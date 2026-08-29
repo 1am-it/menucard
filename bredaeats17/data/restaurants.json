@@ -1,0 +1,3596 @@
+{
+  "1": {
+    "name": "Restaurant Wolfslaar",
+    "cuisine": "Modern Frans",
+    "price": "€€€",
+    "hours": "Di–Za 18:00–22:00",
+    "address": "Wolfslaardreef 100, 4834 SP Breda",
+    "phone": "+31 76 201 4975",
+    "website": "https://www.restaurantwolfslaar.com",
+    "buurt": "Wolfslaar",
+    "color": "#0f2318",
+    "description": "Gevestigd in het koetshuis van het historische landgoed Wolfslaar. Hoofdchef Maarten Camps creëert verfijnde gerechten met streekproducten, begeleid door een indrukwekkende wijnkelder.",
+    "tags": [
+      "⭐ Michelin Ster",
+      "Fine Dining",
+      "Reservering verplicht",
+      "Seizoensgebonden"
+    ],
+    "menus": {
+      "1-lunch": {
+        "subtitle": "Lunchkaart",
+        "scraped": "2026-03-25",
+        "source": "https://www.restaurantwolfslaar.com/nl/menu-lunch",
+        "notes": "Chef Maarten Camps. Di–Vr open voor lunch vanaf 12:00. Keuze van de chef — geen vaste gerechten vermeld.",
+        "categories": [
+          {
+            "name": "Lunchmenu's",
+            "items": [
+              {
+                "name": "Business Lunch",
+                "desc": "Twee gangen, keuze van de chef, binnen een uur geserveerd",
+                "price": "€72,50",
+                "tags": []
+              },
+              {
+                "name": "Lunchmenu 3 Gangen",
+                "desc": "Voorgerecht, hoofdgerecht en dessert — keuze van de chef",
+                "price": "€85",
+                "tags": [
+                  "aanbevolen"
+                ]
+              },
+              {
+                "name": "Lunchmenu 4 Gangen",
+                "desc": "Voor-, tussen-, hoofdgerecht en dessert — keuze van de chef",
+                "price": "€95",
+                "tags": []
+              }
+            ]
+          }
+        ]
+      },
+      "1-diner": {
+        "subtitle": "Dinerkaart",
+        "scraped": "2026-03-25",
+        "source": "https://www.restaurantwolfslaar.com/nl/menu-diner",
+        "notes": "Michelin-ster (sinds 2005), chef Maarten Camps. Za: uitsluitend Signature Menu. Wijnkaart: 500+ selecties, sommelier Jelle van Ravenstein.",
+        "categories": [
+          {
+            "name": "Signature Menu — Maarten Camps (5 gangen)",
+            "items": [
+              {
+                "name": "Signature Menu",
+                "desc": "5 gangen: Pieterman · Noordzeekrab · Bianchetti Truffel · Beter Leven Kalf · Doyenné du Comice Peer",
+                "price": "€130",
+                "tags": [
+                  "aanbevolen"
+                ]
+              },
+              {
+                "name": "Uitbreiding: Langoustine",
+                "desc": "Cannelloni, dragon, Espelette peper, gebrande suiker",
+                "price": "+€20",
+                "tags": []
+              }
+            ]
+          },
+          {
+            "name": "Voorgerechten",
+            "items": [
+              {
+                "name": "Blonde d'Aquitaine Beef",
+                "desc": "Tartaar, kapperrappel, witte balsamico",
+                "price": "€26",
+                "tags": []
+              },
+              {
+                "name": "Pieterman & Royal Belgian Caviar",
+                "desc": "Gerookte boter, gepekelde kool, venkel, sjalot, Charlotte-aardappel",
+                "price": "€32",
+                "tags": []
+              },
+              {
+                "name": "Noordzeekrab",
+                "desc": "Krabvlees, venkel, knolselderij, Granny Smith",
+                "price": "€38",
+                "tags": []
+              },
+              {
+                "name": "Vichyssoise & Coquille",
+                "desc": "Warme prei-aardappelsoep, gegrilde coquille, aardappelchips",
+                "price": "€28",
+                "tags": []
+              },
+              {
+                "name": "Kalfswang",
+                "desc": "Wintertruffel, bonen, gnocchi, Gruyère",
+                "price": "€36",
+                "tags": []
+              },
+              {
+                "name": "Royal Belgian Platinum Caviar 30g",
+                "desc": "Klassiek geserveerd met blini, bieslook, crème fraîche",
+                "price": "€65",
+                "tags": [
+                  "dagspecial"
+                ]
+              },
+              {
+                "name": "Royal Belgian Platinum Caviar 50g",
+                "desc": "Klassiek geserveerd met blini, bieslook, crème fraîche",
+                "price": "€98",
+                "tags": [
+                  "dagspecial"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Hoofdgerechten",
+            "items": [
+              {
+                "name": "Tarbot",
+                "desc": "Gebakken, schorseneer, vadouvan, spruitjes, wintertruffel",
+                "price": "€65",
+                "tags": [
+                  "aanbevolen"
+                ]
+              },
+              {
+                "name": "Skrei",
+                "desc": "Velletje geroosterd filet, groene curry, koriander, zoete aardappel",
+                "price": "€41",
+                "tags": []
+              },
+              {
+                "name": "Dover Sole Meunière",
+                "desc": "Gebakken in boter, citroen, peterselie, pommes pont neuf",
+                "price": "€69",
+                "tags": []
+              },
+              {
+                "name": "Tournedos",
+                "desc": "Blonde d'Aquitaine, pommes pont neuf, seizoensgroenten, sjalottenjus",
+                "price": "€52",
+                "tags": []
+              },
+              {
+                "name": "Ree",
+                "desc": "Rosé geroosterd lendenstuk, pastinaak, witlof, Jamaicaanse piment",
+                "price": "€58",
+                "tags": []
+              },
+              {
+                "name": "Beter Leven Kalf",
+                "desc": "Gepocheerd filet in krachtige bouillon, geconfijte kalfsstaart, kruidenmerg, morilles",
+                "price": "€54",
+                "tags": []
+              }
+            ]
+          },
+          {
+            "name": "Desserts",
+            "items": [
+              {
+                "name": "Madeleines",
+                "desc": "Twee warme madeleines, verrassingsroom",
+                "price": "€10",
+                "tags": []
+              },
+              {
+                "name": "Nougatine",
+                "desc": "Parfait, meringue, hazelnoot, gerookt amandel",
+                "price": "€18",
+                "tags": []
+              },
+              {
+                "name": "Lemon Curd & Heelkruid",
+                "desc": "Citroencrème, Bretons gebak, napoleon, passievrucht, mango",
+                "price": "€18",
+                "tags": []
+              },
+              {
+                "name": "Bloedsinaasappel",
+                "desc": "Panna cotta, kwark, ivoor chocolade, limoenblaad",
+                "price": "€18",
+                "tags": []
+              },
+              {
+                "name": "Doyenné du Comice Peer",
+                "desc": "Gezouten karamel, foelie, laurierijs",
+                "price": "€18",
+                "tags": [
+                  "aanbevolen"
+                ]
+              },
+              {
+                "name": "Kaaswagen",
+                "desc": "Kazen van Fromagerie Guillaume, notenbrood en bijpassende garnituren",
+                "price": "€25",
+                "tags": []
+              }
+            ]
+          },
+          {
+            "name": "Wijnarrangementen",
+            "items": [
+              {
+                "name": "Wijnkaart",
+                "desc": "500+ selecties over drie boeken: mousserende & zoet, wit & rosé, rood — nadruk op elegantie uit koelere klimaten. Samenstelling door sommelier Jelle van Ravenstein.",
+                "price": null,
+                "tags": [
+                  "dagspecial"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "openingHours": {
+      "di": "18:00-22:00",
+      "wo": "18:00-22:00",
+      "do": "18:00-22:00",
+      "vr": "18:00-22:00",
+      "za": "18:00-22:00"
+    },
+    "cuisineKeywords": "french european fine-dining dinsdag woensdag donderdag vrijdag zaterdag",
+    "priceLevel": 3,
+    "badge": "⭐ Michelin Star",
+    "cuisineLabel": "Modern Frans · Fine Dining",
+    "cardDescription": "Elk jaar bekroond met een Michelinster sinds 2005, gevestigd in het koetshuis van het historische landgoed Wolfslaar. Hoofdchef Maarten Camps creëert verfijnde gerechten met streekproducten.",
+    "phoneDisplay": "076 201 4975",
+    "menuLinks": [
+      {
+        "id": "1-lunch",
+        "label": "🥗 Lunchkaart"
+      },
+      {
+        "id": "1-diner",
+        "label": "🍽 Dinerkaart"
+      }
+    ]
+  },
+  "2": {
+    "name": "Restaurant Blossem",
+    "cuisine": "Scandinavisch · Modern Europees",
+    "price": "€€€",
+    "hours": "Di–Za 17:30–22:00",
+    "address": "Ettensebaan 10, 4814 NN Breda",
+    "phone": "+31 76 303 8482",
+    "website": "https://www.restaurantblossem.nl",
+    "buurt": "Princenhage",
+    "color": "#0d1f2d",
+    "description": "In het omgebouwde ketelhuis van de voormalige Nibb-it fabriek. Scandinavische verfijning met pure, seizoensgebonden ingrediënten.",
+    "tags": [
+      "Fine Dining",
+      "Seizoensgebonden",
+      "Uniek pand"
+    ],
+    "openingHours": {
+      "di": "18:00-22:00",
+      "wo": "18:00-22:00",
+      "do": "18:00-22:00",
+      "vr": "18:00-22:00",
+      "za": "18:00-22:00"
+    },
+    "cuisineKeywords": "european scandinavian fine-dining dinsdag woensdag donderdag vrijdag zaterdag",
+    "priceLevel": 3,
+    "cuisineLabel": "Scandinavisch · Modern Europees",
+    "cardDescription": "Gevestigd in het omgebouwde ketelhuis van de voormalige Nibb-it fabriek. De keuken richt zich op seizoensgebonden, pure ingrediënten en eerlijke smaken.",
+    "phoneDisplay": "076 303 8482"
+  },
+  "3": {
+    "name": "Con Fuego",
+    "cuisine": "Grill · Steakhouse",
+    "price": "€€€",
+    "hours": "Ma–Zo 17:00–23:00",
+    "address": "Grote Markt 24, 4811 XR Breda",
+    "phone": "+31 76 870 0176",
+    "website": "https://www.restaurantconfuego.com",
+    "buurt": "Binnenstad",
+    "color": "#1a0d00",
+    "description": "Het ultieme grillrestaurant op de Grote Markt. Exclusieve cuts, Japans Wagyu en een bekroonde wijnkaart van meer dan 600 labels.",
+    "tags": [
+      "🥩 Dry-aged",
+      "Wagyu",
+      "600+ wijnen",
+      "Grote Markt"
+    ],
+    "openingHours": {
+      "ma": "17:00-23:00",
+      "di": "17:00-23:00",
+      "wo": "17:00-23:00",
+      "do": "17:00-23:00",
+      "vr": "12:00-23:00",
+      "za": "12:00-23:00",
+      "zo": "12:00-22:00"
+    },
+    "cuisineKeywords": "grill steak american maandag dinsdag woensdag donderdag vrijdag zaterdag zondag",
+    "priceLevel": 3,
+    "badge": "🥩 Steakhouse",
+    "cuisineLabel": "Grill · Steakhouse",
+    "cardDescription": "Exclusieve cuts zoals Japans Wagyu en dry-aged steaks op de Grote Markt. Bekroonde wijnkaart met meer dan 600 wijnen.",
+    "phoneDisplay": "076 870 0176"
+  },
+  "4": {
+    "name": "Restaurant Uijttewaal",
+    "cuisine": "Modern Europees · Seizoensgebonden",
+    "price": "€€€",
+    "hours": "Di–Za 18:00–21:30",
+    "address": "Ulvenhoutselaan 96, 4834 MH Breda",
+    "phone": "+31 76 565 0970",
+    "website": "https://www.restaurantuijttewaal.nl",
+    "buurt": "Heusdenhout",
+    "color": "#111a0d",
+    "description": "Chef Sven Uijttewaal werkt uitsluitend met biologische, seizoensgebonden producten uit de regio. Verfijnd en eerlijk, erkend door Michelin en Gault&Millau.",
+    "tags": [
+      "Michelin Aanbevolen",
+      "Gault&Millau",
+      "Biologisch",
+      "Lokale producten"
+    ],
+    "openingHours": {
+      "di": "17:30-21:30",
+      "wo": "17:30-21:30",
+      "do": "17:30-21:30",
+      "vr": "17:30-21:30",
+      "za": "17:30-21:30"
+    },
+    "cuisineKeywords": "european seasonal fine-dining dinsdag woensdag donderdag vrijdag zaterdag",
+    "priceLevel": 3,
+    "cuisineLabel": "Modern Europees · Seizoensgebonden",
+    "cardDescription": "Biologische, seizoensgebonden producten uit de regio. Verfijnde proeverijen erkend in zowel de Michelin- als Gault&amp;Millau-gids.",
+    "phoneDisplay": "076 565 0970"
+  },
+  "5": {
+    "name": "Restaurant Chocolat",
+    "cuisine": "Frans · Oosterse Fusion",
+    "price": "€€€",
+    "hours": "Di–Za 18:00–22:00",
+    "address": "Parade 12B, 4811 DZ Breda",
+    "phone": "+31 76 533 5975",
+    "website": "https://www.restaurant-chocolat.nl",
+    "buurt": "Binnenstad",
+    "color": "#1a0d1a",
+    "description": "In de spectaculaire Chassé Botaniquekassen. Chef Dorus Clement vermengt op vernuftige wijze Franse en oosterse invloeden.",
+    "tags": [
+      "Fusion",
+      "Unieke locatie",
+      "Botanische tuin",
+      "Creatief"
+    ],
+    "openingHours": {
+      "di": "18:00-22:00",
+      "wo": "18:00-22:00",
+      "do": "18:00-22:00",
+      "vr": "12:00-22:00",
+      "za": "12:00-22:00"
+    },
+    "cuisineKeywords": "french fusion fine-dining dinsdag woensdag donderdag vrijdag zaterdag",
+    "priceLevel": 3,
+    "cuisineLabel": "Frans · Oosterse Fusion",
+    "cardDescription": "In de spectaculaire Chassé Botaniquekassen. Vermengt op vernuftige wijze Franse en oosterse invloeden met een eigentijdse, artistieke presentatie.",
+    "phoneDisplay": "076 533 5975"
+  },
+  "6": {
+    "name": "Brasserie Bardot",
+    "cuisine": "Franse Brasserie · Wijnbar",
+    "price": "€€",
+    "hours": "Ma–Zo 10:00–23:00",
+    "address": "Van Coothplein 12, 4811 NE Breda",
+    "phone": "+31 76 888 3111",
+    "website": "https://www.brasseriebardot.nl",
+    "buurt": "Binnenstad",
+    "color": "#1a1500",
+    "description": "Een Frans geïnspireerde brasserie voor elke gelegenheid. Van ochtendkoffie tot een uitgebreid diner met een uitgelezen wijnkaart.",
+    "tags": [
+      "🍷 Wine Bar",
+      "All-day dining",
+      "Van Coothplein",
+      "Terras"
+    ],
+    "menus": {
+      "6-diner": {
+        "subtitle": "Dinerkaart",
+        "scraped": "2026-03-25",
+        "source": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf",
+        "notes": "Dinerkaart nov. 2025 — gescraped uit PDF. Hoofdgerechten worden zonder bijgerechten geserveerd. Controleer altijd de actuele kaart.",
+        "categories": [
+          {
+            "name": "Specialiteiten van Bardot",
+            "items": [
+              {
+                "name": "Poussin",
+                "desc": "Krielkippetje van onze huisrotisserie met citroen, tijm en appelcompote",
+                "price": "€20,95",
+                "tags": [
+                  "aanbevolen"
+                ],
+                "wine": "Viognier / Chenin Blanc / Pinot Noir"
+              },
+              {
+                "name": "Kreeft (pasta)",
+                "desc": "Pasta aglio e olio, antiboise, parmezaan — 1/2 of 1/1",
+                "price": null,
+                "tags": [
+                  "dagspecial"
+                ],
+                "wine": "Grüner Veltliner / Verdejo / Bogle Chardonnay"
+              },
+              {
+                "name": "Chateaubriand (450 gr., om te delen)",
+                "desc": "Beste stuk van de ossenhaas met Persillade boter / Béarnaise / Blauwe kaas / Groene pepersaus (45 min. bereidingstijd)",
+                "price": "€74,95",
+                "tags": [
+                  "aanbevolen"
+                ],
+                "wine": "Lalande de Pomerol / Rioja / Saint-Émilion Grand Cru",
+                "sup": "Saus +€6,75"
+              }
+            ]
+          },
+          {
+            "name": "Voorgerechten",
+            "items": [
+              {
+                "name": "Klassieke steak tartaar (90 gr.)",
+                "desc": "Klassieke bereiding",
+                "price": "€15,95",
+                "tags": [
+                  "aanbevolen"
+                ],
+                "wine": "Rosé Chic / Pinot Noir / Lalande de Pomerol",
+                "sup": "Eendenlever +€6,75"
+              },
+              {
+                "name": "Klassieke steak tartaar (150 gr.)",
+                "desc": "Klassieke bereiding",
+                "price": "€27,95",
+                "tags": [],
+                "wine": "Rosé Chic / Pinot Noir / Lalande de Pomerol",
+                "sup": "Eendenlever +€6,75"
+              },
+              {
+                "name": "Bisque de homard",
+                "desc": "Rivierkreeft, saffraanrouille",
+                "price": "€13,95",
+                "tags": [],
+                "wine": "Grüner Veltliner / Pouilly-Fuissé Chardonnay"
+              },
+              {
+                "name": "Garnalenkroketten (2 st.)",
+                "desc": "Met citroenmayonaise",
+                "price": "€21,95",
+                "tags": [],
+                "wine": "Crémant de Bourgogne / Chablis Chardonnay"
+              },
+              {
+                "name": "Escargots",
+                "desc": "Persillade, knoflooksabayon, croutons",
+                "price": "€12,95",
+                "tags": [],
+                "wine": "Viognier / Bogle Chardonnay"
+              },
+              {
+                "name": "Stracciatella",
+                "desc": "Tomaat, pruim, amandel, basilicum",
+                "price": "€16,95",
+                "tags": [
+                  "vegetarisch"
+                ],
+                "wine": "Pinot Noir / Ripassa della Valpolicella"
+              },
+              {
+                "name": "Gravad lax",
+                "desc": "Toast, aardappel, dragonmayonaise, venkel, citroen",
+                "price": "€17,95",
+                "tags": [],
+                "wine": "Menetou-Salon Sauvignon / Grüner Veltliner / Riesling"
+              },
+              {
+                "name": "Boudin Noir",
+                "desc": "Gebakken bloedworst, brioche, appel, Calvados, gebakken eendenlever",
+                "price": "€18,95",
+                "tags": [],
+                "wine": "Pinot Noir / Sauternes"
+              }
+            ]
+          },
+          {
+            "name": "Hoofdgerechten",
+            "items": [
+              {
+                "name": "Canard à l'orange",
+                "desc": "Knolselderij gratin, rode bietencreme, gele biet, Amsterdamse ui, sinaasappel gevogeltesaus",
+                "price": "€24,95",
+                "tags": [
+                  "aanbevolen"
+                ],
+                "wine": "Pinot Noir / Lalande de Pomerol / Rioja"
+              },
+              {
+                "name": "Runderentrecôte (220 gr.)",
+                "desc": "Met beurre de Paris",
+                "price": "€37,95",
+                "tags": [],
+                "wine": "Saint-Émilion Grand Cru / Lalande de Pomerol / Cali Shark Cabernet Sauvignon"
+              },
+              {
+                "name": "Tournedos (170 gr.)",
+                "desc": "Spinazie, champignons, truffeljus",
+                "price": "€37,95",
+                "tags": [],
+                "wine": "Lalande de Pomerol / Saint-Émilion Grand Cru / Cali Shark Cabernet Sauvignon",
+                "sup": "Gebakken eendenlever +€8,50"
+              },
+              {
+                "name": "Hele dorade van de grill",
+                "desc": "Kruidenolie van salie",
+                "price": null,
+                "tags": [
+                  "dagspecial"
+                ],
+                "wine": "Sauvignon Touraine"
+              },
+              {
+                "name": "Kreeft (500/600 gr.)",
+                "desc": "Gekookt of gegrild, citroenmayonaise of dragonboter — 1/2 of 1/1",
+                "price": null,
+                "tags": [
+                  "dagspecial"
+                ],
+                "wine": "Chablis Chardonnay / Sparkling Rosé"
+              },
+              {
+                "name": "Zeetong à la meunière",
+                "desc": "",
+                "price": null,
+                "tags": [
+                  "dagspecial"
+                ],
+                "wine": "Pouilly-Fuissé Chardonnay / Chablis / Bogle Chardonnay"
+              },
+              {
+                "name": "Gnocchi",
+                "desc": "Saffraan, venkel, parmezaan",
+                "price": "€22,95",
+                "tags": [
+                  "vegetarisch"
+                ],
+                "wine": "Crémant de Bourgogne / Pouilly-Fuissé Chardonnay / Barolo",
+                "sup": "Pata Negra 25 gr. +€9,50"
+              }
+            ]
+          },
+          {
+            "name": "Bijgerechten",
+            "items": [
+              {
+                "name": "Desem stokbrood",
+                "desc": "Met seizoensroomboter en olijfolie",
+                "price": "€5,95",
+                "tags": []
+              },
+              {
+                "name": "Verse frites",
+                "desc": "Met Belgische mayonaise",
+                "price": "€4,75",
+                "tags": []
+              },
+              {
+                "name": "Verse frites (truffel)",
+                "desc": "Met truffelmayonaise en parmezaan",
+                "price": "€5,75",
+                "tags": []
+              },
+              {
+                "name": "Frisse botersalade",
+                "desc": "",
+                "price": "€5,50",
+                "tags": []
+              },
+              {
+                "name": "Seizoensgroenten",
+                "desc": "",
+                "price": "€6,75",
+                "tags": []
+              }
+            ]
+          },
+          {
+            "name": "Dessert",
+            "items": [
+              {
+                "name": "Crème brûlée",
+                "desc": "Klassiek met gekarameliseerde suikerkorst",
+                "price": "€9,95",
+                "tags": [],
+                "wine": "Muscat de Beaumes de Venise / Sauternes",
+                "sup": "Bol vanille-ijs +€2,50"
+              },
+              {
+                "name": "Mousse au chocolat",
+                "desc": "Gezouten pecan, karamel",
+                "price": "€12,95",
+                "tags": [],
+                "wine": "Banyuls"
+              },
+              {
+                "name": "Plateau de fromage (3)",
+                "desc": "Kweeperengelei, rozijnenbrood",
+                "price": "€10,95",
+                "tags": [],
+                "wine": "Pedro Ximénez / Martha's Porto 10 yrs."
+              },
+              {
+                "name": "Plateau de fromage (5)",
+                "desc": "Kweeperengelei, rozijnenbrood",
+                "price": "€15,95",
+                "tags": [],
+                "wine": "Pedro Ximénez / Martha's Porto 10 yrs."
+              },
+              {
+                "name": "Café complet",
+                "desc": "Zoete lekkernijen met koffie of thee naar keuze",
+                "price": "€13,95",
+                "tags": [
+                  "aanbevolen"
+                ]
+              },
+              {
+                "name": "Chocolade truffels (2)",
+                "desc": "",
+                "price": "€3,75",
+                "tags": []
+              }
+            ]
+          }
+        ]
+      },
+      "6-lunch": {
+        "subtitle": "Lunchkaart",
+        "scraped": "2026-03-24",
+        "source": "https://www.brasseriebardot.nl/brasserie-bardot/",
+        "notes": "Lunchkaart nov. 2025 — gescraped uit PDF via pdfminer. Controleer altijd de actuele kaart.",
+        "categories": [
+          {
+            "name": "Croissant & Gebak",
+            "items": [
+              {
+                "name": "Croissant met jam en boter",
+                "desc": "",
+                "price": "€4,75",
+                "tags": []
+              },
+              {
+                "name": "Pain au chocolat",
+                "desc": "",
+                "price": "€4,75",
+                "tags": []
+              },
+              {
+                "name": "Appelkruimeltaart (Holkamp)",
+                "desc": "Ambachtelijk gebak",
+                "price": "€5,75",
+                "tags": []
+              },
+              {
+                "name": "Cheesecake (Holtkamp)",
+                "desc": "",
+                "price": "€5,75",
+                "tags": []
+              },
+              {
+                "name": "Hazelnoot karameltaart (Holtkamp)",
+                "desc": "",
+                "price": "€5,75",
+                "tags": []
+              },
+              {
+                "name": "Verse slagroom",
+                "desc": "Extra topping",
+                "price": "€0,75",
+                "tags": []
+              }
+            ]
+          },
+          {
+            "name": "Wisselend Lunchmenu",
+            "items": [
+              {
+                "name": "Menu du Midi",
+                "desc": "Voorgerecht + hoofdgerecht — dagelijks wisselend door de chef",
+                "price": "€38,50",
+                "tags": [
+                  "aanbevolen"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Lunchgerechten (12:00–15:00)",
+            "items": [
+              {
+                "name": "Croque Madame",
+                "desc": "Met spiegelei",
+                "price": "€10,95",
+                "tags": [],
+                "wine": "Grüner Veltliner"
+              },
+              {
+                "name": "Club Classic",
+                "desc": "Kip, bacon, ravigotte, ei, kaas, tomaat, botersla",
+                "price": "€16,95",
+                "tags": [],
+                "wine": "Bertholets Chardonnay / Pinot Noir"
+              },
+              {
+                "name": "Club Coppa di Parma",
+                "desc": "Op brioche, antiboise, little gem, truffelmayonaise, parmezaan",
+                "price": "€16,95",
+                "tags": [],
+                "wine": "Pinot Grigio",
+                "sup": "Eendenlever +€6,75"
+              },
+              {
+                "name": "Steak tartaar (90 gr.)",
+                "desc": "Klassieke bereiding",
+                "price": "€15,95",
+                "tags": [
+                  "aanbevolen"
+                ],
+                "wine": "Rosé / Pinot Noir / Lalande de Pomerol",
+                "sup": "Eendenlever +€6,75"
+              },
+              {
+                "name": "Steak tartaar (150 gr.)",
+                "desc": "Klassieke bereiding",
+                "price": "€24,95",
+                "tags": [],
+                "wine": "Rosé / Pinot Noir / Lalande de Pomerol",
+                "sup": "Eendenlever +€6,75"
+              },
+              {
+                "name": "Vol au vent",
+                "desc": "Kippenragout, paddenstoelen en dragon",
+                "price": "€16,95",
+                "tags": [],
+                "wine": "Pouilly-Fuissé Chardonnay"
+              },
+              {
+                "name": "Runderentrecôte (220 gr.)",
+                "desc": "Met beurre de Paris",
+                "price": "€37,95",
+                "tags": [
+                  "aanbevolen"
+                ],
+                "wine": "Saint-Émilion Grand Cru / Lalande de Pomerol"
+              },
+              {
+                "name": "Bisque de homard",
+                "desc": "Rivierkreeft, saffraanrouille",
+                "price": "€13,95",
+                "tags": [],
+                "wine": "Grüner Veltliner / Pouilly-Fuissé"
+              },
+              {
+                "name": "Vistrio",
+                "desc": "Bisque, kreeftenkroket, brioche, gerookte zalm, gepocheerd ei, Béarnaise",
+                "price": "€17,95",
+                "tags": [
+                  "aanbevolen"
+                ],
+                "wine": "Bertholets Chardonnay"
+              },
+              {
+                "name": "Omelette zalm met truffel",
+                "desc": "",
+                "price": "€16,95",
+                "tags": [],
+                "wine": "Viognier"
+              },
+              {
+                "name": "Garnalenkroketten (2 st.)",
+                "desc": "Met citroenmayonaise",
+                "price": "€21,95",
+                "tags": [],
+                "wine": "Crémant de Bourgogne / Chablis"
+              },
+              {
+                "name": "Stracciatella",
+                "desc": "Tomaat, pruim, amandel, basilicum",
+                "price": "€16,95",
+                "tags": [
+                  "vegetarisch"
+                ],
+                "wine": "Pinot Noir / Ripassa della Valpolicella"
+              },
+              {
+                "name": "Tartelette roquefort",
+                "desc": "Peer, walnoot, rozijnenchutney",
+                "price": "€17,95",
+                "tags": [
+                  "vegetarisch"
+                ],
+                "wine": "Riesling / Bertholets Chardonnay / Pinot Noir"
+              },
+              {
+                "name": "Caesar salade",
+                "desc": "Hoenderfilet, Romaine sla, little gem, bacon, croutons, ansjovis, parmezaan, ei",
+                "price": "€16,95",
+                "tags": [],
+                "wine": "Touraine Sauvignon / Chenin Blanc / Pinot Noir"
+              },
+              {
+                "name": "Kreeft (500/600 gr.)",
+                "desc": "Gekookt of gegrild met citroenmayonaise",
+                "price": null,
+                "tags": [
+                  "dagspecial"
+                ],
+                "wine": "Grüner Veltliner / Verdejo",
+                "sup": "Verse pasta aglio e olio +€9,50"
+              },
+              {
+                "name": "Zeetong à la meunière",
+                "desc": "",
+                "price": null,
+                "tags": [
+                  "dagspecial"
+                ],
+                "wine": "Pouilly-Fuissé / Bogle Chardonnay"
+              },
+              {
+                "name": "Gnocchi",
+                "desc": "Met saffraan, venkel en parmezaan",
+                "price": "€22,95",
+                "tags": [
+                  "vegetarisch"
+                ],
+                "wine": "Crémant de Bourgogne / Barolo",
+                "sup": "Pata Negra 25 gr. +€9,50"
+              }
+            ]
+          },
+          {
+            "name": "Bijgerechten",
+            "items": [
+              {
+                "name": "Desem stokbrood",
+                "desc": "Met seizoensroomboter en olijfolie",
+                "price": "€5,95",
+                "tags": []
+              },
+              {
+                "name": "Verse frites",
+                "desc": "Met Belgische mayonaise",
+                "price": "€4,75",
+                "tags": []
+              },
+              {
+                "name": "Verse frites (truffel)",
+                "desc": "Met truffelmayonaise en parmezaan",
+                "price": "€5,75",
+                "tags": []
+              },
+              {
+                "name": "Frisse botersalade",
+                "desc": "",
+                "price": "€5,75",
+                "tags": []
+              },
+              {
+                "name": "Seizoensgroenten",
+                "desc": "",
+                "price": "€6,75",
+                "tags": []
+              }
+            ]
+          },
+          {
+            "name": "Dessert",
+            "items": [
+              {
+                "name": "Café complet",
+                "desc": "Zoete lekkernijen met koffie of thee naar keuze",
+                "price": "€13,95",
+                "tags": [
+                  "aanbevolen"
+                ]
+              },
+              {
+                "name": "Crème brûlée",
+                "desc": "Klassiek met gekarameliseerde suikerkorst",
+                "price": "€9,95",
+                "tags": [],
+                "wine": "Muscat de Beaumes de Venise / Sauternes",
+                "sup": "Bol vanille-ijs +€2,50"
+              },
+              {
+                "name": "Plateau de fromage (3)",
+                "desc": "Kweeperen gelei en rozijnenbrood",
+                "price": "€10,95",
+                "tags": [],
+                "wine": "Pedro Ximénez / Martha's Porto 10 yrs."
+              },
+              {
+                "name": "Plateau de fromage (5)",
+                "desc": "Kweeperen gelei en rozijnenbrood",
+                "price": "€15,95",
+                "tags": [],
+                "wine": "Pedro Ximénez / Martha's Porto 10 yrs."
+              },
+              {
+                "name": "Chocolade truffels (2)",
+                "desc": "",
+                "price": "€3,75",
+                "tags": []
+              },
+              {
+                "name": "Café Spécial",
+                "desc": "French, Italian, Spanish of Bardot",
+                "price": "€9,95",
+                "tags": []
+              },
+              {
+                "name": "Espresso Martini",
+                "desc": "",
+                "price": "€11,95",
+                "tags": []
+              }
+            ]
+          }
+        ]
+      },
+      "6-borrel": {
+        "subtitle": "Borrelkaart",
+        "scraped": "2026-03-25",
+        "source": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf",
+        "notes": "Borrelkaart — gescraped uit borrel- en drankensecties van de lunch/dinerkaart. Controleer altijd de actuele kaart.",
+        "categories": [
+          {
+            "name": "Klassieke Borrelhappen",
+            "items": [
+              {
+                "name": "Oesters naturel",
+                "desc": "Met sjalottenvinaigrette en citroen (per stuk); topping +€0,95: Gin Tonic schuim, Asian style of Rockefeller",
+                "price": "€4,00",
+                "tags": [],
+                "wine": "Crémant de Bourgogne / Chablis"
+              },
+              {
+                "name": "Pata Negra (70 gr.)",
+                "desc": "Spaanse Ibéricoham — Paleta Capa Negra Cebo",
+                "price": "€21,95",
+                "tags": [],
+                "wine": "Verdejo / Rioja"
+              },
+              {
+                "name": "Paté en croûte",
+                "desc": "Gefrituurde kappertjes, uienconfit",
+                "price": "€16,95",
+                "tags": [],
+                "wine": "Pinot Noir / Côtes du Rhône"
+              },
+              {
+                "name": "Charcuterie",
+                "desc": "Diverse vleeswaren",
+                "price": "€16,95",
+                "tags": [],
+                "wine": "Bertholets Chardonnay / Primitivo"
+              },
+              {
+                "name": "Paling (2 st.)",
+                "desc": "Brioche, rode biet, crème fraîche, roze peper",
+                "price": "€13,95",
+                "tags": [],
+                "wine": "Bogle Chardonnay / Pinot Noir"
+              },
+              {
+                "name": "Kaviaar Osietra 10 gr.",
+                "desc": "Russische steurkaviaar",
+                "price": "€35,00",
+                "tags": [],
+                "wine": "Crémant de Bourgogne / Chablis",
+                "sup": "Blini's en zure room +€5,00"
+              }
+            ]
+          },
+          {
+            "name": "Dranken — Koffie & Thee",
+            "items": [
+              {
+                "name": "Koffie",
+                "desc": "",
+                "price": "€3,20",
+                "tags": []
+              },
+              {
+                "name": "Espresso",
+                "desc": "",
+                "price": "€3,20",
+                "tags": []
+              },
+              {
+                "name": "Dubbele espresso",
+                "desc": "",
+                "price": "€4,50",
+                "tags": []
+              },
+              {
+                "name": "Espresso Macchiato",
+                "desc": "",
+                "price": "€3,65",
+                "tags": []
+              },
+              {
+                "name": "Cappuccino",
+                "desc": "",
+                "price": "€3,75",
+                "tags": []
+              },
+              {
+                "name": "Flat White",
+                "desc": "",
+                "price": "€4,75",
+                "tags": []
+              },
+              {
+                "name": "Latte Macchiato",
+                "desc": "",
+                "price": "€4,20",
+                "tags": []
+              },
+              {
+                "name": "Warme Chocomel",
+                "desc": "",
+                "price": "€3,50",
+                "tags": []
+              },
+              {
+                "name": "Thee",
+                "desc": "Diverse smaken",
+                "price": "€3,00",
+                "tags": []
+              },
+              {
+                "name": "Verse Muntthee",
+                "desc": "",
+                "price": "€4,00",
+                "tags": []
+              },
+              {
+                "name": "Verse Gemberthee",
+                "desc": "",
+                "price": "€4,00",
+                "tags": []
+              }
+            ]
+          },
+          {
+            "name": "Dranken — Cocktails & Mix",
+            "items": [
+              {
+                "name": "Mimosa",
+                "desc": "",
+                "price": "€7,75",
+                "tags": []
+              },
+              {
+                "name": "Aperol Spritz",
+                "desc": "",
+                "price": "€9,75",
+                "tags": []
+              },
+              {
+                "name": "Limoncello Spritz",
+                "desc": "",
+                "price": "€9,75",
+                "tags": []
+              },
+              {
+                "name": "Espresso Martini",
+                "desc": "",
+                "price": "€11,75",
+                "tags": []
+              },
+              {
+                "name": "Pornstar Martini",
+                "desc": "",
+                "price": "€11,75",
+                "tags": []
+              },
+              {
+                "name": "Moscow Mule",
+                "desc": "",
+                "price": "€9,75",
+                "tags": []
+              },
+              {
+                "name": "Amaretto Sour",
+                "desc": "",
+                "price": "€10,75",
+                "tags": []
+              },
+              {
+                "name": "Whisky Sour",
+                "desc": "",
+                "price": "€11,75",
+                "tags": []
+              },
+              {
+                "name": "Negroni",
+                "desc": "",
+                "price": "€9,75",
+                "tags": []
+              },
+              {
+                "name": "Hendrick's G&T",
+                "desc": "Met Fever Tree",
+                "price": "€11,75",
+                "tags": []
+              },
+              {
+                "name": "Copperhead G&T",
+                "desc": "Met Fever Tree",
+                "price": "€12,75",
+                "tags": []
+              }
+            ]
+          },
+          {
+            "name": "Dranken — Bier",
+            "items": [
+              {
+                "name": "Hertog Jan (tap)",
+                "desc": "0,25 / 0,50 l",
+                "price": "v.a. €4,00",
+                "tags": []
+              },
+              {
+                "name": "Hertog Jan Weizener",
+                "desc": "Fles",
+                "price": "€5,25",
+                "tags": []
+              },
+              {
+                "name": "Stella Artois",
+                "desc": "Tap",
+                "price": "€4,30",
+                "tags": []
+              },
+              {
+                "name": "Leffe Blond",
+                "desc": "Tap",
+                "price": "€5,75",
+                "tags": []
+              },
+              {
+                "name": "Leffe Bruin",
+                "desc": "Fles",
+                "price": "€5,25",
+                "tags": []
+              },
+              {
+                "name": "Vedett Extra White",
+                "desc": "Fles",
+                "price": "€5,75",
+                "tags": []
+              },
+              {
+                "name": "Hertog Jan Tripel",
+                "desc": "Fles",
+                "price": "€6,00",
+                "tags": []
+              },
+              {
+                "name": "Tripel Karmeliet",
+                "desc": "Fles",
+                "price": "€6,00",
+                "tags": []
+              },
+              {
+                "name": "Juice Punch NEIPA",
+                "desc": "Craft — fles",
+                "price": "€6,50",
+                "tags": []
+              },
+              {
+                "name": "Duvel",
+                "desc": "Fles",
+                "price": "€6,50",
+                "tags": []
+              },
+              {
+                "name": "Hoegaarden Radler",
+                "desc": "Fles",
+                "price": "€5,00",
+                "tags": []
+              },
+              {
+                "name": "Liefmans Fruitesse",
+                "desc": "Fles",
+                "price": "€5,50",
+                "tags": []
+              },
+              {
+                "name": "Hoegaarden Radler 0.0%",
+                "desc": "Alcoholvrij",
+                "price": "€4,25",
+                "tags": []
+              },
+              {
+                "name": "Leffe Blond 0.0%",
+                "desc": "Alcoholvrij",
+                "price": "€5,25",
+                "tags": []
+              },
+              {
+                "name": "Hertog Jan 0.0%",
+                "desc": "Alcoholvrij",
+                "price": "€3,85",
+                "tags": []
+              }
+            ]
+          }
+        ]
+      },
+      "6-specialiteiten": {
+        "subtitle": "Specialiteiten",
+        "scraped": "2026-03-25",
+        "source": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf",
+        "notes": "Huisspecialiteiten — gekopieerd uit de dinerkaart nov. 2025. Controleer altijd de actuele kaart.",
+        "categories": [
+          {
+            "name": "Specialiteiten van Bardot",
+            "items": [
+              {
+                "name": "Poussin",
+                "desc": "Krielkippetje van onze huisrotisserie met citroen, tijm en appelcompote",
+                "price": "€20,95",
+                "tags": [
+                  "aanbevolen"
+                ],
+                "wine": "Viognier / Chenin Blanc / Pinot Noir"
+              },
+              {
+                "name": "Kreeft (pasta)",
+                "desc": "Pasta aglio e olio, antiboise, parmezaan — 1/2 of 1/1",
+                "price": null,
+                "tags": [
+                  "dagspecial"
+                ],
+                "wine": "Grüner Veltliner / Verdejo / Bogle Chardonnay"
+              },
+              {
+                "name": "Chateaubriand (450 gr., om te delen)",
+                "desc": "Beste stuk van de ossenhaas met Persillade boter / Béarnaise / Blauwe kaas / Groene pepersaus (45 min. bereidingstijd)",
+                "price": "€74,95",
+                "tags": [
+                  "aanbevolen"
+                ],
+                "wine": "Lalande de Pomerol / Rioja / Saint-Émilion Grand Cru",
+                "sup": "Saus +€6,75"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "openingHours": {
+      "ma": "12:00-23:00",
+      "di": "12:00-23:00",
+      "wo": "12:00-23:00",
+      "do": "12:00-23:00",
+      "vr": "12:00-23:00",
+      "za": "12:00-23:00",
+      "zo": "12:00-22:00"
+    },
+    "cuisineKeywords": "french european wine maandag dinsdag woensdag donderdag vrijdag zaterdag zondag",
+    "priceLevel": 2,
+    "badge": "🍷 Wine Bar",
+    "cuisineLabel": "Franse Brasserie · Wijnbar",
+    "cardDescription": "Een Frans geïnspireerde brasserie op het Van Coothplein. Ideaal voor een ochtendbakje koffie, een uitgebreide lunch, goede wijn of een feestelijk diner.",
+    "phoneDisplay": "076 888 3111",
+    "menuLinks": [
+      {
+        "id": "6-lunch",
+        "label": "🥗 Lunchkaart"
+      },
+      {
+        "id": "6-diner",
+        "label": "🍽 Dinerkaart"
+      },
+      {
+        "id": "6-borrel",
+        "label": "🍸 Borrelkaart"
+      },
+      {
+        "id": "6-specialiteiten",
+        "label": "⭐ Specialiteiten"
+      }
+    ]
+  },
+  "7": {
+    "name": "Restaurant Ruitersbosch",
+    "cuisine": "Frans · Mediterraans",
+    "price": "€€",
+    "hours": "Di–Zo 17:30–21:30",
+    "address": "Dr. Batenburglaan 111, 4837 BP Breda",
+    "phone": "+31 76 889 8000",
+    "website": "https://www.restaurantruitersbosch.nl",
+    "buurt": "Mastbos",
+    "color": "#0d1a0d",
+    "description": "Aan de rand van het Mastbos, omgeven door natuur. Ambachtelijke Frans-Mediterraanse keuken in een sfeervolle omgeving.",
+    "tags": [
+      "🌲 Mastbos",
+      "Zometerras",
+      "Ambachtelijk",
+      "Romantisch"
+    ],
+    "openingHours": {
+      "di": "17:00-22:00",
+      "wo": "17:00-22:00",
+      "do": "17:00-22:00",
+      "vr": "17:00-22:00",
+      "za": "12:00-22:00",
+      "zo": "12:00-21:00"
+    },
+    "cuisineKeywords": "french mediterranean european dinsdag woensdag donderdag vrijdag zaterdag zondag",
+    "priceLevel": 2,
+    "badge": "🌲 Forest View",
+    "cuisineLabel": "Frans · Mediterraans",
+    "cardDescription": "Genesteld aan de rand van het Mastbos. Ambachtelijk Frans-Mediterraans menu met een geliefd zometerras.",
+    "phoneDisplay": "076 889 8000"
+  },
+  "8": {
+    "name": "Al Dente Ristorante",
+    "cuisine": "Italiaans · Klassiek",
+    "price": "€€",
+    "hours": "Di–Zo 17:00–22:30",
+    "address": "Nieuwe Ginnekenstraat 20, 4811 NR Breda",
+    "phone": "+31 76 520 4333",
+    "website": "https://www.aldentebreda.nl",
+    "buurt": "Binnenstad",
+    "color": "#1a0d00",
+    "description": "Al meer dan 23 jaar een geliefde Italiaanse instelling in Breda. Authentieke pasta, risotto en antipasti in een warme, huiselijke sfeer.",
+    "tags": [
+      "🇮🇹 Italiaans",
+      "23 jaar in Breda",
+      "Huisgemaakte pasta",
+      "Klassiek"
+    ],
+    "openingHours": {
+      "di": "17:00-22:00",
+      "wo": "17:00-22:00",
+      "do": "17:00-22:00",
+      "vr": "12:00-22:30",
+      "za": "12:00-22:30",
+      "zo": "12:00-21:30"
+    },
+    "cuisineKeywords": "italian mediterranean dinsdag woensdag donderdag vrijdag zaterdag zondag",
+    "priceLevel": 2,
+    "badge": "🇮🇹 Italian",
+    "cuisineLabel": "Italiaans · Klassiek",
+    "cardDescription": "Een geliefde Italiaanse instelling in Breda al meer dan 23 jaar. Authentieke antipasti, risotto en pasta in een warme sfeer.",
+    "phoneDisplay": "076 520 4333"
+  },
+  "9": {
+    "name": "Beers & Barrels",
+    "cuisine": "Biercafé · Amerikaans · Burgers",
+    "price": "€",
+    "hours": "Ma–Zo 12:00–00:00",
+    "address": "Ceresstraat 15 A1, 4811 CA Breda",
+    "phone": "+31 76 303 6200",
+    "website": "https://www.beersbarrels.nl/en/locations/breda/",
+    "buurt": "Binnenstad",
+    "color": "#0d0d1a",
+    "description": "In de historische Oranjeboom brouwerij. Meer dan 150 bieren waaronder 15 speciaalbiertappen die je zelf bedient aan tafel.",
+    "tags": [
+      "🍺 150+ bieren",
+      "Self-tap",
+      "Oranjeboom brouwerij",
+      "Casual"
+    ],
+    "openingHours": {
+      "ma": "12:00-23:00",
+      "di": "12:00-23:00",
+      "wo": "12:00-23:00",
+      "do": "12:00-23:00",
+      "vr": "12:00-23:00",
+      "za": "12:00-23:00",
+      "zo": "12:00-22:00"
+    },
+    "cuisineKeywords": "american grill burgers maandag dinsdag woensdag donderdag vrijdag zaterdag zondag",
+    "priceLevel": 1,
+    "badge": "🍺 150+ Beers",
+    "cuisineLabel": "Biercafé · Amerikaans · Burgers",
+    "cardDescription": "In de historische Oranjeboom brouwerij. Meer dan 150 bieren waaronder 15 speciaal bieren die je zelf tapt aan tafel.",
+    "phoneDisplay": "076 303 6200"
+  },
+  "10": {
+    "name": "Salon de Provence",
+    "cuisine": "Zuid-Afrikaans · Frans Creatief",
+    "price": "€€",
+    "hours": "Di–Za 18:00–22:00",
+    "address": "Salon de Provence Breda",
+    "phone": "Via website",
+    "website": "https://www.salondeprovence.nl",
+    "buurt": "Binnenstad",
+    "color": "#1a1100",
+    "description": "Chefs Niels van Kooten en Bono van Veelen brengen een onderscheidende Zuid-Afrikaans-Franse flair. Creatief, persoonlijk en met een uitzonderlijke wijnkennis.",
+    "tags": [
+      "Verborgen parel",
+      "Creatief",
+      "Zuid-Afrikaans",
+      "Wijnspecialisten"
+    ],
+    "openingHours": {
+      "di": "17:30-22:00",
+      "wo": "17:30-22:00",
+      "do": "17:30-22:00",
+      "vr": "12:00-22:00",
+      "za": "12:00-22:00"
+    },
+    "cuisineKeywords": "french fusion european dinsdag woensdag donderdag vrijdag zaterdag",
+    "priceLevel": 2,
+    "cuisineLabel": "Zuid-Afrikaans · Frans Creatief",
+    "cardDescription": "Onderscheidende Zuid-Afrikaans-Franse flair aan de Ginnekenweg. Creatieve bereidingen en een deskundige wijnselectie — een verborgen parel.",
+    "phoneDisplay": "Contact via website"
+  },
+  "11": {
+    "name": "De Beyerd",
+    "cuisine": "Biercafé · Nederlands",
+    "price": "€",
+    "hours": "Ma–Zo 12:00–01:00",
+    "address": "Boschstraat 26, 4811 GH Breda",
+    "phone": "+31 76 521 4265",
+    "website": "https://www.beyerd.nl",
+    "buurt": "Binnenstad",
+    "color": "#0d0a00",
+    "description": "Een iconisch biercafé in het hart van Breda's Boschstraat, al decennialang een begrip. Proef een ruime selectie van nationale en internationale ambachtelijke bieren bij klassieke Nederlandse borrelhapjes.",
+    "tags": [
+      "🍺 Ambachtelijk bier",
+      "Borrelhapjes",
+      "Boschstraat",
+      "Gezellig"
+    ],
+    "openingHours": {
+      "ma": "11:00-23:00",
+      "di": "11:00-23:00",
+      "wo": "11:00-23:00",
+      "do": "11:00-23:00",
+      "vr": "11:00-23:00",
+      "za": "11:00-23:00",
+      "zo": "12:00-22:00"
+    },
+    "cuisineKeywords": "dutch beer cafe maandag dinsdag woensdag donderdag vrijdag zaterdag zondag",
+    "priceLevel": 1,
+    "badge": "🍺 Proefcafé",
+    "cuisineLabel": "Biercafé · Nederlands",
+    "cardDescription": "Een iconisch biercafé aan de Boschstraat met een ongekende selectie van ambachtelijke bieren en klassieke Nederlandse borrelhapjes.",
+    "phoneDisplay": "076 521 4265"
+  },
+  "12": {
+    "name": "Pellens",
+    "cuisine": "Baskisch · Grill",
+    "price": "€€€",
+    "hours": "Wo–Do 18:00–00:00, Vr–Zo 12:00–00:00",
+    "address": "Boschstraat 24, 4811 GH Breda",
+    "phone": "06 27 34 79 41",
+    "website": "https://pellens.nl",
+    "buurt": "Binnenstad",
+    "color": "#1a0800",
+    "description": "Chef Daan de Brouwer plaatst de houtgestookte Baskische grill centraal in zijn keuken. Alle producten komen van eigen biologisch boerderij De Vloeiweide — puur, seizoensgebonden en vol karakter.",
+    "tags": [
+      "🔥 Baskische grill",
+      "Farm-to-table",
+      "Boschstraat",
+      "Seizoensgebonden"
+    ],
+    "openingHours": {
+      "wo": "17:00-22:00",
+      "do": "17:00-22:00",
+      "vr": "12:00-22:00",
+      "za": "12:00-22:00",
+      "zo": "12:00-21:00"
+    },
+    "cuisineKeywords": "grill european basque woensdag donderdag vrijdag zaterdag zondag",
+    "priceLevel": 3,
+    "badge": "🔥 Baskische Grill",
+    "cuisineLabel": "Baskisch · Grill",
+    "cardDescription": "Houtgestookte Baskische grill als middelpunt van de keuken. Chef Daan de Brouwer werkt met seizoensproducten van eigen biologisch boerderij De Vloeiweide.",
+    "phoneDisplay": "06 27 34 79 41"
+  },
+  "13": {
+    "name": "Gantau Village",
+    "cuisine": "Chinees · Kantonees",
+    "price": "€",
+    "hours": "Di–Zo 12:00–22:30",
+    "address": "Boschstraat 19, 4811 GG Breda",
+    "phone": "+31 76 520 8929",
+    "website": "https://www.gantauvillage.nl",
+    "buurt": "Binnenstad",
+    "color": "#1a0500",
+    "description": "Authentieke Kantonese Chinese keuken in een gezellige setting op de Boschstraat. Gantau Village is geliefd om de dagverse dim sum, smaakvolle wokgerechten en verse zeevruchtenschotels.",
+    "tags": [
+      "🥟 Dim Sum",
+      "Kantonees",
+      "Boschstraat",
+      "Vers zeevruchten"
+    ],
+    "openingHours": {
+      "di": "17:00-22:00",
+      "wo": "17:00-22:00",
+      "do": "17:00-22:00",
+      "vr": "12:00-22:30",
+      "za": "12:00-22:30",
+      "zo": "12:00-21:30"
+    },
+    "cuisineKeywords": "chinese asian dinsdag woensdag donderdag vrijdag zaterdag zondag",
+    "priceLevel": 1,
+    "badge": "🥟 Dim Sum",
+    "cuisineLabel": "Chinees · Kantonees",
+    "cardDescription": "Authentieke Chinese keuken van de Kantonese school. Gantau Village is geliefd om haar dim sum en verse zeevruchtenschotels.",
+    "phoneDisplay": "076 520 8929"
+  },
+  "14": {
+    "name": "The Chai Affairs",
+    "cuisine": "Indiaas · Chai",
+    "price": "€€",
+    "hours": "Di–Zo 12:00–22:00",
+    "address": "Korte Boschstraat 8-10, 4811 GK Breda",
+    "phone": "+31 686 477 229",
+    "website": "https://www.thechaiaffairs.nl",
+    "buurt": "Binnenstad",
+    "color": "#1a0a00",
+    "description": "Waar Indiase culinaire traditie en de Britse theetraditie samenkomen. The Chai Affairs serveert verse curry's, huisgemaakte naan en een breed scala aan geurige chai-variaties.",
+    "tags": [
+      "🫖 Chai specialist",
+      "Indiaas",
+      "Korte Boschstraat",
+      "Vegetarisch-vriendelijk"
+    ],
+    "openingHours": {
+      "di": "17:00-22:00",
+      "wo": "17:00-22:00",
+      "do": "17:00-22:00",
+      "vr": "12:00-22:30",
+      "za": "12:00-22:30",
+      "zo": "12:00-21:30"
+    },
+    "cuisineKeywords": "indian asian dinsdag woensdag donderdag vrijdag zaterdag zondag",
+    "priceLevel": 2,
+    "badge": "🫖 Chai &amp; Curry",
+    "cuisineLabel": "Indiaas · Chai",
+    "cardDescription": "Een bijzondere ontmoeting van Indiase smaken en Britse theetraditie. Verse curry's, tikka masala en heerlijke chai.",
+    "phoneDisplay": "0686 477 229"
+  },
+  "15": {
+    "name": "Andalous",
+    "cuisine": "Mediterraans · Noord-Afrikaans",
+    "price": "€€",
+    "hours": "Ma–Zo 12:00–22:00",
+    "address": "Boschstraat 53, 4811 GK Breda",
+    "phone": "+31 76 515 4585",
+    "website": "https://www.andalous-breda.nl",
+    "buurt": "Binnenstad",
+    "color": "#0d1500",
+    "description": "Andalous neemt je mee op een smaakrondleiding door het Middellandse Zeegebied. Van geurige Marokkaanse tajines en couscous tot verse mezze en gegrilde specialiteiten — warm, gastvrij en vol smaak.",
+    "tags": [
+      "🫒 Mezze",
+      "Tajine",
+      "Noord-Afrikaans",
+      "Boschstraat"
+    ],
+    "openingHours": {
+      "ma": "11:30-22:00",
+      "di": "11:30-22:00",
+      "wo": "11:30-22:00",
+      "do": "11:30-22:00",
+      "vr": "11:30-22:30",
+      "za": "11:30-22:30",
+      "zo": "12:00-21:00"
+    },
+    "cuisineKeywords": "mediterranean middle-eastern maandag dinsdag woensdag donderdag vrijdag zaterdag zondag",
+    "priceLevel": 2,
+    "badge": "🫒 Mediterraan",
+    "cuisineLabel": "Mediterraans · Noord-Afrikaans",
+    "cardDescription": "Andalous brengt de warmte van het Middellandse Zeegebied naar Breda met authentieke tajines, couscous en mezze.",
+    "phoneDisplay": "076 515 4585"
+  },
+  "16": {
+    "name": "Restaurant Smelt",
+    "cuisine": "Kaasfondue · Hollands",
+    "price": "€€",
+    "hours": "Di–Zo 17:00–22:00",
+    "address": "Boschstraat 93, 4811 GN Breda",
+    "phone": "+31 6 13 32 44 00",
+    "website": "https://www.restaurantsmelt.nl",
+    "buurt": "Binnenstad",
+    "color": "#1a1500",
+    "description": "Restaurant Smelt is hét adres in Breda voor kaasfondue en gourmet. Geniet van de gezelligheid van samen tafelen, met een grote variëteit aan gesmolten kaassoorten en verse dipsauzen.",
+    "tags": [
+      "🧀 Kaasfondue",
+      "Gourmet",
+      "Boschstraat",
+      "Gezellig tafelen"
+    ],
+    "openingHours": {
+      "di": "17:00-22:00",
+      "wo": "17:00-22:00",
+      "do": "17:00-22:00",
+      "vr": "12:00-22:00",
+      "za": "12:00-22:00",
+      "zo": "12:00-21:00"
+    },
+    "cuisineKeywords": "dutch cheese fondue dinsdag woensdag donderdag vrijdag zaterdag zondag",
+    "priceLevel": 2,
+    "badge": "🧀 Fondue",
+    "cuisineLabel": "Kaasfondue · Hollands",
+    "cardDescription": "Restaurant Smelt is dé specialist in kaasfondue en gourmet in Breda. Gezellig tafelen met heerlijke gesmolten kaas.",
+    "phoneDisplay": "06 13 32 44 00"
+  },
+  "17": {
+    "name": "Restaurant Zenza",
+    "cuisine": "Halal · Midden-Oosters",
+    "price": "€€",
+    "hours": "Ma–Zo 12:00–22:00",
+    "address": "Boschstraat 86, 4811 GN Breda",
+    "phone": "+31 76 514 3000",
+    "website": "https://www.restaurantzenza.nl",
+    "buurt": "Binnenstad",
+    "color": "#0d1520",
+    "description": "Restaurant Zenza combineert de rijke smaken van de Midden-Oosterse keuken met een moderne, gastvrije sfeer. Volledig halal gecertificeerd en geschikt voor het hele gezin.",
+    "tags": [
+      "🌙 Halal",
+      "Midden-Oosters",
+      "Boschstraat",
+      "Familie-restaurant"
+    ],
+    "openingHours": {
+      "ma": "12:00-22:00",
+      "di": "12:00-22:00",
+      "wo": "12:00-22:00",
+      "do": "12:00-22:00",
+      "vr": "12:00-22:30",
+      "za": "12:00-22:30",
+      "zo": "12:00-21:00"
+    },
+    "cuisineKeywords": "middle-eastern halal maandag dinsdag woensdag donderdag vrijdag zaterdag zondag",
+    "priceLevel": 2,
+    "badge": "🌙 Halal",
+    "cuisineLabel": "Halal · Midden-Oosters",
+    "cardDescription": "Restaurant Zenza serveert smakelijke Midden-Oosterse gerechten in een eigentijdse sfeer. Halal gecertificeerd, ideaal voor het hele gezin.",
+    "phoneDisplay": "076 514 3000"
+  },
+  "18": {
+    "name": "Masala",
+    "cuisine": "Indiaas · Curry",
+    "price": "€",
+    "hours": "Ma–Zo 12:00–22:30",
+    "address": "Boschstraat 51, 4811 GK Breda",
+    "phone": "+31 76 522 5150",
+    "website": "https://www.masalabreda.nl",
+    "buurt": "Binnenstad",
+    "color": "#1a0800",
+    "description": "Masala brengt de levendige smaken van de authentieke Indiase keuken naar de Boschstraat in Breda. Van geurige curry's tot verse tandoorige bereidingen — altijd warm en vol karakter.",
+    "tags": [
+      "🌶️ Curry",
+      "Indiaas",
+      "Boschstraat",
+      "Naan & Tandoori"
+    ],
+    "openingHours": {
+      "ma": "12:00-22:00",
+      "di": "12:00-22:00",
+      "wo": "12:00-22:00",
+      "do": "12:00-22:00",
+      "vr": "12:00-22:30",
+      "za": "12:00-22:30",
+      "zo": "12:00-21:00"
+    },
+    "cuisineKeywords": "indian asian maandag dinsdag woensdag donderdag vrijdag zaterdag zondag",
+    "priceLevel": 1,
+    "badge": "🌶️ Curry",
+    "cuisineLabel": "Indiaas · Curry",
+    "cardDescription": "Masala brengt de authentieke smaken van de Indiase keuken naar de Boschstraat, met geurige curry's en verse naan.",
+    "phoneDisplay": "076 522 5150"
+  },
+  "19": {
+    "name": "Restaurant Zuyd",
+    "cuisine": "Frans · Fine Dining",
+    "price": "€€€",
+    "hours": "Di–Za 12:00–22:00",
+    "address": "Pasbaan 7, 4811 GM Breda",
+    "phone": "+31 76 515 1340",
+    "website": "https://www.restaurantzuyd.nl",
+    "buurt": "Binnenstad",
+    "color": "#0d1020",
+    "description": "Elegant fine dining restaurant in het hart van Breda. Chef combineert verfijnde Frans-geïnspireerde bereidingen met de beste Nederlandse ingrediënten. De woensdag staat in het teken van Wine & Dine Wednesday — een compleet culinair avond voor €99.",
+    "tags": [
+      "🍷 Wine & Dine",
+      "Fine Dining",
+      "Pasbaan",
+      "Frans geïnspireerd"
+    ],
+    "menus": {
+      "19-lunch": {
+        "subtitle": "Lunchkaart",
+        "scraped": "2026-03-28",
+        "source": "https://www.restaurantzuyd.nl/lunch",
+        "notes": "Lunch do–za 12:15–16:30. Lunchmenu's inclusief koffie/thee met friandises. Kaart kan wijzigen — controleer altijd de actuele kaart.",
+        "categories": [
+          {
+            "name": "Bites",
+            "items": [
+              {
+                "name": "Oesterproeverij",
+                "desc": "2 × 3 verschillende naturel oesters, Balinese vinaigrette",
+                "price": "€23,50",
+                "tags": [
+                  "aanbevolen"
+                ]
+              },
+              {
+                "name": "Jamon Iberico Bellota",
+                "desc": "De exclusieve Spaanse ham, 75 gram",
+                "price": "€19,50",
+                "tags": []
+              },
+              {
+                "name": "Brioche met paling",
+                "desc": "",
+                "price": "€8,50",
+                "tags": []
+              },
+              {
+                "name": "Crumpet met huis gerookte zalm",
+                "desc": "",
+                "price": "€8,50",
+                "tags": []
+              },
+              {
+                "name": "Toast met Mangalica, sriracha en sesam",
+                "desc": "",
+                "price": "€8,50",
+                "tags": []
+              },
+              {
+                "name": "Zuurdesembrood",
+                "desc": "2 soorten boter",
+                "price": "€5,50",
+                "tags": []
+              }
+            ]
+          },
+          {
+            "name": "Lunchmenu's",
+            "items": [
+              {
+                "name": "2-gangen menu",
+                "desc": "Keuze van de chef, inclusief koffie/thee met friandises",
+                "price": "€45",
+                "tags": []
+              },
+              {
+                "name": "3-gangen menu",
+                "desc": "Keuze van de chef, inclusief intermezzo en koffie/thee met friandises",
+                "price": "€55",
+                "tags": [
+                  "aanbevolen"
+                ]
+              },
+              {
+                "name": "4-gangen menu",
+                "desc": "Keuze van de chef, inclusief intermezzo en koffie/thee met friandises",
+                "price": "€65",
+                "tags": []
+              },
+              {
+                "name": "5-gangen menu",
+                "desc": "Keuze van de chef, inclusief intermezzo en koffie/thee met friandises",
+                "price": "€75",
+                "tags": []
+              }
+            ]
+          },
+          {
+            "name": "Sandwiches",
+            "items": [
+              {
+                "name": "Sandwich Zuyd",
+                "desc": "Krentenbrood, dungesneden ossenhaas, eendenlever, rucola, truffel, kaas",
+                "price": "€19,50",
+                "tags": [
+                  "aanbevolen"
+                ]
+              },
+              {
+                "name": "Lobster roll",
+                "desc": "Brioche, kreeft, frisse salade, kreeftensoep",
+                "price": "€25,00",
+                "tags": []
+              }
+            ]
+          },
+          {
+            "name": "À la carte",
+            "items": [
+              {
+                "name": "Steak tartaar",
+                "desc": "Currywafel, basilicum, jalapeño, cornichons, ui, mosterdzaad, krokante kippenhuid, Remeker kaas",
+                "price": "€26,00",
+                "tags": []
+              },
+              {
+                "name": "Kreeft (½)",
+                "desc": "½ gegaarde kreeft uit de schaal, bloemkool, koolrabi, hazelnoot, mandarijn",
+                "price": "€29,00",
+                "tags": [
+                  "aanbevolen"
+                ]
+              },
+              {
+                "name": "Catch of the day",
+                "desc": "",
+                "price": null,
+                "tags": [
+                  "dagspecial"
+                ]
+              },
+              {
+                "name": "Zeebaars",
+                "desc": "Gebakken zeebaarsfilet, wortel, curry, yuzu, komijn",
+                "price": "€29,00",
+                "tags": []
+              },
+              {
+                "name": "Zwezerik",
+                "desc": "Gebakken zwezerik, schorseneren, tandoori, mango, chili",
+                "price": "€29,00",
+                "tags": []
+              },
+              {
+                "name": "Ossenhaas",
+                "desc": "Rosé gebraden ossenhaas, gebakken eendenlever, verse truffel, rösti, spinazie, paddenstoel, Madeira jus",
+                "price": "€32,50",
+                "tags": [
+                  "aanbevolen"
+                ]
+              },
+              {
+                "name": "Eendenlever",
+                "desc": "Gebakken lever, mousse van lever, suikerwafel, vijg, pistache",
+                "price": "€27,00",
+                "tags": []
+              },
+              {
+                "name": "Kaasassortiment",
+                "desc": "Diverse Nederlandse kazen, Zuydvruchtencompote, brood — 4 stuks / 6 stuks",
+                "price": "€12,00 / €18,00",
+                "tags": [],
+                "sup": "Suppl. bij menu +€8,50"
+              },
+              {
+                "name": "Kaasgerecht",
+                "desc": "Vacherin Mont d'Or, Tête de Moine, ui, pompoen, ras el hanout, kummel, pecan, toast",
+                "price": "€17,00",
+                "tags": [],
+                "sup": "Suppl. bij menu +€8,50"
+              },
+              {
+                "name": "Dessert",
+                "desc": "Wisselend seizoensdessert",
+                "price": "€16,50",
+                "tags": []
+              }
+            ]
+          }
+        ]
+      },
+      "19-diner": {
+        "subtitle": "Dinerkaart",
+        "scraped": "2026-03-28",
+        "source": "https://www.restaurantzuyd.nl/diner",
+        "notes": "Diner di–za vanaf 18:15. 4-gangenmenu alleen di–do. Dieetwensen en allergieën op voorhand doorgeven. Kaart kan wijzigen — controleer altijd de actuele kaart.",
+        "categories": [
+          {
+            "name": "Bites",
+            "items": [
+              {
+                "name": "Oesterproeverij",
+                "desc": "2 × 3 verschillende naturel oesters, Balinese vinaigrette",
+                "price": "€23,50",
+                "tags": [
+                  "aanbevolen"
+                ]
+              },
+              {
+                "name": "Oesterproeverij Deluxe",
+                "desc": "3 oester variaties: Frankrijk (framboos, roos, sjalot) · Mexico (passievrucht, jalapeño) · Japan (eendenlevercream, ponzu)",
+                "price": "€29,50",
+                "tags": []
+              },
+              {
+                "name": "Jamon Iberico Bellota",
+                "desc": "De exclusieve Spaanse ham, 75 gram",
+                "price": "€19,50",
+                "tags": []
+              },
+              {
+                "name": "Brioche met paling",
+                "desc": "",
+                "price": "€8,50",
+                "tags": []
+              },
+              {
+                "name": "Crumpet met huis gerookte zalm",
+                "desc": "",
+                "price": "€8,50",
+                "tags": []
+              },
+              {
+                "name": "Toast met Mangalica, sriracha en sesam",
+                "desc": "",
+                "price": "€8,50",
+                "tags": []
+              }
+            ]
+          },
+          {
+            "name": "Surprise / Proeverij",
+            "items": [
+              {
+                "name": "4-gangen surprise",
+                "desc": "Keuze van de chef — alleen di t/m do beschikbaar",
+                "price": "€70",
+                "tags": [],
+                "sup": "Wijnparing +€32 / halve glazen +€22"
+              },
+              {
+                "name": "5-gangen surprise",
+                "desc": "Keuze van de chef",
+                "price": "€80",
+                "tags": [
+                  "aanbevolen"
+                ],
+                "sup": "Wijnparing +€40 / halve glazen +€27,50"
+              },
+              {
+                "name": "6-gangen surprise",
+                "desc": "Keuze van de chef",
+                "price": "€90",
+                "tags": [],
+                "sup": "Wijnparing +€48 / halve glazen +€33"
+              },
+              {
+                "name": "7-gangen surprise",
+                "desc": "Keuze van de chef",
+                "price": "€100",
+                "tags": [],
+                "sup": "Wijnparing +€56 / halve glazen +€38,50"
+              }
+            ]
+          },
+          {
+            "name": "À la carte",
+            "items": [
+              {
+                "name": "Steak tartaar",
+                "desc": "Currywafel, basilicum, jalapeño, cornichons, ui, mosterdzaad, krokante kippenhuid, Remeker kaas",
+                "price": "€26,00",
+                "tags": []
+              },
+              {
+                "name": "Kreeft (½)",
+                "desc": "½ gegaarde kreeft uit de schaal, bloemkool, koolrabi, hazelnoot, mandarijn",
+                "price": "€29,00",
+                "tags": [
+                  "aanbevolen"
+                ]
+              },
+              {
+                "name": "Catch of the day",
+                "desc": "Warm of koud — wisselend aanbod",
+                "price": "€27,00",
+                "tags": [
+                  "dagspecial"
+                ]
+              },
+              {
+                "name": "Zeebaars",
+                "desc": "Gebakken zeebaarsfilet, wortel, curry, yuzu, komijn",
+                "price": "€29,00",
+                "tags": []
+              },
+              {
+                "name": "Zwezerik",
+                "desc": "Gebakken zwezerik, schorseneren, tandoori, mango, chili",
+                "price": "€29,00",
+                "tags": []
+              },
+              {
+                "name": "Ossenhaas",
+                "desc": "Rosé gebraden ossenhaas, gebakken eendenlever, verse truffel, rösti, spinazie, paddenstoel, Madeira jus",
+                "price": "€32,50",
+                "tags": [
+                  "aanbevolen"
+                ]
+              },
+              {
+                "name": "Eendenlever",
+                "desc": "Gebakken lever, mousse van lever, suikerwafel, vijg, pistache",
+                "price": "€27,00",
+                "tags": []
+              },
+              {
+                "name": "Kaasassortiment",
+                "desc": "Diverse Nederlandse kazen, Zuydvruchtencompote, brood — 4 stuks / 6 stuks",
+                "price": "€12,00 / €18,00",
+                "tags": [],
+                "sup": "Suppl. bij menu +€8,50"
+              },
+              {
+                "name": "Kaasgerecht",
+                "desc": "Vacherin Mont d'Or, Tête de Moine, ui, pompoen, ras el hanout, kummel, pecan, toast",
+                "price": "€17,00",
+                "tags": [],
+                "sup": "Suppl. bij menu +€8,50"
+              },
+              {
+                "name": "Dessert",
+                "desc": "Laat u verrassen door de chef",
+                "price": "€16,50",
+                "tags": []
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "openingHours": {
+      "di": "18:00-22:00",
+      "wo": "18:00-22:00",
+      "do": "18:00-22:00",
+      "vr": "12:00-22:00",
+      "za": "12:00-22:00"
+    },
+    "cuisineKeywords": "french european fine-dining dinsdag woensdag donderdag vrijdag zaterdag",
+    "priceLevel": 3,
+    "badge": "🍷 Wine &amp; Dine",
+    "cuisineLabel": "Frans · Fine Dining",
+    "cardDescription": "Elegant fine dining restaurant in het hart van Breda. Verfijnde Frans-geïnspireerde keuken met de beste Nederlandse ingrediënten en een bekende Wine &amp; Dine Wednesday.",
+    "phoneDisplay": "076 515 1340",
+    "menuLinks": [
+      {
+        "id": "19-lunch",
+        "label": "🥗 Lunchkaart"
+      },
+      {
+        "id": "19-diner",
+        "label": "🍽 Dinerkaart"
+      }
+    ]
+  },
+  "20": {
+    "name": "Klein Java",
+    "cuisine": "Indonesisch · Afhaal",
+    "price": "€",
+    "hours": "Ma 16:00–20:00, Wo–Zo 16:00–20:00",
+    "address": "Erasmusplein 10, 4834 AD Breda",
+    "phone": "06 26 66 12 19",
+    "website": "https://www.klein-java.nl",
+    "buurt": "Blauwe Kei",
+    "color": "#1a0d00",
+    "description": "Al meer dan 33 jaar de plek voor authentieke Indonesische afhaalmaaltijden en catering in Breda. Elke dag vers bereid met traditionele recepten en verse ingrediënten rechtstreeks uit eigen keuken — nooit opgewarmd.",
+    "tags": [
+      "🇮🇩 Indonesisch",
+      "Afhaal & Catering",
+      "33+ jaar",
+      "Dagvers bereid"
+    ],
+    "openingHours": {
+      "ma": "17:00-21:00",
+      "wo": "17:00-21:00",
+      "do": "17:00-21:00",
+      "vr": "17:00-21:00",
+      "za": "12:00-21:00",
+      "zo": "12:00-20:00"
+    },
+    "service": "afhaal",
+    "cuisineKeywords": "indonesian asian maandag woensdag donderdag vrijdag zaterdag zondag",
+    "priceLevel": 1,
+    "badge": "🇮🇩 Indonesisch",
+    "cuisineLabel": "Indonesisch · Afhaal",
+    "cardDescription": "Al meer dan 33 jaar de plek voor authentieke Indonesische afhaalmaaltijden en catering in Breda. Dagvers bereid met traditionele recepten en verse ingrediënten uit eigen keuken.",
+    "phoneDisplay": "06 26 66 12 19"
+  },
+  "21": {
+    "name": "Senang Makan",
+    "cuisine": "Moluks Indonesisch · Rijsttafel",
+    "price": "€€",
+    "hours": "Do–Zo 17:00–22:00",
+    "address": "Teteringsedijk 138, 4817 MJ Breda",
+    "phone": "076 888 8941",
+    "website": "https://www.senangmakan.nl",
+    "buurt": "Brabantpark",
+    "color": "#0d1a0d",
+    "description": "Authentieke Molukse rijsttafel onder leiding van chef Chesron in Brabantpark. De menukaart wisselt per seizoen en omvat traditionele Molukse gerechten, chef's specials en tijdens de feestdagen een uitgebreid aanbod van zo'n 40 gerechten. Ook mogelijk voor afhaal, catering en kookworkshops.",
+    "tags": [
+      "🍚 Rijsttafel",
+      "Moluks",
+      "Kookworkshops",
+      "Catering"
+    ],
+    "openingHours": {
+      "do": "17:00-21:00",
+      "vr": "17:00-21:00",
+      "za": "12:00-21:00",
+      "zo": "12:00-20:00"
+    },
+    "service": "both",
+    "cuisineKeywords": "indonesian asian donderdag vrijdag zaterdag zondag",
+    "priceLevel": 2,
+    "badge": "🍚 Rijsttafel",
+    "cuisineLabel": "Moluks Indonesisch · Rijsttafel",
+    "cardDescription": "Authentieke Molukse rijsttafel onder leiding van chef Chesron. Naast dineren ook afhaal, catering en kookworkshops. Tijdens de feestdagen een uitgebreid menu van zo'n 40 gerechten.",
+    "phoneDisplay": "076 888 8941"
+  },
+  "22": {
+    "name": "Makanan",
+    "cuisine": "Indonesisch · Afhaal",
+    "price": "€",
+    "hours": "Bel voor openingstijden: 076 514 1712",
+    "address": "Epelenberg 2, 4817 CM Breda",
+    "phone": "076 514 1712",
+    "website": "https://www.makananbreda.nl",
+    "buurt": "Brabantpark",
+    "color": "#0a1a0a",
+    "description": "Makanan Indische Specialiteiten bereidt dagelijks verse Indonesische gerechten op basis van traditionele recepten. Van nasi goreng en rendang tot huisgemaakte loempia's en kroketten. Afhalen kan op afspraak — bellen aanbevolen zodat alles op tijd klaarstaat.",
+    "tags": [
+      "🇮🇩 Indisch",
+      "Afhaal & Catering",
+      "Dagvers",
+      "Op bestelling"
+    ],
+    "openingHours": {
+      "ma": "17:00-21:00",
+      "di": "17:00-21:00",
+      "wo": "17:00-21:00",
+      "do": "17:00-21:00",
+      "vr": "17:00-21:00",
+      "za": "12:00-21:00",
+      "zo": "12:00-20:00"
+    },
+    "service": "afhaal",
+    "cuisineKeywords": "indonesian asian maandag dinsdag woensdag donderdag vrijdag zaterdag zondag",
+    "priceLevel": 1,
+    "badge": "🇮🇩 Indische Specialiteiten",
+    "cuisineLabel": "Indonesisch · Afhaal",
+    "cardDescription": "Verse Indonesische specialiteiten dagelijks vers bereid: nasi goreng, bami goreng, rendang en huisgemaakte loempia's en kroketten. Afhaal op bestelling, bellen aanbevolen.",
+    "phoneDisplay": "076 514 1712"
+  },
+  "23": {
+    "name": "T-Huis",
+    "cuisine": "Grand Café · Parkrestaurant",
+    "price": "€",
+    "hours": "Ma–Zo 09:00–23:00",
+    "address": "John F. Kennedylaan 15, 4811 ET Breda",
+    "phone": "076 562 3780",
+    "website": "https://t-huis.online",
+    "buurt": "Valkenberg",
+    "color": "#0d1f0d",
+    "description": "T-Huis is de enige horecazaak midden in het Valkenbergpark — Breda's groene hart. Zeven dagen per week open vanaf 09:00 voor koffie, lunch, borrel en diner. Op het iconische rode terras, aan picknicktafels of in de beach chairs. Ook to-go via de app.",
+    "tags": [
+      "🌿 Valkenberg Park",
+      "All-day dining",
+      "Craft bier",
+      "Terras"
+    ],
+    "menus": {
+      "23-lunch": {
+        "subtitle": "Lunchkaart",
+        "scraped": "2026-03-28",
+        "source": "https://t-huis.online/menu/",
+        "notes": "Lunch geserveerd tot 15:30.",
+        "categories": [
+          {
+            "name": "Breakfast & Lunch",
+            "items": [
+              {
+                "name": "Middle Eastern Pancakes",
+                "desc": "American pancakes, griekse yoghurt, perzik, verveinesiroop, pistache",
+                "price": "€14,75",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Shakshuka",
+                "desc": "Tomaat, ei, komijn, gerookte paprika, peterselie, focaccia",
+                "price": "€13,75",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Avocado Toast",
+                "desc": "Avocado, bacon, toast, ei, tomaat, aioli",
+                "price": "€14,75",
+                "tags": []
+              },
+              {
+                "name": "Quattro Formaggi Tosti",
+                "desc": "Mozzarella, cheddar, gorgonzola, parmezaan, tomaat-rozemarijnchutney, zongedroogde tomaat",
+                "price": "€14,75",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Burrata & Peach",
+                "desc": "Focaccia, burrata, perzik, rucola, uienchutney, pistache",
+                "price": "€14,75",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Iberian Melt",
+                "desc": "Chorizo, brie, ingelegde ui, uienchutney",
+                "price": "€15,75",
+                "tags": []
+              },
+              {
+                "name": "Veggie Romesco Sandwich",
+                "desc": "Gegrilde seizoensgroenten, romesco, kruidenvinaigrette, geroosterde amandel",
+                "price": "€15,75",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Mortadella Burrata",
+                "desc": "Focaccia, mortadella, burrata, pesto, pistache",
+                "price": "€14,75",
+                "tags": []
+              },
+              {
+                "name": "White Bean & Veggie Sandwich",
+                "desc": "Aubergine, cannellini bonen spread, rode ui, gerookte paprika, kruidenvinaigrette, dille",
+                "price": "€14,75",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Greek Chicken Sandwich",
+                "desc": "Kippendij, feta-geroosterde paprika spread, kruidenvinaigrette, dille",
+                "price": "€15,25",
+                "tags": []
+              },
+              {
+                "name": "Steak à la T-Huis",
+                "desc": "Rumpsteak, balsamico, jus, brood",
+                "price": "€23,75",
+                "tags": [],
+                "sup": "pancetta & champignons +€3,00"
+              },
+              {
+                "name": "Tournedos à la T-Huis",
+                "desc": "Tournedos, balsamico, jus, brood",
+                "price": "€32,75",
+                "tags": [],
+                "sup": "pancetta & champignons +€3,00"
+              },
+              {
+                "name": "TFC Burger",
+                "desc": "Fried chicken burger, gochujang glaze, Koreaans zoetzuur, sesammayo",
+                "price": "€15,75",
+                "tags": [],
+                "sup": "friet +€4,00"
+              },
+              {
+                "name": "Bisque",
+                "desc": "Huisgemaakte bisque, garnalen, focaccia, garnalenolie",
+                "price": "€14,75",
+                "tags": []
+              }
+            ]
+          },
+          {
+            "name": "Salades",
+            "items": [
+              {
+                "name": "Salade Geitenkaas",
+                "desc": "Geitenkaas, appelstroop, rode biet zoetzuur, vleestomaat, walnoot. Geserveerd met brood.",
+                "price": "€20,75",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Japanse Tonijn Salade",
+                "desc": "Tonijn tataki, edamame, wakame, ponzu, wasabi crunch, bosui. Geserveerd met brood.",
+                "price": "€22,75",
+                "tags": []
+              },
+              {
+                "name": "Caesar Salade",
+                "desc": "Kippendij, romaine sla, gekookt ei, bacon, ansjovis, parmezaan, pangrattato. Geserveerd met brood.",
+                "price": "€21,75",
+                "tags": []
+              }
+            ]
+          },
+          {
+            "name": "Sweets",
+            "items": [
+              {
+                "name": "Appeltaart",
+                "desc": "Huisgemaakte appeltaart van 't Klooster",
+                "price": "€4,75",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Red Velvet Cake",
+                "desc": "",
+                "price": "€6,75",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Taart van het Moment",
+                "desc": "Wisselend aanbod",
+                "price": "op aanvraag",
+                "tags": [
+                  "dagspecial"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Kids Menu",
+            "items": [
+              {
+                "name": "Kids Pancakes",
+                "desc": "Keuze: rood seizoensfruit / stroop en suiker / Nutella",
+                "price": "€8,00",
+                "tags": []
+              },
+              {
+                "name": "Kids Burger",
+                "desc": "Mini burger, burger bun, augurk, ketchup, frietjes",
+                "price": "€9,75",
+                "tags": []
+              },
+              {
+                "name": "Biefstukje met Friet",
+                "desc": "Mini steak, frietjes",
+                "price": "€13,75",
+                "tags": []
+              },
+              {
+                "name": "Kids Tosti",
+                "desc": "",
+                "price": "€6,00",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Frietjes & Snacks",
+                "desc": "Bitterballen, frikandelletjes, kipnuggets",
+                "price": "€8,75",
+                "tags": []
+              }
+            ]
+          }
+        ]
+      },
+      "23-diner": {
+        "subtitle": "Dinerkaart",
+        "scraped": "2026-03-28",
+        "source": "https://t-huis.online/menu/",
+        "notes": "Diner geserveerd vanaf 17:00.",
+        "categories": [
+          {
+            "name": "Voorgerechten",
+            "items": [
+              {
+                "name": "Steak Tartaar",
+                "desc": "Grasgevoerd rundvlees | kappertjes | chorizo-olie | kwartelei",
+                "price": "€15,75",
+                "tags": []
+              },
+              {
+                "name": "Tonijn Tataki",
+                "desc": "Saku tonijn | sesam mayo | wakame | ponzu | wasabi crunch | bosui",
+                "price": "€15,75",
+                "tags": []
+              },
+              {
+                "name": "Burrata & Perzik",
+                "desc": "Burrata DOP | perzik | rucola | uienchutney | pistache",
+                "price": "€13,75",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Pata Negra",
+                "desc": "Ibérico cebo campo",
+                "price": "€14,75",
+                "tags": []
+              },
+              {
+                "name": "Romesco & Veg",
+                "desc": "Romesco | gegrilde seizoensgroente | kruidenvinaigrette | koriander | geroosterde amandel | brood",
+                "price": "€13,75",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Greek Delight",
+                "desc": "Aubergine | feta - geroosterde paprika crème | kruidenvinaigrette | dille | brood",
+                "price": "€12,75",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Bisque",
+                "desc": "Huisgemaakte bisque | garnalen | focaccia | garnalenolie",
+                "price": "€14,75",
+                "tags": []
+              }
+            ]
+          },
+          {
+            "name": "Hoofdgerechten",
+            "items": [
+              {
+                "name": "Steak à la T-Huis",
+                "desc": "Rumpsteak | gepofte cherrytomaat | balsamico | jus | friet",
+                "price": "€25,75",
+                "tags": [],
+                "sup": "pancetta & kastanjechampignons +€3,00"
+              },
+              {
+                "name": "Tournedos à la T-Huis",
+                "desc": "Tournedos | gepofte cherrytomaat | balsamico | jus | friet",
+                "price": "€34,75",
+                "tags": [],
+                "sup": "pancetta & kastanjechampignons +€3,00"
+              },
+              {
+                "name": "Sliptongetjes",
+                "desc": "In boter gebakken sliptongetjes | remoulade | seizoensgroenten | friet",
+                "price": "€26,75",
+                "tags": [],
+                "sup": "Seizoensgebonden"
+              },
+              {
+                "name": "Portugese Marisco Seafood Stew",
+                "desc": "Seizoensvis | mosselen | gamba's | krielaardappel | peterselie | brood",
+                "price": "€25,75",
+                "tags": []
+              },
+              {
+                "name": "Pulpo del Sol",
+                "desc": "Pulpo | parelcouscous | tomaat | saffraan | pico de gallo | chorizo vinaigrette",
+                "price": "€25,75",
+                "tags": []
+              },
+              {
+                "name": "Roasted Pointed Cabbage",
+                "desc": "Geroosterde spitskool | cannellini bonen puree | seizoensgroenten | krielaardappel | rode ui | gerookte paprika | kruidenvinaigrette | walnoot",
+                "price": "€24,75",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "TFC Burger",
+                "desc": "Fried chicken burger | gochujang glaze | Koreaans zoetzuur | sesam mayo | friet",
+                "price": "€19,75",
+                "tags": []
+              }
+            ]
+          },
+          {
+            "name": "Signature Salads",
+            "items": [
+              {
+                "name": "Salade Geitenkaas",
+                "desc": "Geitenkaas | appelstroop | rode biet zoetzuur | vleestomaat | walnoot. Geserveerd met brood.",
+                "price": "€20,75",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Japanse Tonijn Salade",
+                "desc": "Tonijn tataki | edamame | wakame | ponzu | sesammayo | wasabi crunch | bosui. Geserveerd met brood.",
+                "price": "€22,75",
+                "tags": []
+              },
+              {
+                "name": "Caesar Salade",
+                "desc": "Kippendij | little gem | gekookt ei | bacon | ansjovis | parmezaan | pangrattato. Geserveerd met brood.",
+                "price": "€21,75",
+                "tags": []
+              }
+            ]
+          },
+          {
+            "name": "Desserts",
+            "items": [
+              {
+                "name": "Summer Peach",
+                "desc": "Perzik | crumble | vanille-ijs | verveinesiroop",
+                "price": "€8,75",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Chocolade Moelleux",
+                "desc": "Chocolade moelleux | rood seizoensfruit crumble | frambozen sorbetijs",
+                "price": "€9,75",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "T-Huis Tiramisu",
+                "desc": "Savoiardi | mascarpone | koffie kahlua | cacaocrumble",
+                "price": "€9,75",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Kaasplankje",
+                "desc": "Wisselende kazen | kletzenbrood | walnoot",
+                "price": "€13,75",
+                "tags": [
+                  "vegetarisch"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Kids Menu",
+            "items": [
+              {
+                "name": "Pancakes",
+                "desc": "Keuze: rood seizoensfruit / stroop en suiker / Nutella",
+                "price": "€8,00",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Kids Burger",
+                "desc": "Mini burger | burger bun | augurk | ketchup | frietjes",
+                "price": "€9,75",
+                "tags": []
+              },
+              {
+                "name": "Biefstukje met Friet",
+                "desc": "Mini steak | frietjes",
+                "price": "€13,25",
+                "tags": []
+              },
+              {
+                "name": "Kids Sliptong",
+                "desc": "Sliptong | frietjes",
+                "price": "€13,25",
+                "tags": []
+              },
+              {
+                "name": "Frietjes & Snacks",
+                "desc": "Keuze uit: bitterballen, frikandelletjes, kipnuggets",
+                "price": "€8,75",
+                "tags": []
+              }
+            ]
+          }
+        ]
+      },
+      "23-borrel": {
+        "subtitle": "Borrelkaart",
+        "scraped": "2026-03-28",
+        "source": "https://t-huis.online/menu/",
+        "notes": "Borrel geserveerd vanaf 14:00 tot laat.",
+        "categories": [
+          {
+            "name": "Signature Snacks",
+            "items": [
+              {
+                "name": "Camembert",
+                "desc": "Camembert uit de oven | honing | walnoot | tijm",
+                "price": "€9,75",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Pata Negra",
+                "desc": "Ibérico cebo campo",
+                "price": "€14,75",
+                "tags": []
+              },
+              {
+                "name": "Charcuterie van het Moment",
+                "desc": "Wat vandaag op z'n best is!",
+                "price": "€13,75",
+                "tags": [
+                  "dagspecial"
+                ]
+              },
+              {
+                "name": "Tonijn Tataki",
+                "desc": "Saku tonijn | sesammayo | wakame | ponzu | wasabi crunch | bosui",
+                "price": "€15,75",
+                "tags": []
+              },
+              {
+                "name": "Kaasplankje",
+                "desc": "Jonge en oude kazen | mosterd | huisgemaakt zuur",
+                "price": "€11,75",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Nacho's",
+                "desc": "Pulled chicken | jalapeños | crème fraîche | cheddar | guacamole | rode salsa | bosui",
+                "price": "€15,75",
+                "tags": []
+              },
+              {
+                "name": "Brood & Boter",
+                "desc": "Bussing-desembrood | roomboter | zeezout",
+                "price": "€6,75",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Noten & Olijven",
+                "desc": "",
+                "price": "€6,75",
+                "tags": [
+                  "vegetarisch"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Fried Delight",
+            "items": [
+              {
+                "name": "Chorizo Kroketjes",
+                "desc": "Chorizo kroketjes | aioli | 6 stuks",
+                "price": "€9,00",
+                "tags": []
+              },
+              {
+                "name": "Kaastengels",
+                "desc": "Kaastengels | chilisaus | 8 stuks",
+                "price": "€9,50",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Gyoza's",
+                "desc": "Vegetarische gyoza's | sesammayo | crispy chili | bosui | 8 stuks",
+                "price": "€9,75",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Chicken Bites",
+                "desc": "Crispy karaage chicken | sesammayo | chilisaus | togarashi | bosui | 8 stuks",
+                "price": "€9,50",
+                "tags": []
+              },
+              {
+                "name": "Bitterballen",
+                "desc": "Bitterballen | mosterd | 8 stuks",
+                "price": "€8,50",
+                "tags": []
+              },
+              {
+                "name": "Frikandelletjes",
+                "desc": "Frikandelletjes | mayo | 10 stuks",
+                "price": "€8,50",
+                "tags": []
+              }
+            ]
+          },
+          {
+            "name": "Wijnen — Wit",
+            "items": [
+              {
+                "name": "La Roche - La Chevallière",
+                "desc": "Chardonnay | Terret — Languedoc-Roussillon, FR · Fris | mineralig | exotisch fruit | gele appel",
+                "price": "€6,00 / €35,00"
+              },
+              {
+                "name": "Agustinos - Gran Terroir White",
+                "desc": "Chardonnay | Viognier — Maipo Valley, CHI · Vol | abrikoos | bloesem",
+                "price": "€7,00 / €39,00"
+              },
+              {
+                "name": "Joseph Cattin - Duo Gris & Blanc",
+                "desc": "Pinot Gris | Pinot Blanc — Elzas, FR · Witte bloesem | abrikoos | peer",
+                "price": "€42,00"
+              },
+              {
+                "name": "Morgadio",
+                "desc": "Albariño — Rías Baixas, POR · Zittig | citrus | fris | nectarines",
+                "price": "€45,00"
+              },
+              {
+                "name": "Höpler - Seeblick",
+                "desc": "Grüner Veltliner | Pinot Blanc — Burgenland, AT · Kruizig | fris | abrikoos | bloesem",
+                "price": "€5,50 / €32,00"
+              },
+              {
+                "name": "Baigorri - Blanco Fermentado en Barrica DOC",
+                "desc": "Viura | Malvasia — Rioja, SP · Romig | toast | exotisch fruit",
+                "price": "€49,00"
+              },
+              {
+                "name": "Maison Champy Pernand-Vergelesses 1er Cru",
+                "desc": "Chardonnay — Bourgogne, FR · Vol | perzik | witte bloesem | anijs",
+                "price": "€98,00"
+              },
+              {
+                "name": "Gérard Bertrand",
+                "desc": "Chardonnay | Sauvignon Blanc | Viognier — Pays d'OC, FR · Citrus | vol | vanille | gedroogd fruit | honing",
+                "price": "€39,00"
+              }
+            ]
+          },
+          {
+            "name": "Wijnen — Mousserend",
+            "items": [
+              {
+                "name": "Vallformosa - Blue Fin Cava Brut Reserva",
+                "desc": "Macabeo | Xarello | Parellada — Catalunya, SP · Fris | fruitig | appel",
+                "price": "€5,00 / €38,00"
+              },
+              {
+                "name": "Bouvet Ladubay - Crémant de Loire",
+                "desc": "Chenin Blanc | Chardonnay — Loire, FR · Perzik | acacia | fris | honing",
+                "price": "€8,50 / €45,00"
+              },
+              {
+                "name": "Gérard Bertrand - Papillon Pétillant Naturel",
+                "desc": "Cinsault | Pinot Noir — Languedoc-Roussillon, FR · Fris | rode bessen | aardbei | framboos",
+                "price": "€38,00"
+              },
+              {
+                "name": "Bouché - Père et Fils Cuvée Réservée Brut",
+                "desc": "Chardonnay | Pinot Noir | Pinot Meunier — Champagne, FR · Mineralig | appel | peer | brioche",
+                "price": "€75,00 / €51,00 (37.5cl)"
+              }
+            ]
+          },
+          {
+            "name": "Wijnen — Oranje",
+            "items": [
+              {
+                "name": "Joseph Cattin Orange",
+                "desc": "Orange Pinot Gris — Elzas, FR · Perzik | rode bessen | fris",
+                "price": "€42,00"
+              }
+            ]
+          },
+          {
+            "name": "Wijnen — Rood",
+            "items": [
+              {
+                "name": "El Esteco - Don David Malbec Reserva",
+                "desc": "Malbec — Calchaqui Valley, ARG · Pruimenjam | tabak | vanille",
+                "price": "€7,00 / €37,00"
+              },
+              {
+                "name": "Pasqua - Desire Lush & Zin",
+                "desc": "Primitivo — Puglia, IT · Rood fruit | koffie | cacao | pruim",
+                "price": "€6,50 / €35,00"
+              },
+              {
+                "name": "Castillo de Monjardin Reserva",
+                "desc": "Cabernet Sauvignon | Merlot | Tempranillo — Navarra, SP · Kersen | pruimen | karamel | genjet",
+                "price": "€43,00"
+              },
+              {
+                "name": "Baigorri - Reserva",
+                "desc": "Tempranillo — Rioja, SP · Pruimen | bramen | romig | vanille",
+                "price": "€55,00"
+              },
+              {
+                "name": "Pasqua - Black Label Valpolicella Superiore Ripasso DOC",
+                "desc": "Veneto, IT · Kers | wilde bessen | balspecerijen",
+                "price": "€45,00"
+              },
+              {
+                "name": "Bassermann Jordan - Spätburgunder",
+                "desc": "Spätburgunder — Pfalz, DE · Frambozen | aardbei | amandel",
+                "price": "€47,00"
+              },
+              {
+                "name": "Höpler - Seeblick",
+                "desc": "Blaufrankisch | Zweigelt | Pinot Noir — Burgenland, AT · Kruizig | zwarte bessen | zwarte peper",
+                "price": "€5,50 / €32,00"
+              },
+              {
+                "name": "Cérvoles - Colors Negre",
+                "desc": "Garnaxa — Costers del Segre, SP · Kruizig | vol | rode kers | sappig",
+                "price": "€42,00"
+              },
+              {
+                "name": "Coppo - La Morra",
+                "desc": "Barolo DOCG — Piemonte, IT · Rode bessen | viooltjes | rozen | drop",
+                "price": "€35,00"
+              },
+              {
+                "name": "Rolland Galareta - Priorat Clos d'en Ferran",
+                "desc": "Cariñena | Garnatxa — Priorat, SP · Zwarte kers | kanel | lavendel",
+                "price": "€73,00"
+              }
+            ]
+          },
+          {
+            "name": "Wijnen — Rosé",
+            "items": [
+              {
+                "name": "La Campagne",
+                "desc": "Cinsault — Pays d'OC, FR · Fruitig | licht | aardbei | framboos",
+                "price": "€5,50 / €29,00"
+              },
+              {
+                "name": "Höpler - Seeblick",
+                "desc": "Pinot Noir | Zweigelt | Blaufrankisch — Burgenland, AT · Mineralig | peer | aardbei | citrus",
+                "price": "€5,50 / €32,00"
+              },
+              {
+                "name": "Pasqua - Y by Il Minuto Rosé",
+                "desc": "Corvina | Cormentere | Trebbiano — Veneto, IT · Citrus | witte bloesem | licht | romig",
+                "price": "€48,00"
+              },
+              {
+                "name": "Château Gassier - Esprit Gassier Bio",
+                "desc": "Syrah | Grenache | Vermentino | Cinsault — Provence, FR · Lychee | peer | fris",
+                "price": "€39,00"
+              }
+            ]
+          },
+          {
+            "name": "Wijnen — Dessert",
+            "items": [
+              {
+                "name": "Santa Alicia - Agustinos Late Harvest",
+                "desc": "Moscatel — Central Valley, CHI · Gekonfijt fruit | fris | nachtschtig",
+                "price": "€8,00"
+              },
+              {
+                "name": "Gérard Bertrand - Rivesaltes Ambré",
+                "desc": "Vin Doux Naturel — Languedoc-Roussillon, FR · Rozijn | honing",
+                "price": "€7,50"
+              },
+              {
+                "name": "Kopke Port",
+                "desc": "Tawny 10 jaar — POR · Houtpepijp | gedroogd fruit | honing",
+                "price": "€7,00"
+              }
+            ]
+          },
+          {
+            "name": "Cocktails",
+            "items": [
+              {
+                "name": "Bombay G&T",
+                "desc": "Bombay Gin | RB Tonic | limoen | citroen",
+                "price": "€9,00"
+              },
+              {
+                "name": "Bulldog G&T",
+                "desc": "Bulldog Gin | Fever-Tree Mediterranean | limoen | sinaasappel",
+                "price": "€11,00"
+              },
+              {
+                "name": "Pink Flamingo",
+                "desc": "Bombay Gin | Pinkyrose Spiced Lemon & Rose | bruiswater | limoen | munt",
+                "price": "€10,00",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Tequila Sunrise",
+                "desc": "Tequila | sinaasappelsap | grenadine | citroen",
+                "price": "€10,00",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Paloma",
+                "desc": "Tequila | limoensap | Pinkyrose Chili Grapefruit | bruiswater | limoen",
+                "price": "€11,00",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Moscow Mule",
+                "desc": "Eristoff Vodka | RB ginger beer | angosturabitlers | limoen | munt",
+                "price": "€9,00",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Bloody Miro",
+                "desc": "Eristoff Vodka | tomatensap | tabasco | Worcestershire sauce",
+                "price": "€9,00",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Dark & Stormy",
+                "desc": "Bacardi Spiced Rum | Royal Bliss ginger beer | limoen | munt",
+                "price": "€10,00"
+              },
+              {
+                "name": "Negroni",
+                "desc": "Campari | Rude Vermouth | Gin | sinaasappel",
+                "price": "€9,00"
+              },
+              {
+                "name": "Mimosa",
+                "desc": "Cava | jus d'orange | sinaasappel",
+                "price": "€7,00",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Lyre's Pink London Spirit & Tonic",
+                "desc": "Lyre's (0%) | Fever-Tree Mediterranean | munt — Alcoholvrij",
+                "price": "€9,00",
+                "tags": [
+                  "vegetarisch"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Spritzers",
+            "items": [
+              {
+                "name": "Aperol Spritz",
+                "desc": "Aperol | cava | bruiswater | sinaasappel",
+                "price": "€9,00"
+              },
+              {
+                "name": "Luxardo Limoncello Spritz",
+                "desc": "Limoncello | cava | bruiswater | citroen",
+                "price": "€9,00",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Campari Spritz",
+                "desc": "Campari | cava | bruiswater | sinaasappel",
+                "price": "€9,00"
+              },
+              {
+                "name": "Kan Rode Sangria",
+                "desc": "Homemade sangria | zomers fruit — per kan",
+                "price": "€26,00"
+              }
+            ]
+          },
+          {
+            "name": "Bieren — Van de Tap",
+            "items": [
+              {
+                "name": "Brand Pilsener 25cl · 5.6%",
+                "desc": "",
+                "price": "€3,00"
+              },
+              {
+                "name": "Brand Pilsener 50cl · 5.8%",
+                "desc": "",
+                "price": "€6,00"
+              },
+              {
+                "name": "Texels Skiller Wit 30cl · 5.6%",
+                "desc": "",
+                "price": "€5,00"
+              },
+              {
+                "name": "Frontaal Juice Punch NEIPA 25cl · 5.8%",
+                "desc": "",
+                "price": "€6,00"
+              },
+              {
+                "name": "Lagunitas IPA 30cl · 6.2%",
+                "desc": "",
+                "price": "€5,00"
+              },
+              {
+                "name": "Affligem Blond 30cl · 6.8%",
+                "desc": "",
+                "price": "€5,00"
+              },
+              {
+                "name": "Paulaner Weizen 30cl · 5.3%",
+                "desc": "",
+                "price": "€5,00"
+              },
+              {
+                "name": "Paulaner Weizen 50cl · 5.5%",
+                "desc": "",
+                "price": "€8,00"
+              }
+            ]
+          },
+          {
+            "name": "Bieren — Flesjes & Blikjes",
+            "items": [
+              {
+                "name": "Eeuwige Jeugd Lieflibel · 8.7%",
+                "desc": "Blond & Tripel",
+                "price": "€6,25"
+              },
+              {
+                "name": "Texels Zeebries",
+                "desc": "Blond & Tripel",
+                "price": "€5,00"
+              },
+              {
+                "name": "Big Belly Loudon · 6.8%",
+                "desc": "Blond & Tripel",
+                "price": "€5,00"
+              },
+              {
+                "name": "Oedipus Mannenliefde · 6.0%",
+                "desc": "Blond & Tripel",
+                "price": "€5,00"
+              },
+              {
+                "name": "Brugse Zot · 6.0%",
+                "desc": "Blond & Tripel",
+                "price": "€5,00"
+              },
+              {
+                "name": "Duvel · 8.5%",
+                "desc": "Blond & Tripel",
+                "price": "€5,00"
+              },
+              {
+                "name": "Oedipus Thai · 8.0%",
+                "desc": "Blond & Tripel",
+                "price": "€5,00"
+              },
+              {
+                "name": "Affligem Tripel · 9.0%",
+                "desc": "Blond & Tripel",
+                "price": "€5,00"
+              },
+              {
+                "name": "IJwit · 4.5%",
+                "desc": "Wit & Weizen",
+                "price": "€6,00"
+              },
+              {
+                "name": "Blanche de Bruges · 5.0%",
+                "desc": "Wit & Weizen",
+                "price": "€5,00"
+              },
+              {
+                "name": "Belgisch Wit · 4.8%",
+                "desc": "Wit & Weizen",
+                "price": "€5,00"
+              },
+              {
+                "name": "Frontaal White Simmie · 5.2%",
+                "desc": "Wit & Weizen",
+                "price": "€5,00"
+              },
+              {
+                "name": "Texels Skuumkoppe · 6.0%",
+                "desc": "Wit & Weizen",
+                "price": "€5,00"
+              },
+              {
+                "name": "Eeuwige Jeugd Dutteloak · 7.7%",
+                "desc": "Wit & Weizen",
+                "price": "€5,00"
+              },
+              {
+                "name": "Texels Overzee · 6.0%",
+                "desc": "IPA",
+                "price": "€5,00"
+              },
+              {
+                "name": "Oedipus Gaia · 7.0%",
+                "desc": "IPA",
+                "price": "€5,00"
+              },
+              {
+                "name": "Eeuwige Jeugd Globjanus · 5.2%",
+                "desc": "IPA",
+                "price": "€5,00"
+              },
+              {
+                "name": "Big Belly Cabron · 5.6%",
+                "desc": "IPA",
+                "price": "€5,00"
+              },
+              {
+                "name": "Bolleke De Koninck · 5.2%",
+                "desc": "Amber & Donker",
+                "price": "€5,00"
+              },
+              {
+                "name": "Affligem Dubbel · 6.0%",
+                "desc": "Amber & Donker",
+                "price": "€5,00"
+              },
+              {
+                "name": "Brugse Zot Dubbel · 7.5%",
+                "desc": "Amber & Donker",
+                "price": "€6,00"
+              },
+              {
+                "name": "Desperados · 5.9%",
+                "desc": "Fris & Fruitig",
+                "price": "€5,00"
+              },
+              {
+                "name": "Liefmans Fruitesse · 3.8%",
+                "desc": "Fris & Fruitig",
+                "price": "€5,00"
+              },
+              {
+                "name": "Amstel Radler · 2.0%",
+                "desc": "Fris & Fruitig",
+                "price": "€4,00"
+              },
+              {
+                "name": "Heineken 0.0%",
+                "desc": "Alcoholvrij",
+                "price": "€3,00"
+              },
+              {
+                "name": "Brand Weizen 0.0%",
+                "desc": "Alcoholvrij",
+                "price": "€4,00"
+              },
+              {
+                "name": "Affligem Blond 0.0%",
+                "desc": "Alcoholvrij",
+                "price": "€4,00"
+              },
+              {
+                "name": "Brand IPA 0.0%",
+                "desc": "Alcoholvrij",
+                "price": "€4,00"
+              },
+              {
+                "name": "Amstel Rosé 0.0%",
+                "desc": "Alcoholvrij",
+                "price": "€4,00"
+              }
+            ]
+          },
+          {
+            "name": "Koffie & Thee",
+            "items": [
+              {
+                "name": "Koffie | Espresso",
+                "desc": "",
+                "price": "€3,00",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Dubbele Espresso",
+                "desc": "",
+                "price": "€3,50",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Cappuccino | Koffie Verkeerd",
+                "desc": "",
+                "price": "€4,00",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Espresso Macchiato | Cortado",
+                "desc": "",
+                "price": "€3,00",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Latte Macchiato",
+                "desc": "",
+                "price": "€4,00",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Flat White",
+                "desc": "",
+                "price": "€4,00",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Chai Latte",
+                "desc": "",
+                "price": "€4,00",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Dirty Chai Latte",
+                "desc": "",
+                "price": "€5,00",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Diverse smaken thee",
+                "desc": "Bradley's",
+                "price": "€3,00",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Verse thee",
+                "desc": "Munt of gember",
+                "price": "€3,00",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Warme Chocolademelk",
+                "desc": "",
+                "price": "€3,50",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "IJskoffie",
+                "desc": "Koffie | volle melk | caramelsiroop",
+                "price": "€4,00",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Koffie Deluxe",
+                "desc": "Koffie Whiskey | Tia Maria | Grand Marnier",
+                "price": "€8,00"
+              },
+              {
+                "name": "Amaretto | Licor 43 | Baileys",
+                "desc": "Met koffie",
+                "price": "€8,00"
+              },
+              {
+                "name": "IJskoffie Deluxe",
+                "desc": "Likeur naar keuze | slagroom",
+                "price": "€8,00"
+              },
+              {
+                "name": "Warme Chocolademelk Deluxe",
+                "desc": "Likeur naar keuze | slagroom",
+                "price": "€8,00"
+              },
+              {
+                "name": "'t Heerdje",
+                "desc": "Amaretto | espresso | sinaasappel — koud",
+                "price": "€8,00"
+              }
+            ]
+          },
+          {
+            "name": "Fresh Lemonades & Frisdranken",
+            "items": [
+              {
+                "name": "Pinkyrose Straight Lemon",
+                "desc": "Bruiswater | citroen | limoen",
+                "price": "€4,00",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Pinkyrose Spiced Lemon & Rose",
+                "desc": "Bruiswater | limoen | munt",
+                "price": "€4,00",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Pinkyrose Ginger & Orange",
+                "desc": "Bruiswater | sinaasappel | citroen",
+                "price": "€4,00",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Pinkyrose Chili Grapefruit",
+                "desc": "Bruiswater | limoen | sinaasappel",
+                "price": "€4,00",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Chaudfontaine",
+                "desc": "Rood of Blauw",
+                "price": "€3,00",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Coca Cola Regular | Zero",
+                "desc": "",
+                "price": "€3,00"
+              },
+              {
+                "name": "Lipton Ice Tea",
+                "desc": "Sparkling of Green",
+                "price": "€3,00",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Fanta Orange | Cassis",
+                "desc": "",
+                "price": "€3,00"
+              },
+              {
+                "name": "Royal Bites",
+                "desc": "Bitter Lemon | Ginger Ale | Tonic",
+                "price": "€3,00",
+                "tags": [
+                  "vegetarisch"
+                ]
+              },
+              {
+                "name": "Red Bull Regular",
+                "desc": "",
+                "price": "€4,00"
+              },
+              {
+                "name": "Jus d'Orange",
+                "desc": "",
+                "price": "€4,00",
+                "tags": [
+                  "vegetarisch"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Gedistilleerd",
+            "items": [
+              {
+                "name": "Johnnie Walker Red Label",
+                "desc": "Scotch Whisky",
+                "price": "€5,00"
+              },
+              {
+                "name": "Jack Daniels",
+                "desc": "Tennessee Whiskey",
+                "price": "€5,00"
+              },
+              {
+                "name": "Jameson",
+                "desc": "Irish Whiskey",
+                "price": "€5,00"
+              },
+              {
+                "name": "The Glenlivet 12 Years",
+                "desc": "Single Malt Whisky",
+                "price": "€7,00"
+              },
+              {
+                "name": "Courvoisier VS",
+                "desc": "Cognac",
+                "price": "€6,00"
+              },
+              {
+                "name": "Ketel 1",
+                "desc": "Jenever",
+                "price": "€5,00"
+              },
+              {
+                "name": "Luxardo Limoncello",
+                "desc": "",
+                "price": "€5,00"
+              },
+              {
+                "name": "Luxardo Sambuca",
+                "desc": "",
+                "price": "€5,00"
+              },
+              {
+                "name": "Pernod",
+                "desc": "",
+                "price": "€5,00"
+              }
+            ]
+          },
+          {
+            "name": "Likeuren",
+            "items": [
+              {
+                "name": "Licor 43",
+                "desc": "",
+                "price": "€5,00"
+              },
+              {
+                "name": "Baileys",
+                "desc": "",
+                "price": "€5,00"
+              },
+              {
+                "name": "Tia Maria",
+                "desc": "",
+                "price": "€5,00"
+              },
+              {
+                "name": "Grand Marnier",
+                "desc": "",
+                "price": "€6,00"
+              },
+              {
+                "name": "Disaronno Amaretto",
+                "desc": "",
+                "price": "€6,00"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "openingHours": {
+      "ma": "10:00-22:00",
+      "di": "10:00-22:00",
+      "wo": "10:00-22:00",
+      "do": "10:00-22:00",
+      "vr": "10:00-22:00",
+      "za": "10:00-22:00",
+      "zo": "10:00-21:00"
+    },
+    "service": "both",
+    "cuisineKeywords": "grand-cafe dutch allday maandag dinsdag woensdag donderdag vrijdag zaterdag zondag",
+    "priceLevel": 1,
+    "badge": "🌿 Parkrestaurant",
+    "cuisineLabel": "Grand Café · Valkenberg Park",
+    "cardDescription": "De enige horecabestemming midden in het Valkenbergpark. Zeven dagen per week open voor koffie, craft bier, cocktails en een all-day menu — op het iconische rode terras of tussen de bomen.",
+    "phoneDisplay": "076 562 3780",
+    "menuLinks": [
+      {
+        "id": "23-lunch",
+        "label": "🥗 Lunchkaart"
+      },
+      {
+        "id": "23-diner",
+        "label": "🍽 Dinerkaart"
+      },
+      {
+        "id": "23-borrel",
+        "label": "🍸 Borrelkaart"
+      }
+    ]
+  },
+  "24": {
+    "name": "Trattoria Perron",
+    "cuisine": "Italiaans · Trattoria",
+    "price": "€€",
+    "hours": "Ma–Do & Zo 11:00–21:00, Vr–Za 11:00–22:00",
+    "address": "Willemstraat 29, 4811 AJ Breda",
+    "phone": "076 532 7575",
+    "website": "https://www.trattoriaperron.nl",
+    "buurt": "Station",
+    "color": "#1a0a00",
+    "description": "Trattoria Perron serveert echte Italiaanse smaken naast Breda Centraal. Handgemaakte pizza's en pasta bereid met ingrediënten direct uit Italië, tegen eerlijke prijzen. Al vijf jaar een vaste waarde voor betaalbaar Italiaans genieten — ter plaatse of via Perron @ Home.",
+    "tags": [
+      "🍕 Pizza & Pasta",
+      "Naast Station",
+      "Perron @ Home",
+      "Verse Italiaanse ingrediënten"
+    ],
+    "openingHours": {
+      "ma": "11:00-22:00",
+      "di": "11:00-22:00",
+      "wo": "11:00-22:00",
+      "do": "11:00-22:00",
+      "vr": "11:00-22:30",
+      "za": "11:00-22:30",
+      "zo": "12:00-21:00"
+    },
+    "service": "both",
+    "cuisineKeywords": "italian pizza pasta maandag dinsdag woensdag donderdag vrijdag zaterdag zondag",
+    "priceLevel": 2,
+    "badge": "🍕 Italiaans",
+    "cuisineLabel": "Italiaans · Bij het Station",
+    "cardDescription": "Authentieke Italiaanse trattoria naast Breda Centraal. Handgemaakte pizza's en pasta met ingrediënten direct uit Italië, tegen eerlijke prijzen. Ook afhalen via Perron @ Home.",
+    "phoneDisplay": "076 532 7575"
+  },
+  "25": {
+    "name": "Dolce e Salato",
+    "cuisine": "Italiaans · Pizza & Pasta",
+    "price": "€€",
+    "hours": "Do–Vr 17:00–21:30, Za 16:30–21:30, Zo 16:30–21:00",
+    "address": "Akkerstraat 9, 4811 JL Breda",
+    "phone": "06 34 01 46 97",
+    "website": "https://dolceesalato.nl",
+    "buurt": "Binnenstad",
+    "color": "#1a0800",
+    "description": "Dolce e Salato is al 18 jaar een vertrouwd Italiaans restaurant in het hart van Breda. De handgemaakte pizza's en verse pasta worden bereid met ingrediënten rechtstreeks uit Italië. Een gezellige buurtrestaurant met eerlijke prijzen — dine-in of thuisbezorgd.",
+    "tags": [
+      "🍕 Handgemaakte pizza",
+      "Verse pasta",
+      "18 jaar ervaring",
+      "Thuisbezorgd"
+    ],
+    "openingHours": {
+      "do": "17:00-22:00",
+      "vr": "17:00-22:00",
+      "za": "12:00-22:00",
+      "zo": "12:00-21:00"
+    },
+    "service": "both",
+    "cuisineKeywords": "italian pizza pasta donderdag vrijdag zaterdag zondag",
+    "priceLevel": 2,
+    "badge": "🍕 Italiaans",
+    "cuisineLabel": "Italiaans · Pizza & Pasta",
+    "cardDescription": "Al 18 jaar een gezellig Italiaans restaurant in het hart van Breda. Handgemaakte pizza's, verse pasta en antipasti bereid met ingrediënten rechtstreeks uit Italië. Ook beschikbaar via Thuisbezorgd.",
+    "phoneDisplay": "06 34 01 46 97"
+  }
+}
