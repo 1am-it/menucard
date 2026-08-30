@@ -134,17 +134,27 @@ There is no UI for this yet — deliberately, per this ticket's scope
    constraint in the migration) and must match the restaurant id scheme
    used in `data/restaurants.json` (e.g. `"6"`).
 
-## What has and hasn't been verified
+## What has been verified
 
-Verified locally: `npm run build` succeeds with these files in place; the
-route handler fails safely (a clear thrown error, not a crash or silent
-no-op) when `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY` are unset, which is
-the actual state of this environment right now — no Supabase project has
-been created yet.
+Verified against a real Supabase project (2026-08-30): the migration runs
+cleanly, a real authenticated `POST` and `GET` against
+`/api/internal/v1/provenance` both succeed, `source`/`confidence`/
+`verified_at`/`verified_by` are confirmed server-derived — a request that
+tried to smuggle `source`/`verifiedBy`/`verifiedAt` in the body had all of
+it silently ignored, with the response showing the real, role-derived
+values instead — and repeated writes to the same
+`(restaurant_id, field_name, field_ref)` correctly upsert to one row rather
+than duplicating. `npm run build` and every consumer route/bundle size were
+unaffected.
 
-**Not verified, and cannot be until a real Supabase project exists**: an
-actual authenticated request reaching the endpoint, the SQL migration
-running cleanly against a real Supabase database, the RLS policies
-behaving as written, and a real upsert/read round-trip. None of this was
-simulated or assumed to work — it's reported here as untested, not as
-passing.
+One real bug was found and fixed during this verification: the migration
+was missing explicit `GRANT` statements for `service_role` on both tables.
+`service_role`'s `BYPASSRLS` skips the RLS policies above, but that is a
+separate mechanism from Postgres's table-level `GRANT` system — without
+them, every query failed with `permission denied` regardless of RLS. Now
+part of the migration itself (see its "Grants for service_role" section).
+
+**Not verified**: the `owner` role's per-restaurant scope restriction and
+the "authenticated but no `staff_roles` row → `403`" path, both of which
+need a second real test account to exercise — not done here to avoid
+expanding this verification round's scope.

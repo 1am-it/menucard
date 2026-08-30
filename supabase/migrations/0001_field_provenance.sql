@@ -133,3 +133,21 @@ create policy "staff_can_update_scoped_provenance" on field_provenance
 
 -- No delete policy for field_provenance: deletes are denied by default
 -- under RLS for non-service-role callers. Not part of this ticket's scope.
+
+-- ── Grants for service_role ──────────────────────────────────────────────
+--
+-- service_role has BYPASSRLS (skips the RLS policies above), but that is a
+-- separate mechanism from Postgres's own table-level GRANT system — RLS
+-- bypass does not imply table privileges. Without these, the internal API
+-- (which always connects as service_role) gets a hard "permission denied"
+-- on every query, even though RLS itself would have allowed it. Discovered
+-- during PLATFORM-05's live verification against a real Supabase project,
+-- applied manually there, and confirmed to fix it — added here so a fresh
+-- environment running this migration doesn't hit the same failure.
+
+grant usage on schema public to service_role;
+
+grant select, insert, update on public.field_provenance to service_role;
+grant usage, select on sequence public.field_provenance_id_seq to service_role;
+
+grant select on public.staff_roles to service_role;
