@@ -21,7 +21,7 @@ of these.
 6. [be-06-filters-url-state.md](./be-06-filters-url-state.md) — done
 7. [be-04-homepage-shift.md](./be-04-homepage-shift.md) — done; see
    `planning/decisions/007-homepage-shift.md`
-8. [be-07-reservation-routing.md](./be-07-reservation-routing.md)
+8. [be-07-reservation-routing.md](./be-07-reservation-routing.md) — done
 9. [be-05-restaurant-menu.md](./be-05-restaurant-menu.md)
 10. [be-08-performance-cleanup.md](./be-08-performance-cleanup.md)
 

@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import ThemeToggle from '@/src/components/ThemeToggle'
+import { getReservationActions } from '@/src/utils/reservation'
 import menusData from '@/data/menus.json'
 import restaurantsData from '@/data/restaurants.json'
 
@@ -217,6 +218,7 @@ export default function MenuPage() {
   const mealType  = id.split('-').slice(1).join('-')
   const subtitle  = MEAL_CONFIG[mealType]?.title || r.subtitle || 'Menukaart'
   const restaurant = restaurantsData[baseId] || {}
+  const primaryReservation = getReservationActions(restaurant)[0]
 
   const availableMeals = ['lunch', 'diner', 'borrel', 'specialiteiten'].filter(
     m => menusData[`${baseId}-${m}`]
@@ -347,7 +349,16 @@ export default function MenuPage() {
             </div>
             <div className="rp-btns">
               <a className="rp-btn-website" href={r.website || restaurant.website} target="_blank" rel="noopener">Website</a>
-              <a className="rp-btn-reserveer" href={r.website || restaurant.website} target="_blank" rel="noopener">Reserveer</a>
+              {primaryReservation && (
+                <a
+                  className="rp-btn-reserveer"
+                  href={primaryReservation.href}
+                  target={primaryReservation.external || primaryReservation.method === 'whatsapp' ? '_blank' : undefined}
+                  rel={primaryReservation.external || primaryReservation.method === 'whatsapp' ? 'noopener noreferrer' : undefined}
+                >
+                  {primaryReservation.label}
+                </a>
+              )}
             </div>
             {r.source && (
               <div className="rp-source">

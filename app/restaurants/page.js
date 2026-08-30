@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import ThemeToggle from '@/src/components/ThemeToggle'
+import { getReservationActions } from '@/src/utils/reservation'
 import restaurantsData from '@/data/restaurants.json'
 import menusData from '@/data/menus.json'
 
@@ -315,16 +316,29 @@ function trackLead(restaurantId, restaurantName, type) {
   } catch {}
 }
 
-function whatsappUrl(phone, restaurantName) {
-  const clean = (phone || '').replace(/[^0-9+]/g, '')
-  const nl = clean.startsWith('0') ? '+31' + clean.slice(1) : clean
-  const msg = encodeURIComponent(
-    `Hoi ${restaurantName}, ik zag jullie via BredaEats en wil graag een tafel reserveren. Kunnen jullie mij terugbellen of reageren?`
-  )
-  return `https://wa.me/${nl.replace('+','')}?text=${msg}`
-}
-
 const MEAL_LABEL = { lunch: 'Lunchkaart', diner: 'Dinerkaart', borrel: 'Borrelkaart', specialiteiten: 'Specialiteiten' }
+
+// BE-07 — one icon per reservation method, reused for whichever action
+// getReservationActions() decides is primary/secondary for this restaurant.
+const RESERVATION_ICONS = {
+  whatsapp: (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/>
+    </svg>
+  ),
+  website: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="2" y1="12" x2="22" y2="12"/>
+      <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+    </svg>
+  ),
+  phone: (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
+    </svg>
+  ),
+}
 
 // ─── Restaurant Card ──────────────────────────────────────────────────────────
 
@@ -332,6 +346,7 @@ function RestaurantCard({ restaurant, id, lang, selectedMeal, selectedDay, ingre
   const t = T[lang]
   const openStatus = getOpenStatus(restaurant, selectedDay)
   const allLinks = restaurant.menuLinks || []
+  const reservationActions = getReservationActions(restaurant)
   const matchedItems = ingredientMatches[id] || []
   const matchCount = matchedItems.length
 
@@ -464,38 +479,23 @@ function RestaurantCard({ restaurant, id, lang, selectedMeal, selectedDay, ingre
           )}
         </div>
 
-        {/* Rij 2: WhatsApp reserveer + website */}
+        {/* Rij 2: reserveringsactie(s) — BE-07, via getReservationActions() */}
         <div className="rc-footer-row2">
-          {restaurant.phone && (
+          {reservationActions.map((action, i) => (
             <a
-              href={whatsappUrl(restaurant.phone, restaurant.name)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rc-whatsapp-btn"
-              onClick={() => trackLead(id, restaurant.name, 'whatsapp')}
+              key={action.method}
+              href={action.href}
+              target={action.external || action.method === 'whatsapp' ? '_blank' : undefined}
+              rel={action.external || action.method === 'whatsapp' ? 'noopener noreferrer' : undefined}
+              className={i === 0 ? 'rc-reserve-btn' : 'rc-website-btn'}
+              style={i === 0 ? { marginLeft: 0, display: 'inline-flex', alignItems: 'center', gap: 6 } : undefined}
+              title={i === 0 ? undefined : action.label}
+              onClick={() => trackLead(id, restaurant.name, action.method)}
             >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/>
-              </svg>
-              Reserveer via WhatsApp
+              {RESERVATION_ICONS[action.method]}
+              {i === 0 && action.label}
             </a>
-          )}
-          {restaurant.website && (
-            <a
-              href={restaurant.website}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rc-website-btn"
-              title="Bezoek website"
-              onClick={() => trackLead(id, restaurant.name, 'website')}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="2" y1="12" x2="22" y2="12"/>
-                <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
-              </svg>
-            </a>
-          )}
+          ))}
         </div>
       </div>
     </div>

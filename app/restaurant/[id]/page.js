@@ -3,6 +3,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import ThemeToggle from '@/src/components/ThemeToggle'
+import { getReservationActions } from '@/src/utils/reservation'
 import restaurantsData from '@/data/restaurants.json'
 import menusData from '@/data/menus.json'
 
@@ -54,6 +55,8 @@ export default function RestaurantPage() {
   }
 
   const menuLinks = restaurant.menuLinks || []
+  const reservationActions = getReservationActions(restaurant)
+  const primaryReservation = reservationActions[0]
   const menuPreview = getMenuPreview(id)
   const priceStr = '€'.repeat(restaurant.priceLevel || 2)
   const openingHours = restaurant.openingHours || {}
@@ -187,10 +190,14 @@ export default function RestaurantPage() {
                   Bekijk menukaart
                 </Link>
               )}
-              {restaurant.website && (
-                <a href={restaurant.website} target="_blank" rel="noopener noreferrer"
-                  className="dip-btn-secondary">
-                  Reserveer via website →
+              {primaryReservation && (
+                <a
+                  href={primaryReservation.href}
+                  target={primaryReservation.external || primaryReservation.method === 'whatsapp' ? '_blank' : undefined}
+                  rel={primaryReservation.external || primaryReservation.method === 'whatsapp' ? 'noopener noreferrer' : undefined}
+                  className="dip-btn-secondary"
+                >
+                  {primaryReservation.label} →
                 </a>
               )}
             </div>

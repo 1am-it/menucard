@@ -64,7 +64,7 @@ THEME — Theme token system: light + dark, user-selectable (done — see
 [[006-theme-token-system-implemented-early]])  
 BE-06 — Price / cuisine / allergy filters + URL state (done)  
 BE-04 — Text-first homepage (done — see [[007-homepage-shift]])  
-BE-07 — Reservation routing  
+BE-07 — Reservation routing (done)  
 BE-05 — Lightweight restaurant menu  
 BE-08 — Performance cleanup
 
