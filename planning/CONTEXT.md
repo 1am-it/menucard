@@ -121,6 +121,11 @@ moderation, owner claims and community contributions. See
 [[008-platform-track-scope]] for why this is scoped as a separate track
 rather than folded into the `BE-*` sequence above.
 
+PLATFORM-01 — Coverage baseline + read-only dashboard (done). Found that
+only 16% of Breda restaurants (4/25) have any digitized menu data in the
+canonical dataset, and 0% have a confirmed reservation method — see
+`docs/coverage/breda-baseline-2026-08-30.md`.
+
 This track does not change, reorder, or depend on the `BE-*` sequence — both
 can proceed independently. It follows the same discipline: one ticket per
 commit, stop for approval after each, doc updates land in the same commit as

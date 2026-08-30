@@ -33,7 +33,7 @@ See [[008-platform-track-scope]] for why this is a separate track. Wave
 order is read-only first, modeling/architecture second, internal write path
 third, external-facing contribution flows last.
 
-1. [platform-01-coverage-baseline-dashboard.md](./platform-01-coverage-baseline-dashboard.md)
+1. [platform-01-coverage-baseline-dashboard.md](./platform-01-coverage-baseline-dashboard.md) — done
 2. [platform-02-low-coverage-transparency-ux.md](./platform-02-low-coverage-transparency-ux.md)
 3. [platform-03-provenance-trust-data-model.md](./platform-03-provenance-trust-data-model.md)
 4. [platform-04-persistence-api-architecture-decision.md](./platform-04-persistence-api-architecture-decision.md)
