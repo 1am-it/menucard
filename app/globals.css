@@ -1426,6 +1426,53 @@ mark.search-highlight {
   color: #aaa;
 }
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   BE-03 — Dish search results (/search)
+   Additive only: reuses existing tokens (--bg-card, --border, --green,
+   --text-*) and existing classes (.menu-card, .td-name, .td-price, .td-desc,
+   .item-tags, .empty-state, .search-field, .detail-menu-btn-outline). No new
+   colors introduced — the light-theme migration (see planning decision
+   005-decouple-theming-from-dish-first) still applies to these tokens later.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.search-page-hero {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 24px 24px 0;
+}
+.search-page-field { max-width: 480px; }
+
+.dish-results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dish-result-card { display: flex; flex-direction: column; }
+
+.dish-result-restaurant {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+.dish-result-status.is-open  { color: var(--green); font-weight: 600; }
+.dish-result-status.is-closed { color: var(--text-muted); }
+.dish-result-distance { color: var(--text-muted); }
+.dish-result-match-hint { color: var(--text-faint); font-style: italic; }
+
+.dish-result-link {
+  align-self: flex-start;
+  margin-top: 10px;
+  padding: 6px 14px;
+  font-size: 12px;
+}
+
+.load-more-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0 8px;
+}
+
 /* ── Contact blok op restaurant card ── */
 .rc-contact {
   display: flex;
