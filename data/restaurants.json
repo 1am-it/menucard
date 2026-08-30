@@ -7,6 +7,13 @@
     "address": "Wolfslaardreef 100, 4834 SP Breda",
     "phone": "+31 76 201 4975",
     "website": "https://www.restaurantwolfslaar.com",
+    "reservation": {
+      "type": "unverified",
+      "whatsapp": "+31 76 201 4975",
+      "url": "https://www.restaurantwolfslaar.com",
+      "phone": "+31 76 201 4975",
+      "verified": false
+    },
     "buurt": "Wolfslaar",
     "color": "#0f2318",
     "description": "Gevestigd in het koetshuis van het historische landgoed Wolfslaar. Hoofdchef Maarten Camps creëert verfijnde gerechten met streekproducten, begeleid door een indrukwekkende wijnkelder.",
@@ -260,6 +267,13 @@
     "address": "Ettensebaan 10, 4814 NN Breda",
     "phone": "+31 76 303 8482",
     "website": "https://www.restaurantblossem.nl",
+    "reservation": {
+      "type": "unverified",
+      "whatsapp": "+31 76 303 8482",
+      "url": "https://www.restaurantblossem.nl",
+      "phone": "+31 76 303 8482",
+      "verified": false
+    },
     "buurt": "Princenhage",
     "color": "#0d1f2d",
     "description": "In het omgebouwde ketelhuis van de voormalige Nibb-it fabriek. Scandinavische verfijning met pure, seizoensgebonden ingrediënten.",
@@ -289,6 +303,13 @@
     "address": "Grote Markt 24, 4811 XR Breda",
     "phone": "+31 76 870 0176",
     "website": "https://www.restaurantconfuego.com",
+    "reservation": {
+      "type": "unverified",
+      "whatsapp": "+31 76 870 0176",
+      "url": "https://www.restaurantconfuego.com",
+      "phone": "+31 76 870 0176",
+      "verified": false
+    },
     "buurt": "Binnenstad",
     "color": "#1a0d00",
     "description": "Het ultieme grillrestaurant op de Grote Markt. Exclusieve cuts, Japans Wagyu en een bekroonde wijnkaart van meer dan 600 labels.",
@@ -322,6 +343,13 @@
     "address": "Ulvenhoutselaan 96, 4834 MH Breda",
     "phone": "+31 76 565 0970",
     "website": "https://www.restaurantuijttewaal.nl",
+    "reservation": {
+      "type": "unverified",
+      "whatsapp": "+31 76 565 0970",
+      "url": "https://www.restaurantuijttewaal.nl",
+      "phone": "+31 76 565 0970",
+      "verified": false
+    },
     "buurt": "Heusdenhout",
     "color": "#111a0d",
     "description": "Chef Sven Uijttewaal werkt uitsluitend met biologische, seizoensgebonden producten uit de regio. Verfijnd en eerlijk, erkend door Michelin en Gault&Millau.",
@@ -352,6 +380,13 @@
     "address": "Parade 12B, 4811 DZ Breda",
     "phone": "+31 76 533 5975",
     "website": "https://www.restaurant-chocolat.nl",
+    "reservation": {
+      "type": "unverified",
+      "whatsapp": "+31 76 533 5975",
+      "url": "https://www.restaurant-chocolat.nl",
+      "phone": "+31 76 533 5975",
+      "verified": false
+    },
     "buurt": "Binnenstad",
     "color": "#1a0d1a",
     "description": "In de spectaculaire Chassé Botaniquekassen. Chef Dorus Clement vermengt op vernuftige wijze Franse en oosterse invloeden.",
@@ -382,6 +417,13 @@
     "address": "Van Coothplein 12, 4811 NE Breda",
     "phone": "+31 76 888 3111",
     "website": "https://www.brasseriebardot.nl",
+    "reservation": {
+      "type": "unverified",
+      "whatsapp": "+31 76 888 3111",
+      "url": "https://www.brasseriebardot.nl",
+      "phone": "+31 76 888 3111",
+      "verified": false
+    },
     "buurt": "Binnenstad",
     "color": "#1a1500",
     "description": "Een Frans geïnspireerde brasserie voor elke gelegenheid. Van ochtendkoffie tot een uitgebreid diner met een uitgelezen wijnkaart.",
@@ -1321,6 +1363,13 @@
     "address": "Dr. Batenburglaan 111, 4837 BP Breda",
     "phone": "+31 76 889 8000",
     "website": "https://www.restaurantruitersbosch.nl",
+    "reservation": {
+      "type": "unverified",
+      "whatsapp": "+31 76 889 8000",
+      "url": "https://www.restaurantruitersbosch.nl",
+      "phone": "+31 76 889 8000",
+      "verified": false
+    },
     "buurt": "Mastbos",
     "color": "#0d1a0d",
     "description": "Aan de rand van het Mastbos, omgeven door natuur. Ambachtelijke Frans-Mediterraanse keuken in een sfeervolle omgeving.",
@@ -1353,6 +1402,13 @@
     "address": "Nieuwe Ginnekenstraat 20, 4811 NR Breda",
     "phone": "+31 76 520 4333",
     "website": "https://www.aldentebreda.nl",
+    "reservation": {
+      "type": "unverified",
+      "whatsapp": "+31 76 520 4333",
+      "url": "https://www.aldentebreda.nl",
+      "phone": "+31 76 520 4333",
+      "verified": false
+    },
     "buurt": "Binnenstad",
     "color": "#1a0d00",
     "description": "Al meer dan 23 jaar een geliefde Italiaanse instelling in Breda. Authentieke pasta, risotto en antipasti in een warme, huiselijke sfeer.",
@@ -1385,6 +1441,13 @@
     "address": "Ceresstraat 15 A1, 4811 CA Breda",
     "phone": "+31 76 303 6200",
     "website": "https://www.beersbarrels.nl/en/locations/breda/",
+    "reservation": {
+      "type": "unverified",
+      "whatsapp": "+31 76 303 6200",
+      "url": "https://www.beersbarrels.nl/en/locations/breda/",
+      "phone": "+31 76 303 6200",
+      "verified": false
+    },
     "buurt": "Binnenstad",
     "color": "#0d0d1a",
     "description": "In de historische Oranjeboom brouwerij. Meer dan 150 bieren waaronder 15 speciaalbiertappen die je zelf bedient aan tafel.",
@@ -1418,6 +1481,13 @@
     "address": "Salon de Provence Breda",
     "phone": "Via website",
     "website": "https://www.salondeprovence.nl",
+    "reservation": {
+      "type": "unverified",
+      "whatsapp": "Via website",
+      "url": "https://www.salondeprovence.nl",
+      "phone": "Via website",
+      "verified": false
+    },
     "buurt": "Binnenstad",
     "color": "#1a1100",
     "description": "Chefs Niels van Kooten en Bono van Veelen brengen een onderscheidende Zuid-Afrikaans-Franse flair. Creatief, persoonlijk en met een uitzonderlijke wijnkennis.",
@@ -1448,6 +1518,13 @@
     "address": "Boschstraat 26, 4811 GH Breda",
     "phone": "+31 76 521 4265",
     "website": "https://www.beyerd.nl",
+    "reservation": {
+      "type": "unverified",
+      "whatsapp": "+31 76 521 4265",
+      "url": "https://www.beyerd.nl",
+      "phone": "+31 76 521 4265",
+      "verified": false
+    },
     "buurt": "Binnenstad",
     "color": "#0d0a00",
     "description": "Een iconisch biercafé in het hart van Breda's Boschstraat, al decennialang een begrip. Proef een ruime selectie van nationale en internationale ambachtelijke bieren bij klassieke Nederlandse borrelhapjes.",
@@ -1481,6 +1558,13 @@
     "address": "Boschstraat 24, 4811 GH Breda",
     "phone": "06 27 34 79 41",
     "website": "https://pellens.nl",
+    "reservation": {
+      "type": "unverified",
+      "whatsapp": "06 27 34 79 41",
+      "url": "https://pellens.nl",
+      "phone": "06 27 34 79 41",
+      "verified": false
+    },
     "buurt": "Binnenstad",
     "color": "#1a0800",
     "description": "Chef Daan de Brouwer plaatst de houtgestookte Baskische grill centraal in zijn keuken. Alle producten komen van eigen biologisch boerderij De Vloeiweide — puur, seizoensgebonden en vol karakter.",
@@ -1512,6 +1596,13 @@
     "address": "Boschstraat 19, 4811 GG Breda",
     "phone": "+31 76 520 8929",
     "website": "https://www.gantauvillage.nl",
+    "reservation": {
+      "type": "unverified",
+      "whatsapp": "+31 76 520 8929",
+      "url": "https://www.gantauvillage.nl",
+      "phone": "+31 76 520 8929",
+      "verified": false
+    },
     "buurt": "Binnenstad",
     "color": "#1a0500",
     "description": "Authentieke Kantonese Chinese keuken in een gezellige setting op de Boschstraat. Gantau Village is geliefd om de dagverse dim sum, smaakvolle wokgerechten en verse zeevruchtenschotels.",
@@ -1544,6 +1635,13 @@
     "address": "Korte Boschstraat 8-10, 4811 GK Breda",
     "phone": "+31 686 477 229",
     "website": "https://www.thechaiaffairs.nl",
+    "reservation": {
+      "type": "unverified",
+      "whatsapp": "+31 686 477 229",
+      "url": "https://www.thechaiaffairs.nl",
+      "phone": "+31 686 477 229",
+      "verified": false
+    },
     "buurt": "Binnenstad",
     "color": "#1a0a00",
     "description": "Waar Indiase culinaire traditie en de Britse theetraditie samenkomen. The Chai Affairs serveert verse curry's, huisgemaakte naan en een breed scala aan geurige chai-variaties.",
@@ -1576,6 +1674,13 @@
     "address": "Boschstraat 53, 4811 GK Breda",
     "phone": "+31 76 515 4585",
     "website": "https://www.andalous-breda.nl",
+    "reservation": {
+      "type": "unverified",
+      "whatsapp": "+31 76 515 4585",
+      "url": "https://www.andalous-breda.nl",
+      "phone": "+31 76 515 4585",
+      "verified": false
+    },
     "buurt": "Binnenstad",
     "color": "#0d1500",
     "description": "Andalous neemt je mee op een smaakrondleiding door het Middellandse Zeegebied. Van geurige Marokkaanse tajines en couscous tot verse mezze en gegrilde specialiteiten — warm, gastvrij en vol smaak.",
@@ -1609,6 +1714,13 @@
     "address": "Boschstraat 93, 4811 GN Breda",
     "phone": "+31 6 13 32 44 00",
     "website": "https://www.restaurantsmelt.nl",
+    "reservation": {
+      "type": "unverified",
+      "whatsapp": "+31 6 13 32 44 00",
+      "url": "https://www.restaurantsmelt.nl",
+      "phone": "+31 6 13 32 44 00",
+      "verified": false
+    },
     "buurt": "Binnenstad",
     "color": "#1a1500",
     "description": "Restaurant Smelt is hét adres in Breda voor kaasfondue en gourmet. Geniet van de gezelligheid van samen tafelen, met een grote variëteit aan gesmolten kaassoorten en verse dipsauzen.",
@@ -1641,6 +1753,13 @@
     "address": "Boschstraat 86, 4811 GN Breda",
     "phone": "+31 76 514 3000",
     "website": "https://www.restaurantzenza.nl",
+    "reservation": {
+      "type": "unverified",
+      "whatsapp": "+31 76 514 3000",
+      "url": "https://www.restaurantzenza.nl",
+      "phone": "+31 76 514 3000",
+      "verified": false
+    },
     "buurt": "Binnenstad",
     "color": "#0d1520",
     "description": "Restaurant Zenza combineert de rijke smaken van de Midden-Oosterse keuken met een moderne, gastvrije sfeer. Volledig halal gecertificeerd en geschikt voor het hele gezin.",
@@ -1674,6 +1793,13 @@
     "address": "Boschstraat 51, 4811 GK Breda",
     "phone": "+31 76 522 5150",
     "website": "https://www.masalabreda.nl",
+    "reservation": {
+      "type": "unverified",
+      "whatsapp": "+31 76 522 5150",
+      "url": "https://www.masalabreda.nl",
+      "phone": "+31 76 522 5150",
+      "verified": false
+    },
     "buurt": "Binnenstad",
     "color": "#1a0800",
     "description": "Masala brengt de levendige smaken van de authentieke Indiase keuken naar de Boschstraat in Breda. Van geurige curry's tot verse tandoorige bereidingen — altijd warm en vol karakter.",
@@ -1707,6 +1833,13 @@
     "address": "Pasbaan 7, 4811 GM Breda",
     "phone": "+31 76 515 1340",
     "website": "https://www.restaurantzuyd.nl",
+    "reservation": {
+      "type": "unverified",
+      "whatsapp": "+31 76 515 1340",
+      "url": "https://www.restaurantzuyd.nl",
+      "phone": "+31 76 515 1340",
+      "verified": false
+    },
     "buurt": "Binnenstad",
     "color": "#0d1020",
     "description": "Elegant fine dining restaurant in het hart van Breda. Chef combineert verfijnde Frans-geïnspireerde bereidingen met de beste Nederlandse ingrediënten. De woensdag staat in het teken van Wine & Dine Wednesday — een compleet culinair avond voor €99.",
@@ -2083,6 +2216,13 @@
     "address": "Erasmusplein 10, 4834 AD Breda",
     "phone": "06 26 66 12 19",
     "website": "https://www.klein-java.nl",
+    "reservation": {
+      "type": "unverified",
+      "whatsapp": "06 26 66 12 19",
+      "url": "https://www.klein-java.nl",
+      "phone": "06 26 66 12 19",
+      "verified": false
+    },
     "buurt": "Blauwe Kei",
     "color": "#1a0d00",
     "description": "Al meer dan 33 jaar de plek voor authentieke Indonesische afhaalmaaltijden en catering in Breda. Elke dag vers bereid met traditionele recepten en verse ingrediënten rechtstreeks uit eigen keuken — nooit opgewarmd.",
@@ -2116,6 +2256,13 @@
     "address": "Teteringsedijk 138, 4817 MJ Breda",
     "phone": "076 888 8941",
     "website": "https://www.senangmakan.nl",
+    "reservation": {
+      "type": "unverified",
+      "whatsapp": "076 888 8941",
+      "url": "https://www.senangmakan.nl",
+      "phone": "076 888 8941",
+      "verified": false
+    },
     "buurt": "Brabantpark",
     "color": "#0d1a0d",
     "description": "Authentieke Molukse rijsttafel onder leiding van chef Chesron in Brabantpark. De menukaart wisselt per seizoen en omvat traditionele Molukse gerechten, chef's specials en tijdens de feestdagen een uitgebreid aanbod van zo'n 40 gerechten. Ook mogelijk voor afhaal, catering en kookworkshops.",
@@ -2147,6 +2294,13 @@
     "address": "Epelenberg 2, 4817 CM Breda",
     "phone": "076 514 1712",
     "website": "https://www.makananbreda.nl",
+    "reservation": {
+      "type": "unverified",
+      "whatsapp": "076 514 1712",
+      "url": "https://www.makananbreda.nl",
+      "phone": "076 514 1712",
+      "verified": false
+    },
     "buurt": "Brabantpark",
     "color": "#0a1a0a",
     "description": "Makanan Indische Specialiteiten bereidt dagelijks verse Indonesische gerechten op basis van traditionele recepten. Van nasi goreng en rendang tot huisgemaakte loempia's en kroketten. Afhalen kan op afspraak — bellen aanbevolen zodat alles op tijd klaarstaat.",
@@ -2181,6 +2335,13 @@
     "address": "John F. Kennedylaan 15, 4811 ET Breda",
     "phone": "076 562 3780",
     "website": "https://t-huis.online",
+    "reservation": {
+      "type": "unverified",
+      "whatsapp": "076 562 3780",
+      "url": "https://t-huis.online",
+      "phone": "076 562 3780",
+      "verified": false
+    },
     "buurt": "Valkenberg",
     "color": "#0d1f0d",
     "description": "T-Huis is de enige horecazaak midden in het Valkenbergpark — Breda's groene hart. Zeven dagen per week open vanaf 09:00 voor koffie, lunch, borrel en diner. Op het iconische rode terras, aan picknicktafels of in de beach chairs. Ook to-go via de app.",
@@ -3536,6 +3697,13 @@
     "address": "Willemstraat 29, 4811 AJ Breda",
     "phone": "076 532 7575",
     "website": "https://www.trattoriaperron.nl",
+    "reservation": {
+      "type": "unverified",
+      "whatsapp": "076 532 7575",
+      "url": "https://www.trattoriaperron.nl",
+      "phone": "076 532 7575",
+      "verified": false
+    },
     "buurt": "Station",
     "color": "#1a0a00",
     "description": "Trattoria Perron serveert echte Italiaanse smaken naast Breda Centraal. Handgemaakte pizza's en pasta bereid met ingrediënten direct uit Italië, tegen eerlijke prijzen. Al vijf jaar een vaste waarde voor betaalbaar Italiaans genieten — ter plaatse of via Perron @ Home.",
@@ -3570,6 +3738,13 @@
     "address": "Akkerstraat 9, 4811 JL Breda",
     "phone": "06 34 01 46 97",
     "website": "https://dolceesalato.nl",
+    "reservation": {
+      "type": "unverified",
+      "whatsapp": "06 34 01 46 97",
+      "url": "https://dolceesalato.nl",
+      "phone": "06 34 01 46 97",
+      "verified": false
+    },
     "buurt": "Binnenstad",
     "color": "#1a0800",
     "description": "Dolce e Salato is al 18 jaar een vertrouwd Italiaans restaurant in het hart van Breda. De handgemaakte pizza's en verse pasta worden bereid met ingrediënten rechtstreeks uit Italië. Een gezellige buurtrestaurant met eerlijke prijzen — dine-in of thuisbezorgd.",

@@ -16,6 +16,11 @@
             "name": "Business Lunch",
             "desc": "Twee gangen, keuze van de chef, binnen een uur geserveerd",
             "price": "€72,50",
+            "priceValue": 72.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -23,6 +28,11 @@
             "name": "Lunchmenu 3 Gangen",
             "desc": "Voorgerecht, hoofdgerecht en dessert — keuze van de chef",
             "price": "€85",
+            "priceValue": 85,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "aanbevolen"
             ],
@@ -32,6 +42,11 @@
             "name": "Lunchmenu 4 Gangen",
             "desc": "Voor-, tussen-, hoofdgerecht en dessert — keuze van de chef",
             "price": "€95",
+            "priceValue": 95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           }
@@ -56,6 +71,11 @@
             "name": "Signature Menu",
             "desc": "5 gangen: Pieterman · Noordzeekrab · Bianchetti Truffel · Beter Leven Kalf · Doyenné du Comice Peer",
             "price": "€130",
+            "priceValue": 130,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "aanbevolen"
             ],
@@ -67,6 +87,11 @@
             "name": "Uitbreiding: Langoustine",
             "desc": "Cannelloni, dragon, Espelette peper, gebrande suiker",
             "price": "+€20",
+            "priceValue": 20,
+            "priceOnRequest": false,
+            "priceIsSupplement": true,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               1,
@@ -82,6 +107,11 @@
             "name": "Blonde d'Aquitaine Beef",
             "desc": "Tartaar, kapperrappel, witte balsamico",
             "price": "€26",
+            "priceValue": 26,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               12
@@ -91,6 +121,11 @@
             "name": "Pieterman & Royal Belgian Caviar",
             "desc": "Gerookte boter, gepekelde kool, venkel, sjalot, Charlotte-aardappel",
             "price": "€32",
+            "priceValue": 32,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               4,
@@ -101,6 +136,11 @@
             "name": "Noordzeekrab",
             "desc": "Krabvlees, venkel, knolselderij, Granny Smith",
             "price": "€38",
+            "priceValue": 38,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               9
@@ -110,6 +150,11 @@
             "name": "Vichyssoise & Coquille",
             "desc": "Warme prei-aardappelsoep, gegrilde coquille, aardappelchips",
             "price": "€28",
+            "priceValue": 28,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               14
@@ -119,6 +164,11 @@
             "name": "Kalfswang",
             "desc": "Wintertruffel, bonen, gnocchi, Gruyère",
             "price": "€36",
+            "priceValue": 36,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               1,
@@ -129,6 +179,11 @@
             "name": "Royal Belgian Platinum Caviar 30g",
             "desc": "Klassiek geserveerd met blini, bieslook, crème fraîche",
             "price": "€65",
+            "priceValue": 65,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "dagspecial"
             ],
@@ -140,6 +195,11 @@
             "name": "Royal Belgian Platinum Caviar 50g",
             "desc": "Klassiek geserveerd met blini, bieslook, crème fraîche",
             "price": "€98",
+            "priceValue": 98,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "dagspecial"
             ],
@@ -156,6 +216,11 @@
             "name": "Tarbot",
             "desc": "Gebakken, schorseneer, vadouvan, spruitjes, wintertruffel",
             "price": "€65",
+            "priceValue": 65,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "aanbevolen"
             ],
@@ -167,6 +232,11 @@
             "name": "Skrei",
             "desc": "Velletje geroosterd filet, groene curry, koriander, zoete aardappel",
             "price": "€41",
+            "priceValue": 41,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -174,6 +244,11 @@
             "name": "Dover Sole Meunière",
             "desc": "Gebakken in boter, citroen, peterselie, pommes pont neuf",
             "price": "€69",
+            "priceValue": 69,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               7
@@ -183,6 +258,11 @@
             "name": "Tournedos",
             "desc": "Blonde d'Aquitaine, pommes pont neuf, seizoensgroenten, sjalottenjus",
             "price": "€52",
+            "priceValue": 52,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -190,6 +270,11 @@
             "name": "Ree",
             "desc": "Rosé geroosterd lendenstuk, pastinaak, witlof, Jamaicaanse piment",
             "price": "€58",
+            "priceValue": 58,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -197,6 +282,11 @@
             "name": "Beter Leven Kalf",
             "desc": "Gepocheerd filet in krachtige bouillon, geconfijte kalfsstaart, kruidenmerg, morilles",
             "price": "€54",
+            "priceValue": 54,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           }
@@ -209,6 +299,11 @@
             "name": "Madeleines",
             "desc": "Twee warme madeleines, verrassingsroom",
             "price": "€10",
+            "priceValue": 10,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -216,6 +311,11 @@
             "name": "Nougatine",
             "desc": "Parfait, meringue, hazelnoot, gerookt amandel",
             "price": "€18",
+            "priceValue": 18,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               3,
@@ -226,6 +326,11 @@
             "name": "Lemon Curd & Heelkruid",
             "desc": "Citroencrème, Bretons gebak, napoleon, passievrucht, mango",
             "price": "€18",
+            "priceValue": 18,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               1,
@@ -236,6 +341,11 @@
             "name": "Bloedsinaasappel",
             "desc": "Panna cotta, kwark, ivoor chocolade, limoenblaad",
             "price": "€18",
+            "priceValue": 18,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               7
@@ -245,6 +355,11 @@
             "name": "Doyenné du Comice Peer",
             "desc": "Gezouten karamel, foelie, laurierijs",
             "price": "€18",
+            "priceValue": 18,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "aanbevolen"
             ],
@@ -254,6 +369,11 @@
             "name": "Kaaswagen",
             "desc": "Kazen van Fromagerie Guillaume, notenbrood en bijpassende garnituren",
             "price": "€25",
+            "priceValue": 25,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           }
@@ -266,6 +386,11 @@
             "name": "Wijnkaart",
             "desc": "500+ selecties over drie boeken: mousserende & zoet, wit & rosé, rood — nadruk op elegantie uit koelere klimaten. Samenstelling door sommelier Jelle van Ravenstein.",
             "price": null,
+            "priceValue": null,
+            "priceOnRequest": true,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "dagspecial"
             ],
@@ -292,6 +417,11 @@
             "name": "Poussin",
             "desc": "Krielkippetje van onze huisrotisserie met citroen, tijm en appelcompote",
             "price": "€20,95",
+            "priceValue": 20.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "aanbevolen"
             ],
@@ -302,6 +432,11 @@
             "name": "Kreeft (pasta)",
             "desc": "Pasta aglio e olio, antiboise, parmezaan — 1/2 of 1/1",
             "price": null,
+            "priceValue": null,
+            "priceOnRequest": true,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "dagspecial"
             ],
@@ -316,6 +451,11 @@
             "name": "Chateaubriand (450 gr., om te delen)",
             "desc": "Beste stuk van de ossenhaas met Persillade boter / Béarnaise / Blauwe kaas / Groene pepersaus (45 min. bereidingstijd)",
             "price": "€74,95",
+            "priceValue": 74.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "aanbevolen"
             ],
@@ -335,6 +475,11 @@
             "name": "Klassieke steak tartaar (90 gr.)",
             "desc": "Klassieke bereiding",
             "price": "€15,95",
+            "priceValue": 15.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "aanbevolen"
             ],
@@ -346,6 +491,11 @@
             "name": "Klassieke steak tartaar (150 gr.)",
             "desc": "Klassieke bereiding",
             "price": "€27,95",
+            "priceValue": 27.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "wine": "Rosé Chic / Pinot Noir / Lalande de Pomerol",
             "sup": "Eendenlever +€6,75",
@@ -355,6 +505,11 @@
             "name": "Bisque de homard",
             "desc": "Rivierkreeft, saffraanrouille",
             "price": "€13,95",
+            "priceValue": 13.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "wine": "Grüner Veltliner / Pouilly-Fuissé Chardonnay",
             "allergens": [
@@ -365,6 +520,11 @@
             "name": "Garnalenkroketten (2 st.)",
             "desc": "Met citroenmayonaise",
             "price": "€21,95",
+            "priceValue": 21.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "wine": "Crémant de Bourgogne / Chablis Chardonnay",
             "allergens": []
@@ -373,6 +533,11 @@
             "name": "Escargots",
             "desc": "Persillade, knoflooksabayon, croutons",
             "price": "€12,95",
+            "priceValue": 12.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "wine": "Viognier / Bogle Chardonnay",
             "allergens": []
@@ -381,6 +546,11 @@
             "name": "Stracciatella",
             "desc": "Tomaat, pruim, amandel, basilicum",
             "price": "€16,95",
+            "priceValue": 16.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -394,6 +564,11 @@
             "name": "Gravad lax",
             "desc": "Toast, aardappel, dragonmayonaise, venkel, citroen",
             "price": "€17,95",
+            "priceValue": 17.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "wine": "Menetou-Salon Sauvignon / Grüner Veltliner / Riesling",
             "allergens": [
@@ -404,6 +579,11 @@
             "name": "Boudin Noir",
             "desc": "Gebakken bloedworst, brioche, appel, Calvados, gebakken eendenlever",
             "price": "€18,95",
+            "priceValue": 18.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "wine": "Pinot Noir / Sauternes",
             "allergens": [
@@ -419,6 +599,11 @@
             "name": "Canard à l'orange",
             "desc": "Knolselderij gratin, rode bietencreme, gele biet, Amsterdamse ui, sinaasappel gevogeltesaus",
             "price": "€24,95",
+            "priceValue": 24.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "aanbevolen"
             ],
@@ -432,6 +617,11 @@
             "name": "Runderentrecôte (220 gr.)",
             "desc": "Met beurre de Paris",
             "price": "€37,95",
+            "priceValue": 37.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "wine": "Saint-Émilion Grand Cru / Lalande de Pomerol / Cali Shark Cabernet Sauvignon",
             "allergens": [
@@ -442,6 +632,11 @@
             "name": "Tournedos (170 gr.)",
             "desc": "Spinazie, champignons, truffeljus",
             "price": "€37,95",
+            "priceValue": 37.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "wine": "Lalande de Pomerol / Saint-Émilion Grand Cru / Cali Shark Cabernet Sauvignon",
             "sup": "Gebakken eendenlever +€8,50",
@@ -451,6 +646,11 @@
             "name": "Hele dorade van de grill",
             "desc": "Kruidenolie van salie",
             "price": null,
+            "priceValue": null,
+            "priceOnRequest": true,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "dagspecial"
             ],
@@ -463,6 +663,11 @@
             "name": "Kreeft (500/600 gr.)",
             "desc": "Gekookt of gegrild, citroenmayonaise of dragonboter — 1/2 of 1/1",
             "price": null,
+            "priceValue": null,
+            "priceOnRequest": true,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "dagspecial"
             ],
@@ -475,6 +680,11 @@
             "name": "Zeetong à la meunière",
             "desc": "",
             "price": null,
+            "priceValue": null,
+            "priceOnRequest": true,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "dagspecial"
             ],
@@ -485,6 +695,11 @@
             "name": "Gnocchi",
             "desc": "Saffraan, venkel, parmezaan",
             "price": "€22,95",
+            "priceValue": 22.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -504,6 +719,11 @@
             "name": "Desem stokbrood",
             "desc": "Met seizoensroomboter en olijfolie",
             "price": "€5,95",
+            "priceValue": 5.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -511,6 +731,11 @@
             "name": "Verse frites",
             "desc": "Met Belgische mayonaise",
             "price": "€4,75",
+            "priceValue": 4.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               3
@@ -520,6 +745,11 @@
             "name": "Verse frites (truffel)",
             "desc": "Met truffelmayonaise en parmezaan",
             "price": "€5,75",
+            "priceValue": 5.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               7
@@ -529,6 +759,11 @@
             "name": "Frisse botersalade",
             "desc": "",
             "price": "€5,50",
+            "priceValue": 5.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -536,6 +771,11 @@
             "name": "Seizoensgroenten",
             "desc": "",
             "price": "€6,75",
+            "priceValue": 6.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           }
@@ -548,6 +788,11 @@
             "name": "Crème brûlée",
             "desc": "Klassiek met gekarameliseerde suikerkorst",
             "price": "€9,95",
+            "priceValue": 9.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "wine": "Muscat de Beaumes de Venise / Sauternes",
             "sup": "Bol vanille-ijs +€2,50",
@@ -559,6 +804,11 @@
             "name": "Mousse au chocolat",
             "desc": "Gezouten pecan, karamel",
             "price": "€12,95",
+            "priceValue": 12.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "wine": "Banyuls",
             "allergens": [
@@ -570,6 +820,11 @@
             "name": "Plateau de fromage (3)",
             "desc": "Kweeperengelei, rozijnenbrood",
             "price": "€10,95",
+            "priceValue": 10.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "wine": "Pedro Ximénez / Martha's Porto 10 yrs.",
             "allergens": [
@@ -580,6 +835,11 @@
             "name": "Plateau de fromage (5)",
             "desc": "Kweeperengelei, rozijnenbrood",
             "price": "€15,95",
+            "priceValue": 15.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "wine": "Pedro Ximénez / Martha's Porto 10 yrs.",
             "allergens": [
@@ -590,6 +850,11 @@
             "name": "Café complet",
             "desc": "Zoete lekkernijen met koffie of thee naar keuze",
             "price": "€13,95",
+            "priceValue": 13.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "aanbevolen"
             ],
@@ -599,6 +864,11 @@
             "name": "Chocolade truffels (2)",
             "desc": "",
             "price": "€3,75",
+            "priceValue": 3.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               7
@@ -625,6 +895,11 @@
             "name": "Croissant met jam en boter",
             "desc": "",
             "price": "€4,75",
+            "priceValue": 4.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               1,
@@ -635,6 +910,11 @@
             "name": "Pain au chocolat",
             "desc": "",
             "price": "€4,75",
+            "priceValue": 4.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -642,6 +922,11 @@
             "name": "Appelkruimeltaart (Holkamp)",
             "desc": "Ambachtelijk gebak",
             "price": "€5,75",
+            "priceValue": 5.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               1
@@ -651,6 +936,11 @@
             "name": "Cheesecake (Holtkamp)",
             "desc": "",
             "price": "€5,75",
+            "priceValue": 5.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -658,6 +948,11 @@
             "name": "Hazelnoot karameltaart (Holtkamp)",
             "desc": "",
             "price": "€5,75",
+            "priceValue": 5.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               8
@@ -667,6 +962,11 @@
             "name": "Verse slagroom",
             "desc": "Extra topping",
             "price": "€0,75",
+            "priceValue": 0.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               7
@@ -681,6 +981,11 @@
             "name": "Menu du Midi",
             "desc": "Voorgerecht + hoofdgerecht — dagelijks wisselend door de chef",
             "price": "€38,50",
+            "priceValue": 38.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "aanbevolen"
             ],
@@ -695,6 +1000,11 @@
             "name": "Croque Madame",
             "desc": "Met spiegelei",
             "price": "€10,95",
+            "priceValue": 10.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "wine": "Grüner Veltliner",
             "allergens": []
@@ -703,6 +1013,11 @@
             "name": "Club Classic",
             "desc": "Kip, bacon, ravigotte, ei, kaas, tomaat, botersla",
             "price": "€16,95",
+            "priceValue": 16.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "wine": "Bertholets Chardonnay / Pinot Noir",
             "allergens": [
@@ -715,6 +1030,11 @@
             "name": "Club Coppa di Parma",
             "desc": "Op brioche, antiboise, little gem, truffelmayonaise, parmezaan",
             "price": "€16,95",
+            "priceValue": 16.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "wine": "Pinot Grigio",
             "sup": "Eendenlever +€6,75",
@@ -727,6 +1047,11 @@
             "name": "Steak tartaar (90 gr.)",
             "desc": "Klassieke bereiding",
             "price": "€15,95",
+            "priceValue": 15.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "aanbevolen"
             ],
@@ -738,6 +1063,11 @@
             "name": "Steak tartaar (150 gr.)",
             "desc": "Klassieke bereiding",
             "price": "€24,95",
+            "priceValue": 24.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "wine": "Rosé / Pinot Noir / Lalande de Pomerol",
             "sup": "Eendenlever +€6,75",
@@ -747,6 +1077,11 @@
             "name": "Vol au vent",
             "desc": "Kippenragout, paddenstoelen en dragon",
             "price": "€16,95",
+            "priceValue": 16.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "wine": "Pouilly-Fuissé Chardonnay",
             "allergens": []
@@ -755,6 +1090,11 @@
             "name": "Runderentrecôte (220 gr.)",
             "desc": "Met beurre de Paris",
             "price": "€37,95",
+            "priceValue": 37.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "aanbevolen"
             ],
@@ -767,6 +1107,11 @@
             "name": "Bisque de homard",
             "desc": "Rivierkreeft, saffraanrouille",
             "price": "€13,95",
+            "priceValue": 13.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "wine": "Grüner Veltliner / Pouilly-Fuissé",
             "allergens": [
@@ -777,6 +1122,11 @@
             "name": "Vistrio",
             "desc": "Bisque, kreeftenkroket, brioche, gerookte zalm, gepocheerd ei, Béarnaise",
             "price": "€17,95",
+            "priceValue": 17.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "aanbevolen"
             ],
@@ -791,6 +1141,11 @@
             "name": "Omelette zalm met truffel",
             "desc": "",
             "price": "€16,95",
+            "priceValue": 16.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "wine": "Viognier",
             "allergens": [
@@ -802,6 +1157,11 @@
             "name": "Garnalenkroketten (2 st.)",
             "desc": "Met citroenmayonaise",
             "price": "€21,95",
+            "priceValue": 21.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "wine": "Crémant de Bourgogne / Chablis",
             "allergens": []
@@ -810,6 +1170,11 @@
             "name": "Stracciatella",
             "desc": "Tomaat, pruim, amandel, basilicum",
             "price": "€16,95",
+            "priceValue": 16.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -823,6 +1188,11 @@
             "name": "Tartelette roquefort",
             "desc": "Peer, walnoot, rozijnenchutney",
             "price": "€17,95",
+            "priceValue": 17.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -836,6 +1206,11 @@
             "name": "Caesar salade",
             "desc": "Hoenderfilet, Romaine sla, little gem, bacon, croutons, ansjovis, parmezaan, ei",
             "price": "€16,95",
+            "priceValue": 16.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "wine": "Touraine Sauvignon / Chenin Blanc / Pinot Noir",
             "allergens": [
@@ -848,6 +1223,11 @@
             "name": "Kreeft (500/600 gr.)",
             "desc": "Gekookt of gegrild met citroenmayonaise",
             "price": null,
+            "priceValue": null,
+            "priceOnRequest": true,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "dagspecial"
             ],
@@ -862,6 +1242,11 @@
             "name": "Zeetong à la meunière",
             "desc": "",
             "price": null,
+            "priceValue": null,
+            "priceOnRequest": true,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "dagspecial"
             ],
@@ -872,6 +1257,11 @@
             "name": "Gnocchi",
             "desc": "Met saffraan, venkel en parmezaan",
             "price": "€22,95",
+            "priceValue": 22.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -891,6 +1281,11 @@
             "name": "Desem stokbrood",
             "desc": "Met seizoensroomboter en olijfolie",
             "price": "€5,95",
+            "priceValue": 5.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -898,6 +1293,11 @@
             "name": "Verse frites",
             "desc": "Met Belgische mayonaise",
             "price": "€4,75",
+            "priceValue": 4.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               3
@@ -907,6 +1307,11 @@
             "name": "Verse frites (truffel)",
             "desc": "Met truffelmayonaise en parmezaan",
             "price": "€5,75",
+            "priceValue": 5.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               7
@@ -916,6 +1321,11 @@
             "name": "Frisse botersalade",
             "desc": "",
             "price": "€5,75",
+            "priceValue": 5.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -923,6 +1333,11 @@
             "name": "Seizoensgroenten",
             "desc": "",
             "price": "€6,75",
+            "priceValue": 6.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           }
@@ -935,6 +1350,11 @@
             "name": "Café complet",
             "desc": "Zoete lekkernijen met koffie of thee naar keuze",
             "price": "€13,95",
+            "priceValue": 13.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "aanbevolen"
             ],
@@ -944,6 +1364,11 @@
             "name": "Crème brûlée",
             "desc": "Klassiek met gekarameliseerde suikerkorst",
             "price": "€9,95",
+            "priceValue": 9.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "wine": "Muscat de Beaumes de Venise / Sauternes",
             "sup": "Bol vanille-ijs +€2,50",
@@ -955,6 +1380,11 @@
             "name": "Plateau de fromage (3)",
             "desc": "Kweeperen gelei en rozijnenbrood",
             "price": "€10,95",
+            "priceValue": 10.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "wine": "Pedro Ximénez / Martha's Porto 10 yrs.",
             "allergens": [
@@ -965,6 +1395,11 @@
             "name": "Plateau de fromage (5)",
             "desc": "Kweeperen gelei en rozijnenbrood",
             "price": "€15,95",
+            "priceValue": 15.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "wine": "Pedro Ximénez / Martha's Porto 10 yrs.",
             "allergens": [
@@ -975,6 +1410,11 @@
             "name": "Chocolade truffels (2)",
             "desc": "",
             "price": "€3,75",
+            "priceValue": 3.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               7
@@ -984,6 +1424,11 @@
             "name": "Café Spécial",
             "desc": "French, Italian, Spanish of Bardot",
             "price": "€9,95",
+            "priceValue": 9.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -991,6 +1436,11 @@
             "name": "Espresso Martini",
             "desc": "",
             "price": "€11,95",
+            "priceValue": 11.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           }
@@ -1015,6 +1465,11 @@
             "name": "Oesters naturel",
             "desc": "Met sjalottenvinaigrette en citroen (per stuk); topping +€0,95: Gin Tonic schuim, Asian style of Rockefeller",
             "price": "€4,00",
+            "priceValue": 4,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "wine": "Crémant de Bourgogne / Chablis",
             "allergens": [
@@ -1025,6 +1480,11 @@
             "name": "Pata Negra (70 gr.)",
             "desc": "Spaanse Ibéricoham — Paleta Capa Negra Cebo",
             "price": "€21,95",
+            "priceValue": 21.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "wine": "Verdejo / Rioja",
             "allergens": []
@@ -1033,6 +1493,11 @@
             "name": "Paté en croûte",
             "desc": "Gefrituurde kappertjes, uienconfit",
             "price": "€16,95",
+            "priceValue": 16.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "wine": "Pinot Noir / Côtes du Rhône",
             "allergens": []
@@ -1041,6 +1506,11 @@
             "name": "Charcuterie",
             "desc": "Diverse vleeswaren",
             "price": "€16,95",
+            "priceValue": 16.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "wine": "Bertholets Chardonnay / Primitivo",
             "allergens": []
@@ -1049,6 +1519,11 @@
             "name": "Paling (2 st.)",
             "desc": "Brioche, rode biet, crème fraîche, roze peper",
             "price": "€13,95",
+            "priceValue": 13.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "wine": "Bogle Chardonnay / Pinot Noir",
             "allergens": [
@@ -1060,6 +1535,11 @@
             "name": "Kaviaar Osietra 10 gr.",
             "desc": "Russische steurkaviaar",
             "price": "€35,00",
+            "priceValue": 35,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "wine": "Crémant de Bourgogne / Chablis",
             "sup": "Blini's en zure room +€5,00",
@@ -1077,6 +1557,11 @@
             "name": "Koffie",
             "desc": "",
             "price": "€3,20",
+            "priceValue": 3.2,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1084,6 +1569,11 @@
             "name": "Espresso",
             "desc": "",
             "price": "€3,20",
+            "priceValue": 3.2,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1091,6 +1581,11 @@
             "name": "Dubbele espresso",
             "desc": "",
             "price": "€4,50",
+            "priceValue": 4.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1098,6 +1593,11 @@
             "name": "Espresso Macchiato",
             "desc": "",
             "price": "€3,65",
+            "priceValue": 3.65,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1105,6 +1605,11 @@
             "name": "Cappuccino",
             "desc": "",
             "price": "€3,75",
+            "priceValue": 3.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1112,6 +1617,11 @@
             "name": "Flat White",
             "desc": "",
             "price": "€4,75",
+            "priceValue": 4.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1119,6 +1629,11 @@
             "name": "Latte Macchiato",
             "desc": "",
             "price": "€4,20",
+            "priceValue": 4.2,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1126,6 +1641,11 @@
             "name": "Warme Chocomel",
             "desc": "",
             "price": "€3,50",
+            "priceValue": 3.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1133,6 +1653,11 @@
             "name": "Thee",
             "desc": "Diverse smaken",
             "price": "€3,00",
+            "priceValue": 3,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1140,6 +1665,11 @@
             "name": "Verse Muntthee",
             "desc": "",
             "price": "€4,00",
+            "priceValue": 4,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1147,6 +1677,11 @@
             "name": "Verse Gemberthee",
             "desc": "",
             "price": "€4,00",
+            "priceValue": 4,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           }
@@ -1159,6 +1694,11 @@
             "name": "Mimosa",
             "desc": "",
             "price": "€7,75",
+            "priceValue": 7.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1166,6 +1706,11 @@
             "name": "Aperol Spritz",
             "desc": "",
             "price": "€9,75",
+            "priceValue": 9.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1173,6 +1718,11 @@
             "name": "Limoncello Spritz",
             "desc": "",
             "price": "€9,75",
+            "priceValue": 9.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1180,6 +1730,11 @@
             "name": "Espresso Martini",
             "desc": "",
             "price": "€11,75",
+            "priceValue": 11.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1187,6 +1742,11 @@
             "name": "Pornstar Martini",
             "desc": "",
             "price": "€11,75",
+            "priceValue": 11.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1194,6 +1754,11 @@
             "name": "Moscow Mule",
             "desc": "",
             "price": "€9,75",
+            "priceValue": 9.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1201,6 +1766,11 @@
             "name": "Amaretto Sour",
             "desc": "",
             "price": "€10,75",
+            "priceValue": 10.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1208,6 +1778,11 @@
             "name": "Whisky Sour",
             "desc": "",
             "price": "€11,75",
+            "priceValue": 11.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1215,6 +1790,11 @@
             "name": "Negroni",
             "desc": "",
             "price": "€9,75",
+            "priceValue": 9.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1222,6 +1802,11 @@
             "name": "Hendrick's G&T",
             "desc": "Met Fever Tree",
             "price": "€11,75",
+            "priceValue": 11.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1229,6 +1814,11 @@
             "name": "Copperhead G&T",
             "desc": "Met Fever Tree",
             "price": "€12,75",
+            "priceValue": 12.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           }
@@ -1241,6 +1831,11 @@
             "name": "Hertog Jan (tap)",
             "desc": "0,25 / 0,50 l",
             "price": "v.a. €4,00",
+            "priceValue": 4,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": true,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1248,6 +1843,11 @@
             "name": "Hertog Jan Weizener",
             "desc": "Fles",
             "price": "€5,25",
+            "priceValue": 5.25,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1255,6 +1855,11 @@
             "name": "Stella Artois",
             "desc": "Tap",
             "price": "€4,30",
+            "priceValue": 4.3,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1262,6 +1867,11 @@
             "name": "Leffe Blond",
             "desc": "Tap",
             "price": "€5,75",
+            "priceValue": 5.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1269,6 +1879,11 @@
             "name": "Leffe Bruin",
             "desc": "Fles",
             "price": "€5,25",
+            "priceValue": 5.25,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1276,6 +1891,11 @@
             "name": "Vedett Extra White",
             "desc": "Fles",
             "price": "€5,75",
+            "priceValue": 5.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1283,6 +1903,11 @@
             "name": "Hertog Jan Tripel",
             "desc": "Fles",
             "price": "€6,00",
+            "priceValue": 6,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1290,6 +1915,11 @@
             "name": "Tripel Karmeliet",
             "desc": "Fles",
             "price": "€6,00",
+            "priceValue": 6,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1297,6 +1927,11 @@
             "name": "Juice Punch NEIPA",
             "desc": "Craft — fles",
             "price": "€6,50",
+            "priceValue": 6.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1304,6 +1939,11 @@
             "name": "Duvel",
             "desc": "Fles",
             "price": "€6,50",
+            "priceValue": 6.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1311,6 +1951,11 @@
             "name": "Hoegaarden Radler",
             "desc": "Fles",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1318,6 +1963,11 @@
             "name": "Liefmans Fruitesse",
             "desc": "Fles",
             "price": "€5,50",
+            "priceValue": 5.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1325,6 +1975,11 @@
             "name": "Hoegaarden Radler 0.0%",
             "desc": "Alcoholvrij",
             "price": "€4,25",
+            "priceValue": 4.25,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1332,6 +1987,11 @@
             "name": "Leffe Blond 0.0%",
             "desc": "Alcoholvrij",
             "price": "€5,25",
+            "priceValue": 5.25,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1339,6 +1999,11 @@
             "name": "Hertog Jan 0.0%",
             "desc": "Alcoholvrij",
             "price": "€3,85",
+            "priceValue": 3.85,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           }
@@ -1363,6 +2028,11 @@
             "name": "Poussin",
             "desc": "Krielkippetje van onze huisrotisserie met citroen, tijm en appelcompote",
             "price": "€20,95",
+            "priceValue": 20.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "aanbevolen"
             ],
@@ -1373,6 +2043,11 @@
             "name": "Kreeft (pasta)",
             "desc": "Pasta aglio e olio, antiboise, parmezaan — 1/2 of 1/1",
             "price": null,
+            "priceValue": null,
+            "priceOnRequest": true,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "dagspecial"
             ],
@@ -1387,6 +2062,11 @@
             "name": "Chateaubriand (450 gr., om te delen)",
             "desc": "Beste stuk van de ossenhaas met Persillade boter / Béarnaise / Blauwe kaas / Groene pepersaus (45 min. bereidingstijd)",
             "price": "€74,95",
+            "priceValue": 74.95,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "aanbevolen"
             ],
@@ -1418,6 +2098,11 @@
             "name": "Oesterproeverij",
             "desc": "2 × 3 verschillende naturel oesters, Balinese vinaigrette",
             "price": "€23,50",
+            "priceValue": 23.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "aanbevolen"
             ],
@@ -1430,6 +2115,11 @@
             "name": "Jamon Iberico Bellota",
             "desc": "De exclusieve Spaanse ham, 75 gram",
             "price": "€19,50",
+            "priceValue": 19.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1437,6 +2127,11 @@
             "name": "Brioche met paling",
             "desc": "",
             "price": "€8,50",
+            "priceValue": 8.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               1
@@ -1446,6 +2141,11 @@
             "name": "Crumpet met huis gerookte zalm",
             "desc": "",
             "price": "€8,50",
+            "priceValue": 8.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               4
@@ -1455,6 +2155,11 @@
             "name": "Toast met Mangalica, sriracha en sesam",
             "desc": "",
             "price": "€8,50",
+            "priceValue": 8.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               1,
@@ -1465,6 +2170,11 @@
             "name": "Zuurdesembrood",
             "desc": "2 soorten boter",
             "price": "€5,50",
+            "priceValue": 5.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               7
@@ -1479,6 +2189,11 @@
             "name": "2-gangen menu",
             "desc": "Keuze van de chef, inclusief koffie/thee met friandises",
             "price": "€45",
+            "priceValue": 45,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1486,6 +2201,11 @@
             "name": "3-gangen menu",
             "desc": "Keuze van de chef, inclusief intermezzo en koffie/thee met friandises",
             "price": "€55",
+            "priceValue": 55,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "aanbevolen"
             ],
@@ -1495,6 +2215,11 @@
             "name": "4-gangen menu",
             "desc": "Keuze van de chef, inclusief intermezzo en koffie/thee met friandises",
             "price": "€65",
+            "priceValue": 65,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1502,6 +2227,11 @@
             "name": "5-gangen menu",
             "desc": "Keuze van de chef, inclusief intermezzo en koffie/thee met friandises",
             "price": "€75",
+            "priceValue": 75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           }
@@ -1514,6 +2244,11 @@
             "name": "Sandwich Zuyd",
             "desc": "Krentenbrood, dungesneden ossenhaas, eendenlever, rucola, truffel, kaas",
             "price": "€19,50",
+            "priceValue": 19.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "aanbevolen"
             ],
@@ -1525,6 +2260,11 @@
             "name": "Lobster roll",
             "desc": "Brioche, kreeft, frisse salade, kreeftensoep",
             "price": "€25,00",
+            "priceValue": 25,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               1,
@@ -1540,6 +2280,11 @@
             "name": "Steak tartaar",
             "desc": "Currywafel, basilicum, jalapeño, cornichons, ui, mosterdzaad, krokante kippenhuid, Remeker kaas",
             "price": "€26,00",
+            "priceValue": 26,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               7
@@ -1549,6 +2294,11 @@
             "name": "Kreeft (½)",
             "desc": "½ gegaarde kreeft uit de schaal, bloemkool, koolrabi, hazelnoot, mandarijn",
             "price": "€29,00",
+            "priceValue": 29,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "aanbevolen"
             ],
@@ -1561,6 +2311,11 @@
             "name": "Catch of the day",
             "desc": "",
             "price": null,
+            "priceValue": null,
+            "priceOnRequest": true,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "dagspecial"
             ],
@@ -1570,6 +2325,11 @@
             "name": "Zeebaars",
             "desc": "Gebakken zeebaarsfilet, wortel, curry, yuzu, komijn",
             "price": "€29,00",
+            "priceValue": 29,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               4
@@ -1579,6 +2339,11 @@
             "name": "Zwezerik",
             "desc": "Gebakken zwezerik, schorseneren, tandoori, mango, chili",
             "price": "€29,00",
+            "priceValue": 29,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1586,6 +2351,11 @@
             "name": "Ossenhaas",
             "desc": "Rosé gebraden ossenhaas, gebakken eendenlever, verse truffel, rösti, spinazie, paddenstoel, Madeira jus",
             "price": "€32,50",
+            "priceValue": 32.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "aanbevolen"
             ],
@@ -1595,6 +2365,11 @@
             "name": "Eendenlever",
             "desc": "Gebakken lever, mousse van lever, suikerwafel, vijg, pistache",
             "price": "€27,00",
+            "priceValue": 27,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               3,
@@ -1605,6 +2380,11 @@
             "name": "Kaasassortiment",
             "desc": "Diverse Nederlandse kazen, Zuydvruchtencompote, brood — 4 stuks / 6 stuks",
             "price": "€12,00 / €18,00",
+            "priceValue": null,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": true,
             "tags": [],
             "sup": "Suppl. bij menu +€8,50",
             "allergens": [
@@ -1615,6 +2395,11 @@
             "name": "Kaasgerecht",
             "desc": "Vacherin Mont d'Or, Tête de Moine, ui, pompoen, ras el hanout, kummel, pecan, toast",
             "price": "€17,00",
+            "priceValue": 17,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "sup": "Suppl. bij menu +€8,50",
             "allergens": [
@@ -1626,6 +2411,11 @@
             "name": "Dessert",
             "desc": "Wisselend seizoensdessert",
             "price": "€16,50",
+            "priceValue": 16.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           }
@@ -1650,6 +2440,11 @@
             "name": "Oesterproeverij",
             "desc": "2 × 3 verschillende naturel oesters, Balinese vinaigrette",
             "price": "€23,50",
+            "priceValue": 23.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "aanbevolen"
             ],
@@ -1662,6 +2457,11 @@
             "name": "Oesterproeverij Deluxe",
             "desc": "3 oester variaties: Frankrijk (framboos, roos, sjalot) · Mexico (passievrucht, jalapeño) · Japan (eendenlevercream, ponzu)",
             "price": "€29,50",
+            "priceValue": 29.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               6,
@@ -1672,6 +2472,11 @@
             "name": "Jamon Iberico Bellota",
             "desc": "De exclusieve Spaanse ham, 75 gram",
             "price": "€19,50",
+            "priceValue": 19.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1679,6 +2484,11 @@
             "name": "Brioche met paling",
             "desc": "",
             "price": "€8,50",
+            "priceValue": 8.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               1
@@ -1688,6 +2498,11 @@
             "name": "Crumpet met huis gerookte zalm",
             "desc": "",
             "price": "€8,50",
+            "priceValue": 8.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               4
@@ -1697,6 +2512,11 @@
             "name": "Toast met Mangalica, sriracha en sesam",
             "desc": "",
             "price": "€8,50",
+            "priceValue": 8.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               1,
@@ -1712,6 +2532,11 @@
             "name": "4-gangen surprise",
             "desc": "Keuze van de chef — alleen di t/m do beschikbaar",
             "price": "€70",
+            "priceValue": 70,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "sup": "Wijnparing +€32 / halve glazen +€22",
             "allergens": []
@@ -1720,6 +2545,11 @@
             "name": "5-gangen surprise",
             "desc": "Keuze van de chef",
             "price": "€80",
+            "priceValue": 80,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "aanbevolen"
             ],
@@ -1730,6 +2560,11 @@
             "name": "6-gangen surprise",
             "desc": "Keuze van de chef",
             "price": "€90",
+            "priceValue": 90,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "sup": "Wijnparing +€48 / halve glazen +€33",
             "allergens": []
@@ -1738,6 +2573,11 @@
             "name": "7-gangen surprise",
             "desc": "Keuze van de chef",
             "price": "€100",
+            "priceValue": 100,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "sup": "Wijnparing +€56 / halve glazen +€38,50",
             "allergens": []
@@ -1751,6 +2591,11 @@
             "name": "Steak tartaar",
             "desc": "Currywafel, basilicum, jalapeño, cornichons, ui, mosterdzaad, krokante kippenhuid, Remeker kaas",
             "price": "€26,00",
+            "priceValue": 26,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               7
@@ -1760,6 +2605,11 @@
             "name": "Kreeft (½)",
             "desc": "½ gegaarde kreeft uit de schaal, bloemkool, koolrabi, hazelnoot, mandarijn",
             "price": "€29,00",
+            "priceValue": 29,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "aanbevolen"
             ],
@@ -1772,6 +2622,11 @@
             "name": "Catch of the day",
             "desc": "Warm of koud — wisselend aanbod",
             "price": "€27,00",
+            "priceValue": 27,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "dagspecial"
             ],
@@ -1781,6 +2636,11 @@
             "name": "Zeebaars",
             "desc": "Gebakken zeebaarsfilet, wortel, curry, yuzu, komijn",
             "price": "€29,00",
+            "priceValue": 29,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               4
@@ -1790,6 +2650,11 @@
             "name": "Zwezerik",
             "desc": "Gebakken zwezerik, schorseneren, tandoori, mango, chili",
             "price": "€29,00",
+            "priceValue": 29,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -1797,6 +2662,11 @@
             "name": "Ossenhaas",
             "desc": "Rosé gebraden ossenhaas, gebakken eendenlever, verse truffel, rösti, spinazie, paddenstoel, Madeira jus",
             "price": "€32,50",
+            "priceValue": 32.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "aanbevolen"
             ],
@@ -1806,6 +2676,11 @@
             "name": "Eendenlever",
             "desc": "Gebakken lever, mousse van lever, suikerwafel, vijg, pistache",
             "price": "€27,00",
+            "priceValue": 27,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               3,
@@ -1816,6 +2691,11 @@
             "name": "Kaasassortiment",
             "desc": "Diverse Nederlandse kazen, Zuydvruchtencompote, brood — 4 stuks / 6 stuks",
             "price": "€12,00 / €18,00",
+            "priceValue": null,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": true,
             "tags": [],
             "sup": "Suppl. bij menu +€8,50",
             "allergens": [
@@ -1826,6 +2706,11 @@
             "name": "Kaasgerecht",
             "desc": "Vacherin Mont d'Or, Tête de Moine, ui, pompoen, ras el hanout, kummel, pecan, toast",
             "price": "€17,00",
+            "priceValue": 17,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "sup": "Suppl. bij menu +€8,50",
             "allergens": [
@@ -1837,6 +2722,11 @@
             "name": "Dessert",
             "desc": "Laat u verrassen door de chef",
             "price": "€16,50",
+            "priceValue": 16.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           }
@@ -1861,6 +2751,11 @@
             "name": "Middle Eastern Pancakes",
             "desc": "American pancakes, griekse yoghurt, perzik, verveinesiroop, pistache",
             "price": "€14,75",
+            "priceValue": 14.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -1873,6 +2768,11 @@
             "name": "Shakshuka",
             "desc": "Tomaat, ei, komijn, gerookte paprika, peterselie, focaccia",
             "price": "€13,75",
+            "priceValue": 13.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -1885,6 +2785,11 @@
             "name": "Avocado Toast",
             "desc": "Avocado, bacon, toast, ei, tomaat, aioli",
             "price": "€14,75",
+            "priceValue": 14.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               1,
@@ -1895,6 +2800,11 @@
             "name": "Quattro Formaggi Tosti",
             "desc": "Mozzarella, cheddar, gorgonzola, parmezaan, tomaat-rozemarijnchutney, zongedroogde tomaat",
             "price": "€14,75",
+            "priceValue": 14.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -1907,6 +2817,11 @@
             "name": "Burrata & Peach",
             "desc": "Focaccia, burrata, perzik, rucola, uienchutney, pistache",
             "price": "€14,75",
+            "priceValue": 14.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -1920,6 +2835,11 @@
             "name": "Iberian Melt",
             "desc": "Chorizo, brie, ingelegde ui, uienchutney",
             "price": "€15,75",
+            "priceValue": 15.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               7
@@ -1929,6 +2849,11 @@
             "name": "Veggie Romesco Sandwich",
             "desc": "Gegrilde seizoensgroenten, romesco, kruidenvinaigrette, geroosterde amandel",
             "price": "€15,75",
+            "priceValue": 15.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -1940,6 +2865,11 @@
             "name": "Mortadella Burrata",
             "desc": "Focaccia, mortadella, burrata, pesto, pistache",
             "price": "€14,75",
+            "priceValue": 14.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               1,
@@ -1951,6 +2881,11 @@
             "name": "White Bean & Veggie Sandwich",
             "desc": "Aubergine, cannellini bonen spread, rode ui, gerookte paprika, kruidenvinaigrette, dille",
             "price": "€14,75",
+            "priceValue": 14.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -1960,6 +2895,11 @@
             "name": "Greek Chicken Sandwich",
             "desc": "Kippendij, feta-geroosterde paprika spread, kruidenvinaigrette, dille",
             "price": "€15,25",
+            "priceValue": 15.25,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               7
@@ -1969,6 +2909,11 @@
             "name": "Steak à la T-Huis",
             "desc": "Rumpsteak, balsamico, jus, brood",
             "price": "€23,75",
+            "priceValue": 23.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "sup": "pancetta & champignons +€3,00",
             "allergens": [
@@ -1980,6 +2925,11 @@
             "name": "Tournedos à la T-Huis",
             "desc": "Tournedos, balsamico, jus, brood",
             "price": "€32,75",
+            "priceValue": 32.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "sup": "pancetta & champignons +€3,00",
             "allergens": [
@@ -1991,6 +2941,11 @@
             "name": "TFC Burger",
             "desc": "Fried chicken burger, gochujang glaze, Koreaans zoetzuur, sesammayo",
             "price": "€15,75",
+            "priceValue": 15.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "sup": "friet +€4,00",
             "allergens": []
@@ -1999,6 +2954,11 @@
             "name": "Bisque",
             "desc": "Huisgemaakte bisque, garnalen, focaccia, garnalenolie",
             "price": "€14,75",
+            "priceValue": 14.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               1,
@@ -2014,6 +2974,11 @@
             "name": "Salade Geitenkaas",
             "desc": "Geitenkaas, appelstroop, rode biet zoetzuur, vleestomaat, walnoot. Geserveerd met brood.",
             "price": "€20,75",
+            "priceValue": 20.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -2026,6 +2991,11 @@
             "name": "Japanse Tonijn Salade",
             "desc": "Tonijn tataki, edamame, wakame, ponzu, wasabi crunch, bosui. Geserveerd met brood.",
             "price": "€22,75",
+            "priceValue": 22.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               1,
@@ -2037,6 +3007,11 @@
             "name": "Caesar Salade",
             "desc": "Kippendij, romaine sla, gekookt ei, bacon, ansjovis, parmezaan, pangrattato. Geserveerd met brood.",
             "price": "€21,75",
+            "priceValue": 21.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               1,
@@ -2054,6 +3029,11 @@
             "name": "Appeltaart",
             "desc": "Huisgemaakte appeltaart van 't Klooster",
             "price": "€4,75",
+            "priceValue": 4.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -2063,6 +3043,11 @@
             "name": "Red Velvet Cake",
             "desc": "",
             "price": "€6,75",
+            "priceValue": 6.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -2074,6 +3059,11 @@
             "name": "Taart van het Moment",
             "desc": "Wisselend aanbod",
             "price": "op aanvraag",
+            "priceValue": null,
+            "priceOnRequest": true,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "dagspecial"
             ],
@@ -2088,6 +3078,11 @@
             "name": "Kids Pancakes",
             "desc": "Keuze: rood seizoensfruit / stroop en suiker / Nutella",
             "price": "€8,00",
+            "priceValue": 8,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -2095,6 +3090,11 @@
             "name": "Kids Burger",
             "desc": "Mini burger, burger bun, augurk, ketchup, frietjes",
             "price": "€9,75",
+            "priceValue": 9.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -2102,6 +3102,11 @@
             "name": "Biefstukje met Friet",
             "desc": "Mini steak, frietjes",
             "price": "€13,75",
+            "priceValue": 13.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -2109,6 +3114,11 @@
             "name": "Kids Tosti",
             "desc": "",
             "price": "€6,00",
+            "priceValue": 6,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -2120,6 +3130,11 @@
             "name": "Frietjes & Snacks",
             "desc": "Bitterballen, frikandelletjes, kipnuggets",
             "price": "€8,75",
+            "priceValue": 8.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           }
@@ -2144,6 +3159,11 @@
             "name": "Steak Tartaar",
             "desc": "Grasgevoerd rundvlees | kappertjes | chorizo-olie | kwartelei",
             "price": "€15,75",
+            "priceValue": 15.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -2151,6 +3171,11 @@
             "name": "Tonijn Tataki",
             "desc": "Saku tonijn | sesam mayo | wakame | ponzu | wasabi crunch | bosui",
             "price": "€15,75",
+            "priceValue": 15.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               3,
@@ -2163,6 +3188,11 @@
             "name": "Burrata & Perzik",
             "desc": "Burrata DOP | perzik | rucola | uienchutney | pistache",
             "price": "€13,75",
+            "priceValue": 13.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -2175,6 +3205,11 @@
             "name": "Pata Negra",
             "desc": "Ibérico cebo campo",
             "price": "€14,75",
+            "priceValue": 14.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -2182,6 +3217,11 @@
             "name": "Romesco & Veg",
             "desc": "Romesco | gegrilde seizoensgroente | kruidenvinaigrette | koriander | geroosterde amandel | brood",
             "price": "€13,75",
+            "priceValue": 13.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -2194,6 +3234,11 @@
             "name": "Greek Delight",
             "desc": "Aubergine | feta - geroosterde paprika crème | kruidenvinaigrette | dille | brood",
             "price": "€12,75",
+            "priceValue": 12.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -2206,6 +3251,11 @@
             "name": "Bisque",
             "desc": "Huisgemaakte bisque | garnalen | focaccia | garnalenolie",
             "price": "€14,75",
+            "priceValue": 14.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               1,
@@ -2221,6 +3271,11 @@
             "name": "Steak à la T-Huis",
             "desc": "Rumpsteak | gepofte cherrytomaat | balsamico | jus | friet",
             "price": "€25,75",
+            "priceValue": 25.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "sup": "pancetta & kastanjechampignons +€3,00",
             "allergens": [
@@ -2231,6 +3286,11 @@
             "name": "Tournedos à la T-Huis",
             "desc": "Tournedos | gepofte cherrytomaat | balsamico | jus | friet",
             "price": "€34,75",
+            "priceValue": 34.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "sup": "pancetta & kastanjechampignons +€3,00",
             "allergens": [
@@ -2241,6 +3301,11 @@
             "name": "Sliptongetjes",
             "desc": "In boter gebakken sliptongetjes | remoulade | seizoensgroenten | friet",
             "price": "€26,75",
+            "priceValue": 26.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "sup": "Seizoensgebonden",
             "allergens": [
@@ -2252,6 +3317,11 @@
             "name": "Portugese Marisco Seafood Stew",
             "desc": "Seizoensvis | mosselen | gamba's | krielaardappel | peterselie | brood",
             "price": "€25,75",
+            "priceValue": 25.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               1
@@ -2261,6 +3331,11 @@
             "name": "Pulpo del Sol",
             "desc": "Pulpo | parelcouscous | tomaat | saffraan | pico de gallo | chorizo vinaigrette",
             "price": "€25,75",
+            "priceValue": 25.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               10
@@ -2270,6 +3345,11 @@
             "name": "Roasted Pointed Cabbage",
             "desc": "Geroosterde spitskool | cannellini bonen puree | seizoensgroenten | krielaardappel | rode ui | gerookte paprika | kruidenvinaigrette | walnoot",
             "price": "€24,75",
+            "priceValue": 24.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -2281,6 +3361,11 @@
             "name": "TFC Burger",
             "desc": "Fried chicken burger | gochujang glaze | Koreaans zoetzuur | sesam mayo | friet",
             "price": "€19,75",
+            "priceValue": 19.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               3,
@@ -2296,6 +3381,11 @@
             "name": "Salade Geitenkaas",
             "desc": "Geitenkaas | appelstroop | rode biet zoetzuur | vleestomaat | walnoot. Geserveerd met brood.",
             "price": "€20,75",
+            "priceValue": 20.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -2308,6 +3398,11 @@
             "name": "Japanse Tonijn Salade",
             "desc": "Tonijn tataki | edamame | wakame | ponzu | sesammayo | wasabi crunch | bosui. Geserveerd met brood.",
             "price": "€22,75",
+            "priceValue": 22.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               1,
@@ -2319,6 +3414,11 @@
             "name": "Caesar Salade",
             "desc": "Kippendij | little gem | gekookt ei | bacon | ansjovis | parmezaan | pangrattato. Geserveerd met brood.",
             "price": "€21,75",
+            "priceValue": 21.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               1,
@@ -2336,6 +3436,11 @@
             "name": "Summer Peach",
             "desc": "Perzik | crumble | vanille-ijs | verveinesiroop",
             "price": "€8,75",
+            "priceValue": 8.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -2347,6 +3452,11 @@
             "name": "Chocolade Moelleux",
             "desc": "Chocolade moelleux | rood seizoensfruit crumble | frambozen sorbetijs",
             "price": "€9,75",
+            "priceValue": 9.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -2358,6 +3468,11 @@
             "name": "T-Huis Tiramisu",
             "desc": "Savoiardi | mascarpone | koffie kahlua | cacaocrumble",
             "price": "€9,75",
+            "priceValue": 9.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -2369,6 +3484,11 @@
             "name": "Kaasplankje",
             "desc": "Wisselende kazen | kletzenbrood | walnoot",
             "price": "€13,75",
+            "priceValue": 13.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -2385,6 +3505,11 @@
             "name": "Pancakes",
             "desc": "Keuze: rood seizoensfruit / stroop en suiker / Nutella",
             "price": "€8,00",
+            "priceValue": 8,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -2394,6 +3519,11 @@
             "name": "Kids Burger",
             "desc": "Mini burger | burger bun | augurk | ketchup | frietjes",
             "price": "€9,75",
+            "priceValue": 9.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -2401,6 +3531,11 @@
             "name": "Biefstukje met Friet",
             "desc": "Mini steak | frietjes",
             "price": "€13,25",
+            "priceValue": 13.25,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -2408,6 +3543,11 @@
             "name": "Kids Sliptong",
             "desc": "Sliptong | frietjes",
             "price": "€13,25",
+            "priceValue": 13.25,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -2415,6 +3555,11 @@
             "name": "Frietjes & Snacks",
             "desc": "Keuze uit: bitterballen, frikandelletjes, kipnuggets",
             "price": "€8,75",
+            "priceValue": 8.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           }
@@ -2439,6 +3584,11 @@
             "name": "Camembert",
             "desc": "Camembert uit de oven | honing | walnoot | tijm",
             "price": "€9,75",
+            "priceValue": 9.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -2451,6 +3601,11 @@
             "name": "Pata Negra",
             "desc": "Ibérico cebo campo",
             "price": "€14,75",
+            "priceValue": 14.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -2458,6 +3613,11 @@
             "name": "Charcuterie van het Moment",
             "desc": "Wat vandaag op z'n best is!",
             "price": "€13,75",
+            "priceValue": 13.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "dagspecial"
             ],
@@ -2467,6 +3627,11 @@
             "name": "Tonijn Tataki",
             "desc": "Saku tonijn | sesammayo | wakame | ponzu | wasabi crunch | bosui",
             "price": "€15,75",
+            "priceValue": 15.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               4,
@@ -2477,6 +3642,11 @@
             "name": "Kaasplankje",
             "desc": "Jonge en oude kazen | mosterd | huisgemaakt zuur",
             "price": "€11,75",
+            "priceValue": 11.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -2488,6 +3658,11 @@
             "name": "Nacho's",
             "desc": "Pulled chicken | jalapeños | crème fraîche | cheddar | guacamole | rode salsa | bosui",
             "price": "€15,75",
+            "priceValue": 15.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               7
@@ -2497,6 +3672,11 @@
             "name": "Brood & Boter",
             "desc": "Bussing-desembrood | roomboter | zeezout",
             "price": "€6,75",
+            "priceValue": 6.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -2509,6 +3689,11 @@
             "name": "Noten & Olijven",
             "desc": "",
             "price": "€6,75",
+            "priceValue": 6.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -2523,6 +3708,11 @@
             "name": "Chorizo Kroketjes",
             "desc": "Chorizo kroketjes | aioli | 6 stuks",
             "price": "€9,00",
+            "priceValue": 9,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               3
@@ -2532,6 +3722,11 @@
             "name": "Kaastengels",
             "desc": "Kaastengels | chilisaus | 8 stuks",
             "price": "€9,50",
+            "priceValue": 9.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -2541,6 +3736,11 @@
             "name": "Gyoza's",
             "desc": "Vegetarische gyoza's | sesammayo | crispy chili | bosui | 8 stuks",
             "price": "€9,75",
+            "priceValue": 9.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -2552,6 +3752,11 @@
             "name": "Chicken Bites",
             "desc": "Crispy karaage chicken | sesammayo | chilisaus | togarashi | bosui | 8 stuks",
             "price": "€9,50",
+            "priceValue": 9.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": []
           },
@@ -2559,6 +3764,11 @@
             "name": "Bitterballen",
             "desc": "Bitterballen | mosterd | 8 stuks",
             "price": "€8,50",
+            "priceValue": 8.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               10
@@ -2568,6 +3778,11 @@
             "name": "Frikandelletjes",
             "desc": "Frikandelletjes | mayo | 10 stuks",
             "price": "€8,50",
+            "priceValue": 8.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [],
             "allergens": [
               3
@@ -2582,36 +3797,66 @@
             "name": "La Roche - La Chevallière",
             "desc": "Chardonnay | Terret — Languedoc-Roussillon, FR · Fris | mineralig | exotisch fruit | gele appel",
             "price": "€6,00 / €35,00",
+            "priceValue": null,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": true,
             "allergens": []
           },
           {
             "name": "Agustinos - Gran Terroir White",
             "desc": "Chardonnay | Viognier — Maipo Valley, CHI · Vol | abrikoos | bloesem",
             "price": "€7,00 / €39,00",
+            "priceValue": null,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": true,
             "allergens": []
           },
           {
             "name": "Joseph Cattin - Duo Gris & Blanc",
             "desc": "Pinot Gris | Pinot Blanc — Elzas, FR · Witte bloesem | abrikoos | peer",
             "price": "€42,00",
+            "priceValue": 42,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Morgadio",
             "desc": "Albariño — Rías Baixas, POR · Zittig | citrus | fris | nectarines",
             "price": "€45,00",
+            "priceValue": 45,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Höpler - Seeblick",
             "desc": "Grüner Veltliner | Pinot Blanc — Burgenland, AT · Kruizig | fris | abrikoos | bloesem",
             "price": "€5,50 / €32,00",
+            "priceValue": null,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": true,
             "allergens": []
           },
           {
             "name": "Baigorri - Blanco Fermentado en Barrica DOC",
             "desc": "Viura | Malvasia — Rioja, SP · Romig | toast | exotisch fruit",
             "price": "€49,00",
+            "priceValue": 49,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": [
               1
             ]
@@ -2620,12 +3865,22 @@
             "name": "Maison Champy Pernand-Vergelesses 1er Cru",
             "desc": "Chardonnay — Bourgogne, FR · Vol | perzik | witte bloesem | anijs",
             "price": "€98,00",
+            "priceValue": 98,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Gérard Bertrand",
             "desc": "Chardonnay | Sauvignon Blanc | Viognier — Pays d'OC, FR · Citrus | vol | vanille | gedroogd fruit | honing",
             "price": "€39,00",
+            "priceValue": 39,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           }
         ]
@@ -2637,24 +3892,44 @@
             "name": "Vallformosa - Blue Fin Cava Brut Reserva",
             "desc": "Macabeo | Xarello | Parellada — Catalunya, SP · Fris | fruitig | appel",
             "price": "€5,00 / €38,00",
+            "priceValue": null,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": true,
             "allergens": []
           },
           {
             "name": "Bouvet Ladubay - Crémant de Loire",
             "desc": "Chenin Blanc | Chardonnay — Loire, FR · Perzik | acacia | fris | honing",
             "price": "€8,50 / €45,00",
+            "priceValue": null,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": true,
             "allergens": []
           },
           {
             "name": "Gérard Bertrand - Papillon Pétillant Naturel",
             "desc": "Cinsault | Pinot Noir — Languedoc-Roussillon, FR · Fris | rode bessen | aardbei | framboos",
             "price": "€38,00",
+            "priceValue": 38,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Bouché - Père et Fils Cuvée Réservée Brut",
             "desc": "Chardonnay | Pinot Noir | Pinot Meunier — Champagne, FR · Mineralig | appel | peer | brioche",
             "price": "€75,00 / €51,00 (37.5cl)",
+            "priceValue": null,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": true,
             "allergens": [
               1
             ]
@@ -2668,6 +3943,11 @@
             "name": "Joseph Cattin Orange",
             "desc": "Orange Pinot Gris — Elzas, FR · Perzik | rode bessen | fris",
             "price": "€42,00",
+            "priceValue": 42,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           }
         ]
@@ -2679,36 +3959,66 @@
             "name": "El Esteco - Don David Malbec Reserva",
             "desc": "Malbec — Calchaqui Valley, ARG · Pruimenjam | tabak | vanille",
             "price": "€7,00 / €37,00",
+            "priceValue": null,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": true,
             "allergens": []
           },
           {
             "name": "Pasqua - Desire Lush & Zin",
             "desc": "Primitivo — Puglia, IT · Rood fruit | koffie | cacao | pruim",
             "price": "€6,50 / €35,00",
+            "priceValue": null,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": true,
             "allergens": []
           },
           {
             "name": "Castillo de Monjardin Reserva",
             "desc": "Cabernet Sauvignon | Merlot | Tempranillo — Navarra, SP · Kersen | pruimen | karamel | genjet",
             "price": "€43,00",
+            "priceValue": 43,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Baigorri - Reserva",
             "desc": "Tempranillo — Rioja, SP · Pruimen | bramen | romig | vanille",
             "price": "€55,00",
+            "priceValue": 55,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Pasqua - Black Label Valpolicella Superiore Ripasso DOC",
             "desc": "Veneto, IT · Kers | wilde bessen | balspecerijen",
             "price": "€45,00",
+            "priceValue": 45,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Bassermann Jordan - Spätburgunder",
             "desc": "Spätburgunder — Pfalz, DE · Frambozen | aardbei | amandel",
             "price": "€47,00",
+            "priceValue": 47,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": [
               8
             ]
@@ -2717,24 +4027,44 @@
             "name": "Höpler - Seeblick",
             "desc": "Blaufrankisch | Zweigelt | Pinot Noir — Burgenland, AT · Kruizig | zwarte bessen | zwarte peper",
             "price": "€5,50 / €32,00",
+            "priceValue": null,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": true,
             "allergens": []
           },
           {
             "name": "Cérvoles - Colors Negre",
             "desc": "Garnaxa — Costers del Segre, SP · Kruizig | vol | rode kers | sappig",
             "price": "€42,00",
+            "priceValue": 42,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Coppo - La Morra",
             "desc": "Barolo DOCG — Piemonte, IT · Rode bessen | viooltjes | rozen | drop",
             "price": "€35,00",
+            "priceValue": 35,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Rolland Galareta - Priorat Clos d'en Ferran",
             "desc": "Cariñena | Garnatxa — Priorat, SP · Zwarte kers | kanel | lavendel",
             "price": "€73,00",
+            "priceValue": 73,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           }
         ]
@@ -2746,24 +4076,44 @@
             "name": "La Campagne",
             "desc": "Cinsault — Pays d'OC, FR · Fruitig | licht | aardbei | framboos",
             "price": "€5,50 / €29,00",
+            "priceValue": null,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": true,
             "allergens": []
           },
           {
             "name": "Höpler - Seeblick",
             "desc": "Pinot Noir | Zweigelt | Blaufrankisch — Burgenland, AT · Mineralig | peer | aardbei | citrus",
             "price": "€5,50 / €32,00",
+            "priceValue": null,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": true,
             "allergens": []
           },
           {
             "name": "Pasqua - Y by Il Minuto Rosé",
             "desc": "Corvina | Cormentere | Trebbiano — Veneto, IT · Citrus | witte bloesem | licht | romig",
             "price": "€48,00",
+            "priceValue": 48,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Château Gassier - Esprit Gassier Bio",
             "desc": "Syrah | Grenache | Vermentino | Cinsault — Provence, FR · Lychee | peer | fris",
             "price": "€39,00",
+            "priceValue": 39,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           }
         ]
@@ -2775,18 +4125,33 @@
             "name": "Santa Alicia - Agustinos Late Harvest",
             "desc": "Moscatel — Central Valley, CHI · Gekonfijt fruit | fris | nachtschtig",
             "price": "€8,00",
+            "priceValue": 8,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Gérard Bertrand - Rivesaltes Ambré",
             "desc": "Vin Doux Naturel — Languedoc-Roussillon, FR · Rozijn | honing",
             "price": "€7,50",
+            "priceValue": 7.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Kopke Port",
             "desc": "Tawny 10 jaar — POR · Houtpepijp | gedroogd fruit | honing",
             "price": "€7,00",
+            "priceValue": 7,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           }
         ]
@@ -2798,18 +4163,33 @@
             "name": "Bombay G&T",
             "desc": "Bombay Gin | RB Tonic | limoen | citroen",
             "price": "€9,00",
+            "priceValue": 9,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Bulldog G&T",
             "desc": "Bulldog Gin | Fever-Tree Mediterranean | limoen | sinaasappel",
             "price": "€11,00",
+            "priceValue": 11,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Pink Flamingo",
             "desc": "Bombay Gin | Pinkyrose Spiced Lemon & Rose | bruiswater | limoen | munt",
             "price": "€10,00",
+            "priceValue": 10,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -2819,6 +4199,11 @@
             "name": "Tequila Sunrise",
             "desc": "Tequila | sinaasappelsap | grenadine | citroen",
             "price": "€10,00",
+            "priceValue": 10,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -2828,6 +4213,11 @@
             "name": "Paloma",
             "desc": "Tequila | limoensap | Pinkyrose Chili Grapefruit | bruiswater | limoen",
             "price": "€11,00",
+            "priceValue": 11,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -2837,6 +4227,11 @@
             "name": "Moscow Mule",
             "desc": "Eristoff Vodka | RB ginger beer | angosturabitlers | limoen | munt",
             "price": "€9,00",
+            "priceValue": 9,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -2846,6 +4241,11 @@
             "name": "Bloody Miro",
             "desc": "Eristoff Vodka | tomatensap | tabasco | Worcestershire sauce",
             "price": "€9,00",
+            "priceValue": 9,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -2855,18 +4255,33 @@
             "name": "Dark & Stormy",
             "desc": "Bacardi Spiced Rum | Royal Bliss ginger beer | limoen | munt",
             "price": "€10,00",
+            "priceValue": 10,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Negroni",
             "desc": "Campari | Rude Vermouth | Gin | sinaasappel",
             "price": "€9,00",
+            "priceValue": 9,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Mimosa",
             "desc": "Cava | jus d'orange | sinaasappel",
             "price": "€7,00",
+            "priceValue": 7,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -2876,6 +4291,11 @@
             "name": "Lyre's Pink London Spirit & Tonic",
             "desc": "Lyre's (0%) | Fever-Tree Mediterranean | munt — Alcoholvrij",
             "price": "€9,00",
+            "priceValue": 9,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -2890,12 +4310,22 @@
             "name": "Aperol Spritz",
             "desc": "Aperol | cava | bruiswater | sinaasappel",
             "price": "€9,00",
+            "priceValue": 9,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Luxardo Limoncello Spritz",
             "desc": "Limoncello | cava | bruiswater | citroen",
             "price": "€9,00",
+            "priceValue": 9,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -2905,12 +4335,22 @@
             "name": "Campari Spritz",
             "desc": "Campari | cava | bruiswater | sinaasappel",
             "price": "€9,00",
+            "priceValue": 9,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Kan Rode Sangria",
             "desc": "Homemade sangria | zomers fruit — per kan",
             "price": "€26,00",
+            "priceValue": 26,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           }
         ]
@@ -2922,48 +4362,88 @@
             "name": "Brand Pilsener 25cl · 5.6%",
             "desc": "",
             "price": "€3,00",
+            "priceValue": 3,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Brand Pilsener 50cl · 5.8%",
             "desc": "",
             "price": "€6,00",
+            "priceValue": 6,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Texels Skiller Wit 30cl · 5.6%",
             "desc": "",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Frontaal Juice Punch NEIPA 25cl · 5.8%",
             "desc": "",
             "price": "€6,00",
+            "priceValue": 6,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Lagunitas IPA 30cl · 6.2%",
             "desc": "",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Affligem Blond 30cl · 6.8%",
             "desc": "",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Paulaner Weizen 30cl · 5.3%",
             "desc": "",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Paulaner Weizen 50cl · 5.5%",
             "desc": "",
             "price": "€8,00",
+            "priceValue": 8,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           }
         ]
@@ -2975,174 +4455,319 @@
             "name": "Eeuwige Jeugd Lieflibel · 8.7%",
             "desc": "Blond & Tripel",
             "price": "€6,25",
+            "priceValue": 6.25,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Texels Zeebries",
             "desc": "Blond & Tripel",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Big Belly Loudon · 6.8%",
             "desc": "Blond & Tripel",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Oedipus Mannenliefde · 6.0%",
             "desc": "Blond & Tripel",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Brugse Zot · 6.0%",
             "desc": "Blond & Tripel",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Duvel · 8.5%",
             "desc": "Blond & Tripel",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Oedipus Thai · 8.0%",
             "desc": "Blond & Tripel",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Affligem Tripel · 9.0%",
             "desc": "Blond & Tripel",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "IJwit · 4.5%",
             "desc": "Wit & Weizen",
             "price": "€6,00",
+            "priceValue": 6,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Blanche de Bruges · 5.0%",
             "desc": "Wit & Weizen",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Belgisch Wit · 4.8%",
             "desc": "Wit & Weizen",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Frontaal White Simmie · 5.2%",
             "desc": "Wit & Weizen",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Texels Skuumkoppe · 6.0%",
             "desc": "Wit & Weizen",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Eeuwige Jeugd Dutteloak · 7.7%",
             "desc": "Wit & Weizen",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Texels Overzee · 6.0%",
             "desc": "IPA",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Oedipus Gaia · 7.0%",
             "desc": "IPA",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Eeuwige Jeugd Globjanus · 5.2%",
             "desc": "IPA",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Big Belly Cabron · 5.6%",
             "desc": "IPA",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Bolleke De Koninck · 5.2%",
             "desc": "Amber & Donker",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Affligem Dubbel · 6.0%",
             "desc": "Amber & Donker",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Brugse Zot Dubbel · 7.5%",
             "desc": "Amber & Donker",
             "price": "€6,00",
+            "priceValue": 6,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Desperados · 5.9%",
             "desc": "Fris & Fruitig",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Liefmans Fruitesse · 3.8%",
             "desc": "Fris & Fruitig",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Amstel Radler · 2.0%",
             "desc": "Fris & Fruitig",
             "price": "€4,00",
+            "priceValue": 4,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Heineken 0.0%",
             "desc": "Alcoholvrij",
             "price": "€3,00",
+            "priceValue": 3,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Brand Weizen 0.0%",
             "desc": "Alcoholvrij",
             "price": "€4,00",
+            "priceValue": 4,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Affligem Blond 0.0%",
             "desc": "Alcoholvrij",
             "price": "€4,00",
+            "priceValue": 4,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Brand IPA 0.0%",
             "desc": "Alcoholvrij",
             "price": "€4,00",
+            "priceValue": 4,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Amstel Rosé 0.0%",
             "desc": "Alcoholvrij",
             "price": "€4,00",
+            "priceValue": 4,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           }
         ]
@@ -3154,6 +4779,11 @@
             "name": "Koffie | Espresso",
             "desc": "",
             "price": "€3,00",
+            "priceValue": 3,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -3163,6 +4793,11 @@
             "name": "Dubbele Espresso",
             "desc": "",
             "price": "€3,50",
+            "priceValue": 3.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -3172,6 +4807,11 @@
             "name": "Cappuccino | Koffie Verkeerd",
             "desc": "",
             "price": "€4,00",
+            "priceValue": 4,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -3181,6 +4821,11 @@
             "name": "Espresso Macchiato | Cortado",
             "desc": "",
             "price": "€3,00",
+            "priceValue": 3,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -3190,6 +4835,11 @@
             "name": "Latte Macchiato",
             "desc": "",
             "price": "€4,00",
+            "priceValue": 4,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -3199,6 +4849,11 @@
             "name": "Flat White",
             "desc": "",
             "price": "€4,00",
+            "priceValue": 4,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -3208,6 +4863,11 @@
             "name": "Chai Latte",
             "desc": "",
             "price": "€4,00",
+            "priceValue": 4,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -3217,6 +4877,11 @@
             "name": "Dirty Chai Latte",
             "desc": "",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -3226,6 +4891,11 @@
             "name": "Diverse smaken thee",
             "desc": "Bradley's",
             "price": "€3,00",
+            "priceValue": 3,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -3235,6 +4905,11 @@
             "name": "Verse thee",
             "desc": "Munt of gember",
             "price": "€3,00",
+            "priceValue": 3,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -3244,6 +4919,11 @@
             "name": "Warme Chocolademelk",
             "desc": "",
             "price": "€3,50",
+            "priceValue": 3.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -3253,6 +4933,11 @@
             "name": "IJskoffie",
             "desc": "Koffie | volle melk | caramelsiroop",
             "price": "€4,00",
+            "priceValue": 4,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -3264,18 +4949,33 @@
             "name": "Koffie Deluxe",
             "desc": "Koffie Whiskey | Tia Maria | Grand Marnier",
             "price": "€8,00",
+            "priceValue": 8,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Amaretto | Licor 43 | Baileys",
             "desc": "Met koffie",
             "price": "€8,00",
+            "priceValue": 8,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "IJskoffie Deluxe",
             "desc": "Likeur naar keuze | slagroom",
             "price": "€8,00",
+            "priceValue": 8,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": [
               7
             ]
@@ -3284,6 +4984,11 @@
             "name": "Warme Chocolademelk Deluxe",
             "desc": "Likeur naar keuze | slagroom",
             "price": "€8,00",
+            "priceValue": 8,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": [
               7
             ]
@@ -3292,6 +4997,11 @@
             "name": "'t Heerdje",
             "desc": "Amaretto | espresso | sinaasappel — koud",
             "price": "€8,00",
+            "priceValue": 8,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           }
         ]
@@ -3303,6 +5013,11 @@
             "name": "Pinkyrose Straight Lemon",
             "desc": "Bruiswater | citroen | limoen",
             "price": "€4,00",
+            "priceValue": 4,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -3312,6 +5027,11 @@
             "name": "Pinkyrose Spiced Lemon & Rose",
             "desc": "Bruiswater | limoen | munt",
             "price": "€4,00",
+            "priceValue": 4,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -3321,6 +5041,11 @@
             "name": "Pinkyrose Ginger & Orange",
             "desc": "Bruiswater | sinaasappel | citroen",
             "price": "€4,00",
+            "priceValue": 4,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -3330,6 +5055,11 @@
             "name": "Pinkyrose Chili Grapefruit",
             "desc": "Bruiswater | limoen | sinaasappel",
             "price": "€4,00",
+            "priceValue": 4,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -3339,6 +5069,11 @@
             "name": "Chaudfontaine",
             "desc": "Rood of Blauw",
             "price": "€3,00",
+            "priceValue": 3,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -3348,12 +5083,22 @@
             "name": "Coca Cola Regular | Zero",
             "desc": "",
             "price": "€3,00",
+            "priceValue": 3,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Lipton Ice Tea",
             "desc": "Sparkling of Green",
             "price": "€3,00",
+            "priceValue": 3,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -3363,12 +5108,22 @@
             "name": "Fanta Orange | Cassis",
             "desc": "",
             "price": "€3,00",
+            "priceValue": 3,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Royal Bites",
             "desc": "Bitter Lemon | Ginger Ale | Tonic",
             "price": "€3,00",
+            "priceValue": 3,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -3378,12 +5133,22 @@
             "name": "Red Bull Regular",
             "desc": "",
             "price": "€4,00",
+            "priceValue": 4,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Jus d'Orange",
             "desc": "",
             "price": "€4,00",
+            "priceValue": 4,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "tags": [
               "vegetarisch"
             ],
@@ -3398,30 +5163,55 @@
             "name": "Johnnie Walker Red Label",
             "desc": "Scotch Whisky",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Jack Daniels",
             "desc": "Tennessee Whiskey",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Jameson",
             "desc": "Irish Whiskey",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "The Glenlivet 12 Years",
             "desc": "Single Malt Whisky",
             "price": "€7,00",
+            "priceValue": 7,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Courvoisier VS",
             "desc": "Cognac",
             "price": "€6,00",
+            "priceValue": 6,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": [
               12
             ]
@@ -3430,24 +5220,44 @@
             "name": "Ketel 1",
             "desc": "Jenever",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Luxardo Limoncello",
             "desc": "",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Luxardo Sambuca",
             "desc": "",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Pernod",
             "desc": "",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           }
         ]
@@ -3459,30 +5269,55 @@
             "name": "Licor 43",
             "desc": "",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Baileys",
             "desc": "",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Tia Maria",
             "desc": "",
             "price": "€5,00",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Grand Marnier",
             "desc": "",
             "price": "€6,00",
+            "priceValue": 6,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           },
           {
             "name": "Disaronno Amaretto",
             "desc": "",
             "price": "€6,00",
+            "priceValue": 6,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
             "allergens": []
           }
         ]
