@@ -145,6 +145,20 @@ see [[010-platform-persistence-and-api]]. Additive to the existing static
 consumer read path, which is unchanged. No infrastructure created yet;
 `PLATFORM-05` is the first implementation ticket.
 
+PLATFORM-05 — Internal API foundation (done). First real write-capable
+code in the platform track: `field_provenance`/`staff_roles` schema
+(`supabase/migrations/0001_field_provenance.sql`), a server-only Supabase
+client, an auth/role guard, and `GET`/`POST /api/internal/v1/provenance` —
+see `docs/api/internal-provenance-api.md`. `source`/`confidence`/
+`verified_at`/`verified_by` are derived entirely server-side from the
+caller's role, never from client input. No public route, no consumer-facing
+change, zero impact on the consumer performance budget (server-only
+dependency). Not yet tested end-to-end against a real Supabase project —
+that requires credentials the user provisions separately. Also documented,
+in [[010-platform-persistence-and-api]]: a pre-existing, unrelated
+`supabase/schema.sql` predating this track was found and left untouched —
+it is not the current direction.
+
 This track does not change, reorder, or depend on the `BE-*` sequence — both
 can proceed independently. It follows the same discipline: one ticket per
 commit, stop for approval after each, doc updates land in the same commit as

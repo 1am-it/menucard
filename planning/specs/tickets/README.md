@@ -37,7 +37,7 @@ third, external-facing contribution flows last.
 2. [platform-02-low-coverage-transparency-ux.md](./platform-02-low-coverage-transparency-ux.md) — done
 3. [platform-03-provenance-trust-data-model.md](./platform-03-provenance-trust-data-model.md) — done
 4. [platform-04-persistence-api-architecture-decision.md](./platform-04-persistence-api-architecture-decision.md) — done
-5. [platform-05-internal-api-foundation.md](./platform-05-internal-api-foundation.md)
+5. [platform-05-internal-api-foundation.md](./platform-05-internal-api-foundation.md) — done
 6. [platform-06-moderation-review-queue.md](./platform-06-moderation-review-queue.md)
 7. [platform-07-owner-claim-identity-verification.md](./platform-07-owner-claim-identity-verification.md)
 8. [platform-08-community-microtask-contributions.md](./platform-08-community-microtask-contributions.md)

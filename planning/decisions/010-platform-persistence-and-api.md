@@ -102,6 +102,26 @@ touches application code.
   `PLATFORM-05` turns `docs/api/data-trust-model.md`'s shape into actual
   tables and policies.
 
+## Note (2026-08-30) — `supabase/schema.sql` is not this decision
+
+While implementing `PLATFORM-05`, an existing, already-committed
+`supabase/schema.sql` was found — a complete, alternative relational schema
+for the entire consumer dataset (`restaurants`, `menus`, `menu_items`,
+`allergens`, `restaurant_accounts`, public-read RLS policies, etc.),
+predating the `PLATFORM-*` track entirely (committed in
+`d232211 chore: move project files from bredaeats17/ to repo root`).
+
+**That file is not the current direction and is not used by anything in
+this decision or in `PLATFORM-05`'s migration.** It answers exactly the
+question this decision deliberately leaves open — whether/when the static
+consumer dataset moves into Supabase — in a much larger, different way than
+anything approved here. It has been left in place, untouched, rather than
+deleted, since removing pre-existing work isn't this ticket's call to make
+unilaterally. If it's genuinely obsolete, a future ticket should propose
+removing or archiving it explicitly; until then, treat it as inert and
+unrelated to the `field_provenance`/`staff_roles` schema this decision and
+`PLATFORM-05` actually implement.
+
 ## Rejected alternatives
 
 - **A plain Postgres provider (e.g. Vercel Postgres/Neon) + a separate auth
