@@ -1,5 +1,10 @@
 # Architecture — Migration Plan
 
+This document covers the `BE-*` dish-first migration only. The separate,
+parallel data-platform track (`PLATFORM-*`) is documented in
+[platform-plan.md](./platform-plan.md) — it does not reorder or depend on
+anything below.
+
 ## Strategy
 
 Evolve the existing BredaEats application incrementally.

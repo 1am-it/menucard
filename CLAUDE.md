@@ -9,6 +9,14 @@ BredaEats helps users answer:
 The product is evolving from a restaurant-first browsing experience into a fast,
 lightweight, text-first, dish-first restaurant menu search experience.
 
+Beyond the Breda-focused consumer experience, MenuCard is also evolving toward
+a multi-city horeca data platform: a persistence and API layer that collects,
+verifies and exposes restaurant/menu data with per-field trust/provenance,
+fed by internal tooling, restaurant owner claims and community contributions.
+This is tracked as a separate, parallel `PLATFORM-*` ticket track — see
+`planning/architecture/platform-plan.md` — and does not change or delay the
+consumer-facing dish-first `BE-*` work above.
+
 ## Core instruction
 
 Do NOT rebuild the project from scratch.

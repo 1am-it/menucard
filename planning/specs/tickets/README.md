@@ -1,15 +1,17 @@
 # Ticket specs
 
-This directory contains the executable breakdown of the dish-first migration,
-one file per ticket. It complements the feature-level specs one level up
-(`planning/specs/*.md`, which describe product behaviour) and the phase
-overview in `planning/architecture/migration-plan.md` (which describes
-sequencing and rationale).
+This directory contains the executable breakdown of two parallel tracks:
+the completed `BE-*` dish-first migration, and the new `PLATFORM-*`
+data-platform track. Each track has its own file per ticket. It complements
+the feature-level specs one level up (`planning/specs/*.md`, which describe
+product behaviour) and the phase overviews in
+`planning/architecture/migration-plan.md` (`BE-*`) and
+`planning/architecture/platform-plan.md` (`PLATFORM-*`).
 
 Read `planning/CONTEXT.md` for the current ticket order before starting any
 of these.
 
-## Order
+## BE-* order (done)
 
 1. [be-02a-data-model-repair.md](./be-02a-data-model-repair.md) — done
 2. [be-02b-server-side-search.md](./be-02b-server-side-search.md) — done
@@ -25,5 +27,23 @@ of these.
 9. [be-05-restaurant-menu.md](./be-05-restaurant-menu.md) — done
 10. [be-08-performance-cleanup.md](./be-08-performance-cleanup.md) — done
 
+## PLATFORM-* order (not started)
+
+See [[008-platform-track-scope]] for why this is a separate track. Wave
+order is read-only first, modeling/architecture second, internal write path
+third, external-facing contribution flows last.
+
+1. [platform-01-coverage-baseline-dashboard.md](./platform-01-coverage-baseline-dashboard.md)
+2. [platform-02-low-coverage-transparency-ux.md](./platform-02-low-coverage-transparency-ux.md)
+3. [platform-03-provenance-trust-data-model.md](./platform-03-provenance-trust-data-model.md)
+4. [platform-04-persistence-api-architecture-decision.md](./platform-04-persistence-api-architecture-decision.md)
+5. [platform-05-internal-api-foundation.md](./platform-05-internal-api-foundation.md)
+6. [platform-06-moderation-review-queue.md](./platform-06-moderation-review-queue.md)
+7. [platform-07-owner-claim-identity-verification.md](./platform-07-owner-claim-identity-verification.md)
+8. [platform-08-community-microtask-contributions.md](./platform-08-community-microtask-contributions.md)
+9. [platform-09-city-rollout-operations.md](./platform-09-city-rollout-operations.md)
+10. [platform-10-public-city-metrics-platform-exposure.md](./platform-10-public-city-metrics-platform-exposure.md)
+
 Do not start a ticket whose dependencies aren't done. Each ticket should be
-independently reviewable and deployable where practical.
+independently reviewable and deployable where practical. The two tracks do
+not block each other.

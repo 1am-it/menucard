@@ -1,0 +1,66 @@
+# Spec — City Coverage Baseline & Rollout Readiness
+
+## Goal
+
+Define what "launch ready" means for a city, in measurable terms, before
+MenuCard expands beyond Breda — and establish a repeatable coverage baseline
+per city rather than a one-off Breda-specific calculation.
+
+## Coverage metrics (per the reference mockup)
+
+For a given city, track at minimum:
+
+- % of restaurants with basic info (name, address, hours, cuisine)
+- % of restaurants with any digitized menu data
+- % of menu items with a price
+- % of restaurants with a confirmed reservation method
+
+Each metric should also be breakable down by cuisine/neighbourhood (e.g. the
+mockup's "Italiaans en Grill & Steak hebben nog extra datadekking nodig"),
+since city-wide averages can hide category-level gaps that matter to a user
+searching that cuisine specifically.
+
+## Baseline vs. live dashboard
+
+`PLATFORM-01` produces two related but distinct things:
+
+1. **A baseline** — a recorded snapshot of these metrics at a point in time
+   for Breda, written down (not just computed on demand), so later progress
+   can be measured against it the same way `docs/changelog/README.md`'s
+   release log gives the `BE-*` track a fixed reference point.
+2. **A read-only dashboard** — a live view recomputing the same metrics from
+   current data, for ongoing monitoring.
+
+Both are needed: the baseline anchors "have we actually improved," the
+dashboard shows "where do we stand right now."
+
+## Launch readiness (informs PLATFORM-09)
+
+A city is not "launch ready" purely on restaurant count. Coverage
+*usability* matters more than volume: a city with 200 restaurants and 20%
+menu coverage is less launch-ready than one with 80 restaurants and 70%
+coverage. `PLATFORM-09` should define concrete per-metric thresholds (not
+fixed in this spec, since Breda's own real numbers from `PLATFORM-01` should
+inform what a realistic threshold looks like) before a second city is
+seriously scoped.
+
+## Requirements
+
+- Metrics must be computed from the same underlying data trust model
+  (`platform-trust-model.md`) once it exists — e.g. "confirmed reservation
+  method" should mean provenance-backed confirmation, not merely a
+  non-null field.
+- Category/neighbourhood breakdowns must degrade gracefully for a city with
+  too little data to break down meaningfully (e.g. a brand-new city with 5
+  restaurants shouldn't show a confusing 15-category breakdown).
+- The dashboard is an internal/admin surface — see
+  [[009-consumer-vs-internal-performance-budget]] — unless and until
+  `PLATFORM-10` decides to publish a public-facing version.
+
+## Out of scope for this spec
+
+- The actual dashboard UI/implementation (`PLATFORM-01`).
+- Concrete numeric launch-readiness thresholds (`PLATFORM-09`, once real
+  Breda data from `PLATFORM-01` exists to calibrate against).
+- Any second-city operational/logistics planning (sourcing, legal, etc.) —
+  purely a data-coverage concern here.

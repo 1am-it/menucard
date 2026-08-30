@@ -66,3 +66,13 @@ This phase does not require:
 - user-generated reviews
 - image galleries
 - elaborate personalization
+
+### Note (2026-08-30) — scope of "user-generated reviews"
+
+The `PLATFORM-*` track (see `planning/architecture/platform-plan.md`)
+introduces community micro-task contributions (`PLATFORM-08`) — small,
+structured confirmations/corrections to factual data (opening hours, price,
+reservation method), not reviews, ratings, or opinion content. That remains
+out of scope for both tracks. Structured contribution to factual data is a
+deliberate, separately-planned exception to this non-goal, not a silent
+reversal of it — see [[008-platform-track-scope]].

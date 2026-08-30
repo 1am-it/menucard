@@ -110,3 +110,18 @@ branching behaviour on ad hoc state.
 - **Analytics/baseline** — capture a baseline (conversion, perceived speed)
   before the dish-first flow ships, or there will be no way to tell afterward
   whether it actually improved things.
+
+## Parallel track: PLATFORM-*
+
+A second, parallel ticket track (`PLATFORM-01` through `PLATFORM-10`) covers
+MenuCard's evolution into a multi-city horeca data platform: city coverage
+tracking, per-field data trust/provenance, persistence/API foundations,
+moderation, owner claims and community contributions. See
+`planning/architecture/platform-plan.md` for the full phase breakdown and
+[[008-platform-track-scope]] for why this is scoped as a separate track
+rather than folded into the `BE-*` sequence above.
+
+This track does not change, reorder, or depend on the `BE-*` sequence — both
+can proceed independently. It follows the same discipline: one ticket per
+commit, stop for approval after each, doc updates land in the same commit as
+the ticket they describe.

@@ -5,6 +5,13 @@ communicated, and versioned during the dish-first migration. It complements
 `planning/` (which tracks *what* is being built and *why*) by documenting
 *how* finished work gets shipped and explained.
 
+A second, parallel ticket track (`PLATFORM-*`, see
+`planning/architecture/platform-plan.md`) now exists alongside the `BE-*`
+track described below. It follows the same commit/versioning/release
+workflow — one ticket per commit, doc updates in the same commit, a version
+bump per meaningful milestone — so future entries in the release log below
+may reference `PLATFORM-*` tickets using the same conventions.
+
 ## Commit workflow
 
 - **Commit after each approved ticket or clearly scoped sub-ticket** — not
