@@ -1,5 +1,12 @@
 # Spec — Internal/External API Principles
 
+**Status (2026-08-30): the persistence/auth vendor is decided.** See
+[`planning/decisions/010-platform-persistence-and-api.md`](../decisions/010-platform-persistence-and-api.md)
+for the concrete choice — Supabase for persistence, Supabase Auth for the
+role/scope model — and how it coexists with the current static consumer
+read path. This file's principles below still govern the API shape itself;
+`PLATFORM-05` is the first ticket that implements against them.
+
 ## Goal
 
 Design the first write-capable API (`PLATFORM-05`) so it can be extended to

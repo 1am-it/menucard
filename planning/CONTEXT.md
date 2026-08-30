@@ -138,6 +138,13 @@ reasoned default, not empirically derived — no repeated-observation history
 exists. Legacy `reservation.verified` gap (no `verifiedBy`) documented as an
 open decision for `PLATFORM-05`.
 
+PLATFORM-04 — Persistence + internal/external API architecture decision
+(done, decision only). Supabase for persistence, Supabase Auth for the
+owner/editor/internal role model, internal API at `/api/internal/v1/...` —
+see [[010-platform-persistence-and-api]]. Additive to the existing static
+consumer read path, which is unchanged. No infrastructure created yet;
+`PLATFORM-05` is the first implementation ticket.
+
 This track does not change, reorder, or depend on the `BE-*` sequence — both
 can proceed independently. It follows the same discipline: one ticket per
 commit, stop for approval after each, doc updates land in the same commit as
