@@ -5,6 +5,10 @@ queried/returned by BE-02b's server-side search layer and ranked by BE-02c.
 It is a documentation contract only — nothing in the current app constructs
 this shape yet.
 
+Result *ordering* (as opposed to shape) is documented separately in
+[dish-search-ranking.md](./dish-search-ranking.md) — this file only defines
+what a result contains, not what order results come back in.
+
 ## Fields
 
 | Field              | Type                     | Notes |

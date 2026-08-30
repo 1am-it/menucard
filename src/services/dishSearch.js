@@ -7,12 +7,13 @@
 // pages still import the JSON directly and are migrated to this layer in
 // BE-04/BE-05, not here (see planning/decisions/004-server-side-search-before-restyle.md).
 //
-// Ranking/relevance beyond a minimal name-match-first ordering is out of
-// scope here — that's BE-02c. Filters below are intentionally simple AND
-// conditions, duplicated from the equivalent client-side helpers in
-// app/page.js and app/menu/[id]/page.js rather than imported from them,
-// since those are 'use client' modules. This duplication is expected to be
-// removed once BE-04 rewires the homepage onto this service.
+// Ranking rules (BE-02c) are documented in docs/api/dish-search-ranking.md —
+// keep that file in sync with getMatchTier() below. Filters below are
+// intentionally simple AND conditions, duplicated from the equivalent
+// client-side helpers in app/page.js and app/menu/[id]/page.js rather than
+// imported from them, since those are 'use client' modules. This
+// duplication is expected to be removed once BE-04 rewires the homepage
+// onto this service.
 
 import restaurantsData from '@/data/restaurants.json'
 import menusData from '@/data/menus.json'
@@ -117,15 +118,21 @@ function getDishIndex() {
   return dishIndex
 }
 
-function textMatches(dish, q) {
-  if (!q || q.length < 2) return true
-  const needle = q.toLowerCase()
-  return (
-    dish.name.toLowerCase().includes(needle) ||
-    (dish.description || '').toLowerCase().includes(needle) ||
-    dish.restaurantName.toLowerCase().includes(needle) ||
-    dish.tags.some((t) => t.toLowerCase().includes(needle))
-  )
+// Ranking tiers, per docs/api/dish-search-ranking.md. Lower tier = better
+// match. Returns null when the query matches none of the ranked fields —
+// callers treat null as "excluded", not "tier 5".
+//
+// Deliberately not part of this: `category` (not a documented search
+// field), accent-insensitive matching, and price/allergen signals (those
+// are hard filters, not ranking inputs — see priceMatches/allergensMatch).
+function getMatchTier(dish, needle) {
+  const name = dish.name.toLowerCase()
+  if (name === needle) return 0
+  if (name.includes(needle)) return 1
+  if ((dish.description || '').toLowerCase().includes(needle)) return 2
+  if (dish.tags.some((t) => t.toLowerCase().includes(needle))) return 3
+  if (dish.restaurantName.toLowerCase().includes(needle)) return 4
+  return null
 }
 
 function priceMatches(dish, maxPrice) {
@@ -171,35 +178,43 @@ export function searchDishes({
 } = {}) {
   const boundedLimit = Math.min(Math.max(1, limit || DEFAULT_LIMIT), MAX_LIMIT)
   const boundedCursor = Math.max(0, cursor || 0)
+  const trimmedQ = (q || '').trim()
+  const hasQuery = trimmedQ.length >= 2 // same minimum-length convention used elsewhere in the app
+  const needle = hasQuery ? trimmedQ.toLowerCase() : null
 
-  let filtered = getDishIndex().filter((dish) => {
-    if (meal && !MEAL_TYPES.includes(meal)) return false
-    if (meal && dish.mealType !== meal) return false
-    if (!textMatches(dish, q)) return false
-    if (!priceMatches(dish, maxPrice)) return false
-    if (!matchesCuisine(dish._restaurant, cuisines)) return false
-    if (buurt && dish._restaurant.buurt !== buurt) return false
-    if (!allergensMatch(dish, excludeAllergens)) return false
-    if (nowOpen && !isCurrentlyOpen(dish._restaurant)) return false
-    if (day && !nowOpen && !dish._restaurant.openingHours?.[day]) return false
-    return true
+  const candidates = getDishIndex()
+    .filter((dish) => {
+      if (meal && !MEAL_TYPES.includes(meal)) return false
+      if (meal && dish.mealType !== meal) return false
+      if (!priceMatches(dish, maxPrice)) return false
+      if (!matchesCuisine(dish._restaurant, cuisines)) return false
+      if (buurt && dish._restaurant.buurt !== buurt) return false
+      if (!allergensMatch(dish, excludeAllergens)) return false
+      if (nowOpen && !isCurrentlyOpen(dish._restaurant)) return false
+      if (day && !nowOpen && !dish._restaurant.openingHours?.[day]) return false
+      return true
+    })
+    .map((dish) => ({ dish, tier: hasQuery ? getMatchTier(dish, needle) : 0 }))
+    .filter(({ tier }) => !hasQuery || tier !== null)
+
+  // Ranking (BE-02c): lower tier first; ties broken by distance (currently
+  // always null for every dish, so this step is a no-op until a location
+  // field exists), then restaurant name, then dish name. See
+  // docs/api/dish-search-ranking.md.
+  candidates.sort((a, b) => {
+    if (a.tier !== b.tier) return a.tier - b.tier
+    const distA = a.dish.distanceMeters
+    const distB = b.dish.distanceMeters
+    if (distA != null && distB != null && distA !== distB) return distA - distB
+    const restCompare = a.dish.restaurantName.localeCompare(b.dish.restaurantName, 'nl')
+    if (restCompare !== 0) return restCompare
+    return a.dish.name.localeCompare(b.dish.name, 'nl')
   })
 
-  // Minimal, temporary ordering: exact-ish name matches first, otherwise
-  // stable dataset order. Real ranking rules are BE-02c's responsibility.
-  if (q && q.length >= 2) {
-    const needle = q.toLowerCase()
-    filtered = [...filtered].sort((a, b) => {
-      const aName = a.name.toLowerCase().includes(needle) ? 0 : 1
-      const bName = b.name.toLowerCase().includes(needle) ? 0 : 1
-      return aName - bName
-    })
-  }
-
-  const total = filtered.length
-  const page = filtered
+  const total = candidates.length
+  const page = candidates
     .slice(boundedCursor, boundedCursor + boundedLimit)
-    .map((dish) => {
+    .map(({ dish }) => {
       const { _restaurant, ...publicShape } = dish
       return {
         ...publicShape,
