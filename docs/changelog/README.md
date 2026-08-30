@@ -77,6 +77,42 @@ non-technical reader understand what shipped, e.g.:
 - `v0.4.0 — Theme selection update`
 - `v0.6.0 — Homepage migration`
 
+## GitHub Releases
+
+The "Release log" below is the changelog — a running record of what shipped.
+A **GitHub Release** is a separate, additional step: publishing one of those
+milestones as an actual tagged release on GitHub, for anyone (technical or
+not) browsing the repo's Releases page.
+
+- **Publish a GitHub Release for meaningful milestones, not every commit.**
+  The same bar as a `minor` version bump above: a new page, a new
+  user-facing capability, a product-visible milestone. Most individual
+  ticket commits do *not* need their own release — several tickets often
+  accumulate into one release (see the version ladder above, e.g. `v0.2.0`
+  bundles `BE-02a`+`BE-02b`+`BE-02c`).
+- **Use the documented `0.x.y` migration version as the tag** (e.g. `v0.6.0`
+  — with the `v` prefix on the tag/release, matching the version ladder
+  above). Don't invent a separate release-numbering scheme.
+- **Every release needs three things**, same spirit as the per-commit
+  requirement above but at milestone scope:
+  1. A clear version number (the tag, e.g. `v0.6.0`).
+  2. A plain-language title (e.g. "Homepage migration") — this is what most
+     readers of the Releases page actually see first.
+  3. Short release notes understandable by non-technical readers: what
+     changed, why it matters, what users/stakeholders will notice, and
+     whether existing functionality was preserved. This is a slightly
+     expanded version of the "Plain-language summary" already required per
+     commit — a release's notes may summarize several commits at once.
+- **Keep the changelog and release notes aligned.** A release's notes
+  should not contradict or omit what the "Release log" entry for that
+  version says — draft the changelog entry first (per commit, as work
+  lands), then compose the release notes from those entries when the
+  milestone is actually published, rather than writing the two
+  independently.
+- Tag format: `vX.Y.Z` (e.g. `v0.6.0`), annotated, pointing at the commit
+  that completes the milestone (typically the last commit of the last
+  ticket bundled into that release).
+
 ## Release log
 
 Retroactive entries below reconstruct the versioning this project should
@@ -171,3 +207,9 @@ after `v0.6.0` is `v0.7.0`, for `BE-07` or whichever ticket ships next).
   matches this log. No git tags were created for these retroactive commits.
   Going forward, new tickets should be committed — and, where meaningful,
   tagged — as they're approved, per the workflow above.
+- **`v0.6.0` is the first version actually published as a GitHub Release**
+  (created after the fact, once the GitHub Releases workflow above was
+  adopted — not at the moment `BE-04` itself was approved). `v0.2.0`–`v0.5.0`
+  remain changelog-only entries, not published releases; nothing requires
+  going back to publish releases for them. From `v0.6.0` onward, new
+  milestones should get an actual GitHub Release at the time they ship.

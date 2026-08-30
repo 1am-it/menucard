@@ -145,9 +145,10 @@ When visual direction matters, read:
 
 `docs/mockups/README.md`
 
-Commit workflow, plain-language change summaries, and versioning (practical
+Commit workflow, plain-language change summaries, versioning (practical
 SemVer during this migration — stay on `0.x.y` until the dish-first flow is
-genuinely stable) are documented under:
+genuinely stable), and when/how to publish a GitHub Release for a milestone
+are documented under:
 
 `docs/changelog/`
 
