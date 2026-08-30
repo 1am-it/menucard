@@ -127,7 +127,7 @@ have had for work already completed and approved (`BE-02a` through `BE-04`).
 **These were not actually tagged as releases when the work happened** — see
 the note at the end of this section. Numbers here are the recommended
 version ladder going forward; new work should continue it (next version
-after `v0.6.0` is `v0.7.0`, for `BE-07` or whichever ticket ships next).
+after `v0.8.0` is `v0.9.0`, for whichever ticket ships next).
 
 ### v0.2.0 — Dish search foundation
 *(`BE-02a` data model repair, `BE-02b` server-side search endpoint, `BE-02c` ranking — bundled as one milestone since none were independently user-visible on their own)*
@@ -198,6 +198,54 @@ after `v0.6.0` is `v0.7.0`, for `BE-07` or whichever ticket ships next).
   homepage still works, unchanged, at `/restaurants`, including saved
   filter preferences.
 
+### v0.7.0 — Reservation accuracy, richer menu info & performance cleanup
+*(`BE-07`, `BE-05`, `BE-08` — bundled as one milestone; changelog-only, no
+separate GitHub Release, matching the `v0.2.0`–`v0.5.0` precedent below.
+This was the "`v0.7.0`, for `BE-07`" version already anticipated in this
+document's earlier text — it shipped, but was never versioned until now.)*
+
+- **What changed**: Reservation buttons now reflect each restaurant's real,
+  per-restaurant reservation method instead of assuming every restaurant
+  accepts WhatsApp (`BE-07`). The restaurant menu page now shows cuisine
+  type and today's open/closed status when known (`BE-05`). The restaurant,
+  menu, and allergen-overview pages were restructured to look up data
+  server-side instead of shipping the full dataset to every visitor, making
+  each roughly 30 KB lighter (`BE-08`).
+- **Why it matters**: Reservation links no longer point somewhere that
+  doesn't actually work; the menu page is more useful at a glance; these
+  pages load faster with no visible change in what they do.
+- **What users notice**: More accurate reservation buttons, extra info on
+  the menu page, faster loading — nothing removed or broken.
+- **Existing functionality**: Fully preserved on all three pages.
+
+### v0.8.0 — Data platform foundation: coverage tracking & trust model (Phase 1)
+*(`PLATFORM-01` through `PLATFORM-05` — bundled as one milestone, published
+as a GitHub Release)*
+
+- **What changed**: Began MenuCard's evolution into a multi-city data
+  platform (see `CLAUDE.md`, `planning/architecture/platform-plan.md`).
+  Added an internal dashboard showing exactly how complete Breda's
+  restaurant data really is — only 16% of restaurants have a digitized
+  menu, 0% have a confirmed reservation method (`PLATFORM-01`). When a dish
+  search comes up empty, `/search` now honestly explains when that's
+  because relevant restaurants exist but simply don't have menu data yet,
+  instead of just saying "nothing found" (`PLATFORM-02`). Defined how
+  MenuCard will track who confirmed a piece of data and how much to trust
+  it (`PLATFORM-03`), decided the technical foundation (Supabase) for
+  storing that trust information (`PLATFORM-04`), and built — then
+  live-verified against a real database — the first authenticated internal
+  system for recording it (`PLATFORM-05`).
+- **Why it matters**: This is the groundwork for restaurant owners and
+  trusted editors eventually being able to confirm and correct their own
+  data. Nothing about that is public yet, but the foundation now exists and
+  has been proven to work against a real database, not just in theory.
+- **What users notice**: One honest new message on `/search` when results
+  are empty because of a data gap, not a search problem. Everything else in
+  this release is internal tooling and foundational work, invisible to
+  visitors.
+- **Existing functionality**: Fully preserved — no existing page, route, or
+  behaviour changed except the new `/search` empty-state addition.
+
 ## Known discrepancies (flagged, not silently fixed)
 
 - **`package.json` read `"version": "1.0.0"`**, left over from the initial
@@ -218,5 +266,14 @@ after `v0.6.0` is `v0.7.0`, for `BE-07` or whichever ticket ships next).
   (created after the fact, once the GitHub Releases workflow above was
   adopted — not at the moment `BE-04` itself was approved). `v0.2.0`–`v0.5.0`
   remain changelog-only entries, not published releases; nothing requires
-  going back to publish releases for them. From `v0.6.0` onward, new
-  milestones should get an actual GitHub Release at the time they ship.
+  going back to publish releases for them.
+- **`BE-07`, `BE-05`, and `BE-08` shipped without ever being versioned or
+  released**, despite this document explicitly anticipating "`v0.7.0`, for
+  `BE-07`" at the time. They were committed individually, correctly, but
+  the version-bump/release step was missed for each. Reconstructed here as
+  `v0.7.0`, changelog-only (same treatment as `v0.2.0`–`v0.5.0`), rather
+  than silently absorbed into `v0.8.0` or renumbered away. `v0.8.0`
+  (`PLATFORM-01`–`05`) is the next actual GitHub Release. Going forward,
+  every meaningful milestone should get its version bump and, where
+  warranted, its GitHub Release at the time it ships — not discovered
+  missing during the next release's preparation.
