@@ -145,4 +145,15 @@ When visual direction matters, read:
 
 `docs/mockups/README.md`
 
+Commit workflow, plain-language change summaries, and versioning (practical
+SemVer during this migration — stay on `0.x.y` until the dish-first flow is
+genuinely stable) are documented under:
+
+`docs/changelog/`
+
+Commit after each approved ticket or clearly scoped sub-ticket; avoid large
+mixed commits across unrelated work. See `docs/changelog/README.md` for the
+full policy and the required commit message / plain-language summary /
+changelog line for every approved step.
+
 Always read the nearest CONTEXT.md before working inside a directory.
