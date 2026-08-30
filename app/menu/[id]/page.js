@@ -220,6 +220,14 @@ export default function MenuPage() {
   const restaurant = restaurantsData[baseId] || {}
   const primaryReservation = getReservationActions(restaurant)[0]
 
+  // BE-05 — optional secondary info, shown only when actually available
+  // (planning/specs/restaurant-menu.md). Reuses the same simple
+  // "today's key has an hours entry" check already used on
+  // app/restaurant/[id]/page.js's hero, for consistency across pages.
+  const todayKey = ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za'][new Date().getDay()]
+  const todayHours = restaurant.openingHours?.[todayKey]
+  const cuisineLabel = restaurant.cuisineLabel || restaurant.cuisine || null
+
   const availableMeals = ['lunch', 'diner', 'borrel', 'specialiteiten'].filter(
     m => menusData[`${baseId}-${m}`]
   )
@@ -334,6 +342,12 @@ export default function MenuPage() {
             <div>
               <div className="rp-label">Restaurant</div>
               <div className="rp-name">{r.name || restaurant.name}</div>
+              {cuisineLabel && <div className="rp-line">{cuisineLabel}</div>}
+              {restaurant.openingHours && (
+                <div className="rp-line" style={{ color: todayHours ? 'var(--green)' : 'var(--text-faint)', fontWeight: todayHours ? 600 : 400 }}>
+                  {todayHours ? `Open · ${todayHours}` : 'Gesloten vandaag'}
+                </div>
+              )}
               <div className="rp-line">
                 <a
                   href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((r.address || restaurant.address || '') + ', Breda')}`}

@@ -22,7 +22,7 @@ of these.
 7. [be-04-homepage-shift.md](./be-04-homepage-shift.md) — done; see
    `planning/decisions/007-homepage-shift.md`
 8. [be-07-reservation-routing.md](./be-07-reservation-routing.md) — done
-9. [be-05-restaurant-menu.md](./be-05-restaurant-menu.md)
+9. [be-05-restaurant-menu.md](./be-05-restaurant-menu.md) — done
 10. [be-08-performance-cleanup.md](./be-08-performance-cleanup.md)
 
 Do not start a ticket whose dependencies aren't done. Each ticket should be
