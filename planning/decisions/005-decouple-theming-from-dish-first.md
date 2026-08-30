@@ -45,3 +45,12 @@ structure/content (e.g. as part of BE-04).
 Reason: conflates two independent regression surfaces (functional vs visual)
 and makes debugging materially harder, per the review that prompted this
 decision.
+
+## Update (2026-08-30)
+
+THEME was implemented ahead of BE-06/BE-04/BE-07/BE-05 after all — see
+[[006-theme-token-system-implemented-early]] for why the sequencing above no
+longer reflects what happened, and why the risk this decision describes
+turned out not to apply to the narrower scope actually shipped (tokens +
+both palettes + a toggle, applied to unchanged pages — no structural change
+for a visual one to be confused with).

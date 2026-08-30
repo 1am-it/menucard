@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import ThemeToggle from '@/src/components/ThemeToggle'
 import menusData from '@/data/menus.json'
 import restaurantsData from '@/data/restaurants.json'
 
@@ -208,7 +209,7 @@ export default function MenuPage() {
   if (!r) return (
     <div className="empty-state" style={{ paddingTop: 80 }}>
       <h2>Menu niet gevonden</h2>
-      <p>Controleer de URL of ga <Link href="/" style={{ color: '#06C167' }}>terug naar het overzicht</Link>.</p>
+      <p>Controleer de URL of ga <Link href="/" style={{ color: 'var(--green)' }}>terug naar het overzicht</Link>.</p>
     </div>
   )
 
@@ -282,7 +283,10 @@ export default function MenuPage() {
       <header>
         <div className="header-inner">
           <Link href="/" className="logo">Breda<span>Eats</span></Link>
-          <Link href="/" className="back-btn">← Alle restaurants</Link>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <ThemeToggle />
+            <Link href="/" className="back-btn">← Alle restaurants</Link>
+          </div>
         </div>
       </header>
 
@@ -484,7 +488,7 @@ export default function MenuPage() {
           <div className="empty-state">
             <div style={{ fontSize: 36, marginBottom: 12 }}>🔍</div>
             <h3>Geen gerechten gevonden</h3>
-            <p>Pas je filters aan of <button onClick={resetFilters} style={{ color: '#06C167', background: 'none', border: 'none', cursor: 'pointer', fontSize: 'inherit', padding: 0 }}>reset alle filters</button>.</p>
+            <p>Pas je filters aan of <button onClick={resetFilters} style={{ color: 'var(--green)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 'inherit', padding: 0 }}>reset alle filters</button>.</p>
           </div>
         ) : (
           filteredCategories.map((cat, i) => {

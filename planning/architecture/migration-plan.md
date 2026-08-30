@@ -30,6 +30,12 @@ theming work was pulled out into its own workstream, and the ticket order was
 rearranged so the server-side search foundation lands before any homepage or
 menu restyling begins.
 
+Revised again 2026-08-30: THEME landed ahead of BE-06/BE-04/BE-07/BE-05 once
+its actual scope turned out to be a token system + a user-selectable
+light/dark toggle applied to unchanged pages, rather than a one-way visual
+flip of already-restructured pages. See
+[[006-theme-token-system-implemented-early]].
+
 ### BE-01 — Audit (done)
 
 Inspect:
@@ -118,6 +124,51 @@ consuming BE-02b/BE-02c. Existing dark theme stays in place for this ticket.
   response from BE-02b.
 - Graceful empty/no-result state.
 
+### THEME — Theme token system (done)
+
+**Scope**: Implemented ahead of its originally planned position — see
+[[006-theme-token-system-implemented-early]]. Delivered a complete design
+token layer (`app/globals.css` `:root` custom properties) covering every
+color previously hardcoded in CSS and in inline `style={{...}}` props across
+`app/page.js`, `app/restaurant/[id]/page.js`, `app/menu/[id]/page.js` and
+`app/nvwa/[id]/page.js`. Both a light palette (per `docs/mockups/`) and the
+original dark palette are defined simultaneously and switchable via a
+user-facing Light/Dark/System control (`src/components/ThemeToggle.js`),
+persisted in `localStorage`. A blocking inline script in `app/layout.js`
+applies the stored preference before first paint to avoid a flash of the
+wrong theme. No stored preference resolves to dark, matching the app's exact
+pre-THEME appearance — the change is invisible until a visitor opts in.
+
+**Key risk**: Doing this at the same time as a structural/functional change
+would make it impossible to tell whether a regression is visual or
+behavioural. Mitigated here because no page's structure, copy, routing,
+search, ranking, filters, reservation logic, or data loading changed — every
+diff was a color-literal-to-token substitution or additive (the toggle
+component, the init script).
+
+**Residual gaps** (tracked, not silently resolved):
+- A handful of near-duplicate legacy color literals were deliberately
+  consolidated onto shared tokens during tokenization (e.g. several
+  slightly-different dark greys all became `--border` or `--bg-hover`).
+- Contrast was rigorously checked for the highest-traffic pairings
+  (accent-on-background, button-label-on-accent) and adjusted by the same
+  darkening heuristic for secondary/decorative tokens (tags, warning,
+  danger, allergy accent) without recomputing an exact ratio for each one —
+  not a full WCAG audit.
+- The print stylesheet (`@media print` in `app/globals.css`) is intentionally
+  left un-tokenized — print output should always be black-on-white
+  regardless of the on-screen theme.
+
+**Acceptance criteria**:
+- [x] Design tokens exist and are used consistently instead of
+      hardcoded/inline colors.
+- [x] Light theme matches the mockups' contrast, spacing and border
+      treatment.
+- [x] Dark theme is preserved and remains the default for visitors with no
+      stored preference.
+- [x] One shared component/layout system across both themes — no
+      theme-specific structural variants.
+
 ### BE-06 — Filters + URL state
 
 **Scope**: Price, cuisine, and allergy filtering on top of the new search
@@ -167,28 +218,13 @@ lightweight universal menu view per
 `docs/mockups/restaurant-menu-v1.png`. Requires BE-02b to be live.
 
 **Key risk**: Low relative to other tickets — the existing `/menu/[id]` page
-is already structurally close to the target; treat this mostly as
-restyling once the theming ticket has landed.
+is already structurally close to the target, and the theming ticket has
+already landed with a working token system to build on; treat this mostly as
+adapting to the BE-02b data layer plus any remaining structural gaps.
 
 **Acceptance criteria**:
 - Matches `planning/specs/restaurant-menu.md`.
 - No dish images required; reservation CTA visible and correct per BE-07.
-
-### THEME — Design-token / light theme migration
-
-**Scope**: Its own workstream, separate from the dish-first functional
-tickets — see [[005-decouple-theming-from-dish-first]]. Introduce a design
-token/CSS-variable layer (none exists today; colors are hardcoded and often
-inline) before flipping the visual theme from dark to light.
-
-**Key risk**: Doing this at the same time as any functional ticket above
-makes it impossible to tell whether a regression is visual or behavioural.
-
-**Acceptance criteria**:
-- Design tokens exist and are used consistently instead of hardcoded/inline
-  colors.
-- Light theme matches the mockups' contrast, spacing and border treatment.
-- Landed only after BE-03/BE-06 (and ideally BE-04) are functionally stable.
 
 ### BE-08 — Performance cleanup
 

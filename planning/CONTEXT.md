@@ -53,35 +53,45 @@ Rundvlees · Glutenvrij
 
 Bekijk menu →
 
-## Linear sequence (revised 2026-08-29 after audit review)
+## Linear sequence (revised 2026-08-30 — THEME landed early)
 
 BE-01 — Audit + migration plan (done)  
-BE-02a — Data model repair (price normalization, reservation fields, dish-result shape)  
-BE-02b — Server-side search / data access layer  
-BE-02c — Dish ranking and result mapping  
-BE-03 — Dish search results  
+BE-02a — Data model repair (done)  
+BE-02b — Server-side search / data access layer (done)  
+BE-02c — Dish ranking and result mapping (done)  
+BE-03 — Dish search results (done)  
+THEME — Theme token system: light + dark, user-selectable (done — see
+[[006-theme-token-system-implemented-early]])  
 BE-06 — Price / cuisine / allergy filters + URL state  
 BE-04 — Text-first homepage  
 BE-07 — Reservation routing  
 BE-05 — Lightweight restaurant menu  
-THEME — Design-token / light theme migration (separate ticket, see [[005-decouple-theming-from-dish-first]])  
 BE-08 — Performance cleanup
 
-Rationale for this order: fix the data/search foundation first, then ship the
-primary dish-search experience against a real server-side query layer, then
-refine (filters, homepage, reservation routing, menu restyle), and only flip
-the visual theme once the new flow is proven. Server-side search
-(BE-02b) is a hard prerequisite for BE-04 and BE-05 — see
+THEME was originally sequenced after BE-06/BE-04/BE-07/BE-05 (see
+[[005-decouple-theming-from-dish-first]]) on the assumption it would mean a
+one-way flip of already-restructured pages from dark to light. When actually
+scoped, it turned out to be additive instead — a token layer plus both a
+light and a dark palette plus a user toggle, applied to the existing,
+structurally unchanged pages — so it was implemented ahead of schedule at
+explicit user direction. See
+[[006-theme-token-system-implemented-early]] for the full reasoning. The
+remaining rationale below still governs BE-06 through BE-08.
+
+Rationale for the remaining order: ship the primary dish-search experience
+against a real server-side query layer (done), then refine (filters,
+homepage, reservation routing, menu restyle). Server-side search (BE-02b) is
+a hard prerequisite for BE-04 and BE-05 — see
 [[004-server-side-search-before-restyle]].
 
 Do not implement multiple tickets implicitly.
 
 Each ticket should be independently reviewable and deployable where practical.
 
-Keep the existing dark theme in place through BE-02a/b/c, BE-03 and BE-06 so
-functional regressions and visual regressions are never introduced in the same
-change. Use feature flags or separate route variants where old and new flows
-coexist, rather than branching behaviour on ad hoc state.
+BE-04 and BE-05's restyling work should extend the token system THEME
+introduced rather than reintroducing hardcoded colors. Use feature flags or
+separate route variants where old and new flows coexist, rather than
+branching behaviour on ad hoc state.
 
 ## Additional risks tracked alongside the migration
 

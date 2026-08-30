@@ -1,6 +1,7 @@
 'use client'
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import Link from 'next/link'
+import ThemeToggle from '@/src/components/ThemeToggle'
 import restaurantsData from '@/data/restaurants.json'
 import menusData from '@/data/menus.json'
 
@@ -355,7 +356,7 @@ function RestaurantCard({ restaurant, id, lang, selectedMeal, selectedDay, ingre
   })()
 
   return (
-    <div className="restaurant-card" style={{ '--card-accent': restaurant.color || '#06C167' }}>
+    <div className="restaurant-card" style={{ '--card-accent': restaurant.color || 'var(--green)' }}>
 
       {/* Header */}
       <div className="rc-header">
@@ -727,6 +728,7 @@ export default function HomePage() {
         <div className="header-inner">
           <div className="logo">Breda<span>Eats</span></div>
           <div className="header-right">
+            <ThemeToggle />
             {/* Language switch */}
             <div className="lang-switch">
               <button className={`lang-btn ${lang === 'nl' ? 'active' : ''}`} onClick={() => setLang('nl')}>NL</button>
@@ -787,7 +789,7 @@ export default function HomePage() {
                 if (!nowOpen) setSelectedDay('')
               }}
             >
-              <span className={`rc-open-dot ${nowOpen ? 'open' : ''}`} style={{ width: 7, height: 7, borderRadius: '50%', display: 'inline-block', background: nowOpen ? '#06C167' : '#444', marginRight: 5 }} />
+              <span className={`rc-open-dot ${nowOpen ? 'open' : ''}`} style={{ width: 7, height: 7, borderRadius: '50%', display: 'inline-block', background: nowOpen ? 'var(--green)' : 'var(--text-faint)', marginRight: 5 }} />
               Nu open
             </button>
           </div>

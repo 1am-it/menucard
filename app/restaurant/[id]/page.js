@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
+import ThemeToggle from '@/src/components/ThemeToggle'
 import restaurantsData from '@/data/restaurants.json'
 import menusData from '@/data/menus.json'
 
@@ -46,7 +47,7 @@ export default function RestaurantPage() {
       <div className="empty-state" style={{ paddingTop: 80 }}>
         <h3>Restaurant niet gevonden</h3>
         <p>
-          <Link href="/" style={{ color: '#06C167' }}>← Terug naar overzicht</Link>
+          <Link href="/" style={{ color: 'var(--green)' }}>← Terug naar overzicht</Link>
         </p>
       </div>
     )
@@ -65,13 +66,16 @@ export default function RestaurantPage() {
       <header>
         <div className="header-inner">
           <Link href="/" className="logo">Breda<span>Eats</span></Link>
-          <Link href="/" className="back-btn">← Alle restaurants</Link>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <ThemeToggle />
+            <Link href="/" className="back-btn">← Alle restaurants</Link>
+          </div>
         </div>
       </header>
 
       {/* ── Hero ── */}
       <div className="detail-hero" style={{
-        background: `linear-gradient(160deg, color-mix(in srgb, ${restaurant.color || '#06C167'} 40%, #0a0a0a) 0%, #0a0a0a 60%)`
+        background: `linear-gradient(160deg, color-mix(in srgb, ${restaurant.color || 'var(--green)'} 40%, var(--bg)) 0%, var(--bg) 60%)`
       }}>
         <div className="detail-hero-inner">
 
@@ -116,10 +120,10 @@ export default function RestaurantPage() {
                   display: 'inline-block',
                   width: 8, height: 8,
                   borderRadius: '50%',
-                  background: isOpenToday ? '#06C167' : '#555',
+                  background: isOpenToday ? 'var(--green)' : 'var(--text-dim)',
                   flexShrink: 0,
                 }} />
-                <span style={{ fontSize: 14, fontWeight: 700, color: isOpenToday ? '#06C167' : '#666' }}>
+                <span style={{ fontSize: 14, fontWeight: 700, color: isOpenToday ? 'var(--green)' : 'var(--text-muted)' }}>
                   {isOpenToday ? `Open · ${todayHours}` : 'Gesloten'}
                 </span>
               </div>
@@ -144,7 +148,7 @@ export default function RestaurantPage() {
                 <div className="dip-row" style={{ marginTop: 6 }}>
                   <span className="dip-icon">🌐</span>
                   <a href={restaurant.website} target="_blank" rel="noopener noreferrer"
-                    style={{ color: '#06C167', textDecoration: 'none', fontSize: 12 }}>
+                    style={{ color: 'var(--green)', textDecoration: 'none', fontSize: 12 }}>
                     {restaurant.website.replace('https://','').replace('http://','').replace(/\/$/,'')}
                   </a>
                 </div>
@@ -199,7 +203,7 @@ export default function RestaurantPage() {
         {menuPreview ? (
           <section>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-              <h2 style={{ fontSize: 20, fontWeight: 700, color: '#fff' }}>
+              <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)' }}>
                 Menukaart preview — {menuPreview.menu.subtitle}
               </h2>
               <Link href={`/menu/${menuPreview.key}`} className="detail-menu-btn-outline">
@@ -224,7 +228,7 @@ export default function RestaurantPage() {
                   </div>
                   {item.desc && <div className="td-desc">{item.desc}</div>}
                   {item.wine && <div className="td-wine">🍷 {item.wine}</div>}
-                  <div style={{ fontSize: 10, color: '#444', marginTop: 6 }}>{item.category}</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-faint)', marginTop: 6 }}>{item.category}</div>
                 </div>
               ))}
             </div>
@@ -242,8 +246,8 @@ export default function RestaurantPage() {
         ) : (
           <section style={{ textAlign: 'center', padding: '60px 0' }}>
             <div style={{ fontSize: 36, marginBottom: 16 }}>📋</div>
-            <h3 style={{ color: '#aaa', marginBottom: 8 }}>Menukaart nog niet beschikbaar</h3>
-            <p style={{ color: '#555', fontSize: 14, marginBottom: 24 }}>
+            <h3 style={{ color: 'var(--text-secondary)', marginBottom: 8 }}>Menukaart nog niet beschikbaar</h3>
+            <p style={{ color: 'var(--text-dim)', fontSize: 14, marginBottom: 24 }}>
               Bekijk de website van het restaurant voor de actuele menukaart.
             </p>
             {restaurant.website && (
@@ -259,8 +263,8 @@ export default function RestaurantPage() {
         <div style={{
           marginTop: 48,
           padding: 20,
-          background: 'rgba(6,193,103,0.06)',
-          border: '1px solid rgba(6,193,103,0.15)',
+          background: 'var(--green-faint)',
+          border: '1px solid var(--green-border)',
           borderRadius: 12,
           display: 'flex',
           alignItems: 'center',
@@ -269,17 +273,17 @@ export default function RestaurantPage() {
           flexWrap: 'wrap',
         }}>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#06C167', marginBottom: 4 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--green)', marginBottom: 4 }}>
               🛡 Allergeneninformatie (NVWA)
             </div>
-            <div style={{ fontSize: 12, color: '#666' }}>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
               Wettelijk verplichte allergenenmatrix · EU Verordening 1169/2011
             </div>
           </div>
           <Link href={`/nvwa/${id}`} style={{
             padding: '9px 18px',
-            background: '#06C167',
-            color: '#000',
+            background: 'var(--green)',
+            color: 'var(--on-accent)',
             fontSize: 13,
             fontWeight: 700,
             borderRadius: 8,

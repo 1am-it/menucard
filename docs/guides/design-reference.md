@@ -38,3 +38,20 @@ Discovery should emphasize:
 7. clear menu/reservation actions
 
 Restaurant branding should remain secondary during search and discovery.
+
+## Theming
+
+The mockups above show the light palette, which is the primary/default
+design direction going forward. The original dark theme is preserved as a
+fully supported, user-selectable alternative — not deprecated — via a
+Light/Dark/System toggle in the header (`src/components/ThemeToggle.js`).
+Anyone who doesn't touch the toggle keeps seeing dark, unchanged.
+
+Both palettes are implemented through one shared set of CSS custom
+properties in `app/globals.css` (see
+`planning/specs/tickets/theme-design-tokens.md` for the full token list and
+`planning/decisions/006-theme-token-system-implemented-early.md` for why
+this was built before the pages that visually depend on it, e.g. the
+homepage, were restyled). New UI work should reference these tokens
+(`var(--text-primary)`, `var(--border)`, `var(--green)`, etc.) rather than
+hardcoded colors, so it works correctly in both themes automatically.
