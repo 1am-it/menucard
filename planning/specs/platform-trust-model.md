@@ -1,5 +1,14 @@
 # Spec — Per-field Data Trust / Provenance Model
 
+**Status (2026-08-30): the concrete schema is finalized.** This file
+remains the product-level goal/rationale layer; the exact, implementable
+shape lives in [`docs/api/data-trust-model.md`](../../docs/api/data-trust-model.md)
+— read that file for the actual `source`/`confidence`/`verifiedAt`/
+`verifiedBy` contract, the staleness window decision, and the documented
+legacy `reservation.verified` gap. This split mirrors `BE-02a`'s
+`planning/specs/dish-first-discovery.md` (why/what) vs.
+`docs/api/dish-result-shape.md` (exact contract).
+
 ## Goal
 
 Let MenuCard show not just *what* the data says, but *how sure* it is, at
@@ -20,7 +29,7 @@ At minimum: price, opening hours, reservation method (extending the existing
 `reservation.verified` field rather than replacing it), menu item
 availability, and allergen/dietary tags.
 
-## Proposed shape (subject to refinement in PLATFORM-03's implementation)
+## Shape (finalized in PLATFORM-03 — see docs/api/data-trust-model.md)
 
 Each trust-bearing field is accompanied by:
 
@@ -28,7 +37,13 @@ Each trust-bearing field is accompanied by:
 - `confidence` — one of: `high`, `medium`, `low`
 - `verifiedAt` — ISO date of last confirmation, nullable
 - `verifiedBy` — reference to the confirming owner/editor/contribution,
-  nullable
+  nullable (the exact reference shape is left to `PLATFORM-04`/`05`'s
+  persistence design)
+
+`docs/api/data-trust-model.md` also documents an explicit legacy gap: the
+existing `reservation.verified` boolean has no `verifiedBy`/`verifiedAt`
+equivalent and cannot be losslessly mapped into this shape as-is — an open
+decision for `PLATFORM-05`, not resolved here.
 
 ## Status labels (consumer + internal display)
 
@@ -44,9 +59,11 @@ Matching the reference mockup (`outputs/menucard-data-playbook-mockups.html`):
 
 ## Staleness
 
-A freshness window (e.g. "confirmed >90 days ago becomes Stale") needs a
-concrete value chosen during `PLATFORM-03` implementation, informed by how
-often real menu data actually changes — not fixed in this spec.
+**Decided in `PLATFORM-03`, see `docs/api/data-trust-model.md`:** 90 days,
+documented explicitly as a reasoned default rather than one derived from
+MenuCard's own history — as of 2026-08-30, the current data has no
+repeated-observation history to derive a real interval from. Whether this
+should later be tuned per restaurant type is an open follow-up, not decided.
 
 ## Requirements
 

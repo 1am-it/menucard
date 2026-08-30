@@ -131,6 +131,13 @@ in the existing empty-state, when a zero-result search is at least partly
 explained by restaurants that match the query's filters but have no
 digitized menu data yet — computed server-side, no new endpoint.
 
+PLATFORM-03 — Provenance/trust data model (done, documentation only). Schema
+finalized in `docs/api/data-trust-model.md`; `planning/specs/platform-trust-model.md`
+stays the rationale layer. Staleness window (90 days) documented as a
+reasoned default, not empirically derived — no repeated-observation history
+exists. Legacy `reservation.verified` gap (no `verifiedBy`) documented as an
+open decision for `PLATFORM-05`.
+
 This track does not change, reorder, or depend on the `BE-*` sequence — both
 can proceed independently. It follows the same discipline: one ticket per
 commit, stop for approval after each, doc updates land in the same commit as
