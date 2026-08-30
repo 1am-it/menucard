@@ -23,7 +23,7 @@ of these.
    `planning/decisions/007-homepage-shift.md`
 8. [be-07-reservation-routing.md](./be-07-reservation-routing.md) — done
 9. [be-05-restaurant-menu.md](./be-05-restaurant-menu.md) — done
-10. [be-08-performance-cleanup.md](./be-08-performance-cleanup.md)
+10. [be-08-performance-cleanup.md](./be-08-performance-cleanup.md) — done
 
 Do not start a ticket whose dependencies aren't done. Each ticket should be
 independently reviewable and deployable where practical.

@@ -66,7 +66,7 @@ BE-06 — Price / cuisine / allergy filters + URL state (done)
 BE-04 — Text-first homepage (done — see [[007-homepage-shift]])  
 BE-07 — Reservation routing (done)  
 BE-05 — Lightweight restaurant menu (done)  
-BE-08 — Performance cleanup
+BE-08 — Performance cleanup (done — see [[007-homepage-shift]])
 
 THEME was originally sequenced after BE-06/BE-04/BE-07/BE-05 (see
 [[005-decouple-theming-from-dish-first]]) on the assumption it would mean a
