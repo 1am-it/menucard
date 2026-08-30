@@ -180,6 +180,7 @@ function SearchPageInner() {
   const [loading, setLoading] = useState(false)
   const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState(null)
+  const [lowCoverage, setLowCoverage] = useState(null)
 
   const requestId = useRef(0)
 
@@ -210,6 +211,7 @@ function SearchPageInner() {
       setTotal(data.total)
       setNextCursor(data.nextCursor)
       setHasMore(data.hasMore)
+      if (!cursor) setLowCoverage(data.lowCoverage || null)
     } catch (e) {
       if (id !== requestId.current) return
       setError('Zoeken is niet gelukt. Probeer het opnieuw.')
@@ -225,7 +227,7 @@ function SearchPageInner() {
   // of them change `filtersKey`, and this is the only place that fetches.
   useEffect(() => {
     if (!filters.q && !active) {
-      setResults([]); setTotal(0); setNextCursor(null); setHasMore(false)
+      setResults([]); setTotal(0); setNextCursor(null); setHasMore(false); setLowCoverage(null)
       return
     }
     runSearch(filters, 0)
@@ -437,6 +439,13 @@ function SearchPageInner() {
                 : 'Niets gevonden met deze filters.'}
               {' '}Probeer een andere zoekterm{active ? ' of pas de filters aan' : ''}.
             </p>
+            {lowCoverage && (
+              <p className="low-coverage-note">
+                {filters.cuisines.length === 1
+                  ? `We hebben momenteel nog geen gedigitaliseerde menukaart voor restaurants in de categorie "${filters.cuisines[0]}": ${lowCoverage.missingMenuDataCount} van de ${lowCoverage.relevantRestaurantCount} restaurants in Breda met deze keuken staat wel geregistreerd, maar heeft nog geen menu in onze data.`
+                  : `Dit kan ook komen doordat we nog niet van alle Breda-restaurants een menukaart hebben: ${lowCoverage.missingMenuDataCount} van de ${lowCoverage.relevantRestaurantCount} relevante restaurants heeft nog geen gedigitaliseerde menukaart.`}
+              </p>
+            )}
             {active && (
               <button className="detail-menu-btn-outline" onClick={resetFilters} style={{ marginTop: 12 }}>
                 Reset filters

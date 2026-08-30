@@ -126,6 +126,11 @@ only 16% of Breda restaurants (4/25) have any digitized menu data in the
 canonical dataset, and 0% have a confirmed reservation method — see
 `docs/coverage/breda-baseline-2026-08-30.md`.
 
+PLATFORM-02 — Low-coverage transparency UX (done). `/search` now discloses,
+in the existing empty-state, when a zero-result search is at least partly
+explained by restaurants that match the query's filters but have no
+digitized menu data yet — computed server-side, no new endpoint.
+
 This track does not change, reorder, or depend on the `BE-*` sequence — both
 can proceed independently. It follows the same discipline: one ticket per
 commit, stop for approval after each, doc updates land in the same commit as

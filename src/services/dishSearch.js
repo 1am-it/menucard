@@ -118,6 +118,48 @@ function getDishIndex() {
   return dishIndex
 }
 
+let menuRestaurantIds = null
+function getMenuRestaurantIds() {
+  if (!menuRestaurantIds) {
+    menuRestaurantIds = new Set(Object.keys(menusData).map((k) => k.split('-')[0]))
+  }
+  return menuRestaurantIds
+}
+
+// PLATFORM-02 — computed independently of PLATFORM-01's coverage dashboard
+// (planning/architecture/platform-plan.md), reusing this module's own
+// restaurant-level filter primitives rather than that dashboard's per-field
+// breakdown, which groups differently and isn't a usable signal here.
+//
+// Only called when a search returns zero dishes. Distinguishes two honest
+// reasons for an empty result, using only the *restaurant*-level filters
+// from the request (cuisine/buurt/day/nowOpen — not q/meal/price/allergen,
+// which are dish-level and don't bear on whether a restaurant is relevant):
+//   - no restaurant matches these filters at all (nothing to disclose)
+//   - matching restaurants exist, and all of them have menu data (the
+//     empty result is a true no-match, nothing to disclose)
+//   - matching restaurants exist, and at least one has no menu data at all
+//     in data/menus.json (the case worth surfacing to the user)
+function computeLowCoverageSignal({ cuisines, buurt, day, nowOpen }) {
+  const menuIds = getMenuRestaurantIds()
+  let relevantRestaurantCount = 0
+  let missingMenuDataCount = 0
+
+  for (const [restaurantId, restaurant] of Object.entries(restaurantsData)) {
+    if (!matchesCuisine(restaurant, cuisines)) continue
+    if (buurt && restaurant.buurt !== buurt) continue
+    if (nowOpen && !isCurrentlyOpen(restaurant)) continue
+    if (day && !nowOpen && !restaurant.openingHours?.[day]) continue
+
+    relevantRestaurantCount += 1
+    if (!menuIds.has(restaurantId)) missingMenuDataCount += 1
+  }
+
+  if (relevantRestaurantCount === 0) return null
+  if (missingMenuDataCount === 0) return null
+  return { relevantRestaurantCount, missingMenuDataCount }
+}
+
 // Ranking tiers, per docs/api/dish-search-ranking.md. Lower tier = better
 // match. Returns null when the query matches none of the ranked fields —
 // callers treat null as "excluded", not "tier 5".
@@ -224,10 +266,17 @@ export function searchDishes({
 
   const nextCursor = boundedCursor + boundedLimit < total ? boundedCursor + boundedLimit : null
 
+  // Only computed on the empty-result path, and only included in the
+  // response when there's actually something honest to disclose — see
+  // computeLowCoverageSignal() above. Every non-empty response is
+  // unchanged from before this field existed.
+  const lowCoverage = total === 0 ? computeLowCoverageSignal({ cuisines, buurt, day, nowOpen }) : null
+
   return {
     results: page,
     total,
     nextCursor,
     hasMore: nextCursor !== null,
+    ...(lowCoverage ? { lowCoverage } : {}),
   }
 }

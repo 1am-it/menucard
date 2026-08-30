@@ -68,3 +68,18 @@ Preferred behaviour:
 - or cursor-based pagination
 
 Do not fetch every matching item at once.
+
+## Empty-result transparency (PLATFORM-02)
+
+When a search returns zero results, the response may include an optional
+`lowCoverage` field:
+
+```json
+{ "results": [], "total": 0, "lowCoverage": { "relevantRestaurantCount": 3, "missingMenuDataCount": 3 } }
+```
+
+Omitted entirely when there's nothing honest to disclose (no restaurant
+matches the request's cuisine/buurt/day/nowOpen filters at all, or every
+matching restaurant already has menu data — a true no-dish-match). Computed
+server-side in `src/services/dishSearch.js`, independent of `PLATFORM-01`'s
+coverage dashboard. Every non-empty response is unaffected.
