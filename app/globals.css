@@ -1716,6 +1716,70 @@ mark.search-highlight {
   padding: 24px 0 8px;
 }
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   BE-06 — Filters + URL state (/search)
+   Reuses existing tokenized classes (.meal-selector/.home-meal-btn,
+   .now-open-btn, .day-selector/.day-btn, .mf-btn, .allergen-chips/
+   .allergen-chip, .active-filters-bar/.filter-tag, .reset-btn, .cat-count).
+   Only genuinely new patterns get new classes below.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.filters-toggle-btn {
+  padding: 9px 16px;
+  border: 1.5px solid var(--input-border);
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.filters-toggle-btn:hover { border-color: var(--green); color: var(--text-primary); }
+.filters-toggle-btn.active { background: var(--green-surface); border-color: var(--green); color: var(--green); }
+
+.filters-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 12px;
+  padding: 16px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+.filters-panel-group { display: flex; flex-direction: column; gap: 8px; }
+.filters-panel-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-faint);
+}
+
+.cuisine-chip-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.cuisine-chip {
+  padding: 6px 12px;
+  background: var(--bg-input);
+  border: 1.5px solid var(--input-border);
+  border-radius: 100px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.cuisine-chip:hover { border-color: var(--border-strong); color: var(--text-primary); }
+.cuisine-chip.active { background: var(--green-surface); border-color: var(--green); color: var(--green); }
+
+@media (max-width: 480px) {
+  .filters-panel { padding: 12px; }
+}
+
 /* ── Contact blok op restaurant card ── */
 .rc-contact {
   display: flex;
