@@ -167,6 +167,35 @@ criteria. Also documented, in [[010-platform-persistence-and-api]]: a
 pre-existing, unrelated `supabase/schema.sql` predating this track was
 found and left untouched — it is not the current direction.
 
+PLATFORM-06 — Moderation/review queue (done, live-verified). Editor-only
+`pending_changes` table (`supabase/migrations/0002_pending_changes.sql`),
+separate from `field_provenance` — pending/approved/rejected state never
+touches the current-value table until approval. Approve is atomic via a
+`SECURITY INVOKER` Postgres RPC (`approve_pending_change`, `EXECUTE` revoked
+from `PUBLIC`, granted only to `service_role`) that writes `field_provenance`
+and flips the pending row's status in one transaction; reject only updates
+`pending_changes` and never touches live data. `owner` and `internal` are
+excluded from every RLS policy and route check — only `editor` can see or
+act on the queue, confirmed live (owner gets `403` on both read and
+approve). Minimal `/internal/login` + `/internal/moderation` UI reuses
+Supabase Auth in the browser strictly for session/login
+(`NEXT_PUBLIC_SUPABASE_ANON_KEY`, categorically different from the
+server-only service-role key) — see `docs/api/internal-moderation-api.md`
+and `docs/guides/internal-api-live-testing.md` for how sessions were minted
+for testing without needing test-account passwords. A live-verification
+bug was found and fixed: rejecting an already-decided change returned `500`
+instead of `404` (`.single()` on a zero-row `update()` throws rather than
+returning empty) — corrected and re-verified. Live testing left six
+`pending_changes` rows (ids 1–6, approved/rejected/pending) in place
+deliberately, as a pre-launch verification audit trail — matching this
+table's own permanent-record design. One fully synthetic
+`field_provenance` test record it produced (restaurant 6, price) was
+removed via a bounded `DELETE`, since it never held a real production value
+and this table's own semantics call for holding only genuine current
+values. As with `PLATFORM-05`, approving here only updates
+`field_provenance` — the route to consumer-facing consumption remains the
+open question documented in `planning/decisions/010-platform-persistence-and-api.md`.
+
 This track does not change, reorder, or depend on the `BE-*` sequence — both
 can proceed independently. It follows the same discipline: one ticket per
 commit, stop for approval after each, doc updates land in the same commit as
