@@ -154,7 +154,13 @@ separate mechanism from Postgres's table-level `GRANT` system — without
 them, every query failed with `permission denied` regardless of RLS. Now
 part of the migration itself (see its "Grants for service_role" section).
 
-**Not verified**: the `owner` role's per-restaurant scope restriction and
-the "authenticated but no `staff_roles` row → `403`" path, both of which
-need a second real test account to exercise — not done here to avoid
-expanding this verification round's scope.
+**Verified in a follow-up round (2026-08-31), with a second real test
+account**: the `owner` role's per-restaurant scope — allowed (`200`/`201`)
+for its own `restaurant_id`, blocked (`403`) for any other restaurant, on
+both `GET` and `POST` — and the "authenticated but no `staff_roles` row"
+path, which correctly returns `403` before any role has been granted. The
+existing `editor` path was re-tested at the same time with a fresh token
+and is unaffected. Consumer routes and bundle sizes were re-confirmed
+unchanged.
+
+`PLATFORM-05` has no remaining unverified acceptance criteria.

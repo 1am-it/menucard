@@ -157,11 +157,15 @@ no consumer-facing change, zero impact on the consumer performance budget
 (server-only dependency). A missing `GRANT` for `service_role` was found
 and fixed during live verification (`BYPASSRLS` skips RLS policies but not
 Postgres's separate table-privilege system) — now part of the migration.
-Not yet verified: the `owner` role's per-restaurant scope and the
-no-role-assigned `403` path, both needing a second test account. Also
-documented, in [[010-platform-persistence-and-api]]: a pre-existing,
-unrelated `supabase/schema.sql` predating this track was found and left
-untouched — it is not the current direction.
+The remaining two open verification points — the `owner` role's
+per-restaurant scope and the no-role-assigned `403` path — were closed in a
+follow-up live round (2026-08-31) with a second test account: `owner`
+correctly allowed within its own restaurant and blocked outside it on both
+`GET`/`POST`, and an authenticated caller with no `staff_roles` row
+correctly gets `403`. `PLATFORM-05` has no remaining unverified acceptance
+criteria. Also documented, in [[010-platform-persistence-and-api]]: a
+pre-existing, unrelated `supabase/schema.sql` predating this track was
+found and left untouched — it is not the current direction.
 
 This track does not change, reorder, or depend on the `BE-*` sequence — both
 can proceed independently. It follows the same discipline: one ticket per
