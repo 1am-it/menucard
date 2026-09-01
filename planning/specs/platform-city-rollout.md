@@ -43,15 +43,19 @@ searching that cuisine specifically.
 Both are needed: the baseline anchors "have we actually improved," the
 dashboard shows "where do we stand right now."
 
-## Launch readiness (informs PLATFORM-09)
+## Launch readiness (decided in PLATFORM-09)
 
 A city is not "launch ready" purely on restaurant count. Coverage
 *usability* matters more than volume: a city with 200 restaurants and 20%
 menu coverage is less launch-ready than one with 80 restaurants and 70%
-coverage. `PLATFORM-09` should define concrete per-metric thresholds (not
-fixed in this spec, since Breda's own real numbers from `PLATFORM-01` should
-inform what a realistic threshold looks like) before a second city is
-seriously scoped.
+coverage. **Concrete per-metric thresholds, the Go/Conditional-go/No-go
+tiers, and the operational process are now decided** — see
+`[[012-city-market-readiness-thresholds]]` and
+`docs/guides/city-rollout-playbook.md`. Calibrated against Breda's real
+`PLATFORM-01` baseline only, never against Supabase's `PLATFORM-05`–`07`
+test data. Note the explicit finding there: Breda itself does not clear
+its own proposed bar on two of the four metrics — a deliberate disclosure,
+not an oversight.
 
 ## Requirements
 
@@ -68,8 +72,13 @@ seriously scoped.
 
 ## Out of scope for this spec
 
-- The actual dashboard UI/implementation (`PLATFORM-01`).
-- Concrete numeric launch-readiness thresholds (`PLATFORM-09`, once real
-  Breda data from `PLATFORM-01` exists to calibrate against).
+- The actual dashboard UI/implementation (`PLATFORM-01`, done).
+- The concrete numeric launch-readiness thresholds themselves — decided in
+  `[[012-city-market-readiness-thresholds]]`, not restated here to avoid
+  the two documents drifting apart.
 - Any second-city operational/logistics planning (sourcing, legal, etc.) —
   purely a data-coverage concern here.
+- Whether the application can actually serve a second market at all —
+  that is `[[011-market-foundation-and-international-growth]]`'s and
+  `planning/architecture/market-data-foundation-plan.md`'s concern, not
+  this spec's.

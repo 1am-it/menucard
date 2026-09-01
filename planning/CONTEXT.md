@@ -240,6 +240,24 @@ records themselves and the synthetic test account were kept deliberately,
 as a documented pre-launch verification audit trail — matching
 `PLATFORM-06`'s precedent for `pending_changes`.
 
+PLATFORM-09 — City rollout operations (done, decision/documentation only —
+`PLATFORM-08` was deliberately skipped, not started). Concrete per-metric
+readiness thresholds decided in
+[[012-city-market-readiness-thresholds]], calibrated against Breda's real
+`PLATFORM-01` baseline only — never against the synthetic Supabase test
+data `PLATFORM-05`–`07` left in place. Explicit, deliberate finding: Breda
+does not clear its own proposed bar on two of four metrics (menu-data
+coverage, reservation confirmation) — stated plainly, not smoothed over.
+Three outcome tiers (Go / Conditional go, reusing `PLATFORM-02`'s existing
+low-coverage messaging / No-go), a launch-status vocabulary
+(`prospective`→`seeding`→`conditional`→`live`→`paused`, resolving the item
+`[[011-market-foundation-and-international-growth]]` left open), and the
+operational process live in `docs/guides/city-rollout-playbook.md`. No
+code, database, import tooling, or second market — and this decision
+explicitly restates, not removes, that no second market can launch until
+the mandatory `MARKET-*` foundation and market-aware consumer read path
+(`planning/architecture/market-data-foundation-plan.md`) exist.
+
 This track does not change, reorder, or depend on the `BE-*` sequence — both
 can proceed independently. It follows the same discipline: one ticket per
 commit, stop for approval after each, doc updates land in the same commit as

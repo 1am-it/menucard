@@ -40,8 +40,8 @@ third, external-facing contribution flows last.
 5. [platform-05-internal-api-foundation.md](./platform-05-internal-api-foundation.md) — done
 6. [platform-06-moderation-review-queue.md](./platform-06-moderation-review-queue.md) — done
 7. [platform-07-owner-claim-identity-verification.md](./platform-07-owner-claim-identity-verification.md) — done
-8. [platform-08-community-microtask-contributions.md](./platform-08-community-microtask-contributions.md)
-9. [platform-09-city-rollout-operations.md](./platform-09-city-rollout-operations.md)
+8. [platform-08-community-microtask-contributions.md](./platform-08-community-microtask-contributions.md) — not started, deliberately skipped for now (see `planning/CONTEXT.md`)
+9. [platform-09-city-rollout-operations.md](./platform-09-city-rollout-operations.md) — done, decision/documentation only (its only dependency, `PLATFORM-01`, was already done)
 10. [platform-10-public-city-metrics-platform-exposure.md](./platform-10-public-city-metrics-platform-exposure.md)
 
 Do not start a ticket whose dependencies aren't done. Each ticket should be

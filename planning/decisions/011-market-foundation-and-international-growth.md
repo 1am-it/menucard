@@ -62,8 +62,10 @@ Every market has, at minimum:
 
 A launch status vocabulary consistent with the go/no-go/conditional-go
 framing already proposed for `PLATFORM-09`: `prospective` → `seeding` →
-`conditional` → `live` (and potentially `paused`). Not fixed until
-`PLATFORM-09`'s own threshold decision is itself approved.
+`conditional` → `live` (and potentially `paused`). **Resolved
+(2026-09-01)**: fixed as this exact vocabulary in
+`[[012-city-market-readiness-thresholds]]`, `PLATFORM-09`'s own threshold
+decision.
 
 ### 3. Hybrid data architecture — accepted direction, future foundation
 
