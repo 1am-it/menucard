@@ -46,26 +46,37 @@ the checklist meaningless, since any equally sparse future market would
 trivially "pass." They exist to catch a repeat of Breda's own current gap
 in a new market, including in Breda itself if re-measured later.
 
-### Outcome tiers — not a strict binary
+### Outcome tiers (`readiness_status`) — not a strict binary
 
-- **Go** — clears all four thresholds.
-- **Conditional go** — clears basic info and price, not menu-data coverage
+**Correction (2026-09-01):** an earlier version of this section merged
+this outcome with the market's own operational state into one vocabulary.
+They are separate fields on the market entity — see
+`docs/api/market-entity-schema.md` (`MARKET-01`). `readiness_status` is
+this decision's outcome, re-evaluated independently of whether a market is
+operationally live.
+
+- **`go`** — clears all four thresholds.
+- **`conditional_go`** — clears basic info and price, not menu-data coverage
   and/or reservation confirmation. Launch is possible only with
   `PLATFORM-02`'s existing low-coverage transparency messaging active for
   the affected categories — reusing already-built infrastructure, not new
   work.
-- **No-go** — fails basic info or price. Not usable enough even with
+- **`no_go`** — fails basic info or price. Not usable enough even with
   disclosure.
 
-Breda today would sit in **conditional go** against this table, were the
-question of launching it fresh ever asked again.
+**Breda's `readiness_status` is honestly `conditional_go` against this
+table today — not `go`, despite being operationally `live`.** Its
+`launch_status` (operational: it serves real visitors right now) and its
+`readiness_status` (this table's outcome) are deliberately independent
+fields precisely so "live" is never read as an implicit claim of "fully
+ready."
 
-### Launch-status vocabulary (resolves the open item in `[[011-market-foundation-and-international-growth]]`)
+### `launch_status` vocabulary (resolves the open item in `[[011-market-foundation-and-international-growth]]`)
 
-`prospective` → `seeding` → `conditional` → `live` (→ `paused` if a live
-market's coverage later degrades below threshold). This is now the fixed
-vocabulary for a market's `launch status` field wherever `MARKET-01`
-eventually defines it.
+`draft` → `seeding` → `live` → `paused`. Purely operational — it says
+nothing about data quality; that's `readiness_status`'s job, above. This
+is the fixed vocabulary for `launch_status`, defined alongside
+`readiness_status` in `docs/api/market-entity-schema.md` (`MARKET-01`).
 
 ### Operational process
 

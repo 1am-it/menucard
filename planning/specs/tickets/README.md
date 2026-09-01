@@ -1,12 +1,14 @@
 # Ticket specs
 
-This directory contains the executable breakdown of two parallel tracks:
-the completed `BE-*` dish-first migration, and the new `PLATFORM-*`
-data-platform track. Each track has its own file per ticket. It complements
-the feature-level specs one level up (`planning/specs/*.md`, which describe
+This directory contains the executable breakdown of three tracks: the
+completed `BE-*` dish-first migration, the `PLATFORM-*` data-platform
+track, and the proposed, not-yet-scheduled `MARKET-*` market-foundation
+track. Each track has its own file per ticket. It complements the
+feature-level specs one level up (`planning/specs/*.md`, which describe
 product behaviour) and the phase overviews in
-`planning/architecture/migration-plan.md` (`BE-*`) and
-`planning/architecture/platform-plan.md` (`PLATFORM-*`).
+`planning/architecture/migration-plan.md` (`BE-*`),
+`planning/architecture/platform-plan.md` (`PLATFORM-*`), and
+`planning/architecture/market-data-foundation-plan.md` (`MARKET-*`).
 
 Read `planning/CONTEXT.md` for the current ticket order before starting any
 of these.
@@ -44,6 +46,23 @@ third, external-facing contribution flows last.
 9. [platform-09-city-rollout-operations.md](./platform-09-city-rollout-operations.md) — done, decision/documentation only (its only dependency, `PLATFORM-01`, was already done)
 10. [platform-10-public-city-metrics-platform-exposure.md](./platform-10-public-city-metrics-platform-exposure.md)
 
+## MARKET-* order (proposed, not scheduled — one ticket done as documentation)
+
+See `planning/decisions/011-market-foundation-and-international-growth.md`
+for why this is a third, separate track from `BE-*`/`PLATFORM-*`. Every
+ticket here is documentation/schema-contract only until explicitly
+otherwise approved — no code, migration, or Supabase change.
+
+1. [market-01-market-entity.md](./market-01-market-entity.md) — done, documentation/schema contract only
+2. MARKET-02 — canonical restaurant/menu schema (not started)
+3. MARKET-03 — source registry (not started)
+4. MARKET-04 — raw imports & import runs (not started)
+5. MARKET-05 — normalization & deduplication (not started)
+6. MARKET-06 — publication snapshots (not started)
+7. MARKET-07 — market-scoped coverage metrics (not started)
+8. MARKET-08 — minimal market-aware consumer read path (not started; mandatory before any second market can launch — see `planning/architecture/market-data-foundation-plan.md`)
+9. MARKET-09 — full snapshot/CDN-optimized publication layer (not started; optional later scale step)
+
 Do not start a ticket whose dependencies aren't done. Each ticket should be
-independently reviewable and deployable where practical. The two tracks do
-not block each other.
+independently reviewable and deployable where practical. The three tracks
+do not block each other.

@@ -277,3 +277,18 @@ is built — the current static consumer read path is unchanged, and
 See `planning/architecture/market-data-foundation-plan.md` for the
 proposed, not-yet-scheduled `MARKET-*` track this would require — a third,
 separate track alongside `BE-*` and `PLATFORM-*`.
+
+MARKET-01 — Market entity (done, documentation/schema contract only).
+Defines the market entity per `[[011-market-foundation-and-international-growth]]`:
+an immutable `id` separate from a mutable `slug`/`name`, geographic
+boundary, country code, timezone, default currency, supported languages,
+and — corrected during this ticket's own drafting, not merged as
+originally drafted — two independent status fields, `launch_status`
+(operational: `draft`/`seeding`/`live`/`paused`) and `readiness_status`
+(the `PLATFORM-09` outcome: `go`/`conditional_go`/`no_go`). See
+`docs/api/market-entity-schema.md`. Breda modeled as the first, retroactive
+reference value: `launch_status: live`, `readiness_status: conditional_go`
+(honestly — Breda does not clear its own `[[012-city-market-readiness-thresholds]]`
+bar on two metrics) — its geographic `boundary` is explicitly documented
+as not yet defined, a real gap, not a placeholder. No code, migration,
+Supabase change, storage choice, market selector, or second market.

@@ -30,13 +30,23 @@ exactly as `PLATFORM-09` explicitly excludes them.
 
 ## Wave 1 — Market dimension & canonical schema (modeling only)
 
-### MARKET-01 — Market entity
+### MARKET-01 — Market entity (done, documentation/schema contract only)
 
-Define and document the `market` schema per `[[011-market-foundation-and-international-growth]]`:
-`id`, geographic boundary, country code, timezone, default currency,
-supported languages, launch status. A modeling ticket, matching
-`PLATFORM-03`'s "defines the shape, not yet a live write path" precedent —
-no live data, no migration.
+Defines and documents the `market` schema per
+`[[011-market-foundation-and-international-growth]]`: an immutable
+technical `id` separate from a mutable, readable `slug`/`name`, geographic
+boundary, country code, timezone, default currency, supported languages,
+and two independent status fields — `launch_status` (operational:
+`draft`/`seeding`/`live`/`paused`) and `readiness_status` (the
+`PLATFORM-09` outcome: `go`/`conditional_go`/`no_go`, never conflated with
+`launch_status`). See `docs/api/market-entity-schema.md` for the full
+contract and Breda's own retroactive reference values. A modeling ticket,
+matching `PLATFORM-03`'s "defines the shape, not yet a live write path"
+precedent — no live data, no migration. A valid geographic boundary is a
+documented hard precondition for `MARKET-04`/`05` (automated imports,
+market-level deduplication) and `MARKET-07` (coverage metrics) below, and
+for any new market launch — not yet satisfied even for Breda itself (see
+the schema contract's open questions).
 
 ### MARKET-02 — Canonical restaurant/menu schema
 
@@ -67,7 +77,9 @@ Turns raw imports into canonical candidate records: matching and
 deduplicating across sources (e.g. the same restaurant found via two
 different imports). The completeness-before-popularity principle applies
 here directly — every candidate in the market boundary gets a canonical
-record, regardless of how thin its data is yet.
+record, regardless of how thin its data is yet. Requires `MARKET-01`'s
+geographic boundary to actually be defined for the market in question —
+"in the market boundary" is not a meaningful test otherwise.
 
 ## Wave 3 — Publication
 
@@ -85,8 +97,10 @@ read from these snapshots.
 
 Generalizes `PLATFORM-01`'s coverage dashboard (currently implicitly
 Breda-only) to compute the same metrics per `market_id`, so `PLATFORM-09`'s
-go/no-go checklist becomes mechanically repeatable rather than a one-off
-script.
+readiness thresholds (`[[012-city-market-readiness-thresholds]]`) become
+mechanically repeatable — producing a market's `readiness_status` — rather
+than a one-off script. Also requires `MARKET-01`'s geographic boundary to
+be defined; "coverage within the market" is not computable without one.
 
 ## Wave 4 — Consumer cutover (mandatory minimum, then an optional scale step)
 

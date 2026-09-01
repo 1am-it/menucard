@@ -50,22 +50,37 @@ for what visitors actually see.
 
 ### 2. Market entity — accepted shape, not yet built
 
+**Correction (2026-09-01):** an earlier version of this section treated
+"launch status" as one merged vocabulary that conflated an operational
+state with a `PLATFORM-09` readiness outcome. Those are two independent
+fields — a market can be operationally `live` while its readiness outcome
+is honestly `conditional_go`, and the two must never be collapsed into one
+value that implies "live" also means "fully ready." See
+`docs/api/market-entity-schema.md` (`MARKET-01`) for the full contract.
+
 Every market has, at minimum:
 
-- a stable `id`
-- a geographic boundary (representation not decided — see Open questions)
+- a stable, immutable technical `id`
+- a separate, human-readable `slug` (used in routes/UI, e.g. `breda`) and
+  `name` (display name) — both can change over time without changing `id`
+- a geographic boundary (representation not decided — see Open questions;
+  a *valid* boundary is a hard precondition for automated imports,
+  market-level deduplication, coverage metrics, or any new market launch —
+  not merely a nice-to-have field)
 - a country code
 - a timezone
 - a default currency
 - a set of supported languages
-- a launch status
+- `launch_status` — the market's own operational state:
+  `draft` → `seeding` → `live` → `paused`
+- `readiness_status` — the `PLATFORM-09` outcome, evaluated independently:
+  `go` / `conditional_go` / `no_go`, per
+  `[[012-city-market-readiness-thresholds]]`
 
-A launch status vocabulary consistent with the go/no-go/conditional-go
-framing already proposed for `PLATFORM-09`: `prospective` → `seeding` →
-`conditional` → `live` (and potentially `paused`). **Resolved
-(2026-09-01)**: fixed as this exact vocabulary in
-`[[012-city-market-readiness-thresholds]]`, `PLATFORM-09`'s own threshold
-decision.
+**Resolved (2026-09-01), corrected**: the vocabularies above are fixed as
+two separate fields, not one — see `docs/api/market-entity-schema.md` for
+Breda's own reference values, including its honest current
+`readiness_status`.
 
 ### 3. Hybrid data architecture — accepted direction, future foundation
 
