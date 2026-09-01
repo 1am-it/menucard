@@ -54,7 +54,7 @@ ticket here is documentation/schema-contract only until explicitly
 otherwise approved — no code, migration, or Supabase change.
 
 1. [market-01-market-entity.md](./market-01-market-entity.md) — done, documentation/schema contract only
-2. MARKET-02 — canonical restaurant/menu schema (not started)
+2. [market-02-canonical-restaurant-menu-schema.md](./market-02-canonical-restaurant-menu-schema.md) — done, documentation/schema contract only
 3. MARKET-03 — source registry (not started)
 4. MARKET-04 — raw imports & import runs (not started)
 5. MARKET-05 — normalization & deduplication (not started)

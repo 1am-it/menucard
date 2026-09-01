@@ -292,3 +292,28 @@ reference value: `launch_status: live`, `readiness_status: conditional_go`
 bar on two metrics) — its geographic `boundary` is explicitly documented
 as not yet defined, a real gap, not a placeholder. No code, migration,
 Supabase change, storage choice, market selector, or second market.
+
+MARKET-02 — Canonical restaurant/menu schema (done, documentation/schema
+contract only). See `docs/api/canonical-restaurant-menu-schema.md`:
+canonical `Restaurant`/`Menu`/`MenuSection`/`MenuItem`/`SourceReference`/
+`FieldAssertion` objects, distinct from both today's static JSON and the
+future publication-snapshot shape. Four status concepts stay explicitly
+separate — `market.launch_status`, `market.readiness_status`,
+`restaurant.operational_status` (`open`/`temporarily_closed`/
+`permanently_closed`/`unknown`, no bare `inactive`), and
+`menu_item.availability.status`. `Money` defines four mutually-exclusive
+pricing states (`known`/`multiple_undecomposed`/`on_request`/`unknown`)
+with minor-units amounts and required-when-applicable ISO-4217 currency.
+Allergens use an extensible `{scheme, code}` model with `EU-14` named as
+the first, not universal, scheme. `FieldAssertion.field_path` addresses
+sub-fields (e.g. `reservation.url`, `opening_hours.tuesday`) individually,
+reusing `docs/api/data-trust-model.md`'s exact `trust_source`/`confidence`
+vocabulary unchanged, for exactly the same five mandatory risk-sensitive
+fields — neither expanded nor reduced. `source_references[]` are sets of
+references to `SourceReference` identities, never copies. Breda's
+retroactive mapping stays conservative: real gaps (13 genuinely
+price-`unknown` items, no legacy `operational_status` at all) are recorded
+as gaps, not filled with invented certainty. Whether `operational_status`
+should join the five mandatory risk-sensitive fields remains an explicit,
+undecided open question. No code, migration, Supabase change, storage
+choice, market selector, or second market.

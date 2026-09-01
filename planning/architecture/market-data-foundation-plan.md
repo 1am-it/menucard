@@ -48,13 +48,23 @@ market-level deduplication) and `MARKET-07` (coverage metrics) below, and
 for any new market launch — not yet satisfied even for Breda itself (see
 the schema contract's open questions).
 
-### MARKET-02 — Canonical restaurant/menu schema
+### MARKET-02 — Canonical restaurant/menu schema (done, documentation/schema contract only)
 
-Define the operational, source-of-truth schema for a restaurant and its
+Defines the operational, source-of-truth schema for a restaurant and its
 menu, distinct from both today's static JSON shape and the future
-publication-snapshot shape. Must accommodate per-field provenance
-(extending `docs/api/data-trust-model.md`, not replacing it) and a
-`market_id` reference.
+publication-snapshot shape. See
+`docs/api/canonical-restaurant-menu-schema.md` for the full contract:
+`Restaurant`/`Menu`/`MenuSection`/`MenuItem`/`SourceReference`/
+`FieldAssertion`, an extensible `{scheme, code}` allergen model
+(`EU-14` as the first, not universal, scheme), a `Money` structure in
+minor units with four explicit non-overlapping pricing states, an
+unambiguous `operational_status` vocabulary, `field_path`-based sub-field
+provenance, and `source_references[]` as sets of references rather than
+copies. Extends `docs/api/data-trust-model.md`'s exact per-field
+provenance shape (not a replacement) and carries a `market_id` on every
+market-bound record. Whether `operational_status` should join
+`PLATFORM-03`'s five mandatory risk-sensitive fields is flagged as an open
+question there, not decided by this ticket.
 
 ## Wave 2 — Import & sourcing infrastructure
 
