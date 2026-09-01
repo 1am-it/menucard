@@ -244,3 +244,18 @@ This track does not change, reorder, or depend on the `BE-*` sequence — both
 can proceed independently. It follows the same discipline: one ticket per
 commit, stop for approval after each, doc updates land in the same commit as
 the ticket they describe.
+
+## Future direction: market foundation (principles accepted, nothing built)
+
+`planning/decisions/011-market-foundation-and-international-growth.md`
+accepts the terminology and architecture principles for growing MenuCard
+beyond Breda via a neutral `market_id` concept (a market can be a city
+first, later a region or country), a future hybrid canonical-dataset +
+published-snapshot data architecture, and governance rules (proposals
+only, never direct mutation of published data; completeness before
+popularity in acquisition; source/AI/risk-data governance). None of this
+is built — the current static consumer read path is unchanged, and
+`planning/decisions/010-platform-persistence-and-api.md` is not rewritten.
+See `planning/architecture/market-data-foundation-plan.md` for the
+proposed, not-yet-scheduled `MARKET-*` track this would require — a third,
+separate track alongside `BE-*` and `PLATFORM-*`.

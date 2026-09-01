@@ -1,5 +1,14 @@
 # Spec — City Coverage Baseline & Rollout Readiness
 
+**Terminology note (2026-09-01):** `[[011-market-foundation-and-international-growth]]`
+introduces "market"/`market_id` as the neutral technical concept for any
+future launch area, with "city"/"stad" reserved for what visitors actually
+see. This spec's use of "city" throughout remains accurate today — Breda
+is the first market, and it is a city — this note exists only so "city"
+here is read as the current, concrete instance of the more general future
+"market" concept, not as a contradiction of it. Nothing in this spec's
+scope, metrics, or thresholds changes.
+
 ## Goal
 
 Define what "launch ready" means for a city, in measurable terms, before

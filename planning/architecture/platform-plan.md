@@ -2,7 +2,12 @@
 
 See [[008-platform-track-scope]] for why this is a separate track from
 `migration-plan.md`'s `BE-*` sequence, and `planning/CONTEXT.md` for how the
-two tracks relate.
+two tracks relate. A third, separate, proposed-but-not-yet-scheduled track
+(`MARKET-*`, see `planning/architecture/market-data-foundation-plan.md` and
+`[[011-market-foundation-and-international-growth]]`) covers the future,
+not-yet-built market/canonical-data foundation for growth beyond Breda —
+this document and every `PLATFORM-*` ticket in it are unaffected by that
+proposal.
 
 ## Strategy
 

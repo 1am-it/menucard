@@ -122,6 +122,23 @@ removing or archiving it explicitly; until then, treat it as inert and
 unrelated to the `field_provenance`/`staff_roles` schema this decision and
 `PLATFORM-05` actually implement.
 
+## Note (2026-09-01) — the deferred question now has a principle-level answer
+
+This decision's "separate, larger question" (whether/when the static
+consumer dataset moves off static JSON) is addressed — at the principle
+level only, nothing built or scheduled — in
+`[[011-market-foundation-and-international-growth]]`. That decision
+describes a future hybrid canonical-dataset + published-snapshot
+architecture and names two separate, not-yet-approved tickets in
+`planning/architecture/market-data-foundation-plan.md`: `MARKET-08` (a
+minimal market-aware consumer read path, needed before any second market
+can launch at all, not tied to the snapshot mechanism) and `MARKET-09`
+(cutting the consumer app over to read from published snapshots, an
+optional later scaling step). **Nothing in this decision changes**:
+Supabase remains scoped to `PLATFORM-*`'s write-capable data only, and
+`data/restaurants.json`/
+`data/menus.json` remain exactly what this decision already said they are.
+
 ## Rejected alternatives
 
 - **A plain Postgres provider (e.g. Vercel Postgres/Neon) + a separate auth

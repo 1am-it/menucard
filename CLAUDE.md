@@ -17,6 +17,18 @@ This is tracked as a separate, parallel `PLATFORM-*` ticket track — see
 `planning/architecture/platform-plan.md` — and does not change or delay the
 consumer-facing dish-first `BE-*` work above.
 
+Beyond Breda itself, MenuCard's growth model is a neutral technical
+**market** (internally `market_id`) — a launch market can be a city first,
+later a region or country. Visitors never see the word "market": the UI
+uses "stad"/"regio". A market is not a restaurant's own catchment area
+("verzorgingsgebied"), a delivery area ("bezorggebied"), or an audience
+segment ("marktsegment") — those stay separate concepts. This is an
+accepted principle and future foundation, not yet built — the current
+static consumer data path is unchanged. See
+`planning/decisions/011-market-foundation-and-international-growth.md` and
+`planning/architecture/market-data-foundation-plan.md` (a proposed,
+not-yet-scheduled `MARKET-*` track, separate from `PLATFORM-*`).
+
 ## Core instruction
 
 Do NOT rebuild the project from scratch.

@@ -20,6 +20,15 @@ this file defines the exact shape.
 Other fields may gain provenance later; these five are the ones later
 `PLATFORM-*` tickets need to build against first.
 
+**Forward reference (2026-09-01):** `[[011-market-foundation-and-international-growth]]`
+proposes a future canonical restaurant/menu record (per `market_id`,
+`MARKET-02` in `planning/architecture/market-data-foundation-plan.md`)
+that extends this exact per-field `source`/`confidence`/`verified_at`/
+`verified_by` shape from a single field to a full record — not a
+replacement or a competing model. How an AI-originated proposal maps onto
+the `source` enum below is explicitly left open there, not decided here
+either.
+
 ## Per-field provenance shape
 
 Each trust-bearing field is accompanied by this record, stored alongside the

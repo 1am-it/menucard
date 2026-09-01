@@ -21,6 +21,10 @@ without building or exposing anything external now.
 - **External API** (out of scope until explicitly planned): a
   publicly-documented, versioned API for third parties. Not built now — this
   spec only asks that internal design decisions don't foreclose it later.
+  `[[011-market-foundation-and-international-growth]]` adds one shaping
+  principle for whenever this is planned: it would be a published,
+  attributed, snapshot-backed data layer, not direct access to internal
+  operational or private data — still not built, still not scheduled.
 
 ## Principles
 

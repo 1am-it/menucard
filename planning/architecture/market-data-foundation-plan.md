@@ -1,0 +1,144 @@
+# Architecture — Market Data Foundation Plan (proposed, not scheduled)
+
+**Status: proposed roadmap only. Nothing below is started, scheduled, or
+approved as active work.** See
+`planning/decisions/011-market-foundation-and-international-growth.md` for
+the accepted principles this roadmap implements, and why it is a separate
+`MARKET-*` track rather than an extension of `PLATFORM-*` or `BE-*`.
+
+This document exists to answer one question concretely: *what would
+actually need to be built before MenuCard could launch a genuine second
+market?* It intentionally does not answer *when*, *which market*, or
+*whether* — those are business decisions outside this document's scope,
+exactly as `PLATFORM-09` explicitly excludes them.
+
+## Relationship to existing tracks
+
+- **`BE-*`** (done) and **`PLATFORM-01`–`07`** (done) are unaffected. The
+  static consumer read path they built stays exactly as it is through
+  Waves 1–3 below, until (and unless) `MARKET-08` is separately decided and
+  approved — see Wave 4 for why some version of `MARKET-08` is not
+  optional the way the rest of this roadmap is.
+- **`PLATFORM-09`** (city rollout operations, proposed, not yet approved)
+  remains a `PLATFORM-*` ticket about Breda-shaped thresholds and process —
+  it is not renumbered or reinterpreted by this roadmap. Its own go/no-go
+  framing is reused conceptually here (see `MARKET-01`'s launch-status
+  vocabulary), not replaced.
+- **`PLATFORM-10`** (public-facing metrics/exposure) and a future public
+  API both depend on this roadmap's snapshot mechanism (`MARKET-06`)
+  existing first if they are ever to expose more than one market.
+
+## Wave 1 — Market dimension & canonical schema (modeling only)
+
+### MARKET-01 — Market entity
+
+Define and document the `market` schema per `[[011-market-foundation-and-international-growth]]`:
+`id`, geographic boundary, country code, timezone, default currency,
+supported languages, launch status. A modeling ticket, matching
+`PLATFORM-03`'s "defines the shape, not yet a live write path" precedent —
+no live data, no migration.
+
+### MARKET-02 — Canonical restaurant/menu schema
+
+Define the operational, source-of-truth schema for a restaurant and its
+menu, distinct from both today's static JSON shape and the future
+publication-snapshot shape. Must accommodate per-field provenance
+(extending `docs/api/data-trust-model.md`, not replacing it) and a
+`market_id` reference.
+
+## Wave 2 — Import & sourcing infrastructure
+
+### MARKET-03 — Source registry
+
+A tracked entity for every data source: source identity, licence/usage
+right, import date, republish/reuse permission, freshness. Implements
+`[[011-market-foundation-and-international-growth]]`'s source-governance
+principle concretely.
+
+### MARKET-04 — Raw imports & import runs
+
+A staging layer that preserves raw source data and records each import
+run, before any normalization — so a bad normalization can be diagnosed or
+replayed against the original source, not just the cleaned result.
+
+### MARKET-05 — Normalization & deduplication
+
+Turns raw imports into canonical candidate records: matching and
+deduplicating across sources (e.g. the same restaurant found via two
+different imports). The completeness-before-popularity principle applies
+here directly — every candidate in the market boundary gets a canonical
+record, regardless of how thin its data is yet.
+
+## Wave 3 — Publication
+
+### MARKET-06 — Publication snapshots
+
+The versioned, per-market export mechanism: version, publication date,
+changelog, generated from canonical data only after review. This is the
+first ticket that produces something a consumer-facing surface *could*
+read — but nothing consumes it directly here. `MARKET-08`'s minimal
+market-aware read path does not need this to exist first; `MARKET-09`'s
+later, optional scale step is what actually wires the consumer app to
+read from these snapshots.
+
+### MARKET-07 — Market-scoped coverage metrics
+
+Generalizes `PLATFORM-01`'s coverage dashboard (currently implicitly
+Breda-only) to compute the same metrics per `market_id`, so `PLATFORM-09`'s
+go/no-go checklist becomes mechanically repeatable rather than a one-off
+script.
+
+## Wave 4 — Consumer cutover (mandatory minimum, then an optional scale step)
+
+**Correction (2026-09-01):** an earlier version of this document claimed a
+second market could launch without any consumer-read-path change, on "the
+same static-JSON-per-market pattern Breda uses today." That was wrong.
+Today's consumer app (`/`, `/search`, `/restaurant/[id]`, `/menu/[id]`) has
+**no market dimension, no market selection, and no market-aware read path
+at all** — it is hard-wired to a single, implicit Breda dataset. Even
+serving a second market from separate static JSON files would still
+require *something* in the consumer app that knows which market a given
+visitor/request is for and loads that market's data accordingly. That
+mechanism does not exist and is not optional. This document now splits
+what was one hypothetical ticket into a mandatory minimum and a genuinely
+optional later step.
+
+### MARKET-08 — Minimal market-aware consumer read path (mandatory before a second market launches)
+
+The smallest change that lets the consumer app serve more than one
+market: some form of market selection (e.g. per-market routing or an
+equivalent mechanism — not chosen here) plus market-scoped data loading,
+so `/`, `/search`, `/restaurant/[id]`, `/menu/[id]` read the correct
+market's data instead of an implicitly single dataset. This can still read
+from simple per-market static data — it does **not** require
+`MARKET-06`'s publication-snapshot mechanism to exist first, and it does
+**not** replace or reinterpret Breda's current static read path, which
+keeps working unchanged as the first market's data source under this same
+mechanism. This is the "separate, larger question"
+`[[010-platform-persistence-and-api]]` deferred, now named concretely and
+scoped to its actual minimum — **not decided or scheduled here**, but no
+longer optional the way the rest of this roadmap is: without it, a second
+market has no way to be shown to anyone.
+
+### MARKET-09 — Full snapshot/CDN-optimized publication layer (optional, later scale step)
+
+Once `MARKET-06`'s versioned publication snapshots exist, wiring the
+consumer app to read from them (instead of hand-maintained per-market
+static files) is a genuine scaling optimization — worth doing once several
+markets are live and keeping each one's static files in sync by hand
+becomes the bottleneck, not before. Explicitly optional relative to
+`MARKET-08`: a second market can launch and run correctly without this,
+just with more manual per-market data maintenance than a snapshot-fed
+version would need.
+
+## What must exist before a real second market can launch
+
+At minimum: `MARKET-01` through `MARKET-07` (the market dimension,
+canonical schema, source registry, import/normalization pipeline,
+publication snapshots, and per-market coverage metrics), **`MARKET-08`'s
+minimal market-aware consumer read path** (mandatory — see the correction
+above), and `PLATFORM-09`'s own threshold decision approved and evaluated
+against that new market's real `MARKET-07` numbers. `MARKET-09` (the full
+snapshot/CDN-optimized layer) is not required to launch a second market —
+only to serve several simultaneously live markets without hand-maintaining
+parallel static files indefinitely.
