@@ -46,7 +46,7 @@ third, external-facing contribution flows last.
 9. [platform-09-city-rollout-operations.md](./platform-09-city-rollout-operations.md) — done, decision/documentation only (its only dependency, `PLATFORM-01`, was already done)
 10. [platform-10-public-city-metrics-platform-exposure.md](./platform-10-public-city-metrics-platform-exposure.md)
 
-## MARKET-* order (proposed, not scheduled — one ticket done as documentation)
+## MARKET-* order (proposed, not scheduled — three tickets done as documentation)
 
 See `planning/decisions/011-market-foundation-and-international-growth.md`
 for why this is a third, separate track from `BE-*`/`PLATFORM-*`. Every
@@ -55,7 +55,7 @@ otherwise approved — no code, migration, or Supabase change.
 
 1. [market-01-market-entity.md](./market-01-market-entity.md) — done, documentation/schema contract only
 2. [market-02-canonical-restaurant-menu-schema.md](./market-02-canonical-restaurant-menu-schema.md) — done, documentation/schema contract only
-3. MARKET-03 — source registry (not started)
+3. [market-03-source-registry.md](./market-03-source-registry.md) — done, documentation/schema contract only
 4. MARKET-04 — raw imports & import runs (not started)
 5. MARKET-05 — normalization & deduplication (not started)
 6. MARKET-06 — publication snapshots (not started)

@@ -130,6 +130,15 @@ extending or renumbering `EU-14`'s own codes.
 (→ future `MARKET-04` import-run log), `source_locator` (URL/PDF/etc.),
 `retrieved_at`.
 
+**Amendment (2026-09-01, `MARKET-03`):** `source_id` must reference a
+registered `Source` identity from `docs/api/source-registry-schema.md` —
+never a bare, unreviewed URL or an ad hoc string. A `SourceReference`
+cannot exist for a source that hasn't at least been entered into the
+registry (as `pending_review` at minimum). This doesn't change anything
+about `SourceReference`'s own shape — it makes explicit a constraint on
+`source_id` that was previously only implied by "→ future `MARKET-03`
+source registry."
+
 ## 6. `source_references[]` — a set of references, never copies
 
 Wherever this document says a record or `FieldAssertion` has

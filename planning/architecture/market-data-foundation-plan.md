@@ -68,10 +68,29 @@ question there, not decided by this ticket.
 
 ## Wave 2 — Import & sourcing infrastructure
 
-### MARKET-03 — Source registry
+### MARKET-03 — Source registry, usage rights, and data minimisation (done, documentation/schema contract only)
 
-A tracked entity for every data source: source identity, licence/usage
-right, import date, republish/reuse permission, freshness. Implements
+See `docs/api/source-registry-schema.md`: a four-value status vocabulary
+(`pending_review` mandatory initial state → `allowed`/`restricted`/
+`blocked`), with `allowed`/`restricted` structurally requiring terms
+evidence, a reviewer, a date, and a reason — a source is never `allowed`
+merely because its data is publicly visible. `allowed_access_method`'s
+vocabulary structurally excludes scraping third-party search-results
+pages (no such option exists, not a per-row exclusion). Licence and
+technical access channel are tracked as separate questions. A narrowly
+scoped `basic_info` data category permits only name/visiting-address/
+general-phone/general-contact/website/reservation-link, with an explicit,
+standing exclusion of any natural-person names or personal contact/home
+address data. `MARKET-02`'s `SourceReference.source_id` is amended to
+require a registered `Source`, never a bare URL. Breda's own existing
+restaurant websites are registered `pending_review`, not retroactively
+`allowed` — no informal past use counts as a review that never happened.
+Four candidate pilot sources (OpenStreetMap, KVK Open Dataset, individual
+restaurant websites, Gemeente Breda open data) were researched using
+primary documentation — none selected; KVK's BV/NV-only coverage is
+flagged as a completeness risk specifically for small/independent
+restaurants, and Gemeente Breda's portal couldn't be confirmed to have a
+relevant dataset at all. Implements
 `[[011-market-foundation-and-international-growth]]`'s source-governance
 principle concretely.
 

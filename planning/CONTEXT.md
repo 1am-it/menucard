@@ -317,3 +317,36 @@ as gaps, not filled with invented certainty. Whether `operational_status`
 should join the five mandatory risk-sensitive fields remains an explicit,
 undecided open question. No code, migration, Supabase change, storage
 choice, market selector, or second market.
+
+MARKET-03 — Source registry, usage rights, and data minimisation (done,
+documentation/schema contract only). See
+`docs/api/source-registry-schema.md`: a four-value `Source.status`
+vocabulary (`pending_review` mandatory initial state → `allowed`/
+`restricted`/`blocked`), with `allowed`/`restricted` structurally requiring
+`terms_reference`, `reviewed_by`, `reviewed_at`, and `status_reason` — a
+source is never `allowed` merely because its data is publicly visible.
+`allowed_access_method`'s enum structurally excludes scraping third-party
+search-results pages (no such value exists, not a per-row exclusion).
+Licence/reuse rights and technical access channel are tracked as separate
+fields (`reuse_rights` vs. `allowed_access_method`/`access_provider_note`),
+so a permissive data licence is never read as blanket permission for any
+fetch method. A narrowly-scoped `basic_info` data category permits only
+name/visiting-address/general-phone/general-contact-address/website/
+reservation-link, with a standing exclusion of owner/staff names, personal
+contact details, and likely home addresses (a particular sole-proprietorship
+risk) — "publicly visible" is documented as never implying "freely
+reusable." `MARKET-02`'s `SourceReference.source_id` is amended to require
+a registered `Source` (at minimum `pending_review`), never a bare URL.
+Breda's own existing restaurant websites are registered `pending_review`,
+not retroactively `allowed` — no informal past use counts as a review that
+never happened. Four candidate pilot sources were researched, none
+selected: OpenStreetMap (strong for a complete, non-popularity-driven
+candidate list; ODbL licence and access-provider policy — extract vs.
+public Overpass instance — reviewed as separate questions); KVK Open
+Dataset Basis Bedrijfsgegevens (proposed `restricted` enrichment-only
+candidate, explicitly not the primary list, since its BV/NV-only coverage
+is a completeness risk specifically for small/independent restaurants);
+individual restaurant websites (per-site `pending_review`, the existing
+informal enrichment layer, no blanket licence); Gemeente Breda open data
+(no specific dataset could be confirmed to exist — not yet a candidate).
+No code, migration, Supabase change, or restaurant data imported.
