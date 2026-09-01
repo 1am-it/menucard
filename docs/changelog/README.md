@@ -127,7 +127,7 @@ have had for work already completed and approved (`BE-02a` through `BE-04`).
 **These were not actually tagged as releases when the work happened** — see
 the note at the end of this section. Numbers here are the recommended
 version ladder going forward; new work should continue it (next version
-after `v0.8.0` is `v0.9.0`, for whichever ticket ships next).
+after `v0.9.0` is `v0.10.0`, for whichever ticket ships next).
 
 ### v0.2.0 — Dish search foundation
 *(`BE-02a` data model repair, `BE-02b` server-side search endpoint, `BE-02c` ranking — bundled as one milestone since none were independently user-visible on their own)*
@@ -217,6 +217,48 @@ document's earlier text — it shipped, but was never versioned until now.)*
 - **What users notice**: More accurate reservation buttons, extra info on
   the menu page, faster loading — nothing removed or broken.
 - **Existing functionality**: Fully preserved on all three pages.
+
+### v0.9.0 — Trusted contributions and data governance
+*(`PLATFORM-06`, `PLATFORM-07`, `MARKET-01` through `MARKET-03` — bundled as
+one milestone, published as a GitHub Release)*
+
+- **What changed**: Restaurant owners can now claim their own restaurant and
+  verify their identity through a moderated review flow; a trusted internal
+  editor reviews and decides every claim before it takes effect — nothing is
+  granted automatically (`PLATFORM-07`). Built the internal review queue
+  editors use to approve or reject proposed data changes, so no single
+  change reaches real data without a recorded decision (`PLATFORM-06`).
+  Alongside this, defined (as documentation/schema contracts, not yet built)
+  the technical foundation MenuCard needs to responsibly grow beyond Breda:
+  a neutral "market" concept for a future city or region (`MARKET-01`), a
+  canonical restaurant/menu data model that records who asserted each price,
+  opening hour, reservation method, or allergen and how confident that
+  assertion is (`MARKET-02`), and a source registry that requires every
+  future data source to be reviewed and approved before use — publicly
+  visible data is never treated as automatically reusable, scraping of
+  third-party search-results pages is excluded by design, and personal data
+  (owner names, personal contact details, likely home addresses) is
+  explicitly kept out of automated collection (`MARKET-03`).
+- **Why it matters**: Restaurant owners get a real, verified way to take
+  ownership of their listing, and every data change — from an owner or from
+  internal review — now goes through a moderated decision, not a silent
+  write. The market and source-governance contracts mean that when MenuCard
+  does start pulling in data from external sources, it will do so with
+  recorded permission, traceability, and clear limits on what's collected,
+  rather than after the fact.
+- **What users/stakeholders will notice**: Restaurant owners can start a
+  claim on their listing. Internal editors have a review queue for claims
+  and proposed changes. Nothing changes for regular visitors browsing or
+  searching — the consumer experience on `/`, `/search`, `/restaurant/[id]`,
+  and `/menu/[id]` is untouched.
+- **Existing functionality**: Fully preserved — no existing page, route, or
+  consumer-facing behaviour changed.
+- **Explicitly not included in this release** (documented as contracts or
+  roadmap only, not built or live): automated import of Breda restaurant
+  data from any external source; a daily-menu or daily-special feature; any
+  new data-driven search ranking or sorting; a public snapshot/publication
+  layer or a market-aware consumer read path; public-facing source or
+  freshness badges. These remain future work, not shipped capability.
 
 ### v0.8.0 — Data platform foundation: coverage tracking & trust model (Phase 1)
 *(`PLATFORM-01` through `PLATFORM-05` — bundled as one milestone, published
