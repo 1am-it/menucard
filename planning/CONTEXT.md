@@ -196,6 +196,50 @@ values. As with `PLATFORM-05`, approving here only updates
 `field_provenance` — the route to consumer-facing consumption remains the
 open question documented in `planning/decisions/010-platform-persistence-and-api.md`.
 
+PLATFORM-07 — Owner claim and identity verification (done, live-verified).
+New `restaurant_claims` table (`supabase/migrations/0003_restaurant_claims.sql`),
+separate from `pending_changes`/`field_provenance`. First API surface in
+the project reachable by any authenticated user without a `staff_roles`
+row (`/api/claims/...`) — kept strictly separate from the editor-only
+`/api/internal/v1/claims/...` review side. `email`/`user_id` come only from
+the verified session; `restaurantId` is validated server-side against
+`data/restaurants.json`. Domain-match (claimant email domain vs. the
+restaurant's website domain, both normalized) is advisory evidence shown
+to the reviewer only — never an automatic gate; every claim, matched or
+not, requires an explicit `editor` decision. A restaurant can end up with
+more than one `owner` — the reviewer sees an existing-owner flag
+(`hasExistingOwner`) and decides anyway; there is no automatic approval
+path of any kind. Approve is atomic via `approve_restaurant_claim` (same
+`SECURITY INVOKER`/fixed-`search_path`/`service_role`-only pattern as
+`PLATFORM-06`), granting `owner` and marking the claim decided in one
+transaction; reject never touches `staff_roles`. `internal` has no RLS
+access to claims, matching `PLATFORM-06`'s corrected posture — only
+`editor` reviews. This is the first ticket to require a real grant beyond
+`PLATFORM-05`'s original assumption that `staff_roles` writes are always
+manual — `docs/api/internal-provenance-api.md` is corrected accordingly:
+manual bootstrap remains the only path for `editor`/`internal`, but
+`owner` now also has this reviewed, automatic path.
+
+**Live-verified**: a real magic-link callback (an admin-generated GoTrue
+link, the same verification mechanism a genuinely emailed link uses) was
+followed all the way through session recognition and a real claim
+submission via an actual click in the `/claim/[restaurantId]` UI — not an
+injected session. **Not verified**: actual email delivery of the magic
+link through the UI's own send button — Supabase's project-wide email
+send-rate-limit was hit during testing (confirmed, via a separate check,
+to affect unrelated addresses too, so this is a shared-quota/environment
+constraint, not a defect in the claim flow). Tracked as an external,
+low-risk follow-up, not a blocker. Domain-match evidence, duplicate-claim
+handling, unknown-restaurant validation, editor review, atomic approve
+(including the granted role working immediately against `PLATFORM-05`'s
+unmodified provenance endpoint), reject, double-decision protection on
+both, and every authorization boundary (owner/no-role blocked from the
+review routes) were all confirmed live. The synthetic owner role granted
+during testing was revoked afterward via a bounded `DELETE`; the claim
+records themselves and the synthetic test account were kept deliberately,
+as a documented pre-launch verification audit trail — matching
+`PLATFORM-06`'s precedent for `pending_changes`.
+
 This track does not change, reorder, or depend on the `BE-*` sequence — both
 can proceed independently. It follows the same discipline: one ticket per
 commit, stop for approval after each, doc updates land in the same commit as

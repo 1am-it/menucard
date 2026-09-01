@@ -177,6 +177,14 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
                 </a>
               )}
             </div>
+
+            {/* PLATFORM-07 — small, unobtrusive claim link, not a CTA */}
+            <Link
+              href={`/claim/${id}`}
+              style={{ display: 'inline-block', marginTop: 12, fontSize: 13, color: 'var(--text-muted)' }}
+            >
+              Is dit jouw restaurant? Claim dit restaurant →
+            </Link>
           </div>
         </div>
       </div>

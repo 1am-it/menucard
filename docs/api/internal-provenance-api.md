@@ -120,8 +120,14 @@ never sends `null` for it — this is why the upsert's conflict target
 
 ## Bootstrap: assigning the first roles
 
-There is no UI for this yet — deliberately, per this ticket's scope
-(`PLATFORM-06`/`07` build role-granting surfaces later). To grant a role:
+**Correction (`PLATFORM-07`): this is no longer accurate for `owner`.**
+It was true through `PLATFORM-06` that role assignment was always manual —
+`owner` now also has a second, real path: an approved restaurant claim
+grants it automatically via `approve_restaurant_claim`
+(`docs/api/owner-claims-api.md`), reviewed by a human editor first, never
+by a self-service form directly. `editor`/`internal` still have no
+self-service or automated path — the manual steps below remain the only
+way to grant those.
 
 1. The person signs in once via Supabase Auth (however your project's auth
    flow is configured) so a row exists in `auth.users`.
@@ -130,7 +136,8 @@ There is no UI for this yet — deliberately, per this ticket's scope
    insert into staff_roles (user_id, role, restaurant_id)
    values ('<their-auth.users-id>', 'editor', null);
    ```
-3. For an `owner` role, `restaurant_id` is required (enforced by a `check`
+3. For an `owner` role granted this way (e.g. for testing, bypassing the
+   claim flow), `restaurant_id` is required (enforced by a `check`
    constraint in the migration) and must match the restaurant id scheme
    used in `data/restaurants.json` (e.g. `"6"`).
 
