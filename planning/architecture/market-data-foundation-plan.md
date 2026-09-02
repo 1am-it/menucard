@@ -174,6 +174,32 @@ becomes the bottleneck, not before. Explicitly optional relative to
 just with more manual per-market data maintenance than a snapshot-fed
 version would need.
 
+## Wave 5 — Shareable public surfaces
+
+### MARKET-10 — Shareable menu, dish, and personal-selection links (proposed, not started)
+
+Lets a visitor create a durable, no-account public link to a full menu
+(with meal-moment context), a single dish, or a personal multi-dish
+selection — not a cart, reservation system, review feature, or paid
+placement. See `planning/specs/tickets/market-10-shareable-links.md` for
+the full contract: durable/direct-open + factual-only + freshness
+-disclosure principles; allergen/diet labels gated on trust-model
+confidence; Web Share API with copy-link fallback; strict data
+minimisation (no personal, private-business, or internal
+provenance/moderation data in a shared payload, mirroring `MARKET-03`'s
+`basic_info` discipline); a future, optional rich link-preview card with
+explicit anti-ranking/anti-paid-placement/anti-marketing-claim
+constraints; ephemeral client-side personal selections by default (a
+save-able/collaborative selection is a later, separate privacy decision);
+and aggregate-only, never-a-ranking-signal analytics. Hard-blocked on
+`MARKET-02` (canonical identities — flagging that "stable" does not
+automatically mean "public-URL-safe"), `MARKET-06` (snapshot version/
+freshness metadata), `MARKET-08` (an actual consumer-facing page to open),
+the existing trust model (`docs/api/data-trust-model.md`), and a URL/
+metadata strategy decision that no existing ticket makes. This wave is
+downstream of the entire Wave 1–4 sequence, not part of the mandatory
+second-market-launch minimum below.
+
 ## What must exist before a real second market can launch
 
 At minimum: `MARKET-01` through `MARKET-07` (the market dimension,

@@ -67,6 +67,10 @@ otherwise approved — no code, migration, or Supabase change.
 7. MARKET-07 — market-scoped coverage metrics (not started)
 8. MARKET-08 — minimal market-aware consumer read path (not started; mandatory before any second market can launch — see `planning/architecture/market-data-foundation-plan.md`)
 9. MARKET-09 — full snapshot/CDN-optimized publication layer (not started; optional later scale step)
+10. [market-10-shareable-links.md](./market-10-shareable-links.md) — not
+    started; blocked on `MARKET-02`, `MARKET-06`, `MARKET-08`, the existing
+    trust model, and an undecided URL/metadata strategy — see the ticket's
+    own "Dependencies" section
 
 Do not start a ticket whose dependencies aren't done. Each ticket should be
 independently reviewable and deployable where practical. The three tracks
