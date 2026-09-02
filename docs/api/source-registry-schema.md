@@ -36,19 +36,19 @@ for where each field actually lives now.
 | `source_type` | enum | `restaurant_own_website`, `restaurant_pdf_menu`, `owner_direct_submission`, `government_open_data`, `poi_directory`, `community_contribution` (future `PLATFORM-08`), `other`. |
 | `official_location` | URL/locator | The canonical place this source lives. |
 | `terms_reference` **→ moved** | URL/text | The actual terms/licence document reviewed. **Required before `allowed`/`restricted`.** |
-| `terms_version` **→ moved** | text, nullable | The specific version/date of the terms, where the source publishes one (many don't — nullable, not forced). |
+| `terms_version` **→ moved** | text, nullable | The specific version/date of the *legal terms/licence* text, where the source publishes one (many don't — nullable, not forced). **Amended 2026-09-05, clarified**: this is never the dataset/data edition (e.g. "2026 edition" of a yearly-published dataset) — that is a separate concept, recorded per use on `ImportRun.source_version`/`MarketBoundaryVersion.source_version`, not here. A source's licence can stay at the same `terms_version` across many different dataset editions. |
 | `terms_retrieved_at` **→ moved** | timestamp | When the terms evidence itself was fetched/read — distinct from `reviewed_at` (§ below), which is when a person made a judgement call about it. |
 | `next_review_due` **→ moved** | timestamp | Every reviewed source gets a re-review date — terms and technical access can both change silently. |
-| `allowed_data_categories[]` / `excluded_data_categories[]` **→ moved** | enum list | See "Data categories" below — this is the primary data-minimisation control point. |
+| `allowed_data_categories[]` / `excluded_data_categories[]` **→ moved** | enum list | See "Data categories" below — this is the primary data-minimisation control point. **Amended 2026-09-05** — see "Amendment: geospatial reference data support" for the new `geospatial_reference_data` category. |
 | `reuse_rights` **→ moved** | `{redistribution_allowed, attribution_required, commercial_use_allowed, geographic_restrictions}` | `commercial_use_allowed` is `true \| false \| 'unknown'` — never defaulted to `true` when actually unstated. |
-| `allowed_access_method` **→ moved** | enum | `manual_entry`, `owner_submission`, `automated_fetch_source_approved_domain`, `authenticated_api`, `licensed_dataset_download`. **There is no "scrape a third-party search-results page" option in this vocabulary at all** — not excluded per-row, structurally absent. |
+| `allowed_access_method` **→ moved** | enum | `manual_entry`, `owner_submission`, `automated_fetch_source_approved_domain`, `authenticated_api`, `licensed_dataset_download`. **There is no "scrape a third-party search-results page" option in this vocabulary at all** — not excluded per-row, structurally absent. **Amended 2026-09-05** — see "Amendment: geospatial reference data support" for two added values and the new primary/supplementary distinction. |
 | `access_provider_note` **→ moved** | text | Records that *licence* and *technical access channel* are reviewed separately — e.g. "ODbL covers the data; this entry's access method is a static extract, not the public Overpass instance, which has its own separate usage policy." |
-| `refresh_policy` | text/enum | e.g. `manual_on_demand`, `periodic_30d`, `event_driven`. |
+| `refresh_policy` | text/enum | e.g. `manual_on_demand`, `periodic_30d`, `event_driven`. **Amended 2026-09-05** — `periodic_annual` added, see below. |
 | `freshness_expectation` | duration | How stale this source's data may become before it's no longer trusted as current. Independent of, but informed by, `docs/api/data-trust-model.md`'s 90-day reasoned default — a source-specific value that differs from it must state why. |
 | `geographic_applicability` **→ moved** | `{country_codes[], market_ids[]}` | A source approved for one country/market is not implicitly approved everywhere — re-review is required to extend its use to a new market, not an automatic carry-over. |
 | `status` **→ moved** | `pending_review` \| `allowed` \| `restricted` \| `blocked` | `pending_review` is the **mandatory initial status** for every new entry — nothing starts anywhere else. |
 | `status_reason` **→ moved** | text | **Required whenever `status ≠ pending_review`.** |
-| `reviewed_by`, `reviewed_at` **→ moved** | | **Required whenever `status ≠ pending_review`.** |
+| `reviewed_by`, `reviewed_at` **→ moved** | | **Required whenever `status ≠ pending_review`.** **Amended 2026-09-05, clarified**: `reviewed_by` must be a real, authorized human reviewer — never an AI system, and never left implicit. See "Amendment: geospatial reference data support" for the explicit invariant. |
 
 ### Invariants (original — see the amendment's own invariants for the current, per-version form)
 
@@ -105,6 +105,29 @@ settles any of them. **Owner submission remains the preferred route** for
 any data a restaurant owner wants to add or correct themselves — see
 `PLATFORM-07`'s existing claim flow, which this principle extends rather
 than replaces.
+
+### `geospatial_reference_data` (added 2026-09-05)
+
+A second, deliberately separate data category for administrative/
+geographic boundary data and comparable reference geometry (e.g. a
+market's boundary source — `MARKET-01`'s `MarketBoundaryVersion`). This
+does **not** restructure or reinterpret `basic_info` above — restaurant
+data sources still classify their fields under `basic_info` exactly as
+before; this is a new, additional value in the same
+`allowed_data_categories[]` enum for a structurally different kind of
+source (geographic reference data, not business or personal information).
+
+By its nature, `geospatial_reference_data`:
+
+- carries no personal or business data — a municipal boundary polygon
+  identifies a place, never a person or a specific restaurant's private
+  information;
+- is used exclusively for programmatic membership testing (`MARKET-01`'s
+  `inclusion_rule`), never displayed to consumers as business or listing
+  information;
+- still requires the same full source review before use (`allowed`/
+  `restricted` with terms, reviewer, date, reason) — "it's just map data"
+  is not an exemption from review, any more than "the data is public" is.
 
 ## Relationship to the canonical schema
 
@@ -196,6 +219,76 @@ not at a specific `SourceAuthorizationVersion` — a factual "this came
 from this source" reference is a lighter claim than an authorization
 -gated action, and does not need point-in-time freezing the way an
 `ImportRun` does. Only `ImportRun` gets the version-specific reference.
+
+## Amendment (2026-09-05): geospatial reference data support
+
+**Trigger**: preparing Breda's `MarketBoundaryVersion` (`MARKET-01` gate 1)
+against a real candidate source (Kadaster/PDOK's "Bestuurlijke Gebieden")
+surfaced several gaps in this registry's vocabulary — it was written with
+restaurant/menu sources in mind and had no good fit for a government
+open-geodata source published as an annual dataset edition with both a
+bulk-download route and a separate live query API. This amendment closes
+those specific gaps. **It does not reclassify or change any existing
+restaurant/menu `Source` entry** — every addition here is a new,
+additional enum value or field, never a redefinition of an existing one.
+
+### New `refresh_policy` value
+
+`periodic_annual` — added alongside the existing `manual_on_demand`,
+`periodic_30d`, `event_driven` values, for sources published on a
+predictable yearly cadence (e.g. a government dataset republished every
+January).
+
+### New `allowed_access_method` values
+
+Added to the existing enum (`manual_entry`, `owner_submission`,
+`automated_fetch_source_approved_domain`, `authenticated_api`,
+`licensed_dataset_download`):
+
+- **`open_dataset_download`** — a direct, unauthenticated download of a
+  publicly published dataset file (e.g. an Atom-feed-listed GeoPackage or
+  GML export). No API key, account, or registration step beyond
+  attribution. Distinct from `licensed_dataset_download`, which implies
+  some licensing/registration friction beyond simple attribution.
+- **`open_api_query`** — an unauthenticated, public, query-based API
+  (e.g. an OGC API Features endpoint) used to read or validate data
+  directly, without a bulk file download.
+
+The structural absence of a "scrape a third-party search-results page"
+value is unchanged — neither addition touches that.
+
+### `SourceAuthorizationVersion.supplementary_access_methods[]` (new field)
+
+| Field | Type | Notes |
+|---|---|---|
+| `supplementary_access_methods[]` | enum list, drawn from the same `allowed_access_method` vocabulary, nullable/empty | Zero or more *additional* access methods explicitly permitted for this version, used only for validation or freshness-checking — never to establish or replace the authoritative artifact on their own. |
+
+**New invariant (extends invariant 4)**: `allowed_access_method` names
+exactly the **one** primary, reproducible route used to establish or
+update a source's authoritative version-of-record (e.g. the specific
+bulk-download artifact an `ImportRun` or `MarketBoundaryVersion` was
+built from). `supplementary_access_methods[]` may separately permit
+additional routes (e.g. a live query API) for confirming a specific
+feature or checking whether the source has changed since the primary
+artifact was retrieved — a supplementary route is never sufficient, on
+its own, to create a new version; only a fetch via the primary
+`allowed_access_method` can do that.
+
+### Human review cannot be delegated to AI research (explicit invariant)
+
+**New invariant (extends invariant 2)**: `reviewed_by` must identify a
+real, authorized human reviewer. AI-assisted research (fact-finding,
+verifying licence text, checking technical access, drafting proposed
+field values) may **prepare evidence** for a review — exactly as this
+project's own AI-assisted research into candidate sources already does —
+but it never satisfies `reviewed_by`/`reviewed_at` itself, and a
+`SourceAuthorizationVersion` may not move to `allowed`/`restricted` on
+the strength of AI research alone, however thorough. This extends
+`[[011-market-foundation-and-international-growth]]` §8's existing
+principle ("AI may never publish independently as a source of truth —
+every AI-assisted extraction is itself a proposal, subject to the same
+review flow as any human-submitted one") explicitly to source
+authorization decisions, not only to restaurant/menu data.
 
 ## Relationship to `MARKET-04` (import runs)
 

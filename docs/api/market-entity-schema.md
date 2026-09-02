@@ -86,7 +86,7 @@ supplies that geometry — see "What this amendment does not decide" below.
 | `market_id` | FK → `market.id` | Which market this version belongs to. |
 | `version_number` | integer | Sequential, human-readable. |
 | `representation_type` | enum: `polygon` \| `postal_code_list` \| `named_administrative_region` | The three candidate representations this contract already named are now the fixed, enumerable vocabulary for this field — which one a given version actually uses is chosen per version, not globally. |
-| `definition_ref` | reference/locator | Points to the actual geometry/list data for this version (a file, a query, a dataset row — physical storage not chosen here). Distinct from `source` below: this is *where the data for this version lives*, not *who is authoritative for it*. |
+| `definition_ref` | reference/locator | Points to the actual geometry/list data for this version (a file, a query, a dataset row — physical storage not chosen here). Distinct from `source` below: this is *where the data for this version lives*, not *who is authoritative for it*. **Amended 2026-09-05, clarified**: `definition_ref` always points to the **official source artifact as published** (e.g. a government dataset's own downloadable file) — never a self-made, locally derived, or pre-extracted file. Where a specific feature must be selected out of a larger official artifact (e.g. one municipality out of a nationwide file), that selection is a separate, explicit step — see `feature_selection_rule` below — not a reason to substitute a derived file as the reference of record. |
 | `source` | text/reference | The authoritative origin of this specific boundary definition (e.g. a named geodata registry or the municipality's own published boundary). **For a market boundary sourced from outside MenuCard's own records, this should be registered and reviewed the same way any other external data origin is** — reusing `docs/api/source-registry-schema.md`'s `Source`/`SourceAuthorizationVersion` mechanism rather than inventing a parallel one, since a boundary provider is exactly the same kind of thing MARKET-03 already governs: an external source with its own terms, licence, and version. Not yet filled in for Breda — see "What this amendment does not decide." |
 | `source_version` | text, nullable | The source's own versioning/edition, where it publishes one. |
 | `valid_from` (peildatum) | date | The date this boundary definition is asserted accurate as of — administrative boundaries do occasionally change (mergers, border adjustments). |
@@ -94,6 +94,10 @@ supplies that geometry — see "What this amendment does not decide" below.
 | `inclusion_rule` | text, explicit | How membership is tested against this specific representation (e.g. "a coordinate is in-market if it falls within or on the polygon boundary" for `polygon`; "an address is in-market if its official postal code appears in the list" for `postal_code_list`). Never implicit — every version states its own rule in terms of its own `representation_type`. |
 | `effective_from` | timestamp | When this version became the market's recorded boundary. |
 | `superseded_by`, `superseded_at` | FK / timestamp, nullable | Set once a later version replaces this one. `null` on the current version. |
+| `feature_selection_rule` **(added 2026-09-05)** | text, explicit | The deterministic rule for selecting *which* feature within `definition_ref`'s official artifact this version actually uses — distinct from `inclusion_rule` above, which tests whether an external coordinate/address falls *inside* the already-selected boundary. `feature_selection_rule` answers "which feature is Breda's," `inclusion_rule` answers "is this point inside Breda's boundary." A selection rule names one **primary selector** (a stable code, never a database-internal UUID/feature id, even one that looks stable — see the invariant below) plus one or more **required validation assertions** that must independently match; if a validation assertion fails, selection must halt as an error, never silently proceed on the primary selector alone. |
+| `source_artifact_hash_algorithm` **(added 2026-09-05)** | text (e.g. `SHA-256`) | The hash algorithm used for `source_artifact_hash` below. |
+| `source_artifact_hash` **(added 2026-09-05)** | text (hex digest) | A cryptographic hash of the **entire official source artifact** at `definition_ref`, exactly as retrieved — not of any extracted subset. Proves which exact file was used, independent of retaining the file itself. |
+| `geometry_hash` **(added 2026-09-05)** | text (hex digest), nullable | A separate hash of only the **selected feature's geometry**, after `feature_selection_rule` has been applied — distinct from `source_artifact_hash`, which covers the whole official artifact. Nullable because selection may not always produce an isolable geometry blob to hash independently of the source artifact; where it does, recording both hashes lets a later audit tell apart "the official source file changed" from "the same source file's Breda feature was extracted differently." |
 
 ### Invariants
 
@@ -121,6 +125,15 @@ supplies that geometry — see "What this amendment does not decide" below.
    never silently redefines or absorbs an existing market's boundary or
    identity. Breda's `market_id` and boundary history stay exactly what
    they were, regardless of what MenuCard later expands into around it.
+6. **(Added 2026-09-05)** `feature_selection_rule`'s primary selector is
+   always a stable, externally meaningful identifier (e.g. an official
+   administrative code) — **never a source-internal database id or
+   feature UUID, even one that appears stable.** A source's own internal
+   identifiers are an implementation detail of that source's database,
+   not a guarantee available to MenuCard; a stable-looking UUID today is
+   still not the product rule. The required validation assertions (e.g. a
+   name check) exist precisely to catch a primary-selector mismatch
+   before it silently corrupts a boundary version.
 
 ### What this amendment does not decide
 
