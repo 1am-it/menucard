@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import ThemeToggle from '@/src/components/ThemeToggle'
-import { getReservationActions } from '@/src/utils/reservation'
+import { getReservationActions, isValidPhone, isValidUrl } from '@/src/utils/reservation'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -284,7 +284,7 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
           <Link href="/" className="logo">Breda<span>Eats</span></Link>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <ThemeToggle />
-            <Link href="/" className="back-btn">← Alle restaurants</Link>
+            <Link href="/restaurants" className="back-btn">← Alle restaurants</Link>
           </div>
         </div>
       </header>
@@ -346,12 +346,14 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
                   📍 {r.address || restaurant.address}
                 </a>
               </div>
-              {(r.phone || restaurant.phone) && (
-                <div className="rp-line">📞 {r.phone || restaurant.phoneDisplay || restaurant.phone}</div>
+              {(isValidPhone(r.phone) || isValidPhone(restaurant.phone)) && (
+                <div className="rp-line">📞 {isValidPhone(r.phone) ? r.phone : (restaurant.phoneDisplay || restaurant.phone)}</div>
               )}
             </div>
             <div className="rp-btns">
-              <a className="rp-btn-website" href={r.website || restaurant.website} target="_blank" rel="noopener">Website</a>
+              {isValidUrl(r.website || restaurant.website) && (
+                <a className="rp-btn-website" href={r.website || restaurant.website} target="_blank" rel="noopener">Website</a>
+              )}
               {primaryReservation && (
                 <a
                   className="rp-btn-reserveer"

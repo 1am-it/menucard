@@ -28,6 +28,9 @@ of these.
 8. [be-07-reservation-routing.md](./be-07-reservation-routing.md) — done
 9. [be-05-restaurant-menu.md](./be-05-restaurant-menu.md) — done
 10. [be-08-performance-cleanup.md](./be-08-performance-cleanup.md) — done
+11. [be-09-consumer-ux-polish.md](./be-09-consumer-ux-polish.md) — done;
+    small independent polish ticket added after this track was otherwise
+    closed
 
 ## PLATFORM-* order (not started)
 

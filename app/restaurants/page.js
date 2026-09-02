@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import ThemeToggle from '@/src/components/ThemeToggle'
-import { getReservationActions } from '@/src/utils/reservation'
+import { getReservationActions, isValidPhone } from '@/src/utils/reservation'
 import restaurantsData from '@/data/restaurants.json'
 import menusData from '@/data/menus.json'
 
@@ -82,7 +82,7 @@ const T = {
     above40: 'Meer dan €40',
     allBuurten: 'Alle buurten',
     allKeukens: 'Alle keukens',
-    bestRated: 'Best beoordeeld',
+    defaultOrder: 'Standaardvolgorde',
     az: 'Naam A–Z',
     za: 'Naam Z–A',
     sort: 'Sorteren',
@@ -95,7 +95,6 @@ const T = {
     viewMenu: 'Bekijk menu',
     reserve: 'Reserveer',
     restaurants: 'restaurants',
-    bestRatedToggle: 'Best beoordeeld',
     openToday: 'Open',
     closedToday: 'Gesloten',
     menuOverviewTitle: 'Menukaarten',
@@ -124,7 +123,7 @@ const T = {
     above40: 'Over €40',
     allBuurten: 'All neighbourhoods',
     allKeukens: 'All cuisines',
-    bestRated: 'Best rated',
+    defaultOrder: 'Default order',
     az: 'Name A–Z',
     za: 'Name Z–A',
     sort: 'Sort',
@@ -137,7 +136,6 @@ const T = {
     viewMenu: 'View menu',
     reserve: 'Reserve',
     restaurants: 'restaurants',
-    bestRatedToggle: 'Best rated',
     openToday: 'Open',
     closedToday: 'Closed',
     menuOverviewTitle: 'Menus',
@@ -418,7 +416,7 @@ function RestaurantCard({ restaurant, id, lang, selectedMeal, selectedDay, ingre
           >
             📍 {restaurant.address}
           </a>
-          {restaurant.phone && (
+          {isValidPhone(restaurant.phone) && (
             <a
               href={`tel:${restaurant.phone}`}
               className="rc-phone"
@@ -460,7 +458,7 @@ function RestaurantCard({ restaurant, id, lang, selectedMeal, selectedDay, ingre
                 className="rc-menu-go-btn"
                 onClick={() => { saveScrollNow(); trackLead(id, restaurant.name, 'menu') }}
               >
-                Bekijk →
+                Bekijk menu →
               </Link>
             </div>
           ) : allLinks.length === 1 ? (
@@ -479,24 +477,31 @@ function RestaurantCard({ restaurant, id, lang, selectedMeal, selectedDay, ingre
           )}
         </div>
 
-        {/* Rij 2: reserveringsactie(s) — BE-07, via getReservationActions() */}
-        <div className="rc-footer-row2">
-          {reservationActions.map((action, i) => (
-            <a
-              key={action.method}
-              href={action.href}
-              target={action.external || action.method === 'whatsapp' ? '_blank' : undefined}
-              rel={action.external || action.method === 'whatsapp' ? 'noopener noreferrer' : undefined}
-              className={i === 0 ? 'rc-reserve-btn' : 'rc-website-btn'}
-              style={i === 0 ? { marginLeft: 0, display: 'inline-flex', alignItems: 'center', gap: 6 } : undefined}
-              title={i === 0 ? undefined : action.label}
-              onClick={() => trackLead(id, restaurant.name, action.method)}
-            >
-              {RESERVATION_ICONS[action.method]}
-              {i === 0 && action.label}
-            </a>
-          ))}
-        </div>
+        {/* Rij 2: reserveringsactie(s) — BE-07, via getReservationActions().
+            BE-09: only rendered when at least one action passed validation,
+            so a restaurant with zero valid contact methods doesn't leave an
+            empty gap at the bottom of the card (see .rc-footer-a's column
+            gap in globals.css). */}
+        {reservationActions.length > 0 && (
+          <div className="rc-footer-row2">
+            {reservationActions.map((action, i) => (
+              <a
+                key={action.method}
+                href={action.href}
+                target={action.external || action.method === 'whatsapp' ? '_blank' : undefined}
+                rel={action.external || action.method === 'whatsapp' ? 'noopener noreferrer' : undefined}
+                className={i === 0 ? 'rc-reserve-btn' : 'rc-website-btn'}
+                style={i === 0 ? { marginLeft: 0, display: 'inline-flex', alignItems: 'center', gap: 6 } : undefined}
+                title={i === 0 ? undefined : action.label}
+                aria-label={action.label}
+                onClick={() => trackLead(id, restaurant.name, action.method)}
+              >
+                <span aria-hidden="true">{RESERVATION_ICONS[action.method]}</span>
+                {i === 0 && action.label}
+              </a>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
@@ -555,7 +560,12 @@ export default function RestaurantsPage() {
   const [buurtFilter, setBuurtFilter] = useState('')
   const [selectedCuisines, setSelectedCuisines] = useState([])
   const [sortBy, setSortBy] = useState('best')
-  const [bestRatedOnly, setBestRatedOnly] = useState(false)
+
+  // BE-09: progressive disclosure for the secondary filters (price, buurt,
+  // keuken, allergies) — search, meal type, day and "Nu open" stay directly
+  // visible. Mirrors the "Filters" toggle pattern already shipped on
+  // /search (app/search/page.js), not a new pattern.
+  const [filtersOpen, setFiltersOpen] = useState(false)
 
   const t = T[lang]
 
@@ -570,7 +580,6 @@ export default function RestaurantsPage() {
       if (saved.buurtFilter)      setBuurtFilter(saved.buurtFilter)
       if (saved.selectedCuisines) setSelectedCuisines(saved.selectedCuisines)
       if (saved.sortBy)           setSortBy(saved.sortBy)
-      if (saved.bestRatedOnly)    setBestRatedOnly(saved.bestRatedOnly)
       if (saved.ingredientQuery)  setIngredientQuery(saved.ingredientQuery)
       if (saved.excludeAllergens) setExcludeAllergens(saved.excludeAllergens)
       if (saved.mode)             setMode(saved.mode)
@@ -594,8 +603,8 @@ export default function RestaurantsPage() {
 
   // Persist ALL filters on change (incl. ingredient search + allergens + mode)
   useEffect(() => {
-    saveFilters({ lang, selectedDay, selectedMeal, priceFilter, buurtFilter, selectedCuisines, sortBy, bestRatedOnly, ingredientQuery, excludeAllergens, mode, nowOpen })
-  }, [lang, selectedDay, selectedMeal, priceFilter, buurtFilter, selectedCuisines, sortBy, bestRatedOnly, ingredientQuery, excludeAllergens, mode])
+    saveFilters({ lang, selectedDay, selectedMeal, priceFilter, buurtFilter, selectedCuisines, sortBy, ingredientQuery, excludeAllergens, mode, nowOpen })
+  }, [lang, selectedDay, selectedMeal, priceFilter, buurtFilter, selectedCuisines, sortBy, ingredientQuery, excludeAllergens, mode])
 
   // Save scroll position when leaving page
   useEffect(() => {
@@ -718,7 +727,6 @@ export default function RestaurantsPage() {
     setBuurtFilter('')
     setSelectedCuisines([])
     setSortBy('best')
-    setBestRatedOnly(false)
   }, [])
 
   const toggleCuisine = useCallback((c) => {
@@ -726,6 +734,10 @@ export default function RestaurantsPage() {
   }, [])
 
   const guidedReady = !!selectedMeal
+
+  // BE-09: badge count for the "Filters" toggle — mirrors /search's
+  // panelFilterCount so the two pages read identically.
+  const panelFilterCount = (priceFilter ? 1 : 0) + (buurtFilter ? 1 : 0) + selectedCuisines.length + excludeAllergens.length
 
   return (
     <>
@@ -887,88 +899,107 @@ export default function RestaurantsPage() {
 
 
 
-        {/* Allergen exclusion panel */}
-        <div className="allergen-filter-bar">
+        {/* BE-09: "Filters" toggle — price/buurt/keuken/allergies live behind
+            this, matching the progressive-disclosure pattern already
+            shipped on /search (app/search/page.js). Search, meal type, day
+            and "Nu open" stay directly visible above, unchanged. */}
+        <div className="filter-block">
           <button
-            className={`allergen-toggle-btn ${allergenModeOpen ? 'active' : ''}`}
-            onClick={() => setAllergenModeOpen(!allergenModeOpen)}
+            type="button"
+            className={`filters-toggle-btn ${filtersOpen ? 'active' : ''}`}
+            onClick={() => setFiltersOpen(o => !o)}
+            aria-expanded={filtersOpen}
+            style={{ alignSelf: 'flex-start' }}
           >
-            🛡 Ik heb een allergie {excludeAllergens.length > 0 && `(${excludeAllergens.length})`}
+            Filters {panelFilterCount > 0 && <span className="cat-count">{panelFilterCount}</span>}
           </button>
-          {allergenModeOpen && (
-            <div className="allergen-chips">
-              {EU14.map(a => (
-                <button
-                  key={a.id}
-                  className={`allergen-chip ${excludeAllergens.includes(a.id) ? 'active' : ''}`}
-                  onClick={() => setExcludeAllergens(prev =>
-                    prev.includes(a.id) ? prev.filter(x => x !== a.id) : [...prev, a.id]
-                  )}
-                  title={`Sluit ${a.name} uit`}
-                >
-                  {a.icon} {a.name}
-                  {excludeAllergens.includes(a.id) && <span className="chip-x"> ×</span>}
-                </button>
-              ))}
-              {excludeAllergens.length > 0 && (
-                <button className="allergen-chip-clear" onClick={() => setExcludeAllergens([])}>
-                  Reset
-                </button>
-              )}
-            </div>
-          )}
         </div>
-        {/* 6–10. Sort bar (dropdowns + toggles) */}
-        <div className="sort-bar">
-          {/* 6. Best rated toggle */}
-          <button
-            className={`sort-toggle ${bestRatedOnly ? 'active' : ''}`}
-            onClick={() => { setBestRatedOnly(!bestRatedOnly); if (!bestRatedOnly) setSortBy('best') }}
-          >
-            ⭐ {t.bestRatedToggle}
-          </button>
 
-          {/* 7. Price dropdown */}
-          <select className="sort-select" value={priceFilter} onChange={e => setPriceFilter(e.target.value)}>
-            <option value="">{t.allPrices}</option>
-            <option value="under25">{t.under25}</option>
-            <option value="mid">{t.mid}</option>
-            <option value="above40">{t.above40}</option>
-          </select>
+        {filtersOpen && (
+          <div className="filters-panel">
+            <div className="filters-panel-group">
+              <div className="filters-panel-label">{lang === 'nl' ? 'Prijs' : 'Price'}</div>
+              <select className="sort-select" value={priceFilter} onChange={e => setPriceFilter(e.target.value)}>
+                <option value="">{t.allPrices}</option>
+                <option value="under25">{t.under25}</option>
+                <option value="mid">{t.mid}</option>
+                <option value="above40">{t.above40}</option>
+              </select>
+            </div>
 
-          {/* 8. Buurt dropdown */}
-          <select className="sort-select" value={buurtFilter} onChange={e => setBuurtFilter(e.target.value)}>
-            <option value="">{t.allBuurten}</option>
-            {BUURTEN.map(b => <option key={b} value={b}>{b}</option>)}
-          </select>
+            <div className="filters-panel-group">
+              <div className="filters-panel-label">{lang === 'nl' ? 'Buurt' : 'Neighbourhood'}</div>
+              <select className="sort-select" value={buurtFilter} onChange={e => setBuurtFilter(e.target.value)}>
+                <option value="">{t.allBuurten}</option>
+                {BUURTEN.map(b => <option key={b} value={b}>{b}</option>)}
+              </select>
+            </div>
 
-          {/* 9. Cuisine multi-select */}
-          <div className="cuisine-dropdown">
-            <button className={`sort-select cuisine-trigger ${selectedCuisines.length > 0 ? 'has-value' : ''}`}>
-              {selectedCuisines.length > 0 ? `${selectedCuisines.length} keukens` : t.allKeukens} ▾
-            </button>
-            <div className="cuisine-panel">
-              {KEUKENS.map(k => (
-                <label key={k} className="cuisine-option">
-                  <input
-                    type="checkbox"
-                    checked={selectedCuisines.includes(k)}
-                    onChange={() => toggleCuisine(k)}
-                  />
-                  {k}
-                </label>
-              ))}
+            <div className="filters-panel-group">
+              <div className="filters-panel-label">{lang === 'nl' ? 'Keuken' : 'Cuisine'}</div>
+              <div className="cuisine-dropdown">
+                <button className={`sort-select cuisine-trigger ${selectedCuisines.length > 0 ? 'has-value' : ''}`}>
+                  {selectedCuisines.length > 0 ? `${selectedCuisines.length} keukens` : t.allKeukens} ▾
+                </button>
+                <div className="cuisine-panel">
+                  {KEUKENS.map(k => (
+                    <label key={k} className="cuisine-option">
+                      <input
+                        type="checkbox"
+                        checked={selectedCuisines.includes(k)}
+                        onChange={() => toggleCuisine(k)}
+                      />
+                      {k}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="filters-panel-group">
+              <div className="filters-panel-label">{lang === 'nl' ? 'Allergieën' : 'Allergies'}</div>
+              <div className="allergen-filter-bar">
+                <button
+                  className={`allergen-toggle-btn ${allergenModeOpen ? 'active' : ''}`}
+                  onClick={() => setAllergenModeOpen(!allergenModeOpen)}
+                >
+                  🛡 Ik heb een allergie {excludeAllergens.length > 0 && `(${excludeAllergens.length})`}
+                </button>
+                {allergenModeOpen && (
+                  <div className="allergen-chips">
+                    {EU14.map(a => (
+                      <button
+                        key={a.id}
+                        className={`allergen-chip ${excludeAllergens.includes(a.id) ? 'active' : ''}`}
+                        onClick={() => setExcludeAllergens(prev =>
+                          prev.includes(a.id) ? prev.filter(x => x !== a.id) : [...prev, a.id]
+                        )}
+                        title={`Sluit ${a.name} uit`}
+                      >
+                        {a.icon} {a.name}
+                        {excludeAllergens.includes(a.id) && <span className="chip-x"> ×</span>}
+                      </button>
+                    ))}
+                    {excludeAllergens.length > 0 && (
+                      <button className="allergen-chip-clear" onClick={() => setExcludeAllergens([])}>
+                        Reset
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
+        )}
 
-          {/* 10. Sort dropdown */}
+        {/* Sort + reset — stay directly visible regardless of the Filters panel */}
+        <div className="sort-bar">
           <select className="sort-select" value={sortBy} onChange={e => setSortBy(e.target.value)}>
-            <option value="best">{t.bestRated}</option>
+            <option value="best">{t.defaultOrder}</option>
             <option value="az">{t.az}</option>
             <option value="za">{t.za}</option>
           </select>
 
-          {/* Reset */}
           {hasFilters && (
             <button className="reset-btn" onClick={resetAll}>{t.reset} ×</button>
           )}

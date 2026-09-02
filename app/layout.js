@@ -15,10 +15,15 @@ export const metadata = {
 // Resolves the effective theme before first paint, so there is no flash of
 // the wrong theme. No stored preference (first visit, or storage cleared)
 // resolves to 'dark' — matching the app's pre-THEME appearance exactly, not
-// to OS preference. Only an explicit 'system' choice hands control to the
-// prefers-color-scheme media query in app/globals.css. See
-// planning/decisions/006-theme-token-system.md.
-const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem('bredaeats_theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);}else if(t==='system'){document.documentElement.removeAttribute('data-theme');}else{document.documentElement.setAttribute('data-theme','dark');localStorage.setItem('bredaeats_theme','dark');}}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`
+// to OS preference. See planning/decisions/006-theme-token-system.md.
+//
+// BE-09 — "Systeem" removed from the picker (src/components/ThemeToggle.js
+// now only offers 'light'/'dark'). A pre-existing stored 'system' value is
+// migrated exactly once, right here, before first paint: resolved to the
+// OS's current preference via matchMedia, applied immediately (so there is
+// still no flash), and written back to storage as an explicit 'light' or
+// 'dark' — never re-read as 'system' again on a later visit.
+const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem('bredaeats_theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);}else if(t==='system'){var r=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)?'light':'dark';document.documentElement.setAttribute('data-theme',r);localStorage.setItem('bredaeats_theme',r);}else{document.documentElement.setAttribute('data-theme','dark');localStorage.setItem('bredaeats_theme','dark');}}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`
 
 export default function RootLayout({ children }) {
   return (

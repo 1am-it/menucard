@@ -10,15 +10,15 @@ const THEME_KEY = 'bredaeats_theme'
 const OPTIONS = [
   { value: 'light', label: 'Licht' },
   { value: 'dark', label: 'Donker' },
-  { value: 'system', label: 'Systeem' },
 ]
 
+// BE-09 — "Systeem" removed from the picker; only 'light'/'dark' are valid
+// choices now. The one-time migration of a pre-existing 'system' value to a
+// concrete OS-resolved preference happens in the blocking script in
+// app/layout.js, before this component ever mounts — by the time this runs,
+// localStorage should already hold 'light' or 'dark'.
 function applyTheme(value) {
-  if (value === 'light' || value === 'dark') {
-    document.documentElement.setAttribute('data-theme', value)
-  } else {
-    document.documentElement.removeAttribute('data-theme')
-  }
+  document.documentElement.setAttribute('data-theme', value)
 }
 
 export default function ThemeToggle() {
@@ -30,7 +30,7 @@ export default function ThemeToggle() {
   useEffect(() => {
     let stored = null
     try { stored = localStorage.getItem(THEME_KEY) } catch {}
-    setTheme(stored === 'light' || stored === 'dark' || stored === 'system' ? stored : 'dark')
+    setTheme(stored === 'light' || stored === 'dark' ? stored : 'dark')
   }, [])
 
   const choose = (value) => {

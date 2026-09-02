@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import ThemeToggle from '@/src/components/ThemeToggle'
-import { getReservationActions } from '@/src/utils/reservation'
+import { getReservationActions, isValidPhone, isValidUrl } from '@/src/utils/reservation'
 
 const DAYS = ['ma','di','wo','do','vr','za','zo']
 const DAY_LABELS = {
@@ -47,7 +47,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
           <Link href="/" className="logo">Breda<span>Eats</span></Link>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <ThemeToggle />
-            <Link href="/" className="back-btn">← Alle restaurants</Link>
+            <Link href="/restaurants" className="back-btn">← Alle restaurants</Link>
           </div>
         </div>
       </header>
@@ -115,7 +115,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
                 <span className="dip-icon">📍</span>
                 <span>{restaurant.address}</span>
               </div>
-              {restaurant.phone && (
+              {isValidPhone(restaurant.phone) && (
                 <div className="dip-row" style={{ marginTop: 6 }}>
                   <span className="dip-icon">📞</span>
                   <a href={`tel:${restaurant.phone}`} style={{ color: 'inherit' }}>
@@ -123,7 +123,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
                   </a>
                 </div>
               )}
-              {restaurant.website && (
+              {isValidUrl(restaurant.website) && (
                 <div className="dip-row" style={{ marginTop: 6 }}>
                   <span className="dip-icon">🌐</span>
                   <a href={restaurant.website} target="_blank" rel="noopener noreferrer"
@@ -198,7 +198,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
                 Menukaart preview — {menuPreview.menu.subtitle}
               </h2>
               <Link href={`/menu/${menuPreview.key}`} className="detail-menu-btn-outline">
-                Volledige kaart →
+                Bekijk menu →
               </Link>
             </div>
 
@@ -241,7 +241,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
             <p style={{ color: 'var(--text-dim)', fontSize: 14, marginBottom: 24 }}>
               Bekijk de website van het restaurant voor de actuele menukaart.
             </p>
-            {restaurant.website && (
+            {isValidUrl(restaurant.website) && (
               <a href={restaurant.website} target="_blank" rel="noopener noreferrer"
                 className="detail-menu-btn">
                 Bezoek website →
