@@ -106,23 +106,33 @@ that eventually *do* go through moderation.
 
 ## Hard gates (must resolve before implementation or any real run)
 
-1. **A programmatically-testable Breda market boundary. Narrowed
-   2026-09-04, still not closed.** `docs/api/market-entity-schema.md` has
+1. **A programmatically-testable Breda market boundary. Narrowed further
+   2026-09-02, still not closed.** `docs/api/market-entity-schema.md` has
    been amended: `boundary` is now a versioned `MarketBoundaryVersion`
    reference, and the semantic question is settled — Breda's boundary is
    Gemeente Breda's administrative/municipal boundary, distinct from any
-   verzorgingsgebied/bezorggebied/marktsegment notion. **What remains
-   open**: no concrete `MarketBoundaryVersion` has actually been recorded
-   for Breda — no geometry, no reviewed data source, no chosen
-   representation type (polygon/postal-code list/named administrative
-   region). This ticket does not choose or record that concrete version
-   either; that is the next step, requiring its own source review (see
-   gate 2, which the amendment explicitly extends to boundary-data
-   sources too).
+   verzorgingsgebied/bezorggebied/marktsegment notion. The candidate data
+   source (Kadaster/PDOK "Bestuurlijke Gebieden") is now formally
+   reviewed and `allowed` — see gate 2 below and
+   `docs/api/source-registry-schema.md`'s "Registered sources" section.
+   **What remains open**: no concrete `MarketBoundaryVersion` has
+   actually been recorded for Breda — the official GeoPackage artifact
+   has not been retrieved, hashed, or canonically stored; no
+   `source_artifact_hash`/`geometry_hash` exist yet. Approving the
+   *source* is not the same as recording the *boundary version* — this
+   ticket does not perform that retrieval/recording step either.
 2. **Every targeted source has a `SourceAuthorizationVersion` with
    `status ∈ {allowed, restricted}`**, checked against that specific
    version at run time — no exceptions, including for well-known,
-   generally permissive sources like OpenStreetMap.
+   generally permissive sources like OpenStreetMap. **Satisfied for one
+   specific source, 2026-09-02**: Kadaster/PDOK "Bestuurlijke Gebieden"
+   is now documented as `allowed`, approved by explicit human
+   product-owner decision — see
+   `docs/api/source-registry-schema.md`'s "Registered sources" section.
+   This closes the gate **only for that one source**; every other source
+   this ticket might ever target (OpenStreetMap, KVK Open Dataset, any
+   restaurant-website source, anything else) still requires its own,
+   separate review — this is not a general resolution of gate 2.
 3. **OpenStreetMap requires a separate legal assessment before any
    pilot**: whether MenuCard's intended combination of OSM data with its
    own/other data forms a Collective Database or a Derivative Database

@@ -315,12 +315,91 @@ is not evidence of a review that didn't happen.
 No blanket "all restaurant websites are equivalent" entry is proposed —
 each is its own `Source` row, since terms genuinely differ site to site.
 
+## Registered sources — actual instances (2026-09-02)
+
+**Distinct from the proposed, not-final table above.** The entry below is
+not a candidate or an example — it is the first source this project has
+actually reviewed and formally approved, per an explicit human product
+-owner decision (see "reviewed_by bootstrap" below), documented here as
+the source-of-truth record until a real database exists to hold it. Only
+this specific `Source`/`SourceAuthorizationVersion` pair is approved by
+this entry — no other source is affected, reclassified, or implicitly
+approved by association.
+
+### Kadaster/PDOK — Bestuurlijke Gebieden
+
+**`Source`**
+
+| Field | Value |
+|---|---|
+| `name` | Kadaster — Bestuurlijke Gebieden |
+| `operator` | Kadaster (Dienst voor het kadaster en de openbare registers) |
+| `source_type` | `government_open_data` |
+| `official_location` | `https://www.pdok.nl/introductie/-/article/bestuurlijke-gebieden` |
+| `refresh_policy` | `periodic_annual` |
+| `freshness_expectation` | ~365 days — a reasoned default matching the dataset's documented annual (January) republication cadence, not an empirical measurement. |
+
+**`SourceAuthorizationVersion` (version 1)**
+
+| Field | Value |
+|---|---|
+| `status` | `allowed` |
+| `status_reason` | CC BY 4.0, explicitly "no further usage restrictions" beyond mandatory attribution, per the official National Georegister (NGR) metadata record and the PDOK Atom feed's own licence statement; an official, primary Kadaster/PDOK source for geospatial reference data. |
+| `terms_reference` | National Georegister metadata record (`nationaalgeoregister.nl/geonetwork/opensearch/api/records/208bc283-7c66-4ce7-8ad3-1cf3e8933fb5`) and `pdok.nl/copyright` |
+| `terms_version` | CC BY 4.0 — the *legal terms* version. **Not** the dataset edition (2026) — see the amendment above distinguishing the two; the licence itself is not versioned separately by year. |
+| `terms_retrieved_at` | 2026-09-02 |
+| `allowed_data_categories[]` | `geospatial_reference_data` |
+| `excluded_data_categories[]` | — (not applicable to this source) |
+| `allowed_access_method` | `open_dataset_download` (primary) |
+| `supplementary_access_methods[]` | `open_api_query` |
+| `access_provider_note` | Primary: PDOK's Atom download service (GeoPackage, 2026 edition). Supplementary: PDOK OGC API Features (`gemeentegebied` collection) — for feature validation and freshness-checking only, never as the primary version-of-record route (per `supplementary_access_methods[]`'s own invariant above). |
+| `reuse_rights` | `{redistribution_allowed: true, attribution_required: true, commercial_use_allowed: true, geographic_restrictions: none}` |
+| `geographic_applicability` | `{country_codes: ["NL"], market_scope: "Breda market (slug: breda)"}` — **not** a `market_id` value. `MARKET-01`'s `id` format is still an open question (see Open questions below); recording a made-up placeholder id here would misrepresent it as decided. This human-readable scope reference stands in until a real id format and value exist, at which point this row is updated, not silently reinterpreted. |
+| `reviewed_by` | `product_owner` — **bootstrap reference, see below.** |
+| `reviewed_at` | 2026-09-02 |
+| `effective_from` | 2026-09-02 |
+| `next_review_due` | 2027-09-02 — one year out, matching the source's own annual cadence; a reasoned default, not policy fixed elsewhere. |
+
+**Required attribution (exact text)**: "Kadaster, Bestuurlijke Gebieden"
+
+**For a future `MarketBoundaryVersion`** (not registered by this entry —
+see `docs/api/market-entity-schema.md`): `definition_ref` must point to
+the official national GeoPackage artifact itself
+(`https://service.pdok.nl/kadaster/brk-bestuurlijke-gebieden/atom/downloads/BestuurlijkeGebieden_2026.gpkg`)
+together with an explicit `feature_selection_rule` — never a derived,
+Breda-only file. The agreed selection rule: primary selector
+`identificatie = "GM0758"`; required validation assertions `code =
+"0758"` and `naam = "Breda"` (per `MarketBoundaryVersion`'s own
+invariant 6: a source-internal id is never the primary selector on its
+own without independent validation — `identificatie` here plays that
+primary-selector role, cross-checked by two independent fields, which is
+exactly the pattern that invariant requires).
+
+#### `reviewed_by: product_owner` — bootstrap reference, not a fabricated identity
+
+This project has no live user-account system yet (documentation only, no
+database) and `docs/api/source-registry-schema.md` itself has, until now,
+left open whether `reviewed_by` names an individual account or a role.
+`product_owner` is recorded here as an explicit **bootstrap reference**:
+it denotes *the human product owner*, and this specific authorization was
+formally approved by that human product owner as an explicit project
+decision (not an AI determination — AI research prepared the evidence
+above, per this document's own human-review invariant). It is
+deliberately **not** a fabricated personal name, email address, user id,
+or staff role. **Open follow-up, not decided here**: migrating this
+bootstrap reference to a formal identity/account convention (e.g. an
+actual `PLATFORM-06`-style role or account system) once one exists — this
+entry should be updated, not silently reinterpreted, when that happens.
+
 ## Open questions (technical implementation choices only)
 
 - Exact `id` format (UUID vs. an internal key scheme) — same open item as
   `MARKET-01`/`MARKET-02`.
 - Whether `reviewed_by` references an individual account or a role —
-  `PLATFORM-06`'s `editor` role is the natural fit, but not fixed here.
+  **partially addressed 2026-09-02** by the `product_owner` bootstrap
+  reference above for the one entry that exists so far; the underlying
+  question (a formal, general identity/account convention for every
+  future reviewer) remains open.
 - Exact re-review cadence per `source_type` (a government open-data
   portal's terms likely change less often than an individual restaurant's
   website) — `next_review_due` exists as a field; the policy for setting
