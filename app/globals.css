@@ -1021,7 +1021,17 @@ header, .site-header {
 
 @media (max-width: 768px) {
   :root { --header-h: 56px; }
-  .header-inner { padding: 0 16px; }
+  /* BE-10: /restaurants' header carries more control groups (theme,
+     back-link, language, mode) than any other page's and was the only
+     route overflowing horizontally on narrow viewports. Letting the header
+     wrap onto extra rows — instead of forcing every control into one
+     non-wrapping line — fixes that without removing or hiding any control.
+     header/.site-header switches from a fixed height to auto so wrapped
+     rows have room; pages whose header content still fits on one line
+     render at the same height as before. */
+  header, .site-header { height: auto; min-height: var(--header-h); padding: 8px 0; }
+  .header-inner { padding: 0 16px; flex-wrap: wrap; row-gap: 8px; }
+  .header-right { flex: 1 1 auto; flex-wrap: wrap; justify-content: flex-end; row-gap: 8px; }
   .hero, .detail-hero { padding: 28px 16px; }
   .page-main { padding: 24px 16px 60px; }
   .restaurant-panel { min-width: unset; }
@@ -1128,9 +1138,14 @@ header, .site-header {
 .filter-tag-remove { background: none; border: none; color: var(--green); cursor: pointer; font-size: 16px; line-height: 1; padding: 0; opacity: 0.7; }
 .filter-tag-remove:hover { opacity: 1; }
 
-/* ── Results ── */
-.results-section { max-width: 1200px; margin: 0 auto; padding: 24px 24px 80px; }
-.results-header { margin-bottom: 16px; }
+/* ── Results ──
+   BE-10: a subtle border-top marks the actual filter-layer/results seam
+   (previously only generic whitespace separated them), and .results-header
+   is now a row so the sort control (moved here from the old .sort-bar) sits
+   directly beside the result count instead of ~150px away in the filter
+   layer above. */
+.results-section { max-width: 1200px; margin: 0 auto; padding: 32px 24px 80px; border-top: 1px solid var(--border); }
+.results-header { margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .results-count { font-size: 13px; color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 .no-results { text-align: center; padding: 60px 24px; color: var(--text-dim); font-size: 16px; }
 
@@ -1163,6 +1178,18 @@ header, .site-header {
 .rc-menu-btn--outline { border-color: var(--green); color: var(--green); }
 .rc-reserve-btn { padding: 6px 14px; background: var(--green); color: var(--on-accent); font-size: 12px; font-weight: 700; border-radius: 8px; text-decoration: none; white-space: nowrap; transition: background 0.15s; margin-left: auto; display: inline-block; }
 .rc-reserve-btn:hover { background: var(--green-dim); }
+
+/* BE-10: one primary action per card, matching "Zie de menukaart vóór je
+   reserveert" — when a restaurant has a menu, the menu action is primary
+   (solid fill) and the reservation action becomes secondary (outline),
+   without losing visibility or click area. When there is no menu, the
+   reservation/website action keeps the primary treatment instead (the
+   existing, unmodified look). Neither modifier removes or hides an action. */
+.rc-reserve-btn--secondary { background: transparent; border: 1.5px solid var(--input-border); color: var(--text-secondary); }
+.rc-reserve-btn--secondary:hover { background: var(--bg-hover); border-color: var(--border-strong); color: var(--text-primary); }
+.rc-menu-btn--primary, .rc-menu-go-btn.rc-menu-go-btn--primary { background: var(--green); border-color: var(--green); color: var(--on-accent); }
+.rc-menu-btn--primary:hover, .rc-menu-go-btn.rc-menu-go-btn--primary:hover { background: var(--green-dim); color: var(--on-accent); }
+.rc-menu-go-btn.rc-menu-go-btn--primary { border-left-color: var(--green-dim); }
 
 /* ── Menu overview cards ── */
 .menu-overview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }

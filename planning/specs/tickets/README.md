@@ -31,6 +31,8 @@ of these.
 11. [be-09-consumer-ux-polish.md](./be-09-consumer-ux-polish.md) — done;
     small independent polish ticket added after this track was otherwise
     closed
+12. [be-10-results-sort-card-hierarchy-mobile.md](./be-10-results-sort-card-hierarchy-mobile.md) — done;
+    small independent polish ticket, same basis as `BE-09`
 
 ## PLATFORM-* order (not started)
 

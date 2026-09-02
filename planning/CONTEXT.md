@@ -70,10 +70,13 @@ BE-08 — Performance cleanup (done — see [[007-homepage-shift]])
 BE-09 — Consumer UX polish: contact validity, calmer filters, nav
 consistency, a11y (done — see
 `planning/specs/tickets/be-09-consumer-ux-polish.md`)
+BE-10 — Results sort placement, filter/results boundary, card hierarchy,
+mobile overflow (done — see
+`planning/specs/tickets/be-10-results-sort-card-hierarchy-mobile.md`)
 
-BE-09 was added after this track was otherwise considered closed — a small,
-independent polish ticket against the already-shipped consumer app, not a
-reopening of the original migration sequence.
+BE-09 and BE-10 were added after this track was otherwise considered
+closed — small, independent polish tickets against the already-shipped
+consumer app, not a reopening of the original migration sequence.
 
 THEME was originally sequenced after BE-06/BE-04/BE-07/BE-05 (see
 [[005-decouple-theming-from-dish-first]]) on the assumption it would mean a

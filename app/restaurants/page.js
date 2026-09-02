@@ -344,6 +344,12 @@ function RestaurantCard({ restaurant, id, lang, selectedMeal, selectedDay, ingre
   const t = T[lang]
   const openStatus = getOpenStatus(restaurant, selectedDay)
   const allLinks = restaurant.menuLinks || []
+  // BE-10: exactly one primary action per card, matching "Zie de menukaart
+  // vóór je reserveert" — when a menu exists, viewing it is primary and a
+  // reservation/website action (if any) is visually secondary; with no
+  // menu, the reservation/website action is primary instead. Neither
+  // action is removed or hidden either way — only which one looks primary.
+  const hasMenu = allLinks.length > 0
   const reservationActions = getReservationActions(restaurant)
   const matchedItems = ingredientMatches[id] || []
   const matchCount = matchedItems.length
@@ -455,7 +461,7 @@ function RestaurantCard({ restaurant, id, lang, selectedMeal, selectedDay, ingre
               <span className="rc-select-chevron">▾</span>
               <Link
                 href={`/menu/${selectedLink}${qs ? '?' + qs : ''}`}
-                className="rc-menu-go-btn"
+                className="rc-menu-go-btn rc-menu-go-btn--primary"
                 onClick={() => { saveScrollNow(); trackLead(id, restaurant.name, 'menu') }}
               >
                 Bekijk menu →
@@ -464,7 +470,7 @@ function RestaurantCard({ restaurant, id, lang, selectedMeal, selectedDay, ingre
           ) : allLinks.length === 1 ? (
             <Link
               href={`/menu/${allLinks[0].id}${qs ? '?' + qs : ''}`}
-              className="rc-menu-btn"
+              className="rc-menu-btn rc-menu-btn--primary"
               onClick={() => { saveScrollNow(); trackLead(id, restaurant.name, 'menu') }}
             >
               {allLinks[0].label}
@@ -490,7 +496,7 @@ function RestaurantCard({ restaurant, id, lang, selectedMeal, selectedDay, ingre
                 href={action.href}
                 target={action.external || action.method === 'whatsapp' ? '_blank' : undefined}
                 rel={action.external || action.method === 'whatsapp' ? 'noopener noreferrer' : undefined}
-                className={i === 0 ? 'rc-reserve-btn' : 'rc-website-btn'}
+                className={i === 0 ? `rc-reserve-btn ${hasMenu ? 'rc-reserve-btn--secondary' : ''}` : 'rc-website-btn'}
                 style={i === 0 ? { marginLeft: 0, display: 'inline-flex', alignItems: 'center', gap: 6 } : undefined}
                 title={i === 0 ? undefined : action.label}
                 aria-label={action.label}
@@ -992,18 +998,15 @@ export default function RestaurantsPage() {
           </div>
         )}
 
-        {/* Sort + reset — stay directly visible regardless of the Filters panel */}
-        <div className="sort-bar">
-          <select className="sort-select" value={sortBy} onChange={e => setSortBy(e.target.value)}>
-            <option value="best">{t.defaultOrder}</option>
-            <option value="az">{t.az}</option>
-            <option value="za">{t.za}</option>
-          </select>
-
-          {hasFilters && (
+        {/* BE-10: the sort select itself moved to .results-header, next to
+            the result count — only the reset button (when relevant) stays
+            here, so this bar no longer renders as an empty, bordered strip
+            when there's nothing to reset. */}
+        {hasFilters && (
+          <div className="sort-bar">
             <button className="reset-btn" onClick={resetAll}>{t.reset} ×</button>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* 12. Active filters bar */}
         {activeFilters.length > 0 && (
@@ -1023,6 +1026,13 @@ export default function RestaurantsPage() {
               ? `${filteredRestaurants.length} ${t.restaurants}`
               : `${filteredMenus.length} ${t.modeMenus.toLowerCase()}`}
           </span>
+          {/* BE-10: moved here from the filter layer's old .sort-bar — same
+              select, same sortBy state, no new sort value or logic. */}
+          <select className="sort-select results-sort-select" value={sortBy} onChange={e => setSortBy(e.target.value)}>
+            <option value="best">{t.defaultOrder}</option>
+            <option value="az">{t.az}</option>
+            <option value="za">{t.za}</option>
+          </select>
         </div>
 
         {/* 11. Mode: Restaurants */}
