@@ -94,11 +94,39 @@ relevant dataset at all. Implements
 `[[011-market-foundation-and-international-growth]]`'s source-governance
 principle concretely.
 
-### MARKET-04 — Raw imports & import runs
+### MARKET-04 — Raw imports & import runs (contract documented, not started — blocked on hard gates)
 
 A staging layer that preserves raw source data and records each import
 run, before any normalization — so a bad normalization can be diagnosed or
-replayed against the original source, not just the cleaned result.
+replayed against the original source, not just the cleaned result. See
+`docs/api/import-run-schema.md` for the full `ImportRun` contract and
+`docs/api/source-registry-schema.md`'s amendment for the
+`SourceAuthorizationVersion` model it depends on: `Source`'s regulated
+fields (status, terms evidence, allowed/excluded categories, access
+method, geographic applicability, reviewer, date, reason) become an
+immutable, append-only version history, so a later source re-review can
+never rewrite a past import's legitimacy — `ImportRun` references one
+exact version, never a copy. Data minimisation is enforced *before*
+durable storage as the default (allowlist extraction; a small structured
+extraction record rather than full raw HTML for unstructured sources),
+with a narrowly six-gated exception for retaining an unredacted capture.
+Strict separation from `MARKET-05` normalization, moderation, and
+`MARKET-06` publication is maintained throughout.
+
+**Documented and approved as a contract — not implementation-ready.**
+Four hard gates block any real run: (1) `MARKET-01`'s Breda `market.boundary`
+is still undefined and must be resolved via an explicit `MARKET-01`
+amendment before `MARKET-04`/`05` can execute for Breda at all; (2) every
+targeted source needs a `SourceAuthorizationVersion` with `status ∈
+{allowed, restricted}`, checked at run time, no exceptions; (3)
+OpenStreetmap specifically requires a separate legal assessment —
+Collective vs. Derivative Database under ODbL, given `MARKET-05`'s own
+matching/merging design — before any pilot, in addition to the ordinary
+licence/access-provider/route review; (4) physical raw-storage technology
+and the encryption mechanism for the unredacted-capture exception are not
+yet chosen. Pilot source research (OpenStreetMap, KVK Open Dataset,
+Gemeente Breda open data, individual restaurant websites) continued from
+`MARKET-03` — still no source selected, none registered.
 
 ### MARKET-05 — Normalization & deduplication
 

@@ -51,17 +51,26 @@ third, external-facing contribution flows last.
 9. [platform-09-city-rollout-operations.md](./platform-09-city-rollout-operations.md) — done, decision/documentation only (its only dependency, `PLATFORM-01`, was already done)
 10. [platform-10-public-city-metrics-platform-exposure.md](./platform-10-public-city-metrics-platform-exposure.md)
 
-## MARKET-* order (proposed, not scheduled — three tickets done as documentation)
+## MARKET-* order (proposed, not scheduled — three tickets done as documentation, one contract documented but blocked)
 
 See `planning/decisions/011-market-foundation-and-international-growth.md`
 for why this is a third, separate track from `BE-*`/`PLATFORM-*`. Every
 ticket here is documentation/schema-contract only until explicitly
-otherwise approved — no code, migration, or Supabase change.
+otherwise approved — no code, migration, or Supabase change. `MARKET-04`
+is documented and approved as a contract but deliberately **not** marked
+done, unlike `MARKET-01`–`03` — its eventual deliverable is a working
+import mechanism, not the documentation itself, and four hard gates block
+implementation (see its own ticket).
 
 1. [market-01-market-entity.md](./market-01-market-entity.md) — done, documentation/schema contract only
 2. [market-02-canonical-restaurant-menu-schema.md](./market-02-canonical-restaurant-menu-schema.md) — done, documentation/schema contract only
 3. [market-03-source-registry.md](./market-03-source-registry.md) — done, documentation/schema contract only
-4. MARKET-04 — raw imports & import runs (not started)
+4. [market-04-raw-imports-import-runs.md](./market-04-raw-imports-import-runs.md) —
+   contract documented and approved, not started; blocked on four hard
+   gates (Breda `market.boundary` amendment, per-source authorization,
+   OpenStreetMap's separate Collective/Derivative-Database legal
+   assessment, raw-storage technology) — see the ticket's own "Hard
+   gates" section
 5. MARKET-05 — normalization & deduplication (not started)
 6. MARKET-06 — publication snapshots (not started)
 7. MARKET-07 — market-scoped coverage metrics (not started)
