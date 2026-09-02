@@ -62,15 +62,16 @@ done, unlike `MARKET-01`–`03` — its eventual deliverable is a working
 import mechanism, not the documentation itself, and four hard gates block
 implementation (see its own ticket).
 
-1. [market-01-market-entity.md](./market-01-market-entity.md) — done, documentation/schema contract only
+1. [market-01-market-entity.md](./market-01-market-entity.md) — done, documentation/schema contract only; amended 2026-09-04 with a versioned `MarketBoundaryVersion` mechanism, see `docs/api/market-entity-schema.md`
 2. [market-02-canonical-restaurant-menu-schema.md](./market-02-canonical-restaurant-menu-schema.md) — done, documentation/schema contract only
 3. [market-03-source-registry.md](./market-03-source-registry.md) — done, documentation/schema contract only
 4. [market-04-raw-imports-import-runs.md](./market-04-raw-imports-import-runs.md) —
    contract documented and approved, not started; blocked on four hard
-   gates (Breda `market.boundary` amendment, per-source authorization,
-   OpenStreetMap's separate Collective/Derivative-Database legal
-   assessment, raw-storage technology) — see the ticket's own "Hard
-   gates" section
+   gates (gate 1, Breda boundary, narrowed but not closed — the semantic
+   decision and versioning contract exist, no concrete boundary version
+   is recorded yet; per-source authorization; OpenStreetMap's separate
+   Collective/Derivative-Database legal assessment; raw-storage
+   technology) — see the ticket's own "Hard gates" section
 5. MARKET-05 — normalization & deduplication (not started)
 6. MARKET-06 — publication snapshots (not started)
 7. MARKET-07 — market-scoped coverage metrics (not started)

@@ -63,10 +63,13 @@ Every market has, at minimum:
 - a stable, immutable technical `id`
 - a separate, human-readable `slug` (used in routes/UI, e.g. `breda`) and
   `name` (display name) — both can change over time without changing `id`
-- a geographic boundary (representation not decided — see Open questions;
-  a *valid* boundary is a hard precondition for automated imports,
-  market-level deduplication, coverage metrics, or any new market launch —
-  not merely a nice-to-have field)
+- a geographic boundary (**amended 2026-09-04** — versioned via
+  `MarketBoundaryVersion`, see `docs/api/market-entity-schema.md`; the
+  concrete representation per version is chosen per version, still not
+  fixed globally — see Open questions; a *valid* boundary version is a
+  hard precondition for automated imports, market-level deduplication,
+  coverage metrics, or any new market launch — not merely a nice-to-have
+  field)
 - a country code
 - a timezone
 - a default currency
@@ -203,8 +206,11 @@ visibly different track, not a number appended to a familiar one.
 
 ## Open questions (explicitly not decided here)
 
-- The concrete representation of a market's geographic boundary (polygon,
-  postal-code list, named administrative region — not chosen).
+- The concrete representation of a market's geographic boundary per
+  version (polygon, postal-code list, named administrative region — the
+  vocabulary is now fixed by `docs/api/market-entity-schema.md`'s
+  `MARKET-04`-gate amendment; which one Breda's actual first version uses,
+  and from what reviewed data source, is still not chosen).
 - The concrete canonical schema (tables/fields for the operational
   dataset) — `MARKET-02`'s job, not this decision's.
 - The concrete snapshot storage/format (files, database table, CDN-hosted

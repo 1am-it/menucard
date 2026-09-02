@@ -85,6 +85,20 @@ per its own operational process), not by this ticket.
 - [x] No code, migration, storage choice, market selector, or second
       market introduced.
 
+## Amendment (2026-09-04, `MARKET-04` gate 1)
+
+This ticket's own scope and acceptance criteria above are unchanged and
+remain accurate for what was decided at the time — the geographic
+boundary's representation was correctly left open. `docs/api/market-entity-schema.md`
+has since been amended to make `boundary` a versioned, testable
+`MarketBoundaryVersion` reference, and to settle the semantic question
+`MARKET-04`'s own hard gate 1 needed answered: Breda's market boundary is
+Gemeente Breda's administrative/municipal boundary. The concrete
+geometry/data source and representation type for Breda's actual first
+boundary version remain open — see that document's amendment section.
+This ticket's own status stays `done`; the amendment lives in the schema
+document it always pointed to.
+
 ## Suggested order
 
 First ticket of the `MARKET-*` track's Wave 1 (market dimension &

@@ -84,6 +84,11 @@ this ticket's `ImportRun.id` becomes the target of) and `MARKET-03`
 (amended, not redesigned, by this ticket — see
 `docs/api/source-registry-schema.md`'s `MARKET-04` amendment section).
 
+**Amendment (2026-09-04)**: `MARKET-01` (`docs/api/market-entity-schema.md`)
+is now also amended by (the work toward) this gate — see hard gate 1
+below and that document's own amendment section for the
+`MarketBoundaryVersion` mechanism.
+
 ## Data model needs
 
 This ticket **is** the data model definition for `ImportRun` and the
@@ -101,12 +106,19 @@ that eventually *do* go through moderation.
 
 ## Hard gates (must resolve before implementation or any real run)
 
-1. **A programmatically-testable Breda market boundary**, via an explicit
-   amendment to `docs/api/market-entity-schema.md` (`MARKET-01`).
-   Confirmed still open: that document itself states Breda's `boundary`
-   is "not yet defined" and a "hard precondition — not optional" for
-   `MARKET-04`. This ticket does not choose the representation or the
-   actual boundary.
+1. **A programmatically-testable Breda market boundary. Narrowed
+   2026-09-04, still not closed.** `docs/api/market-entity-schema.md` has
+   been amended: `boundary` is now a versioned `MarketBoundaryVersion`
+   reference, and the semantic question is settled — Breda's boundary is
+   Gemeente Breda's administrative/municipal boundary, distinct from any
+   verzorgingsgebied/bezorggebied/marktsegment notion. **What remains
+   open**: no concrete `MarketBoundaryVersion` has actually been recorded
+   for Breda — no geometry, no reviewed data source, no chosen
+   representation type (polygon/postal-code list/named administrative
+   region). This ticket does not choose or record that concrete version
+   either; that is the next step, requiring its own source review (see
+   gate 2, which the amendment explicitly extends to boundary-data
+   sources too).
 2. **Every targeted source has a `SourceAuthorizationVersion` with
    `status ∈ {allowed, restricted}`**, checked against that specific
    version at run time — no exceptions, including for well-known,

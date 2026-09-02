@@ -34,16 +34,16 @@ None of these are resolved by this document. They are named here so a
 future implementer cannot mistake "the contract is documented" for "the
 contract can run."
 
-1. **A programmatically-testable Breda market boundary**, defined via an
-   explicit amendment to `docs/api/market-entity-schema.md` (`MARKET-01`).
-   `market-entity-schema.md` already states this is "not yet defined even
-   for Breda" and a "hard precondition — not optional" for `MARKET-04`.
-   This document does not choose a boundary representation (polygon,
-   postal-code list, named administrative region — `MARKET-01`'s own open
-   question) or draw Breda's actual boundary. It only requires that the
-   resulting definition be precise enough to programmatically test
-   "is this address/location within the market" — not legally
-   definitive or pixel-perfect, just decided and testable.
+1. **A programmatically-testable Breda market boundary. Narrowed
+   2026-09-04, still not closed.** `docs/api/market-entity-schema.md` has
+   been amended with a versioned `MarketBoundaryVersion` mechanism and
+   settles the semantic question — Breda's boundary is Gemeente Breda's
+   administrative/municipal boundary. **What's still missing**: no
+   concrete `MarketBoundaryVersion` — geometry, reviewed data source,
+   chosen representation type — has actually been recorded for Breda.
+   This document does not record that concrete version either; see
+   `ImportRun.market_boundary_version_id` below for how a run references
+   one once it exists.
 2. **Every source an `ImportRun` targets has a `SourceAuthorizationVersion`
    with `status ∈ {allowed, restricted}`** (`docs/api/source-registry-schema.md`'s
    amendment) — checked against that specific version, at the time the
@@ -77,6 +77,7 @@ contract can run."
 | `source_id` | FK → `Source.id` | Exactly one source per run. |
 | `source_authorization_version_id` | FK → `SourceAuthorizationVersion.id` | **Not a copy.** The exact immutable version that was current when this run executed — see `docs/api/source-registry-schema.md`'s amendment. A run's legitimacy is judged against this reference forever, even after the source is later re-reviewed. |
 | `market_id` | FK → `market.id` | Requires `MARKET-01`'s boundary to actually be defined for this market — see hard gate 1. |
+| `market_boundary_version_id` | FK → `MarketBoundaryVersion.id`, nullable | **Amendment (2026-09-04).** Not a copy. The specific boundary version this run's own scoping (e.g. a bounding query) was informed by, where applicable — reference-not-copy, same discipline as `source_authorization_version_id`. This is *not* the authoritative "is this candidate in the market" test — that is `MARKET-05`'s job, tested against a specific `MarketBoundaryVersion` at normalization time, per `docs/api/market-entity-schema.md`'s amendment (invariant 3). A record whose location cannot be tested against that version's `inclusion_rule` is `unknown`/`unresolved`, never defaulted to "in the market" (that document's invariant 4) — `MARKET-05`'s concern, not enforced by `ImportRun` itself, but the raw extraction record must preserve whatever location data exists so that test remains possible downstream. This field only lets a run itself stay traceable to which boundary definition it was run under, even for a run whose own fetch wasn't boundary-scoped at all (`null` in that case). |
 | `access_method_used` | enum, drawn from the referenced version's `allowed_access_method` | Recorded per run, not merely inherited, since a source can gain additional allowed methods across later versions. |
 | `access_provider_note` | text | The concrete technical provider/instance used for this run (e.g. "Overpass instance X" vs. "bulk extract from provider Y") — distinct from the licence question, matching `MARKET-03`'s existing licence-vs-access-provider separation. |
 | `source_locator` | URL/query/file reference | The exact endpoint, query, or file this specific run used. |

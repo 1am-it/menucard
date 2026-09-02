@@ -299,9 +299,17 @@ originally drafted — two independent status fields, `launch_status`
 `docs/api/market-entity-schema.md`. Breda modeled as the first, retroactive
 reference value: `launch_status: live`, `readiness_status: conditional_go`
 (honestly — Breda does not clear its own `[[012-city-market-readiness-thresholds]]`
-bar on two metrics) — its geographic `boundary` is explicitly documented
-as not yet defined, a real gap, not a placeholder. No code, migration,
-Supabase change, storage choice, market selector, or second market.
+bar on two metrics). **Correction (2026-09-04)**: its geographic
+`boundary` was originally documented as not yet defined — a real gap at
+the time, not a placeholder — and has since been partially closed:
+`docs/api/market-entity-schema.md` was amended with a versioned
+`MarketBoundaryVersion` mechanism and now settles that Breda's boundary
+is Gemeente Breda's administrative/municipal boundary (the semantic
+question). No concrete boundary version — geometry, reviewed data
+source, representation type — has actually been recorded for Breda yet,
+so this remains an open, narrower gap, not a placeholder either. No code,
+migration, Supabase change, storage choice, market selector, or second
+market.
 
 MARKET-02 — Canonical restaurant/menu schema (done, documentation/schema
 contract only). See `docs/api/canonical-restaurant-menu-schema.md`:
