@@ -52,6 +52,38 @@ const SERIALIZATION_RULE = {
 
 const HASH_ALGORITHM = 'sha256';
 
+// Live-download safety envelope for the one, fixed, already-registered
+// source (see docs/api/source-registry-schema.md's "Registered sources"
+// section). This is NOT a general-purpose fetch config — every field here
+// is a hard constraint checked before any byte of the response body is
+// trusted, and the URL/host/path are never accepted as caller input.
+//
+// allowedContentTypes is a conservative allow-list, not yet confirmed
+// against a real PDOK response (this round never performs a real request
+// against PDOK). Before the separate, explicitly-approved real Breda
+// capture runs, the actual Content-Type header PDOK returns for this exact
+// download should be confirmed (e.g. a single manual HEAD request) and
+// this list corrected if needed — an open follow-up, not a settled fact.
+const LIVE_SOURCE = {
+  url: PDOK_SOURCE.definitionRef,
+  expectedProtocol: 'https:',
+  expectedHost: 'service.pdok.nl',
+  expectedPath: '/kadaster/brk-bestuurlijke-gebieden/atom/downloads/BestuurlijkeGebieden_2026.gpkg',
+  allowedContentTypes: [
+    'application/geopackage+sqlite3',
+    'application/x-sqlite3',
+    'application/octet-stream',
+    'binary/octet-stream',
+  ],
+  // The real file was confirmed ~14.5MB during read-only research; this is
+  // a generous safety margin, not a tight expected-size bound.
+  maxDownloadBytes: 50 * 1024 * 1024,
+  // The only market this procedure currently supports. --confirm-market
+  // must match this exact value — it is a fixed confirmation, not a
+  // free market selector.
+  expectedMarketSlug: 'breda',
+};
+
 module.exports = {
   GDAL,
   PDOK_SOURCE,
@@ -59,4 +91,5 @@ module.exports = {
   CRS,
   SERIALIZATION_RULE,
   HASH_ALGORITHM,
+  LIVE_SOURCE,
 };

@@ -11,15 +11,21 @@
  *
  * This module is defaults-safe: requiring it, or running it without
  * `--live`, never performs network access. Live mode (real PDOK download +
- * real Docker/GDAL run against the real 2026 dataset) exists as code but
- * is gated behind an explicit `--live` flag and is not invoked by this
- * project until a separate, explicit approval closes gate 1.
+ * real Docker/GDAL run against the real 2026 dataset) is real, wired code
+ * — not a stub — but requires BOTH `--live` and an exactly-matching
+ * `--confirm-market=<slug>` (see `assertLiveConfirmation`), accepts no
+ * caller-supplied URL or market (only the one fixed, registered source in
+ * `capture-market-boundary.config.js`'s `LIVE_SOURCE`), and is not invoked
+ * by this project against the real PDOK endpoint until a separate,
+ * explicit approval closes gate 1.
  */
 
 const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');
 const crypto = require('node:crypto');
+const https = require('node:https');
+const { URL } = require('node:url');
 const { execFileSync } = require('node:child_process');
 const { DatabaseSync } = require('node:sqlite');
 
@@ -247,6 +253,181 @@ function runGdalExtraction({ gpkgPath, layer, featureId, gdalRef, outDir, execFi
   return outPath;
 }
 
+// ─── Step 0 (live mode only): guarded confirmation + guarded download ─────
+
+/**
+ * `--live` alone is never enough. A second, exactly-matching
+ * `--confirm-market=<expectedMarketSlug>` flag must also be present —
+ * this is a fixed confirmation of the one market this procedure supports
+ * today, not a free market selector: any other value (or a missing flag)
+ * refuses. Pure/argv-based so this is testable without spawning a process.
+ */
+function assertLiveConfirmation(args, expectedMarketSlug) {
+  const live = args.includes('--live');
+  if (!live) {
+    return { live: false };
+  }
+  const confirmArg = args.find((a) => a.startsWith('--confirm-market='));
+  const confirmedValue = confirmArg ? confirmArg.slice('--confirm-market='.length) : null;
+  if (confirmedValue !== expectedMarketSlug) {
+    throw new HaltError(
+      'live-confirmation-missing',
+      `live mode requires both --live and an exactly matching --confirm-market=${expectedMarketSlug}; ` +
+        `got --confirm-market=${confirmedValue === null ? '(missing)' : JSON.stringify(confirmedValue)}`
+    );
+  }
+  return { live: true, marketSlug: confirmedValue };
+}
+
+function parseContentType(headerValue) {
+  if (!headerValue) return null;
+  return headerValue.split(';')[0].trim().toLowerCase();
+}
+
+/**
+ * Downloads a single file over HTTPS into its own throwaway temp
+ * directory, enforcing every safeguard before a single byte is trusted:
+ * exact protocol/host/path match, no redirects, an allow-listed status
+ * code and Content-Type, and a hard byte-count ceiling enforced while
+ * streaming (not after the fact). Never returns a partial file — any
+ * failure removes the temp directory it created before rejecting.
+ *
+ * `url`/`expectedHost`/`expectedPath` etc. are parameters so this
+ * primitive is independently testable (including against a local
+ * synthetic server); the real live-capture entry point (`downloadLiveSource`
+ * below) is what actually gets called at runtime, and it never accepts a
+ * caller-supplied URL — it always uses the fixed, registered config value.
+ */
+async function downloadGeoPackage({
+  url,
+  expectedProtocol,
+  expectedHost,
+  expectedPath,
+  allowedContentTypes,
+  maxBytes,
+  requestImpl = https.get,
+}) {
+  const parsed = new URL(url);
+  if (parsed.protocol !== expectedProtocol) {
+    throw new HaltError(
+      'live-download-protocol-rejected',
+      `expected protocol "${expectedProtocol}", got "${parsed.protocol}" for ${url}`
+    );
+  }
+  if (parsed.hostname !== expectedHost) {
+    throw new HaltError('live-download-host-mismatch', `expected host "${expectedHost}", got "${parsed.hostname}"`);
+  }
+  if (parsed.pathname !== expectedPath) {
+    throw new HaltError('live-download-path-mismatch', `expected path "${expectedPath}", got "${parsed.pathname}"`);
+  }
+
+  const tmpDir = makeTempDir('market-boundary-live-source-');
+  const destPath = path.join(tmpDir, 'source.gpkg');
+
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    const fail = (err) => {
+      if (settled) return;
+      settled = true;
+      reject(err);
+    };
+
+    let req;
+    try {
+      req = requestImpl(url, (res) => {
+        // Redirects are refused outright — this procedure's explicit,
+        // documented rule. The URL is fixed and already confirmed to
+        // resolve directly during source review; a redirect at capture
+        // time is treated as unexpected, not as something to follow.
+        if (res.statusCode >= 300 && res.statusCode < 400) {
+          res.resume();
+          fail(
+            new HaltError(
+              'live-download-redirect-rejected',
+              `received redirect status ${res.statusCode}; this procedure refuses all redirects`
+            )
+          );
+          return;
+        }
+        if (res.statusCode !== 200) {
+          res.resume();
+          fail(new HaltError('live-download-bad-status', `expected HTTP 200, got ${res.statusCode}`));
+          return;
+        }
+
+        const contentType = parseContentType(res.headers['content-type']);
+        if (!contentType || !allowedContentTypes.includes(contentType)) {
+          res.resume();
+          fail(
+            new HaltError(
+              'live-download-bad-content-type',
+              `unexpected Content-Type "${res.headers['content-type']}"`
+            )
+          );
+          return;
+        }
+
+        const fileStream = fs.createWriteStream(destPath);
+        let bytesWritten = 0;
+
+        res.on('data', (chunk) => {
+          if (settled) return;
+          bytesWritten += chunk.length;
+          if (bytesWritten > maxBytes) {
+            res.destroy();
+            fileStream.destroy();
+            fail(new HaltError('live-download-too-large', `download exceeded maxBytes=${maxBytes}`));
+            return;
+          }
+          fileStream.write(chunk);
+        });
+        res.on('end', () => {
+          if (settled) return;
+          fileStream.end(() => {
+            if (settled) return;
+            settled = true;
+            resolve({ gpkgPath: destPath, tmpDir });
+          });
+        });
+        res.on('error', (err) => {
+          fileStream.destroy();
+          fail(new HaltError('live-download-response-error', err.message));
+        });
+      });
+      req.on('error', (err) => {
+        fail(new HaltError('live-download-request-error', err.message));
+      });
+    } catch (err) {
+      fail(new HaltError('live-download-request-error', err.message));
+    }
+  }).catch((err) => {
+    err.removedTmpDir = tmpDir;
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+    throw err;
+  });
+}
+
+/**
+ * The only entry point `runCapture`'s live mode actually calls. Unlike
+ * `downloadGeoPackage`, it takes no URL/host/path parameters at all — it
+ * always downloads exactly the one, fixed, already-reviewed
+ * `config.LIVE_SOURCE` artifact. `requestImpl` remains overridable purely
+ * as a test seam (mirroring `runGdalExtraction`'s `execFileSyncImpl`), the
+ * same way tests substitute Docker/child-process calls without ever
+ * changing *what* is being requested.
+ */
+function downloadLiveSource(requestImpl) {
+  return downloadGeoPackage({
+    url: config.LIVE_SOURCE.url,
+    expectedProtocol: config.LIVE_SOURCE.expectedProtocol,
+    expectedHost: config.LIVE_SOURCE.expectedHost,
+    expectedPath: config.LIVE_SOURCE.expectedPath,
+    allowedContentTypes: config.LIVE_SOURCE.allowedContentTypes,
+    maxBytes: config.LIVE_SOURCE.maxDownloadBytes,
+    requestImpl,
+  });
+}
+
 // ─── Step 4: canonical serialization + RFC 7946 validation ────────────────
 
 function roundCoordinates(coords, decimals) {
@@ -398,10 +579,10 @@ function assembleManifest({
 // ─── Orchestration ─────────────────────────────────────────────────────────
 
 /**
- * Runs the full capture procedure against a GeoPackage that is already
- * present on disk at `gpkgPath` (a local fixture in dry-run mode; the
- * real downloaded file in live mode — downloading itself is out of scope
- * for this round and not implemented here).
+ * Runs the full capture procedure against a GeoPackage — either one
+ * already present on disk at `gpkgPath` (dry-run/fixture mode), or one
+ * fetched by this function itself via the guarded live download path
+ * (`live: true`; see below).
  *
  * Writes to a temp directory throughout; only on full success does it
  * return the temp directory's contents (still not moved into
@@ -411,8 +592,17 @@ function assembleManifest({
  *
  * `gdalRunner` is injectable so tests can substitute a fake for the one
  * step that requires Docker, without ever faking geometry math itself.
+ *
+ * When `live` is true, `gpkgPath` is ignored and the national GeoPackage
+ * is instead fetched via `liveDownloader` (defaulting to the real,
+ * fixed-source `downloadLiveSource`) into its own temp directory, which is
+ * unconditionally removed again in `finally` — success or failure — so
+ * the downloaded national file never lingers on disk. This is `async`
+ * (rather than blocking, like the rest of this module) only because of
+ * that one network step; every other step remains the same synchronous
+ * call it always was.
  */
-function runCapture({
+async function runCapture({
   gpkgPath,
   layer = config.GDAL.layer,
   selectionRule = config.SELECTION_RULE,
@@ -423,15 +613,26 @@ function runCapture({
   gdalRunner = runGdalExtraction,
   gdalVersionString,
   now = () => new Date().toISOString(),
+  live = false,
+  liveDownloader = downloadLiveSource,
+  liveRequestImpl,
 }) {
   const tmpDir = makeTempDir('market-boundary-capture-');
+  let liveTmpDir = null;
   try {
-    const sourceArtifactHash = sha256File(gpkgPath);
+    let effectiveGpkgPath = gpkgPath;
+    if (live) {
+      const downloaded = await liveDownloader(liveRequestImpl);
+      effectiveGpkgPath = downloaded.gpkgPath;
+      liveTmpDir = downloaded.tmpDir;
+    }
 
-    const featureId = selectAndValidateFeature(gpkgPath, layer, selectionRule);
+    const sourceArtifactHash = sha256File(effectiveGpkgPath);
+
+    const featureId = selectAndValidateFeature(effectiveGpkgPath, layer, selectionRule);
 
     const rawGeoJsonPath = gdalRunner({
-      gpkgPath,
+      gpkgPath: effectiveGpkgPath,
       layer,
       featureId,
       gdalRef: config.GDAL.ref,
@@ -476,57 +677,105 @@ function runCapture({
     err.removedTmpDir = tmpDir;
     fs.rmSync(tmpDir, { recursive: true, force: true });
     throw err;
+  } finally {
+    // The downloaded national GeoPackage is never the deliverable — only
+    // the derived manifest/GeoJSON in `tmpDir` is. It is removed here
+    // unconditionally, on both the success and failure paths.
+    if (liveTmpDir) {
+      fs.rmSync(liveTmpDir, { recursive: true, force: true });
+    }
   }
 }
 
 // ─── CLI entry point ────────────────────────────────────────────────────────
 
+/**
+ * Live mode is real, wired code — not a stub — but it is still gated
+ * behind two flags that must both be present and exactly matching
+ * (`assertLiveConfirmation`), and behind every safeguard in
+ * `downloadGeoPackage`. Nothing in this project invokes it against the
+ * real PDOK endpoint; closing gate 1 for real is a separate, explicitly
+ * approved step (see the ticket/report this script accompanies).
+ */
 function main(argv) {
   const args = argv.slice(2);
-  const live = args.includes('--live');
-  const fixtureIdx = args.indexOf('--fixture');
   const outIdx = args.indexOf('--out');
+  const fixtureIdx = args.indexOf('--fixture');
 
-  if (live) {
-    // Deliberately not implemented in this round. Live mode requires its
-    // own separate, explicit approval step (closing gate 1) — see the
-    // ticket/report this script accompanies. Never reachable via the
-    // default invocation.
-    console.error(
-      'Live mode is intentionally not implemented yet. This is a documented, ' +
-        'deliberate stop, not a bug: closing gate 1 for real requires a ' +
-        'separate, explicit approval. Re-run without --live for dry-run/fixture mode.'
-    );
+  let liveCheck;
+  try {
+    liveCheck = assertLiveConfirmation(args, config.LIVE_SOURCE.expectedMarketSlug);
+  } catch (err) {
+    console.error(err.message);
     process.exitCode = 1;
-    return;
+    return undefined;
+  }
+
+  const repoRoot = path.resolve(__dirname, '..', '..');
+  const scriptRelativePath = path.relative(repoRoot, __filename);
+
+  if (liveCheck.live) {
+    if (outIdx === -1) {
+      console.error(
+        `Usage (live mode): node capture-market-boundary.js --live ` +
+          `--confirm-market=${config.LIVE_SOURCE.expectedMarketSlug} --out <dir>`
+      );
+      process.exitCode = 1;
+      return undefined;
+    }
+    const outDir = args[outIdx + 1];
+    fs.mkdirSync(outDir, { recursive: true });
+
+    return runCapture({
+      live: true,
+      marketSlug: liveCheck.marketSlug,
+      versionNumber: 1,
+      repoRoot,
+      scriptRelativePath,
+      gdalVersionString: execFileSync(
+        'docker',
+        ['run', '--rm', config.GDAL.ref, 'ogr2ogr', '--version'],
+        { encoding: 'utf8' }
+      ).trim(),
+    })
+      .then((result) => {
+        fs.cpSync(result.tmpDir, outDir, { recursive: true });
+        fs.rmSync(result.tmpDir, { recursive: true, force: true });
+        console.log(`Live capture complete. Manifest written to: ${path.join(outDir, 'manifest.json')}`);
+      })
+      .catch((err) => {
+        console.error(err.message);
+        process.exitCode = 1;
+      });
   }
 
   if (fixtureIdx === -1 || outIdx === -1) {
     console.error('Usage (dry-run only): node capture-market-boundary.js --fixture <gpkg-path> --out <dir>');
     process.exitCode = 1;
-    return;
+    return undefined;
   }
 
   const gpkgPath = args[fixtureIdx + 1];
   const outDir = args[outIdx + 1];
   fs.mkdirSync(outDir, { recursive: true });
 
-  try {
-    const result = runCapture({
-      gpkgPath,
-      marketSlug: 'breda',
-      versionNumber: 1,
-      repoRoot: path.resolve(__dirname, '..', '..'),
-      scriptRelativePath: path.relative(path.resolve(__dirname, '..', '..'), __filename),
-      gdalVersionString: 'unresolved — real GDAL was not invoked outside tests in this CLI run',
+  return runCapture({
+    gpkgPath,
+    marketSlug: 'breda',
+    versionNumber: 1,
+    repoRoot,
+    scriptRelativePath,
+    gdalVersionString: 'unresolved — real GDAL was not invoked outside tests in this CLI run',
+  })
+    .then((result) => {
+      fs.cpSync(result.tmpDir, outDir, { recursive: true });
+      fs.rmSync(result.tmpDir, { recursive: true, force: true });
+      console.log(`Dry-run capture complete. Manifest written to: ${path.join(outDir, 'manifest.json')}`);
+    })
+    .catch((err) => {
+      console.error(err.message);
+      process.exitCode = 1;
     });
-    fs.cpSync(result.tmpDir, outDir, { recursive: true });
-    fs.rmSync(result.tmpDir, { recursive: true, force: true });
-    console.log(`Dry-run capture complete. Manifest written to: ${path.join(outDir, 'manifest.json')}`);
-  } catch (err) {
-    console.error(err.message);
-    process.exitCode = 1;
-  }
 }
 
 if (require.main === module) {
@@ -540,6 +789,9 @@ module.exports = {
   generateUuidV7,
   selectAndValidateFeature,
   runGdalExtraction,
+  assertLiveConfirmation,
+  downloadGeoPackage,
+  downloadLiveSource,
   validateRfc7946,
   canonicalizeGeoJson,
   canonicalJsonStringify,

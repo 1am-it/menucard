@@ -5,6 +5,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
+const http = require('node:http');
 
 const { execFileSync } = require('node:child_process');
 const { buildFixtureGeoPackage } = require('./__fixtures__/build-fixture-gpkg');
@@ -14,6 +15,8 @@ const {
   generateUuidV7,
   runCapture,
   runGdalExtraction,
+  assertLiveConfirmation,
+  downloadGeoPackage,
   validateRfc7946,
   canonicalizeGeoJson,
   REQUIRED_MANIFEST_FIELDS,
@@ -124,7 +127,7 @@ test('generateUuidV7 produces RFC 9562-conformant UUIDv7 values', () => {
 test(
   'happy path (primary): real pinned GDAL container selects, validates, reprojects, and produces a complete manifest',
   { skip: DOCKER_REACHABLE ? false : DOCKER_SKIP_REASON },
-  () => {
+  async () => {
     const dir = makeFixtureDir();
     const gpkgPath = path.join(dir, 'fixture.gpkg');
     buildFixtureGeoPackage(gpkgPath, [{ id: 1, identificatie: 'GM0758', code: '0758', naam: 'Breda' }]);
@@ -132,7 +135,7 @@ test(
     // No injected double here — `gdalRunner` defaults to the real
     // `runGdalExtraction`, which shells out to `docker run` against the
     // already-pinned image digest and the synthetic fixture only.
-    const result = runCapture({
+    const result = await runCapture({
       gpkgPath,
       marketSlug: 'breda',
       versionNumber: 1,
@@ -200,12 +203,12 @@ test(
 
 test(
   'happy path (supplementary, injected double): exercises manifest/hash/atomicity logic without invoking Docker',
-  () => {
+  async () => {
     const dir = makeFixtureDir();
     const gpkgPath = path.join(dir, 'fixture.gpkg');
     buildFixtureGeoPackage(gpkgPath, [{ id: 1, identificatie: 'GM0758', code: '0758', naam: 'Breda' }]);
 
-    const result = runCapture({ gpkgPath, ...baseCaptureArgs() });
+    const result = await runCapture({ gpkgPath, ...baseCaptureArgs() });
 
     // Manifest completeness — no required field is null/undefined.
     for (const field of REQUIRED_MANIFEST_FIELDS) {
@@ -261,12 +264,12 @@ test(
   }
 );
 
-test('halts with no output when no feature matches the primary selector', () => {
+test('halts with no output when no feature matches the primary selector', async () => {
   const dir = makeFixtureDir();
   const gpkgPath = path.join(dir, 'fixture.gpkg');
   buildFixtureGeoPackage(gpkgPath, [{ id: 1, identificatie: 'GM9999', code: '9999', naam: 'Nietbreda' }]);
 
-  assert.throws(
+  await assert.rejects(
     () => runCapture({ gpkgPath, ...baseCaptureArgs() }),
     (err) => {
       assert.ok(err instanceof HaltError);
@@ -280,7 +283,7 @@ test('halts with no output when no feature matches the primary selector', () => 
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
-test('halts with no output when more than one feature matches the primary selector', () => {
+test('halts with no output when more than one feature matches the primary selector', async () => {
   const dir = makeFixtureDir();
   const gpkgPath = path.join(dir, 'fixture.gpkg');
   buildFixtureGeoPackage(gpkgPath, [
@@ -288,7 +291,7 @@ test('halts with no output when more than one feature matches the primary select
     { id: 2, identificatie: 'GM0758', code: '0758', naam: 'Breda (duplicate row)' },
   ]);
 
-  assert.throws(
+  await assert.rejects(
     () => runCapture({ gpkgPath, ...baseCaptureArgs() }),
     (err) => {
       assert.ok(err instanceof HaltError);
@@ -301,12 +304,12 @@ test('halts with no output when more than one feature matches the primary select
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
-test('halts with no output when code does not match', () => {
+test('halts with no output when code does not match', async () => {
   const dir = makeFixtureDir();
   const gpkgPath = path.join(dir, 'fixture.gpkg');
   buildFixtureGeoPackage(gpkgPath, [{ id: 1, identificatie: 'GM0758', code: '0001', naam: 'Breda' }]);
 
-  assert.throws(
+  await assert.rejects(
     () => runCapture({ gpkgPath, ...baseCaptureArgs() }),
     (err) => {
       assert.ok(err instanceof HaltError);
@@ -320,12 +323,12 @@ test('halts with no output when code does not match', () => {
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
-test('halts with no output when naam does not match', () => {
+test('halts with no output when naam does not match', async () => {
   const dir = makeFixtureDir();
   const gpkgPath = path.join(dir, 'fixture.gpkg');
   buildFixtureGeoPackage(gpkgPath, [{ id: 1, identificatie: 'GM0758', code: '0758', naam: 'Amsterdam' }]);
 
-  assert.throws(
+  await assert.rejects(
     () => runCapture({ gpkgPath, ...baseCaptureArgs() }),
     (err) => {
       assert.ok(err instanceof HaltError);
@@ -359,7 +362,7 @@ function unavailableDockerGdalRunner(args) {
   });
 }
 
-test('real GDAL/Docker step fails with an understandable error when the container/tooling is unavailable', () => {
+test('real GDAL/Docker step fails with an understandable error when the container/tooling is unavailable', async () => {
   const dir = makeFixtureDir();
   const gpkgPath = path.join(dir, 'fixture.gpkg');
   buildFixtureGeoPackage(gpkgPath, [{ id: 1, identificatie: 'GM0758', code: '0758', naam: 'Breda' }]);
@@ -368,7 +371,7 @@ test('real GDAL/Docker step fails with an understandable error when the containe
   // faked to fail (see unavailableDockerGdalRunner above) — this test's
   // outcome no longer depends on whether Docker actually happens to be
   // reachable on this machine at test time.
-  assert.throws(
+  await assert.rejects(
     () => runCapture({ gpkgPath, ...baseCaptureArgs({ gdalRunner: unavailableDockerGdalRunner }) }),
     (err) => {
       assert.ok(err instanceof HaltError);
@@ -380,4 +383,352 @@ test('real GDAL/Docker step fails with an understandable error when the containe
   );
 
   fs.rmSync(dir, { recursive: true, force: true });
+});
+
+// ─── Live-mode confirmation gate ───────────────────────────────────────────
+
+test('live mode without both confirmation flags refuses', () => {
+  assert.deepEqual(assertLiveConfirmation([], 'breda'), { live: false });
+  assert.deepEqual(assertLiveConfirmation(['--fixture', 'x.gpkg'], 'breda'), { live: false });
+
+  assert.throws(
+    () => assertLiveConfirmation(['--live'], 'breda'),
+    (err) => {
+      assert.ok(err instanceof HaltError);
+      assert.equal(err.reason, 'live-confirmation-missing');
+      return true;
+    },
+    'expected --live alone (no --confirm-market at all) to refuse'
+  );
+
+  assert.throws(
+    () => assertLiveConfirmation(['--live', '--confirm-market=amsterdam'], 'breda'),
+    (err) => {
+      assert.ok(err instanceof HaltError);
+      assert.equal(err.reason, 'live-confirmation-missing');
+      return true;
+    },
+    'expected a mismatched market slug (not a free selector) to refuse'
+  );
+
+  assert.throws(
+    () => assertLiveConfirmation(['--live', '--confirm-market='], 'breda'),
+    (err) => err instanceof HaltError && err.reason === 'live-confirmation-missing',
+    'expected an empty confirmation value to refuse'
+  );
+
+  assert.deepEqual(assertLiveConfirmation(['--live', '--confirm-market=breda'], 'breda'), {
+    live: true,
+    marketSlug: 'breda',
+  });
+});
+
+// ─── Live download: URL/host/path validation (no network involved) ────────
+
+test('live download refuses a non-HTTPS URL without attempting any request', async () => {
+  await assert.rejects(
+    () =>
+      downloadGeoPackage({
+        url: 'http://service.pdok.nl/kadaster/brk-bestuurlijke-gebieden/atom/downloads/BestuurlijkeGebieden_2026.gpkg',
+        expectedProtocol: 'https:',
+        expectedHost: 'service.pdok.nl',
+        expectedPath: '/kadaster/brk-bestuurlijke-gebieden/atom/downloads/BestuurlijkeGebieden_2026.gpkg',
+        allowedContentTypes: ['application/octet-stream'],
+        maxBytes: 1024,
+        requestImpl: () => {
+          throw new Error('requestImpl must never be called for a rejected URL');
+        },
+      }),
+    (err) => err instanceof HaltError && err.reason === 'live-download-protocol-rejected'
+  );
+});
+
+test('live download refuses a mismatched host without attempting any request', async () => {
+  await assert.rejects(
+    () =>
+      downloadGeoPackage({
+        url: 'https://evil.example.com/kadaster/brk-bestuurlijke-gebieden/atom/downloads/BestuurlijkeGebieden_2026.gpkg',
+        expectedProtocol: 'https:',
+        expectedHost: 'service.pdok.nl',
+        expectedPath: '/kadaster/brk-bestuurlijke-gebieden/atom/downloads/BestuurlijkeGebieden_2026.gpkg',
+        allowedContentTypes: ['application/octet-stream'],
+        maxBytes: 1024,
+        requestImpl: () => {
+          throw new Error('requestImpl must never be called for a rejected URL');
+        },
+      }),
+    (err) => err instanceof HaltError && err.reason === 'live-download-host-mismatch'
+  );
+});
+
+test('live download refuses a mismatched path without attempting any request', async () => {
+  await assert.rejects(
+    () =>
+      downloadGeoPackage({
+        url: 'https://service.pdok.nl/some/other/file.gpkg',
+        expectedProtocol: 'https:',
+        expectedHost: 'service.pdok.nl',
+        expectedPath: '/kadaster/brk-bestuurlijke-gebieden/atom/downloads/BestuurlijkeGebieden_2026.gpkg',
+        allowedContentTypes: ['application/octet-stream'],
+        maxBytes: 1024,
+        requestImpl: () => {
+          throw new Error('requestImpl must never be called for a rejected URL');
+        },
+      }),
+    (err) => err instanceof HaltError && err.reason === 'live-download-path-mismatch'
+  );
+});
+
+// ─── Live download: synthetic local server (no real PDOK network access) ──
+//
+// A local, in-process HTTP server on 127.0.0.1 stands in for PDOK so the
+// status/content-type/size/redirect handling can be exercised for real,
+// without ever making a real network request. `expectedProtocol` is set to
+// 'http:' only in these tests (the local server has no TLS cert); the real
+// production entry point (`downloadLiveSource`) always uses the fixed
+// `config.LIVE_SOURCE` values, which require 'https:'.
+
+function startTestServer(handler) {
+  return new Promise((resolve) => {
+    const server = http.createServer(handler);
+    server.listen(0, '127.0.0.1', () => resolve(server));
+  });
+}
+
+function stopTestServer(server) {
+  return new Promise((resolve) => server.close(() => resolve()));
+}
+
+test('live download halts with no leftover file on a redirect response', async () => {
+  const server = await startTestServer((req, res) => {
+    res.writeHead(302, { Location: 'http://127.0.0.1:1/elsewhere' });
+    res.end();
+  });
+  try {
+    const { port } = server.address();
+    let capturedTmpDir;
+    await assert.rejects(
+      async () => {
+        try {
+          return await downloadGeoPackage({
+            url: `http://127.0.0.1:${port}/fixture.gpkg`,
+            expectedProtocol: 'http:',
+            expectedHost: '127.0.0.1',
+            expectedPath: '/fixture.gpkg',
+            allowedContentTypes: ['application/octet-stream'],
+            maxBytes: 1024,
+            requestImpl: http.get,
+          });
+        } catch (err) {
+          capturedTmpDir = err.removedTmpDir;
+          throw err;
+        }
+      },
+      (err) => err instanceof HaltError && err.reason === 'live-download-redirect-rejected'
+    );
+    assert.ok(capturedTmpDir, 'expected a tmp dir to have been created and recorded');
+    assert.equal(fs.existsSync(capturedTmpDir), false, 'temp directory must not survive a rejected redirect');
+  } finally {
+    await stopTestServer(server);
+  }
+});
+
+test('live download halts with no leftover file on a non-200 status', async () => {
+  const server = await startTestServer((req, res) => {
+    res.writeHead(500, { 'Content-Type': 'application/octet-stream' });
+    res.end('server error');
+  });
+  try {
+    const { port } = server.address();
+    await assert.rejects(
+      () =>
+        downloadGeoPackage({
+          url: `http://127.0.0.1:${port}/fixture.gpkg`,
+          expectedProtocol: 'http:',
+          expectedHost: '127.0.0.1',
+          expectedPath: '/fixture.gpkg',
+          allowedContentTypes: ['application/octet-stream'],
+          maxBytes: 1024,
+          requestImpl: http.get,
+        }),
+      (err) => {
+        assert.ok(err instanceof HaltError);
+        assert.equal(err.reason, 'live-download-bad-status');
+        assert.equal(fs.existsSync(err.removedTmpDir), false);
+        return true;
+      }
+    );
+  } finally {
+    await stopTestServer(server);
+  }
+});
+
+test('live download halts with no leftover file on an unexpected content-type', async () => {
+  const server = await startTestServer((req, res) => {
+    res.writeHead(200, { 'Content-Type': 'text/html' });
+    res.end('<html>not a geopackage</html>');
+  });
+  try {
+    const { port } = server.address();
+    await assert.rejects(
+      () =>
+        downloadGeoPackage({
+          url: `http://127.0.0.1:${port}/fixture.gpkg`,
+          expectedProtocol: 'http:',
+          expectedHost: '127.0.0.1',
+          expectedPath: '/fixture.gpkg',
+          allowedContentTypes: ['application/octet-stream'],
+          maxBytes: 1024,
+          requestImpl: http.get,
+        }),
+      (err) => {
+        assert.ok(err instanceof HaltError);
+        assert.equal(err.reason, 'live-download-bad-content-type');
+        assert.equal(fs.existsSync(err.removedTmpDir), false);
+        return true;
+      }
+    );
+  } finally {
+    await stopTestServer(server);
+  }
+});
+
+test('live download halts with no leftover file when the response exceeds maxBytes', async () => {
+  const server = await startTestServer((req, res) => {
+    res.writeHead(200, { 'Content-Type': 'application/octet-stream' });
+    res.write(Buffer.alloc(2000, 1));
+    res.end(Buffer.alloc(2000, 2));
+  });
+  try {
+    const { port } = server.address();
+    await assert.rejects(
+      () =>
+        downloadGeoPackage({
+          url: `http://127.0.0.1:${port}/fixture.gpkg`,
+          expectedProtocol: 'http:',
+          expectedHost: '127.0.0.1',
+          expectedPath: '/fixture.gpkg',
+          allowedContentTypes: ['application/octet-stream'],
+          maxBytes: 1024,
+          requestImpl: http.get,
+        }),
+      (err) => {
+        assert.ok(err instanceof HaltError);
+        assert.equal(err.reason, 'live-download-too-large');
+        assert.equal(fs.existsSync(err.removedTmpDir), false);
+        return true;
+      }
+    );
+  } finally {
+    await stopTestServer(server);
+  }
+});
+
+test('a valid synthetic download flows through the full temporary capture chain, and the downloaded source is removed on success', async () => {
+  const fixtureDir = makeFixtureDir();
+  const gpkgPath = path.join(fixtureDir, 'fixture.gpkg');
+  buildFixtureGeoPackage(gpkgPath, [{ id: 1, identificatie: 'GM0758', code: '0758', naam: 'Breda' }]);
+  const gpkgBytes = fs.readFileSync(gpkgPath);
+
+  const server = await startTestServer((req, res) => {
+    res.writeHead(200, { 'Content-Type': 'application/octet-stream' });
+    res.end(gpkgBytes);
+  });
+
+  let capturedLiveTmpDir;
+  try {
+    const { port } = server.address();
+
+    // `runCapture`'s real live branch, exercised end-to-end, with only the
+    // download target swapped for the local synthetic server (never real
+    // PDOK config/network) and the GDAL step swapped for the same
+    // dependency-free fake used by the "supplementary" fixture test above
+    // — this test's purpose is the live-download plumbing, not GDAL, which
+    // is already independently proven by the real-container happy path.
+    const liveDownloader = async () => {
+      const downloaded = await downloadGeoPackage({
+        url: `http://127.0.0.1:${port}/fixture.gpkg`,
+        expectedProtocol: 'http:',
+        expectedHost: '127.0.0.1',
+        expectedPath: '/fixture.gpkg',
+        allowedContentTypes: ['application/octet-stream'],
+        maxBytes: 10 * 1024 * 1024,
+        requestImpl: http.get,
+      });
+      capturedLiveTmpDir = downloaded.tmpDir;
+      return downloaded;
+    };
+
+    const result = await runCapture({
+      live: true,
+      liveDownloader,
+      ...baseCaptureArgs(),
+    });
+
+    for (const field of REQUIRED_MANIFEST_FIELDS) {
+      assert.notStrictEqual(result.manifest[field], null, `expected ${field} not to be null`);
+      assert.notStrictEqual(result.manifest[field], undefined, `expected ${field} not to be undefined`);
+    }
+    assert.equal(result.manifest.source_artifact_hash, sha256File(gpkgPath));
+    assert.notEqual(result.manifest.source_artifact_hash, result.manifest.geometry_hash);
+
+    assert.ok(capturedLiveTmpDir, 'expected the live downloader to have created a temp dir');
+    assert.equal(
+      fs.existsSync(capturedLiveTmpDir),
+      false,
+      'the downloaded national GeoPackage temp dir must be removed after a successful capture'
+    );
+
+    fs.rmSync(result.tmpDir, { recursive: true, force: true });
+  } finally {
+    await stopTestServer(server);
+    fs.rmSync(fixtureDir, { recursive: true, force: true });
+  }
+});
+
+test('the downloaded live source is removed even when a later capture step fails', async () => {
+  const fixtureDir = makeFixtureDir();
+  const gpkgPath = path.join(fixtureDir, 'fixture.gpkg');
+  // A feature that will fail validation further down the pipeline — the
+  // download itself succeeds; selection/validation is what fails.
+  buildFixtureGeoPackage(gpkgPath, [{ id: 1, identificatie: 'GM9999', code: '9999', naam: 'Nietbreda' }]);
+  const gpkgBytes = fs.readFileSync(gpkgPath);
+
+  const server = await startTestServer((req, res) => {
+    res.writeHead(200, { 'Content-Type': 'application/octet-stream' });
+    res.end(gpkgBytes);
+  });
+
+  let capturedLiveTmpDir;
+  try {
+    const { port } = server.address();
+    const liveDownloader = async () => {
+      const downloaded = await downloadGeoPackage({
+        url: `http://127.0.0.1:${port}/fixture.gpkg`,
+        expectedProtocol: 'http:',
+        expectedHost: '127.0.0.1',
+        expectedPath: '/fixture.gpkg',
+        allowedContentTypes: ['application/octet-stream'],
+        maxBytes: 10 * 1024 * 1024,
+        requestImpl: http.get,
+      });
+      capturedLiveTmpDir = downloaded.tmpDir;
+      return downloaded;
+    };
+
+    await assert.rejects(
+      () => runCapture({ live: true, liveDownloader, ...baseCaptureArgs() }),
+      (err) => err instanceof HaltError && err.reason === 'no-matching-feature'
+    );
+
+    assert.ok(capturedLiveTmpDir, 'expected the live downloader to have created a temp dir');
+    assert.equal(
+      fs.existsSync(capturedLiveTmpDir),
+      false,
+      'the downloaded national GeoPackage temp dir must be removed even after a downstream failure'
+    );
+  } finally {
+    await stopTestServer(server);
+    fs.rmSync(fixtureDir, { recursive: true, force: true });
+  }
 });
