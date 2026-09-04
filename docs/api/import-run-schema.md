@@ -34,21 +34,27 @@ None of these are resolved by this document. They are named here so a
 future implementer cannot mistake "the contract is documented" for "the
 contract can run."
 
-1. **A programmatically-testable Breda market boundary. Narrowed
-   2026-09-04, still not closed.** `docs/api/market-entity-schema.md` has
-   been amended with a versioned `MarketBoundaryVersion` mechanism and
-   settles the semantic question — Breda's boundary is Gemeente Breda's
-   administrative/municipal boundary. **What's still missing**: no
-   concrete `MarketBoundaryVersion` — geometry, reviewed data source,
-   chosen representation type — has actually been recorded for Breda.
-   This document does not record that concrete version either; see
+1. **A programmatically-testable Breda market boundary.** **Closed
+   2026-09-04**: a concrete, complete `MarketBoundaryVersion` (`v1`) has
+   been captured for Breda via the controlled, guarded
+   `ops/scripts/capture-market-boundary.js` live-capture procedure,
+   sourced from the registered Kadaster/PDOK "Bestuurlijke Gebieden"
+   dataset — see `docs/api/market-entity-schema.md`'s "Registered version
+   — actual instance" section and `market-data/CONTEXT.md`. **This closes
+   the gate for Breda specifically, not as a general guarantee that every
+   future market's boundary is automatically available.** See
    `ImportRun.market_boundary_version_id` below for how a run references
-   one once it exists.
+   this version.
 2. **Every source an `ImportRun` targets has a `SourceAuthorizationVersion`
    with `status ∈ {allowed, restricted}`** (`docs/api/source-registry-schema.md`'s
    amendment) — checked against that specific version, at the time the
    run executes. No source, including well-known or generally permissive
-   ones, is exempt from this review.
+   ones, is exempt from this review. **Satisfied for one specific source,
+   2026-09-02**: Kadaster/PDOK "Bestuurlijke Gebieden" is `allowed` — see
+   `docs/api/source-registry-schema.md`'s "Registered sources" section.
+   This closes the gate **only for that one source**; OpenStreetMap, any
+   OSM extract provider, KVK Open Dataset, and every restaurant-website
+   source each still require their own, separate review.
 3. **OpenStreetMap specifically requires an additional, separate legal
    assessment before any pilot**: whether MenuCard's intended combination
    of OSM data with its own/other data forms a *Collective Database*
@@ -58,11 +64,21 @@ contract can run."
    ODbL). This matters concretely here because `MARKET-05`'s own design —
    matching and deduplicating multiple sources into one canonical record
    — plausibly leans toward "Derivative Database" for the OSM-derived
-   portion. **This document does not answer that question** — it is a
-   legal assessment, not a technical one, and is named as a precondition,
-   not resolved here. It is in addition to, not a replacement for, the
-   ordinary review of OSM's licence, its access provider, and the
-   concrete access route (see "Pilot source research" below).
+   portion. **Split 2026-09-04** into two independently-gatable parts —
+   see `docs/api/source-registry-schema.md`'s "Amendment: OSM
+   candidate-register processing-stage constraint" and
+   `planning/specs/tickets/market-04-raw-imports-import-runs.md`'s own
+   hard gate 3 for the precise, current wording:
+   - **3A** (internal OSM candidate register, `raw_import`/
+     `internal_quality_review`/`moderation_preparation` only): framework
+     documented; still pending separate `restricted`
+     `SourceAuthorizationVersion` registrations for both OpenStreetMap
+     and Geofabrik (its proposed extract provider). **Not closed** — no
+     OSM import may start on the strength of the framework alone.
+   - **3B** (`canonical_merge`/`public_publication`/`api_exposure`/
+     `redistribution`): blocked pending a qualified legal review (never
+     AI research alone) of the Collective-vs-Derivative-Database
+     question for `MARKET-05`'s merge design. Not answered here.
 4. **Physical raw-storage technology and the encryption mechanism for the
    unredacted-retention exception** (see "Data minimisation" below) are
    decided before implementation. Not chosen here — matches the "logical,
@@ -208,19 +224,23 @@ Building on `docs/api/source-registry-schema.md`'s existing candidate
 research, specifically for how an `ImportRun` would execute:
 
 - **OpenStreetMap** remains the strongest lead for the import mechanism
-  itself, but is explicitly gated by hard gate 3 above (Collective vs.
-  Derivative Database) before any pilot — not a shortcut merely because
-  its licence is well-documented. Its licence (ODbL), its access provider
-  (e.g. the shared public Overpass API vs. a third-party extract
-  provider such as Geofabrik), and the concrete route (a specific query
-  or a specific extract) remain three separately reviewed questions, per
-  `MARKET-03`'s existing licence-vs-access-provider principle — not
-  collapsed into one. A regional extract via a reviewed third-party
-  provider carries less live-service/rate-limit risk for a first test run
-  than the shared Overpass API, which is a operational observation, not a
-  decision — the extract provider itself would need its own
-  `SourceAuthorizationVersion`, distinct from "OpenStreetMap" as the
-  underlying data origin.
+  itself, but is explicitly gated by hard gate 3 above (now split into
+  3A/3B) before any pilot — not a shortcut merely because its licence is
+  well-documented. Its licence (ODbL), its access provider (e.g. the
+  shared public Overpass API vs. a third-party extract provider such as
+  Geofabrik), and the concrete route (a specific query or a specific
+  extract) remain three separately reviewed questions, per `MARKET-03`'s
+  existing licence-vs-access-provider principle — not collapsed into one.
+  **Update (2026-09-04, research completed)**: a regional extract via
+  Geofabrik is the recommended **primary, reproducible** route — the
+  public Overpass API's own stated usage policy limits regular/automated
+  use to a small fraction of its already-modest one-off allowance and
+  directs heavier or commercial use elsewhere, so it may only ever serve
+  as a `supplementary_access_methods` entry (validation/freshness
+  -checking), never as the basis for a repeatable bulk import. Geofabrik
+  itself would need its own `SourceAuthorizationVersion`, distinct from
+  "OpenStreetMap" as the underlying data origin — no source is registered
+  yet for either.
 - **KVK Open Dataset** stays a `restricted`, enrichment-only candidate
   (BV/NV-only coverage risk, already documented). Its API's numeric rate
   limit (1 req/min per IP, 200/5min combined) is a concrete, operational

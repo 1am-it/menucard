@@ -290,6 +290,101 @@ every AI-assisted extraction is itself a proposal, subject to the same
 review flow as any human-submitted one") explicitly to source
 authorization decisions, not only to restaurant/menu data.
 
+## Amendment (2026-09-04): OSM candidate-register processing-stage constraint — `allowed_processing_stages[]`
+
+**Trigger**: read-only legal/technical research for `MARKET-04` hard gate 3
+(OpenStreetMap as a candidate restaurant list for Breda) found that
+`status` alone (`pending_review`/`allowed`/`restricted`/`blocked`) cannot
+express what that research actually needs: OSM data may plausibly be used
+for internal candidate-list purposes without triggering ODbL share-alike,
+but `MARKET-05`'s own matching/merging design — combining an OSM-derived
+candidate with a non-OSM source for the same feature type (a restaurant)
+— plausibly makes the result a *Derivative Database*, which is a
+materially different question from whether the source may be used
+*internally at all*. Neither `allowed_data_categories` nor
+`allowed_access_method` can express "usable for this pipeline stage, not
+that one" either. This amendment adds that missing, per-pipeline-stage
+constraint. **It does not reclassify or change any existing, already
+-registered `SourceAuthorizationVersion`** — see "What does not change"
+below.
+
+### New fields on `SourceAuthorizationVersion`
+
+| Field | Type | Notes |
+|---|---|---|
+| `allowed_processing_stages[]` | enum list, nullable/empty | **Optional.** Absent or empty means `status` alone governs, exactly as today — this is additive, not a redefinition of any existing version. When present, it narrows what this specific, immutable version may be used for, independent of `status`: any pipeline stage not listed is prohibited for this version, checked at run time the same way `allowed_data_categories`/`allowed_access_method` already are. Enum values, mirroring `docs/api/import-run-schema.md`'s own layer-separation table (raw import → `MARKET-05` normalization → moderation → `MARKET-06` publication), extended with two forward-looking stages for a not-yet-built public/partner-facing surface: `raw_import`, `internal_quality_review`, `moderation_preparation`, `canonical_merge`, `public_publication`, `api_exposure`, `redistribution`. |
+| `restricted_pending` | text, nullable | **Required whenever `allowed_processing_stages[]` excludes at least one stage.** States, in plain language, the specific condition that must be satisfied before a *new* version could add the excluded stage(s) — e.g. naming the category of legal review required. Never mutates the current version to lift a restriction: per invariant 2 (immutability), satisfying the condition requires creating a new `SourceAuthorizationVersion`, not editing this one. |
+
+### New invariant (extends the per-version invariants above)
+
+6. If `allowed_processing_stages[]` is set on a `SourceAuthorizationVersion`,
+   any pipeline stage not in that list is prohibited for that version —
+   this sits alongside, and independently of, `status`,
+   `allowed_data_categories`, and `allowed_access_method`, none of which
+   alone can express a stage-level constraint. `restricted_pending` is
+   mandatory whenever the list excludes at least one stage, and must name
+   the specific condition required to lift it, not merely restate that a
+   restriction exists.
+
+### What does not change
+
+This amendment touches no existing entry. `basic_info`'s permitted/excluded
+field lists, `geospatial_reference_data`, the primary/supplementary
+access-method distinction, and Kadaster/PDOK's already-registered
+`SourceAuthorizationVersion` (see "Registered sources" above) are all
+unaffected — none of them sets `allowed_processing_stages`, so all
+continue to be governed by `status` alone, exactly as before. The KVK Open
+Dataset candidate row in `planning/specs/tickets/market-03-source-registry.md`
+is a proposed research candidate, not a registered
+`SourceAuthorizationVersion` — this amendment does not touch it either.
+
+### OpenStreetMap — the future scope this constraint is intended for (not yet registered)
+
+**No `Source` or `SourceAuthorizationVersion` for OpenStreetMap, or for any
+extract provider, is registered by this amendment.** This section records
+the *scope* a future registration is intended to have — see "Next concrete
+step" below for what actually closing it requires.
+
+- **OpenStreetMap** (the underlying ODbL data origin) — intended future
+  scope: `status: restricted`, `allowed_processing_stages: [raw_import,
+  internal_quality_review, moderation_preparation]`. Explicitly excluded:
+  `canonical_merge`, `public_publication`, `api_exposure`,
+  `redistribution`. `restricted_pending`: "`canonical_merge`,
+  `public_publication`, `api_exposure`, and `redistribution` require a
+  qualified legal review (external, or demonstrably authorized internal
+  counsel — never AI research alone, per the existing invariant above) of
+  the ODbL Collective-vs-Derivative-Database question for `MARKET-05`'s
+  merge of OSM-derived candidates with non-OSM sources for the same
+  feature type. See `MARKET-04`'s hard gate 3B."
+- **Geofabrik** (a specific extract provider) is a **separate** `Source`
+  from "OpenStreetMap" itself — the licence (ODbL, via OSM) and the
+  technical access channel (Geofabrik's periodic regional extract) are
+  reviewed as two different questions, per this document's existing
+  licence-vs-access-provider principle. Intended future scope: its own
+  `status: restricted` entry, `allowed_access_method:
+  open_dataset_download` (primary, reproducible), same
+  `allowed_processing_stages`/`restricted_pending` values as OpenStreetMap
+  above, since it inherits the same merge/publication question once its
+  data reaches that stage.
+- **The public Overpass API** is not a candidate for a primary,
+  reproducible import route at all — read-only research found its main
+  instance's own stated usage policy limits regular/automated use to a
+  small fraction of its already-modest one-off allowance and explicitly
+  directs heavier or commercial use elsewhere. It may only ever appear as
+  a `supplementary_access_methods` entry (validation/freshness-checking
+  of a specific feature), never as `allowed_access_method`, and never as
+  the basis for a repeatable bulk import.
+
+### Next concrete step to actually close gate 3A
+
+Registering the two `SourceAuthorizationVersion` entries above (OpenStreetMap
+and Geofabrik) — each with a real, authorized human `reviewed_by`/
+`reviewed_at`, per the existing invariant that AI research may prepare
+evidence but never substitutes for review. **Gate 3A is not closed by this
+amendment** — this amendment only makes the mechanism available; see
+`planning/specs/tickets/market-04-raw-imports-import-runs.md`'s hard gate
+3A status for the precise, current wording.
+
 ## Relationship to `MARKET-04` (import runs)
 
 An `import_run` references exactly one `Source.id` **and** exactly one

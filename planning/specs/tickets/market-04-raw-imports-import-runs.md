@@ -145,7 +145,41 @@ that eventually *do* go through moderation.
    own/other data forms a Collective Database or a Derivative Database
    under ODbL, given `MARKET-05`'s own matching/merging design — in
    addition to, not instead of, the ordinary licence/access-provider/
-   route review. Not answered here.
+   route review. **Split 2026-09-04**, following read-only legal/technical
+   research, into two independently-gatable parts — see
+   `docs/api/source-registry-schema.md`'s "Amendment: OSM candidate-register
+   processing-stage constraint" for the underlying mechanism
+   (`SourceAuthorizationVersion.allowed_processing_stages[]` /
+   `restricted_pending`):
+
+   - **Gate 3A — internal OSM candidate register.**
+     `3A: framework documented; still pending separate restricted
+     SourceAuthorizationVersion registrations for both the OSM data
+     source and the Geofabrik access provider.` **Not closed.** The
+     mechanism that *would* let an internal, non-popularity-driven OSM
+     candidate register be used — `status: restricted`,
+     `allowed_processing_stages: [raw_import, internal_quality_review,
+     moderation_preparation]` — is now documented and requires no
+     external legal review to *close*, but no actual `Source`/
+     `SourceAuthorizationVersion` for OpenStreetMap or for Geofabrik (its
+     proposed extract provider) has been registered yet. **No OSM import
+     may start on the strength of this amendment alone.**
+   - **Gate 3B — merge and publication of OSM-derived data.**
+     `3B: blocked pending qualified legal review before canonical merge
+     or any public/API exposure.` No `SourceAuthorizationVersion` for
+     OpenStreetMap or Geofabrik may ever add `canonical_merge`,
+     `public_publication`, `api_exposure`, or `redistribution` to its
+     `allowed_processing_stages` until a qualified legal review (external,
+     or demonstrably authorized internal counsel — never AI research
+     alone, per `docs/api/source-registry-schema.md`'s existing
+     invariant) specifically addresses whether `MARKET-05`'s
+     matching/merging design makes the OSM-derived portion a Collective
+     Database or a Derivative Database under ODbL.
+
+   Closing 3A (by actually registering both sources, restricted to the
+   three permitted stages) does not narrow, weaken, or resolve 3B — they
+   are independently gated, per `allowed_processing_stages`'s own
+   per-stage design, not a single blanket "OSM approved" flag.
 4. **Physical raw-storage technology and the encryption mechanism** for
    the unredacted-retention exception are decided before implementation.
 
