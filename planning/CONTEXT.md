@@ -306,10 +306,19 @@ the time, not a placeholder — and has since been partially closed:
 `MarketBoundaryVersion` mechanism and now settles that Breda's boundary
 is Gemeente Breda's administrative/municipal boundary (the semantic
 question). No concrete boundary version — geometry, reviewed data
-source, representation type — has actually been recorded for Breda yet,
-so this remains an open, narrower gap, not a placeholder either. No code,
-migration, Supabase change, storage choice, market selector, or second
-market.
+source, representation type — had actually been recorded for Breda at
+that point, so this remained an open, narrower gap, not a placeholder
+either. **Update (2026-09-04, later the same day): no longer open** — a
+concrete `MarketBoundaryVersion` (`v1`) has since been captured for real
+via a controlled, guarded live download from the registered Kadaster/PDOK
+source (`ops/scripts/capture-market-boundary.js`), closing `MARKET-04`'s
+hard gate 1 for Breda. See `docs/api/market-entity-schema.md`'s
+"Registered version — actual instance" section and
+`market-data/CONTEXT.md`. This is a geographic boundary capture only —
+not a restaurant/menu import — and does not touch
+`data/restaurants.json`/`data/menus.json`. No database, Supabase,
+migration, storage choice beyond the small repo-committed manifest/
+GeoJSON pair, market selector, or second market.
 
 MARKET-02 — Canonical restaurant/menu schema (done, documentation/schema
 contract only). See `docs/api/canonical-restaurant-menu-schema.md`:

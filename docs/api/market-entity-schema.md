@@ -43,7 +43,7 @@ state today.
 | `id` | Breda's own stable identity (format not yet decided — see Open questions) |
 | `slug` | `breda` |
 | `name` | `Breda` |
-| `boundary` | **Semantically decided (2026-09-04): the administrative/municipal boundary of Gemeente Breda.** No concrete `MarketBoundaryVersion` has been recorded yet — see the amendment below. Breda has never needed one before now — there has only ever been one market — this is the first time the gap is being closed, not a retraction of the earlier "not yet defined" finding, which was accurate at the time. |
+| `boundary` | **Semantically decided (2026-09-04): the administrative/municipal boundary of Gemeente Breda.** Breda has never needed one before now — there has only ever been one market — this is the first time the gap is being closed, not a retraction of the earlier "not yet defined" finding, which was accurate at the time. **Update (2026-09-04, later the same day): a concrete `MarketBoundaryVersion` (`v1`) has since been captured and recorded — see "Registered version — actual instance" below.** |
 | `country_code` | `NL` |
 | `timezone` | `Europe/Amsterdam` |
 | `default_currency` | `EUR` |
@@ -227,6 +227,55 @@ binary, not a matter of degree: a record is either a complete, real,
 immutable `MarketBoundaryVersion`, or it is documentation illustrating
 one that does not yet exist.
 
+### Registered version — actual instance (2026-09-04)
+
+Breda's first `MarketBoundaryVersion` has been captured via the controlled,
+reproducible procedure in `ops/scripts/capture-market-boundary.js` — a
+real, digest-pinned GDAL container invocation against a guarded live
+download of the one registered Kadaster/PDOK source (see
+`docs/api/source-registry-schema.md`'s "Registered sources" section). This
+closes `MARKET-04`'s hard gate 1 for Breda — see that ticket's own "Hard
+gates" section.
+
+| Field | Value |
+|---|---|
+| `id` | `01a06ddc-a892-7170-8440-18b932764195` |
+| `business_key` | `{ market_slug: "breda", version_number: 1 }` |
+| `representation_type` | `polygon` (recorded as a GeoJSON `MultiPolygon` — Gemeente Breda's administrative area is not simply connected) |
+| `definition_ref` | `https://service.pdok.nl/kadaster/brk-bestuurlijke-gebieden/atom/downloads/BestuurlijkeGebieden_2026.gpkg` |
+| `source` | Kadaster — Bestuurlijke Gebieden (see `docs/api/source-registry-schema.md`'s "Registered sources" section) |
+| `source_version` | Bestuurlijke Gebieden 2026 (definitieve editie) |
+| `valid_from` | `2026-01-01` |
+| `retrieved_at` / `effective_from` | `2026-09-04T19:19:32.752Z` |
+| `feature_selection_rule` | primary selector `identificatie = "GM0758"`; validations `code = "0758"` and `naam = "Breda"` — all three confirmed present and matching on the actual retrieved artifact |
+| `source_artifact_hash_algorithm` | `SHA256` |
+| `source_artifact_hash` | `1efa5bbed78bb5aa9d918d48bcabcd9a3c0e816671545e42cd68be057b8423e6` |
+| `geometry_hash` | `3b0cf4ee30911f67af5502a16b54ccb46849c14ed7a2d8ae6671eaa9ce8cbf84` |
+| `derivation.input_crs` → `output_crs` | `EPSG:28992` → `EPSG:4326` |
+| `derivation.tool` | `GDAL 3.13.3 "Iowa City", released 2026/08/13` |
+| `derivation.tool_reference` | `ghcr.io/osgeo/gdal@sha256:64250faf833c06d4b21afce4c27190039ba7ab58d70f0eebc87cf77d929c0b40` |
+| `derivation.procedure_ref` | `ops/scripts/capture-market-boundary.js` at git revision `8f996c2bc5140c9e22f42c5edaecd14e0fbc0050` |
+| `supersedes_version` | `null` (Breda's first version) |
+
+Repository realization: `market-data/boundaries/breda/v1/manifest.json` (this
+record) and `market-data/boundaries/breda/v1/breda.geojson` (the operational
+geometry `geometry_hash` was computed over). `market-data/boundaries/breda/current.json`
+is the repo-realization of `market.boundary`, pointing at this version — see
+`market-data/CONTEXT.md` for that directory's own rules, including that the
+downloaded national GeoPackage is never retained: `source_artifact_hash`
+proves which exact upstream file was used without keeping the file itself.
+
+**Attribution required wherever this geometry is used or displayed**:
+"Kadaster, Bestuurlijke Gebieden" (CC BY 4.0).
+
+This records only Breda's geographic boundary. It is not a restaurant,
+menu, or reservation import of any kind, and does not touch
+`data/restaurants.json`/`data/menus.json`, any database, or Supabase.
+`MARKET-04`'s hard gates 3 (OpenStreetMap's separate Collective/
+Derivative-Database legal assessment) and 4 (physical raw-storage
+technology and encryption mechanism) remain open and are unrelated to
+this capture.
+
 ### What this amendment does not decide
 
 - **The concrete geometry/data source for Breda's actual boundary.**
@@ -237,16 +286,22 @@ one that does not yet exist.
   `MarketBoundaryVersion` for Breda — approving the source is not the
   same as retrieving, hashing, and canonically recording a version from
   it (see "Completeness required for a real, registered version" above).
+  **Update (2026-09-04): no longer accurate — a concrete version (`v1`)
+  has since been captured and recorded; see "Registered version — actual
+  instance" above.**
 - **Which `representation_type` Breda's first real version will use**
   (polygon vs. postal-code list vs. named administrative region) — the
   vocabulary is now fixed; the choice for Breda's actual first version is
-  not.
+  not. **Update (2026-09-04): decided for `v1` — `polygon` — see
+  "Registered version — actual instance" above.**
 - **Physical storage technology** for `definition_ref` — not chosen,
   matching the "logical, not physical" precedent this contract and
   `docs/api/canonical-restaurant-menu-schema.md` already set.
 - **No `MarketBoundaryVersion` has been recorded for Breda.** The Breda
   reference row above records the *semantic* decision (Gemeente Breda's
-  administrative boundary) only — there is no version 1 yet.
+  administrative boundary) only — there is no version 1 yet. **Update
+  (2026-09-04): no longer accurate — see "Registered version — actual
+  instance" above.**
 
 ## Open questions (not decided here)
 
@@ -259,7 +314,11 @@ one that does not yet exist.
 - Concrete `representation_type` for Breda's actual first
   `MarketBoundaryVersion`, and the concrete geometry to record — see the
   amendment above; the versioning *contract* is now fixed, the concrete
-  first value is not.
+  first value is not. **Resolved 2026-09-04 for `v1` specifically**:
+  `polygon` (`MultiPolygon` GeoJSON) — see "Registered version — actual
+  instance" above. Whether a *future* version or a *different* market ever
+  uses `postal_code_list`/`named_administrative_region` instead remains
+  open.
 - Whether/how `readiness_status` gets recomputed automatically once
   `MARKET-07` exists, versus staying a manually-recorded decision as it is
   today.

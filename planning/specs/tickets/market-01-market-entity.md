@@ -95,9 +95,13 @@ has since been amended to make `boundary` a versioned, testable
 `MARKET-04`'s own hard gate 1 needed answered: Breda's market boundary is
 Gemeente Breda's administrative/municipal boundary. The concrete
 geometry/data source and representation type for Breda's actual first
-boundary version remain open — see that document's amendment section.
-This ticket's own status stays `done`; the amendment lives in the schema
-document it always pointed to.
+boundary version remained open at the time this amendment was written.
+**Update (2026-09-04, later the same day)**: no longer open — a concrete
+`MarketBoundaryVersion` (`v1`, `polygon`/`MultiPolygon`, sourced from
+Kadaster/PDOK "Bestuurlijke Gebieden") has since been captured; see
+`docs/api/market-entity-schema.md`'s "Registered version — actual
+instance" section. This ticket's own status stays `done`; the amendment
+lives in the schema document it always pointed to.
 
 ## Suggested order
 

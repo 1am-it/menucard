@@ -1,0 +1,50 @@
+{
+  "id": "01a06ddc-a892-7170-8440-18b932764195",
+  "business_key": {
+    "market_slug": "breda",
+    "version_number": 1
+  },
+  "representation_type": "polygon",
+  "definition_ref": "https://service.pdok.nl/kadaster/brk-bestuurlijke-gebieden/atom/downloads/BestuurlijkeGebieden_2026.gpkg",
+  "source_version": "Bestuurlijke Gebieden 2026 (definitieve editie)",
+  "valid_from": "2026-01-01",
+  "retrieved_at": "2026-09-04T19:19:32.752Z",
+  "feature_selection_rule": {
+    "primarySelector": {
+      "field": "identificatie",
+      "value": "GM0758"
+    },
+    "requiredValidations": [
+      {
+        "field": "code",
+        "value": "0758"
+      },
+      {
+        "field": "naam",
+        "value": "Breda"
+      }
+    ]
+  },
+  "inclusion_rule": "A coordinate is in-market if it falls within or on the polygon boundary of the selected feature.",
+  "source_artifact_hash_algorithm": "SHA256",
+  "source_artifact_hash": "1efa5bbed78bb5aa9d918d48bcabcd9a3c0e816671545e42cd68be057b8423e6",
+  "geometry_hash": "3b0cf4ee30911f67af5502a16b54ccb46849c14ed7a2d8ae6671eaa9ce8cbf84",
+  "derivation": {
+    "input_crs": "EPSG:28992",
+    "output_crs": "EPSG:4326",
+    "tool": "GDAL 3.13.3 \"Iowa City\", released 2026/08/13",
+    "tool_reference": "ghcr.io/osgeo/gdal@sha256:64250faf833c06d4b21afce4c27190039ba7ab58d70f0eebc87cf77d929c0b40",
+    "procedure_ref": {
+      "path": "ops\\scripts\\capture-market-boundary.js",
+      "git_revision": "8f996c2bc5140c9e22f42c5edaecd14e0fbc0050",
+      "working_tree_dirty_for_this_file": false
+    },
+    "serialization_rule": {
+      "format": "GeoJSON Feature (RFC 7946)",
+      "coordinatePrecisionDecimals": 7,
+      "keyOrder": "sorted"
+    }
+  },
+  "effective_from": "2026-09-04T19:19:32.752Z",
+  "supersedes_version": null
+}

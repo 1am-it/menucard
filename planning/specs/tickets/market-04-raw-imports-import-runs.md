@@ -107,7 +107,7 @@ that eventually *do* go through moderation.
 ## Hard gates (must resolve before implementation or any real run)
 
 1. **A programmatically-testable Breda market boundary. Narrowed further
-   2026-09-02, still not closed.** `docs/api/market-entity-schema.md` has
+   2026-09-02.** `docs/api/market-entity-schema.md` has
    been amended: `boundary` is now a versioned `MarketBoundaryVersion`
    reference, and the semantic question is settled — Breda's boundary is
    Gemeente Breda's administrative/municipal boundary, distinct from any
@@ -115,12 +115,19 @@ that eventually *do* go through moderation.
    source (Kadaster/PDOK "Bestuurlijke Gebieden") is now formally
    reviewed and `allowed` — see gate 2 below and
    `docs/api/source-registry-schema.md`'s "Registered sources" section.
-   **What remains open**: no concrete `MarketBoundaryVersion` has
-   actually been recorded for Breda — the official GeoPackage artifact
-   has not been retrieved, hashed, or canonically stored; no
-   `source_artifact_hash`/`geometry_hash` exist yet. Approving the
-   *source* is not the same as recording the *boundary version* — this
-   ticket does not perform that retrieval/recording step either.
+   **Closed 2026-09-04**: a concrete, complete `MarketBoundaryVersion`
+   (`v1`) has been captured for Breda via the controlled, guarded
+   `ops/scripts/capture-market-boundary.js` live-capture procedure —
+   real, digest-pinned GDAL container, real download against the
+   registered PDOK source only, `source_artifact_hash`/`geometry_hash`
+   both present and verified. See
+   `docs/api/market-entity-schema.md`'s "Registered version — actual
+   instance" section for the full record, and `market-data/CONTEXT.md`
+   for how it is stored. **This closes gate 1 for Breda specifically —
+   it is not a general statement that every future market's boundary is
+   automatically available.** This is a boundary capture only, not a
+   restaurant/menu import of any kind; gates 3 and 4 below remain open
+   and are unaffected by this closure.
 2. **Every targeted source has a `SourceAuthorizationVersion` with
    `status ∈ {allowed, restricted}`**, checked against that specific
    version at run time — no exceptions, including for well-known,

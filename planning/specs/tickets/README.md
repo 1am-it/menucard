@@ -62,16 +62,19 @@ done, unlike `MARKET-01`–`03` — its eventual deliverable is a working
 import mechanism, not the documentation itself, and four hard gates block
 implementation (see its own ticket).
 
-1. [market-01-market-entity.md](./market-01-market-entity.md) — done, documentation/schema contract only; amended 2026-09-04 with a versioned `MarketBoundaryVersion` mechanism, see `docs/api/market-entity-schema.md`
+1. [market-01-market-entity.md](./market-01-market-entity.md) — done, documentation/schema contract only; amended 2026-09-04 with a versioned `MarketBoundaryVersion` mechanism, see `docs/api/market-entity-schema.md`; Breda's first concrete version (`v1`) captured 2026-09-04 — see that document's "Registered version — actual instance" section
 2. [market-02-canonical-restaurant-menu-schema.md](./market-02-canonical-restaurant-menu-schema.md) — done, documentation/schema contract only
 3. [market-03-source-registry.md](./market-03-source-registry.md) — done, documentation/schema contract only
 4. [market-04-raw-imports-import-runs.md](./market-04-raw-imports-import-runs.md) —
-   contract documented and approved, not started; blocked on four hard
-   gates (gate 1, Breda boundary, narrowed but not closed — the semantic
-   decision and versioning contract exist, no concrete boundary version
-   is recorded yet; per-source authorization; OpenStreetMap's separate
-   Collective/Derivative-Database legal assessment; raw-storage
-   technology) — see the ticket's own "Hard gates" section
+   contract documented and approved, not started; blocked on three of its
+   four hard gates (gate 1, Breda boundary, **closed 2026-09-04** — a
+   concrete `MarketBoundaryVersion` has been captured and recorded, see
+   `docs/api/market-entity-schema.md`'s "Registered version — actual
+   instance" section; per-source authorization, satisfied for the one
+   Kadaster/PDOK source used for the boundary, still required per-source
+   for any other; OpenStreetMap's separate Collective/Derivative-Database
+   legal assessment; raw-storage technology) — see the ticket's own "Hard
+   gates" section
 5. MARKET-05 — normalization & deduplication (not started)
 6. MARKET-06 — publication snapshots (not started)
 7. MARKET-07 — market-scoped coverage metrics (not started)
