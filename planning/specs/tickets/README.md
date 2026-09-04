@@ -76,8 +76,15 @@ implementation (see its own ticket).
    and **3B** (OSM Collective/Derivative-Database legal assessment,
    **open**, blocking merge/publication/API/redistribution); **gate 4**
    split into **4A** (blobless Supabase/Postgres storage foundation,
-   **closed 2026-09-04** — the six-table schema and eight-record seed are
-   now live) and **4B** (encrypted raw-blob exception, **open**). No
+   **closed 2026-09-04, correction 2026-09-05** — the six-table schema
+   and eight-record seed are live, but a completeness gap
+   (`import_runs` missing `source_artifact_hash`/
+   `source_artifact_hash_algorithm`) was found afterward; the fix
+   (`supabase/migrations/0006_market04a_import_runs_artifact_hash.sql`)
+   is locally validated but **not yet applied live** — 4A is only fully
+   complete once it is, and no first `ImportRun` may execute before
+   then; the design and prior live security verification remain valid)
+   and **4B** (encrypted raw-blob exception, **open**). No
    OpenStreetMap, Geofabrik, or restaurant-data import has run — see the
    ticket's own "Hard gates" section for the full record.
 5. MARKET-05 — normalization & deduplication (not started)

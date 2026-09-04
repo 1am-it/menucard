@@ -85,6 +85,15 @@ information):**
 - a general business contact address
 - website URL
 - reservation link
+- **(added 2026-09-05)** a source-structural category/type tag used to
+  classify the candidate (e.g. OpenStreetMap's `amenity` value, such as
+  `restaurant`/`cafe`/`fast_food`) — this is metadata about how the
+  *source* classifies the record, not owner/personal/staff data, and is
+  necessary for any automated candidate list to be minimally useful for
+  later moderation. Omitted from the original list, which predates any
+  source carrying this kind of structural tagging (Kadaster/PDOK's
+  `geospatial_reference_data` category has no equivalent need). Does not
+  change what `basic_info` excludes, below.
 
 **Explicitly excluded from automated import and public display, always:**
 

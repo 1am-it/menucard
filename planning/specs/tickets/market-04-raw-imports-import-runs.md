@@ -191,7 +191,8 @@ that eventually *do* go through moderation.
    `docs/api/import-run-schema.md`'s and `docs/api/market-entity-schema.md`'s
    matching "Amendment (2026-09-04): physical operational base" sections
    for the full design:
-   - **Gate 4A — blobless operational storage base. Closed 2026-09-04.**
+   - **Gate 4A — blobless operational storage base. Closed 2026-09-04;
+     correction 2026-09-05 — see below.**
      A minimal Supabase/Postgres schema (`markets`, `market_boundary_versions`,
      `sources`, `source_authorization_versions`, `import_runs`,
      `import_extraction_records`) for internal, `basic_info`-only
@@ -222,6 +223,30 @@ that eventually *do* go through moderation.
      distinguish between them. **No `ImportRun` has executed against real
      data** — no OpenStreetMap, Geofabrik, or restaurant-data import has
      run; these six tables and eight seed rows are the only live change.
+
+     **Correction (2026-09-05): 4A was closed prematurely — not
+     retracted, but not yet fully complete either.** While preparing the
+     first real OSM/Geofabrik import script, a gap was found:
+     `0004_market04a_import_foundation.sql` never added
+     `source_artifact_hash`/`source_artifact_hash_algorithm` to
+     `import_runs` — only `market_boundary_versions` got that pair. An
+     `ImportRun` therefore could not yet prove which exact upstream file
+     (e.g. a Geofabrik `.osm.pbf` extract) it processed. Everything
+     verified above — the schema, the seed data, and the live RLS/grant
+     security verification — **remains valid and is not superseded by
+     this correction**; nothing live was wrong, something was missing. A
+     follow-up migration, `supabase/migrations/0006_market04a_import_runs_artifact_hash.sql`,
+     adds both columns as mandatory (`import_runs` holds zero rows live,
+     so no backfill is needed); it has been written and locally validated
+     in a disposable, digest-pinned PostgreSQL container (same method as
+     `0004`/`0005`) but **has not yet been applied to the live Supabase
+     project**. The operational 4A basis is only fully complete once
+     `0006` is applied live **and** the two new columns are live-verified
+     to exist with `NOT NULL` enforced. **No first `ImportRun` may
+     execute until then.** See
+     `docs/api/import-run-schema.md`'s "Amendment (2026-09-05):
+     import_runs completeness fix" section for the full detail. This
+     correction does not affect 3B or 4B, both unchanged below.
    - **Gate 4B — encrypted, unredacted raw-blob exception.** Fully open,
      untouched, out of scope. The six existing conditions in
      `docs/api/import-run-schema.md`'s "Data minimisation" section still

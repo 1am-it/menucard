@@ -111,6 +111,8 @@ contract can run."
 | `access_provider_note` | text | The concrete technical provider/instance used for this run (e.g. "Overpass instance X" vs. "bulk extract from provider Y") — distinct from the licence question, matching `MARKET-03`'s existing licence-vs-access-provider separation. |
 | `source_locator` | URL/query/file reference | The exact endpoint, query, or file this specific run used. |
 | `source_version` / `source_version_note` | text, nullable | Whatever versioning the source itself exposes (an extract's timestamp, an ETag, a "last updated" date). Nullable where the source has none — freshness then relies on `retrieved_at` per record instead. |
+| `source_artifact_hash_algorithm` **(added 2026-09-05 — completeness fix, see amendment below)** | text (e.g. `SHA256`) | Not null. Mirrors `MarketBoundaryVersion.source_artifact_hash_algorithm` exactly. |
+| `source_artifact_hash` **(added 2026-09-05)** | text (hex digest) | Not null. A hash of the **entire temporary source artifact this run downloaded** (e.g. a whole Geofabrik `.osm.pbf` extract), computed while it exists in a temporary working directory that is unconditionally removed afterward — the file itself is never stored durably. Proves which exact upstream file this run processed, the same way `MarketBoundaryVersion.source_artifact_hash` already proves it for a boundary capture. **Distinct from `ImportExtractionRecord.content_hash` below** — that one is per-candidate and computed from the already-minimized extraction, never from this whole-file artifact. |
 | `started_at`, `completed_at` | timestamp | |
 | `status` | `pending` \| `running` \| `succeeded` \| `partial` \| `failed` \| `aborted` | `partial` covers a run that completed for some records but not others — a real, expected state, not an error to hide. |
 | `record_counts` | `{fetched, stored, skipped, errored}` | Numeric, recorded by the run itself — never derived after the fact by counting rows elsewhere. |
@@ -312,7 +314,18 @@ decided before implementation"*) is **split, 2026-09-04**, into two
 independently-gatable parts:
 
 - **`4A` — blobless operational storage base (this amendment). Closed
-  2026-09-04.** All three closing conditions are done: (1) this
+  2026-09-04; correction 2026-09-05 — see "Amendment (2026-09-05):
+  `import_runs` completeness fix" below.** The design and the live
+  security/access-control verification recorded in this section remain
+  valid and are not retracted. However, `import_runs` was later found to
+  be missing mandatory `source_artifact_hash`/
+  `source_artifact_hash_algorithm` columns; the fix,
+  `supabase/migrations/0006_market04a_import_runs_artifact_hash.sql`, is
+  written and locally validated but **not yet applied live**. `4A` is
+  only fully complete once `0006` is applied to the live Supabase
+  project **and** the two new columns are live-verified — **no first
+  `ImportRun` may execute before then.** All three closing conditions
+  below are done: (1) this
   documentation approved; (2) `supabase/migrations/0004_market04a_import_foundation.sql`
   and `0005_market04a_import_foundation_seed.sql` written, locally
   validated in a disposable, digest-pinned PostgreSQL container, and then
@@ -346,6 +359,33 @@ independently-gatable parts:
 Closing `4A` does not touch `4B`, and neither touches gate 3B — `MARKET-05`
 canonical merge, public publication, API exposure, and redistribution
 remain blocked there, independently and unchanged.
+
+### Amendment (2026-09-05): `import_runs` completeness fix — `source_artifact_hash`
+
+**The gap this corrects**: while preparing the first real OSM/Geofabrik
+import script, `import_runs` (as actually created by
+`0004_market04a_import_foundation.sql`, already live) was found to have
+no field recording a hash of the whole temporary source artifact a run
+downloads — unlike `MarketBoundaryVersion`, which already has
+`source_artifact_hash`/`source_artifact_hash_algorithm`. This was a real
+omission in the originally-written schema, not a hypothetical one: an
+`ImportRun` could not prove which exact upstream file (e.g. a specific
+Geofabrik `.osm.pbf` extract) it processed.
+
+**The fix**: `supabase/migrations/0006_market04a_import_runs_artifact_hash.sql`
+adds `source_artifact_hash_algorithm`/`source_artifact_hash` (both `not
+null`) to `import_runs` — see the field table above. `import_runs` holds
+zero rows live today (no real import has run), so this is a safe,
+backfill-free `ALTER TABLE ... ADD COLUMN ... NOT NULL`. **Written and
+locally validated only — not yet applied live**; applying it is a
+separate, later, explicitly-approved step, exactly like `0004`/`0005`
+were. Neither grants nor RLS need to change: the existing table-level
+`insert` grant already covers populating new columns, and — matching the
+existing principle that identity/reference fields on `import_runs` get no
+update grant, ever — these two hash columns are deliberately **not**
+added to `service_role`'s column-scoped update grant (`status`/
+`completed_at`/`record_counts`/`error_log`/`checkpoint`); they are set
+once, at insert, like `source_locator` and `data_origin_source_id`.
 
 ### Repeatability, error handling, safe restart
 
@@ -388,13 +428,47 @@ durable record is a small, structured **extraction record**:
 | `record_locator` | Stable identity for this raw item *within the run* — its own natural key if the source has one, else locator+hash. Distinct from any future canonical id (`MARKET-02`) — never conflated. |
 | `source_locator` | Where within the source this specific item came from. |
 | `retrieved_at` | When it was fetched. |
-| `content_hash` | A hash (e.g. SHA-256) of the original fetched bytes, computed *before* minimisation. Lets a later audit prove what was actually fetched and that minimisation was applied to it, without retaining the bytes themselves. |
+| `content_hash` **(corrected 2026-09-05 — see amendment below)** | A hash (e.g. SHA-256) computed from the **canonical, already-minimized, allowed extraction projection plus this record's own stable identity (`record_locator`)** — **never** from the original, unfiltered fetched bytes. |
 | `extracted_fields` | Only the allowlisted subset, already minimized. |
 
 This record — not the page — is what `MARKET-05` reads from and what a
 bad-normalization diagnosis replays against in the overwhelming majority
 of cases: structure, shape, and every authorized field are intact: only
 content outside the authorized scope is absent.
+
+### Amendment (2026-09-05): `content_hash` computed after minimisation, not before
+
+**The problem this corrects**: this document originally said `content_hash`
+is "a hash of the original fetched bytes, computed *before* minimisation."
+Found to be in tension with this section's own opening principle — "data
+outside the authorized scope never reaches durable storage in the first
+place" — while preparing the first real OSM/Geofabrik import: an OSM
+element's full, unfiltered tag set can carry contributor-added freeform
+tags never reviewed under any `SourceAuthorizationVersion`. A hash is not
+the data itself, but it is a durably-stored artifact *derived from*
+out-of-scope content — computing and keeping it forever sits uneasily
+next to a contract that otherwise insists nothing outside the authorized
+scope survives extraction, even in derived form.
+
+**The correction**: `content_hash` is computed **only** from the
+already-minimized `extracted_fields` (the same allowlisted projection
+that gets stored) plus `record_locator` — never from the source's raw,
+unfiltered response. This is a real, deliberate narrowing of what the
+field proves, not a cosmetic rewording:
+
+- **What it no longer does**: it can no longer, by itself, prove that
+  minimisation was applied *correctly* against a specific known original
+  — that would require retaining or separately hashing the original,
+  which is exactly what this correction avoids doing.
+- **What it still does**: proves the exact, specific, already-authorized
+  projection recorded for this exact source item — including detecting
+  whether the *same* record's authorized fields changed between two
+  separate runs, since the hash covers exactly `extracted_fields` +
+  `record_locator`, deterministically.
+- Applies to every source using this extraction-record shape going
+  forward, not only OSM/Geofabrik — this is a correction to the general
+  `ImportRun` contract, motivated by, but not scoped to, the pilot that
+  surfaced it.
 
 ### Blob redaction is a secondary safeguard, not the primary one
 
@@ -469,7 +543,16 @@ research, specifically for how an `ImportRun` would execute:
   as the pilot source or decide a final access route for a real import —
   it only makes internal candidate-list work against these two sources
   possible; `canonical_merge`/`public_publication`/`api_exposure`/
-  `redistribution` remain blocked (gate 3B).
+  `redistribution` remain blocked (gate 3B). **Update (2026-09-05,
+  pre-coding design for the first real run)**: the first internal Breda
+  candidate pass, once built, will cover **OSM nodes (points) only** —
+  a stand-alone POI tagged directly on a single point, the common case
+  for most restaurants/cafés. **This is a first, internal coverage
+  decision, not a completeness claim.** Way- and relation-based
+  locations (e.g. a restaurant tagged on a building outline or a
+  multipolygon) are a known, visible, explicitly out-of-scope gap for
+  this first pass — not silently dropped — and remain a candidate for
+  follow-up coverage once the node-only path is built and proven.
 - **KVK Open Dataset** stays a `restricted`, enrichment-only candidate
   (BV/NV-only coverage risk, already documented). Its API's numeric rate
   limit (1 req/min per IP, 200/5min combined) is a concrete, operational
