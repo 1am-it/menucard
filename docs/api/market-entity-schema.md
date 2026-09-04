@@ -328,11 +328,19 @@ Hard gate 4 is **split, 2026-09-04**, matching
 `docs/api/import-run-schema.md`'s own split:
 
 - **`4A`** (this amendment, plus `docs/api/import-run-schema.md`'s and
-  `docs/api/source-registry-schema.md`'s matching amendments): design
-  decided. **Not yet closed** — closing it requires, in order, this
-  documentation's approval, the actual migration/seed implementation, and
-  live verification of the full access-control and referential-integrity
-  test matrix.
+  `docs/api/source-registry-schema.md`'s matching amendments): **closed
+  2026-09-04.** Documentation approved; the migration and seed were
+  implemented, locally validated in a disposable PostgreSQL container,
+  and then applied live to the actual Supabase project — exactly one
+  Breda market, one boundary version (`v1`, the same record described in
+  "Registered version — actual instance" above), three sources, and three
+  `SourceAuthorizationVersion`s now exist there, with `import_runs`/
+  `import_extraction_records` still empty. Full access-control and
+  referential-integrity test matrix live-verified, including manual
+  confirmation that RLS is active on all six tables and that
+  `service_role` can read but delete nothing. See
+  `docs/api/import-run-schema.md`'s own "Gate 4 status" for the complete
+  record.
 - **`4B`**: fully open, untouched.
 
 ### Registered version — actual instance (2026-09-04)

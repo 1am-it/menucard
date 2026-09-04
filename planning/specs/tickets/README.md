@@ -66,15 +66,20 @@ implementation (see its own ticket).
 2. [market-02-canonical-restaurant-menu-schema.md](./market-02-canonical-restaurant-menu-schema.md) — done, documentation/schema contract only
 3. [market-03-source-registry.md](./market-03-source-registry.md) — done, documentation/schema contract only
 4. [market-04-raw-imports-import-runs.md](./market-04-raw-imports-import-runs.md) —
-   contract documented and approved, not started; blocked on three of its
-   four hard gates (gate 1, Breda boundary, **closed 2026-09-04** — a
-   concrete `MarketBoundaryVersion` has been captured and recorded, see
-   `docs/api/market-entity-schema.md`'s "Registered version — actual
-   instance" section; per-source authorization, satisfied for the one
-   Kadaster/PDOK source used for the boundary, still required per-source
-   for any other; OpenStreetMap's separate Collective/Derivative-Database
-   legal assessment; raw-storage technology) — see the ticket's own "Hard
-   gates" section
+   contract documented and approved; the import mechanism itself is still
+   not built/run. Of its four hard gates: **gate 1** (Breda boundary)
+   **closed 2026-09-04** — a concrete `MarketBoundaryVersion` has been
+   captured and recorded; **gate 2** (per-source authorization) satisfied
+   per-source for Kadaster/PDOK, OpenStreetMap, and Geofabrik specifically
+   — any other source still requires its own review; **gate 3** split
+   into **3A** (internal OSM candidate register, **closed 2026-09-04**)
+   and **3B** (OSM Collective/Derivative-Database legal assessment,
+   **open**, blocking merge/publication/API/redistribution); **gate 4**
+   split into **4A** (blobless Supabase/Postgres storage foundation,
+   **closed 2026-09-04** — the six-table schema and eight-record seed are
+   now live) and **4B** (encrypted raw-blob exception, **open**). No
+   OpenStreetMap, Geofabrik, or restaurant-data import has run — see the
+   ticket's own "Hard gates" section for the full record.
 5. MARKET-05 — normalization & deduplication (not started)
 6. MARKET-06 — publication snapshots (not started)
 7. MARKET-07 — market-scoped coverage metrics (not started)

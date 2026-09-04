@@ -191,22 +191,37 @@ that eventually *do* go through moderation.
    `docs/api/import-run-schema.md`'s and `docs/api/market-entity-schema.md`'s
    matching "Amendment (2026-09-04): physical operational base" sections
    for the full design:
-   - **Gate 4A — blobless operational storage base.** A minimal
-     Supabase/Postgres schema (`markets`, `market_boundary_versions`,
+   - **Gate 4A — blobless operational storage base. Closed 2026-09-04.**
+     A minimal Supabase/Postgres schema (`markets`, `market_boundary_versions`,
      `sources`, `source_authorization_versions`, `import_runs`,
      `import_extraction_records`) for internal, `basic_info`-only
      candidate data — no PBF/HTML/raw blobs ever stored; a temporary
-     Geofabrik download is hashed, processed, and always deleted. Design
-     **decided** 2026-09-04. **Not closed** — closing it requires, in
-     order: this documentation actually approved (done, this ticket's own
-     amendment reference); the schema and seed migrations actually
-     written and applied; live verification of the full access-control
-     test matrix (`service_role` positive; `anon`/`authenticated`
-     -without-role/`owner` negative, on all six tables) and the
-     referential-integrity test matrix (mismatched source/authorization
-     pairs, cross-market boundary pointers, mismatched extraction-record
-     boundary references — all correctly rejected). No `ImportRun` may
-     execute against real data before all three are done.
+     Geofabrik download is hashed, processed, and always deleted.
+     `supabase/migrations/0004_market04a_import_foundation.sql` and
+     `0005_market04a_import_foundation_seed.sql` were written, locally
+     validated in a disposable, digest-pinned PostgreSQL container, and
+     then **applied live to the actual Supabase project**, in that order.
+     Live-verified afterward: schema and seed applied without error;
+     exactly one Breda market, one boundary version, three sources, and
+     three `SourceAuthorizationVersion`s exist, matching the committed
+     UUIDv7 values and Breda's boundary id exactly; `import_runs` and
+     `import_extraction_records` are empty; `anon`, `authenticated` with
+     no special role, a real existing `owner` account, and a real
+     existing `editor` account each get `permission denied` on all six
+     tables via their normal sessions; `service_role`'s allowed access
+     works and its inability to delete anything on any of the six tables
+     was confirmed, and its column-scoped `import_runs` update grant
+     (`status`/`completed_at` updatable, `source_locator`/
+     `data_origin_source_id` not) plus RLS-enabled/revoked-grants on all
+     six tables were manually confirmed live. The `internal` role was not
+     separately tested live —
+     no real `internal`-role account exists, and none was fabricated;
+     risk is low because every logged-in account shares the same
+     `authenticated` database role regardless of its `staff_roles` value,
+     and none of these six tables carries a policy that could ever
+     distinguish between them. **No `ImportRun` has executed against real
+     data** — no OpenStreetMap, Geofabrik, or restaurant-data import has
+     run; these six tables and eight seed rows are the only live change.
    - **Gate 4B — encrypted, unredacted raw-blob exception.** Fully open,
      untouched, out of scope. The six existing conditions in
      `docs/api/import-run-schema.md`'s "Data minimisation" section still
@@ -214,7 +229,7 @@ that eventually *do* go through moderation.
 
    Closing 4A does not touch 4B, and neither touches gate 3B —
    `MARKET-05` canonical merge, public publication, API exposure, and
-   redistribution remain independently blocked there.
+   redistribution remain independently blocked there, unchanged.
 
 ## Risks
 

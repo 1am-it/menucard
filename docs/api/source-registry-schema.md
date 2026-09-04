@@ -358,10 +358,14 @@ above).
 
 ### Gate status
 
-Same status as `docs/api/import-run-schema.md`'s amendment: **`4A` design
-decided, not yet closed** — closing it still requires the migration/seed
-to actually be implemented and the full test matrix live-verified. `4B`
-is untouched.
+Same status as `docs/api/import-run-schema.md`'s amendment: **`4A` closed
+2026-09-04** — the migration and seed were implemented, locally validated,
+applied live to the actual Supabase project, and the full access-control
+and referential-integrity test matrix live-verified (including a real
+existing `owner` and a real existing `editor` account, each denied direct
+access to all six tables via their normal sessions; RLS-enabled and
+`service_role`'s read access and inability to delete anything were also
+manually confirmed live). `4B` remains untouched and fully open.
 
 ## Amendment (2026-09-05): geospatial reference data support
 

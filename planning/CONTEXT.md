@@ -377,3 +377,40 @@ individual restaurant websites (per-site `pending_review`, the existing
 informal enrichment layer, no blanket licence); Gemeente Breda open data
 (no specific dataset could be confirmed to exist — not yet a candidate).
 No code, migration, Supabase change, or restaurant data imported.
+
+MARKET-04 — Raw imports & import runs (contract documented and approved;
+the import mechanism itself is not built/run — see
+`docs/api/import-run-schema.md`). Blocked on four hard gates, tracked
+independently: **gate 1** (Breda boundary) closed 2026-09-04 — see the
+`MARKET-01` entry above. **Gate 2** (per-source `SourceAuthorizationVersion`)
+satisfied per-source for Kadaster/PDOK, OpenStreetMap, and Geofabrik —
+any other source still needs its own review. **Gate 3** split into 3A
+(internal OSM candidate register, closed 2026-09-04 — two `restricted`
+`SourceAuthorizationVersion`s registered, scoped to
+`raw_import`/`internal_quality_review`/`moderation_preparation` only) and
+3B (OSM Collective-vs-Derivative-Database legal assessment — open,
+blocking `canonical_merge`/`public_publication`/`api_exposure`/
+`redistribution`). **Gate 4** split into 4A and 4B. **4A closed
+2026-09-04**: `supabase/migrations/0004_market04a_import_foundation.sql`
+(six tables — `markets`, `sources`, `source_authorization_versions`,
+`market_boundary_versions`, `import_runs`, `import_extraction_records` —
+UUIDv7 ids, composite foreign keys enforcing source+authorization-version
+and market+boundary-version pairs, RLS with zero `anon`/`authenticated`
+policies, column-scoped `import_runs` update grant) and
+`0005_market04a_import_foundation_seed.sql` (the eight already-decided
+records: Breda market, Breda boundary `v1`, and the three sources with
+their authorization versions) were locally validated in a disposable,
+digest-pinned PostgreSQL container, then **applied live to the actual
+Supabase project**. Live-verified: exact record counts and values match
+the committed documentation; `import_runs`/`import_extraction_records`
+are empty; `anon`, a roleless `authenticated` session, a real existing
+`owner` account, and a real existing `editor` account each get
+`permission denied` on all six tables; RLS-active, `service_role`'s read
+access, its inability to delete anything, and its `import_runs`
+column-scoped update grant were all manually confirmed live.
+`internal` was not separately tested — no real `internal`-role account
+exists — noted as low-risk since every logged-in account shares the same
+`authenticated` database role and these tables carry no distinguishing
+policy. **No `ImportRun` has executed** — no OpenStreetMap, Geofabrik, or
+restaurant-data import has run; this is a storage foundation only. **4B**
+(encrypted, unredacted raw-blob exception) remains fully open, untouched.

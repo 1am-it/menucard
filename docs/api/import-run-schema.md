@@ -90,10 +90,11 @@ contract can run."
    decided before implementation. **Split 2026-09-04** — see "Amendment
    (2026-09-04): physical operational base" below for the full design:
    - **4A** (blobless operational storage base, Supabase/Postgres):
-     design decided; **not yet closed** — requires the documentation
-     approval, the actual migration/seed implementation, and live
-     verification of the full access-control and referential-integrity
-     test matrix, in that order.
+     **closed 2026-09-04** — documentation approved, both migrations
+     written, locally validated, and applied live to the actual Supabase
+     project, and the full access-control and referential-integrity test
+     matrix live-verified. See "Amendment (2026-09-04): physical
+     operational base"'s own "Gate 4 status" section for the full record.
    - **4B** (encrypted, unredacted raw-blob exception): fully open,
      untouched, out of scope.
 
@@ -310,24 +311,41 @@ encryption mechanism for the unredacted-retention exception... are
 decided before implementation"*) is **split, 2026-09-04**, into two
 independently-gatable parts:
 
-- **`4A` — blobless operational storage base (this amendment).** Design
-  decided by this documentation. **Not yet closed.** Closing it requires,
-  in order: (1) this documentation actually approved — the step this
-  amendment records; (2) the schema migration and seed migration actually
-  written and applied; (3) live verification of the full access-control
-  test matrix (`service_role` positive; `anon`/`authenticated`-without
-  -role/`owner` negative on all six tables) **and** the referential
-  -integrity test matrix (mismatched source/authorization pairs,
-  cross-market boundary pointers, and mismatched extraction-record
-  boundary references all correctly rejected). No `ImportRun` may execute
-  against real data before all three are done.
+- **`4A` — blobless operational storage base (this amendment). Closed
+  2026-09-04.** All three closing conditions are done: (1) this
+  documentation approved; (2) `supabase/migrations/0004_market04a_import_foundation.sql`
+  and `0005_market04a_import_foundation_seed.sql` written, locally
+  validated in a disposable, digest-pinned PostgreSQL container, and then
+  **applied live** to the actual Supabase project, in that order; (3) live
+  verification, against the real project: schema and seed applied without
+  error; exactly one Breda market, one boundary version, three sources,
+  and three `SourceAuthorizationVersion`s exist, matching the committed
+  UUIDv7 values and Breda's boundary id exactly; `import_runs` and
+  `import_extraction_records` are empty; `anon`, `authenticated` with no
+  special role, a real existing `owner` account, and a real existing
+  `editor` account each get `permission denied` (not silent empty
+  results) on all six tables via their normal sessions; `service_role`'s
+  `select`/insert-appropriate access works and its column-scoped
+  `import_runs` update grant (`status`/`completed_at` updatable;
+  `source_locator`/`data_origin_source_id` not) was manually confirmed
+  against the live database — as was the fact that `service_role` can
+  delete nothing on any of the six tables. RLS-enabled and revoked-grants
+  were manually confirmed live for all six tables. The `internal` role
+  was not
+  separately tested live — no real `internal`-role account exists to test
+  with, and none was fabricated; risk is low because every logged-in
+  account shares the same `authenticated` database role regardless of its
+  `staff_roles` value, and these six tables carry no policy that could
+  ever distinguish between them. **No `ImportRun` has executed against
+  real data** — these six tables and eight seed rows are the only live
+  change; no OpenStreetMap, Geofabrik, or restaurant-data import has run.
 - **`4B` — encrypted, unredacted raw-blob exception.** Fully open, out of
-  scope, untouched by this amendment. The six existing conditions in
-  "Data minimisation" above still all apply, unchanged.
+  scope, untouched. The six existing conditions in "Data minimisation"
+  above still all apply, unchanged.
 
 Closing `4A` does not touch `4B`, and neither touches gate 3B — `MARKET-05`
 canonical merge, public publication, API exposure, and redistribution
-remain blocked there, independently.
+remain blocked there, independently and unchanged.
 
 ### Repeatability, error handling, safe restart
 
