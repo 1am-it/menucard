@@ -13,10 +13,10 @@ this file defines the exact fields, mirroring the convention
 
 | Field | Type | Notes |
 |---|---|---|
-| `id` | stable technical identifier | **Immutable.** Never changes once assigned, regardless of rebranding, boundary changes, or anything else. The only field safe to use as a long-term reference (e.g. a future foreign key). Concrete format (UUID vs. an internal key scheme) not chosen — see Open questions. |
+| `id` | stable technical identifier | **Immutable.** Never changes once assigned, regardless of rebranding, boundary changes, or anything else. The only field safe to use as a long-term reference (e.g. a future foreign key). **Format resolved 2026-09-04 for the physical/operational layer: UUIDv7** — see "Amendment (2026-09-04): physical operational base" below. |
 | `slug` | string | Readable, used in routes/UI (e.g. `breda`). **Mutable** — can change later (renaming, restructuring) without changing `id`. Never use `slug` where a stable reference is needed. |
 | `name` | string | Display name (e.g. "Breda"). **Mutable**, independent of `slug`. |
-| `boundary` | reference to the market's current `MarketBoundaryVersion` | **Amended (2026-09-04, `MARKET-04` gate 1) — see "Amendment: versioned market boundary" below.** `market.boundary` is never a bare, unversioned value; it resolves through a versioned `MarketBoundaryVersion` record. The concrete representation for a specific version (polygon, postal-code list, named administrative region) is chosen per version — see Open questions for what is and isn't decided yet. **A valid, defined boundary version is a hard precondition** — not optional — for `MARKET-04`/`05` (automated imports, market-level deduplication), `MARKET-07` (coverage metrics), and any new market launch. |
+| `boundary` | reference to the market's current `MarketBoundaryVersion` | **Amended (2026-09-04, `MARKET-04` gate 1) — see "Amendment: versioned market boundary" below.** `market.boundary` is never a bare, unversioned value; it resolves through a versioned `MarketBoundaryVersion` record. The concrete representation for a specific version (polygon, postal-code list, named administrative region) is chosen per version — see Open questions for what is and isn't decided yet. **A valid, defined boundary version is a hard precondition** — not optional — for `MARKET-04`/`05` (automated imports, market-level deduplication), `MARKET-07` (coverage metrics), and any new market launch. **Physical realization named 2026-09-04**: `current_boundary_version_id` — see "Amendment (2026-09-04): physical operational base" below. |
 | `country_code` | string | ISO-style country code. |
 | `timezone` | string | e.g. IANA timezone name. |
 | `default_currency` | string | e.g. ISO currency code. Multi-currency display/real-time FX is not addressed here. |
@@ -40,7 +40,7 @@ state today.
 
 | Field | Value |
 |---|---|
-| `id` | Breda's own stable identity (format not yet decided — see Open questions) |
+| `id` | `01a06e1e-aa9a-7e88-aa15-e81b1a4cc5fb` — **assigned 2026-09-04**, UUIDv7, see "Amendment (2026-09-04): physical operational base" below. Previously "format not yet decided." |
 | `slug` | `breda` |
 | `name` | `Breda` |
 | `boundary` | **Semantically decided (2026-09-04): the administrative/municipal boundary of Gemeente Breda.** Breda has never needed one before now — there has only ever been one market — this is the first time the gap is being closed, not a retraction of the earlier "not yet defined" finding, which was accurate at the time. **Update (2026-09-04, later the same day): a concrete `MarketBoundaryVersion` (`v1`) has since been captured and recorded — see "Registered version — actual instance" below.** |
@@ -88,7 +88,8 @@ supplies that geometry — see "What this amendment does not decide" below.
 | `version_number` | integer | Sequential, human-readable. Duplicated inside `business_key` for lookup convenience — `business_key` does not replace this field, it packages it with `market_slug` for readability. |
 | `representation_type` | enum: `polygon` \| `postal_code_list` \| `named_administrative_region` | The three candidate representations this contract already named are now the fixed, enumerable vocabulary for this field — which one a given version actually uses is chosen per version, not globally. |
 | `definition_ref` | reference/locator | Points to the actual geometry/list data for this version (a file, a query, a dataset row — physical storage not chosen here). Distinct from `source` below: this is *where the data for this version lives*, not *who is authoritative for it*. **Amended 2026-09-05, clarified**: `definition_ref` always points to the **official source artifact as published** (e.g. a government dataset's own downloadable file) — never a self-made, locally derived, or pre-extracted file. Where a specific feature must be selected out of a larger official artifact (e.g. one municipality out of a nationwide file), that selection is a separate, explicit step — see `feature_selection_rule` below — not a reason to substitute a derived file as the reference of record. |
-| `source` | text/reference | The authoritative origin of this specific boundary definition (e.g. a named geodata registry or the municipality's own published boundary). **For a market boundary sourced from outside MenuCard's own records, this should be registered and reviewed the same way any other external data origin is** — reusing `docs/api/source-registry-schema.md`'s `Source`/`SourceAuthorizationVersion` mechanism rather than inventing a parallel one, since a boundary provider is exactly the same kind of thing MARKET-03 already governs: an external source with its own terms, licence, and version. Not yet filled in for Breda — see "What this amendment does not decide." |
+| `source_id` **(resolved 2026-09-04, replaces the earlier vague `source` text/reference field)** | FK → `Source.id` | The authoritative origin of this specific boundary definition. **This document already said** a boundary provider "should be registered and reviewed the same way any other external data origin is, reusing `docs/api/source-registry-schema.md`'s `Source`/`SourceAuthorizationVersion` mechanism" — this amendment makes that literal: a real FK, not free text. For Breda's `v1`: Kadaster/PDOK's `Source.id` — see "Amendment (2026-09-04): physical operational base" below. |
+| `source_authorization_version_id` **(added 2026-09-04)** | FK → `SourceAuthorizationVersion.id` | **Not a copy** — the exact immutable authorization version that was current/applicable when this boundary version was captured, same reference-not-copy discipline as `ImportRun`'s own source references (`docs/api/import-run-schema.md`). Must belong to `source_id` above — enforced via a composite foreign key, not just application code; see the physical-operational-base amendment below. |
 | `source_version` | text, nullable | The source's own versioning/edition, where it publishes one. |
 | `valid_from` (peildatum) | date | The date this boundary definition is asserted accurate as of — administrative boundaries do occasionally change (mergers, border adjustments). |
 | `retrieved_at` (vastleggingsdatum) | timestamp | When this version's data was actually fetched/recorded — distinct from `valid_from`, same distinction `docs/api/source-registry-schema.md` already draws between `terms_retrieved_at` and `reviewed_at`. |
@@ -100,6 +101,9 @@ supplies that geometry — see "What this amendment does not decide" below.
 | `source_artifact_hash` **(added 2026-09-05)** | text (hex digest) | A cryptographic hash of the **entire official source artifact** at `definition_ref`, exactly as retrieved, computed *before* any derivation step. Proves which exact file was used, independent of retaining the file itself. |
 | `geometry_hash` **(added 2026-09-05)** | text (hex digest) | A hash of the **exact, serialized operational geometry bytes** produced by `derivation` below — i.e. the actual `breda.geojson`-equivalent file this version ships, after `feature_selection_rule` and coordinate reprojection/serialization have all been applied. Distinct from `source_artifact_hash`: that one proves which *original* file was fetched; this one proves which *derived* artifact was actually recorded from it. Reproducibility of this hash depends entirely on `derivation`'s recorded procedure — it is not expected to match across different, undocumented tool invocations. |
 | `derivation` **(added 2026-09-04)** | object, see below | Mandatory metadata describing exactly how the operational geometry was produced from the official source artifact. See "Amendment: mandatory `derivation` metadata" below for the full sub-field list. |
+| `manifest_path` **(added 2026-09-04)** | text | Repo-relative path to this version's `manifest.json` — see "Amendment (2026-09-04): physical operational base" below. The geometry itself is never duplicated into a database; this is a pointer to it. |
+| `geojson_path` **(added 2026-09-04)** | text | Repo-relative path to this version's operational GeoJSON. |
+| `artifact_git_ref` **(added 2026-09-04)** | text | **A path alone is not a stable reference.** The exact git commit SHA at which `manifest_path`/`geojson_path` were committed, immutable once set. Reuses git's own content-addressed identity — no new hash invented. |
 
 ### Invariants
 
@@ -108,11 +112,13 @@ supplies that geometry — see "What this amendment does not decide" below.
    a field on `market` (`MARKET-01`'s own entity), not on any
    `MarketBoundaryVersion` record. Resolving "the current version" means
    dereferencing `market.boundary`; it is never determined by scanning
-   version records for a mutable flag on the version itself. In a
-   repository-realization (not decided here), this is what
-   `boundaries/<market>/current.json` stands in for. `market.boundary`
-   is never a bare, unversioned value — it always names one specific
-   `MarketBoundaryVersion.id`.
+   version records for a mutable flag on the version itself.
+   `boundaries/<market>/current.json` is the repository-realization;
+   **`markets.current_boundary_version_id` is the physical, DB-column
+   realization — decided 2026-09-04, see "Amendment (2026-09-04):
+   physical operational base" below** (previously "not decided here").
+   `market.boundary` is never a bare, unversioned value — it always names
+   one specific `MarketBoundaryVersion.id`.
 2. A `MarketBoundaryVersion`, once created, is **never edited** — any
    change, including a minor correction, creates a new version.
 3. Membership tests (an address, a coordinate, a candidate record) are
@@ -181,11 +187,13 @@ themselves. Concretely:
   `MarketBoundaryVersion` field is ever written to after that record's
   own creation.
 
-**Known parallel gap, not fixed here**: `docs/api/source-registry-schema.md`'s
-`SourceAuthorizationVersion` has the identical `superseded_by`/
-`superseded_at` inconsistency, for the identical reason. It is not
-corrected by this amendment — that document is out of scope for this
-change and needs its own, separate, equivalent fix.
+**Update (2026-09-04): the parallel gap is now fixed.**
+`docs/api/source-registry-schema.md`'s `SourceAuthorizationVersion` had
+the identical `superseded_by`/`superseded_at` inconsistency, repeatedly
+flagged here as a "known parallel gap, not fixed here." It has since been
+corrected there, using the identical `supersedes_version` pattern — see
+that document's own "Amendment (2026-09-04): immutable succession
+correction." No gap remains between the two documents.
 
 ### Amendment (2026-09-04): mandatory `derivation` metadata
 
@@ -227,6 +235,106 @@ binary, not a matter of degree: a record is either a complete, real,
 immutable `MarketBoundaryVersion`, or it is documentation illustrating
 one that does not yet exist.
 
+### Amendment (2026-09-04): physical operational base — `MARKET-04A`
+
+**Trigger**: closing `MARKET-04`'s hard gate 4A requires an actual,
+minimal Supabase/Postgres base — see `docs/api/import-run-schema.md`'s
+own amendment of the same name for the full `ImportRun` design; this
+section records what changes for `Market`/`MarketBoundaryVersion`
+specifically. **This section decides the design; it does not, by itself,
+close gate 4A** — see "Gate status" below.
+
+**`id` strategy**: `Market.id` and `MarketBoundaryVersion.id` use
+**UUIDv7**, generated application-side (reusing
+`ops/scripts/capture-market-boundary.js`'s already-tested
+`generateUuidV7()` — no new dependency, no Postgres extension), never
+Postgres's native `gen_random_uuid()` (UUIDv4). This resolves `Market.id`'s
+previously-open format question for the physical layer, matching
+`MarketBoundaryVersion.id`'s already-established choice.
+
+**Referential integrity as database constraints, not application
+convention**:
+
+- `MarketBoundaryVersion(market_id, id)` is unique. `Market`'s own
+  `(id, current_boundary_version_id)` is a composite foreign key against
+  that pair — `markets.current_boundary_version_id` can only ever point
+  at a boundary version that actually belongs to that same market. **This
+  pointer is specific to `Market`** — a market genuinely has exactly one
+  current boundary at a time, unlike a `Source`'s authorization, which is
+  scope- and time-bound and does **not** get an equivalent global "current
+  version" pointer (see `docs/api/source-registry-schema.md`'s correction:
+  an earlier draft of that amendment proposed one, mirroring this field
+  exactly, and removed it as semantically wrong once reviewed).
+- `SourceAuthorizationVersion(source_id, id)` is unique (defined in
+  `docs/api/source-registry-schema.md`). `MarketBoundaryVersion`'s own
+  `(source_id, source_authorization_version_id)` is a composite foreign
+  key against it — a boundary version's authorization reference is
+  physically guaranteed to belong to its own `source_id`, never a
+  different source's version by accident.
+- `ImportRun(id, market_boundary_version_id)` is unique
+  (`docs/api/import-run-schema.md`). `ImportExtractionRecord`'s
+  `(import_run_id, market_boundary_version_id)` is a composite foreign
+  key against it — an extraction record can only reference the exact
+  boundary version its own run used. No override/exception mechanism is
+  built for this — a genuinely motivated future exception is a separate,
+  explicitly-decided schema change, not a built-in escape hatch.
+
+**Database vs. repository**: once this amendment is actually implemented
+(migration + seed built and live-verified — not true yet today), the
+database is the operational source of truth for relations and runtime
+audit (which boundary version is current, which authorization version a
+boundary/run used). The existing repository artifacts
+(`market-data/boundaries/breda/v1/breda.geojson` and its `manifest.json`)
+remain the versionable geometry source of truth — never duplicated into
+Postgres; the DB row instead carries `manifest_path`/`geojson_path`/
+`artifact_git_ref` (see the field table above) pointing at them.
+
+**Physical security**: RLS on all six operational tables
+(`markets`, `market_boundary_versions`, `sources`,
+`source_authorization_versions`, `import_runs`,
+`import_extraction_records`), zero policies for `anon`/`authenticated`
+— `owner`, `editor`, and `internal` (the existing `staff_roles` values)
+get no direct access either — plus explicit `revoke all ... from public,
+anon, authenticated`. `service_role` gets only: `select, insert, update`
+on `markets`/`sources` (contractually mutable identity/description
+fields); **`select, insert` only — no `update`, no `delete`** on
+`market_boundary_versions`/`source_authorization_versions`/
+`import_extraction_records` (physically enforcing their append-only,
+never-edited contracts, even against `service_role` itself); `select,
+insert`, plus **column-scoped** `update` limited to `status`,
+`completed_at`, `record_counts`, `error_log`, `checkpoint` on
+`import_runs` — identity, both source-reference pairs, the boundary
+-version reference, and `idempotency_key` never get an update grant. Full
+detail and the reasoning: `docs/api/import-run-schema.md`'s own amendment.
+
+### Completeness required for the DB-row realization (distinct from the
+manifest completeness list above)
+
+The "Completeness required for a real, registered version" list above
+governs the `manifest.json` artifact itself and the capture tool that
+produces it (`ops/scripts/capture-market-boundary.js`'s own
+`assertComplete()`) — **unchanged by this amendment**. A **DB row**
+realizing a `MarketBoundaryVersion` has its own, additional completeness
+requirement: `source_id`, `source_authorization_version_id`,
+`manifest_path`, `geojson_path`, and `artifact_git_ref` may never be
+`null` on a row actually referenced by `markets.current_boundary_version_id`
+or by any `ImportRun`. These fields do not need to exist inside the
+manifest JSON file's own schema — they are the DB layer's superset,
+recorded once at seed/insert time.
+
+### Gate status
+
+Hard gate 4 is **split, 2026-09-04**, matching
+`docs/api/import-run-schema.md`'s own split:
+
+- **`4A`** (this amendment, plus `docs/api/import-run-schema.md`'s and
+  `docs/api/source-registry-schema.md`'s matching amendments): design
+  decided. **Not yet closed** — closing it requires, in order, this
+  documentation's approval, the actual migration/seed implementation, and
+  live verification of the full access-control and referential-integrity
+  test matrix.
+- **`4B`**: fully open, untouched.
+
 ### Registered version — actual instance (2026-09-04)
 
 Breda's first `MarketBoundaryVersion` has been captured via the controlled,
@@ -243,7 +351,8 @@ gates" section.
 | `business_key` | `{ market_slug: "breda", version_number: 1 }` |
 | `representation_type` | `polygon` (recorded as a GeoJSON `MultiPolygon` — Gemeente Breda's administrative area is not simply connected) |
 | `definition_ref` | `https://service.pdok.nl/kadaster/brk-bestuurlijke-gebieden/atom/downloads/BestuurlijkeGebieden_2026.gpkg` |
-| `source` | Kadaster — Bestuurlijke Gebieden (see `docs/api/source-registry-schema.md`'s "Registered sources" section) |
+| `source_id` **(added 2026-09-04, replaces the earlier prose `source` value)** | `01a06e1e-aa9f-7acc-a5cb-61d8c501befb` — Kadaster/PDOK's `Source.id`, see `docs/api/source-registry-schema.md`'s "Registered sources" section. |
+| `source_authorization_version_id` **(added 2026-09-04)** | `01a06e1e-aa9f-7cc6-a59c-d3280676b896` — Kadaster/PDOK's v1 `SourceAuthorizationVersion.id`. |
 | `source_version` | Bestuurlijke Gebieden 2026 (definitieve editie) |
 | `valid_from` | `2026-01-01` |
 | `retrieved_at` / `effective_from` | `2026-09-04T19:19:32.752Z` |
@@ -254,8 +363,11 @@ gates" section.
 | `derivation.input_crs` → `output_crs` | `EPSG:28992` → `EPSG:4326` |
 | `derivation.tool` | `GDAL 3.13.3 "Iowa City", released 2026/08/13` |
 | `derivation.tool_reference` | `ghcr.io/osgeo/gdal@sha256:64250faf833c06d4b21afce4c27190039ba7ab58d70f0eebc87cf77d929c0b40` |
-| `derivation.procedure_ref` | `ops/scripts/capture-market-boundary.js` at git revision `8f996c2bc5140c9e22f42c5edaecd14e0fbc0050` |
+| `derivation.procedure_ref` | `ops/scripts/capture-market-boundary.js` at git revision `8f996c2bc5140c9e22f42c5edaecd14e0fbc0050` — the capture *script's own* revision at the time it ran. Distinct from `artifact_git_ref` below, which is the commit that added the resulting files to the repo. |
 | `supersedes_version` | `null` (Breda's first version) |
+| `manifest_path` **(added 2026-09-04)** | `market-data/boundaries/breda/v1/manifest.json` |
+| `geojson_path` **(added 2026-09-04)** | `market-data/boundaries/breda/v1/breda.geojson` |
+| `artifact_git_ref` **(added 2026-09-04)** | `c5d71febe0ab4ef69d18842778c55ed9d8c96983` — confirmed via `git log --follow` against this exact repository (commit "feat(market): record Breda boundary version 1"), not assumed from memory. |
 
 Repository realization: `market-data/boundaries/breda/v1/manifest.json` (this
 record) and `market-data/boundaries/breda/v1/breda.geojson` (the operational
@@ -296,7 +408,11 @@ this capture.
   "Registered version — actual instance" above.**
 - **Physical storage technology** for `definition_ref` — not chosen,
   matching the "logical, not physical" precedent this contract and
-  `docs/api/canonical-restaurant-menu-schema.md` already set.
+  `docs/api/canonical-restaurant-menu-schema.md` already set. **Partially
+  resolved 2026-09-04**: the DB-row realization of a `MarketBoundaryVersion`
+  (Supabase/Postgres — see "Amendment (2026-09-04): physical operational
+  base" above) is now decided; the official source artifact's own hosting
+  (PDOK's, not MenuCard's) was never MenuCard's to decide and stays n/a.
 - **No `MarketBoundaryVersion` has been recorded for Breda.** The Breda
   reference row above records the *semantic* decision (Gemeente Breda's
   administrative boundary) only — there is no version 1 yet. **Update
@@ -305,12 +421,11 @@ this capture.
 
 ## Open questions (not decided here)
 
-- Concrete `id` format for `Market`/`Source` (UUID vs. an internal key
-  scheme) — **narrowed 2026-09-04**: `MarketBoundaryVersion.id`
-  specifically is now decided (UUIDv7, see the amendment above); `Market.id`
-  and `Source.id`'s own formats remain open, and whether they should
-  follow the same UUIDv7 choice for consistency is a natural follow-up
-  question, not decided here either.
+- Concrete `id` format for `Market`/`Source` — **resolved 2026-09-04 for
+  the physical/operational layer**: UUIDv7, matching
+  `MarketBoundaryVersion.id`'s already-established choice — see "Amendment
+  (2026-09-04): physical operational base" above. `MARKET-02`'s own
+  canonical-schema ids remain a separate, still-open question.
 - Concrete `representation_type` for Breda's actual first
   `MarketBoundaryVersion`, and the concrete geometry to record — see the
   amendment above; the versioning *contract* is now fixed, the concrete

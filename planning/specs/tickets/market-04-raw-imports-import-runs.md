@@ -187,6 +187,34 @@ that eventually *do* go through moderation.
    per-stage design, not a single blanket "OSM approved" flag.
 4. **Physical raw-storage technology and the encryption mechanism** for
    the unredacted-retention exception are decided before implementation.
+   **Split 2026-09-04** into two independently-gatable parts — see
+   `docs/api/import-run-schema.md`'s and `docs/api/market-entity-schema.md`'s
+   matching "Amendment (2026-09-04): physical operational base" sections
+   for the full design:
+   - **Gate 4A — blobless operational storage base.** A minimal
+     Supabase/Postgres schema (`markets`, `market_boundary_versions`,
+     `sources`, `source_authorization_versions`, `import_runs`,
+     `import_extraction_records`) for internal, `basic_info`-only
+     candidate data — no PBF/HTML/raw blobs ever stored; a temporary
+     Geofabrik download is hashed, processed, and always deleted. Design
+     **decided** 2026-09-04. **Not closed** — closing it requires, in
+     order: this documentation actually approved (done, this ticket's own
+     amendment reference); the schema and seed migrations actually
+     written and applied; live verification of the full access-control
+     test matrix (`service_role` positive; `anon`/`authenticated`
+     -without-role/`owner` negative, on all six tables) and the
+     referential-integrity test matrix (mismatched source/authorization
+     pairs, cross-market boundary pointers, mismatched extraction-record
+     boundary references — all correctly rejected). No `ImportRun` may
+     execute against real data before all three are done.
+   - **Gate 4B — encrypted, unredacted raw-blob exception.** Fully open,
+     untouched, out of scope. The six existing conditions in
+     `docs/api/import-run-schema.md`'s "Data minimisation" section still
+     all apply, unchanged.
+
+   Closing 4A does not touch 4B, and neither touches gate 3B —
+   `MARKET-05` canonical merge, public publication, API exposure, and
+   redistribution remain independently blocked there.
 
 ## Risks
 

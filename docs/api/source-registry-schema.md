@@ -178,15 +178,29 @@ immutability the way "what was it authorized to do" does): `id`,
 `legacy_ids[]`/`external_ids[]`, `name`, `operator`, `source_type`,
 `official_location`, `refresh_policy`, `freshness_expectation`.
 
+**Correction (2026-09-04)**: this document previously said, in prose
+above, that "`Source` itself becomes a thin identity/description record
+plus a pointer to its current version," and a same-dated amendment
+briefly named that pointer as an explicit field,
+`current_authorization_version_id`. **That field is removed — it was
+semantically wrong, not just unspecified.** A `SourceAuthorizationVersion`
+is scope- and time-bound: the same `Source` can have different validly
+-applicable versions per market, country, access route, or processing
+stage. A single, global "current version" pointer on `Source` would
+suggest one universally-current answer that does not actually exist, and
+could point to the wrong version entirely once a second market or a
+second access route is ever reviewed for the same source. See "Amendment
+(2026-09-04): physical operational base" below for what replaces it.
+
 ### `SourceAuthorizationVersion`
 
 | Field | Type | Notes |
 |---|---|---|
-| `id` | stable identity | The version's own identity — distinct from `Source.id`. |
+| `id` | stable identity | The version's own identity — distinct from `Source.id`. **UUIDv7 — see the physical-operational-base amendment below.** |
 | `source_id` | FK → `Source.id` | Which source this version belongs to. |
 | `version_number` | integer | Sequential, human-readable (1, 2, 3…). |
 | `effective_from` | timestamp | When this version became the recorded truth. |
-| `superseded_by`, `superseded_at` | FK / timestamp, nullable | Set once a later version replaces this one. `null` on the current version. |
+| `supersedes_version` **(replaces `superseded_by`/`superseded_at` — corrected 2026-09-04)** | FK → `SourceAuthorizationVersion.id`, nullable | **Set once, at this version's own creation** — points backward to the version it replaces. `null` on a source's first version. See "Amendment (2026-09-04): immutable succession correction" below for why this replaces the previous, self-contradictory fields — the identical fix already applied to `docs/api/market-entity-schema.md`'s `MarketBoundaryVersion`. |
 | *(all fields in the table above)* | | |
 
 ### Invariants (extend, do not replace, `Source`'s original five)
@@ -199,16 +213,28 @@ immutability the way "what was it authorized to do" does): `id`,
 2. A `SourceAuthorizationVersion`, once created, is **never edited**. Any
    change — including a re-review that reaches the identical conclusion —
    creates a new version.
-3. Exactly one version per `Source` has `superseded_at = null` at any
-   time — that is the current, authoritative version for review UIs and
-   for registering new `SourceReference`s.
+3. **Corrected 2026-09-04, twice.** The old `superseded_at = null` test
+   this invariant used to name no longer exists as a field (see the
+   immutable-succession correction below). It was briefly replaced by a
+   single `Source.current_authorization_version_id` pointer, which has
+   itself since been removed as semantically wrong (see "Fields that stay
+   on `Source`" above) — a `SourceAuthorizationVersion` is scope- and
+   time-bound, so no single "the current one" exists globally for a
+   `Source`. **There is no global current-version pointer for `Source`.**
+   Any record that needs a specific, applicable authorization version
+   (an `ImportRun`, a `MarketBoundaryVersion`) names that exact version
+   directly, itself — see "Amendment (2026-09-04): physical operational
+   base" below.
 4. The original invariants 2–5 (terms/reviewer/date/reason required for
    `allowed`/`restricted`; `blocked` requires reason+reviewer+date but not
    necessarily terms; the structural absence of a search-results-page
    access method; no automatic cross-market carry-over) now apply to each
    `SourceAuthorizationVersion` individually, not to a `Source` row as a
    whole.
-5. `ImportRun.source_authorization_version_id` (`MARKET-04`) must
+5. **Corrected 2026-09-04** — `ImportRun.data_origin_source_authorization_version_id`,
+   and, where set, `access_provider_source_authorization_version_id`
+   (`docs/api/import-run-schema.md`'s amendment; these fields superseded
+   the original single `source_authorization_version_id`) must each
    reference a version whose `status ∈ {allowed, restricted}` — checked
    against that specific version, at the time the run executes.
 
@@ -219,6 +245,123 @@ not at a specific `SourceAuthorizationVersion` — a factual "this came
 from this source" reference is a lighter claim than an authorization
 -gated action, and does not need point-in-time freezing the way an
 `ImportRun` does. Only `ImportRun` gets the version-specific reference.
+
+## Amendment (2026-09-04): immutable succession correction —
+`supersedes_version` replaces `superseded_by`/`superseded_at`
+
+**The problem this corrects**: `superseded_by`/`superseded_at` ("set once
+a later version replaces this one") directly contradicted invariant 2 ("a
+`SourceAuthorizationVersion`, once created, is never edited") — setting
+them necessarily meant writing to an *older*, already-created record after
+the fact. This was flagged repeatedly across this project as a **known
+parallel gap** to the identical bug already found and fixed in
+`docs/api/market-entity-schema.md`'s `MarketBoundaryVersion` — "not fixed
+here" each time. It is corrected now, as a direct prerequisite for
+`MARKET-04A`'s physical implementation: a physical table cannot encode a
+self-contradictory field pair, and building one that quietly diverged from
+this document's own words would itself be a silent rewrite.
+
+**The correction**, identical in shape to `MarketBoundaryVersion`'s own
+fix: every `SourceAuthorizationVersion` may record `supersedes_version`,
+naming the version it replaces, but only **at its own creation** — never
+edited afterward. **Unlike `MarketBoundaryVersion` (where `market.boundary`
+is a genuine, single, global "current version" pointer)**, `Source` has no
+equivalent — see "Fields that stay on `Source`" above for why a global
+current-authorization pointer would be semantically wrong here. "Which
+version is applicable" is instead answered by whatever specific record
+needs one (an `ImportRun`, a `MarketBoundaryVersion`) naming that exact
+`SourceAuthorizationVersion.id` directly, itself. This still fully
+resolves the invariant-2 contradiction: no `SourceAuthorizationVersion`
+field is ever written to after that record's own creation — succession
+is recorded forward-only via `supersedes_version`, never by mutating an
+older row.
+
+## Amendment (2026-09-04): physical operational base — `MARKET-04A`
+
+**Trigger**: identical to `docs/api/import-run-schema.md`'s own amendment
+of the same name — closing `MARKET-04` hard gate 4A requires a real,
+minimal Supabase/Postgres base. That document holds the full `ImportRun`/
+`MarketBoundaryVersion` design; this section records only what changes
+for `Source`/`SourceAuthorizationVersion` specifically.
+
+### `id` strategy
+
+`Source.id` and `SourceAuthorizationVersion.id` use **UUIDv7**, generated
+application-side (reusing `ops/scripts/capture-market-boundary.js`'s
+already-tested `generateUuidV7()` — no new dependency), matching
+`MarketBoundaryVersion.id`'s already-established choice. This resolves,
+for the physical layer, the "not yet decided" `Source.id` format open
+question below.
+
+### No global "current authorization" pointer — corrected 2026-09-04
+
+An earlier draft of this amendment gave `Source` its own
+`current_authorization_version_id` pointer, directly mirroring
+`market.boundary`/`current_boundary_version_id`. **That mirroring was
+wrong and has been removed.** A market has exactly one boundary that is
+current at a time — the analogy holds. A `Source`'s authorization does
+not work the same way: the same source can have distinct, simultaneously
+-valid `SourceAuthorizationVersion`s that differ by market, country,
+access route, or permitted processing stage. A single global pointer
+would suggest one universally-correct "current" version and could point
+at the wrong one entirely the moment a second market, a second country,
+or a second access route is ever reviewed for the same source.
+
+**What replaces it**: every record that needs a specific, applicable
+authorization version names that exact `SourceAuthorizationVersion.id`
+directly, itself — never by dereferencing a pointer on `Source`.
+`ImportRun.data_origin_source_authorization_version_id`/
+`access_provider_source_authorization_version_id`
+(`docs/api/import-run-schema.md`) and `MarketBoundaryVersion.source_authorization_version_id`
+(`docs/api/market-entity-schema.md`) are still each a composite foreign
+key against `SourceAuthorizationVersion(source_id, id)` — proving the
+version belongs to the referenced source — but there is no intermediate
+"current" pointer on `Source` for them to go through.
+
+**No "current version for a scope" query exists yet, and none is
+authorized by this amendment.** A future query or view answering "which
+`SourceAuthorizationVersion` is currently applicable within a specific
+market/country/access-route/processing-stage combination" may be added
+later, but only once market, time, access route, and processing stage
+are **all** explicit inputs to it — never a bare, scope-free "the current
+one for this source."
+
+### Physical security
+
+RLS, zero `anon`/`authenticated` policies (including `owner`/`editor`/
+`internal`), explicit `revoke`, and minimal `service_role` grants — see
+`docs/api/import-run-schema.md`'s amendment for the full six-table grant
+table. For the two tables this document owns specifically:
+`Source` gets `select, insert, update` (identity/description fields are
+contractually mutable); `SourceAuthorizationVersion` gets **`select,
+insert` only — no `update`, no `delete`**, physically enforcing invariant
+2 even against `service_role` itself.
+
+### Concrete `id` values — Registered sources (2026-09-04)
+
+The three already-registered instances below (Kadaster/PDOK, OpenStreetMap,
+Geofabrik) are given their first concrete, stable `id` values here — none
+had one before. These are the values a future seed migration must use
+literally, not regenerate. See "Registered sources — actual instances"
+further down this document for the full records these ids belong to.
+
+| Source | `Source.id` | `SourceAuthorizationVersion.id` (v1) |
+|---|---|---|
+| Kadaster/PDOK — Bestuurlijke Gebieden | `01a06e1e-aa9f-7acc-a5cb-61d8c501befb` | `01a06e1e-aa9f-7cc6-a59c-d3280676b896` |
+| OpenStreetMap | `01a06e1e-aa9f-7194-8fb7-e959b765d6f8` | `01a06e1e-aaa0-7035-98e8-e8b636cae82a` |
+| Geofabrik — Netherlands extract | `01a06e1e-aaa0-7595-9173-d75b3ab52b0a` | `01a06e1e-aaa0-7a42-8606-fed08df83970` |
+
+Each `SourceAuthorizationVersion.supersedes_version` above is `null`
+(first version of each) — there is no `Source`-level "current version"
+field to also set (see "No global 'current authorization' pointer"
+above).
+
+### Gate status
+
+Same status as `docs/api/import-run-schema.md`'s amendment: **`4A` design
+decided, not yet closed** — closing it still requires the migration/seed
+to actually be implemented and the full test matrix live-verified. `4B`
+is untouched.
 
 ## Amendment (2026-09-05): geospatial reference data support
 
@@ -436,6 +579,7 @@ another's.
 
 | Field | Value |
 |---|---|
+| `id` **(added 2026-09-04)** | `01a06e1e-aa9f-7acc-a5cb-61d8c501befb` — UUIDv7, first concrete value assigned; see "Amendment (2026-09-04): physical operational base" above. |
 | `name` | Kadaster — Bestuurlijke Gebieden |
 | `operator` | Kadaster (Dienst voor het kadaster en de openbare registers) |
 | `source_type` | `government_open_data` |
@@ -447,6 +591,8 @@ another's.
 
 | Field | Value |
 |---|---|
+| `id` **(added 2026-09-04)** | `01a06e1e-aa9f-7cc6-a59c-d3280676b896` |
+| `supersedes_version` **(added 2026-09-04)** | `null` (first version) |
 | `status` | `allowed` |
 | `status_reason` | CC BY 4.0, explicitly "no further usage restrictions" beyond mandatory attribution, per the official National Georegister (NGR) metadata record and the PDOK Atom feed's own licence statement; an official, primary Kadaster/PDOK source for geospatial reference data. |
 | `terms_reference` | National Georegister metadata record (`nationaalgeoregister.nl/geonetwork/opensearch/api/records/208bc283-7c66-4ce7-8ad3-1cf3e8933fb5`) and `pdok.nl/copyright` |
@@ -458,7 +604,7 @@ another's.
 | `supplementary_access_methods[]` | `open_api_query` |
 | `access_provider_note` | Primary: PDOK's Atom download service (GeoPackage, 2026 edition). Supplementary: PDOK OGC API Features (`gemeentegebied` collection) — for feature validation and freshness-checking only, never as the primary version-of-record route (per `supplementary_access_methods[]`'s own invariant above). |
 | `reuse_rights` | `{redistribution_allowed: true, attribution_required: true, commercial_use_allowed: true, geographic_restrictions: none}` |
-| `geographic_applicability` | `{country_codes: ["NL"], market_scope: "Breda market (slug: breda)"}` — **not** a `market_id` value. `MARKET-01`'s `id` format is still an open question (see Open questions below); recording a made-up placeholder id here would misrepresent it as decided. This human-readable scope reference stands in until a real id format and value exist, at which point this row is updated, not silently reinterpreted. |
+| `geographic_applicability` | **Updated 2026-09-04**: `{country_codes: ["NL"], market_id: "01a06e1e-aa9a-7e88-aa15-e81b1a4cc5fb"}` — previously recorded as the human-readable placeholder `market_scope: "Breda market (slug: breda)"` because `Market.id` had no concrete value yet; this is the exact update that placeholder's own note promised, not a silent reinterpretation. See `docs/api/market-entity-schema.md`'s physical-operational-base amendment for where this id comes from. |
 | `reviewed_by` | `product_owner` — **bootstrap reference, see below.** |
 | `reviewed_at` | 2026-09-02 |
 | `effective_from` | 2026-09-02 |
@@ -492,6 +638,7 @@ registration: [openstreetmap.org/copyright](https://www.openstreetmap.org/copyri
 
 | Field | Value |
 |---|---|
+| `id` **(added 2026-09-04)** | `01a06e1e-aa9f-7194-8fb7-e959b765d6f8` |
 | `name` | OpenStreetMap |
 | `operator` | OpenStreetMap Foundation (OSMF) and the OpenStreetMap contributor community |
 | `source_type` | `poi_directory` |
@@ -503,6 +650,8 @@ registration: [openstreetmap.org/copyright](https://www.openstreetmap.org/copyri
 
 | Field | Value |
 |---|---|
+| `id` **(added 2026-09-04)** | `01a06e1e-aaa0-7035-98e8-e8b636cae82a` |
+| `supersedes_version` **(added 2026-09-04)** | `null` (first version) |
 | `status` | `restricted` |
 | `status_reason` | OpenStreetMap's data is ODbL-licensed and free to reuse, including commercially, but `MARKET-05`'s matching/merging design plausibly makes an OSM-derived candidate combined with a non-OSM source for the same feature type (a restaurant) a Derivative Database under ODbL — a question this project has not had legally reviewed. Restricted to internal, pre-merge, pre-publication processing stages only until that review happens (gate 3B). |
 | `terms_reference` | `https://www.openstreetmap.org/copyright` |
@@ -516,7 +665,7 @@ registration: [openstreetmap.org/copyright](https://www.openstreetmap.org/copyri
 | `allowed_processing_stages[]` | `raw_import`, `internal_quality_review`, `moderation_preparation` |
 | `restricted_pending` | `canonical_merge`, `public_publication`, `api_exposure`, and `redistribution` require a qualified legal review (external, or demonstrably authorized internal counsel — never AI research alone, per the existing invariant above) of the ODbL Collective-vs-Derivative-Database question for `MARKET-05`'s merge of OSM-derived candidates with non-OSM sources for the same feature type. See `MARKET-04`'s hard gate 3B. |
 | `reuse_rights` | `{redistribution_allowed: true (ODbL terms apply — share-alike for any Derivative Database; see allowed_processing_stages/restricted_pending for the procedural gate on when redistribution/merge is actually permitted), attribution_required: true, commercial_use_allowed: true, geographic_restrictions: none}` |
-| `geographic_applicability` | `{country_codes: ["NL"], market_scope: "Breda market (slug: breda)"}` |
+| `geographic_applicability` | **Updated 2026-09-04**: `{country_codes: ["NL"], market_id: "01a06e1e-aa9a-7e88-aa15-e81b1a4cc5fb"}` — previously the human-readable `market_scope` placeholder, same update as the Kadaster/PDOK entry above. |
 | `reviewed_by` | `product_owner` — same bootstrap reference as the Kadaster/PDOK entry above, see below. |
 | `reviewed_at` | 2026-09-04 |
 | `effective_from` | 2026-09-04 |
@@ -542,6 +691,7 @@ created by OpenStreetMap Contributors" and licenses the data "ODbL 1.0").
 
 | Field | Value |
 |---|---|
+| `id` **(added 2026-09-04)** | `01a06e1e-aaa0-7595-9173-d75b3ab52b0a` |
 | `name` | Geofabrik — Netherlands OSM extract |
 | `operator` | Geofabrik GmbH |
 | `source_type` | `poi_directory` |
@@ -553,6 +703,8 @@ created by OpenStreetMap Contributors" and licenses the data "ODbL 1.0").
 
 | Field | Value |
 |---|---|
+| `id` **(added 2026-09-04)** | `01a06e1e-aaa0-7a42-8606-fed08df83970` |
+| `supersedes_version` **(added 2026-09-04)** | `null` (first version) |
 | `status` | `restricted` |
 | `status_reason` | Geofabrik is a well-established, widely-used technical redistributor of OpenStreetMap data under the same ODbL terms OSM itself publishes under — it holds no separate rights of its own and is not itself the licensor (see "What this does and does not authorize" below). Restricted to the identical internal-only processing stages as the OpenStreetMap entry above, for the identical reason: `MARKET-05`'s merge question (gate 3B) is unresolved, and it applies equally to data obtained via this channel. |
 | `terms_reference` | `https://download.geofabrik.de/europe/netherlands.html` (page footer licence/attribution statement) |
@@ -566,7 +718,7 @@ created by OpenStreetMap Contributors" and licenses the data "ODbL 1.0").
 | `allowed_processing_stages[]` | `raw_import`, `internal_quality_review`, `moderation_preparation` |
 | `restricted_pending` | Identical condition to the OpenStreetMap entry above: `canonical_merge`, `public_publication`, `api_exposure`, and `redistribution` require the same qualified legal review of `MARKET-05`'s merge question (gate 3B) before any version of this entry could add them — the data obtained via Geofabrik is the same OSM data, subject to the same open question. |
 | `reuse_rights` | `{redistribution_allowed: true (ODbL terms apply, same as the OpenStreetMap entry above), attribution_required: true, commercial_use_allowed: true, geographic_restrictions: none}` |
-| `geographic_applicability` | `{country_codes: ["NL"], market_scope: "Breda market (slug: breda)"}` |
+| `geographic_applicability` | **Updated 2026-09-04**: `{country_codes: ["NL"], market_id: "01a06e1e-aa9a-7e88-aa15-e81b1a4cc5fb"}` — same update as the other two entries above. |
 | `reviewed_by` | `product_owner` — same bootstrap reference as the Kadaster/PDOK entry above, see below. |
 | `reviewed_at` | 2026-09-04 |
 | `effective_from` | 2026-09-04 |
@@ -616,13 +768,18 @@ reinterpreted, when that happens.
 
 ## Open questions (technical implementation choices only)
 
-- Exact `id` format (UUID vs. an internal key scheme) — same open item as
-  `MARKET-01`/`MARKET-02`.
+- Exact `id` format — **resolved 2026-09-04 for the physical/operational
+  layer**: UUIDv7, see "Amendment (2026-09-04): physical operational
+  base" above. `MARKET-02`'s own canonical-schema ids remain a separate,
+  still-open question.
 - Whether `reviewed_by` references an individual account or a role —
   **partially addressed 2026-09-02** by the `product_owner` bootstrap
-  reference above for the one entry that exists so far; the underlying
-  question (a formal, general identity/account convention for every
-  future reviewer) remains open.
+  reference above, now used for three entries; **the go-forward interim
+  rule was made explicit 2026-09-04** (see
+  `docs/api/import-run-schema.md`'s amendment: any future reviewer
+  reference must follow the identical bootstrap-reference discipline
+  until a real identity/account system exists). The underlying question
+  (a formal, general identity/account convention) remains open.
 - Exact re-review cadence per `source_type` (a government open-data
   portal's terms likely change less often than an individual restaurant's
   website) — `next_review_due` exists as a field; the policy for setting

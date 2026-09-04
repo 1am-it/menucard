@@ -87,17 +87,23 @@ contract can run."
      question for `MARKET-05`'s merge design. Not answered here.
 4. **Physical raw-storage technology and the encryption mechanism for the
    unredacted-retention exception** (see "Data minimisation" below) are
-   decided before implementation. Not chosen here — matches the "logical,
-   not physical" precedent `docs/api/canonical-restaurant-menu-schema.md`
-   already set.
+   decided before implementation. **Split 2026-09-04** — see "Amendment
+   (2026-09-04): physical operational base" below for the full design:
+   - **4A** (blobless operational storage base, Supabase/Postgres):
+     design decided; **not yet closed** — requires the documentation
+     approval, the actual migration/seed implementation, and live
+     verification of the full access-control and referential-integrity
+     test matrix, in that order.
+   - **4B** (encrypted, unredacted raw-blob exception): fully open,
+     untouched, out of scope.
 
 ## `ImportRun`
 
 | Field | Type | Notes |
 |---|---|---|
-| `id` | stable identity | Immutable. |
-| `source_id` | FK → `Source.id` | Exactly one source per run. |
-| `source_authorization_version_id` | FK → `SourceAuthorizationVersion.id` | **Not a copy.** The exact immutable version that was current when this run executed — see `docs/api/source-registry-schema.md`'s amendment. A run's legitimacy is judged against this reference forever, even after the source is later re-reviewed. |
+| `id` | stable identity | Immutable. **UUIDv7** — see "Amendment (2026-09-04): physical operational base" below. |
+| `source_id` **→ superseded** | FK → `Source.id` | **Superseded 2026-09-04 by the dual data-origin/access-provider model** — see the amendment below. Left here for history; a real `ImportRun` uses `data_origin_source_id`/`access_provider_source_id` instead. |
+| `source_authorization_version_id` **→ superseded** | FK → `SourceAuthorizationVersion.id` | **Superseded 2026-09-04** — see the amendment below. |
 | `market_id` | FK → `market.id` | Requires `MARKET-01`'s boundary to actually be defined for this market — see hard gate 1. |
 | `market_boundary_version_id` | FK → `MarketBoundaryVersion.id`, nullable | **Amendment (2026-09-04).** Not a copy. The specific boundary version this run's own scoping (e.g. a bounding query) was informed by, where applicable — reference-not-copy, same discipline as `source_authorization_version_id`. This is *not* the authoritative "is this candidate in the market" test — that is `MARKET-05`'s job, tested against a specific `MarketBoundaryVersion` at normalization time, per `docs/api/market-entity-schema.md`'s amendment (invariant 3). A record whose location cannot be tested against that version's `inclusion_rule` is `unknown`/`unresolved`, never defaulted to "in the market" (that document's invariant 4) — `MARKET-05`'s concern, not enforced by `ImportRun` itself, but the raw extraction record must preserve whatever location data exists so that test remains possible downstream. This field only lets a run itself stay traceable to which boundary definition it was run under, even for a run whose own fetch wasn't boundary-scoped at all (`null` in that case). |
 | `access_method_used` | enum, drawn from the referenced version's `allowed_access_method` | Recorded per run, not merely inherited, since a source can gain additional allowed methods across later versions. |
@@ -115,12 +121,14 @@ contract can run."
 
 ### Idempotency
 
-`idempotency_key` is a deterministic function of, at minimum: `source_id`,
-`source_authorization_version_id`, `market_id`, the concrete
-`source_locator`/route or query, `source_version` (where the source
-exposes one), and a fingerprint of the relevant execution configuration
-(e.g. which allowlist/extraction ruleset version was used — see "Data
-minimisation" below). This means:
+`idempotency_key` is a deterministic function of, at minimum:
+`data_origin_source_id`, `data_origin_source_authorization_version_id`
+(and, where set, `access_provider_source_id`/
+`access_provider_source_authorization_version_id` — see the amendment
+below), `market_id`, the concrete `source_locator`/route or query,
+`source_version` (where the source exposes one), and a fingerprint of the
+relevant execution configuration (e.g. which allowlist/extraction
+ruleset version was used — see "Data minimisation" below). This means:
 
 - Re-triggering the "same" import does not silently double-count or
   double-store.
@@ -130,6 +138,196 @@ minimisation" below). This means:
 - A change to *how* extraction/minimisation is performed (a bug fix, a
   stricter allowlist) also produces a new key, so old runs remain
   traceable to the exact rules that were actually applied to them.
+
+## Amendment (2026-09-04): physical operational base — `MARKET-04A`
+
+**Trigger**: closing `MARKET-04`'s hard gate 4 requires an actual, minimal
+physical Supabase/Postgres base before a real Breda OSM candidate import
+can run — this amendment records that design decision. **It does not, by
+itself, close gate 4A** — see "Gate 4 status" below for what closing it
+still requires (this documentation approval is one precondition among
+several, not the whole thing).
+
+### Corrected: `ImportRun` needs two, independently-versioned source
+references, not one
+
+**The problem this corrects**: the original `source_id`/
+`source_authorization_version_id` pair (marked "→ superseded" above)
+assumed one source per run. A Breda OSM import genuinely has two,
+separately-reviewed roles per `docs/api/source-registry-schema.md`'s own
+licence-vs-access-provider principle: OpenStreetMap is the licence-bearing
+**data origin**; Geofabrik is a separate **access provider** for the
+concrete Netherlands extract. A single pair cannot represent both without
+conflating them.
+
+**New fields, replacing `source_id`/`source_authorization_version_id`:**
+
+| Field | Type | Notes |
+|---|---|---|
+| `data_origin_source_id` | FK → `Source.id`, **not nullable** | The licence-bearing source — every run has exactly one. For Kadaster/PDOK-style sources that are both licensor and technical channel, this is the only reference needed. |
+| `data_origin_source_authorization_version_id` | FK → `SourceAuthorizationVersion.id`, **not nullable** | **Not a copy** — the exact immutable version current when the run executed, same discipline as before. Must belong to `data_origin_source_id` — enforced physically, not just in application code (see "Referential integrity" below). |
+| `access_provider_source_id` | FK → `Source.id`, **nullable** | A separate technical-channel source (e.g. Geofabrik), only where one genuinely exists apart from the data origin. |
+| `access_provider_source_authorization_version_id` | FK → `SourceAuthorizationVersion.id`, **nullable** | Same discipline as the data-origin version. Must belong to `access_provider_source_id`. |
+
+**Invariant**: `access_provider_source_id` and
+`access_provider_source_authorization_version_id` are set **together or
+not at all** — never one without the other. A run with no separate access
+provider (e.g. against Kadaster/PDOK) simply leaves both `null`; this is
+the normal case for a source that is its own access provider, not a
+degraded or incomplete state.
+
+### Corrected: `MarketBoundaryVersion` needs the same source-authorization
+reference `docs/api/market-entity-schema.md` already implied
+
+`docs/api/market-entity-schema.md`'s `MarketBoundaryVersion.source` field
+was documented as a vague "text/reference." This amendment resolves it:
+see that document's own "Amendment (2026-09-04): physical operational
+base" section for `source_id`/`source_authorization_version_id` and the
+composite foreign key proving they belong together — the identical
+discipline applied here to `ImportRun`.
+
+### Referential integrity is a database constraint, not an application
+convention
+
+Every "X must belong to Y" relationship below is enforced via a composite
+foreign key against a composite unique key on the referenced table — not
+merely checked in application code before an insert:
+
+- `SourceAuthorizationVersion(source_id, id)` is unique. `ImportRun`'s
+  `(data_origin_source_id, data_origin_source_authorization_version_id)`
+  and, where set, `(access_provider_source_id,
+  access_provider_source_authorization_version_id)` are each a composite
+  foreign key against that same unique pair — a mismatched pairing is a
+  constraint violation, not a bug that silently inserts.
+- `MarketBoundaryVersion(market_id, id)` is unique. `ImportRun`'s
+  `(market_id, market_boundary_version_id)` is a composite foreign key
+  against it, and `Market`'s own `(id, current_boundary_version_id)` is a
+  composite foreign key against the same pair (a boundary version can
+  only ever be "current" for the market it actually belongs to).
+- `ImportRun(id, market_boundary_version_id)` is unique.
+  `ImportExtractionRecord`'s `(import_run_id, market_boundary_version_id)`
+  is a composite foreign key against it — an extraction record can only
+  reference the exact boundary version its own run used, never a
+  different one. No override/exception mechanism is built for this in
+  `MARKET-04A` — a genuinely motivated future exception would be a
+  separate, explicitly-decided schema change, not a built-in escape hatch.
+- **Corrected 2026-09-04**: `Source` does **not** get a
+  `current_authorization_version_id` pointer. An earlier draft of this
+  amendment proposed one, mirroring `Market.current_boundary_version_id`
+  — that mirroring was wrong and has been removed. A market has exactly
+  one current boundary; a `Source`'s authorization does not work the same
+  way — the same source can have distinct, simultaneously-valid
+  `SourceAuthorizationVersion`s per market, country, access route, or
+  processing stage, so a single global "current" pointer would suggest an
+  answer that does not actually exist and could name the wrong version
+  once a second market or access route is reviewed for the same source.
+  See `docs/api/source-registry-schema.md`'s own correction for the full
+  reasoning. Instead: **every `ImportRun` and every `MarketBoundaryVersion`
+  names its own exact, applicable `SourceAuthorizationVersion.id` directly**
+  (via the composite foreign keys above) — there is no intermediate
+  "current" pointer on `Source` to go through. No query or view for
+  "the current version for a given scope" exists yet; a future one is only
+  authorized once market, time, access route, and processing stage are
+  all explicit inputs to it.
+
+### ID strategy
+
+Every table introduced by this amendment (`Market`, `MarketBoundaryVersion`,
+`Source`, `SourceAuthorizationVersion`, `ImportRun`,
+`ImportExtractionRecord`) uses **UUIDv7** for `id`, generated
+application-side (reusing the already-built, already-tested
+`generateUuidV7()` in `ops/scripts/capture-market-boundary.js` — no new
+dependency, no Postgres extension) — never Postgres's native
+`gen_random_uuid()` (UUIDv4), which would be inconsistent with
+`MarketBoundaryVersion.id`'s already-established UUIDv7 choice. This
+resolves, for the physical/operational layer specifically, the "not yet
+decided" `id`-format open question both this document and
+`docs/api/source-registry-schema.md` have carried since `MARKET-01`/`03`.
+
+### Database vs. repository — which is the source of truth for what
+
+**Once this amendment is actually implemented** (migration + seed built
+and live-verified — see "Gate 4 status" below; not true yet today), the
+database becomes the operational source of truth for **relations and
+runtime audit**: which boundary version is current, which authorization
+version a run used, how an extraction record traces back to its run — all
+resolved by querying real foreign keys, never by re-deriving state from
+git at request time.
+
+The **existing repository artifacts remain the versionable geometry
+source** — `market-data/boundaries/breda/v1/breda.geojson`'s bytes are
+never duplicated into Postgres. Every `MarketBoundaryVersion` row instead
+carries:
+
+| Field | Type | Notes |
+|---|---|---|
+| `manifest_path` | text, not null | Repo-relative path to the version's `manifest.json`. |
+| `geojson_path` | text, not null | Repo-relative path to the version's operational GeoJSON. |
+| `artifact_git_ref` | text, not null | **New — a path alone is not a stable reference.** The exact git commit SHA at which `manifest_path`/`geojson_path` were committed, immutable once set. For Breda's `v1`: `c5d71febe0ab4ef69d18842778c55ed9d8c96983` (confirmed via `git log --follow` against this exact repository, not assumed). |
+
+No new geometry or source value is invented here — `artifact_git_ref`
+reuses git's own content-addressed commit identity alongside the already
+-existing `source_artifact_hash`/`geometry_hash` inside the manifest
+itself.
+
+### Physical security principles
+
+RLS enabled on all six tables above, with **zero policies** for `anon` or
+`authenticated` — `owner`, `editor`, and `internal` (the existing
+`staff_roles` values) get no direct access either; none of them have any
+documented business with raw import data at this stage. Explicit
+`revoke all ... from public, anon, authenticated` alongside RLS, matching
+the lesson already learned live in `supabase/migrations/0001_field_provenance.sql`
+(RLS bypass and table-level `GRANT` are separate mechanisms). `service_role`
+gets only the minimal grants each table's own contract actually requires:
+
+| Table | `service_role` grants | Why |
+|---|---|---|
+| `Market`, `Source` | `select, insert, update` | Identity/description fields are contractually mutable (renaming, re-describing) — see `docs/api/source-registry-schema.md`'s existing "Fields that stay on Source" reasoning. |
+| `MarketBoundaryVersion`, `SourceAuthorizationVersion`, `ImportExtractionRecord` | **`select, insert` only — no `update`, no `delete`** | Append-only by contract (invariant 2 for boundary versions; the versioning discipline for authorization versions; one row per fetched item for extraction records). Physically enforced — not even `service_role` can update these, regardless of application-code bugs. |
+| `ImportRun` | `select, insert`, plus **column-scoped** `update` limited to `status`, `completed_at`, `record_counts`, `error_log`, `checkpoint` | Only the contractually-required lifecycle transitions are mutable. Identity, both source-reference pairs, the boundary-version reference, and `idempotency_key` get no update grant at all, ever. |
+
+No `delete` grant anywhere.
+
+### `reviewed_by` — actor-reference convention, going forward
+
+`docs/api/source-registry-schema.md`'s existing `product_owner` bootstrap
+reference (see that document's own explainer) remains the **only**
+currently-sanctioned value for `reviewed_by`. Going forward, until a real
+identity/account system exists: any future reviewer reference must follow
+the identical bootstrap-reference discipline — an explicit, documented,
+non-fabricated label denoting a real, specific, authorized human decision
+— never an ad hoc free-text name, and never a real `auth.users.id` UUID
+asserted without an actual Supabase Auth account behind it. Migrating to a
+formal identity/account convention remains the same open follow-up
+already recorded — this amendment only makes the interim rule explicit
+rather than implicit.
+
+### Gate 4 status
+
+Hard gate 4 (originally: *"Physical raw-storage technology and the
+encryption mechanism for the unredacted-retention exception... are
+decided before implementation"*) is **split, 2026-09-04**, into two
+independently-gatable parts:
+
+- **`4A` — blobless operational storage base (this amendment).** Design
+  decided by this documentation. **Not yet closed.** Closing it requires,
+  in order: (1) this documentation actually approved — the step this
+  amendment records; (2) the schema migration and seed migration actually
+  written and applied; (3) live verification of the full access-control
+  test matrix (`service_role` positive; `anon`/`authenticated`-without
+  -role/`owner` negative on all six tables) **and** the referential
+  -integrity test matrix (mismatched source/authorization pairs,
+  cross-market boundary pointers, and mismatched extraction-record
+  boundary references all correctly rejected). No `ImportRun` may execute
+  against real data before all three are done.
+- **`4B` — encrypted, unredacted raw-blob exception.** Fully open, out of
+  scope, untouched by this amendment. The six existing conditions in
+  "Data minimisation" above still all apply, unchanged.
+
+Closing `4A` does not touch `4B`, and neither touches gate 3B — `MARKET-05`
+canonical merge, public publication, API exposure, and redistribution
+remain blocked there, independently.
 
 ### Repeatability, error handling, safe restart
 
@@ -279,9 +477,14 @@ API exposure, and no restaurant-data import has run.
 
 ## Open questions (technical implementation choices only)
 
-- Exact `id` formats — same open item as `MARKET-01`–`03`.
-- Physical storage technology for extraction records and, separately, for
-  the gated unredacted-capture exception (hard gate 4).
+- Exact `id` formats — **resolved 2026-09-04 for the physical/operational
+  layer**: UUIDv7, see "Amendment (2026-09-04): physical operational
+  base" above. Whether every future record type follows suit remains
+  the general precedent, not a re-litigated question per type.
+- Physical storage technology for extraction records — **resolved
+  2026-09-04**: Supabase/Postgres, see the amendment above (gate 4A).
+  Separately, for the gated unredacted-capture exception (gate 4B):
+  still fully open.
 - Concrete retry/backoff thresholds.
 - Whether a lightweight "technical connectivity check" (confirming an
   endpoint responds, without fetching or storing restaurant data) is
