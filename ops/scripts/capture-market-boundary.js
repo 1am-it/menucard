@@ -758,10 +758,17 @@ function findTopMostNewDir(targetDir) {
  *  - On any failure (the capture itself, or the final copy), removes only
  *    the subtree this call itself created via `findTopMostNewDir` — never
  *    a directory that already existed before this call.
- *  - On success, copies the completed temp capture into `outDir` and
- *    removes the temp directory — the same atomic "build fully in temp,
- *    only place it in the real location once it is fully valid" contract
- *    `runCapture` already upholds internally.
+ *  - On success, copies **only** the two contractual boundary artifacts
+ *    (`manifest.json` and the canonical GeoJSON) into `outDir` by name —
+ *    never the whole temp working directory — and then removes the temp
+ *    directory. `runCapture`'s temp working directory also holds
+ *    GDAL's raw, pre-canonicalization intermediate output
+ *    (`extracted.geojson`); that file is a working artifact of the
+ *    derivation process, not part of the recorded boundary version, and
+ *    must never reach the final output directory. This preserves the
+ *    same atomic "build fully in temp, only place it in the real location
+ *    once it is fully valid" contract `runCapture` already upholds
+ *    internally.
  *
  * Deliberately has no `console.log`/`process.exitCode` side effects of its
  * own, so it is directly unit-testable via `assert.rejects`; `main` is
@@ -782,7 +789,8 @@ async function runCliCapture(outDir, runCapturePromiseFactory) {
 
   try {
     const result = await runCapturePromiseFactory();
-    fs.cpSync(result.tmpDir, resolvedOutDir, { recursive: true });
+    fs.copyFileSync(result.manifestPath, path.join(resolvedOutDir, path.basename(result.manifestPath)));
+    fs.copyFileSync(result.geojsonPath, path.join(resolvedOutDir, path.basename(result.geojsonPath)));
     fs.rmSync(result.tmpDir, { recursive: true, force: true });
     return { outDir: resolvedOutDir, manifest: result.manifest };
   } catch (err) {

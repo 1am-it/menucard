@@ -848,6 +848,26 @@ test('runCliCapture writes atomically into a freshly-created output directory on
   fs.rmSync(parentDir, { recursive: true, force: true });
 });
 
+test('a successful capture leaves no unexpected intermediate files in the output directory', async () => {
+  const parentDir = makeFixtureDir();
+  const gpkgPath = path.join(parentDir, 'fixture.gpkg');
+  buildFixtureGeoPackage(gpkgPath, [{ identificatie: 'GM0758', code: '0758', naam: 'Breda' }]);
+  const outDir = path.join(parentDir, 'out', 'boundaries', 'breda', 'v1');
+
+  await runCliCapture(outDir, () => runCapture({ gpkgPath, ...baseCaptureArgs() }));
+
+  // The exact contractual artifact set — nothing else. In particular, no
+  // raw, pre-canonicalization GDAL intermediate (e.g. "extracted.geojson")
+  // may leak from the temp working directory into the final output.
+  const entries = fs.readdirSync(outDir).sort();
+  assert.deepEqual(entries, ['breda.geojson', 'manifest.json']);
+  assert.equal(fs.existsSync(path.join(outDir, 'extracted.geojson')), false);
+
+  // The temp working directory itself (which did hold the raw
+  // intermediate) is fully cleaned up too — nothing lingers anywhere.
+  fs.rmSync(parentDir, { recursive: true, force: true });
+});
+
 test('a failed live capture (after a successful download) leaves neither an output directory nor a leftover downloaded source', async () => {
   const fixtureDir = makeFixtureDir();
   const gpkgPath = path.join(fixtureDir, 'fixture.gpkg');
