@@ -42,7 +42,16 @@ function encodeGpkgPolygon(ring, srsId) {
 
 /**
  * @param {string} filePath - where to write the .gpkg (must not exist yet)
- * @param {Array<{id:number, identificatie:string, code:string, naam:string}>} features
+ * @param {Array<{identificatie:string, code:string, naam:string}>} features
+ *
+ * Callers never supply a primary-key value — `fid` (this fixture's
+ * deliberately real-GeoPackage-style, non-"id" internal key name) is
+ * assigned internally from an arbitrary offset unrelated to anything
+ * semantic. This proves the capture tool never needs to know, read, or
+ * match this value: the real Kadaster/PDOK GeoPackage's own feature-table
+ * primary key is a different, previously-unverified name (discovered only
+ * once a real GeoPackage was queried), and the capture tool must not care
+ * what it is called either.
  */
 function buildFixtureGeoPackage(filePath, features) {
   const db = new DatabaseSync(filePath);
@@ -75,7 +84,7 @@ function buildFixtureGeoPackage(filePath, features) {
         PRIMARY KEY (table_name, column_name)
       );
       CREATE TABLE gemeentegebied (
-        id INTEGER PRIMARY KEY,
+        fid INTEGER PRIMARY KEY,
         geom BLOB,
         identificatie TEXT,
         code TEXT,
@@ -99,7 +108,7 @@ function buildFixtureGeoPackage(filePath, features) {
     ).run();
 
     const insertFeature = db.prepare(
-      `INSERT INTO gemeentegebied (id, geom, identificatie, code, naam) VALUES (?, ?, ?, ?, ?)`
+      `INSERT INTO gemeentegebied (fid, geom, identificatie, code, naam) VALUES (?, ?, ?, ?, ?)`
     );
 
     // A trivial, entirely fictional 100m square — not a real place or
@@ -115,9 +124,14 @@ function buildFixtureGeoPackage(filePath, features) {
       [150000, 450000],
     ];
 
-    for (const f of features) {
-      insertFeature.run(f.id, encodeGpkgPolygon(dummyRing, 28992), f.identificatie, f.code, f.naam);
-    }
+    features.forEach((f, index) => {
+      // A deliberately arbitrary, semantically-unrelated internal key
+      // (not derived from `index`'s position in any meaningful way beyond
+      // uniqueness, and not "1, 2, 3..." like the old `id` fixture used to
+      // be) — nothing in the capture tool reads or matches against this.
+      const internalFid = 90000 + index;
+      insertFeature.run(internalFid, encodeGpkgPolygon(dummyRing, 28992), f.identificatie, f.code, f.naam);
+    });
   } finally {
     db.close();
   }

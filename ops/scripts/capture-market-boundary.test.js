@@ -17,6 +17,8 @@ const {
   runGdalExtraction,
   assertLiveConfirmation,
   downloadGeoPackage,
+  findTopMostNewDir,
+  runCliCapture,
   validateRfc7946,
   canonicalizeGeoJson,
   REQUIRED_MANIFEST_FIELDS,
@@ -130,7 +132,7 @@ test(
   async () => {
     const dir = makeFixtureDir();
     const gpkgPath = path.join(dir, 'fixture.gpkg');
-    buildFixtureGeoPackage(gpkgPath, [{ id: 1, identificatie: 'GM0758', code: '0758', naam: 'Breda' }]);
+    buildFixtureGeoPackage(gpkgPath, [{ identificatie: 'GM0758', code: '0758', naam: 'Breda' }]);
 
     // No injected double here — `gdalRunner` defaults to the real
     // `runGdalExtraction`, which shells out to `docker run` against the
@@ -206,7 +208,7 @@ test(
   async () => {
     const dir = makeFixtureDir();
     const gpkgPath = path.join(dir, 'fixture.gpkg');
-    buildFixtureGeoPackage(gpkgPath, [{ id: 1, identificatie: 'GM0758', code: '0758', naam: 'Breda' }]);
+    buildFixtureGeoPackage(gpkgPath, [{ identificatie: 'GM0758', code: '0758', naam: 'Breda' }]);
 
     const result = await runCapture({ gpkgPath, ...baseCaptureArgs() });
 
@@ -267,7 +269,7 @@ test(
 test('halts with no output when no feature matches the primary selector', async () => {
   const dir = makeFixtureDir();
   const gpkgPath = path.join(dir, 'fixture.gpkg');
-  buildFixtureGeoPackage(gpkgPath, [{ id: 1, identificatie: 'GM9999', code: '9999', naam: 'Nietbreda' }]);
+  buildFixtureGeoPackage(gpkgPath, [{ identificatie: 'GM9999', code: '9999', naam: 'Nietbreda' }]);
 
   await assert.rejects(
     () => runCapture({ gpkgPath, ...baseCaptureArgs() }),
@@ -287,8 +289,8 @@ test('halts with no output when more than one feature matches the primary select
   const dir = makeFixtureDir();
   const gpkgPath = path.join(dir, 'fixture.gpkg');
   buildFixtureGeoPackage(gpkgPath, [
-    { id: 1, identificatie: 'GM0758', code: '0758', naam: 'Breda' },
-    { id: 2, identificatie: 'GM0758', code: '0758', naam: 'Breda (duplicate row)' },
+    { identificatie: 'GM0758', code: '0758', naam: 'Breda' },
+    { identificatie: 'GM0758', code: '0758', naam: 'Breda (duplicate row)' },
   ]);
 
   await assert.rejects(
@@ -307,7 +309,7 @@ test('halts with no output when more than one feature matches the primary select
 test('halts with no output when code does not match', async () => {
   const dir = makeFixtureDir();
   const gpkgPath = path.join(dir, 'fixture.gpkg');
-  buildFixtureGeoPackage(gpkgPath, [{ id: 1, identificatie: 'GM0758', code: '0001', naam: 'Breda' }]);
+  buildFixtureGeoPackage(gpkgPath, [{ identificatie: 'GM0758', code: '0001', naam: 'Breda' }]);
 
   await assert.rejects(
     () => runCapture({ gpkgPath, ...baseCaptureArgs() }),
@@ -326,7 +328,7 @@ test('halts with no output when code does not match', async () => {
 test('halts with no output when naam does not match', async () => {
   const dir = makeFixtureDir();
   const gpkgPath = path.join(dir, 'fixture.gpkg');
-  buildFixtureGeoPackage(gpkgPath, [{ id: 1, identificatie: 'GM0758', code: '0758', naam: 'Amsterdam' }]);
+  buildFixtureGeoPackage(gpkgPath, [{ identificatie: 'GM0758', code: '0758', naam: 'Amsterdam' }]);
 
   await assert.rejects(
     () => runCapture({ gpkgPath, ...baseCaptureArgs() }),
@@ -365,7 +367,7 @@ function unavailableDockerGdalRunner(args) {
 test('real GDAL/Docker step fails with an understandable error when the container/tooling is unavailable', async () => {
   const dir = makeFixtureDir();
   const gpkgPath = path.join(dir, 'fixture.gpkg');
-  buildFixtureGeoPackage(gpkgPath, [{ id: 1, identificatie: 'GM0758', code: '0758', naam: 'Breda' }]);
+  buildFixtureGeoPackage(gpkgPath, [{ identificatie: 'GM0758', code: '0758', naam: 'Breda' }]);
 
   // Uses the REAL runGdalExtraction, but with the child-process call itself
   // faked to fail (see unavailableDockerGdalRunner above) — this test's
@@ -627,7 +629,7 @@ test('live download halts with no leftover file when the response exceeds maxByt
 test('a valid synthetic download flows through the full temporary capture chain, and the downloaded source is removed on success', async () => {
   const fixtureDir = makeFixtureDir();
   const gpkgPath = path.join(fixtureDir, 'fixture.gpkg');
-  buildFixtureGeoPackage(gpkgPath, [{ id: 1, identificatie: 'GM0758', code: '0758', naam: 'Breda' }]);
+  buildFixtureGeoPackage(gpkgPath, [{ identificatie: 'GM0758', code: '0758', naam: 'Breda' }]);
   const gpkgBytes = fs.readFileSync(gpkgPath);
 
   const server = await startTestServer((req, res) => {
@@ -691,7 +693,7 @@ test('the downloaded live source is removed even when a later capture step fails
   const gpkgPath = path.join(fixtureDir, 'fixture.gpkg');
   // A feature that will fail validation further down the pipeline — the
   // download itself succeeds; selection/validation is what fails.
-  buildFixtureGeoPackage(gpkgPath, [{ id: 1, identificatie: 'GM9999', code: '9999', naam: 'Nietbreda' }]);
+  buildFixtureGeoPackage(gpkgPath, [{ identificatie: 'GM9999', code: '9999', naam: 'Nietbreda' }]);
   const gpkgBytes = fs.readFileSync(gpkgPath);
 
   const server = await startTestServer((req, res) => {
@@ -730,5 +732,171 @@ test('the downloaded live source is removed even when a later capture step fails
   } finally {
     await stopTestServer(server);
     fs.rmSync(fixtureDir, { recursive: true, force: true });
+  }
+});
+
+// ─── Fix 1: no dependency on a source-internal primary key ────────────────
+
+test('the fixture GeoPackage exposes no "id" column, yet a full capture still succeeds', async () => {
+  const dir = makeFixtureDir();
+  const gpkgPath = path.join(dir, 'fixture.gpkg');
+  buildFixtureGeoPackage(gpkgPath, [{ identificatie: 'GM0758', code: '0758', naam: 'Breda' }]);
+
+  // Directly inspect the fixture's real schema — proves this is a genuine
+  // schema property being tested, not just an assumption about the
+  // fixture builder's intent.
+  const { DatabaseSync } = require('node:sqlite');
+  const db = new DatabaseSync(gpkgPath, { readOnly: true });
+  const columns = db.prepare("PRAGMA table_info('gemeentegebied')").all().map((c) => c.name);
+  db.close();
+  assert.ok(!columns.includes('id'), `expected no "id" column, found columns: ${columns.join(', ')}`);
+  assert.ok(columns.includes('fid'), 'expected the fixture to use a differently-named internal key ("fid")');
+
+  const result = await runCapture({ gpkgPath, ...baseCaptureArgs() });
+  assert.equal(result.manifest.feature_selection_rule.primarySelector.field, 'identificatie');
+  assert.match(result.manifest.source_artifact_hash, /^[0-9a-f]{64}$/);
+
+  fs.rmSync(result.tmpDir, { recursive: true, force: true });
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+// ─── Fix 2: no leftover output-directory structure after a failed capture ─
+
+test('refuses to run when the output directory already exists, and never invokes the capture factory', async () => {
+  const parentDir = makeFixtureDir();
+  const existingOutDir = path.join(parentDir, 'v1');
+  fs.mkdirSync(existingOutDir);
+  const sentinelPath = path.join(existingOutDir, 'sentinel.txt');
+  fs.writeFileSync(sentinelPath, 'pre-existing content that must survive untouched');
+
+  let factoryCalled = false;
+  await assert.rejects(
+    () =>
+      runCliCapture(existingOutDir, async () => {
+        factoryCalled = true;
+        throw new Error('the capture factory must never be invoked when the output directory already exists');
+      }),
+    (err) => {
+      assert.ok(err instanceof HaltError);
+      assert.equal(err.reason, 'output-directory-exists');
+      return true;
+    }
+  );
+
+  assert.equal(factoryCalled, false, 'expected the capture factory to never be invoked');
+  assert.equal(fs.existsSync(sentinelPath), true, 'expected the pre-existing directory and its contents to survive');
+
+  fs.rmSync(parentDir, { recursive: true, force: true });
+});
+
+test('findTopMostNewDir identifies exactly the subtree that does not yet exist', () => {
+  const parentDir = makeFixtureDir();
+  // parentDir itself exists; nothing under it does yet.
+  const deepTarget = path.join(parentDir, 'boundaries', 'breda', 'v1');
+  assert.equal(findTopMostNewDir(deepTarget), path.join(parentDir, 'boundaries'));
+
+  // Now pre-create "boundaries" — only "breda/v1" should be considered new.
+  fs.mkdirSync(path.join(parentDir, 'boundaries'));
+  assert.equal(findTopMostNewDir(deepTarget), path.join(parentDir, 'boundaries', 'breda'));
+
+  // An already-existing target returns null.
+  fs.mkdirSync(path.join(parentDir, 'boundaries', 'breda'));
+  fs.mkdirSync(deepTarget);
+  assert.equal(findTopMostNewDir(deepTarget), null);
+
+  fs.rmSync(parentDir, { recursive: true, force: true });
+});
+
+test('removes only the newly-created output directory tree after a failed capture, leaving pre-existing ancestors untouched', async () => {
+  const parentDir = makeFixtureDir(); // stands in for an already-existing market-data/
+  const siblingMarker = path.join(parentDir, 'sibling.txt');
+  fs.writeFileSync(siblingMarker, 'must survive');
+  const outDir = path.join(parentDir, 'boundaries', 'breda', 'v1'); // none of this exists yet
+
+  await assert.rejects(
+    () =>
+      runCliCapture(outDir, async () => {
+        throw new HaltError('no-matching-feature', 'simulated failure for this test');
+      }),
+    (err) => err instanceof HaltError && err.reason === 'no-matching-feature'
+  );
+
+  assert.equal(fs.existsSync(outDir), false, 'expected the output directory to be removed after a failed capture');
+  assert.equal(
+    fs.existsSync(path.join(parentDir, 'boundaries')),
+    false,
+    'expected the newly-created intermediate directory to be removed after a failed capture'
+  );
+  assert.equal(fs.existsSync(siblingMarker), true, 'expected a pre-existing sibling file to survive untouched');
+  assert.equal(fs.existsSync(parentDir), true, 'expected the pre-existing parent directory itself to survive');
+
+  fs.rmSync(parentDir, { recursive: true, force: true });
+});
+
+test('runCliCapture writes atomically into a freshly-created output directory on success', async () => {
+  const parentDir = makeFixtureDir();
+  const gpkgPath = path.join(parentDir, 'fixture.gpkg');
+  buildFixtureGeoPackage(gpkgPath, [{ identificatie: 'GM0758', code: '0758', naam: 'Breda' }]);
+  const outDir = path.join(parentDir, 'out', 'boundaries', 'breda', 'v1');
+
+  const result = await runCliCapture(outDir, () => runCapture({ gpkgPath, ...baseCaptureArgs() }));
+
+  assert.equal(result.outDir, path.resolve(outDir));
+  assert.ok(fs.existsSync(path.join(outDir, 'manifest.json')), 'expected manifest.json in the output directory');
+  assert.ok(fs.existsSync(path.join(outDir, 'breda.geojson')), 'expected breda.geojson in the output directory');
+
+  fs.rmSync(parentDir, { recursive: true, force: true });
+});
+
+test('a failed live capture (after a successful download) leaves neither an output directory nor a leftover downloaded source', async () => {
+  const fixtureDir = makeFixtureDir();
+  const gpkgPath = path.join(fixtureDir, 'fixture.gpkg');
+  // This feature will pass the download but fail selection — exercises the
+  // Fix 1 + Fix 2 guarantees together, end-to-end.
+  buildFixtureGeoPackage(gpkgPath, [{ identificatie: 'GM9999', code: '9999', naam: 'Nietbreda' }]);
+  const gpkgBytes = fs.readFileSync(gpkgPath);
+
+  const server = await startTestServer((req, res) => {
+    res.writeHead(200, { 'Content-Type': 'application/octet-stream' });
+    res.end(gpkgBytes);
+  });
+
+  const parentDir = makeFixtureDir();
+  const outDir = path.join(parentDir, 'market-data', 'boundaries', 'breda', 'v1');
+  let capturedLiveTmpDir;
+
+  try {
+    const { port } = server.address();
+    const liveDownloader = async () => {
+      const downloaded = await downloadGeoPackage({
+        url: `http://127.0.0.1:${port}/fixture.gpkg`,
+        expectedProtocol: 'http:',
+        expectedHost: '127.0.0.1',
+        expectedPath: '/fixture.gpkg',
+        allowedContentTypes: ['application/octet-stream'],
+        maxBytes: 10 * 1024 * 1024,
+        requestImpl: http.get,
+      });
+      capturedLiveTmpDir = downloaded.tmpDir;
+      return downloaded;
+    };
+
+    await assert.rejects(
+      () => runCliCapture(outDir, () => runCapture({ live: true, liveDownloader, ...baseCaptureArgs() })),
+      (err) => err instanceof HaltError && err.reason === 'no-matching-feature'
+    );
+
+    assert.equal(fs.existsSync(outDir), false, 'expected no output directory to remain');
+    assert.equal(
+      fs.existsSync(path.join(parentDir, 'market-data')),
+      false,
+      'expected no newly-created market-data/ parent to remain'
+    );
+    assert.ok(capturedLiveTmpDir, 'expected the live downloader to have created a temp dir');
+    assert.equal(fs.existsSync(capturedLiveTmpDir), false, 'expected the downloaded national GeoPackage to be removed');
+  } finally {
+    await stopTestServer(server);
+    fs.rmSync(fixtureDir, { recursive: true, force: true });
+    fs.rmSync(parentDir, { recursive: true, force: true });
   }
 });

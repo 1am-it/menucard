@@ -144,8 +144,16 @@ class HaltError extends Error {
  * geometry-agnostic and requires no GDAL/Docker at all, so it is fully
  * testable in any environment.
  *
- * Returns the matched row's id on success. Throws HaltError otherwise —
- * never returns a partial/ambiguous result.
+ * Deliberately never reads, returns, or otherwise depends on a
+ * source-internal primary key (`fid`, `id`, or any other name a
+ * GeoPackage happens to use for its feature table). Selection and
+ * validation are keyed entirely on the semantic, approved fields
+ * (`identificatie`/`code`/`naam`) — the same fields `runGdalExtraction`
+ * below uses to select the geometry, so both steps are guaranteed to
+ * agree on which row they mean without ever naming its internal key.
+ *
+ * Throws HaltError on anything but exactly one fully-matching row — never
+ * returns a partial/ambiguous result.
  */
 function selectAndValidateFeature(gpkgPath, layer, selectionRule) {
   if (!isSafeIdentifier(layer)) {
@@ -163,7 +171,7 @@ function selectAndValidateFeature(gpkgPath, layer, selectionRule) {
 
   const db = new DatabaseSync(gpkgPath, { readOnly: true });
   try {
-    const columns = ['id', primarySelector.field, ...requiredValidations.map((v) => v.field)];
+    const columns = [primarySelector.field, ...requiredValidations.map((v) => v.field)];
     const uniqueColumns = [...new Set(columns)];
     const stmt = db.prepare(
       `SELECT ${uniqueColumns.join(', ')} FROM ${layer} WHERE ${primarySelector.field} = ?`
@@ -192,8 +200,6 @@ function selectAndValidateFeature(gpkgPath, layer, selectionRule) {
         );
       }
     }
-
-    return row.id;
   } finally {
     db.close();
   }
@@ -202,18 +208,41 @@ function selectAndValidateFeature(gpkgPath, layer, selectionRule) {
 // ─── Step 3: GDAL extraction + reprojection (requires Docker) ────────────
 
 /**
+ * Escapes a string value for embedding in an OGR SQL `-where` literal
+ * (doubles any single quote — standard SQL string-literal escaping). The
+ * value always originates from this project's own trusted, reviewed
+ * `SELECTION_RULE` config, never from external input, but this is applied
+ * regardless as a defense-in-depth measure.
+ */
+function sqlStringLiteral(value) {
+  return `'${String(value).replace(/'/g, "''")}'`;
+}
+
+/**
  * Real GDAL invocation via a digest-pinned container. This is the only
  * step in the whole procedure that needs Docker. It is intentionally a
  * thin, directly-inspectable wrapper around a single `docker run`
  * invocation — no geometry math is reimplemented in JavaScript.
  *
+ * Selects the feature to extract using the exact same semantic
+ * `selectionRule.primarySelector` (e.g. `identificatie = 'GM0758'`) that
+ * `selectAndValidateFeature` already validated — never a source-internal
+ * primary key. This guarantees both steps agree on the same row without
+ * either one needing to know or care what that key is called.
+ *
  * Throws a clear, actionable Error (never a partial file) if Docker is
  * unavailable, the image can't be pulled, or ogr2ogr itself fails.
  */
-function runGdalExtraction({ gpkgPath, layer, featureId, gdalRef, outDir, execFileSyncImpl = execFileSync }) {
+function runGdalExtraction({ gpkgPath, layer, selectionRule, gdalRef, outDir, execFileSyncImpl = execFileSync }) {
   const gpkgDir = path.dirname(path.resolve(gpkgPath));
   const gpkgName = path.basename(gpkgPath);
   const outName = 'extracted.geojson';
+
+  const { field, value } = selectionRule.primarySelector;
+  if (!isSafeIdentifier(field)) {
+    throw new HaltError('unsafe-selector-field', field);
+  }
+  const whereClause = `${field} = ${sqlStringLiteral(value)}`;
 
   const args = [
     'run',
@@ -230,7 +259,7 @@ function runGdalExtraction({ gpkgPath, layer, featureId, gdalRef, outDir, execFi
     // leaves in place, which `validateRfc7946` (correctly) rejects.
     '-lco', 'RFC7946=YES',
     '-lco', `COORDINATE_PRECISION=${config.SERIALIZATION_RULE.coordinatePrecisionDecimals}`,
-    '-where', `id = ${Number(featureId)}`,
+    '-where', whereClause,
     `/out/${outName}`,
     `/in/${gpkgName}`,
     layer,
@@ -629,12 +658,12 @@ async function runCapture({
 
     const sourceArtifactHash = sha256File(effectiveGpkgPath);
 
-    const featureId = selectAndValidateFeature(effectiveGpkgPath, layer, selectionRule);
+    selectAndValidateFeature(effectiveGpkgPath, layer, selectionRule);
 
     const rawGeoJsonPath = gdalRunner({
       gpkgPath: effectiveGpkgPath,
       layer,
-      featureId,
+      selectionRule,
       gdalRef: config.GDAL.ref,
       outDir: tmpDir,
     });
@@ -687,6 +716,83 @@ async function runCapture({
   }
 }
 
+// ─── Output-directory handling: refuse-if-exists, clean-up-if-new-and-failed ─
+
+/**
+ * Returns the highest ancestor of `targetDir` (inclusive) that does not
+ * yet exist on disk — i.e. the top of the subtree
+ * `fs.mkdirSync(targetDir, { recursive: true })` would need to create.
+ * Returns `null` if `targetDir` already exists.
+ *
+ * This is what lets a failed capture clean up exactly what it created
+ * (and nothing that pre-existed): if `market-data/` already existed but
+ * `market-data/boundaries/breda/v1` did not, this returns
+ * `market-data/boundaries` — removing that one subtree deletes `boundaries`
+ * and `breda` and `v1` together, while leaving `market-data/` itself, and
+ * anything else under it, untouched.
+ */
+function findTopMostNewDir(targetDir) {
+  const resolved = path.resolve(targetDir);
+  if (fs.existsSync(resolved)) {
+    return null;
+  }
+  let current = resolved;
+  let parent = path.dirname(current);
+  while (!fs.existsSync(parent)) {
+    current = parent;
+    const grandparent = path.dirname(parent);
+    if (grandparent === parent) break; // reached filesystem root
+    parent = grandparent;
+  }
+  return current;
+}
+
+/**
+ * Wraps a `runCapture(...)`-shaped async factory with the output-directory
+ * contract this tool must uphold:
+ *
+ *  - Refuses outright (throws, never creates or touches anything) if
+ *    `outDir` already exists — an existing boundary version must never be
+ *    silently overwritten or merged into.
+ *  - Creates only the directories that do not yet exist.
+ *  - On any failure (the capture itself, or the final copy), removes only
+ *    the subtree this call itself created via `findTopMostNewDir` — never
+ *    a directory that already existed before this call.
+ *  - On success, copies the completed temp capture into `outDir` and
+ *    removes the temp directory — the same atomic "build fully in temp,
+ *    only place it in the real location once it is fully valid" contract
+ *    `runCapture` already upholds internally.
+ *
+ * Deliberately has no `console.log`/`process.exitCode` side effects of its
+ * own, so it is directly unit-testable via `assert.rejects`; `main` is
+ * responsible for reporting and exit codes.
+ */
+async function runCliCapture(outDir, runCapturePromiseFactory) {
+  const resolvedOutDir = path.resolve(outDir);
+  if (fs.existsSync(resolvedOutDir)) {
+    throw new HaltError(
+      'output-directory-exists',
+      `refusing to write into an already-existing directory: ${resolvedOutDir} — ` +
+        'an existing boundary version must never be overwritten'
+    );
+  }
+
+  const topNewDir = findTopMostNewDir(resolvedOutDir);
+  fs.mkdirSync(resolvedOutDir, { recursive: true });
+
+  try {
+    const result = await runCapturePromiseFactory();
+    fs.cpSync(result.tmpDir, resolvedOutDir, { recursive: true });
+    fs.rmSync(result.tmpDir, { recursive: true, force: true });
+    return { outDir: resolvedOutDir, manifest: result.manifest };
+  } catch (err) {
+    if (topNewDir) {
+      fs.rmSync(topNewDir, { recursive: true, force: true });
+    }
+    throw err;
+  }
+}
+
 // ─── CLI entry point ────────────────────────────────────────────────────────
 
 /**
@@ -724,24 +830,23 @@ function main(argv) {
       return undefined;
     }
     const outDir = args[outIdx + 1];
-    fs.mkdirSync(outDir, { recursive: true });
 
-    return runCapture({
-      live: true,
-      marketSlug: liveCheck.marketSlug,
-      versionNumber: 1,
-      repoRoot,
-      scriptRelativePath,
-      gdalVersionString: execFileSync(
-        'docker',
-        ['run', '--rm', config.GDAL.ref, 'ogr2ogr', '--version'],
-        { encoding: 'utf8' }
-      ).trim(),
-    })
+    return runCliCapture(outDir, () =>
+      runCapture({
+        live: true,
+        marketSlug: liveCheck.marketSlug,
+        versionNumber: 1,
+        repoRoot,
+        scriptRelativePath,
+        gdalVersionString: execFileSync(
+          'docker',
+          ['run', '--rm', config.GDAL.ref, 'ogr2ogr', '--version'],
+          { encoding: 'utf8' }
+        ).trim(),
+      })
+    )
       .then((result) => {
-        fs.cpSync(result.tmpDir, outDir, { recursive: true });
-        fs.rmSync(result.tmpDir, { recursive: true, force: true });
-        console.log(`Live capture complete. Manifest written to: ${path.join(outDir, 'manifest.json')}`);
+        console.log(`Live capture complete. Manifest written to: ${path.join(result.outDir, 'manifest.json')}`);
       })
       .catch((err) => {
         console.error(err.message);
@@ -757,20 +862,19 @@ function main(argv) {
 
   const gpkgPath = args[fixtureIdx + 1];
   const outDir = args[outIdx + 1];
-  fs.mkdirSync(outDir, { recursive: true });
 
-  return runCapture({
-    gpkgPath,
-    marketSlug: 'breda',
-    versionNumber: 1,
-    repoRoot,
-    scriptRelativePath,
-    gdalVersionString: 'unresolved — real GDAL was not invoked outside tests in this CLI run',
-  })
+  return runCliCapture(outDir, () =>
+    runCapture({
+      gpkgPath,
+      marketSlug: 'breda',
+      versionNumber: 1,
+      repoRoot,
+      scriptRelativePath,
+      gdalVersionString: 'unresolved — real GDAL was not invoked outside tests in this CLI run',
+    })
+  )
     .then((result) => {
-      fs.cpSync(result.tmpDir, outDir, { recursive: true });
-      fs.rmSync(result.tmpDir, { recursive: true, force: true });
-      console.log(`Dry-run capture complete. Manifest written to: ${path.join(outDir, 'manifest.json')}`);
+      console.log(`Dry-run capture complete. Manifest written to: ${path.join(result.outDir, 'manifest.json')}`);
     })
     .catch((err) => {
       console.error(err.message);
@@ -799,6 +903,8 @@ module.exports = {
   assertComplete,
   getProcedureRef,
   runCapture,
+  findTopMostNewDir,
+  runCliCapture,
   REQUIRED_MANIFEST_FIELDS,
   REQUIRED_DERIVATION_FIELDS,
 };
