@@ -314,17 +314,14 @@ decided before implementation"*) is **split, 2026-09-04**, into two
 independently-gatable parts:
 
 - **`4A` — blobless operational storage base (this amendment). Closed
-  2026-09-04; correction 2026-09-05 — see "Amendment (2026-09-05):
-  `import_runs` completeness fix" below.** The design and the live
-  security/access-control verification recorded in this section remain
-  valid and are not retracted. However, `import_runs` was later found to
-  be missing mandatory `source_artifact_hash`/
-  `source_artifact_hash_algorithm` columns; the fix,
-  `supabase/migrations/0006_market04a_import_runs_artifact_hash.sql`, is
-  written and locally validated but **not yet applied live**. `4A` is
-  only fully complete once `0006` is applied to the live Supabase
-  project **and** the two new columns are live-verified — **no first
-  `ImportRun` may execute before then.** All three closing conditions
+  2026-09-04; completeness gap found and corrected 2026-09-05 — see
+  "Amendment (2026-09-05): `import_runs` completeness fix" below.
+  `4A` is now operationally complete: `0006` has been applied live and
+  the two new columns live-verified (2026-09-05).** The design and the
+  live security/access-control verification recorded in this section
+  remained valid throughout the correction and were never retracted;
+  the gap was a missing pair of audit columns on `import_runs`, not an
+  error in what had already been verified. All three closing conditions
   below are done: (1) this
   documentation approved; (2) `supabase/migrations/0004_market04a_import_foundation.sql`
   and `0005_market04a_import_foundation_seed.sql` written, locally
@@ -374,18 +371,33 @@ Geofabrik `.osm.pbf` extract) it processed.
 
 **The fix**: `supabase/migrations/0006_market04a_import_runs_artifact_hash.sql`
 adds `source_artifact_hash_algorithm`/`source_artifact_hash` (both `not
-null`) to `import_runs` — see the field table above. `import_runs` holds
-zero rows live today (no real import has run), so this is a safe,
-backfill-free `ALTER TABLE ... ADD COLUMN ... NOT NULL`. **Written and
-locally validated only — not yet applied live**; applying it is a
-separate, later, explicitly-approved step, exactly like `0004`/`0005`
-were. Neither grants nor RLS need to change: the existing table-level
+null`) to `import_runs` — see the field table above. `import_runs` held
+zero rows live at the time (no real import had run), so this was a safe,
+backfill-free `ALTER TABLE ... ADD COLUMN ... NOT NULL`. Written and
+locally validated in a disposable, digest-pinned PostgreSQL container
+first, exactly like `0004`/`0005` were, as a separate, explicitly-approved
+step. Neither grants nor RLS needed to change: the existing table-level
 `insert` grant already covers populating new columns, and — matching the
 existing principle that identity/reference fields on `import_runs` get no
 update grant, ever — these two hash columns are deliberately **not**
-added to `service_role`'s column-scoped update grant (`status`/
+part of `service_role`'s column-scoped update grant (`status`/
 `completed_at`/`record_counts`/`error_log`/`checkpoint`); they are set
 once, at insert, like `source_locator` and `data_origin_source_id`.
+
+**Resolved (2026-09-05)**: `0006` has been applied live to the actual
+Supabase project and manually confirmed live: `source_artifact_hash`
+and `source_artifact_hash_algorithm` both exist on `import_runs`, both
+`text`, both `not null`; `service_role` cannot update either column
+after insert (both correctly absent from its column-scoped update
+grant above). `import_runs` and `import_extraction_records` remain
+empty — **zero `ImportRun`s have executed**; no OpenStreetMap,
+Geofabrik, or restaurant-data import has run. With this, Gate `4A` is
+operationally complete. Gate `4B` (encrypted, unredacted raw-blob
+exception) remains fully open, untouched; gate `3B` (OSM
+Collective-vs-Derivative-Database legal assessment) remains legally
+blocked, unchanged. The next step is building the first internal Breda
+OSM/Geofabrik import script itself, as a separate, explicitly-approved
+step.
 
 ### Repeatability, error handling, safe restart
 

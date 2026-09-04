@@ -391,7 +391,8 @@ any other source still needs its own review. **Gate 3** split into 3A
 3B (OSM Collective-vs-Derivative-Database legal assessment — open,
 blocking `canonical_merge`/`public_publication`/`api_exposure`/
 `redistribution`). **Gate 4** split into 4A and 4B. **4A closed
-2026-09-04; correction 2026-09-05 (see below)**:
+2026-09-04; completeness gap found and resolved 2026-09-05, now
+operationally complete (see below)**:
 `supabase/migrations/0004_market04a_import_foundation.sql`
 (six tables — `markets`, `sources`, `source_authorization_versions`,
 `market_boundary_versions`, `import_runs`, `import_extraction_records` —
@@ -421,13 +422,21 @@ import script surfaced a gap in the 4A schema — `import_runs` never got
 `source_artifact_hash`/`source_artifact_hash_algorithm` (only
 `market_boundary_versions` did), so an `ImportRun` could not yet prove
 which exact upstream file it processed. The design and the live
-security/access-control verification recorded above **remain valid and
-are not retracted**; this is a completeness gap, not an error in what
-was verified. Fix: `supabase/migrations/0006_market04a_import_runs_artifact_hash.sql`,
+security/access-control verification recorded above **remained valid
+throughout and were not retracted**; this was a completeness gap, not
+an error in what was verified. Fix: `supabase/migrations/0006_market04a_import_runs_artifact_hash.sql`,
 written and locally validated (same disposable-Postgres method as
-`0004`/`0005`) but **not yet applied live**. 4A is only fully complete
-once `0006` is applied to the live Supabase project **and** the two new
-columns are live-verified. **No first `ImportRun` may execute before
-then.** 3B remains legally blocked and 4B remains fully open, both
-unchanged. See `docs/api/import-run-schema.md`'s matching "Amendment
-(2026-09-05): import_runs completeness fix" section.
+`0004`/`0005`).
+
+**Resolved (2026-09-05)**: `0006` has since been applied live to the
+actual Supabase project and manually confirmed live: `import_runs` now
+has both `source_artifact_hash` and `source_artifact_hash_algorithm`,
+each `text`, each `not null`; `service_role` cannot update either
+column after insert. `import_runs`/`import_extraction_records` remain
+empty — **zero `ImportRun`s have executed** (no OpenStreetMap,
+Geofabrik, or restaurant-data import has run). Gate **4A is now
+operationally complete**. 3B remains legally blocked and 4B remains
+fully open, both unchanged. See `docs/api/import-run-schema.md`'s
+matching "Amendment (2026-09-05): import_runs completeness fix"
+section. Next: building the first internal Breda OSM/Geofabrik import
+script, as a separate, explicitly-approved step.

@@ -76,17 +76,19 @@ implementation (see its own ticket).
    and **3B** (OSM Collective/Derivative-Database legal assessment,
    **open**, blocking merge/publication/API/redistribution); **gate 4**
    split into **4A** (blobless Supabase/Postgres storage foundation,
-   **closed 2026-09-04, correction 2026-09-05** — the six-table schema
-   and eight-record seed are live, but a completeness gap
-   (`import_runs` missing `source_artifact_hash`/
-   `source_artifact_hash_algorithm`) was found afterward; the fix
-   (`supabase/migrations/0006_market04a_import_runs_artifact_hash.sql`)
-   is locally validated but **not yet applied live** — 4A is only fully
-   complete once it is, and no first `ImportRun` may execute before
-   then; the design and prior live security verification remain valid)
-   and **4B** (encrypted raw-blob exception, **open**). No
-   OpenStreetMap, Geofabrik, or restaurant-data import has run — see the
-   ticket's own "Hard gates" section for the full record.
+   **closed 2026-09-04, completeness gap found and resolved 2026-09-05,
+   now operationally complete** — the six-table schema and eight-record
+   seed were live first; a gap (`import_runs` missing
+   `source_artifact_hash`/`source_artifact_hash_algorithm`) was found
+   afterward and fixed by
+   `supabase/migrations/0006_market04a_import_runs_artifact_hash.sql`,
+   which has since been **applied live and live-verified** — both
+   columns exist, `not null`, and `service_role` cannot update either
+   after insert; the design and prior live security verification
+   remained valid throughout) and **4B** (encrypted raw-blob exception,
+   **open**). Still **zero** `ImportRun`s executed — no OpenStreetMap,
+   Geofabrik, or restaurant-data import has run — see the ticket's own
+   "Hard gates" section for the full record.
 5. MARKET-05 — normalization & deduplication (not started)
 6. MARKET-06 — publication snapshots (not started)
 7. MARKET-07 — market-scoped coverage metrics (not started)

@@ -192,7 +192,8 @@ that eventually *do* go through moderation.
    matching "Amendment (2026-09-04): physical operational base" sections
    for the full design:
    - **Gate 4A — blobless operational storage base. Closed 2026-09-04;
-     correction 2026-09-05 — see below.**
+     completeness gap found and resolved 2026-09-05, now operationally
+     complete — see below.**
      A minimal Supabase/Postgres schema (`markets`, `market_boundary_versions`,
      `sources`, `source_authorization_versions`, `import_runs`,
      `import_extraction_records`) for internal, `basic_info`-only
@@ -236,17 +237,24 @@ that eventually *do* go through moderation.
      security verification — **remains valid and is not superseded by
      this correction**; nothing live was wrong, something was missing. A
      follow-up migration, `supabase/migrations/0006_market04a_import_runs_artifact_hash.sql`,
-     adds both columns as mandatory (`import_runs` holds zero rows live,
-     so no backfill is needed); it has been written and locally validated
-     in a disposable, digest-pinned PostgreSQL container (same method as
-     `0004`/`0005`) but **has not yet been applied to the live Supabase
-     project**. The operational 4A basis is only fully complete once
-     `0006` is applied live **and** the two new columns are live-verified
-     to exist with `NOT NULL` enforced. **No first `ImportRun` may
-     execute until then.** See
+     adds both columns as mandatory (`import_runs` held zero rows live at
+     the time, so no backfill was needed); it was written and locally
+     validated in a disposable, digest-pinned PostgreSQL container (same
+     method as `0004`/`0005`) before being applied live.
+
+     **Resolved (2026-09-05)**: `0006` has since been applied live to the
+     actual Supabase project and manually confirmed live: both
+     `source_artifact_hash` and `source_artifact_hash_algorithm` exist on
+     `import_runs`, `text`, `not null`; `service_role` cannot update
+     either column after insert. `import_runs`/`import_extraction_records`
+     remain empty — **zero `ImportRun`s have executed**; no OpenStreetMap,
+     Geofabrik, or restaurant-data import has run. Gate **4A is now
+     operationally complete**. See
      `docs/api/import-run-schema.md`'s "Amendment (2026-09-05):
      import_runs completeness fix" section for the full detail. This
-     correction does not affect 3B or 4B, both unchanged below.
+     correction and its resolution do not affect 3B or 4B, both unchanged
+     below. Next: building the first internal Breda OSM/Geofabrik import
+     script, as a separate, explicitly-approved step.
    - **Gate 4B — encrypted, unredacted raw-blob exception.** Fully open,
      untouched, out of scope. The six existing conditions in
      `docs/api/import-run-schema.md`'s "Data minimisation" section still
