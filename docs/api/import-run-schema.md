@@ -49,11 +49,16 @@ contract can run."
    with `status ∈ {allowed, restricted}`** (`docs/api/source-registry-schema.md`'s
    amendment) — checked against that specific version, at the time the
    run executes. No source, including well-known or generally permissive
-   ones, is exempt from this review. **Satisfied for one specific source,
-   2026-09-02**: Kadaster/PDOK "Bestuurlijke Gebieden" is `allowed` — see
+   ones, is exempt from this review. **Always source- and scope-specific
+   — never a single, general resolution.** Satisfied, 2026-09-02, for
+   Kadaster/PDOK "Bestuurlijke Gebieden": `allowed` — see
    `docs/api/source-registry-schema.md`'s "Registered sources" section.
-   This closes the gate **only for that one source**; OpenStreetMap, any
-   OSM extract provider, KVK Open Dataset, and every restaurant-website
+   **Also satisfied, 2026-09-04, for OpenStreetMap and Geofabrik**: each
+   `restricted`, scoped to `raw_import`/`internal_quality_review`/
+   `moderation_preparation` only (gate 3A) — neither authorizes
+   `canonical_merge`, `public_publication`, `api_exposure`, or
+   `redistribution`, which stay separately blocked by gate 3B regardless
+   of gate 2's status. KVK Open Dataset and every restaurant-website
    source each still require their own, separate review.
 3. **OpenStreetMap specifically requires an additional, separate legal
    assessment before any pilot**: whether MenuCard's intended combination
@@ -70,11 +75,12 @@ contract can run."
    `planning/specs/tickets/market-04-raw-imports-import-runs.md`'s own
    hard gate 3 for the precise, current wording:
    - **3A** (internal OSM candidate register, `raw_import`/
-     `internal_quality_review`/`moderation_preparation` only): framework
-     documented; still pending separate `restricted`
-     `SourceAuthorizationVersion` registrations for both OpenStreetMap
-     and Geofabrik (its proposed extract provider). **Not closed** — no
-     OSM import may start on the strength of the framework alone.
+     `internal_quality_review`/`moderation_preparation` only): **closed
+     2026-09-04** — both required `restricted` `SourceAuthorizationVersion`
+     registrations now exist (OpenStreetMap and Geofabrik, its Netherlands
+     -extract access provider) — see
+     `docs/api/source-registry-schema.md`'s "Registered sources — actual
+     instances". No data has been fetched under either registration.
    - **3B** (`canonical_merge`/`public_publication`/`api_exposure`/
      `redistribution`): blocked pending a qualified legal review (never
      AI research alone) of the Collective-vs-Derivative-Database
@@ -238,9 +244,16 @@ research, specifically for how an `ImportRun` would execute:
   directs heavier or commercial use elsewhere, so it may only ever serve
   as a `supplementary_access_methods` entry (validation/freshness
   -checking), never as the basis for a repeatable bulk import. Geofabrik
-  itself would need its own `SourceAuthorizationVersion`, distinct from
-  "OpenStreetMap" as the underlying data origin — no source is registered
-  yet for either.
+  itself needed its own `SourceAuthorizationVersion`, distinct from
+  "OpenStreetMap" as the underlying data origin. **Update (2026-09-04):
+  both are now registered**, `status: restricted`, scoped to
+  `raw_import`/`internal_quality_review`/`moderation_preparation` only
+  (gate 3A) — see `docs/api/source-registry-schema.md`'s "Registered
+  sources — actual instances". This still does not select OpenStreetMap
+  as the pilot source or decide a final access route for a real import —
+  it only makes internal candidate-list work against these two sources
+  possible; `canonical_merge`/`public_publication`/`api_exposure`/
+  `redistribution` remain blocked (gate 3B).
 - **KVK Open Dataset** stays a `restricted`, enrichment-only candidate
   (BV/NV-only coverage risk, already documented). Its API's numeric rate
   limit (1 req/min per IP, 200/5min combined) is a concrete, operational
@@ -256,7 +269,13 @@ research, specifically for how an `ImportRun` would execute:
   enrichment layer, not a first `ImportRun` pilot target given the
   per-site review burden already documented in `MARKET-03`.
 
-**No pilot source or access route is selected. No source is registered.**
+**No pilot source or final access route is selected for a real import.**
+**Update (2026-09-04)**: this no longer means "no source is registered" —
+OpenStreetMap and Geofabrik are now registered, `restricted` to internal
+candidate-list processing only (gate 3A); Kadaster/PDOK is separately
+registered `allowed` for the Breda boundary (unrelated to restaurant
+data). No source is registered for restaurant-data merge, publication, or
+API exposure, and no restaurant-data import has run.
 
 ## Open questions (technical implementation choices only)
 

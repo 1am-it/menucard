@@ -338,12 +338,16 @@ Dataset candidate row in `planning/specs/tickets/market-03-source-registry.md`
 is a proposed research candidate, not a registered
 `SourceAuthorizationVersion` — this amendment does not touch it either.
 
-### OpenStreetMap — the future scope this constraint is intended for (not yet registered)
+### OpenStreetMap — the future scope this constraint is intended for
 
-**No `Source` or `SourceAuthorizationVersion` for OpenStreetMap, or for any
-extract provider, is registered by this amendment.** This section records
-the *scope* a future registration is intended to have — see "Next concrete
-step" below for what actually closing it requires.
+**Update (2026-09-04): registered.** At the time this amendment was
+written, no `Source`/`SourceAuthorizationVersion` for OpenStreetMap or any
+extract provider existed yet — this section recorded only the *intended*
+scope. **Both have since been formally registered**, with the exact same
+scope described below — see "Registered sources — actual instances"
+further down this document for the two full records. The description
+below is left as originally written, as the intended-scope statement it
+was; it is no longer a "not yet registered" gap.
 
 - **OpenStreetMap** (the underlying ODbL data origin) — intended future
   scope: `status: restricted`, `allowed_processing_stages: [raw_import,
@@ -377,13 +381,16 @@ step" below for what actually closing it requires.
 
 ### Next concrete step to actually close gate 3A
 
-Registering the two `SourceAuthorizationVersion` entries above (OpenStreetMap
-and Geofabrik) — each with a real, authorized human `reviewed_by`/
-`reviewed_at`, per the existing invariant that AI research may prepare
-evidence but never substitutes for review. **Gate 3A is not closed by this
-amendment** — this amendment only makes the mechanism available; see
-`planning/specs/tickets/market-04-raw-imports-import-runs.md`'s hard gate
-3A status for the precise, current wording.
+**Update (2026-09-04): done.** This section originally named registering
+the two `SourceAuthorizationVersion` entries (OpenStreetMap and Geofabrik)
+as the next concrete step. Both are now registered — with a real,
+authorized human `reviewed_by`/`reviewed_at` (`product_owner`), per the
+existing invariant that AI research may prepare evidence but never
+substitutes for review — see "Registered sources — actual instances"
+further down this document. **Gate 3A is closed** as of this
+registration; see `planning/specs/tickets/market-04-raw-imports-import-runs.md`'s
+hard gate 3A status for the precise, current wording. Gate 3B is
+untouched by this and remains open and blocked.
 
 ## Relationship to `MARKET-04` (import runs)
 
@@ -410,16 +417,18 @@ is not evidence of a review that didn't happen.
 No blanket "all restaurant websites are equivalent" entry is proposed —
 each is its own `Source` row, since terms genuinely differ site to site.
 
-## Registered sources — actual instances (2026-09-02)
+## Registered sources — actual instances (2026-09-02; updated 2026-09-04)
 
-**Distinct from the proposed, not-final table above.** The entry below is
-not a candidate or an example — it is the first source this project has
-actually reviewed and formally approved, per an explicit human product
--owner decision (see "reviewed_by bootstrap" below), documented here as
-the source-of-truth record until a real database exists to hold it. Only
-this specific `Source`/`SourceAuthorizationVersion` pair is approved by
-this entry — no other source is affected, reclassified, or implicitly
-approved by association.
+**Distinct from the proposed, not-final table above.** Each entry below is
+not a candidate or an example — each is a source this project has
+actually reviewed and formally approved (to the specific, sometimes
+restricted, scope recorded for it), per an explicit human product-owner
+decision (see "reviewed_by bootstrap" below), documented here as the
+source-of-truth record until a real database exists to hold it. Only the
+specific `Source`/`SourceAuthorizationVersion` pair in each entry is
+approved by that entry — no other source is affected, reclassified, or
+implicitly approved by association, and one entry's scope never implies
+another's.
 
 ### Kadaster/PDOK — Bestuurlijke Gebieden
 
@@ -470,21 +479,140 @@ own without independent validation — `identificatie` here plays that
 primary-selector role, cross-checked by two independent fields, which is
 exactly the pattern that invariant requires).
 
+### OpenStreetMap (restricted — internal candidate register only)
+
+**Closes `MARKET-04` gate 3A together with the Geofabrik entry below —
+see "What this does and does not authorize" following both entries.**
+Primary sources re-verified live on 2026-09-04 immediately before this
+registration: [openstreetmap.org/copyright](https://www.openstreetmap.org/copyright)
+(licence/attribution) and [wiki.openstreetmap.org/wiki/Overpass_API](https://wiki.openstreetmap.org/wiki/Overpass_API)
+(public Overpass instance usage policy).
+
+**`Source`**
+
+| Field | Value |
+|---|---|
+| `name` | OpenStreetMap |
+| `operator` | OpenStreetMap Foundation (OSMF) and the OpenStreetMap contributor community |
+| `source_type` | `poi_directory` |
+| `official_location` | `https://www.openstreetmap.org/copyright` |
+| `refresh_policy` | `periodic_30d` — **nearest existing enum value, not an exact fit, flagged rather than silently misrepresented**: OSM's own data changes continuously (real-time community edits); this vocabulary has no "continuous" or "daily" value yet. Not fixed by this entry — an out-of-scope vocabulary gap, noted so it isn't mistaken for measured fact. |
+| `freshness_expectation` | 90 days — `docs/api/data-trust-model.md`'s reasoned default; no compelling reason to deviate for a candidate-list-only use, not yet informed by real usage. |
+
+**`SourceAuthorizationVersion` (version 1)**
+
+| Field | Value |
+|---|---|
+| `status` | `restricted` |
+| `status_reason` | OpenStreetMap's data is ODbL-licensed and free to reuse, including commercially, but `MARKET-05`'s matching/merging design plausibly makes an OSM-derived candidate combined with a non-OSM source for the same feature type (a restaurant) a Derivative Database under ODbL — a question this project has not had legally reviewed. Restricted to internal, pre-merge, pre-publication processing stages only until that review happens (gate 3B). |
+| `terms_reference` | `https://www.openstreetmap.org/copyright` |
+| `terms_version` | ODbL 1.0 |
+| `terms_retrieved_at` | 2026-09-04 |
+| `allowed_data_categories[]` | `basic_info` |
+| `excluded_data_categories[]` | — (not applicable to this source) |
+| `allowed_access_method` | `open_dataset_download` — a reviewed, reproducible bulk extract of OSM data. **The concrete technical channel is the separately-registered Geofabrik entry below, not this entry** — this entry authorizes the OSM data itself under ODbL, not one specific technical route. |
+| `supplementary_access_methods[]` | `open_api_query` — the public Overpass API, **validation/spot-checking of a specific feature only, never the primary or bulk route.** Live-reverified 2026-09-04: the main `overpass-api.de` instance's own usage policy limits regular/automated use to under 100 queries and 10 MB/day (a small fraction of its already-modest one-off allowance of 10,000 queries/1 GB per day) and explicitly directs commercial/heavy use to self-hosted or paid servers — confirming it is unsuitable as a primary or repeatable bulk-import route. |
+| `access_provider_note` | Licence (ODbL, this entry) and technical access channel are reviewed separately, per this document's existing principle. The primary, reproducible route is Geofabrik's periodic Netherlands extract (its own, separate `Source` below) — never the public Overpass instance, which appears here only as a supplementary, non-primary validation method. |
+| `allowed_processing_stages[]` | `raw_import`, `internal_quality_review`, `moderation_preparation` |
+| `restricted_pending` | `canonical_merge`, `public_publication`, `api_exposure`, and `redistribution` require a qualified legal review (external, or demonstrably authorized internal counsel — never AI research alone, per the existing invariant above) of the ODbL Collective-vs-Derivative-Database question for `MARKET-05`'s merge of OSM-derived candidates with non-OSM sources for the same feature type. See `MARKET-04`'s hard gate 3B. |
+| `reuse_rights` | `{redistribution_allowed: true (ODbL terms apply — share-alike for any Derivative Database; see allowed_processing_stages/restricted_pending for the procedural gate on when redistribution/merge is actually permitted), attribution_required: true, commercial_use_allowed: true, geographic_restrictions: none}` |
+| `geographic_applicability` | `{country_codes: ["NL"], market_scope: "Breda market (slug: breda)"}` |
+| `reviewed_by` | `product_owner` — same bootstrap reference as the Kadaster/PDOK entry above, see below. |
+| `reviewed_at` | 2026-09-04 |
+| `effective_from` | 2026-09-04 |
+| `next_review_due` | 2027-03-04 — **six months, not the one-year cadence used for Kadaster/PDOK**: community-maintained data and an open legal question (gate 3B) both warrant a shorter re-check than an annually-republished government dataset. |
+
+**Required attribution (exact text)**: "© OpenStreetMap contributors", linked to
+`https://www.openstreetmap.org/copyright` (the historical form "© OpenStreetMap"
+is also acceptable per the official Attribution Guidelines) — required
+wherever OSM-derived data is ever displayed, independent of when (or
+whether) gate 3B is later resolved.
+
+### Geofabrik — Netherlands extract (restricted — internal candidate register only, access-provider entry)
+
+**A separate `Source` from OpenStreetMap itself — Geofabrik is a technical
+redistributor of OSM data, not an ODbL licensor.** Primary source
+re-verified live on 2026-09-04 immediately before this registration:
+[download.geofabrik.de/europe/netherlands.html](https://download.geofabrik.de/europe/netherlands.html)
+(confirmed today: `netherlands-latest.osm.pbf`, ~1.3 GB, current as of
+2026-09-03; page footer states "Data processed by Geofabrik GmbH and
+created by OpenStreetMap Contributors" and licenses the data "ODbL 1.0").
+
+**`Source`**
+
+| Field | Value |
+|---|---|
+| `name` | Geofabrik — Netherlands OSM extract |
+| `operator` | Geofabrik GmbH |
+| `source_type` | `poi_directory` |
+| `official_location` | `https://download.geofabrik.de/europe/netherlands.html` |
+| `refresh_policy` | `periodic_30d` — **same flagged nearest-fit as OpenStreetMap's own entry**: Geofabrik's own page shows daily-dated extract files; the vocabulary has no daily value yet. |
+| `freshness_expectation` | 90 days — same reasoning as the OpenStreetMap entry above. |
+
+**`SourceAuthorizationVersion` (version 1)**
+
+| Field | Value |
+|---|---|
+| `status` | `restricted` |
+| `status_reason` | Geofabrik is a well-established, widely-used technical redistributor of OpenStreetMap data under the same ODbL terms OSM itself publishes under — it holds no separate rights of its own and is not itself the licensor (see "What this does and does not authorize" below). Restricted to the identical internal-only processing stages as the OpenStreetMap entry above, for the identical reason: `MARKET-05`'s merge question (gate 3B) is unresolved, and it applies equally to data obtained via this channel. |
+| `terms_reference` | `https://download.geofabrik.de/europe/netherlands.html` (page footer licence/attribution statement) |
+| `terms_version` | ODbL 1.0 (via OpenStreetMap — Geofabrik asserts no additional licence terms of its own on this extract) |
+| `terms_retrieved_at` | 2026-09-04 |
+| `allowed_data_categories[]` | `basic_info` |
+| `excluded_data_categories[]` | — (not applicable to this source) |
+| `allowed_access_method` | `open_dataset_download` (primary, reproducible) — the periodically-updated `netherlands-latest.osm.pbf` file at `download.geofabrik.de/europe/netherlands.html`. No account, key, or registration required beyond attribution. |
+| `supplementary_access_methods[]` | — none. (The public Overpass API is a separate access channel to OSM data, not a supplementary method *of Geofabrik* — its supplementary, validation-only status is recorded on the OpenStreetMap entry above, not duplicated here.) |
+| `access_provider_note` | Geofabrik is the technical access channel only. **This entry does not authorize Geofabrik as an ODbL rights-holder or licensor** — the licence itself is authorized by the separate OpenStreetMap entry above; this entry only reviews Geofabrik's specific extract/download service as a technical route to the same, already-licensed data. |
+| `allowed_processing_stages[]` | `raw_import`, `internal_quality_review`, `moderation_preparation` |
+| `restricted_pending` | Identical condition to the OpenStreetMap entry above: `canonical_merge`, `public_publication`, `api_exposure`, and `redistribution` require the same qualified legal review of `MARKET-05`'s merge question (gate 3B) before any version of this entry could add them — the data obtained via Geofabrik is the same OSM data, subject to the same open question. |
+| `reuse_rights` | `{redistribution_allowed: true (ODbL terms apply, same as the OpenStreetMap entry above), attribution_required: true, commercial_use_allowed: true, geographic_restrictions: none}` |
+| `geographic_applicability` | `{country_codes: ["NL"], market_scope: "Breda market (slug: breda)"}` |
+| `reviewed_by` | `product_owner` — same bootstrap reference as the Kadaster/PDOK entry above, see below. |
+| `reviewed_at` | 2026-09-04 |
+| `effective_from` | 2026-09-04 |
+| `next_review_due` | 2027-03-04 — same six-month reasoning as the OpenStreetMap entry above. |
+
+**Required attribution (exact text)**: identical to the OpenStreetMap
+entry above — attribution is to OpenStreetMap, not to Geofabrik. Geofabrik
+itself does not require its own separate attribution credit per its
+stated terms.
+
+### What this does and does not authorize (both entries above)
+
+- **Closes `MARKET-04` gate 3A**: both restricted registrations required
+  to close it now exist — see that ticket's own "Hard gates" section for
+  the precise, current wording.
+- **Does not close, narrow, or otherwise touch gate 3B.** No data has been
+  fetched under either entry. `allowed_processing_stages` permits only
+  `raw_import`, `internal_quality_review`, and `moderation_preparation` —
+  building and testing the raw-import mechanism against these sources.
+  `canonical_merge`, `public_publication`, `api_exposure`, and
+  `redistribution` remain structurally prohibited for both entries until a
+  new version is created following a qualified legal review, per
+  `restricted_pending` above.
+- **Does not constitute legal advice or a legal conclusion** about the
+  Collective-vs-Derivative-Database question — that question remains
+  explicitly open (gate 3B) and is a human-authorized product decision
+  about internal processing scope, not a resolution of the underlying
+  legal question.
+
 #### `reviewed_by: product_owner` — bootstrap reference, not a fabricated identity
 
 This project has no live user-account system yet (documentation only, no
 database) and `docs/api/source-registry-schema.md` itself has, until now,
 left open whether `reviewed_by` names an individual account or a role.
-`product_owner` is recorded here as an explicit **bootstrap reference**:
-it denotes *the human product owner*, and this specific authorization was
-formally approved by that human product owner as an explicit project
-decision (not an AI determination — AI research prepared the evidence
-above, per this document's own human-review invariant). It is
-deliberately **not** a fabricated personal name, email address, user id,
-or staff role. **Open follow-up, not decided here**: migrating this
-bootstrap reference to a formal identity/account convention (e.g. an
-actual `PLATFORM-06`-style role or account system) once one exists — this
-entry should be updated, not silently reinterpreted, when that happens.
+`product_owner` is recorded here — for the Kadaster/PDOK entry above and
+for both the OpenStreetMap and Geofabrik entries above — as an explicit
+**bootstrap reference**: it denotes *the human product owner*, and each of
+these authorizations was formally approved by that human product owner as
+an explicit project decision (not an AI determination — AI research
+prepared the evidence for each, per this document's own human-review
+invariant). It is deliberately **not** a fabricated personal name, email
+address, user id, or staff role. **Open follow-up, not decided here**:
+migrating this bootstrap reference to a formal identity/account
+convention (e.g. an actual `PLATFORM-06`-style role or account system)
+once one exists — every entry using it should be updated, not silently
+reinterpreted, when that happens.
 
 ## Open questions (technical implementation choices only)
 

@@ -131,15 +131,19 @@ that eventually *do* go through moderation.
 2. **Every targeted source has a `SourceAuthorizationVersion` with
    `status ∈ {allowed, restricted}`**, checked against that specific
    version at run time — no exceptions, including for well-known,
-   generally permissive sources like OpenStreetMap. **Satisfied for one
-   specific source, 2026-09-02**: Kadaster/PDOK "Bestuurlijke Gebieden"
-   is now documented as `allowed`, approved by explicit human
-   product-owner decision — see
-   `docs/api/source-registry-schema.md`'s "Registered sources" section.
-   This closes the gate **only for that one source**; every other source
-   this ticket might ever target (OpenStreetMap, KVK Open Dataset, any
-   restaurant-website source, anything else) still requires its own,
-   separate review — this is not a general resolution of gate 2.
+   generally permissive sources like OpenStreetMap. **Always source- and
+   scope-specific — never a single, general resolution of "gate 2" as a
+   whole.** Satisfied, 2026-09-02, for Kadaster/PDOK "Bestuurlijke
+   Gebieden": `allowed`, approved by explicit human product-owner
+   decision — see `docs/api/source-registry-schema.md`'s "Registered
+   sources" section. **Also satisfied, 2026-09-04, for OpenStreetMap and
+   Geofabrik**: each `restricted`, scoped to `raw_import`/
+   `internal_quality_review`/`moderation_preparation` only (gate 3A) —
+   neither registration authorizes `canonical_merge`, `public_publication`,
+   `api_exposure`, or `redistribution`, which remain separately blocked by
+   gate 3B's own processing-stage restriction regardless of gate 2's
+   status. KVK Open Dataset, any restaurant-website source, and any other
+   future source each still require their own, separate review.
 3. **OpenStreetMap requires a separate legal assessment before any
    pilot**: whether MenuCard's intended combination of OSM data with its
    own/other data forms a Collective Database or a Derivative Database
@@ -152,18 +156,19 @@ that eventually *do* go through moderation.
    (`SourceAuthorizationVersion.allowed_processing_stages[]` /
    `restricted_pending`):
 
-   - **Gate 3A — internal OSM candidate register.**
-     `3A: framework documented; still pending separate restricted
-     SourceAuthorizationVersion registrations for both the OSM data
-     source and the Geofabrik access provider.` **Not closed.** The
-     mechanism that *would* let an internal, non-popularity-driven OSM
-     candidate register be used — `status: restricted`,
-     `allowed_processing_stages: [raw_import, internal_quality_review,
-     moderation_preparation]` — is now documented and requires no
-     external legal review to *close*, but no actual `Source`/
-     `SourceAuthorizationVersion` for OpenStreetMap or for Geofabrik (its
-     proposed extract provider) has been registered yet. **No OSM import
-     may start on the strength of this amendment alone.**
+   - **Gate 3A — internal OSM candidate register.** **Closed 2026-09-04.**
+     `3A: two restricted SourceAuthorizationVersion registrations exist —
+     OpenStreetMap (the underlying ODbL data origin) and Geofabrik (its
+     Netherlands-extract access provider) — both status: restricted,
+     allowed_processing_stages: [raw_import, internal_quality_review,
+     moderation_preparation], restricted_pending: a qualified legal
+     review of the MARKET-05 merge question (gate 3B) before anything
+     further.` See `docs/api/source-registry-schema.md`'s "Registered
+     sources — actual instances" section for the full records. **This
+     closes 3A only for these two specific, restricted registrations —
+     it authorizes building/testing the raw-import mechanism against
+     them, nothing that merges, publishes, or exposes their data. No
+     data has actually been fetched under either registration.**
    - **Gate 3B — merge and publication of OSM-derived data.**
      `3B: blocked pending qualified legal review before canonical merge
      or any public/API exposure.` No `SourceAuthorizationVersion` for
