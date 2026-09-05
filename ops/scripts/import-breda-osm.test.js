@@ -28,6 +28,7 @@ const {
   runImport,
   createFixtureDbClient,
   assertDryRunConfirmation,
+  buildDryRunImportOptions,
 } = require('./import-breda-osm');
 const config = require('./import-breda-osm.config');
 const { sha256String, canonicalJsonStringify, HaltError } = require('./capture-market-boundary');
@@ -1195,6 +1196,98 @@ test('assertDryRunConfirmation requires --dry-run AND an exactly-matching --conf
     dryRun: true,
     marketSlug: 'breda',
   });
+});
+
+// ─── buildDryRunImportOptions: the structural "dry-run always means
+// mutate: false" guarantee ─────────────────────────────────────────────
+
+test('buildDryRunImportOptions always produces live:true, mutate:false — never derived from dbClient or any other input', () => {
+  const fakeDbClientA = { marker: 'A' };
+  const fakeDbClientB = createFixtureDbClient();
+
+  for (const dbClient of [fakeDbClientA, fakeDbClientB, undefined, null]) {
+    const options = buildDryRunImportOptions({ dbClient, repoRoot: REPO_ROOT });
+    assert.equal(options.live, true, 'dry-run must always request a real download');
+    assert.equal(options.mutate, false, 'dry-run must never request a database write, regardless of dbClient');
+    assert.equal(options.dbClient, dbClient, 'the given dbClient is passed through unchanged, not swapped');
+    assert.equal(options.repoRoot, REPO_ROOT);
+  }
+});
+
+test('the exact options buildDryRunImportOptions produces, combined with a write-forbidden dbClient, complete with no write attempt', async () => {
+  const db = createWriteForbiddenDbClient(createFixtureDbClient());
+  const options = buildDryRunImportOptions({ dbClient: db, repoRoot: REPO_ROOT });
+
+  const result = await runImport({
+    ...options,
+    gdalRunner: () => fakeFeatureCollection(),
+    downloader: () => Promise.resolve(fakeDownloadResult(FIXTURE_OSM_PATH, null)),
+  });
+
+  assert.equal(result.outcome, 'completed');
+  assert.ok(result.importRun.source_artifact_hash, 'real measurement still happens — only persistence is skipped');
+});
+
+// ─── CLI routing (subprocess): --live / --dry-run gating, end to end ─────
+//
+// Runs the real script file as a child process with SUPABASE_URL/
+// SUPABASE_SERVICE_ROLE_KEY explicitly cleared, so a correctly-routed
+// --dry-run invocation is guaranteed to fail fast at
+// createLiveDbClient() — before any network request or GDAL invocation —
+// rather than risk ever reaching a real download in a test. This proves
+// the CLI's routing (which flag combination reaches which branch)
+// without needing real credentials or performing any real download/
+// database access.
+
+const SCRIPT_PATH = path.join(__dirname, 'import-breda-osm.js');
+
+function runCliNoCredentials(args) {
+  const env = { ...process.env };
+  delete env.SUPABASE_URL;
+  delete env.SUPABASE_SERVICE_ROLE_KEY;
+  try {
+    const stdout = execFileSync('node', [SCRIPT_PATH, ...args], { env, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+    return { status: 0, stdout, stderr: '' };
+  } catch (err) {
+    return { status: err.status, stdout: err.stdout ? err.stdout.toString() : '', stderr: err.stderr ? err.stderr.toString() : '' };
+  }
+}
+
+test('CLI: --live still refuses, even with a correctly-matching --confirm-market', () => {
+  const result = runCliNoCredentials(['--live', '--confirm-market=breda']);
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /Live mode is wired but not enabled/);
+});
+
+test('CLI: --dry-run combined with --live still refuses (via the --live branch, checked first)', () => {
+  const result = runCliNoCredentials(['--dry-run', '--live', '--confirm-market=breda']);
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /Live mode is wired but not enabled/, 'must refuse via the --live message, never proceed as a dry run');
+});
+
+test('CLI: --dry-run without an exact --confirm-market=breda refuses before anything else runs', () => {
+  const missing = runCliNoCredentials(['--dry-run']);
+  assert.equal(missing.status, 1);
+  assert.match(missing.stderr, /dry-run-confirmation-missing/);
+
+  const wrongMarket = runCliNoCredentials(['--dry-run', '--confirm-market=amsterdam']);
+  assert.equal(wrongMarket.status, 1);
+  assert.match(wrongMarket.stderr, /dry-run-confirmation-missing/);
+});
+
+test('CLI: --dry-run --confirm-market=breda now actually starts (reaches the real dry-run branch, not the old hard refusal)', () => {
+  const result = runCliNoCredentials(['--dry-run', '--confirm-market=breda']);
+  assert.equal(result.status, 1, 'fails fast here only because no Supabase credentials are configured in this test');
+  assert.doesNotMatch(
+    result.stderr,
+    /not enabled by this project yet/,
+    'the old hard-refusal message must be gone — --dry-run is meant to actually start now'
+  );
+  assert.match(
+    result.stderr,
+    /live-db-client-not-configured/,
+    'expected it to reach createLiveDbClient() and fail there — proving it got past all CLI gating with no network/GDAL call attempted'
+  );
 });
 
 // ─── Real, end-to-end GDAL test (the one Docker-backed test) ─────────────

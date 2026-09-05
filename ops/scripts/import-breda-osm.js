@@ -26,15 +26,29 @@
  * reimplementing them.
  *
  * Requiring this module, or running it without `--live`/`--dry-run`,
- * never performs network access or a live Supabase mutation. Both live
- * mode (`--live --confirm-market=breda`) and dry-run mode (`--dry-run
- * --confirm-market=breda`, added 2026-09-05 — a real download/hash/GDAL
- * pass that can never write to the database, see `runImport`'s `mutate`
- * parameter) are real, wired code — not stubs — but `main()` below
- * refuses to invoke either, even when correctly confirmed: enabling
- * either for real against the real Geofabrik endpoint is a separate,
- * later, explicitly-approved step, exactly like the boundary tool's own
- * history.
+ * never performs network access or a live Supabase mutation.
+ *
+ * **`--live --confirm-market=breda`**: real, wired code
+ * (`runImport({live: true, mutate: true, ...})`) — but `main()` below
+ * still refuses to invoke it, even when correctly confirmed. Enabling a
+ * real live run (a real `ImportRun`, real extraction records written) is
+ * a separate, later, explicitly-approved step, exactly like the boundary
+ * tool's own history.
+ *
+ * **`--dry-run --confirm-market=breda`** (wired 2026-09-05, **enabled**
+ * this same date after independently verifying the real Geofabrik
+ * redirect route): performs a real download (via
+ * `downloadWithOneValidatedRedirect`), real hashing, real GDAL
+ * extraction, and real measurement against the real, live database and
+ * the real Geofabrik endpoint — always as `runImport({live: true,
+ * mutate: false, ...})`, never anything else. `mutate: false` makes
+ * `insertImportRun`/`insertExtractionRecords`/`updateImportRunStatus`
+ * structurally unreachable inside `runImport` regardless of which
+ * `dbClient` is given — no `ImportRun` or extraction record is ever
+ * created or changed by this mode. Still requires the same explicit
+ * `--confirm-market=breda` gate `--live` uses; any other combination
+ * (missing/mismatched confirmation, or `--live` present at the same
+ * time) refuses before either flag's branch is reached.
  *
  * **Preflight tightening (2026-09-05)**: `verifySourceAuthorization` now
  * checks the exact source/authorization-version ids, the exact expected
@@ -1220,6 +1234,26 @@ function assertDryRunConfirmation(args, expectedMarketSlug) {
   return { dryRun: true, marketSlug: confirmedValue };
 }
 
+/**
+ * Builds the exact `runImport` options the CLI's `--dry-run` branch
+ * uses — pulled out as its own small, pure function so the **structural
+ * guarantee "dry-run always means `mutate: false`"** is directly,
+ * cheaply unit-testable without invoking `main()`, without real network
+ * access, and without a real Supabase client. `live: true` and
+ * `mutate: false` are both hardcoded here, never derived from `dbClient`
+ * or any other input — there is no code path through this function that
+ * can produce `mutate: true`.
+ */
+function buildDryRunImportOptions({ dbClient, repoRoot }) {
+  return {
+    live: true,
+    mutate: false,
+    dbClient,
+    repoRoot,
+    triggeredBy: 'manual',
+  };
+}
+
 function main(argv) {
   const args = argv.slice(2);
   const fixtureIdx = args.indexOf('--fixture');
@@ -1263,26 +1297,42 @@ function main(argv) {
   }
 
   if (dryRunCheck.dryRun) {
-    // Dry-run mode is also real, wired code — runImport({live: true,
-    // mutate: false, ...}) performs a real download, real hashing, real
-    // GDAL extraction, and real measurement, but is structurally
-    // prevented from ever calling insertImportRun/insertExtractionRecords
-    // /updateImportRunStatus (see runImport's own `mutate` handling and
-    // this tool's tests). Enabling it against the real Geofabrik endpoint
-    // is still a separate, later, explicitly-approved step, exactly like
-    // --live — this round only prepares and tests the safe plumbing.
-    console.error(
-      'Dry-run mode is wired (real download + hash + GDAL extraction + measurement, never a database write) ' +
-        'but not enabled by this project yet — running it against the real Geofabrik endpoint is a separate, ' +
-        'later, explicitly-approved step. Refusing to proceed automatically even though --dry-run/--confirm-market matched.'
-    );
-    process.exitCode = 1;
-    return undefined;
+    // Enabled 2026-09-05, after independently verifying the real
+    // Geofabrik redirect route (see downloadWithOneValidatedRedirect
+    // above and this tool's own read-only HEAD-check report). A real
+    // download, real hashing, real GDAL extraction, and real measurement
+    // — but ALWAYS `live: true, mutate: false`, never anything else: the
+    // insertImportRun/insertExtractionRecords/updateImportRunStatus
+    // branches inside runImport are structurally unreachable whenever
+    // `mutate` is false (see runImport's own handling and this tool's
+    // tests), regardless of what `dbClient` is given here. `--live`
+    // remains a separate, still-refused flag below — this branch never
+    // sets `mutate: true` under any circumstance.
+    let dbClient;
+    try {
+      dbClient = createLiveDbClient();
+    } catch (err) {
+      console.error(err.message);
+      process.exitCode = 1;
+      return undefined;
+    }
+    return runImport(buildDryRunImportOptions({ dbClient, repoRoot }))
+      .then((result) => {
+        console.log(`Dry-run complete (${result.outcome}) — nothing was written to the database.`);
+        console.log(JSON.stringify(result.importRun, null, 2));
+        console.log(`Extraction records that would have been stored (not persisted): ${result.extractionRecords.length}`);
+      })
+      .catch((err) => {
+        console.error(err.message);
+        process.exitCode = 1;
+      });
   }
 
   if (fixtureIdx === -1 || outIdx === -1) {
     console.error(
-      'Usage (local fixture only, no network, no database write): node import-breda-osm.js --fixture <osm-file> --out <dir>'
+      'Usage:\n' +
+        '  node import-breda-osm.js --fixture <osm-file> --out <dir>   (local fixture only, no network, no database write)\n' +
+        '  node import-breda-osm.js --dry-run --confirm-market=breda   (real download/hash/GDAL/measurement, never a database write)'
     );
     process.exitCode = 1;
     return undefined;
@@ -1343,4 +1393,5 @@ module.exports = {
   createLiveDbClient,
   createFixtureDbClient,
   assertDryRunConfirmation,
+  buildDryRunImportOptions,
 };
