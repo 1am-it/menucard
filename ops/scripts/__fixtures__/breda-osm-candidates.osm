@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<osm version="0.6" generator="menucard-test-fixture">
+<!--
+  Fully synthetic OSM XML fixture for testing import-breda-osm.js's real,
+  end-to-end GDAL extraction path — no real restaurant, address, or
+  contact data of any kind. Coordinates are chosen to fall either clearly
+  inside or clearly outside Breda's real, committed boundary
+  (market-data/boundaries/breda/v1/breda.geojson), confirmed against that
+  exact geometry before this fixture was written, not assumed.
+
+  Covers, in one file: a fully-populated in-boundary candidate (4001), an
+  in-boundary candidate exercising the contact:*-prefixed fallback fields
+  (4002), a minimal in-boundary candidate with no address/phone/website at
+  all (4003), an amenity value not in the allowed list (4004), an
+  out-of-boundary candidate that would otherwise match (4005), a node with
+  no amenity tag at all (4006), and a way-based "restaurant" (5001) that
+  must never appear in the "points" layer this project's import script
+  reads — proving the node-only v1 scope structurally, not by filtering.
+
+  The comment block is placed here, right after the opening <osm> tag,
+  rather than before the XML declaration's following content — GDAL's OSM
+  driver only sniffs a small header window of the file to identify the
+  format, and a long leading comment before <osm ...> can push that tag
+  past the window, making an otherwise perfectly valid file unrecognized.
+-->
+  <node id="4001" lat="51.5800" lon="4.7800">
+    <tag k="amenity" v="restaurant"/>
+    <tag k="name" v="Fixture Restaurant Inside"/>
+    <tag k="phone" v="+31 76 1111111"/>
+    <tag k="website" v="https://fixture-inside.test"/>
+    <tag k="addr:housenumber" v="1"/>
+    <tag k="addr:street" v="Fixturestraat"/>
+    <tag k="addr:city" v="Breda"/>
+    <tag k="addr:postcode" v="4811AA"/>
+    <tag k="cuisine" v="italian"/>
+    <tag k="opening_hours" v="Mo-Su 12:00-22:00"/>
+  </node>
+
+  <node id="4002" lat="51.5900" lon="4.7700">
+    <tag k="amenity" v="cafe"/>
+    <tag k="name" v="Fixture Cafe Contact Fallback"/>
+    <tag k="contact:phone" v="+31 76 2222222"/>
+    <tag k="contact:website" v="https://fixture-cafe.test"/>
+  </node>
+
+  <node id="4003" lat="51.6000" lon="4.7500">
+    <tag k="amenity" v="bar"/>
+  </node>
+
+  <node id="4004" lat="51.5850" lon="4.7650">
+    <tag k="shop" v="bakery"/>
+    <tag k="name" v="Fixture Wrong Amenity Bakery"/>
+  </node>
+
+  <node id="4005" lat="52.3676" lon="4.9041">
+    <tag k="amenity" v="restaurant"/>
+    <tag k="name" v="Fixture Restaurant Outside Breda"/>
+  </node>
+
+  <node id="4006" lat="51.5820" lon="4.7820">
+    <tag k="name" v="Fixture Node Without Amenity"/>
+  </node>
+
+  <node id="4007" lat="51.5810" lon="4.7810"/>
+  <node id="4008" lat="51.5811" lon="4.7811"/>
+  <node id="4009" lat="51.5812" lon="4.7812"/>
+  <node id="4010" lat="51.5810" lon="4.7810"/>
+
+  <way id="5001">
+    <nd ref="4007"/>
+    <nd ref="4008"/>
+    <nd ref="4009"/>
+    <nd ref="4010"/>
+    <tag k="amenity" v="restaurant"/>
+    <tag k="name" v="Fixture Way-Based Restaurant (must be excluded)"/>
+  </way>
+</osm>

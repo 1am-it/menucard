@@ -67,7 +67,12 @@ implementation (see its own ticket).
 3. [market-03-source-registry.md](./market-03-source-registry.md) — done, documentation/schema contract only
 4. [market-04-raw-imports-import-runs.md](./market-04-raw-imports-import-runs.md) —
    contract documented and approved; the import mechanism itself is still
-   not built/run. Of its four hard gates: **gate 1** (Breda boundary)
+   not **run**. **Update 2026-09-05: the mechanism now exists and is
+   locally tested** (`ops/scripts/import-breda-osm.js` — see that ticket's
+   own "Status" section) — a real, pinned GDAL container against fakes and
+   one synthetic `.osm` fixture only; no real download, no real
+   OSM/Geofabrik query, and no live Supabase mutation have happened. Of
+   its four hard gates: **gate 1** (Breda boundary)
    **closed 2026-09-04** — a concrete `MarketBoundaryVersion` has been
    captured and recorded; **gate 2** (per-source authorization) satisfied
    per-source for Kadaster/PDOK, OpenStreetMap, and Geofabrik specifically

@@ -380,7 +380,18 @@ No code, migration, Supabase change, or restaurant data imported.
 
 MARKET-04 — Raw imports & import runs (contract documented and approved;
 the import mechanism itself is not built/run — see
-`docs/api/import-run-schema.md`). Blocked on four hard gates, tracked
+`docs/api/import-run-schema.md`. **Update 2026-09-05: the import tool
+now exists** — `ops/scripts/import-breda-osm.js` and its config/tests,
+locally tested against fakes and one synthetic `.osm` fixture via the
+real, pinned GDAL container, tightened preflight (exact source/SAV ids,
+exact `restricted` status, `basic_info`, `open_dataset_download`, Breda's
+exact market scope, `raw_import`) and an artifact-hash-inclusive
+idempotency key. **No real download, no real OSM/Geofabrik query, and no
+live Supabase mutation have happened — zero `ImportRun`s exist.** Both its
+`--live` and `--dry-run` CLI modes are wired but still refuse to run even
+when correctly confirmed. Gate 3B stays legally blocked, gate 4B stays
+fully open, and node-only remains a first-pass scope decision, not a
+completeness claim). Blocked on four hard gates, tracked
 independently: **gate 1** (Breda boundary) closed 2026-09-04 — see the
 `MARKET-01` entry above. **Gate 2** (per-source `SourceAuthorizationVersion`)
 satisfied per-source for Kadaster/PDOK, OpenStreetMap, and Geofabrik —
