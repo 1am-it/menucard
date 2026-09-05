@@ -213,6 +213,52 @@ now decided, not merely recommended:**
   `internal`-role row at all). Creating that account is a separate,
   explicit, later step — not performed by this document, and not
   something documentation alone can satisfy.
+- **Update (2026-09-05) — the account-activation gap this precondition
+  surfaced is now closed**: while preparing this account, a real gap was
+  found — `/internal/login` only ever supports `signInWithPassword`, and
+  the app had no page at all where a newly-invited or password-reset
+  account could actually set a usable password. `app/internal/set-password/page.js`
+  (+ its pure decision logic, `src/lib/setPasswordFlow.js`, and its test
+  suite) now fills that gap: it detects a valid Supabase recovery/invite
+  session (never anything else), lets that session set a password, shows
+  a safe, generic invalid/expired state for any other case, and redirects
+  to `/internal/login` on success. **This still does not create any
+  account, invitation, or `staff_roles` row itself, and grants no access
+  to Data-inbox or anything else** — it only completes account setup so
+  the still-unsatisfied precondition above can eventually be resolved
+  safely.
+
+  **Correction (2026-09-05, later the same day): two distinct things are
+  required, not one — the earlier wording above conflated them.**
+  1. **The future `inviteUserByEmail` (or `generateLink({type: 'invite' | 'recovery', ...})`)
+     call itself must explicitly pass `redirectTo`**, pointing at this
+     app's absolute `/internal/set-password` URL — e.g.
+     `supabase.auth.admin.inviteUserByEmail(email, { redirectTo:
+     '<this app's real origin>/internal/set-password' })`. Supabase does
+     **not** infer or default to this page just because it exists in the
+     app; omitting `redirectTo` sends the person to the project's
+     configured default Site URL instead, not to this page.
+  2. **The Supabase dashboard's Redirect URLs allowlist (Authentication →
+     URL Configuration) is a separate, second gate**: it does not *send*
+     anyone anywhere by itself — it only *permits* a `redirectTo` value
+     that matches an allow-listed entry (or wildcard pattern) to be
+     honored at all. Without a matching allowlist entry, Supabase rejects
+     the `redirectTo` above outright, regardless of how correctly it was
+     passed.
+
+  **Both are required together**, and neither substitutes for the other.
+  **Per-environment, not fabricated here**: the exact allowlist entry
+  needed is `<that environment's real, actual origin>/internal/set-password`
+  — local development, any staging deployment, and production each need
+  their own real origin added if invites will ever be sent from that
+  environment; no such origin is recorded anywhere in this repository
+  today (checked `.env.local.example`, `next.config.js`, and the
+  codebase for any documented production domain — none exists), so none
+  is guessed or invented here. Whoever configures this must supply the
+  real value themselves, per environment. Not changed by this
+  document — a human with dashboard access must do this once per
+  environment, separately, and the future invite-sending code/script
+  must itself pass the matching `redirectTo` explicitly.
 - **The future live test matrix must include a real `internal`-session
   test**, not only `owner`/`editor`/anonymous denial tests — mirroring
   the `docs/guides/internal-api-live-testing.md` session-minting pattern
