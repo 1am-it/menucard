@@ -465,15 +465,30 @@ script, as a separate, explicitly-approved step.
 MARKET-05 — Normalization & deduplication. **First ticket content
 created 2026-09-05** — see
 `planning/specs/tickets/market-05-normalization-deduplication.md`,
-split into **`05A`** (data-inbox: internal, read-only candidate review —
-documentation/preparation only this round, no dashboard/route/schema
-built) and **`05B`** (normalization & deduplication, the original scope,
-still not started/designed). `05A` was prepared directly on the strength
+split into **`05A`** (data-inbox: internal, read-only candidate review)
+and **`05B`** (normalization & deduplication, the original scope, still
+not started/designed). `05A` was prepared directly on the strength
 of the two successful, write-free Breda dry-runs recorded in the
 `MARKET-04` entry above (665 candidates after amenity/bbox pre-filter,
 500 exactly inside Breda boundary v1) — it is a read-only window onto
 `MARKET-04`'s `ImportRun`/`ImportExtractionRecord` tables, explicitly
 separate from `PLATFORM-06`'s existing moderation queue (which reviews
 `pending_changes` against live data, not raw import candidates) and from
-`05B`'s eventual real matching/deduplication logic. No code, route,
-page, migration, or Supabase change has been made for either part.
+`05B`'s eventual real matching/deduplication logic.
+
+**Update (2026-09-05, later the same day): `05A` built.**
+`/internal/import-inbox` + `/api/internal/v1/import-inbox/{runs,candidates}`
+(`internal`-only; see `docs/api/import-inbox-api.md` for the full
+contract) now exist, with `src/lib/importInbox.js`'s pure decision logic
+(role check, run-summary shaping, computed read-only quality/
+possible-duplicate hints, filtering, empty-state classification) fully
+unit-tested. Live-verified against the real Supabase project, reusing
+real existing `owner`/`editor` accounts (no new account/session/role
+created): unauthenticated → `401`; `owner`/`editor` → `403`. **Not yet
+live-verifiable**: the `internal`-role success path — no working
+`internal` account exists (its email-activation flow,
+`app/internal/activate/page.js`, still needs a manual Supabase
+Reset-Password/Invite-user email-template edit before any real account
+can complete it) and zero `ImportRun`s exist to browse. No canonical
+merge, `pending_changes`, restaurant record, public route, migration, or
+Supabase configuration change was made for either `05A` or `05B`.

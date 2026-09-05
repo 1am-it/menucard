@@ -16,9 +16,15 @@ parts, the same discipline already used for `MARKET-04`'s hard gates
   this document, triggered by the two successful, write-free Breda
   dry-runs (see `market-04-raw-imports-import-runs.md`'s "Status"
   correction, 2026-09-05) that proved the raw-candidate pipeline produces
-  real, inspectable numbers (665 → 500 inside Breda boundary v1). This
-  part is **documentation/ticket preparation only, in this round** — no
-  dashboard, route, or schema change has been built yet.
+  real, inspectable numbers (665 → 500 inside Breda boundary v1).
+  **Update (2026-09-05, later the same day): built.** The page, both
+  API routes, and their pure decision logic now exist and are tested —
+  see the "Implementation (2026-09-05)" subsection below for the exact
+  files and what is, and is not, yet live-verifiable. **Correction**: the
+  line above originally said this round was "documentation/ticket
+  preparation only... no dashboard, route, or schema change has been
+  built yet" — that was true for the round that wrote it, no longer true
+  now; corrected here visibly rather than left stale.
 - **`MARKET-05B` — Normalization & deduplication (the original scope).**
   Matching/merging multiple sources into canonical candidate records, per
   `market-data-foundation-plan.md`'s original description. **Untouched,
@@ -315,10 +321,51 @@ now decided, not merely recommended:**
   the account above to already exist; it cannot substitute for creating
   it.
 
+### Implementation (2026-09-05)
+
+Built without waiting for the still-broken `internal`-account email
+activation (tracked separately — see "Risks" below):
+
+- **`src/lib/importInbox.js`** (+ `.test.js`, 30 tests) — all decision
+  logic, pure and dependency-free: `isInternalOnly(roles)` (the exact
+  `internal`-only rule below), `buildRunSummary` (the overview shape),
+  `computeQualityStatus`/`computePossibleDuplicateIds`/
+  `enrichAndFilterCandidates` (computed, read-only — see "Duplicate/
+  quality status" above; unchanged design, now implemented exactly as
+  specified), and `classifyInboxState` (the no-runs/zero-candidates/
+  failed-partial/no-filter-matches distinction required below).
+- **`app/api/internal/v1/import-inbox/runs/route.js`** — `GET`,
+  `internal`-only, reads `import_runs` + resolves source names from
+  `sources`, returns `buildRunSummary`'s shape per row.
+- **`app/api/internal/v1/import-inbox/candidates/route.js`** — `GET`,
+  `internal`-only, reads `import_extraction_records`, supports
+  `run_id`/`category`/`name`/`possible_duplicate`/`quality` query
+  filters via `enrichAndFilterCandidates`.
+- **`app/internal/import-inbox/page.js`** — the page itself, following
+  `/internal/moderation`'s exact existing visual/technical pattern
+  (session check + redirect, bearer-token fetch, card-list rendering, no
+  direct Supabase data access from the browser).
+- **`docs/api/import-inbox-api.md`** — new contract doc, matching the
+  existing `docs/api/internal-moderation-api.md`/`owner-claims-api.md`
+  convention.
+
+**Live-verified this same round, using the existing, already-established
+read-only session-minting technique
+(`docs/guides/internal-api-live-testing.md`) against the real Supabase
+project — no new account, session, or role created**: an unauthenticated
+request gets `401`; a real, existing `owner` account and a real, existing
+`editor` account each get `403` from both routes. **Not yet
+live-verifiable**: the `internal`-role success path — no working
+`internal` account exists yet (its email activation link is the still-
+broken flow `app/internal/activate/page.js` was built to fix, but no
+account has completed that flow end-to-end), and zero `ImportRun`s exist,
+so there is nothing for a real `internal` session to browse yet even once
+one exists. The "no import runs yet" empty state is, right now, the only
+genuinely reachable state in production — confirmed live via the real
+`runs`/`candidates` endpoints once a session is available.
+
 ### Out of scope (explicit non-goals)
 
-- Any dashboard, route, page, or schema change — **this ticket is
-  documentation/preparation only**, per this round's own instruction.
 - Direct browser/RLS access to `import_runs`/`import_extraction_records`
   — every read goes through a new, gated `/api/internal/v1/...` route
   using the service role, exactly like `PLATFORM-06`'s existing pattern;
@@ -353,41 +400,64 @@ append-only review/decision table named above, explicitly deferred.
   never a stored verdict, until `MARKET-05B`'s real logic exists.
 - Scope creep toward building `MARKET-05B` or `PLATFORM-06`-style
   approve/reject actions inside what should stay a read-only inbox.
-- **Building against no real `internal` account.** The access decision
-  above (`internal`-only) is now fixed, but no real `internal`-role
-  account exists yet to implement or live-verify against — implementation
-  must not start by fabricating one ad hoc; a real, separate
-  internal-administrator account is a named precondition (see "Access
-  control" above), not an implementation detail to improvise.
+- **Built against no real `internal` account (confirmed, not silently
+  worked around).** The access decision above (`internal`-only) was
+  already fixed; implementation proceeded without fabricating an
+  account, a role, or test data — `isInternalOnly`'s correctness is
+  unit-tested against synthetic role arrays, and the `403` denial path is
+  live-verified against real, existing `owner`/`editor` accounts (see
+  "Implementation" above). The one thing genuinely not yet provable is
+  the real `internal`-role success path, which requires the still-open
+  precondition above to be resolved first — not an implementation gap,
+  an honest, named limitation.
 
 ### Acceptance criteria (for the eventual implementation ticket — not this document)
 
 - [ ] Only a session carrying the `internal` `staff_roles` value can view
       an import overview (counts, duration, status) for every existing
       `ImportRun` — verified with a real `internal` session, per "Access
-      control" above, not merely asserted in code.
-- [ ] A session carrying only `editor` and/or `owner`, and a session with
+      control" above, not merely asserted in code. **Not yet verifiable —
+      no working `internal` account exists (see "Implementation" above).**
+- [x] A session carrying only `editor` and/or `owner`, and a session with
       no `staff_roles` row at all, are each verified to get no access —
-      not merely "not given a link to it."
+      not merely "not given a link to it." **Live-verified 2026-09-05**
+      against real, existing `owner` and `editor` accounts (`403`); a
+      roleless/anonymous request gets `401`.
 - [ ] The same `internal` session can view, filter
       (run/category/name/possible-duplicate/quality), and read the full
-      minimized field set of every `ImportExtractionRecord`.
-- [ ] No-run, zero-candidates, failed/partial-run, and empty-filter-result
-      states are each distinguishable from one another in the UI.
+      minimized field set of every `ImportExtractionRecord`. **Filtering
+      itself is unit-tested (`enrichAndFilterCandidates`); the end-to-end,
+      real-session, real-data path is not yet verifiable — zero
+      `ImportRun`s exist.**
+- [x] No-run, zero-candidates, failed/partial-run, and empty-filter-result
+      states are each distinguishable from one another in the UI —
+      `classifyInboxState` unit-tested for all four; only "no-run" is
+      currently live-reachable (zero `ImportRun`s exist today).
 - [ ] No direct browser/RLS access to either raw table — verified the
-      same way `MARKET-04A`'s own RLS was live-verified.
-- [ ] No route, action, or code path in this surface can write to
-      `import_runs`, `import_extraction_records`, or any canonical table.
+      same way `MARKET-04A`'s own RLS was live-verified. **Not
+      independently re-verified this round — no new grant or RLS policy
+      was added, so `MARKET-04A`'s original live verification still
+      applies unchanged; not re-tested against these two new routes
+      specifically.**
+- [x] No route, action, or code path in this surface can write to
+      `import_runs`, `import_extraction_records`, or any canonical table
+      — both new routes are `GET`-only, and neither calls `.insert()`,
+      `.update()`, or `.delete()` anywhere in their source.
 - [ ] Internal/admin surface — exempt from the consumer performance
       budget per `[[009-consumer-vs-internal-performance-budget]]`, same
-      as `PLATFORM-06`.
+      as `PLATFORM-06`. Not specifically measured this round (matches
+      `PLATFORM-06`'s own precedent of asserting this by convention,
+      not a performance-budget test suite).
 
 ### Suggested order
 
-After a first real, approved `ImportRun` exists (there is nothing to
-browse before then) — but the API route, page shell, and empty/no-run
-state can be built and reviewed beforehand, since "no `ImportRun`s exist
-yet" is itself one of the required, real states to design for.
+**Built 2026-09-05.** Remaining, in order: (1) fix the `internal`-account
+email activation (`app/internal/activate/page.js` exists but no account
+has completed it — Supabase's Reset Password/Invite user templates still
+need their manual dashboard edit, per `docs/api/import-inbox-api.md`'s
+own note); (2) create and activate a real `internal` account; (3) run a
+first real, approved `ImportRun`; (4) only then live-verify the
+`internal`-role success path end to end.
 
 ## MARKET-05B — Normalization & deduplication (placeholder, untouched)
 

@@ -101,10 +101,16 @@ implementation (see its own ticket).
    "Hard gates" section for the full record.
 5. [market-05-normalization-deduplication.md](./market-05-normalization-deduplication.md) —
    **first ticket content created 2026-09-05**, split into **`05A`**
-   (data-inbox: internal, read-only candidate review, prepared this
-   round — no dashboard/route/schema built yet, triggered by the two
-   real 2026-09-05 Breda dry-runs) and **`05B`** (normalization &
+   (data-inbox: internal, read-only candidate review, triggered by the
+   two real 2026-09-05 Breda dry-runs) and **`05B`** (normalization &
    deduplication, the original scope, still not started/designed).
+   **Update, later the same day: `05A` built** — `/internal/import-inbox`
+   + `/api/internal/v1/import-inbox/{runs,candidates}` (see
+   `docs/api/import-inbox-api.md`). `403`-denial for `owner`/`editor`
+   live-verified against real accounts; the `internal`-role success path
+   is not yet live-verifiable — no working `internal` account exists
+   (its email-activation flow is still blocked on a manual Supabase
+   email-template edit) and zero `ImportRun`s exist to browse yet.
 6. MARKET-06 — publication snapshots (not started)
 7. MARKET-07 — market-scoped coverage metrics (not started)
 8. MARKET-08 — minimal market-aware consumer read path (not started; mandatory before any second market can launch — see `planning/architecture/market-data-foundation-plan.md`)
