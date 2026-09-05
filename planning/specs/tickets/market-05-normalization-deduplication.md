@@ -871,6 +871,261 @@ in fact already happened at least once, even though it has not been
 documented as done anywhere in this ticket yet. Recorded here for
 visibility; not otherwise acted on or investigated further this round.
 
+### Implementation (2026-09-06) — centralized normalization + controlled website suggestions
+
+Built as the next feature after the enrichment layer. **No new
+migration** — both additions here are purely computational (normalization)
+or purely a new, read-only-against-Supabase server action (website
+suggestions); neither introduces a new persisted concept
+`import_candidate_enrichments`/`import_candidate_reviews` didn't already
+cover, so `0008` remains the latest schema.
+
+#### Centralized normalization
+
+- **`src/lib/candidateNormalization.js`** (new, 31 tests) —
+  `normalizeWebsite`/`normalizePhoneNL`/`normalizeAddressNL`, each
+  returning `{ value, normalized, display, changed, valid }`. Every
+  normalizer follows the same conservative contract, enforced by its own
+  exhaustive test suite:
+  - **Never guesses.** An input that doesn't clearly match a known-safe
+    shape is returned completely unchanged, `valid: false` — never
+    "corrected" toward a best guess. Applies uniformly: an unrecognized
+    phone digit count, a non-`http(s)` URL, anything non-string.
+  - **Idempotent**, proven directly: feeding a normalizer's own
+    `normalized` (and, for phone, also its `display`) output back in
+    reproduces the identical result. This is the literal, tested
+    guarantee behind "elke normalisatie idempotent."
+  - **Pure — no I/O, no geocoding, no external lookup of any kind.**
+    Address normalization is deliberately whitespace/postcode-shape
+    only (collapses whitespace; uppercases and single-spaces a
+    recognized 4-digit+2-letter Dutch postcode substring) — never an
+    automatic address correction, never a real-address lookup, exactly
+    as scoped.
+  - **Website**: lowercases only the scheme and host (the two
+    genuinely case-insensitive parts of a URL per RFC 3986) — the path,
+    query string, and fragment are carried through as an exact substring
+    of the original input, never re-parsed or re-encoded, so a
+    meaningful path/query parameter can never be silently dropped or
+    altered. Userinfo (rare, but case-sensitive) is preserved as-is.
+  - **Phone (Netherlands-focused)**: recognizes the common, unambiguous
+    national 10-digit shape (`0` + 9 digits, covering `06` mobile and
+    geographic/service numbers), with or without `+31`/`0031`, with
+    common cosmetic punctuation stripped. Canonical storage/comparison
+    form is `+31` + 9 digits; the readable Dutch **display** form is
+    `"06 12345678"` for mobile (unambiguous — `06` is always exactly 2
+    digits) and an intentionally **ungrouped** `"0" + 9 digits` for every
+    other valid number. **Named, deliberate limitation**: this project
+    has no verified, complete table of which Dutch geographic area
+    codes are 2 digits vs. 3 digits, and guessing a split point (e.g.
+    always grouping as `0XX XXXXXXX`) would silently mis-group roughly
+    half of them — preferred over a confidently wrong-looking display.
+    A short-rate number with fewer than 9 digits after the trunk `0`
+    (some real `0800` numbers) is correctly left unrecognized rather
+    than mis-parsed.
+- **`src/lib/importInbox.js`** (extended) — `computeNormalizedFields`
+  runs the three normalizers over the already-combined (raw +
+  enrichment) field set and returns the **display** form
+  (`.display`, not the bare `+31...` storage form, for phone) as the
+  value shown; the full per-field detail (including the canonical
+  `.normalized` form) stays available for anything that needs it (e.g.
+  the suggestion-comparison logic below). `enrichAndFilterCandidates`
+  now attaches this as `normalized_fields`/`normalization` on every
+  candidate, and — per this ticket's own explicit requirement —
+  recomputes `quality_status`/`missing_fields` from `normalized_fields`,
+  not the raw combined view: a purely cosmetic normalization (e.g.
+  postcode casing) can, in principle, be the difference that completes a
+  field comparison downstream. **`extracted_fields` and
+  `enriched_fields`/`enrichment_sources` are completely unaffected** —
+  normalization is a pure, additional display layer, never a
+  replacement for the raw import value or the enrichment audit trail.
+- **`app/internal/import-inbox/page.js`** (extended) — the candidate
+  card and detail view now render `normalized_fields` (the Dutch-readable
+  phone display, the postcode-cased address) instead of the raw/enriched
+  values directly, while still showing each enriched field's source URL
+  and date exactly as before; an unrecognized phone format is flagged
+  inline ("phone format not recognized — shown as entered") rather than
+  silently displaying a guess.
+- **Enrichment form UX (this same round)**: a "Use one source URL for
+  all filled-in fields" checkbox — when checked, one shared URL input
+  replaces the three individual per-field source-URL inputs, and that
+  one URL is applied to every field the reviewer actually filled in at
+  submit time. A candidate's detail card now **automatically collapses
+  after a successful** "Save decision" or "Save enrichment" — but
+  **never** after a validation or API failure, where the card stays open
+  with everything the reviewer typed still in place. The underlying
+  decision (`shouldCollapseCandidateCardAfterAction(outcome)`) is a
+  pure, directly-tested function in `src/lib/importInbox.js` — `true`
+  only for a literal `outcome.ok === true` — precisely because this
+  project has no browser/DOM test harness to verify page.js's own wiring
+  directly; the wiring itself was verified by reading the compiled
+  production bundle, the same discipline used throughout `MARKET-05A`
+  for every CommonJS-into-`'use client'` import.
+
+#### Controlled website suggestions ("Suggest data from website")
+
+A **read-only-against-Supabase**, human-confirmation-required feature —
+never an automated enrichment pipeline. Per candidate, a button fetches
+*only* the candidate's own already-stored website (never a
+caller-supplied URL — the server route re-derives it itself from
+`import_extraction_records`/`import_candidate_enrichments`, exactly
+like every other read in this feature) and returns **temporary**
+suggestions for `address`/`phone`/`website` — nothing is ever written to
+`import_candidate_enrichments` or any other table by this route itself.
+A suggestion only becomes a real enrichment if a reviewer explicitly
+confirms it, per field, through the pre-existing `POST
+.../candidates/{id}/enrichments` route — this feature only ever
+pre-fills that form's draft state.
+
+- **`src/lib/safeOutboundFetch.js`** (new, 26 tests) — the only place in
+  this project that fetches an arbitrary third-party URL, hardened
+  against SSRF at every documented layer (see the file's own header
+  comment for the complete list):
+  1. **Protocol allowlist** (`http`/`https` only) and rejection of
+     embedded credentials and the literal `localhost`/`*.localhost`
+     alias, checked before any DNS lookup.
+  2. **A custom Node `lookup` function is passed to every request** —
+     Node calls this instead of `dns.lookup()` internally and refuses to
+     open a socket at all if it errors. This is the real defense against
+     DNS rebinding: even a hostname that *resolves* to a
+     private/loopback/link-local address is rejected before any TCP
+     connection is attempted, not merely checked against the literal
+     hostname string. Comprehensively tested (`isDisallowedIPv4`/
+     `isDisallowedIPv6`) against the full loopback/private/link-local/
+     "this network"/multicast/reserved ranges, plus IPv4-mapped IPv6
+     addresses.
+
+     > **Correction (2026-09-05):** the claim above was accurate for
+     > *hostnames* but incomplete: a **literal** IP host in the URL
+     > (e.g. `http://127.0.0.1/…`) never triggers a DNS lookup in Node
+     > at all, so the guarded `lookup` function was never even called
+     > for that case — a genuine bypass. Fixed in `isSafeUrlShape`,
+     > which now rejects a disallowed literal IPv4/IPv6 host (including
+     > IPv4-mapped IPv6 in both dotted and Node's canonical hex form,
+     > e.g. `::ffff:7f00:1`) before any request is issued, using
+     > `net.BlockList` against the full IANA special-purpose address
+     > registries — checked on every hop, since `isSafeUrlShape`
+     > already gates every redirect too. `isDisallowedIPv4`/
+     > `isDisallowedIPv6` were also rewritten on top of `net.BlockList`
+     > (previously hand-rolled regex/arithmetic, which only matched the
+     > dotted-decimal form of IPv4-mapped IPv6 and missed the hex form
+     > that `new URL()` actually produces). 15 new tests added; see
+     > `src/lib/safeOutboundFetch.test.js`.
+     >
+     > **Further correction (2026-09-05):** "the full IANA special-
+     > purpose address registries" above was itself not yet accurate —
+     > the block list at the time only covered the most common ranges
+     > and was still missing several IANA-registered ones (IPv4:
+     > AS112-v4 `192.31.196.0/24`, AMT `192.52.193.0/24`, direct-
+     > delegation AS112 `192.175.48.0/24`; IPv6: most `2001::/23`
+     > sub-ranges — Teredo, PCP/TURN anycast, benchmarking, AMT,
+     > AS112-v6, ORCHID/ORCHIDv2, Drone Remote ID — plus the second
+     > NAT64 range `64:ff9b:1::/48`, 6to4 `2002::/16`, the second AS112
+     > direct-delegation range `2620:4f:8000::/48`, and the newer
+     > documentation/SRv6 ranges `3fff::/20` and `5f00::/16`). All now
+     > added to `buildDisallowedIpBlockList` in
+     > `src/lib/safeOutboundFetch.js`, whose own comment states the
+     > policy explicitly: every IANA special-purpose range is
+     > disallowed as a destination for this feature, even one that is
+     > technically globally routable, and the list should be re-diffed
+     > against the live registries periodically rather than assumed to
+     > stay complete forever. 9 new tests added; see
+     > `src/lib/safeOutboundFetch.test.js`.
+  3. **Bounded redirects** (default 3) — every redirect target is
+     independently re-validated by the exact same protocol/credentials/
+     localhost/DNS-guard checks as the initial URL; live-tested with a
+     real local HTTP server proving a redirect to a disallowed address
+     is rejected mid-chain, not merely on the first hop.
+  4. **Bounded response size** (default 2 MB) — the connection is
+     destroyed the instant the cap is exceeded, never buffering an
+     unbounded response; live-tested.
+  5. **A hard timeout** (default 8 s).
+  6. **No cookies, no `Authorization` header, no browser-like session
+     state** — a single, stateless, anonymous request with a fixed,
+     honest `User-Agent` naming this feature (never a browser-spoofing
+     UA); live-tested that no such header is ever sent.
+  Tests separate the SSRF-guard logic itself (fully mocked, no real
+  network — a fake DNS resolver returning a private IP proves the guard
+  rejects it) from every other fetch behavior (redirects/size/timeout;
+  a real local HTTP test server with an explicitly *unguarded* test-only
+  `lookup`, since any real local server is unavoidably loopback-bound,
+  which the real guard correctly, always rejects — see the test file's
+  own comment for why this split is necessary and correct, not a gap in
+  coverage).
+- **`src/lib/candidateSuggestions.js`** (new, 27 tests, real local
+  HTML/JSON-LD fixture files under `src/lib/__fixtures__/`, never a real
+  website) — pure parsing/comparison, no network access of its own:
+  - **Scope: `address`/`phone`/`website` only.** Prefers schema.org
+    JSON-LD (`Restaurant`/`FoodEstablishment`/`LocalBusiness`/
+    `Organization`/etc. — an irrelevant JSON-LD block, e.g. a
+    `BlogPosting`, is correctly ignored); falls back to explicit `tel:`
+    links / `<address>` tag content only when no relevant JSON-LD node
+    exists — **never** a general scan of page text. Test-proven that a
+    real JSON-LD node's `menu`/`priceRange`/`image` fields (present on
+    the same node as the contact info) are never read, even though
+    they're right there in the same object.
+  - **robots.txt** (`parseRobotsTxtDisallowRules`/`isPathAllowedByRobots`)
+    — a minimal, real parser for the `User-agent: *` group's `Disallow`
+    rules. **This is a product policy this feature applies to itself,
+    never a claim of legal permission**: robots.txt allowing (or simply
+    not mentioning) a path is never treated as authorization to use the
+    site's content for anything beyond this narrow, human-confirmed
+    contact-field suggestion; its *absence* entirely is likewise never
+    treated as license to scrape freely. The feature would still apply
+    every other safeguard (SSRF hardening, contact-fields-only scope,
+    human confirmation) with or without a robots.txt gate.
+
+    > **Correction (2026-09-05):** the route previously treated a
+    > *failed* `robots.txt` fetch (network error, non-2xx status,
+    > timeout, or a disallowed SSRF target) the same as "no restriction
+    > declared" and fetched the page anyway — fail-open. Fixed with a
+    > new pure function, `classifyRobotsGate`, that fails **closed**: a
+    > failed fetch and an explicit `Disallow` both result in the page
+    > never being fetched, reported as distinct `"unconfirmed"` vs.
+    > `"disallowed"` statuses so a reviewer can tell them apart.
+    > Redirects are also now disabled entirely (`maxRedirects: 0`) on
+    > both the `robots.txt` fetch and the page fetch, closing a related
+    > gap where a redirect could land on a destination whose own
+    > `robots.txt` was never checked. See `classifyRobotsGate` in
+    > `src/lib/candidateSuggestions.js` and its tests.
+  - **Comparison against the candidate's current data**
+    (`compareFieldValue`, `namesLikelyMatch`, `postcodesLikelyMatch`) —
+    every suggested field is independently classified `new` (candidate
+    had nothing there), `match` (agrees with the current value after
+    normalization), or `needs_review` (conflicts, or the page's own
+    name/address doesn't plausibly match the candidate at all — which
+    downgrades *every* suggested field to `needs_review`, even ones that
+    individually look fine, since a mismatched page can't be trusted for
+    any of them). **Never a status that implies anything is written
+    automatically** — `needs_review` and `new` are both still just
+    proposals for a human to confirm or discard.
+- **`app/api/internal/v1/import-inbox/candidates/[id]/suggest-from-website/route.js`**
+  (new) — `POST`-only, `internal`-only, triggered exclusively by the
+  explicit button click described below (never on candidate load, never
+  scheduled). Structurally proven, via dedicated tests reading this
+  route's own source: no `.insert()`/`.update()`/`.delete()`/`.rpc()`
+  call exists anywhere in it (every Supabase call is a `select`), and
+  every `fetchWebsiteSafely` call site is built from the candidate's own
+  resolved `website` field or a `robots.txt` path derived from it —
+  never from `request.json()`/`request.url`/any caller-supplied value —
+  so this can never be turned into an open fetch proxy for arbitrary
+  URLs.
+- **`app/internal/import-inbox/page.js`** (extended) — a "Suggest data
+  from website" button per candidate, disabled when the candidate has no
+  website on file. On success, pre-fills the existing enrichment form's
+  value + source URL for every suggested field that isn't `no_data`,
+  and shows each field's match/needs-review status plus any name/address
+  mismatch warning inline — the reviewer still has to review and click
+  "Save enrichment" per field for anything to actually be written; the
+  button itself never fires on expand, only on an explicit click.
+
+**Not yet live-verified.** Both `safeOutboundFetch.js` and
+`candidateSuggestions.js` are exhaustively unit-tested against local
+fixtures/a local test server only, per this round's explicit
+instruction — no real website has ever been fetched by this feature, in
+development or otherwise. That remains true until a reviewer actually
+clicks the button against a real candidate with a real website, which
+has not happened.
+
 ## MARKET-05B — Normalization & deduplication (placeholder, untouched)
 
 Original scope, unchanged by this document: matching and deduplicating

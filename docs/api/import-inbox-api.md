@@ -327,6 +327,163 @@ shaped like the items in the `GET` list above. `404`
 (`src/lib/importInbox.js`'s `enrichmentValidationMessage`) on any of the
 validation failures above.
 
+**Addition (2026-09-06): `normalized_fields`/`normalization` on
+candidates.** `GET .../candidates` now also returns, per candidate:
+`normalized_fields` — `extracted_fields`/`enriched_fields` with
+`address`/`phone`/`website` run through
+`src/lib/candidateNormalization.js`'s conservative, idempotent
+normalizers (whitespace/Dutch-postcode-shape formatting for address; a
+Netherlands-focused canonical `+31...` storage form *and* a separate
+readable `"06 12345678"`-style Dutch display for phone — `normalized_fields`
+shows the **display** form; website scheme/host lowercased, path/query/
+fragment byte-for-byte untouched) — and `normalization`, the full
+per-field detail (`value`/`normalized`/`display`/`changed`/`valid`) for
+whichever fields were present. `quality_status`/`missing_fields` are now
+computed from `normalized_fields`, one stage later than
+`enriched_fields`. Nothing here is ever guessed at: an unrecognized
+phone format, for example, is returned with `valid: false` and shown
+completely unchanged, never "corrected."
+
+## Website suggestions (addition, 2026-09-06) — `POST /api/internal/v1/import-inbox/candidates/{id}/suggest-from-website`
+
+A **read-only-against-Supabase**, human-confirmation-required feature —
+`internal`-only, triggered *exclusively* by an explicit reviewer button
+click on `/internal/import-inbox`, never automatically on candidate
+load and never scheduled. Uses **only** the candidate's own
+already-stored website (re-derived server-side from
+`import_extraction_records`/`import_candidate_enrichments` — never a
+URL accepted from the request body, which would otherwise turn this
+into an open fetch proxy for arbitrary URLs).
+
+**This route never writes to Supabase.** Every Supabase call in it is a
+`select`. A suggestion becomes a real, audited enrichment only if a
+reviewer explicitly confirms it, per field, through the existing `POST
+.../candidates/{id}/enrichments` route above — this route only ever
+pre-fills that form's client-side draft; it has no knowledge of, and
+never calls, the enrichments route.
+
+**Scope: `address`/`phone`/`website` only.** Extraction
+(`src/lib/candidateSuggestions.js`) prefers schema.org JSON-LD
+(`Restaurant`/`FoodEstablishment`/`LocalBusiness`/`Organization`/etc.),
+falling back to explicit `tel:` links / `<address>` tag content only
+when no relevant JSON-LD node exists. **Never** a menu, price, photo,
+marketing copy, or any other page content — even fields present on the
+very same JSON-LD node (e.g. `menu`, `priceRange`, `image`) are never
+read.
+
+**SSRF defenses** (`src/lib/safeOutboundFetch.js`, used for both the
+`robots.txt` check and the page fetch itself): `http`/`https` only, no
+embedded credentials, `localhost` rejected outright; every DNS
+resolution goes through a guarded `lookup` that refuses to open a
+socket at all if the resolved address is loopback/private/link-local/
+reserved — checked independently on every redirect hop, not just the
+initial URL; redirects capped (default 3); response size capped
+(default 2 MB); a hard timeout (default 8 s); no cookies, no
+`Authorization` header, no browser-like session state of any kind ever
+sent.
+
+> **Correction (2026-09-05):** the guarded-`lookup` description above
+> was accurate but incomplete — it did not mention that a **literal**
+> IP host (e.g. `http://127.0.0.1/…`) bypasses a custom DNS `lookup`
+> entirely in Node, since no DNS resolution happens for a literal IP.
+> This was a real gap: a candidate website value that was itself a
+> private/loopback/link-local/reserved literal IP address could reach
+> `http(s).request()` unblocked. Fixed: `isSafeUrlShape` now rejects a
+> disallowed literal IPv4/IPv6 host (including IPv4-mapped IPv6, both
+> dotted and Node's canonical hex form, e.g. `::ffff:7f00:1`) before
+> any request is issued, using `net.BlockList` against the full IANA
+> special-purpose address registries — checked on every hop, since
+> `isSafeUrlShape` already gates every redirect too. See
+> `src/lib/safeOutboundFetch.js` and `src/lib/safeOutboundFetch.test.js`
+> for the full range list and test coverage.
+>
+> **Further correction (2026-09-05):** "the full IANA special-purpose
+> address registries" above was itself not yet accurate — the block
+> list was still missing several IANA-registered ranges (IPv4:
+> AS112-v4, AMT, direct-delegation AS112; IPv6: most `2001::/23`
+> sub-ranges, the second NAT64 range, 6to4, the second AS112
+> direct-delegation range, and the newer documentation/SRv6 ranges).
+> All now added — see `buildDisallowedIpBlockList` in
+> `src/lib/safeOutboundFetch.js` for the exact, now-complete list and
+> its stated policy (every IANA special-purpose range is disallowed as
+> a destination, even one that is technically globally routable).
+
+**`robots.txt` — a product policy this feature applies to itself, never
+a claim of legal permission.** The candidate's site's `robots.txt` is
+fetched (via the same SSRF-guarded path) and its `User-agent: *`
+`Disallow` rules checked against the website's path before the page
+itself is ever fetched; a disallowed path is never fetched. Its
+*absence*, or an *allowed* result, is never treated as legal permission
+to use the site's content beyond this narrow, always-human-confirmed
+contact-field suggestion — see
+`planning/specs/tickets/market-05-normalization-deduplication.md`'s own
+"Website suggestions" section for the full policy reasoning.
+
+> **Correction (2026-09-05):** this previously failed *open* — if the
+> `robots.txt` fetch itself failed for any reason (network error,
+> non-2xx status, timeout, or a disallowed SSRF target), that was
+> treated as "no restriction declared" and the page was fetched anyway.
+> Fixed: the gate (`classifyRobotsGate` in
+> `src/lib/candidateSuggestions.js`) now fails **closed** — a failed
+> robots.txt fetch blocks the page fetch exactly like an explicit
+> `Disallow`, reported as its own `"unconfirmed"` status (see the
+> response shape below). Redirects are also now disabled entirely
+> (`maxRedirects: 0`) on both the `robots.txt` fetch and the page fetch,
+> so a redirect can never land on a destination whose own `robots.txt`
+> was never checked.
+
+**Response `200`:**
+```json
+{
+  "source_url": "https://restaurant.example/contact",
+  "fetched_at": "2026-09-06T10:00:00.000Z",
+  "robots_txt_status": "allowed",
+  "parsed_from": "json-ld",
+  "suggestions": {
+    "address": { "status": "new", "value": "Fixturestraat 1, 4811 AA Breda", "source_url": "https://restaurant.example/contact" },
+    "phone": { "status": "match", "value": "+31 76 1234567", "source_url": "https://restaurant.example/contact" },
+    "website": { "status": "no_data", "value": null, "source_url": null }
+  },
+  "warnings": []
+}
+```
+- `status` per field — `"new"` (the candidate has no existing value —
+  a plain addition), `"match"` (agrees with the candidate's current
+  value after normalization), `"needs_review"` (conflicts with the
+  candidate's current value, **or** the page's own name/address doesn't
+  plausibly match the candidate at all — which downgrades *every*
+  suggested field to `needs_review`, not just the mismatched one), or
+  `"no_data"` (nothing found for this field). **None of these statuses
+  ever implies anything was or will be written automatically.**
+- `warnings` — human-readable strings, e.g. naming a name/address
+  mismatch between the website and the candidate.
+- `robots_txt_status` is one of `"allowed"` (confirmed, page fetched),
+  `"disallowed"` (confirmed, path covered by a `Disallow` rule), or
+  `"unconfirmed"` (the `robots.txt` fetch itself failed). When it is
+  anything other than `"allowed"`, `suggestions` is `null` and the page
+  itself was never fetched.
+
+> **Correction (2026-09-05):** this field was previously a boolean
+> `robots_txt_allowed` that conflated "explicitly disallowed" with "not
+> confirmed" — both were impossible to tell apart, and the latter case
+> did not previously exist as a distinct, fail-closed outcome at all
+> (see the `robots.txt` correction above). Replaced with the
+> three-value `robots_txt_status` shown above.
+
+**Error responses**: `400` (`{"error": "No website on file for this
+candidate"}` or `"...is not a valid URL"`) when the candidate has no
+usable website; `404` `Candidate not found`; `502` when the fetch itself
+fails (`{"error": "Could not fetch the website (<reason>)"}` — `<reason>`
+is one of `safeOutboundFetch.js`'s own `SafeFetchError` reasons, e.g.
+`resolved-address-not-allowed`, `too-many-redirects`,
+`response-too-large`, `timeout`, `bad-status` — never the raw underlying
+error message).
+
+**Not yet live-verified.** Both `safeOutboundFetch.js` and
+`candidateSuggestions.js` are exhaustively unit-tested against local
+fixtures/a local test server only — no real website has ever been
+fetched by this feature, in development or otherwise.
+
 ## Error responses (all endpoints)
 
 `401` missing/invalid session, `403` caller has no `internal` role, `500`
@@ -337,8 +494,18 @@ error message).
 
 Same pattern as `/internal/moderation`: `src/lib/supabaseBrowser.js` is
 used **only** for sign-in/session lookup; the page never queries Supabase
-directly, only these routes (now four, since the 2026-09-05 review and
-enrichment additions), with the session's `access_token`.
+directly, only these routes (now five, since the 2026-09-05 review and
+enrichment additions and the 2026-09-06 website-suggestions addition),
+with the session's `access_token`.
+
+**Enrichment form UX (2026-09-06, client-only, no API contract change)**:
+a "Use one source URL for all filled-in fields" checkbox lets a reviewer
+type one URL instead of repeating it per field — applied to every filled-in
+field's `source_url` at submit time, still one `POST` with the same body
+shape as always. A candidate's detail card now collapses automatically
+after a successful "Save decision"/"Save enrichment," and stays open
+with the reviewer's input intact after any validation or API failure —
+`src/lib/importInbox.js`'s `shouldCollapseCandidateCardAfterAction`.
 
 ## What has been verified
 

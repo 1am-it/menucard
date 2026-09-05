@@ -602,3 +602,68 @@ existing candidate) — evidence a working `internal` session has
 completed at least once, contrary to this document's earlier "no working
 `internal` account exists yet" note; flagged here for visibility, not
 otherwise investigated or acted on this round.
+
+**Update (2026-09-06): centralized normalization + controlled website
+suggestions built. No new migration** — both additions are purely
+computational or a new, Supabase-read-only server action.
+`src/lib/candidateNormalization.js` (new) provides conservative,
+idempotent, never-guessing normalizers for `address` (whitespace +
+Dutch-postcode-shape formatting only, no geocoding/lookup), `phone`
+(Netherlands-focused: canonical `+31...` storage form + a readable
+`"06 12345678"`-style Dutch display for mobile; other valid numbers
+shown ungrouped since this project has no verified 2-digit-vs-3-digit
+area-code table — a named, deliberate limitation), and `website`
+(lowercases only scheme/host, leaves path/query/fragment byte-for-byte
+untouched). `import_extraction_records`/`import_candidate_enrichments`
+are entirely unaffected — normalization is a pure additional display
+layer (`normalized_fields`/`normalization` on the candidates response),
+with `quality_status`/`missing_fields` now computed from it.
+
+Also built: a "Suggest data from website" feature — `internal`-only,
+`POST .../candidates/{id}/suggest-from-website`, triggered only by an
+explicit reviewer click, fetching only the candidate's own already-known
+website (never a caller-supplied URL). **Never writes to Supabase** —
+suggestions only pre-fill the existing enrichment form's draft; a human
+must still confirm each field through the existing enrichments route.
+Scoped to `address`/`phone`/`website` only (schema.org JSON-LD
+preferred, `tel:`/`<address>` fallback — never menus, prices, photos, or
+marketing copy). Hardened against SSRF
+(`src/lib/safeOutboundFetch.js`, new): protocol allowlist, a guarded DNS
+lookup rejecting private/loopback/link-local addresses on every request
+*and* every redirect hop, bounded redirects/response size/timeout, no
+cookies/session forwarding. Honors `robots.txt` as a self-imposed
+product policy — explicitly never treated as a claim of legal
+permission, in either direction. Not yet live-verified: tested
+exclusively against local HTML/JSON-LD fixtures and a local test
+server — no real website has ever been fetched. Full detail:
+`planning/specs/tickets/market-05-normalization-deduplication.md`'s own
+"Implementation (2026-09-06) — centralized normalization + controlled
+website suggestions" section.
+
+**Correction (2026-09-05):** the paragraph above was written before two
+release-blocking gaps were closed in this same, still-uncommitted
+feature. (1) The guarded-DNS-lookup description was incomplete: a
+**literal** IP host in the URL bypassed it entirely, since Node never
+invokes a custom `lookup` for a literal IP — fixed with a literal-IP
+pre-check (`net.BlockList`, full IANA special-purpose ranges) in
+`isSafeUrlShape`, covering every redirect hop too. (2) `robots.txt`
+handling previously failed *open* — a failed `robots.txt` fetch was
+treated as "no restriction declared" and the page was fetched anyway —
+fixed to fail **closed** (`classifyRobotsGate` in
+`src/lib/candidateSuggestions.js`), with redirects now disabled entirely
+(`maxRedirects: 0`) on both the `robots.txt` fetch and the page fetch.
+See the dated corrections in
+`planning/specs/tickets/market-05-normalization-deduplication.md` and
+`docs/api/import-inbox-api.md` for full detail.
+
+**Further correction (2026-09-05):** "full IANA special-purpose ranges"
+above was itself not yet accurate — the block list was still missing
+several IANA-registered ranges (IPv4: AS112-v4, AMT, direct-delegation
+AS112; IPv6: most `2001::/23` sub-ranges, the second NAT64 range, 6to4,
+the second AS112 direct-delegation range, and the newer
+documentation/SRv6 ranges). All now added to `buildDisallowedIpBlockList`
+in `src/lib/safeOutboundFetch.js`, whose comment states the policy this
+project applies: every IANA special-purpose range is disallowed as a
+destination for this feature, even one that is technically globally
+routable, re-diffed against the live registries rather than assumed to
+stay complete forever.

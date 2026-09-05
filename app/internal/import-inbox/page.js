@@ -21,6 +21,7 @@ import {
   ENRICHABLE_FIELDS,
   validateEnrichmentRequestInput,
   enrichmentValidationMessage,
+  shouldCollapseCandidateCardAfterAction,
 } from '@/src/lib/importInbox'
 
 // Mirrors ops/scripts/import-breda-osm.config.js's own
@@ -54,7 +55,20 @@ const ENRICHABLE_FIELD_LABELS = {
   website: 'Website',
 }
 
-const EMPTY_ENRICHMENT_DRAFT = { address: { value: '', sourceUrl: '' }, phone: { value: '', sourceUrl: '' }, website: { value: '', sourceUrl: '' } }
+const EMPTY_ENRICHMENT_DRAFT = {
+  address: { value: '', sourceUrl: '' },
+  phone: { value: '', sourceUrl: '' },
+  website: { value: '', sourceUrl: '' },
+  useSharedSourceUrl: false,
+  sharedSourceUrl: '',
+}
+
+const SUGGESTION_STATUS_LABELS = {
+  new: 'New',
+  match: 'Confirms current value',
+  needs_review: 'Needs review',
+  no_data: 'Not found',
+}
 
 const cardStyle = {
   border: '1px solid var(--border)',
@@ -128,6 +142,14 @@ export default function ImportInboxPage() {
   const [enrichmentDraftByCandidateId, setEnrichmentDraftByCandidateId] = useState({})
   const [enrichmentSubmittingId, setEnrichmentSubmittingId] = useState(null)
   const [enrichmentErrorByCandidateId, setEnrichmentErrorByCandidateId] = useState({})
+
+  // MARKET-05A — "Suggest data from website." Only ever triggered by an
+  // explicit button click (see requestSuggestions below) — never on
+  // expand, never on a timer. A result only ever pre-fills the
+  // enrichment draft above; nothing here writes anything by itself.
+  const [suggestionsByCandidateId, setSuggestionsByCandidateId] = useState({})
+  const [suggestionsLoadingId, setSuggestionsLoadingId] = useState(null)
+  const [suggestionsErrorByCandidateId, setSuggestionsErrorByCandidateId] = useState({})
 
   useEffect(() => {
     const supabase = getSupabaseBrowser()
@@ -238,6 +260,46 @@ export default function ImportInboxPage() {
     }
   }, [])
 
+  // MARKET-05A — "Suggest data from website." Uses only the candidate's
+  // already-stored website (the server route itself re-derives this —
+  // this call never sends a URL). On success, pre-fills the enrichment
+  // draft's value + source URL for every suggested field that isn't
+  // "no_data" — the reviewer still has to review and click "Save
+  // enrichment" per field; nothing is written here.
+  async function requestSuggestions(candidateId) {
+    setSuggestionsLoadingId(candidateId)
+    setSuggestionsErrorByCandidateId((prev) => ({ ...prev, [candidateId]: null }))
+    try {
+      const res = await fetch(`/api/internal/v1/import-inbox/candidates/${candidateId}/suggest-from-website`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setSuggestionsErrorByCandidateId((prev) => ({ ...prev, [candidateId]: data.error || 'Failed to get suggestions' }))
+        return
+      }
+      setSuggestionsByCandidateId((prev) => ({ ...prev, [candidateId]: data }))
+      if (data.suggestions) {
+        setEnrichmentDraftByCandidateId((prev) => {
+          const current = prev[candidateId] || EMPTY_ENRICHMENT_DRAFT
+          const next = { ...current }
+          for (const fieldName of ENRICHABLE_FIELDS) {
+            const suggestion = data.suggestions[fieldName]
+            if (suggestion && suggestion.status !== 'no_data') {
+              next[fieldName] = { value: suggestion.value || '', sourceUrl: suggestion.source_url || '' }
+            }
+          }
+          return { ...prev, [candidateId]: next }
+        })
+      }
+    } catch {
+      setSuggestionsErrorByCandidateId((prev) => ({ ...prev, [candidateId]: 'Failed to get suggestions' }))
+    } finally {
+      setSuggestionsLoadingId((current) => (current === candidateId ? null : current))
+    }
+  }
+
   useEffect(() => {
     if (session) {
       loadRuns(session.access_token)
@@ -277,13 +339,24 @@ export default function ImportInboxPage() {
     }
   }
 
-  function updateEnrichmentDraft(candidateId, fieldName, patch) {
+  function updateEnrichmentFieldDraft(candidateId, fieldName, patch) {
     setEnrichmentDraftByCandidateId((prev) => {
       const current = prev[candidateId] || EMPTY_ENRICHMENT_DRAFT
       return {
         ...prev,
         [candidateId]: { ...current, [fieldName]: { ...current[fieldName], ...patch } },
       }
+    })
+  }
+
+  // Merges directly into the top-level draft (useSharedSourceUrl /
+  // sharedSourceUrl) — distinct from updateEnrichmentFieldDraft above,
+  // which merges into one of the three per-field {value, sourceUrl}
+  // sub-objects instead.
+  function updateEnrichmentTopLevelDraft(candidateId, patch) {
+    setEnrichmentDraftByCandidateId((prev) => {
+      const current = prev[candidateId] || EMPTY_ENRICHMENT_DRAFT
+      return { ...prev, [candidateId]: { ...current, ...patch } }
     })
   }
 
@@ -296,11 +369,15 @@ export default function ImportInboxPage() {
   // the same function the API route itself uses.
   async function submitEnrichment(candidateId) {
     const draft = enrichmentDraftByCandidateId[candidateId] || EMPTY_ENRICHMENT_DRAFT
-    const fields = ENRICHABLE_FIELDS.filter((fieldName) => (draft[fieldName]?.value || '').trim() || (draft[fieldName]?.sourceUrl || '').trim()).map(
+    // When "use one source URL for all fields" is checked, that single
+    // URL is applied to every *filled-in* field's source URL at submit
+    // time — the reviewer never has to retype the same URL three times.
+    const effectiveSourceUrl = (fieldName) => (draft.useSharedSourceUrl ? draft.sharedSourceUrl || '' : draft[fieldName]?.sourceUrl || '')
+    const fields = ENRICHABLE_FIELDS.filter((fieldName) => (draft[fieldName]?.value || '').trim() || effectiveSourceUrl(fieldName).trim()).map(
       (fieldName) => ({
         field_name: fieldName,
         value: draft[fieldName]?.value || '',
-        source_url: draft[fieldName]?.sourceUrl || '',
+        source_url: effectiveSourceUrl(fieldName),
       })
     )
 
@@ -312,6 +389,7 @@ export default function ImportInboxPage() {
 
     setEnrichmentSubmittingId(candidateId)
     setEnrichmentErrorByCandidateId((prev) => ({ ...prev, [candidateId]: null }))
+    let outcome
     try {
       const res = await fetch(`/api/internal/v1/import-inbox/candidates/${candidateId}/enrichments`, {
         method: 'POST',
@@ -326,6 +404,7 @@ export default function ImportInboxPage() {
       const data = await res.json()
       if (!res.ok) {
         setEnrichmentErrorByCandidateId((prev) => ({ ...prev, [candidateId]: data.error || 'Recording the enrichment failed' }))
+        outcome = { ok: false }
         return
       }
       setEnrichmentDraftByCandidateId((prev) => ({ ...prev, [candidateId]: EMPTY_ENRICHMENT_DRAFT }))
@@ -338,10 +417,15 @@ export default function ImportInboxPage() {
         quality: qualityFilter,
         reviewStatus: reviewStatusFilter,
       })
+      outcome = { ok: true }
     } catch {
       setEnrichmentErrorByCandidateId((prev) => ({ ...prev, [candidateId]: 'Recording the enrichment failed' }))
+      outcome = { ok: false }
     } finally {
       setEnrichmentSubmittingId((current) => (current === candidateId ? null : current))
+    }
+    if (shouldCollapseCandidateCardAfterAction(outcome)) {
+      setExpandedCandidateId((current) => (current === candidateId ? null : current))
     }
   }
 
@@ -372,6 +456,7 @@ export default function ImportInboxPage() {
 
     setDecisionSubmittingId(candidateId)
     setDecisionErrorByCandidateId((prev) => ({ ...prev, [candidateId]: null }))
+    let outcome
     try {
       const res = await fetch(`/api/internal/v1/import-inbox/candidates/${candidateId}/reviews`, {
         method: 'POST',
@@ -388,6 +473,7 @@ export default function ImportInboxPage() {
       const data = await res.json()
       if (!res.ok) {
         setDecisionErrorByCandidateId((prev) => ({ ...prev, [candidateId]: data.error || 'Recording the decision failed' }))
+        outcome = { ok: false }
         return
       }
       setDecisionDraftByCandidateId((prev) => ({ ...prev, [candidateId]: { status: '', rejectionReason: '', note: '' } }))
@@ -400,10 +486,15 @@ export default function ImportInboxPage() {
         quality: qualityFilter,
         reviewStatus: reviewStatusFilter,
       })
+      outcome = { ok: true }
     } catch {
       setDecisionErrorByCandidateId((prev) => ({ ...prev, [candidateId]: 'Recording the decision failed' }))
+      outcome = { ok: false }
     } finally {
       setDecisionSubmittingId((current) => (current === candidateId ? null : current))
+    }
+    if (shouldCollapseCandidateCardAfterAction(outcome)) {
+      setExpandedCandidateId((current) => (current === candidateId ? null : current))
     }
   }
 
@@ -636,19 +727,25 @@ export default function ImportInboxPage() {
                     </div>
                     <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 4 }}>
                       {c.extracted_fields?.category || '—'}
-                      {c.enriched_fields?.address ? ` · ${c.enriched_fields.address}` : ''}
+                      {c.normalized_fields?.address ? ` · ${c.normalized_fields.address}` : ''}
                       {c.enrichment_sources?.address && (
                         <span style={{ fontSize: 11, color: 'var(--text-faint)' }}>
                           {' '}
-                          (enriched, {c.enrichment_sources.address.recorded_at})
+                          (enriched via {c.enrichment_sources.address.source_url}, {c.enrichment_sources.address.recorded_at})
                         </span>
                       )}
                     </div>
                     <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                      {c.enriched_fields?.phone ? `${c.enriched_fields.phone} · ` : ''}
-                      {c.enriched_fields?.website || ''}
-                      {(c.enrichment_sources?.phone || c.enrichment_sources?.website) && (
-                        <span style={{ fontSize: 11, color: 'var(--text-faint)' }}> (enriched)</span>
+                      {c.normalized_fields?.phone ? `${c.normalized_fields.phone} · ` : ''}
+                      {c.normalized_fields?.website || ''}
+                      {c.normalization?.phone && c.normalization.phone.valid === false && (
+                        <span style={{ fontSize: 11, color: 'var(--warning)' }}> (phone format not recognized — shown as entered)</span>
+                      )}
+                      {c.enrichment_sources?.phone && (
+                        <span style={{ fontSize: 11, color: 'var(--text-faint)' }}> (phone enriched via {c.enrichment_sources.phone.source_url})</span>
+                      )}
+                      {c.enrichment_sources?.website && (
+                        <span style={{ fontSize: 11, color: 'var(--text-faint)' }}> (website enriched via {c.enrichment_sources.website.source_url})</span>
                       )}
                     </div>
                     {c.missing_fields && c.missing_fields.length > 0 && (
@@ -776,36 +873,119 @@ export default function ImportInboxPage() {
                           </div>
                         )}
 
-                        <h3 style={{ fontSize: 13, margin: '0 0 8px', color: 'var(--text-secondary)' }}>
-                          Enrich missing business info
-                        </h3>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '0 0 8px' }}>
+                          <h3 style={{ fontSize: 13, margin: 0, color: 'var(--text-secondary)' }}>Enrich missing business info</h3>
+                          <button
+                            onClick={() => requestSuggestions(c.id)}
+                            disabled={suggestionsLoadingId === c.id || !c.normalized_fields?.website}
+                            title={!c.normalized_fields?.website ? 'No website on file for this candidate' : undefined}
+                            style={{
+                              fontSize: 12,
+                              padding: '4px 10px',
+                              borderRadius: 8,
+                              border: '1px solid var(--border)',
+                              background: 'transparent',
+                              color: c.normalized_fields?.website ? 'var(--text-secondary)' : 'var(--text-faint)',
+                              cursor: c.normalized_fields?.website ? 'pointer' : 'not-allowed',
+                            }}
+                          >
+                            {suggestionsLoadingId === c.id ? 'Fetching…' : 'Suggest data from website'}
+                          </button>
+                        </div>
                         <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 8px' }}>
                           Fill in a value and its source URL for one or more fields. A field left blank is not submitted.
                           A correction is recorded as a new entry — nothing here is ever edited or deleted.
                         </p>
+
+                        {suggestionsErrorByCandidateId[c.id] && (
+                          <div style={{ fontSize: 12, color: 'var(--danger)', marginBottom: 8 }}>{suggestionsErrorByCandidateId[c.id]}</div>
+                        )}
+                        {suggestionsByCandidateId[c.id] && suggestionsByCandidateId[c.id].robots_txt_status === 'disallowed' && (
+                          <div style={{ fontSize: 12, color: 'var(--warning)', marginBottom: 8 }}>
+                            This page is disallowed by the site's robots.txt and was not fetched.
+                          </div>
+                        )}
+                        {suggestionsByCandidateId[c.id] && suggestionsByCandidateId[c.id].robots_txt_status === 'unconfirmed' && (
+                          <div style={{ fontSize: 12, color: 'var(--warning)', marginBottom: 8 }}>
+                            robots.txt could not be confirmed for this site — no suggestion was made.
+                          </div>
+                        )}
+                        {suggestionsByCandidateId[c.id]?.warnings?.length > 0 && (
+                          <div style={{ fontSize: 12, color: 'var(--warning)', marginBottom: 8 }}>
+                            {suggestionsByCandidateId[c.id].warnings.map((w, i) => (
+                              <div key={i}>⚠ {w}</div>
+                            ))}
+                          </div>
+                        )}
+                        {suggestionsByCandidateId[c.id]?.suggestions && (
+                          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
+                            Suggestions from {suggestionsByCandidateId[c.id].source_url} have been filled into the form
+                            below — nothing is saved until you click "Save enrichment."
+                            <div style={{ display: 'grid', gap: 2, marginTop: 4 }}>
+                              {ENRICHABLE_FIELDS.map((fieldName) => {
+                                const s = suggestionsByCandidateId[c.id].suggestions[fieldName]
+                                if (!s || s.status === 'no_data') return null
+                                return (
+                                  <div key={fieldName}>
+                                    {ENRICHABLE_FIELD_LABELS[fieldName]}: {SUGGESTION_STATUS_LABELS[s.status] || s.status}
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        )}
+
                         <div style={{ display: 'grid', gap: 10, maxWidth: 480 }}>
-                          {ENRICHABLE_FIELDS.map((fieldName) => {
-                            const fieldDraft = (enrichmentDraftByCandidateId[c.id] || EMPTY_ENRICHMENT_DRAFT)[fieldName] || { value: '', sourceUrl: '' }
+                          {(() => {
+                            const fieldDraftFor = (fieldName) => (enrichmentDraftByCandidateId[c.id] || EMPTY_ENRICHMENT_DRAFT)[fieldName] || { value: '', sourceUrl: '' }
+                            const useShared = (enrichmentDraftByCandidateId[c.id] || EMPTY_ENRICHMENT_DRAFT).useSharedSourceUrl
+                            const sharedUrl = (enrichmentDraftByCandidateId[c.id] || EMPTY_ENRICHMENT_DRAFT).sharedSourceUrl
                             return (
-                              <div key={fieldName} style={{ display: 'grid', gap: 4 }}>
-                                <label style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{ENRICHABLE_FIELD_LABELS[fieldName]}</label>
-                                <input
-                                  type="text"
-                                  placeholder={`New ${ENRICHABLE_FIELD_LABELS[fieldName].toLowerCase()} value…`}
-                                  value={fieldDraft.value}
-                                  onChange={(e) => updateEnrichmentDraft(c.id, fieldName, { value: e.target.value })}
-                                  style={selectStyle}
-                                />
-                                <input
-                                  type="text"
-                                  placeholder="Source URL (e.g. the restaurant's own website)…"
-                                  value={fieldDraft.sourceUrl}
-                                  onChange={(e) => updateEnrichmentDraft(c.id, fieldName, { sourceUrl: e.target.value })}
-                                  style={selectStyle}
-                                />
-                              </div>
+                              <>
+                                <label style={{ fontSize: 12, color: 'var(--text-secondary)', display: 'flex', gap: 6, alignItems: 'center' }}>
+                                  <input
+                                    type="checkbox"
+                                    checked={useShared}
+                                    onChange={(e) => updateEnrichmentTopLevelDraft(c.id, { useSharedSourceUrl: e.target.checked })}
+                                  />
+                                  Use one source URL for all filled-in fields
+                                </label>
+                                {useShared && (
+                                  <input
+                                    type="text"
+                                    placeholder="Source URL used for every filled-in field below…"
+                                    value={sharedUrl}
+                                    onChange={(e) => updateEnrichmentTopLevelDraft(c.id, { sharedSourceUrl: e.target.value })}
+                                    style={selectStyle}
+                                  />
+                                )}
+                                {ENRICHABLE_FIELDS.map((fieldName) => {
+                                  const fieldDraft = fieldDraftFor(fieldName)
+                                  return (
+                                    <div key={fieldName} style={{ display: 'grid', gap: 4 }}>
+                                      <label style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{ENRICHABLE_FIELD_LABELS[fieldName]}</label>
+                                      <input
+                                        type="text"
+                                        placeholder={`New ${ENRICHABLE_FIELD_LABELS[fieldName].toLowerCase()} value…`}
+                                        value={fieldDraft.value}
+                                        onChange={(e) => updateEnrichmentFieldDraft(c.id, fieldName, { value: e.target.value })}
+                                        style={selectStyle}
+                                      />
+                                      {!useShared && (
+                                        <input
+                                          type="text"
+                                          placeholder="Source URL (e.g. the restaurant's own website)…"
+                                          value={fieldDraft.sourceUrl}
+                                          onChange={(e) => updateEnrichmentFieldDraft(c.id, fieldName, { sourceUrl: e.target.value })}
+                                          style={selectStyle}
+                                        />
+                                      )}
+                                    </div>
+                                  )
+                                })}
+                              </>
                             )
-                          })}
+                          })()}
                           {enrichmentErrorByCandidateId[c.id] && (
                             <div style={{ fontSize: 12, color: 'var(--danger)' }}>{enrichmentErrorByCandidateId[c.id]}</div>
                           )}

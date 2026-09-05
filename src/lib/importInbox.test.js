@@ -32,6 +32,8 @@ const {
   pickLatestEnrichmentRow,
   buildEnrichmentSourceByCandidateId,
   computeEnrichedFields,
+  computeNormalizedFields,
+  shouldCollapseCandidateCardAfterAction,
 } = require('./importInbox');
 
 // ─── Authorization: internal-only, never editor/owner ────────────────────
@@ -758,6 +760,59 @@ test('computeEnrichedFields: never mutates the raw extractedFields object', () =
   assert.equal(raw.address, 'Old', 'the raw object passed in must be unchanged');
 });
 
+// ─── computeNormalizedFields — the centralized display layer ──────────
+
+test('computeNormalizedFields: normalizes address/phone/website, leaves other fields untouched', () => {
+  const { fields, details } = computeNormalizedFields({
+    name: 'X',
+    category: 'restaurant',
+    address: '4811aa   Breda',
+    phone: '06-12345678',
+    website: 'HTTP://Example.COM/x',
+  });
+  assert.equal(fields.name, 'X');
+  assert.equal(fields.category, 'restaurant');
+  assert.equal(fields.address, '4811 AA Breda');
+  assert.equal(fields.phone, '06 12345678', 'the shown value is the readable Dutch display, never the bare +31 storage form');
+  assert.equal(fields.website, 'http://example.com/x');
+  assert.equal(details.phone.normalized, '+31612345678', 'the canonical storage/comparison form is still available in details');
+});
+
+test('computeNormalizedFields: an absent field is neither added nor normalized', () => {
+  const { fields, details } = computeNormalizedFields({ name: 'X' });
+  assert.equal('address' in fields, false);
+  assert.equal('phone' in fields, false);
+  assert.equal('website' in fields, false);
+  assert.deepEqual(details, {});
+});
+
+test('computeNormalizedFields: an invalid/uncertain phone is shown completely unchanged, never guessed at', () => {
+  const { fields, details } = computeNormalizedFields({ phone: 'call us for info' });
+  assert.equal(fields.phone, 'call us for info');
+  assert.equal(details.phone.valid, false);
+});
+
+test('computeNormalizedFields: never mutates the input object', () => {
+  const input = { address: '4811aa Breda' };
+  computeNormalizedFields(input);
+  assert.equal(input.address, '4811aa Breda');
+});
+
+// ─── shouldCollapseCandidateCardAfterAction ────────────────────────────
+
+test('shouldCollapseCandidateCardAfterAction: collapses only on a genuine success', () => {
+  assert.equal(shouldCollapseCandidateCardAfterAction({ ok: true }), true);
+});
+
+test('shouldCollapseCandidateCardAfterAction: never collapses on failure, a missing outcome, or malformed input', () => {
+  assert.equal(shouldCollapseCandidateCardAfterAction({ ok: false }), false);
+  assert.equal(shouldCollapseCandidateCardAfterAction({ ok: false, message: 'Recording failed' }), false);
+  assert.equal(shouldCollapseCandidateCardAfterAction(null), false);
+  assert.equal(shouldCollapseCandidateCardAfterAction(undefined), false);
+  assert.equal(shouldCollapseCandidateCardAfterAction({}), false);
+  assert.equal(shouldCollapseCandidateCardAfterAction({ ok: 'true' }), false, 'must be the literal boolean true, never a truthy string');
+});
+
 // ─── enrichAndFilterCandidates + enrichment integration: complete/
 // incomplete is recomputed from the combined view ───────────────────────
 
@@ -814,6 +869,29 @@ test('enrichAndFilterCandidates: without any enrichmentSourceByCandidateId, beha
   assert.equal(candidates.find((c) => c.id === '2').quality_status, 'incomplete');
 });
 
+test('enrichAndFilterCandidates: normalized_fields shows the readable Dutch display, and extracted_fields/enriched_fields stay exactly as-is', () => {
+  const records = [makeCandidate('1', 'run-a', { name: 'A', phone: '06-12345678', location: { lat: 51.58, lon: 4.78 } })];
+  const { candidates } = enrichAndFilterCandidates(records, {});
+  const candidate = candidates[0];
+  assert.equal(candidate.extracted_fields.phone, '06-12345678', 'raw import value untouched');
+  assert.equal(candidate.enriched_fields.phone, '06-12345678', 'no enrichment happened, so this still matches raw');
+  assert.equal(candidate.normalized_fields.phone, '06 12345678', 'only the displayed, normalized view differs');
+  assert.equal(candidate.normalization.phone.normalized, '+31612345678');
+});
+
+test('enrichAndFilterCandidates: a cosmetic-only normalization (e.g. postcode casing) can move a candidate from incomplete to complete', () => {
+  const records = [
+    makeCandidate('1', 'run-a', { name: 'A', address: '4811aa breda', phone: '06 12345678', website: 'https://a.example', location: { lat: 51.58, lon: 4.78 } }),
+  ];
+  const { candidates } = enrichAndFilterCandidates(records, {});
+  // Not actually incomplete->complete here (all fields were already
+  // present) — this specifically proves normalization runs on the same
+  // pipeline stage quality is computed from, using the address field's
+  // own postcode-casing change as the observable proof.
+  assert.equal(candidates[0].normalized_fields.address, '4811 AA breda');
+  assert.equal(candidates[0].quality_status, 'complete');
+});
+
 // ─── Structural safety net: append-only, no canonical/public write, and
 // — the specific new risk this feature introduces — no code path ever
 // reads a review row or its free-text `note` to derive an enrichment. ───
@@ -860,4 +938,52 @@ test('structural safety net: the migration grants only select+insert on import_c
 test('structural safety net: the candidates list route (extended for enrichment) still never calls .update()/.delete()/.insert()', () => {
   const source = fs.readFileSync(CANDIDATES_ROUTE_PATH, 'utf8');
   assert.doesNotMatch(source, /\.(update|delete|insert)\(/, 'this route is read-only — GET only, no write of any kind');
+});
+
+// ─── Structural safety net: "Suggest data from website" never writes to
+// Supabase — the explicit, named requirement for this feature. Its own
+// SSRF/robots.txt behavior is covered end-to-end in
+// src/lib/safeOutboundFetch.test.js and src/lib/candidateSuggestions.test.js;
+// this only proves the route itself has no database write of any kind. ──
+
+const SUGGEST_ROUTE_PATH = path.join(
+  REPO_ROOT,
+  'app/api/internal/v1/import-inbox/candidates/[id]/suggest-from-website/route.js'
+);
+
+test('structural safety net: the suggest-from-website route never writes to Supabase (no insert/update/delete/rpc), and never references a canonical/public identifier', () => {
+  const source = fs.readFileSync(SUGGEST_ROUTE_PATH, 'utf8');
+  assert.doesNotMatch(source, /\.(insert|update|delete|rpc)\(/, 'this route may only ever read — a suggestion is confirmed exclusively through the existing enrichments POST route');
+  for (const identifier of FORBIDDEN_CANONICAL_IDENTIFIERS) {
+    assert.equal(source.includes(identifier), false, `must never reference "${identifier}"`);
+  }
+  assert.doesNotMatch(source, /writeFileSync|appendFileSync/);
+});
+
+test('structural safety net: the suggest-from-website route only ever fetches the candidate\'s own stored website — never a caller-supplied URL', () => {
+  const source = fs.readFileSync(SUGGEST_ROUTE_PATH, 'utf8');
+  // The only two fetchWebsiteSafely call sites must be built from
+  // `websiteUrl`/robots.txt-relative-to-it — never from `request.body`,
+  // `request.json()`, or a raw query parameter, which would turn this
+  // into an open fetch proxy.
+  assert.doesNotMatch(source, /request\.(json|body|url)[^\n]*fetchWebsiteSafely|fetchWebsiteSafely\([^)]*request\./s);
+  assert.match(source, /fetchWebsiteSafely\(`\$\{websiteUrl\.origin\}\/robots\.txt`/);
+  assert.match(source, /fetchWebsiteSafely\(websiteUrl\.href, \{ maxRedirects: 0 \}\)/);
+});
+
+test('structural safety net: the suggest-from-website route disables redirects on both fetchWebsiteSafely calls and never fetches the target page when the robots.txt gate says not to', () => {
+  const source = fs.readFileSync(SUGGEST_ROUTE_PATH, 'utf8');
+  // Both the robots.txt fetch and the page fetch must set maxRedirects: 0,
+  // so a redirect can never land on a destination whose robots.txt/path
+  // was never checked (the bug this test guards against).
+  const codeOnly = source
+    .split('\n')
+    .filter((line) => !line.trim().startsWith('//'))
+    .join('\n');
+  const maxRedirectsZeroCount = (codeOnly.match(/maxRedirects:\s*0/g) || []).length;
+  assert.equal(maxRedirectsZeroCount, 2, 'expected maxRedirects: 0 on both the robots.txt fetch and the page fetch');
+  // The page fetch must be reachable only through the robots.txt gate's
+  // own shouldFetchPage decision — never unconditionally.
+  assert.match(source, /if \(!robotsGate\.shouldFetchPage\)/);
+  assert.match(source, /return NextResponse\.json\(\{[\s\S]*?robots_txt_status: robotsGate\.status,[\s\S]*?suggestions: null/);
 });

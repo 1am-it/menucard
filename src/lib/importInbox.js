@@ -18,6 +18,8 @@
 
 'use strict';
 
+const { normalizeAddressNL, normalizePhoneNL, normalizeWebsite } = require('./candidateNormalization');
+
 /** The one staff_roles value allowed to see raw import data — decided in
  * planning/specs/tickets/market-05-normalization-deduplication.md's
  * "Access control — decided 2026-09-05": not `editor` (restaurant-scoped
@@ -157,14 +159,21 @@ function enrichAndFilterCandidates(records, filters) {
   const enriched = records.map((record) => {
     const enrichmentSource = enrichmentSourceByCandidateId[record.id] || {};
     const enrichedFields = computeEnrichedFields(record.extracted_fields, enrichmentSource);
-    // Quality is recomputed from the combined (raw + enrichment) fields —
-    // per market-05-normalization-deduplication.md's own requirement — so
-    // a manually-sourced phone/address/website can move a candidate from
-    // "incomplete" to "complete" without ever touching the raw record.
-    const quality = computeQualityStatus(enrichedFields);
+    // The centrally-normalized *display* view (src/lib/candidateNormalization.js)
+    // — never a replacement for extracted_fields/enrichmentSource, which
+    // both stay exactly as recorded for audit. Quality is recomputed
+    // from this normalized view — per market-05-normalization-deduplication.md's
+    // own requirement — so a manually-sourced phone/address/website (or
+    // even a purely cosmetic normalization, e.g. postcode casing) can
+    // move a candidate from "incomplete" to "complete" without ever
+    // touching the raw record or the enrichment audit row.
+    const { fields: normalizedFields, details: normalization } = computeNormalizedFields(enrichedFields);
+    const quality = computeQualityStatus(normalizedFields);
     return {
       ...record,
       enriched_fields: enrichedFields,
+      normalized_fields: normalizedFields,
+      normalization,
       enrichment_sources: enrichmentSource,
       possible_duplicate: duplicateIds.has(record.id),
       quality_status: quality.status,
@@ -549,6 +558,71 @@ function computeEnrichedFields(extractedFields, enrichmentSourceForCandidate) {
   return fields;
 }
 
+// ─── Centralized normalization (src/lib/candidateNormalization.js) —
+// applied only to the already-combined (raw + enrichment) view, purely
+// for display/quality purposes. Never changes what `enriched_fields`
+// itself contains, never touches the raw record or any enrichment audit
+// row — see this file's own module.exports and
+// candidateNormalization.js's own header comment for the full
+// "never guess, always idempotent" contract each field normalizer
+// follows. ────────────────────────────────────────────────────────────
+
+const CANDIDATE_NORMALIZERS = {
+  address: normalizeAddressNL,
+  phone: normalizePhoneNL,
+  website: normalizeWebsite,
+};
+
+/**
+ * Runs each of `address`/`phone`/`website` present on `fields` through
+ * its dedicated normalizer, returning `{ fields, details }`: `fields` is
+ * a shallow copy of the input with those three keys replaced by their
+ * `.display` form — the human-readable Dutch representation Data-inbox
+ * actually shows (for `address`/`website` this is identical to
+ * `.normalized`; for `phone` it is the "06 12345678"-style readable
+ * form, never the bare `+31...` storage/comparison form) — every other
+ * key (e.g. `name`/`category`/`location`) is passed through completely
+ * untouched. `details` carries the *full* per-field normalizer result
+ * (`value`/`normalized`/`display`/`changed`/`valid`) for whichever of
+ * the three fields were actually present, so the UI can show, e.g., an
+ * "unrecognized phone format" hint, and so callers needing the
+ * canonical storage/comparison form (`.normalized`) — e.g.
+ * candidateSuggestions.js's own field-conflict comparison — still have
+ * it available. A field that was invalid/uncertain is not "fixed" —
+ * `fields[name]` still ends up equal to the original value, per each
+ * normalizer's own "never guess" contract.
+ */
+function computeNormalizedFields(fields) {
+  const source = fields || {};
+  const result = { ...source };
+  const details = {};
+  for (const fieldName of Object.keys(CANDIDATE_NORMALIZERS)) {
+    if (source[fieldName] === undefined || source[fieldName] === null) continue;
+    const normalizer = CANDIDATE_NORMALIZERS[fieldName];
+    const outcome = normalizer(source[fieldName]);
+    result[fieldName] = outcome.display;
+    details[fieldName] = outcome;
+  }
+  return { fields: result, details };
+}
+
+// ─── Candidate-card UI decision: collapse only after a real success ────
+
+/**
+ * Whether a candidate's detail card should automatically collapse after
+ * a review-decision or enrichment submission — `true` only when the
+ * action actually succeeded (`outcome.ok === true`). A validation
+ * failure or an API error must never collapse the card: the reviewer's
+ * already-entered values need to stay visible and editable, per
+ * market-05-normalization-deduplication.md's own "Data-inbox UX" note.
+ * Pure and directly testable without a browser/DOM harness — the actual
+ * `setExpandedCandidateId(null)` call happens only in
+ * app/internal/import-inbox/page.js, which just calls this function.
+ */
+function shouldCollapseCandidateCardAfterAction(outcome) {
+  return Boolean(outcome && outcome.ok === true);
+}
+
 module.exports = {
   ALLOWED_ROLE,
   isInternalOnly,
@@ -578,4 +652,7 @@ module.exports = {
   pickLatestEnrichmentRow,
   buildEnrichmentSourceByCandidateId,
   computeEnrichedFields,
+  CANDIDATE_NORMALIZERS,
+  computeNormalizedFields,
+  shouldCollapseCandidateCardAfterAction,
 };
