@@ -165,3 +165,73 @@ test('performActivation: passes token_hash and type through to verifyOtp exactly
   await performActivation(fakeAuth, { tokenHash: 'the-token-hash', type: 'invite' });
   assert.deepEqual(capturedArgs, { token_hash: 'the-token-hash', type: 'invite' });
 });
+
+// ─── Regression (2026-09-05): /internal/activate showed "invalid or has
+// expired" immediately, before any click, for a real password-reset
+// link whose fragment was a syntactically valid
+// #token_hash=...&type=recovery. Root cause: parseHashParams
+// (setPasswordFlow.js, reused here) did not trim whitespace/newlines
+// around a parsed key or value — a stray one (plausible from a
+// hand-edited email template's href line-wrapping) silently broke the
+// exact "token_hash"/"recovery" match. Reproduced and fixed using only
+// synthetic, non-secret values — never the real, exposed link. ────────
+
+test('parseActivationHash (regression): a valid recovery fragment is accepted with no pre-click error, even with corrupting whitespace present', () => {
+  // Every variant below must be exactly as valid as a perfectly clean
+  // fragment — this is the actual bug: it wasn't.
+  const variants = [
+    '#token_hash=synthetic-non-secret-hash&type=recovery',
+    '# token_hash=synthetic-non-secret-hash&type=recovery',
+    '#token_hash=synthetic-non-secret-hash&type=recovery\n',
+    '#\ntoken_hash=synthetic-non-secret-hash&type=recovery',
+  ];
+  for (const hash of variants) {
+    const result = parseActivationHash(hash);
+    assert.deepEqual(
+      result,
+      { valid: true, tokenHash: 'synthetic-non-secret-hash', type: 'recovery' },
+      `expected a valid recovery link for ${JSON.stringify(hash)}`
+    );
+  }
+});
+
+test('parseActivationHash (regression): a valid invite fragment is accepted with no pre-click error, even with corrupting whitespace present', () => {
+  const variants = [
+    '#token_hash=synthetic-non-secret-hash&type=invite',
+    '#token_hash=synthetic-non-secret-hash &type=invite',
+    '#token_hash=synthetic-non-secret-hash&type=invite\n',
+  ];
+  for (const hash of variants) {
+    const result = parseActivationHash(hash);
+    assert.deepEqual(
+      result,
+      { valid: true, tokenHash: 'synthetic-non-secret-hash', type: 'invite' },
+      `expected a valid invite link for ${JSON.stringify(hash)}`
+    );
+  }
+});
+
+test('parseActivationHash (regression): missing/unrecognized parameters still correctly show the safe "invalid" outcome — the fix did not make validation too lenient', () => {
+  assert.deepEqual(parseActivationHash('#type=recovery'), { valid: false }); // no token_hash
+  assert.deepEqual(parseActivationHash('#token_hash=abc123'), { valid: false }); // no type
+  assert.deepEqual(parseActivationHash('#token_hash=abc123&type=signup'), { valid: false }); // disallowed type
+  assert.deepEqual(parseActivationHash('#error=access_denied&error_code=otp_expired'), { valid: false }); // real expired-link shape
+  assert.deepEqual(parseActivationHash(''), { valid: false }); // bare visit
+});
+
+test('regression: reaching a valid "ready" result never itself calls or requires a Supabase client — verifyOtp is only reachable from a click', () => {
+  // parseActivationHash's whole call chain (parseHashParams ->
+  // validateActivationParams) takes only a string and returns a plain
+  // object — there is no Supabase client parameter anywhere in that
+  // path, so it is structurally impossible for parsing/validating the
+  // fragment to invoke verifyOtp. Only performActivation ever does, and
+  // it requires an explicit auth client argument that the mount-time
+  // parse path never has access to.
+  assert.equal(parseActivationHash.length, 1, 'parseActivationHash takes only the raw hash string — no auth client');
+  assert.equal(validateActivationParams.length, 1, 'validateActivationParams takes only parsed params — no auth client');
+
+  const result = parseActivationHash('#token_hash=synthetic-non-secret-hash&type=recovery');
+  assert.equal(result.valid, true);
+  // Nothing above could have called verifyOtp — performActivation (the
+  // only function that does) was never referenced, let alone invoked.
+});

@@ -28,7 +28,21 @@ const MIN_PASSWORD_LENGTH = 8;
  * Supabase's implicit-grant recovery/invite links deliver
  * `access_token`/`type`/`error`/`error_code`/`error_description` this way
  * — never as a query string. Returns `{}` for an empty or malformed hash,
- * never throws.
+ * never throws. `+` is decoded as a space in values (kept deliberately —
+ * Supabase's own real `error_description` values use it that way, per
+ * this file's own test against a real observed Supabase error hash) but
+ * never in keys, where it would never be meaningful.
+ *
+ * **Fixed 2026-09-05** (found live, on `/internal/activate`, reproduced
+ * only with synthetic values — see `activationFlow.test.js`): a stray
+ * leading/trailing whitespace or newline adjacent to a key or value
+ * (plausible from a hand-edited email template's `href` line-wrapping)
+ * previously survived into the parsed key/value verbatim —
+ * `" token_hash"` or `"recovery\n"` never equals
+ * `"token_hash"`/`"recovery"` — silently making a syntactically valid
+ * `#token_hash=...&type=recovery` fragment parse as if `token_hash` or
+ * `type` were simply absent, before any click, with no error at all.
+ * Every key and value is now `.trim()`ed.
  */
 function parseHashParams(hash) {
   const raw = typeof hash === 'string' ? hash.replace(/^#/, '') : '';
@@ -42,8 +56,8 @@ function parseHashParams(hash) {
     let key;
     let value;
     try {
-      key = decodeURIComponent(rawKey);
-      value = decodeURIComponent(rawValue.replace(/\+/g, ' '));
+      key = decodeURIComponent(rawKey).trim();
+      value = decodeURIComponent(rawValue.replace(/\+/g, ' ')).trim();
     } catch (err) {
       // A malformed percent-encoding must never throw and break the page
       // — treat it the same as an unrecognized/empty hash.

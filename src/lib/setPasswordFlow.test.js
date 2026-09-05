@@ -44,6 +44,36 @@ test('parseHashParams: tolerates malformed percent-encoding without throwing', (
   assert.doesNotThrow(() => parseHashParams('#error_description=%E0%A4%A'));
 });
 
+// ─── Regression (2026-09-05): a real /internal/activate link showed
+// "invalid" before any click, despite a syntactically valid
+// #token_hash=...&type=recovery fragment. Reproduced only with
+// synthetic values: stray whitespace/newline adjacent to a key or value
+// (plausible from a hand-edited email template's href line-wrapping)
+// silently broke the exact-match lookup. Fixed by trimming every parsed
+// key and value. ─────────────────────────────────────────────────────
+
+test('parseHashParams (regression): a leading space before the first key is trimmed, not left corrupting the key', () => {
+  const parsed = parseHashParams('# token_hash=abc123def&type=recovery');
+  assert.equal(parsed.token_hash, 'abc123def');
+  assert.equal(parsed.type, 'recovery');
+});
+
+test('parseHashParams (regression): a trailing newline after the last value is trimmed, not left corrupting it', () => {
+  const parsed = parseHashParams('#token_hash=abc123def&type=recovery\n');
+  assert.equal(parsed.type, 'recovery', 'a trailing "\\n" must never make type !== "recovery"');
+});
+
+test('parseHashParams (regression): a stray leading newline right after "#" is trimmed', () => {
+  const parsed = parseHashParams('#\ntoken_hash=abc123def&type=recovery');
+  assert.equal(parsed.token_hash, 'abc123def');
+});
+
+test('parseHashParams (regression): whitespace around an internal pair is trimmed too, not only the first/last', () => {
+  const parsed = parseHashParams('#type=recovery& token_hash =abc123def ');
+  assert.equal(parsed.token_hash, 'abc123def');
+  assert.equal(parsed.type, 'recovery');
+});
+
 // ─── hasAuthErrorInHash / hashLooksLikeAuthLink ────────────────────────
 
 test('hasAuthErrorInHash', () => {
