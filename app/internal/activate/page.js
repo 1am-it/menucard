@@ -3,20 +3,31 @@
 // Scanner-resistant activation step for internal accounts — must be
 // visited *before* /internal/set-password can ever see a real session.
 //
-// Why this page exists, and why it works: see src/lib/activationFlow.js's
-// own header comment for the full explanation (Supabase's default email
-// link verifies a one-time token on a plain GET, which an automated
-// email-link scanner can trigger before the real recipient ever clicks —
-// this was observed live against this project's own invite links). The
-// fix: the email link carries the token only in the URL fragment
-// (`#token_hash=...&type=...`), which no server — not Supabase's, not
-// this app's — ever receives; and loading this page performs no
-// verification at all. Only an explicit button click calls
-// `supabase.auth.verifyOtp()`, a POST no passive scanner can trigger.
+// **Replaced 2026-09-05** (link-based → email+code flow): the earlier
+// design — a link carrying `#token_hash=...&type=...`, verified only
+// after a button click — was found live to still fail: a real reset
+// link reached this page already invalid *before* the human could ever
+// click "Activate account." Whatever consumed it did so from more than
+// a passive server-side GET (the token lived only in the URL fragment,
+// which no server ever receives at all), meaning even a click-gated
+// link is not safe against every real-world email-scanning behavior.
 //
-// No `redirect_to` is ever read from the URL — the only destination
-// after a successful activation is hardcoded below to
-// `/internal/set-password`, never a URL-supplied value.
+// This version removes the link/token from the email entirely. The
+// email now contains only a plain, static, **tokenless** link to this
+// exact page (safe to open any number of times, by anyone or anything,
+// with zero effect) plus a separate, human-readable one-time code
+// (`{{ .Token }}`) the person types in by hand, alongside their own
+// email address. There is nothing on this page's URL for any automated
+// visitor to consume — only `supabase.auth.verifyOtp({ email, token,
+// type })`, called from this page's submit handler after a real,
+// explicit click, can ever consume the code.
+//
+// `type` (`recovery` or `invite`) comes from a non-secret `?type=`
+// query parameter on the fixed link each email template points at —
+// never from free-form user input; there is no type selector in this
+// form. No `redirect_to`/destination is ever read from the URL either —
+// the only destination after a successful activation is hardcoded below
+// to `/internal/set-password`.
 //
 // Grants no access of its own — exactly like /internal/set-password,
 // this only establishes a session so that page's existing, unchanged
@@ -25,51 +36,63 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
-import { parseActivationHash, performActivation } from '@/src/lib/activationFlow'
+import {
+  resolveActivationType,
+  validateActivationForm,
+  activationValidationMessage,
+  performActivation,
+} from '@/src/lib/activationFlow'
+
+const inputStyle = {
+  padding: 10,
+  borderRadius: 8,
+  border: '1px solid var(--border)',
+  background: 'var(--bg-card)',
+  color: 'var(--text-primary)',
+}
 
 export default function ActivatePage() {
   const router = useRouter()
-  // 'invalid' | 'ready' | 'activating' — see parseActivationHash's own
-  // contract: reaching 'ready' never itself creates a session or calls
-  // Supabase; only handleActivate's explicit click path does.
-  const [viewState, setViewState] = useState('invalid')
-  const [tokenHash, setTokenHash] = useState(null)
-  const [type, setType] = useState(null)
+  const [type, setType] = useState('recovery')
+  const [email, setEmail] = useState('')
+  const [code, setCode] = useState('')
+  const [fieldError, setFieldError] = useState(null)
   const [activationError, setActivationError] = useState(null)
+  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
-    // Pure, local parsing only — parseActivationHash has no Supabase
-    // client to call even if it wanted to. No verification happens here.
-    const hash = typeof window !== 'undefined' ? window.location.hash : ''
-    const result = parseActivationHash(hash)
-    if (result.valid) {
-      setTokenHash(result.tokenHash)
-      setType(result.type)
-      setViewState('ready')
-    } else {
-      setViewState('invalid')
-    }
+    // Reading the query string is local and synchronous — no Supabase
+    // client involved, no verification of any kind happens here.
+    const search = typeof window !== 'undefined' ? window.location.search : ''
+    setType(resolveActivationType(search))
   }, [])
 
-  async function handleActivate() {
+  async function handleSubmit(e) {
+    e.preventDefault()
+    setFieldError(null)
     setActivationError(null)
-    setViewState('activating')
 
+    const validation = validateActivationForm(email, code)
+    if (!validation.valid) {
+      setFieldError(activationValidationMessage(validation.reason))
+      return
+    }
+
+    setSubmitting(true)
     let outcome
     try {
       const supabase = getSupabaseBrowser()
-      outcome = await performActivation(supabase.auth, { tokenHash, type })
+      outcome = await performActivation(supabase.auth, { email: validation.email, token: validation.code, type })
     } catch (err) {
       // getSupabaseBrowser() itself throwing (e.g. a browser/embedded
-      // context that blocks storage access — the same real-world failure
-      // class already fixed on /internal/set-password) must degrade the
-      // same safe way here too, never crash this page.
-      outcome = { ok: false, message: 'This activation link is invalid or has expired. Please request a new one.' }
+      // context that blocks storage access) must degrade the same safe
+      // way here too, never crash this page.
+      outcome = { ok: false, message: 'That code is invalid or has expired. Please request a new one.' }
     }
+    setSubmitting(false)
 
     if (!outcome.ok) {
       setActivationError(outcome.message)
-      setViewState('ready')
       return
     }
 
@@ -87,42 +110,48 @@ export default function ActivatePage() {
       }}
     >
       <h1 style={{ fontSize: 22, marginBottom: 16 }}>Activate your account</h1>
+      <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 16 }}>
+        Enter the email address and the code from {type === 'invite' ? 'your invitation' : 'the password reset'} email.
+      </p>
 
-      {viewState === 'invalid' && (
-        <div>
-          <p style={{ color: 'var(--danger)', fontSize: 14, marginBottom: 12 }}>
-            This activation link is invalid or has expired.
-          </p>
-          <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>
-            Please ask whoever manages internal accounts to send a new link.
-          </p>
-        </div>
-      )}
-
-      {(viewState === 'ready' || viewState === 'activating') && (
-        <div style={{ display: 'grid', gap: 12 }}>
-          <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>
-            Click below to activate your account.
-          </p>
-          {activationError && <div style={{ color: 'var(--danger)', fontSize: 13 }}>{activationError}</div>}
-          <button
-            type="button"
-            onClick={handleActivate}
-            disabled={viewState === 'activating'}
-            style={{
-              padding: 10,
-              borderRadius: 8,
-              border: 'none',
-              background: 'var(--green)',
-              color: '#fff',
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
-          >
-            {viewState === 'activating' ? 'Activating…' : 'Activate account'}
-          </button>
-        </div>
-      )}
+      <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 12 }}>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          autoComplete="email"
+          required
+          style={inputStyle}
+        />
+        <input
+          type="text"
+          placeholder="Code"
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+          autoComplete="one-time-code"
+          inputMode="numeric"
+          required
+          style={inputStyle}
+        />
+        {fieldError && <div style={{ color: 'var(--danger)', fontSize: 13 }}>{fieldError}</div>}
+        {activationError && <div style={{ color: 'var(--danger)', fontSize: 13 }}>{activationError}</div>}
+        <button
+          type="submit"
+          disabled={submitting}
+          style={{
+            padding: 10,
+            borderRadius: 8,
+            border: 'none',
+            background: 'var(--green)',
+            color: '#fff',
+            fontWeight: 600,
+            cursor: 'pointer',
+          }}
+        >
+          {submitting ? 'Activating…' : 'Activate account'}
+        </button>
+      </form>
     </main>
   )
 }

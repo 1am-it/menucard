@@ -312,6 +312,77 @@ now decided, not merely recommended:**
   does not substitute for, the still-required email-template edit above:
   the allowlist only permits a `redirectTo` value used elsewhere; it does
   not change what URL any email template's own link points to.
+
+  **Correction (2026-09-05, a third time this day): the click-gated link
+  above was itself found live to still be insufficient, and has been
+  replaced — not supplemented — with an email+code flow.** After the
+  above was deployed and the manual email-template edit made, a real
+  password-reset link reached `/internal/activate` already invalid
+  *before* the human could ever click "Activate account" — meaning
+  whatever consumed the token did so by more than a passive server-side
+  GET (the token lived only in the URL fragment, which no server, not
+  even this app's own, ever receives), so a click-gated link is *not*
+  sufficient against every real-world email-scanning behavior actually
+  observed against this project's own mailbox. `app/internal/activate/page.js`
+  and `src/lib/activationFlow.js` were rewritten (not extended) to remove
+  the link/token from the email entirely, per Supabase's own documented
+  alternative ("Option 1: Use `{{ .Token }}` instead and create a page
+  where users enter their email and token",
+  `supabase.com/docs/guides/auth/auth-email-templates`): the email now
+  contains only a plain, static, **tokenless** link to `/internal/activate`
+  (safe to open any number of times, by anyone or anything, with zero
+  effect — nothing on it is single-use) plus a separate, human-readable
+  one-time code (`{{ .Token }}`) the person types into a form on that
+  page, alongside their own email address. `type` (`recovery`/`invite`)
+  is read from a non-secret `?type=` query parameter on the fixed link —
+  **never** from free-form user input; there is no type selector in the
+  form. `supabase.auth.verifyOtp({ email, token, type })` is what
+  actually consumes the code, called only from the form's submit
+  handler, after a real, explicit click — structurally identical
+  reasoning to the link-based design's own click-gating, applied to a
+  channel (a manually-typed code) that has no URL for anything automated
+  to visit or interact with at all.
+
+  **Remaining manual step, not yet done, not performed by this
+  document, and only to happen *after* this code change is deployed to
+  production** — the Supabase dashboard's **Reset Password** and
+  **Invite user** email templates (Authentication → Email Templates)
+  must each be changed again, this time to show the code and a plain,
+  tokenless link.
+
+  **Correction (2026-09-05, a fourth time this day): the template link
+  basis below is corrected from `{{ .SiteURL }}` to `{{ .RedirectTo }}`**
+  — the earlier version of this paragraph used `{{ .SiteURL }}`, which is
+  only the project's bare configured Site URL and carries no path or
+  query of its own; it does not, by itself, resolve to
+  `/internal/activate?type=...`. `{{ .RedirectTo }}` is the template
+  variable that reflects back whatever `redirectTo` the *triggering call*
+  itself supplied (`resetPasswordForEmail`/`inviteUserByEmail`) — the
+  same variable, and the same "the call decides the destination, the
+  allowlist only permits it" split, already established earlier in this
+  document's own "two distinct things are required, not one" correction
+  for the prior link-based design. Corrected template content
+  (Reset Password):
+  ```html
+  <p>Your code: {{ .Token }}</p>
+  <p><a href="{{ .RedirectTo }}">Activate your account</a></p>
+  ```
+  and the identical form for Invite user — only the `redirectTo` value
+  the triggering call passes differs between the two, never the template
+  itself. **Consequently, the future triggering call must itself pass the
+  complete, exact, allowed destination as `redirectTo`, per type — not
+  merely the bare origin:**
+  - `recovery`: `redirectTo: 'https://menucard-kappa.vercel.app/internal/activate?type=recovery'`
+  - `invite`: `redirectTo: 'https://menucard-kappa.vercel.app/internal/activate?type=invite'`
+
+  Unchanged from the correction this replaces: the link carries no token
+  of any kind — only `type`, which is not a secret — so it remains safe
+  for any automated visitor to load any number of times; the code itself
+  is shown only as plain text in the email body, never inside the link,
+  and the person types it into the form by hand. The
+  `#token_hash={{ .TokenHash }}&type=...` fragment-based template content
+  documented earlier in this same section remains superseded and must
+  not be used going forward, regardless of this further correction.
 - **The future live test matrix must include a real `internal`-session
   test**, not only `owner`/`editor`/anonymous denial tests — mirroring
   the `docs/guides/internal-api-live-testing.md` session-minting pattern

@@ -1,81 +1,104 @@
 // Pure decision logic for /internal/activate — the scanner-resistant
 // step that must exist *before* /internal/set-password.
 //
-// Why this page exists: Supabase's default email link
-// (`{{ .ConfirmationURL }}`) points straight at Supabase's own
-// `/auth/v1/verify` endpoint and verifies the one-time token on a plain
-// GET request, with no user interaction at all. Per Supabase's own
-// documentation (supabase.com/docs/guides/auth/auth-email-templates):
-// "Certain email providers may have spam detection or other security
-// features that prefetch URL links from incoming emails" — an automated
-// scanner visiting the link consumes the single-use token before the
-// real recipient ever clicks it, which is exactly what was observed live
-// against this project's own invite links. The fix, per that same
-// documentation's recommended pattern: route the email link through a
-// page of our own that does nothing on load, and only calls
-// `supabase.auth.verifyOtp()` (a POST — never triggerable by a passive
-// GET-only scanner) after a real, explicit button click.
+// **Replaced 2026-09-05** (link-based fragment flow → email+code flow):
+// the earlier design (a link with `#token_hash=...&type=...`, verified
+// only after a button click) was itself found live to be insufficient —
+// a real reset link reached this page already invalid *before* the
+// human could ever click "Activate account," meaning whatever
+// consumed it did so by more than a passive GET (the token was only
+// ever in the URL fragment, never sent to any server at all — see the
+// previous version of this file's own header comment for that design).
+// This version removes the link/token from the email entirely. The
+// email now contains only: a plain, static, tokenless link to this page
+// (nothing on it is single-use or consumable — it may be opened any
+// number of times by anyone, including a scanner, with zero effect) and
+// a separate, human-readable one-time code (`{{ .Token }}`) the person
+// types in by hand. There is no URL for anything automated to visit or
+// interact with that could ever consume the code — only a real human,
+// reading the email and typing the code into this form, can.
 //
-// The token is carried **only in the URL fragment**
-// (`#token_hash=...&type=...`), deliberately not as a query string —
-// unlike a query string, a URL fragment is never sent to any server at
-// all (not Supabase's, not this app's), so the token never appears in
-// any server or proxy log in the first place, not even ours. No
-// `redirect_to` parameter is accepted from the URL — the only
-// destination after a successful activation is hardcoded to
-// `/internal/set-password` on the page itself, never a URL-supplied
-// value, closing off an avoidable open-redirect surface.
+// `supabase.auth.verifyOtp({ email, token, type })` is what actually
+// consumes the code — a POST, and only ever called from this page's
+// submit handler, after a real, explicit click.
 //
-// Deliberately CommonJS, same reasoning as setPasswordFlow.js (which
-// this module reuses `parseHashParams` from) — directly testable via
-// this project's existing `node --test` tooling, no new dependency,
-// interoperates fine with Next.js's ESM 'use client' page that imports
-// it.
+// Deliberately CommonJS, same reasoning as setPasswordFlow.js —
+// directly testable via this project's existing `node --test` tooling,
+// no new dependency, interoperates fine with the ESM 'use client' page
+// that imports it.
 
 'use strict';
 
-const { parseHashParams } = require('./setPasswordFlow');
-
 /** The only two Supabase OTP types this page ever accepts — matches the
  * two real flows that lead here: accepting an invite, or resetting a
- * password. Any other value (or none) is treated as an invalid link,
- * never partially trusted or guessed at. */
+ * password. */
 const ALLOWED_OTP_TYPES = ['recovery', 'invite'];
 
+/** Used whenever the `type` query parameter is absent or unrecognized —
+ * `recovery` (a password reset) is the more common admin-facing flow,
+ * and guessing wrong here is never unsafe: `verifyOtp` itself is the
+ * only thing that can ever decide whether a given email+code pair is
+ * genuininely valid for the attempted type. A wrong guess simply fails
+ * safely at that point, exactly like any other invalid code — it never
+ * grants anything. */
+const DEFAULT_OTP_TYPE = 'recovery';
+
 /**
- * Validates an already-parsed hash-params object down to exactly
- * `{ valid: true, tokenHash, type }` or `{ valid: false }` — never
- * throws, never partially accepts a malformed or unrecognized-type link.
+ * Resolves which OTP type this activation attempt is for — from the
+ * non-secret `type` query parameter on the fixed link each email
+ * template points at (e.g. `?type=invite`), **never** from free-form
+ * user input (there is no type selector in the form below). Malformed
+ * input, or a value outside `ALLOWED_OTP_TYPES`, safely falls back to
+ * `DEFAULT_OTP_TYPE` — never throws.
  */
-function validateActivationParams(hashParams) {
-  const params = hashParams || {};
-  const tokenHash = params.token_hash;
-  const type = params.type;
-  if (!tokenHash || !type || !ALLOWED_OTP_TYPES.includes(type)) {
-    return { valid: false };
+function resolveActivationType(search) {
+  let raw = null;
+  try {
+    raw = new URLSearchParams(search || '').get('type');
+  } catch (err) {
+    raw = null;
   }
-  return { valid: true, tokenHash, type };
+  return ALLOWED_OTP_TYPES.includes(raw) ? raw : DEFAULT_OTP_TYPE;
+}
+
+function normalizeEmail(email) {
+  return typeof email === 'string' ? email.trim() : '';
+}
+
+function normalizeCode(code) {
+  return typeof code === 'string' ? code.trim() : '';
 }
 
 /**
- * The one function the page calls on mount: parses the raw URL hash
- * string directly into a validation result. Reading and validating the
- * fragment here never calls Supabase and never creates a session —
- * `parseHashParams` is a pure string parser (already proven never to
- * throw, see setPasswordFlow.test.js) and `validateActivationParams`
- * above is a pure property check; there is no Supabase SDK call on this
- * path at all, unlike the click handler below.
+ * Minimal, client-side-only sanity checks — a UX guard only, never the
+ * authoritative check (`verifyOtp` is). A syntactically fine-looking
+ * email and a non-empty code can still be rejected by Supabase; this
+ * only avoids an obviously-empty or clearly-malformed submit.
  */
-function parseActivationHash(hash) {
-  return validateActivationParams(parseHashParams(hash));
+function validateActivationForm(email, code) {
+  const normalizedEmail = normalizeEmail(email);
+  const normalizedCode = normalizeCode(code);
+  if (!normalizedEmail || !normalizedEmail.includes('@')) {
+    return { valid: false, reason: 'invalid-email' };
+  }
+  if (!normalizedCode) {
+    return { valid: false, reason: 'missing-code' };
+  }
+  return { valid: true, email: normalizedEmail, code: normalizedCode };
+}
+
+function activationValidationMessage(reason) {
+  if (reason === 'invalid-email') return 'Enter the email address the code was sent to.';
+  if (reason === 'missing-code') return 'Enter the code from the email.';
+  return '';
 }
 
 /**
  * Maps any `supabase.auth.verifyOtp(...)` result to exactly one safe,
- * generic outcome — never the raw Supabase error, never a token or other
- * technical detail. `error` may be `null`/`undefined` (success) or any
- * thrown/rejected value; both are handled without inspecting *why* it
- * failed, matching this page's own "never reveal technical detail" rule.
+ * generic outcome — never the raw Supabase error, never the code, the
+ * email, or any other account/technical detail. `error` may be
+ * `null`/`undefined` (success) or any thrown/rejected value; both are
+ * handled without inspecting *why* it failed.
  */
 function resolveActivationOutcome(error) {
   if (!error) {
@@ -83,23 +106,23 @@ function resolveActivationOutcome(error) {
   }
   return {
     ok: false,
-    message: 'This activation link is invalid or has expired. Please request a new one.',
+    message: 'That code is invalid or has expired. Please request a new one.',
   };
 }
 
 /**
- * Calls `supabaseAuth.verifyOtp({ token_hash, type })` and resolves to a
- * safe outcome — **never throws, never rejects**, regardless of what the
- * underlying client does. Mirrors `detectSessionViewState`'s own
- * defensive contract in setPasswordFlow.js, added there after a real
- * production crash on the sibling page — the exact same class of failure
- * (an unhandled exception from a Supabase SDK call escaping a React
- * effect/handler and crashing the whole page) must not be reintroduced
+ * Calls `supabaseAuth.verifyOtp({ email, token, type })` and resolves to
+ * a safe outcome — **never throws, never rejects**, regardless of what
+ * the underlying client does. Mirrors `detectSessionViewState`'s own
+ * defensive contract in `setPasswordFlow.js`, added there after a real
+ * production crash on the sibling page — the exact same class of
+ * failure (an unhandled exception from a Supabase SDK call escaping a
+ * React handler and crashing the whole page) must not be reintroduced
  * here.
  */
-async function performActivation(supabaseAuth, { tokenHash, type }) {
+async function performActivation(supabaseAuth, { email, token, type }) {
   try {
-    const { error } = await supabaseAuth.verifyOtp({ token_hash: tokenHash, type });
+    const { error } = await supabaseAuth.verifyOtp({ email, token, type });
     return resolveActivationOutcome(error);
   } catch (err) {
     return resolveActivationOutcome(err);
@@ -108,8 +131,12 @@ async function performActivation(supabaseAuth, { tokenHash, type }) {
 
 module.exports = {
   ALLOWED_OTP_TYPES,
-  validateActivationParams,
-  parseActivationHash,
+  DEFAULT_OTP_TYPE,
+  resolveActivationType,
+  normalizeEmail,
+  normalizeCode,
+  validateActivationForm,
+  activationValidationMessage,
   resolveActivationOutcome,
   performActivation,
 };
