@@ -13,6 +13,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
+import {
+  ALLOWED_REVIEW_STATUSES,
+  ALLOWED_REJECTION_REASONS,
+  validateReviewDecisionInput,
+  reviewValidationMessage,
+} from '@/src/lib/importInbox'
 
 // Mirrors ops/scripts/import-breda-osm.config.js's own
 // ALLOWED_AMENITY_VALUES — the fixed, complete set of categories this
@@ -20,6 +26,24 @@ import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 // list here rather than importing across the app/ops boundary; update
 // both places together if that list ever changes.
 const CATEGORY_OPTIONS = ['restaurant', 'cafe', 'fast_food', 'bar', 'pub']
+
+const REVIEW_STATUS_OPTIONS = ['new', ...ALLOWED_REVIEW_STATUSES]
+
+const REVIEW_STATUS_LABELS = {
+  new: 'New',
+  needs_enrichment: 'Needs enrichment',
+  approved_internal: 'Approved (internal only)',
+  rejected: 'Rejected',
+  deferred: 'Deferred',
+}
+
+const REJECTION_REASON_LABELS = {
+  not_a_restaurant: 'Not a restaurant',
+  duplicate: 'Duplicate',
+  permanently_closed: 'Permanently closed',
+  insufficient_data: 'Insufficient data',
+  other: 'Other',
+}
 
 const cardStyle = {
   border: '1px solid var(--border)',
@@ -70,6 +94,18 @@ export default function ImportInboxPage() {
   const [nameFilter, setNameFilter] = useState('')
   const [duplicateFilter, setDuplicateFilter] = useState('')
   const [qualityFilter, setQualityFilter] = useState('')
+  const [reviewStatusFilter, setReviewStatusFilter] = useState('')
+
+  // MARKET-05A: per-candidate review detail view. Keyed by candidate id
+  // so switching between candidates never loses another one's already-
+  // fetched history or in-progress draft decision.
+  const [expandedCandidateId, setExpandedCandidateId] = useState(null)
+  const [reviewsByCandidateId, setReviewsByCandidateId] = useState({})
+  const [reviewsLoadingId, setReviewsLoadingId] = useState(null)
+  const [reviewsErrorId, setReviewsErrorId] = useState(null)
+  const [decisionDraftByCandidateId, setDecisionDraftByCandidateId] = useState({})
+  const [decisionSubmittingId, setDecisionSubmittingId] = useState(null)
+  const [decisionErrorByCandidateId, setDecisionErrorByCandidateId] = useState({})
 
   useEffect(() => {
     const supabase = getSupabaseBrowser()
@@ -113,6 +149,7 @@ export default function ImportInboxPage() {
       if (filters.name) params.set('name', filters.name)
       if (filters.duplicate) params.set('possible_duplicate', filters.duplicate)
       if (filters.quality) params.set('quality', filters.quality)
+      if (filters.reviewStatus) params.set('review_status', filters.reviewStatus)
 
       const res = await fetch(`/api/internal/v1/import-inbox/candidates?${params.toString()}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -133,6 +170,29 @@ export default function ImportInboxPage() {
     }
   }, [])
 
+  // MARKET-05A — fetches one candidate's full, append-only review
+  // history (newest first). Never mutates anything; the decision form
+  // below is the only thing that ever writes, via a separate POST.
+  const loadReviews = useCallback(async (token, candidateId) => {
+    setReviewsLoadingId(candidateId)
+    setReviewsErrorId(null)
+    try {
+      const res = await fetch(`/api/internal/v1/import-inbox/candidates/${candidateId}/reviews`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setReviewsErrorId(candidateId)
+        return
+      }
+      setReviewsByCandidateId((prev) => ({ ...prev, [candidateId]: data.reviews || [] }))
+    } catch {
+      setReviewsErrorId(candidateId)
+    } finally {
+      setReviewsLoadingId((current) => (current === candidateId ? null : current))
+    }
+  }, [])
+
   useEffect(() => {
     if (session) {
       loadRuns(session.access_token)
@@ -147,9 +207,10 @@ export default function ImportInboxPage() {
         name: nameFilter,
         duplicate: duplicateFilter,
         quality: qualityFilter,
+        reviewStatus: reviewStatusFilter,
       })
     }
-  }, [session, runIdFilter, categoryFilter, nameFilter, duplicateFilter, qualityFilter, loadCandidates])
+  }, [session, runIdFilter, categoryFilter, nameFilter, duplicateFilter, qualityFilter, reviewStatusFilter, loadCandidates])
 
   async function signOut() {
     const supabase = getSupabaseBrowser()
@@ -157,12 +218,84 @@ export default function ImportInboxPage() {
     router.replace('/internal/login')
   }
 
+  // MARKET-05A — expand/collapse one candidate's detail view. Fetches its
+  // review history lazily, only on first expand, not on every render.
+  function toggleExpand(candidateId) {
+    const next = expandedCandidateId === candidateId ? null : candidateId
+    setExpandedCandidateId(next)
+    if (next && !reviewsByCandidateId[next] && session) {
+      loadReviews(session.access_token, next)
+    }
+  }
+
+  function updateDraft(candidateId, patch) {
+    setDecisionDraftByCandidateId((prev) => ({
+      ...prev,
+      [candidateId]: { status: '', rejectionReason: '', note: '', ...prev[candidateId], ...patch },
+    }))
+  }
+
+  // MARKET-05A — records exactly one new decision (POST, never a PATCH/
+  // PUT) via candidates/[id]/reviews. Client-side validation mirrors
+  // src/lib/importInbox.js's validateReviewDecisionInput exactly — the
+  // same function the API route itself uses — so a rejected submission
+  // is never a surprise; the server-side check remains authoritative
+  // regardless.
+  async function submitDecision(candidateId) {
+    const draft = decisionDraftByCandidateId[candidateId] || { status: '', rejectionReason: '', note: '' }
+    const validation = validateReviewDecisionInput({
+      status: draft.status,
+      rejectionReason: draft.rejectionReason || undefined,
+      note: draft.note || undefined,
+    })
+    if (!validation.valid) {
+      setDecisionErrorByCandidateId((prev) => ({ ...prev, [candidateId]: reviewValidationMessage(validation.reason) }))
+      return
+    }
+
+    setDecisionSubmittingId(candidateId)
+    setDecisionErrorByCandidateId((prev) => ({ ...prev, [candidateId]: null }))
+    try {
+      const res = await fetch(`/api/internal/v1/import-inbox/candidates/${candidateId}/reviews`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: validation.status,
+          rejection_reason: validation.rejectionReason,
+          note: validation.note,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setDecisionErrorByCandidateId((prev) => ({ ...prev, [candidateId]: data.error || 'Recording the decision failed' }))
+        return
+      }
+      setDecisionDraftByCandidateId((prev) => ({ ...prev, [candidateId]: { status: '', rejectionReason: '', note: '' } }))
+      await loadReviews(session.access_token, candidateId)
+      await loadCandidates(session.access_token, {
+        runId: runIdFilter,
+        category: categoryFilter,
+        name: nameFilter,
+        duplicate: duplicateFilter,
+        quality: qualityFilter,
+        reviewStatus: reviewStatusFilter,
+      })
+    } catch {
+      setDecisionErrorByCandidateId((prev) => ({ ...prev, [candidateId]: 'Recording the decision failed' }))
+    } finally {
+      setDecisionSubmittingId((current) => (current === candidateId ? null : current))
+    }
+  }
+
   if (session === undefined) {
     return <main style={{ padding: 40, fontFamily: 'system-ui, sans-serif' }}>Loading…</main>
   }
 
   const selectedRun = runIdFilter ? runs.find((r) => r.id === runIdFilter) || null : null
-  const filtersActive = Boolean(categoryFilter || nameFilter || duplicateFilter || qualityFilter)
+  const filtersActive = Boolean(categoryFilter || nameFilter || duplicateFilter || qualityFilter || reviewStatusFilter)
 
   // Same decision src/lib/importInbox.js's classifyInboxState makes,
   // inlined here rather than re-imported into a 'use client' bundle for
@@ -206,9 +339,11 @@ export default function ImportInboxPage() {
       </div>
 
       <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginTop: 0, marginBottom: 24 }}>
-        Read-only. Nothing on this page can write to <code>import_runs</code>, <code>import_extraction_records</code>, or
-        any canonical table. "Possible duplicate" and quality status are computed on every load — never stored, never a
-        review decision.
+        Nothing here can ever write to <code>import_runs</code>, <code>import_extraction_records</code>, or any canonical
+        or public table. "Possible duplicate" and quality status are computed on every load — never stored. Recording a
+        review decision below only ever adds a new row to a separate, append-only audit log
+        (<code>import_candidate_reviews</code>) — the raw import record itself is never changed. "Approved (internal
+        only)" means ready for internal enrichment only — never public publication, never a MenuCard.
       </p>
 
       <h2 style={{ fontSize: 18, marginBottom: 12 }}>Import runs</h2>
@@ -308,6 +443,14 @@ export default function ImportInboxPage() {
               <option value="complete">Complete</option>
               <option value="incomplete">Incomplete</option>
             </select>
+            <select value={reviewStatusFilter} onChange={(e) => setReviewStatusFilter(e.target.value)} style={selectStyle}>
+              <option value="">Any review status</option>
+              {REVIEW_STATUS_OPTIONS.map((s) => (
+                <option key={s} value={s}>
+                  {REVIEW_STATUS_LABELS[s]}
+                </option>
+              ))}
+            </select>
           </div>
 
           {showErrorBanner && (
@@ -337,30 +480,155 @@ export default function ImportInboxPage() {
 
           {candidates.length > 0 && (
             <div style={{ display: 'grid', gap: 12 }}>
-              {candidates.map((c) => (
-                <div key={c.id} style={cardStyle}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-                    <div style={{ fontSize: 15, fontWeight: 600 }}>{c.extracted_fields?.name || '(no name)'}</div>
-                    <div style={{ display: 'flex', gap: 6 }}>
-                      <span style={badgeStyle(c.quality_status === 'complete' ? 'var(--green-faint)' : 'var(--warning-bg)', c.quality_status === 'complete' ? 'var(--green)' : 'var(--warning)')}>
-                        {c.quality_status}
-                      </span>
-                      {c.possible_duplicate && <span style={badgeStyle('var(--warning-bg)', 'var(--warning)')}>possible duplicate</span>}
+              {candidates.map((c) => {
+                const expanded = expandedCandidateId === c.id
+                const draft = decisionDraftByCandidateId[c.id] || { status: '', rejectionReason: '', note: '' }
+                const reviews = reviewsByCandidateId[c.id]
+                return (
+                  <div key={c.id} style={cardStyle}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                      <div style={{ fontSize: 15, fontWeight: 600 }}>{c.extracted_fields?.name || '(no name)'}</div>
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                        <span style={badgeStyle(c.quality_status === 'complete' ? 'var(--green-faint)' : 'var(--warning-bg)', c.quality_status === 'complete' ? 'var(--green)' : 'var(--warning)')}>
+                          {c.quality_status}
+                        </span>
+                        {c.possible_duplicate && <span style={badgeStyle('var(--warning-bg)', 'var(--warning)')}>possible duplicate</span>}
+                        <span
+                          style={badgeStyle(
+                            c.review_status === 'approved_internal'
+                              ? 'var(--green-faint)'
+                              : c.review_status === 'rejected'
+                                ? 'var(--danger-bg)'
+                                : c.review_status === 'new'
+                                  ? 'var(--bg-card)'
+                                  : 'var(--warning-bg)',
+                            c.review_status === 'approved_internal'
+                              ? 'var(--green)'
+                              : c.review_status === 'rejected'
+                                ? 'var(--danger)'
+                                : c.review_status === 'new'
+                                  ? 'var(--text-muted)'
+                                  : 'var(--warning)'
+                          )}
+                        >
+                          {REVIEW_STATUS_LABELS[c.review_status] || c.review_status}
+                        </span>
+                      </div>
                     </div>
+                    <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 4 }}>
+                      {c.extracted_fields?.category || '—'}
+                      {c.extracted_fields?.address ? ` · ${c.extracted_fields.address}` : ''}
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                      {c.extracted_fields?.phone ? `${c.extracted_fields.phone} · ` : ''}
+                      {c.extracted_fields?.website || ''}
+                    </div>
+                    {c.missing_fields && c.missing_fields.length > 0 && (
+                      <div style={{ fontSize: 12, color: 'var(--warning)', marginTop: 6 }}>Missing: {c.missing_fields.join(', ')}</div>
+                    )}
+                    <div style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 8, marginBottom: 8 }}>
+                      {c.record_locator} · imported {c.retrieved_at}
+                    </div>
+                    <button
+                      onClick={() => toggleExpand(c.id)}
+                      style={{
+                        fontSize: 12,
+                        padding: '4px 10px',
+                        borderRadius: 8,
+                        border: '1px solid var(--border)',
+                        background: expanded ? 'var(--green-faint)' : 'transparent',
+                        color: expanded ? 'var(--green)' : 'var(--text-secondary)',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {expanded ? 'Hide details' : 'Details & review'}
+                    </button>
+
+                    {expanded && (
+                      <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
+                        <h3 style={{ fontSize: 13, margin: '0 0 8px', color: 'var(--text-secondary)' }}>Review history</h3>
+                        {reviewsLoadingId === c.id && <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Loading…</p>}
+                        {reviewsErrorId === c.id && (
+                          <p style={{ color: 'var(--danger)', fontSize: 13 }}>Failed to load review history.</p>
+                        )}
+                        {reviewsLoadingId !== c.id && reviews && reviews.length === 0 && (
+                          <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>No review decisions recorded yet — currently "new".</p>
+                        )}
+                        {reviews && reviews.length > 0 && (
+                          <div style={{ display: 'grid', gap: 6, marginBottom: 14 }}>
+                            {reviews.map((r) => (
+                              <div key={r.id} style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+                                <strong>{REVIEW_STATUS_LABELS[r.status] || r.status}</strong>
+                                {r.rejection_reason ? ` (${REJECTION_REASON_LABELS[r.rejection_reason] || r.rejection_reason})` : ''}
+                                {' · '}
+                                {r.decided_at}
+                                {r.note ? <div style={{ color: 'var(--text-muted)', marginTop: 2 }}>{r.note}</div> : null}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        <h3 style={{ fontSize: 13, margin: '0 0 8px', color: 'var(--text-secondary)' }}>Record a decision</h3>
+                        <div style={{ display: 'grid', gap: 8, maxWidth: 420 }}>
+                          <select
+                            value={draft.status}
+                            onChange={(e) => updateDraft(c.id, { status: e.target.value, rejectionReason: '' })}
+                            style={selectStyle}
+                          >
+                            <option value="">Choose a status…</option>
+                            {ALLOWED_REVIEW_STATUSES.map((s) => (
+                              <option key={s} value={s}>
+                                {REVIEW_STATUS_LABELS[s]}
+                              </option>
+                            ))}
+                          </select>
+                          {draft.status === 'rejected' && (
+                            <select
+                              value={draft.rejectionReason}
+                              onChange={(e) => updateDraft(c.id, { rejectionReason: e.target.value })}
+                              style={selectStyle}
+                            >
+                              <option value="">Choose a rejection reason…</option>
+                              {ALLOWED_REJECTION_REASONS.map((r) => (
+                                <option key={r} value={r}>
+                                  {REJECTION_REASON_LABELS[r]}
+                                </option>
+                              ))}
+                            </select>
+                          )}
+                          <textarea
+                            placeholder="Optional internal note…"
+                            value={draft.note}
+                            onChange={(e) => updateDraft(c.id, { note: e.target.value })}
+                            rows={2}
+                            style={{ ...selectStyle, resize: 'vertical', fontFamily: 'inherit' }}
+                          />
+                          {decisionErrorByCandidateId[c.id] && (
+                            <div style={{ fontSize: 12, color: 'var(--danger)' }}>{decisionErrorByCandidateId[c.id]}</div>
+                          )}
+                          <button
+                            onClick={() => submitDecision(c.id)}
+                            disabled={decisionSubmittingId === c.id}
+                            style={{
+                              fontSize: 13,
+                              padding: '6px 12px',
+                              borderRadius: 8,
+                              border: 'none',
+                              background: 'var(--green)',
+                              color: '#fff',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                              justifySelf: 'start',
+                            }}
+                          >
+                            {decisionSubmittingId === c.id ? 'Saving…' : 'Save decision'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 4 }}>
-                    {c.extracted_fields?.category || '—'}
-                    {c.extracted_fields?.address ? ` · ${c.extracted_fields.address}` : ''}
-                  </div>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                    {c.extracted_fields?.phone ? `${c.extracted_fields.phone} · ` : ''}
-                    {c.extracted_fields?.website || ''}
-                  </div>
-                  <div style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 8 }}>
-                    {c.record_locator} · imported {c.retrieved_at}
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </>

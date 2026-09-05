@@ -25,6 +25,12 @@ parts, the same discipline already used for `MARKET-04`'s hard gates
   preparation only... no dashboard, route, or schema change has been
   built yet" — that was true for the round that wrote it, no longer true
   now; corrected here visibly rather than left stale.
+  **Further update (2026-09-05, still the same day): one real, limited
+  `ImportRun` now exists** (10 candidates, all inside Breda, no
+  canonical/public write) **and the candidate review workflow — statuses,
+  an append-only decision log, and a detail view — is built on top of
+  it.** See "Implementation (2026-09-05, later the same day) — candidate
+  review workflow" below.
 - **`MARKET-05B` — Normalization & deduplication (the original scope).**
   Matching/merging multiple sources into canonical candidate records, per
   `market-data-foundation-plan.md`'s original description. **Untouched,
@@ -128,8 +134,12 @@ record is created, matched, or touched by `MARKET-05A`.
   stored" below for why neither is a new database column in this first
   version.
 - **Explicit empty/error/not-yet-imported states**:
-  - **No `ImportRun`s exist yet** (true today, live) — a clear "Nog geen
-    importrun uitgevoerd" state, not an empty table with no explanation.
+  - **No `ImportRun`s exist yet** — a clear "Nog geen importrun
+    uitgevoerd" state, not an empty table with no explanation. **Correction
+    (2026-09-05, later the same day): one real `ImportRun` now exists**
+    (see "Status" below) — this empty state is still correctly built and
+    still the state a *fresh* market/source combination would show, but
+    it is no longer literally "true today" for Breda specifically.
   - **A run exists but produced zero stored candidates** (e.g. every
     candidate fell outside the boundary) — distinct from "no run at all."
   - **A run `failed`/is `partial`** — surface `error_log` entries
@@ -429,11 +439,110 @@ request gets `401`; a real, existing `owner` account and a real, existing
 live-verifiable**: the `internal`-role success path — no working
 `internal` account exists yet (its email activation link is the still-
 broken flow `app/internal/activate/page.js` was built to fix, but no
-account has completed that flow end-to-end), and zero `ImportRun`s exist,
-so there is nothing for a real `internal` session to browse yet even once
-one exists. The "no import runs yet" empty state is, right now, the only
-genuinely reachable state in production — confirmed live via the real
-`runs`/`candidates` endpoints once a session is available.
+account has completed that flow end-to-end).
+
+**Correction (2026-09-05, later the same day): one real `ImportRun` now
+exists** — see "Status" and "Acceptance criteria" below for the full,
+corrected picture. The claim above ("zero `ImportRun`s exist, so there is
+nothing for a real `internal` session to browse") is no longer accurate;
+left visible rather than silently rewritten.
+
+### Implementation (2026-09-05, later the same day) — candidate review workflow
+
+Built as the next feature after the first real, limited Breda
+`ImportRun` (see "Status" below) — the previously-deferred "review notes
+and accept/reject-style decisions" item from this ticket's own "Out of
+scope" section is **no longer deferred**; it is built:
+
+- **`supabase/migrations/0007_market05a_candidate_reviews.sql`** — the
+  separate, append-only `import_candidate_reviews` audit table this
+  ticket's original "Out of scope"/"Data model needs" sections named but
+  explicitly did not build. One row per review **decision**, never one
+  row per candidate — recording a second decision for the same candidate
+  is always a new row; `import_extraction_records` itself is never
+  touched. `internal`-only, matching "Access control" above exactly (not
+  `editor`, not `owner`). Written and locally validated in a disposable,
+  containerized PostgreSQL instance with the real 0001–0006 migrations
+  and seed data applied first (happy path, the not-found case, both
+  check-constraint directions on `rejection_reason`, and — critically —
+  that even `service_role` gets `permission denied` on `UPDATE`/`DELETE`
+  against this table, since only `select, insert` is ever granted).
+  **Applied live (2026-09-05, later the same day)**, manually, in the
+  Supabase SQL Editor — read-only re-verified afterward against the real
+  project (same grant behavior confirmed live, one real `ImportRun`/10
+  candidates unchanged, zero rows in this new table). See the "Correction"
+  paragraph at the end of this section for the full live verification.
+- **Statuses**: `needs_enrichment`, `approved_internal`, `rejected`,
+  `deferred` — plus `new`, which is never itself stored (a pure
+  application-level default meaning "no review row exists yet for this
+  candidate," computed from the latest row's `decided_at`). **`approved_internal`
+  means ready for internal enrichment only — never public publication,
+  never a MenuCard.** `rejected` requires one of a fixed set of reasons
+  (`not_a_restaurant`, `duplicate`, `permanently_closed`,
+  `insufficient_data`, `other`); every other status forbids one — enforced
+  both by a database check constraint and by the API's own validation.
+- **`record_import_candidate_review()`** (Postgres function, `security
+  invoker`, fixed `search_path`) — the only way any decision is ever
+  written; always exactly one insert, mirroring `0002_pending_changes.sql`'s
+  `approve_pending_change()` pattern (typed not-found error, not a raw
+  foreign-key violation) but stricter: that function updates a row in
+  place on approval, this one never updates anything at all.
+- **`src/lib/importInbox.js`** (extended, +21 tests, 51 total) —
+  `validateReviewDecisionInput`/`reviewValidationMessage` (the same
+  validation the API route and the page's client-side pre-check both
+  use), `computeEffectiveReviewStatus`/`buildReviewStatusByCandidateId`
+  (latest-decision-wins, tie-broken by row id, never the first or last
+  row blindly). Also includes four **structural safety-net** tests that
+  read the actual route/migration source files and assert no
+  `.update()`/`.delete()` call and no reference to a canonical/public
+  identifier appears anywhere in them — a regression guard against a
+  future edit accidentally weakening either guarantee, not merely a
+  point-in-time claim.
+- **`app/api/internal/v1/import-inbox/candidates/[id]/reviews/route.js`**
+  — `GET` (full review history for one candidate, newest first) and
+  `POST` (record one new decision), both `internal`-only.
+- **`app/api/internal/v1/import-inbox/candidates/route.js`** (extended)
+  — now also resolves and returns each candidate's effective
+  `review_status`, and accepts a `review_status` filter, alongside the
+  existing filters. Still `GET`-only; the added query is itself
+  read-only.
+- **`app/internal/import-inbox/page.js`** (extended) — each candidate
+  card shows a `review_status` badge, a "Missing: `field`, `field`" line
+  from `missing_fields` (e.g. `Missing: phone`), and an expandable detail
+  view with the full review history and a form to record a new decision
+  (status, conditional rejection reason, optional note).
+- **Deliberately not built this round — a later, evidence-based signal,
+  not guessed at now**: automatic chain/franchise classification. A
+  candidate that is part of a chain (e.g. multiple OSM nodes sharing an
+  operator) is not detected, flagged, or specially treated by anything in
+  this round. When this is eventually built, the intended signal is OSM's
+  own `brand`/`brand:wikidata` tags (already present in upstream OSM data
+  for many chains, though not currently in this pipeline's minimized
+  `basic_info` allowlist — extending that allowlist is itself a separate,
+  later decision) or an explicit manual reviewer marking — never an
+  inferred/fuzzy guess from name similarity alone, which would risk
+  false-positives merging genuinely independent, identically-named
+  small businesses.
+
+**Not yet live-verified — the write path itself.** The migration has not
+been applied to the real Supabase project (see above); `POST
+.../candidates/{id}/reviews` has therefore never been exercised against
+it either. Local, containerized validation (above) is real and thorough,
+but is not a substitute for live verification once the migration is
+applied — that remains a separate, later, explicitly-approved step, per
+this project's own discipline throughout `MARKET-04`/`05A`.
+
+**Correction (2026-09-05, later the same day): migration `0007` has
+since been applied live**, manually, in the Supabase SQL Editor, and
+read-only re-verified afterward: `import_candidate_reviews` exists with
+the intended columns; a live `UPDATE`/`DELETE` attempt as `service_role`
+is refused (`permission denied`, code `42501`) for both; the one real
+`ImportRun` and its 10 `import_extraction_records` are unchanged; no
+canonical/public table exists. `import_candidate_reviews` holds zero
+rows — applying the migration recorded no review decision. **The write
+path itself (`POST .../candidates/{id}/reviews`) remains genuinely
+unexercised live** — no real decision has been recorded yet; that stays
+a separate, later step.
 
 ### Out of scope (explicit non-goals)
 
@@ -451,11 +560,28 @@ genuinely reachable state in production — confirmed live via the real
   append-only table and ticket** (e.g. `import_candidate_reviews` or
   similar — name and shape not decided here), never bolted onto the
   append-only `import_extraction_records` table itself.
+
+  **Correction (2026-09-05, later the same day): built, as the next
+  feature.** See "Implementation (2026-09-05, later the same day) —
+  candidate review workflow" above for the full design
+  (`import_candidate_reviews`, `record_import_candidate_review()`,
+  `needs_enrichment`/`approved_internal`/`rejected`/`deferred`). Still
+  never `PLATFORM-06`'s own moderation workflow, and never a canonical
+  merge or public exposure — `approved_internal` means ready for
+  internal enrichment only.
 - Running any real `ImportRun` — this ticket assumes at least one real,
   live `ImportRun` will eventually exist to browse; it does not create
   one, and does not change the separate, explicit approval `MARKET-04`'s
   own report still requires before that happens.
-- Triggering, scheduling, or re-running an import from the UI.
+
+  **Correction (2026-09-05, later the same day): one now exists** — a
+  single, explicitly-approved, `--max-records-to-store=10`-limited live
+  Breda run (see "Status" below). This document still did not trigger or
+  perform it — that remained a separate, later, explicit approval, exactly
+  as this bullet always required.
+- Triggering, scheduling, or re-running an import from the UI. **Still
+  true** — the one real run above was triggered from the CLI, not this
+  UI, which still has no import-triggering control of any kind.
 
 ### Data model needs
 
@@ -463,6 +589,11 @@ Read-only against `MARKET-04`'s existing six tables — no new table,
 column, grant, or RLS policy for the inbox itself. The one schema
 addition this ticket anticipates but does **not** build is the separate,
 append-only review/decision table named above, explicitly deferred.
+
+**Correction (2026-09-05, later the same day): that table is now built**
+— `supabase/migrations/0007_market05a_candidate_reviews.sql`
+(`import_candidate_reviews`), not yet applied to the live Supabase
+project. See "Implementation (2026-09-05, later the same day)" above.
 
 ### Risks
 
@@ -495,15 +626,23 @@ append-only review/decision table named above, explicitly deferred.
       against real, existing `owner` and `editor` accounts (`403`); a
       roleless/anonymous request gets `401`.
 - [ ] The same `internal` session can view, filter
-      (run/category/name/possible-duplicate/quality), and read the full
-      minimized field set of every `ImportExtractionRecord`. **Filtering
-      itself is unit-tested (`enrichAndFilterCandidates`); the end-to-end,
-      real-session, real-data path is not yet verifiable — zero
-      `ImportRun`s exist.**
+      (run/category/name/possible-duplicate/quality/review-status), and
+      read the full minimized field set of every `ImportExtractionRecord`.
+      **Filtering itself is unit-tested (`enrichAndFilterCandidates`,
+      including the added `review_status` filter); the end-to-end,
+      real-session, real-data path is not yet verifiable — no working
+      `internal` account exists yet.** **Correction (2026-09-05, later
+      the same day): real data to view now exists** (one `ImportRun`, 10
+      candidates) — the remaining blocker is specifically the
+      `internal`-account activation, not "zero data," which was the
+      original blocker named here.
 - [x] No-run, zero-candidates, failed/partial-run, and empty-filter-result
       states are each distinguishable from one another in the UI —
-      `classifyInboxState` unit-tested for all four; only "no-run" is
-      currently live-reachable (zero `ImportRun`s exist today).
+      `classifyInboxState` unit-tested for all four. **Correction
+      (2026-09-05, later the same day): "no-run" is no longer the only
+      live-reachable state** — a real run with real candidates now exists
+      (see "Status" below); it remains true that none of these states has
+      been live-viewed through an actual `internal` session yet.
 - [ ] No direct browser/RLS access to either raw table — verified the
       same way `MARKET-04A`'s own RLS was live-verified. **Not
       independently re-verified this round — no new grant or RLS policy
@@ -512,8 +651,26 @@ append-only review/decision table named above, explicitly deferred.
       specifically.**
 - [x] No route, action, or code path in this surface can write to
       `import_runs`, `import_extraction_records`, or any canonical table
-      — both new routes are `GET`-only, and neither calls `.insert()`,
-      `.update()`, or `.delete()` anywhere in their source.
+      — both original routes are `GET`-only, and neither calls
+      `.insert()`, `.update()`, or `.delete()` anywhere in their source.
+- [x] **(Added 2026-09-05, later the same day)** Recording a candidate
+      review decision is always exactly one new, append-only row —
+      never an update of a previous decision, never a mutation of
+      `import_extraction_records` itself. Proven at three independent
+      layers: the database grants (`select, insert` only on
+      `import_candidate_reviews`, for any role — locally confirmed even
+      `service_role` gets `permission denied` on `UPDATE`/`DELETE`), the
+      route source (structural safety-net tests assert no `.update()`/
+      `.delete()` call exists), and the pure logic
+      (`computeEffectiveReviewStatus` always derives the *displayed*
+      status from the latest row, never mutating history to get there).
+      **Live-verified (2026-09-05, later the same day)**: migration `0007`
+      applied to the real Supabase project; a live `UPDATE`/`DELETE`
+      attempt as `service_role` against `import_candidate_reviews` is
+      refused (`permission denied`, code `42501`) for both. **Still not
+      live-exercised**: the actual write path (`POST
+      .../candidates/{id}/reviews`) — the table holds zero rows; no real
+      review decision has been recorded yet, live or otherwise.
 - [ ] Internal/admin surface — exempt from the consumer performance
       budget per `[[009-consumer-vs-internal-performance-budget]]`, same
       as `PLATFORM-06`. Not specifically measured this round (matches
@@ -522,13 +679,21 @@ append-only review/decision table named above, explicitly deferred.
 
 ### Suggested order
 
-**Built 2026-09-05.** Remaining, in order: (1) fix the `internal`-account
-email activation (`app/internal/activate/page.js` exists but no account
-has completed it — Supabase's Reset Password/Invite user templates still
-need their manual dashboard edit, per `docs/api/import-inbox-api.md`'s
-own note); (2) create and activate a real `internal` account; (3) run a
-first real, approved `ImportRun`; (4) only then live-verify the
-`internal`-role success path end to end.
+**Built 2026-09-05; extended with the candidate review workflow later
+the same day; migration `0007` applied live later still the same day.**
+Remaining, in order: (1) fix the `internal`-account email activation
+(`app/internal/activate/page.js` exists but no account has completed
+it — Supabase's Reset Password/Invite user templates still need their
+manual dashboard edit, per `docs/api/import-inbox-api.md`'s own note);
+(2) create and activate a real `internal` account; (3) only then
+live-verify both the `internal`-role read success path and the
+review-decision write path end to end, against the one real `ImportRun`
+and its 10 real candidates that already exist. Two previously-listed
+steps are now **done** — see "Status": running a first real, approved
+`ImportRun`, and applying `supabase/migrations/0007_market05a_candidate_reviews.sql`
+to the live Supabase project (read-only re-verified: correct columns,
+`UPDATE`/`DELETE` refused even for `service_role`, the existing run/10
+candidates unchanged, zero rows in the new table).
 
 ## MARKET-05B — Normalization & deduplication (placeholder, untouched)
 

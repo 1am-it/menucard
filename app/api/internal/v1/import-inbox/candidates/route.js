@@ -2,14 +2,29 @@
 // `import_extraction_records` — already-minimized `extracted_fields`,
 // never a raw source feature — plus which `import_run_id` each belongs
 // to. `possible_duplicate`/`quality_status` are computed here, read-only,
-// on every request (src/lib/importInbox.js) — never stored, never a
-// review decision, never MARKET-05B's real deduplication logic. Never
-// writes, never touches a canonical table, never a public route.
+// on every request (src/lib/importInbox.js) — never stored, never
+// MARKET-05B's real deduplication logic. Never writes, never touches a
+// canonical table, never a public route.
+//
+// **Update (2026-09-05): also resolves each candidate's `review_status`**
+// (the append-only, human review decision — see
+// supabase/migrations/0007_market05a_candidate_reviews.sql and
+// candidates/[id]/reviews/route.js) from the latest
+// `import_candidate_reviews` row per candidate, defaulting to `'new'`
+// when none exists. This route still never writes anything, to this
+// table or any other — recording a decision only ever happens via the
+// separate `candidates/[id]/reviews` POST route.
 
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/src/lib/supabaseAdmin'
 import { authenticateInternalRequest } from '@/src/lib/internalAuth'
-import { isInternalOnly, enrichAndFilterCandidates } from '@/src/lib/importInbox'
+import { isInternalOnly, enrichAndFilterCandidates, buildReviewStatusByCandidateId } from '@/src/lib/importInbox'
+
+// Same headroom reasoning as RECORD_LIMIT below — bounded, not
+// pagination, revisit once volume materially exceeds this. One row per
+// review *decision*, not per candidate, so this can exceed RECORD_LIMIT
+// once candidates start accumulating more than one decision each.
+const REVIEW_LIMIT = 4000
 
 // v1 limitation, not silently ignored: enough headroom for every
 // candidate the real, already-run dry-runs actually produced (500
@@ -37,6 +52,7 @@ export async function GET(request) {
   const name = searchParams.get('name') || undefined
   const possibleDuplicate = parseBooleanParam(searchParams.get('possible_duplicate'))
   const quality = searchParams.get('quality') || undefined
+  const reviewStatus = searchParams.get('review_status') || undefined
 
   const supabase = getSupabaseAdmin()
   const { data: records, error: recordsError } = await supabase
@@ -46,12 +62,26 @@ export async function GET(request) {
     .limit(RECORD_LIMIT)
   if (recordsError) return NextResponse.json({ error: 'Query failed' }, { status: 500 })
 
+  // MARKET-05A: every review row across every candidate, in one bounded
+  // query — buildReviewStatusByCandidateId (pure, src/lib/importInbox.js)
+  // reduces this to "latest decision per candidate_id" without a second
+  // per-candidate round trip.
+  const { data: reviews, error: reviewsError } = await supabase
+    .from('import_candidate_reviews')
+    .select('id, candidate_id, decided_at, status')
+    .order('decided_at', { ascending: false })
+    .limit(REVIEW_LIMIT)
+  if (reviewsError) return NextResponse.json({ error: 'Query failed' }, { status: 500 })
+  const reviewStatusByCandidateId = buildReviewStatusByCandidateId(reviews)
+
   const { candidates, totalBeforeFilters } = enrichAndFilterCandidates(records, {
     runId,
     category,
     name,
     possibleDuplicate,
     quality,
+    reviewStatusByCandidateId,
+    reviewStatus,
   })
 
   return NextResponse.json({

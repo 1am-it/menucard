@@ -409,7 +409,27 @@ write, so a run can never store more candidates than explicitly
 requested; the CLI requires a matching `--max-records-to-store=<n>` flag
 for every mode. This does not change the existing Breda-boundary check
 or source/licence guardrails — see `ops/scripts/import-breda-osm.js` and
-its test suite. See `planning/specs/tickets/market-04-raw-imports-import-runs.md`'s
+its test suite. **Correction (2026-09-05, still the same day): the
+"`--live` was not used and remains refused"/"still zero `ImportRun`s"
+claims two sentences above are no longer accurate.** One real, limited
+`ImportRun` has since executed — `--live --confirm-market=breda
+--max-records-to-store=10`, run id
+`01a07237-1867-760e-a714-50675078d3a1`, 10 stored candidates (the
+requested cap), all independently re-verified inside Breda's real
+boundary, 0 outside, no canonical/public table touched (none exists yet
+for this data). **Also built the same day, on top of this run: the
+MARKET-05A candidate review workflow** — an append-only
+`import_candidate_reviews` audit log (`needs_enrichment`/
+`approved_internal`/`rejected`/`deferred`; `approved_internal` means
+ready for internal enrichment only, never public/MenuCard), its
+`record_import_candidate_review()` RPC, two API routes, and a detail
+view on `/internal/import-inbox` — migration written and locally
+validated in a disposable Postgres container, **not yet applied to the
+live Supabase project**. See
+`planning/specs/tickets/market-05-normalization-deduplication.md`'s own
+"Implementation (2026-09-05, later the same day) — candidate review
+workflow" section for the full detail. See
+`planning/specs/tickets/market-04-raw-imports-import-runs.md`'s
 own "Status" section for the full record). Blocked on four hard gates, tracked
 independently: **gate 1** (Breda boundary) closed 2026-09-04 — see the
 `MARKET-01` entry above. **Gate 2** (per-source `SourceAuthorizationVersion`)
@@ -498,6 +518,42 @@ live-verifiable**: the `internal`-role success path — no working
 `internal` account exists (its email-activation flow,
 `app/internal/activate/page.js`, still needs a manual Supabase
 Reset-Password/Invite-user email-template edit before any real account
-can complete it) and zero `ImportRun`s exist to browse. No canonical
-merge, `pending_changes`, restaurant record, public route, migration, or
-Supabase configuration change was made for either `05A` or `05B`.
+can complete it). No canonical merge, `pending_changes`, restaurant
+record, public route, migration, or Supabase configuration change was
+made for either `05A` or `05B` in this round.
+
+**Correction (2026-09-05, still the same day): "zero `ImportRun`s exist
+to browse" above is no longer accurate** — one real, limited `ImportRun`
+now exists (see the `MARKET-04` entry above's own correction); once an
+`internal` account exists, there is real data to browse.
+
+**Update (2026-09-05, still the same day): `05A` extended with the
+candidate review workflow.** Statuses `needs_enrichment`/
+`approved_internal`/`rejected`/`deferred` (plus the never-stored default
+`new`); `approved_internal` means ready for internal enrichment only —
+never public publication, never a MenuCard. A separate, append-only
+`import_candidate_reviews` table (`supabase/migrations/0007_market05a_candidate_reviews.sql`)
+plus its `record_import_candidate_review()` RPC is the only way a
+decision is ever written — always exactly one insert, never an update of
+a previous decision, never a mutation of `import_extraction_records`
+itself; locally validated (disposable Postgres container) that even
+`service_role` gets `permission denied` on `UPDATE`/`DELETE` against
+this table. Two new/extended API routes and a per-candidate detail view
+(missing-fields line, review history, decision form) on
+`/internal/import-inbox`. Automatic chain/franchise classification was
+deliberately not built this round — deferred to a later, evidence-based
+signal (OSM `brand`/`brand:wikidata` tags or an explicit manual marking),
+never an inferred name-similarity guess. Full detail:
+`planning/specs/tickets/market-05-normalization-deduplication.md`'s own
+"Implementation (2026-09-05, later the same day) — candidate review
+workflow" section. Still no canonical merge or public route.
+
+**Correction (2026-09-05, still the same day): migration `0007` has
+since been applied live**, manually, in the Supabase SQL Editor —
+read-only re-verified afterward: `import_candidate_reviews` exists with
+the intended columns; a live `UPDATE`/`DELETE` attempt as `service_role`
+is refused (`permission denied`, code `42501`); the one real `ImportRun`
+and its 10 candidates are unchanged; no canonical/public table exists.
+The table holds zero rows — applying the migration recorded no review
+decision, and the write path itself (`POST .../candidates/{id}/reviews`)
+remains genuinely unexercised live.

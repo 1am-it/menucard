@@ -103,6 +103,20 @@ contract can run."
      candidates than explicitly requested. Purely an additional safety
      cap — the Breda-boundary check and the source/licence preflight
      guardrails described above are unchanged.
+
+     **Correction (2026-09-05, still the same day): one real, limited
+     `ImportRun` has now executed.** `--live --confirm-market=breda
+     --max-records-to-store=10` ran exactly once — run id
+     `01a07237-1867-760e-a714-50675078d3a1`, 10 stored candidates (the
+     requested cap), all independently re-verified inside Breda's real
+     boundary. `--live` is no longer unconditionally refused by the
+     CLI — it requires `--confirm-market` plus the mandatory
+     `--max-records-to-store=<n>` above. See
+     `planning/specs/tickets/market-04-raw-imports-import-runs.md`'s own
+     matching correction for the full run detail (fetched/stored/skipped/
+     errored counts, source/hash). This remains a measurement against
+     the `raw_import` stage only — no canonical merge, public exposure,
+     or restaurant-facing data of any kind resulted from it.
    - **3B** (`canonical_merge`/`public_publication`/`api_exposure`/
      `redistribution`): blocked pending a qualified legal review (never
      AI research alone) of the Collective-vs-Derivative-Database

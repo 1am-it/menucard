@@ -151,6 +151,7 @@ function computeQualityStatus(extractedFields) {
 function enrichAndFilterCandidates(records, filters) {
   const opts = filters || {};
   const duplicateIds = computePossibleDuplicateIds(records);
+  const reviewStatusByCandidateId = opts.reviewStatusByCandidateId || {};
 
   const enriched = records.map((record) => {
     const quality = computeQualityStatus(record.extracted_fields);
@@ -159,6 +160,7 @@ function enrichAndFilterCandidates(records, filters) {
       possible_duplicate: duplicateIds.has(record.id),
       quality_status: quality.status,
       missing_fields: quality.missingFields,
+      review_status: reviewStatusByCandidateId[record.id] || DEFAULT_REVIEW_STATUS,
     };
   });
 
@@ -175,10 +177,154 @@ function enrichAndFilterCandidates(records, filters) {
     if (opts.possibleDuplicate === true && !c.possible_duplicate) return false;
     if (opts.possibleDuplicate === false && c.possible_duplicate) return false;
     if (opts.quality && c.quality_status !== opts.quality) return false;
+    if (opts.reviewStatus && c.review_status !== opts.reviewStatus) return false;
     return true;
   });
 
   return { candidates: filtered, totalBeforeFilters: records.length };
+}
+
+// ─── MARKET-05A (candidate review audit log) — pure decision logic for
+// /api/internal/v1/import-inbox/candidates/[id]/reviews and the
+// /internal/import-inbox detail view. The actual read/write against
+// import_candidate_reviews happens only in the route handlers (via the
+// record_import_candidate_review RPC for writes — see
+// supabase/migrations/0007_market05a_candidate_reviews.sql); everything
+// here is pure and never touches Supabase. ──────────────────────────────
+
+/** The only statuses a review decision may ever actually be stored as —
+ * deliberately excludes `'new'` (see DEFAULT_REVIEW_STATUS below) and
+ * matches supabase/migrations/0007_market05a_candidate_reviews.sql's own
+ * `status` check constraint exactly. */
+const ALLOWED_REVIEW_STATUSES = ['needs_enrichment', 'approved_internal', 'rejected', 'deferred'];
+
+/** Never stored — see the migration's own header comment for why. Purely
+ * the application-level meaning of "no review row exists yet for this
+ * candidate," computed by computeEffectiveReviewStatus/
+ * buildReviewStatusByCandidateId below whenever a candidate has zero
+ * review rows. `approved_internal` means ready for internal enrichment
+ * only — never public publication or a MenuCard; nothing in this module
+ * or its callers ever proposes, computes, or writes such a thing. */
+const DEFAULT_REVIEW_STATUS = 'new';
+
+/** Fixed set, matching the migration's own `rejection_reason` check
+ * constraint exactly — never free text. */
+const ALLOWED_REJECTION_REASONS = ['not_a_restaurant', 'duplicate', 'permanently_closed', 'insufficient_data', 'other'];
+
+/** Matches the migration's own `char_length(note) <= 2000` check —
+ * enforced here too so a caller gets a clear, immediate `400` instead of
+ * relying solely on the database constraint to reject an oversized note. */
+const MAX_REVIEW_NOTE_LENGTH = 2000;
+
+/**
+ * Validates a review-decision request body before it ever reaches
+ * `record_import_candidate_review` — a UX/clarity guard only, never the
+ * authoritative check (the migration's check constraints are, enforced
+ * regardless of what any caller sends). Never accepts `'new'` as a
+ * status: recording "new" would be meaningless (equivalent to recording
+ * nothing) and is never a real user action.
+ *
+ * `rejectionReason` is required exactly when `status === 'rejected'` and
+ * forbidden otherwise — symmetric with the migration's own check
+ * constraint, so a caller sees the same rule at the API layer as at the
+ * database layer, never a confusing mismatch between the two.
+ */
+function validateReviewDecisionInput({ status, rejectionReason, note }) {
+  if (!ALLOWED_REVIEW_STATUSES.includes(status)) {
+    return { valid: false, reason: 'invalid-status' };
+  }
+
+  const needsReason = status === 'rejected';
+  const hasReason = typeof rejectionReason === 'string' && rejectionReason.length > 0;
+  if (needsReason && !hasReason) {
+    return { valid: false, reason: 'missing-rejection-reason' };
+  }
+  if (!needsReason && hasReason) {
+    return { valid: false, reason: 'rejection-reason-not-allowed' };
+  }
+  if (hasReason && !ALLOWED_REJECTION_REASONS.includes(rejectionReason)) {
+    return { valid: false, reason: 'invalid-rejection-reason' };
+  }
+
+  if (note !== undefined && note !== null) {
+    if (typeof note !== 'string') {
+      return { valid: false, reason: 'invalid-note' };
+    }
+    if (note.length > MAX_REVIEW_NOTE_LENGTH) {
+      return { valid: false, reason: 'note-too-long' };
+    }
+  }
+
+  return {
+    valid: true,
+    status,
+    rejectionReason: needsReason ? rejectionReason : null,
+    note: note ? note.trim() || null : null,
+  };
+}
+
+/** One safe, human-readable message per validation failure reason —
+ * never the raw request body or any other caller-controlled value. */
+function reviewValidationMessage(reason) {
+  if (reason === 'invalid-status') return `Status must be one of: ${ALLOWED_REVIEW_STATUSES.join(', ')}.`;
+  if (reason === 'missing-rejection-reason') return 'A rejection reason is required when status is "rejected".';
+  if (reason === 'rejection-reason-not-allowed') return 'A rejection reason is only allowed when status is "rejected".';
+  if (reason === 'invalid-rejection-reason') return `Rejection reason must be one of: ${ALLOWED_REJECTION_REASONS.join(', ')}.`;
+  if (reason === 'invalid-note') return 'Note must be a string.';
+  if (reason === 'note-too-long') return `Note must be at most ${MAX_REVIEW_NOTE_LENGTH} characters.`;
+  return 'Invalid request.';
+}
+
+/**
+ * Picks the effective status for one candidate from its full review
+ * history — the row with the latest `decided_at`, tying-broken by the
+ * higher `id` (review rows are inserted with a monotonically increasing
+ * `bigint identity` id, so this is a safe, deterministic tie-break for
+ * two decisions recorded within the same timestamp resolution). Returns
+ * `DEFAULT_REVIEW_STATUS` ('new') when given no rows — never throws,
+ * never guesses at a status from partial/malformed input.
+ */
+function computeEffectiveReviewStatus(reviewRows) {
+  if (!Array.isArray(reviewRows) || reviewRows.length === 0) {
+    return DEFAULT_REVIEW_STATUS;
+  }
+  let latest = null;
+  for (const row of reviewRows) {
+    if (!row || !row.decided_at) continue;
+    if (!latest) {
+      latest = row;
+      continue;
+    }
+    const latestTime = new Date(latest.decided_at).getTime();
+    const rowTime = new Date(row.decided_at).getTime();
+    if (rowTime > latestTime || (rowTime === latestTime && Number(row.id) > Number(latest.id))) {
+      latest = row;
+    }
+  }
+  return latest ? latest.status : DEFAULT_REVIEW_STATUS;
+}
+
+/**
+ * Groups an unordered list of review rows (as returned by a single,
+ * un-filtered `import_candidate_reviews` query covering many candidates)
+ * by `candidate_id` and reduces each group to its effective status —
+ * exactly the `{candidateId: status}` shape `enrichAndFilterCandidates`
+ * expects as its `reviewStatusByCandidateId` option. Pure; never touches
+ * Supabase — the route handler runs the one query, this function turns
+ * its rows into a lookup.
+ */
+function buildReviewStatusByCandidateId(allReviewRows) {
+  const byCandidateId = {};
+  for (const row of allReviewRows || []) {
+    if (!row || !row.candidate_id) continue;
+    if (!byCandidateId[row.candidate_id]) byCandidateId[row.candidate_id] = [];
+    byCandidateId[row.candidate_id].push(row);
+  }
+  const result = {};
+  for (const candidateId of Object.keys(byCandidateId)) {
+    result[candidateId] = computeEffectiveReviewStatus(byCandidateId[candidateId]);
+  }
+  return result;
 }
 
 /**
@@ -215,4 +361,12 @@ module.exports = {
   computeQualityStatus,
   enrichAndFilterCandidates,
   classifyInboxState,
+  ALLOWED_REVIEW_STATUSES,
+  DEFAULT_REVIEW_STATUS,
+  ALLOWED_REJECTION_REASONS,
+  MAX_REVIEW_NOTE_LENGTH,
+  validateReviewDecisionInput,
+  reviewValidationMessage,
+  computeEffectiveReviewStatus,
+  buildReviewStatusByCandidateId,
 };

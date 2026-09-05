@@ -78,6 +78,29 @@ both unchanged. See `ops/scripts/import-breda-osm.js` and its test suite
 tests, including a source with more matches than the cap producing at
 most the cap's own count of actual writes).
 
+**Correction (2026-09-05, still the same day): one real, limited
+`ImportRun` has now executed — the "still zero `ImportRun`s"/"`--live`
+was not used and remains refused" claims above are no longer accurate
+and are corrected here, visibly, rather than left stale.** Under an
+explicit, scoped authorization, `node ops/scripts/import-breda-osm.js
+--live --confirm-market=breda --max-records-to-store=10` ran exactly
+once: run id `01a07237-1867-760e-a714-50675078d3a1`, source
+`netherlands-260904.osm.pbf` (same artifact/hash as the two prior dry
+runs — Geofabrik had not republished), 665 fetched, **10 stored**
+(the requested cap), 655 skipped (165 outside Breda + 490 valid-but-over-cap),
+0 errored. Read-only-verified afterward: exactly one new `import_runs`
+row; exactly 10 `import_extraction_records` rows, all belonging to that
+one run; every one of the 10 independently re-verified inside Breda's
+real boundary via `isPointInBreda` (0 outside); no canonical or public
+table exists in this Supabase project for this data to have reached even
+by mistake. `--live` is therefore **no longer unconditionally refused**
+by the CLI — it now requires the same `--confirm-market` gate as before,
+plus the mandatory `--max-records-to-store=<n>` added the same day (see
+above). This does not change any hard gate below: gate **3B** remains
+legally blocked, gate **4B** remains fully open and untouched, and the
+tool's node-only v1 scope remains a first-pass coverage decision, not a
+completeness claim, exactly as before this correction.
+
 ## Depends on
 
 `[[011-market-foundation-and-international-growth]]` §6 (completeness
