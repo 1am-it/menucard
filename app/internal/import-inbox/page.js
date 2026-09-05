@@ -22,6 +22,10 @@ import {
   validateEnrichmentRequestInput,
   enrichmentValidationMessage,
   shouldCollapseCandidateCardAfterAction,
+  shouldOfferSharedSourceUrlAsWebsite,
+  applySharedSourceUrlAsWebsite,
+  isReviewDecisionSubmittable,
+  hasVerifiedWebsiteForSuggestions,
 } from '@/src/lib/importInbox'
 
 // Mirrors ops/scripts/import-breda-osm.config.js's own
@@ -357,6 +361,21 @@ export default function ImportInboxPage() {
     setEnrichmentDraftByCandidateId((prev) => {
       const current = prev[candidateId] || EMPTY_ENRICHMENT_DRAFT
       return { ...prev, [candidateId]: { ...current, ...patch } }
+    })
+  }
+
+  // UX fix (decided 2026-09-05) — "Use this source URL as the website."
+  // Fills only the Website field's *value* with the already-typed shared
+  // source URL (src/lib/importInbox.js's own applySharedSourceUrlAsWebsite)
+  // — no fetch, no write. The reviewer still has to click "Save
+  // enrichment" for anything to actually be recorded; the
+  // suggest-from-website button only becomes active afterward, once that
+  // save has completed and the candidate list has reloaded with the new
+  // website on file (see hasVerifiedWebsiteForSuggestions below).
+  function useSharedSourceUrlAsWebsite(candidateId, sharedSourceUrl) {
+    setEnrichmentDraftByCandidateId((prev) => {
+      const current = prev[candidateId] || EMPTY_ENRICHMENT_DRAFT
+      return { ...prev, [candidateId]: applySharedSourceUrlAsWebsite(current, sharedSourceUrl) }
     })
   }
 
@@ -771,6 +790,11 @@ export default function ImportInboxPage() {
 
                     {expanded && (
                       <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
+                        <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 12px' }}>
+                          Opening this detail view is read-only — it only loads history, never records anything. Closing it
+                          without choosing a status or saving an enrichment leaves no trace: nothing is written unless you
+                          explicitly click "Save decision" or "Save enrichment" below.
+                        </p>
                         <h3 style={{ fontSize: 13, margin: '0 0 8px', color: 'var(--text-secondary)' }}>Review history</h3>
                         {reviewsLoadingId === c.id && <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Loading…</p>}
                         {reviewsErrorId === c.id && (
@@ -831,9 +855,12 @@ export default function ImportInboxPage() {
                           {decisionErrorByCandidateId[c.id] && (
                             <div style={{ fontSize: 12, color: 'var(--danger)' }}>{decisionErrorByCandidateId[c.id]}</div>
                           )}
+                          {!isReviewDecisionSubmittable(draft) && (
+                            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Choose a status to enable saving a decision.</div>
+                          )}
                           <button
                             onClick={() => submitDecision(c.id)}
-                            disabled={decisionSubmittingId === c.id}
+                            disabled={decisionSubmittingId === c.id || !isReviewDecisionSubmittable(draft)}
                             style={{
                               fontSize: 13,
                               padding: '6px 12px',
@@ -842,7 +869,8 @@ export default function ImportInboxPage() {
                               background: 'var(--green)',
                               color: '#fff',
                               fontWeight: 600,
-                              cursor: 'pointer',
+                              cursor: isReviewDecisionSubmittable(draft) ? 'pointer' : 'not-allowed',
+                              opacity: isReviewDecisionSubmittable(draft) ? 1 : 0.6,
                               justifySelf: 'start',
                             }}
                           >
@@ -877,21 +905,26 @@ export default function ImportInboxPage() {
                           <h3 style={{ fontSize: 13, margin: 0, color: 'var(--text-secondary)' }}>Enrich missing business info</h3>
                           <button
                             onClick={() => requestSuggestions(c.id)}
-                            disabled={suggestionsLoadingId === c.id || !c.normalized_fields?.website}
-                            title={!c.normalized_fields?.website ? 'No website on file for this candidate' : undefined}
+                            disabled={suggestionsLoadingId === c.id || !hasVerifiedWebsiteForSuggestions(c)}
+                            title={!hasVerifiedWebsiteForSuggestions(c) ? 'Save a verified website first to enable suggestions.' : undefined}
                             style={{
                               fontSize: 12,
                               padding: '4px 10px',
                               borderRadius: 8,
                               border: '1px solid var(--border)',
                               background: 'transparent',
-                              color: c.normalized_fields?.website ? 'var(--text-secondary)' : 'var(--text-faint)',
-                              cursor: c.normalized_fields?.website ? 'pointer' : 'not-allowed',
+                              color: hasVerifiedWebsiteForSuggestions(c) ? 'var(--text-secondary)' : 'var(--text-faint)',
+                              cursor: hasVerifiedWebsiteForSuggestions(c) ? 'pointer' : 'not-allowed',
                             }}
                           >
                             {suggestionsLoadingId === c.id ? 'Fetching…' : 'Suggest data from website'}
                           </button>
                         </div>
+                        {!hasVerifiedWebsiteForSuggestions(c) && (
+                          <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 8px' }}>
+                            Save a verified website first to enable suggestions.
+                          </p>
+                        )}
                         <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 8px' }}>
                           Fill in a value and its source URL for one or more fields. A field left blank is not submitted.
                           A correction is recorded as a new entry — nothing here is ever edited or deleted.
@@ -959,6 +992,28 @@ export default function ImportInboxPage() {
                                     style={selectStyle}
                                   />
                                 )}
+                                {shouldOfferSharedSourceUrlAsWebsite({
+                                  useSharedSourceUrl: useShared,
+                                  sharedSourceUrl: sharedUrl,
+                                  websiteValue: fieldDraftFor('website').value,
+                                }) && (
+                                  <button
+                                    type="button"
+                                    onClick={() => useSharedSourceUrlAsWebsite(c.id, sharedUrl)}
+                                    style={{
+                                      fontSize: 12,
+                                      padding: '4px 10px',
+                                      borderRadius: 8,
+                                      border: '1px solid var(--border)',
+                                      background: 'transparent',
+                                      color: 'var(--text-secondary)',
+                                      cursor: 'pointer',
+                                      justifySelf: 'start',
+                                    }}
+                                  >
+                                    Use this source URL as the website
+                                  </button>
+                                )}
                                 {ENRICHABLE_FIELDS.map((fieldName) => {
                                   const fieldDraft = fieldDraftFor(fieldName)
                                   return (
@@ -1007,6 +1062,22 @@ export default function ImportInboxPage() {
                             {enrichmentSubmittingId === c.id ? 'Saving…' : 'Save enrichment'}
                           </button>
                         </div>
+
+                        <button
+                          onClick={() => toggleExpand(c.id)}
+                          style={{
+                            fontSize: 12,
+                            padding: '4px 10px',
+                            borderRadius: 8,
+                            border: '1px solid var(--border)',
+                            background: 'transparent',
+                            color: 'var(--text-secondary)',
+                            cursor: 'pointer',
+                            marginTop: 16,
+                          }}
+                        >
+                          Back to candidates
+                        </button>
                       </div>
                     )}
                   </div>

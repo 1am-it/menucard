@@ -34,6 +34,10 @@ const {
   computeEnrichedFields,
   computeNormalizedFields,
   shouldCollapseCandidateCardAfterAction,
+  shouldOfferSharedSourceUrlAsWebsite,
+  applySharedSourceUrlAsWebsite,
+  isReviewDecisionSubmittable,
+  hasVerifiedWebsiteForSuggestions,
 } = require('./importInbox');
 
 // ─── Authorization: internal-only, never editor/owner ────────────────────
@@ -813,6 +817,132 @@ test('shouldCollapseCandidateCardAfterAction: never collapses on failure, a miss
   assert.equal(shouldCollapseCandidateCardAfterAction({ ok: 'true' }), false, 'must be the literal boolean true, never a truthy string');
 });
 
+// ─── shouldOfferSharedSourceUrlAsWebsite / applySharedSourceUrlAsWebsite
+// — UX fix (2026-09-05): "use this source URL as the website" ──────────
+
+test('shouldOfferSharedSourceUrlAsWebsite: offered only when shared-URL mode is on, the URL is a valid http(s) URL, and Website is still empty', () => {
+  assert.equal(
+    shouldOfferSharedSourceUrlAsWebsite({ useSharedSourceUrl: true, sharedSourceUrl: 'https://restaurant.example/contact', websiteValue: '' }),
+    true
+  );
+  assert.equal(
+    shouldOfferSharedSourceUrlAsWebsite({ useSharedSourceUrl: true, sharedSourceUrl: 'https://restaurant.example/contact', websiteValue: undefined }),
+    true
+  );
+});
+
+test('shouldOfferSharedSourceUrlAsWebsite: never offered when the shared-URL checkbox is off', () => {
+  assert.equal(
+    shouldOfferSharedSourceUrlAsWebsite({ useSharedSourceUrl: false, sharedSourceUrl: 'https://restaurant.example/', websiteValue: '' }),
+    false
+  );
+});
+
+test('shouldOfferSharedSourceUrlAsWebsite: never offered for a syntactically invalid or non-http(s) shared URL', () => {
+  for (const bad of ['not a url', 'ftp://restaurant.example/', '', null, undefined]) {
+    assert.equal(
+      shouldOfferSharedSourceUrlAsWebsite({ useSharedSourceUrl: true, sharedSourceUrl: bad, websiteValue: '' }),
+      false,
+      `expected ${JSON.stringify(bad)} to never be offered`
+    );
+  }
+});
+
+test('shouldOfferSharedSourceUrlAsWebsite: never offered once the reviewer has already typed a Website value — must never silently overwrite it', () => {
+  assert.equal(
+    shouldOfferSharedSourceUrlAsWebsite({
+      useSharedSourceUrl: true,
+      sharedSourceUrl: 'https://restaurant.example/',
+      websiteValue: 'https://something-the-reviewer-typed.example/',
+    }),
+    false
+  );
+  assert.equal(
+    shouldOfferSharedSourceUrlAsWebsite({ useSharedSourceUrl: true, sharedSourceUrl: 'https://restaurant.example/', websiteValue: '   ' }),
+    true,
+    'whitespace-only is still effectively empty'
+  );
+});
+
+test('applySharedSourceUrlAsWebsite: sets only the Website field\'s value, leaves every other field and the Website source URL untouched', () => {
+  const draft = {
+    address: { value: 'Existing address', sourceUrl: 'https://a.example/' },
+    phone: { value: '', sourceUrl: '' },
+    website: { value: '', sourceUrl: '' },
+    useSharedSourceUrl: true,
+    sharedSourceUrl: 'https://restaurant.example/contact',
+  };
+  const result = applySharedSourceUrlAsWebsite(draft, 'https://restaurant.example/contact');
+  assert.deepEqual(result, {
+    address: { value: 'Existing address', sourceUrl: 'https://a.example/' },
+    phone: { value: '', sourceUrl: '' },
+    website: { value: 'https://restaurant.example/contact', sourceUrl: '' },
+    useSharedSourceUrl: true,
+    sharedSourceUrl: 'https://restaurant.example/contact',
+  });
+});
+
+test('applySharedSourceUrlAsWebsite: never mutates the input draft — a pure transform, no fetch, no write', () => {
+  const draft = { website: { value: '', sourceUrl: '' } };
+  const frozen = JSON.parse(JSON.stringify(draft));
+  applySharedSourceUrlAsWebsite(draft, 'https://restaurant.example/');
+  assert.deepEqual(draft, frozen, 'the original draft object must be unchanged');
+});
+
+test('applySharedSourceUrlAsWebsite: tolerates a missing/empty draft without throwing', () => {
+  assert.doesNotThrow(() => applySharedSourceUrlAsWebsite(null, 'https://restaurant.example/'));
+  assert.deepEqual(applySharedSourceUrlAsWebsite(undefined, 'https://restaurant.example/'), {
+    website: { value: 'https://restaurant.example/' },
+  });
+});
+
+// ─── isReviewDecisionSubmittable — never submit without an explicit
+// status (UX fix, 2026-09-05) ───────────────────────────────────────────
+
+test('isReviewDecisionSubmittable: false without an explicit, valid status — "Save decision" must stay disabled', () => {
+  assert.equal(isReviewDecisionSubmittable({ status: '' }), false);
+  assert.equal(isReviewDecisionSubmittable({ status: undefined }), false);
+  assert.equal(isReviewDecisionSubmittable({}), false);
+  assert.equal(isReviewDecisionSubmittable(null), false);
+  assert.equal(isReviewDecisionSubmittable(undefined), false);
+  assert.equal(isReviewDecisionSubmittable({ status: 'new' }), false, '"new" is never a real, submittable decision status');
+  assert.equal(isReviewDecisionSubmittable({ status: 'not-a-real-status' }), false);
+});
+
+test('isReviewDecisionSubmittable: true for every real ALLOWED_REVIEW_STATUSES value', () => {
+  for (const status of ALLOWED_REVIEW_STATUSES) {
+    assert.equal(isReviewDecisionSubmittable({ status }), true, `expected ${status} to make the decision submittable`);
+  }
+});
+
+// ─── hasVerifiedWebsiteForSuggestions — suggest-from-website button only
+// active once a website is an already-saved, on-record fact ────────────
+
+test('hasVerifiedWebsiteForSuggestions: true only when normalized_fields.website is present', () => {
+  assert.equal(hasVerifiedWebsiteForSuggestions({ normalized_fields: { website: 'https://restaurant.example/' } }), true);
+});
+
+test('hasVerifiedWebsiteForSuggestions: false when the website is missing, or the candidate itself is malformed', () => {
+  assert.equal(hasVerifiedWebsiteForSuggestions({ normalized_fields: { website: '' } }), false);
+  assert.equal(hasVerifiedWebsiteForSuggestions({ normalized_fields: { website: null } }), false);
+  assert.equal(hasVerifiedWebsiteForSuggestions({ normalized_fields: {} }), false);
+  assert.equal(hasVerifiedWebsiteForSuggestions({ normalized_fields: null }), false);
+  assert.equal(hasVerifiedWebsiteForSuggestions({}), false);
+  assert.equal(hasVerifiedWebsiteForSuggestions(null), false);
+  assert.equal(hasVerifiedWebsiteForSuggestions(undefined), false);
+});
+
+test('hasVerifiedWebsiteForSuggestions: becomes true after a save is reflected in normalized_fields on reload — the exact activation path this fix relies on', () => {
+  const beforeSave = { id: 'c1', enriched_fields: { website: null }, normalized_fields: { website: undefined } };
+  assert.equal(hasVerifiedWebsiteForSuggestions(beforeSave), false);
+  // Simulates loadCandidates() re-fetching after a successful "Save
+  // enrichment" — normalized_fields.website is now populated from the
+  // newly saved enrichment row, exactly as computeEnrichedFields +
+  // computeNormalizedFields would produce it server-side.
+  const afterSaveAndReload = { ...beforeSave, normalized_fields: { website: 'https://restaurant.example/contact' } };
+  assert.equal(hasVerifiedWebsiteForSuggestions(afterSaveAndReload), true);
+});
+
 // ─── enrichAndFilterCandidates + enrichment integration: complete/
 // incomplete is recomputed from the combined view ───────────────────────
 
@@ -986,4 +1116,64 @@ test('structural safety net: the suggest-from-website route disables redirects o
   // own shouldFetchPage decision — never unconditionally.
   assert.match(source, /if \(!robotsGate\.shouldFetchPage\)/);
   assert.match(source, /return NextResponse\.json\(\{[\s\S]*?robots_txt_status: robotsGate\.status,[\s\S]*?suggestions: null/);
+});
+
+// ─── structural safety net: Data-inbox detail-view UX fix (2026-09-05) ──
+// app/internal/import-inbox/page.js is a 'use client' React component,
+// so it has no automated render harness in this project (no new test
+// dependency was added to get one — see this file's own CommonJS-only
+// testing style). These tests instead read the page's own source, the
+// same structural-proof pattern already used above for the API routes,
+// to prove: (1) closing a candidate's detail view is a pure, local state
+// change with no fetch call of any kind, (2) that same close action is
+// offered both at the top and the bottom of the expanded detail view,
+// (3) "Save decision" cannot be clicked into effect without an explicit
+// status, and (4) "Use this source URL as the website" only ever fills
+// the form — it never calls fetch.
+
+const IMPORT_INBOX_PAGE_PATH = path.join(REPO_ROOT, 'app/internal/import-inbox/page.js');
+
+test('structural safety net: toggleExpand (closing a candidate\'s detail view) never calls fetch, load*, or a submit* function — a pure, local state change', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  const match = source.match(/function toggleExpand\(candidateId\) \{[\s\S]*?\n  \}/);
+  assert.ok(match, 'expected to find the toggleExpand function body');
+  const body = match[0];
+  // loadReviews/loadEnrichments (GET-only reads) are only allowed
+  // *inside* an `if (next && ...)` guard, i.e. only on expand, never on
+  // collapse (next === null) — and neither call, nor this function as a
+  // whole, may ever reference fetch directly, a write endpoint, or
+  // either submit function.
+  assert.doesNotMatch(body, /\bfetch\(/, 'toggleExpand itself must never call fetch directly');
+  assert.doesNotMatch(body, /submitDecision|submitEnrichment|requestSuggestions/, 'closing/opening a detail view must never trigger a write or a suggestion fetch');
+  assert.match(body, /if \(next && !reviewsByCandidateId\[next\] && session\)/, 'the history reads must remain conditional on actually expanding (next truthy)');
+});
+
+test('structural safety net: the expanded detail view offers "Back to candidates"/"Hide details" both at the top and the bottom', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  const toggleCallCount = (source.match(/onClick=\{\(\) => toggleExpand\(c\.id\)\}/g) || []).length;
+  assert.equal(toggleCallCount, 2, 'expected exactly two toggleExpand(c.id) call sites: one above the detail view, one below it');
+  assert.match(source, /Back to candidates/);
+  assert.match(source, /Hide details/);
+});
+
+test('structural safety net: "Save decision" cannot be enabled without an explicit status', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  assert.match(source, /disabled=\{decisionSubmittingId === c\.id \|\| !isReviewDecisionSubmittable\(draft\)\}/);
+});
+
+test('structural safety net: the suggest-from-website button is gated on hasVerifiedWebsiteForSuggestions and shows a visible disabled message, not only a hover title', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  assert.match(source, /disabled=\{suggestionsLoadingId === c\.id \|\| !hasVerifiedWebsiteForSuggestions\(c\)\}/);
+  const visibleMessageCount = (source.match(/Save a verified website first to enable suggestions\./g) || []).length;
+  assert.ok(visibleMessageCount >= 2, 'expected the message in both the title attribute and a visible <p>, not only a hover-only title');
+});
+
+test('structural safety net: "Use this source URL as the website" only fills the enrichment draft — its handler never calls fetch', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  const match = source.match(/function useSharedSourceUrlAsWebsite\(candidateId, sharedSourceUrl\) \{[\s\S]*?\n  \}/);
+  assert.ok(match, 'expected to find the useSharedSourceUrlAsWebsite function body');
+  const body = match[0];
+  assert.doesNotMatch(body, /\bfetch\(/, 'must never fetch anything — form-fill only');
+  assert.match(body, /applySharedSourceUrlAsWebsite\(current, sharedSourceUrl\)/, 'must go through the pure, tested draft transform');
+  assert.match(source, /shouldOfferSharedSourceUrlAsWebsite\(\{/, 'the button must be gated by the pure, tested visibility decision');
 });

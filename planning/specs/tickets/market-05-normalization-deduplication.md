@@ -1118,6 +1118,48 @@ pre-fills that form's draft state.
   "Save enrichment" per field for anything to actually be written; the
   button itself never fires on expand, only on an explicit click.
 
+  > **Update (2026-09-05) — Data-inbox detail-view UX fixes.** Two
+  > usability gaps closed, both purely client-side (no change to any
+  > API response shape, security boundary, or write path):
+  >
+  > 1. **"Use this source URL as the website."** A reviewer typing one
+  >    shared source URL to enrich several fields naturally experiences
+  >    that URL as "the website" the suggest-from-website button should
+  >    work against — but the button correctly stays disabled until a
+  >    website value is actually *saved* as an enrichment (see below).
+  >    When the shared-source-URL checkbox is on, that URL is a valid
+  >    `http(s)` URL, and the Website field is still empty, a new "Use
+  >    this source URL as the website" button pre-fills only the
+  >    Website field's *value* — pure client-side form state
+  >    (`shouldOfferSharedSourceUrlAsWebsite`/
+  >    `applySharedSourceUrlAsWebsite` in `src/lib/importInbox.js`), no
+  >    fetch, no write. Clicking "Save enrichment" afterward records the
+  >    website with that same shared URL as both value and source, per
+  >    this ticket's own append-only rules; the suggest-from-website
+  >    button then becomes active once the candidate list reloads with
+  >    the newly saved website on file. The security boundary is
+  >    unchanged either way: the suggest-from-website route still only
+  >    ever re-derives and fetches the candidate's own already-*saved*
+  >    website, never a URL read directly off this form.
+  > 2. **Read-only, non-forcing detail view.** The disabled-suggestions
+  >    hint is now also a visible line of text (`"Save a verified
+  >    website first to enable suggestions."`), not only a hover title.
+  >    A "Back to candidates" action was added at the *bottom* of the
+  >    expanded detail view (alongside the existing "Hide details"
+  >    toggle above it), so a long card never forces scrolling back to
+  >    the top just to close it — both call the exact same, purely
+  >    local `toggleExpand`, which never issues a fetch call when
+  >    collapsing. "Save decision" is now disabled
+  >    (`isReviewDecisionSubmittable`) until the reviewer has explicitly
+  >    chosen a status — `validateReviewDecisionInput`'s own check
+  >    remains the authoritative guard regardless, so leaving the card
+  >    without choosing a status was already incapable of recording
+  >    anything; this only makes that guarantee visible in the UI
+  >    itself. Opening a candidate's details still only ever issues the
+  >    same two read-only history `GET`s as before — reviewing history
+  >    and then leaving without acting was already impossible to
+  >    conflate with recording a decision, and remains so.
+
 **Not yet live-verified.** Both `safeOutboundFetch.js` and
 `candidateSuggestions.js` are exhaustively unit-tested against local
 fixtures/a local test server only, per this round's explicit

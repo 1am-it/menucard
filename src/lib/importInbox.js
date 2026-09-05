@@ -623,6 +623,94 @@ function shouldCollapseCandidateCardAfterAction(outcome) {
   return Boolean(outcome && outcome.ok === true);
 }
 
+// ─── Enrichment form UX fix (decided 2026-09-05): "use this source URL
+// as the website" ────────────────────────────────────────────────────
+//
+// A reviewer who types one shared source URL to enrich several fields
+// naturally experiences that URL as "the website" the suggest-from-
+// website button should work against — but the button correctly stays
+// disabled until a website value is actually saved as an enrichment
+// (see hasVerifiedWebsiteForSuggestions below). This is a client-side
+// form-fill convenience closing that friction — it never fetches
+// anything and never writes anything by itself; the reviewer still has
+// to click "Save enrichment" for the value to actually be recorded, and
+// the suggest-from-website route's own security boundary is completely
+// unchanged: it still only ever re-derives and fetches the candidate's
+// own already-*saved* website (src/lib/importInbox.js's own
+// computeEnrichedFields), never a URL read directly off this form.
+
+/**
+ * Whether the enrichment form should offer a "Use this source URL as
+ * the website" shortcut — only when the reviewer has opted into one
+ * shared source URL for every filled-in field, that URL is a
+ * syntactically valid `http(s)` URL, and the Website field's own value
+ * is still empty. Never offered once the reviewer has typed anything
+ * into the Website value field themselves — this must never silently
+ * overwrite it.
+ */
+function shouldOfferSharedSourceUrlAsWebsite({ useSharedSourceUrl, sharedSourceUrl, websiteValue }) {
+  if (!useSharedSourceUrl) return false;
+  if (!isValidHttpUrl(sharedSourceUrl)) return false;
+  if (typeof websiteValue === 'string' && websiteValue.trim().length > 0) return false;
+  return true;
+}
+
+/**
+ * Pure enrichment-draft transform for that same shortcut: returns a new
+ * draft with only the Website field's *value* set to `sharedSourceUrl`
+ * — every other field, and the Website field's own separate source-URL
+ * input, is passed through completely untouched (when the shared-
+ * source-URL checkbox is on, every filled-in field's source URL is
+ * already derived from `sharedSourceUrl` at submit time — see
+ * app/internal/import-inbox/page.js's own `effectiveSourceUrl` — so
+ * `Save enrichment` ends up recording the website with that same shared
+ * URL as both its value and its source, per the ticket's own
+ * requirement). Never mutates `draft`; no fetch, no write — this only
+ * ever changes in-memory form state.
+ */
+function applySharedSourceUrlAsWebsite(draft, sharedSourceUrl) {
+  const current = draft || {};
+  const currentWebsite = current.website || {};
+  return { ...current, website: { ...currentWebsite, value: sharedSourceUrl } };
+}
+
+// ─── Review-decision form UX fix (decided 2026-09-05): never submit
+// without an explicit status ────────────────────────────────────────
+
+/**
+ * Whether the "Save decision" button should be enabled — `false` until
+ * the reviewer has explicitly chosen one of `ALLOWED_REVIEW_STATUSES`.
+ * A UX convenience only: `validateReviewDecisionInput` (and the
+ * migration's own check constraint) remain the authoritative guard
+ * either way, so leaving a candidate's detail view without ever
+ * choosing a status can never record a decision, disabled button or
+ * not — closing the card is always a plain, local state change with no
+ * API call at all (see toggleExpand in
+ * app/internal/import-inbox/page.js).
+ */
+function isReviewDecisionSubmittable(draft) {
+  return Boolean(draft && ALLOWED_REVIEW_STATUSES.includes(draft.status));
+}
+
+// ─── Suggest-from-website button: only active once a website is already
+// an on-record, saved fact ──────────────────────────────────────────
+
+/**
+ * Whether the "Suggest data from website" button should be enabled for
+ * one candidate list row — `true` only when `normalized_fields.website`
+ * is already present, i.e. a website value is already on record (raw
+ * import data or a previously saved enrichment) as of the candidate
+ * list's last load. This mirrors exactly what the suggest-from-website
+ * route itself re-derives server-side before ever fetching anything
+ * (computeEnrichedFields above, normalized for display by
+ * computeNormalizedFields below) — the button can never disagree with
+ * what the route would actually do, because both read the same
+ * already-saved fact rather than anything typed into the form.
+ */
+function hasVerifiedWebsiteForSuggestions(candidate) {
+  return Boolean(candidate && candidate.normalized_fields && candidate.normalized_fields.website);
+}
+
 module.exports = {
   ALLOWED_ROLE,
   isInternalOnly,
@@ -655,4 +743,8 @@ module.exports = {
   CANDIDATE_NORMALIZERS,
   computeNormalizedFields,
   shouldCollapseCandidateCardAfterAction,
+  shouldOfferSharedSourceUrlAsWebsite,
+  applySharedSourceUrlAsWebsite,
+  isReviewDecisionSubmittable,
+  hasVerifiedWebsiteForSuggestions,
 };

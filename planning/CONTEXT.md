@@ -667,3 +667,18 @@ project applies: every IANA special-purpose range is disallowed as a
 destination for this feature, even one that is technically globally
 routable, re-diffed against the live registries rather than assumed to
 stay complete forever.
+
+**Update (2026-09-05): Data-inbox detail-view UX fixes, client-side
+only.** Two usability gaps in the same, still-uncommitted feature: (1) a
+new "Use this source URL as the website" button pre-fills only the
+Website field's *value* from the reviewer's already-typed shared source
+URL — pure form state, no fetch, no write; the suggest-from-website
+button still only activates after that value is actually saved and the
+candidate list reloads. (2) "Save decision" is now disabled until a
+status is explicitly chosen, and a "Back to candidates" action was added
+at the bottom of the expanded detail view (in addition to "Hide details"
+above it) so closing a long card never requires scrolling back up —
+closing was, and remains, a purely local state change with no API call.
+No API response shape, security boundary, or write path changed. Full
+detail: `planning/specs/tickets/market-05-normalization-deduplication.md`'s
+own "Update (2026-09-05) — Data-inbox detail-view UX fixes" note.
