@@ -259,6 +259,53 @@ now decided, not merely recommended:**
   document — a human with dashboard access must do this once per
   environment, separately, and the future invite-sending code/script
   must itself pass the matching `redirectTo` explicitly.
+
+  **Correction (2026-09-05, later the same day still): a real invite link
+  against this exact route was observed being consumed before the real
+  recipient could click it — a new, scanner-resistant step,
+  `/internal/activate`, was added ahead of `/internal/set-password` to
+  fix this; both `/internal/login` and `/internal/set-password` remain
+  functionally unchanged.** Supabase's default email-link format performs
+  real, one-time token verification on a plain GET request at Supabase's
+  own `/auth/v1/verify` endpoint — an automated email-link security
+  scanner that merely fetches the link (a documented, known Supabase risk:
+  "Certain email providers may have spam detection or other security
+  features that prefetch URL links from incoming emails",
+  `supabase.com/docs/guides/auth/auth-email-templates`) consumes the
+  single-use token before the person ever clicks it, which is exactly
+  what happened live against this project's own invite links.
+  `app/internal/activate/page.js` (+ `src/lib/activationFlow.js`, tests)
+  fixes this: it performs **no verification at all on page load** — only
+  an explicit, real button click calls `supabase.auth.verifyOtp()` (a
+  POST, never triggerable by a passive GET-only scanner), and only then
+  navigates to the hardcoded `/internal/set-password` (never a
+  URL-supplied `redirect_to` — that parameter is deliberately not
+  accepted at all, closing an avoidable open-redirect surface). The token
+  is carried **only in the URL fragment**
+  (`https://<origin>/internal/activate#token_hash=...&type=recovery`, or
+  `type=invite`) — a fragment is never sent to any server, Supabase's or
+  this app's, so unlike the query-string form Supabase's own
+  documentation shows as an example, the token here never appears in any
+  server or proxy log at all.
+
+  **Remaining manual step, not yet done, not performed by this
+  document**: the Supabase dashboard's **Reset Password** and **Invite
+  user** email templates (Authentication → Email Templates) must each be
+  changed from the default `{{ .ConfirmationURL }}` link to a custom link
+  pointing at `/internal/activate` with the token and type in the
+  fragment, e.g. (Reset Password template):
+  ```html
+  <a href="{{ .SiteURL }}/internal/activate#token_hash={{ .TokenHash }}&type=recovery">Activate your account</a>
+  ```
+  and the equivalent for Invite user with `type=invite`. **This document
+  does not make that change** — it is a separate, later, manual dashboard
+  edit. Per this same round's own confirmation: the existing Redirect
+  URLs allowlist entry is a **wildcard** covering this app's production
+  origin, so it already permits `/internal/activate` as a `redirectTo`
+  target without a new allowlist entry — but that is unrelated to, and
+  does not substitute for, the still-required email-template edit above:
+  the allowlist only permits a `redirectTo` value used elsewhere; it does
+  not change what URL any email template's own link points to.
 - **The future live test matrix must include a real `internal`-session
   test**, not only `owner`/`editor`/anonymous denial tests — mirroring
   the `docs/guides/internal-api-live-testing.md` session-minting pattern
