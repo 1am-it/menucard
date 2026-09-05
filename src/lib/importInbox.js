@@ -152,11 +152,20 @@ function enrichAndFilterCandidates(records, filters) {
   const opts = filters || {};
   const duplicateIds = computePossibleDuplicateIds(records);
   const reviewStatusByCandidateId = opts.reviewStatusByCandidateId || {};
+  const enrichmentSourceByCandidateId = opts.enrichmentSourceByCandidateId || {};
 
   const enriched = records.map((record) => {
-    const quality = computeQualityStatus(record.extracted_fields);
+    const enrichmentSource = enrichmentSourceByCandidateId[record.id] || {};
+    const enrichedFields = computeEnrichedFields(record.extracted_fields, enrichmentSource);
+    // Quality is recomputed from the combined (raw + enrichment) fields —
+    // per market-05-normalization-deduplication.md's own requirement — so
+    // a manually-sourced phone/address/website can move a candidate from
+    // "incomplete" to "complete" without ever touching the raw record.
+    const quality = computeQualityStatus(enrichedFields);
     return {
       ...record,
+      enriched_fields: enrichedFields,
+      enrichment_sources: enrichmentSource,
       possible_duplicate: duplicateIds.has(record.id),
       quality_status: quality.status,
       missing_fields: quality.missingFields,
@@ -349,6 +358,197 @@ function classifyInboxState({ runsCount, selectedRun, candidatesCount, filtersAc
   return { candidateState, showErrorBanner };
 }
 
+// ─── MARKET-05A (candidate enrichment audit log) — pure decision logic
+// for /api/internal/v1/import-inbox/candidates/[id]/enrichments and the
+// /internal/import-inbox detail view's enrichment form. The actual
+// read/write against import_candidate_enrichments happens only in the
+// route handlers (via the record_candidate_enrichments RPC for writes —
+// see supabase/migrations/0008_market05a_candidate_enrichments.sql);
+// everything here is pure and never touches Supabase.
+//
+// Deliberately, structurally independent of the review-decision audit
+// table and RPC defined above in this same file — nothing below this
+// point reads a review row or its free-text note field, and nothing
+// below this point calls or references that RPC. A reviewer who
+// previously typed a phone number, address, or URL into such a note
+// must deliberately re-enter it through this feature's own form; see
+// market-05-normalization-deduplication.md's "Enrichment vs. review
+// notes" section for the full reasoning. ────────────────────────────────
+
+/** The only fields this feature is scoped to enrich — matches
+ * supabase/migrations/0008_market05a_candidate_enrichments.sql's own
+ * `field_name` check constraint exactly. Never `name`/`category`/
+ * `location` — extending this list is a separate, later, deliberate
+ * decision. */
+const ENRICHABLE_FIELDS = ['address', 'phone', 'website'];
+
+/** Defense-in-depth alongside the migration's own `char_length` habits
+ * (mirrors MAX_REVIEW_NOTE_LENGTH's role for review notes) — generous
+ * enough for a real address/phone/URL, not a place for arbitrary text. */
+const MAX_ENRICHMENT_VALUE_LENGTH = 500;
+
+/**
+ * True only for a syntactically valid `http://`/`https://` URL — never
+ * `ftp:`, `mailto:`, a bare domain with no scheme, or a non-string.
+ * Mirrors the migration's own `source_url ~* '^https?://'` check
+ * constraint; kept as a real `URL` parse here (stricter than a regex)
+ * so a caller gets a clear `400` before ever reaching the database.
+ */
+function isValidHttpUrl(value) {
+  if (typeof value !== 'string' || value.trim().length === 0) return false;
+  let parsed;
+  try {
+    parsed = new URL(value.trim());
+  } catch (err) {
+    return false;
+  }
+  return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+}
+
+/**
+ * Validates one `{field_name, value, source_url}` entry — a UX/clarity
+ * guard only, never the authoritative check (the migration's check
+ * constraints are, enforced regardless of what any caller sends).
+ */
+function validateEnrichmentFieldInput({ fieldName, value, sourceUrl }) {
+  if (!ENRICHABLE_FIELDS.includes(fieldName)) {
+    return { valid: false, reason: 'invalid-field-name' };
+  }
+  if (typeof value !== 'string' || value.trim().length === 0) {
+    return { valid: false, reason: 'missing-value' };
+  }
+  if (value.trim().length > MAX_ENRICHMENT_VALUE_LENGTH) {
+    return { valid: false, reason: 'value-too-long' };
+  }
+  if (!isValidHttpUrl(sourceUrl)) {
+    return { valid: false, reason: 'invalid-source-url' };
+  }
+  return { valid: true, fieldName, value: value.trim(), sourceUrl: sourceUrl.trim() };
+}
+
+/**
+ * Validates a whole enrichment request body — one or more fields from a
+ * single form submission. Requires at least one entry, rejects a
+ * duplicate `field_name` within the same submission (ambiguous — which
+ * one would win?), and validates every entry with
+ * `validateEnrichmentFieldInput` before accepting any of them, so a
+ * caller never gets a partially-accepted request. Returns the first
+ * validation failure encountered, or `{valid: true, fields: [...]}` with
+ * every entry normalized (trimmed).
+ */
+function validateEnrichmentRequestInput(fields) {
+  if (!Array.isArray(fields) || fields.length === 0) {
+    return { valid: false, reason: 'missing-fields' };
+  }
+  const seenFieldNames = new Set();
+  const validated = [];
+  for (const entry of fields) {
+    const result = validateEnrichmentFieldInput({
+      fieldName: entry && entry.field_name,
+      value: entry && entry.value,
+      sourceUrl: entry && entry.source_url,
+    });
+    if (!result.valid) {
+      return result;
+    }
+    if (seenFieldNames.has(result.fieldName)) {
+      return { valid: false, reason: 'duplicate-field-name' };
+    }
+    seenFieldNames.add(result.fieldName);
+    validated.push(result);
+  }
+  return { valid: true, fields: validated };
+}
+
+/** One safe, human-readable message per validation failure reason. */
+function enrichmentValidationMessage(reason) {
+  if (reason === 'missing-fields') return 'At least one field is required.';
+  if (reason === 'invalid-field-name') return `Field must be one of: ${ENRICHABLE_FIELDS.join(', ')}.`;
+  if (reason === 'missing-value') return 'Value is required.';
+  if (reason === 'value-too-long') return `Value must be at most ${MAX_ENRICHMENT_VALUE_LENGTH} characters.`;
+  if (reason === 'invalid-source-url') return 'Source URL must be a valid http:// or https:// URL.';
+  if (reason === 'duplicate-field-name') return 'Each field may only be submitted once per request.';
+  return 'Invalid request.';
+}
+
+/**
+ * Picks the effective enrichment row for one (candidate, field) pair
+ * from its full history — the row with the latest `recorded_at`,
+ * tie-broken by the higher `id` — same deterministic pattern as
+ * `computeEffectiveReviewStatus`. Returns `null` given no rows.
+ */
+function pickLatestEnrichmentRow(rows) {
+  if (!Array.isArray(rows) || rows.length === 0) return null;
+  let latest = null;
+  for (const row of rows) {
+    if (!row || !row.recorded_at) continue;
+    if (!latest) {
+      latest = row;
+      continue;
+    }
+    const latestTime = new Date(latest.recorded_at).getTime();
+    const rowTime = new Date(row.recorded_at).getTime();
+    if (rowTime > latestTime || (rowTime === latestTime && Number(row.id) > Number(latest.id))) {
+      latest = row;
+    }
+  }
+  return latest;
+}
+
+/**
+ * Groups an unordered list of enrichment rows (as returned by a single,
+ * un-filtered `import_candidate_enrichments` query covering many
+ * candidates) by `candidate_id`, then by `field_name`, and reduces each
+ * (candidate, field) group to its effective row —
+ * `{ [candidateId]: { [fieldName]: { value, source_url, recorded_at,
+ * reviewer_id } } }`. Pure; never touches Supabase.
+ */
+function buildEnrichmentSourceByCandidateId(allEnrichmentRows) {
+  const byCandidate = {};
+  for (const row of allEnrichmentRows || []) {
+    if (!row || !row.candidate_id || !row.field_name) continue;
+    if (!byCandidate[row.candidate_id]) byCandidate[row.candidate_id] = {};
+    if (!byCandidate[row.candidate_id][row.field_name]) byCandidate[row.candidate_id][row.field_name] = [];
+    byCandidate[row.candidate_id][row.field_name].push(row);
+  }
+  const result = {};
+  for (const candidateId of Object.keys(byCandidate)) {
+    result[candidateId] = {};
+    for (const fieldName of Object.keys(byCandidate[candidateId])) {
+      const latest = pickLatestEnrichmentRow(byCandidate[candidateId][fieldName]);
+      if (latest) {
+        result[candidateId][fieldName] = {
+          value: latest.value,
+          source_url: latest.source_url,
+          recorded_at: latest.recorded_at,
+          reviewer_id: latest.reviewer_id,
+        };
+      }
+    }
+  }
+  return result;
+}
+
+/**
+ * Computes the *displayed* field set for one candidate: the raw
+ * `extractedFields` with any enriched field's value overridden by its
+ * latest, effective enrichment — never the reverse (a raw value never
+ * overrides a real enrichment). Fields with no enrichment at all keep
+ * their raw value (present or absent) unchanged. Never mutates
+ * `extractedFields`; the raw record itself is never touched by this or
+ * any other function in this module.
+ */
+function computeEnrichedFields(extractedFields, enrichmentSourceForCandidate) {
+  const fields = { ...(extractedFields || {}) };
+  const source = enrichmentSourceForCandidate || {};
+  for (const fieldName of ENRICHABLE_FIELDS) {
+    if (source[fieldName]) {
+      fields[fieldName] = source[fieldName].value;
+    }
+  }
+  return fields;
+}
+
 module.exports = {
   ALLOWED_ROLE,
   isInternalOnly,
@@ -369,4 +569,13 @@ module.exports = {
   reviewValidationMessage,
   computeEffectiveReviewStatus,
   buildReviewStatusByCandidateId,
+  ENRICHABLE_FIELDS,
+  MAX_ENRICHMENT_VALUE_LENGTH,
+  isValidHttpUrl,
+  validateEnrichmentFieldInput,
+  validateEnrichmentRequestInput,
+  enrichmentValidationMessage,
+  pickLatestEnrichmentRow,
+  buildEnrichmentSourceByCandidateId,
+  computeEnrichedFields,
 };

@@ -30,7 +30,14 @@ parts, the same discipline already used for `MARKET-04`'s hard gates
   canonical/public write) **and the candidate review workflow — statuses,
   an append-only decision log, and a detail view — is built on top of
   it.** See "Implementation (2026-09-05, later the same day) — candidate
-  review workflow" below.
+  review workflow" below. **Migration `0007` has since been applied
+  live**, read-only re-verified. **Yet further update, still the same
+  day: a second, independent append-only audit log for manual
+  `address`/`phone`/`website` enrichment is now built too** (migration
+  `0008`) — see "Implementation (2026-09-05, later still the same day) —
+  candidate enrichment layer" below, including the deliberate
+  "Enrichment vs. review notes" boundary. **Migration `0008` has since
+  been applied live**, read-only re-verified.
 - **`MARKET-05B` — Normalization & deduplication (the original scope).**
   Matching/merging multiple sources into canonical candidate records, per
   `market-data-foundation-plan.md`'s original description. **Untouched,
@@ -544,6 +551,121 @@ path itself (`POST .../candidates/{id}/reviews`) remains genuinely
 unexercised live** — no real decision has been recorded yet; that stays
 a separate, later step.
 
+### Implementation (2026-09-05, later still the same day) — candidate enrichment layer
+
+Built as the next feature after the review workflow — a **separate**,
+independent audit log for manually-sourced corrections/additions to a
+candidate's `address`/`phone`/`website`:
+
+- **`supabase/migrations/0008_market05a_candidate_enrichments.sql`** —
+  `import_candidate_enrichments`: one row per enrichment **fact** (one
+  field, one value, one source URL), never one row per candidate. A
+  correction is a brand-new row for the same (candidate, field); the raw
+  `import_extraction_records` row is never touched, and no update/delete
+  grant exists on this table either, for any role. `internal`-only,
+  identical access model to `import_candidate_reviews`. Written and
+  locally validated in a disposable, containerized PostgreSQL instance
+  with the real 0001–0007 migrations and seed data applied first (a
+  multi-field submission in one call, a correction creating a second row
+  without touching the first, the not-found case, every check-constraint
+  direction, and — critically — that even `service_role` gets
+  `permission denied` on `UPDATE`/`DELETE`). **Applied live (2026-09-05,
+  later still the same day)**, manually, in the Supabase SQL Editor —
+  read-only re-verified afterward against the real project (same grant
+  behavior confirmed live: correct columns, `UPDATE`/`DELETE` refused
+  even for `service_role`, the existing `ImportRun`/10 candidates
+  unchanged, zero rows in this new table, no canonical/public table
+  touched). See the "Correction" paragraph further below for the full
+  live verification.
+- **Scope: `address`/`phone`/`website` only, manual entry only.** No
+  automatic scraping, no automated website verification, no brand/chain
+  classification, no publication of any kind — this is exclusively a
+  human typing in a value they found, plus the URL where they found it.
+- **`record_candidate_enrichments()`** (Postgres function, `security
+  invoker`, fixed `search_path`) — accepts a JSON array of one or more
+  `{field_name, value, source_url}` entries and inserts them **all in
+  one transaction**: either every field from a submission is recorded,
+  or none is. Mirrors `0002_pending_changes.sql`'s/`0007`'s own RPC
+  pattern (typed not-found error, not a raw foreign-key violation).
+- **`src/lib/importInbox.js`** (extended, +28 tests, 79 total) —
+  `validateEnrichmentFieldInput`/`validateEnrichmentRequestInput`/
+  `enrichmentValidationMessage` (the same validation the API route and
+  the page's client-side pre-check both use — including `isValidHttpUrl`,
+  a real `URL` parse restricted to `http:`/`https:`),
+  `pickLatestEnrichmentRow`/`buildEnrichmentSourceByCandidateId`
+  (latest-value-per-field-wins, tie-broken by row id — same deterministic
+  pattern as the review workflow's `computeEffectiveReviewStatus`), and
+  `computeEnrichedFields` (raw fields + enrichment overrides → the
+  *displayed* view, never mutating the raw input). `enrichAndFilterCandidates`
+  now recomputes `quality_status`/`missing_fields` from this combined
+  view, not the raw fields alone — a manually-sourced value can move a
+  candidate from `incomplete` to `complete` without the raw record ever
+  changing. Five structural safety-net tests read the actual route/
+  library/migration source files and assert: no `.update()`/`.delete()`
+  call exists; no canonical/public identifier appears; the migration
+  grants only `select, insert`; and — the specific new risk this feature
+  introduces — **the enrichment code path never references the review
+  table or a review's note field at all**, anywhere.
+- **`app/api/internal/v1/import-inbox/candidates/[id]/enrichments/route.js`**
+  — `GET` (full enrichment history for one candidate) and `POST` (record
+  one or more field enrichments in one atomic call), both `internal`-only.
+- **`app/api/internal/v1/import-inbox/candidates/route.js`** (extended)
+  — now also resolves and returns each candidate's `enriched_fields`/
+  `enrichment_sources`, and recomputes `quality_status`/`missing_fields`
+  from the combined view. Still `GET`-only.
+- **`app/internal/import-inbox/page.js`** (extended) — the detail view
+  now shows, per enriched field, its source URL and recorded date, plus
+  a form to submit one or more `address`/`phone`/`website` corrections
+  at once (each with its own value and source URL); a field left blank
+  is simply not submitted, never an error.
+
+**Enrichment vs. review notes — a deliberate, tested boundary, not an
+oversight.** `import_candidate_reviews.note` is optional free text,
+written for a different purpose (context on a review decision) via a
+different action (`POST .../reviews`). **Nothing in this feature reads,
+parses, or derives a structured enrichment from a review's note** — not
+automatically, not on a schedule, not as a one-time migration. Concrete,
+named example: if a reviewer had previously typed a phone number or
+website reference for **Do Spaces** into a review note, that data is
+**not** available as an enrichment merely because the note exists — it
+must be deliberately re-entered, by a human who reads the note, through
+this feature's own form, with its own source URL. This boundary is
+enforced structurally (the enrichment code has no reference to the
+review table at all — see the safety-net tests above) and is a
+permanent design decision, not a temporary limitation to later relax.
+
+**Independent of review decisions in both directions.** Recording an
+enrichment never sets a candidate's `review_status` to
+`approved_internal` (or anything else) — review decisions remain their
+own, separate, human judgment call. The reverse holds too: recording a
+review decision never reads, requires, or is blocked by an enrichment.
+
+**Not yet live-verified — the write path itself, same discipline as
+`0007`.** The migration has not been applied to the real Supabase
+project; `POST .../candidates/{id}/enrichments` has therefore never been
+exercised against it either. Local, containerized validation (above) is
+real and thorough, but is not a substitute for live verification once
+the migration is applied.
+
+**Correction (2026-09-05, later still the same day): migration `0008`
+has since been applied live**, manually, in the Supabase SQL Editor, and
+read-only re-verified afterward: `import_candidate_enrichments` exists
+with the intended columns; a live `UPDATE`/`DELETE` attempt as
+`service_role` is refused (`permission denied`, code `42501`) for both;
+the one real `ImportRun` and its 10 `import_extraction_records` are
+unchanged; no canonical/public table exists. `import_candidate_enrichments`
+holds zero rows — applying the migration recorded no enrichment. **The
+write path itself (`POST .../candidates/{id}/enrichments`) remains
+genuinely unexercised live** — no real enrichment has been recorded yet;
+that stays a separate, later step.
+
+Noted during this same verification, unrelated to this migration:
+`import_candidate_reviews` was found to hold 10 rows (one review
+decision per existing candidate) — evidence a working `internal` session
+has completed at least once. This does not change anything about
+`0008`'s own verification above; recorded here for visibility only, not
+folded into the review-workflow section's own account of that gap.
+
 ### Out of scope (explicit non-goals)
 
 - Direct browser/RLS access to `import_runs`/`import_extraction_records`
@@ -569,6 +691,13 @@ a separate, later step.
   never `PLATFORM-06`'s own moderation workflow, and never a canonical
   merge or public exposure — `approved_internal` means ready for
   internal enrichment only.
+- Automatic scraping, automated website verification, brand/chain
+  classification, or publication of any kind for candidate data.
+  **Built manual-only, as a later feature (2026-09-05, later still the
+  same day)**: `import_candidate_enrichments` records exactly what a
+  human reviewer typed in, with a source URL they manually provided —
+  see "Implementation (2026-09-05, later still the same day) — candidate
+  enrichment layer" above. No automated fetch of any kind was added.
 - Running any real `ImportRun` — this ticket assumes at least one real,
   live `ImportRun` will eventually exist to browse; it does not create
   one, and does not change the separate, explicit approval `MARKET-04`'s
@@ -590,10 +719,23 @@ column, grant, or RLS policy for the inbox itself. The one schema
 addition this ticket anticipates but does **not** build is the separate,
 append-only review/decision table named above, explicitly deferred.
 
-**Correction (2026-09-05, later the same day): that table is now built**
-— `supabase/migrations/0007_market05a_candidate_reviews.sql`
-(`import_candidate_reviews`), not yet applied to the live Supabase
-project. See "Implementation (2026-09-05, later the same day)" above.
+**Correction (2026-09-05, later the same day): that table is now built
+and applied live** — `supabase/migrations/0007_market05a_candidate_reviews.sql`
+(`import_candidate_reviews`). Read-only re-verified against the real
+Supabase project: correct columns, `UPDATE`/`DELETE` refused even for
+`service_role`, the existing `ImportRun`/10 candidates unchanged, no
+canonical/public table touched. See "Implementation (2026-09-05, later
+the same day)" above.
+
+**Further correction (2026-09-05, later still the same day): a second,
+independent append-only table is now also built and applied live** —
+`supabase/migrations/0008_market05a_candidate_enrichments.sql`
+(`import_candidate_enrichments`), for manual `address`/`phone`/`website`
+enrichment. Read-only re-verified against the real Supabase project:
+correct columns, `UPDATE`/`DELETE` refused even for `service_role`, the
+existing `ImportRun`/10 candidates unchanged, no canonical/public table
+touched. See "Implementation (2026-09-05, later still the same day) —
+candidate enrichment layer" above.
 
 ### Risks
 
@@ -671,6 +813,25 @@ project. See "Implementation (2026-09-05, later the same day)" above.
       live-exercised**: the actual write path (`POST
       .../candidates/{id}/reviews`) — the table holds zero rows; no real
       review decision has been recorded yet, live or otherwise.
+- [x] **(Added 2026-09-05, later still the same day)** Recording a
+      candidate enrichment is always exactly one new, append-only row per
+      field (or several, one per field, atomically in one submission) —
+      never an update of a previous value, never a mutation of
+      `import_extraction_records` itself, and a correction never removes
+      or alters the row it supersedes. Proven the same three ways as the
+      review workflow above (database grants, structural safety-net
+      tests, pure-logic latest-wins reduction), plus a fourth, specific
+      to this feature: dedicated structural tests confirm the enrichment
+      code path never references the review table or a review's note
+      field at all. `quality_status`/`missing_fields` are unit-tested to
+      be recomputed from the combined (raw + enrichment) view.
+      **Live-verified (2026-09-05, later still the same day)**: migration
+      `0008` applied to the real Supabase project; a live `UPDATE`/`DELETE`
+      attempt as `service_role` against `import_candidate_enrichments` is
+      refused (`permission denied`, code `42501`) for both. **Still not
+      live-exercised**: the actual write path (`POST
+      .../candidates/{id}/enrichments`) — the table holds zero rows; no
+      real enrichment has been recorded yet, live or otherwise.
 - [ ] Internal/admin surface — exempt from the consumer performance
       budget per `[[009-consumer-vs-internal-performance-budget]]`, same
       as `PLATFORM-06`. Not specifically measured this round (matches
@@ -680,20 +841,35 @@ project. See "Implementation (2026-09-05, later the same day)" above.
 ### Suggested order
 
 **Built 2026-09-05; extended with the candidate review workflow later
-the same day; migration `0007` applied live later still the same day.**
-Remaining, in order: (1) fix the `internal`-account email activation
+the same day; migration `0007` applied live later still the same day;
+the candidate enrichment layer built later still the same day; migration
+`0008` applied live later still the same day.** Remaining, in order:
+(1) fix the `internal`-account email activation
 (`app/internal/activate/page.js` exists but no account has completed
 it — Supabase's Reset Password/Invite user templates still need their
 manual dashboard edit, per `docs/api/import-inbox-api.md`'s own note);
 (2) create and activate a real `internal` account; (3) only then
-live-verify both the `internal`-role read success path and the
-review-decision write path end to end, against the one real `ImportRun`
-and its 10 real candidates that already exist. Two previously-listed
-steps are now **done** — see "Status": running a first real, approved
-`ImportRun`, and applying `supabase/migrations/0007_market05a_candidate_reviews.sql`
-to the live Supabase project (read-only re-verified: correct columns,
+live-verify the `internal`-role read success path, the review-decision
+write path, and the enrichment write path end to end, against the one
+real `ImportRun` and its 10 real candidates that already exist. Three
+previously-listed steps are now **done** — see "Status": running a
+first real, approved `ImportRun`; applying
+`supabase/migrations/0007_market05a_candidate_reviews.sql` to the live
+Supabase project (read-only re-verified: correct columns,
 `UPDATE`/`DELETE` refused even for `service_role`, the existing run/10
-candidates unchanged, zero rows in the new table).
+candidates unchanged, zero rows in that table); and applying
+`supabase/migrations/0008_market05a_candidate_enrichments.sql` to the
+live Supabase project (read-only re-verified the same way: correct
+columns, `UPDATE`/`DELETE` refused even for `service_role`, the existing
+run/10 candidates unchanged, zero rows in that table).
+
+**Note (2026-09-05, later still the same day), unrelated to either
+migration above**: while re-verifying `0008` live, `import_candidate_reviews`
+was found to already hold 10 rows (one review decision per existing
+candidate) — evidence step (2) above (a working `internal` account) has
+in fact already happened at least once, even though it has not been
+documented as done anywhere in this ticket yet. Recorded here for
+visibility; not otherwise acted on or investigated further this round.
 
 ## MARKET-05B — Normalization & deduplication (placeholder, untouched)
 

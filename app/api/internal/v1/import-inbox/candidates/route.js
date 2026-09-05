@@ -14,17 +14,37 @@
 // when none exists. This route still never writes anything, to this
 // table or any other — recording a decision only ever happens via the
 // separate `candidates/[id]/reviews` POST route.
+//
+// **Update (2026-09-05, later the same day): also resolves each
+// candidate's `enriched_fields`/`enrichment_sources`** from
+// `import_candidate_enrichments` (supabase/migrations/0008_market05a_candidate_enrichments.sql)
+// — the raw `extracted_fields` with any `address`/`phone`/`website`
+// overridden by its latest, effective enrichment. `quality_status`/
+// `missing_fields` are now computed from this combined view, not the
+// raw fields alone, so a manually-sourced value can move a candidate
+// from "incomplete" to "complete." Entirely independent of
+// `import_candidate_reviews` — this route never reads that table's
+// `note` field or derives an enrichment from it.
 
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/src/lib/supabaseAdmin'
 import { authenticateInternalRequest } from '@/src/lib/internalAuth'
-import { isInternalOnly, enrichAndFilterCandidates, buildReviewStatusByCandidateId } from '@/src/lib/importInbox'
+import {
+  isInternalOnly,
+  enrichAndFilterCandidates,
+  buildReviewStatusByCandidateId,
+  buildEnrichmentSourceByCandidateId,
+} from '@/src/lib/importInbox'
 
 // Same headroom reasoning as RECORD_LIMIT below — bounded, not
 // pagination, revisit once volume materially exceeds this. One row per
 // review *decision*, not per candidate, so this can exceed RECORD_LIMIT
 // once candidates start accumulating more than one decision each.
 const REVIEW_LIMIT = 4000
+
+// One row per enrichment *fact* (one field, one value), not per
+// candidate — same headroom reasoning as REVIEW_LIMIT above.
+const ENRICHMENT_LIMIT = 4000
 
 // v1 limitation, not silently ignored: enough headroom for every
 // candidate the real, already-run dry-runs actually produced (500
@@ -74,6 +94,18 @@ export async function GET(request) {
   if (reviewsError) return NextResponse.json({ error: 'Query failed' }, { status: 500 })
   const reviewStatusByCandidateId = buildReviewStatusByCandidateId(reviews)
 
+  // MARKET-05A: every enrichment row across every candidate, in one
+  // bounded query — buildEnrichmentSourceByCandidateId (pure,
+  // src/lib/importInbox.js) reduces this to "latest value per
+  // (candidate, field)" without a second per-candidate round trip.
+  const { data: enrichments, error: enrichmentsError } = await supabase
+    .from('import_candidate_enrichments')
+    .select('id, candidate_id, field_name, value, source_url, recorded_at, reviewer_id')
+    .order('recorded_at', { ascending: false })
+    .limit(ENRICHMENT_LIMIT)
+  if (enrichmentsError) return NextResponse.json({ error: 'Query failed' }, { status: 500 })
+  const enrichmentSourceByCandidateId = buildEnrichmentSourceByCandidateId(enrichments)
+
   const { candidates, totalBeforeFilters } = enrichAndFilterCandidates(records, {
     runId,
     category,
@@ -82,6 +114,7 @@ export async function GET(request) {
     quality,
     reviewStatusByCandidateId,
     reviewStatus,
+    enrichmentSourceByCandidateId,
   })
 
   return NextResponse.json({

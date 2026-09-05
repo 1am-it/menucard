@@ -18,6 +18,9 @@ import {
   ALLOWED_REJECTION_REASONS,
   validateReviewDecisionInput,
   reviewValidationMessage,
+  ENRICHABLE_FIELDS,
+  validateEnrichmentRequestInput,
+  enrichmentValidationMessage,
 } from '@/src/lib/importInbox'
 
 // Mirrors ops/scripts/import-breda-osm.config.js's own
@@ -44,6 +47,14 @@ const REJECTION_REASON_LABELS = {
   insufficient_data: 'Insufficient data',
   other: 'Other',
 }
+
+const ENRICHABLE_FIELD_LABELS = {
+  address: 'Address',
+  phone: 'Phone',
+  website: 'Website',
+}
+
+const EMPTY_ENRICHMENT_DRAFT = { address: { value: '', sourceUrl: '' }, phone: { value: '', sourceUrl: '' }, website: { value: '', sourceUrl: '' } }
 
 const cardStyle = {
   border: '1px solid var(--border)',
@@ -106,6 +117,17 @@ export default function ImportInboxPage() {
   const [decisionDraftByCandidateId, setDecisionDraftByCandidateId] = useState({})
   const [decisionSubmittingId, setDecisionSubmittingId] = useState(null)
   const [decisionErrorByCandidateId, setDecisionErrorByCandidateId] = useState({})
+
+  // MARKET-05A — per-candidate enrichment detail view. Entirely
+  // independent state from the review-decision state above: enrichment
+  // and review decisions are two separate actions on two separate
+  // tables (see src/lib/importInbox.js's own note on this).
+  const [enrichmentsByCandidateId, setEnrichmentsByCandidateId] = useState({})
+  const [enrichmentsLoadingId, setEnrichmentsLoadingId] = useState(null)
+  const [enrichmentsErrorId, setEnrichmentsErrorId] = useState(null)
+  const [enrichmentDraftByCandidateId, setEnrichmentDraftByCandidateId] = useState({})
+  const [enrichmentSubmittingId, setEnrichmentSubmittingId] = useState(null)
+  const [enrichmentErrorByCandidateId, setEnrichmentErrorByCandidateId] = useState({})
 
   useEffect(() => {
     const supabase = getSupabaseBrowser()
@@ -193,6 +215,29 @@ export default function ImportInboxPage() {
     }
   }, [])
 
+  // MARKET-05A — fetches one candidate's full, append-only enrichment
+  // history (newest first). Never mutates anything; the enrichment form
+  // below is the only thing that ever writes, via a separate POST.
+  const loadEnrichments = useCallback(async (token, candidateId) => {
+    setEnrichmentsLoadingId(candidateId)
+    setEnrichmentsErrorId(null)
+    try {
+      const res = await fetch(`/api/internal/v1/import-inbox/candidates/${candidateId}/enrichments`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setEnrichmentsErrorId(candidateId)
+        return
+      }
+      setEnrichmentsByCandidateId((prev) => ({ ...prev, [candidateId]: data.enrichments || [] }))
+    } catch {
+      setEnrichmentsErrorId(candidateId)
+    } finally {
+      setEnrichmentsLoadingId((current) => (current === candidateId ? null : current))
+    }
+  }, [])
+
   useEffect(() => {
     if (session) {
       loadRuns(session.access_token)
@@ -219,12 +264,84 @@ export default function ImportInboxPage() {
   }
 
   // MARKET-05A — expand/collapse one candidate's detail view. Fetches its
-  // review history lazily, only on first expand, not on every render.
+  // review and enrichment history lazily, only on first expand, not on
+  // every render.
   function toggleExpand(candidateId) {
     const next = expandedCandidateId === candidateId ? null : candidateId
     setExpandedCandidateId(next)
     if (next && !reviewsByCandidateId[next] && session) {
       loadReviews(session.access_token, next)
+    }
+    if (next && !enrichmentsByCandidateId[next] && session) {
+      loadEnrichments(session.access_token, next)
+    }
+  }
+
+  function updateEnrichmentDraft(candidateId, fieldName, patch) {
+    setEnrichmentDraftByCandidateId((prev) => {
+      const current = prev[candidateId] || EMPTY_ENRICHMENT_DRAFT
+      return {
+        ...prev,
+        [candidateId]: { ...current, [fieldName]: { ...current[fieldName], ...patch } },
+      }
+    })
+  }
+
+  // MARKET-05A — records one or more field enrichments in a single POST
+  // via candidates/[id]/enrichments. Only fields where the reviewer
+  // filled in *both* a value and a source URL are submitted — a field
+  // left entirely blank is simply not part of this submission, never an
+  // error. Client-side validation mirrors
+  // src/lib/importInbox.js's validateEnrichmentRequestInput exactly —
+  // the same function the API route itself uses.
+  async function submitEnrichment(candidateId) {
+    const draft = enrichmentDraftByCandidateId[candidateId] || EMPTY_ENRICHMENT_DRAFT
+    const fields = ENRICHABLE_FIELDS.filter((fieldName) => (draft[fieldName]?.value || '').trim() || (draft[fieldName]?.sourceUrl || '').trim()).map(
+      (fieldName) => ({
+        field_name: fieldName,
+        value: draft[fieldName]?.value || '',
+        source_url: draft[fieldName]?.sourceUrl || '',
+      })
+    )
+
+    const validation = validateEnrichmentRequestInput(fields)
+    if (!validation.valid) {
+      setEnrichmentErrorByCandidateId((prev) => ({ ...prev, [candidateId]: enrichmentValidationMessage(validation.reason) }))
+      return
+    }
+
+    setEnrichmentSubmittingId(candidateId)
+    setEnrichmentErrorByCandidateId((prev) => ({ ...prev, [candidateId]: null }))
+    try {
+      const res = await fetch(`/api/internal/v1/import-inbox/candidates/${candidateId}/enrichments`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fields: validation.fields.map((f) => ({ field_name: f.fieldName, value: f.value, source_url: f.sourceUrl })),
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setEnrichmentErrorByCandidateId((prev) => ({ ...prev, [candidateId]: data.error || 'Recording the enrichment failed' }))
+        return
+      }
+      setEnrichmentDraftByCandidateId((prev) => ({ ...prev, [candidateId]: EMPTY_ENRICHMENT_DRAFT }))
+      await loadEnrichments(session.access_token, candidateId)
+      await loadCandidates(session.access_token, {
+        runId: runIdFilter,
+        category: categoryFilter,
+        name: nameFilter,
+        duplicate: duplicateFilter,
+        quality: qualityFilter,
+        reviewStatus: reviewStatusFilter,
+      })
+    } catch {
+      setEnrichmentErrorByCandidateId((prev) => ({ ...prev, [candidateId]: 'Recording the enrichment failed' }))
+    } finally {
+      setEnrichmentSubmittingId((current) => (current === candidateId ? null : current))
     }
   }
 
@@ -340,10 +457,12 @@ export default function ImportInboxPage() {
 
       <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginTop: 0, marginBottom: 24 }}>
         Nothing here can ever write to <code>import_runs</code>, <code>import_extraction_records</code>, or any canonical
-        or public table. "Possible duplicate" and quality status are computed on every load — never stored. Recording a
-        review decision below only ever adds a new row to a separate, append-only audit log
-        (<code>import_candidate_reviews</code>) — the raw import record itself is never changed. "Approved (internal
-        only)" means ready for internal enrichment only — never public publication, never a MenuCard.
+        or public table. "Possible duplicate" and quality status are computed on every load from the raw data plus any
+        manual enrichments — never stored on the raw record. Recording a review decision or an enrichment below only ever
+        adds a new row to its own separate, append-only audit log — the raw import record itself is never changed, and a
+        correction is always a new entry, never an edit. "Approved (internal only)" means ready for internal enrichment
+        only — never public publication, never a MenuCard — and is entirely independent from recording an enrichment:
+        neither one ever sets the other automatically.
       </p>
 
       <h2 style={{ fontSize: 18, marginBottom: 12 }}>Import runs</h2>
@@ -517,11 +636,20 @@ export default function ImportInboxPage() {
                     </div>
                     <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 4 }}>
                       {c.extracted_fields?.category || '—'}
-                      {c.extracted_fields?.address ? ` · ${c.extracted_fields.address}` : ''}
+                      {c.enriched_fields?.address ? ` · ${c.enriched_fields.address}` : ''}
+                      {c.enrichment_sources?.address && (
+                        <span style={{ fontSize: 11, color: 'var(--text-faint)' }}>
+                          {' '}
+                          (enriched, {c.enrichment_sources.address.recorded_at})
+                        </span>
+                      )}
                     </div>
                     <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                      {c.extracted_fields?.phone ? `${c.extracted_fields.phone} · ` : ''}
-                      {c.extracted_fields?.website || ''}
+                      {c.enriched_fields?.phone ? `${c.enriched_fields.phone} · ` : ''}
+                      {c.enriched_fields?.website || ''}
+                      {(c.enrichment_sources?.phone || c.enrichment_sources?.website) && (
+                        <span style={{ fontSize: 11, color: 'var(--text-faint)' }}> (enriched)</span>
+                      )}
                     </div>
                     {c.missing_fields && c.missing_fields.length > 0 && (
                       <div style={{ fontSize: 12, color: 'var(--warning)', marginTop: 6 }}>Missing: {c.missing_fields.join(', ')}</div>
@@ -622,6 +750,81 @@ export default function ImportInboxPage() {
                             }}
                           >
                             {decisionSubmittingId === c.id ? 'Saving…' : 'Save decision'}
+                          </button>
+                        </div>
+
+                        <h3 style={{ fontSize: 13, margin: '20px 0 8px', color: 'var(--text-secondary)' }}>Enrichment history</h3>
+                        {enrichmentsLoadingId === c.id && <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Loading…</p>}
+                        {enrichmentsErrorId === c.id && (
+                          <p style={{ color: 'var(--danger)', fontSize: 13 }}>Failed to load enrichment history.</p>
+                        )}
+                        {enrichmentsLoadingId !== c.id &&
+                          enrichmentsByCandidateId[c.id] &&
+                          enrichmentsByCandidateId[c.id].length === 0 && (
+                            <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>No manual enrichments recorded yet.</p>
+                          )}
+                        {enrichmentsByCandidateId[c.id] && enrichmentsByCandidateId[c.id].length > 0 && (
+                          <div style={{ display: 'grid', gap: 6, marginBottom: 14 }}>
+                            {enrichmentsByCandidateId[c.id].map((e) => (
+                              <div key={e.id} style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+                                <strong>{ENRICHABLE_FIELD_LABELS[e.field_name] || e.field_name}</strong>: {e.value}
+                                <div style={{ color: 'var(--text-muted)', fontSize: 11, marginTop: 2 }}>
+                                  Source: {e.source_url} · {e.recorded_at}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        <h3 style={{ fontSize: 13, margin: '0 0 8px', color: 'var(--text-secondary)' }}>
+                          Enrich missing business info
+                        </h3>
+                        <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 8px' }}>
+                          Fill in a value and its source URL for one or more fields. A field left blank is not submitted.
+                          A correction is recorded as a new entry — nothing here is ever edited or deleted.
+                        </p>
+                        <div style={{ display: 'grid', gap: 10, maxWidth: 480 }}>
+                          {ENRICHABLE_FIELDS.map((fieldName) => {
+                            const fieldDraft = (enrichmentDraftByCandidateId[c.id] || EMPTY_ENRICHMENT_DRAFT)[fieldName] || { value: '', sourceUrl: '' }
+                            return (
+                              <div key={fieldName} style={{ display: 'grid', gap: 4 }}>
+                                <label style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{ENRICHABLE_FIELD_LABELS[fieldName]}</label>
+                                <input
+                                  type="text"
+                                  placeholder={`New ${ENRICHABLE_FIELD_LABELS[fieldName].toLowerCase()} value…`}
+                                  value={fieldDraft.value}
+                                  onChange={(e) => updateEnrichmentDraft(c.id, fieldName, { value: e.target.value })}
+                                  style={selectStyle}
+                                />
+                                <input
+                                  type="text"
+                                  placeholder="Source URL (e.g. the restaurant's own website)…"
+                                  value={fieldDraft.sourceUrl}
+                                  onChange={(e) => updateEnrichmentDraft(c.id, fieldName, { sourceUrl: e.target.value })}
+                                  style={selectStyle}
+                                />
+                              </div>
+                            )
+                          })}
+                          {enrichmentErrorByCandidateId[c.id] && (
+                            <div style={{ fontSize: 12, color: 'var(--danger)' }}>{enrichmentErrorByCandidateId[c.id]}</div>
+                          )}
+                          <button
+                            onClick={() => submitEnrichment(c.id)}
+                            disabled={enrichmentSubmittingId === c.id}
+                            style={{
+                              fontSize: 13,
+                              padding: '6px 12px',
+                              borderRadius: 8,
+                              border: 'none',
+                              background: 'var(--green)',
+                              color: '#fff',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                              justifySelf: 'start',
+                            }}
+                          >
+                            {enrichmentSubmittingId === c.id ? 'Saving…' : 'Save enrichment'}
                           </button>
                         </div>
                       </div>

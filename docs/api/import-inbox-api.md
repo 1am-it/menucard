@@ -20,6 +20,17 @@ never to `import_extraction_records`, never to a canonical or public
 table (no such table exists in Supabase for this data yet — see "What
 has been verified" below).
 
+**Addition (2026-09-05, later the same day): a second, entirely
+independent append-only audit log now exists for manual field
+enrichment** —
+`GET`/`POST /api/internal/v1/import-inbox/candidates/{id}/enrichments`,
+see "Candidate enrichments" below — writing only ever a new row to its
+own table (`import_candidate_enrichments`,
+`supabase/migrations/0008_market05a_candidate_enrichments.sql`). Same
+guarantee as the review log: never a write to `import_extraction_records`,
+never to a canonical or public table, and this table has no update or
+delete grant either, for any role.
+
 ## Authentication and roles
 
 Same Supabase Auth bearer-token pattern as every other internal route.
@@ -67,12 +78,27 @@ pagination once volume materially exceeds this), enriched with
 **computed, read-only, never-stored** fields and then filtered. All
 query parameters are optional and combine with AND.
 
-- `possible_duplicate`/`quality_status`/`missing_fields` are computed
-  fresh on every request from `extracted_fields` (`src/lib/importInbox.js`)
-  — **never** a stored column, **never** `MARKET-05B`'s eventual real
-  deduplication logic. `possible_duplicate` is computed over the *entire*
-  candidate set before any filter is applied, so a cross-run duplicate is
-  still flagged even when filtering down to one run.
+- `possible_duplicate` is computed fresh on every request from
+  `extracted_fields` (`src/lib/importInbox.js`) — **never** a stored
+  column, **never** `MARKET-05B`'s eventual real deduplication logic.
+  Computed over the *entire* candidate set before any filter is applied,
+  so a cross-run duplicate is still flagged even when filtering down to
+  one run.
+- **`enriched_fields`/`enrichment_sources` (addition, 2026-09-05, later
+  the same day)**: `enriched_fields` is `extracted_fields` with any
+  `address`/`phone`/`website` overridden by its latest, effective
+  manually-sourced value (see "Candidate enrichments" below) —
+  `extracted_fields` itself is always still returned, unmodified, for
+  transparency. `enrichment_sources` names, per enriched field, the
+  `source_url`/`recorded_at`/`reviewer_id` behind the value currently
+  shown; a field with no enrichment simply has no key here.
+  **`quality_status`/`missing_fields` are now computed from
+  `enriched_fields`, not `extracted_fields`** — a manually-sourced value
+  can move a candidate from `incomplete` to `complete` without the raw
+  record ever changing. Every enrichment row across every candidate is
+  fetched in one bounded query (capped at 4000) and reduced in
+  `src/lib/importInbox.js`'s `buildEnrichmentSourceByCandidateId`; no
+  per-candidate round trip.
 - **`review_status` (addition, 2026-09-05) is resolved, not computed**:
   the `status` of the *latest* `import_candidate_reviews` row for that
   candidate (by `decided_at`), or `"new"` when no review row exists yet
@@ -86,7 +112,8 @@ query parameters are optional and combine with AND.
 - `name` — case-insensitive substring match against
   `extracted_fields.name`.
 - `possible_duplicate` — `"true"` or `"false"`.
-- `quality` — `"complete"` or `"incomplete"`.
+- `quality` — `"complete"` or `"incomplete"` — evaluated against the
+  **enriched** view, per above.
 - `review_status` — one of `"new"`, `"needs_enrichment"`,
   `"approved_internal"`, `"rejected"`, `"deferred"`.
 
@@ -100,12 +127,21 @@ query parameters are optional and combine with AND.
       "record_locator": "osm:node:4001",
       "retrieved_at": "...",
       "extracted_fields": {
-        "name": "...", "address": "...", "phone": "...", "website": "...",
-        "category": "restaurant", "location": { "lat": 51.58, "lon": 4.78 }, "osm_node_id": "4001"
+        "name": "...", "category": "restaurant",
+        "location": { "lat": 51.58, "lon": 4.78 }, "osm_node_id": "4001"
+      },
+      "enriched_fields": {
+        "name": "...", "category": "restaurant",
+        "location": { "lat": 51.58, "lon": 4.78 }, "osm_node_id": "4001",
+        "phone": "+31 76 1234567", "website": "https://restaurant.example"
+      },
+      "enrichment_sources": {
+        "phone": { "value": "+31 76 1234567", "source_url": "https://restaurant.example/contact", "recorded_at": "2026-09-05T14:00:00.000Z", "reviewer_id": "..." },
+        "website": { "value": "https://restaurant.example", "source_url": "https://restaurant.example/contact", "recorded_at": "2026-09-05T14:00:00.000Z", "reviewer_id": "..." }
       },
       "possible_duplicate": false,
-      "quality_status": "complete",
-      "missing_fields": [],
+      "quality_status": "incomplete",
+      "missing_fields": ["address"],
       "review_status": "new"
     }
   ],
@@ -114,9 +150,10 @@ query parameters are optional and combine with AND.
 }
 ```
 An incomplete candidate's `missing_fields` names exactly which of
-`name`/`address`/`phone`/`website` are absent, e.g. `["phone"]` — shown
-in `/internal/import-inbox`'s per-candidate detail view as
-`Missing: phone`.
+`name`/`address`/`phone`/`website` are absent **from the enriched view**,
+e.g. `["phone"]` — shown in `/internal/import-inbox`'s per-candidate
+detail view as `Missing: phone`. A field present only because of a
+manual enrichment is not listed as missing.
 
 ## Candidate reviews (addition, 2026-09-05) — `GET`/`POST /api/internal/v1/import-inbox/candidates/{id}/reviews`
 
@@ -189,6 +226,107 @@ name a real `import_extraction_records` row. `400` with a specific,
 safe message (`src/lib/importInbox.js`'s `reviewValidationMessage`) on
 any of the validation failures above.
 
+## Candidate enrichments (addition, 2026-09-05, later the same day) — `GET`/`POST /api/internal/v1/import-inbox/candidates/{id}/enrichments`
+
+A second, **entirely independent**, append-only audit log — this one for
+manually-sourced corrections/additions to a candidate's `address`,
+`phone`, or `website`. Never a mutation of `import_extraction_records`,
+never a mutation of a previous enrichment. Full schema/grants:
+`supabase/migrations/0008_market05a_candidate_enrichments.sql`. Same
+`internal`-only guard as every other route on this page.
+
+**Scope: `address`/`phone`/`website` only, manual entry only.** No
+scraping, no automated website verification, no brand/chain
+classification, no publication — this feature only records what a human
+reviewer manually typed in, with a source URL they manually provided.
+
+**Enrichment vs. review notes — read before assuming a note already
+covers this.** `import_candidate_reviews.note` is optional, free
+text, written for a completely different purpose (context on a review
+decision) and by a completely different action (`POST .../reviews`).
+**Nothing in this feature ever reads, parses, or derives a structured
+enrichment from a review's `note` field** — not on a schedule, not on
+first use, not ever; see `src/lib/importInbox.js`'s own structural
+safety-net tests, which assert the enrichment code path never even
+references the review table. Concretely: if a reviewer previously typed
+something like a phone number or a website reference for **Do Spaces**
+into a review note, that data is **not** automatically available as an
+enrichment — a reviewer must read the note and deliberately re-enter the
+value, with its source, through this feature's own form. See
+`planning/specs/tickets/market-05-normalization-deduplication.md`'s own
+"Enrichment vs. review notes" section for the full reasoning.
+
+**Independent of review decisions in both directions.** Recording an
+enrichment never sets `import_candidate_reviews.status` to
+`approved_internal` (or anything else) — a reviewer who enriches a
+candidate's phone number still has to separately record a review
+decision if they want one recorded at all. The reverse holds too:
+recording a review decision never reads or requires an enrichment.
+
+**`GET .../candidates/{id}/enrichments`** — every enrichment row for
+this one candidate, newest `recorded_at` first (ties broken by the
+higher `id`). Response `200`:
+```json
+{
+  "enrichments": [
+    {
+      "id": 2,
+      "candidate_id": "...",
+      "reviewer_id": "...",
+      "field_name": "phone",
+      "value": "+31 76 1234567",
+      "source_url": "https://restaurant.example/contact",
+      "recorded_at": "2026-09-05T14:00:00.000Z"
+    },
+    {
+      "id": 1,
+      "candidate_id": "...",
+      "reviewer_id": "...",
+      "field_name": "website",
+      "value": "https://restaurant.example",
+      "source_url": "https://restaurant.example/contact",
+      "recorded_at": "2026-09-05T14:00:00.000Z"
+    }
+  ]
+}
+```
+An empty `enrichments` array means no field has ever been manually
+enriched for this candidate — it does not mean the candidate doesn't
+exist (that's a separate `404`, see below, and only surfaces on `POST`).
+
+**`POST .../candidates/{id}/enrichments`** — body:
+```json
+{
+  "fields": [
+    { "field_name": "phone", "value": "+31 76 1234567", "source_url": "https://restaurant.example/contact" },
+    { "field_name": "website", "value": "https://restaurant.example", "source_url": "https://restaurant.example/contact" }
+  ]
+}
+```
+- `fields` — required, a non-empty array; one or more of `address`,
+  `phone`, `website`, each at most once per request
+  (`src/lib/importInbox.js`'s `validateEnrichmentRequestInput`).
+- `field_name` — one of `address`, `phone`, `website`.
+- `value` — required, non-empty, at most 500 characters.
+- `source_url` — required, must be a syntactically valid `http://` or
+  `https://` URL (`isValidHttpUrl`) — never `ftp:`, `mailto:`, or a bare
+  domain with no scheme.
+
+Always performs exactly **one atomic insert** (one transaction, every
+submitted field or none) via the `record_candidate_enrichments()`
+Postgres function — never an update, never a delete; the database itself
+grants `select, insert` only on `import_candidate_enrichments`, to
+`service_role`, with no update/delete grant to any role at all, for any
+reason. A correction is made by submitting the field again with a new
+value/source — this creates a **new row**; it never touches the
+previous one. `reviewer_id` is always `auth.userId` from the caller's
+own verified session. Response `201` with every newly-created row,
+shaped like the items in the `GET` list above. `404`
+(`{"error": "Candidate not found"}`) when `{id}` does not name a real
+`import_extraction_records` row. `400` with a specific, safe message
+(`src/lib/importInbox.js`'s `enrichmentValidationMessage`) on any of the
+validation failures above.
+
 ## Error responses (all endpoints)
 
 `401` missing/invalid session, `403` caller has no `internal` role, `500`
@@ -199,8 +337,8 @@ error message).
 
 Same pattern as `/internal/moderation`: `src/lib/supabaseBrowser.js` is
 used **only** for sign-in/session lookup; the page never queries Supabase
-directly, only these routes (now three, since the 2026-09-05 review
-addition), with the session's `access_token`.
+directly, only these routes (now four, since the 2026-09-05 review and
+enrichment additions), with the session's `access_token`.
 
 ## What has been verified
 
@@ -269,3 +407,42 @@ remains genuinely unexercised against the live project** — a named,
 honest gap, not an oversight: no real review decision has been recorded
 yet, live or otherwise, since doing so was explicitly out of scope for
 the verification round that confirmed the above.
+
+**Also not yet applied or verified live (2026-09-05, later the same
+day) — the candidate-enrichments feature.** Migration `0008` and
+`record_candidate_enrichments()` were locally validated the same way as
+`0007` above (disposable, containerized PostgreSQL instance, 0001
+through 0008 applied in sequence): a multi-field enrichment recorded in
+one call, a correction for the same field creating a second row without
+touching the first, the not-found case, every check-constraint direction
+(`field_name` outside the fixed set, an empty `value`, a non-`http(s)`
+`source_url`), and the append-only `UPDATE`/`DELETE` refusal — even for
+`service_role` — all behaved exactly as designed. **None of this has
+been exercised against the actual live Supabase project, and the
+migration itself has not been applied there either** — both remain
+separate, later, explicitly-approved steps, exactly like `0007` before
+it was applied.
+
+**Correction (2026-09-05, later still the same day): migration `0008`
+has since been applied live to the actual Supabase project**, manually,
+in the SQL Editor, and read-only re-verified afterward: `import_candidate_enrichments`
+exists with the intended columns (confirmed via PostgREST's own OpenAPI
+introspection); a live `UPDATE`/`DELETE` attempt against it, as
+`service_role`, is refused (`permission denied for table
+import_candidate_enrichments`, code `42501`) for both; the one real
+`ImportRun` and its 10 `import_extraction_records` are unchanged; no
+canonical or public table exists. `import_candidate_enrichments` holds
+**zero rows** — applying the migration did not itself record any
+enrichment. **The write path (`POST .../candidates/{id}/enrichments`)
+remains genuinely unexercised against the live project.**
+
+Separately noted during this same verification, not caused by it: **`import_candidate_reviews`
+now holds 10 rows** (one review decision per existing candidate,
+recorded between this migration's own live-verification rounds) —
+meaning a working `internal` session has evidently completed at least
+once since the "no working `internal` account exists yet" note above
+was written. That note is not corrected here in full (it concerns the
+review feature and the account-activation flow, both out of scope for
+this migration's own verification) — flagged here only because it was
+directly observed while confirming this migration's effects, and left
+for a dedicated update rather than folded silently into this one.

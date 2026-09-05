@@ -557,3 +557,48 @@ and its 10 candidates are unchanged; no canonical/public table exists.
 The table holds zero rows — applying the migration recorded no review
 decision, and the write path itself (`POST .../candidates/{id}/reviews`)
 remains genuinely unexercised live.
+
+**Update (2026-09-05, still the same day): a second, independent,
+append-only audit log added for manual candidate enrichment.** Scope:
+`address`/`phone`/`website` only, manual entry only — no scraping, no
+automated website verification, no brand/chain classification, no
+publication. `import_candidate_enrichments`
+(`supabase/migrations/0008_market05a_candidate_enrichments.sql`) plus
+its `record_candidate_enrichments()` RPC record
+one or more field corrections atomically, always as new rows — a
+correction never edits or removes a previous enrichment, and the raw
+`import_extraction_records` row is never touched; locally validated
+(disposable Postgres container, 0001–0008 applied in sequence) that even
+`service_role` gets `permission denied` on `UPDATE`/`DELETE`. Candidate
+`quality_status`/`missing_fields` are now computed from the raw fields
+plus the latest, effective enrichment per field — a manually-sourced
+value can move a candidate from incomplete to complete without the raw
+record changing. **Deliberately, structurally independent of
+`import_candidate_reviews`**: nothing in this feature reads a review's
+free-text note to derive an enrichment — a reviewer who had previously
+written, e.g., a phone number or website reference for **Do Spaces**
+into a review note must deliberately re-enter it through this feature's
+own form; enforced by dedicated structural tests, not just documented
+intent. Recording an enrichment never sets a review's status to
+`approved_internal`, and vice versa — the two remain fully independent
+actions. Full detail:
+`planning/specs/tickets/market-05-normalization-deduplication.md`'s own
+"Implementation (2026-09-05, later still the same day) — candidate
+enrichment layer" section. Still no canonical merge, public route, or
+Supabase configuration change.
+
+**Correction (2026-09-05, later still the same day): migration `0008`
+has since been applied live**, manually, in the Supabase SQL Editor —
+read-only re-verified afterward: `import_candidate_enrichments` exists
+with the intended columns; a live `UPDATE`/`DELETE` attempt as
+`service_role` is refused (`permission denied`, code `42501`); the one
+real `ImportRun` and its 10 candidates are unchanged; no canonical/public
+table exists. The table holds zero rows — applying the migration
+recorded no enrichment, and the write path itself
+(`POST .../candidates/{id}/enrichments`) remains genuinely unexercised
+live. Separately noted during this same check, unrelated to `0008`:
+`import_candidate_reviews` now holds 10 rows (one review decision per
+existing candidate) — evidence a working `internal` session has
+completed at least once, contrary to this document's earlier "no working
+`internal` account exists yet" note; flagged here for visibility, not
+otherwise investigated or acted on this round.

@@ -23,6 +23,15 @@ const {
   reviewValidationMessage,
   computeEffectiveReviewStatus,
   buildReviewStatusByCandidateId,
+  ENRICHABLE_FIELDS,
+  MAX_ENRICHMENT_VALUE_LENGTH,
+  isValidHttpUrl,
+  validateEnrichmentFieldInput,
+  validateEnrichmentRequestInput,
+  enrichmentValidationMessage,
+  pickLatestEnrichmentRow,
+  buildEnrichmentSourceByCandidateId,
+  computeEnrichedFields,
 } = require('./importInbox');
 
 // ─── Authorization: internal-only, never editor/owner ────────────────────
@@ -556,4 +565,299 @@ test('structural safety net: the migration grants only select+insert on import_c
   // statement — a real grant would always be followed by "on public." in
   // this project's own migration style (see 0004/0006's own grants).
   assert.doesNotMatch(sql, /grant\s+(?:[\w,\s]*\b)?(update|delete)\b[\w,\s]*\bon\s+public\.import_candidate_reviews/i);
+});
+
+// ─── MARKET-05A candidate enrichments — validateEnrichmentFieldInput /
+// validateEnrichmentRequestInput ──────────────────────────────────────
+
+test('isValidHttpUrl: accepts only syntactically valid http(s) URLs', () => {
+  assert.equal(isValidHttpUrl('https://example.com'), true);
+  assert.equal(isValidHttpUrl('http://example.com/contact'), true);
+  assert.equal(isValidHttpUrl('ftp://example.com'), false);
+  assert.equal(isValidHttpUrl('mailto:x@example.com'), false);
+  assert.equal(isValidHttpUrl('example.com'), false, 'no scheme at all');
+  assert.equal(isValidHttpUrl(''), false);
+  assert.equal(isValidHttpUrl('   '), false);
+  assert.equal(isValidHttpUrl(null), false);
+  assert.equal(isValidHttpUrl(undefined), false);
+  assert.equal(isValidHttpUrl(123), false);
+  assert.doesNotThrow(() => isValidHttpUrl('not a url at all'));
+});
+
+test('validateEnrichmentFieldInput: constants match the migration exactly', () => {
+  assert.deepEqual(ENRICHABLE_FIELDS, ['address', 'phone', 'website']);
+});
+
+test('validateEnrichmentFieldInput: rejects a field name outside the fixed set (e.g. name/category/location)', () => {
+  for (const fieldName of ['name', 'category', 'location', 'osm_node_id', '']) {
+    assert.deepEqual(
+      validateEnrichmentFieldInput({ fieldName, value: 'x', sourceUrl: 'https://example.com' }),
+      { valid: false, reason: 'invalid-field-name' },
+      `expected fieldName=${JSON.stringify(fieldName)} to be rejected`
+    );
+  }
+});
+
+test('validateEnrichmentFieldInput: rejects a missing/empty/too-long value', () => {
+  assert.deepEqual(validateEnrichmentFieldInput({ fieldName: 'phone', value: '', sourceUrl: 'https://example.com' }), {
+    valid: false,
+    reason: 'missing-value',
+  });
+  assert.deepEqual(validateEnrichmentFieldInput({ fieldName: 'phone', value: '   ', sourceUrl: 'https://example.com' }), {
+    valid: false,
+    reason: 'missing-value',
+  });
+  assert.deepEqual(
+    validateEnrichmentFieldInput({ fieldName: 'phone', value: 'x'.repeat(MAX_ENRICHMENT_VALUE_LENGTH + 1), sourceUrl: 'https://example.com' }),
+    { valid: false, reason: 'value-too-long' }
+  );
+});
+
+test('validateEnrichmentFieldInput: rejects a missing/invalid source URL', () => {
+  assert.deepEqual(validateEnrichmentFieldInput({ fieldName: 'phone', value: '+31 76 0000000', sourceUrl: '' }), {
+    valid: false,
+    reason: 'invalid-source-url',
+  });
+  assert.deepEqual(validateEnrichmentFieldInput({ fieldName: 'phone', value: '+31 76 0000000', sourceUrl: 'not-a-url' }), {
+    valid: false,
+    reason: 'invalid-source-url',
+  });
+  assert.deepEqual(validateEnrichmentFieldInput({ fieldName: 'phone', value: '+31 76 0000000', sourceUrl: 'ftp://example.com' }), {
+    valid: false,
+    reason: 'invalid-source-url',
+  });
+});
+
+test('validateEnrichmentFieldInput: accepts and trims a valid entry', () => {
+  assert.deepEqual(
+    validateEnrichmentFieldInput({ fieldName: 'website', value: '  https://restaurant.example  ', sourceUrl: '  https://source.example/page  ' }),
+    { valid: true, fieldName: 'website', value: 'https://restaurant.example', sourceUrl: 'https://source.example/page' }
+  );
+});
+
+test('validateEnrichmentRequestInput: requires at least one field', () => {
+  assert.deepEqual(validateEnrichmentRequestInput([]), { valid: false, reason: 'missing-fields' });
+  assert.deepEqual(validateEnrichmentRequestInput(undefined), { valid: false, reason: 'missing-fields' });
+  assert.deepEqual(validateEnrichmentRequestInput(null), { valid: false, reason: 'missing-fields' });
+  assert.deepEqual(validateEnrichmentRequestInput('not-an-array'), { valid: false, reason: 'missing-fields' });
+});
+
+test('validateEnrichmentRequestInput: validates every entry, returning the first failure', () => {
+  const result = validateEnrichmentRequestInput([
+    { field_name: 'phone', value: '+31 76 0000000', source_url: 'https://example.com' },
+    { field_name: 'website', value: '', source_url: 'https://example.com' },
+  ]);
+  assert.deepEqual(result, { valid: false, reason: 'missing-value' });
+});
+
+test('validateEnrichmentRequestInput: rejects a duplicate field_name within one submission', () => {
+  const result = validateEnrichmentRequestInput([
+    { field_name: 'phone', value: '+31 76 0000000', source_url: 'https://example.com' },
+    { field_name: 'phone', value: '+31 76 1111111', source_url: 'https://example.com/other' },
+  ]);
+  assert.deepEqual(result, { valid: false, reason: 'duplicate-field-name' });
+});
+
+test('validateEnrichmentRequestInput: accepts multiple distinct, valid fields in one submission', () => {
+  const result = validateEnrichmentRequestInput([
+    { field_name: 'phone', value: '+31 76 0000000', source_url: 'https://example.com/contact' },
+    { field_name: 'website', value: 'https://restaurant.example', source_url: 'https://example.com/contact' },
+    { field_name: 'address', value: 'Fixturestraat 1, Breda', source_url: 'https://example.com/contact' },
+  ]);
+  assert.equal(result.valid, true);
+  assert.equal(result.fields.length, 3);
+  assert.deepEqual(result.fields.map((f) => f.fieldName).sort(), ['address', 'phone', 'website']);
+});
+
+test('enrichmentValidationMessage: returns a distinct, non-empty message per reason', () => {
+  const reasons = ['missing-fields', 'invalid-field-name', 'missing-value', 'value-too-long', 'invalid-source-url', 'duplicate-field-name'];
+  const messages = reasons.map(enrichmentValidationMessage);
+  assert.equal(new Set(messages).size, messages.length, 'every reason must map to a distinct message');
+  for (const m of messages) assert.ok(m.length > 0);
+  assert.equal(enrichmentValidationMessage('something-unrecognized'), 'Invalid request.');
+});
+
+// ─── pickLatestEnrichmentRow / buildEnrichmentSourceByCandidateId ────────
+// Same "append-only, latest wins" guarantee as the review workflow: a
+// correction is a brand-new row (the database grants make overwriting
+// the old one structurally impossible), but the *displayed* value must
+// reflect only the newest one.
+
+test('pickLatestEnrichmentRow: no rows returns null', () => {
+  assert.equal(pickLatestEnrichmentRow([]), null);
+  assert.equal(pickLatestEnrichmentRow(undefined), null);
+});
+
+test('pickLatestEnrichmentRow: the latest recorded_at wins, regardless of array order', () => {
+  const rows = [
+    { id: 1, recorded_at: '2026-09-05T10:00:00Z', value: 'old' },
+    { id: 2, recorded_at: '2026-09-05T12:00:00Z', value: 'new' },
+    { id: 3, recorded_at: '2026-09-05T11:00:00Z', value: 'middle' },
+  ];
+  assert.equal(pickLatestEnrichmentRow(rows).value, 'new');
+  assert.equal(pickLatestEnrichmentRow([...rows].reverse()).value, 'new');
+});
+
+test('pickLatestEnrichmentRow: ties on recorded_at break toward the higher id', () => {
+  const rows = [
+    { id: 5, recorded_at: '2026-09-05T10:00:00Z', value: 'a' },
+    { id: 6, recorded_at: '2026-09-05T10:00:00Z', value: 'b' },
+  ];
+  assert.equal(pickLatestEnrichmentRow(rows).value, 'b');
+});
+
+test('buildEnrichmentSourceByCandidateId: groups by candidate then field, reducing each independently', () => {
+  const rows = [
+    { id: 1, candidate_id: 'a', field_name: 'phone', recorded_at: '2026-09-05T10:00:00Z', value: '+31 76 0000000', source_url: 'https://s1.example', reviewer_id: 'r1' },
+    { id: 2, candidate_id: 'a', field_name: 'phone', recorded_at: '2026-09-05T11:00:00Z', value: '+31 76 1111111', source_url: 'https://s2.example', reviewer_id: 'r2' },
+    { id: 3, candidate_id: 'a', field_name: 'website', recorded_at: '2026-09-05T10:00:00Z', value: 'https://a.example', source_url: 'https://s3.example', reviewer_id: 'r1' },
+    { id: 4, candidate_id: 'b', field_name: 'address', recorded_at: '2026-09-05T09:00:00Z', value: 'Somestraat 1', source_url: 'https://s4.example', reviewer_id: 'r3' },
+  ];
+  const result = buildEnrichmentSourceByCandidateId(rows);
+  assert.deepEqual(Object.keys(result).sort(), ['a', 'b']);
+  assert.deepEqual(Object.keys(result.a).sort(), ['phone', 'website']);
+  assert.equal(result.a.phone.value, '+31 76 1111111', 'the later phone correction wins');
+  assert.equal(result.a.phone.source_url, 'https://s2.example');
+  assert.equal(result.a.website.value, 'https://a.example');
+  assert.equal(result.b.address.value, 'Somestraat 1');
+});
+
+test('buildEnrichmentSourceByCandidateId: no rows at all yields an empty map', () => {
+  assert.deepEqual(buildEnrichmentSourceByCandidateId([]), {});
+  assert.deepEqual(buildEnrichmentSourceByCandidateId(undefined), {});
+});
+
+// ─── computeEnrichedFields ────────────────────────────────────────────
+
+test('computeEnrichedFields: with no enrichment, the raw fields pass through unchanged', () => {
+  const raw = { name: 'X', category: 'restaurant' };
+  assert.deepEqual(computeEnrichedFields(raw, {}), raw);
+  assert.deepEqual(computeEnrichedFields(raw, undefined), raw);
+});
+
+test('computeEnrichedFields: an enrichment overrides the raw value for that field only', () => {
+  const raw = { name: 'X', address: 'Old address', category: 'restaurant' };
+  const source = { address: { value: 'New verified address', source_url: 'https://example.com', recorded_at: 'now', reviewer_id: 'r1' } };
+  const result = computeEnrichedFields(raw, source);
+  assert.equal(result.address, 'New verified address');
+  assert.equal(result.name, 'X', 'unenriched fields are untouched');
+  assert.equal(result.category, 'restaurant');
+});
+
+test('computeEnrichedFields: an enrichment can fill in a field the raw record never had at all', () => {
+  const raw = { name: 'X', category: 'restaurant' }; // no phone
+  const source = { phone: { value: '+31 76 0000000', source_url: 'https://example.com', recorded_at: 'now', reviewer_id: 'r1' } };
+  const result = computeEnrichedFields(raw, source);
+  assert.equal(result.phone, '+31 76 0000000');
+});
+
+test('computeEnrichedFields: never mutates the raw extractedFields object', () => {
+  const raw = { name: 'X', address: 'Old' };
+  const source = { address: { value: 'New', source_url: 'https://example.com', recorded_at: 'now', reviewer_id: 'r1' } };
+  computeEnrichedFields(raw, source);
+  assert.equal(raw.address, 'Old', 'the raw object passed in must be unchanged');
+});
+
+// ─── enrichAndFilterCandidates + enrichment integration: complete/
+// incomplete is recomputed from the combined view ───────────────────────
+
+test('enrichAndFilterCandidates: an incomplete candidate becomes complete once every missing field is enriched, without touching extracted_fields', () => {
+  const records = [makeCandidate('1', 'run-a', { name: 'A', location: { lat: 51.58, lon: 4.78 } })]; // missing address/phone/website
+  const enrichmentSourceByCandidateId = {
+    '1': {
+      address: { value: 'Fixturestraat 1', source_url: 'https://s.example', recorded_at: '2026-09-05T10:00:00Z', reviewer_id: 'r1' },
+      phone: { value: '+31 76 0000000', source_url: 'https://s.example', recorded_at: '2026-09-05T10:00:00Z', reviewer_id: 'r1' },
+      website: { value: 'https://a.example', source_url: 'https://s.example', recorded_at: '2026-09-05T10:00:00Z', reviewer_id: 'r1' },
+    },
+  };
+  const { candidates } = enrichAndFilterCandidates(records, { enrichmentSourceByCandidateId });
+  const candidate = candidates[0];
+  assert.equal(candidate.quality_status, 'complete');
+  assert.deepEqual(candidate.missing_fields, []);
+  assert.deepEqual(candidate.enriched_fields.address, 'Fixturestraat 1');
+  assert.deepEqual(candidate.extracted_fields, { name: 'A', location: { lat: 51.58, lon: 4.78 } }, 'the raw record itself is never touched');
+});
+
+test('enrichAndFilterCandidates: a partial enrichment (only one of several missing fields) narrows missing_fields but stays incomplete', () => {
+  const records = [makeCandidate('1', 'run-a', { name: 'A', location: { lat: 51.58, lon: 4.78 } })];
+  const enrichmentSourceByCandidateId = {
+    '1': { phone: { value: '+31 76 0000000', source_url: 'https://s.example', recorded_at: '2026-09-05T10:00:00Z', reviewer_id: 'r1' } },
+  };
+  const { candidates } = enrichAndFilterCandidates(records, { enrichmentSourceByCandidateId });
+  assert.equal(candidates[0].quality_status, 'incomplete');
+  assert.deepEqual(candidates[0].missing_fields.sort(), ['address', 'website']);
+});
+
+test('enrichAndFilterCandidates: the quality filter operates on the enriched (combined) status, not the raw one', () => {
+  const records = [makeCandidate('1', 'run-a', { name: 'A', location: { lat: 51.58, lon: 4.78 } })]; // raw: incomplete
+  const enrichmentSourceByCandidateId = {
+    '1': {
+      address: { value: 'X', source_url: 'https://s.example', recorded_at: 'now', reviewer_id: 'r1' },
+      phone: { value: 'X', source_url: 'https://s.example', recorded_at: 'now', reviewer_id: 'r1' },
+      website: { value: 'X', source_url: 'https://s.example', recorded_at: 'now', reviewer_id: 'r1' },
+    },
+  };
+  const completeOnly = enrichAndFilterCandidates(records, { enrichmentSourceByCandidateId, quality: 'complete' }).candidates;
+  assert.deepEqual(completeOnly.map((c) => c.id), ['1'], 'now complete after enrichment, so it must match the "complete" filter');
+
+  const incompleteOnly = enrichAndFilterCandidates(records, { quality: 'incomplete' }).candidates;
+  assert.deepEqual(incompleteOnly.map((c) => c.id), ['1'], 'without enrichment data supplied, the same candidate is still incomplete');
+});
+
+test('enrichAndFilterCandidates: without any enrichmentSourceByCandidateId, behavior is identical to before this feature existed', () => {
+  const records = [
+    makeCandidate('1', 'run-a', { name: 'A', address: 'x', phone: 'y', website: 'z', location: { lat: 51.58, lon: 4.78 } }),
+    makeCandidate('2', 'run-a', { name: 'B', location: { lat: 51.59, lon: 4.79 } }),
+  ];
+  const { candidates } = enrichAndFilterCandidates(records, {});
+  assert.equal(candidates.find((c) => c.id === '1').quality_status, 'complete');
+  assert.equal(candidates.find((c) => c.id === '2').quality_status, 'incomplete');
+});
+
+// ─── Structural safety net: append-only, no canonical/public write, and
+// — the specific new risk this feature introduces — no code path ever
+// reads a review row or its free-text `note` to derive an enrichment. ───
+
+const ENRICHMENTS_ROUTE_PATH = path.join(REPO_ROOT, 'app/api/internal/v1/import-inbox/candidates/[id]/enrichments/route.js');
+const ENRICHMENTS_MIGRATION_PATH = path.join(REPO_ROOT, 'supabase/migrations/0008_market05a_candidate_enrichments.sql');
+
+test('structural safety net: the enrichments route never calls .update()/.delete(), never references a canonical/public identifier, and never reads import_candidate_reviews or its note field', () => {
+  const source = fs.readFileSync(ENRICHMENTS_ROUTE_PATH, 'utf8');
+  assert.doesNotMatch(source, /\.update\(/, 'a correction is always a new row, never an update of a previous one');
+  assert.doesNotMatch(source, /\.delete\(/);
+  for (const identifier of FORBIDDEN_CANONICAL_IDENTIFIERS) {
+    assert.equal(source.includes(identifier), false, `must never reference "${identifier}"`);
+  }
+  assert.doesNotMatch(source, /writeFileSync|appendFileSync/);
+  assert.equal(source.includes('import_candidate_reviews'), false, 'must never read the review table — enrichment is a fully independent action');
+  assert.doesNotMatch(source, /\.note\b/, 'must never read a review\'s free-text note');
+});
+
+test('structural safety net: the pure enrichment logic in importInbox.js never references import_candidate_reviews or a review note', () => {
+  const source = fs.readFileSync(path.join(__dirname, 'importInbox.js'), 'utf8');
+  // Scoped to the enrichment section only, so this cannot spuriously fail
+  // on the review-workflow code above it in the same file (which
+  // legitimately does mention import_candidate_reviews for itself).
+  const sectionStart = source.indexOf('MARKET-05A (candidate enrichment audit log)');
+  assert.ok(sectionStart > -1, 'expected to find the enrichment section header');
+  // Ends before module.exports — that block legitimately lists every
+  // export from the whole file, review-workflow names included, and is
+  // not itself a functional dependency of the enrichment code above it.
+  const sectionEnd = source.indexOf('module.exports', sectionStart);
+  assert.ok(sectionEnd > sectionStart, 'expected to find module.exports after the enrichment section');
+  const enrichmentSection = source.slice(sectionStart, sectionEnd);
+  assert.equal(enrichmentSection.includes('import_candidate_reviews'), false);
+  assert.equal(enrichmentSection.includes('reviewValidationMessage'), false);
+  assert.equal(enrichmentSection.includes('rejection_reason'), false);
+});
+
+test('structural safety net: the migration grants only select+insert on import_candidate_enrichments — no update, no delete, for any role', () => {
+  const sql = fs.readFileSync(ENRICHMENTS_MIGRATION_PATH, 'utf8');
+  assert.match(sql, /grant select, insert on public\.import_candidate_enrichments to service_role/);
+  assert.doesNotMatch(sql, /grant\s+(?:[\w,\s]*\b)?(update|delete)\b[\w,\s]*\bon\s+public\.import_candidate_enrichments/i);
+});
+
+test('structural safety net: the candidates list route (extended for enrichment) still never calls .update()/.delete()/.insert()', () => {
+  const source = fs.readFileSync(CANDIDATES_ROUTE_PATH, 'utf8');
+  assert.doesNotMatch(source, /\.(update|delete|insert)\(/, 'this route is read-only — GET only, no write of any kind');
 });
