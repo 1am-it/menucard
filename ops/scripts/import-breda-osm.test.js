@@ -5,6 +5,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
+const http = require('node:http');
 const { execFileSync } = require('node:child_process');
 
 const {
@@ -21,6 +22,8 @@ const {
   processGdalFeatureCollection,
   computeExtractionConfigFingerprint,
   computeIdempotencyKey,
+  isSafeRedirectTarget,
+  downloadWithOneValidatedRedirect,
   runPreflightChecks,
   runImport,
   createFixtureDbClient,
@@ -376,6 +379,424 @@ test('computeExtractionConfigFingerprint changes when the allowed amenity list c
   }
 });
 
+// ─── Geofabrik redirect handling: downloadWithOneValidatedRedirect ───────
+//
+// Uses a real local HTTP test server (same convention as
+// capture-market-boundary.test.js's own live-download tests) rather than
+// a hand-rolled fake response object — exercises the real Node HTTP
+// client/redirect-handling code path, not a reimplementation of it.
+
+function startTestServer(handler) {
+  return new Promise((resolve) => {
+    const server = http.createServer(handler);
+    server.listen(0, '127.0.0.1', () => resolve(server));
+  });
+}
+
+function stopTestServer(server) {
+  return new Promise((resolve) => server.close(() => resolve()));
+}
+
+/** The redirect-target rules under test, scoped to the local test
+ * server's own host/port rather than the real `download.geofabrik.de` —
+ * `downloadGeofabrikExtract`'s own wrapper (untested here directly, since
+ * it requires a real network round-trip) pins the real values; this is
+ * the same core function it calls. */
+function redirectRulesFor(port) {
+  return {
+    expectedProtocol: 'http:',
+    expectedHost: '127.0.0.1',
+    expectedPort: String(port),
+    pathPattern: /^\/europe\/netherlands-\d{6}\.osm\.pbf$/,
+  };
+}
+
+test('isSafeRedirectTarget: accepts an exact match, rejects host/port/path/credentials/query/fragment deviations', () => {
+  const rules = { expectedProtocol: 'https:', expectedHost: 'download.geofabrik.de', expectedPort: '', pathPattern: /^\/europe\/netherlands-\d{6}\.osm\.pbf$/ };
+
+  assert.equal(isSafeRedirectTarget(new URL('https://download.geofabrik.de/europe/netherlands-260904.osm.pbf'), rules).ok, true);
+
+  assert.equal(isSafeRedirectTarget(new URL('https://evil.example/europe/netherlands-260904.osm.pbf'), rules).ok, false, 'wrong host');
+  assert.equal(isSafeRedirectTarget(new URL('http://download.geofabrik.de/europe/netherlands-260904.osm.pbf'), rules).ok, false, 'wrong protocol');
+  assert.equal(isSafeRedirectTarget(new URL('https://download.geofabrik.de:8443/europe/netherlands-260904.osm.pbf'), rules).ok, false, 'non-default port');
+  assert.equal(isSafeRedirectTarget(new URL('https://user:pass@download.geofabrik.de/europe/netherlands-260904.osm.pbf'), rules).ok, false, 'credentials');
+  assert.equal(isSafeRedirectTarget(new URL('https://download.geofabrik.de/europe/netherlands-260904.osm.pbf?x=1'), rules).ok, false, 'query string');
+  assert.equal(isSafeRedirectTarget(new URL('https://download.geofabrik.de/europe/netherlands-260904.osm.pbf#frag'), rules).ok, false, 'fragment');
+  assert.equal(isSafeRedirectTarget(new URL('https://download.geofabrik.de/europe/germany-260904.osm.pbf'), rules).ok, false, 'wrong region in path');
+  assert.equal(isSafeRedirectTarget(new URL('https://download.geofabrik.de/europe/netherlands-latest.osm.pbf'), rules).ok, false, 'not the dated-file pattern');
+});
+
+test('downloadWithOneValidatedRedirect: a direct 200 on the fixed URL is accepted with no redirect', async () => {
+  const body = Buffer.from('fake pbf bytes');
+  const server = await startTestServer((req, res) => {
+    res.writeHead(200, { 'Content-Type': 'application/octet-stream' });
+    res.end(body);
+  });
+  try {
+    const { port } = server.address();
+    const result = await downloadWithOneValidatedRedirect({
+      url: `http://127.0.0.1:${port}/europe/netherlands-latest.osm.pbf`,
+      expectedProtocol: 'http:',
+      expectedHost: '127.0.0.1',
+      expectedPath: '/europe/netherlands-latest.osm.pbf',
+      redirect: redirectRulesFor(port),
+      allowedContentTypes: ['application/octet-stream'],
+      maxBytes: 1024,
+      requestImpl: http.get,
+    });
+    try {
+      assert.equal(result.redirected, false);
+      assert.equal(result.initialUrl, result.finalUrl);
+      assert.equal(fs.readFileSync(result.filePath).equals(body), true);
+    } finally {
+      fs.rmSync(result.tmpDir, { recursive: true, force: true });
+    }
+  } finally {
+    await stopTestServer(server);
+  }
+});
+
+test('downloadWithOneValidatedRedirect: one valid redirect to a dated extract is followed and downloaded', async () => {
+  const body = Buffer.from('fake dated pbf bytes');
+  const server = await startTestServer((req, res) => {
+    if (req.url === '/europe/netherlands-latest.osm.pbf') {
+      res.writeHead(302, { Location: `http://127.0.0.1:${server.address().port}/europe/netherlands-260904.osm.pbf`, 'Content-Type': 'text/html' });
+      res.end('<html>redirecting…</html>');
+      return;
+    }
+    res.writeHead(200, { 'Content-Type': 'application/octet-stream' });
+    res.end(body);
+  });
+  try {
+    const { port } = server.address();
+    const result = await downloadWithOneValidatedRedirect({
+      url: `http://127.0.0.1:${port}/europe/netherlands-latest.osm.pbf`,
+      expectedProtocol: 'http:',
+      expectedHost: '127.0.0.1',
+      expectedPath: '/europe/netherlands-latest.osm.pbf',
+      redirect: redirectRulesFor(port),
+      allowedContentTypes: ['application/octet-stream'],
+      maxBytes: 1024,
+      requestImpl: http.get,
+    });
+    try {
+      assert.equal(result.redirected, true);
+      assert.equal(result.finalUrl, `http://127.0.0.1:${port}/europe/netherlands-260904.osm.pbf`);
+      assert.notEqual(result.initialUrl, result.finalUrl);
+      assert.equal(fs.readFileSync(result.filePath).equals(body), true);
+    } finally {
+      fs.rmSync(result.tmpDir, { recursive: true, force: true });
+    }
+  } finally {
+    await stopTestServer(server);
+  }
+});
+
+test('downloadWithOneValidatedRedirect: a second redirect (from the already-redirected target) is a hard failure', async () => {
+  const server = await startTestServer((req, res) => {
+    if (req.url === '/europe/netherlands-latest.osm.pbf') {
+      res.writeHead(302, { Location: `http://127.0.0.1:${server.address().port}/europe/netherlands-260904.osm.pbf` });
+      res.end();
+      return;
+    }
+    // The redirect target itself redirects again — must never be followed.
+    res.writeHead(302, { Location: `http://127.0.0.1:${server.address().port}/europe/netherlands-260905.osm.pbf` });
+    res.end();
+  });
+  try {
+    const { port } = server.address();
+    let capturedTmpDir;
+    await assert.rejects(
+      async () => {
+        try {
+          return await downloadWithOneValidatedRedirect({
+            url: `http://127.0.0.1:${port}/europe/netherlands-latest.osm.pbf`,
+            expectedProtocol: 'http:',
+            expectedHost: '127.0.0.1',
+            expectedPath: '/europe/netherlands-latest.osm.pbf',
+            redirect: redirectRulesFor(port),
+            allowedContentTypes: ['application/octet-stream'],
+            maxBytes: 1024,
+            requestImpl: http.get,
+          });
+        } catch (err) {
+          capturedTmpDir = err.removedTmpDir;
+          throw err;
+        }
+      },
+      (err) => err instanceof HaltError && err.reason === 'geofabrik-second-redirect-rejected'
+    );
+    assert.equal(capturedTmpDir, undefined, 'no temp dir is ever created before the final target is even reached');
+  } finally {
+    await stopTestServer(server);
+  }
+});
+
+test('downloadWithOneValidatedRedirect: a redirect to a different host is rejected, never followed', async () => {
+  const server = await startTestServer((req, res) => {
+    res.writeHead(302, { Location: 'http://evil.example/europe/netherlands-260904.osm.pbf' });
+    res.end();
+  });
+  try {
+    const { port } = server.address();
+    await assert.rejects(
+      () =>
+        downloadWithOneValidatedRedirect({
+          url: `http://127.0.0.1:${port}/europe/netherlands-latest.osm.pbf`,
+          expectedProtocol: 'http:',
+          expectedHost: '127.0.0.1',
+          expectedPath: '/europe/netherlands-latest.osm.pbf',
+          redirect: redirectRulesFor(port),
+          allowedContentTypes: ['application/octet-stream'],
+          maxBytes: 1024,
+          requestImpl: http.get,
+        }),
+      (err) => err instanceof HaltError && err.reason === 'geofabrik-redirect-target-rejected' && /hostname/.test(err.message)
+    );
+  } finally {
+    await stopTestServer(server);
+  }
+});
+
+test('downloadWithOneValidatedRedirect: a redirect to an unexpected path is rejected, never followed', async () => {
+  const server = await startTestServer((req, res) => {
+    res.writeHead(302, { Location: `http://127.0.0.1:${server.address().port}/europe/germany-260904.osm.pbf` });
+    res.end();
+  });
+  try {
+    const { port } = server.address();
+    await assert.rejects(
+      () =>
+        downloadWithOneValidatedRedirect({
+          url: `http://127.0.0.1:${port}/europe/netherlands-latest.osm.pbf`,
+          expectedProtocol: 'http:',
+          expectedHost: '127.0.0.1',
+          expectedPath: '/europe/netherlands-latest.osm.pbf',
+          redirect: redirectRulesFor(port),
+          allowedContentTypes: ['application/octet-stream'],
+          maxBytes: 1024,
+          requestImpl: http.get,
+        }),
+      (err) => err instanceof HaltError && err.reason === 'geofabrik-redirect-target-rejected' && /path/.test(err.message)
+    );
+  } finally {
+    await stopTestServer(server);
+  }
+});
+
+test('downloadWithOneValidatedRedirect: a redirect carrying a query string, fragment, credentials, or a deviating port is rejected', async () => {
+  // Each variant is rejected purely by inspecting the parsed Location
+  // URL, before any second request is ever issued — so a deviating-port
+  // variant can safely name a port nothing is listening on, and a
+  // credentials variant can safely name fake credentials, without either
+  // ever actually being connected to.
+  async function expectRejected(locationBuilder, matchesMessage) {
+    const server = await startTestServer((req, res) => {
+      res.writeHead(302, { Location: locationBuilder(server.address().port) });
+      res.end();
+    });
+    try {
+      const { port } = server.address();
+      await assert.rejects(
+        () =>
+          downloadWithOneValidatedRedirect({
+            url: `http://127.0.0.1:${port}/europe/netherlands-latest.osm.pbf`,
+            expectedProtocol: 'http:',
+            expectedHost: '127.0.0.1',
+            expectedPath: '/europe/netherlands-latest.osm.pbf',
+            redirect: redirectRulesFor(port),
+            allowedContentTypes: ['application/octet-stream'],
+            maxBytes: 1024,
+            requestImpl: http.get,
+          }),
+        (err) => err instanceof HaltError && err.reason === 'geofabrik-redirect-target-rejected' && matchesMessage(err.message)
+      );
+    } finally {
+      await stopTestServer(server);
+    }
+  }
+
+  await expectRejected((port) => `http://127.0.0.1:${port}/europe/netherlands-260904.osm.pbf?x=1`, (msg) => /query/.test(msg));
+  await expectRejected((port) => `http://127.0.0.1:${port}/europe/netherlands-260904.osm.pbf#frag`, (msg) => /fragment/.test(msg));
+  await expectRejected((port) => `http://user:pass@127.0.0.1:${port}/europe/netherlands-260904.osm.pbf`, (msg) => /credentials/.test(msg));
+  // A port that differs from the one this redirect rule expects — never
+  // actually reachable, and never connected to; rejection happens purely
+  // on the parsed URL.
+  await expectRejected((port) => `http://127.0.0.1:${port + 1}/europe/netherlands-260904.osm.pbf`, (msg) => /port/.test(msg));
+});
+
+test('downloadWithOneValidatedRedirect: an unexpected final Content-Type is rejected even after a valid redirect', async () => {
+  const server = await startTestServer((req, res) => {
+    if (req.url === '/europe/netherlands-latest.osm.pbf') {
+      res.writeHead(302, { Location: `http://127.0.0.1:${server.address().port}/europe/netherlands-260904.osm.pbf` });
+      res.end();
+      return;
+    }
+    res.writeHead(200, { 'Content-Type': 'text/html' });
+    res.end('<html>not a pbf</html>');
+  });
+  try {
+    const { port } = server.address();
+    await assert.rejects(
+      () =>
+        downloadWithOneValidatedRedirect({
+          url: `http://127.0.0.1:${port}/europe/netherlands-latest.osm.pbf`,
+          expectedProtocol: 'http:',
+          expectedHost: '127.0.0.1',
+          expectedPath: '/europe/netherlands-latest.osm.pbf',
+          redirect: redirectRulesFor(port),
+          allowedContentTypes: ['application/octet-stream'],
+          maxBytes: 1024,
+          requestImpl: http.get,
+        }),
+      (err) => err instanceof HaltError && err.reason === 'geofabrik-download-bad-content-type'
+    );
+  } finally {
+    await stopTestServer(server);
+  }
+});
+
+test('downloadWithOneValidatedRedirect: the initial 302 response\'s own Content-Type is never treated as the file type', async () => {
+  // The redirect page's Content-Type ("text/html") would fail the
+  // allowlist if it were ever (wrongly) checked — proving it is truly
+  // never inspected by using a final target whose real Content-Type
+  // legitimately passes, while the intermediate redirect page's does not.
+  const server = await startTestServer((req, res) => {
+    if (req.url === '/europe/netherlands-latest.osm.pbf') {
+      res.writeHead(302, {
+        Location: `http://127.0.0.1:${server.address().port}/europe/netherlands-260904.osm.pbf`,
+        'Content-Type': 'text/html; charset=iso-8859-1',
+      });
+      res.end('<html>redirecting…</html>');
+      return;
+    }
+    res.writeHead(200, { 'Content-Type': 'application/octet-stream' });
+    res.end(Buffer.from('real bytes'));
+  });
+  try {
+    const { port } = server.address();
+    const result = await downloadWithOneValidatedRedirect({
+      url: `http://127.0.0.1:${port}/europe/netherlands-latest.osm.pbf`,
+      expectedProtocol: 'http:',
+      expectedHost: '127.0.0.1',
+      expectedPath: '/europe/netherlands-latest.osm.pbf',
+      redirect: redirectRulesFor(port),
+      allowedContentTypes: ['application/octet-stream'],
+      maxBytes: 1024,
+      requestImpl: http.get,
+    });
+    fs.rmSync(result.tmpDir, { recursive: true, force: true });
+  } finally {
+    await stopTestServer(server);
+  }
+});
+
+test('downloadWithOneValidatedRedirect: a non-200 final status (after a valid redirect) is rejected', async () => {
+  const server = await startTestServer((req, res) => {
+    if (req.url === '/europe/netherlands-latest.osm.pbf') {
+      res.writeHead(302, { Location: `http://127.0.0.1:${server.address().port}/europe/netherlands-260904.osm.pbf` });
+      res.end();
+      return;
+    }
+    res.writeHead(404, { 'Content-Type': 'text/html' });
+    res.end('not found');
+  });
+  try {
+    const { port } = server.address();
+    await assert.rejects(
+      () =>
+        downloadWithOneValidatedRedirect({
+          url: `http://127.0.0.1:${port}/europe/netherlands-latest.osm.pbf`,
+          expectedProtocol: 'http:',
+          expectedHost: '127.0.0.1',
+          expectedPath: '/europe/netherlands-latest.osm.pbf',
+          redirect: redirectRulesFor(port),
+          allowedContentTypes: ['application/octet-stream'],
+          maxBytes: 1024,
+          requestImpl: http.get,
+        }),
+      (err) => err instanceof HaltError && err.reason === 'geofabrik-download-bad-status'
+    );
+  } finally {
+    await stopTestServer(server);
+  }
+});
+
+test('downloadWithOneValidatedRedirect: the byte limit is enforced on the final download, with no leftover file', async () => {
+  const server = await startTestServer((req, res) => {
+    if (req.url === '/europe/netherlands-latest.osm.pbf') {
+      res.writeHead(302, { Location: `http://127.0.0.1:${server.address().port}/europe/netherlands-260904.osm.pbf` });
+      res.end();
+      return;
+    }
+    res.writeHead(200, { 'Content-Type': 'application/octet-stream' });
+    res.write(Buffer.alloc(2000, 1));
+    res.end(Buffer.alloc(2000, 2));
+  });
+  try {
+    const { port } = server.address();
+    await assert.rejects(
+      () =>
+        downloadWithOneValidatedRedirect({
+          url: `http://127.0.0.1:${port}/europe/netherlands-latest.osm.pbf`,
+          expectedProtocol: 'http:',
+          expectedHost: '127.0.0.1',
+          expectedPath: '/europe/netherlands-latest.osm.pbf',
+          redirect: redirectRulesFor(port),
+          allowedContentTypes: ['application/octet-stream'],
+          maxBytes: 1024,
+        requestImpl: http.get,
+        }),
+      (err) => err instanceof HaltError && err.reason === 'geofabrik-download-too-large'
+    );
+  } finally {
+    await stopTestServer(server);
+  }
+});
+
+test('runImport records the audit fields correctly after a valid redirect (source_locator/source_version/source_version_note)', async () => {
+  const body = Buffer.from('fake dated pbf bytes for runImport audit test');
+  const server = await startTestServer((req, res) => {
+    if (req.url === '/europe/netherlands-latest.osm.pbf') {
+      res.writeHead(302, { Location: `http://127.0.0.1:${server.address().port}/europe/netherlands-260904.osm.pbf` });
+      res.end();
+      return;
+    }
+    res.writeHead(200, { 'Content-Type': 'application/octet-stream' });
+    res.end(body);
+  });
+  try {
+    const { port } = server.address();
+    const db = createFixtureDbClient();
+    const result = await runImport({
+      live: true,
+      dbClient: db,
+      repoRoot: REPO_ROOT,
+      gdalRunner: () => fakeFeatureCollection(),
+      downloader: () =>
+        downloadWithOneValidatedRedirect({
+          url: `http://127.0.0.1:${port}/europe/netherlands-latest.osm.pbf`,
+          expectedProtocol: 'http:',
+          expectedHost: '127.0.0.1',
+          expectedPath: '/europe/netherlands-latest.osm.pbf',
+          redirect: redirectRulesFor(port),
+          allowedContentTypes: ['application/octet-stream'],
+          maxBytes: 1024,
+          requestImpl: http.get,
+        }),
+    });
+
+    assert.equal(result.outcome, 'completed');
+    assert.equal(result.importRun.source_locator, `http://127.0.0.1:${port}/europe/netherlands-260904.osm.pbf`, 'source_locator is the actually-downloaded dated URL, not the "latest" alias');
+    assert.equal(result.importRun.source_version, 'netherlands-260904.osm.pbf', 'source_version is the dated file identity');
+    assert.match(result.importRun.source_version_note, /netherlands-latest\.osm\.pbf/, 'note records the original "latest" URL');
+    assert.match(result.importRun.source_version_note, /netherlands-260904\.osm\.pbf/, 'note records the validated redirect target');
+    assert.ok(result.importRun.source_artifact_hash, 'the artifact hash is still computed from the actually-downloaded bytes');
+  } finally {
+    await stopTestServer(server);
+  }
+});
+
 // ─── Preflight — must run before any network traffic ──────────────────────
 
 test('runPreflightChecks succeeds against a correctly-seeded fixture db client', async () => {
@@ -542,6 +963,14 @@ function fakeFeatureCollection() {
   };
 }
 
+/** Shapes a fake `downloader()` resolution to match what
+ * downloadWithOneValidatedRedirect actually resolves — `filePath` (not
+ * the old `gpkgPath`), plus the audit fields runImport now reads
+ * (`initialUrl`/`finalUrl`/`redirected`). */
+function fakeDownloadResult(filePath, tmpDir, { redirected = false, finalUrl = config.LIVE_SOURCE.url, initialUrl = config.LIVE_SOURCE.url } = {}) {
+  return { filePath, tmpDir, initialUrl, finalUrl, redirected };
+}
+
 test('runImport (live) inserts an ImportRun and its extraction records exactly once', async () => {
   const db = createFixtureDbClient();
   const result = await runImport({
@@ -549,7 +978,7 @@ test('runImport (live) inserts an ImportRun and its extraction records exactly o
     dbClient: db,
     repoRoot: REPO_ROOT,
     gdalRunner: () => fakeFeatureCollection(),
-    downloader: () => Promise.resolve({ gpkgPath: FIXTURE_OSM_PATH, tmpDir: null }),
+    downloader: () => Promise.resolve(fakeDownloadResult(FIXTURE_OSM_PATH, null)),
   });
   assert.equal(result.outcome, 'completed');
   assert.equal(result.importRun.status, 'succeeded');
@@ -565,7 +994,7 @@ test('runImport idempotency: an identical re-trigger recognizes the existing run
       dbClient: db,
       repoRoot: REPO_ROOT,
       gdalRunner: () => fakeFeatureCollection(),
-      downloader: () => Promise.resolve({ gpkgPath: FIXTURE_OSM_PATH, tmpDir: null }),
+      downloader: () => Promise.resolve(fakeDownloadResult(FIXTURE_OSM_PATH, null)),
     });
 
   const first = await runOnce();
@@ -589,7 +1018,7 @@ test('runImport error handling: a GDAL failure marks the ImportRun failed and st
           const { HaltError } = require('./capture-market-boundary');
           throw new HaltError('osm-gdal-extraction-failed', 'simulated failure');
         },
-        downloader: () => Promise.resolve({ gpkgPath: FIXTURE_OSM_PATH, tmpDir: null }),
+        downloader: () => Promise.resolve(fakeDownloadResult(FIXTURE_OSM_PATH, null)),
       }),
     (err) => err.name === 'HaltError' && err.reason === 'osm-gdal-extraction-failed'
   );
@@ -643,7 +1072,7 @@ test('runImport removes its temporary download directory (live mode) on both suc
     dbClient: db1,
     repoRoot: REPO_ROOT,
     gdalRunner: () => fakeFeatureCollection(),
-    downloader: () => Promise.resolve({ gpkgPath: path.join(tmp1, 'netherlands-latest.osm'), tmpDir: tmp1 }),
+    downloader: () => Promise.resolve(fakeDownloadResult(path.join(tmp1, 'netherlands-latest.osm'), tmp1)),
   });
   assert.equal(fs.existsSync(tmp1), false, 'download temp dir removed after success');
 
@@ -659,7 +1088,7 @@ test('runImport removes its temporary download directory (live mode) on both suc
         const { HaltError } = require('./capture-market-boundary');
         throw new HaltError('osm-gdal-extraction-failed', 'simulated failure');
       },
-      downloader: () => Promise.resolve({ gpkgPath: path.join(tmp2, 'netherlands-latest.osm'), tmpDir: tmp2 }),
+      downloader: () => Promise.resolve(fakeDownloadResult(path.join(tmp2, 'netherlands-latest.osm'), tmp2)),
     })
   );
   assert.equal(fs.existsSync(tmp2), false, 'download temp dir removed after failure too');
@@ -709,7 +1138,7 @@ test('runImport (live: true, mutate: false — the new dry-run shape) performs a
     dbClient: db,
     repoRoot: REPO_ROOT,
     gdalRunner: () => fakeFeatureCollection(),
-    downloader: () => Promise.resolve({ gpkgPath: downloadedPath, tmpDir: downloadTmp }),
+    downloader: () => Promise.resolve(fakeDownloadResult(downloadedPath, downloadTmp)),
   });
 
   // A real (here: faked-network, real-code-path) download happened —

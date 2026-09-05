@@ -53,6 +53,8 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');
+const https = require('node:https');
+const { URL } = require('node:url');
 const { execFileSync } = require('node:child_process');
 
 const config = require('./import-breda-osm.config');
@@ -63,7 +65,6 @@ const {
   canonicalJsonStringify,
   generateUuidV7,
   assertLiveConfirmation,
-  downloadGeoPackage,
 } = require('./capture-market-boundary');
 
 // ─── Small utilities ──────────────────────────────────────────────────────
@@ -466,20 +467,253 @@ function computeIdempotencyKey({
 // ─── Live source download (requires network — live mode only) ────────────
 
 /**
+ * Deliberately **not** a reuse of capture-market-boundary.js's generic
+ * `downloadGeoPackage` — that function halts on ANY redirect, by design,
+ * and stays completely unmodified (as does the boundary capture tool that
+ * depends on it). This project's own read-only verification (2026-09-05)
+ * found that Geofabrik's fixed, registered `netherlands-latest.osm.pbf`
+ * URL is not itself the file — it 302-redirects to a periodically
+ * re-dated artifact (confirmed: `netherlands-<YYMMDD>.osm.pbf`, e.g.
+ * `netherlands-260904.osm.pbf`). This function is a self-contained,
+ * strictly-scoped exception that exists **only** for this one Geofabrik
+ * download path, never as a general "redirects are OK" capability.
+ *
+ * `url.pathname` matching `redirectPathPattern` and `url.port` being
+ * exactly `expectedRedirectPort` and everything else in
+ * `isSafeRedirectTarget` below is checked before the one allowed redirect
+ * is ever followed — never a best-effort or partial match.
+ */
+function parseContentType(headerValue) {
+  if (!headerValue) return null;
+  return headerValue.split(';')[0].trim().toLowerCase();
+}
+
+/**
+ * Whether `url` (already parsed) is a permitted redirect target. Every
+ * dimension is checked explicitly and independently — protocol, host,
+ * port, absence of credentials/query/fragment, and the exact dated-file
+ * path pattern — so a partial match (e.g. right host, wrong path) is
+ * never treated as "close enough."
+ */
+function isSafeRedirectTarget(url, { expectedProtocol, expectedHost, expectedPort, pathPattern }) {
+  if (url.protocol !== expectedProtocol) {
+    return { ok: false, reason: `protocol "${url.protocol}" !== expected "${expectedProtocol}"` };
+  }
+  if (url.hostname !== expectedHost) {
+    return { ok: false, reason: `hostname "${url.hostname}" !== expected "${expectedHost}"` };
+  }
+  if (url.port !== expectedPort) {
+    return { ok: false, reason: `port "${url.port || '(default)'}" !== expected "${expectedPort || '(default)'}"` };
+  }
+  if (url.username || url.password) {
+    return { ok: false, reason: 'redirect target must not carry credentials' };
+  }
+  if (url.search) {
+    return { ok: false, reason: `redirect target must not carry a query string, got "${url.search}"` };
+  }
+  if (url.hash) {
+    return { ok: false, reason: `redirect target must not carry a fragment, got "${url.hash}"` };
+  }
+  if (!pathPattern.test(url.pathname)) {
+    return { ok: false, reason: `path "${url.pathname}" does not match the expected dated-extract pattern` };
+  }
+  return { ok: true };
+}
+
+/**
+ * Downloads from `url`, allowing **zero or exactly one** redirect, to
+ * exactly one validated target shape — never a general-purpose redirect
+ * follower. Behaviour:
+ *
+ *  - a direct `200` on `url` itself is accepted and downloaded as-is;
+ *  - a single `3xx` with a `Location` header pointing at a target that
+ *    passes `isSafeRedirectTarget` is followed exactly once; that
+ *    second request's response is then held to the exact same `200`/
+ *    content-type/byte-limit rules as a direct response would be;
+ *  - a second `3xx` (a redirect from the already-redirected target) is a
+ *    hard `HaltError` — never followed;
+ *  - a redirect to any target that fails `isSafeRedirectTarget` is a
+ *    hard `HaltError` — never followed;
+ *  - the **initial** `3xx` response's own `Content-Type` (almost always
+ *    an HTML redirect page) is never read or treated as the file's type
+ *    — that response's body is drained and discarded, unread, and only
+ *    the *final* `200` response's `Content-Type` is ever checked against
+ *    `allowedContentTypes`.
+ *
+ * Resolves `{ filePath, tmpDir, initialUrl, finalUrl, redirected }` —
+ * `tmpDir` (and only `tmpDir`) must be removed by the caller once
+ * `filePath` is no longer needed, exactly like `downloadGeoPackage`'s own
+ * `tmpDir` contract. On any failure, the temp directory this call itself
+ * created is removed before rejecting — no partial file ever survives.
+ */
+function downloadWithOneValidatedRedirect({
+  url,
+  expectedProtocol,
+  expectedHost,
+  expectedPath,
+  redirect,
+  allowedContentTypes,
+  maxBytes,
+  requestImpl = https.get,
+}) {
+  const initialUrl = new URL(url);
+  if (initialUrl.protocol !== expectedProtocol) {
+    throw new HaltError('geofabrik-download-protocol-rejected', `expected protocol "${expectedProtocol}", got "${initialUrl.protocol}"`);
+  }
+  if (initialUrl.hostname !== expectedHost) {
+    throw new HaltError('geofabrik-download-host-mismatch', `expected host "${expectedHost}", got "${initialUrl.hostname}"`);
+  }
+  if (initialUrl.pathname !== expectedPath) {
+    throw new HaltError('geofabrik-download-path-mismatch', `expected path "${expectedPath}", got "${initialUrl.pathname}"`);
+  }
+
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    const fail = (err) => {
+      if (settled) return;
+      settled = true;
+      reject(err);
+    };
+    const succeed = (result) => {
+      if (settled) return;
+      settled = true;
+      resolve(result);
+    };
+
+    function downloadFinalResponse(res, finalUrl) {
+      if (res.statusCode !== 200) {
+        res.resume();
+        fail(new HaltError('geofabrik-download-bad-status', `expected HTTP 200 at the final target, got ${res.statusCode}`));
+        return;
+      }
+      const contentType = parseContentType(res.headers['content-type']);
+      if (!contentType || !allowedContentTypes.includes(contentType)) {
+        res.resume();
+        fail(
+          new HaltError(
+            'geofabrik-download-bad-content-type',
+            `unexpected Content-Type "${res.headers['content-type']}" at the final target`
+          )
+        );
+        return;
+      }
+
+      const tmpDir = makeTempDir('breda-osm-geofabrik-download-');
+      const destPath = path.join(tmpDir, path.basename(finalUrl.pathname) || 'geofabrik-extract.osm.pbf');
+      const fileStream = fs.createWriteStream(destPath);
+      let bytesWritten = 0;
+
+      res.on('data', (chunk) => {
+        if (settled) return;
+        bytesWritten += chunk.length;
+        if (bytesWritten > maxBytes) {
+          res.destroy();
+          fileStream.destroy();
+          fs.rmSync(tmpDir, { recursive: true, force: true });
+          fail(new HaltError('geofabrik-download-too-large', `download exceeded maxBytes=${maxBytes}`));
+          return;
+        }
+        fileStream.write(chunk);
+      });
+      res.on('end', () => {
+        if (settled) return;
+        fileStream.end(() => {
+          if (settled) return;
+          succeed({
+            filePath: destPath,
+            tmpDir,
+            initialUrl: initialUrl.href,
+            finalUrl: finalUrl.href,
+            redirected: finalUrl.href !== initialUrl.href,
+          });
+        });
+      });
+      res.on('error', (err) => {
+        fileStream.destroy();
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+        fail(new HaltError('geofabrik-download-response-error', err.message));
+      });
+    }
+
+    function issueRequest(targetUrl, isFollowingRedirect) {
+      let req;
+      try {
+        req = requestImpl(targetUrl.href, (res) => {
+          if (res.statusCode >= 300 && res.statusCode < 400) {
+            if (isFollowingRedirect) {
+              // A redirect from the already-redirected target — the one
+              // allowed hop has been used; a second is always rejected,
+              // regardless of where it points.
+              res.resume();
+              fail(
+                new HaltError(
+                  'geofabrik-second-redirect-rejected',
+                  `received a second redirect (status ${res.statusCode}) from the already-validated target — refusing to follow further`
+                )
+              );
+              return;
+            }
+
+            const locationHeader = res.headers.location;
+            // The initial redirect response's own body/content-type is
+            // never read as the file — drained and discarded, unused.
+            res.resume();
+
+            if (!locationHeader) {
+              fail(new HaltError('geofabrik-redirect-missing-location', `received redirect status ${res.statusCode} with no Location header`));
+              return;
+            }
+
+            let redirectTarget;
+            try {
+              redirectTarget = new URL(locationHeader, targetUrl);
+            } catch (err) {
+              fail(new HaltError('geofabrik-redirect-location-invalid', String(locationHeader)));
+              return;
+            }
+
+            const check = isSafeRedirectTarget(redirectTarget, redirect);
+            if (!check.ok) {
+              fail(new HaltError('geofabrik-redirect-target-rejected', `${redirectTarget.href}: ${check.reason}`));
+              return;
+            }
+
+            issueRequest(redirectTarget, true);
+            return;
+          }
+
+          downloadFinalResponse(res, targetUrl);
+        });
+        req.on('error', (err) => fail(new HaltError('geofabrik-download-request-error', err.message)));
+      } catch (err) {
+        fail(new HaltError('geofabrik-download-request-error', err.message));
+      }
+    }
+
+    issueRequest(initialUrl, false);
+  });
+}
+
+/**
  * The only entry point live mode actually calls for the Geofabrik
- * extract. Unlike the generic `downloadGeoPackage` it wraps, this takes
- * no URL/host/path parameters — it always downloads exactly the one,
- * fixed, already-reviewed `config.LIVE_SOURCE` artifact. Mirrors
- * capture-market-boundary.js's own `downloadLiveSource` exactly, reusing
- * the same generic, already-tested downloader rather than a second
- * implementation.
+ * extract — always the one, fixed, already-reviewed `config.LIVE_SOURCE`
+ * URL, with the one, fixed, already-validated redirect shape
+ * (`https://download.geofabrik.de/europe/netherlands-<YYMMDD>.osm.pbf`,
+ * no port/credentials/query/fragment). Never accepts a caller-supplied
+ * URL or redirect target.
  */
 function downloadGeofabrikExtract(requestImpl) {
-  return downloadGeoPackage({
+  return downloadWithOneValidatedRedirect({
     url: config.LIVE_SOURCE.url,
     expectedProtocol: config.LIVE_SOURCE.expectedProtocol,
     expectedHost: config.LIVE_SOURCE.expectedHost,
     expectedPath: config.LIVE_SOURCE.expectedPath,
+    redirect: {
+      expectedProtocol: config.LIVE_SOURCE.expectedProtocol,
+      expectedHost: config.LIVE_SOURCE.expectedHost,
+      expectedPort: '',
+      pathPattern: /^\/europe\/netherlands-\d{6}\.osm\.pbf$/,
+    },
     allowedContentTypes: config.LIVE_SOURCE.allowedContentTypes,
     maxBytes: config.LIVE_SOURCE.maxDownloadBytes,
     requestImpl,
@@ -656,7 +890,6 @@ async function runImport({
   const bredaGeojson = loadAndVerifyBoundaryGeometry(repoRoot);
   const bbox = computeBbox(bredaGeojson, config.BBOX_PADDING_DEGREES);
 
-  const sourceLocator = live ? config.LIVE_SOURCE.url : `fixture:${path.basename(osmFilePath)}`;
   const extractionConfigFingerprint = computeExtractionConfigFingerprint();
 
   let downloadTmpDir = null;
@@ -665,10 +898,31 @@ async function runImport({
   let importRun = null;
 
   try {
+    // sourceLocator/sourceVersion/sourceVersionNote are only fully known
+    // once the download (live mode) has actually happened — the fixed
+    // "latest" URL may 302-redirect to a periodically re-dated artifact
+    // (see downloadWithOneValidatedRedirect above); the *actual*, final,
+    // dated URL is what gets recorded, never the "latest" alias alone.
+    let sourceLocator;
+    let sourceVersion = null;
+    let sourceVersionNote;
+
     if (live) {
       const downloaded = await downloader(liveRequestImpl);
-      effectiveOsmFilePath = downloaded.gpkgPath;
+      effectiveOsmFilePath = downloaded.filePath;
       downloadTmpDir = downloaded.tmpDir;
+
+      sourceLocator = downloaded.finalUrl;
+      if (downloaded.redirected) {
+        sourceVersion = path.basename(new URL(downloaded.finalUrl).pathname);
+        sourceVersionNote = `Fetched via the fixed "latest" URL (${downloaded.initialUrl}), which redirected exactly once to the validated, dated extract ${downloaded.finalUrl}.`;
+      } else {
+        sourceVersion = null;
+        sourceVersionNote = `Fetched directly from the fixed "latest" URL (${downloaded.initialUrl}) with no redirect.`;
+      }
+    } else {
+      sourceLocator = `fixture:${path.basename(osmFilePath)}`;
+      sourceVersionNote = 'Synthetic fixture — not a real Geofabrik extract';
     }
 
     // The actual artifact must be in hand (downloaded or, in fixture
@@ -683,7 +937,7 @@ async function runImport({
       accessProviderSourceAuthorizationVersionId: config.GEOFABRIK_SOURCE.authorizationVersionId,
       marketId: config.BREDA.marketId,
       sourceLocator,
-      sourceVersion: null,
+      sourceVersion,
       sourceArtifactHash,
       extractionConfigFingerprint,
     });
@@ -705,8 +959,8 @@ async function runImport({
       access_method_used: 'open_dataset_download',
       access_provider_note: 'Geofabrik periodic Netherlands OSM extract (netherlands-latest.osm.pbf)',
       source_locator: sourceLocator,
-      source_version: null,
-      source_version_note: live ? null : 'Synthetic fixture — not a real Geofabrik extract',
+      source_version: sourceVersion,
+      source_version_note: sourceVersionNote,
       source_artifact_hash_algorithm: config.HASH_ALGORITHM.toUpperCase(),
       source_artifact_hash: sourceArtifactHash,
       started_at: now(),
@@ -1080,6 +1334,8 @@ module.exports = {
   processGdalFeatureCollection,
   computeExtractionConfigFingerprint,
   computeIdempotencyKey,
+  isSafeRedirectTarget,
+  downloadWithOneValidatedRedirect,
   downloadGeofabrikExtract,
   verifySourceAuthorization,
   runPreflightChecks,
