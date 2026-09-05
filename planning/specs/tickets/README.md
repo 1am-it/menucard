@@ -66,12 +66,17 @@ implementation (see its own ticket).
 2. [market-02-canonical-restaurant-menu-schema.md](./market-02-canonical-restaurant-menu-schema.md) — done, documentation/schema contract only
 3. [market-03-source-registry.md](./market-03-source-registry.md) — done, documentation/schema contract only
 4. [market-04-raw-imports-import-runs.md](./market-04-raw-imports-import-runs.md) —
-   contract documented and approved; the import mechanism itself is still
-   not **run**. **Update 2026-09-05: the mechanism now exists and is
-   locally tested** (`ops/scripts/import-breda-osm.js` — see that ticket's
-   own "Status" section) — a real, pinned GDAL container against fakes and
-   one synthetic `.osm` fixture only; no real download, no real
-   OSM/Geofabrik query, and no live Supabase mutation have happened. Of
+   contract documented and approved; no restaurant-data **import** has run
+   and none is authorized to. **Update 2026-09-05: the mechanism now
+   exists and is locally tested** (`ops/scripts/import-breda-osm.js` — see
+   that ticket's own "Status" section). **Correction 2026-09-05 (later the
+   same day): `--dry-run` was enabled and twice actually run** against the
+   real Geofabrik endpoint and the real live Supabase project (read-only
+   preflight only) — `netherlands-260904.osm.pbf`, 665 candidates after
+   amenity+bbox pre-filter, 500 exactly inside Breda boundary v1, 165
+   outside, 0 errors, and **still zero `ImportRun`s / extraction records,
+   no database write, no data retained** — read-only-verified before and
+   after both runs. `--live` was not used and remains refused. Of
    its four hard gates: **gate 1** (Breda boundary)
    **closed 2026-09-04** — a concrete `MarketBoundaryVersion` has been
    captured and recorded; **gate 2** (per-source authorization) satisfied
@@ -94,7 +99,12 @@ implementation (see its own ticket).
    **open**). Still **zero** `ImportRun`s executed — no OpenStreetMap,
    Geofabrik, or restaurant-data import has run — see the ticket's own
    "Hard gates" section for the full record.
-5. MARKET-05 — normalization & deduplication (not started)
+5. [market-05-normalization-deduplication.md](./market-05-normalization-deduplication.md) —
+   **first ticket content created 2026-09-05**, split into **`05A`**
+   (data-inbox: internal, read-only candidate review, prepared this
+   round — no dashboard/route/schema built yet, triggered by the two
+   real 2026-09-05 Breda dry-runs) and **`05B`** (normalization &
+   deduplication, the original scope, still not started/designed).
 6. MARKET-06 — publication snapshots (not started)
 7. MARKET-07 — market-scoped coverage metrics (not started)
 8. MARKET-08 — minimal market-aware consumer read path (not started; mandatory before any second market can launch — see `planning/architecture/market-data-foundation-plan.md`)

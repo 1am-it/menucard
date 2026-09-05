@@ -80,7 +80,19 @@ contract can run."
      registrations now exist (OpenStreetMap and Geofabrik, its Netherlands
      -extract access provider) — see
      `docs/api/source-registry-schema.md`'s "Registered sources — actual
-     instances". No data has been fetched under either registration.
+     instances". **Update (2026-09-05)**: data *has* since been
+     temporarily fetched under both registrations — twice, via two real,
+     `--dry-run`-only executions of `ops/scripts/import-breda-osm.js`
+     against the actual Geofabrik endpoint (see
+     `planning/specs/tickets/market-04-raw-imports-import-runs.md`'s own
+     "Status" correction for the full figures). Neither run stored, kept,
+     or persisted anything: the downloaded extract and all working files
+     were deleted after each run, and zero rows exist in `import_runs`/
+     `import_extraction_records`, read-only-verified before and after
+     both runs. This is a measurement against the `raw_import` stage
+     these registrations permit, not a fetch that produced any lasting
+     record — the original "no data has been fetched" claim is corrected
+     here, visibly, rather than left to silently go stale.
    - **3B** (`canonical_merge`/`public_publication`/`api_exposure`/
      `redistribution`): blocked pending a qualified legal review (never
      AI research alone) of the Collective-vs-Derivative-Database

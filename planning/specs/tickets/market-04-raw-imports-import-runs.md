@@ -12,7 +12,8 @@ not the mechanism itself. See "Hard gates" for what must resolve before
 any implementation or first real run.
 
 **Update (2026-09-05): the import tool itself now exists, locally tested
-— no real download or import has happened.** `ops/scripts/import-breda-osm.js`
+— at that point, no real download or import had happened.**
+`ops/scripts/import-breda-osm.js`
 (+ `import-breda-osm.config.js`, `osmconf.ini`, its test suite, and a
 synthetic `.osm` fixture) implements this contract's design: preflight
 checks against the live database (exact source/authorization-version ids,
@@ -20,19 +21,43 @@ exact `restricted` status, `basic_info` allowed, `open_dataset_download`
 as the primary access method, Breda's exact market scope, `raw_import`
 permitted), an artifact-hash-inclusive idempotency key, node-only
 (`points`-layer) GDAL extraction, minimized-field extraction, and
-`content_hash` computed after minimisation. All of this has been
-exercised only against fakes and one synthetic fixture, via a real,
-pinned GDAL container — **never against the real Geofabrik/OpenStreetMap
-endpoints, and never against a live Supabase mutation.** Both `--live` and
-the newer `--dry-run` (real download/hash/measurement, structurally unable
-to write a row) CLI modes are wired but refuse to run even when correctly
-confirmed — enabling either for real is still a separate, later,
-explicitly-approved step. **Zero `ImportRun`s exist anywhere, still.**
-This update does not change any hard gate below: gate **3B** remains
-legally blocked, gate **4B** remains fully open and untouched, and the
-tool's **node-only v1 scope remains a first-pass coverage decision, not a
-completeness claim** — way/relation-based locations stay a known, visible,
-out-of-scope gap.
+`content_hash` computed after minimisation. At the time this paragraph
+was first written, all of this had been exercised only against fakes and
+one synthetic fixture, via a real, pinned GDAL container — never against
+the real Geofabrik/OpenStreetMap endpoints. **Superseded by the
+correction directly below.**
+
+**Correction (2026-09-05, later the same day): the real Geofabrik
+download route has since been exercised, twice, under an explicit,
+scoped authorization — still zero `ImportRun`s, still no database
+write.** Two real, write-free dry runs (`node ops/scripts/import-breda-osm.js
+--dry-run --confirm-market=breda`) were executed against the actual
+Geofabrik endpoint and the actual live Supabase project (read-only
+preflight against real Breda/boundary/source-authorization rows). Both
+runs: downloaded the real, current Netherlands extract —
+`netherlands-260904.osm.pbf` (Geofabrik's own dated redirect target from
+the fixed `netherlands-latest.osm.pbf` URL, per the strictly-bounded
+redirect rule) — hashed it
+(`sha256:0241c8e5269a5cd8c0f19162bec0b419b4b6db12136b443b5feb783705378c0a`),
+filtered it (amenity ∈ {`restaurant`, `cafe`, `fast_food`, `bar`, `pub`} +
+bounding-box pre-filter, `points`-layer only), and measured the result:
+**665** candidates survived the amenity/bounding-box pre-filter; **500**
+fell exactly inside Breda boundary v1 (exact point-in-polygon, not the
+bounding box) and would have been stored; **165** fell outside it;
+**zero** errored. `import_runs` and `import_extraction_records` were
+read-only-verified to hold **zero rows both before and after each run**
+— `mutate: false` held throughout, structurally, not merely by outcome.
+The downloaded `.pbf` and all GDAL working files were removed after each
+run; no PBF, OSM record, or working file was retained anywhere. **This
+remains a measurement, not an import**: no `ImportRun`, no extraction
+record, no canonical candidate, and no restaurant data of any kind exists
+anywhere as a result. `--live` was not used and remains refused. This
+update does not change any hard gate below: gate **3B** remains legally
+blocked, gate **4B** remains fully open and untouched, and the tool's
+**node-only v1 scope remains a first-pass coverage decision, not a
+completeness claim** — way/relation-based locations stay a known,
+visible, out-of-scope gap; the 500/665 figures above cover node-based
+candidates only.
 
 ## Depends on
 

@@ -747,14 +747,24 @@ stated terms.
 - **Closes `MARKET-04` gate 3A**: both restricted registrations required
   to close it now exist — see that ticket's own "Hard gates" section for
   the precise, current wording.
-- **Does not close, narrow, or otherwise touch gate 3B.** No data has been
-  fetched under either entry. `allowed_processing_stages` permits only
-  `raw_import`, `internal_quality_review`, and `moderation_preparation` —
-  building and testing the raw-import mechanism against these sources.
-  `canonical_merge`, `public_publication`, `api_exposure`, and
-  `redistribution` remain structurally prohibited for both entries until a
-  new version is created following a qualified legal review, per
-  `restricted_pending` above.
+- **Does not close, narrow, or otherwise touch gate 3B.**
+  `allowed_processing_stages` permits only `raw_import`,
+  `internal_quality_review`, and `moderation_preparation` — building and
+  testing the raw-import mechanism against these sources. **Update
+  (2026-09-05)**: data *has* since been temporarily fetched under both
+  entries — twice, via real, write-free `--dry-run` executions of
+  `ops/scripts/import-breda-osm.js` (see
+  `planning/specs/tickets/market-04-raw-imports-import-runs.md`'s
+  "Status" correction for the full figures: 665 candidates after
+  amenity/bbox pre-filter, 500 inside Breda boundary v1) — squarely
+  within the `raw_import` stage this entry already permits. Nothing was
+  stored: no `ImportRun`, no extraction record, and no retained file
+  exist as a result; this remains a measurement of the pipeline, not a
+  use of gate 3B's still-prohibited stages. `canonical_merge`,
+  `public_publication`, `api_exposure`, and `redistribution` remain
+  structurally prohibited for both entries until a new version is
+  created following a qualified legal review, per `restricted_pending`
+  above.
 - **Does not constitute legal advice or a legal conclusion** about the
   Collective-vs-Derivative-Database question — that question remains
   explicitly open (gate 3B) and is a human-authorized product decision

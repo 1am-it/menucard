@@ -379,19 +379,29 @@ informal enrichment layer, no blanket licence); Gemeente Breda open data
 No code, migration, Supabase change, or restaurant data imported.
 
 MARKET-04 — Raw imports & import runs (contract documented and approved;
-the import mechanism itself is not built/run — see
+the import mechanism itself is not run for real — see
 `docs/api/import-run-schema.md`. **Update 2026-09-05: the import tool
 now exists** — `ops/scripts/import-breda-osm.js` and its config/tests,
 locally tested against fakes and one synthetic `.osm` fixture via the
 real, pinned GDAL container, tightened preflight (exact source/SAV ids,
 exact `restricted` status, `basic_info`, `open_dataset_download`, Breda's
-exact market scope, `raw_import`) and an artifact-hash-inclusive
-idempotency key. **No real download, no real OSM/Geofabrik query, and no
-live Supabase mutation have happened — zero `ImportRun`s exist.** Both its
-`--live` and `--dry-run` CLI modes are wired but still refuse to run even
-when correctly confirmed. Gate 3B stays legally blocked, gate 4B stays
-fully open, and node-only remains a first-pass scope decision, not a
-completeness claim). Blocked on four hard gates, tracked
+exact market scope, `raw_import`), an artifact-hash-inclusive idempotency
+key, and a strictly-bounded Geofabrik redirect rule. **Correction
+2026-09-05 (later the same day): `--dry-run` was subsequently enabled
+and, twice, actually run** against the real Geofabrik endpoint and the
+real live Supabase project (read-only preflight only) —
+`netherlands-260904.osm.pbf`, hash
+`0241c8e5269a5cd8c0f19162bec0b419b4b6db12136b443b5feb783705378c0a`; 665
+candidates after amenity+bbox pre-filter, 500 exactly inside Breda
+boundary v1, 165 outside, 0 errors. **Still zero `ImportRun`s, zero
+`import_extraction_records`, no database write, no restaurant data
+retained anywhere** — read-only-verified before and after both runs;
+the downloaded file and all working files were deleted afterward. `--live`
+was not used and remains refused. Gate 3B stays legally blocked, gate 4B
+stays fully open, and node-only remains a first-pass scope decision (the
+500/665 figures are node-based candidates only), not a completeness
+claim. See `planning/specs/tickets/market-04-raw-imports-import-runs.md`'s
+own "Status" section for the full record). Blocked on four hard gates, tracked
 independently: **gate 1** (Breda boundary) closed 2026-09-04 — see the
 `MARKET-01` entry above. **Gate 2** (per-source `SourceAuthorizationVersion`)
 satisfied per-source for Kadaster/PDOK, OpenStreetMap, and Geofabrik —
@@ -451,3 +461,19 @@ fully open, both unchanged. See `docs/api/import-run-schema.md`'s
 matching "Amendment (2026-09-05): import_runs completeness fix"
 section. Next: building the first internal Breda OSM/Geofabrik import
 script, as a separate, explicitly-approved step.
+
+MARKET-05 — Normalization & deduplication. **First ticket content
+created 2026-09-05** — see
+`planning/specs/tickets/market-05-normalization-deduplication.md`,
+split into **`05A`** (data-inbox: internal, read-only candidate review —
+documentation/preparation only this round, no dashboard/route/schema
+built) and **`05B`** (normalization & deduplication, the original scope,
+still not started/designed). `05A` was prepared directly on the strength
+of the two successful, write-free Breda dry-runs recorded in the
+`MARKET-04` entry above (665 candidates after amenity/bbox pre-filter,
+500 exactly inside Breda boundary v1) — it is a read-only window onto
+`MARKET-04`'s `ImportRun`/`ImportExtractionRecord` tables, explicitly
+separate from `PLATFORM-06`'s existing moderation queue (which reviews
+`pending_changes` against live data, not raw import candidates) and from
+`05B`'s eventual real matching/deduplication logic. No code, route,
+page, migration, or Supabase change has been made for either part.
