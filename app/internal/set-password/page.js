@@ -24,7 +24,7 @@ import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import {
   parseHashParams,
-  determineInitialViewState,
+  detectSessionViewState,
   validateNewPassword,
   passwordValidationMessage,
   resolveUpdatePasswordOutcome,
@@ -53,29 +53,46 @@ export default function SetPasswordPage() {
 
   useEffect(() => {
     let cancelled = false
-    const supabase = getSupabaseBrowser()
-    const hashParams = typeof window !== 'undefined' ? parseHashParams(window.location.hash) : {}
+    let unsubscribe = () => {}
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (cancelled) return
-      setViewState(determineInitialViewState({ hashParams, hasSession: Boolean(data.session) }))
-    })
+    // Found in production (2026-09-05): a real invitation link crashed
+    // this page with Next.js's generic "a client-side exception has
+    // occurred" — there was no error handling at all around the Supabase
+    // client here, so any unexpected failure (e.g. a browser or embedded
+    // context that blocks storage access — some email-link security
+    // scanners open links in exactly such a sandboxed context) propagated
+    // out of this effect and crashed the whole page. Both the
+    // synchronous client-setup path (this try/catch) and the async
+    // session check (detectSessionViewState's own internal try/catch,
+    // src/lib/setPasswordFlow.js) now degrade to the existing, safe
+    // 'invalid' state instead — never a hard crash.
+    try {
+      const supabase = getSupabaseBrowser()
+      const hashParams = typeof window !== 'undefined' ? parseHashParams(window.location.hash) : {}
 
-    // detectSessionInUrl (the Supabase client's default) processes a
-    // recovery/invite link asynchronously — this is the SDK-recommended
-    // way to catch the resulting session however long that takes,
-    // independent of the getSession() check above, which may resolve
-    // before that processing finishes.
-    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (cancelled) return
-      if ((event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') && session) {
-        setViewState('ready')
-      }
-    })
+      detectSessionViewState(supabase.auth, hashParams).then((state) => {
+        if (!cancelled) setViewState(state)
+      })
+
+      // detectSessionInUrl (the Supabase client's default) processes a
+      // recovery/invite link asynchronously — this is the SDK-recommended
+      // way to catch the resulting session however long that takes,
+      // independent of the check above, which may resolve before that
+      // processing finishes.
+      const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+        if (cancelled) return
+        if ((event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') && session) {
+          setViewState('ready')
+        }
+      })
+      unsubscribe = () => listener.subscription.unsubscribe()
+    } catch (err) {
+      setViewState('invalid')
+    }
 
     return () => {
       cancelled = true
-      listener.subscription.unsubscribe()
+      unsubscribe()
     }
   }, [])
 

@@ -9,6 +9,7 @@ const {
   hasAuthErrorInHash,
   hashLooksLikeAuthLink,
   determineInitialViewState,
+  detectSessionViewState,
   validateNewPassword,
   passwordValidationMessage,
   resolveUpdatePasswordOutcome,
@@ -79,6 +80,52 @@ test('determineInitialViewState: a link-shaped hash with no session yet is check
 test('determineInitialViewState: no hash and no session (a bare visit) is invalid, never an indefinite spinner', () => {
   assert.equal(determineInitialViewState({ hashParams: {}, hasSession: false }), 'invalid');
   assert.equal(determineInitialViewState({ hashParams: undefined, hasSession: false }), 'invalid');
+});
+
+// ─── detectSessionViewState — regression test for the 2026-09-05
+// production crash: a real invitation link crashed the whole page with
+// Next.js's generic "a client-side exception has occurred" because
+// nothing caught a failing/throwing Supabase client call. This must
+// never propagate again. ─────────────────────────────────────────────
+
+test('detectSessionViewState: a real session resolves to ready, same as determineInitialViewState', async () => {
+  const fakeAuth = { getSession: async () => ({ data: { session: { access_token: 'x' } } }) };
+  const state = await detectSessionViewState(fakeAuth, { access_token: 'x', type: 'invite' });
+  assert.equal(state, 'ready');
+});
+
+test('detectSessionViewState: no session, but a link-shaped hash, resolves to checking', async () => {
+  const fakeAuth = { getSession: async () => ({ data: { session: null } }) };
+  const state = await detectSessionViewState(fakeAuth, { access_token: 'x', type: 'invite' });
+  assert.equal(state, 'checking');
+});
+
+test('detectSessionViewState: getSession() rejecting (e.g. blocked storage access) resolves to invalid, never throws or rejects', async () => {
+  const fakeAuth = {
+    getSession: async () => {
+      throw new Error('SecurityError: Failed to read the \'localStorage\' property from \'Window\'');
+    },
+  };
+  await assert.doesNotReject(async () => {
+    const state = await detectSessionViewState(fakeAuth, { access_token: 'x', type: 'invite' });
+    assert.equal(state, 'invalid');
+  });
+});
+
+test('detectSessionViewState: getSession() throwing synchronously (not returning a promise at all) still resolves to invalid', async () => {
+  const fakeAuth = {
+    getSession: () => {
+      throw new TypeError('some unexpected client failure');
+    },
+  };
+  const state = await detectSessionViewState(fakeAuth, {});
+  assert.equal(state, 'invalid');
+});
+
+test('detectSessionViewState: an unexpectedly malformed getSession() result (no data field) resolves to invalid rather than throwing', async () => {
+  const fakeAuth = { getSession: async () => ({}) };
+  const state = await detectSessionViewState(fakeAuth, {});
+  assert.equal(state, 'invalid');
 });
 
 // ─── validateNewPassword / passwordValidationMessage ──────────────────

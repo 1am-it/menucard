@@ -97,6 +97,34 @@ function determineInitialViewState({ hashParams, hasSession }) {
 }
 
 /**
+ * Runs the actual session check against a live (or test-double) Supabase
+ * Auth client — `{ getSession(): Promise<{ data: { session } }> }` — and
+ * resolves to the same `'invalid' | 'ready' | 'checking'` states as
+ * `determineInitialViewState`, but **never throws and never rejects**.
+ *
+ * **Found in production, 2026-09-05**: a real invitation link crashed
+ * this page with Next.js's generic "a client-side exception has
+ * occurred" — the page had no error handling at all around the Supabase
+ * client call here, so any failure (a browser or embedded context that
+ * blocks storage access — some email-link security scanners open links
+ * in exactly such a sandboxed context — or any other unexpected
+ * `getSession()` failure) propagated straight out of the effect and
+ * crashed the whole page instead of showing the existing, safe "invalid
+ * link" state. This function is the fix: whatever goes wrong here
+ * degrades to `'invalid'`, the same state already shown for a bare visit
+ * or an expired link — never a hard crash, and never a message revealing
+ * *why* it failed.
+ */
+async function detectSessionViewState(supabaseAuth, hashParams) {
+  try {
+    const { data } = await supabaseAuth.getSession();
+    return determineInitialViewState({ hashParams, hasSession: Boolean(data && data.session) });
+  } catch (err) {
+    return 'invalid';
+  }
+}
+
+/**
  * Client-side password validation — a UX guard only, never the
  * authoritative policy (Supabase's own server-side password rules, set
  * in the project's Auth settings, are enforced independently and may be
@@ -154,6 +182,7 @@ module.exports = {
   hasAuthErrorInHash,
   hashLooksLikeAuthLink,
   determineInitialViewState,
+  detectSessionViewState,
   validateNewPassword,
   passwordValidationMessage,
   resolveUpdatePasswordOutcome,
