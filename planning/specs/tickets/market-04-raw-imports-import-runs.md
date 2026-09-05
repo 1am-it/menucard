@@ -59,6 +59,25 @@ completeness claim** — way/relation-based locations stay a known,
 visible, out-of-scope gap; the 500/665 figures above cover node-based
 candidates only.
 
+**Addition (2026-09-05, later the same day): a mandatory `maxRecordsToStore`
+storage cap has been added to the tool.** Every `runImport()` call
+(`--fixture`, `--dry-run`, or `--live`) now requires an explicit,
+positive-integer `maxRecordsToStore` — validated before any preflight
+check, network access, or GDAL invocation; enforced again at the single
+point extraction records are built (`processGdalFeatureCollection`,
+excess in-boundary matches are counted as skipped, never pushed); and
+checked a third, redundant time immediately before the database write
+itself. A run can therefore never store more candidates than the caller
+explicitly requested, by construction. The CLI requires a matching
+`--max-records-to-store=<n>` flag for every mode. This is purely an
+additional safety cap — it does not change, weaken, or replace the
+existing Breda-boundary point-in-polygon check or the source/licence
+preflight guardrails (`runPreflightChecks`/`verifySourceAuthorization`),
+both unchanged. See `ops/scripts/import-breda-osm.js` and its test suite
+(`processGdalFeatureCollection`/`runImport`/`assertMaxRecordsToStoreArg`
+tests, including a source with more matches than the cap producing at
+most the cap's own count of actual writes).
+
 ## Depends on
 
 `[[011-market-foundation-and-international-growth]]` §6 (completeness

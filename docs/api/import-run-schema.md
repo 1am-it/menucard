@@ -93,6 +93,16 @@ contract can run."
      these registrations permit, not a fetch that produced any lasting
      record — the original "no data has been fetched" claim is corrected
      here, visibly, rather than left to silently go stale.
+
+     **Addition (2026-09-05, later the same day): `ops/scripts/import-breda-osm.js`
+     now requires a mandatory `maxRecordsToStore` storage cap** for every
+     mode (`--fixture`, `--dry-run`, `--live`) — validated before any
+     preflight check, network access, or GDAL invocation; enforced again
+     where extraction records are built; and re-checked immediately
+     before the database write itself, so a run can never store more
+     candidates than explicitly requested. Purely an additional safety
+     cap — the Breda-boundary check and the source/licence preflight
+     guardrails described above are unchanged.
    - **3B** (`canonical_merge`/`public_publication`/`api_exposure`/
      `redistribution`): blocked pending a qualified legal review (never
      AI research alone) of the Collective-vs-Derivative-Database

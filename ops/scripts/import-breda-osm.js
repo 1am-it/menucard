@@ -28,17 +28,24 @@
  * Requiring this module, or running it without `--live`/`--dry-run`,
  * never performs network access or a live Supabase mutation.
  *
- * **`--live --confirm-market=breda`**: real, wired code
- * (`runImport({live: true, mutate: true, ...})`) — but `main()` below
- * still refuses to invoke it, even when correctly confirmed. Enabling a
- * real live run (a real `ImportRun`, real extraction records written) is
- * a separate, later, explicitly-approved step, exactly like the boundary
- * tool's own history.
+ * **`--live --confirm-market=breda --max-records-to-store=<n>`**
+ * (**enabled 2026-09-05**, after the first two real dry-runs and an
+ * explicit, scoped approval for exactly one real, limited trial import):
+ * `runImport({live: true, mutate: true, maxRecordsToStore, ...})` is now
+ * actually invoked by `main()`. Requires the same `--confirm-market`
+ * gate as before, **plus** a mandatory `--max-records-to-store=<n>` —
+ * see `assertMaxRecordsToStoreArg`/`assertValidMaxRecordsToStore` below:
+ * every mode (`--fixture`, `--dry-run`, `--live`) now requires this, and
+ * `processGdalFeatureCollection` enforces it at the single point
+ * extraction records are ever built, with a second, redundant hard check
+ * in `runImport` immediately before the database write itself — a live
+ * run can never write more records than the caller explicitly requested,
+ * by construction, not by convention.
  *
- * **`--dry-run --confirm-market=breda`** (wired 2026-09-05, **enabled**
- * this same date after independently verifying the real Geofabrik
- * redirect route): performs a real download (via
- * `downloadWithOneValidatedRedirect`), real hashing, real GDAL
+ * **`--dry-run --confirm-market=breda --max-records-to-store=<n>`**
+ * (wired 2026-09-05, **enabled** the same date after independently
+ * verifying the real Geofabrik redirect route): performs a real download
+ * (via `downloadWithOneValidatedRedirect`), real hashing, real GDAL
  * extraction, and real measurement against the real, live database and
  * the real Geofabrik endpoint — always as `runImport({live: true,
  * mutate: false, ...})`, never anything else. `mutate: false` makes
@@ -391,10 +398,23 @@ function classifyAndExtractFeature(feature, { bredaGeojson, allowedAmenityValues
   };
 }
 
-/** Processes a whole GDAL-produced FeatureCollection into the final
+/**
+ * Processes a whole GDAL-produced FeatureCollection into the final
  * extraction records plus ImportRun.record_counts/error_log — the core,
- * fully pure/unit-testable pipeline stage. */
-function processGdalFeatureCollection(featureCollection, { bredaGeojson, allowedAmenityValues, retrievedAt }) {
+ * fully pure/unit-testable pipeline stage.
+ *
+ * `maxRecordsToStore` (mandatory — see `assertValidMaxRecordsToStore`)
+ * is enforced right here, at the single point `records` is ever built:
+ * once `records.length` reaches the limit, every further otherwise-
+ * "stored" candidate is deliberately never pushed — counted as skipped
+ * instead (nothing about the candidate itself is wrong; it is simply
+ * beyond the requested cap). This guarantees `records.length <=
+ * maxRecordsToStore` for every possible input, checkable directly by a
+ * pure unit test with no Docker/database involved — the same guarantee
+ * `runImport` re-checks a second time, defense-in-depth, immediately
+ * before the actual database write.
+ */
+function processGdalFeatureCollection(featureCollection, { bredaGeojson, allowedAmenityValues, retrievedAt, maxRecordsToStore }) {
   const features = (featureCollection && featureCollection.features) || [];
   const seenOsmIds = new Set();
   const records = [];
@@ -405,7 +425,11 @@ function processGdalFeatureCollection(featureCollection, { bredaGeojson, allowed
   for (const feature of features) {
     const result = classifyAndExtractFeature(feature, { bredaGeojson, allowedAmenityValues, seenOsmIds, retrievedAt });
     if (result.outcome === 'stored') {
-      records.push(result.record);
+      if (records.length >= maxRecordsToStore) {
+        skipped += 1;
+      } else {
+        records.push(result.record);
+      }
     } else if (result.outcome === 'skipped') {
       skipped += 1;
     } else {
@@ -855,6 +879,25 @@ async function runPreflightChecks(dbClient) {
   return { market, boundary, dataOrigin, accessProvider };
 }
 
+// ─── Mandatory storage cap ─────────────────────────────────────────────────
+
+/**
+ * `maxRecordsToStore` is mandatory for every `runImport` call — fixture,
+ * dry-run, or live — never defaulted, so a caller can never accidentally
+ * invoke a real import without explicitly deciding how many records it
+ * may ever write. Validated once, at the very start of `runImport`,
+ * before any preflight check, network access, or GDAL invocation — an
+ * invalid value halts the whole run immediately, never partway through.
+ */
+function assertValidMaxRecordsToStore(maxRecordsToStore) {
+  if (!Number.isInteger(maxRecordsToStore) || maxRecordsToStore < 1) {
+    throw new HaltError(
+      'invalid-max-records-to-store',
+      `maxRecordsToStore must be a positive integer, got ${JSON.stringify(maxRecordsToStore)}`
+    );
+  }
+}
+
 // ─── Orchestration ─────────────────────────────────────────────────────────
 
 /**
@@ -891,6 +934,7 @@ async function runPreflightChecks(dbClient) {
 async function runImport({
   live = false,
   mutate = live,
+  maxRecordsToStore,
   osmFilePath,
   dbClient,
   gdalRunner = runOsmExtraction,
@@ -900,6 +944,7 @@ async function runImport({
   triggeredBy = 'manual',
   now = () => new Date().toISOString(),
 }) {
+  assertValidMaxRecordsToStore(maxRecordsToStore);
   await runPreflightChecks(dbClient);
   const bredaGeojson = loadAndVerifyBoundaryGeometry(repoRoot);
   const bbox = computeBbox(bredaGeojson, config.BBOX_PADDING_DEGREES);
@@ -1007,6 +1052,7 @@ async function runImport({
       bredaGeojson,
       allowedAmenityValues: config.ALLOWED_AMENITY_VALUES,
       retrievedAt: now(),
+      maxRecordsToStore,
     });
 
     const extractionRecords = records.map((record) => ({
@@ -1015,6 +1061,18 @@ async function runImport({
       market_boundary_version_id: config.BREDA.boundaryVersionId,
       ...record,
     }));
+
+    // Hard, redundant gate immediately before the write itself — belt
+    // and suspenders alongside processGdalFeatureCollection's own cap:
+    // even if that function's enforcement were ever weakened by a future
+    // change, this halts before any insert rather than silently writing
+    // more than requested.
+    if (extractionRecords.length > maxRecordsToStore) {
+      throw new HaltError(
+        'max-records-to-store-exceeded-before-write',
+        `refusing to write ${extractionRecords.length} records — exceeds maxRecordsToStore=${maxRecordsToStore}`
+      );
+    }
 
     const status = record_counts.errored > 0 && record_counts.stored === 0 ? 'failed' : record_counts.errored > 0 ? 'partial' : 'succeeded';
     const completedAt = now();
@@ -1235,6 +1293,31 @@ function assertDryRunConfirmation(args, expectedMarketSlug) {
 }
 
 /**
+ * CLI-level counterpart to `assertValidMaxRecordsToStore` — required for
+ * every mode (`--fixture`, `--dry-run`, `--live`) that actually runs an
+ * import, checked before that mode's own branch does anything else.
+ * `runImport` would refuse an invalid value anyway, but checking it here
+ * too gives a clear, CLI-specific usage message instead of a bare
+ * HaltError, and keeps every branch's own gating symmetric with
+ * `assertLiveConfirmation`/`assertDryRunConfirmation` above.
+ */
+function assertMaxRecordsToStoreArg(args) {
+  const arg = args.find((a) => a.startsWith('--max-records-to-store='));
+  if (!arg) {
+    throw new HaltError(
+      'max-records-to-store-missing',
+      '--max-records-to-store=<positive integer> is required for every run (--fixture, --dry-run, or --live).'
+    );
+  }
+  const raw = arg.slice('--max-records-to-store='.length);
+  const value = Number(raw);
+  if (!Number.isInteger(value) || value < 1) {
+    throw new HaltError('max-records-to-store-invalid', `--max-records-to-store must be a positive integer, got ${JSON.stringify(raw)}`);
+  }
+  return value;
+}
+
+/**
  * Builds the exact `runImport` options the CLI's `--dry-run` branch
  * uses — pulled out as its own small, pure function so the **structural
  * guarantee "dry-run always means `mutate: false`"** is directly,
@@ -1244,10 +1327,11 @@ function assertDryRunConfirmation(args, expectedMarketSlug) {
  * or any other input — there is no code path through this function that
  * can produce `mutate: true`.
  */
-function buildDryRunImportOptions({ dbClient, repoRoot }) {
+function buildDryRunImportOptions({ dbClient, repoRoot, maxRecordsToStore }) {
   return {
     live: true,
     mutate: false,
+    maxRecordsToStore,
     dbClient,
     repoRoot,
     triggeredBy: 'manual',
@@ -1282,18 +1366,40 @@ function main(argv) {
   if (liveCheck.live) {
     // Live mode is real, wired code (runImport({live: true, mutate: true,
     // ...}) and createLiveDbClient() are both fully implemented and
-    // unit-tested against fakes) — but this CLI entry point deliberately
-    // refuses to invoke it, even with a correctly-matching
-    // --confirm-market, exactly like the boundary tool's own history:
-    // enabling a real live run is a separate, later, explicitly-approved
-    // step, not a side effect of building this tool.
-    console.error(
-      'Live mode is wired but not enabled by this project yet. A real Breda ' +
-        'OSM/Geofabrik import run requires a separate, explicit approval — ' +
-        'see docs/api/import-run-schema.md and this tool\'s own report. Refusing to proceed.'
-    );
-    process.exitCode = 1;
-    return undefined;
+    // unit-tested against fakes). **Enabled 2026-09-05** — a real, first,
+    // explicitly-approved live run (see this tool's own report and
+    // docs/api/import-run-schema.md) is what this exact combination of
+    // flags is for. Still requires the same `--confirm-market=breda` gate
+    // as before, AND (added the same day) a mandatory
+    // `--max-records-to-store=<n>` — a real live run can never be
+    // triggered without the caller explicitly deciding, every time, how
+    // many records it may ever write.
+    let maxRecordsToStore;
+    try {
+      maxRecordsToStore = assertMaxRecordsToStoreArg(args);
+    } catch (err) {
+      console.error(err.message);
+      process.exitCode = 1;
+      return undefined;
+    }
+    let dbClient;
+    try {
+      dbClient = createLiveDbClient();
+    } catch (err) {
+      console.error(err.message);
+      process.exitCode = 1;
+      return undefined;
+    }
+    return runImport({ live: true, mutate: true, maxRecordsToStore, dbClient, repoRoot, triggeredBy: 'manual' })
+      .then((result) => {
+        console.log(`Live import complete (${result.outcome}).`);
+        console.log(JSON.stringify(result.importRun, null, 2));
+        console.log(`Extraction records stored: ${result.extractionRecords.length}`);
+      })
+      .catch((err) => {
+        console.error(err.message);
+        process.exitCode = 1;
+      });
   }
 
   if (dryRunCheck.dryRun) {
@@ -1305,9 +1411,15 @@ function main(argv) {
     // insertImportRun/insertExtractionRecords/updateImportRunStatus
     // branches inside runImport are structurally unreachable whenever
     // `mutate` is false (see runImport's own handling and this tool's
-    // tests), regardless of what `dbClient` is given here. `--live`
-    // remains a separate, still-refused flag below — this branch never
-    // sets `mutate: true` under any circumstance.
+    // tests), regardless of what `dbClient` is given here.
+    let maxRecordsToStore;
+    try {
+      maxRecordsToStore = assertMaxRecordsToStoreArg(args);
+    } catch (err) {
+      console.error(err.message);
+      process.exitCode = 1;
+      return undefined;
+    }
     let dbClient;
     try {
       dbClient = createLiveDbClient();
@@ -1316,7 +1428,7 @@ function main(argv) {
       process.exitCode = 1;
       return undefined;
     }
-    return runImport(buildDryRunImportOptions({ dbClient, repoRoot }))
+    return runImport(buildDryRunImportOptions({ dbClient, repoRoot, maxRecordsToStore }))
       .then((result) => {
         console.log(`Dry-run complete (${result.outcome}) — nothing was written to the database.`);
         console.log(JSON.stringify(result.importRun, null, 2));
@@ -1331,9 +1443,19 @@ function main(argv) {
   if (fixtureIdx === -1 || outIdx === -1) {
     console.error(
       'Usage:\n' +
-        '  node import-breda-osm.js --fixture <osm-file> --out <dir>   (local fixture only, no network, no database write)\n' +
-        '  node import-breda-osm.js --dry-run --confirm-market=breda   (real download/hash/GDAL/measurement, never a database write)'
+        '  node import-breda-osm.js --fixture <osm-file> --out <dir> --max-records-to-store=<n>   (local fixture only, no network, no database write)\n' +
+        '  node import-breda-osm.js --dry-run --confirm-market=breda --max-records-to-store=<n>   (real download/hash/GDAL/measurement, never a database write)\n' +
+        '  node import-breda-osm.js --live --confirm-market=breda --max-records-to-store=<n>       (real download, real ImportRun, real extraction record writes)'
     );
+    process.exitCode = 1;
+    return undefined;
+  }
+
+  let maxRecordsToStore;
+  try {
+    maxRecordsToStore = assertMaxRecordsToStoreArg(args);
+  } catch (err) {
+    console.error(err.message);
     process.exitCode = 1;
     return undefined;
   }
@@ -1344,6 +1466,7 @@ function main(argv) {
 
   return runImport({
     live: false,
+    maxRecordsToStore,
     osmFilePath,
     dbClient,
     repoRoot,
@@ -1393,5 +1516,7 @@ module.exports = {
   createLiveDbClient,
   createFixtureDbClient,
   assertDryRunConfirmation,
+  assertMaxRecordsToStoreArg,
+  assertValidMaxRecordsToStore,
   buildDryRunImportOptions,
 };

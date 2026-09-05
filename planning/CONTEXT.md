@@ -400,7 +400,16 @@ the downloaded file and all working files were deleted afterward. `--live`
 was not used and remains refused. Gate 3B stays legally blocked, gate 4B
 stays fully open, and node-only remains a first-pass scope decision (the
 500/665 figures are node-based candidates only), not a completeness
-claim. See `planning/specs/tickets/market-04-raw-imports-import-runs.md`'s
+claim. **Addition (2026-09-05, later the same day): a mandatory
+`maxRecordsToStore` storage cap has been added to the tool.** Every
+`runImport()` call (`--fixture`, `--dry-run`, or `--live`) now requires an
+explicit, positive-integer `maxRecordsToStore`, enforced both where
+extraction records are built and again immediately before any database
+write, so a run can never store more candidates than explicitly
+requested; the CLI requires a matching `--max-records-to-store=<n>` flag
+for every mode. This does not change the existing Breda-boundary check
+or source/licence guardrails — see `ops/scripts/import-breda-osm.js` and
+its test suite. See `planning/specs/tickets/market-04-raw-imports-import-runs.md`'s
 own "Status" section for the full record). Blocked on four hard gates, tracked
 independently: **gate 1** (Breda boundary) closed 2026-09-04 — see the
 `MARKET-01` entry above. **Gate 2** (per-source `SourceAuthorizationVersion`)

@@ -28,6 +28,8 @@ const {
   runImport,
   createFixtureDbClient,
   assertDryRunConfirmation,
+  assertMaxRecordsToStoreArg,
+  assertValidMaxRecordsToStore,
   buildDryRunImportOptions,
 } = require('./import-breda-osm');
 const config = require('./import-breda-osm.config');
@@ -35,6 +37,12 @@ const { sha256String, canonicalJsonStringify, HaltError } = require('./capture-m
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
 const FIXTURE_OSM_PATH = path.join(__dirname, '__fixtures__', 'breda-osm-candidates.osm');
+
+// A deliberately generous cap for tests that are not themselves about the
+// maxRecordsToStore feature — every such fixture produces at most a
+// handful of real candidates, so this can never be the thing that limits
+// what gets stored in those tests.
+const GENEROUS_MAX_RECORDS = 100;
 
 function isDockerDaemonReachable() {
   try {
@@ -317,10 +325,42 @@ test('processGdalFeatureCollection aggregates stored/skipped/errored counts corr
     bredaGeojson: geo,
     allowedAmenityValues: config.ALLOWED_AMENITY_VALUES,
     retrievedAt: 'now',
+    maxRecordsToStore: GENEROUS_MAX_RECORDS,
   });
   assert.deepEqual(result.record_counts, { fetched: 4, stored: 1, skipped: 1, errored: 2 });
   assert.equal(result.records.length, 1);
   assert.equal(result.error_log.length, 2);
+});
+
+// ─── maxRecordsToStore: the mandatory storage cap ─────────────────────────
+
+test('processGdalFeatureCollection: never stores more than maxRecordsToStore, even when more valid candidates match', () => {
+  const geo = loadAndVerifyBoundaryGeometry(REPO_ROOT);
+  // 15 distinct, individually valid, in-Breda restaurant nodes — more
+  // than the cap below.
+  const features = Array.from({ length: 15 }, (_, i) =>
+    fakeGeoJsonFeature({ osmId: `cap-${i}`, amenity: 'restaurant', lon: 4.7683, lat: 51.5719 })
+  );
+  const result = processGdalFeatureCollection(
+    { type: 'FeatureCollection', features },
+    { bredaGeojson: geo, allowedAmenityValues: config.ALLOWED_AMENITY_VALUES, retrievedAt: 'now', maxRecordsToStore: 10 }
+  );
+  assert.equal(result.records.length, 10, 'never more than the cap, even though 15 candidates were individually valid');
+  assert.deepEqual(result.record_counts, { fetched: 15, stored: 10, skipped: 5, errored: 0 });
+  assert.equal(result.error_log.length, 0, 'candidates excluded only by the cap are not errors — nothing about them is wrong');
+});
+
+test('processGdalFeatureCollection: exactly maxRecordsToStore candidates are stored when there are exactly that many', () => {
+  const geo = loadAndVerifyBoundaryGeometry(REPO_ROOT);
+  const features = Array.from({ length: 10 }, (_, i) =>
+    fakeGeoJsonFeature({ osmId: `exact-${i}`, amenity: 'restaurant', lon: 4.7683, lat: 51.5719 })
+  );
+  const result = processGdalFeatureCollection(
+    { type: 'FeatureCollection', features },
+    { bredaGeojson: geo, allowedAmenityValues: config.ALLOWED_AMENITY_VALUES, retrievedAt: 'now', maxRecordsToStore: 10 }
+  );
+  assert.equal(result.records.length, 10);
+  assert.equal(result.record_counts.skipped, 0, 'exactly hitting the cap is not itself a skip');
 });
 
 // ─── Idempotency ───────────────────────────────────────────────────────────
@@ -770,6 +810,7 @@ test('runImport records the audit fields correctly after a valid redirect (sourc
     const { port } = server.address();
     const db = createFixtureDbClient();
     const result = await runImport({
+      maxRecordsToStore: GENEROUS_MAX_RECORDS,
       live: true,
       dbClient: db,
       repoRoot: REPO_ROOT,
@@ -941,6 +982,7 @@ test('a preflight mismatch halts runImport before any GDAL/network call is made'
   await assert.rejects(
     () =>
       runImport({
+        maxRecordsToStore: GENEROUS_MAX_RECORDS,
         live: false,
         osmFilePath: FIXTURE_OSM_PATH,
         dbClient: db,
@@ -975,6 +1017,7 @@ function fakeDownloadResult(filePath, tmpDir, { redirected = false, finalUrl = c
 test('runImport (live) inserts an ImportRun and its extraction records exactly once', async () => {
   const db = createFixtureDbClient();
   const result = await runImport({
+    maxRecordsToStore: GENEROUS_MAX_RECORDS,
     live: true,
     dbClient: db,
     repoRoot: REPO_ROOT,
@@ -987,10 +1030,81 @@ test('runImport (live) inserts an ImportRun and its extraction records exactly o
   assert.equal(db._state.insertedExtractionRecords.length, 1);
 });
 
+// ─── maxRecordsToStore: mandatory, and enforced end to end ────────────────
+
+test('runImport rejects a missing/invalid maxRecordsToStore before any preflight check, network access, or GDAL invocation', async () => {
+  const throwsIfTouched = {
+    getMarket: async () => { throw new Error('must never be called — maxRecordsToStore must be validated first'); },
+    getBoundaryVersion: async () => { throw new Error('must never be called'); },
+    getSource: async () => { throw new Error('must never be called'); },
+    getSourceAuthorizationVersion: async () => { throw new Error('must never be called'); },
+    getImportRunByIdempotencyKey: async () => { throw new Error('must never be called'); },
+    insertImportRun: async () => { throw new Error('must never be called'); },
+    insertExtractionRecords: async () => { throw new Error('must never be called'); },
+    updateImportRunStatus: async () => { throw new Error('must never be called'); },
+  };
+
+  for (const badValue of [undefined, null, 0, -1, 3.5, '10', NaN]) {
+    let gdalCalled = false;
+    let downloaderCalled = false;
+    await assert.rejects(
+      () =>
+        runImport({
+          maxRecordsToStore: badValue,
+          live: true,
+          dbClient: throwsIfTouched,
+          repoRoot: REPO_ROOT,
+          gdalRunner: () => {
+            gdalCalled = true;
+            return fakeFeatureCollection();
+          },
+          downloader: () => {
+            downloaderCalled = true;
+            return Promise.resolve(fakeDownloadResult(FIXTURE_OSM_PATH, null));
+          },
+        }),
+      (err) => err.name === 'HaltError' && err.reason === 'invalid-max-records-to-store',
+      `expected maxRecordsToStore=${JSON.stringify(badValue)} to be rejected`
+    );
+    assert.equal(gdalCalled, false, 'GDAL must never run when maxRecordsToStore itself is invalid');
+    assert.equal(downloaderCalled, false, 'no download must ever start when maxRecordsToStore itself is invalid');
+  }
+});
+
+test('runImport (end to end): a source with more matches than maxRecordsToStore still results in at most 10 actual writes', async () => {
+  const db = createFixtureDbClient();
+  // 25 distinct, individually valid, in-Breda restaurant nodes — far more
+  // than the cap requested below.
+  const manyMatchesFeatureCollection = {
+    type: 'FeatureCollection',
+    features: Array.from({ length: 25 }, (_, i) =>
+      fakeGeoJsonFeature({ osmId: `many-${i}`, amenity: 'restaurant', lon: 4.7683, lat: 51.5719 })
+    ),
+  };
+
+  const result = await runImport({
+    maxRecordsToStore: 10,
+    live: true,
+    dbClient: db,
+    repoRoot: REPO_ROOT,
+    gdalRunner: () => manyMatchesFeatureCollection,
+    downloader: () => Promise.resolve(fakeDownloadResult(FIXTURE_OSM_PATH, null)),
+  });
+
+  assert.equal(result.outcome, 'completed');
+  assert.equal(result.extractionRecords.length, 10, 'runImport\'s own return value must reflect the cap');
+  assert.equal(result.importRun.record_counts.fetched, 25);
+  assert.equal(result.importRun.record_counts.stored, 10);
+  assert.equal(result.importRun.record_counts.skipped, 15, 'the 15 candidates beyond the cap are accounted for as skipped, not silently dropped');
+  assert.equal(db._state.insertedImportRuns.length, 1, 'exactly one ImportRun');
+  assert.equal(db._state.insertedExtractionRecords.length, 10, 'the database actually received at most 10 records — the real, end-to-end guarantee');
+});
+
 test('runImport idempotency: an identical re-trigger recognizes the existing run and creates nothing new', async () => {
   const db = createFixtureDbClient();
   const runOnce = () =>
     runImport({
+      maxRecordsToStore: GENEROUS_MAX_RECORDS,
       live: true,
       dbClient: db,
       repoRoot: REPO_ROOT,
@@ -1012,6 +1126,7 @@ test('runImport error handling: a GDAL failure marks the ImportRun failed and st
   await assert.rejects(
     () =>
       runImport({
+        maxRecordsToStore: GENEROUS_MAX_RECORDS,
         live: true,
         dbClient: db,
         repoRoot: REPO_ROOT,
@@ -1032,6 +1147,7 @@ test('runImport removes its temporary extraction directory on both success and f
   const db1 = createFixtureDbClient();
   let capturedOutDirSuccess;
   await runImport({
+    maxRecordsToStore: GENEROUS_MAX_RECORDS,
     live: false,
     osmFilePath: FIXTURE_OSM_PATH,
     dbClient: db1,
@@ -1048,6 +1164,7 @@ test('runImport removes its temporary extraction directory on both success and f
   let capturedOutDirFailure;
   await assert.rejects(() =>
     runImport({
+      maxRecordsToStore: GENEROUS_MAX_RECORDS,
       live: false,
       osmFilePath: FIXTURE_OSM_PATH,
       dbClient: db2,
@@ -1069,6 +1186,7 @@ test('runImport removes its temporary download directory (live mode) on both suc
   const tmp1 = makeDownloadTmp();
   fs.copyFileSync(FIXTURE_OSM_PATH, path.join(tmp1, 'netherlands-latest.osm'));
   await runImport({
+    maxRecordsToStore: GENEROUS_MAX_RECORDS,
     live: true,
     dbClient: db1,
     repoRoot: REPO_ROOT,
@@ -1082,6 +1200,7 @@ test('runImport removes its temporary download directory (live mode) on both suc
   fs.copyFileSync(FIXTURE_OSM_PATH, path.join(tmp2, 'netherlands-latest.osm'));
   await assert.rejects(() =>
     runImport({
+      maxRecordsToStore: GENEROUS_MAX_RECORDS,
       live: true,
       dbClient: db2,
       repoRoot: REPO_ROOT,
@@ -1098,6 +1217,7 @@ test('runImport removes its temporary download directory (live mode) on both suc
 test('runImport (dry-run) never calls any dbClient insert/update method', async () => {
   const db = createFixtureDbClient();
   const result = await runImport({
+    maxRecordsToStore: GENEROUS_MAX_RECORDS,
     live: false,
     osmFilePath: FIXTURE_OSM_PATH,
     dbClient: db,
@@ -1134,6 +1254,7 @@ test('runImport (live: true, mutate: false — the new dry-run shape) performs a
   fs.copyFileSync(FIXTURE_OSM_PATH, downloadedPath);
 
   const result = await runImport({
+    maxRecordsToStore: GENEROUS_MAX_RECORDS,
     live: true,
     mutate: false,
     dbClient: db,
@@ -1161,6 +1282,7 @@ test('runImport (mutate: false) still performs the idempotency read but never an
   };
 
   await runImport({
+    maxRecordsToStore: GENEROUS_MAX_RECORDS,
     live: false,
     mutate: false,
     osmFilePath: FIXTURE_OSM_PATH,
@@ -1198,6 +1320,43 @@ test('assertDryRunConfirmation requires --dry-run AND an exactly-matching --conf
   });
 });
 
+// ─── assertMaxRecordsToStoreArg / assertValidMaxRecordsToStore (CLI + core
+// mandatory-limit gating) ───────────────────────────────────────────────
+
+test('assertMaxRecordsToStoreArg requires the flag and a positive integer value', () => {
+  assert.throws(
+    () => assertMaxRecordsToStoreArg([]),
+    (err) => err instanceof HaltError && err.reason === 'max-records-to-store-missing'
+  );
+  assert.throws(
+    () => assertMaxRecordsToStoreArg(['--dry-run', '--confirm-market=breda']),
+    (err) => err instanceof HaltError && err.reason === 'max-records-to-store-missing'
+  );
+
+  for (const badValue of ['0', '-1', 'ten', '3.5', '']) {
+    assert.throws(
+      () => assertMaxRecordsToStoreArg([`--max-records-to-store=${badValue}`]),
+      (err) => err instanceof HaltError && err.reason === 'max-records-to-store-invalid',
+      `expected --max-records-to-store=${badValue} to be rejected`
+    );
+  }
+
+  assert.equal(assertMaxRecordsToStoreArg(['--max-records-to-store=10']), 10);
+  assert.equal(assertMaxRecordsToStoreArg(['--live', '--confirm-market=breda', '--max-records-to-store=1']), 1);
+});
+
+test('assertValidMaxRecordsToStore accepts only positive integers', () => {
+  assert.doesNotThrow(() => assertValidMaxRecordsToStore(1));
+  assert.doesNotThrow(() => assertValidMaxRecordsToStore(10));
+  for (const badValue of [undefined, null, 0, -1, 3.5, '10', NaN]) {
+    assert.throws(
+      () => assertValidMaxRecordsToStore(badValue),
+      (err) => err instanceof HaltError && err.reason === 'invalid-max-records-to-store',
+      `expected ${JSON.stringify(badValue)} to be rejected`
+    );
+  }
+});
+
 // ─── buildDryRunImportOptions: the structural "dry-run always means
 // mutate: false" guarantee ─────────────────────────────────────────────
 
@@ -1206,17 +1365,18 @@ test('buildDryRunImportOptions always produces live:true, mutate:false — never
   const fakeDbClientB = createFixtureDbClient();
 
   for (const dbClient of [fakeDbClientA, fakeDbClientB, undefined, null]) {
-    const options = buildDryRunImportOptions({ dbClient, repoRoot: REPO_ROOT });
+    const options = buildDryRunImportOptions({ dbClient, repoRoot: REPO_ROOT, maxRecordsToStore: GENEROUS_MAX_RECORDS });
     assert.equal(options.live, true, 'dry-run must always request a real download');
     assert.equal(options.mutate, false, 'dry-run must never request a database write, regardless of dbClient');
     assert.equal(options.dbClient, dbClient, 'the given dbClient is passed through unchanged, not swapped');
     assert.equal(options.repoRoot, REPO_ROOT);
+    assert.equal(options.maxRecordsToStore, GENEROUS_MAX_RECORDS, 'the given maxRecordsToStore is passed through unchanged');
   }
 });
 
 test('the exact options buildDryRunImportOptions produces, combined with a write-forbidden dbClient, complete with no write attempt', async () => {
   const db = createWriteForbiddenDbClient(createFixtureDbClient());
-  const options = buildDryRunImportOptions({ dbClient: db, repoRoot: REPO_ROOT });
+  const options = buildDryRunImportOptions({ dbClient: db, repoRoot: REPO_ROOT, maxRecordsToStore: GENEROUS_MAX_RECORDS });
 
   const result = await runImport({
     ...options,
@@ -1253,16 +1413,36 @@ function runCliNoCredentials(args) {
   }
 }
 
-test('CLI: --live still refuses, even with a correctly-matching --confirm-market', () => {
+test('CLI: --live with --confirm-market but WITHOUT --max-records-to-store refuses before reaching a database client', () => {
   const result = runCliNoCredentials(['--live', '--confirm-market=breda']);
   assert.equal(result.status, 1);
-  assert.match(result.stderr, /Live mode is wired but not enabled/);
+  assert.match(result.stderr, /max-records-to-store-missing/);
+  assert.doesNotMatch(result.stderr, /live-db-client-not-configured/, 'must never get as far as constructing a db client without the mandatory limit');
 });
 
-test('CLI: --dry-run combined with --live still refuses (via the --live branch, checked first)', () => {
+test('CLI: --live --confirm-market=breda --max-records-to-store=<n> now actually starts (enabled 2026-09-05) — reaches the real live branch, not the old hard refusal', () => {
+  const result = runCliNoCredentials(['--live', '--confirm-market=breda', '--max-records-to-store=10']);
+  assert.equal(result.status, 1, 'fails fast here only because no Supabase credentials are configured in this test');
+  assert.doesNotMatch(result.stderr, /not enabled by this project yet/, 'the old hard-refusal message must be gone — --live is meant to actually start now, given the mandatory limit');
+  assert.match(
+    result.stderr,
+    /live-db-client-not-configured/,
+    'expected it to reach createLiveDbClient() and fail there — proving it got past all CLI gating (including the new mandatory limit) with no network/GDAL/database call attempted'
+  );
+});
+
+test('CLI: --live with an invalid --max-records-to-store (zero, negative, non-numeric) refuses before reaching a database client', () => {
+  for (const badValue of ['0', '-1', 'ten', '3.5']) {
+    const result = runCliNoCredentials(['--live', '--confirm-market=breda', `--max-records-to-store=${badValue}`]);
+    assert.equal(result.status, 1, `expected failure for --max-records-to-store=${badValue}`);
+    assert.match(result.stderr, /max-records-to-store-invalid/, `expected the invalid-value message for --max-records-to-store=${badValue}`);
+  }
+});
+
+test('CLI: --dry-run combined with --live still routes through the --live branch, checked first', () => {
   const result = runCliNoCredentials(['--dry-run', '--live', '--confirm-market=breda']);
   assert.equal(result.status, 1);
-  assert.match(result.stderr, /Live mode is wired but not enabled/, 'must refuse via the --live message, never proceed as a dry run');
+  assert.match(result.stderr, /max-records-to-store-missing/, 'must refuse via the --live branch\'s own gating, never proceed as a dry run');
 });
 
 test('CLI: --dry-run without an exact --confirm-market=breda refuses before anything else runs', () => {
@@ -1275,8 +1455,15 @@ test('CLI: --dry-run without an exact --confirm-market=breda refuses before anyt
   assert.match(wrongMarket.stderr, /dry-run-confirmation-missing/);
 });
 
-test('CLI: --dry-run --confirm-market=breda now actually starts (reaches the real dry-run branch, not the old hard refusal)', () => {
+test('CLI: --dry-run --confirm-market=breda WITHOUT --max-records-to-store refuses before reaching a database client', () => {
   const result = runCliNoCredentials(['--dry-run', '--confirm-market=breda']);
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /max-records-to-store-missing/);
+  assert.doesNotMatch(result.stderr, /live-db-client-not-configured/, 'must never get as far as constructing a db client without the mandatory limit');
+});
+
+test('CLI: --dry-run --confirm-market=breda --max-records-to-store=<n> now actually starts (reaches the real dry-run branch, not the old hard refusal)', () => {
+  const result = runCliNoCredentials(['--dry-run', '--confirm-market=breda', '--max-records-to-store=10']);
   assert.equal(result.status, 1, 'fails fast here only because no Supabase credentials are configured in this test');
   assert.doesNotMatch(
     result.stderr,
@@ -1295,6 +1482,7 @@ test('CLI: --dry-run --confirm-market=breda now actually starts (reaches the rea
 test('end-to-end: real GDAL extraction against the synthetic .osm fixture produces exactly the expected Breda candidates', { skip: DOCKER_REACHABLE ? false : DOCKER_SKIP_REASON }, async () => {
   const db = createFixtureDbClient();
   const result = await runImport({
+    maxRecordsToStore: GENEROUS_MAX_RECORDS,
     live: false,
     osmFilePath: FIXTURE_OSM_PATH,
     dbClient: db,
