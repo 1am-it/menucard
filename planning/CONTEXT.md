@@ -755,3 +755,26 @@ never-committed static-HTML preview of the same CSS classes — no live
 `planning/specs/tickets/market-05-normalization-deduplication.md`'s own
 "Implementation (2026-09-06, later still the same day) — presentation-only
 redesign to match the mockup" section.
+
+**Update (2026-09-06, later still the same day): terminology +
+information-hierarchy update, UI text and docs only.** `/internal/import-inbox`
+now reads: page title **"Imported Restaurant Review"** (was "Candidate
+triage"), summary section **"Review Overview"** (was "Triage overview"),
+browsing section **"Imported candidates"** (was "Candidates"). The
+long, duplicate explanatory banner under "Review Overview" is removed —
+one short top banner (raw data unchanged + append-only reviews/
+enrichments) is now the page's only general notice; no new chain/
+service-model/future-feature explanation was added anywhere in the main
+interface. Two new, documented-only (never built) future-phase terms:
+**Restaurant Profile Drafts** (the human-facing name for the still
+not-built `MARKET-05B` canonical-draft step) and **Restaurant
+Onboarding** (a separate, later, owner-facing phase that only follows an
+explicit claim/consent/active participation — unrelated to this
+internal-only page, never mentioned in its UI). No migration, database
+write, website fetch, new canonical table, onboarding feature, or
+API/database-value change (`approved_internal` and every other audit
+status/route/contract are byte-for-byte unchanged). Full detail:
+`planning/specs/tickets/market-05-normalization-deduplication.md`'s own
+"Implementation (2026-09-06, later still the same day) — terminology +
+information-hierarchy update" section and `docs/api/import-inbox-api.md`'s
+matching correction note.

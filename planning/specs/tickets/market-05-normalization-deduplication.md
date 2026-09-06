@@ -1432,6 +1432,98 @@ touching any consumer-facing page's styles).
   changed only markup/classNames around those exact same, untouched
   handlers and state variables, never their logic.
 
+### Implementation (2026-09-06, later still the same day) — terminology + information-hierarchy update
+
+**Terminology glossary (authoritative from this point forward).** Every
+"Triage overview"/"Candidate triage"/"Candidates" (as a section name)/
+"View in list"/"canonical draft step" reference in the two
+implementation sections above is now **superseded terminology** —
+recorded there as an accurate description of what was true *at the
+time each of those sections was written*, not retroactively rewritten,
+per this project's own documentation discipline (dated additions, never
+silent rewrites). The actual UI, and every reference to it from now on,
+uses:
+
+- **`Imported Restaurant Review`** — the page itself (was "Candidate
+  triage"). The route (`/internal/import-inbox`), every API contract,
+  and the `MARKET-05A`/"Data-inbox" internal ticket codename this
+  document uses throughout are all unaffected — this is the *displayed*
+  page title only.
+- **`Review Overview`** — the summary/filter/browse section (was
+  "Triage overview").
+- **`Imported candidates`** — the full browsing list/section, used
+  where it reads naturally as the list's own name (was "Candidates" as
+  a section heading; "View details" — itself already renamed from "View
+  in list" during the presentation redesign — and "Back to imported
+  candidates" — was "Back to candidates" — are the two row/detail-view
+  actions that reference it).
+- **`Restaurant Profile Drafts`** — the human-facing name for the
+  *future, not-yet-built* canonical-draft step this document has called
+  `MARKET-05B` throughout (see its own placeholder section immediately
+  below, still untouched). **Not built by this round** — this is a
+  naming/documentation change only, applied to
+  `TRIAGE_BUCKET_DESCRIPTIONS`' `approved_pending_canonical` text in
+  `app/internal/import-inbox/page.js` (the internal pure-function bucket
+  key itself, `'approved_pending_canonical'`, is unchanged — it is a
+  JS-internal identifier, never an API/database value, and renaming it
+  would have forced churn across already-passing tests for zero
+  user-facing benefit).
+- **`Restaurant Onboarding`** — a **separate, later, owner-facing**
+  future phase that only ever follows an explicit claim
+  (`PLATFORM-07` — `planning/specs/tickets/platform-07-owner-claim-identity-verification.md`,
+  whose own "Out of scope" section already names "new-restaurant
+  onboarding" as future scope), consent, or active participation by the
+  business itself. **Not built by this round, and not referenced
+  anywhere in `Imported Restaurant Review`'s own UI** — that page is
+  purely internal/staff-facing and has no relationship to an owner's
+  claim or onboarding journey. Documented here only so the two distinct
+  future phases are never conflated: `Restaurant Profile Drafts` is an
+  *internal* data-quality step (MARKET-05B, no owner involvement at
+  all); `Restaurant Onboarding` is an *owner-facing* step that only
+  starts after that owner has already claimed/consented/participated —
+  entirely different triggers, entirely different audiences.
+
+**Information hierarchy.** The long, duplicate explanatory banner that
+previously sat directly under the `Review Overview` heading (the
+"Read-only summary... Chain/franchise matching and service-model
+classification are separate, later features" paragraph) has been
+removed outright — it repeated what the page's one remaining top banner
+already says. That single top banner is now the page's only general
+notice, and now explicitly names both halves of the guarantee it
+covers: raw imported data is never changed, and `Save decision`/`Save
+enrichment` only ever add a new append-only audit row. No new
+explanation about chains, service models, or future features was added
+anywhere in the main interface — removing the duplicate banner deleted
+that sentence entirely rather than relocating it into the UI; the
+underlying guarantee (this feature does not attempt chain/franchise
+matching or service-model classification) remains documented here, in
+this ticket, where a reader looking for the full reasoning would already
+know to look.
+
+**`Approved (internal only)` vs. public publication.** Unchanged in
+substance, restated here for the glossary's sake: the label itself
+(mapped from the unchanged `approved_internal` database/API value) and
+the per-row helper text next to it
+(`TRIAGE_BUCKET_DESCRIPTIONS.approved_pending_canonical`, now reading
+"Internally approved — never public. Ready only for the future
+Restaurant Profile Drafts step, not yet built.") are the only places
+this distinction is made — deliberately not restated in the removed
+top-level banner, since it only applies to one specific status, not the
+page as a whole.
+
+**Scope discipline**: no migration, database write, website fetch, new
+canonical table, or onboarding feature was built or touched by this
+round — `Restaurant Profile Drafts` and `Restaurant Onboarding` remain
+exactly as not-built as `MARKET-05B` and `PLATFORM-07`'s own "new-
+restaurant onboarding" note already said they were.
+
+**Tests**: `src/lib/importInbox.test.js`'s structural safety-net test
+for the bottom close/back action updated for the new copy ("Back to
+imported candidates," was "Back to candidates") — the only test that
+asserted the literal text touched by this round; the full suite
+otherwise passes unmodified (still 154 tests, since no pure function,
+route, or API contract changed).
+
 ## MARKET-05B — Normalization & deduplication (placeholder, untouched)
 
 Original scope, unchanged by this document: matching and deduplicating

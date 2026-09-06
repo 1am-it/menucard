@@ -51,16 +51,23 @@ const REVIEW_STATUS_LABELS = {
   deferred: 'Deferred',
 }
 
-// Triage overview (added 2026-09-06) — one short, honest sentence per
+// Review Overview (added 2026-09-06) — one short, honest sentence per
 // bucket computeCandidateTriageBucket can return. Deliberately never
 // implies anything automatic: "approved_pending_canonical" only ever
-// means "ready for a future, not-yet-built canonical-draft step"
-// (MARKET-05B) — never that such a step is scheduled, running, or will
-// ever happen without a separate, later, deliberate decision.
+// means "ready for the future, not-yet-built Restaurant Profile Drafts
+// step" (MARKET-05B) — never that such a step is scheduled, running, or
+// will ever happen without a separate, later, deliberate decision. This
+// is also the short helper text that keeps "Approved (internal only)"
+// visibly distinct from public publication — never mentions Restaurant
+// Onboarding (the separate, later, owner-facing phase that only ever
+// follows an explicit claim/consent/active participation — see
+// planning/specs/tickets/market-05-normalization-deduplication.md's own
+// terminology note), since that phase has nothing to do with this
+// internal-only review step.
 const TRIAGE_BUCKET_DESCRIPTIONS = {
   needs_enrichment: 'Still needs enrichment before it can move forward.',
   deferred: 'Deliberately postponed by a reviewer.',
-  approved_pending_canonical: 'Internally approved — ready only for a future, not-yet-built canonical draft step.',
+  approved_pending_canonical: 'Internally approved — never public. Ready only for the future Restaurant Profile Drafts step, not yet built.',
 }
 
 const REJECTION_REASON_LABELS = {
@@ -268,7 +275,7 @@ export default function ImportInboxPage() {
 
   // Triage overview (added 2026-09-06) — a read-only, always-full-picture
   // summary of every candidate's *effective* review status, entirely
-  // independent from the "Candidates" section's own browsing filters
+  // independent from the "Imported candidates" section's own browsing filters
   // below (category/name/duplicate/quality/reviewStatus) — those narrow
   // what a reviewer is currently looking at; this always reflects the
   // true counts for the selected run (or every run, if none is
@@ -757,7 +764,7 @@ export default function ImportInboxPage() {
     <div className="di-page">
       <main className="di-main">
       <div className="di-topbar">
-        <h1 className="di-title">Candidate triage</h1>
+        <h1 className="di-title">Imported Restaurant Review</h1>
         <button onClick={signOut} className="di-signout">
           Sign out
         </button>
@@ -768,8 +775,8 @@ export default function ImportInboxPage() {
           <IconInfo />
         </span>
         <span>
-          Everything here is read-only history plus two append-only actions — <strong>Save decision</strong> and{' '}
-          <strong>Save enrichment</strong> — each adding a new audit row, never editing or deleting one.
+          Raw imported data is never changed. <strong>Save decision</strong> and <strong>Save enrichment</strong> are
+          the only two actions here, and each only ever adds a new append-only audit row — never an edit or a delete.
         </span>
       </div>
 
@@ -832,19 +839,7 @@ export default function ImportInboxPage() {
 
       {runs.length > 0 && (
         <>
-          <h2 className="di-section-title">Triage overview</h2>
-
-          <div className="di-banner di-banner-neutral">
-            <span className="di-banner-icon">
-              <IconInfo />
-            </span>
-            <span>
-              Read-only summary for {runIdFilter ? 'the selected run' : 'every run'}, independent from the "Candidates"
-              filters below. "View details" only opens that candidate's existing, unchanged detail view further down —
-              nothing here ever writes anything. Chain/franchise matching and service-model classification are separate,
-              later features, not part of this.
-            </span>
-          </div>
+          <h2 className="di-section-title">Review Overview</h2>
 
           {triageError && (
             <div className="di-banner di-banner-danger">
@@ -957,7 +952,7 @@ export default function ImportInboxPage() {
                   searchTerm: triageSearchTerm,
                 })
                 if (triageFiltered.length === 0) {
-                  return <div className="di-empty" style={{ marginBottom: 28 }}>No candidates match the current triage filters.</div>
+                  return <div className="di-empty" style={{ marginBottom: 28 }}>No imported candidates match the current filters.</div>
                 }
                 return (
                   <div className="di-rows" style={{ marginBottom: 28 }}>
@@ -1021,7 +1016,7 @@ export default function ImportInboxPage() {
 
       {runs.length > 0 && (
         <>
-          <h2 className="di-section-title">Candidates</h2>
+          <h2 className="di-section-title">Imported candidates</h2>
 
           <div className="di-filterbar">
             <div className="di-filter-group di-search-wrap">
@@ -1115,12 +1110,12 @@ export default function ImportInboxPage() {
           {candidatesLoading && <p style={{ color: 'var(--text-muted)' }}>Loading…</p>}
 
           {!candidatesLoading && candidateState === 'run-has-no-candidates' && !candidatesError && (
-            <p style={{ color: 'var(--text-muted)' }}>This run produced no stored candidates.</p>
+            <p style={{ color: 'var(--text-muted)' }}>This run produced no imported candidates.</p>
           )}
 
           {!candidatesLoading && candidateState === 'no-filter-matches' && !candidatesError && (
             <p style={{ color: 'var(--text-muted)' }}>
-              No candidates match the current filters ({totalBeforeFilters} total before filtering).
+              No imported candidates match the current filters ({totalBeforeFilters} total before filtering).
             </p>
           )}
 
@@ -1475,7 +1470,7 @@ export default function ImportInboxPage() {
                         </div>
 
                         <button onClick={() => toggleExpand(c.id)} className="di-link-btn" style={{ marginTop: 16 }}>
-                          Back to candidates
+                          Back to imported candidates
                         </button>
                       </div>
                     )}

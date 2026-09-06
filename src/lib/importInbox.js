@@ -836,8 +836,11 @@ function hasVerifiedWebsiteForSuggestions(candidate) {
 }
 
 // ─── Triage overview (added 2026-09-06) — read-only summary, filter, and
-// search logic for the Data-inbox's new top-of-page "Triage overview"
-// section (app/internal/import-inbox/page.js). Everything below is pure
+// search logic for the Data-inbox's "Review Overview" section (renamed
+// 2026-09-06, later still, for terminology consistency — see
+// planning/specs/tickets/market-05-normalization-deduplication.md's own
+// glossary note; was "Triage overview")
+// (app/internal/import-inbox/page.js). Everything below is pure
 // and operates only on already-loaded candidate objects (each one
 // already carrying `review_status`/`deferred_reason` from
 // enrichAndFilterCandidates above) — no new query, no write, no
@@ -878,9 +881,12 @@ function computeReviewStatusCounts(candidates) {
  * requirements a candidate currently falls into — `'needs_enrichment'`
  * (still needs enrichment), `'deferred'` (deliberately postponed, with
  * a structured reason where one was recorded), or
- * `'approved_pending_canonical'` (internally approved; ready only for a
- * *future*, not-yet-built canonical-draft step — MARKET-05B — never a
- * claim that such a step is scheduled, running, or automatic). `'new'`
+ * `'approved_pending_canonical'` (internally approved; ready only for
+ * the *future*, not-yet-built **Restaurant Profile Drafts** step —
+ * MARKET-05B, still just a placeholder — never a claim that such a step
+ * is scheduled, running, or automatic; the identifier string itself
+ * stays `'approved_pending_canonical'`, unchanged, since it is a
+ * JS-internal key, never an API/database value). `'new'`
  * (not yet reviewed at all) and `'rejected'` (out of the pipeline) are
  * both real statuses but deliberately fall outside these three named
  * buckets — returned as `null`, never force-fit into one of the three.

@@ -1559,11 +1559,11 @@ test('structural safety net: toggleExpand (closing a candidate\'s detail view) n
   assert.match(body, /if \(next && !reviewsByCandidateId\[next\] && session\)/, 'the history reads must remain conditional on actually expanding (next truthy)');
 });
 
-test('structural safety net: the expanded detail view offers "Back to candidates"/"Hide details" both at the top and the bottom', () => {
+test('structural safety net: the expanded detail view offers "Back to imported candidates"/"Hide details" both at the top and the bottom', () => {
   const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
   const toggleCallCount = (source.match(/onClick=\{\(\) => toggleExpand\(c\.id\)\}/g) || []).length;
   assert.equal(toggleCallCount, 2, 'expected exactly two toggleExpand(c.id) call sites: one above the detail view, one below it');
-  assert.match(source, /Back to candidates/);
+  assert.match(source, /Back to imported candidates/);
   assert.match(source, /Hide details/);
 });
 

@@ -606,6 +606,24 @@ no automatic classification of any kind:
   not-yet-built features; this only ever reflects the *human-recorded*
   `review_status`/`deferred_reason` exactly as decided.
 
+> **Correction (2026-09-06, later still) — terminology update, UI text
+> only.** The page/section/button names above are now stale: the page
+> title is "Imported Restaurant Review" (was "Candidate triage"), this
+> section is titled "Review Overview" (was "Triage overview"), the
+> browsing section below it is titled "Imported candidates" (was
+> "Candidates"), and its row action reads "View details" (was "View in
+> list"). The *not-yet-built* future step named above is now called
+> **Restaurant Profile Drafts** — the human-facing name for the same
+> `MARKET-05B` canonical-draft step, still not built. None of this
+> changes the API contract, the query parameters, the pure functions
+> named above, or `review_status`/`deferred_reason`'s own values
+> (`approved_internal` included) — see
+> `planning/specs/tickets/market-05-normalization-deduplication.md`'s
+> own terminology note for the full glossary, including **Restaurant
+> Onboarding** — a separate, later, owner-facing phase (after an
+> explicit claim, consent, or active participation) that this internal
+> review page never mentions and has no relationship to.
+
 ## What has been verified
 
 Verified against the real Supabase project (2026-09-05), using the
