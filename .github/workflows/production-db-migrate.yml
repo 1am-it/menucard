@@ -51,6 +51,17 @@ on:
           before any secret is read or any connection is made.
         required: true
         type: string
+      expected_versions:
+        description: >-
+          The exact migration version(s) this run is expected to apply —
+          the part of the filename before the first underscore (e.g.
+          "0010"), comma-separated if more than one. Must match this run's
+          own dry-run output exactly, or the workflow stops before the
+          real push. Use the same value you used for
+          production-db-preflight.yml's "Ready for migration" run. Type
+          "none" (not blank) if you expect nothing to be pending.
+        required: true
+        type: string
 
 jobs:
   migrate:
@@ -129,31 +140,75 @@ jobs:
         run: |
           supabase migration list --linked | tee before-migration-list.txt
 
+      # Read-only. Confirms exactly which migration version(s) `db push`
+      # would apply, and aborts BEFORE the real push if that set doesn't
+      # match `expected_versions` exactly — e.g. because a migration was
+      # applied out of band since the preflight ran, an unexpected file
+      # is pending, or the wrong `expected_versions` value was typed.
+      # Output line format ("Would push migration <file>...") confirmed
+      # against a real `--dry-run` run reported in a Supabase CLI GitHub
+      # issue (supabase/cli#776) — the official reference page documents
+      # the flag's purpose but does not show example stdout.
+      - name: Dry-run — confirm exactly which migration(s) would be applied
+        id: dry_run
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          # Every `mapfile < <(... | sort -u)` below ends in `|| true`:
+          # under `set -e -o pipefail`, a `grep` that matches zero lines
+          # (a legitimate outcome here — e.g. "nothing pending") exits
+          # non-zero and would otherwise abort this whole step.
+          raw="${{ github.event.inputs.expected_versions }}"
+          if [ "$(printf '%s' "$raw" | tr '[:upper:]' '[:lower:]')" = "none" ]; then
+            raw=""
+          fi
+          mapfile -t expected_versions < <(printf '%s' "$raw" | tr ',' '\n' | tr -d '[:space:]' | grep -v '^$' | sort -u || true)
+
+          supabase db push --linked --dry-run | tee dry-run-output.txt
+
+          mapfile -t would_push_files < <(grep -oE 'Would push migration [^[:space:]]+\.\.\.' dry-run-output.txt | sed -E 's/^Would push migration (.+)\.\.\.$/\1/' || true)
+          would_push_versions=()
+          for f in "${would_push_files[@]:-}"; do
+            [ -n "$f" ] && would_push_versions+=("$(basename "$f" | cut -d'_' -f1)")
+          done
+          mapfile -t would_push_versions < <(printf '%s\n' "${would_push_versions[@]:-}" | grep -v '^$' | sort -u || true)
+
+          echo "Dry-run says these version(s) would be applied: ${would_push_versions[*]:-(none)}"
+          echo "This run declared expected version(s):          ${expected_versions[*]:-(none)}"
+
+          if [ "$(printf '%s\n' "${would_push_versions[@]:-}")" != "$(printf '%s\n' "${expected_versions[@]:-}")" ]; then
+            echo "::error::Dry-run would apply a different migration version set than declared in 'expected_versions'. Would apply: ${would_push_versions[*]:-(none)}. Expected: ${expected_versions[*]:-(none)}. Aborting before the real push — re-run with the correct 'expected_versions' input, or investigate why an unexpected migration is pending (see docs/guides/production-migration-pipeline.md) before dispatching again."
+            exit 1
+          fi
+
+          echo "Dry-run matches the declared release exactly. Proceeding to the real push."
+
       - name: Apply pending migrations
         id: migrate
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
+          set -euo pipefail
           # `supabase db push` itself stops at the first migration that
           # fails to apply — it does not silently skip a broken file and
           # continue with the rest. A non-zero exit here fails this step,
           # and every step after it is skipped (no "unexpected migration
           # status" is ever reported as if it were success).
           #
-          # `yes |` and `set -o pipefail` are both load-bearing, not
-          # stylistic: `supabase db push` is documented (Supabase GitHub
-          # Discussion #26366) to sometimes wait on an interactive
-          # confirmation prompt that a CI runner's non-interactive stdin
-          # never answers, in which case the command can return *success*
-          # having silently applied nothing. Piping `yes` answers that
-          # prompt every time it appears (a no-op on CLI versions that
-          # don't prompt at all); GitHub Actions' default `bash -e` does
-          # NOT set `pipefail`, so without it a real `db push` failure
-          # would be masked by `yes`'s own always-zero exit status and
-          # this step would report success regardless.
-          set -o pipefail
-          yes | supabase db push --linked
+          # `--yes` is the Supabase CLI's own documented global flag
+          # ("answer yes to all prompts"; placed before the subcommand)
+          # for exactly the non-interactive-confirmation problem
+          # documented in Supabase GitHub Discussion #26366 (`db push`
+          # can otherwise wait on a prompt a CI shell never answers, and
+          # report success having applied nothing). This replaces the
+          # previous `yes | supabase db push` workaround with the CLI's
+          # own supported mechanism — no unbounded stdin pipe, and no
+          # need for `set -o pipefail` to unmask a hidden failure behind
+          # `yes`'s own always-zero exit status.
+          supabase --yes db push --linked
 
       - name: Show the resulting migration state (verifiable result)
         if: always()
@@ -168,6 +223,7 @@ jobs:
             echo "## Production migration run"
             echo ""
             echo "- Triggered by: \`${{ github.actor }}\`"
+            echo "- Declared expected version(s): \`${{ github.event.inputs.expected_versions }}\`"
             echo "- Approved via the \`production-migrations\` environment's required reviewer(s)"
             echo "- Run: [$GITHUB_RUN_ID]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID)"
             echo "- Outcome: \`${{ job.status }}\`"

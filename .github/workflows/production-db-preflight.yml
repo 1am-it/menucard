@@ -21,11 +21,28 @@ name: Production database preflight (read-only)
 # Safe order of production actions (see docs/guides/production-migration-pipeline.md):
 #   1. Run THIS workflow (confirm: "verify"). Read its summary.
 #   2. Only if it reports "Ready for migration": dispatch
-#      production-db-migrate.yml (confirm: "migrate") for the specific
-#      pending migration(s) it named.
+#      production-db-migrate.yml (confirm: "migrate", same
+#      expected_versions value) for the specific pending migration(s) it
+#      named.
 # The two confirmation phrases ("verify" vs "migrate") are deliberately
 # different strings so a copy-pasted confirmation can never accidentally
 # trigger the wrong one of the two workflows.
+#
+# "Ready for migration" means more than "the commands didn't error": this
+# workflow requires local and live migration history to be in EXACT sync
+# with what `expected_versions` explicitly declares as pending — never
+# "whatever happens to be pending." A history that has ANY other
+# divergence (a version applied live with no local file, or a pending
+# version not named in `expected_versions`) reports "Not ready" and names
+# a required, separate, explicitly-approved history reconciliation
+# instead — it never runs `supabase migration repair` or any SQL itself.
+# This matters for this repository specifically: migrations `0001`-`0009`
+# were applied to production by hand via the Supabase Dashboard's SQL
+# Editor, not through this CLI pipeline, so the live history table may
+# not already record them — the first real run of this workflow is
+# expected to surface exactly that gap. See
+# docs/guides/production-migration-pipeline.md's "History reconciliation"
+# section.
 
 on:
   workflow_dispatch:
@@ -35,6 +52,16 @@ on:
           Type "verify" to confirm you intend to run a READ-ONLY preflight
           check against the PRODUCTION Supabase project. Any other value
           aborts before any secret is read or any connection is made.
+        required: true
+        type: string
+      expected_versions:
+        description: >-
+          The exact migration version(s) this check should find pending —
+          the part of the filename before the first underscore (e.g.
+          "0010"), comma-separated if more than one. "Ready for
+          migration" is only reported if the live history's pending set
+          matches this exactly. Type "none" (not blank) if you expect
+          local and live history to already match with nothing pending.
         required: true
         type: string
 
@@ -88,6 +115,24 @@ jobs:
             exit 1
           fi
 
+      # Ground truth for the integrity check inside the history-comparison
+      # step below — computed directly from the files on disk, never from
+      # anything the Supabase CLI prints, so a change in the CLI's output
+      # format can be detected rather than silently trusted.
+      - name: Determine local migration versions from supabase/migrations/
+        id: local_versions
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          files=(supabase/migrations/*.sql)
+          versions=()
+          for f in "${files[@]}"; do
+            versions+=("$(basename "$f" | cut -d'_' -f1)")
+          done
+          mapfile -t sorted_versions < <(printf '%s\n' "${versions[@]:-}" | grep -v '^$' | sort -u || true)
+          printf '%s\n' "${sorted_versions[@]:-}" > local-versions.txt
+          echo "Local migration versions found: ${sorted_versions[*]:-(none)}"
+
       # v3 is the version currently documented in the action's own
       # README as of this workflow's last review (2026-09-06) — kept in
       # sync with production-db-migrate.yml's own setup-cli step.
@@ -130,19 +175,118 @@ jobs:
       # live test of whether that mismatch actually breaks anything —
       # local Docker-based validation cannot reproduce it, since it
       # requires a real linked project's migration-history table.
-      - name: Compare local migration files against the live migration history (read-only)
-        id: migration_list
+      #
+      # "Ready for migration" requires EXACT sync with `expected_versions`
+      # — not just "the command ran". Three ways this can fail, each
+      # reported as "Not ready" with a specific reason, never guessed
+      # past:
+      #   1. `supabase migration list` itself errors (connection/auth/CLI
+      #      problem).
+      #   2. Its LOCAL column doesn't match the real files on disk — the
+      #      parsing below (or the CLI's output shape) can't be trusted.
+      #   3. The live-only-pending set doesn't exactly equal
+      #      `expected_versions` — either something unexpected is
+      #      pending, something expected is missing, or (most likely for
+      #      this repository) a REMOTE-only version exists with no local
+      #      file, which is exactly what happens when a migration was
+      #      applied by hand outside the CLI. None of these are fixed
+      #      here — this workflow never runs `supabase migration repair`
+      #      or any SQL; a mismatch always means a separate, explicitly
+      #      approved history reconciliation is needed first.
+      - name: Compare local and live migration history — require exact expected sync (read-only)
+        id: history_check
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: |
-          if supabase migration list --linked | tee migration-list.txt; then
-            echo "verdict=ok" >> "$GITHUB_OUTPUT"
-          else
-            echo "::error::'supabase migration list' failed — this is the check that compares supabase/migrations/*.sql against the live history table. A failure here (rather than a clean LOCAL/REMOTE table) most likely means either a connection problem or the migration-filename-format risk noted above. Do not proceed to production-db-migrate.yml until this is understood."
-            echo "verdict=blocked" >> "$GITHUB_OUTPUT"
-            echo "reason=supabase migration list failed - see job log" >> "$GITHUB_OUTPUT"
+          # `-e` (errexit) is deliberately NOT set in this step: every
+          # command that can legitimately fail is already checked
+          # explicitly below and exits with its own specific verdict/
+          # reason, and `-e` would risk an unannounced abort on some
+          # intermediate command (e.g. a zero-match comm/printf) instead
+          # of one of those specific, explained exits.
+          set -uo pipefail
+
+          raw="${{ github.event.inputs.expected_versions }}"
+          if [ "$(printf '%s' "$raw" | tr '[:upper:]' '[:lower:]')" = "none" ]; then
+            raw=""
+          fi
+          mapfile -t expected_versions < <(printf '%s' "$raw" | tr ',' '\n' | tr -d '[:space:]' | grep -v '^$' | sort -u || true)
+
+          if ! supabase migration list --linked | tee migration-list.txt; then
+            echo "::error::'supabase migration list' exited non-zero — cannot determine migration history."
+            {
+              echo "verdict=not_ready"
+              echo "reason=supabase migration list failed - see job log"
+            } >> "$GITHUB_OUTPUT"
             exit 1
           fi
+
+          if ! grep -qi 'LOCAL' migration-list.txt || ! grep -qi 'REMOTE' migration-list.txt; then
+            echo "::error::Could not find the expected LOCAL/REMOTE header in 'supabase migration list' output — its format may not match what this workflow parses. Treating history as NOT reliably parseable, never as 'nothing pending'."
+            {
+              echo "verdict=not_ready"
+              echo "reason=unexpected migration list output format"
+            } >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+
+          # Column separator may render as either an ASCII "|" or a
+          # Unicode box-drawing "│" depending on CLI version/TTY
+          # detection — not conclusively documented for a non-interactive
+          # CI shell. Normalize to "|" with `sed` FIRST, then split with a
+          # single-character `awk -F'|'`: tested locally (2026-09-06) and
+          # confirmed that matching "│" directly inside an awk bracket
+          # character class (`-F'[|│]'`) silently mis-splits under some
+          # locale/gawk combinations — this two-step form does not.
+          mapfile -t parsed_local < <(sed 's/│/|/g' migration-list.txt | awk -F'|' 'NF>=2 { v=$1; gsub(/^[ \t]+|[ \t]+$/, "", v); if (v ~ /^[0-9]+$/) print v }' | sort -u || true)
+          mapfile -t parsed_remote < <(sed 's/│/|/g' migration-list.txt | awk -F'|' 'NF>=2 { v=$2; gsub(/^[ \t]+|[ \t]+$/, "", v); if (v ~ /^[0-9]+$/) print v }' | sort -u || true)
+          mapfile -t known_local < local-versions.txt
+
+          if [ "$(printf '%s\n' "${parsed_local[@]:-}")" != "$(printf '%s\n' "${known_local[@]:-}")" ]; then
+            echo "::error::The LOCAL column parsed from 'supabase migration list' does not match the actual files in supabase/migrations/. Either this workflow's parsing is wrong or the CLI's output format has changed — never assume this means history is fine."
+            echo "Parsed from CLI output: ${parsed_local[*]:-(none)}"
+            echo "Actual files on disk:   ${known_local[*]:-(none)}"
+            {
+              echo "verdict=not_ready"
+              echo "reason=migration list output did not parse as expected"
+            } >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+
+          # remote-only: live history references a version with no local
+          # file at all — always blocks, regardless of expected_versions.
+          mapfile -t remote_only < <(comm -23 <(printf '%s\n' "${parsed_remote[@]:-}") <(printf '%s\n' "${parsed_local[@]:-}") || true)
+          # local-only: a local file not yet recorded as applied live —
+          # the actual "pending" set, compared against expected_versions.
+          mapfile -t local_only < <(comm -23 <(printf '%s\n' "${parsed_local[@]:-}") <(printf '%s\n' "${parsed_remote[@]:-}") || true)
+
+          echo "Pending (local-only):      ${local_only[*]:-(none)}"
+          echo "Remote-only (no local file): ${remote_only[*]:-(none)}"
+          echo "Declared expected pending: ${expected_versions[*]:-(none)}"
+
+          if [ "${#remote_only[@]}" -gt 0 ]; then
+            echo "::error::Live migration history references version(s) with no matching local file: ${remote_only[*]}. This is exactly the divergence expected if a migration was applied to production by hand (e.g. via the Dashboard SQL Editor) outside this CLI pipeline. A separate, explicitly-approved history reconciliation is required before any push — see docs/guides/production-migration-pipeline.md's 'History reconciliation' section. This workflow never runs 'supabase migration repair' automatically; that remains a manual, reviewed action."
+            {
+              echo "verdict=not_ready"
+              echo "reason=remote-only version(s) with no local file: ${remote_only[*]}"
+            } >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+
+          if [ "$(printf '%s\n' "${local_only[@]:-}" | sort -u)" != "$(printf '%s\n' "${expected_versions[@]:-}" | sort -u)" ]; then
+            echo "::error::Pending (local-only) migration version(s) do not exactly match 'expected_versions'. Pending: ${local_only[*]:-(none)}. Expected: ${expected_versions[*]:-(none)}. If this is because earlier migrations were applied to production by hand outside the CLI, a separate, explicitly-approved history reconciliation is needed first — see docs/guides/production-migration-pipeline.md. This workflow never runs 'supabase migration repair' automatically."
+            {
+              echo "verdict=not_ready"
+              echo "reason=pending set (${local_only[*]:-none}) does not equal expected set (${expected_versions[*]:-none})"
+            } >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+
+          echo "History is exactly in sync with what was declared as expected."
+          {
+            echo "verdict=ready"
+            echo "reason=local and live history match expected_versions exactly"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Write a run summary — the actual "ready or not" verdict
         if: always()
@@ -151,20 +295,23 @@ jobs:
             echo "## Production migration preflight (read-only)"
             echo ""
             echo "- Triggered by: \`${{ github.actor }}\`"
+            echo "- Declared expected pending version(s): \`${{ github.event.inputs.expected_versions }}\`"
             echo "- Approved via the \`production-migrations\` environment's required reviewer(s)"
             echo "- Run: [$GITHUB_RUN_ID]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID)"
             echo ""
-            if [ "${{ job.status }}" = "success" ]; then
+            if [ "${{ steps.history_check.outputs.verdict }}" = "ready" ]; then
               echo "### ✅ Ready for migration"
               echo ""
-              echo "Secrets present, CLI accepted the configuration, authentication and project linking succeeded, and the local/live migration history was compared successfully. Rows marked only-LOCAL below are pending — they are what \`production-db-migrate.yml\` (confirm: \"migrate\") would apply next."
+              echo "Secrets present, CLI accepted the configuration, authentication and project linking succeeded, and local/live migration history matches \`expected_versions\` exactly. \`production-db-migrate.yml\` (confirm: \"migrate\", same \`expected_versions\` value) may now be dispatched."
             else
-              echo "### ❌ Not ready — see the failed step above for the specific reason"
+              echo "### ❌ Not ready for migration"
               echo ""
-              echo "Do not dispatch \`production-db-migrate.yml\` until the failing check above is understood and resolved."
+              echo "Reason: \`${{ steps.history_check.outputs.reason || 'an earlier step failed before the history check ran - see its own step log above' }}\`"
+              echo ""
+              echo "If this is because earlier migrations were applied to production by hand (Dashboard SQL Editor) rather than via this CLI pipeline, the fix is a separate, explicitly-approved history reconciliation — never an automatic one. See docs/guides/production-migration-pipeline.md's 'History reconciliation' section. This workflow never runs \`supabase migration repair\` and never applies SQL."
             fi
             echo ""
-            echo "### Local vs. live migration history"
+            echo "### Local vs. live migration history (raw CLI output)"
             echo '```'
             cat migration-list.txt 2>/dev/null || echo "(not captured — job failed before this step; see the step logs above)"
             echo '```'

@@ -170,6 +170,61 @@ None of this addendum's changes touch `supabase/migrations/0010_market05c_restau
 or any MARKET-05C application code, consistent with the original
 decision's own "What this decision does not do."
 
+## Addendum 2 (2026-09-06) — non-interactive flag correction, exact history-sync gate, dry-run gate
+
+This is a second dated addition, the same day as Addendum 1 above, from a
+follow-up hardening pass before this pipeline's first real dispatch. It
+does not rewrite Addendum 1 — see the corrections inline in
+`docs/guides/production-migration-pipeline.md`'s "Residual risks" for the
+full detail. Three changes:
+
+1. **Correction, not a new finding**: Addendum 1's `yes | supabase db
+   push` fix for the CI prompt bug (Discussion #26366) is replaced by the
+   Supabase CLI's own documented `--yes` global flag (`supabase --yes db
+   push --linked`) — "answer yes to all prompts," placed before the
+   subcommand. Addendum 1's search had only checked `db push`'s own flag
+   table, which doesn't list `--yes` because it's documented separately
+   as a *global* flag; this was found by checking the CLI's global-flags
+   reference directly. No pipe, no `set -o pipefail` needed.
+2. **`production-db-preflight.yml` now requires EXACT history sync, not
+   just a successful command.** Both this workflow and
+   `production-db-migrate.yml` take a new `expected_versions` input (the
+   version(s), e.g. `0010`, this run should find/apply as pending, or
+   `none`). The preflight reports "Ready for migration" only when local
+   vs. live history matches that declaration exactly; any other outcome —
+   including the specific, expected case of `0001`-`0009` appearing
+   pending because they were applied by hand outside the CLI — reports
+   "Not ready" and points at a required, separate, explicitly-approved
+   history reconciliation (`supabase migration repair`, run manually,
+   never by either workflow). See
+   `docs/guides/production-migration-pipeline.md`'s new "History
+   reconciliation" section. **This directly gates MARKET-05C**: `0010`
+   cannot be released as a migration-only step until that reconciliation
+   is done and a preflight run reports ready for it specifically.
+3. **`production-db-migrate.yml` now runs a read-only `db push --dry-run`
+   before the real push**, parses which version(s) it says it would
+   apply, and aborts before any write if that set doesn't exactly match
+   `expected_versions` — an independent, second confirmation of the same
+   "expliciet bedoelde release" check the preflight already performed,
+   now immediately before the point of no return.
+
+Local testing this round (synthetic fixtures matching the CLI's
+documented `migration list`/`db push --dry-run` output shapes, run
+through the exact parsing logic used in both workflows) found and fixed
+one real bug: matching the table's column separator via an `awk` bracket
+character class (to accept either `|` or the CLI's documented Unicode
+`│`) silently mis-parsed under this environment's locale even with the
+same `gawk` version `ubuntu-latest` ships. Fixed by normalizing with
+`sed` before a plain single-character `awk -F'|'` split, reverified
+against the same fixtures. This was never tested against the real
+Supabase CLI's actual output — see the guide's "Residual risks" for what
+remains unverified.
+
+None of this addendum's changes touch
+`supabase/migrations/0010_market05c_restaurant_profile_drafts.sql`,
+migration `0010`, or any MARKET-05C application code — same as Addendum 1
+and the original decision's "What this decision does not do."
+
 ## Rejected alternatives
 
 - **A custom migration-runner script with its own tracking table**

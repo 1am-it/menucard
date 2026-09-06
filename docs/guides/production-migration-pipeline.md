@@ -34,22 +34,107 @@ needed, without ever risking a write.
 **Always run the preflight before the migration workflow — never dispatch
 `production-db-migrate.yml` cold.**
 
-1. Dispatch `production-db-preflight.yml` (confirm: `verify`). Read its
+Both workflows take the same `expected_versions` input: the exact
+migration version(s) (the filename prefix before the first underscore,
+e.g. `0010`) this run is expected to find/apply as pending — comma
+separated, or the literal word `none` if nothing should be pending. This
+is not a formality: **"Ready for migration" is only ever reported when
+local and live migration history match `expected_versions` exactly** —
+not "whatever happens to be pending." Any other divergence (something
+pending that wasn't named, something named that isn't pending, or a live
+history entry with no matching local file at all) is reported as **"Not
+ready"**, with the specific reason, and points at a required, separate
+history reconciliation (see "History reconciliation" below) — it is never
+silently treated as "close enough."
+
+1. Dispatch `production-db-preflight.yml` (confirm: `verify`,
+   `expected_versions`: the version(s) you intend to release). Read its
    job summary.
 2. Only if that summary says **"✅ Ready for migration"**: dispatch
-   `production-db-migrate.yml` (confirm: `migrate`) for the specific
-   pending migration(s) the preflight's LOCAL/REMOTE comparison named.
+   `production-db-migrate.yml` (confirm: `migrate`, the same
+   `expected_versions` value). That workflow runs its own read-only
+   `db push --dry-run` first and independently re-confirms the same exact
+   match before ever running a real push — see "How approval works" below.
 3. If the preflight instead says **"❌ Not ready"**, resolve whatever it
-   named (missing secret, failed link, failed history comparison) and
-   re-run the preflight — it is read-only and safe to run as many times
-   as needed — before ever attempting step 2.
+   named — a missing secret, a failed link, or (see "History
+   reconciliation" below) a history mismatch — and re-run the preflight
+   (it is read-only and safe to run as many times as needed) before ever
+   attempting step 2.
 
 As of this writing, the next real migration release under this rule is
 `supabase/migrations/0010_market05c_restaurant_profile_drafts.sql` —
 already written and locally validated (see `validate-migrations.yml`),
 but not yet live. This document and the preflight workflow do not apply
 it; that remains a separate, later, explicitly-approved dispatch of
-`production-db-migrate.yml`, only after a preflight run reports ready.
+`production-db-migrate.yml`, only after a preflight run reports ready
+with `expected_versions: 0010`.
+
+**MARKET-05C may only reach `main` as a migration-only release
+(`supabase/migrations/0010_market05c_restaurant_profile_drafts.sql`
+alone) after the `0001`-`0009` history reconciliation below is resolved
+— never before, and never bundled with MARKET-05C's application code.**
+Concretely, in order: (1) reconcile `0001`-`0009` (separate,
+explicitly-approved action — see "History reconciliation"); (2) merge
+`0010` to `main` on its own, get a preflight run reporting ready with
+`expected_versions: 0010`, then dispatch `production-db-migrate.yml` for
+it — this is the "migration-only release"; (3) only once `0010` is
+confirmed live (per "How to verify the outcome") does MARKET-05C's
+application code (the routes/pages reading and writing the tables `0010`
+creates) merge, as a separate, later release — per "Release sequencing"
+below. Skipping straight to (2) without (1) is exactly what
+`production-db-preflight.yml` is built to catch and refuse.
+
+## History reconciliation
+
+Migrations `0001`-`0009` were applied to production by hand, via the
+Supabase Dashboard's SQL Editor — never through `supabase db push`. The
+Supabase CLI's own migration-history table
+(`supabase_migrations.schema_migrations`) is only ever written to by the
+CLI itself (`db push`, or `migration repair`); a manual SQL Editor run
+does not touch it. This means the **first-ever** run of
+`production-db-preflight.yml` against this project should be expected to
+show `0001`-`0009` as pending (LOCAL-only, no matching REMOTE row) even
+though they are, in reality, already live — a false "not applied" signal
+caused entirely by how they were originally applied, not by anything
+actually wrong with the database.
+
+**This is not something either workflow fixes automatically, and neither
+ever will.** `production-db-preflight.yml` requires an exact match
+against the version(s) declared in `expected_versions`; it does not
+special-case "these particular versions are probably fine." A likely
+first-ever preflight result:
+
+- Declare `expected_versions: 0010` (the actual next release).
+- Get back **"❌ Not ready"**, reason: pending set `(0001 0002 ... 0009
+  0010)` does not equal expected set `(0010)`.
+
+The fix is a **separate, explicitly-approved reconciliation**, done by
+hand, before `0010` is ever pushed:
+
+1. Confirm via the Supabase Dashboard (Table Editor / SQL Editor) that
+   `0001`-`0009`'s tables/functions genuinely already exist in
+   production — i.e. that this is the expected "applied by hand, not
+   CLI-tracked" gap, not a real missing migration.
+2. Once confirmed, a person with the `SUPABASE_ACCESS_TOKEN` runs
+   `supabase migration repair --linked --status applied <version> ...`
+   **by hand, locally or in a one-off authorized session — never
+   automatically, and never as part of either workflow in this
+   repository.** Per the Supabase CLI's own documentation, `repair` only
+   inserts/deletes rows in the history tracking table; it never applies
+   SQL or alters schema — but it is still a real, unreviewed-by-CI change
+   to production state, so it gets its own explicit approval moment, the
+   same way a migration does.
+3. Re-run `production-db-preflight.yml` with `expected_versions: 0010`.
+   It should now report "✅ Ready for migration" — if it does not,
+   reconciliation was incomplete or something else is genuinely wrong;
+   do not proceed to `production-db-migrate.yml` until it does.
+
+Neither workflow in this repository runs `migration repair`, prompts for
+it, or automates any part of step 2 — by design, per this pipeline's own
+"never run migration repair automatically, never apply SQL from a
+preflight" rule. Reconciliation is intentionally a manual, separate,
+reviewed action, distinct from both "check readiness" and "apply a
+migration."
 
 ## One-time GitHub setup (do this before dispatching the workflow for real)
 
@@ -139,13 +224,20 @@ and the database directly, only to push schema migrations.
    require — nothing before this point has touched a secret or a
    connection.
 5. Once approved, the job links the Supabase CLI to the production
-   project, prints which migrations are currently pending
-   (`supabase migration list --linked`), runs `supabase db push --linked`
-   (applies only the not-yet-recorded ones, in order — never a full
-   re-run, never anything not already a reviewed file in
-   `supabase/migrations/`), then prints the resulting migration state
-   again.
-6. If any migration fails to apply, `supabase db push` itself stops at
+   project and prints which migrations are currently pending
+   (`supabase migration list --linked`).
+6. It then runs `supabase db push --linked --dry-run` (read-only) and
+   parses its "Would push migration ...sql..." lines. If the version(s)
+   it names don't exactly match this run's own `expected_versions` input,
+   the job stops here — **before the real push** — with no schema change
+   made. This catches a stale/incorrect `expected_versions` value or a
+   migration that became pending unexpectedly since the preflight ran.
+7. Only if the dry-run matches exactly does it run the real
+   `supabase --yes db push --linked` (applies only the not-yet-recorded
+   ones, in order — never a full re-run, never anything not already a
+   reviewed file in `supabase/migrations/`), then prints the resulting
+   migration state again.
+8. If any migration fails to apply, `supabase db push` itself stops at
    that file — no attempt to skip it and continue, no partial success
    reported as success. The job fails, and every later step is skipped
    (the "Show the resulting migration state"/summary steps still run,
@@ -216,38 +308,80 @@ for a real production migration:
   after checking the action's own README — `v1` was outdated at the time
   this pipeline was first written. If a newer major version exists by the
   time this is actually run, re-check before dispatching.
-- **_(Added 2026-09-06)_ `supabase db push` has a documented CI-specific
-  failure mode** (Supabase GitHub Discussion #26366): it can wait on an
-  interactive confirmation prompt that a non-interactive CI shell never
-  answers, and in that case can report a *successful* exit having applied
-  nothing. `production-db-migrate.yml`'s "Apply pending migrations" step
-  now runs `set -o pipefail; yes | supabase db push --linked` to answer
-  any such prompt automatically and to make sure a real failure still
-  fails the step (plain `yes | cmd` without `pipefail` would mask a
-  non-zero exit from `cmd` behind `yes`'s own always-zero one). This
-  workaround is documented, not yet exercised against a real prompt — the
-  first real dispatch is this fix's first real test too.
+- **_(Added 2026-09-06, corrected 2026-09-06)_ `supabase db push`'s
+  documented CI-specific failure mode** (Supabase GitHub Discussion
+  #26366: it can wait on an interactive confirmation prompt a
+  non-interactive CI shell never answers, and report a *successful* exit
+  having applied nothing) **is now handled with the CLI's own documented
+  mechanism, not a workaround.** The original fix for this
+  (`yes | supabase db push`, piped through `yes` with `set -o pipefail`
+  to keep a real failure from being masked) has been replaced: the
+  Supabase CLI's official global-flags reference documents `--yes`
+  ("answer yes to all prompts"), used before the subcommand —
+  `supabase --yes db push --linked`. This is the CLI's own supported
+  non-interactive mechanism, needs no stdin pipe, and needs no
+  `pipefail` trick to keep a failure visible. The previous round's search
+  had only checked `db push`'s own flag table (which indeed does not list
+  `--yes`) and missed that it is a *global* flag documented separately —
+  corrected this round by checking the CLI's global-flags reference
+  directly.
 - **_(Added 2026-09-06)_ Migration filename convention mismatch — NOT
-  resolved, only newly documented.** The Supabase CLI's own reference
-  documentation and CLI issue #6036 confirm the officially expected
-  migration filename shape is `<timestamp>_<name>.sql` with a 14-digit
-  `YYYYMMDDHHMMSS` prefix. This repository's actual files
-  (`supabase/migrations/0001_field_provenance.sql` through
-  `0010_market05c_restaurant_profile_drafts.sql`) use a 4-digit
+  resolved, only newly documented, now with a live test built for it.**
+  The Supabase CLI's own reference documentation and CLI issue #6036
+  confirm the officially expected migration filename shape is
+  `<timestamp>_<name>.sql` with a 14-digit `YYYYMMDDHHMMSS` prefix. This
+  repository's actual files (`supabase/migrations/0001_field_provenance.sql`
+  through `0010_market05c_restaurant_profile_drafts.sql`) use a 4-digit
   sequential numeric prefix instead. Whether the CLI merely needs any
   consistently sortable string (which zero-padded sequential numbers
   satisfy) or hard-validates the timestamp shape could not be
   conclusively resolved from documentation alone. **This is exactly what
-  `production-db-preflight.yml`'s "Compare local migration files against
-  the live migration history" step tests, safely, before any real
-  migration is ever applied** — if that step or `supabase migration list`
-  errors instead of producing a clean LOCAL/REMOTE table, this mismatch is
-  the first thing to suspect. Renaming the migration files themselves was
-  deliberately left out of scope for this round (touches migration-adjacent
-  files this round's task explicitly excluded); if the risk materializes,
-  the fix is a separate, explicit ticket to rename
+  `production-db-preflight.yml`'s history-comparison step tests, safely,
+  before any real migration is ever applied** — its own "the LOCAL column
+  parsed from the CLI must match the real files on disk" integrity check
+  (not just "did the command exit 0") is specifically there to catch a
+  format mismatch that silently changes what the CLI reports, not only
+  one that makes it error outright. Renaming the migration files
+  themselves remains out of scope (migration-adjacent, explicitly
+  excluded from every round of this pipeline work so far); if the risk
+  materializes, the fix is a separate, explicit ticket to rename
   `supabase/migrations/*.sql` to the 14-digit convention, migrating the
   live history table's recorded names to match.
+- **_(Added 2026-09-06)_ The preflight's history-comparison and the
+  migration workflow's dry-run both parse Supabase CLI text output —
+  tested locally against synthetic fixtures, not against the real CLI.**
+  Local testing this round (synthetic `migration list`-shaped tables and
+  `db push --dry-run`-shaped text, fed through the exact `sed`/`awk`/
+  `comm` logic used in both workflows) did catch and fix one real bug:
+  matching the table's column separator with an `awk` bracket character
+  class (`-F'[|│]'`, to accept either a plain `|` or the CLI's documented
+  Unicode box-drawing `│`) silently mis-split every row under this
+  environment's locale, even using the same `gawk` version GitHub's
+  `ubuntu-latest` ships. The fix — normalize with `sed 's/│/|/g'` before a
+  plain single-character `awk -F'|'` — was verified to handle both
+  separator styles correctly in the same local test. This is a real,
+  fixed bug, not merely a documented risk, but it was only exercised
+  against fixtures written to match the CLI's *documented* table shape —
+  the real CLI's actual current output (column order, extra whitespace,
+  additional columns, a completely different format) has not been
+  confirmed. If `production-db-preflight.yml` ever reports "Not ready"
+  with reason "migration list output did not parse as expected" on an
+  otherwise-healthy project, this is the first thing to suspect, and the
+  fix is updating the parsing logic to match the CLI's real current
+  output — never loosening the check to assume history is fine when it
+  can't be confirmed.
+- **_(Added 2026-09-06)_ The `expected_versions` exact-sync requirement
+  has not been exercised against the real, first-ever divergence it was
+  built for.** Both workflows now require local/live history (or a
+  dry-run's own announced version set) to match `expected_versions`
+  exactly, and both fail closed — "Not ready" / abort before push — on
+  any other outcome, including the migration-repair-required case
+  described in "History reconciliation" above. The logic was verified
+  locally against synthetic scenarios (exact match, remote-only orphan,
+  unparseable output, wrong declared version), but never against this
+  project's actual, real Supabase project — where `0001`-`0009` are
+  genuinely expected to appear as an unreconciled gap on the very first
+  run.
 - **`supabase/config.toml` is hand-authored, not generated by a locally
   run `supabase init`.** It is deliberately minimal (just `project_id`,
   a local label, never the real project reference). Confirmed against the
