@@ -106,6 +106,18 @@ query parameters are optional and combine with AND.
   across every candidate is fetched in one bounded query (capped at 4000)
   and reduced in `src/lib/importInbox.js`'s `buildReviewStatusByCandidateId`;
   no per-candidate round trip.
+- **`deferred_reason` (addition, 2026-09-06)**: the *current* deferred
+  reason from that same latest review row — `null` unless
+  `review_status` is actually `"deferred"` right now (see
+  `buildLatestDeferredReasonByCandidateId`; reuses the same one query,
+  no second round trip). A candidate that was deferred once and later
+  re-reviewed to a different status never still shows its old reason. A
+  legacy `deferred` row recorded before
+  `supabase/migrations/0009_market05a_candidate_reviews_deferred_reason.sql`
+  existed simply yields `null` here too — exactly like having no reason
+  at all, never an error. Built for the client-side "Triage overview"
+  section on `/internal/import-inbox` (see that page's own section
+  below).
 - `run_id` — exact `import_run_id` match.
 - `category` — exact match against `extracted_fields.category` (the
   OSM `amenity` value).
@@ -142,7 +154,8 @@ query parameters are optional and combine with AND.
       "possible_duplicate": false,
       "quality_status": "incomplete",
       "missing_fields": ["address"],
-      "review_status": "new"
+      "review_status": "new",
+      "deferred_reason": null
     }
   ],
   "total_before_filters": 500,
@@ -550,6 +563,48 @@ same draft state, the same `POST` body shape, the same security
 boundary (the suggest-from-website route still only ever fetches the
 candidate's own already-*saved* website — never a value read directly
 off this form).
+
+**Addition (2026-09-06, later still the same day) — Triage overview.**
+A new, read-only section on `/internal/import-inbox`, between "Import
+runs" and "Candidates," giving reviewers a way to quickly overview and
+navigate every reviewed candidate without changing any of the existing
+detail-view/review/enrichment flow. No migration, no new write endpoint,
+no automatic classification of any kind:
+
+- **Summary counts** for the five effective statuses (`new`,
+  `needs_enrichment`, `approved_internal`, `deferred`, `rejected`) —
+  `src/lib/importInbox.js`'s `computeReviewStatusCounts`, computed
+  client-side over a dedicated fetch of `GET .../candidates?run_id=`
+  (the same route documented above, called with **only** `run_id` —
+  never `category`/`name`/`possible_duplicate`/`quality`/
+  `review_status`), so the counts always reflect the true picture for
+  the selected run regardless of what the "Candidates" section's own
+  browsing filters are currently set to.
+- **Filters**: clicking a status count filters the triage list to that
+  status; choosing `Deferred` additionally reveals a "deferred reason"
+  filter (the same fixed `ALLOWED_DEFERRED_REASONS` set). A text search
+  matches candidate name and the *currently displayed* (normalized)
+  address/website — entirely client-side
+  (`src/lib/importInbox.js`'s `matchesTriageSearch`/
+  `filterCandidatesForTriage`), never a new query parameter.
+- **Three named buckets** (`computeCandidateTriageBucket`): candidates
+  still needing enrichment, candidates deliberately deferred (with their
+  reason, via the same `formatDeferredReasonLabel` used everywhere
+  else), and candidates internally approved and ready only for a
+  *future, not-yet-built* canonical-draft step (`MARKET-05B`) — never a
+  claim that such a step is scheduled, running, or automatic. `new` and
+  `rejected` candidates are real statuses but deliberately fall outside
+  these three named buckets.
+- **"View in list"** on a triage row clears the "Candidates" section's
+  own browsing filters (never the run filter), expands that candidate's
+  existing, unchanged detail view, and scrolls to it — no new fetch
+  beyond the same read-only review/enrichment history an ordinary expand
+  already triggers, and no decision or enrichment is ever recorded by
+  this action.
+- Deliberately does **not** attempt chain/franchise name-matching or
+  automatic service-model classification — both are separate, later,
+  not-yet-built features; this only ever reflects the *human-recorded*
+  `review_status`/`deferred_reason` exactly as decided.
 
 ## What has been verified
 

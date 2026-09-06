@@ -715,3 +715,25 @@ detail: `planning/specs/tickets/market-05-normalization-deduplication.md`'s
 own "Implementation (2026-09-06, later the same day) — structured
 deferred reason + enrichment-form reflow" section and
 `docs/api/import-inbox-api.md`'s matching "Addition (2026-09-06)" notes.
+
+**Update (2026-09-06, later still the same day): read-only Triage
+overview.** A new section on `/internal/import-inbox`, between "Import
+runs" and "Candidates" — summary counts for the five effective review
+statuses, a status/deferred-reason/name-address-website filter and
+search (entirely client-side, no new query parameter), and a clear split
+into the three buckets this round named: still-needs-enrichment,
+deliberately-deferred (with its reason), and internally-approved-but-
+only-ready-for-a-future-not-yet-built-canonical-step. No migration, no
+write, no website fetch, and deliberately no chain/franchise
+name-matching or automatic service-model classification — both stay
+separate, later features. The existing detail view, append-only
+history, normalization, and manual-enrichment flow are all completely
+unchanged; a "View in list" action only expands and scrolls to a
+candidate's existing card. `GET .../candidates` gains one additive field
+(`deferred_reason`, reusing the same query the route already ran — no
+second round trip). 27 new tests in `src/lib/importInbox.test.js`
+(127 → 154). Full detail:
+`planning/specs/tickets/market-05-normalization-deduplication.md`'s own
+"Implementation (2026-09-06, later still the same day) — Triage
+overview" section and `docs/api/import-inbox-api.md`'s matching
+"Addition (2026-09-06, later still the same day)" note.

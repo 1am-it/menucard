@@ -25,6 +25,15 @@
 // from "incomplete" to "complete." Entirely independent of
 // `import_candidate_reviews` — this route never reads that table's
 // `note` field or derives an enrichment from it.
+//
+// **Update (2026-09-06): also resolves each candidate's *current*
+// `deferred_reason`** (the structured reason from that same latest
+// review row, added by supabase/migrations/0009_market05a_candidate_reviews_deferred_reason.sql
+// — see buildLatestDeferredReasonByCandidateId's own comment) — `null`
+// unless the candidate's effective status is actually `'deferred'`
+// right now. Built for the client-side "Triage overview" section on
+// `/internal/import-inbox`; no new query, no write, no automatic
+// classification of any kind.
 
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/src/lib/supabaseAdmin'
@@ -33,6 +42,7 @@ import {
   isInternalOnly,
   enrichAndFilterCandidates,
   buildReviewStatusByCandidateId,
+  buildLatestDeferredReasonByCandidateId,
   buildEnrichmentSourceByCandidateId,
 } from '@/src/lib/importInbox'
 
@@ -85,14 +95,17 @@ export async function GET(request) {
   // MARKET-05A: every review row across every candidate, in one bounded
   // query — buildReviewStatusByCandidateId (pure, src/lib/importInbox.js)
   // reduces this to "latest decision per candidate_id" without a second
-  // per-candidate round trip.
+  // per-candidate round trip. `deferred_reason` (added 2026-09-06, for
+  // the triage overview) is read from the same rows via
+  // buildLatestDeferredReasonByCandidateId — no second query.
   const { data: reviews, error: reviewsError } = await supabase
     .from('import_candidate_reviews')
-    .select('id, candidate_id, decided_at, status')
+    .select('id, candidate_id, decided_at, status, deferred_reason')
     .order('decided_at', { ascending: false })
     .limit(REVIEW_LIMIT)
   if (reviewsError) return NextResponse.json({ error: 'Query failed' }, { status: 500 })
   const reviewStatusByCandidateId = buildReviewStatusByCandidateId(reviews)
+  const deferredReasonByCandidateId = buildLatestDeferredReasonByCandidateId(reviews)
 
   // MARKET-05A: every enrichment row across every candidate, in one
   // bounded query — buildEnrichmentSourceByCandidateId (pure,
@@ -115,6 +128,7 @@ export async function GET(request) {
     reviewStatusByCandidateId,
     reviewStatus,
     enrichmentSourceByCandidateId,
+    deferredReasonByCandidateId,
   })
 
   return NextResponse.json({

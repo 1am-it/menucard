@@ -28,6 +28,10 @@ import {
   applySharedSourceUrlAsWebsite,
   isReviewDecisionSubmittable,
   hasVerifiedWebsiteForSuggestions,
+  TRIAGE_SUMMARY_STATUSES,
+  computeReviewStatusCounts,
+  computeCandidateTriageBucket,
+  filterCandidatesForTriage,
 } from '@/src/lib/importInbox'
 
 // Mirrors ops/scripts/import-breda-osm.config.js's own
@@ -45,6 +49,18 @@ const REVIEW_STATUS_LABELS = {
   approved_internal: 'Approved (internal only)',
   rejected: 'Rejected',
   deferred: 'Deferred',
+}
+
+// Triage overview (added 2026-09-06) — one short, honest sentence per
+// bucket computeCandidateTriageBucket can return. Deliberately never
+// implies anything automatic: "approved_pending_canonical" only ever
+// means "ready for a future, not-yet-built canonical-draft step"
+// (MARKET-05B) — never that such a step is scheduled, running, or will
+// ever happen without a separate, later, deliberate decision.
+const TRIAGE_BUCKET_DESCRIPTIONS = {
+  needs_enrichment: 'Still needs enrichment before it can move forward.',
+  deferred: 'Deliberately postponed by a reviewer.',
+  approved_pending_canonical: 'Internally approved — ready only for a future, not-yet-built canonical draft step.',
 }
 
 const REJECTION_REASON_LABELS = {
@@ -157,6 +173,29 @@ export default function ImportInboxPage() {
   const [suggestionsLoadingId, setSuggestionsLoadingId] = useState(null)
   const [suggestionsErrorByCandidateId, setSuggestionsErrorByCandidateId] = useState({})
 
+  // Triage overview (added 2026-09-06) — a read-only, always-full-picture
+  // summary of every candidate's *effective* review status, entirely
+  // independent from the "Candidates" section's own browsing filters
+  // below (category/name/duplicate/quality/reviewStatus) — those narrow
+  // what a reviewer is currently looking at; this always reflects the
+  // true counts for the selected run (or every run, if none is
+  // selected), so switching a browsing filter can never silently shrink
+  // a triage count. Scoped only by runIdFilter — its own GET call below
+  // deliberately omits every other filter param. Never writes anything;
+  // its own status/deferred-reason/search filters are applied entirely
+  // client-side (filterCandidatesForTriage, src/lib/importInbox.js) over
+  // this already-fetched, already-read-only data.
+  const [triageCandidates, setTriageCandidates] = useState([])
+  const [triageError, setTriageError] = useState(null)
+  const [triageLoading, setTriageLoading] = useState(false)
+  const [triageStatusFilter, setTriageStatusFilter] = useState('')
+  const [triageDeferredReasonFilter, setTriageDeferredReasonFilter] = useState('')
+  const [triageSearchTerm, setTriageSearchTerm] = useState('')
+  // Set by "View in list" below; cleared once the target candidate's
+  // card has actually rendered and been scrolled to (see the dedicated
+  // effect further down) — never itself scrolls anything directly.
+  const [pendingScrollCandidateId, setPendingScrollCandidateId] = useState(null)
+
   useEffect(() => {
     const supabase = getSupabaseBrowser()
     supabase.auth.getSession().then(({ data }) => {
@@ -217,6 +256,35 @@ export default function ImportInboxPage() {
       setCandidatesError('Failed to load candidates')
     } finally {
       setCandidatesLoading(false)
+    }
+  }, [])
+
+  // Triage overview (added 2026-09-06) — the same read-only
+  // `/candidates` GET the browsing section below already uses, but
+  // deliberately scoped by `run_id` only (never
+  // category/name/duplicate/quality/review_status), so the triage
+  // summary always reflects the true picture for the selected run,
+  // regardless of what the browsing filters below are currently set to.
+  const loadTriageCandidates = useCallback(async (token, runId) => {
+    setTriageLoading(true)
+    setTriageError(null)
+    try {
+      const params = new URLSearchParams()
+      if (runId) params.set('run_id', runId)
+      const res = await fetch(`/api/internal/v1/import-inbox/candidates?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setTriageError(data.error || 'Failed to load the triage overview')
+        setTriageCandidates([])
+        return
+      }
+      setTriageCandidates(data.candidates || [])
+    } catch {
+      setTriageError('Failed to load the triage overview')
+    } finally {
+      setTriageLoading(false)
     }
   }, [])
 
@@ -325,6 +393,27 @@ export default function ImportInboxPage() {
     }
   }, [session, runIdFilter, categoryFilter, nameFilter, duplicateFilter, qualityFilter, reviewStatusFilter, loadCandidates])
 
+  // Triage overview — deliberately its own effect, keyed only on
+  // runIdFilter, never on the browsing filters above.
+  useEffect(() => {
+    if (session) {
+      loadTriageCandidates(session.access_token, runIdFilter)
+    }
+  }, [session, runIdFilter, loadTriageCandidates])
+
+  // Triage overview — scrolls to and reveals a candidate's card once
+  // "View in list" has cleared the browsing filters and the freshly
+  // (re)loaded `candidates` array actually contains it. Never scrolls on
+  // its own initiative; only ever runs after an explicit click sets
+  // `pendingScrollCandidateId` below.
+  useEffect(() => {
+    if (!pendingScrollCandidateId) return
+    if (!candidates.some((c) => c.id === pendingScrollCandidateId)) return
+    const el = document.getElementById(`candidate-${pendingScrollCandidateId}`)
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    setPendingScrollCandidateId(null)
+  }, [candidates, pendingScrollCandidateId])
+
   async function signOut() {
     const supabase = getSupabaseBrowser()
     await supabase.auth.signOut()
@@ -343,6 +432,28 @@ export default function ImportInboxPage() {
     if (next && !enrichmentsByCandidateId[next] && session) {
       loadEnrichments(session.access_token, next)
     }
+  }
+
+  // Triage overview — "View in list": clears the browsing filters below
+  // (never the run filter — triage is already scoped to it) so the
+  // target candidate is guaranteed to appear there, expands its card
+  // (loading its history exactly like an ordinary toggleExpand would),
+  // and queues a scroll-into-view for once that card has actually
+  // rendered (see the dedicated effect above). No fetch of anything
+  // beyond the same read-only history any ordinary expand already
+  // triggers; never records a decision or enrichment by itself.
+  function jumpToCandidateFromTriage(candidateId) {
+    setCategoryFilter('')
+    setNameFilter('')
+    setDuplicateFilter('')
+    setQualityFilter('')
+    setReviewStatusFilter('')
+    setExpandedCandidateId(candidateId)
+    if (session) {
+      if (!reviewsByCandidateId[candidateId]) loadReviews(session.access_token, candidateId)
+      if (!enrichmentsByCandidateId[candidateId]) loadEnrichments(session.access_token, candidateId)
+    }
+    setPendingScrollCandidateId(candidateId)
   }
 
   function updateEnrichmentFieldDraft(candidateId, fieldName, patch) {
@@ -438,6 +549,7 @@ export default function ImportInboxPage() {
         quality: qualityFilter,
         reviewStatus: reviewStatusFilter,
       })
+      await loadTriageCandidates(session.access_token, runIdFilter)
       outcome = { ok: true }
     } catch {
       setEnrichmentErrorByCandidateId((prev) => ({ ...prev, [candidateId]: 'Recording the enrichment failed' }))
@@ -509,6 +621,7 @@ export default function ImportInboxPage() {
         quality: qualityFilter,
         reviewStatus: reviewStatusFilter,
       })
+      await loadTriageCandidates(session.access_token, runIdFilter)
       outcome = { ok: true }
     } catch {
       setDecisionErrorByCandidateId((prev) => ({ ...prev, [candidateId]: 'Recording the decision failed' }))
@@ -648,6 +761,157 @@ export default function ImportInboxPage() {
 
       {runs.length > 0 && (
         <>
+          <h2 style={{ fontSize: 18, marginBottom: 12 }}>Triage overview</h2>
+          <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginTop: 0, marginBottom: 16 }}>
+            Read-only summary of every candidate's current review status for {runIdFilter ? 'the selected run' : 'every run'} —
+            independent from the filters in "Candidates" below, so it never shrinks when you narrow those down. Nothing here
+            ever writes anything; "View in list" only expands that candidate's existing, unchanged detail view further down.
+            Chain/franchise matching and automatic service-model classification are not part of this — those are separate,
+            later features.
+          </p>
+
+          {triageError && (
+            <div style={{ padding: 12, borderRadius: 8, background: 'var(--danger-bg)', color: 'var(--danger)', marginBottom: 16, fontSize: 14 }}>
+              {triageError}
+            </div>
+          )}
+
+          {triageLoading && <p style={{ color: 'var(--text-muted)' }}>Loading…</p>}
+
+          {!triageLoading && !triageError && (
+            <>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+                {(() => {
+                  const counts = computeReviewStatusCounts(triageCandidates)
+                  return TRIAGE_SUMMARY_STATUSES.map((status) => {
+                    const active = triageStatusFilter === status
+                    return (
+                      <button
+                        key={status}
+                        onClick={() => {
+                          setTriageStatusFilter(active ? '' : status)
+                          setTriageDeferredReasonFilter('')
+                        }}
+                        style={{
+                          fontSize: 13,
+                          padding: '6px 12px',
+                          borderRadius: 999,
+                          border: '1px solid var(--border)',
+                          background: active ? 'var(--green-faint)' : 'var(--bg-card)',
+                          color: active ? 'var(--green)' : 'var(--text-primary)',
+                          cursor: 'pointer',
+                          fontWeight: active ? 600 : 400,
+                        }}
+                      >
+                        {REVIEW_STATUS_LABELS[status]}: {counts[status]}
+                      </button>
+                    )
+                  })
+                })()}
+              </div>
+
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}>
+                <input
+                  type="text"
+                  placeholder="Search name, address, or website…"
+                  value={triageSearchTerm}
+                  onChange={(e) => setTriageSearchTerm(e.target.value)}
+                  style={{ ...selectStyle, minWidth: 220 }}
+                />
+                {triageStatusFilter === 'deferred' && (
+                  <select
+                    value={triageDeferredReasonFilter}
+                    onChange={(e) => setTriageDeferredReasonFilter(e.target.value)}
+                    style={selectStyle}
+                  >
+                    <option value="">Any deferred reason</option>
+                    {ALLOWED_DEFERRED_REASONS.map((r) => (
+                      <option key={r} value={r}>
+                        {formatDeferredReasonLabel(r)}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                {(triageStatusFilter || triageDeferredReasonFilter || triageSearchTerm) && (
+                  <button
+                    onClick={() => {
+                      setTriageStatusFilter('')
+                      setTriageDeferredReasonFilter('')
+                      setTriageSearchTerm('')
+                    }}
+                    style={{
+                      fontSize: 12,
+                      padding: '4px 10px',
+                      borderRadius: 8,
+                      border: '1px solid var(--border)',
+                      background: 'transparent',
+                      color: 'var(--text-secondary)',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Clear triage filters
+                  </button>
+                )}
+              </div>
+
+              {(() => {
+                const triageFiltered = filterCandidatesForTriage(triageCandidates, {
+                  statusFilter: triageStatusFilter,
+                  deferredReasonFilter: triageStatusFilter === 'deferred' ? triageDeferredReasonFilter : '',
+                  searchTerm: triageSearchTerm,
+                })
+                if (triageFiltered.length === 0) {
+                  return <p style={{ color: 'var(--text-muted)', marginBottom: 28 }}>No candidates match the current triage filters.</p>
+                }
+                return (
+                  <div style={{ display: 'grid', gap: 8, marginBottom: 28 }}>
+                    {triageFiltered.map((c) => {
+                      const bucket = computeCandidateTriageBucket(c)
+                      return (
+                        <div key={c.id} style={{ ...cardStyle, padding: 10 }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                            <div style={{ fontSize: 13, fontWeight: 600 }}>{c.extracted_fields?.name || '(no name)'}</div>
+                            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                              <span style={badgeStyle('var(--bg-card)', 'var(--text-secondary)')}>{REVIEW_STATUS_LABELS[c.review_status] || c.review_status}</span>
+                              <button
+                                onClick={() => jumpToCandidateFromTriage(c.id)}
+                                style={{
+                                  fontSize: 12,
+                                  padding: '4px 10px',
+                                  borderRadius: 8,
+                                  border: '1px solid var(--border)',
+                                  background: 'transparent',
+                                  color: 'var(--text-secondary)',
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                View in list
+                              </button>
+                            </div>
+                          </div>
+                          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
+                            {c.normalized_fields?.address || '—'}
+                            {c.normalized_fields?.website ? ` · ${c.normalized_fields.website}` : ''}
+                          </div>
+                          {bucket && (
+                            <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>
+                              {TRIAGE_BUCKET_DESCRIPTIONS[bucket]}
+                              {bucket === 'deferred' && c.deferred_reason ? ` (${formatDeferredReasonLabel(c.deferred_reason)})` : ''}
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                )
+              })()}
+            </>
+          )}
+        </>
+      )}
+
+      {runs.length > 0 && (
+        <>
           <h2 style={{ fontSize: 18, marginBottom: 12 }}>Candidates</h2>
 
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}>
@@ -718,7 +982,7 @@ export default function ImportInboxPage() {
                 const draft = decisionDraftByCandidateId[c.id] || { status: '', rejectionReason: '', deferredReason: '', note: '' }
                 const reviews = reviewsByCandidateId[c.id]
                 return (
-                  <div key={c.id} style={cardStyle}>
+                  <div key={c.id} id={`candidate-${c.id}`} style={cardStyle}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
                       <div style={{ fontSize: 15, fontWeight: 600 }}>{c.extracted_fields?.name || '(no name)'}</div>
                       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
@@ -748,6 +1012,11 @@ export default function ImportInboxPage() {
                         </span>
                       </div>
                     </div>
+                    {c.review_status === 'deferred' && c.deferred_reason && (
+                      <div style={{ fontSize: 12, color: 'var(--warning)', marginBottom: 4 }}>
+                        Deferred reason: {formatDeferredReasonLabel(c.deferred_reason)}
+                      </div>
+                    )}
                     <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 4 }}>
                       {c.extracted_fields?.category || '—'}
                       {c.normalized_fields?.address ? ` · ${c.normalized_fields.address}` : ''}

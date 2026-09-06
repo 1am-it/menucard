@@ -1276,6 +1276,103 @@ itself; structural tests reading the reviews route and the page's own
 source for the GET/POST wiring, the conditional deferred-reason select,
 the history rendering, and the enrichment-form reflow's step ordering.
 
+### Implementation (2026-09-06, later still the same day) — Triage overview
+
+A new, read-only "Triage overview" section on `/internal/import-inbox`,
+between "Import runs" and "Candidates" — the goal per this round's own
+instruction: let a reviewer quickly overview every reviewed candidate
+and jump to targeted work, without changing any candidate data, review
+history, or enrichment. No migration, no database write, no website
+fetch, no automatic classification, no canonical/public table.
+
+**Summary counts.** `computeReviewStatusCounts` (new, pure,
+`src/lib/importInbox.js`) counts candidates into the five effective
+statuses (`new`/`needs_enrichment`/`approved_internal`/`deferred`/
+`rejected`), always returning all five keys (defaulting to `0`) so the
+UI never has to guess whether a bucket is zero or missing. Computed over
+a **dedicated** fetch (`loadTriageCandidates` in
+`app/internal/import-inbox/page.js`) of the existing, unmodified
+`GET .../candidates` route, scoped **only** by `run_id` — deliberately
+never by the "Candidates" section's own browsing filters
+(`category`/`name`/`possible_duplicate`/`quality`/`review_status`), so
+switching one of those filters can never silently shrink a triage count.
+Refetched after every successful "Save decision"/"Save enrichment," same
+as the browsing list already was.
+
+**Filters and search.** `filterCandidatesForTriage` (new, pure) combines
+three filters with AND, entirely client-side over the already-fetched
+triage data — no new query parameter: a status filter (clicking a
+summary count), a deferred-reason filter (`ALLOWED_DEFERRED_REASONS`,
+only shown/applied when the status filter is `deferred`), and a
+name/normalized-address/normalized-website search
+(`matchesTriageSearch`) — matching exactly what is currently *displayed*
+to the reviewer, never the raw, un-normalized fields.
+
+**Three named buckets.** `computeCandidateTriageBucket` (new, pure) maps
+`review_status` to exactly the three categories this round's own
+requirements named:
+- `'needs_enrichment'` — still needs enrichment before it can move
+  forward;
+- `'deferred'` — deliberately postponed by a reviewer, shown with its
+  structured reason (`formatDeferredReasonLabel`, the same shared
+  mapping used everywhere else — see the "structured deferred reason"
+  section above);
+- `'approved_pending_canonical'` — internally approved; ready **only**
+  for a *future, not-yet-built* canonical-draft step (`MARKET-05B`,
+  still just a placeholder below) — never a claim that such a step is
+  scheduled, running, or automatic.
+
+`'new'` (not yet reviewed) and `'rejected'` (out of the pipeline) are
+real statuses but deliberately fall outside these three named buckets —
+`computeCandidateTriageBucket` returns `null` for both, never force-fit.
+
+**"View in list."** Each triage row's own button clears the "Candidates"
+section's browsing filters (never the run filter, since triage is
+already scoped to it), expands that exact candidate's existing,
+completely unchanged detail view (loading its review/enrichment history
+through the same read-only calls an ordinary expand already makes), and
+scrolls to it once it actually renders (a dedicated effect watching for
+the target id in the freshly (re)loaded `candidates` array — never
+scrolls on its own, only after this explicit click). No decision or
+enrichment is ever recorded by this action, and the detail view itself
+is byte-for-byte the one already documented above — untouched by this
+round.
+
+**Deliberately not built, per this round's own explicit instruction**:
+chain/franchise name-matching and automatic service-model
+classification — both stay separate, later, not-yet-built features;
+this section only ever reflects the *human-recorded*
+`review_status`/`deferred_reason` exactly as decided, never an inferred
+guess.
+
+**API**: `GET .../candidates`'s response gains one additive field,
+`deferred_reason` (`null` unless `review_status` is currently
+`'deferred'` — `buildLatestDeferredReasonByCandidateId`, new, pure,
+reusing the same one bounded review-rows query the route already ran;
+no second round trip). See `docs/api/import-inbox-api.md`'s own
+"Addition (2026-09-06)" notes, both for this field and for the full
+Triage overview UI contract.
+
+**Refactor, no behavior change**: `computeEffectiveReviewStatus`'s
+"latest review wins" tie-break (latest `decided_at`, ties broken by the
+higher `id`) is now extracted into a shared `pickLatestReviewRow`, so
+`buildLatestDeferredReasonByCandidateId` doesn't re-implement the same
+rule a second time — both existing and new tests confirm the refactor
+changed nothing observable.
+
+**Tests**: 27 new tests in `src/lib/importInbox.test.js` (127 → 154 in
+that file) — `pickLatestReviewRow` directly; `buildLatestDeferredReasonByCandidateId`
+including the key "latest review wins, a stale reason from a superseded
+deferred decision must never resurface" case; `enrichAndFilterCandidates`'s
+new `deferred_reason` attachment; `computeReviewStatusCounts`,
+`computeCandidateTriageBucket`, `matchesTriageSearch`, and
+`filterCandidatesForTriage` each on their own, plus combined-filter
+cases; structural tests reading the page's own source confirming the
+triage fetch is scoped only by `run_id`, is GET-only, routes its
+summary/filter/bucket logic through the pure tested functions (never a
+re-implementation), gates the deferred-reason filter on the status
+filter, and that "View in list" never calls a write endpoint.
+
 ## MARKET-05B — Normalization & deduplication (placeholder, untouched)
 
 Original scope, unchanged by this document: matching and deduplicating

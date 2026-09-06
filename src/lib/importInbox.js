@@ -155,6 +155,7 @@ function enrichAndFilterCandidates(records, filters) {
   const duplicateIds = computePossibleDuplicateIds(records);
   const reviewStatusByCandidateId = opts.reviewStatusByCandidateId || {};
   const enrichmentSourceByCandidateId = opts.enrichmentSourceByCandidateId || {};
+  const deferredReasonByCandidateId = opts.deferredReasonByCandidateId || {};
 
   const enriched = records.map((record) => {
     const enrichmentSource = enrichmentSourceByCandidateId[record.id] || {};
@@ -179,6 +180,12 @@ function enrichAndFilterCandidates(records, filters) {
       quality_status: quality.status,
       missing_fields: quality.missingFields,
       review_status: reviewStatusByCandidateId[record.id] || DEFAULT_REVIEW_STATUS,
+      // Added 2026-09-06 for the triage overview: the *current* deferred
+      // reason, i.e. only set when this candidate's effective status is
+      // actually 'deferred' right now — never a stale reason left over
+      // from an earlier decision that was since superseded (see
+      // buildLatestDeferredReasonByCandidateId's own comment).
+      deferred_reason: deferredReasonByCandidateId[record.id] || null,
     };
   });
 
@@ -370,17 +377,20 @@ function reviewValidationMessage(reason) {
 }
 
 /**
- * Picks the effective status for one candidate from its full review
+ * Picks the single latest row from one candidate's full review
  * history — the row with the latest `decided_at`, tying-broken by the
  * higher `id` (review rows are inserted with a monotonically increasing
  * `bigint identity` id, so this is a safe, deterministic tie-break for
  * two decisions recorded within the same timestamp resolution). Returns
- * `DEFAULT_REVIEW_STATUS` ('new') when given no rows — never throws,
- * never guesses at a status from partial/malformed input.
+ * `null` given no rows — never throws, never guesses from partial/
+ * malformed input. The one shared "latest review wins" rule this whole
+ * feature depends on — computeEffectiveReviewStatus and
+ * buildLatestDeferredReasonByCandidateId below both build on this
+ * instead of each re-implementing the same tie-break.
  */
-function computeEffectiveReviewStatus(reviewRows) {
+function pickLatestReviewRow(reviewRows) {
   if (!Array.isArray(reviewRows) || reviewRows.length === 0) {
-    return DEFAULT_REVIEW_STATUS;
+    return null;
   }
   let latest = null;
   for (const row of reviewRows) {
@@ -395,6 +405,16 @@ function computeEffectiveReviewStatus(reviewRows) {
       latest = row;
     }
   }
+  return latest;
+}
+
+/**
+ * Picks the effective status for one candidate from its full review
+ * history — see pickLatestReviewRow for the tie-break rule. Returns
+ * `DEFAULT_REVIEW_STATUS` ('new') when given no rows.
+ */
+function computeEffectiveReviewStatus(reviewRows) {
+  const latest = pickLatestReviewRow(reviewRows);
   return latest ? latest.status : DEFAULT_REVIEW_STATUS;
 }
 
@@ -417,6 +437,34 @@ function buildReviewStatusByCandidateId(allReviewRows) {
   const result = {};
   for (const candidateId of Object.keys(byCandidateId)) {
     result[candidateId] = computeEffectiveReviewStatus(byCandidateId[candidateId]);
+  }
+  return result;
+}
+
+/**
+ * Groups review rows by `candidate_id` and reduces each group to its
+ * *current* deferred reason — added 2026-09-06 for the triage overview.
+ * `null` unless that candidate's single latest review row (same
+ * pickLatestReviewRow tie-break as buildReviewStatusByCandidateId) is
+ * itself `status === 'deferred'`: a candidate that was deferred once and
+ * later re-reviewed (e.g. now `approved_internal`) must never still show
+ * its old deferred reason as if it were current. A legacy `deferred` row
+ * recorded before `deferred_reason` existed (see
+ * supabase/migrations/0009_market05a_candidate_reviews_deferred_reason.sql)
+ * simply yields `null` here — exactly like having no reason at all,
+ * never an error.
+ */
+function buildLatestDeferredReasonByCandidateId(allReviewRows) {
+  const byCandidateId = {};
+  for (const row of allReviewRows || []) {
+    if (!row || !row.candidate_id) continue;
+    if (!byCandidateId[row.candidate_id]) byCandidateId[row.candidate_id] = [];
+    byCandidateId[row.candidate_id].push(row);
+  }
+  const result = {};
+  for (const candidateId of Object.keys(byCandidateId)) {
+    const latest = pickLatestReviewRow(byCandidateId[candidateId]);
+    result[candidateId] = latest && latest.status === 'deferred' ? latest.deferred_reason || null : null;
   }
   return result;
 }
@@ -787,6 +835,100 @@ function hasVerifiedWebsiteForSuggestions(candidate) {
   return Boolean(candidate && candidate.normalized_fields && candidate.normalized_fields.website);
 }
 
+// ─── Triage overview (added 2026-09-06) — read-only summary, filter, and
+// search logic for the Data-inbox's new top-of-page "Triage overview"
+// section (app/internal/import-inbox/page.js). Everything below is pure
+// and operates only on already-loaded candidate objects (each one
+// already carrying `review_status`/`deferred_reason` from
+// enrichAndFilterCandidates above) — no new query, no write, no
+// automatic classification of any kind. Deliberately does NOT attempt
+// chain/franchise name-matching or service-model classification — both
+// are named, separate, later features; this only reflects the
+// *human-recorded* review_status/deferred_reason exactly as decided. ───
+
+/** Fixed display order for the triage summary counts — the five
+ * possible effective statuses, `'new'` (never itself stored — see
+ * DEFAULT_REVIEW_STATUS) first, then the four real, storable statuses in
+ * the same order ALLOWED_REVIEW_STATUSES already uses everywhere else in
+ * this file. */
+const TRIAGE_SUMMARY_STATUSES = ['new', ...ALLOWED_REVIEW_STATUSES];
+
+/**
+ * Counts candidates per effective review status — the numbers shown at
+ * the top of the triage overview. Always returns all five
+ * `TRIAGE_SUMMARY_STATUSES` keys (defaulting to `0`), so the UI never
+ * has to guess whether a bucket is "zero" or "missing." A candidate
+ * whose `review_status` somehow isn't one of the five (should be
+ * impossible, given `enrichAndFilterCandidates` always defaults to
+ * `DEFAULT_REVIEW_STATUS`) is silently not counted anywhere, never
+ * thrown on and never force-fit into the wrong bucket.
+ */
+function computeReviewStatusCounts(candidates) {
+  const counts = {};
+  for (const status of TRIAGE_SUMMARY_STATUSES) counts[status] = 0;
+  for (const candidate of candidates || []) {
+    const status = candidate && candidate.review_status;
+    if (Object.prototype.hasOwnProperty.call(counts, status)) counts[status] += 1;
+  }
+  return counts;
+}
+
+/**
+ * Which of the three triage buckets named in this feature's own
+ * requirements a candidate currently falls into — `'needs_enrichment'`
+ * (still needs enrichment), `'deferred'` (deliberately postponed, with
+ * a structured reason where one was recorded), or
+ * `'approved_pending_canonical'` (internally approved; ready only for a
+ * *future*, not-yet-built canonical-draft step — MARKET-05B — never a
+ * claim that such a step is scheduled, running, or automatic). `'new'`
+ * (not yet reviewed at all) and `'rejected'` (out of the pipeline) are
+ * both real statuses but deliberately fall outside these three named
+ * buckets — returned as `null`, never force-fit into one of the three.
+ */
+function computeCandidateTriageBucket(candidate) {
+  const status = candidate && candidate.review_status;
+  if (status === 'needs_enrichment') return 'needs_enrichment';
+  if (status === 'deferred') return 'deferred';
+  if (status === 'approved_internal') return 'approved_pending_canonical';
+  return null;
+}
+
+/**
+ * Case-insensitive substring search across a candidate's name and its
+ * *currently displayed* (normalized) address/website — never the raw,
+ * un-normalized fields, so a search matches exactly what the reviewer
+ * sees on screen. An empty/whitespace-only `searchTerm` matches every
+ * candidate (i.e. "no search active"), never zero candidates.
+ */
+function matchesTriageSearch(candidate, searchTerm) {
+  if (typeof searchTerm !== 'string' || searchTerm.trim().length === 0) return true;
+  if (!candidate) return false;
+  const needle = searchTerm.trim().toLowerCase();
+  const name = (candidate.extracted_fields && candidate.extracted_fields.name) || '';
+  const address = (candidate.normalized_fields && candidate.normalized_fields.address) || '';
+  const website = (candidate.normalized_fields && candidate.normalized_fields.website) || '';
+  return (
+    name.toLowerCase().includes(needle) || address.toLowerCase().includes(needle) || website.toLowerCase().includes(needle)
+  );
+}
+
+/**
+ * The triage overview's one combined filter: status, then — only
+ * meaningful for `'deferred'` — the structured deferred reason, then the
+ * name/address/website search above. Purely client-side, over an
+ * already-loaded candidate array; never issues a request, never mutates
+ * `candidates`. Filters compose with AND, exactly like the existing
+ * browsing filters in `enrichAndFilterCandidates`.
+ */
+function filterCandidatesForTriage(candidates, { statusFilter, deferredReasonFilter, searchTerm } = {}) {
+  return (candidates || []).filter((candidate) => {
+    if (statusFilter && candidate.review_status !== statusFilter) return false;
+    if (deferredReasonFilter && candidate.deferred_reason !== deferredReasonFilter) return false;
+    if (!matchesTriageSearch(candidate, searchTerm)) return false;
+    return true;
+  });
+}
+
 module.exports = {
   ALLOWED_ROLE,
   isInternalOnly,
@@ -808,8 +950,10 @@ module.exports = {
   MAX_REVIEW_NOTE_LENGTH,
   validateReviewDecisionInput,
   reviewValidationMessage,
+  pickLatestReviewRow,
   computeEffectiveReviewStatus,
   buildReviewStatusByCandidateId,
+  buildLatestDeferredReasonByCandidateId,
   ENRICHABLE_FIELDS,
   MAX_ENRICHMENT_VALUE_LENGTH,
   isValidHttpUrl,
@@ -826,4 +970,9 @@ module.exports = {
   applySharedSourceUrlAsWebsite,
   isReviewDecisionSubmittable,
   hasVerifiedWebsiteForSuggestions,
+  TRIAGE_SUMMARY_STATUSES,
+  computeReviewStatusCounts,
+  computeCandidateTriageBucket,
+  matchesTriageSearch,
+  filterCandidatesForTriage,
 };

@@ -25,7 +25,14 @@ const {
   validateReviewDecisionInput,
   reviewValidationMessage,
   computeEffectiveReviewStatus,
+  pickLatestReviewRow,
   buildReviewStatusByCandidateId,
+  buildLatestDeferredReasonByCandidateId,
+  TRIAGE_SUMMARY_STATUSES,
+  computeReviewStatusCounts,
+  computeCandidateTriageBucket,
+  matchesTriageSearch,
+  filterCandidatesForTriage,
   ENRICHABLE_FIELDS,
   MAX_ENRICHMENT_VALUE_LENGTH,
   isValidHttpUrl,
@@ -622,6 +629,69 @@ test('buildReviewStatusByCandidateId: a candidate with no rows at all simply nev
   assert.deepEqual(buildReviewStatusByCandidateId(undefined), {});
 });
 
+// ─── pickLatestReviewRow — the one shared "latest review wins" rule ────
+
+test('pickLatestReviewRow: returns null for no rows', () => {
+  assert.equal(pickLatestReviewRow([]), null);
+  assert.equal(pickLatestReviewRow(undefined), null);
+  assert.equal(pickLatestReviewRow(null), null);
+});
+
+test('pickLatestReviewRow: returns the whole row with the latest decided_at, not just its status', () => {
+  const rows = [
+    { id: 1, candidate_id: 'a', decided_at: '2026-09-05T10:00:00Z', status: 'needs_enrichment' },
+    { id: 2, candidate_id: 'a', decided_at: '2026-09-05T12:00:00Z', status: 'deferred', deferred_reason: 'verify_later' },
+  ];
+  assert.deepEqual(pickLatestReviewRow(rows), rows[1]);
+  assert.deepEqual(pickLatestReviewRow([...rows].reverse()), rows[1], 'array order must never matter');
+});
+
+test('pickLatestReviewRow: ties on decided_at break toward the higher id', () => {
+  const rows = [
+    { id: 5, decided_at: '2026-09-05T10:00:00Z', status: 'needs_enrichment' },
+    { id: 6, decided_at: '2026-09-05T10:00:00Z', status: 'rejected' },
+  ];
+  assert.deepEqual(pickLatestReviewRow(rows), rows[1]);
+});
+
+// ─── buildLatestDeferredReasonByCandidateId (added 2026-09-06) ─────────
+
+test('buildLatestDeferredReasonByCandidateId: returns the reason when the latest review is deferred with a reason', () => {
+  const rows = [{ id: 1, candidate_id: 'c1', decided_at: '2026-09-05T10:00:00Z', status: 'deferred', deferred_reason: 'source_conflict' }];
+  assert.deepEqual(buildLatestDeferredReasonByCandidateId(rows), { c1: 'source_conflict' });
+});
+
+test('buildLatestDeferredReasonByCandidateId: returns null for a legacy deferred row with no reason — never an error, never a guess', () => {
+  const rows = [{ id: 1, candidate_id: 'c1', decided_at: '2026-09-05T10:00:00Z', status: 'deferred', deferred_reason: null }];
+  assert.deepEqual(buildLatestDeferredReasonByCandidateId(rows), { c1: null });
+});
+
+test('buildLatestDeferredReasonByCandidateId: "latest review wins" — a stale reason from an earlier deferred decision must never resurface once superseded', () => {
+  const rows = [
+    { id: 1, candidate_id: 'c1', decided_at: '2026-09-05T10:00:00Z', status: 'deferred', deferred_reason: 'chain_or_franchise_review' },
+    { id: 2, candidate_id: 'c1', decided_at: '2026-09-06T09:00:00Z', status: 'approved_internal' },
+  ];
+  assert.deepEqual(buildLatestDeferredReasonByCandidateId(rows), { c1: null });
+  // Reversed input order must produce the identical result.
+  assert.deepEqual(buildLatestDeferredReasonByCandidateId([...rows].reverse()), { c1: null });
+});
+
+test('buildLatestDeferredReasonByCandidateId: a non-deferred candidate (rejected/approved/needs_enrichment/new-via-no-rows) is always null', () => {
+  assert.deepEqual(
+    buildLatestDeferredReasonByCandidateId([{ id: 1, candidate_id: 'c1', decided_at: '2026-09-05T10:00:00Z', status: 'rejected' }]),
+    { c1: null }
+  );
+  assert.deepEqual(buildLatestDeferredReasonByCandidateId([]), {});
+});
+
+test('buildLatestDeferredReasonByCandidateId: groups by candidate_id and reduces each group independently', () => {
+  const rows = [
+    { id: 1, candidate_id: 'a', decided_at: '2026-09-05T10:00:00Z', status: 'deferred', deferred_reason: 'verify_later' },
+    { id: 2, candidate_id: 'b', decided_at: '2026-09-05T10:00:00Z', status: 'needs_enrichment' },
+  ];
+  assert.deepEqual(buildLatestDeferredReasonByCandidateId(rows), { a: 'verify_later', b: null });
+});
+
 // ─── enrichAndFilterCandidates: review_status attachment + filter ────────
 
 test('enrichAndFilterCandidates: attaches "new" when no review rows exist for a candidate', () => {
@@ -652,6 +722,148 @@ test('enrichAndFilterCandidates: filters by review_status', () => {
     reviewStatus: 'approved_internal',
   });
   assert.deepEqual(candidates.map((c) => c.id), ['1']);
+});
+
+test('enrichAndFilterCandidates: attaches deferred_reason from deferredReasonByCandidateId, defaulting to null when absent (added 2026-09-06)', () => {
+  const records = [
+    makeCandidate('1', 'run-a', { name: 'A', location: { lat: 51.58, lon: 4.78 } }),
+    makeCandidate('2', 'run-a', { name: 'B', location: { lat: 51.59, lon: 4.79 } }),
+  ];
+  const { candidates } = enrichAndFilterCandidates(records, {
+    reviewStatusByCandidateId: { '1': 'deferred' },
+    deferredReasonByCandidateId: { '1': 'ownership_or_permission_needed' },
+  });
+  assert.equal(candidates.find((c) => c.id === '1').deferred_reason, 'ownership_or_permission_needed');
+  assert.equal(candidates.find((c) => c.id === '2').deferred_reason, null, 'no entry in the map must default to null, never undefined or an error');
+});
+
+// ─── Triage overview (added 2026-09-06): computeReviewStatusCounts,
+// computeCandidateTriageBucket, matchesTriageSearch,
+// filterCandidatesForTriage — all pure, all operate on already-enriched
+// candidate objects (the shape enrichAndFilterCandidates produces), no
+// query, no write, no chain/franchise or service-model classification.
+
+function makeTriageCandidate(overrides) {
+  return {
+    id: '1',
+    extracted_fields: { name: 'Fixture Restaurant' },
+    normalized_fields: { address: 'Fixturestraat 1, 4811 AA Breda', website: 'https://fixture.example/' },
+    review_status: 'new',
+    deferred_reason: null,
+    ...overrides,
+  };
+}
+
+test('computeReviewStatusCounts: always returns all five statuses, defaulting to 0, in TRIAGE_SUMMARY_STATUSES order', () => {
+  assert.deepEqual(Object.keys(computeReviewStatusCounts([])), TRIAGE_SUMMARY_STATUSES);
+  assert.deepEqual(computeReviewStatusCounts([]), { new: 0, needs_enrichment: 0, approved_internal: 0, deferred: 0, rejected: 0 });
+});
+
+test('computeReviewStatusCounts: counts candidates into their exact effective-status bucket', () => {
+  const candidates = [
+    makeTriageCandidate({ id: '1', review_status: 'new' }),
+    makeTriageCandidate({ id: '2', review_status: 'needs_enrichment' }),
+    makeTriageCandidate({ id: '3', review_status: 'needs_enrichment' }),
+    makeTriageCandidate({ id: '4', review_status: 'deferred' }),
+    makeTriageCandidate({ id: '5', review_status: 'approved_internal' }),
+    makeTriageCandidate({ id: '6', review_status: 'rejected' }),
+  ];
+  assert.deepEqual(computeReviewStatusCounts(candidates), {
+    new: 1,
+    needs_enrichment: 2,
+    approved_internal: 1,
+    deferred: 1,
+    rejected: 1,
+  });
+});
+
+test('computeReviewStatusCounts: an unrecognized review_status is silently not counted anywhere, never thrown on', () => {
+  const candidates = [makeTriageCandidate({ review_status: 'not-a-real-status' })];
+  assert.doesNotThrow(() => computeReviewStatusCounts(candidates));
+  const counts = computeReviewStatusCounts(candidates);
+  assert.equal(Object.values(counts).reduce((a, b) => a + b, 0), 0);
+});
+
+test('computeCandidateTriageBucket: maps each status to the three named buckets, or null for "new"/"rejected"', () => {
+  assert.equal(computeCandidateTriageBucket(makeTriageCandidate({ review_status: 'needs_enrichment' })), 'needs_enrichment');
+  assert.equal(computeCandidateTriageBucket(makeTriageCandidate({ review_status: 'deferred' })), 'deferred');
+  assert.equal(computeCandidateTriageBucket(makeTriageCandidate({ review_status: 'approved_internal' })), 'approved_pending_canonical');
+  assert.equal(computeCandidateTriageBucket(makeTriageCandidate({ review_status: 'new' })), null);
+  assert.equal(computeCandidateTriageBucket(makeTriageCandidate({ review_status: 'rejected' })), null);
+  assert.equal(computeCandidateTriageBucket(null), null);
+  assert.equal(computeCandidateTriageBucket(undefined), null);
+});
+
+test('matchesTriageSearch: an empty or whitespace-only search term matches every candidate', () => {
+  const candidate = makeTriageCandidate({});
+  assert.equal(matchesTriageSearch(candidate, ''), true);
+  assert.equal(matchesTriageSearch(candidate, '   '), true);
+  assert.equal(matchesTriageSearch(candidate, undefined), true);
+  assert.equal(matchesTriageSearch(candidate, null), true);
+});
+
+test('matchesTriageSearch: matches case-insensitively against name, normalized address, and normalized website', () => {
+  const candidate = makeTriageCandidate({});
+  assert.equal(matchesTriageSearch(candidate, 'fixture restaurant'), true, 'name match');
+  assert.equal(matchesTriageSearch(candidate, 'FIXTURESTRAAT'), true, 'address match, case-insensitive');
+  assert.equal(matchesTriageSearch(candidate, 'fixture.example'), true, 'website match');
+  assert.equal(matchesTriageSearch(candidate, 'breda'), true, 'substring within the address');
+  assert.equal(matchesTriageSearch(candidate, 'not present anywhere'), false);
+});
+
+test('matchesTriageSearch: never uses the raw, un-normalized fields — only what is currently displayed', () => {
+  const candidate = makeTriageCandidate({
+    extracted_fields: { name: 'Fixture Restaurant', address: 'some raw address never shown as-is' },
+    normalized_fields: { address: 'Fixturestraat 1, 4811 AA Breda' },
+  });
+  assert.equal(matchesTriageSearch(candidate, 'never shown as-is'), false);
+});
+
+test('matchesTriageSearch: tolerates a missing normalized_fields/extracted_fields without throwing', () => {
+  assert.doesNotThrow(() => matchesTriageSearch({}, 'anything'));
+  assert.equal(matchesTriageSearch({}, 'anything'), false);
+  assert.equal(matchesTriageSearch(null, 'anything'), false);
+});
+
+test('filterCandidatesForTriage: with no options, returns every candidate unchanged', () => {
+  const candidates = [makeTriageCandidate({ id: '1' }), makeTriageCandidate({ id: '2' })];
+  assert.deepEqual(filterCandidatesForTriage(candidates), candidates);
+  assert.deepEqual(filterCandidatesForTriage(candidates, {}), candidates);
+});
+
+test('filterCandidatesForTriage: filters by status alone', () => {
+  const candidates = [
+    makeTriageCandidate({ id: '1', review_status: 'needs_enrichment' }),
+    makeTriageCandidate({ id: '2', review_status: 'deferred' }),
+  ];
+  const result = filterCandidatesForTriage(candidates, { statusFilter: 'deferred' });
+  assert.deepEqual(result.map((c) => c.id), ['2']);
+});
+
+test('filterCandidatesForTriage: deferredReasonFilter narrows within the deferred bucket only when it is set', () => {
+  const candidates = [
+    makeTriageCandidate({ id: '1', review_status: 'deferred', deferred_reason: 'verify_later' }),
+    makeTriageCandidate({ id: '2', review_status: 'deferred', deferred_reason: 'source_conflict' }),
+    makeTriageCandidate({ id: '3', review_status: 'needs_enrichment', deferred_reason: null }),
+  ];
+  const result = filterCandidatesForTriage(candidates, { statusFilter: 'deferred', deferredReasonFilter: 'verify_later' });
+  assert.deepEqual(result.map((c) => c.id), ['1']);
+});
+
+test('filterCandidatesForTriage: combines status, deferred reason, and search with AND semantics', () => {
+  const candidates = [
+    makeTriageCandidate({ id: '1', review_status: 'deferred', deferred_reason: 'verify_later', extracted_fields: { name: 'Alpha' } }),
+    makeTriageCandidate({ id: '2', review_status: 'deferred', deferred_reason: 'verify_later', extracted_fields: { name: 'Beta' } }),
+  ];
+  const result = filterCandidatesForTriage(candidates, { statusFilter: 'deferred', deferredReasonFilter: 'verify_later', searchTerm: 'Beta' });
+  assert.deepEqual(result.map((c) => c.id), ['2']);
+});
+
+test('filterCandidatesForTriage: never mutates the input array or its candidate objects', () => {
+  const candidates = [makeTriageCandidate({ id: '1' })];
+  const frozen = JSON.parse(JSON.stringify(candidates));
+  filterCandidatesForTriage(candidates, { statusFilter: 'new', searchTerm: 'fixture' });
+  assert.deepEqual(candidates, frozen);
 });
 
 // ─── Structural safety net: append-only behavior and "never a public/
@@ -1394,10 +1606,14 @@ test('structural safety net: review history renders deferred_reason next to stat
   assert.match(source, /r\.deferred_reason \? ` \(\$\{formatDeferredReasonLabel\(r\.deferred_reason\)\}\)` : ''/);
 });
 
-test('structural safety net: the deferred-reason dropdown and the review-history line both go through formatDeferredReasonLabel — no separate, divergence-prone label map in the page itself', () => {
+test('structural safety net: every deferred-reason display in the page (decision dropdown, review history, main card, and the triage overview) goes through formatDeferredReasonLabel — no separate, divergence-prone label map in the page itself', () => {
   const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
   const usageCount = (source.match(/formatDeferredReasonLabel\(/g) || []).length;
-  assert.equal(usageCount, 2, 'expected exactly two call sites: the dropdown <option> label and the review-history line');
+  // Decision-form dropdown option, review-history line, the main card's
+  // own "Deferred reason: …" line, and the triage overview's own reason
+  // filter dropdown + candidate-row bucket description — five call
+  // sites, all through the one shared, tested function.
+  assert.equal(usageCount, 5, 'expected exactly five call sites — see this test\'s own comment for which');
   assert.doesNotMatch(source, /const DEFERRED_REASON_LABELS/, 'the page must import the shared mapping from src/lib/importInbox.js, never define its own copy');
 });
 
@@ -1416,4 +1632,54 @@ test('structural safety net: the enrichment form puts the shared source URL in a
 test('structural safety net: individual per-field source URLs are shown only when the shared source is off — unchanged by the reflow', () => {
   const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
   assert.match(source, /\{!useShared && \(\s*<input\s*type="text"\s*placeholder="Source URL \(e\.g\. the restaurant's own website\)…"/);
+});
+
+// ─── structural safety net: Triage overview (added 2026-09-06) ─────────
+// A read-only summary/filter/search section — no migration, no write,
+// no website fetch, no automatic chain/franchise or service-model
+// classification. These tests read the page's own source (the same
+// pattern used throughout this file, since this project has no React
+// render harness — see the earlier structural-safety-net tests' own
+// comments) to prove the section is wired the way this feature
+// requires, on top of the already pure-tested summary/filter/search
+// logic above.
+
+test('structural safety net: the triage overview loads its own data scoped only by run_id — never the browsing filters (category/name/duplicate/quality/review_status)', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  const match = source.match(/const loadTriageCandidates = useCallback\(async \(token, runId\) => \{[\s\S]*?\n  \}, \[\]\)/);
+  assert.ok(match, 'expected to find the loadTriageCandidates function body');
+  const body = match[0];
+  assert.match(body, /params\.set\('run_id', runId\)/);
+  for (const forbiddenParam of ['category', 'name', 'possible_duplicate', 'quality', 'review_status']) {
+    assert.doesNotMatch(body, new RegExp(`params\\.set\\('${forbiddenParam}'`), `must never filter the triage fetch by ${forbiddenParam}`);
+  }
+});
+
+test('structural safety net: the triage overview never calls a write endpoint (POST/insert/update/delete) — GET only', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  const match = source.match(/const loadTriageCandidates = useCallback\(async \(token, runId\) => \{[\s\S]*?\n  \}, \[\]\)/);
+  assert.ok(match, 'expected to find the loadTriageCandidates function body');
+  assert.doesNotMatch(match[0], /method:\s*'POST'/);
+});
+
+test('structural safety net: the triage summary counts and its filtering both go through the pure, tested src/lib/importInbox.js functions, never a re-implementation in the page', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  assert.match(source, /computeReviewStatusCounts\(triageCandidates\)/);
+  assert.match(source, /filterCandidatesForTriage\(triageCandidates, \{/);
+  assert.match(source, /computeCandidateTriageBucket\(c\)/);
+});
+
+test('structural safety net: the deferred-reason triage filter is only applied when the status filter is "deferred"', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  assert.match(source, /deferredReasonFilter: triageStatusFilter === 'deferred' \? triageDeferredReasonFilter : ''/);
+});
+
+test('structural safety net: "View in list" never writes anything — it only adjusts local filter/expand state and queues a scroll, using the same read-only history loaders as an ordinary expand', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  const match = source.match(/function jumpToCandidateFromTriage\(candidateId\) \{[\s\S]*?\n  \}/);
+  assert.ok(match, 'expected to find the jumpToCandidateFromTriage function body');
+  const body = match[0];
+  assert.doesNotMatch(body, /\bfetch\(/, 'must never call fetch directly');
+  assert.doesNotMatch(body, /submitDecision|submitEnrichment|requestSuggestions/, 'must never trigger a write or a suggestion fetch');
+  assert.match(body, /setPendingScrollCandidateId\(candidateId\)/);
 });
