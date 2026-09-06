@@ -682,3 +682,36 @@ closing was, and remains, a purely local state change with no API call.
 No API response shape, security boundary, or write path changed. Full
 detail: `planning/specs/tickets/market-05-normalization-deduplication.md`'s
 own "Update (2026-09-05) — Data-inbox detail-view UX fixes" note.
+
+**Update (2026-09-06): structured `deferred_reason` + enrichment-form
+reflow.** A `deferred` review decision previously carried no structured
+reason, only free-text `note`. New migration
+`supabase/migrations/0009_market05a_candidate_reviews_deferred_reason.sql`
+(**NOT YET APPLIED live**) adds a nullable, fixed-set `deferred_reason`
+column, required exactly when `status = 'deferred'` — enforced via a
+`NOT VALID` check constraint specifically because `import_candidate_reviews`
+already holds 10 real, live rows (see this document's own 2026-09-05
+notes above), so a normally-validated constraint could fail against a
+pre-existing `deferred` row recorded before this column existed; `NOT
+VALID` skips that one-time scan while still enforcing the rule on every
+future insert — no backfill, no update, ever, of any existing row.
+`record_import_candidate_review()`'s signature is extended from 5 to 6
+arguments, with the old 5-argument overload explicitly dropped first (a
+different argument list is a different function to Postgres — leaving
+both would risk an ambiguous call). Locally validated in a fresh,
+disposable, containerized PostgreSQL instance — including seeding a
+synthetic pre-existing `deferred` row with no reason before applying
+`0009`, to exactly reproduce the live scenario — never against the live
+Supabase project; the migration remains unapplied there. `GET`/`POST
+.../candidates/{id}/reviews` and the Data-inbox UI were extended to
+match (a "Deferred reason" select shown only for status `Deferred`;
+review history now shows it next to status, with a legacy row's `null`
+value rendering as nothing extra, never an error). Separately, the
+enrichment form was reflowed (client-only, no behavior change): the
+shared source URL is now a distinct, labeled "1. Source" step above a
+"2. Fields" section holding the three fields as compact, consistent
+rows. 13 new tests in `src/lib/importInbox.test.js` (107 → 120). Full
+detail: `planning/specs/tickets/market-05-normalization-deduplication.md`'s
+own "Implementation (2026-09-06, later the same day) — structured
+deferred reason + enrichment-form reflow" section and
+`docs/api/import-inbox-api.md`'s matching "Addition (2026-09-06)" notes.

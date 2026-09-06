@@ -229,6 +229,20 @@ const DEFAULT_REVIEW_STATUS = 'new';
  * constraint exactly — never free text. */
 const ALLOWED_REJECTION_REASONS = ['not_a_restaurant', 'duplicate', 'permanently_closed', 'insufficient_data', 'other'];
 
+/** Fixed set, matching
+ * supabase/migrations/0009_market05a_candidate_reviews_deferred_reason.sql's
+ * own `deferred_reason` check constraint exactly — never free text.
+ * Added 2026-09-06: `deferred` previously had no structured reason at
+ * all, only the free-text `note`, making deferred candidates hard to
+ * triage in bulk. */
+const ALLOWED_DEFERRED_REASONS = [
+  'service_model_unclear',
+  'chain_or_franchise_review',
+  'ownership_or_permission_needed',
+  'source_conflict',
+  'verify_later',
+];
+
 /** Matches the migration's own `char_length(note) <= 2000` check —
  * enforced here too so a caller gets a clear, immediate `400` instead of
  * relying solely on the database constraint to reject an oversized note. */
@@ -246,8 +260,17 @@ const MAX_REVIEW_NOTE_LENGTH = 2000;
  * forbidden otherwise — symmetric with the migration's own check
  * constraint, so a caller sees the same rule at the API layer as at the
  * database layer, never a confusing mismatch between the two.
+ * `deferredReason` (added 2026-09-06) follows the exact same symmetric
+ * pattern for `status === 'deferred'`. This only governs *new* decisions
+ * being validated right now — it says nothing about, and never
+ * retroactively judges, an already-recorded `deferred` row that predates
+ * this field and so has no `deferred_reason` at all (see
+ * 0009_market05a_candidate_reviews_deferred_reason.sql's own `NOT VALID`
+ * constraint and this file's own `buildReviewStatusByCandidateId`/
+ * `computeEffectiveReviewStatus`, neither of which reads or requires
+ * `deferred_reason` to treat an existing row as valid history).
  */
-function validateReviewDecisionInput({ status, rejectionReason, note }) {
+function validateReviewDecisionInput({ status, rejectionReason, note, deferredReason }) {
   if (!ALLOWED_REVIEW_STATUSES.includes(status)) {
     return { valid: false, reason: 'invalid-status' };
   }
@@ -264,6 +287,18 @@ function validateReviewDecisionInput({ status, rejectionReason, note }) {
     return { valid: false, reason: 'invalid-rejection-reason' };
   }
 
+  const needsDeferredReason = status === 'deferred';
+  const hasDeferredReason = typeof deferredReason === 'string' && deferredReason.length > 0;
+  if (needsDeferredReason && !hasDeferredReason) {
+    return { valid: false, reason: 'missing-deferred-reason' };
+  }
+  if (!needsDeferredReason && hasDeferredReason) {
+    return { valid: false, reason: 'deferred-reason-not-allowed' };
+  }
+  if (hasDeferredReason && !ALLOWED_DEFERRED_REASONS.includes(deferredReason)) {
+    return { valid: false, reason: 'invalid-deferred-reason' };
+  }
+
   if (note !== undefined && note !== null) {
     if (typeof note !== 'string') {
       return { valid: false, reason: 'invalid-note' };
@@ -277,6 +312,7 @@ function validateReviewDecisionInput({ status, rejectionReason, note }) {
     valid: true,
     status,
     rejectionReason: needsReason ? rejectionReason : null,
+    deferredReason: needsDeferredReason ? deferredReason : null,
     note: note ? note.trim() || null : null,
   };
 }
@@ -288,6 +324,9 @@ function reviewValidationMessage(reason) {
   if (reason === 'missing-rejection-reason') return 'A rejection reason is required when status is "rejected".';
   if (reason === 'rejection-reason-not-allowed') return 'A rejection reason is only allowed when status is "rejected".';
   if (reason === 'invalid-rejection-reason') return `Rejection reason must be one of: ${ALLOWED_REJECTION_REASONS.join(', ')}.`;
+  if (reason === 'missing-deferred-reason') return 'A deferred reason is required when status is "deferred".';
+  if (reason === 'deferred-reason-not-allowed') return 'A deferred reason is only allowed when status is "deferred".';
+  if (reason === 'invalid-deferred-reason') return `Deferred reason must be one of: ${ALLOWED_DEFERRED_REASONS.join(', ')}.`;
   if (reason === 'invalid-note') return 'Note must be a string.';
   if (reason === 'note-too-long') return `Note must be at most ${MAX_REVIEW_NOTE_LENGTH} characters.`;
   return 'Invalid request.';
@@ -726,6 +765,7 @@ module.exports = {
   ALLOWED_REVIEW_STATUSES,
   DEFAULT_REVIEW_STATUS,
   ALLOWED_REJECTION_REASONS,
+  ALLOWED_DEFERRED_REASONS,
   MAX_REVIEW_NOTE_LENGTH,
   validateReviewDecisionInput,
   reviewValidationMessage,

@@ -16,6 +16,7 @@ import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import {
   ALLOWED_REVIEW_STATUSES,
   ALLOWED_REJECTION_REASONS,
+  ALLOWED_DEFERRED_REASONS,
   validateReviewDecisionInput,
   reviewValidationMessage,
   ENRICHABLE_FIELDS,
@@ -51,6 +52,14 @@ const REJECTION_REASON_LABELS = {
   permanently_closed: 'Permanently closed',
   insufficient_data: 'Insufficient data',
   other: 'Other',
+}
+
+const DEFERRED_REASON_LABELS = {
+  service_model_unclear: 'Service model unclear',
+  chain_or_franchise_review: 'Chain or franchise review',
+  ownership_or_permission_needed: 'Ownership or permission needed',
+  source_conflict: 'Source conflict',
+  verify_later: 'Verify later',
 }
 
 const ENRICHABLE_FIELD_LABELS = {
@@ -451,7 +460,7 @@ export default function ImportInboxPage() {
   function updateDraft(candidateId, patch) {
     setDecisionDraftByCandidateId((prev) => ({
       ...prev,
-      [candidateId]: { status: '', rejectionReason: '', note: '', ...prev[candidateId], ...patch },
+      [candidateId]: { status: '', rejectionReason: '', deferredReason: '', note: '', ...prev[candidateId], ...patch },
     }))
   }
 
@@ -462,10 +471,11 @@ export default function ImportInboxPage() {
   // is never a surprise; the server-side check remains authoritative
   // regardless.
   async function submitDecision(candidateId) {
-    const draft = decisionDraftByCandidateId[candidateId] || { status: '', rejectionReason: '', note: '' }
+    const draft = decisionDraftByCandidateId[candidateId] || { status: '', rejectionReason: '', deferredReason: '', note: '' }
     const validation = validateReviewDecisionInput({
       status: draft.status,
       rejectionReason: draft.rejectionReason || undefined,
+      deferredReason: draft.deferredReason || undefined,
       note: draft.note || undefined,
     })
     if (!validation.valid) {
@@ -486,6 +496,7 @@ export default function ImportInboxPage() {
         body: JSON.stringify({
           status: validation.status,
           rejection_reason: validation.rejectionReason,
+          deferred_reason: validation.deferredReason,
           note: validation.note,
         }),
       })
@@ -495,7 +506,7 @@ export default function ImportInboxPage() {
         outcome = { ok: false }
         return
       }
-      setDecisionDraftByCandidateId((prev) => ({ ...prev, [candidateId]: { status: '', rejectionReason: '', note: '' } }))
+      setDecisionDraftByCandidateId((prev) => ({ ...prev, [candidateId]: { status: '', rejectionReason: '', deferredReason: '', note: '' } }))
       await loadReviews(session.access_token, candidateId)
       await loadCandidates(session.access_token, {
         runId: runIdFilter,
@@ -711,7 +722,7 @@ export default function ImportInboxPage() {
             <div style={{ display: 'grid', gap: 12 }}>
               {candidates.map((c) => {
                 const expanded = expandedCandidateId === c.id
-                const draft = decisionDraftByCandidateId[c.id] || { status: '', rejectionReason: '', note: '' }
+                const draft = decisionDraftByCandidateId[c.id] || { status: '', rejectionReason: '', deferredReason: '', note: '' }
                 const reviews = reviewsByCandidateId[c.id]
                 return (
                   <div key={c.id} style={cardStyle}>
@@ -809,6 +820,7 @@ export default function ImportInboxPage() {
                               <div key={r.id} style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
                                 <strong>{REVIEW_STATUS_LABELS[r.status] || r.status}</strong>
                                 {r.rejection_reason ? ` (${REJECTION_REASON_LABELS[r.rejection_reason] || r.rejection_reason})` : ''}
+                                {r.deferred_reason ? ` (${DEFERRED_REASON_LABELS[r.deferred_reason] || r.deferred_reason})` : ''}
                                 {' · '}
                                 {r.decided_at}
                                 {r.note ? <div style={{ color: 'var(--text-muted)', marginTop: 2 }}>{r.note}</div> : null}
@@ -821,7 +833,7 @@ export default function ImportInboxPage() {
                         <div style={{ display: 'grid', gap: 8, maxWidth: 420 }}>
                           <select
                             value={draft.status}
-                            onChange={(e) => updateDraft(c.id, { status: e.target.value, rejectionReason: '' })}
+                            onChange={(e) => updateDraft(c.id, { status: e.target.value, rejectionReason: '', deferredReason: '' })}
                             style={selectStyle}
                           >
                             <option value="">Choose a status…</option>
@@ -841,6 +853,20 @@ export default function ImportInboxPage() {
                               {ALLOWED_REJECTION_REASONS.map((r) => (
                                 <option key={r} value={r}>
                                   {REJECTION_REASON_LABELS[r]}
+                                </option>
+                              ))}
+                            </select>
+                          )}
+                          {draft.status === 'deferred' && (
+                            <select
+                              value={draft.deferredReason}
+                              onChange={(e) => updateDraft(c.id, { deferredReason: e.target.value })}
+                              style={selectStyle}
+                            >
+                              <option value="">Choose a deferred reason…</option>
+                              {ALLOWED_DEFERRED_REASONS.map((r) => (
+                                <option key={r} value={r}>
+                                  {DEFERRED_REASON_LABELS[r]}
                                 </option>
                               ))}
                             </select>
@@ -968,76 +994,97 @@ export default function ImportInboxPage() {
                           </div>
                         )}
 
-                        <div style={{ display: 'grid', gap: 10, maxWidth: 480 }}>
+                        <div style={{ display: 'grid', gap: 14, maxWidth: 560 }}>
                           {(() => {
                             const fieldDraftFor = (fieldName) => (enrichmentDraftByCandidateId[c.id] || EMPTY_ENRICHMENT_DRAFT)[fieldName] || { value: '', sourceUrl: '' }
                             const useShared = (enrichmentDraftByCandidateId[c.id] || EMPTY_ENRICHMENT_DRAFT).useSharedSourceUrl
                             const sharedUrl = (enrichmentDraftByCandidateId[c.id] || EMPTY_ENRICHMENT_DRAFT).sharedSourceUrl
                             return (
                               <>
-                                <label style={{ fontSize: 12, color: 'var(--text-secondary)', display: 'flex', gap: 6, alignItems: 'center' }}>
-                                  <input
-                                    type="checkbox"
-                                    checked={useShared}
-                                    onChange={(e) => updateEnrichmentTopLevelDraft(c.id, { useSharedSourceUrl: e.target.checked })}
-                                  />
-                                  Use one source URL for all filled-in fields
-                                </label>
-                                {useShared && (
-                                  <input
-                                    type="text"
-                                    placeholder="Source URL used for every filled-in field below…"
-                                    value={sharedUrl}
-                                    onChange={(e) => updateEnrichmentTopLevelDraft(c.id, { sharedSourceUrl: e.target.value })}
-                                    style={selectStyle}
-                                  />
-                                )}
-                                {shouldOfferSharedSourceUrlAsWebsite({
-                                  useSharedSourceUrl: useShared,
-                                  sharedSourceUrl: sharedUrl,
-                                  websiteValue: fieldDraftFor('website').value,
-                                }) && (
-                                  <button
-                                    type="button"
-                                    onClick={() => useSharedSourceUrlAsWebsite(c.id, sharedUrl)}
-                                    style={{
-                                      fontSize: 12,
-                                      padding: '4px 10px',
-                                      borderRadius: 8,
-                                      border: '1px solid var(--border)',
-                                      background: 'transparent',
-                                      color: 'var(--text-secondary)',
-                                      cursor: 'pointer',
-                                      justifySelf: 'start',
-                                    }}
-                                  >
-                                    Use this source URL as the website
-                                  </button>
-                                )}
-                                {ENRICHABLE_FIELDS.map((fieldName) => {
-                                  const fieldDraft = fieldDraftFor(fieldName)
-                                  return (
-                                    <div key={fieldName} style={{ display: 'grid', gap: 4 }}>
-                                      <label style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{ENRICHABLE_FIELD_LABELS[fieldName]}</label>
-                                      <input
-                                        type="text"
-                                        placeholder={`New ${ENRICHABLE_FIELD_LABELS[fieldName].toLowerCase()} value…`}
-                                        value={fieldDraft.value}
-                                        onChange={(e) => updateEnrichmentFieldDraft(c.id, fieldName, { value: e.target.value })}
-                                        style={selectStyle}
-                                      />
-                                      {!useShared && (
+                                {/* Step 1: the source URL, first and most prominent — everything
+                                    below is either derived from it (shared mode) or needs its own
+                                    per-field source instead (individual mode). */}
+                                <div style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 10, display: 'grid', gap: 8 }}>
+                                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>1. Source</div>
+                                  <label style={{ fontSize: 12, color: 'var(--text-secondary)', display: 'flex', gap: 6, alignItems: 'center' }}>
+                                    <input
+                                      type="checkbox"
+                                      checked={useShared}
+                                      onChange={(e) => updateEnrichmentTopLevelDraft(c.id, { useSharedSourceUrl: e.target.checked })}
+                                    />
+                                    Use one source URL for all filled-in fields
+                                  </label>
+                                  {useShared && (
+                                    <input
+                                      type="text"
+                                      placeholder="Source URL used for every filled-in field below…"
+                                      value={sharedUrl}
+                                      onChange={(e) => updateEnrichmentTopLevelDraft(c.id, { sharedSourceUrl: e.target.value })}
+                                      style={selectStyle}
+                                    />
+                                  )}
+                                  {shouldOfferSharedSourceUrlAsWebsite({
+                                    useSharedSourceUrl: useShared,
+                                    sharedSourceUrl: sharedUrl,
+                                    websiteValue: fieldDraftFor('website').value,
+                                  }) && (
+                                    <button
+                                      type="button"
+                                      onClick={() => useSharedSourceUrlAsWebsite(c.id, sharedUrl)}
+                                      style={{
+                                        fontSize: 12,
+                                        padding: '4px 10px',
+                                        borderRadius: 8,
+                                        border: '1px solid var(--border)',
+                                        background: 'transparent',
+                                        color: 'var(--text-secondary)',
+                                        cursor: 'pointer',
+                                        justifySelf: 'start',
+                                      }}
+                                    >
+                                      Use this source URL as the website
+                                    </button>
+                                  )}
+                                </div>
+
+                                {/* Step 2: the three enrichable fields, as compact, consistent
+                                    rows — value first, then its own source URL, only when the
+                                    fields aren't already sharing the one source URL above. */}
+                                <div style={{ display: 'grid', gap: 6 }}>
+                                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>2. Fields</div>
+                                  {ENRICHABLE_FIELDS.map((fieldName) => {
+                                    const fieldDraft = fieldDraftFor(fieldName)
+                                    return (
+                                      <div
+                                        key={fieldName}
+                                        style={{
+                                          display: 'grid',
+                                          gridTemplateColumns: useShared ? '80px minmax(0, 1fr)' : '80px minmax(0, 1fr) minmax(0, 1fr)',
+                                          gap: 6,
+                                          alignItems: 'center',
+                                        }}
+                                      >
+                                        <label style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{ENRICHABLE_FIELD_LABELS[fieldName]}</label>
                                         <input
                                           type="text"
-                                          placeholder="Source URL (e.g. the restaurant's own website)…"
-                                          value={fieldDraft.sourceUrl}
-                                          onChange={(e) => updateEnrichmentFieldDraft(c.id, fieldName, { sourceUrl: e.target.value })}
+                                          placeholder={`New ${ENRICHABLE_FIELD_LABELS[fieldName].toLowerCase()} value…`}
+                                          value={fieldDraft.value}
+                                          onChange={(e) => updateEnrichmentFieldDraft(c.id, fieldName, { value: e.target.value })}
                                           style={selectStyle}
                                         />
-                                      )}
-                                    </div>
-                                  )
-                                })}
+                                        {!useShared && (
+                                          <input
+                                            type="text"
+                                            placeholder="Source URL (e.g. the restaurant's own website)…"
+                                            value={fieldDraft.sourceUrl}
+                                            onChange={(e) => updateEnrichmentFieldDraft(c.id, fieldName, { sourceUrl: e.target.value })}
+                                            style={selectStyle}
+                                          />
+                                        )}
+                                      </div>
+                                    )
+                                  })}
+                                </div>
                               </>
                             )
                           })()}

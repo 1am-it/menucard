@@ -183,6 +183,7 @@ Response `200`:
       "decided_at": "2026-09-05T12:00:00.000Z",
       "status": "approved_internal",
       "rejection_reason": null,
+      "deferred_reason": null,
       "note": "phone number confirmed via a second look"
     },
     {
@@ -192,11 +193,24 @@ Response `200`:
       "decided_at": "2026-09-05T10:00:00.000Z",
       "status": "needs_enrichment",
       "rejection_reason": null,
+      "deferred_reason": null,
       "note": null
     }
   ]
 }
 ```
+
+> **Addition (2026-09-06): `deferred_reason`.** A `deferred` row recorded
+> *before* `supabase/migrations/0009_market05a_candidate_reviews_deferred_reason.sql`
+> was applied has `deferred_reason: null` — it predates this field
+> entirely, is never backfilled, and stays fully valid, readable history
+> exactly as originally recorded. `null` on a `deferred` row therefore
+> means one of two distinct things depending on when it was recorded:
+> "no reason existed yet as a concept" (a legacy row) — never confused
+> with an error, and never re-validated retroactively. A `deferred` row
+> recorded *after* that migration always has a non-null
+> `deferred_reason` — the API enforces this on every new write (see the
+> `POST` addition below).
 An empty `reviews` array means the candidate's effective status is `new`
 — it does not mean the candidate doesn't exist (that's a separate `404`,
 see below, and only surfaces on `POST`).
@@ -210,7 +224,23 @@ see below, and only surfaces on `POST`).
 - `rejection_reason` — required exactly when `status` is `"rejected"`,
   forbidden otherwise; one of `not_a_restaurant`, `duplicate`,
   `permanently_closed`, `insufficient_data`, `other`.
+- `deferred_reason` (added 2026-09-06) — required exactly when `status`
+  is `"deferred"`, forbidden otherwise; one of `service_model_unclear`,
+  `chain_or_franchise_review`, `ownership_or_permission_needed`,
+  `source_conflict`, `verify_later`. Symmetric with `rejection_reason`'s
+  own rule, enforced at both the API layer
+  (`validateReviewDecisionInput`) and the database layer (a `NOT VALID`
+  check constraint — see the migration's own header comment for why it
+  is `NOT VALID` rather than a normally-validated constraint: this table
+  already held real, live `deferred` rows recorded before this column
+  existed, and a normally-validated constraint would have failed
+  immediately against exactly those rows at migration time).
 - `note` — optional, at most 2000 characters.
+
+Example with the new field:
+```json
+{ "status": "deferred", "deferred_reason": "ownership_or_permission_needed", "note": "waiting on a reply from the listed operator" }
+```
 
 Always performs exactly **one insert** via the
 `record_import_candidate_review()` Postgres function — never an update,
@@ -507,6 +537,20 @@ after a successful "Save decision"/"Save enrichment," and stays open
 with the reviewer's input intact after any validation or API failure —
 `src/lib/importInbox.js`'s `shouldCollapseCandidateCardAfterAction`.
 
+**Further enrichment form UX (2026-09-06, later the same day,
+client-only, no API contract change)**: the source-URL step is now a
+distinct, labeled "1. Source" block above the three fields (previously
+first in render order but not visually set apart), with the "Use one
+source URL for all filled-in fields" checkbox and the existing "Use this
+source URL as the website" shortcut both inside it; the three fields
+(`Address`/`Phone`/`Website`) are rendered as compact, consistent rows
+(label, value, and — only when the shared source is off — its own
+source URL) under a "2. Fields" heading. Purely a layout reflow: the
+same draft state, the same `POST` body shape, the same security
+boundary (the suggest-from-website route still only ever fetches the
+candidate's own already-*saved* website — never a value read directly
+off this form).
+
 ## What has been verified
 
 Verified against the real Supabase project (2026-09-05), using the
@@ -613,3 +657,29 @@ review feature and the account-activation flow, both out of scope for
 this migration's own verification) — flagged here only because it was
 directly observed while confirming this migration's effects, and left
 for a dedicated update rather than folded silently into this one.
+
+**Addition (2026-09-06) — `deferred_reason`, migration `0009`, NOT YET
+APPLIED live.** Because `import_candidate_reviews` already held those 10
+real, live rows by the time this need was identified — and because it is
+entirely plausible some of them are `deferred` — the new
+`deferred_reason` column and its "required exactly when deferred" check
+were written and locally validated (a fresh, disposable, containerized
+PostgreSQL instance; 0004/0006/0007/0008 applied first, then a synthetic
+row seeded with `status = 'deferred'` and no `deferred_reason`, to
+exactly reproduce that live scenario, before applying `0009` on top)
+specifically to prove: the migration applies cleanly despite that
+pre-existing row (the `NOT VALID` constraint is what makes this
+possible — a normally-validated constraint would have failed
+immediately); the pre-existing row remains completely unmodified and
+fully readable afterward; a new `deferred` decision with no reason, an
+invalid reason, or a reason on a non-`deferred` status are all correctly
+refused; a new `deferred` decision with a valid reason succeeds; the
+append-only `UPDATE`/`DELETE` refusal (even for `service_role`) still
+holds; and exactly one overload of `record_import_candidate_review()`
+exists afterward (the old 5-argument version is explicitly dropped, not
+left callable alongside the new 6-argument one). **None of this has been
+exercised against the actual live Supabase project, and the migration
+itself has not been applied there either** — both remain separate,
+later, explicitly-approved steps, exactly like `0007`/`0008` before they
+were applied. The real, live `import_candidate_reviews` rows themselves
+were not read, queried, or otherwise touched while preparing this round.

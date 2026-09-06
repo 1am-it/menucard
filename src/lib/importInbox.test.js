@@ -18,6 +18,7 @@ const {
   ALLOWED_REVIEW_STATUSES,
   DEFAULT_REVIEW_STATUS,
   ALLOWED_REJECTION_REASONS,
+  ALLOWED_DEFERRED_REASONS,
   MAX_REVIEW_NOTE_LENGTH,
   validateReviewDecisionInput,
   reviewValidationMessage,
@@ -349,6 +350,13 @@ test('validateReviewDecisionInput: constants match the migration exactly', () =>
   assert.equal(DEFAULT_REVIEW_STATUS, 'new');
   assert.equal(ALLOWED_REVIEW_STATUSES.includes(DEFAULT_REVIEW_STATUS), false, "'new' must never be a storable status");
   assert.deepEqual(ALLOWED_REJECTION_REASONS, ['not_a_restaurant', 'duplicate', 'permanently_closed', 'insufficient_data', 'other']);
+  assert.deepEqual(ALLOWED_DEFERRED_REASONS, [
+    'service_model_unclear',
+    'chain_or_franchise_review',
+    'ownership_or_permission_needed',
+    'source_conflict',
+    'verify_later',
+  ]);
 });
 
 test('validateReviewDecisionInput: rejects "new" and any other unrecognized status', () => {
@@ -357,10 +365,10 @@ test('validateReviewDecisionInput: rejects "new" and any other unrecognized stat
   assert.deepEqual(validateReviewDecisionInput({ status: undefined }), { valid: false, reason: 'invalid-status' });
 });
 
-test('validateReviewDecisionInput: accepts a non-rejection status with no rejection reason', () => {
-  for (const status of ['needs_enrichment', 'approved_internal', 'deferred']) {
+test('validateReviewDecisionInput: accepts a status with no reason concept (needs_enrichment/approved_internal) with no rejection or deferred reason', () => {
+  for (const status of ['needs_enrichment', 'approved_internal']) {
     const result = validateReviewDecisionInput({ status });
-    assert.deepEqual(result, { valid: true, status, rejectionReason: null, note: null });
+    assert.deepEqual(result, { valid: true, status, rejectionReason: null, deferredReason: null, note: null });
   }
 });
 
@@ -378,36 +386,82 @@ test('validateReviewDecisionInput: "rejected" requires one of the fixed rejectio
     valid: true,
     status: 'rejected',
     rejectionReason: 'duplicate',
+    deferredReason: null,
     note: null,
   });
 });
 
 test('validateReviewDecisionInput: a rejection reason on a non-rejection status is refused', () => {
-  assert.deepEqual(validateReviewDecisionInput({ status: 'deferred', rejectionReason: 'duplicate' }), {
+  assert.deepEqual(validateReviewDecisionInput({ status: 'deferred', rejectionReason: 'duplicate', deferredReason: 'verify_later' }), {
     valid: false,
     reason: 'rejection-reason-not-allowed',
   });
 });
 
+// ─── "deferred" requires a structured reason (added 2026-09-06) ────────
+// Previously a `deferred` decision needed no structured reason at all —
+// this is the new symmetric requirement, mirroring "rejected" requiring
+// rejection_reason exactly. This governs new decisions only — it says
+// nothing about an already-recorded legacy `deferred` row that predates
+// this field (see the dedicated legacy-row tests further below).
+
+test('validateReviewDecisionInput: "deferred" requires one of the fixed deferred reasons', () => {
+  assert.deepEqual(validateReviewDecisionInput({ status: 'deferred' }), { valid: false, reason: 'missing-deferred-reason' });
+  assert.deepEqual(validateReviewDecisionInput({ status: 'deferred', deferredReason: '' }), {
+    valid: false,
+    reason: 'missing-deferred-reason',
+  });
+  assert.deepEqual(validateReviewDecisionInput({ status: 'deferred', deferredReason: 'not_on_the_list' }), {
+    valid: false,
+    reason: 'invalid-deferred-reason',
+  });
+  for (const deferredReason of ALLOWED_DEFERRED_REASONS) {
+    assert.deepEqual(validateReviewDecisionInput({ status: 'deferred', deferredReason }), {
+      valid: true,
+      status: 'deferred',
+      rejectionReason: null,
+      deferredReason,
+      note: null,
+    });
+  }
+});
+
+test('validateReviewDecisionInput: a deferred reason on a non-deferred status is refused', () => {
+  assert.deepEqual(validateReviewDecisionInput({ status: 'needs_enrichment', deferredReason: 'verify_later' }), {
+    valid: false,
+    reason: 'deferred-reason-not-allowed',
+  });
+  assert.deepEqual(validateReviewDecisionInput({ status: 'approved_internal', deferredReason: 'verify_later' }), {
+    valid: false,
+    reason: 'deferred-reason-not-allowed',
+  });
+  assert.deepEqual(validateReviewDecisionInput({ status: 'rejected', rejectionReason: 'duplicate', deferredReason: 'verify_later' }), {
+    valid: false,
+    reason: 'deferred-reason-not-allowed',
+  });
+});
+
 test('validateReviewDecisionInput: note is optional, trimmed, and length-capped', () => {
-  assert.deepEqual(validateReviewDecisionInput({ status: 'deferred', note: '  needs a second look  ' }), {
+  assert.deepEqual(validateReviewDecisionInput({ status: 'needs_enrichment', note: '  needs a second look  ' }), {
     valid: true,
-    status: 'deferred',
+    status: 'needs_enrichment',
     rejectionReason: null,
+    deferredReason: null,
     note: 'needs a second look',
   });
-  assert.deepEqual(validateReviewDecisionInput({ status: 'deferred', note: '   ' }), {
+  assert.deepEqual(validateReviewDecisionInput({ status: 'needs_enrichment', note: '   ' }), {
     valid: true,
-    status: 'deferred',
+    status: 'needs_enrichment',
     rejectionReason: null,
+    deferredReason: null,
     note: null,
   });
-  assert.deepEqual(validateReviewDecisionInput({ status: 'deferred', note: 123 }), { valid: false, reason: 'invalid-note' });
-  assert.deepEqual(validateReviewDecisionInput({ status: 'deferred', note: 'x'.repeat(MAX_REVIEW_NOTE_LENGTH + 1) }), {
+  assert.deepEqual(validateReviewDecisionInput({ status: 'needs_enrichment', note: 123 }), { valid: false, reason: 'invalid-note' });
+  assert.deepEqual(validateReviewDecisionInput({ status: 'needs_enrichment', note: 'x'.repeat(MAX_REVIEW_NOTE_LENGTH + 1) }), {
     valid: false,
     reason: 'note-too-long',
   });
-  assert.deepEqual(validateReviewDecisionInput({ status: 'deferred', note: 'x'.repeat(MAX_REVIEW_NOTE_LENGTH) }).valid, true);
+  assert.deepEqual(validateReviewDecisionInput({ status: 'needs_enrichment', note: 'x'.repeat(MAX_REVIEW_NOTE_LENGTH) }).valid, true);
 });
 
 test('reviewValidationMessage: returns a distinct, non-empty message per reason, never echoing raw input', () => {
@@ -416,12 +470,18 @@ test('reviewValidationMessage: returns a distinct, non-empty message per reason,
     'missing-rejection-reason',
     'rejection-reason-not-allowed',
     'invalid-rejection-reason',
+    'missing-deferred-reason',
+    'deferred-reason-not-allowed',
+    'invalid-deferred-reason',
     'invalid-note',
     'note-too-long',
   ];
   const messages = reasons.map(reviewValidationMessage);
   assert.equal(new Set(messages).size, messages.length, 'every reason must map to a distinct message');
   for (const m of messages) assert.ok(m.length > 0);
+  assert.equal(reviewValidationMessage('missing-deferred-reason'), 'A deferred reason is required when status is "deferred".');
+  assert.equal(reviewValidationMessage('deferred-reason-not-allowed'), 'A deferred reason is only allowed when status is "deferred".');
+  assert.match(reviewValidationMessage('invalid-deferred-reason'), /Deferred reason must be one of:.*verify_later/);
   assert.equal(reviewValidationMessage('something-unrecognized'), 'Invalid request.');
 });
 
@@ -471,6 +531,29 @@ test('computeEffectiveReviewStatus: malformed rows (missing decided_at) are skip
   ];
   assert.doesNotThrow(() => computeEffectiveReviewStatus(rows));
   assert.equal(computeEffectiveReviewStatus(rows), 'deferred');
+});
+
+// ─── Legacy `deferred` rows with no `deferred_reason` (added 2026-09-06,
+// migration 0009) — recorded before that column existed, so it is
+// `null`/entirely absent. They must stay fully readable and treated
+// exactly like any other row: no crash, no special-casing, no implicit
+// "invalid" status, no backfill/guess at a reason. This is the pure-
+// logic half of that guarantee — the database half (the NOT VALID
+// constraint that lets such a row exist and survive the migration
+// unmodified) is proven by the migration structural tests below. ──────
+
+test('computeEffectiveReviewStatus: a legacy deferred row with deferred_reason null/absent is still a fully valid effective status', () => {
+  const withExplicitNull = [{ id: 1, decided_at: '2026-09-05T10:00:00Z', status: 'deferred', deferred_reason: null }];
+  assert.equal(computeEffectiveReviewStatus(withExplicitNull), 'deferred');
+
+  const withKeyEntirelyAbsent = [{ id: 1, decided_at: '2026-09-05T10:00:00Z', status: 'deferred' }];
+  assert.doesNotThrow(() => computeEffectiveReviewStatus(withKeyEntirelyAbsent));
+  assert.equal(computeEffectiveReviewStatus(withKeyEntirelyAbsent), 'deferred');
+});
+
+test('buildReviewStatusByCandidateId: a legacy deferred row with no deferred_reason is still included as that candidate\'s effective status', () => {
+  const rows = [{ id: 1, candidate_id: 'c1', decided_at: '2026-09-05T10:00:00Z', status: 'deferred', deferred_reason: null }];
+  assert.deepEqual(buildReviewStatusByCandidateId(rows), { c1: 'deferred' });
 });
 
 test('buildReviewStatusByCandidateId: groups by candidate_id and reduces each group independently', () => {
@@ -529,6 +612,10 @@ const REVIEW_ROUTE_PATH = path.join(REPO_ROOT, 'app/api/internal/v1/import-inbox
 const CANDIDATES_ROUTE_PATH = path.join(REPO_ROOT, 'app/api/internal/v1/import-inbox/candidates/route.js');
 const RUNS_ROUTE_PATH = path.join(REPO_ROOT, 'app/api/internal/v1/import-inbox/runs/route.js');
 const MIGRATION_PATH = path.join(REPO_ROOT, 'supabase/migrations/0007_market05a_candidate_reviews.sql');
+const DEFERRED_REASON_MIGRATION_PATH = path.join(
+  REPO_ROOT,
+  'supabase/migrations/0009_market05a_candidate_reviews_deferred_reason.sql'
+);
 
 // Consumer-facing canonical data does not live in a Supabase table in
 // this project at all yet (see docs/api/import-inbox-api.md) — it is
@@ -545,6 +632,13 @@ test('structural safety net: the candidate-reviews route never calls .update()/.
     assert.equal(source.includes(identifier), false, `must never reference "${identifier}"`);
   }
   assert.doesNotMatch(source, /writeFileSync|appendFileSync/, 'must never write to any file on disk');
+});
+
+test('structural safety net: the candidate-reviews route reads and writes deferred_reason end to end', () => {
+  const source = fs.readFileSync(REVIEW_ROUTE_PATH, 'utf8');
+  assert.match(source, /\.select\('id, candidate_id, reviewer_id, decided_at, status, rejection_reason, deferred_reason, note'\)/);
+  assert.match(source, /deferredReason: body && body\.deferred_reason/);
+  assert.match(source, /p_deferred_reason: validation\.deferredReason/);
 });
 
 test('structural safety net: the candidates list route never calls .update()/.delete()/.insert(), and never references a canonical/public identifier', () => {
@@ -571,6 +665,59 @@ test('structural safety net: the migration grants only select+insert on import_c
   // statement — a real grant would always be followed by "on public." in
   // this project's own migration style (see 0004/0006's own grants).
   assert.doesNotMatch(sql, /grant\s+(?:[\w,\s]*\b)?(update|delete)\b[\w,\s]*\bon\s+public\.import_candidate_reviews/i);
+});
+
+// ─── 0009: deferred_reason migration — append-only, legacy-safe ────────
+// Structural proof (no live/local database available in this test run)
+// that the migration text itself matches every guarantee this feature
+// depends on. The actual runtime behavior (a legacy deferred row with no
+// reason survives this exact migration unmodified; new inserts are
+// correctly gated) was additionally verified by hand in a disposable,
+// throwaway local Postgres container before this migration was
+// considered ready — never against the live Supabase project — see this
+// round's own report for the transcript; that verification is not
+// itself part of this repo's automated test suite since it requires a
+// real Postgres server, which `node --test` does not provide.
+
+test('structural safety net: 0009 never updates or deletes an existing row, and grants no new table-level privilege', () => {
+  const sql = fs.readFileSync(DEFERRED_REASON_MIGRATION_PATH, 'utf8');
+  assert.doesNotMatch(sql, /^\s*update\s+import_candidate_reviews/im, 'must never update an existing review row');
+  assert.doesNotMatch(sql, /^\s*delete\s+from\s+import_candidate_reviews/im, 'must never delete an existing review row');
+  // A backfill would look like an UPDATE ... SET deferred_reason — already
+  // covered above, but asserted by name too since that is the literal
+  // thing this ticket explicitly forbids.
+  assert.doesNotMatch(sql, /set\s+deferred_reason\s*=/i, 'must never backfill deferred_reason on any existing row');
+  assert.doesNotMatch(sql, /grant\s+(?:[\w,\s]*\b)?(update|delete)\b[\w,\s]*\bon\s+public\.import_candidate_reviews/i);
+});
+
+test('structural safety net: 0009 adds the "required exactly when deferred" constraint as NOT VALID — the mechanism that lets legacy rows survive', () => {
+  const sql = fs.readFileSync(DEFERRED_REASON_MIGRATION_PATH, 'utf8');
+  assert.match(
+    sql,
+    /add constraint import_candidate_reviews_deferred_reason_required\s+check \(\(status = 'deferred'\) = \(deferred_reason is not null\)\) not valid/
+  );
+});
+
+test('structural safety net: 0009\'s fixed deferred_reason value list matches ALLOWED_DEFERRED_REASONS exactly', () => {
+  const sql = fs.readFileSync(DEFERRED_REASON_MIGRATION_PATH, 'utf8');
+  const match = sql.match(/deferred_reason in \(([\s\S]*?)\)/);
+  assert.ok(match, 'expected to find the deferred_reason fixed-value check');
+  const values = match[1]
+    .split(',')
+    .map((s) => s.trim().replace(/^'|'$/g, ''))
+    .filter(Boolean);
+  assert.deepEqual(values, ALLOWED_DEFERRED_REASONS);
+});
+
+test('structural safety net: 0009 drops the old 5-argument RPC signature by its exact type list before recreating it — never leaves two overloads', () => {
+  const sql = fs.readFileSync(DEFERRED_REASON_MIGRATION_PATH, 'utf8');
+  assert.match(sql, /drop function if exists record_import_candidate_review\(uuid, uuid, text, text, text\)/);
+  assert.match(sql, /create or replace function record_import_candidate_review\(/);
+  assert.match(sql, /p_deferred_reason text default null/);
+  assert.match(
+    sql,
+    /grant execute on function record_import_candidate_review\(uuid, uuid, text, text, text, text\) to service_role/
+  );
 });
 
 // ─── MARKET-05A candidate enrichments — validateEnrichmentFieldInput /
@@ -1176,4 +1323,38 @@ test('structural safety net: "Use this source URL as the website" only fills the
   assert.doesNotMatch(body, /\bfetch\(/, 'must never fetch anything — form-fill only');
   assert.match(body, /applySharedSourceUrlAsWebsite\(current, sharedSourceUrl\)/, 'must go through the pure, tested draft transform');
   assert.match(source, /shouldOfferSharedSourceUrlAsWebsite\(\{/, 'the button must be gated by the pure, tested visibility decision');
+});
+
+// ─── structural safety net: deferred reason (2026-09-06) ────────────────
+
+test('structural safety net: the deferred-reason select is only rendered for status "deferred"', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  assert.match(source, /\{draft\.status === 'deferred' && \(/, 'expected a dedicated conditional block gated on status === "deferred"');
+  assert.match(source, /ALLOWED_DEFERRED_REASONS\.map/, 'expected the fixed reason list to drive the <option>s, never free text');
+  // Choosing a new status must clear both reason drafts — never leave a
+  // stale rejection/deferred reason from a previous status selection
+  // silently attached to the next submission.
+  assert.match(source, /updateDraft\(c\.id, \{ status: e\.target\.value, rejectionReason: '', deferredReason: '' \}\)/);
+});
+
+test('structural safety net: review history renders deferred_reason next to status and decided_at, same pattern as rejection_reason', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  assert.match(source, /r\.deferred_reason \? ` \(\$\{DEFERRED_REASON_LABELS\[r\.deferred_reason\] \|\| r\.deferred_reason\}\)` : ''/);
+});
+
+test('structural safety net: the enrichment form puts the shared source URL in a distinct, labeled first step above the field rows', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  const stepOneIndex = source.indexOf('1. Source');
+  const stepTwoIndex = source.indexOf('2. Fields');
+  const checkboxIndex = source.indexOf('Use one source URL for all filled-in fields');
+  const fieldsMapIndex = source.indexOf('ENRICHABLE_FIELDS.map((fieldName) => {\n                                    const fieldDraft');
+  assert.ok(stepOneIndex >= 0 && stepTwoIndex >= 0, 'expected both a labeled "1. Source" and "2. Fields" section');
+  assert.ok(stepOneIndex < checkboxIndex, 'the source step heading must come before the shared-source-URL checkbox');
+  assert.ok(checkboxIndex < stepTwoIndex, 'the shared-source-URL checkbox must be part of step 1, before step 2 begins');
+  assert.ok(stepTwoIndex < fieldsMapIndex, 'the three field rows must be rendered inside step 2, after its heading');
+});
+
+test('structural safety net: individual per-field source URLs are shown only when the shared source is off — unchanged by the reflow', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  assert.match(source, /\{!useShared && \(\s*<input\s*type="text"\s*placeholder="Source URL \(e\.g\. the restaurant's own website\)…"/);
 });

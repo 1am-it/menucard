@@ -1168,6 +1168,114 @@ development or otherwise. That remains true until a reviewer actually
 clicks the button against a real candidate with a real website, which
 has not happened.
 
+### Implementation (2026-09-06, later the same day) — structured deferred reason + enrichment-form reflow
+
+Two small, independent additions to the review/enrichment workflow — no
+change to normalization, website suggestions, SSRF/robots.txt handling,
+or any of their documented guarantees.
+
+**1. Structured `deferred_reason` on `import_candidate_reviews`.**
+Previously a `deferred` decision carried no structured reason at all,
+only the free-text `note` — making deferred candidates impossible to
+triage or filter in bulk. `supabase/migrations/0009_market05a_candidate_reviews_deferred_reason.sql`
+(**NOT YET APPLIED live**) adds a nullable `deferred_reason` column with
+a fixed value set (`service_model_unclear`, `chain_or_franchise_review`,
+`ownership_or_permission_needed`, `source_conflict`, `verify_later`),
+and requires it exactly when `status = 'deferred'` — the same symmetric
+shape as this table's existing `rejection_reason` rule. Append-only,
+unchanged: the migration only adds a column, a check constraint, and
+extends the RPC's signature; it never updates or deletes a single
+existing row, and grants no new table privilege (the table's existing
+`select, insert`-only grant already covers the new column).
+
+**The one genuinely tricky part: this table already holds real, live
+rows** — `import_candidate_reviews` was applied live on 2026-09-05 and,
+per this document's own "Correction" note further up plus
+`docs/api/import-inbox-api.md`'s matching note, held 10 rows as of the
+last live check, plausibly including a `deferred` one predating this
+column. A normally-validated `(status = 'deferred') = (deferred_reason
+is not null)` check constraint would fail immediately at migration time
+against exactly such a row. Fixed by adding that constraint `NOT VALID`
+— Postgres skips the one-time backfill scan of existing rows while still
+enforcing the constraint against every future insert. No backfill, no
+update, no guess at what an old deferred row's reason might have been;
+it stays exactly as recorded, indefinitely, by design.
+
+`record_import_candidate_review()`'s signature changes from 5 to 6
+arguments (`p_deferred_reason text default null`, appended last) —
+`CREATE OR REPLACE FUNCTION` cannot change an existing function's
+argument list in place (a different argument list is a different
+overload to Postgres), so the migration explicitly `DROP FUNCTION`s the
+old 5-argument signature first, so exactly one overload ever exists.
+
+**Locally validated, never against the live project**: a fresh,
+disposable, containerized PostgreSQL instance (0004/0006/0007/0008
+applied in sequence, a minimal seed chain — one market/source/
+authorization-version/boundary-version/import-run/extraction-record —
+then a synthetic `deferred` row inserted with `deferred_reason` left
+unset, to exactly reproduce the live scenario) confirmed: `0009` applies
+cleanly despite that pre-existing row; the row remains byte-for-byte
+unmodified and fully readable afterward; a new `deferred` decision with
+no reason, an invalid reason, or any reason on a non-`deferred` status
+are all correctly refused; a new `deferred` decision with a valid reason
+succeeds; `needs_enrichment`/`approved_internal`/`rejected` behave
+exactly as before (unaffected by this change); the append-only
+`UPDATE`/`DELETE` refusal still holds for `service_role`; and exactly
+one overload of `record_import_candidate_review()` exists afterward. The
+container was destroyed immediately after. `src/lib/importInbox.js`'s
+`validateReviewDecisionInput` mirrors the same symmetric rule at the API
+layer (`ALLOWED_DEFERRED_REASONS`, `missing-deferred-reason`/
+`deferred-reason-not-allowed`/`invalid-deferred-reason`), and
+`GET`/`POST .../candidates/{id}/reviews` were extended to read/write the
+new field — see `docs/api/import-inbox-api.md`'s own "Addition
+(2026-09-06)" notes for the full API contract.
+
+**UI** (`app/internal/import-inbox/page.js`): a "Deferred reason" select
+appears only when the reviewer has chosen status `Deferred` (labels:
+Service model unclear, Chain or franchise review, Ownership or
+permission needed, Source conflict, Verify later); choosing a different
+status clears both the rejection and deferred reason drafts, so neither
+can be silently carried over from a previous selection. The internal
+note stays optional and independent, exactly as before. Review history
+now shows the deferred reason next to status and `decided_at`, the same
+place and style `rejection_reason` already appears — a legacy `deferred`
+row with `deferred_reason: null` renders with nothing extra shown, never
+an error or a placeholder implying something is missing or wrong.
+Opening/closing details remains exactly as read-only as before this
+change (untouched by it); a decision is still only ever recorded by an
+explicit status choice plus "Save decision."
+
+**2. Enrichment-form reflow, client-only, no behavior change.** The
+shared source URL (checkbox, its own input, and the existing "Use this
+source URL as the website" shortcut) is now a distinct, labeled "1.
+Source" block rendered above the three fields — previously first in
+render order already, but not visually set apart from the fields below
+it. The three fields (`Address`/`Phone`/`Website`) are now rendered as
+compact, consistent rows under a "2. Fields" heading — label, value, and
+(only when the shared source is off) its own source URL, all on one
+row per field instead of stacked. Individual source fields remain
+hidden exactly when the shared source is on, unchanged. No security
+boundary, validation rule, or write path changed — same draft state
+shape, same `POST` body, same human-confirmation requirement.
+
+**Tests**: 13 new tests in `src/lib/importInbox.test.js` (107 → 120 in
+that file), plus several pre-existing `validateReviewDecisionInput`
+tests updated to include the new `deferredReason` field in their
+expected result shape —
+`validateReviewDecisionInput`/`reviewValidationMessage` coverage for
+every new failure reason and the success case for every
+`ALLOWED_DEFERRED_REASONS` value; `computeEffectiveReviewStatus`/
+`buildReviewStatusByCandidateId` proven to treat a legacy deferred row
+with `deferred_reason: null`/absent as fully valid history, no crash, no
+special-casing; structural tests reading `0009`'s own migration source
+(the `NOT VALID` constraint text, the fixed value list matching
+`ALLOWED_DEFERRED_REASONS` exactly, no `UPDATE`/`DELETE`/backfill
+statement anywhere in the file, the old RPC signature explicitly
+dropped) since no live/local database is available inside `node --test`
+itself; structural tests reading the reviews route and the page's own
+source for the GET/POST wiring, the conditional deferred-reason select,
+the history rendering, and the enrichment-form reflow's step ordering.
+
 ## MARKET-05B — Normalization & deduplication (placeholder, untouched)
 
 Original scope, unchanged by this document: matching and deduplicating

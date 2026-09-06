@@ -31,7 +31,7 @@ export async function GET(request, { params }) {
   const supabase = getSupabaseAdmin()
   const { data: reviews, error } = await supabase
     .from('import_candidate_reviews')
-    .select('id, candidate_id, reviewer_id, decided_at, status, rejection_reason, note')
+    .select('id, candidate_id, reviewer_id, decided_at, status, rejection_reason, deferred_reason, note')
     .eq('candidate_id', id)
     .order('decided_at', { ascending: false })
     .order('id', { ascending: false })
@@ -62,6 +62,7 @@ export async function POST(request, { params }) {
     status: body && body.status,
     rejectionReason: body && body.rejection_reason,
     note: body && body.note,
+    deferredReason: body && body.deferred_reason,
   })
   if (!validation.valid) {
     return NextResponse.json({ error: reviewValidationMessage(validation.reason) }, { status: 400 })
@@ -69,14 +70,17 @@ export async function POST(request, { params }) {
 
   const supabase = getSupabaseAdmin()
   // The RPC does exactly one insert — see
-  // supabase/migrations/0007_market05a_candidate_reviews.sql. This file
-  // never calls a mutating method other than this one RPC.
+  // supabase/migrations/0009_market05a_candidate_reviews_deferred_reason.sql
+  // (extends supabase/migrations/0007_market05a_candidate_reviews.sql's
+  // original version). This file never calls a mutating method other
+  // than this one RPC.
   const { data, error } = await supabase.rpc('record_import_candidate_review', {
     p_candidate_id: id,
     p_actor_user_id: auth.userId,
     p_status: validation.status,
     p_rejection_reason: validation.rejectionReason,
     p_note: validation.note,
+    p_deferred_reason: validation.deferredReason,
   })
 
   if (error) {
