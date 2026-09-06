@@ -1,0 +1,171 @@
+name: Production database preflight (read-only)
+
+# ═══════════════════════════════════════════════════════════════════════
+# READ-ONLY. This workflow never applies a migration, never creates or
+# alters a database object, and never runs arbitrary SQL. Its only job is
+# to answer, without changing anything: are we actually ready to run
+# production-db-migrate.yml?
+#
+# Same protection as that workflow: `environment: production-migrations`
+# below only pauses for human approval if "Required reviewers" has been
+# configured on that environment in this repository's Settings →
+# Environments. See docs/guides/production-migration-pipeline.md's
+# "One-time GitHub setup" section — that one-time setup, once done,
+# protects BOTH this workflow and production-db-migrate.yml, with no
+# extra configuration needed for this file specifically.
+# ═══════════════════════════════════════════════════════════════════════
+#
+# Manual-only, by design: no `push`, `pull_request`, or `schedule`
+# trigger exists anywhere in this file.
+#
+# Safe order of production actions (see docs/guides/production-migration-pipeline.md):
+#   1. Run THIS workflow (confirm: "verify"). Read its summary.
+#   2. Only if it reports "Ready for migration": dispatch
+#      production-db-migrate.yml (confirm: "migrate") for the specific
+#      pending migration(s) it named.
+# The two confirmation phrases ("verify" vs "migrate") are deliberately
+# different strings so a copy-pasted confirmation can never accidentally
+# trigger the wrong one of the two workflows.
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: >-
+          Type "verify" to confirm you intend to run a READ-ONLY preflight
+          check against the PRODUCTION Supabase project. Any other value
+          aborts before any secret is read or any connection is made.
+        required: true
+        type: string
+
+jobs:
+  preflight:
+    name: Check production migration readiness (no writes)
+    runs-on: ubuntu-latest
+
+    # See the warning banner at the top of this file. Nothing below this
+    # line runs until a reviewer configured on this environment explicitly
+    # approves this specific run — *if and only if* the environment's
+    # protection rules have actually been set up.
+    environment: production-migrations
+
+    steps:
+      - name: Require the literal confirmation phrase
+        run: |
+          if [ "${{ github.event.inputs.confirm }}" != "verify" ]; then
+            echo "::error::Confirmation input was not exactly 'verify' — aborting before reading any secret or opening any connection. Re-run and type it exactly. (Looking to actually apply a migration? That is production-db-migrate.yml, a separate workflow, confirmed with a different phrase.)"
+            exit 1
+          fi
+
+      - name: Mask secret values defensively (in addition to GitHub's automatic masking)
+        run: |
+          echo "::add-mask::${{ secrets.SUPABASE_ACCESS_TOKEN }}"
+          echo "::add-mask::${{ secrets.SUPABASE_PROJECT_ID }}"
+          echo "::add-mask::${{ secrets.SUPABASE_DB_PASSWORD }}"
+
+      - name: Check that every required secret is configured
+        id: secrets_check
+        run: |
+          missing=""
+          [ -z "${{ secrets.SUPABASE_ACCESS_TOKEN }}" ] && missing="$missing SUPABASE_ACCESS_TOKEN"
+          [ -z "${{ secrets.SUPABASE_PROJECT_ID }}" ] && missing="$missing SUPABASE_PROJECT_ID"
+          [ -z "${{ secrets.SUPABASE_DB_PASSWORD }}" ] && missing="$missing SUPABASE_DB_PASSWORD"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing required secret(s):$missing — configure them on the 'production-migrations' environment (Settings → Environments → production-migrations → Environment secrets). See docs/guides/production-migration-pipeline.md."
+            echo "verdict=blocked" >> "$GITHUB_OUTPUT"
+            echo "reason=Missing secret(s):$missing" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+          echo "verdict=ok" >> "$GITHUB_OUTPUT"
+          echo "All required secrets are present (values never printed)."
+
+      - uses: actions/checkout@v4
+
+      - name: Fail if no migrations exist yet
+        run: |
+          if [ -z "$(ls -A supabase/migrations/*.sql 2>/dev/null)" ]; then
+            echo "::error::No .sql files found under supabase/migrations/ — nothing to check readiness for."
+            exit 1
+          fi
+
+      # v3 is the version currently documented in the action's own
+      # README as of this workflow's last review (2026-09-06) — kept in
+      # sync with production-db-migrate.yml's own setup-cli step.
+      - uses: supabase/setup-cli@v3
+        with:
+          version: latest
+
+      - name: Confirm the CLI itself installed correctly
+        run: supabase --version
+
+      # A single command that, by construction, exercises all three of
+      # this preflight's "does auth/config/project-coupling work?"
+      # checks at once: `link` reads and must accept supabase/config.toml
+      # (config check), authenticates using SUPABASE_ACCESS_TOKEN (auth
+      # check), and resolves + connects to the real project named by
+      # SUPABASE_PROJECT_ID (project-coupling check). Confirmed via the
+      # Supabase CLI's own documentation to be read-only against the
+      # target database — it stores the password locally and reads
+      # Management API project metadata, but performs no schema or data
+      # write of any kind.
+      - name: Link to the production Supabase project (read-only)
+        id: link
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          if supabase link --project-ref "${{ secrets.SUPABASE_PROJECT_ID }}"; then
+            echo "verdict=ok" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::'supabase link' failed — see the command output above for the CLI's own reason (commonly: invalid/expired access token, wrong project ref, or a config.toml the CLI rejects). No further checks were run."
+            echo "verdict=blocked" >> "$GITHUB_OUTPUT"
+            echo "reason=supabase link failed - see job log" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+
+      # Unverified risk (see docs/guides/production-migration-pipeline.md's
+      # "Residual risks"): this repo's migration files are named
+      # 0001_..., 0002_..., ... (a 4-digit sequential prefix), while the
+      # Supabase CLI's own documented convention is a 14-digit
+      # YYYYMMDDHHMMSS timestamp prefix. This step is the first real,
+      # live test of whether that mismatch actually breaks anything —
+      # local Docker-based validation cannot reproduce it, since it
+      # requires a real linked project's migration-history table.
+      - name: Compare local migration files against the live migration history (read-only)
+        id: migration_list
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          if supabase migration list --linked | tee migration-list.txt; then
+            echo "verdict=ok" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::'supabase migration list' failed — this is the check that compares supabase/migrations/*.sql against the live history table. A failure here (rather than a clean LOCAL/REMOTE table) most likely means either a connection problem or the migration-filename-format risk noted above. Do not proceed to production-db-migrate.yml until this is understood."
+            echo "verdict=blocked" >> "$GITHUB_OUTPUT"
+            echo "reason=supabase migration list failed - see job log" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+
+      - name: Write a run summary — the actual "ready or not" verdict
+        if: always()
+        run: |
+          {
+            echo "## Production migration preflight (read-only)"
+            echo ""
+            echo "- Triggered by: \`${{ github.actor }}\`"
+            echo "- Approved via the \`production-migrations\` environment's required reviewer(s)"
+            echo "- Run: [$GITHUB_RUN_ID]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID)"
+            echo ""
+            if [ "${{ job.status }}" = "success" ]; then
+              echo "### ✅ Ready for migration"
+              echo ""
+              echo "Secrets present, CLI accepted the configuration, authentication and project linking succeeded, and the local/live migration history was compared successfully. Rows marked only-LOCAL below are pending — they are what \`production-db-migrate.yml\` (confirm: \"migrate\") would apply next."
+            else
+              echo "### ❌ Not ready — see the failed step above for the specific reason"
+              echo ""
+              echo "Do not dispatch \`production-db-migrate.yml\` until the failing check above is understood and resolved."
+            fi
+            echo ""
+            echo "### Local vs. live migration history"
+            echo '```'
+            cat migration-list.txt 2>/dev/null || echo "(not captured — job failed before this step; see the step logs above)"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

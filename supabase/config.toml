@@ -1,0 +1,25 @@
+# Supabase CLI project file — required for `supabase link`/`supabase db
+# push` (used by .github/workflows/production-db-migrate.yml) to
+# recognize this directory as a Supabase project at all.
+#
+# Deliberately minimal, not a full `supabase init` output. This project
+# has never run local Supabase development (`supabase start`) — everyday
+# development connects directly to the real, hosted project via
+# `.env.local` (see .env.local.example), and this session had no network
+# access to actually run `supabase init` and confirm its current full
+# generated shape against the installed CLI version. `project_id` below
+# is a local label only, used for naming local Docker resources if
+# `supabase start` is ever run — it is NOT the real Supabase project
+# reference. The real, sensitive project reference is never stored in
+# this file; it is injected only at workflow-run time via the
+# `SUPABASE_PROJECT_ID` secret and passed to `supabase link --project-ref`.
+#
+# Before this pipeline is used for real: verify this file against
+# `supabase init`'s current output for whatever CLI version
+# supabase/setup-cli@v1 resolves to (see
+# docs/guides/production-migration-pipeline.md's own "Residual risks"
+# section) and extend it if local Supabase development is ever wanted —
+# neither is required for `supabase link`/`db push` to apply the
+# migrations already in supabase/migrations/.
+
+project_id = "menucard"

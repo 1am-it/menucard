@@ -1,0 +1,146 @@
+name: Validate Supabase migrations
+
+# Automatic, secret-free safety net — deliberately the *opposite* kind of
+# workflow from production-db-migrate.yml. This one runs on every push/PR
+# that touches supabase/migrations/**, against a throwaway Postgres
+# container that is destroyed the moment the job ends. It never touches
+# the real Supabase project, needs zero repository secrets, and cannot
+# apply anything to production — it only proves that the full migration
+# sequence in supabase/migrations/ still applies cleanly, in order, from
+# an empty database.
+#
+# This automates, in CI, exactly the manual check this project's own
+# engineering practice already required before considering any migration
+# "ready" (see e.g. docs/api/import-inbox-api.md's own notes on migrations
+# 0007-0009 having been "locally validated in a disposable, containerized
+# PostgreSQL instance" by hand). See docs/guides/production-migration-pipeline.md
+# for the full picture, including why this check passing is a recommended
+# required status check on `main` before production-db-migrate.yml's
+# manual, approval-gated run ever applies the same files for real.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/**'
+  pull_request:
+    paths:
+      - 'supabase/migrations/**'
+  workflow_dispatch: {}
+
+jobs:
+  validate:
+    name: Apply full migration sequence to a throwaway database
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Default (1) leaves no prior commit to diff against, which
+          # would silently disable the advisory "release separately"
+          # reminder below (git diff HEAD~1 HEAD errors on a shallow
+          # clone) rather than ever firing incorrectly — 2 is the
+          # cheapest depth that actually lets that comparison work.
+          fetch-depth: 2
+
+      - name: Fail if no migrations exist yet
+        run: |
+          if [ -z "$(ls -A supabase/migrations/*.sql 2>/dev/null)" ]; then
+            echo "::error::No .sql files found under supabase/migrations/ — nothing to validate."
+            exit 1
+          fi
+
+      # `ubuntu-latest` runners are documented to ship a PostgreSQL client,
+      # but that detail has changed across runner-image versions before —
+      # installed explicitly here rather than assumed, so this job fails
+      # with a clear apt error instead of a confusing "psql: command not
+      # found" if that ever changes again.
+      - name: Ensure the PostgreSQL client is available
+        run: |
+          if ! command -v psql >/dev/null 2>&1; then
+            sudo apt-get update -y
+            sudo apt-get install -y --no-install-recommends postgresql-client
+          fi
+          psql --version
+
+      # This project's Postgres schema depends on Supabase-managed objects
+      # (the `auth` schema, `auth.users`, `auth.uid()`, and the
+      # anon/authenticated/service_role roles) that a real Supabase project
+      # provisions automatically but a plain postgres:16 image does not.
+      # This stub reproduces only what every migration file in this repo
+      # actually references — never a full Supabase stack, never a
+      # substitute for the real thing, and never used by
+      # production-db-migrate.yml. Matches this session's own established
+      # local-validation practice, now automated.
+      - name: Stub the Supabase-managed schema/roles this repo's migrations depend on
+        run: |
+          psql -v ON_ERROR_STOP=1 <<'SQL'
+          create schema if not exists auth;
+          create table if not exists auth.users (id uuid primary key);
+          create or replace function auth.uid() returns uuid language sql as $$ select null::uuid $$;
+          do $$
+          begin
+            if not exists (select 1 from pg_roles where rolname = 'anon') then
+              create role anon;
+            end if;
+            if not exists (select 1 from pg_roles where rolname = 'authenticated') then
+              create role authenticated;
+            end if;
+            if not exists (select 1 from pg_roles where rolname = 'service_role') then
+              create role service_role;
+            end if;
+          end
+          $$;
+          alter role service_role bypassrls;
+          SQL
+
+      - name: Apply every migration in order (0001, 0002, ... — sorted filename order)
+        run: |
+          set -e
+          shopt -s nullglob
+          files=(supabase/migrations/*.sql)
+          mapfile -t sorted < <(printf '%s\n' "${files[@]}" | sort)
+          for f in "${sorted[@]}"; do
+            echo "::group::Applying $f"
+            psql -v ON_ERROR_STOP=1 -f "$f"
+            echo "::endgroup::"
+          done
+          echo "All migrations applied cleanly to an empty database."
+
+      # Advisory only — never fails the build. A migration and the
+      # application code that depends on its new tables/RPCs are commonly
+      # developed together on one feature branch, which is fine; but per
+      # docs/guides/production-migration-pipeline.md's "Release
+      # sequencing" section, they must be *released* as two separate
+      # steps — the migration applied and verified live first, the
+      # dependent app code merged/deployed only afterward. This step just
+      # surfaces the reminder in the CI log when a single push/PR mixes
+      # both, so it is never missed by accident.
+      - name: Reminder — migrations and app code release separately
+        if: always()
+        run: |
+          other_files=$(git diff --name-only HEAD~1 HEAD 2>/dev/null | grep -v '^supabase/migrations/' || true)
+          migration_files=$(git diff --name-only HEAD~1 HEAD 2>/dev/null | grep '^supabase/migrations/' || true)
+          if [ -n "$migration_files" ] && [ -n "$other_files" ]; then
+            echo "::notice::This change touches both supabase/migrations/** and other files. That's fine for a feature branch, but remember: release the migration first (via production-db-migrate.yml, approved) and verify it live before merging/deploying any app code that depends on it. See docs/guides/production-migration-pipeline.md#release-sequencing."
+          fi

@@ -1,0 +1,186 @@
+name: Apply production database migrations
+
+# ═══════════════════════════════════════════════════════════════════════
+# READ THIS BEFORE RELYING ON THIS WORKFLOW FOR SAFETY.
+#
+# `environment: production-migrations` below is what makes this workflow
+# pause for a human approval — but ONLY if that environment has actually
+# been configured with "Required reviewers" in this repository's own
+# Settings → Environments UI. GitHub Actions silently AUTO-CREATES an
+# environment with ZERO protection the first time a workflow references
+# one that doesn't exist yet. If that one-time setup step is skipped,
+# `workflow_dispatch` alone is enough to run this job immediately, with
+# no approval gate at all — nothing in this YAML file can detect or
+# prevent that on its own. See
+# docs/guides/production-migration-pipeline.md's "One-time GitHub setup"
+# section for the exact steps, and do them before this workflow is ever
+# dispatched for real.
+# ═══════════════════════════════════════════════════════════════════════
+#
+# Manual-only, by design: no `push`, `pull_request`, or `schedule`
+# trigger exists anywhere in this file. A migration must never run just
+# because someone pushed to `main` — see
+# docs/guides/production-migration-pipeline.md for the full reasoning.
+#
+# What this does, and only this: links the Supabase CLI to the real
+# production project and runs `supabase db push`, which compares
+# supabase/migrations/*.sql against that project's own migration history
+# table and applies only the ones not yet recorded there, in filename
+# order — never a full re-run, never a downgrade, never arbitrary SQL
+# pasted by hand. See validate-migrations.yml for the automatic,
+# secret-free check that should already have proven these same files
+# apply cleanly, before this workflow is ever dispatched.
+#
+# ALWAYS run production-db-preflight.yml first, on the same commit, and
+# read its "Ready for migration" verdict before ever dispatching this
+# workflow — see docs/guides/production-migration-pipeline.md's own
+# "Safe order of production actions" section. This workflow does not
+# invoke the preflight itself or verify it already ran; that ordering is
+# a documented operational rule, not something GitHub Actions can enforce
+# between two independent workflow_dispatch runs without a much more
+# invasive, custom cross-workflow gate this project has deliberately not
+# built (see that guide's own "Residual risks").
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: >-
+          Type "migrate" to confirm you intend to apply pending migrations
+          to the PRODUCTION Supabase project. Any other value aborts
+          before any secret is read or any connection is made.
+        required: true
+        type: string
+
+jobs:
+  migrate:
+    name: Apply pending migrations to production
+    runs-on: ubuntu-latest
+
+    # See the warning banner at the top of this file. Nothing below this
+    # line runs until a reviewer configured on this environment explicitly
+    # approves this specific run, in the GitHub Actions UI — *if and only
+    # if* the environment's protection rules have actually been set up.
+    environment: production-migrations
+
+    steps:
+      - name: Require the literal confirmation phrase
+        run: |
+          if [ "${{ github.event.inputs.confirm }}" != "migrate" ]; then
+            echo "::error::Confirmation input was not exactly 'migrate' — aborting before reading any secret or opening any connection. Re-run and type it exactly."
+            exit 1
+          fi
+
+      - name: Mask secret values defensively (in addition to GitHub's automatic masking)
+        run: |
+          echo "::add-mask::${{ secrets.SUPABASE_ACCESS_TOKEN }}"
+          echo "::add-mask::${{ secrets.SUPABASE_PROJECT_ID }}"
+          echo "::add-mask::${{ secrets.SUPABASE_DB_PASSWORD }}"
+
+      - name: Check that every required secret is configured
+        run: |
+          missing=""
+          [ -z "${{ secrets.SUPABASE_ACCESS_TOKEN }}" ] && missing="$missing SUPABASE_ACCESS_TOKEN"
+          [ -z "${{ secrets.SUPABASE_PROJECT_ID }}" ] && missing="$missing SUPABASE_PROJECT_ID"
+          [ -z "${{ secrets.SUPABASE_DB_PASSWORD }}" ] && missing="$missing SUPABASE_DB_PASSWORD"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing required secret(s):$missing — configure them on the 'production-migrations' environment (Settings → Environments → production-migrations → Environment secrets). See docs/guides/production-migration-pipeline.md."
+            exit 1
+          fi
+          echo "All required secrets are present (values never printed)."
+
+      - uses: actions/checkout@v4
+
+      - name: Fail if no migrations exist yet
+        run: |
+          if [ -z "$(ls -A supabase/migrations/*.sql 2>/dev/null)" ]; then
+            echo "::error::No .sql files found under supabase/migrations/ — nothing to apply. Aborting rather than doing nothing silently."
+            exit 1
+          fi
+
+      # v1 (previously pinned here) is outdated — v3 is the version
+      # currently documented in the action's own README as of this
+      # workflow's last review (2026-09-06).
+      - uses: supabase/setup-cli@v3
+        with:
+          version: latest
+
+      - name: Link to the production Supabase project
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: supabase link --project-ref "${{ secrets.SUPABASE_PROJECT_ID }}"
+
+      # Unverified risk (see docs/guides/production-migration-pipeline.md's
+      # "Residual risks"): this repo's migration files are named
+      # 0001_..., 0002_..., ... (a 4-digit sequential prefix), while the
+      # Supabase CLI's own documented convention is a 14-digit
+      # YYYYMMDDHHMMSS timestamp prefix. Whether the CLI merely needs a
+      # lexicographically-sortable string (which zero-padded sequential
+      # numbers satisfy) or hard-validates the timestamp format has not
+      # been conclusively resolved from documentation alone. If this step
+      # or the next one errors or produces obviously wrong LOCAL/REMOTE
+      # output, that mismatch is the first thing to suspect — run
+      # production-db-preflight.yml (read-only) to investigate before
+      # ever retrying this workflow.
+      - name: Show which migrations are pending (visible before anything is applied)
+        id: before
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          supabase migration list --linked | tee before-migration-list.txt
+
+      - name: Apply pending migrations
+        id: migrate
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          # `supabase db push` itself stops at the first migration that
+          # fails to apply — it does not silently skip a broken file and
+          # continue with the rest. A non-zero exit here fails this step,
+          # and every step after it is skipped (no "unexpected migration
+          # status" is ever reported as if it were success).
+          #
+          # `yes |` and `set -o pipefail` are both load-bearing, not
+          # stylistic: `supabase db push` is documented (Supabase GitHub
+          # Discussion #26366) to sometimes wait on an interactive
+          # confirmation prompt that a CI runner's non-interactive stdin
+          # never answers, in which case the command can return *success*
+          # having silently applied nothing. Piping `yes` answers that
+          # prompt every time it appears (a no-op on CLI versions that
+          # don't prompt at all); GitHub Actions' default `bash -e` does
+          # NOT set `pipefail`, so without it a real `db push` failure
+          # would be masked by `yes`'s own always-zero exit status and
+          # this step would report success regardless.
+          set -o pipefail
+          yes | supabase db push --linked
+
+      - name: Show the resulting migration state (verifiable result)
+        if: always()
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: supabase migration list --linked | tee after-migration-list.txt
+
+      - name: Write a run summary
+        if: always()
+        run: |
+          {
+            echo "## Production migration run"
+            echo ""
+            echo "- Triggered by: \`${{ github.actor }}\`"
+            echo "- Approved via the \`production-migrations\` environment's required reviewer(s)"
+            echo "- Run: [$GITHUB_RUN_ID]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID)"
+            echo "- Outcome: \`${{ job.status }}\`"
+            echo ""
+            echo "### Migration state before this run"
+            echo '```'
+            cat before-migration-list.txt 2>/dev/null || echo "(not captured — see the step logs above)"
+            echo '```'
+            echo ""
+            echo "### Migration state after this run"
+            echo '```'
+            cat after-migration-list.txt 2>/dev/null || echo "(not captured — job may have failed before reaching this step; see the step logs above)"
+            echo '```'
+            echo ""
+            echo "**Next step**: record the outcome in \`planning/CONTEXT.md\` (this project's own convention for every prior migration — e.g. \"Migration 0007 has since been applied live\"), and confirm the exact same result in the Supabase dashboard's Table Editor/SQL Editor before merging or deploying any app code that depends on this schema."
+          } >> "$GITHUB_STEP_SUMMARY"
