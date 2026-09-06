@@ -243,6 +243,43 @@ const ALLOWED_DEFERRED_REASONS = [
   'verify_later',
 ];
 
+/** Human-readable label per `ALLOWED_DEFERRED_REASONS` value — display
+ * only, never written anywhere. The single source of truth for both the
+ * "Deferred reason" dropdown and the review-history line in
+ * app/internal/import-inbox/page.js, so the two can never drift apart —
+ * always go through `formatDeferredReasonLabel` below rather than
+ * indexing this object directly, since a raw stored/typed value may use
+ * hyphens instead of underscores (see that function's own comment). */
+const DEFERRED_REASON_LABELS = {
+  service_model_unclear: 'Service model unclear',
+  chain_or_franchise_review: 'Chain or franchise review',
+  ownership_or_permission_needed: 'Ownership or permission needed',
+  source_conflict: 'Source conflict',
+  verify_later: 'Verify later',
+};
+
+/**
+ * Human-readable label for a `deferred_reason` value — display only,
+ * never touches the database, the audit history, or any API payload
+ * (the raw value is always what gets stored/sent; this only decides
+ * what a reviewer *sees*). Defensively normalizes hyphens to
+ * underscores before lookup, so a legacy or manually-recorded value
+ * like `chain-or-franchise-review` resolves to the exact same label as
+ * the canonical `chain_or_franchise_review` — this project has never
+ * written a hyphenated value itself (the migration's check constraint
+ * only allows the underscore form), but a human-edited or
+ * externally-sourced row is not assumed to have followed that
+ * convention. A value that still isn't recognized after normalization
+ * (or isn't a non-empty string at all) is returned completely
+ * unchanged — never hidden, never guessed at, never altered — so an
+ * unexpected value is always visible to the reviewer, just unformatted.
+ */
+function formatDeferredReasonLabel(value) {
+  if (typeof value !== 'string' || value.length === 0) return value;
+  const normalized = value.replace(/-/g, '_');
+  return DEFERRED_REASON_LABELS[normalized] || value;
+}
+
 /** Matches the migration's own `char_length(note) <= 2000` check —
  * enforced here too so a caller gets a clear, immediate `400` instead of
  * relying solely on the database constraint to reject an oversized note. */
@@ -766,6 +803,8 @@ module.exports = {
   DEFAULT_REVIEW_STATUS,
   ALLOWED_REJECTION_REASONS,
   ALLOWED_DEFERRED_REASONS,
+  DEFERRED_REASON_LABELS,
+  formatDeferredReasonLabel,
   MAX_REVIEW_NOTE_LENGTH,
   validateReviewDecisionInput,
   reviewValidationMessage,

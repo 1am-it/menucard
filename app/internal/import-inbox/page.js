@@ -17,6 +17,7 @@ import {
   ALLOWED_REVIEW_STATUSES,
   ALLOWED_REJECTION_REASONS,
   ALLOWED_DEFERRED_REASONS,
+  formatDeferredReasonLabel,
   validateReviewDecisionInput,
   reviewValidationMessage,
   ENRICHABLE_FIELDS,
@@ -52,14 +53,6 @@ const REJECTION_REASON_LABELS = {
   permanently_closed: 'Permanently closed',
   insufficient_data: 'Insufficient data',
   other: 'Other',
-}
-
-const DEFERRED_REASON_LABELS = {
-  service_model_unclear: 'Service model unclear',
-  chain_or_franchise_review: 'Chain or franchise review',
-  ownership_or_permission_needed: 'Ownership or permission needed',
-  source_conflict: 'Source conflict',
-  verify_later: 'Verify later',
 }
 
 const ENRICHABLE_FIELD_LABELS = {
@@ -820,7 +813,7 @@ export default function ImportInboxPage() {
                               <div key={r.id} style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
                                 <strong>{REVIEW_STATUS_LABELS[r.status] || r.status}</strong>
                                 {r.rejection_reason ? ` (${REJECTION_REASON_LABELS[r.rejection_reason] || r.rejection_reason})` : ''}
-                                {r.deferred_reason ? ` (${DEFERRED_REASON_LABELS[r.deferred_reason] || r.deferred_reason})` : ''}
+                                {r.deferred_reason ? ` (${formatDeferredReasonLabel(r.deferred_reason)})` : ''}
                                 {' · '}
                                 {r.decided_at}
                                 {r.note ? <div style={{ color: 'var(--text-muted)', marginTop: 2 }}>{r.note}</div> : null}
@@ -866,7 +859,7 @@ export default function ImportInboxPage() {
                               <option value="">Choose a deferred reason…</option>
                               {ALLOWED_DEFERRED_REASONS.map((r) => (
                                 <option key={r} value={r}>
-                                  {DEFERRED_REASON_LABELS[r]}
+                                  {formatDeferredReasonLabel(r)}
                                 </option>
                               ))}
                             </select>

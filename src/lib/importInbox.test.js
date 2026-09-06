@@ -19,6 +19,8 @@ const {
   DEFAULT_REVIEW_STATUS,
   ALLOWED_REJECTION_REASONS,
   ALLOWED_DEFERRED_REASONS,
+  DEFERRED_REASON_LABELS,
+  formatDeferredReasonLabel,
   MAX_REVIEW_NOTE_LENGTH,
   validateReviewDecisionInput,
   reviewValidationMessage,
@@ -439,6 +441,56 @@ test('validateReviewDecisionInput: a deferred reason on a non-deferred status is
     valid: false,
     reason: 'deferred-reason-not-allowed',
   });
+});
+
+// ─── formatDeferredReasonLabel / DEFERRED_REASON_LABELS — display-only
+// label mapping (added 2026-09-06). Never touches the database, the
+// audit history, or any API payload; the single source of truth for
+// both the "Deferred reason" dropdown and the review-history line in
+// app/internal/import-inbox/page.js (see the structural test below).
+
+test('DEFERRED_REASON_LABELS: has exactly one label per ALLOWED_DEFERRED_REASONS value, no more, no fewer', () => {
+  assert.deepEqual(Object.keys(DEFERRED_REASON_LABELS).sort(), [...ALLOWED_DEFERRED_REASONS].sort());
+});
+
+test('formatDeferredReasonLabel: maps every canonical (underscore) value to its exact human-readable label', () => {
+  assert.equal(formatDeferredReasonLabel('service_model_unclear'), 'Service model unclear');
+  assert.equal(formatDeferredReasonLabel('chain_or_franchise_review'), 'Chain or franchise review');
+  assert.equal(formatDeferredReasonLabel('ownership_or_permission_needed'), 'Ownership or permission needed');
+  assert.equal(formatDeferredReasonLabel('source_conflict'), 'Source conflict');
+  assert.equal(formatDeferredReasonLabel('verify_later'), 'Verify later');
+});
+
+test('formatDeferredReasonLabel: the hyphenated spelling of every value resolves to the identical label as its underscore form', () => {
+  const hyphenated = {
+    'service-model-unclear': 'Service model unclear',
+    'chain-or-franchise-review': 'Chain or franchise review',
+    'ownership-or-permission-needed': 'Ownership or permission needed',
+    'source-conflict': 'Source conflict',
+    'verify-later': 'Verify later',
+  };
+  for (const [value, expectedLabel] of Object.entries(hyphenated)) {
+    assert.equal(formatDeferredReasonLabel(value), expectedLabel, `expected ${value} to resolve to "${expectedLabel}"`);
+  }
+});
+
+test('formatDeferredReasonLabel: a mixed hyphen/underscore spelling still resolves correctly', () => {
+  assert.equal(formatDeferredReasonLabel('chain-or_franchise-review'), 'Chain or franchise review');
+});
+
+test('formatDeferredReasonLabel: an unrecognized value is returned completely unchanged — never hidden, never guessed at', () => {
+  assert.equal(formatDeferredReasonLabel('not_a_real_reason'), 'not_a_real_reason');
+  assert.equal(formatDeferredReasonLabel('not-a-real-reason'), 'not-a-real-reason');
+  assert.equal(formatDeferredReasonLabel('Service Model Unclear'), 'Service Model Unclear', 'casing is never normalized — only the separator is');
+  assert.equal(formatDeferredReasonLabel('some free text a reviewer once typed'), 'some free text a reviewer once typed');
+});
+
+test('formatDeferredReasonLabel: non-string/empty input is returned unchanged, never throws', () => {
+  assert.equal(formatDeferredReasonLabel(''), '');
+  assert.equal(formatDeferredReasonLabel(null), null);
+  assert.equal(formatDeferredReasonLabel(undefined), undefined);
+  assert.doesNotThrow(() => formatDeferredReasonLabel(123));
+  assert.equal(formatDeferredReasonLabel(123), 123);
 });
 
 test('validateReviewDecisionInput: note is optional, trimmed, and length-capped', () => {
@@ -1339,7 +1391,14 @@ test('structural safety net: the deferred-reason select is only rendered for sta
 
 test('structural safety net: review history renders deferred_reason next to status and decided_at, same pattern as rejection_reason', () => {
   const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
-  assert.match(source, /r\.deferred_reason \? ` \(\$\{DEFERRED_REASON_LABELS\[r\.deferred_reason\] \|\| r\.deferred_reason\}\)` : ''/);
+  assert.match(source, /r\.deferred_reason \? ` \(\$\{formatDeferredReasonLabel\(r\.deferred_reason\)\}\)` : ''/);
+});
+
+test('structural safety net: the deferred-reason dropdown and the review-history line both go through formatDeferredReasonLabel — no separate, divergence-prone label map in the page itself', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  const usageCount = (source.match(/formatDeferredReasonLabel\(/g) || []).length;
+  assert.equal(usageCount, 2, 'expected exactly two call sites: the dropdown <option> label and the review-history line');
+  assert.doesNotMatch(source, /const DEFERRED_REASON_LABELS/, 'the page must import the shared mapping from src/lib/importInbox.js, never define its own copy');
 });
 
 test('structural safety net: the enrichment form puts the shared source URL in a distinct, labeled first step above the field rows', () => {
