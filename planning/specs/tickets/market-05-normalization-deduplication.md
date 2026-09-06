@@ -1524,6 +1524,61 @@ asserted the literal text touched by this round; the full suite
 otherwise passes unmodified (still 154 tests, since no pure function,
 route, or API contract changed).
 
+### Implementation (2026-09-06, later still) — information-hierarchy update
+
+**Correction to the terminology glossary immediately above.** Two of
+the three names it introduced are now themselves superseded — recorded
+there as accurate *at the time that round was written*, per this
+project's own documentation discipline (dated additions, never silent
+rewrites):
+
+- **`Dashboard imported Restaurant Data`** — the page's displayed
+  title (was `Imported Restaurant Review`). `Review Overview` (the
+  summary/filter/browse section) is unchanged and remains the correct
+  name.
+- **`Review queue`** — the full browsing list/section (was `Imported
+  candidates`). Its detail-view back action now reads "Back to review
+  queue" (was "Back to imported candidates").
+- No change to the route, any API contract, `review_status`/
+  `deferred_reason` values, the `MARKET-05A` ticket codename, the
+  `Restaurant Profile Drafts`/`Restaurant Onboarding` naming, or any
+  pure function — this round changed page-level presentation text and
+  layout order only.
+
+**Section order.** The page previously rendered `Import runs` first,
+then `Review Overview`, then the browsing list. It now renders, in
+order: the top append-only banner, `Review Overview` (status cards +
+its existing search/filter bar + its own filtered summary rows,
+internally unchanged), `Review queue` directly beneath it (the full
+candidate cards with expand/decision/enrichment actions, internally
+unchanged), and `Import runs` last, as secondary context. The goal
+(per this round's own instruction): the daily review task comes before
+import administration, on both desktop and mobile.
+
+**`Import runs` made compact/collapsible.** Its heading now shows a
+live run count and a `Show`/`Hide` toggle (new `importRunsExpanded`
+state, `useState(false)` — collapsed by default). The heading itself,
+the `runsError` banner, the loading message, and the "No import runs
+yet." empty state remain always visible; only the detailed run-card
+list (full stats and the `Show only this run` toggle) is gated behind
+the expanded state. Nothing about run information, filtering, or
+`Show only this run` was removed — only whether the list is shown by
+default.
+
+**Scope discipline**: no migration, database write, website fetch, new
+filter dimension, sample data, automatic classification, or canonical/
+publication functionality was added — presentation and layout order
+only.
+
+**Tests**: `src/lib/importInbox.test.js` — the one existing test
+asserting "Back to imported candidates" updated to "Back to review
+queue"; four new structural safety-net tests added covering the exact
+page title string, the Review Overview → Review queue → Import runs
+section order, the collapsed-by-default/toggle behavior and continued
+presence of run info and `Show only this run`, and that Review
+Overview/Review queue still call the same unchanged pure functions
+(158 tests total, up from 154).
+
 ## MARKET-05B — Normalization & deduplication (placeholder, untouched)
 
 Original scope, unchanged by this document: matching and deduplicating

@@ -207,6 +207,13 @@ function IconChevronRight() {
     </svg>
   )
 }
+function IconChevronDown() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  )
+}
 
 const TRIAGE_STATUS_ICONS = {
   new: IconDocument,
@@ -230,6 +237,14 @@ export default function ImportInboxPage() {
   const [runs, setRuns] = useState([])
   const [runsError, setRunsError] = useState(null)
   const [runsLoading, setRunsLoading] = useState(false)
+  // Information-hierarchy update (2026-09-06) — "Import runs" moved
+  // below the review sections as secondary context and made compact/
+  // collapsible; collapsed by default so the daily review task (Review
+  // Overview + Review queue) is what a reviewer sees first, without
+  // scrolling past import administration. Never hides run info,
+  // filtering, or "Show only this run" — only whether the list is
+  // currently shown.
+  const [importRunsExpanded, setImportRunsExpanded] = useState(false)
 
   const [candidates, setCandidates] = useState([])
   const [totalBeforeFilters, setTotalBeforeFilters] = useState(0)
@@ -764,7 +779,7 @@ export default function ImportInboxPage() {
     <div className="di-page">
       <main className="di-main">
       <div className="di-topbar">
-        <h1 className="di-title">Imported Restaurant Review</h1>
+        <h1 className="di-title">Dashboard imported Restaurant Data</h1>
         <button onClick={signOut} className="di-signout">
           Sign out
         </button>
@@ -779,63 +794,6 @@ export default function ImportInboxPage() {
           the only two actions here, and each only ever adds a new append-only audit row — never an edit or a delete.
         </span>
       </div>
-
-      <h2 className="di-section-title">Import runs</h2>
-
-      {runsError && (
-        <div className="di-banner di-banner-danger">
-          <span className="di-banner-icon">
-            <IconX />
-          </span>
-          <span>{runsError}</span>
-        </div>
-      )}
-
-      {runsLoading && <p style={{ color: 'var(--text-muted)' }}>Loading…</p>}
-
-      {!runsLoading && candidateState === 'no-runs' && !runsError && (
-        <p style={{ color: 'var(--text-muted)' }}>No import runs yet.</p>
-      )}
-
-      {runs.length > 0 && (
-        <div style={{ display: 'grid', gap: 12, marginBottom: 28 }}>
-          {runs.map((run) => (
-            <div key={run.id} className="di-run-card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <span
-                  className={`di-chip ${
-                    run.status === 'succeeded' ? 'di-chip--complete' : run.status === 'failed' ? 'di-chip--rejected' : 'di-chip--deferred'
-                  }`}
-                >
-                  {run.status}
-                </span>
-                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{run.started_at}</span>
-              </div>
-              <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8 }}>
-                {run.data_origin_source_name || 'Unknown source'}
-                {run.access_provider_source_name ? ` via ${run.access_provider_source_name}` : ''}
-                {run.source_version ? ` · ${run.source_version}` : ''}
-              </div>
-              <div style={{ fontSize: 13, marginBottom: 8 }}>
-                Duration: {formatDuration(run.duration_seconds)} · Fetched: {run.record_counts?.fetched ?? '—'} · Stored:{' '}
-                {run.record_counts?.stored ?? '—'} · Skipped: {run.record_counts?.skipped ?? '—'} · Errored:{' '}
-                {run.record_counts?.errored ?? '—'}
-              </div>
-              {(run.status === 'failed' || run.status === 'partial') && run.error_log && run.error_log.length > 0 && (
-                <div style={{ fontSize: 12, color: 'var(--danger)', marginBottom: 8 }}>
-                  {run.error_log.length} error(s) recorded for this run.
-                </div>
-              )}
-              <button
-                onClick={() => setRunIdFilter(runIdFilter === run.id ? '' : run.id)}
-                className={`di-run-toggle ${runIdFilter === run.id ? 'active' : ''}`}
-              >
-                {runIdFilter === run.id ? 'Showing this run only' : 'Show only this run'}
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
 
       {runs.length > 0 && (
         <>
@@ -1016,7 +974,7 @@ export default function ImportInboxPage() {
 
       {runs.length > 0 && (
         <>
-          <h2 className="di-section-title">Imported candidates</h2>
+          <h2 className="di-section-title">Review queue</h2>
 
           <div className="di-filterbar">
             <div className="di-filter-group di-search-wrap">
@@ -1470,7 +1428,7 @@ export default function ImportInboxPage() {
                         </div>
 
                         <button onClick={() => toggleExpand(c.id)} className="di-link-btn" style={{ marginTop: 16 }}>
-                          Back to imported candidates
+                          Back to review queue
                         </button>
                       </div>
                     )}
@@ -1480,6 +1438,79 @@ export default function ImportInboxPage() {
             </div>
           )}
         </>
+      )}
+
+      {/* Import runs — secondary context, moved below the two review
+          sections and made compact/collapsible (2026-09-06) so the daily
+          review task is what a reviewer sees first. Nothing about run
+          info, filtering, or "Show only this run" is removed — only
+          whether the full list is currently shown; collapsed by
+          default. */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 28, marginBottom: 12 }}>
+        <h2 className="di-section-title" style={{ margin: 0 }}>
+          Import runs{runs.length > 0 ? ` (${runs.length})` : ''}
+        </h2>
+        {runs.length > 0 && (
+          <button onClick={() => setImportRunsExpanded((v) => !v)} className="di-link-btn">
+            {importRunsExpanded ? 'Hide' : 'Show'}
+            {importRunsExpanded ? <IconChevronDown /> : <IconChevronRight />}
+          </button>
+        )}
+      </div>
+
+      {runsError && (
+        <div className="di-banner di-banner-danger">
+          <span className="di-banner-icon">
+            <IconX />
+          </span>
+          <span>{runsError}</span>
+        </div>
+      )}
+
+      {runsLoading && <p style={{ color: 'var(--text-muted)' }}>Loading…</p>}
+
+      {!runsLoading && candidateState === 'no-runs' && !runsError && (
+        <p style={{ color: 'var(--text-muted)' }}>No import runs yet.</p>
+      )}
+
+      {runs.length > 0 && importRunsExpanded && (
+        <div style={{ display: 'grid', gap: 12, marginBottom: 28 }}>
+          {runs.map((run) => (
+            <div key={run.id} className="di-run-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <span
+                  className={`di-chip ${
+                    run.status === 'succeeded' ? 'di-chip--complete' : run.status === 'failed' ? 'di-chip--rejected' : 'di-chip--deferred'
+                  }`}
+                >
+                  {run.status}
+                </span>
+                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{run.started_at}</span>
+              </div>
+              <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8 }}>
+                {run.data_origin_source_name || 'Unknown source'}
+                {run.access_provider_source_name ? ` via ${run.access_provider_source_name}` : ''}
+                {run.source_version ? ` · ${run.source_version}` : ''}
+              </div>
+              <div style={{ fontSize: 13, marginBottom: 8 }}>
+                Duration: {formatDuration(run.duration_seconds)} · Fetched: {run.record_counts?.fetched ?? '—'} · Stored:{' '}
+                {run.record_counts?.stored ?? '—'} · Skipped: {run.record_counts?.skipped ?? '—'} · Errored:{' '}
+                {run.record_counts?.errored ?? '—'}
+              </div>
+              {(run.status === 'failed' || run.status === 'partial') && run.error_log && run.error_log.length > 0 && (
+                <div style={{ fontSize: 12, color: 'var(--danger)', marginBottom: 8 }}>
+                  {run.error_log.length} error(s) recorded for this run.
+                </div>
+              )}
+              <button
+                onClick={() => setRunIdFilter(runIdFilter === run.id ? '' : run.id)}
+                className={`di-run-toggle ${runIdFilter === run.id ? 'active' : ''}`}
+              >
+                {runIdFilter === run.id ? 'Showing this run only' : 'Show only this run'}
+              </button>
+            </div>
+          ))}
+        </div>
       )}
       </main>
     </div>

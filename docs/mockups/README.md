@@ -41,7 +41,12 @@ reference instead of ad hoc judgment calls:
   labels, since it governs layout only, never exact text (see this
   file's own top-level note). Full detail:
   `planning/specs/tickets/market-05-normalization-deduplication.md`'s
-  own terminology glossary.
+  own terminology glossary. **Correction (2026-09-06, later still):**
+  the page name above, "Imported Restaurant Review", is itself now
+  stale — the page title is "Dashboard imported Restaurant Data" as of
+  that ticket's "information-hierarchy update" section; "Review
+  Overview" is unchanged. This mockup still governs layout/visual
+  language only, not exact text.
 
 ## Naming
 

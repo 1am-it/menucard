@@ -624,6 +624,24 @@ no automatic classification of any kind:
 > explicit claim, consent, or active participation) that this internal
 > review page never mentions and has no relationship to.
 
+> **Correction (2026-09-06, later still) — information-hierarchy
+> update, UI text and layout order only.** The names in the correction
+> above are now themselves partly stale: the page title is "Dashboard
+> imported Restaurant Data" (was "Imported Restaurant Review"); the
+> browsing section below "Review Overview" is titled "Review queue"
+> (was "Imported candidates"), with its detail-view back action reading
+> "Back to review queue"; "Review Overview" itself is unchanged. The
+> page now renders "Review Overview" then "Review queue" then "Import
+> runs" (was "Import runs" first) — the daily review task before import
+> administration. "Import runs" is now compact and collapsed by default
+> behind a "Show"/"Hide" toggle, without removing run information,
+> filtering, or "Show only this run". None of this changes the API
+> contract, the query parameters, the pure functions named above, or
+> `review_status`/`deferred_reason`'s own values — see
+> `planning/specs/tickets/market-05-normalization-deduplication.md`'s
+> own "Implementation (2026-09-06, later still) — information-hierarchy
+> update" section for the full detail.
+
 ## What has been verified
 
 Verified against the real Supabase project (2026-09-05), using the

@@ -1559,12 +1559,61 @@ test('structural safety net: toggleExpand (closing a candidate\'s detail view) n
   assert.match(body, /if \(next && !reviewsByCandidateId\[next\] && session\)/, 'the history reads must remain conditional on actually expanding (next truthy)');
 });
 
-test('structural safety net: the expanded detail view offers "Back to imported candidates"/"Hide details" both at the top and the bottom', () => {
+test('structural safety net: the expanded detail view offers "Back to review queue"/"Hide details" both at the top and the bottom', () => {
   const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
   const toggleCallCount = (source.match(/onClick=\{\(\) => toggleExpand\(c\.id\)\}/g) || []).length;
   assert.equal(toggleCallCount, 2, 'expected exactly two toggleExpand(c.id) call sites: one above the detail view, one below it');
-  assert.match(source, /Back to imported candidates/);
+  assert.match(source, /Back to review queue/);
   assert.match(source, /Hide details/);
+});
+
+// ─── structural safety net: information-hierarchy update (2026-09-06) ──
+// Review Overview → Review queue → Import runs (secondary, compact,
+// collapsible). No filter, data, or write-path change — these tests
+// only prove the page title/section names/order/labels and that
+// nothing about Import runs (info, filtering, "Show only this run") was
+// removed, only made collapsible.
+
+test('structural safety net: the page title is exactly "Dashboard imported Restaurant Data"', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  assert.match(source, /<h1 className="di-title">Dashboard imported Restaurant Data<\/h1>/);
+});
+
+test('structural safety net: sections appear in the order Review Overview, then Review queue, then Import runs — the daily review task before import administration', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  const reviewOverviewIndex = source.indexOf('>Review Overview<');
+  const reviewQueueIndex = source.indexOf('>Review queue<');
+  const importRunsIndex = source.indexOf('Import runs{runs.length > 0');
+  assert.ok(reviewOverviewIndex >= 0, 'expected to find the "Review Overview" heading');
+  assert.ok(reviewQueueIndex >= 0, 'expected to find the "Review queue" heading');
+  assert.ok(importRunsIndex >= 0, 'expected to find the "Import runs" heading');
+  assert.ok(reviewOverviewIndex < reviewQueueIndex, 'Review Overview must come before Review queue');
+  assert.ok(reviewQueueIndex < importRunsIndex, 'Review queue must come before Import runs');
+});
+
+test('structural safety net: Import runs is collapsed by default and toggles via its own state, never removing run info, filtering, or "Show only this run"', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  assert.match(source, /const \[importRunsExpanded, setImportRunsExpanded\] = useState\(false\)/, 'must default to collapsed');
+  assert.match(source, /\{runs\.length > 0 && importRunsExpanded && \(/, 'the run-card list must be gated on the expanded flag');
+  assert.match(source, /setImportRunsExpanded\(\(v\) => !v\)/, 'must toggle, never only ever set true or only ever false');
+  // Nothing about the run cards' own content, filtering, or the
+  // "Show only this run" action was removed by making the section
+  // collapsible — all still present verbatim.
+  assert.match(source, /Show only this run/);
+  assert.match(source, /Showing this run only/);
+  assert.match(source, /setRunIdFilter\(runIdFilter === run\.id \? '' : run\.id\)/);
+  assert.match(source, /Duration: \{formatDuration\(run\.duration_seconds\)\}/);
+  assert.match(source, /error\(s\) recorded for this run\./);
+});
+
+test('structural safety net: Review Overview and Review queue are unaffected by the reorder — same pure summary/filter functions, same candidate-rendering logic', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  // Same assertions as the pre-existing triage-overview tests above,
+  // repeated here specifically to prove the *reorder* did not silently
+  // change any of this logic.
+  assert.match(source, /computeReviewStatusCounts\(triageCandidates\)/);
+  assert.match(source, /filterCandidatesForTriage\(triageCandidates, \{/);
+  assert.match(source, /candidates\.map\(\(c\) => \{/, 'the full Review queue candidate list must still render every candidate');
 });
 
 test('structural safety net: "Save decision" cannot be enabled without an explicit status', () => {

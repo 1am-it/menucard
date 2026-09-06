@@ -778,3 +778,19 @@ status/route/contract are byte-for-byte unchanged). Full detail:
 "Implementation (2026-09-06, later still the same day) — terminology +
 information-hierarchy update" section and `docs/api/import-inbox-api.md`'s
 matching correction note.
+
+**Update (2026-09-06, later still): information-hierarchy update,
+superseding two names above.** `/internal/import-inbox` now reads: page
+title **"Dashboard imported Restaurant Data"** (was "Imported Restaurant
+Review"), browsing section **"Review queue"** (was "Imported
+candidates"); **"Review Overview"** is unchanged. Section order is now
+`Review Overview` then `Review queue` then `Import runs` (was `Import
+runs` first) — the daily review task before import administration, on
+both desktop and mobile. `Import runs` is now compact and collapsed by
+default (a new `Show`/`Hide` toggle), without removing run info,
+filtering, or `Show only this run`. No migration, database write,
+website fetch, new filter, sample data, or API/database-value change.
+Full detail: `planning/specs/tickets/market-05-normalization-deduplication.md`'s
+own "Implementation (2026-09-06, later still) — information-hierarchy
+update" section and `docs/api/import-inbox-api.md`'s matching correction
+note.
