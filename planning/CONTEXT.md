@@ -814,3 +814,52 @@ the same records. Full detail:
 `planning/specs/tickets/market-05-normalization-deduplication.md`'s
 own "Implementation (2026-09-06, later still) — remove the Review
 Overview / Review queue duplication" section.
+
+**Update (2026-09-06, later still): `MARKET-05C` — Restaurant Profile
+Drafts designed (documentation/schema contract only, no code, migration,
+or Supabase change).** A new internal-only staging layer, one step past
+`MARKET-05A`'s candidate review and long before any public restaurant
+page or owner-facing Restaurant Onboarding: an explicit human action
+promotes one already-`approved_internal` candidate into a durable
+`restaurant_profile_drafts` row, with its identity fields (name/category/
+address/phone/website — no menu, price, photo, marketing, or owner
+contact) tracked as an append-only `restaurant_profile_draft_field_facts`
+ledger, each fact traceable to exactly the candidate's raw import or one
+specific `import_candidate_enrichments` row — never a third, free-form
+"correction" path. Duplicate promotion of the *same* candidate is
+physically prevented (a unique constraint); a possible duplicate *across*
+candidates is surfaced as a visible, audited warning, never silently
+merged or blocked — real cross-source deduplication remains `MARKET-05B`'s
+job, which this ticket does not depend on or wait for (no cross-source
+merge happens here, so `MARKET-04` hard gate 3B does not apply). `internal`
+role only, matching `MARKET-05A`'s exact access posture. **Corrects an
+earlier imprecision**: an earlier round of this project's own
+documentation (2026-09-06, earlier the same day) had informally equated
+"Restaurant Profile Drafts" with `MARKET-05B` itself — that conflated a
+narrow, single-candidate promotion feature with `05B`'s actual, harder,
+gate-3B-blocked cross-source matching scope. Corrected, visibly, in
+`market-05-normalization-deduplication.md`'s own terminology glossary and
+new `MARKET-05C` section. Full detail:
+`docs/api/restaurant-profile-drafts-schema.md` (the full contract) and
+`planning/specs/tickets/market-05-normalization-deduplication.md`'s own
+"MARKET-05C — Restaurant Profile Drafts" section (the concise ticket
+summary).
+
+**Update (2026-09-06, later still): `MARKET-05C` design reviewed and
+confirmed as documentation source of truth; implementation not started.**
+Product review accepted `05C` as its own ticket, confirmed warn-and-allow-
+with-audit for possible duplicates, reconfirmed promotion as exclusive to
+`approved_internal` with no automatic sync or publication, and confirmed
+sync stays fully explicit (always a new fact row, never a silent
+overwrite). The review also caught and fixed one real design gap before
+any build: a discarded draft must stay permanently auditable, and a later
+change of mind must always be a new, deliberate promotion — never a
+silent recreation. This required correcting the schema contract's
+`source_candidate_id` uniqueness from a plain column constraint to a
+`where status = 'draft'` partial unique index (the same pattern
+`restaurant_claims`'s own one-pending-per-user index already uses), plus
+a new `restarted_from_draft_id` column recording a deliberate restart.
+Migration, RPC, API routes, and the internal "promote" UI action remain a
+separate, later, explicitly-authorized implementation step. Full detail:
+`docs/api/restaurant-profile-drafts-schema.md`'s own "Resolved decisions"
+and "Discard is permanent; restart is a new row" sections.

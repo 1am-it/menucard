@@ -150,6 +150,19 @@ record, regardless of how thin its data is yet. Requires `MARKET-01`'s
 geographic boundary to actually be defined for the market in question —
 "in the market boundary" is not a meaningful test otherwise.
 
+**Update (2026-09-06):** `planning/specs/tickets/market-05-normalization-deduplication.md`
+has since split this into three sub-tickets, not described by this
+document's original prose above: `05A` (internal candidate review, built),
+`05B` (this section's original cross-source matching/dedup scope,
+unchanged, still blocked on `MARKET-04` hard gate 3B), and a new `05C`
+("Restaurant Profile Drafts" — explicit internal promotion of one
+already-approved candidate into a durable draft; does not perform
+cross-source matching and does not depend on or wait for `05B`; see
+`docs/api/restaurant-profile-drafts-schema.md`). This document's own
+prose is the original, still-accurate description of `05B` specifically —
+it was never a description of `05C`, which did not exist when this was
+written.
+
 ## Wave 3 — Publication
 
 ### MARKET-06 — Publication snapshots

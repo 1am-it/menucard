@@ -1467,7 +1467,15 @@ uses:
   key itself, `'approved_pending_canonical'`, is unchanged — it is a
   JS-internal identifier, never an API/database value, and renaming it
   would have forced churn across already-passing tests for zero
-  user-facing benefit).
+  user-facing benefit). **Correction (2026-09-06, later still):** naming
+  this "`MARKET-05B`" was imprecise — `05B`'s own placeholder scope
+  (immediately below) is cross-source matching/deduplication, a different
+  and harder problem, blocked on `MARKET-04` hard gate 3B.
+  `Restaurant Profile Drafts` is now its own ticket, **`MARKET-05C`** (see
+  that section above, and `docs/api/restaurant-profile-drafts-schema.md`
+  for the full design) — it does not depend on or wait for `05B`. The
+  human-facing phrase itself is unaffected; only which ticket number it
+  maps to is corrected here.
 - **`Restaurant Onboarding`** — a **separate, later, owner-facing**
   future phase that only ever follows an explicit claim
   (`PLATFORM-07` — `planning/specs/tickets/platform-07-owner-claim-identity-verification.md`,
@@ -1478,8 +1486,9 @@ uses:
   purely internal/staff-facing and has no relationship to an owner's
   claim or onboarding journey. Documented here only so the two distinct
   future phases are never conflated: `Restaurant Profile Drafts` is an
-  *internal* data-quality step (MARKET-05B, no owner involvement at
-  all); `Restaurant Onboarding` is an *owner-facing* step that only
+  *internal* data-quality step (**`MARKET-05C`, corrected 2026-09-06,
+  later still — was mislabeled `MARKET-05B` above**; no owner involvement
+  at all); `Restaurant Onboarding` is an *owner-facing* step that only
   starts after that owner has already claimed/consented/participated —
   entirely different triggers, entirely different audiences.
 
@@ -1680,6 +1689,137 @@ safety-net test asserting the explanation is gated on
 `review_status === 'approved_internal'`, renders only inside the
 expanded detail view (never the always-visible row), and appears
 exactly once in the page (167 tests in this file, up from 166).
+
+## MARKET-05C — Restaurant Profile Drafts
+
+**Added 2026-09-06.** A new, third ticket alongside `05A` (built) and
+`05B` (original cross-source dedup scope, below, unchanged) — not a
+redefinition of either. Full schema/API contract:
+`docs/api/restaurant-profile-drafts-schema.md`. This section is the
+concise ticket-level summary; that file is the implementation-ready
+detail.
+
+**Update (2026-09-06, later still): design reviewed and confirmed as
+documentation source of truth; implementation not started.** Product
+review confirmed `05C` as its own ticket, warn-and-allow-with-audit for
+possible duplicates, promotion staying exclusively for `approved_internal`
+with no automatic sync or publication, sync staying fully explicit
+(always a new fact row, never a silent overwrite), and — the one design
+gap the review caught before any build — that a **discarded draft must
+remain permanently auditable and a later restart must always be a new,
+deliberate promotion, never a silent recreation**. That last point
+required correcting `source_candidate_id`'s uniqueness in the schema
+contract from a plain column constraint to a `where status = 'draft'`
+partial unique index (matching `restaurant_claims`'s own
+one-pending-per-user precedent), plus a new `restarted_from_draft_id`
+column — see the schema contract's "Discard is permanent; restart is a
+new row" and "Resolved decisions" sections for the full reasoning.
+Migration, RPC, API routes, and the internal "promote" UI action remain a
+separate, later, explicitly-authorized implementation step — not part of
+this round either.
+
+**Correction to this document's own terminology glossary** (see
+"Implementation (2026-09-06, later still) — terminology + information-
+hierarchy update" above): that round's glossary entry named
+`Restaurant Profile Drafts` as "the human-facing name for... `MARKET-05B`."
+That was imprecise. Reading `05B`'s own placeholder scope closely (directly
+below) shows it means **cross-source matching/deduplication into canonical
+candidate records** — blocked on `MARKET-04` hard gate 3B — a materially
+different, harder problem than "let staff explicitly promote one
+already-approved candidate into a durable draft." `Restaurant Profile
+Drafts` is now `MARKET-05C`, a distinct ticket that does not depend on or
+wait for `05B`. `TRIAGE_BUCKET_DESCRIPTIONS`' UI copy in
+`app/internal/import-inbox/page.js` (and its later replacement UI copy)
+needs no further change — it never named a ticket number, only the
+human-facing phrase, which still applies, now to the correct ticket.
+
+### Depends on
+
+`MARKET-05A` (the `import_candidate_reviews`/`import_candidate_enrichments`
+this reads — an `approved_internal` effective status is the only entry
+point); `PLATFORM-05`'s internal API/`staff_roles` pattern (reused, not
+reinvented). **Does not depend on `MARKET-05B`, `MARKET-02`,
+`MARKET-06`, or `PLATFORM-07`** — see the schema contract's "Pipeline
+position" for why.
+
+### Objective
+
+Give internal staff an explicit way to turn one candidate they have
+already marked `approved_internal` into a durable, named draft record —
+with its own identity, its own field-level provenance back to the
+candidate's raw import or a specific enrichment, and its own audit trail —
+without waiting for cross-source deduplication (`05B`), the full canonical
+schema (`MARKET-02`), or any owner-facing Restaurant Onboarding
+(`PLATFORM-07`+) to exist first.
+
+### User story
+
+As internal staff who has just approved a candidate on
+`/internal/import-inbox`, I want to promote it into a Restaurant Profile
+Draft with one explicit action, see exactly which of its fields came from
+the raw import versus a specific enrichment, get warned (not silently
+blocked or silently allowed) if it looks like a duplicate of an
+already-promoted draft, and be able to discard it later if it turns out to
+be wrong — all without that promotion ever touching the raw candidate
+data, creating a public page, or implying any owner involvement.
+
+### Scope
+
+- Two new tables (`restaurant_profile_drafts`,
+  `restaurant_profile_draft_field_facts`) and three RPCs
+  (`promote_candidate_to_profile_draft`, `record_profile_draft_field_sync`,
+  `discard_profile_draft`) — full shape in the schema contract.
+- A new `/api/internal/v1/profile-drafts/...` route family, following the
+  exact existing `authenticateInternalRequest` + `isInternalOnly` gate —
+  `internal` only, matching `05A`.
+- A new internal-only view (page/section — not designed here in detail;
+  the existing `/internal/import-inbox` "Details & review" pattern is the
+  obvious visual precedent) to promote, browse, and discard drafts.
+
+### Out of scope
+
+- `05B`'s actual cross-source matching/deduplication.
+- Any canonical (`MARKET-02`), publication (`MARKET-06`), or public
+  read-path change.
+- Restaurant Onboarding's actual design — see the schema contract's
+  "Relationship to a future Restaurant Onboarding," named only so a later
+  design has somewhere to attach.
+- Menu, price, photo, marketing, or owner-contact data of any kind.
+- Any code, migration, or Supabase change — documentation/schema contract
+  only, this round.
+
+### Risks
+
+- **Terminology drift** (already found and corrected above) — mitigated
+  going forward by this ticket's own explicit "does not depend on 05B"
+  framing.
+- **Duplicate drafts across candidates** (not across a single candidate —
+  physically prevented by a `unique` constraint) — mitigated by a
+  visible warn-and-audit mechanism, not solved outright; real
+  deduplication remains `05B`'s job.
+- **Scope creep into Onboarding** — mitigated by the schema contract's
+  explicit boundary list and by giving Onboarding its own, undecided
+  linkage question rather than pre-designing it here.
+
+### Acceptance criteria
+
+- [x] `docs/api/restaurant-profile-drafts-schema.md` exists and covers:
+      entities/fields/statuses, the promotion/sync/discard RPCs,
+      field-level provenance rules, duplicate handling, roles/RLS, audit
+      trail, and explicit boundaries.
+- [x] The terminology glossary's `Restaurant Profile Drafts` ↔ `MARKET-05B`
+      conflation is visibly corrected (this section).
+- [x] Design reviewed and confirmed (2026-09-06, later still) — ticket
+      identity, duplicate-draft handling, promotion/sync exclusivity, and
+      discard/restart permanence all resolved; see "Resolved decisions" in
+      the schema contract.
+- [x] No code, migration, or Supabase change made this round.
+
+### Suggested order
+
+Third sub-ticket of `MARKET-05`, buildable independently of `05B` (see
+"Depends on"). A reasonable next step after `05A`'s own live verification
+completes.
 
 ## MARKET-05B — Normalization & deduplication (placeholder, untouched)
 

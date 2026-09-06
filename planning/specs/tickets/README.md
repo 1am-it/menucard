@@ -111,6 +111,17 @@ implementation (see its own ticket).
    is not yet live-verifiable — no working `internal` account exists
    (its email-activation flow is still blocked on a manual Supabase
    email-template edit) and zero `ImportRun`s exist to browse yet.
+   **Update (2026-09-06): a third sub-ticket, `05C` — Restaurant Profile
+   Drafts — designed as documentation/schema contract only.** Explicit
+   internal promotion of one already-`approved_internal` candidate into a
+   durable draft, with field-level provenance back to import/enrichment,
+   duplicate-promotion handling, `internal`-only access, and an audit
+   trail — see `docs/api/restaurant-profile-drafts-schema.md`. Does not
+   depend on or wait for `05B` (no cross-source merge is involved, so
+   `MARKET-04` hard gate 3B does not apply). Corrects an earlier,
+   imprecise equating of "Restaurant Profile Drafts" with `05B` itself —
+   see the ticket file's own dated correction. No code, migration, or
+   Supabase change made.
 6. MARKET-06 — publication snapshots (not started)
 7. MARKET-07 — market-scoped coverage metrics (not started)
 8. MARKET-08 — minimal market-aware consumer read path (not started; mandatory before any second market can launch — see `planning/architecture/market-data-foundation-plan.md`)
