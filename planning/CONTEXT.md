@@ -737,3 +737,21 @@ second round trip). 27 new tests in `src/lib/importInbox.test.js`
 "Implementation (2026-09-06, later still the same day) — Triage
 overview" section and `docs/api/import-inbox-api.md`'s matching
 "Addition (2026-09-06, later still the same day)" note.
+
+**Update (2026-09-06, later still the same day): presentation-only
+redesign of `/internal/import-inbox` to match `docs/mockups/internal-candidate-triage-v1.png`.**
+New `.di-*`-scoped CSS in `app/globals.css` plus a markup rewrite in
+`app/internal/import-inbox/page.js` — status summary tiles with icons,
+one labeled filter+search bar, redesigned candidate rows, short banners
+in place of long paragraphs, and mobile breakpoints. No data, API,
+filter/search-logic, or security-boundary change of any kind — every
+pure function and test from the two rounds above stayed untouched, and
+the full `src/lib/importInbox.test.js` suite (154 tests) still passes
+unmodified. One real mobile CSS bug (a desktop `flex-basis` becoming a
+height once the filter bar goes column-flex on narrow screens) was
+found and fixed during manual visual verification against a disposable,
+never-committed static-HTML preview of the same CSS classes — no live
+`internal` session was created or used. Full detail:
+`planning/specs/tickets/market-05-normalization-deduplication.md`'s own
+"Implementation (2026-09-06, later still the same day) — presentation-only
+redesign to match the mockup" section.

@@ -1859,3 +1859,157 @@ mark.search-highlight {
   transition: color 0.15s;
 }
 .rc-phone:hover { color: var(--green); }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   INTERNAL TOOLING — Data-inbox / Candidate triage (MARKET-05A)
+   Presentation only. Visual acceptance reference:
+   docs/mockups/internal-candidate-triage-v1.png. Scoped entirely under
+   .di- so it can never leak into, or be affected by, any consumer-facing
+   page — this is an `internal`-only tool, not part of the dish-first
+   redesign. Uses the same shared token system as the rest of the app
+   (light/dark both supported automatically, per docs/guides/design-reference.md);
+   no colors are hardcoded here.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.di-page { background: var(--bg-elevated); min-height: 100vh; }
+.di-main { max-width: 1080px; margin: 0 auto; padding: 32px 24px 80px; }
+
+.di-topbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+.di-title { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; color: var(--text-primary); margin: 0; }
+.di-signout {
+  font-size: 13px; font-weight: 600; background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: 7px 14px; color: var(--text-secondary); cursor: pointer; transition: all 0.15s;
+}
+.di-signout:hover { border-color: var(--border-hover); color: var(--text-primary); }
+
+.di-section-title { font-size: 16px; font-weight: 700; color: var(--text-primary); margin: 28px 0 12px; }
+.di-section-title:first-of-type { margin-top: 0; }
+
+/* Short banners — replace long explanatory paragraphs everywhere on this
+   page (BE-style principle: information hierarchy over walls of text). */
+.di-banner { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: var(--radius-md); font-size: 13px; line-height: 1.5; margin-bottom: 16px; }
+.di-banner strong { font-weight: 700; }
+.di-banner-icon { flex-shrink: 0; margin-top: 1px; display: flex; }
+.di-banner-icon svg { width: 16px; height: 16px; }
+.di-banner-info { background: var(--green-faint); border: 1px solid var(--green-border); color: var(--green); }
+.di-banner-warning { background: var(--warning-bg); border: 1px solid var(--warning-border); color: var(--warning); }
+.di-banner-danger { background: var(--danger-bg); border: 1px solid var(--danger-border); color: var(--danger); }
+.di-banner-neutral { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-secondary); }
+
+/* Status summary cards */
+.di-summary { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+.di-summary-card {
+  display: flex; align-items: center; gap: 12px; text-align: left; font: inherit;
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 12px 16px; cursor: pointer; transition: all 0.15s; flex: 1 1 150px; min-width: 150px;
+}
+.di-summary-card:hover { border-color: var(--border-hover); }
+.di-summary-card.active { border-color: var(--green); box-shadow: 0 0 0 1px var(--green); }
+.di-summary-icon { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.di-summary-icon svg { width: 17px; height: 17px; }
+.di-summary-body { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.di-summary-label { font-size: 12px; color: var(--text-muted); font-weight: 600; white-space: nowrap; }
+.di-summary-count { font-size: 19px; font-weight: 800; color: var(--text-primary); line-height: 1.2; }
+
+.di-summary-icon--new                { background: var(--tag-info-bg); color: var(--tag-info); }
+.di-summary-icon--needs_enrichment   { background: var(--warning-bg); color: var(--warning); }
+.di-summary-icon--approved_internal  { background: var(--green-faint); color: var(--green); }
+.di-summary-icon--deferred           { background: var(--warning-bg); color: var(--warning); }
+.di-summary-icon--rejected           { background: var(--danger-bg); color: var(--danger); }
+
+/* Labeled filter + search bar */
+.di-filterbar { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px; }
+.di-filter-group { display: flex; flex-direction: column; gap: 4px; }
+.di-filter-label { font-size: 11px; font-weight: 700; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.4px; }
+.di-search-wrap { position: relative; flex: 2 1 220px; min-width: 190px; display: flex; }
+.di-search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-faint); pointer-events: none; display: flex; }
+.di-search-icon svg { width: 14px; height: 14px; }
+.di-input, .di-select {
+  padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--input-border);
+  background: var(--bg-input); color: var(--text-primary); font-size: 13px; outline: none; transition: border-color 0.15s;
+}
+.di-input:focus, .di-select:focus { border-color: var(--green); }
+.di-search-wrap .di-input { width: 100%; padding-left: 30px; }
+.di-clear-link { align-self: center; font-size: 13px; font-weight: 600; color: var(--green); background: none; border: none; cursor: pointer; text-decoration: underline; white-space: nowrap; padding: 8px 0; }
+.di-clear-link:hover { color: var(--green-dim); }
+
+/* Candidate rows (triage list) */
+.di-rows { display: grid; gap: 10px; }
+.di-row {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px;
+  display: grid; grid-template-columns: 1.7fr 1fr 1.6fr auto; gap: 18px; align-items: center; transition: border-color 0.15s;
+}
+.di-row:hover { border-color: var(--border-hover); }
+.di-row-name { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+.di-row-contact { display: flex; flex-direction: column; gap: 3px; }
+.di-row-contact-line { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--text-muted); }
+.di-row-contact-line svg { width: 13px; height: 13px; flex-shrink: 0; color: var(--text-faint); }
+.di-row-contact-line.di-muted { color: var(--text-faint); font-style: italic; }
+
+.di-row-col-label { font-size: 11px; font-weight: 700; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; }
+.di-row-meta { font-size: 11px; color: var(--text-faint); margin-top: 4px; }
+.di-row-reason { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+.di-chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: var(--radius-pill); font-size: 12px; font-weight: 700; white-space: nowrap; }
+.di-chip svg { width: 12px; height: 12px; }
+.di-chip--complete           { background: var(--green-faint); color: var(--green); }
+.di-chip--incomplete         { background: var(--danger-bg); color: var(--danger); }
+.di-chip--new                { background: var(--tag-info-bg); color: var(--tag-info); }
+.di-chip--needs_enrichment   { background: var(--warning-bg); color: var(--warning); }
+.di-chip--approved_internal  { background: var(--green-faint); color: var(--green); }
+.di-chip--deferred           { background: var(--warning-bg); color: var(--warning); }
+.di-chip--rejected           { background: var(--danger-bg); color: var(--danger); }
+.di-chip--muted              { background: var(--bg-elevated); color: var(--text-muted); border: 1px solid var(--border); }
+
+.di-view-btn {
+  display: inline-flex; align-items: center; gap: 4px; padding: 8px 14px; border-radius: var(--radius-md);
+  border: 1px solid var(--border); background: var(--bg-card); color: var(--green); font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.di-view-btn:hover { border-color: var(--green); background: var(--green-faint); }
+.di-view-btn svg { width: 14px; height: 14px; }
+
+.di-empty { text-align: center; padding: 36px 20px; color: var(--text-muted); font-size: 14px; background: var(--bg-card); border: 1px dashed var(--border-hover); border-radius: var(--radius-lg); }
+
+/* Import runs */
+.di-run-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px 16px; }
+.di-run-toggle {
+  font-size: 12px; padding: 5px 12px; border-radius: var(--radius-pill); border: 1px solid var(--border);
+  background: transparent; color: var(--text-secondary); cursor: pointer; transition: all 0.15s;
+}
+.di-run-toggle.active { background: var(--green-faint); border-color: var(--green); color: var(--green); }
+
+/* Candidates section (full detail cards) — same card/chip language,
+   kept structurally intact (forms unchanged), lightly reskinned. */
+.di-candidate-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; }
+.di-detail { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+.di-link-btn {
+  font-size: 12px; padding: 6px 12px; border-radius: var(--radius-md); border: 1px solid var(--border);
+  background: transparent; color: var(--text-secondary); cursor: pointer; transition: all 0.15s;
+}
+.di-link-btn:hover { border-color: var(--border-hover); color: var(--text-primary); }
+.di-link-btn.active { background: var(--green-faint); border-color: var(--green); color: var(--green); }
+.di-btn-primary {
+  font-size: 13px; font-weight: 700; padding: 9px 16px; border-radius: var(--radius-md); border: none;
+  background: var(--green); color: var(--on-accent); cursor: pointer; transition: background 0.15s;
+}
+.di-btn-primary:hover { background: var(--green-dim); }
+.di-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Mobile */
+@media (max-width: 720px) {
+  .di-main { padding: 20px 14px 60px; }
+  .di-summary-card { flex: 1 1 calc(50% - 8px); min-width: 130px; }
+  .di-row { grid-template-columns: 1fr; gap: 10px; }
+  .di-view-btn { width: 100%; justify-content: center; }
+  .di-filterbar { flex-direction: column; align-items: stretch; }
+  /* .di-filterbar switches to a column flex container here, which flips
+     its main axis to vertical — .di-search-wrap's desktop `flex: 2 1
+     220px` would otherwise be read as a 220px preferred *height* instead
+     of width, stretching the search field far taller than intended. */
+  .di-filter-group, .di-search-wrap { width: 100%; flex: none; }
+}
+
+@media (max-width: 420px) {
+  .di-summary-card { flex: 1 1 100%; }
+}

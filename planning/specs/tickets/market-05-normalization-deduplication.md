@@ -1373,6 +1373,65 @@ summary/filter/bucket logic through the pure tested functions (never a
 re-implementation), gates the deferred-reason filter on the status
 filter, and that "View in list" never calls a write endpoint.
 
+### Implementation (2026-09-06, later still the same day) — presentation-only redesign to match the mockup
+
+Visual acceptance reference:
+`docs/mockups/internal-candidate-triage-v1.png` (see
+`docs/mockups/README.md`'s new "Internal tooling" section). **Presentation
+only** — no data/API/filter/search-logic change, no new migration, no
+database write, no website fetch. Every pure function, route, and test
+from the two implementation sections above is untouched; this only
+changes markup and CSS in `app/internal/import-inbox/page.js` and adds a
+new, dedicated `.di-*`-scoped CSS section to `app/globals.css` (never
+touching any consumer-facing page's styles).
+
+- **Layout**: page background/cards/summary tiles/labeled filter bar/
+  candidate rows now mirror the mockup's structure — status summary
+  tiles with an icon per status (lightweight inline SVGs, never emoji,
+  never an icon library — same principle as `docs/guides/design-reference.md`'s
+  existing "lightweight icons" direction), a single labeled filter+search
+  bar ("Search"/"Status"/"Deferred reason"), and candidate rows showing
+  name, contact lines (address/phone/website, each with its own icon),
+  a "Completeness" chip, a "Latest review" chip plus its bucket
+  description, and a "View details" action.
+- **Short banners replace long paragraphs**: the page-level and
+  triage-level explanatory paragraphs are now short, icon-led banners —
+  same underlying guarantees, less to read.
+- **Internal-approval vs. public-publication distinction**: the
+  "approved_pending_canonical" bucket description
+  (`TRIAGE_BUCKET_DESCRIPTIONS` in `src/lib/importInbox.js`, unchanged
+  from the previous round) is what visually carries this — "ready only
+  for a future, not-yet-built canonical draft step," never implying
+  scheduled/automatic publication.
+- **Mobile**: new responsive rules in `app/globals.css` (`@media
+  (max-width: 720px)`/`(max-width: 420px)`) stack the summary tiles,
+  candidate rows, and filter bar. One real bug caught and fixed during
+  manual visual verification: the search field's desktop `flex: 2 1
+  220px` was still active once the filter bar becomes a column flex
+  container on mobile, where `flex-basis` applies to height rather than
+  width — it briefly stretched the search box to ~220px tall. Fixed by
+  resetting `flex: none` on `.di-filter-group`/`.di-search-wrap` inside
+  that same mobile breakpoint.
+- **No real candidate data or hardcoded mockup content in the shipped
+  page**: every field rendered by the real component (`c.extracted_fields`,
+  `c.normalized_fields`, `c.review_status`, `c.deferred_reason`, the
+  summary counts) still comes from the same, unmodified API responses as
+  before — nothing here was replaced with sample data. Verification
+  against the mockup's own sample rows (De Eetkamer, Bistro aan de
+  Gracht, etc.) was done separately, in a disposable, out-of-repo static
+  HTML preview built only from the same CSS classes — never committed,
+  never part of the app — since exercising the real, authenticated page
+  would have required a live `internal` session, which this round's
+  instructions did not call for and which was not created.
+- **Tests**: the full existing `src/lib/importInbox.test.js` suite
+  (still 154 tests, unchanged) continues to pass unmodified — including
+  every structural test that reads `app/internal/import-inbox/page.js`'s
+  own source for specific handler/state patterns (e.g. the two
+  `toggleExpand(c.id)` call sites, `loadTriageCandidates`'s `run_id`-only
+  scoping, the deferred-reason filter gating) — proving the redesign
+  changed only markup/classNames around those exact same, untouched
+  handlers and state variables, never their logic.
+
 ## MARKET-05B — Normalization & deduplication (placeholder, untouched)
 
 Original scope, unchanged by this document: matching and deduplicating

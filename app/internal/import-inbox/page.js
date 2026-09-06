@@ -92,13 +92,6 @@ const SUGGESTION_STATUS_LABELS = {
   no_data: 'Not found',
 }
 
-const cardStyle = {
-  border: '1px solid var(--border)',
-  borderRadius: 12,
-  padding: 16,
-  background: 'var(--bg-card)',
-}
-
 const selectStyle = {
   padding: 8,
   borderRadius: 8,
@@ -108,13 +101,113 @@ const selectStyle = {
   fontSize: 13,
 }
 
-const badgeStyle = (bg, color) => ({
-  fontSize: 12,
-  padding: '3px 8px',
-  borderRadius: 999,
-  background: bg,
-  color,
-})
+// Presentation-only redesign (2026-09-06) — visual acceptance reference:
+// docs/mockups/internal-candidate-triage-v1.png. Lightweight, stroke-only
+// SVG icons (never emoji, never an icon font/library dependency) —
+// mirrors docs/guides/design-reference.md's "lightweight icons" principle
+// already used elsewhere in this app. Each renders at whatever size/color
+// its containing `.di-*` CSS class sets via `currentColor`/`svg { width; height }`.
+function IconDocument() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <path d="M14 2v6h6" />
+    </svg>
+  )
+}
+function IconPencil() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+    </svg>
+  )
+}
+function IconCheck() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <path d="m8.5 12.5 2.5 2.5 4.5-5" />
+    </svg>
+  )
+}
+function IconClock() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 6v6l4 2" />
+    </svg>
+  )
+}
+function IconX() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <path d="m9 9 6 6m0-6-6 6" />
+    </svg>
+  )
+}
+function IconSearch() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-3.5-3.5" />
+    </svg>
+  )
+}
+function IconShield() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2 4 5v6c0 5 3.4 8.7 8 11 4.6-2.3 8-6 8-11V5Z" />
+      <path d="m9 12 2 2 4-4" />
+    </svg>
+  )
+}
+function IconInfo() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 16v-5M12 8h.01" />
+    </svg>
+  )
+}
+function IconPin() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+      <circle cx="12" cy="10" r="3" />
+    </svg>
+  )
+}
+function IconPhone() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .6 2.9a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c.9.3 1.9.5 2.9.6a2 2 0 0 1 1.8 2Z" />
+    </svg>
+  )
+}
+function IconGlobe() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z" />
+    </svg>
+  )
+}
+function IconChevronRight() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m9 6 6 6-6 6" />
+    </svg>
+  )
+}
+
+const TRIAGE_STATUS_ICONS = {
+  new: IconDocument,
+  needs_enrichment: IconPencil,
+  approved_internal: IconCheck,
+  deferred: IconClock,
+  rejected: IconX,
+}
 
 function formatDuration(seconds) {
   if (seconds === null || seconds === undefined) return '—'
@@ -635,7 +728,13 @@ export default function ImportInboxPage() {
   }
 
   if (session === undefined) {
-    return <main style={{ padding: 40, fontFamily: 'system-ui, sans-serif' }}>Loading…</main>
+    return (
+      <div className="di-page">
+        <main className="di-main" style={{ color: 'var(--text-muted)' }}>
+          Loading…
+        </main>
+      </div>
+    )
   }
 
   const selectedRun = runIdFilter ? runs.find((r) => r.id === runIdFilter) || null : null
@@ -655,48 +754,33 @@ export default function ImportInboxPage() {
   const showErrorBanner = Boolean(selectedRun && (selectedRun.status === 'failed' || selectedRun.status === 'partial'))
 
   return (
-    <main
-      style={{
-        maxWidth: 960,
-        margin: '0 auto',
-        padding: '32px 20px',
-        fontFamily: 'system-ui, sans-serif',
-        color: 'var(--text-primary)',
-      }}
-    >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <h1 style={{ fontSize: 24, margin: 0 }}>Data-inbox — import candidates</h1>
-        <button
-          onClick={signOut}
-          style={{
-            fontSize: 13,
-            background: 'none',
-            border: '1px solid var(--border)',
-            borderRadius: 8,
-            padding: '6px 10px',
-            cursor: 'pointer',
-            color: 'var(--text-secondary)',
-          }}
-        >
+    <div className="di-page">
+      <main className="di-main">
+      <div className="di-topbar">
+        <h1 className="di-title">Candidate triage</h1>
+        <button onClick={signOut} className="di-signout">
           Sign out
         </button>
       </div>
 
-      <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginTop: 0, marginBottom: 24 }}>
-        Nothing here can ever write to <code>import_runs</code>, <code>import_extraction_records</code>, or any canonical
-        or public table. "Possible duplicate" and quality status are computed on every load from the raw data plus any
-        manual enrichments — never stored on the raw record. Recording a review decision or an enrichment below only ever
-        adds a new row to its own separate, append-only audit log — the raw import record itself is never changed, and a
-        correction is always a new entry, never an edit. "Approved (internal only)" means ready for internal enrichment
-        only — never public publication, never a MenuCard — and is entirely independent from recording an enrichment:
-        neither one ever sets the other automatically.
-      </p>
+      <div className="di-banner di-banner-neutral">
+        <span className="di-banner-icon">
+          <IconInfo />
+        </span>
+        <span>
+          Everything here is read-only history plus two append-only actions — <strong>Save decision</strong> and{' '}
+          <strong>Save enrichment</strong> — each adding a new audit row, never editing or deleting one.
+        </span>
+      </div>
 
-      <h2 style={{ fontSize: 18, marginBottom: 12 }}>Import runs</h2>
+      <h2 className="di-section-title">Import runs</h2>
 
       {runsError && (
-        <div style={{ padding: 12, borderRadius: 8, background: 'var(--danger-bg)', color: 'var(--danger)', marginBottom: 16, fontSize: 14 }}>
-          {runsError}
+        <div className="di-banner di-banner-danger">
+          <span className="di-banner-icon">
+            <IconX />
+          </span>
+          <span>{runsError}</span>
         </div>
       )}
 
@@ -709,17 +793,12 @@ export default function ImportInboxPage() {
       {runs.length > 0 && (
         <div style={{ display: 'grid', gap: 12, marginBottom: 28 }}>
           {runs.map((run) => (
-            <div key={run.id} style={cardStyle}>
+            <div key={run.id} className="di-run-card">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                 <span
-                  style={badgeStyle(
-                    run.status === 'succeeded'
-                      ? 'var(--green-faint)'
-                      : run.status === 'failed'
-                        ? 'var(--danger-bg)'
-                        : 'var(--warning-bg)',
-                    run.status === 'succeeded' ? 'var(--green)' : run.status === 'failed' ? 'var(--danger)' : 'var(--warning)'
-                  )}
+                  className={`di-chip ${
+                    run.status === 'succeeded' ? 'di-chip--complete' : run.status === 'failed' ? 'di-chip--rejected' : 'di-chip--deferred'
+                  }`}
                 >
                   {run.status}
                 </span>
@@ -742,15 +821,7 @@ export default function ImportInboxPage() {
               )}
               <button
                 onClick={() => setRunIdFilter(runIdFilter === run.id ? '' : run.id)}
-                style={{
-                  fontSize: 12,
-                  padding: '4px 10px',
-                  borderRadius: 8,
-                  border: '1px solid var(--border)',
-                  background: runIdFilter === run.id ? 'var(--green-faint)' : 'transparent',
-                  color: runIdFilter === run.id ? 'var(--green)' : 'var(--text-secondary)',
-                  cursor: 'pointer',
-                }}
+                className={`di-run-toggle ${runIdFilter === run.id ? 'active' : ''}`}
               >
                 {runIdFilter === run.id ? 'Showing this run only' : 'Show only this run'}
               </button>
@@ -761,18 +832,26 @@ export default function ImportInboxPage() {
 
       {runs.length > 0 && (
         <>
-          <h2 style={{ fontSize: 18, marginBottom: 12 }}>Triage overview</h2>
-          <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginTop: 0, marginBottom: 16 }}>
-            Read-only summary of every candidate's current review status for {runIdFilter ? 'the selected run' : 'every run'} —
-            independent from the filters in "Candidates" below, so it never shrinks when you narrow those down. Nothing here
-            ever writes anything; "View in list" only expands that candidate's existing, unchanged detail view further down.
-            Chain/franchise matching and automatic service-model classification are not part of this — those are separate,
-            later features.
-          </p>
+          <h2 className="di-section-title">Triage overview</h2>
+
+          <div className="di-banner di-banner-neutral">
+            <span className="di-banner-icon">
+              <IconInfo />
+            </span>
+            <span>
+              Read-only summary for {runIdFilter ? 'the selected run' : 'every run'}, independent from the "Candidates"
+              filters below. "View details" only opens that candidate's existing, unchanged detail view further down —
+              nothing here ever writes anything. Chain/franchise matching and service-model classification are separate,
+              later features, not part of this.
+            </span>
+          </div>
 
           {triageError && (
-            <div style={{ padding: 12, borderRadius: 8, background: 'var(--danger-bg)', color: 'var(--danger)', marginBottom: 16, fontSize: 14 }}>
-              {triageError}
+            <div className="di-banner di-banner-danger">
+              <span className="di-banner-icon">
+                <IconX />
+              </span>
+              <span>{triageError}</span>
             </div>
           )}
 
@@ -780,11 +859,12 @@ export default function ImportInboxPage() {
 
           {!triageLoading && !triageError && (
             <>
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+              <div className="di-summary">
                 {(() => {
                   const counts = computeReviewStatusCounts(triageCandidates)
                   return TRIAGE_SUMMARY_STATUSES.map((status) => {
                     const active = triageStatusFilter === status
+                    const Icon = TRIAGE_STATUS_ICONS[status]
                     return (
                       <button
                         key={status}
@@ -792,45 +872,69 @@ export default function ImportInboxPage() {
                           setTriageStatusFilter(active ? '' : status)
                           setTriageDeferredReasonFilter('')
                         }}
-                        style={{
-                          fontSize: 13,
-                          padding: '6px 12px',
-                          borderRadius: 999,
-                          border: '1px solid var(--border)',
-                          background: active ? 'var(--green-faint)' : 'var(--bg-card)',
-                          color: active ? 'var(--green)' : 'var(--text-primary)',
-                          cursor: 'pointer',
-                          fontWeight: active ? 600 : 400,
-                        }}
+                        className={`di-summary-card ${active ? 'active' : ''}`}
                       >
-                        {REVIEW_STATUS_LABELS[status]}: {counts[status]}
+                        <span className={`di-summary-icon di-summary-icon--${status}`}>
+                          <Icon />
+                        </span>
+                        <span className="di-summary-body">
+                          <span className="di-summary-label">{REVIEW_STATUS_LABELS[status]}</span>
+                          <span className="di-summary-count">{counts[status]}</span>
+                        </span>
                       </button>
                     )
                   })
                 })()}
               </div>
 
-              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}>
-                <input
-                  type="text"
-                  placeholder="Search name, address, or website…"
-                  value={triageSearchTerm}
-                  onChange={(e) => setTriageSearchTerm(e.target.value)}
-                  style={{ ...selectStyle, minWidth: 220 }}
-                />
-                {triageStatusFilter === 'deferred' && (
+              <div className="di-filterbar">
+                <div className="di-filter-group di-search-wrap">
+                  <span className="di-filter-label">Search</span>
+                  <span className="di-search-icon">
+                    <IconSearch />
+                  </span>
+                  <input
+                    type="text"
+                    placeholder="Search by business name, address, phone or website"
+                    value={triageSearchTerm}
+                    onChange={(e) => setTriageSearchTerm(e.target.value)}
+                    className="di-input"
+                  />
+                </div>
+                <div className="di-filter-group">
+                  <span className="di-filter-label">Status</span>
                   <select
-                    value={triageDeferredReasonFilter}
-                    onChange={(e) => setTriageDeferredReasonFilter(e.target.value)}
-                    style={selectStyle}
+                    value={triageStatusFilter}
+                    onChange={(e) => {
+                      setTriageStatusFilter(e.target.value)
+                      setTriageDeferredReasonFilter('')
+                    }}
+                    className="di-select"
                   >
-                    <option value="">Any deferred reason</option>
-                    {ALLOWED_DEFERRED_REASONS.map((r) => (
-                      <option key={r} value={r}>
-                        {formatDeferredReasonLabel(r)}
+                    <option value="">All statuses</option>
+                    {TRIAGE_SUMMARY_STATUSES.map((status) => (
+                      <option key={status} value={status}>
+                        {REVIEW_STATUS_LABELS[status]}
                       </option>
                     ))}
                   </select>
+                </div>
+                {triageStatusFilter === 'deferred' && (
+                  <div className="di-filter-group">
+                    <span className="di-filter-label">Deferred reason</span>
+                    <select
+                      value={triageDeferredReasonFilter}
+                      onChange={(e) => setTriageDeferredReasonFilter(e.target.value)}
+                      className="di-select"
+                    >
+                      <option value="">All reasons</option>
+                      {ALLOWED_DEFERRED_REASONS.map((r) => (
+                        <option key={r} value={r}>
+                          {formatDeferredReasonLabel(r)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 )}
                 {(triageStatusFilter || triageDeferredReasonFilter || triageSearchTerm) && (
                   <button
@@ -839,17 +943,9 @@ export default function ImportInboxPage() {
                       setTriageDeferredReasonFilter('')
                       setTriageSearchTerm('')
                     }}
-                    style={{
-                      fontSize: 12,
-                      padding: '4px 10px',
-                      borderRadius: 8,
-                      border: '1px solid var(--border)',
-                      background: 'transparent',
-                      color: 'var(--text-secondary)',
-                      cursor: 'pointer',
-                    }}
+                    className="di-clear-link"
                   >
-                    Clear triage filters
+                    Clear filters
                   </button>
                 )}
               </div>
@@ -861,44 +957,57 @@ export default function ImportInboxPage() {
                   searchTerm: triageSearchTerm,
                 })
                 if (triageFiltered.length === 0) {
-                  return <p style={{ color: 'var(--text-muted)', marginBottom: 28 }}>No candidates match the current triage filters.</p>
+                  return <div className="di-empty" style={{ marginBottom: 28 }}>No candidates match the current triage filters.</div>
                 }
                 return (
-                  <div style={{ display: 'grid', gap: 8, marginBottom: 28 }}>
+                  <div className="di-rows" style={{ marginBottom: 28 }}>
                     {triageFiltered.map((c) => {
                       const bucket = computeCandidateTriageBucket(c)
+                      const StatusIcon = TRIAGE_STATUS_ICONS[c.review_status]
                       return (
-                        <div key={c.id} style={{ ...cardStyle, padding: 10 }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                            <div style={{ fontSize: 13, fontWeight: 600 }}>{c.extracted_fields?.name || '(no name)'}</div>
-                            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                              <span style={badgeStyle('var(--bg-card)', 'var(--text-secondary)')}>{REVIEW_STATUS_LABELS[c.review_status] || c.review_status}</span>
-                              <button
-                                onClick={() => jumpToCandidateFromTriage(c.id)}
-                                style={{
-                                  fontSize: 12,
-                                  padding: '4px 10px',
-                                  borderRadius: 8,
-                                  border: '1px solid var(--border)',
-                                  background: 'transparent',
-                                  color: 'var(--text-secondary)',
-                                  cursor: 'pointer',
-                                }}
-                              >
-                                View in list
-                              </button>
+                        <div key={c.id} className="di-row">
+                          <div>
+                            <div className="di-row-name">{c.extracted_fields?.name || '(no name)'}</div>
+                            <div className="di-row-contact">
+                              <span className="di-row-contact-line">
+                                <IconPin />
+                                {c.normalized_fields?.address || '—'}
+                              </span>
+                              {c.normalized_fields?.phone && (
+                                <span className="di-row-contact-line">
+                                  <IconPhone />
+                                  {c.normalized_fields.phone}
+                                </span>
+                              )}
+                              <span className={`di-row-contact-line ${c.normalized_fields?.website ? '' : 'di-muted'}`}>
+                                <IconGlobe />
+                                {c.normalized_fields?.website || '—'}
+                              </span>
                             </div>
                           </div>
-                          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
-                            {c.normalized_fields?.address || '—'}
-                            {c.normalized_fields?.website ? ` · ${c.normalized_fields.website}` : ''}
+                          <div>
+                            <div className="di-row-col-label">Completeness</div>
+                            <span className={`di-chip ${c.quality_status === 'complete' ? 'di-chip--complete' : 'di-chip--incomplete'}`}>
+                              {c.quality_status === 'complete' ? 'Complete' : 'Incomplete'}
+                            </span>
                           </div>
-                          {bucket && (
-                            <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>
-                              {TRIAGE_BUCKET_DESCRIPTIONS[bucket]}
-                              {bucket === 'deferred' && c.deferred_reason ? ` (${formatDeferredReasonLabel(c.deferred_reason)})` : ''}
-                            </div>
-                          )}
+                          <div>
+                            <div className="di-row-col-label">Latest review</div>
+                            <span className={`di-chip di-chip--${c.review_status}`}>
+                              {StatusIcon && <StatusIcon />}
+                              {REVIEW_STATUS_LABELS[c.review_status] || c.review_status}
+                            </span>
+                            {bucket && (
+                              <div className="di-row-reason">
+                                {TRIAGE_BUCKET_DESCRIPTIONS[bucket]}
+                                {bucket === 'deferred' && c.deferred_reason ? ` (${formatDeferredReasonLabel(c.deferred_reason)})` : ''}
+                              </div>
+                            )}
+                          </div>
+                          <button onClick={() => jumpToCandidateFromTriage(c.id)} className="di-view-btn">
+                            View details
+                            <IconChevronRight />
+                          </button>
                         </div>
                       )
                     })}
@@ -912,54 +1021,94 @@ export default function ImportInboxPage() {
 
       {runs.length > 0 && (
         <>
-          <h2 style={{ fontSize: 18, marginBottom: 12 }}>Candidates</h2>
+          <h2 className="di-section-title">Candidates</h2>
 
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}>
-            <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} style={selectStyle}>
-              <option value="">All categories</option>
-              {CATEGORY_OPTIONS.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-            <input
-              type="text"
-              placeholder="Search name…"
-              value={nameFilter}
-              onChange={(e) => setNameFilter(e.target.value)}
-              style={{ ...selectStyle, minWidth: 160 }}
-            />
-            <select value={duplicateFilter} onChange={(e) => setDuplicateFilter(e.target.value)} style={selectStyle}>
-              <option value="">Any duplicate status</option>
-              <option value="true">Possible duplicates only</option>
-              <option value="false">No possible duplicate</option>
-            </select>
-            <select value={qualityFilter} onChange={(e) => setQualityFilter(e.target.value)} style={selectStyle}>
-              <option value="">Any quality</option>
-              <option value="complete">Complete</option>
-              <option value="incomplete">Incomplete</option>
-            </select>
-            <select value={reviewStatusFilter} onChange={(e) => setReviewStatusFilter(e.target.value)} style={selectStyle}>
-              <option value="">Any review status</option>
-              {REVIEW_STATUS_OPTIONS.map((s) => (
-                <option key={s} value={s}>
-                  {REVIEW_STATUS_LABELS[s]}
-                </option>
-              ))}
-            </select>
+          <div className="di-filterbar">
+            <div className="di-filter-group di-search-wrap">
+              <span className="di-filter-label">Name</span>
+              <span className="di-search-icon">
+                <IconSearch />
+              </span>
+              <input
+                type="text"
+                placeholder="Search name…"
+                value={nameFilter}
+                onChange={(e) => setNameFilter(e.target.value)}
+                className="di-input"
+              />
+            </div>
+            <div className="di-filter-group">
+              <span className="di-filter-label">Category</span>
+              <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="di-select">
+                <option value="">All categories</option>
+                {CATEGORY_OPTIONS.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="di-filter-group">
+              <span className="di-filter-label">Duplicates</span>
+              <select value={duplicateFilter} onChange={(e) => setDuplicateFilter(e.target.value)} className="di-select">
+                <option value="">Any duplicate status</option>
+                <option value="true">Possible duplicates only</option>
+                <option value="false">No possible duplicate</option>
+              </select>
+            </div>
+            <div className="di-filter-group">
+              <span className="di-filter-label">Completeness</span>
+              <select value={qualityFilter} onChange={(e) => setQualityFilter(e.target.value)} className="di-select">
+                <option value="">Any quality</option>
+                <option value="complete">Complete</option>
+                <option value="incomplete">Incomplete</option>
+              </select>
+            </div>
+            <div className="di-filter-group">
+              <span className="di-filter-label">Status</span>
+              <select value={reviewStatusFilter} onChange={(e) => setReviewStatusFilter(e.target.value)} className="di-select">
+                <option value="">Any review status</option>
+                {REVIEW_STATUS_OPTIONS.map((s) => (
+                  <option key={s} value={s}>
+                    {REVIEW_STATUS_LABELS[s]}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {(categoryFilter || nameFilter || duplicateFilter || qualityFilter || reviewStatusFilter) && (
+              <button
+                onClick={() => {
+                  setCategoryFilter('')
+                  setNameFilter('')
+                  setDuplicateFilter('')
+                  setQualityFilter('')
+                  setReviewStatusFilter('')
+                }}
+                className="di-clear-link"
+              >
+                Clear filters
+              </button>
+            )}
           </div>
 
           {showErrorBanner && (
-            <div style={{ padding: 12, borderRadius: 8, background: 'var(--danger-bg)', color: 'var(--danger)', marginBottom: 16, fontSize: 14 }}>
-              The selected run {selectedRun.status === 'failed' ? 'failed' : 'completed only partially'} — see its error
-              count above. Any candidates it did store are still listed below.
+            <div className="di-banner di-banner-warning">
+              <span className="di-banner-icon">
+                <IconX />
+              </span>
+              <span>
+                The selected run {selectedRun.status === 'failed' ? 'failed' : 'completed only partially'} — see its error
+                count above. Any candidates it did store are still listed below.
+              </span>
             </div>
           )}
 
           {candidatesError && (
-            <div style={{ padding: 12, borderRadius: 8, background: 'var(--danger-bg)', color: 'var(--danger)', marginBottom: 16, fontSize: 14 }}>
-              {candidatesError}
+            <div className="di-banner di-banner-danger">
+              <span className="di-banner-icon">
+                <IconX />
+              </span>
+              <span>{candidatesError}</span>
             </div>
           )}
 
@@ -982,38 +1131,21 @@ export default function ImportInboxPage() {
                 const draft = decisionDraftByCandidateId[c.id] || { status: '', rejectionReason: '', deferredReason: '', note: '' }
                 const reviews = reviewsByCandidateId[c.id]
                 return (
-                  <div key={c.id} id={`candidate-${c.id}`} style={cardStyle}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-                      <div style={{ fontSize: 15, fontWeight: 600 }}>{c.extracted_fields?.name || '(no name)'}</div>
+                  <div key={c.id} id={`candidate-${c.id}`} className="di-candidate-card">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8, gap: 8, flexWrap: 'wrap' }}>
+                      <div className="di-row-name" style={{ marginBottom: 0 }}>{c.extracted_fields?.name || '(no name)'}</div>
                       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                        <span style={badgeStyle(c.quality_status === 'complete' ? 'var(--green-faint)' : 'var(--warning-bg)', c.quality_status === 'complete' ? 'var(--green)' : 'var(--warning)')}>
-                          {c.quality_status}
+                        <span className={`di-chip ${c.quality_status === 'complete' ? 'di-chip--complete' : 'di-chip--incomplete'}`}>
+                          {c.quality_status === 'complete' ? 'Complete' : 'Incomplete'}
                         </span>
-                        {c.possible_duplicate && <span style={badgeStyle('var(--warning-bg)', 'var(--warning)')}>possible duplicate</span>}
-                        <span
-                          style={badgeStyle(
-                            c.review_status === 'approved_internal'
-                              ? 'var(--green-faint)'
-                              : c.review_status === 'rejected'
-                                ? 'var(--danger-bg)'
-                                : c.review_status === 'new'
-                                  ? 'var(--bg-card)'
-                                  : 'var(--warning-bg)',
-                            c.review_status === 'approved_internal'
-                              ? 'var(--green)'
-                              : c.review_status === 'rejected'
-                                ? 'var(--danger)'
-                                : c.review_status === 'new'
-                                  ? 'var(--text-muted)'
-                                  : 'var(--warning)'
-                          )}
-                        >
+                        {c.possible_duplicate && <span className="di-chip di-chip--incomplete">possible duplicate</span>}
+                        <span className={`di-chip di-chip--${c.review_status}`}>
                           {REVIEW_STATUS_LABELS[c.review_status] || c.review_status}
                         </span>
                       </div>
                     </div>
                     {c.review_status === 'deferred' && c.deferred_reason && (
-                      <div style={{ fontSize: 12, color: 'var(--warning)', marginBottom: 4 }}>
+                      <div className="di-row-reason" style={{ marginBottom: 4 }}>
                         Deferred reason: {formatDeferredReasonLabel(c.deferred_reason)}
                       </div>
                     )}
@@ -1046,28 +1178,21 @@ export default function ImportInboxPage() {
                     <div style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 8, marginBottom: 8 }}>
                       {c.record_locator} · imported {c.retrieved_at}
                     </div>
-                    <button
-                      onClick={() => toggleExpand(c.id)}
-                      style={{
-                        fontSize: 12,
-                        padding: '4px 10px',
-                        borderRadius: 8,
-                        border: '1px solid var(--border)',
-                        background: expanded ? 'var(--green-faint)' : 'transparent',
-                        color: expanded ? 'var(--green)' : 'var(--text-secondary)',
-                        cursor: 'pointer',
-                      }}
-                    >
+                    <button onClick={() => toggleExpand(c.id)} className={`di-link-btn ${expanded ? 'active' : ''}`}>
                       {expanded ? 'Hide details' : 'Details & review'}
                     </button>
 
                     {expanded && (
-                      <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
-                        <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 12px' }}>
-                          Opening this detail view is read-only — it only loads history, never records anything. Closing it
-                          without choosing a status or saving an enrichment leaves no trace: nothing is written unless you
-                          explicitly click "Save decision" or "Save enrichment" below.
-                        </p>
+                      <div className="di-detail">
+                        <div className="di-banner di-banner-info" style={{ marginBottom: 12 }}>
+                          <span className="di-banner-icon">
+                            <IconShield />
+                          </span>
+                          <span>
+                            Read-only until you act: opening this never records anything, and closing it without choosing a
+                            status or saving an enrichment leaves no trace.
+                          </span>
+                        </div>
                         <h3 style={{ fontSize: 13, margin: '0 0 8px', color: 'var(--text-secondary)' }}>Review history</h3>
                         {reviewsLoadingId === c.id && <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Loading…</p>}
                         {reviewsErrorId === c.id && (
@@ -1149,18 +1274,8 @@ export default function ImportInboxPage() {
                           <button
                             onClick={() => submitDecision(c.id)}
                             disabled={decisionSubmittingId === c.id || !isReviewDecisionSubmittable(draft)}
-                            style={{
-                              fontSize: 13,
-                              padding: '6px 12px',
-                              borderRadius: 8,
-                              border: 'none',
-                              background: 'var(--green)',
-                              color: '#fff',
-                              fontWeight: 600,
-                              cursor: isReviewDecisionSubmittable(draft) ? 'pointer' : 'not-allowed',
-                              opacity: isReviewDecisionSubmittable(draft) ? 1 : 0.6,
-                              justifySelf: 'start',
-                            }}
+                            className="di-btn-primary"
+                            style={{ justifySelf: 'start' }}
                           >
                             {decisionSubmittingId === c.id ? 'Saving…' : 'Save decision'}
                           </button>
@@ -1195,12 +1310,8 @@ export default function ImportInboxPage() {
                             onClick={() => requestSuggestions(c.id)}
                             disabled={suggestionsLoadingId === c.id || !hasVerifiedWebsiteForSuggestions(c)}
                             title={!hasVerifiedWebsiteForSuggestions(c) ? 'Save a verified website first to enable suggestions.' : undefined}
+                            className="di-link-btn"
                             style={{
-                              fontSize: 12,
-                              padding: '4px 10px',
-                              borderRadius: 8,
-                              border: '1px solid var(--border)',
-                              background: 'transparent',
                               color: hasVerifiedWebsiteForSuggestions(c) ? 'var(--text-secondary)' : 'var(--text-faint)',
                               cursor: hasVerifiedWebsiteForSuggestions(c) ? 'pointer' : 'not-allowed',
                             }}
@@ -1356,35 +1467,14 @@ export default function ImportInboxPage() {
                           <button
                             onClick={() => submitEnrichment(c.id)}
                             disabled={enrichmentSubmittingId === c.id}
-                            style={{
-                              fontSize: 13,
-                              padding: '6px 12px',
-                              borderRadius: 8,
-                              border: 'none',
-                              background: 'var(--green)',
-                              color: '#fff',
-                              fontWeight: 600,
-                              cursor: 'pointer',
-                              justifySelf: 'start',
-                            }}
+                            className="di-btn-primary"
+                            style={{ justifySelf: 'start' }}
                           >
                             {enrichmentSubmittingId === c.id ? 'Saving…' : 'Save enrichment'}
                           </button>
                         </div>
 
-                        <button
-                          onClick={() => toggleExpand(c.id)}
-                          style={{
-                            fontSize: 12,
-                            padding: '4px 10px',
-                            borderRadius: 8,
-                            border: '1px solid var(--border)',
-                            background: 'transparent',
-                            color: 'var(--text-secondary)',
-                            cursor: 'pointer',
-                            marginTop: 16,
-                          }}
-                        >
+                        <button onClick={() => toggleExpand(c.id)} className="di-link-btn" style={{ marginTop: 16 }}>
                           Back to candidates
                         </button>
                       </div>
@@ -1396,6 +1486,7 @@ export default function ImportInboxPage() {
           )}
         </>
       )}
-    </main>
+      </main>
+    </div>
   )
 }
