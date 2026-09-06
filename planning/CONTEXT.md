@@ -794,3 +794,23 @@ Full detail: `planning/specs/tickets/market-05-normalization-deduplication.md`'s
 own "Implementation (2026-09-06, later still) — information-hierarchy
 update" section and `docs/api/import-inbox-api.md`'s matching correction
 note.
+
+**Update (2026-09-06, later still): removed the Review Overview /
+Review queue duplication.** `Review Overview` now holds only the five
+status tiles — its own preview list and the `Review queue` heading
+below it are both gone; the page now has exactly one candidate list,
+directly below **one combined filter bar** (search, status, deferred
+reason when relevant, category, duplicates, completeness — every
+filter dimension that existed before, now in one place). Clicking a
+tile sets this same real filter. Candidate cards apply progressive
+disclosure: the always-visible row shows only name/category/contact/
+completeness/status/deferred-reason; technical origin, import time,
+normalization warnings, and enrichment-source notes moved into the
+expanded "Details & review" view. No migration, database write,
+website fetch, new API param, or review-value change. Design principle
+recorded for this and future internal review screens: one list per
+screen, one combined filter bar per list, no duplicate rendering of
+the same records. Full detail:
+`planning/specs/tickets/market-05-normalization-deduplication.md`'s
+own "Implementation (2026-09-06, later still) — remove the Review
+Overview / Review queue duplication" section.

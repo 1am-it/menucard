@@ -642,6 +642,32 @@ no automatic classification of any kind:
 > own "Implementation (2026-09-06, later still) — information-hierarchy
 > update" section for the full detail.
 
+> **Correction (2026-09-06, later still) — removed the Review Overview
+> / Review queue duplication.** Both corrections above are now
+> themselves partly stale: `Review Overview` no longer has its own
+> preview list or filter bar — it holds only the five status tiles. The
+> `Review queue` heading and its "View details"/"View in list" row
+> action (from the two corrections above) no longer exist: there is
+> exactly one candidate list on the page, using the original, full
+> `di-candidate-card` rendering, directly below **one combined filter
+> bar** — search, review status, deferred reason (only when status is
+> `deferred`), category, duplicate status, completeness. Clicking a
+> status tile now sets this same real filter. Every candidate card's
+> always-visible content is now limited to what a reviewer needs to
+> triage (name/category/contact/completeness/status/deferred reason);
+> `record_locator`, `retrieved_at`, the phone-normalization warning, and
+> enrichment-source annotations moved into the expanded "Details &
+> review" view. None of this changes the API contract, the query
+> parameters, the pure functions named above, or
+> `review_status`/`deferred_reason`'s own values — the deferred-reason
+> filter is applied client-side over already-fetched candidates, never
+> a new query parameter. See
+> `planning/specs/tickets/market-05-normalization-deduplication.md`'s
+> own "Implementation (2026-09-06, later still) — remove the Review
+> Overview / Review queue duplication" section for the full detail,
+> including the new design principle it records (one list per screen,
+> one combined filter bar per list).
+
 ## What has been verified
 
 Verified against the real Supabase project (2026-09-05), using the

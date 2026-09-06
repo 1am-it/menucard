@@ -1579,6 +1579,108 @@ presence of run info and `Show only this run`, and that Review
 Overview/Review queue still call the same unchanged pure functions
 (158 tests total, up from 154).
 
+### Implementation (2026-09-06, later still) — remove the Review Overview / Review queue duplication
+
+**Correction to the two rounds immediately above.** `Review queue` (the
+heading) and the compact preview list it named alongside are both
+themselves now superseded — recorded above as accurate *at the time
+each round was written*, per this project's documentation discipline
+(dated additions, never silent rewrites):
+
+- `Review Overview` now contains **only** the five status tiles. Its
+  own read-only preview list (`.di-rows`, each row's "View details"
+  jumping to the full card below) is removed outright, along with the
+  `jumpToCandidateFromTriage` function and the scroll-into-view
+  plumbing that only ever served it.
+- The `Review queue` heading is removed. There is now exactly **one**
+  candidate list on the page — the full cards, unchanged in their
+  review/enrichment/decision actions — directly below the tiles.
+- The two former, separate filter bars (Review Overview's own search/
+  status/deferred-reason bar, which only ever fed the now-removed
+  preview list; and the list's own name/category/duplicate/quality/
+  status bar) are replaced by **one combined filter bar**, directly
+  under the tiles: free-text search, review status, deferred reason
+  (only when status is `deferred`), category, duplicate status, and
+  completeness. Every dimension that drove the real list before
+  (category/name/duplicate/quality/reviewStatus) still goes through
+  the exact same server-side `GET .../candidates` call, unchanged;
+  deferred-reason narrowing is new *only* in the sense that it now has
+  a real list to narrow — applied client-side over the already-fetched
+  candidates, never a new API param. Clicking a status tile now sets
+  this same, real filter (previously it set a separate filter that
+  only affected the removed preview list).
+- **Progressive disclosure**: the always-visible part of each
+  candidate card now shows only what a reviewer needs to triage — name,
+  category, address/phone/website, completeness/missing fields,
+  effective status, and deferred reason. `record_locator`, `retrieved_at`,
+  the phone-normalization warning, and the enrichment-source
+  annotations (previously inline in the always-visible row) moved into
+  the expanded "Details & review" view — relocated, never dropped. The
+  one piece of information that is **not** carried forward anywhere:
+  the removed preview list's own short "Approved (internal only) —
+  ready only for the future Restaurant Profile Drafts step" helper
+  sentence: the review-status chip itself already says "Approved
+  (internal only)," and this sentence was forward-looking guidance
+  about a not-yet-built step, not information needed to perform
+  today's review — a deliberate simplification the project's own
+  request in this round asked for ("zo min mogelijk velden, zonder de
+  noodzakelijke reviewinformatie te verliezen"), not an oversight.
+
+**Design principle (new, recorded here for `/internal/import-inbox`
+and any future internal review screen built the same way):** one
+candidate/record list per screen, one combined filter bar per list,
+never two renderings of the same records on one page. Internal review
+screens stay functional and calm — as few fields as the review task
+actually needs, never fewer than that.
+
+**Scope discipline**: no migration, database write, website fetch, new
+API param, or canonical/publication functionality was added —
+presentation, filter-UI consolidation, and information hierarchy only.
+`review_status`/`deferred_reason` values and every write endpoint are
+byte-for-byte unchanged.
+
+**Tests**: `src/lib/importInbox.test.js` — updated the deferred-reason-
+label call-site count (four now, was five — the removed preview row's
+bucket description was one of the five); replaced the now-invalid
+"Review queue" section-order and reorder-consistency tests; replaced
+the triage-specific filtering assertions (which asserted
+`filterCandidatesForTriage`/`computeCandidateTriageBucket` calls that
+no longer exist in the page) with new ones for the combined filter bar,
+the tiles' rewiring to the real filter state, the client-side
+deferred-reason narrowing, and progressive disclosure (technical
+fields present only inside the expanded view). Net new/updated:
+several new structural safety-net tests; two obsolete ones (`"View in
+list" never writes anything`, the old triage-filtering assertion)
+removed since the code they described no longer exists (166 tests in
+this file, up from 158).
+
+### Correction (2026-09-06, later still) — "Approved (internal only)" gets an explanation back, detail view only
+
+**Correction to the round immediately above.** Its "Progressive
+disclosure" note claimed the removed preview list's short "Approved
+(internal only)" helper sentence was "not carried forward anywhere" —
+that is now stale. A short, differently-worded explanation was added
+back for that one status:
+
+> Internally approved only. This does not publish the restaurant or
+> create a public profile.
+
+It renders **only** inside the expanded "Details & review" view, gated
+on `c.review_status === 'approved_internal'` — never in the
+always-visible candidate row, and never for any other status. It does
+not restore the old sentence's forward-looking "Restaurant Profile
+Drafts, not yet built" phrasing (still true, but out of scope for this
+small addition); it exists to make explicit, at the point a reviewer
+is actually acting on a candidate, that this status is never public.
+No migration, database write, API contract, `review_status` value, or
+filter/audit behavior changed.
+
+**Tests**: `src/lib/importInbox.test.js` — one new structural
+safety-net test asserting the explanation is gated on
+`review_status === 'approved_internal'`, renders only inside the
+expanded detail view (never the always-visible row), and appears
+exactly once in the page (167 tests in this file, up from 166).
+
 ## MARKET-05B — Normalization & deduplication (placeholder, untouched)
 
 Original scope, unchanged by this document: matching and deduplicating

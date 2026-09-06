@@ -30,8 +30,6 @@ import {
   hasVerifiedWebsiteForSuggestions,
   TRIAGE_SUMMARY_STATUSES,
   computeReviewStatusCounts,
-  computeCandidateTriageBucket,
-  filterCandidatesForTriage,
 } from '@/src/lib/importInbox'
 
 // Mirrors ops/scripts/import-breda-osm.config.js's own
@@ -49,25 +47,6 @@ const REVIEW_STATUS_LABELS = {
   approved_internal: 'Approved (internal only)',
   rejected: 'Rejected',
   deferred: 'Deferred',
-}
-
-// Review Overview (added 2026-09-06) — one short, honest sentence per
-// bucket computeCandidateTriageBucket can return. Deliberately never
-// implies anything automatic: "approved_pending_canonical" only ever
-// means "ready for the future, not-yet-built Restaurant Profile Drafts
-// step" (MARKET-05B) — never that such a step is scheduled, running, or
-// will ever happen without a separate, later, deliberate decision. This
-// is also the short helper text that keeps "Approved (internal only)"
-// visibly distinct from public publication — never mentions Restaurant
-// Onboarding (the separate, later, owner-facing phase that only ever
-// follows an explicit claim/consent/active participation — see
-// planning/specs/tickets/market-05-normalization-deduplication.md's own
-// terminology note), since that phase has nothing to do with this
-// internal-only review step.
-const TRIAGE_BUCKET_DESCRIPTIONS = {
-  needs_enrichment: 'Still needs enrichment before it can move forward.',
-  deferred: 'Deliberately postponed by a reviewer.',
-  approved_pending_canonical: 'Internally approved — never public. Ready only for the future Restaurant Profile Drafts step, not yet built.',
 }
 
 const REJECTION_REASON_LABELS = {
@@ -177,29 +156,6 @@ function IconInfo() {
     </svg>
   )
 }
-function IconPin() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-      <circle cx="12" cy="10" r="3" />
-    </svg>
-  )
-}
-function IconPhone() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .6 2.9a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c.9.3 1.9.5 2.9.6a2 2 0 0 1 1.8 2Z" />
-    </svg>
-  )
-}
-function IconGlobe() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10" />
-      <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z" />
-    </svg>
-  )
-}
 function IconChevronRight() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -257,6 +213,13 @@ export default function ImportInboxPage() {
   const [duplicateFilter, setDuplicateFilter] = useState('')
   const [qualityFilter, setQualityFilter] = useState('')
   const [reviewStatusFilter, setReviewStatusFilter] = useState('')
+  // Information-hierarchy update (2026-09-06, later still) — the one
+  // remaining candidate list's deferred-reason narrowing. Only ever
+  // meaningful alongside reviewStatusFilter === 'deferred' (see the combined
+  // filter bar below); applied client-side over the already-fetched
+  // `candidates` array (never a new fetch/API param), same pattern as the
+  // former triage overview's own client-side filtering.
+  const [deferredReasonFilter, setDeferredReasonFilter] = useState('')
 
   // MARKET-05A: per-candidate review detail view. Keyed by candidate id
   // so switching between candidates never loses another one's already-
@@ -288,28 +251,20 @@ export default function ImportInboxPage() {
   const [suggestionsLoadingId, setSuggestionsLoadingId] = useState(null)
   const [suggestionsErrorByCandidateId, setSuggestionsErrorByCandidateId] = useState({})
 
-  // Triage overview (added 2026-09-06) — a read-only, always-full-picture
-  // summary of every candidate's *effective* review status, entirely
-  // independent from the "Imported candidates" section's own browsing filters
-  // below (category/name/duplicate/quality/reviewStatus) — those narrow
-  // what a reviewer is currently looking at; this always reflects the
-  // true counts for the selected run (or every run, if none is
-  // selected), so switching a browsing filter can never silently shrink
-  // a triage count. Scoped only by runIdFilter — its own GET call below
-  // deliberately omits every other filter param. Never writes anything;
-  // its own status/deferred-reason/search filters are applied entirely
-  // client-side (filterCandidatesForTriage, src/lib/importInbox.js) over
-  // this already-fetched, already-read-only data.
+  // Review Overview's five status tiles (information-hierarchy update,
+  // 2026-09-06, later still — was the "Triage overview") — a read-only,
+  // always-full-picture count of every candidate's *effective* review
+  // status, entirely independent of the one candidate list's own
+  // combined filter bar below (search/status/deferred reason/category/
+  // duplicate/quality) — those narrow what a reviewer is currently
+  // looking at; this always reflects the true counts for the selected
+  // run (or every run, if none is selected), so switching a filter can
+  // never silently shrink a tile's count. Scoped only by runIdFilter —
+  // its own GET call below deliberately omits every other filter param.
+  // Never writes anything.
   const [triageCandidates, setTriageCandidates] = useState([])
   const [triageError, setTriageError] = useState(null)
   const [triageLoading, setTriageLoading] = useState(false)
-  const [triageStatusFilter, setTriageStatusFilter] = useState('')
-  const [triageDeferredReasonFilter, setTriageDeferredReasonFilter] = useState('')
-  const [triageSearchTerm, setTriageSearchTerm] = useState('')
-  // Set by "View in list" below; cleared once the target candidate's
-  // card has actually rendered and been scrolled to (see the dedicated
-  // effect further down) — never itself scrolls anything directly.
-  const [pendingScrollCandidateId, setPendingScrollCandidateId] = useState(null)
 
   useEffect(() => {
     const supabase = getSupabaseBrowser()
@@ -374,12 +329,12 @@ export default function ImportInboxPage() {
     }
   }, [])
 
-  // Triage overview (added 2026-09-06) — the same read-only
-  // `/candidates` GET the browsing section below already uses, but
-  // deliberately scoped by `run_id` only (never
-  // category/name/duplicate/quality/review_status), so the triage
-  // summary always reflects the true picture for the selected run,
-  // regardless of what the browsing filters below are currently set to.
+  // Review Overview's status tiles — the same read-only `/candidates`
+  // GET the one candidate list below already uses, but deliberately
+  // scoped by `run_id` only (never search/status/deferred reason/
+  // category/duplicate/quality), so the tile counts always reflect the
+  // true picture for the selected run, regardless of what the list's
+  // own filters are currently set to.
   const loadTriageCandidates = useCallback(async (token, runId) => {
     setTriageLoading(true)
     setTriageError(null)
@@ -391,13 +346,13 @@ export default function ImportInboxPage() {
       })
       const data = await res.json()
       if (!res.ok) {
-        setTriageError(data.error || 'Failed to load the triage overview')
+        setTriageError(data.error || 'Failed to load the review overview')
         setTriageCandidates([])
         return
       }
       setTriageCandidates(data.candidates || [])
     } catch {
-      setTriageError('Failed to load the triage overview')
+      setTriageError('Failed to load the review overview')
     } finally {
       setTriageLoading(false)
     }
@@ -508,26 +463,14 @@ export default function ImportInboxPage() {
     }
   }, [session, runIdFilter, categoryFilter, nameFilter, duplicateFilter, qualityFilter, reviewStatusFilter, loadCandidates])
 
-  // Triage overview — deliberately its own effect, keyed only on
-  // runIdFilter, never on the browsing filters above.
+  // Review Overview's status tiles — deliberately their own effect,
+  // keyed only on runIdFilter, never on the one candidate list's own
+  // filters above.
   useEffect(() => {
     if (session) {
       loadTriageCandidates(session.access_token, runIdFilter)
     }
   }, [session, runIdFilter, loadTriageCandidates])
-
-  // Triage overview — scrolls to and reveals a candidate's card once
-  // "View in list" has cleared the browsing filters and the freshly
-  // (re)loaded `candidates` array actually contains it. Never scrolls on
-  // its own initiative; only ever runs after an explicit click sets
-  // `pendingScrollCandidateId` below.
-  useEffect(() => {
-    if (!pendingScrollCandidateId) return
-    if (!candidates.some((c) => c.id === pendingScrollCandidateId)) return
-    const el = document.getElementById(`candidate-${pendingScrollCandidateId}`)
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    setPendingScrollCandidateId(null)
-  }, [candidates, pendingScrollCandidateId])
 
   async function signOut() {
     const supabase = getSupabaseBrowser()
@@ -547,28 +490,6 @@ export default function ImportInboxPage() {
     if (next && !enrichmentsByCandidateId[next] && session) {
       loadEnrichments(session.access_token, next)
     }
-  }
-
-  // Triage overview — "View in list": clears the browsing filters below
-  // (never the run filter — triage is already scoped to it) so the
-  // target candidate is guaranteed to appear there, expands its card
-  // (loading its history exactly like an ordinary toggleExpand would),
-  // and queues a scroll-into-view for once that card has actually
-  // rendered (see the dedicated effect above). No fetch of anything
-  // beyond the same read-only history any ordinary expand already
-  // triggers; never records a decision or enrichment by itself.
-  function jumpToCandidateFromTriage(candidateId) {
-    setCategoryFilter('')
-    setNameFilter('')
-    setDuplicateFilter('')
-    setQualityFilter('')
-    setReviewStatusFilter('')
-    setExpandedCandidateId(candidateId)
-    if (session) {
-      if (!reviewsByCandidateId[candidateId]) loadReviews(session.access_token, candidateId)
-      if (!enrichmentsByCandidateId[candidateId]) loadEnrichments(session.access_token, candidateId)
-    }
-    setPendingScrollCandidateId(candidateId)
   }
 
   function updateEnrichmentFieldDraft(candidateId, fieldName, patch) {
@@ -760,7 +681,19 @@ export default function ImportInboxPage() {
   }
 
   const selectedRun = runIdFilter ? runs.find((r) => r.id === runIdFilter) || null : null
-  const filtersActive = Boolean(categoryFilter || nameFilter || duplicateFilter || qualityFilter || reviewStatusFilter)
+  const filtersActive = Boolean(categoryFilter || nameFilter || duplicateFilter || qualityFilter || reviewStatusFilter || deferredReasonFilter)
+
+  // Information-hierarchy update (2026-09-06, later still) — the one
+  // combined filter bar's deferred-reason control narrows the already-
+  // fetched `candidates` array client-side (never a new fetch/API param,
+  // same pattern the former triage overview used for its own filters).
+  // Only meaningful alongside reviewStatusFilter === 'deferred'; the
+  // dropdown itself is only rendered in that state, so a stale value
+  // left over from a previous status can never silently apply here.
+  const visibleCandidates =
+    reviewStatusFilter === 'deferred' && deferredReasonFilter
+      ? candidates.filter((c) => c.deferred_reason === deferredReasonFilter)
+      : candidates
 
   // Same decision src/lib/importInbox.js's classifyInboxState makes,
   // inlined here rather than re-imported into a 'use client' bundle for
@@ -770,7 +703,7 @@ export default function ImportInboxPage() {
   let candidateState = 'has-candidates'
   if (runs.length === 0) {
     candidateState = 'no-runs'
-  } else if (candidates.length === 0) {
+  } else if (visibleCandidates.length === 0) {
     candidateState = filtersActive || runIdFilter ? 'no-filter-matches' : 'run-has-no-candidates'
   }
   const showErrorBanner = Boolean(selectedRun && (selectedRun.status === 'failed' || selectedRun.status === 'partial'))
@@ -811,185 +744,95 @@ export default function ImportInboxPage() {
           {triageLoading && <p style={{ color: 'var(--text-muted)' }}>Loading…</p>}
 
           {!triageLoading && !triageError && (
-            <>
-              <div className="di-summary">
-                {(() => {
-                  const counts = computeReviewStatusCounts(triageCandidates)
-                  return TRIAGE_SUMMARY_STATUSES.map((status) => {
-                    const active = triageStatusFilter === status
-                    const Icon = TRIAGE_STATUS_ICONS[status]
-                    return (
-                      <button
-                        key={status}
-                        onClick={() => {
-                          setTriageStatusFilter(active ? '' : status)
-                          setTriageDeferredReasonFilter('')
-                        }}
-                        className={`di-summary-card ${active ? 'active' : ''}`}
-                      >
-                        <span className={`di-summary-icon di-summary-icon--${status}`}>
-                          <Icon />
-                        </span>
-                        <span className="di-summary-body">
-                          <span className="di-summary-label">{REVIEW_STATUS_LABELS[status]}</span>
-                          <span className="di-summary-count">{counts[status]}</span>
-                        </span>
-                      </button>
-                    )
-                  })
-                })()}
-              </div>
-
-              <div className="di-filterbar">
-                <div className="di-filter-group di-search-wrap">
-                  <span className="di-filter-label">Search</span>
-                  <span className="di-search-icon">
-                    <IconSearch />
-                  </span>
-                  <input
-                    type="text"
-                    placeholder="Search by business name, address, phone or website"
-                    value={triageSearchTerm}
-                    onChange={(e) => setTriageSearchTerm(e.target.value)}
-                    className="di-input"
-                  />
-                </div>
-                <div className="di-filter-group">
-                  <span className="di-filter-label">Status</span>
-                  <select
-                    value={triageStatusFilter}
-                    onChange={(e) => {
-                      setTriageStatusFilter(e.target.value)
-                      setTriageDeferredReasonFilter('')
-                    }}
-                    className="di-select"
-                  >
-                    <option value="">All statuses</option>
-                    {TRIAGE_SUMMARY_STATUSES.map((status) => (
-                      <option key={status} value={status}>
-                        {REVIEW_STATUS_LABELS[status]}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                {triageStatusFilter === 'deferred' && (
-                  <div className="di-filter-group">
-                    <span className="di-filter-label">Deferred reason</span>
-                    <select
-                      value={triageDeferredReasonFilter}
-                      onChange={(e) => setTriageDeferredReasonFilter(e.target.value)}
-                      className="di-select"
-                    >
-                      <option value="">All reasons</option>
-                      {ALLOWED_DEFERRED_REASONS.map((r) => (
-                        <option key={r} value={r}>
-                          {formatDeferredReasonLabel(r)}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-                {(triageStatusFilter || triageDeferredReasonFilter || triageSearchTerm) && (
-                  <button
-                    onClick={() => {
-                      setTriageStatusFilter('')
-                      setTriageDeferredReasonFilter('')
-                      setTriageSearchTerm('')
-                    }}
-                    className="di-clear-link"
-                  >
-                    Clear filters
-                  </button>
-                )}
-              </div>
-
+            <div className="di-summary">
               {(() => {
-                const triageFiltered = filterCandidatesForTriage(triageCandidates, {
-                  statusFilter: triageStatusFilter,
-                  deferredReasonFilter: triageStatusFilter === 'deferred' ? triageDeferredReasonFilter : '',
-                  searchTerm: triageSearchTerm,
+                const counts = computeReviewStatusCounts(triageCandidates)
+                return TRIAGE_SUMMARY_STATUSES.map((status) => {
+                  const active = reviewStatusFilter === status
+                  const Icon = TRIAGE_STATUS_ICONS[status]
+                  return (
+                    <button
+                      key={status}
+                      onClick={() => {
+                        setReviewStatusFilter(active ? '' : status)
+                        setDeferredReasonFilter('')
+                      }}
+                      className={`di-summary-card ${active ? 'active' : ''}`}
+                    >
+                      <span className={`di-summary-icon di-summary-icon--${status}`}>
+                        <Icon />
+                      </span>
+                      <span className="di-summary-body">
+                        <span className="di-summary-label">{REVIEW_STATUS_LABELS[status]}</span>
+                        <span className="di-summary-count">{counts[status]}</span>
+                      </span>
+                    </button>
+                  )
                 })
-                if (triageFiltered.length === 0) {
-                  return <div className="di-empty" style={{ marginBottom: 28 }}>No imported candidates match the current filters.</div>
-                }
-                return (
-                  <div className="di-rows" style={{ marginBottom: 28 }}>
-                    {triageFiltered.map((c) => {
-                      const bucket = computeCandidateTriageBucket(c)
-                      const StatusIcon = TRIAGE_STATUS_ICONS[c.review_status]
-                      return (
-                        <div key={c.id} className="di-row">
-                          <div>
-                            <div className="di-row-name">{c.extracted_fields?.name || '(no name)'}</div>
-                            <div className="di-row-contact">
-                              <span className="di-row-contact-line">
-                                <IconPin />
-                                {c.normalized_fields?.address || '—'}
-                              </span>
-                              {c.normalized_fields?.phone && (
-                                <span className="di-row-contact-line">
-                                  <IconPhone />
-                                  {c.normalized_fields.phone}
-                                </span>
-                              )}
-                              <span className={`di-row-contact-line ${c.normalized_fields?.website ? '' : 'di-muted'}`}>
-                                <IconGlobe />
-                                {c.normalized_fields?.website || '—'}
-                              </span>
-                            </div>
-                          </div>
-                          <div>
-                            <div className="di-row-col-label">Completeness</div>
-                            <span className={`di-chip ${c.quality_status === 'complete' ? 'di-chip--complete' : 'di-chip--incomplete'}`}>
-                              {c.quality_status === 'complete' ? 'Complete' : 'Incomplete'}
-                            </span>
-                          </div>
-                          <div>
-                            <div className="di-row-col-label">Latest review</div>
-                            <span className={`di-chip di-chip--${c.review_status}`}>
-                              {StatusIcon && <StatusIcon />}
-                              {REVIEW_STATUS_LABELS[c.review_status] || c.review_status}
-                            </span>
-                            {bucket && (
-                              <div className="di-row-reason">
-                                {TRIAGE_BUCKET_DESCRIPTIONS[bucket]}
-                                {bucket === 'deferred' && c.deferred_reason ? ` (${formatDeferredReasonLabel(c.deferred_reason)})` : ''}
-                              </div>
-                            )}
-                          </div>
-                          <button onClick={() => jumpToCandidateFromTriage(c.id)} className="di-view-btn">
-                            View details
-                            <IconChevronRight />
-                          </button>
-                        </div>
-                      )
-                    })}
-                  </div>
-                )
               })()}
-            </>
+            </div>
           )}
-        </>
-      )}
 
-      {runs.length > 0 && (
-        <>
-          <h2 className="di-section-title">Review queue</h2>
-
+          {/* One combined filter bar (information-hierarchy update,
+              2026-09-06, later still) — replaces the former two separate,
+              overlapping filter bars (a read-only overview search/status/
+              deferred-reason bar that only ever fed a now-removed compact
+              preview list, and this list's own name/category/duplicate/
+              completeness/status bar). Every filter dimension that
+              existed before still works exactly as before: category/
+              name/duplicate/quality/reviewStatus are unchanged, sent to
+              the same GET this list has always used; deferredReasonFilter
+              is new *only* in the sense that it now has a list to narrow
+              — applied client-side, never a new API param. */}
           <div className="di-filterbar">
             <div className="di-filter-group di-search-wrap">
-              <span className="di-filter-label">Name</span>
+              <span className="di-filter-label">Search</span>
               <span className="di-search-icon">
                 <IconSearch />
               </span>
               <input
                 type="text"
-                placeholder="Search name…"
+                placeholder="Search by business name…"
                 value={nameFilter}
                 onChange={(e) => setNameFilter(e.target.value)}
                 className="di-input"
               />
             </div>
+            <div className="di-filter-group">
+              <span className="di-filter-label">Status</span>
+              <select
+                value={reviewStatusFilter}
+                onChange={(e) => {
+                  setReviewStatusFilter(e.target.value)
+                  setDeferredReasonFilter('')
+                }}
+                className="di-select"
+              >
+                <option value="">Any review status</option>
+                {REVIEW_STATUS_OPTIONS.map((s) => (
+                  <option key={s} value={s}>
+                    {REVIEW_STATUS_LABELS[s]}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {reviewStatusFilter === 'deferred' && (
+              <div className="di-filter-group">
+                <span className="di-filter-label">Deferred reason</span>
+                <select
+                  value={deferredReasonFilter}
+                  onChange={(e) => setDeferredReasonFilter(e.target.value)}
+                  className="di-select"
+                >
+                  <option value="">All reasons</option>
+                  {ALLOWED_DEFERRED_REASONS.map((r) => (
+                    <option key={r} value={r}>
+                      {formatDeferredReasonLabel(r)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
             <div className="di-filter-group">
               <span className="di-filter-label">Category</span>
               <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="di-select">
@@ -1017,18 +860,7 @@ export default function ImportInboxPage() {
                 <option value="incomplete">Incomplete</option>
               </select>
             </div>
-            <div className="di-filter-group">
-              <span className="di-filter-label">Status</span>
-              <select value={reviewStatusFilter} onChange={(e) => setReviewStatusFilter(e.target.value)} className="di-select">
-                <option value="">Any review status</option>
-                {REVIEW_STATUS_OPTIONS.map((s) => (
-                  <option key={s} value={s}>
-                    {REVIEW_STATUS_LABELS[s]}
-                  </option>
-                ))}
-              </select>
-            </div>
-            {(categoryFilter || nameFilter || duplicateFilter || qualityFilter || reviewStatusFilter) && (
+            {(categoryFilter || nameFilter || duplicateFilter || qualityFilter || reviewStatusFilter || deferredReasonFilter) && (
               <button
                 onClick={() => {
                   setCategoryFilter('')
@@ -1036,6 +868,7 @@ export default function ImportInboxPage() {
                   setDuplicateFilter('')
                   setQualityFilter('')
                   setReviewStatusFilter('')
+                  setDeferredReasonFilter('')
                 }}
                 className="di-clear-link"
               >
@@ -1077,12 +910,20 @@ export default function ImportInboxPage() {
             </p>
           )}
 
-          {candidates.length > 0 && (
+          {visibleCandidates.length > 0 && (
             <div style={{ display: 'grid', gap: 12 }}>
-              {candidates.map((c) => {
+              {visibleCandidates.map((c) => {
                 const expanded = expandedCandidateId === c.id
                 const draft = decisionDraftByCandidateId[c.id] || { status: '', rejectionReason: '', deferredReason: '', note: '' }
                 const reviews = reviewsByCandidateId[c.id]
+                // Progressive disclosure (2026-09-06, later still): the
+                // always-visible row keeps only what's needed to triage —
+                // name, category, completeness/missing fields, effective
+                // status, deferred reason, contact details. Technical
+                // origin, import time, normalization warnings, and
+                // enrichment-source annotations move into the expanded
+                // detail view below — nothing is dropped, only relocated
+                // behind "Details & review".
                 return (
                   <div key={c.id} id={`candidate-${c.id}`} className="di-candidate-card">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8, gap: 8, flexWrap: 'wrap' }}>
@@ -1105,33 +946,15 @@ export default function ImportInboxPage() {
                     <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 4 }}>
                       {c.extracted_fields?.category || '—'}
                       {c.normalized_fields?.address ? ` · ${c.normalized_fields.address}` : ''}
-                      {c.enrichment_sources?.address && (
-                        <span style={{ fontSize: 11, color: 'var(--text-faint)' }}>
-                          {' '}
-                          (enriched via {c.enrichment_sources.address.source_url}, {c.enrichment_sources.address.recorded_at})
-                        </span>
-                      )}
                     </div>
                     <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
                       {c.normalized_fields?.phone ? `${c.normalized_fields.phone} · ` : ''}
                       {c.normalized_fields?.website || ''}
-                      {c.normalization?.phone && c.normalization.phone.valid === false && (
-                        <span style={{ fontSize: 11, color: 'var(--warning)' }}> (phone format not recognized — shown as entered)</span>
-                      )}
-                      {c.enrichment_sources?.phone && (
-                        <span style={{ fontSize: 11, color: 'var(--text-faint)' }}> (phone enriched via {c.enrichment_sources.phone.source_url})</span>
-                      )}
-                      {c.enrichment_sources?.website && (
-                        <span style={{ fontSize: 11, color: 'var(--text-faint)' }}> (website enriched via {c.enrichment_sources.website.source_url})</span>
-                      )}
                     </div>
                     {c.missing_fields && c.missing_fields.length > 0 && (
                       <div style={{ fontSize: 12, color: 'var(--warning)', marginTop: 6 }}>Missing: {c.missing_fields.join(', ')}</div>
                     )}
-                    <div style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 8, marginBottom: 8 }}>
-                      {c.record_locator} · imported {c.retrieved_at}
-                    </div>
-                    <button onClick={() => toggleExpand(c.id)} className={`di-link-btn ${expanded ? 'active' : ''}`}>
+                    <button onClick={() => toggleExpand(c.id)} className={`di-link-btn ${expanded ? 'active' : ''}`} style={{ marginTop: 8 }}>
                       {expanded ? 'Hide details' : 'Details & review'}
                     </button>
 
@@ -1145,6 +968,32 @@ export default function ImportInboxPage() {
                             Read-only until you act: opening this never records anything, and closing it without choosing a
                             status or saving an enrichment leaves no trace.
                           </span>
+                        </div>
+                        {c.review_status === 'approved_internal' && (
+                          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>
+                            Internally approved only. This does not publish the restaurant or create a public profile.
+                          </div>
+                        )}
+                        <div style={{ marginBottom: 14 }}>
+                          <div style={{ fontSize: 11, color: 'var(--text-faint)' }}>
+                            {c.record_locator} · imported {c.retrieved_at}
+                          </div>
+                          {c.normalization?.phone && c.normalization.phone.valid === false && (
+                            <div style={{ fontSize: 11, color: 'var(--warning)' }}>Phone format not recognized — shown as entered.</div>
+                          )}
+                          {c.enrichment_sources?.address && (
+                            <div style={{ fontSize: 11, color: 'var(--text-faint)' }}>
+                              Address enriched via {c.enrichment_sources.address.source_url}, {c.enrichment_sources.address.recorded_at}
+                            </div>
+                          )}
+                          {c.enrichment_sources?.phone && (
+                            <div style={{ fontSize: 11, color: 'var(--text-faint)' }}>Phone enriched via {c.enrichment_sources.phone.source_url}</div>
+                          )}
+                          {c.enrichment_sources?.website && (
+                            <div style={{ fontSize: 11, color: 'var(--text-faint)' }}>
+                              Website enriched via {c.enrichment_sources.website.source_url}
+                            </div>
+                          )}
                         </div>
                         <h3 style={{ fontSize: 13, margin: '0 0 8px', color: 'var(--text-secondary)' }}>Review history</h3>
                         {reviewsLoadingId === c.id && <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Loading…</p>}

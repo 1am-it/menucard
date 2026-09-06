@@ -1568,27 +1568,113 @@ test('structural safety net: the expanded detail view offers "Back to review que
 });
 
 // ─── structural safety net: information-hierarchy update (2026-09-06) ──
-// Review Overview → Review queue → Import runs (secondary, compact,
-// collapsible). No filter, data, or write-path change — these tests
-// only prove the page title/section names/order/labels and that
-// nothing about Import runs (info, filtering, "Show only this run") was
-// removed, only made collapsible.
+// Review Overview (tiles only) → one combined filter bar → the one full
+// candidate list → Import runs (secondary, compact, collapsible). No
+// database/API/migration change — these tests only prove the page
+// title/section order/labels, that the former duplicate preview list is
+// gone, that exactly one filter bar drives the one remaining list, and
+// that nothing about Import runs (info, filtering, "Show only this
+// run") was removed, only made collapsible.
 
 test('structural safety net: the page title is exactly "Dashboard imported Restaurant Data"', () => {
   const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
   assert.match(source, /<h1 className="di-title">Dashboard imported Restaurant Data<\/h1>/);
 });
 
-test('structural safety net: sections appear in the order Review Overview, then Review queue, then Import runs — the daily review task before import administration', () => {
+test('structural safety net: sections appear in the order Review Overview, then the one candidate list, then Import runs — the daily review task before import administration', () => {
   const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
   const reviewOverviewIndex = source.indexOf('>Review Overview<');
-  const reviewQueueIndex = source.indexOf('>Review queue<');
+  const filterBarIndex = source.indexOf('<div className="di-filterbar">');
   const importRunsIndex = source.indexOf('Import runs{runs.length > 0');
   assert.ok(reviewOverviewIndex >= 0, 'expected to find the "Review Overview" heading');
-  assert.ok(reviewQueueIndex >= 0, 'expected to find the "Review queue" heading');
+  assert.ok(filterBarIndex >= 0, 'expected to find the combined filter bar');
   assert.ok(importRunsIndex >= 0, 'expected to find the "Import runs" heading');
-  assert.ok(reviewOverviewIndex < reviewQueueIndex, 'Review Overview must come before Review queue');
-  assert.ok(reviewQueueIndex < importRunsIndex, 'Review queue must come before Import runs');
+  assert.ok(reviewOverviewIndex < filterBarIndex, 'Review Overview must come before the filter bar');
+  assert.ok(filterBarIndex < importRunsIndex, 'the filter bar (and the list below it) must come before Import runs');
+});
+
+test('structural safety net: "Review queue" no longer exists as a separate heading, and there is only one filter bar on the page', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  assert.doesNotMatch(source, /<h2 className="di-section-title">Review queue<\/h2>/, 'the "Review queue" heading must be removed');
+  const filterBarCount = (source.match(/<div className="di-filterbar">/g) || []).length;
+  assert.equal(filterBarCount, 1, 'expected exactly one combined filter bar, replacing the two former separate bars');
+});
+
+test('structural safety net: the former compact, duplicate candidate-row preview (di-rows, "View details", "View in list" jump-to-candidate) is fully removed — candidates are rendered exactly once, as the full cards', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  assert.doesNotMatch(source, /di-rows/, 'the compact preview-row list must be gone');
+  assert.doesNotMatch(source, /View details\s*\n\s*<IconChevronRight/, 'the compact list\'s own "View details" row action must be gone');
+  assert.doesNotMatch(source, /function jumpToCandidateFromTriage/, 'the jump-to-candidate function existed only to serve the removed preview list');
+  assert.doesNotMatch(source, /pendingScrollCandidateId/, 'the scroll-to-candidate plumbing existed only to serve the removed preview list');
+  assert.match(source, /di-candidate-card/, 'the full candidate cards must still be the (only) way candidates are rendered');
+});
+
+test('structural safety net: Review Overview contains only the five status tiles — no filter bar and no candidate list inside it', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  const heading = source.indexOf('>Review Overview<');
+  const filterBar = source.indexOf('<div className="di-filterbar">');
+  assert.ok(heading >= 0 && filterBar > heading, 'expected the filter bar to come after the Review Overview heading');
+  const between = source.slice(heading, filterBar);
+  assert.match(between, /di-summary/, 'the five status tiles must sit between the heading and the filter bar');
+  assert.doesNotMatch(between, /di-search-icon|di-select|di-input/, 'no filter control may render inside Review Overview itself');
+});
+
+test('structural safety net: the one combined filter bar carries every filter dimension — search, status, category, duplicates, completeness — driving the one remaining candidate list', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  const filterBarIndex = source.indexOf('<div className="di-filterbar">');
+  const listIndex = source.indexOf('{visibleCandidates.length > 0 && (');
+  assert.ok(filterBarIndex >= 0 && listIndex > filterBarIndex, 'the one candidate list must render directly after the combined filter bar');
+  const bar = source.slice(filterBarIndex, listIndex);
+  assert.match(bar, /value=\{nameFilter\}/, 'expected the free-text search input');
+  assert.match(bar, /value=\{reviewStatusFilter\}/, 'expected the status filter, wired to the same state the list itself uses');
+  assert.match(bar, /value=\{categoryFilter\}/, 'expected the category filter');
+  assert.match(bar, /value=\{duplicateFilter\}/, 'expected the duplicate-status filter');
+  assert.match(bar, /value=\{qualityFilter\}/, 'expected the completeness filter');
+  assert.match(bar, /\{reviewStatusFilter === 'deferred' && \(/, 'the deferred-reason filter must only render when the status filter is "deferred"');
+  assert.match(bar, /value=\{deferredReasonFilter\}/);
+});
+
+test('structural safety net: the status tiles set the real list filter (reviewStatusFilter), not a separate, disconnected filter', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  assert.match(source, /const active = reviewStatusFilter === status/, 'a tile\'s active state must reflect the same filter driving the list');
+  assert.match(source, /setReviewStatusFilter\(active \? '' : status\)/, 'clicking a tile must set the real status filter');
+  assert.match(source, /setDeferredReasonFilter\(''\)/, 'switching status via a tile must clear any stale deferred-reason filter');
+});
+
+test('structural safety net: changing the status filter away from "deferred" (via the dropdown) also clears the deferred-reason filter', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  const match = source.match(/onChange=\{\(e\) => \{\s*setReviewStatusFilter\(e\.target\.value\)\s*setDeferredReasonFilter\(''\)\s*\}\}/);
+  assert.ok(match, 'expected the status <select> to clear deferredReasonFilter on every change, not just via tiles');
+});
+
+test('structural safety net: "Clear filters" on the combined bar resets all six filter dimensions, including the new deferred-reason one', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  const clearBlock = source.match(/\(categoryFilter \|\| nameFilter \|\| duplicateFilter \|\| qualityFilter \|\| reviewStatusFilter \|\| deferredReasonFilter\) && \(\s*<button[\s\S]*?Clear filters/);
+  assert.ok(clearBlock, 'expected the Clear filters button, visible whenever any of the six filters is active');
+  assert.match(clearBlock[0], /setCategoryFilter\(''\)/);
+  assert.match(clearBlock[0], /setNameFilter\(''\)/);
+  assert.match(clearBlock[0], /setDuplicateFilter\(''\)/);
+  assert.match(clearBlock[0], /setQualityFilter\(''\)/);
+  assert.match(clearBlock[0], /setReviewStatusFilter\(''\)/);
+  assert.match(clearBlock[0], /setDeferredReasonFilter\(''\)/);
+});
+
+test('structural safety net: the deferred-reason filter narrows the visible list client-side, never via a new fetch/API param', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  assert.match(
+    source,
+    /const visibleCandidates =\s*\n\s*reviewStatusFilter === 'deferred' && deferredReasonFilter\s*\n\s*\? candidates\.filter\(\(c\) => c\.deferred_reason === deferredReasonFilter\)\s*\n\s*: candidates/,
+    'expected a pure client-side narrowing of the already-fetched candidates array'
+  );
+  const loadCandidatesBody = source.match(/const loadCandidates = useCallback\(async \(token, filters\) => \{[\s\S]*?\n  \}, \[\]\)/);
+  assert.ok(loadCandidatesBody, 'expected to find the loadCandidates function body');
+  assert.doesNotMatch(loadCandidatesBody[0], /deferred_reason/, 'the deferred-reason filter must never be sent to the API');
+});
+
+test('structural safety net: the one remaining candidate list still renders every candidate via the full, uncollapsed cards', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  assert.match(source, /\{visibleCandidates\.map\(\(c\) => \{/, 'the full candidate list must map over the (filtered) visible candidates');
+  assert.match(source, /className="di-candidate-card"/);
 });
 
 test('structural safety net: Import runs is collapsed by default and toggles via its own state, never removing run info, filtering, or "Show only this run"', () => {
@@ -1606,14 +1692,72 @@ test('structural safety net: Import runs is collapsed by default and toggles via
   assert.match(source, /error\(s\) recorded for this run\./);
 });
 
-test('structural safety net: Review Overview and Review queue are unaffected by the reorder — same pure summary/filter functions, same candidate-rendering logic', () => {
+// ─── structural safety net: progressive disclosure (2026-09-06, later still) ──
+// The always-visible candidate row keeps only what's needed to triage;
+// technical origin, import time, normalization warnings, and
+// enrichment-source annotations move into the expanded "Details &
+// review" view — relocated, never dropped.
+
+test('structural safety net: record_locator, retrieved_at, the phone-normalization warning, and enrichment-source annotations render only inside the expanded detail view, not in the always-visible row', () => {
   const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
-  // Same assertions as the pre-existing triage-overview tests above,
-  // repeated here specifically to prove the *reorder* did not silently
-  // change any of this logic.
-  assert.match(source, /computeReviewStatusCounts\(triageCandidates\)/);
-  assert.match(source, /filterCandidatesForTriage\(triageCandidates, \{/);
-  assert.match(source, /candidates\.map\(\(c\) => \{/, 'the full Review queue candidate list must still render every candidate');
+  const cardStart = source.indexOf('className="di-candidate-card"');
+  const expandedStart = source.indexOf('{expanded && (', cardStart);
+  assert.ok(cardStart >= 0 && expandedStart > cardStart, 'expected to find the candidate card and its expanded block');
+  const alwaysVisible = source.slice(cardStart, expandedStart);
+  assert.doesNotMatch(alwaysVisible, /record_locator/, 'record_locator must not render in the always-visible row');
+  assert.doesNotMatch(alwaysVisible, /retrieved_at/, 'retrieved_at must not render in the always-visible row');
+  assert.doesNotMatch(alwaysVisible, /phone format not recognized/i, 'the normalization warning must not render in the always-visible row');
+  assert.doesNotMatch(alwaysVisible, /enriched via/i, 'enrichment-source annotations must not render in the always-visible row');
+
+  const detailEnd = source.indexOf('Review history', expandedStart);
+  const detail = source.slice(expandedStart, detailEnd);
+  assert.match(detail, /\{c\.record_locator\} · imported \{c\.retrieved_at\}/, 'record_locator/retrieved_at must render inside the expanded detail view');
+  assert.match(detail, /Phone format not recognized — shown as entered\./);
+  assert.match(detail, /Address enriched via \{c\.enrichment_sources\.address\.source_url\}/);
+  assert.match(detail, /Phone enriched via \{c\.enrichment_sources\.phone\.source_url\}/);
+  assert.match(detail, /Website enriched via \{c\.enrichment_sources\.website\.source_url\}/);
+});
+
+test('structural safety net: "Approved (internal only)" gets a short explanation, rendered only inside the expanded detail view and only for that status', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  const cardStart = source.indexOf('className="di-candidate-card"');
+  const expandedStart = source.indexOf('{expanded && (', cardStart);
+  assert.ok(cardStart >= 0 && expandedStart > cardStart, 'expected to find the candidate card and its expanded block');
+
+  const alwaysVisible = source.slice(cardStart, expandedStart);
+  assert.doesNotMatch(
+    alwaysVisible,
+    /This does not publish the restaurant or create a public profile/,
+    'the explanation must not render in the always-visible row'
+  );
+
+  const detailEnd = source.indexOf('Review history', expandedStart);
+  const detail = source.slice(expandedStart, detailEnd);
+  assert.match(
+    detail,
+    /\{c\.review_status === 'approved_internal' && \(\s*<div[^>]*>\s*Internally approved only\. This does not publish the restaurant or create a public profile\.\s*<\/div>\s*\)\}/,
+    'expected the explanation gated on review_status === "approved_internal", inside the expanded detail view'
+  );
+
+  // Only one occurrence of the exact sentence in the whole file — no
+  // second copy accidentally left in the candidate list or filter bar.
+  const occurrences = (source.match(/This does not publish the restaurant or create a public profile\./g) || []).length;
+  assert.equal(occurrences, 1, 'expected exactly one occurrence of the explanation sentence');
+});
+
+test('structural safety net: the always-visible row still shows name, category, address, phone, website, completeness/missing fields, effective status, and deferred reason', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  const cardStart = source.indexOf('className="di-candidate-card"');
+  const expandedStart = source.indexOf('{expanded && (', cardStart);
+  const alwaysVisible = source.slice(cardStart, expandedStart);
+  assert.match(alwaysVisible, /c\.extracted_fields\?\.name/);
+  assert.match(alwaysVisible, /c\.extracted_fields\?\.category/);
+  assert.match(alwaysVisible, /c\.normalized_fields\?\.address/);
+  assert.match(alwaysVisible, /c\.normalized_fields\?\.phone/);
+  assert.match(alwaysVisible, /c\.normalized_fields\?\.website/);
+  assert.match(alwaysVisible, /c\.missing_fields/);
+  assert.match(alwaysVisible, /di-chip di-chip--\$\{c\.review_status\}/);
+  assert.match(alwaysVisible, /Deferred reason: \{formatDeferredReasonLabel\(c\.deferred_reason\)\}/);
 });
 
 test('structural safety net: "Save decision" cannot be enabled without an explicit status', () => {
@@ -1655,14 +1799,16 @@ test('structural safety net: review history renders deferred_reason next to stat
   assert.match(source, /r\.deferred_reason \? ` \(\$\{formatDeferredReasonLabel\(r\.deferred_reason\)\}\)` : ''/);
 });
 
-test('structural safety net: every deferred-reason display in the page (decision dropdown, review history, main card, and the triage overview) goes through formatDeferredReasonLabel — no separate, divergence-prone label map in the page itself', () => {
+test('structural safety net: every deferred-reason display in the page (decision dropdown, review history, main card, and the combined filter bar) goes through formatDeferredReasonLabel — no separate, divergence-prone label map in the page itself', () => {
   const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
   const usageCount = (source.match(/formatDeferredReasonLabel\(/g) || []).length;
   // Decision-form dropdown option, review-history line, the main card's
-  // own "Deferred reason: …" line, and the triage overview's own reason
-  // filter dropdown + candidate-row bucket description — five call
-  // sites, all through the one shared, tested function.
-  assert.equal(usageCount, 5, 'expected exactly five call sites — see this test\'s own comment for which');
+  // own "Deferred reason: …" line, and the combined filter bar's own
+  // deferred-reason dropdown — four call sites, all through the one
+  // shared, tested function. (Information-hierarchy update, 2026-09-06,
+  // later still: was five, including the now-removed compact preview
+  // row's bucket description.)
+  assert.equal(usageCount, 4, 'expected exactly four call sites — see this test\'s own comment for which');
   assert.doesNotMatch(source, /const DEFERRED_REASON_LABELS/, 'the page must import the shared mapping from src/lib/importInbox.js, never define its own copy');
 });
 
@@ -1683,52 +1829,35 @@ test('structural safety net: individual per-field source URLs are shown only whe
   assert.match(source, /\{!useShared && \(\s*<input\s*type="text"\s*placeholder="Source URL \(e\.g\. the restaurant's own website\)…"/);
 });
 
-// ─── structural safety net: Triage overview (added 2026-09-06) ─────────
-// A read-only summary/filter/search section — no migration, no write,
-// no website fetch, no automatic chain/franchise or service-model
-// classification. These tests read the page's own source (the same
-// pattern used throughout this file, since this project has no React
-// render harness — see the earlier structural-safety-net tests' own
-// comments) to prove the section is wired the way this feature
-// requires, on top of the already pure-tested summary/filter/search
-// logic above.
+// ─── structural safety net: Review Overview's status tiles (was "Triage
+// overview", added 2026-09-06; tile-only since the information-hierarchy
+// update, 2026-09-06 later still) ───────────────────────────────────────
+// A read-only summary of every candidate's effective review status,
+// always scoped only by run_id, never by the one candidate list's own
+// filters — so a tile's count can never be silently narrowed by them.
+// These tests read the page's own source (the same pattern used
+// throughout this file, since this project has no React render harness
+// — see the earlier structural-safety-net tests' own comments).
 
-test('structural safety net: the triage overview loads its own data scoped only by run_id — never the browsing filters (category/name/duplicate/quality/review_status)', () => {
+test('structural safety net: the status tiles load their own data scoped only by run_id — never the candidate list\'s own filters (category/name/duplicate/quality/review_status)', () => {
   const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
   const match = source.match(/const loadTriageCandidates = useCallback\(async \(token, runId\) => \{[\s\S]*?\n  \}, \[\]\)/);
   assert.ok(match, 'expected to find the loadTriageCandidates function body');
   const body = match[0];
   assert.match(body, /params\.set\('run_id', runId\)/);
   for (const forbiddenParam of ['category', 'name', 'possible_duplicate', 'quality', 'review_status']) {
-    assert.doesNotMatch(body, new RegExp(`params\\.set\\('${forbiddenParam}'`), `must never filter the triage fetch by ${forbiddenParam}`);
+    assert.doesNotMatch(body, new RegExp(`params\\.set\\('${forbiddenParam}'`), `must never filter the tile-count fetch by ${forbiddenParam}`);
   }
 });
 
-test('structural safety net: the triage overview never calls a write endpoint (POST/insert/update/delete) — GET only', () => {
+test('structural safety net: the status tiles never call a write endpoint (POST/insert/update/delete) — GET only', () => {
   const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
   const match = source.match(/const loadTriageCandidates = useCallback\(async \(token, runId\) => \{[\s\S]*?\n  \}, \[\]\)/);
   assert.ok(match, 'expected to find the loadTriageCandidates function body');
   assert.doesNotMatch(match[0], /method:\s*'POST'/);
 });
 
-test('structural safety net: the triage summary counts and its filtering both go through the pure, tested src/lib/importInbox.js functions, never a re-implementation in the page', () => {
+test('structural safety net: the status tiles\' counts go through the pure, tested computeReviewStatusCounts — never a re-implementation in the page', () => {
   const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
   assert.match(source, /computeReviewStatusCounts\(triageCandidates\)/);
-  assert.match(source, /filterCandidatesForTriage\(triageCandidates, \{/);
-  assert.match(source, /computeCandidateTriageBucket\(c\)/);
-});
-
-test('structural safety net: the deferred-reason triage filter is only applied when the status filter is "deferred"', () => {
-  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
-  assert.match(source, /deferredReasonFilter: triageStatusFilter === 'deferred' \? triageDeferredReasonFilter : ''/);
-});
-
-test('structural safety net: "View in list" never writes anything — it only adjusts local filter/expand state and queues a scroll, using the same read-only history loaders as an ordinary expand', () => {
-  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
-  const match = source.match(/function jumpToCandidateFromTriage\(candidateId\) \{[\s\S]*?\n  \}/);
-  assert.ok(match, 'expected to find the jumpToCandidateFromTriage function body');
-  const body = match[0];
-  assert.doesNotMatch(body, /\bfetch\(/, 'must never call fetch directly');
-  assert.doesNotMatch(body, /submitDecision|submitEnrichment|requestSuggestions/, 'must never trigger a write or a suggestion fetch');
-  assert.match(body, /setPendingScrollCandidateId\(candidateId\)/);
 });
