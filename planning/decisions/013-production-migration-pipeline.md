@@ -225,6 +225,84 @@ None of this addendum's changes touch
 migration `0010`, or any MARKET-05C application code — same as Addendum 1
 and the original decision's "What this decision does not do."
 
+## Addendum 3 (2026-09-06) — unambiguous preflight semantics, a fourth reconciliation-only workflow, two real bash bugs fixed
+
+This is a third dated addition, the same day as Addenda 1 and 2 above,
+from a follow-up hardening pass specifically requested to disambiguate
+preflight semantics and add a dedicated history-reconciliation workflow
+before the first real preflight run. It does not rewrite Addenda 1/2 —
+see `docs/guides/production-migration-pipeline.md`'s "Safe order of
+production actions" and "History reconciliation" sections for the full,
+current detail. Four changes:
+
+1. **Addendum 2's single shared `expected_versions` input was replaced
+   with three distinctly-named, distinctly-scoped inputs**, because a
+   single shared concept ("what's expected") had been quietly doing two
+   different jobs: `production-db-preflight.yml` now takes
+   `applied_versions` (what must already be applied, both locally and
+   live) and `staged_versions` (what must exist only as a local file, not
+   yet applied anywhere); `production-db-migrate.yml` now takes
+   `release_versions` (what this specific dispatch is authorized to
+   push). A preflight run can never accept `staged_versions` naming a
+   version with no matching local file — this is the structural
+   guarantee that a preflight on `main` can never expect `0010` before
+   `0010` has actually been merged there.
+2. **A fourth workflow, `production-db-history-reconcile.yml`, was
+   added** — the only workflow in this repository allowed to run
+   `supabase migration repair`. Gated by the same `production-migrations`
+   environment, its own distinct confirmation phrase
+   (`repair-history-only`), and a `legacy_versions` input that must match
+   a constant hard-coded in the workflow file itself
+   (`DOCUMENTED_LEGACY_VERSIONS`) — not just any operator-typed value.
+   Before its one write (`migration repair --status applied`, which per
+   the Supabase CLI's own documentation only touches the history-tracking
+   table, never schema or data), it verifies: local files exist for
+   exactly the declared legacy set (never `0010` or later); remote
+   history contains no version outside that set; and it repairs only
+   the specific versions still missing from remote, never the full set
+   unconditionally. It re-verifies exact sync after writing and never
+   runs `db push`, SQL, seed, reset, delete, or an app deploy.
+3. **The full nine-step safe order for this repository's actual first
+   release was written out explicitly** in the guide's "Safe order of
+   production actions": GitHub setup → preflight for `0001`-`0009`
+   (expected to fail) → history reconciliation → preflight again
+   (expected to pass) → `0010` merged as a migration-only release →
+   preflight with `0010` staged → the production migration → read-only
+   verification → only then MARKET-05C's application code.
+4. **Two real bash bugs were found via local testing and fixed in all
+   three affected workflows** (`production-db-preflight.yml`,
+   `production-db-migrate.yml`, and the new
+   `production-db-history-reconcile.yml`) — both present since Addendum
+   2, neither caught by that round's own tests because those only
+   exercised single-version inputs:
+   - `tr -d '[:space:]'` (meant to strip incidental whitespace) also
+     deletes the newlines that `tr ',' '\n'` had just introduced,
+     silently concatenating every multi-version comma-separated input
+     (e.g. `legacy_versions: 0001,...,0009`) into one garbled token.
+     Fixed with `tr -d '[:blank:]'` (space/tab only).
+   - `printf '%s\n' "${arr[@]}"` on a genuinely empty array still prints
+     one blank line (printf runs its format at least once), and
+     `"${arr[@]:-}"` compounds this by turning "zero elements" into "one
+     empty-string element" even before that. Together these silently
+     broke the single most important scenario this pipeline exists for:
+     comparing against a completely empty remote history, before any
+     reconciliation has happened. Fixed with a small `print_lines`
+     helper that prints nothing for zero arguments, used everywhere a
+     possibly-empty array feeds a `comm`/`mapfile` comparison.
+
+   See the guide's "Residual risks" for the full write-up. Both fixes
+   were verified against synthetic fixtures covering the exact scenarios
+   this pipeline is for (empty remote history, partial reconciliation,
+   `0010` staged before/after merge, unexpected remote versions) — never
+   against the real Supabase CLI or the real project.
+
+None of this addendum's changes touch
+`supabase/migrations/0010_market05c_restaurant_profile_drafts.sql`,
+migration `0010`, or any MARKET-05C application code — same as Addenda 1
+and 2 and the original decision's "What this decision does not do." No
+workflow was dispatched, no live database action was taken, and nothing
+was committed as part of this addendum.
+
 ## Rejected alternatives
 
 - **A custom migration-runner script with its own tracking table**

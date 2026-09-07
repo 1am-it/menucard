@@ -1,0 +1,335 @@
+name: Reconcile legacy migration history (no schema changes)
+
+# ═══════════════════════════════════════════════════════════════════════
+# THIS WORKFLOW NEVER APPLIES SQL, NEVER RUNS `db push`, NEVER SEEDS,
+# NEVER RESETS, NEVER DELETES ANYTHING, AND NEVER DEPLOYS THE APP.
+# Its one and only write is `supabase migration repair --status applied`,
+# which — per the Supabase CLI's own documentation — only inserts rows
+# into the `supabase_migrations.schema_migrations` tracking table. It
+# does not touch application schema or data in any way.
+#
+# Same protection as the other two production-reaching workflows:
+# `environment: production-migrations` below only pauses for human
+# approval if "Required reviewers" has been configured on that
+# environment in this repository's Settings → Environments. See
+# docs/guides/production-migration-pipeline.md's "One-time GitHub setup"
+# section.
+# ═══════════════════════════════════════════════════════════════════════
+#
+# Why this workflow exists: migrations `0001`-`0009` were applied to
+# production by hand, via the Supabase Dashboard's SQL Editor, before
+# this CI pipeline existed. The Supabase CLI's migration-history table is
+# only ever written by the CLI itself (`db push` or `migration repair`),
+# so those manual applications were never recorded there — meaning
+# `supabase migration list` will show them as pending even though they
+# are, in reality, already live. `production-db-preflight.yml` is built
+# to detect exactly this gap and refuse to report "ready" until it is
+# fixed; this workflow is the ONLY sanctioned way to fix it. See
+# docs/guides/production-migration-pipeline.md's "History reconciliation"
+# section for the full narrative and the required order of operations.
+#
+# Manual-only, by design: no `push`, `pull_request`, or `schedule`
+# trigger exists anywhere in this file.
+#
+# `legacy_versions` below must match DOCUMENTED_LEGACY_VERSIONS,
+# hard-coded further down in this same file, EXACTLY — typing a
+# different set into the dispatch form does not bypass this; the job
+# checks the input against the constant and refuses to proceed on any
+# mismatch. Reconciling a different set of versions in the future means
+# updating that constant in a reviewed pull request, not just filling in
+# a different value at dispatch time — deliberately not a bare
+# free-typed field for a write action this sensitive.
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: >-
+          Type "repair-history-only" to confirm you understand this run
+          ONLY repairs migration HISTORY TRACKING (no schema/data change)
+          against the PRODUCTION Supabase project. Any other value aborts
+          before any secret is read or any connection is made.
+        required: true
+        type: string
+      legacy_versions:
+        description: >-
+          The full, explicit, comma-separated list of legacy migration
+          version(s) to mark as applied (e.g. "0001,0002,...,0009") — the
+          filename prefix before the first underscore. Must exactly match
+          this workflow's own hard-coded DOCUMENTED_LEGACY_VERSIONS
+          constant, or the job refuses to proceed. `0010` or any later
+          version must never appear here.
+        required: true
+        type: string
+
+jobs:
+  reconcile:
+    name: Reconcile legacy migration history (history-table write only)
+    runs-on: ubuntu-latest
+
+    # See the warning banner at the top of this file. Nothing below this
+    # line runs until a reviewer configured on this environment explicitly
+    # approves this specific run — *if and only if* the environment's
+    # protection rules have actually been set up.
+    environment: production-migrations
+
+    steps:
+      - name: Require the literal confirmation phrase
+        run: |
+          if [ "${{ github.event.inputs.confirm }}" != "repair-history-only" ]; then
+            echo "::error::Confirmation input was not exactly 'repair-history-only' — aborting before reading any secret or opening any connection. Re-run and type it exactly. (Looking to check readiness or apply a migration? Those are production-db-preflight.yml and production-db-migrate.yml, separate workflows, confirmed with different phrases.)"
+            exit 1
+          fi
+
+      - name: Mask secret values defensively (in addition to GitHub's automatic masking)
+        run: |
+          echo "::add-mask::${{ secrets.SUPABASE_ACCESS_TOKEN }}"
+          echo "::add-mask::${{ secrets.SUPABASE_PROJECT_ID }}"
+          echo "::add-mask::${{ secrets.SUPABASE_DB_PASSWORD }}"
+
+      - name: Check that every required secret is configured
+        run: |
+          missing=""
+          [ -z "${{ secrets.SUPABASE_ACCESS_TOKEN }}" ] && missing="$missing SUPABASE_ACCESS_TOKEN"
+          [ -z "${{ secrets.SUPABASE_PROJECT_ID }}" ] && missing="$missing SUPABASE_PROJECT_ID"
+          [ -z "${{ secrets.SUPABASE_DB_PASSWORD }}" ] && missing="$missing SUPABASE_DB_PASSWORD"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing required secret(s):$missing — configure them on the 'production-migrations' environment (Settings → Environments → production-migrations → Environment secrets). See docs/guides/production-migration-pipeline.md."
+            exit 1
+          fi
+          echo "All required secrets are present (values never printed)."
+
+      - uses: actions/checkout@v4
+
+      # This is THE documented, reviewed legacy set — see
+      # docs/guides/production-migration-pipeline.md's "History
+      # reconciliation" section and planning/decisions/013-production-migration-pipeline.md.
+      # Changing which versions this workflow is allowed to reconcile
+      # means editing this constant in a reviewed pull request, never
+      # just typing a different `legacy_versions` value at dispatch time.
+      # `0010` and later are deliberately never listed here.
+      - name: Verify the declared input matches the documented legacy set exactly
+        id: check_declared
+        run: |
+          set -uo pipefail
+          # `printf '%s\n' "${arr[@]}"` on a genuinely EMPTY array still
+          # prints one blank line (printf executes its format at least
+          # once) — used below for every list comparison instead.
+          print_lines () { [ "$#" -gt 0 ] && printf '%s\n' "$@"; return 0; }
+
+          DOCUMENTED_LEGACY_VERSIONS=(0001 0002 0003 0004 0005 0006 0007 0008 0009)
+          mapfile -t documented < <(print_lines "${DOCUMENTED_LEGACY_VERSIONS[@]}" | sort -u || true)
+
+          raw="${{ github.event.inputs.legacy_versions }}"
+          mapfile -t declared < <(printf '%s' "$raw" | tr ',' '\n' | tr -d '[:blank:]' | grep -v '^$' | sort -u || true)
+
+          echo "Documented legacy set: ${documented[*]:-(none)}"
+          echo "Declared legacy_versions input: ${declared[*]:-(none)}"
+
+          if [ "${#declared[@]}" -eq 0 ]; then
+            echo "::error::'legacy_versions' was empty — this workflow requires an explicit, non-empty list. Nothing to reconcile means this workflow should not be dispatched at all."
+            exit 1
+          fi
+
+          if [ "$(print_lines "${declared[@]}")" != "$(print_lines "${documented[@]}")" ]; then
+            echo "::error::'legacy_versions' does not exactly match this workflow's own hard-coded DOCUMENTED_LEGACY_VERSIONS constant (${documented[*]:-none}). This workflow only ever reconciles that one reviewed set. To reconcile a different set, edit the constant in this file via a reviewed pull request — never by typing a different value here."
+            exit 1
+          fi
+
+          echo "Declared input matches the documented legacy set exactly."
+
+      # Ground truth from disk, never from anything the Supabase CLI
+      # prints — mirrors the same pattern used in
+      # production-db-preflight.yml.
+      - name: Determine local migration versions from supabase/migrations/
+        id: local_versions
+        run: |
+          set -euo pipefail
+          print_lines () { [ "$#" -gt 0 ] && printf '%s\n' "$@"; return 0; }
+
+          shopt -s nullglob
+          files=(supabase/migrations/*.sql)
+          versions=()
+          for f in "${files[@]}"; do
+            versions+=("$(basename "$f" | cut -d'_' -f1)")
+          done
+          mapfile -t sorted_versions < <(print_lines "${versions[@]}" | grep -v '^$' | sort -u || true)
+          print_lines "${sorted_versions[@]}" > local-versions.txt
+          echo "Local migration versions found: ${sorted_versions[*]:-(none)}"
+
+      # Requirement: local migration files must exist for EXACTLY the
+      # declared legacy versions — no more, no less. This is the specific
+      # check that guarantees `0010` (or any later version) can never be
+      # part of this repair action: if `0010` exists locally, the local
+      # set no longer equals the declared/documented legacy set and this
+      # step fails closed, before any connection is even opened.
+      - name: Verify local files exist for exactly the declared legacy versions
+        run: |
+          set -uo pipefail
+          print_lines () { [ "$#" -gt 0 ] && printf '%s\n' "$@"; return 0; }
+
+          mapfile -t declared < <(printf '%s' "${{ github.event.inputs.legacy_versions }}" | tr ',' '\n' | tr -d '[:blank:]' | grep -v '^$' | sort -u || true)
+          mapfile -t known_local < local-versions.txt
+
+          mapfile -t local_extra < <(comm -23 <(print_lines "${known_local[@]}") <(print_lines "${declared[@]}") || true)
+          mapfile -t declared_missing < <(comm -23 <(print_lines "${declared[@]}") <(print_lines "${known_local[@]}") || true)
+
+          if [ "${#local_extra[@]}" -gt 0 ] || [ "${#declared_missing[@]}" -gt 0 ]; then
+            echo "::error::Local files under supabase/migrations/ do not exactly match 'legacy_versions'. Local file(s) NOT in the declared legacy set (e.g. 0010 or later — these must NEVER be part of this repair action): ${local_extra[*]:-(none)}. Declared legacy version(s) with no matching local file: ${declared_missing[*]:-(none)}. Aborting before any connection is opened."
+            exit 1
+          fi
+
+          echo "Local files exactly match the declared legacy versions: ${declared[*]:-(none)}."
+
+      # v3 is the version currently documented in the action's own
+      # README — kept in sync with the other two production workflows.
+      - uses: supabase/setup-cli@v3
+        with:
+          version: latest
+
+      - name: Link to the production Supabase project
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: supabase link --project-ref "${{ secrets.SUPABASE_PROJECT_ID }}"
+
+      # Requirement: remote migration history must contain no unexpected
+      # versions — every version already recorded as applied live must be
+      # one of the declared legacy versions. If something else shows up
+      # (e.g. `0010` somehow already applied, or a version nobody
+      # recognizes), this is not the documented legacy scenario and the
+      # workflow refuses to touch history at all.
+      - name: Verify remote history contains no unexpected versions (read-only)
+        id: check_remote_before
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          set -uo pipefail
+          # `printf '%s\n' "${arr[@]}"` on a genuinely EMPTY array still
+          # prints one blank line (printf executes its format at least
+          # once) — this is exactly the case where `parsed_remote` is
+          # legitimately empty (nothing applied remotely yet, the normal
+          # first-ever-reconciliation scenario this workflow exists for),
+          # so every list comparison below uses this helper instead.
+          print_lines () { [ "$#" -gt 0 ] && printf '%s\n' "$@"; return 0; }
+
+          mapfile -t declared < <(printf '%s' "${{ github.event.inputs.legacy_versions }}" | tr ',' '\n' | tr -d '[:blank:]' | grep -v '^$' | sort -u || true)
+
+          if ! supabase migration list --linked | tee migration-list-before.txt; then
+            echo "::error::'supabase migration list' exited non-zero — cannot determine migration history. Aborting before any write."
+            exit 1
+          fi
+
+          if ! grep -qi 'LOCAL' migration-list-before.txt || ! grep -qi 'REMOTE' migration-list-before.txt; then
+            echo "::error::Could not find the expected LOCAL/REMOTE header in 'supabase migration list' output — its format may not match what this workflow parses. Treating history as NOT reliably parseable. Aborting before any write."
+            exit 1
+          fi
+
+          # See production-db-preflight.yml for why this normalizes the
+          # separator with `sed` before a single-character `awk -F'|'`
+          # split rather than an awk bracket character class.
+          mapfile -t parsed_local < <(sed 's/│/|/g' migration-list-before.txt | awk -F'|' 'NF>=2 { v=$1; gsub(/^[ \t]+|[ \t]+$/, "", v); if (v ~ /^[0-9]+$/) print v }' | sort -u || true)
+          mapfile -t parsed_remote < <(sed 's/│/|/g' migration-list-before.txt | awk -F'|' 'NF>=2 { v=$2; gsub(/^[ \t]+|[ \t]+$/, "", v); if (v ~ /^[0-9]+$/) print v }' | sort -u || true)
+          mapfile -t known_local < local-versions.txt
+
+          if [ "$(print_lines "${parsed_local[@]}")" != "$(print_lines "${known_local[@]}")" ]; then
+            echo "::error::The LOCAL column parsed from 'supabase migration list' does not match the actual files on disk. Either this workflow's parsing is wrong or the CLI's output format has changed — never assume history is fine. Aborting before any write."
+            echo "Parsed from CLI output: ${parsed_local[*]:-(none)}"
+            echo "Actual files on disk:   ${known_local[*]:-(none)}"
+            exit 1
+          fi
+
+          mapfile -t remote_unexpected < <(comm -23 <(print_lines "${parsed_remote[@]}") <(print_lines "${declared[@]}") || true)
+          if [ "${#remote_unexpected[@]}" -gt 0 ]; then
+            echo "::error::Live migration history already contains version(s) NOT in the declared legacy set: ${remote_unexpected[*]}. This is not the documented legacy scenario (0001-0009 applied by hand, nothing else) — refusing to touch history. Investigate manually before re-running this workflow."
+            exit 1
+          fi
+
+          mapfile -t to_repair < <(comm -23 <(print_lines "${declared[@]}") <(print_lines "${parsed_remote[@]}") || true)
+          echo "Already recorded as applied remotely: $(comm -12 <(print_lines "${declared[@]}") <(print_lines "${parsed_remote[@]}") | tr '\n' ' ')"
+          echo "Will be marked applied by this run:   ${to_repair[*]:-(none)}"
+          print_lines "${to_repair[@]}" > to-repair.txt
+
+          if [ "${#to_repair[@]}" -eq 0 ]; then
+            echo "verdict=nothing_to_repair" >> "$GITHUB_OUTPUT"
+            echo "Nothing to reconcile — remote history already shows every declared legacy version as applied."
+          else
+            echo "verdict=will_repair" >> "$GITHUB_OUTPUT"
+          fi
+
+      # The ONLY write in this entire workflow. Runs once, for exactly
+      # the version(s) computed above (never the full declared list
+      # unconditionally — an already-applied version is left untouched
+      # rather than relying on undocumented repair-on-existing-row
+      # behavior). Per the Supabase CLI's own documentation, this only
+      # inserts row(s) into supabase_migrations.schema_migrations; it
+      # never applies SQL, never touches application schema or data.
+      - name: Mark exactly the missing legacy version(s) as applied
+        if: steps.check_remote_before.outputs.verdict == 'will_repair'
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          set -euo pipefail
+          mapfile -t to_repair < to-repair.txt
+          echo "Running: supabase migration repair --linked --status applied ${to_repair[*]}"
+          supabase migration repair --linked --status applied "${to_repair[@]}"
+
+      # Re-verification, required regardless of whether the repair step
+      # ran: confirm remote history now exactly equals the declared
+      # legacy set. A mismatch here means the repair did not fully work
+      # (or something changed concurrently) and must be investigated by
+      # hand — this workflow never retries or repairs further on its own.
+      - name: Verify local and live history are now exactly synchronized (read-only)
+        if: always()
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          set -uo pipefail
+          print_lines () { [ "$#" -gt 0 ] && printf '%s\n' "$@"; return 0; }
+
+          mapfile -t declared < <(printf '%s' "${{ github.event.inputs.legacy_versions }}" | tr ',' '\n' | tr -d '[:blank:]' | grep -v '^$' | sort -u || true)
+
+          if ! supabase migration list --linked | tee migration-list-after.txt; then
+            echo "::error::'supabase migration list' exited non-zero while re-verifying history after reconciliation. Do not assume success — investigate manually."
+            echo "verdict=verification_failed" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+
+          mapfile -t parsed_remote_after < <(sed 's/│/|/g' migration-list-after.txt | awk -F'|' 'NF>=2 { v=$2; gsub(/^[ \t]+|[ \t]+$/, "", v); if (v ~ /^[0-9]+$/) print v }' | sort -u || true)
+
+          if [ "$(print_lines "${parsed_remote_after[@]}")" != "$(print_lines "${declared[@]}")" ]; then
+            echo "::error::After reconciliation, live migration history does NOT exactly equal the declared legacy set. Now recorded live: ${parsed_remote_after[*]:-(none)}. Declared: ${declared[*]:-(none)}. Do not treat this run as successful — investigate manually before running production-db-preflight.yml again."
+            echo "verdict=verification_failed" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+
+          echo "Confirmed: live migration history now exactly equals the declared legacy set."
+          echo "verdict=verified_in_sync" >> "$GITHUB_OUTPUT"
+
+      - name: Write a run summary
+        if: always()
+        run: |
+          {
+            echo "## Legacy migration history reconciliation"
+            echo ""
+            echo "- Triggered by: \`${{ github.actor }}\`"
+            echo "- Declared legacy_versions: \`${{ github.event.inputs.legacy_versions }}\`"
+            echo "- Approved via the \`production-migrations\` environment's required reviewer(s)"
+            echo "- Run: [$GITHUB_RUN_ID]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID)"
+            echo "- Outcome: \`${{ job.status }}\`"
+            echo ""
+            echo "### History before this run"
+            echo '```'
+            cat migration-list-before.txt 2>/dev/null || echo "(not captured — job failed before this step; see the step logs above)"
+            echo '```'
+            echo ""
+            echo "### History after this run"
+            echo '```'
+            cat migration-list-after.txt 2>/dev/null || echo "(not captured — job failed before this step; see the step logs above)"
+            echo '```'
+            echo ""
+            echo "**Next step**: only after this run's outcome is \`success\` and the final verification above says the history is in sync, dispatch \`production-db-preflight.yml\` again (with \`applied_versions\` set to this same legacy set) to confirm it now reports \"Ready for migration\". Record this reconciliation in \`planning/CONTEXT.md\`, matching this project's own documentation convention."
+          } >> "$GITHUB_STEP_SUMMARY"

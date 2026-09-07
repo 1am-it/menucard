@@ -40,6 +40,18 @@ name: Apply production database migrations
 # between two independent workflow_dispatch runs without a much more
 # invasive, custom cross-workflow gate this project has deliberately not
 # built (see that guide's own "Residual risks").
+#
+# `release_versions` below is deliberately a DIFFERENT input, with a
+# different name and meaning, from production-db-preflight.yml's
+# `applied_versions`/`staged_versions`. The preflight checks "what is
+# currently true" (what's already applied, what's staged); this workflow
+# checks "what should happen right now" — the specific release this
+# dispatch is authorized to push, confirmed against this run's own
+# read-only dry-run before any write. Never conflate the two: typing a
+# preflight's `staged_versions` value into this workflow's
+# `release_versions` field (or vice versa) happens to often be the same
+# version string, but they answer different questions and are validated
+# by entirely separate logic.
 
 on:
   workflow_dispatch:
@@ -51,15 +63,16 @@ on:
           before any secret is read or any connection is made.
         required: true
         type: string
-      expected_versions:
+      release_versions:
         description: >-
-          The exact migration version(s) this run is expected to apply —
-          the part of the filename before the first underscore (e.g.
-          "0010"), comma-separated if more than one. Must match this run's
-          own dry-run output exactly, or the workflow stops before the
-          real push. Use the same value you used for
-          production-db-preflight.yml's "Ready for migration" run. Type
-          "none" (not blank) if you expect nothing to be pending.
+          The exact migration version(s) THIS RUN is authorized to apply
+          as a pending release — the filename prefix before the first
+          underscore (e.g. "0010"), comma-separated if more than one.
+          Must match this run's own read-only dry-run output exactly, or
+          the workflow stops before the real push. Normally the same
+          version(s) just confirmed via production-db-preflight.yml's
+          `staged_versions` input. Type "none" (not blank) if you expect
+          nothing to be pending.
         required: true
         type: string
 
@@ -116,9 +129,15 @@ jobs:
         with:
           version: latest
 
+      # SUPABASE_DB_PASSWORD is set here (not only on the "Apply pending
+      # migrations" step below) per the Supabase CLI's own documented CI
+      # example (docs/guides/deployment/managing-environments), which
+      # sets all three secrets before `supabase link` — kept consistent
+      # with the same fix applied to production-db-preflight.yml.
       - name: Link to the production Supabase project
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: supabase link --project-ref "${{ secrets.SUPABASE_PROJECT_ID }}"
 
       # Unverified risk (see docs/guides/production-migration-pipeline.md's
@@ -137,14 +156,15 @@ jobs:
         id: before
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
           supabase migration list --linked | tee before-migration-list.txt
 
       # Read-only. Confirms exactly which migration version(s) `db push`
       # would apply, and aborts BEFORE the real push if that set doesn't
-      # match `expected_versions` exactly — e.g. because a migration was
+      # match `release_versions` exactly — e.g. because a migration was
       # applied out of band since the preflight ran, an unexpected file
-      # is pending, or the wrong `expected_versions` value was typed.
+      # is pending, or the wrong `release_versions` value was typed.
       # Output line format ("Would push migration <file>...") confirmed
       # against a real `--dry-run` run reported in a Supabase CLI GitHub
       # issue (supabase/cli#776) — the official reference page documents
@@ -153,6 +173,7 @@ jobs:
         id: dry_run
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
           set -euo pipefail
 
@@ -160,26 +181,33 @@ jobs:
           # under `set -e -o pipefail`, a `grep` that matches zero lines
           # (a legitimate outcome here — e.g. "nothing pending") exits
           # non-zero and would otherwise abort this whole step.
-          raw="${{ github.event.inputs.expected_versions }}"
+          #
+          # `printf '%s\n' "${arr[@]}"` on a genuinely EMPTY array still
+          # prints one blank line (printf executes its format at least
+          # once) — this helper prints nothing at all when called with
+          # zero arguments, which is what the comparison below needs.
+          print_lines () { [ "$#" -gt 0 ] && printf '%s\n' "$@"; return 0; }
+
+          raw="${{ github.event.inputs.release_versions }}"
           if [ "$(printf '%s' "$raw" | tr '[:upper:]' '[:lower:]')" = "none" ]; then
             raw=""
           fi
-          mapfile -t expected_versions < <(printf '%s' "$raw" | tr ',' '\n' | tr -d '[:space:]' | grep -v '^$' | sort -u || true)
+          mapfile -t release_versions < <(printf '%s' "$raw" | tr ',' '\n' | tr -d '[:blank:]' | grep -v '^$' | sort -u || true)
 
           supabase db push --linked --dry-run | tee dry-run-output.txt
 
           mapfile -t would_push_files < <(grep -oE 'Would push migration [^[:space:]]+\.\.\.' dry-run-output.txt | sed -E 's/^Would push migration (.+)\.\.\.$/\1/' || true)
           would_push_versions=()
-          for f in "${would_push_files[@]:-}"; do
+          for f in "${would_push_files[@]}"; do
             [ -n "$f" ] && would_push_versions+=("$(basename "$f" | cut -d'_' -f1)")
           done
-          mapfile -t would_push_versions < <(printf '%s\n' "${would_push_versions[@]:-}" | grep -v '^$' | sort -u || true)
+          mapfile -t would_push_versions < <(print_lines "${would_push_versions[@]}" | grep -v '^$' | sort -u || true)
 
           echo "Dry-run says these version(s) would be applied: ${would_push_versions[*]:-(none)}"
-          echo "This run declared expected version(s):          ${expected_versions[*]:-(none)}"
+          echo "This run declared release_versions:             ${release_versions[*]:-(none)}"
 
-          if [ "$(printf '%s\n' "${would_push_versions[@]:-}")" != "$(printf '%s\n' "${expected_versions[@]:-}")" ]; then
-            echo "::error::Dry-run would apply a different migration version set than declared in 'expected_versions'. Would apply: ${would_push_versions[*]:-(none)}. Expected: ${expected_versions[*]:-(none)}. Aborting before the real push — re-run with the correct 'expected_versions' input, or investigate why an unexpected migration is pending (see docs/guides/production-migration-pipeline.md) before dispatching again."
+          if [ "$(print_lines "${would_push_versions[@]}")" != "$(print_lines "${release_versions[@]}")" ]; then
+            echo "::error::Dry-run would apply a different migration version set than declared in 'release_versions'. Would apply: ${would_push_versions[*]:-(none)}. Declared release_versions: ${release_versions[*]:-(none)}. Aborting before the real push — re-run with the correct 'release_versions' input, or investigate why an unexpected migration is pending (see docs/guides/production-migration-pipeline.md) before dispatching again."
             exit 1
           fi
 
@@ -214,6 +242,7 @@ jobs:
         if: always()
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: supabase migration list --linked | tee after-migration-list.txt
 
       - name: Write a run summary
@@ -223,7 +252,7 @@ jobs:
             echo "## Production migration run"
             echo ""
             echo "- Triggered by: \`${{ github.actor }}\`"
-            echo "- Declared expected version(s): \`${{ github.event.inputs.expected_versions }}\`"
+            echo "- Declared release_versions: \`${{ github.event.inputs.release_versions }}\`"
             echo "- Approved via the \`production-migrations\` environment's required reviewer(s)"
             echo "- Run: [$GITHUB_RUN_ID]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID)"
             echo "- Outcome: \`${{ job.status }}\`"

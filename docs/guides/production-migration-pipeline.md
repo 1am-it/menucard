@@ -9,80 +9,100 @@ SQL Editor by hand, run it, and record the outcome in prose in
 for why this changed and what was decided; this file is the concrete
 operational how-to.
 
-## The three workflows, and why there are three
+## The four workflows, and why there are four
 
-| | `.github/workflows/validate-migrations.yml` | `.github/workflows/production-db-preflight.yml` | `.github/workflows/production-db-migrate.yml` |
-|---|---|---|---|
-| Trigger | Automatic — push/PR touching `supabase/migrations/**` | **Manual only** — `workflow_dispatch`, confirm `"verify"` | **Manual only** — `workflow_dispatch`, confirm `"migrate"` |
-| Target | A throwaway Postgres container, destroyed after the job | The real, production Supabase project — **read-only** | The real, production Supabase project — **applies changes** |
-| Secrets needed | None | `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_ID`, `SUPABASE_DB_PASSWORD` | Same three secrets |
-| Approval | None needed — it can't affect anything real | **Required** — same protected GitHub Environment | **Required** — same protected GitHub Environment |
-| What it proves | The full migration sequence applies cleanly, in order, from empty | Secrets work, the CLI accepts the config, auth + project linking succeed, and local vs. live migration history can be compared — **without changing anything** | The *pending* migrations were actually applied to production |
+| | `.github/workflows/validate-migrations.yml` | `.github/workflows/production-db-preflight.yml` | `.github/workflows/production-db-history-reconcile.yml` | `.github/workflows/production-db-migrate.yml` |
+|---|---|---|---|---|
+| Trigger | Automatic — push/PR touching `supabase/migrations/**` | **Manual only** — confirm `"verify"` | **Manual only** — confirm `"repair-history-only"` | **Manual only** — confirm `"migrate"` |
+| Target | A throwaway Postgres container, destroyed after the job | The real, production Supabase project — **read-only** | The real, production Supabase project — **writes ONLY the history-tracking table** | The real, production Supabase project — **applies schema changes** |
+| Its own input | none | `applied_versions`, `staged_versions` | `legacy_versions` | `release_versions` |
+| Secrets needed | None | `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_ID`, `SUPABASE_DB_PASSWORD` | Same three secrets | Same three secrets |
+| Approval | None needed — it can't affect anything real | **Required** — same protected GitHub Environment | **Required** — same protected GitHub Environment | **Required** — same protected GitHub Environment |
+| What it proves / does | The full migration sequence applies cleanly, in order, from empty | What is currently known-**applied** (local + live) and known-**staged** (local only), exactly — **without changing anything** | Marks specific, pre-documented legacy version(s) as applied in the history table ONLY — no schema/data write | The *declared release* (and only that) was actually applied to production |
 
-They are deliberately three separate files, not two, and not one combined
-one. `validate-migrations.yml` is safe to run automatically on every
-change because it is incapable of touching anything real.
-`production-db-preflight.yml` and `production-db-migrate.yml` both reach
-the real production project and therefore both require the same explicit
-human trigger and separate human approval — but only the second one is
-capable of changing anything; the first exists specifically so that fact
-("are we actually ready?") can be checked and re-checked, as often as
-needed, without ever risking a write.
+Four separate files, not three, and not one combined one.
+`validate-migrations.yml` is safe to run automatically because it cannot
+touch anything real. The other three all reach the real production
+project and therefore all require the same explicit human trigger and
+separate human approval — but each does a categorically different job,
+on purpose:
+
+- **`production-db-preflight.yml` answers "what is currently true?"** —
+  never "what should happen next." Its `applied_versions` input is the
+  set that must already be fully applied (local file **and** live
+  history); its `staged_versions` input is the set that must exist
+  **only** as a local file, staged for later. Neither is the same
+  concept as `production-db-migrate.yml`'s own `release_versions` — see
+  each workflow's own banner comment for why these are deliberately
+  different inputs, not one shared value renamed per workflow.
+- **`production-db-history-reconcile.yml` answers "can the tracked-but-
+  never-CLI-applied legacy gap be closed?"** — the *only* workflow in
+  this repository allowed to run `supabase migration repair`, and only
+  for a version list that matches a constant hard-coded into the
+  workflow file itself (see "History reconciliation" below). It never
+  runs `db push`, never applies SQL, never seeds, resets, or deletes
+  anything, and never touches the app.
+- **`production-db-migrate.yml` answers "apply this specific, already-
+  confirmed release, now."** Its own `release_versions` input is
+  independently re-checked against a read-only `db push --dry-run`
+  immediately before the real push.
 
 ## Safe order of production actions
 
-**Always run the preflight before the migration workflow — never dispatch
-`production-db-migrate.yml` cold.**
+**Never dispatch `production-db-migrate.yml` cold, and never skip
+straight from "history looks wrong" to guessing at a fix.** The full,
+required order for this repository's actual first real release:
 
-Both workflows take the same `expected_versions` input: the exact
-migration version(s) (the filename prefix before the first underscore,
-e.g. `0010`) this run is expected to find/apply as pending — comma
-separated, or the literal word `none` if nothing should be pending. This
-is not a formality: **"Ready for migration" is only ever reported when
-local and live migration history match `expected_versions` exactly** —
-not "whatever happens to be pending." Any other divergence (something
-pending that wasn't named, something named that isn't pending, or a live
-history entry with no matching local file at all) is reported as **"Not
-ready"**, with the specific reason, and points at a required, separate
-history reconciliation (see "History reconciliation" below) — it is never
-silently treated as "close enough."
-
-1. Dispatch `production-db-preflight.yml` (confirm: `verify`,
-   `expected_versions`: the version(s) you intend to release). Read its
-   job summary.
-2. Only if that summary says **"✅ Ready for migration"**: dispatch
-   `production-db-migrate.yml` (confirm: `migrate`, the same
-   `expected_versions` value). That workflow runs its own read-only
-   `db push --dry-run` first and independently re-confirms the same exact
-   match before ever running a real push — see "How approval works" below.
-3. If the preflight instead says **"❌ Not ready"**, resolve whatever it
-   named — a missing secret, a failed link, or (see "History
-   reconciliation" below) a history mismatch — and re-run the preflight
-   (it is read-only and safe to run as many times as needed) before ever
-   attempting step 2.
-
-As of this writing, the next real migration release under this rule is
-`supabase/migrations/0010_market05c_restaurant_profile_drafts.sql` —
-already written and locally validated (see `validate-migrations.yml`),
-but not yet live. This document and the preflight workflow do not apply
-it; that remains a separate, later, explicitly-approved dispatch of
-`production-db-migrate.yml`, only after a preflight run reports ready
-with `expected_versions: 0010`.
-
-**MARKET-05C may only reach `main` as a migration-only release
-(`supabase/migrations/0010_market05c_restaurant_profile_drafts.sql`
-alone) after the `0001`-`0009` history reconciliation below is resolved
-— never before, and never bundled with MARKET-05C's application code.**
-Concretely, in order: (1) reconcile `0001`-`0009` (separate,
-explicitly-approved action — see "History reconciliation"); (2) merge
-`0010` to `main` on its own, get a preflight run reporting ready with
-`expected_versions: 0010`, then dispatch `production-db-migrate.yml` for
-it — this is the "migration-only release"; (3) only once `0010` is
-confirmed live (per "How to verify the outcome") does MARKET-05C's
-application code (the routes/pages reading and writing the tables `0010`
-creates) merge, as a separate, later release — per "Release sequencing"
-below. Skipping straight to (2) without (1) is exactly what
-`production-db-preflight.yml` is built to catch and refuse.
+1. **One-time GitHub setup** (see below): create the `production-migrations`
+   environment, enable Required reviewers, add the three environment
+   secrets. Done once, protects all three production-reaching workflows.
+2. **Read-only preflight for `0001`-`0009`**: dispatch
+   `production-db-preflight.yml` (confirm `verify`,
+   `applied_versions: 0001,0002,0003,0004,0005,0006,0007,0008,0009`,
+   `staged_versions: none`). Expected first-ever result: **"❌ Not
+   ready"** — remote history does not yet record these as applied (they
+   were applied by hand, outside the CLI — see "History reconciliation").
+   This step is diagnostic, not expected to pass yet; it exists to
+   produce written, timestamped confirmation of the exact gap before step
+   3 touches anything.
+3. **Separately approved history reconciliation**: dispatch
+   `production-db-history-reconcile.yml` (confirm
+   `repair-history-only`, `legacy_versions: 0001,0002,0003,0004,0005,0006,0007,0008,0009`
+   — must match that workflow's own hard-coded constant exactly). This is
+   its own distinct approval at the same protected environment; it writes
+   only to the migration-history tracking table (see "History
+   reconciliation" below for the full guarantee).
+4. **Read-only preflight again, now requiring exact sync**: dispatch
+   `production-db-preflight.yml` again, same `applied_versions`,
+   `staged_versions: none`. Expected result now: **"✅ Ready for
+   migration"**. If not, reconciliation was incomplete or something else
+   is genuinely wrong — do not proceed.
+5. **`0010` as a migration-only release to `main`**: merge
+   `supabase/migrations/0010_market05c_restaurant_profile_drafts.sql`
+   alone — no MARKET-05C application code in the same PR.
+6. **Preflight with `0010` as the declared pending release**: dispatch
+   `production-db-preflight.yml` with `applied_versions:
+   0001,...,0009`, `staged_versions: 0010`. This is what confirms `0010`
+   is now a real local file on `main` and correctly not yet applied
+   anywhere live — see requirement 3 in that workflow's own header
+   comment for why this is structurally impossible to pass before `0010`
+   is actually merged.
+7. **Separately approved production migration**: only once step 6 reports
+   ready, dispatch `production-db-migrate.yml` (confirm `migrate`,
+   `release_versions: 0010`). Its own read-only dry-run independently
+   re-confirms the exact same version set before the real push — see "How
+   approval works" below.
+8. **Read-only verification**: `production-db-migrate.yml`'s own summary
+   and a follow-up `production-db-preflight.yml` run (`applied_versions:
+   0001,...,0010`, `staged_versions: none`, expecting "✅ Ready") confirm
+   `0010` is now live. Also cross-check the Supabase Dashboard directly —
+   see "How to verify the outcome."
+9. **Only after step 8 is confirmed** does MARKET-05C's dependent
+   application code (the routes/pages reading and writing the tables
+   `0010` creates) merge, as its own separate release — see "Release
+   sequencing" below. Steps 5-9 skipping straight past 1-4 is exactly what
+   `production-db-preflight.yml`'s local-files-vs-declared-versions check
+   is built to catch and refuse (see "History reconciliation").
 
 ## History reconciliation
 
@@ -92,49 +112,60 @@ Supabase CLI's own migration-history table
 (`supabase_migrations.schema_migrations`) is only ever written to by the
 CLI itself (`db push`, or `migration repair`); a manual SQL Editor run
 does not touch it. This means the **first-ever** run of
-`production-db-preflight.yml` against this project should be expected to
-show `0001`-`0009` as pending (LOCAL-only, no matching REMOTE row) even
-though they are, in reality, already live — a false "not applied" signal
-caused entirely by how they were originally applied, not by anything
-actually wrong with the database.
+`production-db-preflight.yml` against this project (step 2 above) should
+be expected to report "Not ready," reason: live history is missing
+`0001`-`0009` — even though they are, in reality, already live. A false
+"not applied" signal caused entirely by how they were originally applied,
+not by anything actually wrong with the database.
 
-**This is not something either workflow fixes automatically, and neither
-ever will.** `production-db-preflight.yml` requires an exact match
-against the version(s) declared in `expected_versions`; it does not
-special-case "these particular versions are probably fine." A likely
-first-ever preflight result:
+**Neither `production-db-preflight.yml` nor `production-db-migrate.yml`
+fixes this automatically, and neither ever will.** The dedicated,
+separately-approved fix is `production-db-history-reconcile.yml` (step 3
+above). Its safeguards, all enforced before it ever opens a connection or
+writes anything:
 
-- Declare `expected_versions: 0010` (the actual next release).
-- Get back **"❌ Not ready"**, reason: pending set `(0001 0002 ... 0009
-  0010)` does not equal expected set `(0010)`.
+- **Confirmation phrase is `repair-history-only`** — distinct from
+  `verify` and `migrate`, so it can never be triggered by a copy-pasted
+  confirmation meant for either other workflow.
+- **`legacy_versions` must exactly match a constant hard-coded in the
+  workflow file itself** (`DOCUMENTED_LEGACY_VERSIONS`, currently
+  `0001`-`0009`). Typing a different value at dispatch time does not
+  work — reconciling a different set requires editing that constant in a
+  reviewed pull request. This is deliberate: a write this sensitive is
+  not left to a free-typed dispatch-time value alone.
+- **Local files must exist for EXACTLY the declared legacy versions** —
+  no more, no less. If `0010` (or any later version) is already present
+  as a local file when this workflow runs, the local set no longer
+  equals the declared/documented legacy set and the job fails closed
+  *before opening any connection* — this is the specific, structural
+  guarantee that `0010` (or anything later) can never be part of this
+  repair action.
+- **Remote history must contain no version outside the declared legacy
+  set** — if something unexpected is already recorded live (e.g. `0010`
+  somehow applied early, or an unrecognized version), the workflow
+  refuses to touch history at all rather than guess what's safe to leave
+  alone.
+- **Only the specific version(s) still missing from remote are repaired**
+  — computed as `legacy_versions` minus what's already recorded, never
+  the full declared list unconditionally. An already-applied version is
+  left untouched. If everything is already reconciled, the workflow
+  performs no write at all and says so.
+- **The only write is `supabase migration repair --linked --status
+  applied <versions>`** — per the Supabase CLI's own documentation, this
+  only inserts row(s) into `supabase_migrations.schema_migrations`; it
+  never applies SQL, never touches application schema or data, never
+  runs `db push`, seed, reset, or delete, and never deploys anything.
+- **Re-verifies after writing**: a final read-only `migration list` run
+  confirms live history now exactly equals the declared legacy set. A
+  mismatch here is reported as a failure requiring manual investigation —
+  this workflow never retries or repairs further on its own.
+- **No secrets, passwords, tokens, or full connection strings are ever
+  logged** — same masking discipline (`::add-mask::` plus GitHub's own
+  automatic masking) as the other two production-reaching workflows.
 
-The fix is a **separate, explicitly-approved reconciliation**, done by
-hand, before `0010` is ever pushed:
-
-1. Confirm via the Supabase Dashboard (Table Editor / SQL Editor) that
-   `0001`-`0009`'s tables/functions genuinely already exist in
-   production — i.e. that this is the expected "applied by hand, not
-   CLI-tracked" gap, not a real missing migration.
-2. Once confirmed, a person with the `SUPABASE_ACCESS_TOKEN` runs
-   `supabase migration repair --linked --status applied <version> ...`
-   **by hand, locally or in a one-off authorized session — never
-   automatically, and never as part of either workflow in this
-   repository.** Per the Supabase CLI's own documentation, `repair` only
-   inserts/deletes rows in the history tracking table; it never applies
-   SQL or alters schema — but it is still a real, unreviewed-by-CI change
-   to production state, so it gets its own explicit approval moment, the
-   same way a migration does.
-3. Re-run `production-db-preflight.yml` with `expected_versions: 0010`.
-   It should now report "✅ Ready for migration" — if it does not,
-   reconciliation was incomplete or something else is genuinely wrong;
-   do not proceed to `production-db-migrate.yml` until it does.
-
-Neither workflow in this repository runs `migration repair`, prompts for
-it, or automates any part of step 2 — by design, per this pipeline's own
-"never run migration repair automatically, never apply SQL from a
-preflight" rule. Reconciliation is intentionally a manual, separate,
-reviewed action, distinct from both "check readiness" and "apply a
-migration."
+Any unexpected state at any of these checks stops the workflow
+immediately, with a specific reason in the job log — never a partial
+write followed by a silent "close enough" continuation.
 
 ## One-time GitHub setup (do this before dispatching the workflow for real)
 
@@ -146,10 +177,11 @@ workflow references one that doesn't already exist.
 
 1. **Repository Settings → Environments → New environment**, named
    exactly `production-migrations` (matching the `environment:` key in
-   both `production-db-migrate.yml` and `production-db-preflight.yml` —
-   renaming one without the others breaks the link between them). This
-   one-time setup protects both workflows simultaneously; nothing extra
-   is needed to also gate the preflight.
+   `production-db-migrate.yml`, `production-db-preflight.yml`, AND
+   `production-db-history-reconcile.yml` — renaming one without the
+   others breaks the link between them). This one-time setup protects
+   all three production-reaching workflows simultaneously; nothing extra
+   is needed to also gate the preflight or the reconciliation workflow.
 2. On that environment, enable **Required reviewers** and add at least
    one person authorized to approve a production migration. (Optionally
    also set a wait timer, and restrict which branches/tags may deploy to
@@ -198,56 +230,52 @@ and the database directly, only to push schema migrations.
 
 ## How approval works, end to end
 
-0. **Preflight first, always** (see "Safe order of production actions"
-   above): dispatch `production-db-preflight.yml` (confirm: `verify`),
-   have it approved at the `production-migrations` environment like any
-   other run of that environment, and confirm its summary says "✅ Ready
-   for migration" before continuing to step 1 below. This step performs
-   no write of any kind — it exists so readiness can be checked (and
-   re-checked) independently of ever running `db push`.
-1. A migration file (or files) lands on `main` — after `validate-migrations.yml`
-   has already run automatically and passed on that PR (recommended:
-   make that check a **required status check** on `main`'s branch
-   protection rule, so nothing merges without it — a one-time repository
-   setting alongside the environment setup above).
-2. Someone with write access goes to the repo's **Actions** tab →
+This walks through `production-db-migrate.yml` specifically — i.e. step 7
+of "Safe order of production actions" above, which assumes steps 1-6
+(setup, preflight, reconciliation if needed, preflight again, the
+migration-only merge, preflight with the release staged) are already
+done.
+
+1. Someone with write access goes to the repo's **Actions** tab →
    "Apply production database migrations" → **Run workflow**, selects
-   the `main` branch, and types `migrate` in the confirmation field
-   exactly as prompted.
-3. The job starts, validates the confirmation phrase and that all three
+   the `main` branch, types `migrate` in the confirmation field exactly
+   as prompted, and sets `release_versions` to the version(s) just
+   confirmed ready by the preflight (e.g. `0010`).
+2. The job starts, validates the confirmation phrase and that all three
    secrets are configured, then **pauses** at the `production-migrations`
    environment (assuming the one-time setup above was done).
-4. A configured reviewer sees the pending deployment (GitHub notifies
+3. A configured reviewer sees the pending deployment (GitHub notifies
    reviewers, and it's visible under the workflow run's "Review
    deployments" button) and either approves or rejects it. Approving is
    the one explicit production approval this whole design exists to
    require — nothing before this point has touched a secret or a
    connection.
-5. Once approved, the job links the Supabase CLI to the production
+4. Once approved, the job links the Supabase CLI to the production
    project and prints which migrations are currently pending
    (`supabase migration list --linked`).
-6. It then runs `supabase db push --linked --dry-run` (read-only) and
+5. It then runs `supabase db push --linked --dry-run` (read-only) and
    parses its "Would push migration ...sql..." lines. If the version(s)
-   it names don't exactly match this run's own `expected_versions` input,
+   it names don't exactly match this run's own `release_versions` input,
    the job stops here — **before the real push** — with no schema change
-   made. This catches a stale/incorrect `expected_versions` value or a
+   made. This catches a stale/incorrect `release_versions` value or a
    migration that became pending unexpectedly since the preflight ran.
-7. Only if the dry-run matches exactly does it run the real
+6. Only if the dry-run matches exactly does it run the real
    `supabase --yes db push --linked` (applies only the not-yet-recorded
    ones, in order — never a full re-run, never anything not already a
    reviewed file in `supabase/migrations/`), then prints the resulting
    migration state again.
-8. If any migration fails to apply, `supabase db push` itself stops at
+7. If any migration fails to apply, `supabase db push` itself stops at
    that file — no attempt to skip it and continue, no partial success
    reported as success. The job fails, and every later step is skipped
    (the "Show the resulting migration state"/summary steps still run,
    via `if: always()`, so the failure is visible, but nothing pretends
    the run succeeded).
 
-Note the confirmation phrase is deliberately different between the two
-workflows — `verify` for the read-only preflight, `migrate` for the
-actual apply — precisely so a copy-pasted confirmation value can never
-accidentally trigger the wrong one.
+Note the confirmation phrase is deliberately different across all three
+production-reaching workflows — `verify` for the read-only preflight,
+`repair-history-only` for the history-reconciliation workflow, `migrate`
+for the actual schema apply — precisely so a copy-pasted confirmation
+value can never accidentally trigger the wrong one.
 
 ## How to verify the outcome (the "controleerbaar resultaat")
 
@@ -267,6 +295,11 @@ accidentally trigger the wrong one.
   candidate-reviews table... has since been applied live"). This
   pipeline automates the *apply* step; it does not replace this
   project's documentation discipline around it.
+- **A follow-up `production-db-preflight.yml` run** with
+  `applied_versions` including the just-released version(s) is the
+  cleanest single "did this actually work" check — "✅ Ready for
+  migration" confirms local and live history agree exactly, from a
+  workflow that touches nothing.
 
 ## Release sequencing
 
@@ -370,18 +403,78 @@ for a real production migration:
   fix is updating the parsing logic to match the CLI's real current
   output — never loosening the check to assume history is fine when it
   can't be confirmed.
-- **_(Added 2026-09-06)_ The `expected_versions` exact-sync requirement
-  has not been exercised against the real, first-ever divergence it was
-  built for.** Both workflows now require local/live history (or a
-  dry-run's own announced version set) to match `expected_versions`
-  exactly, and both fail closed — "Not ready" / abort before push — on
-  any other outcome, including the migration-repair-required case
-  described in "History reconciliation" above. The logic was verified
-  locally against synthetic scenarios (exact match, remote-only orphan,
-  unparseable output, wrong declared version), but never against this
+- **_(Added 2026-09-06)_ The exact-sync requirement (`applied_versions`/
+  `staged_versions` on the preflight, `release_versions` on the migration
+  workflow, `legacy_versions` on the reconciliation workflow) has not been
+  exercised against the real, first-ever divergence it was built for.**
+  All three fail closed — "Not ready" / abort before write — on any
+  outcome other than an exact match. The logic was verified locally
+  against synthetic scenarios (exact match, remote-only orphan,
+  unparseable output, wrong declared version, `0010` staged before/after
+  being merged locally, partial reconciliation), but never against this
   project's actual, real Supabase project — where `0001`-`0009` are
   genuinely expected to appear as an unreconciled gap on the very first
-  run.
+  preflight run.
+- **_(Added 2026-09-06, this round)_ Two real bash bugs were found and
+  fixed via local testing — both would have silently broken the most
+  common, most important scenarios.** Neither was caught by the previous
+  round's own local tests, which happened to only exercise single-version
+  inputs.
+  1. **Multi-version comma-separated inputs were silently concatenated
+     into one garbled token.** `tr -d '[:space:]'` (used to strip
+     incidental whitespace after splitting on commas) deletes newlines
+     too — so `tr ',' '\n' | tr -d '[:space:]'` on `"0001,0002,0009"`
+     produced `000100020009` as a single value instead of three separate
+     lines. Every multi-version declaration (most importantly
+     `legacy_versions: 0001,...,0009`, the reconciliation workflow's main
+     use case) was affected. Fixed by using `tr -d '[:blank:]'` (space
+     and tab only, not newline) everywhere this pattern appears.
+  2. **A "zero elements" set was silently turned into "one empty-string
+     element,"** breaking exactly the empty-remote-history case this
+     whole pipeline exists for. Two compounding causes: `"${arr[@]:-}"`
+     on a genuinely empty array expands to one empty-string argument
+     instead of zero (a real, if obscure, bash quirk — the `:-` fallback
+     triggers because the expansion result is "null," even though the
+     array itself is merely empty, not unset); and separately, even
+     without `:-`, `printf '%s\n' "${arr[@]}"` on a truly empty array
+     still prints one blank line, because `printf` executes its format
+     string at least once and treats a missing `%s` argument as an empty
+     string. Combined, every `comm`/`mapfile` comparison built on
+     `printf '%s\n' "${arr[@]:-}"` treated "nothing on this side" as "one
+     blank-string entry on this side" — which silently broke the
+     reconciliation workflow's most important scenario (remote history
+     completely empty, before any reconciliation has ever happened) and
+     the migration workflow's "nothing pending" dry-run case. Fixed with
+     a small `print_lines () { [ "$#" -gt 0 ] && printf '%s\n' "$@"; }`
+     helper (defined per script block, since GitHub Actions `run:` steps
+     don't share shell state) used everywhere a possibly-empty array
+     feeds a list comparison; plain `"${arr[@]}"` (no `:-`) is used
+     everywhere else, which is correctly zero-words-safe under `set -u`
+     since bash 4.4 (confirmed against the bash 5.2 available locally;
+     `ubuntu-latest` ships bash 5.x). Both bugs were caught only by
+     testing genuinely empty and multi-element scenarios locally, not by
+     re-testing the single-version cases the previous round had already
+     covered — a reminder that this pipeline's own local test coverage
+     needs deliberately adversarial cases, not just the happy path,
+     before each real dispatch.
+- **_(Added 2026-09-06, this round)_ `SUPABASE_DB_PASSWORD` is now set on
+  every step that talks to the linked project, not only on `db push`.**
+  The Supabase CLI's own documented CI example
+  (`docs/guides/deployment/managing-environments`) sets all three secrets
+  before `supabase link`, without stating which later commands
+  specifically require the password — rather than assume `migration
+  list`/`migration repair`'s direct Postgres history-table access work
+  without it, it is now provided throughout every job in all three
+  production-reaching workflows. Not yet confirmed necessary or
+  sufficient against a real project.
+- **_(Added 2026-09-06, this round)_ `production-db-history-reconcile.yml`
+  is entirely new and has not been run.** Its `supabase migration repair`
+  invocation, its constant-matching gate, and its local-files-exact-match
+  gate were each checked against the Supabase CLI's own documentation and
+  tested locally with synthetic fixtures (see above), but the workflow as
+  a whole — including its behavior inside GitHub's real environment-
+  approval flow, and `migration repair`'s real behavior against a
+  project's actual history table — has not been executed.
 - **`supabase/config.toml` is hand-authored, not generated by a locally
   run `supabase init`.** It is deliberately minimal (just `project_id`,
   a local label, never the real project reference). Confirmed against the
