@@ -363,8 +363,28 @@ jobs:
           # confirmed that matching "│" directly inside an awk bracket
           # character class (`-F'[|│]'`) silently mis-splits under some
           # locale/gawk combinations — this two-step form does not.
-          mapfile -t parsed_local < <(sed 's/│/|/g' migration-list.txt | awk -F'|' 'NF>=2 { v=$1; gsub(/^[ \t]+|[ \t]+$/, "", v); if (v ~ /^[0-9]+$/) print v }' | sort -u || true)
-          mapfile -t parsed_remote < <(sed 's/│/|/g' migration-list.txt | awk -F'|' 'NF>=2 { v=$2; gsub(/^[ \t]+|[ \t]+$/, "", v); if (v ~ /^[0-9]+$/) print v }' | sort -u || true)
+          #
+          # _(Added 2026-09-09, confirmed via a real dispatch)_ The real
+          # CLI wraps each cell value in backticks, e.g. `` `0001` `` (and
+          # an empty REMOTE cell as `` ` ` `` — backtick-space-backtick) —
+          # not shown in any documentation checked for this pipeline, and
+          # not something the original whitespace-only trim below
+          # accounted for, which silently produced an empty parsed set
+          # instead of failing loudly. `tr -d '\140\047'` strips backticks
+          # (octal 140 = 0x60) and single quotes (octal 047 = 0x27, in
+          # case a future CLI version renders with those instead) from
+          # the WHOLE line before field-splitting — safe here because
+          # neither character appears anywhere else in this output
+          # (header text, the dashed separator row, or timestamps).
+          # Octal escapes are used specifically to avoid embedding a
+          # literal backtick or single quote inside this already
+          # single-quoted shell script. The strict `v ~ /^[0-9]+$/` check
+          # below is unchanged and still anchored start-to-end — this
+          # never accepts a value merely containing digits, only a cell
+          # that, after removing quoting/whitespace, is nothing but
+          # digits.
+          mapfile -t parsed_local < <(sed 's/│/|/g' migration-list.txt | tr -d '\140\047' | awk -F'|' 'NF>=2 { v=$1; gsub(/^[ \t]+|[ \t]+$/, "", v); if (v ~ /^[0-9]+$/) print v }' | sort -u || true)
+          mapfile -t parsed_remote < <(sed 's/│/|/g' migration-list.txt | tr -d '\140\047' | awk -F'|' 'NF>=2 { v=$2; gsub(/^[ \t]+|[ \t]+$/, "", v); if (v ~ /^[0-9]+$/) print v }' | sort -u || true)
           mapfile -t known_local < local-versions.txt
 
           if [ "$(print_lines "${parsed_local[@]}")" != "$(print_lines "${known_local[@]}")" ]; then

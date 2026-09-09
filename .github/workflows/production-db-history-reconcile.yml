@@ -272,9 +272,14 @@ jobs:
 
           # See production-db-preflight.yml for why this normalizes the
           # separator with `sed` before a single-character `awk -F'|'`
-          # split rather than an awk bracket character class.
-          mapfile -t parsed_local < <(sed 's/│/|/g' migration-list-before.txt | awk -F'|' 'NF>=2 { v=$1; gsub(/^[ \t]+|[ \t]+$/, "", v); if (v ~ /^[0-9]+$/) print v }' | sort -u || true)
-          mapfile -t parsed_remote < <(sed 's/│/|/g' migration-list-before.txt | awk -F'|' 'NF>=2 { v=$2; gsub(/^[ \t]+|[ \t]+$/, "", v); if (v ~ /^[0-9]+$/) print v }' | sort -u || true)
+          # split rather than an awk bracket character class, and why
+          # `tr -d '\140\047'` (added 2026-09-09, confirmed via a real
+          # dispatch) strips the backticks the real CLI wraps each cell
+          # value in — e.g. `` `0001` `` — which the original whitespace-
+          # only trim silently turned into an empty parsed set instead of
+          # failing loudly. The strict `v ~ /^[0-9]+$/` check is unchanged.
+          mapfile -t parsed_local < <(sed 's/│/|/g' migration-list-before.txt | tr -d '\140\047' | awk -F'|' 'NF>=2 { v=$1; gsub(/^[ \t]+|[ \t]+$/, "", v); if (v ~ /^[0-9]+$/) print v }' | sort -u || true)
+          mapfile -t parsed_remote < <(sed 's/│/|/g' migration-list-before.txt | tr -d '\140\047' | awk -F'|' 'NF>=2 { v=$2; gsub(/^[ \t]+|[ \t]+$/, "", v); if (v ~ /^[0-9]+$/) print v }' | sort -u || true)
           mapfile -t known_local < local-versions.txt
 
           if [ "$(print_lines "${parsed_local[@]}")" != "$(print_lines "${known_local[@]}")" ]; then
@@ -344,7 +349,10 @@ jobs:
             exit 1
           fi
 
-          mapfile -t parsed_remote_after < <(sed 's/│/|/g' migration-list-after.txt | awk -F'|' 'NF>=2 { v=$2; gsub(/^[ \t]+|[ \t]+$/, "", v); if (v ~ /^[0-9]+$/) print v }' | sort -u || true)
+          # `tr -d '\140\047'` strips the backticks the real CLI wraps
+          # each cell value in — see the same fix in
+          # production-db-preflight.yml for the full explanation.
+          mapfile -t parsed_remote_after < <(sed 's/│/|/g' migration-list-after.txt | tr -d '\140\047' | awk -F'|' 'NF>=2 { v=$2; gsub(/^[ \t]+|[ \t]+$/, "", v); if (v ~ /^[0-9]+$/) print v }' | sort -u || true)
 
           if [ "$(print_lines "${parsed_remote_after[@]}")" != "$(print_lines "${declared[@]}")" ]; then
             echo "::error::After reconciliation, live migration history does NOT exactly equal the declared legacy set. Now recorded live: ${parsed_remote_after[*]:-(none)}. Declared: ${declared[*]:-(none)}. Do not treat this run as successful — investigate manually before running production-db-preflight.yml again."
