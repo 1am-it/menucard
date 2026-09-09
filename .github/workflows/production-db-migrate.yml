@@ -220,7 +220,27 @@ jobs:
       # nothing against this real shape, silently producing an empty
       # "would apply" set — which correctly, safely stopped the workflow
       # before any write (0010 was never pushed), but for the wrong,
-      # misleading reason. Fixed below.
+      # misleading reason.
+      #
+      # _(Corrected again, 2026-09-09)_ The first fix (stripping the
+      # bullet's UTF-8 bytes with `tr -d '\342\200\242'`) was verified
+      # locally but STILL failed on a second real dispatch, against the
+      # identical byte-for-byte input — strong evidence of a
+      # locale-dependent difference between this local shell and the
+      # real `ubuntu-latest` runner in how `tr` interprets octal escapes,
+      # not reproducible or provable from outside that runner. Rebuilt
+      # below to need no knowledge of the bullet character at all: digits
+      # 0-9 are single-byte ASCII in every encoding, so extracting "the
+      # digit run immediately before this line's first underscore" is
+      # correct regardless of whatever precedes it — bullet, dash,
+      # whitespace, or nothing — with no multi-byte matching anywhere in
+      # the chain. The section is also now bounded to only the lines
+      # between the fixed `Would push these migrations:` header and
+      # `Finished supabase db push.` footer, so this never risks matching
+      # an unrelated digit-underscore pattern elsewhere in the CLI's
+      # output. Proven end to end against fixtures built from the exact
+      # real output above — see the commit message for the full test
+      # matrix; this is not a change made on theory alone.
       - name: Dry-run — confirm exactly which migration(s) would be applied
         id: dry_run
         env:
@@ -249,22 +269,28 @@ jobs:
           # — see this file's 2026-09-09 addition at the top.
           supabase db push --db-url "$SUPABASE_DB_URL" --dry-run | tee dry-run-output.txt
 
-          # Each pending migration is listed on its own line, prefixed
-          # with a Unicode bullet (U+2022, UTF-8 bytes E2 80 A2) — e.g.
-          # " • 0010_....sql". Stripping those three specific bytes with
-          # `tr` first (rather than matching the bullet literally inside
-          # a grep/awk regex) avoids the same class of locale-dependent
-          # multi-byte mis-match already found and fixed in
-          # production-db-preflight.yml's history-table parsing — after
-          # stripping, every remaining `*.sql`-suffixed token in the
-          # entire dry-run output is a real pending migration filename;
-          # nothing else in this CLI's output ever contains `.sql`.
-          mapfile -t would_push_files < <(tr -d '\342\200\242' < dry-run-output.txt | grep -oE '[^[:space:]]+\.sql' || true)
-          would_push_versions=()
-          for f in "${would_push_files[@]}"; do
-            [ -n "$f" ] && would_push_versions+=("$(basename "$f" | cut -d'_' -f1)")
-          done
-          mapfile -t would_push_versions < <(print_lines "${would_push_versions[@]}" | grep -v '^$' | sort -u || true)
+          # Step 1: isolate exactly the lines between the CLI's own fixed
+          # header and footer — content-agnostic to whatever precedes
+          # each filename (bullet, dash, whitespace, or nothing), and
+          # immune to an unrelated digit-underscore pattern appearing
+          # anywhere else in the CLI's output, past or future.
+          awk '
+            /^Would push these migrations:$/ { in_section = 1; next }
+            /^Finished supabase db push\.$/  { in_section = 0 }
+            in_section { print }
+          ' dry-run-output.txt > would-push-section.txt
+
+          # Step 2: from each remaining line, take only the run of digits
+          # immediately before that line's FIRST underscore — this repo's
+          # migration version prefix — never a full filename or any
+          # other substring. `awk`'s `match()` finds only the first
+          # occurrence per line (unlike `grep -o`, which would return
+          # every match on a line), so this is unambiguous even if a
+          # filename ever contained a second digit-run-before-underscore
+          # later in its own name. Every character involved (digits,
+          # underscore) is single-byte ASCII — nothing here can be
+          # affected by locale-dependent multi-byte interpretation.
+          mapfile -t would_push_versions < <(awk '{ if (match($0, /[0-9]+_/)) print substr($0, RSTART, RLENGTH-1) }' would-push-section.txt | sort -u || true)
 
           echo "Dry-run says these version(s) would be applied: ${would_push_versions[*]:-(none)}"
           echo "This run declared release_versions:             ${release_versions[*]:-(none)}"
