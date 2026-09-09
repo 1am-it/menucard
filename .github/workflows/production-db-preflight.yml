@@ -58,6 +58,20 @@ name: Production database preflight (read-only)
 # docs/guides/production-migration-pipeline.md's "History reconciliation"
 # section, and production-db-history-reconcile.yml, the only workflow in
 # this repository allowed to fix it.
+#
+# _(Added 2026-09-09)_ Every database-reading step below connects via an
+# explicit `SUPABASE_DB_URL` (the Session Pooler connection string, port
+# 5432) rather than `--linked`. Confirmed via a real dispatch of this
+# workflow: GitHub Actions runners have no IPv6 route, and `--linked`
+# resolves to Supabase's direct database connection, which is IPv6-only
+# unless the project has purchased the paid IPv4 add-on (see
+# https://supabase.com/docs/guides/database/connecting-to-postgres).
+# Supavisor's Session pooler is IPv4-only on every project at no extra
+# cost, which is why it's used here instead. `supabase link` itself is
+# unaffected and kept exactly as before — it only calls the Management
+# API and stores project metadata, never opens the direct DB connection.
+# See docs/guides/production-migration-pipeline.md's "One-time GitHub
+# setup" section for exactly how to obtain this connection string.
 
 on:
   workflow_dispatch:
@@ -114,6 +128,7 @@ jobs:
           echo "::add-mask::${{ secrets.SUPABASE_ACCESS_TOKEN }}"
           echo "::add-mask::${{ secrets.SUPABASE_PROJECT_ID }}"
           echo "::add-mask::${{ secrets.SUPABASE_DB_PASSWORD }}"
+          echo "::add-mask::${{ secrets.SUPABASE_DB_URL }}"
 
       - name: Check that every required secret is configured
         id: secrets_check
@@ -122,6 +137,7 @@ jobs:
           [ -z "${{ secrets.SUPABASE_ACCESS_TOKEN }}" ] && missing="$missing SUPABASE_ACCESS_TOKEN"
           [ -z "${{ secrets.SUPABASE_PROJECT_ID }}" ] && missing="$missing SUPABASE_PROJECT_ID"
           [ -z "${{ secrets.SUPABASE_DB_PASSWORD }}" ] && missing="$missing SUPABASE_DB_PASSWORD"
+          [ -z "${{ secrets.SUPABASE_DB_URL }}" ] && missing="$missing SUPABASE_DB_URL"
           if [ -n "$missing" ]; then
             echo "::error::Missing required secret(s):$missing — configure them on the 'production-migrations' environment (Settings → Environments → production-migrations → Environment secrets). See docs/guides/production-migration-pipeline.md."
             echo "verdict=blocked" >> "$GITHUB_OUTPUT"
@@ -130,6 +146,32 @@ jobs:
           fi
           echo "verdict=ok" >> "$GITHUB_OUTPUT"
           echo "All required secrets are present (values never printed)."
+
+      # Stops early and clearly if SUPABASE_DB_URL is missing the Session
+      # Pooler shape this pipeline requires — never prints the connection
+      # string or password, only pattern-matches it (on top of the
+      # ::add-mask:: above and GitHub's own automatic secret masking).
+      - name: Validate SUPABASE_DB_URL targets the Session Pooler on port 5432
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "${SUPABASE_DB_URL:-}" ]; then
+            echo "::error::SUPABASE_DB_URL is empty. GitHub Actions runners have no IPv6 route to Supabase's direct database connection, so this pipeline requires the Session Pooler connection string explicitly. See docs/guides/production-migration-pipeline.md's 'One-time GitHub setup' section (Supabase Dashboard → Connect → Session pooler)."
+            exit 1
+          fi
+          if [[ "$SUPABASE_DB_URL" == *":6543"* ]]; then
+            echo "::error::SUPABASE_DB_URL appears to use port 6543 — that is the Transaction Pooler, not the Session Pooler this pipeline requires. Re-copy the 'Session pooler' connection string from Supabase Dashboard → Connect (port 5432), not 'Transaction pooler'."
+            exit 1
+          fi
+          if [[ "$SUPABASE_DB_URL" != *":5432"* ]]; then
+            echo "::error::SUPABASE_DB_URL does not appear to use port 5432. Expected the Session Pooler connection string (port 5432) from Supabase Dashboard → Connect → Session pooler."
+            exit 1
+          fi
+          if [[ "$SUPABASE_DB_URL" != *".pooler.supabase.com"* ]]; then
+            echo "::error::SUPABASE_DB_URL does not look like a Supavisor pooler host (expected a *.pooler.supabase.com hostname) — this may be a direct database connection string, which fails from GitHub Actions runners (no IPv6 route). Use the Session Pooler connection string instead."
+            exit 1
+          fi
+          echo "SUPABASE_DB_URL looks like a valid Session Pooler connection string (port 5432, pooler.supabase.com host). The value itself was never printed."
 
       - uses: actions/checkout@v4
 
@@ -185,13 +227,13 @@ jobs:
       # target database — it stores the password locally and reads
       # Management API project metadata, but performs no schema or data
       # write of any kind.
-      # SUPABASE_DB_PASSWORD is set here (not only in production-db-migrate.yml's
-      # own db-push step) per the Supabase CLI's own documented CI example
-      # (docs/guides/deployment/managing-environments), which sets all
-      # three secrets before `supabase link` — the docs don't say which
-      # later commands specifically require it, so it's provided
-      # throughout this job rather than guessed to be unnecessary for
-      # `migration list`'s own direct Postgres history-table read.
+      # SUPABASE_DB_PASSWORD is still supplied here for `link` itself
+      # (per the Supabase CLI's own documented CI example, which sets it
+      # before `supabase link`). It is NOT used by the history-comparison
+      # step below anymore — that step connects via the explicit
+      # `SUPABASE_DB_URL` Session Pooler string instead (see this file's
+      # 2026-09-09 addition at the top), since `--linked` was confirmed
+      # via a real dispatch to resolve to the IPv6-only direct connection.
       - name: Link to the production Supabase project (read-only)
         id: link
         env:
@@ -241,8 +283,7 @@ jobs:
       - name: Compare local and live migration history — require exact expected sync (read-only)
         id: history_check
         env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
           # `-e` (errexit) is deliberately NOT set in this step: every
           # command that can legitimately fail is already checked
@@ -290,7 +331,13 @@ jobs:
 
           mapfile -t declared_union < <(print_lines "${applied_versions[@]}" "${staged_versions[@]}" | grep -v '^$' | sort -u || true)
 
-          if ! supabase migration list --linked | tee migration-list.txt; then
+          # `--db-url` (Session Pooler, port 5432) instead of `--linked`:
+          # confirmed via a real dispatch of this workflow (2026-09-09)
+          # that `--linked` resolves to Supabase's direct database
+          # connection, which GitHub Actions runners cannot reach
+          # (IPv6-only unless the project has the paid IPv4 add-on). The
+          # Session Pooler is IPv4-only on every project at no extra cost.
+          if ! supabase migration list --db-url "$SUPABASE_DB_URL" | tee migration-list.txt; then
             echo "::error::'supabase migration list' exited non-zero — cannot determine migration history."
             {
               echo "verdict=not_ready"

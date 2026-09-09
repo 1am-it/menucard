@@ -52,6 +52,19 @@ name: Apply production database migrations
 # `release_versions` field (or vice versa) happens to often be the same
 # version string, but they answer different questions and are validated
 # by entirely separate logic.
+#
+# _(Added 2026-09-09)_ Every database-reading/-writing step below (the
+# before/after `migration list`, the dry-run, and the real `db push`)
+# connects via an explicit `SUPABASE_DB_URL` (Session Pooler, port 5432)
+# rather than `--linked`. Confirmed via a real dispatch of
+# production-db-preflight.yml: GitHub Actions runners have no IPv6 route,
+# and `--linked` resolves to Supabase's direct database connection, which
+# is IPv6-only unless the project has the paid IPv4 add-on. `supabase
+# link` itself is kept exactly as before for platform/project validation
+# — it only calls the Management API, never opens the direct DB
+# connection. See docs/guides/production-migration-pipeline.md's
+# "One-time GitHub setup" section for how to obtain this connection
+# string.
 
 on:
   workflow_dispatch:
@@ -100,6 +113,7 @@ jobs:
           echo "::add-mask::${{ secrets.SUPABASE_ACCESS_TOKEN }}"
           echo "::add-mask::${{ secrets.SUPABASE_PROJECT_ID }}"
           echo "::add-mask::${{ secrets.SUPABASE_DB_PASSWORD }}"
+          echo "::add-mask::${{ secrets.SUPABASE_DB_URL }}"
 
       - name: Check that every required secret is configured
         run: |
@@ -107,11 +121,37 @@ jobs:
           [ -z "${{ secrets.SUPABASE_ACCESS_TOKEN }}" ] && missing="$missing SUPABASE_ACCESS_TOKEN"
           [ -z "${{ secrets.SUPABASE_PROJECT_ID }}" ] && missing="$missing SUPABASE_PROJECT_ID"
           [ -z "${{ secrets.SUPABASE_DB_PASSWORD }}" ] && missing="$missing SUPABASE_DB_PASSWORD"
+          [ -z "${{ secrets.SUPABASE_DB_URL }}" ] && missing="$missing SUPABASE_DB_URL"
           if [ -n "$missing" ]; then
             echo "::error::Missing required secret(s):$missing — configure them on the 'production-migrations' environment (Settings → Environments → production-migrations → Environment secrets). See docs/guides/production-migration-pipeline.md."
             exit 1
           fi
           echo "All required secrets are present (values never printed)."
+
+      # Stops early and clearly if SUPABASE_DB_URL is missing the Session
+      # Pooler shape this pipeline requires — never prints the connection
+      # string or password, only pattern-matches it.
+      - name: Validate SUPABASE_DB_URL targets the Session Pooler on port 5432
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "${SUPABASE_DB_URL:-}" ]; then
+            echo "::error::SUPABASE_DB_URL is empty. GitHub Actions runners have no IPv6 route to Supabase's direct database connection, so this pipeline requires the Session Pooler connection string explicitly. See docs/guides/production-migration-pipeline.md's 'One-time GitHub setup' section (Supabase Dashboard → Connect → Session pooler)."
+            exit 1
+          fi
+          if [[ "$SUPABASE_DB_URL" == *":6543"* ]]; then
+            echo "::error::SUPABASE_DB_URL appears to use port 6543 — that is the Transaction Pooler, not the Session Pooler this pipeline requires. Re-copy the 'Session pooler' connection string from Supabase Dashboard → Connect (port 5432), not 'Transaction pooler'."
+            exit 1
+          fi
+          if [[ "$SUPABASE_DB_URL" != *":5432"* ]]; then
+            echo "::error::SUPABASE_DB_URL does not appear to use port 5432. Expected the Session Pooler connection string (port 5432) from Supabase Dashboard → Connect → Session pooler."
+            exit 1
+          fi
+          if [[ "$SUPABASE_DB_URL" != *".pooler.supabase.com"* ]]; then
+            echo "::error::SUPABASE_DB_URL does not look like a Supavisor pooler host (expected a *.pooler.supabase.com hostname) — this may be a direct database connection string, which fails from GitHub Actions runners (no IPv6 route). Use the Session Pooler connection string instead."
+            exit 1
+          fi
+          echo "SUPABASE_DB_URL looks like a valid Session Pooler connection string (port 5432, pooler.supabase.com host). The value itself was never printed."
 
       - uses: actions/checkout@v4
 
@@ -129,11 +169,13 @@ jobs:
         with:
           version: latest
 
-      # SUPABASE_DB_PASSWORD is set here (not only on the "Apply pending
-      # migrations" step below) per the Supabase CLI's own documented CI
-      # example (docs/guides/deployment/managing-environments), which
-      # sets all three secrets before `supabase link` — kept consistent
-      # with the same fix applied to production-db-preflight.yml.
+      # Kept exactly as platform/project validation only — auth check
+      # (SUPABASE_ACCESS_TOKEN) and project-ref resolution via the
+      # Management API. Every step below that actually reads or writes
+      # migration history connects via SUPABASE_DB_URL instead (see this
+      # file's 2026-09-09 addition at the top) — `link`'s own DB
+      # connection attempt is unaffected by the IPv6 issue that broke
+      # `--linked` elsewhere, so it is left unchanged here.
       - name: Link to the production Supabase project
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
@@ -155,10 +197,9 @@ jobs:
       - name: Show which migrations are pending (visible before anything is applied)
         id: before
         env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
-          supabase migration list --linked | tee before-migration-list.txt
+          supabase migration list --db-url "$SUPABASE_DB_URL" | tee before-migration-list.txt
 
       # Read-only. Confirms exactly which migration version(s) `db push`
       # would apply, and aborts BEFORE the real push if that set doesn't
@@ -172,8 +213,7 @@ jobs:
       - name: Dry-run — confirm exactly which migration(s) would be applied
         id: dry_run
         env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
           set -euo pipefail
 
@@ -194,7 +234,9 @@ jobs:
           fi
           mapfile -t release_versions < <(printf '%s' "$raw" | tr ',' '\n' | tr -d '[:blank:]' | grep -v '^$' | sort -u || true)
 
-          supabase db push --linked --dry-run | tee dry-run-output.txt
+          # `--db-url` (Session Pooler, port 5432) instead of `--linked`
+          # — see this file's 2026-09-09 addition at the top.
+          supabase db push --db-url "$SUPABASE_DB_URL" --dry-run | tee dry-run-output.txt
 
           mapfile -t would_push_files < <(grep -oE 'Would push migration [^[:space:]]+\.\.\.' dry-run-output.txt | sed -E 's/^Would push migration (.+)\.\.\.$/\1/' || true)
           would_push_versions=()
@@ -216,8 +258,7 @@ jobs:
       - name: Apply pending migrations
         id: migrate
         env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
           set -euo pipefail
           # `supabase db push` itself stops at the first migration that
@@ -236,14 +277,16 @@ jobs:
           # own supported mechanism — no unbounded stdin pipe, and no
           # need for `set -o pipefail` to unmask a hidden failure behind
           # `yes`'s own always-zero exit status.
-          supabase --yes db push --linked
+          #
+          # `--db-url` (Session Pooler, port 5432) instead of `--linked`
+          # — see this file's 2026-09-09 addition at the top.
+          supabase --yes db push --db-url "$SUPABASE_DB_URL"
 
       - name: Show the resulting migration state (verifiable result)
         if: always()
         env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-        run: supabase migration list --linked | tee after-migration-list.txt
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: supabase migration list --db-url "$SUPABASE_DB_URL" | tee after-migration-list.txt
 
       - name: Write a run summary
         if: always()

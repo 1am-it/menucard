@@ -303,6 +303,61 @@ and 2 and the original decision's "What this decision does not do." No
 workflow was dispatched, no live database action was taken, and nothing
 was committed as part of this addendum.
 
+## Addendum 4 (2026-09-09) — real dispatches found real problems; routed around GitHub Actions' missing IPv6
+
+Unlike Addenda 1-3, this addendum follows two **actual dispatches** of
+`production-db-preflight.yml` against the real Supabase project (with
+real environment approval via a required reviewer) — the first genuine
+test of any part of this pipeline for real, not just locally.
+
+**First dispatch (2026-09-07)**: failed at `supabase link` with a
+Management API authorization error — the `SUPABASE_ACCESS_TOKEN` lacked
+the necessary privileges for the linked project. Not a pipeline design
+flaw; fixed by rotating the token in the `production-migrations`
+environment's secrets.
+
+**Second dispatch (2026-09-09)**, after the token fix: got past `link`
+successfully, then failed at `supabase migration list --linked` with the
+CLI's own diagnostic: `"IPv6 is not supported on your current network."`
+GitHub Actions runners have no IPv6 route; Supabase's direct database
+connection (what `--linked` resolves to for `migration list`/`db push`)
+is IPv6-only unless the project has purchased the paid IPv4 add-on.
+
+**Fix**: all three production-reaching workflows now connect via an
+explicit `SUPABASE_DB_URL` secret — the Supavisor **Session Pooler**
+connection string (port `5432`), which is IPv4-only on every Supabase
+project at no extra cost. `--linked` is replaced with `--db-url
+"$SUPABASE_DB_URL"` on every database-reading/-writing command
+(`migration list`, `db push --dry-run`, `db push`, `migration repair`).
+`supabase link` itself is unchanged — kept solely for platform/project
+validation (Management API auth + project-ref resolution), since it was
+never the source of either failure. Each workflow now also validates
+`SUPABASE_DB_URL`'s shape (port `5432`, `*.pooler.supabase.com` host)
+before using it, stopping with a specific error — never a guess — if it
+looks like the Transaction Pooler (port `6543`) or a direct connection
+string instead. The connection string is never logged, matching this
+pipeline's existing masking discipline.
+
+**No paid Supabase add-on was needed** — this is worth stating plainly
+since "buy the IPv4 add-on" was the CLI's own suggested next step in the
+error output, and the Session Pooler resolves the same problem for free.
+
+This is the clearest demonstration yet, across this pipeline's four
+rounds of work, of why "verified locally, never dispatched for real" is
+a materially weaker claim than an actual dispatch: neither of the two
+real failures found here (token privileges, IPv6 routing) was predicted
+by any amount of documentation review or synthetic local testing in
+Addenda 1-3. See `docs/guides/production-migration-pipeline.md`'s
+"Residual risks" for the corresponding dated corrections to claims that
+were accurate when written but are no longer.
+
+None of this addendum's changes touch
+`supabase/migrations/0010_market05c_restaurant_profile_drafts.sql`,
+migration `0010`, or any MARKET-05C application code. No history
+reconciliation, `db push`, migration, seed, reset, deploy, or account
+action was performed — only the two real, read-only preflight dispatches
+described above, plus this round's own local-only workflow edits.
+
 ## Rejected alternatives
 
 - **A custom migration-runner script with its own tracking table**

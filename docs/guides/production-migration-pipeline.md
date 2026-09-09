@@ -16,7 +16,7 @@ operational how-to.
 | Trigger | Automatic — push/PR touching `supabase/migrations/**` | **Manual only** — confirm `"verify"` | **Manual only** — confirm `"repair-history-only"` | **Manual only** — confirm `"migrate"` |
 | Target | A throwaway Postgres container, destroyed after the job | The real, production Supabase project — **read-only** | The real, production Supabase project — **writes ONLY the history-tracking table** | The real, production Supabase project — **applies schema changes** |
 | Its own input | none | `applied_versions`, `staged_versions` | `legacy_versions` | `release_versions` |
-| Secrets needed | None | `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_ID`, `SUPABASE_DB_PASSWORD` | Same three secrets | Same three secrets |
+| Secrets needed | None | `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_ID`, `SUPABASE_DB_PASSWORD`, `SUPABASE_DB_URL` | Same four secrets | Same four secrets |
 | Approval | None needed — it can't affect anything real | **Required** — same protected GitHub Environment | **Required** — same protected GitHub Environment | **Required** — same protected GitHub Environment |
 | What it proves / does | The full migration sequence applies cleanly, in order, from empty | What is currently known-**applied** (local + live) and known-**staged** (local only), exactly — **without changing anything** | Marks specific, pre-documented legacy version(s) as applied in the history table ONLY — no schema/data write | The *declared release* (and only that) was actually applied to production |
 
@@ -150,11 +150,13 @@ writes anything:
   the full declared list unconditionally. An already-applied version is
   left untouched. If everything is already reconciled, the workflow
   performs no write at all and says so.
-- **The only write is `supabase migration repair --linked --status
-  applied <versions>`** — per the Supabase CLI's own documentation, this
-  only inserts row(s) into `supabase_migrations.schema_migrations`; it
-  never applies SQL, never touches application schema or data, never
-  runs `db push`, seed, reset, or delete, and never deploys anything.
+- **The only write is `supabase migration repair --db-url
+  "$SUPABASE_DB_URL" --status applied <versions>`** (Session Pooler
+  connection, not `--linked` — see "One-time GitHub setup") — per the
+  Supabase CLI's own documentation, this only inserts row(s) into
+  `supabase_migrations.schema_migrations`; it never applies SQL, never
+  touches application schema or data, never runs `db push`, seed, reset,
+  or delete, and never deploys anything.
 - **Re-verifies after writing**: a final read-only `migration list` run
   confirms live history now exactly equals the declared legacy set. A
   mismatch here is reported as a failure requiring manual investigation —
@@ -201,16 +203,35 @@ workflow references one that doesn't already exist.
      (Supabase Dashboard → Project Settings → Database → "Database
      password" — reset it there if it is not already known; resetting
      invalidates the old one, so coordinate before doing this against a
-     database other services also connect to).
+     database other services also connect to). Used only by `supabase
+     link` (platform/project validation) — see the next secret for the
+     actual database connection used everywhere else.
+   - `SUPABASE_DB_URL` — the full **Session Pooler** connection string,
+     copied exactly as shown, from **Supabase Dashboard → Connect →
+     Session pooler** (port `5432` — never "Transaction pooler", which
+     is port `6543`). _(Added 2026-09-09.)_ This is required because
+     GitHub Actions runners have no IPv6 route, and Supabase's *direct*
+     database connection (what `supabase migration list --linked` and
+     `db push --linked` resolve to) is IPv6-only unless the project has
+     purchased the paid IPv4 add-on — confirmed by an actual dispatch of
+     `production-db-preflight.yml` failing with "IPv6 is not supported on
+     your current network." Supavisor's Session Pooler is IPv4-only on
+     **every** Supabase project at no extra cost, which is exactly why
+     it's used instead — **no paid IPv4 add-on is needed to fix this.**
+     All three production-reaching workflows validate this secret's
+     shape (port `5432`, a `*.pooler.supabase.com` host) before using it,
+     and stop with a clear error rather than guess if it looks like the
+     Transaction Pooler or a direct connection string instead.
 
    **Scope these secrets to the environment, not the whole repository.**
    A repository secret is readable by any workflow run on any branch; an
    environment secret is only readable once a job actually reaches that
    protected environment — i.e., only after the required reviewer has
    approved. This is what stops "anyone who can dispatch a workflow" from
-   also being "anyone who can read the production DB password."
+   also being "anyone who can read the production DB password" (or the
+   Session Pooler connection string, which itself embeds that password).
 
-None of these three values are ever written to a file in this
+None of these four values are ever written to a file in this
 repository — they exist only as GitHub's own encrypted secret storage,
 injected into the job's environment at run time. This is a completely
 separate secret set from the app's own runtime configuration
@@ -218,15 +239,23 @@ separate secret set from the app's own runtime configuration
 `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, etc., per
 `.env.local.example`). Don't confuse the two: the app's runtime secrets
 let the deployed Next.js app talk to Supabase as a normal client; these
-three CI secrets let the Supabase CLI talk to Supabase's Management API
-and the database directly, only to push schema migrations.
+four CI secrets let the Supabase CLI talk to Supabase's Management API
+(`link`) and the database itself (everything else, via the Session
+Pooler), only to inspect/push schema migrations.
 
 ## One-time Supabase-side setup
 
-- The access token and DB password above (Supabase Dashboard, as
-  described).
+- The access token, DB password, and Session Pooler connection string
+  above (all from the Supabase Dashboard, as described) — no account or
+  project-level action needed beyond copying them.
+- **No paid add-on required.** In particular, the IPv6-only direct
+  connection issue this pipeline works around does NOT require
+  purchasing Supabase's IPv4 add-on — routing through the Session Pooler
+  (free, on every project) is the fix. Buying the IPv4 add-on would also
+  work but is unnecessary spend for this specific problem.
 - Nothing else — this pipeline does not need a new Supabase feature or
-  plan tier. `supabase link`/`db push` work against any existing project.
+  plan tier. `supabase link` and every `--db-url`-based command work
+  against any existing project.
 
 ## How approval works, end to end
 
@@ -251,19 +280,22 @@ done.
    require — nothing before this point has touched a secret or a
    connection.
 4. Once approved, the job links the Supabase CLI to the production
-   project and prints which migrations are currently pending
-   (`supabase migration list --linked`).
-5. It then runs `supabase db push --linked --dry-run` (read-only) and
-   parses its "Would push migration ...sql..." lines. If the version(s)
-   it names don't exactly match this run's own `release_versions` input,
-   the job stops here — **before the real push** — with no schema change
-   made. This catches a stale/incorrect `release_versions` value or a
-   migration that became pending unexpectedly since the preflight ran.
-6. Only if the dry-run matches exactly does it run the real
-   `supabase --yes db push --linked` (applies only the not-yet-recorded
-   ones, in order — never a full re-run, never anything not already a
-   reviewed file in `supabase/migrations/`), then prints the resulting
-   migration state again.
+   project for platform/project validation, then prints which migrations
+   are currently pending — via `supabase migration list --db-url
+   "$SUPABASE_DB_URL"` (the Session Pooler connection, not `--linked`;
+   see "One-time GitHub setup" for why).
+5. It then runs `supabase db push --db-url "$SUPABASE_DB_URL" --dry-run`
+   (read-only) and parses its "Would push migration ...sql..." lines. If
+   the version(s) it names don't exactly match this run's own
+   `release_versions` input, the job stops here — **before the real
+   push** — with no schema change made. This catches a stale/incorrect
+   `release_versions` value or a migration that became pending
+   unexpectedly since the preflight ran.
+6. Only if the dry-run matches exactly does it run the real `supabase
+   --yes db push --db-url "$SUPABASE_DB_URL"` (applies only the
+   not-yet-recorded ones, in order — never a full re-run, never anything
+   not already a reviewed file in `supabase/migrations/`), then prints
+   the resulting migration state again.
 7. If any migration fails to apply, `supabase db push` itself stops at
    that file — no attempt to skip it and continue, no partial success
    reported as success. The job fails, and every later step is skipped
@@ -282,10 +314,11 @@ value can never accidentally trigger the wrong one.
 - **The workflow run's own summary** (`$GITHUB_STEP_SUMMARY`, visible
   directly on the run's page) shows who triggered it, a link to the run,
   the migration state before and after, and a reminder of the next step.
-- **`supabase migration list --linked`'s own output**, printed twice in
-  the job log (before and after `db push`), is the authoritative "what's
-  actually applied" answer — it reads the real migration history table in
-  the target database, not a guess from file names alone.
+- **`supabase migration list --db-url "$SUPABASE_DB_URL"`'s own output**,
+  printed twice in the job log (before and after `db push`), is the
+  authoritative "what's actually applied" answer — it reads the real
+  migration history table in the target database, not a guess from file
+  names alone.
 - **Cross-check in the Supabase Dashboard** (Table Editor / SQL Editor)
   that the new tables/functions named in the migration actually exist,
   the same live-verification discipline this project has applied to
@@ -331,10 +364,12 @@ since mixing both in one *branch* is normal; only mixing both in one
 
 ## Residual risks / what has not been verified
 
-This pipeline was designed and written without network access to an
-actual GitHub Actions runner or a real Supabase project — nothing in it
-has been executed against a real Supabase project. Before relying on it
-for a real production migration:
+This pipeline was originally designed and written without network access
+to an actual GitHub Actions runner or a real Supabase project.
+`production-db-preflight.yml` has since been dispatched for real twice
+(2026-09-07, 2026-09-09 — see the dated bullets below); `production-db-migrate.yml`
+and `production-db-history-reconcile.yml` have not. Before relying on
+either of those for a real production write:
 
 - **_(Added 2026-09-06)_ `supabase/setup-cli@v1` was corrected to `@v3`**
   in both `production-db-migrate.yml` and `production-db-preflight.yml`,
@@ -475,6 +510,35 @@ for a real production migration:
   a whole — including its behavior inside GitHub's real environment-
   approval flow, and `migration repair`'s real behavior against a
   project's actual history table — has not been executed.
+- **_(Added 2026-09-09, CONFIRMED via two real dispatches — not a
+  documentation-only risk)_ GitHub Actions runners have no IPv6 route,
+  and `--linked` resolved to Supabase's direct database connection.**
+  The first real dispatch of `production-db-preflight.yml` failed at
+  `supabase link` itself (a Management-API authorization error, unrelated
+  to IPv6 — fixed by rotating `SUPABASE_ACCESS_TOKEN`). The **second**
+  real dispatch got past `link` successfully and failed at `supabase
+  migration list --linked` with the CLI's own message: `"IPv6 is not
+  supported on your current network. Run supabase link --project-ref ***
+  to setup IPv4 connection."` All three production-reaching workflows now
+  connect via an explicit `SUPABASE_DB_URL` (the Session Pooler
+  connection string, port `5432`, IPv4-only on every project at no extra
+  cost) for every database-reading/-writing command; `supabase link`
+  itself is untouched, since it only calls the Management API and was
+  never the source of this specific failure. See "One-time GitHub setup"
+  for the exact secret and validation added. **Not yet re-verified with
+  a real dispatch after this fix** — the next preflight run is this
+  fix's first real test.
+- **`production-db-preflight.yml` HAS now been dispatched twice for
+  real** (2026-09-07 and 2026-09-09), correcting the earlier claim below
+  that it hadn't been. Both real dispatches surfaced genuine, previously
+  undocumented problems this pipeline's design had not anticipated
+  (Supabase access-token privileges, then the IPv6 routing issue above) —
+  neither was the "missing legacy history" scenario the pipeline was
+  originally built to expect first. This is worth stating plainly: a
+  pipeline's own local, synthetic testing (however thorough) did not
+  predict either real failure mode: both required an actual dispatch
+  against the real project to surface. Treat every remaining
+  "not yet tested against a real project" bullet below with that in mind.
 - **`supabase/config.toml` is hand-authored, not generated by a locally
   run `supabase init`.** It is deliberately minimal (just `project_id`,
   a local label, never the real project reference). Confirmed against the
@@ -491,14 +555,15 @@ for a real production migration:
   dispatch; this must be confirmed by hand (Settings → Environments →
   production-migrations should show "Required reviewers" listed) before
   trusting either protected workflow for anything production-real.
-- **`production-db-preflight.yml` itself has not been run.** Its
-  individual commands (`supabase --version`, `supabase link`, `supabase
-  migration list --linked`) were each checked against the Supabase CLI's
-  own official documentation this round — including the specific claim
-  that `supabase link` performs no schema/data write — but the workflow
-  as a whole, including how it behaves inside GitHub's actual environment-
-  approval flow, has not been executed. Its first real dispatch is what
-  this whole round of hardening exists to make safe to attempt.
+- **_(Corrected 2026-09-09 — superseded, not deleted, per this project's
+  never-silently-rewrite discipline)_ "`production-db-preflight.yml`
+  itself has not been run" is no longer true.** It was accurate when
+  written (2026-09-06); see the dated bullet above for what its two real
+  dispatches since then actually found. Its individual commands
+  (`supabase --version`, `supabase link`, `supabase migration list`) were
+  checked against the Supabase CLI's own official documentation before
+  ever running it for real — that documentation review did not, and
+  could not, predict either real failure mode encountered.
 - **This design has not been tried against `supabase/migrations/0010_market05c_restaurant_profile_drafts.sql`
   or any other real, pending migration** — per this round's own explicit
   instruction, no migration was run, no GitHub Action was dispatched, and

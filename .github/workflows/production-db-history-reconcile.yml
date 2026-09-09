@@ -39,6 +39,18 @@ name: Reconcile legacy migration history (no schema changes)
 # updating that constant in a reviewed pull request, not just filling in
 # a different value at dispatch time — deliberately not a bare
 # free-typed field for a write action this sensitive.
+#
+# _(Added 2026-09-09)_ Every database-reading/-writing step below (both
+# `migration list` calls and the one `migration repair` call) connects
+# via an explicit `SUPABASE_DB_URL` (Session Pooler, port 5432) rather
+# than `--linked`. Confirmed via a real dispatch of
+# production-db-preflight.yml: GitHub Actions runners have no IPv6
+# route, and `--linked` resolves to Supabase's direct database
+# connection, which is IPv6-only unless the project has the paid IPv4
+# add-on. `supabase link` itself is kept exactly as before for
+# platform/project validation only. See
+# docs/guides/production-migration-pipeline.md's "One-time GitHub
+# setup" section for how to obtain this connection string.
 
 on:
   workflow_dispatch:
@@ -86,6 +98,7 @@ jobs:
           echo "::add-mask::${{ secrets.SUPABASE_ACCESS_TOKEN }}"
           echo "::add-mask::${{ secrets.SUPABASE_PROJECT_ID }}"
           echo "::add-mask::${{ secrets.SUPABASE_DB_PASSWORD }}"
+          echo "::add-mask::${{ secrets.SUPABASE_DB_URL }}"
 
       - name: Check that every required secret is configured
         run: |
@@ -93,11 +106,37 @@ jobs:
           [ -z "${{ secrets.SUPABASE_ACCESS_TOKEN }}" ] && missing="$missing SUPABASE_ACCESS_TOKEN"
           [ -z "${{ secrets.SUPABASE_PROJECT_ID }}" ] && missing="$missing SUPABASE_PROJECT_ID"
           [ -z "${{ secrets.SUPABASE_DB_PASSWORD }}" ] && missing="$missing SUPABASE_DB_PASSWORD"
+          [ -z "${{ secrets.SUPABASE_DB_URL }}" ] && missing="$missing SUPABASE_DB_URL"
           if [ -n "$missing" ]; then
             echo "::error::Missing required secret(s):$missing — configure them on the 'production-migrations' environment (Settings → Environments → production-migrations → Environment secrets). See docs/guides/production-migration-pipeline.md."
             exit 1
           fi
           echo "All required secrets are present (values never printed)."
+
+      # Stops early and clearly if SUPABASE_DB_URL is missing the Session
+      # Pooler shape this pipeline requires — never prints the connection
+      # string or password, only pattern-matches it.
+      - name: Validate SUPABASE_DB_URL targets the Session Pooler on port 5432
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "${SUPABASE_DB_URL:-}" ]; then
+            echo "::error::SUPABASE_DB_URL is empty. GitHub Actions runners have no IPv6 route to Supabase's direct database connection, so this pipeline requires the Session Pooler connection string explicitly. See docs/guides/production-migration-pipeline.md's 'One-time GitHub setup' section (Supabase Dashboard → Connect → Session pooler)."
+            exit 1
+          fi
+          if [[ "$SUPABASE_DB_URL" == *":6543"* ]]; then
+            echo "::error::SUPABASE_DB_URL appears to use port 6543 — that is the Transaction Pooler, not the Session Pooler this pipeline requires. Re-copy the 'Session pooler' connection string from Supabase Dashboard → Connect (port 5432), not 'Transaction pooler'."
+            exit 1
+          fi
+          if [[ "$SUPABASE_DB_URL" != *":5432"* ]]; then
+            echo "::error::SUPABASE_DB_URL does not appear to use port 5432. Expected the Session Pooler connection string (port 5432) from Supabase Dashboard → Connect → Session pooler."
+            exit 1
+          fi
+          if [[ "$SUPABASE_DB_URL" != *".pooler.supabase.com"* ]]; then
+            echo "::error::SUPABASE_DB_URL does not look like a Supavisor pooler host (expected a *.pooler.supabase.com hostname) — this may be a direct database connection string, which fails from GitHub Actions runners (no IPv6 route). Use the Session Pooler connection string instead."
+            exit 1
+          fi
+          echo "SUPABASE_DB_URL looks like a valid Session Pooler connection string (port 5432, pooler.supabase.com host). The value itself was never printed."
 
       - uses: actions/checkout@v4
 
@@ -187,6 +226,10 @@ jobs:
         with:
           version: latest
 
+      # Kept exactly as platform/project validation only. Every step below
+      # that actually reads or writes migration history connects via
+      # SUPABASE_DB_URL instead (see this file's 2026-09-09 addition at
+      # the top).
       - name: Link to the production Supabase project
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
@@ -202,8 +245,7 @@ jobs:
       - name: Verify remote history contains no unexpected versions (read-only)
         id: check_remote_before
         env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
           set -uo pipefail
           # `printf '%s\n' "${arr[@]}"` on a genuinely EMPTY array still
@@ -216,7 +258,9 @@ jobs:
 
           mapfile -t declared < <(printf '%s' "${{ github.event.inputs.legacy_versions }}" | tr ',' '\n' | tr -d '[:blank:]' | grep -v '^$' | sort -u || true)
 
-          if ! supabase migration list --linked | tee migration-list-before.txt; then
+          # `--db-url` (Session Pooler, port 5432) instead of `--linked`
+          # — see this file's 2026-09-09 addition at the top.
+          if ! supabase migration list --db-url "$SUPABASE_DB_URL" | tee migration-list-before.txt; then
             echo "::error::'supabase migration list' exited non-zero — cannot determine migration history. Aborting before any write."
             exit 1
           fi
@@ -268,13 +312,14 @@ jobs:
       - name: Mark exactly the missing legacy version(s) as applied
         if: steps.check_remote_before.outputs.verdict == 'will_repair'
         env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
           set -euo pipefail
           mapfile -t to_repair < to-repair.txt
-          echo "Running: supabase migration repair --linked --status applied ${to_repair[*]}"
-          supabase migration repair --linked --status applied "${to_repair[@]}"
+          echo "Running: supabase migration repair --db-url [Session Pooler URL, not logged] --status applied ${to_repair[*]}"
+          # `--db-url` (Session Pooler, port 5432) instead of `--linked`
+          # — see this file's 2026-09-09 addition at the top.
+          supabase migration repair --db-url "$SUPABASE_DB_URL" --status applied "${to_repair[@]}"
 
       # Re-verification, required regardless of whether the repair step
       # ran: confirm remote history now exactly equals the declared
@@ -284,15 +329,16 @@ jobs:
       - name: Verify local and live history are now exactly synchronized (read-only)
         if: always()
         env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
           set -uo pipefail
           print_lines () { [ "$#" -gt 0 ] && printf '%s\n' "$@"; return 0; }
 
           mapfile -t declared < <(printf '%s' "${{ github.event.inputs.legacy_versions }}" | tr ',' '\n' | tr -d '[:blank:]' | grep -v '^$' | sort -u || true)
 
-          if ! supabase migration list --linked | tee migration-list-after.txt; then
+          # `--db-url` (Session Pooler, port 5432) instead of `--linked`
+          # — see this file's 2026-09-09 addition at the top.
+          if ! supabase migration list --db-url "$SUPABASE_DB_URL" | tee migration-list-after.txt; then
             echo "::error::'supabase migration list' exited non-zero while re-verifying history after reconciliation. Do not assume success — investigate manually."
             echo "verdict=verification_failed" >> "$GITHUB_OUTPUT"
             exit 1
