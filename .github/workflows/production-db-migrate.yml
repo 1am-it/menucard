@@ -206,10 +206,21 @@ jobs:
       # match `release_versions` exactly — e.g. because a migration was
       # applied out of band since the preflight ran, an unexpected file
       # is pending, or the wrong `release_versions` value was typed.
-      # Output line format ("Would push migration <file>...") confirmed
-      # against a real `--dry-run` run reported in a Supabase CLI GitHub
-      # issue (supabase/cli#776) — the official reference page documents
-      # the flag's purpose but does not show example stdout.
+      #
+      # _(Corrected 2026-09-09, confirmed via a real dispatch)_ The output
+      # line format assumed here ("Would push migration <file>...",
+      # sourced from a Supabase CLI GitHub issue, supabase/cli#776) does
+      # NOT match this deployment's real CLI output. The actual format,
+      # captured verbatim from a real dry-run's job log:
+      #   Would push these migrations:
+      #    • 0010_market05c_restaurant_profile_drafts.sql
+      #   Finished supabase db push.
+      # — a header line, then one bullet-prefixed filename per line (no
+      # trailing "..."), never all on one line. The old regex matched
+      # nothing against this real shape, silently producing an empty
+      # "would apply" set — which correctly, safely stopped the workflow
+      # before any write (0010 was never pushed), but for the wrong,
+      # misleading reason. Fixed below.
       - name: Dry-run — confirm exactly which migration(s) would be applied
         id: dry_run
         env:
@@ -238,7 +249,17 @@ jobs:
           # — see this file's 2026-09-09 addition at the top.
           supabase db push --db-url "$SUPABASE_DB_URL" --dry-run | tee dry-run-output.txt
 
-          mapfile -t would_push_files < <(grep -oE 'Would push migration [^[:space:]]+\.\.\.' dry-run-output.txt | sed -E 's/^Would push migration (.+)\.\.\.$/\1/' || true)
+          # Each pending migration is listed on its own line, prefixed
+          # with a Unicode bullet (U+2022, UTF-8 bytes E2 80 A2) — e.g.
+          # " • 0010_....sql". Stripping those three specific bytes with
+          # `tr` first (rather than matching the bullet literally inside
+          # a grep/awk regex) avoids the same class of locale-dependent
+          # multi-byte mis-match already found and fixed in
+          # production-db-preflight.yml's history-table parsing — after
+          # stripping, every remaining `*.sql`-suffixed token in the
+          # entire dry-run output is a real pending migration filename;
+          # nothing else in this CLI's output ever contains `.sql`.
+          mapfile -t would_push_files < <(tr -d '\342\200\242' < dry-run-output.txt | grep -oE '[^[:space:]]+\.sql' || true)
           would_push_versions=()
           for f in "${would_push_files[@]}"; do
             [ -n "$f" ] && would_push_versions+=("$(basename "$f" | cut -d'_' -f1)")
