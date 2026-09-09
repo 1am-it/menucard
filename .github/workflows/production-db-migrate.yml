@@ -46,25 +46,50 @@ name: Apply production database migrations
 # `applied_versions`/`staged_versions`. The preflight checks "what is
 # currently true" (what's already applied, what's staged); this workflow
 # checks "what should happen right now" — the specific release this
-# dispatch is authorized to push, confirmed against this run's own
-# read-only dry-run before any write. Never conflate the two: typing a
+# dispatch is authorized to push. Never conflate the two: typing a
 # preflight's `staged_versions` value into this workflow's
 # `release_versions` field (or vice versa) happens to often be the same
 # version string, but they answer different questions and are validated
 # by entirely separate logic.
 #
 # _(Added 2026-09-09)_ Every database-reading/-writing step below (the
-# before/after `migration list`, the dry-run, and the real `db push`)
-# connects via an explicit `SUPABASE_DB_URL` (Session Pooler, port 5432)
-# rather than `--linked`. Confirmed via a real dispatch of
-# production-db-preflight.yml: GitHub Actions runners have no IPv6 route,
-# and `--linked` resolves to Supabase's direct database connection, which
-# is IPv6-only unless the project has the paid IPv4 add-on. `supabase
-# link` itself is kept exactly as before for platform/project validation
-# — it only calls the Management API, never opens the direct DB
-# connection. See docs/guides/production-migration-pipeline.md's
-# "One-time GitHub setup" section for how to obtain this connection
-# string.
+# before/after `migration list` and the real `db push`) connects via an
+# explicit `SUPABASE_DB_URL` (Session Pooler, port 5432) rather than
+# `--linked`. Confirmed via a real dispatch of production-db-preflight.yml:
+# GitHub Actions runners have no IPv6 route, and `--linked` resolves to
+# Supabase's direct database connection, which is IPv6-only unless the
+# project has the paid IPv4 add-on. `supabase link` itself is kept
+# exactly as before for platform/project validation — it only calls the
+# Management API, never opens the direct DB connection. See
+# docs/guides/production-migration-pipeline.md's "One-time GitHub setup"
+# section for how to obtain this connection string.
+#
+# _(Rebuilt 2026-09-09, after three consecutive real-dispatch failures)_
+# The safety decision below no longer parses `supabase db push --dry-run`'s
+# human-readable text AT ALL. Three separate attempts to parse that
+# output (matching a documented-but-wrong line shape, then stripping its
+# Unicode bullet with `tr`, then a bullet-agnostic digit-extraction with
+# `awk`) each failed on a real dispatch against byte-identical real
+# input that worked correctly in local testing every time — strong
+# evidence the true failure mode is something about this specific
+# command's raw output (line-ending or terminal-control-character
+# behavior neither `gh run view --log` nor local reproduction can fully
+# reveal), not any one specific regex. `supabase migration list`'s own
+# output, by contrast, has been parsed correctly on two real dispatches
+# of production-db-preflight.yml — the one structural difference: that
+# parser never anchors a match to the start/end of a whole line
+# (`awk -F'|'` field-splitting only), while every dry-run-text attempt
+# did (`^...$` line anchors). The dry-run still runs, still visible in
+# the job log, and its own exit code is still checked (a real CLI/
+# connection failure is a real, non-text-parsing signal worth stopping
+# on) — but its printed migration names are never read, parsed, or
+# compared again. The actual go/no-go decision below instead reuses
+# `production-db-preflight.yml`'s own proven `migration list` parsing
+# technique (unchanged field-splitting logic, same masking discipline)
+# against two hard-coded constants — see "Verify exact migration state"
+# below — that must be updated via a reviewed pull request for any
+# future release, the same discipline production-db-history-reconcile.yml
+# already applies to its own `DOCUMENTED_LEGACY_VERSIONS`.
 
 on:
   workflow_dispatch:
@@ -79,11 +104,13 @@ on:
       release_versions:
         description: >-
           The exact migration version(s) THIS RUN is authorized to apply
-          as a pending release — the filename prefix before the first
-          underscore (e.g. "0010"), comma-separated if more than one.
-          Must match this run's own read-only dry-run output exactly, or
-          the workflow stops before the real push. Normally the same
-          version(s) just confirmed via production-db-preflight.yml's
+          — the filename prefix before the first underscore (e.g.
+          "0010"), comma-separated if more than one. Must exactly match
+          this workflow's own hard-coded DOCUMENTED_RELEASE_VERSIONS
+          constant (see the "Verify exact migration state" step) or the
+          workflow stops before the real push — typing a different value
+          here does not bypass that check. Normally the same version(s)
+          just confirmed via production-db-preflight.yml's
           `staged_versions` input. Type "none" (not blank) if you expect
           nothing to be pending.
         required: true
@@ -189,75 +216,57 @@ jobs:
       # YYYYMMDDHHMMSS timestamp prefix. Whether the CLI merely needs a
       # lexicographically-sortable string (which zero-padded sequential
       # numbers satisfy) or hard-validates the timestamp format has not
-      # been conclusively resolved from documentation alone. If this step
-      # or the next one errors or produces obviously wrong LOCAL/REMOTE
-      # output, that mismatch is the first thing to suspect — run
+      # been conclusively resolved from documentation alone. If the next
+      # step errors or produces obviously wrong LOCAL/REMOTE output, that
+      # mismatch is the first thing to suspect — run
       # production-db-preflight.yml (read-only) to investigate before
       # ever retrying this workflow.
-      - name: Show which migrations are pending (visible before anything is applied)
-        id: before
+      #
+      # THE actual go/no-go decision for this release. Reuses
+      # production-db-preflight.yml's own proven `migration list` parsing
+      # (field-splitting only, never a whole-line anchor — see this
+      # file's 2026-09-09 "Rebuilt" note at the top for why that matters)
+      # against two constants that must be updated via a reviewed pull
+      # request for any future release — never by typing a different
+      # `release_versions` value at dispatch time alone. This mirrors
+      # production-db-history-reconcile.yml's own
+      # `DOCUMENTED_LEGACY_VERSIONS` discipline: a write this sensitive is
+      # not left to a free-typed dispatch-time value by itself.
+      #
+      # Passes only when ALL of the following hold:
+      #   1. `release_versions` exactly equals DOCUMENTED_RELEASE_VERSIONS.
+      #   2. Local files under supabase/migrations/ exactly equal
+      #      DOCUMENTED_APPLIED_VERSIONS ∪ DOCUMENTED_RELEASE_VERSIONS —
+      #      no missing, no extra.
+      #   3. `supabase migration list`'s LOCAL column matches those same
+      #      real files exactly (the CLI-output integrity check already
+      #      used in production-db-preflight.yml).
+      #   4. `supabase migration list`'s REMOTE column exactly equals
+      #      DOCUMENTED_APPLIED_VERSIONS — i.e. exactly the already-live
+      #      baseline, with this release's version(s) confirmed NOT yet
+      #      live. Any other outcome (already partially/fully applied,
+      #      an unreconciled gap, an unexpected extra version) fails
+      #      closed rather than guessing whether it's safe to push.
+      - name: Verify exact migration state — the real safety gate (not dry-run text)
+        id: exact_state_check
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
-          supabase migration list --db-url "$SUPABASE_DB_URL" | tee before-migration-list.txt
-
-      # Read-only. Confirms exactly which migration version(s) `db push`
-      # would apply, and aborts BEFORE the real push if that set doesn't
-      # match `release_versions` exactly — e.g. because a migration was
-      # applied out of band since the preflight ran, an unexpected file
-      # is pending, or the wrong `release_versions` value was typed.
-      #
-      # _(Corrected 2026-09-09, confirmed via a real dispatch)_ The output
-      # line format assumed here ("Would push migration <file>...",
-      # sourced from a Supabase CLI GitHub issue, supabase/cli#776) does
-      # NOT match this deployment's real CLI output. The actual format,
-      # captured verbatim from a real dry-run's job log:
-      #   Would push these migrations:
-      #    • 0010_market05c_restaurant_profile_drafts.sql
-      #   Finished supabase db push.
-      # — a header line, then one bullet-prefixed filename per line (no
-      # trailing "..."), never all on one line. The old regex matched
-      # nothing against this real shape, silently producing an empty
-      # "would apply" set — which correctly, safely stopped the workflow
-      # before any write (0010 was never pushed), but for the wrong,
-      # misleading reason.
-      #
-      # _(Corrected again, 2026-09-09)_ The first fix (stripping the
-      # bullet's UTF-8 bytes with `tr -d '\342\200\242'`) was verified
-      # locally but STILL failed on a second real dispatch, against the
-      # identical byte-for-byte input — strong evidence of a
-      # locale-dependent difference between this local shell and the
-      # real `ubuntu-latest` runner in how `tr` interprets octal escapes,
-      # not reproducible or provable from outside that runner. Rebuilt
-      # below to need no knowledge of the bullet character at all: digits
-      # 0-9 are single-byte ASCII in every encoding, so extracting "the
-      # digit run immediately before this line's first underscore" is
-      # correct regardless of whatever precedes it — bullet, dash,
-      # whitespace, or nothing — with no multi-byte matching anywhere in
-      # the chain. The section is also now bounded to only the lines
-      # between the fixed `Would push these migrations:` header and
-      # `Finished supabase db push.` footer, so this never risks matching
-      # an unrelated digit-underscore pattern elsewhere in the CLI's
-      # output. Proven end to end against fixtures built from the exact
-      # real output above — see the commit message for the full test
-      # matrix; this is not a change made on theory alone.
-      - name: Dry-run — confirm exactly which migration(s) would be applied
-        id: dry_run
-        env:
-          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
-        run: |
-          set -euo pipefail
-
-          # Every `mapfile < <(... | sort -u)` below ends in `|| true`:
-          # under `set -e -o pipefail`, a `grep` that matches zero lines
-          # (a legitimate outcome here — e.g. "nothing pending") exits
-          # non-zero and would otherwise abort this whole step.
-          #
-          # `printf '%s\n' "${arr[@]}"` on a genuinely EMPTY array still
-          # prints one blank line (printf executes its format at least
-          # once) — this helper prints nothing at all when called with
-          # zero arguments, which is what the comparison below needs.
+          # `-e` deliberately not set — every command that can fail is
+          # checked explicitly below with its own specific error message,
+          # matching production-db-preflight.yml's own history_check step.
+          set -uo pipefail
           print_lines () { [ "$#" -gt 0 ] && printf '%s\n' "$@"; return 0; }
+
+          # This is THE documented, reviewed baseline for this release —
+          # see docs/guides/production-migration-pipeline.md's "Safe
+          # order of production actions" and
+          # planning/decisions/013-production-migration-pipeline.md.
+          # Changing either list for a future release means editing this
+          # file via a reviewed pull request, never just dispatching with
+          # a different `release_versions` value.
+          DOCUMENTED_APPLIED_VERSIONS=(0001 0002 0003 0004 0005 0006 0007 0008 0009)
+          DOCUMENTED_RELEASE_VERSIONS=(0010)
 
           raw="${{ github.event.inputs.release_versions }}"
           if [ "$(printf '%s' "$raw" | tr '[:upper:]' '[:lower:]')" = "none" ]; then
@@ -265,42 +274,84 @@ jobs:
           fi
           mapfile -t release_versions < <(printf '%s' "$raw" | tr ',' '\n' | tr -d '[:blank:]' | grep -v '^$' | sort -u || true)
 
-          # `--db-url` (Session Pooler, port 5432) instead of `--linked`
-          # — see this file's 2026-09-09 addition at the top.
-          supabase db push --db-url "$SUPABASE_DB_URL" --dry-run | tee dry-run-output.txt
-
-          # Step 1: isolate exactly the lines between the CLI's own fixed
-          # header and footer — content-agnostic to whatever precedes
-          # each filename (bullet, dash, whitespace, or nothing), and
-          # immune to an unrelated digit-underscore pattern appearing
-          # anywhere else in the CLI's output, past or future.
-          awk '
-            /^Would push these migrations:$/ { in_section = 1; next }
-            /^Finished supabase db push\.$/  { in_section = 0 }
-            in_section { print }
-          ' dry-run-output.txt > would-push-section.txt
-
-          # Step 2: from each remaining line, take only the run of digits
-          # immediately before that line's FIRST underscore — this repo's
-          # migration version prefix — never a full filename or any
-          # other substring. `awk`'s `match()` finds only the first
-          # occurrence per line (unlike `grep -o`, which would return
-          # every match on a line), so this is unambiguous even if a
-          # filename ever contained a second digit-run-before-underscore
-          # later in its own name. Every character involved (digits,
-          # underscore) is single-byte ASCII — nothing here can be
-          # affected by locale-dependent multi-byte interpretation.
-          mapfile -t would_push_versions < <(awk '{ if (match($0, /[0-9]+_/)) print substr($0, RSTART, RLENGTH-1) }' would-push-section.txt | sort -u || true)
-
-          echo "Dry-run says these version(s) would be applied: ${would_push_versions[*]:-(none)}"
-          echo "This run declared release_versions:             ${release_versions[*]:-(none)}"
-
-          if [ "$(print_lines "${would_push_versions[@]}")" != "$(print_lines "${release_versions[@]}")" ]; then
-            echo "::error::Dry-run would apply a different migration version set than declared in 'release_versions'. Would apply: ${would_push_versions[*]:-(none)}. Declared release_versions: ${release_versions[*]:-(none)}. Aborting before the real push — re-run with the correct 'release_versions' input, or investigate why an unexpected migration is pending (see docs/guides/production-migration-pipeline.md) before dispatching again."
+          if [ "$(print_lines "${release_versions[@]}")" != "$(print_lines "${DOCUMENTED_RELEASE_VERSIONS[@]}")" ]; then
+            echo "::error::'release_versions' (${release_versions[*]:-none}) does not exactly match this workflow's own hard-coded DOCUMENTED_RELEASE_VERSIONS constant (${DOCUMENTED_RELEASE_VERSIONS[*]}). This workflow only ever releases that one reviewed set. To release a different version, edit the constant in this file via a reviewed pull request — never by typing a different value here."
             exit 1
           fi
 
-          echo "Dry-run matches the declared release exactly. Proceeding to the real push."
+          shopt -s nullglob
+          files=(supabase/migrations/*.sql)
+          local_versions=()
+          for f in "${files[@]}"; do
+            local_versions+=("$(basename "$f" | cut -d'_' -f1)")
+          done
+          mapfile -t known_local < <(print_lines "${local_versions[@]}" | sort -u || true)
+
+          mapfile -t declared_union < <(print_lines "${DOCUMENTED_APPLIED_VERSIONS[@]}" "${DOCUMENTED_RELEASE_VERSIONS[@]}" | sort -u || true)
+
+          mapfile -t local_undeclared < <(comm -23 <(print_lines "${known_local[@]}") <(print_lines "${declared_union[@]}") || true)
+          mapfile -t declared_missing_file < <(comm -23 <(print_lines "${declared_union[@]}") <(print_lines "${known_local[@]}") || true)
+          if [ "${#local_undeclared[@]}" -gt 0 ] || [ "${#declared_missing_file[@]}" -gt 0 ]; then
+            echo "::error::Local files under supabase/migrations/ do not exactly match DOCUMENTED_APPLIED_VERSIONS + DOCUMENTED_RELEASE_VERSIONS. Local file(s) not accounted for: ${local_undeclared[*]:-(none)}. Declared version(s) with no matching local file: ${declared_missing_file[*]:-(none)}. Aborting before any connection is opened."
+            exit 1
+          fi
+
+          # `--db-url` (Session Pooler, port 5432) instead of `--linked`
+          # — see this file's 2026-09-09 addition at the top.
+          if ! supabase migration list --db-url "$SUPABASE_DB_URL" | tee before-migration-list.txt; then
+            echo "::error::'supabase migration list' exited non-zero — cannot determine migration history. Aborting before any write."
+            exit 1
+          fi
+
+          if ! grep -qi 'LOCAL' before-migration-list.txt || ! grep -qi 'REMOTE' before-migration-list.txt; then
+            echo "::error::Could not find the expected LOCAL/REMOTE header in 'supabase migration list' output — its format may not match what this workflow parses. Treating history as NOT reliably parseable. Aborting before any write."
+            exit 1
+          fi
+
+          # Same proven parsing as production-db-preflight.yml's own
+          # history_check step: normalize the column separator, strip the
+          # backticks the real CLI wraps each cell value in (confirmed
+          # via a real dispatch — see that file's own 2026-09-09 note),
+          # then split on "|" — field-splitting only, no whole-line
+          # anchor, which is exactly the structural property this
+          # rebuild is standardizing on.
+          mapfile -t parsed_local < <(sed 's/│/|/g' before-migration-list.txt | tr -d '\140\047' | awk -F'|' 'NF>=2 { v=$1; gsub(/^[ \t]+|[ \t]+$/, "", v); if (v ~ /^[0-9]+$/) print v }' | sort -u || true)
+          mapfile -t parsed_remote < <(sed 's/│/|/g' before-migration-list.txt | tr -d '\140\047' | awk -F'|' 'NF>=2 { v=$2; gsub(/^[ \t]+|[ \t]+$/, "", v); if (v ~ /^[0-9]+$/) print v }' | sort -u || true)
+
+          if [ "$(print_lines "${parsed_local[@]}")" != "$(print_lines "${known_local[@]}")" ]; then
+            echo "::error::The LOCAL column parsed from 'supabase migration list' does not match the actual files in supabase/migrations/. Either this workflow's parsing is wrong or the CLI's output format has changed — never assume this means history is fine."
+            echo "Parsed from CLI output: ${parsed_local[*]:-(none)}"
+            echo "Actual files on disk:   ${known_local[*]:-(none)}"
+            exit 1
+          fi
+
+          mapfile -t remote_extra < <(comm -23 <(print_lines "${parsed_remote[@]}") <(print_lines "${DOCUMENTED_APPLIED_VERSIONS[@]}") || true)
+          mapfile -t remote_missing < <(comm -23 <(print_lines "${DOCUMENTED_APPLIED_VERSIONS[@]}") <(print_lines "${parsed_remote[@]}") || true)
+          if [ "${#remote_extra[@]}" -gt 0 ] || [ "${#remote_missing[@]}" -gt 0 ]; then
+            echo "::error::Live migration history does not exactly equal DOCUMENTED_APPLIED_VERSIONS. Applied live but NOT declared: ${remote_extra[*]:-(none)}. Declared as applied but NOT recorded live: ${remote_missing[*]:-(none)}. If this release's version(s) already appear live, do not proceed — investigate before dispatching again. If earlier migrations are unreconciled, production-db-history-reconcile.yml is required first."
+            exit 1
+          fi
+
+          echo "Exact migration state confirmed: live history is exactly ${DOCUMENTED_APPLIED_VERSIONS[*]}, and ${DOCUMENTED_RELEASE_VERSIONS[*]} is staged locally and not yet live. Proceeding."
+
+          # Passed to the post-push verification step below via
+          # $GITHUB_OUTPUT rather than redeclaring the two constants a
+          # second time in a separate step (GitHub Actions steps share no
+          # shell state) — this is the ONE place in this file that needs
+          # to change for a future release, not two.
+          echo "expected_after_release=${declared_union[*]}" >> "$GITHUB_OUTPUT"
+
+      # Informational only from here on — its own exit code is still
+      # checked (a real CLI/connection failure is a genuine, non-text
+      # signal worth stopping on), but its printed migration names are
+      # never read again. See this file's 2026-09-09 "Rebuilt" note at
+      # the top for the three real-dispatch failures that led to this.
+      - name: Dry-run (informational only — never used to gate the push)
+        id: dry_run
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          supabase db push --db-url "$SUPABASE_DB_URL" --dry-run
 
       - name: Apply pending migrations
         id: migrate
@@ -328,6 +379,40 @@ jobs:
           # `--db-url` (Session Pooler, port 5432) instead of `--linked`
           # — see this file's 2026-09-09 addition at the top.
           supabase --yes db push --db-url "$SUPABASE_DB_URL"
+
+      # Active re-verification, not just a printed line: confirms the
+      # push actually took effect, using the same proven parsing as the
+      # gate above. Runs only if "Apply pending migrations" succeeded
+      # (no `if: always()` here) — the informational display step below
+      # still runs unconditionally for visibility even on failure.
+      - name: Verify this release is now live (read-only)
+        id: verify_live
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          set -uo pipefail
+          print_lines () { [ "$#" -gt 0 ] && printf '%s\n' "$@"; return 0; }
+
+          # Reuses the exact validated set the gate above already
+          # computed (DOCUMENTED_APPLIED_VERSIONS ∪
+          # DOCUMENTED_RELEASE_VERSIONS), passed via $GITHUB_OUTPUT rather
+          # than redeclaring those two constants a second time in this
+          # separate step.
+          mapfile -t expected_after < <(printf '%s\n' ${{ steps.exact_state_check.outputs.expected_after_release }} | sort -u || true)
+
+          if ! supabase migration list --db-url "$SUPABASE_DB_URL" | tee after-migration-list.txt; then
+            echo "::error::'supabase migration list' exited non-zero while verifying the push. Do not assume success — investigate manually."
+            exit 1
+          fi
+
+          mapfile -t parsed_remote_after < <(sed 's/│/|/g' after-migration-list.txt | tr -d '\140\047' | awk -F'|' 'NF>=2 { v=$2; gsub(/^[ \t]+|[ \t]+$/, "", v); if (v ~ /^[0-9]+$/) print v }' | sort -u || true)
+
+          if [ "$(print_lines "${parsed_remote_after[@]}")" != "$(print_lines "${expected_after[@]}")" ]; then
+            echo "::error::After the push, live migration history does NOT exactly equal the expected post-release set. Now recorded live: ${parsed_remote_after[*]:-(none)}. Expected: ${expected_after[*]}. Do not treat this run as successful — investigate manually."
+            exit 1
+          fi
+
+          echo "Confirmed: live migration history now exactly equals ${expected_after[*]} — this release is live."
 
       - name: Show the resulting migration state (verifiable result)
         if: always()

@@ -358,6 +358,77 @@ reconciliation, `db push`, migration, seed, reset, deploy, or account
 action was performed — only the two real, read-only preflight dispatches
 described above, plus this round's own local-only workflow edits.
 
+## Addendum 5 (2026-09-09) — three real dispatch failures retired dry-run-text parsing entirely
+
+Following Addendum 4, `production-db-history-reconcile.yml` was
+dispatched for real (confirm `repair-history-only`,
+`legacy_versions: 0001,...,0009`) with genuine environment approval and
+succeeded: it started with nothing recorded remotely, ran `migration
+repair --status applied` for exactly those nine versions, and its own
+read-only re-verification confirmed live history then exactly matched
+them. A follow-up `production-db-preflight.yml` dispatch
+(`applied_versions: 0001,...,0009`, `staged_versions: 0010`) then
+reported "✅ Ready for migration," confirming `0010` correctly staged
+and not yet live. `0010` was then merged to `main` as its own
+migration-only commit, per "Safe order of production actions."
+
+**`production-db-migrate.yml` was then dispatched three times for
+`release_versions: 0010`, with genuine environment approval each time,
+and each time correctly stopped before any write — but for three
+different, all-misleading reasons**, described in full in
+`docs/guides/production-migration-pipeline.md`'s "Residual risks." In
+order: (1) a dry-run line-shape regex sourced from a Supabase CLI GitHub
+issue, which did not match this deployment's real output at all; (2)
+stripping the real output's Unicode bullet with `tr`, verified correct
+locally, which still failed on a real dispatch against byte-identical
+input; (3) a bullet-agnostic `awk` extraction bounded by the CLI's own
+fixed header/footer lines, also verified correct locally under three
+different locales, which *also* still failed on a real dispatch against
+byte-identical input. `0010` was never applied by any of the three — the
+workflow's existing fail-safe design held throughout — but each result
+misreported *why* it stopped, undermining confidence in the mechanism
+itself.
+
+**Decision: retire `db push --dry-run` text-parsing from the safety
+decision entirely, rather than attempt a fourth parser.** Three
+consecutive failures against byte-identical, locally-verified input is
+no longer "one more edge case" — it is evidence that something about
+this specific command's raw output cannot be reliably observed from
+outside the real runner (a line-ending or terminal-control-character
+convention neither the GitHub Actions log viewer nor local reproduction
+fully reveals is the working hypothesis, never independently confirmed).
+`production-db-migrate.yml`'s actual go/no-go decision now reuses
+`production-db-preflight.yml`'s own `migration list` parsing technique —
+the one approach in this whole pipeline confirmed correct on two real
+dispatches, structurally different in exactly one way: it never anchors
+a match to the start or end of a whole line (`awk -F'|'` field-splitting
+only), where every dry-run-text attempt did. This is checked against two
+constants hard-coded directly in the workflow
+(`DOCUMENTED_APPLIED_VERSIONS`, `DOCUMENTED_RELEASE_VERSIONS`) — the same
+"a write this sensitive is not left to a free-typed dispatch-time value
+alone" discipline `production-db-history-reconcile.yml`'s own
+`DOCUMENTED_LEGACY_VERSIONS` already established — and a new post-push
+step ("Verify this release is now live") actively re-confirms the push
+took effect, rather than trusting `db push`'s own exit code alone. The
+dry-run itself still runs and is still visible in the job log for a
+human to read; its printed migration names are simply never read by the
+workflow again.
+
+Verified locally against fixtures matching the exact real `migration
+list` table format (backtick-quoted cells) for: the exact happy-path
+state, `0010` already applied, an unreconciled `0001`-`0009` gap, a
+missing/extra local file, a `release_versions` value not matching the
+hard-coded constant, unparseable output, and — after a successful push —
+both a correct and an incorrect post-push state. Explicitly confirmed
+that the decision path contains zero references to dry-run output
+anywhere in the file.
+
+None of this addendum's changes touch
+`supabase/migrations/0010_market05c_restaurant_profile_drafts.sql`,
+migration `0010`, or any MARKET-05C application code. `0010` remains not
+applied to production as of this writing — the next dispatch of
+`production-db-migrate.yml` is this rebuild's own first real test.
+
 ## Rejected alternatives
 
 - **A custom migration-runner script with its own tracking table**

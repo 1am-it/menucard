@@ -43,9 +43,12 @@ on purpose:
   runs `db push`, never applies SQL, never seeds, resets, or deletes
   anything, and never touches the app.
 - **`production-db-migrate.yml` answers "apply this specific, already-
-  confirmed release, now."** Its own `release_versions` input is
-  independently re-checked against a read-only `db push --dry-run`
-  immediately before the real push.
+  confirmed release, now."** Its own `release_versions` input is checked
+  against a hard-coded constant and against live migration history
+  (`production-db-preflight.yml`'s own proven parsing technique, reused)
+  immediately before the real push — never against `db push --dry-run`'s
+  printed text, which is informational only. See "The real safety gate"
+  under "How approval works" below.
 
 ## Safe order of production actions
 
@@ -89,9 +92,10 @@ required order for this repository's actual first real release:
    is actually merged.
 7. **Separately approved production migration**: only once step 6 reports
    ready, dispatch `production-db-migrate.yml` (confirm `migrate`,
-   `release_versions: 0010`). Its own read-only dry-run independently
-   re-confirms the exact same version set before the real push — see "How
-   approval works" below.
+   `release_versions: 0010`). Its own "Verify exact migration state" gate
+   re-confirms the exact same version set — against live history, not
+   dry-run text — before the real push; see "The real safety gate" under
+   "How approval works" below.
 8. **Read-only verification**: `production-db-migrate.yml`'s own summary
    and a follow-up `production-db-preflight.yml` run (`applied_versions:
    0001,...,0010`, `staged_versions: none`, expecting "✅ Ready") confirm
@@ -270,7 +274,7 @@ done.
    the `main` branch, types `migrate` in the confirmation field exactly
    as prompted, and sets `release_versions` to the version(s) just
    confirmed ready by the preflight (e.g. `0010`).
-2. The job starts, validates the confirmation phrase and that all three
+2. The job starts, validates the confirmation phrase and that all four
    secrets are configured, then **pauses** at the `production-migrations`
    environment (assuming the one-time setup above was done).
 3. A configured reviewer sees the pending deployment (GitHub notifies
@@ -280,28 +284,86 @@ done.
    require — nothing before this point has touched a secret or a
    connection.
 4. Once approved, the job links the Supabase CLI to the production
-   project for platform/project validation, then prints which migrations
-   are currently pending — via `supabase migration list --db-url
-   "$SUPABASE_DB_URL"` (the Session Pooler connection, not `--linked`;
-   see "One-time GitHub setup" for why).
+   project for platform/project validation, then runs **"Verify exact
+   migration state"** — the actual go/no-go decision, described in full
+   in "The real safety gate" below. Only if every one of its checks
+   passes does the job continue.
 5. It then runs `supabase db push --db-url "$SUPABASE_DB_URL" --dry-run`
-   (read-only) and parses its "Would push migration ...sql..." lines. If
-   the version(s) it names don't exactly match this run's own
-   `release_versions` input, the job stops here — **before the real
-   push** — with no schema change made. This catches a stale/incorrect
-   `release_versions` value or a migration that became pending
-   unexpectedly since the preflight ran.
-6. Only if the dry-run matches exactly does it run the real `supabase
-   --yes db push --db-url "$SUPABASE_DB_URL"` (applies only the
-   not-yet-recorded ones, in order — never a full re-run, never anything
-   not already a reviewed file in `supabase/migrations/`), then prints
-   the resulting migration state again.
+   — **informational only** (see "The real safety gate" below for why
+   its printed text is never read for anything). Its own exit code is
+   still checked; a real CLI/connection failure here still stops the
+   job.
+6. Only if step 4's gate passed does it run the real `supabase --yes db
+   push --db-url "$SUPABASE_DB_URL"` (applies only the not-yet-recorded
+   ones, in order — never a full re-run, never anything not already a
+   reviewed file in `supabase/migrations/`).
 7. If any migration fails to apply, `supabase db push` itself stops at
    that file — no attempt to skip it and continue, no partial success
    reported as success. The job fails, and every later step is skipped
-   (the "Show the resulting migration state"/summary steps still run,
-   via `if: always()`, so the failure is visible, but nothing pretends
-   the run succeeded).
+   except the always-on display/summary steps.
+8. If the push succeeded, **"Verify this release is now live"** re-queries
+   `supabase migration list` and asserts the live history now exactly
+   equals the expected post-release set — an active check, not just a
+   printed line. A mismatch here (the push reported success but the
+   history doesn't reflect it) fails the job rather than trusting the
+   push's own exit code alone.
+
+### The real safety gate — not `db push --dry-run`'s printed text
+
+_(Rebuilt 2026-09-09, after three consecutive real-dispatch failures —
+see "Residual risks" below for the full account.)_ **`production-db-migrate.yml`
+no longer parses `supabase db push --dry-run`'s human-readable output for
+its go/no-go decision, and never will again.** The dry-run still runs
+and is still visible in the job log — it is genuinely useful for a human
+to read before approving — but nothing in the workflow reads, parses, or
+compares its printed migration names. Three separate parsing attempts
+(a line shape sourced from a Supabase CLI GitHub issue; stripping the
+CLI's Unicode bullet with `tr`; a bullet-agnostic digit extraction with
+`awk`) each worked correctly against byte-identical fixtures in local
+testing and each still failed on a real dispatch — evidence the true
+problem is something about that specific command's raw output that
+neither the GitHub Actions log viewer nor local reproduction can fully
+surface, not any one regex.
+
+The actual decision is now made by a step named **"Verify exact
+migration state"**, which reuses `production-db-preflight.yml`'s own
+proven `migration list` parsing (the one technique in this whole
+pipeline that has been confirmed correct on two real dispatches) against
+two constants hard-coded directly in `production-db-migrate.yml`:
+
+```bash
+DOCUMENTED_APPLIED_VERSIONS=(0001 0002 0003 0004 0005 0006 0007 0008 0009)
+DOCUMENTED_RELEASE_VERSIONS=(0010)
+```
+
+**Releasing a different or additional migration in the future means
+editing these two lines in a reviewed pull request** — the same
+discipline `production-db-history-reconcile.yml` already applies to its
+own `DOCUMENTED_LEGACY_VERSIONS`. Typing a different `release_versions`
+value at dispatch time does not bypass this; the workflow checks the
+input against the constant and refuses to proceed on any mismatch.
+
+The gate passes only when ALL of the following hold, each checked
+explicitly and each failing closed on its own:
+
+1. `release_versions` exactly equals `DOCUMENTED_RELEASE_VERSIONS`.
+2. Local files under `supabase/migrations/` exactly equal
+   `DOCUMENTED_APPLIED_VERSIONS` ∪ `DOCUMENTED_RELEASE_VERSIONS` — no
+   missing file, no extra file.
+3. `supabase migration list`'s LOCAL column matches those same real
+   files exactly (the CLI-output integrity check already used in the
+   preflight).
+4. `supabase migration list`'s REMOTE column exactly equals
+   `DOCUMENTED_APPLIED_VERSIONS` — i.e. exactly the already-live
+   baseline, with this release's version(s) confirmed **not yet** live.
+   Already-applied, partially-applied, or an unreconciled gap all fail
+   closed here rather than guessing whether it's safe to push.
+
+After a successful push, **"Verify this release is now live"** repeats
+the same parsing technique and asserts the live history now exactly
+equals `DOCUMENTED_APPLIED_VERSIONS` ∪ `DOCUMENTED_RELEASE_VERSIONS` —
+confirming the push actually took effect, not merely that the command
+exited zero.
 
 Note the confirmation phrase is deliberately different across all three
 production-reaching workflows — `verify` for the read-only preflight,
@@ -315,10 +377,13 @@ value can never accidentally trigger the wrong one.
   directly on the run's page) shows who triggered it, a link to the run,
   the migration state before and after, and a reminder of the next step.
 - **`supabase migration list --db-url "$SUPABASE_DB_URL"`'s own output**,
-  printed twice in the job log (before and after `db push`), is the
-  authoritative "what's actually applied" answer — it reads the real
+  printed multiple times in the job log (before and after `db push`), is
+  the authoritative "what's actually applied" answer — it reads the real
   migration history table in the target database, not a guess from file
-  names alone.
+  names alone. The workflow's own "Verify this release is now live" step
+  already asserts this automatically after a successful push — a failed
+  assertion there means the push's own reported success should not be
+  trusted without manual investigation.
 - **Cross-check in the Supabase Dashboard** (Table Editor / SQL Editor)
   that the new tables/functions named in the migration actually exist,
   the same live-verification discipline this project has applied to
@@ -564,11 +629,58 @@ either of those for a real production write:
   checked against the Supabase CLI's own official documentation before
   ever running it for real — that documentation review did not, and
   could not, predict either real failure mode encountered.
-- **This design has not been tried against `supabase/migrations/0010_market05c_restaurant_profile_drafts.sql`
-  or any other real, pending migration** — per this round's own explicit
-  instruction, no migration was run, no GitHub Action was dispatched, and
-  MARKET-05C's own files were deliberately left untouched. The first real
-  production action should be `production-db-preflight.yml` (read-only);
-  only after it reports ready should `production-db-migrate.yml` be
-  dispatched for `0010` specifically, as a separate, later, explicitly
-  approved release — see "Safe order of production actions" above.
+- **_(Corrected 2026-09-09 — superseded, not deleted)_ "This design has
+  not been tried against `0010`" is no longer true.** It was accurate
+  when written; `production-db-migrate.yml` has since been dispatched
+  three times against `0010` for real (all with genuine environment
+  approval), and each time correctly stopped before any write — see the
+  dated entry below for the full account of why, and what changed as a
+  result. `0010` remains not applied to production as of this writing.
+- **_(Added 2026-09-09) `production-db-migrate.yml`'s dry-run-text
+  parsing failed on three consecutive real dispatches; the safety
+  decision no longer depends on it at all.** All three attempts
+  targeted `release_versions: 0010` against the real project, with real
+  environment approval each time:
+  1. A line-shape regex sourced from a Supabase CLI GitHub issue
+     (`Would push migration <file>...`) — did not match this
+     deployment's real output at all.
+  2. Stripping the real output's Unicode bullet (`tr -d '\342\200\242'`)
+     — verified correct in local testing, still failed on a real
+     dispatch against byte-identical input.
+  3. A bullet-agnostic digit extraction bounded by the CLI's own fixed
+     header/footer lines (`awk` field-splitting-free, line-anchored) —
+     also verified correct in local testing under three different
+     locales, also still failed on a real dispatch against
+     byte-identical input.
+  Each failure was safe (the workflow correctly stopped before any
+  write — `0010` was never applied by any of the three), but each was
+  for a misleading reason ("would apply: (none)" when the real dry-run
+  output plainly showed `0010` pending). The working hypothesis: `db
+  push --dry-run`'s raw output likely contains something (a line-ending
+  or terminal-control-character convention) that neither `gh run view
+  --log` nor local reproduction can fully surface, and that every
+  attempt's **line-anchored** matching (`^...$`) was sensitive to in a
+  way the *other*, structurally different, and repeatedly proven-correct
+  `migration list` parser (pure `awk -F'|'` field-splitting, never a
+  whole-line anchor) was not — this was never independently confirmed
+  against the real runner's raw bytes, since doing so would require a
+  live, non-read-only action outside this pipeline's own scope. Given
+  three straight failures for what may be the same underlying reason,
+  the decision was made to stop iterating on that parser entirely:
+  `production-db-migrate.yml`'s actual go/no-go gate ("Verify exact
+  migration state") now reuses `production-db-preflight.yml`'s own
+  `migration list` parsing technique — proven correct on two real
+  dispatches — against two hard-coded constants
+  (`DOCUMENTED_APPLIED_VERSIONS`, `DOCUMENTED_RELEASE_VERSIONS`), and a
+  matching post-push assertion ("Verify this release is now live")
+  confirms the write actually took effect. The dry-run still runs, for a
+  human to read, but its printed text is never parsed or compared again
+  — see "How approval works" → "The real safety gate" above for the full
+  design. **Not yet exercised against a real dispatch** — the next
+  dispatch of `production-db-migrate.yml` for `0010` is this rebuild's
+  own first real test.
+- **The first real production action should be
+  `production-db-preflight.yml` (read-only); only after it reports ready
+  should `production-db-migrate.yml` be dispatched for `0010`
+  specifically, as a separate, later, explicitly approved release** —
+  see "Safe order of production actions" above.
