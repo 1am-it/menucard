@@ -34,6 +34,13 @@
 // right now. Built for the client-side "Triage overview" section on
 // `/internal/import-inbox`; no new query, no write, no automatic
 // classification of any kind.
+//
+// **Update (2026-09-06, later still) — MARKET-05C: also resolves each
+// candidate's active Restaurant Profile Draft, if any** (`profile_draft`
+// — `null` unless a `status = 'draft'` row already exists for it, per
+// supabase/migrations/0010_market05c_restaurant_profile_drafts.sql). This
+// route still never writes anything — creating a draft only ever happens
+// via the separate `POST /api/internal/v1/profile-drafts` route.
 
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/src/lib/supabaseAdmin'
@@ -45,6 +52,7 @@ import {
   buildLatestDeferredReasonByCandidateId,
   buildEnrichmentSourceByCandidateId,
 } from '@/src/lib/importInbox'
+import { buildActiveProfileDraftByCandidateId } from '@/src/lib/restaurantProfileDrafts'
 
 // Same headroom reasoning as RECORD_LIMIT below — bounded, not
 // pagination, revisit once volume materially exceeds this. One row per
@@ -119,6 +127,19 @@ export async function GET(request) {
   if (enrichmentsError) return NextResponse.json({ error: 'Query failed' }, { status: 500 })
   const enrichmentSourceByCandidateId = buildEnrichmentSourceByCandidateId(enrichments)
 
+  // MARKET-05C: every *active* draft, in one bounded query —
+  // buildActiveProfileDraftByCandidateId (pure,
+  // src/lib/restaurantProfileDrafts.js) reduces this to "the active draft
+  // per source_candidate_id, if any," without a second per-candidate
+  // round trip. Read-only: creating/discarding a draft only ever happens
+  // via the separate profile-drafts route.
+  const { data: drafts, error: draftsError } = await supabase
+    .from('restaurant_profile_drafts')
+    .select('id, source_candidate_id, status, promoted_by, promoted_at, restarted_from_draft_id, possible_duplicate_of_draft_id')
+    .eq('status', 'draft')
+  if (draftsError) return NextResponse.json({ error: 'Query failed' }, { status: 500 })
+  const profileDraftByCandidateId = buildActiveProfileDraftByCandidateId(drafts)
+
   const { candidates, totalBeforeFilters } = enrichAndFilterCandidates(records, {
     runId,
     category,
@@ -129,6 +150,7 @@ export async function GET(request) {
     reviewStatus,
     enrichmentSourceByCandidateId,
     deferredReasonByCandidateId,
+    profileDraftByCandidateId,
   })
 
   return NextResponse.json({

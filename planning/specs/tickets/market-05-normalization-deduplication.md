@@ -1821,6 +1821,81 @@ Third sub-ticket of `MARKET-05`, buildable independently of `05B` (see
 "Depends on"). A reasonable next step after `05A`'s own live verification
 completes.
 
+### Implementation (2026-09-06, later still — same day)
+
+**Built, not yet applied live.** Migration
+`supabase/migrations/0010_market05c_restaurant_profile_drafts.sql`, the
+`promote_candidate_to_profile_draft`/`discard_profile_draft` RPCs,
+`src/lib/restaurantProfileDrafts.js`, `src/lib/uuidv7.js`,
+`POST /api/internal/v1/profile-drafts`, and the "Create Restaurant
+Profile Draft" action on `/internal/import-inbox`'s `approved_internal`
+detail view all now exist — see
+`docs/api/restaurant-profile-drafts-schema.md`'s own "Implementation"
+section for the full detail, including a transparent correction to that
+contract's RPC signature (it never named how the application-generated
+`id` reaches the function — fixed by adding `p_draft_id` as its first
+parameter, a mechanical completion, not a design change) and the full
+list of what was locally validated in a disposable Postgres container
+before this was considered ready.
+
+**Narrower than this section's own "Scope" above, deliberately.** Only
+`promote_candidate_to_profile_draft` and `discard_profile_draft` were
+built — `record_profile_draft_field_sync` (the third RPC named in
+"Scope") is explicitly left unbuilt this round, per this round's own
+instruction; re-syncing a field after a later enrichment is not yet
+possible through the UI. Likewise, "Scope"'s "browse, and discard drafts"
+UI never got built this round — only *promote* has a UI action;
+`discard_profile_draft` exists and is RPC-level tested, but nothing under
+`/internal/*` calls it yet, so discarding a draft today requires direct
+database access. "Scope" above still describes this ticket's full,
+eventual intent — not stale, just not yet entirely delivered.
+**Correction (2026-09-06, later still — discard/duplicate follow-up
+round): the "discard" gap named above is closed** — see the
+"Implementation (2026-09-06, later still — discard/duplicate follow-up
+round)" section below. `record_profile_draft_field_sync`/re-sync remains
+the one still-unbuilt piece of "Scope."
+
+**Tests**: `src/lib/restaurantProfileDrafts.test.js` (new — 40 tests:
+pure-function unit tests for the duplicate heuristic, the field/draft
+reducers, and the promotion-eligibility check, plus structural
+safety-net tests reading the migration/route/page source directly, the
+same pattern this project's test suite already uses throughout);
+`src/lib/uuidv7.test.js` (new — RFC 9562 conformance, mirroring
+`ops/scripts/capture-market-boundary.test.js`'s own test for its
+independent copy of the same generator); `src/lib/importInbox.js`'s
+`enrichAndFilterCandidates` extended with `profileDraftByCandidateId`,
+with matching new tests in `src/lib/importInbox.test.js`; one existing
+structural test there updated for the new nested explanation markup.
+Full suite: 475 tests, all passing.
+
+### Implementation (2026-09-06, later still — discard/duplicate follow-up round)
+
+Two of "Scope"'s remaining gaps closed: **discard as a real product
+action** (`POST /api/internal/v1/profile-drafts/[id]/discard`, an
+`internal`-only route calling only `discard_profile_draft`, plus a
+"Discard Restaurant Profile Draft" UI action requiring a mandatory
+reason and an explicit, separate confirm click) and **a mandatory
+discard reason**, added to migration `0010` in place (still not applied
+live — this project's own convention of only ever creating a new
+numbered migration for something already live). The "Promote anyway"
+duplicate flow was audited, not changed — it already recomputed the
+possible-duplicate check server-side on every call and already stored
+the confirmed relationship via `possible_duplicate_of_draft_id`, exactly
+as designed.
+
+**A real schema bug was found and fixed during this round's own local
+Postgres validation**: the original combined
+`(status = 'discarded') = (A and B and C)` check could be satisfied
+while `status = 'draft'` by leaving just one of the three sub-conditions
+false, which a direct test proved let `discard_note` alone be set on an
+active draft. Replaced with three independent per-column biconditionals
+— see `docs/api/restaurant-profile-drafts-schema.md`'s own
+"Implementation (2026-09-06, later still — discard/duplicate follow-up
+round)" section for the full before/after transcript.
+
+**Tests**: `src/lib/restaurantProfileDrafts.test.js` grew from 40 to 60
+tests. Full suite: 495 tests, all passing.
+
 ## MARKET-05B — Normalization & deduplication (placeholder, untouched)
 
 Original scope, unchanged by this document: matching and deduplicating

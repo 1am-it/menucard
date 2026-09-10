@@ -149,6 +149,16 @@ function computeQualityStatus(extractedFields) {
  * filtering down to a single run — then applies the requested filters.
  * Returns `{ candidates, totalBeforeFilters }`. Pure; never touches a
  * database, never mutates its input.
+ *
+ * `profileDraftByCandidateId` (MARKET-05C, added 2026-09-06) attaches
+ * each candidate's *active* Restaurant Profile Draft, if any —
+ * `{ id, status, promoted_by, promoted_at, restarted_from_draft_id,
+ * possible_duplicate_of_draft_id }` or `null` — via
+ * src/lib/restaurantProfileDrafts.js's own buildActiveProfileDraftByCandidateId.
+ * Never a discarded draft (out of this feature's scope this round); never
+ * computed here — this function only attaches an already-reduced lookup,
+ * the exact same "one query, one pure reducer, no N+1" pattern this file
+ * already uses for review status and enrichment sources.
  */
 function enrichAndFilterCandidates(records, filters) {
   const opts = filters || {};
@@ -156,6 +166,7 @@ function enrichAndFilterCandidates(records, filters) {
   const reviewStatusByCandidateId = opts.reviewStatusByCandidateId || {};
   const enrichmentSourceByCandidateId = opts.enrichmentSourceByCandidateId || {};
   const deferredReasonByCandidateId = opts.deferredReasonByCandidateId || {};
+  const profileDraftByCandidateId = opts.profileDraftByCandidateId || {};
 
   const enriched = records.map((record) => {
     const enrichmentSource = enrichmentSourceByCandidateId[record.id] || {};
@@ -186,6 +197,10 @@ function enrichAndFilterCandidates(records, filters) {
       // from an earlier decision that was since superseded (see
       // buildLatestDeferredReasonByCandidateId's own comment).
       deferred_reason: deferredReasonByCandidateId[record.id] || null,
+      // Added 2026-09-06, later still, for MARKET-05C: this candidate's
+      // active Restaurant Profile Draft, if any — null otherwise. Never
+      // computed here; see this function's own top comment.
+      profile_draft: profileDraftByCandidateId[record.id] || null,
     };
   });
 

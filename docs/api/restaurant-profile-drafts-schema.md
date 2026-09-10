@@ -21,6 +21,168 @@ See `planning/specs/tickets/market-05-normalization-deduplication.md`'s own
 objective, user story, and acceptance criteria. This file is the exact,
 implementable shape.
 
+**Status correction (2026-09-06, later still — discard/duplicate
+follow-up round): the line above is stale.** Implementation has since
+started and progressed through two rounds — see "Implementation"
+immediately below (promotion built) and "Implementation (2026-09-06,
+later still — discard/duplicate follow-up round)" further down (discard
+built, one real schema bug found and fixed via local validation, the
+duplicate flow verified). Migration `0010` is still not applied live.
+
+## Implementation (2026-09-06, later still — same day)
+
+**Built, not yet applied live.** Migration
+`supabase/migrations/0010_market05c_restaurant_profile_drafts.sql`
+implements both tables, both indexes, and the `promote_candidate_to_profile_draft`/
+`discard_profile_draft` RPCs exactly as this contract describes, with one
+correction (below) to a genuine gap in this contract's own text. Locally
+validated end to end in a disposable, throwaway Postgres container (0001
+through 0010 applied in sequence) — every guarantee below was actually
+exercised, not just read: the happy path, the effective-status guard
+(`P0010`), the active-draft guard (`P0011`, both via the pre-check and via
+a genuine `unique_violation` race), the restart-link guard (`P0012`),
+discard and double-discard (`P0013`), a real restart after discard
+(verifying the old row stays untouched and the new row's
+`restarted_from_draft_id` points at it, and that a field enriched *after*
+the first promotion is correctly picked up with `origin = 'enrichment'`
+on the restart), the column-scoped update grant (an attempt to update
+`source_candidate_id` directly is refused; `discard_note` succeeds), the
+complete absence of any update/delete privilege on the field-facts
+ledger, and `anon`/`authenticated` RLS denial on both tables — never
+against the live Supabase project.
+
+**Correction to this contract's own RPC signature.** The "Promotion &
+sync flow" section above never listed a `p_draft_id` parameter on
+`promote_candidate_to_profile_draft` — an oversight: this contract's own
+`id` column description says the id is application-generated (UUIDv7),
+but a caller-supplied id has to reach the function *somehow*, and no
+other mechanism was named. Implemented as the RPC's first parameter:
+`promote_candidate_to_profile_draft(p_draft_id, p_candidate_id,
+p_actor_user_id, p_possible_duplicate_of_draft_id default null,
+p_restarted_from_draft_id default null)`. This does not change the
+design — application-generated UUIDv7, never `gen_random_uuid()`, exactly
+as already stated — it only completes a mechanical detail the original
+text left implicit.
+
+**What was built this round**:
+- Both tables, both indexes, both RPCs, RLS posture, and grants — exactly
+  as specified above (plus the one correction just noted).
+- `src/lib/restaurantProfileDrafts.js` — the pure decision logic
+  (`findPossibleDuplicateDraftId`, `buildDraftFieldsByDraftId`,
+  `buildActiveProfileDraftByCandidateId`,
+  `canPromoteCandidateToProfileDraft`), mirroring
+  `src/lib/importInbox.js`'s own established shape.
+- `src/lib/uuidv7.js` — the application-side UUIDv7 generator, extracted
+  as its own small module (functionally identical to
+  `ops/scripts/capture-market-boundary.js`'s own, which is left
+  untouched) for reuse by the new route below.
+- `POST /api/internal/v1/profile-drafts` — the only way to create a
+  draft, `internal`-only, computing the possible-duplicate check and the
+  restart linkage in application code before calling the RPC, exactly as
+  this contract describes.
+- `GET /api/internal/v1/import-inbox/candidates` extended to attach each
+  candidate's active draft (`profile_draft`), read-only — see
+  `docs/api/import-inbox-api.md`'s own matching addition.
+- `/internal/import-inbox`'s `approved_internal` detail view gained an
+  explicit "Create Restaurant Profile Draft" action: disabled while
+  submitting (never double-clickable — the partial unique index backs
+  this up physically either way), shows "Restaurant Profile Draft already
+  created" once one exists (never a second button), and renders the
+  possible-duplicate warning with "Promote anyway"/"Cancel" — never a
+  silent auto-merge — exactly per "Duplicate handling" above.
+
+**What was deliberately not built this round** (per this round's own
+explicit scope, not a contract change):
+- `record_profile_draft_field_sync` — the sync RPC this contract
+  describes under "Promotion & sync flow." Left entirely unbuilt this
+  round, per explicit instruction — re-syncing a field after a later
+  enrichment remains impossible through the UI until a future round adds
+  it. The append-only field-facts ledger and the "no automatic sync"
+  invariant it depends on are both fully in place and tested; only the
+  RPC/route/UI for triggering a sync are missing.
+- A `discard` API route or UI button. `discard_profile_draft` exists and
+  is tested at the RPC level (see above), but nothing under
+  `/internal/*` or `/api/internal/v1/*` calls it yet — for this round, a
+  draft can only be discarded via direct, manual database access, not
+  through the product. Restart-after-discard is fully implemented and
+  tested at the RPC level regardless, since the promotion RPC's own
+  restart-linkage validation does not depend on how a draft came to be
+  discarded.
+- Any UI for browsing a draft's own field-fact history — the "Restaurant
+  Profile Draft already created" message names only that a draft exists
+  and when it was promoted, not its current field values. `GET`-ing a
+  single draft's full detail is not part of this round's scope.
+
+## Implementation (2026-09-06, later still — discard/duplicate follow-up round)
+
+**Built, migration `0010` updated in place (still not applied live).**
+Two gaps closed:
+
+1. **Discard is now a full internal product action, not just an RPC.**
+   `POST /api/internal/v1/profile-drafts/[id]/discard` — `internal`-only,
+   same gate as every other route in this contract — calls only
+   `discard_profile_draft`, validates a discard reason first
+   (`src/lib/restaurantProfileDrafts.js`'s `validateDiscardRequestInput`),
+   and is the only way this feature's own UI ever discards a draft. The
+   `/internal/import-inbox` `approved_internal` detail view gained a
+   "Discard Restaurant Profile Draft" action that reveals a confirm form
+   (a mandatory reason, a distinct "Confirm discard" click — never the
+   first click) — see `canDiscardCandidateDraft`. A successful discard
+   reloads the candidate list, so the "Create Restaurant Profile Draft"
+   button reappears only once `profile_draft` is genuinely `null` again —
+   nothing here ever starts a restart on its own.
+2. **A short discard reason is now mandatory, not optional** — this
+   contract's own "Open decisions" had left free-text-vs-enum open, but
+   never said the field could be skipped. `discard_note` is now required
+   and non-blank whenever `status = 'discarded'`, enforced both by
+   `discard_profile_draft` (a friendly, typed `P0014` before ever
+   attempting the update) and by the table's own constraint (see the
+   corrected shape below).
+
+**A real bug found and fixed during this round's own local Postgres
+validation, before any of this reached even a disposable database
+permanently.** The header table's original single check —
+`(status = 'discarded') = (discarded_by is not null and discarded_at is
+not null and discard_note is not null and btrim(discard_note) <> '')` —
+looks airtight but is not: because the right-hand side is one big `and`,
+`status = 'draft'` only requires *at least one* of the three sub-conditions
+to be false, not all three. A direct
+`update restaurant_profile_drafts set discard_note = 'x' where id = ...`
+against an *active* (`status = 'draft'`) row was verified to succeed
+against that original check (`discarded_by`/`discarded_at` stayed `null`,
+which alone satisfied the biconditional). Fixed by replacing the one
+combined check with **three independent per-column biconditionals** —
+`(status = 'discarded') = (discarded_by is not null)`,
+`(status = 'discarded') = (discarded_at is not null)`, and
+`(status = 'discarded') = (discard_note is not null and btrim(discard_note)
+<> '')` — each tying its own column to the discarded state on its own,
+closing the gap: none of the three can be set while `status = 'draft'`,
+and all three are required the moment it becomes `'discarded'`. Verified,
+both before (reproducing the bug) and after (confirming the fix), in a
+disposable Postgres container.
+
+**The "Promote anyway" duplicate flow was checked, not changed** — it
+already matched this contract exactly: the server (never the client)
+recomputes the possible-duplicate check on every call, including the
+confirmation call, and only proceeds once the caller's confirmation
+matches what the server itself just found; the confirmed relationship is
+stored via the already-designed `possible_duplicate_of_draft_id` column,
+making "who promoted despite which possible duplicate, and when" a plain
+query away (`promoted_by`/`promoted_at`/`possible_duplicate_of_draft_id`
+on the same row) — verified end to end in the same disposable container.
+No automatic merge, block, or name-based chain classification was added —
+none was needed; the existing warn-and-allow-with-audit design already
+covers this.
+
+**Tests**: `src/lib/restaurantProfileDrafts.test.js` grew from 40 to 60 —
+new unit tests for `validateDiscardRequestInput`/`discardValidationMessage`/
+`canDiscardCandidateDraft`, and new structural safety-net tests for the
+migration's three-biconditional fix (with an explicit regression guard
+against the old, buggy combined-check shape reappearing), the
+`discard_profile_draft` RPC's own guard ordering, the new discard route,
+the promote route's server-side-recomputation guarantee, and the page's
+discard confirm-form gating. Full suite: 495 tests passing.
+
 ## What this is
 
 A small, internal-only staging layer that lets a member of staff **turn one
@@ -221,6 +383,14 @@ account. Nothing here is scheduled, batch, or triggered by any other
 event.
 
 ### `promote_candidate_to_profile_draft(p_candidate_id, p_actor_user_id, p_possible_duplicate_of_draft_id default null, p_restarted_from_draft_id default null)`
+
+**Correction (2026-09-06, later still — implementation round): this
+signature was missing `p_draft_id`.** The application-generated id (see
+the `id` column above) has to reach this function somehow, and this
+section never named how. Implemented with `p_draft_id` as the first
+parameter — see "Implementation" at the top of this file for the full
+reasoning; this does not change the design, only completes a mechanical
+detail this section left implicit.
 
 Single-purpose RPC, mirroring `record_import_candidate_review`'s /
 `approve_pending_change`'s existing pattern (`security invoker`, fixed

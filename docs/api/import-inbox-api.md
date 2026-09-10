@@ -118,6 +118,18 @@ query parameters are optional and combine with AND.
   at all, never an error. Built for the client-side "Triage overview"
   section on `/internal/import-inbox` (see that page's own section
   below).
+- **`profile_draft` (addition, MARKET-05C, 2026-09-06, later still)**:
+  this candidate's *active* (`status = 'draft'`) Restaurant Profile Draft,
+  or `null` if none exists — `{ id, status, promoted_by, promoted_at,
+  restarted_from_draft_id, possible_duplicate_of_draft_id }`. Never a
+  discarded draft (out of this route's scope — see
+  `docs/api/restaurant-profile-drafts-schema.md`). Every active draft is
+  fetched in one bounded query and reduced in
+  `src/lib/restaurantProfileDrafts.js`'s
+  `buildActiveProfileDraftByCandidateId`; no per-candidate round trip.
+  This route still never creates or discards a draft — that only ever
+  happens via the separate `POST /api/internal/v1/profile-drafts` route,
+  documented in full in `docs/api/restaurant-profile-drafts-schema.md`.
 - `run_id` — exact `import_run_id` match.
 - `category` — exact match against `extracted_fields.category` (the
   OSM `amenity` value).
@@ -155,7 +167,8 @@ query parameters are optional and combine with AND.
       "quality_status": "incomplete",
       "missing_fields": ["address"],
       "review_status": "new",
-      "deferred_reason": null
+      "deferred_reason": null,
+      "profile_draft": null
     }
   ],
   "total_before_filters": 500,

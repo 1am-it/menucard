@@ -737,6 +737,36 @@ test('enrichAndFilterCandidates: attaches deferred_reason from deferredReasonByC
   assert.equal(candidates.find((c) => c.id === '2').deferred_reason, null, 'no entry in the map must default to null, never undefined or an error');
 });
 
+// ─── enrichAndFilterCandidates: profile_draft attachment (MARKET-05C,
+// added 2026-09-06, later still) — never computed here, only attached
+// from an already-reduced lookup, same "one query, one pure reducer"
+// pattern as review_status/enrichment_sources above. ─────────────────────
+
+test('enrichAndFilterCandidates: attaches null profile_draft when no active draft exists for a candidate', () => {
+  const records = [makeCandidate('1', 'run-a', { name: 'A', location: { lat: 51.58, lon: 4.78 } })];
+  const { candidates } = enrichAndFilterCandidates(records, {});
+  assert.equal(candidates[0].profile_draft, null);
+});
+
+test('enrichAndFilterCandidates: attaches the active draft from profileDraftByCandidateId when present', () => {
+  const records = [
+    makeCandidate('1', 'run-a', { name: 'A', location: { lat: 51.58, lon: 4.78 } }),
+    makeCandidate('2', 'run-a', { name: 'B', location: { lat: 51.59, lon: 4.79 } }),
+  ];
+  const draft = { id: 'd1', status: 'draft', promoted_by: 'u1', promoted_at: '2026-09-06T10:00:00Z', restarted_from_draft_id: null, possible_duplicate_of_draft_id: null };
+  const { candidates } = enrichAndFilterCandidates(records, {
+    profileDraftByCandidateId: { '1': draft },
+  });
+  assert.deepEqual(candidates.find((c) => c.id === '1').profile_draft, draft);
+  assert.equal(candidates.find((c) => c.id === '2').profile_draft, null);
+});
+
+test('enrichAndFilterCandidates: without any profileDraftByCandidateId, every candidate gets profile_draft: null — no crash, no undefined', () => {
+  const records = [makeCandidate('1', 'run-a', { name: 'A', location: { lat: 51.58, lon: 4.78 } })];
+  const { candidates } = enrichAndFilterCandidates(records, {});
+  assert.equal(candidates[0].profile_draft, null);
+});
+
 // ─── Triage overview (added 2026-09-06): computeReviewStatusCounts,
 // computeCandidateTriageBucket, matchesTriageSearch,
 // filterCandidatesForTriage — all pure, all operate on already-enriched
@@ -1735,7 +1765,7 @@ test('structural safety net: "Approved (internal only)" gets a short explanation
   const detail = source.slice(expandedStart, detailEnd);
   assert.match(
     detail,
-    /\{c\.review_status === 'approved_internal' && \(\s*<div[^>]*>\s*Internally approved only\. This does not publish the restaurant or create a public profile\.\s*<\/div>\s*\)\}/,
+    /\{c\.review_status === 'approved_internal' && \(\s*<div[^>]*>\s*<div style=\{\{ marginBottom: 8 \}\}>\s*Internally approved only\. This does not publish the restaurant or create a public profile\.\s*<\/div>/,
     'expected the explanation gated on review_status === "approved_internal", inside the expanded detail view'
   );
 

@@ -122,6 +122,14 @@ implementation (see its own ticket).
    imprecise equating of "Restaurant Profile Drafts" with `05B` itself —
    see the ticket file's own dated correction. No code, migration, or
    Supabase change made.
+   **Update (2026-09-06, later still): `05C` built, not yet applied
+   live.** Migration `0010`, both RPCs (`promote_candidate_to_profile_draft`,
+   `discard_profile_draft`), `POST /api/internal/v1/profile-drafts`, and
+   the "Create Restaurant Profile Draft" action on `/internal/import-inbox`
+   now exist — locally validated end to end in a disposable Postgres
+   container. `record_profile_draft_field_sync` and any discard UI/route
+   are explicitly deferred, not part of this round — see the ticket
+   file's own "Implementation" section for the full detail.
 6. MARKET-06 — publication snapshots (not started)
 7. MARKET-07 — market-scoped coverage metrics (not started)
 8. MARKET-08 — minimal market-aware consumer read path (not started; mandatory before any second market can launch — see `planning/architecture/market-data-foundation-plan.md`)

@@ -31,6 +31,7 @@ import {
   TRIAGE_SUMMARY_STATUSES,
   computeReviewStatusCounts,
 } from '@/src/lib/importInbox'
+import { canPromoteCandidateToProfileDraft, canDiscardCandidateDraft } from '@/src/lib/restaurantProfileDrafts'
 
 // Mirrors ops/scripts/import-breda-osm.config.js's own
 // ALLOWED_AMENITY_VALUES — the fixed, complete set of categories this
@@ -265,6 +266,37 @@ export default function ImportInboxPage() {
   const [triageCandidates, setTriageCandidates] = useState([])
   const [triageError, setTriageError] = useState(null)
   const [triageLoading, setTriageLoading] = useState(false)
+
+  // MARKET-05C — "Create Restaurant Profile Draft." Entirely independent
+  // of the review/enrichment state above: this is a separate, explicit
+  // action, never triggered by a review decision itself. Keyed by
+  // candidate id, same pattern as the review/enrichment submitting/error
+  // state. `profileDraftDuplicateByCandidateId` holds a pending
+  // possible-duplicate confirmation prompt (the flagged draft's id, or
+  // undefined/null when there is none) — set only from a 409 response,
+  // never guessed at client-side; confirming re-submits with that same id
+  // echoed back, per docs/api/restaurant-profile-drafts-schema.md's own
+  // "Duplicate handling."
+  const [profileDraftSubmittingId, setProfileDraftSubmittingId] = useState(null)
+  const [profileDraftErrorByCandidateId, setProfileDraftErrorByCandidateId] = useState({})
+  const [profileDraftDuplicateByCandidateId, setProfileDraftDuplicateByCandidateId] = useState({})
+
+  // MARKET-05C — "Discard Restaurant Profile Draft" (added 2026-09-06,
+  // later still, discard/duplicate follow-up round). `discardPromptOpenId`
+  // is the one candidate id (if any) currently showing the confirm form —
+  // clicking "Discard..." only ever opens this form, never discards
+  // directly; the form's own "Confirm discard" is the actual, separate
+  // confirmation action, disabled until a non-empty reason is typed (see
+  // canDiscardCandidateDraft's own doc comment — this is a UX gate only,
+  // the RPC's own check constraint is what actually enforces the
+  // requirement). `discardSuccessByCandidateId` shows the "discarded —
+  // a restart is always a new promotion" message once, after success;
+  // cleared the moment a new promotion attempt starts for that candidate.
+  const [discardPromptOpenId, setDiscardPromptOpenId] = useState(null)
+  const [discardNoteByCandidateId, setDiscardNoteByCandidateId] = useState({})
+  const [discardSubmittingId, setDiscardSubmittingId] = useState(null)
+  const [discardErrorByCandidateId, setDiscardErrorByCandidateId] = useState({})
+  const [discardSuccessByCandidateId, setDiscardSuccessByCandidateId] = useState({})
 
   useEffect(() => {
     const supabase = getSupabaseBrowser()
@@ -595,6 +627,107 @@ export default function ImportInboxPage() {
     }
     if (shouldCollapseCandidateCardAfterAction(outcome)) {
       setExpandedCandidateId((current) => (current === candidateId ? null : current))
+    }
+  }
+
+  // MARKET-05C — records exactly one promotion via POST
+  // /api/internal/v1/profile-drafts. `confirmPossibleDuplicateOfDraftId`
+  // is only ever set when the reviewer has explicitly clicked "Promote
+  // anyway" after seeing the duplicate warning below — never sent on the
+  // first attempt. A 409 with `possible_duplicate: true` is not an error
+  // to display; it stores the flagged draft id so the confirm prompt can
+  // render, per the API's own documented duplicate-handling contract.
+  // Disabled while submitting (see the button below) so a double click
+  // can never fire two overlapping requests; the server's own partial
+  // unique index physically prevents two active drafts either way.
+  async function promoteToProfileDraft(candidateId, confirmPossibleDuplicateOfDraftId) {
+    setProfileDraftSubmittingId(candidateId)
+    setProfileDraftErrorByCandidateId((prev) => ({ ...prev, [candidateId]: null }))
+    // A fresh promotion attempt supersedes any earlier "discarded" success
+    // message for this exact candidate — never lingers once staff have
+    // moved on to a genuine restart attempt.
+    setDiscardSuccessByCandidateId((prev) => ({ ...prev, [candidateId]: false }))
+    try {
+      const res = await fetch('/api/internal/v1/profile-drafts', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          candidate_id: candidateId,
+          ...(confirmPossibleDuplicateOfDraftId ? { confirm_possible_duplicate_of_draft_id: confirmPossibleDuplicateOfDraftId } : {}),
+        }),
+      })
+      const data = await res.json()
+      if (res.status === 409 && data.possible_duplicate) {
+        setProfileDraftDuplicateByCandidateId((prev) => ({ ...prev, [candidateId]: data.possible_duplicate_of_draft_id }))
+        return
+      }
+      if (!res.ok) {
+        setProfileDraftErrorByCandidateId((prev) => ({ ...prev, [candidateId]: data.error || 'Creating the draft failed' }))
+        return
+      }
+      setProfileDraftDuplicateByCandidateId((prev) => ({ ...prev, [candidateId]: null }))
+      await loadCandidates(session.access_token, {
+        runId: runIdFilter,
+        category: categoryFilter,
+        name: nameFilter,
+        duplicate: duplicateFilter,
+        quality: qualityFilter,
+        reviewStatus: reviewStatusFilter,
+      })
+    } catch {
+      setProfileDraftErrorByCandidateId((prev) => ({ ...prev, [candidateId]: 'Creating the draft failed' }))
+    } finally {
+      setProfileDraftSubmittingId((current) => (current === candidateId ? null : current))
+    }
+  }
+
+  // MARKET-05C — discards exactly one active draft via POST
+  // /api/internal/v1/profile-drafts/{draftId}/discard. The "Confirm
+  // discard" button that calls this is itself the explicit confirmation
+  // step (see the disabled condition below, requiring a non-empty
+  // reason) — this function never runs from the initial "Discard
+  // Restaurant Profile Draft" click, only from that confirm form's own
+  // submit. Reloading candidates afterward is what makes the "Create
+  // Restaurant Profile Draft" button reappear (profile_draft becomes
+  // null) — nothing here ever starts a restart itself; that always
+  // requires a separate, later, explicit click on that button.
+  async function discardProfileDraft(candidateId, draftId) {
+    const note = (discardNoteByCandidateId[candidateId] || '').trim()
+    if (!note) return
+    setDiscardSubmittingId(candidateId)
+    setDiscardErrorByCandidateId((prev) => ({ ...prev, [candidateId]: null }))
+    try {
+      const res = await fetch(`/api/internal/v1/profile-drafts/${draftId}/discard`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ note }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setDiscardErrorByCandidateId((prev) => ({ ...prev, [candidateId]: data.error || 'Discarding the draft failed' }))
+        return
+      }
+      setDiscardPromptOpenId((current) => (current === candidateId ? null : current))
+      setDiscardNoteByCandidateId((prev) => ({ ...prev, [candidateId]: '' }))
+      setDiscardSuccessByCandidateId((prev) => ({ ...prev, [candidateId]: true }))
+      await loadCandidates(session.access_token, {
+        runId: runIdFilter,
+        category: categoryFilter,
+        name: nameFilter,
+        duplicate: duplicateFilter,
+        quality: qualityFilter,
+        reviewStatus: reviewStatusFilter,
+      })
+    } catch {
+      setDiscardErrorByCandidateId((prev) => ({ ...prev, [candidateId]: 'Discarding the draft failed' }))
+    } finally {
+      setDiscardSubmittingId((current) => (current === candidateId ? null : current))
     }
   }
 
@@ -971,7 +1104,105 @@ export default function ImportInboxPage() {
                         </div>
                         {c.review_status === 'approved_internal' && (
                           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>
-                            Internally approved only. This does not publish the restaurant or create a public profile.
+                            <div style={{ marginBottom: 8 }}>
+                              Internally approved only. This does not publish the restaurant or create a public profile.
+                            </div>
+                            {canDiscardCandidateDraft(c) ? (
+                              <div style={{ display: 'grid', gap: 8 }}>
+                                <div style={{ color: 'var(--text-secondary)' }}>
+                                  Restaurant Profile Draft already created ({c.profile_draft.promoted_at}) — internal
+                                  only, still not published.
+                                </div>
+                                {discardPromptOpenId === c.id ? (
+                                  <div style={{ display: 'grid', gap: 6, maxWidth: 420 }}>
+                                    <textarea
+                                      placeholder="Why are you discarding this draft? (required)"
+                                      value={discardNoteByCandidateId[c.id] || ''}
+                                      onChange={(e) => setDiscardNoteByCandidateId((prev) => ({ ...prev, [c.id]: e.target.value }))}
+                                      rows={2}
+                                      style={{ ...selectStyle, resize: 'vertical', fontFamily: 'inherit' }}
+                                    />
+                                    {discardErrorByCandidateId[c.id] && (
+                                      <div style={{ color: 'var(--danger)' }}>{discardErrorByCandidateId[c.id]}</div>
+                                    )}
+                                    <div style={{ display: 'flex', gap: 8 }}>
+                                      <button
+                                        onClick={() => discardProfileDraft(c.id, c.profile_draft.id)}
+                                        disabled={discardSubmittingId === c.id || !(discardNoteByCandidateId[c.id] || '').trim()}
+                                        className="di-btn-primary"
+                                      >
+                                        {discardSubmittingId === c.id ? 'Discarding…' : 'Confirm discard'}
+                                      </button>
+                                      <button
+                                        onClick={() => {
+                                          setDiscardPromptOpenId(null)
+                                          setDiscardNoteByCandidateId((prev) => ({ ...prev, [c.id]: '' }))
+                                          setDiscardErrorByCandidateId((prev) => ({ ...prev, [c.id]: null }))
+                                        }}
+                                        disabled={discardSubmittingId === c.id}
+                                        className="di-link-btn"
+                                      >
+                                        Cancel
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <button
+                                    onClick={() => setDiscardPromptOpenId(c.id)}
+                                    className="di-link-btn"
+                                    style={{ color: 'var(--danger)' }}
+                                  >
+                                    Discard Restaurant Profile Draft
+                                  </button>
+                                )}
+                              </div>
+                            ) : (
+                              <>
+                                {discardSuccessByCandidateId[c.id] && (
+                                  <div style={{ color: 'var(--text-secondary)', marginBottom: 8 }}>
+                                    Restaurant Profile Draft discarded. A restart is always a new, explicit promotion
+                                    — it will get a new draft id.
+                                  </div>
+                                )}
+                                {profileDraftDuplicateByCandidateId[c.id] ? (
+                                  <div style={{ display: 'grid', gap: 6 }}>
+                                    <div style={{ color: 'var(--warning)' }}>
+                                      This looks like a possible duplicate of an already-promoted draft. Promoting
+                                      anyway is recorded and flagged for later review — it never merges the two.
+                                    </div>
+                                    <div style={{ display: 'flex', gap: 8 }}>
+                                      <button
+                                        onClick={() => promoteToProfileDraft(c.id, profileDraftDuplicateByCandidateId[c.id])}
+                                        disabled={profileDraftSubmittingId === c.id}
+                                        className="di-btn-primary"
+                                      >
+                                        {profileDraftSubmittingId === c.id ? 'Creating…' : 'Promote anyway'}
+                                      </button>
+                                      <button
+                                        onClick={() => setProfileDraftDuplicateByCandidateId((prev) => ({ ...prev, [c.id]: null }))}
+                                        disabled={profileDraftSubmittingId === c.id}
+                                        className="di-link-btn"
+                                      >
+                                        Cancel
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  canPromoteCandidateToProfileDraft(c) && (
+                                    <button
+                                      onClick={() => promoteToProfileDraft(c.id)}
+                                      disabled={profileDraftSubmittingId === c.id}
+                                      className="di-btn-primary"
+                                    >
+                                      {profileDraftSubmittingId === c.id ? 'Creating…' : 'Create Restaurant Profile Draft'}
+                                    </button>
+                                  )
+                                )}
+                              </>
+                            )}
+                            {profileDraftErrorByCandidateId[c.id] && (
+                              <div style={{ color: 'var(--danger)', marginTop: 6 }}>{profileDraftErrorByCandidateId[c.id]}</div>
+                            )}
                           </div>
                         )}
                         <div style={{ marginBottom: 14 }}>
