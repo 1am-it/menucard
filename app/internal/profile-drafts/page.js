@@ -49,6 +49,14 @@ export default function ProfileDraftsOverviewPage() {
   const router = useRouter()
   const [session, setSession] = useState(undefined) // undefined = loading, null = no session
   const [drafts, setDrafts] = useState([])
+  // True total, from the API — independent of DISCARDED_DRAFT_LIMIT on
+  // the route (app/api/internal/v1/profile-drafts/route.js). Every
+  // *active* draft is always present in `drafts` in full, but the
+  // discarded ones are bounded to the most recent N, so the summary
+  // below must never be derived from `drafts.filter(...)` for the
+  // discarded count — that would silently understate the real total
+  // once discard volume exceeds the route's own limit.
+  const [totalDiscarded, setTotalDiscarded] = useState(0)
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
 
@@ -74,9 +82,11 @@ export default function ProfileDraftsOverviewPage() {
       if (!res.ok) {
         setError(data.error || 'Failed to load Restaurant Profile Drafts')
         setDrafts([])
+        setTotalDiscarded(0)
         return
       }
       setDrafts(data.drafts || [])
+      setTotalDiscarded(data.total_discarded || 0)
     } catch {
       setError('Failed to load Restaurant Profile Drafts')
     } finally {
@@ -105,7 +115,12 @@ export default function ProfileDraftsOverviewPage() {
   }
 
   const activeCount = drafts.filter((d) => d.status === 'draft').length
-  const discardedCount = drafts.filter((d) => d.status === 'discarded').length
+  const discardedShownCount = drafts.filter((d) => d.status === 'discarded').length
+  // `drafts` only ever omits *discarded* rows (the route always fetches
+  // every active one) — a true mismatch here means the route's own
+  // DISCARDED_DRAFT_LIMIT was reached, so the list below is showing the
+  // most recent ones, not all of them.
+  const discardedTruncated = discardedShownCount < totalDiscarded
 
   return (
     <div className="di-page">
@@ -143,7 +158,16 @@ export default function ProfileDraftsOverviewPage() {
 
         {!loading && drafts.length > 0 && (
           <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16 }}>
-            {activeCount} active · {discardedCount} discarded
+            {activeCount} active · {totalDiscarded} discarded
+          </div>
+        )}
+
+        {!loading && discardedTruncated && (
+          <div className="di-banner di-banner-neutral" style={{ marginBottom: 16 }}>
+            <span>
+              Showing the {discardedShownCount} most recently discarded of {totalDiscarded} total — older discarded
+              drafts still exist and are not deleted, just not listed here.
+            </span>
           </div>
         )}
 

@@ -30,9 +30,19 @@
 // read-only list /internal/profile-drafts renders. Lists every draft,
 // active AND discarded, plus each one's source candidate's name (for
 // display only — never its full field set, to avoid duplicating
-// import-inbox's own candidate cards). Two bounded queries, never a
-// per-row round trip; this handler only ever reads — it issues no
-// create, mutate, or remove call of any kind.
+// import-inbox's own candidate cards). This handler only ever reads — it
+// issues no create, mutate, or remove call of any kind.
+//
+// **Update (2026-09-12, later still) — bounded query follow-up.** The
+// single, unfiltered `restaurant_profile_drafts` read above briefly had
+// no limit at all. Restored via two separate queries instead of one
+// plain `.limit()`: active drafts are always fetched in full (see
+// DISCARDED_DRAFT_LIMIT's own comment below for why that's safe), and
+// only the discarded side — this table's unbounded, ever-growing history
+// — carries a named limit. The page's own "N active / M discarded"
+// summary uses `total_discarded` (an exact count, independent of that
+// limit), so it can never understate how many discarded drafts actually
+// exist, even once real volume exceeds DISCARDED_DRAFT_LIMIT.
 
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/src/lib/supabaseAdmin'
@@ -45,6 +55,24 @@ import {
 } from '@/src/lib/restaurantProfileDrafts'
 import { generateUuidV7 } from '@/src/lib/uuidv7'
 
+const DRAFT_OVERVIEW_COLUMNS =
+  'id, source_candidate_id, status, promoted_at, discarded_at, discard_note, possible_duplicate_of_draft_id, restarted_from_draft_id'
+
+// One row per discard *event*; nothing here is ever deleted (discard is
+// permanent — see the schema contract's own "Discard is permanent"
+// section), so unlike active drafts this side of the table only ever
+// grows. Ordered `discarded_at` descending before this limit is applied,
+// so a truncation — if real discard volume ever grows enough to reach
+// it — only ever drops the OLDEST discarded rows, never the most recent
+// ones, and never affects `total_discarded` (a separate, exact count).
+// Known v1 limitation, not silently ignored: revisit (e.g. real
+// pagination) once discard volume materially exceeds this. Deliberately
+// generous relative to this table's real growth rate — each row requires
+// a deliberate, one-at-a-time internal promote-then-discard action, so
+// this is far larger headroom than RECORD_LIMIT gives the much
+// higher-volume raw import candidate list in the sibling route.
+const DISCARDED_DRAFT_LIMIT = 2000
+
 export async function GET(request) {
   const auth = await authenticateInternalRequest(request)
   if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status })
@@ -55,14 +83,40 @@ export async function GET(request) {
 
   const supabase = getSupabaseAdmin()
 
-  const { data: draftRows, error: draftsError } = await supabase
+  // Active drafts: always fetched in full, never limited. At most one
+  // per candidate that has ever been promoted (the migration's own
+  // partial unique index) — the same small, inherently-bounded set this
+  // file's own POST handler below already fetches unconditionally (see
+  // its "possible-duplicate check" query) — so a candidate's current
+  // active draft can never be hidden by DISCARDED_DRAFT_LIMIT, which
+  // only ever applies to the query below.
+  const { data: activeDraftRows, error: activeDraftsError } = await supabase
     .from('restaurant_profile_drafts')
-    .select(
-      'id, source_candidate_id, status, promoted_at, discarded_at, discard_note, possible_duplicate_of_draft_id, restarted_from_draft_id'
-    )
-  if (draftsError) return NextResponse.json({ error: 'Query failed' }, { status: 500 })
+    .select(DRAFT_OVERVIEW_COLUMNS)
+    .eq('status', 'draft')
+  if (activeDraftsError) return NextResponse.json({ error: 'Query failed' }, { status: 500 })
 
-  const candidateIds = [...new Set((draftRows || []).map((row) => row.source_candidate_id).filter(Boolean))]
+  const { data: discardedDraftRows, error: discardedDraftsError } = await supabase
+    .from('restaurant_profile_drafts')
+    .select(DRAFT_OVERVIEW_COLUMNS)
+    .eq('status', 'discarded')
+    .order('discarded_at', { ascending: false })
+    .limit(DISCARDED_DRAFT_LIMIT)
+  if (discardedDraftsError) return NextResponse.json({ error: 'Query failed' }, { status: 500 })
+
+  // Exact total, independent of DISCARDED_DRAFT_LIMIT — `head: true`
+  // returns only the count, never the rows themselves, so this stays a
+  // cheap, index-backed query even as the table grows well past the
+  // limit above.
+  const { count: totalDiscarded, error: discardedCountError } = await supabase
+    .from('restaurant_profile_drafts')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'discarded')
+  if (discardedCountError) return NextResponse.json({ error: 'Query failed' }, { status: 500 })
+
+  const draftRows = [...(activeDraftRows || []), ...(discardedDraftRows || [])]
+
+  const candidateIds = [...new Set(draftRows.map((row) => row.source_candidate_id).filter(Boolean))]
   const candidateNameById = {}
   if (candidateIds.length > 0) {
     const { data: candidateRows, error: candidatesError } = await supabase
@@ -75,7 +129,10 @@ export async function GET(request) {
     }
   }
 
-  return NextResponse.json({ drafts: buildProfileDraftOverviewRows(draftRows, candidateNameById) })
+  return NextResponse.json({
+    drafts: buildProfileDraftOverviewRows(draftRows, candidateNameById),
+    total_discarded: totalDiscarded || 0,
+  })
 }
 
 export async function POST(request) {

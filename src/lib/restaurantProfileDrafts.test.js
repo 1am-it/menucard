@@ -843,6 +843,51 @@ test('structural safety net: GET /api/internal/v1/profile-drafts is internal-onl
   }
 });
 
+// ─── Bounded-query follow-up (2026-09-12, later still) — the GET handler's
+// single, unfiltered restaurant_profile_drafts read briefly had no limit
+// at all; see the route's own updated header comment for the full
+// reasoning behind the two-query split below. ──────────────────────────
+
+test('structural safety net: the profile-drafts overview fetches every active draft unconditionally — DISCARDED_DRAFT_LIMIT must never apply to it', () => {
+  const source = fs.readFileSync(PROFILE_DRAFTS_ROUTE_PATH, 'utf8');
+  const fn = source.match(/export async function GET\(request\) \{[\s\S]*?\n\}/);
+  assert.ok(fn, 'expected to find the GET handler');
+
+  const activeQueryMatch = fn[0].match(/\.eq\('status', 'draft'\)\s*\n(\s*if \(activeDraftsError\))/);
+  assert.ok(activeQueryMatch, 'expected the active-drafts query, immediately followed by its own error check (i.e. nothing chained after .eq)');
+});
+
+test('structural safety net: the discarded side of the overview is bounded by a named limit, ordered newest-discarded-first', () => {
+  const source = fs.readFileSync(PROFILE_DRAFTS_ROUTE_PATH, 'utf8');
+  assert.match(source, /const DISCARDED_DRAFT_LIMIT = \d+/, 'expected a named limit constant, matching this project\'s own bounded-query convention');
+  const fn = source.match(/export async function GET\(request\) \{[\s\S]*?\n\}/);
+  assert.ok(fn, 'expected to find the GET handler');
+  assert.match(
+    fn[0],
+    /\.eq\('status', 'discarded'\)\s*\.order\('discarded_at', \{ ascending: false \}\)\s*\.limit\(DISCARDED_DRAFT_LIMIT\)/,
+    'the discarded-drafts query must be explicitly ordered newest-first and bounded'
+  );
+});
+
+test('structural safety net: total_discarded is computed via an independent, exact, head-only count query — never derived from the possibly-limited discarded rows', () => {
+  const source = fs.readFileSync(PROFILE_DRAFTS_ROUTE_PATH, 'utf8');
+  const fn = source.match(/export async function GET\(request\) \{[\s\S]*?\n\}/);
+  assert.ok(fn, 'expected to find the GET handler');
+  assert.match(fn[0], /\.select\('id', \{ count: 'exact', head: true \}\)/, 'expected a head-only exact count query, not a full row fetch');
+  assert.match(fn[0], /\.eq\('status', 'discarded'\)/, 'the count must be scoped to discarded rows, matching what the page displays as "discarded"');
+  assert.match(fn[0], /total_discarded: totalDiscarded/, 'the true count must be returned in the response, not silently dropped');
+});
+
+test('structural safety net: the overview GET handler remains strictly read-only after the bounded-query follow-up — still no insert/update/delete/rpc', () => {
+  const source = fs.readFileSync(PROFILE_DRAFTS_ROUTE_PATH, 'utf8');
+  const fn = source.match(/export async function GET\(request\) \{[\s\S]*?\n\}/);
+  assert.ok(fn, 'expected to find the GET handler');
+  assert.doesNotMatch(fn[0], /\.insert\(/);
+  assert.doesNotMatch(fn[0], /\.update\(/);
+  assert.doesNotMatch(fn[0], /\.delete\(/);
+  assert.doesNotMatch(fn[0], /\.rpc\(/);
+});
+
 test('structural safety net: the profile-drafts overview page never calls a mutating endpoint — only GET, and links out to Import Inbox for promote/discard', () => {
   const source = fs.readFileSync(PROFILE_DRAFTS_PAGE_PATH, 'utf8');
   assert.doesNotMatch(source, /method:\s*['"]POST['"]/, 'the overview page must never itself POST anything');
@@ -864,4 +909,21 @@ test('structural safety net: the profile-drafts overview page uses the same sess
   assert.match(source, /getSupabaseBrowser\(\)/);
   assert.match(source, /router\.replace\('\/internal\/login'\)/);
   assert.doesNotMatch(source, /from\(['"]restaurant_profile_drafts['"]\)/, 'must never query Supabase directly from the browser');
+});
+
+test('structural safety net: the profile-drafts overview page shows the true total discarded count from the API — never one derived only from the (possibly-bounded) fetched rows', () => {
+  const source = fs.readFileSync(PROFILE_DRAFTS_PAGE_PATH, 'utf8');
+  assert.match(source, /setTotalDiscarded\(data\.total_discarded \|\| 0\)/, 'the true count must come from the API response, not be computed client-side');
+  assert.doesNotMatch(
+    source,
+    /\{activeCount\} active · \{discardedShownCount\} discarded/,
+    'the headline must never be derived from the array of fetched rows for the discarded count — that undercounts once DISCARDED_DRAFT_LIMIT is reached'
+  );
+  assert.match(source, /\{activeCount\} active · \{totalDiscarded\} discarded/);
+});
+
+test('structural safety net: the profile-drafts overview page discloses when the discarded list is bounded, rather than silently presenting an incomplete history as complete', () => {
+  const source = fs.readFileSync(PROFILE_DRAFTS_PAGE_PATH, 'utf8');
+  assert.match(source, /discardedShownCount < totalDiscarded/, 'expected an explicit truncation check comparing the shown count to the true total');
+  assert.match(source, /most recently discarded of/i, 'expected a visible, honest disclosure when the list is not the full history');
 });
