@@ -1,13 +1,27 @@
-import { computeCoverageMetrics } from '@/src/services/coverageMetrics'
+'use client'
 
 // Internal-only, read-only dashboard (PLATFORM-01). Not linked from any
-// navigation, excluded from indexing below and via /public/robots.txt.
-// Not authenticated — see planning/specs/tickets/platform-01-coverage-baseline-dashboard.md
-// for why that's an accepted, temporary limitation of this ticket's scope.
-export const metadata = {
-  title: 'MenuCard — Coverage Dashboard (internal)',
-  robots: { index: false, follow: false },
-}
+// navigation, excluded from indexing via app/internal/layout.js's shared
+// robots metadata and /public/robots.txt's own `Disallow: /internal/`.
+//
+// **Security fix (2026-09-12): now genuinely internal-only on the server,
+// not merely unlinked.** Previously rendered with no authentication check
+// at all — accepted at the time this ticket was scoped, before
+// PLATFORM-05's internal-only mechanism existed; see
+// planning/specs/tickets/platform-01-coverage-baseline-dashboard.md's own
+// dated correction. Now reuses the exact same, already-proven session +
+// authenticated-fetch pattern every other internal page already uses
+// (src/lib/supabaseBrowser.js for the session,
+// /api/internal/v1/coverage for data — gated there by
+// authenticateInternalRequest + isInternalOnly('internal'), see
+// src/lib/internalAuth.js/src/lib/importInbox.js). No direct Supabase
+// access from the browser. The metrics computation itself
+// (src/services/coverageMetrics.js) is unchanged — only how it's reached
+// changed.
+
+import { useCallback, useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 
 function Metric({ label, count, total, pct, tone }) {
   return (
@@ -62,36 +76,102 @@ function BreakdownTable({ title, rows, sampleThreshold }) {
   )
 }
 
+const SHELL_STYLE = {
+  maxWidth: 960,
+  margin: '0 auto',
+  padding: '32px 20px 64px',
+  fontFamily: 'system-ui, sans-serif',
+  color: 'var(--text-primary)',
+  background: 'var(--bg)',
+  minHeight: '100vh',
+}
+
 export default function CoverageDashboardPage() {
-  const data = computeCoverageMetrics()
-  const generatedAt = new Date().toISOString()
+  const router = useRouter()
+  const [session, setSession] = useState(undefined) // undefined = loading, null = no session
+  const [data, setData] = useState(null)
+  const [generatedAt, setGeneratedAt] = useState(null)
+  const [error, setError] = useState(null)
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    const supabase = getSupabaseBrowser()
+    supabase.auth.getSession().then(({ data }) => {
+      if (!data.session) {
+        router.replace('/internal/login')
+      } else {
+        setSession(data.session)
+      }
+    })
+  }, [router])
+
+  const loadCoverage = useCallback(async (token) => {
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/internal/v1/coverage', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        setError(json.error || 'Failed to load the coverage dashboard')
+        setData(null)
+        return
+      }
+      setData(json)
+      setGeneratedAt(new Date().toISOString())
+    } catch {
+      setError('Failed to load the coverage dashboard')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (session) loadCoverage(session.access_token)
+  }, [session, loadCoverage])
+
+  if (session === undefined) {
+    return <main style={{ ...SHELL_STYLE, color: 'var(--text-muted)' }}>Loading…</main>
+  }
+
+  if (error) {
+    return (
+      <main style={SHELL_STYLE}>
+        <div
+          style={{
+            padding: 18,
+            borderRadius: 12,
+            border: '1px solid var(--danger-border)',
+            background: 'var(--danger-bg)',
+            color: 'var(--danger)',
+          }}
+        >
+          {error}
+        </div>
+      </main>
+    )
+  }
+
+  if (loading || !data) {
+    return <main style={{ ...SHELL_STYLE, color: 'var(--text-muted)' }}>Loading…</main>
+  }
 
   return (
-    <main
-      style={{
-        maxWidth: 960,
-        margin: '0 auto',
-        padding: '32px 20px 64px',
-        fontFamily: 'system-ui, sans-serif',
-        color: 'var(--text-primary)',
-        background: 'var(--bg)',
-        minHeight: '100vh',
-      }}
-    >
+    <main style={SHELL_STYLE}>
       <div
         style={{
           padding: '10px 14px',
           borderRadius: 8,
-          border: '1px dashed var(--warning-border)',
-          background: 'var(--warning-bg)',
-          color: 'var(--warning)',
+          border: '1px dashed var(--border)',
+          background: 'var(--bg-card)',
+          color: 'var(--text-secondary)',
           fontSize: 13,
           marginBottom: 20,
         }}
       >
-        Internal tool — not indexed, not linked from navigation, and not yet
-        access-controlled (no auth exists until PLATFORM-05). Do not share
-        this URL externally.
+        Internal tool — internal-only, not indexed, and not linked from navigation. Read-only; recomputed on every
+        load.
       </div>
 
       <h1 style={{ fontSize: 28, margin: '0 0 4px' }}>MenuCard — {data.city} Coverage Dashboard</h1>

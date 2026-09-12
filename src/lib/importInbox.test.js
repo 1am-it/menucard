@@ -906,6 +906,8 @@ const REPO_ROOT = path.resolve(__dirname, '..', '..');
 const REVIEW_ROUTE_PATH = path.join(REPO_ROOT, 'app/api/internal/v1/import-inbox/candidates/[id]/reviews/route.js');
 const CANDIDATES_ROUTE_PATH = path.join(REPO_ROOT, 'app/api/internal/v1/import-inbox/candidates/route.js');
 const RUNS_ROUTE_PATH = path.join(REPO_ROOT, 'app/api/internal/v1/import-inbox/runs/route.js');
+const COVERAGE_ROUTE_PATH = path.join(REPO_ROOT, 'app/api/internal/v1/coverage/route.js');
+const COVERAGE_PAGE_PATH = path.join(REPO_ROOT, 'app/internal/coverage/page.js');
 const MIGRATION_PATH = path.join(REPO_ROOT, 'supabase/migrations/0007_market05a_candidate_reviews.sql');
 const DEFERRED_REASON_MIGRATION_PATH = path.join(
   REPO_ROOT,
@@ -950,6 +952,59 @@ test('structural safety net: the runs list route never calls .update()/.delete()
   for (const identifier of FORBIDDEN_CANONICAL_IDENTIFIERS) {
     assert.equal(source.includes(identifier), false, `must never reference "${identifier}"`);
   }
+});
+
+// ─── Coverage Dashboard security fix (2026-09-12) — /internal/coverage
+// previously rendered with no authentication check at all. These tests
+// confirm it now uses the exact same, already-proven internal-only gate
+// every other route above already uses, rather than a new or different
+// mechanism, and that its metrics computation is reused unmodified. ─────
+
+test('structural safety net: GET /api/internal/v1/coverage is gated by authenticateInternalRequest + isInternalOnly, exactly like every other internal route — no session, no data', () => {
+  const source = fs.readFileSync(COVERAGE_ROUTE_PATH, 'utf8');
+  assert.match(source, /authenticateInternalRequest\(request\)/);
+  assert.match(source, /if \(!auth\.ok\) return NextResponse\.json\(\{ error: auth\.error \}, \{ status: auth\.status \}\)/, 'an unauthenticated caller must get authenticateInternalRequest\'s own 401, not coverage data');
+  assert.match(source, /isInternalOnly\(auth\.roles\)/, 'must reuse the exact same role check every other internal-only route uses — no new/different check');
+  assert.match(
+    source,
+    /if \(!isInternalOnly\(auth\.roles\)\) \{\s*return NextResponse\.json\(\{ error: [^}]+ \}, \{ status: 403 \}\)/,
+    'a caller without the internal role must get 403, not coverage data'
+  );
+});
+
+test('structural safety net: the coverage route is strictly read-only and reuses computeCoverageMetrics() unmodified — no regression in the underlying calculations', () => {
+  const source = fs.readFileSync(COVERAGE_ROUTE_PATH, 'utf8');
+  assert.doesNotMatch(source, /\.(update|delete|insert|upsert)\(/, 'this route must never write anything');
+  assert.doesNotMatch(source, /\.rpc\(/, 'this route must never call a write RPC');
+  assert.match(
+    source,
+    /import \{ computeCoverageMetrics \} from '@\/src\/services\/coverageMetrics'/,
+    'must reuse the existing, already-shipped metrics computation — never a reimplementation'
+  );
+  assert.match(
+    source,
+    /return NextResponse\.json\(computeCoverageMetrics\(\)\)/,
+    'the computed result must be returned exactly as computeCoverageMetrics() produces it — no route-level transformation that could silently change a figure'
+  );
+});
+
+test('structural safety net: the coverage page no longer claims to be unauthenticated, and fetches through the new gated route instead of computing locally', () => {
+  const source = fs.readFileSync(COVERAGE_PAGE_PATH, 'utf8');
+  assert.doesNotMatch(
+    source,
+    /not yet access-controlled|no auth exists|not authenticated/i,
+    'no visible text or comment may still claim this page is unauthenticated now that it is gated'
+  );
+  assert.doesNotMatch(source, /computeCoverageMetrics\(/, 'the page itself must no longer call the metrics function directly — only the gated route may');
+  assert.match(source, /fetch\('\/api\/internal\/v1\/coverage'/, 'must fetch through the new internal-only route');
+  assert.match(source, /Authorization: `Bearer \$\{token\}`/, 'must send the caller\'s own session token, the same pattern every other internal page uses');
+});
+
+test('structural safety net: the coverage page redirects an unauthenticated visitor to login, the same as every other internal page — no direct Supabase table access from the browser', () => {
+  const source = fs.readFileSync(COVERAGE_PAGE_PATH, 'utf8');
+  assert.match(source, /getSupabaseBrowser\(\)/);
+  assert.match(source, /router\.replace\('\/internal\/login'\)/);
+  assert.doesNotMatch(source, /\.from\(['"]/, 'must never query a Supabase table directly from the browser');
 });
 
 test('structural safety net: the migration grants only select+insert on import_candidate_reviews — no update, no delete, for any role', () => {

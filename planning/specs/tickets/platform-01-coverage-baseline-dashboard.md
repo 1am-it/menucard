@@ -69,6 +69,16 @@ None.
 - [ ] Explicitly documented that metrics reflect data presence, not
       provenance-verified trust (until `PLATFORM-03` lands).
 
+**Correction (2026-09-12): the "no authentication introduced" line above is
+no longer accurate.** It was true and correctly scoped at the time this
+ticket was written — `PLATFORM-05`, which introduced this project's
+internal-only authentication mechanism, did not exist yet. `/internal/coverage`
+has since been gated behind the exact same `authenticateInternalRequest`/
+`isInternalOnly('internal')` check every other internal page already uses,
+via a new `GET /api/internal/v1/coverage` route — no new role, no bypass,
+no different mechanism. Nothing else about this ticket's original scope
+(the metrics themselves, the breakdowns, the baseline document) changed.
+
 ## Suggested order
 
 First ticket in the `PLATFORM-*` track. No prerequisites.
