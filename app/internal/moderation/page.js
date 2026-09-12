@@ -12,6 +12,28 @@ import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import InternalNav from '@/src/components/InternalNav'
+import { formatFieldName, formatFieldValue, formatSourceLabel, NO_CURRENT_VALUE_LABEL } from '@/src/lib/moderationFormatting'
+
+// A small, neutral "who proposed/verified this" pill — same rounded-pill
+// language the Owner claims section below already uses for its
+// domain-match badge, reused here for a plain informational label rather
+// than a warning/success one.
+function SourceTag({ children }) {
+  return (
+    <span
+      style={{
+        fontSize: 11,
+        fontWeight: 600,
+        padding: '2px 8px',
+        borderRadius: 999,
+        background: 'var(--bg-elevated)',
+        color: 'var(--text-secondary)',
+      }}
+    >
+      {children}
+    </span>
+  )
+}
 
 export default function ModerationQueuePage() {
   const router = useRouter()
@@ -165,29 +187,61 @@ export default function ModerationQueuePage() {
       {!loading && items.length === 0 && !error && <p style={{ color: 'var(--text-muted)' }}>No pending changes.</p>}
 
       <div style={{ display: 'grid', gap: 14 }}>
-        {items.map(({ pending, current }) => (
+        {items.map(({ pending, current }) => {
+          const currentDisplay = current ? formatFieldValue(pending.field_name, current.value) || NO_CURRENT_VALUE_LABEL : NO_CURRENT_VALUE_LABEL
+          const proposedDisplay = formatFieldValue(pending.field_name, pending.proposed_value) || '(no details)'
+          return (
           <div
             key={pending.id}
             style={{ border: '1px solid var(--border)', borderRadius: 12, padding: 16, background: 'var(--bg-card)' }}
           >
             <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8 }}>
-              Restaurant {pending.restaurant_id} · {pending.field_name}
+              Restaurant {pending.restaurant_id} · {formatFieldName(pending.field_name)}
               {pending.field_ref ? ` · ${pending.field_ref}` : ''}
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, marginBottom: 12 }}>
               <div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Current ({current?.source ?? 'none'})</div>
-                <pre style={{ fontSize: 13, whiteSpace: 'pre-wrap', margin: 0 }}>
-                  {current ? JSON.stringify(current.value, null, 2) : '—'}
-                </pre>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>
+                  <span>Current</span>
+                  {current && <SourceTag>{formatSourceLabel(current.source)}</SourceTag>}
+                </div>
+                <div style={{ fontSize: 14, color: current ? 'var(--text-primary)' : 'var(--text-muted)', fontStyle: current ? 'normal' : 'italic' }}>
+                  {currentDisplay}
+                </div>
               </div>
               <div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Proposed ({pending.proposed_source})</div>
-                <pre style={{ fontSize: 13, whiteSpace: 'pre-wrap', margin: 0 }}>
-                  {JSON.stringify(pending.proposed_value, null, 2)}
-                </pre>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>
+                  <span>Proposed</span>
+                  <SourceTag>{formatSourceLabel(pending.proposed_source)}</SourceTag>
+                </div>
+                <div style={{ fontSize: 14, color: 'var(--text-primary)' }}>{proposedDisplay}</div>
               </div>
             </div>
+
+            {pending.decision_note && (
+              <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 12 }}>Note: {pending.decision_note}</div>
+            )}
+
+            <details style={{ marginBottom: 12 }}>
+              <summary style={{ fontSize: 12, color: 'var(--text-muted)', cursor: 'pointer' }}>Technical details</summary>
+              <pre
+                style={{
+                  fontSize: 12,
+                  whiteSpace: 'pre-wrap',
+                  overflowX: 'auto',
+                  wordBreak: 'break-word',
+                  marginTop: 8,
+                  marginBottom: 0,
+                  padding: 10,
+                  borderRadius: 8,
+                  background: 'var(--bg-elevated)',
+                  color: 'var(--text-secondary)',
+                }}
+              >
+                {JSON.stringify({ pending, current }, null, 2)}
+              </pre>
+            </details>
+
             <div style={{ display: 'flex', gap: 8 }}>
               <button
                 onClick={() => decide(pending.id, 'approve')}
@@ -220,7 +274,8 @@ export default function ModerationQueuePage() {
               </button>
             </div>
           </div>
-        ))}
+          )
+        })}
       </div>
 
       <h2 style={{ fontSize: 20, margin: '36px 0 16px' }}>Owner claims</h2>

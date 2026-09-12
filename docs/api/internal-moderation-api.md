@@ -113,6 +113,49 @@ here. The moderation page never queries Supabase directly — it calls this
 API with the session's `access_token`, exactly like any other authenticated
 client of these routes.
 
+## Moderation queue UI — proposal presentation (added 2026-09-12)
+
+`/internal/moderation` renders each pending item from the `GET .../pending`
+response above as a **human-readable diff**, not the raw JSON shapes shown
+in that response example — those shapes are still the real wire format;
+only how the browser displays them changed. Implemented in
+`app/internal/moderation/page.js` using the pure formatting helpers in
+`src/lib/moderationFormatting.js` (unit- and structurally-tested in
+`src/lib/moderationFormatting.test.js`):
+
+- Every proposal shows, by default: a readable field name (`formatFieldName`
+  — e.g. `openingHours` → "Opening hours"), the current value, the proposed
+  value, and a readable source label (`formatSourceLabel` — e.g. `imported`
+  → "Imported") for both `current.source` and `pending.proposed_source`.
+- `price` values render as a plain amount (`formatPrice` — `priceDisplay`
+  when present, otherwise derived from `priceValue`, e.g. `€21,00`; or
+  "Price on request" for `priceOnRequest`) and `allergens` values (the
+  `{scheme, code}[]` shape from `docs/api/canonical-restaurant-menu-schema.md`)
+  render as a plain comma-separated code list — never
+  `{"priceValue":21,"priceDisplay":"€21,00"}`-style JSON. `openingHours`,
+  `reservationMethod`, and `itemAvailability` have no fixed value schema
+  yet (see that same schema doc), so they render through a generic,
+  schema-agnostic humanizer (`humanizeValue`) that turns any object into
+  readable `Key: value` segments instead of JSON — a dedicated formatter
+  can be added the same way `formatPrice`/`formatAllergens` were, once/if
+  one of those fields gets a concrete documented shape.
+- A missing current value — no `field_provenance` row exists yet for that
+  `(restaurant_id, field_name, field_ref)`, or one exists but its own
+  `value` is itself `null` — renders as the exact string **"Geen huidige
+  waarde"**, never `null`, `none`, or JSON.
+- Raw JSON (the full `{ pending, current }` payload) is never visible by
+  default. It is available only inside a native, **closed-by-default**
+  `<details><summary>Technical details</summary>...</details>` element per
+  proposal — a user must deliberately open it to see the underlying
+  payload.
+
+**This is a presentation-only change.** It does not alter this document's
+request/response contracts, the `GET`/`approve`/`reject` endpoints
+themselves, `authenticateInternalRequest`/the `isEditor` role check, or the
+append-only `pending_changes`/`field_provenance` audit behavior described
+above — Approve and Reject still call exactly the same endpoints, with the
+same authorization, validation, and error handling.
+
 ## What has been verified
 
 Verified against a real Supabase project (2026-08-31), with the existing

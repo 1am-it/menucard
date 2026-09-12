@@ -67,6 +67,23 @@ evidence, provenance recorded on decision.
 - [ ] Internal/admin surface — exempt from the consumer performance budget
       per [[009-consumer-vs-internal-performance-budget]].
 
+**Correction (2026-09-12): the "Scope" section's mockup-pattern bullet is
+now actually implemented as described.** This ticket's original scope
+called for the queue UI to follow the mockup's readable "Oud €18,50
+(imported) → Nieuw €19,50 (community + foto menu)" pattern, but the
+version that originally shipped instead rendered `current`/proposed
+values as raw `JSON.stringify` output. Closed via a presentation-only
+rework (`app/internal/moderation/page.js` +
+`src/lib/moderationFormatting.js`, documented in
+`docs/api/internal-moderation-api.md`'s own "Moderation queue UI —
+proposal presentation" section): a readable field name, current value,
+proposed value, and source label per proposal; a missing current value
+reads as "Geen huidige waarde"; raw JSON is only ever available inside a
+closed-by-default "Technical details" `<details>` element. Approve/reject,
+`PLATFORM-05`'s authorization, and the append-only
+`pending_changes`/`field_provenance` behavior this ticket's own scope and
+acceptance criteria already required are unchanged by this rework.
+
 ## Suggested order
 
 Sixth ticket — second of the internal-write wave.
