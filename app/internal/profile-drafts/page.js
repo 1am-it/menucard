@@ -18,6 +18,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
+import InternalNav from '@/src/components/InternalNav'
 
 const STATUS_LABELS = {
   draft: 'Active',
@@ -98,12 +99,6 @@ export default function ProfileDraftsOverviewPage() {
     if (session) loadDrafts(session.access_token)
   }, [session, loadDrafts])
 
-  async function signOut() {
-    const supabase = getSupabaseBrowser()
-    await supabase.auth.signOut()
-    router.replace('/internal/login')
-  }
-
   if (session === undefined) {
     return (
       <div className="di-page">
@@ -125,11 +120,10 @@ export default function ProfileDraftsOverviewPage() {
   return (
     <div className="di-page">
       <main className="di-main">
+        <InternalNav accessToken={session.access_token} />
+
         <div className="di-topbar">
           <h1 className="di-title">Restaurant Profile Drafts</h1>
-          <button onClick={signOut} className="di-signout">
-            Sign out
-          </button>
         </div>
 
         <div className="di-banner di-banner-info" style={{ marginBottom: 16 }}>

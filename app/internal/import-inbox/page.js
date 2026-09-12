@@ -13,6 +13,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
+import InternalNav from '@/src/components/InternalNav'
 import {
   ALLOWED_REVIEW_STATUSES,
   ALLOWED_REJECTION_REASONS,
@@ -553,12 +554,6 @@ export default function ImportInboxPage() {
     }
   }, [session, runIdFilter, loadTriageCandidates])
 
-  async function signOut() {
-    const supabase = getSupabaseBrowser()
-    await supabase.auth.signOut()
-    router.replace('/internal/login')
-  }
-
   // MARKET-05A — expand/collapse one candidate's detail view. Fetches its
   // review and enrichment history lazily, only on first expand, not on
   // every render.
@@ -893,11 +888,10 @@ export default function ImportInboxPage() {
   return (
     <div className="di-page">
       <main className="di-main">
+      <InternalNav accessToken={session.access_token} />
+
       <div className="di-topbar">
         <h1 className="di-title">Dashboard imported Restaurant Data</h1>
-        <button onClick={signOut} className="di-signout">
-          Sign out
-        </button>
       </div>
 
       <div className="di-banner di-banner-neutral">

@@ -11,6 +11,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
+import InternalNav from '@/src/components/InternalNav'
 
 export default function ModerationQueuePage() {
   const router = useRouter()
@@ -124,12 +125,6 @@ export default function ModerationQueuePage() {
     }
   }
 
-  async function signOut() {
-    const supabase = getSupabaseBrowser()
-    await supabase.auth.signOut()
-    router.replace('/internal/login')
-  }
-
   if (session === undefined) {
     return <main style={{ padding: 40, fontFamily: 'system-ui, sans-serif' }}>Loading…</main>
   }
@@ -144,22 +139,10 @@ export default function ModerationQueuePage() {
         color: 'var(--text-primary)',
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+      <InternalNav accessToken={session.access_token} />
+
+      <div style={{ margin: '20px 0' }}>
         <h1 style={{ fontSize: 24, margin: 0 }}>Moderation queue</h1>
-        <button
-          onClick={signOut}
-          style={{
-            fontSize: 13,
-            background: 'none',
-            border: '1px solid var(--border)',
-            borderRadius: 8,
-            padding: '6px 10px',
-            cursor: 'pointer',
-            color: 'var(--text-secondary)',
-          }}
-        >
-          Sign out
-        </button>
       </div>
 
       {error && (

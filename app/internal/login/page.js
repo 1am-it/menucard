@@ -4,6 +4,12 @@
 // browser strictly for session/login (src/lib/supabaseBrowser.js) — it
 // never queries data directly; that always goes through
 // /api/internal/v1/... with the resulting session's access_token.
+//
+// **PLATFORM-11 (Phase 2): post-sign-in destination is now always
+// `/internal`**, never a specific module — every account, regardless of
+// role, lands on the role-aware home page, which resolves its own
+// `staff_roles` and shows only what they unlock. See that ticket's
+// "Design decision — login destination and role-based access."
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -27,7 +33,7 @@ export default function InternalLoginPage() {
         setError(signInError.message)
         return
       }
-      router.push('/internal/moderation')
+      router.push('/internal')
     } catch (err) {
       setError(err.message)
     } finally {

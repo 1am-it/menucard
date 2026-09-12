@@ -37,6 +37,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
+import InternalNav from '@/src/components/InternalNav'
 
 function IconLock() {
   return (
@@ -236,8 +237,10 @@ export default function CoverageDashboardPage() {
   if (error) {
     return (
       <main style={SHELL_STYLE}>
+        <InternalNav accessToken={session.access_token} />
         <div
           style={{
+            marginTop: 20,
             padding: 18,
             borderRadius: 'var(--radius-lg)',
             border: '1px solid var(--danger-border)',
@@ -252,12 +255,18 @@ export default function CoverageDashboardPage() {
   }
 
   if (loading || !data) {
-    return <main style={{ ...SHELL_STYLE, color: 'var(--text-muted)' }}>Loading…</main>
+    return (
+      <main style={SHELL_STYLE}>
+        <InternalNav accessToken={session.access_token} />
+        <p style={{ marginTop: 20, color: 'var(--text-muted)' }}>Loading…</p>
+      </main>
+    )
   }
 
   return (
     <main style={SHELL_STYLE}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap', marginBottom: 24 }}>
+      <InternalNav accessToken={session.access_token} />
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap', marginTop: 20, marginBottom: 24 }}>
         <div>
           <h1 style={{ fontSize: 28, margin: '0 0 4px' }}>MenuCard — {data.city} Coverage Dashboard</h1>
           <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: 0 }}>Read-only, recomputed on every load. Generated {generatedAt}.</p>

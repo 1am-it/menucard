@@ -2066,3 +2066,61 @@ mark.search-highlight {
 @media (max-width: 420px) {
   .di-summary-card { flex: 1 1 100%; }
 }
+
+/* PLATFORM-11 — shared, role-aware internal navigation shell
+   (src/components/InternalNav.js). Mounted individually on /internal and
+   every existing authenticated internal page. A single flex-wrapping row
+   rather than a hamburger/overlay: on narrow viewports the links simply
+   wrap onto additional lines, so mobile needs no separate JS-driven
+   collapse mechanism and no new dependency. Same shared token system as
+   the rest of this file — no colors hardcoded here either. */
+.internal-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  padding: 10px 14px;
+  margin-bottom: 4px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+}
+.internal-nav-home {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: var(--radius-pill);
+}
+.internal-nav-home[aria-current="page"] { background: var(--green-faint); color: var(--green); }
+.internal-nav-link {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: var(--radius-pill);
+}
+.internal-nav-link:hover { color: var(--text-primary); }
+.internal-nav-link[aria-current="page"] { background: var(--green-faint); color: var(--green); }
+.internal-nav-note {
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 6px 4px;
+}
+.internal-nav-signout {
+  margin-left: auto;
+  font-size: 13px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 6px 12px;
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+.internal-nav-signout:hover { border-color: var(--border-hover); color: var(--text-primary); }
+
+@media (max-width: 420px) {
+  .internal-nav-signout { margin-left: 0; }
+}
