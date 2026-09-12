@@ -1896,6 +1896,35 @@ round)" section for the full before/after transcript.
 **Tests**: `src/lib/restaurantProfileDrafts.test.js` grew from 40 to 60
 tests. Full suite: 495 tests, all passing.
 
+**Update (2026-09-12): migration `0010` applied live, the app-code
+release shipped separately, and a controlled production smoke test (one
+real candidate: promote, visual confirm, discard with a mandatory
+reason, visual confirm) completed successfully.** Next step built: a
+small, `internal`-only, read-only-by-default **Restaurant Profile Drafts
+overview** (`GET /api/internal/v1/profile-drafts`, `/internal/profile-drafts`)
+listing every draft — active and discarded — with its source candidate's
+name, status, creation time, and duplicate/restart relationship (each
+resolved to the *other* draft's candidate name, never a bare id). No
+create/discard/sync/publish action was added to this page — promoting
+and discarding still only happen on `/internal/import-inbox`, linked
+from every row. No per-field fact (address/phone/website) is repeated
+here, to avoid duplicating the import-review queue. Full detail:
+`docs/api/restaurant-profile-drafts-schema.md`'s own "Implementation
+(2026-09-12)" section, including the residual, unconfirmed mobile-visual
+item recorded there. Full suite: 504 tests, all passing.
+
+**Update (2026-09-12, later still): the `/internal/import-inbox`
+candidate detail card was visually rebuilt** against two new mockups
+(`docs/mockups/restaurant-profile-drafts-v1.png`/`-detail-v1.png`) — a
+presentation/information-hierarchy change only, no new field, route,
+mutation, or business rule. A compact status row (candidate status,
+completeness, draft lineage), a single primary action, and three
+accordions (Review decision/Enrichment/History & sources, the last a
+merged, human-readable timeline) replace the previous flat stack of
+sections. Full detail: `docs/api/restaurant-profile-drafts-schema.md`'s
+own "Presentation rebuild (2026-09-12, later still)" section. Full suite:
+522 tests, all passing.
+
 ## MARKET-05B — Normalization & deduplication (placeholder, untouched)
 
 Original scope, unchanged by this document: matching and deduplicating

@@ -167,6 +167,7 @@ function enrichAndFilterCandidates(records, filters) {
   const enrichmentSourceByCandidateId = opts.enrichmentSourceByCandidateId || {};
   const deferredReasonByCandidateId = opts.deferredReasonByCandidateId || {};
   const profileDraftByCandidateId = opts.profileDraftByCandidateId || {};
+  const latestDiscardedDraftByCandidateId = opts.latestDiscardedDraftByCandidateId || {};
 
   const enriched = records.map((record) => {
     const enrichmentSource = enrichmentSourceByCandidateId[record.id] || {};
@@ -201,6 +202,14 @@ function enrichAndFilterCandidates(records, filters) {
       // active Restaurant Profile Draft, if any — null otherwise. Never
       // computed here; see this function's own top comment.
       profile_draft: profileDraftByCandidateId[record.id] || null,
+      // Added 2026-09-12 for the candidate detail card's "Previous
+      // profile draft discarded" line — this candidate's single
+      // most-recently-discarded draft, if any, regardless of whether it
+      // also currently has an active one (buildDraftLineageSummary in
+      // src/lib/restaurantProfileDrafts.js decides which one "wins" for
+      // display). Never computed here; see this function's own top
+      // comment.
+      latest_discarded_draft: latestDiscardedDraftByCandidateId[record.id] || null,
     };
   });
 
@@ -745,6 +754,78 @@ function computeNormalizedFields(fields) {
   return { fields: result, details };
 }
 
+// ─── Candidate detail card: merged, human-readable history (added
+// 2026-09-12 for the mockup-driven presentation rebuild — see
+// docs/mockups/restaurant-profile-drafts-detail-v1.png's "History &
+// sources" accordion). Combines one candidate's review-decision rows and
+// enrichment rows (already fetched separately by the page, exactly as
+// before — this adds no query of its own) into a single, newest-first
+// event list, so a reviewer reads one timeline instead of two separate
+// lists. Every field a review/enrichment row already carries (status,
+// rejection/deferred reason, note, field_name, value, source_url, the
+// raw timestamp) is still present on each event — nothing is dropped,
+// only reordered and merged; the page decides what to show prominently
+// vs. de-emphasized. ─────────────────────────────────────────────────────
+
+/**
+ * Normalizes one review row into a timeline event. Pure; the page still
+ * owns turning `status`/`rejectionReason`/`deferredReason` into their
+ * human labels (REVIEW_STATUS_LABELS/REJECTION_REASON_LABELS/
+ * formatDeferredReasonLabel), exactly as it already does for the
+ * existing review-history list.
+ */
+function reviewRowToTimelineEvent(row) {
+  return {
+    id: `review-${row.id}`,
+    kind: 'review',
+    at: row.decided_at,
+    status: row.status,
+    rejectionReason: row.rejection_reason || null,
+    deferredReason: row.deferred_reason || null,
+    note: row.note || null,
+  };
+}
+
+/** Normalizes one enrichment row into a timeline event. Pure, same
+ * reasoning as reviewRowToTimelineEvent above. */
+function enrichmentRowToTimelineEvent(row) {
+  return {
+    id: `enrichment-${row.id}`,
+    kind: 'enrichment',
+    at: row.recorded_at,
+    fieldName: row.field_name,
+    value: row.value,
+    sourceUrl: row.source_url,
+  };
+}
+
+/**
+ * Merges one candidate's full review-decision history and full
+ * enrichment history into a single newest-first list of timeline
+ * events. `reviewRows`/`enrichmentRows` are exactly the arrays the page
+ * already lazily loads per candidate (`reviewsByCandidateId`/
+ * `enrichmentsByCandidateId` in app/internal/import-inbox/page.js) — this
+ * function issues no query and touches no other candidate's data. An
+ * event missing its own timestamp is skipped entirely (can't be placed
+ * on a timeline) rather than guessed at. Ties (identical timestamp) are
+ * broken by `id` descending only for deterministic test/render output —
+ * two real audit rows are never expected to share a timestamp at
+ * millisecond resolution.
+ */
+function buildCandidateHistoryTimeline(reviewRows, enrichmentRows) {
+  const events = [
+    ...(reviewRows || []).filter((r) => r && r.decided_at).map(reviewRowToTimelineEvent),
+    ...(enrichmentRows || []).filter((e) => e && e.recorded_at).map(enrichmentRowToTimelineEvent),
+  ];
+  events.sort((a, b) => {
+    const aTime = new Date(a.at).getTime();
+    const bTime = new Date(b.at).getTime();
+    if (bTime !== aTime) return bTime - aTime;
+    return a.id < b.id ? 1 : a.id > b.id ? -1 : 0;
+  });
+  return events;
+}
+
 // ─── Candidate-card UI decision: collapse only after a real success ────
 
 /**
@@ -986,6 +1067,7 @@ module.exports = {
   computeEnrichedFields,
   CANDIDATE_NORMALIZERS,
   computeNormalizedFields,
+  buildCandidateHistoryTimeline,
   shouldCollapseCandidateCardAfterAction,
   shouldOfferSharedSourceUrlAsWebsite,
   applySharedSourceUrlAsWebsite,

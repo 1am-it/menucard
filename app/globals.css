@@ -1996,6 +1996,57 @@ mark.search-highlight {
 .di-btn-primary:hover { background: var(--green-dim); }
 .di-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
+/* Candidate detail card — compact status overview, accordions, and
+   history timeline (MARKET-05C presentation rebuild, 2026-09-12).
+   Visual acceptance reference: docs/mockups/restaurant-profile-drafts-v1.png
+   and docs/mockups/restaurant-profile-drafts-detail-v1.png. Same shared
+   token system as the rest of .di- — no colors hardcoded here either. */
+
+.di-status-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 4px 0 14px; }
+.di-status-item {
+  display: flex; align-items: flex-start; gap: 10px; flex: 1 1 180px; min-width: 160px;
+  background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 10px 12px;
+}
+.di-status-icon { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.di-status-icon svg { width: 15px; height: 15px; }
+.di-status-body { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.di-status-label { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+.di-status-sublabel { font-size: 11.5px; color: var(--text-muted); }
+.di-status-icon--positive { background: var(--green-faint); color: var(--green); }
+.di-status-icon--warning  { background: var(--warning-bg); color: var(--warning); }
+.di-status-icon--danger   { background: var(--danger-bg); color: var(--danger); }
+.di-status-icon--info     { background: var(--tag-info-bg); color: var(--tag-info); }
+.di-status-icon--muted    { background: var(--bg-card); color: var(--text-muted); border: 1px solid var(--border); }
+
+.di-accordion { display: grid; gap: 8px; margin-top: 14px; }
+.di-accordion-item { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+.di-accordion-trigger {
+  display: flex; align-items: center; gap: 10px; padding: 12px 14px; cursor: pointer; list-style: none;
+}
+.di-accordion-trigger::-webkit-details-marker { display: none; }
+.di-accordion-trigger:focus-visible { outline: 2px solid var(--green); outline-offset: -2px; border-radius: var(--radius-sm); }
+.di-accordion-icon {
+  width: 30px; height: 30px; border-radius: 50%; background: var(--bg-card); color: var(--text-secondary);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.di-accordion-icon svg { width: 14px; height: 14px; }
+.di-accordion-heading { display: flex; flex-direction: column; gap: 1px; min-width: 0; flex: 1; }
+.di-accordion-title { font-size: 13.5px; font-weight: 700; color: var(--text-primary); }
+.di-accordion-subtitle { font-size: 11.5px; color: var(--text-muted); }
+.di-accordion-chevron { color: var(--text-faint); display: flex; flex-shrink: 0; transition: transform 0.15s; }
+.di-accordion-chevron svg { width: 16px; height: 16px; }
+.di-accordion-item[open] .di-accordion-chevron { transform: rotate(180deg); }
+.di-accordion-body { padding: 0 14px 14px; border-top: 1px solid var(--border); padding-top: 12px; }
+
+.di-timeline { list-style: none; margin: 0; padding: 0 0 0 4px; display: grid; gap: 16px; }
+.di-timeline-item { position: relative; padding-left: 20px; }
+.di-timeline-item::before { content: ''; position: absolute; left: 4px; top: 4px; width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+.di-timeline-item:not(:last-child)::after { content: ''; position: absolute; left: 7px; top: 14px; bottom: -16px; width: 2px; background: var(--border); }
+.di-timeline-date { font-size: 11px; font-weight: 700; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.3px; }
+.di-timeline-title { font-size: 13px; font-weight: 700; color: var(--text-primary); margin-top: 2px; }
+.di-timeline-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.di-timeline-meta { font-size: 11px; color: var(--text-faint); margin-top: 4px; word-break: break-all; }
+
 /* Mobile */
 @media (max-width: 720px) {
   .di-main { padding: 20px 14px 60px; }
@@ -2008,6 +2059,8 @@ mark.search-highlight {
      220px` would otherwise be read as a 220px preferred *height* instead
      of width, stretching the search field far taller than intended. */
   .di-filter-group, .di-search-wrap { width: 100%; flex: none; }
+  .di-status-item { flex: 1 1 100%; }
+  .di-accordion-trigger { padding: 14px; }
 }
 
 @media (max-width: 420px) {

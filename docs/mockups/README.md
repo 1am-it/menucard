@@ -47,6 +47,25 @@ reference instead of ad hoc judgment calls:
   that ticket's "information-hierarchy update" section; "Review
   Overview" is unchanged. This mockup still governs layout/visual
   language only, not exact text.
+- [Restaurant Profile Drafts mockup](./restaurant-profile-drafts-v1.png)
+  (addition, 2026-09-12) — visual reference for the MARKET-05C candidate
+  detail card on `/internal/import-inbox` (the "Create Restaurant Profile
+  Draft"/discard flow reached via a candidate's "Details & review"):
+  governs page layout, the existing Import Inbox context, the compact
+  status overview, the single primary action, the three secondary
+  accordions (Review decision/Enrichment/History & sources), and the
+  human-readable history timeline, at both desktop and mobile widths. Per
+  this file's own top-level note, it governs layout/visual language
+  only, not exact text; see
+  `docs/api/restaurant-profile-drafts-schema.md`'s own "Presentation
+  rebuild (2026-09-12)" section for the full implementation notes.
+  **Correction (2026-09-12, later still):** an earlier version of this
+  entry also referenced a second, companion mockup
+  (`restaurant-profile-drafts-detail-v1.png`) that additionally informed
+  some of the above. That file contains restaurant photography, which
+  does not fit this project's text-first/no-photography UI principle
+  (see `CLAUDE.md`), so it was never committed and is not listed here —
+  photography itself was never built, per that same principle.
 
 ## Naming
 

@@ -15,9 +15,12 @@ const {
   pickLatestDraftFactRow,
   buildDraftFieldsByDraftId,
   buildActiveProfileDraftByCandidateId,
+  buildLatestDiscardedProfileDraftByCandidateId,
+  buildDraftLineageSummary,
   canPromoteCandidateToProfileDraft,
   canDiscardCandidateDraft,
   findPossibleDuplicateDraftId,
+  buildProfileDraftOverviewRows,
 } = require('./restaurantProfileDrafts');
 
 // ─── Constants — kept in sync with the migration's own check constraints ──
@@ -127,6 +130,100 @@ test('buildActiveProfileDraftByCandidateId: carries restarted_from_draft_id and 
 test('buildActiveProfileDraftByCandidateId: returns an empty object given no rows, never throws', () => {
   assert.deepEqual(buildActiveProfileDraftByCandidateId([]), {});
   assert.deepEqual(buildActiveProfileDraftByCandidateId(null), {});
+});
+
+// ─── buildLatestDiscardedProfileDraftByCandidateId ──────────────────────
+
+test('buildLatestDiscardedProfileDraftByCandidateId: keeps only status="discarded" rows, keyed by source_candidate_id', () => {
+  const rows = [
+    { id: 'd1', source_candidate_id: 'c1', status: 'draft', promoted_at: '2026-09-06T10:00:00Z' },
+    { id: 'd2', source_candidate_id: 'c2', status: 'discarded', promoted_at: '2026-09-05T10:00:00Z', discarded_at: '2026-09-05T11:00:00Z', discard_note: 'Not a real place.' },
+  ];
+  const result = buildLatestDiscardedProfileDraftByCandidateId(rows);
+  assert.equal(result.c1, undefined, 'an active draft must never surface here');
+  assert.equal(result.c2.id, 'd2');
+  assert.equal(result.c2.discard_note, 'Not a real place.');
+});
+
+test('buildLatestDiscardedProfileDraftByCandidateId: a candidate discarded more than once keeps only the most recent, by discarded_at', () => {
+  const rows = [
+    { id: 'd1', source_candidate_id: 'c1', status: 'discarded', promoted_at: '2026-09-01T10:00:00Z', discarded_at: '2026-09-02T10:00:00Z', discard_note: 'first' },
+    { id: 'd2', source_candidate_id: 'c1', status: 'discarded', promoted_at: '2026-09-05T10:00:00Z', discarded_at: '2026-09-06T10:00:00Z', discard_note: 'second, more recent' },
+  ];
+  const result = buildLatestDiscardedProfileDraftByCandidateId(rows);
+  assert.equal(result.c1.id, 'd2');
+  assert.equal(result.c1.discard_note, 'second, more recent');
+});
+
+test('buildLatestDiscardedProfileDraftByCandidateId: ties on discarded_at are broken by the higher id', () => {
+  const rows = [
+    { id: 'd1', source_candidate_id: 'c1', status: 'discarded', promoted_at: '2026-09-01T10:00:00Z', discarded_at: '2026-09-02T10:00:00Z', discard_note: 'a' },
+    { id: 'd9', source_candidate_id: 'c1', status: 'discarded', promoted_at: '2026-09-01T10:00:00Z', discarded_at: '2026-09-02T10:00:00Z', discard_note: 'b' },
+  ];
+  const result = buildLatestDiscardedProfileDraftByCandidateId(rows);
+  assert.equal(result.c1.discard_note, 'b');
+});
+
+test('buildLatestDiscardedProfileDraftByCandidateId: returns an empty object given no rows, never throws', () => {
+  assert.deepEqual(buildLatestDiscardedProfileDraftByCandidateId([]), {});
+  assert.deepEqual(buildLatestDiscardedProfileDraftByCandidateId(null), {});
+});
+
+test('buildActiveProfileDraftByCandidateId + buildLatestDiscardedProfileDraftByCandidateId: both stay correct given the exact shape/order the candidates route\'s bounded query now returns — active drafts (discarded_at null) first, then discarded rows newest-first, capped by DRAFT_LIMIT', () => {
+  // Simulates `.order('discarded_at', { ascending: false, nullsFirst: true }).limit(DRAFT_LIMIT)`:
+  // c1 has an active draft; c2 was discarded twice (only the more recent
+  // one should win); c3's only discarded draft is comparatively old, but
+  // it must still surface correctly as long as it is present in the
+  // returned rows (this test does not simulate truncation itself — see
+  // the route-level tests for the truncation-safety argument for active
+  // drafts specifically).
+  const rows = [
+    { id: 'd-active', source_candidate_id: 'c1', status: 'draft', promoted_at: '2026-09-12T09:00:00Z', discarded_at: null },
+    { id: 'd-c2-new', source_candidate_id: 'c2', status: 'discarded', promoted_at: '2026-09-10T08:00:00Z', discarded_at: '2026-09-11T10:00:00Z', discard_note: 'newer' },
+    { id: 'd-c2-old', source_candidate_id: 'c2', status: 'discarded', promoted_at: '2026-09-01T08:00:00Z', discarded_at: '2026-09-02T10:00:00Z', discard_note: 'older' },
+    { id: 'd-c3-old', source_candidate_id: 'c3', status: 'discarded', promoted_at: '2026-08-01T08:00:00Z', discarded_at: '2026-08-02T10:00:00Z', discard_note: 'only one, old' },
+  ];
+  const active = buildActiveProfileDraftByCandidateId(rows);
+  const discarded = buildLatestDiscardedProfileDraftByCandidateId(rows);
+
+  assert.equal(active.c1.id, 'd-active', 'the active draft must never be affected by the discarded-history reduction');
+  assert.equal(active.c2, undefined);
+  assert.equal(active.c3, undefined);
+
+  assert.equal(discarded.c1, undefined, 'a candidate with an active draft has no *latest discarded* entry from this input');
+  assert.equal(discarded.c2.id, 'd-c2-new', 'the more recent of two discarded rows for the same candidate must win');
+  assert.equal(discarded.c3.id, 'd-c3-old', 'a candidate\'s sole discarded row must still surface even though it is comparatively old');
+});
+
+// ─── buildDraftLineageSummary ────────────────────────────────────────────
+
+test('buildDraftLineageSummary: "active" when an active draft is present, regardless of any discarded history', () => {
+  const candidate = {
+    profile_draft: { id: 'd2', status: 'draft', promoted_at: '2026-09-10T10:00:00Z' },
+    latest_discarded_draft: { id: 'd1', status: 'discarded', discarded_at: '2026-09-05T10:00:00Z', discard_note: 'old attempt' },
+  };
+  const result = buildDraftLineageSummary(candidate);
+  assert.equal(result.state, 'active');
+  assert.equal(result.promoted_at, '2026-09-10T10:00:00Z');
+  assert.equal(result.draft_id, 'd2');
+});
+
+test('buildDraftLineageSummary: "discarded" when there is no active draft but a discarded one exists', () => {
+  const candidate = {
+    profile_draft: null,
+    latest_discarded_draft: { id: 'd1', status: 'discarded', discarded_at: '2026-09-05T10:00:00Z', discard_note: 'old attempt' },
+  };
+  const result = buildDraftLineageSummary(candidate);
+  assert.equal(result.state, 'discarded');
+  assert.equal(result.discarded_at, '2026-09-05T10:00:00Z');
+  assert.equal(result.discard_note, 'old attempt');
+  assert.equal(result.draft_id, 'd1');
+});
+
+test('buildDraftLineageSummary: "none" when there is neither an active nor a discarded draft', () => {
+  assert.deepEqual(buildDraftLineageSummary({ profile_draft: null, latest_discarded_draft: null }), { state: 'none' });
+  assert.deepEqual(buildDraftLineageSummary({}), { state: 'none' });
+  assert.deepEqual(buildDraftLineageSummary(null), { state: 'none' });
 });
 
 // ─── canPromoteCandidateToProfileDraft ──────────────────────────────────
@@ -271,6 +368,7 @@ const PROFILE_DRAFTS_ROUTE_PATH = path.join(REPO_ROOT, 'app/api/internal/v1/prof
 const DISCARD_ROUTE_PATH = path.join(REPO_ROOT, 'app/api/internal/v1/profile-drafts/[id]/discard/route.js');
 const CANDIDATES_ROUTE_PATH = path.join(REPO_ROOT, 'app/api/internal/v1/import-inbox/candidates/route.js');
 const IMPORT_INBOX_PAGE_PATH = path.join(REPO_ROOT, 'app/internal/import-inbox/page.js');
+const PROFILE_DRAFTS_PAGE_PATH = path.join(REPO_ROOT, 'app/internal/profile-drafts/page.js');
 
 const FORBIDDEN_CANONICAL_IDENTIFIERS = ['restaurants', 'menus', 'dishes', 'data/restaurants.json', 'data/menus.json'];
 
@@ -437,18 +535,110 @@ test('structural safety net: the profile-drafts route generates the draft id app
   assert.match(source, /p_draft_id: draftId/);
 });
 
-test('structural safety net: the candidates list route reads active profile drafts read-only, never writes one', () => {
+test('structural safety net: the candidates list route reads all profile drafts (active and discarded) read-only, never writes one', () => {
+  // Extended 2026-09-12 to also resolve each candidate's most-recently-
+  // discarded draft (for the detail card's "Previous profile draft
+  // discarded" status) — the query itself is no longer filtered to
+  // `status = 'draft'` alone, but both reducers still only ever read.
   const source = fs.readFileSync(CANDIDATES_ROUTE_PATH, 'utf8');
   assert.match(source, /from\('restaurant_profile_drafts'\)/);
-  assert.match(source, /\.eq\('status', 'draft'\)/);
+  assert.match(source, /buildActiveProfileDraftByCandidateId\(drafts\)/);
+  assert.match(source, /buildLatestDiscardedProfileDraftByCandidateId\(drafts\)/);
   assert.doesNotMatch(source, /restaurant_profile_drafts[\s\S]{0,80}\.(insert|update|delete)\(/);
+});
+
+test('structural safety net: the widened drafts query is bounded by a named limit, same convention as REVIEW_LIMIT/ENRICHMENT_LIMIT/RECORD_LIMIT — never left unbounded', () => {
+  // Follow-up fix (2026-09-12, later still): the query above briefly had
+  // no `.limit()` at all once it stopped being scoped to `status =
+  // 'draft'` — this restores this route's own bounded-query convention.
+  const source = fs.readFileSync(CANDIDATES_ROUTE_PATH, 'utf8');
+  assert.match(source, /const DRAFT_LIMIT = \d+/, 'expected a named limit constant, matching REVIEW_LIMIT/ENRICHMENT_LIMIT/RECORD_LIMIT');
+  const draftsQueryMatch = source.match(
+    /\.from\('restaurant_profile_drafts'\)\s*\.select\([\s\S]*?\)\s*\.order\([\s\S]*?\)\s*\.limit\(DRAFT_LIMIT\)/
+  );
+  assert.ok(draftsQueryMatch, 'expected the drafts query itself to end in .order(...).limit(DRAFT_LIMIT), not be left unbounded');
+});
+
+test('structural safety net: the drafts query orders discarded_at descending with nulls first, so DRAFT_LIMIT can never truncate an active draft', () => {
+  // An active draft's discarded_at is always null; ordering nulls first
+  // on a descending sort guarantees every active draft sorts ahead of
+  // every discarded row, regardless of how large the discarded-draft
+  // history grows — buildActiveProfileDraftByCandidateId's result can
+  // never be affected by DRAFT_LIMIT.
+  const source = fs.readFileSync(CANDIDATES_ROUTE_PATH, 'utf8');
+  assert.match(source, /\.order\('discarded_at', \{ ascending: false, nullsFirst: true \}\)/);
 });
 
 test('structural safety net: the import-inbox page gates the "Create Restaurant Profile Draft" action on approved_internal and hides it once an active draft exists', () => {
   const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
   assert.match(source, /canPromoteCandidateToProfileDraft\(c\)/, 'the button must be gated by the pure, tested eligibility function');
   assert.match(source, /Create Restaurant Profile Draft/);
-  assert.match(source, /Restaurant Profile Draft already created/);
+  // Relocated 2026-09-12 from a standalone sentence into the compact
+  // status row's third item — still shown only when an active draft
+  // exists (buildDraftLineageSummary's 'active' state).
+  assert.match(source, /Profile draft created/);
+});
+
+// ─── Presentation rebuild (2026-09-12) — visual acceptance reference:
+// docs/mockups/restaurant-profile-drafts-v1.png and
+// docs/mockups/restaurant-profile-drafts-detail-v1.png. ─────────────────
+
+test('structural safety net: the candidate detail card never renders a restaurant photo — the mockups\' photos are decorative and explicitly out of scope', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  assert.doesNotMatch(source, /<img\b/i, 'no <img> element anywhere on this page');
+  assert.doesNotMatch(source, /background-image/i);
+  assert.doesNotMatch(source, /photo_url|image_url|photoUrl|imageUrl/);
+});
+
+test('structural safety net: the compact status row shows candidate status, completeness, and draft lineage, computed from already-existing data only', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  assert.match(source, /className="di-status-row"/);
+  const rowStart = source.indexOf('className="di-status-row"');
+  const rowEnd = source.indexOf("View audit details", rowStart);
+  assert.ok(rowStart >= 0 && rowEnd > rowStart, 'expected to find the status row and the audit link after it');
+  const row = source.slice(rowStart, rowEnd);
+  assert.match(row, /REVIEW_STATUS_LABELS\[c\.review_status\]/, 'candidate status must come from the same label map used elsewhere');
+  assert.match(row, /c\.quality_status === 'complete'/, 'completeness must come from the existing computeQualityStatus result');
+  assert.match(row, /draftLineage\.state/, 'draft lineage must come from buildDraftLineageSummary, never a separate ad hoc check');
+});
+
+test('structural safety net: "View audit details" links to the existing read-only profile-drafts overview — no new route, only when a draft exists', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  assert.match(source, /draftLineage\.state !== 'none' && \(/, 'the audit link must be gated — never shown for a candidate with no draft history at all');
+  assert.match(source, /href="\/internal\/profile-drafts"/, 'must link to the existing overview page, never a new destination');
+});
+
+test('structural safety net: the three secondary sections are native, dependency-free disclosure widgets — Review decision, Enrichment, History & sources', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  const accordionCount = (source.match(/className="di-accordion-item"/g) || []).length;
+  assert.equal(accordionCount, 3, 'expected exactly three accordion sections per candidate card');
+  assert.match(source, /<details className="di-accordion-item">[\s\S]{0,400}Review decision/);
+  assert.match(source, /<details className="di-accordion-item">[\s\S]{0,400}Enrichment/);
+  assert.match(source, /<details className="di-accordion-item" open>[\s\S]{0,400}History (&amp;|&) sources/, 'the history section must default to open, per both mockups');
+});
+
+test('structural safety net: the page never skips a heading level — no <h3> exists, so nothing between <h2> and <h4> is ever introduced', () => {
+  // Follow-up fix (2026-09-12, later still): the accordion rebuild
+  // removed every <h3> this page used to have for "Review history"/
+  // "Record a decision"/"Enrichment history" (the accordion's own
+  // <summary> is the accessible name for each section now, exactly like
+  // "1. Source"/"2. Fields" already were), but one <h4> ("Enrich missing
+  // business info") was accidentally left behind, jumping straight from
+  // this page's own <h2> "Review Overview" with nothing in between. Fixed
+  // by making that label a plain, bold, non-heading element, matching
+  // every other sub-label inside an accordion body.
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  const headingLevels = [...source.matchAll(/<h([1-6])[\s>]/g)].map((m) => Number(m[1]));
+  assert.deepEqual(headingLevels, [1, 2, 2], 'expected exactly the page title (h1) and the two h2 section titles — no h3/h4 anywhere');
+  assert.doesNotMatch(source, /<h4[\s>]/);
+  assert.match(source, /Enrich missing business info/, 'the label itself must still be present, just not as a heading');
+});
+
+test('structural safety net: promoting/discarding a draft still only ever calls the existing MARKET-05C routes — the redesign adds no new fetch target', () => {
+  const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
+  assert.match(source, /fetch\('\/api\/internal\/v1\/profile-drafts', \{/);
+  assert.match(source, /fetch\(`\/api\/internal\/v1\/profile-drafts\/\$\{draftId\}\/discard`, \{/);
+  assert.doesNotMatch(source, /\/api\/internal\/v1\/profile-drafts[^'"`]*\/(update|edit)\b/);
 });
 
 test('structural safety net: the promote button is disabled while a submission for that candidate is already in flight — never double-clickable', () => {
@@ -535,4 +725,143 @@ test('structural safety net: discarding never automatically starts a restart —
   const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
   const fn = source.match(/async function discardProfileDraft\(candidateId, draftId\) \{[\s\S]*?\n  \}/);
   assert.doesNotMatch(fn[0], /promoteToProfileDraft\(/, 'discardProfileDraft must never itself call promoteToProfileDraft');
+});
+
+// ─── Restaurant Profile Drafts overview (added 2026-09-12, the next step
+// after the production smoke test) — GET /api/internal/v1/profile-drafts
+// and /internal/profile-drafts, both strictly read-only. ─────────────────
+
+test('buildProfileDraftOverviewRows: shapes an active and a discarded draft, resolving candidate names, newest first', () => {
+  const rows = [
+    {
+      id: 'd1',
+      source_candidate_id: 'c1',
+      status: 'draft',
+      promoted_at: '2026-09-01T10:00:00Z',
+      discarded_at: null,
+      discard_note: null,
+      possible_duplicate_of_draft_id: null,
+      restarted_from_draft_id: null,
+    },
+    {
+      id: 'd2',
+      source_candidate_id: 'c2',
+      status: 'discarded',
+      promoted_at: '2026-09-02T10:00:00Z',
+      discarded_at: '2026-09-03T10:00:00Z',
+      discard_note: 'Wrong location',
+      possible_duplicate_of_draft_id: null,
+      restarted_from_draft_id: null,
+    },
+  ];
+  const names = { c1: 'De Kroon', c2: 'Cafe Bloem' };
+  const result = buildProfileDraftOverviewRows(rows, names);
+
+  assert.equal(result.length, 2);
+  // Newest promoted_at first.
+  assert.equal(result[0].id, 'd2');
+  assert.equal(result[0].candidate_name, 'Cafe Bloem');
+  assert.equal(result[0].status, 'discarded');
+  assert.equal(result[0].discarded_at, '2026-09-03T10:00:00Z');
+  assert.equal(result[0].discard_note, 'Wrong location');
+  assert.equal(result[1].id, 'd1');
+  assert.equal(result[1].candidate_name, 'De Kroon');
+  assert.equal(result[1].status, 'draft');
+  // An active draft must never carry discard fields, even if the row
+  // somehow had stray values for them.
+  assert.equal(result[1].discarded_at, null);
+  assert.equal(result[1].discard_note, null);
+});
+
+test('buildProfileDraftOverviewRows: resolves possible_duplicate_of_draft_id and restarted_from_draft_id to the OTHER draft\'s candidate name, never a raw id alone', () => {
+  const rows = [
+    { id: 'd1', source_candidate_id: 'c1', status: 'discarded', promoted_at: '2026-09-01T10:00:00Z', discarded_at: '2026-09-02T10:00:00Z', discard_note: 'closed' },
+    {
+      id: 'd2',
+      source_candidate_id: 'c1',
+      status: 'draft',
+      promoted_at: '2026-09-05T10:00:00Z',
+      restarted_from_draft_id: 'd1',
+    },
+    {
+      id: 'd3',
+      source_candidate_id: 'c2',
+      status: 'draft',
+      promoted_at: '2026-09-06T10:00:00Z',
+      possible_duplicate_of_draft_id: 'd2',
+    },
+  ];
+  const names = { c1: 'De Kroon', c2: 'De Kroon Centrum' };
+  const result = buildProfileDraftOverviewRows(rows, names);
+
+  const d3 = result.find((r) => r.id === 'd3');
+  assert.deepEqual(d3.possible_duplicate_of, { draft_id: 'd2', candidate_name: 'De Kroon' });
+
+  const d2 = result.find((r) => r.id === 'd2');
+  assert.deepEqual(d2.restarted_from, { draft_id: 'd1', candidate_name: 'De Kroon' });
+});
+
+test('buildProfileDraftOverviewRows: a candidate with no resolvable name still produces a row — null, never a crash or "undefined"', () => {
+  const result = buildProfileDraftOverviewRows(
+    [{ id: 'd1', source_candidate_id: 'c1', status: 'draft', promoted_at: '2026-09-01T10:00:00Z' }],
+    {}
+  );
+  assert.equal(result[0].candidate_name, null);
+  assert.equal(result[0].possible_duplicate_of, null);
+  assert.equal(result[0].restarted_from, null);
+});
+
+test('buildProfileDraftOverviewRows: empty input never throws, returns an empty list', () => {
+  assert.deepEqual(buildProfileDraftOverviewRows([], {}), []);
+  assert.deepEqual(buildProfileDraftOverviewRows(null, null), []);
+});
+
+test('buildProfileDraftOverviewRows: never includes a per-field fact (address/phone/website) — that stays on the source candidate\'s own card, never duplicated here', () => {
+  const result = buildProfileDraftOverviewRows(
+    [{ id: 'd1', source_candidate_id: 'c1', status: 'draft', promoted_at: '2026-09-01T10:00:00Z' }],
+    { c1: 'De Kroon' }
+  );
+  const keys = Object.keys(result[0]);
+  for (const forbidden of ['address', 'phone', 'website', 'extracted_fields', 'normalized_fields']) {
+    assert.equal(keys.includes(forbidden), false, `overview row must never carry "${forbidden}"`);
+  }
+});
+
+test('structural safety net: GET /api/internal/v1/profile-drafts is internal-only and strictly read-only — no insert/update/delete anywhere in its handler', () => {
+  const source = fs.readFileSync(PROFILE_DRAFTS_ROUTE_PATH, 'utf8');
+  const fn = source.match(/export async function GET\(request\) \{[\s\S]*?\n\}/);
+  assert.ok(fn, 'expected to find the GET handler');
+  assert.match(fn[0], /authenticateInternalRequest\(request\)/);
+  assert.match(fn[0], /isInternalOnly\(auth\.roles\)/);
+  assert.doesNotMatch(fn[0], /\.insert\(/, 'the overview list must never create a draft');
+  assert.doesNotMatch(fn[0], /\.update\(/, 'the overview list must never mutate a draft');
+  assert.doesNotMatch(fn[0], /\.delete\(/, 'the overview list must never delete anything');
+  assert.doesNotMatch(fn[0], /\.rpc\(/, 'the overview list must never call a write RPC');
+  assert.match(fn[0], /buildProfileDraftOverviewRows\(/);
+  for (const identifier of FORBIDDEN_CANONICAL_IDENTIFIERS) {
+    assert.equal(fn[0].includes(identifier), false, `must never reference "${identifier}"`);
+  }
+});
+
+test('structural safety net: the profile-drafts overview page never calls a mutating endpoint — only GET, and links out to Import Inbox for promote/discard', () => {
+  const source = fs.readFileSync(PROFILE_DRAFTS_PAGE_PATH, 'utf8');
+  assert.doesNotMatch(source, /method:\s*['"]POST['"]/, 'the overview page must never itself POST anything');
+  assert.doesNotMatch(source, /\/discard/, 'discarding must only ever happen on Import Inbox, never a direct link/call from this page');
+  assert.match(source, /fetch\('\/api\/internal\/v1\/profile-drafts'/);
+  assert.match(source, /href="\/internal\/import-inbox"/, 'must link out to the existing promote/discard flow rather than duplicate it');
+});
+
+test('structural safety net: the profile-drafts overview page states plainly that drafts are internal-only and never auto-published', () => {
+  const source = fs.readFileSync(PROFILE_DRAFTS_PAGE_PATH, 'utf8');
+  // Whitespace-tolerant: the actual JSX text wraps across lines/indentation
+  // in the source file, same convention already used elsewhere in this
+  // file for multi-line rendered text.
+  assert.match(source, /never\s+appears\s+on\s+a\s+public\s+restaurant\s+page\s+automatically/i);
+});
+
+test('structural safety net: the profile-drafts overview page uses the same session/auth pattern as every other internal page — no direct Supabase data access', () => {
+  const source = fs.readFileSync(PROFILE_DRAFTS_PAGE_PATH, 'utf8');
+  assert.match(source, /getSupabaseBrowser\(\)/);
+  assert.match(source, /router\.replace\('\/internal\/login'\)/);
+  assert.doesNotMatch(source, /from\(['"]restaurant_profile_drafts['"]\)/, 'must never query Supabase directly from the browser');
 });

@@ -30,8 +30,13 @@ import {
   hasVerifiedWebsiteForSuggestions,
   TRIAGE_SUMMARY_STATUSES,
   computeReviewStatusCounts,
+  buildCandidateHistoryTimeline,
 } from '@/src/lib/importInbox'
-import { canPromoteCandidateToProfileDraft, canDiscardCandidateDraft } from '@/src/lib/restaurantProfileDrafts'
+import {
+  canPromoteCandidateToProfileDraft,
+  canDiscardCandidateDraft,
+  buildDraftLineageSummary,
+} from '@/src/lib/restaurantProfileDrafts'
 
 // Mirrors ops/scripts/import-breda-osm.config.js's own
 // ALLOWED_AMENITY_VALUES — the fixed, complete set of categories this
@@ -186,6 +191,50 @@ function formatDuration(seconds) {
   const minutes = Math.floor(seconds / 60)
   const rest = seconds % 60
   return `${minutes}m ${rest}s`
+}
+
+// Presentation-only redesign (2026-09-12) — visual acceptance reference:
+// docs/mockups/restaurant-profile-drafts-detail-v1.png's "History &
+// sources" accordion. The short, human-readable date shown prominently
+// on each timeline row — the full raw timestamp is still shown, just
+// de-emphasized (di-timeline-meta), never hidden. Falls back to the raw
+// value for anything that doesn't parse, rather than showing "Invalid
+// Date" — never expected in practice (every event comes from a real
+// decided_at/recorded_at column), but a display helper should never
+// throw on unexpected input.
+function formatShortDate(value) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return date.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
+/** Turns one merged-timeline review event (src/lib/importInbox.js's own
+ * buildCandidateHistoryTimeline) into a short title + optional one-line
+ * description — reuses this page's own REVIEW_STATUS_LABELS/
+ * REJECTION_REASON_LABELS/formatDeferredReasonLabel, exactly the same
+ * labels the rest of this page already shows, so the timeline can never
+ * disagree with them. */
+function describeReviewTimelineEvent(event) {
+  const reasonLabel = event.rejectionReason
+    ? REJECTION_REASON_LABELS[event.rejectionReason] || event.rejectionReason
+    : event.deferredReason
+      ? formatDeferredReasonLabel(event.deferredReason)
+      : null
+  const statusLabel = event.status === 'approved_internal' ? 'Approved internally' : REVIEW_STATUS_LABELS[event.status] || event.status
+  return {
+    title: reasonLabel ? `${statusLabel} — ${reasonLabel}` : statusLabel,
+    description: event.note || null,
+  }
+}
+
+/** Same as describeReviewTimelineEvent above, for one merged-timeline
+ * enrichment event. */
+function describeEnrichmentTimelineEvent(event) {
+  const fieldLabel = ENRICHABLE_FIELD_LABELS[event.fieldName] || event.fieldName
+  return {
+    title: `${fieldLabel} enriched`,
+    description: event.value,
+  }
 }
 
 export default function ImportInboxPage() {
@@ -1091,427 +1140,551 @@ export default function ImportInboxPage() {
                       {expanded ? 'Hide details' : 'Details & review'}
                     </button>
 
-                    {expanded && (
-                      <div className="di-detail">
-                        <div className="di-banner di-banner-info" style={{ marginBottom: 12 }}>
-                          <span className="di-banner-icon">
-                            <IconShield />
-                          </span>
-                          <span>
-                            Read-only until you act: opening this never records anything, and closing it without choosing a
-                            status or saving an enrichment leaves no trace.
-                          </span>
-                        </div>
-                        {c.review_status === 'approved_internal' && (
-                          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>
-                            <div style={{ marginBottom: 8 }}>
-                              Internally approved only. This does not publish the restaurant or create a public profile.
+                    {expanded && (() => {
+                      const draftLineage = buildDraftLineageSummary(c)
+                      const StatusIcon = TRIAGE_STATUS_ICONS[c.review_status] || IconDocument
+                      const statusTone =
+                        c.review_status === 'approved_internal'
+                          ? 'positive'
+                          : c.review_status === 'rejected'
+                            ? 'danger'
+                            : c.review_status === 'needs_enrichment' || c.review_status === 'deferred'
+                              ? 'warning'
+                              : 'info'
+                      const statusSublabel =
+                        c.review_status === 'approved_internal'
+                          ? 'Internal only — not published'
+                          : c.review_status === 'needs_enrichment'
+                            ? 'More data required'
+                            : c.review_status === 'deferred'
+                              ? formatDeferredReasonLabel(c.deferred_reason) || 'Postponed'
+                              : c.review_status === 'rejected'
+                                ? 'Removed from the pipeline'
+                                : 'Not yet reviewed'
+                      const timelineEvents = buildCandidateHistoryTimeline(reviews, enrichmentsByCandidateId[c.id])
+                      return (
+                        <div className="di-detail">
+                          <div className="di-banner di-banner-info" style={{ marginBottom: 12 }}>
+                            <span className="di-banner-icon">
+                              <IconShield />
+                            </span>
+                            <span>
+                              Read-only until you act: opening this never records anything, and closing it without choosing
+                              a status or saving an enrichment leaves no trace.
+                            </span>
+                          </div>
+
+                          {/* Compact status overview — visual reference:
+                              docs/mockups/restaurant-profile-drafts-detail-v1.png. Three
+                              always-visible facts about this candidate: its review status,
+                              its data completeness, and its Restaurant Profile Draft
+                              lineage. Presentation only — every value here already exists
+                              on `c` (review_status/quality_status/missing_fields) or comes
+                              from buildDraftLineageSummary (pure, src/lib/restaurantProfileDrafts.js);
+                              nothing here decides whether an action is allowed. */}
+                          <div className="di-status-row">
+                            <div className="di-status-item">
+                              <span className={`di-status-icon di-status-icon--${statusTone}`}>
+                                <StatusIcon />
+                              </span>
+                              <span className="di-status-body">
+                                <span className="di-status-label">{REVIEW_STATUS_LABELS[c.review_status] || c.review_status}</span>
+                                <span className="di-status-sublabel">{statusSublabel}</span>
+                              </span>
                             </div>
-                            {canDiscardCandidateDraft(c) ? (
-                              <div style={{ display: 'grid', gap: 8 }}>
-                                <div style={{ color: 'var(--text-secondary)' }}>
-                                  Restaurant Profile Draft already created ({c.profile_draft.promoted_at}) — internal
-                                  only, still not published.
-                                </div>
-                                {discardPromptOpenId === c.id ? (
-                                  <div style={{ display: 'grid', gap: 6, maxWidth: 420 }}>
-                                    <textarea
-                                      placeholder="Why are you discarding this draft? (required)"
-                                      value={discardNoteByCandidateId[c.id] || ''}
-                                      onChange={(e) => setDiscardNoteByCandidateId((prev) => ({ ...prev, [c.id]: e.target.value }))}
-                                      rows={2}
-                                      style={{ ...selectStyle, resize: 'vertical', fontFamily: 'inherit' }}
-                                    />
-                                    {discardErrorByCandidateId[c.id] && (
-                                      <div style={{ color: 'var(--danger)' }}>{discardErrorByCandidateId[c.id]}</div>
-                                    )}
-                                    <div style={{ display: 'flex', gap: 8 }}>
-                                      <button
-                                        onClick={() => discardProfileDraft(c.id, c.profile_draft.id)}
-                                        disabled={discardSubmittingId === c.id || !(discardNoteByCandidateId[c.id] || '').trim()}
-                                        className="di-btn-primary"
-                                      >
-                                        {discardSubmittingId === c.id ? 'Discarding…' : 'Confirm discard'}
-                                      </button>
-                                      <button
-                                        onClick={() => {
-                                          setDiscardPromptOpenId(null)
-                                          setDiscardNoteByCandidateId((prev) => ({ ...prev, [c.id]: '' }))
-                                          setDiscardErrorByCandidateId((prev) => ({ ...prev, [c.id]: null }))
-                                        }}
-                                        disabled={discardSubmittingId === c.id}
-                                        className="di-link-btn"
-                                      >
-                                        Cancel
-                                      </button>
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <button
-                                    onClick={() => setDiscardPromptOpenId(c.id)}
-                                    className="di-link-btn"
-                                    style={{ color: 'var(--danger)' }}
-                                  >
-                                    Discard Restaurant Profile Draft
-                                  </button>
-                                )}
-                              </div>
-                            ) : (
-                              <>
-                                {discardSuccessByCandidateId[c.id] && (
-                                  <div style={{ color: 'var(--text-secondary)', marginBottom: 8 }}>
-                                    Restaurant Profile Draft discarded. A restart is always a new, explicit promotion
-                                    — it will get a new draft id.
-                                  </div>
-                                )}
-                                {profileDraftDuplicateByCandidateId[c.id] ? (
-                                  <div style={{ display: 'grid', gap: 6 }}>
-                                    <div style={{ color: 'var(--warning)' }}>
-                                      This looks like a possible duplicate of an already-promoted draft. Promoting
-                                      anyway is recorded and flagged for later review — it never merges the two.
-                                    </div>
-                                    <div style={{ display: 'flex', gap: 8 }}>
-                                      <button
-                                        onClick={() => promoteToProfileDraft(c.id, profileDraftDuplicateByCandidateId[c.id])}
-                                        disabled={profileDraftSubmittingId === c.id}
-                                        className="di-btn-primary"
-                                      >
-                                        {profileDraftSubmittingId === c.id ? 'Creating…' : 'Promote anyway'}
-                                      </button>
-                                      <button
-                                        onClick={() => setProfileDraftDuplicateByCandidateId((prev) => ({ ...prev, [c.id]: null }))}
-                                        disabled={profileDraftSubmittingId === c.id}
-                                        className="di-link-btn"
-                                      >
-                                        Cancel
-                                      </button>
-                                    </div>
-                                  </div>
-                                ) : (
-                                  canPromoteCandidateToProfileDraft(c) && (
-                                    <button
-                                      onClick={() => promoteToProfileDraft(c.id)}
-                                      disabled={profileDraftSubmittingId === c.id}
-                                      className="di-btn-primary"
-                                    >
-                                      {profileDraftSubmittingId === c.id ? 'Creating…' : 'Create Restaurant Profile Draft'}
-                                    </button>
-                                  )
-                                )}
-                              </>
-                            )}
-                            {profileDraftErrorByCandidateId[c.id] && (
-                              <div style={{ color: 'var(--danger)', marginTop: 6 }}>{profileDraftErrorByCandidateId[c.id]}</div>
-                            )}
-                          </div>
-                        )}
-                        <div style={{ marginBottom: 14 }}>
-                          <div style={{ fontSize: 11, color: 'var(--text-faint)' }}>
-                            {c.record_locator} · imported {c.retrieved_at}
-                          </div>
-                          {c.normalization?.phone && c.normalization.phone.valid === false && (
-                            <div style={{ fontSize: 11, color: 'var(--warning)' }}>Phone format not recognized — shown as entered.</div>
-                          )}
-                          {c.enrichment_sources?.address && (
-                            <div style={{ fontSize: 11, color: 'var(--text-faint)' }}>
-                              Address enriched via {c.enrichment_sources.address.source_url}, {c.enrichment_sources.address.recorded_at}
+                            <div className="di-status-item">
+                              <span className={`di-status-icon di-status-icon--${c.quality_status === 'complete' ? 'positive' : 'warning'}`}>
+                                {c.quality_status === 'complete' ? <IconCheck /> : <IconInfo />}
+                              </span>
+                              <span className="di-status-body">
+                                <span className="di-status-label">{c.quality_status === 'complete' ? 'Profile complete' : 'Incomplete'}</span>
+                                <span className="di-status-sublabel">
+                                  {c.quality_status === 'complete' ? 'All required data present' : `Missing: ${c.missing_fields.join(', ')}`}
+                                </span>
+                              </span>
                             </div>
-                          )}
-                          {c.enrichment_sources?.phone && (
-                            <div style={{ fontSize: 11, color: 'var(--text-faint)' }}>Phone enriched via {c.enrichment_sources.phone.source_url}</div>
-                          )}
-                          {c.enrichment_sources?.website && (
-                            <div style={{ fontSize: 11, color: 'var(--text-faint)' }}>
-                              Website enriched via {c.enrichment_sources.website.source_url}
-                            </div>
-                          )}
-                        </div>
-                        <h3 style={{ fontSize: 13, margin: '0 0 8px', color: 'var(--text-secondary)' }}>Review history</h3>
-                        {reviewsLoadingId === c.id && <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Loading…</p>}
-                        {reviewsErrorId === c.id && (
-                          <p style={{ color: 'var(--danger)', fontSize: 13 }}>Failed to load review history.</p>
-                        )}
-                        {reviewsLoadingId !== c.id && reviews && reviews.length === 0 && (
-                          <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>No review decisions recorded yet — currently "new".</p>
-                        )}
-                        {reviews && reviews.length > 0 && (
-                          <div style={{ display: 'grid', gap: 6, marginBottom: 14 }}>
-                            {reviews.map((r) => (
-                              <div key={r.id} style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
-                                <strong>{REVIEW_STATUS_LABELS[r.status] || r.status}</strong>
-                                {r.rejection_reason ? ` (${REJECTION_REASON_LABELS[r.rejection_reason] || r.rejection_reason})` : ''}
-                                {r.deferred_reason ? ` (${formatDeferredReasonLabel(r.deferred_reason)})` : ''}
-                                {' · '}
-                                {r.decided_at}
-                                {r.note ? <div style={{ color: 'var(--text-muted)', marginTop: 2 }}>{r.note}</div> : null}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-
-                        <h3 style={{ fontSize: 13, margin: '0 0 8px', color: 'var(--text-secondary)' }}>Record a decision</h3>
-                        <div style={{ display: 'grid', gap: 8, maxWidth: 420 }}>
-                          <select
-                            value={draft.status}
-                            onChange={(e) => updateDraft(c.id, { status: e.target.value, rejectionReason: '', deferredReason: '' })}
-                            style={selectStyle}
-                          >
-                            <option value="">Choose a status…</option>
-                            {ALLOWED_REVIEW_STATUSES.map((s) => (
-                              <option key={s} value={s}>
-                                {REVIEW_STATUS_LABELS[s]}
-                              </option>
-                            ))}
-                          </select>
-                          {draft.status === 'rejected' && (
-                            <select
-                              value={draft.rejectionReason}
-                              onChange={(e) => updateDraft(c.id, { rejectionReason: e.target.value })}
-                              style={selectStyle}
-                            >
-                              <option value="">Choose a rejection reason…</option>
-                              {ALLOWED_REJECTION_REASONS.map((r) => (
-                                <option key={r} value={r}>
-                                  {REJECTION_REASON_LABELS[r]}
-                                </option>
-                              ))}
-                            </select>
-                          )}
-                          {draft.status === 'deferred' && (
-                            <select
-                              value={draft.deferredReason}
-                              onChange={(e) => updateDraft(c.id, { deferredReason: e.target.value })}
-                              style={selectStyle}
-                            >
-                              <option value="">Choose a deferred reason…</option>
-                              {ALLOWED_DEFERRED_REASONS.map((r) => (
-                                <option key={r} value={r}>
-                                  {formatDeferredReasonLabel(r)}
-                                </option>
-                              ))}
-                            </select>
-                          )}
-                          <textarea
-                            placeholder="Optional internal note…"
-                            value={draft.note}
-                            onChange={(e) => updateDraft(c.id, { note: e.target.value })}
-                            rows={2}
-                            style={{ ...selectStyle, resize: 'vertical', fontFamily: 'inherit' }}
-                          />
-                          {decisionErrorByCandidateId[c.id] && (
-                            <div style={{ fontSize: 12, color: 'var(--danger)' }}>{decisionErrorByCandidateId[c.id]}</div>
-                          )}
-                          {!isReviewDecisionSubmittable(draft) && (
-                            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Choose a status to enable saving a decision.</div>
-                          )}
-                          <button
-                            onClick={() => submitDecision(c.id)}
-                            disabled={decisionSubmittingId === c.id || !isReviewDecisionSubmittable(draft)}
-                            className="di-btn-primary"
-                            style={{ justifySelf: 'start' }}
-                          >
-                            {decisionSubmittingId === c.id ? 'Saving…' : 'Save decision'}
-                          </button>
-                        </div>
-
-                        <h3 style={{ fontSize: 13, margin: '20px 0 8px', color: 'var(--text-secondary)' }}>Enrichment history</h3>
-                        {enrichmentsLoadingId === c.id && <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Loading…</p>}
-                        {enrichmentsErrorId === c.id && (
-                          <p style={{ color: 'var(--danger)', fontSize: 13 }}>Failed to load enrichment history.</p>
-                        )}
-                        {enrichmentsLoadingId !== c.id &&
-                          enrichmentsByCandidateId[c.id] &&
-                          enrichmentsByCandidateId[c.id].length === 0 && (
-                            <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>No manual enrichments recorded yet.</p>
-                          )}
-                        {enrichmentsByCandidateId[c.id] && enrichmentsByCandidateId[c.id].length > 0 && (
-                          <div style={{ display: 'grid', gap: 6, marginBottom: 14 }}>
-                            {enrichmentsByCandidateId[c.id].map((e) => (
-                              <div key={e.id} style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
-                                <strong>{ENRICHABLE_FIELD_LABELS[e.field_name] || e.field_name}</strong>: {e.value}
-                                <div style={{ color: 'var(--text-muted)', fontSize: 11, marginTop: 2 }}>
-                                  Source: {e.source_url} · {e.recorded_at}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '0 0 8px' }}>
-                          <h3 style={{ fontSize: 13, margin: 0, color: 'var(--text-secondary)' }}>Enrich missing business info</h3>
-                          <button
-                            onClick={() => requestSuggestions(c.id)}
-                            disabled={suggestionsLoadingId === c.id || !hasVerifiedWebsiteForSuggestions(c)}
-                            title={!hasVerifiedWebsiteForSuggestions(c) ? 'Save a verified website first to enable suggestions.' : undefined}
-                            className="di-link-btn"
-                            style={{
-                              color: hasVerifiedWebsiteForSuggestions(c) ? 'var(--text-secondary)' : 'var(--text-faint)',
-                              cursor: hasVerifiedWebsiteForSuggestions(c) ? 'pointer' : 'not-allowed',
-                            }}
-                          >
-                            {suggestionsLoadingId === c.id ? 'Fetching…' : 'Suggest data from website'}
-                          </button>
-                        </div>
-                        {!hasVerifiedWebsiteForSuggestions(c) && (
-                          <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 8px' }}>
-                            Save a verified website first to enable suggestions.
-                          </p>
-                        )}
-                        <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 8px' }}>
-                          Fill in a value and its source URL for one or more fields. A field left blank is not submitted.
-                          A correction is recorded as a new entry — nothing here is ever edited or deleted.
-                        </p>
-
-                        {suggestionsErrorByCandidateId[c.id] && (
-                          <div style={{ fontSize: 12, color: 'var(--danger)', marginBottom: 8 }}>{suggestionsErrorByCandidateId[c.id]}</div>
-                        )}
-                        {suggestionsByCandidateId[c.id] && suggestionsByCandidateId[c.id].robots_txt_status === 'disallowed' && (
-                          <div style={{ fontSize: 12, color: 'var(--warning)', marginBottom: 8 }}>
-                            This page is disallowed by the site's robots.txt and was not fetched.
-                          </div>
-                        )}
-                        {suggestionsByCandidateId[c.id] && suggestionsByCandidateId[c.id].robots_txt_status === 'unconfirmed' && (
-                          <div style={{ fontSize: 12, color: 'var(--warning)', marginBottom: 8 }}>
-                            robots.txt could not be confirmed for this site — no suggestion was made.
-                          </div>
-                        )}
-                        {suggestionsByCandidateId[c.id]?.warnings?.length > 0 && (
-                          <div style={{ fontSize: 12, color: 'var(--warning)', marginBottom: 8 }}>
-                            {suggestionsByCandidateId[c.id].warnings.map((w, i) => (
-                              <div key={i}>⚠ {w}</div>
-                            ))}
-                          </div>
-                        )}
-                        {suggestionsByCandidateId[c.id]?.suggestions && (
-                          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
-                            Suggestions from {suggestionsByCandidateId[c.id].source_url} have been filled into the form
-                            below — nothing is saved until you click "Save enrichment."
-                            <div style={{ display: 'grid', gap: 2, marginTop: 4 }}>
-                              {ENRICHABLE_FIELDS.map((fieldName) => {
-                                const s = suggestionsByCandidateId[c.id].suggestions[fieldName]
-                                if (!s || s.status === 'no_data') return null
-                                return (
-                                  <div key={fieldName}>
-                                    {ENRICHABLE_FIELD_LABELS[fieldName]}: {SUGGESTION_STATUS_LABELS[s.status] || s.status}
-                                  </div>
-                                )
-                              })}
+                            <div className="di-status-item">
+                              <span
+                                className={`di-status-icon di-status-icon--${draftLineage.state === 'active' ? 'positive' : 'muted'}`}
+                              >
+                                {draftLineage.state === 'active' ? <IconCheck /> : <IconDocument />}
+                              </span>
+                              <span className="di-status-body">
+                                <span className="di-status-label">
+                                  {draftLineage.state === 'active'
+                                    ? 'Profile draft created'
+                                    : draftLineage.state === 'discarded'
+                                      ? 'Previous draft discarded'
+                                      : 'No draft yet'}
+                                </span>
+                                <span className="di-status-sublabel">
+                                  {draftLineage.state === 'active'
+                                    ? `Created ${draftLineage.promoted_at}`
+                                    : draftLineage.state === 'discarded'
+                                      ? 'No longer active'
+                                      : 'Not yet created'}
+                                </span>
+                              </span>
                             </div>
                           </div>
-                        )}
 
-                        <div style={{ display: 'grid', gap: 14, maxWidth: 560 }}>
-                          {(() => {
-                            const fieldDraftFor = (fieldName) => (enrichmentDraftByCandidateId[c.id] || EMPTY_ENRICHMENT_DRAFT)[fieldName] || { value: '', sourceUrl: '' }
-                            const useShared = (enrichmentDraftByCandidateId[c.id] || EMPTY_ENRICHMENT_DRAFT).useSharedSourceUrl
-                            const sharedUrl = (enrichmentDraftByCandidateId[c.id] || EMPTY_ENRICHMENT_DRAFT).sharedSourceUrl
-                            return (
-                              <>
-                                {/* Step 1: the source URL, first and most prominent — everything
-                                    below is either derived from it (shared mode) or needs its own
-                                    per-field source instead (individual mode). */}
-                                <div style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 10, display: 'grid', gap: 8 }}>
-                                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>1. Source</div>
-                                  <label style={{ fontSize: 12, color: 'var(--text-secondary)', display: 'flex', gap: 6, alignItems: 'center' }}>
-                                    <input
-                                      type="checkbox"
-                                      checked={useShared}
-                                      onChange={(e) => updateEnrichmentTopLevelDraft(c.id, { useSharedSourceUrl: e.target.checked })}
-                                    />
-                                    Use one source URL for all filled-in fields
-                                  </label>
-                                  {useShared && (
-                                    <input
-                                      type="text"
-                                      placeholder="Source URL used for every filled-in field below…"
-                                      value={sharedUrl}
-                                      onChange={(e) => updateEnrichmentTopLevelDraft(c.id, { sharedSourceUrl: e.target.value })}
-                                      style={selectStyle}
-                                    />
-                                  )}
-                                  {shouldOfferSharedSourceUrlAsWebsite({
-                                    useSharedSourceUrl: useShared,
-                                    sharedSourceUrl: sharedUrl,
-                                    websiteValue: fieldDraftFor('website').value,
-                                  }) && (
-                                    <button
-                                      type="button"
-                                      onClick={() => useSharedSourceUrlAsWebsite(c.id, sharedUrl)}
-                                      style={{
-                                        fontSize: 12,
-                                        padding: '4px 10px',
-                                        borderRadius: 8,
-                                        border: '1px solid var(--border)',
-                                        background: 'transparent',
-                                        color: 'var(--text-secondary)',
-                                        cursor: 'pointer',
-                                        justifySelf: 'start',
-                                      }}
-                                    >
-                                      Use this source URL as the website
-                                    </button>
-                                  )}
-                                </div>
+                          {draftLineage.state !== 'none' && (
+                            <a href="/internal/profile-drafts" className="di-link-btn" style={{ display: 'inline-block', marginBottom: 14 }}>
+                              View audit details
+                            </a>
+                          )}
 
-                                {/* Step 2: the three enrichable fields, as compact, consistent
-                                    rows — value first, then its own source URL, only when the
-                                    fields aren't already sharing the one source URL above. */}
-                                <div style={{ display: 'grid', gap: 6 }}>
-                                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>2. Fields</div>
-                                  {ENRICHABLE_FIELDS.map((fieldName) => {
-                                    const fieldDraft = fieldDraftFor(fieldName)
-                                    return (
-                                      <div
-                                        key={fieldName}
-                                        style={{
-                                          display: 'grid',
-                                          gridTemplateColumns: useShared ? '80px minmax(0, 1fr)' : '80px minmax(0, 1fr) minmax(0, 1fr)',
-                                          gap: 6,
-                                          alignItems: 'center',
-                                        }}
-                                      >
-                                        <label style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{ENRICHABLE_FIELD_LABELS[fieldName]}</label>
-                                        <input
-                                          type="text"
-                                          placeholder={`New ${ENRICHABLE_FIELD_LABELS[fieldName].toLowerCase()} value…`}
-                                          value={fieldDraft.value}
-                                          onChange={(e) => updateEnrichmentFieldDraft(c.id, fieldName, { value: e.target.value })}
-                                          style={selectStyle}
-                                        />
-                                        {!useShared && (
-                                          <input
-                                            type="text"
-                                            placeholder="Source URL (e.g. the restaurant's own website)…"
-                                            value={fieldDraft.sourceUrl}
-                                            onChange={(e) => updateEnrichmentFieldDraft(c.id, fieldName, { sourceUrl: e.target.value })}
-                                            style={selectStyle}
-                                          />
-                                        )}
+                          {c.review_status === 'approved_internal' && (
+                            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>
+                              {canDiscardCandidateDraft(c) ? (
+                                <div style={{ display: 'grid', gap: 8 }}>
+                                  {discardPromptOpenId === c.id ? (
+                                    <div style={{ display: 'grid', gap: 6, maxWidth: 420 }}>
+                                      <textarea
+                                        placeholder="Why are you discarding this draft? (required)"
+                                        value={discardNoteByCandidateId[c.id] || ''}
+                                        onChange={(e) => setDiscardNoteByCandidateId((prev) => ({ ...prev, [c.id]: e.target.value }))}
+                                        rows={2}
+                                        style={{ ...selectStyle, resize: 'vertical', fontFamily: 'inherit' }}
+                                      />
+                                      {discardErrorByCandidateId[c.id] && (
+                                        <div style={{ color: 'var(--danger)' }}>{discardErrorByCandidateId[c.id]}</div>
+                                      )}
+                                      <div style={{ display: 'flex', gap: 8 }}>
+                                        <button
+                                          onClick={() => discardProfileDraft(c.id, c.profile_draft.id)}
+                                          disabled={discardSubmittingId === c.id || !(discardNoteByCandidateId[c.id] || '').trim()}
+                                          className="di-btn-primary"
+                                        >
+                                          {discardSubmittingId === c.id ? 'Discarding…' : 'Confirm discard'}
+                                        </button>
+                                        <button
+                                          onClick={() => {
+                                            setDiscardPromptOpenId(null)
+                                            setDiscardNoteByCandidateId((prev) => ({ ...prev, [c.id]: '' }))
+                                            setDiscardErrorByCandidateId((prev) => ({ ...prev, [c.id]: null }))
+                                          }}
+                                          disabled={discardSubmittingId === c.id}
+                                          className="di-link-btn"
+                                        >
+                                          Cancel
+                                        </button>
                                       </div>
-                                    )
-                                  })}
+                                    </div>
+                                  ) : (
+                                    <button
+                                      onClick={() => setDiscardPromptOpenId(c.id)}
+                                      className="di-link-btn"
+                                      style={{ color: 'var(--danger)' }}
+                                    >
+                                      Discard Restaurant Profile Draft
+                                    </button>
+                                  )}
                                 </div>
-                              </>
-                            )
-                          })()}
-                          {enrichmentErrorByCandidateId[c.id] && (
-                            <div style={{ fontSize: 12, color: 'var(--danger)' }}>{enrichmentErrorByCandidateId[c.id]}</div>
+                              ) : (
+                                <>
+                                  {discardSuccessByCandidateId[c.id] && (
+                                    <div style={{ color: 'var(--text-secondary)', marginBottom: 8 }}>
+                                      Restaurant Profile Draft discarded. A restart is always a new, explicit promotion
+                                      — it will get a new draft id.
+                                    </div>
+                                  )}
+                                  {profileDraftDuplicateByCandidateId[c.id] ? (
+                                    <div style={{ display: 'grid', gap: 6 }}>
+                                      <div style={{ color: 'var(--warning)' }}>
+                                        This looks like a possible duplicate of an already-promoted draft. Promoting
+                                        anyway is recorded and flagged for later review — it never merges the two.
+                                      </div>
+                                      <div style={{ display: 'flex', gap: 8 }}>
+                                        <button
+                                          onClick={() => promoteToProfileDraft(c.id, profileDraftDuplicateByCandidateId[c.id])}
+                                          disabled={profileDraftSubmittingId === c.id}
+                                          className="di-btn-primary"
+                                        >
+                                          {profileDraftSubmittingId === c.id ? 'Creating…' : 'Promote anyway'}
+                                        </button>
+                                        <button
+                                          onClick={() => setProfileDraftDuplicateByCandidateId((prev) => ({ ...prev, [c.id]: null }))}
+                                          disabled={profileDraftSubmittingId === c.id}
+                                          className="di-link-btn"
+                                        >
+                                          Cancel
+                                        </button>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    canPromoteCandidateToProfileDraft(c) && (
+                                      <button
+                                        onClick={() => promoteToProfileDraft(c.id)}
+                                        disabled={profileDraftSubmittingId === c.id}
+                                        className="di-btn-primary"
+                                      >
+                                        {profileDraftSubmittingId === c.id ? 'Creating…' : 'Create Restaurant Profile Draft'}
+                                      </button>
+                                    )
+                                  )}
+                                </>
+                              )}
+                              {profileDraftErrorByCandidateId[c.id] && (
+                                <div style={{ color: 'var(--danger)', marginTop: 6 }}>{profileDraftErrorByCandidateId[c.id]}</div>
+                              )}
+                            </div>
                           )}
-                          <button
-                            onClick={() => submitEnrichment(c.id)}
-                            disabled={enrichmentSubmittingId === c.id}
-                            className="di-btn-primary"
-                            style={{ justifySelf: 'start' }}
-                          >
-                            {enrichmentSubmittingId === c.id ? 'Saving…' : 'Save enrichment'}
+
+                          <div className="di-accordion">
+                            <details className="di-accordion-item">
+                              <summary className="di-accordion-trigger">
+                                <span className="di-accordion-icon">
+                                  <IconDocument />
+                                </span>
+                                <span className="di-accordion-heading">
+                                  <span className="di-accordion-title">Review decision</span>
+                                  <span className="di-accordion-subtitle">Record or update this candidate's review status.</span>
+                                </span>
+                                <span className="di-accordion-chevron">
+                                  <IconChevronDown />
+                                </span>
+                              </summary>
+                              <div className="di-accordion-body">
+                                <div style={{ display: 'grid', gap: 8, maxWidth: 420 }}>
+                                  <select
+                                    value={draft.status}
+                                    onChange={(e) => updateDraft(c.id, { status: e.target.value, rejectionReason: '', deferredReason: '' })}
+                                    style={selectStyle}
+                                  >
+                                    <option value="">Choose a status…</option>
+                                    {ALLOWED_REVIEW_STATUSES.map((s) => (
+                                      <option key={s} value={s}>
+                                        {REVIEW_STATUS_LABELS[s]}
+                                      </option>
+                                    ))}
+                                  </select>
+                                  {draft.status === 'rejected' && (
+                                    <select
+                                      value={draft.rejectionReason}
+                                      onChange={(e) => updateDraft(c.id, { rejectionReason: e.target.value })}
+                                      style={selectStyle}
+                                    >
+                                      <option value="">Choose a rejection reason…</option>
+                                      {ALLOWED_REJECTION_REASONS.map((r) => (
+                                        <option key={r} value={r}>
+                                          {REJECTION_REASON_LABELS[r]}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  )}
+                                  {draft.status === 'deferred' && (
+                                    <select
+                                      value={draft.deferredReason}
+                                      onChange={(e) => updateDraft(c.id, { deferredReason: e.target.value })}
+                                      style={selectStyle}
+                                    >
+                                      <option value="">Choose a deferred reason…</option>
+                                      {ALLOWED_DEFERRED_REASONS.map((r) => (
+                                        <option key={r} value={r}>
+                                          {formatDeferredReasonLabel(r)}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  )}
+                                  <textarea
+                                    placeholder="Optional internal note…"
+                                    value={draft.note}
+                                    onChange={(e) => updateDraft(c.id, { note: e.target.value })}
+                                    rows={2}
+                                    style={{ ...selectStyle, resize: 'vertical', fontFamily: 'inherit' }}
+                                  />
+                                  {decisionErrorByCandidateId[c.id] && (
+                                    <div style={{ fontSize: 12, color: 'var(--danger)' }}>{decisionErrorByCandidateId[c.id]}</div>
+                                  )}
+                                  {!isReviewDecisionSubmittable(draft) && (
+                                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Choose a status to enable saving a decision.</div>
+                                  )}
+                                  <button
+                                    onClick={() => submitDecision(c.id)}
+                                    disabled={decisionSubmittingId === c.id || !isReviewDecisionSubmittable(draft)}
+                                    className="di-btn-primary"
+                                    style={{ justifySelf: 'start' }}
+                                  >
+                                    {decisionSubmittingId === c.id ? 'Saving…' : 'Save decision'}
+                                  </button>
+                                </div>
+                              </div>
+                            </details>
+
+                            <details className="di-accordion-item">
+                              <summary className="di-accordion-trigger">
+                                <span className="di-accordion-icon">
+                                  <IconPencil />
+                                </span>
+                                <span className="di-accordion-heading">
+                                  <span className="di-accordion-title">Enrichment</span>
+                                  <span className="di-accordion-subtitle">Recorded field values and adding new ones.</span>
+                                </span>
+                                <span className="di-accordion-chevron">
+                                  <IconChevronDown />
+                                </span>
+                              </summary>
+                              <div className="di-accordion-body">
+                                {ENRICHABLE_FIELDS.some((f) => c.enrichment_sources?.[f]) ? (
+                                  <div style={{ display: 'grid', gap: 8, marginBottom: 14 }}>
+                                    {ENRICHABLE_FIELDS.filter((f) => c.enrichment_sources?.[f]).map((f) => (
+                                      <div key={f} style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+                                        <strong>{ENRICHABLE_FIELD_LABELS[f]}</strong>: {c.enrichment_sources[f].value}
+                                        <div style={{ color: 'var(--text-faint)', fontSize: 11, marginTop: 2 }}>
+                                          Source: {c.enrichment_sources[f].source_url}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 14px' }}>
+                                    No manual enrichments recorded yet.
+                                  </p>
+                                )}
+
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '0 0 8px' }}>
+                                  {/* Deliberately not a heading element: this accordion's own
+                                      summary ("Enrichment") is already the accessible name for
+                                      this section, exactly like the numbered source/field
+                                      sub-labels further below in this same form — a heading
+                                      here would jump straight from this page's own h2 "Review
+                                      Overview" with nothing in between, since no other part of
+                                      an accordion body uses a heading either. */}
+                                  <div style={{ fontSize: 13, fontWeight: 700, margin: 0, color: 'var(--text-secondary)' }}>
+                                    Enrich missing business info
+                                  </div>
+                                  <button
+                                    onClick={() => requestSuggestions(c.id)}
+                                    disabled={suggestionsLoadingId === c.id || !hasVerifiedWebsiteForSuggestions(c)}
+                                    title={!hasVerifiedWebsiteForSuggestions(c) ? 'Save a verified website first to enable suggestions.' : undefined}
+                                    className="di-link-btn"
+                                    style={{
+                                      color: hasVerifiedWebsiteForSuggestions(c) ? 'var(--text-secondary)' : 'var(--text-faint)',
+                                      cursor: hasVerifiedWebsiteForSuggestions(c) ? 'pointer' : 'not-allowed',
+                                    }}
+                                  >
+                                    {suggestionsLoadingId === c.id ? 'Fetching…' : 'Suggest data from website'}
+                                  </button>
+                                </div>
+                                {!hasVerifiedWebsiteForSuggestions(c) && (
+                                  <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 8px' }}>
+                                    Save a verified website first to enable suggestions.
+                                  </p>
+                                )}
+                                <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 8px' }}>
+                                  Fill in a value and its source URL for one or more fields. A field left blank is not submitted.
+                                  A correction is recorded as a new entry — nothing here is ever edited or deleted.
+                                </p>
+
+                                {suggestionsErrorByCandidateId[c.id] && (
+                                  <div style={{ fontSize: 12, color: 'var(--danger)', marginBottom: 8 }}>{suggestionsErrorByCandidateId[c.id]}</div>
+                                )}
+                                {suggestionsByCandidateId[c.id] && suggestionsByCandidateId[c.id].robots_txt_status === 'disallowed' && (
+                                  <div style={{ fontSize: 12, color: 'var(--warning)', marginBottom: 8 }}>
+                                    This page is disallowed by the site's robots.txt and was not fetched.
+                                  </div>
+                                )}
+                                {suggestionsByCandidateId[c.id] && suggestionsByCandidateId[c.id].robots_txt_status === 'unconfirmed' && (
+                                  <div style={{ fontSize: 12, color: 'var(--warning)', marginBottom: 8 }}>
+                                    robots.txt could not be confirmed for this site — no suggestion was made.
+                                  </div>
+                                )}
+                                {suggestionsByCandidateId[c.id]?.warnings?.length > 0 && (
+                                  <div style={{ fontSize: 12, color: 'var(--warning)', marginBottom: 8 }}>
+                                    {suggestionsByCandidateId[c.id].warnings.map((w, i) => (
+                                      <div key={i}>⚠ {w}</div>
+                                    ))}
+                                  </div>
+                                )}
+                                {suggestionsByCandidateId[c.id]?.suggestions && (
+                                  <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
+                                    Suggestions from {suggestionsByCandidateId[c.id].source_url} have been filled into the form
+                                    below — nothing is saved until you click "Save enrichment."
+                                    <div style={{ display: 'grid', gap: 2, marginTop: 4 }}>
+                                      {ENRICHABLE_FIELDS.map((fieldName) => {
+                                        const s = suggestionsByCandidateId[c.id].suggestions[fieldName]
+                                        if (!s || s.status === 'no_data') return null
+                                        return (
+                                          <div key={fieldName}>
+                                            {ENRICHABLE_FIELD_LABELS[fieldName]}: {SUGGESTION_STATUS_LABELS[s.status] || s.status}
+                                          </div>
+                                        )
+                                      })}
+                                    </div>
+                                  </div>
+                                )}
+
+                                <div style={{ display: 'grid', gap: 14, maxWidth: 560 }}>
+                                  {(() => {
+                                    const fieldDraftFor = (fieldName) => (enrichmentDraftByCandidateId[c.id] || EMPTY_ENRICHMENT_DRAFT)[fieldName] || { value: '', sourceUrl: '' }
+                                    const useShared = (enrichmentDraftByCandidateId[c.id] || EMPTY_ENRICHMENT_DRAFT).useSharedSourceUrl
+                                    const sharedUrl = (enrichmentDraftByCandidateId[c.id] || EMPTY_ENRICHMENT_DRAFT).sharedSourceUrl
+                                    return (
+                                      <>
+                                        {/* Step 1: the source URL, first and most prominent — everything
+                                            below is either derived from it (shared mode) or needs its own
+                                            per-field source instead (individual mode). */}
+                                        <div style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 10, display: 'grid', gap: 8 }}>
+                                          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>1. Source</div>
+                                          <label style={{ fontSize: 12, color: 'var(--text-secondary)', display: 'flex', gap: 6, alignItems: 'center' }}>
+                                            <input
+                                              type="checkbox"
+                                              checked={useShared}
+                                              onChange={(e) => updateEnrichmentTopLevelDraft(c.id, { useSharedSourceUrl: e.target.checked })}
+                                            />
+                                            Use one source URL for all filled-in fields
+                                          </label>
+                                          {useShared && (
+                                            <input
+                                              type="text"
+                                              placeholder="Source URL used for every filled-in field below…"
+                                              value={sharedUrl}
+                                              onChange={(e) => updateEnrichmentTopLevelDraft(c.id, { sharedSourceUrl: e.target.value })}
+                                              style={selectStyle}
+                                            />
+                                          )}
+                                          {shouldOfferSharedSourceUrlAsWebsite({
+                                            useSharedSourceUrl: useShared,
+                                            sharedSourceUrl: sharedUrl,
+                                            websiteValue: fieldDraftFor('website').value,
+                                          }) && (
+                                            <button
+                                              type="button"
+                                              onClick={() => useSharedSourceUrlAsWebsite(c.id, sharedUrl)}
+                                              style={{
+                                                fontSize: 12,
+                                                padding: '4px 10px',
+                                                borderRadius: 8,
+                                                border: '1px solid var(--border)',
+                                                background: 'transparent',
+                                                color: 'var(--text-secondary)',
+                                                cursor: 'pointer',
+                                                justifySelf: 'start',
+                                              }}
+                                            >
+                                              Use this source URL as the website
+                                            </button>
+                                          )}
+                                        </div>
+
+                                        {/* Step 2: the three enrichable fields, as compact, consistent
+                                            rows — value first, then its own source URL, only when the
+                                            fields aren't already sharing the one source URL above. */}
+                                        <div style={{ display: 'grid', gap: 6 }}>
+                                          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>2. Fields</div>
+                                          {ENRICHABLE_FIELDS.map((fieldName) => {
+                                            const fieldDraft = fieldDraftFor(fieldName)
+                                            return (
+                                              <div
+                                                key={fieldName}
+                                                style={{
+                                                  display: 'grid',
+                                                  gridTemplateColumns: useShared ? '80px minmax(0, 1fr)' : '80px minmax(0, 1fr) minmax(0, 1fr)',
+                                                  gap: 6,
+                                                  alignItems: 'center',
+                                                }}
+                                              >
+                                                <label style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{ENRICHABLE_FIELD_LABELS[fieldName]}</label>
+                                                <input
+                                                  type="text"
+                                                  placeholder={`New ${ENRICHABLE_FIELD_LABELS[fieldName].toLowerCase()} value…`}
+                                                  value={fieldDraft.value}
+                                                  onChange={(e) => updateEnrichmentFieldDraft(c.id, fieldName, { value: e.target.value })}
+                                                  style={selectStyle}
+                                                />
+                                                {!useShared && (
+                                                  <input
+                                                    type="text"
+                                                    placeholder="Source URL (e.g. the restaurant's own website)…"
+                                                    value={fieldDraft.sourceUrl}
+                                                    onChange={(e) => updateEnrichmentFieldDraft(c.id, fieldName, { sourceUrl: e.target.value })}
+                                                    style={selectStyle}
+                                                  />
+                                                )}
+                                              </div>
+                                            )
+                                          })}
+                                        </div>
+                                      </>
+                                    )
+                                  })()}
+                                  {enrichmentErrorByCandidateId[c.id] && (
+                                    <div style={{ fontSize: 12, color: 'var(--danger)' }}>{enrichmentErrorByCandidateId[c.id]}</div>
+                                  )}
+                                  <button
+                                    onClick={() => submitEnrichment(c.id)}
+                                    disabled={enrichmentSubmittingId === c.id}
+                                    className="di-btn-primary"
+                                    style={{ justifySelf: 'start' }}
+                                  >
+                                    {enrichmentSubmittingId === c.id ? 'Saving…' : 'Save enrichment'}
+                                  </button>
+                                </div>
+                              </div>
+                            </details>
+
+                            <details className="di-accordion-item" open>
+                              <summary className="di-accordion-trigger">
+                                <span className="di-accordion-icon">
+                                  <IconClock />
+                                </span>
+                                <span className="di-accordion-heading">
+                                  <span className="di-accordion-title">History &amp; sources</span>
+                                  <span className="di-accordion-subtitle">An overview of what happened, in order.</span>
+                                </span>
+                                <span className="di-accordion-chevron">
+                                  <IconChevronDown />
+                                </span>
+                              </summary>
+                              <div className="di-accordion-body">
+                                <div style={{ fontSize: 11, color: 'var(--text-faint)', marginBottom: 12 }}>
+                                  {c.record_locator} · imported {c.retrieved_at}
+                                  {c.normalization?.phone && c.normalization.phone.valid === false && (
+                                    <div style={{ color: 'var(--warning)', marginTop: 4 }}>Phone format not recognized — shown as entered.</div>
+                                  )}
+                                </div>
+                                {(reviewsLoadingId === c.id || enrichmentsLoadingId === c.id) && (
+                                  <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Loading…</p>
+                                )}
+                                {reviewsErrorId === c.id && (
+                                  <p style={{ color: 'var(--danger)', fontSize: 13 }}>Failed to load review history.</p>
+                                )}
+                                {enrichmentsErrorId === c.id && (
+                                  <p style={{ color: 'var(--danger)', fontSize: 13 }}>Failed to load enrichment history.</p>
+                                )}
+                                {reviewsLoadingId !== c.id && enrichmentsLoadingId !== c.id && timelineEvents.length === 0 && (
+                                  <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>No recorded history yet — currently "new".</p>
+                                )}
+                                {timelineEvents.length > 0 && (
+                                  <div className="di-timeline">
+                                    {timelineEvents.map((event) => {
+                                      const { title, description } =
+                                        event.kind === 'review' ? describeReviewTimelineEvent(event) : describeEnrichmentTimelineEvent(event)
+                                      return (
+                                        <div key={event.id} className="di-timeline-item">
+                                          <div className="di-timeline-date">{formatShortDate(event.at)}</div>
+                                          <div className="di-timeline-title">{title}</div>
+                                          {description && <div className="di-timeline-desc">{description}</div>}
+                                          <div className="di-timeline-meta">
+                                            {event.at}
+                                            {event.kind === 'enrichment' && event.sourceUrl ? ` · Source: ${event.sourceUrl}` : ''}
+                                          </div>
+                                        </div>
+                                      )
+                                    })}
+                                  </div>
+                                )}
+                              </div>
+                            </details>
+                          </div>
+
+                          <button onClick={() => toggleExpand(c.id)} className="di-link-btn" style={{ marginTop: 16 }}>
+                            Back to review queue
                           </button>
                         </div>
-
-                        <button onClick={() => toggleExpand(c.id)} className="di-link-btn" style={{ marginTop: 16 }}>
-                          Back to review queue
-                        </button>
-                      </div>
-                    )}
+                      )
+                    })()}
                   </div>
                 )
               })}

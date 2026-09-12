@@ -43,6 +43,7 @@ const {
   buildEnrichmentSourceByCandidateId,
   computeEnrichedFields,
   computeNormalizedFields,
+  buildCandidateHistoryTimeline,
   shouldCollapseCandidateCardAfterAction,
   shouldOfferSharedSourceUrlAsWebsite,
   applySharedSourceUrlAsWebsite,
@@ -1243,6 +1244,58 @@ test('computeNormalizedFields: never mutates the input object', () => {
   assert.equal(input.address, '4811aa Breda');
 });
 
+// ─── buildCandidateHistoryTimeline (2026-09-12, presentation rebuild) ──
+
+test('buildCandidateHistoryTimeline: merges review and enrichment rows into one newest-first list', () => {
+  const reviews = [{ id: 1, decided_at: '2026-09-10T10:00:00Z', status: 'approved_internal' }];
+  const enrichments = [{ id: 1, recorded_at: '2026-09-11T10:00:00Z', field_name: 'phone', value: '020 1234567', source_url: 'https://example.com' }];
+  const result = buildCandidateHistoryTimeline(reviews, enrichments);
+  assert.equal(result.length, 2);
+  assert.equal(result[0].kind, 'enrichment', 'the later enrichment event must come first');
+  assert.equal(result[1].kind, 'review');
+});
+
+test('buildCandidateHistoryTimeline: carries every field a caller might display — nothing dropped, only reordered', () => {
+  const reviews = [{ id: 1, decided_at: '2026-09-10T10:00:00Z', status: 'rejected', rejection_reason: 'duplicate', note: 'Seen twice.' }];
+  const result = buildCandidateHistoryTimeline(reviews, []);
+  assert.equal(result[0].id, 'review-1');
+  assert.equal(result[0].status, 'rejected');
+  assert.equal(result[0].rejectionReason, 'duplicate');
+  assert.equal(result[0].note, 'Seen twice.');
+  assert.equal(result[0].at, '2026-09-10T10:00:00Z');
+});
+
+test('buildCandidateHistoryTimeline: an enrichment event carries its field name, value, and source URL', () => {
+  const enrichments = [{ id: 7, recorded_at: '2026-09-11T10:00:00Z', field_name: 'website', value: 'https://example.com', source_url: 'https://maps.example.com' }];
+  const result = buildCandidateHistoryTimeline([], enrichments);
+  assert.equal(result[0].id, 'enrichment-7');
+  assert.equal(result[0].fieldName, 'website');
+  assert.equal(result[0].value, 'https://example.com');
+  assert.equal(result[0].sourceUrl, 'https://maps.example.com');
+});
+
+test('buildCandidateHistoryTimeline: ties on timestamp are broken deterministically by id, descending', () => {
+  const reviews = [
+    { id: 1, decided_at: '2026-09-10T10:00:00Z', status: 'needs_enrichment' },
+    { id: 9, decided_at: '2026-09-10T10:00:00Z', status: 'approved_internal' },
+  ];
+  const result = buildCandidateHistoryTimeline(reviews, []);
+  assert.equal(result[0].id, 'review-9');
+  assert.equal(result[1].id, 'review-1');
+});
+
+test('buildCandidateHistoryTimeline: a row missing its own timestamp is skipped, never placed on the timeline', () => {
+  const reviews = [{ id: 1, status: 'needs_enrichment' }];
+  const enrichments = [{ id: 1, field_name: 'phone', value: '020 1234567', source_url: 'https://example.com' }];
+  assert.deepEqual(buildCandidateHistoryTimeline(reviews, enrichments), []);
+});
+
+test('buildCandidateHistoryTimeline: empty/missing input never throws, returns an empty list', () => {
+  assert.deepEqual(buildCandidateHistoryTimeline([], []), []);
+  assert.deepEqual(buildCandidateHistoryTimeline(null, null), []);
+  assert.deepEqual(buildCandidateHistoryTimeline(undefined, undefined), []);
+});
+
 // ─── shouldCollapseCandidateCardAfterAction ────────────────────────────
 
 test('shouldCollapseCandidateCardAfterAction: collapses only on a genuine success', () => {
@@ -1737,15 +1790,19 @@ test('structural safety net: record_locator, retrieved_at, the phone-normalizati
   assert.doesNotMatch(alwaysVisible, /record_locator/, 'record_locator must not render in the always-visible row');
   assert.doesNotMatch(alwaysVisible, /retrieved_at/, 'retrieved_at must not render in the always-visible row');
   assert.doesNotMatch(alwaysVisible, /phone format not recognized/i, 'the normalization warning must not render in the always-visible row');
-  assert.doesNotMatch(alwaysVisible, /enriched via/i, 'enrichment-source annotations must not render in the always-visible row');
+  assert.doesNotMatch(alwaysVisible, /c\.enrichment_sources/i, 'enrichment-source annotations must not render in the always-visible row');
 
-  const detailEnd = source.indexOf('Review history', expandedStart);
+  const detailEnd = source.indexOf('Back to review queue', expandedStart);
   const detail = source.slice(expandedStart, detailEnd);
+  // Relocated 2026-09-12 into the "History & sources" accordion (still
+  // inside the expanded detail view, never in the always-visible row).
   assert.match(detail, /\{c\.record_locator\} · imported \{c\.retrieved_at\}/, 'record_locator/retrieved_at must render inside the expanded detail view');
   assert.match(detail, /Phone format not recognized — shown as entered\./);
-  assert.match(detail, /Address enriched via \{c\.enrichment_sources\.address\.source_url\}/);
-  assert.match(detail, /Phone enriched via \{c\.enrichment_sources\.phone\.source_url\}/);
-  assert.match(detail, /Website enriched via \{c\.enrichment_sources\.website\.source_url\}/);
+  // The per-field "enriched via ..." footnote lines were consolidated
+  // (2026-09-12) into the Enrichment accordion's own current-value
+  // display, which already shows each field's source_url — still
+  // reachable, just no longer duplicated a third time.
+  assert.match(detail, /Source: \{c\.enrichment_sources\[f\]\.source_url\}/, 'each enriched field\'s source must still be shown inside the expanded detail view');
 });
 
 test('structural safety net: "Approved (internal only)" gets a short explanation, rendered only inside the expanded detail view and only for that status', () => {
@@ -1757,21 +1814,25 @@ test('structural safety net: "Approved (internal only)" gets a short explanation
   const alwaysVisible = source.slice(cardStart, expandedStart);
   assert.doesNotMatch(
     alwaysVisible,
-    /This does not publish the restaurant or create a public profile/,
+    /Internal only — not published/,
     'the explanation must not render in the always-visible row'
   );
 
-  const detailEnd = source.indexOf('Review history', expandedStart);
+  // Relocated 2026-09-12 from a standalone paragraph into the compact
+  // status row's sublabel for the candidate-status item — still computed
+  // from, and only true for, review_status === 'approved_internal',
+  // still inside the expanded detail view.
+  const detailEnd = source.indexOf('Back to review queue', expandedStart);
   const detail = source.slice(expandedStart, detailEnd);
   assert.match(
     detail,
-    /\{c\.review_status === 'approved_internal' && \(\s*<div[^>]*>\s*<div style=\{\{ marginBottom: 8 \}\}>\s*Internally approved only\. This does not publish the restaurant or create a public profile\.\s*<\/div>/,
-    'expected the explanation gated on review_status === "approved_internal", inside the expanded detail view'
+    /c\.review_status === 'approved_internal'\s*\?\s*'Internal only — not published'/,
+    'expected the explanation computed from review_status === "approved_internal", inside the expanded detail view'
   );
 
   // Only one occurrence of the exact sentence in the whole file — no
   // second copy accidentally left in the candidate list or filter bar.
-  const occurrences = (source.match(/This does not publish the restaurant or create a public profile\./g) || []).length;
+  const occurrences = (source.match(/Internal only — not published/g) || []).length;
   assert.equal(occurrences, 1, 'expected exactly one occurrence of the explanation sentence');
 });
 
@@ -1824,21 +1885,33 @@ test('structural safety net: the deferred-reason select is only rendered for sta
   assert.match(source, /updateDraft\(c\.id, \{ status: e\.target\.value, rejectionReason: '', deferredReason: '' \}\)/);
 });
 
-test('structural safety net: review history renders deferred_reason next to status and decided_at, same pattern as rejection_reason', () => {
+test('structural safety net: the merged history timeline renders a review event\'s deferred_reason next to its status, same pattern as rejection_reason', () => {
+  // Relocated 2026-09-12: the standalone "Review history" list was
+  // merged into the "History & sources" accordion's single timeline
+  // (buildCandidateHistoryTimeline, src/lib/importInbox.js) — this page's
+  // own describeReviewTimelineEvent still turns a review event's
+  // rejection_reason/deferred_reason into the same human label, exactly
+  // the symmetric pattern the old inline JSX used.
   const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
-  assert.match(source, /r\.deferred_reason \? ` \(\$\{formatDeferredReasonLabel\(r\.deferred_reason\)\}\)` : ''/);
+  const match = source.match(/function describeReviewTimelineEvent\(event\) \{[\s\S]*?\n\}/);
+  assert.ok(match, 'expected to find the describeReviewTimelineEvent function body');
+  const body = match[0];
+  assert.match(body, /event\.rejectionReason/);
+  assert.match(body, /event\.deferredReason/);
+  assert.match(body, /formatDeferredReasonLabel\(event\.deferredReason\)/);
 });
 
 test('structural safety net: every deferred-reason display in the page (decision dropdown, review history, main card, and the combined filter bar) goes through formatDeferredReasonLabel — no separate, divergence-prone label map in the page itself', () => {
   const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
   const usageCount = (source.match(/formatDeferredReasonLabel\(/g) || []).length;
-  // Decision-form dropdown option, review-history line, the main card's
-  // own "Deferred reason: …" line, and the combined filter bar's own
-  // deferred-reason dropdown — four call sites, all through the one
-  // shared, tested function. (Information-hierarchy update, 2026-09-06,
-  // later still: was five, including the now-removed compact preview
-  // row's bucket description.)
-  assert.equal(usageCount, 4, 'expected exactly four call sites — see this test\'s own comment for which');
+  // Decision-form dropdown option, the main card's own "Deferred reason:
+  // …" line, the combined filter bar's own deferred-reason dropdown, the
+  // compact status row's sublabel, and the merged history timeline's
+  // describeReviewTimelineEvent — five call sites, all through the one
+  // shared, tested function. (Presentation rebuild, 2026-09-12: the old
+  // standalone review-history line was replaced by the timeline's own
+  // call site, and the new compact status row added one more.)
+  assert.equal(usageCount, 5, 'expected exactly five call sites — see this test\'s own comment for which');
   assert.doesNotMatch(source, /const DEFERRED_REASON_LABELS/, 'the page must import the shared mapping from src/lib/importInbox.js, never define its own copy');
 });
 
@@ -1847,7 +1920,7 @@ test('structural safety net: the enrichment form puts the shared source URL in a
   const stepOneIndex = source.indexOf('1. Source');
   const stepTwoIndex = source.indexOf('2. Fields');
   const checkboxIndex = source.indexOf('Use one source URL for all filled-in fields');
-  const fieldsMapIndex = source.indexOf('ENRICHABLE_FIELDS.map((fieldName) => {\n                                    const fieldDraft');
+  const fieldsMapIndex = source.indexOf('const fieldDraft = fieldDraftFor(fieldName)');
   assert.ok(stepOneIndex >= 0 && stepTwoIndex >= 0, 'expected both a labeled "1. Source" and "2. Fields" section');
   assert.ok(stepOneIndex < checkboxIndex, 'the source step heading must come before the shared-source-URL checkbox');
   assert.ok(checkboxIndex < stepTwoIndex, 'the shared-source-URL checkbox must be part of step 1, before step 2 begins');

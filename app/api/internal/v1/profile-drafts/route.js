@@ -25,13 +25,58 @@
 // `p_restarted_from_draft_id` — the RPC itself validates that reference
 // before trusting it (see the migration's own comment). Nothing here
 // requires the caller to know about a prior discarded draft's id.
+//
+// GET (added 2026-09-12, next step after the production smoke test) — the
+// read-only list /internal/profile-drafts renders. Lists every draft,
+// active AND discarded, plus each one's source candidate's name (for
+// display only — never its full field set, to avoid duplicating
+// import-inbox's own candidate cards). Two bounded queries, never a
+// per-row round trip; this handler only ever reads — it issues no
+// create, mutate, or remove call of any kind.
 
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/src/lib/supabaseAdmin'
 import { authenticateInternalRequest } from '@/src/lib/internalAuth'
 import { isInternalOnly } from '@/src/lib/importInbox'
-import { findPossibleDuplicateDraftId, buildDraftFieldsByDraftId } from '@/src/lib/restaurantProfileDrafts'
+import {
+  findPossibleDuplicateDraftId,
+  buildDraftFieldsByDraftId,
+  buildProfileDraftOverviewRows,
+} from '@/src/lib/restaurantProfileDrafts'
 import { generateUuidV7 } from '@/src/lib/uuidv7'
+
+export async function GET(request) {
+  const auth = await authenticateInternalRequest(request)
+  if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status })
+
+  if (!isInternalOnly(auth.roles)) {
+    return NextResponse.json({ error: 'Only internal staff can view Restaurant Profile Drafts' }, { status: 403 })
+  }
+
+  const supabase = getSupabaseAdmin()
+
+  const { data: draftRows, error: draftsError } = await supabase
+    .from('restaurant_profile_drafts')
+    .select(
+      'id, source_candidate_id, status, promoted_at, discarded_at, discard_note, possible_duplicate_of_draft_id, restarted_from_draft_id'
+    )
+  if (draftsError) return NextResponse.json({ error: 'Query failed' }, { status: 500 })
+
+  const candidateIds = [...new Set((draftRows || []).map((row) => row.source_candidate_id).filter(Boolean))]
+  const candidateNameById = {}
+  if (candidateIds.length > 0) {
+    const { data: candidateRows, error: candidatesError } = await supabase
+      .from('import_extraction_records')
+      .select('id, extracted_fields')
+      .in('id', candidateIds)
+    if (candidatesError) return NextResponse.json({ error: 'Query failed' }, { status: 500 })
+    for (const row of candidateRows || []) {
+      candidateNameById[row.id] = (row.extracted_fields && row.extracted_fields.name) || null
+    }
+  }
+
+  return NextResponse.json({ drafts: buildProfileDraftOverviewRows(draftRows, candidateNameById) })
+}
 
 export async function POST(request) {
   const auth = await authenticateInternalRequest(request)

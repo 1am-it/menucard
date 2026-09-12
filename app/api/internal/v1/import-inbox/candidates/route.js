@@ -41,6 +41,13 @@
 // supabase/migrations/0010_market05c_restaurant_profile_drafts.sql). This
 // route still never writes anything — creating a draft only ever happens
 // via the separate `POST /api/internal/v1/profile-drafts` route.
+//
+// **Update (2026-09-12) — also resolves each candidate's most-recently-
+// discarded Restaurant Profile Draft, if any** (`latest_discarded_draft`
+// — `null` unless a `status = 'discarded'` row exists for it), for the
+// candidate detail card's "Previous profile draft discarded" line. Still
+// read-only: discarding a draft only ever happens via the separate
+// `POST /api/internal/v1/profile-drafts/[id]/discard` route.
 
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/src/lib/supabaseAdmin'
@@ -52,7 +59,10 @@ import {
   buildLatestDeferredReasonByCandidateId,
   buildEnrichmentSourceByCandidateId,
 } from '@/src/lib/importInbox'
-import { buildActiveProfileDraftByCandidateId } from '@/src/lib/restaurantProfileDrafts'
+import {
+  buildActiveProfileDraftByCandidateId,
+  buildLatestDiscardedProfileDraftByCandidateId,
+} from '@/src/lib/restaurantProfileDrafts'
 
 // Same headroom reasoning as RECORD_LIMIT below — bounded, not
 // pagination, revisit once volume materially exceeds this. One row per
@@ -63,6 +73,15 @@ const REVIEW_LIMIT = 4000
 // One row per enrichment *fact* (one field, one value), not per
 // candidate — same headroom reasoning as REVIEW_LIMIT above.
 const ENRICHMENT_LIMIT = 4000
+
+// One row per draft *lifecycle event* (a promotion or a discard), not
+// per candidate — same headroom reasoning as REVIEW_LIMIT/ENRICHMENT_LIMIT
+// above. See the query below for how ordering keeps this limit from ever
+// hiding a candidate's *active* draft, and why the same, already-accepted
+// "latest per candidate over the top-N most recent events" tradeoff
+// REVIEW_LIMIT/ENRICHMENT_LIMIT already carry applies here too, deliberately
+// — not a new or different risk.
+const DRAFT_LIMIT = 4000
 
 // v1 limitation, not silently ignored: enough headroom for every
 // candidate the real, already-run dry-runs actually produced (500
@@ -127,18 +146,51 @@ export async function GET(request) {
   if (enrichmentsError) return NextResponse.json({ error: 'Query failed' }, { status: 500 })
   const enrichmentSourceByCandidateId = buildEnrichmentSourceByCandidateId(enrichments)
 
-  // MARKET-05C: every *active* draft, in one bounded query —
-  // buildActiveProfileDraftByCandidateId (pure,
-  // src/lib/restaurantProfileDrafts.js) reduces this to "the active draft
-  // per source_candidate_id, if any," without a second per-candidate
-  // round trip. Read-only: creating/discarding a draft only ever happens
-  // via the separate profile-drafts route.
+  // MARKET-05C: every draft header row (active AND discarded), in one
+  // bounded query (DRAFT_LIMIT, added 2026-09-12 — this query briefly had
+  // no limit at all while it was scoped to `status = 'draft'` only; once
+  // widened to also read discarded rows for the "Previous profile draft
+  // discarded" line, an explicit bound became necessary again, same as
+  // every other query in this route) — buildActiveProfileDraftByCandidateId
+  // reduces this to "the active draft per source_candidate_id, if any,"
+  // and buildLatestDiscardedProfileDraftByCandidateId separately reduces
+  // it to "the most-recently-discarded draft per source_candidate_id, if
+  // any" — both pure, both in src/lib/restaurantProfileDrafts.js, neither
+  // issuing a second query. Read-only: creating/discarding a draft only
+  // ever happens via the separate profile-drafts route.
+  //
+  // Ordered `discarded_at` descending with nulls first: every *active*
+  // draft (`discarded_at` is null) sorts ahead of every discarded one, so
+  // DRAFT_LIMIT can never cut off an active draft — its own count is
+  // already bounded to at most one per candidate that has ever been
+  // promoted (the migration's own partial unique index), nowhere near
+  // this limit. Discarded rows are then ordered newest-first *across all
+  // candidates*, not scoped per candidate — a plain, unscoped `.limit()`
+  // here would risk silently dropping a specific candidate's own latest
+  // discarded row if enough more-recent discards from *other* candidates
+  // filled the limit first. Scoping this query to only the candidates on
+  // the current page (`.in('source_candidate_id', ...)`) was considered
+  // and rejected: with RECORD_LIMIT candidates, that filter can carry up
+  // to 2000 UUIDs, and PostgREST/Supabase's own request-size limits are
+  // not something this route can safely assume headroom for. Instead,
+  // this accepts the exact same, already-shipped tradeoff
+  // buildReviewStatusByCandidateId/buildEnrichmentSourceByCandidateId
+  // above already make via REVIEW_LIMIT/ENRICHMENT_LIMIT (both are also
+  // "latest per candidate" reductions over a globally newest-first,
+  // limited query) — not a new or different risk, and, like those two,
+  // a known v1 limitation rather than a silently ignored one: revisit
+  // (e.g. a dedicated per-candidate "latest" database view) once real
+  // discard volume materially exceeds this.
   const { data: drafts, error: draftsError } = await supabase
     .from('restaurant_profile_drafts')
-    .select('id, source_candidate_id, status, promoted_by, promoted_at, restarted_from_draft_id, possible_duplicate_of_draft_id')
-    .eq('status', 'draft')
+    .select(
+      'id, source_candidate_id, status, promoted_by, promoted_at, restarted_from_draft_id, possible_duplicate_of_draft_id, discarded_at, discard_note'
+    )
+    .order('discarded_at', { ascending: false, nullsFirst: true })
+    .limit(DRAFT_LIMIT)
   if (draftsError) return NextResponse.json({ error: 'Query failed' }, { status: 500 })
   const profileDraftByCandidateId = buildActiveProfileDraftByCandidateId(drafts)
+  const latestDiscardedDraftByCandidateId = buildLatestDiscardedProfileDraftByCandidateId(drafts)
 
   const { candidates, totalBeforeFilters } = enrichAndFilterCandidates(records, {
     runId,
@@ -151,6 +203,7 @@ export async function GET(request) {
     enrichmentSourceByCandidateId,
     deferredReasonByCandidateId,
     profileDraftByCandidateId,
+    latestDiscardedDraftByCandidateId,
   })
 
   return NextResponse.json({

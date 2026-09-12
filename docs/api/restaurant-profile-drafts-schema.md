@@ -29,6 +29,15 @@ later still — discard/duplicate follow-up round)" further down (discard
 built, one real schema bug found and fixed via local validation, the
 duplicate flow verified). Migration `0010` is still not applied live.
 
+**Status correction (2026-09-12): the line above is also stale.**
+Migration `0010` has since been applied to production, as its own
+separate, explicitly-approved release (see
+`planning/decisions/013-production-migration-pipeline.md`'s production
+migration pipeline for how), followed by the MARKET-05C app-code release
+and a controlled production smoke test for one real candidate — see
+"Implementation (2026-09-12) — Restaurant Profile Drafts overview" below
+for the next step taken after that smoke test.
+
 ## Implementation (2026-09-06, later still — same day)
 
 **Built, not yet applied live.** Migration
@@ -182,6 +191,251 @@ against the old, buggy combined-check shape reappearing), the
 `discard_profile_draft` RPC's own guard ordering, the new discard route,
 the promote route's server-side-recomputation guarantee, and the page's
 discard confirm-form gating. Full suite: 495 tests passing.
+
+## Implementation (2026-09-12) — Restaurant Profile Drafts overview
+
+Built as the next step after migration `0010` went live, the app-code
+release above was shipped separately, and a controlled production smoke
+test (one real candidate, promote → visual confirm → discard with a
+mandatory reason → visual confirm) completed successfully. A small,
+`internal`-only, **read-only by default** overview so staff can see every
+draft — active and discarded — without opening each source candidate
+individually on `/internal/import-inbox`.
+
+- **`GET /api/internal/v1/profile-drafts`** (added alongside the existing
+  `POST` in the same route file) — lists every `restaurant_profile_drafts`
+  row, active and discarded, plus each one's source candidate's name
+  (resolved via one bounded `import_extraction_records` query, never a
+  per-row round trip). `internal`-only, the same
+  `authenticateInternalRequest` + `isInternalOnly` gate as every other
+  Data-inbox/profile-drafts route. Strictly read-only: no `.insert()`,
+  `.update()`, `.delete()`, or RPC call anywhere in the handler —
+  confirmed both by direct review and by a structural safety-net test
+  that greps the handler's own source for exactly those forbidden calls.
+- **`src/lib/restaurantProfileDrafts.js`'s `buildProfileDraftOverviewRows`**
+  — the pure reducer behind the list: unlike
+  `buildActiveProfileDraftByCandidateId` (which deliberately keeps only
+  the active draft per candidate, for the import-inbox candidate cards),
+  this keeps every row, resolves `possible_duplicate_of_draft_id` and
+  `restarted_from_draft_id` to the *other* draft's candidate name (never
+  a bare id alone), and sorts newest-first by `promoted_at`.
+- **`/internal/profile-drafts`** — the page itself, reusing the existing
+  `.di-*` design system and the exact session/auth pattern every other
+  internal page already uses (`getSupabaseBrowser()` for the session,
+  a bearer-token `fetch` for data, no direct Supabase access from the
+  browser). A top banner states plainly that a draft is internal-only and
+  never appears on a public restaurant page automatically. Each card
+  shows: candidate name, active/discarded status, creation timestamp, a
+  possible-duplicate note (candidate name of the *other* draft) when
+  flagged, a restart note (candidate name of the discarded draft it
+  restarted) when applicable, discard timestamp + a short note preview
+  when discarded, and the draft's own id (for cross-referencing, e.g.
+  against `$GITHUB_STEP_SUMMARY`-style audit trails or a support
+  conversation) — never its full field-fact ledger
+  (name/category/address/phone/website), which already lives on the
+  source candidate's own card in the import-review queue; repeating it
+  here would be exactly the duplicate information this overview is
+  scoped to avoid.
+
+**Deliberately unchanged, by explicit scope**: no create, discard, sync,
+or publish action exists on this page. Promoting a candidate or
+discarding a draft still only happens on `/internal/import-inbox`'s
+existing `approved_internal` detail view — every card here links out to
+it ("Open in Import Inbox") rather than duplicating that flow. No legacy
+public-restaurant linkage, merge, or write of any kind was added; this
+overview only ever reads `restaurant_profile_drafts` and
+`import_extraction_records.extracted_fields.name`.
+
+**Tests**: `src/lib/restaurantProfileDrafts.test.js` grew from 60 to 69
+— 5 new unit tests for `buildProfileDraftOverviewRows` (candidate-name
+resolution, duplicate/restart-link resolution to the *other* draft's
+name, missing-name handling, empty input, and an explicit assertion that
+no per-field fact ever appears on a row) and 4 new structural safety-net
+tests (the `GET` handler is internal-only and issues no mutating/RPC
+call; the page never `POST`s or links to a `/discard` endpoint directly;
+the page states the internal-only/never-auto-published guarantee in its
+own text; the page uses the same session/auth pattern as every other
+internal page, never a direct Supabase query from the browser). Full
+suite: 504 tests passing.
+
+**Visual check**: reviewed in a disposable local preview at desktop
+(1280px) and mobile (390px) widths, in both the light and dark theme —
+desktop rendered cleanly in both themes. The mobile screenshot from this
+session's own headless-browser tooling showed clipped content, but a
+follow-up, code-independent diagnostic (a plain, unrelated test page)
+reproduced the identical clipping, isolating it to a local headless
+Edge/Windows DPI-scaling artifact in this tooling — not a defect in the
+page's CSS, which reuses the exact `.di-*` responsive classes and
+`max-width: 720px` breakpoint already shipped on `/internal/import-inbox`.
+Recorded here as a residual, unconfirmed item: a real mobile check (a
+phone, or real browser dev tools) is still worth doing before treating
+this page's small-viewport layout as fully proven.
+
+**Update (2026-09-12, later — mobile verification closed out): the
+residual item above is resolved.** The earlier clipping was confirmed to
+be specific to the `--window-size` CLI-flag path of that session's
+headless-browser tooling, not to browser-level mobile viewport emulation
+in general. Re-verified via the Chrome DevTools Protocol's
+`Emulation.setDeviceMetricsOverride` (`mobile: true`, `deviceScaleFactor: 1`,
+390×844) — the same device-emulation mechanism real browser-automation
+tools use, a different code path from the flag that showed the artifact,
+run against the OS's own Edge binary with no new dependency added. Also
+re-confirmed the same `diag.html` page that first reproduced the
+artifact now renders correctly full-width under this method, isolating
+the original clipping conclusively to the earlier tool invocation rather
+than to anything device- or CSS-related.
+
+Result, same disposable preview and sample data as above, both themes,
+both widths:
+
+- **No horizontal overflow or clipped element** at either 390px or
+  1280px, in either theme — every card, the banner, and the topbar span
+  the full available width and wrap correctly.
+- **Statuses are readable**: the green "Active" / muted "Discarded"
+  chips keep clear contrast against both the dark and light card
+  background.
+- **The one primary action** ("Open in Import Inbox") stays a clearly
+  sized, comfortably tappable button-style link at 390px, never cramped
+  against the card edge.
+- **No collapsible section exists on this specific page** (unlike
+  Import Inbox's own "Details & review" expand/collapse) — this page is
+  a flat, read-only list by design, so this checklist item does not
+  apply here; nothing was found to break because there is nothing to
+  collapse.
+- **No form exists on this page** (also by design — every mutation stays
+  on Import Inbox); the two interactive elements ("Sign out", "Open in
+  Import Inbox") remain well-spaced and reachable at 390px.
+- **Light/dark theme parity confirmed**: identical layout and copy in
+  both themes, with only the expected token-driven color swap (card
+  background, chip colors, banner tint) — no theme-specific breakage.
+
+Mobile is now considered genuinely verified, not merely asserted — this
+was re-checked with a method demonstrated (via the same `diag.html`
+control) to be free of the earlier artifact, rather than by re-running
+the same suspect tooling and hoping for a different result.
+
+## Presentation rebuild (2026-09-12, later still) — candidate detail card
+
+A **visual/UX-only** rebuild of the existing candidate detail card on
+`/internal/import-inbox` (the "Details & review" expanded view for one
+candidate), driven by two new visual references:
+`docs/mockups/restaurant-profile-drafts-v1.png` (page layout/Import Inbox
+context) and `docs/mockups/restaurant-profile-drafts-detail-v1.png` (the
+compact status overview, primary action, accordions, and history
+timeline). No database field, migration, API route, mutation,
+authorization rule, or business rule changed — every change below is
+presentation/information-hierarchy only, verified by rerunning the full
+existing test suite unchanged in intent (only relocated/rewritten where
+the assertions checked exact JSX text or position that moved).
+
+**Correction (2026-09-12, later still — commit preparation): only the
+first of the two mockups above was committed.**
+`restaurant-profile-drafts-detail-v1.png` contains restaurant
+photography, which does not fit this project's text-first/no-photography
+UI principle (see `CLAUDE.md`) — it was excluded from the commit, stays
+in the local working tree unreferenced, and `docs/mockups/README.md` no
+longer lists it as a governing design reference. The implementation
+choices this mockup informed (the compact status overview, primary
+action, accordions, and history timeline) are unaffected by its exclusion
+— photography itself was never built, per this same principle — and
+remain accurately described below.
+
+**What changed, in `app/internal/import-inbox/page.js`:**
+
+- A **compact status row** (three always-visible items once a candidate's
+  detail is expanded): candidate status (`review_status`), completeness
+  (`quality_status`/`missing_fields`), and Restaurant Profile Draft
+  lineage. All three values already existed — this only gives them one
+  consistent, scannable presentation (icon + label + one-line sublabel),
+  replacing two previously separate, easy-to-miss lines ("Internally
+  approved only. This does not publish…" and "Restaurant Profile Draft
+  already created (…)").
+- A **compact audit reference** ("View audit details") — shown whenever a
+  candidate has an active or a discarded draft, linking to the
+  already-built, read-only `/internal/profile-drafts` overview (no new
+  page, no new route).
+- The existing "Create Restaurant Profile Draft"/duplicate-confirmation/
+  discard flow is now the one clear primary action in this area — moved
+  into place, restyled, but **every condition, state variable, API call,
+  and confirmation step is unchanged** (`canPromoteCandidateToProfileDraft`,
+  `canDiscardCandidateDraft`, the 409-duplicate flow, the mandatory
+  discard-reason textarea, all identical).
+- The former flat stack of "Review history" / "Record a decision" /
+  "Enrichment history" / "Enrich missing business info" is now three
+  native `<details>`/`<summary>` accordions — **Review decision**,
+  **Enrichment**, **History & sources** — using the platform's own
+  disclosure element (no new dependency, full keyboard/focus support for
+  free). The decision and enrichment *forms* are unchanged, field for
+  field. The two separate history lists (review decisions, enrichment
+  facts) are merged into one newest-first, human-readable timeline inside
+  "History & sources" (`buildCandidateHistoryTimeline`, new pure function
+  in `src/lib/importInbox.js`) — each entry shows a short date and a
+  plain-language title/description prominently, with the full raw
+  timestamp and, for enrichment entries, the source URL, still present
+  but de-emphasized (smaller, muted text) rather than hidden.
+- The candidate's most-recently-**discarded** Restaurant Profile Draft is
+  now also visible (as "Previous draft discarded" in the status row) —
+  previously only the *active* draft was resolved by
+  `GET /api/internal/v1/import-inbox/candidates`. This required widening
+  that route's existing `restaurant_profile_drafts` query (no longer
+  filtered to `status = 'draft'` alone; `discarded_at`/`discard_note` were
+  added to the `select`) and adding a second pure reducer,
+  `buildLatestDiscardedProfileDraftByCandidateId`, alongside the existing
+  `buildActiveProfileDraftByCandidateId` — both read-only, same query, no
+  new round trip. `buildDraftLineageSummary` (also new, in
+  `src/lib/restaurantProfileDrafts.js`) decides which of the two "wins"
+  for display (an active draft always wins over discard history).
+- Restaurant/dish photography from the mockups was **not** built —
+  explicitly out of scope per this project's text-first principle and the
+  task's own instruction; neither is the mockups' "Bewerken"/Edit button,
+  since no such action exists in the current app.
+
+**Deliberately unchanged**: internal-only authorization
+(`authenticateInternalRequest` + `isInternalOnly`), append-only audit
+behavior, the duplicate-draft warn-and-confirm flow, the mandatory
+discard-reason requirement, and every existing validation function
+(`validateReviewDecisionInput`, `validateEnrichmentRequestInput`,
+`isReviewDecisionSubmittable`, `hasVerifiedWebsiteForSuggestions`, etc.) —
+none were touched. No new theme/styling layer: every new class (`.di-status-*`,
+`.di-accordion-*`, `.di-timeline-*`) lives in the same `app/globals.css`
+"INTERNAL TOOLING" block and uses only existing CSS custom properties.
+
+**Tests**: `src/lib/importInbox.test.js` gained 6 new unit tests for
+`buildCandidateHistoryTimeline` (merge order, field preservation, tie-
+break, malformed/missing-timestamp rows, empty input) and had 5 existing
+structural safety-net tests updated to match the relocated/rewritten
+markup (same intent — e.g. "the explanation is gated on
+`review_status === 'approved_internal'`, inside the expanded view" —
+just pointed at the new location/wording). `src/lib/restaurantProfileDrafts.test.js`
+gained 9 new unit tests (`buildLatestDiscardedProfileDraftByCandidateId`,
+`buildDraftLineageSummary`) and 5 new structural safety-net tests (no
+photo/image element anywhere on the page; the status row is built from
+already-existing data only; the audit link is gated and targets the
+existing overview page, never a new route; exactly three native
+accordions exist, in order, with "History & sources" open by default; the
+promote/discard flow still targets only the two existing routes), plus 2
+existing tests updated for the widened candidates-route query and the
+relocated "active draft" text. Full suite: **522 tests passing** (up from
+504).
+
+**Build**: `npm run build` succeeds (Next.js 15.5.15, no new
+dependencies).
+
+**Visual check**: reviewed via a disposable, non-committed local preview
+(the same CDP-based, dependency-free method proven in the mobile-
+verification round above) at 1280px and 390px, in both the light and dark
+theme, covering three states: an approved candidate with an active draft,
+an approved candidate whose only draft is a discarded one (verifying the
+new "Previous draft discarded" status item and audit link), and a
+`needs_enrichment` candidate with no draft (verifying the status row/audit
+link degrade gracefully when there is nothing to show). In all cases: no
+horizontal overflow or clipped element at either width; the compact status
+row wraps to one column per item on mobile with no cramped text; the one
+primary action (create/discard/promote-anyway, whichever applies) reads
+as the single clear call to action; all three accordions expand/collapse
+via native keyboard and pointer interaction with a visible focus ring;
+chips, borders, icons, and the timeline's connecting line keep correct
+contrast in both themes with only the expected token-driven color swap.
 
 ## What this is
 

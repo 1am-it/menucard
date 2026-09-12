@@ -162,6 +162,62 @@ function buildActiveProfileDraftByCandidateId(allDraftRows) {
 }
 
 /**
+ * Groups an unordered list of draft header rows by `source_candidate_id`,
+ * keeping only each candidate's single most-recently-discarded
+ * (`status === 'discarded'`) draft — a candidate can accumulate more than
+ * one discarded draft over time (e.g. promote, discard, restart, discard
+ * again), so "latest wins" is required here, unlike
+ * buildActiveProfileDraftByCandidateId's direct map (at most one active
+ * draft per candidate is already guaranteed by the migration's partial
+ * unique index). Tie-broken by `id` lexicographically (never `Number()`
+ * — unlike the field-facts ledger's bigint identity ids,
+ * `restaurant_profile_drafts.id` is an application-generated UUIDv7 —
+ * see src/lib/uuidv7.js — whose lexicographic order already matches
+ * creation order, so this is a safe, deterministic tie-break; a true
+ * same-millisecond `discarded_at` tie is not expected in practice
+ * either way). Added 2026-09-12 for the candidate detail card's
+ * "Previous profile draft discarded" line — purely a presentation
+ * addition; this never changes what counts as active/discardable
+ * (canPromoteCandidateToProfileDraft/canDiscardCandidateDraft below
+ * still only ever look at the *active* draft). Returns
+ * `{ [candidateId]: { id, status, discarded_at, discard_note,
+ * promoted_at } }`.
+ */
+function buildLatestDiscardedProfileDraftByCandidateId(allDraftRows) {
+  const byCandidateId = {};
+  for (const row of allDraftRows || []) {
+    if (!row || !row.source_candidate_id || row.status !== 'discarded') continue;
+    if (!byCandidateId[row.source_candidate_id]) byCandidateId[row.source_candidate_id] = [];
+    byCandidateId[row.source_candidate_id].push(row);
+  }
+  const result = {};
+  for (const candidateId of Object.keys(byCandidateId)) {
+    let latest = null;
+    for (const row of byCandidateId[candidateId]) {
+      if (!latest) {
+        latest = row;
+        continue;
+      }
+      const latestTime = new Date(latest.discarded_at).getTime();
+      const rowTime = new Date(row.discarded_at).getTime();
+      if (rowTime > latestTime || (rowTime === latestTime && String(row.id) > String(latest.id))) {
+        latest = row;
+      }
+    }
+    if (latest) {
+      result[candidateId] = {
+        id: latest.id,
+        status: latest.status,
+        discarded_at: latest.discarded_at || null,
+        discard_note: latest.discard_note || null,
+        promoted_at: latest.promoted_at,
+      };
+    }
+  }
+  return result;
+}
+
+/**
  * Whether the "Create Restaurant Profile Draft" action should be offered
  * for one candidate (as already shaped by
  * importInbox.js's enrichAndFilterCandidates, which attaches
@@ -190,6 +246,38 @@ function canPromoteCandidateToProfileDraft(candidate) {
  */
 function canDiscardCandidateDraft(candidate) {
   return Boolean(candidate && candidate.profile_draft && candidate.profile_draft.status === 'draft');
+}
+
+/**
+ * Reduces one candidate's draft lineage (its `profile_draft` from
+ * buildActiveProfileDraftByCandidateId and `latest_discarded_draft` from
+ * buildLatestDiscardedProfileDraftByCandidateId, both already attached by
+ * enrichAndFilterCandidates) to the single fact the candidate detail
+ * card's compact status row needs to show — added 2026-09-12 for the
+ * mockup-driven presentation rebuild (docs/mockups/restaurant-profile-drafts-detail-v1.png).
+ * An active draft always wins over a discarded one — a candidate that
+ * was discarded and later restarted must show "active," never stale
+ * "discarded" history, exactly matching what canDiscardCandidateDraft
+ * above already treats as authoritative. Purely a display reducer: it
+ * never decides whether an action is allowed (canPromoteCandidateToProfileDraft/
+ * canDiscardCandidateDraft still own that), only what the status row's
+ * third item says.
+ */
+function buildDraftLineageSummary(candidate) {
+  const activeDraft = candidate && candidate.profile_draft;
+  if (activeDraft && activeDraft.status === 'draft') {
+    return { state: 'active', promoted_at: activeDraft.promoted_at, draft_id: activeDraft.id };
+  }
+  const discardedDraft = candidate && candidate.latest_discarded_draft;
+  if (discardedDraft) {
+    return {
+      state: 'discarded',
+      discarded_at: discardedDraft.discarded_at,
+      discard_note: discardedDraft.discard_note,
+      draft_id: discardedDraft.id,
+    };
+  }
+  return { state: 'none' };
 }
 
 /**
@@ -223,6 +311,59 @@ function findPossibleDuplicateDraftId(candidateFields, activeDraftCandidates) {
   return null;
 }
 
+/**
+ * Shapes ALL draft header rows — active AND discarded, unlike
+ * buildActiveProfileDraftByCandidateId above, which deliberately keeps
+ * only the active one per candidate — into the read-only list
+ * /internal/profile-drafts renders (added as the next step after the
+ * production smoke test, 2026-09-12). Resolves `source_candidate_id`,
+ * `possible_duplicate_of_draft_id`, and `restarted_from_draft_id` to a
+ * human-readable candidate name via `candidateNameById` (built by the
+ * caller from one already-run `import_extraction_records` query — the
+ * exact same "one query, resolve here" pattern this module and
+ * importInbox.js already use throughout; never a second Supabase query
+ * per row). Deliberately does NOT include per-field facts
+ * (address/phone/website) — those already live on the source candidate's
+ * own card in the import-review queue; repeating them here would be the
+ * exact duplicate information this overview is scoped to avoid. Sorted
+ * newest-first by `promoted_at`. Pure; never touches Supabase.
+ */
+function buildProfileDraftOverviewRows(allDraftRows, candidateNameById) {
+  const namesById = candidateNameById || {};
+  const rows = (allDraftRows || []).filter((row) => row && row.id);
+
+  // Resolves possible_duplicate_of_draft_id/restarted_from_draft_id (both
+  // OTHER draft ids) to a candidate name via the same already-fetched
+  // list — never a second query for a "which candidate is that draft
+  // for" lookup.
+  const candidateNameByDraftId = {};
+  for (const row of rows) {
+    candidateNameByDraftId[row.id] = namesById[row.source_candidate_id] || null;
+  }
+
+  function resolveDraftRef(draftId) {
+    if (!draftId) return null;
+    return { draft_id: draftId, candidate_name: candidateNameByDraftId[draftId] || null };
+  }
+
+  return rows
+    .map((row) => ({
+      id: row.id,
+      status: row.status,
+      candidate_name: namesById[row.source_candidate_id] || null,
+      source_candidate_id: row.source_candidate_id,
+      promoted_at: row.promoted_at,
+      possible_duplicate_of: resolveDraftRef(row.possible_duplicate_of_draft_id),
+      restarted_from: resolveDraftRef(row.restarted_from_draft_id),
+      // Discard fields are only ever non-null when status === 'discarded'
+      // (the migration's own three-biconditional check guarantees this),
+      // but the check here is kept explicit rather than trusted blindly.
+      discarded_at: row.status === 'discarded' ? row.discarded_at || null : null,
+      discard_note: row.status === 'discarded' ? row.discard_note || null : null,
+    }))
+    .sort((a, b) => new Date(b.promoted_at).getTime() - new Date(a.promoted_at).getTime());
+}
+
 module.exports = {
   ALLOWED_DRAFT_STATUSES,
   ALLOWED_DRAFT_FIELD_NAMES,
@@ -233,7 +374,10 @@ module.exports = {
   pickLatestDraftFactRow,
   buildDraftFieldsByDraftId,
   buildActiveProfileDraftByCandidateId,
+  buildLatestDiscardedProfileDraftByCandidateId,
+  buildDraftLineageSummary,
   canPromoteCandidateToProfileDraft,
   canDiscardCandidateDraft,
   findPossibleDuplicateDraftId,
+  buildProfileDraftOverviewRows,
 };
