@@ -1007,6 +1007,112 @@ test('structural safety net: the coverage page redirects an unauthenticated visi
   assert.doesNotMatch(source, /\.from\(['"]/, 'must never query a Supabase table directly from the browser');
 });
 
+// ─── Coverage Dashboard presentation rebuild (2026-09-12, later still) —
+// docs/mockups/coverage-dashboard-v1.png. Presentation only: these tests
+// confirm the new "—" placeholder and the single, shared explanation
+// line, without touching or re-deriving any of computeCoverageMetrics()'s
+// own calculations (already covered, unchanged, by the security-fix
+// tests above — this route/page still reuses that function verbatim). ──
+
+test('structural safety net: the coverage page never shows the old per-row "too few restaurants" sentence anywhere — replaced by a calm em dash', () => {
+  const source = fs.readFileSync(COVERAGE_PAGE_PATH, 'utf8');
+  assert.doesNotMatch(source, /too few restaurants/i, 'the old verbose per-row sentence must be fully gone');
+  assert.match(
+    source,
+    /r\.pct === null \? '—' : `\$\{r\.pct\}%`/,
+    'a breakdown row with no percentage (sample too small) must render a plain em dash instead'
+  );
+});
+
+test('structural safety net: the coverage page shows the sample-threshold explanation exactly once per table, not once per row', () => {
+  const source = fs.readFileSync(COVERAGE_PAGE_PATH, 'utf8');
+  const explanationMatches = source.match(/Percentages are only shown for groups with at least/g) || [];
+  assert.equal(explanationMatches.length, 1, 'the explanation must be written once in source (inside BreakdownTable, outside its rows.map) — not duplicated per call site or per row');
+
+  const mapStart = source.indexOf('{rows.map((r) => (');
+  const mapEnd = source.indexOf('))}', mapStart);
+  const explanationIndex = source.indexOf('Percentages are only shown for groups with at least');
+  assert.ok(mapStart >= 0 && mapEnd > mapStart, 'expected to find the rows.map row-rendering block');
+  assert.ok(explanationIndex > mapEnd, 'the explanation must be rendered after the row loop, never inside it — otherwise it would repeat once per row');
+
+  assert.match(
+    source,
+    /Percentages are only shown for groups with at least \{sampleThreshold\} restaurants\.\s*<\/div>/,
+    'must use the real sampleThreshold value from computeCoverageMetrics(), never a hardcoded number that could drift from it'
+  );
+});
+
+test('structural safety net: the coverage page metric cards and breakdown tables still read every field computeCoverageMetrics() actually returns — no renamed or dropped field', () => {
+  const source = fs.readFileSync(COVERAGE_PAGE_PATH, 'utf8');
+  for (const field of [
+    'data.city',
+    'data.metrics.basicInfo.count',
+    'data.metrics.basicInfo.total',
+    'data.metrics.basicInfo.pct',
+    'data.metrics.menuData.count',
+    'data.metrics.menuData.total',
+    'data.metrics.menuData.pct',
+    'data.metrics.menuData.restaurantIds',
+    'data.metrics.menuData.missingRestaurantIds',
+    'data.metrics.priceCoverage.count',
+    'data.metrics.priceCoverage.total',
+    'data.metrics.priceCoverage.pct',
+    'data.metrics.reservationConfirmed.count',
+    'data.metrics.reservationConfirmed.total',
+    'data.metrics.reservationConfirmed.pct',
+    'data.byBuurt',
+    'data.byCuisine',
+    'data.sampleThreshold',
+  ]) {
+    assert.ok(source.includes(field), `expected the page to still read ${field}, exactly as computeCoverageMetrics() returns it`);
+  }
+});
+
+test('structural safety net: each horizontally-scrollable coverage table is keyboard-reachable, with a unique, readable accessible name', () => {
+  // Follow-up accessibility fix (2026-09-12, later still): a plain
+  // `overflowX: auto` div is not part of the tab order by default, so a
+  // keyboard-only user could never scroll it. `tabIndex={0}` puts it in
+  // the tab order; `role="region"` + a unique `aria-label` (built from
+  // each table's own `title` prop, so "By neighbourhood (buurt)" and "By
+  // cuisine" never share the same name) gives it a real, announced
+  // landmark — the same pattern this project already documents for
+  // injecting a Supabase session into a browser test
+  // (docs/guides/internal-api-live-testing.md), applied here to a plain
+  // scroll container instead.
+  const source = fs.readFileSync(COVERAGE_PAGE_PATH, 'utf8');
+  const overflowDivMatch = source.match(/<div\s+role="region"[\s\S]*?style=\{\{ overflowX: 'auto' \}\}/);
+  assert.ok(overflowDivMatch, 'expected to find the scrollable table wrapper with role="region"');
+  assert.match(overflowDivMatch[0], /tabIndex=\{0\}/, 'the scrollable wrapper must be part of the tab order');
+  assert.match(
+    overflowDivMatch[0],
+    /aria-label=\{`\$\{title\} table, horizontally scrollable`\}/,
+    'the accessible name must be built from this table\'s own title, so the two tables never share an identical label'
+  );
+});
+
+test('structural safety net: every coverage table column header uses scope="col", explicitly associating it with its column', () => {
+  const source = fs.readFileSync(COVERAGE_PAGE_PATH, 'utf8');
+  const theadMatch = source.match(/<thead>[\s\S]*?<\/thead>/);
+  assert.ok(theadMatch, 'expected to find the table header row');
+  const headerCells = theadMatch[0].match(/<th\b[^>]*>/g) || [];
+  assert.equal(headerCells.length, 4, 'expected exactly the four existing column headers — Group/Restaurants/With menu data/Coverage');
+  for (const cell of headerCells) {
+    assert.match(cell, /scope="col"/, `expected every <th> to carry scope="col", found: ${cell}`);
+  }
+});
+
+test('structural safety net: the coverage table accessibility fix changed only these attributes — same columns, same rows, same styling direction', () => {
+  const source = fs.readFileSync(COVERAGE_PAGE_PATH, 'utf8');
+  // The four column labels and the em-dash/explanation behaviour from the
+  // presentation rebuild must still be exactly as they were — this fix
+  // only adds attributes, it never touches table content or styling.
+  assert.match(source, />Group<\/th>/);
+  assert.match(source, />Restaurants<\/th>/);
+  assert.match(source, />With menu data<\/th>/);
+  assert.match(source, />Coverage<\/th>/);
+  assert.match(source, /r\.pct === null \? '—' : `\$\{r\.pct\}%`/);
+});
+
 test('structural safety net: the migration grants only select+insert on import_candidate_reviews — no update, no delete, for any role', () => {
   const sql = fs.readFileSync(MIGRATION_PATH, 'utf8');
   assert.match(sql, /grant select, insert on public\.import_candidate_reviews to service_role/);

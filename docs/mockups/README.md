@@ -66,6 +66,16 @@ reference instead of ad hoc judgment calls:
   does not fit this project's text-first/no-photography UI principle
   (see `CLAUDE.md`), so it was never committed and is not listed here —
   photography itself was never built, per that same principle.
+- [Coverage Dashboard mockup](./coverage-dashboard-v1.png) (addition,
+  2026-09-12) — visual reference for `/internal/coverage`'s (PLATFORM-01)
+  presentation: the compact internal-only/read-only badge, the four
+  equal metric cards, and the calmer neighbourhood/cuisine breakdown
+  tables (centered numeric columns, an em dash for small samples, one
+  shared explanation below each table). Governs layout/visual language
+  only, per this file's own top-level note — the sample Dutch labels and
+  cuisine groupings shown in the mockup were not adopted as real page
+  text or data; the page keeps its existing English copy and its real,
+  computed `computeCoverageMetrics()` figures unchanged.
 
 ## Naming
 
