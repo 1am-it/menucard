@@ -50,6 +50,7 @@ third, external-facing contribution flows last.
 8. [platform-08-community-microtask-contributions.md](./platform-08-community-microtask-contributions.md) — not started, deliberately skipped for now (see `planning/CONTEXT.md`)
 9. [platform-09-city-rollout-operations.md](./platform-09-city-rollout-operations.md) — done, decision/documentation only (its only dependency, `PLATFORM-01`, was already done)
 10. [platform-10-public-city-metrics-platform-exposure.md](./platform-10-public-city-metrics-platform-exposure.md)
+11. [platform-11-role-aware-internal-navigation-home.md](./platform-11-role-aware-internal-navigation-home.md) — not started, documentation/planning only; a role-aware `/internal` home and shared navigation across the existing internal surfaces (Import Inbox, Restaurant Profile Drafts, Moderation/Owner claims, Coverage) — server-side authorization per route remains the real boundary, this only adds discoverability
 
 ## MARKET-* order (proposed, not scheduled — three tickets done as documentation, one contract documented but blocked)
 
