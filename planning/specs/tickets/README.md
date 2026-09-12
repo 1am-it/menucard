@@ -138,6 +138,11 @@ implementation (see its own ticket).
     started; blocked on `MARKET-02`, `MARKET-06`, `MARKET-08`, the existing
     trust model, and an undecided URL/metadata strategy — see the ticket's
     own "Dependencies" section
+11. [market-11-import-batch-operations-scalable-review-queue.md](./market-11-import-batch-operations-scalable-review-queue.md) —
+    not started; an operational-scale extension of `05A`/`05C` (Wave 2),
+    not a new wave — cursor pagination, real server-side filtering, batch
+    context, and safe (never bulk-promotion) bulk actions for large import
+    batches. See the ticket's own "Depends on" and "Non-goals" sections.
 
 Do not start a ticket whose dependencies aren't done. Each ticket should be
 independently reviewable and deployable where practical. The three tracks
