@@ -569,6 +569,23 @@ test('structural safety net: the drafts query orders discarded_at descending wit
   assert.match(source, /\.order\('discarded_at', \{ ascending: false, nullsFirst: true \}\)/);
 });
 
+test('structural safety net: the drafts query orders by id descending as a secondary key, so a (discarded_at, id) tie is fully deterministic before DRAFT_LIMIT is applied', () => {
+  // Follow-up fix: `id` is unique per row, so ordering by
+  // (discarded_at, id) together can never leave two different rows
+  // tied at the DRAFT_LIMIT boundary — the same `(timestamp, id)`
+  // two-column-order convention this project's review/enrichment
+  // history routes already use (candidates/[id]/reviews/route.js,
+  // candidates/[id]/enrichments/route.js), and the same fix applied to
+  // the sibling profile-drafts overview route's own DISCARDED_DRAFT_LIMIT
+  // query.
+  const source = fs.readFileSync(CANDIDATES_ROUTE_PATH, 'utf8');
+  assert.match(
+    source,
+    /\.order\('discarded_at', \{ ascending: false, nullsFirst: true \}\)\s*\.order\('id', \{ ascending: false \}\)\s*\.limit\(DRAFT_LIMIT\)/,
+    'expected the exact order: .order(discarded_at, nullsFirst) then .order(id, descending) then .limit(DRAFT_LIMIT)'
+  );
+});
+
 test('structural safety net: the import-inbox page gates the "Create Restaurant Profile Draft" action on approved_internal and hides it once an active draft exists', () => {
   const source = fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8');
   assert.match(source, /canPromoteCandidateToProfileDraft\(c\)/, 'the button must be gated by the pure, tested eligibility function');
@@ -857,15 +874,22 @@ test('structural safety net: the profile-drafts overview fetches every active dr
   assert.ok(activeQueryMatch, 'expected the active-drafts query, immediately followed by its own error check (i.e. nothing chained after .eq)');
 });
 
-test('structural safety net: the discarded side of the overview is bounded by a named limit, ordered newest-discarded-first', () => {
+test('structural safety net: the discarded side of the overview is bounded by a named limit, ordered newest-discarded-first, then by id descending so a (discarded_at, id) tie is fully deterministic', () => {
+  // Follow-up fix: two rows sharing the exact same discarded_at sitting
+  // right at the limit boundary previously had no guaranteed, stable
+  // inclusion order across requests. `id` is unique per row, so ordering
+  // by (discarded_at, id) together can never leave two different rows
+  // tied — the same `(timestamp, id)` two-column-order convention this
+  // project's review/enrichment history routes already use
+  // (candidates/[id]/reviews/route.js, candidates/[id]/enrichments/route.js).
   const source = fs.readFileSync(PROFILE_DRAFTS_ROUTE_PATH, 'utf8');
   assert.match(source, /const DISCARDED_DRAFT_LIMIT = \d+/, 'expected a named limit constant, matching this project\'s own bounded-query convention');
   const fn = source.match(/export async function GET\(request\) \{[\s\S]*?\n\}/);
   assert.ok(fn, 'expected to find the GET handler');
   assert.match(
     fn[0],
-    /\.eq\('status', 'discarded'\)\s*\.order\('discarded_at', \{ ascending: false \}\)\s*\.limit\(DISCARDED_DRAFT_LIMIT\)/,
-    'the discarded-drafts query must be explicitly ordered newest-first and bounded'
+    /\.eq\('status', 'discarded'\)\s*\.order\('discarded_at', \{ ascending: false \}\)\s*\.order\('id', \{ ascending: false \}\)\s*\.limit\(DISCARDED_DRAFT_LIMIT\)/,
+    'the discarded-drafts query must be explicitly ordered by (discarded_at, id) and bounded'
   );
 });
 

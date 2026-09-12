@@ -61,16 +61,25 @@ const DRAFT_OVERVIEW_COLUMNS =
 // One row per discard *event*; nothing here is ever deleted (discard is
 // permanent — see the schema contract's own "Discard is permanent"
 // section), so unlike active drafts this side of the table only ever
-// grows. Ordered `discarded_at` descending before this limit is applied,
-// so a truncation — if real discard volume ever grows enough to reach
-// it — only ever drops the OLDEST discarded rows, never the most recent
-// ones, and never affects `total_discarded` (a separate, exact count).
-// Known v1 limitation, not silently ignored: revisit (e.g. real
-// pagination) once discard volume materially exceeds this. Deliberately
-// generous relative to this table's real growth rate — each row requires
-// a deliberate, one-at-a-time internal promote-then-discard action, so
-// this is far larger headroom than RECORD_LIMIT gives the much
-// higher-volume raw import candidate list in the sibling route.
+// grows. Ordered `discarded_at` descending, then `id` descending
+// (`restaurant_profile_drafts.id` is an application-generated UUIDv7 —
+// see src/lib/uuidv7.js — whose byte order already matches creation
+// order, the same reasoning buildLatestDiscardedProfileDraftByCandidateId's
+// own tie-break already relies on), before this limit is applied — the
+// same `(timestamp, id)` two-column-order convention this project's
+// review/enrichment history routes already use. Without that second key,
+// two rows sharing the exact same `discarded_at` sitting right at the
+// limit boundary would have no guaranteed, stable inclusion order across
+// requests. With it, a truncation — if real discard volume ever grows
+// enough to reach it — only ever drops the OLDEST discarded rows,
+// deterministically, never the most recent ones, and never affects
+// `total_discarded` (a separate, exact count). Known v1 limitation, not
+// silently ignored: revisit (e.g. real pagination) once discard volume
+// materially exceeds this. Deliberately generous relative to this
+// table's real growth rate — each row requires a deliberate,
+// one-at-a-time internal promote-then-discard action, so this is far
+// larger headroom than RECORD_LIMIT gives the much higher-volume raw
+// import candidate list in the sibling route.
 const DISCARDED_DRAFT_LIMIT = 2000
 
 export async function GET(request) {
@@ -101,6 +110,7 @@ export async function GET(request) {
     .select(DRAFT_OVERVIEW_COLUMNS)
     .eq('status', 'discarded')
     .order('discarded_at', { ascending: false })
+    .order('id', { ascending: false })
     .limit(DISCARDED_DRAFT_LIMIT)
   if (discardedDraftsError) return NextResponse.json({ error: 'Query failed' }, { status: 500 })
 

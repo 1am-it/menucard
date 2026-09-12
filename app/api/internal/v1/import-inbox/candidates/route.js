@@ -159,16 +159,25 @@ export async function GET(request) {
   // issuing a second query. Read-only: creating/discarding a draft only
   // ever happens via the separate profile-drafts route.
   //
-  // Ordered `discarded_at` descending with nulls first: every *active*
-  // draft (`discarded_at` is null) sorts ahead of every discarded one, so
-  // DRAFT_LIMIT can never cut off an active draft — its own count is
-  // already bounded to at most one per candidate that has ever been
-  // promoted (the migration's own partial unique index), nowhere near
-  // this limit. Discarded rows are then ordered newest-first *across all
-  // candidates*, not scoped per candidate — a plain, unscoped `.limit()`
-  // here would risk silently dropping a specific candidate's own latest
-  // discarded row if enough more-recent discards from *other* candidates
-  // filled the limit first. Scoping this query to only the candidates on
+  // Ordered `discarded_at` descending with nulls first, then `id`
+  // descending: every *active* draft (`discarded_at` is null) sorts
+  // ahead of every discarded one, so DRAFT_LIMIT can never cut off an
+  // active draft — its own count is already bounded to at most one per
+  // candidate that has ever been promoted (the migration's own partial
+  // unique index), nowhere near this limit. The secondary `id` order
+  // (`restaurant_profile_drafts.id` is an application-generated UUIDv7 —
+  // see src/lib/uuidv7.js — whose byte order already matches creation
+  // order) makes the full `(discarded_at, id)` ordering stable even
+  // among rows that share the exact same `discarded_at`, the same
+  // two-column-order convention this project's review/enrichment history
+  // routes already use — without it, which of several exactly-tied rows
+  // falls on either side of the limit boundary would not be guaranteed
+  // consistent across requests. Discarded rows are then ordered
+  // newest-first *across all candidates*, not scoped per candidate — a
+  // plain, unscoped `.limit()` here would risk silently dropping a
+  // specific candidate's own latest discarded row if enough more-recent
+  // discards from *other* candidates filled the limit first. Scoping
+  // this query to only the candidates on
   // the current page (`.in('source_candidate_id', ...)`) was considered
   // and rejected: with RECORD_LIMIT candidates, that filter can carry up
   // to 2000 UUIDs, and PostgREST/Supabase's own request-size limits are
@@ -187,6 +196,7 @@ export async function GET(request) {
       'id, source_candidate_id, status, promoted_by, promoted_at, restarted_from_draft_id, possible_duplicate_of_draft_id, discarded_at, discard_note'
     )
     .order('discarded_at', { ascending: false, nullsFirst: true })
+    .order('id', { ascending: false })
     .limit(DRAFT_LIMIT)
   if (draftsError) return NextResponse.json({ error: 'Query failed' }, { status: 500 })
   const profileDraftByCandidateId = buildActiveProfileDraftByCandidateId(drafts)
