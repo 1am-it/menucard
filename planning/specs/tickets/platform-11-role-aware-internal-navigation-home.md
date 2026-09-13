@@ -2,8 +2,81 @@
 
 ## Status
 
-Proposed, **not started**. Documentation/planning only — no route, page,
-component, migration, or test exists yet for anything described here.
+**Built and pushed (commit `af389ca`). Live acceptance validation
+partial — see "Implementation and verification (2026-09-13)" below.**
+The original "Proposed, not started" line is no longer accurate: `/internal`,
+the shared `InternalNav` shell, `GET /api/internal/v1/me`, and the
+decided login redirect all exist in production code, with 28 passing
+unit/structural tests (`src/lib/internalNav.test.js`). What remains
+unproven is specifically **live, role-gated rendering** — see below for
+exactly what is and is not demonstrated.
+
+### Implementation and verification (2026-09-13)
+
+**Shipped**: `app/internal/page.js`, `src/components/InternalNav.js`,
+`src/lib/internalNav.js`, `app/api/internal/v1/me/route.js`; the four
+existing internal pages (`coverage`, `import-inbox`, `moderation`,
+`profile-drafts`) each adopted the shared nav and had their own
+now-redundant local sign-out button/function removed, leaving exactly one
+sign-out control per page; `/internal/login`'s post-sign-in redirect
+changed from the hardcoded `/internal/moderation` to `/internal` — all in
+commit `af389ca`, matching this ticket's Design decision and Phase 2/3
+scope exactly. `src/lib/internalNav.test.js` (28 tests, all passing)
+covers the route/role matrix, the union-of-roles rule, the no-access
+state, the no-duplicate-fetch/-signout structural guarantees, and that
+every existing page's own data/API calls are unchanged.
+
+**Live-verified this round (read-only, no account/role/data change, no
+new session created for the not-logged-in checks)**, against the real,
+deployed production app:
+
+- An unauthenticated visitor at `/internal` and at `/internal/coverage`
+  is redirected to `/internal/login` in both cases.
+- `GET /api/internal/v1/me` and `GET /api/internal/v1/coverage` with no
+  `Authorization` header both return `401` with a generic error message —
+  no internal data of any kind is exposed.
+- A garbage bearer token also returns `401` (`"Invalid or expired
+  session"`), not a `500` or a data leak.
+- `/internal/login` renders with no page-level horizontal overflow, in
+  both light and dark themes, at both `~1280px` and `~390px`; the first
+  `Tab` press lands on the email field, a logical starting point for a
+  page with no navigation region to skip.
+
+**Not live-verified this round — a genuine, environment-level
+limitation, not a design or account gap**: real, existing accounts for
+every needed role shape were confirmed to exist read-only (a multi-role
+`internal`+`editor` account — `developer@1am-it.com`, named elsewhere in
+this document — a real, existing editor-only account, and, notably, a
+real account with zero `staff_roles` rows today: the synthetic account
+`PLATFORM-07`'s own claim-flow verification created and later revoked
+role access from, per `docs/api/owner-claims-api.md`'s "What has been
+verified" — confirmed genuinely role-less now, requiring no fabricated
+account for that path). Minting a temporary session for any of them
+(this project's own documented, password-free technique,
+`docs/guides/internal-api-live-testing.md`) was blocked by this
+environment's own tool-level safety classifier this round, independent
+of explicit approval to proceed. As a direct result, the following
+remain **unproven live**, resting on code inspection and the unit/
+structural tests above only:
+
+- A multi-role account's `/internal` showing the exact union of modules,
+  and each shown module actually being reachable.
+- An editor-only account's `/internal` showing only Moderation, and a
+  direct visit to an internal-only route (e.g. `/internal/coverage`)
+  actually being refused server-side for that account.
+- The real, existing role-less account's `/internal` showing exactly the
+  decided "no internal access" status.
+- `aria-current`, keyboard tab order through the nav's own links, and
+  visible focus, inside an actual rendered, role-populated nav (as
+  opposed to the login page's simpler, nav-free form).
+
+This ticket is not considered fully live-accepted until those specific,
+role-gated checks are either completed in an environment where session
+-minting is permitted, or a deliberate, documented exception is decided
+instead. See `[[014-navigation-and-orientation-standard]]` for the
+general navigation/accessibility standard this implementation is the
+first concrete instance of; that document's own acceptance checklist is
+the reference for closing this gap, not a new one invented here.
 
 ## Depends on
 
@@ -482,3 +555,14 @@ ticket, and it does not require `PLATFORM-08`/`09`/`10` to be revisited.
 Reasonable to schedule as soon as there is appetite for internal-tooling
 polish, since the underlying discoverability gap (Problem section) only
 grows as more internal pages ship.
+
+**Addition (2026-09-13):** the navigation/discoverability approach this
+ticket designed — role-filtered visibility that never substitutes for
+server-side authorization, a stable and programmatically-marked active
+destination, mobile parity without dropped routes, and accessible focus
+handling — is now generalized into a reusable, system-wide reference:
+`[[014-navigation-and-orientation-standard]]`. Nothing in this ticket's
+own route/role matrix, phased delivery, or acceptance criteria changes;
+this ticket remains the standard's first concrete implementation, and its
+still-open Phase 3/4 work should be verified against that document's
+acceptance checklist alongside this ticket's own.
