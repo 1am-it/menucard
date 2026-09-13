@@ -51,6 +51,20 @@ third, external-facing contribution flows last.
 9. [platform-09-city-rollout-operations.md](./platform-09-city-rollout-operations.md) — done, decision/documentation only (its only dependency, `PLATFORM-01`, was already done)
 10. [platform-10-public-city-metrics-platform-exposure.md](./platform-10-public-city-metrics-platform-exposure.md)
 11. [platform-11-role-aware-internal-navigation-home.md](./platform-11-role-aware-internal-navigation-home.md) — not started, documentation/planning only; a role-aware `/internal` home and shared navigation across the existing internal surfaces (Import Inbox, Restaurant Profile Drafts, Moderation/Owner claims, Coverage) — server-side authorization per route remains the real boundary, this only adds discoverability
+13. [platform-08b-community-evidence-submissions.md](./platform-08b-community-evidence-submissions.md) —
+    not started, documentation/planning only; **renamed 2026-09-13 from
+    "Community Photo Evidence Submission"** — now one coherent plan for
+    reporting a missing restaurant, a single targeted correction, and
+    submitting an official menu link (the preferred, photo-free
+    contribution: link out only, no preview/scrape/copy of any kind),
+    with private photo evidence carried forward unchanged as a later,
+    gated Fase 4 rather than the ticket's sole subject; no automatic
+    publication in any phase, no new owner role (reuses `PLATFORM-07`'s
+    existing/future claim flow), no new `pending_changes` field invented
+    ad hoc — the name/address/phone/website correction gap and the
+    menu-link record's shape are recorded as explicit open decisions; see
+    the ticket's own "Data model needs" and "Open policy decisions"
+    sections
 
 ## MARKET-* order (proposed, not scheduled — three tickets done as documentation, one contract documented but blocked)
 

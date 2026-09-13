@@ -77,6 +77,38 @@ reference instead of ad hoc judgment calls:
   text or data; the page keeps its existing English copy and its real,
   computed `computeCoverageMetrics()` figures unchanged.
 
+- [Community "Restaurant ontbreekt?" mockup](./community-add-restaurant-v1.png)
+  (addition, 2026-09-13) — directional reference for `PLATFORM-08B`'s
+  missing-restaurant flow: search by name/address, a non-blocking
+  duplicate-possibility hint, and the required name/full-address fields
+  with optional website/reservation/menu-link fields. Mobile-first only —
+  no distinct desktop layout is shown, since this is a short, single-column
+  form with no functional desktop-specific difference. Per this file's own
+  top-level note, this mockup governs layout/information-hierarchy only:
+  it is not product code, does not imply any backend, storage, validation,
+  rate-limiting, or moderation mechanism has actually been built, and does
+  not by itself authorize automatic publication of anything a visitor
+  submits — see `planning/specs/tickets/platform-08b-community-evidence-submissions.md`'s
+  own "Data model needs" and "Hard boundaries" for what is and isn't
+  decided.
+- [Community "Menukaart gevonden?" mockup](./community-add-menu-link-v1.png)
+  (addition, 2026-09-13) — directional reference for the same ticket's
+  menu-link submission flow: read-only restaurant context, one required
+  `https://` URL field, and an optional short note. Mobile-first only, same
+  reasoning as above. Governs layout only — it does not imply MenuCard
+  fetches, previews, or copies anything from a submitted link; the ticket's
+  own "Menu-link submission" section states that boundary explicitly as a
+  structural rule, not a presentation detail this mockup could relax.
+- [Community submission status mockup](./community-submission-status-v1.png)
+  (addition, 2026-09-13) — directional reference for the shared
+  post-submission status screen: an honest "received"/"in review"
+  confirmation, a neutral (non-graded) status badge, and an optional,
+  account-free email field for a later status update. Mobile-first only.
+  Governs layout only — deliberately shows no feed, score, social
+  affordance, or fake button; it does not imply any of `PLATFORM-08B`'s
+  status transitions, moderation queue, or optional magic-link route have
+  actually been built.
+
 ## Naming
 
 Prefer clear versioned names such as:
