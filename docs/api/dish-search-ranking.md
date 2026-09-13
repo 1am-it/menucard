@@ -19,7 +19,7 @@ the best one it qualifies for:
 |------|---------|--------------------------|
 | 0 | Exact dish-name match (case-insensitive, full string) | dish named exactly "Steak" |
 | 1 | Dish name contains the query | "Ribeye Steak 300g" |
-| 2 | Description contains the query (ingredient/description match) | desc: "Malse steak van de grill" |
+| 2 | Description, supplement note, or wine-pairing suggestion contains the query | desc: "Malse steak van de grill" |
 | 3 | A tag contains the query | tag: "steak-special" |
 | 4 | Restaurant name contains the query | restaurant "Steakhouse Bardot" |
 

@@ -14,9 +14,16 @@
 // imported from them, since those are 'use client' modules. This
 // duplication is expected to be removed once BE-04 rewires the homepage
 // onto this service.
+//
+// Deliberately CommonJS, same reasoning as importInbox.js/
+// moderationFormatting.js — directly testable via this project's existing
+// `node --test` tooling, no new dependency, interoperates fine with the
+// ESM route handler (app/api/search/route.js) that imports it.
 
-import restaurantsData from '@/data/restaurants.json'
-import menusData from '@/data/menus.json'
+'use strict'
+
+const restaurantsData = require('../../data/restaurants.json')
+const menusData = require('../../data/menus.json')
 
 const MEAL_TYPES = ['lunch', 'diner', 'borrel', 'specialiteiten']
 
@@ -103,8 +110,14 @@ function buildDishIndex() {
           distanceMeters: null, // no location data source yet, see dish-result-shape.md
           openStatus: null,     // computed per-request against the current/selected day, not cached
           menuLink: `/menu/${restaurantId}-${mealType}`,
-          // internal-only, not part of the public shape, used for filtering:
+          // internal-only, never part of the public shape returned by
+          // searchDishes() (see toPublicDishShape() below) — used only to
+          // widen text matching in getMatchTier(). sup/wine are a
+          // supplement note and a wine-pairing suggestion respectively;
+          // exposing either publicly is a separate, not-yet-made decision.
           _restaurant: restaurant,
+          _sup: item.sup || null,
+          _wine: item.wine || null,
         })
       })
     })
@@ -172,6 +185,12 @@ function getMatchTier(dish, needle) {
   if (name === needle) return 0
   if (name.includes(needle)) return 1
   if ((dish.description || '').toLowerCase().includes(needle)) return 2
+  // sup/wine are explanatory text, folded into the same tier as
+  // description — matching on them never outranks a name match and never
+  // introduces a new tier, so existing ranking for name/description/
+  // tag/restaurant-name is unchanged for every query that already matched.
+  if ((dish._sup || '').toLowerCase().includes(needle)) return 2
+  if ((dish._wine || '').toLowerCase().includes(needle)) return 2
   if (dish.tags.some((t) => t.toLowerCase().includes(needle))) return 3
   if (dish.restaurantName.toLowerCase().includes(needle)) return 4
   return null
@@ -193,6 +212,25 @@ function allergensMatch(dish, excludeIds) {
   return !excludeIds.some((id) => dish.allergens.includes(id))
 }
 
+// Explicit whitelist of fields returned to callers of searchDishes(), per
+// docs/api/dish-result-shape.md. Deliberately a whitelist, not a blacklist
+// of internal-only fields (_restaurant, _sup, _wine) — adding a new
+// internal-only field to a dish object in buildDishIndex() never risks
+// leaking into the public response by accident; only adding a field here
+// does, which is the point.
+const PUBLIC_DISH_FIELDS = [
+  'dishId', 'name', 'description', 'priceValue', 'priceDisplay',
+  'priceOnRequest', 'priceIsFrom', 'priceIsMultiple', 'restaurantId',
+  'restaurantName', 'mealType', 'category', 'tags', 'allergens',
+  'distanceMeters', 'openStatus', 'menuLink',
+]
+
+function toPublicDishShape(dish) {
+  const shape = {}
+  for (const field of PUBLIC_DISH_FIELDS) shape[field] = dish[field]
+  return shape
+}
+
 /**
  * @param {object} params
  * @param {string} [params.q]
@@ -206,7 +244,7 @@ function allergensMatch(dish, excludeIds) {
  * @param {number} [params.cursor] - offset into the filtered result set
  * @param {number} [params.limit]
  */
-export function searchDishes({
+function searchDishes({
   q = '',
   meal = '',
   maxPrice = null,
@@ -256,13 +294,10 @@ export function searchDishes({
   const total = candidates.length
   const page = candidates
     .slice(boundedCursor, boundedCursor + boundedLimit)
-    .map(({ dish }) => {
-      const { _restaurant, ...publicShape } = dish
-      return {
-        ...publicShape,
-        openStatus: getOpenStatus(_restaurant, day || undefined),
-      }
-    })
+    .map(({ dish }) => ({
+      ...toPublicDishShape(dish),
+      openStatus: getOpenStatus(dish._restaurant, day || undefined),
+    }))
 
   const nextCursor = boundedCursor + boundedLimit < total ? boundedCursor + boundedLimit : null
 
@@ -280,3 +315,5 @@ export function searchDishes({
     ...(lowCoverage ? { lowCoverage } : {}),
   }
 }
+
+module.exports = { searchDishes }
