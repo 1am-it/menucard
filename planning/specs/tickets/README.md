@@ -158,6 +158,19 @@ implementation (see its own ticket).
     not a new wave — cursor pagination, real server-side filtering, batch
     context, and safe (never bulk-promotion) bulk actions for large import
     batches. See the ticket's own "Depends on" and "Non-goals" sections.
+13. [market-02b-menu-proposal-publication-contract.md](./market-02b-menu-proposal-publication-contract.md) —
+    not started; a second, separate schema contract extending `MARKET-02`
+    (Wave 1), not a new wave — defines a writable, moderatable
+    `MenuProposal` model and a canonical menu-publication layer for
+    complete, structured menus (sections/items/prices/allergens), closing
+    the gap that today's scalar `pending_changes`/`field_provenance` and
+    `restaurant_profile_drafts` contracts cannot carry a whole menu.
+    Contract/documentation only — no migration, route, UI, or
+    `data/menus.json` change; independent of `MARKET-05B` (unrelated,
+    still blocked) and does not gate `MARKET-04B`/`PLATFORM-08B`'s own
+    current-phase scope, though both eventually need this contract before
+    they can carry menu content specifically — see the ticket's own
+    "Relationship to `MARKET-05B`" and "Suggested order" sections.
 
 Do not start a ticket whose dependencies aren't done. Each ticket should be
 independently reviewable and deployable where practical. The three tracks
