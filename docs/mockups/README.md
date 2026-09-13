@@ -109,6 +109,49 @@ reference instead of ad hoc judgment calls:
   status transitions, moderation queue, or optional magic-link route have
   actually been built.
 
+## Public menu discovery (addition, 2026-09-13)
+
+- [BE-11 menu discovery prototype](./be-11-menu-discovery-v1.html) — a
+  static, local HTML/CSS UX prototype (not a PNG — the HTML/CSS file
+  itself is the primary mockup for this ticket) for
+  `planning/specs/tickets/be-11-public-menu-discovery-intent-aware-results.md`.
+  Shows four switchable states, each **genuinely responsive** between a
+  ~390px mobile width and a ~1280px desktop width (resize the browser
+  window to see both — this is not a fixed mobile frame floating in empty
+  desktop space): a light search start with no default result list, a
+  general `Alle restaurants` browse overview (one card per restaurant,
+  available menu types as non-clickable information labels, no filter
+  chip pre-selected), an explicit meal-type intent opening the matching
+  menu directly, and a general search query resolving to either a single
+  direct match or a short, explicit choice among several matches. On
+  desktop, restaurant cards lay out in a real multi-column grid (reusing
+  the existing `.restaurant-grid`
+  `repeat(auto-fill, minmax(...,1fr))` pattern from `app/globals.css`),
+  not a stretched phone frame.
+  **Primary navigation is `Zoeken`/`Alle restaurants`** — plain text
+  labels, no icon, no emoji (a deliberate replacement of the earlier
+  `Restaurants`/`Menukaarten` draft and today's live `🏠`/`📋` mode-switch
+  icons, not an oversight — see the ticket's own "Primary navigation"
+  section for the full decision). `Zoeken` is shown active for the search
+  start, an explicit meal-type filter, and any general search result;
+  `Alle restaurants` is shown active only on the dedicated browse view.
+  Reuses existing design tokens (`app/globals.css`'s light-theme custom
+  properties), the existing `.restaurant-card`/`.rc-*` card structure, and
+  the existing `.mode-switch`/`.theme-switch`/`.lang-switch`
+  segmented-control patterns — including reusing the real theme/language
+  toggles themselves to demonstrate that they wrap beneath the primary
+  tabs on mobile and sit visually separate from them on desktop, rather
+  than competing for space. Per this file's own top-level note, this
+  prototype governs layout, information hierarchy, and interaction logic
+  only: it is not product code, is not wired to the application, and does
+  not by itself prove that a lightweight restaurant-summary data
+  contract, a server-side address/buurt search extension, route transfer
+  logic, or result filtering has actually been built — the desktop
+  responsiveness shown here is a layout demonstration only, not proof
+  that this behavior exists anywhere in the live application. All names,
+  addresses, counts, and search terms shown are clearly directional
+  example data, never real MenuCard data.
+
 ## Naming
 
 Prefer clear versioned names such as:

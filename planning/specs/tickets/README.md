@@ -33,6 +33,20 @@ of these.
     closed
 12. [be-10-results-sort-card-hierarchy-mobile.md](./be-10-results-sort-card-hierarchy-mobile.md) — done;
     small independent polish ticket, same basis as `BE-09`
+13. [be-11-public-menu-discovery-intent-aware-results.md](./be-11-public-menu-discovery-intent-aware-results.md) —
+    not started, documentation/planning + static prototype only;
+    **replaces the `Restaurants`/`Menukaarten` primary navigation with two
+    permanent, text-only destinations — `Zoeken` (default, active for any
+    search/filter/meal-type-driven view) and `Alle restaurants` (the
+    deliberate browse route, active only there)** — see the ticket's own
+    "Primary navigation" section. Search/browse results group one card
+    per restaurant instead of one per menu type, with an intention-aware
+    primary action that resolves an explicit meal-type or general search
+    intent directly to the right existing menu route (or an honest,
+    explicit choice among matches) — never a guess. Names, but does not
+    design or build, a lightweight restaurant-summary data shape and a
+    future address/buurt server-side search extension. `Daghap vandaag`
+    explicitly out of scope — see the ticket's own dedicated section.
 
 ## PLATFORM-* order (not started)
 

@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>BE-11 — Public Menu Discovery and Intent-Aware Results (prototype)</title>
+<style>
+  /* ── Tokens copied from app/globals.css :root[data-theme="light"] — a
+     trimmed, faithful copy for this static prototype only, not a live
+     import. See docs/mockups/README.md's own entry for this file. ── */
+  :root {
+    --green:            #087f45;
+    --green-dim:        #066b3a;
+    --green-faint:      rgba(8, 127, 69, 0.08);
+    --green-border:     rgba(8, 127, 69, 0.22);
+    --on-accent:        #ffffff;
+    --bg:               #ffffff;
+    --bg-card:          #ffffff;
+    --bg-elevated:      #f3f4f6;
+    --bg-input:         #ffffff;
+    --bg-hover:         #eef0f2;
+    --border:           #e3e5e8;
+    --border-hover:     #c7cbd1;
+    --border-strong:    #b3b8c0;
+    --input-border:     #d7dae0;
+    --text-primary:     #14181c;
+    --text-secondary:   #4b5563;
+    --text-muted:       #6b7280;
+    --text-dim:         #6b7280;
+    --text-faint:       #9aa1ab;
+    --radius-sm:        6px;
+    --radius-md:        10px;
+    --radius-lg:        14px;
+    --max-w:            1200px;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: var(--font);
+    background: #eef0f2;
+    color: var(--text-primary);
+  }
+
+  /* ── Prototype chrome (not part of the real app) ── */
+  .proto-banner {
+    max-width: var(--max-w);
+    margin: 0 auto;
+    padding: 20px 20px 0;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+  }
+  .proto-banner strong { color: var(--text-primary); }
+  .proto-tabs {
+    max-width: var(--max-w);
+    margin: 16px auto 0;
+    padding: 0 20px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .proto-tab {
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .proto-tab.active { background: var(--green); border-color: var(--green); color: var(--on-accent); }
+
+  /* ── The "frame" represents the actual app page. Mobile-first: a
+     phone-shaped card centered in the preview area. At desktop widths
+     (≥768px, this project's own existing breakpoint) it becomes a real,
+     full-width page — not a phone frame floating in empty space. ── */
+  .frame-wrap {
+    max-width: var(--max-w);
+    margin: 20px auto 60px;
+    padding: 0 20px;
+    display: flex;
+    justify-content: center;
+  }
+  .frame {
+    width: 390px;
+    max-width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  }
+  @media (min-width: 768px) {
+    .frame-wrap { padding: 0; }
+    .frame {
+      width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+  }
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ── Header — reuses .site-header/.header-inner/.logo structure ── */
+  .site-header {
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  @media (min-width: 768px) {
+    .site-header { padding: 16px 32px; }
+  }
+  .logo { font-size: 19px; font-weight: 800; letter-spacing: -0.5px; color: var(--text-primary); text-decoration: none; flex-shrink: 0; }
+  .logo span { color: var(--green); }
+  .header-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+  /* Primary nav — text-only, no emoji, no icon (matches ThemeToggle's
+     existing plain-text-label precedent, not the earlier draft's
+     🏠/📋 mode-switch icons). Segmented-control visual pattern reused
+     from the existing .mode-switch/.mode-btn CSS. */
+  .primary-nav { display: flex; background: var(--bg-elevated); border-radius: 8px; padding: 2px; gap: 2px; }
+  .primary-nav button {
+    padding: 6px 13px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+  .primary-nav button[aria-current="page"] { background: var(--green); color: var(--on-accent); }
+
+  /* Secondary settings (theme, language) — reuses the real, already-shipped
+     .theme-switch/.theme-btn and .lang-switch/.lang-btn structure exactly.
+     On mobile, .header-right's own flex-wrap lets this group drop to a
+     second row beneath the primary nav rather than compress against it.
+     On desktop, a left border + margin keeps it visually and logically
+     separate from the primary nav group, never interleaved with it. */
+  .secondary-settings { display: flex; align-items: center; gap: 8px; }
+  /* Force secondary settings onto their own row below the primary nav on
+     narrow viewports — position and smaller control size (not a new
+     color treatment) are what mark them as subordinate, keeping the
+     real, existing .theme-switch/.lang-switch styling unchanged. */
+  @media (max-width: 480px) {
+    .header-right { width: 100%; }
+    .secondary-settings { flex-basis: 100%; justify-content: flex-start; margin-top: 6px; }
+  }
+  @media (min-width: 768px) {
+    .secondary-settings { padding-left: 14px; margin-left: 6px; border-left: 1px solid var(--border); }
+  }
+  .theme-switch, .lang-switch { display: flex; background: var(--bg-elevated); border-radius: 8px; padding: 2px; gap: 2px; }
+  .theme-switch button, .lang-switch button { padding: 4px 9px; border: none; background: transparent; color: var(--text-muted); font-size: 11px; font-weight: 600; border-radius: 6px; font-family: inherit; cursor: pointer; }
+  .theme-switch button.active, .lang-switch button.active { background: var(--green); color: var(--on-accent); }
+
+  main { padding: 20px 16px 32px; }
+  @media (min-width: 768px) {
+    main { padding: 32px; max-width: var(--max-w); margin: 0 auto; }
+  }
+
+  /* ── Search start (state 1) ── */
+  .search-hero { text-align: center; padding: 28px 8px 20px; }
+  @media (min-width: 768px) { .search-hero { padding: 48px 8px 32px; max-width: 560px; margin: 0 auto; } }
+  .search-hero h1 { font-size: 19px; font-weight: 800; margin: 0 0 6px; color: var(--text-primary); }
+  @media (min-width: 768px) { .search-hero h1 { font-size: 26px; } }
+  .search-hero p { font-size: 13px; color: var(--text-muted); margin: 0 0 18px; }
+  .search-field { position: relative; display: flex; align-items: center; }
+  .search-icon { position: absolute; left: 12px; color: var(--text-faint); display: flex; }
+  .search-input {
+    width: 100%;
+    padding: 11px 14px 11px 38px;
+    background: var(--bg-input);
+    border: 1.5px solid var(--input-border);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+  }
+  .search-input:focus { border-color: var(--green); }
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--green);
+    outline-offset: 2px;
+  }
+
+  .quick-chip-row { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 14px; }
+  .quick-chip {
+    padding: 7px 14px;
+    border: 1.5px solid var(--input-border);
+    background: var(--bg-input);
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .quick-chip.active { background: var(--green); border-color: var(--green); color: var(--on-accent); }
+
+  /* ── Filter row (states 2-4) ── */
+  .filter-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+  .more-filters-btn {
+    padding: 7px 12px;
+    border: 1px dashed var(--border-strong);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 12.5px;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  /* ── Results grid — one column on mobile, a real multi-column grid on
+     desktop, matching the existing .restaurant-grid pattern
+     (repeat(auto-fill, minmax(...,1fr))) in app/globals.css. ── */
+  .results-grid { display: block; }
+  @media (min-width: 768px) {
+    .results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; align-items: start; }
+  }
+
+  /* ── Restaurant summary card — reuses .restaurant-card/.rc-* structure
+     from app/globals.css, extended with a new, clearly-labelled menu-type
+     info row and intent-aware primary action. ── */
+  .restaurant-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 14px; }
+  @media (min-width: 768px) { .restaurant-card { margin-bottom: 0; } }
+  .rc-header { padding: 14px 16px 12px; border-bottom: 1px solid var(--border); }
+  .rc-badge { display: inline-block; font-size: 10px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
+  .rc-name { font-size: 16px; font-weight: 700; color: var(--text-primary); margin: 0 0 2px; }
+  .rc-cuisine { font-size: 12px; color: var(--text-muted); }
+  .rc-body { padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; }
+  .rc-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .rc-address { font-size: 12px; color: var(--text-dim); }
+  .rc-price { font-size: 12.5px; color: var(--green); font-weight: 700; }
+
+  /* Available menu types shown as non-clickable information labels,
+     never as navigation targets themselves (see ticket §2/§5). Only
+     ever marked active-intent when that specific intent is actually
+     the one currently being viewed (see ticket "Desired behavior" §3). */
+  .menu-type-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .menu-type-pill {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 4px 9px;
+  }
+  .menu-type-pill.active-intent { background: var(--green-faint); border-color: var(--green-border); color: var(--green); }
+
+  .rc-footer { padding: 12px 16px 14px; border-top: 1px solid var(--border); }
+  .rc-primary-btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: 10px 14px;
+    background: var(--green);
+    color: var(--on-accent);
+    font-size: 13.5px;
+    font-weight: 700;
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .rc-secondary-note { margin-top: 8px; font-size: 11.5px; color: var(--text-dim); text-align: center; }
+
+  .section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-faint); margin: 0 0 10px; }
+  .example-data-note {
+    font-size: 11.5px;
+    color: var(--text-faint);
+    background: var(--bg-elevated);
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    margin-top: 14px;
+  }
+
+  .choice-panel {
+    border: 1.5px dashed var(--green-border);
+    background: var(--green-faint);
+    border-radius: var(--radius-lg);
+    padding: 14px 16px;
+    margin-bottom: 14px;
+  }
+  .choice-panel-title { font-size: 13px; font-weight: 700; color: var(--text-primary); margin: 0 0 8px; }
+  .choice-list { display: flex; flex-direction: column; gap: 6px; }
+  .choice-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 9px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+  .choice-item strong { font-weight: 700; }
+  .choice-item .go { color: var(--green); font-weight: 700; font-size: 12px; }
+</style>
+</head>
+<body>
+
+  <div class="proto-banner">
+    <strong>BE-11 — statisch UX-prototype (directional reference only).</strong>
+    Dit bestand toont uitsluitend layout, informatiehiërarchie en
+    interactielogica voor vier toestanden van de publieke
+    menu-discovery-ervaring, op zowel mobiel (~390px) als een echte
+    responsieve desktopbreedte (~1280px, gebruik de breedte van je
+    browservenster om dit te zien). Het is geen productcode, is niet
+    gekoppeld aan de applicatie, en bewijst niet dat een lichte
+    restaurant-samenvattingsvorm, een servergedreven adres-/buurtzoeklaag,
+    route-overdracht, of resultaatfiltering al bestaat. Alle namen,
+    adressen, aantallen en zoektermen hieronder zijn duidelijk
+    richtinggevende voorbeelddata, geen echte MenuCard-gegevens. Gebruik de
+    tabs hieronder om de vier toestanden te bekijken.
+  </div>
+
+  <div class="proto-tabs" role="tablist" aria-label="Prototype-toestanden">
+    <button class="proto-tab active" role="tab" aria-selected="true" onclick="showScreen(1, this)">1. Zoekstart</button>
+    <button class="proto-tab" role="tab" aria-selected="false" onclick="showScreen(2, this)">2. Alle restaurants</button>
+    <button class="proto-tab" role="tab" aria-selected="false" onclick="showScreen(3, this)">3. Expliciete maaltijdintentie</button>
+    <button class="proto-tab" role="tab" aria-selected="false" onclick="showScreen(4, this)">4. Algemene zoekopdracht</button>
+  </div>
+
+  <div class="frame-wrap">
+    <div class="frame">
+
+      <!-- ═══════════ STATE 1 — Zoeken, no active intent ═══════════ -->
+      <section class="screen active" id="screen-1" aria-label="Zoekstart">
+        <header class="site-header">
+          <a class="logo" href="#">Breda<span>Eats</span></a>
+          <div class="header-right">
+            <div class="primary-nav" role="group" aria-label="Hoofdnavigatie">
+              <button aria-current="page">Zoeken</button>
+              <button>Alle restaurants</button>
+            </div>
+            <div class="secondary-settings">
+              <div class="theme-switch" role="group" aria-label="Thema">
+                <button class="active">Licht</button>
+                <button>Donker</button>
+              </div>
+              <div class="lang-switch" role="group" aria-label="Taal">
+                <button class="active">NL</button>
+                <button>EN</button>
+              </div>
+            </div>
+          </div>
+        </header>
+        <main>
+          <div class="search-hero">
+            <h1>Wat wil je vanavond eten?</h1>
+            <p>Zoek in de menukaarten van restaurants in Breda</p>
+            <form onsubmit="return false">
+              <div class="search-field">
+                <span class="search-icon" aria-hidden="true">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </span>
+                <input class="search-input" type="text" placeholder="Zoek op gerecht, restaurant of adres" aria-label="Zoek op gerecht, restaurant of adres">
+              </div>
+            </form>
+            <div class="quick-chip-row">
+              <button class="quick-chip">Lunch</button>
+              <button class="quick-chip">Diner</button>
+              <button class="quick-chip">Borrel</button>
+            </div>
+          </div>
+        </main>
+      </section>
+
+      <!-- ═══════════ STATE 2 — Alle restaurants (browse, no intent) ═══════════ -->
+      <section class="screen" id="screen-2" aria-label="Alle restaurants">
+        <header class="site-header">
+          <a class="logo" href="#">Breda<span>Eats</span></a>
+          <div class="header-right">
+            <div class="primary-nav" role="group" aria-label="Hoofdnavigatie">
+              <button>Zoeken</button>
+              <button aria-current="page">Alle restaurants</button>
+            </div>
+            <div class="secondary-settings">
+              <div class="theme-switch" role="group" aria-label="Thema">
+                <button class="active">Licht</button>
+                <button>Donker</button>
+              </div>
+              <div class="lang-switch" role="group" aria-label="Taal">
+                <button class="active">NL</button>
+                <button>EN</button>
+              </div>
+            </div>
+          </div>
+        </header>
+        <main>
+          <p class="section-label">Alle restaurants</p>
+          <div class="filter-row">
+            <button class="quick-chip">Lunch</button>
+            <button class="quick-chip">Diner</button>
+            <button class="quick-chip">Borrel</button>
+            <button class="more-filters-btn">Filters</button>
+          </div>
+
+          <div class="results-grid">
+            <article class="restaurant-card">
+              <div class="rc-header">
+                <span class="rc-badge">Frans · Fine Dining</span>
+                <h2 class="rc-name">Brasserie Bardot</h2>
+                <div class="rc-cuisine">Modern Frans · Grand Café</div>
+              </div>
+              <div class="rc-body">
+                <div class="menu-type-row" aria-label="Beschikbare menutypen">
+                  <span class="menu-type-pill">Lunch</span>
+                  <span class="menu-type-pill">Diner</span>
+                  <span class="menu-type-pill">Borrel</span>
+                  <span class="menu-type-pill">Specialiteiten</span>
+                </div>
+                <div class="rc-meta">
+                  <span class="rc-address">Ginnekenmarkt 5, Breda</span>
+                  <span class="rc-price">€€</span>
+                </div>
+              </div>
+              <div class="rc-footer">
+                <a class="rc-primary-btn" href="#">Bekijk 4 menukaarten</a>
+                <p class="rc-secondary-note">Geen specifiek menutype gekozen — één kaart, vier menukaarten.</p>
+              </div>
+            </article>
+
+            <article class="restaurant-card">
+              <div class="rc-header">
+                <span class="rc-badge">Italiaans</span>
+                <h2 class="rc-name">Trattoria Del Corso</h2>
+                <div class="rc-cuisine">Italiaans · Pizzeria</div>
+              </div>
+              <div class="rc-body">
+                <div class="menu-type-row" aria-label="Beschikbare menutypen">
+                  <span class="menu-type-pill">Lunch</span>
+                  <span class="menu-type-pill">Diner</span>
+                </div>
+                <div class="rc-meta">
+                  <span class="rc-address">Nieuwe Ginnekenstraat 22, Breda</span>
+                  <span class="rc-price">€€</span>
+                </div>
+              </div>
+              <div class="rc-footer">
+                <a class="rc-primary-btn" href="#">Bekijk 2 menukaarten</a>
+              </div>
+            </article>
+
+            <article class="restaurant-card">
+              <div class="rc-header">
+                <span class="rc-badge">Steakhouse</span>
+                <h2 class="rc-name">Steakhouse Bardot Zuid</h2>
+                <div class="rc-cuisine">Grill &amp; Steak</div>
+              </div>
+              <div class="rc-body">
+                <div class="menu-type-row" aria-label="Beschikbare menutypen">
+                  <span class="menu-type-pill">Diner</span>
+                  <span class="menu-type-pill">Specialiteiten</span>
+                </div>
+                <div class="rc-meta">
+                  <span class="rc-address">Ceresstraat 8, Breda</span>
+                  <span class="rc-price">€€€</span>
+                </div>
+              </div>
+              <div class="rc-footer">
+                <a class="rc-primary-btn" href="#">Bekijk 2 menukaarten</a>
+              </div>
+            </article>
+          </div>
+
+          <div class="example-data-note">
+            Voorbeelddata — restaurantnamen, adressen en aantallen dienen
+            uitsluitend ter illustratie van de layout. Dit is de bewuste
+            browse-route: geen menutype is hier vooraf geselecteerd, dus
+            geen enkele filterchip staat actief.
+          </div>
+        </main>
+      </section>
+
+      <!-- ═══════════ STATE 3 — Zoeken, explicit meal-type intent ═══════════ -->
+      <section class="screen" id="screen-3" aria-label="Expliciete maaltijdintentie">
+        <header class="site-header">
+          <a class="logo" href="#">Breda<span>Eats</span></a>
+          <div class="header-right">
+            <div class="primary-nav" role="group" aria-label="Hoofdnavigatie">
+              <button aria-current="page">Zoeken</button>
+              <button>Alle restaurants</button>
+            </div>
+            <div class="secondary-settings">
+              <div class="theme-switch" role="group" aria-label="Thema">
+                <button class="active">Licht</button>
+                <button>Donker</button>
+              </div>
+              <div class="lang-switch" role="group" aria-label="Taal">
+                <button class="active">NL</button>
+                <button>EN</button>
+              </div>
+            </div>
+          </div>
+        </header>
+        <main>
+          <p class="section-label">Zoeken · gefilterd op Lunch</p>
+          <div class="filter-row">
+            <button class="quick-chip active">Lunch</button>
+            <button class="quick-chip">Diner</button>
+            <button class="quick-chip">Borrel</button>
+            <button class="more-filters-btn">Filters</button>
+          </div>
+
+          <div class="results-grid">
+            <article class="restaurant-card">
+              <div class="rc-header">
+                <span class="rc-badge">Frans · Fine Dining</span>
+                <h2 class="rc-name">Brasserie Bardot</h2>
+                <div class="rc-cuisine">Modern Frans · Grand Café</div>
+              </div>
+              <div class="rc-body">
+                <div class="menu-type-row" aria-label="Beschikbare menutypen, Lunch actief">
+                  <span class="menu-type-pill active-intent">Lunch</span>
+                  <span class="menu-type-pill">Diner</span>
+                  <span class="menu-type-pill">Borrel</span>
+                  <span class="menu-type-pill">Specialiteiten</span>
+                </div>
+                <div class="rc-meta">
+                  <span class="rc-address">Ginnekenmarkt 5, Breda</span>
+                  <span class="rc-price">€€</span>
+                </div>
+              </div>
+              <div class="rc-footer">
+                <a class="rc-primary-btn" href="#">Open lunchkaart</a>
+                <p class="rc-secondary-note">Lunch is actief — de kaart en de knop leiden naar dezelfde, ene lunchkaart.</p>
+              </div>
+            </article>
+          </div>
+
+          <div class="example-data-note">
+            Voorbeeld: de knoptekst noemt de bestemming eerlijk — nooit een
+            generieke "Bekijken" wanneer het doel al vaststaat. `Zoeken`
+            is actief, niet `Alle restaurants`, omdat dit een filter- en
+            intentiegedreven resultaat is, geen bewuste browse-actie.
+          </div>
+        </main>
+      </section>
+
+      <!-- ═══════════ STATE 4 — Zoeken, general search, multiple matches ═══════════ -->
+      <section class="screen" id="screen-4" aria-label="Algemene zoekopdracht met meerdere matches">
+        <header class="site-header">
+          <a class="logo" href="#">Breda<span>Eats</span></a>
+          <div class="header-right">
+            <div class="primary-nav" role="group" aria-label="Hoofdnavigatie">
+              <button aria-current="page">Zoeken</button>
+              <button>Alle restaurants</button>
+            </div>
+            <div class="secondary-settings">
+              <div class="theme-switch" role="group" aria-label="Thema">
+                <button class="active">Licht</button>
+                <button>Donker</button>
+              </div>
+              <div class="lang-switch" role="group" aria-label="Taal">
+                <button class="active">NL</button>
+                <button>EN</button>
+              </div>
+            </div>
+          </div>
+        </header>
+        <main>
+          <div class="search-field" style="margin-bottom:16px; max-width: 480px;">
+            <span class="search-icon" aria-hidden="true">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </span>
+            <input class="search-input" type="text" value="filet" aria-label="Zoek op gerecht, restaurant of adres">
+          </div>
+
+          <p class="section-label">Zoeken · meerdere passende menukaarten</p>
+
+          <div class="choice-panel">
+            <p class="choice-panel-title">"filet" komt voor op 2 menukaarten — kies er één, of bekijk beide.</p>
+            <div class="choice-list">
+              <a class="choice-item" href="#"><span><strong>Brasserie Bardot</strong> · Dinerkaart</span><span class="go">Open →</span></a>
+              <a class="choice-item" href="#"><span><strong>Steakhouse Bardot Zuid</strong> · Specialiteiten</span><span class="go">Open →</span></a>
+            </div>
+          </div>
+
+          <div class="results-grid">
+            <article class="restaurant-card">
+              <div class="rc-header">
+                <span class="rc-badge">Steakhouse</span>
+                <h2 class="rc-name">Steakhouse Bardot Zuid</h2>
+                <div class="rc-cuisine">Grill &amp; Steak</div>
+              </div>
+              <div class="rc-body">
+                <div class="menu-type-row">
+                  <span class="menu-type-pill active-intent">Specialiteiten</span>
+                </div>
+                <div class="rc-meta">
+                  <span class="rc-address">Ceresstraat 8, Breda</span>
+                  <span class="rc-price">€€€</span>
+                </div>
+              </div>
+              <div class="rc-footer">
+                <a class="rc-primary-btn" href="#">Open specialiteitenkaart</a>
+                <p class="rc-secondary-note">Voorbeeld met precies één match: opent direct, zonder tussenkeuze.</p>
+              </div>
+            </article>
+          </div>
+
+          <div class="example-data-note">
+            Voorbeeld toont zowel "meerdere matches → korte keuze" (boven)
+            als "één match → directe opening" (kaart hieronder) — nooit een
+            gok naar een willekeurige kaart. `Zoeken` blijft actief in beide
+            gevallen — dit is een zoekresultaat, geen browse-actie.
+          </div>
+        </main>
+      </section>
+
+    </div>
+  </div>
+
+  <script>
+    function showScreen(n, tabEl) {
+      document.querySelectorAll('.screen').forEach(function (el) { el.classList.remove('active'); });
+      document.getElementById('screen-' + n).classList.add('active');
+      document.querySelectorAll('.proto-tab').forEach(function (el) {
+        el.classList.remove('active');
+        el.setAttribute('aria-selected', 'false');
+      });
+      if (tabEl) { tabEl.classList.add('active'); tabEl.setAttribute('aria-selected', 'true'); }
+    }
+  </script>
+
+</body>
+</html>
