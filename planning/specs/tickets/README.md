@@ -158,6 +158,16 @@ implementation (see its own ticket).
     not a new wave — cursor pagination, real server-side filtering, batch
     context, and safe (never bulk-promotion) bulk actions for large import
     batches. See the ticket's own "Depends on" and "Non-goals" sections.
+12. [market-04b-controlled-csv-jsonl-intake.md](./market-04b-controlled-csv-jsonl-intake.md) —
+    not started; a controlled, source-agnostic CSV/JSONL extension of
+    `MARKET-04`/`04A`'s existing `ImportRun` contract and
+    `ops/scripts/import-breda-osm.js`'s proven discipline (Wave 2), not a
+    new import platform — same preflight/idempotency/dry-run/hard-cap
+    pattern, reusing `computePossibleDuplicateIds`/
+    `candidateNormalization.js` unchanged. Blocked on registering a new
+    source under `MARKET-03` first (Fase 0); no upload UI, connector
+    platform, or new dependency in this phase — see the ticket's own
+    "Non-goals" and "Open datamodelvragen" sections.
 13. [market-02b-menu-proposal-publication-contract.md](./market-02b-menu-proposal-publication-contract.md) —
     not started; a second, separate schema contract extending `MARKET-02`
     (Wave 1), not a new wave — defines a writable, moderatable
