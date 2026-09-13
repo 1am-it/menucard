@@ -491,6 +491,79 @@ restaurant data — using a neutral, rotating evidence placeholder, never a
 real restaurant/menu photo, exactly as the prior version of this ticket
 already required. This update changes nothing about that requirement.
 
+## External research addendum — lightweight community contributions (2026-09-13)
+
+**Confirmatory, not architectural.** Comparative research into how Google
+Maps, Untappd, and OpenStreetMap handle lightweight community edits and
+trusted local business/venue data was conducted after this ticket's own
+design was already settled. It confirms the direction already decided
+above — it adds **no new architecture, role, status, or publication
+rule**. MenuCard adopts observed *patterns* from these platforms, never
+their product or data model, and never their gamification/social layers
+(see "Explicitly not adopted" below).
+
+**Confirmed design principles** (each already established elsewhere in
+this document; restated here only as a compact, dated cross-reference,
+not a new decision):
+
+1. One contribution at a time — a missing restaurant, one correction, or
+   one official menu link (see "1"–"3" above).
+2. A community contribution is always a proposal, never a direct
+   publication (see "Status flow" and "Hard boundaries").
+3. A source link remains source evidence only — never automatic content,
+   scraping input, or publication (see "Menu-link submission").
+4. An owner confirmation carries higher trust but never bypasses
+   moderation (see "Restaurant owners").
+5. Published information stays traceable through source, proposal,
+   decision, and superseding version; history is never silently
+   overwritten (see "Status flow" and `PLATFORM-03`/`06`'s existing
+   append-only pattern).
+6. Speed comes from lightweight, accountless input, never from skipping
+   human moderation (see "Optional status route" and "Hard boundaries").
+7. Status communicates honestly what is happening to a contribution —
+   never a reward or social recognition (see the six-status vocabulary in
+   "Status flow").
+8. Source and freshness must be visible and understandable to users —
+   showing source context and last-verified/freshness status where
+   possible, per `docs/api/data-trust-model.md`'s existing status-label
+   mapping and staleness window. **This is a design goal, not a claim
+   that display work exists yet** — no consumer UI for this is built by
+   this ticket.
+
+**Explicitly not adopted**, based on the same research:
+
+- Points, levels, badges, leaderboards, or any other gamification
+  (observed in Google's Local Guides program).
+- Friend feeds, check-ins, and a friends-based social graph (observed in
+  Untappd's own activity feed and Groups features), plus direct
+  messaging between users (observed in Untappd's own Direct Message
+  feature).
+- Public change-discussion threads (observed in OpenStreetMap's
+  changeset discussions).
+- Automatic publication triggered by accumulated user confirmations
+  alone, without an explicit human moderation decision — this ticket
+  keeps 100% human moderation for every submission type, per "Hard
+  boundaries," regardless of what verification-volume mechanism any
+  single external platform may or may not use for its own lowest-risk
+  edits.
+- Direct, unmoderated mutation of published restaurant or menu data by
+  anyone, including a verified owner.
+
+**Relation to phasing**: this addendum changes no phase's scope or
+go/no-go criteria (see "Phased delivery" above) — it is read as
+supporting evidence for the direction already chosen in Fase 0, not a
+new requirement for any later phase.
+
+**Sources consulted (inspiration only — no product or data model
+copied)**: [Edit place information in Google Maps](https://support.google.com/maps/answer/7084895?hl=en),
+[Local Guides points, levels & badging](https://support.google.com/maps/answer/6225851?hl=en),
+[What is a Verified Venue? – Untappd](https://help.untappd.com/hc/en-us/articles/360034387071-What-is-a-Verified-Venue),
+[Mute Friends Check-Ins – Untappd](https://help.untappd.com/hc/en-us/articles/360033981332-Mute-Friends-Check-Ins),
+[How to use Groups – Untappd](https://help.untappd.com/hc/en-us/articles/360033982292-How-to-use-Groups),
+[Direct Message – Untappd](https://help.untappd.com/hc/en-us/articles/360034354711-Direct-Message),
+[Data Working Group - OpenStreetMap Wiki](https://wiki.openstreetmap.org/wiki/DWG),
+[Keep the history - OpenStreetMap Wiki](https://wiki.openstreetmap.org/wiki/Keep_the_history).
+
 ## Risks
 
 - **A duplicate-hint that reads as a hard block**, discouraging a
@@ -562,6 +635,12 @@ already required. This update changes nothing about that requirement.
       set of hard boundaries and open policy decisions, unweakened.
 - [ ] The three new mockups exist, are photo-free, and are referenced
       from `docs/mockups/README.md` as directional references only.
+- [ ] Where a risk-sensitive field or menu link produced by this ticket's
+      flows is ever shown to consumers, its source and last-verified/
+      freshness status are shown per `docs/api/data-trust-model.md`'s
+      existing status-label mapping — a design goal from the "External
+      research addendum" above, not a claim that this display already
+      exists.
 
 ## Suggested order
 
