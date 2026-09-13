@@ -34,7 +34,12 @@ function AllergenCell({ itemAllergens, allergenId }) {
 }
 
 const COMPLIANCE_TONE = {
-  full:    { color: 'var(--green)',   bg: 'var(--green-faint)',   border: 'var(--green-border)' },
+  // Neutral/informative — deliberately not the green "success" treatment.
+  // A pct of 100 only means every item has *a* value (filled or explicitly
+  // empty); it is not a verification result, so it must not read as one.
+  // Reuses the same neutral pill treatment as /internal/moderation's
+  // SourceTag (src/lib/moderationFormatting.js), not a new token.
+  neutral: { color: 'var(--text-secondary)', bg: 'var(--bg-elevated)',   border: 'var(--border)' },
   partial: { color: 'var(--warning)', bg: 'var(--warning-bg)',    border: 'var(--warning-border)' },
   none:    { color: 'var(--danger)',  bg: 'var(--danger-bg)',     border: 'var(--danger-border)' },
 }
@@ -43,7 +48,7 @@ function ComplianceScore({ items }) {
   if (!items.length) return null
   const known = items.filter(i => i.allergens !== null).length
   const pct = Math.round((known / items.length) * 100)
-  const tone = pct === 100 ? COMPLIANCE_TONE.full : pct >= 50 ? COMPLIANCE_TONE.partial : COMPLIANCE_TONE.none
+  const tone = pct === 100 ? COMPLIANCE_TONE.neutral : pct >= 50 ? COMPLIANCE_TONE.partial : COMPLIANCE_TONE.none
   return (
     <div style={{
       display: 'flex',
@@ -63,17 +68,13 @@ function ComplianceScore({ items }) {
       </div>
       <div>
         <div style={{ fontSize: 13, fontWeight: 700, color: tone.color }}>
-          {pct === 100 ? '✓ NVWA-compliant' : pct >= 50 ? '⚠ Gedeeltelijk compliant' : '✗ Niet compliant'}
+          {pct === 100 ? 'Elke gerechtregel heeft een waarde voor allergenen' : pct >= 50 ? 'Allergeneninformatie gedeeltelijk vastgelegd' : 'Allergeneninformatie grotendeels nog niet vastgelegd'}
         </div>
         <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-          {known} van {items.length} gerechten hebben allergeneninformatie
+          {known} van {items.length} gerechten hebben een waarde voor allergenen (ingevuld of leeg) —
+          een lege waarde bevestigt geen afwezigheid van allergenen.
         </div>
       </div>
-      {pct < 100 && (
-        <div style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-muted)', maxWidth: 200 }}>
-          Boete NVWA bij overtreding: <strong style={{ color: 'var(--warning)' }}>min. €525</strong>
-        </div>
-      )}
     </div>
   )
 }
@@ -122,7 +123,7 @@ export default function NvwaView({ id, restaurant, allItems }) {
         <div className="nvwa-header">
           <div>
             <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px', color: 'var(--green)', marginBottom: 6 }}>
-              NVWA Allergenenmatrix · EU 1169/2011
+              Allergenenmatrix · EU Verordening 1169/2011
             </div>
             <h1 className="nvwa-title">{restaurant.name}</h1>
             <div className="nvwa-subtitle">
@@ -142,8 +143,9 @@ export default function NvwaView({ id, restaurant, allItems }) {
         {allItems.some(i => i.allergens === null) && (
           <div className="nvwa-warning">
             ⚠ Sommige gerechten missen nog allergeneninformatie (weergegeven als <strong>?</strong>).
-            Vul de ontbrekende gegevens in via het restaurant-dashboard om volledig NVWA-compliant te zijn.
-            Boete bij overtreding: minimaal €525.
+            Dit betekent niet dat deze gerechten vrij zijn van deze allergenen — vul de ontbrekende
+            gegevens aan zodra ze bekend zijn. {restaurant.name} blijft zelf verantwoordelijk voor de
+            juistheid en volledigheid van deze informatie.
           </div>
         )}
 
@@ -308,11 +310,15 @@ export default function NvwaView({ id, restaurant, allItems }) {
             <span className="allergen-yes">✓</span> Aanwezig
           </div>
           <div className="nvwa-legend-item">
-            <span className="allergen-no">—</span> Niet aanwezig
+            <span className="allergen-no">—</span> Niet opgegeven voor dit gerecht
           </div>
           <div className="nvwa-legend-item">
-            <span className="allergen-unknown">?</span> Onbekend (invullen vereist)
+            <span className="allergen-unknown">?</span> Onbekend (nog niet vastgelegd)
           </div>
+        </div>
+        <div style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 8, maxWidth: 640 }}>
+          Een "—" of "?" is geen garantie dat een gerecht vrij is van dit allergeen — het betekent
+          alleen dat dit niet als aanwezig is geregistreerd in MenuCard.
         </div>
 
         {/* Legal footer */}
@@ -326,10 +332,23 @@ export default function NvwaView({ id, restaurant, allItems }) {
           color: 'var(--text-faint)',
           lineHeight: 1.6,
         }}>
-          <strong style={{ color: 'var(--text-dim)' }}>Wettelijke grondslag:</strong> EU Verordening (EU) Nr. 1169/2011 betreffende de
-          verstrekking van voedselinformatie aan consumenten. Verplicht voor alle horecabedrijven in Nederland per 13 december 2014.
-          Toezicht door NVWA (Nederlandse Voedsel- en Warenautoriteit). Boete bij overtreding: minimaal €525.
-          Gegenereerd door BredaEats · {new Date().toLocaleDateString('nl-NL', { year: 'numeric', month: 'long', day: 'numeric' })}
+          <p style={{ margin: '0 0 8px 0' }}>
+            <strong style={{ color: 'var(--text-dim)' }}>Achtergrond:</strong> EU Verordening (EU) Nr. 1169/2011
+            verplicht horecabedrijven in Nederland om allergene informatie over hun gerechten beschikbaar te
+            stellen aan gasten. Toezicht hierop ligt bij de NVWA (Nederlandse Voedsel- en Warenautoriteit).
+            MenuCard helpt {restaurant.name} deze informatie overzichtelijk vast te leggen en te delen —
+            MenuCard voert zelf geen keuring of inspectie uit.
+          </p>
+          <p style={{ margin: '0 0 8px 0' }}>
+            Deze pagina, en een eventuele geprinte of gedownloade versie ervan, is een momentopname van de
+            op dit moment in MenuCard vastgelegde informatie — geen certificering, keuring of juridische
+            garantie van naleving. {restaurant.name} blijft zelf verantwoordelijk voor de juistheid en
+            actualiteit van deze gegevens, de gebruikte recepturen, leveranciersinformatie, en het beheersen
+            van kruisbesmettingsrisico's in de keuken.
+          </p>
+          <p style={{ margin: 0 }}>
+            Weergave gemaakt op {new Date().toLocaleDateString('nl-NL', { year: 'numeric', month: 'long', day: 'numeric' })} via MenuCard.
+          </p>
         </div>
       </div>
     </>
