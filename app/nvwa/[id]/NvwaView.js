@@ -110,7 +110,7 @@ export default function NvwaView({ id, restaurant, allItems }) {
       <header>
         <div className="header-inner">
           <Link href="/" className="logo">Breda<span>Eats</span></Link>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div className="nvwa-header-actions">
             <ThemeToggle />
             <Link href={`/restaurant/${id}`} className="back-btn">← {restaurant.name}</Link>
             <button onClick={handlePrint} className="nvwa-export-btn">⬇ Export PDF</button>

@@ -871,6 +871,12 @@ header, .site-header {
 }
 .nvwa-export-btn:hover { background: var(--green-dim); }
 
+/* Same shape as the removed inline style — display:flex, gap:8, center —
+   only pulled into a class so the narrow-viewport rule below (matching
+   .header-right's existing BE-10 pattern) can target it. Desktop is
+   byte-identical to the prior inline style. */
+.nvwa-header-actions { display: flex; align-items: center; gap: 8px; }
+
 .nvwa-warning {
   background: var(--warning-bg);
   border: 1px solid var(--warning-border);
@@ -1032,6 +1038,10 @@ header, .site-header {
   header, .site-header { height: auto; min-height: var(--header-h); padding: 8px 0; }
   .header-inner { padding: 0 16px; flex-wrap: wrap; row-gap: 8px; }
   .header-right { flex: 1 1 auto; flex-wrap: wrap; justify-content: flex-end; row-gap: 8px; }
+  /* /nvwa/[id]'s own header control-group (ThemeToggle + back-link +
+     Export PDF) — same fix as .header-right above, its own class because
+     it keeps a smaller 8px desktop gap than .header-right's 16px. */
+  .nvwa-header-actions { flex-wrap: wrap; justify-content: flex-end; row-gap: 8px; }
   .hero, .detail-hero { padding: 28px 16px; }
   .page-main { padding: 24px 16px 60px; }
   .restaurant-panel { min-width: unset; }
