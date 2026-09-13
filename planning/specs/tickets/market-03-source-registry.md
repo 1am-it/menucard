@@ -104,6 +104,85 @@ with an explicit completeness risk; restaurant websites remain the
 per-site enrichment layer already informally in use; Gemeente Breda's
 portal needs direct follow-up before it can be assessed at all.
 
+**Correction (2026-09-13): KVK Open Dataset Basis Bedrijfsgegevens is not
+usable for individual Breda restaurant records, at any coverage level —
+this supersedes the row and paragraph above, which understated the
+problem as a completeness risk alone.**
+
+Direct verification against KVK's own current, official documentation
+found that the table row above correctly named a *completeness* risk
+(BV/NV-only legal-form coverage, excluding eenmanszaak/VOF) but did not
+check whether the open dataset can identify a specific business at all.
+It cannot, for any legal form it does cover:
+
+- **No company name.** KVK's own documentation states plainly: *"De naam
+  van de onderneming, het KVK-nummer en het vestigingsadres kunnen niet
+  in alle gevallen worden aangemerkt als persoonsgegeven. KVK kan dit
+  niet per geval beoordelen en stelt deze gegevens daarom niet
+  beschikbaar"* — the name, the KVK number, and the establishment address
+  are each withheld from this specific open dataset, as a matter of
+  policy under EU Implementing Regulation 2023/138's High Value Dataset
+  personal-data safeguards, not an oversight or a paid-tier restriction.
+- **No KVK number** — the one stable identifier that could otherwise tie
+  a row to a specific, already-known business.
+- **No full establishment address** — only the *first two digits* of the
+  postcode are included (a broad area shared by many businesses), never
+  the street, house number, or remaining postcode digits.
+- What the dataset *does* contain: legal form (BV/NV only — the existing
+  completeness gap above stands, unrelated to this correction),
+  commencement date, active/insolvency status, SBI activity code(s), and
+  the two-digit postcode-region prefix.
+
+**A bulk file or an authenticated API does not fix this.** Both are
+merely *access methods* to the same underlying, deliberately
+de-identified field set — per this document's own existing
+licence-vs-access-method separation, no access route can produce a field
+the dataset itself never contains. This is a **data-shape** disqualifier,
+not an access-method or rate-limit problem — the row's existing API
+rate-limit caveat remains true but is no longer the operative reason to
+reject this candidate.
+
+**Consequence**: KVK Open Dataset Basis Bedrijfsgegevens is **no longer a
+candidate for a first `basic_info` batch, a source-specific harvester
+target, or any individual Breda restaurant record, at any coverage
+level** — not "enrichment-only" as the row above still says, but **not
+usable at all** for this project's purpose of identifying and describing
+specific restaurants. No row in this dataset can be matched to "this one
+specific restaurant" — even a human reviewer cannot recover a name or
+address from it.
+
+**Open long-term option — not decided, not authorized here.** KVK
+separately sells contractually-licensed products (e.g. commercial
+Handelsregister-inzage/API products that *do* carry name, KVK-number, and
+full address, under KVK's own commercial terms —
+[kvk.nl/producten-bestellen](https://www.kvk.nl/producten-bestellen/kvk-handelsregister-open-data-set/)).
+**This correction says nothing about those** — they are a structurally
+different product from the open HVDS corrected here, not reviewed, not
+registered, and not authorized by anything in this document. Whether such
+a product is ever worth pursuing is an explicit, separate, human legal/
+commercial decision, gated by the same `MARKET-03` review-and-registration
+process as any other source (`reviewed_by` a real, authorized human —
+never AI research alone) — not decided or pre-approved here.
+
+**OSM/Geofabrik are unaffected by this correction and remain exactly as
+gated as before**: `restricted` to internal `raw_import`/
+`internal_quality_review`/`moderation_preparation` only, per `MARKET-04`'s
+own hard gate 3A/3B. Closing off KVK as a candidate does not loosen that
+separate, still-open legal gate, and this correction does not suggest OSM
+as a substitute route around it.
+
+**Practical preferred route, today**: explicitly authorized partner- or
+restaurant-supplied data, entered via `MARKET-04B`'s own (not-yet-built)
+CSV/JSONL intake — a source a human has actually reviewed and registered
+through this document's own process, under the exact same discipline
+already required for every other source. This is a process statement,
+not a new registered `Source` — no source is registered by this
+correction.
+
+Official sources verified 2026-09-13:
+[KVK Developer Portal — Open Dataset Basis Bedrijfsgegevens](https://developers.kvk.nl/nl/documentation/open-dataset-basis-bedrijfsgegevens-api),
+[KVK — KVK Handelsregister Open Dataset Basis Bedrijfsgegevens](https://www.kvk.nl/producten-bestellen/kvk-handelsregister-open-data-set/).
+
 ## Acceptance criteria
 
 - [x] A documented `Source` registry schema exists with the four-value

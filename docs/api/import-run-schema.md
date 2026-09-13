@@ -601,12 +601,23 @@ research, specifically for how an `ImportRun` would execute:
   multipolygon) are a known, visible, explicitly out-of-scope gap for
   this first pass — not silently dropped — and remain a candidate for
   follow-up coverage once the node-only path is built and proven.
-- **KVK Open Dataset** stays a `restricted`, enrichment-only candidate
-  (BV/NV-only coverage risk, already documented). Its API's numeric rate
-  limit (1 req/min per IP, 200/5min combined) is a concrete, operational
-  constraint an `ImportRun` targeting it must pace against explicitly —
-  a clear example of dataset licence (CC BY 4.0, permissive) and access
-  limits (specific, restrictive) being genuinely different questions.
+- **KVK Open Dataset — corrected 2026-09-13, no longer any kind of
+  candidate.** The bullet as originally written here ("stays a
+  `restricted`, enrichment-only candidate") is superseded: direct
+  verification against KVK's own official documentation found the open
+  dataset (Basis Bedrijfsgegevens / HVDS) contains no company name, no
+  KVK number, and no full establishment address (only a two-digit
+  postcode-region prefix) — a data-shape disqualifier no bulk file or API
+  access can fix, distinct from and in addition to the already-known
+  BV/NV-only completeness gap. The original bullet's own rate-limit
+  detail (1 req/min per IP, 200/5min combined) remained factually true
+  but is no longer the operative reason to reject this candidate.
+  See `market-03-source-registry.md`'s own, fuller correction for the
+  complete reasoning, the official KVK sources, and the distinction from
+  KVK's separate, contractually-licensed products (not reviewed, not
+  registered, not authorized by either document). This does not touch
+  OpenStreetMap/Geofabrik's own, separate gate 3A/3B status elsewhere in
+  this document.
 - **Gemeente Breda open data**: re-checked; still no specific horeca/
   vestigingen dataset could be confirmed. The portal is a
   JavaScript-rendered single-page application, which is itself a concrete
