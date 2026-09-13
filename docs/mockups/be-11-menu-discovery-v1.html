@@ -435,7 +435,7 @@
           </div>
         </header>
         <main>
-          <p class="results-heading">3 restaurants gevonden</p>
+          <p class="results-heading">4 restaurants gevonden</p>
           <p class="section-label">Alle restaurants</p>
           <div class="filter-row">
             <button class="quick-chip">Lunch</button>
@@ -508,6 +508,23 @@
                 <a class="rc-primary-btn" href="#">Bekijk 2 menukaarten</a>
               </div>
             </article>
+
+            <article class="restaurant-card">
+              <div class="rc-header">
+                <h2 class="rc-name">Bistro Voorbeeld</h2>
+                <div class="rc-cuisine">Nederlands · Café<span aria-hidden="true"> · <span class="rc-price-glyph">€€</span></span><span class="vh">, prijsniveau: gemiddeld</span></div>
+              </div>
+              <div class="rc-body">
+                <div class="rc-meta">
+                  <span class="rc-address">Voorbeeldwijk-Oost</span>
+                  <span class="rc-status is-open">Open nu</span>
+                </div>
+              </div>
+              <div class="rc-footer">
+                <a class="rc-primary-btn" href="#">Bekijk restaurant</a>
+                <p class="rc-secondary-note">Nog geen menukaart beschikbaar.</p>
+              </div>
+            </article>
           </div>
 
           <div class="example-data-note">
@@ -525,7 +542,16 @@
             indicatie, geen exacte prijs; Steakhouse Voorbeeld toont
             bewust géén prijsniveau — dat demonstreert dat de kaart het
             segment gewoon weglaat wanneer die data ontbreekt, in plaats
-            van een verzonnen standaardwaarde te tonen.
+            van een verzonnen standaardwaarde te tonen. Bistro Voorbeeld
+            heeft geen enkele menukaart — geen menutype-rij, en de enige
+            actie heet eerlijk "Bekijk restaurant" (conceptueel naar de
+            restaurantdetailpagina), nooit "Bekijk menu" of een andere
+            menubelofte die deze kaart niet kan waarmaken. Dit demonstreert
+            dat "Alle restaurants" bedoeld is als een restaurant-niveau
+            index — nooit een groepering van uitsluitend
+            gerechtresultaten, die dit restaurant zou weglaten. In het echt
+            heeft slechts 4 van de 25 Bredase restaurants al gerechtdata;
+            deze kaart staat voor de andere 21.
           </div>
         </main>
       </section>
@@ -706,6 +732,12 @@
             verandert. Steakhouse Voorbeeld toont bij (B) bewust geen
             prijsniveau, exact zoals bij toestand 2 — dezelfde
             ontbrekende-data-situatie, consistent over alle toestanden.
+            "Bistro Voorbeeld" (toestand 2, zonder menukaart) komt in geen
+            van deze drie zoekvoorbeelden voor — terecht, want dit zijn
+            gerecht-/menu-afhankelijke zoekresultaten en dat restaurant
+            heeft geen gerecht om op te matchen. Dat is geen fout: een
+            restaurant mag hier ontbreken; het mag alleen nooit ontbreken
+            op de bewuste "Alle restaurants"-browse in toestand 2.
           </div>
         </main>
       </section>

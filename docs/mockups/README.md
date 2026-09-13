@@ -139,7 +139,16 @@ reference instead of ad hoc judgment calls:
   alternative (e.g. "prijsniveau: gemiddeld") — a small pattern scoped to
   this prototype file only, not a general product CSS utility — since a
   plain, non-interactive element's `aria-label` is not reliably exposed by
-  screen readers. On desktop,
+  screen readers. The `Alle restaurants` browse overview also includes
+  one card for a restaurant with no menu/dish data at all (most of
+  Breda's real restaurants are currently in this state — only 4 of 25
+  have any entry in `data/menus.json`) — it shows the same allowed base
+  fields with no menu-type row, and its one primary action is honestly
+  labelled `Bekijk restaurant` (conceptually `/restaurant/[id]`), never a
+  menu-specific label. This demonstrates the ticket's own corrected rule
+  that `Alle restaurants` must be sourced from a restaurant-level index,
+  never from grouping dish-search results, which would silently exclude
+  it. On desktop,
   restaurant cards lay out in a real multi-column grid (reusing the
   existing `.restaurant-grid`
   `repeat(auto-fill, minmax(...,1fr))` pattern from `app/globals.css`),

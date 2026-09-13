@@ -22,7 +22,10 @@ sits alongside, never replaces), `src/services/dishSearch.js`,
 this ticket's address/buurt matching extends). Reads, but does not modify:
 `app/restaurants/page.js`, `app/page.js`, `app/search/page.js`,
 `app/restaurant/[id]/RestaurantDetailView.js`, `app/menu/[id]/MenuView.js`,
-`data/restaurants.json`, `data/menus.json`.
+`data/restaurants.json`, `data/menus.json`,
+`src/services/coverageMetrics.js` (PLATFORM-01 — its existing
+`withMenuData`/`withoutMenuData` computation is the source for this
+ticket's menu-coverage figure in "Problem," reused, not reimplemented).
 
 ## Problem
 
@@ -48,6 +51,29 @@ this ticket's address/buurt matching extends). Reads, but does not modify:
   logo-as-home link — an already-named gap in
   `planning/decisions/014-navigation-and-orientation-standard.md`'s own
   "Known deviations."
+- **Dated snapshot (verified 2026-09-13, reproducible via the same
+  computation `src/services/coverageMetrics.js` (PLATFORM-01) already
+  uses — `withMenuData`/`withoutMenuData`, grouped by
+  `Object.keys(menusData).map(k => k.split('-')[0])`): only 4 of Breda's
+  25 restaurants had any entry in `data/menus.json` at the time this
+  ticket was written; the other 21 had no menu/dish data and no
+  `menuLinks` at all.** This is a one-time, dated measurement, not a
+  fixed assumption this ticket depends on — re-run the same computation
+  to check today's real ratio before relying on it. The underlying
+  product rule does not depend on the exact count: as long as *any*
+  known restaurant can lack real menu/dish data in
+  `data/menus.json` — whether that gap is large today or shrinks
+  significantly after future data entry — a restaurant-summary source
+  derived from grouping `src/services/dishSearch.js`'s dish-level
+  results would still silently exclude it from `Alle restaurants`, the
+  opposite of what that name promises. A restaurant counts as having a
+  menu only when real menu/dish data exists for it in that source —
+  never because a UI element, a planned future intent, or an assumption
+  about eventual coverage suggests it should. This is why "Primary
+  navigation" and "Technical and accessibility boundaries" below require
+  a restaurant-level index as that view's permanent source, never the
+  dish index — regardless of how complete menu coverage becomes over
+  time.
 
 ## Objective
 
@@ -126,6 +152,18 @@ both visually and programmatically (`aria-current="page"`), per decision
   intent. It is marked active **only** on that dedicated browse view —
   never on a `Zoeken`-driven result, even one that happens to list every
   restaurant (e.g. an empty query).
+- **`Alle restaurants` means literally every known restaurant matching
+  only restaurant-level filters** (cuisine, buurt, day, "now open",
+  indicative price level) — **never a byproduct of dish/menu search.** A
+  restaurant must never disappear from this browse view solely because
+  it has no menu/dish data yet (see "Problem" for the dated 4-of-25
+  coverage snapshot — a one-time measurement, not a number this rule
+  depends on). Deriving `Alle restaurants` from a grouping of
+  `src/services/dishSearch.js` results is explicitly rejected: its
+  source must be a light, server-side restaurant-level index built from
+  `data/restaurants.json`, never the dish index. The exact endpoint/
+  route form of that index is *not* decided by this ticket — see "Open
+  technical questions"; this ticket approves no specific API or route.
 - **`Menukaarten` is not a primary destination.** Menu content is
   presentation *within* `Zoeken` results and within `/restaurant/[id]`'s
   own menu-preview section, reached via a restaurant card's primary
@@ -230,9 +268,20 @@ both visually and programmatically (`aria-current="page"`), per decision
 - Without a specific menu-type intent, the primary action opens an
   overview, e.g. `Bekijk 4 menukaarten` — never a guess at which single
   menu the visitor wants.
+- **A restaurant with no menu/dish data at all still gets its own card,
+  on `Alle restaurants`, with the same allowed base fields as any other**
+  (name, cuisine, optional indicative price level, compact address/buurt,
+  optional short open/closed status) — it simply has no menu types to
+  list. Its one primary action is honestly labelled `Bekijk restaurant`
+  and conceptually leads to `/restaurant/[id]` — **never** `Bekijk menu`,
+  `Open lunchkaart`, or any other menu-specific promise this card cannot
+  keep. This card is never silently omitted, and never given a fallback
+  or invented menu-type row.
 - **Result-count copy is a full sentence, not a bare label**: e.g.
   `4 restaurants gevonden`, never only a bare, all-caps category heading
   (`4 RESTAURANTS`) with no readable count sentence anywhere on the page.
+  On `Alle restaurants`, this count includes restaurants with no menu
+  data — it is a count of matching restaurants, not of matching menus.
 
 ### 3. Explicit meal-type intent
 
@@ -294,6 +343,44 @@ both visually and programmatically (`aria-current="page"`), per decision
   fetching `data/menus.json`'s full content just to render a summary card
   — see "Open technical questions" for what remains undecided about its
   exact shape/source.
+- **`Alle restaurants` and `Zoeken` use different data sources for
+  filtering, not just different default states of one query:**
+  - `Alle restaurants` (no dish/menu-content intent) filters only on
+    restaurant-level attributes — cuisine, buurt, day, "now open",
+    indicative price level — evaluated against the full restaurant
+    catalog (`data/restaurants.json`), independent of whether a
+    restaurant has any menu/dish data at all.
+  - `Zoeken` with a dish/ingredient text query, an explicit meal-type
+    intent, or an allergen exclusion filters on actual menu/dish content
+    (the existing `src/services/dishSearch.js` index) — a restaurant
+    with no matching (or no) menu content legitimately does not appear
+    in these results. This is correct, expected behavior, not a defect.
+  - A dish/menu-dependent result set must never be presented under the
+    `Alle restaurants` name or its active navigation state — that name
+    promises the full restaurant catalog, not "restaurants with a
+    searchable menu."
+  - Result-count copy for a pure `Alle restaurants` browse counts every
+    restaurant matching the restaurant-level filters, including those
+    with no menu/dish data — never only those with searchable menu
+    content.
+- **The future restaurant-level index may return only an explicit,
+  whitelisted light restaurant shape** — a `dish-result-shape.md`-
+  equivalent contract naming its exact fields is implied but not written
+  or approved by this ticket. It must never include full menu content or
+  the legacy embedded `menus` blob from `data/restaurants.json`.
+- **Restaurant-level filter predicates that already exist in more than
+  one place today** (`searchDishes()`'s own filter step and
+  `computeLowCoverageSignal()`, both in `src/services/dishSearch.js`)
+  should eventually be consolidated into one shared function once the
+  restaurant-level index is built, so the two never silently diverge —
+  named here as a real, future need. This ticket does not design or
+  implement that refactor.
+- **Pagination is part of the future restaurant-index contract, not an
+  optional later addition** — even though Breda's current 25-restaurant
+  catalog is small enough that "return all" would work today, the
+  contract itself must not assume that stays true (this project's own
+  multi-city ambition, per `CLAUDE.md`, means a future city's catalog
+  will not be this small).
 - **Address/buurt search is a real, future server-side search extension**
   (`src/services/dishSearch.js`/`app/api/search/route.js`), not a
   client-side text-matching shortcut. This ticket names the requirement;
@@ -431,13 +518,31 @@ dramatically lighter than `/restaurants`.
   noticing the accessible-name reliability gap between interactive and
   non-interactive elements — mitigated by naming the correct pattern
   explicitly in §2 and demonstrating it concretely in the prototype.
+- **`Alle restaurants` gets implemented as a grouping of
+  `src/services/dishSearch.js` results** instead of a restaurant-level
+  index — would silently reduce the browse view to only whichever
+  restaurants happen to have real menu/dish data at any given time (a
+  dated snapshot found 4 of 25 at the time this ticket was written, see
+  "Problem" — not a number this risk depends on), defeating the tab's
+  own name regardless of how that ratio changes over time. Explicitly
+  rejected in "Primary navigation" and "Technical and accessibility
+  boundaries."
 
 ## Open technical questions (explicitly not decided here)
 
-- Exact shape and source of the lightweight restaurant-summary data (a
-  new static export, a new server-side endpoint, or a slimmed client-side
-  projection) — a `dish-result-shape.md`-equivalent contract is implied
-  but not written by this ticket.
+- **Exact shape and source of the lightweight restaurant-summary
+  index** — a new static export, a new server-side endpoint, or a
+  slimmed client-side projection are all still open. What is *not* open
+  (see "Primary navigation" and "Technical and accessibility
+  boundaries") is that its source must be restaurant-level data
+  (`data/restaurants.json`), never a grouping of
+  `src/services/dishSearch.js`'s dish-level results. A
+  `dish-result-shape.md`-equivalent contract — its exact field
+  whitelist, its pagination shape, and whether/how the restaurant-level
+  filter predicates that today exist independently in both
+  `searchDishes()`'s own filter step and `computeLowCoverageSignal()`
+  get consolidated — is implied but not written or approved by this
+  ticket. This ticket approves no specific API or route for it.
 - Exact address/buurt matching algorithm and where it sits in
   `docs/api/dish-search-ranking.md`'s existing tier system.
 - Exact copy/threshold for "a short, clear choice" vs. "an overview
@@ -466,8 +571,11 @@ One card per restaurant in existing result surfaces; explicit meal-type
 and general-search-intent resolution as described above. No address/buurt
 search yet — reuses the existing dish-level search tiers unchanged.
 
-**Go/no-go**: the lightweight restaurant-summary shape exists and is
-proven not to ship full menu content by default.
+**Go/no-go**: the lightweight restaurant-summary shape exists, is proven
+not to ship full menu content by default, and is proven to be sourced
+from the restaurant-level index (`data/restaurants.json`), not a
+grouping of dish-search results — so restaurants without menu data are
+never silently excluded from `Alle restaurants`.
 
 ### Fase 2 — Address/buurt server-side search extension
 
@@ -515,6 +623,27 @@ transfer, or result filtering has actually been built.
       link, not only the header logo.
 - [ ] Search results and the `Alle restaurants` browse view show exactly
       one card per restaurant, never one per menu type.
+- [ ] `Alle restaurants` is sourced from a restaurant-level index
+      (`data/restaurants.json`-equivalent), never from grouping
+      dish-search results — every restaurant matching only the
+      restaurant-level filters (cuisine, buurt, day, "now open",
+      indicative price level) appears, including restaurants with no
+      menu/dish data at all.
+- [ ] A restaurant with no menu/dish data still gets its own light
+      summary card on `Alle restaurants` — it is never silently omitted
+      solely because it lacks menu data.
+- [ ] A restaurant-without-menu card shows only the same allowed base
+      fields as any other summary card (name, cuisine, optional
+      indicative price level, compact address/buurt, optional short
+      open/closed status) and exactly one primary action, honestly
+      labelled `Bekijk restaurant` — never `Bekijk menu`, `Open
+      lunchkaart`, or any other menu-specific promise it cannot keep.
+- [ ] Result-count copy on a pure `Alle restaurants` browse counts every
+      matching restaurant, including those without menu data — never
+      only restaurants with searchable menu content.
+- [ ] A dish- or menu-dependent result set (an active meal-type intent,
+      dish/ingredient query, or allergen exclusion) never appears under
+      the `Alle restaurants` name or its active navigation state.
 - [ ] A restaurant card shows its available menu types and their count as
       information; no menu-type label is shown as active/selected unless
       that specific intent is actually active.
