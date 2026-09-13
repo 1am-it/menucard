@@ -122,10 +122,26 @@ reference instead of ad hoc judgment calls:
   general `Alle restaurants` browse overview (one card per restaurant,
   available menu types as non-clickable information labels, no filter
   chip pre-selected), an explicit meal-type intent opening the matching
-  menu directly, and a general search query resolving to either a single
-  direct match or a short, explicit choice among several matches. On
-  desktop, restaurant cards lay out in a real multi-column grid (reusing
-  the existing `.restaurant-grid`
+  menu directly, and a general search query — shown as three separate,
+  clearly labelled examples (not sequential steps of one query) — of a
+  single direct match, a short explicit choice among matches spread
+  across different restaurants, and a same-restaurant match restricted to
+  only its matching menus (`Bekijk N passende menukaarten`, never that
+  restaurant's full, unfiltered menu count). Every restaurant summary
+  card deliberately shows only name, cuisine, an optional compact price
+  level (`€`/`€€`/`€€€`, appended to the cuisine line, shown only when
+  real data exists and never a fallback default), a compact address, an
+  optional short open/closed status, available menu types, and exactly
+  one primary action — no description, and no reservation/phone/chat/
+  website/contact action of any kind; a Michelin-style quality label, when
+  shown, is plain compact text, never a badge or icon. The price level's
+  visible glyph is `aria-hidden`, paired with a visually-hidden text
+  alternative (e.g. "prijsniveau: gemiddeld") — a small pattern scoped to
+  this prototype file only, not a general product CSS utility — since a
+  plain, non-interactive element's `aria-label` is not reliably exposed by
+  screen readers. On desktop,
+  restaurant cards lay out in a real multi-column grid (reusing the
+  existing `.restaurant-grid`
   `repeat(auto-fill, minmax(...,1fr))` pattern from `app/globals.css`),
   not a stretched phone frame.
   **Primary navigation is `Zoeken`/`Alle restaurants`** — plain text

@@ -176,11 +176,63 @@ both visually and programmatically (`aria-current="page"`), per decision
 ### 2. After an explicit choice or search action
 
 - One result card per restaurant, never one per menu type.
+- **A restaurant summary card shows only**: name, cuisine, an optional
+  indicative price level (`€`/`€€`/`€€€`, appended to the cuisine line —
+  see below for the full rule), a compact address or buurt, an optional
+  short open/closed status, the available menu types (as information, not
+  as a second row of competing actions — see below), and exactly one
+  primary action. Nothing else.
+- **No long marketing description** on this card — a short cuisine label
+  only (e.g. `Modern Frans · Grand Café`), never a multi-sentence
+  restaurant blurb. A full description belongs on `/restaurant/[id]`.
+- **No reservation, phone, chat, website, or other contact/secondary
+  action** of any kind (button, icon, or link) on this card — those stay
+  on `/restaurant/[id]`, never duplicated here.
+- **Michelin-/quality information, if shown at all, is at most a compact
+  text label** (e.g. `Michelin-vermeld`) — never a dominant badge, star
+  icon, colored box, or other decoration competing with the card's actual
+  content. Full, expanded badges belong on `/restaurant/[id]`.
+- **An optional, compact price level (`€`/`€€`/`€€€`) may be appended to
+  the existing cuisine line** (e.g. `Modern Frans · Grand Café · €€`) —
+  never a new row, badge, colored accent, button, filter, sort, or
+  ranking input. It is an **indicative price level, never an exact
+  price, a freshness claim, or a verified/trust claim** — the same
+  presentational-only caveat as the Michelin-/quality label above, and
+  for the same reason: `docs/api/data-trust-model.md` names "Price" as a
+  field with no source/confidence model yet.
+  - Shown on **every** card that has a real, present price-level value —
+    independent of whether a price filter is currently active. It is a
+    static restaurant attribute, like cuisine, not a filter-context
+    highlight like an active-intent menu-type pill.
+  - **Never a fallback or invented default** when the value is missing —
+    the segment is simply omitted for that card, exactly like the
+    quality label above. Do not reuse the existing
+    `getPriceLevel()`-style `|| 2` fallback pattern that
+    `app/restaurants/page.js` uses today for filtering — that pattern is
+    explicitly not acceptable for display.
+  - **Accessible name requirement (a result, not a specific markup
+    mandate here — see the prototype for one concrete implementation):**
+    a screen reader must announce the cuisine text plus an indicative
+    price-level description (e.g. "Modern Frans · Grand Café, prijsniveau:
+    gemiddeld") **exactly once** — never the bare `€€` glyph read
+    literally (e.g. as repeated "euro" tokens), never both the glyph and
+    a separate description announced together, and never at the cost of
+    the surrounding cuisine text becoming inaccessible. `aria-label` on a
+    plain, non-interactive text node is **not** a reliable way to achieve
+    this — screen reader support for `aria-label` is inconsistent outside
+    interactive elements, widgets, landmarks, and images; a visually
+    hidden text alternative paired with `aria-hidden` on the visible
+    glyph is the dependable pattern, demonstrated in the prototype.
 - Available menu types and their count shown as information on the card
-  (e.g. `Lunch · Diner · Borrel · Specialiteiten`).
+  (e.g. `Lunch · Diner · Borrel · Specialiteiten`) — plain, non-interactive
+  labels, not buttons or links; see §3 for when one is marked as the
+  active intent.
 - Without a specific menu-type intent, the primary action opens an
   overview, e.g. `Bekijk 4 menukaarten` — never a guess at which single
   menu the visitor wants.
+- **Result-count copy is a full sentence, not a bare label**: e.g.
+  `4 restaurants gevonden`, never only a bare, all-caps category heading
+  (`4 RESTAURANTS`) with no readable count sentence anywhere on the page.
 
 ### 3. Explicit meal-type intent
 
@@ -192,17 +244,36 @@ both visually and programmatically (`aria-current="page"`), per decision
 - **The whole card and its primary action never point at different
   destinations.** If the card as a whole is also clickable, it resolves
   to exactly the same place the primary action button does.
+- **No competing second action.** A card never shows a separate
+  menu-type button next to a second, generic `Bekijk menu` button — that
+  is two competing steps toward the same place. Exactly one primary
+  action per card, always.
+- **No nested links.** If the whole card is clickable, it contains no
+  second click target of any kind; if it is not, only the primary action
+  itself is clickable — never both a whole-card link and an inner link or
+  button pointing elsewhere.
 
 ### 4. General search/filter intent
 
 - For dish text, allergen exclusion, price, date, or another general
   filter:
-  - **exactly one matching menu** → opens directly;
-  - **more than one matching menu** → a short, clear choice, or an
-    overview restricted to only the matching menus — never a guess at
-    which one the visitor meant;
-  - text is explicit either way, e.g. `Open lunchkaart` or `Bekijk 2
-    passende menukaarten`.
+  - **exactly one matching menu** → opens directly, with honest button
+    text (e.g. `Open lunchkaart`);
+  - **more than one matching menu, across different restaurants** → a
+    short, explicit choice naming each restaurant and menu type — never
+    a guess at which one the visitor meant;
+  - **more than one matching menu within the same restaurant** → that
+    restaurant's card shows one primary action restricted to only the
+    matching menus, e.g. `Bekijk 2 passende menukaarten` — never the
+    card's full, unfiltered `Bekijk N menukaarten` count, and never a
+    second action next to it.
+  - These two "more than one matching menu" cases are distinct and must
+    not be conflated: the first names restaurants explicitly because the
+    matches are spread across them; the second stays a single card
+    because the matches are within one restaurant.
+  - Result-count copy above these results follows the same full-sentence
+    rule as §2 (e.g. `2 restaurants gevonden`), stated for whichever of
+    the above cases actually applies.
 
 ### 5. Filters
 
@@ -241,6 +312,12 @@ both visually and programmatically (`aria-current="page"`), per decision
   named existing gap — an explicit, page-specific "back to results" link
   on `/restaurant/[id]`/`/menu/[id]`, not only the shared header's
   logo-as-home link.
+- **The cuisine line (including an appended price level, if shown) wraps
+  naturally at approximately 390px** — exactly like the existing,
+  unmodified cuisine text does today; no truncation, no ellipsis, and the
+  price level itself is never silently hidden at narrow widths. The price
+  glyph (`€`/`€€`/`€€€`) never breaks internally across two lines — a
+  wrap point may occur before it, never inside it.
 
 ## Daghap — explicitly out of scope
 
@@ -333,6 +410,27 @@ dramatically lighter than `/restaurants`.
   different from its own primary button) — explicitly named as a hard
   rule in "Explicit meal-type intent" above, not left to implementation
   judgment.
+- **The two "more than one matching menu" subcases get conflated during
+  implementation** (a same-restaurant restricted overview built as if it
+  were a cross-restaurant choice, or vice versa) — mitigated by naming
+  both explicitly, with distinct example copy, in "Desired behavior" §4.
+- **A browse/summary card quietly grows a contact or reservation
+  shortcut** (phone, chat, website, "reserveer") because it already
+  exists on the detail page and seems convenient to surface earlier —
+  explicitly forbidden in §2, since it competes with the card's one
+  primary action and duplicates content that belongs on
+  `/restaurant/[id]`.
+- **The price-level segment reuses `app/restaurants/page.js`'s existing
+  `getPriceLevel()` `|| 2` fallback** during implementation, silently
+  showing "gemiddeld" for a restaurant with no real price-level data —
+  explicitly forbidden in §2; the segment must be omitted entirely when
+  the value is absent.
+- **The price-level segment is implemented with `aria-label` on a plain
+  `<span>`**, matching this project's own existing (but different)
+  `aria-label`-on-`<button>` precedent (e.g. `filter-tag-remove`) without
+  noticing the accessible-name reliability gap between interactive and
+  non-interactive elements — mitigated by naming the correct pattern
+  explicitly in §2 and demonstrating it concretely in the prototype.
 
 ## Open technical questions (explicitly not decided here)
 
@@ -427,6 +525,45 @@ transfer, or result filtering has actually been built.
 - [ ] Given a general search/filter intent with exactly one match, that
       match opens directly; with more than one match, a short, explicit
       choice or a matches-only overview is shown — never a guess.
+- [ ] A restaurant summary card shows only name, cuisine, an optional
+      indicative price level, a compact address/buurt, an optional short
+      open/closed status, available menu types, and exactly one primary
+      action — no long description and no reservation/phone/chat/website/
+      contact action of any kind.
+- [ ] Michelin-/quality information, when present on a summary card, is
+      at most a compact text label, never a dominant badge or decoration.
+- [ ] A restaurant summary card shows a price level (`€`/`€€`/`€€€`)
+      appended to its cuisine line only when that restaurant's real
+      price-level data is present — never a fallback or invented default
+      when it is missing, and never a separate row, badge, colored
+      accent, button, filter, sort, or ranking input.
+- [ ] The price level appears on every summary card with real data,
+      independent of whether a price filter is currently active.
+- [ ] The cuisine line, including an appended price level, wraps
+      naturally at approximately 390px exactly like it does today; the
+      price glyph itself never breaks internally across two lines.
+- [ ] A screen reader announces the cuisine text plus an indicative
+      price-level description exactly once — never the bare price glyph
+      read literally, never both the glyph and a description announced
+      together, and never at the cost of the surrounding cuisine text
+      becoming inaccessible; `aria-label` on a plain, non-interactive
+      text node is not used for this, since screen reader support for it
+      is unreliable outside interactive elements, widgets, landmarks, and
+      images.
+- [ ] The price level is presented as an indicative price level only —
+      never as an exact price, a freshness claim, or a verified/trust
+      claim.
+- [ ] Result counts are always stated as a full sentence (e.g.
+      `4 restaurants gevonden`), never only as a bare, all-caps category
+      label.
+- [ ] No card shows a competing second action (a separate menu-type
+      button next to a generic `Bekijk menu` button) and no card contains
+      a nested link — exactly one click target per card.
+- [ ] Given more than one matching menu within the same restaurant, that
+      restaurant's card shows one action restricted to the matching menus
+      only (e.g. `Bekijk 2 passende menukaarten`); this is kept distinct
+      from more-than-one-match-across-restaurants, which shows a short,
+      explicit choice instead.
 - [ ] The fast filter row stays compact; less-frequent menu types remain
       reachable via `Filters`/`Alle menutypen`, never removed.
 - [ ] Available menu types/counts are derived from real data, never

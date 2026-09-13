@@ -234,13 +234,37 @@
   .restaurant-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 14px; }
   @media (min-width: 768px) { .restaurant-card { margin-bottom: 0; } }
   .rc-header { padding: 14px 16px 12px; border-bottom: 1px solid var(--border); }
-  .rc-badge { display: inline-block; font-size: 10px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
   .rc-name { font-size: 16px; font-weight: 700; color: var(--text-primary); margin: 0 0 2px; }
   .rc-cuisine { font-size: 12px; color: var(--text-muted); }
+  /* Optional price-level segment appended to the cuisine line (ticket
+     §2). The visible glyph is paired with a visually-hidden text
+     alternative via .vh below, not an aria-label on this span — a plain,
+     non-interactive element's aria-label is not reliably exposed by
+     screen readers outside interactive elements, widgets, landmarks, and
+     images. The glyph itself never breaks across two lines; a wrap point
+     may still occur before it, same as the rest of this line. */
+  .rc-price-glyph { white-space: nowrap; }
+  /* Visually hidden but screen-reader-accessible text — a small,
+     self-contained pattern scoped to this prototype only (not a proposal
+     to add a general product CSS utility). Paired with aria-hidden on the
+     adjacent visible glyph so a screen reader announces the price-level
+     description exactly once — never the bare €-glyph read literally,
+     never both together. */
+  .vh { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); clip-path: inset(50%); white-space: nowrap; border: 0; }
+  /* Quality/Michelin-style information — compact text only, deliberately
+     no background, border, icon, or star decoration (ticket §2: "at most
+     a compact text label ... never a dominant badge, star icon, colored
+     box, or other decoration"). Shown only when applicable — most cards
+     carry no such label. */
+  .rc-quality { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
   .rc-body { padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; }
-  .rc-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .rc-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
   .rc-address { font-size: 12px; color: var(--text-dim); }
-  .rc-price { font-size: 12.5px; color: var(--green); font-weight: 700; }
+  /* Open/closed status — plain colored text, no badge shape, same
+     "compact, no dominant decoration" rule as .rc-quality above. */
+  .rc-status { font-size: 11.5px; font-weight: 600; }
+  .rc-status.is-open { color: var(--green); }
+  .rc-status.is-closed { color: var(--text-muted); }
 
   /* Available menu types shown as non-clickable information labels,
      never as navigation targets themselves (see ticket §2/§5). Only
@@ -277,6 +301,13 @@
   .rc-secondary-note { margin-top: 8px; font-size: 11.5px; color: var(--text-dim); text-align: center; }
 
   .section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-faint); margin: 0 0 10px; }
+  /* Sentence-case result count — the primary way a visitor learns "how
+     many", per ticket §2/§3 ("4 restaurants gevonden", never only a bare
+     "4 RESTAURANTS" label). .section-label above stays for a secondary,
+     quieter line (active filter context, example naming) — never the
+     only place a count appears. */
+  .results-heading { font-size: 15px; font-weight: 700; color: var(--text-primary); margin: 0 0 10px; }
+  .results-heading.small { font-size: 12.5px; font-weight: 700; color: var(--text-secondary); margin: 18px 0 6px; }
   .example-data-note {
     font-size: 11.5px;
     color: var(--text-faint);
@@ -404,6 +435,7 @@
           </div>
         </header>
         <main>
+          <p class="results-heading">3 restaurants gevonden</p>
           <p class="section-label">Alle restaurants</p>
           <div class="filter-row">
             <button class="quick-chip">Lunch</button>
@@ -415,9 +447,9 @@
           <div class="results-grid">
             <article class="restaurant-card">
               <div class="rc-header">
-                <span class="rc-badge">Frans · Fine Dining</span>
-                <h2 class="rc-name">Brasserie Bardot</h2>
-                <div class="rc-cuisine">Modern Frans · Grand Café</div>
+                <h2 class="rc-name">Brasserie Voorbeeld</h2>
+                <div class="rc-cuisine">Modern Frans · Grand Café<span aria-hidden="true"> · <span class="rc-price-glyph">€€</span></span><span class="vh">, prijsniveau: gemiddeld</span></div>
+                <div class="rc-quality">Michelin-vermeld</div>
               </div>
               <div class="rc-body">
                 <div class="menu-type-row" aria-label="Beschikbare menutypen">
@@ -427,8 +459,8 @@
                   <span class="menu-type-pill">Specialiteiten</span>
                 </div>
                 <div class="rc-meta">
-                  <span class="rc-address">Ginnekenmarkt 5, Breda</span>
-                  <span class="rc-price">€€</span>
+                  <span class="rc-address">Voorbeeldwijk-Noord</span>
+                  <span class="rc-status is-open">Open nu</span>
                 </div>
               </div>
               <div class="rc-footer">
@@ -439,9 +471,8 @@
 
             <article class="restaurant-card">
               <div class="rc-header">
-                <span class="rc-badge">Italiaans</span>
-                <h2 class="rc-name">Trattoria Del Corso</h2>
-                <div class="rc-cuisine">Italiaans · Pizzeria</div>
+                <h2 class="rc-name">Trattoria Voorbeeld</h2>
+                <div class="rc-cuisine">Italiaans · Pizzeria<span aria-hidden="true"> · <span class="rc-price-glyph">€</span></span><span class="vh">, prijsniveau: laag</span></div>
               </div>
               <div class="rc-body">
                 <div class="menu-type-row" aria-label="Beschikbare menutypen">
@@ -449,8 +480,8 @@
                   <span class="menu-type-pill">Diner</span>
                 </div>
                 <div class="rc-meta">
-                  <span class="rc-address">Nieuwe Ginnekenstraat 22, Breda</span>
-                  <span class="rc-price">€€</span>
+                  <span class="rc-address">Voorbeeldwijk-West</span>
+                  <span class="rc-status is-closed">Gesloten</span>
                 </div>
               </div>
               <div class="rc-footer">
@@ -460,8 +491,7 @@
 
             <article class="restaurant-card">
               <div class="rc-header">
-                <span class="rc-badge">Steakhouse</span>
-                <h2 class="rc-name">Steakhouse Bardot Zuid</h2>
+                <h2 class="rc-name">Steakhouse Voorbeeld</h2>
                 <div class="rc-cuisine">Grill &amp; Steak</div>
               </div>
               <div class="rc-body">
@@ -470,8 +500,8 @@
                   <span class="menu-type-pill">Specialiteiten</span>
                 </div>
                 <div class="rc-meta">
-                  <span class="rc-address">Ceresstraat 8, Breda</span>
-                  <span class="rc-price">€€€</span>
+                  <span class="rc-address">Voorbeeldwijk-Zuid</span>
+                  <span class="rc-status is-open">Open nu</span>
                 </div>
               </div>
               <div class="rc-footer">
@@ -484,7 +514,18 @@
             Voorbeelddata — restaurantnamen, adressen en aantallen dienen
             uitsluitend ter illustratie van de layout. Dit is de bewuste
             browse-route: geen menutype is hier vooraf geselecteerd, dus
-            geen enkele filterchip staat actief.
+            geen enkele filterchip staat actief. Elke kaart toont bewust
+            alleen naam, keuken, een optioneel prijsniveau, adres, een
+            korte open/gesloten-status, beschikbare menutypen en één
+            actie — geen omschrijving en geen reserverings-, telefoon-,
+            chat- of websiteknop; die blijven op de restaurantdetailpagina.
+            Het Michelin-label bij Brasserie Voorbeeld is een voorbeeld van
+            een compact tekstlabel, geen badge of decoratie. Het
+            prijsniveau (`€€`/`€`) staat achter de keukennaam en is een
+            indicatie, geen exacte prijs; Steakhouse Voorbeeld toont
+            bewust géén prijsniveau — dat demonstreert dat de kaart het
+            segment gewoon weglaat wanneer die data ontbreekt, in plaats
+            van een verzonnen standaardwaarde te tonen.
           </div>
         </main>
       </section>
@@ -511,6 +552,7 @@
           </div>
         </header>
         <main>
+          <p class="results-heading">1 restaurant gevonden</p>
           <p class="section-label">Zoeken · gefilterd op Lunch</p>
           <div class="filter-row">
             <button class="quick-chip active">Lunch</button>
@@ -522,9 +564,9 @@
           <div class="results-grid">
             <article class="restaurant-card">
               <div class="rc-header">
-                <span class="rc-badge">Frans · Fine Dining</span>
-                <h2 class="rc-name">Brasserie Bardot</h2>
-                <div class="rc-cuisine">Modern Frans · Grand Café</div>
+                <h2 class="rc-name">Brasserie Voorbeeld</h2>
+                <div class="rc-cuisine">Modern Frans · Grand Café<span aria-hidden="true"> · <span class="rc-price-glyph">€€</span></span><span class="vh">, prijsniveau: gemiddeld</span></div>
+                <div class="rc-quality">Michelin-vermeld</div>
               </div>
               <div class="rc-body">
                 <div class="menu-type-row" aria-label="Beschikbare menutypen, Lunch actief">
@@ -534,8 +576,8 @@
                   <span class="menu-type-pill">Specialiteiten</span>
                 </div>
                 <div class="rc-meta">
-                  <span class="rc-address">Ginnekenmarkt 5, Breda</span>
-                  <span class="rc-price">€€</span>
+                  <span class="rc-address">Voorbeeldwijk-Noord</span>
+                  <span class="rc-status is-open">Open nu</span>
                 </div>
               </div>
               <div class="rc-footer">
@@ -549,7 +591,14 @@
             Voorbeeld: de knoptekst noemt de bestemming eerlijk — nooit een
             generieke "Bekijken" wanneer het doel al vaststaat. `Zoeken`
             is actief, niet `Alle restaurants`, omdat dit een filter- en
-            intentiegedreven resultaat is, geen bewuste browse-actie.
+            intentiegedreven resultaat is, geen bewuste browse-actie. Er
+            is precies één klikbaar doel op deze kaart — geen losse
+            menutypeknop naast een tweede "Bekijk menu"-knop, en geen
+            geneste links. Het `€€`-prijsniveau achter de keukennaam is
+            visueel zichtbaar maar voor een screenreader onzichtbaar
+            (`aria-hidden`); een screenreader hoort in plaats daarvan één
+            keer de tekst "prijsniveau: gemiddeld", direct na de
+            keukeninformatie — nooit allebei, nooit het kale teken zelf.
           </div>
         </main>
       </section>
@@ -585,19 +634,20 @@
 
           <p class="section-label">Zoeken · meerdere passende menukaarten</p>
 
+          <p class="results-heading small">Voorbeeld A — 2 restaurants gevonden voor "filet", op verschillende menukaarten</p>
           <div class="choice-panel">
-            <p class="choice-panel-title">"filet" komt voor op 2 menukaarten — kies er één, of bekijk beide.</p>
+            <p class="choice-panel-title">"filet" komt voor op 2 menukaarten bij verschillende restaurants — kies er één, of bekijk beide.</p>
             <div class="choice-list">
-              <a class="choice-item" href="#"><span><strong>Brasserie Bardot</strong> · Dinerkaart</span><span class="go">Open →</span></a>
-              <a class="choice-item" href="#"><span><strong>Steakhouse Bardot Zuid</strong> · Specialiteiten</span><span class="go">Open →</span></a>
+              <a class="choice-item" href="#"><span><strong>Brasserie Voorbeeld</strong> · Dinerkaart</span><span class="go">Open →</span></a>
+              <a class="choice-item" href="#"><span><strong>Steakhouse Voorbeeld</strong> · Specialiteiten</span><span class="go">Open →</span></a>
             </div>
           </div>
 
+          <p class="results-heading small">Voorbeeld B — 1 restaurant gevonden, precies één match</p>
           <div class="results-grid">
             <article class="restaurant-card">
               <div class="rc-header">
-                <span class="rc-badge">Steakhouse</span>
-                <h2 class="rc-name">Steakhouse Bardot Zuid</h2>
+                <h2 class="rc-name">Steakhouse Voorbeeld</h2>
                 <div class="rc-cuisine">Grill &amp; Steak</div>
               </div>
               <div class="rc-body">
@@ -605,8 +655,8 @@
                   <span class="menu-type-pill active-intent">Specialiteiten</span>
                 </div>
                 <div class="rc-meta">
-                  <span class="rc-address">Ceresstraat 8, Breda</span>
-                  <span class="rc-price">€€€</span>
+                  <span class="rc-address">Voorbeeldwijk-Zuid</span>
+                  <span class="rc-status is-open">Open nu</span>
                 </div>
               </div>
               <div class="rc-footer">
@@ -616,11 +666,46 @@
             </article>
           </div>
 
+          <p class="results-heading small">Voorbeeld C — 1 restaurant gevonden, meerdere passende menukaarten bij dat ene restaurant</p>
+          <div class="results-grid">
+            <article class="restaurant-card">
+              <div class="rc-header">
+                <h2 class="rc-name">Trattoria Voorbeeld</h2>
+                <div class="rc-cuisine">Italiaans · Pizzeria<span aria-hidden="true"> · <span class="rc-price-glyph">€</span></span><span class="vh">, prijsniveau: laag</span></div>
+              </div>
+              <div class="rc-body">
+                <div class="menu-type-row" aria-label="Beschikbare menutypen, 2 passend">
+                  <span class="menu-type-pill active-intent">Lunch</span>
+                  <span class="menu-type-pill active-intent">Diner</span>
+                </div>
+                <div class="rc-meta">
+                  <span class="rc-address">Voorbeeldwijk-West</span>
+                  <span class="rc-status is-closed">Gesloten</span>
+                </div>
+              </div>
+              <div class="rc-footer">
+                <a class="rc-primary-btn" href="#">Bekijk 2 passende menukaarten</a>
+                <p class="rc-secondary-note">"Pasta" komt voor op zowel de lunch- als dinerkaart van dit restaurant — het overzicht toont alleen deze twee, niet alle menukaarten van dit restaurant.</p>
+              </div>
+            </article>
+          </div>
+
           <div class="example-data-note">
-            Voorbeeld toont zowel "meerdere matches → korte keuze" (boven)
-            als "één match → directe opening" (kaart hieronder) — nooit een
-            gok naar een willekeurige kaart. `Zoeken` blijft actief in beide
-            gevallen — dit is een zoekresultaat, geen browse-actie.
+            Drie afzonderlijke voorbeelden, niet drie stappen van dezelfde
+            zoekopdracht: (A) meerdere matches over verschillende
+            restaurants → een korte, expliciete keuze die elk restaurant
+            en menutype noemt; (B) precies één match → directe opening,
+            zonder tussenkeuze; (C) meerdere matches binnen één restaurant
+            → "Bekijk N passende menukaarten", een overzicht beperkt tot
+            alleen de matchende kaarten — nooit alle menukaarten van dat
+            restaurant, en nooit als korte keuze zoals bij (A). `Zoeken`
+            blijft in alle drie actief — dit zijn zoekresultaten, geen
+            browse-actie. Trattoria Voorbeeld toont bij (C) een `€`, dat
+            hetzelfde restaurant al toonde bij toestand 2 — het prijsniveau
+            is een vast restaurantkenmerk, niet iets dat per zoekopdracht
+            verandert. Steakhouse Voorbeeld toont bij (B) bewust geen
+            prijsniveau, exact zoals bij toestand 2 — dezelfde
+            ontbrekende-data-situatie, consistent over alle toestanden.
           </div>
         </main>
       </section>
