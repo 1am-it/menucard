@@ -2,8 +2,28 @@
 
 ## Status
 
-Proposed, **not started**. Documentation/planning only — no code, route,
-data, test, or deploy action exists yet for anything described here.
+Proposed; **Fase 1's first vertical slice is implemented, not yet
+deployed or linked from primary navigation.** Concretely, as of this
+writing:
+- Built and tested: `GET /api/restaurants` (`app/api/restaurants/
+  route.js`, `src/services/restaurantIndex.js`), a restaurant-level
+  browse index that reads only `data/restaurants.json` — see
+  `docs/api/restaurant-summary-shape.md` for the full contract — and a
+  first real UI at `/alle-restaurants` (`app/alle-restaurants/page.js`)
+  consuming it against real data.
+- Deliberately **not** built yet: any link from the shared site header/
+  primary navigation to `/alle-restaurants` (the final `Zoeken`/
+  `Alle restaurants` nav is a separate, larger decision — see "Open
+  technical questions"); cuisine/buurt-exact/day/"now open" filters on
+  this endpoint; the meal-type-intent and general-search-intent
+  behaviors in "Desired behavior" §3/§4 (no `meal` parameter exists on
+  this endpoint yet); Fase 2 (address/buurt free-text matching beyond
+  what "Open technical questions" already scoped); Fase 3 (back-to-
+  results links).
+- `/restaurants` is completely unchanged and still the canonical deep
+  link for existing bookmarks/links — this slice added a new, additive
+  route, never modified the existing one.
+- No deploy, commit, or push has been made for any of this.
 
 ## Depends on
 
@@ -19,7 +39,13 @@ ticket's own navigation/accessibility bar, restated, not redecided),
 existing dish-level search contract this ticket's restaurant-level summary
 sits alongside, never replaces), `src/services/dishSearch.js`,
 `app/api/search/route.js` (BE-02b — the existing server-side search layer
-this ticket's address/buurt matching extends). Reads, but does not modify:
+this ticket's address/buurt matching extends).
+**Implements** (this ticket's own, new artifacts, Fase 1 first slice):
+`src/services/restaurantIndex.js`, `src/services/restaurantIndex.test.js`,
+`app/api/restaurants/route.js`, `app/alle-restaurants/page.js`,
+`docs/api/restaurant-summary-shape.md`, plus a new, additively-scoped
+`.lrc-*`/`.vh` CSS block in `app/globals.css` (existing `.rc-*`/
+`.restaurant-card`/`.restaurant-grid` rules untouched). Reads, but does not modify:
 `app/restaurants/page.js`, `app/page.js`, `app/search/page.js`,
 `app/restaurant/[id]/RestaurantDetailView.js`, `app/menu/[id]/MenuView.js`,
 `data/restaurants.json`, `data/menus.json`,
@@ -577,6 +603,20 @@ from the restaurant-level index (`data/restaurants.json`), not a
 grouping of dish-search results — so restaurants without menu data are
 never silently excluded from `Alle restaurants`.
 
+**First vertical slice, implemented:** `GET /api/restaurants` +
+`/alle-restaurants` (see "Status" above and
+`docs/api/restaurant-summary-shape.md`) prove the go/no-go condition
+above against real data — one card per restaurant, `hasMenu`-aware
+primary action, restaurant id `10`'s placeholder address correctly
+excluded and never shown. **Still open within Fase 1**, not yet built:
+wiring `/alle-restaurants` into primary navigation (a separate,
+shared-header decision); cuisine/buurt-exact/day/"now open" filters on
+this endpoint; explicit meal-type intent (`Open lunchkaart`, requires a
+`meal` parameter this endpoint doesn't have); the general-search-intent
+behaviors in §4 (single match vs. short choice vs. restricted overview) —
+this endpoint has no dish-content awareness at all, by design (see
+"Technical and accessibility boundaries").
+
 ### Fase 2 — Address/buurt server-side search extension
 
 The named, real server-side search extension.
@@ -602,6 +642,14 @@ hierarchy, and interaction logic only. It is not product code, is not
 wired to the application, and does not by itself prove that a
 restaurant-summary data contract, a server-side search extension, a route
 transfer, or result filtering has actually been built.
+
+**Update — Fase 1 first vertical slice:** the restaurant-summary data
+contract, the server-side restaurant-level index, and a real (if
+unlinked) route now do exist — see "Status" above. The static prototype
+remains the directional reference for the eventual, fully-wired
+`Zoeken`/`Alle restaurants` navigation and for behaviors not yet built
+(meal-type intent, general-search-intent choices); it does not need to
+be updated just because a first real slice now exists alongside it.
 
 ## Acceptance criteria
 

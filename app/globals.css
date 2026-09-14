@@ -2134,3 +2134,65 @@ mark.search-highlight {
 @media (max-width: 420px) {
   .internal-nav-signout { margin-left: 0; }
 }
+
+/* ── BE-11 Fase 1 — light restaurant browse card ──────────────────────────
+   Deliberately new, "lrc-" ("light restaurant card") namespaced classes —
+   never reuses or redefines the existing rc-prefixed / .restaurant-card
+   rules above, which app/restaurants/page.js's heavier card still depends
+   on.
+   Reuses the existing .restaurant-grid container class (layout-only, no
+   card-specific styling) and design tokens from :root. See
+   docs/mockups/be-11-menu-discovery-v1.html for the directional
+   reference this implements, and docs/api/restaurant-summary-shape.md
+   for the data contract. */
+.lrc-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.lrc-header { padding: 14px 16px 12px; border-bottom: 1px solid var(--border); }
+.lrc-name { font-size: 16px; font-weight: 700; color: var(--text-primary); margin: 0 0 2px; }
+.lrc-cuisine { font-size: 12px; color: var(--text-muted); }
+.lrc-price-glyph { white-space: nowrap; }
+/* Visually hidden but screen-reader-accessible text, paired with
+   aria-hidden on the adjacent visible price glyph — see
+   docs/api/restaurant-summary-shape.md and the BE-11 ticket's own
+   accessible-name requirement for why aria-label on a plain,
+   non-interactive node is not used here. */
+.vh { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); clip-path: inset(50%); white-space: nowrap; border: 0; }
+.lrc-body { padding: 12px 16px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
+.lrc-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.lrc-address { font-size: 12px; color: var(--text-dim); }
+.lrc-status { font-size: 11.5px; font-weight: 600; }
+.lrc-status.is-open { color: var(--green); }
+.lrc-status.is-closed { color: var(--text-muted); }
+.lrc-menu-type-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.lrc-menu-type-pill {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 4px 9px;
+}
+.lrc-footer { padding: 12px 16px 14px; border-top: 1px solid var(--border); margin-top: auto; }
+.lrc-primary-btn {
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding: 10px 14px;
+  background: var(--green);
+  color: var(--on-accent);
+  font-size: 13.5px;
+  font-weight: 700;
+  border: none;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+}
+.lrc-primary-btn:hover { background: var(--green-dim); }
+.lrc-primary-btn:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.lrc-secondary-note { margin-top: 8px; font-size: 11.5px; color: var(--text-dim); text-align: center; }
