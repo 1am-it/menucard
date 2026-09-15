@@ -11,6 +11,13 @@ function parseIntOr(value, fallback) {
 // allergen, cuisine, buurt-exact, day, or "now open" filter yet — see
 // docs/api/restaurant-summary-shape.md "Known limitations" for what this
 // endpoint intentionally does not do yet.
+//
+// BE-11 Fase 2 — the response also carries `uniqueNameMatch` (see
+// src/services/restaurantIndex.js's hasUniqueRestaurantNameMatch()), the
+// server-computed signal /search uses to decide whether "Restaurants
+// gevonden" is shown before "Gerechten gevonden". This is deliberately
+// computed here, server-side, against the full dataset and the raw query —
+// never derived client-side from this endpoint's own paginated result page.
 export async function GET(request) {
   const { searchParams } = new URL(request.url)
 

@@ -983,6 +983,24 @@ header, .site-header {
   color: var(--text-muted);
 }
 .empty-state h3 { font-size: 18px; color: var(--text-secondary); margin-bottom: 8px; }
+/* BE-11 Fase 2 — same visual treatment as .empty-state h3 above, kept as
+   a separate CLASS (not a tag selector) for two distinct reasons on
+   /search:
+   1. A dish-results-empty status message that must NOT be a heading: it
+      can appear directly under the "Restaurants gevonden" <h2> (when a
+      restaurant match exists but no dish does), and an extra <h3> there
+      would sit out of order relative to that <h2> and the restaurant
+      name <h3>s inside it, breaking heading-level navigation for
+      screen-reader users — so it's a plain <p> with this class instead.
+   2. The page's own top-level "Waar heb je zin in?"/"Er ging iets mis"
+      states, which ARE headings (<h2>, nested under the page's <h1>) but
+      must render identically to the earlier <h3> they replaced. Using a
+      tag selector (.empty-state h2) here instead would also restyle any
+      other <h2> inside .empty-state elsewhere in the app — e.g.
+      app/menu/[id]/MenuView.js's unrelated "Menu niet gevonden" state,
+      which relies on the browser's default h2 size — this class avoids
+      that collision entirely. */
+.empty-state-title { font-size: 18px; font-weight: 700; color: var(--text-secondary); margin-bottom: 8px; }
 .empty-state p { font-size: 14px; }
 .low-coverage-note {
   max-width: 440px;
@@ -1158,6 +1176,12 @@ header, .site-header {
 .results-header { margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .results-count { font-size: 13px; color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 .no-results { text-align: center; padding: 60px 24px; color: var(--text-dim); font-size: 16px; }
+/* BE-11 Fase 2 — a short, neutral, text-first note under a result group
+   heading (e.g. clarifying that active dish filters don't apply to
+   restaurant results). Deliberately plain — no border/background box like
+   .low-coverage-note, which is for the centered .empty-state context; this
+   sits inside an ordinary, left-aligned group. */
+.results-group-note { margin: -8px 0 16px; font-size: 12.5px; color: var(--text-dim); }
 
 /* ── Restaurant grid & cards ── */
 .restaurant-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }

@@ -1,17 +1,11 @@
 'use strict';
 
-// Targeted correction: the light browse card's fallback for a restaurant
-// with no valid address (e.g. id 10, "Salon de Provence" — see
-// docs/api/restaurant-summary-shape.md "Known limitations") now says
-// "Buurt: X" instead of showing a bare neighbourhood name in the exact
-// same slot/style a real street address would occupy. This is a
-// structural source test (fs.readFileSync + regex, this project's
-// existing convention for app/ pages with no browser/DOM test harness —
-// see src/lib/nvwaComplianceCopy.test.js), not a rendered-DOM test. The
-// underlying data this fallback depends on (address: null, buurt:
-// 'Binnenstad' for restaurant id 10) is already covered by
-// src/services/restaurantIndex.test.js — this file only keeps the
-// presentational copy/markup honest.
+// BE-11 Fase 2 — RestaurantBrowseCard was extracted from this page into
+// src/components/RestaurantBrowseCard.js (see that file's own
+// RestaurantBrowseCard.test.js for the presentational/accessibility
+// assertions that used to live here). This file now only confirms the
+// page still wires up the shared component correctly, rather than
+// defining its own copy of the card.
 
 const fs = require('fs');
 const path = require('path');
@@ -25,18 +19,13 @@ function readPageSource() {
   return fs.readFileSync(PAGE_PATH, 'utf8');
 }
 
-test('address-less fallback explicitly labels the buurt value, not a bare neighbourhood name', () => {
+test('imports the shared RestaurantBrowseCard component rather than defining its own copy', () => {
   const source = readPageSource();
-  assert.match(source, /Buurt: \{restaurant\.buurt\}/, 'the fallback branch must render an explicit "Buurt:" prefix');
+  assert.match(source, /import RestaurantBrowseCard from ['"]@\/src\/components\/RestaurantBrowseCard['"]/);
+  assert.doesNotMatch(source, /function RestaurantBrowseCard\(/, 'the card must no longer be defined locally on this page');
 });
 
-test('the fallback span carries no aria-label — its accessible name must equal its visible "Buurt: X" text, not an overridden one', () => {
+test('renders the shared card for each result, keyed by restaurantId', () => {
   const source = readPageSource();
-  const fallbackLineMatch = source.match(/<span className="lrc-address">Buurt: \{restaurant\.buurt\}<\/span>/);
-  assert.ok(fallbackLineMatch, 'expected the exact fallback element, with no aria-label or other accessible-name override applied to it');
-});
-
-test('a real, valid address is still rendered as-is, never prefixed with "Buurt:"', () => {
-  const source = readPageSource();
-  assert.match(source, /<span className="lrc-address">\{restaurant\.address\}<\/span>/, 'a valid address must render unprefixed and unchanged');
+  assert.match(source, /<RestaurantBrowseCard key=\{restaurant\.restaurantId\} restaurant=\{restaurant\} \/>/);
 });

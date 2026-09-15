@@ -8,7 +8,7 @@
 const assert = require('node:assert/strict');
 const { test } = require('node:test');
 
-const { searchRestaurants, isValidAddress } = require('./restaurantIndex');
+const { searchRestaurants, isValidAddress, hasUniqueRestaurantNameMatch } = require('./restaurantIndex');
 
 test('whitelist: no internal field leaks into the public shape, for any result', () => {
   const res = searchRestaurants({ limit: 50 });
@@ -141,4 +141,167 @@ test('ordinary browse (no query) is sorted deterministically by restaurant name'
   const names = res.results.map((r) => r.name);
   const sorted = [...names].sort((a, b) => a.localeCompare(b, 'nl'));
   assert.deepEqual(names, sorted);
+});
+
+// ─── BE-11 Fase 2: hasUniqueRestaurantNameMatch() / uniqueNameMatch ────────
+// Group-ordering signal for /search's "Restaurants gevonden" vs "Gerechten
+// gevonden" precedence. Verified against the real, unmodified 25-restaurant
+// dataset — no mocks, same convention as every other test in this file.
+
+test('unique single-token name match: "Bardot" matches exactly one restaurant name (Brasserie Bardot)', () => {
+  assert.equal(hasUniqueRestaurantNameMatch('Bardot'), true);
+  const res = searchRestaurants({ q: 'Bardot' });
+  assert.equal(res.uniqueNameMatch, true, 'the same signal must be exposed on the searchRestaurants() response');
+});
+
+test('unique multi-token name match: the full name "Brasserie Bardot" also matches uniquely', () => {
+  assert.equal(hasUniqueRestaurantNameMatch('Brasserie Bardot'), true);
+});
+
+test('hyphen/space equivalence: "T-Huis", "T Huis", and "Huis" all tokenize identically and match uniquely', () => {
+  assert.equal(hasUniqueRestaurantNameMatch('T-Huis'), true);
+  assert.equal(hasUniqueRestaurantNameMatch('T Huis'), true);
+  assert.equal(hasUniqueRestaurantNameMatch('Huis'), true);
+});
+
+test('short-token floor: a 3-character token ("Bar") is never treated as matching "Barrels" as a substring', () => {
+  // "Beers & Barrels" tokenizes to ["beers", "barrels"] — "bar" is a
+  // substring of "barrels" but never a whole token of it, so this must
+  // not match, even though "bar" itself clears the 3-character floor.
+  assert.equal(hasUniqueRestaurantNameMatch('Bar'), false);
+});
+
+test('article/short-word floor: "De" tokenizes to zero remaining tokens and never matches, even though "de" is a real whole token in two restaurant names', () => {
+  // "Salon de Provence" and "De Beyerd" both contain "de" as a genuine,
+  // full token — proof this isn't filtered by coincidence of substring
+  // matching, but by the deliberate <3-character floor.
+  assert.equal(hasUniqueRestaurantNameMatch('De'), false);
+});
+
+test('non-unique name match: "Restaurant" matches many restaurant names and must not fire the precedence rule', () => {
+  assert.equal(hasUniqueRestaurantNameMatch('Restaurant'), false);
+  const res = searchRestaurants({ q: 'Restaurant' });
+  assert.equal(res.uniqueNameMatch, false);
+  assert.ok(res.total > 1, 'sanity check: this query must still match more than one restaurant via the ordinary tier ranking');
+});
+
+test('a buurt match, however exact, never sets uniqueNameMatch — only a name-token match does', () => {
+  // "Binnenstad" matches 16 restaurants by buurt (tier 2) but is not a
+  // token of any restaurant's own name.
+  assert.equal(hasUniqueRestaurantNameMatch('Binnenstad'), false);
+  const res = searchRestaurants({ q: 'Binnenstad', limit: 50 });
+  assert.equal(res.total, 16);
+  assert.equal(res.uniqueNameMatch, false);
+});
+
+test('a real address match never sets uniqueNameMatch either', () => {
+  // "Wolfslaardreef" (restaurant 1's real street) is not a token of any
+  // restaurant's own name, only of its address (tier 3) — the rule must
+  // stay false here.
+  const res = searchRestaurants({ q: 'Wolfslaardreef' });
+  assert.equal(res.total, 1);
+  assert.equal(res.uniqueNameMatch, false);
+});
+
+test('no query means no name match: uniqueNameMatch is false on a plain browse', () => {
+  const res = searchRestaurants({});
+  assert.equal(res.uniqueNameMatch, false);
+});
+
+test('a query matching zero restaurants by name never fires the rule', () => {
+  assert.equal(hasUniqueRestaurantNameMatch('zzzznomatch'), false);
+});
+
+test('a menu-less restaurant is still reachable via a unique name match (Restaurant Blossem, id 2, has zero menu data)', () => {
+  assert.equal(hasUniqueRestaurantNameMatch('Blossem'), true);
+  const res = searchRestaurants({ q: 'Blossem' });
+  assert.equal(res.total, 1);
+  assert.equal(res.results[0].hasMenu, false);
+  assert.equal(res.uniqueNameMatch, true);
+});
+
+// ─── Regression fix: a unique token-name match must also be a real result ──
+// A pre-commit review found that uniqueNameMatch could report true while
+// searchRestaurants()'s own results/total for that exact same call were
+// empty, because getMatchTier() (tier 0/1, substring-based) does not
+// recognize the same separator equivalence (space/hyphen/"&") that
+// findRestaurantsByNameToken() uses — e.g. "t-huis".includes("t huis") is
+// false. The fix injects a unique token-name match into the candidate set
+// (at tier 1) when getMatchTier() didn't already find it, so uniqueNameMatch:
+// true now always means that restaurant is actually present in `results`.
+
+test('"T Huis" (space instead of hyphen) actually finds "T-Huis" as a real, visible result', () => {
+  const res = searchRestaurants({ q: 'T Huis' });
+  assert.equal(res.total, 1, 'the space variant must return the same result as the stored hyphenated name');
+  assert.equal(res.results.length, 1);
+  assert.equal(res.results[0].name, 'T-Huis');
+  assert.equal(res.uniqueNameMatch, true);
+});
+
+test('"Beers Barrels" (no "&") actually finds "Beers & Barrels" as a real, visible result', () => {
+  const res = searchRestaurants({ q: 'Beers Barrels' });
+  assert.equal(res.total, 1);
+  assert.equal(res.results[0].name, 'Beers & Barrels');
+  assert.equal(res.uniqueNameMatch, true);
+});
+
+test('double spaces in an otherwise valid restaurant-name query still return a real result ("Con  Fuego" finds "Con Fuego")', () => {
+  const res = searchRestaurants({ q: 'Con  Fuego' });
+  assert.equal(res.total, 1);
+  assert.equal(res.results[0].name, 'Con Fuego');
+  assert.equal(res.uniqueNameMatch, true);
+});
+
+test('invariant: uniqueNameMatch: true always implies at least one actual result, across every query tried', () => {
+  const queries = [
+    'Bardot', 'Brasserie Bardot', 'T-Huis', 'T Huis', 'Huis',
+    'Beers Barrels', 'Beers & Barrels', 'Con  Fuego', 'Con Fuego',
+    'Blossem', 'de Beyerd', 'Bar', 'De', 'Restaurant', 'Binnenstad',
+    'Wolfslaardreef', 'zzzznomatch', 'a',
+  ];
+  for (const q of queries) {
+    const res = searchRestaurants({ q });
+    if (res.uniqueNameMatch) {
+      assert.ok(res.total > 0, `uniqueNameMatch was true for ${JSON.stringify(q)} but total was 0`);
+      assert.ok(res.results.length > 0, `uniqueNameMatch was true for ${JSON.stringify(q)} but results was empty`);
+    }
+  }
+});
+
+test('"Bar" and "De" still never trigger an unwarranted unique-name priority, and their existing substring results are unaffected by the injection fix', () => {
+  const bar = searchRestaurants({ q: 'Bar' });
+  assert.equal(bar.uniqueNameMatch, false);
+  assert.ok(bar.total >= 1, 'existing substring matches (e.g. "Beers & Barrels" containing "bar") must still work');
+
+  const de = searchRestaurants({ q: 'De' });
+  assert.equal(de.uniqueNameMatch, false);
+  assert.ok(de.total >= 1, 'existing substring/buurt/address matches for "De" must still work');
+});
+
+test('existing buurt, address, and substring results are unchanged by the token-injection fix', () => {
+  const binnenstad = searchRestaurants({ q: 'Binnenstad', limit: 50 });
+  assert.equal(binnenstad.total, 16);
+  assert.equal(binnenstad.uniqueNameMatch, false);
+
+  const wolfslaardreef = searchRestaurants({ q: 'Wolfslaardreef' });
+  assert.equal(wolfslaardreef.total, 1);
+  assert.equal(wolfslaardreef.results[0].name, 'Restaurant Wolfslaar');
+  assert.equal(wolfslaardreef.uniqueNameMatch, false);
+
+  const bardot = searchRestaurants({ q: 'Bardot' });
+  assert.equal(bardot.total, 1);
+  assert.equal(bardot.results[0].name, 'Brasserie Bardot');
+  assert.equal(bardot.uniqueNameMatch, true);
+
+  const restaurant = searchRestaurants({ q: 'Restaurant' });
+  assert.equal(restaurant.total, 8, 'non-unique substring name match count must be unaffected by the injection fix');
+  assert.equal(restaurant.uniqueNameMatch, false);
+});
+
+test('a unique token match injected into candidates never outranks an existing exact (tier 0) or substring (tier 1) match', () => {
+  // "Bardot" already matches "Brasserie Bardot" via substring tier 1
+  // (getMatchTier) AND via the token rule uniquely — the injection must
+  // not duplicate it or change its tier/position.
+  const res = searchRestaurants({ q: 'Bardot' });
+  assert.equal(res.results.length, 1, 'no duplicate entry from the injection when a substring match already exists');
 });

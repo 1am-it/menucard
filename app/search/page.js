@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useMemo, useRef, Suspense } from 'rea
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import ThemeToggle from '@/src/components/ThemeToggle'
+import RestaurantBrowseCard from '@/src/components/RestaurantBrowseCard'
 
 // BE-03 — dish-first search results.
 // BE-06 — filters + URL state added on top, see below.
@@ -10,6 +11,17 @@ import ThemeToggle from '@/src/components/ThemeToggle'
 // This is a standalone route, not wired into the homepage yet (that's
 // BE-04). It consumes the existing, unchanged /api/search endpoint
 // (BE-02b/BE-02c) and does not modify any existing page.
+//
+// BE-11 Fase 2 — this page also, in parallel, and only for a meaningful
+// free-text query (2+ trimmed characters — see MEANINGFUL_QUERY_MIN_LENGTH
+// below), queries GET /api/restaurants (src/services/restaurantIndex.js,
+// same endpoint /alle-restaurants already uses) and renders its results as
+// a second, separately-headed "Restaurants gevonden" group alongside the
+// existing "Gerechten gevonden" group. dishSearch.js and /api/search
+// themselves are NOT modified by this — dish search, its URL/filter
+// semantics, and its own ranking are exactly as BE-02b/BE-02c/BE-06 left
+// them. See docs/api/restaurant-summary-shape.md "Name-token match for
+// group ordering" for the rule that decides which group is shown first.
 
 const TAG_LABELS = {
   aanbevolen:  'Aanbevolen',
@@ -82,6 +94,14 @@ function parseFilters(searchParams) {
 function hasActiveFilters(f) {
   return !!(f.meal || f.maxPrice || f.cuisines.length || f.excl.length || f.day || f.nowOpen)
 }
+
+// Same minimum-length convention dishSearch.js and restaurantIndex.js both
+// already use for their own `q` handling. Below this, GET /api/restaurants
+// is not queried at all — per BE-11 Fase 2 §3, a bare or near-empty query
+// (or a page with only existing dish filters active) must never trigger a
+// restaurant fetch, let alone show a restaurant group.
+const MEANINGFUL_QUERY_MIN_LENGTH = 2
+const RESTAURANT_RESULTS_LIMIT = 12
 
 function buildParams(f) {
   const p = new URLSearchParams()
@@ -182,7 +202,21 @@ function SearchPageInner() {
   const [error, setError] = useState(null)
   const [lowCoverage, setLowCoverage] = useState(null)
 
+  // BE-11 Fase 2 — the parallel restaurant group. Entirely independent
+  // request/loading/error state from the dish search above: the two fetch
+  // in parallel and settle independently, so a slow one never blocks the
+  // other from rendering.
+  const [restaurantResults, setRestaurantResults] = useState([])
+  const [restaurantTotal, setRestaurantTotal] = useState(0)
+  const [restaurantNextCursor, setRestaurantNextCursor] = useState(null)
+  const [restaurantHasMore, setRestaurantHasMore] = useState(false)
+  const [restaurantLoading, setRestaurantLoading] = useState(false)
+  const [restaurantLoadingMore, setRestaurantLoadingMore] = useState(false)
+  const [restaurantError, setRestaurantError] = useState(null)
+  const [uniqueNameMatch, setUniqueNameMatch] = useState(false)
+
   const requestId = useRef(0)
+  const restaurantRequestId = useRef(0)
 
   // Keep the (uncommitted) text input in sync when the URL's q changes from
   // outside typing — e.g. back/forward, a shared link, or a filter reset.
@@ -234,6 +268,83 @@ function SearchPageInner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtersKey])
 
+  // BE-11 Fase 2 — separate fetch against GET /api/restaurants, gated only
+  // on the free-text query itself (never on the existing dish filters,
+  // which this endpoint has no concept of — see docs/api/restaurant-
+  // summary-shape.md "Known limitations"). Deliberately keyed on
+  // `filters.q` alone, not `filtersKey`: toggling a meal/price/cuisine/day/
+  // allergen/"nu open" filter with no text query must never trigger this
+  // fetch (BE-11 Fase 2 §3), and must never re-trigger it again once a
+  // query is already present, since none of those filters change the
+  // restaurant result for the same query text.
+  const runRestaurantSearch = useCallback(async (q) => {
+    const id = ++restaurantRequestId.current
+    const params = new URLSearchParams({ q, limit: String(RESTAURANT_RESULTS_LIMIT) })
+
+    setRestaurantLoading(true)
+    setRestaurantError(null)
+
+    try {
+      const res = await fetch(`/api/restaurants?${params.toString()}`)
+      if (!res.ok) throw new Error(`Request failed (${res.status})`)
+      const data = await res.json()
+      if (id !== restaurantRequestId.current) return
+
+      setRestaurantResults(data.results)
+      setRestaurantTotal(data.total)
+      setRestaurantNextCursor(data.nextCursor)
+      setRestaurantHasMore(data.hasMore)
+      setUniqueNameMatch(!!data.uniqueNameMatch)
+    } catch (e) {
+      if (id !== restaurantRequestId.current) return
+      setRestaurantError('Restaurants laden is niet gelukt.')
+    } finally {
+      if (id !== restaurantRequestId.current) return
+      setRestaurantLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    const trimmedQ = filters.q.trim()
+    if (trimmedQ.length < MEANINGFUL_QUERY_MIN_LENGTH) {
+      restaurantRequestId.current++ // invalidate any in-flight request
+      setRestaurantResults([]); setRestaurantTotal(0); setRestaurantNextCursor(null)
+      setRestaurantHasMore(false); setRestaurantLoading(false); setRestaurantError(null)
+      setUniqueNameMatch(false)
+      return
+    }
+    runRestaurantSearch(trimmedQ)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.q])
+
+  const handleRestaurantLoadMore = () => {
+    if (restaurantNextCursor == null) return
+    const trimmedQ = filters.q.trim()
+    if (trimmedQ.length < MEANINGFUL_QUERY_MIN_LENGTH) return
+    const id = restaurantRequestId.current
+    const params = new URLSearchParams({ q: trimmedQ, limit: String(RESTAURANT_RESULTS_LIMIT), cursor: String(restaurantNextCursor) })
+    setRestaurantLoadingMore(true)
+    fetch(`/api/restaurants?${params.toString()}`)
+      .then((res) => {
+        if (!res.ok) throw new Error(`Request failed (${res.status})`)
+        return res.json()
+      })
+      .then((data) => {
+        if (id !== restaurantRequestId.current) return
+        setRestaurantResults((prev) => [...prev, ...data.results])
+        setRestaurantNextCursor(data.nextCursor)
+        setRestaurantHasMore(data.hasMore)
+      })
+      .catch(() => {
+        if (id !== restaurantRequestId.current) return
+        setRestaurantError('Meer restaurants laden is niet gelukt.')
+      })
+      .finally(() => {
+        if (id !== restaurantRequestId.current) return
+        setRestaurantLoadingMore(false)
+      })
+  }
+
   const pushFilters = useCallback((next) => {
     const qs = buildParams(next).toString()
     router.replace(qs ? `/search?${qs}` : '/search', { scroll: false })
@@ -276,6 +387,149 @@ function SearchPageInner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtersKey])
 
+  // BE-11 Fase 2 group-ordering + combined-state derivation. See
+  // docs/api/restaurant-summary-shape.md "Name-token match for group
+  // ordering" for the underlying rule computed server-side in
+  // hasUniqueRestaurantNameMatch() — this page only reads the boolean
+  // already returned by GET /api/restaurants, never re-derives it from a
+  // paginated result list.
+  const meaningfulQuery = filters.q.trim().length >= MEANINGFUL_QUERY_MIN_LENGTH
+  const restaurantsPending = meaningfulQuery && restaurantLoading
+  const restaurantsFirst = meaningfulQuery && uniqueNameMatch && restaurantResults.length > 0
+
+  const dishesGroup = loading ? (
+    <div className="empty-state">
+      <p>Zoeken…</p>
+    </div>
+  ) : results.length === 0 ? (
+    restaurantsPending ? (
+      // Dishes are already known to be empty, but the parallel restaurant
+      // fetch for this same query hasn't settled yet — wait for it rather
+      // than momentarily declaring "Geen gerechten gevonden" only to
+      // possibly replace that message a moment later once restaurants
+      // arrive (BE-11 Fase 2 §11: honest copy for every combination).
+      <div className="empty-state">
+        <p>Zoeken…</p>
+      </div>
+    ) : (
+      <div className="empty-state">
+        {/* BE-11 Fase 2 — deliberately not a heading (see app/globals.css's
+            .empty-state-title comment): this status message can appear
+            directly under the "Restaurants gevonden" <h2> and must not
+            introduce a stray, out-of-order <h3> alongside the restaurant
+            name <h3>s that group already contains. */}
+        <p className="empty-state-title">{meaningfulQuery && restaurantResults.length > 0 ? 'Geen gerechten gevonden' : 'Niets gevonden'}</p>
+        <p>
+          {meaningfulQuery && restaurantResults.length > 0 ? (
+            restaurantsFirst ? (
+              // The restaurant group already rendered directly above this
+              // message (restaurantsFirst) — repeating "wel N restaurant(en)
+              // gevonden" here would just restate what's already visible.
+              <>Geen gerechten gevonden voor &quot;{filters.q}&quot;.</>
+            ) : (
+              <>Geen gerechten gevonden voor &quot;{filters.q}&quot; — wel {restaurantTotal} restaurant{restaurantTotal !== 1 ? 's' : ''} gevonden met deze naam of buurt.</>
+            )
+          ) : (
+            <>
+              {filters.q
+                ? `Niets gevonden voor "${filters.q}"${active ? ' met deze filters' : ''}.`
+                : 'Niets gevonden met deze filters.'}
+              {' '}Probeer een ander gerecht, restaurant of buurt{active ? ', of pas de filters aan' : ''}.
+            </>
+          )}
+        </p>
+        {lowCoverage && (
+          <p className="low-coverage-note">
+            {filters.cuisines.length === 1
+              ? `We hebben momenteel nog geen gedigitaliseerde menukaart voor restaurants in de categorie "${filters.cuisines[0]}": ${lowCoverage.missingMenuDataCount} van de ${lowCoverage.relevantRestaurantCount} restaurants in Breda met deze keuken staat wel geregistreerd, maar heeft nog geen menu in onze data.`
+              : `Dit kan ook komen doordat we nog niet van alle Breda-restaurants een menukaart hebben: ${lowCoverage.missingMenuDataCount} van de ${lowCoverage.relevantRestaurantCount} relevante restaurants heeft nog geen gedigitaliseerde menukaart.`}
+          </p>
+        )}
+        {active && (
+          <button className="detail-menu-btn-outline" onClick={resetFilters} style={{ marginTop: 12 }}>
+            Reset filters
+          </button>
+        )}
+      </div>
+    )
+  ) : (
+    <>
+      <div className="results-header">
+        <h2 className="results-count">
+          Gerechten gevonden{' '}
+          <span className="results-count-detail">
+            ({total}{filters.q && ` voor "${filters.q}"`})
+          </span>
+        </h2>
+      </div>
+
+      <div className="dish-results-list">
+        {results.map((dish) => (
+          <DishResultRow key={dish.dishId} dish={dish} query={filters.q} />
+        ))}
+      </div>
+
+      {hasMore && (
+        <div className="load-more-wrap">
+          <button
+            className="detail-menu-btn-outline load-more-btn"
+            onClick={handleLoadMore}
+            disabled={loadingMore}
+          >
+            {loadingMore ? 'Laden…' : 'Meer resultaten laden ↓'}
+          </button>
+        </div>
+      )}
+    </>
+  )
+
+  // Only ever rendered when it has actual results (BE-11 Fase 2 §5/§11):
+  // no bare "0 restaurants" block, no placeholder while loading — it
+  // simply doesn't exist yet, and appears once its own fetch resolves.
+  const restaurantsGroup = meaningfulQuery && restaurantResults.length > 0 && (
+    <section aria-labelledby="restaurants-gevonden-heading" style={{ marginTop: 24 }}>
+      <div className="results-header">
+        <h2 className="results-count" id="restaurants-gevonden-heading">
+          Restaurants gevonden{' '}
+          <span className="results-count-detail">
+            ({restaurantTotal} voor &quot;{filters.q}&quot;)
+          </span>
+        </h2>
+      </div>
+
+      {active && (
+        // BE-11 Fase 2 honesty fix: the active-filters chip bar sits right
+        // above this group, and a restaurant card visibly lists its own
+        // meal types/price regardless of the current meal/price/day/
+        // allergen filter — GET /api/restaurants has no such parameter at
+        // all (see docs/api/restaurant-summary-shape.md "Known
+        // limitations"). Without this note, a viewer could reasonably
+        // read the nearby filter chips as applying here too.
+        <p className="results-group-note">Filters gelden alleen voor gerechtresultaten, niet voor restaurants.</p>
+      )}
+
+      <div className="restaurant-grid">
+        {restaurantResults.map((restaurant) => (
+          <RestaurantBrowseCard key={restaurant.restaurantId} restaurant={restaurant} headingLevel={3} />
+        ))}
+      </div>
+
+      {restaurantError && <p className="low-coverage-note">{restaurantError}</p>}
+
+      {restaurantHasMore && (
+        <div className="load-more-wrap">
+          <button
+            className="detail-menu-btn-outline load-more-btn"
+            onClick={handleRestaurantLoadMore}
+            disabled={restaurantLoadingMore}
+          >
+            {restaurantLoadingMore ? 'Laden…' : 'Meer restaurants laden ↓'}
+          </button>
+        </div>
+      )}
+    </section>
+  )
+
   return (
     <>
       <header className="site-header">
@@ -288,13 +542,23 @@ function SearchPageInner() {
         </div>
       </header>
 
+      {/* BE-11 Fase 2 — a real page title for assistive tech (decision 014
+          item 1: "a real page title, not only a generic site name"). Kept
+          visually hidden rather than a new visible headline, so the
+          existing visual design is unchanged; the header logo remains the
+          visible brand mark for sighted users. This is also what makes
+          "Gerechten gevonden"/"Restaurants gevonden" valid <h2>s below —
+          they now nest under a real <h1> instead of floating with no
+          page-level heading above them. */}
+      <h1 className="vh">Zoeken</h1>
+
       <section className="search-page-hero">
         <form className="search-field search-page-field" onSubmit={handleSubmit}>
           <span className="search-icon">🔍</span>
           <input
             type="text"
             className="search-input flagship"
-            placeholder="Zoek steak, sushi, risotto, vegan…"
+            placeholder="Zoek steak, sushi, een restaurant of een buurt…"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
           />
@@ -418,66 +682,31 @@ function SearchPageInner() {
       <main className="results-section">
         {!filters.q && !active ? (
           <div className="empty-state">
-            <h3>Waar heb je zin in?</h3>
-            <p>Typ een gerecht, ingrediënt of keuken, of kies een filter hierboven.</p>
+            {/* BE-11 Fase 2 — <h2> (not <h3>), nested directly under this
+                page's own <h1> above, closing the last h1→h3 heading-level
+                skip on this page. Reuses .empty-state-title (not a bare
+                <h2> or the shared .empty-state h3 selector) so this stays
+                visually identical without also restyling <h2>s inside
+                .empty-state elsewhere in the app (e.g. app/menu/[id]/
+                MenuView.js's unrelated "Menu niet gevonden" state, which
+                relies on the browser's default h2 size). */}
+            <h2 className="empty-state-title">Waar heb je zin in?</h2>
+            <p>Typ een gerecht, ingrediënt, restaurantnaam of buurt, of kies een filter hierboven.</p>
           </div>
         ) : error ? (
           <div className="empty-state">
-            <h3>Er ging iets mis</h3>
+            <h2 className="empty-state-title">Er ging iets mis</h2>
             <p>{error}</p>
           </div>
-        ) : loading ? (
-          <div className="empty-state">
-            <p>Zoeken…</p>
-          </div>
-        ) : results.length === 0 ? (
-          <div className="empty-state">
-            <h3>Geen gerechten gevonden</h3>
-            <p>
-              {filters.q
-                ? `Niets gevonden voor "${filters.q}"${active ? ' met deze filters' : ''}.`
-                : 'Niets gevonden met deze filters.'}
-              {' '}Probeer een andere zoekterm{active ? ' of pas de filters aan' : ''}.
-            </p>
-            {lowCoverage && (
-              <p className="low-coverage-note">
-                {filters.cuisines.length === 1
-                  ? `We hebben momenteel nog geen gedigitaliseerde menukaart voor restaurants in de categorie "${filters.cuisines[0]}": ${lowCoverage.missingMenuDataCount} van de ${lowCoverage.relevantRestaurantCount} restaurants in Breda met deze keuken staat wel geregistreerd, maar heeft nog geen menu in onze data.`
-                  : `Dit kan ook komen doordat we nog niet van alle Breda-restaurants een menukaart hebben: ${lowCoverage.missingMenuDataCount} van de ${lowCoverage.relevantRestaurantCount} relevante restaurants heeft nog geen gedigitaliseerde menukaart.`}
-              </p>
-            )}
-            {active && (
-              <button className="detail-menu-btn-outline" onClick={resetFilters} style={{ marginTop: 12 }}>
-                Reset filters
-              </button>
-            )}
-          </div>
+        ) : restaurantsFirst ? (
+          <>
+            {restaurantsGroup}
+            {dishesGroup}
+          </>
         ) : (
           <>
-            <div className="results-header">
-              <span className="results-count">
-                {total} gerecht{total !== 1 ? 'en' : ''}
-                {filters.q && ` gevonden voor "${filters.q}"`}
-              </span>
-            </div>
-
-            <div className="dish-results-list">
-              {results.map((dish) => (
-                <DishResultRow key={dish.dishId} dish={dish} query={filters.q} />
-              ))}
-            </div>
-
-            {hasMore && (
-              <div className="load-more-wrap">
-                <button
-                  className="detail-menu-btn-outline load-more-btn"
-                  onClick={handleLoadMore}
-                  disabled={loadingMore}
-                >
-                  {loadingMore ? 'Laden…' : 'Meer resultaten laden ↓'}
-                </button>
-              </div>
-            )}
+            {dishesGroup}
+            {restaurantsGroup}
           </>
         )}
       </main>

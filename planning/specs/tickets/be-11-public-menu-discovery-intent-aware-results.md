@@ -2,28 +2,71 @@
 
 ## Status
 
-Proposed; **Fase 1's first vertical slice is implemented, not yet
-deployed or linked from primary navigation.** Concretely, as of this
-writing:
-- Built and tested: `GET /api/restaurants` (`app/api/restaurants/
-  route.js`, `src/services/restaurantIndex.js`), a restaurant-level
-  browse index that reads only `data/restaurants.json` — see
-  `docs/api/restaurant-summary-shape.md` for the full contract — and a
-  first real UI at `/alle-restaurants` (`app/alle-restaurants/page.js`)
-  consuming it against real data.
+Proposed; **Fase 1's first vertical slice is built, committed, and live;
+Fase 2's joint search experience is built and locally verified, not yet
+committed or pushed.** Concretely, as of this writing:
+- **Fase 1 — built, tested, committed (`f7e6e79`), pushed, and verified
+  live** on production (`https://menucard-kappa.vercel.app`): `GET /api/
+  restaurants` (`app/api/restaurants/route.js`, `src/services/
+  restaurantIndex.js`), a restaurant-level browse index that reads only
+  `data/restaurants.json` — see `docs/api/restaurant-summary-shape.md`
+  for the full contract — and a first real UI at `/alle-restaurants`
+  (`app/alle-restaurants/page.js`) consuming it against real data.
+- **Fase 2 — built and locally verified (tests + build green;
+  Playwright-checked at 390px/1280px against a local production server),
+  not yet committed or pushed:** `/search` (`app/search/page.js`) now
+  additionally queries `GET /api/restaurants` in parallel, for a
+  meaningful free-text query only, and renders a separate "Restaurants
+  gevonden" group alongside the existing, unmodified "Gerechten
+  gevonden" dish group. Group order is decided by a new, server-computed
+  `uniqueNameMatch` field on `GET /api/restaurants`'s response (see
+  `src/services/restaurantIndex.js`'s `hasUniqueRestaurantNameMatch()`
+  and `docs/api/restaurant-summary-shape.md`'s "Name-token match for
+  group ordering") — never derived client-side from a paginated result
+  list. `RestaurantBrowseCard` was extracted from `/alle-restaurants`
+  into `src/components/RestaurantBrowseCard.js` so both routes render the
+  identical card. `src/services/dishSearch.js` and `app/api/search/
+  route.js` are unmodified — see "Fase 2" under "Phased delivery" below
+  for the full account of what this covers and what remains open.
+- **Fase 2 corrections, applied before this reached the state above:**
+  two review rounds found and fixed real defects in the first build of
+  the above. (1) `uniqueNameMatch` could report `true` while `GET /api/
+  restaurants` returned zero actual results for the same query (e.g.
+  `T Huis` against the stored name `T-Huis`) — fixed so a valid unique
+  name-token match is now guaranteed to be an actual, visible result;
+  see `docs/api/restaurant-summary-shape.md`'s "Consistency guarantee".
+  (2) The heading structure inside a rendered restaurant group was
+  incoherent (no page-level `<h1>`, restaurant names as sibling `<h2>`s
+  to the group heading) — fixed with a visually hidden `<h1>Zoeken</h1>`,
+  `<h2>` group headings, and restaurant names correctly nested as
+  `<h3>`; the page's own "Waar heb je zin in?" and "Er ging iets mis"
+  states were also promoted from `<h3>` to `<h2>` to close the same
+  heading-level gap there. Two related copy corrections shipped
+  alongside: a neutral note now states that active dish filters do not
+  apply to restaurant results, and the dish-empty message no longer
+  repeats a restaurant count already visible above it. None of this
+  touched the two parallel fetches' own async-loading behavior: a query
+  whose restaurant fetch resolves meaningfully later than its dish fetch
+  can still cause the restaurant group to appear above already-rendered
+  dish results a moment after first paint — a known, deliberately
+  unaddressed UX/performance trade-off of the parallel-fetch design, not
+  a defect introduced or fixed by either correction round above.
 - Deliberately **not** built yet: any link from the shared site header/
-  primary navigation to `/alle-restaurants` (the final `Zoeken`/
-  `Alle restaurants` nav is a separate, larger decision — see "Open
-  technical questions"); cuisine/buurt-exact/day/"now open" filters on
-  this endpoint; the meal-type-intent and general-search-intent
-  behaviors in "Desired behavior" §3/§4 (no `meal` parameter exists on
-  this endpoint yet); Fase 2 (address/buurt free-text matching beyond
-  what "Open technical questions" already scoped); Fase 3 (back-to-
-  results links).
+  primary navigation to `/alle-restaurants` or a combined `/search` entry
+  point (the final `Zoeken`/`Alle restaurants` nav is a separate, larger
+  decision — see "Open technical questions"); cuisine/buurt-exact/day/
+  "now open" filters on `GET /api/restaurants`; the meal-type-intent and
+  general-search-intent behaviors in "Desired behavior" §3/§4 (no `meal`
+  parameter exists on this endpoint yet); GPS/distance/"near me"; a
+  restaurant-level price-level filter; free-text cuisine matching (no
+  matching against `cuisine`/`cuisineLabel` exists anywhere in this
+  product yet — a known, pre-existing gap, not introduced or closed by
+  Fase 2); Fase 3 (back-to-results links).
 - `/restaurants` is completely unchanged and still the canonical deep
-  link for existing bookmarks/links — this slice added a new, additive
-  route, never modified the existing one.
-- No deploy, commit, or push has been made for any of this.
+  link for existing bookmarks/links — Fase 1 added a new, additive
+  route, never modified the existing one; Fase 2 added to `/search`
+  without changing its existing URL/filter semantics or its `/api/
+  search` dependency.
 
 ## Depends on
 
@@ -617,12 +660,90 @@ behaviors in §4 (single match vs. short choice vs. restricted overview) —
 this endpoint has no dish-content awareness at all, by design (see
 "Technical and accessibility boundaries").
 
-### Fase 2 — Address/buurt server-side search extension
+### Fase 2 — Joint dish + restaurant search on `/search`
 
-The named, real server-side search extension.
+**Note on this phase's original name:** this phase was originally named
+"Address/buurt server-side search extension." That specific capability —
+free-text matching against a restaurant's buurt and valid address, not
+only its name — was, in the event, already delivered as part of Fase 1's
+`GET /api/restaurants` (`getMatchTier()`'s tiers 2 and 3; see
+`docs/api/restaurant-summary-shape.md` "Ranking"). What this phase
+actually built, once Fase 1 was live, is the joint public search
+experience that surfaces that capability to a visitor: `/search` showing
+a separate, named restaurant-result group (by name, buurt, or address)
+alongside its existing dish results, rather than requiring a visit to the
+separate `/alle-restaurants` page to search restaurants at all. This
+section is renamed to describe that, rather than leaving a stale
+description that reads as not-yet-done for a search capability that
+already exists.
 
-**Go/no-go**: Fase 1 is live and stable; the exact matching algorithm has
-its own, separate design decision.
+**Go/no-go**: Fase 1 is live and stable (met — see "Status").
+
+**Built:**
+- `/search` fetches `GET /api/restaurants?q=...` in parallel with its
+  existing `GET /api/search` call, gated only on a meaningful (2+
+  character) free-text query — never on an empty page, and never merely
+  because an existing dish filter (meal/price/cuisine/day/allergen/"nu
+  open") is active with no text query.
+- Two separate, explicitly named groups — `Gerechten gevonden` and
+  `Restaurants gevonden` — are rendered as real `<h2>` headings, never
+  merged into one ranked list. Each is shown only when it has results;
+  neither ever shows a bare "0 results" block for the other.
+- Default order is dishes first. `Restaurants gevonden` is shown first
+  only when the query is a whole-word/token match against exactly one
+  restaurant's own name (never a buurt or address match, however exact)
+  — the full, tested rule lives in `src/services/restaurantIndex.js`'s
+  `hasUniqueRestaurantNameMatch()`, exposed as `uniqueNameMatch` on `GET
+  /api/restaurants`'s response and documented in `docs/api/restaurant-
+  summary-shape.md`. Normally this only ever changes which of the two
+  already-visible groups is shown first. In the narrow, explicitly
+  documented case where a unique whole-name-token match exists but a
+  space/hyphen/`&` difference kept the existing substring search from
+  finding it (e.g. the query `T Huis` against the stored name `T-Huis`),
+  the rule additionally guarantees that one specific restaurant is
+  actually present in `Restaurants gevonden`, not only its ordering —
+  it adds no fuzzy, substring, or otherwise unrelated result, only that
+  single, exact whole-name-token match. See `docs/api/restaurant-
+  summary-shape.md`'s "Name-token match for group ordering" for the full
+  contract.
+- Honest copy for every combination: both groups empty shows one
+  combined "Niets gevonden" message (mentioning dish, restaurant, and
+  buurt as real, working search forms); dishes-empty-but-restaurants-
+  found says so explicitly instead of showing a bare "Geen gerechten
+  gevonden"; restaurants-empty-but-dishes-found never mentions
+  restaurants at all. The search field placeholder and the default
+  (no-query, no-filter) empty state were updated to mention restaurant
+  name and buurt as real search forms — the old "keuken" (cuisine)
+  mention in the default empty state was removed in the same edit, since
+  free-text cuisine matching does not exist anywhere in this product
+  (a pre-existing inaccuracy, not something Fase 2 introduced, corrected
+  because this exact sentence was already being touched).
+- Heading hierarchy: the page carries a real, visually hidden
+  `<h1>Zoeken</h1>`; `Gerechten gevonden`/`Restaurants gevonden` are its
+  `<h2>` children; each restaurant name inside a rendered group is a
+  correctly nested `<h3>` (via `RestaurantBrowseCard`'s `headingLevel`
+  prop); and the page's own "Waar heb je zin in?"/"Er ging iets mis"
+  states are `<h2>`, not `<h3>` — no heading-level skip remains anywhere
+  on this page. When active dish filters are shown alongside a rendered
+  restaurant group, a neutral note states they only apply to dish
+  results, since `GET /api/restaurants` has no filter parameters at all.
+  When the restaurant group already renders above the dish-empty
+  message, that message no longer repeats the restaurant count it
+  already made visible.
+- `RestaurantBrowseCard` (name, cuisine + accessible price level, one
+  primary action, `hasMenu`-aware button text, the `Buurt: X` fallback,
+  no contact/reservation/phone/chat/website action) was extracted from
+  `/alle-restaurants` into `src/components/RestaurantBrowseCard.js` and
+  is now shared, unchanged, by both routes.
+- `src/services/dishSearch.js` and `app/api/search/route.js` are
+  untouched; `/search`'s existing URL params, filters, and dish ranking
+  are unchanged (see `app/search/page.test.js`'s explicit regression
+  checks).
+
+**Still open within this phase, not yet built:** wiring a combined
+`/search` entry point into primary navigation (see "Open technical
+questions"); a restaurant-level price/day/"now open" filter surfaced from
+`/search` itself; GPS/distance; free-text cuisine matching.
 
 ### Fase 3 — Back-to-results navigation closure
 
@@ -765,6 +886,45 @@ be updated just because a first real slice now exists alongside it.
       information architecture, reuses existing design tokens and
       component patterns, and is referenced from
       `docs/mockups/README.md` as a directional, non-binding reference.
+
+### Fase 2 — joint `/search` acceptance criteria
+
+- [x] `/search`'s existing URL params, filters, and `GET /api/search`
+      request are unchanged; `src/services/dishSearch.js` and
+      `app/api/search/route.js` are not modified by this phase.
+- [x] `GET /api/restaurants` is only queried from `/search` for a
+      meaningful (2+ character) free-text query — never on an empty page
+      and never merely because an existing dish filter is active with no
+      text query.
+- [x] Dish and restaurant results are never merged into one ranked list;
+      they render as two separately, explicitly headed groups
+      (`Gerechten gevonden`, `Restaurants gevonden`).
+- [x] Each group is shown only when it has results; neither ever renders
+      a bare "0 results" block for the other.
+- [x] `Gerechten gevonden` is the default first group; `Restaurants
+      gevonden` is shown first only when the query is a whole-word/token
+      match against exactly one restaurant's own name, per
+      `hasUniqueRestaurantNameMatch()` — never for a buurt or address
+      match, however exact, and never derived client-side from a
+      paginated result list.
+- [x] Group order only ever changes which group renders first; it never
+      hides or adds a result in either group.
+- [x] Both groups empty for a meaningful query renders one combined
+      "Niets gevonden" message, not two separate empty blocks.
+- [x] Dishes empty but restaurants found states this explicitly, rather
+      than showing an unqualified "Geen gerechten gevonden".
+- [x] Restaurants empty but dishes found never mentions restaurants —
+      the dish results render exactly as they did before this phase.
+- [x] `Restaurants gevonden` reuses the same `RestaurantBrowseCard` as
+      `/alle-restaurants` (one primary action, `hasMenu`-aware button
+      text, accessible price level, the `Buurt: X` fallback, no contact/
+      reservation/phone/chat/website action) — no separate, duplicated
+      card implementation.
+- [x] No horizontal overflow at ~390px or ~1280px on `/search` for a
+      dish-only, restaurant-only, both-groups, and both-empty query,
+      verified against a local production build.
+- [x] No GPS/distance, restaurant-level price/day/"now open" filter, or
+      free-text cuisine matching is introduced by this phase.
 
 ## Release boundary and rollback
 

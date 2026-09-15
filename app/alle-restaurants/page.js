@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useRef, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import ThemeToggle from '@/src/components/ThemeToggle'
+import RestaurantBrowseCard from '@/src/components/RestaurantBrowseCard'
 
 // BE-11 Fase 1 — first real, server-first "Alle restaurants" browse
 // vertical slice. Deliberately a new, additive route (not `/restaurants`,
@@ -21,94 +22,8 @@ import ThemeToggle from '@/src/components/ThemeToggle'
 // documented, deliberate gaps (no cuisine/buurt/day/nowOpen filter yet,
 // no price-level filter, no GPS/distance).
 
-const PRICE_LEVEL_LABEL = { 1: 'laag', 2: 'gemiddeld', 3: 'hoog' }
-
-// Menu-type ids are "{restaurantId}-{mealType}" — derive a clean label
-// from the suffix rather than using menuLinks[].label, which carries an
-// emoji prefix (e.g. "🥗 Lunchkaart") not appropriate for this light
-// card's plain-text information row. See BE-11 ticket §2 (no emoji) and
-// the earlier BE-11 technical-preparation note that this derivation was
-// still needed.
-const MEAL_TYPE_LABELS = {
-  lunch: 'Lunch',
-  diner: 'Diner',
-  borrel: 'Borrel',
-  specialiteiten: 'Specialiteiten',
-}
-function mealTypeLabel(menuLinkId, restaurantId) {
-  const suffix = menuLinkId.slice(restaurantId.length + 1)
-  return MEAL_TYPE_LABELS[suffix] || suffix
-}
-
 function parseQ(searchParams) {
   return searchParams.get('q') || ''
-}
-
-function RestaurantBrowseCard({ restaurant }) {
-  const priceLabel = restaurant.priceLevel ? PRICE_LEVEL_LABEL[restaurant.priceLevel] : null
-  const priceGlyph = restaurant.priceLevel ? '€'.repeat(restaurant.priceLevel) : null
-
-  return (
-    <article className="lrc-card">
-      <div className="lrc-header">
-        <h2 className="lrc-name">{restaurant.name}</h2>
-        <div className="lrc-cuisine">
-          {restaurant.cuisine}
-          {priceGlyph && (
-            <>
-              <span aria-hidden="true"> · <span className="lrc-price-glyph">{priceGlyph}</span></span>
-              <span className="vh">, prijsniveau: {priceLabel}</span>
-            </>
-          )}
-        </div>
-      </div>
-      <div className="lrc-body">
-        {restaurant.hasMenu && (
-          <div className="lrc-menu-type-row" aria-label="Beschikbare menutypen">
-            {restaurant.menuLinks.map((link) => (
-              <span key={link.id} className="lrc-menu-type-pill">
-                {mealTypeLabel(link.id, restaurant.restaurantId)}
-              </span>
-            ))}
-          </div>
-        )}
-        <div className="lrc-meta">
-          {restaurant.address ? (
-            <span className="lrc-address">{restaurant.address}</span>
-          ) : restaurant.buurt ? (
-            // No valid address on file (see docs/api/restaurant-summary-
-            // shape.md "Known limitations") — fall back to the buurt,
-            // but say so explicitly ("Buurt: X") rather than showing a
-            // bare neighbourhood name in the exact same slot/style a
-            // real street address would occupy, which could otherwise
-            // read as an unusually short address. The visible text is
-            // the only accessible name here (no aria-label override),
-            // so both are identical by construction.
-            <span className="lrc-address">Buurt: {restaurant.buurt}</span>
-          ) : null}
-          {restaurant.openStatus && (
-            <span className={`lrc-status is-${restaurant.openStatus}`}>
-              {restaurant.openStatus === 'open' ? 'Open nu' : 'Gesloten'}
-            </span>
-          )}
-        </div>
-      </div>
-      <div className="lrc-footer">
-        {restaurant.hasMenu ? (
-          <Link href={`/restaurant/${restaurant.restaurantId}`} className="lrc-primary-btn">
-            Bekijk {restaurant.menuLinks.length} menukaart{restaurant.menuLinks.length !== 1 ? 'en' : ''}
-          </Link>
-        ) : (
-          <>
-            <Link href={`/restaurant/${restaurant.restaurantId}`} className="lrc-primary-btn">
-              Bekijk restaurant
-            </Link>
-            <p className="lrc-secondary-note">Nog geen menukaart beschikbaar.</p>
-          </>
-        )}
-      </div>
-    </article>
-  )
 }
 
 export default function AlleRestaurantsPage() {
