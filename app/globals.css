@@ -313,6 +313,24 @@ img { display: block; max-width: 100%; }
 .theme-btn.active { background: var(--green); color: var(--on-accent); }
 
 /* ─────────────────────────────────────────────────────────────────────────────
+   PRIMARY NAV (shared component, see src/components/PrimaryNav.js)
+   BE-11 — permanent, text-only nav: same compact, segmented-control shape
+   as .theme-switch above, but real <a> links (via next/link), never
+   buttons — aria-current="page" marks the active destination directly,
+   styled below instead of a separate .active class, since aria-current
+   already is the real state. Border added (unlike .theme-switch) to
+   borrow the light restaurant card's calm, bordered, restrained-green
+   visual language (see .lrc-card) for this nav's own compact appearance
+   only — this is not a card-style change anywhere else.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.primary-nav { display: flex; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 8px; padding: 2px; gap: 2px; }
+.primary-nav-link { padding: 4px 10px; color: var(--text-muted); font-size: 12px; font-weight: 600; text-decoration: none; border-radius: 6px; transition: all 0.15s; white-space: nowrap; }
+.primary-nav-link:hover { color: var(--text-secondary); }
+.primary-nav-link[aria-current="page"] { background: var(--green); color: var(--on-accent); }
+.primary-nav-link:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
    HEADER
    ───────────────────────────────────────────────────────────────────────────── */
 
@@ -1060,6 +1078,10 @@ header, .site-header {
      Export PDF) — same fix as .header-right above, its own class because
      it keeps a smaller 8px desktop gap than .header-right's 16px. */
   .nvwa-header-actions { flex-wrap: wrap; justify-content: flex-end; row-gap: 8px; }
+  /* BE-11 — PrimaryNav takes its own full row above ThemeToggle (and any
+     other .header-right sibling) on mobile, rather than sitting beside
+     another segmented-control pill on the same line. */
+  .primary-nav { flex-basis: 100%; }
   .hero, .detail-hero { padding: 28px 16px; }
   .page-main { padding: 24px 16px 60px; }
   .restaurant-panel { min-width: unset; }

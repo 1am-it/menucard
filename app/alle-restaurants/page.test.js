@@ -29,3 +29,16 @@ test('renders the shared card for each result, keyed by restaurantId', () => {
   const source = readPageSource();
   assert.match(source, /<RestaurantBrowseCard key=\{restaurant\.restaurantId\} restaurant=\{restaurant\} \/>/);
 });
+
+// ─── BE-11 primary navigation slice — PrimaryNav mounted here too ─────────
+
+test('imports and renders the shared PrimaryNav component, before ThemeToggle, inside the existing header-right group', () => {
+  const source = readPageSource();
+  assert.match(source, /import PrimaryNav from ['"]@\/src\/components\/PrimaryNav['"]/);
+  assert.match(source, /<div className="header-right">\s*<PrimaryNav \/>\s*<ThemeToggle \/>\s*<\/div>/);
+});
+
+test('the header-right group uses the shared .header-right class, not an inline style, so it inherits the existing mobile flex-wrap treatment', () => {
+  const source = readPageSource();
+  assert.doesNotMatch(source, /style=\{\{\s*display:\s*'flex',\s*gap:\s*8/, 'the old inline right-hand header style must be gone');
+});

@@ -158,3 +158,30 @@ test('no <h3> JSX element remains anywhere in this file — only the restaurant-
     .replace(/\/\/[^\n]*/g, '');
   assert.doesNotMatch(withoutComments, /<h3[ >]/, 'app/search/page.js must not render any <h3> of its own — restaurant-name <h3>s come from RestaurantBrowseCard, not from this file');
 });
+
+// ─── BE-11 primary navigation slice — PrimaryNav mounted, "← Home" removed ──
+// First navigation slice: PrimaryNav is mounted only on /search and
+// /alle-restaurants (never on the homepage, /restaurants, or any detail
+// page — see src/components/PrimaryNav.js and the BE-11 ticket's own
+// "Primary navigation" section for the full, decided scope). The
+// previously duplicate "← Home" link is removed here since the existing,
+// already-accessible BredaEats logo link to "/" already covers it.
+
+test('imports and renders the shared PrimaryNav component, before ThemeToggle, inside the existing header-right group', () => {
+  const source = readPageSource();
+  assert.match(source, /import PrimaryNav from ['"]@\/src\/components\/PrimaryNav['"]/);
+  assert.match(source, /<div className="header-right">\s*<PrimaryNav \/>\s*<ThemeToggle \/>\s*<\/div>/);
+});
+
+test('the duplicate "← Home" link is removed; the BredaEats logo remains the only link to "/"', () => {
+  const source = readPageSource();
+  assert.doesNotMatch(source, /← Home/, 'the redundant back-link must be gone now that the logo already links to "/"');
+  const logoMatches = source.match(/<Link href="\/"[^>]*>/g) || [];
+  assert.equal(logoMatches.length, 1, 'exactly one link to "/" should remain — the logo');
+  assert.match(source, /<Link href="\/" className="logo">Breda<span>Eats<\/span><\/Link>/, 'the logo link itself must stay fully intact and unchanged');
+});
+
+test('the header-right group uses the shared .header-right class, not an inline style, so it inherits the existing mobile flex-wrap treatment', () => {
+  const source = readPageSource();
+  assert.doesNotMatch(source, /style=\{\{\s*display:\s*'flex',\s*gap:\s*8/, 'the old inline right-hand header style must be gone');
+});

@@ -3,18 +3,20 @@ import { useState, useEffect, useCallback, useRef, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import ThemeToggle from '@/src/components/ThemeToggle'
+import PrimaryNav from '@/src/components/PrimaryNav'
 import RestaurantBrowseCard from '@/src/components/RestaurantBrowseCard'
 
 // BE-11 Fase 1 — first real, server-first "Alle restaurants" browse
 // vertical slice. Deliberately a new, additive route (not `/restaurants`,
 // which stays exactly as-is for existing deep links per
-// planning/decisions/007-homepage-shift.md), and deliberately not yet
-// linked from the shared site header/primary navigation — wiring the
-// final `Zoeken`/`Alle restaurants` primary nav is a separate, larger
-// decision affecting every page's shared header, not a small vertical
-// slice; see the BE-11 ticket's own "Open technical questions" and this
-// page's own header, which stays a plain, self-contained page header
-// (logo + theme toggle only) rather than a half-built nav change.
+// planning/decisions/007-homepage-shift.md).
+//
+// Now permanently linked from the shared PrimaryNav (see
+// src/components/PrimaryNav.js and the BE-11 ticket's "Primary
+// navigation" section) — this page and /search are the only two routes
+// that mount it in this first navigation slice; every other route
+// (homepage, /restaurants, and every detail page) is deliberately
+// excluded, not merely not-yet-wired.
 //
 // Consumes GET /api/restaurants (src/services/restaurantIndex.js) —
 // restaurant-level only, never data/menus.json. See
@@ -106,7 +108,8 @@ function AlleRestaurantsPageInner() {
       <header className="site-header">
         <div className="header-inner">
           <Link href="/" className="logo">Breda<span>Eats</span></Link>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div className="header-right">
+            <PrimaryNav />
             <ThemeToggle />
           </div>
         </div>

@@ -210,6 +210,21 @@ that exists on desktop), and the active destination stays unambiguous
 both visually and programmatically (`aria-current="page"`), per decision
 014 item 2.
 
+**First slice scope, built (`src/components/PrimaryNav.js`):** `PrimaryNav`
+is mounted only on `/search` and `/alle-restaurants` — the two pages that
+actually need it as a tab. The homepage (`/`) is deliberately excluded
+for this slice: it already has its own `Restaurants` link to
+`/restaurants` (`app/page.js`), and adding the two new tabs there before
+that is reconciled would create a third, colliding destination.
+`/restaurants` is excluded because its existing mode-switch (`🏠
+Restaurants` / `📋 Menukaarten`) is a different, in-page view toggle over
+the same dataset, not page-level routing — this ticket does not touch or
+replace it. `/restaurant/[id]`, `/menu/[id]`, and `/nvwa/[id]` remain
+excluded for the same reason detail pages are below (neither tab is
+ever current there) — they keep their own existing, page-specific
+back-link as the sole orientation mechanism, unchanged. Widening
+`PrimaryNav` to any of these routes is future work, not decided here.
+
 - **`Zoeken`** is the default, standard route for a dish query, an
   explicit meal-type filter (`Lunch`/`Diner`/`Borrel`/`Ontbijt`/
   `Specialiteiten`), a restaurant-name query, and — once Fase 2 ships —

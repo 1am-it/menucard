@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useMemo, useRef, Suspense } from 'rea
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import ThemeToggle from '@/src/components/ThemeToggle'
+import PrimaryNav from '@/src/components/PrimaryNav'
 import RestaurantBrowseCard from '@/src/components/RestaurantBrowseCard'
 
 // BE-03 — dish-first search results.
@@ -535,9 +536,9 @@ function SearchPageInner() {
       <header className="site-header">
         <div className="header-inner">
           <Link href="/" className="logo">Breda<span>Eats</span></Link>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div className="header-right">
+            <PrimaryNav />
             <ThemeToggle />
-            <Link href="/" className="back-btn">← Home</Link>
           </div>
         </div>
       </header>
