@@ -47,6 +47,21 @@ of these.
     design or build, a lightweight restaurant-summary data shape and a
     future address/buurt server-side search extension. `Daghap vandaag`
     explicitly out of scope — see the ticket's own dedicated section.
+14. [be-12-dish-result-deep-link-scroll-highlight.md](./be-12-dish-result-deep-link-scroll-highlight.md) —
+    not started, documentation/planning only; a small, independent
+    extension of `BE-11`'s dish search results — a click on a specific
+    dish result scrolls, focuses, and briefly highlights that exact item
+    on its existing menu route, keeping the full menu visible. Validates
+    the existing `dishId` against its own expected name and category
+    before ever highlighting anything (verified against a real,
+    12-way "friet" spread and a real 3-way identical-name duplicate in
+    `data/menus.json`); never guesses among same-name matches, and falls
+    back silently to the plain, unfiltered menu when validation fails.
+    Extends `docs/api/dish-result-shape.md`'s existing `dishId`/`name`/
+    `category` fields via new, additive `dish`/`name`/`cat`/`fromQuery`
+    query parameters on `/menu/[id]` — `?q=`'s existing filter behavior
+    is unchanged and unconditional. Also closes part of `BE-11` Fase 3's
+    open "back to results" question for this specific entry point.
 
 ## PLATFORM-* order (not started)
 
