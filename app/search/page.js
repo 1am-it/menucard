@@ -117,11 +117,19 @@ function buildParams(f) {
 }
 
 // Display-only heuristic: does the query show up anywhere a user would
-// actually see it on this row (name/description/tags)? If not — i.e. the
-// only reason this dish matched is its restaurant's name (ranking tier 4,
-// see docs/api/dish-search-ranking.md) — say so, so the result doesn't look
-// unexplained. This never re-orders or re-filters results; the server's
-// order is authoritative.
+// actually see it on this row (name/description/tags)? If not, the match
+// came from an internal, non-public menu field — a supplement note or
+// wine-pairing suggestion (see docs/api/dish-search-ranking.md's tier 2,
+// `_sup`/`_wine`) — so say so, without exposing that raw internal text,
+// so the result doesn't look unexplained. This never re-orders or
+// re-filters results; the server's order is authoritative.
+//
+// BE-13 note: a dish's own restaurant name is never the cause of a weak
+// match — src/services/dishSearch.js no longer matches dishes on
+// restaurant name at all, so every dish reaching this component already
+// has a real match on one of its own fields (name/description/supplement/
+// wine/tag). The only way a match can still be invisible here is via the
+// non-public `_sup`/`_wine` fields, never the restaurant's identity.
 function isWeakMatch(dish, query) {
   if (!query || query.length < 2) return false
   const needle = query.toLowerCase()
@@ -156,7 +164,7 @@ function DishResultRow({ dish, query }) {
         {dish.distanceMeters != null && (
           <span className="dish-result-distance"> · {Math.round(dish.distanceMeters)} m</span>
         )}
-        {weakMatch && <span className="dish-result-match-hint"> · gevonden via restaurantnaam</span>}
+        {weakMatch && <span className="dish-result-match-hint"> · Gevonden in aanvullende menudetails</span>}
       </div>
 
       {dish.description && <div className="td-desc">{dish.description}</div>}

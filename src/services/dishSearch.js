@@ -175,11 +175,19 @@ function computeLowCoverageSignal({ cuisines, buurt, day, nowOpen }) {
 
 // Ranking tiers, per docs/api/dish-search-ranking.md. Lower tier = better
 // match. Returns null when the query matches none of the ranked fields —
-// callers treat null as "excluded", not "tier 5".
+// callers treat null as "excluded", not "tier 4".
 //
 // Deliberately not part of this: `category` (not a documented search
 // field), accent-insensitive matching, and price/allergen signals (those
 // are hard filters, not ranking inputs — see priceMatches/allergensMatch).
+//
+// BE-13 — a dish's own restaurant name is deliberately NOT a match field
+// here. A dish is only ever a "gerecht gevonden" because of its own
+// content (name/description/supplement/wine/tag) — never merely because
+// it happens to belong to a restaurant whose name contains the query.
+// Restaurant-name search is exclusively restaurantIndex.js's job; this
+// function never depends on or imports that module (see BE-13 ticket and
+// restaurantIndex.js's own header comment for why the two stay decoupled).
 function getMatchTier(dish, needle) {
   const name = dish.name.toLowerCase()
   if (name === needle) return 0
@@ -187,12 +195,11 @@ function getMatchTier(dish, needle) {
   if ((dish.description || '').toLowerCase().includes(needle)) return 2
   // sup/wine are explanatory text, folded into the same tier as
   // description — matching on them never outranks a name match and never
-  // introduces a new tier, so existing ranking for name/description/
-  // tag/restaurant-name is unchanged for every query that already matched.
+  // introduces a new tier, so existing ranking for name/description/tag
+  // is unchanged for every query that already matched.
   if ((dish._sup || '').toLowerCase().includes(needle)) return 2
   if ((dish._wine || '').toLowerCase().includes(needle)) return 2
   if (dish.tags.some((t) => t.toLowerCase().includes(needle))) return 3
-  if (dish.restaurantName.toLowerCase().includes(needle)) return 4
   return null
 }
 

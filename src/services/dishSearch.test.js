@@ -102,3 +102,51 @@ test('ordinary query unaffected by sup/wine: "steak" keeps its exact pre-existin
   assert.equal(res.total, expectedOrder.length);
   assert.deepEqual(res.results.map((d) => d.dishId), expectedOrder);
 });
+
+// ─── BE-13 — restaurant-name-only matches removed from dish search ────────
+// Written against the real, unmodified project data, same "no mocks"
+// convention as the rest of this file. Baseline before this ticket's
+// change: `q=Bardot` returned all 111 dishes at restaurant 6 ("Brasserie
+// Bardot"), of which 110 matched only because the restaurant's own name
+// contains "Bardot" — never because of anything in the dish itself. See
+// planning/specs/tickets/be-13-remove-restaurant-name-only-dish-matches.md
+// and docs/api/dish-search-ranking.md's "BE-13" amendment.
+
+test('BE-13: "Bardot" returns only the one real content match, not the restaurant\'s full 111-dish menu', () => {
+  const res = searchDishes({ q: 'Bardot' });
+  assert.equal(res.total, 1, 'restaurant-name-only matches must no longer appear — only "Café Spécial" is a real match');
+  const [match] = res.results;
+  assert.equal(match.dishId, '6-lunch-4-5');
+  assert.equal(match.name, 'Café Spécial');
+  assert.equal(match.restaurantName, 'Brasserie Bardot');
+  // The kept match is retained BECAUSE of its own description, not merely
+  // because it happens to sit at a "Bardot"-named restaurant — this is the
+  // exact "a dish matching the term both directly and via its restaurant
+  // name must never disappear" case named in the BE-13 ticket.
+  assert.match(match.description, /Bardot/, 'the surviving match must have a real, visible description match, not just a restaurant-name coincidence');
+});
+
+test('BE-13: a restaurant name with no dish-content match of its own now returns zero dish results', () => {
+  // "Restaurant Wolfslaar" (id 1, 25 dishes across lunch/diner) has no
+  // dish whose own name/description/supplement/wine/tag mentions
+  // "Wolfslaar" — before this ticket, all 25 of its dishes matched via
+  // the now-removed restaurant-name tier alone.
+  const res = searchDishes({ q: 'Wolfslaar' });
+  assert.equal(res.total, 0, 'a restaurant-name-only match must never produce a dish result');
+});
+
+test('BE-13: "friet" keeps its exact, unchanged pre-existing result set — unaffected by the restaurant-name tier removal', () => {
+  const res = searchDishes({ q: 'friet' });
+  const expectedIds = [
+    '23-lunch-3-2', '23-diner-4-2', '23-lunch-3-4', '23-diner-4-4',
+    '23-lunch-3-1', '23-diner-4-1', '23-diner-4-3', '23-diner-1-2',
+    '23-diner-1-0', '23-lunch-0-12', '23-diner-1-6', '23-diner-1-1',
+  ];
+  assert.equal(res.total, expectedIds.length);
+  assert.deepEqual(res.results.map((d) => d.dishId).sort(), expectedIds.sort());
+});
+
+test('BE-13: the mixed query "Bardot friet" stays at zero results — explicitly out of scope, not a regression', () => {
+  const res = searchDishes({ q: 'Bardot friet' });
+  assert.equal(res.total, 0, 'mixed/tokenized cross-field queries are a distinct, separately-scoped problem this ticket does not solve');
+});

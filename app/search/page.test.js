@@ -185,3 +185,45 @@ test('the header-right group uses the shared .header-right class, not an inline 
   const source = readPageSource();
   assert.doesNotMatch(source, /style=\{\{\s*display:\s*'flex',\s*gap:\s*8/, 'the old inline right-hand header style must be gone');
 });
+
+// ─── BE-13 provenance-copy correction — restaurant name is no longer a
+// dish-search match field (src/services/dishSearch.js), so the old
+// "gevonden via restaurantnaam" hint became factually wrong for every
+// remaining case it could still fire on (a real, currently-shipped
+// example: q=Chablis matches six dishes only via their internal wine
+// field, at a restaurant whose own name never contains "Chablis" — that
+// hint text described a cause that was never true even for this pre-
+// existing case). Replaced with neutral, honest copy that names the real
+// mechanism (an internal, non-public supplement/wine field) without
+// exposing its raw text. ─────────────────────────────────────────────────
+
+test('the old, now-inaccurate "gevonden via restaurantnaam" hint text is gone', () => {
+  const source = readPageSource();
+  assert.doesNotMatch(source, /gevonden via restaurantnaam/, 'restaurant name can no longer cause a dish match (BE-13) — this text must not remain');
+});
+
+test('the weak-match hint uses the new, neutral, factually accurate copy', () => {
+  const source = readPageSource();
+  assert.match(source, /\{weakMatch && <span className="dish-result-match-hint"> · Gevonden in aanvullende menudetails<\/span>\}/);
+});
+
+test('isWeakMatch\'s own comment no longer assumes restaurant name or a ranking tier 4 as a possible cause', () => {
+  const source = readPageSource();
+  const commentMatch = source.match(/\/\/ Display-only heuristic:[\s\S]*?function isWeakMatch/);
+  assert.ok(commentMatch, 'expected to find the isWeakMatch heuristic comment block');
+  const comment = commentMatch[0];
+  assert.doesNotMatch(comment, /tier 4/i, 'the comment must not still reference the removed ranking tier 4');
+  assert.doesNotMatch(comment, /restaurant'?s name/i, 'the comment must not still claim restaurant name can cause a weak match');
+});
+
+test('nowhere in this file does any comment or visible copy claim a dish\'s own restaurant name can cause it to match', () => {
+  const source = readPageSource();
+  const withoutComments = source
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/\/\/[^\n]*/g, '');
+  // Visible JSX/copy only (comments already stripped): the page may still
+  // legitimately *display* dish.restaurantName as plain restaurant
+  // context (unrelated to why a dish matched) — this checks no remaining
+  // string literal frames restaurant name as a match reason.
+  assert.doesNotMatch(withoutComments, /restaurantnaam.*(?:gevonden|matcht|reden)/i, 'no visible copy may claim restaurant name is why a dish matched');
+});
