@@ -2,9 +2,17 @@
 
 ## Status
 
-Proposed; not started. Documentation/planning only — no product code,
-test, route, API, mockup, commit, push, or deploy change has been made
-for this ticket.
+Proposed; **implemented and committed locally (commit
+`a93778aef74f6a3f07a5d11bdefd7e3b5e152ab7`, 2026-09-16), not yet pushed
+or deployed.** Tier 4 has been removed from `src/services/dishSearch.js`'s
+`getMatchTier()`; `docs/api/dish-search-ranking.md` documents the removal;
+targeted tests, the full project test suite, and `npm run build` all pass
+locally. Behavior has been verified against a local production server
+only (390px/1280px, both themes) — not against any live/deployed
+environment. The actual implementation scope grew by two files beyond
+what was originally planned below, for a reason the ticket itself already
+anticipated — see "Planned implementation scope" and "Risks" for the
+full, dated account.
 
 ## Depends on
 
@@ -168,33 +176,68 @@ Confined to exactly:
   summary-shape.md`'s dated "Consistency guarantee, corrected..." note).
 
 Explicitly not touched: `src/services/restaurantIndex.js`,
-`app/api/search/route.js`'s request/response wiring, `app/search/page.js`,
+`app/api/search/route.js`'s request/response wiring,
 `src/components/RestaurantBrowseCard.js`, any route, any migration, any
 mockup.
 
+**Correction (2026-09-16, implementation): `app/search/page.js` and
+`app/search/page.test.js` were touched after all, narrowly.** This was
+not part of the original plan above, but the ticket's own "Risks" section
+already named the reason in advance: removing tier 4 makes
+`app/search/page.js`'s existing `isWeakMatch()` hint ("· gevonden via
+restaurantnaam") describe a cause that can no longer occur. A concrete
+test, run during implementation, proved this: `q=Chablis` (an existing,
+unmodified `dishSearch.test.js` fixture) matches six dishes only via
+their internal `_wine` field, at a restaurant whose name never contains
+"Chablis" — live-verified on a local production build to still render
+"· gevonden via restaurantnaam" for all six, which is factually wrong
+regardless of tier 4. Per this ticket's own condition for allowing a UI
+change ("a UI change is only in scope if a concrete test demonstrates the
+existing copy/logic is actually insufficient once tier 4 is removed" —
+see the original "Non-goals" wording above), this qualified. The fix was
+kept minimal: the visible hint text was replaced with neutral, honest
+copy, `Gevonden in aanvullende menudetails`, and `isWeakMatch()`'s own
+comment was corrected to no longer assume restaurant name or tier 4 as a
+possible cause. Nothing about which dishes match, result order, counts,
+filters, the public API shape, or `dishSearch.js`/`restaurantIndex.js`'s
+decoupling changed as part of this — see commit
+`a93778aef74f6a3f07a5d11bdefd7e3b5e152ab7` for the exact diff.
+
 ## Acceptance criteria
 
-- [ ] `searchDishes({ q: 'Bardot' })` returns `total: 1`, and that one
+All items below are checked off as **verified locally** (targeted tests,
+full test suite, `npm run build`, and a local production server) as of
+commit `a93778aef74f6a3f07a5d11bdefd7e3b5e152ab7` — none of this has been
+verified against a live or deployed environment, since the commit has not
+been pushed.
+
+- [x] `searchDishes({ q: 'Bardot' })` returns `total: 1`, and that one
       result is "Café Spécial" — not 111, not 0.
-- [ ] `searchDishes({ q: 'friet' })`'s result count and contents are
+- [x] `searchDishes({ q: 'friet' })`'s result count and contents are
       byte-for-byte unchanged from today (regression check against the
       pre-change behavior).
-- [ ] A dish with a real name, description, supplement, wine-pairing, or
+- [x] A dish with a real name, description, supplement, wine-pairing, or
       tag match is never excluded, for any query — verified against at
       least one fixture where a dish's own content match and its
       restaurant's name match would previously have coincided.
-- [ ] A dish whose *only* match reason is its restaurant's name never
+- [x] A dish whose *only* match reason is its restaurant's name never
       appears in `Gerechten gevonden` (i.e. is never part of
       `searchDishes()`'s `results`/`total`), for any query, unique or
       non-unique restaurant name alike.
-- [ ] `searchDishes({ q: 'Bardot friet' })` still returns `total: 0` after
+- [x] `searchDishes({ q: 'Bardot friet' })` still returns `total: 0` after
       this change — explicitly confirmed as the expected, unchanged,
       out-of-scope state, not treated as a regression.
-- [ ] Every existing test in `src/services/dishSearch.test.js` passes
+- [x] Every existing test in `src/services/dishSearch.test.js` passes
       unmodified; the full project test suite and `npm run build` are run
       and pass before this ticket is considered done.
-- [ ] `docs/api/dish-search-ranking.md`'s tier table contains no
+- [x] `docs/api/dish-search-ranking.md`'s tier table contains no
       restaurant-name-only tier after implementation.
+- [x] **Added during implementation:** the now-inaccurate "· gevonden via
+      restaurantnaam" hint in `app/search/page.js` no longer appears
+      anywhere; the replacement copy, "Gevonden in aanvullende
+      menudetails", is factually correct for every remaining case that can
+      trigger it (a tier-2 match via the non-public `_sup`/`_wine`
+      fields only) and never implies restaurant name as a cause.
 
 ## Risks
 
@@ -209,6 +252,14 @@ mockup.
   only less frequently triggered. Confirming this empirically (finding a
   real sup/wine-only match fixture) is left to implementation-time
   verification, not decided here.
+  **Resolved during implementation (2026-09-16):** exactly this case was
+  found and confirmed live — `q=Chablis` still showed "· gevonden via
+  restaurantnaam" on all six of its real, existing wine-field matches,
+  none of which sit at a restaurant whose name contains "Chablis". The
+  hint text itself was corrected (see "Planned implementation scope"'s
+  correction note and the updated acceptance criteria above); the
+  underlying mechanism (`isWeakMatch()`'s matching logic, which dishes
+  trigger it) was not changed.
 - This is a documented, deliberate behavior change to an already-shipped
   BE-02c ranking rule, not a bug fix to unreleased code — verified above
   to have zero existing test coverage depending on it, which lowers but
