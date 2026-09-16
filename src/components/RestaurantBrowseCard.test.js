@@ -16,9 +16,14 @@ const { test } = require('node:test');
 
 const REPO_ROOT = path.join(__dirname, '..', '..');
 const COMPONENT_PATH = path.join(REPO_ROOT, 'src/components/RestaurantBrowseCard.js');
+const GLOBALS_CSS_PATH = path.join(REPO_ROOT, 'app/globals.css');
 
 function readComponentSource() {
   return fs.readFileSync(COMPONENT_PATH, 'utf8');
+}
+
+function readGlobalsCss() {
+  return fs.readFileSync(GLOBALS_CSS_PATH, 'utf8');
 }
 
 test('address-less fallback explicitly labels the buurt value, not a bare neighbourhood name', () => {
@@ -74,4 +79,75 @@ test('renders <h3> instead of <h2> only when headingLevel is explicitly 3, purel
   const source = readComponentSource();
   assert.match(source, /const NameHeading = headingLevel === 3 \? 'h3' : 'h2'/);
   assert.match(source, /<NameHeading className="lrc-name">\{restaurant\.name\}<\/NameHeading>/, 'the name heading tag must be dynamic, and still carry the same .lrc-name class regardless of level');
+});
+
+// ─── BE-11 — quiet, uniform primary-action styling (both variants share
+// the exact same lrc-primary-btn class, size, href, and link text; only
+// app/globals.css's own .lrc-primary-btn rule changes fill/border color —
+// no modifier class, since both branches never needed one). ──────────────
+
+test('both hasMenu and menu-less branches use the exact same, unmodified lrc-primary-btn class — no variant-specific modifier class exists', () => {
+  const source = readComponentSource();
+  const primaryLinkMatches = [...source.matchAll(/<Link href=\{`\/restaurant\/\$\{restaurant\.restaurantId\}`\}\s+className="([^"]+)">/g)];
+  assert.equal(primaryLinkMatches.length, 2, 'expected exactly one primary-action Link per branch (hasMenu and menu-less)');
+  for (const match of primaryLinkMatches) {
+    assert.equal(match[1], 'lrc-primary-btn', 'every primary-action link must carry exactly the "lrc-primary-btn" class, unmodified — the same class for every restaurant, with or without a menu');
+  }
+});
+
+test('both primary-action links point at the same, unchanged deep link target — /restaurant/[id]', () => {
+  const source = readComponentSource();
+  const hrefMatches = [...source.matchAll(/<Link href=\{`\/restaurant\/\$\{restaurant\.restaurantId\}`\}/g)];
+  assert.equal(hrefMatches.length, 2, 'both branches must still link to /restaurant/{restaurantId}, unchanged');
+});
+
+test('link text for both variants is unchanged: "Bekijk N menukaart(en)" and "Bekijk restaurant"', () => {
+  const source = readComponentSource();
+  assert.match(source, />\s*Bekijk \{restaurant\.menuLinks\.length\} menukaart\{restaurant\.menuLinks\.length !== 1 \? 'en' : ''\}\s*<\/Link>/, 'hasMenu link text must be unchanged');
+  assert.match(source, />\s*Bekijk restaurant\s*<\/Link>/, 'menu-less link text must be unchanged');
+});
+
+// ─── app/globals.css — the actual quiet-styling contract ──────────────────
+
+test('globals.css: .lrc-header and .lrc-footer no longer draw an internal divider line', () => {
+  const css = readGlobalsCss();
+  assert.match(css, /\.lrc-header \{ padding: 14px 16px 12px; \}/, 'the border-bottom must be gone, padding unchanged');
+  assert.doesNotMatch(css, /\.lrc-header[^}]*border-bottom/, 'no border-bottom must remain on .lrc-header');
+  assert.match(css, /\.lrc-footer \{ padding: 12px 16px 14px; margin-top: auto; \}/, 'the border-top must be gone, padding and margin-top:auto unchanged');
+  assert.doesNotMatch(css, /\.lrc-footer[^}]*border-top/, 'no border-top must remain on .lrc-footer');
+});
+
+test('globals.css: .lrc-primary-btn uses the quiet, tinted green treatment — no full-saturation fill — for every restaurant card', () => {
+  const css = readGlobalsCss();
+  const ruleMatch = css.match(/\.lrc-primary-btn \{([^}]*)\}/);
+  assert.ok(ruleMatch, 'expected a single .lrc-primary-btn base rule');
+  const rule = ruleMatch[1];
+  assert.match(rule, /background:\s*var\(--green-faint\)/, 'background must be the tinted, not full-saturation, green');
+  assert.match(rule, /border:\s*1px solid var\(--green\)/, 'border must be a visible, accessible green outline');
+  assert.match(rule, /color:\s*var\(--green\)/, 'text must be green, not var(--on-accent) white/black-on-solid-fill');
+  assert.doesNotMatch(rule, /background:\s*var\(--green\)[,;\s]/, 'must not use the old full-saturation --green fill');
+});
+
+test('globals.css: .lrc-primary-btn is compact and left-aligned (not full-width), matching the dish-result card\'s own restrained action pattern, while keeping its padding/shape unchanged', () => {
+  const css = readGlobalsCss();
+  const ruleMatch = css.match(/\.lrc-primary-btn \{([^}]*)\}/);
+  const rule = ruleMatch[1];
+  assert.match(rule, /display:\s*inline-block/, 'must be compact, not a full-width block');
+  assert.match(rule, /width:\s*auto/, 'must size to its own content, not stretch to fill the footer');
+  assert.match(rule, /padding:\s*10px 14px/);
+  assert.match(rule, /font-size:\s*13\.5px/);
+  assert.match(rule, /font-weight:\s*700/);
+  assert.match(rule, /border-radius:\s*var\(--radius-md\)/, '.lrc-primary-btn\'s own radius-md is unrelated to .lrc-card\'s radius-lg and must stay unchanged');
+});
+
+test('globals.css: .lrc-primary-btn:focus-visible keeps its existing, unchanged visible focus style', () => {
+  const css = readGlobalsCss();
+  assert.match(css, /\.lrc-primary-btn:focus-visible \{ outline: 2px solid var\(--green\); outline-offset: 2px; \}/);
+});
+
+test('globals.css: .lrc-card\'s border-radius token (--radius-lg) is untouched by this slice', () => {
+  const css = readGlobalsCss();
+  const cardRuleMatch = css.match(/\.lrc-card \{([^}]*)\}/);
+  assert.ok(cardRuleMatch, 'expected a .lrc-card rule');
+  assert.match(cardRuleMatch[1], /border-radius:\s*var\(--radius-lg\)/, '.lrc-card must keep --radius-lg, unchanged');
 });
