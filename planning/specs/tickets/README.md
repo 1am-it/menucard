@@ -62,6 +62,22 @@ of these.
     query parameters on `/menu/[id]` — `?q=`'s existing filter behavior
     is unchanged and unconditional. Also closes part of `BE-11` Fase 3's
     open "back to results" question for this specific entry point.
+15. [be-13-remove-restaurant-name-only-dish-matches.md](./be-13-remove-restaurant-name-only-dish-matches.md) —
+    not started, documentation/planning only; a small, independent
+    amendment to `BE-02c`'s dish-search ranking contract — removes tier 4
+    (a dish matching only because its restaurant's name contains the
+    query) entirely and unconditionally from `Gerechten gevonden`.
+    Verified against real data: `q=Bardot` today returns 111 dishes for
+    restaurant 6 ("Brasserie Bardot"), of which 110 match only via
+    restaurant name and just 1 ("Café Spécial") is a real content match —
+    after this change, only the real match remains. Real dish-content
+    matches (name/description/supplement/wine/tag) are never affected;
+    `q=friet` and every other pure dish query are unchanged; restaurant-
+    name search stays exactly where it already lives, in
+    `restaurantIndex.js`, with no new coupling between the two modules.
+    Explicitly does not attempt mixed, tokenized queries like `q=Bardot
+    friet` (verified: already returns 0 results today, unchanged by this
+    ticket) — that remains a distinct, later, separately-scoped ticket.
 
 ## PLATFORM-* order (not started)
 
