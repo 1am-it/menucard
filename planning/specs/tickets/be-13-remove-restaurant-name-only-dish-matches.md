@@ -2,14 +2,15 @@
 
 ## Status
 
-Proposed; **implemented and committed locally (commit
-`a93778aef74f6a3f07a5d11bdefd7e3b5e152ab7`, 2026-09-16), not yet pushed
-or deployed.** Tier 4 has been removed from `src/services/dishSearch.js`'s
-`getMatchTier()`; `docs/api/dish-search-ranking.md` documents the removal;
-targeted tests, the full project test suite, and `npm run build` all pass
-locally. Behavior has been verified against a local production server
-only (390px/1280px, both themes) — not against any live/deployed
-environment. The actual implementation scope grew by two files beyond
+Proposed; **implemented and locally verified in commit
+`a93778aef74f6a3f07a5d11bdefd7e3b5e152ab7` (2026-09-16); deployment and
+live verification are pending.** Tier 4 has been removed from
+`src/services/dishSearch.js`'s `getMatchTier()`; `docs/api/dish-search-
+ranking.md` documents the removal; targeted tests, the full project test
+suite, and `npm run build` all pass locally. Behavior has been verified
+against a local production server only (390px/1280px, both themes) — not
+against any live/deployed environment, regardless of the commit's current
+push status. The actual implementation scope grew by two files beyond
 what was originally planned below, for a reason the ticket itself already
 anticipated — see "Planned implementation scope" and "Risks" for the
 full, dated account.
@@ -208,8 +209,9 @@ decoupling changed as part of this — see commit
 All items below are checked off as **verified locally** (targeted tests,
 full test suite, `npm run build`, and a local production server) as of
 commit `a93778aef74f6a3f07a5d11bdefd7e3b5e152ab7` — none of this has been
-verified against a live or deployed environment, since the commit has not
-been pushed.
+verified against a live or deployed environment. That remains true
+regardless of the commit's push status; live verification is a separate,
+later step this ticket does not claim has happened.
 
 - [x] `searchDishes({ q: 'Bardot' })` returns `total: 1`, and that one
       result is "Café Spécial" — not 111, not 0.
@@ -253,8 +255,9 @@ been pushed.
   real sup/wine-only match fixture) is left to implementation-time
   verification, not decided here.
   **Resolved during implementation (2026-09-16):** exactly this case was
-  found and confirmed live — `q=Chablis` still showed "· gevonden via
-  restaurantnaam" on all six of its real, existing wine-field matches,
+  found and confirmed on a local production build — `q=Chablis` still
+  showed "· gevonden via restaurantnaam" on all six of its real, existing
+  wine-field matches,
   none of which sit at a restaurant whose name contains "Chablis". The
   hint text itself was corrected (see "Planned implementation scope"'s
   correction note and the updated acceptance criteria above); the
