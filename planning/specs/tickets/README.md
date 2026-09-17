@@ -78,6 +78,21 @@ of these.
     Explicitly does not attempt mixed, tokenized queries like `q=Bardot
     friet` (verified: already returns 0 results today, unchanged by this
     ticket) — that remains a distinct, later, separately-scoped ticket.
+16. [be-14-fix-alle-restaurants-back-navigation.md](./be-14-fix-alle-restaurants-back-navigation.md) —
+    not started, documentation/planning only; a small, independent
+    navigation correction — the permanent `Alle restaurants` tab points at
+    `/alle-restaurants`, but the homepage's `Bekijk alle restaurants` link
+    and the back-links on `/restaurant/[id]`/`/menu/[id]` still point at
+    the older `/restaurants`. Adopts the canonical hierarchy `Alle
+    restaurants → Restaurant → Menukaart`: `app/page.js` and
+    `RestaurantDetailView.js`'s links keep their exact visible text but
+    now target `/alle-restaurants`; `/menu/[id]`'s back-link becomes an
+    honest `← {restaurantnaam}` link to its own restaurant, its real
+    structural parent. No herkomst-tracking, query parameter,
+    `document.referrer`, or `sessionStorage` — a deliberately bounded,
+    static fix, not context-aware routing. Should land before `BE-12`,
+    which plans its own, separate, conditional back-to-search link on the
+    same page.
 
 ## PLATFORM-* order (not started)
 
