@@ -2,18 +2,26 @@
 
 ## Status
 
-Proposed; **implemented and locally verified in commit
-`a93778aef74f6a3f07a5d11bdefd7e3b5e152ab7` (2026-09-16); deployment and
-live verification are pending.** Tier 4 has been removed from
-`src/services/dishSearch.js`'s `getMatchTier()`; `docs/api/dish-search-
-ranking.md` documents the removal; targeted tests, the full project test
-suite, and `npm run build` all pass locally. Behavior has been verified
-against a local production server only (390px/1280px, both themes) — not
-against any live/deployed environment, regardless of the commit's current
-push status. The actual implementation scope grew by two files beyond
-what was originally planned below, for a reason the ticket itself already
-anticipated — see "Planned implementation scope" and "Risks" for the
-full, dated account.
+Done — **implemented, pushed, and verified live.** Tier 4 was removed
+from `src/services/dishSearch.js`'s `getMatchTier()` in commit
+`a93778aef74f6a3f07a5d11bdefd7e3b5e152ab7`; the full chain (that commit
+plus the two status-only documentation commits that followed it) was
+pushed to `origin/main` in commit
+`d01221431738a39a578e94f2fd47862dfa815b70`. The automatic Vercel deploy
+for that commit completed successfully. Production verification against
+`https://menucard-kappa.vercel.app`, on both mobile (390px) and desktop
+(1280px), confirmed the expected behavior for `Bardot` (one restaurant
+card, one real dish match), `Wolfslaar` (a restaurant result, zero dish
+results, the existing honest empty-state text), `friet` (unchanged, all
+12 results), `Bardot friet` (the existing honest empty state — still
+zero results, still out of scope), and `Chablis` (six results, the
+corrected "Gevonden in aanvullende menudetails" hint). Targeted tests,
+the full project test suite, and `npm run build` all pass. The actual
+implementation scope grew by two files beyond what was originally
+planned below, for a reason the ticket itself already anticipated — see
+"Planned implementation scope" and "Risks" for the full, dated account.
+No version bump, git tag, GitHub Release, or changelog entry has been
+made for this ticket.
 
 ## Depends on
 
@@ -206,12 +214,19 @@ decoupling changed as part of this — see commit
 
 ## Acceptance criteria
 
-All items below are checked off as **verified locally** (targeted tests,
-full test suite, `npm run build`, and a local production server) as of
-commit `a93778aef74f6a3f07a5d11bdefd7e3b5e152ab7` — none of this has been
-verified against a live or deployed environment. That remains true
-regardless of the commit's push status; live verification is a separate,
-later step this ticket does not claim has happened.
+All items below were originally checked off as **verified locally**
+(targeted tests, full test suite, `npm run build`, and a local
+production server) as of commit
+`a93778aef74f6a3f07a5d11bdefd7e3b5e152ab7`.
+
+**Live-verified (2026-09-17):** the same behaviors — `Bardot`, `Wolfslaar`,
+`friet`, `Bardot friet`, and `Chablis` — were independently confirmed
+against the actual production deployment at
+`https://menucard-kappa.vercel.app`, on both mobile (390px) and desktop
+(1280px), after the full chain was pushed in commit
+`d01221431738a39a578e94f2fd47862dfa815b70` and the automatic Vercel
+deploy completed successfully. No item below needed correction as a
+result.
 
 - [x] `searchDishes({ q: 'Bardot' })` returns `total: 1`, and that one
       result is "Café Spécial" — not 111, not 0.
