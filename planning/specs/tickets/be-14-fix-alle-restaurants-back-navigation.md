@@ -2,23 +2,34 @@
 
 ## Status
 
-Proposed; **implemented and locally verified in commit
-`0a6a2811781c6c58732eb99514a8f5f6bc7d1762` (2026-09-17); not yet pushed
-or deployed — no production or live verification has been done.** The
-three planned link changes are built exactly as scoped: `app/page.js`'s
-`Bekijk alle restaurants →` now targets `/alle-restaurants`;
-`RestaurantDetailView.js`'s `← Alle restaurants` now targets
-`/alle-restaurants`; `MenuView.js`'s back-link is now an honest
-`← {restaurantnaam}` link to that menu's own `/restaurant/[id]`, replacing
-the old `← Alle restaurants` → `/restaurants` link entirely. Targeted
-tests (`app/page.test.js`, `RestaurantDetailView.test.js`,
-`MenuView.test.js`), the full project test suite (735 tests, 733 pass, 0
-fail, 2 pre-existing/unrelated skips), and `npm run build` all pass
-locally. Behavior has been verified against a local production server
-only (390px/1280px, both themes, direct-link visits with no prior app
-history, and a full `/alle-restaurants` → restaurant → back click-through)
-— not against any live/deployed environment, regardless of the commit's
-current push status.
+Done — **implemented, pushed, and verified live.** The three navigation
+corrections were built in commit
+`0a6a2811781c6c58732eb99514a8f5f6bc7d1762`; the full chain (that commit
+plus the status-only documentation commit that followed it) was pushed to
+`origin/main` in commit `f00332b9e0cff69b8544f3bc6ddb7ea0157392a4`. The
+automatic Vercel deploy for that commit completed successfully.
+
+Production verification against `https://menucard-kappa.vercel.app`, on
+`2026-09-17`, confirmed: the homepage's `Bekijk alle restaurants →` link
+resolves to `/alle-restaurants`; `/restaurant/6`'s `← Alle restaurants`
+back-link resolves to `/alle-restaurants`; `/menu/6-lunch`'s back-link
+reads `← Brasserie Bardot` and resolves to `/restaurant/6`; a full
+`/alle-restaurants?q=Bardot` → open Brasserie Bardot → back click-through
+lands exactly on `/alle-restaurants`, never the old `/restaurants`; and
+direct visits to `/restaurant/6` and `/menu/6-lunch`, with no prior app
+history, render correctly. These three modified routes were each checked
+at both `390px` and `1280px`, in both light and dark themes.
+`/restaurants` and `/search?q=friet` were also checked, but only as
+regression sanity checks — confirmed still functional (HTTP 200, existing
+behavior intact, `/search?q=friet` still returning its known 12 results)
+— not with the same full viewport/theme matrix as the three modified
+routes, since this ticket does not change either of them. Targeted tests,
+the full project test suite, and `npm run build` all pass locally.
+
+This ticket does not build, and does not claim to have built, `BE-12`,
+any multi-city/`MARKET-*` work, or any rebranding/domain change — all
+remain exactly as scoped in "Non-goals" below, unaffected by this status
+update.
 
 ## Depends on
 
@@ -136,12 +147,23 @@ tracking of any kind.
 
 ## Acceptance criteria
 
-All items below are checked off as **verified locally** (targeted tests,
-full test suite, `npm run build`, and a local production server) as of
-commit `0a6a2811781c6c58732eb99514a8f5f6bc7d1762` — none of this has been
-verified against a live or deployed environment. That remains true
-regardless of the commit's push status; live verification is a separate,
-later step this ticket does not claim has happened.
+All items below were originally checked off as **verified locally**
+(targeted tests, full test suite, `npm run build`, and a local production
+server) as of commit `0a6a2811781c6c58732eb99514a8f5f6bc7d1762`.
+
+**Live-verified (2026-09-17):** the homepage-to-`/alle-restaurants` link,
+`/restaurant/6`'s back-link to `/alle-restaurants`, `/menu/6-lunch`'s
+`← Brasserie Bardot` back-link to `/restaurant/6`, the full
+`/alle-restaurants?q=Bardot` → restaurant → back click-through, and direct
+visits to `/restaurant/6`/`/menu/6-lunch` with no prior history were
+independently confirmed against the actual production deployment at
+`https://menucard-kappa.vercel.app`, on both mobile (390px) and desktop
+(1280px), in both light and dark themes, after the full chain was pushed
+in commit `f00332b9e0cff69b8544f3bc6ddb7ea0157392a4` and the automatic
+Vercel deploy completed successfully. `/restaurants` and
+`/search?q=friet` were confirmed unaffected as regression sanity checks
+only, not across the same full viewport/theme matrix. No item below
+needed correction as a result.
 
 - [x] The visible label `Alle restaurants`, wherever it appears in the
       three modified files, always points at `/alle-restaurants` — never
