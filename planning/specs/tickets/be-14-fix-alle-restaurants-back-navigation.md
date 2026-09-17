@@ -2,9 +2,23 @@
 
 ## Status
 
-Proposed; not started. Documentation/planning only — no product code, test,
-route, API, data, mockup, domain, or branding change has been made for
-this ticket.
+Proposed; **implemented and locally verified in commit
+`0a6a2811781c6c58732eb99514a8f5f6bc7d1762` (2026-09-17); not yet pushed
+or deployed — no production or live verification has been done.** The
+three planned link changes are built exactly as scoped: `app/page.js`'s
+`Bekijk alle restaurants →` now targets `/alle-restaurants`;
+`RestaurantDetailView.js`'s `← Alle restaurants` now targets
+`/alle-restaurants`; `MenuView.js`'s back-link is now an honest
+`← {restaurantnaam}` link to that menu's own `/restaurant/[id]`, replacing
+the old `← Alle restaurants` → `/restaurants` link entirely. Targeted
+tests (`app/page.test.js`, `RestaurantDetailView.test.js`,
+`MenuView.test.js`), the full project test suite (735 tests, 733 pass, 0
+fail, 2 pre-existing/unrelated skips), and `npm run build` all pass
+locally. Behavior has been verified against a local production server
+only (390px/1280px, both themes, direct-link visits with no prior app
+history, and a full `/alle-restaurants` → restaurant → back click-through)
+— not against any live/deployed environment, regardless of the commit's
+current push status.
 
 ## Depends on
 
@@ -122,40 +136,47 @@ tracking of any kind.
 
 ## Acceptance criteria
 
-- [ ] The visible label `Alle restaurants`, wherever it appears in the
+All items below are checked off as **verified locally** (targeted tests,
+full test suite, `npm run build`, and a local production server) as of
+commit `0a6a2811781c6c58732eb99514a8f5f6bc7d1762` — none of this has been
+verified against a live or deployed environment. That remains true
+regardless of the commit's push status; live verification is a separate,
+later step this ticket does not claim has happened.
+
+- [x] The visible label `Alle restaurants`, wherever it appears in the
       three modified files, always points at `/alle-restaurants` — never
       at `/restaurants` — in both places it is used (`app/page.js`,
       `RestaurantDetailView.js`).
-- [ ] `/menu/[id]`'s back-link names and links to its own direct
+- [x] `/menu/[id]`'s back-link names and links to its own direct
       restaurant parent (`/restaurant/{baseId}`), using the restaurant's
       real name, not the generic `Alle restaurants` label.
-- [ ] All three modified links remain real `<Link>`/`<a>` elements with
+- [x] All three modified links remain real `<Link>`/`<a>` elements with
       visible keyboard focus (`:focus-visible`) — never a `<div>` with a
       click handler, and never a link with no visible focus state.
-- [ ] A direct visit to `/restaurant/[id]` or `/menu/[id]` (no prior
+- [x] A direct visit to `/restaurant/[id]` or `/menu/[id]` (no prior
       in-app navigation, no `document.referrer`) shows a working,
       correctly-targeted back-link exactly as described in "Direct-link
       guarantee" above.
-- [ ] No horizontal overflow at approximately 390px or approximately
+- [x] No horizontal overflow at approximately 390px or approximately
       1280px, in both light and dark themes, on all three modified pages
       after the change (`document.documentElement.scrollWidth <=
       clientWidth`, per `planning/decisions/014-navigation-and-orientation-standard.md`
       item 5).
-- [ ] `/search`'s existing results, filters, and BE-13's restaurant-name
+- [x] `/search`'s existing results, filters, and BE-13's restaurant-name
       match-tier removal behaviour (`Bardot`/`Wolfslaar`/`friet`/`Bardot
       friet`/`Chablis`) are verified unchanged — this ticket touches none
       of `dishSearch.js`, `restaurantIndex.js`, or `/api/search`.
-- [ ] `PrimaryNav`'s existing `aria-current` behaviour on `/search` and
+- [x] `PrimaryNav`'s existing `aria-current` behaviour on `/search` and
       `/alle-restaurants` is verified unchanged.
-- [ ] `/restaurants` itself is verified unchanged and still reachable at
+- [x] `/restaurants` itself is verified unchanged and still reachable at
       its exact current URL, with its existing mode-switch and filter
       behaviour intact.
-- [ ] Targeted, structural tests (same convention as
+- [x] Targeted, structural tests (same convention as
       `app/search/page.test.js` — `fs.readFileSync` + regex/structural
       checks, no DOM harness) pin: the exact `href` each of the three
       modified links now resolves to, and that the old `/restaurants`
       target is gone from `app/page.js` and `RestaurantDetailView.js`.
-- [ ] A local production build, checked manually in a browser at ~390px
+- [x] A local production build, checked manually in a browser at ~390px
       and ~1280px, both themes, proves all three paths: `/alle-restaurants`
       → a restaurant → back lands on `/alle-restaurants`;
       `/restaurant/[id]` opened directly → back lands on
