@@ -47,7 +47,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
           <Link href="/" className="logo">Breda<span>Eats</span></Link>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <ThemeToggle />
-            <Link href="/restaurants" className="back-btn">← Alle restaurants</Link>
+            <Link href="/alle-restaurants" className="back-btn">← Alle restaurants</Link>
           </div>
         </div>
       </header>

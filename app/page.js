@@ -101,7 +101,7 @@ export default function HomePage() {
         <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 12 }}>
           Liever zelf rondkijken?
         </p>
-        <Link href="/restaurants" className="detail-menu-btn-outline">
+        <Link href="/alle-restaurants" className="detail-menu-btn-outline">
           Bekijk alle restaurants →
         </Link>
       </section>

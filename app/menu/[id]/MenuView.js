@@ -284,7 +284,7 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
           <Link href="/" className="logo">Breda<span>Eats</span></Link>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <ThemeToggle />
-            <Link href="/restaurants" className="back-btn">← Alle restaurants</Link>
+            <Link href={`/restaurant/${baseId}`} className="back-btn">← {r.name || restaurant.name}</Link>
           </div>
         </div>
       </header>
