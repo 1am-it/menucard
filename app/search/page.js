@@ -176,12 +176,28 @@ function buildDishMenuHref(dish, query) {
   return `${dish.menuLink}?${params.toString()}`
 }
 
-function DishResultRow({ dish, query }) {
+// BE-12 §1.1 — "two rows for the same restaurant happen to share a name":
+// a collision is scoped to one restaurant, not a name shared across
+// different restaurants (a common, expected, non-confusing case this
+// must never flag). Computed purely client-side from the already-fetched
+// `results` array — no new field, no backend/API change.
+function hasDishNameCollision(dish, results) {
+  return results.some((other) => other !== dish && other.restaurantId === dish.restaurantId && other.name === dish.name)
+}
+
+function DishResultRow({ dish, query, hasNameCollision }) {
   const weakMatch = isWeakMatch(dish, query)
+  // BE-12 §1.1 — category appended inline only on a real, same-restaurant
+  // name collision (e.g. "Höpler - Seeblick (Wijnen — Rood)"), exactly as
+  // the ticket's own example shows. A dish with a unique name keeps its
+  // plain, unmodified title. This never changes `dish.name` itself, the
+  // deep-link (which is always built from the raw `dish.name`), or the
+  // CTA text below.
+  const displayTitle = hasNameCollision ? `${dish.name} (${dish.category})` : dish.name
   return (
     <div className="menu-card dish-result-card">
       <div className="card-top">
-        <div className="td-name">{dish.name}</div>
+        <div className="td-name">{displayTitle}</div>
         <div className={`td-price ${dish.priceOnRequest ? 'no-price' : ''}`}>
           {formatPrice(dish)}
         </div>
@@ -508,7 +524,12 @@ function SearchPageInner() {
 
       <div className="dish-results-list">
         {results.map((dish) => (
-          <DishResultRow key={dish.dishId} dish={dish} query={filters.q} />
+          <DishResultRow
+            key={dish.dishId}
+            dish={dish}
+            query={filters.q}
+            hasNameCollision={hasDishNameCollision(dish, results)}
+          />
         ))}
       </div>
 

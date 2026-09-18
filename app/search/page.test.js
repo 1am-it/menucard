@@ -286,3 +286,72 @@ test('BE-12: the meal-type label map covers all four real meal types, using plai
   const source = readPageSource();
   assert.match(source, /const MEAL_TYPE_LABELS = \{\s*lunch:\s*'Lunch',\s*diner:\s*'Diner',\s*borrel:\s*'Borrel',\s*specialiteiten:\s*'Specialiteiten',\s*\}/);
 });
+
+// ─── BE-12 §1.1 — name-collision disambiguation ──────────────────────────
+// "Two rows for the same restaurant happen to share a name" — verified
+// against a real, existing fixture: searching "Höpler" returns exactly
+// three dishes, all named "Höpler - Seeblick", all from the same
+// restaurant (id `23`, "T-Huis"), in three different categories
+// (Wijnen — Wit/Rood/Rosé) — confirmed via
+// `searchDishes({ q: 'Höpler' })`. A different-restaurant same-name case
+// is deliberately not a collision under this rule and must never be
+// flagged as one.
+
+test('BE-12: hasDishNameCollision scopes a collision to the same restaurant AND the same name — not just a shared name across different restaurants', () => {
+  const source = readPageSource();
+  assert.match(
+    source,
+    /function hasDishNameCollision\(dish, results\) \{\s*return results\.some\(\(other\) => other !== dish && other\.restaurantId === dish\.restaurantId && other\.name === dish\.name\)\s*\}/,
+    'expected the collision check to require both restaurantId and name equality, excluding the dish itself'
+  );
+});
+
+test('BE-12: the card title appends the category inline only on a real collision, exactly matching the ticket\'s own example format', () => {
+  const source = readPageSource();
+  assert.match(
+    source,
+    /const displayTitle = hasNameCollision \? `\$\{dish\.name\} \(\$\{dish\.category\}\)` : dish\.name/,
+    'expected "{name} ({category})" only when hasNameCollision is true, otherwise the plain, unmodified name'
+  );
+  assert.match(source, /<div className="td-name">\{displayTitle\}<\/div>/);
+});
+
+test('BE-12: hasNameCollision is computed per-dish from the already-fetched results array and passed down — no new field, no separate fetch', () => {
+  const source = readPageSource();
+  assert.match(
+    source,
+    /<DishResultRow\s*\n\s*key=\{dish\.dishId\}\s*\n\s*dish=\{dish\}\s*\n\s*query=\{filters\.q\}\s*\n\s*hasNameCollision=\{hasDishNameCollision\(dish, results\)\}\s*\n\s*\/>/,
+    'expected hasNameCollision to be derived from the same results array already rendered, not a new prop from the API'
+  );
+});
+
+test('BE-12: the raw dish.name, the CTA, and the deep-link are never affected by the collision title — only the card title changes', () => {
+  const source = readPageSource();
+  // The CTA must still read the plain, unmodified dish.name — never
+  // displayTitle — so a colliding dish's button never doubles up the
+  // category (e.g. never "Bekijk Höpler - Seeblick (Wijnen — Rood) op
+  // menu →").
+  assert.match(source, /Bekijk \{dish\.name\} op menu →/);
+  assert.doesNotMatch(source, /Bekijk \{displayTitle\}/, 'the CTA must never use the disambiguated title');
+  // The deep-link builder itself must still be untouched, still reading
+  // dish.name/dish.category directly — not displayTitle — confirmed by
+  // the same, already-pinned buildDishMenuHref tests above continuing to
+  // pass unchanged.
+  assert.match(source, /<Link href=\{buildDishMenuHref\(dish, query\)\} className="detail-menu-btn-outline dish-result-link">/);
+});
+
+test('BE-12: the existing context line (restaurant, meal type, category, status) is completely untouched by the collision-title addition', () => {
+  const source = readPageSource();
+  assert.match(
+    source,
+    /<div className="dish-result-restaurant">\s*\{dish\.restaurantName\}[\s\S]*?<span className="dish-result-context"> · \{MEAL_TYPE_LABELS\[dish\.mealType\] \|\| dish\.mealType\} · \{dish\.category\}<\/span>[\s\S]*?is-open[\s\S]*?is-closed/,
+    'expected the pre-existing context line structure to be fully intact, unmodified by the collision addition'
+  );
+});
+
+test('BE-12: no grouping, filter mode, or backend logic was added for this refinement — hasDishNameCollision is a pure, local, presentation-only helper', () => {
+  const source = readPageSource();
+  const helperMatch = source.match(/function hasDishNameCollision\([\s\S]*?\n\}/);
+  assert.ok(helperMatch, 'expected to find the collision helper');
+  assert.doesNotMatch(helperMatch[0], /fetch\(|useState|useEffect|useMemo/, 'the collision check must be a plain, synchronous function — no new fetch, state, or effect');
+});
