@@ -33,6 +33,18 @@ const TAG_LABELS = {
   glutenvrij:  'Glutenvrij',
 }
 
+// BE-12 §1.1 — the meal-type label for each dish result's compact,
+// consistently-shown context line. Plain text, no emoji — this row
+// already avoids icons (unlike the page's own filter chips above it),
+// and dish-search-ranking.md's own field is 'mealType', reused here
+// as-is; no new field, no backend change.
+const MEAL_TYPE_LABELS = {
+  lunch:          'Lunch',
+  diner:          'Diner',
+  borrel:         'Borrel',
+  specialiteiten: 'Specialiteiten',
+}
+
 // ─── BE-06 filter constants ─────────────────────────────────────────────────
 // Duplicated from app/page.js rather than imported — that file is a separate
 // 'use client' page, not a shared module, consistent with how BE-02b/BE-03
@@ -146,6 +158,24 @@ function formatPrice(dish) {
   return dish.priceDisplay
 }
 
+// BE-12 — additive-only deep link into this dish's exact position on its
+// menu. Built entirely from fields GET /api/search already returns
+// (dishId, name, category — see docs/api/dish-result-shape.md) via
+// URLSearchParams, the same mechanism buildParams() above already uses —
+// never a hand-built string. `fromQuery` is only added when there is a
+// real, current text query, so a meal-type/filter-only view (no text
+// query) never sends one. This never changes dish.menuLink itself or
+// any existing filter/URL semantics on /menu/[id] — see MenuView.js's
+// own, entirely separate `?q=` handling.
+function buildDishMenuHref(dish, query) {
+  const params = new URLSearchParams()
+  params.set('dish', dish.dishId)
+  params.set('name', dish.name)
+  params.set('cat', dish.category)
+  if (query) params.set('fromQuery', query)
+  return `${dish.menuLink}?${params.toString()}`
+}
+
 function DishResultRow({ dish, query }) {
   const weakMatch = isWeakMatch(dish, query)
   return (
@@ -159,6 +189,10 @@ function DishResultRow({ dish, query }) {
 
       <div className="dish-result-restaurant">
         {dish.restaurantName}
+        {/* BE-12 §1.1 — a compact, consistent context line (meal type +
+            category) on every dish row, from fields GET /api/search
+            already returns — no new field, no backend change. */}
+        <span className="dish-result-context"> · {MEAL_TYPE_LABELS[dish.mealType] || dish.mealType} · {dish.category}</span>
         {dish.openStatus === 'open' && <span className="dish-result-status is-open"> · Nu open</span>}
         {dish.openStatus === 'closed' && <span className="dish-result-status is-closed"> · Gesloten</span>}
         {dish.distanceMeters != null && (
@@ -177,8 +211,8 @@ function DishResultRow({ dish, query }) {
         </div>
       )}
 
-      <Link href={dish.menuLink} className="detail-menu-btn-outline dish-result-link">
-        Bekijk menu →
+      <Link href={buildDishMenuHref(dish, query)} className="detail-menu-btn-outline dish-result-link">
+        Bekijk {dish.name} op menu →
       </Link>
     </div>
   )

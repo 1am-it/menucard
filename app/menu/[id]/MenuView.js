@@ -4,6 +4,7 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import ThemeToggle from '@/src/components/ThemeToggle'
 import { getReservationActions, isValidPhone, isValidUrl } from '@/src/utils/reservation'
+import { resolveDishTarget } from '@/src/lib/dishDeepLink'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -101,21 +102,31 @@ function itemMatchesPrice(item, maxPrice) {
 
 // ─── MenuItem Component ────────────────────────────────────────────────────────
 
-function MenuItem({ item, query, excludeAllergens, isFiltering }) {
+function MenuItem({ item, query, excludeAllergens, isFiltering, isResolvedTarget, showPulse, highlightQuery, innerRef }) {
   const { safe, unknown } = itemMatchesAllergens(item, excludeAllergens)
   const hasAllergenFilter = excludeAllergens.length > 0
+  // BE-12 — the resolved dish's own substring mark comes from `fromQuery`,
+  // never the shared `?q=` filter state, and only for this one item; it
+  // stays for as long as this item is the resolved target (the life of
+  // this page view), independent of the separate, temporary `showPulse`
+  // highlight below, which fades after ~2.5-3s.
+  const displayQuery = isResolvedTarget && highlightQuery ? highlightQuery : query
 
   return (
-    <div className={`menu-card ${hasAllergenFilter && unknown ? 'mc-unknown' : ''} ${hasAllergenFilter && !safe ? 'mc-unsafe' : ''}`}>
+    <div
+      ref={innerRef}
+      tabIndex={isResolvedTarget ? -1 : undefined}
+      className={`menu-card ${hasAllergenFilter && unknown ? 'mc-unknown' : ''} ${hasAllergenFilter && !safe ? 'mc-unsafe' : ''} ${showPulse ? 'menu-card-highlighted' : ''}`}
+    >
       <div className="card-top">
-        <div className="td-name">{highlight(item.name, query)}</div>
+        <div className="td-name">{highlight(item.name, displayQuery)}</div>
         <div className={`td-price ${!item.price ? 'no-price' : ''}`}>
           {item.price || 'op aanvraag'}
         </div>
       </div>
 
       {item.desc && (
-        <div className="td-desc">{highlight(item.desc, query)}</div>
+        <div className="td-desc">{highlight(item.desc, displayQuery)}</div>
       )}
       {item.sup  && <div className="td-sup">+ {highlight(item.sup, query)}</div>}
       {item.wine && <div className="td-wine">🍷 {item.wine}</div>}
@@ -178,6 +189,16 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
     ? searchParams.get('excl').split(',').map(Number).filter(Boolean)
     : []
 
+  // BE-12 — additive-only dish deep-link params. Read here, alongside the
+  // existing `q`/`excl` params, but never assigned into `query`/
+  // `excludeAllergens` or any other existing filter state — `?q=` keeps
+  // its exact current, independent meaning and effect regardless of
+  // whether these are present.
+  const dishParam      = searchParams.get('dish')
+  const nameParam      = searchParams.get('name')
+  const catParam       = searchParams.get('cat')
+  const fromQueryParam = searchParams.get('fromQuery')
+
   // Filter state — initialiseer vanuit URL
   const [query,           setQuery]           = useState(urlQuery)
   const [excludeAllergens, setExcludeAllergens] = useState(urlExclude)
@@ -212,6 +233,63 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
   const mealType  = id.split('-').slice(1).join('-')
   const subtitle  = MEAL_CONFIG[mealType]?.title || r.subtitle || 'Menukaart'
   const primaryReservation = getReservationActions(restaurant)[0]
+
+  // BE-12 — resolve the dish deep-link (if any) against this route's own,
+  // unfiltered categories. `resolvedTargetItem` is the actual item object
+  // reference — used below for a robust identity check per rendered item,
+  // rather than re-matching indices against whatever the active filter
+  // happens to be showing.
+  const dishTarget = useMemo(
+    () => resolveDishTarget(dishParam, nameParam, catParam, id, r.categories),
+    [dishParam, nameParam, catParam, id, r]
+  )
+  const resolvedTargetItem = dishTarget ? r.categories[dishTarget.catIdx].items[dishTarget.itemIdx] : null
+
+  const highlightedItemRef = useRef(null)
+  const [showPulse, setShowPulse] = useState(false)
+  const [dishAnnouncement, setDishAnnouncement] = useState('')
+
+  // Scroll, focus, temporary highlight, and an accessible announcement —
+  // only when a dish target actually resolved. Runs once per resolved
+  // target (keyed on the target itself, not on the unrelated `query`/
+  // filter state), so typing in the filter box afterwards never re-fires
+  // this. `prefers-reduced-motion` is respected for the scroll itself;
+  // this is the first place in this codebase that checks it (no existing
+  // convention to reuse or break).
+  useEffect(() => {
+    if (!dishTarget || !resolvedTargetItem) return
+    const node = highlightedItemRef.current
+    // BE-12 — handles a valid dish context arriving alongside a `?q=` (or
+    // allergen/diet/price) filter that excludes the resolved item from
+    // filteredCategories: existing `?q=` behavior stays authoritative, so
+    // when that happens `innerRef` below is never attached to any DOM
+    // node for this render, `node` stays null, and this effect does
+    // nothing — no crash, no focus moved, no highlight, no announcement.
+    // Verified live: `?q=` values that exclude the resolved target leave
+    // this a no-op, exactly like an unresolved/invalid dish context does.
+    if (!node) return
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    node.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'center' })
+    node.focus()
+    setShowPulse(true)
+    setDishAnnouncement(`Gerecht gevonden: ${resolvedTargetItem.name}`)
+
+    const timer = setTimeout(() => setShowPulse(false), 2750)
+    return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dishTarget])
+
+  // BE-12 — a safe, same-origin, self-constructed relative back-link to
+  // the original search results, built only from URLSearchParams — never
+  // a free `returnTo` value, `document.referrer`, or sessionStorage.
+  // Shown whenever `fromQuery` is present, independent of whether the
+  // dish itself validated (see be-12-dish-result-deep-link-scroll-
+  // highlight.md's own query-contract table: `fromQuery` is usable on its
+  // own to build this link).
+  const backToSearchHref = fromQueryParam
+    ? `/search?${new URLSearchParams({ q: fromQueryParam }).toString()}`
+    : null
 
   // BE-05 — optional secondary info, shown only when actually available
   // (planning/specs/restaurant-menu.md). Reuses the same simple
@@ -282,12 +360,29 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
       <header>
         <div className="header-inner">
           <Link href="/" className="logo">Breda<span>Eats</span></Link>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center', rowGap: 8 }}>
             <ThemeToggle />
             <Link href={`/restaurant/${baseId}`} className="back-btn">← {r.name || restaurant.name}</Link>
+            {/* BE-12 — alongside, not replacing, the restaurant back-link
+                above. Only present when fromQuery is present. Wrapping
+                (flexWrap above) is required here since this second link's
+                text is long enough to overflow on narrow viewports
+                otherwise — verified: without it, this exact combination
+                overflowed at 390px (per decision 014 item 5's "mobile
+                never causes horizontal overflow" rule). */}
+            {backToSearchHref && (
+              <Link href={backToSearchHref} className="back-btn">
+                ← Terug naar zoekresultaten voor &apos;{fromQueryParam}&apos;
+              </Link>
+            )}
           </div>
         </div>
       </header>
+
+      {/* BE-12 — visually hidden, announces the resolved dish once; never
+          re-announces on later, unrelated filter/state changes since it's
+          only ever set inside the dishTarget-scoped effect above. */}
+      <div aria-live="polite" className="vh">{dishAnnouncement}</div>
 
       {/* ── Hero ── */}
       <div className="hero">
@@ -524,15 +619,26 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
                   )}
                 </div>
                 <div className="menu-grid">
-                  {cat.items.map((item, j) => (
-                    <MenuItem
-                      key={j}
-                      item={item}
-                      query={query}
-                      excludeAllergens={excludeAllergens}
-                      isFiltering={isFiltering}
-                    />
-                  ))}
+                  {cat.items.map((item, j) => {
+                    // BE-12 — identity check against the resolved target's
+                    // actual item object, not index matching: robust
+                    // regardless of whatever the current filter happens to
+                    // be showing (filteredCategories never clones items).
+                    const isResolvedTarget = item === resolvedTargetItem
+                    return (
+                      <MenuItem
+                        key={j}
+                        item={item}
+                        query={query}
+                        excludeAllergens={excludeAllergens}
+                        isFiltering={isFiltering}
+                        isResolvedTarget={isResolvedTarget}
+                        showPulse={isResolvedTarget && showPulse}
+                        highlightQuery={fromQueryParam}
+                        innerRef={isResolvedTarget ? highlightedItemRef : undefined}
+                      />
+                    )
+                  })}
                 </div>
               </div>
             )

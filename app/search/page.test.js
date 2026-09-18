@@ -227,3 +227,62 @@ test('nowhere in this file does any comment or visible copy claim a dish\'s own 
   // string literal frames restaurant name as a match reason.
   assert.doesNotMatch(withoutComments, /restaurantnaam.*(?:gevonden|matcht|reden)/i, 'no visible copy may claim restaurant name is why a dish matched');
 });
+
+// ─── BE-12 — dish result deep link (dish/name/cat/fromQuery) ─────────────
+// Additive-only: a dish result's "Bekijk menu →" link now carries enough
+// context for /menu/[id] to scroll/focus/highlight the exact dish, built
+// safely via URLSearchParams from fields GET /api/search already returns.
+// Existing filters, /api/search itself, and dish.menuLink's own value are
+// all untouched by this — see the tests above, still passing unchanged.
+
+test('BE-12: the dish menu link is built via URLSearchParams, never manual string concatenation', () => {
+  const source = readPageSource();
+  assert.match(
+    source,
+    /function buildDishMenuHref\(dish, query\) \{\s*const params = new URLSearchParams\(\)/,
+    'expected a dedicated, URLSearchParams-based link builder'
+  );
+});
+
+test('BE-12: the link builder sets dish, name, and cat from the existing, unmodified dish-result fields', () => {
+  const source = readPageSource();
+  assert.match(source, /params\.set\('dish', dish\.dishId\)/);
+  assert.match(source, /params\.set\('name', dish\.name\)/);
+  assert.match(source, /params\.set\('cat', dish\.category\)/);
+});
+
+test('BE-12: fromQuery is only added when a real query is present — never an empty/absent one', () => {
+  const source = readPageSource();
+  assert.match(source, /if \(query\) params\.set\('fromQuery', query\)/);
+});
+
+test('BE-12: the dish result Link uses the new builder, not the bare dish.menuLink, and dish.menuLink itself is unchanged', () => {
+  const source = readPageSource();
+  assert.match(source, /<Link href=\{buildDishMenuHref\(dish, query\)\} className="detail-menu-btn-outline dish-result-link">/);
+  // dish.menuLink itself must still be exactly what /api/search returns —
+  // this ticket never changes that field or its route target, only what
+  // else is appended alongside it.
+  assert.match(source, /\$\{dish\.menuLink\}\?\$\{params\.toString\(\)\}/);
+});
+
+// ─── BE-12 §1.1/§1.2 — CTA copy and a consistent, visible context line ──
+
+test('BE-12: the CTA names the specific dish, matching the ticket\'s "Bekijk {gerechtnaam} op menu →" wording', () => {
+  const source = readPageSource();
+  assert.match(source, />\s*Bekijk \{dish\.name\} op menu →\s*</, 'expected the specific-dish CTA wording, replacing the old generic "Bekijk menu →"');
+  assert.doesNotMatch(source, />\s*Bekijk menu →\s*</, 'the old, generic CTA text must be fully gone');
+});
+
+test('BE-12: every dish row shows a consistent meal-type + category context line, from existing fields only', () => {
+  const source = readPageSource();
+  assert.match(
+    source,
+    /<span className="dish-result-context"> · \{MEAL_TYPE_LABELS\[dish\.mealType\] \|\| dish\.mealType\} · \{dish\.category\}<\/span>/,
+    'expected a compact context line reading meal type and category, unconditionally, not only on a name collision'
+  );
+});
+
+test('BE-12: the meal-type label map covers all four real meal types, using plain text (no emoji, unlike the page\'s own filter chips)', () => {
+  const source = readPageSource();
+  assert.match(source, /const MEAL_TYPE_LABELS = \{\s*lunch:\s*'Lunch',\s*diner:\s*'Diner',\s*borrel:\s*'Borrel',\s*specialiteiten:\s*'Specialiteiten',\s*\}/);
+});
