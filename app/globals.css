@@ -618,11 +618,14 @@ header, .site-header {
    primary action — no new color introduced. Applied/removed by a JS timer,
    never a CSS animation, so it is unconditionally instant in both normal
    and prefers-reduced-motion contexts (only the scroll itself branches on
-   that preference, in MenuView.js). */
+   that preference, in MenuView.js). `transition: none` overrides the
+   inherited `.menu-card { transition: border-color 0.15s }` rule, which
+   would otherwise fade the highlight in instead of showing it instantly. */
 .menu-card-highlighted {
   background: var(--green-faint);
   border-color: var(--green);
   scroll-margin-top: 160px;
+  transition: none;
 }
 .menu-card-highlighted:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
 

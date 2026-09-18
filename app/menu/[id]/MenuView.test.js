@@ -14,9 +14,14 @@ const { test } = require('node:test');
 
 const REPO_ROOT = path.join(__dirname, '..', '..', '..');
 const COMPONENT_PATH = path.join(REPO_ROOT, 'app/menu/[id]/MenuView.js');
+const GLOBALS_CSS_PATH = path.join(REPO_ROOT, 'app/globals.css');
 
 function readComponentSource() {
   return fs.readFileSync(COMPONENT_PATH, 'utf8');
+}
+
+function readGlobalsCss() {
+  return fs.readFileSync(GLOBALS_CSS_PATH, 'utf8');
 }
 
 test('BE-14: the back-link is a real Link element pointing at this menu\'s own restaurant (/restaurant/{baseId}), not the browse-level /restaurants', () => {
@@ -178,4 +183,19 @@ test('BE-12: innerRef is only ever attached to the actually-rendered target — 
   // inside the `cat.items.map((item, j) => {` block under
   // `filteredCategories.map((cat, i) => {`.
   assert.match(source, /filteredCategories\.map\(\(cat, i\) => \{[\s\S]*?cat\.items\.map\(\(item, j\) => \{[\s\S]*?innerRef=\{isResolvedTarget \? highlightedItemRef : undefined\}/);
+});
+
+// BE-12 — live production check (see task report) found that
+// .menu-card-highlighted silently inherited .menu-card's own
+// `transition: border-color 0.15s`, so the highlight faded in instead of
+// appearing instantly, in both normal and reduced-motion contexts. This
+// pins the fix: an explicit `transition: none` override on
+// .menu-card-highlighted itself, and confirms it doesn't leak onto the
+// plain .menu-card rule.
+test('BE-12: .menu-card-highlighted overrides the inherited .menu-card transition so the highlight is always instant, in both normal and reduced-motion contexts', () => {
+  const css = readGlobalsCss();
+  assert.match(css, /\.menu-card \{[^}]*transition: border-color 0\.15s;[^}]*\}/, 'the base .menu-card transition must be unchanged');
+  const highlightRuleMatch = css.match(/\.menu-card-highlighted \{([^}]*)\}/);
+  assert.ok(highlightRuleMatch, 'expected a single .menu-card-highlighted base rule');
+  assert.match(highlightRuleMatch[1], /transition: none;/, 'the highlight rule must explicitly disable the inherited transition');
 });
