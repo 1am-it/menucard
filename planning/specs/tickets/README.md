@@ -93,6 +93,18 @@ of these.
     static fix, not context-aware routing. Should land before `BE-12`,
     which plans its own, separate, conditional back-to-search link on the
     same page.
+17. [be-15-group-broad-dish-search-results.md](./be-15-group-broad-dish-search-results.md) —
+    not started, documentation/planning only; proposes grouping a broad
+    dish query's results (e.g. `q=kip`, verified: 11 dishes across 3
+    restaurants and 7 restaurant+menu combinations today) by restaurant
+    and menu instead of one flat card per dish, once a restaurant+menu's
+    own match count passes a threshold. Preserves BE-12's exact-dish deep
+    link unchanged; proposes reusing the existing `?q=`+`fromQuery`
+    combination (already safe, already shipped) for a new "view all
+    matches on this filtered menu, no highlight" action — no new query
+    parameter. Names, but does not choose between, a client-side (no
+    backend change) and a server-side aggregation option, and does not
+    authorize any implementation.
 
 ## PLATFORM-* order (not started)
 
