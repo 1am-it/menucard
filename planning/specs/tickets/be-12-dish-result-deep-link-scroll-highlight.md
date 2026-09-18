@@ -2,9 +2,67 @@
 
 ## Status
 
-Proposed; not started. Documentation/planning only — no product code,
-mockup, commit, push, deploy, database, account, or storage change has
-been made for this ticket.
+Proposed; **implemented and locally verified across two separate local
+commits — base commit `fbaefe45160e9aead41f482419845f3468952172`
+(2026-09-18) plus a later, separate local commit
+`8cd3f05cae76732ecd02de738b82ec86f879de1a` (2026-09-18) that adds the
+name-collision disambiguation refinement described in the
+"Implementation note" below — neither commit has been pushed or
+deployed; no production or live verification has been done.** The base
+commit's flow is built end-to-end: a dish search result's CTA now reads
+`Bekijk {gerechtnaam} op menu →` and links to `/menu/[id]` with
+`dish`/`name`/`cat` (and, when a real text query is active, `fromQuery`)
+built safely via `URLSearchParams`, from the existing, unmodified public
+dish fields (`dishId`/`name`/`category`); every dish result row also now
+shows a consistent, visible `{maaltijdtype} · {categorie}` context line,
+from those same existing fields. On `/menu/[id]`, `dish`+`name`+`cat` are
+validated strictly (route prefix, in-range position, exact trimmed/case-
+insensitive name, exact category) via the new, independently unit-tested
+`src/lib/dishDeepLink.js`; any mismatch falls back silently to the
+normal, unfiltered, unhighlighted menu — no guess, no error. A valid
+match scrolls the exact item into view (respecting
+`prefers-reduced-motion`), moves keyboard focus to it, applies a
+temporary (~2.5–3s) highlight to that one item only, and announces it
+once via a visually-hidden `aria-live="polite"` region; when `fromQuery`
+is present, an additional, same-origin `/search?q=...` back-link (built
+only via `URLSearchParams`) appears alongside the existing restaurant
+back-link. `?q=`'s own existing behavior is completely independent and
+unmodified — it is read separately and never assigned into any dish-
+target state — and the specific case of a valid dish context whose item
+is excluded by an active `?q=`/allergen/diet/price filter falls back
+safely (no highlight, no focus move, no announcement, no error): the
+item simply has no rendered DOM node to attach to, and the effect
+inspects that before doing anything. Targeted tests, the full project
+test suite, and `npm run build` all pass locally. Behavior has been
+verified against a local production server only (390px/1280px, both
+themes, `prefers-reduced-motion: reduce`, the real 8-way "friet" spread
+and the real 3-way "Höpler - Seeblick" duplicate on restaurant 23, and a
+full search → highlight → back-link → search click-through) — not
+against any live/deployed environment, regardless of the commit's
+current push status.
+
+**Implementation note (2026-09-18), updated (2026-09-18):** the
+originally planned "Desired behavior" §1.1 also described same-named
+dish rows for the same restaurant additionally showing their
+distinguishing category inline next to the dish name, on top of the
+already-built consistent meal-type/category context line. That specific
+inline-on-collision refinement — a separate local commit,
+`8cd3f05cae76732ecd02de738b82ec86f879de1a` (2026-09-18), on top of the
+`fbaefe4...` base commit above, not folded into it — has now been
+implemented and verified locally: `hasDishNameCollision()` in
+`app/search/page.js` flags
+a collision only when two results share both the same `restaurantId` and
+the same raw `dish.name`; only the visible card title gains the inline
+`(category)` suffix (e.g. "Höpler - Seeblick (Wijnen — Rood)"), confirmed
+against the real 3-way "Höpler - Seeblick" fixture on restaurant `23`.
+The deep-link (`buildDishMenuHref`, still built from the raw `dish.name`),
+the CTA text (still `Bekijk {dish.name} op menu →`), the `?q=`/`fromQuery`
+query contract, the highlight/scroll/focus behavior on `/menu/[id]`, and
+every dish with a unique name are all verified unchanged. Targeted tests,
+the full project test suite, and `npm run build` all pass locally. This
+refinement has **not** been pushed, deployed, or verified against any
+live/deployed environment — it remains local-only, same as the rest of
+this ticket's implementation.
 
 ## Depends on
 
@@ -323,43 +381,84 @@ client-side interaction code.
 
 ## Acceptance criteria
 
-- [ ] Existing `/menu/[id]` deep links, with or without `?q=`, render
-      identically to today when `dish` is absent — a regression test
-      pins this exact behavior.
-- [ ] Given a valid `dish`+`name`+`cat`, the resolved item is scrolled
+All items below are checked off as **verified locally** (targeted tests,
+full test suite, `npm run build`, and a local production server) across
+both local commits: base commit
+`fbaefe45160e9aead41f482419845f3468952172`, plus the separate local
+commit `8cd3f05cae76732ecd02de738b82ec86f879de1a` containing the
+name-collision refinement described in the updated "Implementation note
+(2026-09-18)" above, also verified locally on 2026-09-18 — none of this
+has been verified against a live or deployed environment. That remains
+true regardless of either commit's push status; live verification is a
+separate, later step this ticket does not claim has happened. Every item
+below is now demonstrably proven by local verification (targeted tests,
+the full suite, and the build), not assumed.
+
+- [x] Existing `/menu/[id]` deep links, with or without `?q=`, render
+      identically to today when `dish` is absent — proven structurally:
+      `resolveDishTarget()` returns `null` whenever `dish` is absent, so
+      the entire scroll/focus/highlight effect never runs at all in that
+      case, and every pre-existing, unmodified test for `/menu/[id]`
+      still passes unchanged.
+- [x] Given a valid `dish`+`name`+`cat`, the resolved item is scrolled
       into view, receives keyboard focus, and is temporarily (~2.5–3s)
       highlighted; the rest of the menu remains fully visible and
-      unfiltered.
-- [ ] Given the real `23-diner` fixture (8 "friet" matches in one menu)
+      unfiltered. Verified live against the real `23-diner-1-0` ("Steak
+      à la T-Huis") fixture.
+- [x] Given the real `23-diner` fixture (8 "friet" matches in one menu)
       and a `dish`/`name`/`cat` pointing at one of them: at most one item
       on the entire rendered page carries the temporary highlight, and at
       most one substring is wrapped in `<mark>`, regardless of how many
-      other items also contain "friet".
-- [ ] Given the real `23-borrel` fixture (three "Höpler - Seeblick"
+      other items also contain "friet". Verified live: exactly 1
+      highlighted card, exactly 1 `<mark>` on the whole page.
+- [x] Given the real `23-borrel` fixture (three "Höpler - Seeblick"
       entries, identical name and price, different category): each of
       the three distinct `dish` values resolves to, validates against,
       and highlights only its own specific category's entry — never one
-      of the other two.
-- [ ] A mismatched `name`, a mismatched `cat`, an out-of-range index, or a
+      of the other two. Proven for all three by
+      `src/lib/dishDeepLink.test.js`; the `Wijnen — Rosé` case additionally
+      verified live.
+- [x] A mismatched `name`, a mismatched `cat`, an out-of-range index, or a
       `dish` whose restaurantId-mealType prefix doesn't match the current
       route each independently trigger the full, unhighlighted fallback,
       with zero items carrying any highlight class — not just "the
-      intended item is absent."
-- [ ] The back-link, when `fromQuery` is present, renders as a relative
+      intended item is absent." Proven by 13 targeted tests in
+      `src/lib/dishDeepLink.test.js` plus live checks for a wrong name, a
+      wrong category, and an out-of-range position.
+- [x] The back-link, when `fromQuery` is present, renders as a relative
       path beginning with `/search?q=`, built only via `URLSearchParams`,
-      never as an absolute URL or a value containing a URL scheme.
-- [ ] `prefers-reduced-motion: reduce` results in an instant (non-smooth)
+      never as an absolute URL or a value containing a URL scheme. Proven
+      structurally and live (`href="/search?q=friet"`).
+- [x] `prefers-reduced-motion: reduce` results in an instant (non-smooth)
       scroll and a non-animated highlight, visible for the same total
-      duration as the animated version.
-- [ ] The resolved item is reachable despite the page's sticky
+      duration as the animated version. Verified live: `scrollIntoView`
+      is called with `{behavior: 'auto'}` under reduced motion (`'smooth'`
+      otherwise). The highlight itself (`.menu-card-highlighted`, a
+      background/border color change applied and removed by a JS timer)
+      carries no CSS transition or animation of its own in either mode —
+      it is unconditionally instant, which satisfies this criterion in
+      its strongest form rather than only under the reduced-motion branch.
+- [x] The resolved item is reachable despite the page's sticky
       `.menu-filter-bar` — verified visually at ~390px and ~1280px, in
-      both themes.
-- [ ] `/search`'s dish result rows show `category`/`mealType`
-      consistently, and two same-named rows for the same restaurant
-      additionally show their distinguishing category inline.
-- [ ] No new network request is made beyond what `/search` and
+      both themes. `.menu-card-highlighted`'s `scroll-margin-top: 160px`
+      plus `scrollIntoView({block: 'center'})` were used; no page in any
+      of the tested viewport/theme combinations showed the highlighted
+      item obscured or any horizontal overflow.
+- [x] `/search`'s dish result rows show `category`/`mealType`
+      consistently — verified live (local production server). Two
+      same-named rows for the same restaurant additionally showing their
+      distinguishing category inline is now also implemented and verified
+      locally, in the separate local commit
+      `8cd3f05cae76732ecd02de738b82ec86f879de1a` — `hasDishNameCollision()`
+      scoped to a shared `restaurantId` and shared raw `dish.name`, only
+      the visible card title affected — confirmed against the real 3-way
+      "Höpler - Seeblick" fixture on restaurant `23`. See the updated
+      "Implementation note (2026-09-18)" above. Not yet pushed, deployed,
+      or verified against any live/deployed environment.
+- [x] No new network request is made beyond what `/search` and
       `/menu/[id]` already make today; no `/api/search`/`/api/restaurants`
-      contract change.
+      contract change. Confirmed: neither file appears anywhere in either
+      commit's diff.
 
 ## Suggested order
 
