@@ -2,9 +2,52 @@
 
 ## Status
 
-Proposed; not started. Documentation/planning only — no product code,
-test, route, API, data, mockup, commit, push, deploy, database, account,
-or storage change has been made for this ticket.
+Done — **implemented, pushed, and verified live.** The presentation
+revision was built and committed in
+`447ecfe27832fc6f1c058f5cc22a114c33b563f3` (code) on top of this
+ticket's own documentation commit `04acfbe35c67f0e5a609236af8d9f3adc0763ede`
+(both already pushed to `origin/main`). The automatic Vercel deploy for
+the code commit completed successfully on `2026-09-19`.
+
+Production verification against `https://menucard-kappa.vercel.app`, on
+`2026-09-19`, confirmed: `q=brood` renders four restaurant groups
+(Brasserie Bardot, Restaurant Zuyd, T-Huis, Restaurant Wolfslaar) summing
+to 24 gerechten, with no separate leftover-individual-results section
+anywhere on the page; `q=friet` renders one restaurant group (T-Huis)
+with two uniform menu subgroups (Dinerkaart 8, Lunchkaart 4, correctly
+showing `+5 meer`/`+1 meer`); `q=kip` renders three restaurant groups
+summing to 11 gerechten, with no incorrect low-coverage note; `q=Höpler`
+shows Wit, Rood, and Rosé as three separately recognizable, clickable
+examples within one Borrelkaart subgroup, and clicking "Rood" produces
+exactly one correct highlight, the right category, an accurate
+`aria-live` announcement, and visible keyboard focus that persists
+independently of the highlight; a primary group action opens the
+filtered menu with only `q`/`fromQuery` in its URL and zero highlights;
+a secondary example click was independently confirmed across a 1-match
+subgroup (Borrelkaart's "Brood & Boter"), a 3-match subgroup (Höpler's
+"Rood"), and one of a >3-match subgroup's shown examples (Dinerkaart's
+"Desem stokbrood") — each produced exactly one highlight and a correct
+announcement; the highlight remained visible well past BE-12's old
+2750ms mark and was gone by the expected ~4000ms window, with focus
+remaining on a real element throughout; `q=Chablis` showed the restored,
+honest `· Gevonden in aanvullende menudetails` hint on all six relevant
+wine-only examples, while `q=Bardot`'s visible description match showed
+no hint; a direct call to the live `/api/search?group=restaurant`
+endpoint confirmed every example object contains only
+`dishId`/`name`/`category`/`weakMatch` (no internal wine/supplement
+data), that an absent/unrecognized `group` value still returns the exact
+pre-existing ungrouped response, and that restaurant-level pagination
+(`limit`/`cursor`) never splits a restaurant's own menu subgroups across
+two pages. All routes were checked at both `390px` and `1280px`, in both
+light and dark themes, with no horizontal overflow and no console
+errors. Targeted tests, the full project test suite, and `npm run build`
+all pass locally on the exact pushed commit.
+
+This ticket does not build, and does not claim to have built, `BE-12`'s
+own validation/highlight mechanism beyond the one deliberate `4000`ms
+duration change, any multi-city/`MARKET-*` work, any rebranding/domain
+change, or any `PLATFORM-12` work — all remain exactly as scoped in
+"Non-goals" below, unaffected by this status update.
 
 ## Depends on
 
@@ -275,159 +318,199 @@ touch.
 
 ## Acceptance criteria
 
+All items below were originally written as pre-implementation
+requirements. Every item except the one explicitly noted below was
+verified both locally (targeted tests, full test suite, `npm run build`,
+and a local production server) as of commit
+`447ecfe27832fc6f1c058f5cc22a114c33b563f3`, and independently
+re-confirmed live against `https://menucard-kappa.vercel.app` on
+`2026-09-19` — including direct calls to the live `/api/search` endpoint
+itself for the server-side/API-shaped items, not only through the
+rendered page.
+
 **Always grouped, never a leftover individual section**
-- [ ] For any query with `total > 0`, every matching dish belongs to
+- [x] For any query with `total > 0`, every matching dish belongs to
       exactly one menu subgroup of exactly one restaurant group — there
       is no separate section of individual, ungrouped dish cards
       anywhere on the page.
-- [ ] Given the real `q=kip` fixture, all three restaurants (Brasserie
+- [x] Given the real `q=kip` fixture, all three restaurants (Brasserie
       Bardot, Restaurant Zuyd, T-Huis) each render as their own
       restaurant group — none renders as flat individual cards, even
       though none reaches BE-15's old "4 or more" threshold on any
       single menu.
-- [ ] Given the real `q=brood` fixture, all four restaurants (T-Huis,
+- [x] Given the real `q=brood` fixture, all four restaurants (T-Huis,
       Brasserie Bardot, Restaurant Zuyd, Restaurant Wolfslaar) each
       render as their own group; the sum of every subgroup's count
       across all four groups equals 24 exactly.
-- [ ] Given the real `q=friet` fixture, T-Huis renders as one group with
+- [x] Given the real `q=friet` fixture, T-Huis renders as one group with
       two subgroups (Dinerkaart 8, Lunchkaart 4); the sum equals 12.
 
 **Uniform menu-subgroup shape**
-- [ ] Every menu subgroup — regardless of its own match count — renders
+- [x] Every menu subgroup — regardless of its own match count — renders
       the exact same shape: menu-card name, full-sentence count, up to
       three example dish names, `+N meer` only when `count > 3`, and
       exactly one primary action labelled `Bekijk alle X
       gerechten/gerecht op de kaart →`.
-- [ ] A menu subgroup with exactly 1, 2, or 3 matches never shows `+N
+- [x] A menu subgroup with exactly 1, 2, or 3 matches never shows `+N
       meer` and shows every one of its matches as an example.
-- [ ] A menu subgroup with more than 3 matches shows exactly 3 examples
+- [x] A menu subgroup with more than 3 matches shows exactly 3 examples
       (in existing relevance order) followed by `+N meer`, where `N`
-      equals `count - 3` exactly (e.g. `q=brood`'s Dinerkaart: 7 total,
-      3 shown, `+4`).
-- [ ] No menu subgroup is ever rendered with a different structure based
+      equals `count - 3` exactly — live-verified on `q=friet`'s
+      Dinerkaart (8 total, `+5`) and Lunchkaart (4 total, `+1`); the same
+      formula/code path is exercised identically for `q=brood`'s
+      Dinerkaart (7 total, `+4`).
+- [x] No menu subgroup is ever rendered with a different structure based
       on its own size — there is no code path that renders a "full item
       list" for small subgroups and a "count + examples" summary for
       large ones.
 
 **Primary action (filtered menu, no highlight)**
-- [ ] The primary action's `href` is exactly `/menu/{restaurantId}-
+- [x] The primary action's `href` is exactly `/menu/{restaurantId}-
       {mealType}?q={query}&fromQuery={query}`, built via
       `URLSearchParams`, reusing only the two existing, already-safe
       parameters — no new parameter, no new route.
-- [ ] Visiting the primary action opens the full, normal menu, filtered
+- [x] Visiting the primary action opens the full, normal menu, filtered
       to matches via the existing `?q=` mechanism, with zero items
       scrolled to, focused, or highlighted.
 
 **Secondary example links (exact BE-12 deep link)**
-- [ ] Each of the up to three shown example dish names is its own real,
+- [x] Each of the up to three shown example dish names is its own real,
       keyboard-operable link, built from that dish's existing
       `dishId`/`name`/`category` via the unmodified BE-12 mechanism
       (`dish`/`name`/`cat`/`fromQuery`).
-- [ ] Clicking a specific example dish name scrolls to, focuses, and
+- [x] Clicking a specific example dish name scrolls to, focuses, and
       temporarily highlights exactly that one dish, and announces it via
-      the existing `aria-live` region — verified for a 1-match subgroup
-      (e.g. `q=brood`'s Borrelkaart, "Brood & Boter"), a 2-3-match
-      subgroup, and a >3-match subgroup's shown examples.
-- [ ] `+N meer` is plain, non-interactive text — never a link, never
+      the existing `aria-live` region — live-verified for a 1-match
+      subgroup (`q=brood`'s Borrelkaart, "Brood & Boter"), a 3-match
+      subgroup (`q=Höpler`'s "Rood"), and one of a >3-match subgroup's
+      shown examples (`q=brood`'s Dinerkaart, "Desem stokbrood").
+- [x] `+N meer` is plain, non-interactive text — never a link, never
       clickable, and never itself a path to any specific dish.
-- [ ] The temporary highlight becomes visible immediately, remains
+- [x] The temporary highlight becomes visible immediately, remains
       visible for exactly 4000ms, then disappears — a real, measured
-      change from BE-12's current 2750ms constant.
-- [ ] Keyboard focus on the resolved dish is visible and remains exactly
+      change from BE-12's current 2750ms constant, live-timed against
+      production.
+- [x] Keyboard focus on the resolved dish is visible and remains exactly
       as long as focus stays there, independent of the 4-second
       highlight timer (tabbing away or waiting past 4 seconds must not
-      remove focus itself, only the highlight class).
+      remove focus itself, only the highlight class) — live-confirmed
+      focus remained on a real element both mid-highlight and after it
+      cleared.
 
 **No duplication or loss**
-- [ ] For every real fixture above, the sum of every rendered menu
+- [x] For every real fixture above, the sum of every rendered menu
       subgroup's count across every rendered restaurant group equals the
       query's own ungrouped `total` exactly — no dish is ever counted
       twice or dropped.
-- [ ] No dish ever appears in two different restaurant groups, or in a
+- [x] No dish ever appears in two different restaurant groups, or in a
       restaurant group and anywhere else on the page.
 
 **Restaurant-level pagination, sorting, and `lowCoverage`**
-- [ ] Restaurant groups are paginated (cursor/limit), never raw dishes
+- [x] Restaurant groups are paginated (cursor/limit), never raw dishes
       and never menu subgroups — a restaurant's own subgroups never
       span two pages of the response. Reuses the existing
       `DEFAULT_LIMIT`/`MAX_LIMIT` constants at this aggregation level,
-      unchanged from BE-15.
-- [ ] Restaurant groups are ordered by relevance (a restaurant's
+      unchanged from BE-15. Live-verified with a direct
+      `limit=2`/`cursor` call against the production API on the real
+      `q=brood` fixture (4 groups split cleanly across two pages, no
+      group split).
+- [x] Restaurant groups are ordered by relevance (a restaurant's
       position determined by its best-ranked matching dish, the same
       tier/tie-break order `dishSearch.js` already produces) — never
       alphabetical, never by match count alone. Menu subgroups within one
       restaurant keep BE-15's own descending-match-count order.
-- [ ] `lowCoverage` is present if and only if the full, underlying,
+- [x] `lowCoverage` is present if and only if the full, underlying,
       ungrouped candidate count is genuinely zero — never derived from
       the number of restaurant groups, a restaurant-level cursor, or
-      `hasMore`. Given the real `q=kip` fixture (11 underlying matches,
-      now 3 real groups instead of BE-15's 0), `lowCoverage` stays
-      correctly absent.
-- [ ] An absent or unrecognized `group` value still falls back,
+      `hasMore`. Live-verified on both sides: the real `q=kip` fixture
+      (11 underlying matches, 3 real groups) correctly omits
+      `lowCoverage`, and the real `cuisine=Chinees` fixture (genuinely
+      zero underlying matches) correctly includes it, identically to the
+      ungrouped response.
+- [x] An absent or unrecognized `group` value still falls back,
       completely and silently, to today's exact, unmodified, ungrouped
-      response — unchanged from BE-15.
+      response — unchanged from BE-15; live-verified directly against
+      the production API.
 
 **Accessibility and mobile**
-- [ ] Heading hierarchy has no skipped level: `<h1>` → the grouped
+- [x] Heading hierarchy has no skipped level: `<h1>` → the grouped
       section's own `<h2>` → each restaurant group's `<h3>` → each menu
       subgroup's `<h4>`.
-- [ ] No horizontal overflow at ~390px or ~1280px, in both themes, with
+- [x] No horizontal overflow at ~390px or ~1280px, in both themes, with
       a restaurant that has a long name, a long menu label, and three
-      long example dish names all present in one subgroup at once.
-- [ ] Exactly four real, keyboard-operable links per >3-match subgroup
+      long example dish names all present in one subgroup at once —
+      confirmed across every real fixture tested (`brood`, `friet`,
+      `kip`, `Höpler`, `Chablis`).
+- [x] Exactly four real, keyboard-operable links per >3-match subgroup
       (three example links + one primary action) and exactly `count + 1`
       links per ≤3-match subgroup — no nested links, no fake buttons.
-- [ ] Visible keyboard focus on every example link and every primary
+- [x] Visible keyboard focus on every example link and every primary
       action, reusing existing, already-shipped focus-visible tokens —
-      no new focus convention.
+      no new focus convention. Live-confirmed via computed style: both
+      an example link and a primary action show a real, visible outline
+      on focus.
 - [ ] A page with many restaurant groups (e.g. a synthetic or future
       fixture with 10+ qualifying restaurants) remains scannable on a
-      ~390px viewport — checked visually once real or synthetic coverage
-      makes this reproducible.
+      ~390px viewport — still not reproducible against today's real
+      data (only 4 of Breda's 25 restaurants have any digitized menu);
+      left unchecked for this reason, not because of any known defect.
 
 **API compatibility**
-- [ ] `/api/search`'s existing, ungrouped response (no `group` param, or
-      an unrecognized one) is verified byte-for-byte unchanged.
-- [ ] Every menu subgroup in the `group=restaurant` response uses one
+- [x] `/api/search`'s existing, ungrouped response (no `group` param, or
+      an unrecognized one) is verified byte-for-byte unchanged —
+      live-verified directly against the production API.
+- [x] Every menu subgroup in the `group=restaurant` response uses one
       uniform shape (`count` + up to three public example dish objects)
       — no field or branch whose presence or shape depends on whether
-      `count` crosses any threshold.
+      `count` crosses any threshold. Live-verified via a direct
+      production API call: every example object contains exactly
+      `dishId`/`name`/`category`/`weakMatch`, never any internal
+      wine/supplement data.
 
 ## Open decisions (explicitly not resolved by this ticket)
 
-- **Exact field name/shape for the up to three example dish objects** in
-  the `group=restaurant` API response (replacing BE-15's bare
-  `examples: string[]`) — this ticket decides the *content* (up to
-  three, public, sufficient for an exact BE-12 link, no hidden
-  items-vs-summary branch) but not the literal JSON field name, which is
-  an implementation detail for the follow-up code ticket.
-- **Exact visual treatment** of the now-uniform menu-subgroup card
-  (spacing, the `+N meer` treatment, how the four-links-per-subgroup
-  case reads on a narrow viewport) — a short static mockup, following
-  this project's own `docs/mockups/README.md` convention, is recommended
-  before implementation but not produced by this ticket.
+**Resolved during implementation (2026-09-19):** the exact example
+object shape was settled as `{ dishId, name, category, weakMatch }` in
+`src/services/dishSearch.js` — a uniform shape for every menu subgroup
+regardless of size, satisfying this ticket's own constraint (no hidden
+items-vs-summary branch). `weakMatch` is a restored BE-12 §1.2/BE-13
+provenance signal, not part of the shape question this ticket originally
+posed, but decided alongside it — see the ticket's own commit history.
+The exact visual treatment was implemented directly during the code
+round (no separate static mockup was produced) and was live-verified at
+`390px`/`1280px`, both themes, with no overflow — a conscious deferral to
+the implementation task itself, per "Suggested order" point 3 below, not
+an unresolved gap.
+
+Still genuinely open:
+
 - **Restaurant-group page size at real scale** (today's real data caps
   out at 4 restaurant groups for any query) — the existing
   `DEFAULT_LIMIT`/`MAX_LIMIT` constants are reused per point 10 above,
   but whether a smaller default improves mobile scannability once
   coverage grows to dozens of qualifying restaurants per query is not
-  decided here.
+  decided here, and is not reproducible against today's real data (see
+  the one remaining unchecked acceptance criterion below).
 
 ## Suggested order
 
 A direct revision of `BE-15`'s own delivered presentation rule — not a
 new feature area. `BE-15`'s architecture (server-side aggregation,
-restaurant-level pagination, the API flag/fallback contract) is not
+restaurant-level pagination, the API flag/fallback contract) was not
 reopened; only the "does a restaurant get grouped at all" rule and the
-menu-subgroup's own display shape change.
+menu-subgroup's own display shape changed.
 
-**Implementation must not start until all of the following are true:**
+**All preconditions below were met before implementation started, in
+order:**
 
-1. This ticket's own documentation commit is made and pushed.
+1. This ticket's own documentation commit was made
+   (`04acfbe35c67f0e5a609236af8d9f3adc0763ede`) and pushed.
 2. An independent, read-only implementation-readiness review of this
-   ticket is green.
-3. The exact example-object shape (see "Open decisions") is settled —
-   either resolved in a follow-up decision review, or consciously
-   deferred to the implementation task itself with the constraint above
-   (no hidden items-vs-summary branch) treated as a hard acceptance
-   criterion either way.
+   ticket was green.
+3. The exact example-object shape (see "Open decisions") was resolved
+   directly during the implementation round, per the constraint already
+   decided (no hidden items-vs-summary branch).
+
+Implementation, an independent pre-commit review, a combined pre-push
+review, the code push, and production verification then followed, in
+that order — see "Status" above for the full result.
