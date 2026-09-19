@@ -199,3 +199,15 @@ test('BE-12: .menu-card-highlighted overrides the inherited .menu-card transitio
   assert.ok(highlightRuleMatch, 'expected a single .menu-card-highlighted base rule');
   assert.match(highlightRuleMatch[1], /transition: none;/, 'the highlight rule must explicitly disable the inherited transition');
 });
+
+test('BE-16: the highlight stays visible for exactly 4000ms (was 2750ms/BE-12) — the only deliberate change to this effect', () => {
+  const source = readComponentSource();
+  assert.match(source, /setTimeout\(\(\) => setShowPulse\(false\), 4000\)/, 'expected the highlight-removal timer to use the new, decided 4000ms duration');
+  assert.doesNotMatch(source, /setTimeout\(\(\) => setShowPulse\(false\), 2750\)/, 'the old 2750ms timer call must be fully gone, not left alongside the new one');
+});
+
+test('BE-16: keyboard focus is moved independently of, and before, the highlight timer starts — tabbing away or waiting past 4 seconds only removes the highlight class, never focus itself', () => {
+  const source = readComponentSource();
+  const effectMatch = source.match(/node\.scrollIntoView\([^)]*\)\s*node\.focus\(\)\s*setShowPulse\(true\)[\s\S]*?const timer = setTimeout/);
+  assert.ok(effectMatch, 'expected node.focus() to run unconditionally before the highlight timer is created, with no dependency between them');
+});

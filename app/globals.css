@@ -612,8 +612,9 @@ header, .site-header {
 }
 .menu-card:hover { border-color: var(--border-hover); }
 
-/* BE-12 — the resolved dish's temporary, ~2.5-3s highlight after a search
-   result deep-link. Reuses the existing --green/--green-faint pair, the
+/* BE-12/BE-16 — the resolved dish's temporary, 4s highlight after a search
+   result deep-link (BE-16 changed this from ~2.5-3s). Reuses the existing
+   --green/--green-faint pair, the
    same quiet-accent tokens already used for the restaurant browse card's
    primary action — no new color introduced. Applied/removed by a JS timer,
    never a CSS animation, so it is unconditionally instant in both normal
@@ -1841,6 +1842,11 @@ mark.search-highlight {
 .dish-group-menu:first-of-type { border-top: none; padding-top: 0; }
 .dish-group-menu-title { font-size: 13px; font-weight: 600; margin: 0 0 4px; }
 .dish-group-examples { font-size: 12px; color: var(--text-secondary); margin: 0 0 8px; }
+/* BE-16 — each example is its own secondary, exact BE-12 link — reuses the
+   existing link color/underline convention, no new visual language. */
+.dish-group-example-link { color: var(--text-secondary); text-decoration: underline; text-underline-offset: 2px; }
+.dish-group-example-link:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.dish-group-more { color: var(--text-muted); }
 .dish-group-link { font-size: 12px; padding: 6px 14px; }
 
 /* ─────────────────────────────────────────────────────────────────────────────

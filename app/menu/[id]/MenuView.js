@@ -109,7 +109,7 @@ function MenuItem({ item, query, excludeAllergens, isFiltering, isResolvedTarget
   // never the shared `?q=` filter state, and only for this one item; it
   // stays for as long as this item is the resolved target (the life of
   // this page view), independent of the separate, temporary `showPulse`
-  // highlight below, which fades after ~2.5-3s.
+  // highlight below, which fades after 4s (BE-16, was ~2.5-3s).
   const displayQuery = isResolvedTarget && highlightQuery ? highlightQuery : query
 
   return (
@@ -275,7 +275,11 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
     setShowPulse(true)
     setDishAnnouncement(`Gerecht gevonden: ${resolvedTargetItem.name}`)
 
-    const timer = setTimeout(() => setShowPulse(false), 2750)
+    // BE-16 — 4000ms (was 2750ms/BE-12): the only deliberate change to this
+    // effect. Keyboard focus (node.focus() above) is unaffected — it stays
+    // exactly where it landed until the visitor moves it, independent of
+    // this timer clearing only the highlight class.
+    const timer = setTimeout(() => setShowPulse(false), 4000)
     return () => clearTimeout(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dishTarget])

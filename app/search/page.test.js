@@ -49,9 +49,9 @@ test('imports the shared RestaurantBrowseCard component rather than duplicating 
   assert.match(source, /import RestaurantBrowseCard from ['"]@\/src\/components\/RestaurantBrowseCard['"]/);
 });
 
-test('renders both required, literally-named result groups — "Gerechten gevonden" and "Restaurants gevonden"', () => {
+test('renders both required, literally-named result groups — "Gerechten gegroepeerd per restaurant" and "Restaurants gevonden"', () => {
   const source = readPageSource();
-  assert.match(source, />\s*Gerechten gevonden/);
+  assert.match(source, />\s*Gerechten gegroepeerd per restaurant/);
   assert.match(source, />\s*Restaurants gevonden/);
 });
 
@@ -204,20 +204,6 @@ test('the old, now-inaccurate "gevonden via restaurantnaam" hint text is gone', 
   assert.doesNotMatch(source, /gevonden via restaurantnaam/, 'restaurant name can no longer cause a dish match (BE-13) — this text must not remain');
 });
 
-test('the weak-match hint uses the new, neutral, factually accurate copy', () => {
-  const source = readPageSource();
-  assert.match(source, /\{weakMatch && <span className="dish-result-match-hint"> · Gevonden in aanvullende menudetails<\/span>\}/);
-});
-
-test('isWeakMatch\'s own comment no longer assumes restaurant name or a ranking tier 4 as a possible cause', () => {
-  const source = readPageSource();
-  const commentMatch = source.match(/\/\/ Display-only heuristic:[\s\S]*?function isWeakMatch/);
-  assert.ok(commentMatch, 'expected to find the isWeakMatch heuristic comment block');
-  const comment = commentMatch[0];
-  assert.doesNotMatch(comment, /tier 4/i, 'the comment must not still reference the removed ranking tier 4');
-  assert.doesNotMatch(comment, /restaurant'?s name/i, 'the comment must not still claim restaurant name can cause a weak match');
-});
-
 test('nowhere in this file does any comment or visible copy claim a dish\'s own restaurant name can cause it to match', () => {
   const source = readPageSource();
   const withoutComments = source
@@ -230,12 +216,11 @@ test('nowhere in this file does any comment or visible copy claim a dish\'s own 
   assert.doesNotMatch(withoutComments, /restaurantnaam.*(?:gevonden|matcht|reden)/i, 'no visible copy may claim restaurant name is why a dish matched');
 });
 
-// ─── BE-12 — dish result deep link (dish/name/cat/fromQuery) ─────────────
-// Additive-only: a dish result's "Bekijk menu →" link now carries enough
-// context for /menu/[id] to scroll/focus/highlight the exact dish, built
-// safely via URLSearchParams from fields GET /api/search already returns.
-// Existing filters, /api/search itself, and dish.menuLink's own value are
-// all untouched by this — see the tests above, still passing unchanged.
+// ─── BE-12 — the exact-dish deep-link builder, now reused for BE-16's
+// secondary example links (dish/name/cat/fromQuery) ───────────────────────
+// The builder itself is completely unchanged; BE-16 no longer renders an
+// individual dish-result row on this page (see BE-16 tests below), so it
+// is exercised only via the grouped section's example links now.
 
 test('BE-12: the dish menu link is built via URLSearchParams, never manual string concatenation', () => {
   const source = readPageSource();
@@ -258,104 +243,13 @@ test('BE-12: fromQuery is only added when a real query is present — never an e
   assert.match(source, /if \(query\) params\.set\('fromQuery', query\)/);
 });
 
-test('BE-12: the dish result Link uses the new builder, not the bare dish.menuLink, and dish.menuLink itself is unchanged', () => {
-  const source = readPageSource();
-  assert.match(source, /<Link href=\{buildDishMenuHref\(dish, query\)\} className="detail-menu-btn-outline dish-result-link">/);
-  // dish.menuLink itself must still be exactly what /api/search returns —
-  // this ticket never changes that field or its route target, only what
-  // else is appended alongside it.
-  assert.match(source, /\$\{dish\.menuLink\}\?\$\{params\.toString\(\)\}/);
-});
-
-// ─── BE-12 §1.1/§1.2 — CTA copy and a consistent, visible context line ──
-
-test('BE-12: the CTA names the specific dish, matching the ticket\'s "Bekijk {gerechtnaam} op menu →" wording', () => {
-  const source = readPageSource();
-  assert.match(source, />\s*Bekijk \{dish\.name\} op menu →\s*</, 'expected the specific-dish CTA wording, replacing the old generic "Bekijk menu →"');
-  assert.doesNotMatch(source, />\s*Bekijk menu →\s*</, 'the old, generic CTA text must be fully gone');
-});
-
-test('BE-12: every dish row shows a consistent meal-type + category context line, from existing fields only', () => {
+test('BE-16: the example-dish link builder reuses buildDishMenuHref unmodified, merging in the subgroup\'s own menuLink', () => {
   const source = readPageSource();
   assert.match(
     source,
-    /<span className="dish-result-context"> · \{MEAL_TYPE_LABELS\[dish\.mealType\] \|\| dish\.mealType\} · \{dish\.category\}<\/span>/,
-    'expected a compact context line reading meal type and category, unconditionally, not only on a name collision'
+    /function buildExampleDishHref\(example, menu, query\) \{\s*return buildDishMenuHref\(\{ \.\.\.example, menuLink: menu\.menuLink \}, query\)\s*\}/,
+    'expected the example-link builder to delegate to the exact same, unmodified buildDishMenuHref'
   );
-});
-
-test('BE-12: the meal-type label map covers all four real meal types, using plain text (no emoji, unlike the page\'s own filter chips)', () => {
-  const source = readPageSource();
-  assert.match(source, /const MEAL_TYPE_LABELS = \{\s*lunch:\s*'Lunch',\s*diner:\s*'Diner',\s*borrel:\s*'Borrel',\s*specialiteiten:\s*'Specialiteiten',\s*\}/);
-});
-
-// ─── BE-12 §1.1 — name-collision disambiguation ──────────────────────────
-// "Two rows for the same restaurant happen to share a name" — verified
-// against a real, existing fixture: searching "Höpler" returns exactly
-// three dishes, all named "Höpler - Seeblick", all from the same
-// restaurant (id `23`, "T-Huis"), in three different categories
-// (Wijnen — Wit/Rood/Rosé) — confirmed via
-// `searchDishes({ q: 'Höpler' })`. A different-restaurant same-name case
-// is deliberately not a collision under this rule and must never be
-// flagged as one.
-
-test('BE-12: hasDishNameCollision scopes a collision to the same restaurant AND the same name — not just a shared name across different restaurants', () => {
-  const source = readPageSource();
-  assert.match(
-    source,
-    /function hasDishNameCollision\(dish, results\) \{\s*return results\.some\(\(other\) => other !== dish && other\.restaurantId === dish\.restaurantId && other\.name === dish\.name\)\s*\}/,
-    'expected the collision check to require both restaurantId and name equality, excluding the dish itself'
-  );
-});
-
-test('BE-12: the card title appends the category inline only on a real collision, exactly matching the ticket\'s own example format', () => {
-  const source = readPageSource();
-  assert.match(
-    source,
-    /const displayTitle = hasNameCollision \? `\$\{dish\.name\} \(\$\{dish\.category\}\)` : dish\.name/,
-    'expected "{name} ({category})" only when hasNameCollision is true, otherwise the plain, unmodified name'
-  );
-  assert.match(source, /<div className="td-name">\{displayTitle\}<\/div>/);
-});
-
-test('BE-12: hasNameCollision is computed per-dish from the already-fetched results array and passed down — no new field, no separate fetch', () => {
-  const source = readPageSource();
-  assert.match(
-    source,
-    /<DishResultRow\s*\n\s*key=\{dish\.dishId\}\s*\n\s*dish=\{dish\}\s*\n\s*query=\{filters\.q\}\s*\n\s*hasNameCollision=\{hasDishNameCollision\(dish, results\)\}\s*\n\s*\/>/,
-    'expected hasNameCollision to be derived from the same results array already rendered, not a new prop from the API'
-  );
-});
-
-test('BE-12: the raw dish.name, the CTA, and the deep-link are never affected by the collision title — only the card title changes', () => {
-  const source = readPageSource();
-  // The CTA must still read the plain, unmodified dish.name — never
-  // displayTitle — so a colliding dish's button never doubles up the
-  // category (e.g. never "Bekijk Höpler - Seeblick (Wijnen — Rood) op
-  // menu →").
-  assert.match(source, /Bekijk \{dish\.name\} op menu →/);
-  assert.doesNotMatch(source, /Bekijk \{displayTitle\}/, 'the CTA must never use the disambiguated title');
-  // The deep-link builder itself must still be untouched, still reading
-  // dish.name/dish.category directly — not displayTitle — confirmed by
-  // the same, already-pinned buildDishMenuHref tests above continuing to
-  // pass unchanged.
-  assert.match(source, /<Link href=\{buildDishMenuHref\(dish, query\)\} className="detail-menu-btn-outline dish-result-link">/);
-});
-
-test('BE-12: the existing context line (restaurant, meal type, category, status) is completely untouched by the collision-title addition', () => {
-  const source = readPageSource();
-  assert.match(
-    source,
-    /<div className="dish-result-restaurant">\s*\{dish\.restaurantName\}[\s\S]*?<span className="dish-result-context"> · \{MEAL_TYPE_LABELS\[dish\.mealType\] \|\| dish\.mealType\} · \{dish\.category\}<\/span>[\s\S]*?is-open[\s\S]*?is-closed/,
-    'expected the pre-existing context line structure to be fully intact, unmodified by the collision addition'
-  );
-});
-
-test('BE-12: no grouping, filter mode, or backend logic was added for this refinement — hasDishNameCollision is a pure, local, presentation-only helper', () => {
-  const source = readPageSource();
-  const helperMatch = source.match(/function hasDishNameCollision\([\s\S]*?\n\}/);
-  assert.ok(helperMatch, 'expected to find the collision helper');
-  assert.doesNotMatch(helperMatch[0], /fetch\(|useState|useEffect|useMemo/, 'the collision check must be a plain, synchronous function — no new fetch, state, or effect');
 });
 
 // ─── BE-15 — group broad dish search results by restaurant and menu ──────
@@ -393,30 +287,83 @@ test('BE-15: heading hierarchy — restaurant group is an <h3>, each menu subgro
   assert.match(source, /<h4 className="dish-group-menu-title">/);
 });
 
-test('BE-15: a menu subgroup shows a full-sentence count, honestly-labelled primary action, and plain-text (non-link) examples — exactly one real Link per subgroup', () => {
+test('BE-16: a menu subgroup shows a full-sentence count and an honestly-labelled primary action', () => {
   const source = readPageSource();
   assert.match(source, /\{menu\.count\} \{menu\.count === 1 \? 'gerecht' : 'gerechten'\}/, 'singular/plural full-sentence count, matching "1 gerecht"/"N gerechten"');
-  assert.match(source, /<p className="dish-group-examples">\{menu\.examples\.join\(', '\)\}<\/p>/, 'examples must be plain text, never individually wrapped in a Link');
   assert.match(source, /<Link href=\{buildGroupMenuHref\(menu, filters\.q\)\} className="detail-menu-btn-outline dish-group-link">\s*Bekijk alle \{menu\.count\} op de kaart →/);
 });
 
-test('BE-15: "Gerechten gevonden" is scoped to leftover, non-qualifying results only — its own count is results.length, never the restaurant-group total', () => {
+test('BE-16: every shown example is its own real Link (not plain text), built via buildExampleDishHref, one per example', () => {
   const source = readPageSource();
-  assert.match(source, /\(\{results\.length\}\{filters\.q && ` voor "\$\{filters\.q\}"`\}\)/, 'the individual-results heading must count results.length, not a restaurant-group total');
+  assert.match(
+    source,
+    /<Link href=\{buildExampleDishHref\(example, menu, filters\.q\)\} className="dish-group-example-link">\s*\{label\}\s*<\/Link>/,
+    'each example must be rendered as its own real Link using the exact BE-12 deep-link builder'
+  );
 });
 
-test('BE-15: the empty/"niets gevonden" state only fires when both the individual results and the restaurant groups are empty — never merely because restaurantGroups is empty', () => {
+test('BE-16: examples within the same subgroup are disambiguated by name+category, mirroring BE-12 §1.1\'s original rule one level narrower', () => {
   const source = readPageSource();
-  assert.match(source, /results\.length === 0 && groups\.length === 0 \?/);
+  assert.match(
+    source,
+    /function hasExampleNameCollision\(example, examples\) \{\s*return examples\.some\(\(other\) => other !== example && other\.name === example\.name\)\s*\}/,
+    'expected the collision check to be scoped to the subgroup\'s own examples array'
+  );
+  assert.match(
+    source,
+    /const collision = hasExampleNameCollision\(example, menu\.examples\)/,
+  );
+  assert.match(
+    source,
+    /const label = collision \? `\$\{example\.name\} \(\$\{example\.category\}\)` : example\.name/,
+    'expected "{name} ({category})" only on a real collision, otherwise the plain, unmodified name'
+  );
+});
+
+test('BE-16: "+N meer" is plain, non-interactive text — computed as the exact remainder past the shown examples, never a link', () => {
+  const source = readPageSource();
+  assert.match(source, /const remaining = menu\.count - menu\.examples\.length/);
+  assert.match(source, /\{remaining > 0 && <span className="dish-group-more"> \+\{remaining\} meer<\/span>\}/);
+});
+
+// ─── BE-12 §1.2/BE-13 — restored provenance hint for BE-16's examples ────
+
+test('BE-13/BE-16: an example that only matched via an internal field shows the existing, honest hint text — reusing the server-computed weakMatch boolean, never the raw internal text', () => {
+  const source = readPageSource();
+  assert.match(
+    source,
+    /\{example\.weakMatch && <span className="dish-result-match-hint"> · Gevonden in aanvullende menudetails<\/span>\}/,
+    'expected the exact, existing honest hint text, shown only for a weakMatch example'
+  );
+});
+
+test('BE-13/BE-16: a normal, visibly-matching example never renders the hint — weakMatch is a plain, per-example boolean, not a blanket flag', () => {
+  const source = readPageSource();
+  // The hint must be conditioned on the specific example's own weakMatch
+  // flag, not on the menu or the group as a whole.
+  assert.doesNotMatch(source, /\{menu\.weakMatch/, 'weakMatch must never be read off the menu subgroup itself');
+  assert.doesNotMatch(source, /\{group\.weakMatch/, 'weakMatch must never be read off the restaurant group itself');
+});
+
+test('BE-16: no separate "Gerechten gevonden" section exists anywhere in this file — every match lives inside a restaurant group', () => {
+  const source = readPageSource();
+  // Strip comments first: this file's own explanatory comments legitimately
+  // mention the retired section's old name as history, which a raw source
+  // scan would otherwise misinterpret as a rendered element.
+  const withoutComments = source
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/\/\/[^\n]*/g, '');
+  assert.doesNotMatch(withoutComments, /Gerechten gevonden/, 'the old, BE-15 leftover-individual-results section must be fully removed');
+  assert.doesNotMatch(source, /DishResultRow/, 'the individual dish-card component must be fully removed, not merely unused');
+});
+
+test('BE-16: the empty/"niets gevonden" state fires only when there are zero restaurant groups', () => {
+  const source = readPageSource();
+  assert.match(source, /const dishesGroup = loading \? \(/);
+  assert.match(source, /\) : groups\.length === 0 \? \(/);
 });
 
 test('BE-15: "load more" now paginates restaurant groups (groupsNextCursor/groupsHasMore), never a raw-dish cursor', () => {
   const source = readPageSource();
   assert.match(source, /const handleLoadMore = \(\) => \{\s*if \(groupsNextCursor == null\) return\s*runSearch\(filters, groupsNextCursor\)/);
-});
-
-test('BE-15: results is always replaced (never appended) on every fetch — the leftover list is already complete, so appending on "load more" would duplicate it', () => {
-  const source = readPageSource();
-  assert.match(source, /setResults\(data\.results\)/);
-  assert.doesNotMatch(source, /setResults\(\(prev\) => \(cursor \? \[\.\.\.prev, \.\.\.data\.results\]/, 'results must never be concatenated across pages in the new BE-15 fetch logic');
 });

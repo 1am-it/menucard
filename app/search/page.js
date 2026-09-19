@@ -18,39 +18,23 @@ import RestaurantBrowseCard from '@/src/components/RestaurantBrowseCard'
 // below), queries GET /api/restaurants (src/services/restaurantIndex.js,
 // same endpoint /alle-restaurants already uses) and renders its results as
 // a second, separately-headed "Restaurants gevonden" group alongside the
-// existing "Gerechten gevonden" group. dishSearch.js and /api/search
-// themselves are NOT modified by this — dish search, its URL/filter
-// semantics, and its own ranking are exactly as BE-02b/BE-02c/BE-06 left
-// them. See docs/api/restaurant-summary-shape.md "Name-token match for
-// group ordering" for the rule that decides which group is shown first.
+// dish-results section (BE-16's "Gerechten gegroepeerd per restaurant" —
+// BE-15's own, differently-named "Gerechten gevonden" section is retired,
+// see below). dishSearch.js's own ranking is unchanged by this — its
+// URL/filter semantics are exactly as BE-02b/BE-02c/BE-06 left them. See
+// docs/api/restaurant-summary-shape.md "Name-token match for group
+// ordering" for the rule that decides which group is shown first.
+//
+// BE-16 — every restaurant with at least one matching dish is always one
+// restaurant group; there is no longer a separate section of flat,
+// individual dish cards for restaurants with few matches. See
+// planning/specs/tickets/be-16-uniform-restaurant-grouped-dish-search-results.md.
 
-const TAG_LABELS = {
-  aanbevolen:  'Aanbevolen',
-  dagspecial:  'Dagspecial',
-  vegetarisch: 'Vegetarisch',
-  vegan:       'Vegan',
-  halal:       'Halal',
-  glutenvrij:  'Glutenvrij',
-}
-
-// BE-12 §1.1 — the meal-type label for each dish result's compact,
-// consistently-shown context line. Plain text, no emoji — this row
-// already avoids icons (unlike the page's own filter chips above it),
-// and dish-search-ranking.md's own field is 'mealType', reused here
-// as-is; no new field, no backend change.
-const MEAL_TYPE_LABELS = {
-  lunch:          'Lunch',
-  diner:          'Diner',
-  borrel:         'Borrel',
-  specialiteiten: 'Specialiteiten',
-}
-
-// BE-15 — the menu-*card* title form (matching `app/menu/[id]/MenuView.js`'s
+// BE-16 — the menu-*card* title form (matching `app/menu/[id]/MenuView.js`'s
 // own MEAL_CONFIG.title strings already shown on `/menu/[id]` itself), used
-// only for the grouped section's menu-subgroup headings below — distinct
-// from MEAL_TYPE_LABELS above, which labels an individual dish row's
-// compact context line. Duplicated rather than imported, same reasoning as
-// MEAL_TYPE_LABELS itself (MenuView.js is a separate 'use client' module).
+// for the grouped section's menu-subgroup headings below. Duplicated rather
+// than imported, same reasoning as elsewhere in this file (MenuView.js is a
+// separate 'use client' module).
 const MENU_TITLE_LABELS = {
   lunch:          'Lunchkaart',
   diner:          'Dinerkaart',
@@ -141,45 +125,16 @@ function buildParams(f) {
   return p
 }
 
-// Display-only heuristic: does the query show up anywhere a user would
-// actually see it on this row (name/description/tags)? If not, the match
-// came from an internal, non-public menu field — a supplement note or
-// wine-pairing suggestion (see docs/api/dish-search-ranking.md's tier 2,
-// `_sup`/`_wine`) — so say so, without exposing that raw internal text,
-// so the result doesn't look unexplained. This never re-orders or
-// re-filters results; the server's order is authoritative.
-//
-// BE-13 note: a dish's own restaurant name is never the cause of a weak
-// match — src/services/dishSearch.js no longer matches dishes on
-// restaurant name at all, so every dish reaching this component already
-// has a real match on one of its own fields (name/description/supplement/
-// wine/tag). The only way a match can still be invisible here is via the
-// non-public `_sup`/`_wine` fields, never the restaurant's identity.
-function isWeakMatch(dish, query) {
-  if (!query || query.length < 2) return false
-  const needle = query.toLowerCase()
-  const visibleTextMatches =
-    dish.name.toLowerCase().includes(needle) ||
-    (dish.description || '').toLowerCase().includes(needle) ||
-    dish.tags.some((t) => t.toLowerCase().includes(needle))
-  return !visibleTextMatches
-}
-
-function formatPrice(dish) {
-  if (dish.priceOnRequest) return 'op aanvraag'
-  if (dish.priceIsFrom) return `vanaf ${dish.priceDisplay}`
-  return dish.priceDisplay
-}
-
-// BE-12 — additive-only deep link into this dish's exact position on its
-// menu. Built entirely from fields GET /api/search already returns
-// (dishId, name, category — see docs/api/dish-result-shape.md) via
-// URLSearchParams, the same mechanism buildParams() above already uses —
-// never a hand-built string. `fromQuery` is only added when there is a
-// real, current text query, so a meal-type/filter-only view (no text
-// query) never sends one. This never changes dish.menuLink itself or
-// any existing filter/URL semantics on /menu/[id] — see MenuView.js's
-// own, entirely separate `?q=` handling.
+// BE-12 — additive-only deep link into a dish's exact position on its
+// menu. Built entirely from public dish fields (dishId, name, category —
+// see docs/api/dish-result-shape.md) via URLSearchParams, the same
+// mechanism buildParams() above already uses — never a hand-built string.
+// `fromQuery` is only added when there is a real, current text query.
+// This never changes `dish.menuLink` itself or any existing filter/URL
+// semantics on /menu/[id] — see MenuView.js's own, entirely separate
+// `?q=` handling. BE-16 reuses this exact, unmodified function for a
+// group's secondary example-dish links (see `buildExampleDishHref` below)
+// — the underlying deep-link mechanism is identical either way.
 function buildDishMenuHref(dish, query) {
   const params = new URLSearchParams()
   params.set('dish', dish.dishId)
@@ -189,12 +144,12 @@ function buildDishMenuHref(dish, query) {
   return `${dish.menuLink}?${params.toString()}`
 }
 
-// BE-15 — a group's "view all matches" action: additive combination of the
-// two already-existing, already-safe parameters `?q=`/`fromQuery`, never a
-// new parameter or mechanism. Deliberately never sets `dish`/`name`/`cat`,
-// so `resolveDishTarget()` on `/menu/[id]` always returns null for this
-// link — no item is scrolled to, focused, or highlighted, per "Two intents
-// to preserve" in the ticket.
+// BE-15 — a group's primary "view all matches" action: additive combination
+// of the two already-existing, already-safe parameters `?q=`/`fromQuery`,
+// never a new parameter or mechanism. Deliberately never sets
+// `dish`/`name`/`cat`, so `resolveDishTarget()` on `/menu/[id]` always
+// returns null for this link — no item is scrolled to, focused, or
+// highlighted.
 function buildGroupMenuHref(menu, query) {
   const params = new URLSearchParams()
   if (query) {
@@ -205,62 +160,24 @@ function buildGroupMenuHref(menu, query) {
   return qs ? `${menu.menuLink}?${qs}` : menu.menuLink
 }
 
-// BE-12 §1.1 — "two rows for the same restaurant happen to share a name":
-// a collision is scoped to one restaurant, not a name shared across
-// different restaurants (a common, expected, non-confusing case this
-// must never flag). Computed purely client-side from the already-fetched
-// `results` array — no new field, no backend/API change.
-function hasDishNameCollision(dish, results) {
-  return results.some((other) => other !== dish && other.restaurantId === dish.restaurantId && other.name === dish.name)
+// BE-16 — a menu subgroup's secondary, exact BE-12 link for one specific
+// example dish. Reuses `buildDishMenuHref` unmodified, merging in the
+// subgroup's own `menuLink` (examples themselves don't carry one, to avoid
+// duplicating it per example in the API response).
+function buildExampleDishHref(example, menu, query) {
+  return buildDishMenuHref({ ...example, menuLink: menu.menuLink }, query)
 }
 
-function DishResultRow({ dish, query, hasNameCollision }) {
-  const weakMatch = isWeakMatch(dish, query)
-  // BE-12 §1.1 — category appended inline only on a real, same-restaurant
-  // name collision (e.g. "Höpler - Seeblick (Wijnen — Rood)"), exactly as
-  // the ticket's own example shows. A dish with a unique name keeps its
-  // plain, unmodified title. This never changes `dish.name` itself, the
-  // deep-link (which is always built from the raw `dish.name`), or the
-  // CTA text below.
-  const displayTitle = hasNameCollision ? `${dish.name} (${dish.category})` : dish.name
-  return (
-    <div className="menu-card dish-result-card">
-      <div className="card-top">
-        <div className="td-name">{displayTitle}</div>
-        <div className={`td-price ${dish.priceOnRequest ? 'no-price' : ''}`}>
-          {formatPrice(dish)}
-        </div>
-      </div>
-
-      <div className="dish-result-restaurant">
-        {dish.restaurantName}
-        {/* BE-12 §1.1 — a compact, consistent context line (meal type +
-            category) on every dish row, from fields GET /api/search
-            already returns — no new field, no backend change. */}
-        <span className="dish-result-context"> · {MEAL_TYPE_LABELS[dish.mealType] || dish.mealType} · {dish.category}</span>
-        {dish.openStatus === 'open' && <span className="dish-result-status is-open"> · Nu open</span>}
-        {dish.openStatus === 'closed' && <span className="dish-result-status is-closed"> · Gesloten</span>}
-        {dish.distanceMeters != null && (
-          <span className="dish-result-distance"> · {Math.round(dish.distanceMeters)} m</span>
-        )}
-        {weakMatch && <span className="dish-result-match-hint"> · Gevonden in aanvullende menudetails</span>}
-      </div>
-
-      {dish.description && <div className="td-desc">{dish.description}</div>}
-
-      {dish.tags?.length > 0 && (
-        <div className="item-tags">
-          {dish.tags.map((t) => (
-            <span key={t} className={`item-tag tag-${t}`}>{TAG_LABELS[t] || t}</span>
-          ))}
-        </div>
-      )}
-
-      <Link href={buildDishMenuHref(dish, query)} className="detail-menu-btn-outline dish-result-link">
-        Bekijk {dish.name} op menu →
-      </Link>
-    </div>
-  )
+// BE-16 — "two examples within the same visible menu subgroup happen to
+// share a name" (e.g. the real q=Höpler fixture: three identically-named
+// "Höpler - Seeblick" wines in one Borrelkaart subgroup, distinguished
+// only by category). Scoped to the subgroup's own (already capped at 3)
+// examples array — not the whole page — since that is the only set a
+// visitor ever sees side by side. Mirrors BE-12 §1.1's original
+// same-restaurant collision rule, now scoped one level narrower (same
+// menu subgroup instead of same restaurant).
+function hasExampleNameCollision(example, examples) {
+  return examples.some((other) => other !== example && other.name === example.name)
 }
 
 export default function SearchPage() {
@@ -281,7 +198,6 @@ function SearchPageInner() {
 
   const [inputValue, setInputValue] = useState(filters.q)
   const [filtersOpen, setFiltersOpen] = useState(false)
-  const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
   const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState(null)
@@ -344,13 +260,12 @@ function SearchPageInner() {
       const data = await res.json()
       if (id !== requestId.current) return // stale response, ignore
 
-      // BE-15 — `results` (the leftover, non-qualifying dishes) is always
-      // returned complete by the server in grouped mode, never chunked, so
-      // it is always replaced, never appended — appending here would
-      // duplicate it on every "load more" click. `groups` themselves are
-      // the paginated unit and are appended on "load more", exactly like
-      // the pre-existing dish-level pagination this replaces.
-      setResults(data.results)
+      // BE-16 — every restaurant with a match is now its own group, so the
+      // server's own `results` field is always `[]` in this mode (kept
+      // server-side only for API-response-shape stability — see
+      // dishSearch.js). The page never reads it: `groups` is the sole,
+      // paginated unit, appended on "load more", exactly like the
+      // pre-existing dish-level pagination this replaces.
       setGroups((prev) => (cursor ? [...prev, ...(data.restaurantGroups || [])] : (data.restaurantGroups || [])))
       setGroupsTotal(data.total)
       setGroupsNextCursor(data.nextCursor)
@@ -371,7 +286,7 @@ function SearchPageInner() {
   // of them change `filtersKey`, and this is the only place that fetches.
   useEffect(() => {
     if (!filters.q && !active) {
-      setResults([]); setGroups([]); setGroupsTotal(0); setGroupsNextCursor(null); setGroupsHasMore(false); setLowCoverage(null)
+      setGroups([]); setGroupsTotal(0); setGroupsNextCursor(null); setGroupsHasMore(false); setLowCoverage(null)
       return
     }
     runSearch(filters, 0)
@@ -510,11 +425,14 @@ function SearchPageInner() {
   const restaurantsPending = meaningfulQuery && restaurantLoading
   const restaurantsFirst = meaningfulQuery && uniqueNameMatch && restaurantResults.length > 0
 
+  // BE-16 — this only ever renders the loading spinner or the "nothing
+  // found" empty state now: every matching dish lives inside `groupedSection`
+  // below, so there is no separate individual-results branch left here.
   const dishesGroup = loading ? (
     <div className="empty-state">
       <p>Zoeken…</p>
     </div>
-  ) : results.length === 0 && groups.length === 0 ? (
+  ) : groups.length === 0 ? (
     restaurantsPending ? (
       // Dishes are already known to be empty, but the parallel restaurant
       // fetch for this same query hasn't settled yet — wait for it rather
@@ -565,45 +483,18 @@ function SearchPageInner() {
         )}
       </div>
     )
-  ) : results.length > 0 ? (
-    // BE-15 — "Gerechten gevonden" is now scoped to only the non-qualifying,
-    // leftover dishes (see dishSearch.js); once a restaurant qualifies for
-    // grouping, all of its dishes moved into `groupedSection` above and are
-    // never shown here too. This list is always complete, so its own count
-    // is `results.length`, never the (now restaurant-group) `groupsTotal`.
-    <>
-      <div className="results-header">
-        <h2 className="results-count">
-          Gerechten gevonden{' '}
-          <span className="results-count-detail">
-            ({results.length}{filters.q && ` voor "${filters.q}"`})
-          </span>
-        </h2>
-      </div>
-
-      <div className="dish-results-list">
-        {results.map((dish) => (
-          <DishResultRow
-            key={dish.dishId}
-            dish={dish}
-            query={filters.q}
-            hasNameCollision={hasDishNameCollision(dish, results)}
-          />
-        ))}
-      </div>
-    </>
   ) : null
 
-  // BE-15 — the grouped section, only ever rendered when it has actual
-  // groups, matching the "only when non-empty" rule in the ticket's
-  // decided heading hierarchy. A restaurant is one <h3> group; each of its
-  // relevant menus (including a thin, 1-3-match one riding along once the
-  // restaurant itself qualifies) is an <h4> subgroup — never re-sorted,
-  // counts and examples come straight from the server in relevance order.
-  // Example dish names are plain, non-interactive text (no nested links):
-  // exactly one real, keyboard-operable <Link> per subgroup, the "view all
-  // matches" action, which never highlights a dish (see buildGroupMenuHref
-  // above).
+  // BE-16 — the grouped section, only ever rendered when it has actual
+  // groups, matching the "only when non-empty" rule in the decided heading
+  // hierarchy. A restaurant is always one <h3> group; every one of its
+  // relevant menus is always the same <h4> subgroup shape, uniform for one,
+  // three, or twenty matches — never re-sorted, counts and examples come
+  // straight from the server in relevance order. Each shown example is its
+  // own real, secondary, exact BE-12 link (see buildExampleDishHref above);
+  // `+N meer` is plain, non-interactive text. Exactly one further, primary
+  // action per subgroup opens the filtered menu, never highlighting a dish
+  // (see buildGroupMenuHref above).
   const groupedSection = groups.length > 0 && (
     <section aria-labelledby="gerechten-gegroepeerd-heading" style={{ marginTop: 24 }}>
       <div className="results-header">
@@ -616,21 +507,46 @@ function SearchPageInner() {
         {groups.map((group) => (
           <div key={group.restaurantId} className="menu-card dish-group-card">
             <h3 className="dish-group-restaurant-name">{group.restaurantName}</h3>
-            {group.menus.map((menu) => (
-              <div key={menu.mealType} className="dish-group-menu">
-                <h4 className="dish-group-menu-title">
-                  {MENU_TITLE_LABELS[menu.mealType] || menu.mealType}
-                  {' — '}
-                  {menu.count} {menu.count === 1 ? 'gerecht' : 'gerechten'}
-                </h4>
-                {menu.examples.length > 0 && (
-                  <p className="dish-group-examples">{menu.examples.join(', ')}</p>
-                )}
-                <Link href={buildGroupMenuHref(menu, filters.q)} className="detail-menu-btn-outline dish-group-link">
-                  Bekijk alle {menu.count} op de kaart →
-                </Link>
-              </div>
-            ))}
+            {group.menus.map((menu) => {
+              const remaining = menu.count - menu.examples.length
+              return (
+                <div key={menu.mealType} className="dish-group-menu">
+                  <h4 className="dish-group-menu-title">
+                    {MENU_TITLE_LABELS[menu.mealType] || menu.mealType}
+                    {' — '}
+                    {menu.count} {menu.count === 1 ? 'gerecht' : 'gerechten'}
+                  </h4>
+                  {menu.examples.length > 0 && (
+                    <p className="dish-group-examples">
+                      {menu.examples.map((example, i) => {
+                        const collision = hasExampleNameCollision(example, menu.examples)
+                        const label = collision ? `${example.name} (${example.category})` : example.name
+                        return (
+                          <span key={example.dishId}>
+                            {i > 0 && ' · '}
+                            <Link href={buildExampleDishHref(example, menu, filters.q)} className="dish-group-example-link">
+                              {label}
+                            </Link>
+                            {/* BE-12 §1.2/BE-13, restored for BE-16 — a
+                                neutral, honest hint, only for an example
+                                that matched purely via an internal,
+                                non-public field (never the raw sup/wine
+                                text itself — see dishSearch.js's
+                                isWeakMatch()). A normal, visibly-matching
+                                example gets no hint at all. */}
+                            {example.weakMatch && <span className="dish-result-match-hint"> · Gevonden in aanvullende menudetails</span>}
+                          </span>
+                        )
+                      })}
+                      {remaining > 0 && <span className="dish-group-more"> +{remaining} meer</span>}
+                    </p>
+                  )}
+                  <Link href={buildGroupMenuHref(menu, filters.q)} className="detail-menu-btn-outline dish-group-link">
+                    Bekijk alle {menu.count} op de kaart →
+                  </Link>
+                </div>
+              )
+            })}
           </div>
         ))}
       </div>
@@ -713,7 +629,7 @@ function SearchPageInner() {
           visually hidden rather than a new visible headline, so the
           existing visual design is unchanged; the header logo remains the
           visible brand mark for sighted users. This is also what makes
-          "Gerechten gevonden"/"Restaurants gevonden" valid <h2>s below —
+          "Gerechten gegroepeerd per restaurant"/"Restaurants gevonden" valid <h2>s below —
           they now nest under a real <h1> instead of floating with no
           page-level heading above them. */}
       <h1 className="vh">Zoeken</h1>

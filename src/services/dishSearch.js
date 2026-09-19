@@ -45,11 +45,13 @@ const CUISINE_KEYWORDS = {
 const DEFAULT_LIMIT = 20
 const MAX_LIMIT = 50
 
-// BE-15 — a restaurant qualifies for the optional `group=restaurant`
-// response mode when at least one of its menus reaches this many matches
-// for the query. Stated once, positively, reused verbatim — see
-// be-15-group-broad-dish-search-results.md "Server-side aggregation".
-const GROUP_THRESHOLD = 4
+// BE-16 — every menu subgroup in the `group=restaurant` response shows at
+// most this many example dishes before a plain-text "+N meer" remainder
+// appears; a uniform display-truncation limit, never a qualification gate
+// (BE-15's old "4 or more" restaurant-qualification threshold is retired
+// entirely — see be-16-uniform-restaurant-grouped-dish-search-results.md
+// "Decided presentation model").
+const EXAMPLE_LIMIT = 3
 
 function getTodayKey() {
   const map = ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za']
@@ -209,6 +211,23 @@ function getMatchTier(dish, needle) {
   return null
 }
 
+// BE-12 §1.2/BE-13 — restored for BE-16: does the query show up anywhere a
+// visitor would actually see it on this dish (name/description/tags)? If
+// not, the match came only from an internal, non-public field (`_sup`/
+// `_wine`) — this is the exact, original client-side condition (recovered
+// from the pre-BE-16 `app/search/page.js`), not a tier-based approximation:
+// tier 2 also covers a *visible* description match, so `tier === 2` alone
+// would over-flag. Deliberately never returns the raw `_sup`/`_wine` text
+// itself — only this boolean travels to the client (see `examples` below).
+function isWeakMatch(dish, needle) {
+  if (!needle) return false
+  const visibleTextMatches =
+    dish.name.toLowerCase().includes(needle) ||
+    (dish.description || '').toLowerCase().includes(needle) ||
+    dish.tags.some((t) => t.toLowerCase().includes(needle))
+  return !visibleTextMatches
+}
+
 function priceMatches(dish, maxPrice) {
   if (maxPrice == null) return true
   // Never silently exclude data we can't reduce to one number — see
@@ -342,16 +361,20 @@ function searchDishes({
     }
   }
 
-  // BE-15 — server-side restaurant+menu aggregation, computed over the
+  // BE-16 — server-side restaurant+menu aggregation, computed over the
   // complete, unpaginated `candidates` set built above — never over one
-  // already-paginated page (the real `q=brood` fixture in the ticket is
-  // the reproduced defect this prevents). Restaurants are ordered by
-  // first-appearance in `candidates` (the existing tier/tie-break
-  // relevance order); each menu's own example dish names are also in that
-  // order. Menu subgroups within a restaurant are ordered by descending
-  // match count, matching the ticket's own worked examples ("Dinerkaart —
-  // 8, Lunchkaart — 3, Borrelkaart — 1"; the real `brood` fixture's
-  // diner=7, lunch=5, borrel=1) — never re-sorted alphabetically.
+  // already-paginated page (the real `q=brood` fixture is the reproduced
+  // defect this prevents). Every restaurant with at least one match is
+  // always exactly one restaurant group — BE-15's old per-menu "4 or
+  // more" qualification gate is retired entirely; there is no longer a
+  // separate flat/individual card path for a thinly-matched restaurant.
+  // Restaurants are ordered by first-appearance in `candidates` (the
+  // existing tier/tie-break relevance order); each menu's own example
+  // dishes are also in that order. Menu subgroups within a restaurant are
+  // ordered by descending match count, matching the ticket's own worked
+  // examples ("Dinerkaart — 8, Lunchkaart — 3, Borrelkaart — 1"; the real
+  // `brood` fixture's diner=7, lunch=5, borrel=1) — never re-sorted
+  // alphabetically.
   const restaurantOrder = []
   const restaurantsById = new Map()
 
@@ -374,23 +397,35 @@ function searchDishes({
       entry.menuOrder.push(dish.mealType)
     }
     menu.count += 1
-    if (menu.examples.length < 3) menu.examples.push(dish.name)
+    // BE-16 — each example is a small, public dish object (not a bare
+    // name string), carrying exactly the fields BE-12's own deep-link
+    // mechanism needs (`dishId`/`name`/`category`) so a visible example
+    // can itself be an exact, secondary BE-12 link — see
+    // "Decided presentation model" point 12. `weakMatch` is the restored
+    // BE-12 §1.2/BE-13 provenance signal (see `isWeakMatch()` above) — a
+    // plain boolean, never the raw internal `_sup`/`_wine` text itself.
+    if (menu.examples.length < EXAMPLE_LIMIT) {
+      menu.examples.push({
+        dishId: dish.dishId,
+        name: dish.name,
+        category: dish.category,
+        weakMatch: isWeakMatch(dish, needle),
+      })
+    }
   }
 
-  // A restaurant qualifies once at least one of its menus reaches
-  // GROUP_THRESHOLD; every one of that restaurant's other matching menus
-  // (even at 1-3 matches) is then included as its own subgroup — a menu
-  // never independently qualifies below the threshold, but rides along
-  // once its own restaurant already qualifies via a different menu.
-  const qualifyingRestaurantIds = new Set()
+  // Every restaurant that has at least one match becomes one group — no
+  // qualification gate. Menu subgroups are always ordered by descending
+  // match count within their restaurant, regardless of the restaurant's
+  // own total.
+  const restaurantIdsWithGroups = new Set()
   const allGroups = []
   for (const restaurantId of restaurantOrder) {
     const entry = restaurantsById.get(restaurantId)
     const menus = entry.menuOrder
       .map((mealType) => entry.menusByType.get(mealType))
       .sort((a, b) => b.count - a.count)
-    if (!menus.some((m) => m.count >= GROUP_THRESHOLD)) continue
-    qualifyingRestaurantIds.add(restaurantId)
+    restaurantIdsWithGroups.add(restaurantId)
     allGroups.push({ restaurantId: entry.restaurantId, restaurantName: entry.restaurantName, menus })
   }
 
@@ -402,15 +437,13 @@ function searchDishes({
   const groupsPage = allGroups.slice(boundedCursor, boundedCursor + boundedLimit)
   const groupsNextCursor = boundedCursor + boundedLimit < groupsTotal ? boundedCursor + boundedLimit : null
 
-  // No duplication: once a restaurant qualifies, every one of its dishes
-  // (including a thin, 1-3-match menu) moves entirely into
-  // `restaurantGroups` and is removed from `results` here. This list is
-  // deliberately returned complete, never sliced by cursor/limit — those
-  // now paginate `restaurantGroups` only; a second, independent pagination
-  // axis for these leftover dishes is not something the ticket specifies,
-  // and today's real data keeps this list small.
+  // BE-16 — every restaurant with a match now has a group, so this is
+  // always `[]` in practice: kept as an explicit, always-present field
+  // (never omitted) purely for API-response-shape stability, not because
+  // any dish is ever actually left out of `restaurantGroups` above. No
+  // dish is ever duplicated between the two fields either way.
   const leftoverResults = candidates
-    .filter(({ dish }) => !qualifyingRestaurantIds.has(dish.restaurantId))
+    .filter(({ dish }) => !restaurantIdsWithGroups.has(dish.restaurantId))
     .map(({ dish }) => ({
       ...toPublicDishShape(dish),
       openStatus: getOpenStatus(dish._restaurant, day || undefined),
