@@ -58,11 +58,26 @@ name: Apply production database migrations
 # `--linked`. Confirmed via a real dispatch of production-db-preflight.yml:
 # GitHub Actions runners have no IPv6 route, and `--linked` resolves to
 # Supabase's direct database connection, which is IPv6-only unless the
-# project has the paid IPv4 add-on. `supabase link` itself is kept
-# exactly as before for platform/project validation — it only calls the
-# Management API, never opens the direct DB connection. See
+# project has the paid IPv4 add-on. The project-coupling check itself is
+# unaffected by any of this — it only reads project metadata over the
+# Management API, never opens the direct DB connection (see "Confirm
+# access token and project ref belong together" below). See
 # docs/guides/production-migration-pipeline.md's "One-time GitHub setup"
 # section for how to obtain this connection string.
+#
+# _(Corrected 2026-09-19)_ The platform/project validation step below no
+# longer runs `supabase link`. A real dispatch of this workflow's sibling,
+# production-db-preflight.yml, confirmed `supabase link` fails with a 403
+# ("account does not have the necessary privileges") against this
+# project's actual, deliberately narrow-scoped access token — `link`
+# requires broader project-management privileges this pipeline's token
+# was never meant to have. Every step in this file that actually reads or
+# writes migration history already connects via the explicit
+# `SUPABASE_DB_URL` argument, never via `link`'s session state, so
+# nothing downstream depends on it — it only ever existed here as an
+# early "does this token/project pair even work" check. Replaced with the
+# same narrower, read-only Management API check already proven working
+# in production-db-preflight.yml, which needs only project-read access.
 #
 # _(Rebuilt 2026-09-09, after three consecutive real-dispatch failures)_
 # The safety decision below no longer parses `supabase db push --dry-run`'s
@@ -196,18 +211,43 @@ jobs:
         with:
           version: latest
 
-      # Kept exactly as platform/project validation only — auth check
-      # (SUPABASE_ACCESS_TOKEN) and project-ref resolution via the
-      # Management API. Every step below that actually reads or writes
-      # migration history connects via SUPABASE_DB_URL instead (see this
-      # file's 2026-09-09 addition at the top) — `link`'s own DB
-      # connection attempt is unaffected by the IPv6 issue that broke
-      # `--linked` elsewhere, so it is left unchanged here.
-      - name: Link to the production Supabase project
+      # Read-only Management API check: confirms SUPABASE_ACCESS_TOKEN and
+      # SUPABASE_PROJECT_ID belong to the same, real project — the one
+      # thing this platform/project validation step actually needs before
+      # the real migration steps below (which already connect on their
+      # own, via the explicit SUPABASE_DB_URL Session Pooler string, not
+      # via this token/ref pair). Deliberately narrower than `supabase
+      # link`, which this step replaces (see this file's 2026-09-19
+      # correction note at the top) — a basic "get project" call against
+      # the Management API only requires the token to be able to read
+      # project settings, no database/migration/write scope of any kind.
+      # Only the resulting HTTP status is inspected; the token, the
+      # request URL, and the response body are never printed or logged,
+      # on success or failure. Identical in shape to
+      # production-db-preflight.yml's own step of the same name, already
+      # proven working in a real dispatch.
+      - name: Confirm access token and project ref belong together (read-only Management API check)
+        id: project_check
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-        run: supabase link --project-ref "${{ secrets.SUPABASE_PROJECT_ID }}"
+          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+        run: |
+          set -uo pipefail
+          http_status="$(curl -s -o /dev/null -w '%{http_code}' \
+            --request GET \
+            --header "Authorization: Bearer ${SUPABASE_ACCESS_TOKEN}" \
+            "https://api.supabase.com/v1/projects/${SUPABASE_PROJECT_ID}")"
+          curl_exit=$?
+          if [ "$curl_exit" -ne 0 ]; then
+            echo "::error::Could not reach the Supabase Management API (curl exit code ${curl_exit}) before any HTTP status was returned — this may be a network problem rather than an invalid token/project. Neither the token nor the request URL was printed."
+            exit 1
+          fi
+          if [ "$http_status" = "200" ]; then
+            echo "Access token and project ref confirmed to belong together (HTTP 200). Neither the token, the request URL, nor any response content was printed."
+          else
+            echo "::error::Management API project check failed (HTTP ${http_status}) — the access token and project ref do not appear to belong together, or the token lacks sufficient privileges. Neither the token, the request URL, nor any response content was printed. Commonly: invalid/expired access token, wrong project ref, or a token scoped without project-read access."
+            exit 1
+          fi
 
       # Unverified risk (see docs/guides/production-migration-pipeline.md's
       # "Residual risks"): this repo's migration files are named
@@ -265,8 +305,8 @@ jobs:
           # Changing either list for a future release means editing this
           # file via a reviewed pull request, never just dispatching with
           # a different `release_versions` value.
-          DOCUMENTED_APPLIED_VERSIONS=(0001 0002 0003 0004 0005 0006 0007 0008 0009)
-          DOCUMENTED_RELEASE_VERSIONS=(0010)
+          DOCUMENTED_APPLIED_VERSIONS=(0001 0002 0003 0004 0005 0006 0007 0008 0009 0010)
+          DOCUMENTED_RELEASE_VERSIONS=(0011)
 
           raw="${{ github.event.inputs.release_versions }}"
           if [ "$(printf '%s' "$raw" | tr '[:upper:]' '[:lower:]')" = "none" ]; then
