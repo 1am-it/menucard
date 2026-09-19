@@ -120,6 +120,16 @@ of these.
     independence unchanged; the one deliberate BE-12 change is the
     highlight's visible duration (2750ms → 4000ms) — validation,
     scroll/focus, and `aria-live` are otherwise untouched.
+19. [be-17-menu-proposal-snapshot-foundation.md](./be-17-menu-proposal-snapshot-foundation.md) —
+    not started, documentation/planning only; a small, additive, internal
+    Breda-only foundation for capturing a restaurant menu as a reviewable
+    snapshot (source, hash, version, quality score) with a separate,
+    append-only review-event history — deriving effective status from the
+    latest review event rather than any mutable status column. Does not
+    reuse `field_provenance` or `pending_changes` as the audit log (both
+    have real mutation paths), does not promote anything to public menu
+    data, and does not run the pilot itself — see the ticket's own
+    "Relationship to `MARKET-02B`" and "Non-goals" sections.
 
 ## PLATFORM-* order (not started)
 
