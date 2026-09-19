@@ -495,7 +495,7 @@ jobs:
           # Kept as one comma-separated list so every query below filters
           # on the exact same set — adding a table here later never
           # requires touching any query.
-          tables="field_provenance,staff_roles,pending_changes,restaurant_claims,import_extraction_records,import_candidate_reviews,import_candidate_enrichments,restaurant_profile_drafts,restaurant_profile_draft_field_facts"
+          tables="field_provenance,staff_roles,pending_changes,restaurant_claims,import_extraction_records,import_candidate_reviews,import_candidate_enrichments,restaurant_profile_drafts,restaurant_profile_draft_field_facts,menu_snapshot_proposals,menu_snapshot_reviews"
 
           # Single-quoted heredoc delimiter ('SQL') so bash never expands
           # anything inside — `:'tables'` below is a psql variable
