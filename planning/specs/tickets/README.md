@@ -105,6 +105,21 @@ of these.
     parameter. Names, but does not choose between, a client-side (no
     backend change) and a server-side aggregation option, and does not
     authorize any implementation.
+18. [be-16-uniform-restaurant-grouped-dish-search-results.md](./be-16-uniform-restaurant-grouped-dish-search-results.md) —
+    not started, documentation/planning only; revises `BE-15`'s delivered
+    presentation rule so every restaurant with at least one matching
+    dish always renders as one restaurant group (never a flat individual
+    card), removing the old "4 or more matches" qualification threshold
+    and the separate leftover-individual-dishes section entirely. Every
+    menu subgroup always shows the same shape — name, full-sentence
+    count, up to three example dishes, `+N meer` past three, one
+    primary "view filtered menu" action — and each shown example is
+    itself a secondary, exact BE-12 deep link, so a one-match restaurant
+    keeps a precise path to its one dish. Reuses BE-15's server-side
+    aggregation, restaurant-level pagination, and `lowCoverage`
+    independence unchanged; the one deliberate BE-12 change is the
+    highlight's visible duration (2750ms → 4000ms) — validation,
+    scroll/focus, and `aria-live` are otherwise untouched.
 
 ## PLATFORM-* order (not started)
 
