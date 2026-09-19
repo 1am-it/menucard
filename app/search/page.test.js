@@ -148,7 +148,7 @@ test('the "Er ging iets mis" error state is an <h2> (not <h3>), closing the h1�
   assert.match(source, /<h2 className="empty-state-title">Er ging iets mis<\/h2>/);
 });
 
-test('no <h3> JSX element remains anywhere in this file — only the restaurant-name headings inside a rendered group are <h3>, and those live in RestaurantBrowseCard, not here', () => {
+test('the only <h3> this file renders itself is BE-15\'s own grouped-restaurant heading — "Restaurants gevonden" restaurant-name headings still come from RestaurantBrowseCard, never duplicated here', () => {
   const source = readPageSource();
   // Strip comments first: this file's own explanatory comments legitimately
   // mention "<h3>" as text while describing the fix, which a raw source
@@ -156,7 +156,9 @@ test('no <h3> JSX element remains anywhere in this file — only the restaurant-
   const withoutComments = source
     .replace(/\/\*[\s\S]*?\*\//g, '')
     .replace(/\/\/[^\n]*/g, '');
-  assert.doesNotMatch(withoutComments, /<h3[ >]/, 'app/search/page.js must not render any <h3> of its own — restaurant-name <h3>s come from RestaurantBrowseCard, not from this file');
+  const h3Matches = withoutComments.match(/<h3[ >][^]*?<\/h3>/g) || [];
+  assert.equal(h3Matches.length, 1, 'expected exactly one <h3> element in this file — BE-15\'s own grouped-restaurant heading');
+  assert.match(h3Matches[0], /className="dish-group-restaurant-name"/, 'the one <h3> in this file must be BE-15\'s grouped-restaurant heading, not a duplicated restaurant-name heading for "Restaurants gevonden"');
 });
 
 // ─── BE-11 primary navigation slice — PrimaryNav mounted, "← Home" removed ──
@@ -354,4 +356,67 @@ test('BE-12: no grouping, filter mode, or backend logic was added for this refin
   const helperMatch = source.match(/function hasDishNameCollision\([\s\S]*?\n\}/);
   assert.ok(helperMatch, 'expected to find the collision helper');
   assert.doesNotMatch(helperMatch[0], /fetch\(|useState|useEffect|useMemo/, 'the collision check must be a plain, synchronous function — no new fetch, state, or effect');
+});
+
+// ─── BE-15 — group broad dish search results by restaurant and menu ──────
+// Same fs.readFileSync + regex convention as the rest of this file. See
+// planning/specs/tickets/be-15-group-broad-dish-search-results.md.
+
+test('BE-15: the dish search request always opts into the additive group=restaurant response mode', () => {
+  const source = readPageSource();
+  assert.match(source, /params\.set\('group', 'restaurant'\)/);
+});
+
+test('BE-15: the group action link never sets dish/name/cat — only q/fromQuery — so it can never trigger BE-12\'s highlight mechanism', () => {
+  const source = readPageSource();
+  const fnMatch = source.match(/function buildGroupMenuHref\([\s\S]*?\n\}/);
+  assert.ok(fnMatch, 'expected to find buildGroupMenuHref');
+  assert.doesNotMatch(fnMatch[0], /\bdish\b|\bname\b|\bcat\b/, 'the group link builder must never set a dish/name/cat param');
+  assert.match(fnMatch[0], /params\.set\('q', query\)/);
+  assert.match(fnMatch[0], /params\.set\('fromQuery', query\)/);
+});
+
+test('BE-15: the grouped section is only rendered when non-empty, and sits in a fixed position independent of the BE-11 restaurantsFirst order-flip', () => {
+  const source = readPageSource();
+  assert.match(source, /const groupedSection = groups\.length > 0 && \(/);
+  assert.match(
+    source,
+    /\{!loading && groupedSection\}\s*\{restaurantsFirst \? \(/,
+    'groupedSection must render before the restaurantsFirst ternary, never inside either branch of it'
+  );
+});
+
+test('BE-15: heading hierarchy — restaurant group is an <h3>, each menu subgroup is an <h4>, nested under the section\'s own, distinctly-named <h2>', () => {
+  const source = readPageSource();
+  assert.match(source, /<h2 className="results-count" id="gerechten-gegroepeerd-heading">\s*Gerechten gegroepeerd per restaurant/);
+  assert.match(source, /<h3 className="dish-group-restaurant-name">\{group\.restaurantName\}<\/h3>/);
+  assert.match(source, /<h4 className="dish-group-menu-title">/);
+});
+
+test('BE-15: a menu subgroup shows a full-sentence count, honestly-labelled primary action, and plain-text (non-link) examples — exactly one real Link per subgroup', () => {
+  const source = readPageSource();
+  assert.match(source, /\{menu\.count\} \{menu\.count === 1 \? 'gerecht' : 'gerechten'\}/, 'singular/plural full-sentence count, matching "1 gerecht"/"N gerechten"');
+  assert.match(source, /<p className="dish-group-examples">\{menu\.examples\.join\(', '\)\}<\/p>/, 'examples must be plain text, never individually wrapped in a Link');
+  assert.match(source, /<Link href=\{buildGroupMenuHref\(menu, filters\.q\)\} className="detail-menu-btn-outline dish-group-link">\s*Bekijk alle \{menu\.count\} op de kaart →/);
+});
+
+test('BE-15: "Gerechten gevonden" is scoped to leftover, non-qualifying results only — its own count is results.length, never the restaurant-group total', () => {
+  const source = readPageSource();
+  assert.match(source, /\(\{results\.length\}\{filters\.q && ` voor "\$\{filters\.q\}"`\}\)/, 'the individual-results heading must count results.length, not a restaurant-group total');
+});
+
+test('BE-15: the empty/"niets gevonden" state only fires when both the individual results and the restaurant groups are empty — never merely because restaurantGroups is empty', () => {
+  const source = readPageSource();
+  assert.match(source, /results\.length === 0 && groups\.length === 0 \?/);
+});
+
+test('BE-15: "load more" now paginates restaurant groups (groupsNextCursor/groupsHasMore), never a raw-dish cursor', () => {
+  const source = readPageSource();
+  assert.match(source, /const handleLoadMore = \(\) => \{\s*if \(groupsNextCursor == null\) return\s*runSearch\(filters, groupsNextCursor\)/);
+});
+
+test('BE-15: results is always replaced (never appended) on every fetch — the leftover list is already complete, so appending on "load more" would duplicate it', () => {
+  const source = readPageSource();
+  assert.match(source, /setResults\(data\.results\)/);
+  assert.doesNotMatch(source, /setResults\(\(prev\) => \(cursor \? \[\.\.\.prev, \.\.\.data\.results\]/, 'results must never be concatenated across pages in the new BE-15 fetch logic');
 });

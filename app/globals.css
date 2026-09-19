@@ -1828,6 +1828,21 @@ mark.search-highlight {
   padding: 24px 0 8px;
 }
 
+/* BE-15 — the grouped-restaurant section. `.dish-group-card` reuses
+   `.menu-card`'s existing background/border/padding/radius (see the
+   "menu-card dish-group-card" className) — no new card surface. */
+.dish-group-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.dish-group-restaurant-name { font-size: 15px; margin: 0 0 8px; }
+.dish-group-menu { padding: 8px 0; border-top: 1px solid var(--border); }
+.dish-group-menu:first-of-type { border-top: none; padding-top: 0; }
+.dish-group-menu-title { font-size: 13px; font-weight: 600; margin: 0 0 4px; }
+.dish-group-examples { font-size: 12px; color: var(--text-secondary); margin: 0 0 8px; }
+.dish-group-link { font-size: 12px; padding: 6px 14px; }
+
 /* ─────────────────────────────────────────────────────────────────────────────
    BE-06 — Filters + URL state (/search)
    Reuses existing tokenized classes (.meal-selector/.home-meal-btn,

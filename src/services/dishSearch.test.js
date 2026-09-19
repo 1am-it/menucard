@@ -150,3 +150,122 @@ test('BE-13: the mixed query "Bardot friet" stays at zero results — explicitly
   const res = searchDishes({ q: 'Bardot friet' });
   assert.equal(res.total, 0, 'mixed/tokenized cross-field queries are a distinct, separately-scoped problem this ticket does not solve');
 });
+
+// ─── BE-15 — group broad dish search results by restaurant and menu ──────
+// Written against the real, unmodified project data, same "no mocks"
+// convention as the rest of this file. See
+// planning/specs/tickets/be-15-group-broad-dish-search-results.md.
+
+test('BE-15: an absent group value returns the exact, unmodified ungrouped response — no restaurantGroups field at all', () => {
+  const ungrouped = searchDishes({ q: 'friet' });
+  const withoutGroupParam = searchDishes({ q: 'friet', group: '' });
+  assert.deepEqual(withoutGroupParam, ungrouped, 'omitting group must be byte-for-byte identical to the pre-BE-15 response');
+  assert.equal(Object.prototype.hasOwnProperty.call(ungrouped, 'restaurantGroups'), false);
+});
+
+test('BE-15: an unknown group value falls back to the exact ungrouped response, same as an absent one', () => {
+  const ungrouped = searchDishes({ q: 'friet' });
+  const unknownGroup = searchDishes({ q: 'friet', group: 'meal' });
+  assert.deepEqual(unknownGroup, ungrouped, 'an unrecognized group value must fall back completely and silently, never zero out results like an invalid `meal` would');
+});
+
+test('BE-15: q=kip — 11 dishes match, but none reaches the 4-or-more threshold, so restaurantGroups is empty and all 11 stay as individual results', () => {
+  const res = searchDishes({ q: 'kip', group: 'restaurant' });
+  assert.equal(res.restaurantGroups.length, 0, 'no restaurant+menu combination for "kip" reaches 4 matches');
+  assert.equal(res.total, 0, 'group-mode total counts qualifying restaurant groups — zero here');
+  assert.equal(res.results.length, 11, 'all 11 underlying dish matches remain as individual, non-grouped results');
+  assert.equal(res.lowCoverage, undefined, 'lowCoverage must not appear — the underlying, ungrouped dish count (11) is not zero, even though the group-mode total is');
+});
+
+test('BE-15: q=friet — both T-Huis menus reach the threshold (lunch=4, diner=8), one restaurant group with two subgroups, zero leftover individual results', () => {
+  const res = searchDishes({ q: 'friet', group: 'restaurant' });
+  assert.equal(res.restaurantGroups.length, 1);
+  const [group] = res.restaurantGroups;
+  assert.equal(group.restaurantId, '23');
+  assert.equal(group.restaurantName, 'T-Huis');
+  assert.deepEqual(group.menus.map((m) => [m.mealType, m.count]), [['diner', 8], ['lunch', 4]], 'subgroups ordered by descending match count, diner (8) before lunch (4)');
+  assert.equal(res.results.length, 0, 'every friet match belongs to the one qualifying restaurant, so no individual leftover dishes remain');
+});
+
+test('BE-15: q=brood — the decisive pagination-reliability fixture. Server-side aggregation over the full candidate set gives the real, complete counts regardless of dish-level page size', () => {
+  const res = searchDishes({ q: 'brood', group: 'restaurant' });
+  assert.equal(res.restaurantGroups.length, 1, 'only T-Huis qualifies');
+  const [group] = res.restaurantGroups;
+  assert.equal(group.restaurantId, '23');
+  assert.deepEqual(
+    group.menus.map((m) => [m.mealType, m.count]),
+    [['diner', 7], ['lunch', 5], ['borrel', 1]],
+    'exact, complete per-menu totals (diner=7, lunch=5) — a client-side pass over one dish-level page alone would undercount these (see the ungrouped q=brood pagination test below)'
+  );
+  // T-Huis's own thin borrel menu (1 match) rides along as a third
+  // subgroup purely because T-Huis already qualifies via diner/lunch —
+  // never because 1 reaches the threshold on its own.
+  assert.equal(group.menus.find((m) => m.mealType === 'borrel').count, 1);
+  assert.equal(res.results.length, 11, 'Bardot (6), Zuyd (4), and Wolfslaar (1) — 11 dishes — stay individual; 13 grouped + 11 individual = 24');
+  const leftoverRestaurantIds = new Set(res.results.map((d) => d.restaurantId));
+  assert.deepEqual([...leftoverRestaurantIds].sort(), ['1', '19', '6'], 'no leftover dish belongs to T-Huis (id 23) — no duplication between the group and the individual list');
+});
+
+test('BE-15: the ungrouped q=brood response still exhibits the real pagination boundary this ticket\'s architecture is designed around', () => {
+  // Proof that aggregation must happen over the full set, not one page:
+  // page 1 alone would undercount 23-lunch/23-diner.
+  const page1 = searchDishes({ q: 'brood', cursor: 0, limit: 20 });
+  const page2 = searchDishes({ q: 'brood', cursor: 20, limit: 20 });
+  assert.equal(page1.total, 24);
+  assert.equal(page1.hasMore, true);
+  const countOnPage1 = (mealType) => page1.results.filter((d) => d.restaurantId === '23' && d.mealType === mealType).length;
+  const countOnPage2 = (mealType) => page2.results.filter((d) => d.restaurantId === '23' && d.mealType === mealType).length;
+  assert.equal(countOnPage1('lunch') + countOnPage2('lunch'), 5, 'real total for 23-lunch is 5, split across the two dish-level pages');
+  assert.equal(countOnPage1('diner') + countOnPage2('diner'), 7, 'real total for 23-diner is 7, split across the two dish-level pages');
+});
+
+test('BE-15: server-side aggregation happens before pagination — a small cursor/limit never shrinks a restaurant group\'s counts or drops the restaurant entirely', () => {
+  const full = searchDishes({ q: 'brood', group: 'restaurant', limit: 20 });
+  const tinyPage = searchDishes({ q: 'brood', group: 'restaurant', limit: 1 });
+  assert.deepEqual(tinyPage.restaurantGroups[0], full.restaurantGroups[0], 'the one restaurant group on a 1-per-page slice is identical to the same group in a full, unpaginated fetch — aggregation ran over all 24 candidates either way');
+});
+
+test('BE-15: restaurant-level pagination — cursor/limit paginate qualifying restaurant groups, never raw dishes, and a group is never split across two pages', () => {
+  // A synthetic broad query with more than one qualifying restaurant is not
+  // reproducible against today's real data (only T-Huis ever reaches the
+  // threshold on any single real query) — so this proves the pagination
+  // mechanics themselves on the one real multi-group-shaped case available:
+  // requesting limit=1 still returns exactly the one real qualifying group,
+  // complete and un-split, with hasMore correctly false since there is only
+  // one qualifying restaurant for this query today.
+  const res = searchDishes({ q: 'brood', group: 'restaurant', limit: 1 });
+  assert.equal(res.restaurantGroups.length, 1);
+  assert.equal(res.restaurantGroups[0].menus.length, 3, 'all three of T-Huis\'s own qualifying/riding-along menus stay together in the one group, never split');
+  assert.equal(res.hasMore, false);
+  assert.equal(res.nextCursor, null);
+});
+
+test('BE-15: no duplication — a dish appearing in a qualifying restaurant group never also appears in the individual results list', () => {
+  const res = searchDishes({ q: 'brood', group: 'restaurant' });
+  const groupedRestaurantIds = new Set(res.restaurantGroups.map((g) => g.restaurantId));
+  for (const dish of res.results) {
+    assert.equal(groupedRestaurantIds.has(dish.restaurantId), false, `dish ${dish.dishId} belongs to a restaurant that is both grouped and listed individually`);
+  }
+});
+
+test('BE-15: qualifying menu subgroups reuse the exact same public dish fields and openStatus computation as the ungrouped path — no separate/duplicated shape', () => {
+  const ungrouped = searchDishes({ q: 'friet' });
+  const grouped = searchDishes({ q: 'friet', group: 'restaurant' });
+  const dinerNames = ungrouped.results.filter((d) => d.mealType === 'diner').map((d) => d.name);
+  const group = grouped.restaurantGroups[0];
+  const dinerMenu = group.menus.find((m) => m.mealType === 'diner');
+  assert.deepEqual(dinerMenu.examples, dinerNames.slice(0, 3), 'the first three examples must be the same three dishes, in the same relevance order, as the ungrouped path already returns');
+  assert.equal(dinerMenu.menuLink, '/menu/23-diner');
+});
+
+test('BE-15: lowCoverage keeps its exact existing trigger under group=restaurant — a genuinely zero-match query still gets it, identically in both modes', () => {
+  // Real fixture: cuisine "Chinees" has one relevant restaurant with no
+  // digitized menu data — the ungrouped path already surfaces lowCoverage
+  // for this filter today.
+  const filters = { cuisines: ['Chinees'] };
+  const ungrouped = searchDishes(filters);
+  const grouped = searchDishes({ ...filters, group: 'restaurant' });
+  assert.ok(ungrouped.lowCoverage, 'baseline: this real filter must already trigger lowCoverage in the ungrouped response');
+  assert.deepEqual(grouped.lowCoverage, ungrouped.lowCoverage, 'lowCoverage must be identical in both modes for the same genuinely-zero-match filters');
+  assert.deepEqual(grouped.restaurantGroups, [], 'zero underlying matches means zero groups too');
+});

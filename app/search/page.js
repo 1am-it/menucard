@@ -45,6 +45,19 @@ const MEAL_TYPE_LABELS = {
   specialiteiten: 'Specialiteiten',
 }
 
+// BE-15 — the menu-*card* title form (matching `app/menu/[id]/MenuView.js`'s
+// own MEAL_CONFIG.title strings already shown on `/menu/[id]` itself), used
+// only for the grouped section's menu-subgroup headings below — distinct
+// from MEAL_TYPE_LABELS above, which labels an individual dish row's
+// compact context line. Duplicated rather than imported, same reasoning as
+// MEAL_TYPE_LABELS itself (MenuView.js is a separate 'use client' module).
+const MENU_TITLE_LABELS = {
+  lunch:          'Lunchkaart',
+  diner:          'Dinerkaart',
+  borrel:         'Borrelkaart',
+  specialiteiten: 'Specialiteiten',
+}
+
 // ─── BE-06 filter constants ─────────────────────────────────────────────────
 // Duplicated from app/page.js rather than imported — that file is a separate
 // 'use client' page, not a shared module, consistent with how BE-02b/BE-03
@@ -176,6 +189,22 @@ function buildDishMenuHref(dish, query) {
   return `${dish.menuLink}?${params.toString()}`
 }
 
+// BE-15 — a group's "view all matches" action: additive combination of the
+// two already-existing, already-safe parameters `?q=`/`fromQuery`, never a
+// new parameter or mechanism. Deliberately never sets `dish`/`name`/`cat`,
+// so `resolveDishTarget()` on `/menu/[id]` always returns null for this
+// link — no item is scrolled to, focused, or highlighted, per "Two intents
+// to preserve" in the ticket.
+function buildGroupMenuHref(menu, query) {
+  const params = new URLSearchParams()
+  if (query) {
+    params.set('q', query)
+    params.set('fromQuery', query)
+  }
+  const qs = params.toString()
+  return qs ? `${menu.menuLink}?${qs}` : menu.menuLink
+}
+
 // BE-12 §1.1 — "two rows for the same restaurant happen to share a name":
 // a collision is scoped to one restaurant, not a name shared across
 // different restaurants (a common, expected, non-confusing case this
@@ -253,13 +282,22 @@ function SearchPageInner() {
   const [inputValue, setInputValue] = useState(filters.q)
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [results, setResults] = useState([])
-  const [total, setTotal] = useState(0)
-  const [nextCursor, setNextCursor] = useState(null)
-  const [hasMore, setHasMore] = useState(false)
   const [loading, setLoading] = useState(false)
   const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState(null)
   const [lowCoverage, setLowCoverage] = useState(null)
+
+  // BE-15 — the additive `group=restaurant` response mode's own state,
+  // named distinctly from `restaurantResults`/`restaurantTotal`/etc. below
+  // (BE-11 Fase 2's unrelated restaurant *name*/buurt-match group) to avoid
+  // any confusion between the two separate "restaurant" concepts on this
+  // page. `groupsTotal`/`groupsNextCursor`/`groupsHasMore` paginate
+  // restaurant groups, never raw dishes — see dishSearch.js's own
+  // "Server-side aggregation" comment.
+  const [groups, setGroups] = useState([])
+  const [groupsTotal, setGroupsTotal] = useState(0)
+  const [groupsNextCursor, setGroupsNextCursor] = useState(null)
+  const [groupsHasMore, setGroupsHasMore] = useState(false)
 
   // BE-11 Fase 2 — the parallel restaurant group. Entirely independent
   // request/loading/error state from the dish search above: the two fetch
@@ -288,6 +326,12 @@ function SearchPageInner() {
   const runSearch = useCallback(async (f, cursor) => {
     const id = ++requestId.current
     const params = buildParams(f)
+    // BE-15 — always request the additive grouped mode; the existing
+    // ungrouped shape stays available to any other caller that omits this
+    // parameter (see dishSearch.js). `cursor`/`limit` below now paginate
+    // restaurant groups, not raw dishes, per the ticket's decided
+    // architecture.
+    params.set('group', 'restaurant')
     if (cursor) params.set('cursor', String(cursor))
 
     if (cursor) setLoadingMore(true)
@@ -300,10 +344,17 @@ function SearchPageInner() {
       const data = await res.json()
       if (id !== requestId.current) return // stale response, ignore
 
-      setResults((prev) => (cursor ? [...prev, ...data.results] : data.results))
-      setTotal(data.total)
-      setNextCursor(data.nextCursor)
-      setHasMore(data.hasMore)
+      // BE-15 — `results` (the leftover, non-qualifying dishes) is always
+      // returned complete by the server in grouped mode, never chunked, so
+      // it is always replaced, never appended — appending here would
+      // duplicate it on every "load more" click. `groups` themselves are
+      // the paginated unit and are appended on "load more", exactly like
+      // the pre-existing dish-level pagination this replaces.
+      setResults(data.results)
+      setGroups((prev) => (cursor ? [...prev, ...(data.restaurantGroups || [])] : (data.restaurantGroups || [])))
+      setGroupsTotal(data.total)
+      setGroupsNextCursor(data.nextCursor)
+      setGroupsHasMore(data.hasMore)
       if (!cursor) setLowCoverage(data.lowCoverage || null)
     } catch (e) {
       if (id !== requestId.current) return
@@ -320,7 +371,7 @@ function SearchPageInner() {
   // of them change `filtersKey`, and this is the only place that fetches.
   useEffect(() => {
     if (!filters.q && !active) {
-      setResults([]); setTotal(0); setNextCursor(null); setHasMore(false); setLowCoverage(null)
+      setResults([]); setGroups([]); setGroupsTotal(0); setGroupsNextCursor(null); setGroupsHasMore(false); setLowCoverage(null)
       return
     }
     runSearch(filters, 0)
@@ -424,9 +475,12 @@ function SearchPageInner() {
 
   const resetFilters = () => pushFilters({ q: filters.q, meal: '', maxPrice: '', cuisines: [], excl: [], day: '', nowOpen: false })
 
+  // BE-15 — "Meer resultaten laden" now loads more restaurant groups
+  // (never more raw dishes — `results`, the leftover individual dishes, is
+  // always already complete), reusing the exact same button/pattern.
   const handleLoadMore = () => {
-    if (nextCursor == null) return
-    runSearch(filters, nextCursor)
+    if (groupsNextCursor == null) return
+    runSearch(filters, groupsNextCursor)
   }
 
   const panelFilterCount = (filters.day ? 1 : 0) + (filters.maxPrice ? 1 : 0) + filters.cuisines.length + filters.excl.length
@@ -460,7 +514,7 @@ function SearchPageInner() {
     <div className="empty-state">
       <p>Zoeken…</p>
     </div>
-  ) : results.length === 0 ? (
+  ) : results.length === 0 && groups.length === 0 ? (
     restaurantsPending ? (
       // Dishes are already known to be empty, but the parallel restaurant
       // fetch for this same query hasn't settled yet — wait for it rather
@@ -511,13 +565,18 @@ function SearchPageInner() {
         )}
       </div>
     )
-  ) : (
+  ) : results.length > 0 ? (
+    // BE-15 — "Gerechten gevonden" is now scoped to only the non-qualifying,
+    // leftover dishes (see dishSearch.js); once a restaurant qualifies for
+    // grouping, all of its dishes moved into `groupedSection` above and are
+    // never shown here too. This list is always complete, so its own count
+    // is `results.length`, never the (now restaurant-group) `groupsTotal`.
     <>
       <div className="results-header">
         <h2 className="results-count">
           Gerechten gevonden{' '}
           <span className="results-count-detail">
-            ({total}{filters.q && ` voor "${filters.q}"`})
+            ({results.length}{filters.q && ` voor "${filters.q}"`})
           </span>
         </h2>
       </div>
@@ -532,8 +591,51 @@ function SearchPageInner() {
           />
         ))}
       </div>
+    </>
+  ) : null
 
-      {hasMore && (
+  // BE-15 — the grouped section, only ever rendered when it has actual
+  // groups, matching the "only when non-empty" rule in the ticket's
+  // decided heading hierarchy. A restaurant is one <h3> group; each of its
+  // relevant menus (including a thin, 1-3-match one riding along once the
+  // restaurant itself qualifies) is an <h4> subgroup — never re-sorted,
+  // counts and examples come straight from the server in relevance order.
+  // Example dish names are plain, non-interactive text (no nested links):
+  // exactly one real, keyboard-operable <Link> per subgroup, the "view all
+  // matches" action, which never highlights a dish (see buildGroupMenuHref
+  // above).
+  const groupedSection = groups.length > 0 && (
+    <section aria-labelledby="gerechten-gegroepeerd-heading" style={{ marginTop: 24 }}>
+      <div className="results-header">
+        <h2 className="results-count" id="gerechten-gegroepeerd-heading">
+          Gerechten gegroepeerd per restaurant
+        </h2>
+      </div>
+
+      <div className="dish-group-list">
+        {groups.map((group) => (
+          <div key={group.restaurantId} className="menu-card dish-group-card">
+            <h3 className="dish-group-restaurant-name">{group.restaurantName}</h3>
+            {group.menus.map((menu) => (
+              <div key={menu.mealType} className="dish-group-menu">
+                <h4 className="dish-group-menu-title">
+                  {MENU_TITLE_LABELS[menu.mealType] || menu.mealType}
+                  {' — '}
+                  {menu.count} {menu.count === 1 ? 'gerecht' : 'gerechten'}
+                </h4>
+                {menu.examples.length > 0 && (
+                  <p className="dish-group-examples">{menu.examples.join(', ')}</p>
+                )}
+                <Link href={buildGroupMenuHref(menu, filters.q)} className="detail-menu-btn-outline dish-group-link">
+                  Bekijk alle {menu.count} op de kaart →
+                </Link>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+
+      {groupsHasMore && (
         <div className="load-more-wrap">
           <button
             className="detail-menu-btn-outline load-more-btn"
@@ -544,7 +646,7 @@ function SearchPageInner() {
           </button>
         </div>
       )}
-    </>
+    </section>
   )
 
   // Only ever rendered when it has actual results (BE-11 Fase 2 §5/§11):
@@ -762,15 +864,24 @@ function SearchPageInner() {
             <h2 className="empty-state-title">Er ging iets mis</h2>
             <p>{error}</p>
           </div>
-        ) : restaurantsFirst ? (
-          <>
-            {restaurantsGroup}
-            {dishesGroup}
-          </>
         ) : (
           <>
-            {dishesGroup}
-            {restaurantsGroup}
+            {/* BE-15 — fixed position, always immediately here, regardless
+                of BE-11 Fase 2's own order-flip logic below (that logic is
+                untouched — see the ticket's "Section placement and heading
+                hierarchy" decision). */}
+            {!loading && groupedSection}
+            {restaurantsFirst ? (
+              <>
+                {restaurantsGroup}
+                {dishesGroup}
+              </>
+            ) : (
+              <>
+                {dishesGroup}
+                {restaurantsGroup}
+              </>
+            )}
           </>
         )}
       </main>

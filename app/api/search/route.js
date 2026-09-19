@@ -32,6 +32,9 @@ export async function GET(request) {
   const nowOpen = searchParams.get('nowOpen') === '1' || searchParams.get('nowOpen') === 'true'
   const cursor = parseIntOr(searchParams.get('cursor'), 0)
   const limit = parseIntOr(searchParams.get('limit'), undefined)
+  // BE-15 — passed through as-is; searchDishes() itself falls back to the
+  // default, ungrouped response for any value other than 'restaurant'.
+  const group = searchParams.get('group') || ''
 
   const result = searchDishes({
     q,
@@ -44,6 +47,7 @@ export async function GET(request) {
     nowOpen,
     cursor,
     limit,
+    group,
   })
 
   return NextResponse.json(result, {

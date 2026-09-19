@@ -45,6 +45,12 @@ const CUISINE_KEYWORDS = {
 const DEFAULT_LIMIT = 20
 const MAX_LIMIT = 50
 
+// BE-15 — a restaurant qualifies for the optional `group=restaurant`
+// response mode when at least one of its menus reaches this many matches
+// for the query. Stated once, positively, reused verbatim — see
+// be-15-group-broad-dish-search-results.md "Server-side aggregation".
+const GROUP_THRESHOLD = 4
+
 function getTodayKey() {
   const map = ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za']
   return map[new Date().getDay()]
@@ -250,6 +256,9 @@ function toPublicDishShape(dish) {
  * @param {boolean} [params.nowOpen]
  * @param {number} [params.cursor] - offset into the filtered result set
  * @param {number} [params.limit]
+ * @param {string} [params.group] - BE-15: 'restaurant' for the additive
+ *   grouped response mode; any other/absent value falls back, silently
+ *   and completely, to the default, ungrouped response below.
  */
 function searchDishes({
   q = '',
@@ -262,6 +271,7 @@ function searchDishes({
   nowOpen = false,
   cursor = 0,
   limit = DEFAULT_LIMIT,
+  group = '',
 } = {}) {
   const boundedLimit = Math.min(Math.max(1, limit || DEFAULT_LIMIT), MAX_LIMIT)
   const boundedCursor = Math.max(0, cursor || 0)
@@ -298,27 +308,127 @@ function searchDishes({
     return a.dish.name.localeCompare(b.dish.name, 'nl')
   })
 
-  const total = candidates.length
-  const page = candidates
-    .slice(boundedCursor, boundedCursor + boundedLimit)
+  // BE-15 — `group` is a response-shape flag, not a content filter (unlike
+  // `meal` above, whose own unrecognized value correctly zeroes out
+  // results): an absent or unrecognized value must fall back, silently and
+  // completely, to today's exact, unmodified response below. See
+  // be-15-group-broad-dish-search-results.md "Server-side aggregation"
+  // point 2.
+  const groupMode = group === 'restaurant'
+
+  if (!groupMode) {
+    const total = candidates.length
+    const page = candidates
+      .slice(boundedCursor, boundedCursor + boundedLimit)
+      .map(({ dish }) => ({
+        ...toPublicDishShape(dish),
+        openStatus: getOpenStatus(dish._restaurant, day || undefined),
+      }))
+
+    const nextCursor = boundedCursor + boundedLimit < total ? boundedCursor + boundedLimit : null
+
+    // Only computed on the empty-result path, and only included in the
+    // response when there's actually something honest to disclose — see
+    // computeLowCoverageSignal() above. Every non-empty response is
+    // unchanged from before this field existed.
+    const lowCoverage = total === 0 ? computeLowCoverageSignal({ cuisines, buurt, day, nowOpen }) : null
+
+    return {
+      results: page,
+      total,
+      nextCursor,
+      hasMore: nextCursor !== null,
+      ...(lowCoverage ? { lowCoverage } : {}),
+    }
+  }
+
+  // BE-15 — server-side restaurant+menu aggregation, computed over the
+  // complete, unpaginated `candidates` set built above — never over one
+  // already-paginated page (the real `q=brood` fixture in the ticket is
+  // the reproduced defect this prevents). Restaurants are ordered by
+  // first-appearance in `candidates` (the existing tier/tie-break
+  // relevance order); each menu's own example dish names are also in that
+  // order. Menu subgroups within a restaurant are ordered by descending
+  // match count, matching the ticket's own worked examples ("Dinerkaart —
+  // 8, Lunchkaart — 3, Borrelkaart — 1"; the real `brood` fixture's
+  // diner=7, lunch=5, borrel=1) — never re-sorted alphabetically.
+  const restaurantOrder = []
+  const restaurantsById = new Map()
+
+  for (const { dish } of candidates) {
+    let entry = restaurantsById.get(dish.restaurantId)
+    if (!entry) {
+      entry = {
+        restaurantId: dish.restaurantId,
+        restaurantName: dish.restaurantName,
+        menuOrder: [],
+        menusByType: new Map(),
+      }
+      restaurantsById.set(dish.restaurantId, entry)
+      restaurantOrder.push(dish.restaurantId)
+    }
+    let menu = entry.menusByType.get(dish.mealType)
+    if (!menu) {
+      menu = { mealType: dish.mealType, count: 0, examples: [], menuLink: dish.menuLink }
+      entry.menusByType.set(dish.mealType, menu)
+      entry.menuOrder.push(dish.mealType)
+    }
+    menu.count += 1
+    if (menu.examples.length < 3) menu.examples.push(dish.name)
+  }
+
+  // A restaurant qualifies once at least one of its menus reaches
+  // GROUP_THRESHOLD; every one of that restaurant's other matching menus
+  // (even at 1-3 matches) is then included as its own subgroup — a menu
+  // never independently qualifies below the threshold, but rides along
+  // once its own restaurant already qualifies via a different menu.
+  const qualifyingRestaurantIds = new Set()
+  const allGroups = []
+  for (const restaurantId of restaurantOrder) {
+    const entry = restaurantsById.get(restaurantId)
+    const menus = entry.menuOrder
+      .map((mealType) => entry.menusByType.get(mealType))
+      .sort((a, b) => b.count - a.count)
+    if (!menus.some((m) => m.count >= GROUP_THRESHOLD)) continue
+    qualifyingRestaurantIds.add(restaurantId)
+    allGroups.push({ restaurantId: entry.restaurantId, restaurantName: entry.restaurantName, menus })
+  }
+
+  // Restaurant-level pagination (never raw-dish, never menu-subgroup) —
+  // `total`/`nextCursor`/`hasMore` now count/paginate restaurant groups,
+  // reusing the same DEFAULT_LIMIT/MAX_LIMIT-bounded cursor as the
+  // ungrouped path above, at this new aggregation level.
+  const groupsTotal = allGroups.length
+  const groupsPage = allGroups.slice(boundedCursor, boundedCursor + boundedLimit)
+  const groupsNextCursor = boundedCursor + boundedLimit < groupsTotal ? boundedCursor + boundedLimit : null
+
+  // No duplication: once a restaurant qualifies, every one of its dishes
+  // (including a thin, 1-3-match menu) moves entirely into
+  // `restaurantGroups` and is removed from `results` here. This list is
+  // deliberately returned complete, never sliced by cursor/limit — those
+  // now paginate `restaurantGroups` only; a second, independent pagination
+  // axis for these leftover dishes is not something the ticket specifies,
+  // and today's real data keeps this list small.
+  const leftoverResults = candidates
+    .filter(({ dish }) => !qualifyingRestaurantIds.has(dish.restaurantId))
     .map(({ dish }) => ({
       ...toPublicDishShape(dish),
       openStatus: getOpenStatus(dish._restaurant, day || undefined),
     }))
 
-  const nextCursor = boundedCursor + boundedLimit < total ? boundedCursor + boundedLimit : null
-
-  // Only computed on the empty-result path, and only included in the
-  // response when there's actually something honest to disclose — see
-  // computeLowCoverageSignal() above. Every non-empty response is
-  // unchanged from before this field existed.
-  const lowCoverage = total === 0 ? computeLowCoverageSignal({ cuisines, buurt, day, nowOpen }) : null
+  // `lowCoverage` keeps its exact existing meaning and trigger: the full,
+  // underlying, ungrouped candidate count (`candidates.length`) — never
+  // the group-mode `total` above, which can be 0 while dozens of dishes
+  // matched (the real `q=kip` fixture). See "Server-side aggregation"
+  // point 6.
+  const lowCoverage = candidates.length === 0 ? computeLowCoverageSignal({ cuisines, buurt, day, nowOpen }) : null
 
   return {
-    results: page,
-    total,
-    nextCursor,
-    hasMore: nextCursor !== null,
+    results: leftoverResults,
+    total: groupsTotal,
+    nextCursor: groupsNextCursor,
+    hasMore: groupsNextCursor !== null,
+    restaurantGroups: groupsPage,
     ...(lowCoverage ? { lowCoverage } : {}),
   }
 }
