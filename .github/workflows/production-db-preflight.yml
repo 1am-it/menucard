@@ -2,9 +2,12 @@ name: Production database preflight (read-only)
 
 # ═══════════════════════════════════════════════════════════════════════
 # READ-ONLY. This workflow never applies a migration, never creates or
-# alters a database object, and never runs arbitrary SQL. Its only job is
-# to answer, without changing anything: are we actually ready to run
-# production-db-migrate.yml?
+# alters a database object, and never runs mutating or arbitrary SQL — the
+# only SQL it ever runs is a fixed, hardcoded set of read-only catalog
+# queries (information_schema/pg_catalog) for schema inspection, wrapped
+# in an explicit read-only transaction that always ends in ROLLBACK. Its
+# only job is to answer, without changing anything: are we actually ready
+# to run production-db-migrate.yml?
 #
 # Same protection as that workflow: `environment: production-migrations`
 # below only pauses for human approval if "Required reviewers" has been
@@ -461,6 +464,134 @@ jobs:
             echo "verdict=ready"
             echo "reason=local and live history match applied_versions/staged_versions exactly"
           } >> "$GITHUB_OUTPUT"
+
+      # Read-only schema/catalog metadata check: confirms whether the
+      # existing review-, audit-log-, and provenance-pattern tables that a
+      # future menu-proposal model might reuse actually exist in
+      # production, with the expected columns/constraints/protections —
+      # catalog metadata only, never a table's own rows. Table names below
+      # are taken directly from the migrations already in this repository
+      # (0001, 0002, 0003, 0004, 0007, 0008, 0010).
+      #
+      # Reuses this job's existing `production-migrations` environment
+      # gate and the same SUPABASE_DB_URL Session Pooler connection the
+      # history-comparison step above already uses — opens one separate,
+      # explicit READ ONLY transaction with a short statement_timeout,
+      # runs only information_schema/pg_catalog SELECTs, and always ends
+      # with ROLLBACK, even on success, since nothing here is ever meant
+      # to persist. No DDL, DML, permission change, migration command, or
+      # function call with a possible side effect appears anywhere below.
+      # Deliberately placed after the history comparison above (so it
+      # only runs once that connection is already known to work) and
+      # before the unmodified run-summary step below, so its own output
+      # is purely additive to the existing "ready or not" verdict.
+      - name: Inspect existing review/audit/provenance table shapes (read-only catalog metadata only)
+        id: schema_check
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          set -uo pipefail
+
+          # Kept as one comma-separated list so every query below filters
+          # on the exact same set — adding a table here later never
+          # requires touching any query.
+          tables="field_provenance,staff_roles,pending_changes,restaurant_claims,import_extraction_records,import_candidate_reviews,import_candidate_enrichments,restaurant_profile_drafts,restaurant_profile_draft_field_facts"
+
+          # Single-quoted heredoc delimiter ('SQL') so bash never expands
+          # anything inside — `:'tables'` below is a psql variable
+          # substitution, resolved by psql itself, not by bash.
+          cat > schema-check.sql <<'SQL'
+          begin transaction read only;
+          set local statement_timeout = '5s';
+
+          select table_name
+            from information_schema.tables
+           where table_schema = 'public'
+             and table_name = any(string_to_array(:'tables', ','))
+           order by table_name;
+
+          select table_name, column_name, data_type, is_nullable, column_default
+            from information_schema.columns
+           where table_schema = 'public'
+             and table_name = any(string_to_array(:'tables', ','))
+           order by table_name, ordinal_position;
+
+          select tc.table_name, tc.constraint_type, tc.constraint_name, kcu.column_name
+            from information_schema.table_constraints tc
+            left join information_schema.key_column_usage kcu
+              on kcu.constraint_name = tc.constraint_name
+             and kcu.table_schema = tc.table_schema
+           where tc.table_schema = 'public'
+             and tc.table_name = any(string_to_array(:'tables', ','))
+           order by tc.table_name, tc.constraint_type, tc.constraint_name;
+
+          select tc.table_name as fk_table, kcu.column_name as fk_column,
+                 ccu.table_name as referenced_table, ccu.column_name as referenced_column,
+                 tc.constraint_name
+            from information_schema.table_constraints tc
+            join information_schema.key_column_usage kcu
+              on kcu.constraint_name = tc.constraint_name and kcu.table_schema = tc.table_schema
+            join information_schema.constraint_column_usage ccu
+              on ccu.constraint_name = tc.constraint_name and ccu.table_schema = tc.table_schema
+           where tc.constraint_type = 'FOREIGN KEY'
+             and tc.table_schema = 'public'
+             and tc.table_name = any(string_to_array(:'tables', ','))
+           order by tc.table_name, tc.constraint_name;
+
+          select rel.relname as table_name, con.conname, con.contype,
+                 pg_get_constraintdef(con.oid) as definition
+            from pg_constraint con
+            join pg_class rel on rel.oid = con.conrelid
+            join pg_namespace nsp on nsp.oid = rel.relnamespace
+           where nsp.nspname = 'public'
+             and rel.relname = any(string_to_array(:'tables', ','))
+             and con.contype = 'c'
+           order by rel.relname, con.conname;
+
+          select indexname, tablename, indexdef
+            from pg_indexes
+           where schemaname = 'public'
+             and tablename = any(string_to_array(:'tables', ','))
+           order by tablename, indexname;
+
+          select event_object_table, trigger_name, action_timing, event_manipulation
+            from information_schema.triggers
+           where event_object_schema = 'public'
+             and event_object_table = any(string_to_array(:'tables', ','))
+           order by event_object_table, trigger_name;
+
+          select schemaname, tablename, policyname, permissive, roles, cmd
+            from pg_policies
+           where schemaname = 'public'
+             and tablename = any(string_to_array(:'tables', ','))
+           order by tablename, policyname;
+
+          select table_name, grantee, privilege_type
+            from information_schema.role_table_grants
+           where table_schema = 'public'
+             and table_name = any(string_to_array(:'tables', ','))
+           order by table_name, grantee, privilege_type;
+
+          rollback;
+          SQL
+
+          if ! psql "$SUPABASE_DB_URL" -X -q -v ON_ERROR_STOP=1 -v tables="$tables" -f schema-check.sql > schema-check-output.txt 2>&1; then
+            echo "::error::Schema metadata inspection failed — see the (metadata-only) output below for the database's own reason. No table rows were ever requested, and the transaction was read-only throughout."
+            cat schema-check-output.txt
+            echo "verdict=blocked" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+
+          echo "Schema metadata inspection completed inside a read-only, rolled-back transaction. The output below contains only catalog/information_schema metadata for the named tables — never row data, and nothing was ever committed."
+          echo "verdict=ok" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "### Existing review/audit/provenance table shapes (read-only catalog metadata; transaction rolled back)"
+            echo ""
+            echo '```'
+            cat schema-check-output.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Write a run summary — the actual "ready or not" verdict
         if: always()
