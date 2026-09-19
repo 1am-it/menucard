@@ -575,7 +575,19 @@ jobs:
           rollback;
           SQL
 
-          if ! psql "$SUPABASE_DB_URL" -X -q -v ON_ERROR_STOP=1 -v tables="$tables" -f schema-check.sql > schema-check-output.txt 2>&1; then
+          # Local, temporary copy of the connection string with only
+          # carriage returns and newlines stripped, used for this psql
+          # call only — never echoed, logged, or written anywhere.
+          # Confirmed via a real dispatch (2026-09-19): the existing
+          # `supabase migration list --db-url "$SUPABASE_DB_URL"` call
+          # above tolerates the secret as stored, but plain `psql` does
+          # not — a trailing newline in the secret value gets included in
+          # libpq's own URI parsing and corrupts the last path segment
+          # (the database name), which this normalization removes before
+          # psql ever sees the value.
+          clean_db_url="$(printf '%s' "$SUPABASE_DB_URL" | tr -d '\r\n')"
+
+          if ! psql "$clean_db_url" -X -q -v ON_ERROR_STOP=1 -v tables="$tables" -f schema-check.sql > schema-check-output.txt 2>&1; then
             echo "::error::Schema metadata inspection failed — see the (metadata-only) output below for the database's own reason. No table rows were ever requested, and the transaction was read-only throughout."
             cat schema-check-output.txt
             echo "verdict=blocked" >> "$GITHUB_OUTPUT"
