@@ -67,9 +67,10 @@ name: Production database preflight (read-only)
 # unless the project has purchased the paid IPv4 add-on (see
 # https://supabase.com/docs/guides/database/connecting-to-postgres).
 # Supavisor's Session pooler is IPv4-only on every project at no extra
-# cost, which is why it's used here instead. `supabase link` itself is
-# unaffected and kept exactly as before — it only calls the Management
-# API and stores project metadata, never opens the direct DB connection.
+# cost, which is why it's used here instead. The project-coupling check
+# itself is unaffected by any of this — it only reads project metadata
+# over the Management API, never opens the direct DB connection (see
+# "Confirm access token and project ref belong together" below).
 # See docs/guides/production-migration-pipeline.md's "One-time GitHub
 # setup" section for exactly how to obtain this connection string.
 
@@ -217,35 +218,47 @@ jobs:
       - name: Confirm the CLI itself installed correctly
         run: supabase --version
 
-      # A single command that, by construction, exercises all three of
-      # this preflight's "does auth/config/project-coupling work?"
-      # checks at once: `link` reads and must accept supabase/config.toml
-      # (config check), authenticates using SUPABASE_ACCESS_TOKEN (auth
-      # check), and resolves + connects to the real project named by
-      # SUPABASE_PROJECT_ID (project-coupling check). Confirmed via the
-      # Supabase CLI's own documentation to be read-only against the
-      # target database — it stores the password locally and reads
-      # Management API project metadata, but performs no schema or data
-      # write of any kind.
-      # SUPABASE_DB_PASSWORD is still supplied here for `link` itself
-      # (per the Supabase CLI's own documented CI example, which sets it
-      # before `supabase link`). It is NOT used by the history-comparison
-      # step below anymore — that step connects via the explicit
-      # `SUPABASE_DB_URL` Session Pooler string instead (see this file's
-      # 2026-09-09 addition at the top), since `--linked` was confirmed
-      # via a real dispatch to resolve to the IPv6-only direct connection.
-      - name: Link to the production Supabase project (read-only)
-        id: link
+      # Read-only Management API check: confirms SUPABASE_ACCESS_TOKEN and
+      # SUPABASE_PROJECT_ID belong to the same, real project — the one
+      # thing this preflight actually needs before the history-comparison
+      # step below (which already connects on its own, via the explicit
+      # SUPABASE_DB_URL Session Pooler string, not via this token/ref
+      # pair). Deliberately narrower than `supabase link`, which this
+      # step replaces: `link` also reads and must accept
+      # supabase/config.toml and requires broader project-management
+      # privileges on the access token, neither of which this preflight
+      # actually needs. A basic "get project" call against the
+      # Management API only requires the token to be able to read
+      # project settings (a token scoped to "Project Settings: Read" is
+      # sufficient) — no database, migration, or write scope of any
+      # kind. Only the resulting HTTP status is inspected; the token,
+      # the request URL, and the response body are never printed or
+      # logged, on success or failure.
+      - name: Confirm access token and project ref belong together (read-only Management API check)
+        id: project_check
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
         run: |
-          if supabase link --project-ref "${{ secrets.SUPABASE_PROJECT_ID }}"; then
-            echo "verdict=ok" >> "$GITHUB_OUTPUT"
-          else
-            echo "::error::'supabase link' failed — see the command output above for the CLI's own reason (commonly: invalid/expired access token, wrong project ref, or a config.toml the CLI rejects). No further checks were run."
+          set -uo pipefail
+          http_status="$(curl -s -o /dev/null -w '%{http_code}' \
+            --request GET \
+            --header "Authorization: Bearer ${SUPABASE_ACCESS_TOKEN}" \
+            "https://api.supabase.com/v1/projects/${SUPABASE_PROJECT_ID}")"
+          curl_exit=$?
+          if [ "$curl_exit" -ne 0 ]; then
+            echo "::error::Could not reach the Supabase Management API (curl exit code ${curl_exit}) before any HTTP status was returned — this may be a network problem rather than an invalid token/project. Neither the token nor the request URL was printed."
             echo "verdict=blocked" >> "$GITHUB_OUTPUT"
-            echo "reason=supabase link failed - see job log" >> "$GITHUB_OUTPUT"
+            echo "reason=curl failed with exit code ${curl_exit} before an HTTP status could be obtained" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+          if [ "$http_status" = "200" ]; then
+            echo "verdict=ok" >> "$GITHUB_OUTPUT"
+            echo "Access token and project ref confirmed to belong together (HTTP 200). Neither the token, the request URL, nor any response content was printed."
+          else
+            echo "::error::Management API project check failed (HTTP ${http_status}) — the access token and project ref do not appear to belong together, or the token lacks sufficient privileges. Neither the token, the request URL, nor any response content was printed. Commonly: invalid/expired access token, wrong project ref, or a token scoped without project-read access."
+            echo "verdict=blocked" >> "$GITHUB_OUTPUT"
+            echo "reason=Management API project check failed with HTTP ${http_status}" >> "$GITHUB_OUTPUT"
             exit 1
           fi
 
