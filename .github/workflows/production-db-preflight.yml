@@ -572,6 +572,32 @@ jobs:
              and table_name = any(string_to_array(:'tables', ','))
            order by table_name, grantee, privilege_type;
 
+          -- BE-17-specific, deliberately not scoped by the general
+          -- `:'tables'` list above: confirms RLS enablement (relrowsecurity/
+          -- relforcerowsecurity) for exactly the two menu-snapshot tables,
+          -- never any other table this inspection already covers.
+          select n.nspname as schema_name, c.relname as table_name,
+                 c.relrowsecurity, c.relforcerowsecurity
+            from pg_catalog.pg_class c
+            join pg_catalog.pg_namespace n on n.oid = c.relnamespace
+           where n.nspname = 'public'
+             and c.relname in ('menu_snapshot_proposals', 'menu_snapshot_reviews')
+           order by c.relname;
+
+          -- BE-17-specific: confirms service_role's effective privileges on
+          -- exactly the two menu-snapshot identity sequences, using the
+          -- fixed, side-effect-free has_sequence_privilege() function —
+          -- never a grant/revoke, never a broader role or sequence.
+          select seq.sequence_name,
+                 has_sequence_privilege('service_role', seq.sequence_name, 'USAGE') as has_usage,
+                 has_sequence_privilege('service_role', seq.sequence_name, 'SELECT') as has_select,
+                 has_sequence_privilege('service_role', seq.sequence_name, 'UPDATE') as has_update
+            from (values
+                    ('public.menu_snapshot_proposals_id_seq'),
+                    ('public.menu_snapshot_reviews_id_seq')
+                 ) as seq(sequence_name)
+           order by seq.sequence_name;
+
           rollback;
           SQL
 
