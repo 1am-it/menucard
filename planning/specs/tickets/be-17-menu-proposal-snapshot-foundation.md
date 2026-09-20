@@ -2,9 +2,35 @@
 
 ## Status
 
-Proposed; not started. Documentation/planning only — no product code,
-migration, route, API, data, dashboard, commit, push, deploy, database,
-account, or storage change has been made for this ticket.
+Implemented, committed, pushed, and live-verified in production, with a
+follow-up build fix also committed and pushed. Verified: local product
+code built and tested (targeted and full test suites green), an
+independent pre-commit review, and a combined pre-push review, each
+conducted separately for the feature commit (`9fee5f7`, "feat(internal):
+add onboarding menu flow") and its Vercel build-fix follow-up
+(`dedb31e`, "fix(internal): separate menu snapshot hash from client
+bundle"). Verified directly against Vercel's own deployment log: the
+production deployment built from `dedb31e` compiled successfully and is
+aliased to the production domain.
+
+**Also verified live, via an authenticated production session** (a
+non-mutating UI smoketest, not a data-mutating end-to-end proposal/review
+test — see Voortgang step 9 below for exactly what this confirms and
+does not confirm): `https://menucard-kappa.vercel.app/internal` shows
+the title `Beheer`, the roles `internal, editor`, and a reachable
+`Onboarding Menu` card/link; `https://menucard-kappa.vercel.app/internal/onboarding-menu`
+renders correctly with `New proposal` and `No menu snapshots yet`. One
+non-blocking UX issue was observed during this same check: on a fresh
+load, `No internal access for this account` briefly appeared before the
+correct page rendered — a role-resolution loading-state timing issue,
+not evidence of an authorization defect (server-side authorization was
+never bypassed; the final, settled rendered state was correct). This is
+recorded as a forward-looking acceptance requirement in
+`be-18-onboarding-menu-via-url.md`, not fixed on this already-shipped
+ticket.
+
+This ticket's own "Onboarding Menu via URL" successor is tracked
+separately as `be-18-onboarding-menu-via-url.md`.
 
 ## Voortgang
 
@@ -16,10 +42,10 @@ BE-17 VOORTGANG
 - [x] 3. Implementatie-readinessreview groen
 - [x] 4. Lokale productcode gebouwd en getest
 - [x] 5. Onafhankelijke pre-commitreview groen
-- [ ] 6. Lokale codecommit gemaakt
-- [ ] 7. Gecombineerde pre-pushreview groen
-- [ ] 8. Code gepusht
-- [ ] 9. Productiecontrole
+- [x] 6. Lokale codecommit gemaakt
+- [x] 7. Gecombineerde pre-pushreview groen
+- [x] 8. Code gepusht
+- [x] 9. Productiecontrole
 
 See `015-be-ticket-structure-and-time-boxing.md` for what this checklist
 means and how it must be kept up to date.

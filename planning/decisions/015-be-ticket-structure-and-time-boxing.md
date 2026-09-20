@@ -84,18 +84,22 @@ the active working time it will take, including local checks, but
 excluding time spent waiting on human approvals, external workflows, or
 deploys.
 
+- **Always report the estimate upfront, before starting** — purely for
+  information.
 - **7 minutes or less** — proceed independently.
-- **More than 7 minutes** — do not make the change yet. Report the
-  estimate, the reason, a safe way to split the work into a first bounded
-  step and a follow-up, and wait for explicit permission before
-  continuing.
+- **More than 7 minutes** — report the estimate and the reason, then
+  proceed automatically. **Corrected 2026-09-20, by explicit user
+  decision**: this no longer means waiting for explicit permission before
+  continuing — duration alone is never a reason to pause work or ask
+  permission. The estimate is informational only, not a gate.
 - **A running estimate turns out to be wrong** — as soon as it becomes
-  reasonably clear that the total will exceed 7 minutes, stop after the
-  most recent safely completed step, make no further changes beyond it,
-  and report the revised estimate in the same shape. Do not keep working
-  past that point on the assumption the estimate will "even out."
+  reasonably clear that the total will exceed 7 minutes, report the
+  revised estimate in the same shape and keep working. Do not stop or
+  wait for permission on account of duration alone.
 - An estimate is a practical expectation, not a guarantee — state briefly
   why an estimate was uncertain or had to be revised when that happens.
+- Stopping mid-task remains correct for a genuine technical, safety, or
+  scope blocker — never for duration by itself.
 
 ## Scope
 

@@ -130,6 +130,16 @@ of these.
     have real mutation paths), does not promote anything to public menu
     data, and does not run the pilot itself — see the ticket's own
     "Relationship to `MARKET-02B`" and "Non-goals" sections.
+20. [be-18-onboarding-menu-via-url.md](./be-18-onboarding-menu-via-url.md) —
+    not started, documentation/planning only; fase 1 of a URL-driven
+    replacement for BE-17's raw restaurant-ID/menu-context/JSON pilot
+    input — the reviewer pastes only a menu URL, the app reads it,
+    matches it to an existing restaurant (asking only on genuine
+    ambiguity), distinguishes separate menu contexts (e.g. Lunch/Diner)
+    from categories within one card, and creates one BE-17 proposal per
+    confirmed menu via the existing, unchanged creation route. HTML with
+    JSON-LD menu data only in this fase; PDF sources and batch/CSV intake
+    of multiple URLs are explicitly later, separate tickets.
 
 ## PLATFORM-* order (not started)
 
