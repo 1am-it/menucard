@@ -123,7 +123,7 @@ export default function InternalHomePage() {
       {!showNoAccessStatus && <InternalNav accessToken={session.access_token} roles={roles} />}
 
       <div style={{ paddingTop: 28, marginBottom: 24 }}>
-        <h1 style={{ fontSize: 28, margin: '0 0 4px' }}>Internal</h1>
+        <h1 style={{ fontSize: 28, margin: '0 0 4px' }}>Beheer</h1>
         <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: 0 }}>
           {email ? `Signed in as ${email}` : 'Signed in'}
           {roleLabels.length > 0 ? ` · roles: ${roleLabels.join(', ')}` : ''}

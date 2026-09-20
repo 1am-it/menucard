@@ -54,6 +54,12 @@ const INTERNAL_MODULES = [
   { id: 'profile-drafts', label: 'Restaurant Profile Drafts', href: '/internal/profile-drafts', requiredRole: 'internal' },
   { id: 'coverage', label: 'Coverage Dashboard', href: '/internal/coverage', requiredRole: 'internal' },
   { id: 'moderation', label: 'Moderation', href: '/internal/moderation', requiredRole: 'editor' },
+  // BE-17 — phase 1 deliberately shows this card to `internal` only (the
+  // role that creates a proposal), using the existing single-role
+  // contract unchanged. Making it also visible to an `editor`-only
+  // account is explicitly deferred, later work — see
+  // planning/specs/tickets/be-17-menu-proposal-snapshot-foundation.md.
+  { id: 'onboarding-menu', label: 'Onboarding Menu', href: '/internal/onboarding-menu', requiredRole: 'internal' },
 ];
 
 // The union of every section each of the roles individually unlocks — an

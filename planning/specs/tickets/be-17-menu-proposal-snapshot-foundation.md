@@ -11,11 +11,11 @@ account, or storage change has been made for this ticket.
 BE-17 VOORTGANG
 
 - [x] 1. Ticket en kernbeslissingen vastgelegd
-- [ ] 2a. Documentatiecommit lokaal gemaakt
-- [ ] 2b. Documentatiecommit gepusht
-- [ ] 3. Implementatie-readinessreview groen
-- [ ] 4. Lokale productcode gebouwd en getest
-- [ ] 5. Onafhankelijke pre-commitreview groen
+- [x] 2a. Documentatiecommit lokaal gemaakt
+- [x] 2b. Documentatiecommit gepusht
+- [x] 3. Implementatie-readinessreview groen
+- [x] 4. Lokale productcode gebouwd en getest
+- [x] 5. Onafhankelijke pre-commitreview groen
 - [ ] 6. Lokale codecommit gemaakt
 - [ ] 7. Gecombineerde pre-pushreview groen
 - [ ] 8. Code gepusht
@@ -244,6 +244,14 @@ usable, and no new visual pattern.
   — is separate, later work. Today's 11 historical menus remain review
   starting points only, never treated as an already-current source of
   truth.
+- **A version-incrementing recapture through the internal review route.**
+  The route currently supports only a snapshot's first capture, always as
+  `version = 1`; a recapture for the same `(restaurant_id, menu_context)`
+  as a new proposal with a higher `version` (the second path under
+  "Correction pattern" above) is deliberately not yet available and
+  remains later work. Correction via a new, append-only
+  `menu_snapshot_reviews` row (the first path under "Correction pattern")
+  is already supported.
 
 ## Acceptance criteria
 

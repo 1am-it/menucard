@@ -73,10 +73,10 @@ test('hasAnyKnownRole: true for any of internal/editor/owner, false for zero row
 
 // ─── resolveVisibleModules — the route/role matrix, enforced in code ───
 
-test('resolveVisibleModules: an internal-only account sees exactly Import Inbox, Restaurant Profile Drafts, and Coverage Dashboard — not Moderation', () => {
+test('resolveVisibleModules: an internal-only account sees exactly Import Inbox, Restaurant Profile Drafts, Coverage Dashboard, and Onboarding Menu — not Moderation', () => {
   const modules = resolveVisibleModules([{ role: 'internal' }]);
   const ids = modules.map((m) => m.id);
-  assert.deepEqual(ids.sort(), ['coverage', 'import-inbox', 'profile-drafts']);
+  assert.deepEqual(ids.sort(), ['coverage', 'import-inbox', 'onboarding-menu', 'profile-drafts']);
 });
 
 test('resolveVisibleModules: an editor-only account sees exactly Moderation — not the internal-only modules', () => {
@@ -96,7 +96,7 @@ test('resolveVisibleModules: an account with no roles at all sees zero modules',
 test('resolveVisibleModules: a multi-role (internal + editor) account sees the full union, not just one role\'s subset', () => {
   const modules = resolveVisibleModules([{ role: 'internal' }, { role: 'editor' }]);
   const ids = modules.map((m) => m.id).sort();
-  assert.deepEqual(ids, ['coverage', 'import-inbox', 'moderation', 'profile-drafts']);
+  assert.deepEqual(ids, ['coverage', 'import-inbox', 'moderation', 'onboarding-menu', 'profile-drafts']);
 });
 
 test('resolveVisibleModules: every entry links to an existing route with a non-empty label', () => {
