@@ -190,6 +190,20 @@ test('structural safety net: the Onboarding Menu client page never imports the s
   assert.doesNotMatch(source, /node:crypto/);
 });
 
+test('structural safety net: Onboarding Menu passes roles to InternalNav unchanged — regression guard for the premature "No internal access" flash', () => {
+  const source = fs.readFileSync(ONBOARDING_MENU_PAGE_PATH, 'utf8');
+  assert.match(
+    source,
+    /<InternalNav accessToken={session\.access_token} roles={roles} \/>/,
+    'InternalNav must receive the raw roles value (undefined while still loading), never a substituted value'
+  );
+  assert.doesNotMatch(
+    source,
+    /roles=\{rolesLoaded \? roles : \[\]\}/,
+    'substituting [] for roles while still loading defeats InternalNav\'s own "roles !== undefined means already resolved" check and reintroduces the premature "No internal access" message in the shared nav'
+  );
+});
+
 // ─── Structural safety net: the two BE-17 routes themselves — read
 // directly from their actual source, not asserted from memory. ────────
 

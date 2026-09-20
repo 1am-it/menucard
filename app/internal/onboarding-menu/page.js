@@ -322,7 +322,7 @@ export default function OnboardingMenuPage() {
   return (
     <div className="di-page">
       <main className="di-main">
-        <InternalNav accessToken={session.access_token} roles={rolesLoaded ? roles : []} />
+        <InternalNav accessToken={session.access_token} roles={roles} />
 
         <div className="di-topbar">
           <h1 className="di-title">Onboarding Menu</h1>
