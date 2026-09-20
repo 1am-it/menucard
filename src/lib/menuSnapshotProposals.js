@@ -1,60 +1,25 @@
-// Pure logic for BE-17's menu snapshot proposal foundation
+// Pure, browser-safe logic for BE-17's menu snapshot proposal foundation
 // (menu_snapshot_proposals/menu_snapshot_reviews,
-// supabase/migrations/0011_be17_menu_snapshot_foundation.sql). No route,
-// RPC, or UI exists against these tables yet — this module only computes
-// the two things application code will eventually need before writing or
-// reading a row: a deterministic content hash, and the effective review
+// supabase/migrations/0011_be17_menu_snapshot_foundation.sql): fixed
+// validation vocabularies, request validation, and the effective review
 // status derived from a snapshot's review history. See
 // planning/specs/tickets/be-17-menu-proposal-snapshot-foundation.md.
 //
 // Deliberately CommonJS, same reasoning as src/lib/importInbox.js —
 // directly testable via this project's existing `node --test` tooling,
-// no new dependency.
+// no new dependency. Deliberately free of any server-only Node builtin:
+// app/internal/onboarding-menu/page.js ('use client') imports directly
+// from this module, so the content-hash logic that needs a server-only
+// hashing primitive lives in the separate src/lib/menuSnapshotHash.js
+// instead — see that file's own header, and this file's own structural
+// safety-net test guarding against that primitive ever being
+// reintroduced here.
 //
-// This module never touches Supabase, the filesystem, or the network —
-// it only takes an already-fetched value/rows and returns a hash or a
-// derived status.
+// This module never touches Supabase, the filesystem, the network, or
+// any Node-only API — it only takes an already-fetched value/rows and
+// returns a derived status or a validation result.
 
-const crypto = require('node:crypto')
 const { isValidHttpUrl } = require('./importInbox')
-
-/**
- * Recursively sorts every object's own keys (arrays keep their existing
- * order — a snapshot's dish order is meaningful content, not something
- * to normalize away) so that two independently constructed but
- * semantically identical `captured_content` values always serialize to
- * the exact same string, regardless of the key order either producer
- * happened to build them in. This is what makes
- * computeCanonicalContentHash deterministic across two independent
- * captures of unchanged content.
- */
-function canonicalize(value) {
-  if (Array.isArray(value)) {
-    return value.map(canonicalize)
-  }
-  if (value !== null && typeof value === 'object') {
-    const sortedKeys = Object.keys(value).sort()
-    const result = {}
-    for (const key of sortedKeys) {
-      result[key] = canonicalize(value[key])
-    }
-    return result
-  }
-  return value
-}
-
-/**
- * The migration's own `content_hash` column requires exactly this shape
- * (64 lowercase hex characters) — hex-encoded SHA-256 of the canonical
- * JSON form of `content`. Always recomputed here, server-side, from the
- * actual `captured_content` being written — a caller must never be able
- * to supply its own hash, or the hash could silently drift from what it
- * claims to describe.
- */
-function computeCanonicalContentHash(content) {
-  const canonicalJson = JSON.stringify(canonicalize(content))
-  return crypto.createHash('sha256').update(canonicalJson).digest('hex')
-}
 
 /**
  * Picks the single latest row from one snapshot's full review
@@ -248,7 +213,6 @@ function groupReviewsBySnapshotId(reviewRows) {
 }
 
 module.exports = {
-  computeCanonicalContentHash,
   DEFAULT_SNAPSHOT_STATUS,
   pickLatestSnapshotReviewRow,
   deriveEffectiveSnapshotStatus,

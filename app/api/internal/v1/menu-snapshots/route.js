@@ -32,8 +32,8 @@ import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/src/lib/supabaseAdmin'
 import { authenticateInternalRequest } from '@/src/lib/internalAuth'
 import { isInternalOnly } from '@/src/lib/importInbox'
+import { computeCanonicalContentHash } from '@/src/lib/menuSnapshotHash'
 import {
-  computeCanonicalContentHash,
   deriveEffectiveSnapshotStatus,
   groupReviewsBySnapshotId,
   validateSnapshotProposalInput,

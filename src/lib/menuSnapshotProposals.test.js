@@ -6,7 +6,6 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const {
-  computeCanonicalContentHash,
   DEFAULT_SNAPSHOT_STATUS,
   pickLatestSnapshotReviewRow,
   deriveEffectiveSnapshotStatus,
@@ -17,31 +16,10 @@ const {
   groupReviewsBySnapshotId,
 } = require('./menuSnapshotProposals');
 
-test('computeCanonicalContentHash: identical content produces an identical hash', () => {
-  const content = { categories: [{ name: 'Dinerkaart', items: [{ name: 'Tournedos', price: '22,50' }] }] };
-  const hashA = computeCanonicalContentHash(content);
-  const hashB = computeCanonicalContentHash(JSON.parse(JSON.stringify(content)));
-  assert.equal(hashA, hashB);
-  assert.match(hashA, /^[0-9a-f]{64}$/, 'must be exactly the 64-character lowercase hex shape the migration constraint requires');
-});
-
-test('computeCanonicalContentHash: key order never changes the hash', () => {
-  const contentA = { b: 2, a: 1, categories: [{ name: 'Lunchkaart', items: [] }] };
-  const contentB = { a: 1, categories: [{ items: [], name: 'Lunchkaart' }], b: 2 };
-  assert.equal(computeCanonicalContentHash(contentA), computeCanonicalContentHash(contentB));
-});
-
-test('computeCanonicalContentHash: array order is preserved and does change the hash', () => {
-  const dishesInOrder = { items: ['Tournedos', 'Zalm'] };
-  const dishesReordered = { items: ['Zalm', 'Tournedos'] };
-  assert.notEqual(computeCanonicalContentHash(dishesInOrder), computeCanonicalContentHash(dishesReordered));
-});
-
-test('computeCanonicalContentHash: genuinely different content produces a different hash', () => {
-  const original = { categories: [{ name: 'Dinerkaart', items: [{ name: 'Tournedos', price: '22,50' }] }] };
-  const changedPrice = { categories: [{ name: 'Dinerkaart', items: [{ name: 'Tournedos', price: '24,50' }] }] };
-  assert.notEqual(computeCanonicalContentHash(original), computeCanonicalContentHash(changedPrice));
-});
+// computeCanonicalContentHash's own tests moved to
+// src/lib/menuSnapshotHash.test.js alongside the server-only module that
+// now owns that logic (see this file's own structural safety-net test
+// below for why it moved).
 
 test('pickLatestSnapshotReviewRow: picks the row with the latest decided_at', () => {
   const rows = [
@@ -187,6 +165,29 @@ test('structural safety net: the BE-17 migration adds no review_status/publicati
     source.indexOf('create table if not exists menu_snapshot_reviews')
   );
   assert.doesNotMatch(tableDefinition, /review_status|publication_status/);
+});
+
+// ─── Structural safety net: this module must stay importable from the
+// 'use client' Onboarding Menu page — a Vercel production build once
+// failed (commit 9fee5f7) because this file pulled `node:crypto` into
+// the browser bundle via app/internal/onboarding-menu/page.js. The hash
+// logic that needed `node:crypto` now lives in the separate, server-only
+// src/lib/menuSnapshotHash.js instead; these tests fail the moment
+// either file drifts back toward that regression. ──────────────────────
+
+const MENU_SNAPSHOT_PROPOSALS_PATH = path.join(__dirname, 'menuSnapshotProposals.js');
+const ONBOARDING_MENU_PAGE_PATH = path.join(REPO_ROOT, 'app/internal/onboarding-menu/page.js');
+
+test('structural safety net: src/lib/menuSnapshotProposals.js never reintroduces node:crypto or any other Node-only API', () => {
+  const source = fs.readFileSync(MENU_SNAPSHOT_PROPOSALS_PATH, 'utf8');
+  assert.doesNotMatch(source, /node:crypto/, 'menuSnapshotProposals.js must stay safely importable from a \'use client\' component');
+  assert.doesNotMatch(source, /require\(['"]crypto['"]\)/);
+});
+
+test('structural safety net: the Onboarding Menu client page never imports the server-only hash module or node:crypto directly', () => {
+  const source = fs.readFileSync(ONBOARDING_MENU_PAGE_PATH, 'utf8');
+  assert.doesNotMatch(source, /menuSnapshotHash/, 'the hash module is server-only — a client page must never import it');
+  assert.doesNotMatch(source, /node:crypto/);
 });
 
 // ─── Structural safety net: the two BE-17 routes themselves — read
