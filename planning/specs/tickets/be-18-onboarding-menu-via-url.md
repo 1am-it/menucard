@@ -2,28 +2,72 @@
 
 ## Status
 
-Proposed; not started. Documentation/planning only — no product code,
-migration, route, API, data, dashboard, commit, push, deploy, database,
-account, or storage change has been made for this ticket. Describes
-**fase 1 only**: a single, directly pasted URL, HTML sources with
-reliable JSON-LD menu structured data. PDF sources and batch/CSV intake
-of multiple URLs are explicitly later, separately scoped fases — see
-"Non-goals / later work."
+Implemented, committed, pushed, and live-verified in production.
+**Fase 1 only** (a single, directly pasted URL, HTML sources with
+reliable JSON-LD menu structured data) was built, tested, independently
+pre-commit- and pre-push-reviewed, committed (`d4caa06`, `feat(internal):
+add onboarding menu URL flow`) and pushed, with a follow-up fix also
+independently reviewed, committed (`1d100e6`, `fix(internal): avoid
+false no-access flash`) and pushed — see `## Voortgang` below for the
+full, per-step evidence trail.
+
+**Also confirmed via a non-mutating production/browser check** (not a
+data-mutating end-to-end proposal/review test — see Voortgang step 9
+below for exactly what this confirms and does not confirm): `/internal`
+and `/internal/onboarding-menu` render correctly on the live production
+deployment, without the previously observed premature "No internal
+access for this account" message. No proposal, review, or other
+product data was created during this check.
+
+PDF sources, batch/CSV intake of multiple URLs, general source
+discovery, restaurant profile fetch, HTML heuristics beyond JSON-LD,
+OCR, and the navigation restructuring discussed for later `/internal`
+work are **not built** in this fase and remain explicitly later,
+separately scoped work — see "Non-goals / later work" below.
 
 ## Voortgang
 
 BE-18 VOORTGANG
 
 - [x] 1. Ticket en kernbeslissingen vastgelegd
-- [ ] 2a. Documentatiecommit lokaal gemaakt
-- [ ] 2b. Documentatiecommit gepusht
-- [ ] 3. Implementatie-readinessreview groen
-- [ ] 4. Lokale productcode gebouwd en getest
-- [ ] 5. Onafhankelijke pre-commitreview groen
-- [ ] 6. Lokale codecommit gemaakt
-- [ ] 7. Gecombineerde pre-pushreview groen
-- [ ] 8. Code gepusht
-- [ ] 9. Productiecontrole
+- [x] 2a. Documentatiecommit lokaal gemaakt
+- [x] 2b. Documentatiecommit gepusht
+- [x] 3. Implementatie-readinessreview groen
+- [x] 4. Lokale productcode gebouwd en getest
+- [x] 5. Onafhankelijke pre-commitreview groen
+- [x] 6. Lokale codecommit gemaakt
+- [x] 7. Gecombineerde pre-pushreview groen
+- [x] 8. Code gepusht
+- [x] 9. Productiecontrole
+
+**Voortgangsreconciliatie (retroactief, stappen 1–8).** Step 1/2a/2b: the
+ticket and its core decisions were authored and committed in `7781c94`
+(`docs(planning): reconcile BE-17 and prepare BE-18`), confirmed pushed
+(an ancestor of `origin/main`). Step 3: a dedicated implementation-
+readiness review and a follow-up scope-closure advice review (resolving
+the three open "Besluitpunten" above) were each conducted and reported
+green before implementation began. Step 4: fase 1 was built and tested,
+committed in `d4caa06` (`feat(internal): add onboarding menu URL flow`)
+with a follow-up fix in `1d100e6`; a fresh full local test run (598/598
+passing) and a fresh `next build` (no errors, all fase-1 routes present)
+both succeed against current `HEAD`. Steps 5/7: an independent pre-commit
+review and pre-push review were each separately conducted and reported
+green, once for `d4caa06` and once for `1d100e6`. Step 6/8: both commits
+exist locally and are confirmed pushed (ancestors of `origin/main`).
+
+**Non-mutating UI smoketest, live-verified** — mirrors BE-17's own step 9
+precedent (a non-mutating check, never a data-mutating end-to-end
+proposal/review test): commit `1d100e64d85da9f97b760fa1a1e6ddc59ecff601`
+is live in production; the Vercel production deployment is `Ready` and
+the production alias resolves to that commit. In an existing,
+authenticated `internal`/`editor` browser session, `/internal` was
+freshly loaded multiple times — first a neutral `Loading…`, then the
+correct `Beheer` page with resolved roles; `/internal/onboarding-menu`
+was freshly loaded multiple times without the premature `No internal
+access for this account` message, showing the menu-URL field and "Lees
+URL uit" — the old manual restaurant-id/menu-context/JSON form is not
+visible. No URL was read, no proposal or review was created, and no
+database or other product mutation occurred.
 
 See `015-be-ticket-structure-and-time-boxing.md` for what this checklist
 means and how it must be kept up to date.
