@@ -140,6 +140,25 @@ of these.
     confirmed menu via the existing, unchanged creation route. HTML with
     JSON-LD menu data only in this fase; PDF sources and batch/CSV intake
     of multiple URLs are explicitly later, separate tickets.
+21. [be-19-onboarding-restaurant-via-url.md](./be-19-onboarding-restaurant-via-url.md) —
+    not started, documentation/schema contract only; closes the gap
+    between BE-18 (dead-ends on an unmatched restaurant URL) and
+    MARKET-05C's `restaurant_profile_drafts` (structurally requires a
+    full `MARKET-04` `ImportRun`/registered `Source` today) by defining a
+    small, additive `url_intakes` audit/traceability object
+    (`docs/api/url-intake-schema.md`, new) and a matching
+    `restaurant_profile_drafts`/`_field_facts` dual-origin amendment
+    (`docs/api/restaurant-profile-drafts-schema.md`) — two real, separate
+    foreign keys with a symmetric "exactly one origin" database check,
+    never a polymorphic reference. Names a bounded governance exception
+    for staff-triggered, single-URL, robots.txt-honoring onboarding
+    fetches (no prior per-site `Source` registration required). Hard
+    boundary, explicitly restated: a BE-17 menu snapshot proposal may
+    never reference a restaurant concept or intake id — only an existing
+    `data/restaurants.json` key; `menu_snapshot_proposals` itself stays
+    byte-for-byte unchanged. The future "concept → real restaurant
+    record" promotion step is explicitly out of scope, not designed or
+    promised here.
 
 ## PLATFORM-* order (not started)
 

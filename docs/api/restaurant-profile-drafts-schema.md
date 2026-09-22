@@ -891,6 +891,87 @@ change before any code exists.
    separate table. **Not decided here** — explicitly Onboarding's own
    design question.
 
+## Amendment (2026-09-22, BE-19): URL-intake origin — contract only, not yet implemented
+
+**Trigger**: `be-19-onboarding-restaurant-via-url.md` names a second way a
+draft can originate — a staff-triggered, single-URL onboarding fetch
+(see `docs/api/url-intake-schema.md`'s own "Governance exception"),
+distinct from `MARKET-05A`'s existing, registered-source candidate
+pipeline. `source_candidate_id`'s current shape (`uuid not null
+references import_extraction_records(id)`) structurally cannot represent
+this — every `import_extraction_records` row presupposes a full
+`ImportRun` against a registered `Source`, which a staff-pasted URL
+deliberately does not have (that mismatch, and why it should not be
+forced through the heavier pipeline, is exactly what
+`docs/api/url-intake-schema.md`'s "Governance exception" section
+resolves). **This amendment records only the change to this document's
+own two tables; the new `url_intakes` table itself is defined in that
+sibling document.**
+
+**What changes on `restaurant_profile_drafts`**: `source_candidate_id`
+becomes **nullable**. A new, equally real, nullable column is added:
+
+| Column | Type | Notes |
+|---|---|---|
+| `source_url_intake_id` | `uuid references url_intakes(id)` | The second possible origin. Never set together with `source_candidate_id`. |
+
+With a new table-level check:
+
+```
+check ((source_candidate_id is null) <> (source_url_intake_id is null))
+```
+
+**Exactly one origin, always** — never both null, never both set. This is
+the same symmetric-check idiom this table's own
+`restaurant_profile_draft_field_facts.origin`/`source_enrichment_id` pair
+already uses (see below) and the same dual-real-foreign-key shape
+`import_runs`' `data_origin_source_id`/`access_provider_source_id` pair
+already establishes elsewhere in this project — **never** a bare
+discriminator/type column pointing at different tables without its own
+foreign key, and never a single, untyped reference column.
+
+**Consequences for the existing partial unique index and RPC — named,
+not yet resolved here**: `idx_restaurant_profile_drafts_one_active_per_candidate`
+(today scoped to `source_candidate_id` alone, `where status = 'draft'`)
+must widen to cover whichever origin column is actually set for a given
+row, so "at most one active draft per candidate" continues to hold
+regardless of origin. `promote_candidate_to_profile_draft()` must gain a
+second code path for the `source_url_intake_id` case: it has no
+`import_runs` row to join through for `market_id` (step 1 of the existing
+function) — `url_intakes.market_id` is read directly instead, and no
+`import_candidate_reviews` effective-status check (step 2) applies, since
+a `url_intakes` row carries no review-status concept at all (see
+`docs/api/url-intake-schema.md`'s own "not a review queue" section). The
+exact SQL shape of this branching is an implementation detail for the
+migration that eventually builds this, not fixed here.
+
+**What changes on `restaurant_profile_draft_field_facts`**: `origin`'s
+check constraint gains a third value, `'url_intake'`, alongside a new,
+equally nullable `source_url_intake_id uuid references url_intakes(id)`
+column — matching `url_intakes.id`'s own `uuid` type, not
+`import_candidate_enrichments`'s `bigint`. The existing two-way symmetric
+check
+(`check ((origin = 'import') = (source_enrichment_id is null))`) becomes
+a three-way form: exactly one of `source_enrichment_id`/
+`source_url_intake_id` is set when `origin` is `'enrichment'`/
+`'url_intake'` respectively, and neither when `origin = 'import'`. No new
+ledger table — the existing, already-tested, append-only field-facts
+table remains the **only** place a draft's field values and their origin
+are ever recorded, regardless of which pipeline produced them. `field_name`'s
+existing fixed allowlist (`name`/`category`/`address`/`phone`/`website`)
+is unchanged and unexpanded by this amendment.
+
+**What does not change**: everything else in this document — the
+promotion/discard RPCs' existing guarantees for the `import_extraction_records`
+origin, the duplicate-handling design, the roles/access posture, and
+every existing invariant not named above — is unaffected. This amendment
+adds a second, parallel, equally-real origin; it does not alter the
+first one's behavior in any way.
+
+**Status**: documentation/schema contract only, matching this document's
+own top-of-file convention — no migration, RPC change, route, or UI
+exists yet for anything described in this amendment.
+
 ## Out of scope for this contract
 
 - Any canonical (`MARKET-02`), publication (`MARKET-06`), or public
@@ -898,5 +979,11 @@ change before any code exists.
 - `MARKET-05B`'s actual cross-source matching/deduplication algorithm.
 - Restaurant Onboarding's actual design (claim linkage, verification,
   owner editing) — named above only as a forward-compatibility note.
+- The "concept → real restaurant record" promotion mechanism named in
+  `docs/api/url-intake-schema.md`'s own "Restaurant promotion boundary"
+  section — not designed here either.
+- A `menu_snapshot_proposals`/`menu_snapshot_reviews` change of any kind —
+  see `docs/api/url-intake-schema.md`'s own "Hard boundary" section; those
+  two tables stay byte-for-byte unchanged by this amendment.
 - Any code, migration, RLS policy, or Supabase change of any kind — see
-  "Status" at the top of this file.
+  "Status" at the top of this file and immediately above.
