@@ -305,8 +305,8 @@ jobs:
           # Changing either list for a future release means editing this
           # file via a reviewed pull request, never just dispatching with
           # a different `release_versions` value.
-          DOCUMENTED_APPLIED_VERSIONS=(0001 0002 0003 0004 0005 0006 0007 0008 0009 0010 0011)
-          DOCUMENTED_RELEASE_VERSIONS=(0012)
+          DOCUMENTED_APPLIED_VERSIONS=(0001 0002 0003 0004 0005 0006 0007 0008 0009 0010 0011 0012)
+          DOCUMENTED_RELEASE_VERSIONS=(0013)
 
           raw="${{ github.event.inputs.release_versions }}"
           if [ "$(printf '%s' "$raw" | tr '[:upper:]' '[:lower:]')" = "none" ]; then
