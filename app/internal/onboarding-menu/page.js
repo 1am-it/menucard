@@ -117,6 +117,26 @@ export default function OnboardingMenuPage() {
   const [menuErrorBySlug, setMenuErrorBySlug] = useState({})
   const [creatingProposals, setCreatingProposals] = useState(false)
 
+  // BE-19 — the exact-match menu-proposal path now runs through the
+  // receipt-based url_intakes bridge (see submitMenusViaUrlIntake below)
+  // instead of calling the menu-snapshots route directly. `urlIntakeId`
+  // is set exactly once per successful read (the receipt is single-use —
+  // see ensureUrlIntake) and reused for every subsequent menu in the
+  // same batch, and for any later individual retry.
+  const [urlIntakeId, setUrlIntakeId] = useState(null)
+  const [intakeError, setIntakeError] = useState(null)
+
+  // BE-19 — "Restaurantconcept maken" for an unmatched/ambiguous source
+  // URL. Deliberately separate state from the exact-match menu-creation
+  // flow above: creating a restaurant concept and creating a menu
+  // proposal remain two fully independent, explicit human actions — this
+  // page never offers, and never triggers, a menu proposal from this
+  // path (there is no confirmed restaurant identity to attach one to).
+  const [creatingConcept, setCreatingConcept] = useState(false)
+  const [conceptError, setConceptError] = useState(null)
+  const [conceptDuplicateOf, setConceptDuplicateOf] = useState(null)
+  const [conceptResult, setConceptResult] = useState(null)
+
   const [reviewDraftBySnapshotId, setReviewDraftBySnapshotId] = useState({})
   const [reviewErrorBySnapshotId, setReviewErrorBySnapshotId] = useState({})
   const [reviewSubmittingId, setReviewSubmittingId] = useState(null)
@@ -178,6 +198,11 @@ export default function OnboardingMenuPage() {
     setSelectedMenuSlugs({})
     setMenuStatusBySlug({})
     setMenuErrorBySlug({})
+    setUrlIntakeId(null)
+    setIntakeError(null)
+    setConceptError(null)
+    setConceptDuplicateOf(null)
+    setConceptResult(null)
     try {
       const res = await fetch('/api/internal/v1/onboarding-menu/read-url', {
         method: 'POST',
@@ -248,15 +273,113 @@ export default function OnboardingMenuPage() {
     }
   }
 
+  // BE-19 — redeems this read's own analysis receipt into exactly one
+  // durable url_intakes row, exactly once, and reuses it for every
+  // subsequent call in this same read (the receipt is single-use — a
+  // second redemption attempt is rejected server-side). Returns
+  // `{ id, error }`; a caller must check `id` before proceeding, never
+  // assume success. The browser never sends a restaurant id, match
+  // status, or analysis hash here — only the receipt id and the exact
+  // URL the reviewer typed, exactly like createConceptFromReceipt above.
+  async function ensureUrlIntake() {
+    if (urlIntakeId) return { id: urlIntakeId, error: null }
+    if (!readResult || !readResult.receipt) {
+      return { id: null, error: 'Geen geldige analyse beschikbaar. Lees de URL opnieuw uit.' }
+    }
+    try {
+      const res = await fetch('/api/internal/v1/url-intakes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ receipt_id: readResult.receipt.id, source_url: sourceUrlInput }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        const message = data.error || 'Analyse kon niet worden vastgelegd. Lees de URL opnieuw uit.'
+        setIntakeError(message)
+        return { id: null, error: message }
+      }
+      setUrlIntakeId(data.url_intake.id)
+      return { id: data.url_intake.id, error: null }
+    } catch {
+      const message = 'Analyse kon niet worden vastgelegd. Lees de URL opnieuw uit.'
+      setIntakeError(message)
+      return { id: null, error: message }
+    }
+  }
+
+  // BE-19 — the exact-match path for one or more menus: ensures exactly
+  // one url_intakes row exists (see ensureUrlIntake), then asks the
+  // existing, unchanged BE-17 write path — via the safe BE-19 wrapper —
+  // to create a proposal per requested menu context, by slug only. The
+  // browser never sends restaurant_id, matched_restaurant_id,
+  // menu content, captured_content, or an analysis hash — the wrapper
+  // reads all of that itself from the server-stored url_intakes row.
+  async function submitMenusViaUrlIntake(menusToSubmit) {
+    setIntakeError(null)
+    for (const menu of menusToSubmit) {
+      setMenuStatusBySlug((prev) => ({ ...prev, [menu.contextSlug]: 'pending' }))
+      setMenuErrorBySlug((prev) => ({ ...prev, [menu.contextSlug]: null }))
+    }
+
+    const { id: intakeId, error: intakeErrMsg } = await ensureUrlIntake()
+    if (!intakeId) {
+      for (const menu of menusToSubmit) {
+        setMenuStatusBySlug((prev) => ({ ...prev, [menu.contextSlug]: 'error' }))
+        setMenuErrorBySlug((prev) => ({ ...prev, [menu.contextSlug]: intakeErrMsg }))
+      }
+      return
+    }
+
+    try {
+      const res = await fetch(`/api/internal/v1/url-intakes/${intakeId}/menu-proposals`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ menu_context_slugs: menusToSubmit.map((m) => m.contextSlug) }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        for (const menu of menusToSubmit) {
+          setMenuStatusBySlug((prev) => ({ ...prev, [menu.contextSlug]: 'error' }))
+          setMenuErrorBySlug((prev) => ({ ...prev, [menu.contextSlug]: data.error || 'Aanmaken mislukt.' }))
+        }
+        return
+      }
+      for (const result of data.results || []) {
+        const alreadyExists = typeof result.error === 'string' && /already exists/i.test(result.error)
+        if (result.ok) {
+          setMenuStatusBySlug((prev) => ({ ...prev, [result.context_slug]: 'success' }))
+        } else if (alreadyExists) {
+          setMenuStatusBySlug((prev) => ({ ...prev, [result.context_slug]: 'exists' }))
+        } else {
+          setMenuStatusBySlug((prev) => ({ ...prev, [result.context_slug]: 'error' }))
+          setMenuErrorBySlug((prev) => ({ ...prev, [result.context_slug]: result.error || 'Aanmaken mislukt.' }))
+        }
+      }
+    } catch {
+      for (const menu of menusToSubmit) {
+        setMenuStatusBySlug((prev) => ({ ...prev, [menu.contextSlug]: 'error' }))
+        setMenuErrorBySlug((prev) => ({ ...prev, [menu.contextSlug]: 'Aanmaken mislukt.' }))
+      }
+    }
+  }
+
   async function submitSelectedMenus(menusToSubmit) {
     setCreatingProposals(true)
-    // Sequential, not Promise.all: each menu's own result (bezig/gelukt/
-    // al bestaand/mislukt) is shown as it resolves, and a menu that
-    // fails never blocks or rolls back a menu that already succeeded —
-    // there is no all-or-nothing transaction here, by design (each call
-    // is its own, fully independent, unchanged snapshot-creation route).
-    for (const menu of menusToSubmit) {
-      await submitOneMenu(menu)
+    const isExactMatch = Boolean(readResult && readResult.restaurant_match && readResult.restaurant_match.type === 'exact')
+    if (isExactMatch) {
+      // BE-19 — one url_intakes row, one wrapper call for the whole
+      // selected batch (never one call per menu here — the wrapper
+      // itself already accepts multiple slugs in a single request).
+      await submitMenusViaUrlIntake(menusToSubmit)
+    } else {
+      // Unchanged: the manual/ambiguous-match path keeps calling the
+      // existing, unchanged menu-snapshots route directly, once per
+      // menu — a url_intakes row can never carry a confirmed restaurant
+      // identity for this path (the server-side receipt only ever
+      // records a matched_restaurant_id for a genuine exact match).
+      for (const menu of menusToSubmit) {
+        await submitOneMenu(menu)
+      }
     }
     setCreatingProposals(false)
     await loadSnapshots(session.access_token)
@@ -269,12 +392,59 @@ export default function OnboardingMenuPage() {
   // been cleared, this must say so plainly rather than firing a request
   // that the existing route would reject anyway.
   async function retryOneMenu(menu) {
+    const isExactMatch = Boolean(readResult && readResult.restaurant_match && readResult.restaurant_match.type === 'exact')
+    if (isExactMatch) {
+      await submitMenusViaUrlIntake([menu])
+      await loadSnapshots(session.access_token)
+      return
+    }
     if (!chosenRestaurantId) {
       setMenuErrorBySlug((prev) => ({ ...prev, [menu.contextSlug]: 'Kies eerst een restaurant voordat je het opnieuw probeert.' }))
       return
     }
     await submitOneMenu(menu)
     await loadSnapshots(session.access_token)
+  }
+
+  // BE-19 — redeems this read's own analysis receipt into a new
+  // restaurant concept. The server (never this page) re-verifies actor,
+  // expiry, URL binding, and analysis integrity from the receipt before
+  // creating anything — this call only ever sends the receipt id and the
+  // exact URL the reviewer typed; it never sends a restaurant name,
+  // address, or any other extracted field itself. On a detected possible
+  // duplicate the server returns 409 with the other draft's id, which
+  // this page shows as an explicit, separate confirmation step — never
+  // auto-retried.
+  async function createConceptFromReceipt(confirmDuplicateOfDraftId) {
+    if (!readResult || !readResult.receipt) return
+    setCreatingConcept(true)
+    setConceptError(null)
+    try {
+      const res = await fetch('/api/internal/v1/profile-drafts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({
+          receipt_id: readResult.receipt.id,
+          source_url: sourceUrlInput,
+          confirm_possible_duplicate_of_draft_id: confirmDuplicateOfDraftId || undefined,
+        }),
+      })
+      const data = await res.json()
+      if (res.status === 409 && data.possible_duplicate) {
+        setConceptDuplicateOf(data.possible_duplicate_of_draft_id)
+        return
+      }
+      if (!res.ok) {
+        setConceptError(data.error || 'Restaurantconcept aanmaken is mislukt.')
+        return
+      }
+      setConceptDuplicateOf(null)
+      setConceptResult(data.draft)
+    } catch {
+      setConceptError('Restaurantconcept aanmaken is mislukt.')
+    } finally {
+      setCreatingConcept(false)
+    }
   }
 
   function updateReviewDraft(snapshotId, patch) {
@@ -372,6 +542,44 @@ export default function OnboardingMenuPage() {
                   <div className="di-banner di-banner-warning">
                     <span className="di-banner-icon"><IconDocument /></span>
                     <span>{readResult.warning}</span>
+                  </div>
+                )}
+
+                {needsRestaurantChoice && readResult.receipt && (
+                  <div className="di-candidate-card">
+                    <div className="di-row-name">Restaurantconcept</div>
+                    <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 8 }}>
+                      Bestaat dit restaurant nog niet in het systeem? Maak een restaurantconcept aan op basis van deze bron.
+                      Menuvoorstellen zijn pas mogelijk zodra dit restaurant later is bevestigd als bestaand restaurant.
+                    </div>
+                    {conceptError && <div style={{ fontSize: 12, color: 'var(--danger)', marginBottom: 8 }}>{conceptError}</div>}
+                    {conceptDuplicateOf && (
+                      <div className="di-banner di-banner-warning" style={{ marginBottom: 8 }}>
+                        <span className="di-banner-icon"><IconDocument /></span>
+                        <span>
+                          Dit lijkt op een al bestaand restaurantconcept. Weet je zeker dat je toch een nieuw concept wilt aanmaken?
+                          {' '}
+                          <button type="button" className="di-link-btn" onClick={() => createConceptFromReceipt(conceptDuplicateOf)}>
+                            Toch aanmaken
+                          </button>
+                        </span>
+                      </div>
+                    )}
+                    {conceptResult ? (
+                      <div className="di-banner di-banner-neutral">
+                        <span className="di-banner-icon"><IconDocument /></span>
+                        <span>Restaurantconcept aangemaakt. Menuvoorstellen zijn pas mogelijk na latere bevestiging als bestaand restaurant.</span>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        className="di-btn-primary"
+                        disabled={creatingConcept}
+                        onClick={() => createConceptFromReceipt()}
+                      >
+                        {creatingConcept ? 'Bezig…' : 'Restaurantconcept maken'}
+                      </button>
+                    )}
                   </div>
                 )}
 

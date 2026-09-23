@@ -33,10 +33,14 @@ const ALLOWED_DRAFT_STATUSES = ['draft', 'discarded'];
  * photo, marketing, or owner-contact field exists in this list. */
 const ALLOWED_DRAFT_FIELD_NAMES = ['name', 'category', 'address', 'phone', 'website'];
 
-/** The only two provenance origins a field fact may ever carry — never a
- * third, free-form "manual correction" value. See the schema contract's
- * own "Field-level provenance" section for why. */
-const ALLOWED_DRAFT_FIELD_ORIGINS = ['import', 'enrichment'];
+/** The only provenance origins a field fact may ever carry — never a
+ * fourth, free-form "manual correction" value. `url_intake` (BE-19,
+ * supabase/migrations/0013_be19_url_intakes.sql) was added alongside the
+ * original `import`/`enrichment` pair — see
+ * docs/api/restaurant-profile-drafts-schema.md's own "Amendment
+ * (2026-09-22, BE-19)" section for why a third origin needed three
+ * independent biconditional checks, not one combined expression. */
+const ALLOWED_DRAFT_FIELD_ORIGINS = ['import', 'enrichment', 'url_intake'];
 
 /** Matches the migration's own `char_length(discard_note) <= 2000`
  * check — enforced here too so a caller gets a clear, immediate `400`
@@ -124,6 +128,11 @@ function buildDraftFieldsByDraftId(allFactRows) {
           value: latest.value,
           origin: latest.origin,
           source_enrichment_id: latest.source_enrichment_id,
+          // BE-19 — passed through only when the row actually carries it
+          // (origin = 'url_intake'); undefined/absent for every
+          // pre-existing 'import'/'enrichment' row, exactly like
+          // source_enrichment_id itself is already null for those.
+          source_url_intake_id: latest.source_url_intake_id,
           recorded_by: latest.recorded_by,
           recorded_at: latest.recorded_at,
         };

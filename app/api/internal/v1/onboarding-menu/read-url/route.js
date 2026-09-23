@@ -46,13 +46,64 @@ import { NextResponse } from 'next/server'
 import { authenticateInternalRequest } from '@/src/lib/internalAuth'
 import { isInternalOnly } from '@/src/lib/importInbox'
 import { fetchWebsiteSafely } from '@/src/lib/safeOutboundFetch'
-import { classifyRobotsGate } from '@/src/lib/candidateSuggestions'
+import { classifyRobotsGate, parseContactSuggestionsFromHtml } from '@/src/lib/candidateSuggestions'
 import { extractMenusFromHtml } from '@/src/lib/menuJsonLdExtraction'
 import { matchRestaurantByHostname, buildRestaurantChoiceList } from '@/src/lib/restaurantHostMatch'
+import { canonicalizeSourceUrl, buildCandidateSummary, computeReceiptExpiry } from '@/src/lib/urlIntakes'
+import { computeAnalysisResultHash } from '@/src/lib/urlIntakeReceiptHash'
+import { generateUuidV7 } from '@/src/lib/uuidv7'
+import { getSupabaseAdmin } from '@/src/lib/supabaseAdmin'
 import restaurantsData from '@/data/restaurants.json'
 
 const ROBOTS_MAX_BYTES = 200 * 1024
 const ROBOTS_TIMEOUT_MS = 5000
+
+// BE-19 — issues a short-lived, server-side analysis receipt (see
+// docs/api/url-intake-schema.md's own "Analysis-result integrity"
+// section) once this route's own, unchanged fetch/robots/content-type
+// gates and JSON-LD/contact extraction have already run. Never called
+// before those checks — a receipt only ever describes an analysis that
+// actually happened. Returns `null` (never throws) on any database
+// failure, exactly this route's existing "no internal error detail is
+// ever returned" convention: the read-url response itself still
+// succeeds with the analysis, only the durable-action path becomes
+// unavailable for this particular read.
+async function issueAnalysisReceipt({ actorUserId, canonicalSourceUrl, sourceHostname, restaurantMatchType, matchedRestaurantId, candidateSummary }) {
+  try {
+    const supabase = getSupabaseAdmin()
+    const { data: marketRow, error: marketError } = await supabase.from('markets').select('id').eq('slug', 'breda').maybeSingle()
+    if (marketError || !marketRow) return null
+
+    const analysisResultHash = computeAnalysisResultHash({
+      actorUserId,
+      canonicalSourceUrl,
+      restaurantMatchType,
+      matchedRestaurantId,
+      candidateSummary,
+    })
+    const receiptId = generateUuidV7()
+    const expiresAt = computeReceiptExpiry()
+
+    const { error: insertError } = await supabase.from('url_intake_analysis_receipts').insert({
+      id: receiptId,
+      market_id: marketRow.id,
+      actor_user_id: actorUserId,
+      canonical_source_url: canonicalSourceUrl,
+      source_hostname: sourceHostname,
+      fetched_at: new Date().toISOString(),
+      restaurant_match_type: restaurantMatchType,
+      matched_restaurant_id: matchedRestaurantId,
+      candidate_summary: candidateSummary,
+      analysis_result_hash: analysisResultHash,
+      expires_at: expiresAt,
+    })
+    if (insertError) return null
+
+    return { id: receiptId, expires_at: expiresAt }
+  } catch {
+    return null
+  }
+}
 
 // Minimal, privacy-safe structured server log — actor, timestamp,
 // hostname, an outcome category, and (when known) how many menus were
@@ -148,19 +199,50 @@ export async function POST(request) {
   }
 
   const menus = extractMenusFromHtml(fetchResult.body)
+  // BE-19: also run the existing, unchanged MARKET-05A contact-field
+  // extraction on this same already-fetched HTML — never a second
+  // fetch — so a restaurant concept can be created even for a page with
+  // no reliable menu structure. This never weakens
+  // candidateSuggestions.js's own tested "never reads menu/price/image
+  // fields" guarantee: that module is only ever asked for contact
+  // fields, never menu content, which continues to come exclusively
+  // from menuJsonLdExtraction.js above.
+  const restaurantCandidateFields = parseContactSuggestionsFromHtml(fetchResult.body)
+  const match = matchRestaurantByHostname(restaurantsData, fetchResult.finalUrl)
+  const needsExplicitChoice = match.matchType !== 'exact'
+  const canonical = canonicalizeSourceUrl(fetchResult.finalUrl)
+  const candidateSummary = buildCandidateSummary({ restaurantCandidateFields, menus })
+  // Never issued without a valid canonical form — this should not
+  // realistically fail given fetchResult.finalUrl already passed
+  // safeOutboundFetch.js's own URL validation, but fails closed (no
+  // receipt, no durable action possible) rather than guessing if it ever
+  // does.
+  const receipt = canonical
+    ? await issueAnalysisReceipt({
+        actorUserId: auth.userId,
+        canonicalSourceUrl: canonical.canonicalUrl,
+        sourceHostname: canonical.hostname,
+        restaurantMatchType: match.matchType,
+        matchedRestaurantId: match.matchType === 'exact' ? match.restaurantId : null,
+        candidateSummary,
+      })
+    : null
 
   if (menus.length === 0) {
     logUrlFetchAttempt({ actor: auth.userId, hostname: sourceUrl.hostname, outcome: 'no_reliable_structure', menuCount: 0 })
     return NextResponse.json({
       source_url: fetchResult.finalUrl,
       menus: [],
-      restaurant_match: { type: 'none', restaurant_id: null, candidates: [] },
+      restaurant_match: {
+        type: match.matchType,
+        restaurant_id: match.matchType === 'exact' ? match.restaurantId : null,
+        restaurant_name: match.matchType === 'exact' ? match.candidates[0].name : null,
+        candidates: needsExplicitChoice ? buildRestaurantChoiceList(restaurantsData) : [],
+      },
+      receipt,
       warning: 'Deze pagina kon niet automatisch worden uitgelezen. Probeer een andere bron, of wacht op ondersteuning voor deze paginavorm.',
     })
   }
-
-  const match = matchRestaurantByHostname(restaurantsData, fetchResult.finalUrl)
-  const needsExplicitChoice = match.matchType !== 'exact'
 
   logUrlFetchAttempt({ actor: auth.userId, hostname: sourceUrl.hostname, outcome: 'ok', menuCount: menus.length })
 
@@ -173,6 +255,7 @@ export async function POST(request) {
       restaurant_name: match.matchType === 'exact' ? match.candidates[0].name : null,
       candidates: needsExplicitChoice ? buildRestaurantChoiceList(restaurantsData) : [],
     },
+    receipt,
     warning: needsExplicitChoice
       ? 'De bron van deze pagina komt niet automatisch overeen met één bekend restaurant — kies handmatig het juiste restaurant.'
       : null,

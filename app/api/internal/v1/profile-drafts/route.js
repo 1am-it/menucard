@@ -54,6 +54,8 @@ import {
   buildProfileDraftOverviewRows,
 } from '@/src/lib/restaurantProfileDrafts'
 import { generateUuidV7 } from '@/src/lib/uuidv7'
+import { canonicalizeSourceUrl } from '@/src/lib/urlIntakes'
+import { computeAnalysisResultHash } from '@/src/lib/urlIntakeReceiptHash'
 
 const DRAFT_OVERVIEW_COLUMNS =
   'id, source_candidate_id, status, promoted_at, discarded_at, discard_note, possible_duplicate_of_draft_id, restarted_from_draft_id'
@@ -160,9 +162,20 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
 
+  // BE-19 — a second, separate origin: {receipt_id, source_url} instead
+  // of {candidate_id}. Handled as its own, self-contained branch that
+  // returns before any of the existing candidate_id logic below ever
+  // runs — the existing MARKET-05A candidate path underneath is
+  // completely unmodified, unreachable-and-untouched by this branch, and
+  // vice versa. Exactly one of candidate_id/receipt_id may be given.
+  const receiptId = body && typeof body.receipt_id === 'string' ? body.receipt_id.trim() : ''
+  if (receiptId) {
+    return handleUrlIntakePromotion(request, auth, body, receiptId)
+  }
+
   const candidateId = body && body.candidate_id
   if (typeof candidateId !== 'string' || candidateId.trim().length === 0) {
-    return NextResponse.json({ error: 'candidate_id is required' }, { status: 400 })
+    return NextResponse.json({ error: 'candidate_id or receipt_id is required' }, { status: 400 })
   }
   const confirmPossibleDuplicateOfDraftId =
     typeof (body && body.confirm_possible_duplicate_of_draft_id) === 'string' ? body.confirm_possible_duplicate_of_draft_id : null
@@ -260,4 +273,181 @@ export async function POST(request) {
   if (factsError) return NextResponse.json({ error: 'Query failed' }, { status: 500 })
 
   return NextResponse.json({ draft, fields: buildDraftFieldsByDraftId(factRows)[draftId] || {} }, { status: 201 })
+}
+
+// BE-19 — the {receipt_id, source_url} origin. Redeems the receipt into a
+// durable url_intakes row (create_url_intake_from_receipt), then
+// promotes THAT row into a restaurant concept (promote_url_intake_to_profile_draft,
+// supabase/migrations/0013_be19_url_intakes.sql — a new, separate RPC;
+// promote_candidate_to_profile_draft above this function is never called
+// or modified by this path). Two sequential RPC calls, not one shared
+// transaction across both — if the second ever failed after the first
+// succeeded, the result is an orphan, still-valid url_intakes audit row
+// with no draft yet, never a half-written draft or a lost analysis.
+async function handleUrlIntakePromotion(request, auth, body, receiptId) {
+  const canonical = canonicalizeSourceUrl(body && body.source_url)
+  if (!canonical) {
+    return NextResponse.json({ error: 'A valid source_url is required' }, { status: 400 })
+  }
+
+  const supabase = getSupabaseAdmin()
+
+  const { data: receiptRow, error: receiptError } = await supabase
+    .from('url_intake_analysis_receipts')
+    .select('actor_user_id, canonical_source_url, restaurant_match_type, matched_restaurant_id, candidate_summary')
+    .eq('id', receiptId)
+    .maybeSingle()
+  if (receiptError) return NextResponse.json({ error: 'Query failed' }, { status: 500 })
+  if (!receiptRow) {
+    return NextResponse.json({ error: 'Deze analyse is niet meer geldig. Lees de URL opnieuw uit.' }, { status: 409 })
+  }
+
+  const expectedHash = computeAnalysisResultHash({
+    actorUserId: receiptRow.actor_user_id,
+    canonicalSourceUrl: receiptRow.canonical_source_url,
+    restaurantMatchType: receiptRow.restaurant_match_type,
+    matchedRestaurantId: receiptRow.matched_restaurant_id,
+    candidateSummary: receiptRow.candidate_summary,
+  })
+
+  const urlIntakeId = generateUuidV7()
+  const { data: urlIntake, error: intakeError } = await supabase.rpc('create_url_intake_from_receipt', {
+    p_url_intake_id: urlIntakeId,
+    p_receipt_id: receiptId,
+    p_actor_user_id: auth.userId,
+    p_canonical_source_url: canonical.canonicalUrl,
+    p_expected_analysis_result_hash: expectedHash,
+  })
+  if (intakeError) {
+    if (['P0020', 'P0021', 'P0022', 'P0023', 'P0024'].includes(intakeError.code)) {
+      return NextResponse.json({ error: 'Deze analyse is niet meer geldig. Lees de URL opnieuw uit.' }, { status: 409 })
+    }
+    return NextResponse.json({ error: 'Creating the URL intake failed' }, { status: 500 })
+  }
+
+  // Possible-duplicate check against every OTHER candidate/url-intake
+  // that already backs an *active* draft (never a discarded one — same
+  // "settled no" reasoning the candidate path above already applies) —
+  // reuses the exact same, unchanged findPossibleDuplicateDraftId
+  // heuristic. **Fix (BE-19 repair, pre-commit review finding):**
+  // previously called with a hardcoded `[]`, so this could never
+  // actually fire regardless of location-data availability — the real
+  // gap was the empty comparison set, not solely missing geocoding. Now
+  // builds the genuine comparison set across both origins: a
+  // candidate-origin draft's own import_extraction_records.extracted_fields
+  // (the identical source the candidate path above already reads), and a
+  // url-intake-origin draft's own originating receipt's
+  // candidate_summary.restaurant — the same field
+  // promote_url_intake_to_profile_draft itself already reads via
+  // issued_via_receipt_id, deliberately never the url_intakes row's own
+  // menu-summary column (which only ever carries menu content, never a
+  // restaurant field). A URL-intake-derived candidate on either
+  // side of the comparison still typically has no location today (no
+  // geocoding capability exists in this project) — findPossibleDuplicateDraftId
+  // itself already requires a name AND a location on both sides, never
+  // guessing otherwise — but every eligible draft is now genuinely
+  // considered, not structurally excluded up front.
+  const restaurantCandidate = (receiptRow.candidate_summary && receiptRow.candidate_summary.restaurant) || {}
+  const confirmPossibleDuplicateOfDraftId =
+    typeof body.confirm_possible_duplicate_of_draft_id === 'string' ? body.confirm_possible_duplicate_of_draft_id : null
+
+  const { data: otherActiveDraftRows, error: otherActiveDraftsError } = await supabase
+    .from('restaurant_profile_drafts')
+    .select('id, source_candidate_id, source_url_intake_id')
+    .eq('status', 'draft')
+  if (otherActiveDraftsError) return NextResponse.json({ error: 'Query failed' }, { status: 500 })
+
+  const otherActiveCandidateDraftRows = (otherActiveDraftRows || []).filter((row) => row.source_candidate_id)
+  const otherActiveUrlIntakeDraftRows = (otherActiveDraftRows || []).filter((row) => row.source_url_intake_id)
+
+  let activeDraftCandidates = []
+
+  if (otherActiveCandidateDraftRows.length > 0) {
+    const { data: otherCandidateRows, error: otherCandidatesError } = await supabase
+      .from('import_extraction_records')
+      .select('id, extracted_fields')
+      .in(
+        'id',
+        otherActiveCandidateDraftRows.map((row) => row.source_candidate_id)
+      )
+    if (otherCandidatesError) return NextResponse.json({ error: 'Query failed' }, { status: 500 })
+    const extractedFieldsByCandidateId = {}
+    for (const row of otherCandidateRows || []) extractedFieldsByCandidateId[row.id] = row.extracted_fields
+    activeDraftCandidates = activeDraftCandidates.concat(
+      otherActiveCandidateDraftRows.map((row) => ({
+        draftId: row.id,
+        extractedFields: extractedFieldsByCandidateId[row.source_candidate_id],
+      }))
+    )
+  }
+
+  if (otherActiveUrlIntakeDraftRows.length > 0) {
+    const { data: otherUrlIntakeRows, error: otherUrlIntakesError } = await supabase
+      .from('url_intakes')
+      .select('id, issued_via_receipt_id')
+      .in(
+        'id',
+        otherActiveUrlIntakeDraftRows.map((row) => row.source_url_intake_id)
+      )
+    if (otherUrlIntakesError) return NextResponse.json({ error: 'Query failed' }, { status: 500 })
+    const otherReceiptIdByUrlIntakeId = {}
+    for (const row of otherUrlIntakeRows || []) otherReceiptIdByUrlIntakeId[row.id] = row.issued_via_receipt_id
+
+    const otherReceiptIds = [...new Set(Object.values(otherReceiptIdByUrlIntakeId).filter(Boolean))]
+    const otherCandidateSummaryByReceiptId = {}
+    if (otherReceiptIds.length > 0) {
+      const { data: otherReceiptRows, error: otherReceiptsError } = await supabase
+        .from('url_intake_analysis_receipts')
+        .select('id, candidate_summary')
+        .in('id', otherReceiptIds)
+      if (otherReceiptsError) return NextResponse.json({ error: 'Query failed' }, { status: 500 })
+      for (const row of otherReceiptRows || []) otherCandidateSummaryByReceiptId[row.id] = row.candidate_summary
+    }
+
+    activeDraftCandidates = activeDraftCandidates.concat(
+      otherActiveUrlIntakeDraftRows.map((row) => {
+        const otherReceiptId = otherReceiptIdByUrlIntakeId[row.source_url_intake_id]
+        const otherCandidateSummary = otherReceiptId ? otherCandidateSummaryByReceiptId[otherReceiptId] : null
+        return {
+          draftId: row.id,
+          extractedFields: (otherCandidateSummary && otherCandidateSummary.restaurant) || null,
+        }
+      })
+    )
+  }
+
+  const possibleDuplicateDraftId = findPossibleDuplicateDraftId(restaurantCandidate, activeDraftCandidates)
+  if (possibleDuplicateDraftId && possibleDuplicateDraftId !== confirmPossibleDuplicateOfDraftId) {
+    return NextResponse.json(
+      {
+        error: 'This candidate looks like a possible duplicate of an already-promoted draft. Confirm to promote anyway.',
+        possible_duplicate: true,
+        possible_duplicate_of_draft_id: possibleDuplicateDraftId,
+      },
+      { status: 409 }
+    )
+  }
+
+  const draftId = generateUuidV7()
+  const { data: draft, error: promoteError } = await supabase.rpc('promote_url_intake_to_profile_draft', {
+    p_draft_id: draftId,
+    p_url_intake_id: urlIntake.id,
+    p_actor_user_id: auth.userId,
+    p_possible_duplicate_of_draft_id: possibleDuplicateDraftId,
+    p_restarted_from_draft_id: null,
+  })
+  if (promoteError) {
+    if (promoteError.code === 'P0011') {
+      return NextResponse.json({ error: 'An active Restaurant Profile Draft already exists for this URL intake' }, { status: 409 })
+    }
+    return NextResponse.json({ error: 'Creating the draft failed' }, { status: 500 })
+  }
+
+  const { data: factRows, error: factsError } = await supabase
+    .from('restaurant_profile_draft_field_facts')
+    .select('id, draft_id, field_name, value, origin, source_url_intake_id, recorded_by, recorded_at')
+    .eq('draft_id', draftId)
+  if (factsError) return NextResponse.json({ error: 'Query failed' }, { status: 500 })
+
+  return NextResponse.json({ draft, url_intake: urlIntake, fields: buildDraftFieldsByDraftId(factRows)[draftId] || {} }, { status: 201 })
 }

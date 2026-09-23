@@ -33,8 +33,8 @@ test('ALLOWED_DRAFT_FIELD_NAMES matches the migration exactly — no menu/price/
   assert.deepEqual(ALLOWED_DRAFT_FIELD_NAMES, ['name', 'category', 'address', 'phone', 'website']);
 });
 
-test('ALLOWED_DRAFT_FIELD_ORIGINS is exactly import/enrichment — never a third, free-form value', () => {
-  assert.deepEqual(ALLOWED_DRAFT_FIELD_ORIGINS, ['import', 'enrichment']);
+test('ALLOWED_DRAFT_FIELD_ORIGINS is exactly import/enrichment/url_intake — never a fourth, free-form value', () => {
+  assert.deepEqual(ALLOWED_DRAFT_FIELD_ORIGINS, ['import', 'enrichment', 'url_intake']);
 });
 
 // ─── pickLatestDraftFactRow ─────────────────────────────────────────────
@@ -364,6 +364,12 @@ test('findPossibleDuplicateDraftId: returns the first matching draftId when mult
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
 const MIGRATION_PATH = path.join(REPO_ROOT, 'supabase/migrations/0010_market05c_restaurant_profile_drafts.sql');
+// BE-19's amendment (supabase/migrations/0013_be19_url_intakes.sql)
+// drops and replaces 0010's own origin check with a three-value one —
+// 0010's file itself stays byte-for-byte unchanged (see that migration's
+// own header), so any assertion about the CURRENT, effective origin
+// enum must read 0013, never 0010's now-superseded original.
+const AMENDMENT_MIGRATION_PATH = path.join(REPO_ROOT, 'supabase/migrations/0013_be19_url_intakes.sql');
 const PROFILE_DRAFTS_ROUTE_PATH = path.join(REPO_ROOT, 'app/api/internal/v1/profile-drafts/route.js');
 const DISCARD_ROUTE_PATH = path.join(REPO_ROOT, 'app/api/internal/v1/profile-drafts/[id]/discard/route.js');
 const CANDIDATES_ROUTE_PATH = path.join(REPO_ROOT, 'app/api/internal/v1/import-inbox/candidates/route.js');
@@ -463,15 +469,29 @@ test('structural safety net: field_name is a fixed five-value set matching ALLOW
   assert.deepEqual(values, ALLOWED_DRAFT_FIELD_NAMES);
 });
 
-test('structural safety net: origin is a fixed two-value set matching ALLOWED_DRAFT_FIELD_ORIGINS exactly — never a third, free-form value', () => {
-  const sql = fs.readFileSync(MIGRATION_PATH, 'utf8');
-  const match = sql.match(/origin\s+text not null check \(origin in \(([\s\S]*?)\)\)/);
-  assert.ok(match, 'expected to find the origin fixed-value check');
+test('structural safety net: origin is a fixed three-value set matching ALLOWED_DRAFT_FIELD_ORIGINS exactly — never a fourth, free-form value', () => {
+  // Reads the AMENDED (0013), not the original (0010), check — 0010's
+  // own inline two-value check is dropped and replaced by 0013, never
+  // edited in place. See AMENDMENT_MIGRATION_PATH's own comment above.
+  const sql = fs.readFileSync(AMENDMENT_MIGRATION_PATH, 'utf8');
+  const match = sql.match(/add constraint restaurant_profile_draft_field_facts_origin_check\s*\n\s*check \(origin in \(([\s\S]*?)\)\)/);
+  assert.ok(match, 'expected to find the amended origin fixed-value check in 0013');
   const values = match[1]
     .split(',')
     .map((s) => s.trim().replace(/^'|'$/g, ''))
     .filter(Boolean);
   assert.deepEqual(values, ALLOWED_DRAFT_FIELD_ORIGINS);
+});
+
+test('structural safety net: 0010 itself is never edited by the BE-19 amendment — its own inline origin check stays exactly as originally written', () => {
+  const sql = fs.readFileSync(MIGRATION_PATH, 'utf8');
+  const match = sql.match(/origin\s+text not null check \(origin in \(([\s\S]*?)\)\)/);
+  assert.ok(match, 'expected to still find 0010\'s own, original, unedited origin check');
+  const values = match[1]
+    .split(',')
+    .map((s) => s.trim().replace(/^'|'$/g, ''))
+    .filter(Boolean);
+  assert.deepEqual(values, ['import', 'enrichment'], '0010\'s own file must stay byte-for-byte as originally written — the amendment lives entirely in 0013');
 });
 
 test('structural safety net: the promotion RPC re-derives the effective review status itself and never accepts one as a parameter', () => {
@@ -950,4 +970,120 @@ test('structural safety net: the profile-drafts overview page discloses when the
   const source = fs.readFileSync(PROFILE_DRAFTS_PAGE_PATH, 'utf8');
   assert.match(source, /discardedShownCount < totalDiscarded/, 'expected an explicit truncation check comparing the shown count to the true total');
   assert.match(source, /most recently discarded of/i, 'expected a visible, honest disclosure when the list is not the full history');
+});
+
+// ─── BE-19 — the {receipt_id, source_url} origin branch ───────────────────
+
+test('structural safety net: the profile-drafts route branches to a SEPARATE function for receipt_id — never inline-mixed with the candidate_id path', () => {
+  const source = fs.readFileSync(PROFILE_DRAFTS_ROUTE_PATH, 'utf8');
+  assert.match(source, /if \(receiptId\) \{\s*\n\s*return handleUrlIntakePromotion\(request, auth, body, receiptId\)/);
+  assert.match(source, /async function handleUrlIntakePromotion\(/);
+});
+
+test('structural safety net: handleUrlIntakePromotion never calls promote_candidate_to_profile_draft — only the new, separate RPC', () => {
+  const source = fs.readFileSync(PROFILE_DRAFTS_ROUTE_PATH, 'utf8');
+  const fnStart = source.indexOf('async function handleUrlIntakePromotion');
+  assert.ok(fnStart !== -1);
+  const fnBody = source.slice(fnStart);
+  assert.doesNotMatch(fnBody, /\.rpc\('promote_candidate_to_profile_draft'/);
+  assert.match(fnBody, /\.rpc\('create_url_intake_from_receipt'/);
+  assert.match(fnBody, /\.rpc\('promote_url_intake_to_profile_draft'/);
+});
+
+test('structural safety net: handleUrlIntakePromotion recomputes the analysis hash server-side from the stored receipt row — never accepts a hash, restaurant match, or candidate field from the request body', () => {
+  const source = fs.readFileSync(PROFILE_DRAFTS_ROUTE_PATH, 'utf8');
+  const fnStart = source.indexOf('async function handleUrlIntakePromotion');
+  const fnBody = source.slice(fnStart);
+  assert.match(fnBody, /computeAnalysisResultHash\(\{/);
+  assert.doesNotMatch(fnBody, /body\.analysis_result_hash/);
+  assert.doesNotMatch(fnBody, /body\.matched_restaurant_id/);
+  assert.doesNotMatch(fnBody, /body\.restaurant_match_type/);
+  assert.doesNotMatch(fnBody, /body\.candidate_summary/);
+});
+
+test('structural safety net: handleUrlIntakePromotion generates both new ids (url intake + draft) application-side — never lets Postgres default either', () => {
+  const source = fs.readFileSync(PROFILE_DRAFTS_ROUTE_PATH, 'utf8');
+  const fnStart = source.indexOf('async function handleUrlIntakePromotion');
+  const fnBody = source.slice(fnStart);
+  const uuidCalls = fnBody.match(/generateUuidV7\(\)/g) || [];
+  assert.ok(uuidCalls.length >= 2, 'expected at least two generateUuidV7() calls — one for the url intake id, one for the draft id');
+});
+
+// ─── BE-19 repair — handleUrlIntakePromotion's possible-duplicate check ───
+//
+// Pre-commit review (2026-09-22) found that handleUrlIntakePromotion called
+// findPossibleDuplicateDraftId(restaurantCandidate, []) — a hardcoded empty
+// comparison list, so a possible duplicate could never actually be flagged
+// for this path, regardless of location-data availability. The fix below
+// builds the real comparison set across both draft origins. No browser or
+// live Supabase connection is available in this environment, and this
+// project's own established pattern for every other route in this file is
+// a source-level structural safety net (see every test above this one) —
+// findPossibleDuplicateDraftId's own general matching/no-matching/empty-list
+// logic is exhaustively covered, unchanged, by its dedicated tests earlier
+// in this file (see the "findPossibleDuplicateDraftId" section above); what
+// changed here is purely the wiring that assembles its second argument.
+
+test('structural safety net: the old hardcoded empty-array bug is gone — findPossibleDuplicateDraftId is called with a real, assembled variable', () => {
+  const source = fs.readFileSync(PROFILE_DRAFTS_ROUTE_PATH, 'utf8');
+  const fnStart = source.indexOf('async function handleUrlIntakePromotion');
+  const fnBody = source.slice(fnStart);
+  assert.doesNotMatch(fnBody, /findPossibleDuplicateDraftId\(restaurantCandidate,\s*\[\]\)/);
+  assert.match(fnBody, /findPossibleDuplicateDraftId\(restaurantCandidate, activeDraftCandidates\)/);
+  // The misleading old comment (which attributed the no-op solely to
+  // missing geocoding, when the true, more fundamental cause was the
+  // empty comparison set) must not survive verbatim.
+  assert.doesNotMatch(fnBody, /Wired here anyway so this path benefits automatically/);
+});
+
+test('structural safety net: the possible-duplicate comparison set is built from active (never discarded) drafts covering BOTH origin columns', () => {
+  const source = fs.readFileSync(PROFILE_DRAFTS_ROUTE_PATH, 'utf8');
+  const fnStart = source.indexOf('async function handleUrlIntakePromotion');
+  const fnBody = source.slice(fnStart);
+  const queryMatch = fnBody.match(/\.from\('restaurant_profile_drafts'\)\s*\n\s*\.select\('id, source_candidate_id, source_url_intake_id'\)\s*\n\s*\.eq\('status', 'draft'\)/);
+  assert.ok(queryMatch, 'expected one query selecting both origin columns, filtered to status = draft (excludes discarded)');
+});
+
+test('structural safety net: a candidate-origin active draft is compared using import_extraction_records.extracted_fields — the same source the candidate path above already reads', () => {
+  const source = fs.readFileSync(PROFILE_DRAFTS_ROUTE_PATH, 'utf8');
+  const fnStart = source.indexOf('async function handleUrlIntakePromotion');
+  const fnBody = source.slice(fnStart);
+  assert.match(fnBody, /otherActiveCandidateDraftRows = \(otherActiveDraftRows \|\| \[\]\)\.filter\(\(row\) => row\.source_candidate_id\)/);
+  assert.match(fnBody, /\.from\('import_extraction_records'\)\s*\n\s*\.select\('id, extracted_fields'\)/);
+});
+
+test('structural safety net: a url-intake-origin active draft is compared using its originating receipt\'s candidate_summary.restaurant — never url_intakes.menu_candidate_summary', () => {
+  const source = fs.readFileSync(PROFILE_DRAFTS_ROUTE_PATH, 'utf8');
+  const fnStart = source.indexOf('async function handleUrlIntakePromotion');
+  const fnBody = source.slice(fnStart);
+  assert.match(fnBody, /otherActiveUrlIntakeDraftRows = \(otherActiveDraftRows \|\| \[\]\)\.filter\(\(row\) => row\.source_url_intake_id\)/);
+  assert.match(fnBody, /\.from\('url_intakes'\)\s*\n\s*\.select\('id, issued_via_receipt_id'\)/);
+  assert.match(fnBody, /\.from\('url_intake_analysis_receipts'\)\s*\n\s*\.select\('id, candidate_summary'\)/);
+  assert.match(fnBody, /otherCandidateSummary && otherCandidateSummary\.restaurant/);
+  assert.doesNotMatch(fnBody, /menu_candidate_summary/, 'must never read the menus-only field for a restaurant comparison');
+});
+
+test('structural safety net: the comparison list defaults to and stays a real array ([], never null/undefined) even when neither origin has any active draft', () => {
+  const source = fs.readFileSync(PROFILE_DRAFTS_ROUTE_PATH, 'utf8');
+  const fnStart = source.indexOf('async function handleUrlIntakePromotion');
+  const fnBody = source.slice(fnStart);
+  const initIndex = fnBody.indexOf('let activeDraftCandidates = []');
+  const useIndex = fnBody.indexOf('findPossibleDuplicateDraftId(restaurantCandidate, activeDraftCandidates)');
+  assert.ok(initIndex !== -1 && useIndex !== -1 && initIndex < useIndex, 'activeDraftCandidates must be initialized to [] before being passed, so an empty/no-op comparison set is a genuine empty array, never null or undefined');
+});
+
+test('structural safety net: the existing candidate-based promotion flow (POST, above handleUrlIntakePromotion) is untouched by this repair', () => {
+  const source = fs.readFileSync(PROFILE_DRAFTS_ROUTE_PATH, 'utf8');
+  const handlerStart = source.indexOf('async function handleUrlIntakePromotion');
+  const candidatePathSource = source.slice(0, handlerStart);
+  // The candidate path's own possible-duplicate query still selects only
+  // its own original two columns — never widened to source_url_intake_id
+  // (that column is meaningless for a candidate-originated draft's own
+  // comparison, and widening it here would be an unrequested change to a
+  // flow this repair must leave alone).
+  assert.match(candidatePathSource, /\.select\('id, source_candidate_id'\)\s*\n\s*\.eq\('status', 'draft'\)/);
+  assert.doesNotMatch(candidatePathSource, /source_url_intake_id/);
+  // Exactly one call to the original RPC, unchanged, only in the candidate path.
+  const rpcCalls = source.match(/\.rpc\('promote_candidate_to_profile_draft'/g) || [];
+  assert.equal(rpcCalls.length, 1);
 });

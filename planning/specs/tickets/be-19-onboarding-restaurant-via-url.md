@@ -17,15 +17,31 @@ implementable shape lives in `docs/api/url-intake-schema.md` (new) and
 BE-19 VOORTGANG
 
 - [x] 1. Ticket en kernbeslissingen vastgelegd
-- [ ] 2a. Documentatiecommit lokaal gemaakt
-- [ ] 2b. Documentatiecommit gepusht
-- [ ] 3. Implementatie-readinessreview groen
-- [ ] 4. Lokale productcode gebouwd en getest
+- [x] 2a. Documentatiecommit lokaal gemaakt
+- [x] 2b. Documentatiecommit gepusht
+- [x] 3. Implementatie-readinessreview groen
+- [x] 4. Lokale productcode gebouwd en getest
 - [ ] 5. Onafhankelijke pre-commitreview groen
 - [ ] 6. Lokale codecommit gemaakt
 - [ ] 7. Gecombineerde pre-pushreview groen
 - [ ] 8. Code gepusht
 - [ ] 9. Productiecontrole
+
+**Stap 2a/2b**: commit `973df5befa148c94dc2e78386b257b536ea872cc`
+("docs(planning): define BE-19 URL intake contract"), lokaal gemaakt en
+naar `origin/main` gepusht. **Stap 3**: een aparte, onafhankelijke
+implementatie-readinessreview is als eigen taak uitgevoerd (broncode/
+migraties/RPC's/tests rechtstreeks gelezen, inclusief een gevonden en
+opgeloste inconsistentie in migratie `0010`'s eigen kopregel). **Stap 4**:
+deze ronde — `url_intakes`, `url_intake_analysis_receipts`, de
+`restaurant_profile_drafts`/`_field_facts`-amendering, en beide nieuwe
+RPC's zijn gebouwd in `supabase/migrations/0013_be19_url_intakes.sql` en
+functioneel geverifieerd in een lokale, wegwerpbare Postgres-container
+(0001–0013 achtereenvolgens toegepast; receipt-uitgifte, eenmalig
+gebruik, actor-/URL-/hash-manipulatie geweigerd, promotie, field-facts-
+herkomst, en bevestiging dat `promote_candidate_to_profile_draft` zelf
+ongewijzigd blijft — alle getest, niet aangenomen). De volledige lokale
+testset (671 tests) en `npm run build` zijn vers gedraaid en groen.
 
 See `015-be-ticket-structure-and-time-boxing.md` for what this checklist
 means and how it must be kept up to date.
@@ -92,8 +108,23 @@ MARKET-05C — nothing else.
 - It stores no raw HTML, no full JSON-LD payload, no PDF, and no full
   source document — only a bounded, already-established allowlist of
   selected, normalized restaurant- and menu-candidate fields plus source
-  references (URL, hostname, timestamp, actor), so a staff member never
-  has to re-submit the same URL after a restaurant is promoted.
+  references (a canonical, query/fragment-stripped URL, hostname,
+  timestamp, actor), so a staff member never has to re-submit the same
+  URL after a restaurant is promoted.
+- **The originally submitted URL, including any query parameters or
+  fragment, is never stored durably.** Only a server-normalized
+  `canonical_source_url` (scheme, host, path — no query, no fragment) is
+  ever written to `url_intakes` or any other audit field; the original,
+  fully-qualified URL exists only transiently, for exactly as long as the
+  existing, unchanged fetch step needs it.
+- **A durable URL-intake action never trusts a client-supplied analysis
+  result.** `restaurant_match_type`, `matched_restaurant_id`, and every
+  extracted field are accepted only insofar as they match a short-lived,
+  server-issued `analysis_receipt` bound to the actor, the
+  `canonical_source_url`, and a server-computed hash of the server's own
+  analysis result — never accepted from the client as authoritative on
+  their own. See `docs/api/url-intake-schema.md`'s own "Analysis-result
+  integrity" section for the precise requirement.
 - An unmatched URL may produce a `restaurant_profile_drafts` concept.
 - A `BE-17` menu snapshot proposal may **never** reference a
   `restaurant_profile_drafts` id, a `url_intakes` id, or any identifier
@@ -171,13 +202,28 @@ restated here:
       nullable foreign keys with a symmetric "exactly one" check — no
       polymorphic reference of any kind.
 - [ ] The amendment explicitly names the required, not-yet-implemented
-      changes to the existing partial unique index and to
-      `promote_candidate_to_profile_draft()` — not silently assumed to be
-      free.
+      changes to the existing partial unique index (two separate indexes,
+      never one combined expression) and explicitly names a **new,
+      separate** RPC (`promote_url_intake_to_profile_draft`) for the
+      `url_intakes` origin — `promote_candidate_to_profile_draft()` itself
+      is explicitly stated to be unmodified, not silently assumed to be
+      free of change.
 - [ ] `restaurant_profile_draft_field_facts.origin` gains exactly one new
       value (`url_intake`) with a matching, equally nullable
-      `source_url_intake_id` column and an extended symmetric check — no
-      second ledger table introduced.
+      `source_url_intake_id` column and **three independent biconditional
+      checks** (never one combined `and`/`or` expression) — no second
+      ledger table introduced.
+- [ ] The contract requires a short-lived, server-issued, independently
+      verifiable `analysis_receipt` (or an explicitly justified equivalent
+      server-side mechanism) binding actor, `canonical_source_url`, and a
+      server-computed analysis-result hash, re-validated at durable-action
+      time — and states plainly that a client-supplied
+      `restaurant_match_type`/`matched_restaurant_id`/extracted field is
+      never authoritative on its own.
+- [ ] The contract requires that only a server-normalized
+      `canonical_source_url` (no query string, no fragment) is ever
+      durably stored, and that the originally submitted URL is used only
+      transiently for the existing, unchanged fetch step.
 - [ ] The contract states, unambiguously, that a `menu_snapshot_proposals`
       row may only ever reference an existing `data/restaurants.json` key
       — never a `restaurant_profile_drafts` id or a `url_intakes` id —
@@ -187,6 +233,11 @@ restated here:
 - [ ] The contract states that the "concept → real restaurant record"
       promotion step is explicitly out of scope and not implicitly
       promised.
+- [ ] The contract states that migration `0010` is treated as an
+      already-applied, live migration and must never be edited (including
+      its own comments) — any schema change lands in a new, separate,
+      additive migration file only, preceded by a read-only verification
+      against the real database (not a row count alone).
 - [ ] `menu_snapshot_proposals`, `menu_snapshot_reviews`, and every
       currently-shipped `BE-18` route/UI file are byte-for-byte unchanged
       after this ticket's documentation lands.
@@ -201,16 +252,29 @@ separately-reviewable phases — not one combined step:
 1. This ticket's own documentation commit (this round), made and pushed.
 2. An independent, read-only implementation-readiness review of this
    ticket and its two sibling `docs/api/*.md` contracts.
-3. **Migration** — the `url_intakes` table itself, the
+3. **Migration** — preceded by a required, separate, read-only
+   verification step: confirm the real, live migration history (resolving
+   `0010`'s own header comment, which still says "NOT YET APPLIED,"
+   against this document's — and `docs/api/restaurant-profile-drafts-schema.md`'s
+   — own statement that it is in fact already live), the actual current
+   shape of both `restaurant_profile_drafts`/`_field_facts` in production,
+   and a targeted compatibility query proving no existing row would
+   violate the new checks — a row count alone is not sufficient evidence.
+   Only then: a **new, separate, additive** migration file (the next
+   unused number in sequence) — `0010` itself is never edited, including
+   its comments — containing the `url_intakes` table, the
+   `url_intake_analysis_receipts` table, the
    `restaurant_profile_drafts`/`_field_facts` amendment (nullable
-   `source_candidate_id`, new `source_url_intake_id` columns, the
-   widened partial unique index, the extended symmetric checks), written
-   and locally validated in a disposable Postgres container before any
-   live application.
-4. **Server logic** — the new route(s) that create a `url_intakes` row on
-   first durable action, the widened `promote_candidate_to_profile_draft()`
-   call path (or its own dedicated RPC branch) for the
-   `source_url_intake_id` origin, and the unchanged, existing
+   `source_candidate_id`, new `source_url_intake_id` columns, two separate
+   partial unique indexes, and the three independent biconditional checks
+   on `field_facts.origin` — never one combined `and`/`or` expression),
+   written and locally validated in a disposable Postgres container before
+   any live application.
+4. **Server logic** — the new route(s) that issue and validate an
+   `analysis_receipt`, create a `url_intakes` row on first durable action,
+   the new, separate `promote_url_intake_to_profile_draft()` RPC for the
+   `source_url_intake_id` origin (`promote_candidate_to_profile_draft()`
+   itself stays unmodified), and the unchanged, existing
    `POST /api/internal/v1/menu-snapshots` call reused as-is once a real
    restaurant identity exists.
 5. **UI** — wiring `BE-18`'s existing "no restaurant match" dead end into

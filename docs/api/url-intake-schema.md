@@ -120,18 +120,98 @@ approval workflow.
 |---|---|---|
 | `id` | `uuid primary key` | App-generated UUIDv7, matching `markets`/`import_runs`/`restaurant_profile_drafts`' own convention — not Postgres's `gen_random_uuid()`. |
 | `market_id` | `uuid not null references markets(id)` | Same requirement every market-bound record in this project already carries. |
-| `source_url` | `text not null check (source_url ~* '^https?://')` | The exact URL a staff member submitted — same shape check as `menu_snapshot_proposals.source_url`. |
-| `source_hostname` | `text not null` | Normalized the same way `src/lib/restaurantHostMatch.js`'s `normalizeHostname` already does — stored redundantly with `source_url` purely for cheap lookup/audit, never re-derived inconsistently. |
+| `canonical_source_url` | `text not null check (canonical_source_url ~* '^https?://' and canonical_source_url !~ '[?#]')` | **Never the originally submitted URL verbatim.** A server-normalized form only: scheme, host, and path — query string and fragment always stripped before this value is ever computed. See "URL data minimisation" below for why, and for where the original, fully-qualified URL (including any query parameters) is allowed to exist at all. |
+| `source_hostname` | `text not null` | Normalized the same way `src/lib/restaurantHostMatch.js`'s `normalizeHostname` already does — stored redundantly with `canonical_source_url` purely for cheap lookup/audit, never re-derived inconsistently. |
 | `fetched_at` | `timestamptz not null` | When the underlying fetch actually happened — may predate `created_at` below by the time it takes a reviewer to decide. |
 | `actor_user_id` | `uuid not null references auth.users(id)` | The authenticated `internal` account that triggered the fetch and the resulting action. |
-| `restaurant_match_type` | `text not null check (restaurant_match_type in ('exact', 'none', 'multiple'))` | Mirrors `src/lib/restaurantHostMatch.js`'s existing `matchType` vocabulary exactly — descriptive of what the fetch found, never itself an authorization to act. |
-| `matched_restaurant_id` | `text` (nullable) | Set only when `restaurant_match_type = 'exact'` **and** a human confirmed it. The existing `data/restaurants.json` string key — never a `restaurant_profile_drafts` id, never any other identifier shape. This is the **only** field in this entire contract that a future `BE-17` menu-snapshot call may ever read `restaurant_id` from. |
+| `restaurant_match_type` | `text not null check (restaurant_match_type in ('exact', 'none', 'multiple'))` | Mirrors `src/lib/restaurantHostMatch.js`'s existing `matchType` vocabulary exactly — descriptive of what the fetch found, never itself an authorization to act, and never trusted from the client at durable-action time (see "Analysis-result integrity" below) — always re-derived server-side from the bound analysis result. |
+| `matched_restaurant_id` | `text` (nullable) | Set only when `restaurant_match_type = 'exact'` **and** a human confirmed it. The existing `data/restaurants.json` string key — never a `restaurant_profile_drafts` id, never any other identifier shape. This is the **only** field in this entire contract that a future `BE-17` menu-snapshot call may ever read `restaurant_id` from. Never accepted verbatim from the client — see "Analysis-result integrity" below. |
 | `created_profile_draft_id` | `uuid references restaurant_profile_drafts(id)` (nullable) | Set exactly once, at the moment a staff member explicitly creates a new restaurant concept from this intake (see the coupling section below) — never overwritten, never set automatically. |
+| `issued_via_receipt_id` | `uuid references url_intake_analysis_receipts(id)` (nullable) | Which analysis receipt (see "Analysis-result integrity" below) authorized this row's creation — a plain audit reference, never re-validated after the fact. Nullable only because the receipts table itself is short-lived and may eventually be pruned; the row this points to having since expired/been deleted does not retroactively invalidate this already-written `url_intakes` row. |
 | `created_at` | `timestamptz not null default now()` | When this audit row itself was written (the first durable action), distinct from `fetched_at`. |
 
 No status column. No decision/review vocabulary. No `pending`/`approved`/
 `rejected` value of any kind exists on this table — there is nothing here
 for a second workflow to move through.
+
+## Analysis-result integrity — the `analysis_receipt` requirement
+
+**A future durable URL-intake action must never blindly trust a
+browser-supplied analysis result.** `BE-18`'s existing read-url step
+already returns `restaurant_match_type`/`matched_restaurant_id`/extracted
+menu candidates to the browser as an ordinary JSON response — that step
+stays entirely unchanged. The gap this section closes is what happens
+*after*: the durable action that eventually writes a `url_intakes` row
+(and, downstream, a `restaurant_profile_drafts` concept or a `BE-17` menu
+snapshot) is necessarily a **separate** HTTP call, made some time later,
+by a browser that is holding onto whatever the read-url step told it. A
+client is not a trusted source of fact for any of that — the same
+principle `docs/api/internal-provenance-api.md` already applies to
+`source`/`confidence`/`verified_at`/`verified_by` ("never accepted from
+the request body... derived entirely server-side") extends here to
+`restaurant_match_type`, `matched_restaurant_id`, and every extracted
+restaurant/menu field.
+
+**Requirement**: the durable-action route requires a short-lived,
+server-issued, independently verifiable `analysis_receipt`, obtained as
+part of `BE-18`'s existing read-url response (that response gains one
+additional, opaque field — no change to its own analysis behavior). The
+receipt binds, at minimum:
+
+- the authenticated actor who requested the analysis;
+- the exact `canonical_source_url` the analysis was performed against;
+- a server-computed hash/identity of the **server's own** analysis result
+  (match type, matched restaurant candidate, and the normalized menu-
+  candidate summary) — never a hash of anything the client itself
+  produced;
+- an expiry, short enough that a receipt cannot realistically be reused
+  well after the analysis it represents.
+
+**At durable-action time**, the server re-validates all four of: the
+caller's identity against the receipt's bound actor, the receipt's
+expiry, the caller's stated URL against the receipt's bound
+`canonical_source_url`, and a fresh hash of whatever analysis payload the
+caller submits against the receipt's stored hash. Any mismatch or
+expiry — actor, URL, or analysis binding — is refused outright, with no
+fallback or partial acceptance. **A client-submitted `matched_restaurant_id`,
+`restaurant_match_type`, or any extracted field is never treated as
+authoritative on its own** — it is accepted only insofar as it matches
+what the bound, already-issued receipt says the server itself found.
+
+**Mechanism — decided, by explicit user decision (2026-09-22)**: a small,
+short-TTL, server-side table, `url_intake_analysis_receipts` (`id`,
+`actor_user_id`, `canonical_source_url`, `analysis_result_hash`,
+`expires_at`, `consumed_at` nullable — set once, at first successful use,
+so a receipt is single-use), rather than a stateless, cryptographically
+signed token. Both were considered; the server-side table was chosen for
+two concrete reasons, not merely convention: (1) it introduces no new
+signing secret/key-management concern — every other authenticity
+guarantee in this project already flows through Supabase Auth's own
+session tokens, and a bespoke signing scheme would be a genuinely new
+class of secret this project has never needed; (2) single-use replay
+protection is a hard requirement here (an already-consumed receipt must
+never authorize a second durable action), and a stateless signed token
+cannot enforce single-use **without** its own server-side "already used"
+table anyway — at which point the stateless option no longer avoids
+server-side state, it just adds a second mechanism on top of one. A plain
+Postgres table, RLS-enabled with zero `anon`/`authenticated` policies and
+`service_role` limited to `select, insert`, plus a narrow, column-scoped
+`update` grant on `consumed_at` only, matches this project's own
+established pattern exactly (e.g. `import_runs`' column-scoped update
+grant) rather than introducing an unprecedented mechanism. Cleanup of
+expired, unconsumed receipts (a scheduled delete, or simply leaving them
+to accumulate and pruning periodically) is an operational detail, not
+fixed here.
+
+**Terminology, made explicit**: a receipt is a temporary, short-lived
+technical record of one server-side analysis — it is **never** the
+durable `url_intakes` audit record itself, and the two must never be
+conflated in code, naming, or prose. Reading a URL and issuing a receipt
+never writes to `url_intakes`; only a subsequent, deliberate human action
+(see "One row per confirmed human action" above) ever does. A receipt
+that is never redeemed leaves no durable `url_intakes` trace at all —
+this is intentional, not a gap: an analysis nobody acted on should not
+accumulate as a permanent audit row.
 
 ## Data minimisation
 
@@ -157,8 +237,9 @@ field list invented for this contract:
   retention of selected menu candidates" below. Never the full
   `captured_content` shape `BE-17`'s `menu_snapshot_proposals` itself
   uses — only enough to let a staff member resume without re-fetching.
-- **Source references** — `source_url`/`source_hostname`/`fetched_at` on
-  `url_intakes` itself, exactly as listed above.
+- **Source references** — `canonical_source_url`/`source_hostname`/
+  `fetched_at` on `url_intakes` itself, exactly as listed above — **never**
+  the originally submitted URL verbatim.
 
 Anything outside these allowlists — including any field
 `docs/api/source-registry-schema.md`'s `basic_info` exclusion list
@@ -166,6 +247,26 @@ already names (owner/staff names, personal contact details, likely home
 addresses) — is never extracted into a durable record by this contract,
 the same standing exclusion every other intake path in this project
 already honors.
+
+### URL data minimisation — `url_intakes` is not a URL log
+
+`url_intakes` is an audit/traceability record, not a request log, and
+must not accumulate the same kind of incidental exposure a raw access log
+would. The originally submitted URL — including any query parameters or
+fragment (which may carry session identifiers, referral tokens, tracking
+parameters, or other incidental data never intended for durable storage)
+— is used **only transiently**, for exactly as long as `BE-18`'s existing,
+unchanged, ephemeral read-url step needs it to perform the actual fetch.
+It is never written into `canonical_source_url`, never included in any
+other `url_intakes` column, never included in `logUrlFetchAttempt`'s
+existing structured server log (already true today, per that function's
+own structural safety-net test — this contract changes nothing about it),
+and never appears in any other durable audit field this contract
+introduces. The only durably stored trace of "which page" is
+`canonical_source_url` (scheme, host, path — no query, no fragment) plus
+`source_hostname`. Terminology and field names throughout this document
+use `canonical_source_url` precisely because "a URL" invites the
+assumption that the full, original string is what is meant — it is not.
 
 ## Coupling to `restaurant_profile_drafts` — two real foreign keys, one symmetric check
 
@@ -189,24 +290,59 @@ different tables without its own foreign key, and never a single column
 whose meaning depends on an untyped string tag.
 
 **This is a real schema change to an already-shipped table, not a
-cosmetic addition.** It requires, at minimum: widening the existing
-partial unique index (`... where status = 'draft'`) to cover both origin
-columns instead of only `source_candidate_id`, and a second code path in
-`promote_candidate_to_profile_draft()` for the `source_url_intake_id`
-case (which has no `import_runs` row to join through for `market_id` —
-`url_intakes.market_id` is read directly instead). See
-`docs/api/restaurant-profile-drafts-schema.md`'s own amendment section
-for the authoritative statement of this change; it is recorded there,
-not duplicated here, since it is a change to that table's own contract.
+cosmetic addition.** It requires, at minimum: widening "at most one active
+draft per candidate" to also cover the new origin — via **two separate**
+partial unique indexes, one per origin column, rather than one combined
+expression index — and a **new, separate RPC**,
+`promote_url_intake_to_profile_draft(...)`, for the `source_url_intake_id`
+case. **`promote_candidate_to_profile_draft(...)` itself is never modified
+— not its body, not its signature, not its behavior.** The two paths
+differ too much to share one function safely: the candidate path's own
+`approved_internal` effective-status check (re-derived from
+`import_candidate_reviews`) has no equivalent for a `url_intakes` row,
+which carries no review-status concept at all (see "not a review queue"
+above), and `market_id` is read via a join through `import_runs` for one
+path but directly from `url_intakes.market_id` for the other. Branching
+one shared function on origin would risk a precondition from one path
+silently leaking into the other; a second, single-purpose RPC — matching
+this project's own established convention that every RPC here does
+exactly one thing (`record_import_candidate_review`,
+`approve_pending_change`, `discard_profile_draft`, none of which branch
+on origin/type internally) — makes the non-regression of the existing,
+already-live candidate path trivial to prove: its own SQL text simply
+never changes. See `docs/api/restaurant-profile-drafts-schema.md`'s own
+amendment section for the authoritative statement of this change; it is
+recorded there, not duplicated here, since it is a change to that table's
+own contract.
 
 ## Field-level provenance — extends the existing ledger, never a second one
 
 `restaurant_profile_draft_field_facts.origin` gains a third value,
 `'url_intake'`, alongside a new, equally nullable `source_url_intake_id`
-column, extending the existing symmetric check to a three-way form
-(exactly one of `source_enrichment_id`/`source_url_intake_id` set,
-depending on `origin`; neither when `origin = 'import'`). No new ledger
-table is introduced — the existing, already-tested, append-only
+column. The existing two-way symmetric check
+(`check ((origin = 'import') = (source_enrichment_id is null))`) is
+replaced by **three independent biconditional checks**, never one
+combined `and` expression:
+
+```
+check ((origin = 'import') = (source_enrichment_id is null and source_url_intake_id is null))
+check ((origin = 'enrichment') = (source_enrichment_id is not null))
+check ((origin = 'url_intake') = (source_url_intake_id is not null))
+```
+
+**This specific shape is not arbitrary caution — it repeats a bug this
+project has already found and fixed once, in this exact table.**
+`restaurant_profile_drafts`' own discard columns originally used one
+combined `(status = 'discarded') = (A and B and C)` check, which was found
+to allow a partial, invalid state (`discard_note` alone settable on an
+active draft) because the right-hand side only required *one* of three
+conditions to be false while `status = 'draft'`, not all three — fixed by
+splitting it into three independent per-column biconditionals (see
+`supabase/migrations/0010_market05c_restaurant_profile_drafts.sql`'s own
+comment on this exact fix). A single combined three-way `and`/`or`
+expression for `origin` would repeat the identical class of bug; the
+three separate checks above are required, not a stylistic preference. No
+new ledger table is introduced — the existing, already-tested, append-only
 field-facts table is the only place a draft's field values, and their
 origin, are ever recorded, regardless of which pipeline produced them.
 See `docs/api/restaurant-profile-drafts-schema.md`'s matching amendment
@@ -309,6 +445,10 @@ proposal — see "Hard boundary" above.
 - Exact bounded size of the stored menu-candidate summary `jsonb` — a
   physical-layer decision for whoever implements the migration, not fixed
   here.
+- Cleanup/garbage-collection cadence for expired, unconsumed
+  `url_intake_analysis_receipts` rows — see "Analysis-result integrity"
+  above; the mechanism itself (a server-side table) is recommended there,
+  its operational cleanup schedule is not fixed here.
 
 ## Out of scope for this contract
 

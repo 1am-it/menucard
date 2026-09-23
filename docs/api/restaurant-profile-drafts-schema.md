@@ -930,43 +930,101 @@ already establishes elsewhere in this project — **never** a bare
 discriminator/type column pointing at different tables without its own
 foreign key, and never a single, untyped reference column.
 
-**Consequences for the existing partial unique index and RPC — named,
-not yet resolved here**: `idx_restaurant_profile_drafts_one_active_per_candidate`
-(today scoped to `source_candidate_id` alone, `where status = 'draft'`)
-must widen to cover whichever origin column is actually set for a given
-row, so "at most one active draft per candidate" continues to hold
-regardless of origin. `promote_candidate_to_profile_draft()` must gain a
-second code path for the `source_url_intake_id` case: it has no
-`import_runs` row to join through for `market_id` (step 1 of the existing
-function) — `url_intakes.market_id` is read directly instead, and no
-`import_candidate_reviews` effective-status check (step 2) applies, since
-a `url_intakes` row carries no review-status concept at all (see
-`docs/api/url-intake-schema.md`'s own "not a review queue" section). The
-exact SQL shape of this branching is an implementation detail for the
-migration that eventually builds this, not fixed here.
+**Consequences for the existing partial unique index and RPC**:
+`idx_restaurant_profile_drafts_one_active_per_candidate` (today scoped to
+`source_candidate_id` alone, `where status = 'draft'`) is replaced by
+**two separate** partial unique indexes, one per origin column (each
+`where <column> is not null and status = 'draft'`) — never one combined
+expression index — so "at most one active draft per candidate/intake"
+continues to hold regardless of origin, without requiring a `coalesce()`
+expression that would be harder to reason about and to index correctly.
+
+**`promote_candidate_to_profile_draft(...)` is never modified by this
+amendment — not its body, not its signature, not its behavior, not even
+its comments.** It is today, per this document's own "Implementation"
+section, an already-implemented, already-live function (see that
+section's own dated status corrections). The `source_url_intake_id` case
+is served instead by a **new, separate, single-purpose RPC**,
+`promote_url_intake_to_profile_draft(p_draft_id, p_url_intake_id,
+p_actor_user_id, p_possible_duplicate_of_draft_id default null,
+p_restarted_from_draft_id default null)`, mirroring the existing
+function's transactional shape (one transaction, `security invoker`,
+fixed `search_path`, typed exceptions) but with two deliberate
+differences, not an internal branch inside one shared function: it reads
+`market_id` directly from `url_intakes.market_id` rather than joining
+through `import_runs`, and it performs **no** `import_candidate_reviews`
+effective-status check at all, since a `url_intakes` row carries no
+review-status concept (see `docs/api/url-intake-schema.md`'s own "not a
+review queue" section) — there is nothing there to re-derive. A single
+function branching on which origin was supplied was considered and
+rejected: the two paths' preconditions are different enough (one requires
+an `approved_internal` review status that literally cannot exist for the
+other) that branching risks one precondition silently leaking into, or
+silently being skipped for, the wrong path. This also matches every other
+RPC already in this project (`record_import_candidate_review`,
+`approve_pending_change`, `discard_profile_draft`), none of which branch
+on an origin or type internally — each does exactly one thing.
 
 **What changes on `restaurant_profile_draft_field_facts`**: `origin`'s
 check constraint gains a third value, `'url_intake'`, alongside a new,
 equally nullable `source_url_intake_id uuid references url_intakes(id)`
 column — matching `url_intakes.id`'s own `uuid` type, not
 `import_candidate_enrichments`'s `bigint`. The existing two-way symmetric
-check
-(`check ((origin = 'import') = (source_enrichment_id is null))`) becomes
-a three-way form: exactly one of `source_enrichment_id`/
-`source_url_intake_id` is set when `origin` is `'enrichment'`/
-`'url_intake'` respectively, and neither when `origin = 'import'`. No new
-ledger table — the existing, already-tested, append-only field-facts
-table remains the **only** place a draft's field values and their origin
-are ever recorded, regardless of which pipeline produced them. `field_name`'s
-existing fixed allowlist (`name`/`category`/`address`/`phone`/`website`)
-is unchanged and unexpanded by this amendment.
+check (`check ((origin = 'import') = (source_enrichment_id is null))`) is
+replaced by **three independent biconditional checks**, never one
+combined `and`/`or` expression:
+
+```
+check ((origin = 'import') = (source_enrichment_id is null and source_url_intake_id is null))
+check ((origin = 'enrichment') = (source_enrichment_id is not null))
+check ((origin = 'url_intake') = (source_url_intake_id is not null))
+```
+
+**This exact shape is required, not a stylistic preference — this table
+has already taught this project this lesson once.** Its own discard
+columns originally used one combined
+`(status = 'discarded') = (A and B and C)` check, later found (see this
+document's own "Implementation (2026-09-06, later still — discard/duplicate
+follow-up round)" section above) to allow `discard_note` alone to be set
+on an active draft, because the combined right-hand side only required
+*one* of three conditions to be false while `status = 'draft'`, not all
+three — fixed by splitting it into three independent per-column
+biconditionals. A combined three-way check for `origin` would repeat the
+identical class of bug. No new ledger table — the existing,
+already-tested, append-only field-facts table remains the **only** place
+a draft's field values and their origin are ever recorded, regardless of
+which pipeline produced them. `field_name`'s existing fixed allowlist
+(`name`/`category`/`address`/`phone`/`website`) is unchanged and
+unexpanded by this amendment.
 
 **What does not change**: everything else in this document — the
 promotion/discard RPCs' existing guarantees for the `import_extraction_records`
 origin, the duplicate-handling design, the roles/access posture, and
 every existing invariant not named above — is unaffected. This amendment
-adds a second, parallel, equally-real origin; it does not alter the
-first one's behavior in any way.
+adds a second, parallel, equally-real origin via a second, separate RPC;
+it does not alter the first origin's existing function or behavior in any
+way.
+
+**Migration numbering — explicit, not left to inference**: this document's
+own migration file, `0010_market05c_restaurant_profile_drafts.sql`, is,
+per this document's own "Implementation" section, an already-applied,
+live migration — regardless of what that file's own header comment
+currently says. **This amendment's schema changes must ship as a new,
+separate, additive migration file (the next unused number in sequence),
+never as an edit to `0010`'s own file, including its comments.** This
+matches this project's own established precedent exactly:
+`0006_market04a_import_runs_artifact_hash.sql` added a completeness fix
+to the already-live `0004`/`0005` rather than editing them, and
+`0009_market05a_candidate_reviews_deferred_reason.sql` added a `NOT
+VALID` constraint to the already-live `0007` rather than editing it in
+place. Before that new migration is written, a read-only verification
+against the real, live database — confirming which migrations have
+actually been applied, the actual current shape of both tables here, and
+a targeted compatibility query proving no existing row would violate the
+new checks (a row count alone is not sufficient evidence of this) — is a
+required, separate, prior step. See
+`planning/specs/tickets/be-19-onboarding-restaurant-via-url.md`'s own
+"Suggested order" for where this fits.
 
 **Status**: documentation/schema contract only, matching this document's
 own top-of-file convention — no migration, RPC change, route, or UI

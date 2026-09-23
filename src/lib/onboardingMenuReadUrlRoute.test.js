@@ -25,13 +25,35 @@ test('structural safety net: the read-url route calls authenticateInternalReques
   assert.match(source, /isInternalOnly\(auth\.roles\)/);
 });
 
-test('structural safety net: the read-url route never touches Supabase or writes a menu_snapshot_proposals row', () => {
+// BE-19 (2026-09-22): this route now issues a short-lived analysis
+// receipt (docs/api/url-intake-schema.md's own "Analysis-result
+// integrity" section), which requires exactly one, narrow Supabase
+// write — never a menu_snapshot_proposals row, never any update or
+// delete anywhere in this file. The previous version of this test
+// asserted `getSupabaseAdmin`/`.insert(` were entirely absent; that is
+// no longer true by design, so the assertion is narrowed to what must
+// still always hold, rather than removed.
+test('structural safety net: the read-url route writes only an ephemeral analysis receipt — never a menu_snapshot_proposals row, never any update or delete', () => {
   const source = readRouteSource();
-  assert.doesNotMatch(source, /getSupabaseAdmin/);
-  assert.doesNotMatch(source, /\.insert\(/);
   assert.doesNotMatch(source, /\.update\(/);
   assert.doesNotMatch(source, /\.delete\(/);
   assert.doesNotMatch(source, /menu_snapshot_proposals/);
+  // Every `.insert(` call in this file must target exactly
+  // url_intake_analysis_receipts — never a second table.
+  const insertCalls = source.match(/\.from\('([^']+)'\)\s*\.insert\(/g) || [];
+  assert.ok(insertCalls.length >= 1, 'expected at least one .insert( call (the analysis receipt)');
+  for (const call of insertCalls) {
+    assert.match(call, /^\.from\('url_intake_analysis_receipts'\)/, `unexpected insert target: ${call}`);
+  }
+});
+
+test('structural safety net: issueAnalysisReceipt never throws — any database failure degrades to no receipt, never an unhandled error', () => {
+  const source = readRouteSource();
+  const fnStart = source.indexOf('async function issueAnalysisReceipt');
+  assert.ok(fnStart !== -1, 'expected to find issueAnalysisReceipt');
+  const fnBody = source.slice(fnStart, source.indexOf('\n}', fnStart) + 2);
+  assert.match(fnBody, /try\s*\{/);
+  assert.match(fnBody, /catch\s*\{[\s\S]*?return null/);
 });
 
 test('structural safety net: the read-url route validates content-type before parsing, and rejects PDF distinctly', () => {
