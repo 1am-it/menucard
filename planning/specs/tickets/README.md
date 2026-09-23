@@ -159,6 +159,42 @@ of these.
     byte-for-byte unchanged. The future "concept → real restaurant
     record" promotion step is explicitly out of scope, not designed or
     promised here.
+22. [be-20-general-restaurant-source-extraction.md](./be-20-general-restaurant-source-extraction.md) —
+    not started, documentation/product-contract only; defines fase 1 of a
+    general-purpose "one homepage URL → analysis job → reviewable
+    restaurant concept and menu proposals" pipeline for thousands of
+    structurally different restaurant websites, extending BE-19's
+    receipt/`url_intakes`/concept backbone rather than replacing it.
+    Covers: HTML/JSON-LD/linked-HTML-menu/digital-PDF extraction; a new,
+    additive `extraction_method` value (never a new `origin`); strict
+    schema-validated AI structuring with per-field source evidence,
+    confidence, and mandatory human review; a minimal durable
+    analysis-job contract (status/result reference/fixed error
+    categories/idempotency/retries/optional `batch_id`) so the browser
+    never depends on one long synchronous request; a small, explicit,
+    dated amendment to `docs/api/url-intake-schema.md`'s "one URL, never
+    a crawl" Governance exception, narrowly bounding it to a same-host,
+    one-extra-hop, small-candidate-set discovery step; and the approved
+    `onboarding-restaurant-workflow-v1.png`/`internal-navigation-workqueue-v1.png`
+    visual/navigation direction (no photography, existing app style, a
+    simplified `Dekkingsoverzicht`/`Onboarding Restaurant` nav with a
+    `Werkvoorraad` control for real, computed counts). OCR, browser
+    rendering, a built bulk-intake UI, and any external API remain
+    explicitly later, separate work.
+23. [be-21-restaurant-source-extraction-vendor-benchmark.md](./be-21-restaurant-source-extraction-vendor-benchmark.md) —
+    not started, documentation/planning only; the separate, isolated
+    vendor benchmark BE-20's own "Non-goals for fase 1" excludes —
+    50–100 real, authorized-to-test restaurant sources (the six BE-20
+    practice-set URLs as a mandatory subset), measuring field accuracy,
+    false positives, source-evidence coverage, human correction time,
+    cost, and latency per source type for OCR (Google Document AI vs.
+    Azure Document Intelligence vs. AWS Textract) and browser-rendering
+    (a managed service vs. self-hosted Playwright) candidates. Dispatched
+    only once BE-20's fase 1 has real evidence to benchmark against — no
+    OCR, browser-rendering, or other vendor is implemented by this
+    ticket; its own deliverables are a comparison report, a vendor
+    recommendation, and an explicit DPA/EU-processing/retention/cost
+    decision, never assumed in advance.
 
 ## PLATFORM-* order (not started)
 

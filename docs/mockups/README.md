@@ -177,6 +177,37 @@ reference instead of ad hoc judgment calls:
   addresses, counts, and search terms shown are clearly directional
   example data, never real MenuCard data.
 
+## Restaurant onboarding (addition, 2026-09-23)
+
+- [Onboarding Restaurant workflow](./onboarding-restaurant-workflow-v1.png) —
+  approved visual reference for the future internal restaurant-source
+  intake flow: one homepage URL, visible analysis progress, reviewable
+  restaurant and menu concepts, and a later bulk-URL intake view. It
+  deliberately contains no restaurant photography or image-upload
+  interaction. The restaurant concept includes a source-backed,
+  reviewable short description; it is not a second content type and must
+  remain empty when the source provides insufficient evidence. Governs
+  layout, information hierarchy, and interaction intent only; it does
+  not imply that source discovery, PDF extraction, AI structuring, bulk
+  intake, or publication has already been built. **Its own top
+  navigation bar still shows the full, not-yet-simplified module list
+  (`Beheer`, `Nieuwe aanleveringen`, `Profielconcepten`,
+  `Dekkingsoverzicht`, `Beoordelen`, `Onboarding Restaurant`) — this
+  predates and is superseded by the navigation mockup below for
+  navigation structure specifically; this mockup governs the workflow
+  steps/content shown in its four panels only, never the nav shell.**
+- [Internal navigation and work queue](./internal-navigation-workqueue-v1.png) —
+  **leading, approved visual reference for the simplified internal
+  navigation structure** — supersedes the workflow mockup above wherever
+  the two differ on navigation. The main navigation exposes only
+  `Dekkingsoverzicht` and `Onboarding Restaurant`; the BredaEats wordmark
+  is the quiet internal home link. `Nieuwe aanleveringen`,
+  `Profielconcepten`, and `Beoordelen` remain reachable through an
+  accessible work-queue control. Counts shown in the mockup are
+  directional only and must never be rendered unless computed from real
+  work items. Governs visual hierarchy only, not route, role, or
+  data-contract changes.
+
 ## Naming
 
 Prefer clear versioned names such as:
