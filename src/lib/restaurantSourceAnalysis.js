@@ -39,19 +39,31 @@
 // src/lib/pdfTextExtraction.js — only a server-side route handler may call
 // this module, never client code.
 //
-// Context-conflict detection (e.g. a chain/head-office address on a
-// location-specific page) is real, not hardcoded — see
-// src/lib/fieldContextConflict.js: whenever this same analysis finds more
-// than one materially different value for the same field across
-// different pages of the same site, that field's confidence is capped at
-// `laag`, never `hoog`, per deriveFieldConfidence's own rule. An earlier
-// version of this module passed a hardcoded `false` here — an
-// independent review correctly flagged that as never actually exercising
-// the "no context conflict" leg of BE-20's own three-part confidence
-// rule. When a comparison is genuinely inconclusive (no other sighting
-// exists, or it cannot be compared), the safe default still applies: no
-// conflict is asserted, and the field's confidence is decided by the
-// normal content-hash-plus-plausibility rule alone.
+// Context validation (e.g. a chain/head-office address on a location-
+// specific page) is real, not hardcoded — see
+// src/lib/fieldContextConflict.js's own `checkFieldContextStatus`, which
+// returns one of three explicit outcomes, never a boolean:
+// `'conflict'` (actively compared against another same-site sighting and
+// found to genuinely differ) caps a field at `laag`; `'consistent'`
+// (actively compared and confirmed) is the only outcome that ever permits
+// `hoog`, and only alongside a valid content-hash and a passed
+// plausibility check; `'unverified'` (no comparable second sighting
+// exists at all, or every comparison was inconclusive) caps a field at
+// `middel`, exactly the same as `'conflict'`'s ceiling of `laag` is a
+// stronger signal than "not yet checked."
+//
+// **Corrected 2026-09-24, following an independent review.** An earlier
+// version of this module computed a plain boolean here that was `false`
+// both when a field was genuinely validated as consistent AND when there
+// was nothing at all to compare against (the common case — same-host
+// discovery often finds no candidates, or a found candidate simply does
+// not restate a given field) — silently treating "never checked" as "no
+// conflict," which let `hoog` be reached from content-hash + plausibility
+// alone far more often than intended. `checkFieldContextStatus`'s
+// explicit `'unverified'` outcome, and `deriveFieldConfidence`'s own
+// matching rule (src/lib/fieldConfidence.js), close that gap: `hoog` now
+// requires a positively confirmed `'consistent'` status, never merely the
+// absence of a detected conflict.
 //
 // Deliberately CommonJS, same reasoning as every other pure-logic module
 // in this project.
@@ -63,7 +75,7 @@ const { findSameHostMenuCandidates } = require('./sameHostDiscovery')
 const { extractRestaurantFieldsWithEvidence } = require('./restaurantFieldEvidence')
 const { ALLOWED_FIELD_NAMES, deriveFieldConfidence, isFieldReviewReady } = require('./fieldConfidence')
 const { computeFieldEvidenceHash } = require('./fieldEvidenceHash')
-const { detectFieldContextConflict } = require('./fieldContextConflict')
+const { checkFieldContextStatus } = require('./fieldContextConflict')
 const { extractDigitalPdfText, PdfExtractionError } = require('./pdfTextExtraction')
 const { rollUpPdfAdapterErrorReason } = require('./restaurantSourceAnalysisJobs')
 const { composeEvidenceBasedDescription } = require('./restaurantConceptDescription')
@@ -208,16 +220,17 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
   // 4. Confidence + content-hash evidence, per field — never `hoog` for a
   // deterministic extractor alone (src/lib/fieldConfidence.js's own,
   // already-tested rule); every field surfaces exactly what it is.
-  // `hasContextConflict` is a real, explainable, server-side check (see
-  // src/lib/fieldContextConflict.js): whether this same analysis also
-  // found a DEFINITIVELY different value for this field on another page
-  // of the same site (e.g. a different Dutch postcode). When that
-  // comparison is inconclusive rather than genuinely absent (no other
-  // sighting exists, or every other sighting could not be compared),
-  // `detectFieldContextConflict` itself already returns `false` — the
-  // safe default this ticket requires: an unconfirmed conflict never
-  // promotes a field to `hoog`, it simply leaves the normal content-hash-
-  // plus-plausibility rule to decide between `hoog`/`middel`.
+  // `contextStatus` is a real, explainable, server-side, three-way check
+  // (see src/lib/fieldContextConflict.js's own `checkFieldContextStatus`):
+  // `'consistent'` only when this same analysis actively compared this
+  // field's value against another same-site sighting and confirmed it
+  // matches; `'conflict'` when a comparison found a genuine mismatch
+  // (e.g. a different Dutch postcode); `'unverified'` when there is
+  // nothing comparable at all (no other sighting, a blocked/failed
+  // candidate, or an incomparable value). Only `'consistent'` can ever
+  // lead to `hoog` — `'unverified'` is capped at `middel` the same as
+  // having no context signal at all, never silently treated as
+  // equivalent to a confirmed absence of conflict.
   const restaurantCandidateFields = {}
   const fieldEvidence = {}
   for (const fieldName of ALLOWED_FIELD_NAMES) {
@@ -225,13 +238,13 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
     if (!found) continue
     restaurantCandidateFields[fieldName] = found.value
     const contentHash = computeFieldEvidenceHash(found.rawSourceFragment)
-    const hasContextConflict = detectFieldContextConflict(fieldName, found.value, otherFieldValuesByName[fieldName])
+    const contextStatus = checkFieldContextStatus(fieldName, found.value, otherFieldValuesByName[fieldName])
     const confidence = deriveFieldConfidence({
       fieldName,
       value: found.value,
       extractionMethod: found.extractionMethod,
       hasContentHash: Boolean(contentHash),
-      hasContextConflict,
+      contextStatus,
     })
     fieldEvidence[fieldName] = {
       value: found.value,
@@ -239,7 +252,7 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
       sourceUrl: found.sourceUrl,
       contentHash,
       confidence,
-      contextConflict: hasContextConflict,
+      contextStatus,
       reviewReady: isFieldReviewReady({ hasContentHash: Boolean(contentHash), confidence }),
     }
   }

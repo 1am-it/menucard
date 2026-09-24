@@ -360,7 +360,7 @@ export default function OnboardingRestaurantPage() {
                           <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
                             Bron: {evidence.extractionMethod} — {evidence.sourceUrl}
                           </div>
-                          {evidence.contextConflict && (
+                          {evidence.contextStatus === 'conflict' && (
                             <div style={{ fontSize: 11, color: 'var(--danger)', marginTop: 2 }}>
                               Afwijkende waarde gevonden op een andere pagina van deze site.
                             </div>

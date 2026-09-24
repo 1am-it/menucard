@@ -6,8 +6,27 @@
 // itself, sufficient for `hoog` — for any `extraction_method`. A field
 // reaches `hoog` only when it has (1) a valid, field-specific
 // content-hash source reference, (2) it passes a server-side
-// plausibility check, and (3) it shows no context conflict. Without
-// that, the field stays at most `middel`.
+// plausibility check, and (3) its context has been actively compared
+// against another independent sighting and found consistent
+// (`contextStatus: 'consistent'`, see below) — never merely "no conflict
+// was found" when no comparison was ever possible. Without all three,
+// the field stays at most `middel`.
+//
+// **Corrected 2026-09-24, following an independent review**: this
+// module previously took a plain `hasContextConflict` boolean, which an
+// earlier version of its own caller (src/lib/restaurantSourceAnalysis.js)
+// computed as `false` both when a field's context was genuinely checked
+// and found consistent, AND when there was simply nothing to compare
+// against at all (no other same-host sighting, a blocked/failed
+// candidate, or an incomparable value) — silently treating "never
+// validated" the same as "positively validated," which let `hoog` be
+// reached from content-hash + plausibility alone in the common case
+// where no real cross-page comparison ever happened. Fixed by requiring
+// an explicit three-way `contextStatus` (`'consistent'` | `'conflict'` |
+// `'unverified'`) instead of a boolean — see `deriveFieldConfidence`
+// below for the corrected rule, and src/lib/fieldContextConflict.js's
+// own `checkFieldContextStatus` for how this status is actually
+// computed.
 //
 // Never touches the database layer, the DOM, or any server-only Node
 // hashing primitive — this module is safe to import from either side. The
@@ -42,6 +61,15 @@ const ALLOWED_EXTRACTION_METHODS = ['json_ld', 'html', 'pdf_text', 'ai_structure
  * `src/lib/restaurantProfileDrafts.js`'s `ALLOWED_DRAFT_FIELD_NAMES`
  * already enforces — never a wider set invented for this contract. */
 const ALLOWED_FIELD_NAMES = ['name', 'category', 'address', 'phone', 'website']
+
+/** The only context-validation outcomes this contract ever produces —
+ * `'consistent'` (actively compared against another independent sighting
+ * of the same field and found to match), `'conflict'` (actively compared
+ * and found to genuinely differ), or `'unverified'` (no comparable second
+ * sighting exists at all, or the comparison was inconclusive — this is
+ * NOT the same as `'consistent'` and must never be treated as such). See
+ * src/lib/fieldContextConflict.js's own `checkFieldContextStatus`. */
+const ALLOWED_CONTEXT_STATUSES = ['consistent', 'conflict', 'unverified']
 
 /**
  * The server-side plausibility check BE-20's confidence rule requires.
@@ -81,17 +109,21 @@ function checkFieldPlausibility(fieldName, value) {
  *  - No content-hash at all → `middel` (nothing actively wrong is known,
  *    but there is no field-specific evidence to point to either — never
  *    `hoog` without it).
- *  - An actively detected context conflict (e.g. a chain/head-office
- *    address surfacing on a location-specific page) → `laag` — a
- *    stronger, more specific negative signal than "merely unvalidated",
- *    deliberately distinguished from the plain `middel` default so a
- *    reviewer can tell "not yet checked" apart from "actively looks
- *    wrong" (this project's own "at most middel" phrasing in the ticket
- *    permits, and this function makes explicit, that a worse-than-middel
- *    outcome exists for exactly this case).
- *  - Otherwise: `hoog` only if the field-specific plausibility check
- *    passes; `middel` if it does not (never `laag` for a merely
- *    unconfirmed-but-not-actively-conflicting field).
+ *  - `contextStatus: 'conflict'` (an actively detected mismatch, e.g. a
+ *    chain/head-office address surfacing on a location-specific page) →
+ *    `laag` — a stronger, more specific negative signal than "merely
+ *    unvalidated", deliberately distinguished from the plain `middel`
+ *    default so a reviewer can tell "not yet checked" apart from
+ *    "actively looks wrong" (this project's own "at most middel"
+ *    phrasing in the ticket permits, and this function makes explicit,
+ *    that a worse-than-middel outcome exists for exactly this case).
+ *  - `contextStatus: 'unverified'` (no comparable second sighting exists,
+ *    or the comparison was inconclusive) → `middel`, **never** `hoog` —
+ *    this is the corrected case: the mere absence of a detected conflict
+ *    is never, by itself, treated as a positive validation.
+ *  - `contextStatus: 'consistent'` (actively compared and confirmed) →
+ *    `hoog` only if the field-specific plausibility check *also* passes;
+ *    `middel` if it does not.
  *
  * `extractionMethod` is accepted and validated against
  * `ALLOWED_EXTRACTION_METHODS` but never itself changes the outcome —
@@ -99,15 +131,19 @@ function checkFieldPlausibility(fieldName, value) {
  * `ai_structured`, per the ticket's own explicit correction that a
  * deterministic method is never automatically trustworthy.
  */
-function deriveFieldConfidence({ fieldName, value, extractionMethod, hasContentHash, hasContextConflict }) {
+function deriveFieldConfidence({ fieldName, value, extractionMethod, hasContentHash, contextStatus }) {
   if (!ALLOWED_EXTRACTION_METHODS.includes(extractionMethod)) {
     throw new Error(`Unknown extraction_method: ${extractionMethod}`)
   }
   if (!ALLOWED_FIELD_NAMES.includes(fieldName)) {
     throw new Error(`Unknown field_name: ${fieldName}`)
   }
+  if (!ALLOWED_CONTEXT_STATUSES.includes(contextStatus)) {
+    throw new Error(`Unknown context status: ${contextStatus}`)
+  }
   if (!hasContentHash) return 'middel'
-  if (hasContextConflict) return 'laag'
+  if (contextStatus === 'conflict') return 'laag'
+  if (contextStatus === 'unverified') return 'middel'
   return checkFieldPlausibility(fieldName, value) ? 'hoog' : 'middel'
 }
 
@@ -131,6 +167,7 @@ module.exports = {
   ALLOWED_CONFIDENCE_TIERS,
   ALLOWED_EXTRACTION_METHODS,
   ALLOWED_FIELD_NAMES,
+  ALLOWED_CONTEXT_STATUSES,
   checkFieldPlausibility,
   deriveFieldConfidence,
   isFieldReviewReady,

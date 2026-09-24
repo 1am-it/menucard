@@ -173,7 +173,34 @@ test('runRestaurantSourceAnalysis: a field with no evidence anywhere is simply a
   assert.equal(result.description, '')
 })
 
-test('runRestaurantSourceAnalysis: a genuine context conflict (a different Dutch postcode on a same-host menu page) caps the field at laag, never hoog, and marks it needing manual review', async () => {
+// ─── contextStatus: consistent / conflict / unverified, end to end ─────────
+//
+// These five tests exercise src/lib/fieldContextConflict.js's own
+// checkFieldContextStatus exclusively through the real pipeline
+// (runRestaurantSourceAnalysis) — never only in isolation — per the
+// independent review's own explicit requirement that this status be
+// proven wired end to end, not merely correct as an isolated unit.
+
+test('runRestaurantSourceAnalysis: contextStatus "consistent" — the same address actively restated and confirmed on another same-host page reaches hoog', async () => {
+  const homepageWithBredaAddress = jsonLdScript({
+    '@type': 'Restaurant',
+    name: 'De Botanist Breda',
+    address: { streetAddress: 'Tolbrugstraat 19', postalCode: '4811 WN', addressLocality: 'Breda' },
+  }) + '<a href="/menukaart">Menukaart</a>'
+  const candidateHtmlWithSamePostcode = `<address>Onze locatie: 4811 WN Breda (achteringang)</address>`
+
+  const result = await runRestaurantSourceAnalysis({
+    homepageHtml: homepageWithBredaAddress,
+    homepageUrl: 'https://debotanistbreda.nl/',
+    fetchCandidate: async () => ({ status: 'html', body: candidateHtmlWithSamePostcode, finalUrl: 'https://debotanistbreda.nl/menukaart' }),
+  })
+
+  assert.equal(result.fieldEvidence.address.contextStatus, 'consistent')
+  assert.equal(result.fieldEvidence.address.confidence, 'hoog')
+  assert.equal(result.fieldEvidence.address.reviewReady, true)
+})
+
+test('runRestaurantSourceAnalysis: contextStatus "conflict" — a demonstrably different Dutch postcode on a same-host menu page caps the field at laag and marks it needing manual review', async () => {
   const homepageWithBredaAddress = jsonLdScript({
     '@type': 'Restaurant',
     name: 'De Botanist Breda',
@@ -189,34 +216,15 @@ test('runRestaurantSourceAnalysis: a genuine context conflict (a different Dutch
     fetchCandidate: async () => ({ status: 'html', body: candidateHtmlWithDifferentCity, finalUrl: 'https://debotanistbreda.nl/menukaart' }),
   })
 
+  assert.equal(result.fieldEvidence.address.contextStatus, 'conflict')
   assert.equal(result.fieldEvidence.address.confidence, 'laag')
-  assert.equal(result.fieldEvidence.address.contextConflict, true)
   assert.equal(result.fieldEvidence.address.reviewReady, false)
   // The description composer only ever uses a review-ready address for
   // its city clause — a conflicting address must never leak into it.
   assert.doesNotMatch(result.description, /Amsterdam/)
 })
 
-test('runRestaurantSourceAnalysis: the same address restated on another same-host page is not a conflict, and the field can still reach hoog', async () => {
-  const homepageWithBredaAddress = jsonLdScript({
-    '@type': 'Restaurant',
-    name: 'De Botanist Breda',
-    address: { streetAddress: 'Tolbrugstraat 19', postalCode: '4811 WN', addressLocality: 'Breda' },
-  }) + '<a href="/menukaart">Menukaart</a>'
-  const candidateHtmlWithSamePostcode = `<address>Onze locatie: 4811 WN Breda (achteringang)</address>`
-
-  const result = await runRestaurantSourceAnalysis({
-    homepageHtml: homepageWithBredaAddress,
-    homepageUrl: 'https://debotanistbreda.nl/',
-    fetchCandidate: async () => ({ status: 'html', body: candidateHtmlWithSamePostcode, finalUrl: 'https://debotanistbreda.nl/menukaart' }),
-  })
-
-  assert.equal(result.fieldEvidence.address.contextConflict, false)
-  assert.equal(result.fieldEvidence.address.confidence, 'hoog')
-  assert.equal(result.fieldEvidence.address.reviewReady, true)
-})
-
-test('runRestaurantSourceAnalysis: an inconclusive other sighting (does not parse as a comparable value) is never guessed into a conflict — the safe default applies', async () => {
+test('runRestaurantSourceAnalysis: contextStatus "unverified" — a non-comparable other sighting is never silently treated as "consistent", and the field is capped at middel even though content-hash and plausibility both pass', async () => {
   const homepageWithPhone = jsonLdScript({ '@type': 'Restaurant', name: 'Mr. Moos', telephone: '076 0000000' }) +
     '<a href="/menukaart">Menukaart</a>'
   const candidateHtmlWithUnparsablePhone = '<a href="tel:notarealnumber">Bel</a>'
@@ -227,8 +235,62 @@ test('runRestaurantSourceAnalysis: an inconclusive other sighting (does not pars
     fetchCandidate: async () => ({ status: 'html', body: candidateHtmlWithUnparsablePhone, finalUrl: 'https://mrmoos.nl/menukaart' }),
   })
 
-  assert.equal(result.fieldEvidence.phone.contextConflict, false)
-  assert.equal(result.fieldEvidence.phone.confidence, 'hoog')
+  assert.equal(result.fieldEvidence.phone.contextStatus, 'unverified')
+  // The regression this test guards: before the fix, this exact scenario
+  // (a valid content-hash, a plausible value, and nothing but an
+  // inconclusive comparison) incorrectly reached 'hoog'.
+  assert.equal(result.fieldEvidence.phone.confidence, 'middel')
+})
+
+test('runRestaurantSourceAnalysis: contextStatus "unverified" — zero comparable same-host candidates at all (the common case) never lets a field reach hoog', async () => {
+  // No menu-keyword link at all on this homepage, so same-host discovery
+  // itself finds zero candidates — fetchCandidate is never even called.
+  // This is the exact scenario the independent review's own reproduction
+  // used: every field has nothing whatsoever to compare against.
+  const homepageWithNoDiscoverableLinks = jsonLdScript({
+    '@type': 'Restaurant',
+    name: 'De Botanist Breda',
+    telephone: '076 3032490',
+    url: 'https://debotanistbreda.nl',
+    address: { streetAddress: 'Tolbrugstraat 19', postalCode: '4811 WN', addressLocality: 'Breda' },
+  })
+
+  const result = await runRestaurantSourceAnalysis({
+    homepageHtml: homepageWithNoDiscoverableLinks,
+    homepageUrl: 'https://debotanistbreda.nl/',
+    fetchCandidate: async () => {
+      throw new Error('fetchCandidate must never be called when no candidates were discovered')
+    },
+  })
+
+  for (const fieldName of ['name', 'category', 'address', 'phone', 'website']) {
+    assert.equal(result.fieldEvidence[fieldName].contextStatus, 'unverified', `expected ${fieldName} to be unverified`)
+    assert.equal(result.fieldEvidence[fieldName].confidence, 'middel', `expected ${fieldName} to be capped at middel, never hoog`)
+  }
+})
+
+test('runRestaurantSourceAnalysis: contextStatus "unverified" — a blocked or failed same-host candidate never lets a field reach hoog', async () => {
+  const homepageWithBredaAddress = jsonLdScript({
+    '@type': 'Restaurant',
+    name: 'De Botanist Breda',
+    address: { streetAddress: 'Tolbrugstraat 19', postalCode: '4811 WN', addressLocality: 'Breda' },
+  }) + '<a href="/menukaart">Menukaart</a>'
+
+  const blockedResult = await runRestaurantSourceAnalysis({
+    homepageHtml: homepageWithBredaAddress,
+    homepageUrl: 'https://debotanistbreda.nl/',
+    fetchCandidate: async () => ({ status: 'blocked' }),
+  })
+  assert.equal(blockedResult.fieldEvidence.address.contextStatus, 'unverified')
+  assert.equal(blockedResult.fieldEvidence.address.confidence, 'middel')
+
+  const failedResult = await runRestaurantSourceAnalysis({
+    homepageHtml: homepageWithBredaAddress,
+    homepageUrl: 'https://debotanistbreda.nl/',
+    fetchCandidate: async () => ({ status: 'error' }),
+  })
+  assert.equal(failedResult.fieldEvidence.address.contextStatus, 'unverified')
+  assert.equal(failedResult.fieldEvidence.address.confidence, 'middel')
 })
 
 test('runRestaurantSourceAnalysis: always notes that AI structuring is unavailable — the Claude adapter boundary is unconditionally disabled today', async () => {

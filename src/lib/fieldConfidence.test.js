@@ -77,37 +77,48 @@ test('checkFieldPlausibility: non-string or missing value is never plausible', (
 
 // ─── deriveFieldConfidence ───────────────────────────────────────────────
 
-test('deriveFieldConfidence: no content-hash at all is always middel, never hoog — for every extraction method', () => {
+test('deriveFieldConfidence: no content-hash at all is always middel, never hoog — for every extraction method, regardless of context status', () => {
   for (const method of ALLOWED_EXTRACTION_METHODS) {
     const confidence = deriveFieldConfidence({
       fieldName: 'phone',
       value: '06 12345678',
       extractionMethod: method,
       hasContentHash: false,
-      hasContextConflict: false,
+      contextStatus: 'consistent',
     })
     assert.equal(confidence, 'middel', `expected middel for method ${method} without content-hash`)
   }
 })
 
-test('deriveFieldConfidence: a detected context conflict is always laag, regardless of plausibility', () => {
+test('deriveFieldConfidence: contextStatus "conflict" is always laag, regardless of plausibility', () => {
   const confidence = deriveFieldConfidence({
     fieldName: 'phone',
     value: '06 12345678',
     extractionMethod: 'json_ld',
     hasContentHash: true,
-    hasContextConflict: true,
+    contextStatus: 'conflict',
   })
   assert.equal(confidence, 'laag')
 })
 
-test('deriveFieldConfidence: hoog requires content-hash + plausibility + no conflict, for json_ld (deterministic method is never automatically hoog)', () => {
+test('deriveFieldConfidence: contextStatus "unverified" is always at most middel, never hoog — even with a valid content-hash and a plausible value', () => {
+  const confidence = deriveFieldConfidence({
+    fieldName: 'phone',
+    value: '06 12345678',
+    extractionMethod: 'json_ld',
+    hasContentHash: true,
+    contextStatus: 'unverified',
+  })
+  assert.equal(confidence, 'middel')
+})
+
+test('deriveFieldConfidence: hoog requires content-hash + plausibility + contextStatus "consistent", for json_ld (deterministic method is never automatically hoog)', () => {
   const plausibleAndValidated = deriveFieldConfidence({
     fieldName: 'phone',
     value: '06 12345678',
     extractionMethod: 'json_ld',
     hasContentHash: true,
-    hasContextConflict: false,
+    contextStatus: 'consistent',
   })
   assert.equal(plausibleAndValidated, 'hoog')
 
@@ -116,7 +127,7 @@ test('deriveFieldConfidence: hoog requires content-hash + plausibility + no conf
     value: 'niet een telefoonnummer',
     extractionMethod: 'json_ld',
     hasContentHash: true,
-    hasContextConflict: false,
+    contextStatus: 'consistent',
   })
   assert.equal(implausibleDespiteHash, 'middel')
 })
@@ -127,13 +138,13 @@ test('deriveFieldConfidence: ai_structured never self-assigns hoog without the s
     value: 'not-a-url',
     extractionMethod: 'ai_structured',
     hasContentHash: true,
-    hasContextConflict: false,
+    contextStatus: 'consistent',
   })
   assert.equal(confidence, 'middel')
 })
 
 test('deriveFieldConfidence: the rule is uniform across html and pdf_text as well — same inputs, same outcome as json_ld', () => {
-  const inputs = { fieldName: 'website', value: 'https://example.nl', hasContentHash: true, hasContextConflict: false }
+  const inputs = { fieldName: 'website', value: 'https://example.nl', hasContentHash: true, contextStatus: 'consistent' }
   const outcomes = ['json_ld', 'html', 'pdf_text', 'ai_structured'].map((extractionMethod) =>
     deriveFieldConfidence({ ...inputs, extractionMethod })
   )
@@ -147,7 +158,7 @@ test('deriveFieldConfidence: throws on an unknown extraction_method — never si
       value: '06 12345678',
       extractionMethod: 'guessed',
       hasContentHash: true,
-      hasContextConflict: false,
+      contextStatus: 'consistent',
     })
   )
 })
@@ -159,8 +170,31 @@ test('deriveFieldConfidence: throws on an unknown field_name — never silently 
       value: 'ma-vr 12:00-22:00',
       extractionMethod: 'json_ld',
       hasContentHash: true,
-      hasContextConflict: false,
+      contextStatus: 'consistent',
     })
+  )
+})
+
+test('deriveFieldConfidence: throws on an unknown context status — never silently accepted, never defaults to permissive', () => {
+  assert.throws(() =>
+    deriveFieldConfidence({
+      fieldName: 'phone',
+      value: '06 12345678',
+      extractionMethod: 'json_ld',
+      hasContentHash: true,
+      contextStatus: 'maybe',
+    }),
+    /Unknown context status/
+  )
+  assert.throws(() =>
+    deriveFieldConfidence({
+      fieldName: 'phone',
+      value: '06 12345678',
+      extractionMethod: 'json_ld',
+      hasContentHash: true,
+      contextStatus: undefined,
+    }),
+    /Unknown context status/
   )
 })
 

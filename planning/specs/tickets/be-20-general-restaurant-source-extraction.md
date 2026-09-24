@@ -275,9 +275,19 @@ free-text-error result reaching a reviewer.
   checks `src/lib/candidateNormalization.js` already applies, or an
   equivalent described alongside whichever field is being validated),
   and (3) it shows no context conflict — e.g. a chain/head-office
-  address surfacing on a location-specific restaurant page. Without
-  that validation, the field stays at most `middel` and is shown as a
-  reviewable field, never as an automatically-trustworthy result.
+  address surfacing on a location-specific restaurant page. **Correction
+  (2026-09-24, following an independent review of the fase-1
+  implementation): condition (3) means the field's context has been
+  actively checked against another independent sighting and confirmed
+  consistent — not merely that no conflict happened to be found.** An
+  implementation that reads "shows no context conflict" as "the absence
+  of a detected problem is enough" repeats exactly the same mistake this
+  bullet's own opening sentence already forbids for conditions (1)/(2):
+  a field with nothing to compare against has not had its context
+  validated at all, and must be treated the same as if condition (3) had
+  not been checked — never as if it had passed. Without that validation,
+  the field stays at most `middel` and is shown as a reviewable field,
+  never as an automatically-trustworthy result.
   `pdf_text` without AI structuring is, on the same basis, at most
   `middel`. `ai_structured` output is likewise capped at `middel`
   regardless of what confidence the model itself reports, unless the
