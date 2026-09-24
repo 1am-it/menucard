@@ -60,6 +60,15 @@ const INTERNAL_MODULES = [
   // account is explicitly deferred, later work — see
   // planning/specs/tickets/be-17-menu-proposal-snapshot-foundation.md.
   { id: 'onboarding-menu', label: 'Onboarding Menu', href: '/internal/onboarding-menu', requiredRole: 'internal' },
+  // BE-20 — the general-purpose, same-host-discovery/PDF-capable
+  // extension of the URL-driven flow above. Shown to the same
+  // `internal` role, using the same existing nav mechanism — this is
+  // NOT the simplified Werkvoorraad-based navigation
+  // be-20-general-restaurant-source-extraction.md's own "Visual
+  // contract" separately *describes as a decided-but-not-yet-built*
+  // information-architecture change; that remains its own, later,
+  // unbuilt step.
+  { id: 'onboarding-restaurant', label: 'Onboarding Restaurant', href: '/internal/onboarding-restaurant', requiredRole: 'internal' },
 ];
 
 // The union of every section each of the roles individually unlocks — an
