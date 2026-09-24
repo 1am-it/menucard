@@ -71,16 +71,16 @@ test('structural safety net: only ever writes to restaurant_source_analysis_jobs
   assert.deepEqual([...new Set(fromCalls)].sort(), ['markets', 'restaurant_source_analysis_jobs', 'url_intake_analysis_receipts'])
 })
 
-test('structural safety net: a succeeded job update always sets result_receipt_id alongside status "succeeded" — matches the migration\'s own biconditional', () => {
+test('structural safety net: a succeeded job transition always sets result_receipt_id alongside status "succeeded" — matches the migration\'s own biconditional', () => {
   const source = readPostRouteSource()
-  const succeededUpdateMatch = source.match(/updateJobSucceeded[\s\S]*?status: 'succeeded'[\s\S]*?result_receipt_id: receiptId/)
-  assert.ok(succeededUpdateMatch, 'expected the succeeded-path update to set both status and result_receipt_id together')
+  const succeededUpdateMatch = source.match(/updateJobSucceeded[\s\S]*?transitionJob\(jobId, fromStatuses, 'succeeded', \{[\s\S]*?result_receipt_id: receiptId/)
+  assert.ok(succeededUpdateMatch, 'expected the succeeded-path transition to set both status and result_receipt_id together')
 })
 
-test('structural safety net: every failed-job update passes an error_reason — never a bare status without one', () => {
+test('structural safety net: every respondFailed call site passes one of the closed job-level error reasons — never a bare status without one', () => {
   const source = readPostRouteSource()
-  const failedCallSites = [...source.matchAll(/updateJobFailed\(jobId, '([^']+)'\)/g)].map((m) => m[1])
-  assert.ok(failedCallSites.length >= 4, 'expected multiple distinct failure call sites')
+  const failedCallSites = [...source.matchAll(/respondFailed\(jobId, \[[^\]]*\], '([^']+)'/g)].map((m) => m[1])
+  assert.ok(failedCallSites.length >= 5, 'expected multiple distinct failure call sites')
   const closedErrorReasons = [
     'unsafe_url', 'robots_disallowed', 'unsupported_content_type', 'fetch_failed',
     'pdf_extraction_failed', 'ai_structuring_failed', 'budget_exceeded',
@@ -89,6 +89,69 @@ test('structural safety net: every failed-job update passes an error_reason — 
   for (const reason of failedCallSites) {
     assert.ok(closedErrorReasons.includes(reason), `${reason} must be one of the closed job-level error reasons`)
   }
+})
+
+test('structural safety net: every job-status transition is validated through the shared, tested restaurantSourceAnalysisJobs module — never a raw, unvalidated write', () => {
+  const source = readPostRouteSource()
+  assert.match(
+    source,
+    /import \{\s*isValidJobStatus,\s*isValidJobErrorReason,\s*canTransitionJobStatus,\s*rollUpPdfAdapterErrorReason,?\s*\} from ['"]@\/src\/lib\/restaurantSourceAnalysisJobs['"]/
+  )
+  assert.match(source, /isValidJobStatus\(toStatus\)/)
+  assert.match(source, /canTransitionJobStatus\(fromStatus, toStatus\)/)
+  assert.match(source, /isValidJobErrorReason\(extraFields\.error_reason\)/)
+})
+
+test('structural safety net: every job-status write is a compare-and-swap guarded by the job\'s expected current status — never an unconditional update', () => {
+  const source = readPostRouteSource()
+  const transitionFnMatch = source.match(/async function transitionJob[\s\S]*?\n}/)
+  assert.ok(transitionFnMatch, 'expected to find transitionJob')
+  const fnBody = transitionFnMatch[0]
+  assert.match(fnBody, /\.in\('status', fromStatuses\)/, 'the update must only match rows whose current status is one of the expected source statuses')
+  assert.match(fnBody, /\.select\('id'\)/, 'the update must select back the affected row to confirm it was actually changed')
+  assert.match(fnBody, /if \(error \|\| !data \|\| data\.length === 0\) return false/, 'zero affected rows must be treated as an unconfirmed transition, not a silent success')
+})
+
+test('structural safety net: respondFailed never claims job.status "failed" in its response unless updateJobFailed actually confirmed the write', () => {
+  const source = readPostRouteSource()
+  const fnStart = source.indexOf('async function respondFailed')
+  const fnBody = source.slice(fnStart, source.indexOf('\n}', fnStart))
+  assert.match(fnBody, /const confirmed = await updateJobFailed\(/)
+  assert.match(fnBody, /if \(confirmed\)/)
+  // The non-confirmed branch must return a response with no `job` key at all.
+  const elseReturnMatch = fnBody.match(/return NextResponse\.json\(\{ error: message \}, \{ status: httpStatus \}\)/)
+  assert.ok(elseReturnMatch, 'expected the unconfirmed-failure branch to return a plain error with no job status claim')
+})
+
+test('structural safety net: a receipt-issued-but-job-update-failed outcome never falsely reports success — updateJobSucceeded\'s own confirmation is checked before the success response', () => {
+  const source = readPostRouteSource()
+  assert.match(source, /const succeededConfirmed = await updateJobSucceeded\(/)
+  assert.match(source, /if \(!succeededConfirmed\)/)
+})
+
+test('structural safety net: the entire running-phase of the analysis is wrapped in a catch-all that marks the job failed rather than leaking a raw exception', () => {
+  const source = readPostRouteSource()
+  assert.match(source, /const runningConfirmed = await updateJobRunning\(jobId\)/)
+  assert.match(source, /if \(!runningConfirmed\)/)
+  // The try block that starts right after the running-transition is
+  // confirmed must have a matching catch that calls respondFailed with
+  // 'internal_error' — never a bare rethrow.
+  const tryStart = source.indexOf('try {', source.indexOf('runningConfirmed'))
+  const lastCatchIndex = source.lastIndexOf('} catch {')
+  assert.ok(tryStart !== -1 && lastCatchIndex > tryStart, 'expected a try block after the running transition with a trailing catch-all')
+  const catchBody = source.slice(lastCatchIndex, source.indexOf('\n}', lastCatchIndex))
+  assert.match(catchBody, /respondFailed\(jobId, \['running'\], 'internal_error'/)
+})
+
+test('structural safety net: the entry-URL-is-PDF path never re-throws a non-PdfExtractionError — every failure there rolls up to a closed reason', () => {
+  const source = readPostRouteSource()
+  assert.doesNotMatch(source, /if \(!\(err instanceof PdfExtractionError\)\) throw err/)
+})
+
+test('structural safety net: no raw PDF text excerpt is ever assembled into the entry-URL-is-PDF result — only a derived word count', () => {
+  const source = readPostRouteSource()
+  assert.doesNotMatch(source, /textPreview/)
+  assert.match(source, /wordCount: countWords\(pdfResult\.text\)/)
 })
 
 test('structural safety net: a PDF closed error is rolled up via rollUpPdfAdapterErrorReason, never passed through as a raw adapter reason', () => {

@@ -44,10 +44,15 @@ import { classifyRobotsGate } from '@/src/lib/candidateSuggestions'
 import { matchRestaurantByHostname, buildRestaurantChoiceList } from '@/src/lib/restaurantHostMatch'
 import { canonicalizeSourceUrl, buildCandidateSummary, computeReceiptExpiry } from '@/src/lib/urlIntakes'
 import { computeAnalysisResultHash } from '@/src/lib/urlIntakeReceiptHash'
-import { runRestaurantSourceAnalysis } from '@/src/lib/restaurantSourceAnalysis'
+import { runRestaurantSourceAnalysis, countWords } from '@/src/lib/restaurantSourceAnalysis'
 import { extractDigitalPdfText, PdfExtractionError } from '@/src/lib/pdfTextExtraction'
 import { computeFieldEvidenceHash } from '@/src/lib/fieldEvidenceHash'
-import { rollUpPdfAdapterErrorReason } from '@/src/lib/restaurantSourceAnalysisJobs'
+import {
+  isValidJobStatus,
+  isValidJobErrorReason,
+  canTransitionJobStatus,
+  rollUpPdfAdapterErrorReason,
+} from '@/src/lib/restaurantSourceAnalysisJobs'
 import { generateUuidV7 } from '@/src/lib/uuidv7'
 import { getSupabaseAdmin } from '@/src/lib/supabaseAdmin'
 import restaurantsData from '@/data/restaurants.json'
@@ -71,36 +76,85 @@ async function insertJob({ jobId, actorUserId, canonicalSourceUrl }) {
   return !error
 }
 
-async function updateJobRunning(jobId) {
-  const supabase = getSupabaseAdmin()
-  await supabase.from('restaurant_source_analysis_jobs').update({ status: 'running', updated_at: new Date().toISOString() }).eq('id', jobId)
-}
+/**
+ * The one, single place any job-status transition actually happens.
+ * Validates the transition itself (never a status/error_reason string this
+ * project's own contract, src/lib/restaurantSourceAnalysisJobs.js, does
+ * not recognize) and writes it as a compare-and-swap: the `update` only
+ * ever matches a row whose *current* status is still one of `fromStatuses`
+ * (`.in('status', fromStatuses)`), and `.select('id')` proves whether a row
+ * was actually changed — never assumed from the mere absence of a
+ * Supabase-reported error. Returns `true` only when the transition is
+ * CONFIRMED to have been durably written; `false` for every other
+ * outcome (a database error, or zero rows matched because the job's real
+ * current status was not what the caller expected). A caller must never
+ * report a status to the reviewer that this function did not confirm.
+ */
+async function transitionJob(jobId, fromStatuses, toStatus, extraFields = {}) {
+  if (!isValidJobStatus(toStatus)) {
+    throw new Error(`Unknown target job status: ${toStatus}`)
+  }
+  for (const fromStatus of fromStatuses) {
+    if (!isValidJobStatus(fromStatus)) {
+      throw new Error(`Unknown source job status: ${fromStatus}`)
+    }
+    if (!canTransitionJobStatus(fromStatus, toStatus)) {
+      throw new Error(`Disallowed job status transition: ${fromStatus} -> ${toStatus}`)
+    }
+  }
+  if (typeof extraFields.error_reason === 'string' && !isValidJobErrorReason(extraFields.error_reason)) {
+    throw new Error(`Unknown job error_reason: ${extraFields.error_reason}`)
+  }
 
-async function updateJobFailed(jobId, errorReason) {
   try {
     const supabase = getSupabaseAdmin()
-    await supabase
+    const { data, error } = await supabase
       .from('restaurant_source_analysis_jobs')
-      .update({ status: 'failed', error_reason: errorReason, updated_at: new Date().toISOString() })
+      .update({ status: toStatus, updated_at: new Date().toISOString(), ...extraFields })
       .eq('id', jobId)
+      .in('status', fromStatuses)
+      .select('id')
+    if (error || !data || data.length === 0) return false
+    return true
   } catch {
-    // Best-effort — the caller's own response to the reviewer is never
-    // blocked on this bookkeeping update succeeding.
+    return false
   }
 }
 
-async function updateJobSucceeded(jobId, { receiptId, fieldEvidencePayload }) {
-  const supabase = getSupabaseAdmin()
-  const { error } = await supabase
-    .from('restaurant_source_analysis_jobs')
-    .update({
-      status: 'succeeded',
-      result_receipt_id: receiptId,
-      field_evidence: fieldEvidencePayload,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', jobId)
-  return !error
+async function updateJobRunning(jobId) {
+  return transitionJob(jobId, ['pending'], 'running')
+}
+
+/** `fromStatuses` must name every status this specific failure can
+ * realistically occur from — never a blanket "any status," so an already-
+ * terminal job can never be silently overwritten. */
+async function updateJobFailed(jobId, fromStatuses, errorReason) {
+  return transitionJob(jobId, fromStatuses, 'failed', { error_reason: errorReason })
+}
+
+async function updateJobSucceeded(jobId, fromStatuses, { receiptId, fieldEvidencePayload }) {
+  return transitionJob(jobId, fromStatuses, 'succeeded', {
+    result_receipt_id: receiptId,
+    field_evidence: fieldEvidencePayload,
+  })
+}
+
+/**
+ * Builds the "failed" HTTP response — but only ever claims `job.status:
+ * 'failed'` in the body once `updateJobFailed` has actually CONFIRMED that
+ * write. If the durable transition itself could not be confirmed (a
+ * database error, or the job was no longer in a state this failure could
+ * apply to), the response is a plain, generic error with no `job` claim at
+ * all — never a status the database does not actually hold. This is the
+ * one, single response-building path every failure branch below uses, so
+ * this guarantee cannot be accidentally skipped at a new call site.
+ */
+async function respondFailed(jobId, fromStatuses, errorReason, message, httpStatus) {
+  const confirmed = await updateJobFailed(jobId, fromStatuses, errorReason)
+  if (confirmed) {
+    return NextResponse.json({ error: message, job: { id: jobId, status: 'failed', error_reason: errorReason } }, { status: httpStatus })
+  }
+  return NextResponse.json({ error: message }, { status: httpStatus })
 }
 
 // Mirrors app/api/internal/v1/onboarding-menu/read-url/route.js's own
@@ -232,151 +286,163 @@ export async function POST(request) {
   const jobId = generateUuidV7()
   const jobInserted = await insertJob({ jobId, actorUserId: auth.userId, canonicalSourceUrl: initialCanonical.canonicalUrl })
   if (!jobInserted) {
+    // No row exists at all — there is nothing to transition or report a
+    // status for.
     return NextResponse.json({ error: 'Het starten van de analyse is mislukt.' }, { status: 500 })
   }
-  await updateJobRunning(jobId)
 
-  // ── robots.txt gate for the entry URL itself ──────────────────────────
-  let robotsFetchFailed = false
-  let robotsTxtBody = ''
+  const runningConfirmed = await updateJobRunning(jobId)
+  if (!runningConfirmed) {
+    // The job row exists (insert above succeeded) but the pending->running
+    // transition could not be confirmed — the row can only still be
+    // 'pending' at this point, so that is the only state this failure
+    // transition is attempted from.
+    return respondFailed(jobId, ['pending'], 'internal_error', 'Het starten van de analyse is mislukt.', 500)
+  }
+
+  // From this point on, the job's own durable status is confirmed
+  // 'running'. Every failure below transitions it from exactly that state,
+  // and this whole block is wrapped in one last-resort catch: any
+  // unexpected exception anywhere in this analysis (a future regression,
+  // an edge case no explicit branch below anticipated) is still mapped to
+  // a closed, generic failure — the job always reaches a durable terminal
+  // status and the client never sees a raw internal error.
   try {
-    const robotsResult = await fetchWebsiteSafely(`${sourceUrl.origin}/robots.txt`, {
-      maxBytes: ROBOTS_MAX_BYTES,
-      timeoutMs: ROBOTS_TIMEOUT_MS,
-      maxRedirects: 0,
-    })
-    robotsTxtBody = robotsResult.body
-  } catch {
-    robotsFetchFailed = true
-  }
-  const robotsGate = classifyRobotsGate({ robotsFetchFailed, robotsTxtBody, pathname: sourceUrl.pathname })
-  if (!robotsGate.shouldFetchPage) {
-    await updateJobFailed(jobId, 'robots_disallowed')
-    return NextResponse.json(
-      { error: 'Deze pagina kan niet automatisch worden opgehaald.', job: { id: jobId, status: 'failed', error_reason: 'robots_disallowed' } },
-      { status: 400 }
-    )
-  }
-
-  // ── the entry fetch itself — always as raw bytes, since the entry URL
-  // may turn out to be either an HTML page or a digital PDF menu ────────
-  let fetchResult
-  try {
-    fetchResult = await fetchWebsiteSafely(sourceUrl.href, { maxRedirects: 0, encoding: 'buffer', maxBytes: CANDIDATE_PDF_MAX_BYTES })
-  } catch {
-    await updateJobFailed(jobId, 'fetch_failed')
-    return NextResponse.json(
-      { error: 'Het ophalen van deze pagina is mislukt.', job: { id: jobId, status: 'failed', error_reason: 'fetch_failed' } },
-      { status: 502 }
-    )
-  }
-
-  let analysis
-  if (fetchResult.contentType === 'text/html' || fetchResult.contentType === 'application/xhtml+xml') {
-    analysis = await runRestaurantSourceAnalysis({
-      homepageHtml: fetchResult.bytes.toString('utf8'),
-      homepageUrl: fetchResult.finalUrl,
-      fetchCandidate: fetchCandidateSafely,
-    })
-  } else if (fetchResult.contentType === 'application/pdf') {
-    // The entry URL itself is a digital PDF menu — BE-20's own general
-    // extension of BE-18's HTML-only entry point. No same-host discovery
-    // is possible here (there is no HTML to discover links from), so this
-    // produces exactly one unknown menu context and no restaurant fields.
+    // ── robots.txt gate for the entry URL itself ────────────────────────
+    let robotsFetchFailed = false
+    let robotsTxtBody = ''
     try {
-      const pdfResult = await extractDigitalPdfText(fetchResult.bytes)
-      analysis = {
-        restaurantCandidateFields: {},
-        fieldEvidence: {},
-        menuContexts: [],
-        unknownMenuContexts: [
-          {
-            sourceUrl: fetchResult.finalUrl,
-            extractionMethod: 'pdf_text',
-            pageCount: pdfResult.pageCount,
-            contentHash: computeFieldEvidenceHash(pdfResult.text),
-            textPreview: pdfResult.text.slice(0, 280),
-          },
-        ],
-        description: '',
-        notes: ['Deze bron is een PDF zonder bijbehorende HTML-pagina — restaurantgegevens konden hier niet uit worden afgeleid.'],
-      }
-    } catch (err) {
-      if (!(err instanceof PdfExtractionError)) throw err
-      const errorReason = rollUpPdfAdapterErrorReason(err.reason)
-      await updateJobFailed(jobId, errorReason)
-      return NextResponse.json(
-        { error: 'Deze PDF kon niet worden gelezen.', job: { id: jobId, status: 'failed', error_reason: errorReason } },
-        { status: 400 }
-      )
-    }
-  } else {
-    await updateJobFailed(jobId, 'unsupported_content_type')
-    return NextResponse.json(
-      { error: 'Dit type bron wordt niet ondersteund.', job: { id: jobId, status: 'failed', error_reason: 'unsupported_content_type' } },
-      { status: 400 }
-    )
-  }
-
-  const match = matchRestaurantByHostname(restaurantsData, fetchResult.finalUrl)
-  const needsExplicitChoice = match.matchType !== 'exact'
-  const canonical = canonicalizeSourceUrl(fetchResult.finalUrl)
-  const candidateSummary = buildCandidateSummary({ restaurantCandidateFields: analysis.restaurantCandidateFields, menus: analysis.menuContexts })
-
-  const receipt = canonical
-    ? await issueAnalysisReceipt({
-        actorUserId: auth.userId,
-        canonicalSourceUrl: canonical.canonicalUrl,
-        sourceHostname: canonical.hostname,
-        restaurantMatchType: match.matchType,
-        matchedRestaurantId: match.matchType === 'exact' ? match.restaurantId : null,
-        candidateSummary,
+      const robotsResult = await fetchWebsiteSafely(`${sourceUrl.origin}/robots.txt`, {
+        maxBytes: ROBOTS_MAX_BYTES,
+        timeoutMs: ROBOTS_TIMEOUT_MS,
+        maxRedirects: 0,
       })
-    : null
+      robotsTxtBody = robotsResult.body
+    } catch {
+      robotsFetchFailed = true
+    }
+    const robotsGate = classifyRobotsGate({ robotsFetchFailed, robotsTxtBody, pathname: sourceUrl.pathname })
+    if (!robotsGate.shouldFetchPage) {
+      return respondFailed(jobId, ['running'], 'robots_disallowed', 'Deze pagina kan niet automatisch worden opgehaald.', 400)
+    }
 
-  if (!receipt) {
-    // Never a partial success — restaurant_source_analysis_jobs' own
-    // check constraint requires 'succeeded' to always carry a receipt, so
-    // a receipt that could not be issued always means this job failed,
-    // even though the analysis itself may have found real content.
-    await updateJobFailed(jobId, 'internal_error')
-    return NextResponse.json(
-      { error: 'De analyse kon niet worden vastgelegd.', job: { id: jobId, status: 'failed', error_reason: 'internal_error' } },
-      { status: 500 }
-    )
-  }
+    // ── the entry fetch itself — always as raw bytes, since the entry URL
+    // may turn out to be either an HTML page or a digital PDF menu ──────
+    let fetchResult
+    try {
+      fetchResult = await fetchWebsiteSafely(sourceUrl.href, { maxRedirects: 0, encoding: 'buffer', maxBytes: CANDIDATE_PDF_MAX_BYTES })
+    } catch {
+      return respondFailed(jobId, ['running'], 'fetch_failed', 'Het ophalen van deze pagina is mislukt.', 502)
+    }
 
-  const fieldEvidencePayload = {
-    fields: analysis.fieldEvidence,
-    unknown_menu_contexts: analysis.unknownMenuContexts,
-    description: analysis.description,
-    notes: analysis.notes,
-  }
-  const jobSucceeded = await updateJobSucceeded(jobId, { receiptId: receipt.id, fieldEvidencePayload })
-  if (!jobSucceeded) {
-    return NextResponse.json(
-      { error: 'De analyse kon niet worden vastgelegd.', job: { id: jobId, status: 'failed', error_reason: 'internal_error' } },
-      { status: 500 }
-    )
-  }
+    let analysis
+    if (fetchResult.contentType === 'text/html' || fetchResult.contentType === 'application/xhtml+xml') {
+      analysis = await runRestaurantSourceAnalysis({
+        homepageHtml: fetchResult.bytes.toString('utf8'),
+        homepageUrl: fetchResult.finalUrl,
+        fetchCandidate: fetchCandidateSafely,
+      })
+    } else if (fetchResult.contentType === 'application/pdf') {
+      // The entry URL itself is a digital PDF menu — BE-20's own general
+      // extension of BE-18's HTML-only entry point. No same-host discovery
+      // is possible here (there is no HTML to discover links from), so
+      // this produces exactly one unknown menu context and no restaurant
+      // fields.
+      try {
+        const pdfResult = await extractDigitalPdfText(fetchResult.bytes)
+        analysis = {
+          restaurantCandidateFields: {},
+          fieldEvidence: {},
+          menuContexts: [],
+          unknownMenuContexts: [
+            {
+              sourceUrl: fetchResult.finalUrl,
+              extractionMethod: 'pdf_text',
+              pageCount: pdfResult.pageCount,
+              wordCount: countWords(pdfResult.text),
+              contentHash: computeFieldEvidenceHash(pdfResult.text),
+            },
+          ],
+          description: '',
+          notes: ['Deze bron is een PDF zonder bijbehorende HTML-pagina — restaurantgegevens konden hier niet uit worden afgeleid.'],
+        }
+      } catch (err) {
+        // Any failure here — a properly-typed PdfExtractionError, or, as
+        // defense in depth, any other unexpected error — rolls up to the
+        // job's own closed pdf_extraction_failed reason. Never re-thrown:
+        // one bad PDF must never crash this whole request after the job is
+        // already durably 'running'.
+        const errorReason = err instanceof PdfExtractionError ? rollUpPdfAdapterErrorReason(err.reason) : 'pdf_extraction_failed'
+        return respondFailed(jobId, ['running'], errorReason, 'Deze PDF kon niet worden gelezen.', 400)
+      }
+    } else {
+      return respondFailed(jobId, ['running'], 'unsupported_content_type', 'Dit type bron wordt niet ondersteund.', 400)
+    }
 
-  return NextResponse.json({
-    job: { id: jobId, status: 'succeeded' },
-    source_url: fetchResult.finalUrl,
-    restaurant_match: {
-      type: match.matchType,
-      restaurant_id: match.matchType === 'exact' ? match.restaurantId : null,
-      restaurant_name: match.matchType === 'exact' ? match.candidates[0].name : null,
-      candidates: needsExplicitChoice ? buildRestaurantChoiceList(restaurantsData) : [],
-    },
-    receipt,
-    menus: analysis.menuContexts,
-    field_evidence: analysis.fieldEvidence,
-    unknown_menu_contexts: analysis.unknownMenuContexts,
-    description: analysis.description,
-    notes: analysis.notes,
-    warning: needsExplicitChoice
-      ? 'De bron van deze pagina komt niet automatisch overeen met één bekend restaurant — kies handmatig het juiste restaurant.'
-      : null,
-  })
+    const match = matchRestaurantByHostname(restaurantsData, fetchResult.finalUrl)
+    const needsExplicitChoice = match.matchType !== 'exact'
+    const canonical = canonicalizeSourceUrl(fetchResult.finalUrl)
+    const candidateSummary = buildCandidateSummary({ restaurantCandidateFields: analysis.restaurantCandidateFields, menus: analysis.menuContexts })
+
+    const receipt = canonical
+      ? await issueAnalysisReceipt({
+          actorUserId: auth.userId,
+          canonicalSourceUrl: canonical.canonicalUrl,
+          sourceHostname: canonical.hostname,
+          restaurantMatchType: match.matchType,
+          matchedRestaurantId: match.matchType === 'exact' ? match.restaurantId : null,
+          candidateSummary,
+        })
+      : null
+
+    if (!receipt) {
+      // Never a partial success — restaurant_source_analysis_jobs' own
+      // check constraint requires 'succeeded' to always carry a receipt,
+      // so a receipt that could not be issued always means this job
+      // failed, even though the analysis itself may have found real
+      // content.
+      return respondFailed(jobId, ['running'], 'internal_error', 'De analyse kon niet worden vastgelegd.', 500)
+    }
+
+    const fieldEvidencePayload = {
+      fields: analysis.fieldEvidence,
+      unknown_menu_contexts: analysis.unknownMenuContexts,
+      description: analysis.description,
+      notes: analysis.notes,
+    }
+    const succeededConfirmed = await updateJobSucceeded(jobId, ['running'], { receiptId: receipt.id, fieldEvidencePayload })
+    if (!succeededConfirmed) {
+      // The receipt already exists (durable and reusable on its own), but
+      // this job's own row could not be confirmed to reach 'succeeded' —
+      // never claim it did. Mirrors respondFailed's own "never report a
+      // status that was not actually confirmed" rule, just for the
+      // opposite (succeeded) transition.
+      return respondFailed(jobId, ['running'], 'internal_error', 'De analyse kon niet worden vastgelegd.', 500)
+    }
+
+    return NextResponse.json({
+      job: { id: jobId, status: 'succeeded' },
+      source_url: fetchResult.finalUrl,
+      restaurant_match: {
+        type: match.matchType,
+        restaurant_id: match.matchType === 'exact' ? match.restaurantId : null,
+        restaurant_name: match.matchType === 'exact' ? match.candidates[0].name : null,
+        candidates: needsExplicitChoice ? buildRestaurantChoiceList(restaurantsData) : [],
+      },
+      receipt,
+      menus: analysis.menuContexts,
+      field_evidence: analysis.fieldEvidence,
+      unknown_menu_contexts: analysis.unknownMenuContexts,
+      description: analysis.description,
+      notes: analysis.notes,
+      warning: needsExplicitChoice
+        ? 'De bron van deze pagina komt niet automatisch overeen met één bekend restaurant — kies handmatig het juiste restaurant.'
+        : null,
+    })
+  } catch {
+    // Last-resort safety net — never let a raw exception (message or
+    // stack) reach the client, and never leave the job stuck at 'running'
+    // forever.
+    return respondFailed(jobId, ['running'], 'internal_error', 'De analyse is onverwacht mislukt.', 500)
+  }
 }
