@@ -129,3 +129,20 @@ test('structural safety net: the migration defines exactly the same status and e
     assert.ok(migrationSource.includes(`'${reason}'`), `migration must mention error_reason '${reason}'`)
   }
 })
+
+test('structural safety net: both new tables carry a market_id column referencing markets(id), matching every other market-bound record in this project', () => {
+  const migrationSource = fs.readFileSync(
+    require.resolve('../../supabase/migrations/0014_be20_restaurant_source_analysis_jobs.sql'),
+    'utf8'
+  )
+  const marketIdMatches = [...migrationSource.matchAll(/market_id\s+uuid not null references markets\(id\)/g)]
+  assert.equal(marketIdMatches.length, 2, 'expected url_intake_batches and restaurant_source_analysis_jobs to each declare market_id')
+})
+
+test('structural safety net: field_evidence\'s "null until succeeded" invariant is enforced by an actual CHECK constraint, not only a comment', () => {
+  const migrationSource = fs.readFileSync(
+    require.resolve('../../supabase/migrations/0014_be20_restaurant_source_analysis_jobs.sql'),
+    'utf8'
+  )
+  assert.match(migrationSource, /check \(\(status = 'succeeded'\) = \(field_evidence is not null\)\)/)
+})

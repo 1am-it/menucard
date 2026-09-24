@@ -65,10 +65,23 @@ const ROBOTS_TIMEOUT_MS = 5000
 // safeOutboundFetch.js maxBytes (2 MB) unless raised here explicitly.
 const CANDIDATE_PDF_MAX_BYTES = 15 * 1024 * 1024
 
-async function insertJob({ jobId, actorUserId, canonicalSourceUrl }) {
+/** Every market-bound record in this project resolves `market_id` this
+ * same way: a server-side lookup by this project's own single, stable
+ * `slug` — never hardcoded, never client-supplied. Resolved once per
+ * request and reused for both the job row and the eventual receipt, so
+ * this route never performs the lookup twice. */
+async function resolveMarketId() {
+  const supabase = getSupabaseAdmin()
+  const { data: marketRow, error } = await supabase.from('markets').select('id').eq('slug', 'breda').maybeSingle()
+  if (error || !marketRow) return null
+  return marketRow.id
+}
+
+async function insertJob({ jobId, marketId, actorUserId, canonicalSourceUrl }) {
   const supabase = getSupabaseAdmin()
   const { error } = await supabase.from('restaurant_source_analysis_jobs').insert({
     id: jobId,
+    market_id: marketId,
     actor_user_id: actorUserId,
     canonical_source_url: canonicalSourceUrl,
     status: 'pending',
@@ -158,16 +171,19 @@ async function respondFailed(jobId, fromStatuses, errorReason, message, httpStat
 }
 
 // Mirrors app/api/internal/v1/onboarding-menu/read-url/route.js's own
-// issueAnalysisReceipt exactly — deliberately duplicated rather than
+// issueAnalysisReceipt closely — deliberately duplicated rather than
 // shared, matching that route's own existing, un-exported, route-local
-// helper pattern (it is not a lib export either). Returns `null` (never
-// throws) on any database failure, same "no internal error detail" fail-
-// closed convention.
-async function issueAnalysisReceipt({ actorUserId, canonicalSourceUrl, sourceHostname, restaurantMatchType, matchedRestaurantId, candidateSummary }) {
+// helper pattern (it is not a lib export either). One deliberate
+// difference from that route's own copy: `marketId` is passed in rather
+// than looked up again here, since this route already resolved it once
+// for the job row itself (see resolveMarketId above) — a small,
+// intentional divergence to avoid a second, redundant lookup within the
+// same request, not a change in what is looked up or how. Returns `null`
+// (never throws) on any database failure, same "no internal error
+// detail" fail-closed convention.
+async function issueAnalysisReceipt({ marketId, actorUserId, canonicalSourceUrl, sourceHostname, restaurantMatchType, matchedRestaurantId, candidateSummary }) {
   try {
     const supabase = getSupabaseAdmin()
-    const { data: marketRow, error: marketError } = await supabase.from('markets').select('id').eq('slug', 'breda').maybeSingle()
-    if (marketError || !marketRow) return null
 
     const analysisResultHash = computeAnalysisResultHash({
       actorUserId,
@@ -181,7 +197,7 @@ async function issueAnalysisReceipt({ actorUserId, canonicalSourceUrl, sourceHos
 
     const { error: insertError } = await supabase.from('url_intake_analysis_receipts').insert({
       id: receiptId,
-      market_id: marketRow.id,
+      market_id: marketId,
       actor_user_id: actorUserId,
       canonical_source_url: canonicalSourceUrl,
       source_hostname: sourceHostname,
@@ -283,8 +299,13 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Dit is geen geldige URL.' }, { status: 400 })
   }
 
+  const marketId = await resolveMarketId()
+  if (!marketId) {
+    return NextResponse.json({ error: 'Het starten van de analyse is mislukt.' }, { status: 500 })
+  }
+
   const jobId = generateUuidV7()
-  const jobInserted = await insertJob({ jobId, actorUserId: auth.userId, canonicalSourceUrl: initialCanonical.canonicalUrl })
+  const jobInserted = await insertJob({ jobId, marketId, actorUserId: auth.userId, canonicalSourceUrl: initialCanonical.canonicalUrl })
   if (!jobInserted) {
     // No row exists at all — there is nothing to transition or report a
     // status for.
@@ -386,6 +407,7 @@ export async function POST(request) {
 
     const receipt = canonical
       ? await issueAnalysisReceipt({
+          marketId,
           actorUserId: auth.userId,
           canonicalSourceUrl: canonical.canonicalUrl,
           sourceHostname: canonical.hostname,

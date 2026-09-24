@@ -42,6 +42,11 @@
 
 create table if not exists url_intake_batches (
   id             uuid primary key,
+  -- Same requirement every market-bound record in this project already
+  -- carries (url_intakes/url_intake_analysis_receipts, 0013) — added
+  -- here after an independent review correctly found it missing from
+  -- this table's own first draft.
+  market_id      uuid not null references markets(id),
   actor_user_id  uuid not null references auth.users(id),
   created_at     timestamptz not null default now()
 );
@@ -60,6 +65,12 @@ grant select, insert on public.url_intake_batches to service_role;
 
 create table if not exists restaurant_source_analysis_jobs (
   id                    uuid primary key,
+  -- Same requirement every market-bound record in this project already
+  -- carries (url_intakes/url_intake_analysis_receipts, 0013) — added
+  -- here after an independent review correctly found it missing from
+  -- this table's own first draft, despite this file's own comment on
+  -- canonical_source_url below already citing that exact convention.
+  market_id             uuid not null references markets(id),
   actor_user_id         uuid not null references auth.users(id),
   -- Same canonical shape url_intake_analysis_receipts/url_intakes (0013)
   -- already require — scheme, host, path only, no query string, no
@@ -118,8 +129,16 @@ create table if not exists restaurant_source_analysis_jobs (
   -- promote_url_intake_to_profile_draft() (0013), so it is never widened
   -- here; this column is read only by this job's own status-poll response,
   -- never by either existing RPC. Null until 'succeeded'; never populated
-  -- speculatively on a 'pending'/'running'/'failed' job.
+  -- speculatively on a 'pending'/'running'/'failed' job — enforced below
+  -- by its own biconditional, not asserted in this comment alone. An
+  -- independent review correctly found this column's own invariant had no
+  -- matching constraint, unlike its two siblings below — this table has
+  -- already taught this project the cost of trusting a comment alone for
+  -- exactly this kind of invariant (see restaurant_profile_drafts' own
+  -- discard-columns history in docs/api/restaurant-profile-drafts-schema.md).
   field_evidence        jsonb,
+  constraint restaurant_source_analysis_jobs_succeeded_has_field_evidence
+    check ((status = 'succeeded') = (field_evidence is not null)),
   created_at            timestamptz not null default now(),
   updated_at            timestamptz not null default now()
 );
@@ -132,8 +151,8 @@ revoke all on public.restaurant_source_analysis_jobs from public, anon, authenti
 
 revoke all on public.restaurant_source_analysis_jobs from service_role;
 grant select, insert on public.restaurant_source_analysis_jobs to service_role;
--- Column-scoped: id/actor_user_id/canonical_source_url/batch_id/created_at
--- are set once at insert and never updated by any role — only the job's
--- own lifecycle columns move after creation.
+-- Column-scoped: id/market_id/actor_user_id/canonical_source_url/batch_id/
+-- created_at are set once at insert and never updated by any role — only
+-- the job's own lifecycle columns move after creation.
 grant update (status, result_receipt_id, error_reason, attempt_count, field_evidence, updated_at)
   on public.restaurant_source_analysis_jobs to service_role;

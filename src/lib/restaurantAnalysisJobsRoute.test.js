@@ -65,6 +65,15 @@ test('structural safety net: reuses buildCandidateSummary and computeAnalysisRes
   assert.match(source, /import \{ computeAnalysisResultHash \} from ['"]@\/src\/lib\/urlIntakeReceiptHash['"]/)
 })
 
+test('structural safety net: resolves market_id once, server-side, and passes it into both the job insert and the receipt — never hardcoded, never client-supplied', () => {
+  const source = readPostRouteSource()
+  assert.match(source, /async function resolveMarketId/)
+  assert.match(source, /const marketId = await resolveMarketId\(\)/)
+  assert.match(source, /insertJob\(\{ jobId, marketId,/)
+  assert.match(source, /\? await issueAnalysisReceipt\(\{\s*marketId,/)
+  assert.doesNotMatch(source, /body\.market_id/)
+})
+
 test('structural safety net: only ever writes to restaurant_source_analysis_jobs, url_intake_analysis_receipts, or reads markets — never url_intakes, restaurant_profile_drafts, or menu_snapshot_proposals directly', () => {
   const source = readPostRouteSource()
   const fromCalls = [...source.matchAll(/\.from\(['"]([^'"]+)['"]\)/g)].map((m) => m[1])
