@@ -48,7 +48,18 @@ function rollUpPdfAdapterErrorReason(pdfErrorReason) {
  * to the job's own terminal `ai_structuring_failed` — reserved
  * exclusively for this case, per the ticket's own explicit instruction
  * that a Claude-adapter *budget* overrun must never be reported this way
- * (see rollUpClaudeAdapterBudgetOverrun below for that separate case). */
+ * (see rollUpClaudeAdapterBudgetOverrun below for that separate case).
+ *
+ * **Not called anywhere in this build today, same as
+ * rollUpClaudeAdapterBudgetOverrun below — also a deliberate, documented
+ * gap.** src/lib/claudeStructuringAdapter.js's own boundary always
+ * resolves `{ enabled: false }` and never performs a real call, so it
+ * never produces any of these four error shapes to roll up. Both
+ * functions exist, already tested, as the fixed mapping a real future
+ * Claude integration would need on day one — building a fake/simulated
+ * Claude failure path now, merely to exercise these call sites, would
+ * mean pretending an external AI call exists in this build, which it
+ * explicitly, deliberately does not. */
 function rollUpClaudeAdapterErrorReason(claudeErrorReason) {
   if (!CLAUDE_ADAPTER_ERROR_REASONS.includes(claudeErrorReason)) {
     throw new Error(`Unknown Claude adapter error reason: ${claudeErrorReason}`)
@@ -99,7 +110,23 @@ function canTransitionJobStatus(fromStatus, toStatus) {
 }
 
 /** `true` when another attempt may still be made — never silent infinite
- * retry, per the ticket's own "Retries" bullet. */
+ * retry, per the ticket's own "Retries" bullet.
+ *
+ * **Not called anywhere in this build today — a deliberate, documented
+ * gap, not an oversight.** This project's own idempotency decision
+ * (be-20-general-restaurant-source-extraction.md's own "Idempotency"
+ * bullet, restated in app/api/internal/v1/restaurant-analysis-jobs/route.js's
+ * own header comment) is explicit that "a fresh, deliberate re-analysis
+ * after a terminal `failed` state always creates a genuinely new job,
+ * never silently resurrects the old one" — meaning every job this route
+ * creates today has exactly one attempt, `attempt_count` never moves off
+ * its schema default of `1`, and there is no real call site for this
+ * function to guard yet. It exists now, already tested, as the fixed
+ * ceiling a future *within-one-job* retry mechanism (e.g. one bounded
+ * internal retry of a single flaky sub-step, distinct from today's
+ * "start a brand-new job" reviewer-facing retry) would need — building
+ * that mechanism now, merely to give this function a caller, would be
+ * inventing functionality this checkpoint's own scope does not ask for. */
 function canRetryJob(attemptCount) {
   return typeof attemptCount === 'number' && attemptCount < MAX_ATTEMPT_COUNT
 }
