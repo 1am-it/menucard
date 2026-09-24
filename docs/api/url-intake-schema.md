@@ -522,10 +522,25 @@ proposal — see "Hard boundary" above.
 ## Out of scope for this contract
 
 - Any code, migration, RLS policy, or Supabase change of any kind.
-- General same-host source discovery, PDF fetching/processing, OCR, or
-  bulk/CSV intake of multiple URLs — all remain separate, later,
+- **Corrected (2026-09-24), to stay consistent with the dated Amendment
+  above**: this bullet originally listed general same-host source
+  discovery and PDF fetching/processing as out of scope outright,
+  written before that Amendment existed — left unedited at the time, it
+  would silently contradict the Amendment's own, later text. Only the
+  bounded, precisely-scoped forms the Amendment defines are in scope:
+  same-host discovery limited to the fixed keyword-matched candidates
+  found directly on the one already-fetched entry page (never a further
+  hop, never an unbounded crawl), and fetching/parsing a digital PDF's
+  own text under the identical existing gates. **Still, unambiguously,
+  out of scope**: any *unbounded* or *general* same-host/site discovery
+  beyond that one bounded step, OCR or any other later
+  technique for a scanned/image PDF, browser rendering, and bulk/CSV
+  intake of multiple URLs — all of these remain separate, later,
   explicitly-scoped tickets, per `be-18-onboarding-menu-via-url.md`'s own
-  "Non-goals."
+  "Non-goals" and the Amendment's own "What remains explicitly,
+  unambiguously out of scope" list. This correction restates an existing
+  decision for internal consistency only — it does not add a new vendor,
+  privacy, migration, or product decision of any kind.
 - Any change to `menu_snapshot_proposals`/`menu_snapshot_reviews` or
   `0011_be17_menu_snapshot_foundation.sql` — see "Hard boundary" above.
 - Any change to `BE-18`'s current fase-1 functionality.
