@@ -143,7 +143,8 @@ test('runRestaurantSourceAnalysis: a same-host PDF candidate becomes an unknown 
   assert.equal(unknown.extractionMethod, 'pdf_text')
   assert.equal(unknown.pageCount, 1)
   assert.ok(unknown.contentHash)
-  assert.match(unknown.textPreview, /Hello from a digital PDF menu/)
+  assert.equal(unknown.wordCount, 6) // "Hello from a digital PDF menu" — never the raw text itself
+  assert.equal(unknown.textPreview, undefined)
 })
 
 test('runRestaurantSourceAnalysis: a closed PDF error rolls up into a plain-language note naming the job-level error_reason, never the raw exception', async () => {
@@ -170,6 +171,64 @@ test('runRestaurantSourceAnalysis: a field with no evidence anywhere is simply a
   assert.deepEqual(result.restaurantCandidateFields, {})
   assert.deepEqual(result.fieldEvidence, {})
   assert.equal(result.description, '')
+})
+
+test('runRestaurantSourceAnalysis: a genuine context conflict (a different Dutch postcode on a same-host menu page) caps the field at laag, never hoog, and marks it needing manual review', async () => {
+  const homepageWithBredaAddress = jsonLdScript({
+    '@type': 'Restaurant',
+    name: 'De Botanist Breda',
+    address: { streetAddress: 'Tolbrugstraat 19', postalCode: '4811 WN', addressLocality: 'Breda' },
+  }) + '<a href="/menukaart">Menukaart</a>'
+  // A same-host menu page whose own footer carries a different address —
+  // e.g. a shared chain-wide template pointing at a head office.
+  const candidateHtmlWithDifferentCity = `<address>Hoofdkantoor 1, 1011 AB Amsterdam</address>`
+
+  const result = await runRestaurantSourceAnalysis({
+    homepageHtml: homepageWithBredaAddress,
+    homepageUrl: 'https://debotanistbreda.nl/',
+    fetchCandidate: async () => ({ status: 'html', body: candidateHtmlWithDifferentCity, finalUrl: 'https://debotanistbreda.nl/menukaart' }),
+  })
+
+  assert.equal(result.fieldEvidence.address.confidence, 'laag')
+  assert.equal(result.fieldEvidence.address.contextConflict, true)
+  assert.equal(result.fieldEvidence.address.reviewReady, false)
+  // The description composer only ever uses a review-ready address for
+  // its city clause — a conflicting address must never leak into it.
+  assert.doesNotMatch(result.description, /Amsterdam/)
+})
+
+test('runRestaurantSourceAnalysis: the same address restated on another same-host page is not a conflict, and the field can still reach hoog', async () => {
+  const homepageWithBredaAddress = jsonLdScript({
+    '@type': 'Restaurant',
+    name: 'De Botanist Breda',
+    address: { streetAddress: 'Tolbrugstraat 19', postalCode: '4811 WN', addressLocality: 'Breda' },
+  }) + '<a href="/menukaart">Menukaart</a>'
+  const candidateHtmlWithSamePostcode = `<address>Onze locatie: 4811 WN Breda (achteringang)</address>`
+
+  const result = await runRestaurantSourceAnalysis({
+    homepageHtml: homepageWithBredaAddress,
+    homepageUrl: 'https://debotanistbreda.nl/',
+    fetchCandidate: async () => ({ status: 'html', body: candidateHtmlWithSamePostcode, finalUrl: 'https://debotanistbreda.nl/menukaart' }),
+  })
+
+  assert.equal(result.fieldEvidence.address.contextConflict, false)
+  assert.equal(result.fieldEvidence.address.confidence, 'hoog')
+  assert.equal(result.fieldEvidence.address.reviewReady, true)
+})
+
+test('runRestaurantSourceAnalysis: an inconclusive other sighting (does not parse as a comparable value) is never guessed into a conflict — the safe default applies', async () => {
+  const homepageWithPhone = jsonLdScript({ '@type': 'Restaurant', name: 'Mr. Moos', telephone: '076 0000000' }) +
+    '<a href="/menukaart">Menukaart</a>'
+  const candidateHtmlWithUnparsablePhone = '<a href="tel:notarealnumber">Bel</a>'
+
+  const result = await runRestaurantSourceAnalysis({
+    homepageHtml: homepageWithPhone,
+    homepageUrl: 'https://mrmoos.nl/',
+    fetchCandidate: async () => ({ status: 'html', body: candidateHtmlWithUnparsablePhone, finalUrl: 'https://mrmoos.nl/menukaart' }),
+  })
+
+  assert.equal(result.fieldEvidence.phone.contextConflict, false)
+  assert.equal(result.fieldEvidence.phone.confidence, 'hoog')
 })
 
 test('runRestaurantSourceAnalysis: always notes that AI structuring is unavailable — the Claude adapter boundary is unconditionally disabled today', async () => {

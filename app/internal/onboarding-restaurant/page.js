@@ -360,6 +360,11 @@ export default function OnboardingRestaurantPage() {
                           <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
                             Bron: {evidence.extractionMethod} — {evidence.sourceUrl}
                           </div>
+                          {evidence.contextConflict && (
+                            <div style={{ fontSize: 11, color: 'var(--danger)', marginTop: 2 }}>
+                              Afwijkende waarde gevonden op een andere pagina van deze site.
+                            </div>
+                          )}
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-end' }}>
                           <span className={`di-chip ${CONFIDENCE_CHIP_CLASS[evidence.confidence] || 'di-chip--muted'}`}>
@@ -499,7 +504,8 @@ export default function OnboardingRestaurantPage() {
                     </div>
                     {unknownMenuContexts.map((unknown, idx) => (
                       <div key={idx} style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}>
-                        {unknown.sourceUrl} ({unknown.extractionMethod}, {unknown.pageCount} pagina{unknown.pageCount === 1 ? '' : "'s"})
+                        {unknown.sourceUrl} ({unknown.extractionMethod}, {unknown.pageCount} pagina{unknown.pageCount === 1 ? '' : "'s"},{' '}
+                        ~{unknown.wordCount} woorden)
                       </div>
                     ))}
                   </div>

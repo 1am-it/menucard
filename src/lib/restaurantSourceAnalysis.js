@@ -39,14 +39,19 @@
 // src/lib/pdfTextExtraction.js — only a server-side route handler may call
 // this module, never client code.
 //
-// No context-conflict detection (e.g. a chain/head-office address on a
-// location-specific page) is implemented in fase 1 — `hasContextConflict`
-// is always passed as `false` to deriveFieldConfidence below. This is a
-// deliberate, documented fase-1 gap, not a claim that no conflict could
-// exist: a field's confidence still correctly caps at `middel` without it
-// (deriveFieldConfidence's own default), it simply never reaches the
-// stricter `laag` outcome a detected conflict would produce. Building
-// that detection is separate, later work.
+// Context-conflict detection (e.g. a chain/head-office address on a
+// location-specific page) is real, not hardcoded — see
+// src/lib/fieldContextConflict.js: whenever this same analysis finds more
+// than one materially different value for the same field across
+// different pages of the same site, that field's confidence is capped at
+// `laag`, never `hoog`, per deriveFieldConfidence's own rule. An earlier
+// version of this module passed a hardcoded `false` here — an
+// independent review correctly flagged that as never actually exercising
+// the "no context conflict" leg of BE-20's own three-part confidence
+// rule. When a comparison is genuinely inconclusive (no other sighting
+// exists, or it cannot be compared), the safe default still applies: no
+// conflict is asserted, and the field's confidence is decided by the
+// normal content-hash-plus-plausibility rule alone.
 //
 // Deliberately CommonJS, same reasoning as every other pure-logic module
 // in this project.
@@ -58,18 +63,22 @@ const { findSameHostMenuCandidates } = require('./sameHostDiscovery')
 const { extractRestaurantFieldsWithEvidence } = require('./restaurantFieldEvidence')
 const { ALLOWED_FIELD_NAMES, deriveFieldConfidence, isFieldReviewReady } = require('./fieldConfidence')
 const { computeFieldEvidenceHash } = require('./fieldEvidenceHash')
+const { detectFieldContextConflict } = require('./fieldContextConflict')
 const { extractDigitalPdfText, PdfExtractionError } = require('./pdfTextExtraction')
 const { rollUpPdfAdapterErrorReason } = require('./restaurantSourceAnalysisJobs')
 const { composeEvidenceBasedDescription } = require('./restaurantConceptDescription')
 const { runClaudeStructuringAdapter } = require('./claudeStructuringAdapter')
 
-/** How much of a discovered PDF's extracted text is kept for the review
- * UI's own preview — a bounded excerpt, never the full text duplicated
- * into the job's `field_evidence` column (matches this project's existing
- * data-minimisation convention, e.g. url-intake-schema.md's own bounded
- * menu-candidate summary). The content-hash below still covers the FULL
- * extracted text, not just this preview. */
-const UNKNOWN_MENU_TEXT_PREVIEW_LENGTH = 280
+/** A safe, derived signal for a discovered PDF's own review metadata —
+ * never the raw text itself. See the "unknown menu context" assembly
+ * below for why: unlike every structured restaurant field elsewhere in
+ * this pipeline, a PDF's own text has no fixed field allowlist to draw
+ * from, so no excerpt of it — however short — is ever stored or
+ * displayed. */
+function countWords(text) {
+  if (typeof text !== 'string' || text.trim().length === 0) return 0
+  return text.trim().split(/\s+/).length
+}
 
 /**
  * Runs the full fase-1 analysis. Returns
@@ -96,14 +105,29 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
     menuContexts.push({ ...menu, extractionMethod: 'json_ld', sourceUrl: homepageUrl })
   }
 
-  // 2. Homepage field evidence — first source wins per field; a later
-  // candidate page only ever fills a field the homepage itself left
-  // absent (see the loop below), never overrides an already-found one.
+  // 2. Homepage field evidence — first source wins per field for the
+  // actual value/evidence/hash a candidate page only ever fills a field
+  // the homepage itself left absent (see the loop below), never
+  // overrides an already-found one. Every OTHER, later-found value for a
+  // field this analysis already has a primary value for is kept
+  // separately, in `otherFieldValuesByName`, purely for the context-
+  // conflict check in step 4 below — never used as evidence itself.
   const fieldsByName = {}
+  const otherFieldValuesByName = {}
+  for (const fieldName of ALLOWED_FIELD_NAMES) otherFieldValuesByName[fieldName] = []
+
+  function recordFieldSighting(fieldName, found, sourceUrl) {
+    if (!found) return
+    if (!fieldsByName[fieldName]) {
+      fieldsByName[fieldName] = { ...found, sourceUrl }
+    } else {
+      otherFieldValuesByName[fieldName].push(found.value)
+    }
+  }
+
   const homepageFieldEvidence = extractRestaurantFieldsWithEvidence(homepageHtml)
   for (const fieldName of ALLOWED_FIELD_NAMES) {
-    const found = homepageFieldEvidence[fieldName]
-    if (found) fieldsByName[fieldName] = { ...found, sourceUrl: homepageUrl }
+    recordFieldSighting(fieldName, homepageFieldEvidence[fieldName], homepageUrl)
   }
 
   // 3. Bounded same-host discovery — at most sameHostDiscovery.js's own
@@ -137,9 +161,7 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
       }
       const candidateFieldEvidence = extractRestaurantFieldsWithEvidence(fetched.body)
       for (const fieldName of ALLOWED_FIELD_NAMES) {
-        if (fieldsByName[fieldName]) continue
-        const found = candidateFieldEvidence[fieldName]
-        if (found) fieldsByName[fieldName] = { ...found, sourceUrl: fetched.finalUrl || candidate.url }
+        recordFieldSighting(fieldName, candidateFieldEvidence[fieldName], fetched.finalUrl || candidate.url)
       }
       continue
     }
@@ -153,16 +175,31 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
         // an explicit, reviewer-facing "unknown menu context," per the
         // ticket's own acceptance criterion for a section the system
         // found but could not confidently categorize.
+        //
+        // Deliberately never a raw text excerpt here — an earlier version
+        // of this module kept a bounded (280-character) raw preview of
+        // the extracted PDF text, which an independent review correctly
+        // flagged: unlike every structured restaurant field elsewhere in
+        // this pipeline (always drawn from the fixed name/category/
+        // address/phone/website allowlist), a PDF's own header/footer
+        // could incidentally include something outside that allowlist
+        // (e.g. a name). `wordCount` gives a reviewer a real, useful
+        // signal ("this PDF has substantial content") without ever
+        // storing or displaying any of the PDF's own words.
         unknownMenuContexts.push({
           sourceUrl: fetched.finalUrl || candidate.url,
           extractionMethod: 'pdf_text',
           pageCount: pdfResult.pageCount,
+          wordCount: countWords(pdfResult.text),
           contentHash: computeFieldEvidenceHash(pdfResult.text),
-          textPreview: pdfResult.text.slice(0, UNKNOWN_MENU_TEXT_PREVIEW_LENGTH),
         })
       } catch (err) {
-        if (!(err instanceof PdfExtractionError)) throw err
-        notes.push(`PDF op ${candidate.url} kon niet worden gelezen (${rollUpPdfAdapterErrorReason(err.reason)}).`)
+        // Any failure here — a properly-typed PdfExtractionError, or, as
+        // defense in depth, any other unexpected error — is reported as a
+        // plain-language note and never re-thrown: one bad candidate PDF
+        // must never crash the rest of this analysis.
+        const reason = err instanceof PdfExtractionError ? rollUpPdfAdapterErrorReason(err.reason) : 'pdf_extraction_failed'
+        notes.push(`PDF op ${candidate.url} kon niet worden gelezen (${reason}).`)
       }
       continue
     }
@@ -171,6 +208,16 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
   // 4. Confidence + content-hash evidence, per field — never `hoog` for a
   // deterministic extractor alone (src/lib/fieldConfidence.js's own,
   // already-tested rule); every field surfaces exactly what it is.
+  // `hasContextConflict` is a real, explainable, server-side check (see
+  // src/lib/fieldContextConflict.js): whether this same analysis also
+  // found a DEFINITIVELY different value for this field on another page
+  // of the same site (e.g. a different Dutch postcode). When that
+  // comparison is inconclusive rather than genuinely absent (no other
+  // sighting exists, or every other sighting could not be compared),
+  // `detectFieldContextConflict` itself already returns `false` — the
+  // safe default this ticket requires: an unconfirmed conflict never
+  // promotes a field to `hoog`, it simply leaves the normal content-hash-
+  // plus-plausibility rule to decide between `hoog`/`middel`.
   const restaurantCandidateFields = {}
   const fieldEvidence = {}
   for (const fieldName of ALLOWED_FIELD_NAMES) {
@@ -178,12 +225,13 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
     if (!found) continue
     restaurantCandidateFields[fieldName] = found.value
     const contentHash = computeFieldEvidenceHash(found.rawSourceFragment)
+    const hasContextConflict = detectFieldContextConflict(fieldName, found.value, otherFieldValuesByName[fieldName])
     const confidence = deriveFieldConfidence({
       fieldName,
       value: found.value,
       extractionMethod: found.extractionMethod,
       hasContentHash: Boolean(contentHash),
-      hasContextConflict: false,
+      hasContextConflict,
     })
     fieldEvidence[fieldName] = {
       value: found.value,
@@ -191,6 +239,7 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
       sourceUrl: found.sourceUrl,
       contentHash,
       confidence,
+      contextConflict: hasContextConflict,
       reviewReady: isFieldReviewReady({ hasContentHash: Boolean(contentHash), confidence }),
     }
   }
@@ -218,6 +267,6 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
 }
 
 module.exports = {
-  UNKNOWN_MENU_TEXT_PREVIEW_LENGTH,
+  countWords,
   runRestaurantSourceAnalysis,
 }
