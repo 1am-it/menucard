@@ -281,6 +281,14 @@ export default function OnboardingRestaurantPage() {
 
         <div className="di-topbar">
           <h1 className="di-title">Onboarding Restaurant</h1>
+          {/* BE-20 — Onboarding Menu is no longer its own top-level nav
+              item (folded into the wider Onboarding Restaurant context
+              per the current navigation direction), but its route and
+              existing URL-driven flow are completely unchanged — reached
+              from here instead of the shared nav. */}
+          <a href="/internal/onboarding-menu" className="di-link-btn" style={{ textDecoration: 'none' }}>
+            Onboarding Menu (bestaande URL-flow) →
+          </a>
         </div>
 
         {rolesLoaded && !isInternal && (
