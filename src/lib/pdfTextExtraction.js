@@ -118,14 +118,14 @@ async function extractDigitalPdfText(pdfBytes, options = {}) {
 
   let doc
   try {
-    // Loaded only here, only via `await import(...)` — see this file's
-    // own header for why this is required (an ESM-only package) and why
-    // it must be the `legacy` entry point specifically (the package's
-    // own default entry point is not Node-compatible in this project's
-    // pinned runtime).
-    const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs')
-
     try {
+      // Loaded only here, only via `await import(...)` — see this file's
+      // own header for why this is required (an ESM-only package) and why
+      // it must be the `legacy` entry point specifically (the package's
+      // own default entry point is not Node-compatible in this project's
+      // pinned runtime).
+      const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs')
+
       const loadingTask = pdfjsLib.getDocument({
         data: new Uint8Array(pdfBytes),
         isEvalSupported: false,
@@ -133,45 +133,70 @@ async function extractDigitalPdfText(pdfBytes, options = {}) {
         disableFontFace: true,
       })
       doc = await Promise.race([loadingTask.promise, timedOut])
+
+      if (doc.numPages > maxPages) {
+        throw new PdfExtractionError('pdf_too_large', `PDF has ${doc.numPages} pages, exceeds maxPages=${maxPages}`)
+      }
+
+      // Every step below — resolving a page, reading its text content —
+      // is included in this SAME try block, not a separate one scoped
+      // only to document loading. A structurally valid PDF (per the
+      // outer getDocument() call above) can still fail per page: e.g. a
+      // dangling page-tree reference that resolves to the wrong object
+      // type. pdfjs-dist itself is otherwise very fault-tolerant about a
+      // malformed CONTENT STREAM specifically — confirmed directly, it
+      // degrades to an empty text-items array rather than throwing (the
+      // same behavior a genuinely scanned/image-only page produces,
+      // correctly handled below as pdf_no_text_layer) — but a broken
+      // PAGE-TREE reference is a different, real failure mode that does
+      // throw at getPage() time, confirmed directly against a hand-built
+      // fixture whose second page's own kid reference resolves to the
+      // wrong object type. Without this per-page code living inside the
+      // same catch-all below, such an error would propagate as a raw,
+      // untyped exception instead of this module's own closed
+      // PdfExtractionError contract — this is the exact gap an
+      // independent review found and this fix closes.
+      const pageTexts = []
+      for (let pageNumber = 1; pageNumber <= doc.numPages; pageNumber += 1) {
+        const page = await Promise.race([doc.getPage(pageNumber), timedOut])
+        const textContent = await Promise.race([page.getTextContent(), timedOut])
+        const pageText = textContent.items
+          .map((item) => (item && typeof item.str === 'string' ? item.str : ''))
+          .join(' ')
+          .replace(/\s+/g, ' ')
+          .trim()
+        if (pageText.length > 0) pageTexts.push(pageText)
+      }
+
+      const fullText = pageTexts.join('\n\n').trim()
+      if (fullText.length === 0) {
+        // A structurally valid PDF with zero extractable text — the
+        // deterministic, closed signal for "likely a scanned/image-only
+        // PDF", per this project's own directly-verified finding that
+        // `pdfjs-dist` never throws for this case, it simply returns no
+        // text items. Never guessed at as "empty menu"; never silently
+        // escalated to a pixel-based text-recognition pass in fase 1 —
+        // see this ticket's own explicit requirement that this outcome
+        // stay an honest end result for a later such pass, never a
+        // trigger to run one now.
+        throw new PdfExtractionError('pdf_no_text_layer', 'PDF loaded successfully but contains no extractable text')
+      }
+
+      return { text: fullText, pageCount: doc.numPages }
     } catch (err) {
+      // The one, single place every failure from the block above — load
+      // failure, page-count overrun, a per-page exception, or the
+      // no-text-layer case — is mapped to this module's own closed
+      // vocabulary. Never returns a partial result assembled from
+      // whatever pages happened to succeed before a later page failed —
+      // an untrusted/incomplete extraction is exactly what this module's
+      // own contract already refuses to resolve with.
       if (err instanceof PdfExtractionError) throw err
       if (err && err.name === 'PasswordException') {
         throw new PdfExtractionError('pdf_encrypted', 'PDF requires a password')
       }
-      throw new PdfExtractionError('pdf_corrupt', (err && err.message) || 'Failed to load PDF')
+      throw new PdfExtractionError('pdf_corrupt', (err && err.message) || 'Failed to process PDF')
     }
-
-    if (doc.numPages > maxPages) {
-      throw new PdfExtractionError('pdf_too_large', `PDF has ${doc.numPages} pages, exceeds maxPages=${maxPages}`)
-    }
-
-    const pageTexts = []
-    for (let pageNumber = 1; pageNumber <= doc.numPages; pageNumber += 1) {
-      const page = await Promise.race([doc.getPage(pageNumber), timedOut])
-      const textContent = await Promise.race([page.getTextContent(), timedOut])
-      const pageText = textContent.items
-        .map((item) => (item && typeof item.str === 'string' ? item.str : ''))
-        .join(' ')
-        .replace(/\s+/g, ' ')
-        .trim()
-      if (pageText.length > 0) pageTexts.push(pageText)
-    }
-
-    const fullText = pageTexts.join('\n\n').trim()
-    if (fullText.length === 0) {
-      // A structurally valid PDF with zero extractable text — the
-      // deterministic, closed signal for "likely a scanned/image-only
-      // PDF", per this project's own directly-verified finding that
-      // `pdfjs-dist` never throws for this case, it simply returns no
-      // text items. Never guessed at as "empty menu"; never silently
-      // escalated to a pixel-based text-recognition pass in fase 1 — see
-      // this ticket's own explicit requirement that this outcome stay an
-      // honest end result for a later such pass, never a trigger to run
-      // one now.
-      throw new PdfExtractionError('pdf_no_text_layer', 'PDF loaded successfully but contains no extractable text')
-    }
-
-    return { text: fullText, pageCount: doc.numPages }
   } finally {
     clearTimeout(timeoutHandle)
     if (doc) {

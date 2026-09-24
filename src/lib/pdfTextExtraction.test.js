@@ -25,6 +25,22 @@ const NO_TEXT_PDF_BASE64 =
 const ENCRYPTED_PDF_BASE64 =
   'JVBERi0xLjQKMSAwIG9iago8PCAvVHlwZSAvQ2F0YWxvZyAvUGFnZXMgMiAwIFIgPj4KZW5kb2JqCjIgMCBvYmoKPDwgL1R5cGUgL1BhZ2VzIC9LaWRzIFszIDAgUl0gL0NvdW50IDEgPj4KZW5kb2JqCjMgMCBvYmoKPDwgL1R5cGUgL1BhZ2UgL1BhcmVudCAyIDAgUiAvUmVzb3VyY2VzIDw8IC9Gb250IDw8IC9GMSA0IDAgUiA+PiA+PiAvTWVkaWFCb3ggWzAgMCAzMDAgMjAwXSAvQ29udGVudHMgNSAwIFIgPj4KZW5kb2JqCjQgMCBvYmoKPDwgL1R5cGUgL0ZvbnQgL1N1YnR5cGUgL1R5cGUxIC9CYXNlRm9udCAvSGVsdmV0aWNhID4+CmVuZG9iago1IDAgb2JqCjw8IC9MZW5ndGggNDIgPj4Kc3RyZWFtCiLwVBDlMFkw5IR5QqJA4pHCbx68IWPICT40ytLC/CzqVhteQXQApZzi8wplbmRzdHJlYW0KZW5kb2JqCjYgMCBvYmoKPDwgL0ZpbHRlciAvU3RhbmRhcmQgL1YgMSAvUiAyIC9PIChz3PnG4MSAxzwC7oF4rlOZb7654PNX/M5mmBOq3ECyxykgL1UgKFwpv3Y64QDStFxc4KT2JtpX5UBCWzjXLwvYnuokGRnU7BgpIC9QIC0zOTA0ID4+CmVuZG9iagp4cmVmCjAgNwowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwMDkgMDAwMDAgbiAKMDAwMDAwMDA1OCAwMDAwMCBuIAowMDAwMDAwMTE1IDAwMDAwIG4gCjAwMDAwMDAyNDEgMDAwMDAgbiAKMDAwMDAwMDMxMSAwMDAwMCBuIAowMDAwMDAwNDAzIDAwMDAwIG4gCnRyYWlsZXIKPDwgL1NpemUgNyAvUm9vdCAxIDAgUiAvRW5jcnlwdCA2IDAgUiAvSUQgWzwwMmUyZDU2NDBlMTUzMGFkZGFhOWEwNzA5NzlkOTc5YT4gPDAyZTJkNTY0MGUxNTMwYWRkYWE5YTA3MDk3OWQ5NzlhPl0gPj4Kc3RhcnR4cmVmCjUzOQolJUVPRg=='
 
+// Two-page PDF whose page tree's second kid reference resolves to the
+// wrong object type (a dangling/broken page reference, not merely a
+// broken content stream) — empirically verified against this project's
+// own pinned pdfjs-dist build to load successfully as a document
+// (numPages: 2) but throw a real, uncaught exception specifically at
+// `doc.getPage(2)` time. This is the regression fixture for the
+// independent review finding that per-page failures were not being
+// mapped to the closed PdfExtractionError vocabulary — pdfjs-dist itself
+// is otherwise very fault-tolerant about a merely-corrupt CONTENT
+// STREAM (confirmed separately to degrade to zero text items rather than
+// throw, exactly like a genuine scanned/image-only page), so a broken
+// page-tree reference specifically was required to reproduce a real,
+// uncaught per-page throw.
+const PAGE_TREE_BROKEN_SECOND_PAGE_PDF_BASE64 =
+  'JVBERi0xLjQKMSAwIG9iago8PCAvVHlwZSAvQ2F0YWxvZyAvUGFnZXMgMiAwIFIgPj4KZW5kb2JqCjIgMCBvYmoKPDwgL1R5cGUgL1BhZ2VzIC9LaWRzIFszIDAgUiA2MCAwIFJdIC9Db3VudCAyID4+CmVuZG9iagozIDAgb2JqCjw8IC9UeXBlIC9QYWdlIC9QYXJlbnQgMiAwIFIgL1Jlc291cmNlcyA8PCAvRm9udCA8PCAvRjEgNCAwIFIgPj4gPj4gL01lZGlhQm94IFswIDAgMzAwIDIwMF0gL0NvbnRlbnRzIDUgMCBSID4+CmVuZG9iago0IDAgb2JqCjw8IC9UeXBlIC9Gb250IC9TdWJ0eXBlIC9UeXBlMSAvQmFzZUZvbnQgL0hlbHZldGljYSA+PgplbmRvYmoKNSAwIG9iago8PCAvTGVuZ3RoIDQ0ID4+CnN0cmVhbQpCVCAvRjEgMTggVGYgMjAgMTAwIFRkIChQYWdlIG9uZSB0ZXh0KSBUaiBFVAplbmRzdHJlYW0KZW5kb2JqCjYgMCBvYmoKPDwgL1R5cGUgL1BhZ2UgL1BhcmVudCAyIDAgUiAvUmVzb3VyY2VzIDw8IC9Gb250IDw8IC9GMSA0IDAgUiA+PiA+PiAvTWVkaWFCb3ggWzAgMCAzMDAgMjAwXSAvQ29udGVudHMgNyAwIFIgPj4KZW5kb2JqCjcgMCBvYmoKPDwgL0xlbmd0aCA0MCAvRmlsdGVyIC9GbGF0ZURlY29kZSA+PgpzdHJlYW0KZ2FyYmFnZS1ub3QtcmVhbGx5LWZsYXRlLWNvbXByZXNzZWQtZGF0YQplbmRzdHJlYW0KZW5kb2JqCnhyZWYKMCA4CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDAwOSAwMDAwMCBuIAowMDAwMDAwMDU4IDAwMDAwIG4gCjAwMDAwMDAxMjIgMDAwMDAgbiAKMDAwMDAwMDI0OCAwMDAwMCBuIAowMDAwMDAwMzE4IDAwMDAwIG4gCjAwMDAwMDA0MTIgMDAwMDAgbiAKMDAwMDAwMDUzOCAwMDAwMCBuIAp0cmFpbGVyCjw8IC9TaXplIDggL1Jvb3QgMSAwIFIgPj4Kc3RhcnR4cmVmCjY0OQolJUVPRg=='
+
 function pdfBytes(base64) {
   return Buffer.from(base64, 'base64')
 }
@@ -96,6 +112,17 @@ test('extractDigitalPdfText: pdf_no_text_layer for a structurally valid PDF with
     (err) => {
       assert.ok(err instanceof PdfExtractionError)
       assert.equal(err.reason, 'pdf_no_text_layer')
+      return true
+    }
+  )
+})
+
+test('extractDigitalPdfText: pdf_corrupt for a document that loads successfully but throws on a later page (regression: per-page errors must map to the closed vocabulary, never leak a raw pdfjs exception)', async () => {
+  await assert.rejects(
+    () => extractDigitalPdfText(pdfBytes(PAGE_TREE_BROKEN_SECOND_PAGE_PDF_BASE64)),
+    (err) => {
+      assert.ok(err instanceof PdfExtractionError, `expected a PdfExtractionError, got ${err && err.constructor && err.constructor.name}`)
+      assert.equal(err.reason, 'pdf_corrupt')
       return true
     }
   )
