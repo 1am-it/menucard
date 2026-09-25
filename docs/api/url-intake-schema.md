@@ -103,6 +103,75 @@ human-review gates as any other source, unchanged. This exception is
 scoped to the acquisition step only, never to what may be done with its
 result.
 
+### Amendment (2026-09-24, BE-20): bounded same-host discovery and digital-PDF fetching
+
+**This amendment narrowly widens the exception above for exactly two,
+precisely bounded cases `be-20-general-restaurant-source-extraction.md`'s
+own "Vaststaande productkeuzes" §6 names — same-host menu-link discovery
+and digital-PDF fetching — both of which the original text above
+explicitly listed as *not* covered.** Everything else the exception
+already permits, requires, or excludes remains completely unchanged;
+this amendment adds two new, tightly bounded fetch shapes, never a
+general crawl or a relaxation of any existing gate.
+
+**Same-host discovery, precisely bounded**: after the single entry URL
+above is fetched, the server may additionally identify, from that one
+already-fetched page's own HTML, a small, fixed-size set of same-host
+links whose visible text or path matches a fixed, closed list of
+menu-related keywords (`src/lib/sameHostDiscovery.js`'s own
+`MENU_KEYWORDS`/`MAX_CANDIDATES`) — at most five candidates, never more.
+Each candidate so identified may then be fetched **exactly once**, under
+the identical technical gates the entry URL itself already requires:
+`robots.txt` honored fail-closed, `src/lib/safeOutboundFetch.js` as the
+only egress (including its SSRF/redirect/protocol/host defenses,
+unchanged), no browser login/session/credential, and the same
+`basic_info`-only data-minimisation standing exclusion. **No candidate
+page is ever itself mined for further links — this is exactly one extra
+hop beyond the entry URL, never a second hop from a discovered page, and
+never a bulk or CSV list of URLs**, both of which remain exactly as
+excluded as the unamended text above states.
+
+**Digital-PDF fetching, precisely bounded**: a same-host candidate (or,
+directly, the entry URL itself) identified above may be a PDF rather
+than an HTML page. Fetching it uses the exact same
+`safeOutboundFetch.js` egress and gates as any other fetch this contract
+already covers — this amendment authorizes fetching the PDF's own bytes
+under those same gates, nothing more. Deriving readable text from an
+already-fetched, structurally valid digital PDF (`src/lib/pdfTextExtraction.js`)
+is a local, offline, deterministic parsing step over bytes this contract
+already permitted fetching — never a network call, never a vendor, and
+never itself a governance question this contract needs to answer twice.
+
+**What remains explicitly, unambiguously out of scope — this amendment
+authorizes neither of them, by association or otherwise**:
+
+- **OCR or any pixel-based text recognition** for a scanned/image-only
+  PDF (one with no extractable digital text layer) — that outcome
+  (`pdf_no_text_layer`) is reported as an honest, reviewable end state,
+  never a trigger to run OCR now. OCR, if ever built, remains
+  `be-21-restaurant-source-extraction-vendor-benchmark.md`'s own,
+  separate, later, explicitly-scoped decision.
+- **Browser rendering of any kind** (a JavaScript-dependent page, a
+  headless-browser fetch, Browserless, Playwright, or any comparable
+  managed or self-hosted service) — not built, not evaluated, and not
+  authorized by this amendment.
+- **Any external AI/Claude call.** Structuring free HTML or PDF text via
+  a large-language-model adapter remains its own separate, explicitly
+  disabled-by-default boundary (`src/lib/claudeStructuringAdapter.js`) —
+  this amendment governs fetching only, never processing extracted
+  content through any external vendor, and no such call exists in this
+  build regardless.
+- **Any bulk or CSV intake of multiple URLs.** The entry point remains
+  exactly one staff-supplied URL per action, unchanged from the
+  unamended text above.
+
+This amendment is scoped exclusively to the *acquisition* step, exactly
+like the exception it extends: everything a discovered page or PDF
+produces still goes through the same, unchanged human-review gates
+before anything is ever recorded as a restaurant concept or menu
+proposal — see "What this exception does not exempt downstream" above,
+unaffected by this amendment.
+
 ## `url_intakes` — audit/traceability record, not a review queue
 
 **One row per confirmed human action on an analyzed URL — never one row
@@ -453,10 +522,25 @@ proposal — see "Hard boundary" above.
 ## Out of scope for this contract
 
 - Any code, migration, RLS policy, or Supabase change of any kind.
-- General same-host source discovery, PDF fetching/processing, OCR, or
-  bulk/CSV intake of multiple URLs — all remain separate, later,
+- **Corrected (2026-09-24), to stay consistent with the dated Amendment
+  above**: this bullet originally listed general same-host source
+  discovery and PDF fetching/processing as out of scope outright,
+  written before that Amendment existed — left unedited at the time, it
+  would silently contradict the Amendment's own, later text. Only the
+  bounded, precisely-scoped forms the Amendment defines are in scope:
+  same-host discovery limited to the fixed keyword-matched candidates
+  found directly on the one already-fetched entry page (never a further
+  hop, never an unbounded crawl), and fetching/parsing a digital PDF's
+  own text under the identical existing gates. **Still, unambiguously,
+  out of scope**: any *unbounded* or *general* same-host/site discovery
+  beyond that one bounded step, OCR or any other later
+  technique for a scanned/image PDF, browser rendering, and bulk/CSV
+  intake of multiple URLs — all of these remain separate, later,
   explicitly-scoped tickets, per `be-18-onboarding-menu-via-url.md`'s own
-  "Non-goals."
+  "Non-goals" and the Amendment's own "What remains explicitly,
+  unambiguously out of scope" list. This correction restates an existing
+  decision for internal consistency only — it does not add a new vendor,
+  privacy, migration, or product decision of any kind.
 - Any change to `menu_snapshot_proposals`/`menu_snapshot_reviews` or
   `0011_be17_menu_snapshot_foundation.sql` — see "Hard boundary" above.
 - Any change to `BE-18`'s current fase-1 functionality.

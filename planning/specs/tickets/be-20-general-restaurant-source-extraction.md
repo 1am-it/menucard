@@ -2,6 +2,24 @@
 
 ## Status
 
+**Update (2026-09-24): local implementation complete on the isolated
+`be-20-fase-1` worktree/branch — not yet pushed, not yet independently
+reviewed end-to-end, and not yet verified in production.** Source
+discovery, HTML/JSON-LD/digital-PDF extraction, the analysis-job
+contract, per-field content-hash/confidence/context-status evidence,
+the optional Claude adapter boundary, the `restaurant-analysis-jobs`
+API routes, the Onboarding Restaurant UI, and the simplified
+`Dekkingsoverzicht`/`Onboarding Restaurant`/`Werkvoorraad` navigation
+described below all exist as real, locally built and locally tested
+code and the local migration `0014` (never applied to any real
+database). This local build has not been pushed to `origin`, has not
+had the independent pre-commit/pre-push review this project's own
+workflow requires before a push, and has had no production or live
+Supabase verification of any kind. The original text below ("Proposed;
+not started... no product code... has been made for this ticket") is
+kept as-written for history; it described this ticket before any of
+the above existed and no longer reflects the current local state.
+
 Proposed; not started. Documentation/schema-contract only — no product
 code, migration, route, API, worker, UI, or Supabase change has been
 made for this ticket. This ticket is the narrative/product-contract
@@ -15,12 +33,12 @@ implementable schema shape (`docs/api/*.md`), matching the same
 BE-20 VOORTGANG
 
 - [x] 1. Ticket en kernbeslissingen vastgelegd
-- [ ] 2a. Documentatiecommit lokaal gemaakt
+- [x] 2a. Documentatiecommit lokaal gemaakt
 - [ ] 2b. Documentatiecommit gepusht
 - [ ] 3. Implementatie-readinessreview groen
-- [ ] 4. Lokale productcode gebouwd en getest
+- [x] 4. Lokale productcode gebouwd en getest
 - [ ] 5. Onafhankelijke pre-commitreview groen
-- [ ] 6. Lokale codecommit gemaakt
+- [x] 6. Lokale codecommit gemaakt
 - [ ] 7. Gecombineerde pre-pushreview groen
 - [ ] 8. Code gepusht
 - [ ] 9. Productiecontrole
@@ -275,9 +293,19 @@ free-text-error result reaching a reviewer.
   checks `src/lib/candidateNormalization.js` already applies, or an
   equivalent described alongside whichever field is being validated),
   and (3) it shows no context conflict — e.g. a chain/head-office
-  address surfacing on a location-specific restaurant page. Without
-  that validation, the field stays at most `middel` and is shown as a
-  reviewable field, never as an automatically-trustworthy result.
+  address surfacing on a location-specific restaurant page. **Correction
+  (2026-09-24, following an independent review of the fase-1
+  implementation): condition (3) means the field's context has been
+  actively checked against another independent sighting and confirmed
+  consistent — not merely that no conflict happened to be found.** An
+  implementation that reads "shows no context conflict" as "the absence
+  of a detected problem is enough" repeats exactly the same mistake this
+  bullet's own opening sentence already forbids for conditions (1)/(2):
+  a field with nothing to compare against has not had its context
+  validated at all, and must be treated the same as if condition (3) had
+  not been checked — never as if it had passed. Without that validation,
+  the field stays at most `middel` and is shown as a reviewable field,
+  never as an automatically-trustworthy result.
   `pdf_text` without AI structuring is, on the same basis, at most
   `middel`. `ai_structured` output is likewise capped at `middel`
   regardless of what confidence the model itself reports, unless the

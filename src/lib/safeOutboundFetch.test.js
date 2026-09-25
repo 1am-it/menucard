@@ -516,6 +516,46 @@ test('fetchWebsiteSafely: a direct 200 response is returned with its body and co
   }
 });
 
+test('fetchWebsiteSafely: encoding "buffer" preserves exact response bytes, never a lossy UTF-8 round-trip — BE-20\'s own PDF-fetch requirement', async () => {
+  // Bytes that are NOT valid UTF-8 on their own (0xff 0xd8 — a JPEG-like
+  // marker, chosen specifically because naively decoding it as UTF-8 and
+  // re-encoding would corrupt it) — proves this path never goes through
+  // toString('utf8') at all, not just that it happens to survive it.
+  const rawBytes = Buffer.from([0x25, 0x50, 0x44, 0x46, 0xff, 0xd8, 0x00, 0x01, 0x02, 0x03]);
+  const server = await startTestServer((req, res) => {
+    res.writeHead(200, { 'Content-Type': 'application/pdf' });
+    res.end(rawBytes);
+  });
+  try {
+    const { port } = server.address();
+    const result = await fetchWebsiteSafely(`http://${TEST_HOSTNAME}:${port}/`, {
+      lookup: passthroughLookup,
+      encoding: 'buffer',
+    });
+    assert.equal(result.body, null);
+    assert.ok(Buffer.isBuffer(result.bytes));
+    assert.ok(result.bytes.equals(rawBytes));
+    assert.equal(result.contentType, 'application/pdf');
+  } finally {
+    await stopTestServer(server);
+  }
+});
+
+test('fetchWebsiteSafely: default encoding ("utf8") still returns bytes: null — the new field is inert for every existing caller', async () => {
+  const server = await startTestServer((req, res) => {
+    res.writeHead(200, { 'Content-Type': 'text/html' });
+    res.end('<html>hi</html>');
+  });
+  try {
+    const { port } = server.address();
+    const result = await fetchWebsiteSafely(`http://${TEST_HOSTNAME}:${port}/`, { lookup: passthroughLookup });
+    assert.equal(result.body, '<html>hi</html>');
+    assert.equal(result.bytes, null);
+  } finally {
+    await stopTestServer(server);
+  }
+});
+
 test('fetchWebsiteSafely: follows one redirect and re-validates the target the same way', async () => {
   const server = await startTestServer((req, res) => {
     if (req.url === '/') {
