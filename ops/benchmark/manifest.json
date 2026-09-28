@@ -1,0 +1,182 @@
+[
+  {
+    "id": "real-01-debotanistbreda",
+    "sourceType": "html_only",
+    "provenance": "real_benchmark_evidence_pending",
+    "mandatorySubset": true,
+    "referenceUrl": "https://debotanistbreda.nl/",
+    "fixtureId": null,
+    "groundTruth": null,
+    "expectedErrorCode": null,
+    "fetched": false,
+    "notes": "One of be-20/be-21's six mandatory real sources. Metadata only — never fetched, never scored by this local foundation. Awaits the separate, later, explicitly-authorized real benchmark run be-21 itself describes."
+  },
+  {
+    "id": "real-02-bobbisbar",
+    "sourceType": "html_only",
+    "provenance": "real_benchmark_evidence_pending",
+    "mandatorySubset": true,
+    "referenceUrl": "https://bobbisbar.nl/",
+    "fixtureId": null,
+    "groundTruth": null,
+    "expectedErrorCode": null,
+    "fetched": false,
+    "notes": "One of be-20/be-21's six mandatory real sources. Metadata only — never fetched, never scored by this local foundation."
+  },
+  {
+    "id": "real-03-gauchosgrill",
+    "sourceType": "html_only",
+    "provenance": "real_benchmark_evidence_pending",
+    "mandatorySubset": true,
+    "referenceUrl": "https://www.gauchosgrill.nl/breda",
+    "fixtureId": null,
+    "groundTruth": null,
+    "expectedErrorCode": null,
+    "fetched": false,
+    "notes": "One of be-20/be-21's six mandatory real sources — a chain/location page in the real world. Metadata only — never fetched, never scored by this local foundation."
+  },
+  {
+    "id": "real-04-mrmoos",
+    "sourceType": "javascript_dependent",
+    "provenance": "real_benchmark_evidence_pending",
+    "mandatorySubset": true,
+    "referenceUrl": "https://mrmoos.nl/",
+    "fixtureId": null,
+    "groundTruth": null,
+    "expectedErrorCode": null,
+    "fetched": false,
+    "notes": "One of be-20/be-21's six mandatory real sources — already named in be-21's own ticket text as the practice set's JavaScript-dependent example. Metadata only — never fetched, never scored by this local foundation."
+  },
+  {
+    "id": "real-05-demarktbreda",
+    "sourceType": "html_only",
+    "provenance": "real_benchmark_evidence_pending",
+    "mandatorySubset": true,
+    "referenceUrl": "https://demarktbreda.nl/",
+    "fixtureId": null,
+    "groundTruth": null,
+    "expectedErrorCode": null,
+    "fetched": false,
+    "notes": "One of be-20/be-21's six mandatory real sources. Metadata only — never fetched, never scored by this local foundation."
+  },
+  {
+    "id": "real-06-bredacolonie",
+    "sourceType": "html_only",
+    "provenance": "real_benchmark_evidence_pending",
+    "mandatorySubset": true,
+    "referenceUrl": "https://breda.colonie.nl/",
+    "fixtureId": null,
+    "groundTruth": null,
+    "expectedErrorCode": null,
+    "fetched": false,
+    "notes": "One of be-20/be-21's six mandatory real sources. Metadata only — never fetched, never scored by this local foundation."
+  },
+  {
+    "id": "fixture-html-only-consistent",
+    "sourceType": "html_only",
+    "provenance": "synthetic_fixture",
+    "mandatorySubset": false,
+    "referenceUrl": null,
+    "fixtureId": "synthetic-html-full-consistent",
+    "groundTruth": {
+      "name": "Fixture Bistro Noord",
+      "category": "Restaurant",
+      "address": "Voorbeeldstraat 1, 4800 AA Breda",
+      "phone": "076 1234567",
+      "website": "https://fixture-one.invalid/",
+      "menuContextNames": ["Diner"],
+      "unknownMenuContextCount": 0
+    },
+    "expectedErrorCode": null,
+    "notes": "Fictional fixture on the .invalid TLD (RFC 2606) — never a real restaurant. A same-host candidate restates the same address, producing a genuine contextStatus 'consistent' for address; name/phone/website/category are sighted once only (contextStatus 'unverified', capped at confidence 'middel' even though otherwise plausible)."
+  },
+  {
+    "id": "fixture-chain-location-conflict",
+    "sourceType": "chain_location",
+    "provenance": "synthetic_fixture",
+    "mandatorySubset": false,
+    "referenceUrl": null,
+    "fixtureId": "synthetic-html-chain-location-conflict",
+    "groundTruth": {
+      "name": "Fixture Grill Zuid",
+      "category": "Restaurant",
+      "address": "Locatiestraat 5, 4811 BB Breda",
+      "phone": "076 7654321",
+      "website": "https://fixture-two.invalid/",
+      "menuContextNames": [],
+      "unknownMenuContextCount": 0
+    },
+    "expectedErrorCode": null,
+    "notes": "Fictional fixture on the .invalid TLD — never a real restaurant or chain. Simulates be-20's own motivating example: a same-host page restates a different postcode (a head-office address), producing a genuine contextStatus 'conflict' for address (confidence capped at 'laag'). The extracted address value itself must still be the location page's own (correct) value, never the conflicting one."
+  },
+  {
+    "id": "fixture-multilingual-menu-keyword",
+    "sourceType": "multilingual",
+    "provenance": "synthetic_fixture",
+    "mandatorySubset": false,
+    "referenceUrl": null,
+    "fixtureId": "synthetic-html-multilingual-menu-keyword",
+    "groundTruth": {
+      "menuContextNames": ["Speisekarte"],
+      "unknownMenuContextCount": 0
+    },
+    "expectedErrorCode": null,
+    "notes": "Fictional fixture on the .invalid TLD. No restaurant JSON-LD anywhere (deliberately empty restaurant-field ground truth). Proves sameHostDiscovery.js's own closed MENU_KEYWORDS list finds a German-language menu link ('Speisekarte') and follows it exactly once."
+  },
+  {
+    "id": "fixture-javascript-dependent-empty",
+    "sourceType": "javascript_dependent",
+    "provenance": "synthetic_fixture",
+    "mandatorySubset": false,
+    "referenceUrl": null,
+    "fixtureId": "synthetic-html-javascript-dependent-empty",
+    "groundTruth": {
+      "menuContextNames": [],
+      "unknownMenuContextCount": 0
+    },
+    "expectedErrorCode": null,
+    "notes": "Fictional fixture on the .invalid TLD, simulating a page whose real content a JavaScript bundle would inject client-side. Deliberately empty ground truth — proves fase 1 reports nothing found rather than guessing, matching be-20's own documented non-goal for this source type."
+  },
+  {
+    "id": "fixture-digital-pdf-valid",
+    "sourceType": "digital_pdf",
+    "provenance": "local_be20_fixture",
+    "mandatorySubset": false,
+    "referenceUrl": null,
+    "fixtureId": "local-be20-digital-pdf-valid",
+    "groundTruth": {
+      "menuContextNames": [],
+      "unknownMenuContextCount": 1
+    },
+    "expectedErrorCode": null,
+    "notes": "Reused verbatim from src/lib/pdfTextExtraction.test.js's own hand-built, empirically-verified single-page digital PDF. The entry URL itself is the PDF; produces exactly one unknown menu context (never a confidently-named menu without AI structuring), no restaurant fields."
+  },
+  {
+    "id": "fixture-digital-pdf-encrypted",
+    "sourceType": "digital_pdf",
+    "provenance": "local_be20_fixture",
+    "mandatorySubset": false,
+    "referenceUrl": null,
+    "fixtureId": "local-be20-digital-pdf-encrypted",
+    "groundTruth": {
+      "menuContextNames": [],
+      "unknownMenuContextCount": 0
+    },
+    "expectedErrorCode": "pdf_encrypted",
+    "notes": "Reused verbatim from src/lib/pdfTextExtraction.test.js's own genuinely password-protected PDF (real RC4/Standard Security Handler encryption). Proves the closed pdf_encrypted error path, never a silent empty success."
+  },
+  {
+    "id": "fixture-scanned-pdf-no-text-layer",
+    "sourceType": "scanned_pdf",
+    "provenance": "local_be20_fixture",
+    "mandatorySubset": false,
+    "referenceUrl": null,
+    "fixtureId": "local-be20-scanned-pdf-no-text-layer",
+    "groundTruth": {
+      "menuContextNames": [],
+      "unknownMenuContextCount": 0
+    },
+    "expectedErrorCode": "pdf_no_text_layer",
+    "notes": "Reused verbatim from src/lib/pdfTextExtraction.test.js's own structurally-valid, zero-length-content-stream PDF — this project's own directly-verified stand-in for a scanned/image-only PDF. Proves the honest, non-OCR pdf_no_text_layer outcome be-20 itself requires: an explicit end state, never a trigger to run OCR now."
+  }
+]
