@@ -102,11 +102,17 @@ const FIXTURES = {
       address: { streetAddress: 'Locatiestraat 5', postalCode: '4811 BB', addressLocality: 'Breda' },
     }
     const homepageHtml = `<html><head>${jsonLdScript(restaurant)}</head><body>
-      <a href="/contact">Contact / hoofdkantoor</a>
+      <a href="/menukaart">Bekijk de kaart</a>
     </body></html>`
-    const candidateUrl = 'https://fixture-two.invalid/contact'
+    const candidateUrl = 'https://fixture-two.invalid/menukaart'
     // A different postcode on the same host — the honest simulation of a
-    // chain/head-office address surfacing on a location-specific page.
+    // chain/head-office address surfacing (in this page's own footer) on
+    // what is otherwise a location-specific page. The link text/path
+    // must contain one of sameHostDiscovery.js's own closed
+    // MENU_KEYWORDS ("kaart") for this candidate to be discovered and
+    // fetched at all — a real chain page in the wild would equally need
+    // to be reached through that same bounded, keyword-matched discovery
+    // step, never a special case for this fixture.
     const candidateHtml = `<html><body><address>Hoofdkantoor, Kantoorweg 99, 3000 XX Rotterdam</address></body></html>`
     return {
       entryIsPdf: false,
