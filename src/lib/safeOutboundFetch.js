@@ -328,16 +328,30 @@ function parseContentType(headerValue) {
 
 /**
  * Fetches `targetUrl` with every defense described in this file's own
- * header comment. Resolves `{ body, finalUrl, contentType, redirected }`
- * on success (a real `200` response, within all limits). Rejects with a
- * `SafeFetchError` (see `.reason`) on any violation — never partially
- * resolves with an untrusted/incomplete body.
+ * header comment. Resolves `{ body, bytes, finalUrl, contentType,
+ * redirected }` on success (a real `200` response, within all limits) —
+ * none of the five defense-in-depth layers above concern the response
+ * body's own encoding, so this option sits orthogonal to all of them.
+ * Rejects with a `SafeFetchError` (see `.reason`) on any violation —
+ * never partially resolves with an untrusted/incomplete body.
+ *
+ * `options.encoding` (default `'utf8'`, matching every existing caller's
+ * unchanged behavior): `'utf8'` decodes the response as text into `body`
+ * (`bytes` is `null`); `'buffer'` instead keeps the exact, undecoded
+ * response bytes in `bytes` (`body` is `null`) — added for BE-20's own
+ * digital-PDF fetch, which must never round-trip PDF bytes through a
+ * lossy UTF-8 string decode/re-encode. This project's own
+ * "Vaststaande productkeuzes" §8 requires this file to remain the only
+ * network egress for every fetch, including PDFs — this option is that
+ * requirement's own byte-fidelity escape hatch, not a second, parallel
+ * fetcher.
  */
 function fetchWebsiteSafely(targetUrl, options = {}) {
   const {
     maxRedirects = DEFAULT_MAX_REDIRECTS,
     maxBytes = DEFAULT_MAX_BYTES,
     timeoutMs = DEFAULT_TIMEOUT_MS,
+    encoding = 'utf8',
     // Defaults to the real guard (real DNS + isDisallowedIp) — a caller
     // must go out of its way to override this, and no route in this
     // project ever does. Tests use this seam to inject either (a) a
@@ -423,8 +437,10 @@ function fetchWebsiteSafely(targetUrl, options = {}) {
           });
           res.on('end', () => {
             if (settled) return;
+            const buffer = Buffer.concat(chunks);
             succeed({
-              body: Buffer.concat(chunks).toString('utf8'),
+              body: encoding === 'buffer' ? null : buffer.toString('utf8'),
+              bytes: encoding === 'buffer' ? buffer : null,
               finalUrl: url.href,
               contentType,
               redirected: isFollowingRedirect,

@@ -160,7 +160,11 @@ of these.
     record" promotion step is explicitly out of scope, not designed or
     promised here.
 22. [be-20-general-restaurant-source-extraction.md](./be-20-general-restaurant-source-extraction.md) —
-    not started, documentation/product-contract only; defines fase 1 of a
+    **local implementation complete on the isolated `be-20-fase-1`
+    branch/worktree (2026-09-24) — not pushed, not independently
+    reviewed end-to-end, not production-verified; see the ticket's own
+    "Status" section for the full, dated note.** Originally:
+    documentation/product-contract only; defines fase 1 of a
     general-purpose "one homepage URL → analysis job → reviewable
     restaurant concept and menu proposals" pipeline for thousands of
     structurally different restaurant websites, extending BE-19's
