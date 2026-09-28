@@ -31,8 +31,12 @@ const ALLOWED_ACCURACY_CLASSES = ['match', 'mismatch', 'missing', 'correctly_abs
 
 /** The only per-case status values a scored case can carry. A pending
  * real source is never silently scored as if it were a fixture — it is
- * always, explicitly `skipped_pending_real_fetch`. */
-const ALLOWED_CASE_STATUSES = ['scored', 'skipped_pending_real_fetch']
+ * always, explicitly `skipped_pending_real_fetch`. `not_evaluated` is
+ * `runner.js`'s own status for a deliberately unavailable adapter
+ * (`ai_structured`/`ocr` today) — never blended into ordinary
+ * accuracy/miss statistics, since "not evaluated" and "evaluated and
+ * wrong" are different findings this model must never conflate. */
+const ALLOWED_CASE_STATUSES = ['scored', 'skipped_pending_real_fetch', 'not_evaluated']
 
 /** Normalizes one field's value for equality comparison only — never for
  * storage or display. Reuses BE-20's own normalizers for phone/website
@@ -188,22 +192,35 @@ function scoreCase(manifestEntry, adapterResult, { timingMs = null } = {}) {
 }
 
 /**
- * Aggregates scored cases by `sourceType` — NEVER one blended figure
- * across source types, per be-21's own explicit "elke bron-type
- * afzonderlijk, nooit één blended average" requirement. Cases with
- * `status: 'skipped_pending_real_fetch'` are counted separately and
- * excluded from every accuracy/coverage computation — they were never
- * scored.
+ * Aggregates scored cases by `sourceType` **and** `adapterKind` — NEVER
+ * one blended figure across source types (be-21's own explicit
+ * requirement), and never one blended figure across adapters either,
+ * so a future `ai_structured`/`ocr` result can sit next to
+ * `deterministic` for direct comparison rather than diluting it. A
+ * score's `adapterKind` is attached by `runner.js`, not by `scoreCase`
+ * itself (`scoring.js` stays agnostic to which adapter produced a
+ * result — see `scoreCase`'s own doc comment).
+ *
+ * Cases with `status: 'skipped_pending_real_fetch'` (a real source no
+ * fetch has ever been performed for) or `status: 'not_evaluated'` (a
+ * deliberately unavailable adapter) are each counted separately and
+ * excluded from every accuracy/coverage computation — neither was ever
+ * genuinely scored, and the two must never be conflated with each other
+ * or with an ordinary miss.
  */
 function aggregateScores(caseScores) {
-  const bySourceType = {}
+  const buckets = {}
 
   for (const score of caseScores) {
-    if (!bySourceType[score.sourceType]) {
-      bySourceType[score.sourceType] = {
+    const adapterKind = score.adapterKind || 'unknown'
+    const key = `${score.sourceType}::${adapterKind}`
+    if (!buckets[key]) {
+      buckets[key] = {
         sourceType: score.sourceType,
+        adapterKind,
         scoredCaseCount: 0,
         pendingRealFetchCaseCount: 0,
+        notEvaluatedCaseCount: 0,
         fieldsEvaluated: 0,
         fieldsMatched: 0,
         falsePositiveFieldCount: 0,
@@ -214,10 +231,14 @@ function aggregateScores(caseScores) {
         timingMsSamples: [],
       }
     }
-    const bucket = bySourceType[score.sourceType]
+    const bucket = buckets[key]
 
     if (score.status === 'skipped_pending_real_fetch') {
       bucket.pendingRealFetchCaseCount += 1
+      continue
+    }
+    if (score.status === 'not_evaluated') {
+      bucket.notEvaluatedCaseCount += 1
       continue
     }
 
@@ -243,10 +264,12 @@ function aggregateScores(caseScores) {
     }
   }
 
-  return Object.values(bySourceType).map((bucket) => ({
+  return Object.values(buckets).map((bucket) => ({
     sourceType: bucket.sourceType,
+    adapterKind: bucket.adapterKind,
     scoredCaseCount: bucket.scoredCaseCount,
     pendingRealFetchCaseCount: bucket.pendingRealFetchCaseCount,
+    notEvaluatedCaseCount: bucket.notEvaluatedCaseCount,
     fieldAccuracy: bucket.fieldsEvaluated > 0 ? bucket.fieldsMatched / bucket.fieldsEvaluated : null,
     fieldsEvaluated: bucket.fieldsEvaluated,
     falsePositiveFieldCount: bucket.falsePositiveFieldCount,
