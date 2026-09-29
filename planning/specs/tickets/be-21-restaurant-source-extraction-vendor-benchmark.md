@@ -2,9 +2,36 @@
 
 ## Status
 
+**Update (2026-09-28): a local, leverancier-neutrale benchmark
+FOUNDATION exists on the isolated `be-21-benchmark-foundation`
+worktree/branch — not the real benchmark this ticket describes, not
+yet pushed, not yet independently reviewed.** `ops/benchmark/` now
+holds a case/fixture manifest (the six mandatory real sources recorded
+as metadata only, `fetched: false`, never fetched or scored; local
+BE-20 fixtures; fictional `.invalid`-TLD synthetic fixtures covering
+all six stratification categories), a provider-neutral adapter
+contract (`deterministic` wraps BE-20's own unmodified pipeline;
+`ai_structured`/`ocr` are deliberately unavailable stubs — no vendor,
+no secret, no network call), a score model that always re-derives
+confidence via BE-20's own `deriveFieldConfidence` (never trusts a
+value an adapter claims), a fully offline and tested-reproducible
+runner, and machine-readable/human-readable reporting that carries an
+explicit "this is not the real benchmark" disclaimer in the report
+body itself. This closes none of this ticket's own acceptance
+criteria — no real source has been fetched, no vendor evaluated, no
+DPA/cost-ceiling deliverable produced — it only gives the eventual real
+benchmark run a manifest, contract, scorer, and report shape to plug
+into rather than starting from nothing. See `ops/benchmark/README.md`
+for the full, honest account of what exists and what does not.
+
 Proposed; not started. Documentation/planning only — no benchmark run,
 vendor account, API key, secret, billing profile, migration, route,
-workflow, or Supabase change has been made for this ticket.
+workflow, or Supabase change has been made for this ticket. The
+sentence above described this ticket before the local foundation
+above existed and no longer reflects the current local state (though
+every one of its claims — no vendor account, no API key, no secret, no
+migration/route/workflow/Supabase change — remains equally true of the
+foundation itself).
 
 ## Voortgang
 
@@ -14,9 +41,12 @@ BE-21 VOORTGANG
 - [ ] 2a. Documentatiecommit lokaal gemaakt
 - [ ] 2b. Documentatiecommit gepusht
 - [ ] 3. Implementatie-readinessreview groen
-- [ ] 4. Lokale productcode gebouwd en getest
+- [x] 4. Lokale productcode gebouwd en getest — beperkt tot de
+      leverancier-neutrale benchmarkfoundation (`ops/benchmark/`); de
+      echte 50-100-bronnen-benchmark, vendorkeuze, DPA en kostenplafond
+      zelf blijven volledig open, zie "Status" hierboven.
 - [ ] 5. Onafhankelijke pre-commitreview groen
-- [ ] 6. Lokale codecommit gemaakt
+- [x] 6. Lokale codecommit gemaakt
 - [ ] 7. Gecombineerde pre-pushreview groen
 - [ ] 8. Code gepusht
 - [ ] 9. Productiecontrole
