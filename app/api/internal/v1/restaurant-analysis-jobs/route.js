@@ -44,9 +44,8 @@ import { classifyRobotsGate } from '@/src/lib/candidateSuggestions'
 import { matchRestaurantByHostname, buildRestaurantChoiceList } from '@/src/lib/restaurantHostMatch'
 import { canonicalizeSourceUrl, buildCandidateSummary, computeReceiptExpiry } from '@/src/lib/urlIntakes'
 import { computeAnalysisResultHash } from '@/src/lib/urlIntakeReceiptHash'
-import { runRestaurantSourceAnalysis, countWords } from '@/src/lib/restaurantSourceAnalysis'
-import { extractDigitalPdfText, PdfExtractionError } from '@/src/lib/pdfTextExtraction'
-import { computeFieldEvidenceHash } from '@/src/lib/fieldEvidenceHash'
+import { runRestaurantSourceAnalysis, buildUnknownMenuContext } from '@/src/lib/restaurantSourceAnalysis'
+import { PdfExtractionError } from '@/src/lib/pdfTextExtraction'
 import {
   isValidJobStatus,
   isValidJobErrorReason,
@@ -370,20 +369,11 @@ export async function POST(request) {
       // this produces exactly one unknown menu context and no restaurant
       // fields.
       try {
-        const pdfResult = await extractDigitalPdfText(fetchResult.bytes)
         analysis = {
           restaurantCandidateFields: {},
           fieldEvidence: {},
           menuContexts: [],
-          unknownMenuContexts: [
-            {
-              sourceUrl: fetchResult.finalUrl,
-              extractionMethod: 'pdf_text',
-              pageCount: pdfResult.pageCount,
-              wordCount: countWords(pdfResult.text),
-              contentHash: computeFieldEvidenceHash(pdfResult.text),
-            },
-          ],
+          unknownMenuContexts: [await buildUnknownMenuContext(fetchResult.bytes, fetchResult.finalUrl)],
           description: '',
           notes: ['Deze bron is een PDF zonder bijbehorende HTML-pagina — restaurantgegevens konden hier niet uit worden afgeleid.'],
         }

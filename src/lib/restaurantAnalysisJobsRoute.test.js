@@ -157,10 +157,18 @@ test('structural safety net: the entry-URL-is-PDF path never re-throws a non-Pdf
   assert.doesNotMatch(source, /if \(!\(err instanceof PdfExtractionError\)\) throw err/)
 })
 
-test('structural safety net: no raw PDF text excerpt is ever assembled into the entry-URL-is-PDF result — only a derived word count', () => {
+test('structural safety net: no raw PDF text excerpt is ever assembled into the entry-URL-is-PDF result — delegates to the shared, already-tested buildUnknownMenuContext helper, never a second inline copy', () => {
   const source = readPostRouteSource()
   assert.doesNotMatch(source, /textPreview/)
-  assert.match(source, /wordCount: countWords\(pdfResult\.text\)/)
+  assert.doesNotMatch(source, /pdfResult\.text/) // no direct raw-text access left in this route at all
+  assert.match(source, /await buildUnknownMenuContext\(fetchResult\.bytes, fetchResult\.finalUrl\)/)
+})
+
+test('structural safety net: buildUnknownMenuContext itself (src/lib/restaurantSourceAnalysis.js) never assembles a raw PDF text excerpt — only a derived word count and content-hash', () => {
+  const source = fs.readFileSync(path.join(REPO_ROOT, 'src/lib/restaurantSourceAnalysis.js'), 'utf8')
+  assert.doesNotMatch(source, /textPreview/)
+  assert.match(source, /wordCount: countWords\(result\.text\)/)
+  assert.match(source, /contentHash: computeFieldEvidenceHash\(result\.text\)/)
 })
 
 test('structural safety net: a PDF closed error is rolled up via rollUpPdfAdapterErrorReason, never passed through as a raw adapter reason', () => {
