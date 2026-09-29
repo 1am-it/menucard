@@ -3,7 +3,7 @@
 const test = require('node:test')
 const assert = require('node:assert/strict')
 
-const { extractDigitalPdfText, PdfExtractionError, ALLOWED_PDF_ERROR_REASONS } = require('./pdfTextExtraction')
+const { extractDigitalPdfText, PdfExtractionError, ALLOWED_PDF_ERROR_REASONS, hasPdfSignature } = require('./pdfTextExtraction')
 
 // Self-contained, hand-built minimal PDF fixtures (no external files, no
 // PDF-authoring library — none exists in this project and none should be
@@ -90,6 +90,30 @@ test('extractDigitalPdfText: pdf_corrupt for bytes that are not a PDF at all', a
     (err) => {
       assert.ok(err instanceof PdfExtractionError)
       assert.equal(err.reason, 'pdf_corrupt')
+      return true
+    }
+  )
+})
+
+test('hasPdfSignature: recognizes the real %PDF- magic number and rejects unrelated file signatures, never trusting a claimed content-type alone', () => {
+  assert.equal(hasPdfSignature(pdfBytes(VALID_TEXT_PDF_BASE64)), true)
+  assert.equal(hasPdfSignature(Buffer.from('this is not a pdf at all', 'utf8')), false)
+  // A PNG magic number — the exact "server lied about content-type, or
+  // the download was truncated/substituted" scenario this signature
+  // check exists to catch before pdfjs ever sees the bytes.
+  assert.equal(hasPdfSignature(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])), false)
+  assert.equal(hasPdfSignature(Buffer.alloc(0)), false)
+  assert.equal(hasPdfSignature(Buffer.from('%PDF', 'utf8')), false) // too short — missing the trailing "-"
+})
+
+test('extractDigitalPdfText: pdf_corrupt for bytes with a real image signature (PNG), never handed to pdfjs at all', async () => {
+  const pngBytes = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 0])
+  await assert.rejects(
+    () => extractDigitalPdfText(pngBytes),
+    (err) => {
+      assert.ok(err instanceof PdfExtractionError)
+      assert.equal(err.reason, 'pdf_corrupt')
+      assert.match(err.message, /signature/)
       return true
     }
   )

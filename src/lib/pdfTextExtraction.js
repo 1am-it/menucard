@@ -78,6 +78,40 @@ class PdfExtractionError extends Error {
   }
 }
 
+/** The fixed, five-byte PDF magic number (`%PDF-`) every valid PDF file
+ * starts with, per the PDF specification's own "File Structure" chapter
+ * — checked BEFORE this module ever hands bytes to `pdfjs-dist`, as a
+ * cheap, explicit defense-in-depth signature check. `fetchResult.contentType`
+ * (checked one layer up, by the caller) is a claim the remote server
+ * made about itself — never trusted alone; this module verifies the
+ * bytes it was actually given are structurally a PDF, independent of
+ * whatever content-type header accompanied them. */
+function hasPdfSignature(bytes) {
+  if (bytes.length < 5) return false
+  return bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46 && bytes[4] === 0x2d // "%PDF-"
+}
+
+/** Shared validation every extraction entry point in this file applies
+ * first, identically — never duplicated with a subtly different check
+ * at a second call site. Throws `pdf_corrupt` for anything that is not
+ * even byte-shaped like a PDF, and `pdf_too_large` for the byte-budget
+ * violation — both checked before any parsing library, real or
+ * fallback, ever sees the bytes. */
+function validatePdfBytesOrThrow(pdfBytes, maxBytes) {
+  if (!Buffer.isBuffer(pdfBytes) && !(pdfBytes instanceof Uint8Array)) {
+    throw new PdfExtractionError('pdf_corrupt', 'Input is not a byte buffer')
+  }
+  if (pdfBytes.length === 0) {
+    throw new PdfExtractionError('pdf_corrupt', 'Empty input')
+  }
+  if (pdfBytes.length > maxBytes) {
+    throw new PdfExtractionError('pdf_too_large', `PDF exceeds maxBytes=${maxBytes}`)
+  }
+  if (!hasPdfSignature(pdfBytes)) {
+    throw new PdfExtractionError('pdf_corrupt', 'Input does not start with the PDF signature (%PDF-)')
+  }
+}
+
 /**
  * Extracts machine-readable text from digital PDF bytes. Resolves
  * `{ text, pageCount }` — `text` is the newline-joined text of every
@@ -97,17 +131,10 @@ async function extractDigitalPdfText(pdfBytes, options = {}) {
   const maxPages = typeof options.maxPages === 'number' ? options.maxPages : DEFAULT_MAX_PAGES
   const timeoutMs = typeof options.timeoutMs === 'number' ? options.timeoutMs : DEFAULT_TIMEOUT_MS
 
-  if (!Buffer.isBuffer(pdfBytes) && !(pdfBytes instanceof Uint8Array)) {
-    throw new PdfExtractionError('pdf_corrupt', 'Input is not a byte buffer')
-  }
-  if (pdfBytes.length === 0) {
-    throw new PdfExtractionError('pdf_corrupt', 'Empty input')
-  }
   // Checked before ever touching the parsing library — the cheapest,
-  // earliest possible fail-closed point for the byte-size budget.
-  if (pdfBytes.length > maxBytes) {
-    throw new PdfExtractionError('pdf_too_large', `PDF exceeds maxBytes=${maxBytes}`)
-  }
+  // earliest possible fail-closed point for byte-shape, size budget, and
+  // the PDF signature itself.
+  validatePdfBytesOrThrow(pdfBytes, maxBytes)
 
   let timeoutHandle
   const timedOut = new Promise((_, reject) => {
@@ -211,5 +238,6 @@ module.exports = {
   DEFAULT_MAX_BYTES,
   DEFAULT_MAX_PAGES,
   DEFAULT_TIMEOUT_MS,
+  hasPdfSignature,
   extractDigitalPdfText,
 }
