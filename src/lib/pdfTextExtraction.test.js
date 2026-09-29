@@ -2,6 +2,8 @@
 
 const test = require('node:test')
 const assert = require('node:assert/strict')
+const fs = require('node:fs')
+const path = require('node:path')
 
 const zlib = require('node:zlib')
 const {
@@ -14,6 +16,14 @@ const {
   hasPdfSignature,
   FALLBACK_MAX_INFLATED_BYTES,
 } = require('./pdfTextExtraction')
+
+const packageManifest = JSON.parse(
+  fs.readFileSync(path.join(__dirname, '..', '..', 'package.json'), 'utf8')
+)
+
+test('PDF extraction pins the Vercel runtime to Node 22, which pdfjs-dist requires', () => {
+  assert.equal(packageManifest.engines && packageManifest.engines.node, '22.x')
+})
 
 /**
  * Builds a minimal, valid, single-page digital PDF from a raw content
