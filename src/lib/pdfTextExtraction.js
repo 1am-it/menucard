@@ -46,6 +46,8 @@
 
 'use strict'
 
+const zlib = require('node:zlib')
+
 /** A reasoned, generous-for-a-real-menu-PDF default — a technical,
  * never business-facing bound (per this ticket's own "Vaststaande
  * productkeuzes" §4: no product-level PDF-count limit, but real
@@ -354,6 +356,160 @@ async function extractDigitalPdfLines(pdfBytes, options = {}) {
   }
 }
 
+/** Decodes a PDF string-literal body's own escape sequences
+ * (`\n`/`\r`/`\t`/`\(`/`\)`/`\\`/a one-to-three-digit octal `\ddd`) per
+ * the PDF specification's own "Literal Strings" syntax — the same
+ * escaping every real PDF writer already produces, never a guessed or
+ * approximate decoding. An unrecognized escape (should not occur in a
+ * spec-conforming file) is passed through as its own literal character
+ * rather than dropped, so a decoding gap is visible, never silently
+ * lossy. */
+function decodePdfStringLiteral(raw) {
+  let out = ''
+  for (let i = 0; i < raw.length; i += 1) {
+    const c = raw[i]
+    if (c !== '\\') {
+      out += c
+      continue
+    }
+    const next = raw[i + 1]
+    if (next === 'n') {
+      out += '\n'
+      i += 1
+    } else if (next === 'r') {
+      out += '\r'
+      i += 1
+    } else if (next === 't') {
+      out += '\t'
+      i += 1
+    } else if (next === '(' || next === ')' || next === '\\') {
+      out += next
+      i += 1
+    } else if (next >= '0' && next <= '7') {
+      let octal = next
+      let j = i + 2
+      for (let digits = 0; digits < 2 && raw[j] >= '0' && raw[j] <= '7'; digits += 1, j += 1) octal += raw[j]
+      out += String.fromCharCode(parseInt(octal, 8))
+      i = j - 1
+    } else {
+      out += next || ''
+      i += 1
+    }
+  }
+  return out
+}
+
+/** Every `(literal) Tj` and `[(literal) ... ] TJ` text-showing operator
+ * in one already-decompressed PDF content-stream string, in the order
+ * they appear — the same two operators `pdfjs-dist` itself ultimately
+ * reads text from, applied here as a direct, best-effort byte-level
+ * scan for exactly the case this fallback exists for: the surrounding
+ * PDF *structure* (page tree, xref) is broken, but this one content
+ * stream's own bytes are intact. Never invents text that is not a real,
+ * decoded string literal already present in the stream. */
+function extractTextShowingOperators(streamText) {
+  const parts = []
+  for (const m of streamText.matchAll(/\(((?:[^()\\]|\\.)*)\)\s*Tj/g)) {
+    parts.push(decodePdfStringLiteral(m[1]))
+  }
+  for (const m of streamText.matchAll(/\[((?:[^[\]\\]|\\.)*)\]\s*TJ/g)) {
+    for (const sm of m[1].matchAll(/\(((?:[^()\\]|\\.)*)\)/g)) {
+      parts.push(decodePdfStringLiteral(sm[1]))
+    }
+  }
+  return parts.join(' ')
+}
+
+/**
+ * The maintainable fallback strategy this fix's own ticket requires:
+ * when the primary, structure-aware parser (`pdfjs-dist`, via
+ * `extractDigitalPdfText`) cannot even open or navigate a PDF's object
+ * graph, this function bypasses that graph entirely and scans the raw
+ * bytes directly for `stream`/`endstream` blocks, decompresses each
+ * (FlateDecode via `node:zlib`, the by far most common PDF stream
+ * filter; a stream that fails to inflate is tried as already-literal
+ * text instead, never discarded outright), and recovers whatever real
+ * `Tj`/`TJ` text-showing content those streams still contain.
+ *
+ * Deliberately has NO knowledge of pages, page order, or page count —
+ * this is a genuine, honest limitation of a structure-bypassing
+ * fallback, not an oversight; see `extractDigitalPdfTextWithFallback`'s
+ * own `pageCount: null` for how a caller is told this explicitly, never
+ * left to assume a real page count exists.
+ *
+ * Returns a plain string (`''` when nothing was recovered) — never
+ * throws; a caller decides what an empty result means for its own
+ * error handling. Never a pixel-based text-recognition operation of any
+ * kind: this only ever recovers text that was already digitally
+ * embedded in the file, exactly like the primary parser it stands in
+ * for.
+ */
+function extractDigitalPdfTextViaRawStreams(pdfBytes) {
+  const raw = pdfBytes.toString('latin1')
+  const recovered = []
+  for (const m of raw.matchAll(/stream\r?\n([\s\S]*?)endstream/g)) {
+    const streamBytes = Buffer.from(m[1], 'latin1')
+    let streamText
+    try {
+      streamText = zlib.inflateSync(streamBytes).toString('latin1')
+    } catch {
+      // Not FlateDecode-compressed (or genuinely corrupt) — try the raw
+      // bytes as already-literal text rather than giving up on this one
+      // stream; a stream with no real Tj/TJ content simply contributes
+      // nothing below, never a fabricated fallback string.
+      streamText = streamBytes.toString('latin1')
+    }
+    const extracted = extractTextShowingOperators(streamText).trim()
+    if (extracted.length > 0) recovered.push(extracted)
+  }
+  return recovered.join('\n\n').trim()
+}
+
+/**
+ * Orchestrates the primary parser and the raw-stream fallback into one
+ * entry point: tries `extractDigitalPdfText` first, unchanged; only for
+ * the two failure classes a raw byte scan could plausibly still recover
+ * something from (`pdf_corrupt` — the object graph is broken;
+ * `pdf_no_text_layer` — the structured parser found zero text items,
+ * which a differently-decoded stream might still contain real text
+ * for) does it then attempt the fallback.
+ *
+ * **Never attempts the fallback for `pdf_encrypted` or
+ * `pdf_too_large`** — encryption is a legitimacy boundary a raw byte
+ * scan must never be used to bypass (this fallback has no decryption
+ * capability at all in any case, but the exclusion is stated explicitly
+ * here so a future change can never accidentally wire one in), and a
+ * byte/page/time budget is a resource limit, not a parsing weakness, so
+ * a fallback attempt would only spend more of that same budget for no
+ * legitimate reason. Every existing SSRF/host/redirect/byte/page/timeout
+ * boundary this ticket's own hard requirements name is therefore left
+ * completely intact — this function only ever adds a second *parsing*
+ * attempt within the boundaries the primary path already enforced.
+ *
+ * Resolves `{ text, pageCount, usedFallback }` — `pageCount` is the
+ * real, structured page count when the primary path succeeded
+ * (`usedFallback: false`), or `null` when the fallback recovered the
+ * text instead (`usedFallback: true`), since a raw byte scan has no
+ * reliable page boundaries to report — never a guessed count. Rejects
+ * with the ORIGINAL `PdfExtractionError` when the fallback also finds
+ * nothing (or was never attempted) — never invents a new, less precise
+ * reason once the primary parser has already given a specific one.
+ */
+async function extractDigitalPdfTextWithFallback(pdfBytes, options = {}) {
+  try {
+    const result = await extractDigitalPdfText(pdfBytes, options)
+    return { ...result, usedFallback: false }
+  } catch (err) {
+    if (!(err instanceof PdfExtractionError)) throw err
+    if (err.reason !== 'pdf_corrupt' && err.reason !== 'pdf_no_text_layer') throw err
+
+    const fallbackText = extractDigitalPdfTextViaRawStreams(pdfBytes)
+    if (fallbackText.length === 0) throw err
+
+    return { text: fallbackText, pageCount: null, usedFallback: true }
+  }
+}
+
 module.exports = {
   ALLOWED_PDF_ERROR_REASONS,
   PdfExtractionError,
@@ -363,4 +519,6 @@ module.exports = {
   hasPdfSignature,
   extractDigitalPdfText,
   extractDigitalPdfLines,
+  extractDigitalPdfTextViaRawStreams,
+  extractDigitalPdfTextWithFallback,
 }

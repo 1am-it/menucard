@@ -3,7 +3,16 @@
 const test = require('node:test')
 const assert = require('node:assert/strict')
 
-const { extractDigitalPdfText, extractDigitalPdfLines, PdfExtractionError, ALLOWED_PDF_ERROR_REASONS, hasPdfSignature } = require('./pdfTextExtraction')
+const zlib = require('node:zlib')
+const {
+  extractDigitalPdfText,
+  extractDigitalPdfLines,
+  extractDigitalPdfTextViaRawStreams,
+  extractDigitalPdfTextWithFallback,
+  PdfExtractionError,
+  ALLOWED_PDF_ERROR_REASONS,
+  hasPdfSignature,
+} = require('./pdfTextExtraction')
 
 /**
  * Builds a minimal, valid, single-page digital PDF from a raw content
@@ -56,6 +65,46 @@ function buildTestPdf({ contentStream, contentStreams, mediaBox = [0, 0, 300, 60
 function textAt(x, y, text) {
   const escaped = text.replace(/([()\\])/g, '\\$1')
   return `1 0 0 1 ${x} ${y} Tm (${escaped}) Tj`
+}
+
+/**
+ * Builds a PDF whose page tree is genuinely, structurally broken (the
+ * `/Pages` object's own `/Kids` array references an object number that
+ * does not exist), while its lone content-stream object — found by this
+ * fixture's own caller via a direct byte scan, never via the broken
+ * object graph — still holds real, intact text. Confirmed directly
+ * against this exact shape during this fix's own diagnosis: pdfjs loads
+ * the document (`numPages` comes from the declared `/Count`) but throws
+ * a real `UnknownErrorException` ("Page dictionary kid reference points
+ * to wrong type of object") the moment `getPage(1)` is called — mapped
+ * by `extractDigitalPdfText`'s own existing catch-all to `pdf_corrupt`.
+ * `compressed: true` FlateDecode-compresses the content stream first,
+ * to exercise the fallback's own decompression path too.
+ */
+function buildPageTreeBrokenPdf(contentStream, { compressed = false } = {}) {
+  const streamBody = compressed ? zlib.deflateSync(Buffer.from(contentStream, 'latin1')) : Buffer.from(contentStream, 'latin1')
+  const filterClause = compressed ? ' /Filter /FlateDecode' : ''
+  let pdf = Buffer.from('%PDF-1.4\n', 'latin1')
+  const offsets = {}
+  function appendObj(num, bodyBuffer) {
+    offsets[num] = pdf.length
+    pdf = Buffer.concat([pdf, Buffer.from(`${num} 0 obj\n`, 'latin1'), bodyBuffer, Buffer.from('\nendobj\n', 'latin1')])
+  }
+  appendObj(1, Buffer.from('<< /Type /Catalog /Pages 2 0 R >>', 'latin1'))
+  appendObj(2, Buffer.from('<< /Type /Pages /Kids [99 0 R] /Count 1 >>', 'latin1')) // 99 0 R: deliberately nonexistent
+  appendObj(
+    5,
+    Buffer.concat([
+      Buffer.from(`<< /Length ${streamBody.length}${filterClause} >>\nstream\n`, 'latin1'),
+      streamBody,
+      Buffer.from('\nendstream', 'latin1'),
+    ])
+  )
+  const xrefOffset = pdf.length
+  let tail = 'xref\n0 6\n0000000000 65535 f \n'
+  for (let i = 1; i <= 5; i += 1) tail += `${String(offsets[i] || 0).padStart(10, '0')} 00000 n \n`
+  tail += `trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`
+  return Buffer.concat([pdf, Buffer.from(tail, 'latin1')])
 }
 
 // Self-contained, hand-built minimal PDF fixtures (no external files, no
@@ -291,6 +340,91 @@ test('extractDigitalPdfLines: rejects bytes with no PDF signature, never handed 
     (err) => {
       assert.ok(err instanceof PdfExtractionError)
       assert.equal(err.reason, 'pdf_corrupt')
+      return true
+    }
+  )
+})
+
+test('extractDigitalPdfText: the broken-page-tree fixture itself genuinely fails with pdf_corrupt via the primary parser — proves the fallback tests below exercise a real failure, not a fabricated one', async () => {
+  const pdf = buildPageTreeBrokenPdf('BT /F1 12 Tf 1 0 0 1 20 100 Tm (Recoverable Text Here) Tj ET')
+  await assert.rejects(
+    () => extractDigitalPdfText(pdf),
+    (err) => {
+      assert.ok(err instanceof PdfExtractionError)
+      assert.equal(err.reason, 'pdf_corrupt')
+      return true
+    }
+  )
+})
+
+test('extractDigitalPdfTextViaRawStreams: recovers real text from an uncompressed content stream, bypassing a broken page tree entirely', () => {
+  const pdf = buildPageTreeBrokenPdf('BT /F1 12 Tf 1 0 0 1 20 100 Tm (Recoverable Text Here) Tj ET')
+  assert.equal(extractDigitalPdfTextViaRawStreams(pdf), 'Recoverable Text Here')
+})
+
+test('extractDigitalPdfTextViaRawStreams: recovers real text from a FlateDecode-compressed content stream too', () => {
+  const pdf = buildPageTreeBrokenPdf('BT /F1 12 Tf 1 0 0 1 20 100 Tm (Compressed Menu Text) Tj ET', { compressed: true })
+  assert.equal(extractDigitalPdfTextViaRawStreams(pdf), 'Compressed Menu Text')
+})
+
+test('extractDigitalPdfTextViaRawStreams: decodes PDF string-literal escapes (parentheses, backslash) correctly, never mangling real text', () => {
+  const pdf = buildPageTreeBrokenPdf('BT /F1 12 Tf 1 0 0 1 20 100 Tm (Prijs \\(incl. btw\\) en A\\\\B) Tj ET')
+  assert.equal(extractDigitalPdfTextViaRawStreams(pdf), 'Prijs (incl. btw) en A\\B')
+})
+
+test('extractDigitalPdfTextViaRawStreams: a TJ array with multiple string fragments is joined into one recovered run', () => {
+  const pdf = buildPageTreeBrokenPdf('BT /F1 12 Tf 1 0 0 1 20 100 Tm [(Twee) -30 (delen)] TJ ET')
+  assert.equal(extractDigitalPdfTextViaRawStreams(pdf), 'Twee delen')
+})
+
+test('extractDigitalPdfTextViaRawStreams: returns an empty string, never a fabricated one, when a stream has no real Tj/TJ text at all', () => {
+  const pdf = buildPageTreeBrokenPdf('/GS1 gs 0 0 1 rg 0 0 100 100 re f') // graphics-only content, no text operators
+  assert.equal(extractDigitalPdfTextViaRawStreams(pdf), '')
+})
+
+test('extractDigitalPdfTextWithFallback: primary success is passed through unchanged with usedFallback: false', async () => {
+  const result = await extractDigitalPdfTextWithFallback(pdfBytes(VALID_TEXT_PDF_BASE64))
+  assert.equal(result.usedFallback, false)
+  assert.equal(result.pageCount, 1)
+  assert.ok(result.text.length > 0)
+})
+
+test('extractDigitalPdfTextWithFallback: recovers text via the fallback for a broken page tree, with pageCount: null (never a guessed count)', async () => {
+  const pdf = buildPageTreeBrokenPdf('BT /F1 12 Tf 1 0 0 1 20 100 Tm (Recoverable Text Here) Tj ET')
+  const result = await extractDigitalPdfTextWithFallback(pdf)
+  assert.equal(result.usedFallback, true)
+  assert.equal(result.pageCount, null)
+  assert.equal(result.text, 'Recoverable Text Here')
+})
+
+test('extractDigitalPdfTextWithFallback: rethrows the ORIGINAL error when the fallback also finds nothing, never inventing a new reason', async () => {
+  await assert.rejects(
+    () => extractDigitalPdfTextWithFallback(pdfBytes(NO_TEXT_PDF_BASE64)),
+    (err) => {
+      assert.ok(err instanceof PdfExtractionError)
+      assert.equal(err.reason, 'pdf_no_text_layer')
+      return true
+    }
+  )
+})
+
+test('extractDigitalPdfTextWithFallback: NEVER attempts the fallback for pdf_encrypted — encryption is a legitimacy boundary, not a parsing weakness', async () => {
+  await assert.rejects(
+    () => extractDigitalPdfTextWithFallback(pdfBytes(ENCRYPTED_PDF_BASE64)),
+    (err) => {
+      assert.ok(err instanceof PdfExtractionError)
+      assert.equal(err.reason, 'pdf_encrypted')
+      return true
+    }
+  )
+})
+
+test('extractDigitalPdfTextWithFallback: NEVER attempts the fallback for pdf_too_large — a budget limit is never bypassed by a second parsing attempt', async () => {
+  await assert.rejects(
+    () => extractDigitalPdfTextWithFallback(pdfBytes(VALID_TEXT_PDF_BASE64), { maxBytes: 10 }),
+    (err) => {
+      assert.ok(err instanceof PdfExtractionError)
+      assert.equal(err.reason, 'pdf_too_large')
       return true
     }
   )
