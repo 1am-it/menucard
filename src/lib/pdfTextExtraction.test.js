@@ -20,9 +20,14 @@ const {
 const packageManifest = JSON.parse(
   fs.readFileSync(path.join(__dirname, '..', '..', 'package.json'), 'utf8')
 )
+const nextConfig = require('../../next.config.js')
 
 test('PDF extraction pins the Vercel runtime to Node 22, which pdfjs-dist requires', () => {
   assert.equal(packageManifest.engines && packageManifest.engines.node, '22.x')
+})
+
+test('PDF extraction keeps pdfjs-dist external to the Next.js server bundle', () => {
+  assert.ok(nextConfig.serverExternalPackages.includes('pdfjs-dist'))
 })
 
 /**
