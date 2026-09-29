@@ -12,6 +12,7 @@ const {
   PdfExtractionError,
   ALLOWED_PDF_ERROR_REASONS,
   hasPdfSignature,
+  FALLBACK_MAX_INFLATED_BYTES,
 } = require('./pdfTextExtraction')
 
 /**
@@ -379,6 +380,22 @@ test('extractDigitalPdfTextViaRawStreams: a TJ array with multiple string fragme
 
 test('extractDigitalPdfTextViaRawStreams: returns an empty string, never a fabricated one, when a stream has no real Tj/TJ text at all', () => {
   const pdf = buildPageTreeBrokenPdf('/GS1 gs 0 0 1 rg 0 0 100 100 re f') // graphics-only content, no text operators
+  assert.equal(extractDigitalPdfTextViaRawStreams(pdf), '')
+})
+
+test('extractDigitalPdfTextViaRawStreams: a decompression-bomb stream (tiny compressed bytes, huge decompressed size) is rejected via maxOutputLength, never fully inflated', () => {
+  // A real zip-bomb shape, not a theoretical one: a large, highly-repetitive
+  // plaintext compresses to a tiny fraction of its size, so an attacker-
+  // controlled PDF can embed a content stream whose declared/compressed
+  // size looks entirely ordinary while its DECOMPRESSED size would exceed
+  // FALLBACK_MAX_INFLATED_BYTES by itself. This proves the cap this fix
+  // added to the fallback's own `zlib.inflateSync` call actually stops that
+  // — the stream is skipped (falls through to the try/catch's literal-text
+  // path, which finds no real Tj/TJ operators in the still-compressed
+  // bytes) rather than this call allocating the full decompressed buffer.
+  const oversizedPlaintext = Buffer.alloc(FALLBACK_MAX_INFLATED_BYTES + 1024 * 1024, 0x41)
+  const compressed = zlib.deflateSync(oversizedPlaintext)
+  const pdf = Buffer.concat([Buffer.from('stream\n', 'latin1'), compressed, Buffer.from('\nendstream', 'latin1')])
   assert.equal(extractDigitalPdfTextViaRawStreams(pdf), '')
 })
 

@@ -56,6 +56,21 @@ const DEFAULT_MAX_BYTES = 15 * 1024 * 1024 // 15 MB
 const DEFAULT_MAX_PAGES = 30
 const DEFAULT_TIMEOUT_MS = 15000
 
+/** A real, technical ceiling on the decompressed size of any ONE
+ * content-stream `zlib.inflateSync` call inside
+ * `extractDigitalPdfTextViaRawStreams` — never left unbounded. Found
+ * during this fix's own self-review, not merely a theoretical concern:
+ * confirmed directly that 50 MB of trivial repeated data compresses to
+ * roughly 50 KB (a ~1000x amplification), which an unbounded
+ * `inflateSync` would happily allocate in full — a real decompression-
+ * bomb risk this fallback's own byte-level scan would otherwise
+ * introduce on top of the existing, unrelated `maxBytes` budget on the
+ * PDF's own COMPRESSED input size. Generous for any real PDF content
+ * stream (even one compressed 50-100x from an already
+ * `DEFAULT_MAX_BYTES`-bounded input stays well under this), never
+ * business-facing. */
+const FALLBACK_MAX_INFLATED_BYTES = 128 * 1024 * 1024 // 128 MB
+
 /** The closed, four-value error vocabulary this ticket's own
  * documentation requires at minimum, plus nothing else — an
  * unrecognized load failure is deliberately folded into `pdf_corrupt`
@@ -451,7 +466,7 @@ function extractDigitalPdfTextViaRawStreams(pdfBytes) {
     const streamBytes = Buffer.from(m[1], 'latin1')
     let streamText
     try {
-      streamText = zlib.inflateSync(streamBytes).toString('latin1')
+      streamText = zlib.inflateSync(streamBytes, { maxOutputLength: FALLBACK_MAX_INFLATED_BYTES }).toString('latin1')
     } catch {
       // Not FlateDecode-compressed (or genuinely corrupt) — try the raw
       // bytes as already-literal text rather than giving up on this one
@@ -516,6 +531,7 @@ module.exports = {
   DEFAULT_MAX_BYTES,
   DEFAULT_MAX_PAGES,
   DEFAULT_TIMEOUT_MS,
+  FALLBACK_MAX_INFLATED_BYTES,
   hasPdfSignature,
   extractDigitalPdfText,
   extractDigitalPdfLines,
