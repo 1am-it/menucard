@@ -53,6 +53,20 @@ const MENU_CREATE_STATUS_LABELS = {
   error: 'Mislukt',
 }
 
+/**
+ * Derives the confidence label shown to a reviewer for a set of
+ * recognized PDF menu items from the items' own real `confidence`
+ * field — never a hardcoded display string. Returns every distinct
+ * value found, joined, so a future change to how those items are
+ * scored (`src/lib/pdfMenuStructuring.js`'s own `MENU_ITEM_CONFIDENCE`)
+ * is reflected here automatically instead of this copy silently going
+ * stale. `''` for an empty list — never guessed.
+ */
+function describeRecognizedConfidence(items) {
+  const distinct = [...new Set((items || []).map((item) => item.confidence).filter(Boolean))]
+  return distinct.join('/')
+}
+
 function IconDocument() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -512,7 +526,9 @@ export default function OnboardingRestaurantPage() {
                     </div>
                     {unknownMenuContexts.map((unknown, idx) => {
                       const recognizedSections = unknown.recognizedSections || []
-                      const totalRecognizedItems = recognizedSections.reduce((sum, s) => sum + s.items.length, 0)
+                      const allRecognizedItems = recognizedSections.flatMap((s) => s.items)
+                      const totalRecognizedItems = allRecognizedItems.length
+                      const recognizedConfidenceLabel = describeRecognizedConfidence(allRecognizedItems)
                       return (
                         <div key={idx} style={{ marginBottom: 12 }}>
                           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>
@@ -530,7 +546,7 @@ export default function OnboardingRestaurantPage() {
                             <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 10 }}>
                               <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}>
                                 {totalRecognizedItems} mogelijk menu-item{totalRecognizedItems === 1 ? '' : 's'} gevonden in deze PDF —
-                                confidence: middel, uitsluitend reviewbaar, nooit automatisch overgenomen.
+                                confidence: {recognizedConfidenceLabel}, uitsluitend reviewbaar, nooit automatisch overgenomen.
                               </div>
                               {recognizedSections.map((section, sIdx) => (
                                 <div key={sIdx} style={{ marginBottom: 8 }}>

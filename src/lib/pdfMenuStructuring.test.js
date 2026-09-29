@@ -178,6 +178,34 @@ test('pureSectionMarkerNames: two side-by-side prefix markers on one row (a real
   )
 })
 
+test('structurePdfLinesIntoMenu: two side-by-side section headers on ONE real PDF line, through the full end-to-end flow — only the first is ever used as the active section; the second is never silently used to misattribute a dish to the wrong section', async () => {
+  const content = [
+    'BT /F1 12 Tf',
+    textAt(20, 100, '// EERSTE KOP'),
+    textAt(160, 100, '// TWEEDE KOP'), // same row as the first — the real, verified layout
+    textAt(20, 80, 'Testgerecht'),
+    textAt(100, 80, '9.50'),
+    'ET',
+  ].join('\n')
+  const { categories } = await structureFromContentStream(content)
+
+  // Exactly one category exists — the first header's own name. The
+  // second, side-by-side header is never silently promoted into its
+  // own category — this is the documented, unchanged limitation, not a
+  // claim that it is now supported.
+  assert.equal(categories.length, 1)
+  assert.equal(categories[0].name, 'EERSTE KOP')
+  assert.equal(categories.some((c) => c.name === 'TWEEDE KOP'), false)
+
+  // The dish that actually follows on the next line is attributed to
+  // the first (active) section — never dropped, never attached to a
+  // category under the ignored second header's name instead.
+  assert.deepEqual(
+    categories[0].items.map((it) => ({ name: it.name, price: it.price })),
+    [{ name: 'Testgerecht', price: '9.50' }]
+  )
+})
+
 test('structurePdfLinesIntoMenu: multiple sections on one page are each recognized with their own items', async () => {
   const content = [
     'BT /F1 12 Tf',
