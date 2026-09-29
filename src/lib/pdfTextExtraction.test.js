@@ -3,7 +3,60 @@
 const test = require('node:test')
 const assert = require('node:assert/strict')
 
-const { extractDigitalPdfText, PdfExtractionError, ALLOWED_PDF_ERROR_REASONS, hasPdfSignature } = require('./pdfTextExtraction')
+const { extractDigitalPdfText, extractDigitalPdfLines, PdfExtractionError, ALLOWED_PDF_ERROR_REASONS, hasPdfSignature } = require('./pdfTextExtraction')
+
+/**
+ * Builds a minimal, valid, single-page digital PDF from a raw content
+ * stream — computes every xref byte offset programmatically rather
+ * than by hand, so a test can place text at exact (x, y) coordinates
+ * without the fragile manual offset arithmetic this file's own
+ * pre-existing fixtures needed. Never used to fabricate anything other
+ * than test input; production code never calls this.
+ */
+function buildTestPdf({ contentStream, contentStreams, mediaBox = [0, 0, 300, 600] }) {
+  const streams = contentStreams || [contentStream]
+  const pageCount = streams.length
+  const pageObjNums = streams.map((_, i) => 3 + i * 2) // page N's own content stream is pageObjNums[i] + 1
+  const objects = {
+    1: '<< /Type /Catalog /Pages 2 0 R >>',
+    2: `<< /Type /Pages /Kids [${pageObjNums.map((n) => `${n} 0 R`).join(' ')}] /Count ${pageCount} >>`,
+  }
+  const fontObjNum = 3 + pageCount * 2
+  streams.forEach((stream, i) => {
+    const pageNum = pageObjNums[i]
+    const contentsNum = pageNum + 1
+    objects[pageNum] =
+      `<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 ${fontObjNum} 0 R >> >> /MediaBox [${mediaBox.join(' ')}] /Contents ${contentsNum} 0 R >>`
+    objects[contentsNum] = `<< /Length ${Buffer.byteLength(stream)} >>\nstream\n${stream}\nendstream`
+  })
+  objects[fontObjNum] = '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>'
+
+  const objectNumbers = Object.keys(objects)
+    .map(Number)
+    .sort((a, b) => a - b)
+  const maxObjNum = objectNumbers[objectNumbers.length - 1]
+
+  let pdf = '%PDF-1.4\n'
+  const offsets = new Array(maxObjNum + 1).fill(null)
+  for (const num of objectNumbers) {
+    offsets[num] = Buffer.byteLength(pdf)
+    pdf += `${num} 0 obj\n${objects[num]}\nendobj\n`
+  }
+  const xrefOffset = Buffer.byteLength(pdf)
+  pdf += `xref\n0 ${maxObjNum + 1}\n0000000000 65535 f \n`
+  for (let num = 1; num <= maxObjNum; num += 1) {
+    const offset = offsets[num] === null ? 0 : offsets[num]
+    pdf += `${String(offset).padStart(10, '0')} 00000 n \n`
+  }
+  pdf += `trailer\n<< /Size ${maxObjNum + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`
+  return Buffer.from(pdf, 'latin1')
+}
+
+/** One `Tm (text) Tj` text-showing operation at an absolute (x, y). */
+function textAt(x, y, text) {
+  const escaped = text.replace(/([()\\])/g, '\\$1')
+  return `1 0 0 1 ${x} ${y} Tm (${escaped}) Tj`
+}
 
 // Self-contained, hand-built minimal PDF fixtures (no external files, no
 // PDF-authoring library — none exists in this project and none should be
@@ -146,6 +199,97 @@ test('extractDigitalPdfText: pdf_corrupt for a document that loads successfully 
     () => extractDigitalPdfText(pdfBytes(PAGE_TREE_BROKEN_SECOND_PAGE_PDF_BASE64)),
     (err) => {
       assert.ok(err instanceof PdfExtractionError, `expected a PdfExtractionError, got ${err && err.constructor && err.constructor.name}`)
+      assert.equal(err.reason, 'pdf_corrupt')
+      return true
+    }
+  )
+})
+
+test('extractDigitalPdfLines: reconstructs visual rows by Y-position, correctly pairing a name with its own price even though pdfjs emits them as separate items', async () => {
+  const content = [
+    'BT /F1 12 Tf',
+    textAt(20, 100, '// SECTION ONE //'),
+    textAt(20, 80, 'Soep'),
+    textAt(100, 80, '4.50'),
+    textAt(20, 60, 'Broodje'),
+    textAt(100, 60, '3.00'),
+    textAt(20, 50, 'met kaas en ham'),
+    'ET',
+  ].join('\n')
+  const { pages, pageCount } = await extractDigitalPdfLines(buildTestPdf({ contentStream: content }))
+  assert.equal(pageCount, 1)
+  assert.equal(pages.length, 1)
+  const lineTexts = pages[0].lines.map((line) => line.items.map((it) => it.str).join('|'))
+  assert.deepEqual(lineTexts, ['// SECTION ONE //', 'Soep| |4.50', 'Broodje| |3.00', 'met kaas en ham'])
+  // Top-of-page first — the section marker's Y (100) must sort before
+  // the item rows below it (80, 60, 50).
+  assert.deepEqual(pages[0].lines.map((l) => l.y), [100, 80, 60, 50])
+})
+
+test('extractDigitalPdfLines: items within a small Y jitter band are still grouped into one line, never split into near-duplicate rows', async () => {
+  const content = ['BT /F1 12 Tf', textAt(20, 100, 'Naam'), textAt(100, 100.4, '5.00'), 'ET'].join('\n')
+  const { pages } = await extractDigitalPdfLines(buildTestPdf({ contentStream: content }))
+  assert.equal(pages[0].lines.length, 1)
+  // pdfjs may insert its own synthetic whitespace item for the horizontal
+  // gap between the two Tj calls — real text content is still exactly
+  // these two strings, on one reconstructed line, never two.
+  const realStrings = pages[0].lines[0].items.map((it) => it.str).filter((s) => s.trim().length > 0)
+  assert.deepEqual(realStrings, ['Naam', '5.00'])
+})
+
+test('extractDigitalPdfLines: a page with no text items still contributes an empty lines array, never silently dropped', async () => {
+  // Two pages: the first has real text (so the document as a whole is
+  // not pdf_no_text_layer), the second is a valid, empty text object —
+  // no Tj at all — the exact case this test exists to check.
+  const pdfBuf = buildTestPdf({
+    contentStreams: [['BT /F1 12 Tf', textAt(20, 100, 'Pagina één'), 'ET'].join('\n'), 'BT ET'],
+  })
+  const { pages, pageCount } = await extractDigitalPdfLines(pdfBuf)
+  assert.equal(pageCount, 2)
+  assert.equal(pages.length, 2)
+  assert.equal(pages[0].pageNumber, 1)
+  assert.ok(pages[0].lines.length > 0)
+  assert.deepEqual(pages[1], { pageNumber: 2, lines: [] })
+})
+
+test('extractDigitalPdfLines: pdf_no_text_layer when every page is empty — same honest signal as extractDigitalPdfText', async () => {
+  await assert.rejects(
+    () => extractDigitalPdfLines(pdfBytes(NO_TEXT_PDF_BASE64)),
+    (err) => {
+      assert.ok(err instanceof PdfExtractionError)
+      assert.equal(err.reason, 'pdf_no_text_layer')
+      return true
+    }
+  )
+})
+
+test('extractDigitalPdfLines: pdf_encrypted for a genuinely password-protected PDF — the exact same closed reason as extractDigitalPdfText', async () => {
+  await assert.rejects(
+    () => extractDigitalPdfLines(pdfBytes(ENCRYPTED_PDF_BASE64)),
+    (err) => {
+      assert.ok(err instanceof PdfExtractionError)
+      assert.equal(err.reason, 'pdf_encrypted')
+      return true
+    }
+  )
+})
+
+test('extractDigitalPdfLines: pdf_too_large when maxBytes is exceeded — the same byte budget as extractDigitalPdfText, never bypassed', async () => {
+  await assert.rejects(
+    () => extractDigitalPdfLines(pdfBytes(VALID_TEXT_PDF_BASE64), { maxBytes: 10 }),
+    (err) => {
+      assert.ok(err instanceof PdfExtractionError)
+      assert.equal(err.reason, 'pdf_too_large')
+      return true
+    }
+  )
+})
+
+test('extractDigitalPdfLines: rejects bytes with no PDF signature, never handed to pdfjs — same defense in depth as extractDigitalPdfText', async () => {
+  await assert.rejects(
+    () => extractDigitalPdfLines(Buffer.from('not a pdf', 'utf8')),
+    (err) => {
+      assert.ok(err instanceof PdfExtractionError)
       assert.equal(err.reason, 'pdf_corrupt')
       return true
     }

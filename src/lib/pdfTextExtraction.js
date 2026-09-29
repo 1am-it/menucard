@@ -67,6 +67,18 @@ const DEFAULT_TIMEOUT_MS = 15000
  */
 const ALLOWED_PDF_ERROR_REASONS = ['pdf_too_large', 'pdf_encrypted', 'pdf_corrupt', 'pdf_no_text_layer']
 
+/** The one, single place `pdfjs-dist` is ever loaded from — both
+ * `extractDigitalPdfText` and `extractDigitalPdfLines` call this instead
+ * of each holding their own `await import(...)`, so this file keeps
+ * exactly one literal import specifier, matching this file's own header
+ * comment ("loads the library via a single `await import(...)` call")
+ * and the structural test that verifies it. Node's own dynamic `import()`
+ * already caches by specifier, so calling this more than once across a
+ * process's lifetime is cheap either way. */
+async function loadPdfjsLib() {
+  return import('pdfjs-dist/legacy/build/pdf.mjs')
+}
+
 class PdfExtractionError extends Error {
   constructor(reason, message) {
     super(message || reason)
@@ -151,7 +163,7 @@ async function extractDigitalPdfText(pdfBytes, options = {}) {
       // it must be the `legacy` entry point specifically (the package's
       // own default entry point is not Node-compatible in this project's
       // pinned runtime).
-      const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs')
+      const pdfjsLib = await loadPdfjsLib()
 
       const loadingTask = pdfjsLib.getDocument({
         data: new Uint8Array(pdfBytes),
@@ -232,6 +244,116 @@ async function extractDigitalPdfText(pdfBytes, options = {}) {
   }
 }
 
+/** Groups raw pdfjs text items into visual lines by Y-coordinate, sorted
+ * left-to-right within a line — never by their raw content-stream
+ * order alone. Confirmed necessary, not merely nice-to-have, against a
+ * real digital restaurant menu PDF during this fix's own diagnosis: a
+ * genuine multi-column layout emits every item name run, THEN every
+ * price in that column, in raw stream order — `extractDigitalPdfText`'s
+ * own flattened, single-string-per-page join destroys the one signal
+ * (shared Y position) that still lets a price be paired with its own
+ * name. `yToleranceUnits` absorbs the small sub-pixel Y jitter within
+ * one visual text row (confirmed empirically against that same real
+ * PDF: same-row items differ by well under 1 unit) — never large enough
+ * to merge two genuinely different rows. */
+function groupItemsIntoLines(items, yToleranceUnits = 2) {
+  const bucketed = new Map()
+  for (const item of items) {
+    if (!item || typeof item.str !== 'string') continue
+    const x = item.transform[4]
+    const y = item.transform[5]
+    const bucketKey = Math.round(y / yToleranceUnits) * yToleranceUnits
+    if (!bucketed.has(bucketKey)) bucketed.set(bucketKey, [])
+    bucketed.get(bucketKey).push({ str: item.str, x, y })
+  }
+  const sortedYs = [...bucketed.keys()].sort((a, b) => b - a) // top of page first
+  return sortedYs.map((y) => ({
+    y,
+    items: bucketed.get(y).sort((a, b) => a.x - b.x),
+  }))
+}
+
+/**
+ * Extracts digital PDF text as **position-aware lines**, one array per
+ * page — never the flattened, single-string-per-page shape
+ * `extractDigitalPdfText` returns. This is what
+ * `src/lib/pdfMenuStructuring.js` requires to pair a menu item's name
+ * with its own price; `extractDigitalPdfText` itself is never modified
+ * and stays the right choice for anything that only needs plain text
+ * (e.g. the existing `unknownMenuContexts` word/page count).
+ *
+ * Resolves `{ pages: [{ pageNumber, lines: [{ y, items: [{ str, x }] }] }],
+ * pageCount }`. Applies the exact same validation, byte/page/time
+ * budgets, and closed `PdfExtractionError` vocabulary as
+ * `extractDigitalPdfText` — every existing security/budget boundary is
+ * reused unchanged, never re-implemented with a subtly different
+ * limit. A page with zero text items still contributes an empty
+ * `lines: []` entry — never silently dropped, so a caller can tell "no
+ * lines on this page" apart from "this page does not exist."
+ */
+async function extractDigitalPdfLines(pdfBytes, options = {}) {
+  const maxBytes = typeof options.maxBytes === 'number' ? options.maxBytes : DEFAULT_MAX_BYTES
+  const maxPages = typeof options.maxPages === 'number' ? options.maxPages : DEFAULT_MAX_PAGES
+  const timeoutMs = typeof options.timeoutMs === 'number' ? options.timeoutMs : DEFAULT_TIMEOUT_MS
+
+  validatePdfBytesOrThrow(pdfBytes, maxBytes)
+
+  let timeoutHandle
+  const timedOut = new Promise((_, reject) => {
+    timeoutHandle = setTimeout(() => {
+      reject(new PdfExtractionError('pdf_too_large', `PDF processing exceeded timeoutMs=${timeoutMs}`))
+    }, timeoutMs)
+  })
+
+  let doc
+  try {
+    try {
+      const pdfjsLib = await loadPdfjsLib()
+      const loadingTask = pdfjsLib.getDocument({
+        data: new Uint8Array(pdfBytes),
+        isEvalSupported: false,
+        useWorkerFetch: false,
+        disableFontFace: true,
+      })
+      doc = await Promise.race([loadingTask.promise, timedOut])
+
+      if (doc.numPages > maxPages) {
+        throw new PdfExtractionError('pdf_too_large', `PDF has ${doc.numPages} pages, exceeds maxPages=${maxPages}`)
+      }
+
+      const pages = []
+      let anyLineFound = false
+      for (let pageNumber = 1; pageNumber <= doc.numPages; pageNumber += 1) {
+        const page = await Promise.race([doc.getPage(pageNumber), timedOut])
+        const textContent = await Promise.race([page.getTextContent(), timedOut])
+        const lines = groupItemsIntoLines(textContent.items)
+        if (lines.length > 0) anyLineFound = true
+        pages.push({ pageNumber, lines })
+      }
+
+      if (!anyLineFound) {
+        // Same honest signal extractDigitalPdfText's own pdf_no_text_layer
+        // case already gives — never guessed at, never a trigger for a
+        // future pixel-based pass.
+        throw new PdfExtractionError('pdf_no_text_layer', 'PDF loaded successfully but contains no extractable text')
+      }
+
+      return { pages, pageCount: doc.numPages }
+    } catch (err) {
+      if (err instanceof PdfExtractionError) throw err
+      if (err && err.name === 'PasswordException') {
+        throw new PdfExtractionError('pdf_encrypted', 'PDF requires a password')
+      }
+      throw new PdfExtractionError('pdf_corrupt', (err && err.message) || 'Failed to process PDF')
+    }
+  } finally {
+    clearTimeout(timeoutHandle)
+    if (doc) {
+      await doc.cleanup().catch(() => {})
+    }
+  }
+}
+
 module.exports = {
   ALLOWED_PDF_ERROR_REASONS,
   PdfExtractionError,
@@ -240,4 +362,5 @@ module.exports = {
   DEFAULT_TIMEOUT_MS,
   hasPdfSignature,
   extractDigitalPdfText,
+  extractDigitalPdfLines,
 }
