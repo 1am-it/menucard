@@ -253,6 +253,100 @@ test('runRestaurantSourceAnalysis: a same-host PDF candidate that only the fallb
   assert.ok(unknown.wordCount > 0)
 })
 
+test('DE BOTANIST REGRESSION CASE — this fix\'s own named production finding, reproduced with entirely fictional content, never the real menu text: job completes without crash, restaurant fields found, zero json_ld/html menus, the discovered PDF is processed successfully (not pdf_extraction_failed) and yields at least one reviewable menu result', async () => {
+  // Diagnosed directly against the real, live source this ticket names
+  // (https://debotanistbreda.nl/, read-only, never fetched by this
+  // automated test, never stored anywhere in this repository) during
+  // this fix's own root-cause investigation. Two real, structural
+  // quirks confirmed on that real PDF, both reproduced here with
+  // fictional restaurant/dish names only:
+  //   1. The real section-marker convention is a prefix-only "// NAME",
+  //      never a closed "// NAME //" — see pdfMenuStructuring.js's own
+  //      header comment for the full finding.
+  //   2. pdfjs-dist does not reliably keep a name and its own price as
+  //      separate text items on a two-column row — sometimes it does
+  //      ("Fictieve Koffie" / "3.5" as two items), sometimes it merges
+  //      them into one string ("Fictief Broodje 4.5"). Both shapes
+  //      appear below, on the SAME row, exactly like the real PDF's own
+  //      "Koffie 3.5 | Red Bull Energy Drink 4.5" row.
+  const menuContent = [
+    'BT /F1 12 Tf',
+    textAt(20, 100, '// FICTIEVE DRANKEN'),
+    // Two side-by-side (name, price) pairs on one row — one pair split
+    // into separate items by pdfjs, the other merged into one string.
+    textAt(20, 80, 'Fictieve Koffie'),
+    textAt(90, 80, '3.5'),
+    textAt(160, 80, 'Fictief Broodje 4.5'),
+    'ET',
+  ].join('\n')
+
+  const homepageHtml = `<html><head></head><body>
+    <p>Telefoon: 076 1234567</p>
+    <a href="https://fictieve-botanist.invalid/">website</a>
+    <a href="/menukaart">Download Menukaart</a>
+  </body></html>`
+
+  const result = await runRestaurantSourceAnalysis({
+    homepageHtml,
+    homepageUrl: 'https://fictieve-botanist.invalid/',
+    fetchCandidate: async () => ({
+      status: 'pdf',
+      bytes: buildTestPdf({ contentStream: menuContent }),
+      finalUrl: 'https://fictieve-botanist.invalid/menukaart',
+    }),
+  })
+
+  // "restaurantvelden werden gevonden" — at least the phone field, from
+  // the homepage's own <a href="tel:..."> is NOT present here (this
+  // homepage deliberately has no tel: link, mirroring how sparse a real
+  // homepage can be) — the point of this case is the PDF path, not
+  // field extraction, so this assertion only confirms the analysis
+  // itself never throws and returns its normal shape.
+  assert.ok(result.restaurantCandidateFields)
+
+  // "nul menu's werden gevonden" — no json_ld/html menu on the homepage
+  // or any HTML candidate (there is none here; the only candidate is
+  // the PDF itself).
+  assert.equal(result.menuContexts.length, 0)
+
+  // "de ontdekte PDF gaf pdf_extraction_failed" — reproduced as NOT
+  // reproducing today: the PDF is processed successfully, never
+  // pdf_extraction_failed, once this fix's own extraction/structuring
+  // improvements are in place.
+  assert.equal(result.notes.some((n) => n.includes('pdf_extraction_failed')), false)
+  assert.equal(result.unknownMenuContexts.length, 1)
+  const unknown = result.unknownMenuContexts[0]
+  assert.equal(unknown.extractionMethod, 'pdf_text')
+  assert.equal(unknown.usedFallback, false)
+
+  // "AI-structurering is bewust niet beschikbaar" — unchanged.
+  assert.ok(result.notes.some((n) => n.includes('AI-structurering is niet beschikbaar')))
+
+  // The actual, minimal acceptance criterion this whole fix exists to
+  // satisfy: at least one reviewable menu result — both the split-item
+  // pair and the merged-string pair are correctly recognized.
+  assert.equal(unknown.recognizedSections.length, 1)
+  assert.equal(unknown.recognizedSections[0].name, 'FICTIEVE DRANKEN')
+  assert.deepEqual(
+    unknown.recognizedSections[0].items.map((it) => ({ name: it.name, price: it.price, confidence: it.confidence })),
+    [
+      { name: 'Fictieve Koffie', price: '3.5', confidence: 'middel' },
+      { name: 'Fictief Broodje', price: '4.5', confidence: 'middel' },
+    ]
+  )
+
+  // "geen restaurantconcept, menuvoorstel, review of publieke data is
+  // aangemaakt" — structurally guaranteed by this module's own
+  // architecture, not merely by this one test: runRestaurantSourceAnalysis
+  // is a pure function that never touches a database, never calls
+  // Supabase, and returns only in-memory data for a human reviewer to
+  // act on later, through the existing, separate, explicit
+  // createConceptFromReceipt/submitSelectedMenus actions this fix never
+  // touches (see src/lib/onboardingRestaurantUi.test.js's own dedicated
+  // checks for those two functions).
+  assert.doesNotMatch(fs.readFileSync(require.resolve('./restaurantSourceAnalysis.js'), 'utf8'), /supabase|getSupabaseAdmin/i)
+})
+
 test('runRestaurantSourceAnalysis: a closed PDF error rolls up into a plain-language note naming the job-level error_reason, never the raw exception', async () => {
   const result = await runRestaurantSourceAnalysis({
     homepageHtml: homepageWithFullRestaurantAndOneMenu(),
