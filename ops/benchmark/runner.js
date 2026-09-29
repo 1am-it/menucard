@@ -18,6 +18,7 @@ const defaultManifest = require('./manifest.json')
 const { validateManifest } = require('./manifest')
 const { buildFixture } = require('./fixtures')
 const { scoreCase } = require('./scoring')
+const { assertNeverCarriesPrecomputedConfidence } = require('./adapters')
 
 /**
  * Runs every entry in `manifest` against every adapter in `adapters`.
@@ -43,6 +44,14 @@ const { scoreCase } = require('./scoring')
  * clock local execution time, never a vendor latency claim) varies, and
  * is therefore excluded from any reproducibility comparison a caller
  * makes.
+ *
+ * Every available adapter's result is passed through
+ * `adapters.js`'s own `assertNeverCarriesPrecomputedConfidence` — as
+ * explicit defense in depth, not the primary guarantee — immediately
+ * after it runs and before `scoring.js` ever sees it: a future adapter
+ * that smuggles a precomputed `confidence`/`reviewReady` value throws
+ * here, loudly and immediately, rather than merely having that value
+ * silently ignored by `scoreCase` (which never reads it anyway).
  */
 async function runBenchmark({ manifest = defaultManifest, adapters } = {}) {
   if (!Array.isArray(adapters) || adapters.length === 0) {
@@ -87,6 +96,14 @@ async function runBenchmark({ manifest = defaultManifest, adapters } = {}) {
       const startedAt = process.hrtime.bigint()
       const adapterResult = await adapter.run(fixture)
       const timingMs = Number(process.hrtime.bigint() - startedAt) / 1e6
+
+      // Defense in depth, explicitly wired in — never scores a result
+      // that smuggles a precomputed confidence/reviewReady value. Throws
+      // immediately, loudly, and before any scoring happens; see
+      // adapters.js's own doc comment on this function for why this is
+      // additive to, never a substitute for, scoring.js's own primary
+      // guarantee (it never reads such a value even when present).
+      assertNeverCarriesPrecomputedConfidence(adapterResult)
 
       const score = scoreCase(entry, adapterResult, { timingMs })
       score.adapterKind = adapter.kind

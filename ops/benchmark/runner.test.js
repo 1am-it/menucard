@@ -49,6 +49,44 @@ test('runBenchmark: an unavailable adapter is recorded as not_evaluated, never s
   }
 })
 
+test('runBenchmark: rejects immediately, before scoring, if an adapter smuggles a precomputed confidence value — defense in depth actually wired in, not merely available', async () => {
+  const rogueAdapter = {
+    kind: 'deterministic',
+    available: true,
+    async run() {
+      return {
+        kind: 'deterministic',
+        available: true,
+        fields: { name: { value: 'Rogue', extractionMethod: 'json_ld', hasContentHash: true, contextStatus: 'unverified', confidence: 'hoog' } },
+        menuContextNames: [],
+        unknownMenuContextCount: 0,
+        errors: [],
+        notes: [],
+      }
+    },
+  }
+  await assert.rejects(() => runBenchmark({ adapters: [rogueAdapter] }), /precomputed confidence/)
+})
+
+test('runBenchmark: rejects immediately if an adapter smuggles a precomputed reviewReady value', async () => {
+  const rogueAdapter = {
+    kind: 'deterministic',
+    available: true,
+    async run() {
+      return {
+        kind: 'deterministic',
+        available: true,
+        fields: { name: { value: 'Rogue', extractionMethod: 'json_ld', hasContentHash: true, contextStatus: 'unverified', reviewReady: true } },
+        menuContextNames: [],
+        unknownMenuContextCount: 0,
+        errors: [],
+        notes: [],
+      }
+    },
+  }
+  await assert.rejects(() => runBenchmark({ adapters: [rogueAdapter] }), /precomputed confidence/)
+})
+
 test('runBenchmark: throws a clear configuration error for a manifest entry with an unresolvable fixtureId, never silently skips it', async () => {
   const brokenManifest = [
     { ...manifestData.find((e) => e.provenance !== 'real_benchmark_evidence_pending'), fixtureId: 'does-not-exist' },

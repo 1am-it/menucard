@@ -199,10 +199,21 @@ function createUnavailableAdapter(kind) {
 }
 
 /**
- * Structural guard, used by tests and by the runner before scoring:
- * fails loudly if an `AdapterResult` ever smuggles a `confidence` or
- * `reviewReady` key on any field — the one shape violation that would
- * silently defeat this file's own central guarantee.
+ * Structural guard: fails loudly if an `AdapterResult` ever smuggles a
+ * `confidence` or `reviewReady` key on any field — the one shape
+ * violation that would silently defeat this file's own central
+ * guarantee. `runner.js` calls this explicitly, as defense in depth,
+ * immediately after every `adapter.run(...)` and before handing the
+ * result to `scoring.js`'s `scoreCase` — never scoring a result this
+ * guard has not already passed. `scoring.js` itself provides the
+ * primary guarantee regardless (it only ever reads `.value`/
+ * `.extractionMethod`/`.hasContentHash`/`.contextStatus` off a field and
+ * always re-derives confidence itself via BE-20's own
+ * `deriveFieldConfidence`, so a smuggled `confidence` value could never
+ * reach a report even without this guard) — this function's own job is
+ * to turn that silent no-op into a loud, immediate failure instead, so a
+ * future buggy or malicious adapter is caught at the moment it
+ * misbehaves, not left to be caught only by a test happening to notice.
  */
 function assertNeverCarriesPrecomputedConfidence(adapterResult) {
   for (const [fieldName, evidence] of Object.entries(adapterResult.fields || {})) {
