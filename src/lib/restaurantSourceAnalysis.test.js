@@ -22,6 +22,58 @@ function jsonLdScript(obj) {
   return `<script type="application/ld+json">${JSON.stringify(obj)}</script>`
 }
 
+// Reused verbatim from src/lib/pdfTextExtraction.test.js's own
+// programmatic PDF-fixture builders — deliberately duplicated rather
+// than imported, same "necessary duplication" precedent as above.
+function buildTestPdf({ contentStream, mediaBox = [0, 0, 300, 600] }) {
+  const objects = {
+    1: '<< /Type /Catalog /Pages 2 0 R >>',
+    2: '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+    3: `<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 4 0 R >> >> /MediaBox [${mediaBox.join(' ')}] /Contents 5 0 R >>`,
+    4: '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+    5: `<< /Length ${Buffer.byteLength(contentStream)} >>\nstream\n${contentStream}\nendstream`,
+  }
+  let pdf = '%PDF-1.4\n'
+  const offsets = [0]
+  for (let i = 1; i <= 5; i += 1) {
+    offsets[i] = Buffer.byteLength(pdf)
+    pdf += `${i} 0 obj\n${objects[i]}\nendobj\n`
+  }
+  const xrefOffset = Buffer.byteLength(pdf)
+  pdf += 'xref\n0 6\n0000000000 65535 f \n'
+  for (let i = 1; i <= 5; i += 1) pdf += `${String(offsets[i]).padStart(10, '0')} 00000 n \n`
+  pdf += `trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`
+  return Buffer.from(pdf, 'latin1')
+}
+
+function textAt(x, y, text) {
+  const escaped = text.replace(/([()\\])/g, '\\$1')
+  return `1 0 0 1 ${x} ${y} Tm (${escaped}) Tj`
+}
+
+// Reused verbatim from src/lib/pdfTextExtraction.test.js's own broken-
+// page-tree fixture builder — a genuinely, structurally corrupt PDF
+// (its /Pages object's /Kids array references a nonexistent object)
+// whose lone content-stream object still holds real, recoverable text.
+function buildPageTreeBrokenPdf(contentStream) {
+  const objects = {
+    1: '<< /Type /Catalog /Pages 2 0 R >>',
+    2: '<< /Type /Pages /Kids [99 0 R] /Count 1 >>',
+    5: `<< /Length ${Buffer.byteLength(contentStream)} >>\nstream\n${contentStream}\nendstream`,
+  }
+  let pdf = '%PDF-1.4\n'
+  const offsets = {}
+  for (const num of [1, 2, 5]) {
+    offsets[num] = Buffer.byteLength(pdf)
+    pdf += `${num} 0 obj\n${objects[num]}\nendobj\n`
+  }
+  const xrefOffset = Buffer.byteLength(pdf)
+  pdf += 'xref\n0 6\n0000000000 65535 f \n'
+  for (let i = 1; i <= 5; i += 1) pdf += `${String(offsets[i] || 0).padStart(10, '0')} 00000 n \n`
+  pdf += `trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`
+  return Buffer.from(pdf, 'latin1')
+}
+
 function homepageWithFullRestaurantAndOneMenu() {
   const restaurant = {
     '@context': 'https://schema.org',
@@ -145,6 +197,154 @@ test('runRestaurantSourceAnalysis: a same-host PDF candidate becomes an unknown 
   assert.ok(unknown.contentHash)
   assert.equal(unknown.wordCount, 6) // "Hello from a digital PDF menu" — never the raw text itself
   assert.equal(unknown.textPreview, undefined)
+})
+
+test('runRestaurantSourceAnalysis: a same-host PDF candidate with real menu content produces reviewable recognizedSections, this fix\'s own new deterministic menu recognition', async () => {
+  const content = [
+    'BT /F1 12 Tf',
+    textAt(20, 100, '// FICTIEVE SECTIE'),
+    textAt(20, 80, 'Fictieve Soep'),
+    textAt(100, 80, '4.50'),
+    'ET',
+  ].join('\n')
+  const result = await runRestaurantSourceAnalysis({
+    homepageHtml: homepageWithFullRestaurantAndOneMenu(),
+    homepageUrl: 'https://debotanistbreda.nl/',
+    fetchCandidate: async () => ({ status: 'pdf', bytes: buildTestPdf({ contentStream: content }), finalUrl: 'https://debotanistbreda.nl/menukaart' }),
+  })
+
+  const unknown = result.unknownMenuContexts[0]
+  assert.equal(unknown.usedFallback, false)
+  assert.equal(unknown.recognizedSections.length, 1)
+  assert.equal(unknown.recognizedSections[0].name, 'FICTIEVE SECTIE')
+  assert.deepEqual(
+    unknown.recognizedSections[0].items.map((it) => ({ name: it.name, price: it.price })),
+    [{ name: 'Fictieve Soep', price: '4.50' }]
+  )
+  assert.equal(unknown.recognizedSections[0].items[0].confidence, 'middel')
+})
+
+test('runRestaurantSourceAnalysis: a same-host PDF candidate with no recognizable menu content still succeeds, with recognizedSections: [] — never fabricated', async () => {
+  const result = await runRestaurantSourceAnalysis({
+    homepageHtml: homepageWithFullRestaurantAndOneMenu(),
+    homepageUrl: 'https://debotanistbreda.nl/',
+    fetchCandidate: async () => ({
+      status: 'pdf',
+      bytes: Buffer.from(VALID_TEXT_PDF_BASE64, 'base64'),
+      finalUrl: 'https://debotanistbreda.nl/menukaart',
+    }),
+  })
+  const unknown = result.unknownMenuContexts[0]
+  assert.equal(unknown.usedFallback, false)
+  assert.deepEqual(unknown.recognizedSections, [])
+})
+
+test('runRestaurantSourceAnalysis: a same-host PDF candidate that only the fallback can recover is still reported, with usedFallback: true and no structured sections (no position data survives the fallback)', async () => {
+  const content = 'BT /F1 12 Tf 1 0 0 1 20 100 Tm (Alleen via fallback herstelde tekst) Tj ET'
+  const result = await runRestaurantSourceAnalysis({
+    homepageHtml: homepageWithFullRestaurantAndOneMenu(),
+    homepageUrl: 'https://debotanistbreda.nl/',
+    fetchCandidate: async () => ({ status: 'pdf', bytes: buildPageTreeBrokenPdf(content), finalUrl: 'https://debotanistbreda.nl/menukaart' }),
+  })
+  const unknown = result.unknownMenuContexts[0]
+  assert.equal(unknown.usedFallback, true)
+  assert.equal(unknown.pageCount, null)
+  assert.deepEqual(unknown.recognizedSections, [])
+  assert.ok(unknown.wordCount > 0)
+})
+
+test('DE BOTANIST REGRESSION CASE — this fix\'s own named production finding, reproduced with entirely fictional content, never the real menu text: job completes without crash, restaurant fields found, zero json_ld/html menus, the discovered PDF is processed successfully (not pdf_extraction_failed) and yields at least one reviewable menu result', async () => {
+  // Diagnosed directly against the real, live source this ticket names
+  // (https://debotanistbreda.nl/, read-only, never fetched by this
+  // automated test, never stored anywhere in this repository) during
+  // this fix's own root-cause investigation. Two real, structural
+  // quirks confirmed on that real PDF, both reproduced here with
+  // fictional restaurant/dish names only:
+  //   1. The real section-marker convention is a prefix-only "// NAME",
+  //      never a closed "// NAME //" — see pdfMenuStructuring.js's own
+  //      header comment for the full finding.
+  //   2. pdfjs-dist does not reliably keep a name and its own price as
+  //      separate text items on a two-column row — sometimes it does
+  //      ("Fictieve Koffie" / "3.5" as two items), sometimes it merges
+  //      them into one string ("Fictief Broodje 4.5"). Both shapes
+  //      appear below, on the SAME row, exactly like the real PDF's own
+  //      "Koffie 3.5 | Red Bull Energy Drink 4.5" row.
+  const menuContent = [
+    'BT /F1 12 Tf',
+    textAt(20, 100, '// FICTIEVE DRANKEN'),
+    // Two side-by-side (name, price) pairs on one row — one pair split
+    // into separate items by pdfjs, the other merged into one string.
+    textAt(20, 80, 'Fictieve Koffie'),
+    textAt(90, 80, '3.5'),
+    textAt(160, 80, 'Fictief Broodje 4.5'),
+    'ET',
+  ].join('\n')
+
+  const homepageHtml = `<html><head></head><body>
+    <p>Telefoon: 076 1234567</p>
+    <a href="https://fictieve-botanist.invalid/">website</a>
+    <a href="/menukaart">Download Menukaart</a>
+  </body></html>`
+
+  const result = await runRestaurantSourceAnalysis({
+    homepageHtml,
+    homepageUrl: 'https://fictieve-botanist.invalid/',
+    fetchCandidate: async () => ({
+      status: 'pdf',
+      bytes: buildTestPdf({ contentStream: menuContent }),
+      finalUrl: 'https://fictieve-botanist.invalid/menukaart',
+    }),
+  })
+
+  // "restaurantvelden werden gevonden" — at least the phone field, from
+  // the homepage's own <a href="tel:..."> is NOT present here (this
+  // homepage deliberately has no tel: link, mirroring how sparse a real
+  // homepage can be) — the point of this case is the PDF path, not
+  // field extraction, so this assertion only confirms the analysis
+  // itself never throws and returns its normal shape.
+  assert.ok(result.restaurantCandidateFields)
+
+  // "nul menu's werden gevonden" — no json_ld/html menu on the homepage
+  // or any HTML candidate (there is none here; the only candidate is
+  // the PDF itself).
+  assert.equal(result.menuContexts.length, 0)
+
+  // "de ontdekte PDF gaf pdf_extraction_failed" — reproduced as NOT
+  // reproducing today: the PDF is processed successfully, never
+  // pdf_extraction_failed, once this fix's own extraction/structuring
+  // improvements are in place.
+  assert.equal(result.notes.some((n) => n.includes('pdf_extraction_failed')), false)
+  assert.equal(result.unknownMenuContexts.length, 1)
+  const unknown = result.unknownMenuContexts[0]
+  assert.equal(unknown.extractionMethod, 'pdf_text')
+  assert.equal(unknown.usedFallback, false)
+
+  // "AI-structurering is bewust niet beschikbaar" — unchanged.
+  assert.ok(result.notes.some((n) => n.includes('AI-structurering is niet beschikbaar')))
+
+  // The actual, minimal acceptance criterion this whole fix exists to
+  // satisfy: at least one reviewable menu result — both the split-item
+  // pair and the merged-string pair are correctly recognized.
+  assert.equal(unknown.recognizedSections.length, 1)
+  assert.equal(unknown.recognizedSections[0].name, 'FICTIEVE DRANKEN')
+  assert.deepEqual(
+    unknown.recognizedSections[0].items.map((it) => ({ name: it.name, price: it.price, confidence: it.confidence })),
+    [
+      { name: 'Fictieve Koffie', price: '3.5', confidence: 'middel' },
+      { name: 'Fictief Broodje', price: '4.5', confidence: 'middel' },
+    ]
+  )
+
+  // "geen restaurantconcept, menuvoorstel, review of publieke data is
+  // aangemaakt" — structurally guaranteed by this module's own
+  // architecture, not merely by this one test: runRestaurantSourceAnalysis
+  // is a pure function that never touches a database, never calls
+  // Supabase, and returns only in-memory data for a human reviewer to
+  // act on later, through the existing, separate, explicit
+  // createConceptFromReceipt/submitSelectedMenus actions this fix never
+  // touches (see src/lib/onboardingRestaurantUi.test.js's own dedicated
+  // checks for those two functions).
+  assert.doesNotMatch(fs.readFileSync(require.resolve('./restaurantSourceAnalysis.js'), 'utf8'), /supabase|getSupabaseAdmin/i)
 })
 
 test('runRestaurantSourceAnalysis: a closed PDF error rolls up into a plain-language note naming the job-level error_reason, never the raw exception', async () => {

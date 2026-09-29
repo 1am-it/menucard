@@ -53,6 +53,57 @@ test('structural safety net: an unknown menu context is shown as an explicit rev
   assert.match(source, /unknownMenuContexts\.map/)
 })
 
+test('structural safety net: a discovered PDF\'s deterministically recognized menu sections/items are rendered as an explicit, reviewable list — never a raw text excerpt', () => {
+  const source = readPageSource()
+  assert.match(source, /unknown\.recognizedSections/)
+  assert.match(source, /section\.items\.map/)
+  assert.match(source, /mogelijk menu-item/)
+  assert.doesNotMatch(source, /textPreview/)
+})
+
+test('structural safety net: the confidence shown for recognized PDF menu items is derived from the real item.confidence value, never a hardcoded "middel" string — changing the source value changes what is displayed', () => {
+  const source = readPageSource()
+  assert.doesNotMatch(source, /confidence: middel/)
+  assert.match(source, /describeRecognizedConfidence\(allRecognizedItems\)/)
+
+  const fnStart = source.indexOf('function describeRecognizedConfidence')
+  assert.ok(fnStart !== -1, 'expected to find describeRecognizedConfidence')
+  const fnEnd = source.indexOf('\n}', fnStart) + 2
+  const fnSource = source.slice(fnStart, fnEnd)
+
+  // Evaluate the extracted, dependency-free function directly — this
+  // page is a 'use client' Next.js component that imports React/Next/
+  // Supabase modules this plain Node test environment cannot load
+  // (the same reason every other test in this file only ever reads the
+  // source as text), but this one function has no such dependency, so
+  // running it for real proves its ACTUAL behavior, not merely that
+  // some matching text exists.
+  const describeRecognizedConfidence = new Function(`${fnSource}\nreturn describeRecognizedConfidence;`)()
+
+  assert.equal(describeRecognizedConfidence([{ confidence: 'middel' }, { confidence: 'middel' }]), 'middel')
+  // The behavior this test exists to prove: changing the source items'
+  // own confidence value changes what would be displayed — never a
+  // fixed string regardless of input.
+  assert.equal(describeRecognizedConfidence([{ confidence: 'laag' }]), 'laag')
+  assert.equal(describeRecognizedConfidence([{ confidence: 'middel' }, { confidence: 'laag' }]), 'middel/laag')
+  assert.equal(describeRecognizedConfidence([]), '')
+})
+
+test('structural safety net: a PDF recovered only via the fallback text-recovery path shows an explicit, honest notice to the reviewer, never presented as identical to a normal result', () => {
+  const source = readPageSource()
+  assert.match(source, /unknown\.usedFallback/)
+})
+
+test('structural safety net: recognized PDF menu items are only ever rendered, never wired into createConceptFromReceipt or a menu-proposal submission call', () => {
+  const source = readPageSource()
+  const fnStart = source.indexOf('async function createConceptFromReceipt')
+  const fnBody = source.slice(fnStart, source.indexOf('\n  }', fnStart) + 4)
+  assert.doesNotMatch(fnBody, /recognizedSections/)
+  const submitStart = source.indexOf('function submitSelectedMenus')
+  const submitBody = source.slice(submitStart, source.indexOf('\n  }', submitStart) + 4)
+  assert.doesNotMatch(submitBody, /recognizedSections/)
+})
+
 test('structural safety net: menu proposals are only ever offered for a confirmed restaurant identity — never alongside the restaurant-concept-creation path', () => {
   const source = readPageSource()
   assert.match(source, /!needsRestaurantChoice && foundMenus\.map/)

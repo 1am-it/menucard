@@ -53,6 +53,20 @@ const MENU_CREATE_STATUS_LABELS = {
   error: 'Mislukt',
 }
 
+/**
+ * Derives the confidence label shown to a reviewer for a set of
+ * recognized PDF menu items from the items' own real `confidence`
+ * field — never a hardcoded display string. Returns every distinct
+ * value found, joined, so a future change to how those items are
+ * scored (`src/lib/pdfMenuStructuring.js`'s own `MENU_ITEM_CONFIDENCE`)
+ * is reflected here automatically instead of this copy silently going
+ * stale. `''` for an empty list — never guessed.
+ */
+function describeRecognizedConfidence(items) {
+  const distinct = [...new Set((items || []).map((item) => item.confidence).filter(Boolean))]
+  return distinct.join('/')
+}
+
 function IconDocument() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -510,12 +524,53 @@ export default function OnboardingRestaurantPage() {
                       Deze bron(nen) zijn gevonden maar konden niet automatisch als een herkend menu worden ingedeeld —
                       handmatige beoordeling nodig.
                     </div>
-                    {unknownMenuContexts.map((unknown, idx) => (
-                      <div key={idx} style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}>
-                        {unknown.sourceUrl} ({unknown.extractionMethod}, {unknown.pageCount} pagina{unknown.pageCount === 1 ? '' : "'s"},{' '}
-                        ~{unknown.wordCount} woorden)
-                      </div>
-                    ))}
+                    {unknownMenuContexts.map((unknown, idx) => {
+                      const recognizedSections = unknown.recognizedSections || []
+                      const allRecognizedItems = recognizedSections.flatMap((s) => s.items)
+                      const totalRecognizedItems = allRecognizedItems.length
+                      const recognizedConfidenceLabel = describeRecognizedConfidence(allRecognizedItems)
+                      return (
+                        <div key={idx} style={{ marginBottom: 12 }}>
+                          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>
+                            {unknown.sourceUrl} ({unknown.extractionMethod},{' '}
+                            {unknown.pageCount === null ? 'onbekend aantal pagina’s' : `${unknown.pageCount} pagina${unknown.pageCount === 1 ? '' : "'s"}`},{' '}
+                            ~{unknown.wordCount} woorden)
+                          </div>
+                          {unknown.usedFallback && (
+                            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4, fontStyle: 'italic' }}>
+                              Tekst herstel via een alternatieve leesmethode nadat de PDF-structuur zelf niet volledig
+                              leesbaar was — beoordeel deze inhoud extra kritisch.
+                            </div>
+                          )}
+                          {totalRecognizedItems > 0 ? (
+                            <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 10 }}>
+                              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}>
+                                {totalRecognizedItems} mogelijk menu-item{totalRecognizedItems === 1 ? '' : 's'} gevonden in deze PDF —
+                                confidence: {recognizedConfidenceLabel}, uitsluitend reviewbaar, nooit automatisch overgenomen.
+                              </div>
+                              {recognizedSections.map((section, sIdx) => (
+                                <div key={sIdx} style={{ marginBottom: 8 }}>
+                                  <div style={{ fontSize: 12, fontWeight: 600 }}>{section.name || 'Zonder herkende sectienaam'}</div>
+                                  {section.items.map((item, iIdx) => (
+                                    <div key={iIdx} style={{ fontSize: 12, display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+                                      <span>
+                                        {item.name}
+                                        {item.desc ? <span style={{ color: 'var(--text-muted)' }}> — {item.desc}</span> : null}
+                                      </span>
+                                      <span style={{ color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>&euro; {item.price}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                              Geen menu-items automatisch herkend in deze bron — handmatige beoordeling nodig.
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
                   </div>
                 )}
               </div>

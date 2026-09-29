@@ -76,7 +76,8 @@ const { extractRestaurantFieldsWithEvidence } = require('./restaurantFieldEviden
 const { ALLOWED_FIELD_NAMES, deriveFieldConfidence, isFieldReviewReady } = require('./fieldConfidence')
 const { computeFieldEvidenceHash } = require('./fieldEvidenceHash')
 const { checkFieldContextStatus } = require('./fieldContextConflict')
-const { extractDigitalPdfText, PdfExtractionError } = require('./pdfTextExtraction')
+const { extractDigitalPdfLines, extractDigitalPdfTextWithFallback, PdfExtractionError } = require('./pdfTextExtraction')
+const { structurePdfLinesIntoMenu } = require('./pdfMenuStructuring')
 const { rollUpPdfAdapterErrorReason } = require('./restaurantSourceAnalysisJobs')
 const { composeEvidenceBasedDescription } = require('./restaurantConceptDescription')
 const { runClaudeStructuringAdapter } = require('./claudeStructuringAdapter')
@@ -90,6 +91,59 @@ const { runClaudeStructuringAdapter } = require('./claudeStructuringAdapter')
 function countWords(text) {
   if (typeof text !== 'string' || text.trim().length === 0) return 0
   return text.trim().split(/\s+/).length
+}
+
+/**
+ * The one, single place a discovered PDF (a same-host candidate here,
+ * or the entry URL itself in
+ * `app/api/internal/v1/restaurant-analysis-jobs/route.js`'s own PDF-entry
+ * branch) is turned into an `unknownMenuContexts` entry — shared so both
+ * call sites apply the exact same extraction-with-fallback and menu-
+ * structuring logic, never two subtly different copies.
+ *
+ * Rejects with the underlying `PdfExtractionError` exactly like the
+ * plain `extractDigitalPdfText` used to — every caller's existing
+ * catch/note-and-continue handling stays unchanged. On success, always
+ * returns the same shape as before (`sourceUrl`/`extractionMethod`/
+ * `pageCount`/`wordCount`/`contentHash`) plus two new, additive fields:
+ * `usedFallback` (honest signal that the byte-scanning fallback, not
+ * the structure-aware primary parser, produced this text — see
+ * `src/lib/pdfTextExtraction.js`'s own `extractDigitalPdfTextWithFallback`)
+ * and `recognizedSections` (this fix's own new deterministic menu
+ * recognition — see `src/lib/pdfMenuStructuring.js` — always `[]`, never
+ * omitted, when nothing reliable was found, or when the fallback path
+ * ran and has no position data to structure at all).
+ */
+async function buildUnknownMenuContext(pdfBytes, sourceUrl) {
+  const result = await extractDigitalPdfTextWithFallback(pdfBytes)
+
+  let recognizedSections = []
+  if (!result.usedFallback) {
+    // Structuring is a bonus layered on top of an already-succeeded,
+    // structure-aware text extraction — never lets a structuring-
+    // specific failure discard the plain text/wordCount result the
+    // primary parser already confirmed. Re-parses the same bytes via
+    // extractDigitalPdfLines (position data extractDigitalPdfText's own
+    // flattened text never carries) — a real, accepted second parse,
+    // not a correctness risk: both functions apply the exact same
+    // validation/budgets to the exact same bytes.
+    try {
+      const { pages } = await extractDigitalPdfLines(pdfBytes)
+      recognizedSections = structurePdfLinesIntoMenu(pages).categories
+    } catch {
+      recognizedSections = []
+    }
+  }
+
+  return {
+    sourceUrl,
+    extractionMethod: 'pdf_text',
+    pageCount: result.pageCount,
+    wordCount: countWords(result.text),
+    contentHash: computeFieldEvidenceHash(result.text),
+    usedFallback: result.usedFallback,
+    recognizedSections,
+  }
 }
 
 /**
@@ -180,31 +234,22 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
 
     if (fetched.status === 'pdf') {
       try {
-        const pdfResult = await extractDigitalPdfText(fetched.bytes)
-        // A digital PDF's text is never itself a confidently-named,
+        // A digital PDF's plain text is never itself a confidently-named,
         // structured menu context without AI structuring (disabled today
         // — see runClaudeStructuringAdapter below) — surfaced instead as
         // an explicit, reviewer-facing "unknown menu context," per the
         // ticket's own acceptance criterion for a section the system
-        // found but could not confidently categorize.
-        //
-        // Deliberately never a raw text excerpt here — an earlier version
-        // of this module kept a bounded (280-character) raw preview of
-        // the extracted PDF text, which an independent review correctly
-        // flagged: unlike every structured restaurant field elsewhere in
-        // this pipeline (always drawn from the fixed name/category/
-        // address/phone/website allowlist), a PDF's own header/footer
-        // could incidentally include something outside that allowlist
-        // (e.g. a name). `wordCount` gives a reviewer a real, useful
-        // signal ("this PDF has substantial content") without ever
-        // storing or displaying any of the PDF's own words.
-        unknownMenuContexts.push({
-          sourceUrl: fetched.finalUrl || candidate.url,
-          extractionMethod: 'pdf_text',
-          pageCount: pdfResult.pageCount,
-          wordCount: countWords(pdfResult.text),
-          contentHash: computeFieldEvidenceHash(pdfResult.text),
-        })
+        // found but could not confidently categorize. `recognizedSections`
+        // (see buildUnknownMenuContext's own doc comment) is this fix's
+        // own additive, deterministic layer on top of that: real,
+        // reviewable (name, price) candidates when the PDF's own layout
+        // allows them to be found — never a raw text excerpt (an earlier
+        // version of this module kept a bounded raw preview, which an
+        // independent review correctly flagged: unlike every structured
+        // restaurant field elsewhere in this pipeline, a PDF's own
+        // header/footer could incidentally include something outside the
+        // fixed field allowlist).
+        unknownMenuContexts.push(await buildUnknownMenuContext(fetched.bytes, fetched.finalUrl || candidate.url))
       } catch (err) {
         // Any failure here — a properly-typed PdfExtractionError, or, as
         // defense in depth, any other unexpected error — is reported as a
@@ -281,5 +326,6 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
 
 module.exports = {
   countWords,
+  buildUnknownMenuContext,
   runRestaurantSourceAnalysis,
 }
