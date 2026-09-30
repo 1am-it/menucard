@@ -27,9 +27,10 @@
 //   2. `pdfjs-dist` ships as pure ESM (`"main": "build/pdf.mjs"`, no
 //      CommonJS build at all) — this module stays CommonJS, matching
 //      every other pure-logic module in `src/lib/`, and loads the
-//      library via a single `await import(...)` call inside its one
-//      async function. This is Node's own documented, standard
-//      CommonJS-importing-ESM interop mechanism, not a workaround.
+//      library (plus its worker module — see `loadPdfjsLib`) via
+//      `await import(...)` calls inside one async function. This is
+//      Node's own documented, standard CommonJS-importing-ESM interop
+//      mechanism, not a workaround.
 //
 // `pdfjs-dist` itself introduces zero new `npm audit` findings in this
 // project (independently confirmed at pin time) — the four pre-existing
@@ -87,12 +88,28 @@ const ALLOWED_PDF_ERROR_REASONS = ['pdf_too_large', 'pdf_encrypted', 'pdf_corrup
 /** The one, single place `pdfjs-dist` is ever loaded from — both
  * `extractDigitalPdfText` and `extractDigitalPdfLines` call this instead
  * of each holding their own `await import(...)`, so this file keeps
- * exactly one literal import specifier, matching this file's own header
- * comment ("loads the library via a single `await import(...)` call")
- * and the structural test that verifies it. Node's own dynamic `import()`
+ * exactly two literal import specifiers (the worker module, then the
+ * library), verified by a structural test. Node's own dynamic `import()`
  * already caches by specifier, so calling this more than once across a
- * process's lifetime is cheap either way. */
+ * process's lifetime is cheap either way.
+ *
+ * The worker module is imported first, deliberately. Under Node, PDF.js
+ * always runs its worker as a same-thread "fake worker" and, unless
+ * `globalThis.pdfjsWorker` is already set, loads it through a COMPUTED
+ * dynamic import of "./pdf.worker.mjs", relative to wherever `pdf.mjs`
+ * itself ends up at runtime. No static file tracer can follow a computed
+ * specifier: a production build of this project traced `pdf.mjs` into
+ * the analysis route's serverless-function file list but not
+ * `pdf.worker.mjs`, and running this module against only those traced
+ * files reproduced "Setting up fake worker failed" for every PDF (mapped
+ * to `pdf_corrupt`, rolled up to `pdf_extraction_failed`), while every
+ * local run with the full `node_modules` present succeeded. Evaluating
+ * the worker module sets `globalThis.pdfjsWorker` itself, which PDF.js
+ * checks before ever attempting that computed import — the same
+ * same-thread execution model as before, but now a literal, traceable
+ * dependency. */
 async function loadPdfjsLib() {
+  await import('pdfjs-dist/legacy/build/pdf.worker.mjs')
   return import('pdfjs-dist/legacy/build/pdf.mjs')
 }
 

@@ -20,9 +20,14 @@ const {
 const packageManifest = JSON.parse(
   fs.readFileSync(path.join(__dirname, '..', '..', 'package.json'), 'utf8')
 )
+const nextConfig = require('../../next.config.js')
 
 test('PDF extraction pins the Vercel runtime to Node 22, which pdfjs-dist requires', () => {
   assert.equal(packageManifest.engines && packageManifest.engines.node, '22.x')
+})
+
+test('PDF extraction keeps pdfjs-dist external to the Next.js server bundle', () => {
+  assert.ok(nextConfig.serverExternalPackages.includes('pdfjs-dist'))
 })
 
 /**
@@ -474,9 +479,41 @@ test('structural safety net: never imports an OCR, screenshot, image-rendering, 
   assert.doesNotMatch(source, /tesseract|ocr|puppeteer|playwright|browserless|canvas|screenshot/i)
 })
 
-test('structural safety net: only ever imports the Node-specific legacy pdfjs-dist build, never the default/browser entry point', () => {
+test('structural safety net: only ever imports the Node-specific legacy pdfjs-dist build (its worker module first, then the library), never the default/browser entry point', () => {
   const fs = require('node:fs')
   const source = fs.readFileSync(require.resolve('./pdfTextExtraction.js'), 'utf8')
   const importCalls = [...source.matchAll(/import\(['"]([^'"]+)['"]\)/g)].map((m) => m[1])
-  assert.deepEqual(importCalls, ['pdfjs-dist/legacy/build/pdf.mjs'])
+  assert.deepEqual(importCalls, ['pdfjs-dist/legacy/build/pdf.worker.mjs', 'pdfjs-dist/legacy/build/pdf.mjs'])
+})
+
+test('runtime safety net: extraction never depends on PDF.js resolving its own worker through a computed path — the one a serverless file tracer cannot follow', () => {
+  // A fresh child process, so no earlier test in this file has already
+  // initialized PDF.js's cached worker loader. There, PDF.js's own
+  // computed worker location is pointed at a file that does not exist —
+  // exactly what a serverless function that ships pdf.mjs without
+  // pdf.worker.mjs looks like at runtime. Extraction must still succeed,
+  // proving the worker comes from loadPdfjsLib's own literal import.
+  const { execFileSync } = require('node:child_process')
+  const script = [
+    '(async () => {',
+    "  const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs')",
+    "  pdfjs.GlobalWorkerOptions.workerSrc = './worker-file-that-does-not-exist.mjs'",
+    '  const { extractDigitalPdfText } = require(process.env.PDF_TEXT_EXTRACTION_MODULE)',
+    "  const result = await extractDigitalPdfText(Buffer.from(process.env.PDF_BASE64, 'base64'))",
+    "  process.stdout.write('\\nRESULT:' + JSON.stringify({ pageCount: result.pageCount, hasText: result.text.length > 0 }))",
+    "})().catch((err) => process.stdout.write('\\nRESULT:' + JSON.stringify({ error: err.reason || err.message })))",
+  ].join('\n')
+  const output = execFileSync(process.execPath, ['-e', script], {
+    cwd: path.join(__dirname, '..', '..'),
+    env: {
+      ...process.env,
+      PDF_TEXT_EXTRACTION_MODULE: require.resolve('./pdfTextExtraction'),
+      PDF_BASE64: VALID_TEXT_PDF_BASE64,
+    },
+    encoding: 'utf8',
+  })
+  // PDF.js prints its own warnings to stdout — only the marked line counts.
+  const resultLine = output.split('\n').find((line) => line.startsWith('RESULT:'))
+  assert.ok(resultLine, 'expected a RESULT line from the child process')
+  assert.deepEqual(JSON.parse(resultLine.slice('RESULT:'.length)), { pageCount: 1, hasText: true })
 })
