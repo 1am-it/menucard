@@ -199,6 +199,11 @@ of these.
     ticket; its own deliverables are a comparison report, a vendor
     recommendation, and an explicit DPA/EU-processing/retention/cost
     decision, never assumed in advance.
+24. [be-22-html-menu-recognition-foundation.md](./be-22-html-menu-recognition-foundation.md) —
+    local, offline benchmark foundation only (`ops/benchmark/`); a strict,
+    deterministic HTML menu structure adapter, a shared output contract for a
+    later AI comparison, and scoring against synthetic fixtures. No product,
+    UI, database, provider or live-pipeline change; no real source is fetched.
 
 ## PLATFORM-* order (not started)
 
