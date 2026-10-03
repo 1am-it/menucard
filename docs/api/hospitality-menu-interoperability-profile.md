@@ -40,7 +40,7 @@ question open, this profile leaves it open too (see §11).
 | **Interoperability envelope** | An internal companion record that travels with a mapping: the original source label, provenance references, optional adapter normalization, and recorded canonical gaps (§4). Never public. |
 | **Source label** | A section, item, or option name exactly as the source wrote it, for example `SPRITZERS` or `SIDE DISHES`. |
 | **Adapter normalization** | An optional, nullable, reviewable, adapter-specific classification next to a source label. Not canonical; no controlled vocabulary. |
-| **Canonical gap** | A concept an external shape can express but `MARKET-02` has no field for today: modifiers, tax/VAT treatment, service mode. |
+| **Canonical gap** | A concept an external shape can express but `MARKET-02` has no field for today: modifiers, tax/VAT treatment, service mode, nested sections. |
 | **Missing evidence** | A concept `MARKET-02` does represent, but the source did not supply. Represented with that concept's own existing "unknown" state, never with an invented default. |
 | **Derived public trust label** | A `PLATFORM-03` status label (Owner verified, Community confirmed, Editor verified, Imported, Stale) shown for a published risk-sensitive field as `MARKET-02B` allows. |
 
@@ -89,6 +89,25 @@ Until the published layer (`MARKET-02B`) or the snapshot mechanism
 (`MARKET-06`) exists, no projection of the corresponding kind can be
 produced at all.
 
+### Risk-sensitive values stay out of Schema.org markup
+
+Price and availability are risk-sensitive (Decision 011 §9: their display
+must always show provenance and freshness). Schema.org offers no existing,
+accepted way to carry BredaEats' provenance and freshness alongside those
+claims. Therefore, **no Schema.org markup** — neither the on-page projection
+nor any external feed, API, or export — carries price, price variants,
+`minPrice`, availability status, or validity dates, until the publication
+contracts explicitly decide how provenance and freshness are shown for
+machine-readable markup. The mapping table (§5) describes those concepts
+only as blocked, conditional future projections, never as current output.
+Allergens are not projected either (§5), and an empty allergen list never
+means "allergen-free".
+
+This applies to machine-readable markup only. The human-readable on-page
+display of published prices and availability stays governed by the existing
+active-published-version, `PLATFORM-03`, and `MARKET-02B` contracts, and is
+not changed by this profile.
+
 ## 4. Interoperability envelope (internal only)
 
 A logical, illustrative shape — not a physical schema, table, or API:
@@ -99,8 +118,8 @@ InteropEnvelope {
   source_label:      { text, locale } | null          // exactly as the source wrote it
   adapter_normalization: {
     adapter_id:      text                             // which future adapter proposed it
-    value:           text                             // adapter-specific; no controlled vocabulary
-    reviewed:        boolean                          // false until a human accepts it
+    review_state:    'pending' | 'accepted' | 'rejected'  // internal review outcome only
+    value:           text | null                      // adapter-specific; no controlled vocabulary; null when rejected
   } | null
   source_reference_ids: [SourceReference.id]          // MARKET-02 §5/§6, references only
   canonical_gaps:    [{ concept, offered_by_source: true }]
@@ -122,9 +141,18 @@ Rules:
    source label, and is never invented when the source gives no evidence (an
    unknown category stays `null`). Adding any normalized classification to
    canonical data requires a separate, explicit `MARKET-02` amendment.
+   `review_state` is an internal, adapter-bound review outcome: `pending`
+   until a human decides, `accepted`, or `rejected` — and on `rejected` the
+   `value` is `null`. The original source section name is always kept,
+   whatever the review outcome. These three states are envelope bookkeeping
+   only: not a canonical taxonomy, not a vocabulary for categories, and not a
+   `MARKET-02` field.
 4. **Canonical gaps are recorded, not stored.** The envelope may note *that*
    a source offers a canonical-gap concept (§6). It never holds those values
-   as a substitute canonical store.
+   as a substitute canonical store. In particular, it keeps no parent source
+   label for a nested section: section nesting is a canonical gap (§6), and
+   representing it later requires a separate `MARKET-02` amendment or a
+   separate, explicit envelope decision.
 5. **Provenance stays referenced, not copied.** Only `SourceReference`
    identities, per `MARKET-02` §6.
 
@@ -137,6 +165,10 @@ Visibility codes:
   open; this profile decides nothing about it).
 - **L** — only as a derived public trust label (§8).
 - **I** — internal; never projected or exported automatically.
+- **B** — **blocked in Schema.org markup** (§3, "Risk-sensitive values stay
+  out of Schema.org markup"). The "Schema.org projection" column then names
+  only a possible future, conditional projection — never current output.
+  Human-readable on-page display is unaffected (it stays **P**).
 
 | Canonical field (`MARKET-02`) | External concept | Schema.org projection | Lossy / unsupported | Visibility |
 |---|---|---|---|---|
@@ -147,16 +179,17 @@ Visibility codes:
 | `CanonicalMenuSection.name` (+ `locale`) | Category / group | `MenuSection.name`, `MenuSection.inLanguage` | Projects the canonical section name as published (for example `SPRITZERS`); adapter normalization is never projected. | P |
 | `CanonicalMenuSection.position` | Display order | order of `hasMenuSection` | Order is not a guaranteed semantic of JSON-LD arrays; consumers may reorder. | P |
 | `CanonicalMenuItem.name`, `description` (+ `locale`) | Product / item | `MenuItem.name`, `MenuItem.description` | `MenuItem` (an `Intangible`) has no `inLanguage`; per-item locale is lost unless it equals the containing section's. | P |
-| `CanonicalMenuItem.price` — `known`, single amount | Base price | `MenuItem.offers` → `Offer.price` + `Offer.priceCurrency` | Minor units rendered as a decimal with `.`; display formatting is not carried. | P (+ L) |
-| `price.is_from = true` | "From" price | `Offer.priceSpecification` → `PriceSpecification.minPrice` + `priceCurrency`; never `Offer.price` | "From" semantics are approximated, never shown as an exact price. Omit if the projection cannot express `minPrice`. | P (+ L) |
-| `price.variants[]` (`known`, ≥2) | Size / portion variants | one `Offer` per variant (`Offer.name` = variant `label`, `price`, `priceCurrency`) | The variant `label` is free text; its meaning (glass/bottle, size) is not typed. | P (+ L) |
+| `CanonicalMenuItem.price` — `known`, single amount | Base price | **Blocked today.** Possible future: `MenuItem.offers` → `Offer.price` + `Offer.priceCurrency` | Minor units would render as a decimal with `.`; display formatting is not carried. | B; on-page display P (+ L) |
+| `price.is_from = true` | "From" price | **Blocked today.** Possible future: `Offer.priceSpecification` → `PriceSpecification.minPrice` (a **Number**, e.g. `4.5`, never a string such as `"4.50"`) + `priceCurrency`; never `Offer.price` | "From" semantics would be approximated, never shown as an exact price. | B; on-page display P (+ L) |
+| `price.variants[]` (`known`, ≥2) | Size / portion variants | **Blocked today.** Possible future: one `Offer` per variant (`Offer.name` = variant `label`, `price`, `priceCurrency`) | The variant `label` is free text; its meaning (glass/bottle, size) is not typed. | B; on-page display P (+ L) |
 | `price` — `multiple_undecomposed` | Several prices, breakdown unknown | no `Offer` amount | Unsupported: no Schema.org way to say "several prices, unknown". Never collapsed into one amount. | P (not projected) |
 | `price` — `on_request` | Price on request | no `Offer` amount | Unsupported. Never rendered as `0`, "free", or a placeholder number. | P (not projected) |
 | `price` — `unknown` | Missing price | omitted | Missing evidence — never `0`, never "free". | — |
-| `availability.status` — `available` | In stock / sellable | `Offer.availability` = `InStock` | Retail-oriented vocabulary; a restaurant nuance is lost. | P (+ L) |
-| `availability.status` — `temporarily_unavailable` | Sold out / paused | `Offer.availability` = `OutOfStock` | As above. | P (+ L) |
-| `availability.status` — `seasonal` | Seasonal item | no faithful enumeration value; `valid_from`/`valid_to` → `Offer.validFrom`/`validThrough` when set | Seasonality itself is not expressible; never forced onto another value. | P (+ L) |
+| `availability.status` — `available` | In stock / sellable | **Blocked today.** Possible future: `Offer.availability` = `InStock` | Retail-oriented vocabulary; a restaurant nuance would be lost. | B; on-page display P (+ L) |
+| `availability.status` — `temporarily_unavailable` | Sold out / paused | **Blocked today.** Possible future: `Offer.availability` = `OutOfStock` | As above. | B; on-page display P (+ L) |
+| `availability.status` — `seasonal` | Seasonal item | **Blocked today.** No faithful enumeration value even later. | Seasonality itself is not expressible; never forced onto another value. | B; on-page display P (+ L) |
 | `availability.status` — `unknown` | — | omitted | Missing evidence. | — |
+| `availability.valid_from`, `valid_to` (with **any** status) | Availability window | **Blocked today.** Possible future: `Offer.validFrom` / `Offer.validThrough` | In `MARKET-02` these can accompany every availability status. `Offer.validFrom`/`validThrough` describe the validity of an offer, not item availability, so any future mapping is lossy and must be assessed independently of the status. | B; on-page display P (+ L) |
 | `allergens[]` (`{scheme, code}`) | Allergen declarations | none | **Unsupported**: Schema.org has no allergen property. Never mapped onto `suitableForDiet` — a diet is not an allergen declaration, and an empty list never means "allergen-free". | P (not projected) (+ L) |
 | `tags[]` (free text) | Labels, badges | none | Free text; never translated into `suitableForDiet` or any `RestrictedDiet` value — that would be a new, unreviewed diet claim. | P (not projected) |
 | `id`, `market_id`, `legacy_ids[]`, `external_ids[]` | Provider/catalog ids | none | A stable public identifier or URL strategy is a separate, open publication decision. | I |
@@ -165,9 +198,11 @@ Visibility codes:
 
 "(not projected)" means the field may well be public on a BredaEats page under
 the publication contracts, but this profile defines no Schema.org rendering for
-it. The trust labels (**L**) have no standard Schema.org property; where they
-appear, they appear in BredaEats' own UI, not as invented Schema.org
-extensions.
+it. **B** rows are blocked in all Schema.org markup until the publication
+contracts decide how provenance and freshness are carried there (§3); their
+"possible future" entries are not a decision to project them. The trust labels
+(**L**) have no standard Schema.org property; where they appear, they appear in
+BredaEats' own UI, not as invented Schema.org extensions.
 
 ## 6. POS capability matrix
 
@@ -178,7 +213,8 @@ chosen, or assumed to support any concept.
 | Concept | External representation (varies per provider) | `MARKET-02` today | Profile rule | Provider-specific behaviour |
 |---|---|---|---|---|
 | **Menu** | Menu, catalog, or channel-specific menu | `CanonicalMenu` | Map to `CanonicalMenu`. | One catalog may serve several channels; channel scoping is not canonical. |
-| **Section** | Category, group, tab | `CanonicalMenuSection` (`name` + `locale`, `position`) | Keep the source label (§4); nesting deeper than one level is flattened only with the source label kept in the envelope. | Nesting depth, hidden or internal categories. |
+| **Section** | Category, group, tab | `CanonicalMenuSection` (`name` + `locale`, `position`) | Keep the source label (§4). | Hidden or internal categories. |
+| **Nested sections** | Sub-categories, section hierarchy | **`canonical gap`** — `MARKET-02` has no section hierarchy, and the envelope keeps no parent source label | Never silently flattened as if nothing were lost: the hierarchy is a recorded gap, not mapped onto names, positions, or descriptions. Representing it requires a separate `MARKET-02` amendment or a separate, explicit envelope decision. | Nesting depth, sections nested in sections. |
 | **Item** | Product, article, item | `CanonicalMenuItem` | Map name/description; keep the source label. | SKUs, PLU codes, kitchen routing — never canonical. |
 | **Price** | Base price, often with tax flags | `Money` (`pricing_status`, `amount_minor_units`, `currency`, `is_from`) | Only the four existing states; never invent an amount, currency, or state. | Price per channel, time-based pricing, rounding. |
 | **Price variants** | Sizes, portions | `Money.variants` (`label?`, `amount_minor_units`) | Map only fully decomposed variants as `known`; otherwise `multiple_undecomposed`. | Variant-as-separate-product vs. variant-on-product. |
@@ -207,16 +243,20 @@ until `MARKET-02` is amended.
    gets a number.
 4. **Locale is never guessed.** Text keeps its own `locale`; a projection that
    cannot carry it says so (§5).
-5. **Modifiers, tax, and service mode are canonical gaps** (§6) — never
-   squeezed into another field.
-6. **Provenance is never automatic output** (§8).
-7. **Source labels survive normalization** (§4).
+5. **Modifiers, tax, service mode, and nested sections are canonical gaps**
+   (§6) — never squeezed into another field.
+6. **Risk-sensitive values stay out of Schema.org markup** (§3): price, price
+   variants, `minPrice`, availability status, and validity dates are not
+   emitted until the publication contracts decide how provenance and
+   freshness are carried there.
+7. **Provenance is never automatic output** (§8).
+8. **Source labels survive normalization** (§4).
 
 ## 8. Visibility
 
 | Information | Class | Rule |
 |---|---|---|
-| Published canonical values (names, prices per `Money`, availability, allergens, …) | Public **only via the published layer** | Only from the sources in §3, and only as far as the publication contracts make each field public (Decision 011 §10 open). |
+| Published canonical values (names, prices per `Money`, availability, allergens, …) | Public **only via the published layer** | Only from the sources in §3, and only as far as the publication contracts make each field public (Decision 011 §10 open). Price, availability, and validity dates are additionally blocked in all Schema.org markup (§3); allergens are never projected (§5). |
 | Derived trust labels for published risk-sensitive fields (Owner verified, Community confirmed, Editor verified, Imported, Stale) | **Derived public label** | Only where `PLATFORM-03`, `MARKET-02B`, and Decision 011 §9 already allow it; computed from the published layer, never from raw assertions at export time. |
 | Raw `FieldAssertion` data (`trust_source`, `confidence`, `verified_at`, `verified_by`, `field_path`, ids) | **Never automatically public** | Only the derived label above may appear. |
 | Reviewer identity (`verified_by`, moderator, reviewer) | **Never automatically public** | — |
@@ -256,13 +296,15 @@ Internal envelope for section `s-1` (never public):
 InteropEnvelope {
   canonical_ref: { entity_type: "MenuSection", entity_id: "s-1" },
   source_label: { text: "SPRITZERS", locale: "nl" },
-  adapter_normalization: { adapter_id: "example-adapter", value: "drinks", reviewed: false },
+  adapter_normalization: { adapter_id: "example-adapter", review_state: "pending", value: "drinks" },
   source_reference_ids: ["sr-1"],
   canonical_gaps: [{ concept: "modifiers", offered_by_source: true }]
 }
 ```
 
-On-page projection, derived only from the active, published version (§3):
+On-page Schema.org projection, derived only from the active, published
+version (§3). It carries no price, price variant, `minPrice`, availability,
+or validity date — those stay blocked in markup (§3):
 
 ```json
 {
@@ -278,11 +320,7 @@ On-page projection, derived only from the active, published version (§3):
         "name": "SPRITZERS",
         "inLanguage": "nl",
         "hasMenuItem": [
-          {
-            "@type": "MenuItem",
-            "name": "Fictieve spritz",
-            "offers": { "@type": "Offer", "price": "8.50", "priceCurrency": "EUR", "availability": "https://schema.org/InStock" }
-          },
+          { "@type": "MenuItem", "name": "Fictieve spritz" },
           { "@type": "MenuItem", "name": "Fictieve huisspritz" }
         ]
       },
@@ -291,14 +329,7 @@ On-page projection, derived only from the active, published version (§3):
         "name": "SIDE DISHES",
         "inLanguage": "en",
         "hasMenuItem": [
-          {
-            "@type": "MenuItem",
-            "name": "Fictional fries",
-            "offers": {
-              "@type": "Offer",
-              "priceSpecification": { "@type": "PriceSpecification", "minPrice": "4.50", "priceCurrency": "EUR" }
-            }
-          }
+          { "@type": "MenuItem", "name": "Fictional fries" }
         ]
       }
     ]
@@ -308,10 +339,14 @@ On-page projection, derived only from the active, published version (§3):
 
 Deliberately not projected:
 
-- the adapter normalization `drinks` and the whole envelope;
-- any amount for `Fictieve huisspritz` (`multiple_undecomposed`) and its
-  `unknown` availability;
-- `seasonal` (no faithful value; no `valid_from`/`valid_to` set);
+- the adapter normalization `drinks` (`pending`) and the whole envelope;
+- every price: the `known` 8.50 for `Fictieve spritz`, the `is_from` 4.50 for
+  `Fictional fries` (a later, permitted projection would write `minPrice` as
+  the Number `4.5`, never the string `"4.50"`), and the
+  `multiple_undecomposed` state of `Fictieve huisspritz` — all blocked in
+  markup (§3);
+- every availability status (`available`, `unknown`, `seasonal`) and any
+  validity date — blocked in markup (§3);
 - `meal_type: "borrel"`;
 - the empty `allergens[]` (never "allergen-free");
 - the modifiers the source offered (canonical gap);
@@ -350,8 +385,16 @@ endorsement, standard, dataset, API, or data access is assumed or implied.
 - The field-level public/private classification (Decision 011 §10).
 - Whether derived trust labels ever get a machine-readable form in an
   external export — no standard Schema.org property exists for them.
-- Whether `MARKET-02` should be amended for modifiers, tax/VAT, or service
-  mode — each a separate, explicit decision.
+- How Decision 011 §9 (provenance and freshness for risk-sensitive data)
+  applies to machine-readable markup, which decides whether price and
+  availability may ever leave the "blocked" state (§3). Possible freshness
+  carriers such as `dateModified`, `Offer.priceValidUntil`, `Offer.validFrom`,
+  and `Offer.validThrough` are a research question only; none is chosen
+  here, and none carries provenance.
+- Whether section nesting gets a representation — a `MARKET-02` amendment or
+  a separate, explicit envelope decision.
+- Whether `MARKET-02` should be amended for modifiers, tax/VAT, service
+  mode, or nested sections — each a separate, explicit decision.
 - Whether any adapter normalization should ever become canonical — a separate
   `MARKET-02` amendment, never implied by this profile.
 - How an AI-assisted inbound proposal is tagged (Decision 011 §8, open there).

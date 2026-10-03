@@ -348,7 +348,8 @@ implementation (see its own ticket).
     they can carry menu content specifically — see the ticket's own
     "Relationship to `MARKET-05B`" and "Suggested order" sections.
 14. [market-12-hospitality-data-interoperability.md](./market-12-hospitality-data-interoperability.md) —
-    not started; a documentation-only interoperability profile around the
+    documentation profile drafted locally, under review; no implementation.
+    A documentation-only interoperability profile around the
     existing `MARKET-02` canonical model. It maps safely to a useful,
     explicitly lossy Schema.org projection and defines how future POS or
     Dutch-hospitality integrations are evaluated without treating a vendor or

@@ -2,14 +2,16 @@
 
 ## Status
 
-Proposed. Documentation and decision work only. No code, UI,
-API route, database table, migration, provider account, POS connection, or
-restaurant-data import is authorized by this ticket.
+Documentation profile drafted locally, under review; no implementation.
+Documentation and decision work only. No code, UI, API route, database
+table, migration, provider account, POS connection, or restaurant-data
+import is authorized by this ticket.
 
 **Update (2026-10-03):** the profile
 `docs/api/hospitality-menu-interoperability-profile.md` is drafted locally
-on an isolated documentation branch — not yet independently reviewed, not
-pushed. It decides nothing beyond this ticket's own required decisions.
+on an isolated documentation branch and corrected after a first review —
+under review, not pushed. It decides nothing beyond this ticket's own
+required decisions.
 
 ## Depends on
 
@@ -94,13 +96,21 @@ certainty, or silently losing review and provenance data.
   (`MARKET-02B`); any external feed, API, or export only from a versioned
   `MARKET-06` snapshot — never from menu proposals, restaurant profile
   drafts, import candidates, raw imports, BE-20 analysis jobs, or review
-  context.
+  context. Price, price variants, `minPrice`, availability status, and
+  validity dates are risk-sensitive (Decision 011 §9) and stay out of all
+  Schema.org markup — on-page and external — until the publication
+  contracts explicitly decide how provenance and freshness are shown for
+  machine-readable markup; the profile describes them only as blocked,
+  conditional future projections. Allergens are not projected, and an empty
+  allergen list never means "allergen-free". Human-readable on-page display
+  stays governed by the existing publication contracts.
 - A provider-neutral POS capability matrix covering, at minimum, menu,
   section, item, price/price variants, modifier groups/options, availability,
   allergens, locale, service mode, and tax information where supplied. The
   matrix states per concept whether `MARKET-02` can represent it today.
-  Modifier groups/options, tax/VAT treatment, and service mode have no field
-  in `MARKET-02` today and are marked `canonical gap`: an external source may
+  Modifier groups/options, tax/VAT treatment, service mode, and nested
+  sections (`MARKET-02` has no section hierarchy) have no field in
+  `MARKET-02` today and are marked `canonical gap`: an external source may
   offer them, but they are neither silently mapped onto another field nor
   recorded as missing evidence, and storing them canonically first requires a
   separate, explicit `MARKET-02` amendment. Price variants (`Money.variants`),
@@ -113,8 +123,10 @@ certainty, or silently losing review and provenance data.
   and reviewable. That classification exists only in the interoperability
   envelope or an adapter: it is not a current `MARKET-02` field, defines no
   controlled vocabulary or canonical section taxonomy, and never replaces the
-  original source section name. Adding it to canonical data requires a
-  separate, explicit `MARKET-02` amendment.
+  original source section name. Its internal, adapter-bound review outcome
+  is `pending`, `accepted`, or `rejected` (a rejected normalization has a
+  `null` value) — envelope bookkeeping, not a taxonomy or vocabulary. Adding
+  it to canonical data requires a separate, explicit `MARKET-02` amendment.
 - Rules that separate two kinds of trust information: (a) the derived public
   status labels that `PLATFORM-03` and `MARKET-02B` already allow for
   published risk-sensitive fields, which a public projection may carry as
@@ -151,10 +163,10 @@ certainty, or silently losing review and provenance data.
    single invented amount.
 4. Price variants, availability, allergens, and locale may be absent in a
    source. Absence of these existing `MARKET-02` concepts must be represented
-   as missing evidence, not as a false default. Modifiers, tax/VAT, and
-   service mode are a `canonical gap` instead (see Scope): not representable
-   in `MARKET-02` today, and no current schema or field is stretched to hold
-   them.
+   as missing evidence, not as a false default. Modifiers, tax/VAT, service
+   mode, and nested sections are a `canonical gap` instead (see Scope): not
+   representable in `MARKET-02` today, and no current schema or field is
+   stretched to hold them.
 5. Derived public status labels for published risk-sensitive fields follow
    the existing `PLATFORM-03`/`MARKET-02B` contracts and Decision 011 §9.
    Raw `FieldAssertion` data, internal review status, `source_locator`,
@@ -166,7 +178,10 @@ certainty, or silently losing review and provenance data.
    a projection, not as a round-trippable backup or a POS interchange format.
    A BredaEats on-page projection is derived only from the active, published
    canonical version (`MARKET-02B`); any external feed, API, or export only
-   from a versioned `MARKET-06` snapshot (Decision 011 §11).
+   from a versioned `MARKET-06` snapshot (Decision 011 §11). Neither carries
+   price, price variants, `minPrice`, availability status, or validity dates
+   until the publication contracts decide how provenance and freshness are
+   shown for machine-readable markup (Decision 011 §9).
 7. Any future KHN engagement is a validation/research conversation only until
    legal, technical, commercial, privacy, and governance decisions are
    separately documented and approved.
@@ -211,9 +226,15 @@ certainty, or silently losing review and provenance data.
 - [ ] The capability matrix covers section/item structure, price states and
       variants, modifiers, availability, allergens, locale, service mode, and
       tax treatment when a provider supplies it, and marks modifiers, tax/VAT,
-      and service mode as `canonical gap` rather than mapping them.
+      service mode, and nested sections as `canonical gap` rather than
+      mapping them.
 - [ ] Original source labels are preserved; normalized categories are optional,
-      envelope/adapter-only, and never invented from missing evidence.
+      envelope/adapter-only, never invented from missing evidence, and carry
+      only an internal `pending`/`accepted`/`rejected` review outcome.
+- [ ] No Schema.org markup — on-page or external — carries price, price
+      variants, `minPrice`, availability status, or validity dates until the
+      publication contracts decide how provenance and freshness are shown
+      there; the synthetic example emits none of them.
 - [ ] The profile preserves `MARKET-02` money invariants and `PLATFORM-03`
       provenance/trust boundaries: derived public status labels only as
       `PLATFORM-03`/`MARKET-02B` allow, raw provenance and audit data never.
