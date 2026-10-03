@@ -1024,10 +1024,15 @@ test('structural safety net: the coverage page never shows the old per-row "too 
   );
 });
 
-test('structural safety net: the coverage page shows the sample-threshold explanation exactly once per table, not once per row', () => {
+test('structural safety net: the coverage page shows the sample-threshold explanation exactly once, never once per row', () => {
+  // PLATFORM-12 Phase 1 (2026-10-04): the explanation moved from below
+  // each breakdown table into the page's single, collapsed "Methodology &
+  // data notes" section (see coveragePriority.test.js's own structural
+  // tests). Still written exactly once, still outside the row loop, still
+  // driven by the real sampleThreshold value.
   const source = fs.readFileSync(COVERAGE_PAGE_PATH, 'utf8');
   const explanationMatches = source.match(/Percentages are only shown for groups with at least/g) || [];
-  assert.equal(explanationMatches.length, 1, 'the explanation must be written once in source (inside BreakdownTable, outside its rows.map) — not duplicated per call site or per row');
+  assert.equal(explanationMatches.length, 1, 'the explanation must be written once in source — not duplicated per call site or per row');
 
   const mapStart = source.indexOf('{rows.map((r) => (');
   const mapEnd = source.indexOf('))}', mapStart);
@@ -1035,9 +1040,13 @@ test('structural safety net: the coverage page shows the sample-threshold explan
   assert.ok(mapStart >= 0 && mapEnd > mapStart, 'expected to find the rows.map row-rendering block');
   assert.ok(explanationIndex > mapEnd, 'the explanation must be rendered after the row loop, never inside it — otherwise it would repeat once per row');
 
+  const detailsStart = source.indexOf('<details');
+  const detailsEnd = source.indexOf('</details>');
+  assert.ok(detailsStart >= 0 && explanationIndex > detailsStart && explanationIndex < detailsEnd, 'the explanation must live inside the single methodology section');
+
   assert.match(
     source,
-    /Percentages are only shown for groups with at least \{sampleThreshold\} restaurants\.\s*<\/div>/,
+    /Percentages are only shown for groups with at least \{data\.sampleThreshold\} restaurants\./,
     'must use the real sampleThreshold value from computeCoverageMetrics(), never a hardcoded number that could drift from it'
   );
 });
