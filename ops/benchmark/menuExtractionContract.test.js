@@ -9,6 +9,9 @@ const {
   PRICE_STATUSES,
   REJECTION_REASONS,
   emptyCost,
+  findForbiddenTrustKey,
+  TRUST_SCAN_MAX_DEPTH,
+  TRUST_SCAN_MAX_NODES,
   validateMenuExtraction,
 } = require('./menuExtractionContract')
 const { ADAPTER_KINDS } = require('./adapters')
@@ -28,7 +31,7 @@ function validResult() {
         ],
       },
     ],
-    rejected: [{ text: 'ma t/m vr 12.00 - 22.00', reason: 'clock_time' }],
+    rejected: [{ text: 'ma t/m vr 12.00 - 22.00', reason: 'clock_time', locator: 'ul>li[2]' }],
     cost: emptyCost(),
   }
 }
@@ -122,4 +125,67 @@ test('never throws on garbage input', () => {
     assert.ok(Array.isArray(validateMenuExtraction(input)))
     assert.ok(validateMenuExtraction(input).length > 0)
   }
+})
+
+// ─── M3: the trust-key ban is recursive, bounded and cycle-safe ───────────
+
+test('M3: confidence/reviewReady is invalid at any depth — evidence, rejected, stats, cost, arrays', () => {
+  const mutations = [
+    (r) => { r.sections[0].items[0].evidence.confidence = 'hoog' },
+    (r) => { r.rejected[0].reviewReady = true },
+    (r) => { r.stats = { counted: 3, confidence: 1 } },
+    (r) => { r.cost.reviewReady = false },
+    (r) => { r.sections[0].path = ['Fictief'], r.sections[0].extra = [[{ deeper: { confidence: 'laag' } }]] },
+  ]
+  for (const mutate of mutations) {
+    const result = validResult()
+    mutate(result)
+    const problems = validateMenuExtraction(result)
+    assert.equal(problems.length, 1, JSON.stringify(problems))
+    assert.match(problems[0], /forbidden at any depth/)
+  }
+})
+
+test('M3: findForbiddenTrustKey reports the path; clean structures, primitives and shared references pass', () => {
+  assert.equal(findForbiddenTrustKey(validResult()), null)
+  assert.equal(findForbiddenTrustKey(null), null)
+  assert.equal(findForbiddenTrustKey('confidence'), null)
+  assert.equal(findForbiddenTrustKey({ notes: ['confidence is a word, not a key'] }), null)
+  const shared = { a: 1 }
+  assert.equal(findForbiddenTrustKey({ x: shared, y: shared, z: [shared, shared] }), null)
+  assert.equal(findForbiddenTrustKey({ a: [{ b: { reviewReady: true } }] }), '$.a[0].b.reviewReady is forbidden')
+})
+
+test('M3: a cyclic structure is a violation, never an endless loop', () => {
+  const cyclic = validResult()
+  cyclic.stats = {}
+  cyclic.sections[0].items[0].evidence.self = cyclic
+  assert.match(findForbiddenTrustKey(cyclic), /cyclic structure/)
+  assert.ok(validateMenuExtraction(cyclic).length > 0)
+})
+
+test('M3: an over-deep or over-large structure is a violation, never a stack overflow', () => {
+  let deep = {}
+  const top = deep
+  for (let i = 0; i < 100000; i += 1) deep = deep.next = {}
+  assert.match(findForbiddenTrustKey(top), new RegExp(`deeper than ${TRUST_SCAN_MAX_DEPTH}`))
+  const wide = { list: Array.from({ length: TRUST_SCAN_MAX_NODES + 10 }, () => ({})) }
+  assert.match(findForbiddenTrustKey(wide), /more than/)
+})
+
+test('M3: a getter that throws is a violation, never a crash', () => {
+  const hostile = validResult()
+  Object.defineProperty(hostile, 'trap', { enumerable: true, get() { throw new Error('boom') } })
+  assert.equal(findForbiddenTrustKey(hostile), 'structure could not be inspected')
+})
+
+test('M3: rejected[].locator follows the evidence-locator rule; stats must be flat counters/flags', () => {
+  const noLocator = validResult()
+  delete noLocator.rejected[0].locator
+  const longLocator = validResult()
+  longLocator.rejected[0].locator = 'x'.repeat(500)
+  const badStats = { ...validResult(), stats: { counted: -1 } }
+  const nestedStats = { ...validResult(), stats: { inner: { a: 1 } } }
+  for (const result of [noLocator, longLocator, badStats, nestedStats]) assert.ok(validateMenuExtraction(result).length > 0)
+  assert.deepEqual(validateMenuExtraction({ ...validResult(), stats: { counted: 3, depthLimited: false } }), [])
 })

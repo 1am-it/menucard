@@ -29,6 +29,7 @@
 const { runRestaurantSourceAnalysis, countWords } = require('../../src/lib/restaurantSourceAnalysis')
 const { extractDigitalPdfText, PdfExtractionError } = require('../../src/lib/pdfTextExtraction')
 const { computeFieldEvidenceHash } = require('../../src/lib/fieldEvidenceHash')
+const { findForbiddenTrustKey } = require('./menuExtractionContract')
 
 /** The only adapter kinds this contract knows about. `ai_structured` and
  * `ocr` name the exact two capabilities be-21's own ticket exists to
@@ -221,19 +222,15 @@ function assertNeverCarriesPrecomputedConfidence(adapterResult) {
       throw new Error(`AdapterResult field "${fieldName}" carries a precomputed confidence/reviewReady value — forbidden by this contract`)
     }
   }
-  // BE-22 — the same rule for the menu-structure track: a menu extraction
-  // result, its sections and its items never carry a self-assessed trust
-  // value either. Additive; a result without `menuExtraction` is unaffected.
-  const menu = adapterResult.menuExtraction
-  if (menu && typeof menu === 'object') {
-    const carriesTrust = (object) => Boolean(object) && typeof object === 'object' && ['confidence', 'reviewReady'].some((key) => Object.prototype.hasOwnProperty.call(object, key))
-    if (carriesTrust(menu)) throw new Error('AdapterResult menuExtraction carries a precomputed confidence/reviewReady value — forbidden by this contract')
-    for (const section of Array.isArray(menu.sections) ? menu.sections : []) {
-      if (carriesTrust(section)) throw new Error('AdapterResult menu section carries a precomputed confidence/reviewReady value — forbidden by this contract')
-      for (const item of Array.isArray(section && section.items) ? section.items : []) {
-        if (carriesTrust(item)) throw new Error('AdapterResult menu item carries a precomputed confidence/reviewReady value — forbidden by this contract')
-      }
-    }
+  // BE-22 — the same rule at ANY depth of the whole result (menu extraction,
+  // sections, items, evidence, rejected lines, stats, cost, notes, `_internal`
+  // — objects and arrays alike), via the one shared recursive scan. A cyclic,
+  // over-deep or uninspectable result fails closed here too. BE-20's own
+  // deterministic results carry no such key anywhere, so the field track is
+  // unaffected.
+  const violation = findForbiddenTrustKey(adapterResult)
+  if (violation) {
+    throw new Error(`AdapterResult carries a precomputed confidence/reviewReady value (or an uninspectable structure) — forbidden by this contract: ${violation}`)
   }
 }
 

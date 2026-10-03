@@ -36,7 +36,7 @@ const menuCase = {
 
 test('a perfect result scores precision 1, recall 1 and no errors', () => {
   const result = parsed([{ path: ['Kaart'], items: [item('Fictief a', 'known', 450), item('Fictief b', 'known', 500), item('Fictief c', 'multiple_undecomposed', null)] }], [
-    { text: '+ extra fictief', reason: 'modifier' },
+    { text: '+ extra fictief', reason: 'modifier', locator: 'ul>li[4]' },
   ])
   const score = scoreMenuCase(menuCase, result)
   assert.equal(score.status, 'scored')

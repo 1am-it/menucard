@@ -5,8 +5,9 @@
 //
 // What this contract deliberately does NOT contain: `confidence`,
 // `reviewReady`, or any other self-assessment. Trust is never claimed by an
-// adapter (see adapters.js's own `assertNeverCarriesPrecomputedConfidence`,
-// which also checks menu items) and nothing here creates a concept,
+// adapter: `findForbiddenTrustKey` below rejects those keys at ANY depth, and
+// adapters.js's own `assertNeverCarriesPrecomputedConfidence` applies the
+// same recursive scan to every adapter result. Nothing here creates a concept,
 // proposal, review or publication. Money follows MARKET-02's four states
 // (`docs/api/canonical-restaurant-menu-schema.md` §4a).
 //
@@ -36,12 +37,14 @@ const PRICE_STATUSES = ['known', 'multiple_undecomposed', 'on_request', 'unknown
 
 /** Why a line was not counted as a dish or drink — a closed vocabulary. */
 const REJECTION_REASONS = [
-  'clock_time', // opening hours, time ranges
+  'clock_time', // opening hours, time ranges, a clock time in clear time context ("vanaf 12.00")
+  'date', // a date in clear date/event context ("Fictief feest 24.12", "15 mei")
   'service_unit', // per person, per table, arrangements, packages, courses
   'modifier', // "+ extra …", supplements
   'missing_name', // a price with no name in the same local structure
   'missing_price', // a name with no price (and no explicit on-request phrase)
-  'non_menu_section', // under an opening-hours/contact/reviews/reservation/arrangement heading
+  'non_menu_section', // under an opening-hours/contact/reviews/reservation/arrangement/voucher/… heading
+  'ambiguous_structure', // several name+price pairs in one element, or an oversized element with a price
 ]
 
 /** The evidence patterns the deterministic adapter may cite. A model
@@ -67,8 +70,48 @@ function isBoundedString(value) {
   return typeof value === 'string' && value.trim().length > 0 && value.length <= MAX_TEXT
 }
 
-function hasForbiddenTrustKey(object) {
-  return Boolean(object) && typeof object === 'object' && FORBIDDEN_TRUST_KEYS.some((key) => Object.prototype.hasOwnProperty.call(object, key))
+/** Bounds on the recursive trust-key scan, so a deep, huge or cyclic
+ * structure can never hang or crash it — exceeding one is itself a
+ * violation (fail closed). */
+const TRUST_SCAN_MAX_DEPTH = 64
+const TRUST_SCAN_MAX_NODES = 100000
+
+/**
+ * Recursively looks for a `confidence` or `reviewReady` key at ANY depth of
+ * `value` — objects and arrays alike (evidence, rejected lines, stats, cost,
+ * notes, anything). Returns `null` when clean, otherwise a short description
+ * of the first violation. A cycle, more than TRUST_SCAN_MAX_DEPTH levels or
+ * more than TRUST_SCAN_MAX_NODES objects is reported as a violation rather
+ * than traversed. Never throws.
+ */
+function findForbiddenTrustKey(value) {
+  let visited = 0
+  const onPath = new Set()
+  function visit(node, path, depth) {
+    if (!node || typeof node !== 'object') return null
+    if (onPath.has(node)) return `cyclic structure at ${path}`
+    if (depth > TRUST_SCAN_MAX_DEPTH) return `structure deeper than ${TRUST_SCAN_MAX_DEPTH} levels at ${path}`
+    visited += 1
+    if (visited > TRUST_SCAN_MAX_NODES) return `more than ${TRUST_SCAN_MAX_NODES} nested objects`
+    onPath.add(node)
+    try {
+      for (const key of Object.keys(node)) {
+        const childPath = Array.isArray(node) ? `${path}[${key}]` : `${path}.${key}`
+        if (!Array.isArray(node) && FORBIDDEN_TRUST_KEYS.includes(key)) return `${childPath} is forbidden`
+        const found = visit(node[key], childPath, depth + 1)
+        if (found) return found
+      }
+    } finally {
+      onPath.delete(node)
+    }
+    return null
+  }
+  try {
+    return visit(value, '$', 0)
+  } catch (err) {
+    // Getters or proxies that throw — never trusted, never a crash.
+    return 'structure could not be inspected'
+  }
 }
 
 /**
@@ -78,7 +121,8 @@ function hasForbiddenTrustKey(object) {
 function validateMenuExtraction(result) {
   const problems = []
   if (!result || typeof result !== 'object') return ['result is not an object']
-  if (hasForbiddenTrustKey(result)) problems.push('result carries confidence/reviewReady — forbidden')
+  const trustViolation = findForbiddenTrustKey(result)
+  if (trustViolation) return [`confidence/reviewReady (or an uninspectable structure) is forbidden at any depth: ${trustViolation}`]
   if (result.contractVersion !== MENU_EXTRACTION_CONTRACT_VERSION) problems.push(`contractVersion must be ${MENU_EXTRACTION_CONTRACT_VERSION}`)
   if (!MENU_EXTRACTION_STATUSES.includes(result.status)) problems.push(`status must be one of ${MENU_EXTRACTION_STATUSES.join(', ')}`)
   if (result.status === 'unparsed' && !isBoundedString(result.reason)) problems.push('an unparsed result needs a reason')
@@ -92,7 +136,10 @@ function validateMenuExtraction(result) {
 
   let itemCount = 0
   result.sections.forEach((section, s) => {
-    if (hasForbiddenTrustKey(section)) problems.push(`sections[${s}] carries confidence/reviewReady`)
+    if (!section || typeof section !== 'object') {
+      problems.push(`sections[${s}] must be an object`)
+      return
+    }
     if (!Array.isArray(section.path) || !section.path.every((label) => label === null || isBoundedString(label))) {
       problems.push(`sections[${s}].path must be an array of short labels (or null for an unlabelled block)`)
     }
@@ -103,7 +150,10 @@ function validateMenuExtraction(result) {
     section.items.forEach((item, i) => {
       itemCount += 1
       const where = `sections[${s}].items[${i}]`
-      if (hasForbiddenTrustKey(item)) problems.push(`${where} carries confidence/reviewReady`)
+      if (!item || typeof item !== 'object') {
+        problems.push(`${where} must be an object`)
+        return
+      }
       if (!isBoundedString(item.name)) problems.push(`${where}.name must be a short non-empty string`)
       if (!PRICE_STATUSES.includes(item.priceStatus)) problems.push(`${where}.priceStatus must be one of ${PRICE_STATUSES.join(', ')}`)
       const known = item.priceStatus === 'known'
@@ -122,9 +172,27 @@ function validateMenuExtraction(result) {
   if (itemCount > MAX_ITEMS) problems.push(`more than ${MAX_ITEMS} items`)
 
   result.rejected.forEach((line, r) => {
+    if (!line || typeof line !== 'object') {
+      problems.push(`rejected[${r}] must be an object`)
+      return
+    }
     if (!REJECTION_REASONS.includes(line.reason)) problems.push(`rejected[${r}].reason must be one of ${REJECTION_REASONS.join(', ')}`)
     if (!isBoundedString(line.text)) problems.push(`rejected[${r}].text must be a short non-empty string`)
+    // The same locator rule as an item's evidence: short and non-empty.
+    if (!isBoundedString(line.locator)) problems.push(`rejected[${r}].locator must be a short non-empty string`)
   })
+
+  // stats is optional; when present, a flat object of counters/flags only.
+  if (result.stats !== undefined) {
+    const stats = result.stats
+    if (!stats || typeof stats !== 'object' || Array.isArray(stats)) {
+      problems.push('stats must be an object when present')
+    } else {
+      for (const [key, value] of Object.entries(stats)) {
+        if (!(typeof value === 'boolean' || (Number.isInteger(value) && value >= 0))) problems.push(`stats.${key} must be a non-negative integer or a boolean`)
+      }
+    }
+  }
 
   const cost = result.cost
   if (!cost || typeof cost !== 'object') {
@@ -148,6 +216,9 @@ module.exports = {
   MAX_ITEMS,
   MAX_REJECTED,
   MAX_TEXT,
+  TRUST_SCAN_MAX_DEPTH,
+  TRUST_SCAN_MAX_NODES,
   emptyCost,
+  findForbiddenTrustKey,
   validateMenuExtraction,
 }

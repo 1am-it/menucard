@@ -93,3 +93,97 @@ test('report: the menu track appears only when given, with its own disclaimer an
   assert.ok(summary.includes(MENU_TRACK_DISCLAIMER))
   assert.deepEqual(JSON.parse(JSON.stringify(withMenu)), withMenu)
 })
+
+// ─── M3: end-to-end rogue adapters fail BEFORE any scoring happens ────────
+
+/** Loads `moduleName` fresh with `exportName` of `dependencyName` replaced by
+ * a spy, so a test can prove the runner never reached scoring. */
+function loadWithScoringSpy(moduleName, dependencyName, exportName) {
+  const modulePath = require.resolve(moduleName)
+  const dependency = require(dependencyName)
+  const original = dependency[exportName]
+  const calls = []
+  dependency[exportName] = (...args) => {
+    calls.push(args)
+    return original(...args)
+  }
+  delete require.cache[modulePath]
+  const loaded = require(modulePath)
+  return {
+    loaded,
+    calls,
+    restore() {
+      dependency[exportName] = original
+      delete require.cache[modulePath]
+    },
+  }
+}
+
+function rogueMenuAdapter(mutate) {
+  return {
+    kind: 'html_structure',
+    available: true,
+    async run(fixture) {
+      const result = await createHtmlStructureAdapter().run(fixture)
+      mutate(result)
+      return result
+    },
+  }
+}
+
+const NESTED_MUTATIONS = {
+  evidence: (r) => { r.menuExtraction.sections[0].items[0].evidence.confidence = 'hoog' },
+  rejected: (r) => { r.menuExtraction.rejected.push({ text: 'Fictief', reason: 'modifier', locator: 'li', reviewReady: true }) },
+  stats: (r) => { r.menuExtraction.stats.confidence = 1 },
+  cost: (r) => { r.menuExtraction.cost.reviewReady = false },
+  notes: (r) => { r.notes.push({ confidence: 'hoog' }) },
+  cycle: (r) => { r.menuExtraction.stats = { counted: 1 }; r._loop = r },
+}
+
+for (const [where, mutate] of Object.entries(NESTED_MUTATIONS)) {
+  test(`M3 end-to-end: a menu adapter smuggling trust/cycles in ${where} makes the runner throw before scoreMenuCase is called`, async () => {
+    const spy = loadWithScoringSpy('./menuBenchmark', './menuScoring', 'scoreMenuCase')
+    try {
+      await assert.rejects(() => spy.loaded.runMenuBenchmark({ cases: [HTML_MENU_CASES[0]], adapters: [rogueMenuAdapter(mutate)] }), /forbidden by this contract/)
+      assert.equal(spy.calls.length, 0, 'scoring must never be reached')
+    } finally {
+      spy.restore()
+    }
+  })
+}
+
+test('M3 end-to-end: a clean menu adapter does reach scoring (the spy works)', async () => {
+  const spy = loadWithScoringSpy('./menuBenchmark', './menuScoring', 'scoreMenuCase')
+  try {
+    await spy.loaded.runMenuBenchmark({ cases: [HTML_MENU_CASES[0]], adapters: [createHtmlStructureAdapter()] })
+    assert.equal(spy.calls.length, 1)
+  } finally {
+    spy.restore()
+  }
+})
+
+test('M3 end-to-end (field track): a nested confidence anywhere in a field-track result throws before scoreCase is called', async () => {
+  const spy = loadWithScoringSpy('./runner', './scoring', 'scoreCase')
+  try {
+    const rogue = {
+      kind: 'deterministic',
+      available: true,
+      async run() {
+        return {
+          kind: 'deterministic',
+          available: true,
+          fields: { name: { value: { nested: [{ reviewReady: true }] }, extractionMethod: 'json_ld', hasContentHash: true, contextStatus: 'unverified' } },
+          menuContextNames: [],
+          unknownMenuContextCount: 0,
+          errors: [],
+          notes: [],
+          _internal: { unknownMenuContexts: [] },
+        }
+      },
+    }
+    await assert.rejects(() => spy.loaded.runBenchmark({ adapters: [rogue] }), /precomputed confidence/)
+    assert.equal(spy.calls.length, 0, 'scoring must never be reached')
+  } finally {
+    spy.restore()
+  }
+})
