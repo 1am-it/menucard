@@ -23,9 +23,9 @@ means.
 
 ## Depends on
 
-`be-20-general-restaurant-source-extraction.md` (the analysis pipeline,
-evidence/confidence contract and PDF counting rules this foundation reuses,
-never redefines) and `be-21-restaurant-source-extraction-vendor-benchmark.md`
+`be-20-general-restaurant-source-extraction.md` (the analysis pipeline and
+evidence/confidence contract this foundation measures against, never
+redefines) and `be-21-restaurant-source-extraction-vendor-benchmark.md`
 (the `ops/benchmark/` foundation this extends: adapter contract,
 `assertNeverCarriesPrecomputedConfidence`, the unavailable `ai_structured`
 stub, `(sourceType, adapterKind)` aggregation, and the "this is not the real
@@ -78,6 +78,13 @@ dishes?
   `multiple_undecomposed`, `on_request` (or `unknown` for a future adapter)
   and `amountMinorUnits` only when `known`; a dual price is never collapsed
   into one amount, and a currency is only recorded when the source shows €.
+- **Local service-unit vocabulary, for now.** BE-20's PDF service-unit and
+  plausible-name helpers exist only on its unmerged recognition branch, not
+  on `main`. This benchmark therefore keeps a small, documented local list
+  (per person/table, arrangements, packages, courses, hire, deposit) inside
+  `htmlMenuStructure.js`. It must be consolidated with BE-20's before any
+  product adapter is built — never two diverging vocabularies in product
+  code.
 - **No claim of real-world support.** Synthetic scores prove the machinery,
   not that any real site's HTML menu is supported — that needs a separately
   authorized benchmark on the 24 reachable Breda sources.
