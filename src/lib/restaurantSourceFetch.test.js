@@ -47,8 +47,8 @@ test('classifyRobotsOutcome: every outcome maps to exactly one of the five statu
   const cases = [
     [{ result: { contentType: 'text/plain' } }, 'rules_loaded', 200],
     [{ result: { contentType: null } }, 'rules_loaded', 200],
-    [{ result: { contentType: 'text/html' } }, 'invalid_or_unknown', 200],
-    [{ result: { contentType: 'application/octet-stream' } }, 'invalid_or_unknown', 200],
+    [{ result: { contentType: 'text/html' } }, 'rules_loaded', 200],
+    [{ result: { contentType: 'application/octet-stream' } }, 'rules_loaded', 200],
     [{ error: new SafeFetchError('bad-status', '', { statusCode: 404 }) }, 'missing', 404],
     [{ error: new SafeFetchError('bad-status', '', { statusCode: 410 }) }, 'missing', 410],
     [{ error: new SafeFetchError('bad-status', '', { statusCode: 401 }) }, 'access_denied', 401],
@@ -84,6 +84,24 @@ test('checkRobotsForUrl: 200 text/plain loads and honors Disallow rules — allo
   assert.equal(denied.shouldFetchPage, false)
 })
 
+test('checkRobotsForUrl: a 200 served as text/html is still rules_loaded and goes through the existing parser — the shared gate\'s behavior (regression: Breda re-measurement)', async () => {
+  // An HTML page served for /robots.txt: no robots lines, so nothing is disallowed.
+  const html = fakeFetch({ 'https://site.example/robots.txt': { status: 200, contentType: 'text/html', body: '<html><body>Welkom</body></html>' } })
+  const allowed = await checkRobotsForUrl('https://site.example/menu', { fetchImpl: html })
+  assert.equal(allowed.robotsStatus, 'rules_loaded')
+  assert.equal(allowed.httpStatus, 200)
+  assert.deepEqual(allowed.disallowRules, [])
+  assert.equal(allowed.shouldFetchPage, true)
+
+  // Real robots rules in a text/html response are still parsed and honored.
+  const rulesAsHtml = fakeFetch({ 'https://site.example/robots.txt': { ...ROBOTS_OK, contentType: 'text/html' } })
+  const denied = await checkRobotsForUrl('https://site.example/private/menu', { fetchImpl: rulesAsHtml })
+  assert.equal(denied.robotsStatus, 'rules_loaded')
+  assert.equal(denied.decision, 'disallowed')
+  assert.equal(denied.shouldFetchPage, false)
+  assert.deepEqual(denied.disallowRules, ['/privé', '/private'])
+})
+
 test('checkRobotsForUrl: 404 and 410 are `missing` and allow the page; 401/403/429, 5xx, network errors and other answers block', async () => {
   const expectations = [
     [{ status: 404 }, 'missing', true],
@@ -96,7 +114,6 @@ test('checkRobotsForUrl: 404 and 410 are `missing` and allow the page; 401/403/4
     [{ error: 'timeout' }, 'unreachable', false],
     [{ error: 'request-error' }, 'unreachable', false],
     [{ status: 400 }, 'invalid_or_unknown', false],
-    [{ status: 200, contentType: 'text/html', body: '<html>not robots</html>' }, 'invalid_or_unknown', false],
   ]
   for (const [route, status, shouldFetchPage] of expectations) {
     const gate = await checkRobotsForUrl('https://site.example/', { fetchImpl: fakeFetch({ 'https://site.example/robots.txt': route }) })

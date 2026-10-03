@@ -189,11 +189,11 @@ later implementation round:
    (25 real sources, code `75224ee`) showed 4 sources blocked only because
    they have no robots.txt (HTTP 404) and 3 fetches failing on a same-host
    redirect (a language prefix, a trailing slash). This route now
-   classifies robots.txt as `rules_loaded` (200 text/plain — rules
-   honored), `missing` (404/410 — allowed, RFC 9309 §2.3.1.3),
-   `access_denied` (401/403/429), `unreachable` (5xx, timeout,
-   network/TLS) or `invalid_or_unknown` (anything else, including HTML
-   served as robots.txt); only `rules_loaded` without a matching
+   classifies robots.txt as `rules_loaded` (any 200, whatever its content
+   type, as the shared gate already does — parsed and honored), `missing`
+   (404/410 — allowed, RFC 9309 §2.3.1.3), `access_denied`
+   (401/403/429), `unreachable` (5xx, timeout, network/TLS) or
+   `invalid_or_unknown` (anything else); only `rules_loaded` without a matching
    `Disallow` and `missing` allow a fetch, every other status blocks with
    its real reason (the job's closed `error_reason` stays
    `robots_disallowed`). Redirects: at most 3 hops, each requested with

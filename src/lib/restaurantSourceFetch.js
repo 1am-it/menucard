@@ -16,8 +16,9 @@
 // unchanged.
 //
 // robots.txt outcome (`classifyRobotsOutcome`):
-//   - `rules_loaded`       200 with a text/plain (or absent) content type —
-//                          parsed and honored (Disallow rules).
+//   - `rules_loaded`       any 200, whatever its content type (as the shared
+//                          gate already does) — parsed by the existing
+//                          parser and honored (Disallow rules).
 //   - `missing`            404 or 410 — the file demonstrably does not
 //                          exist; the page may proceed through the rest of
 //                          the unchanged safe-fetch chain (RFC 9309 §2.3.1.3).
@@ -25,11 +26,10 @@
 //   - `unreachable`        5xx, timeout, network or TLS error — blocked
 //                          (RFC 9309 §2.3.1.4 treats a server error as a
 //                          complete disallow).
-//   - `invalid_or_unknown` everything else — any other status, a 200 that
-//                          is not text/plain (e.g. an HTML page served for
-//                          /robots.txt), an oversized file, an unsafe
-//                          target, or a robots.txt redirect this policy does
-//                          not follow — blocked (fail-closed).
+//   - `invalid_or_unknown` everything else — any other status, an
+//                          oversized file, an unsafe target, or a robots.txt
+//                          redirect this policy does not follow — blocked
+//                          (fail-closed).
 // Only `rules_loaded` (path not disallowed) and `missing` allow a fetch.
 //
 // Redirect policy (`fetchSameSiteWithRedirects`): every hop is requested
@@ -84,11 +84,10 @@ class RedirectPolicyError extends Error {
  */
 function classifyRobotsOutcome({ result, error }) {
   if (result) {
-    const contentType = result.contentType || null
-    if (contentType === null || contentType === 'text/plain') {
-      return { robotsStatus: 'rules_loaded', httpStatus: 200 }
-    }
-    return { robotsStatus: 'invalid_or_unknown', httpStatus: 200, detail: `content-type ${contentType}` }
+    // Any 200 is `rules_loaded`, whatever its content type — exactly the
+    // shared gate's existing behavior: the body always goes through the
+    // existing parser, which ignores lines that are not robots rules.
+    return { robotsStatus: 'rules_loaded', httpStatus: 200 }
   }
   const reason = error && error.reason
   const statusCode = error && Number.isInteger(error.statusCode) ? error.statusCode : null
