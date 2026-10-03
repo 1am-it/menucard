@@ -44,10 +44,34 @@ test('structural safety net: every non-robots.txt fetch uses encoding: "buffer" 
   assert.ok(bufferFetchCount >= 2, 'expected at least the entry fetch and the candidate fetch to both request encoding: "buffer"')
 })
 
-test('structural safety net: the entry URL is gated by classifyRobotsGate before the page itself is ever fetched', () => {
+test('structural safety net: the entry URL is gated by the BE-20 robots.txt gate before the page itself is ever fetched, and a block names its real reason', () => {
   const source = readPostRouteSource()
-  assert.match(source, /classifyRobotsGate\(/)
+  assert.match(source, /checkRobotsForUrl\(url, \{ fetchImpl: fetchWebsiteSafely \}\)/)
+  const gateIndex = source.indexOf('const robotsGate = await robotsGateFor(sourceUrl.href)')
+  const entryFetchIndex = source.indexOf('await fetchSameSiteWithRedirects(sourceUrl.href')
+  assert.ok(gateIndex !== -1 && entryFetchIndex !== -1 && gateIndex < entryFetchIndex, 'robots.txt must be checked before the entry fetch')
   assert.match(source, /robotsGate\.shouldFetchPage/)
+  assert.match(source, /'robots_disallowed', describeRobotsBlock\(robotsGate\)/)
+  assert.doesNotMatch(source, /classifyRobotsGate/, 'the shared gate stays in use by BE-18/MARKET-05A only')
+})
+
+test('structural safety net: every entry and candidate fetch follows redirects only through fetchSameSiteWithRedirects, with fetchWebsiteSafely as the only egress and robots.txt re-checked per hop', () => {
+  const source = readPostRouteSource()
+  const calls = source.match(/await fetchSameSiteWithRedirects\([\s\S]*?\}\)\r?\n/g) || []
+  assert.equal(calls.length, 2, 'expected exactly the entry fetch and the candidate fetch')
+  for (const call of calls) {
+    assert.match(call, /fetchImpl: fetchWebsiteSafely/)
+    assert.match(call, /robotsCheck: robotsGateFor/)
+    assert.match(call, /encoding: 'buffer'/)
+  }
+  assert.doesNotMatch(source, /maxRedirects:\s*[1-9]/, "the route never raises safeOutboundFetch's own redirect limit directly")
+  assert.doesNotMatch(source, /fetchWebsiteSafely\(sourceUrl/, 'no direct entry fetch bypassing the redirect policy')
+})
+
+test('structural safety net: the receipt stays bound to the URL the reviewer entered — a followed redirect never changes the BE-19 url-intake binding', () => {
+  const source = readPostRouteSource()
+  assert.match(source, /const canonical = canonicalizeSourceUrl\(sourceUrl\.href\)/)
+  assert.match(source, /analysis\.notes = \[\.\.\.redirectNotes, \.\.\.analysis\.notes\]/)
 })
 
 test('structural safety net: never accepts a restaurant field, match type, or analysis hash from the client body — only body.url is ever read', () => {

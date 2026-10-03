@@ -184,6 +184,30 @@ later implementation round:
    candidate. See "Amendment to the Governance exception" below for the
    exact, explicit correction this requires to already-published
    contract text.
+   **Clarification (2026-10-03), robots.txt status and redirects — BE-20
+   route only** (`src/lib/restaurantSourceFetch.js`). The Breda baseline
+   (25 real sources, code `75224ee`) showed 4 sources blocked only because
+   they have no robots.txt (HTTP 404) and 3 fetches failing on a same-host
+   redirect (a language prefix, a trailing slash). This route now
+   classifies robots.txt as `rules_loaded` (any 200, whatever its content
+   type, as the shared gate already does — parsed and honored), `missing`
+   (404/410 — allowed, RFC 9309 §2.3.1.3), `access_denied`
+   (401/403/429), `unreachable` (5xx, timeout, network/TLS) or
+   `invalid_or_unknown` (anything else); only `rules_loaded` without a matching
+   `Disallow` and `missing` allow a fetch, every other status blocks with
+   its real reason (the job's closed `error_reason` stays
+   `robots_disallowed`). Redirects: at most 3 hops, each requested with
+   `maxRedirects: 0` so `safeOutboundFetch.js` re-validates it fully, only
+   on the same site (hostname equal up to a leading `www.`, the existing
+   `normalizeHostname` boundary; same port; no https→http downgrade), no
+   credentials, fragment, loop, or non-http(s) target, and each target's
+   path re-checked against robots.txt before it is requested; followed
+   hops are shown as reviewable notes. The receipt stays bound to the URL
+   the reviewer entered. This is a deliberate deviation from the shared
+   gate's 2026-09-05 "every non-2xx is unconfirmed, no redirects" rule,
+   which BE-18's read-url route and the MARKET-05A website-suggestion
+   route keep unchanged. Cross-host PDFs, external menu hosts, JavaScript
+   rendering and HTML-menu parsing are not changed by this clarification.
 7. Analysis runs durably outside the browser request. The browser polls
    status only; processing never depends on a tab staying open. See
    "Minimal durable analysis-job contract" below.
