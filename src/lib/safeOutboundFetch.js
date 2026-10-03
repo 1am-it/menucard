@@ -90,11 +90,21 @@ const DEFAULT_TIMEOUT_MS = 8000;
 // feature.
 const USER_AGENT = 'MenuCardInternalSuggestBot/1.0 (+internal candidate data suggestion feature)';
 
+/**
+ * `details` (optional, additive — 2026-10-03, BE-20 safe-fetch repair):
+ * `statusCode` on `bad-status` and on `too-many-redirects`, and the raw
+ * `location` header on `too-many-redirects`, so a caller can classify an
+ * outcome (e.g. a robots.txt 404 vs 403 vs 503) or follow a redirect
+ * itself under its own, stricter policy. Never changes which requests
+ * are made or which errors are raised — existing callers are unaffected.
+ */
 class SafeFetchError extends Error {
-  constructor(reason, message) {
+  constructor(reason, message, details = {}) {
     super(message || reason);
     this.name = 'SafeFetchError';
     this.reason = reason;
+    if (Number.isInteger(details.statusCode)) this.statusCode = details.statusCode;
+    if (typeof details.location === 'string') this.location = details.location;
   }
 }
 
@@ -400,7 +410,12 @@ function fetchWebsiteSafely(targetUrl, options = {}) {
           if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
             if (redirectsLeft <= 0) {
               res.resume();
-              fail(new SafeFetchError('too-many-redirects', 'Exceeded the maximum number of allowed redirects'));
+              fail(
+                new SafeFetchError('too-many-redirects', 'Exceeded the maximum number of allowed redirects', {
+                  statusCode: res.statusCode,
+                  location: String(res.headers.location),
+                })
+              );
               return;
             }
             // The redirect response's own body/content-type is never
@@ -419,7 +434,7 @@ function fetchWebsiteSafely(targetUrl, options = {}) {
 
           if (res.statusCode !== 200) {
             res.resume();
-            fail(new SafeFetchError('bad-status', `Expected HTTP 200, got ${res.statusCode}`));
+            fail(new SafeFetchError('bad-status', `Expected HTTP 200, got ${res.statusCode}`, { statusCode: res.statusCode }));
             return;
           }
 

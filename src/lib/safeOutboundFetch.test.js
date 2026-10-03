@@ -675,6 +675,43 @@ test('fetchWebsiteSafely: maxRedirects: 0 rejects even a single redirect — the
   }
 });
 
+test('fetchWebsiteSafely: a refused redirect carries its own status code and raw Location (additive detail) — no request is made to the target', async () => {
+  let requests = 0;
+  const server = await startTestServer((req, res) => {
+    requests += 1;
+    res.writeHead(301, { Location: 'nl/' });
+    res.end();
+  });
+  try {
+    const { port } = server.address();
+    await assert.rejects(
+      () => fetchWebsiteSafely(`http://${TEST_HOSTNAME}:${port}/`, { lookup: passthroughLookup, maxRedirects: 0 }),
+      (err) => err instanceof SafeFetchError && err.reason === 'too-many-redirects' && err.statusCode === 301 && err.location === 'nl/'
+    );
+    assert.equal(requests, 1, 'the redirect target must never be requested when maxRedirects is exhausted');
+  } finally {
+    await stopTestServer(server);
+  }
+});
+
+test('fetchWebsiteSafely: a non-200 response carries its own status code (additive detail) — 404, 403, 503 stay distinguishable', async () => {
+  for (const status of [404, 403, 503]) {
+    const server = await startTestServer((req, res) => {
+      res.writeHead(status, { 'Content-Type': 'text/html' });
+      res.end('no');
+    });
+    try {
+      const { port } = server.address();
+      await assert.rejects(
+        () => fetchWebsiteSafely(`http://${TEST_HOSTNAME}:${port}/robots.txt`, { lookup: passthroughLookup, maxRedirects: 0 }),
+        (err) => err instanceof SafeFetchError && err.reason === 'bad-status' && err.statusCode === status
+      );
+    } finally {
+      await stopTestServer(server);
+    }
+  }
+});
+
 test('fetchWebsiteSafely: a response exceeding maxBytes is aborted, never buffered in full', async () => {
   const server = await startTestServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/html' });
