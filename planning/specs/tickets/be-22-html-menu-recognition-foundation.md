@@ -5,7 +5,10 @@
 Proposed; local, offline foundation only. An isolated benchmark track under
 `ops/benchmark/` — no product code, route, UI, database, migration,
 provider, or live analysis-pipeline change. Not yet independently reviewed,
-not pushed.
+not pushed. A first pre-push review (adversarial self-review, NOT GREEN)
+found time/date and volume misreads, unbounded parser work, a shallow trust
+guard and merged two-dish elements; those are fixed locally (see "Review
+fixes") and await a new independent pre-push review.
 
 ## Voortgang
 
@@ -91,8 +94,9 @@ dishes?
 
 ## Scope
 
-- `ops/benchmark/htmlMenuStructure.js` — a bounded, dependency-free HTML
-  tree builder and the `html_structure` adapter. Supported patterns: semantic
+- `ops/benchmark/htmlMenuStructure.js` — a dependency-free HTML tree
+  builder, bounded in input size and in work (a linear single pass plus a
+  deterministic work budget), and the `html_structure` adapter. Supported patterns: semantic
   heading sections (`h1`–`h6`, `role="heading"`), list items (`li`,
   `role="listitem"`), table rows, definition lists (`dt`/`dd`), and repeated
   item cards (two or more sibling elements with the same tag and an item-like
@@ -121,20 +125,52 @@ dishes?
 
 - [x] Every supported pattern and every rejected structure has a regression
       test against a synthetic fixture.
-- [x] Opening hours, reservation/contact blocks, reviews, loose prices,
-      prose prices, per-person/per-table offers, modifiers and unpriced lists
-      never yield a menu.
-- [x] Dual prices stay `multiple_undecomposed`; duplicate markup is
-      de-duplicated; nested sections keep their full heading path.
-- [x] No adapter output carries `confidence` or `reviewReady`; the shared
-      guard rejects it.
+- [x] In the synthetic fixtures and tests, opening hours (time ranges,
+      weekdays, and single clock times in clear time context such as
+      "vanaf 12.00" or "21.30 uur"), dates in clear date/event context,
+      reservation/contact blocks, reviews, loose prices, prose prices,
+      per-person/per-table offers, modifiers, unpriced lists and clearly
+      labelled voucher/admission/parking/cloakroom sections never yield a
+      menu. Not covered: such lists without any time/date context word or
+      section label (see Known limitations in `ops/benchmark/README.md`).
+- [x] Volumes and weights are never read as prices; dual prices stay
+      `multiple_undecomposed`; an element with two name+price pairs is
+      rejected, never merged; duplicate markup is de-duplicated; nested
+      sections keep their full heading path.
+- [x] No adapter output carries `confidence` or `reviewReady` at any depth;
+      the shared, recursive, cycle-safe guard rejects it in both runners
+      before scoring.
+- [x] Parser work is bounded by a deterministic budget as well as by input
+      size; broken or hostile HTML ends `unparsed`, never in a hang or a
+      partial menu.
 - [x] No product code imports `ops/benchmark/`; no new module imports a
       network client, provider SDK, or browser tool.
 - [x] Results stay separated per `(sourceType, adapterKind)`; the
       `ai_structured` stub stays `not_evaluated` with `null` cost.
 
-All six are met on synthetic fixtures only (step 3); none says anything
-about real websites (step 6).
+All seven are met on synthetic fixtures and unit tests only (step 3); none
+says anything about real websites (step 6).
+
+## Review fixes
+
+The first pre-push review (an adversarial self-review by the same author,
+not an independent review) was NOT GREEN. Local fixes, each with regression
+tests that were checked by mutation:
+
+- **H1** — single clock times and dates in clear context are rejected
+  (`clock_time`, new reason `date`); comma prices, prices with € and
+  context-free dot prices stay prices.
+- **M1** — volume and weight tokens are never prices.
+- **M2** — one linear forward pass plus a deterministic work budget;
+  `work_limit_exceeded`, `too_deep` and `too_many_nodes` fail closed.
+- **M3** — recursive trust-key ban in the contract and the shared guard;
+  `rejected[].locator` and `stats` validated.
+- **L1** — several name+price pairs in one element →
+  `ambiguous_structure`.
+- **L2** — narrow section labels only; unlabelled lists remain a
+  documented, tested limitation.
+- **L3/L4** — trailing alcohol percentage dropped from display names;
+  fixture phone number replaced by an obvious test number.
 
 ## Suggested next step
 

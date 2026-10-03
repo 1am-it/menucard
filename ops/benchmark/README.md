@@ -74,28 +74,54 @@ untouched.
 
 - `menuExtractionContract.js` — the one output contract shared by the
   deterministic `html_structure` adapter and a later `ai_structured`
-  adapter: MARKET-02 money states, a closed rejection vocabulary, an
-  evidence locator per item, bounded text, and cost fields that are always
-  `null` here. No `confidence`/`reviewReady` anywhere.
-- `htmlMenuStructure.js` — a bounded, dependency-free HTML tree builder and
-  the `html_structure` adapter. Supported: heading sections (`h1`–`h6`,
-  `role="heading"`), list items (`li`, `role="listitem"`, nested lists as
-  sub-sections), table rows, definition lists, and repeated item cards, each
-  with name and price in the same element; a description only inside that
-  same element. Rejected with a reason: clock times, service units (per
-  person/table, arrangements, packages, courses — a small local list until
-  BE-20's is merged), modifiers, prices without a name, and anything under an
-  opening-hours/contact/reservation/reviews/arrangement heading. Unpriced
-  lines and prose prices never count; fewer than three items is `unparsed`.
-  Dual prices stay `multiple_undecomposed`. Amounts of €1.000 or more with
-  a thousands separator are not recognized (fail closed).
+  adapter: MARKET-02 money states, a closed rejection vocabulary, a short
+  locator on every item's evidence and every rejected line, bounded text,
+  flat counter-only `stats`, and cost fields that are always `null` here.
+  `confidence`/`reviewReady` are rejected at any depth by one bounded,
+  cycle-safe recursive scan (`findForbiddenTrustKey`); a cyclic, over-deep
+  or uninspectable structure is itself a violation.
+- `htmlMenuStructure.js` — a dependency-free HTML tree builder and the
+  `html_structure` adapter, bounded in input (2 MB, 50 000 nodes, 1 000
+  open elements) AND in work: one linear forward pass (unclosed
+  `script`/`style`/comment blocks consumed in one scan; closing tags for
+  elements that are not open ignored in O(1); implicit closing looks at most
+  64 levels up), with every token, forward scan, stack step, tree visit and
+  inspected character charged to a deterministic budget (`MAX_WORK`).
+  Exceeding any bound returns `unparsed`, never a partial menu.
+  Supported: heading sections (`h1`–`h6`, `role="heading"`), list items
+  (`li`, `role="listitem"`, nested lists as sub-sections), table rows,
+  definition lists, and repeated item cards, each with name and price in the
+  same element; a description only inside that same element.
+  Rejected with a reason: clock times (ranges, weekdays, and a single time
+  in clear time context — "vanaf 12.00", "om 21.45", "08.30 uur"); dates in
+  clear date/event context ("Fictief feest 24.12", "op 01.06", "15 mei");
+  service units (per person/table, arrangements, packages, courses — a small
+  local list until BE-20's is merged); modifiers; prices without a name; an
+  element with several name+price pairs (`ambiguous_structure`, never
+  merged); and anything under an opening-hours, contact, reservation,
+  reviews, arrangement, voucher, ticket, admission, parking, cloakroom or
+  webshop heading. Volumes and weights ("0,75 l", "33cl", "250 g") are never
+  prices. Unpriced lines and prose prices never count; fewer than three
+  items is `unparsed`. Dual prices stay `multiple_undecomposed`.
+
+  Known limitations (not solved, and not claimed to be):
+  - Non-dish price lists WITHOUT a clear section label (unlabelled voucher
+    cards, admission or parking prices) are still read as a menu — this is
+    structure recognition, not semantic understanding. A test documents it.
+  - Time and date recognition depends on context words; a dot price right
+    after "van"/"tot" ("van 4.50 voor 3.50") is rejected as a time (fail
+    closed), and a bare day.month without context ("12.05") stays a price.
+  - Amounts of €1.000 or more with a thousands separator are not recognized
+    (fail closed). Comma clock times ("12,00 uur") are read as prices.
+  - "Entree" as a starters heading is treated as admission (fail closed).
+  - Only a trailing alcohol percentage is dropped from a displayed name.
 - `htmlMenuFixtures.js` — synthetic, self-written cases ("Fictie…" names
   only; never copied restaurant content) with explicit expected results.
 - `menuScoring.js` / `menuBenchmark.js` — precision, recall, wrong prices,
   wrong sections, false/missed menus, review load, local timing and `null`
   cost, per `(sourceType, adapterKind)`; the `ai_structured` stub is always
-  `not_evaluated`. `assertNeverCarriesPrecomputedConfidence` also covers menu
-  results.
+  `not_evaluated`. `assertNeverCarriesPrecomputedConfidence` applies the same
+  recursive scan to every adapter result of both tracks, before scoring.
 - `menuIsolation.test.js` — proves no product code imports this directory
   and the menu modules import no network client, provider, browser tool,
   child process or environment variable.
