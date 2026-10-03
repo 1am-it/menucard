@@ -65,6 +65,45 @@ URL, contacts a vendor, or spends any money.
   ceiling — all of those remain be-21's own explicit, separate,
   owner-confirmed deliverables once a real vendor is actually chosen.
 
+## BE-22 — menu-structure track (HTML)
+
+A separate, additive track for recognizing ordinary HTML menus — see
+`planning/specs/tickets/be-22-html-menu-recognition-foundation.md`. It
+leaves the field track above (manifest, `ADAPTER_KINDS`, `scoreCase`)
+untouched.
+
+- `menuExtractionContract.js` — the one output contract shared by the
+  deterministic `html_structure` adapter and a later `ai_structured`
+  adapter: MARKET-02 money states, a closed rejection vocabulary, an
+  evidence locator per item, bounded text, and cost fields that are always
+  `null` here. No `confidence`/`reviewReady` anywhere.
+- `htmlMenuStructure.js` — a bounded, dependency-free HTML tree builder and
+  the `html_structure` adapter. Supported: heading sections (`h1`–`h6`,
+  `role="heading"`), list items (`li`, `role="listitem"`, nested lists as
+  sub-sections), table rows, definition lists, and repeated item cards, each
+  with name and price in the same element; a description only inside that
+  same element. Rejected with a reason: clock times, service units (per
+  person/table, arrangements, packages, courses — a small local list until
+  BE-20's is merged), modifiers, prices without a name, and anything under an
+  opening-hours/contact/reservation/reviews/arrangement heading. Unpriced
+  lines and prose prices never count; fewer than three items is `unparsed`.
+  Dual prices stay `multiple_undecomposed`. Amounts of €1.000 or more with
+  a thousands separator are not recognized (fail closed).
+- `htmlMenuFixtures.js` — synthetic, self-written cases ("Fictie…" names
+  only; never copied restaurant content) with explicit expected results.
+- `menuScoring.js` / `menuBenchmark.js` — precision, recall, wrong prices,
+  wrong sections, false/missed menus, review load, local timing and `null`
+  cost, per `(sourceType, adapterKind)`; the `ai_structured` stub is always
+  `not_evaluated`. `assertNeverCarriesPrecomputedConfidence` also covers menu
+  results.
+- `menuIsolation.test.js` — proves no product code imports this directory
+  and the menu modules import no network client, provider, browser tool,
+  child process or environment variable.
+
+A perfect score on these fixtures only proves the machinery against inputs
+written alongside the adapter — never that any real website's HTML menu is
+supported. That needs a separately authorized benchmark on real sources.
+
 ## Running it
 
 ```

@@ -13,7 +13,7 @@ BE-22 VOORTGANG
 
 - [x] 1. Ticket en kernbeslissingen vastgelegd
 - [ ] 2. Implementatie-readinessreview groen
-- [ ] 3. Lokale offline foundation gebouwd en getest (`ops/benchmark/`)
+- [x] 3. Lokale offline foundation gebouwd en getest (`ops/benchmark/`)
 - [ ] 4. Onafhankelijke pre-pushreview groen
 - [ ] 5. Code gepusht
 - [ ] 6. Apart geautoriseerd experiment op echte bronnen
@@ -119,19 +119,22 @@ dishes?
 
 ## Acceptance criteria
 
-- [ ] Every supported pattern and every rejected structure has a regression
+- [x] Every supported pattern and every rejected structure has a regression
       test against a synthetic fixture.
-- [ ] Opening hours, reservation/contact blocks, reviews, loose prices,
+- [x] Opening hours, reservation/contact blocks, reviews, loose prices,
       prose prices, per-person/per-table offers, modifiers and unpriced lists
       never yield a menu.
-- [ ] Dual prices stay `multiple_undecomposed`; duplicate markup is
+- [x] Dual prices stay `multiple_undecomposed`; duplicate markup is
       de-duplicated; nested sections keep their full heading path.
-- [ ] No adapter output carries `confidence` or `reviewReady`; the shared
+- [x] No adapter output carries `confidence` or `reviewReady`; the shared
       guard rejects it.
-- [ ] No product code imports `ops/benchmark/`; no new module imports a
+- [x] No product code imports `ops/benchmark/`; no new module imports a
       network client, provider SDK, or browser tool.
-- [ ] Results stay separated per `(sourceType, adapterKind)`; the
+- [x] Results stay separated per `(sourceType, adapterKind)`; the
       `ai_structured` stub stays `not_evaluated` with `null` cost.
+
+All six are met on synthetic fixtures only (step 3); none says anything
+about real websites (step 6).
 
 ## Suggested next step
 
