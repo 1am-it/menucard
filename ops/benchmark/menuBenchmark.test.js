@@ -138,6 +138,11 @@ const NESTED_MUTATIONS = {
   cost: (r) => { r.menuExtraction.cost.reviewReady = false },
   notes: (r) => { r.notes.push({ confidence: 'hoog' }) },
   cycle: (r) => { r.menuExtraction.stats = { counted: 1 }; r._loop = r },
+  // N6: hidden trust keys
+  nonEnumerable: (r) => { Object.defineProperty(r.menuExtraction.sections[0].items[0], 'confidence', { value: 'hoog', enumerable: false }) },
+  inherited: (r) => { r.menuExtraction.sections[0].items[0] = Object.assign(Object.create({ reviewReady: true }), r.menuExtraction.sections[0].items[0]) },
+  getter: (r) => { Object.defineProperty(r.menuExtraction.sections[0].items[0].evidence, 'confidence', { enumerable: true, get: () => 'hoog' }) },
+  symbol: (r) => { r.menuExtraction.stats[Symbol('reviewReady')] = true },
 }
 
 for (const [where, mutate] of Object.entries(NESTED_MUTATIONS)) {
@@ -151,6 +156,24 @@ for (const [where, mutate] of Object.entries(NESTED_MUTATIONS)) {
     }
   })
 }
+
+test('N6 end-to-end (field track): an inherited trust key on a field value throws before scoreCase is called', async () => {
+  const spy = loadWithScoringSpy('./runner', './scoring', 'scoreCase')
+  try {
+    const rogue = {
+      kind: 'deterministic',
+      available: true,
+      async run() {
+        const value = Object.assign(Object.create({ confidence: 'hoog' }), { text: 'Fictief' })
+        return { kind: 'deterministic', available: true, fields: { name: { value, extractionMethod: 'json_ld', hasContentHash: true, contextStatus: 'unverified' } }, menuContextNames: [], unknownMenuContextCount: 0, errors: [], notes: [], _internal: { unknownMenuContexts: [] } }
+      },
+    }
+    await assert.rejects(() => spy.loaded.runBenchmark({ adapters: [rogue] }), /precomputed confidence/)
+    assert.equal(spy.calls.length, 0, 'scoring must never be reached')
+  } finally {
+    spy.restore()
+  }
+})
 
 test('M3 end-to-end: a clean menu adapter does reach scoring (the spy works)', async () => {
   const spy = loadWithScoringSpy('./menuBenchmark', './menuScoring', 'scoreMenuCase')

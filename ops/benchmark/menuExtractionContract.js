@@ -75,30 +75,56 @@ function isBoundedString(value) {
  * violation (fail closed). */
 const TRUST_SCAN_MAX_DEPTH = 64
 const TRUST_SCAN_MAX_NODES = 100000
+const TRUST_SCAN_MAX_ENTRIES = 1000000
 
 /**
- * Recursively looks for a `confidence` or `reviewReady` key at ANY depth of
- * `value` — objects and arrays alike (evidence, rejected lines, stats, cost,
- * notes, anything). Returns `null` when clean, otherwise a short description
- * of the first violation. A cycle, more than TRUST_SCAN_MAX_DEPTH levels or
- * more than TRUST_SCAN_MAX_NODES objects is reported as a violation rather
- * than traversed. Never throws.
+ * Accepts only plain, JSON-safe data — and within it, no `confidence` or
+ * `reviewReady` key at ANY depth (evidence, rejected lines, stats, cost,
+ * notes, `_internal`, arrays, anything). Returns `null` when clean,
+ * otherwise a short description of the first violation. Never throws.
+ *
+ * Strict by design, so "no trust key anywhere" is technically true rather
+ * than true-for-enumerable-keys-only:
+ *   - every own key is inspected (`Reflect.ownKeys`): non-enumerable keys,
+ *     symbol keys and accessor properties (getters/setters) are violations,
+ *     and a getter is never invoked;
+ *   - only plain objects (prototype `Object.prototype` or `null`) and arrays
+ *     are allowed, so an inherited trust key on a custom prototype is a
+ *     violation too; functions, symbols and bigints are not JSON values;
+ *   - a cycle, more than TRUST_SCAN_MAX_DEPTH levels, more than
+ *     TRUST_SCAN_MAX_NODES objects or TRUST_SCAN_MAX_ENTRIES keys, or a
+ *     structure that throws while being inspected (e.g. a Proxy) is a
+ *     violation rather than traversed.
  */
 function findForbiddenTrustKey(value) {
-  let visited = 0
+  let visitedNodes = 0
+  let visitedEntries = 0
   const onPath = new Set()
   function visit(node, path, depth) {
-    if (!node || typeof node !== 'object') return null
+    const type = typeof node
+    if (type === 'function' || type === 'symbol' || type === 'bigint') return `non-JSON value (${type}) at ${path}`
+    if (node === null || type !== 'object') return null
     if (onPath.has(node)) return `cyclic structure at ${path}`
     if (depth > TRUST_SCAN_MAX_DEPTH) return `structure deeper than ${TRUST_SCAN_MAX_DEPTH} levels at ${path}`
-    visited += 1
-    if (visited > TRUST_SCAN_MAX_NODES) return `more than ${TRUST_SCAN_MAX_NODES} nested objects`
+    visitedNodes += 1
+    if (visitedNodes > TRUST_SCAN_MAX_NODES) return `more than ${TRUST_SCAN_MAX_NODES} nested objects`
+    const isArray = Array.isArray(node)
+    const proto = Object.getPrototypeOf(node)
+    if (!(isArray ? proto === Array.prototype : proto === Object.prototype || proto === null)) return `unexpected prototype (not plain data) at ${path}`
     onPath.add(node)
     try {
-      for (const key of Object.keys(node)) {
-        const childPath = Array.isArray(node) ? `${path}[${key}]` : `${path}.${key}`
-        if (!Array.isArray(node) && FORBIDDEN_TRUST_KEYS.includes(key)) return `${childPath} is forbidden`
-        const found = visit(node[key], childPath, depth + 1)
+      for (const key of Reflect.ownKeys(node)) {
+        visitedEntries += 1
+        if (visitedEntries > TRUST_SCAN_MAX_ENTRIES) return `more than ${TRUST_SCAN_MAX_ENTRIES} keys`
+        if (isArray && key === 'length') continue
+        if (typeof key === 'symbol') return `symbol key at ${path}`
+        const childPath = isArray ? `${path}[${key}]` : `${path}.${key}`
+        if (FORBIDDEN_TRUST_KEYS.includes(key)) return `${childPath} is forbidden`
+        const descriptor = Object.getOwnPropertyDescriptor(node, key)
+        if (!descriptor) continue
+        if (descriptor.get || descriptor.set) return `accessor property at ${childPath}`
+        if (!descriptor.enumerable) return `non-enumerable property at ${childPath}`
+        const found = visit(descriptor.value, childPath, depth + 1)
         if (found) return found
       }
     } finally {
@@ -109,7 +135,7 @@ function findForbiddenTrustKey(value) {
   try {
     return visit(value, '$', 0)
   } catch (err) {
-    // Getters or proxies that throw — never trusted, never a crash.
+    // Proxies or exotic objects that throw — never trusted, never a crash.
     return 'structure could not be inspected'
   }
 }
@@ -218,6 +244,7 @@ module.exports = {
   MAX_TEXT,
   TRUST_SCAN_MAX_DEPTH,
   TRUST_SCAN_MAX_NODES,
+  TRUST_SCAN_MAX_ENTRIES,
   emptyCost,
   findForbiddenTrustKey,
   validateMenuExtraction,
