@@ -500,15 +500,25 @@ function createHtmlStructureAdapter() {
     kind: 'html_structure',
     available: true,
     async run(fixture) {
+      let menuExtraction
+      const errors = []
+      try {
+        menuExtraction = extractHtmlMenuStructure(fixture && fixture.html)
+      } catch (err) {
+        // Defense in depth only — an adapter never throws into the runner,
+        // and an internal failure is never a guessed menu.
+        menuExtraction = unparsed('internal_error', [], { candidates: 0, counted: 0, rejected: 0, duplicatesRemoved: 0, ignoredMarkers: 0, depthLimited: false })
+        errors.push({ code: 'internal_error' })
+      }
       return {
         kind: 'html_structure',
         available: true,
         fields: {},
         menuContextNames: [],
         unknownMenuContextCount: 0,
-        errors: [],
+        errors,
         notes: [],
-        menuExtraction: extractHtmlMenuStructure(fixture.html),
+        menuExtraction,
       }
     },
   }

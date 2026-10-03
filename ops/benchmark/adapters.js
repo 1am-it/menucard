@@ -221,6 +221,20 @@ function assertNeverCarriesPrecomputedConfidence(adapterResult) {
       throw new Error(`AdapterResult field "${fieldName}" carries a precomputed confidence/reviewReady value — forbidden by this contract`)
     }
   }
+  // BE-22 — the same rule for the menu-structure track: a menu extraction
+  // result, its sections and its items never carry a self-assessed trust
+  // value either. Additive; a result without `menuExtraction` is unaffected.
+  const menu = adapterResult.menuExtraction
+  if (menu && typeof menu === 'object') {
+    const carriesTrust = (object) => Boolean(object) && typeof object === 'object' && ['confidence', 'reviewReady'].some((key) => Object.prototype.hasOwnProperty.call(object, key))
+    if (carriesTrust(menu)) throw new Error('AdapterResult menuExtraction carries a precomputed confidence/reviewReady value — forbidden by this contract')
+    for (const section of Array.isArray(menu.sections) ? menu.sections : []) {
+      if (carriesTrust(section)) throw new Error('AdapterResult menu section carries a precomputed confidence/reviewReady value — forbidden by this contract')
+      for (const item of Array.isArray(section && section.items) ? section.items : []) {
+        if (carriesTrust(item)) throw new Error('AdapterResult menu item carries a precomputed confidence/reviewReady value — forbidden by this contract')
+      }
+    }
+  }
 }
 
 module.exports = {
