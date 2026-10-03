@@ -371,3 +371,131 @@ test('displayName drops only a trailing alcohol percentage — never mid-name, n
   assert.equal(displayName('Fictieve 50% korting burger'), 'Fictieve 50% korting burger')
   assert.equal(displayName('5%'), '5%')
 })
+
+// ─── N1: table rows with several name+price pairs ─────────────────────────
+
+const table = (...rows) => `<h2>Fictief</h2><table>${rows.map((r) => `<tr>${r.map((c) => `<td>${c}</td>`).join('')}</tr>`).join('')}</table>`
+const FILLER_ROWS = [['Fictief a', '4,50'], ['Fictief b', '5,00'], ['Fictief c', '6,00']]
+
+test('N1: two name cells each with their own price cell are ambiguous — the first dish is never claimed', () => {
+  for (const row of [
+    ['Fictieve soep', '6,50', 'Fictieve salade', '7,50'],
+    ['6,50', 'Fictieve soep', '7,50', 'Fictieve salade'],
+    ['Fictieve soep', 'Met brood', '6,50', 'Fictieve salade', '7,50'],
+    ['Fictieve soep 6,50', 'Fictieve salade 7,50'],
+  ]) {
+    const result = extractHtmlMenuStructure(table(row, ...FILLER_ROWS))
+    assert.equal(result.status, 'parsed', JSON.stringify(row))
+    assert.equal(result.sections[0].items.length, 3, JSON.stringify(row))
+    assert.ok(!JSON.stringify(result.sections).includes('soep'), JSON.stringify(row))
+    assert.ok(result.rejected.some((r) => r.reason === 'ambiguous_structure'), JSON.stringify(row))
+  }
+})
+
+test('N1: one name with two real price variants stays one multiple_undecomposed item', () => {
+  for (const row of [
+    ['Fictieve huiswijn', '5,50', '27,50'],
+    ['Fictieve huiswijn', 'glas', '5,50', 'fles', '27,50'],
+    ['Fictieve huiswijn', 'glas 5,50', 'fles 27,50'],
+    ['Fictieve huiswijn', 'Droog en fris', '5,50', '27,50'],
+  ]) {
+    const result = extractHtmlMenuStructure(table(row, ...FILLER_ROWS))
+    const item = result.sections[0].items[0]
+    assert.equal(item.name, 'Fictieve huiswijn', JSON.stringify(row))
+    assert.equal(item.priceStatus, 'multiple_undecomposed', JSON.stringify(row))
+    assert.equal(item.amountMinorUnits, null)
+    assert.ok(!result.rejected.some((r) => r.reason === 'ambiguous_structure'), JSON.stringify(row))
+  }
+})
+
+test('N1: a name, a description cell and one price cell stay one known item', () => {
+  const result = extractHtmlMenuStructure(table(['Fictieve quiche', 'Met fictieve prei', '9,25'], ...FILLER_ROWS))
+  const item = result.sections[0].items[0]
+  assert.deepEqual([item.name, item.priceStatus, item.amountMinorUnits, item.description], ['Fictieve quiche', 'known', 925, 'Met fictieve prei'])
+})
+
+// ─── N2: cards and list items with several name/price elements ────────────
+
+const card = (inner) => `<div class="menu-item">${inner}</div>`
+const FILLER_CARDS = ['Fictief a', 'Fictief b', 'Fictief c'].map((n, i) => card(`<h3>${n}</h3><span class="price">${i + 4},00</span>`)).join('')
+
+test('N2: two name or two price elements in one card are ambiguous — no first item or price is claimed', () => {
+  for (const inner of [
+    '<h3>Fictieve soep</h3><span class="price">6,50</span><h3>Fictieve salade</h3><span class="price">7,50</span>',
+    '<h3>Fictieve soep</h3><h3>Fictieve salade</h3><span class="price">6,50</span>',
+    '<h3>Fictieve soep</h3><span class="price">6,50</span><span class="price">7,50</span>',
+    '<h3>Fictieve soep</h3><span class="price">6,50</span> Fictieve salade 7,50',
+  ]) {
+    const result = extractHtmlMenuStructure(`<h2>Fictief</h2>${card(inner)}${FILLER_CARDS}`)
+    assert.equal(result.sections[0].items.length, 3, inner)
+    assert.ok(!JSON.stringify(result.sections).includes('soep'), inner)
+    assert.ok(!result.sections[0].items.some((i) => i.amountMinorUnits === 650), inner)
+    assert.ok(result.rejected.some((r) => r.reason === 'ambiguous_structure'), inner)
+  }
+})
+
+test('N2: a card with exactly one name and one price stays supported — nested and description markup do not count twice', () => {
+  for (const [inner, description] of [
+    ['<h3>Fictieve soep</h3><span class="price">€ 6,50</span>', null],
+    ['<h3 class="name"><strong>Fictieve soep</strong></h3><span class="price"><span class="price-amount">€ 6,50</span></span>', null],
+    ['<h3>Fictieve soep</h3><p class="desc">Met <strong>verse</strong> kruiden</p><span class="price">€ 6,50</span>', 'Met verse kruiden'],
+  ]) {
+    const result = extractHtmlMenuStructure(`<h2>Fictief</h2>${card(inner)}${FILLER_CARDS}`)
+    const item = result.sections[0].items[0]
+    assert.deepEqual([item.name, item.priceStatus, item.amountMinorUnits, item.description], ['Fictieve soep', 'known', 650, description], inner)
+  }
+})
+
+test('N2: a list item with name/price elements follows the same rule', () => {
+  const result = extractHtmlMenuStructure('<h2>Fictief</h2><ul><li><b>Fictieve soep</b> <span class="price">6,50</span> <b>Fictieve salade</b> <span class="price">7,50</span></li><li>Fictief a 4,50</li><li>Fictief b 5,00</li><li>Fictief c 6,00</li></ul>')
+  assert.equal(result.sections[0].items.length, 3)
+  assert.ok(result.rejected.some((r) => r.reason === 'ambiguous_structure'))
+})
+
+// ─── N3: size letters versus volume units ─────────────────────────────────
+
+test('N3: an upper-case size letter after a price is never a volume', () => {
+  assert.deepEqual(findPrices('Fictieve pizza 9,50 M 12,50 L').map((p) => p.amountMinorUnits), [950, 1250])
+  assert.deepEqual(findPrices('Fictieve pizza 12,50 L').map((p) => p.amountMinorUnits), [1250])
+  assert.deepEqual(findPrices('Fictieve pizza 9,50 G').map((p) => p.amountMinorUnits), [950])
+})
+
+test('N3: a real quantity is still skipped, upper or lower case, before the price', () => {
+  assert.deepEqual(findPrices('Fictief bier 0,75 L 4,50').map((p) => p.amountMinorUnits), [450])
+  assert.deepEqual(findPrices('Fictief bier 0,75 l 4,50').map((p) => p.amountMinorUnits), [450])
+  assert.deepEqual(findPrices('Fictief bier 0,33l 4,50').map((p) => p.amountMinorUnits), [450])
+  assert.deepEqual(findPrices('Fictief bier 33 CL 4,50').map((p) => p.amountMinorUnits), [450])
+  assert.deepEqual(findPrices('Fictieve kaas 0,25 KG 4,50').map((p) => p.amountMinorUnits), [450])
+  assert.deepEqual(findPrices('Fictieve kaas 0,20 G 4,50').map((p) => p.amountMinorUnits), [450])
+})
+
+test('N3: a unit-like token AFTER a price is kept as a price (fail closed), so two prices stay two', () => {
+  assert.deepEqual(findPrices('Fictieve calzone 10,50 m 13,50 l').map((p) => p.amountMinorUnits), [1050, 1350])
+  assert.deepEqual(findPrices('Fictief tapbier 4,50 (0,25 l)').map((p) => p.amountMinorUnits), [450, 25])
+})
+
+test('N3: in an item, a size pair is multiple_undecomposed and glas/fles stays multiple_undecomposed', () => {
+  const result = extractHtmlMenuStructure('<h2>Fictief</h2><ul><li>Fictieve pizza 9,50 M 12,50 L</li><li>Fictieve wijn 0,75 L glas 5,50 / fles 27,50</li><li>Fictief bier 0,75 L 4,50</li></ul>')
+  assert.deepEqual(result.sections[0].items.map((i) => [i.name, i.priceStatus, i.amountMinorUnits, i.description]), [
+    ['Fictieve pizza', 'multiple_undecomposed', null, null],
+    ['Fictieve wijn 0,75 L', 'multiple_undecomposed', null, null],
+    ['Fictief bier 0,75 L', 'known', 450, null],
+  ])
+})
+
+// ─── N4: table rows are linear and fully charged ──────────────────────────
+
+test('N4: many table cells are processed linearly and every cell classification is charged', () => {
+  const wideRow = (count) => `<table><tr>${'<td>1,00</td>'.repeat(count)}${Array.from({ length: count }, (_, i) => `<td>Fictief ${i}</td>`).join('')}</tr></table>`
+  const small = extractHtmlMenuStructure(wideRow(2000))
+  const large = extractHtmlMenuStructure(wideRow(4000))
+  assert.equal(large.status, 'unparsed')
+  assert.ok(large.stats.workUnits <= small.stats.workUnits * 2.2 + 50, `${small.stats.workUnits} -> ${large.stats.workUnits}`)
+  // Beyond parsing, reading the row charges per cell at least: one child
+  // step, two tree visits (td + text) and a classification (>= 2 units).
+  const html = wideRow(4000)
+  const parseBudget = createBudget()
+  parseHtml(html, parseBudget)
+  const cells = 8000
+  assert.ok(large.stats.workUnits - parseBudget.used >= cells * 5, `read cost ${large.stats.workUnits - parseBudget.used} for ${cells} cells`)
+})

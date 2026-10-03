@@ -439,6 +439,79 @@ const HTML_MENU_CASES = [
       <ul><li>Fictieve jas 1,00</li></ul>`),
     expected: { isMenu: false, items: [], rejectedReasons: ['non_menu_section'] },
   },
+
+  // ── BE-22 review round 2 (N1, N2, N3) ───────────────────────────────────
+  {
+    id: 'html-table-two-dishes-per-row',
+    kind: 'difficult',
+    notes: 'N1: a row with two name+price pairs is ambiguous (never the first dish alone); one name with glas/fles price cells stays one multiple_undecomposed item; a description cell is not a second dish.',
+    html: page(`
+      <h2>Kaart</h2>
+      <table>
+        <tr><td>Fictieve soep</td><td>6,50</td><td>Fictieve salade</td><td>7,50</td></tr>
+        <tr><td>Fictieve huiswijn</td><td>5,50</td><td>27,50</td></tr>
+        <tr><td>Fictieve rosé</td><td>glas</td><td>5,75</td><td>fles</td><td>28,00</td></tr>
+        <tr><td>Fictieve wrap</td><td>8,50</td></tr>
+        <tr><td>Fictieve quiche</td><td>Met fictieve prei</td><td>9,25</td></tr>
+      </table>`),
+    expected: {
+      isMenu: true,
+      items: [
+        ['Kaart', 'Fictieve huiswijn', 'multiple_undecomposed', null],
+        ['Kaart', 'Fictieve rosé', 'multiple_undecomposed', null],
+        ['Kaart', 'Fictieve wrap', 'known', 850],
+        ['Kaart', 'Fictieve quiche', 'known', 925],
+      ],
+      rejectedReasons: ['ambiguous_structure'],
+      descriptions: { 'Fictieve quiche': 'Met fictieve prei' },
+    },
+  },
+  {
+    id: 'html-card-two-pairs',
+    kind: 'difficult',
+    notes: 'N2: a card with two name/price element pairs, or a price outside its one price element, is ambiguous; a card with exactly one name and one price stays supported, even with a <strong> word in its description.',
+    html: page(`
+      <h2>Gerechten</h2>
+      <div class="menu-item"><h3>Fictieve soep</h3><span class="price">6,50</span><h3>Fictieve salade</h3><span class="price">7,50</span></div>
+      <div class="menu-item"><h3>Fictief broodje</h3><span class="price">6,00</span> Fictieve tosti 4,50</div>
+      <div class="menu-item"><h3>Fictieve pasta</h3><p class="desc">Met <strong>verse</strong> fictieve kruiden</p><span class="price">€ 14,50</span></div>
+      <div class="menu-item"><h3>Fictieve risotto</h3><p class="desc">Met fictieve paddenstoelen</p><span class="price">€ 16,00</span></div>
+      <div class="menu-item"><h3>Fictieve curry</h3><span class="price">€ 15,50</span></div>`),
+    expected: {
+      isMenu: true,
+      items: [
+        ['Gerechten', 'Fictieve pasta', 'known', 1450],
+        ['Gerechten', 'Fictieve risotto', 'known', 1600],
+        ['Gerechten', 'Fictieve curry', 'known', 1550],
+      ],
+      rejectedReasons: ['ambiguous_structure'],
+      descriptions: { 'Fictieve pasta': 'Met verse fictieve kruiden' },
+    },
+  },
+  {
+    id: 'html-size-letters-and-volumes',
+    kind: 'difficult',
+    notes: 'N3: a size letter after a price ("9,50 M 12,50 L") is never a volume — two prices stay multiple_undecomposed; a sub-euro quantity with "L" ("0,75 L 4,50") is a volume; a unit-like token after a price is kept as a price (fail closed).',
+    html: page(`
+      <h2>Fictief</h2>
+      <ul>
+        <li>Fictieve pizza 9,50 M 12,50 L</li>
+        <li>Fictieve calzone 10,50 m 13,50 l</li>
+        <li>Fictief bier 0,75 L 4,50</li>
+        <li>Fictieve frisdrank 0,33 l 2,90</li>
+        <li>Fictief tapbier 4,50 (0,25 l)</li>
+      </ul>`),
+    expected: {
+      isMenu: true,
+      items: [
+        ['Fictief', 'Fictieve pizza', 'multiple_undecomposed', null],
+        ['Fictief', 'Fictieve calzone', 'multiple_undecomposed', null],
+        ['Fictief', 'Fictief bier 0,75 L', 'known', 450],
+        ['Fictief', 'Fictieve frisdrank 0,33 l', 'known', 290],
+        ['Fictief', 'Fictief tapbier', 'multiple_undecomposed', null],
+      ],
+    },
+  },
 ]
 
 module.exports = { HTML_MENU_CASES }

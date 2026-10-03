@@ -26,8 +26,12 @@
 // local list, see SERVICE_UNIT_PATTERN); modifiers ("+ extra …"); a price
 // without a name; a name without a price (recorded only in a section that also
 // has priced items, so navigation links never become noise); and an element
-// holding several name+price pairs (never merged into one item). Volumes and
-// weights ("0,75 l", "33cl", "250 g") are never prices. Prices in running text
+// holding several independent name/price pairs — in one list item, definition,
+// table row (two name runs and two price runs) or card (two name or two price
+// elements, or a price outside its price element) — never merged, never read
+// as its first pair. Volumes and weights ("0,75 l", "33cl", "250 g", a
+// sub-euro "0,75 L") before the first price are never prices; a size letter
+// or unit-like token after a price is kept as a price (fail closed). Prices in running text
 // (paragraphs, prose) never count — only the structures above. Fewer than
 // MIN_ITEMS counted items → `unparsed`.
 //
@@ -366,21 +370,38 @@ function cleanName(text) {
  * never a percentage, never a 1-decimal value (alcohol %). */
 const PRICE_PATTERN = /(€\s*)?(?<![\d.,])(\d{1,3})(?:[.,](\d{2})|,[-–])(?![\d.,]*\d)(?!\s*%)|€\s*(\d{1,3})(?![\d.,]*\d)(?!\s*%)/g
 
-/** A volume or weight unit directly after a number ("0,75 l", "33cl",
- * "500 ml", "250 g", "1 kg") — that number is a quantity, never a price. */
-const QUANTITY_UNIT_AFTER = /^\s?(?:l|ltr|liter|liters|litre|cl|ml|dl|kg|kilo|g|gr|gram|grams|mg|oz|lb)(?!\p{L})/iu
+/** A multi-letter volume or weight unit directly after a number ("33cl",
+ * "500 ml", "1 kg", "1,50 liter") — that number is a quantity, any case. */
+const MULTI_LETTER_UNIT_AFTER = /^\s?(?:ltr|liter|liters|litre|litres|cl|ml|dl|kg|kilo|gr|gram|grams|mg|oz|lb)(?!\p{L})/iu
+/** A single-letter unit ("0,75 l", "250 g"). Lower case is a unit; an
+ * upper-case "L"/"G" is also a common SIZE letter ("12,50 L" = large), so it
+ * only counts as a unit for a sub-euro quantity such as "0,75 L". */
+const SINGLE_LETTER_UNIT_AFTER = /^\s?([lLgG])(?!\p{L})/u
 
-/** Money tokens in `text`. A token directly followed by a volume/weight unit
- * is a quantity and skipped — unless the source shows € for it. */
+function isQuantityToken(text, end, amountMinorUnits) {
+  const after = text.slice(end, end + 10)
+  if (MULTI_LETTER_UNIT_AFTER.test(after)) return true
+  const single = SINGLE_LETTER_UNIT_AFTER.exec(after)
+  if (!single) return false
+  return single[1] === 'l' || single[1] === 'g' || amountMinorUnits < 100
+}
+
+/**
+ * Money tokens in `text`. A number directly followed by a volume/weight unit
+ * is a quantity and skipped — but only BEFORE the first money token and only
+ * without €: a unit-like token after a price ("9,50 m 12,50 l") is kept as a
+ * price, so a second price can never hide as a "volume" and turn an item
+ * into one known amount (fail closed: multiple_undecomposed).
+ */
 function findPrices(text) {
   const prices = []
   for (const m of text.matchAll(PRICE_PATTERN)) {
     const hasEuroSign = m[0].includes('€')
-    const end = m.index + m[0].length
-    if (!hasEuroSign && QUANTITY_UNIT_AFTER.test(text.slice(end, end + 10))) continue
     const euros = m[2] !== undefined ? Number(m[2]) : Number(m[4])
     const cents = m[3] !== undefined ? Number(m[3]) : 0
-    prices.push({ raw: m[0].trim(), index: m.index, length: m[0].length, amountMinorUnits: euros * 100 + cents, hasEuroSign })
+    const amountMinorUnits = euros * 100 + cents
+    if (!hasEuroSign && prices.length === 0 && isQuantityToken(text, m.index + m[0].length, amountMinorUnits)) continue
+    prices.push({ raw: m[0].trim(), index: m.index, length: m[0].length, amountMinorUnits, hasEuroSign })
   }
   return prices
 }
@@ -522,12 +543,14 @@ function isRepeatedCard(node, budget) {
 }
 
 function findDescendant(node, predicate, budget) {
+  if (budget) budget.spend(node.children.length)
   const queue = [...node.children]
   for (let head = 0; head < queue.length; head += 1) {
     const n = queue[head]
     if (budget) budget.spend(1)
     if (n.tag === '#text') continue
     if (predicate(n)) return n
+    if (budget) budget.spend(n.children.length)
     for (const child of n.children) queue.push(child)
   }
   return null
@@ -537,13 +560,94 @@ function classMatches(node, pattern) {
   return Boolean(node.attrs && typeof node.attrs.class === 'string' && pattern.test(node.attrs.class))
 }
 
-/** Splits one item element into { name, priceText, description, fullText }. */
+function letterCount(text) {
+  return (text.match(/\p{L}/gu) || []).length
+}
+
+/** One table cell: 'price' (only prices, optionally with variant words such
+ * as "glas"/"fles"), 'variant' (only variant words), 'name' (a plausible
+ * name, no price), 'mixed' (a name AND a price in one cell), or 'other'. */
+function classifyCell(cell) {
+  if (cell.length === 0 || cell.length > MAX_ITEM_TEXT) return 'other'
+  const prices = findPrices(cell)
+  let rest = ''
+  let from = 0
+  for (const p of prices) {
+    rest += cell.slice(from, p.index)
+    from = p.index + p.length
+  }
+  rest = (rest + cell.slice(from)).replace(PRICE_VARIANT_WORDS, ' ')
+  const restLetters = letterCount(rest)
+  if (prices.length > 0) return restLetters < 3 ? 'price' : 'mixed'
+  if (restLetters === 0 && letterCount(cell) > 0) return 'variant'
+  return isPlausibleItemName(cell) ? 'name' : 'other'
+}
+
+/** Several independent name+price groups in one row: at least two runs of
+ * name cells AND at least two runs of price cells ("soep | 6,50 | salade |
+ * 7,50"). One name with several price cells (glas/fles) is one item. */
+function rowHasSeveralNamePricePairs(kinds) {
+  let nameRuns = 0
+  let priceRuns = 0
+  let last = null
+  for (const kind of kinds) {
+    if (kind === 'name' || kind === 'mixed') {
+      if (last !== 'name') nameRuns += 1
+      last = 'name'
+    }
+    if (kind === 'price' || kind === 'mixed') {
+      if (last !== 'price' || kind === 'mixed') priceRuns += 1
+      last = 'price'
+    }
+  }
+  return nameRuns >= 2 && priceRuns >= 2
+}
+
+/** Outermost descendants matching `predicate` (never descending into a match
+ * or into a subtree `skip` excludes); stops once `limit` are found. */
+function findOutermost(node, predicate, budget, { skip, limit = 2 } = {}) {
+  const found = []
+  if (budget) budget.spend(node.children.length)
+  const queue = [...node.children]
+  for (let head = 0; head < queue.length && found.length < limit; head += 1) {
+    const n = queue[head]
+    if (budget) budget.spend(1)
+    if (n.tag === '#text') continue
+    if (predicate(n)) {
+      found.push(n)
+      continue
+    }
+    if (skip && skip(n)) continue
+    if (budget) budget.spend(n.children.length)
+    for (const child of n.children) queue.push(child)
+  }
+  return found
+}
+
+const isNameElement = (n) => classMatches(n, NAME_CLASS_PATTERN) || /^h[3-6]$/.test(n.tag) || n.tag === 'strong' || n.tag === 'b' || (n.attrs && n.attrs.itemprop === 'name')
+const isPriceElement = (n) => classMatches(n, PRICE_CLASS_PATTERN) || (n.attrs && n.attrs.itemprop === 'price')
+const isDescriptionElement = (n) => classMatches(n, DESC_CLASS_PATTERN) || n.tag === 'p' || (n.attrs && n.attrs.itemprop === 'description')
+
+/** Splits one item element into { name, priceText, description, fullText }.
+ * `ambiguous: true` marks an element holding several independent
+ * name/price pairs — never read as one item, never partially. */
 function readItem(node, pattern, markerCounter, budget) {
   if (pattern === 'table_row') {
-    const cells = node.children.filter((c) => c.tag === 'td' || c.tag === 'th').map((c) => textOf(c, { markerCounter, budget }))
-    const priceCells = cells.filter((c) => findPrices(c).length > 0 && c.replace(PRICE_PATTERN, '').trim() === '')
-    const other = cells.filter((c) => !priceCells.includes(c) && c.length > 0)
-    return { name: other[0] || '', priceText: priceCells.join(' '), description: other.slice(1).join(' '), fullText: cells.join(' ') }
+    // Linear: each cell is classified once (charged), membership by index.
+    const cells = []
+    for (const c of node.children) {
+      budget.spend(1)
+      if (c.tag === 'td' || c.tag === 'th') cells.push(textOf(c, { markerCounter, budget }))
+    }
+    const kinds = cells.map((cell) => {
+      budget.spend(1 + Math.ceil(Math.min(cell.length, MAX_ITEM_TEXT) / 16))
+      return classifyCell(cell)
+    })
+    const fullText = cells.join(' ')
+    if (rowHasSeveralNamePricePairs(kinds)) return { name: '', priceText: '', description: '', fullText, ambiguous: true }
+    const priceCells = cells.filter((cell, i) => kinds[i] === 'price')
+    const other = cells.filter((cell, i) => kinds[i] !== 'price' && kinds[i] !== 'variant' && cell.length > 0)
+    return { name: other[0] || '', priceText: priceCells.join(' '), description: other.slice(1).join(' '), fullText }
   }
   if (pattern === 'definition') {
     const name = textOf(node, { markerCounter, budget })
@@ -555,15 +659,25 @@ function readItem(node, pattern, markerCounter, budget) {
   }
   // Markers are counted once, on the full-text pass only.
   const fullText = textOf(node, { markerCounter, budget })
-  const nameEl = findDescendant(node, (n) => classMatches(n, NAME_CLASS_PATTERN) || /^h[3-6]$/.test(n.tag) || n.tag === 'strong' || n.tag === 'b' || (n.attrs && n.attrs.itemprop === 'name'), budget)
-  const priceEl = findDescendant(node, (n) => classMatches(n, PRICE_CLASS_PATTERN) || (n.attrs && n.attrs.itemprop === 'price'), budget)
-  const descEl = findDescendant(node, (n) => n !== nameEl && n !== priceEl && (classMatches(n, DESC_CLASS_PATTERN) || n.tag === 'p' || (n.attrs && n.attrs.itemprop === 'description')), budget)
+  // Name elements inside a description (a <strong> word in a <p>) are not
+  // independent names; nested matches count once (outermost only).
+  const nameEls = findOutermost(node, isNameElement, budget, { skip: isDescriptionElement })
+  const priceEls = findOutermost(node, isPriceElement, budget)
+  if (nameEls.length >= 2 || priceEls.length >= 2) return { name: '', priceText: '', description: '', fullText, ambiguous: true }
+  const nameEl = nameEls[0] || null
+  const priceEl = priceEls[0] || null
   if (nameEl && priceEl) {
+    // A price outside the one price element is a second pair: ambiguous.
+    const outside = textOf(node, { skip: (n) => n === priceEl, budget })
+    budget.spend(Math.ceil(outside.length / 16))
+    if (findPrices(outside).length > 0) return { name: '', priceText: '', description: '', fullText, ambiguous: true }
+    const descEl = findDescendant(node, (n) => n !== nameEl && n !== priceEl && isDescriptionElement(n), budget)
     const description = descEl ? textOf(descEl, { budget }) : ''
-    return { name: textOf(nameEl, { budget }), priceText: textOf(priceEl, { budget }), description: findPrices(description).length > 0 ? '' : description, fullText }
+    return { name: textOf(nameEl, { budget }), priceText: textOf(priceEl, { budget }), description, fullText }
   }
   // No explicit name/price elements: the name is the text before the first
   // price, the description what follows the last one (inside this element).
+  budget.spend(Math.ceil(fullText.length / 16))
   const prices = findPrices(fullText)
   if (prices.length === 0) return { name: fullText, priceText: '', description: '', fullText }
   const first = prices[0]
@@ -653,6 +767,9 @@ function extractWithinBudget(html, budget, stats) {
     if (isDateText(fullText)) return reject(fullText, 'date', node)
     if (MODIFIER_PATTERN.test(fullText)) return reject(fullText, 'modifier', node)
     if (hasServiceUnit(fullText) || PER_TABLE_PATTERN.test(fullText)) return reject(fullText, 'service_unit', node)
+    // Several independent name/price pairs (table row, card, list item):
+    // never one item, never the first pair alone.
+    if (item.ambiguous) return reject(fullText, 'ambiguous_structure', node)
 
     const name = cleanName(item.name)
     const prices = findPrices(item.priceText)
@@ -729,6 +846,7 @@ function extractWithinBudget(html, budget, stats) {
         continue
       }
       if (isListItem(child)) {
+        budget.spend(child.children.length)
         const nested = child.children.filter((c) => c.tag !== '#text' && isList(c))
         if (nested.length > 0) {
           const label = clip(textOf(child, { skip: isList, markerCounter, budget }))
@@ -738,7 +856,7 @@ function extractWithinBudget(html, budget, stats) {
         handleItem(child, 'list_item', currentPath(extraLabel))
         continue
       }
-      if (child.tag === 'tr' && child.children.some((c) => c.tag === 'td')) {
+      if (child.tag === 'tr' && (budget.spend(child.children.length), child.children.some((c) => c.tag === 'td'))) {
         handleItem(child, 'table_row', currentPath(extraLabel))
         continue
       }
