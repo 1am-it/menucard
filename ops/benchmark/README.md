@@ -79,12 +79,15 @@ untouched.
   flat counter-only `stats`, and cost fields that are always `null` here.
   One bounded, cycle-safe recursive scan (`findForbiddenTrustKey`) accepts
   only plain, JSON-safe data and rejects `confidence`/`reviewReady` at any
-  depth: every own key is inspected (`Reflect.ownKeys`), non-enumerable
+  depth: every Proxy — transparent or one hiding keys — is rejected first
+  via `util.types.isProxy` (from `node:util`, the only Node built-in this
+  track imports), before any trap runs; every own key is inspected (`Reflect.ownKeys`), non-enumerable
   properties, symbol keys and accessors are violations (a getter is never
   invoked), only plain objects (prototype `Object.prototype`/`null`) and
   arrays are allowed — so an inherited trust key fails closed — and a
-  cyclic, over-deep, over-large or uninspectable structure (e.g. a throwing
-  Proxy) is itself a violation.
+  cyclic, over-deep, over-large or otherwise uninspectable structure is
+  itself a violation. The shared guard runs this scan before any other
+  property read and before scoring, in both runners.
 - `htmlMenuStructure.js` — a dependency-free HTML tree builder and the
   `html_structure` adapter, bounded in input (2 MB, 50 000 nodes, 1 000
   open elements) AND in work: one linear forward pass (unclosed
@@ -142,6 +145,17 @@ untouched.
     - a card with separate price elements for variants (glas/fles) is
       rejected as ambiguous, unlike a table row with variant price cells;
     - "Entree" as a starters heading is treated as admission.
+  - Known structure limits (not solved; no amount is claimed, but a second
+    dish can be hidden):
+    - the ambiguous table order "name | price | price | name" ("Fictieve
+      soep | 6,50 | 7,50 | Fictieve salade") is read as one
+      `multiple_undecomposed` item with only the first name visible (the
+      second name becomes its description) — it cannot be told apart from
+      glas/fles prices followed by a description cell;
+    - a second dish name shorter than three letters inside one combined
+      element ("Fictieve soep 6,50 Ei 2,50") is not reliably distinguished
+      from a variant label, so the element can become one
+      `multiple_undecomposed` item named after the first dish.
   - Amounts of €1.000 or more with a thousands separator are not recognized
     (fail closed).
   - Only a trailing alcohol percentage is dropped from a displayed name.
@@ -154,7 +168,8 @@ untouched.
   recursive scan to every adapter result of both tracks, before scoring.
 - `menuIsolation.test.js` — proves no product code imports this directory
   and the menu modules import no network client, provider, browser tool,
-  child process or environment variable.
+  child process or environment variable; the only non-relative import is
+  `node:util` (for `types.isProxy`), in the contract module only.
 
 A perfect score on these fixtures only proves the machinery against inputs
 written alongside the adapter — never that any real website's HTML menu is

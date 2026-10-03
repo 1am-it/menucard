@@ -5,11 +5,12 @@
 Proposed; local, offline foundation only. An isolated benchmark track under
 `ops/benchmark/` — no product code, route, UI, database, migration,
 provider, or live analysis-pipeline change. Not yet independently reviewed,
-not pushed. Two pre-push reviews (adversarial self-reviews by the same
-author, both NOT GREEN) found time/date and volume misreads, unbounded
-parser work, a shallow trust guard, and two-dish table rows/cards being
-merged or partially claimed; those are fixed locally (see "Review fixes")
-and await a new independent pre-push review.
+not pushed. Three pre-push reviews (adversarial self-reviews by the same
+author, all NOT GREEN) found time/date and volume misreads, unbounded
+parser work, a shallow trust guard, two-dish table rows/cards being merged
+or partially claimed, and Proxies passing the plain-data guard; those are
+fixed locally (see "Review fixes") and await a new independent pre-push
+review.
 
 ## Voortgang
 
@@ -139,12 +140,15 @@ dishes?
       second price; dual prices stay `multiple_undecomposed`; an element
       with two independent name/price pairs (list item, definition, table
       row or card, as tested) is rejected, never merged and never read as
-      its first pair; duplicate markup is de-duplicated; nested sections
-      keep their full heading path.
+      its first pair — except the two documented structure limits T1 and
+      L1 (see Review fixes), which never claim an amount; duplicate markup
+      is de-duplicated; nested sections keep their full heading path.
 - [x] No adapter output carries `confidence` or `reviewReady` at any depth
       — including non-enumerable, inherited, symbol or getter-based keys;
-      the shared guard accepts only plain JSON-safe data and rejects
-      anything else in both runners before scoring.
+      the shared guard accepts only plain JSON-safe data — every Proxy,
+      transparent or hiding keys, is rejected via `util.types.isProxy`
+      before any trap runs — and rejects anything else in both runners,
+      before any other property read and before scoring.
 - [x] Parser work is bounded by a deterministic budget as well as by input
       size; broken or hostile HTML ends `unparsed`, never in a hang or a
       partial menu.
@@ -199,6 +203,21 @@ by mutation:
 - **N6** — the trust-key scan accepts only plain JSON-safe data:
   non-enumerable, symbol, accessor and inherited keys, and non-plain
   objects, fail closed.
+
+The third pre-push review (an adversarial self-review, NOT GREEN) found one
+blocking gap and two low structure limits:
+
+- **P1** — a transparent or key-hiding Proxy passed the plain-data guard.
+  Fixed: `util.types.isProxy` (from `node:util`, the only Node built-in in
+  the menu track, allowed in the contract module only) rejects every Proxy
+  before any trap runs; the shared guard now runs this scan before any
+  other property read. Checked by tests and mutation, in both runners.
+- **T1 / L1** — documented, not solved: the ambiguous table order
+  "name | price | price | name" can become one `multiple_undecomposed`
+  item with only the first name visible, and a second dish name shorter
+  than three letters in one combined element is not reliably
+  distinguished. Both are listed under Known limitations in
+  `ops/benchmark/README.md`; no parser rule was added for them.
 
 ## Suggested next step
 

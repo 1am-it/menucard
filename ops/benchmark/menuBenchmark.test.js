@@ -143,6 +143,10 @@ const NESTED_MUTATIONS = {
   inherited: (r) => { r.menuExtraction.sections[0].items[0] = Object.assign(Object.create({ reviewReady: true }), r.menuExtraction.sections[0].items[0]) },
   getter: (r) => { Object.defineProperty(r.menuExtraction.sections[0].items[0].evidence, 'confidence', { enumerable: true, get: () => 'hoog' }) },
   symbol: (r) => { r.menuExtraction.stats[Symbol('reviewReady')] = true },
+  // P1: Proxies, transparent or hiding a trust key
+  transparentProxyItem: (r) => { r.menuExtraction.sections[0].items[0] = new Proxy({ ...r.menuExtraction.sections[0].items[0] }, {}) },
+  hidingProxyItem: (r) => { r.menuExtraction.sections[0].items[0] = new Proxy({ ...r.menuExtraction.sections[0].items[0], confidence: 'hoog' }, { ownKeys: (t) => Reflect.ownKeys(t).filter((k) => k !== 'confidence') }) },
+  proxyMenuExtraction: (r) => { r.menuExtraction = new Proxy(r.menuExtraction, {}) },
 }
 
 for (const [where, mutate] of Object.entries(NESTED_MUTATIONS)) {
@@ -172,6 +176,57 @@ test('N6 end-to-end (field track): an inherited trust key on a field value throw
     assert.equal(spy.calls.length, 0, 'scoring must never be reached')
   } finally {
     spy.restore()
+  }
+})
+
+test('P1 end-to-end (field track): a Proxy-wrapped field (transparent, no trust key) throws before scoreCase is called', async () => {
+  const spy = loadWithScoringSpy('./runner', './scoring', 'scoreCase')
+  try {
+    const rogue = {
+      kind: 'deterministic',
+      available: true,
+      async run() {
+        const field = new Proxy({ value: 'Fictief', extractionMethod: 'json_ld', hasContentHash: true, contextStatus: 'unverified' }, {})
+        return { kind: 'deterministic', available: true, fields: { name: field }, menuContextNames: [], unknownMenuContextCount: 0, errors: [], notes: [], _internal: { unknownMenuContexts: [] } }
+      },
+    }
+    await assert.rejects(() => spy.loaded.runBenchmark({ adapters: [rogue] }), /Proxy \(not plain data\)/)
+    assert.equal(spy.calls.length, 0, 'scoring must never be reached')
+  } finally {
+    spy.restore()
+  }
+})
+
+test('P1: the shared guard rejects a Proxy before ANY of its traps run — field evidence and menu items alike', () => {
+  for (const place of ['field', 'menuItem']) {
+    const ran = []
+    const traps = Object.fromEntries(['get', 'has', 'ownKeys', 'getOwnPropertyDescriptor', 'getPrototypeOf'].map((t) => [t, (...args) => { ran.push(t); return Reflect[t](...args) }]))
+    const target = place === 'field' ? { value: 'Fictief', extractionMethod: 'json_ld', hasContentHash: true, contextStatus: 'unverified' } : { name: 'Fictief', priceStatus: 'known', amountMinorUnits: 450, currency: null, description: null, evidence: { pattern: 'list_item', locator: 'li' } }
+    const proxy = new Proxy(target, traps)
+    const result = place === 'field'
+      ? { fields: { name: proxy } }
+      : { fields: {}, menuExtraction: { sections: [{ path: [], items: [proxy] }], rejected: [] } }
+    assert.throws(() => assertNeverCarriesPrecomputedConfidence(result), /Proxy \(not plain data\)/, place)
+    assert.deepEqual(ran, [], `${place}: traps ran: ${ran.join(', ')}`)
+  }
+})
+
+test('P1: every real adapter output (BE-20 deterministic, stubs, html_structure) passes the strict guard', async () => {
+  const { createDeterministicAdapter } = require('./adapters')
+  const manifest = require('./manifest.json')
+  const { buildFixture } = require('./fixtures')
+  const deterministic = createDeterministicAdapter()
+  for (const entry of manifest.filter((e) => e.provenance !== 'real_benchmark_evidence_pending')) {
+    const result = await deterministic.run(buildFixture(entry.fixtureId))
+    assert.doesNotThrow(() => assertNeverCarriesPrecomputedConfidence(result), entry.id)
+  }
+  for (const kind of ['ai_structured', 'ocr']) {
+    const result = await createUnavailableAdapter(kind).run({})
+    assert.doesNotThrow(() => assertNeverCarriesPrecomputedConfidence(result), kind)
+  }
+  for (const menuCase of HTML_MENU_CASES) {
+    const result = await createHtmlStructureAdapter().run({ html: menuCase.html })
+    assert.doesNotThrow(() => assertNeverCarriesPrecomputedConfidence(result), menuCase.id)
   }
 })
 

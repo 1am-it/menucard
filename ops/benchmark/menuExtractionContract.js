@@ -23,6 +23,11 @@
 
 'use strict'
 
+// The one Node built-in this module uses: `util.types.isProxy`, so every
+// Proxy — transparent or lying — is rejected before any reflective
+// operation or property read touches it. No dependency, no I/O, no network.
+const { types: { isProxy } } = require('node:util')
+
 const MENU_EXTRACTION_CONTRACT_VERSION = 1
 
 /** The menu-track adapter kinds. `ai_structured` is the same kind name the
@@ -85,6 +90,8 @@ const TRUST_SCAN_MAX_ENTRIES = 1000000
  *
  * Strict by design, so "no trust key anywhere" is technically true rather
  * than true-for-enumerable-keys-only:
+ *   - every Proxy — transparent or lying — is rejected first
+ *     (`util.types.isProxy`), before any trap can run;
  *   - every own key is inspected (`Reflect.ownKeys`): non-enumerable keys,
  *     symbol keys and accessor properties (getters/setters) are violations,
  *     and a getter is never invoked;
@@ -92,9 +99,9 @@ const TRUST_SCAN_MAX_ENTRIES = 1000000
  *     are allowed, so an inherited trust key on a custom prototype is a
  *     violation too; functions, symbols and bigints are not JSON values;
  *   - a cycle, more than TRUST_SCAN_MAX_DEPTH levels, more than
- *     TRUST_SCAN_MAX_NODES objects or TRUST_SCAN_MAX_ENTRIES keys, or a
- *     structure that throws while being inspected (e.g. a Proxy) is a
- *     violation rather than traversed.
+ *     TRUST_SCAN_MAX_NODES objects or TRUST_SCAN_MAX_ENTRIES keys, or an
+ *     exotic structure that throws while being inspected is a violation
+ *     rather than traversed.
  */
 function findForbiddenTrustKey(value) {
   let visitedNodes = 0
@@ -104,6 +111,9 @@ function findForbiddenTrustKey(value) {
     const type = typeof node
     if (type === 'function' || type === 'symbol' || type === 'bigint') return `non-JSON value (${type}) at ${path}`
     if (node === null || type !== 'object') return null
+    // First, before any trap could run: a Proxy is never plain data, even
+    // a transparent one, and a lying one could hide keys from any scan.
+    if (isProxy(node)) return `Proxy (not plain data) at ${path}`
     if (onPath.has(node)) return `cyclic structure at ${path}`
     if (depth > TRUST_SCAN_MAX_DEPTH) return `structure deeper than ${TRUST_SCAN_MAX_DEPTH} levels at ${path}`
     visitedNodes += 1

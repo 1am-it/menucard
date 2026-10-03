@@ -223,11 +223,56 @@ test('N6: any non-enumerable property, accessor or non-plain object is rejected,
   assert.equal(findForbiddenTrustKey(nullProto), null)
 })
 
-test('N6: a Proxy that throws on inspection is a violation, never a crash', () => {
-  const trap = new Proxy({}, { ownKeys() { throw new Error('boom') } })
-  assert.equal(findForbiddenTrustKey({ a: trap }), 'structure could not be inspected')
-  const lying = new Proxy({ confidence: 'hoog' }, { getPrototypeOf: () => Object.prototype })
-  assert.match(findForbiddenTrustKey(lying), /confidence is forbidden/)
+// ─── P1: every Proxy is rejected before any trap can run ──────────────────
+
+/** A Proxy whose every trap records that it ran. */
+function spyProxy(target, extraTraps = {}) {
+  const ran = []
+  const traps = {}
+  for (const trap of ['get', 'has', 'ownKeys', 'getOwnPropertyDescriptor', 'getPrototypeOf', 'defineProperty', 'set', 'deleteProperty', 'isExtensible', 'preventExtensions', 'setPrototypeOf']) {
+    traps[trap] = (...args) => {
+      ran.push(trap)
+      return extraTraps[trap] ? extraTraps[trap](...args) : Reflect[trap](...args)
+    }
+  }
+  return { proxy: new Proxy(target, traps), ran }
+}
+
+test('P1: a transparent Proxy around plain data is rejected, and none of its traps run', () => {
+  const { proxy, ran } = spyProxy({ name: 'Fictief', amount: 450 })
+  assert.equal(findForbiddenTrustKey({ item: proxy }), 'Proxy (not plain data) at $.item')
+  assert.deepEqual(ran, [])
+})
+
+test('P1: a Proxy hiding confidence or reviewReady via ownKeys is rejected before its traps run', () => {
+  for (const key of ['confidence', 'reviewReady']) {
+    const { proxy, ran } = spyProxy({ name: 'Fictief', [key]: 'hoog' }, { ownKeys: (t) => Reflect.ownKeys(t).filter((k) => k !== key) })
+    const result = validResult()
+    result.sections[0].items[0] = proxy
+    assert.match(findForbiddenTrustKey(result), /Proxy \(not plain data\) at \$\.sections\[0\]\.items\[0\]/)
+    assert.ok(validateMenuExtraction(result).length > 0)
+    assert.deepEqual(ran, [], key)
+  }
+})
+
+test('P1: a legitimate-looking Proxy without any trust key is still rejected — at the root too', () => {
+  const { proxy, ran } = spyProxy(validResult())
+  assert.equal(findForbiddenTrustKey(proxy), 'Proxy (not plain data) at $')
+  assert.deepEqual(validateMenuExtraction(proxy), ['confidence/reviewReady (or an uninspectable structure) is forbidden at any depth: Proxy (not plain data) at $'])
+  assert.deepEqual(ran, [])
+  const { proxy: arrayProxy } = spyProxy([1, 2, 3])
+  assert.match(findForbiddenTrustKey({ list: arrayProxy }), /Proxy/)
+})
+
+test('P1: a Proxy whose traps throw is rejected without a crash and without running them', () => {
+  const trap = new Proxy({}, { ownKeys() { throw new Error('boom') }, getPrototypeOf() { throw new Error('boom') } })
+  assert.equal(findForbiddenTrustKey({ a: trap }), 'Proxy (not plain data) at $.a')
+})
+
+test('P1: ordinary JSON-safe data stays valid (including JSON round-trips)', () => {
+  assert.equal(findForbiddenTrustKey(validResult()), null)
+  assert.equal(findForbiddenTrustKey(JSON.parse(JSON.stringify(validResult()))), null)
+  assert.deepEqual(validateMenuExtraction(JSON.parse(JSON.stringify(validResult()))), [])
 })
 
 test('N6: a key-heavy structure is bounded by TRUST_SCAN_MAX_ENTRIES', () => {
