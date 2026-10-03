@@ -2,9 +2,14 @@
 
 ## Status
 
-Proposed, not started. Documentation and decision work only. No code, UI,
+Proposed. Documentation and decision work only. No code, UI,
 API route, database table, migration, provider account, POS connection, or
 restaurant-data import is authorized by this ticket.
+
+**Update (2026-10-03):** the profile
+`docs/api/hospitality-menu-interoperability-profile.md` is drafted locally
+on an isolated documentation branch — not yet independently reviewed, not
+pushed. It decides nothing beyond this ticket's own required decisions.
 
 ## Depends on
 
@@ -28,11 +33,14 @@ here:
 - Decision `011-market-foundation-and-international-growth.md` — §5
   (publication only after review), §9 (risk-sensitive data shows provenance
   and freshness), §10 (data separation; the field-level public/private
-  classification is explicitly still open), §11 (any external surface is
-  built from snapshots).
+  classification is explicitly still open), §11 (a future public API is
+  built from snapshots, never from internal operational data).
 
-A public Schema.org projection cannot be produced before the published layer
-those contracts describe exists.
+Applied to this ticket: a BredaEats on-page projection may only come from the
+active, published canonical version (`MARKET-02B`); any external feed, API,
+or export may only come from a versioned `MARKET-06` snapshot. Neither kind
+of projection can be produced before the published layer or snapshot those
+contracts describe exists.
 
 ## Problem
 
@@ -81,9 +89,10 @@ certainty, or silently losing review and provenance data.
   alongside optional normalized values.
 - A documented, explicitly lossy Schema.org projection for public/web
   interchange only. It must identify fields Schema.org cannot faithfully
-  carry rather than flattening or inventing them. A public projection is
-  derived only from an active, published canonical version or snapshot
-  (`MARKET-02B`/`MARKET-06`) — never from menu proposals, restaurant profile
+  carry rather than flattening or inventing them. A BredaEats on-page
+  projection is derived only from the active, published canonical version
+  (`MARKET-02B`); any external feed, API, or export only from a versioned
+  `MARKET-06` snapshot — never from menu proposals, restaurant profile
   drafts, import candidates, raw imports, BE-20 analysis jobs, or review
   context.
 - A provider-neutral POS capability matrix covering, at minimum, menu,
@@ -154,9 +163,10 @@ certainty, or silently losing review and provenance data.
    publication decision under Decision 011 §10 and the existing publication
    contracts; this ticket does not decide it.
 6. A Schema.org export is optional and may be partial. It must be labelled as
-   a projection, not as a round-trippable backup or a POS interchange format,
-   and is derived only from an active, published canonical version or
-   snapshot (`MARKET-02B`/`MARKET-06`).
+   a projection, not as a round-trippable backup or a POS interchange format.
+   A BredaEats on-page projection is derived only from the active, published
+   canonical version (`MARKET-02B`); any external feed, API, or export only
+   from a versioned `MARKET-06` snapshot (Decision 011 §11).
 7. Any future KHN engagement is a validation/research conversation only until
    legal, technical, commercial, privacy, and governance decisions are
    separately documented and approved.
@@ -207,9 +217,10 @@ certainty, or silently losing review and provenance data.
 - [ ] The profile preserves `MARKET-02` money invariants and `PLATFORM-03`
       provenance/trust boundaries: derived public status labels only as
       `PLATFORM-03`/`MARKET-02B` allow, raw provenance and audit data never.
-- [ ] A public projection is sourced only from an active, published canonical
-      version or snapshot, never from proposals, drafts, import candidates,
-      raw imports, BE-20 analysis jobs, or review context.
+- [ ] A BredaEats on-page projection is sourced only from the active,
+      published canonical version, and any external feed, API, or export only
+      from a versioned `MARKET-06` snapshot — never from proposals, drafts,
+      import candidates, raw imports, BE-20 analysis jobs, or review context.
 - [ ] No real restaurant content, provider credentials, personal data, or
       partner claim is added to the repository.
 - [ ] KHN is named only as a possible future validation stakeholder, never as
