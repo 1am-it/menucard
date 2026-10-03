@@ -146,8 +146,10 @@ function Metric({ label, count, total, pct, icon }) {
   const state = metricState(count, total)
   const { label: stateLabel, color } = STATE_STYLE[state]
   return (
-    <div style={{ padding: 16, borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)', background: 'var(--bg-card)', minWidth: 0 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+    // A flex column whose label row absorbs any extra height, so the
+    // figures line up across cards even when one label wraps to two lines.
+    <div style={{ padding: 16, borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)', background: 'var(--bg-card)', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 10, flex: '1 0 auto' }}>
         <span style={{ width: 16, height: 16, display: 'flex', flexShrink: 0, color: 'var(--text-secondary)' }}>{icon}</span>
         <span style={{ fontSize: 13, color: 'var(--text-secondary)', minWidth: 0 }}>{label}</span>
       </div>
