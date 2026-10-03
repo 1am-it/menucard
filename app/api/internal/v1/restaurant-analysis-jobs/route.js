@@ -40,7 +40,13 @@ import { NextResponse } from 'next/server'
 import { authenticateInternalRequest } from '@/src/lib/internalAuth'
 import { isInternalOnly } from '@/src/lib/importInbox'
 import { fetchWebsiteSafely } from '@/src/lib/safeOutboundFetch'
-import { classifyRobotsGate } from '@/src/lib/candidateSuggestions'
+import {
+  checkRobotsForUrl,
+  fetchSameSiteWithRedirects,
+  describeRedirects,
+  describeRobotsBlock,
+  RedirectPolicyError,
+} from '@/src/lib/restaurantSourceFetch'
 import { matchRestaurantByHostname, buildRestaurantChoiceList } from '@/src/lib/restaurantHostMatch'
 import { canonicalizeSourceUrl, buildCandidateSummary, computeReceiptExpiry } from '@/src/lib/urlIntakes'
 import { computeAnalysisResultHash } from '@/src/lib/urlIntakeReceiptHash'
@@ -56,8 +62,16 @@ import { generateUuidV7 } from '@/src/lib/uuidv7'
 import { getSupabaseAdmin } from '@/src/lib/supabaseAdmin'
 import restaurantsData from '@/data/restaurants.json'
 
-const ROBOTS_MAX_BYTES = 200 * 1024
-const ROBOTS_TIMEOUT_MS = 5000
+// robots.txt and redirects (2026-10-03): this route uses
+// src/lib/restaurantSourceFetch.js — a robots.txt 404/410 counts as
+// `missing` (allowed); 401/403/429, 5xx/network and anything unknown still
+// block, with the real reason; at most a few same-site redirects are
+// followed, each hop re-validated by safeOutboundFetch and robots.txt. This
+// is a deliberate, BE-20-only refinement of the shared gate the BE-18
+// read-url and MARKET-05A suggestion routes keep using unchanged — see
+// that module's own header. Every fetch still goes through
+// fetchWebsiteSafely, passed in explicitly as `fetchImpl`.
+//
 // Generous for a real menu PDF but still a real, technical bound — same
 // reasoning src/lib/pdfTextExtraction.js's own DEFAULT_MAX_BYTES already
 // documents; a same-host candidate PDF fetch uses this file's own default
@@ -215,45 +229,51 @@ async function issueAnalysisReceipt({ marketId, actorUserId, canonicalSourceUrl,
   }
 }
 
-/** The real `fetchCandidate` implementation passed into
+/** robots.txt check for one URL, always through fetchWebsiteSafely. */
+function robotsGateFor(url) {
+  return checkRobotsForUrl(url, { fetchImpl: fetchWebsiteSafely })
+}
+
+/** Builds the real `fetchCandidate` implementation passed into
  * runRestaurantSourceAnalysis: a robots.txt check, then a
  * `encoding: 'buffer'` fetch (a same-host candidate may be HTML or a
- * PDF), dispatched by content type. Every fetch still goes exclusively
- * through safeOutboundFetch.js — this function adds no second egress
- * path, only the robots-gate/content-type branching this ticket's own
- * "Vaststaande productkeuzes" §6 requires per candidate. */
-async function fetchCandidateSafely(url) {
-  let target
-  try {
-    target = new URL(url)
-  } catch {
-    return { status: 'blocked' }
-  }
+ * PDF) that follows at most a few same-site redirects, each hop
+ * re-checked (see src/lib/restaurantSourceFetch.js), dispatched by
+ * content type. Every fetch still goes exclusively through
+ * safeOutboundFetch.js — no second egress path. Each followed redirect is
+ * appended to `redirectNotes` as reviewable, plain-language metadata. */
+function createCandidateFetcher(redirectNotes) {
+  return async function fetchCandidateSafely(url) {
+    let target
+    try {
+      target = new URL(url)
+    } catch {
+      return { status: 'blocked' }
+    }
 
-  let robotsFetchFailed = false
-  let robotsTxtBody = ''
-  try {
-    const robotsResult = await fetchWebsiteSafely(`${target.origin}/robots.txt`, {
-      maxBytes: ROBOTS_MAX_BYTES,
-      timeoutMs: ROBOTS_TIMEOUT_MS,
-      maxRedirects: 0,
-    })
-    robotsTxtBody = robotsResult.body
-  } catch {
-    robotsFetchFailed = true
-  }
-  const robotsGate = classifyRobotsGate({ robotsFetchFailed, robotsTxtBody, pathname: target.pathname })
-  if (!robotsGate.shouldFetchPage) {
-    return { status: 'blocked' }
-  }
+    const robotsGate = await robotsGateFor(target.href)
+    if (!robotsGate.shouldFetchPage) {
+      return { status: 'blocked' }
+    }
 
-  let fetchResult
-  try {
-    fetchResult = await fetchWebsiteSafely(target.href, { maxRedirects: 0, encoding: 'buffer', maxBytes: CANDIDATE_PDF_MAX_BYTES })
-  } catch {
-    return { status: 'error' }
-  }
+    let fetchResult
+    try {
+      const fetched = await fetchSameSiteWithRedirects(target.href, {
+        fetchImpl: fetchWebsiteSafely,
+        fetchOptions: { encoding: 'buffer', maxBytes: CANDIDATE_PDF_MAX_BYTES },
+        robotsCheck: robotsGateFor,
+      })
+      fetchResult = fetched.response
+      redirectNotes.push(...describeRedirects(fetched.redirects))
+    } catch (err) {
+      return err instanceof RedirectPolicyError && err.reason === 'redirect-robots-blocked' ? { status: 'blocked' } : { status: 'error' }
+    }
 
+    return dispatchCandidateResponse(fetchResult)
+  }
+}
+
+function dispatchCandidateResponse(fetchResult) {
   if (fetchResult.contentType === 'application/pdf') {
     return { status: 'pdf', bytes: fetchResult.bytes, finalUrl: fetchResult.finalUrl }
   }
@@ -329,30 +349,37 @@ export async function POST(request) {
   // status and the client never sees a raw internal error.
   try {
     // ── robots.txt gate for the entry URL itself ────────────────────────
-    let robotsFetchFailed = false
-    let robotsTxtBody = ''
-    try {
-      const robotsResult = await fetchWebsiteSafely(`${sourceUrl.origin}/robots.txt`, {
-        maxBytes: ROBOTS_MAX_BYTES,
-        timeoutMs: ROBOTS_TIMEOUT_MS,
-        maxRedirects: 0,
-      })
-      robotsTxtBody = robotsResult.body
-    } catch {
-      robotsFetchFailed = true
-    }
-    const robotsGate = classifyRobotsGate({ robotsFetchFailed, robotsTxtBody, pathname: sourceUrl.pathname })
+    // The job's closed error vocabulary keeps `robots_disallowed` for every
+    // robots block (no migration); the message names the real reason
+    // (disallow, access denied, unreachable, or unreadable).
+    const robotsGate = await robotsGateFor(sourceUrl.href)
     if (!robotsGate.shouldFetchPage) {
-      return respondFailed(jobId, ['running'], 'robots_disallowed', 'Deze pagina kan niet automatisch worden opgehaald.', 400)
+      return respondFailed(jobId, ['running'], 'robots_disallowed', describeRobotsBlock(robotsGate), 400)
     }
 
     // ── the entry fetch itself — always as raw bytes, since the entry URL
-    // may turn out to be either an HTML page or a digital PDF menu ──────
+    // may turn out to be either an HTML page or a digital PDF menu. At most
+    // a few same-site redirects are followed, each hop re-validated by
+    // safeOutboundFetch and robots.txt; anything else fails closed. ──────
     let fetchResult
+    const redirectNotes = []
     try {
-      fetchResult = await fetchWebsiteSafely(sourceUrl.href, { maxRedirects: 0, encoding: 'buffer', maxBytes: CANDIDATE_PDF_MAX_BYTES })
-    } catch {
-      return respondFailed(jobId, ['running'], 'fetch_failed', 'Het ophalen van deze pagina is mislukt.', 502)
+      const fetched = await fetchSameSiteWithRedirects(sourceUrl.href, {
+        fetchImpl: fetchWebsiteSafely,
+        fetchOptions: { encoding: 'buffer', maxBytes: CANDIDATE_PDF_MAX_BYTES },
+        robotsCheck: robotsGateFor,
+      })
+      fetchResult = fetched.response
+      redirectNotes.push(...describeRedirects(fetched.redirects))
+    } catch (err) {
+      if (err instanceof RedirectPolicyError && err.reason === 'redirect-robots-blocked') {
+        return respondFailed(jobId, ['running'], 'robots_disallowed', describeRobotsBlock(err.robotsGate), 400)
+      }
+      const message =
+        err instanceof RedirectPolicyError
+          ? 'Deze pagina stuurt door naar een adres dat niet veilig automatisch kan worden gevolgd.'
+          : 'Het ophalen van deze pagina is mislukt.'
+      return respondFailed(jobId, ['running'], 'fetch_failed', message, 502)
     }
 
     let analysis
@@ -360,7 +387,7 @@ export async function POST(request) {
       analysis = await runRestaurantSourceAnalysis({
         homepageHtml: fetchResult.bytes.toString('utf8'),
         homepageUrl: fetchResult.finalUrl,
-        fetchCandidate: fetchCandidateSafely,
+        fetchCandidate: createCandidateFetcher(redirectNotes),
       })
     } else if (fetchResult.contentType === 'application/pdf') {
       // The entry URL itself is a digital PDF menu — BE-20's own general
@@ -390,9 +417,16 @@ export async function POST(request) {
       return respondFailed(jobId, ['running'], 'unsupported_content_type', 'Dit type bron wordt niet ondersteund.', 400)
     }
 
+    // Followed redirects are reviewable metadata, shown with the other notes.
+    analysis.notes = [...redirectNotes, ...analysis.notes]
+
     const match = matchRestaurantByHostname(restaurantsData, fetchResult.finalUrl)
     const needsExplicitChoice = match.matchType !== 'exact'
-    const canonical = canonicalizeSourceUrl(fetchResult.finalUrl)
+    // The receipt stays bound to the URL the reviewer entered — identical
+    // to the final URL whenever no redirect was followed, and the URL
+    // BE-19's url-intake step compares against. A same-site redirect's
+    // final URL is recorded in the notes above instead.
+    const canonical = canonicalizeSourceUrl(sourceUrl.href)
     const candidateSummary = buildCandidateSummary({ restaurantCandidateFields: analysis.restaurantCandidateFields, menus: analysis.menuContexts })
 
     const receipt = canonical
