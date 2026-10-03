@@ -22,6 +22,8 @@ const path = require('node:path')
 const fs = require('node:fs')
 
 const { runBenchmark } = require('./runner')
+const { runMenuBenchmark } = require('./menuBenchmark')
+const { createHtmlStructureAdapter } = require('./htmlMenuStructure')
 const { createDeterministicAdapter, createUnavailableAdapter } = require('./adapters')
 const { buildMachineReadableReport, buildHumanReadableSummary } = require('./report')
 
@@ -32,7 +34,11 @@ async function main() {
   const runResult = await runBenchmark({
     adapters: [createDeterministicAdapter(), createUnavailableAdapter('ai_structured'), createUnavailableAdapter('ocr')],
   })
-  const machineReport = buildMachineReadableReport(runResult)
+  // BE-22 — the menu-structure track, on synthetic HTML fixtures only.
+  const { menuCaseScores } = await runMenuBenchmark({
+    adapters: [createHtmlStructureAdapter(), createUnavailableAdapter('ai_structured')],
+  })
+  const machineReport = buildMachineReadableReport({ ...runResult, menuCaseScores })
   const humanSummary = buildHumanReadableSummary(machineReport)
 
   fs.mkdirSync(OUTPUT_DIR, { recursive: true })
