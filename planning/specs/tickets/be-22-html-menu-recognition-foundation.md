@@ -5,10 +5,11 @@
 Proposed; local, offline foundation only. An isolated benchmark track under
 `ops/benchmark/` — no product code, route, UI, database, migration,
 provider, or live analysis-pipeline change. Not yet independently reviewed,
-not pushed. A first pre-push review (adversarial self-review, NOT GREEN)
-found time/date and volume misreads, unbounded parser work, a shallow trust
-guard and merged two-dish elements; those are fixed locally (see "Review
-fixes") and await a new independent pre-push review.
+not pushed. Two pre-push reviews (adversarial self-reviews by the same
+author, both NOT GREEN) found time/date and volume misreads, unbounded
+parser work, a shallow trust guard, and two-dish table rows/cards being
+merged or partially claimed; those are fixed locally (see "Review fixes")
+and await a new independent pre-push review.
 
 ## Voortgang
 
@@ -133,13 +134,17 @@ dishes?
       labelled voucher/admission/parking/cloakroom sections never yield a
       menu. Not covered: such lists without any time/date context word or
       section label (see Known limitations in `ops/benchmark/README.md`).
-- [x] Volumes and weights are never read as prices; dual prices stay
-      `multiple_undecomposed`; an element with two name+price pairs is
-      rejected, never merged; duplicate markup is de-duplicated; nested
-      sections keep their full heading path.
-- [x] No adapter output carries `confidence` or `reviewReady` at any depth;
-      the shared, recursive, cycle-safe guard rejects it in both runners
-      before scoring.
+- [x] A volume or weight before the first price is never read as a price,
+      and a size letter or unit-like token after a price never hides a
+      second price; dual prices stay `multiple_undecomposed`; an element
+      with two independent name/price pairs (list item, definition, table
+      row or card, as tested) is rejected, never merged and never read as
+      its first pair; duplicate markup is de-duplicated; nested sections
+      keep their full heading path.
+- [x] No adapter output carries `confidence` or `reviewReady` at any depth
+      — including non-enumerable, inherited, symbol or getter-based keys;
+      the shared guard accepts only plain JSON-safe data and rejects
+      anything else in both runners before scoring.
 - [x] Parser work is bounded by a deterministic budget as well as by input
       size; broken or hostile HTML ends `unparsed`, never in a hang or a
       partial menu.
@@ -171,6 +176,29 @@ tests that were checked by mutation:
   documented, tested limitation.
 - **L3/L4** — trailing alcohol percentage dropped from display names;
   fixture phone number replaced by an obvious test number.
+
+The second pre-push review (again an adversarial self-review, NOT GREEN)
+found that some of those fixes were incomplete. Local fixes, again checked
+by mutation:
+
+- **N1** — a table row with two runs of name cells and two runs of price
+  cells → `ambiguous_structure`; one name with glas/fles price cells stays
+  `multiple_undecomposed`.
+- **N2** — a card or list item with two outermost name or price elements,
+  or a price outside its one price element → `ambiguous_structure`; one
+  name plus one price stays supported.
+- **N3** — quantity units only before the first price and without €; an
+  upper-case size letter after a price stays a price ("9,50 M 12,50 L" →
+  `multiple_undecomposed`), a sub-euro "0,75 L 4,50" keeps 4,50.
+- **N4** — table cells classified once (index membership, no
+  `includes()`), and cell classification, queued children, child checks and
+  long-text price scans charged to the work budget.
+- **N5** — the remaining fail-closed recall limits (price ranges, "u",
+  event-context dot dates, and others) are listed in
+  `ops/benchmark/README.md` as deliberate limits, not as solved behaviour.
+- **N6** — the trust-key scan accepts only plain JSON-safe data:
+  non-enumerable, symbol, accessor and inherited keys, and non-plain
+  objects, fail closed.
 
 ## Suggested next step
 
