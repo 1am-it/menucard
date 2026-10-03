@@ -8,6 +8,14 @@ const {
   MAX_HTML_LENGTH,
   MAX_NODES,
   MAX_DEPTH,
+  MAX_PARSE_DEPTH,
+  MAX_WORK,
+  MAX_ITEM_TEXT,
+  parseHtml,
+  createBudget,
+  isClockText,
+  isDateText,
+  displayName,
   findPrices,
   extractHtmlMenuStructure,
   createHtmlStructureAdapter,
@@ -118,7 +126,8 @@ test('bounds: empty, non-string, oversized and node-heavy input fail closed', ()
   assert.equal(extractHtmlMenuStructure('').reason, 'empty_input')
   assert.equal(extractHtmlMenuStructure(null).reason, 'empty_input')
   assert.equal(extractHtmlMenuStructure('x'.repeat(MAX_HTML_LENGTH + 1)).reason, 'input_too_large')
-  assert.equal(extractHtmlMenuStructure('<div>'.repeat(MAX_NODES + 5)).reason, 'too_many_nodes')
+  assert.equal(extractHtmlMenuStructure('<span></span>'.repeat(MAX_NODES + 5)).reason, 'too_many_nodes')
+  assert.equal(extractHtmlMenuStructure('<div>'.repeat(MAX_PARSE_DEPTH + 5)).reason, 'too_deep')
 })
 
 test('bounds: nesting deeper than MAX_DEPTH is not walked and never throws', () => {
@@ -164,4 +173,201 @@ test('deterministic: the same input always yields the same result', () => {
   for (const menuCase of HTML_MENU_CASES) {
     assert.deepEqual(extractHtmlMenuStructure(menuCase.html), extractHtmlMenuStructure(menuCase.html))
   }
+})
+
+// ─── M2: bounded work on broken or hostile HTML ───────────────────────────
+
+const HOSTILE_UNITS = {
+  'unclosed <script': '<script ',
+  'unclosed comment': '<!--',
+  'unclosed <style>': '<style>',
+  'stray closing tags': '</span>',
+  'tag without >': '<a b="',
+  'deeply nested divs': '<div>',
+  'li with deep nesting': '<li><div><div><div>',
+  'dt/dt under deep nesting': '<dt></dt>',
+  'unterminated entity': '&aaaaaaaaa',
+  'sibling cards': '<div class="card">x</div>',
+}
+
+function hostile(unit, length) {
+  const prefix = unit === '<dt></dt>' ? `<dl><dt><dl>${'<div>'.repeat(900)}` : ''
+  return prefix + unit.repeat(Math.floor((length - prefix.length) / unit.length))
+}
+
+for (const [label, unit] of Object.entries(HOSTILE_UNITS)) {
+  test(`M2 ${label}: a maximum-size hostile input ends unparsed within the deterministic work budget`, () => {
+    const result = extractHtmlMenuStructure(hostile(unit, MAX_HTML_LENGTH - 16))
+    assert.equal(result.status, 'unparsed')
+    assert.ok(result.stats.workUnits <= MAX_WORK, `work ${result.stats.workUnits}`)
+    assert.deepEqual(validateMenuExtraction(result), [])
+  })
+}
+
+test('M2: work grows linearly — doubling a hostile input at most ~doubles the work (no quadratic re-scanning)', () => {
+  for (const unit of ['</span>', '<a b="', '<p a=" ', '&aaaaaaaaa', '<li>x', '<x-'.padEnd(40, 'y')]) {
+    const small = extractHtmlMenuStructure(`<div>${unit.repeat(2000)}</div>`).stats.workUnits
+    const large = extractHtmlMenuStructure(`<div>${unit.repeat(4000)}</div>`).stats.workUnits
+    assert.ok(large <= small * 2.2 + 50, `${unit}: ${small} -> ${large}`)
+  }
+})
+
+test('M2: an unclosed script, style or comment consumes the rest of the input in ONE forward scan', () => {
+  for (const opener of ['<script>', '<style>', '<!--', '<script>'.repeat(5000), '<!--'.repeat(5000)]) {
+    const html = `<p>Fictief</p>${opener}${'<li>Fictief geheim € 9,99</li>'.repeat(20000)}`
+    const budget = createBudget()
+    const { root } = parseHtml(html, budget)
+    // One pass costs about html.length / 64 units; any re-scan multiplies it.
+    assert.ok(budget.used <= Math.ceil(html.length / 64) * 2 + 50, `${opener.slice(0, 8)}: ${budget.used} units for ${html.length} chars`)
+    assert.ok(!JSON.stringify(root.children.map((c) => c.tag)).includes('li'))
+  }
+})
+
+test('M2: a closing tag for an element that is not open is ignored without searching the stack', () => {
+  const budget = createBudget()
+  parseHtml(`${'<div>'.repeat(900)}${'</span>'.repeat(5000)}`, budget)
+  assert.ok(budget.used < 20000, `${budget.used} units for 5000 stray closers under 900 levels`)
+})
+
+test('M2: implicit closing inspects a bounded number of stack levels, not the whole stack', () => {
+  const budget = createBudget()
+  parseHtml(`<dl><dt><dl>${'<div>'.repeat(900)}${'<dt></dt>'.repeat(1000)}`, budget)
+  // ~64 levels per <dt> at most; scanning all 900 levels would cost ~900 000.
+  assert.ok(budget.used < 150000, `${budget.used} units`)
+})
+
+test('M2: exceeding the work budget fails closed as work_limit_exceeded, never a partial menu', () => {
+  const html = `<h2>Fictief</h2>${listOf(50)}`
+  assert.equal(extractHtmlMenuStructure(html).status, 'parsed')
+  const limited = extractHtmlMenuStructure(html, { maxWork: 200 })
+  assert.equal(limited.status, 'unparsed')
+  assert.equal(limited.reason, 'work_limit_exceeded')
+  assert.deepEqual(limited.sections, [])
+  assert.deepEqual(validateMenuExtraction(limited), [])
+})
+
+test('M2: options.maxWork can only lower the budget, never raise it', () => {
+  const result = extractHtmlMenuStructure(hostile('<dt></dt>', MAX_HTML_LENGTH - 16), { maxWork: MAX_WORK * 10 })
+  assert.ok(result.stats.workUnits <= MAX_WORK)
+})
+
+test('M2: a realistic 1000-item menu page parses well inside the budget', () => {
+  const sections = Array.from({ length: 40 }, (_, s) => `<h2>Fictieve sectie ${s}</h2><ul>${Array.from({ length: 25 }, (_, i) => `<li><span class="name">Fictief gerecht ${s}-${i}</span> <span class="desc">Met fictieve saus</span> <span class="price">€ ${i + 3},50</span></li>`).join('')}</ul>`).join('')
+  const result = extractHtmlMenuStructure(`<h1>Fictieve kaart</h1>${sections}`)
+  assert.equal(result.status, 'parsed')
+  assert.equal(result.stats.counted, 1000)
+  assert.ok(result.stats.workUnits < MAX_WORK / 10, `work ${result.stats.workUnits}`)
+})
+
+test(`M2: an item element with more than ${MAX_ITEM_TEXT} characters is never read as one dish`, () => {
+  const long = `Fictief ${'woord '.repeat(150)}`
+  const result = extractHtmlMenuStructure(`<h2>Fictief</h2><ul><li>${long} 4,50</li><li>${long}</li><li>Fictief a 4,50</li><li>Fictief b 5,00</li><li>Fictief c 6,00</li></ul>`)
+  assert.equal(result.status, 'parsed')
+  assert.equal(result.sections[0].items.length, 3)
+  assert.equal(result.rejected.filter((r) => r.reason === 'ambiguous_structure').length, 1)
+})
+
+// ─── H1: clock times and dates versus ordinary prices ─────────────────────
+
+test('H1: clock times in clear time context are recognized', () => {
+  for (const text of ['Lunch vanaf 12.00', 'Diner vanaf 17.30', 'Keuken sluit om 21.45', 'Ontbijt 08.30 uur', 'Open tot 22:00', 'Fictief 12.00 - 16.00', 'Maandag gesloten']) {
+    assert.ok(isClockText(text), text)
+  }
+})
+
+test('H1: ordinary prices are never mistaken for times', () => {
+  for (const text of ['Fictieve pasta 12.50', 'Fictieve plank vanaf 12,50', 'Fictieve schotel vanaf € 14.50', 'Fictieve soep 6.30', 'Fictieve huiswijn glas 5.50 - fles 27.50', 'Fictieve open sandwich 7.50', '€ 12.00 uur']) {
+    assert.ok(!isClockText(text), text)
+  }
+})
+
+test('H1: dates in clear date/event context are recognized', () => {
+  for (const text of ['Fictief event 12.05', 'Fictief feest 24.12', 'Fictieve markt op 01.06', 'Fictief concert 15 mei', 'Fictieve proeverij 1 dec.']) {
+    assert.ok(isDateText(text), text)
+  }
+})
+
+test('H1: prices without date context — or with € — are never dates', () => {
+  for (const text of ['Fictieve marktsalade 12.05', 'Fictieve proeverij 24.50', 'Fictief concert-diner € 24.12', 'Fictief feest 24,12', 'Fictieve soep 12.05']) {
+    assert.ok(!isDateText(text), text)
+  }
+})
+
+test('H1: a list of single times or dates never yields a menu; a dot-price list does', () => {
+  const times = extractHtmlMenuStructure('<h2>Fictief</h2><ul><li>Lunch vanaf 12.00</li><li>Diner vanaf 17.30</li><li>Borrel vanaf 16.00</li></ul>')
+  const dates = extractHtmlMenuStructure('<h2>Fictief</h2><ul><li>Fictief event 12.05</li><li>Fictief feest 24.12</li><li>Fictieve markt op 01.06</li></ul>')
+  const prices = extractHtmlMenuStructure('<h2>Fictief</h2><ul><li>Fictief a 12.00</li><li>Fictief b 17.30</li><li>Fictief c 16.00</li></ul>')
+  assert.equal(times.status, 'unparsed')
+  assert.equal(dates.status, 'unparsed')
+  assert.equal(prices.status, 'parsed')
+  assert.deepEqual(prices.sections[0].items.map((i) => i.amountMinorUnits), [1200, 1730, 1600])
+})
+
+// ─── M1: volumes and weights are never prices ─────────────────────────────
+
+test('M1: volume and weight tokens are skipped, comma and dot, with and without a space', () => {
+  for (const text of ['0,75 l', '0.75l', '0,33 cl', '0,50 ml', '0,25 kg', '0.25kg', '1,50 liter', '0,20 g', '0,50 gr']) {
+    assert.deepEqual(findPrices(text), [], text)
+  }
+  assert.deepEqual(findPrices('Fictief bier 0,33 l 4,50').map((p) => p.amountMinorUnits), [450])
+  assert.deepEqual(findPrices('Fictieve steak 250 g 24,50').map((p) => p.amountMinorUnits), [2450])
+  // A unit-like word that is not a unit is no reason to drop a price.
+  assert.deepEqual(findPrices('Fictief 4,50 lunch').map((p) => p.amountMinorUnits), [450])
+  assert.deepEqual(findPrices('Fictief 5,50 glas').map((p) => p.amountMinorUnits), [550])
+  // With € it is money.
+  assert.deepEqual(findPrices('€ 4,50 l').map((p) => p.amountMinorUnits), [450])
+})
+
+test('M1: a volume never turns one real price into multiple_undecomposed, and two real prices stay multiple_undecomposed', () => {
+  const result = extractHtmlMenuStructure('<h2>Fictief</h2><ul><li>Fictief bier 0,33 l 4,50</li><li>Fictieve wijn 0,75 l glas 5,50 / fles 27,50</li><li>Fictief c 3,00</li></ul>')
+  assert.deepEqual(result.sections[0].items.map((i) => [i.priceStatus, i.amountMinorUnits]), [['known', 450], ['multiple_undecomposed', null], ['known', 300]])
+})
+
+// ─── L1: two dishes in one element ─────────────────────────────────────────
+
+test('L1: two name+price pairs in one element are rejected — no partial dish or price is claimed', () => {
+  const result = extractHtmlMenuStructure('<h2>Fictief</h2><ul><li>Fictieve soep 6,50 Fictieve salade 7,50</li><li>Fictieve a 4,50</li><li>Fictieve b 5,00</li><li>Fictieve c 6,00</li></ul>')
+  const text = JSON.stringify(result.sections)
+  assert.ok(!text.includes('soep') && !text.includes('salade'))
+  assert.ok(!result.sections[0].items.some((i) => i.amountMinorUnits === 650 || i.amountMinorUnits === 750))
+  assert.equal(result.rejected.filter((r) => r.reason === 'ambiguous_structure').length, 1)
+})
+
+test('L1: the same rule holds inside a card price element and a definition', () => {
+  const card = (name, price) => `<div class="menu-item"><h3>${name}</h3><span class="price">${price}</span></div>`
+  const cards = extractHtmlMenuStructure(`<h2>Fictief</h2>${card('Fictieve soep', '6,50 Fictieve salade 7,50')}${card('Fictieve a', '4,50')}${card('Fictieve b', '5,00')}${card('Fictieve c', '6,00')}`)
+  const dl = extractHtmlMenuStructure('<h2>Fictief</h2><dl><dt>Fictieve soep</dt><dd>6,50 Fictieve salade 7,50</dd><dt>Fictieve a</dt><dd>4,50</dd><dt>Fictieve b</dt><dd>5,00</dd><dt>Fictieve c</dt><dd>6,00</dd></dl>')
+  for (const result of [cards, dl]) {
+    assert.equal(result.sections[0].items.length, 3)
+    assert.ok(result.rejected.some((r) => r.reason === 'ambiguous_structure'))
+  }
+})
+
+// ─── L2: non-dish price sections (narrow labels only) ─────────────────────
+
+test('L2: labelled voucher, ticket, admission, parking and cloakroom sections are never menus', () => {
+  for (const heading of ['Cadeaubonnen', 'Cadeaukaarten', 'Tickets', 'Entree', 'Toegangsprijzen', 'Parkeren', 'Garderobe', 'Webshop']) {
+    const result = extractHtmlMenuStructure(`<h2>${heading}</h2>${listOf(4)}`)
+    assert.equal(result.status, 'unparsed', heading)
+    assert.ok(result.rejected.every((r) => r.reason === 'non_menu_section'), heading)
+  }
+})
+
+test('L2 documented limitation: an UNLABELLED list of non-dish prices is still read as a menu (not semantically solved)', () => {
+  const card = (name, price) => `<div class="product-card"><h3>${name}</h3><span class="price">${price}</span></div>`
+  const result = extractHtmlMenuStructure(`${card('Fictieve bon 25', '€ 25')}${card('Fictieve bon 50', '€ 50')}${card('Fictieve bon 75', '€ 75')}`)
+  // Documents a known gap; if a future change closes it, update this test
+  // and the README together.
+  assert.equal(result.status, 'parsed')
+})
+
+// ─── Cosmetic: trailing alcohol percentage in the displayed name ──────────
+
+test('displayName drops only a trailing alcohol percentage — never mid-name, never 100%', () => {
+  assert.equal(displayName('Fictief bier 5,0%'), 'Fictief bier')
+  assert.equal(displayName('Fictieve tripel (8,5% vol)'), 'Fictieve tripel')
+  assert.equal(displayName('Fictieve tripel 8,5% vol'), 'Fictieve tripel')
+  assert.equal(displayName('Fictieve 100%'), 'Fictieve 100%')
+  assert.equal(displayName('Fictieve 50% korting burger'), 'Fictieve 50% korting burger')
+  assert.equal(displayName('5%'), '5%')
 })

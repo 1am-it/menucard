@@ -264,7 +264,7 @@ const HTML_MENU_CASES = [
     notes: 'Reservation, contact and review blocks — phone numbers, group sizes and stars are never dishes or prices.',
     html: page(`
       <h2>Reserveren</h2>
-      <ul><li>Groepen vanaf 8 personen</li><li>Bel 076 123 45 67</li><li>Aanbetaling € 10,00 per reservering</li></ul>
+      <ul><li>Groepen vanaf 8 personen</li><li>Bel 000 000 0000 (testnummer)</li><li>Aanbetaling € 10,00 per reservering</li></ul>
       <h2>Contact</h2>
       <ul><li>Fictiefstraat 1</li><li>1234 AB Fictiefstad</li><li>info@fictief.invalid</li></ul>
       <h2>Reviews</h2>
@@ -318,6 +318,126 @@ const HTML_MENU_CASES = [
     notes: 'Only two priced items — below the minimum, stays unparsed.',
     html: page(`<h2>Snacks</h2><ul><li>Fictieve friet 3,50</li><li>Fictieve kroket 2,75</li></ul>`),
     expected: { isMenu: false, items: [] },
+  },
+
+  // ── BE-22 review fixes (H1, M1, L1, L2) ─────────────────────────────────
+  {
+    id: 'html-single-clock-times',
+    kind: 'negative',
+    notes: 'H1: single clock times in clear time context ("vanaf 12.00", "om 21.45", "uur") are times, never prices — even without an opening-hours heading.',
+    html: page(`
+      <h2>Fictief</h2>
+      <ul><li>Lunch vanaf 12.00</li><li>Diner vanaf 17.30</li><li>Borrel vanaf 16.00</li><li>Keuken sluit om 21.45</li><li>Ontbijt 08.30 uur</li></ul>`),
+    expected: { isMenu: false, items: [], rejectedReasons: ['clock_time'] },
+  },
+  {
+    id: 'html-event-dates',
+    kind: 'negative',
+    notes: 'H1: dates in clear date/event context (event word, "op", month name) are never prices.',
+    html: page(`
+      <h2>Agenda</h2>
+      <ul><li>Fictief event 12.05</li><li>Fictief feest 24.12</li><li>Fictieve markt op 01.06</li><li>Fictief concert 15 mei</li></ul>`),
+    expected: { isMenu: false, items: [], rejectedReasons: ['date'] },
+  },
+  {
+    id: 'html-dot-prices-not-times',
+    kind: 'positive',
+    notes: 'H1 positive: ordinary dot and comma prices stay prices — no time/date context, "vanaf" with a comma or €, € in event context, an invalid date.',
+    html: page(`
+      <h2>Kaart</h2>
+      <ul>
+        <li>Fictieve pasta 12.50</li>
+        <li>Fictieve plank vanaf 12,50</li>
+        <li>Fictieve schotel vanaf € 14.50</li>
+        <li>Fictief concert-diner € 24.12</li>
+        <li>Fictieve marktsalade 12.05</li>
+        <li>Fictieve proeverij 24.50</li>
+        <li>Fictieve soep 6.30</li>
+      </ul>`),
+    expected: {
+      isMenu: true,
+      items: [
+        ['Kaart', 'Fictieve pasta', 'known', 1250],
+        ['Kaart', 'Fictieve plank vanaf', 'known', 1250],
+        ['Kaart', 'Fictieve schotel vanaf', 'known', 1450],
+        ['Kaart', 'Fictief concert-diner', 'known', 2412],
+        ['Kaart', 'Fictieve marktsalade', 'known', 1205],
+        ['Kaart', 'Fictieve proeverij', 'known', 2450],
+        ['Kaart', 'Fictieve soep', 'known', 630],
+      ],
+    },
+  },
+  {
+    id: 'html-volumes-and-weights',
+    kind: 'positive',
+    notes: 'M1: volumes and weights (comma/dot, with/without space) are never prices; only the real price remains; a real dual price stays multiple_undecomposed; a trailing alcohol percentage is dropped from the displayed name.',
+    html: page(`
+      <h2>Dranken</h2>
+      <ul>
+        <li>Fictieve wijn 0,75 l</li>
+        <li>Fictief bier 0,33 l 4,50</li>
+        <li>Fictief bier 33cl 3,80</li>
+        <li>Fictieve frisdrank 0.25l 2.75</li>
+        <li>Fictief water 500 ml 3,20</li>
+        <li>Fictieve huiswijn 0,75 l glas 5,50 / fles 27,50</li>
+        <li>Fictieve tripel 8,5% vol 5,50</li>
+      </ul>
+      <h2>Vlees</h2>
+      <ul><li>Fictieve steak 250 g 24,50</li><li>Fictieve olijven 0,20 kg € 4,50</li></ul>`),
+    expected: {
+      isMenu: true,
+      items: [
+        ['Dranken', 'Fictief bier 0,33 l', 'known', 450],
+        ['Dranken', 'Fictief bier 33cl', 'known', 380],
+        ['Dranken', 'Fictieve frisdrank 0.25l', 'known', 275],
+        ['Dranken', 'Fictief water 500 ml', 'known', 320],
+        ['Dranken', 'Fictieve huiswijn 0,75 l', 'multiple_undecomposed', null],
+        ['Dranken', 'Fictieve tripel', 'known', 550],
+        ['Vlees', 'Fictieve steak 250 g', 'known', 2450],
+        ['Vlees', 'Fictieve olijven 0,20 kg', 'known', 450],
+      ],
+      rejectedReasons: ['missing_price'],
+    },
+  },
+  {
+    id: 'html-two-dishes-one-element',
+    kind: 'difficult',
+    notes: 'L1: one element holding two name+price pairs is rejected as ambiguous, never merged into one item; size variants of one drink stay one multiple_undecomposed item.',
+    html: page(`
+      <h2>Lunch</h2>
+      <ul>
+        <li>Fictieve soep 6,50 Fictieve salade 7,50</li>
+        <li>Fictieve wrap 8,50</li>
+        <li>Fictieve quiche 9,25</li>
+        <li>Fictieve bowl 11,00</li>
+        <li>Fictieve koffie klein 2,50 middel 3,00 groot 3,50</li>
+      </ul>`),
+    expected: {
+      isMenu: true,
+      items: [
+        ['Lunch', 'Fictieve wrap', 'known', 850],
+        ['Lunch', 'Fictieve quiche', 'known', 925],
+        ['Lunch', 'Fictieve bowl', 'known', 1100],
+        ['Lunch', 'Fictieve koffie', 'multiple_undecomposed', null],
+      ],
+      rejectedReasons: ['ambiguous_structure'],
+    },
+  },
+  {
+    id: 'html-non-dish-price-sections',
+    kind: 'negative',
+    notes: 'L2: clearly labelled voucher, admission, parking and cloakroom sections are never menus. Narrow heading labels only — an unlabelled list of such prices is NOT caught (documented limitation).',
+    html: page(`
+      <h2>Cadeaubonnen</h2>
+      <div class="product-card"><h3>Fictieve bon klein</h3><span class="price">€ 25</span></div>
+      <div class="product-card"><h3>Fictieve bon groot</h3><span class="price">€ 50</span></div>
+      <h2>Entree</h2>
+      <ul><li>Fictief kind tot 12 jaar 7,50</li><li>Fictief volwassen 15,00</li></ul>
+      <h2>Parkeren</h2>
+      <ul><li>Fictief parkeren per uur 2,50</li></ul>
+      <h2>Garderobe</h2>
+      <ul><li>Fictieve jas 1,00</li></ul>`),
+    expected: { isMenu: false, items: [], rejectedReasons: ['non_menu_section'] },
   },
 ]
 
