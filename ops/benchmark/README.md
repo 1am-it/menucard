@@ -175,6 +175,19 @@ A perfect score on these fixtures only proves the machinery against inputs
 written alongside the adapter — never that any real website's HTML menu is
 supported. That needs a separately authorized benchmark on real sources.
 
+**No bare-price fallback (decision).** A bare number ("18", "13,5" — whole
+euros or one decimal, no euro sign) is never a price for this adapter, also
+not inside an element classed as a price: without semantic understanding it
+cannot be told apart reliably from a rating, old price, from-price,
+capacity, workshop or ticket price, gift voucher or step number. Two local
+recall experiments in that direction were rejected by independent reviews
+and never pushed or integrated. A source whose menu needs such
+interpretation stays `unparsed` (or `ambiguous_structure`); that is the
+documented hand-over point to a separate, not yet authorized AI structuring
+track — see "Decision: no bare-price fallback" and "Hand-over boundary" in
+`planning/specs/tickets/be-22-html-menu-recognition-foundation.md`. Nothing
+here authorizes AI, OCR, providers or any external call.
+
 ## Running it
 
 ```
