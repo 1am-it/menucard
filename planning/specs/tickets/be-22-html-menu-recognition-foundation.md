@@ -2,15 +2,17 @@
 
 ## Status
 
-Proposed; local, offline foundation only. An isolated benchmark track under
-`ops/benchmark/` — no product code, route, UI, database, migration,
-provider, or live analysis-pipeline change. Not yet independently reviewed,
-not pushed. Three pre-push reviews (adversarial self-reviews by the same
+Merged to `main` via PR #9 (merge commit `7ff8655`, 2026-10-04): an
+offline benchmark track under `ops/benchmark/` plus this ticket. It adds
+no product code, route, UI, database, migration, provider or live
+analysis-pipeline change, and no production menu recognition. Before that
+merge, three pre-push reviews (adversarial self-reviews by the same
 author, all NOT GREEN) found time/date and volume misreads, unbounded
 parser work, a shallow trust guard, two-dish table rows/cards being merged
-or partially claimed, and Proxies passing the plain-data guard; those are
-fixed locally (see "Review fixes") and await a new independent pre-push
-review.
+or partially claimed, and Proxies passing the plain-data guard; those were
+fixed before the merge (see "Review fixes"). Whether an independent
+pre-push review took place before the merge is not recorded in this
+repository; step 4 below is therefore left open.
 
 ## Voortgang
 
@@ -20,7 +22,7 @@ BE-22 VOORTGANG
 - [ ] 2. Implementatie-readinessreview groen
 - [x] 3. Lokale offline foundation gebouwd en getest (`ops/benchmark/`)
 - [ ] 4. Onafhankelijke pre-pushreview groen
-- [ ] 5. Code gepusht
+- [x] 5. Code gepusht
 - [ ] 6. Apart geautoriseerd experiment op echte bronnen
 
 See `015-be-ticket-structure-and-time-boxing.md` for what this checklist
