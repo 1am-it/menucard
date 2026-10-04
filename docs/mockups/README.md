@@ -207,6 +207,16 @@ reference instead of ad hoc judgment calls:
   directional only and must never be rendered unless computed from real
   work items. Governs visual hierarchy only, not route, role, or
   data-contract changes.
+- [Internal source workqueue](./internal-source-workqueue-v1.png) —
+  visual direction for `/internal/source-workqueue` (Bronwerkvoorraad,
+  `planning/specs/tickets/be-23-internal-source-workqueue.md`): two
+  separate status badges per restaurant (Bron, Menukaart) with icon and
+  text, mutually exclusive queue tabs, filters, one action per row, and a
+  mobile card layout. The implementation keeps the existing InternalNav
+  shell instead of the mockup's top bar, has no `Geen actie` queue and no
+  "was: …" line (no data for them yet) — see that ticket's "Deviations
+  from the mockup". Example names, dates and counts in the image are
+  illustrative only.
 
 ## Naming
 
