@@ -339,3 +339,19 @@ test('wijkOptions and domainOf', () => {
   assert.equal(domainOf(''), null);
   assert.equal(domainOf(null), null);
 });
+
+test('attributeJob: a receipt that is not an exact match is never attributed, even when it carries an id', () => {
+  assert.equal(attributeJob({ status: 'succeeded' }, { restaurant_match_type: 'multiple', matched_restaurant_id: '7' }, () => null), null);
+  assert.equal(attributeJob({ status: 'succeeded' }, { restaurant_match_type: 'none', matched_restaurant_id: '7' }, () => null), null);
+});
+
+test('buildSourceWorkqueue: the newest usable check wins regardless of input order (the route reads newest first)', () => {
+  const restaurants = { 1: { name: 'Fictief Alfa', buurt: 'Centrum', website: 'https://alfa.example.invalid' } };
+  const newer = { id: 'n', canonical_source_url: 'https://alfa.example.invalid/', status: 'failed', error_reason: 'fetch_failed', created_at: '2026-03-05T10:00:00Z', updated_at: '2026-03-05T10:01:00Z' };
+  const older = { id: 'o', canonical_source_url: 'https://alfa.example.invalid/', status: 'failed', error_reason: 'robots_disallowed', created_at: '2026-03-01T10:00:00Z', updated_at: '2026-03-01T10:01:00Z' };
+  const match = matcherFor({ 1: 'alfa.example.invalid' });
+  for (const jobs of [[newer, older], [older, newer]]) {
+    const { rows } = buildSourceWorkqueue({ restaurants, jobs, receipts: [], matchHostname: match });
+    assert.deepEqual([rows[0].source, rows[0].checkedAt], ['unreachable', '2026-03-05T10:01:00Z']);
+  }
+});
