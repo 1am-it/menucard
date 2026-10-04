@@ -28,6 +28,7 @@ const {
   filterRows,
   wijkOptions,
   domainOf,
+  hostOf,
 } = require('./sourceWorkqueue');
 const { ALLOWED_JOB_ERROR_REASONS, ALLOWED_JOB_STATUSES } = require('./restaurantSourceAnalysisJobs');
 
@@ -166,27 +167,47 @@ test('observeJob: no job status or error reason that exists today ever yields "I
 
 // ─── attributeJob ──────────────────────────────────────────────────────────
 
-const matcherFor = (map) => (url) => {
-  const host = domainOf(url);
-  const ids = Object.entries(map).filter(([, h]) => h === host).map(([id]) => id);
-  if (ids.length === 1) return { matchType: 'exact', restaurantId: ids[0] };
-  return { matchType: ids.length > 1 ? 'multiple' : 'none', restaurantId: null };
+const R_ATTR = {
+  1: { name: 'Fictief Alfa', website: 'https://www.fictief-a.example.invalid' },
+  2: { name: 'Fictief Gedeeld Een', website: 'https://gedeeld.example.invalid' },
+  3: { name: 'Fictief Gedeeld Twee', website: 'http://www.Gedeeld.example.invalid/andere-pagina' },
+  4: { name: 'Fictief Zonder Schema', website: 'zonderschema.example.invalid/menu' },
 };
+const exactReceipt = (id) => ({ restaurant_match_type: 'exact', matched_restaurant_id: id });
 
-test('attributeJob: a succeeded job uses only the receipt\'s exact match; never none/multiple', () => {
-  const match = matcherFor({ 1: 'fictief-a.example.invalid' });
-  assert.equal(attributeJob({ status: 'succeeded' }, { restaurant_match_type: 'exact', matched_restaurant_id: '7' }, match), '7');
-  assert.equal(attributeJob({ status: 'succeeded', canonical_source_url: 'https://fictief-a.example.invalid/' }, { restaurant_match_type: 'none', matched_restaurant_id: null }, match), null);
-  assert.equal(attributeJob({ status: 'succeeded' }, { restaurant_match_type: 'multiple' }, match), null);
-  assert.equal(attributeJob({ status: 'succeeded' }, null, match), null);
+test('attributeJob: a succeeded job needs host evidence AND an exact receipt for that same restaurant', () => {
+  const ok = { status: 'succeeded', canonical_source_url: 'https://fictief-a.example.invalid/menu' };
+  assert.equal(attributeJob(ok, exactReceipt('1'), R_ATTR), '1');
+  assert.equal(attributeJob(ok, exactReceipt(1), R_ATTR), '1', 'numeric receipt id');
+  assert.equal(attributeJob(ok, exactReceipt('2'), R_ATTR), null, 'receipt names another restaurant');
+  assert.equal(attributeJob(ok, { restaurant_match_type: 'none', matched_restaurant_id: null }, R_ATTR), null);
+  assert.equal(attributeJob(ok, { restaurant_match_type: 'multiple', matched_restaurant_id: '1' }, R_ATTR), null);
+  assert.equal(attributeJob(ok, null, R_ATTR), null, 'missing receipt');
+  // A receipt id is never an exemption from the host check.
+  assert.equal(attributeJob({ status: 'succeeded', canonical_source_url: 'https://elders.example.invalid/' }, exactReceipt('1'), R_ATTR), null);
+  assert.equal(attributeJob({ status: 'succeeded' }, exactReceipt('1'), R_ATTR), null, 'no checked URL');
 });
 
-test('attributeJob: a failed job uses an exact hostname match of the checked URL only', () => {
-  const match = matcherFor({ 1: 'fictief-a.example.invalid', 2: 'gedeeld.example.invalid', 3: 'gedeeld.example.invalid' });
-  assert.equal(attributeJob({ status: 'failed', canonical_source_url: 'https://www.fictief-a.example.invalid/menu' }, null, match), '1');
-  assert.equal(attributeJob({ status: 'failed', canonical_source_url: 'https://gedeeld.example.invalid/' }, null, match), null);
-  assert.equal(attributeJob({ status: 'failed', canonical_source_url: 'https://onbekend.example.invalid/' }, null, match), null);
-  assert.equal(attributeJob({ status: 'failed', canonical_source_url: 'https://fictief-a.example.invalid/' }, null, undefined), null);
+test('attributeJob: a failed job uses exactly one restaurant with the same current host — www, case, scheme and path do not matter', () => {
+  for (const url of ['https://www.fictief-a.example.invalid/menu', 'http://FICTIEF-A.example.invalid', 'https://fictief-a.example.invalid./x?y']) {
+    assert.equal(attributeJob({ status: 'failed', canonical_source_url: url }, null, R_ATTR), '1', url);
+  }
+  assert.equal(attributeJob({ status: 'failed', canonical_source_url: 'https://zonderschema.example.invalid/' }, null, R_ATTR), '4', 'website without a scheme');
+  assert.equal(attributeJob({ status: 'failed', canonical_source_url: 'https://gedeeld.example.invalid/' }, null, R_ATTR), null, 'two restaurants share the host');
+  assert.equal(attributeJob({ status: 'failed', canonical_source_url: 'https://onbekend.example.invalid/' }, null, R_ATTR), null);
+  assert.equal(attributeJob({ status: 'failed', canonical_source_url: 'https://fictief-a.example.invalid/' }, null, null), null);
+  assert.equal(attributeJob(null, null, R_ATTR), null);
+});
+
+test('hostOf: pure normalization — scheme optional, www/case/trailing dot removed, everything else null', () => {
+  assert.equal(hostOf('https://www.Fictief.example.invalid/menu?x=1'), 'fictief.example.invalid');
+  assert.equal(hostOf('fictief.example.invalid/menu'), 'fictief.example.invalid');
+  assert.equal(hostOf('WWW.fictief.example.invalid'), 'fictief.example.invalid');
+  assert.equal(hostOf('//fictief.example.invalid/x'), 'fictief.example.invalid');
+  assert.equal(hostOf('https://fictief.example.invalid.'), 'fictief.example.invalid');
+  for (const bad of ['ftp://fictief.example.invalid', 'mailto:x@fictief.example.invalid', 'javascript:alert(1)', 'geen url', 'localhost', '', '   ', null, 42]) {
+    assert.equal(hostOf(bad), null, String(bad));
+  }
 });
 
 // ─── buildSourceWorkqueue ──────────────────────────────────────────────────
@@ -200,7 +221,6 @@ const RESTAURANTS = {
   6: { name: 'Fictief Foxtrot', buurt: 'Heuvel', website: 'https://foxtrot.example.invalid' },
   7: { name: 'Fictief Golf', buurt: 'Heuvel', website: 'https://golf.example.invalid' },
 };
-const HOSTS = { 1: 'alfa.example.invalid', 2: 'bravo.example.invalid', 3: 'charlie.example.invalid', 4: 'delta.example.invalid', 6: 'foxtrot.example.invalid', 7: 'golf.example.invalid' };
 const job = (id, url, status, extra = {}) => ({ id, canonical_source_url: url, status, created_at: extra.created_at || '2026-03-01T10:00:00Z', updated_at: extra.updated_at || extra.created_at || '2026-03-01T10:01:00Z', ...extra });
 
 function sampleQueue() {
@@ -225,7 +245,7 @@ function sampleQueue() {
     { id: 'r2', restaurant_match_type: 'exact', matched_restaurant_id: '1', menus: receiptWith([{ name: 'Fictieve soep' }]).menus },
     { id: 'r4', restaurant_match_type: 'exact', matched_restaurant_id: '3', menus: [] },
   ];
-  return buildSourceWorkqueue({ restaurants: RESTAURANTS, jobs, receipts, matchHostname: matcherFor(HOSTS) });
+  return buildSourceWorkqueue({ restaurants: RESTAURANTS, jobs, receipts });
 }
 
 test('buildSourceWorkqueue: the latest usable observation per restaurant decides the row', () => {
@@ -264,9 +284,9 @@ test('buildSourceWorkqueue: every known restaurant is in exactly one place — a
 });
 
 test('buildSourceWorkqueue: empty or malformed input gives an empty, consistent queue', () => {
-  const empty = buildSourceWorkqueue({ restaurants: {}, jobs: null, receipts: undefined, matchHostname: null });
+  const empty = buildSourceWorkqueue({ restaurants: {}, jobs: null, receipts: undefined });
   assert.deepEqual(empty, { rows: [], notInQueue: [], counts: { review: 0, source: 0, identity: 0, total: 0 }, unattributedChecks: 0 });
-  const odd = buildSourceWorkqueue({ restaurants: { 1: { name: '' }, 2: null, 3: { name: 'Fictief Hotel' } }, jobs: [null, 5], receipts: [null], matchHostname: () => null });
+  const odd = buildSourceWorkqueue({ restaurants: { 1: { name: '' }, 2: null, 3: { name: 'Fictief Hotel' } }, jobs: [null, 5], receipts: [null] });
   assert.deepEqual(odd.notInQueue.map((r) => [r.name, r.reason]), [['Fictief Hotel', 'no_website']]);
 });
 
@@ -341,17 +361,127 @@ test('wijkOptions and domainOf', () => {
 });
 
 test('attributeJob: a receipt that is not an exact match is never attributed, even when it carries an id', () => {
-  assert.equal(attributeJob({ status: 'succeeded' }, { restaurant_match_type: 'multiple', matched_restaurant_id: '7' }, () => null), null);
-  assert.equal(attributeJob({ status: 'succeeded' }, { restaurant_match_type: 'none', matched_restaurant_id: '7' }, () => null), null);
+  const job = { status: 'succeeded', canonical_source_url: 'https://fictief-a.example.invalid/' };
+  assert.equal(attributeJob(job, { restaurant_match_type: 'multiple', matched_restaurant_id: '1' }, R_ATTR), null);
+  assert.equal(attributeJob(job, { restaurant_match_type: 'none', matched_restaurant_id: '1' }, R_ATTR), null);
 });
 
 test('buildSourceWorkqueue: the newest usable check wins regardless of input order (the route reads newest first)', () => {
   const restaurants = { 1: { name: 'Fictief Alfa', buurt: 'Centrum', website: 'https://alfa.example.invalid' } };
   const newer = { id: 'n', canonical_source_url: 'https://alfa.example.invalid/', status: 'failed', error_reason: 'fetch_failed', created_at: '2026-03-05T10:00:00Z', updated_at: '2026-03-05T10:01:00Z' };
   const older = { id: 'o', canonical_source_url: 'https://alfa.example.invalid/', status: 'failed', error_reason: 'robots_disallowed', created_at: '2026-03-01T10:00:00Z', updated_at: '2026-03-01T10:01:00Z' };
-  const match = matcherFor({ 1: 'alfa.example.invalid' });
   for (const jobs of [[newer, older], [older, newer]]) {
-    const { rows } = buildSourceWorkqueue({ restaurants, jobs, receipts: [], matchHostname: match });
+    const { rows } = buildSourceWorkqueue({ restaurants, jobs, receipts: [] });
     assert.deepEqual([rows[0].source, rows[0].checkedAt], ['unreachable', '2026-03-05T10:01:00Z']);
+  }
+});
+
+// ─── Review fix B1: host evidence is required for every job ───────────────
+
+const menuReceipt = (id, rid) => ({ id, restaurant_match_type: 'exact', matched_restaurant_id: rid, menus: [{ name: 'F', categories: [{ name: 'F', items: [{ name: 'Fictief gerecht' }] }] }] });
+const okJob = (id, host, receiptId, createdAt) => ({ id, canonical_source_url: `https://${host}/`, status: 'succeeded', result_receipt_id: receiptId, unknown_menu_contexts: [], created_at: createdAt, updated_at: createdAt });
+const failJob = (id, host, reason, createdAt, status = 'failed') => ({ id, canonical_source_url: `https://${host}/`, status, error_reason: reason, created_at: createdAt, updated_at: createdAt });
+const statusOf = (q, name) => q.rows.find((r) => r.name === name) || q.notInQueue.find((r) => r.name === name);
+
+test('B1: a restaurant whose website changed never gets a status from a check of its old domain', () => {
+  const restaurants = { g: { name: 'Fictief G', website: 'https://nieuw-g.example.invalid' } };
+  const q = buildSourceWorkqueue({ restaurants, jobs: [okJob('j1', 'oud-g.example.invalid', 'r1', '2026-10-01T10:00:00Z')], receipts: [menuReceipt('r1', 'g')] });
+  assert.equal(q.rows.length, 0, 'no green status for a domain that was never checked');
+  assert.equal(statusOf(q, 'Fictief G').reason, 'check_ambiguous');
+  assert.equal(q.unattributedChecks, 1);
+});
+
+test('B1: an old domain that now belongs to another restaurant gives neither restaurant the old green status', () => {
+  const restaurants = { g: { name: 'Fictief G', website: '' }, h: { name: 'Fictief H', website: 'https://www.domein.example.invalid' } };
+  const receipts = [menuReceipt('r1', 'g')];
+  const onlyOld = buildSourceWorkqueue({ restaurants, jobs: [okJob('j1', 'domein.example.invalid', 'r1', '2026-09-01T10:00:00Z')], receipts });
+  assert.equal(onlyOld.rows.length, 0);
+  assert.equal(statusOf(onlyOld, 'Fictief G').reason, 'check_ambiguous');
+  assert.equal(statusOf(onlyOld, 'Fictief H').reason, 'check_ambiguous');
+  assert.equal(onlyOld.unattributedChecks, 1);
+  const both = buildSourceWorkqueue({
+    restaurants,
+    jobs: [okJob('j1', 'domein.example.invalid', 'r1', '2026-09-01T10:00:00Z'), failJob('j2', 'DOMEIN.example.invalid', 'fetch_failed', '2026-10-01T10:00:00Z')],
+    receipts,
+  });
+  assert.deepEqual(both.rows.map((r) => [r.name, r.source, r.menu]), [['Fictief H', 'unreachable', 'not_assessed']]);
+  assert.equal(statusOf(both, 'Fictief G').reason, 'check_ambiguous');
+  assert.equal(both.unattributedChecks, 1);
+});
+
+test('B1: restaurants sharing a host are never attributed — all of them get "Controle niet eenduidig te koppelen"', () => {
+  const restaurants = { b: { name: 'Fictief B', website: 'https://gedeeld.example.invalid/b' }, c: { name: 'Fictief C', website: 'gedeeld.example.invalid/c' } };
+  const jobs = [failJob('j1', 'GEDEELD.example.invalid', 'fetch_failed', '2026-10-01T10:00:00Z'), okJob('j2', 'www.gedeeld.example.invalid', 'r2', '2026-10-02T10:00:00Z')];
+  const q = buildSourceWorkqueue({ restaurants, jobs, receipts: [menuReceipt('r2', 'b')] });
+  assert.equal(q.rows.length, 0);
+  assert.deepEqual(q.notInQueue.map((r) => [r.name, r.reason]), [['Fictief B', 'check_ambiguous'], ['Fictief C', 'check_ambiguous']]);
+  assert.equal(q.unattributedChecks, 2);
+});
+
+test('B1: a receipt id for an unknown restaurant, or a missing receipt, is never green and is counted', () => {
+  const restaurants = { x: { name: 'Fictief X', website: 'https://x.example.invalid' } };
+  const unknownId = buildSourceWorkqueue({ restaurants, jobs: [okJob('j1', 'x.example.invalid', 'r1', '2026-10-01T10:00:00Z')], receipts: [menuReceipt('r1', 'bestaat-niet')] });
+  assert.equal(unknownId.rows.length, 0);
+  assert.equal(statusOf(unknownId, 'Fictief X').reason, 'check_ambiguous');
+  assert.equal(unknownId.unattributedChecks, 1);
+  const noReceipt = buildSourceWorkqueue({ restaurants, jobs: [okJob('j1', 'x.example.invalid', 'r-missing', '2026-10-01T10:00:00Z')], receipts: [] });
+  assert.equal(noReceipt.rows.length, 0);
+  assert.equal(statusOf(noReceipt, 'Fictief X').reason, 'check_ambiguous');
+  assert.equal(noReceipt.unattributedChecks, 1);
+});
+
+test('B1: a job for a nameless restaurant entry is counted as unattributed, never silently dropped', () => {
+  const restaurants = { n: { name: '   ', website: 'https://naamloos.example.invalid' }, y: { name: 'Fictief Y', website: 'https://y.example.invalid' } };
+  const q = buildSourceWorkqueue({ restaurants, jobs: [failJob('j1', 'naamloos.example.invalid', 'fetch_failed', '2026-10-01T10:00:00Z')], receipts: [] });
+  assert.equal(q.unattributedChecks, 1);
+  assert.deepEqual(q.notInQueue.map((r) => [r.name, r.reason]), [['Fictief Y', 'never_checked']]);
+});
+
+test('B1: across mixed scenarios, a row only ever comes from evidence on the restaurant\'s own current host', () => {
+  const restaurants = {
+    a: { name: 'Fictief A', website: 'https://a.example.invalid' },
+    b: { name: 'Fictief B', website: 'https://nieuw-b.example.invalid' },
+    c: { name: 'Fictief C', website: 'https://gedeeld.example.invalid' },
+    d: { name: 'Fictief D', website: 'gedeeld.example.invalid' },
+  };
+  const jobs = [
+    okJob('j1', 'a.example.invalid', 'r1', '2026-10-01T10:00:00Z'),
+    okJob('j2', 'oud-b.example.invalid', 'r2', '2026-10-01T10:00:00Z'),
+    okJob('j3', 'gedeeld.example.invalid', 'r3', '2026-10-01T10:00:00Z'),
+    okJob('j4', 'a.example.invalid', 'r4', '2026-10-02T10:00:00Z'), // receipt names b, host is a's
+  ];
+  const receipts = [menuReceipt('r1', 'a'), menuReceipt('r2', 'b'), menuReceipt('r3', 'c'), menuReceipt('r4', 'b')];
+  const q = buildSourceWorkqueue({ restaurants, jobs, receipts });
+  assert.deepEqual(q.rows.map((r) => [r.restaurantId, r.domain, r.checkedAt]), [['a', 'a.example.invalid', '2026-10-01T10:00:00Z']]);
+  assert.equal(q.unattributedChecks, 3);
+  assert.equal(q.counts.total, q.rows.length);
+  assert.deepEqual(q.notInQueue.map((r) => [r.restaurantId, r.reason]), [['b', 'check_ambiguous'], ['c', 'check_ambiguous'], ['d', 'check_ambiguous']]);
+});
+
+// ─── Review fixes: in-progress only when nothing newer finished ───────────
+
+test('a running or pending check only counts as "Controle loopt nog" when no terminal check is newer', () => {
+  const restaurants = { p: { name: 'Fictief P', website: 'https://p.example.invalid' } };
+  const run = (jobs) => statusOf(buildSourceWorkqueue({ restaurants, jobs, receipts: [] }), 'Fictief P').reason;
+  assert.equal(run([failJob('j1', 'p.example.invalid', null, '2026-01-01T10:00:00Z', 'running'), failJob('j2', 'p.example.invalid', 'internal_error', '2026-10-01T10:00:00Z')]), 'check_not_usable', 'stuck old running job');
+  assert.equal(run([failJob('j1', 'p.example.invalid', 'internal_error', '2026-01-01T10:00:00Z'), failJob('j2', 'p.example.invalid', null, '2026-10-01T10:00:00Z', 'running')]), 'check_in_progress');
+  assert.equal(run([failJob('j1', 'p.example.invalid', null, '2026-10-01T10:00:00Z', 'pending')]), 'check_in_progress', 'pending counts as in progress');
+  assert.equal(run([]), 'never_checked');
+});
+
+test('a running check never hides an existing usable row', () => {
+  const restaurants = { p: { name: 'Fictief P', website: 'https://p.example.invalid' } };
+  const q = buildSourceWorkqueue({ restaurants, jobs: [failJob('j1', 'p.example.invalid', 'robots_disallowed', '2026-09-01T10:00:00Z'), failJob('j2', 'p.example.invalid', null, '2026-10-01T10:00:00Z', 'running')], receipts: [] });
+  assert.deepEqual(q.rows.map((r) => r.source), ['access_limited']);
+});
+
+test('no website and no evidence is "Geen website bekend"; a website without checks is "Nog nooit gecontroleerd"', () => {
+  const q = buildSourceWorkqueue({ restaurants: { a: { name: 'Fictief A', website: '' }, b: { name: 'Fictief B', website: 'b.example.invalid' } }, jobs: [], receipts: [] });
+  assert.deepEqual(q.notInQueue.map((r) => [r.name, r.reason, r.domain]), [['Fictief A', 'no_website', null], ['Fictief B', 'never_checked', 'b.example.invalid']]);
+});
+
+test('observeJob: inherited object members are never an error-reason mapping', () => {
+  for (const reason of ['__proto__', 'constructor', 'toString', 'hasOwnProperty', 'valueOf']) {
+    assert.deepEqual(observeJob({ status: 'failed', error_reason: reason }, null), { kind: 'unusable' }, reason);
   }
 });

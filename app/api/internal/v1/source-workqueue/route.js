@@ -14,7 +14,6 @@ import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/src/lib/supabaseAdmin'
 import { authenticateInternalRequest } from '@/src/lib/internalAuth'
 import { isInternalOnly } from '@/src/lib/importInbox'
-import { matchRestaurantByHostname } from '@/src/lib/restaurantHostMatch'
 import { buildSourceWorkqueue } from '@/src/lib/sourceWorkqueue'
 import restaurantsData from '@/data/restaurants.json'
 
@@ -70,7 +69,6 @@ export async function GET(request) {
     restaurants: restaurantsData,
     jobs: jobs || [],
     receipts,
-    matchHostname: (url) => matchRestaurantByHostname(restaurantsData, url),
   })
 
   return NextResponse.json({

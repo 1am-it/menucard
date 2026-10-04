@@ -88,13 +88,14 @@ const ACTION_PRIORITY = {
 
 // Why a known restaurant is not (yet) in the workqueue — never a guessed
 // source status.
-const NOT_IN_QUEUE_REASONS = ['no_website', 'never_checked', 'check_in_progress', 'check_not_usable'];
+const NOT_IN_QUEUE_REASONS = ['no_website', 'never_checked', 'check_in_progress', 'check_not_usable', 'check_ambiguous'];
 
 const NOT_IN_QUEUE_LABELS = {
   no_website: 'Geen website bekend',
   never_checked: 'Nog nooit gecontroleerd',
   check_in_progress: 'Controle loopt nog',
   check_not_usable: 'Laatste controle gaf geen bruikbaar resultaat',
+  check_ambiguous: 'Controle niet eenduidig te koppelen',
 };
 
 const SORT_MODES = ['action_first', 'oldest_check', 'name'];
@@ -184,24 +185,52 @@ function observeJob(job, receipt) {
     return { kind: 'classified', source: 'reachable', menu: 'not_assessed' };
   }
   if (job.status === 'failed') {
-    const observation = FAILED_REASON_OBSERVATIONS[job.error_reason];
+    // Own-property lookup only: a reason such as "toString" or "__proto__"
+    // must never hit an inherited object member.
+    const observation = typeof job.error_reason === 'string' && Object.prototype.hasOwnProperty.call(FAILED_REASON_OBSERVATIONS, job.error_reason)
+      ? FAILED_REASON_OBSERVATIONS[job.error_reason]
+      : null;
     if (!observation) return { kind: 'unusable' };
     return { kind: 'classified', source: observation.source, menu: observation.menu || 'not_assessed' };
   }
   return { kind: 'unusable' }; // pending/running/unknown: not a terminal observation
 }
 
-/** Hostname without a leading "www." — what the workqueue shows instead of a
- * full URL. `null` for anything that is not an http(s) URL. */
-function domainOf(url) {
-  if (typeof url !== 'string' || url.trim() === '') return null;
+/**
+ * The normalized host of a website or URL — lower case, without a leading
+ * "www." or a trailing dot — or `null`. Pure string parsing, never a fetch.
+ * A value without a scheme ("fictief.example.invalid/menu") is read as
+ * https; any other scheme, whitespace, or a host without a dot gives `null`.
+ * This one function is the host comparison for attribution AND the domain
+ * the page shows.
+ */
+function hostOf(value) {
+  if (typeof value !== 'string') return null;
+  let text = value.trim();
+  if (text === '' || /\s/.test(text)) return null;
+  if (text.startsWith('//')) text = `https:${text}`;
+  else if (!/^[a-z][a-z0-9+.-]*:/i.test(text)) text = `https://${text}`;
   try {
-    const parsed = new URL(url.trim());
+    const parsed = new URL(text);
     if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return null;
-    return parsed.hostname.toLowerCase().replace(/^www\./, '') || null;
+    const host = parsed.hostname.toLowerCase().replace(/\.$/, '').replace(/^www\./, '');
+    return host && host.includes('.') ? host : null;
   } catch {
     return null;
   }
+}
+
+/** What the workqueue shows instead of a full URL (same as hostOf). */
+const domainOf = hostOf;
+
+/** Ids of every restaurant entry whose current website has `host`. */
+function restaurantIdsForHost(restaurants, host) {
+  if (!host || !restaurants || typeof restaurants !== 'object') return [];
+  const ids = [];
+  for (const [id, restaurant] of Object.entries(restaurants)) {
+    if (restaurant && typeof restaurant === 'object' && hostOf(restaurant.website) === host) ids.push(String(id));
+  }
+  return ids;
 }
 
 function timeOf(value) {
@@ -210,23 +239,28 @@ function timeOf(value) {
 }
 
 /**
- * Which restaurant a job belongs to — or `null` when that is not certain.
- * A succeeded job uses only its receipt's server-side exact match (made
- * against the final URL); a failed job uses an exact hostname match of the
- * URL that was checked. `none`/`multiple` matches are never attributed.
- *
- *   matchHostname(url) => { matchType, restaurantId }
+ * Which restaurant a job is evidence for — or `null` when that is not
+ * certain. Host evidence is always required: the normalized host of the
+ * checked URL must equal the normalized host of the CURRENT website of
+ * exactly one restaurant entry. A succeeded job additionally needs its
+ * receipt to be an `exact` match for that same restaurant — a receipt id is
+ * never an exemption from the host check (the website may have changed, or
+ * the old domain may now belong to another restaurant).
  */
-function attributeJob(job, receipt, matchHostname) {
-  if (!job) return null;
+function attributeJob(job, receipt, restaurants) {
+  if (!job || typeof job !== 'object') return null;
+  const ids = restaurantIdsForHost(restaurants, hostOf(job.canonical_source_url));
+  if (ids.length !== 1) return null;
+  const id = ids[0];
   if (job.status === 'succeeded') {
-    return receipt && receipt.restaurant_match_type === 'exact' && receipt.matched_restaurant_id
-      ? String(receipt.matched_restaurant_id)
-      : null;
+    if (!receipt || receipt.restaurant_match_type !== 'exact' || receipt.matched_restaurant_id == null) return null;
+    if (String(receipt.matched_restaurant_id) !== id) return null;
   }
-  if (typeof matchHostname !== 'function') return null;
-  const match = matchHostname(job.canonical_source_url);
-  return match && match.matchType === 'exact' && match.restaurantId ? String(match.restaurantId) : null;
+  return id;
+}
+
+function namedRestaurant(restaurant) {
+  return Boolean(restaurant && typeof restaurant === 'object' && typeof restaurant.name === 'string' && restaurant.name.trim());
 }
 
 /**
@@ -236,33 +270,46 @@ function attributeJob(job, receipt, matchHostname) {
  *   jobs: [{ id, canonical_source_url, status, error_reason, result_receipt_id,
  *            unknown_menu_contexts, created_at, updated_at }]
  *   receipts: [{ id, restaurant_match_type, matched_restaurant_id, menus }]
- *   matchHostname: (url) => { matchType, restaurantId }
  *
  * Per restaurant, the most recent terminal job that gives a usable
  * observation decides the row; `checkedAt` is that job's own `updated_at`.
  * A restaurant without one is listed in `notInQueue` with a plain reason —
- * never given a guessed status.
+ * never given a guessed status. A job that cannot be attributed with
+ * certainty (see attributeJob), or that points at an unknown or nameless
+ * restaurant entry, is counted in `unattributedChecks`; every restaurant it
+ * could plausibly concern (same current host, or named by its receipt) gets
+ * the reason `check_ambiguous` instead of `never_checked`.
  */
-function buildSourceWorkqueue({ restaurants, jobs, receipts, matchHostname }) {
+function buildSourceWorkqueue({ restaurants, jobs, receipts }) {
   const receiptById = new Map();
   for (const r of Array.isArray(receipts) ? receipts : []) if (r && r.id) receiptById.set(r.id, r);
+  const known = restaurants && typeof restaurants === 'object' ? restaurants : {};
 
-  const byRestaurant = new Map(); // id -> { usable: [], inProgress: bool, unusableTerminal: bool }
+  // id -> { usable: [], latestTerminalAt, latestInProgressAt, unusableTerminal }
+  const byRestaurant = new Map();
+  const ambiguous = new Set();
+  const entryFor = (id) => {
+    if (!byRestaurant.has(id)) byRestaurant.set(id, { usable: [], latestTerminalAt: null, latestInProgressAt: null, unusableTerminal: false });
+    return byRestaurant.get(id);
+  };
   let unattributedChecks = 0;
   for (const job of Array.isArray(jobs) ? jobs : []) {
     if (!job || typeof job !== 'object') continue;
     const receipt = job.result_receipt_id ? receiptById.get(job.result_receipt_id) || null : null;
-    const restaurantId = attributeJob(job, receipt, matchHostname);
-    if (!restaurantId || !restaurants || !restaurants[restaurantId]) {
+    const restaurantId = attributeJob(job, receipt, known);
+    if (!restaurantId || !namedRestaurant(known[restaurantId])) {
       unattributedChecks += 1;
+      for (const id of restaurantIdsForHost(known, hostOf(job.canonical_source_url))) ambiguous.add(id);
+      if (receipt && receipt.matched_restaurant_id != null) ambiguous.add(String(receipt.matched_restaurant_id));
       continue;
     }
-    if (!byRestaurant.has(restaurantId)) byRestaurant.set(restaurantId, { usable: [], inProgress: false, unusableTerminal: false });
-    const entry = byRestaurant.get(restaurantId);
+    const entry = entryFor(restaurantId);
+    const createdAt = timeOf(job.created_at);
     if (job.status === 'pending' || job.status === 'running') {
-      entry.inProgress = true;
+      if (entry.latestInProgressAt === null || (createdAt !== null && createdAt > entry.latestInProgressAt)) entry.latestInProgressAt = createdAt ?? 0;
       continue;
     }
+    if (entry.latestTerminalAt === null || (createdAt !== null && createdAt > entry.latestTerminalAt)) entry.latestTerminalAt = createdAt ?? 0;
     const observation = observeJob(job, receipt);
     if (observation.kind === 'classified') entry.usable.push({ job, observation });
     else entry.unusableTerminal = true;
@@ -270,10 +317,9 @@ function buildSourceWorkqueue({ restaurants, jobs, receipts, matchHostname }) {
 
   const rows = [];
   const notInQueue = [];
-  for (const [id, restaurant] of Object.entries(restaurants || {})) {
-    if (!restaurant || typeof restaurant !== 'object') continue;
-    const name = typeof restaurant.name === 'string' && restaurant.name.trim() ? restaurant.name.trim() : null;
-    if (!name) continue;
+  for (const [id, restaurant] of Object.entries(known)) {
+    if (!namedRestaurant(restaurant)) continue;
+    const name = restaurant.name.trim();
     const wijk = typeof restaurant.buurt === 'string' && restaurant.buurt.trim() ? restaurant.buurt.trim() : null;
     const domain = domainOf(restaurant.website);
     const entry = byRestaurant.get(String(id));
@@ -291,10 +337,13 @@ function buildSourceWorkqueue({ restaurants, jobs, receipts, matchHostname }) {
       });
       continue;
     }
+    // A running/pending check only counts when no terminal check is newer.
+    const inProgress = Boolean(entry && entry.latestInProgressAt !== null && (entry.latestTerminalAt === null || entry.latestInProgressAt > entry.latestTerminalAt));
     let reason;
-    if (!domain && !entry) reason = 'no_website';
-    else if (entry && entry.inProgress) reason = 'check_in_progress';
+    if (inProgress) reason = 'check_in_progress';
     else if (entry && entry.unusableTerminal) reason = 'check_not_usable';
+    else if (ambiguous.has(String(id))) reason = 'check_ambiguous';
+    else if (!domain) reason = 'no_website';
     else reason = 'never_checked';
     notInQueue.push({ restaurantId: String(id), name, wijk, domain, reason });
   }
@@ -384,6 +433,7 @@ module.exports = {
   filterRows,
   wijkOptions,
   domainOf,
+  hostOf,
   countSummaryMenuItems,
   countRecognizedPdfItems,
 };
