@@ -91,6 +91,13 @@ const INTERNAL_MODULES = [
   { id: 'onboarding-restaurant', label: 'Onboarding Restaurant', href: '/internal/onboarding-restaurant', requiredRole: 'internal', placement: 'primary' },
   { id: 'manage', label: 'Beheer', href: '/internal', requiredRole: 'internal', placement: 'workqueue', subtitle: 'Alle modules' },
   { id: 'import-inbox', label: 'Nieuwe aanleveringen', href: '/internal/import-inbox', requiredRole: 'internal', placement: 'workqueue', subtitle: 'Nieuwe bronnen' },
+  // Bronwerkvoorraad — read-only overview of every known restaurant source
+  // (Bron and Menukaart as two separate statuses), built only from existing
+  // BE-20 analysis jobs/receipts; see
+  // planning/specs/tickets/be-23-internal-source-workqueue.md. No badge
+  // count is shown in the nav (BE-20 "Visual contract": only real, computed
+  // counts — the page itself shows them).
+  { id: 'source-workqueue', label: 'Bronwerkvoorraad', href: '/internal/source-workqueue', requiredRole: 'internal', placement: 'workqueue', subtitle: 'Bron en menukaart per restaurant' },
   { id: 'profile-drafts', label: 'Profielconcepten', href: '/internal/profile-drafts', requiredRole: 'internal', placement: 'workqueue', subtitle: 'Klaarzetten' },
   // BE-17/PLATFORM-06's existing `editor`-only Moderation module — route,
   // authorization, and data model completely unchanged. Per BE-20's own

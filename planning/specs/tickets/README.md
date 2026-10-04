@@ -207,6 +207,13 @@ of these.
     Decision recorded: no bare-price fallback; sources that need semantic
     interpretation stay `unparsed` (the hand-over point to a possible,
     not yet authorized AI structuring track).
+25. [be-23-internal-source-workqueue.md](./be-23-internal-source-workqueue.md) —
+    internal, read-only Bronwerkvoorraad (`/internal/source-workqueue`)
+    under the existing Werkvoorraad entry: Bron and Menukaart as two
+    separate statuses with exactly one action per restaurant, built only
+    from existing BE-20 analysis jobs/receipts. Records a data-model gap:
+    `Identiteit gewijzigd` and `Geen menukaart aangetroffen` cannot be
+    derived yet and are never shown.
 
 ## PLATFORM-* order (not started)
 
