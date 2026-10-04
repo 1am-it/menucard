@@ -75,10 +75,10 @@ test('hasAnyKnownRole: true for any of internal/editor/owner, false for zero row
 
 // ─── resolveVisibleModules — the route/role matrix, enforced in code ───
 
-test('resolveVisibleModules: an internal-only account sees exactly Dekkingsoverzicht, Onboarding Restaurant, Beheer, Nieuwe aanleveringen, and Profielconcepten — not Beoordelen (editor-only)', () => {
+test('resolveVisibleModules: an internal-only account sees exactly Dekkingsoverzicht, Onboarding Restaurant, Beheer, Nieuwe aanleveringen, Bronwerkvoorraad, and Profielconcepten — not Beoordelen (editor-only)', () => {
   const modules = resolveVisibleModules([{ role: 'internal' }]);
   const ids = modules.map((m) => m.id);
-  assert.deepEqual(ids.sort(), ['coverage', 'import-inbox', 'manage', 'onboarding-restaurant', 'profile-drafts']);
+  assert.deepEqual(ids.sort(), ['coverage', 'import-inbox', 'manage', 'onboarding-restaurant', 'profile-drafts', 'source-workqueue']);
 });
 
 test('resolveVisibleModules: an editor-only account sees exactly Beoordelen (moderation) — not any internal-only module', () => {
@@ -98,7 +98,7 @@ test('resolveVisibleModules: an account with no roles at all sees zero modules',
 test('resolveVisibleModules: a multi-role (internal + editor) account sees the full union, not just one role\'s subset', () => {
   const modules = resolveVisibleModules([{ role: 'internal' }, { role: 'editor' }]);
   const ids = modules.map((m) => m.id).sort();
-  assert.deepEqual(ids, ['coverage', 'import-inbox', 'manage', 'moderation', 'onboarding-restaurant', 'profile-drafts']);
+  assert.deepEqual(ids, ['coverage', 'import-inbox', 'manage', 'moderation', 'onboarding-restaurant', 'profile-drafts', 'source-workqueue']);
 });
 
 test('resolveVisibleModules: every entry links to an existing internal route with a non-empty label and a recognized required role', () => {
@@ -124,7 +124,7 @@ test('groupModulesByPlacement: splits Dekkingsoverzicht and Onboarding Restauran
   const modules = resolveVisibleModules([{ role: 'internal' }, { role: 'editor' }]);
   const { primary, workqueue } = groupModulesByPlacement(modules);
   assert.deepEqual(primary.map((m) => m.id), ['coverage', 'onboarding-restaurant']);
-  assert.deepEqual(workqueue.map((m) => m.id), ['manage', 'import-inbox', 'profile-drafts', 'moderation']);
+  assert.deepEqual(workqueue.map((m) => m.id), ['manage', 'import-inbox', 'source-workqueue', 'profile-drafts', 'moderation']);
 });
 
 test('groupModulesByPlacement: an internal-only account never sees Beoordelen in the workqueue group — role boundaries hold through the grouping step too', () => {
