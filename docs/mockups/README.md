@@ -216,7 +216,11 @@ reference instead of ad hoc judgment calls:
   shell instead of the mockup's top bar, has no `Geen actie` queue and no
   "was: …" line (no data for them yet) — see that ticket's "Deviations
   from the mockup". Example names, dates and counts in the image are
-  illustrative only.
+  illustrative only. In this first version the badges `Identiteit
+  gewijzigd` and `Geen menukaart aangetroffen` shown in the mockup cannot
+  yet arise from real data (no explicit evidence is recorded for them; see
+  that ticket's "Datamodelkloof"), so they do not appear in the built
+  page's list.
 
 ## Naming
 

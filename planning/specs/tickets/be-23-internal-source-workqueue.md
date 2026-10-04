@@ -3,8 +3,11 @@
 ## Status
 
 Built locally on `feat/internal-source-workqueue`; not pushed, not
-merged, not deployed. Internal, read-only. Awaiting an independent
-pre-push review.
+merged, not deployed. Internal, read-only. The first independent pre-push
+review was NOT GREEN (attribution through a stored receipt id without a
+host check, and an inaccurate "Nog nooit gecontroleerd" reason); both are
+fixed locally (see "Attribution") and await a new independent pre-push
+review.
 
 ## Goal
 
@@ -83,15 +86,26 @@ reliable about the source decides the row; its `updated_at` is shown as
   `no_reliable_content_found`, and `pending` / `running` say nothing
   reliable about the source and are never mapped to a status.
 
-Attribution: a succeeded job counts for a restaurant only through its
-receipt's server-side `exact` match; a failed job only through an exact
-hostname match of the checked URL (`restaurantHostMatch`). Anything else
-is counted as "niet gekoppeld" and not attributed.
+Attribution — host evidence is always required. A job is only evidence
+for a restaurant when the normalized host of the checked URL (lower case,
+without `www.`, scheme and path ignored, also for a website stored without
+a scheme) equals the normalized host of that restaurant's **current**
+website, for exactly one restaurant entry. A succeeded job additionally
+needs its receipt to be an `exact` match for that same restaurant; a
+stored receipt id is never an exemption from the host check (the website
+may have changed, or the old domain may now belong to another restaurant).
+Shared hosts, a missing or non-exact receipt, a receipt naming another
+restaurant, an unknown host, and jobs for unknown or nameless restaurant
+entries are never attributed: they are counted on the page as checks that
+"niet aan precies één bekend restaurant konden worden gekoppeld".
 
 Restaurants without a usable check are not given a status; they are
-listed under "Nog niet in de werkvoorraad" with a plain reason
-(`Geen website bekend`, `Nog nooit gecontroleerd`, `Controle loopt nog`,
-`Laatste controle gaf geen bruikbaar resultaat`).
+listed under "Nog niet in de werkvoorraad" with a plain reason:
+`Controle loopt nog` (only when no finished check is newer),
+`Laatste controle gaf geen bruikbaar resultaat`,
+`Controle niet eenduidig te koppelen` (checks exist for its current host,
+or its receipt names it, but none could be attributed safely),
+`Geen website bekend` or `Nog nooit gecontroleerd`.
 
 ## Datamodelkloof (data-model gap)
 
@@ -117,10 +131,13 @@ can feed them without changing the queue logic. Until then the
 `Identiteit` queue shows 0.
 
 Smaller limits: the jobs table has no restaurant id (attribution goes
-through the receipt or the hostname, see above); "Gecontroleerd" is the
-moment of the last usable analysis, not a separate scheduled check; the
-route reads at most the 2000 newest jobs and says so when that bound is
-reached.
+through the host, plus the receipt for a succeeded job, see above);
+"Gecontroleerd" is the moment of the last usable analysis, not a separate
+scheduled check; the route reads at most the 2000 newest jobs and says so
+when that bound is reached. A redirect to another host is recorded by the
+analysis as a failed fetch, so such a source shows as `Niet bereikbaar`
+even though the website answered — the action (`Controleer bron`) is
+still the right one; the page shows no HTTP or redirect details.
 
 ## Deviations from the mockup
 
