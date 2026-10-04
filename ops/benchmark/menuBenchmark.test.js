@@ -1,0 +1,267 @@
+'use strict'
+
+const test = require('node:test')
+const assert = require('node:assert/strict')
+
+const { runMenuBenchmark, MENU_SOURCE_TYPE } = require('./menuBenchmark')
+const { createHtmlStructureAdapter } = require('./htmlMenuStructure')
+const { createUnavailableAdapter, assertNeverCarriesPrecomputedConfidence } = require('./adapters')
+const { HTML_MENU_CASES } = require('./htmlMenuFixtures')
+const { aggregateMenuScores } = require('./menuScoring')
+const { buildMachineReadableReport, buildHumanReadableSummary, MENU_TRACK_DISCLAIMER } = require('./report')
+const { stripTimingForComparison } = require('./runner')
+
+function adapters() {
+  return [createHtmlStructureAdapter(), createUnavailableAdapter('ai_structured')]
+}
+
+test('runMenuBenchmark: every case × adapter is recorded, under the html_only source type', async () => {
+  const { menuCaseScores } = await runMenuBenchmark({ adapters: adapters() })
+  assert.equal(menuCaseScores.length, HTML_MENU_CASES.length * 2)
+  assert.ok(menuCaseScores.every((s) => s.sourceType === MENU_SOURCE_TYPE))
+})
+
+test('runMenuBenchmark: the ai_structured stub is not_evaluated for every case, never scored', async () => {
+  const { menuCaseScores } = await runMenuBenchmark({ adapters: adapters() })
+  const ai = menuCaseScores.filter((s) => s.adapterKind === 'ai_structured')
+  assert.equal(ai.length, HTML_MENU_CASES.length)
+  assert.ok(ai.every((s) => s.status === 'not_evaluated' && s.precision === undefined))
+})
+
+test('runMenuBenchmark: html_structure finds no false menus and no wrong prices on the synthetic set', async () => {
+  const { menuCaseScores } = await runMenuBenchmark({ adapters: adapters() })
+  const [bucket] = aggregateMenuScores(menuCaseScores.filter((s) => s.adapterKind === 'html_structure'))
+  assert.equal(bucket.scoredCaseCount, HTML_MENU_CASES.length)
+  assert.equal(bucket.invalidOutputCaseCount, 0)
+  assert.equal(bucket.falseMenus, 0)
+  assert.equal(bucket.missedMenus, 0)
+  assert.equal(bucket.wrongPrices, 0)
+  assert.equal(bucket.falsePositives, 0)
+  assert.equal(bucket.costEurCents, null)
+})
+
+test('runMenuBenchmark: an adapter that smuggles confidence throws before scoring', async () => {
+  const cheating = {
+    kind: 'html_structure',
+    available: true,
+    async run(fixture) {
+      const result = await createHtmlStructureAdapter().run(fixture)
+      if (result.menuExtraction.sections[0]) result.menuExtraction.sections[0].items[0].reviewReady = true
+      return result
+    },
+  }
+  await assert.rejects(() => runMenuBenchmark({ cases: [HTML_MENU_CASES[0]], adapters: [cheating] }), /confidence\/reviewReady/)
+})
+
+test('assertNeverCarriesPrecomputedConfidence: covers the menu result, its sections and items; ignores results without one', () => {
+  const base = () => ({ fields: {}, menuExtraction: { sections: [{ path: [], items: [{ name: 'Fictief' }] }] } })
+  assert.doesNotThrow(() => assertNeverCarriesPrecomputedConfidence(base()))
+  assert.doesNotThrow(() => assertNeverCarriesPrecomputedConfidence({ fields: {} }))
+  const onMenu = base()
+  onMenu.menuExtraction.confidence = 'hoog'
+  const onSection = base()
+  onSection.menuExtraction.sections[0].confidence = 'hoog'
+  const onItem = base()
+  onItem.menuExtraction.sections[0].items[0].reviewReady = true
+  for (const result of [onMenu, onSection, onItem]) assert.throws(() => assertNeverCarriesPrecomputedConfidence(result))
+})
+
+test('runMenuBenchmark: deterministic once timing is stripped', async () => {
+  const first = await runMenuBenchmark({ adapters: adapters() })
+  const second = await runMenuBenchmark({ adapters: adapters() })
+  assert.deepEqual(stripTimingForComparison(first.menuCaseScores), stripTimingForComparison(second.menuCaseScores))
+})
+
+test('runMenuBenchmark: requires adapters', async () => {
+  await assert.rejects(() => runMenuBenchmark({ adapters: [] }))
+})
+
+test('report: the menu track appears only when given, with its own disclaimer and separate buckets', async () => {
+  const { menuCaseScores } = await runMenuBenchmark({ adapters: adapters() })
+  const base = { manifestValid: true, manifestProblems: [], caseScores: [] }
+  const without = buildMachineReadableReport(base)
+  assert.equal(without.menuBuckets, undefined)
+  assert.ok(!buildHumanReadableSummary(without).includes('BE-22'))
+
+  const withMenu = buildMachineReadableReport({ ...base, menuCaseScores })
+  assert.equal(withMenu.menuDisclaimer, MENU_TRACK_DISCLAIMER)
+  assert.equal(withMenu.menuBuckets.length, 2)
+  assert.ok(withMenu.menuBuckets.every((b) => b.costEurCents === null))
+  const summary = buildHumanReadableSummary(withMenu)
+  assert.ok(summary.includes('menu: html_only × html_structure'))
+  assert.ok(summary.includes('menu: html_only × ai_structured'))
+  assert.ok(summary.includes(MENU_TRACK_DISCLAIMER))
+  assert.deepEqual(JSON.parse(JSON.stringify(withMenu)), withMenu)
+})
+
+// ─── M3: end-to-end rogue adapters fail BEFORE any scoring happens ────────
+
+/** Loads `moduleName` fresh with `exportName` of `dependencyName` replaced by
+ * a spy, so a test can prove the runner never reached scoring. */
+function loadWithScoringSpy(moduleName, dependencyName, exportName) {
+  const modulePath = require.resolve(moduleName)
+  const dependency = require(dependencyName)
+  const original = dependency[exportName]
+  const calls = []
+  dependency[exportName] = (...args) => {
+    calls.push(args)
+    return original(...args)
+  }
+  delete require.cache[modulePath]
+  const loaded = require(modulePath)
+  return {
+    loaded,
+    calls,
+    restore() {
+      dependency[exportName] = original
+      delete require.cache[modulePath]
+    },
+  }
+}
+
+function rogueMenuAdapter(mutate) {
+  return {
+    kind: 'html_structure',
+    available: true,
+    async run(fixture) {
+      const result = await createHtmlStructureAdapter().run(fixture)
+      mutate(result)
+      return result
+    },
+  }
+}
+
+const NESTED_MUTATIONS = {
+  evidence: (r) => { r.menuExtraction.sections[0].items[0].evidence.confidence = 'hoog' },
+  rejected: (r) => { r.menuExtraction.rejected.push({ text: 'Fictief', reason: 'modifier', locator: 'li', reviewReady: true }) },
+  stats: (r) => { r.menuExtraction.stats.confidence = 1 },
+  cost: (r) => { r.menuExtraction.cost.reviewReady = false },
+  notes: (r) => { r.notes.push({ confidence: 'hoog' }) },
+  cycle: (r) => { r.menuExtraction.stats = { counted: 1 }; r._loop = r },
+  // N6: hidden trust keys
+  nonEnumerable: (r) => { Object.defineProperty(r.menuExtraction.sections[0].items[0], 'confidence', { value: 'hoog', enumerable: false }) },
+  inherited: (r) => { r.menuExtraction.sections[0].items[0] = Object.assign(Object.create({ reviewReady: true }), r.menuExtraction.sections[0].items[0]) },
+  getter: (r) => { Object.defineProperty(r.menuExtraction.sections[0].items[0].evidence, 'confidence', { enumerable: true, get: () => 'hoog' }) },
+  symbol: (r) => { r.menuExtraction.stats[Symbol('reviewReady')] = true },
+  // P1: Proxies, transparent or hiding a trust key
+  transparentProxyItem: (r) => { r.menuExtraction.sections[0].items[0] = new Proxy({ ...r.menuExtraction.sections[0].items[0] }, {}) },
+  hidingProxyItem: (r) => { r.menuExtraction.sections[0].items[0] = new Proxy({ ...r.menuExtraction.sections[0].items[0], confidence: 'hoog' }, { ownKeys: (t) => Reflect.ownKeys(t).filter((k) => k !== 'confidence') }) },
+  proxyMenuExtraction: (r) => { r.menuExtraction = new Proxy(r.menuExtraction, {}) },
+}
+
+for (const [where, mutate] of Object.entries(NESTED_MUTATIONS)) {
+  test(`M3 end-to-end: a menu adapter smuggling trust/cycles in ${where} makes the runner throw before scoreMenuCase is called`, async () => {
+    const spy = loadWithScoringSpy('./menuBenchmark', './menuScoring', 'scoreMenuCase')
+    try {
+      await assert.rejects(() => spy.loaded.runMenuBenchmark({ cases: [HTML_MENU_CASES[0]], adapters: [rogueMenuAdapter(mutate)] }), /forbidden by this contract/)
+      assert.equal(spy.calls.length, 0, 'scoring must never be reached')
+    } finally {
+      spy.restore()
+    }
+  })
+}
+
+test('N6 end-to-end (field track): an inherited trust key on a field value throws before scoreCase is called', async () => {
+  const spy = loadWithScoringSpy('./runner', './scoring', 'scoreCase')
+  try {
+    const rogue = {
+      kind: 'deterministic',
+      available: true,
+      async run() {
+        const value = Object.assign(Object.create({ confidence: 'hoog' }), { text: 'Fictief' })
+        return { kind: 'deterministic', available: true, fields: { name: { value, extractionMethod: 'json_ld', hasContentHash: true, contextStatus: 'unverified' } }, menuContextNames: [], unknownMenuContextCount: 0, errors: [], notes: [], _internal: { unknownMenuContexts: [] } }
+      },
+    }
+    await assert.rejects(() => spy.loaded.runBenchmark({ adapters: [rogue] }), /precomputed confidence/)
+    assert.equal(spy.calls.length, 0, 'scoring must never be reached')
+  } finally {
+    spy.restore()
+  }
+})
+
+test('P1 end-to-end (field track): a Proxy-wrapped field (transparent, no trust key) throws before scoreCase is called', async () => {
+  const spy = loadWithScoringSpy('./runner', './scoring', 'scoreCase')
+  try {
+    const rogue = {
+      kind: 'deterministic',
+      available: true,
+      async run() {
+        const field = new Proxy({ value: 'Fictief', extractionMethod: 'json_ld', hasContentHash: true, contextStatus: 'unverified' }, {})
+        return { kind: 'deterministic', available: true, fields: { name: field }, menuContextNames: [], unknownMenuContextCount: 0, errors: [], notes: [], _internal: { unknownMenuContexts: [] } }
+      },
+    }
+    await assert.rejects(() => spy.loaded.runBenchmark({ adapters: [rogue] }), /Proxy \(not plain data\)/)
+    assert.equal(spy.calls.length, 0, 'scoring must never be reached')
+  } finally {
+    spy.restore()
+  }
+})
+
+test('P1: the shared guard rejects a Proxy before ANY of its traps run — field evidence and menu items alike', () => {
+  for (const place of ['field', 'menuItem']) {
+    const ran = []
+    const traps = Object.fromEntries(['get', 'has', 'ownKeys', 'getOwnPropertyDescriptor', 'getPrototypeOf'].map((t) => [t, (...args) => { ran.push(t); return Reflect[t](...args) }]))
+    const target = place === 'field' ? { value: 'Fictief', extractionMethod: 'json_ld', hasContentHash: true, contextStatus: 'unverified' } : { name: 'Fictief', priceStatus: 'known', amountMinorUnits: 450, currency: null, description: null, evidence: { pattern: 'list_item', locator: 'li' } }
+    const proxy = new Proxy(target, traps)
+    const result = place === 'field'
+      ? { fields: { name: proxy } }
+      : { fields: {}, menuExtraction: { sections: [{ path: [], items: [proxy] }], rejected: [] } }
+    assert.throws(() => assertNeverCarriesPrecomputedConfidence(result), /Proxy \(not plain data\)/, place)
+    assert.deepEqual(ran, [], `${place}: traps ran: ${ran.join(', ')}`)
+  }
+})
+
+test('P1: every real adapter output (BE-20 deterministic, stubs, html_structure) passes the strict guard', async () => {
+  const { createDeterministicAdapter } = require('./adapters')
+  const manifest = require('./manifest.json')
+  const { buildFixture } = require('./fixtures')
+  const deterministic = createDeterministicAdapter()
+  for (const entry of manifest.filter((e) => e.provenance !== 'real_benchmark_evidence_pending')) {
+    const result = await deterministic.run(buildFixture(entry.fixtureId))
+    assert.doesNotThrow(() => assertNeverCarriesPrecomputedConfidence(result), entry.id)
+  }
+  for (const kind of ['ai_structured', 'ocr']) {
+    const result = await createUnavailableAdapter(kind).run({})
+    assert.doesNotThrow(() => assertNeverCarriesPrecomputedConfidence(result), kind)
+  }
+  for (const menuCase of HTML_MENU_CASES) {
+    const result = await createHtmlStructureAdapter().run({ html: menuCase.html })
+    assert.doesNotThrow(() => assertNeverCarriesPrecomputedConfidence(result), menuCase.id)
+  }
+})
+
+test('M3 end-to-end: a clean menu adapter does reach scoring (the spy works)', async () => {
+  const spy = loadWithScoringSpy('./menuBenchmark', './menuScoring', 'scoreMenuCase')
+  try {
+    await spy.loaded.runMenuBenchmark({ cases: [HTML_MENU_CASES[0]], adapters: [createHtmlStructureAdapter()] })
+    assert.equal(spy.calls.length, 1)
+  } finally {
+    spy.restore()
+  }
+})
+
+test('M3 end-to-end (field track): a nested confidence anywhere in a field-track result throws before scoreCase is called', async () => {
+  const spy = loadWithScoringSpy('./runner', './scoring', 'scoreCase')
+  try {
+    const rogue = {
+      kind: 'deterministic',
+      available: true,
+      async run() {
+        return {
+          kind: 'deterministic',
+          available: true,
+          fields: { name: { value: { nested: [{ reviewReady: true }] }, extractionMethod: 'json_ld', hasContentHash: true, contextStatus: 'unverified' } },
+          menuContextNames: [],
+          unknownMenuContextCount: 0,
+          errors: [],
+          notes: [],
+          _internal: { unknownMenuContexts: [] },
+        }
+      },
+    }
+    await assert.rejects(() => spy.loaded.runBenchmark({ adapters: [rogue] }), /precomputed confidence/)
+    assert.equal(spy.calls.length, 0, 'scoring must never be reached')
+  } finally {
+    spy.restore()
+  }
+})

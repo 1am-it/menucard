@@ -29,6 +29,7 @@
 const { runRestaurantSourceAnalysis, countWords } = require('../../src/lib/restaurantSourceAnalysis')
 const { extractDigitalPdfText, PdfExtractionError } = require('../../src/lib/pdfTextExtraction')
 const { computeFieldEvidenceHash } = require('../../src/lib/fieldEvidenceHash')
+const { findForbiddenTrustKey } = require('./menuExtractionContract')
 
 /** The only adapter kinds this contract knows about. `ai_structured` and
  * `ocr` name the exact two capabilities be-21's own ticket exists to
@@ -216,6 +217,18 @@ function createUnavailableAdapter(kind) {
  * misbehaves, not left to be caught only by a test happening to notice.
  */
 function assertNeverCarriesPrecomputedConfidence(adapterResult) {
+  // BE-22 — FIRST, before any property read of our own: the one shared
+  // recursive scan over the whole result (menu extraction, sections, items,
+  // evidence, rejected lines, stats, cost, notes, `_internal` — objects and
+  // arrays alike). It accepts only plain JSON-safe data, so a Proxy, a cyclic,
+  // over-deep or otherwise uninspectable result fails closed here too. BE-20's
+  // own deterministic results are plain data with no such key anywhere, so
+  // the field track is unaffected.
+  const violation = findForbiddenTrustKey(adapterResult)
+  if (violation) {
+    throw new Error(`AdapterResult carries a precomputed confidence/reviewReady value (or an uninspectable structure) — forbidden by this contract: ${violation}`)
+  }
+  // BE-21's original field-level check, kept as is (now redundant).
   for (const [fieldName, evidence] of Object.entries(adapterResult.fields || {})) {
     if (evidence && (Object.prototype.hasOwnProperty.call(evidence, 'confidence') || Object.prototype.hasOwnProperty.call(evidence, 'reviewReady'))) {
       throw new Error(`AdapterResult field "${fieldName}" carries a precomputed confidence/reviewReady value — forbidden by this contract`)

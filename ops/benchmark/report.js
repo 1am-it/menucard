@@ -13,6 +13,7 @@
 'use strict'
 
 const { aggregateScores } = require('./scoring')
+const { aggregateMenuScores } = require('./menuScoring')
 
 /** Present in every report this file produces, machine-readable and
  * human-readable alike — the one, single source of this exact wording,
@@ -20,14 +21,19 @@ const { aggregateScores } = require('./scoring')
 const FOUNDATION_DISCLAIMER =
   'This is a local, offline, synthetic BE-21 benchmark FOUNDATION — never the real, 50-100-source vendor benchmark be-21-restaurant-source-extraction-vendor-benchmark.md itself describes. No real restaurant source has been fetched. No OCR or browser-rendering vendor has been evaluated, contacted, or billed. Synthetic/local fixtures never demonstrate real-website or vendor quality.'
 
+/** BE-22 — the menu-structure track's own wording, carried alongside the
+ * foundation disclaimer wherever menu results appear. */
+const MENU_TRACK_DISCLAIMER =
+  "BE-22 menu track: synthetic, self-written HTML fixtures only. Scores prove the offline machinery, never that any real restaurant website's HTML menu is supported — that needs a separately authorized benchmark on real sources. No AI, OCR or document provider was called; cost is not measured."
+
 /**
  * `{ generatedAt, disclaimer, manifestValid, manifestProblems, buckets,
  * caseScores }` — a plain, JSON-serializable object. `generatedAt` is
  * metadata only (real wall-clock time); every other field is exactly as
  * deterministic as `runner.js`'s own `caseScores` already are.
  */
-function buildMachineReadableReport({ manifestValid, manifestProblems, caseScores }) {
-  return {
+function buildMachineReadableReport({ manifestValid, manifestProblems, caseScores, menuCaseScores }) {
+  const report = {
     generatedAt: new Date().toISOString(),
     disclaimer: FOUNDATION_DISCLAIMER,
     manifestValid,
@@ -35,6 +41,14 @@ function buildMachineReadableReport({ manifestValid, manifestProblems, caseScore
     buckets: aggregateScores(caseScores),
     caseScores,
   }
+  // BE-22 — the menu track is optional and additive; a field-only run's
+  // report is unchanged.
+  if (Array.isArray(menuCaseScores)) {
+    report.menuDisclaimer = MENU_TRACK_DISCLAIMER
+    report.menuBuckets = aggregateMenuScores(menuCaseScores)
+    report.menuCaseScores = menuCaseScores
+  }
+  return report
 }
 
 function formatPercent(fraction) {
@@ -83,12 +97,36 @@ function buildHumanReadableSummary(machineReport) {
     lines.push('')
   }
 
+  if (Array.isArray(machineReport.menuBuckets)) {
+    lines.push('BE-22 — menustructuur-track (synthetische HTML, offline)')
+    lines.push(machineReport.menuDisclaimer)
+    lines.push('')
+    for (const bucket of machineReport.menuBuckets) {
+      lines.push(`## menu: ${bucket.sourceType} × ${bucket.adapterKind}`)
+      lines.push(`  Gescoorde cases: ${bucket.scoredCaseCount}`)
+      lines.push(`  Ongeldige output (contract geschonden): ${bucket.invalidOutputCaseCount}`)
+      lines.push(`  Niet geëvalueerd (leverancier niet actief): ${bucket.notEvaluatedCaseCount}`)
+      if (bucket.scoredCaseCount > 0) {
+        lines.push(`  Precisie: ${formatPercent(bucket.precision)}; recall: ${formatPercent(bucket.recall)}`)
+        lines.push(`  Gevonden/onterecht/gemist: ${bucket.truePositives}/${bucket.falsePositives}/${bucket.falseNegatives}`)
+        lines.push(`  Verkeerde prijzen: ${bucket.wrongPrices}; verkeerde secties: ${bucket.wrongSections}`)
+        lines.push(`  Onterecht als menu herkend: ${bucket.falseMenus}; gemiste menu's: ${bucket.missedMenus}`)
+        lines.push(`  Cases met ontbrekende afwijsreden: ${bucket.casesMissingRejectionReasons}`)
+        lines.push(`  Reviewlast (items + afgewezen regels): ${bucket.reviewLoad}`)
+        lines.push(`  Mediane lokale looptijd: ${formatMs(bucket.medianTimingMs)} (lokale uitvoeringstijd — geen leverancier-latency)`)
+      }
+      lines.push('  Kosten: niet gemeten — geen leverancier actief in deze omgeving')
+      lines.push('')
+    }
+  }
+
   lines.push(FOUNDATION_DISCLAIMER)
   return lines.join('\n')
 }
 
 module.exports = {
   FOUNDATION_DISCLAIMER,
+  MENU_TRACK_DISCLAIMER,
   buildMachineReadableReport,
   buildHumanReadableSummary,
 }
