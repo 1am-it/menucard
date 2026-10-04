@@ -124,6 +124,10 @@ untouched.
   - Non-dish price lists WITHOUT a clear section label (unlabelled voucher
     cards, admission or parking prices) are still read as a menu — this is
     structure recognition, not semantic understanding. A test documents it.
+  - A table row whose first name cell is only a quantity with a unit
+    ("8 st | Fictieve bitterbal | 6,00") becomes an item named after the
+    quantity — the first cell that is neither a price nor a variant label
+    is taken as the name.
   - Time and date recognition depends on context words; a bare day.month
     without context ("12.05") stays a price, and comma clock times
     ("12,00 uur") are read as prices.
@@ -174,6 +178,20 @@ untouched.
 A perfect score on these fixtures only proves the machinery against inputs
 written alongside the adapter — never that any real website's HTML menu is
 supported. That needs a separately authorized benchmark on real sources.
+
+**No bare-price fallback (decision).** A bare number such as "18" or
+"13,5" is not read as a price by this adapter, also not inside an element
+classed as a price, and no fallback will add that: without semantic
+understanding it
+cannot be told apart reliably from a rating, old price, from-price,
+capacity, workshop or ticket price, gift voucher or step number. Two local
+recall experiments in that direction were rejected by independent reviews
+and never pushed or integrated. A source whose menu needs such
+interpretation stays `unparsed` (or `ambiguous_structure`); that is the
+documented hand-over point to a separate, not yet authorized AI structuring
+track — see "Decision: no bare-price fallback" and "Hand-over boundary" in
+`planning/specs/tickets/be-22-html-menu-recognition-foundation.md`. Nothing
+here authorizes AI, OCR, providers or any external call.
 
 ## Running it
 

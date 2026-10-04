@@ -2,15 +2,17 @@
 
 ## Status
 
-Proposed; local, offline foundation only. An isolated benchmark track under
-`ops/benchmark/` — no product code, route, UI, database, migration,
-provider, or live analysis-pipeline change. Not yet independently reviewed,
-not pushed. Three pre-push reviews (adversarial self-reviews by the same
+Merged to `main` via PR #9 (merge commit `7ff8655`, 2026-10-04): an
+offline benchmark track under `ops/benchmark/` plus this ticket. It adds
+no product code, route, UI, database, migration, provider or live
+analysis-pipeline change, and no production menu recognition. Before that
+merge, three pre-push reviews (adversarial self-reviews by the same
 author, all NOT GREEN) found time/date and volume misreads, unbounded
 parser work, a shallow trust guard, two-dish table rows/cards being merged
-or partially claimed, and Proxies passing the plain-data guard; those are
-fixed locally (see "Review fixes") and await a new independent pre-push
-review.
+or partially claimed, and Proxies passing the plain-data guard; those were
+fixed before the merge (see "Review fixes"). Whether an independent
+pre-push review took place before the merge is not recorded in this
+repository; step 4 below is therefore left open.
 
 ## Voortgang
 
@@ -20,7 +22,7 @@ BE-22 VOORTGANG
 - [ ] 2. Implementatie-readinessreview groen
 - [x] 3. Lokale offline foundation gebouwd en getest (`ops/benchmark/`)
 - [ ] 4. Onafhankelijke pre-pushreview groen
-- [ ] 5. Code gepusht
+- [x] 5. Code gepusht
 - [ ] 6. Apart geautoriseerd experiment op echte bronnen
 
 See `015-be-ticket-structure-and-time-boxing.md` for what this checklist
@@ -219,9 +221,85 @@ blocking gap and two low structure limits:
   distinguished. Both are listed under Known limitations in
   `ops/benchmark/README.md`; no parser rule was added for them.
 
+## Decision: no bare-price fallback (2026-10-04)
+
+An authorized, read-only phase A run of this adapter on recorded Breda
+candidate pages (local only; no page content is kept in this repository)
+produced no false positive but also no menu. Four of those sources show a
+real HTML menu that the adapter does not recognize: their prices are bare
+numbers that the existing price parser does not accept, or their dishes
+sit inside structures that need interpretation (category wrappers, neutral
+heading blocks).
+
+Two local experiments tried to close that gap deterministically. Neither
+was pushed, merged or integrated, and nothing they produced is product
+data, a proposal or a publication — including the 98 items one experiment
+recognized on two of those sources:
+
+1. A broad recall attempt (bare amounts in price elements and table cells,
+   descent into ambiguous wrappers, neutral repeated cards). Independent
+   reviews found new false positives after successive fix rounds —
+   arrangements, vouchers and vacancies read through wrappers; team,
+   capacity, rating, countdown and step blocks read as dishes — and fixes
+   opened further edge cases.
+2. A narrow attempt (a bare amount only as the sole text of an explicit,
+   price-classed element in a repeated item card, with structural checks
+   on the whole card). Independent reviews found that it still reads
+   non-prices as prices: a rating, nutrition value, capacity or step number
+   in a price-classed element, an old price or a from-price whose qualifier
+   sits in the class name, and gift-voucher, workshop, room or ticket cards
+   whose label is not a heading. No source-independent structural rule
+   closes that without losing the sources it was meant for.
+
+**Decision.** A bare number in HTML cannot be told apart reliably from a
+rating, old price, from-price, capacity, workshop or ticket price, gift
+voucher, step number or other value without semantic understanding.
+Therefore no bare-price fallback is added to the deterministic HTML
+recognition. The strict price parser and the supported structures stay
+exactly as described above; this decision makes no fail-closed claim for
+any bare-price rule, because none exists.
+
+**Consequence.** Under the production baseline (`ea21337`) the four phase-A
+sources with a real HTML menu remain `unparsed`: they are not recognized
+automatically, and this foundation does not claim support for any of them.
+
+## Hand-over boundary to a possible AI structuring track
+
+The deterministic layer handles a candidate line only when the existing
+structure rules match (for example a list item, table row, definition list
+entry or repeated item card), the existing price parser recognizes a
+compatible notation, and none of the existing rejection rules applies.
+This is structural classification, not semantic proof: which notations the
+parser accepts is an implementation detail, not a semantic guarantee, and
+the adapter can still read non-dish price lists as a menu (see "Known
+limitations" in `ops/benchmark/README.md`). Deterministic output therefore
+passes the same schema, evidence, trust and human-review boundary as any
+other candidate; it is never published or trusted on its own.
+
+When a source probably contains a menu but its structure needs semantic
+interpretation, it stays `unparsed` (or its lines are rejected as
+`ambiguous_structure`). That outcome is the future hand-over point:
+
+```
+safe source extraction → deterministic recognition → unparsed / ambiguous
+  → possible AI candidate → schema, evidence and trust checks
+  → human review
+```
+
+The later steps are a separate, not yet authorized research track (the
+`ai_structured` stub and the shared output contract above exist for it).
+This section is explicitly **not** an authorization to build or use AI,
+OCR, providers, external APIs or URLs, production integration, database
+changes or UI. Any such step needs its own ticket, privacy and vendor
+review (BE-20 "Privacy and vendor review before production use", BE-21
+"Vendor selection and privacy review"), cost authorization and
+independent review first.
+
 ## Suggested next step
 
 A separately authorized, read-only experiment that runs the
 `html_structure` adapter on the 24 reachable Breda sources under BE-20's
 existing safe fetch chain, with a manually verified reference per source —
-before any product adapter or AI trial is considered.
+before any product adapter or AI trial is considered. Sources that stay
+`unparsed` there are candidates for the hand-over boundary above, not for a
+new deterministic fallback.
