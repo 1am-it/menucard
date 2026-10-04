@@ -2420,3 +2420,24 @@ mark.search-highlight {
 .cov-toggle-chevron { display: flex; width: 15px; height: 15px; transition: transform 0.15s; }
 .cov-toggle-chevron svg { width: 15px; height: 15px; }
 .cov-toggle[aria-expanded="true"] .cov-toggle-chevron { transform: rotate(180deg); }
+
+/* PLATFORM-12 dark-mode contrast fix — the Coverage Dashboard's own
+   secondary-text color, scoped to .cov-dashboard (every <main> of
+   app/internal/coverage/page.js) so the global --text-muted/--text-faint
+   tokens, and every other screen, stay exactly as they are. Measured
+   WCAG contrast for normal text (AA needs 4.5:1):
+     dark  #8f8f8f — 6.12 on --bg, 5.84 on --bg-card, 5.49 on --bg-elevated
+                     (global --text-muted: 3.45 / 3.29 / 3.09); still
+                     visibly dimmer than --text-secondary (8.13 on the card),
+                     so the hierarchy is kept.
+     light #5f6672 — 5.78 on --bg/--bg-card, 5.26 on --bg-elevated
+                     (global --text-muted: 4.83 / 4.39) — no light regression.
+   Same three-place theme pattern as the global tokens above: dark base,
+   system light (unless dark is forced), explicit light. Solid colors only,
+   no opacity. src/lib/coveragePriority.test.js recomputes these ratios. */
+.cov-dashboard { --cov-text-subtle: #8f8f8f; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .cov-dashboard { --cov-text-subtle: #5f6672; }
+}
+:root[data-theme="light"] .cov-dashboard { --cov-text-subtle: #5f6672; }
+.cov-dashboard .di-accordion-subtitle { color: var(--cov-text-subtle); }
