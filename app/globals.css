@@ -2391,3 +2391,32 @@ mark.search-highlight {
 .lrc-primary-btn:hover { border-color: var(--green-dim); color: var(--green-dim); }
 .lrc-primary-btn:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
 .lrc-secondary-note { margin-top: 8px; font-size: 11.5px; color: var(--text-dim); text-align: center; }
+
+/* PLATFORM-12 Phase 1 — Coverage Dashboard "show all neighbourhoods"
+   toggle. An in-page disclosure over the already-fetched byBuurt rows
+   (no route, no fetch): a real <button type="button"> with aria-expanded/
+   aria-controls, styled as a calm text control matching the mockup's
+   "View all neighbourhoods" link, existing tokens only. Visible keyboard
+   focus per decision 014 item 6; tap target kept at >= 36px. */
+.cov-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  margin-top: 10px;
+  padding: 6px 2px;
+  background: none;
+  border: none;
+  color: var(--green);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.cov-toggle:hover { color: var(--green-dim); }
+.cov-toggle:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; border-radius: var(--radius-sm); }
+.cov-toggle-chevron { display: flex; width: 15px; height: 15px; transition: transform 0.15s; }
+.cov-toggle-chevron svg { width: 15px; height: 15px; }
+.cov-toggle[aria-expanded="true"] .cov-toggle-chevron { transform: rotate(180deg); }

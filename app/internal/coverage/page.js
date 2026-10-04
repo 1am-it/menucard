@@ -19,25 +19,37 @@
 //
 // **Presentation-only rebuild (2026-09-12, later still)** against
 // `docs/mockups/coverage-dashboard-v1.png`: a compact internal-only/
-// read-only badge, four equal metric cards (count first, percentage as
-// secondary context — matching the mockup's own emphasis), calmer
-// breakdown tables (centered numeric columns, a muted em dash in place
-// of the old, longer per-row explanatory sentence, one shared
-// explanation below each table instead of repeating it per row), and
-// the headline-gap
-// callout restyled with the existing warning tokens instead of the
-// danger ones, so it reads as a data insight rather than an error. The
-// metrics computation (src/services/coverageMetrics.js), the session/
-// fetch/auth flow above, every data value, and the mobile horizontal
-// table scroll are all unchanged — only how the same numbers are laid
-// out changed. Lightweight, stroke-only inline SVG icons only (no icon
-// font, no image asset), matching this project's existing convention
-// (see app/internal/import-inbox/page.js's own icons).
+// read-only badge, calmer breakdown tables (centered numeric columns, a
+// muted em dash in place of the old, longer per-row explanatory
+// sentence), and the headline-gap callout restyled with the existing
+// warning tokens instead of the danger ones, so it reads as a data
+// insight rather than an error. Lightweight, stroke-only inline SVG icons
+// only (no icon font, no image asset), matching this project's existing
+// convention (see app/internal/import-inbox/page.js's own icons).
+//
+// **PLATFORM-12 Phase 1 — prioritized data gaps (2026-10-04)**, against
+// the content column of `docs/mockups/coverage-dashboard-v2.png` (its
+// left-hand navigation column is PLATFORM-11's scope and is not built
+// here; the existing InternalNav top bar stays the only navigation). Same
+// data, new hierarchy: menu coverage (`metrics.menuData`) is the one
+// dominant hero metric; the four existing metric cards stay, secondary,
+// with a complete/partial/empty state; `byBuurt` is re-sorted on this
+// page by the absolute number of restaurants still missing menu data
+// (src/lib/coveragePriority.js), top 3 first with an inline "show all"
+// over the same, already-fetched array; the by-cuisine table leaves the
+// primary view; and every methodology/trust caveat moves into exactly one
+// collapsed-by-default "Methodology & data notes" section on this page.
+// No new route, API call, button-with-a-destination, or workflow — the
+// mockup's "View restaurants without menus" action is deliberately not
+// built (PLATFORM-12 Phase 2+). The metrics computation
+// (src/services/coverageMetrics.js), the coverage route, the session/
+// fetch/auth flow and every data value are unchanged.
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import InternalNav from '@/src/components/InternalNav'
+import { PRIORITY_DEFAULT_VISIBLE, sortByMenuDataGap, visiblePriorityRows, metricState } from '@/src/lib/coveragePriority'
 
 function IconLock() {
   return (
@@ -79,40 +91,78 @@ function IconCalendar() {
     </svg>
   )
 }
-function IconInfo() {
+function IconAlert() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10" />
-      <path d="M12 16v-5M12 8h.01" />
+      <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
+      <path d="M12 9v4M12 17h.01" />
+    </svg>
+  )
+}
+function IconChevronDown() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  )
+}
+
+// Complete / partial / empty — always shown as text too, never by color
+// or shape alone.
+const STATE_STYLE = {
+  complete: { label: 'Complete', color: 'var(--green)' },
+  partial: { label: 'Partial', color: 'var(--warning)' },
+  empty: { label: 'None yet', color: 'var(--text-faint)' },
+}
+
+/** A small, purpose-built progress ring (decorative; the state is also
+ * written out as text next to it). */
+function StateRing({ state, pct }) {
+  const r = 9
+  const circumference = 2 * Math.PI * r
+  const fraction = state === 'complete' ? 1 : state === 'empty' ? 0 : Math.min(1, Math.max(0, (pct || 0) / 100))
+  const { color } = STATE_STYLE[state]
+  return (
+    <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false" style={{ flexShrink: 0 }}>
+      <circle cx="12" cy="12" r={r} fill="none" stroke="var(--border-strong)" strokeWidth="3" />
+      {fraction > 0 && (
+        <circle
+          cx="12"
+          cy="12"
+          r={r}
+          fill="none"
+          stroke={color}
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeDasharray={`${fraction * circumference} ${circumference}`}
+          transform="rotate(-90 12 12)"
+        />
+      )}
     </svg>
   )
 }
 
 function Metric({ label, count, total, pct, icon }) {
+  const state = metricState(count, total)
+  const { label: stateLabel, color } = STATE_STYLE[state]
   return (
-    <div style={{ padding: 18, borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)', background: 'var(--bg-card)' }}>
-      <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 10 }}>{label}</div>
+    // A flex column whose label row absorbs any extra height, so the
+    // figures line up across cards even when one label wraps to two lines.
+    <div style={{ padding: 16, borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)', background: 'var(--bg-card)', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 10, flex: '1 0 auto' }}>
+        <span style={{ width: 16, height: 16, display: 'flex', flexShrink: 0, color: 'var(--text-secondary)' }}>{icon}</span>
+        <span style={{ fontSize: 13, color: 'var(--text-secondary)', minWidth: 0 }}>{label}</span>
+      </div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
-        <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)' }}>
+        <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)' }}>
           {count} / {total}
         </div>
-        <span
-          style={{
-            width: 34,
-            height: 34,
-            borderRadius: '50%',
-            background: 'var(--green-faint)',
-            color: 'var(--green)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-          }}
-        >
-          <span style={{ width: 16, height: 16, display: 'flex' }}>{icon}</span>
-        </span>
+        <StateRing state={state} pct={pct} />
       </div>
-      <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 6 }}>{pct === null ? '—' : `${pct}%`}</div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginTop: 6, fontSize: 12.5 }}>
+        <span style={{ color: 'var(--text-muted)' }}>{pct === null ? '—' : `${pct}%`}</span>
+        <span style={{ color, fontWeight: 600 }}>{stateLabel}</span>
+      </div>
     </div>
   )
 }
@@ -120,60 +170,44 @@ function Metric({ label, count, total, pct, icon }) {
 const TH_STYLE = { padding: '10px 12px', borderBottom: '1px solid var(--border)', fontWeight: 600 }
 const TD_STYLE = { padding: '10px 12px', borderBottom: '1px solid var(--border)' }
 
-function BreakdownTable({ title, rows, sampleThreshold }) {
+function BreakdownTable({ title, rows, tbodyId }) {
   return (
-    <div style={{ padding: 20, borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)', background: 'var(--bg-card)', marginBottom: 20 }}>
-      <h2 style={{ fontSize: 16, margin: '0 0 12px', color: 'var(--text-primary)' }}>{title}</h2>
-      <div
-        role="region"
-        aria-label={`${title} table, horizontally scrollable`}
-        tabIndex={0}
-        style={{ overflowX: 'auto' }}
-      >
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-          <thead>
-            <tr style={{ textAlign: 'left', color: 'var(--text-secondary)', background: 'var(--green-faint)' }}>
-              <th scope="col" style={TH_STYLE}>Group</th>
-              <th scope="col" style={{ ...TH_STYLE, textAlign: 'center' }}>Restaurants</th>
-              <th scope="col" style={{ ...TH_STYLE, textAlign: 'center' }}>With menu data</th>
-              <th scope="col" style={{ ...TH_STYLE, textAlign: 'center' }}>Coverage</th>
+    <div
+      role="region"
+      aria-label={`${title} table, horizontally scrollable`}
+      tabIndex={0}
+      style={{ overflowX: 'auto' }}
+    >
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+        <thead>
+          <tr style={{ textAlign: 'left', color: 'var(--text-secondary)', background: 'var(--green-faint)' }}>
+            <th scope="col" style={TH_STYLE}>Group</th>
+            <th scope="col" style={{ ...TH_STYLE, textAlign: 'center' }}>Restaurants</th>
+            <th scope="col" style={{ ...TH_STYLE, textAlign: 'center' }}>With menu data</th>
+            <th scope="col" style={{ ...TH_STYLE, textAlign: 'center' }}>Coverage</th>
+          </tr>
+        </thead>
+        <tbody id={tbodyId}>
+          {rows.map((r) => (
+            <tr key={r.label}>
+              <td style={{ ...TD_STYLE, color: 'var(--text-primary)' }}>{r.label}</td>
+              <td style={{ ...TD_STYLE, textAlign: 'center', color: 'var(--text-secondary)' }}>{r.total}</td>
+              <td style={{ ...TD_STYLE, textAlign: 'center', color: 'var(--text-secondary)' }}>{r.withMenuData}</td>
+              <td style={{ ...TD_STYLE, textAlign: 'center', color: 'var(--text-secondary)' }}>
+                {r.pct === null ? '—' : `${r.pct}%`}
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {rows.map((r) => (
-              <tr key={r.label}>
-                <td style={{ ...TD_STYLE, color: 'var(--text-primary)' }}>{r.label}</td>
-                <td style={{ ...TD_STYLE, textAlign: 'center', color: 'var(--text-secondary)' }}>{r.total}</td>
-                <td style={{ ...TD_STYLE, textAlign: 'center', color: 'var(--text-secondary)' }}>{r.withMenuData}</td>
-                <td style={{ ...TD_STYLE, textAlign: 'center', color: 'var(--text-secondary)' }}>
-                  {r.pct === null ? '—' : `${r.pct}%`}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          marginTop: 14,
-          padding: '8px 12px',
-          borderRadius: 'var(--radius-md)',
-          background: 'var(--bg-elevated)',
-          color: 'var(--text-muted)',
-          fontSize: 12.5,
-        }}
-      >
-        <span style={{ width: 14, height: 14, display: 'flex', flexShrink: 0 }}>
-          <IconInfo />
-        </span>
-        Percentages are only shown for groups with at least {sampleThreshold} restaurants.
-      </div>
+          ))}
+        </tbody>
+      </table>
     </div>
   )
 }
+
+const NOTE_HEADING_STYLE = { fontSize: 13.5, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 4px' }
+const NOTE_TEXT_STYLE = { fontSize: 13, lineHeight: 1.55, color: 'var(--text-secondary)', margin: '0 0 14px' }
+
+const CARD_STYLE = { padding: 20, borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)', background: 'var(--bg-card)' }
 
 const SHELL_STYLE = {
   maxWidth: 960,
@@ -185,6 +219,8 @@ const SHELL_STYLE = {
   minHeight: '100vh',
 }
 
+const PRIORITY_TBODY_ID = 'coverage-priority-rows'
+
 export default function CoverageDashboardPage() {
   const router = useRouter()
   const [session, setSession] = useState(undefined) // undefined = loading, null = no session
@@ -192,6 +228,9 @@ export default function CoverageDashboardPage() {
   const [generatedAt, setGeneratedAt] = useState(null)
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
+  // The only client state PLATFORM-12 adds: whether the priority table
+  // shows every neighbourhood or only the top PRIORITY_DEFAULT_VISIBLE.
+  const [showAllBuurten, setShowAllBuurten] = useState(false)
 
   useEffect(() => {
     const supabase = getSupabaseBrowser()
@@ -230,6 +269,10 @@ export default function CoverageDashboardPage() {
     if (session) loadCoverage(session.access_token)
   }, [session, loadCoverage])
 
+  // Presentation-only re-sort of the already-fetched byBuurt rows (a new
+  // array; `data` itself is never mutated).
+  const priorityRows = useMemo(() => (data ? sortByMenuDataGap(data.byBuurt) : []), [data])
+
   if (session === undefined) {
     return <main style={{ ...SHELL_STYLE, color: 'var(--text-muted)' }}>Loading…</main>
   }
@@ -263,72 +306,107 @@ export default function CoverageDashboardPage() {
     )
   }
 
+  const menuState = metricState(data.metrics.menuData.count, data.metrics.menuData.total)
+  const { rows: visibleBuurten, hiddenCount } = visiblePriorityRows(priorityRows, showAllBuurten)
+
   return (
     <main style={SHELL_STYLE}>
       <InternalNav accessToken={session.access_token} />
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap', marginTop: 20, marginBottom: 24 }}>
-        <div>
-          <h1 style={{ fontSize: 28, margin: '0 0 4px' }}>MenuCard — {data.city} Coverage Dashboard</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: 0 }}>Read-only, recomputed on every load. Generated {generatedAt}.</p>
+
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap', marginTop: 20, marginBottom: 20 }}>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <h1 style={{ fontSize: 26, margin: 0 }}>Coverage Dashboard</h1>
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '5px 11px',
+                borderRadius: 'var(--radius-pill)',
+                border: '1px solid var(--green-border)',
+                background: 'var(--green-faint)',
+                color: 'var(--green)',
+                fontSize: 12,
+                fontWeight: 600,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <span style={{ width: 13, height: 13, display: 'flex' }}>
+                <IconLock />
+              </span>
+              Internal only · Read-only
+            </span>
+          </div>
+          <p style={{ color: 'var(--text-secondary)', fontSize: 14, margin: '6px 0 2px' }}>
+            Overview of restaurant data coverage across {data.city}.
+          </p>
+          <p style={{ color: 'var(--text-muted)', fontSize: 12.5, margin: 0 }}>Read-only, recomputed on every load. Generated {generatedAt}.</p>
         </div>
-        <span
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 6,
-            padding: '6px 12px',
-            borderRadius: 'var(--radius-pill)',
-            border: '1px solid var(--border)',
-            background: 'var(--bg-card)',
-            color: 'var(--text-secondary)',
-            fontSize: 12,
-            fontWeight: 600,
-            whiteSpace: 'nowrap',
-          }}
-        >
-          <span style={{ width: 13, height: 13, display: 'flex' }}>
-            <IconLock />
-          </span>
-          Internal only · Read-only
-        </span>
       </div>
 
-      <div
-        style={{
-          padding: 18,
-          borderRadius: 'var(--radius-lg)',
-          border: '1px solid var(--warning-border)',
-          background: 'var(--warning-bg)',
-          marginBottom: 28,
-        }}
+      {/* Hero: menu coverage — data presence, not verified accuracy */}
+      <section
+        aria-labelledby="coverage-hero-heading"
+        style={{ ...CARD_STYLE, padding: 24, display: 'flex', flexWrap: 'wrap', gap: 24, alignItems: 'flex-start', marginBottom: 16 }}
       >
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-          <span style={{ width: 18, height: 18, display: 'flex', flexShrink: 0, color: 'var(--warning)', marginTop: 1 }}>
-            <IconInfo />
-          </span>
-          <div>
-            <strong style={{ color: 'var(--warning)' }}>
-              Headline gap: only {data.metrics.menuData.count} of {data.metrics.menuData.total} restaurants
-              ({data.metrics.menuData.pct}%) have any digitized menu data in the canonical,
-              search-indexed dataset.
-            </strong>
-            <div style={{ marginTop: 8, fontSize: 14, color: 'var(--text-secondary)' }}>
-              Dish search can currently only ever return results from these {data.metrics.menuData.count} restaurants:{' '}
-              {data.metrics.menuData.restaurantIds.join(', ')}. The other{' '}
-              {data.metrics.menuData.missingRestaurantIds.length} have no menu items in
-              <code style={{ margin: '0 4px' }}>data/menus.json</code> at all — not a display bug, an actual
-              data gap.
+        <div style={{ flex: '1 1 300px', minWidth: 0 }}>
+          <div style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+            Overall menu coverage
+          </div>
+          <h2 id="coverage-hero-heading" style={{ fontSize: 22, margin: '6px 0 4px', color: 'var(--text-primary)' }}>
+            {menuState === 'complete' ? 'Menu coverage is complete' : 'Menu coverage needs attention'}
+          </h2>
+          <div style={{ fontSize: 'clamp(44px, 10vw, 64px)', fontWeight: 800, lineHeight: 1.05, color: 'var(--green)' }}>
+            {data.metrics.menuData.pct === null ? '—' : `${data.metrics.menuData.pct}%`}
+          </div>
+          <p style={{ margin: '6px 0 0', fontSize: 15, color: 'var(--text-secondary)' }}>
+            {data.metrics.menuData.count} of {data.metrics.menuData.total} restaurants have digitized menu data.
+          </p>
+          <p style={{ margin: '4px 0 0', fontSize: 12.5, color: 'var(--text-muted)' }}>
+            Shows whether menu data is present — not whether it has been verified as accurate.
+          </p>
+        </div>
+
+        {data.metrics.menuData.missingRestaurantIds.length > 0 && (
+          <div
+            style={{
+              flex: '1 1 300px',
+              minWidth: 0,
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: 10,
+              padding: 16,
+              borderRadius: 'var(--radius-lg)',
+              border: '1px solid var(--warning-border)',
+              background: 'var(--warning-bg)',
+            }}
+          >
+            <span style={{ width: 18, height: 18, display: 'flex', flexShrink: 0, color: 'var(--warning)', marginTop: 1 }}>
+              <IconAlert />
+            </span>
+            <div style={{ minWidth: 0 }}>
+              <strong style={{ color: 'var(--warning)' }}>Menu data is limited</strong>
+              <div style={{ marginTop: 6, fontSize: 13.5, color: 'var(--text-secondary)', overflowWrap: 'anywhere' }}>
+                Dish search can currently only ever return results from these {data.metrics.menuData.count} restaurants:{' '}
+                {data.metrics.menuData.restaurantIds.join(', ')}. The other{' '}
+                {data.metrics.menuData.missingRestaurantIds.length} have no menu items in
+                <code style={{ margin: '0 4px' }}>data/menus.json</code> at all — not a display bug, an actual
+                data gap.
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        )}
+      </section>
 
+      {/* Four secondary metric cards — the same four figures as before */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-          gap: 14,
-          marginBottom: 32,
+          gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))',
+          gap: 12,
+          marginBottom: 20,
         }}
       >
         <Metric
@@ -361,23 +439,83 @@ export default function CoverageDashboardPage() {
         />
       </div>
 
-      <BreakdownTable title="By neighbourhood (buurt)" rows={data.byBuurt} sampleThreshold={data.sampleThreshold} />
-      <BreakdownTable title="By cuisine" rows={data.byCuisine} sampleThreshold={data.sampleThreshold} />
+      {/* Priority gaps by neighbourhood */}
+      <section aria-labelledby="coverage-priority-heading" style={{ ...CARD_STYLE, marginBottom: 20 }}>
+        <h2 id="coverage-priority-heading" style={{ fontSize: 17, margin: '0 0 4px', color: 'var(--text-primary)' }}>
+          Priority gaps by neighbourhood
+        </h2>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 12px' }}>
+          Neighbourhoods with the most restaurants still missing menu data, largest gap first.
+        </p>
+        <BreakdownTable title="Priority gaps by neighbourhood" rows={visibleBuurten} tbodyId={PRIORITY_TBODY_ID} />
+        {hiddenCount > 0 && (
+          <button
+            type="button"
+            className="cov-toggle"
+            aria-expanded={showAllBuurten}
+            aria-controls={PRIORITY_TBODY_ID}
+            onClick={() => setShowAllBuurten((open) => !open)}
+          >
+            {showAllBuurten ? `Show top ${PRIORITY_DEFAULT_VISIBLE} only` : `Show all ${priorityRows.length} neighbourhoods`}
+            <span className="cov-toggle-chevron" aria-hidden="true">
+              <IconChevronDown />
+            </span>
+          </button>
+        )}
+      </section>
 
-      <p style={{ marginTop: 12, fontSize: 13, color: 'var(--text-muted)' }}>
-        Note: the current <code>cuisine</code> field is a near-unique free-text
-        description per restaurant (24 distinct values across 25 restaurants), not a
-        shared category taxonomy — most rows above show a count only, not a
-        percentage, because there's nothing meaningful to average within a group of
-        one.
-      </p>
+      {/* Methodology & data notes — exactly one section, collapsed by default */}
+      <details className="di-accordion-item">
+        <summary className="di-accordion-trigger">
+          <span className="di-accordion-icon">
+            <IconDocument />
+          </span>
+          <span className="di-accordion-heading">
+            <span className="di-accordion-title">Methodology &amp; data notes</span>
+            <span className="di-accordion-subtitle">Coverage shows data presence, not verified accuracy.</span>
+          </span>
+          <span className="di-accordion-chevron">
+            <IconChevronDown />
+          </span>
+        </summary>
+        <div className="di-accordion-body">
+          <h3 style={NOTE_HEADING_STYLE}>How the priority order works</h3>
+          <p style={NOTE_TEXT_STYLE}>
+            Neighbourhoods are ordered by the number of restaurants still missing menu data (restaurants minus
+            restaurants with menu data), largest gap first. Ties go to the larger neighbourhood, then to the
+            neighbourhood name alphabetically. The order is worked out on this page from the same figures shown in
+            the table; no neighbourhood is left out, only the first {PRIORITY_DEFAULT_VISIBLE} are shown until the
+            list is expanded.
+          </p>
 
-      <div style={{ marginTop: 32, padding: 16, borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)', background: 'var(--bg-card)', fontSize: 13, color: 'var(--text-secondary)' }}>
-        All figures reflect data <em>presence</em>, not verified trust/provenance —
-        the per-field trust model (PLATFORM-03) doesn't exist yet. A written,
-        dated baseline snapshot of these same numbers is recorded at{' '}
-        <code>docs/coverage/breda-baseline-2026-08-30.md</code>.
-      </div>
+          <h3 style={NOTE_HEADING_STYLE}>Sample size</h3>
+          <p style={NOTE_TEXT_STYLE}>
+            Percentages are only shown for groups with at least {data.sampleThreshold} restaurants. Smaller groups
+            show a dash (—) instead.
+          </p>
+
+          <h3 style={NOTE_HEADING_STYLE}>Why there is no cuisine breakdown</h3>
+          <p style={NOTE_TEXT_STYLE}>
+            The current <code>cuisine</code> field is a near-unique free-text description per restaurant (
+            {data.byCuisine.length} distinct values across {data.totals.restaurants} restaurants), not a shared
+            category taxonomy — most cuisine groups contain a single restaurant, so there is nothing meaningful to
+            average within them. A cuisine table would look like a ranked priority list without being one, so it is
+            not used as a prioritization axis here.
+          </p>
+
+          <h3 style={NOTE_HEADING_STYLE}>Presence, not verified accuracy</h3>
+          <p style={NOTE_TEXT_STYLE}>
+            All figures reflect data <em>presence</em>, not verified trust/provenance — the per-field trust model
+            (PLATFORM-03) doesn&apos;t exist yet.
+          </p>
+
+          <h3 style={NOTE_HEADING_STYLE}>Baseline</h3>
+          <p style={{ ...NOTE_TEXT_STYLE, marginBottom: 0 }}>
+            A written, dated baseline snapshot of these same numbers is recorded at{' '}
+            <code>docs/coverage/breda-baseline-2026-08-30.md</code>.
+          </p>
+        </div>
+      </details>
     </main>
   )
 }

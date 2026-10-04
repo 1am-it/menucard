@@ -321,7 +321,10 @@ test('structural safety net: the Werkvoorraad panel never causes page-level hori
 
 test('structural safety net: every existing internal page adopts the shared InternalNav shell without losing its own preserved content markers', () => {
   const cases = [
-    { file: COVERAGE_PAGE_PATH, mustStillContain: [/MenuCard — \{data\.city\} Coverage Dashboard/, /BreakdownTable/] },
+    // PLATFORM-12 Phase 1 (2026-10-04): the page title is now the calmer
+    // "Coverage Dashboard" (city moved into the subtitle) — still the same
+    // page, still the same BreakdownTable component.
+    { file: COVERAGE_PAGE_PATH, mustStillContain: [/<h1[^>]*>Coverage Dashboard<\/h1>/, /\{data\.city\}/, /BreakdownTable/] },
     { file: IMPORT_INBOX_PAGE_PATH, mustStillContain: [/di-topbar/, /Dashboard imported Restaurant Data/] },
     { file: PROFILE_DRAFTS_PAGE_PATH, mustStillContain: [/di-topbar/, /Restaurant Profile Drafts/] },
     { file: MODERATION_PAGE_PATH, mustStillContain: [/Moderation queue/, /Owner claims/] },
