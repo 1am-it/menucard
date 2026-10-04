@@ -204,6 +204,9 @@ of these.
     deterministic HTML menu structure adapter, a shared output contract for a
     later AI comparison, and scoring against synthetic fixtures. No product,
     UI, database, provider or live-pipeline change; no real source is fetched.
+    Decision recorded: no bare-price fallback; sources that need semantic
+    interpretation stay `unparsed` (the hand-over point to a possible,
+    not yet authorized AI structuring track).
 
 ## PLATFORM-* order (not started)
 
