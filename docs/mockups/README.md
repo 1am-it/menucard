@@ -14,6 +14,39 @@ Use them as guidance for:
 
 Do not treat them as a pixel-perfect implementation requirement.
 
+The durable rules these mockups illustrate are written down in
+`docs/guides/design-reference.md`, the canonical design context. Read it
+first; it covers theming, branding, internal navigation, accessibility,
+status vocabulary, and mockup naming and lead rules. Where a mockup and
+that guide or a ticket disagree, the text wins.
+
+## Index at a glance (addition, 2026-10-06)
+
+Every file in this directory, with its leading ticket and role. The
+sections below hold the full notes; nothing listed here was removed.
+
+| File | Surface | Leading ticket / spec | Role |
+|---|---|---|---|
+| `homepage-v1.png` | Public homepage | `be-04-homepage-shift.md`, `planning/specs/dish-first-discovery.md` | Leading |
+| `search-results-v1.png` | Public dish search results | `planning/specs/dish-first-discovery.md` | Leading |
+| `restaurant-menu-v1.png` | Public restaurant menu | `planning/specs/dish-first-discovery.md` | Leading |
+| `overview-v1.png` | Overview board of the consumer direction (homepage, results, filters, menu, design principles; desktop and mobile) | `planning/specs/dish-first-discovery.md` | Directional summary; the three files above lead per page |
+| `be-11-menu-discovery-v1.html` | Public menu discovery prototype | `be-11-public-menu-discovery-intent-aware-results.md` | Leading for BE-11 |
+| `internal-candidate-triage-v1.png` | `/internal/import-inbox` Review Overview | `market-05-normalization-deduplication.md` (MARKET-05A) | Layout only; labels renamed since |
+| `restaurant-profile-drafts-v1.png` | Import Inbox candidate detail | `market-05-normalization-deduplication.md` (MARKET-05C) | Leading |
+| `coverage-dashboard-v1.png` | `/internal/coverage` | `platform-01-coverage-baseline-dashboard.md` | Leading until a v2 is committed |
+| `community-add-restaurant-v1.png` | Community: missing restaurant | `platform-08b-community-evidence-submissions.md` | Directional, mobile only |
+| `community-add-menu-link-v1.png` | Community: menu link | `platform-08b-community-evidence-submissions.md` | Directional, mobile only |
+| `community-submission-status-v1.png` | Community: submission status | `platform-08b-community-evidence-submissions.md` | Directional, mobile only |
+| `onboarding-restaurant-workflow-v1.png` | Internal Onboarding Restaurant flow | `be-19-onboarding-restaurant-via-url.md`, `be-20-general-restaurant-source-extraction.md` | Leading for the workflow panels; **not** for navigation |
+| `internal-navigation-workqueue-v1.png` | Internal navigation shell and Werkvoorraad | `platform-11-role-aware-internal-navigation-home.md`, decision 014 | **Leading for all internal navigation** |
+| `internal-source-workqueue-v1.png` | `/internal/source-workqueue` (Bronwerkvoorraad) | `be-23-internal-source-workqueue.md` | Leading for page content; the ticket's "Deviations from the mockup" win. The "Onze Menukaarten" top bar is a placeholder, not branding. |
+
+Not yet in this directory: a PLATFORM-12 coverage dashboard v2 has no
+committed ticket or mockup in the repository yet. When it lands, add it
+as `coverage-dashboard-v2.png`, keep `coverage-dashboard-v1.png`, and
+mark in this table which one leads.
+
 ## Recommended files
 
 - [Homepage mockup](./homepage-v1.png)
