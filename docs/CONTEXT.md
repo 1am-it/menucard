@@ -8,3 +8,8 @@ records that support the dish-first redesign.
 Mockups and visual references should be stored in:
 
 `docs/mockups/`
+
+The canonical design context (theming, branding, internal navigation,
+accessibility, status vocabulary, mockup conventions) is
+`docs/guides/design-reference.md`; the mockup index with the leading
+ticket per mockup is `docs/mockups/README.md`.

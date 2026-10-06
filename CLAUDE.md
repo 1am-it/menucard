@@ -92,6 +92,22 @@ styling instead of hardcoded values, so new UI works correctly in both
 themes automatically. See `docs/guides/design-reference.md` and
 `planning/specs/tickets/theme-design-tokens.md`.
 
+### Design context
+
+Before any UI, navigation, status-label or mockup work, read
+`docs/guides/design-reference.md`. It is the canonical design context
+and covers:
+
+- positioning and branding;
+- the theme contract;
+- the internal navigation hierarchy;
+- contrast, keyboard and responsive requirements;
+- Bron and Menukaart as separate status dimensions;
+- mockup conventions.
+
+Also read `docs/mockups/README.md`, the mockup index with the leading
+ticket per mockup.
+
 ## Performance principles
 
 Target:
