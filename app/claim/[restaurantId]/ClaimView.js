@@ -100,8 +100,8 @@ export default function ClaimView({ restaurantId, restaurant }) {
     padding: 10,
     borderRadius: 8,
     border: 'none',
-    background: 'var(--green)',
-    color: '#fff',
+    background: 'var(--accent-fill)',
+    color: 'var(--on-accent-fill)',
     fontWeight: 600,
     cursor: 'pointer',
   }
@@ -111,7 +111,7 @@ export default function ClaimView({ restaurantId, restaurant }) {
       <main style={box}>
         <h1 style={{ fontSize: 20 }}>Restaurant niet gevonden</h1>
         <p>
-          <Link href="/" style={{ color: 'var(--green)' }}>← Terug naar overzicht</Link>
+          <Link href="/" style={{ color: 'var(--accent)' }}>← Terug naar overzicht</Link>
         </p>
       </main>
     )

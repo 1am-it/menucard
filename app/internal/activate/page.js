@@ -143,8 +143,8 @@ export default function ActivatePage() {
             padding: 10,
             borderRadius: 8,
             border: 'none',
-            background: 'var(--green)',
-            color: '#fff',
+            background: 'var(--accent-fill)',
+            color: 'var(--on-accent-fill)',
             fontWeight: 600,
             cursor: 'pointer',
           }}
