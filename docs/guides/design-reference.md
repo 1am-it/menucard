@@ -98,8 +98,11 @@ wat kost het?"* It is a dish-first, text-first menu search with real
 prices (see `CLAUDE.md`'s mission and product principles, and
 `planning/specs/dish-first-discovery.md`).
 
-BredaEats is not a stand-alone ordering, delivery or booking platform. It
-takes no orders, deliveries or bookings itself:
+Product direction (product owner, 2026-10-06; formal decision record pending): BredaEats is not intended to operate as a standalone ordering or delivery platform.
+
+Reservations follow the existing, source-backed rule (BE-07):
+BredaEats is not a standalone booking platform and takes no bookings
+itself.
 
 - Where a reservation action is visible, it routes to the reservation
   channel the restaurant itself offers (its website or booking page,
