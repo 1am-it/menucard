@@ -31,6 +31,13 @@ import { useEffect, useRef, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import { resolveVisibleModules, groupModulesByPlacement, isOwnerRole, hasAnyKnownRole } from '@/src/lib/internalNav'
+// The same shared Licht/Donker toggle every public header already uses
+// (theme-design-tokens.md: "the same component reused in every page's
+// header"; decision 006 + BE-09: an explicit per-browser choice stored as
+// `bredaeats_theme`, dark when nothing is stored, no OS-preference
+// following). Mounted once here so every internal page gets it — no
+// internal-only theme logic.
+import ThemeToggle from '@/src/components/ThemeToggle'
 
 function IconWordmark() {
   return (
@@ -215,6 +222,9 @@ export default function InternalNav({ accessToken, roles: rolesProp }) {
 
       {showOwnerNote && <span className="internal-nav-note">Owner tools — not available yet</span>}
       {noAccess && <span className="internal-nav-note">No internal access for this account</span>}
+      <div className="internal-nav-theme">
+        <ThemeToggle />
+      </div>
       <button type="button" onClick={signOut} className="internal-nav-signout">
         Sign out
       </button>
