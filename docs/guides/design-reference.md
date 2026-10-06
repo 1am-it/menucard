@@ -210,15 +210,25 @@ Sources:
 
 ## Accessibility and responsive requirements
 
-These restate decision 014's acceptance checklist and the measured
-practice of BE-23 and the internal theme toggle. Every UI ticket must
-meet them.
+Where these rules come from:
 
-**Contrast**
+- **Decision 014** (items 5–8 and 10, and its "Acceptance checklist —
+  include in every future UI ticket") carries the keyboard, focus,
+  semantics, responsive and dead-end rules below. Every UI ticket must
+  meet those.
+- **The contrast thresholds** are not in decision 014. They are the
+  WCAG AA practice this project already measures against:
+  `theme-design-tokens.md` ("Contrast"; addendum of 2026-10-06), BE-09
+  item 6, and BE-23's verification. No decision fixes them as a binding
+  standard, and no full WCAG audit has been done (decision 006,
+  `theme-design-tokens.md` "Known limitations"). Use them as the target,
+  and record the measurement.
 
-- Text, including small badge, chip and toggle labels, needs at least
-  4.5:1. Focus indicators and essential non-text UI need at least 3:1.
-  Measure in **both** themes.
+**Contrast (target: WCAG AA)**
+
+- Text, including small badge, chip and toggle labels, aims for at least
+  4.5:1. Focus indicators and essential non-text UI aim for at least
+  3:1. Measure in **both** themes.
 - Use tokens. When a token fails in a specific context, use a stronger
   existing token there instead of a hardcoded colour. For example, the
   inactive internal toggle option uses `--text-secondary` instead of
@@ -228,27 +238,34 @@ meet them.
   light and 3.09:1 dark. This is a separate follow-up.
 
 **Status is never colour alone.** Every status badge carries an icon and
-the full text (e.g. "Bron: Bereikbaar").
+the full text, e.g. "Bron: Bereikbaar" (BE-23; decision 014, item 2:
+the current destination is "never color alone").
 
-**Keyboard**
+**Keyboard and focus** (decision 014, items 6–7)
 
-- Every interactive element can be reached and operated with Tab, Enter
-  and Space, in visual order.
-- Every interactive element has an explicit `:focus-visible` outline
-  (`var(--border-focus)` or `var(--green)`).
-- Toggles expose `aria-pressed`, and disclosures expose their open state.
-- Focus lands deliberately after navigation (decision 014, items 6–7).
+- Every interactive element is keyboard-operable, in a focus order that
+  matches the visual order.
+- Every interactive element has an explicit `:focus-visible` treatment.
+  Existing practice uses `var(--border-focus)` or `var(--green)`.
+- A page with a navigation region offers a skip-link to the main
+  content as its first focusable element. The current `InternalNav` has
+  none yet.
+- A mobile menu control exposes its expanded/collapsed state. Existing
+  toggles expose `aria-pressed` (`ThemeToggle`).
+- Focus lands deliberately after navigating or closing an overlay.
 
 **Semantics.** Use real `<nav>`, `<a>`, `<button>` elements and tables
 with headers. No `<div>` click handlers and no fake or dead buttons
 (decision 014, item 10).
 
-**Responsive**
+**Responsive** (decision 014, item 5 and acceptance checklist)
 
-- Verify at desktop (about 1280px) and at about 390px, in light and dark.
+- Verify at desktop width and at about 390px, in light and dark. Desktop
+  checks so far used about 1280px (e.g. the BE-11 prototype).
 - No page-level horizontal overflow (`scrollWidth <= clientWidth`).
 - Mobile may collapse a destination or action, never remove it.
-- Wide tables become cards on mobile, as in `/internal/source-workqueue`.
+- Wide tables may become cards on mobile, as in
+  `/internal/source-workqueue` (BE-23 mockup).
 
 **Dead ends.** Logged-out, 403, 404, empty and success states each offer
 a working next step (decision 014, item 8).
@@ -297,8 +314,18 @@ Bron or Menukaart status until a check is attributed to it. Do not label
 these restaurants "nieuw", do not route them into
 `Nieuwe aanleveringen`, and do not count them as intake volume.
 
-As of 2026-10-06, all 25 Breda restaurants in production are in this
-state: nothing has been analysed yet.
+> **Snapshot, 2026-10-06 — not a design rule or a product claim.**
+> According to the product owner's production check of
+> `/internal/source-workqueue` on that date, none of the 25 Breda
+> restaurants had a production source check (a BE-20 analysis job)
+> attributed to it. This cannot be reproduced from the repository.
+>
+> - Offline benchmarks over the same restaurants (BE-20, BE-22) do not
+>   count as source checks here.
+> - Each restaurant still carries its own reason from the list above;
+>   this snapshot does not imply one shared reason.
+> - The snapshot goes stale as soon as checks are attributed. Do not
+>   copy it into UI text or tickets as a current fact.
 
 ## Mockups: location, naming and leading references
 
@@ -310,8 +337,14 @@ state: nothing has been analysed yet.
 - Naming is `<surface>-v<N>.png`, or `.html` for an interactive
   prototype. A new version gets a new file (`-v2`). Older files are kept,
   and the index marks which version leads.
-- Mockups with restaurant or dish photography are not committed (see the
-  `restaurant-profile-drafts` entry in the index).
+- Derived design direction, not a direct rule from decision 002: do not
+  commit mockups with restaurant or dish photography.
+  - Decision 002 and `CLAUDE.md` forbid that photography in the UI
+    itself (hero, dish search results, listing cards).
+  - The precedent for mockups is `restaurant-profile-drafts-detail-v1.png`.
+    It was never committed for this reason (index,
+    `restaurant-profile-drafts` entry). BE-20 "Visual contract" follows
+    that precedent.
 - If a mockup and a ticket disagree, the ticket's "Deviations from the
   mockup" section (or its equivalent) wins. If two mockups disagree, the
   index says which one leads.
