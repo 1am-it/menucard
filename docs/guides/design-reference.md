@@ -95,9 +95,23 @@ scheduled yet.
 
 BredaEats answers *"Wat wil je vanavond eten, waar kan ik dat krijgen, en
 wat kost het?"* It is a dish-first, text-first menu search with real
-prices. It is not an ordering, delivery, reservation or review platform,
-and it publishes nothing on a restaurant's behalf (see `CLAUDE.md`'s
-mission and product principles, and `planning/specs/dish-first-discovery.md`).
+prices (see `CLAUDE.md`'s mission and product principles, and
+`planning/specs/dish-first-discovery.md`).
+
+BredaEats is not a stand-alone ordering, delivery or booking platform. It
+takes no orders, deliveries or bookings itself:
+
+- Where a reservation action is visible, it routes to the reservation
+  channel the restaurant itself offers (its website or booking page,
+  WhatsApp or phone). The label names that channel, e.g.
+  `Reserveer via website` (BE-07, `planning/specs/reservation-routing.md`,
+  `src/utils/reservation.js`). An unsupported method is never shown.
+- Integrating a booking platform's API is out of scope (BE-07,
+  "Out of scope").
+- User-generated reviews are a non-goal (`dish-first-discovery.md`,
+  "Non-goals").
+- Nothing is published automatically; see "Source status and menu status
+  are separate dimensions" below.
 
 What is decided:
 
@@ -127,7 +141,9 @@ not resemble. Until the product owner records such a list (here, or in a
 
 - no borrowed brand names, logos or house styles of restaurants or
   platforms;
-- no UI that implies BredaEats orders, delivers or reserves.
+- no UI that implies BredaEats itself takes orders, deliveries or
+  bookings. A reservation action that routes to the restaurant's own
+  channel, as above, is allowed.
 
 Do not invent a fuller policy in a ticket.
 
