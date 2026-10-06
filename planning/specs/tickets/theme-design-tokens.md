@@ -123,3 +123,50 @@ only, the inactive toggle option uses `--text-secondary` instead of
 contrast — a separate, pre-existing follow-up, not changed here).
 Internal pages without the internal nav (login, activation, set-password)
 still apply the stored choice through the init script but show no toggle.
+
+## Addendum — Onze Menukaarten brand accent (2026-10-06)
+
+Implements the chosen Claude Design direction "5 · Oker licht — uitgewerkt
+(okergeel)" (see `docs/guides/design-reference.md`, "Wordmark and brand
+accent"). The theme contract (explicit Licht/Donker, dark default, no live
+OS following) is unchanged. The light values are the approved handoff
+values; the dark values are derived for contrast on the existing dark
+surfaces.
+
+| Token | Light | Dark |
+|---|---|---|
+| `--accent` | `#7A4E00` | `#F2C35B` |
+| `--accent-dim` | `#5E3C00` | `#E0AA36` |
+| `--accent-fill` | `#F2C35B` | `#F2C35B` |
+| `--accent-fill-hover` | `#E8B648` | `#E3B04A` |
+| `--on-accent-fill` | `#1F1600` | `#1F1600` |
+| `--accent-faint` | `#FDF3D8` | `rgba(242, 195, 91, 0.08)` |
+| `--accent-border` | `rgba(122, 78, 0, 0.30)` | `rgba(242, 195, 91, 0.28)` |
+| `--accent-surface` | `#FDF3D8` | `#2A2109` |
+| `--accent-surface-strong` | `#FBE6A8` | `#3A2D0C` |
+| `--wordmark` | `#7A4E00` | `#F2C35B` |
+| `--mark-bg` / `--mark-text` | `#F2C35B` / inherit | `#3A2D0C` / `#F2C35B` |
+| `--warning` | `#9A3412` (was `#8a5a00`, identical to the old brand-adjacent oker) | `#FF9E6B` (was `#ffa000`, too close to the accent) |
+| `--input-border` (control border) | `#8A919C` (was `#d7dae0`, ~1.4:1) | `#6b7280` (was `#2a2a2a`) |
+| `--bg-hover-accent` | `#FDF8EA` | `#1a170d` |
+
+`--hero-gradient-start(-alt)` were removed: hero and detail surfaces are
+flat (`var(--bg)`).
+
+Measured contrast (WCAG 2.x), also asserted in
+`src/components/Wordmark.test.js`:
+
+| Pair | Light | Dark |
+|---|---|---|
+| `--accent` on `--bg` | 7.20:1 | 12.60:1 |
+| `--on-accent-fill` on `--accent-fill` | 10.85:1 | 10.85:1 |
+| `--accent` on `--accent-surface` | 6.51:1 | 9.65:1 |
+| `--accent` on `--accent-surface-strong` | 5.82:1 | 8.16:1 |
+| `--warning` on `--bg` / `--bg-card` | 7.31:1 | 9.31:1 |
+| `--input-border` on `--bg` / `--bg-card` (UI, 3:1) | 3.18:1 | 3.91:1 |
+| `--accent-fill` as text on white | 1.65:1 — not allowed | — |
+
+`--green` keeps its values and is now a status colour only. Known,
+unchanged follow-ups: dark `--text-muted` (`#666666`) stays below 4.5:1;
+`--tag-featured` / `--tag-halal` (gold) sit close to the accent hue; the
+editor-only moderation approve buttons still use white on `--green`.
