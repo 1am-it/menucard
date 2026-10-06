@@ -149,31 +149,62 @@ Do not invent a fuller policy in a ticket.
 
 ## Internal navigation hierarchy
 
-Source of truth: `src/lib/internalNav.js` (config) and
-`src/components/InternalNav.js` (render), per PLATFORM-11, decision 014
-and the leading mockup `docs/mockups/internal-navigation-workqueue-v1.png`.
+Sources:
+
+- **Decided structure:** BE-20 "Visual contract" and "Approved design
+  references", with the leading mockup
+  `docs/mockups/internal-navigation-workqueue-v1.png`.
+- **Role filtering and the `/internal` home:** PLATFORM-11.
+- **Orientation, stability and access rules for every navigation:**
+  decision 014.
+- **Live behaviour:** `src/lib/internalNav.js` (config) and
+  `src/components/InternalNav.js` (render).
+
+### Implemented today
 
 1. **BredaEats wordmark:** the quiet home link to `/internal`.
 2. **Primary items:** `Dekkingsoverzicht` (`/internal/coverage`) and
    `Onboarding Restaurant` (`/internal/onboarding-restaurant`).
-3. **`Werkvoorraad`:** one accessible `<details>` disclosure. Each
-   module in it has a short subtitle:
-   - `Beheer` (`/internal`, "Alle modules");
-   - `Nieuwe aanleveringen` (`/internal/import-inbox`);
-   - `Bronwerkvoorraad` (`/internal/source-workqueue`, "Bron en
-     menukaart per restaurant");
-   - `Profielconcepten` (`/internal/profile-drafts`);
-   - `Beoordelen` (`/internal/moderation`, editor only).
+3. **`Werkvoorraad`:** one accessible `<details>` disclosure. Each entry
+   has a short subtitle; the exact texts live in `INTERNAL_MODULES` in
+   `src/lib/internalNav.js`. The entries are, in order:
+   - `Beheer` → `/internal`;
+   - `Nieuwe aanleveringen` → `/internal/import-inbox`;
+   - `Bronwerkvoorraad` → `/internal/source-workqueue`;
+   - `Profielconcepten` → `/internal/profile-drafts`;
+   - `Beoordelen` → `/internal/moderation`, editor only.
 4. **Right side:** the shared theme toggle, then `Sign out`.
+5. **No counts:** no entry shows a count today. BE-23 added
+   `Bronwerkvoorraad` without a badge count and lists "any nav badge
+   count" under "Not built (deliberately)".
 
-Rules:
+### Decided direction (not all built yet)
+
+- Werkvoorraad entries may show counts, but only counts that are
+  provably computed from real, currently open work items. Never show a
+  placeholder or hardcoded number (BE-20 "Visual contract"; BE-20
+  acceptance criterion "Werkvoorraad navigation", tested against a
+  non-zero and a zero-count state).
+- The mockup's 3/2/1 and badge-6 counts are directional only
+  (`docs/mockups/README.md`).
+- `Beoordelen` groups the existing editor-only Moderation module under
+  Werkvoorraad, with route, role gate and data model unchanged (BE-20
+  "Visual contract").
+
+### Open product decisions
+
+- **`Beheer` → `/internal`.** BE-20 says `Beheer` is not a separate
+  top-level item. No approved mockup or ticket names its destination. The
+  mapping to `/internal` is the build's own choice, flagged in
+  `src/lib/internalNav.js` for confirmation or correction. Treat it as
+  provisional until the product owner confirms it.
+
+### Rules
 
 - A new internal module is a new entry in `internalNav.js`, usually under
   `Werkvoorraad`. It is never a second navigation or a page-local nav.
 - Every internal page uses the same order, labels and position. The
   active destination has `aria-current="page"` (decision 014, item 2).
-- No badge counts in the nav. A count may only ever appear when it is
-  computed from real work items (BE-20 visual contract, mockup note).
 - Role filtering only hides links. Every route and API keeps its own
   server-side authorization check (decision 014, item 4).
 
