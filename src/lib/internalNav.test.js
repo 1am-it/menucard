@@ -363,3 +363,42 @@ test('structural safety net: app/internal/layout.js keeps its existing noindex m
   const source = fs.readFileSync(LAYOUT_PATH, 'utf8');
   assert.match(source, /robots:\s*\{\s*index:\s*false,\s*follow:\s*false\s*\}/);
 });
+
+// ─── Structural safety net: the shared theme toggle in the internal shell ──
+
+const ROOT_LAYOUT_PATH = path.join(REPO_ROOT, 'app/layout.js');
+const THEME_TOGGLE_PATH = path.join(REPO_ROOT, 'src/components/ThemeToggle.js');
+
+test('structural safety net: InternalNav renders the one shared ThemeToggle — no internal copy and no internal theme logic', () => {
+  const source = fs.readFileSync(NAV_COMPONENT_PATH, 'utf8');
+  assert.match(source, /import ThemeToggle from '@\/src\/components\/ThemeToggle'/);
+  assert.match(source, /<div className="internal-nav-theme">\s*<ThemeToggle \/>\s*<\/div>/);
+  // The nav itself never touches the theme: no data-theme, storage key or media query.
+  const code = source.replace(/^\s*\/\/.*$/gm, '');
+  assert.doesNotMatch(code, /data-theme|bredaeats_theme|prefers-color-scheme|localStorage/);
+});
+
+test('structural safety net: the theme toggle sits right before Sign out and keeps Sign out on the right', () => {
+  const source = fs.readFileSync(NAV_COMPONENT_PATH, 'utf8');
+  assert.ok(source.indexOf('<ThemeToggle />') < source.indexOf('onClick={signOut}'), 'toggle before Sign out');
+  const css = fs.readFileSync(GLOBALS_CSS_PATH, 'utf8');
+  assert.match(css, /\.internal-nav-theme \{ margin-left: auto; display: flex; \}/);
+  assert.match(css, /\.internal-nav-theme \+ \.internal-nav-signout \{ margin-left: 0; \}/);
+  assert.match(css, /\.internal-nav-theme \.theme-btn:focus-visible \{ outline: 2px solid var\(--border-focus\)/);
+  // Contrast of the inactive option inside the internal nav (measured below 4.5:1 with --text-muted).
+  assert.match(css, /\.internal-nav-theme \.theme-btn \{ color: var\(--text-secondary\); \}/);
+  assert.match(css, /\.internal-nav-theme \.theme-btn\.active \{ color: var\(--on-accent\); \}/);
+});
+
+test('structural safety net: the theme contract stays as decided — explicit Licht/Donker choice, dark when nothing is stored, no OS-preference following', () => {
+  const layout = fs.readFileSync(ROOT_LAYOUT_PATH, 'utf8');
+  // No stored choice resolves to dark (decision 006); only the one-time
+  // migration of a legacy stored 'system' value reads the OS preference (BE-09).
+  assert.match(layout, /else\{document\.documentElement\.setAttribute\('data-theme','dark'\);localStorage\.setItem\('bredaeats_theme','dark'\);\}/);
+  assert.equal((layout.match(/prefers-color-scheme/g) || []).length, 1, 'only the legacy "system" migration reads the OS preference');
+  assert.match(layout, /else if\(t==='system'\)\{var r=\(window\.matchMedia&&window\.matchMedia\('\(prefers-color-scheme: light\)'\)\.matches\)/);
+  const toggle = fs.readFileSync(THEME_TOGGLE_PATH, 'utf8');
+  assert.match(toggle, /\{ value: 'light', label: 'Licht' \}/);
+  assert.match(toggle, /\{ value: 'dark', label: 'Donker' \}/);
+  assert.doesNotMatch(toggle, /value: 'system'/);
+});

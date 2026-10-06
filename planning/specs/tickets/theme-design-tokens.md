@@ -94,3 +94,32 @@ redesigning any page's information architecture, structure, or behaviour.
       screenshots across `/`, `/restaurant/[id]`, `/menu/[id]`, `/nvwa/[id]`,
       `/search` in both themes plus `system` mode under both emulated OS
       preferences.
+
+## Addendum — theme choice in the internal UI (2026-10-06)
+
+A read-only production check of `/internal/source-workqueue` found that
+emulating `prefers-color-scheme: dark` left the page on
+`data-theme="light"`, and that the internal UI had no theme toggle. Both
+follow from the decided contract, not from a broken chain:
+
+- The theme is an explicit per-browser choice (`localStorage`
+  `bredaeats_theme`, `light` or `dark`), dark when nothing is stored
+  (decision 006). The OS preference is deliberately **not** followed: BE-09
+  removed "Systeem" and only uses `prefers-color-scheme` once, to migrate a
+  legacy stored `system` value. A browser that had stored `light` therefore
+  stays light under an emulated dark OS preference.
+- The gap was that internal pages had no way to make that choice: the
+  shared `ThemeToggle` was only mounted in the public headers, while this
+  ticket says "the same component reused in every page's header".
+
+Fix: `src/components/InternalNav.js` mounts the same shared `ThemeToggle`
+once, next to Sign out, so every internal page that uses the internal nav
+gets it. No internal-only theme logic, storage key or default was added,
+and `app/layout.js`'s init script is unchanged. Inside the internal nav
+only, the inactive toggle option uses `--text-secondary` instead of
+`--text-muted` (measured 4.39:1 light / 3.09:1 dark before, at least
+5.08:1 / 7.64:1 after) and gets a visible focus ring; the public header's
+`.theme-btn` styling is unchanged (its inactive option has the same low
+contrast — a separate, pre-existing follow-up, not changed here).
+Internal pages without the internal nav (login, activation, set-password)
+still apply the stored choice through the init script but show no toggle.

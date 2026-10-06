@@ -2219,6 +2219,19 @@ mark.search-highlight {
   color: var(--text-secondary);
 }
 .internal-nav-signout:hover { border-color: var(--border-hover); color: var(--text-primary); }
+/* The shared Licht/Donker toggle (src/components/ThemeToggle.js) sits next
+   to Sign out on the right; the wrapper takes over Sign out's auto margin
+   so both stay together. Focus ring scoped to the internal nav only — the
+   public header's .theme-btn styling is unchanged. */
+.internal-nav-theme { margin-left: auto; display: flex; }
+.internal-nav-theme + .internal-nav-signout { margin-left: 0; }
+.internal-nav-theme .theme-btn:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+/* The shared .theme-btn uses --text-muted for the inactive option, which
+   measures 4.39:1 (light) and 3.09:1 (dark) on this nav — below 4.5:1. Inside
+   the internal nav only, the inactive option uses --text-secondary instead;
+   the active option keeps its accent colours. */
+.internal-nav-theme .theme-btn { color: var(--text-secondary); }
+.internal-nav-theme .theme-btn.active { color: var(--on-accent); }
 
 /* BE-20 — the compact "Werkvoorraad" disclosure grouping Beheer/Nieuwe
    aanleveringen/Profielconcepten/Beoordelen. A native <details>/<summary>
