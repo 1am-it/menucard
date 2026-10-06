@@ -85,6 +85,9 @@ test('globals.css: the allergen matrix\'s own horizontal-scroll container is unt
 test('NvwaView: no new dependency, route, or unrelated markup change — only the one div\'s className changed', () => {
   const source = readNvwaViewSource();
   const importLines = source.split('\n').filter((line) => line.trim().startsWith('import '));
-  assert.equal(importLines.length, 3);
+  // 3 pre-existing imports + the shared, in-repo Wordmark component (Onze
+  // Menukaarten header) — still no external dependency.
+  assert.equal(importLines.length, 4);
+  assert.ok(importLines.some((line) => line.includes('@/src/components/Wordmark')));
   assert.match(source, /const handlePrint = \(\) => window\.print\(\)/);
 });

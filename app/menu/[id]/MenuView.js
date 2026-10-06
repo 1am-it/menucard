@@ -5,6 +5,7 @@ import Link from 'next/link'
 import ThemeToggle from '@/src/components/ThemeToggle'
 import { getReservationActions, isValidPhone, isValidUrl } from '@/src/utils/reservation'
 import { resolveDishTarget } from '@/src/lib/dishDeepLink'
+import Wordmark from '@/src/components/Wordmark'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -225,7 +226,7 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
   if (!r) return (
     <div className="empty-state" style={{ paddingTop: 80 }}>
       <h2>Menu niet gevonden</h2>
-      <p>Controleer de URL of ga <Link href="/" style={{ color: 'var(--green)' }}>terug naar het overzicht</Link>.</p>
+      <p>Controleer de URL of ga <Link href="/" style={{ color: 'var(--accent)' }}>terug naar het overzicht</Link>.</p>
     </div>
   )
 
@@ -363,7 +364,7 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
       {/* ── Header ── */}
       <header>
         <div className="header-inner">
-          <Link href="/" className="logo">Breda<span>Eats</span></Link>
+          <Wordmark />
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center', rowGap: 8 }}>
             <ThemeToggle />
             <Link href={`/restaurant/${baseId}`} className="back-btn">← {r.name || restaurant.name}</Link>
@@ -461,6 +462,12 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
                   rel={primaryReservation.external || primaryReservation.method === 'whatsapp' ? 'noopener noreferrer' : undefined}
                 >
                   {primaryReservation.label}
+                  {(primaryReservation.external || primaryReservation.method === 'whatsapp') && (
+                    <svg className="rp-btn-external-icon" width="14" height="14" viewBox="0 0 18 18" fill="none"
+                      stroke="currentColor" strokeWidth="1.8" aria-hidden="true" focusable="false">
+                      <path d="M10.5 3h4.5v4.5M15 3l-7 7M13 10.5V15H3V5h4.5" />
+                    </svg>
+                  )}
                 </a>
               )}
             </div>
@@ -603,7 +610,7 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
           <div className="empty-state">
             <div style={{ fontSize: 36, marginBottom: 12 }}>🔍</div>
             <h3>Geen gerechten gevonden</h3>
-            <p>Pas je filters aan of <button onClick={resetFilters} style={{ color: 'var(--green)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 'inherit', padding: 0 }}>reset alle filters</button>.</p>
+            <p>Pas je filters aan of <button onClick={resetFilters} style={{ color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 'inherit', padding: 0 }}>reset alle filters</button>.</p>
           </div>
         ) : (
           filteredCategories.map((cat, i) => {

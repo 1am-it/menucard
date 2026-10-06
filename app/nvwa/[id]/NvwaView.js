@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import ThemeToggle from '@/src/components/ThemeToggle'
+import Wordmark from '@/src/components/Wordmark'
 
 // EU Verordening 1169/2011 — 14 verplichte allergenen
 const EU14 = [
@@ -87,7 +88,7 @@ export default function NvwaView({ id, restaurant, allItems }) {
     return (
       <div className="empty-state" style={{ paddingTop: 80 }}>
         <h3>Restaurant niet gevonden</h3>
-        <p><Link href="/" style={{ color: 'var(--green)' }}>← Terug naar overzicht</Link></p>
+        <p><Link href="/" style={{ color: 'var(--accent)' }}>← Terug naar overzicht</Link></p>
       </div>
     )
   }
@@ -109,7 +110,7 @@ export default function NvwaView({ id, restaurant, allItems }) {
     <>
       <header>
         <div className="header-inner">
-          <Link href="/" className="logo">Breda<span>Eats</span></Link>
+          <Wordmark />
           <div className="nvwa-header-actions">
             <ThemeToggle />
             <Link href={`/restaurant/${id}`} className="back-btn">← {restaurant.name}</Link>
@@ -122,7 +123,7 @@ export default function NvwaView({ id, restaurant, allItems }) {
         {/* Header */}
         <div className="nvwa-header">
           <div>
-            <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px', color: 'var(--green)', marginBottom: 6 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px', color: 'var(--accent)', marginBottom: 6 }}>
               Allergenenmatrix · EU Verordening 1169/2011
             </div>
             <h1 className="nvwa-title">{restaurant.name}</h1>
@@ -160,9 +161,9 @@ export default function NvwaView({ id, restaurant, allItems }) {
                 onClick={() => setFilterMeal('')}
                 style={{
                   padding: '5px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600,
-                  border: `1px solid ${!filterMeal ? 'var(--green)' : 'var(--input-border)'}`,
-                  background: !filterMeal ? 'var(--green-faint)' : 'var(--bg-input)',
-                  color: !filterMeal ? 'var(--green)' : 'var(--text-muted)', cursor: 'pointer',
+                  border: `1px solid ${!filterMeal ? 'var(--accent)' : 'var(--input-border)'}`,
+                  background: !filterMeal ? 'var(--accent-faint)' : 'var(--bg-input)',
+                  color: !filterMeal ? 'var(--accent)' : 'var(--text-muted)', cursor: 'pointer',
                 }}>
                 Alle kaarten
               </button>
@@ -172,9 +173,9 @@ export default function NvwaView({ id, restaurant, allItems }) {
                   onClick={() => setFilterMeal(m)}
                   style={{
                     padding: '5px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600,
-                    border: `1px solid ${filterMeal === m ? 'var(--green)' : 'var(--input-border)'}`,
-                    background: filterMeal === m ? 'var(--green-faint)' : 'var(--bg-input)',
-                    color: filterMeal === m ? 'var(--green)' : 'var(--text-muted)', cursor: 'pointer',
+                    border: `1px solid ${filterMeal === m ? 'var(--accent)' : 'var(--input-border)'}`,
+                    background: filterMeal === m ? 'var(--accent-faint)' : 'var(--bg-input)',
+                    color: filterMeal === m ? 'var(--accent)' : 'var(--text-muted)', cursor: 'pointer',
                   }}>
                   {m.charAt(0).toUpperCase() + m.slice(1)}
                 </button>
@@ -188,9 +189,9 @@ export default function NvwaView({ id, restaurant, allItems }) {
               onClick={() => setFilterAllergen(null)}
               style={{
                 padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 600,
-                border: `1px solid ${filterAllergen === null ? 'var(--green)' : 'var(--input-border)'}`,
-                background: filterAllergen === null ? 'var(--green-faint)' : 'var(--bg-input)',
-                color: filterAllergen === null ? 'var(--green)' : 'var(--text-muted)', cursor: 'pointer',
+                border: `1px solid ${filterAllergen === null ? 'var(--accent)' : 'var(--input-border)'}`,
+                background: filterAllergen === null ? 'var(--accent-faint)' : 'var(--bg-input)',
+                color: filterAllergen === null ? 'var(--accent)' : 'var(--text-muted)', cursor: 'pointer',
               }}>
               Alle allergenen
             </button>
@@ -201,9 +202,9 @@ export default function NvwaView({ id, restaurant, allItems }) {
                 title={a.name}
                 style={{
                   padding: '4px 8px', borderRadius: 6, fontSize: 11,
-                  border: `1px solid ${filterAllergen === a.id ? 'var(--green)' : 'var(--input-border)'}`,
-                  background: filterAllergen === a.id ? 'var(--green-faint)' : 'var(--bg-input)',
-                  color: filterAllergen === a.id ? 'var(--green)' : 'var(--text-muted)', cursor: 'pointer',
+                  border: `1px solid ${filterAllergen === a.id ? 'var(--accent)' : 'var(--input-border)'}`,
+                  background: filterAllergen === a.id ? 'var(--accent-faint)' : 'var(--bg-input)',
+                  color: filterAllergen === a.id ? 'var(--accent)' : 'var(--text-muted)', cursor: 'pointer',
                 }}>
                 {a.icon} {a.short}
               </button>
@@ -247,14 +248,14 @@ export default function NvwaView({ id, restaurant, allItems }) {
                       rows.push(
                         <tr key={`meal-${item.mealType}`}>
                           <td colSpan={15} style={{
-                            background: 'var(--green-faint)',
-                            color: 'var(--green)',
+                            background: 'var(--accent-faint)',
+                            color: 'var(--accent)',
                             fontWeight: 700,
                             fontSize: 11,
                             textTransform: 'uppercase',
                             letterSpacing: '0.6px',
                             padding: '8px 12px',
-                            borderLeft: '3px solid var(--green)',
+                            borderLeft: '3px solid var(--accent)',
                           }}>
                             {mealLabel}
                           </td>

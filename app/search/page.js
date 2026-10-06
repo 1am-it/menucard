@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import ThemeToggle from '@/src/components/ThemeToggle'
 import PrimaryNav from '@/src/components/PrimaryNav'
 import RestaurantBrowseCard from '@/src/components/RestaurantBrowseCard'
+import Wordmark from '@/src/components/Wordmark'
 
 // BE-03 — dish-first search results.
 // BE-06 — filters + URL state added on top, see below.
@@ -616,7 +617,7 @@ function SearchPageInner() {
     <>
       <header className="site-header">
         <div className="header-inner">
-          <Link href="/" className="logo">Breda<span>Eats</span></Link>
+          <Wordmark />
           <div className="header-right">
             <PrimaryNav />
             <ThemeToggle />

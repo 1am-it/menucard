@@ -167,7 +167,8 @@ test('the only <h3> this file renders itself is BE-15\'s own grouped-restaurant 
 // page — see src/components/PrimaryNav.js and the BE-11 ticket's own
 // "Primary navigation" section for the full, decided scope). The
 // previously duplicate "← Home" link is removed here since the existing,
-// already-accessible BredaEats logo link to "/" already covers it.
+// already-accessible wordmark link to "/" already covers it (since the
+// Onze Menukaarten wordmark: the shared <Wordmark /> component).
 
 test('imports and renders the shared PrimaryNav component, before ThemeToggle, inside the existing header-right group', () => {
   const source = readPageSource();
@@ -175,12 +176,13 @@ test('imports and renders the shared PrimaryNav component, before ThemeToggle, i
   assert.match(source, /<div className="header-right">\s*<PrimaryNav \/>\s*<ThemeToggle \/>\s*<\/div>/);
 });
 
-test('the duplicate "← Home" link is removed; the BredaEats logo remains the only link to "/"', () => {
+test('the duplicate "← Home" link is removed; the shared wordmark remains the only link to "/"', () => {
   const source = readPageSource();
-  assert.doesNotMatch(source, /← Home/, 'the redundant back-link must be gone now that the logo already links to "/"');
-  const logoMatches = source.match(/<Link href="\/"[^>]*>/g) || [];
-  assert.equal(logoMatches.length, 1, 'exactly one link to "/" should remain — the logo');
-  assert.match(source, /<Link href="\/" className="logo">Breda<span>Eats<\/span><\/Link>/, 'the logo link itself must stay fully intact and unchanged');
+  assert.doesNotMatch(source, /← Home/, 'the redundant back-link must be gone now that the wordmark already links to "/"');
+  const homeLinks = source.match(/<Link href="\/"[^>]*>/g) || [];
+  assert.equal(homeLinks.length, 0, 'no page-local link to "/" — the shared <Wordmark /> renders the only one');
+  assert.equal((source.match(/<Wordmark \/>/g) || []).length, 1, 'exactly one shared wordmark in the header');
+  assert.doesNotMatch(source, /Breda<span>Eats<\/span>/, 'the old split BredaEats logo must be gone');
 });
 
 test('the header-right group uses the shared .header-right class, not an inline style, so it inherits the existing mobile flex-wrap treatment', () => {
