@@ -63,8 +63,10 @@ properties in `app/globals.css` (see
 this was built before the pages that visually depend on it, e.g. the
 homepage, were restyled). New UI work should reference these tokens
 (`var(--text-primary)`, `var(--border)`, `var(--accent)` for the brand
-accent, `var(--green)` only for status, etc.) rather than hardcoded colors,
-so it works correctly in both themes automatically.
+accent, a `var(--status-*)` role only for status, etc.) rather than
+hardcoded colors, so it works correctly in both themes automatically. The
+colour values and rules are set by **Kleurtaal v2** (see "Kleurtaal v2"
+below).
 
 The implemented theme contract, which every new page inherits without
 extra work:
@@ -171,7 +173,10 @@ directions were rejected.
   `Menukaarten` with a folded-menu-card line motif (inline SVG,
   `currentColor`, `aria-hidden`). One colour (`--wordmark`), no split
   accent on a word part, no external font or asset. The DOM text is
-  "Onze Menukaarten"; `ONZE` is uppercase via CSS only. Because browsers
+  "Onze Menukaarten"; `ONZE` is uppercase via CSS only. Kleurtaal v2: in
+  light the text is `--wordmark` (`#1A1410`) and the folded-card icon is
+  `--wordmark-icon` (`#B28110`, decorative); in dark both stay oker. The
+  icon is not a word part, so the no-split rule still holds. Because browsers
   expose the CSS uppercase in the accessible name ("ONZE Menukaarten",
   measured in Edge), the link carries an explicit `aria-label`, as in the
   handoff: "Onze Menukaarten, naar de startpagina" (public) and "Onze
@@ -183,24 +188,25 @@ directions were rejected.
   `--accent` (text, links, icons, focus), `--accent-fill` /
   `--on-accent-fill` (filled controls), `--accent-faint`,
   `--accent-border`, `--accent-surface(-strong)`, `--accent-glow`,
-  `--wordmark`, `--mark-bg` / `--mark-text` (homepage keyword marker).
+  `--wordmark`, `--wordmark-icon`, `--nav-indicator` (decorative active
+  tab stripe), `--mark-bg` / `--mark-text` (homepage keyword marker).
   `--border-focus` follows `--accent`.
 - **Full okergeel only for three things** (handoff rule): the primary
   button, the homepage keyword marker (and search-term highlight) and an
   active tab underline. Selected chips, active navigation, the active
   theme option and similar toggles use the soft treatment:
   `--accent-surface` background, `--accent` text, 1px `--accent` ring.
-- **`--green` is a status colour** (open, ok, vegan/vegetarian,
-  approved/complete). Never use it for new brand accents; never recolour
-  a status to the brand accent. Known internal exceptions predate this
-  rule and are out of this scope: the coverage dashboard's table header
-  and headline number, the editor-only moderation approve buttons and
-  the import-inbox info banner (listed in `theme-design-tokens.md`).
-- **Okergeel `#F2C35B` is a fill, never text on a light surface**
-  (1.65:1 on white). Light text/links use `#7A4E00`.
+- **Green is never a brand or action accent.** It exists only as the
+  dark value of `--status-positive` (see "Kleurtaal v2"). Approvals and
+  primary action buttons use the oker fill; information banners use the
+  soft accent; dietary labels are neutral. The former exceptions (coverage
+  table header and headline number, moderation approve buttons,
+  import-inbox info banner) were migrated by Kleurtaal v2.
+- **Okergeel is a fill, never text on a light surface** (light
+  `#F6C057`, dark `#F2C35B`; 1.65:1 on white). Light text, links, focus
+  and active chip text use ink oker `#7A4E00`.
 - **Control borders** (`--input-border`) reach at least 3:1 on every
-  surface token in both themes (light `#808792`, a slightly darker value
-  than the handoff's `#8A919C`, which fell below 3:1 on grey surfaces).
+  surface token in both themes (light `#8E877B`, dark `#6B7280`).
 - **No gradients** on hero or detail surfaces; the homepage keyword
   marker is an inset `box-shadow`.
 - **Reservation actions** never read as an ordering or primary internal
@@ -221,8 +227,103 @@ directions were rejected.
   mobile rather than being hidden.
 
 Light and dark values and measured contrast:
-`planning/specs/tickets/theme-design-tokens.md`, addendum "Onze
-Menukaarten brand accent".
+`planning/specs/tickets/theme-design-tokens.md`, addenda "Onze
+Menukaarten brand accent" and "Kleurtaal v2".
+
+## Kleurtaal v2 (implemented 2026-10-07)
+
+Source: the final design handoff "Onze Menukaarten — Kleurtaal v2
+(Brontriage)" (PDF, product owner; not stored in the repository, like the
+earlier Claude Design canvas). One colour language for public and
+internal UI. It is leading for every colour decision; where it and an
+older section of this file disagree, this section wins. Behaviour,
+routes, data, roles and the theme contract (explicit Licht/Donker, dark
+default, no system mode) are unchanged by it.
+
+**Global tokens** (`app/globals.css`; light / dark):
+
+| Token | Light | Dark |
+|---|---|---|
+| `--bg` / `--bg-card` | `#FCFAF4` / `#FFFDF9` | `#0A0A0A` / `#111111` |
+| `--bg-elevated` (also table header) | `#F5F3EE` | `#181818` |
+| `--text-primary` / `--text-secondary` | `#1A1410` / `#5C5650` | `#FFFFFF` / `#AAAAAA` |
+| `--input-border` (control border) | `#8E877B` | `#6B7280` |
+| `--accent` = `--border-focus` (links, focus, active nav/chip text) | `#7A4E00` | `#F2C35B` |
+| `--accent-fill` / `--on-accent-fill` (primary button, marker, active underline) | `#F6C057` / `#1F1600` | `#F2C35B` / `#1F1600` |
+| `--accent-surface` (selected, soft accent) | `#FEF1D5` | `#2A2109` |
+| `--border` (divider) | `#EFE8D8` | unchanged |
+| `--wordmark` / `--wordmark-icon` | `#1A1410` / `#B28110` | `#F2C35B` / `#F2C35B` |
+| `--nav-indicator` (decorative stripe) | `#D8BC7A` | `#F2C35B` |
+
+Hard rules:
+
+- **Oker is the brand and interaction colour.** Ink oker (`--accent`) is
+  text; okergeel (`--accent-fill`) is a fill only, behind `#1F1600`.
+- **Green is never a brand accent**; it is only the dark value of
+  `--status-positive`. Approvals and primary buttons are oker.
+- **Readable text uses `--text-primary` or `--text-secondary` only.**
+  Body text, labels, help text and status text never use `--text-muted`,
+  `--text-dim` or `--text-faint` (they miss AA on some surface: light
+  muted 4.36:1 on `--bg-elevated`, dark muted 3.09:1, faint ≤ 2.50:1).
+  Those tokens remain only for non-text decoration.
+- **Status always shows icon plus text**; colour is never the only
+  carrier. Use the shared `.status-badge` with `src/components/StatusIcon.js`
+  (or a module badge such as `.swq-badge` that uses the same roles).
+- No gradients, no food photography, no ordering, delivery or booking
+  look.
+
+**Semantic status roles** — only for status. Each role has a text
+colour, `-bg` and `-border` token; `--status-radius` gives the shape.
+
+| Role | Light (text on fill) | Dark (text + 1px border, 10% fill) | Used for |
+|---|---|---|---|
+| `--status-blocked` | `#8A1C12` on `#FCE0DA` (7.45:1) | `#FF6B6B` (min. 4.96:1) | Robots geblokkeerd, Niet bereikbaar, load and validation errors |
+| `--status-file` | `#5A3A0A` on `#FEF0D3` (9.11:1) | `#64B4FF` (min. 6.05:1) | Afbeelding/PDF, Klaar voor review |
+| `--status-old` | `#5A3A0A` on `#FEF0D3` (9.11:1) | `#FF9E6B` (min. 6.43:1) | Oude URL, Toegang beperkt, Identiteit gewijzigd, Structuur niet herkend |
+| `--status-action` | `#5A3A0A` on `#FEF1D5` (9.18:1) | `#FFD27A`, fill `rgba(255,210,122,0.10)` (min. **8.70:1**) | Actie nodig: an open task for an editor |
+| `--status-neutral` | `#2A2E36` on `#EFEFEF` (11.84:1) | `#AAAAAA` (min. 5.71:1) | Geen bruikbare menulink, Niet beoordeeld, Geen menukaart aangetroffen, closed |
+| `--status-positive` | `#2A2E36` on `#EFEFEF` (11.84:1) | `#06C167` (min. 5.77:1) | Herkenbaar, Bereikbaar, Nu open, goedgekeurd |
+
+Dark minima are measured over `--bg-card`, `--bg-elevated` and
+`--accent-surface`. Light is a borderless pill in calm red, oker and grey
+only (no blue, no green); dark uses a 6px radius and may also use blue
+and green. A user who switches themes therefore sees e.g. "Bereikbaar"
+grey in light and green in dark — deliberate.
+
+Meaning that must be kept:
+
+- Dietary labels (vegetarisch, vegan) are neutral outlined labels with a
+  leaf icon, not a success status.
+- Information is not success: info banners use `--accent-surface` with a
+  1px `--accent` border.
+- Approvals and primary action buttons use the oker fill, never green.
+
+BE-23 mapping (`app/internal/source-workqueue/page.js`): Bereikbaar →
+positive; Niet bereikbaar → blocked; Toegang beperkt, Identiteit
+gewijzigd, Structuur niet herkend → old; Klaar voor review → file; Niet
+beoordeeld, Geen menukaart aangetroffen → neutral. Import inbox: Nieuw →
+action; Aanvullen / Uitgesteld → old; Goedgekeurd / Complete → positive;
+Afgewezen / Incomplete → blocked.
+
+Compatibility: `--green`, `--green-faint`, `--green-border` (→
+`--status-positive*`), `--danger` (→ `--status-blocked`) and `--warning`
+(→ `--status-old`) remain as aliases so other branches do not break
+silently. New code uses the role names. `--tag-*` content tags
+(Aanbevolen, Dagspecial, Halal, Glutenvrij) are not status roles and keep
+their own tokens.
+
+Open points (not decided by Kleurtaal v2):
+
+- Where "Actie nodig" sits in the status vocabulary below (which
+  dimension, when it is assigned). The role exists; today only the
+  import inbox's "Nieuw" uses it.
+- The Brontriage statuses and the "Brontriage" navigation item stay open
+  decisions from that handoff.
+- In light, the "Actie nodig" fill equals the selected-row fill; on a
+  selected row the fill disappears, icon and text stay readable.
+- The light values were measured from a generated mockup image (a few
+  shades of margin). Serif typography, KPI tiles and the deviating nav
+  labels in that mockup were not adopted.
 
 ## Internal navigation hierarchy
 
@@ -308,16 +409,18 @@ Where these rules come from:
   4.5:1. Focus indicators and essential non-text UI aim for at least
   3:1. Measure in **both** themes.
 - Use tokens. When a token fails in a specific context, use a stronger
-  existing token there instead of a hardcoded colour. For example, the
-  inactive internal toggle option uses `--text-secondary` instead of
-  `--text-muted`.
+  existing token there instead of a hardcoded colour. Readable text uses
+  `--text-secondary`, never `--text-muted`/`--text-dim`/`--text-faint`
+  (Kleurtaal v2).
 - Record the measured minimum in the ticket.
-- Known gap: the public header's inactive toggle option measures 4.39:1
-  light and 3.09:1 dark. This is a separate follow-up.
+- The former gap of the public header's inactive toggle option (4.39:1
+  light / 3.09:1 dark with `--text-muted`) is closed by Kleurtaal v2: it
+  now uses `--text-secondary` (at least 6.46:1 light / 6.85:1 dark).
 
 **Status is never colour alone.** Every status badge carries an icon and
 the full text, e.g. "Bron: Bereikbaar" (BE-23; decision 014, item 2:
-the current destination is "never color alone").
+the current destination is "never color alone"). Colours come from the
+Kleurtaal v2 status roles; a bare coloured dot is not a status.
 
 **Keyboard and focus** (decision 014, items 6–7)
 

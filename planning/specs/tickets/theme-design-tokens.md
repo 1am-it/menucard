@@ -193,3 +193,76 @@ darker open-green (`#1B6B3A`) and a neutral info colour; neither is
 implemented — the current `--green` meets 4.5:1 (5.08:1 on white). Other
 known, unchanged follow-ups: dark `--text-muted` (`#666666`) stays below
 4.5:1; `--tag-featured` / `--tag-halal` (gold) sit close to the accent hue.
+
+## Addendum — Kleurtaal v2 (2026-10-07)
+
+Implements the final design source "Onze Menukaarten — Kleurtaal v2
+(Brontriage)" for public and internal UI. The rules, the full token table
+and the status roles live in `docs/guides/design-reference.md`
+("Kleurtaal v2"); this addendum records the migration. The theme contract
+is unchanged: explicit Licht/Donker, dark is the runtime default, no
+system option. Dark global values are unchanged; new dark tokens are the
+status roles. Both light blocks (media + explicit) stay identical.
+
+Old → new (light unless noted):
+
+| Token | Before | After |
+|---|---|---|
+| `--bg` / `--bg-card` | `#ffffff` / `#ffffff` | `#FCFAF4` / `#FFFDF9` |
+| `--bg-elevated` | `#f3f4f6` | `#F5F3EE` |
+| `--bg-input` | `#ffffff` | `#FFFDF9` (derived: same as card) |
+| `--text-primary` / `--text-secondary` | `#14181c` / `#4b5563` | `#1A1410` / `#5C5650` |
+| `--border` | `#e3e5e8` | `#EFE8D8` |
+| `--input-border` | `#808792` | `#8E877B` |
+| `--accent-fill`, `--mark-bg` | `#F2C35B` | `#F6C057` |
+| `--accent-surface`, `--accent-faint` | `#FDF3D8` | `#FEF1D5` |
+| `--wordmark` | `#7A4E00` | `#1A1410` (+ new `--wordmark-icon` `#B28110`) |
+| `--nav-indicator` | — | new: `#D8BC7A` light / `#F2C35B` dark |
+| `--header-bg` / `--sticky-bg` | white, 0.92 / 0.94 | `rgba(252, 250, 244, …)` (derived from `--bg`) |
+| `--tag-featured` | `#8a6a00` (4.33:1 on white, below AA) | `#735800` (5.54:1 on its tint over the card) |
+| `--status-*` (6 roles × text/`-bg`/`-border`), `--status-radius` | — | new, both themes |
+| `--green`, `--green-faint`, `--green-border` | light `#087f45`…, dark `#06C167`… | aliases of `--status-positive*`, defined once in the dark `:root` |
+| `--green-dim`, `--green-surface(-strong)`, `--green-glow` | defined, unused | removed |
+| `--danger`, `--danger-bg` | light `#c62828`, dark `#ff4444` | aliases of `--status-blocked(-bg)` (light `#8A1C12`, dark `#FF6B6B`) |
+| `--warning`, `--warning-bg` | light `#9A3412` (rust), dark `#FF9E6B` | aliases of `--status-old(-bg)` (light `#5A3A0A` oker, dark unchanged) |
+| `--whatsapp-bg/-border/-hover-bg` | green tints | removed; the WhatsApp button is outlined oker like `.rc-reserve-btn` |
+| `--text-muted`, `--text-dim`, `--text-faint` | used for readable text | values unchanged; decoration only. All 165 readable uses moved to `--text-secondary` |
+
+Green applications moved:
+
+- To oker: moderation approve buttons (white on green → `--accent-fill` /
+  `--on-accent-fill`).
+- To the soft accent: the import-inbox info banner (`--accent-surface`,
+  1px `--accent`, primary text).
+- To neutral: coverage table header tint (`--bg-elevated`), coverage
+  headline number (`--text-primary`), the coverage "Internal only" label,
+  `.tag-vegetarisch` / `.tag-vegan` (outlined, `--text-secondary`, leaf
+  icon), the WhatsApp reservation button tint.
+- To `--status-positive` with icon + text: "Open" on the menu page, the
+  restaurant detail page, the legacy `/restaurants` card and the browse
+  card (`.lrc-status`); `.hours-today`; `.dish-result-status.is-open`;
+  `.di-chip--complete/--approved_internal`, `.di-summary-icon--approved_internal`,
+  `.di-status-icon--positive`; Bronwerkvoorraad "Bereikbaar"; coverage
+  "Complete"; the set-password success message; moderation "Domain match".
+- Dots replaced: coloured status dots became `StatusIcon` + text; the
+  "Nu open" filter buttons show a decorative clock icon (the button text
+  and its active state carry the meaning).
+
+Also aligned: internal navigation active destinations now use
+`--accent-surface` + 1px `--accent` ring (the soft treatment this file
+already prescribes), and the import-inbox status chips carry an icon.
+
+Measured (WCAG 2.x; asserted in `src/lib/colourLanguage.test.js`):
+
+| Pair | Light | Dark |
+|---|---|---|
+| `--text-secondary` on bg / card / elevated / accent-surface | 6.93 / 7.12 / 6.53 / 6.46 | 8.52 / 8.13 / 7.64 / 6.85 |
+| `--accent` on bg / accent-surface | 6.90 / 6.43 | 12.00 / 9.65 |
+| `--on-accent-fill` on `--accent-fill` | 10.74 | 10.85 |
+| `--input-border` on bg / elevated / hover (UI 3:1) | 3.41 / 3.21 / 3.11 | 4.10 / 3.67 / 3.29 |
+| Focus ring (`--accent`) on bg | 6.90 | 12.00 |
+| Status minima | see design-reference table | "Actie nodig" 8.70 |
+
+`--nav-indicator` light (`#D8BC7A`, 1.77:1) and `--wordmark-icon`
+(`#B28110`, 3.33:1) are decorative; the active tab is also carried by its
+`--accent` text, the wordmark by its text and accessible name.
