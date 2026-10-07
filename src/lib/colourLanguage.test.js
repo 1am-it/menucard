@@ -310,3 +310,54 @@ test('import-inbox status chips carry an icon next to the text', () => {
 test('no gradients and no photography were introduced', () => {
   assert.doesNotMatch(css(), /linear-gradient|radial-gradient/);
 });
+
+// ── Herstelronde: statusrollen alleen waar de inhoud een status is ─────────
+
+const jsFiles = () => execSync('git ls-files app src', { cwd: ROOT }).toString().trim().split('\n')
+  .filter((f) => f.endsWith('.js') && !f.endsWith('.test.js') && fs.existsSync(path.join(ROOT, f)));
+
+// Every custom property used as a text colour must be a known, reviewed
+// token. A new page-scoped "secondary" colour (such as the former
+// coverage-only variable) fails here instead of silently escaping the
+// Kleurtaal v2 rule that readable secondary text is --text-secondary.
+const TEXT_COLOUR_TOKENS = new Set([
+  'text-primary', 'text-secondary',
+  'accent', 'accent-dim', 'on-accent', 'on-accent-fill', 'wordmark', 'wordmark-icon', 'mark-text',
+  'status-positive', 'status-blocked', 'status-neutral', 'status-file', 'status-old', 'status-action',
+  'danger', 'warning',
+  'tag-featured', 'tag-info', 'tag-halal', 'tag-gluten', 'allergy', 'allergy-strong', 'wine',
+  'bg-card', // only as text on a full --accent fill (.swq-count), never as readable text on a surface
+]);
+
+test('every text colour custom property is a reviewed token (CSS and inline styles)', () => {
+  const offenders = [];
+  const scan = (label, src, re) => {
+    let m;
+    while ((m = re.exec(src))) {
+      for (const v of m[1].matchAll(/var\(--([a-z0-9-]+)/g)) if (!TEXT_COLOUR_TOKENS.has(v[1])) offenders.push(`${label}: --${v[1]}`);
+    }
+  };
+  scan('app/globals.css', css(), /(?<![-\w])color\s*:\s*([^;}\n]*)/g);
+  for (const f of jsFiles()) scan(f, read(f), /(?<![-\w])color\s*:\s*([^,;}\n]*)/g);
+  assert.deepEqual(offenders, []);
+});
+
+test('today in the opening hours is a presentation marker, never a positive status', () => {
+  const s = css();
+  const today = s.match(/\.hours-today[^{]*\{[^}]*\}/g) || [];
+  assert.ok(today.length > 0);
+  for (const rule of today) assert.doesNotMatch(rule, /status-|green/, rule);
+  assert.match(s, /\.hours-today \.hours-day \{ color: var\(--accent\); \}/);
+  assert.match(read('app/restaurant/[id]/RestaurantDetailView.js'), /aria-current=\{isToday \? 'date' : undefined\}/);
+});
+
+test('dark: only approved refinements — the error border keeps its former 20% alpha', () => {
+  const { dark } = blocks();
+  assert.equal(tokenIn(dark, 'danger-border'), 'rgba(255, 107, 107, 0.20)');
+});
+
+test('dead open-dot and dish-result-status CSS is gone and nothing references it', () => {
+  const s = css();
+  assert.doesNotMatch(s, /\.rc-open-(dot|label|status)\b|\.dish-result-status\b/);
+  for (const f of jsFiles()) assert.doesNotMatch(read(f), /rc-open-(dot|label|status)|dish-result-status/, f);
+});

@@ -145,7 +145,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
                   return (
                     <div key={day} className={`hours-row ${isToday ? 'hours-today' : ''}`}
                       style={{ display: 'contents' }}>
-                      <span className="hours-day">{DAY_SHORT[day]}</span>
+                      <span className="hours-day" aria-current={isToday ? 'date' : undefined}>{DAY_SHORT[day]}</span>
                       {hours
                         ? <span className="hours-time">{hours}</span>
                         : <span className="hours-closed">Gesloten</span>

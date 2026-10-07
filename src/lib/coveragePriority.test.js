@@ -270,8 +270,10 @@ test('structural: the coverage route and metrics computation are byte-for-byte u
 
 // ─── Dark-mode contrast fix (F1/F2 from the production dark-mode check) ───
 // The dashboard's secondary texts and the "None yet" status must meet WCAG
-// AA for normal text (4.5:1) in both themes, through a page-scoped variable
-// — never by changing the global --text-muted/--text-faint tokens.
+// AA for normal text (4.5:1) in both themes. Kleurtaal v2 replaced the
+// former page-scoped --cov-text-subtle with the global --text-secondary
+// (the only readable secondary colour), without changing the global
+// --text-muted/--text-faint tokens.
 
 /** Reads the real token values out of app/globals.css's three theme
  * places (dark base :root, system-light media block, explicit light). */
@@ -289,11 +291,7 @@ function themeTokens() {
   const dark = block(/\n:root \{([\s\S]*?)\n\}/);
   const systemLight = block(/@media \(prefers-color-scheme: light\) \{\n  :root:not\(\[data-theme="dark"\]\) \{([\s\S]*?)\n  \}/);
   const explicitLight = block(/\n:root\[data-theme="light"\] \{([\s\S]*?)\n\}/);
-  const covDark = css.match(/\n\.cov-dashboard \{ --cov-text-subtle: (#[0-9a-fA-F]{6}); \}/);
-  const covSystemLight = css.match(/:root:not\(\[data-theme="dark"\]\) \.cov-dashboard \{ --cov-text-subtle: (#[0-9a-fA-F]{6}); \}/);
-  const covExplicitLight = css.match(/\n:root\[data-theme="light"\] \.cov-dashboard \{ --cov-text-subtle: (#[0-9a-fA-F]{6}); \}/);
-  assert.ok(covDark && covSystemLight && covExplicitLight, 'expected --cov-text-subtle in all three theme places, scoped to .cov-dashboard');
-  const pick = (body, cov) => ({
+  const pick = (body) => ({
     bg: read(body, 'bg'),
     card: read(body, 'bg-card'),
     elevated: read(body, 'bg-elevated'),
@@ -301,15 +299,9 @@ function themeTokens() {
     muted: read(body, 'text-muted'),
     faint: read(body, 'text-faint'),
     positive: read(body, 'status-positive'),
-    old: read(body, 'status-old'),
-    subtle: cov.toLowerCase(),
+    neutral: read(body, 'status-neutral'),
   });
-  return {
-    dark: pick(dark, covDark[1]),
-    systemLight: pick(systemLight, covSystemLight[1]),
-    explicitLight: pick(explicitLight, covExplicitLight[1]),
-    css,
-  };
+  return { dark: pick(dark), systemLight: pick(systemLight), explicitLight: pick(explicitLight), css };
 }
 
 /** WCAG 2.x contrast ratio of two #rrggbb colors — no dependency. */
@@ -328,30 +320,21 @@ test('contrast helper matches known WCAG values', () => {
   assert.equal(Math.round(contrast('#444444', '#111111') * 100) / 100, 1.94, 'the measured production value of the old "None yet" on a dark card');
 });
 
-test('F2: the coverage secondary-text color meets 4.5:1 on every page surface, in every theme', () => {
+test('F2 (Kleurtaal v2): the coverage secondary text is --text-secondary and meets 4.5:1 on every page surface, in every theme', () => {
   const tokens = themeTokens();
   for (const theme of ['dark', 'systemLight', 'explicitLight']) {
     const t = tokens[theme];
     for (const surface of ['bg', 'card', 'elevated']) {
-      const ratio = contrast(t.subtle, t[surface]);
-      assert.ok(ratio >= 4.5, `${theme}: --cov-text-subtle ${t.subtle} on ${surface} ${t[surface]} is ${ratio.toFixed(2)}:1`);
+      const ratio = contrast(t.secondary, t[surface]);
+      assert.ok(ratio >= 4.5, `${theme}: --text-secondary ${t.secondary} on ${surface} ${t[surface]} is ${ratio.toFixed(2)}:1`);
     }
   }
 });
 
-test('F2: the hierarchy is kept — subtle text stays visibly dimmer than --text-secondary in dark', () => {
-  const { dark } = themeTokens();
-  assert.ok(contrast(dark.subtle, dark.card) < contrast(dark.secondary, dark.card), 'subtle must remain below secondary');
-});
-
-test('F2: no light-theme regression — subtle is at least as strong as the old --text-muted on every surface', () => {
-  const tokens = themeTokens();
-  for (const theme of ['systemLight', 'explicitLight']) {
-    const t = tokens[theme];
-    for (const surface of ['bg', 'card', 'elevated']) {
-      assert.ok(contrast(t.subtle, t[surface]) >= contrast(t.muted, t[surface]), `${theme} on ${surface}`);
-    }
-  }
+test('F2 (Kleurtaal v2): no page-scoped secondary-text variable remains', () => {
+  const { css } = themeTokens();
+  assert.doesNotMatch(css, /--cov-text-subtle/, 'the CSS no longer defines or uses --cov-text-subtle');
+  assert.doesNotMatch(pageCode(), /--cov-text-subtle/, 'the coverage page no longer uses --cov-text-subtle');
 });
 
 test('F1: every metric-card status label (Complete / Partial / None yet) meets 4.5:1 on the card, in every theme', () => {
@@ -359,8 +342,11 @@ test('F1: every metric-card status label (Complete / Partial / None yet) meets 4
   const source = pageSource();
   const stateColor = (state) => source.match(new RegExp(`${state}: \\{ label: '[^']+', color: 'var\\(--([a-z-]+)\\)' \\}`))[1];
   assert.equal(stateColor('empty'), 'text-secondary', '"None yet" uses --text-secondary, never --text-faint');
-  // Kleurtaal v2: Complete = --status-positive, Partial = --status-old.
-  const tokenKey = { 'status-positive': 'positive', 'status-old': 'old', 'text-secondary': 'secondary' };
+  // Kleurtaal v2: only Complete is a positive status; Partial has no
+  // decided role and stays neutral (never --status-old or --status-action).
+  assert.equal(stateColor('complete'), 'status-positive');
+  assert.equal(stateColor('partial'), 'status-neutral');
+  const tokenKey = { 'status-positive': 'positive', 'status-neutral': 'neutral', 'text-secondary': 'secondary' };
   for (const theme of ['dark', 'systemLight', 'explicitLight']) {
     const t = tokens[theme];
     for (const state of ['complete', 'partial', 'empty']) {
@@ -371,30 +357,26 @@ test('F1: every metric-card status label (Complete / Partial / None yet) meets 4
   }
 });
 
-test('the global --text-muted and --text-faint tokens are unchanged (the fix is page-scoped)', () => {
+test('the global --text-muted and --text-faint tokens are unchanged', () => {
   const tokens = themeTokens();
   assert.deepEqual([tokens.dark.muted, tokens.dark.faint], ['#666666', '#444444']);
   for (const theme of ['systemLight', 'explicitLight']) assert.deepEqual([tokens[theme].muted, tokens[theme].faint], ['#6b7280', '#9aa1ab']);
-  // A bare :root selector (optionally with [attr]/:not(...)), with no
-  // descendant .cov-dashboard part, must never define the variable.
-  assert.doesNotMatch(tokens.css, /(^|\n)\s*:root(\[[^\]]*\]|:not\([^)]*\))*\s*\{[^}]*--cov-text-subtle/, '--cov-text-subtle is never defined on :root itself');
-  assert.match(tokens.css, /\.cov-dashboard \.di-accordion-subtitle \{ color: var\(--cov-text-subtle\); \}/, 'the shared accordion subtitle is only overridden inside the coverage page');
   assert.doesNotMatch(tokens.css, /\.cov-dashboard[^{]*\{[^}]*opacity/, 'no opacity trick');
 });
 
-test('structural: every <main> of the coverage page carries the scoped class, and no global muted/faint color is used on the page', () => {
+test('structural: every <main> of the coverage page carries the page class, and its secondary texts use --text-secondary', () => {
   const code = pageCode();
   const mains = code.match(/<main\b[^>]*>/g) || [];
   assert.equal(mains.length, 4, 'loading, error, loading-data and data states');
   for (const main of mains) assert.match(main, /className="cov-dashboard"/);
-  assert.doesNotMatch(code, /var\(--text-muted\)|var\(--text-faint\)/);
+  assert.doesNotMatch(code, /var\(--text-muted\)|var\(--text-faint\)|var\(--text-dim\)/);
   for (const text of ['Read-only, recomputed on every load', 'Overall menu coverage', 'Shows whether menu data is present', 'Neighbourhoods with the most restaurants still missing menu data']) {
     const at = code.indexOf(text);
     assert.ok(at > 0, text);
     const opening = code.slice(code.lastIndexOf('<', at), at);
-    assert.match(opening, /color: 'var\(--cov-text-subtle\)'/, `${text} uses the scoped subtle color`);
+    assert.match(opening, /color: 'var\(--text-secondary\)'/, `${text} uses --text-secondary`);
   }
-  assert.match(code, /<span style=\{\{ color: 'var\(--cov-text-subtle\)' \}\}>\{pct === null \? '—' : `\$\{pct\}%`\}<\/span>/, 'card percentages use the scoped subtle color');
+  assert.match(code, /<span style=\{\{ color: 'var\(--text-secondary\)' \}\}>\{pct === null \? '—' : `\$\{pct\}%`\}<\/span>/, 'card percentages use --text-secondary');
 });
 
 test('structural: the status stays readable without color — text label next to a decorative, aria-hidden ring', () => {

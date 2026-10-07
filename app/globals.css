@@ -115,7 +115,7 @@
      --status-old (aandacht). Alleen de randen zijn eigen waarden. */
   --danger:               var(--status-blocked);
   --danger-bg:            var(--status-blocked-bg);
-  --danger-border:        rgba(255, 107, 107, 0.35);
+  --danger-border:        rgba(255, 107, 107, 0.20);
   --danger-glow:          rgba(255, 107, 107, 0.6);
   --warning:              var(--status-old);
   --warning-bg:           var(--status-old-bg);
@@ -947,7 +947,14 @@ header, .site-header {
 .hours-time { font-size: 12px; color: var(--text-secondary); }
 .hours-closed { font-size: 12px; color: var(--text-secondary); font-style: italic; }
 .hours-today .hours-day,
-.hours-today .hours-time { color: var(--status-positive); font-weight: 700; }
+.hours-today .hours-time,
+.hours-today .hours-closed { font-weight: 700; }
+/* Kleurtaal v2: "vandaag" is een presentatiemarkering, geen status. Het
+   daglabel krijgt inkt-oker (accent als tekst), de tijden primaire tekst;
+   nooit --status-positive — openingsstatus staat apart in "Vandaag". */
+.hours-today .hours-day { color: var(--accent); }
+.hours-today .hours-time,
+.hours-today .hours-closed { color: var(--text-primary); }
 
 .dip-cta { display: flex; flex-direction: column; gap: 8px; }
 
@@ -1484,27 +1491,6 @@ header, .site-header {
 }
 .allergen-chip-clear:hover { border-color: var(--danger); color: var(--danger); }
 
-/* ── Open/closed status op restaurant card ── */
-.rc-open-status {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.rc-open-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.rc-open-dot.open   { background: var(--status-positive); }
-.rc-open-dot.closed { background: var(--text-dim); }
-.rc-open-label {
-  font-size: 12px;
-  font-weight: 600;
-}
-.rc-open-label.open   { color: var(--status-positive); }
-.rc-open-label.closed { color: var(--text-secondary); }
-
 /* ── Adres als Google Maps link ── */
 .rc-address-link {
   color: var(--text-secondary);
@@ -1963,8 +1949,6 @@ mark.search-highlight {
   color: var(--text-secondary);
   margin-bottom: 4px;
 }
-.dish-result-status.is-open  { color: var(--status-positive); font-weight: 600; }
-.dish-result-status.is-closed { color: var(--text-secondary); }
 .dish-result-distance { color: var(--text-secondary); }
 .dish-result-context { color: var(--text-secondary); }
 .dish-result-match-hint { color: var(--text-secondary); font-style: italic; }
@@ -2398,10 +2382,9 @@ mark.search-highlight {
 .internal-nav-theme { margin-left: auto; display: flex; }
 .internal-nav-theme + .internal-nav-signout { margin-left: 0; }
 .internal-nav-theme .theme-btn:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
-/* The shared .theme-btn uses --text-muted for the inactive option, which
-   measures 4.39:1 (light) and 3.09:1 (dark) on this nav — below 4.5:1. Inside
-   the internal nav only, the inactive option uses --text-secondary instead;
-   the active option keeps its accent colours. */
+/* The shared .theme-btn now uses --text-secondary for the inactive option
+   everywhere (Kleurtaal v2); these internal-nav rules are kept as an
+   explicit, scoped guarantee and match the global values. */
 .internal-nav-theme .theme-btn { color: var(--text-secondary); }
 .internal-nav-theme .theme-btn.active { color: var(--accent); }
 
@@ -2606,26 +2589,11 @@ mark.search-highlight {
 .cov-toggle-chevron svg { width: 15px; height: 15px; }
 .cov-toggle[aria-expanded="true"] .cov-toggle-chevron { transform: rotate(180deg); }
 
-/* PLATFORM-12 dark-mode contrast fix — the Coverage Dashboard's own
-   secondary-text color, scoped to .cov-dashboard (every <main> of
-   app/internal/coverage/page.js) so the global --text-muted/--text-faint
-   tokens, and every other screen, stay exactly as they are. Measured
-   WCAG contrast for normal text (AA needs 4.5:1):
-     dark  #8f8f8f — 6.12 on --bg, 5.84 on --bg-card, 5.49 on --bg-elevated
-                     (global --text-muted: 3.45 / 3.29 / 3.09); still
-                     visibly dimmer than --text-secondary (8.13 on the card),
-                     so the hierarchy is kept.
-     light #5f6672 — 5.78 on --bg/--bg-card, 5.26 on --bg-elevated
-                     (global --text-muted: 4.83 / 4.39) — no light regression.
-   Same three-place theme pattern as the global tokens above: dark base,
-   system light (unless dark is forced), explicit light. Solid colors only,
-   no opacity. src/lib/coveragePriority.test.js recomputes these ratios. */
-.cov-dashboard { --cov-text-subtle: #8f8f8f; }
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) .cov-dashboard { --cov-text-subtle: #5f6672; }
-}
-:root[data-theme="light"] .cov-dashboard { --cov-text-subtle: #5f6672; }
-.cov-dashboard .di-accordion-subtitle { color: var(--cov-text-subtle); }
+/* PLATFORM-12 / Kleurtaal v2 — the Coverage Dashboard no longer has its
+   own secondary-text colour (the former page-scoped "cov-text-subtle" variable).
+   Its secondary text uses the global --text-secondary like every other
+   screen: the only readable secondary colour under Kleurtaal v2.
+   src/lib/coveragePriority.test.js asserts this. */
 
 /* ── Bronwerkvoorraad (/internal/source-workqueue) ─────────────────────────
    Theme tokens only, so light and dark both work. Status colour is never
