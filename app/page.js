@@ -12,7 +12,7 @@ import Wordmark from '@/src/components/Wordmark'
 // planning/decisions/007-homepage-shift.md.
 
 // Lichte lijn-iconen i.p.v. emoji (Onze Menukaarten-richting, design-reference
-// "Woordmerk en iconen"): aria-hidden, currentColor, geen externe asset.
+// "Wordmark and brand accent"): aria-hidden, currentColor, geen externe asset.
 const MEAL_ICON_PATHS = {
   lunch: 'M3 11h14a7 7 0 01-14 0zM10 4v3M7 5.5l.8 1.6M13 5.5l-.8 1.6',
   diner: 'M6 2.5v6M4 2.5v4a2 2 0 004 0v-4M6 8.5v9M14.5 17.5v-15c-1.8.8-3 2.8-3 5.5v3h3',

@@ -87,7 +87,8 @@ Both a light theme (the primary/default design direction, per
 `docs/mockups/`) and the original dark theme are supported as
 user-selectable options — dark is not being deprecated. Use the CSS custom
 properties defined in `app/globals.css` (`var(--text-primary)`,
-`var(--border)`, `var(--green)`, etc.) for any color, border, or surface
+`var(--border)`, `var(--accent)` for the brand accent, `var(--green)` only
+for status, etc.) for any color, border, or surface
 styling instead of hardcoded values, so new UI works correctly in both
 themes automatically. See `docs/guides/design-reference.md` and
 `planning/specs/tickets/theme-design-tokens.md`.

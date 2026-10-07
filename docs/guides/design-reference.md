@@ -62,8 +62,9 @@ properties in `app/globals.css` (see
 `planning/decisions/006-theme-token-system-implemented-early.md` for why
 this was built before the pages that visually depend on it, e.g. the
 homepage, were restyled). New UI work should reference these tokens
-(`var(--text-primary)`, `var(--border)`, `var(--green)`, etc.) rather than
-hardcoded colors, so it works correctly in both themes automatically.
+(`var(--text-primary)`, `var(--border)`, `var(--accent)` for the brand
+accent, `var(--green)` only for status, etc.) rather than hardcoded colors,
+so it works correctly in both themes automatically.
 
 The implemented theme contract, which every new page inherits without
 extra work:
@@ -170,7 +171,11 @@ directions were rejected.
   `Menukaarten` with a folded-menu-card line motif (inline SVG,
   `currentColor`, `aria-hidden`). One colour (`--wordmark`), no split
   accent on a word part, no external font or asset. The DOM text is
-  "Onze Menukaarten"; `ONZE` is uppercase via CSS only. The descriptor
+  "Onze Menukaarten"; `ONZE` is uppercase via CSS only. Because browsers
+  expose the CSS uppercase in the accessible name ("ONZE Menukaarten",
+  measured in Edge), the link carries an explicit `aria-label`, as in the
+  handoff: "Onze Menukaarten, naar de startpagina" (public) and "Onze
+  Menukaarten, naar het interne overzicht" (`InternalNav`). The descriptor
   sits next to the link and is hidden below 720px. Every public page
   header renders exactly one `<Wordmark />`; `InternalNav` uses
   `WordmarkInline`.
@@ -180,16 +185,40 @@ directions were rejected.
   `--accent-border`, `--accent-surface(-strong)`, `--accent-glow`,
   `--wordmark`, `--mark-bg` / `--mark-text` (homepage keyword marker).
   `--border-focus` follows `--accent`.
-- **`--green` is a status colour only** (open, ok, vegan/vegetarian,
-  approved/complete). Never use it for brand accents; never recolour a
-  status to the brand accent.
+- **Full okergeel only for three things** (handoff rule): the primary
+  button, the homepage keyword marker (and search-term highlight) and an
+  active tab underline. Selected chips, active navigation, the active
+  theme option and similar toggles use the soft treatment:
+  `--accent-surface` background, `--accent` text, 1px `--accent` ring.
+- **`--green` is a status colour** (open, ok, vegan/vegetarian,
+  approved/complete). Never use it for new brand accents; never recolour
+  a status to the brand accent. Known internal exceptions predate this
+  rule and are out of this scope: the coverage dashboard's table header
+  and headline number, the editor-only moderation approve buttons and
+  the import-inbox info banner (listed in `theme-design-tokens.md`).
 - **Okergeel `#F2C35B` is a fill, never text on a light surface**
   (1.65:1 on white). Light text/links use `#7A4E00`.
+- **Control borders** (`--input-border`) reach at least 3:1 on every
+  surface token in both themes (light `#808792`, a slightly darker value
+  than the handoff's `#8A919C`, which fell below 3:1 on grey surfaces).
 - **No gradients** on hero or detail surfaces; the homepage keyword
   marker is an inset `box-shadow`.
-- Reservation actions on the menu page are outlined (`.rp-btn-reserveer`)
-  with an external-link icon when they leave the site, so they never read
-  as an ordering button.
+- **Reservation actions** never read as an ordering or primary internal
+  button. On the menu page they are outlined (`.rp-btn-reserveer`); on
+  the restaurant detail page they stay secondary to "Bekijk menukaart";
+  the legacy `/restaurants` card button is outlined. When the action
+  leaves the site it carries `ExternalLinkIcon` (decorative icon plus
+  visually hidden "(opent in een nieuw venster)"). Below the action a
+  note names the restaurant's own channel and says Onze Menukaarten
+  takes no reservations or orders itself (`getReservationNote` in
+  `src/utils/reservation.js`).
+- **Homepage USP blocks:** "Zoek op gerecht", "Zie direct de prijs" and
+  "Snel en licht", directly under the search bar and meal chips and
+  before "Populaire keukens" (handoff "Start · 1280"): a list with one
+  `h2` and plain text per block and a 44px soft-oker icon tile. Three
+  columns on desktop, one column below 720px. The handoff's 390px frame
+  does not draw them above the fold; they stay in the same order on
+  mobile rather than being hidden.
 
 Light and dark values and measured contrast:
 `planning/specs/tickets/theme-design-tokens.md`, addendum "Onze
