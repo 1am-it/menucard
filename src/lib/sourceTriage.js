@@ -52,6 +52,22 @@ const STATUS_ROLES = {
   rejected: { tone: 'neutral', icon: 'cross' },
 };
 
+// BE-23's Bron/Menukaart badges, same Kleurtaal v2 mapping as
+// app/internal/source-workqueue/page.js (design-reference.md, "BE-23
+// mapping"); icons are StatusIcon names.
+const SOURCE_BADGES = {
+  reachable: { tone: 'positive', icon: 'check' },
+  unreachable: { tone: 'blocked', icon: 'cross' },
+  access_limited: { tone: 'old', icon: 'alert' },
+  identity_changed: { tone: 'old', icon: 'alert' },
+};
+const MENU_BADGES = {
+  ready_for_review: { tone: 'file', icon: 'alert' },
+  structure_not_recognized: { tone: 'old', icon: 'alert' },
+  no_menu_found: { tone: 'neutral', icon: 'dot' },
+  not_assessed: { tone: 'neutral', icon: 'dot' },
+};
+
 const DECISIONS = ['accepted', 'rejected'];
 
 // The only allowed transitions. `accepted` and `rejected` are final.
@@ -426,6 +442,8 @@ module.exports = {
   PROPOSAL_STATUSES,
   STATUS_LABELS,
   STATUS_ROLES,
+  SOURCE_BADGES,
+  MENU_BADGES,
   DECISIONS,
   TRANSITIONS,
   EVENT_LABELS,

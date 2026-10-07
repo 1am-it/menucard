@@ -98,6 +98,12 @@ const INTERNAL_MODULES = [
   // count is shown in the nav (BE-20 "Visual contract": only real, computed
   // counts — the page itself shows them).
   { id: 'source-workqueue', label: 'Bronwerkvoorraad', href: '/internal/source-workqueue', requiredRole: 'internal', placement: 'workqueue', subtitle: 'Bron en menukaart per restaurant' },
+  // Brontriage — proposal-only source triage (BE-24,
+  // planning/specs/tickets/be-24-internal-source-triage.md): record and
+  // accept/reject source proposals; nothing is fetched or published. Label
+  // and position are this build's choice (Kleurtaal v2 left the item open),
+  // flagged for product confirmation. No badge count.
+  { id: 'source-triage', label: 'Brontriage', href: '/internal/source-triage', requiredRole: 'internal', placement: 'workqueue', subtitle: 'Bronvoorstellen vastleggen en beoordelen' },
   { id: 'profile-drafts', label: 'Profielconcepten', href: '/internal/profile-drafts', requiredRole: 'internal', placement: 'workqueue', subtitle: 'Klaarzetten' },
   // BE-17/PLATFORM-06's existing `editor`-only Moderation module — route,
   // authorization, and data model completely unchanged. Per BE-20's own
