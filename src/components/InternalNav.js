@@ -38,17 +38,7 @@ import { resolveVisibleModules, groupModulesByPlacement, isOwnerRole, hasAnyKnow
 // following). Mounted once here so every internal page gets it — no
 // internal-only theme logic.
 import ThemeToggle from '@/src/components/ThemeToggle'
-
-function IconWordmark() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
-      <path d="M6 2v7a2 2 0 0 0 2 2v11" />
-      <path d="M6 2v4" />
-      <path d="M9 2v4" />
-      <path d="M18 2c-2 0-3 2-3 5s1 4 3 4v11" />
-    </svg>
-  )
-}
+import { WordmarkInline } from '@/src/components/Wordmark'
 
 function IconWorkqueue() {
   return (
@@ -177,10 +167,10 @@ export default function InternalNav({ accessToken, roles: rolesProp }) {
       <a
         href="/internal"
         className="internal-nav-home"
+        aria-label="Onze Menukaarten, naar het interne overzicht"
         aria-current={pathname === '/internal' ? 'page' : undefined}
       >
-        <IconWordmark />
-        <span>BredaEats</span>
+        <WordmarkInline />
       </a>
 
       {primary.map((m) => (

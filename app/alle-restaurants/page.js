@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import ThemeToggle from '@/src/components/ThemeToggle'
 import PrimaryNav from '@/src/components/PrimaryNav'
 import RestaurantBrowseCard from '@/src/components/RestaurantBrowseCard'
+import Wordmark from '@/src/components/Wordmark'
 
 // BE-11 Fase 1 — first real, server-first "Alle restaurants" browse
 // vertical slice. Deliberately a new, additive route (not `/restaurants`,
@@ -107,7 +108,7 @@ function AlleRestaurantsPageInner() {
     <>
       <header className="site-header">
         <div className="header-inner">
-          <Link href="/" className="logo">Breda<span>Eats</span></Link>
+          <Wordmark />
           <div className="header-right">
             <PrimaryNav />
             <ThemeToggle />

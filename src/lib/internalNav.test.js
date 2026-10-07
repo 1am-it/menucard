@@ -387,7 +387,8 @@ test('structural safety net: the theme toggle sits right before Sign out and kee
   assert.match(css, /\.internal-nav-theme \.theme-btn:focus-visible \{ outline: 2px solid var\(--border-focus\)/);
   // Contrast of the inactive option inside the internal nav (measured below 4.5:1 with --text-muted).
   assert.match(css, /\.internal-nav-theme \.theme-btn \{ color: var\(--text-secondary\); \}/);
-  assert.match(css, /\.internal-nav-theme \.theme-btn\.active \{ color: var\(--on-accent\); \}/);
+  // Active option uses the soft accent treatment (.theme-btn.active), so its text uses --accent.
+  assert.match(css, /\.internal-nav-theme \.theme-btn\.active \{ color: var\(--accent\); \}/);
 });
 
 test('structural safety net: the theme contract stays as decided — explicit Licht/Donker choice, dark when nothing is stored, no OS-preference following', () => {

@@ -117,15 +117,17 @@ test('globals.css: .lrc-header and .lrc-footer no longer draw an internal divide
   assert.doesNotMatch(css, /\.lrc-footer[^}]*border-top/, 'no border-top must remain on .lrc-footer');
 });
 
-test('globals.css: .lrc-primary-btn uses the quiet, tinted green treatment — no full-saturation fill — for every restaurant card', () => {
+test('globals.css: .lrc-primary-btn uses the quiet, tinted accent treatment — no full-saturation fill — for every restaurant card', () => {
   const css = readGlobalsCss();
   const ruleMatch = css.match(/\.lrc-primary-btn \{([^}]*)\}/);
   assert.ok(ruleMatch, 'expected a single .lrc-primary-btn base rule');
   const rule = ruleMatch[1];
-  assert.match(rule, /background:\s*var\(--green-faint\)/, 'background must be the tinted, not full-saturation, green');
-  assert.match(rule, /border:\s*1px solid var\(--green\)/, 'border must be a visible, accessible green outline');
-  assert.match(rule, /color:\s*var\(--green\)/, 'text must be green, not var(--on-accent) white/black-on-solid-fill');
-  assert.doesNotMatch(rule, /background:\s*var\(--green\)[,;\s]/, 'must not use the old full-saturation --green fill');
+  // Onze Menukaarten: het merkaccent is nu --accent (oker); --green is alleen nog status.
+  assert.match(rule, /background:\s*var\(--accent-faint\)/, 'background must be the tinted, not full-saturation, accent');
+  assert.match(rule, /border:\s*1px solid var\(--accent\)/, 'border must be a visible, accessible accent outline');
+  assert.match(rule, /color:\s*var\(--accent\)/, 'text must be the accent ink, not a text-on-fill colour');
+  assert.doesNotMatch(rule, /background:\s*var\(--accent-fill\)[,;\s]/, 'must not use the full okergeel fill');
+  assert.doesNotMatch(rule, /var\(--green/, 'the brand accent must no longer be the green status colour');
 });
 
 test('globals.css: .lrc-primary-btn is compact and left-aligned (not full-width), matching the dish-result card\'s own restrained action pattern, while keeping its padding/shape unchanged', () => {
@@ -142,7 +144,8 @@ test('globals.css: .lrc-primary-btn is compact and left-aligned (not full-width)
 
 test('globals.css: .lrc-primary-btn:focus-visible keeps its existing, unchanged visible focus style', () => {
   const css = readGlobalsCss();
-  assert.match(css, /\.lrc-primary-btn:focus-visible \{ outline: 2px solid var\(--green\); outline-offset: 2px; \}/);
+  // Onze Menukaarten: same focus shape, brand accent is now --accent (oker).
+  assert.match(css, /\.lrc-primary-btn:focus-visible \{ outline: 2px solid var\(--accent\); outline-offset: 2px; \}/);
 });
 
 test('globals.css: .lrc-card\'s border-radius token (--radius-lg) is untouched by this slice', () => {

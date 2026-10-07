@@ -1,6 +1,6 @@
 /* ─────────────────────────────────────────────────────────────────────────────
    BredaEats — globals.css
-   Light (default) + Dark theme via design tokens · #06C167-family accent
+   Light + Dark theme via design tokens · oker merkaccent (--accent*); --green = status
    Inter-style system font stack
    ───────────────────────────────────────────────────────────────────────────── */
 
@@ -29,6 +29,23 @@
   --green-surface-strong:  #0f2318;
   --green-glow:            rgba(6, 193, 103, 0.4);
   --on-accent:             #000000;
+  /* Merkaccent — Onze Menukaarten · oker (zie docs/guides/design-reference.md).
+     --green blijft bestaan als semantische succes-/open-statuskleur en is
+     geen merkkleur meer. Okergeel (--accent-fill) is een vulkleur, nooit
+     tekst op een licht vlak. */
+  --accent:                #F2C35B;
+  --accent-dim:            #E0AA36;
+  --accent-fill:           #F2C35B;
+  --accent-fill-hover:     #E3B04A;
+  --on-accent-fill:        #1F1600;
+  --accent-faint:          rgba(242, 195, 91, 0.08);
+  --accent-border:         rgba(242, 195, 91, 0.28);
+  --accent-surface:        #2A2109;
+  --accent-surface-strong: #3A2D0C;
+  --accent-glow:           rgba(242, 195, 91, 0.35);
+  --wordmark:              #F2C35B;
+  --mark-bg:               #3A2D0C;
+  --mark-text:             #F2C35B;
 
   /* Surfaces */
   --bg:              #0a0a0a;
@@ -36,15 +53,15 @@
   --bg-elevated:     #181818;
   --bg-input:        #111111;
   --bg-hover:        #222222;
-  --bg-hover-accent: #131a15;
+  --bg-hover-accent: #1a170d;
   --bg-panel:        #0f0f1a;
 
   /* Borders */
   --border:        #1f1f1f;
   --border-hover:  #333333;
   --border-strong: #3a3a3a;
-  --input-border:  #2a2a2a;
-  --border-focus:  var(--green);
+  --input-border:  #6b7280;
+  --border-focus:  var(--accent);
 
   /* Text */
   --text-primary:   #ffffff;
@@ -68,10 +85,10 @@
   --danger-bg:            rgba(255, 68, 68, 0.1);
   --danger-border:        rgba(255, 68, 68, 0.2);
   --danger-glow:          rgba(255, 68, 68, 0.6);
-  --warning:              #ffa000;
-  --warning-bg:           rgba(255, 160, 0, 0.1);
-  --warning-border:       rgba(255, 160, 0, 0.25);
-  --warning-strong-border: #5a4800;
+  --warning:              #FF9E6B;
+  --warning-bg:           rgba(255, 158, 107, 0.10);
+  --warning-border:       rgba(255, 158, 107, 0.28);
+  --warning-strong-border: #5a2a14;
 
   /* Allergy-filter accent (purple) */
   --allergy:            #a78bfa;
@@ -88,8 +105,6 @@
   --whatsapp-hover-bg: #0f2e18;
 
   /* Gradients & sticky surfaces */
-  --hero-gradient-start:     #0f1f15;
-  --hero-gradient-start-alt: #0f1a0f;
   --header-bg: rgba(10, 10, 10, 0.95);
   --sticky-bg: rgba(10, 10, 10, 0.97);
 
@@ -104,9 +119,9 @@
   /* Scrollbar / selection / table */
   --scrollbar-thumb:       #2a2a2a;
   --scrollbar-thumb-hover: #3a3a3a;
-  --selection-bg:          rgba(6, 193, 103, 0.25);
+  --selection-bg:          rgba(242, 195, 91, 0.30);
   --stripe-alt:            rgba(255, 255, 255, 0.02);
-  --row-hover:             rgba(6, 193, 103, 0.04);
+  --row-hover:             rgba(242, 195, 91, 0.04);
 
   /* Theme-independent */
   --radius-sm:    6px;
@@ -131,19 +146,32 @@
     --green-surface-strong:  #c3edd6;
     --green-glow:            rgba(8, 127, 69, 0.35);
     --on-accent:             #ffffff;
+    --accent:                #7A4E00;
+    --accent-dim:            #5E3C00;
+    --accent-fill:           #F2C35B;
+    --accent-fill-hover:     #E8B648;
+    --on-accent-fill:        #1F1600;
+    --accent-faint:          #FDF3D8;
+    --accent-border:         rgba(122, 78, 0, 0.30);
+    --accent-surface:        #FDF3D8;
+    --accent-surface-strong: #FBE6A8;
+    --accent-glow:           rgba(122, 78, 0, 0.30);
+    --wordmark:              #7A4E00;
+    --mark-bg:               #F2C35B;
+    --mark-text:             inherit;
 
     --bg:              #ffffff;
     --bg-card:         #ffffff;
     --bg-elevated:     #f3f4f6;
     --bg-input:        #ffffff;
     --bg-hover:        #eef0f2;
-    --bg-hover-accent: #f0fbf5;
+    --bg-hover-accent: #FDF8EA;
     --bg-panel:        #faf8ff;
 
     --border:        #e3e5e8;
     --border-hover:  #c7cbd1;
     --border-strong: #b3b8c0;
-    --input-border:  #d7dae0;
+    --input-border:  #808792;
 
     --text-primary:   #14181c;
     --text-secondary: #4b5563;
@@ -164,10 +192,10 @@
     --danger-bg:            rgba(198, 40, 40, 0.1);
     --danger-border:        rgba(198, 40, 40, 0.25);
     --danger-glow:          rgba(198, 40, 40, 0.5);
-    --warning:              #8a5a00;
-    --warning-bg:           rgba(138, 90, 0, 0.1);
-    --warning-border:       rgba(138, 90, 0, 0.3);
-    --warning-strong-border: #d9b84d;
+    --warning:              #9A3412;
+    --warning-bg:           rgba(154, 52, 18, 0.08);
+    --warning-border:       rgba(154, 52, 18, 0.30);
+    --warning-strong-border: #E3A68A;
 
     --allergy:            #6d4fc7;
     --allergy-strong:     #5b3fb0;
@@ -181,8 +209,6 @@
     --whatsapp-border:   #a9e6c4;
     --whatsapp-hover-bg: #d1f0df;
 
-    --hero-gradient-start:     #eafcf3;
-    --hero-gradient-start-alt: #eefaf0;
     --header-bg: rgba(255, 255, 255, 0.92);
     --sticky-bg: rgba(255, 255, 255, 0.94);
 
@@ -192,9 +218,9 @@
 
     --scrollbar-thumb:       #d1d5db;
     --scrollbar-thumb-hover: #b0b6bf;
-    --selection-bg:          rgba(8, 127, 69, 0.25);
+    --selection-bg:          rgba(242, 195, 91, 0.45);
     --stripe-alt:            rgba(0, 0, 0, 0.02);
-    --row-hover:             rgba(8, 127, 69, 0.05);
+    --row-hover:             rgba(122, 78, 0, 0.05);
   }
 }
 
@@ -208,19 +234,32 @@
   --green-surface-strong:  #c3edd6;
   --green-glow:            rgba(8, 127, 69, 0.35);
   --on-accent:             #ffffff;
+  --accent:                #7A4E00;
+  --accent-dim:            #5E3C00;
+  --accent-fill:           #F2C35B;
+  --accent-fill-hover:     #E8B648;
+  --on-accent-fill:        #1F1600;
+  --accent-faint:          #FDF3D8;
+  --accent-border:         rgba(122, 78, 0, 0.30);
+  --accent-surface:        #FDF3D8;
+  --accent-surface-strong: #FBE6A8;
+  --accent-glow:           rgba(122, 78, 0, 0.30);
+  --wordmark:              #7A4E00;
+  --mark-bg:               #F2C35B;
+  --mark-text:             inherit;
 
   --bg:              #ffffff;
   --bg-card:         #ffffff;
   --bg-elevated:     #f3f4f6;
   --bg-input:        #ffffff;
   --bg-hover:        #eef0f2;
-  --bg-hover-accent: #f0fbf5;
+  --bg-hover-accent: #FDF8EA;
   --bg-panel:        #faf8ff;
 
   --border:        #e3e5e8;
   --border-hover:  #c7cbd1;
   --border-strong: #b3b8c0;
-  --input-border:  #d7dae0;
+  --input-border:  #808792;
 
   --text-primary:   #14181c;
   --text-secondary: #4b5563;
@@ -241,10 +280,10 @@
   --danger-bg:            rgba(198, 40, 40, 0.1);
   --danger-border:        rgba(198, 40, 40, 0.25);
   --danger-glow:          rgba(198, 40, 40, 0.5);
-  --warning:              #8a5a00;
-  --warning-bg:           rgba(138, 90, 0, 0.1);
-  --warning-border:       rgba(138, 90, 0, 0.3);
-  --warning-strong-border: #d9b84d;
+  --warning:              #9A3412;
+  --warning-bg:           rgba(154, 52, 18, 0.08);
+  --warning-border:       rgba(154, 52, 18, 0.30);
+  --warning-strong-border: #E3A68A;
 
   --allergy:            #6d4fc7;
   --allergy-strong:     #5b3fb0;
@@ -258,8 +297,6 @@
   --whatsapp-border:   #a9e6c4;
   --whatsapp-hover-bg: #d1f0df;
 
-  --hero-gradient-start:     #eafcf3;
-  --hero-gradient-start-alt: #eefaf0;
   --header-bg: rgba(255, 255, 255, 0.92);
   --sticky-bg: rgba(255, 255, 255, 0.94);
 
@@ -269,9 +306,9 @@
 
   --scrollbar-thumb:       #d1d5db;
   --scrollbar-thumb-hover: #b0b6bf;
-  --selection-bg:          rgba(8, 127, 69, 0.25);
+  --selection-bg:          rgba(242, 195, 91, 0.45);
   --stripe-alt:            rgba(0, 0, 0, 0.02);
-  --row-hover:             rgba(8, 127, 69, 0.05);
+  --row-hover:             rgba(122, 78, 0, 0.05);
 }
 
 html {
@@ -310,7 +347,9 @@ img { display: block; max-width: 100%; }
 .theme-switch { display: flex; background: var(--bg-elevated); border-radius: 8px; padding: 2px; gap: 2px; }
 .theme-btn { padding: 4px 10px; border: none; background: transparent; color: var(--text-muted); font-size: 12px; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s; white-space: nowrap; }
 .theme-btn:hover { color: var(--text-secondary); }
-.theme-btn.active { background: var(--green); color: var(--on-accent); }
+/* Geselecteerde staat: zacht accent. Handoff "Oker licht": okergeel vol alleen
+   voor primaire knop, markeerstreep en actieve tab-onderstreping. */
+.theme-btn.active { background: var(--accent-surface); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 
 /* ─────────────────────────────────────────────────────────────────────────────
    PRIMARY NAV (shared component, see src/components/PrimaryNav.js)
@@ -327,8 +366,8 @@ img { display: block; max-width: 100%; }
 .primary-nav { display: flex; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 8px; padding: 2px; gap: 2px; }
 .primary-nav-link { padding: 4px 10px; color: var(--text-muted); font-size: 12px; font-weight: 600; text-decoration: none; border-radius: 6px; transition: all 0.15s; white-space: nowrap; }
 .primary-nav-link:hover { color: var(--text-secondary); }
-.primary-nav-link[aria-current="page"] { background: var(--green); color: var(--on-accent); }
-.primary-nav-link:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.primary-nav-link[aria-current="page"] { background: var(--accent-surface); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.primary-nav-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* ─────────────────────────────────────────────────────────────────────────────
    HEADER
@@ -358,15 +397,30 @@ header, .site-header {
   gap: 16px;
 }
 
-.logo {
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  color: var(--text-primary);
+/* ── Woordmerk: Onze Menukaarten (src/components/Wordmark.js) ──
+   Eén kleur (--wordmark), gestapeld "ONZE / Menukaarten", menukaartmotief.
+   Geen gesplitste accentbehandeling van een woorddeel. */
+.wordmark-wrap { display: inline-flex; align-items: center; gap: 14px; flex-shrink: 0; min-width: 0; }
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--wordmark);
   text-decoration: none;
   flex-shrink: 0;
+  border-radius: var(--radius-sm);
 }
-.logo span { color: var(--green); }
+.wordmark:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 3px; }
+.wordmark-mark { flex-shrink: 0; }
+.wordmark-text { display: inline-flex; flex-direction: column; line-height: 1; }
+.wordmark-top { font-size: 9px; font-weight: 700; letter-spacing: 0.32em; text-transform: uppercase; }
+.wordmark-main { font-size: 19px; font-weight: 800; letter-spacing: -0.02em; margin-top: 3px; }
+.wordmark--sm .wordmark-top { font-size: 7px; letter-spacing: 0.3em; }
+.wordmark--sm .wordmark-main { font-size: 15px; margin-top: 2px; }
+.wordmark-descriptor { font-size: 13px; color: var(--text-secondary); white-space: nowrap; }
+@media (max-width: 720px) {
+  .wordmark-descriptor { display: none; }
+}
 
 .back-btn {
   padding: 7px 14px;
@@ -411,8 +465,8 @@ header, .site-header {
   transition: all 0.15s;
 }
 .tab-item.active {
-  color: var(--green);
-  border-bottom-color: var(--green);
+  color: var(--accent);
+  border-bottom-color: var(--accent);
 }
 .tab-item:hover:not(.active) {
   color: var(--text-secondary);
@@ -423,7 +477,7 @@ header, .site-header {
    ───────────────────────────────────────────────────────────────────────────── */
 
 .hero {
-  background: linear-gradient(180deg, var(--hero-gradient-start) 0%, var(--bg) 100%);
+  background: var(--bg);
   border-bottom: 1px solid var(--border);
   padding: 40px 24px;
 }
@@ -446,7 +500,7 @@ header, .site-header {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  color: var(--green);
+  color: var(--accent);
   margin-bottom: 6px;
 }
 
@@ -479,7 +533,7 @@ header, .site-header {
   cursor: pointer;
 }
 .meal-btn:hover { border-color: var(--border-hover); color: var(--text-primary); }
-.meal-btn.active { background: var(--green); color: var(--on-accent); border-color: var(--green); }
+.meal-btn.active { background: var(--accent-surface); color: var(--accent); border-color: var(--accent); }
 
 /* Category nav */
 .cat-nav { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
@@ -497,7 +551,7 @@ header, .site-header {
   cursor: pointer;
 }
 .cat-nav-item:hover { border-color: var(--border-hover); color: var(--text-secondary); }
-.cat-nav-item.active { background: var(--green-faint); border-color: var(--green); color: var(--green); }
+.cat-nav-item.active { background: var(--accent-faint); border-color: var(--accent); color: var(--accent); }
 
 /* Restaurant panel (in menu hero) */
 .restaurant-panel {
@@ -557,11 +611,25 @@ header, .site-header {
 .rp-btn-website:hover { border-color: var(--border-hover); color: var(--text-primary); }
 
 .rp-btn-reserveer {
-  background: var(--green);
-  color: var(--on-accent);
-  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: transparent;
+  color: var(--accent);
+  border: 2px solid var(--accent);
+  font-weight: 700;
 }
-.rp-btn-reserveer:hover { background: var(--green-dim); }
+.rp-btn-reserveer:hover { background: var(--accent-faint); }
+.rp-btn-reserveer:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+.rp-btn-external-icon { flex-shrink: 0; }
+/* Toelichting onder de reserveeractie (handoff "Oker licht"): eigen kanaal
+   van het restaurant; Onze Menukaarten neemt zelf niets aan. */
+.reservation-note { margin: 8px 0 0; font-size: 12px; line-height: 17px; color: var(--text-secondary); }
+.dip-cta .reservation-note { margin-top: 0; }
+.dip-btn-secondary.dip-btn-reserve { display: flex; align-items: center; justify-content: center; gap: 6px; }
+.dip-btn-secondary.dip-btn-reserve:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
 .rp-source {
   font-size: 10px;
@@ -576,7 +644,7 @@ header, .site-header {
   background: var(--bg-elevated);
   border-radius: var(--radius-sm);
   padding: 8px 10px;
-  border-left: 2px solid var(--green);
+  border-left: 2px solid var(--accent);
   line-height: 1.5;
 }
 
@@ -591,7 +659,7 @@ header, .site-header {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  color: var(--green);
+  color: var(--accent);
   padding-bottom: 12px;
   border-bottom: 1px solid var(--border);
   margin-bottom: 16px;
@@ -623,12 +691,12 @@ header, .site-header {
    inherited `.menu-card { transition: border-color 0.15s }` rule, which
    would otherwise fade the highlight in instead of showing it instantly. */
 .menu-card-highlighted {
-  background: var(--green-faint);
-  border-color: var(--green);
+  background: var(--accent-faint);
+  border-color: var(--accent);
   scroll-margin-top: 160px;
   transition: none;
 }
-.menu-card-highlighted:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.menu-card-highlighted:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .card-top {
   display: flex;
@@ -649,7 +717,7 @@ header, .site-header {
 .td-price {
   font-size: 13px;
   font-weight: 700;
-  color: var(--green);
+  color: var(--accent);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -696,7 +764,7 @@ header, .site-header {
    ───────────────────────────────────────────────────────────────────────────── */
 
 .detail-hero {
-  background: linear-gradient(180deg, var(--hero-gradient-start-alt) 0%, var(--bg) 100%);
+  background: var(--bg);
   border-bottom: 1px solid var(--border);
   padding: 48px 24px 40px;
 }
@@ -717,7 +785,7 @@ header, .site-header {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  color: var(--green);
+  color: var(--accent);
   margin-bottom: 8px;
 }
 
@@ -759,8 +827,8 @@ header, .site-header {
 
 .detail-menu-btn {
   padding: 10px 20px;
-  background: var(--green);
-  color: var(--on-accent);
+  background: var(--accent-fill);
+  color: var(--on-accent-fill);
   font-size: 14px;
   font-weight: 700;
   border-radius: var(--radius-md);
@@ -768,7 +836,7 @@ header, .site-header {
   transition: background 0.15s;
   border: none;
 }
-.detail-menu-btn:hover { background: var(--green-dim); }
+.detail-menu-btn:hover { background: var(--accent-fill-hover); }
 
 .detail-menu-btn-outline {
   padding: 10px 20px;
@@ -834,15 +902,15 @@ header, .site-header {
   display: block;
   text-align: center;
   padding: 11px;
-  background: var(--green);
-  color: var(--on-accent);
+  background: var(--accent-fill);
+  color: var(--on-accent-fill);
   font-size: 14px;
   font-weight: 700;
   border-radius: var(--radius-md);
   text-decoration: none;
   transition: background 0.15s;
 }
-.dip-btn-primary:hover { background: var(--green-dim); }
+.dip-btn-primary:hover { background: var(--accent-fill-hover); }
 
 .dip-btn-secondary {
   display: block;
@@ -893,8 +961,8 @@ header, .site-header {
 
 .nvwa-export-btn {
   padding: 10px 20px;
-  background: var(--green);
-  color: var(--on-accent);
+  background: var(--accent-fill);
+  color: var(--on-accent-fill);
   font-size: 14px;
   font-weight: 700;
   border: none;
@@ -905,7 +973,7 @@ header, .site-header {
   text-decoration: none;
   display: inline-block;
 }
-.nvwa-export-btn:hover { background: var(--green-dim); }
+.nvwa-export-btn:hover { background: var(--accent-fill-hover); }
 
 /* Same shape as the removed inline style — display:flex, gap:8, center —
    only pulled into a class so the narrow-viewport rule below (matching
@@ -1122,15 +1190,15 @@ header, .site-header {
 
 .lang-switch { display: flex; background: var(--bg-elevated); border-radius: 8px; padding: 2px; gap: 2px; }
 .lang-btn { padding: 4px 10px; border: none; background: transparent; color: var(--text-muted); font-size: 13px; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s; }
-.lang-btn.active { background: var(--green); color: var(--on-accent); }
+.lang-btn.active { background: var(--accent-surface); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 
 .mode-switch { display: flex; background: var(--bg-elevated); border-radius: 8px; padding: 2px; gap: 2px; }
 .mode-btn { padding: 5px 14px; border: none; background: transparent; color: var(--text-muted); font-size: 13px; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s; white-space: nowrap; }
-.mode-btn.active { background: var(--green); color: var(--on-accent); }
+.mode-btn.active { background: var(--accent-surface); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 
 /* ── Hero section ── */
 .hero-section {
-  background: linear-gradient(180deg, var(--hero-gradient-start) 0%, var(--bg) 100%);
+  background: var(--bg);
   padding: 48px 24px 40px;
   text-align: center;
   border-bottom: 1px solid var(--border);
@@ -1138,9 +1206,24 @@ header, .site-header {
 .hero-content { max-width: 700px; margin: 0 auto; }
 .hero-title { font-size: clamp(24px, 4vw, 40px); font-weight: 800; color: var(--text-primary); letter-spacing: -1px; margin: 0 0 8px; }
 .hero-sub { color: var(--text-secondary); font-size: 16px; margin: 0 0 28px; }
+.hero-title-mark { box-shadow: inset 0 -0.34em 0 var(--mark-bg); color: var(--mark-text); padding: 0 0.06em; }
+.hero-icon { display: inline-block; vertical-align: -3px; flex-shrink: 0; }
+
+/* Drie USP-blokken onder zoekbalk en chips (handoff "5 · Oker licht —
+   uitgewerkt", Start · 1280): 3 kolommen, 32px tussenruimte, 40px boven;
+   icoontegel 44px zacht oker met inkt-oker lijnicoon; kop 16/700, tekst
+   14 secundair. Onder 720px één kolom. */
+.home-usps { list-style: none; max-width: 960px; margin: 40px auto 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; text-align: left; }
+.home-usp { display: flex; gap: 14px; align-items: flex-start; }
+.home-usp-icon { width: 44px; height: 44px; flex: none; border-radius: 12px; background: var(--accent-surface); color: var(--accent); display: flex; align-items: center; justify-content: center; }
+.home-usp-title { margin: 0; font-size: 16px; line-height: 1.35; font-weight: 700; color: var(--text-primary); }
+.home-usp-text { margin: 2px 0 0; font-size: 14px; line-height: 1.45; color: var(--text-secondary); }
+@media (max-width: 720px) {
+  .home-usps { grid-template-columns: minmax(0, 1fr); gap: 16px; margin-top: 28px; }
+}
 .hero-steps { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
 .hero-step { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 14px; }
-.step-num { width: 24px; height: 24px; border-radius: 50%; background: var(--green); color: var(--on-accent); font-weight: 700; font-size: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.step-num { width: 24px; height: 24px; border-radius: 50%; background: var(--accent-surface); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); font-weight: 700; font-size: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .hero-step-arrow { color: var(--text-faint); font-size: 16px; }
 
 /* ── Filter section ── */
@@ -1149,35 +1232,35 @@ header, .site-header {
 
 .day-selector { display: flex; gap: 6px; flex-wrap: wrap; }
 .day-btn { min-width: 48px; padding: 8px 14px; border: 1.5px solid var(--input-border); background: var(--bg-input); color: var(--text-secondary); font-size: 14px; font-weight: 600; border-radius: 10px; cursor: pointer; transition: all 0.15s; }
-.day-btn:hover { border-color: var(--green); color: var(--text-primary); }
-.day-btn.active { background: var(--green); color: var(--on-accent); border-color: var(--green); }
+.day-btn:hover { border-color: var(--accent); color: var(--text-primary); }
+.day-btn.active { background: var(--accent-surface); color: var(--accent); border-color: var(--accent); }
 
 .meal-selector { display: flex; gap: 8px; flex-wrap: wrap; }
 .home-meal-btn { padding: 9px 20px; border: 1.5px solid var(--input-border); background: var(--bg-input); color: var(--text-secondary); font-size: 14px; font-weight: 600; border-radius: 10px; cursor: pointer; transition: all 0.15s; }
-.home-meal-btn:hover { border-color: var(--green); color: var(--text-primary); }
-.home-meal-btn.active { background: var(--green); color: var(--on-accent); border-color: var(--green); }
+.home-meal-btn:hover { border-color: var(--accent); color: var(--text-primary); }
+.home-meal-btn.active { background: var(--accent-surface); color: var(--accent); border-color: var(--accent); }
 
 .filter-hint { font-size: 13px; color: var(--text-dim); display: flex; align-items: center; gap: 6px; margin-top: 4px; }
-.hint-arrow { color: var(--green); font-size: 16px; animation: bounce 1s ease-in-out infinite; }
+.hint-arrow { color: var(--accent); font-size: 16px; animation: bounce 1s ease-in-out infinite; }
 @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
 
 .cta-block { align-items: flex-start; }
-.show-menus-btn { padding: 12px 28px; background: var(--green); color: var(--on-accent); font-size: 15px; font-weight: 700; border: none; border-radius: 12px; cursor: pointer; transition: all 0.15s; }
-.show-menus-btn:hover { background: var(--green-dim); transform: translateY(-1px); }
+.show-menus-btn { padding: 12px 28px; background: var(--accent-fill); color: var(--on-accent-fill); font-size: 15px; font-weight: 700; border: none; border-radius: 12px; cursor: pointer; transition: all 0.15s; }
+.show-menus-btn:hover { background: var(--accent-fill-hover); transform: translateY(-1px); }
 .show-menus-btn.pulse { animation: pulse-glow 2s ease-in-out infinite; }
 /* The 50% keyframe fades to fully transparent (alpha 0) — the RGB channels
    are visually irrelevant at alpha 0, so this endpoint is intentionally not
    tokenized. */
-@keyframes pulse-glow { 0%,100% { box-shadow: 0 0 0 0 var(--green-glow); } 50% { box-shadow: 0 0 0 10px rgba(6,193,103,0); } }
+@keyframes pulse-glow { 0%,100% { box-shadow: 0 0 0 0 var(--accent-glow); } 50% { box-shadow: 0 0 0 10px rgba(0,0,0,0); } }
 
 .search-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 @media (max-width: 640px) { .search-row { grid-template-columns: 1fr; } }
 .search-field { position: relative; display: flex; align-items: center; }
 .search-icon { position: absolute; left: 12px; font-size: 15px; pointer-events: none; }
 .search-input { width: 100%; padding: 10px 36px 10px 38px; background: var(--bg-input); border: 1.5px solid var(--input-border); border-radius: 10px; color: var(--text-primary); font-size: 14px; outline: none; transition: border-color 0.15s; }
-.search-input:focus { border-color: var(--green); }
-.search-input.flagship { border-color: var(--green-surface); }
-.search-input.flagship:focus { border-color: var(--green); }
+.search-input:focus { border-color: var(--accent); }
+.search-input.flagship { border-color: var(--input-border); }
+.search-input.flagship:focus { border-color: var(--accent); }
 .search-clear { position: absolute; right: 10px; background: none; border: none; color: var(--text-dim); font-size: 18px; cursor: pointer; line-height: 1; }
 .search-clear:hover { color: var(--text-primary); }
 
@@ -1185,9 +1268,9 @@ header, .site-header {
 .sort-bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 12px 0; border-top: 1px solid var(--border); }
 .sort-select { padding: 7px 12px; background: var(--bg-input); border: 1.5px solid var(--input-border); border-radius: 8px; color: var(--text-secondary); font-size: 13px; cursor: pointer; outline: none; transition: border-color 0.15s; appearance: none; -webkit-appearance: none; }
 .sort-select:hover, .sort-select:focus { border-color: var(--border-strong); }
-.sort-select.has-value { border-color: var(--green); color: var(--green); }
+.sort-select.has-value { border-color: var(--accent); color: var(--accent); }
 .sort-toggle { padding: 7px 14px; background: var(--bg-input); border: 1.5px solid var(--input-border); border-radius: 8px; color: var(--text-secondary); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
-.sort-toggle.active { background: var(--green-surface); border-color: var(--green); color: var(--green); }
+.sort-toggle.active { background: var(--accent-surface); border-color: var(--accent); color: var(--accent); }
 
 .cuisine-dropdown { position: relative; }
 .cuisine-trigger { cursor: pointer; font-size: 13px; white-space: nowrap; }
@@ -1195,15 +1278,15 @@ header, .site-header {
 .cuisine-dropdown:hover .cuisine-panel, .cuisine-dropdown:focus-within .cuisine-panel { display: flex; }
 .cuisine-option { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 6px; color: var(--text-secondary); font-size: 13px; cursor: pointer; transition: background 0.1s; }
 .cuisine-option:hover { background: var(--bg-hover); }
-.cuisine-option input { accent-color: var(--green); }
+.cuisine-option input { accent-color: var(--accent); }
 
 .reset-btn { padding: 7px 14px; background: transparent; border: 1.5px solid var(--border-hover); border-radius: 8px; color: var(--text-muted); font-size: 13px; cursor: pointer; transition: all 0.15s; margin-left: auto; }
 .reset-btn:hover { border-color: var(--danger); color: var(--danger); }
 
 /* ── Active filters ── */
 .active-filters-bar { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 0 4px; }
-.filter-tag { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px 4px 12px; background: var(--green-surface); border: 1px solid var(--green); border-radius: 100px; color: var(--green); font-size: 12px; font-weight: 600; }
-.filter-tag-remove { background: none; border: none; color: var(--green); cursor: pointer; font-size: 16px; line-height: 1; padding: 0; opacity: 0.7; }
+.filter-tag { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px 4px 12px; background: var(--accent-surface); border: 1px solid var(--accent); border-radius: 100px; color: var(--accent); font-size: 12px; font-weight: 600; }
+.filter-tag-remove { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 16px; line-height: 1; padding: 0; opacity: 0.7; }
 .filter-tag-remove:hover { opacity: 1; }
 
 /* ── Results ──
@@ -1231,17 +1314,17 @@ header, .site-header {
 .restaurant-card:hover { border-color: var(--border-hover); transform: translateY(-2px); }
 
 .rc-header { padding: 18px 18px 16px; border-bottom: 1px solid var(--border); }
-.rc-badge { display: inline-block; font-size: 10px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px; }
+.rc-badge { display: inline-block; font-size: 10px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px; }
 .rc-name { font-size: 18px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; line-height: 1.2; }
 .rc-cuisine { font-size: 12px; color: var(--text-muted); }
 
 .rc-body { padding: 16px 18px; flex: 1; display: flex; flex-direction: column; gap: 12px; }
 .rc-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin: 0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-.rc-matches { font-size: 12px; color: var(--green); background: var(--green-faint); border: 1px solid var(--green-border); border-radius: 8px; padding: 6px 10px; }
+.rc-matches { font-size: 12px; color: var(--accent); background: var(--accent-faint); border: 1px solid var(--accent-border); border-radius: 8px; padding: 6px 10px; }
 .rc-matches-label { font-weight: 600; }
 .rc-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .rc-address { font-size: 12px; color: var(--text-dim); }
-.rc-price { font-size: 13px; color: var(--green); font-weight: 700; letter-spacing: 1px; flex-shrink: 0; }
+.rc-price { font-size: 13px; color: var(--accent); font-weight: 700; letter-spacing: 1px; flex-shrink: 0; }
 .rc-tags { display: flex; gap: 6px; flex-wrap: wrap; }
 .rc-tag { font-size: 11px; color: var(--text-dim); border: 1px solid var(--border); border-radius: 6px; padding: 3px 9px; }
 
@@ -1249,9 +1332,11 @@ header, .site-header {
 .rc-menu-links { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
 .rc-menu-btn { padding: 6px 12px; background: var(--bg-elevated); border: 1px solid var(--input-border); border-radius: 8px; color: var(--text-secondary); font-size: 12px; font-weight: 600; text-decoration: none; transition: all 0.15s; white-space: nowrap; display: inline-block; }
 .rc-menu-btn:hover { background: var(--bg-hover); border-color: var(--border-strong); color: var(--text-primary); }
-.rc-menu-btn--outline { border-color: var(--green); color: var(--green); }
-.rc-reserve-btn { padding: 6px 14px; background: var(--green); color: var(--on-accent); font-size: 12px; font-weight: 700; border-radius: 8px; text-decoration: none; white-space: nowrap; transition: background 0.15s; margin-left: auto; display: inline-block; }
-.rc-reserve-btn:hover { background: var(--green-dim); }
+.rc-menu-btn--outline { border-color: var(--accent); color: var(--accent); }
+/* Reserveren is een externe actie via het kanaal van het restaurant, geen
+   primaire interne actie: outline, nooit de okergele vulling. */
+.rc-reserve-btn { padding: 6px 14px; background: transparent; border: 1.5px solid var(--accent); color: var(--accent); font-size: 12px; font-weight: 700; border-radius: 8px; text-decoration: none; white-space: nowrap; transition: background 0.15s; margin-left: auto; display: inline-block; }
+.rc-reserve-btn:hover { background: var(--accent-faint); }
 
 /* BE-10: one primary action per card, matching "Zie de menukaart vóór je
    reserveert" — when a restaurant has a menu, the menu action is primary
@@ -1261,18 +1346,18 @@ header, .site-header {
    existing, unmodified look). Neither modifier removes or hides an action. */
 .rc-reserve-btn--secondary { background: transparent; border: 1.5px solid var(--input-border); color: var(--text-secondary); }
 .rc-reserve-btn--secondary:hover { background: var(--bg-hover); border-color: var(--border-strong); color: var(--text-primary); }
-.rc-menu-btn--primary, .rc-menu-go-btn.rc-menu-go-btn--primary { background: var(--green); border-color: var(--green); color: var(--on-accent); }
-.rc-menu-btn--primary:hover, .rc-menu-go-btn.rc-menu-go-btn--primary:hover { background: var(--green-dim); color: var(--on-accent); }
-.rc-menu-go-btn.rc-menu-go-btn--primary { border-left-color: var(--green-dim); }
+.rc-menu-btn--primary, .rc-menu-go-btn.rc-menu-go-btn--primary { background: var(--accent-fill); border-color: var(--accent-fill); color: var(--on-accent-fill); }
+.rc-menu-btn--primary:hover, .rc-menu-go-btn.rc-menu-go-btn--primary:hover { background: var(--accent-fill-hover); color: var(--on-accent-fill); }
+.rc-menu-go-btn.rc-menu-go-btn--primary { border-left-color: var(--accent-dim); }
 
 /* ── Menu overview cards ── */
 .menu-overview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
 .menu-overview-card { display: flex; align-items: center; gap: 14px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-decoration: none; transition: all 0.15s; }
-.menu-overview-card:hover { border-color: var(--green); background: var(--bg-hover-accent); transform: translateY(-1px); }
+.menu-overview-card:hover { border-color: var(--accent); background: var(--bg-hover-accent); transform: translateY(-1px); }
 .moc-icon { font-size: 28px; flex-shrink: 0; }
 .moc-body { flex: 1; min-width: 0; }
 .moc-name { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.moc-subtitle { font-size: 12px; color: var(--green); font-weight: 600; margin-bottom: 4px; }
+.moc-subtitle { font-size: 12px; color: var(--accent); font-weight: 600; margin-bottom: 4px; }
 .moc-address { font-size: 11px; color: var(--text-dim); margin-bottom: 2px; }
 .moc-scraped { font-size: 10px; color: var(--text-faint); }
 
@@ -1362,7 +1447,7 @@ header, .site-header {
   font-size: 12px;
 }
 .rc-address-link:hover {
-  color: var(--green);
+  color: var(--accent);
   text-decoration: underline;
 }
 
@@ -1414,7 +1499,7 @@ header, .site-header {
   outline: none;
   transition: border-color 0.15s;
 }
-.mf-search:focus { border-color: var(--green); }
+.mf-search:focus { border-color: var(--accent); }
 .mf-clear {
   position: absolute;
   right: 8px;
@@ -1441,7 +1526,7 @@ header, .site-header {
   white-space: nowrap;
 }
 .mf-btn:hover { border-color: var(--border-strong); color: var(--text-secondary); }
-.mf-btn.active { background: var(--green-surface); border-color: var(--green); color: var(--green); }
+.mf-btn.active { background: var(--accent-surface); border-color: var(--accent); color: var(--accent); }
 
 /* Price slider */
 .mf-price-wrap {
@@ -1457,7 +1542,7 @@ header, .site-header {
 }
 .mf-price-slider {
   width: 90px;
-  accent-color: var(--green);
+  accent-color: var(--accent);
   cursor: pointer;
 }
 
@@ -1514,17 +1599,17 @@ header, .site-header {
   align-items: center;
   gap: 4px;
   padding: 3px 8px 3px 10px;
-  background: var(--green-surface);
-  border: 1px solid var(--green);
+  background: var(--accent-surface);
+  border: 1px solid var(--accent);
   border-radius: 100px;
-  color: var(--green);
+  color: var(--accent);
   font-size: 11px;
   font-weight: 600;
 }
 .mf-tag-x {
   background: none;
   border: none;
-  color: var(--green);
+  color: var(--accent);
   cursor: pointer;
   font-size: 14px;
   line-height: 1;
@@ -1571,8 +1656,8 @@ header, .site-header {
 
 /* Search highlight */
 mark.search-highlight {
-  background: var(--green-border);
-  color: var(--green);
+  background: var(--accent-fill);
+  color: var(--on-accent-fill);
   border-radius: 2px;
   padding: 0 1px;
   font-weight: 700;
@@ -1582,8 +1667,8 @@ mark.search-highlight {
 .cat-count {
   font-size: 11px;
   font-weight: 600;
-  color: var(--green);
-  background: var(--green-faint);
+  color: var(--accent);
+  background: var(--accent-faint);
   border-radius: 100px;
   padding: 2px 8px;
   margin-left: 10px;
@@ -1596,8 +1681,8 @@ mark.search-highlight {
 .nvwa-teaser {
   margin-top: 48px;
   padding: 18px 20px;
-  background: var(--green-faint);
-  border: 1px solid var(--green-border);
+  background: var(--accent-faint);
+  border: 1px solid var(--accent-border);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -1605,12 +1690,12 @@ mark.search-highlight {
   gap: 16px;
   flex-wrap: wrap;
 }
-.nvwa-teaser-title { font-size: 13px; font-weight: 700; color: var(--green); margin-bottom: 2px; }
+.nvwa-teaser-title { font-size: 13px; font-weight: 700; color: var(--accent); margin-bottom: 2px; }
 .nvwa-teaser-sub   { font-size: 11px; color: var(--text-dim); }
 .nvwa-teaser-btn {
   padding: 8px 16px;
-  background: var(--green);
-  color: var(--on-accent);
+  background: var(--accent-fill);
+  color: var(--on-accent-fill);
   font-size: 12px;
   font-weight: 700;
   border-radius: 8px;
@@ -1618,7 +1703,7 @@ mark.search-highlight {
   white-space: nowrap;
   transition: background 0.15s;
 }
-.nvwa-teaser-btn:hover { background: var(--green-dim); }
+.nvwa-teaser-btn:hover { background: var(--accent-fill-hover); }
 
 /* ── rc-bottom-row: open status + tags naast elkaar ── */
 .rc-bottom-row {
@@ -1672,7 +1757,7 @@ mark.search-highlight {
   padding: 8px 14px;
   background: var(--bg-hover);
   border-left: 1px solid var(--input-border);
-  color: var(--green);
+  color: var(--accent);
   font-size: 12px;
   font-weight: 700;
   text-decoration: none;
@@ -1680,7 +1765,7 @@ mark.search-highlight {
   transition: background 0.15s;
   flex-shrink: 0;
 }
-.rc-menu-go-btn:hover { background: var(--green-surface); }
+.rc-menu-go-btn:hover { background: var(--accent-surface); }
 
 /* ── Nu open knop in dag-selector ── */
 .day-divider {
@@ -1705,8 +1790,8 @@ mark.search-highlight {
   transition: all 0.15s;
   white-space: nowrap;
 }
-.now-open-btn:hover { border-color: var(--green); color: var(--text-primary); }
-.now-open-btn.active { background: var(--green-surface-strong); border-color: var(--green); color: var(--green); }
+.now-open-btn:hover { border-color: var(--accent); color: var(--text-primary); }
+.now-open-btn.active { background: var(--accent-surface-strong); border-color: var(--accent); color: var(--accent); }
 
 .day-btn.disabled {
   opacity: 0.3;
@@ -1754,7 +1839,7 @@ mark.search-highlight {
   background: var(--whatsapp-bg);
   border: 1px solid var(--whatsapp-border);
   border-radius: 8px;
-  color: var(--green);
+  color: var(--accent);
   font-size: 12px;
   font-weight: 700;
   text-decoration: none;
@@ -1763,7 +1848,7 @@ mark.search-highlight {
 }
 .rc-whatsapp-btn:hover {
   background: var(--whatsapp-hover-bg);
-  border-color: var(--green);
+  border-color: var(--accent);
 }
 
 /* Website icon knop */
@@ -1845,7 +1930,7 @@ mark.search-highlight {
 /* BE-16 — each example is its own secondary, exact BE-12 link — reuses the
    existing link color/underline convention, no new visual language. */
 .dish-group-example-link { color: var(--text-secondary); text-decoration: underline; text-underline-offset: 2px; }
-.dish-group-example-link:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.dish-group-example-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .dish-group-more { color: var(--text-muted); }
 .dish-group-link { font-size: 12px; padding: 6px 14px; }
 
@@ -1871,8 +1956,8 @@ mark.search-highlight {
   align-items: center;
   gap: 6px;
 }
-.filters-toggle-btn:hover { border-color: var(--green); color: var(--text-primary); }
-.filters-toggle-btn.active { background: var(--green-surface); border-color: var(--green); color: var(--green); }
+.filters-toggle-btn:hover { border-color: var(--accent); color: var(--text-primary); }
+.filters-toggle-btn.active { background: var(--accent-surface); border-color: var(--accent); color: var(--accent); }
 
 .filters-panel {
   display: flex;
@@ -1890,7 +1975,8 @@ mark.search-highlight {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.6px;
-  color: var(--text-faint);
+  /* --text-faint haalde geen 4,5:1 (licht 2,6:1); --text-secondary wel. */
+  color: var(--text-secondary);
 }
 
 .cuisine-chip-list { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -1907,7 +1993,7 @@ mark.search-highlight {
   white-space: nowrap;
 }
 .cuisine-chip:hover { border-color: var(--border-strong); color: var(--text-primary); }
-.cuisine-chip.active { background: var(--green-surface); border-color: var(--green); color: var(--green); }
+.cuisine-chip.active { background: var(--accent-surface); border-color: var(--accent); color: var(--accent); }
 
 @media (max-width: 480px) {
   .filters-panel { padding: 12px; }
@@ -1924,9 +2010,10 @@ mark.search-highlight {
   margin: 0 auto;
 }
 .hero-search-btn {
+  min-height: 44px;
   padding: 0 22px;
-  background: var(--green);
-  color: var(--on-accent);
+  background: var(--accent-fill);
+  color: var(--on-accent-fill);
   border: none;
   border-radius: 10px;
   font-size: 14px;
@@ -1935,7 +2022,18 @@ mark.search-highlight {
   white-space: nowrap;
   transition: background 0.15s;
 }
-.hero-search-btn:hover { background: var(--green-dim); }
+.hero-search-btn:hover { background: var(--accent-fill-hover); }
+/* Expliciete focus voor de publieke bedieningselementen uit de Onze Menukaarten-handoff
+   (decision 014, design-reference "Keyboard and focus"). */
+.hero-search-btn:focus-visible,
+.home-meal-btn:focus-visible,
+.cuisine-chip:focus-visible,
+.back-btn:focus-visible,
+.theme-btn:focus-visible,
+.detail-menu-btn:focus-visible,
+.detail-menu-btn-outline:focus-visible,
+.rc-reserve-btn:focus-visible,
+.search-input:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
 
 @media (max-width: 480px) {
   .hero-search-bar { flex-direction: column; }
@@ -1953,7 +2051,7 @@ mark.search-highlight {
   text-decoration: none;
   transition: color 0.15s;
 }
-.rc-phone:hover { color: var(--green); }
+.rc-phone:hover { color: var(--accent); }
 
 /* ─────────────────────────────────────────────────────────────────────────────
    INTERNAL TOOLING — Data-inbox / Candidate triage (MARKET-05A)
@@ -1999,7 +2097,7 @@ mark.search-highlight {
   padding: 12px 16px; cursor: pointer; transition: all 0.15s; flex: 1 1 150px; min-width: 150px;
 }
 .di-summary-card:hover { border-color: var(--border-hover); }
-.di-summary-card.active { border-color: var(--green); box-shadow: 0 0 0 1px var(--green); }
+.di-summary-card.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
 .di-summary-icon { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .di-summary-icon svg { width: 17px; height: 17px; }
 .di-summary-body { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
@@ -2023,10 +2121,10 @@ mark.search-highlight {
   padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--input-border);
   background: var(--bg-input); color: var(--text-primary); font-size: 13px; outline: none; transition: border-color 0.15s;
 }
-.di-input:focus, .di-select:focus { border-color: var(--green); }
+.di-input:focus, .di-select:focus { border-color: var(--accent); }
 .di-search-wrap .di-input { width: 100%; padding-left: 30px; }
-.di-clear-link { align-self: center; font-size: 13px; font-weight: 600; color: var(--green); background: none; border: none; cursor: pointer; text-decoration: underline; white-space: nowrap; padding: 8px 0; }
-.di-clear-link:hover { color: var(--green-dim); }
+.di-clear-link { align-self: center; font-size: 13px; font-weight: 600; color: var(--accent); background: none; border: none; cursor: pointer; text-decoration: underline; white-space: nowrap; padding: 8px 0; }
+.di-clear-link:hover { color: var(--accent-dim); }
 
 /* Candidate rows (triage list) */
 .di-rows { display: grid; gap: 10px; }
@@ -2058,10 +2156,10 @@ mark.search-highlight {
 
 .di-view-btn {
   display: inline-flex; align-items: center; gap: 4px; padding: 8px 14px; border-radius: var(--radius-md);
-  border: 1px solid var(--border); background: var(--bg-card); color: var(--green); font-size: 13px; font-weight: 700;
+  border: 1px solid var(--border); background: var(--bg-card); color: var(--accent); font-size: 13px; font-weight: 700;
   cursor: pointer; transition: all 0.15s; white-space: nowrap;
 }
-.di-view-btn:hover { border-color: var(--green); background: var(--green-faint); }
+.di-view-btn:hover { border-color: var(--accent); background: var(--accent-faint); }
 .di-view-btn svg { width: 14px; height: 14px; }
 
 .di-empty { text-align: center; padding: 36px 20px; color: var(--text-muted); font-size: 14px; background: var(--bg-card); border: 1px dashed var(--border-hover); border-radius: var(--radius-lg); }
@@ -2072,7 +2170,7 @@ mark.search-highlight {
   font-size: 12px; padding: 5px 12px; border-radius: var(--radius-pill); border: 1px solid var(--border);
   background: transparent; color: var(--text-secondary); cursor: pointer; transition: all 0.15s;
 }
-.di-run-toggle.active { background: var(--green-faint); border-color: var(--green); color: var(--green); }
+.di-run-toggle.active { background: var(--accent-faint); border-color: var(--accent); color: var(--accent); }
 
 /* Candidates section (full detail cards) — same card/chip language,
    kept structurally intact (forms unchanged), lightly reskinned. */
@@ -2083,12 +2181,12 @@ mark.search-highlight {
   background: transparent; color: var(--text-secondary); cursor: pointer; transition: all 0.15s;
 }
 .di-link-btn:hover { border-color: var(--border-hover); color: var(--text-primary); }
-.di-link-btn.active { background: var(--green-faint); border-color: var(--green); color: var(--green); }
+.di-link-btn.active { background: var(--accent-faint); border-color: var(--accent); color: var(--accent); }
 .di-btn-primary {
   font-size: 13px; font-weight: 700; padding: 9px 16px; border-radius: var(--radius-md); border: none;
-  background: var(--green); color: var(--on-accent); cursor: pointer; transition: background 0.15s;
+  background: var(--accent-fill); color: var(--on-accent-fill); cursor: pointer; transition: background 0.15s;
 }
-.di-btn-primary:hover { background: var(--green-dim); }
+.di-btn-primary:hover { background: var(--accent-fill-hover); }
 .di-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* Candidate detail card — compact status overview, accordions, and
@@ -2119,7 +2217,7 @@ mark.search-highlight {
   display: flex; align-items: center; gap: 10px; padding: 12px 14px; cursor: pointer; list-style: none;
 }
 .di-accordion-trigger::-webkit-details-marker { display: none; }
-.di-accordion-trigger:focus-visible { outline: 2px solid var(--green); outline-offset: -2px; border-radius: var(--radius-sm); }
+.di-accordion-trigger:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: var(--radius-sm); }
 .di-accordion-icon {
   width: 30px; height: 30px; border-radius: 50%; background: var(--bg-card); color: var(--text-secondary);
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
@@ -2135,7 +2233,7 @@ mark.search-highlight {
 
 .di-timeline { list-style: none; margin: 0; padding: 0 0 0 4px; display: grid; gap: 16px; }
 .di-timeline-item { position: relative; padding-left: 20px; }
-.di-timeline-item::before { content: ''; position: absolute; left: 4px; top: 4px; width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+.di-timeline-item::before { content: ''; position: absolute; left: 4px; top: 4px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
 .di-timeline-item:not(:last-child)::after { content: ''; position: absolute; left: 7px; top: 14px; bottom: -16px; width: 2px; background: var(--border); }
 .di-timeline-date { font-size: 11px; font-weight: 700; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.3px; }
 .di-timeline-title { font-size: 13px; font-weight: 700; color: var(--text-primary); margin-top: 2px; }
@@ -2192,7 +2290,8 @@ mark.search-highlight {
   border-radius: var(--radius-pill);
 }
 .internal-nav-home svg { width: 16px; height: 16px; flex-shrink: 0; }
-.internal-nav-home[aria-current="page"] { background: var(--green-faint); color: var(--green); }
+.internal-nav-home .wordmark-mark { width: 20px; height: 20px; }
+.internal-nav-home[aria-current="page"] { background: var(--accent-faint); color: var(--accent); }
 .internal-nav-link {
   font-size: 13px;
   font-weight: 600;
@@ -2202,7 +2301,7 @@ mark.search-highlight {
   border-radius: var(--radius-pill);
 }
 .internal-nav-link:hover { color: var(--text-primary); }
-.internal-nav-link[aria-current="page"] { background: var(--green-faint); color: var(--green); }
+.internal-nav-link[aria-current="page"] { background: var(--accent-faint); color: var(--accent); }
 .internal-nav-note {
   font-size: 12px;
   color: var(--text-muted);
@@ -2231,7 +2330,7 @@ mark.search-highlight {
    the internal nav only, the inactive option uses --text-secondary instead;
    the active option keeps its accent colours. */
 .internal-nav-theme .theme-btn { color: var(--text-secondary); }
-.internal-nav-theme .theme-btn.active { color: var(--on-accent); }
+.internal-nav-theme .theme-btn.active { color: var(--accent); }
 
 /* BE-20 — the compact "Werkvoorraad" disclosure grouping Beheer/Nieuwe
    aanleveringen/Profielconcepten/Beoordelen. A native <details>/<summary>
@@ -2259,9 +2358,9 @@ mark.search-highlight {
 .internal-nav-workqueue-trigger svg { width: 16px; height: 16px; }
 .internal-nav-workqueue-trigger:hover { color: var(--text-primary); border-color: var(--border-hover); }
 .internal-nav-workqueue[open] > .internal-nav-workqueue-trigger {
-  background: var(--green-faint);
-  color: var(--green);
-  border-color: var(--green-border);
+  background: var(--accent-faint);
+  color: var(--accent);
+  border-color: var(--accent-border);
 }
 .internal-nav-workqueue-panel {
   position: absolute;
@@ -2296,9 +2395,9 @@ mark.search-highlight {
   color: var(--text-primary);
 }
 .internal-nav-workqueue-item:hover { background: var(--bg-elevated); }
-.internal-nav-workqueue-item[aria-current="page"] { background: var(--green-faint); color: var(--green); }
+.internal-nav-workqueue-item[aria-current="page"] { background: var(--accent-faint); color: var(--accent); }
 .internal-nav-workqueue-item-icon { flex-shrink: 0; margin-top: 1px; color: var(--text-secondary); }
-.internal-nav-workqueue-item[aria-current="page"] .internal-nav-workqueue-item-icon { color: var(--green); }
+.internal-nav-workqueue-item[aria-current="page"] .internal-nav-workqueue-item-icon { color: var(--accent); }
 .internal-nav-workqueue-item-icon svg { width: 18px; height: 18px; }
 .internal-nav-workqueue-item-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .internal-nav-workqueue-item-label { font-size: 13px; font-weight: 600; }
@@ -2393,16 +2492,16 @@ mark.search-highlight {
   width: auto;
   text-align: center;
   padding: 10px 14px;
-  background: var(--green-faint);
-  color: var(--green);
+  background: var(--accent-faint);
+  color: var(--accent);
   font-size: 13.5px;
   font-weight: 700;
-  border: 1px solid var(--green);
+  border: 1px solid var(--accent);
   border-radius: var(--radius-md);
   text-decoration: none;
 }
-.lrc-primary-btn:hover { border-color: var(--green-dim); color: var(--green-dim); }
-.lrc-primary-btn:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.lrc-primary-btn:hover { border-color: var(--accent-dim); color: var(--accent-dim); }
+.lrc-primary-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .lrc-secondary-note { margin-top: 8px; font-size: 11.5px; color: var(--text-dim); text-align: center; }
 
 /* PLATFORM-12 Phase 1 — Coverage Dashboard "show all neighbourhoods"
@@ -2420,7 +2519,7 @@ mark.search-highlight {
   padding: 6px 2px;
   background: none;
   border: none;
-  color: var(--green);
+  color: var(--accent);
   font: inherit;
   font-size: 13.5px;
   font-weight: 600;
@@ -2428,8 +2527,8 @@ mark.search-highlight {
   text-underline-offset: 3px;
   cursor: pointer;
 }
-.cov-toggle:hover { color: var(--green-dim); }
-.cov-toggle:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; border-radius: var(--radius-sm); }
+.cov-toggle:hover { color: var(--accent-dim); }
+.cov-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--radius-sm); }
 .cov-toggle-chevron { display: flex; width: 15px; height: 15px; transition: transform 0.15s; }
 .cov-toggle-chevron svg { width: 15px; height: 15px; }
 .cov-toggle[aria-expanded="true"] .cov-toggle-chevron { transform: rotate(180deg); }
@@ -2471,8 +2570,8 @@ mark.search-highlight {
 .swq-queue { flex: 1 1 0; min-width: 0; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 12px; border: 0; border-right: 1px solid var(--border); background: transparent; color: var(--text-primary); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
 .swq-queue:last-child { border-right: 0; }
 .swq-queue:hover { background: var(--bg-hover); }
-.swq-queue[aria-pressed="true"] { background: var(--green); color: var(--on-accent); }
-.swq-queue[aria-pressed="true"] .swq-count { background: var(--on-accent); color: var(--green); }
+.swq-queue[aria-pressed="true"] { background: var(--accent-surface); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.swq-queue[aria-pressed="true"] .swq-count { background: var(--accent); color: var(--bg-card); }
 .swq-queue:focus-visible, .swq-action:focus-visible, .swq-legend-toggle:focus-visible, .swq-btn-secondary:focus-visible,
 .swq-search input:focus-visible, .swq-select select:focus-visible, .swq-panel-link:focus-visible, .swq-outside-details summary:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
 .swq-filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
@@ -2516,15 +2615,15 @@ mark.search-highlight {
 .swq-name { font-weight: 700; color: var(--text-primary); }
 .swq-domain { color: var(--text-secondary); font-size: 12px; word-break: break-all; }
 .swq-date { color: var(--text-primary); }
-.swq-action { display: inline-flex; align-items: center; gap: 4px; padding: 6px 4px; border: 0; background: transparent; color: var(--green); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; text-align: left; }
+.swq-action { display: inline-flex; align-items: center; gap: 4px; padding: 6px 4px; border: 0; background: transparent; color: var(--accent); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; text-align: left; }
 .swq-action:hover span { text-decoration: underline; }
 .swq-action[aria-expanded="true"] svg { transform: rotate(90deg); }
-.swq-panel-row td { background: var(--bg-card); border-left: 3px solid var(--green); }
+.swq-panel-row td { background: var(--bg-card); border-left: 3px solid var(--accent); }
 .swq-panel { display: grid; gap: 10px; padding: 4px 0; max-width: 720px; }
 .swq-panel p { margin: 0; }
 .swq-panel-title { font-weight: 700; color: var(--text-primary); }
 .swq-panel-text { color: var(--text-primary); font-size: 14px; line-height: 1.5; }
-.swq-panel-link { color: var(--green); font-weight: 600; font-size: 14px; }
+.swq-panel-link { color: var(--accent); font-weight: 600; font-size: 14px; }
 .swq-compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
 .swq-compare > div { border: 1px solid var(--border); border-radius: var(--radius-md); padding: 10px 12px; background: var(--bg-card); color: var(--text-primary); }
 .swq-compare-heading { font-size: 12px; font-weight: 700; color: var(--text-secondary) !important; margin-bottom: 4px !important; }

@@ -143,7 +143,10 @@ test('NvwaView: the print mechanism itself is untouched (window.print(), no new 
   assert.match(source, /const handlePrint = \(\) => window\.print\(\)/);
   // Only the four pre-existing imports remain — no PDF/email library added.
   const importLines = source.split('\n').filter((line) => line.trim().startsWith('import '));
-  assert.equal(importLines.length, 3);
+  // 3 pre-existing imports + the shared, in-repo Wordmark component (Onze
+  // Menukaarten header) — still no external dependency.
+  assert.equal(importLines.length, 4);
+  assert.ok(importLines.some((line) => line.includes('@/src/components/Wordmark')));
   assert.ok(importLines.some((line) => line.includes("'react'")));
   assert.ok(importLines.some((line) => line.includes("next/link")));
   assert.ok(importLines.some((line) => line.includes('ThemeToggle')));

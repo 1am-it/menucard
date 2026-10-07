@@ -5,6 +5,7 @@ import ThemeToggle from '@/src/components/ThemeToggle'
 import { getReservationActions, isValidPhone } from '@/src/utils/reservation'
 import restaurantsData from '@/data/restaurants.json'
 import menusData from '@/data/menus.json'
+import Wordmark from '@/src/components/Wordmark'
 
 // BE-04 — this is the pre-BE-04 homepage, relocated intact from app/page.js
 // to its own secondary route. Nothing about its behaviour changed — only
@@ -381,7 +382,7 @@ function RestaurantCard({ restaurant, id, lang, selectedMeal, selectedDay, ingre
   })()
 
   return (
-    <div className="restaurant-card" style={{ '--card-accent': restaurant.color || 'var(--green)' }}>
+    <div className="restaurant-card" style={{ '--card-accent': restaurant.color || 'var(--accent)' }}>
 
       {/* Header */}
       <div className="rc-header">
@@ -750,7 +751,7 @@ export default function RestaurantsPage() {
       {/* ── Header ── */}
       <header className="site-header">
         <div className="header-inner">
-          <Link href="/" className="logo">Breda<span>Eats</span></Link>
+          <Wordmark />
           <div className="header-right">
             <ThemeToggle />
             <Link href="/" className="back-btn">← Zoeken</Link>

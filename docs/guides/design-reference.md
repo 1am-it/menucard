@@ -62,8 +62,9 @@ properties in `app/globals.css` (see
 `planning/decisions/006-theme-token-system-implemented-early.md` for why
 this was built before the pages that visually depend on it, e.g. the
 homepage, were restyled). New UI work should reference these tokens
-(`var(--text-primary)`, `var(--border)`, `var(--green)`, etc.) rather than
-hardcoded colors, so it works correctly in both themes automatically.
+(`var(--text-primary)`, `var(--border)`, `var(--accent)` for the brand
+accent, `var(--green)` only for status, etc.) rather than hardcoded colors,
+so it works correctly in both themes automatically.
 
 The implemented theme contract, which every new page inherits without
 extra work:
@@ -118,10 +119,19 @@ itself.
 
 What is decided:
 
-- The visible product name is **BredaEats**. Internal module names are
+- The visible product name on the public screens and in the shared
+  navigation is **Onze Menukaarten**, with the descriptor **Menukaarten in
+  Breda** (product owner, 2026-10-06; implemented with the chosen Claude
+  Design direction "5 · Oker licht — uitgewerkt", see "Wordmark and brand
+  accent" below). This changes visible UI copy and the wordmark only:
+  domains, redirects, technical identifiers (package name, the
+  `bredaeats_theme` storage key), SEO metadata, e-mails, legal texts,
+  database values, APIs and outgoing messages (e.g. the WhatsApp
+  reservation text in `src/utils/reservation.js`) still say BredaEats
+  until a separate decision changes them. The name is descriptive; a
+  separate trademark check is still open. Internal module names stay
   plain Dutch labels (`Dekkingsoverzicht`, `Onboarding Restaurant`,
-  `Bronwerkvoorraad`, …). No ticket introduces a rebrand or domain
-  change (non-goals in BE-14, BE-15 and BE-16).
+  `Bronwerkvoorraad`, …).
 - Restaurant branding stays secondary during search and discovery. We
   never adopt a restaurant's logo, photography, colours or house style as
   our own UI.
@@ -129,9 +139,9 @@ What is decided:
   or listing cards. At most a neutral icon or monogram is used (decision
   002, BE-20 "Visual contract").
 - Product names, logos or wordmarks that appear in a mockup are
-  placeholders, not adopted branding. Example: the Bronwerkvoorraad
-  mockup's top bar reads "Onze Menukaarten", but the built page keeps
-  the BredaEats `InternalNav` shell.
+  placeholders, not adopted branding, unless a decision adopts them. The
+  "Onze Menukaarten" name was adopted on 2026-10-06 (above); the
+  `InternalNav` shell itself is unchanged apart from its wordmark.
 - The UI says "stad"/"regio", never "market" (`CLAUDE.md`, decision 011).
 - Status and trust labels never suggest more certainty than the data
   carries. No "geverifieerd", score or quality badge appears without
@@ -150,6 +160,70 @@ not resemble. Until the product owner records such a list (here, or in a
 
 Do not invent a fuller policy in a ticket.
 
+### Wordmark and brand accent (implemented 2026-10-06)
+
+Source: Claude Design canvas "Onze Menukaarten — Identiteit &
+kleurstudies", variant "5 · Oker licht — uitgewerkt (okergeel)", without
+the colour-gradient variant. The green reference, cobalt and aubergine
+directions were rejected.
+
+- **Wordmark:** `src/components/Wordmark.js`. Stacked `ONZE` /
+  `Menukaarten` with a folded-menu-card line motif (inline SVG,
+  `currentColor`, `aria-hidden`). One colour (`--wordmark`), no split
+  accent on a word part, no external font or asset. The DOM text is
+  "Onze Menukaarten"; `ONZE` is uppercase via CSS only. Because browsers
+  expose the CSS uppercase in the accessible name ("ONZE Menukaarten",
+  measured in Edge), the link carries an explicit `aria-label`, as in the
+  handoff: "Onze Menukaarten, naar de startpagina" (public) and "Onze
+  Menukaarten, naar het interne overzicht" (`InternalNav`). The descriptor
+  sits next to the link and is hidden below 720px. Every public page
+  header renders exactly one `<Wordmark />`; `InternalNav` uses
+  `WordmarkInline`.
+- **Brand accent tokens** (`app/globals.css`, all three theme blocks):
+  `--accent` (text, links, icons, focus), `--accent-fill` /
+  `--on-accent-fill` (filled controls), `--accent-faint`,
+  `--accent-border`, `--accent-surface(-strong)`, `--accent-glow`,
+  `--wordmark`, `--mark-bg` / `--mark-text` (homepage keyword marker).
+  `--border-focus` follows `--accent`.
+- **Full okergeel only for three things** (handoff rule): the primary
+  button, the homepage keyword marker (and search-term highlight) and an
+  active tab underline. Selected chips, active navigation, the active
+  theme option and similar toggles use the soft treatment:
+  `--accent-surface` background, `--accent` text, 1px `--accent` ring.
+- **`--green` is a status colour** (open, ok, vegan/vegetarian,
+  approved/complete). Never use it for new brand accents; never recolour
+  a status to the brand accent. Known internal exceptions predate this
+  rule and are out of this scope: the coverage dashboard's table header
+  and headline number, the editor-only moderation approve buttons and
+  the import-inbox info banner (listed in `theme-design-tokens.md`).
+- **Okergeel `#F2C35B` is a fill, never text on a light surface**
+  (1.65:1 on white). Light text/links use `#7A4E00`.
+- **Control borders** (`--input-border`) reach at least 3:1 on every
+  surface token in both themes (light `#808792`, a slightly darker value
+  than the handoff's `#8A919C`, which fell below 3:1 on grey surfaces).
+- **No gradients** on hero or detail surfaces; the homepage keyword
+  marker is an inset `box-shadow`.
+- **Reservation actions** never read as an ordering or primary internal
+  button. On the menu page they are outlined (`.rp-btn-reserveer`); on
+  the restaurant detail page they stay secondary to "Bekijk menukaart";
+  the legacy `/restaurants` card button is outlined. When the action
+  leaves the site it carries `ExternalLinkIcon` (decorative icon plus
+  visually hidden "(opent in een nieuw venster)"). Below the action a
+  note names the restaurant's own channel and says Onze Menukaarten
+  takes no reservations or orders itself (`getReservationNote` in
+  `src/utils/reservation.js`).
+- **Homepage USP blocks:** "Zoek op gerecht", "Zie direct de prijs" and
+  "Snel en licht", directly under the search bar and meal chips and
+  before "Populaire keukens" (handoff "Start · 1280"): a list with one
+  `h2` and plain text per block and a 44px soft-oker icon tile. Three
+  columns on desktop, one column below 720px. The handoff's 390px frame
+  does not draw them above the fold; they stay in the same order on
+  mobile rather than being hidden.
+
+Light and dark values and measured contrast:
+`planning/specs/tickets/theme-design-tokens.md`, addendum "Onze
+Menukaarten brand accent".
+
 ## Internal navigation hierarchy
 
 Sources:
@@ -165,7 +239,8 @@ Sources:
 
 ### Implemented today
 
-1. **BredaEats wordmark:** the quiet home link to `/internal`.
+1. **Onze Menukaarten wordmark** (`WordmarkInline`): the quiet home link
+   to `/internal`.
 2. **Primary items:** `Dekkingsoverzicht` (`/internal/coverage`) and
    `Onboarding Restaurant` (`/internal/onboarding-restaurant`).
 3. **`Werkvoorraad`:** one accessible `<details>` disclosure. Each entry
@@ -249,7 +324,8 @@ the current destination is "never color alone").
 - Every interactive element is keyboard-operable, in a focus order that
   matches the visual order.
 - Every interactive element has an explicit `:focus-visible` treatment.
-  Existing practice uses `var(--border-focus)` or `var(--green)`.
+  Use `var(--border-focus)` (which follows `--accent`); never
+  `var(--green)` for focus since 2026-10-06.
 - A page with a navigation region offers a skip-link to the main
   content as its first focusable element. The current `InternalNav` has
   none yet.

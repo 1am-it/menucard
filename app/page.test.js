@@ -44,3 +44,37 @@ test('BE-14: no link on this page still points at /restaurants under the "alle r
   // unchanged.
   assert.match(source, /<Link href="\/restaurants" className="back-btn">Restaurants<\/Link>/);
 });
+
+// Onze Menukaarten — de drie USP-blokken uit de gekozen handoff
+// ("5 · Oker licht — uitgewerkt", Start · 1280).
+
+test('USP blocks: three blocks in handoff order, each a real h2 heading with plain text', () => {
+  const source = readPageSource();
+  const titles = ['Zoek op gerecht', 'Zie direct de prijs', 'Snel en licht'];
+  let last = -1;
+  for (const t of titles) {
+    const i = source.indexOf(`title: '${t}'`);
+    assert.ok(i > last, `${t} present and in handoff order`);
+    last = i;
+  }
+  assert.match(source, /<ul className="home-usps">/);
+  assert.match(source, /<h2 className="home-usp-title">\{u\.title\}<\/h2>/);
+  assert.match(source, /<p className="home-usp-text">\{u\.text\}<\/p>/);
+  assert.doesNotMatch(source, /<img|background-image|linear-gradient/);
+});
+
+test('USP blocks: placed after the search bar and meal chips, before "Populaire keukens"', () => {
+  const source = readPageSource();
+  const search = source.indexOf('className="hero-search-bar"');
+  const chips = source.indexOf('className="meal-selector"');
+  const usps = source.indexOf('<ul className="home-usps">');
+  const cuisines = source.indexOf('Populaire keukens');
+  assert.ok(search < chips && chips < usps && usps < cuisines);
+});
+
+test('USP blocks CSS: tokens only, 3 columns on desktop, one column below 720px', () => {
+  const css = fs.readFileSync(path.join(REPO_ROOT, 'app/globals.css'), 'utf8');
+  assert.match(css, /\.home-usps \{[^}]*grid-template-columns: repeat\(3, minmax\(0, 1fr\)\);[^}]*gap: 32px;/);
+  assert.match(css, /\.home-usp-icon \{[^}]*background: var\(--accent-surface\);[^}]*color: var\(--accent\);/);
+  assert.match(css, /@media \(max-width: 720px\) \{\s*\.home-usps \{ grid-template-columns: minmax\(0, 1fr\);/);
+});

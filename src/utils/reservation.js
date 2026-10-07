@@ -100,4 +100,27 @@ export function getReservationActions(restaurant) {
   return actions
 }
 
+/** True when the action leaves this site (opened in a new window). */
+export function isExternalReservation(action) {
+  return Boolean(action && (action.external || action.method === 'whatsapp'))
+}
+
+/**
+ * Toelichting onder een zichtbare reserveeractie (handoff "5 · Oker licht —
+ * uitgewerkt"): noemt het eigen kanaal van het restaurant en zegt dat
+ * Onze Menukaarten zelf geen reserveringen of bestellingen aanneemt.
+ * Alleen weergavetekst; verandert niets aan de routering (BE-07).
+ */
+export function getReservationNote(action, restaurantName) {
+  if (!action) return null
+  const name = restaurantName || 'het restaurant'
+  const channel = {
+    website: `via de website van ${name}`,
+    whatsapp: `via WhatsApp met ${name}`,
+    phone: `telefonisch bij ${name}`,
+  }[action.method]
+  if (!channel) return null
+  return `Reserveren gaat ${channel}. Onze Menukaarten neemt zelf geen reserveringen of bestellingen aan.`
+}
+
 export { buildWhatsAppLink }

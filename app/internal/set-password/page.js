@@ -183,8 +183,8 @@ export default function SetPasswordPage() {
               padding: 10,
               borderRadius: 8,
               border: 'none',
-              background: 'var(--green)',
-              color: '#fff',
+              background: 'var(--accent-fill)',
+              color: 'var(--on-accent-fill)',
               fontWeight: 600,
               cursor: 'pointer',
             }}
@@ -201,7 +201,7 @@ export default function SetPasswordPage() {
           </p>
           <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>
             Redirecting you to sign in…{' '}
-            <a href="/internal/login" style={{ color: 'var(--green)' }}>
+            <a href="/internal/login" style={{ color: 'var(--accent)' }}>
               Click here if nothing happens.
             </a>
           </p>

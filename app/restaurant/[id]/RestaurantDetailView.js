@@ -2,7 +2,9 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import ThemeToggle from '@/src/components/ThemeToggle'
-import { getReservationActions, isValidPhone, isValidUrl } from '@/src/utils/reservation'
+import { getReservationActions, getReservationNote, isExternalReservation, isValidPhone, isValidUrl } from '@/src/utils/reservation'
+import Wordmark from '@/src/components/Wordmark'
+import ExternalLinkIcon from '@/src/components/ExternalLinkIcon'
 
 const DAYS = ['ma','di','wo','do','vr','za','zo']
 const DAY_LABELS = {
@@ -25,7 +27,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
       <div className="empty-state" style={{ paddingTop: 80 }}>
         <h3>Restaurant niet gevonden</h3>
         <p>
-          <Link href="/" style={{ color: 'var(--green)' }}>← Terug naar overzicht</Link>
+          <Link href="/" style={{ color: 'var(--accent)' }}>← Terug naar overzicht</Link>
         </p>
       </div>
     )
@@ -44,7 +46,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
       {/* ── Header ── */}
       <header>
         <div className="header-inner">
-          <Link href="/" className="logo">Breda<span>Eats</span></Link>
+          <Wordmark />
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <ThemeToggle />
             <Link href="/alle-restaurants" className="back-btn">← Alle restaurants</Link>
@@ -53,9 +55,9 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
       </header>
 
       {/* ── Hero ── */}
-      <div className="detail-hero" style={{
-        background: `linear-gradient(160deg, color-mix(in srgb, ${restaurant.color || 'var(--green)'} 40%, var(--bg)) 0%, var(--bg) 60%)`
-      }}>
+      {/* Geen gradient en geen restaurantkleur als achtergrond (design-reference:
+          geen huisstijl van restaurants overnemen; Onze Menukaarten: geen gradients). */}
+      <div className="detail-hero">
         <div className="detail-hero-inner">
 
           {/* Left: main info */}
@@ -127,7 +129,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
                 <div className="dip-row" style={{ marginTop: 6 }}>
                   <span className="dip-icon">🌐</span>
                   <a href={restaurant.website} target="_blank" rel="noopener noreferrer"
-                    style={{ color: 'var(--green)', textDecoration: 'none', fontSize: 12 }}>
+                    style={{ color: 'var(--accent)', textDecoration: 'none', fontSize: 12 }}>
                     {restaurant.website.replace('https://','').replace('http://','').replace(/\/$/,'')}
                   </a>
                 </div>
@@ -169,12 +171,16 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
               {primaryReservation && (
                 <a
                   href={primaryReservation.href}
-                  target={primaryReservation.external || primaryReservation.method === 'whatsapp' ? '_blank' : undefined}
-                  rel={primaryReservation.external || primaryReservation.method === 'whatsapp' ? 'noopener noreferrer' : undefined}
-                  className="dip-btn-secondary"
+                  target={isExternalReservation(primaryReservation) ? '_blank' : undefined}
+                  rel={isExternalReservation(primaryReservation) ? 'noopener noreferrer' : undefined}
+                  className="dip-btn-secondary dip-btn-reserve"
                 >
-                  {primaryReservation.label} →
+                  {primaryReservation.label}
+                  {isExternalReservation(primaryReservation) && <ExternalLinkIcon />}
                 </a>
+              )}
+              {primaryReservation && (
+                <p className="reservation-note">{getReservationNote(primaryReservation, restaurant.name)}</p>
               )}
             </div>
 
@@ -254,8 +260,8 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
         <div style={{
           marginTop: 48,
           padding: 20,
-          background: 'var(--green-faint)',
-          border: '1px solid var(--green-border)',
+          background: 'var(--accent-faint)',
+          border: '1px solid var(--accent-border)',
           borderRadius: 12,
           display: 'flex',
           alignItems: 'center',
@@ -264,7 +270,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
           flexWrap: 'wrap',
         }}>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--green)', marginBottom: 4 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent)', marginBottom: 4 }}>
               🛡 Allergeneninformatie (NVWA)
             </div>
             <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
@@ -273,8 +279,8 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
           </div>
           <Link href={`/nvwa/${id}`} style={{
             padding: '9px 18px',
-            background: 'var(--green)',
-            color: 'var(--on-accent)',
+            background: 'var(--accent-fill)',
+            color: 'var(--on-accent-fill)',
             fontSize: 13,
             fontWeight: 700,
             borderRadius: 8,
