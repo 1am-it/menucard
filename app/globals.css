@@ -347,7 +347,9 @@ img { display: block; max-width: 100%; }
 .theme-switch { display: flex; background: var(--bg-elevated); border-radius: 8px; padding: 2px; gap: 2px; }
 .theme-btn { padding: 4px 10px; border: none; background: transparent; color: var(--text-muted); font-size: 12px; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s; white-space: nowrap; }
 .theme-btn:hover { color: var(--text-secondary); }
-.theme-btn.active { background: var(--accent-fill); color: var(--on-accent-fill); }
+/* Geselecteerde staat: zacht accent. Handoff "Oker licht": okergeel vol alleen
+   voor primaire knop, markeerstreep en actieve tab-onderstreping. */
+.theme-btn.active { background: var(--accent-surface); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 
 /* ─────────────────────────────────────────────────────────────────────────────
    PRIMARY NAV (shared component, see src/components/PrimaryNav.js)
@@ -364,7 +366,7 @@ img { display: block; max-width: 100%; }
 .primary-nav { display: flex; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 8px; padding: 2px; gap: 2px; }
 .primary-nav-link { padding: 4px 10px; color: var(--text-muted); font-size: 12px; font-weight: 600; text-decoration: none; border-radius: 6px; transition: all 0.15s; white-space: nowrap; }
 .primary-nav-link:hover { color: var(--text-secondary); }
-.primary-nav-link[aria-current="page"] { background: var(--accent-fill); color: var(--on-accent-fill); }
+.primary-nav-link[aria-current="page"] { background: var(--accent-surface); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 .primary-nav-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -531,7 +533,7 @@ header, .site-header {
   cursor: pointer;
 }
 .meal-btn:hover { border-color: var(--border-hover); color: var(--text-primary); }
-.meal-btn.active { background: var(--accent-fill); color: var(--on-accent-fill); border-color: var(--accent-fill); }
+.meal-btn.active { background: var(--accent-surface); color: var(--accent); border-color: var(--accent); }
 
 /* Category nav */
 .cat-nav { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
@@ -1181,11 +1183,11 @@ header, .site-header {
 
 .lang-switch { display: flex; background: var(--bg-elevated); border-radius: 8px; padding: 2px; gap: 2px; }
 .lang-btn { padding: 4px 10px; border: none; background: transparent; color: var(--text-muted); font-size: 13px; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s; }
-.lang-btn.active { background: var(--accent-fill); color: var(--on-accent-fill); }
+.lang-btn.active { background: var(--accent-surface); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 
 .mode-switch { display: flex; background: var(--bg-elevated); border-radius: 8px; padding: 2px; gap: 2px; }
 .mode-btn { padding: 5px 14px; border: none; background: transparent; color: var(--text-muted); font-size: 13px; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s; white-space: nowrap; }
-.mode-btn.active { background: var(--accent-fill); color: var(--on-accent-fill); }
+.mode-btn.active { background: var(--accent-surface); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 
 /* ── Hero section ── */
 .hero-section {
@@ -1201,7 +1203,7 @@ header, .site-header {
 .hero-icon { display: inline-block; vertical-align: -3px; flex-shrink: 0; }
 .hero-steps { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
 .hero-step { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 14px; }
-.step-num { width: 24px; height: 24px; border-radius: 50%; background: var(--accent-fill); color: var(--on-accent-fill); font-weight: 700; font-size: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.step-num { width: 24px; height: 24px; border-radius: 50%; background: var(--accent-surface); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); font-weight: 700; font-size: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .hero-step-arrow { color: var(--text-faint); font-size: 16px; }
 
 /* ── Filter section ── */
@@ -1211,12 +1213,12 @@ header, .site-header {
 .day-selector { display: flex; gap: 6px; flex-wrap: wrap; }
 .day-btn { min-width: 48px; padding: 8px 14px; border: 1.5px solid var(--input-border); background: var(--bg-input); color: var(--text-secondary); font-size: 14px; font-weight: 600; border-radius: 10px; cursor: pointer; transition: all 0.15s; }
 .day-btn:hover { border-color: var(--accent); color: var(--text-primary); }
-.day-btn.active { background: var(--accent-fill); color: var(--on-accent-fill); border-color: var(--accent-fill); }
+.day-btn.active { background: var(--accent-surface); color: var(--accent); border-color: var(--accent); }
 
 .meal-selector { display: flex; gap: 8px; flex-wrap: wrap; }
 .home-meal-btn { padding: 9px 20px; border: 1.5px solid var(--input-border); background: var(--bg-input); color: var(--text-secondary); font-size: 14px; font-weight: 600; border-radius: 10px; cursor: pointer; transition: all 0.15s; }
 .home-meal-btn:hover { border-color: var(--accent); color: var(--text-primary); }
-.home-meal-btn.active { background: var(--accent-fill); color: var(--on-accent-fill); border-color: var(--accent-fill); }
+.home-meal-btn.active { background: var(--accent-surface); color: var(--accent); border-color: var(--accent); }
 
 .filter-hint { font-size: 13px; color: var(--text-dim); display: flex; align-items: center; gap: 6px; margin-top: 4px; }
 .hint-arrow { color: var(--accent); font-size: 16px; animation: bounce 1s ease-in-out infinite; }
@@ -1311,8 +1313,10 @@ header, .site-header {
 .rc-menu-btn { padding: 6px 12px; background: var(--bg-elevated); border: 1px solid var(--input-border); border-radius: 8px; color: var(--text-secondary); font-size: 12px; font-weight: 600; text-decoration: none; transition: all 0.15s; white-space: nowrap; display: inline-block; }
 .rc-menu-btn:hover { background: var(--bg-hover); border-color: var(--border-strong); color: var(--text-primary); }
 .rc-menu-btn--outline { border-color: var(--accent); color: var(--accent); }
-.rc-reserve-btn { padding: 6px 14px; background: var(--accent-fill); color: var(--on-accent-fill); font-size: 12px; font-weight: 700; border-radius: 8px; text-decoration: none; white-space: nowrap; transition: background 0.15s; margin-left: auto; display: inline-block; }
-.rc-reserve-btn:hover { background: var(--accent-fill-hover); }
+/* Reserveren is een externe actie via het kanaal van het restaurant, geen
+   primaire interne actie: outline, nooit de okergele vulling. */
+.rc-reserve-btn { padding: 6px 14px; background: transparent; border: 1.5px solid var(--accent); color: var(--accent); font-size: 12px; font-weight: 700; border-radius: 8px; text-decoration: none; white-space: nowrap; transition: background 0.15s; margin-left: auto; display: inline-block; }
+.rc-reserve-btn:hover { background: var(--accent-faint); }
 
 /* BE-10: one primary action per card, matching "Zie de menukaart vóór je
    reserveert" — when a restaurant has a menu, the menu action is primary
@@ -2209,7 +2213,7 @@ mark.search-highlight {
 
 .di-timeline { list-style: none; margin: 0; padding: 0 0 0 4px; display: grid; gap: 16px; }
 .di-timeline-item { position: relative; padding-left: 20px; }
-.di-timeline-item::before { content: ''; position: absolute; left: 4px; top: 4px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent-fill); }
+.di-timeline-item::before { content: ''; position: absolute; left: 4px; top: 4px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
 .di-timeline-item:not(:last-child)::after { content: ''; position: absolute; left: 7px; top: 14px; bottom: -16px; width: 2px; background: var(--border); }
 .di-timeline-date { font-size: 11px; font-weight: 700; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.3px; }
 .di-timeline-title { font-size: 13px; font-weight: 700; color: var(--text-primary); margin-top: 2px; }
@@ -2306,7 +2310,7 @@ mark.search-highlight {
    the internal nav only, the inactive option uses --text-secondary instead;
    the active option keeps its accent colours. */
 .internal-nav-theme .theme-btn { color: var(--text-secondary); }
-.internal-nav-theme .theme-btn.active { color: var(--on-accent-fill); }
+.internal-nav-theme .theme-btn.active { color: var(--accent); }
 
 /* BE-20 — the compact "Werkvoorraad" disclosure grouping Beheer/Nieuwe
    aanleveringen/Profielconcepten/Beoordelen. A native <details>/<summary>
@@ -2546,8 +2550,8 @@ mark.search-highlight {
 .swq-queue { flex: 1 1 0; min-width: 0; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 12px; border: 0; border-right: 1px solid var(--border); background: transparent; color: var(--text-primary); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
 .swq-queue:last-child { border-right: 0; }
 .swq-queue:hover { background: var(--bg-hover); }
-.swq-queue[aria-pressed="true"] { background: var(--accent-fill); color: var(--on-accent-fill); }
-.swq-queue[aria-pressed="true"] .swq-count { background: var(--on-accent-fill); color: var(--accent-fill); }
+.swq-queue[aria-pressed="true"] { background: var(--accent-surface); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.swq-queue[aria-pressed="true"] .swq-count { background: var(--accent); color: var(--bg-card); }
 .swq-queue:focus-visible, .swq-action:focus-visible, .swq-legend-toggle:focus-visible, .swq-btn-secondary:focus-visible,
 .swq-search input:focus-visible, .swq-select select:focus-visible, .swq-panel-link:focus-visible, .swq-outside-details summary:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
 .swq-filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }

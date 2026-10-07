@@ -165,7 +165,39 @@ test('status colours stay semantic: open/ok/vegan keep --green, brand controls u
   assert.match(s, /\.dish-result-status\.is-open\s*\{ color: var\(--green\);/);
   assert.match(s, /\.swq-badge--ok svg \{ color: var\(--green\); \}/);
   assert.match(s, /\.hero-search-btn \{[^}]*background: var\(--accent-fill\);[^}]*color: var\(--on-accent-fill\);/);
-  assert.match(s, /\.primary-nav-link\[aria-current="page"\] \{ background: var\(--accent-fill\); color: var\(--on-accent-fill\); \}/);
+  assert.match(s, /\.primary-nav-link\[aria-current="page"\] \{ background: var\(--accent-surface\); color: var\(--accent\);/);
+});
+
+// Handoff "Oker licht": okergeel als vol vlak alleen voor primaire knop,
+// markeerstreep en actieve tab-onderstreping. Selectietoestanden zijn zacht.
+const SELECTED_STATE_RULES = [
+  '.theme-btn.active',
+  '.primary-nav-link[aria-current="page"]',
+  '.meal-btn.active',
+  '.lang-btn.active',
+  '.mode-btn.active',
+  '.day-btn.active',
+  '.home-meal-btn.active',
+  '.swq-queue[aria-pressed="true"]',
+];
+
+for (const selector of SELECTED_STATE_RULES) {
+  test(`selected state ${selector}: soft accent, never the full okergeel fill`, () => {
+    const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const m = css().match(new RegExp(`\\n${escaped} \\{([^}]*)\\}`));
+    assert.ok(m, `${selector} rule exists`);
+    assert.match(m[1], /background: var\(--accent-surface\);/);
+    assert.match(m[1], /color: var\(--accent\);/);
+    assert.doesNotMatch(m[1], /--accent-fill/);
+  });
+}
+
+test('legacy reservation button (/restaurants) is outlined, not a filled primary action', () => {
+  const m = css().match(/\n\.rc-reserve-btn \{([^}]*)\}/);
+  assert.ok(m);
+  assert.match(m[1], /background: transparent;/);
+  assert.match(m[1], /border: 1\.5px solid var\(--accent\);/);
+  assert.doesNotMatch(m[1], /--accent-fill/);
 });
 
 // ── No gradients, external reservation, homepage marker ─────────────────
