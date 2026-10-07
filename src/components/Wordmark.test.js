@@ -231,5 +231,6 @@ test('reservation button on the menu page is an outlined, visibly external actio
   const s = css();
   assert.match(s, /\.rp-btn-reserveer \{[^}]*background: transparent;[^}]*border: 2px solid var\(--accent\);/);
   const src = read('app/menu/[id]/MenuView.js');
-  assert.match(src, /className="rp-btn-external-icon"/);
+  assert.match(src, /<ExternalLinkIcon \/>/);
+  assert.match(read('src/components/ExternalLinkIcon.js'), /className = 'rp-btn-external-icon'/);
 });

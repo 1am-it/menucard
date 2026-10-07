@@ -3,9 +3,10 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import ThemeToggle from '@/src/components/ThemeToggle'
-import { getReservationActions, isValidPhone, isValidUrl } from '@/src/utils/reservation'
+import { getReservationActions, getReservationNote, isExternalReservation, isValidPhone, isValidUrl } from '@/src/utils/reservation'
 import { resolveDishTarget } from '@/src/lib/dishDeepLink'
 import Wordmark from '@/src/components/Wordmark'
+import ExternalLinkIcon from '@/src/components/ExternalLinkIcon'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -458,19 +459,17 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
                 <a
                   className="rp-btn-reserveer"
                   href={primaryReservation.href}
-                  target={primaryReservation.external || primaryReservation.method === 'whatsapp' ? '_blank' : undefined}
-                  rel={primaryReservation.external || primaryReservation.method === 'whatsapp' ? 'noopener noreferrer' : undefined}
+                  target={isExternalReservation(primaryReservation) ? '_blank' : undefined}
+                  rel={isExternalReservation(primaryReservation) ? 'noopener noreferrer' : undefined}
                 >
                   {primaryReservation.label}
-                  {(primaryReservation.external || primaryReservation.method === 'whatsapp') && (
-                    <svg className="rp-btn-external-icon" width="14" height="14" viewBox="0 0 18 18" fill="none"
-                      stroke="currentColor" strokeWidth="1.8" aria-hidden="true" focusable="false">
-                      <path d="M10.5 3h4.5v4.5M15 3l-7 7M13 10.5V15H3V5h4.5" />
-                    </svg>
-                  )}
+                  {isExternalReservation(primaryReservation) && <ExternalLinkIcon />}
                 </a>
               )}
             </div>
+            {primaryReservation && (
+              <p className="reservation-note">{getReservationNote(primaryReservation, r.name || restaurant.name)}</p>
+            )}
             {r.source && (
               <div className="rp-source">
                 Bron: <a href={r.source} target="_blank" rel="noopener">

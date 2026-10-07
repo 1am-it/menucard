@@ -2,8 +2,9 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import ThemeToggle from '@/src/components/ThemeToggle'
-import { getReservationActions, isValidPhone, isValidUrl } from '@/src/utils/reservation'
+import { getReservationActions, getReservationNote, isExternalReservation, isValidPhone, isValidUrl } from '@/src/utils/reservation'
 import Wordmark from '@/src/components/Wordmark'
+import ExternalLinkIcon from '@/src/components/ExternalLinkIcon'
 
 const DAYS = ['ma','di','wo','do','vr','za','zo']
 const DAY_LABELS = {
@@ -170,12 +171,16 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
               {primaryReservation && (
                 <a
                   href={primaryReservation.href}
-                  target={primaryReservation.external || primaryReservation.method === 'whatsapp' ? '_blank' : undefined}
-                  rel={primaryReservation.external || primaryReservation.method === 'whatsapp' ? 'noopener noreferrer' : undefined}
-                  className="dip-btn-secondary"
+                  target={isExternalReservation(primaryReservation) ? '_blank' : undefined}
+                  rel={isExternalReservation(primaryReservation) ? 'noopener noreferrer' : undefined}
+                  className="dip-btn-secondary dip-btn-reserve"
                 >
-                  {primaryReservation.label} →
+                  {primaryReservation.label}
+                  {isExternalReservation(primaryReservation) && <ExternalLinkIcon />}
                 </a>
+              )}
+              {primaryReservation && (
+                <p className="reservation-note">{getReservationNote(primaryReservation, restaurant.name)}</p>
               )}
             </div>
 
