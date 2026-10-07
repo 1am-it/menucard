@@ -378,8 +378,13 @@ Open points (not decided by Kleurtaal v2):
   (for example to the import inbox's "New") is a future product
   decision, as are non-neutral roles for the states listed as neutral
   above.
-- The Brontriage statuses and the "Brontriage" navigation item stay open
-  decisions from that handoff.
+- The Brontriage screens of that handoff were not adopted as a mockup.
+  BE-24 (`planning/specs/tickets/be-24-internal-source-triage.md`) built a
+  first, proposal-only version on BE-23's layout. Its proposal statuses use
+  only existing roles: `Wacht op controle` → neutral (clock),
+  `Geaccepteerd` → positive (check), `Afgewezen` → neutral (cross); the
+  reserved "Actie nodig" role stays unused. The navigation label and
+  position remain open (see "Internal navigation hierarchy").
 - In light, the "Actie nodig" fill equals the selected-row fill; on a
   selected row the fill disappears, icon and text stay readable.
 - The light values were measured from a generated mockup image (a few
@@ -411,6 +416,8 @@ Sources:
    - `Beheer` → `/internal`;
    - `Nieuwe aanleveringen` → `/internal/import-inbox`;
    - `Bronwerkvoorraad` → `/internal/source-workqueue`;
+   - `Brontriage` → `/internal/source-triage` (BE-24; label and position
+     await product confirmation, see "Open product decisions");
    - `Profielconcepten` → `/internal/profile-drafts`;
    - `Beoordelen` → `/internal/moderation`, editor only.
 4. **Right side:** the shared theme toggle, then `Sign out`.
@@ -433,6 +440,8 @@ Sources:
 
 ### Open product decisions
 
+- **`Brontriage` under `Werkvoorraad`, after `Bronwerkvoorraad`.** Added
+  by BE-24 as this build's choice; Kleurtaal v2 left the item open.
 - **`Beheer` → `/internal`.** BE-20 says `Beheer` is not a separate
   top-level item. No approved mockup or ticket names its destination. The
   mapping to `/internal` is the build's own choice, flagged in

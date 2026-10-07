@@ -267,27 +267,35 @@ behaviourally in the app release.
 
 ## Release sequencing
 
-Per `docs/guides/production-migration-pipeline.md`: `0015` is released
-and verified live first, as this migration-only release, before the app
-release that depends on it is merged or deployed.
+Per `docs/guides/production-migration-pipeline.md`, `0015` was released
+and verified live before this app release is considered for merge or
+deployment. The app release still needs its own review and the product
+decisions listed below.
 
 Release gate: `production-db-migrate.yml` only applies a release whose
-versions match its documented lists. They now read applied `0001`–`0014`,
-release `0015`.
+versions match its documented lists. The live history and documented applied
+list now both read `0001`–`0015`; there is no staged migration version.
 
-`0014` is live according to existing, read-only audit evidence:
-production-db-migrate.yml run
+`0014` is live according to production-db-migrate run
 https://github.com/1am-it/menucard/actions/runs/36601808246 (2026-09-29,
-success) verified live history as exactly `0001`–`0014` in its own
-read-only post-verification step, and no migrate or history-reconcile run
-has happened since (checked read-only on 2026-10-08). This is evidence,
-not a fresh measurement: a fresh read-only `production-db-preflight.yml`
-run (applied `0001`–`0014`, staged `0015`) is still mandatory before
-`0015` is applied.
+success), whose read-only post-apply step reported history `0001` through
+`0014`.
 
-Order after merge: preflight → approved `production-db-migrate.yml`
-(release `0015`) → second preflight → live privilege check → record
-"0015 live" in `planning/CONTEXT.md` → only then the app release.
+`0015` was then applied alone by production-db-migrate run
+https://github.com/1am-it/menucard/actions/runs/37811864210 (2026-10-08,
+success). The approved preflight
+https://github.com/1am-it/menucard/actions/runs/37810992211 first found
+live `0001` through `0014` with `0015` staged; the second preflight
+https://github.com/1am-it/menucard/actions/runs/37812236504 confirmed exact
+live and local history `0001` through `0015`. A read-only production catalog
+check then confirmed RLS on both tables, no policies, no table/sequence/RPC
+rights for `anon` or `authenticated`, only the documented minimum rights for
+`service_role`, and `SECURITY INVOKER` RPCs with `search_path=public`.
+Neither the migration nor the checks inserted a proposal or audit event.
+
+The remaining release sequence is: resolve the product decisions below,
+complete an independent app review, then open a separate app PR. Only an
+explicit merge approval may deploy the app/API/UI.
 
 ## Follow-up phases (not built)
 
@@ -306,20 +314,29 @@ Order after merge: preflight → approved `production-db-migrate.yml`
 - Self-review allowed or not (see "Roles and authorization").
 - The unusable-reason list.
 
-## Verification (schema release)
+## Verification
 
-Local, 2026-10-08, on the schema release branch:
+### Schema release
 
 - `node --test src/lib/sourceTriageMigration.test.js`: 13/13. Structural
-  checks on `0015`: the two tables and their constraints, the partial
-  unique index, both RPCs (security invoker, fixed `search_path`, typed
-  errors, an audit event per change), and the exact grant and revoke set
-  of the privilege model above. 17 targeted mutations of the privileges
-  were all caught.
-- `git diff --check` is clean.
-- Not yet verified: a real Postgres replay of `0001`–`0015`. That first
-  happens in the `validate-migrations` CI run on this release (no local
-  database was used).
+  checks cover the tables and constraints, partial unique index, both RPCs,
+  append-only events, and the exact grant/revoke model; 17 targeted privilege
+  mutations were caught.
+- The schema PR's `validate-migrations` check successfully replayed
+  `0001` through `0015` against a throwaway PostgreSQL database.
+- The production preflight, migration, second preflight, and read-only
+  privilege check are recorded above. No app route, page, or API was part of
+  the schema release.
 
-This release claims no API, page, browser, navigation or mockup
-verification; those belong to the app release.
+### App implementation baseline
+
+- The original local app validation on 2026-10-07 reported `src/lib`
+  1148/1149, `app` 79/79, `ops` 315/315, and `src/components` 59/59. The
+  single `src/lib` failure was the known CRLF working-copy check in
+  `menuSnapshotProposals.test.js`, whose files were unchanged by this ticket.
+- That validation also completed a local build and browser check with
+  fictional data and all non-local requests blocked. It covered 1280, 390,
+  and 320px in both themes, keyboard order, client-side validation, and the
+  one-RPC-per-action rule.
+- It was not a production UI/session check. The app/API/UI remains unreleased
+  until its separate PR is independently reviewed and explicitly approved.
