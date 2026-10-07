@@ -104,7 +104,7 @@ export default function InternalHomePage() {
   }
 
   if (session === undefined || roles === undefined) {
-    return <main style={{ ...SHELL_STYLE, color: 'var(--text-muted)' }}>Loading…</main>
+    return <main style={{ ...SHELL_STYLE, color: 'var(--text-secondary)' }}>Loading…</main>
   }
 
   const modules = resolveVisibleModules(roles)
@@ -124,7 +124,7 @@ export default function InternalHomePage() {
 
       <div style={{ paddingTop: 28, marginBottom: 24 }}>
         <h1 style={{ fontSize: 28, margin: '0 0 4px' }}>Beheer</h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: 0 }}>
+        <p style={{ color: 'var(--text-secondary)', fontSize: 13, margin: 0 }}>
           {email ? `Signed in as ${email}` : 'Signed in'}
           {roleLabels.length > 0 ? ` · roles: ${roleLabels.join(', ')}` : ''}
         </p>
@@ -157,7 +157,7 @@ export default function InternalHomePage() {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-            <span style={{ width: 18, height: 18, display: 'flex', flexShrink: 0, color: 'var(--text-muted)', marginTop: 1 }}>
+            <span style={{ width: 18, height: 18, display: 'flex', flexShrink: 0, color: 'var(--text-secondary)', marginTop: 1 }}>
               <IconLock />
             </span>
             <div>
@@ -214,7 +214,7 @@ export default function InternalHomePage() {
               }}
             >
               {m.label}
-              <span style={{ width: 16, height: 16, display: 'flex', flexShrink: 0, color: 'var(--text-muted)' }}>
+              <span style={{ width: 16, height: 16, display: 'flex', flexShrink: 0, color: 'var(--text-secondary)' }}>
                 <IconArrowRight />
               </span>
             </a>
@@ -227,7 +227,7 @@ export default function InternalHomePage() {
                 borderRadius: 'var(--radius-lg)',
                 border: '1px dashed var(--border)',
                 background: 'var(--bg-elevated)',
-                color: 'var(--text-muted)',
+                color: 'var(--text-secondary)',
               }}
             >
               <div style={{ fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>Owner tools</div>

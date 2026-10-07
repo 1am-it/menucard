@@ -1,6 +1,7 @@
 /* ─────────────────────────────────────────────────────────────────────────────
    BredaEats — globals.css
-   Light + Dark theme via design tokens · oker merkaccent (--accent*); --green = status
+   Light + Dark theme via design tokens · Kleurtaal v2: oker = merk en interactie,
+   --status-* = semantische status (docs/guides/design-reference.md)
    Inter-style system font stack
    ───────────────────────────────────────────────────────────────────────────── */
 
@@ -20,19 +21,12 @@
    ───────────────────────────────────────────────────────────────────────────── */
 
 :root {
-  /* Brand / accent */
-  --green:                #06C167;
-  --green-dim:             #05a957;
-  --green-faint:           rgba(6, 193, 103, 0.08);
-  --green-border:          rgba(6, 193, 103, 0.2);
-  --green-surface:         #1f4030;
-  --green-surface-strong:  #0f2318;
-  --green-glow:            rgba(6, 193, 103, 0.4);
+  /* Kleurtaal v2 — zie docs/guides/design-reference.md ("Kleurtaal v2").
+     Oker is de merk- en interactiekleur. Groen is nooit een merkaccent;
+     het bestaat alleen nog als --status-positive (donker). */
   --on-accent:             #000000;
-  /* Merkaccent — Onze Menukaarten · oker (zie docs/guides/design-reference.md).
-     --green blijft bestaan als semantische succes-/open-statuskleur en is
-     geen merkkleur meer. Okergeel (--accent-fill) is een vulkleur, nooit
-     tekst op een licht vlak. */
+  /* Merkaccent — Onze Menukaarten · oker. Okergeel (--accent-fill) is een
+     vulkleur, nooit tekst op een licht vlak. */
   --accent:                #F2C35B;
   --accent-dim:            #E0AA36;
   --accent-fill:           #F2C35B;
@@ -44,8 +38,42 @@
   --accent-surface-strong: #3A2D0C;
   --accent-glow:           rgba(242, 195, 91, 0.35);
   --wordmark:              #F2C35B;
+  --wordmark-icon:         #F2C35B;
+  --nav-indicator:         #F2C35B;
   --mark-bg:               #3A2D0C;
   --mark-text:             #F2C35B;
+
+  /* Semantische statusrollen — alleen voor status, altijd icoon + tekst.
+     Donker: statuskleur als tekst en 1px rand, vlak = statuskleur op 10%.
+     Minimum gemeten over kaart, verhoogd vlak en zacht accentvlak
+     (src/lib/colourLanguage.test.js). Welke staat welke rol krijgt:
+     src/lib/statusRoles.js; --status-action is gereserveerd. */
+  --status-blocked:         #FF6B6B;
+  --status-blocked-bg:      rgba(255, 107, 107, 0.10);
+  --status-blocked-border:  #FF6B6B;
+  --status-neutral:         #AAAAAA;
+  --status-neutral-bg:      rgba(170, 170, 170, 0.10);
+  --status-neutral-border:  #AAAAAA;
+  --status-file:            #64B4FF;
+  --status-file-bg:         rgba(100, 180, 255, 0.10);
+  --status-file-border:     #64B4FF;
+  --status-old:             #FF9E6B;
+  --status-old-bg:          rgba(255, 158, 107, 0.10);
+  --status-old-border:      #FF9E6B;
+  --status-positive:        #06C167;
+  --status-positive-bg:     rgba(6, 193, 103, 0.10);
+  --status-positive-border: #06C167;
+  --status-action:          #FFD27A;
+  --status-action-bg:       rgba(255, 210, 122, 0.10);
+  --status-action-border:   #FFD27A;
+  --status-radius:          var(--radius-sm);
+
+  /* Tijdelijke compatibele aliassen (Kleurtaal v2). Nieuwe UI gebruikt de
+     --status-* rollen; deze namen bestaan alleen nog zodat lopende branches
+     niet stil breken. Niet meer gebruiken in app/ of src/. */
+  --green:        var(--status-positive);
+  --green-faint:  var(--status-positive-bg);
+  --green-border: var(--status-positive-border);
 
   /* Surfaces */
   --bg:              #0a0a0a;
@@ -63,7 +91,10 @@
   --input-border:  #6b7280;
   --border-focus:  var(--accent);
 
-  /* Text */
+  /* Text. Leesbare tekst (body, labels, hulptekst, status) gebruikt alleen
+     --text-primary of --text-secondary. --text-muted, --text-dim en
+     --text-faint halen geen AA op elk vlak: alleen voor niet-tekstuele
+     decoratie (Kleurtaal v2). */
   --text-primary:   #ffffff;
   --text-secondary: #aaaaaa;
   --text-muted:     #666666;
@@ -80,13 +111,15 @@
   --tag-gluten:      #ff7800;
   --tag-gluten-bg:   rgba(255, 120, 0, 0.1);
 
-  /* Status */
-  --danger:               #ff4444;
-  --danger-bg:            rgba(255, 68, 68, 0.1);
-  --danger-border:        rgba(255, 68, 68, 0.2);
-  --danger-glow:          rgba(255, 68, 68, 0.6);
-  --warning:              #FF9E6B;
-  --warning-bg:           rgba(255, 158, 107, 0.10);
+  /* Fout- en waarschuwingsmeldingen. Compatibele namen: --danger volgt
+     --status-blocked (fout, laad- en validatiefout), --warning volgt
+     --status-old (aandacht). Alleen de randen zijn eigen waarden. */
+  --danger:               var(--status-blocked);
+  --danger-bg:            var(--status-blocked-bg);
+  --danger-border:        rgba(255, 107, 107, 0.20);
+  --danger-glow:          rgba(255, 107, 107, 0.6);
+  --warning:              var(--status-old);
+  --warning-bg:           var(--status-old-bg);
   --warning-border:       rgba(255, 158, 107, 0.28);
   --warning-strong-border: #5a2a14;
 
@@ -99,10 +132,7 @@
   --allergy-toggle-bg:  #1f1a30;
 
   /* Misc */
-  --wine:             #a87c4a;
-  --whatsapp-bg:      #0a2010;
-  --whatsapp-border:  #1a4a28;
-  --whatsapp-hover-bg: #0f2e18;
+  --wine:              #a87c4a;
 
   /* Gradients & sticky surfaces */
   --header-bg: rgba(10, 10, 10, 0.95);
@@ -138,48 +168,65 @@
 /* ── Light theme: system preference (no explicit override) ── */
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
-    --green:                #087f45;
-    --green-dim:             #066b3a;
-    --green-faint:           rgba(8, 127, 69, 0.08);
-    --green-border:          rgba(8, 127, 69, 0.22);
-    --green-surface:         #d9f5e6;
-    --green-surface-strong:  #c3edd6;
-    --green-glow:            rgba(8, 127, 69, 0.35);
     --on-accent:             #ffffff;
     --accent:                #7A4E00;
     --accent-dim:            #5E3C00;
-    --accent-fill:           #F2C35B;
+    --accent-fill:           #F6C057;
     --accent-fill-hover:     #E8B648;
     --on-accent-fill:        #1F1600;
-    --accent-faint:          #FDF3D8;
+    --accent-faint:          #FEF1D5;
     --accent-border:         rgba(122, 78, 0, 0.30);
-    --accent-surface:        #FDF3D8;
+    --accent-surface:        #FEF1D5;
     --accent-surface-strong: #FBE6A8;
     --accent-glow:           rgba(122, 78, 0, 0.30);
-    --wordmark:              #7A4E00;
-    --mark-bg:               #F2C35B;
+    --wordmark:              #1A1410;
+    --wordmark-icon:         #B28110;
+    --nav-indicator:         #D8BC7A;
+    --mark-bg:               #F6C057;
     --mark-text:             inherit;
 
-    --bg:              #ffffff;
-    --bg-card:         #ffffff;
-    --bg-elevated:     #f3f4f6;
-    --bg-input:        #ffffff;
+    /* Statusrollen licht: pil zonder rand, effen vlak; alleen rood, oker
+       en grijs (geen blauw of groen). */
+    --status-blocked:         #8A1C12;
+    --status-blocked-bg:      #FCE0DA;
+    --status-blocked-border:  transparent;
+    --status-neutral:         #2A2E36;
+    --status-neutral-bg:      #EFEFEF;
+    --status-neutral-border:  transparent;
+    --status-file:            #5A3A0A;
+    --status-file-bg:         #FEF0D3;
+    --status-file-border:     transparent;
+    --status-old:             #5A3A0A;
+    --status-old-bg:          #FEF0D3;
+    --status-old-border:      transparent;
+    --status-positive:        #2A2E36;
+    --status-positive-bg:     #EFEFEF;
+    --status-positive-border: transparent;
+    --status-action:          #5A3A0A;
+    --status-action-bg:       #FEF1D5;
+    --status-action-border:   transparent;
+    --status-radius:          var(--radius-pill);
+
+    --bg:              #FCFAF4;
+    --bg-card:         #FFFDF9;
+    --bg-elevated:     #F5F3EE;
+    --bg-input:        #FFFDF9;
     --bg-hover:        #eef0f2;
     --bg-hover-accent: #FDF8EA;
     --bg-panel:        #faf8ff;
 
-    --border:        #e3e5e8;
+    --border:        #EFE8D8;
     --border-hover:  #c7cbd1;
     --border-strong: #b3b8c0;
-    --input-border:  #808792;
+    --input-border:  #8E877B;
 
-    --text-primary:   #14181c;
-    --text-secondary: #4b5563;
+    --text-primary:   #1A1410;
+    --text-secondary: #5C5650;
     --text-muted:     #6b7280;
     --text-dim:       #6b7280;
     --text-faint:     #9aa1ab;
 
-    --tag-featured:    #8a6a00;
+    --tag-featured:    #735800;
     --tag-featured-bg: rgba(138, 106, 0, 0.12);
     --tag-info:        #1d5fb0;
     --tag-info-bg:     rgba(29, 95, 176, 0.1);
@@ -188,13 +235,9 @@
     --tag-gluten:      #a34f00;
     --tag-gluten-bg:   rgba(163, 79, 0, 0.1);
 
-    --danger:               #c62828;
-    --danger-bg:            rgba(198, 40, 40, 0.1);
-    --danger-border:        rgba(198, 40, 40, 0.25);
-    --danger-glow:          rgba(198, 40, 40, 0.5);
-    --warning:              #9A3412;
-    --warning-bg:           rgba(154, 52, 18, 0.08);
-    --warning-border:       rgba(154, 52, 18, 0.30);
+    --danger-border:        rgba(138, 28, 18, 0.30);
+    --danger-glow:          rgba(138, 28, 18, 0.5);
+    --warning-border:       rgba(90, 58, 10, 0.30);
     --warning-strong-border: #E3A68A;
 
     --allergy:            #6d4fc7;
@@ -205,12 +248,9 @@
     --allergy-toggle-bg:  #f0eaff;
 
     --wine:              #7a5a35;
-    --whatsapp-bg:       #e3f7ec;
-    --whatsapp-border:   #a9e6c4;
-    --whatsapp-hover-bg: #d1f0df;
 
-    --header-bg: rgba(255, 255, 255, 0.92);
-    --sticky-bg: rgba(255, 255, 255, 0.94);
+    --header-bg: rgba(252, 250, 244, 0.92);
+    --sticky-bg: rgba(252, 250, 244, 0.94);
 
     --shadow-tint-sm: rgba(0, 0, 0, 0.08);
     --shadow-tint-md: rgba(0, 0, 0, 0.10);
@@ -226,48 +266,65 @@
 
 /* ── Light theme: explicit user choice (wins regardless of OS preference) ── */
 :root[data-theme="light"] {
-  --green:                #087f45;
-  --green-dim:             #066b3a;
-  --green-faint:           rgba(8, 127, 69, 0.08);
-  --green-border:          rgba(8, 127, 69, 0.22);
-  --green-surface:         #d9f5e6;
-  --green-surface-strong:  #c3edd6;
-  --green-glow:            rgba(8, 127, 69, 0.35);
   --on-accent:             #ffffff;
   --accent:                #7A4E00;
   --accent-dim:            #5E3C00;
-  --accent-fill:           #F2C35B;
+  --accent-fill:           #F6C057;
   --accent-fill-hover:     #E8B648;
   --on-accent-fill:        #1F1600;
-  --accent-faint:          #FDF3D8;
+  --accent-faint:          #FEF1D5;
   --accent-border:         rgba(122, 78, 0, 0.30);
-  --accent-surface:        #FDF3D8;
+  --accent-surface:        #FEF1D5;
   --accent-surface-strong: #FBE6A8;
   --accent-glow:           rgba(122, 78, 0, 0.30);
-  --wordmark:              #7A4E00;
-  --mark-bg:               #F2C35B;
+  --wordmark:              #1A1410;
+  --wordmark-icon:         #B28110;
+  --nav-indicator:         #D8BC7A;
+  --mark-bg:               #F6C057;
   --mark-text:             inherit;
 
-  --bg:              #ffffff;
-  --bg-card:         #ffffff;
-  --bg-elevated:     #f3f4f6;
-  --bg-input:        #ffffff;
+  /* Statusrollen licht: pil zonder rand, effen vlak; alleen rood, oker
+     en grijs (geen blauw of groen). */
+  --status-blocked:         #8A1C12;
+  --status-blocked-bg:      #FCE0DA;
+  --status-blocked-border:  transparent;
+  --status-neutral:         #2A2E36;
+  --status-neutral-bg:      #EFEFEF;
+  --status-neutral-border:  transparent;
+  --status-file:            #5A3A0A;
+  --status-file-bg:         #FEF0D3;
+  --status-file-border:     transparent;
+  --status-old:             #5A3A0A;
+  --status-old-bg:          #FEF0D3;
+  --status-old-border:      transparent;
+  --status-positive:        #2A2E36;
+  --status-positive-bg:     #EFEFEF;
+  --status-positive-border: transparent;
+  --status-action:          #5A3A0A;
+  --status-action-bg:       #FEF1D5;
+  --status-action-border:   transparent;
+  --status-radius:          var(--radius-pill);
+
+  --bg:              #FCFAF4;
+  --bg-card:         #FFFDF9;
+  --bg-elevated:     #F5F3EE;
+  --bg-input:        #FFFDF9;
   --bg-hover:        #eef0f2;
   --bg-hover-accent: #FDF8EA;
   --bg-panel:        #faf8ff;
 
-  --border:        #e3e5e8;
+  --border:        #EFE8D8;
   --border-hover:  #c7cbd1;
   --border-strong: #b3b8c0;
-  --input-border:  #808792;
+  --input-border:  #8E877B;
 
-  --text-primary:   #14181c;
-  --text-secondary: #4b5563;
+  --text-primary:   #1A1410;
+  --text-secondary: #5C5650;
   --text-muted:     #6b7280;
   --text-dim:       #6b7280;
   --text-faint:     #9aa1ab;
 
-  --tag-featured:    #8a6a00;
+  --tag-featured:    #735800;
   --tag-featured-bg: rgba(138, 106, 0, 0.12);
   --tag-info:        #1d5fb0;
   --tag-info-bg:     rgba(29, 95, 176, 0.1);
@@ -276,13 +333,9 @@
   --tag-gluten:      #a34f00;
   --tag-gluten-bg:   rgba(163, 79, 0, 0.1);
 
-  --danger:               #c62828;
-  --danger-bg:            rgba(198, 40, 40, 0.1);
-  --danger-border:        rgba(198, 40, 40, 0.25);
-  --danger-glow:          rgba(198, 40, 40, 0.5);
-  --warning:              #9A3412;
-  --warning-bg:           rgba(154, 52, 18, 0.08);
-  --warning-border:       rgba(154, 52, 18, 0.30);
+  --danger-border:        rgba(138, 28, 18, 0.30);
+  --danger-glow:          rgba(138, 28, 18, 0.5);
+  --warning-border:       rgba(90, 58, 10, 0.30);
   --warning-strong-border: #E3A68A;
 
   --allergy:            #6d4fc7;
@@ -293,12 +346,9 @@
   --allergy-toggle-bg:  #f0eaff;
 
   --wine:              #7a5a35;
-  --whatsapp-bg:       #e3f7ec;
-  --whatsapp-border:   #a9e6c4;
-  --whatsapp-hover-bg: #d1f0df;
 
-  --header-bg: rgba(255, 255, 255, 0.92);
-  --sticky-bg: rgba(255, 255, 255, 0.94);
+  --header-bg: rgba(252, 250, 244, 0.92);
+  --sticky-bg: rgba(252, 250, 244, 0.94);
 
   --shadow-tint-sm: rgba(0, 0, 0, 0.08);
   --shadow-tint-md: rgba(0, 0, 0, 0.10);
@@ -345,8 +395,8 @@ img { display: block; max-width: 100%; }
    ───────────────────────────────────────────────────────────────────────────── */
 
 .theme-switch { display: flex; background: var(--bg-elevated); border-radius: 8px; padding: 2px; gap: 2px; }
-.theme-btn { padding: 4px 10px; border: none; background: transparent; color: var(--text-muted); font-size: 12px; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s; white-space: nowrap; }
-.theme-btn:hover { color: var(--text-secondary); }
+.theme-btn { padding: 4px 10px; border: none; background: transparent; color: var(--text-secondary); font-size: 12px; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s; white-space: nowrap; }
+.theme-btn:hover { color: var(--text-primary); }
 /* Geselecteerde staat: zacht accent. Handoff "Oker licht": okergeel vol alleen
    voor primaire knop, markeerstreep en actieve tab-onderstreping. */
 .theme-btn.active { background: var(--accent-surface); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
@@ -358,14 +408,14 @@ img { display: block; max-width: 100%; }
    buttons — aria-current="page" marks the active destination directly,
    styled below instead of a separate .active class, since aria-current
    already is the real state. Border added (unlike .theme-switch) to
-   borrow the light restaurant card's calm, bordered, restrained-green
+   borrow the light restaurant card's calm, bordered, restrained
    visual language (see .lrc-card) for this nav's own compact appearance
    only — this is not a card-style change anywhere else.
    ───────────────────────────────────────────────────────────────────────────── */
 
 .primary-nav { display: flex; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 8px; padding: 2px; gap: 2px; }
-.primary-nav-link { padding: 4px 10px; color: var(--text-muted); font-size: 12px; font-weight: 600; text-decoration: none; border-radius: 6px; transition: all 0.15s; white-space: nowrap; }
-.primary-nav-link:hover { color: var(--text-secondary); }
+.primary-nav-link { padding: 4px 10px; color: var(--text-secondary); font-size: 12px; font-weight: 600; text-decoration: none; border-radius: 6px; transition: all 0.15s; white-space: nowrap; }
+.primary-nav-link:hover { color: var(--text-primary); }
 .primary-nav-link[aria-current="page"] { background: var(--accent-surface); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 .primary-nav-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
@@ -411,7 +461,8 @@ header, .site-header {
   border-radius: var(--radius-sm);
 }
 .wordmark:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 3px; }
-.wordmark-mark { flex-shrink: 0; }
+/* Kleurtaal v2: licht woordmerk-tekst #1A1410 + icoon #B28110; donker beide oker. */
+.wordmark-mark { flex-shrink: 0; color: var(--wordmark-icon); }
 .wordmark-text { display: inline-flex; flex-direction: column; line-height: 1; }
 .wordmark-top { font-size: 9px; font-weight: 700; letter-spacing: 0.32em; text-transform: uppercase; }
 .wordmark-main { font-size: 19px; font-weight: 800; letter-spacing: -0.02em; margin-top: 3px; }
@@ -458,7 +509,7 @@ header, .site-header {
   padding: 12px 16px;
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   white-space: nowrap;
   border-bottom: 2px solid transparent;
   cursor: pointer;
@@ -466,7 +517,7 @@ header, .site-header {
 }
 .tab-item.active {
   color: var(--accent);
-  border-bottom-color: var(--accent);
+  border-bottom-color: var(--nav-indicator);
 }
 .tab-item:hover:not(.active) {
   color: var(--text-secondary);
@@ -543,14 +594,14 @@ header, .site-header {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: var(--radius-pill);
-  color: var(--text-muted);
+  color: var(--text-secondary);
   font-size: 12px;
   font-weight: 600;
   text-decoration: none;
   transition: all 0.15s;
   cursor: pointer;
 }
-.cat-nav-item:hover { border-color: var(--border-hover); color: var(--text-secondary); }
+.cat-nav-item:hover { border-color: var(--border-hover); color: var(--text-primary); }
 .cat-nav-item.active { background: var(--accent-faint); border-color: var(--accent); color: var(--accent); }
 
 /* Restaurant panel (in menu hero) */
@@ -570,7 +621,7 @@ header, .site-header {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  color: var(--text-faint);
+  color: var(--text-secondary);
   margin-bottom: 4px;
 }
 
@@ -583,7 +634,7 @@ header, .site-header {
 
 .rp-line {
   font-size: 12px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   margin-bottom: 3px;
 }
 
@@ -633,14 +684,14 @@ header, .site-header {
 
 .rp-source {
   font-size: 10px;
-  color: var(--text-faint);
+  color: var(--text-secondary);
 }
-.rp-source a { color: var(--text-muted); text-decoration: underline; }
-.rp-source a:hover { color: var(--text-secondary); }
+.rp-source a { color: var(--text-secondary); text-decoration: underline; }
+.rp-source a:hover { color: var(--text-primary); }
 
 .rp-note {
   font-size: 11px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   background: var(--bg-elevated);
   border-radius: var(--radius-sm);
   padding: 8px 10px;
@@ -681,8 +732,8 @@ header, .site-header {
 .menu-card:hover { border-color: var(--border-hover); }
 
 /* BE-12/BE-16 — the resolved dish's temporary, 4s highlight after a search
-   result deep-link (BE-16 changed this from ~2.5-3s). Reuses the existing
-   --green/--green-faint pair, the
+   result deep-link (BE-16 changed this from ~2.5-3s). Reuses the
+   --accent/--accent-faint pair, the
    same quiet-accent tokens already used for the restaurant browse card's
    primary action — no new color introduced. Applied/removed by a JS timer,
    never a CSS animation, so it is unconditionally instant in both normal
@@ -721,18 +772,18 @@ header, .site-header {
   white-space: nowrap;
   flex-shrink: 0;
 }
-.td-price.no-price { color: var(--text-faint); font-style: italic; font-weight: 400; }
+.td-price.no-price { color: var(--text-secondary); font-style: italic; font-weight: 400; }
 
 .td-desc {
   font-size: 12px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   line-height: 1.5;
   margin-bottom: 4px;
 }
 
 .td-sup {
   font-size: 11px;
-  color: var(--text-faint);
+  color: var(--text-secondary);
   margin-bottom: 4px;
 }
 
@@ -754,8 +805,11 @@ header, .site-header {
 }
 .tag-aanbevolen   { background: var(--tag-featured-bg); color: var(--tag-featured); }
 .tag-dagspecial   { background: var(--tag-info-bg); color: var(--tag-info); }
-.tag-vegetarisch  { background: var(--green-faint); color: var(--green); }
-.tag-vegan        { background: var(--green-faint); color: var(--green); }
+/* Dieetlabels zijn neutrale labels, geen successtatus (Kleurtaal v2):
+   omlijnd, secundaire tekst, blaadje-icoon (MenuView.js). */
+.tag-vegetarisch,
+.tag-vegan        { display: inline-flex; align-items: center; gap: 4px; background: transparent; color: var(--text-secondary); box-shadow: inset 0 0 0 1px var(--input-border); }
+.item-tag-icon    { flex-shrink: 0; }
 .tag-halal        { background: var(--tag-halal-bg); color: var(--tag-halal); }
 .tag-glutenvrij   { background: var(--tag-gluten-bg); color: var(--tag-gluten); }
 
@@ -800,7 +854,7 @@ header, .site-header {
 
 .detail-cuisine {
   font-size: 15px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   margin-bottom: 20px;
 }
 
@@ -867,7 +921,7 @@ header, .site-header {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  color: var(--text-faint);
+  color: var(--text-secondary);
   margin-bottom: 10px;
 }
 
@@ -888,13 +942,20 @@ header, .site-header {
 }
 .hours-day {
   font-size: 12px;
-  color: var(--text-faint);
+  color: var(--text-secondary);
   font-weight: 600;
 }
 .hours-time { font-size: 12px; color: var(--text-secondary); }
-.hours-closed { font-size: 12px; color: var(--text-faint); font-style: italic; }
+.hours-closed { font-size: 12px; color: var(--text-secondary); font-style: italic; }
 .hours-today .hours-day,
-.hours-today .hours-time { color: var(--green); font-weight: 700; }
+.hours-today .hours-time,
+.hours-today .hours-closed { font-weight: 700; }
+/* Kleurtaal v2: "vandaag" is een presentatiemarkering, geen status. Het
+   daglabel krijgt inkt-oker (accent als tekst), de tijden primaire tekst;
+   nooit --status-positive — openingsstatus staat apart in "Vandaag". */
+.hours-today .hours-day { color: var(--accent); }
+.hours-today .hours-time,
+.hours-today .hours-closed { color: var(--text-primary); }
 
 .dip-cta { display: flex; flex-direction: column; gap: 8px; }
 
@@ -956,7 +1017,7 @@ header, .site-header {
 
 .nvwa-subtitle {
   font-size: 14px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
 }
 
 .nvwa-export-btn {
@@ -981,14 +1042,16 @@ header, .site-header {
    byte-identical to the prior inline style. */
 .nvwa-header-actions { display: flex; align-items: center; gap: 8px; }
 
+/* Kleurtaal v2: missing allergen data is incomplete data — the neutral
+   status role, not the "old source" attention role (--warning). */
 .nvwa-warning {
-  background: var(--warning-bg);
-  border: 1px solid var(--warning-border);
-  border-left: 3px solid var(--warning);
+  background: var(--status-neutral-bg);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--status-neutral);
   border-radius: var(--radius-md);
   padding: 14px 16px;
   font-size: 13px;
-  color: var(--warning);
+  color: var(--status-neutral);
   margin-bottom: 24px;
   line-height: 1.5;
 }
@@ -1003,7 +1066,7 @@ header, .site-header {
 
 .allergen-table th {
   background: var(--bg-elevated);
-  color: var(--text-muted);
+  color: var(--text-secondary);
   font-weight: 700;
   font-size: 10px;
   text-transform: uppercase;
@@ -1027,11 +1090,11 @@ header, .site-header {
 .allergen-table tr:hover td { background: var(--row-hover); }
 
 .allergen-item-name { font-weight: 600; color: var(--text-primary); font-size: 12px; }
-.allergen-item-cat { font-size: 10px; color: var(--text-faint); }
+.allergen-item-cat { font-size: 10px; color: var(--text-secondary); }
 
 .allergen-yes { font-size: 16px; line-height: 1; }
-.allergen-no  { font-size: 12px; color: var(--text-faint); }
-.allergen-unknown { font-size: 12px; color: var(--warning); }
+.allergen-no  { font-size: 12px; color: var(--text-secondary); }
+.allergen-unknown { font-size: 12px; color: var(--status-neutral); }
 
 .nvwa-legend {
   margin-top: 20px;
@@ -1039,7 +1102,7 @@ header, .site-header {
   gap: 20px;
   flex-wrap: wrap;
   font-size: 12px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
 }
 .nvwa-legend-item { display: flex; align-items: center; gap: 6px; }
 
@@ -1066,6 +1129,21 @@ header, .site-header {
   margin: 32px 0;
 }
 
+/* ── Statusbadge (Kleurtaal v2) ──
+   Eén vorm voor elke status: icoon + tekst, kleur is nooit de enige drager.
+   Licht: pil zonder rand, effen vlak. Donker: 6px radius, 1px rand in de
+   statuskleur, vlak = statuskleur op 10%. De rollen staan in :root.
+   --action ("Actie nodig") is een gereserveerde ontwerprol: geen
+   businessstatus gebruikt hem tot een expliciet productbesluit. */
+.status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border: 1px solid transparent; border-radius: var(--status-radius); font-size: 12px; font-weight: 600; line-height: 1.35; white-space: nowrap; max-width: 100%; }
+.status-badge svg { flex-shrink: 0; }
+.status-badge--blocked,  .swq-badge--blocked  { color: var(--status-blocked);  background: var(--status-blocked-bg);  border-color: var(--status-blocked-border); }
+.status-badge--neutral,  .swq-badge--neutral  { color: var(--status-neutral);  background: var(--status-neutral-bg);  border-color: var(--status-neutral-border); }
+.status-badge--file,     .swq-badge--file     { color: var(--status-file);     background: var(--status-file-bg);     border-color: var(--status-file-border); }
+.status-badge--old,      .swq-badge--old      { color: var(--status-old);      background: var(--status-old-bg);      border-color: var(--status-old-border); }
+.status-badge--positive, .swq-badge--positive { color: var(--status-positive); background: var(--status-positive-bg); border-color: var(--status-positive-border); }
+.status-badge--action,   .swq-badge--action   { color: var(--status-action);   background: var(--status-action-bg);   border-color: var(--status-action-border); }
+
 /* Badge */
 .badge {
   display: inline-block;
@@ -1076,15 +1154,14 @@ header, .site-header {
   text-transform: uppercase;
   letter-spacing: 0.4px;
 }
-.badge-green { background: var(--green-faint); color: var(--green); border: 1px solid var(--green-border); }
-.badge-warning { background: var(--warning-bg); color: var(--warning); }
-.badge-muted { background: var(--bg-elevated); color: var(--text-muted); border: 1px solid var(--border); }
+.badge-green { background: var(--status-positive-bg); color: var(--status-positive); border: 1px solid var(--status-positive-border); }
+.badge-muted { background: var(--bg-elevated); color: var(--text-secondary); border: 1px solid var(--border); }
 
 /* Empty state */
 .empty-state {
   text-align: center;
   padding: 80px 24px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
 }
 .empty-state h3 { font-size: 18px; color: var(--text-secondary); margin-bottom: 8px; }
 /* BE-11 Fase 2 — same visual treatment as .empty-state h3 above, kept as
@@ -1111,12 +1188,15 @@ header, .site-header {
   margin: 12px auto 0;
   padding: 12px 14px;
   border-radius: 10px;
-  border: 1px solid var(--warning-border);
-  background: var(--warning-bg);
-  color: var(--warning);
+  border: 1px solid var(--border);
+  background: var(--status-neutral-bg);
+  color: var(--status-neutral);
   font-size: 13px;
   line-height: 1.5;
 }
+/* Kleurtaal v2: low coverage is incomplete data (neutral); a real load
+   error in the same slot keeps the error role. */
+.low-coverage-note--error { border-color: var(--danger-border); background: var(--status-blocked-bg); color: var(--status-blocked); }
 
 /* Loading */
 .loading {
@@ -1124,7 +1204,7 @@ header, .site-header {
   align-items: center;
   justify-content: center;
   min-height: 200px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   font-size: 14px;
 }
 
@@ -1140,7 +1220,7 @@ header, .site-header {
   .allergen-table th { background: #f0f0f0; color: #000; }
   .allergen-table td { border-color: #ccc; }
   .allergen-item-name { color: #000; }
-  .nvwa-warning { border-color: #ffa000; color: #a06000; background: #fff8e1; }
+  .nvwa-warning { border-color: #999; color: #000; background: #f5f5f5; }
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -1189,11 +1269,11 @@ header, .site-header {
 .header-right { display: flex; align-items: center; gap: 16px; }
 
 .lang-switch { display: flex; background: var(--bg-elevated); border-radius: 8px; padding: 2px; gap: 2px; }
-.lang-btn { padding: 4px 10px; border: none; background: transparent; color: var(--text-muted); font-size: 13px; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s; }
+.lang-btn { padding: 4px 10px; border: none; background: transparent; color: var(--text-secondary); font-size: 13px; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s; }
 .lang-btn.active { background: var(--accent-surface); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 
 .mode-switch { display: flex; background: var(--bg-elevated); border-radius: 8px; padding: 2px; gap: 2px; }
-.mode-btn { padding: 5px 14px; border: none; background: transparent; color: var(--text-muted); font-size: 13px; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s; white-space: nowrap; }
+.mode-btn { padding: 5px 14px; border: none; background: transparent; color: var(--text-secondary); font-size: 13px; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s; white-space: nowrap; }
 .mode-btn.active { background: var(--accent-surface); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 
 /* ── Hero section ── */
@@ -1224,7 +1304,7 @@ header, .site-header {
 .hero-steps { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
 .hero-step { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 14px; }
 .step-num { width: 24px; height: 24px; border-radius: 50%; background: var(--accent-surface); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); font-weight: 700; font-size: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.hero-step-arrow { color: var(--text-faint); font-size: 16px; }
+.hero-step-arrow { color: var(--text-secondary); font-size: 16px; }
 
 /* ── Filter section ── */
 .filter-section { max-width: 1200px; margin: 0 auto; padding: 24px 24px 0; display: flex; flex-direction: column; gap: 16px; }
@@ -1240,7 +1320,7 @@ header, .site-header {
 .home-meal-btn:hover { border-color: var(--accent); color: var(--text-primary); }
 .home-meal-btn.active { background: var(--accent-surface); color: var(--accent); border-color: var(--accent); }
 
-.filter-hint { font-size: 13px; color: var(--text-dim); display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+.filter-hint { font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; margin-top: 4px; }
 .hint-arrow { color: var(--accent); font-size: 16px; animation: bounce 1s ease-in-out infinite; }
 @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
 
@@ -1261,7 +1341,7 @@ header, .site-header {
 .search-input:focus { border-color: var(--accent); }
 .search-input.flagship { border-color: var(--input-border); }
 .search-input.flagship:focus { border-color: var(--accent); }
-.search-clear { position: absolute; right: 10px; background: none; border: none; color: var(--text-dim); font-size: 18px; cursor: pointer; line-height: 1; }
+.search-clear { position: absolute; right: 10px; background: none; border: none; color: var(--text-secondary); font-size: 18px; cursor: pointer; line-height: 1; }
 .search-clear:hover { color: var(--text-primary); }
 
 /* ── Sort bar ── */
@@ -1280,7 +1360,7 @@ header, .site-header {
 .cuisine-option:hover { background: var(--bg-hover); }
 .cuisine-option input { accent-color: var(--accent); }
 
-.reset-btn { padding: 7px 14px; background: transparent; border: 1.5px solid var(--border-hover); border-radius: 8px; color: var(--text-muted); font-size: 13px; cursor: pointer; transition: all 0.15s; margin-left: auto; }
+.reset-btn { padding: 7px 14px; background: transparent; border: 1.5px solid var(--border-hover); border-radius: 8px; color: var(--text-secondary); font-size: 13px; cursor: pointer; transition: all 0.15s; margin-left: auto; }
 .reset-btn:hover { border-color: var(--danger); color: var(--danger); }
 
 /* ── Active filters ── */
@@ -1297,14 +1377,14 @@ header, .site-header {
    layer above. */
 .results-section { max-width: 1200px; margin: 0 auto; padding: 32px 24px 80px; border-top: 1px solid var(--border); }
 .results-header { margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-.results-count { font-size: 13px; color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-.no-results { text-align: center; padding: 60px 24px; color: var(--text-dim); font-size: 16px; }
+.results-count { font-size: 13px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.no-results { text-align: center; padding: 60px 24px; color: var(--text-secondary); font-size: 16px; }
 /* BE-11 Fase 2 — a short, neutral, text-first note under a result group
    heading (e.g. clarifying that active dish filters don't apply to
    restaurant results). Deliberately plain — no border/background box like
    .low-coverage-note, which is for the centered .empty-state context; this
    sits inside an ordinary, left-aligned group. */
-.results-group-note { margin: -8px 0 16px; font-size: 12.5px; color: var(--text-dim); }
+.results-group-note { margin: -8px 0 16px; font-size: 12.5px; color: var(--text-secondary); }
 
 /* ── Restaurant grid & cards ── */
 .restaurant-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
@@ -1316,17 +1396,17 @@ header, .site-header {
 .rc-header { padding: 18px 18px 16px; border-bottom: 1px solid var(--border); }
 .rc-badge { display: inline-block; font-size: 10px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px; }
 .rc-name { font-size: 18px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; line-height: 1.2; }
-.rc-cuisine { font-size: 12px; color: var(--text-muted); }
+.rc-cuisine { font-size: 12px; color: var(--text-secondary); }
 
 .rc-body { padding: 16px 18px; flex: 1; display: flex; flex-direction: column; gap: 12px; }
 .rc-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin: 0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .rc-matches { font-size: 12px; color: var(--accent); background: var(--accent-faint); border: 1px solid var(--accent-border); border-radius: 8px; padding: 6px 10px; }
 .rc-matches-label { font-weight: 600; }
 .rc-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.rc-address { font-size: 12px; color: var(--text-dim); }
+.rc-address { font-size: 12px; color: var(--text-secondary); }
 .rc-price { font-size: 13px; color: var(--accent); font-weight: 700; letter-spacing: 1px; flex-shrink: 0; }
 .rc-tags { display: flex; gap: 6px; flex-wrap: wrap; }
-.rc-tag { font-size: 11px; color: var(--text-dim); border: 1px solid var(--border); border-radius: 6px; padding: 3px 9px; }
+.rc-tag { font-size: 11px; color: var(--text-secondary); border: 1px solid var(--border); border-radius: 6px; padding: 3px 9px; }
 
 .rc-footer { padding: 14px 18px 16px; display: flex; align-items: center; gap: 8px; border-top: 1px solid var(--border); flex-wrap: wrap; }
 .rc-menu-links { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
@@ -1358,8 +1438,8 @@ header, .site-header {
 .moc-body { flex: 1; min-width: 0; }
 .moc-name { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .moc-subtitle { font-size: 12px; color: var(--accent); font-weight: 600; margin-bottom: 4px; }
-.moc-address { font-size: 11px; color: var(--text-dim); margin-bottom: 2px; }
-.moc-scraped { font-size: 10px; color: var(--text-faint); }
+.moc-address { font-size: 11px; color: var(--text-secondary); margin-bottom: 2px; }
+.moc-scraped { font-size: 10px; color: var(--text-secondary); }
 
 /* ── Allergen filter bar ── */
 .allergen-filter-bar {
@@ -1373,13 +1453,13 @@ header, .site-header {
   background: var(--bg-input);
   border: 1.5px solid var(--input-border);
   border-radius: 8px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s;
 }
-.allergen-toggle-btn:hover { border-color: var(--border-strong); color: var(--text-secondary); }
+.allergen-toggle-btn:hover { border-color: var(--border-strong); color: var(--text-primary); }
 .allergen-toggle-btn.active { background: var(--allergy-toggle-bg); border-color: var(--allergy); color: var(--allergy); }
 
 .allergen-chips {
@@ -1411,37 +1491,16 @@ header, .site-header {
   background: transparent;
   border: 1.5px solid var(--border-hover);
   border-radius: 100px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   font-size: 12px;
   cursor: pointer;
   transition: all 0.15s;
 }
 .allergen-chip-clear:hover { border-color: var(--danger); color: var(--danger); }
 
-/* ── Open/closed status op restaurant card ── */
-.rc-open-status {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.rc-open-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.rc-open-dot.open   { background: var(--green); box-shadow: 0 0 0 2px var(--green-border); }
-.rc-open-dot.closed { background: var(--text-dim); }
-.rc-open-label {
-  font-size: 12px;
-  font-weight: 600;
-}
-.rc-open-label.open   { color: var(--green); }
-.rc-open-label.closed { color: var(--text-dim); }
-
 /* ── Adres als Google Maps link ── */
 .rc-address-link {
-  color: var(--text-dim);
+  color: var(--text-secondary);
   text-decoration: none;
   transition: color 0.15s;
   font-size: 12px;
@@ -1505,7 +1564,7 @@ header, .site-header {
   right: 8px;
   background: none;
   border: none;
-  color: var(--text-dim);
+  color: var(--text-secondary);
   font-size: 16px;
   cursor: pointer;
   line-height: 1;
@@ -1518,14 +1577,14 @@ header, .site-header {
   background: var(--bg-input);
   border: 1.5px solid var(--input-border);
   border-radius: 8px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s;
   white-space: nowrap;
 }
-.mf-btn:hover { border-color: var(--border-strong); color: var(--text-secondary); }
+.mf-btn:hover { border-color: var(--border-strong); color: var(--text-primary); }
 .mf-btn.active { background: var(--accent-surface); border-color: var(--accent); color: var(--accent); }
 
 /* Price slider */
@@ -1536,7 +1595,7 @@ header, .site-header {
 }
 .mf-price-label {
   font-size: 11px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   white-space: nowrap;
   min-width: 80px;
 }
@@ -1552,7 +1611,7 @@ header, .site-header {
   background: transparent;
   border: 1.5px solid var(--border-hover);
   border-radius: 8px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   font-size: 12px;
   cursor: pointer;
   transition: all 0.15s;
@@ -1572,7 +1631,7 @@ header, .site-header {
 .mf-allergen-title {
   font-size: 11px;
   font-weight: 700;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 8px;
@@ -1590,7 +1649,7 @@ header, .site-header {
 }
 .mf-count {
   font-size: 12px;
-  color: var(--text-dim);
+  color: var(--text-secondary);
   font-weight: 600;
 }
 .mf-active-tags { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -1622,7 +1681,9 @@ header, .site-header {
    MENU CARDS — Allergen state & highlight
    ───────────────────────────────────────────────────────────────────────────── */
 
-.mc-unknown { border-color: var(--warning-strong-border) !important; }
+/* Kleurtaal v2: unknown allergen data is uncertainty, not an "old source"
+   status — a neutral control border plus the text badge below. */
+.mc-unknown { border-color: var(--input-border) !important; }
 .mc-unsafe  { opacity: 0.4; }
 
 .mc-allergen-status { margin-top: 6px; }
@@ -1633,7 +1694,7 @@ header, .site-header {
   padding: 2px 8px;
   border-radius: 4px;
 }
-.mc-badge-unknown  { background: var(--warning-bg); color: var(--warning); }
+.mc-badge-unknown  { background: var(--status-neutral-bg); color: var(--status-neutral); }
 .mc-badge-contains { background: var(--danger-bg);  color: var(--danger); }
 
 .mc-allergen-icons {
@@ -1691,7 +1752,7 @@ mark.search-highlight {
   flex-wrap: wrap;
 }
 .nvwa-teaser-title { font-size: 13px; font-weight: 700; color: var(--accent); margin-bottom: 2px; }
-.nvwa-teaser-sub   { font-size: 11px; color: var(--text-dim); }
+.nvwa-teaser-sub   { font-size: 11px; color: var(--text-secondary); }
 .nvwa-teaser-btn {
   padding: 8px 16px;
   background: var(--accent-fill);
@@ -1749,7 +1810,7 @@ mark.search-highlight {
   position: absolute;
   right: 70px;
   font-size: 10px;
-  color: var(--text-dim);
+  color: var(--text-secondary);
   pointer-events: none;
 }
 
@@ -1791,6 +1852,7 @@ mark.search-highlight {
   white-space: nowrap;
 }
 .now-open-btn:hover { border-color: var(--accent); color: var(--text-primary); }
+.now-open-icon { margin-right: 6px; flex-shrink: 0; }
 .now-open-btn.active { background: var(--accent-surface-strong); border-color: var(--accent); color: var(--accent); }
 
 .day-btn.disabled {
@@ -1829,15 +1891,17 @@ mark.search-highlight {
   gap: 6px;
 }
 
-/* WhatsApp knop */
+/* WhatsApp knop — Kleurtaal v2: geen groene tint (geen geleende
+   platformhuisstijl, groen is alleen status). Zelfde omlijnde
+   reserveerbehandeling als .rc-reserve-btn. */
 .rc-whatsapp-btn {
   display: flex;
   align-items: center;
   gap: 6px;
   flex: 1;
   padding: 7px 12px;
-  background: var(--whatsapp-bg);
-  border: 1px solid var(--whatsapp-border);
+  background: transparent;
+  border: 1px solid var(--accent);
   border-radius: 8px;
   color: var(--accent);
   font-size: 12px;
@@ -1847,8 +1911,7 @@ mark.search-highlight {
   white-space: nowrap;
 }
 .rc-whatsapp-btn:hover {
-  background: var(--whatsapp-hover-bg);
-  border-color: var(--accent);
+  background: var(--accent-faint);
 }
 
 /* Website icon knop */
@@ -1861,7 +1924,7 @@ mark.search-highlight {
   background: var(--bg-input);
   border: 1px solid var(--input-border);
   border-radius: 8px;
-  color: var(--text-dim);
+  color: var(--text-secondary);
   text-decoration: none;
   transition: all 0.15s;
   flex-shrink: 0;
@@ -1895,11 +1958,9 @@ mark.search-highlight {
   color: var(--text-secondary);
   margin-bottom: 4px;
 }
-.dish-result-status.is-open  { color: var(--green); font-weight: 600; }
-.dish-result-status.is-closed { color: var(--text-muted); }
-.dish-result-distance { color: var(--text-muted); }
-.dish-result-context { color: var(--text-muted); }
-.dish-result-match-hint { color: var(--text-faint); font-style: italic; }
+.dish-result-distance { color: var(--text-secondary); }
+.dish-result-context { color: var(--text-secondary); }
+.dish-result-match-hint { color: var(--text-secondary); font-style: italic; }
 
 .dish-result-link {
   align-self: flex-start;
@@ -1931,7 +1992,7 @@ mark.search-highlight {
    existing link color/underline convention, no new visual language. */
 .dish-group-example-link { color: var(--text-secondary); text-decoration: underline; text-underline-offset: 2px; }
 .dish-group-example-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.dish-group-more { color: var(--text-muted); }
+.dish-group-more { color: var(--text-secondary); }
 .dish-group-link { font-size: 12px; padding: 6px 14px; }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -2047,7 +2108,7 @@ mark.search-highlight {
 }
 .rc-phone {
   font-size: 12px;
-  color: var(--text-dim);
+  color: var(--text-secondary);
   text-decoration: none;
   transition: color 0.15s;
 }
@@ -2084,9 +2145,10 @@ mark.search-highlight {
 .di-banner strong { font-weight: 700; }
 .di-banner-icon { flex-shrink: 0; margin-top: 1px; display: flex; }
 .di-banner-icon svg { width: 16px; height: 16px; }
-.di-banner-info { background: var(--green-faint); border: 1px solid var(--green-border); color: var(--green); }
-.di-banner-warning { background: var(--warning-bg); border: 1px solid var(--warning-border); color: var(--warning); }
-.di-banner-danger { background: var(--danger-bg); border: 1px solid var(--danger-border); color: var(--danger); }
+/* Informatie is geen succes (Kleurtaal v2): zacht accentvlak, 1px accent. */
+.di-banner-info { background: var(--accent-surface); border: 1px solid var(--accent); color: var(--text-primary); }
+.di-banner-info .di-banner-icon { color: var(--accent); }
+.di-banner-danger { background: var(--status-blocked-bg); border: 1px solid var(--danger-border); color: var(--status-blocked); }
 .di-banner-neutral { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-secondary); }
 
 /* Status summary cards */
@@ -2101,21 +2163,22 @@ mark.search-highlight {
 .di-summary-icon { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .di-summary-icon svg { width: 17px; height: 17px; }
 .di-summary-body { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-.di-summary-label { font-size: 12px; color: var(--text-muted); font-weight: 600; white-space: nowrap; }
+.di-summary-label { font-size: 12px; color: var(--text-secondary); font-weight: 600; white-space: nowrap; }
 .di-summary-count { font-size: 19px; font-weight: 800; color: var(--text-primary); line-height: 1.2; }
 
-.di-summary-icon--new                { background: var(--tag-info-bg); color: var(--tag-info); }
-.di-summary-icon--needs_enrichment   { background: var(--warning-bg); color: var(--warning); }
-.di-summary-icon--approved_internal  { background: var(--green-faint); color: var(--green); }
-.di-summary-icon--deferred           { background: var(--warning-bg); color: var(--warning); }
-.di-summary-icon--rejected           { background: var(--danger-bg); color: var(--danger); }
+/* Kleurtaal v2: rolklassen, geen statusnamen. Welke staat welke rol krijgt
+   staat per scherm in src/lib/statusRoles.js (alleen goedgekeurd is
+   positief; de rest blijft neutraal tot een productbesluit). Het label staat
+   er altijd als tekst naast. */
+.di-summary-icon--positive { background: var(--status-positive-bg); color: var(--status-positive); }
+.di-summary-icon--neutral  { background: var(--status-neutral-bg); color: var(--status-neutral); }
 
 /* Labeled filter + search bar */
 .di-filterbar { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px; }
 .di-filter-group { display: flex; flex-direction: column; gap: 4px; }
-.di-filter-label { font-size: 11px; font-weight: 700; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.4px; }
+.di-filter-label { font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.4px; }
 .di-search-wrap { position: relative; flex: 2 1 220px; min-width: 190px; display: flex; }
-.di-search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-faint); pointer-events: none; display: flex; }
+.di-search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); pointer-events: none; display: flex; }
 .di-search-icon svg { width: 14px; height: 14px; }
 .di-input, .di-select {
   padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--input-border);
@@ -2135,24 +2198,24 @@ mark.search-highlight {
 .di-row:hover { border-color: var(--border-hover); }
 .di-row-name { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
 .di-row-contact { display: flex; flex-direction: column; gap: 3px; }
-.di-row-contact-line { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--text-muted); }
-.di-row-contact-line svg { width: 13px; height: 13px; flex-shrink: 0; color: var(--text-faint); }
-.di-row-contact-line.di-muted { color: var(--text-faint); font-style: italic; }
+.di-row-contact-line { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--text-secondary); }
+.di-row-contact-line svg { width: 13px; height: 13px; flex-shrink: 0; color: var(--text-secondary); }
+.di-row-contact-line.di-muted { color: var(--text-secondary); font-style: italic; }
 
-.di-row-col-label { font-size: 11px; font-weight: 700; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; }
-.di-row-meta { font-size: 11px; color: var(--text-faint); margin-top: 4px; }
+.di-row-col-label { font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; }
+.di-row-meta { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
 .di-row-reason { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
 
-.di-chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: var(--radius-pill); font-size: 12px; font-weight: 700; white-space: nowrap; }
+/* Statuschip: zelfde vorm als .status-badge (licht pil, donker 6px).
+   Rolklassen per betekenis, gekozen in src/lib/statusRoles.js. --label is
+   géén status (bijv. betrouwbaarheid hoog/middel/laag): omlijnd, secundaire
+   tekst, geen statuskleur en geen statusicoon. */
+.di-chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border: 1px solid transparent; border-radius: var(--status-radius); font-size: 12px; font-weight: 700; white-space: nowrap; }
 .di-chip svg { width: 12px; height: 12px; }
-.di-chip--complete           { background: var(--green-faint); color: var(--green); }
-.di-chip--incomplete         { background: var(--danger-bg); color: var(--danger); }
-.di-chip--new                { background: var(--tag-info-bg); color: var(--tag-info); }
-.di-chip--needs_enrichment   { background: var(--warning-bg); color: var(--warning); }
-.di-chip--approved_internal  { background: var(--green-faint); color: var(--green); }
-.di-chip--deferred           { background: var(--warning-bg); color: var(--warning); }
-.di-chip--rejected           { background: var(--danger-bg); color: var(--danger); }
-.di-chip--muted              { background: var(--bg-elevated); color: var(--text-muted); border: 1px solid var(--border); }
+.di-chip--positive { background: var(--status-positive-bg); color: var(--status-positive); border-color: var(--status-positive-border); }
+.di-chip--blocked  { background: var(--status-blocked-bg); color: var(--status-blocked); border-color: var(--status-blocked-border); }
+.di-chip--neutral  { background: var(--status-neutral-bg); color: var(--status-neutral); border-color: var(--status-neutral-border); }
+.di-chip--label    { background: transparent; color: var(--text-secondary); box-shadow: inset 0 0 0 1px var(--input-border); }
 
 .di-view-btn {
   display: inline-flex; align-items: center; gap: 4px; padding: 8px 14px; border-radius: var(--radius-md);
@@ -2162,7 +2225,7 @@ mark.search-highlight {
 .di-view-btn:hover { border-color: var(--accent); background: var(--accent-faint); }
 .di-view-btn svg { width: 14px; height: 14px; }
 
-.di-empty { text-align: center; padding: 36px 20px; color: var(--text-muted); font-size: 14px; background: var(--bg-card); border: 1px dashed var(--border-hover); border-radius: var(--radius-lg); }
+.di-empty { text-align: center; padding: 36px 20px; color: var(--text-secondary); font-size: 14px; background: var(--bg-card); border: 1px dashed var(--border-hover); border-radius: var(--radius-lg); }
 
 /* Import runs */
 .di-run-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px 16px; }
@@ -2181,6 +2244,10 @@ mark.search-highlight {
   background: transparent; color: var(--text-secondary); cursor: pointer; transition: all 0.15s;
 }
 .di-link-btn:hover { border-color: var(--border-hover); color: var(--text-primary); }
+/* Uitgeschakeld: gestippelde rand i.p.v. vervaagde tekst, zodat de tekst
+   AA houdt; de zichtbare uitleg eronder draagt de reden. */
+.di-link-btn:disabled { border-style: dashed; }
+.di-link-btn:disabled:hover { border-color: var(--border); color: var(--text-secondary); }
 .di-link-btn.active { background: var(--accent-faint); border-color: var(--accent); color: var(--accent); }
 .di-btn-primary {
   font-size: 13px; font-weight: 700; padding: 9px 16px; border-radius: var(--radius-md); border: none;
@@ -2204,12 +2271,9 @@ mark.search-highlight {
 .di-status-icon svg { width: 15px; height: 15px; }
 .di-status-body { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .di-status-label { font-size: 13px; font-weight: 700; color: var(--text-primary); }
-.di-status-sublabel { font-size: 11.5px; color: var(--text-muted); }
-.di-status-icon--positive { background: var(--green-faint); color: var(--green); }
-.di-status-icon--warning  { background: var(--warning-bg); color: var(--warning); }
-.di-status-icon--danger   { background: var(--danger-bg); color: var(--danger); }
-.di-status-icon--info     { background: var(--tag-info-bg); color: var(--tag-info); }
-.di-status-icon--muted    { background: var(--bg-card); color: var(--text-muted); border: 1px solid var(--border); }
+.di-status-sublabel { font-size: 11.5px; color: var(--text-secondary); }
+.di-status-icon--positive { background: var(--status-positive-bg); color: var(--status-positive); }
+.di-status-icon--neutral  { background: var(--status-neutral-bg); color: var(--status-neutral); border: 1px solid var(--border); }
 
 .di-accordion { display: grid; gap: 8px; margin-top: 14px; }
 .di-accordion-item { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
@@ -2225,8 +2289,8 @@ mark.search-highlight {
 .di-accordion-icon svg { width: 14px; height: 14px; }
 .di-accordion-heading { display: flex; flex-direction: column; gap: 1px; min-width: 0; flex: 1; }
 .di-accordion-title { font-size: 13.5px; font-weight: 700; color: var(--text-primary); }
-.di-accordion-subtitle { font-size: 11.5px; color: var(--text-muted); }
-.di-accordion-chevron { color: var(--text-faint); display: flex; flex-shrink: 0; transition: transform 0.15s; }
+.di-accordion-subtitle { font-size: 11.5px; color: var(--text-secondary); }
+.di-accordion-chevron { color: var(--text-secondary); display: flex; flex-shrink: 0; transition: transform 0.15s; }
 .di-accordion-chevron svg { width: 16px; height: 16px; }
 .di-accordion-item[open] .di-accordion-chevron { transform: rotate(180deg); }
 .di-accordion-body { padding: 0 14px 14px; border-top: 1px solid var(--border); padding-top: 12px; }
@@ -2235,10 +2299,10 @@ mark.search-highlight {
 .di-timeline-item { position: relative; padding-left: 20px; }
 .di-timeline-item::before { content: ''; position: absolute; left: 4px; top: 4px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
 .di-timeline-item:not(:last-child)::after { content: ''; position: absolute; left: 7px; top: 14px; bottom: -16px; width: 2px; background: var(--border); }
-.di-timeline-date { font-size: 11px; font-weight: 700; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.3px; }
+.di-timeline-date { font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.3px; }
 .di-timeline-title { font-size: 13px; font-weight: 700; color: var(--text-primary); margin-top: 2px; }
-.di-timeline-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-.di-timeline-meta { font-size: 11px; color: var(--text-faint); margin-top: 4px; word-break: break-all; }
+.di-timeline-desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.di-timeline-meta { font-size: 11px; color: var(--text-secondary); margin-top: 4px; word-break: break-all; }
 
 /* Mobile */
 @media (max-width: 720px) {
@@ -2291,7 +2355,7 @@ mark.search-highlight {
 }
 .internal-nav-home svg { width: 16px; height: 16px; flex-shrink: 0; }
 .internal-nav-home .wordmark-mark { width: 20px; height: 20px; }
-.internal-nav-home[aria-current="page"] { background: var(--accent-faint); color: var(--accent); }
+.internal-nav-home[aria-current="page"] { background: var(--accent-surface); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 .internal-nav-link {
   font-size: 13px;
   font-weight: 600;
@@ -2301,10 +2365,10 @@ mark.search-highlight {
   border-radius: var(--radius-pill);
 }
 .internal-nav-link:hover { color: var(--text-primary); }
-.internal-nav-link[aria-current="page"] { background: var(--accent-faint); color: var(--accent); }
+.internal-nav-link[aria-current="page"] { background: var(--accent-surface); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 .internal-nav-note {
   font-size: 12px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   padding: 6px 4px;
 }
 .internal-nav-signout {
@@ -2325,10 +2389,9 @@ mark.search-highlight {
 .internal-nav-theme { margin-left: auto; display: flex; }
 .internal-nav-theme + .internal-nav-signout { margin-left: 0; }
 .internal-nav-theme .theme-btn:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
-/* The shared .theme-btn uses --text-muted for the inactive option, which
-   measures 4.39:1 (light) and 3.09:1 (dark) on this nav — below 4.5:1. Inside
-   the internal nav only, the inactive option uses --text-secondary instead;
-   the active option keeps its accent colours. */
+/* The shared .theme-btn now uses --text-secondary for the inactive option
+   everywhere (Kleurtaal v2); these internal-nav rules are kept as an
+   explicit, scoped guarantee and match the global values. */
 .internal-nav-theme .theme-btn { color: var(--text-secondary); }
 .internal-nav-theme .theme-btn.active { color: var(--accent); }
 
@@ -2382,7 +2445,7 @@ mark.search-highlight {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   padding: 6px 8px 4px;
 }
 .internal-nav-workqueue-item {
@@ -2395,13 +2458,13 @@ mark.search-highlight {
   color: var(--text-primary);
 }
 .internal-nav-workqueue-item:hover { background: var(--bg-elevated); }
-.internal-nav-workqueue-item[aria-current="page"] { background: var(--accent-faint); color: var(--accent); }
+.internal-nav-workqueue-item[aria-current="page"] { background: var(--accent-surface); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 .internal-nav-workqueue-item-icon { flex-shrink: 0; margin-top: 1px; color: var(--text-secondary); }
 .internal-nav-workqueue-item[aria-current="page"] .internal-nav-workqueue-item-icon { color: var(--accent); }
 .internal-nav-workqueue-item-icon svg { width: 18px; height: 18px; }
 .internal-nav-workqueue-item-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .internal-nav-workqueue-item-label { font-size: 13px; font-weight: 600; }
-.internal-nav-workqueue-item-subtitle { font-size: 11px; color: var(--text-muted); }
+.internal-nav-workqueue-item-subtitle { font-size: 11px; color: var(--text-secondary); }
 
 .internal-nav-home:focus-visible,
 .internal-nav-link:focus-visible,
@@ -2442,7 +2505,7 @@ mark.search-highlight {
 }
 .lrc-header { padding: 14px 16px 12px; }
 .lrc-name { font-size: 16px; font-weight: 700; color: var(--text-primary); margin: 0 0 2px; }
-.lrc-cuisine { font-size: 12px; color: var(--text-muted); }
+.lrc-cuisine { font-size: 12px; color: var(--text-secondary); }
 .lrc-price-glyph { white-space: nowrap; }
 /* Visually hidden but screen-reader-accessible text, paired with
    aria-hidden on the adjacent visible price glyph — see
@@ -2452,10 +2515,7 @@ mark.search-highlight {
 .vh { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); clip-path: inset(50%); white-space: nowrap; border: 0; }
 .lrc-body { padding: 12px 16px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
 .lrc-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
-.lrc-address { font-size: 12px; color: var(--text-dim); }
-.lrc-status { font-size: 11.5px; font-weight: 600; }
-.lrc-status.is-open { color: var(--green); }
-.lrc-status.is-closed { color: var(--text-muted); }
+.lrc-address { font-size: 12px; color: var(--text-secondary); }
 .lrc-menu-type-row { display: flex; gap: 6px; flex-wrap: wrap; }
 .lrc-menu-type-pill {
   font-size: 11.5px;
@@ -2469,15 +2529,14 @@ mark.search-highlight {
 .lrc-footer { padding: 12px 16px 14px; margin-top: auto; }
 /* BE-11 — deliberately quiet, tinted treatment for every generic browse
    card's primary action (mét and zonder menukaart alike): a full-
-   saturation green fill reads as a confident, high-certainty action
+   saturation fill reads as a confident, high-certainty action
    (reserved for a future, genuinely more certain action — e.g. an
    explicit "Open lunchkaart" once a specific meal-type intent exists —
    never automatically for generic restaurant browsing). Uses only
-   existing tokens (--green-faint/--green, already used for
-   .tag-vegetarisch/.cat-nav-item.active elsewhere), WCAG-verified: text/
-   border contrast against the tinted fill is 7.17:1 (dark theme) /
-   4.56:1 (light theme) — both comfortably clear the 3:1 UI-component
-   floor (WCAG 1.4.11) and 4.5:1 text floor (WCAG AA). Same class, same
+   brand tokens (--accent-faint/--accent; Kleurtaal v2: green is a
+   status colour only, never a brand or action accent). Contrast of
+   --accent on --accent-faint: 6.43:1 light / 9.95:1 dark (over the card) (text 4.5:1 and
+   UI 3:1 both met; src/lib/colourLanguage.test.js). Same class, same
    padding, same link text/target as before.
    Compact and left-aligned (display: inline-block; width: auto — not
    full-width), matching the same restrained, content-sized action
@@ -2502,7 +2561,7 @@ mark.search-highlight {
 }
 .lrc-primary-btn:hover { border-color: var(--accent-dim); color: var(--accent-dim); }
 .lrc-primary-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.lrc-secondary-note { margin-top: 8px; font-size: 11.5px; color: var(--text-dim); text-align: center; }
+.lrc-secondary-note { margin-top: 8px; font-size: 11.5px; color: var(--text-secondary); text-align: center; }
 
 /* PLATFORM-12 Phase 1 — Coverage Dashboard "show all neighbourhoods"
    toggle. An in-page disclosure over the already-fetched byBuurt rows
@@ -2533,26 +2592,11 @@ mark.search-highlight {
 .cov-toggle-chevron svg { width: 15px; height: 15px; }
 .cov-toggle[aria-expanded="true"] .cov-toggle-chevron { transform: rotate(180deg); }
 
-/* PLATFORM-12 dark-mode contrast fix — the Coverage Dashboard's own
-   secondary-text color, scoped to .cov-dashboard (every <main> of
-   app/internal/coverage/page.js) so the global --text-muted/--text-faint
-   tokens, and every other screen, stay exactly as they are. Measured
-   WCAG contrast for normal text (AA needs 4.5:1):
-     dark  #8f8f8f — 6.12 on --bg, 5.84 on --bg-card, 5.49 on --bg-elevated
-                     (global --text-muted: 3.45 / 3.29 / 3.09); still
-                     visibly dimmer than --text-secondary (8.13 on the card),
-                     so the hierarchy is kept.
-     light #5f6672 — 5.78 on --bg/--bg-card, 5.26 on --bg-elevated
-                     (global --text-muted: 4.83 / 4.39) — no light regression.
-   Same three-place theme pattern as the global tokens above: dark base,
-   system light (unless dark is forced), explicit light. Solid colors only,
-   no opacity. src/lib/coveragePriority.test.js recomputes these ratios. */
-.cov-dashboard { --cov-text-subtle: #8f8f8f; }
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) .cov-dashboard { --cov-text-subtle: #5f6672; }
-}
-:root[data-theme="light"] .cov-dashboard { --cov-text-subtle: #5f6672; }
-.cov-dashboard .di-accordion-subtitle { color: var(--cov-text-subtle); }
+/* PLATFORM-12 / Kleurtaal v2 — the Coverage Dashboard no longer has its
+   own secondary-text colour (the former page-scoped "cov-text-subtle" variable).
+   Its secondary text uses the global --text-secondary like every other
+   screen: the only readable secondary colour under Kleurtaal v2.
+   src/lib/coveragePriority.test.js asserts this. */
 
 /* ── Bronwerkvoorraad (/internal/source-workqueue) ─────────────────────────
    Theme tokens only, so light and dark both work. Status colour is never
@@ -2590,20 +2634,10 @@ mark.search-highlight {
 .swq-legend-note { margin: 12px 0 0; font-size: 13px; color: var(--text-secondary); }
 .swq-result-count { margin: 0 0 8px; font-size: 13px; color: var(--text-secondary); }
 .swq-empty { padding: 20px; border: 1px dashed var(--border); border-radius: var(--radius-md); color: var(--text-secondary); font-size: 14px; }
-.swq-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: var(--radius-pill); border: 1px solid transparent; font-size: 13px; font-weight: 600; line-height: 1.35; max-width: 100%; color: var(--text-primary); }
+.swq-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: var(--status-radius); border-width: 1px; border-style: solid; font-size: 13px; font-weight: 600; line-height: 1.35; max-width: 100%; }
 .swq-badge svg { flex-shrink: 0; }
-/* Badge text stays in the main text colour (readable in both themes);
-   the tone colours the icon, border and background. */
-.swq-badge--ok { background: var(--green-faint); border-color: var(--green-border); }
-.swq-badge--ok svg { color: var(--green); }
-.swq-badge--danger { background: var(--danger-bg); border-color: var(--danger-border); }
-.swq-badge--danger svg { color: var(--danger); }
-.swq-badge--warning { background: var(--warning-bg); border-color: var(--warning-border); }
-.swq-badge--warning svg { color: var(--warning); }
-.swq-badge--info { background: var(--tag-info-bg); border-color: var(--border); }
-.swq-badge--info svg { color: var(--tag-info); }
-.swq-badge--neutral { background: var(--bg-card); border-color: var(--border); }
-.swq-badge--neutral svg { color: var(--text-secondary); }
+/* Kleurtaal v2: de rol kleurt tekst, icoon, vlak en (donker) rand. Zie
+   .status-badge--* hierboven; BE-23-mapping in source-workqueue/page.js. */
 .swq-table-wrap { border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-card); }
 .swq-table { width: 100%; border-collapse: collapse; font-size: 14px; }
 .swq-table thead th { text-align: left; font-size: 13px; font-weight: 600; color: var(--text-secondary); padding: 10px 14px; border-bottom: 1px solid var(--border); }

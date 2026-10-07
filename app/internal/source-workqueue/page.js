@@ -95,17 +95,21 @@ const ICON_SEARCH = (
   </Svg>
 )
 
-// Tone + icon per status. The tone only adds colour; meaning is always in
-// the text ("Bron: …" / "Menukaart: …") and the icon shape.
+// Kleurtaal v2-statusrol + icoon per status. De rol voegt alleen kleur toe;
+// de betekenis staat altijd in de tekst ("Bron: …" / "Menukaart: …") en
+// de vorm van het icoon. Mapping volgens de ontwerpbron (design-reference.md,
+// "Kleurtaal v2"): Bereikbaar → positive; Niet bereikbaar → blocked;
+// Toegang beperkt, Identiteit gewijzigd, Structuur niet herkend → old;
+// Klaar voor review → file; Niet beoordeeld, Geen menukaart → neutral.
 const SOURCE_BADGE = {
-  reachable: { tone: 'ok', icon: ICON_CHECK },
-  unreachable: { tone: 'danger', icon: ICON_WARNING },
-  access_limited: { tone: 'warning', icon: ICON_LOCK },
-  identity_changed: { tone: 'warning', icon: ICON_SWAP },
+  reachable: { tone: 'positive', icon: ICON_CHECK },
+  unreachable: { tone: 'blocked', icon: ICON_WARNING },
+  access_limited: { tone: 'old', icon: ICON_LOCK },
+  identity_changed: { tone: 'old', icon: ICON_SWAP },
 }
 const MENU_BADGE = {
-  ready_for_review: { tone: 'info', icon: ICON_INFO },
-  structure_not_recognized: { tone: 'danger', icon: ICON_WARNING },
+  ready_for_review: { tone: 'file', icon: ICON_INFO },
+  structure_not_recognized: { tone: 'old', icon: ICON_WARNING },
   no_menu_found: { tone: 'neutral', icon: ICON_DOT },
   not_assessed: { tone: 'neutral', icon: ICON_DOT },
 }
@@ -306,7 +310,7 @@ export default function SourceWorkqueuePage() {
   if (session === undefined) {
     return (
       <div className="di-page">
-        <main className="di-main" style={{ color: 'var(--text-muted)' }}>
+        <main className="di-main" style={{ color: 'var(--text-secondary)' }}>
           Laden…
         </main>
       </div>

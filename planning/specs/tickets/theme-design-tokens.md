@@ -193,3 +193,165 @@ darker open-green (`#1B6B3A`) and a neutral info colour; neither is
 implemented — the current `--green` meets 4.5:1 (5.08:1 on white). Other
 known, unchanged follow-ups: dark `--text-muted` (`#666666`) stays below
 4.5:1; `--tag-featured` / `--tag-halal` (gold) sit close to the accent hue.
+
+## Addendum — Kleurtaal v2 (2026-10-07)
+
+Implements the final design source "Onze Menukaarten — Kleurtaal v2
+(Brontriage)" for public and internal UI. The rules, the full token table
+and the status roles live in `docs/guides/design-reference.md`
+("Kleurtaal v2"); this addendum records the migration. The theme contract
+is unchanged: explicit Licht/Donker, dark is the runtime default, no
+system option. Dark behaviour and the dark base surfaces (`#0A0A0A`,
+`#111111`, `#181818`), text, accent and control-border values are
+unchanged; the visual refinements dark does receive are listed under
+"Dark: what changed, and its source" below. Both light blocks (media +
+explicit) stay identical.
+
+Old → new (light unless noted):
+
+| Token | Before | After |
+|---|---|---|
+| `--bg` / `--bg-card` | `#ffffff` / `#ffffff` | `#FCFAF4` / `#FFFDF9` |
+| `--bg-elevated` | `#f3f4f6` | `#F5F3EE` |
+| `--bg-input` | `#ffffff` | `#FFFDF9` (derived: same as card) |
+| `--text-primary` / `--text-secondary` | `#14181c` / `#4b5563` | `#1A1410` / `#5C5650` |
+| `--border` | `#e3e5e8` | `#EFE8D8` |
+| `--input-border` | `#808792` | `#8E877B` |
+| `--accent-fill`, `--mark-bg` | `#F2C35B` | `#F6C057` |
+| `--accent-surface`, `--accent-faint` | `#FDF3D8` | `#FEF1D5` |
+| `--wordmark` | `#7A4E00` | `#1A1410` (+ new `--wordmark-icon` `#B28110`) |
+| `--nav-indicator` | — | new: `#D8BC7A` light / `#F2C35B` dark |
+| `--header-bg` / `--sticky-bg` | white, 0.92 / 0.94 | `rgba(252, 250, 244, …)` (derived from `--bg`) |
+| `--tag-featured` | `#8a6a00` (4.33:1 on white, below AA) | `#735800` (5.54:1 on its tint over the card) |
+| `--status-*` (6 roles × text/`-bg`/`-border`), `--status-radius` | — | new, both themes |
+| `--green`, `--green-faint`, `--green-border` | light `#087f45`…, dark `#06C167`… | aliases of `--status-positive*`, defined once in the dark `:root` |
+| `--green-dim`, `--green-surface(-strong)`, `--green-glow` | defined, unused | removed |
+| `--danger`, `--danger-bg` | light `#c62828`, dark `#ff4444` | aliases of `--status-blocked(-bg)` (light `#8A1C12`, dark `#FF6B6B`); dark `--danger-border` keeps its former 20% alpha |
+| `--warning`, `--warning-bg` | light `#9A3412` (rust), dark `#FF9E6B` | aliases of `--status-old(-bg)` (light `#5A3A0A` oker, dark unchanged) |
+| `--whatsapp-bg/-border/-hover-bg` | green tints | removed; the WhatsApp button is outlined oker like `.rc-reserve-btn` |
+| `--text-muted`, `--text-dim`, `--text-faint` | used for readable text | values unchanged; decoration only. All 165 readable uses moved to `--text-secondary` |
+
+Green applications moved:
+
+- To oker: moderation approve buttons (white on green → `--accent-fill` /
+  `--on-accent-fill`).
+- To the soft accent: the import-inbox info banner (`--accent-surface`,
+  1px `--accent`, primary text).
+- To neutral: coverage table header tint (`--bg-elevated`), coverage
+  headline number (`--text-primary`), the coverage "Internal only" label,
+  `.tag-vegetarisch` / `.tag-vegan` (outlined, `--text-secondary`, leaf
+  icon), the WhatsApp reservation button tint.
+- To `--status-positive` with icon + text: "Open" on the menu page, the
+  restaurant detail page and the legacy `/restaurants` card (the browse
+  card's `.lrc-status` was later removed: it relied on a server/cache
+  `openStatus` the browser cannot confirm — no live status there until
+  an API extension); "Approved (internal only)" and "Complete" in the
+  import inbox (list chip, summary tile, detail) and "Approved" in the
+  onboarding menu review; Bronwerkvoorraad "Bereikbaar"; coverage
+  "Complete"; the set-password success message; moderation "Domain match".
+- Not a status, so not `--status-positive`: `.hours-today` (today's row
+  is a presentation marker — ink-oker day label, primary-text times,
+  `aria-current="date"`; see the correction below).
+- Removed as dead CSS (no reference anywhere in `app/` or `src/`):
+  `.rc-open-status`, `.rc-open-dot*`, `.rc-open-label*`,
+  `.dish-result-status.*`.
+- Dots replaced: coloured status dots became `StatusIcon` + text; the
+  "Nu open" filter buttons show a decorative clock icon (the button text
+  and its active state carry the meaning).
+
+Also aligned: internal navigation active destinations now use
+`--accent-surface` + 1px `--accent` ring (the soft treatment this file
+already prescribes), and every status chip on the import inbox,
+onboarding and profile-draft screens carries an icon next to its text.
+
+Dark: what changed, and its source. Dark behaviour, the stored theme
+choice, the runtime default and the base surfaces are unchanged, but dark
+is not frozen pixel for pixel. This is the complete list of visual
+refinements dark receives on this branch, each carried by the design
+source or by existing documentation:
+
+| Dark change | Source |
+|---|---|
+| Status roles (`--status-*`): role colour as text and 1px border, 10% fill, 6px radius (`.status-badge`, `.swq-badge`, `.di-chip`) — so Bronwerkvoorraad badge text and the internal chips now take their role colour and border | PDF, "Semantische statusrollen" (dark: "statuskleur op 10% met 1px rand") |
+| `--danger` `#ff4444` → `#FF6B6B` (via `--status-blocked`) | PDF, "Vervangt --danger (#C62828 / #FF4444)" |
+| "Actie nodig" tokens (`--status-action*`), reserved, not assigned | PDF, "Donker ongewijzigd, aangevuld met Actie nodig" |
+| Readable text from `--text-muted`/`--text-dim`/`--text-faint` to `--text-secondary` | PDF, hard rule for secondary text |
+| No green outside a positive status: moderation approve buttons oker, info banner soft accent, coverage header/headline neutral, WhatsApp reservation button outlined oker instead of a green tint | PDF, "Bestaande groene toepassingen" and "nooit merk, knopkleur" |
+| Internal navigation active destination: `--accent-surface` + 1px `--accent` ring | existing rule in this file / design-reference ("selected chips, active navigation … soft treatment") |
+| Dietary labels (vegetarisch/vegan): green tint → neutral outlined label with a leaf icon | PDF, "dieet is geen successtatus" |
+| Status dots → icon + text badges (open/closed indicators, "Nu open" filter button shows a clock) | PDF, "Waar nu alleen een stip staat: stip vervangen door icoon + tekst" |
+| Public "Open" badge: green only when open at this moment, otherwise a neutral clock line ("Opent vandaag om …", "Nu gesloten · …") | PDF, positive = "Nu open" |
+| `.hours-today`: green → ink-oker day label and primary-text times | PDF, accent as text; today is not a status |
+| Internal status chips per meaning: only approved/complete green, failed import run / failed request red, everything else neutral grey (previously blue, orange, red or green by status name) | PDF status roles; `src/lib/statusRoles.js` |
+| Incomplete data and uncertainty orange → neutral grey: NVWA score, NVWA note and "?" marks, menu-card "Allergeneninformatie onbekend" badge and border, search low-coverage note, Coverage "Partial" and "Menu data is limited", import-inbox missing fields / possible duplicate / phone format / robots unconfirmed / suggestion warnings, profile-draft duplicate note, onboarding conflict note and notice banners; moderation "No domain match" / "Already has an owner" orange → grey | PDF, `--status-old` only for the four source states |
+| Errors that were orange become red: import inbox failed-run banner, search restaurant-load error | PDF, blocked = "laad- en validatiefout" |
+| Coverage secondary text `#8f8f8f` → `--text-secondary` `#aaaaaa` | PDF, hard rule for secondary text |
+| Confidence (onboarding): coloured chip → neutral outlined label "Betrouwbaarheid: …" | not a status (design-reference) |
+| Disabled "Suggest data from website" button: dashed border | keeps the text at AA instead of fading it |
+
+Reverted because neither source covers it: a stronger dark
+`--danger-border` (0.35 alpha) — it is back at the former 20% alpha, in
+the new `#FF6B6B` hue.
+
+Correction (2026-10-07, review round). The first implementation mapped
+shared chip class names to status roles globally, so screens that were
+not migrated showed the wrong meaning. Fixed:
+
+- `.di-chip`, `.di-summary-icon` and `.di-status-icon` now only have
+  role classes (`--positive`, `--blocked`, `--neutral`, plus
+  `.di-chip--label` for non-status labels); each screen picks the role
+  per meaning in `src/lib/statusRoles.js`. `.di-chip` takes the status
+  shape (`--status-radius`).
+- The unapproved "New → Actie nodig" mapping is withdrawn from code and
+  documentation. `--status-action` stays a reserved design role;
+  assigning it to a business state is a future product decision.
+- Conservatively neutral until that decision: New / Not yet reviewed /
+  Needs review / Needs enrichment / Deferred / Rejected, Incomplete,
+  "possible duplicate", running/partial/succeeded import runs, "Bezig…",
+  "Voorstel aangemaakt", "Al voorgesteld", profile drafts, coverage
+  "Partial", moderation "No domain match" / "Already has an owner".
+- Confidence hoog/middel/laag (onboarding restaurant) is not a status:
+  neutral outlined label, no status colour or icon.
+- Incomplete data is not an error: NVWA "grotendeels nog niet
+  vastgelegd" and the onboarding field-conflict note no longer use
+  `--danger` (first moved to `--warning`; superseded by the second
+  review round below, which makes them neutral).
+- The coverage page's own secondary colour (`--cov-text-subtle`) is
+  removed; its secondary text is `--text-secondary`.
+
+Correction (2026-10-07, second review round):
+
+- Public "Open": `MenuView`, `RestaurantDetailView` and the legacy
+  `/restaurants` card showed a green "Open · …" whenever today had
+  opening hours, also at night. Now `src/lib/openingStatus.js` (pure,
+  tested with fixed moments) gives "Nu open · tot …" (positive) only
+  while open, and a neutral clock line otherwise; the browser clock is
+  read after mount (`src/components/useClientNow.js`), so the server
+  render is always neutral.
+- `--warning` (alias of `--status-old`) is no longer used for any
+  content: incomplete data, missing NVWA data, conflicts, duplicates and
+  similar uncertainty use the neutral role; `.di-banner-warning` and the
+  unused `.badge-warning` are removed; real errors in those slots use the
+  error role. The robots.txt block on a read page is "Robots
+  geblokkeerd" and uses the blocked role with icon + text
+  (`robotsTxtRole()`; corrected in a later review round — it briefly
+  used `--status-old`, which the design source reserves for the four
+  source states). The `--warning*` and `--warning-strong-border` tokens stay
+  only as unused compatibility aliases.
+- Moderation neutral states use a neutral dot icon instead of the
+  attention icon; confidence reads "Betrouwbaarheid: …".
+
+Measured (WCAG 2.x; asserted in `src/lib/colourLanguage.test.js`):
+
+| Pair | Light | Dark |
+|---|---|---|
+| `--text-secondary` on bg / card / elevated / accent-surface | 6.93 / 7.12 / 6.53 / 6.46 | 8.52 / 8.13 / 7.64 / 6.85 |
+| `--accent` on bg / accent-surface | 6.90 / 6.43 | 12.00 / 9.65 |
+| `--on-accent-fill` on `--accent-fill` | 10.74 | 10.85 |
+| `--input-border` on bg / elevated / hover (UI 3:1) | 3.41 / 3.21 / 3.11 | 4.10 / 3.67 / 3.29 |
+| Focus ring (`--accent`) on bg | 6.90 | 12.00 |
+| Status minima | see design-reference table | "Actie nodig" 8.70 |
+
+`--nav-indicator` light (`#D8BC7A`, 1.77:1) and `--wordmark-icon`
+(`#B28110`, 3.33:1) are decorative; the active tab is also carried by its
+`--accent` text, the wordmark by its text and accessible name.

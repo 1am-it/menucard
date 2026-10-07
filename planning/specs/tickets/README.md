@@ -21,7 +21,8 @@ of these.
 4. [be-03-dish-search-results.md](./be-03-dish-search-results.md) — done
 5. [theme-design-tokens.md](./theme-design-tokens.md) — done, implemented
    ahead of its originally listed position; see
-   `planning/decisions/006-theme-token-system-implemented-early.md`
+   `planning/decisions/006-theme-token-system-implemented-early.md`;
+   colour values now follow Kleurtaal v2 (addendum of 2026-10-07)
 6. [be-06-filters-url-state.md](./be-06-filters-url-state.md) — done
 7. [be-04-homepage-shift.md](./be-04-homepage-shift.md) — done; see
    `planning/decisions/007-homepage-shift.md`

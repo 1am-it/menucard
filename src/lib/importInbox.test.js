@@ -2017,7 +2017,10 @@ test('structural safety net: the always-visible row still shows name, category, 
   assert.match(alwaysVisible, /c\.normalized_fields\?\.phone/);
   assert.match(alwaysVisible, /c\.normalized_fields\?\.website/);
   assert.match(alwaysVisible, /c\.missing_fields/);
-  assert.match(alwaysVisible, /di-chip di-chip--\$\{c\.review_status\}/);
+  // Kleurtaal v2: the effective status is still shown; its colour role comes
+  // from src/lib/statusRoles.js (reviewStatusRole), not the raw status name.
+  assert.match(alwaysVisible, /di-chip di-chip--\$\{reviewStatusRole\(c\.review_status\)\}/);
+  assert.match(alwaysVisible, /\{REVIEW_STATUS_LABELS\[c\.review_status\] \|\| c\.review_status\}/);
   assert.match(alwaysVisible, /Deferred reason: \{formatDeferredReasonLabel\(c\.deferred_reason\)\}/);
 });
 

@@ -41,8 +41,11 @@ const COMPLIANCE_TONE = {
   // Reuses the same neutral pill treatment as /internal/moderation's
   // SourceTag (src/lib/moderationFormatting.js), not a new token.
   neutral: { color: 'var(--text-secondary)', bg: 'var(--bg-elevated)',   border: 'var(--border)' },
-  partial: { color: 'var(--warning)', bg: 'var(--warning-bg)',    border: 'var(--warning-border)' },
-  none:    { color: 'var(--danger)',  bg: 'var(--danger-bg)',     border: 'var(--danger-border)' },
+  // Kleurtaal v2: gedeeltelijk of grotendeels ontbrekende allergeneninformatie
+  // is onvolledige data — geen fout en geen "oude bron". Neutrale statusrol;
+  // de tekst ernaast draagt de betekenis.
+  partial: { color: 'var(--status-neutral)', bg: 'var(--status-neutral-bg)', border: 'var(--border)' },
+  none:    { color: 'var(--status-neutral)', bg: 'var(--status-neutral-bg)', border: 'var(--border)' },
 }
 
 function ComplianceScore({ items }) {
@@ -71,7 +74,7 @@ function ComplianceScore({ items }) {
         <div style={{ fontSize: 13, fontWeight: 700, color: tone.color }}>
           {pct === 100 ? 'Elke gerechtregel heeft een waarde voor allergenen' : pct >= 50 ? 'Allergeneninformatie gedeeltelijk vastgelegd' : 'Allergeneninformatie grotendeels nog niet vastgelegd'}
         </div>
-        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
+        <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>
           {known} van {items.length} gerechten hebben een waarde voor allergenen (ingevuld of leeg) —
           een lege waarde bevestigt geen afwezigheid van allergenen.
         </div>
@@ -133,7 +136,7 @@ export default function NvwaView({ id, restaurant, allItems }) {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
             <button onClick={handlePrint} className="nvwa-export-btn">⬇ Export PDF</button>
-            <div style={{ fontSize: 11, color: 'var(--text-faint)' }}>Gegenereerd {new Date().toLocaleDateString('nl-NL')}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Gegenereerd {new Date().toLocaleDateString('nl-NL')}</div>
           </div>
         </div>
 
@@ -152,7 +155,7 @@ export default function NvwaView({ id, restaurant, allItems }) {
 
         {/* Filters */}
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 20, alignItems: 'center' }}>
-          <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 600 }}>Filter:</span>
+          <span style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 600 }}>Filter:</span>
 
           {/* Meal type filter */}
           {mealTypes.length > 1 && (
@@ -163,7 +166,7 @@ export default function NvwaView({ id, restaurant, allItems }) {
                   padding: '5px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600,
                   border: `1px solid ${!filterMeal ? 'var(--accent)' : 'var(--input-border)'}`,
                   background: !filterMeal ? 'var(--accent-faint)' : 'var(--bg-input)',
-                  color: !filterMeal ? 'var(--accent)' : 'var(--text-muted)', cursor: 'pointer',
+                  color: !filterMeal ? 'var(--accent)' : 'var(--text-secondary)', cursor: 'pointer',
                 }}>
                 Alle kaarten
               </button>
@@ -175,7 +178,7 @@ export default function NvwaView({ id, restaurant, allItems }) {
                     padding: '5px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600,
                     border: `1px solid ${filterMeal === m ? 'var(--accent)' : 'var(--input-border)'}`,
                     background: filterMeal === m ? 'var(--accent-faint)' : 'var(--bg-input)',
-                    color: filterMeal === m ? 'var(--accent)' : 'var(--text-muted)', cursor: 'pointer',
+                    color: filterMeal === m ? 'var(--accent)' : 'var(--text-secondary)', cursor: 'pointer',
                   }}>
                   {m.charAt(0).toUpperCase() + m.slice(1)}
                 </button>
@@ -191,7 +194,7 @@ export default function NvwaView({ id, restaurant, allItems }) {
                 padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 600,
                 border: `1px solid ${filterAllergen === null ? 'var(--accent)' : 'var(--input-border)'}`,
                 background: filterAllergen === null ? 'var(--accent-faint)' : 'var(--bg-input)',
-                color: filterAllergen === null ? 'var(--accent)' : 'var(--text-muted)', cursor: 'pointer',
+                color: filterAllergen === null ? 'var(--accent)' : 'var(--text-secondary)', cursor: 'pointer',
               }}>
               Alle allergenen
             </button>
@@ -204,7 +207,7 @@ export default function NvwaView({ id, restaurant, allItems }) {
                   padding: '4px 8px', borderRadius: 6, fontSize: 11,
                   border: `1px solid ${filterAllergen === a.id ? 'var(--accent)' : 'var(--input-border)'}`,
                   background: filterAllergen === a.id ? 'var(--accent-faint)' : 'var(--bg-input)',
-                  color: filterAllergen === a.id ? 'var(--accent)' : 'var(--text-muted)', cursor: 'pointer',
+                  color: filterAllergen === a.id ? 'var(--accent)' : 'var(--text-secondary)', cursor: 'pointer',
                 }}>
                 {a.icon} {a.short}
               </button>
@@ -213,7 +216,7 @@ export default function NvwaView({ id, restaurant, allItems }) {
         </div>
 
         {/* Result count */}
-        <div style={{ fontSize: 12, color: 'var(--text-dim)', marginBottom: 12 }}>
+        <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 12 }}>
           {filtered.length} gerecht{filtered.length !== 1 ? 'en' : ''} weergegeven
           {filterAllergen !== null && ` met ${EU14.find(a => a.id === filterAllergen)?.name}`}
         </div>
@@ -269,7 +272,7 @@ export default function NvwaView({ id, restaurant, allItems }) {
                         <tr key={`cat-${item.mealType}-${item.category}`}>
                           <td colSpan={15} style={{
                             background: 'var(--bg-elevated)',
-                            color: 'var(--text-dim)',
+                            color: 'var(--text-secondary)',
                             fontWeight: 600,
                             fontSize: 11,
                             padding: '6px 12px 6px 20px',
@@ -317,7 +320,7 @@ export default function NvwaView({ id, restaurant, allItems }) {
             <span className="allergen-unknown">?</span> Onbekend (nog niet vastgelegd)
           </div>
         </div>
-        <div style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 8, maxWidth: 640 }}>
+        <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 8, maxWidth: 640 }}>
           Een "—" of "?" is geen garantie dat een gerecht vrij is van dit allergeen — het betekent
           alleen dat dit niet als aanwezig is geregistreerd in MenuCard.
         </div>
@@ -330,11 +333,11 @@ export default function NvwaView({ id, restaurant, allItems }) {
           border: '1px solid var(--border)',
           borderRadius: 10,
           fontSize: 11,
-          color: 'var(--text-faint)',
+          color: 'var(--text-secondary)',
           lineHeight: 1.6,
         }}>
           <p style={{ margin: '0 0 8px 0' }}>
-            <strong style={{ color: 'var(--text-dim)' }}>Achtergrond:</strong> EU Verordening (EU) Nr. 1169/2011
+            <strong style={{ color: 'var(--text-secondary)' }}>Achtergrond:</strong> EU Verordening (EU) Nr. 1169/2011
             verplicht horecabedrijven in Nederland om allergene informatie over hun gerechten beschikbaar te
             stellen aan gasten. Toezicht hierop ligt bij de NVWA (Nederlandse Voedsel- en Warenautoriteit).
             MenuCard helpt {restaurant.name} deze informatie overzichtelijk vast te leggen en te delen —

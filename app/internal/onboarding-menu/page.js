@@ -30,6 +30,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import InternalNav from '@/src/components/InternalNav'
+import StatusIcon from '@/src/components/StatusIcon'
+import { reviewStatusRole, proposalRequestRole } from '@/src/lib/statusRoles'
 import { ALLOWED_DECISIONS, ALLOWED_REJECTION_REASONS } from '@/src/lib/menuSnapshotProposals'
 
 const selectStyle = {
@@ -49,12 +51,15 @@ const STATUS_LABELS = {
   deferred: 'Deferred',
 }
 
-const STATUS_CHIP_CLASS = {
-  unreviewed: 'di-chip--new',
-  needs_review: 'di-chip--needs_enrichment',
-  approved_internal: 'di-chip--approved_internal',
-  rejected: 'di-chip--rejected',
-  deferred: 'di-chip--deferred',
+// Kleurtaal v2: icoon per reviewstatus; de rol komt uit
+// src/lib/statusRoles.js (alleen approved_internal is positief, de rest
+// blijft neutraal tot een productbesluit over de statusvocabulaire).
+const STATUS_CHIP_ICONS = {
+  unreviewed: 'clock',
+  needs_review: 'clock',
+  approved_internal: 'check',
+  rejected: 'cross',
+  deferred: 'clock',
 }
 
 const REJECTION_REASON_LABELS = {
@@ -68,6 +73,16 @@ const REJECTION_REASON_LABELS = {
 // New, task-oriented labels this ticket introduces are Dutch, per
 // BE-18's own recorded direction — the fixed module name "Onboarding
 // Menu" and the "Beheer" shell name are unchanged.
+// Kleurtaal v2: icoon per verzoekstatus; de rol komt uit
+// src/lib/statusRoles.js (alleen "Mislukt" is een echte fout, de rest
+// blijft neutraal — een aangemaakt voorstel is geen goedkeuring).
+const PROPOSAL_REQUEST_ICONS = {
+  pending: 'clock',
+  success: 'check',
+  exists: 'check',
+  error: 'cross',
+}
+
 const MENU_CREATE_STATUS_LABELS = {
   pending: 'Bezig…',
   success: 'Voorstel aangemaakt',
@@ -478,7 +493,7 @@ export default function OnboardingMenuPage() {
   if (session === undefined) {
     return (
       <div className="di-page">
-        <main className="di-main" style={{ color: 'var(--text-muted)' }}>Loading…</main>
+        <main className="di-main" style={{ color: 'var(--text-secondary)' }}>Loading…</main>
       </div>
     )
   }
@@ -499,7 +514,7 @@ export default function OnboardingMenuPage() {
         </div>
 
         {rolesLoaded && !isInternal && !isEditor && (
-          <div className="di-banner di-banner-warning">
+          <div className="di-banner di-banner-neutral">
             <span className="di-banner-icon"><IconDocument /></span>
             <span>Your account has neither the "internal" nor the "editor" role — menu snapshots cannot be shown.</span>
           </div>
@@ -509,7 +524,7 @@ export default function OnboardingMenuPage() {
           <div className="di-candidate-card" style={{ marginBottom: 16 }}>
             <div className="di-row-name">Menu-URL uitlezen</div>
             <div style={{ display: 'grid', gap: 8, maxWidth: 480 }}>
-              <label htmlFor="onboarding-menu-source-url" style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+              <label htmlFor="onboarding-menu-source-url" style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
                 Menu-URL
               </label>
               <input
@@ -539,7 +554,7 @@ export default function OnboardingMenuPage() {
                 </div>
 
                 {readResult.warning && (
-                  <div className="di-banner di-banner-warning">
+                  <div className="di-banner di-banner-neutral">
                     <span className="di-banner-icon"><IconDocument /></span>
                     <span>{readResult.warning}</span>
                   </div>
@@ -548,13 +563,13 @@ export default function OnboardingMenuPage() {
                 {needsRestaurantChoice && readResult.receipt && (
                   <div className="di-candidate-card">
                     <div className="di-row-name">Restaurantconcept</div>
-                    <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 8 }}>
+                    <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8 }}>
                       Bestaat dit restaurant nog niet in het systeem? Maak een restaurantconcept aan op basis van deze bron.
                       Menuvoorstellen zijn pas mogelijk zodra dit restaurant later is bevestigd als bestaand restaurant.
                     </div>
                     {conceptError && <div style={{ fontSize: 12, color: 'var(--danger)', marginBottom: 8 }}>{conceptError}</div>}
                     {conceptDuplicateOf && (
-                      <div className="di-banner di-banner-warning" style={{ marginBottom: 8 }}>
+                      <div className="di-banner di-banner-neutral" style={{ marginBottom: 8 }}>
                         <span className="di-banner-icon"><IconDocument /></span>
                         <span>
                           Dit lijkt op een al bestaand restaurantconcept. Weet je zeker dat je toch een nieuw concept wilt aanmaken?
@@ -587,7 +602,7 @@ export default function OnboardingMenuPage() {
                   <div>
                     <label
                       htmlFor={needsRestaurantChoice ? 'onboarding-menu-restaurant' : undefined}
-                      style={{ display: 'block', fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}
+                      style={{ display: 'block', fontSize: 12, color: 'var(--text-secondary)', marginBottom: 4 }}
                     >
                       Restaurant
                     </label>
@@ -627,9 +642,15 @@ export default function OnboardingMenuPage() {
                         <div style={{ flex: 1 }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
                             <div className="di-row-name" style={{ marginBottom: 0 }}>{menu.name || 'Menu zonder naam'}</div>
-                            {alreadyExists && <span className="di-chip di-chip--muted">Al voorgesteld</span>}
+                            {alreadyExists && (
+                              <span className="di-chip di-chip--neutral">
+                                <StatusIcon name="check" size={12} />
+                                Al voorgesteld
+                              </span>
+                            )}
                             {!alreadyExists && status && (
-                              <span className={`di-chip ${status === 'success' ? 'di-chip--approved_internal' : status === 'error' ? 'di-chip--rejected' : 'di-chip--new'}`}>
+                              <span className={`di-chip di-chip--${proposalRequestRole(status)}`}>
+                                <StatusIcon name={PROPOSAL_REQUEST_ICONS[status] || 'dot'} size={12} />
                                 {MENU_CREATE_STATUS_LABELS[status]}
                               </span>
                             )}
@@ -693,7 +714,7 @@ export default function OnboardingMenuPage() {
                         : `Maak ${selectedMenus.length} menuvoorstel${selectedMenus.length === 1 ? '' : 'len'} voor review`}
                     </button>
                     {selectedMenus.length > 0 && !creatingProposals && (
-                      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6 }}>
+                      <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 6 }}>
                         {selectedMenus.length} menuvoorstel{selectedMenus.length === 1 ? '' : 'len'} klaar voor review.
                       </div>
                     )}
@@ -726,11 +747,12 @@ export default function OnboardingMenuPage() {
                     <div className="di-row-name" style={{ marginBottom: 0 }}>
                       {s.restaurant_id} — {s.menu_context}
                     </div>
-                    <span className={`di-chip ${STATUS_CHIP_CLASS[s.effective_status] || 'di-chip--muted'}`}>
+                    <span className={`di-chip di-chip--${reviewStatusRole(s.effective_status)}`}>
+                      <StatusIcon name={STATUS_CHIP_ICONS[s.effective_status] || 'dot'} size={12} />
                       {STATUS_LABELS[s.effective_status] || s.effective_status}
                     </span>
                   </div>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
+                  <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>
                     {s.source_type} · quality: {s.quality_score} · version {s.version}
                   </div>
 

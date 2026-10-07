@@ -13,6 +13,8 @@ import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import InternalNav from '@/src/components/InternalNav'
 import { formatFieldName, formatFieldValue, formatSourceLabel, NO_CURRENT_VALUE_LABEL } from '@/src/lib/moderationFormatting'
+import StatusIcon from '@/src/components/StatusIcon'
+import { domainMatchRole } from '@/src/lib/statusRoles'
 
 // A small, neutral "who proposed/verified this" pill — same rounded-pill
 // language the Owner claims section below already uses for its
@@ -182,9 +184,9 @@ export default function ModerationQueuePage() {
         </div>
       )}
 
-      {loading && <p style={{ color: 'var(--text-muted)' }}>Loading…</p>}
+      {loading && <p style={{ color: 'var(--text-secondary)' }}>Loading…</p>}
 
-      {!loading && items.length === 0 && !error && <p style={{ color: 'var(--text-muted)' }}>No pending changes.</p>}
+      {!loading && items.length === 0 && !error && <p style={{ color: 'var(--text-secondary)' }}>No pending changes.</p>}
 
       <div style={{ display: 'grid', gap: 14 }}>
         {items.map(({ pending, current }) => {
@@ -201,16 +203,16 @@ export default function ModerationQueuePage() {
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, marginBottom: 12 }}>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-secondary)', marginBottom: 4 }}>
                   <span>Current</span>
                   {current && <SourceTag>{formatSourceLabel(current.source)}</SourceTag>}
                 </div>
-                <div style={{ fontSize: 14, color: current ? 'var(--text-primary)' : 'var(--text-muted)', fontStyle: current ? 'normal' : 'italic' }}>
+                <div style={{ fontSize: 14, color: current ? 'var(--text-primary)' : 'var(--text-secondary)', fontStyle: current ? 'normal' : 'italic' }}>
                   {currentDisplay}
                 </div>
               </div>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-secondary)', marginBottom: 4 }}>
                   <span>Proposed</span>
                   <SourceTag>{formatSourceLabel(pending.proposed_source)}</SourceTag>
                 </div>
@@ -223,7 +225,7 @@ export default function ModerationQueuePage() {
             )}
 
             <details style={{ marginBottom: 12 }}>
-              <summary style={{ fontSize: 12, color: 'var(--text-muted)', cursor: 'pointer' }}>Technical details</summary>
+              <summary style={{ fontSize: 12, color: 'var(--text-secondary)', cursor: 'pointer' }}>Technical details</summary>
               <pre
                 style={{
                   fontSize: 12,
@@ -250,8 +252,8 @@ export default function ModerationQueuePage() {
                   padding: '8px 14px',
                   borderRadius: 8,
                   border: 'none',
-                  background: 'var(--green)',
-                  color: '#fff',
+                  background: 'var(--accent-fill)',
+                  color: 'var(--on-accent-fill)',
                   fontWeight: 600,
                   cursor: 'pointer',
                 }}
@@ -295,10 +297,10 @@ export default function ModerationQueuePage() {
         </div>
       )}
 
-      {claimsLoading && <p style={{ color: 'var(--text-muted)' }}>Loading…</p>}
+      {claimsLoading && <p style={{ color: 'var(--text-secondary)' }}>Loading…</p>}
 
       {!claimsLoading && claimItems.length === 0 && !claimsError && (
-        <p style={{ color: 'var(--text-muted)' }}>No pending claims.</p>
+        <p style={{ color: 'var(--text-secondary)' }}>No pending claims.</p>
       )}
 
       <div style={{ display: 'grid', gap: 14 }}>
@@ -314,27 +316,16 @@ export default function ModerationQueuePage() {
               Claimant: <strong>{claim.claim_email}</strong>
             </div>
             <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-              <span
-                style={{
-                  fontSize: 12,
-                  padding: '3px 8px',
-                  borderRadius: 999,
-                  background: claim.domain_match ? 'var(--green-faint)' : 'var(--warning-bg)',
-                  color: claim.domain_match ? 'var(--green)' : 'var(--warning)',
-                }}
-              >
+              {/* Kleurtaal v2: statusrol + icoon + tekst. Een domeinmatch is
+                  positief; een mismatch of bestaande eigenaar heeft nog geen
+                  besloten rol en blijft neutraal (src/lib/statusRoles.js). */}
+              <span className={`status-badge status-badge--${domainMatchRole(claim.domain_match)}`}>
+                <StatusIcon name={claim.domain_match ? 'check' : 'dot'} size={12} />
                 {claim.domain_match ? 'Domain match' : 'No domain match'}
               </span>
               {hasExistingOwner && (
-                <span
-                  style={{
-                    fontSize: 12,
-                    padding: '3px 8px',
-                    borderRadius: 999,
-                    background: 'var(--warning-bg)',
-                    color: 'var(--warning)',
-                  }}
-                >
+                <span className="status-badge status-badge--neutral">
+                  <StatusIcon name="dot" size={12} />
                   Already has an owner
                 </span>
               )}
@@ -347,8 +338,8 @@ export default function ModerationQueuePage() {
                   padding: '8px 14px',
                   borderRadius: 8,
                   border: 'none',
-                  background: 'var(--green)',
-                  color: '#fff',
+                  background: 'var(--accent-fill)',
+                  color: 'var(--on-accent-fill)',
                   fontWeight: 600,
                   cursor: 'pointer',
                 }}

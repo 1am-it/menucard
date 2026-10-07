@@ -7,6 +7,9 @@ import { getReservationActions, getReservationNote, isExternalReservation, isVal
 import { resolveDishTarget } from '@/src/lib/dishDeepLink'
 import Wordmark from '@/src/components/Wordmark'
 import ExternalLinkIcon from '@/src/components/ExternalLinkIcon'
+import StatusIcon from '@/src/components/StatusIcon'
+import useClientNow from '@/src/components/useClientNow'
+import { todayOpening, openingBadge } from '@/src/lib/openingStatus'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -18,6 +21,10 @@ const TAG_LABELS = {
   halal:       'Halal',
   glutenvrij:  'Glutenvrij',
 }
+
+// Dieetlabels zijn neutrale labels met een blaadje-icoon, geen successtatus
+// (Kleurtaal v2).
+const NEUTRAL_DIET_TAG_KEYS = new Set(['vegetarisch', 'vegan'])
 
 const MEAL_CONFIG = {
   lunch:          { label: '🥗 Lunch',          title: 'Lunchkaart' },
@@ -172,7 +179,10 @@ function MenuItem({ item, query, excludeAllergens, isFiltering, isResolvedTarget
       {item.tags?.length > 0 && (
         <div className="item-tags">
           {item.tags.map(t => (
-            <span key={t} className={`item-tag tag-${t}`}>{TAG_LABELS[t] || t}</span>
+            <span key={t} className={`item-tag tag-${t}`}>
+              {NEUTRAL_DIET_TAG_KEYS.has(t) && <StatusIcon name="leaf" size={11} className="item-tag-icon" />}
+              {TAG_LABELS[t] || t}
+            </span>
           ))}
         </div>
       )}
@@ -302,7 +312,10 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
   // "today's key has an hours entry" check already used on
   // app/restaurant/[id]/page.js's hero, for consistency across pages.
   const todayKey = ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za'][new Date().getDay()]
-  const todayHours = restaurant.openingHours?.[todayKey]
+  // Kleurtaal v2: "Nu open" only when open at this moment (browser clock,
+  // after mount); opening hours today alone are a neutral line.
+  const now = useClientNow()
+  const todayBadge = openingBadge(now ? todayOpening(restaurant.openingHours, now) : null, restaurant.openingHours, todayKey)
   const cuisineLabel = restaurant.cuisineLabel || restaurant.cuisine || null
 
   // Max price options based on actual prices in this menu
@@ -434,8 +447,11 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
               <div className="rp-name">{r.name || restaurant.name}</div>
               {cuisineLabel && <div className="rp-line">{cuisineLabel}</div>}
               {restaurant.openingHours && (
-                <div className="rp-line" style={{ color: todayHours ? 'var(--green)' : 'var(--text-faint)', fontWeight: todayHours ? 600 : 400 }}>
-                  {todayHours ? `Open · ${todayHours}` : 'Gesloten vandaag'}
+                <div className="rp-line">
+                  <span className={`status-badge status-badge--${todayBadge.role}`}>
+                    <StatusIcon name={todayBadge.icon} size={13} />
+                    {todayBadge.text}
+                  </span>
                 </div>
               )}
               <div className="rp-line">

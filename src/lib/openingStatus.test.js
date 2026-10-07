@@ -1,0 +1,100 @@
+'use strict';
+
+// Kleurtaal v2 — src/lib/openingStatus.js. Deterministic: every case uses an
+// explicit local moment, so the result never depends on when the test runs.
+// Wednesday 7 October 2026 ("wo").
+
+const assert = require('node:assert/strict');
+const { test } = require('node:test');
+const { todayOpening, openingBadge } = require('./openingStatus');
+
+const HOURS = { wo: '12:00-23:00', do: '17:00-22:00' };
+const at = (h, m = 0) => new Date(2026, 9, 7, h, m);
+const badgeAt = (h, m) => openingBadge(todayOpening(HOURS, at(h, m)), HOURS, 'wo');
+const NO_OPEN_WORD = /\bOpen\b|Nu open/;
+
+test('02:00, before opening: not open — neutral clock, "Opent vandaag om 12:00", never the word Open', () => {
+  assert.equal(todayOpening(HOURS, at(2)).state, 'later');
+  const b = badgeAt(2);
+  assert.deepEqual([b.role, b.icon], ['neutral', 'clock']);
+  assert.equal(b.text, 'Opent vandaag om 12:00');
+  assert.doesNotMatch(b.text, NO_OPEN_WORD);
+});
+
+test('13:30, inside the window: open now — positive, check, "Nu open · tot 23:00"', () => {
+  assert.equal(todayOpening(HOURS, at(13, 30)).state, 'open');
+  assert.deepEqual(badgeAt(13, 30), { role: 'positive', icon: 'check', text: 'Nu open · tot 23:00' });
+});
+
+test('the window is open from the opening minute up to, not including, the closing minute (same rule as the existing helpers)', () => {
+  assert.equal(todayOpening(HOURS, at(11, 59)).state, 'later');
+  assert.equal(todayOpening(HOURS, at(12, 0)).state, 'open');
+  assert.equal(todayOpening(HOURS, at(22, 59)).state, 'open');
+  assert.equal(todayOpening(HOURS, at(23, 0)).state, 'closed-now');
+});
+
+test('23:30, after closing: neutral "Nu gesloten · vandaag 12:00-23:00", not positive', () => {
+  const b = badgeAt(23, 30);
+  assert.deepEqual([b.role, b.icon, b.text], ['neutral', 'clock', 'Nu gesloten · vandaag 12:00-23:00']);
+  assert.doesNotMatch(b.text, NO_OPEN_WORD);
+});
+
+test('no opening hours today: neutral "Gesloten vandaag"', () => {
+  const b = openingBadge(todayOpening({ do: '17:00-22:00' }, at(13)), { do: '17:00-22:00' }, 'wo');
+  assert.deepEqual(b, { role: 'neutral', icon: 'clock', text: 'Gesloten vandaag' });
+  assert.equal(todayOpening(undefined, at(13)).state, 'closed-today');
+});
+
+test('an unreadable entry is never shown as open', () => {
+  const hours = { wo: 'op afspraak' };
+  const b = openingBadge(todayOpening(hours, at(13)), hours, 'wo');
+  assert.deepEqual([b.role, b.text], ['neutral', 'Vandaag op afspraak']);
+});
+
+test('before the browser clock is known (server render, first paint) the badge is neutral, even during opening hours', () => {
+  assert.deepEqual(openingBadge(null, HOURS, 'wo'), { role: 'neutral', icon: 'clock', text: 'Vandaag 12:00-23:00' });
+  assert.deepEqual(openingBadge(null, HOURS, 'ma'), { role: 'neutral', icon: 'clock', text: 'Gesloten vandaag' });
+});
+
+test('a server/cache "open" never yields a positive status: only the browser moment counts', () => {
+  // openingBadge takes no server/cache status at all — a restaurant the
+  // server (or a cached response) reported as open is judged by the
+  // browser's own moment: 23:30 is after closing, so neutral.
+  assert.equal(openingBadge.length, 3, 'inputs: opening (browser), hours, todayKey — no server openStatus');
+  const serverSaidOpen = { ...HOURS, openStatus: 'open' };
+  const b = openingBadge(todayOpening(serverSaidOpen, at(23, 30)), serverSaidOpen, 'wo');
+  assert.equal(b.role, 'neutral');
+  assert.doesNotMatch(b.text, NO_OPEN_WORD);
+});
+
+test('browser time open: positive "Nu open"', () => {
+  assert.equal(badgeAt(20, 48).role, 'positive');
+  assert.match(badgeAt(20, 48).text, /^Nu open · tot 23:00$/);
+});
+
+test('unknown browser clock (SSR, first paint): neutral, for every key and even inside opening hours', () => {
+  for (const key of ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za']) {
+    const b = openingBadge(null, HOURS, key);
+    assert.equal(b.role, 'neutral', key);
+    assert.doesNotMatch(b.text, NO_OPEN_WORD, key);
+  }
+});
+
+test('a stale server date does not make a restaurant green: the browser day decides', () => {
+  // The server rendered on Wednesday ("wo", open 12:00-23:00), but the
+  // browser is already at Thursday 02:00 — todayOpening uses the browser's
+  // own day, not the server's todayKey, so the result is neutral.
+  const thursdayNight = new Date(2026, 9, 8, 2, 0);
+  const b = openingBadge(todayOpening(HOURS, thursdayNight), HOURS, 'wo');
+  assert.equal(b.role, 'neutral');
+  assert.doesNotMatch(b.text, NO_OPEN_WORD);
+});
+
+test('only an open-now state is positive, over a whole day in 15-minute steps', () => {
+  for (let min = 0; min < 24 * 60; min += 15) {
+    const opening = todayOpening(HOURS, at(Math.floor(min / 60), min % 60));
+    const b = openingBadge(opening, HOURS, 'wo');
+    assert.equal(b.role === 'positive', opening.state === 'open', `${min} min`);
+    if (b.role !== 'positive') assert.doesNotMatch(b.text, NO_OPEN_WORD, `${min} min`);
+  }
+});

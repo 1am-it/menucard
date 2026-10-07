@@ -38,6 +38,10 @@ import {
   canDiscardCandidateDraft,
   buildDraftLineageSummary,
 } from '@/src/lib/restaurantProfileDrafts'
+import { reviewStatusRole, qualityStatusRole, importRunRole, profileDraftRole, robotsTxtRole } from '@/src/lib/statusRoles'
+// Shared Kleurtaal v2 status glyph. Imported under another name because
+// this page already uses a local `StatusIcon` variable for triage icons.
+import StatusGlyph from '@/src/components/StatusIcon'
 
 // Mirrors ops/scripts/import-breda-osm.config.js's own
 // ALLOWED_AMENITY_VALUES — the fixed, complete set of categories this
@@ -850,7 +854,7 @@ export default function ImportInboxPage() {
   if (session === undefined) {
     return (
       <div className="di-page">
-        <main className="di-main" style={{ color: 'var(--text-muted)' }}>
+        <main className="di-main" style={{ color: 'var(--text-secondary)' }}>
           Loading…
         </main>
       </div>
@@ -917,7 +921,7 @@ export default function ImportInboxPage() {
             </div>
           )}
 
-          {triageLoading && <p style={{ color: 'var(--text-muted)' }}>Loading…</p>}
+          {triageLoading && <p style={{ color: 'var(--text-secondary)' }}>Loading…</p>}
 
           {!triageLoading && !triageError && (
             <div className="di-summary">
@@ -935,7 +939,7 @@ export default function ImportInboxPage() {
                       }}
                       className={`di-summary-card ${active ? 'active' : ''}`}
                     >
-                      <span className={`di-summary-icon di-summary-icon--${status}`}>
+                      <span className={`di-summary-icon di-summary-icon--${reviewStatusRole(status)}`}>
                         <Icon />
                       </span>
                       <span className="di-summary-body">
@@ -1054,7 +1058,7 @@ export default function ImportInboxPage() {
           </div>
 
           {showErrorBanner && (
-            <div className="di-banner di-banner-warning">
+            <div className={`di-banner di-banner-${importRunRole(selectedRun.status) === 'blocked' ? 'danger' : 'neutral'}`}>
               <span className="di-banner-icon">
                 <IconX />
               </span>
@@ -1074,14 +1078,14 @@ export default function ImportInboxPage() {
             </div>
           )}
 
-          {candidatesLoading && <p style={{ color: 'var(--text-muted)' }}>Loading…</p>}
+          {candidatesLoading && <p style={{ color: 'var(--text-secondary)' }}>Loading…</p>}
 
           {!candidatesLoading && candidateState === 'run-has-no-candidates' && !candidatesError && (
-            <p style={{ color: 'var(--text-muted)' }}>This run produced no imported candidates.</p>
+            <p style={{ color: 'var(--text-secondary)' }}>This run produced no imported candidates.</p>
           )}
 
           {!candidatesLoading && candidateState === 'no-filter-matches' && !candidatesError && (
-            <p style={{ color: 'var(--text-muted)' }}>
+            <p style={{ color: 'var(--text-secondary)' }}>
               No imported candidates match the current filters ({totalBeforeFilters} total before filtering).
             </p>
           )}
@@ -1105,11 +1109,23 @@ export default function ImportInboxPage() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8, gap: 8, flexWrap: 'wrap' }}>
                       <div className="di-row-name" style={{ marginBottom: 0 }}>{c.extracted_fields?.name || '(no name)'}</div>
                       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                        <span className={`di-chip ${c.quality_status === 'complete' ? 'di-chip--complete' : 'di-chip--incomplete'}`}>
+                        {/* Kleurtaal v2: elke statuschip heeft icoon + tekst; de rol
+                            per betekenis komt uit src/lib/statusRoles.js. */}
+                        <span className={`di-chip di-chip--${qualityStatusRole(c.quality_status)}`}>
+                          {c.quality_status === 'complete' ? <IconCheck /> : <IconInfo />}
                           {c.quality_status === 'complete' ? 'Complete' : 'Incomplete'}
                         </span>
-                        {c.possible_duplicate && <span className="di-chip di-chip--incomplete">possible duplicate</span>}
-                        <span className={`di-chip di-chip--${c.review_status}`}>
+                        {c.possible_duplicate && (
+                          <span className="di-chip di-chip--neutral">
+                            <IconInfo />
+                            possible duplicate
+                          </span>
+                        )}
+                        <span className={`di-chip di-chip--${reviewStatusRole(c.review_status)}`}>
+                          {(() => {
+                            const ChipIcon = TRIAGE_STATUS_ICONS[c.review_status] || IconDocument
+                            return <ChipIcon />
+                          })()}
                           {REVIEW_STATUS_LABELS[c.review_status] || c.review_status}
                         </span>
                       </div>
@@ -1123,12 +1139,12 @@ export default function ImportInboxPage() {
                       {c.extracted_fields?.category || '—'}
                       {c.normalized_fields?.address ? ` · ${c.normalized_fields.address}` : ''}
                     </div>
-                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                    <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
                       {c.normalized_fields?.phone ? `${c.normalized_fields.phone} · ` : ''}
                       {c.normalized_fields?.website || ''}
                     </div>
                     {c.missing_fields && c.missing_fields.length > 0 && (
-                      <div style={{ fontSize: 12, color: 'var(--warning)', marginTop: 6 }}>Missing: {c.missing_fields.join(', ')}</div>
+                      <div style={{ fontSize: 12, color: 'var(--status-neutral)', marginTop: 6 }}>Missing: {c.missing_fields.join(', ')}</div>
                     )}
                     <button onClick={() => toggleExpand(c.id)} className={`di-link-btn ${expanded ? 'active' : ''}`} style={{ marginTop: 8 }}>
                       {expanded ? 'Hide details' : 'Details & review'}
@@ -1137,14 +1153,7 @@ export default function ImportInboxPage() {
                     {expanded && (() => {
                       const draftLineage = buildDraftLineageSummary(c)
                       const StatusIcon = TRIAGE_STATUS_ICONS[c.review_status] || IconDocument
-                      const statusTone =
-                        c.review_status === 'approved_internal'
-                          ? 'positive'
-                          : c.review_status === 'rejected'
-                            ? 'danger'
-                            : c.review_status === 'needs_enrichment' || c.review_status === 'deferred'
-                              ? 'warning'
-                              : 'info'
+                      const statusTone = reviewStatusRole(c.review_status)
                       const statusSublabel =
                         c.review_status === 'approved_internal'
                           ? 'Internal only — not published'
@@ -1187,7 +1196,7 @@ export default function ImportInboxPage() {
                               </span>
                             </div>
                             <div className="di-status-item">
-                              <span className={`di-status-icon di-status-icon--${c.quality_status === 'complete' ? 'positive' : 'warning'}`}>
+                              <span className={`di-status-icon di-status-icon--${qualityStatusRole(c.quality_status)}`}>
                                 {c.quality_status === 'complete' ? <IconCheck /> : <IconInfo />}
                               </span>
                               <span className="di-status-body">
@@ -1199,7 +1208,7 @@ export default function ImportInboxPage() {
                             </div>
                             <div className="di-status-item">
                               <span
-                                className={`di-status-icon di-status-icon--${draftLineage.state === 'active' ? 'positive' : 'muted'}`}
+                                className={`di-status-icon di-status-icon--${profileDraftRole(draftLineage.state)}`}
                               >
                                 {draftLineage.state === 'active' ? <IconCheck /> : <IconDocument />}
                               </span>
@@ -1229,7 +1238,7 @@ export default function ImportInboxPage() {
                           )}
 
                           {c.review_status === 'approved_internal' && (
-                            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>
+                            <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 14 }}>
                               {canDiscardCandidateDraft(c) ? (
                                 <div style={{ display: 'grid', gap: 8 }}>
                                   {discardPromptOpenId === c.id ? (
@@ -1285,7 +1294,7 @@ export default function ImportInboxPage() {
                                   )}
                                   {profileDraftDuplicateByCandidateId[c.id] ? (
                                     <div style={{ display: 'grid', gap: 6 }}>
-                                      <div style={{ color: 'var(--warning)' }}>
+                                      <div style={{ color: 'var(--status-neutral)' }}>
                                         This looks like a possible duplicate of an already-promoted draft. Promoting
                                         anyway is recorded and flagged for later review — it never merges the two.
                                       </div>
@@ -1392,7 +1401,7 @@ export default function ImportInboxPage() {
                                     <div style={{ fontSize: 12, color: 'var(--danger)' }}>{decisionErrorByCandidateId[c.id]}</div>
                                   )}
                                   {!isReviewDecisionSubmittable(draft) && (
-                                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Choose a status to enable saving a decision.</div>
+                                    <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Choose a status to enable saving a decision.</div>
                                   )}
                                   <button
                                     onClick={() => submitDecision(c.id)}
@@ -1425,14 +1434,14 @@ export default function ImportInboxPage() {
                                     {ENRICHABLE_FIELDS.filter((f) => c.enrichment_sources?.[f]).map((f) => (
                                       <div key={f} style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
                                         <strong>{ENRICHABLE_FIELD_LABELS[f]}</strong>: {c.enrichment_sources[f].value}
-                                        <div style={{ color: 'var(--text-faint)', fontSize: 11, marginTop: 2 }}>
+                                        <div style={{ color: 'var(--text-secondary)', fontSize: 11, marginTop: 2 }}>
                                           Source: {c.enrichment_sources[f].source_url}
                                         </div>
                                       </div>
                                     ))}
                                   </div>
                                 ) : (
-                                  <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 14px' }}>
+                                  <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '0 0 14px' }}>
                                     No manual enrichments recorded yet.
                                   </p>
                                 )}
@@ -1454,7 +1463,7 @@ export default function ImportInboxPage() {
                                     title={!hasVerifiedWebsiteForSuggestions(c) ? 'Save a verified website first to enable suggestions.' : undefined}
                                     className="di-link-btn"
                                     style={{
-                                      color: hasVerifiedWebsiteForSuggestions(c) ? 'var(--text-secondary)' : 'var(--text-faint)',
+                                      color: 'var(--text-secondary)',
                                       cursor: hasVerifiedWebsiteForSuggestions(c) ? 'pointer' : 'not-allowed',
                                     }}
                                   >
@@ -1462,11 +1471,11 @@ export default function ImportInboxPage() {
                                   </button>
                                 </div>
                                 {!hasVerifiedWebsiteForSuggestions(c) && (
-                                  <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 8px' }}>
+                                  <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '0 0 8px' }}>
                                     Save a verified website first to enable suggestions.
                                   </p>
                                 )}
-                                <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 8px' }}>
+                                <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '0 0 8px' }}>
                                   Fill in a value and its source URL for one or more fields. A field left blank is not submitted.
                                   A correction is recorded as a new entry — nothing here is ever edited or deleted.
                                 </p>
@@ -1475,24 +1484,32 @@ export default function ImportInboxPage() {
                                   <div style={{ fontSize: 12, color: 'var(--danger)', marginBottom: 8 }}>{suggestionsErrorByCandidateId[c.id]}</div>
                                 )}
                                 {suggestionsByCandidateId[c.id] && suggestionsByCandidateId[c.id].robots_txt_status === 'disallowed' && (
-                                  <div style={{ fontSize: 12, color: 'var(--warning)', marginBottom: 8 }}>
-                                    This page is disallowed by the site's robots.txt and was not fetched.
+                                  // Kleurtaal v2: "Robots geblokkeerd" is the blocked role
+                                  // (src/lib/statusRoles.js), shown as icon + text.
+                                  <div style={{ marginBottom: 8 }}>
+                                    <span
+                                      className={`status-badge status-badge--${robotsTxtRole('disallowed')}`}
+                                      style={{ whiteSpace: 'normal', alignItems: 'flex-start' }}
+                                    >
+                                      <StatusGlyph name="cross" size={13} />
+                                      This page is disallowed by the site's robots.txt and was not fetched.
+                                    </span>
                                   </div>
                                 )}
                                 {suggestionsByCandidateId[c.id] && suggestionsByCandidateId[c.id].robots_txt_status === 'unconfirmed' && (
-                                  <div style={{ fontSize: 12, color: 'var(--warning)', marginBottom: 8 }}>
+                                  <div style={{ fontSize: 12, color: 'var(--status-neutral)', marginBottom: 8 }}>
                                     robots.txt could not be confirmed for this site — no suggestion was made.
                                   </div>
                                 )}
                                 {suggestionsByCandidateId[c.id]?.warnings?.length > 0 && (
-                                  <div style={{ fontSize: 12, color: 'var(--warning)', marginBottom: 8 }}>
+                                  <div style={{ fontSize: 12, color: 'var(--status-neutral)', marginBottom: 8 }}>
                                     {suggestionsByCandidateId[c.id].warnings.map((w, i) => (
                                       <div key={i}>⚠ {w}</div>
                                     ))}
                                   </div>
                                 )}
                                 {suggestionsByCandidateId[c.id]?.suggestions && (
-                                  <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
+                                  <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>
                                     Suggestions from {suggestionsByCandidateId[c.id].source_url} have been filled into the form
                                     below — nothing is saved until you click "Save enrichment."
                                     <div style={{ display: 'grid', gap: 2, marginTop: 4 }}>
@@ -1632,14 +1649,14 @@ export default function ImportInboxPage() {
                                 </span>
                               </summary>
                               <div className="di-accordion-body">
-                                <div style={{ fontSize: 11, color: 'var(--text-faint)', marginBottom: 12 }}>
+                                <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 12 }}>
                                   {c.record_locator} · imported {c.retrieved_at}
                                   {c.normalization?.phone && c.normalization.phone.valid === false && (
-                                    <div style={{ color: 'var(--warning)', marginTop: 4 }}>Phone format not recognized — shown as entered.</div>
+                                    <div style={{ color: 'var(--status-neutral)', marginTop: 4 }}>Phone format not recognized — shown as entered.</div>
                                   )}
                                 </div>
                                 {(reviewsLoadingId === c.id || enrichmentsLoadingId === c.id) && (
-                                  <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Loading…</p>
+                                  <p style={{ color: 'var(--text-secondary)', fontSize: 13 }}>Loading…</p>
                                 )}
                                 {reviewsErrorId === c.id && (
                                   <p style={{ color: 'var(--danger)', fontSize: 13 }}>Failed to load review history.</p>
@@ -1648,7 +1665,7 @@ export default function ImportInboxPage() {
                                   <p style={{ color: 'var(--danger)', fontSize: 13 }}>Failed to load enrichment history.</p>
                                 )}
                                 {reviewsLoadingId !== c.id && enrichmentsLoadingId !== c.id && timelineEvents.length === 0 && (
-                                  <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>No recorded history yet — currently "new".</p>
+                                  <p style={{ color: 'var(--text-secondary)', fontSize: 13 }}>No recorded history yet — currently "new".</p>
                                 )}
                                 {timelineEvents.length > 0 && (
                                   <div className="di-timeline">
@@ -1714,10 +1731,10 @@ export default function ImportInboxPage() {
         </div>
       )}
 
-      {runsLoading && <p style={{ color: 'var(--text-muted)' }}>Loading…</p>}
+      {runsLoading && <p style={{ color: 'var(--text-secondary)' }}>Loading…</p>}
 
       {!runsLoading && candidateState === 'no-runs' && !runsError && (
-        <p style={{ color: 'var(--text-muted)' }}>No import runs yet.</p>
+        <p style={{ color: 'var(--text-secondary)' }}>No import runs yet.</p>
       )}
 
       {runs.length > 0 && importRunsExpanded && (
@@ -1726,13 +1743,12 @@ export default function ImportInboxPage() {
             <div key={run.id} className="di-run-card">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                 <span
-                  className={`di-chip ${
-                    run.status === 'succeeded' ? 'di-chip--complete' : run.status === 'failed' ? 'di-chip--rejected' : 'di-chip--deferred'
-                  }`}
+                  className={`di-chip di-chip--${importRunRole(run.status)}`}
                 >
+                  {run.status === 'succeeded' ? <IconCheck /> : run.status === 'failed' ? <IconX /> : <IconClock />}
                   {run.status}
                 </span>
-                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{run.started_at}</span>
+                <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{run.started_at}</span>
               </div>
               <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8 }}>
                 {run.data_origin_source_name || 'Unknown source'}

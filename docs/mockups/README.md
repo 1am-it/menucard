@@ -44,6 +44,15 @@ the full notes; nothing listed here was removed.
 | `internal-navigation-workqueue-v1.png` | Internal navigation shell and Werkvoorraad | `be-20-general-restaurant-source-extraction.md` ("Approved design references", "Visual contract"). Context: `platform-11-role-aware-internal-navigation-home.md` (role filtering, `/internal` home) and decision 014 (orientation standard); neither names this file | **Leading for all internal navigation**; its counts are directional only |
 | `internal-source-workqueue-v1.png` | `/internal/source-workqueue` (Bronwerkvoorraad) | `be-23-internal-source-workqueue.md` | Leading for page content; the ticket's "Deviations from the mockup" win. The "Onze Menukaarten" top bar is a placeholder, not branding. |
 
+**Colour (addition, 2026-10-07).** Colours in every mockup above are
+superseded by **Kleurtaal v2** (final design source "Onze Menukaarten —
+Kleurtaal v2 (Brontriage)", a PDF handoff that is not stored here: it
+does not follow the `<surface>-vN.png/.html` convention, like the earlier
+Claude Design canvas). Its rules and values are written down in
+`docs/guides/design-reference.md` ("Kleurtaal v2"), which wins over any
+mockup colour. Its Brontriage screens are not a mockup for a built page;
+Brontriage remains an open decision.
+
 Not yet in this directory: a PLATFORM-12 coverage dashboard v2 has no
 committed ticket or mockup in the repository yet. When it lands, add it
 as `coverage-dashboard-v2.png`, keep `coverage-dashboard-v1.png`, and

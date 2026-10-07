@@ -91,14 +91,6 @@ function IconCalendar() {
     </svg>
   )
 }
-function IconAlert() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
-      <path d="M12 9v4M12 17h.01" />
-    </svg>
-  )
-}
 function IconChevronDown() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -108,13 +100,13 @@ function IconChevronDown() {
 }
 
 // Complete / partial / empty — always shown as text too, never by color
-// or shape alone. Every label meets WCAG AA (4.5:1) for normal text in both
-// themes: "None yet" uses --text-secondary (8.13:1 dark / 7.56:1 light on
-// the card), never the near-invisible --text-faint it used before
-// (1.94:1 dark), so the text is at least as clear as the empty ring.
+// or shape alone. Kleurtaal v2: only "Complete" is a positive status;
+// "Partial" has no decided role and stays neutral (--status-neutral), and
+// "None yet" uses --text-secondary. Every label meets WCAG AA on the card
+// in both themes (asserted in src/lib/coveragePriority.test.js).
 const STATE_STYLE = {
-  complete: { label: 'Complete', color: 'var(--green)' },
-  partial: { label: 'Partial', color: 'var(--warning)' },
+  complete: { label: 'Complete', color: 'var(--status-positive)' },
+  partial: { label: 'Partial', color: 'var(--status-neutral)' },
   empty: { label: 'None yet', color: 'var(--text-secondary)' },
 }
 
@@ -163,7 +155,7 @@ function Metric({ label, count, total, pct, icon }) {
         <StateRing state={state} pct={pct} />
       </div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginTop: 6, fontSize: 12.5 }}>
-        <span style={{ color: 'var(--cov-text-subtle)' }}>{pct === null ? '—' : `${pct}%`}</span>
+        <span style={{ color: 'var(--text-secondary)' }}>{pct === null ? '—' : `${pct}%`}</span>
         <span style={{ color, fontWeight: 600 }}>{stateLabel}</span>
       </div>
     </div>
@@ -183,7 +175,7 @@ function BreakdownTable({ title, rows, tbodyId }) {
     >
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
         <thead>
-          <tr style={{ textAlign: 'left', color: 'var(--text-secondary)', background: 'var(--green-faint)' }}>
+          <tr style={{ textAlign: 'left', color: 'var(--text-secondary)', background: 'var(--bg-elevated)' }}>
             <th scope="col" style={TH_STYLE}>Group</th>
             <th scope="col" style={{ ...TH_STYLE, textAlign: 'center' }}>Restaurants</th>
             <th scope="col" style={{ ...TH_STYLE, textAlign: 'center' }}>With menu data</th>
@@ -212,10 +204,9 @@ const NOTE_TEXT_STYLE = { fontSize: 13, lineHeight: 1.55, color: 'var(--text-sec
 
 const CARD_STYLE = { padding: 20, borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)', background: 'var(--bg-card)' }
 
-// Every <main> on this page carries className="cov-dashboard", which scopes
-// --cov-text-subtle (app/globals.css): this page's own secondary-text color,
-// AA-compliant in both themes, used instead of the global --text-muted
-// (3.09–3.45:1 in dark). Global tokens stay unchanged for other screens.
+// Every <main> on this page carries className="cov-dashboard" (a page
+// hook). Secondary text uses the global --text-secondary, the only
+// readable secondary colour under Kleurtaal v2 — no page-scoped variant.
 const SHELL_STYLE = {
   maxWidth: 960,
   margin: '0 auto',
@@ -281,7 +272,7 @@ export default function CoverageDashboardPage() {
   const priorityRows = useMemo(() => (data ? sortByMenuDataGap(data.byBuurt) : []), [data])
 
   if (session === undefined) {
-    return <main className="cov-dashboard" style={{ ...SHELL_STYLE, color: 'var(--cov-text-subtle)' }}>Loading…</main>
+    return <main className="cov-dashboard" style={{ ...SHELL_STYLE, color: 'var(--text-secondary)' }}>Loading…</main>
   }
 
   if (error) {
@@ -308,7 +299,7 @@ export default function CoverageDashboardPage() {
     return (
       <main className="cov-dashboard" style={SHELL_STYLE}>
         <InternalNav accessToken={session.access_token} />
-        <p style={{ marginTop: 20, color: 'var(--cov-text-subtle)' }}>Loading…</p>
+        <p style={{ marginTop: 20, color: 'var(--text-secondary)' }}>Loading…</p>
       </main>
     )
   }
@@ -332,9 +323,9 @@ export default function CoverageDashboardPage() {
                 gap: 6,
                 padding: '5px 11px',
                 borderRadius: 'var(--radius-pill)',
-                border: '1px solid var(--green-border)',
-                background: 'var(--green-faint)',
-                color: 'var(--green)',
+                border: '1px solid var(--border)',
+                background: 'var(--bg-elevated)',
+                color: 'var(--text-secondary)',
                 fontSize: 12,
                 fontWeight: 600,
                 whiteSpace: 'nowrap',
@@ -349,7 +340,7 @@ export default function CoverageDashboardPage() {
           <p style={{ color: 'var(--text-secondary)', fontSize: 14, margin: '6px 0 2px' }}>
             Overview of restaurant data coverage across {data.city}.
           </p>
-          <p style={{ color: 'var(--cov-text-subtle)', fontSize: 12.5, margin: 0 }}>Read-only, recomputed on every load. Generated {generatedAt}.</p>
+          <p style={{ color: 'var(--text-secondary)', fontSize: 12.5, margin: 0 }}>Read-only, recomputed on every load. Generated {generatedAt}.</p>
         </div>
       </div>
 
@@ -359,19 +350,19 @@ export default function CoverageDashboardPage() {
         style={{ ...CARD_STYLE, padding: 24, display: 'flex', flexWrap: 'wrap', gap: 24, alignItems: 'flex-start', marginBottom: 16 }}
       >
         <div style={{ flex: '1 1 300px', minWidth: 0 }}>
-          <div style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--cov-text-subtle)' }}>
+          <div style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
             Overall menu coverage
           </div>
           <h2 id="coverage-hero-heading" style={{ fontSize: 22, margin: '6px 0 4px', color: 'var(--text-primary)' }}>
             {menuState === 'complete' ? 'Menu coverage is complete' : 'Menu coverage needs attention'}
           </h2>
-          <div style={{ fontSize: 'clamp(44px, 10vw, 64px)', fontWeight: 800, lineHeight: 1.05, color: 'var(--green)' }}>
+          <div style={{ fontSize: 'clamp(44px, 10vw, 64px)', fontWeight: 800, lineHeight: 1.05, color: 'var(--text-primary)' }}>
             {data.metrics.menuData.pct === null ? '—' : `${data.metrics.menuData.pct}%`}
           </div>
           <p style={{ margin: '6px 0 0', fontSize: 15, color: 'var(--text-secondary)' }}>
             {data.metrics.menuData.count} of {data.metrics.menuData.total} restaurants have digitized menu data.
           </p>
-          <p style={{ margin: '4px 0 0', fontSize: 12.5, color: 'var(--cov-text-subtle)' }}>
+          <p style={{ margin: '4px 0 0', fontSize: 12.5, color: 'var(--text-secondary)' }}>
             Shows whether menu data is present — not whether it has been verified as accurate.
           </p>
         </div>
@@ -386,15 +377,17 @@ export default function CoverageDashboardPage() {
               gap: 10,
               padding: 16,
               borderRadius: 'var(--radius-lg)',
-              border: '1px solid var(--warning-border)',
-              background: 'var(--warning-bg)',
+              // Kleurtaal v2: limited menu data is incomplete data — neutral,
+              // not the "old source" attention role.
+              border: '1px solid var(--border)',
+              background: 'var(--status-neutral-bg)',
             }}
           >
-            <span style={{ width: 18, height: 18, display: 'flex', flexShrink: 0, color: 'var(--warning)', marginTop: 1 }}>
-              <IconAlert />
+            <span style={{ width: 18, height: 18, display: 'flex', flexShrink: 0, color: 'var(--status-neutral)', marginTop: 1 }}>
+              <IconDocument />
             </span>
             <div style={{ minWidth: 0 }}>
-              <strong style={{ color: 'var(--warning)' }}>Menu data is limited</strong>
+              <strong style={{ color: 'var(--status-neutral)' }}>Menu data is limited</strong>
               <div style={{ marginTop: 6, fontSize: 13.5, color: 'var(--text-secondary)', overflowWrap: 'anywhere' }}>
                 Dish search can currently only ever return results from these {data.metrics.menuData.count} restaurants:{' '}
                 {data.metrics.menuData.restaurantIds.join(', ')}. The other{' '}
@@ -451,7 +444,7 @@ export default function CoverageDashboardPage() {
         <h2 id="coverage-priority-heading" style={{ fontSize: 17, margin: '0 0 4px', color: 'var(--text-primary)' }}>
           Priority gaps by neighbourhood
         </h2>
-        <p style={{ fontSize: 13, color: 'var(--cov-text-subtle)', margin: '0 0 12px' }}>
+        <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '0 0 12px' }}>
           Neighbourhoods with the most restaurants still missing menu data, largest gap first.
         </p>
         <BreakdownTable title="Priority gaps by neighbourhood" rows={visibleBuurten} tbodyId={PRIORITY_TBODY_ID} />

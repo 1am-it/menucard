@@ -29,6 +29,7 @@ import {
   passwordValidationMessage,
   resolveUpdatePasswordOutcome,
 } from '@/src/lib/setPasswordFlow'
+import StatusIcon from '@/src/components/StatusIcon'
 
 const REDIRECT_DELAY_MS = 2000
 
@@ -196,7 +197,8 @@ export default function SetPasswordPage() {
 
       {viewState === 'success' && (
         <div>
-          <p style={{ color: 'var(--green)', fontSize: 14, marginBottom: 12 }}>
+          <p className="status-badge status-badge--positive" style={{ fontSize: 14, marginBottom: 12 }}>
+            <StatusIcon name="check" size={14} />
             Your password has been set.
           </p>
           <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>

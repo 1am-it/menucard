@@ -19,6 +19,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import InternalNav from '@/src/components/InternalNav'
+import StatusIcon from '@/src/components/StatusIcon'
+import { profileDraftRole } from '@/src/lib/statusRoles'
 
 const STATUS_LABELS = {
   draft: 'Active',
@@ -102,7 +104,7 @@ export default function ProfileDraftsOverviewPage() {
   if (session === undefined) {
     return (
       <div className="di-page">
-        <main className="di-main" style={{ color: 'var(--text-muted)' }}>
+        <main className="di-main" style={{ color: 'var(--text-secondary)' }}>
           Loading…
         </main>
       </div>
@@ -144,10 +146,10 @@ export default function ProfileDraftsOverviewPage() {
           </div>
         )}
 
-        {loading && <p style={{ color: 'var(--text-muted)' }}>Loading…</p>}
+        {loading && <p style={{ color: 'var(--text-secondary)' }}>Loading…</p>}
 
         {!loading && drafts.length === 0 && !error && (
-          <p style={{ color: 'var(--text-muted)' }}>No Restaurant Profile Drafts yet.</p>
+          <p style={{ color: 'var(--text-secondary)' }}>No Restaurant Profile Drafts yet.</p>
         )}
 
         {!loading && drafts.length > 0 && (
@@ -174,17 +176,19 @@ export default function ProfileDraftsOverviewPage() {
                 <div className="di-row-name" style={{ marginBottom: 0 }}>
                   {d.candidate_name || '(unnamed candidate)'}
                 </div>
-                <span className={`di-chip ${d.status === 'draft' ? 'di-chip--approved_internal' : 'di-chip--muted'}`}>
+                {/* Kleurtaal v2: een concept is geen goedkeuring — neutraal, icoon + tekst. */}
+                <span className={`di-chip di-chip--${profileDraftRole(d.status)}`}>
+                  <StatusIcon name={d.status === 'discarded' ? 'cross' : 'dot'} size={12} />
                   {STATUS_LABELS[d.status] || d.status}
                 </span>
               </div>
 
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6 }}>
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 6 }}>
                 Created {formatTimestamp(d.promoted_at)}
               </div>
 
               {d.possible_duplicate_of && (
-                <div style={{ fontSize: 12, color: 'var(--warning)', marginTop: 6 }}>
+                <div style={{ fontSize: 12, color: 'var(--status-neutral)', marginTop: 6 }}>
                   Possibly a duplicate of {d.possible_duplicate_of.candidate_name || 'another draft'} — flagged at
                   creation, never auto-merged.
                 </div>
@@ -197,13 +201,13 @@ export default function ProfileDraftsOverviewPage() {
               )}
 
               {d.status === 'discarded' && (
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6 }}>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 6 }}>
                   Discarded {formatTimestamp(d.discarded_at)}
                   {previewNote(d.discard_note) ? ` — "${previewNote(d.discard_note)}"` : ''}
                 </div>
               )}
 
-              <div style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 8 }}>Draft ID: {d.id}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 8 }}>Draft ID: {d.id}</div>
 
               <a href="/internal/import-inbox" className="di-link-btn" style={{ marginTop: 10, display: 'inline-block' }}>
                 Open in Import Inbox

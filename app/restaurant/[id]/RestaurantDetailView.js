@@ -5,6 +5,9 @@ import ThemeToggle from '@/src/components/ThemeToggle'
 import { getReservationActions, getReservationNote, isExternalReservation, isValidPhone, isValidUrl } from '@/src/utils/reservation'
 import Wordmark from '@/src/components/Wordmark'
 import ExternalLinkIcon from '@/src/components/ExternalLinkIcon'
+import StatusIcon from '@/src/components/StatusIcon'
+import useClientNow from '@/src/components/useClientNow'
+import { todayOpening, openingBadge } from '@/src/lib/openingStatus'
 
 const DAYS = ['ma','di','wo','do','vr','za','zo']
 const DAY_LABELS = {
@@ -21,6 +24,9 @@ function getTodayKey() {
 export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
   const todayKey = getTodayKey()
   const [activeDay, setActiveDay] = useState(todayKey)
+  // Kleurtaal v2: "Nu open" only when open at this moment (browser clock,
+  // after mount) — opening hours today alone are not a positive status.
+  const now = useClientNow()
 
   if (!restaurant) {
     return (
@@ -38,8 +44,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
   const primaryReservation = reservationActions[0]
   const priceStr = '€'.repeat(restaurant.priceLevel || 2)
   const openingHours = restaurant.openingHours || {}
-  const todayHours = openingHours[todayKey]
-  const isOpenToday = !!todayHours
+  const todayBadge = openingBadge(now ? todayOpening(openingHours, now) : null, openingHours, todayKey)
 
   return (
     <>
@@ -96,16 +101,10 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
             {/* Open status */}
             <div>
               <div className="dip-section-title">Vandaag</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                <span style={{
-                  display: 'inline-block',
-                  width: 8, height: 8,
-                  borderRadius: '50%',
-                  background: isOpenToday ? 'var(--green)' : 'var(--text-dim)',
-                  flexShrink: 0,
-                }} />
-                <span style={{ fontSize: 14, fontWeight: 700, color: isOpenToday ? 'var(--green)' : 'var(--text-muted)' }}>
-                  {isOpenToday ? `Open · ${todayHours}` : 'Gesloten'}
+              <div style={{ marginBottom: 4 }}>
+                <span className={`status-badge status-badge--${todayBadge.role}`} style={{ fontSize: 13 }}>
+                  <StatusIcon name={todayBadge.icon} size={14} />
+                  {todayBadge.text}
                 </span>
               </div>
             </div>
@@ -150,7 +149,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
                   return (
                     <div key={day} className={`hours-row ${isToday ? 'hours-today' : ''}`}
                       style={{ display: 'contents' }}>
-                      <span className="hours-day">{DAY_SHORT[day]}</span>
+                      <span className="hours-day" aria-current={isToday ? 'date' : undefined}>{DAY_SHORT[day]}</span>
                       {hours
                         ? <span className="hours-time">{hours}</span>
                         : <span className="hours-closed">Gesloten</span>
@@ -187,7 +186,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
             {/* PLATFORM-07 — small, unobtrusive claim link, not a CTA */}
             <Link
               href={`/claim/${id}`}
-              style={{ display: 'inline-block', marginTop: 12, fontSize: 13, color: 'var(--text-muted)' }}
+              style={{ display: 'inline-block', marginTop: 12, fontSize: 13, color: 'var(--text-secondary)' }}
             >
               Is dit jouw restaurant? Claim dit restaurant →
             </Link>
@@ -225,7 +224,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
                   </div>
                   {item.desc && <div className="td-desc">{item.desc}</div>}
                   {item.wine && <div className="td-wine">🍷 {item.wine}</div>}
-                  <div style={{ fontSize: 10, color: 'var(--text-faint)', marginTop: 6 }}>{item.category}</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 6 }}>{item.category}</div>
                 </div>
               ))}
             </div>
@@ -244,7 +243,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
           <section style={{ textAlign: 'center', padding: '60px 0' }}>
             <div style={{ fontSize: 36, marginBottom: 16 }}>📋</div>
             <h3 style={{ color: 'var(--text-secondary)', marginBottom: 8 }}>Menukaart nog niet beschikbaar</h3>
-            <p style={{ color: 'var(--text-dim)', fontSize: 14, marginBottom: 24 }}>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 24 }}>
               Bekijk de website van het restaurant voor de actuele menukaart.
             </p>
             {isValidUrl(restaurant.website) && (
@@ -273,7 +272,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
             <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent)', marginBottom: 4 }}>
               🛡 Allergeneninformatie (NVWA)
             </div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+            <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
               Wettelijk verplichte allergenenmatrix · EU Verordening 1169/2011
             </div>
           </div>
