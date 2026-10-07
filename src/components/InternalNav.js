@@ -167,6 +167,7 @@ export default function InternalNav({ accessToken, roles: rolesProp }) {
       <a
         href="/internal"
         className="internal-nav-home"
+        aria-label="Onze Menukaarten, naar het interne overzicht"
         aria-current={pathname === '/internal' ? 'page' : undefined}
       >
         <WordmarkInline />

@@ -3,7 +3,7 @@
 // Onze Menukaarten — gekozen Claude Design-richting "5 · Oker licht —
 // uitgewerkt (okergeel)". Zelfde conventie als de andere tests in dit
 // project: fs.readFileSync + regex, geen gerenderde DOM-harness.
-// Zie docs/guides/design-reference.md ("Woordmerk" en "Merkaccent").
+// Zie docs/guides/design-reference.md ("Wordmark and brand accent").
 
 const fs = require('fs');
 const path = require('path');
@@ -97,6 +97,15 @@ test('InternalNav: the home link shows the shared wordmark instead of the BredaE
   const src = read('src/components/InternalNav.js');
   assert.match(src, /<WordmarkInline \/>/);
   assert.doesNotMatch(src, /<span>BredaEats<\/span>/);
+});
+
+// Zonder expliciete naam berekende Edge "ONZE Menukaarten" (text-transform).
+test('Wordmark: links carry an explicit accessible name that starts with the visible name', () => {
+  const src = read('src/components/Wordmark.js');
+  assert.match(src, /WORDMARK_HOME_LABEL = 'Onze Menukaarten, naar de startpagina'/);
+  assert.match(src, /<Link href=\{href\} className="wordmark" aria-label=\{label\}>/);
+  const nav = read('src/components/InternalNav.js');
+  assert.match(nav, /className="internal-nav-home"\s+aria-label="Onze Menukaarten, naar het interne overzicht"/);
 });
 
 // ── Tokens ──────────────────────────────────────────────────────────────

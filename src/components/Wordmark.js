@@ -2,11 +2,12 @@ import Link from 'next/link'
 
 // Onze Menukaarten — gedeeld woordmerk (gekozen Claude Design-richting
 // "5 · Oker licht — uitgewerkt", zie docs/guides/design-reference.md,
-// "Woordmerk").
+// "Wordmark and brand accent").
 //
 // - Gestapeld: "ONZE" (klein, spatiëring, hoofdletters via CSS) boven
-//   "Menukaarten". De DOM-tekst is "Onze Menukaarten", zodat
-//   schermlezers de naam gewoon uitspreken in plaats van te spellen.
+//   "Menukaarten". De link krijgt een expliciete toegankelijke naam
+//   (handoff: "Onze Menukaarten, naar de startpagina"): zonder die naam
+//   leest de browser "ONZE Menukaarten" (text-transform), gemeten in Edge.
 // - Eén kleur (--wordmark), geen gesplitste accentbehandeling van een
 //   woorddeel.
 // - Het motief is een gevouwen menukaart: inline SVG, currentColor,
@@ -16,8 +17,10 @@ import Link from 'next/link'
 //
 // `href` blijft standaard "/" — dit vervangt de vroegere
 // `<Link href="/" className="logo">` op elke pagina met exact één link naar
-// de homepage. `as="a"` is voor plekken die geen Next-<Link> gebruiken
-// (InternalNav rendert gewone <a>-elementen).
+// de homepage. Voor de interne navigatie (gewone <a>-elementen) is er
+// WordmarkInline; de omringende <a> draagt daar zelf de aria-label.
+
+export const WORDMARK_HOME_LABEL = 'Onze Menukaarten, naar de startpagina'
 
 export function WordmarkMark({ size = 24 }) {
   return (
@@ -49,10 +52,10 @@ function WordmarkText() {
   )
 }
 
-export default function Wordmark({ href = '/', descriptor = true, size = 'md' }) {
+export default function Wordmark({ href = '/', descriptor = true, size = 'md', label = WORDMARK_HOME_LABEL }) {
   return (
     <span className={`wordmark-wrap wordmark--${size}`}>
-      <Link href={href} className="wordmark">
+      <Link href={href} className="wordmark" aria-label={label}>
         <WordmarkMark />
         <WordmarkText />
       </Link>
