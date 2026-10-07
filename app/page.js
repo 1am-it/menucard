@@ -25,16 +25,36 @@ const MEAL_SHORTCUTS = [
   { value: 'borrel', label: 'Borrel' },
 ]
 
-function LineIcon({ d, size = 16 }) {
+function LineIcon({ d, size = 16, strokeWidth = 1.7 }) {
   return (
     <svg className="hero-icon" width={size} height={size} viewBox="0 0 20 20" fill="none" stroke="currentColor"
-      strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+      strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
       <path d={d} />
     </svg>
   )
 }
 
 const SEARCH_ICON_PATH = 'M8.5 3a5.5 5.5 0 110 11 5.5 5.5 0 010-11zM12.5 12.5L17 17'
+
+// De drie USP-blokken uit de gekozen handoff ("5 · Oker licht — uitgewerkt",
+// Start · 1280): onderwerp, tekst en lijnicoon zoals daar getekend.
+const USPS = [
+  {
+    title: 'Zoek op gerecht',
+    text: 'Doorzoek echte menukaarten van restaurants in Breda.',
+    icon: 'M9 3.5a5.5 5.5 0 110 11 5.5 5.5 0 010-11zM13 13l4 4',
+  },
+  {
+    title: 'Zie direct de prijs',
+    text: 'Je weet vooraf wat een gerecht kost.',
+    icon: 'M13.5 5.5a5 5 0 100 9M4 8.5h7M4 11.5h7',
+  },
+  {
+    title: 'Snel en licht',
+    text: 'Geen foto’s, wél de informatie. Ook op een trage verbinding.',
+    icon: 'M11 2.5L4.5 11h5l-1 6.5L15 9h-5z',
+  },
+]
 
 // A representative subset of the real cuisine list from
 // src/services/dishSearch.js's CUISINE_KEYWORDS — not the mockup's
@@ -100,6 +120,18 @@ export default function HomePage() {
             ))}
           </div>
         </div>
+
+        <ul className="home-usps">
+          {USPS.map((u) => (
+            <li key={u.title} className="home-usp">
+              <span className="home-usp-icon"><LineIcon d={u.icon} size={20} strokeWidth={1.75} /></span>
+              <div>
+                <h2 className="home-usp-title">{u.title}</h2>
+                <p className="home-usp-text">{u.text}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section className="filter-section" style={{ alignItems: 'center' }}>

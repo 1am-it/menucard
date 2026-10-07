@@ -1201,6 +1201,19 @@ header, .site-header {
 .hero-sub { color: var(--text-secondary); font-size: 16px; margin: 0 0 28px; }
 .hero-title-mark { box-shadow: inset 0 -0.34em 0 var(--mark-bg); color: var(--mark-text); padding: 0 0.06em; }
 .hero-icon { display: inline-block; vertical-align: -3px; flex-shrink: 0; }
+
+/* Drie USP-blokken onder zoekbalk en chips (handoff "5 · Oker licht —
+   uitgewerkt", Start · 1280): 3 kolommen, 32px tussenruimte, 40px boven;
+   icoontegel 44px zacht oker met inkt-oker lijnicoon; kop 16/700, tekst
+   14 secundair. Onder 720px één kolom. */
+.home-usps { list-style: none; max-width: 960px; margin: 40px auto 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; text-align: left; }
+.home-usp { display: flex; gap: 14px; align-items: flex-start; }
+.home-usp-icon { width: 44px; height: 44px; flex: none; border-radius: 12px; background: var(--accent-surface); color: var(--accent); display: flex; align-items: center; justify-content: center; }
+.home-usp-title { margin: 0; font-size: 16px; line-height: 1.35; font-weight: 700; color: var(--text-primary); }
+.home-usp-text { margin: 2px 0 0; font-size: 14px; line-height: 1.45; color: var(--text-secondary); }
+@media (max-width: 720px) {
+  .home-usps { grid-template-columns: minmax(0, 1fr); gap: 16px; margin-top: 28px; }
+}
 .hero-steps { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
 .hero-step { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 14px; }
 .step-num { width: 24px; height: 24px; border-radius: 50%; background: var(--accent-surface); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); font-weight: 700; font-size: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
