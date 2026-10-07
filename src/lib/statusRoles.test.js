@@ -69,6 +69,11 @@ test('owner claim: a domain match is positive, a mismatch has no decided role an
   assert.equal(roles.domainMatchRole(false), 'neutral');
 });
 
+test('robots.txt: a disallow is "Robots geblokkeerd" (blocked, never old); unconfirmed stays neutral', () => {
+  assert.equal(roles.robotsTxtRole('disallowed'), 'blocked');
+  for (const s of ['unconfirmed', 'allowed', undefined, null, '']) assert.equal(roles.robotsTxtRole(s), 'neutral', String(s));
+});
+
 test('confidence (hoog/middel/laag) is not a status: no role function maps it', () => {
   assert.equal(Object.keys(roles).some((k) => /confidence/i.test(k)), false);
 });

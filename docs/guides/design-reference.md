@@ -324,9 +324,13 @@ Meaning that must be kept:
   use `--warning` (an alias of `--status-old`, which is reserved for the
   four source states in the table above) and never
   `--danger`/`--status-blocked`. A destructive action (e.g. "Discard")
-  and real load/validation errors keep `--danger`; a robots.txt block on
-  a page Onze Menukaarten tried to read uses `--status-old` (access
-  limited).
+  and real load/validation errors keep `--danger`. A robots.txt block on
+  a page Onze Menukaarten tried to read is "Robots geblokkeerd": the
+  **blocked** role (`--status-blocked`, icon + text,
+  `robotsTxtRole()` in `src/lib/statusRoles.js`); an unconfirmed
+  robots.txt is uncertainty and stays neutral. `--status-old` is only
+  for Oude URL, Toegang beperkt, Identiteit gewijzigd and Structuur niet
+  herkend.
 
 BE-23 mapping (`app/internal/source-workqueue/page.js`): Bereikbaar →
 positive; Niet bereikbaar → blocked; Toegang beperkt, Identiteit

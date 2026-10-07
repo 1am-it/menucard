@@ -427,7 +427,12 @@ test('incomplete data and uncertainty use the neutral role — never an error an
   assert.match(inbox, /color: 'var\(--status-neutral\)', marginTop: 4 \}\}>Phone format not recognized/);
   assert.match(inbox, /color: 'var\(--status-neutral\)' \}\}>\s*This looks like a possible duplicate/);
   assert.match(inbox, /color: 'var\(--status-neutral\)', marginBottom: 8 \}\}>\s*robots\.txt could not be confirmed/);
-  assert.match(inbox, /color: 'var\(--status-old\)', marginBottom: 8 \}\}>\s*This page is disallowed by the site's robots\.txt/, 'a real access limitation keeps the old role, explicitly');
+  // Kleurtaal v2: "Robots geblokkeerd" is the blocked role with icon + text, never old.
+  const robots = inbox.slice(inbox.indexOf("robots_txt_status === 'disallowed'"), inbox.indexOf("This page is disallowed by the site's robots.txt"));
+  assert.match(robots, /status-badge--\$\{robotsTxtRole\('disallowed'\)\}/);
+  assert.match(robots, /<StatusGlyph name="cross"/);
+  assert.doesNotMatch(robots, /--status-old|--warning/);
+  assert.doesNotMatch(inbox, /var\(--status-old\)/, 'old is only for the four BE-23 source states, not in the import inbox');
   assert.match(inbox, /di-banner-\$\{importRunRole\(selectedRun\.status\) === 'blocked' \? 'danger' : 'neutral'\}/);
   assert.match(read('app/internal/profile-drafts/page.js'), /color: 'var\(--status-neutral\)', marginTop: 6 \}\}>\s*Possibly a duplicate/);
   const s = css();

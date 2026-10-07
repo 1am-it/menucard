@@ -38,7 +38,10 @@ import {
   canDiscardCandidateDraft,
   buildDraftLineageSummary,
 } from '@/src/lib/restaurantProfileDrafts'
-import { reviewStatusRole, qualityStatusRole, importRunRole, profileDraftRole } from '@/src/lib/statusRoles'
+import { reviewStatusRole, qualityStatusRole, importRunRole, profileDraftRole, robotsTxtRole } from '@/src/lib/statusRoles'
+// Shared Kleurtaal v2 status glyph. Imported under another name because
+// this page already uses a local `StatusIcon` variable for triage icons.
+import StatusGlyph from '@/src/components/StatusIcon'
 
 // Mirrors ops/scripts/import-breda-osm.config.js's own
 // ALLOWED_AMENITY_VALUES — the fixed, complete set of categories this
@@ -1481,8 +1484,16 @@ export default function ImportInboxPage() {
                                   <div style={{ fontSize: 12, color: 'var(--danger)', marginBottom: 8 }}>{suggestionsErrorByCandidateId[c.id]}</div>
                                 )}
                                 {suggestionsByCandidateId[c.id] && suggestionsByCandidateId[c.id].robots_txt_status === 'disallowed' && (
-                                  <div style={{ fontSize: 12, color: 'var(--status-old)', marginBottom: 8 }}>
-                                    This page is disallowed by the site's robots.txt and was not fetched.
+                                  // Kleurtaal v2: "Robots geblokkeerd" is the blocked role
+                                  // (src/lib/statusRoles.js), shown as icon + text.
+                                  <div style={{ marginBottom: 8 }}>
+                                    <span
+                                      className={`status-badge status-badge--${robotsTxtRole('disallowed')}`}
+                                      style={{ whiteSpace: 'normal', alignItems: 'flex-start' }}
+                                    >
+                                      <StatusGlyph name="cross" size={13} />
+                                      This page is disallowed by the site's robots.txt and was not fetched.
+                                    </span>
                                   </div>
                                 )}
                                 {suggestionsByCandidateId[c.id] && suggestionsByCandidateId[c.id].robots_txt_status === 'unconfirmed' && (

@@ -330,8 +330,11 @@ Correction (2026-10-07, second review round):
   content: incomplete data, missing NVWA data, conflicts, duplicates and
   similar uncertainty use the neutral role; `.di-banner-warning` and the
   unused `.badge-warning` are removed; real errors in those slots use the
-  error role; the robots.txt block on a read page uses `--status-old`
-  explicitly. The `--warning*` and `--warning-strong-border` tokens stay
+  error role. The robots.txt block on a read page is "Robots
+  geblokkeerd" and uses the blocked role with icon + text
+  (`robotsTxtRole()`; corrected in a later review round — it briefly
+  used `--status-old`, which the design source reserves for the four
+  source states). The `--warning*` and `--warning-strong-border` tokens stay
   only as unused compatibility aliases.
 - Moderation neutral states use a neutral dot icon instead of the
   attention icon; confidence reads "Betrouwbaarheid: …".

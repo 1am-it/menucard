@@ -9,8 +9,8 @@
 // explicitly:
 //   positive — real approval or reachability (goedgekeurd, compleet, Nu open,
 //              Bereikbaar, domain match, a successful password set);
-//   blocked  — a real technical block or error (Niet bereikbaar, a failed
-//              import run or request);
+//   blocked  — a real technical block or error (Robots geblokkeerd, Niet
+//              bereikbaar, a failed import run or request);
 //   old / file — only the BE-23 source/menu states in
 //              app/internal/source-workqueue/page.js.
 // 'action' ("Actie nodig") is a reserved design role. Assigning it to a
@@ -44,6 +44,15 @@ function profileDraftRole() {
   return 'neutral';
 }
 
+/**
+ * robots.txt check on a page Onze Menukaarten tried to read. A disallow is
+ * "Robots geblokkeerd" — the blocked role, never old. An unconfirmed
+ * robots.txt is uncertainty and stays neutral.
+ */
+function robotsTxtRole(robotsTxtStatus) {
+  return robotsTxtStatus === 'disallowed' ? 'blocked' : 'neutral';
+}
+
 /** Owner claim domain check: a match is positive, a mismatch is not decided. */
 function domainMatchRole(domainMatch) {
   return domainMatch ? 'positive' : 'neutral';
@@ -55,5 +64,6 @@ module.exports = {
   importRunRole,
   proposalRequestRole,
   profileDraftRole,
+  robotsTxtRole,
   domainMatchRole,
 };
