@@ -2516,10 +2516,6 @@ mark.search-highlight {
 .lrc-body { padding: 12px 16px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
 .lrc-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
 .lrc-address { font-size: 12px; color: var(--text-secondary); }
-.lrc-status { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 600; }
-.lrc-status-icon { flex-shrink: 0; }
-.lrc-status.is-open { color: var(--status-positive); }
-.lrc-status.is-closed { color: var(--text-secondary); }
 .lrc-menu-type-row { display: flex; gap: 6px; flex-wrap: wrap; }
 .lrc-menu-type-pill {
   font-size: 11.5px;

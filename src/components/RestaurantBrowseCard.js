@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import StatusIcon from '@/src/components/StatusIcon'
 
 // BE-11 — the light, text-first restaurant browse card. Built for
 // /alle-restaurants (Fase 1) and extracted here, unchanged, so /search
@@ -89,12 +88,13 @@ export default function RestaurantBrowseCard({ restaurant, headingLevel = 2 }) {
             // so both are identical by construction.
             <span className="lrc-address">Buurt: {restaurant.buurt}</span>
           ) : null}
-          {restaurant.openStatus && (
-            <span className={`lrc-status is-${restaurant.openStatus}`}>
-              <StatusIcon name={restaurant.openStatus === 'open' ? 'check' : 'clock'} size={12} className="lrc-status-icon" />
-              {restaurant.openStatus === 'open' ? 'Open nu' : 'Gesloten'}
-            </span>
-          )}
+          {/* Kleurtaal v2: no live opening status on this card. The summary
+              shape (docs/api/restaurant-summary-shape.md) carries no opening
+              hours, only a server/cache-computed openStatus, so the browser
+              cannot confirm "Nu open" here; a server value must never become
+              a positive status on its own. The real status is on the
+              restaurant and menu pages (src/lib/openingStatus.js). Showing
+              today's hours here needs an API extension — a separate ticket. */}
         </div>
       </div>
       <div className="lrc-footer">

@@ -292,8 +292,33 @@ test('open indicators show an icon plus text, never a coloured dot alone', () =>
     assert.doesNotMatch(src, /`Open · \$\{/, `${f}: no "Open · hours" from opening hours alone`);
     assert.doesNotMatch(src, /borderRadius: '50%'[^}]*var\(--/, `${f}: no colour-only dot`);
   }
-  assert.match(read('src/components/RestaurantBrowseCard.js'), /<StatusIcon name=\{restaurant\.openStatus === 'open' \? 'check' : 'clock'\}/);
   assert.doesNotMatch(read('app/search/page.js'), /borderRadius: '50%'/);
+});
+
+test('browse card (/search, /alle-restaurants): a server/cache openStatus never becomes a status — no live opening status at all', () => {
+  const card = read('src/components/RestaurantBrowseCard.js');
+  // Strip comments: only rendered code counts.
+  const code = card.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+  assert.doesNotMatch(code, /openStatus/, 'the server/cache-computed openStatus is not rendered');
+  assert.doesNotMatch(code, /status-badge|lrc-status|StatusIcon|--status-positive/);
+  assert.doesNotMatch(code, /Open nu|Nu open|Gesloten/);
+  assert.doesNotMatch(css(), /\.lrc-status/, 'no leftover browse-card status styling');
+  for (const f of ['app/search/page.js', 'app/alle-restaurants/page.js']) {
+    assert.doesNotMatch(read(f), /\.openStatus\b/, `${f}: no status from server openStatus`);
+  }
+});
+
+test('"Nu open" is the only wording: "Open nu" appears in no rendered UI', () => {
+  const files = execSync('git ls-files app src', { cwd: ROOT }).toString().trim().split('\n')
+    .filter((f) => f.endsWith('.js') && !f.endsWith('.test.js'));
+  for (const f of files) {
+    assert.doesNotMatch(read(f), /Open nu/, f);
+  }
+});
+
+test('the approved "🟢 Nu open" filter tags on /search and /restaurants are kept as they are', () => {
+  assert.match(read('app/search/page.js'), /label: '🟢 Nu open'/);
+  assert.match(read('app/restaurants/page.js'), /label: '🟢 Nu open'/);
 });
 
 test('status icons are decorative inline SVG (aria-hidden, currentColor), no asset', () => {

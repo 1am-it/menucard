@@ -242,8 +242,10 @@ Green applications moved:
   `.tag-vegetarisch` / `.tag-vegan` (outlined, `--text-secondary`, leaf
   icon), the WhatsApp reservation button tint.
 - To `--status-positive` with icon + text: "Open" on the menu page, the
-  restaurant detail page, the legacy `/restaurants` card and the browse
-  card (`.lrc-status`); "Approved (internal only)" and "Complete" in the
+  restaurant detail page and the legacy `/restaurants` card (the browse
+  card's `.lrc-status` was later removed: it relied on a server/cache
+  `openStatus` the browser cannot confirm — no live status there until
+  an API extension); "Approved (internal only)" and "Complete" in the
   import inbox (list chip, summary tile, detail) and "Approved" in the
   onboarding menu review; Bronwerkvoorraad "Bereikbaar"; coverage
   "Complete"; the set-password success message; moderation "Domain match".

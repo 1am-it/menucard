@@ -313,7 +313,11 @@ Meaning that must be kept:
   neutral with a clock ("Opent vandaag om 12:00", "Nu gesloten ·
   vandaag 12:00-23:00", "Vandaag 12:00-23:00") and never says "Open".
   A chosen other day on `/restaurants` shows its opening hours,
-  neutrally.
+  neutrally. The browse card (`/search`, `/alle-restaurants`) shows no
+  live opening status: its API shape has no opening hours, only a
+  server/cache-computed `openStatus`, which must never become a status
+  on its own. Today's hours on that card need an API extension (a
+  separate ticket).
 - "Today" in opening hours is a presentation marker, not a status: the
   day label is ink oker (`--accent`), the times primary text, with
   `aria-current="date"`; never `--status-positive`. Whether the

@@ -56,6 +56,40 @@ test('before the browser clock is known (server render, first paint) the badge i
   assert.deepEqual(openingBadge(null, HOURS, 'ma'), { role: 'neutral', icon: 'clock', text: 'Gesloten vandaag' });
 });
 
+test('a server/cache "open" never yields a positive status: only the browser moment counts', () => {
+  // openingBadge takes no server/cache status at all — a restaurant the
+  // server (or a cached response) reported as open is judged by the
+  // browser's own moment: 23:30 is after closing, so neutral.
+  assert.equal(openingBadge.length, 3, 'inputs: opening (browser), hours, todayKey — no server openStatus');
+  const serverSaidOpen = { ...HOURS, openStatus: 'open' };
+  const b = openingBadge(todayOpening(serverSaidOpen, at(23, 30)), serverSaidOpen, 'wo');
+  assert.equal(b.role, 'neutral');
+  assert.doesNotMatch(b.text, NO_OPEN_WORD);
+});
+
+test('browser time open: positive "Nu open"', () => {
+  assert.equal(badgeAt(20, 48).role, 'positive');
+  assert.match(badgeAt(20, 48).text, /^Nu open · tot 23:00$/);
+});
+
+test('unknown browser clock (SSR, first paint): neutral, for every key and even inside opening hours', () => {
+  for (const key of ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za']) {
+    const b = openingBadge(null, HOURS, key);
+    assert.equal(b.role, 'neutral', key);
+    assert.doesNotMatch(b.text, NO_OPEN_WORD, key);
+  }
+});
+
+test('a stale server date does not make a restaurant green: the browser day decides', () => {
+  // The server rendered on Wednesday ("wo", open 12:00-23:00), but the
+  // browser is already at Thursday 02:00 — todayOpening uses the browser's
+  // own day, not the server's todayKey, so the result is neutral.
+  const thursdayNight = new Date(2026, 9, 8, 2, 0);
+  const b = openingBadge(todayOpening(HOURS, thursdayNight), HOURS, 'wo');
+  assert.equal(b.role, 'neutral');
+  assert.doesNotMatch(b.text, NO_OPEN_WORD);
+});
+
 test('only an open-now state is positive, over a whole day in 15-minute steps', () => {
   for (let min = 0; min < 24 * 60; min += 15) {
     const opening = todayOpening(HOURS, at(Math.floor(min / 60), min % 60));

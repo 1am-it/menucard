@@ -189,7 +189,7 @@ test('contrast guard: okergeel is never valid text on white (documented rule)', 
 
 test('status colours stay semantic: open/ok use --status-positive, brand controls use --accent*', () => {
   const s = css();
-  assert.match(s, /\.lrc-status\.is-open \{ color: var\(--status-positive\); \}/);
+  assert.match(s, /\.status-badge--positive, \.swq-badge--positive \{ color: var\(--status-positive\);/);
   assert.match(s, /\.swq-badge--positive \{ color: var\(--status-positive\);/);
   assert.doesNotMatch(s, /\.tag-vegan[^{]*\{[^}]*--status-positive/, 'dietary labels are neutral, not a success status');
   assert.match(s, /\.hero-search-btn \{[^}]*background: var\(--accent-fill\);[^}]*color: var\(--on-accent-fill\);/);
