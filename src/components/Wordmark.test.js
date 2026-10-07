@@ -118,7 +118,7 @@ test('tokens: approved light values are used in both light blocks (system + expl
     assert.equal(tokenIn(b, 'on-accent-fill'), '#1F1600');
     assert.equal(tokenIn(b, 'accent-surface'), '#FDF3D8');
     assert.equal(tokenIn(b, 'warning'), '#9A3412');
-    assert.equal(tokenIn(b, 'input-border'), '#8A919C');
+    assert.equal(tokenIn(b, 'input-border'), '#808792');
     assert.equal(tokenIn(b, 'wordmark'), '#7A4E00');
   }
 });
@@ -155,6 +155,20 @@ test('contrast: every accent pairing meets WCAG AA (text 4.5:1, focus/UI 3:1) in
     ['dark accent on accent-surface-strong', tokenIn(dark, 'accent'), tokenIn(dark, 'accent-surface-strong'), 4.5],
     ['dark warning on card', tokenIn(dark, 'warning'), tokenIn(dark, 'bg-card'), 4.5],
     ['dark control border', tokenIn(dark, 'input-border'), tokenIn(dark, 'bg-card'), 3],
+    ['light control border on --bg', tokenIn(lightAttr, 'input-border'), tokenIn(lightAttr, 'bg'), 3],
+    ['light control border on --bg-card', tokenIn(lightAttr, 'input-border'), tokenIn(lightAttr, 'bg-card'), 3],
+    ['light control border on --bg-elevated', tokenIn(lightAttr, 'input-border'), tokenIn(lightAttr, 'bg-elevated'), 3],
+    ['light control border on --bg-hover', tokenIn(lightAttr, 'input-border'), tokenIn(lightAttr, 'bg-hover'), 3],
+    ['light control border on --bg-input', tokenIn(lightAttr, 'input-border'), tokenIn(lightAttr, 'bg-input'), 3],
+    ['light control border on --bg-panel', tokenIn(lightAttr, 'input-border'), tokenIn(lightAttr, 'bg-panel'), 3],
+    ['light control border on --accent-surface', tokenIn(lightAttr, 'input-border'), tokenIn(lightAttr, 'accent-surface'), 3],
+    ['dark control border on --bg', tokenIn(dark, 'input-border'), tokenIn(dark, 'bg'), 3],
+    ['dark control border on --bg-card', tokenIn(dark, 'input-border'), tokenIn(dark, 'bg-card'), 3],
+    ['dark control border on --bg-elevated', tokenIn(dark, 'input-border'), tokenIn(dark, 'bg-elevated'), 3],
+    ['dark control border on --bg-hover', tokenIn(dark, 'input-border'), tokenIn(dark, 'bg-hover'), 3],
+    ['dark control border on --bg-input', tokenIn(dark, 'input-border'), tokenIn(dark, 'bg-input'), 3],
+    ['dark control border on --bg-panel', tokenIn(dark, 'input-border'), tokenIn(dark, 'bg-panel'), 3],
+    ['dark control border on --accent-surface', tokenIn(dark, 'input-border'), tokenIn(dark, 'accent-surface'), 3],
     ['dark hero mark text', tokenIn(dark, 'mark-text'), tokenIn(dark, 'mark-bg'), 4.5],
   ];
   for (const [label, fg, bg, min] of checks) {
