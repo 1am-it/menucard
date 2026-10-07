@@ -275,7 +275,7 @@ export default function OnboardingRestaurantPage() {
   if (session === undefined) {
     return (
       <div className="di-page">
-        <main className="di-main" style={{ color: 'var(--text-muted)' }}>Loading…</main>
+        <main className="di-main" style={{ color: 'var(--text-secondary)' }}>Loading…</main>
       </div>
     )
   }
@@ -315,13 +315,13 @@ export default function OnboardingRestaurantPage() {
         {isInternal && (
           <div className="di-candidate-card" style={{ marginBottom: 16 }}>
             <div className="di-row-name">Bron-URL</div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
+            <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>
               Nog niets wordt gepubliceerd. De analyse leest alleen deze pagina en een klein, vast aantal
               vergelijkbare pagina's op dezelfde website (bijvoorbeeld een menukaart-link) en toont het resultaat
               hier ter beoordeling.
             </div>
             <div style={{ display: 'grid', gap: 8, maxWidth: 480 }}>
-              <label htmlFor="onboarding-restaurant-source-url" style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+              <label htmlFor="onboarding-restaurant-source-url" style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
                 Restaurant-URL
               </label>
               <input
@@ -369,7 +369,7 @@ export default function OnboardingRestaurantPage() {
                 <div className="di-candidate-card">
                   <div className="di-row-name">Restaurantconcept</div>
                   {Object.keys(fieldEvidence).length === 0 && (
-                    <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+                    <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
                       Geen restaurantgegevens met voldoende bewijs gevonden op deze bron.
                     </div>
                   )}
@@ -377,9 +377,9 @@ export default function OnboardingRestaurantPage() {
                     {Object.entries(fieldEvidence).map(([fieldName, evidence]) => (
                       <div key={fieldName} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
                         <div>
-                          <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{FIELD_LABELS_NL[fieldName] || fieldName}</div>
+                          <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{FIELD_LABELS_NL[fieldName] || fieldName}</div>
                           <div style={{ fontSize: 14 }}>{evidence.value}</div>
-                          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                          <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
                             Bron: {evidence.extractionMethod} — {evidence.sourceUrl}
                           </div>
                           {evidence.contextStatus === 'conflict' && (
@@ -401,14 +401,14 @@ export default function OnboardingRestaurantPage() {
                   </div>
 
                   {result.description && (
-                    <div style={{ marginTop: 10, fontSize: 13, fontStyle: 'italic', color: 'var(--text-muted)' }}>
+                    <div style={{ marginTop: 10, fontSize: 13, fontStyle: 'italic', color: 'var(--text-secondary)' }}>
                       Korte omschrijving: "{result.description}"
                     </div>
                   )}
 
                   {needsRestaurantChoice ? (
                     <div style={{ marginTop: 12 }}>
-                      <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 8 }}>
+                      <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8 }}>
                         Bestaat dit restaurant nog niet in het systeem? Maak een restaurantconcept aan op basis van deze bron.
                         Menuvoorstellen zijn pas mogelijk zodra dit restaurant later is bevestigd als bestaand restaurant.
                       </div>
@@ -465,7 +465,7 @@ export default function OnboardingRestaurantPage() {
                               </span>
                             )}
                           </div>
-                          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                          <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
                             Bron: {menu.extractionMethod} — {menu.sourceUrl}
                           </div>
                           {menuErrorBySlug[menu.contextSlug] && (
@@ -520,7 +520,7 @@ export default function OnboardingRestaurantPage() {
                     <div className="di-row-name">
                       {unknownMenuContexts.length} onbekende sectie{unknownMenuContexts.length === 1 ? '' : 's'}
                     </div>
-                    <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 8 }}>
+                    <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8 }}>
                       Deze bron(nen) zijn gevonden maar konden niet automatisch als een herkend menu worden ingedeeld —
                       handmatige beoordeling nodig.
                     </div>
@@ -531,20 +531,20 @@ export default function OnboardingRestaurantPage() {
                       const recognizedConfidenceLabel = describeRecognizedConfidence(allRecognizedItems)
                       return (
                         <div key={idx} style={{ marginBottom: 12 }}>
-                          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>
+                          <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 4 }}>
                             {unknown.sourceUrl} ({unknown.extractionMethod},{' '}
                             {unknown.pageCount === null ? 'onbekend aantal pagina’s' : `${unknown.pageCount} pagina${unknown.pageCount === 1 ? '' : "'s"}`},{' '}
                             ~{unknown.wordCount} woorden)
                           </div>
                           {unknown.usedFallback && (
-                            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4, fontStyle: 'italic' }}>
+                            <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 4, fontStyle: 'italic' }}>
                               Tekst herstel via een alternatieve leesmethode nadat de PDF-structuur zelf niet volledig
                               leesbaar was — beoordeel deze inhoud extra kritisch.
                             </div>
                           )}
                           {totalRecognizedItems > 0 ? (
                             <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 10 }}>
-                              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}>
+                              <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 6 }}>
                                 {totalRecognizedItems} mogelijk menu-item{totalRecognizedItems === 1 ? '' : 's'} gevonden in deze PDF —
                                 confidence: {recognizedConfidenceLabel}, uitsluitend reviewbaar, nooit automatisch overgenomen.
                               </div>
@@ -555,16 +555,16 @@ export default function OnboardingRestaurantPage() {
                                     <div key={iIdx} style={{ fontSize: 12, display: 'flex', justifyContent: 'space-between', gap: 8 }}>
                                       <span>
                                         {item.name}
-                                        {item.desc ? <span style={{ color: 'var(--text-muted)' }}> — {item.desc}</span> : null}
+                                        {item.desc ? <span style={{ color: 'var(--text-secondary)' }}> — {item.desc}</span> : null}
                                       </span>
-                                      <span style={{ color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>&euro; {item.price}</span>
+                                      <span style={{ color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>&euro; {item.price}</span>
                                     </div>
                                   ))}
                                 </div>
                               ))}
                             </div>
                           ) : (
-                            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                            <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
                               Geen menu-items automatisch herkend in deze bron — handmatige beoordeling nodig.
                             </div>
                           )}

@@ -110,16 +110,20 @@ test('Wordmark: links carry an explicit accessible name that starts with the vis
 
 // ── Tokens ──────────────────────────────────────────────────────────────
 
+// Kleurtaal v2 (definitieve ontwerpbron) vervangt de "Oker licht"-waarden;
+// de volledige tokenset staat in src/lib/colourLanguage.test.js.
 test('tokens: approved light values are used in both light blocks (system + explicit)', () => {
   const { lightMedia, lightAttr } = blocks();
   for (const b of [lightMedia, lightAttr]) {
     assert.equal(tokenIn(b, 'accent'), '#7A4E00');
-    assert.equal(tokenIn(b, 'accent-fill'), '#F2C35B');
+    assert.equal(tokenIn(b, 'accent-fill'), '#F6C057');
     assert.equal(tokenIn(b, 'on-accent-fill'), '#1F1600');
-    assert.equal(tokenIn(b, 'accent-surface'), '#FDF3D8');
-    assert.equal(tokenIn(b, 'warning'), '#9A3412');
-    assert.equal(tokenIn(b, 'input-border'), '#808792');
-    assert.equal(tokenIn(b, 'wordmark'), '#7A4E00');
+    assert.equal(tokenIn(b, 'accent-surface'), '#FEF1D5');
+    assert.equal(tokenIn(b, 'status-old'), '#5A3A0A');
+    assert.equal(tokenIn(b, 'warning'), null, '--warning is an alias of --status-old, defined once in :root');
+    assert.equal(tokenIn(b, 'input-border'), '#8E877B');
+    assert.equal(tokenIn(b, 'wordmark'), '#1A1410');
+    assert.equal(tokenIn(b, 'wordmark-icon'), '#B28110');
   }
 });
 
@@ -146,14 +150,14 @@ test('contrast: every accent pairing meets WCAG AA (text 4.5:1, focus/UI 3:1) in
     ['light fill text', tokenIn(lightAttr, 'on-accent-fill'), tokenIn(lightAttr, 'accent-fill'), 4.5],
     ['light accent on accent-surface', tokenIn(lightAttr, 'accent'), tokenIn(lightAttr, 'accent-surface'), 4.5],
     ['light accent on accent-surface-strong', tokenIn(lightAttr, 'accent'), tokenIn(lightAttr, 'accent-surface-strong'), 4.5],
-    ['light warning on bg', tokenIn(lightAttr, 'warning'), lightBg, 4.5],
+    ['light status-old on bg', tokenIn(lightAttr, 'status-old'), lightBg, 4.5],
     ['light control border', tokenIn(lightAttr, 'input-border'), lightBg, 3],
     ['dark accent text on bg', tokenIn(dark, 'accent'), darkBg, 4.5],
     ['dark accent on card', tokenIn(dark, 'accent'), tokenIn(dark, 'bg-card'), 4.5],
     ['dark fill text', tokenIn(dark, 'on-accent-fill'), tokenIn(dark, 'accent-fill'), 4.5],
     ['dark accent on accent-surface', tokenIn(dark, 'accent'), tokenIn(dark, 'accent-surface'), 4.5],
     ['dark accent on accent-surface-strong', tokenIn(dark, 'accent'), tokenIn(dark, 'accent-surface-strong'), 4.5],
-    ['dark warning on card', tokenIn(dark, 'warning'), tokenIn(dark, 'bg-card'), 4.5],
+    ['dark status-old on card', tokenIn(dark, 'status-old'), tokenIn(dark, 'bg-card'), 4.5],
     ['dark control border', tokenIn(dark, 'input-border'), tokenIn(dark, 'bg-card'), 3],
     ['light control border on --bg', tokenIn(lightAttr, 'input-border'), tokenIn(lightAttr, 'bg'), 3],
     ['light control border on --bg-card', tokenIn(lightAttr, 'input-border'), tokenIn(lightAttr, 'bg-card'), 3],
@@ -183,10 +187,11 @@ test('contrast guard: okergeel is never valid text on white (documented rule)', 
 
 // ── Brand vs status separation ─────────────────────────────────────────
 
-test('status colours stay semantic: open/ok/vegan keep --green, brand controls use --accent*', () => {
+test('status colours stay semantic: open/ok use --status-positive, brand controls use --accent*', () => {
   const s = css();
-  assert.match(s, /\.dish-result-status\.is-open\s*\{ color: var\(--green\);/);
-  assert.match(s, /\.swq-badge--ok svg \{ color: var\(--green\); \}/);
+  assert.match(s, /\.dish-result-status\.is-open\s*\{ color: var\(--status-positive\);/);
+  assert.match(s, /\.swq-badge--positive \{ color: var\(--status-positive\);/);
+  assert.doesNotMatch(s, /\.tag-vegan[^{]*\{[^}]*--status-positive/, 'dietary labels are neutral, not a success status');
   assert.match(s, /\.hero-search-btn \{[^}]*background: var\(--accent-fill\);[^}]*color: var\(--on-accent-fill\);/);
   assert.match(s, /\.primary-nav-link\[aria-current="page"\] \{ background: var\(--accent-surface\); color: var\(--accent\);/);
 });

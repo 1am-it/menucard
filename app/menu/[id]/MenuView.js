@@ -434,7 +434,7 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
               <div className="rp-name">{r.name || restaurant.name}</div>
               {cuisineLabel && <div className="rp-line">{cuisineLabel}</div>}
               {restaurant.openingHours && (
-                <div className="rp-line" style={{ color: todayHours ? 'var(--green)' : 'var(--text-faint)', fontWeight: todayHours ? 600 : 400 }}>
+                <div className="rp-line" style={{ color: todayHours ? 'var(--green)' : 'var(--text-secondary)', fontWeight: todayHours ? 600 : 400 }}>
                   {todayHours ? `Open · ${todayHours}` : 'Gesloten vandaag'}
                 </div>
               )}

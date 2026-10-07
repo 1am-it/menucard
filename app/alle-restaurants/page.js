@@ -118,7 +118,7 @@ function AlleRestaurantsPageInner() {
 
       <main className="results-section">
         <h1 style={{ fontSize: 20, fontWeight: 800, margin: '0 0 4px' }}>Alle restaurants</h1>
-        <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 16px' }}>
+        <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '0 0 16px' }}>
           Elk bekend restaurant in Breda — ook restaurants die nog geen menukaart hebben.
         </p>
 

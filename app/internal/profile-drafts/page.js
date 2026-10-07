@@ -102,7 +102,7 @@ export default function ProfileDraftsOverviewPage() {
   if (session === undefined) {
     return (
       <div className="di-page">
-        <main className="di-main" style={{ color: 'var(--text-muted)' }}>
+        <main className="di-main" style={{ color: 'var(--text-secondary)' }}>
           Loading…
         </main>
       </div>
@@ -144,10 +144,10 @@ export default function ProfileDraftsOverviewPage() {
           </div>
         )}
 
-        {loading && <p style={{ color: 'var(--text-muted)' }}>Loading…</p>}
+        {loading && <p style={{ color: 'var(--text-secondary)' }}>Loading…</p>}
 
         {!loading && drafts.length === 0 && !error && (
-          <p style={{ color: 'var(--text-muted)' }}>No Restaurant Profile Drafts yet.</p>
+          <p style={{ color: 'var(--text-secondary)' }}>No Restaurant Profile Drafts yet.</p>
         )}
 
         {!loading && drafts.length > 0 && (
@@ -179,7 +179,7 @@ export default function ProfileDraftsOverviewPage() {
                 </span>
               </div>
 
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6 }}>
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 6 }}>
                 Created {formatTimestamp(d.promoted_at)}
               </div>
 
@@ -197,13 +197,13 @@ export default function ProfileDraftsOverviewPage() {
               )}
 
               {d.status === 'discarded' && (
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6 }}>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 6 }}>
                   Discarded {formatTimestamp(d.discarded_at)}
                   {previewNote(d.discard_note) ? ` — "${previewNote(d.discard_note)}"` : ''}
                 </div>
               )}
 
-              <div style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 8 }}>Draft ID: {d.id}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 8 }}>Draft ID: {d.id}</div>
 
               <a href="/internal/import-inbox" className="di-link-btn" style={{ marginTop: 10, display: 'inline-block' }}>
                 Open in Import Inbox

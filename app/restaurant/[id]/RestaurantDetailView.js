@@ -104,7 +104,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
                   background: isOpenToday ? 'var(--green)' : 'var(--text-dim)',
                   flexShrink: 0,
                 }} />
-                <span style={{ fontSize: 14, fontWeight: 700, color: isOpenToday ? 'var(--green)' : 'var(--text-muted)' }}>
+                <span style={{ fontSize: 14, fontWeight: 700, color: isOpenToday ? 'var(--green)' : 'var(--text-secondary)' }}>
                   {isOpenToday ? `Open · ${todayHours}` : 'Gesloten'}
                 </span>
               </div>
@@ -187,7 +187,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
             {/* PLATFORM-07 — small, unobtrusive claim link, not a CTA */}
             <Link
               href={`/claim/${id}`}
-              style={{ display: 'inline-block', marginTop: 12, fontSize: 13, color: 'var(--text-muted)' }}
+              style={{ display: 'inline-block', marginTop: 12, fontSize: 13, color: 'var(--text-secondary)' }}
             >
               Is dit jouw restaurant? Claim dit restaurant →
             </Link>
@@ -225,7 +225,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
                   </div>
                   {item.desc && <div className="td-desc">{item.desc}</div>}
                   {item.wine && <div className="td-wine">🍷 {item.wine}</div>}
-                  <div style={{ fontSize: 10, color: 'var(--text-faint)', marginTop: 6 }}>{item.category}</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 6 }}>{item.category}</div>
                 </div>
               ))}
             </div>
@@ -244,7 +244,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
           <section style={{ textAlign: 'center', padding: '60px 0' }}>
             <div style={{ fontSize: 36, marginBottom: 16 }}>📋</div>
             <h3 style={{ color: 'var(--text-secondary)', marginBottom: 8 }}>Menukaart nog niet beschikbaar</h3>
-            <p style={{ color: 'var(--text-dim)', fontSize: 14, marginBottom: 24 }}>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 24 }}>
               Bekijk de website van het restaurant voor de actuele menukaart.
             </p>
             {isValidUrl(restaurant.website) && (
@@ -273,7 +273,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
             <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent)', marginBottom: 4 }}>
               🛡 Allergeneninformatie (NVWA)
             </div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+            <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
               Wettelijk verplichte allergenenmatrix · EU Verordening 1169/2011
             </div>
           </div>

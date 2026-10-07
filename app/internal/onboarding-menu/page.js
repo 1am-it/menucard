@@ -478,7 +478,7 @@ export default function OnboardingMenuPage() {
   if (session === undefined) {
     return (
       <div className="di-page">
-        <main className="di-main" style={{ color: 'var(--text-muted)' }}>Loading…</main>
+        <main className="di-main" style={{ color: 'var(--text-secondary)' }}>Loading…</main>
       </div>
     )
   }
@@ -509,7 +509,7 @@ export default function OnboardingMenuPage() {
           <div className="di-candidate-card" style={{ marginBottom: 16 }}>
             <div className="di-row-name">Menu-URL uitlezen</div>
             <div style={{ display: 'grid', gap: 8, maxWidth: 480 }}>
-              <label htmlFor="onboarding-menu-source-url" style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+              <label htmlFor="onboarding-menu-source-url" style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
                 Menu-URL
               </label>
               <input
@@ -548,7 +548,7 @@ export default function OnboardingMenuPage() {
                 {needsRestaurantChoice && readResult.receipt && (
                   <div className="di-candidate-card">
                     <div className="di-row-name">Restaurantconcept</div>
-                    <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 8 }}>
+                    <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8 }}>
                       Bestaat dit restaurant nog niet in het systeem? Maak een restaurantconcept aan op basis van deze bron.
                       Menuvoorstellen zijn pas mogelijk zodra dit restaurant later is bevestigd als bestaand restaurant.
                     </div>
@@ -587,7 +587,7 @@ export default function OnboardingMenuPage() {
                   <div>
                     <label
                       htmlFor={needsRestaurantChoice ? 'onboarding-menu-restaurant' : undefined}
-                      style={{ display: 'block', fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}
+                      style={{ display: 'block', fontSize: 12, color: 'var(--text-secondary)', marginBottom: 4 }}
                     >
                       Restaurant
                     </label>
@@ -693,7 +693,7 @@ export default function OnboardingMenuPage() {
                         : `Maak ${selectedMenus.length} menuvoorstel${selectedMenus.length === 1 ? '' : 'len'} voor review`}
                     </button>
                     {selectedMenus.length > 0 && !creatingProposals && (
-                      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6 }}>
+                      <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 6 }}>
                         {selectedMenus.length} menuvoorstel{selectedMenus.length === 1 ? '' : 'len'} klaar voor review.
                       </div>
                     )}
@@ -730,7 +730,7 @@ export default function OnboardingMenuPage() {
                       {STATUS_LABELS[s.effective_status] || s.effective_status}
                     </span>
                   </div>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
+                  <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>
                     {s.source_type} · quality: {s.quality_score} · version {s.version}
                   </div>
 

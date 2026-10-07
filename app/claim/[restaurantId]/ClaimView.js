@@ -122,7 +122,7 @@ export default function ClaimView({ restaurantId, restaurant }) {
       <h1 style={{ fontSize: 22, marginBottom: 4 }}>Claim dit restaurant</h1>
       <p style={{ color: 'var(--text-secondary)', marginBottom: 20 }}>{restaurant.name}</p>
 
-      {session === undefined && <p style={{ color: 'var(--text-muted)' }}>Laden…</p>}
+      {session === undefined && <p style={{ color: 'var(--text-secondary)' }}>Laden…</p>}
 
       {session === null && !linkSent && (
         <form onSubmit={sendMagicLink} style={{ display: 'grid', gap: 12 }}>
@@ -151,7 +151,7 @@ export default function ClaimView({ restaurantId, restaurant }) {
         </p>
       )}
 
-      {session && claim === undefined && <p style={{ color: 'var(--text-muted)' }}>Claimstatus laden…</p>}
+      {session && claim === undefined && <p style={{ color: 'var(--text-secondary)' }}>Claimstatus laden…</p>}
 
       {session && claim === null && (
         <div style={{ display: 'grid', gap: 12 }}>
@@ -177,7 +177,7 @@ export default function ClaimView({ restaurantId, restaurant }) {
           }}
         >
           <strong>{STATUS_LABEL[claim.status] || claim.status}</strong>
-          <div style={{ color: 'var(--text-muted)', marginTop: 6 }}>
+          <div style={{ color: 'var(--text-secondary)', marginTop: 6 }}>
             Ingediend op {new Date(claim.created_at).toLocaleDateString('nl-NL')}
           </div>
         </div>

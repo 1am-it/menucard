@@ -182,9 +182,9 @@ export default function ModerationQueuePage() {
         </div>
       )}
 
-      {loading && <p style={{ color: 'var(--text-muted)' }}>Loading…</p>}
+      {loading && <p style={{ color: 'var(--text-secondary)' }}>Loading…</p>}
 
-      {!loading && items.length === 0 && !error && <p style={{ color: 'var(--text-muted)' }}>No pending changes.</p>}
+      {!loading && items.length === 0 && !error && <p style={{ color: 'var(--text-secondary)' }}>No pending changes.</p>}
 
       <div style={{ display: 'grid', gap: 14 }}>
         {items.map(({ pending, current }) => {
@@ -201,16 +201,16 @@ export default function ModerationQueuePage() {
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, marginBottom: 12 }}>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-secondary)', marginBottom: 4 }}>
                   <span>Current</span>
                   {current && <SourceTag>{formatSourceLabel(current.source)}</SourceTag>}
                 </div>
-                <div style={{ fontSize: 14, color: current ? 'var(--text-primary)' : 'var(--text-muted)', fontStyle: current ? 'normal' : 'italic' }}>
+                <div style={{ fontSize: 14, color: current ? 'var(--text-primary)' : 'var(--text-secondary)', fontStyle: current ? 'normal' : 'italic' }}>
                   {currentDisplay}
                 </div>
               </div>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-secondary)', marginBottom: 4 }}>
                   <span>Proposed</span>
                   <SourceTag>{formatSourceLabel(pending.proposed_source)}</SourceTag>
                 </div>
@@ -223,7 +223,7 @@ export default function ModerationQueuePage() {
             )}
 
             <details style={{ marginBottom: 12 }}>
-              <summary style={{ fontSize: 12, color: 'var(--text-muted)', cursor: 'pointer' }}>Technical details</summary>
+              <summary style={{ fontSize: 12, color: 'var(--text-secondary)', cursor: 'pointer' }}>Technical details</summary>
               <pre
                 style={{
                   fontSize: 12,
@@ -295,10 +295,10 @@ export default function ModerationQueuePage() {
         </div>
       )}
 
-      {claimsLoading && <p style={{ color: 'var(--text-muted)' }}>Loading…</p>}
+      {claimsLoading && <p style={{ color: 'var(--text-secondary)' }}>Loading…</p>}
 
       {!claimsLoading && claimItems.length === 0 && !claimsError && (
-        <p style={{ color: 'var(--text-muted)' }}>No pending claims.</p>
+        <p style={{ color: 'var(--text-secondary)' }}>No pending claims.</p>
       )}
 
       <div style={{ display: 'grid', gap: 14 }}>

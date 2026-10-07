@@ -113,8 +113,8 @@ function IconChevronDown() {
 // the card), never the near-invisible --text-faint it used before
 // (1.94:1 dark), so the text is at least as clear as the empty ring.
 const STATE_STYLE = {
-  complete: { label: 'Complete', color: 'var(--green)' },
-  partial: { label: 'Partial', color: 'var(--warning)' },
+  complete: { label: 'Complete', color: 'var(--status-positive)' },
+  partial: { label: 'Partial', color: 'var(--status-old)' },
   empty: { label: 'None yet', color: 'var(--text-secondary)' },
 }
 
@@ -183,7 +183,7 @@ function BreakdownTable({ title, rows, tbodyId }) {
     >
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
         <thead>
-          <tr style={{ textAlign: 'left', color: 'var(--text-secondary)', background: 'var(--green-faint)' }}>
+          <tr style={{ textAlign: 'left', color: 'var(--text-secondary)', background: 'var(--bg-elevated)' }}>
             <th scope="col" style={TH_STYLE}>Group</th>
             <th scope="col" style={{ ...TH_STYLE, textAlign: 'center' }}>Restaurants</th>
             <th scope="col" style={{ ...TH_STYLE, textAlign: 'center' }}>With menu data</th>
@@ -332,9 +332,9 @@ export default function CoverageDashboardPage() {
                 gap: 6,
                 padding: '5px 11px',
                 borderRadius: 'var(--radius-pill)',
-                border: '1px solid var(--green-border)',
-                background: 'var(--green-faint)',
-                color: 'var(--green)',
+                border: '1px solid var(--border)',
+                background: 'var(--bg-elevated)',
+                color: 'var(--text-secondary)',
                 fontSize: 12,
                 fontWeight: 600,
                 whiteSpace: 'nowrap',
@@ -365,7 +365,7 @@ export default function CoverageDashboardPage() {
           <h2 id="coverage-hero-heading" style={{ fontSize: 22, margin: '6px 0 4px', color: 'var(--text-primary)' }}>
             {menuState === 'complete' ? 'Menu coverage is complete' : 'Menu coverage needs attention'}
           </h2>
-          <div style={{ fontSize: 'clamp(44px, 10vw, 64px)', fontWeight: 800, lineHeight: 1.05, color: 'var(--green)' }}>
+          <div style={{ fontSize: 'clamp(44px, 10vw, 64px)', fontWeight: 800, lineHeight: 1.05, color: 'var(--text-primary)' }}>
             {data.metrics.menuData.pct === null ? '—' : `${data.metrics.menuData.pct}%`}
           </div>
           <p style={{ margin: '6px 0 0', fontSize: 15, color: 'var(--text-secondary)' }}>

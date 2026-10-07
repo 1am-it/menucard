@@ -300,8 +300,8 @@ function themeTokens() {
     secondary: read(body, 'text-secondary'),
     muted: read(body, 'text-muted'),
     faint: read(body, 'text-faint'),
-    green: read(body, 'green'),
-    warning: read(body, 'warning'),
+    positive: read(body, 'status-positive'),
+    old: read(body, 'status-old'),
     subtle: cov.toLowerCase(),
   });
   return {
@@ -359,7 +359,8 @@ test('F1: every metric-card status label (Complete / Partial / None yet) meets 4
   const source = pageSource();
   const stateColor = (state) => source.match(new RegExp(`${state}: \\{ label: '[^']+', color: 'var\\(--([a-z-]+)\\)' \\}`))[1];
   assert.equal(stateColor('empty'), 'text-secondary', '"None yet" uses --text-secondary, never --text-faint');
-  const tokenKey = { green: 'green', warning: 'warning', 'text-secondary': 'secondary' };
+  // Kleurtaal v2: Complete = --status-positive, Partial = --status-old.
+  const tokenKey = { 'status-positive': 'positive', 'status-old': 'old', 'text-secondary': 'secondary' };
   for (const theme of ['dark', 'systemLight', 'explicitLight']) {
     const t = tokens[theme];
     for (const state of ['complete', 'partial', 'empty']) {

@@ -850,7 +850,7 @@ export default function ImportInboxPage() {
   if (session === undefined) {
     return (
       <div className="di-page">
-        <main className="di-main" style={{ color: 'var(--text-muted)' }}>
+        <main className="di-main" style={{ color: 'var(--text-secondary)' }}>
           Loading…
         </main>
       </div>
@@ -917,7 +917,7 @@ export default function ImportInboxPage() {
             </div>
           )}
 
-          {triageLoading && <p style={{ color: 'var(--text-muted)' }}>Loading…</p>}
+          {triageLoading && <p style={{ color: 'var(--text-secondary)' }}>Loading…</p>}
 
           {!triageLoading && !triageError && (
             <div className="di-summary">
@@ -1074,14 +1074,14 @@ export default function ImportInboxPage() {
             </div>
           )}
 
-          {candidatesLoading && <p style={{ color: 'var(--text-muted)' }}>Loading…</p>}
+          {candidatesLoading && <p style={{ color: 'var(--text-secondary)' }}>Loading…</p>}
 
           {!candidatesLoading && candidateState === 'run-has-no-candidates' && !candidatesError && (
-            <p style={{ color: 'var(--text-muted)' }}>This run produced no imported candidates.</p>
+            <p style={{ color: 'var(--text-secondary)' }}>This run produced no imported candidates.</p>
           )}
 
           {!candidatesLoading && candidateState === 'no-filter-matches' && !candidatesError && (
-            <p style={{ color: 'var(--text-muted)' }}>
+            <p style={{ color: 'var(--text-secondary)' }}>
               No imported candidates match the current filters ({totalBeforeFilters} total before filtering).
             </p>
           )}
@@ -1123,7 +1123,7 @@ export default function ImportInboxPage() {
                       {c.extracted_fields?.category || '—'}
                       {c.normalized_fields?.address ? ` · ${c.normalized_fields.address}` : ''}
                     </div>
-                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                    <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
                       {c.normalized_fields?.phone ? `${c.normalized_fields.phone} · ` : ''}
                       {c.normalized_fields?.website || ''}
                     </div>
@@ -1229,7 +1229,7 @@ export default function ImportInboxPage() {
                           )}
 
                           {c.review_status === 'approved_internal' && (
-                            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>
+                            <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 14 }}>
                               {canDiscardCandidateDraft(c) ? (
                                 <div style={{ display: 'grid', gap: 8 }}>
                                   {discardPromptOpenId === c.id ? (
@@ -1392,7 +1392,7 @@ export default function ImportInboxPage() {
                                     <div style={{ fontSize: 12, color: 'var(--danger)' }}>{decisionErrorByCandidateId[c.id]}</div>
                                   )}
                                   {!isReviewDecisionSubmittable(draft) && (
-                                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Choose a status to enable saving a decision.</div>
+                                    <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Choose a status to enable saving a decision.</div>
                                   )}
                                   <button
                                     onClick={() => submitDecision(c.id)}
@@ -1425,14 +1425,14 @@ export default function ImportInboxPage() {
                                     {ENRICHABLE_FIELDS.filter((f) => c.enrichment_sources?.[f]).map((f) => (
                                       <div key={f} style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
                                         <strong>{ENRICHABLE_FIELD_LABELS[f]}</strong>: {c.enrichment_sources[f].value}
-                                        <div style={{ color: 'var(--text-faint)', fontSize: 11, marginTop: 2 }}>
+                                        <div style={{ color: 'var(--text-secondary)', fontSize: 11, marginTop: 2 }}>
                                           Source: {c.enrichment_sources[f].source_url}
                                         </div>
                                       </div>
                                     ))}
                                   </div>
                                 ) : (
-                                  <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 14px' }}>
+                                  <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '0 0 14px' }}>
                                     No manual enrichments recorded yet.
                                   </p>
                                 )}
@@ -1454,7 +1454,7 @@ export default function ImportInboxPage() {
                                     title={!hasVerifiedWebsiteForSuggestions(c) ? 'Save a verified website first to enable suggestions.' : undefined}
                                     className="di-link-btn"
                                     style={{
-                                      color: hasVerifiedWebsiteForSuggestions(c) ? 'var(--text-secondary)' : 'var(--text-faint)',
+                                      color: hasVerifiedWebsiteForSuggestions(c) ? 'var(--text-secondary)' : 'var(--text-secondary)',
                                       cursor: hasVerifiedWebsiteForSuggestions(c) ? 'pointer' : 'not-allowed',
                                     }}
                                   >
@@ -1462,11 +1462,11 @@ export default function ImportInboxPage() {
                                   </button>
                                 </div>
                                 {!hasVerifiedWebsiteForSuggestions(c) && (
-                                  <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 8px' }}>
+                                  <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '0 0 8px' }}>
                                     Save a verified website first to enable suggestions.
                                   </p>
                                 )}
-                                <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 8px' }}>
+                                <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '0 0 8px' }}>
                                   Fill in a value and its source URL for one or more fields. A field left blank is not submitted.
                                   A correction is recorded as a new entry — nothing here is ever edited or deleted.
                                 </p>
@@ -1492,7 +1492,7 @@ export default function ImportInboxPage() {
                                   </div>
                                 )}
                                 {suggestionsByCandidateId[c.id]?.suggestions && (
-                                  <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
+                                  <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>
                                     Suggestions from {suggestionsByCandidateId[c.id].source_url} have been filled into the form
                                     below — nothing is saved until you click "Save enrichment."
                                     <div style={{ display: 'grid', gap: 2, marginTop: 4 }}>
@@ -1632,14 +1632,14 @@ export default function ImportInboxPage() {
                                 </span>
                               </summary>
                               <div className="di-accordion-body">
-                                <div style={{ fontSize: 11, color: 'var(--text-faint)', marginBottom: 12 }}>
+                                <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 12 }}>
                                   {c.record_locator} · imported {c.retrieved_at}
                                   {c.normalization?.phone && c.normalization.phone.valid === false && (
                                     <div style={{ color: 'var(--warning)', marginTop: 4 }}>Phone format not recognized — shown as entered.</div>
                                   )}
                                 </div>
                                 {(reviewsLoadingId === c.id || enrichmentsLoadingId === c.id) && (
-                                  <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Loading…</p>
+                                  <p style={{ color: 'var(--text-secondary)', fontSize: 13 }}>Loading…</p>
                                 )}
                                 {reviewsErrorId === c.id && (
                                   <p style={{ color: 'var(--danger)', fontSize: 13 }}>Failed to load review history.</p>
@@ -1648,7 +1648,7 @@ export default function ImportInboxPage() {
                                   <p style={{ color: 'var(--danger)', fontSize: 13 }}>Failed to load enrichment history.</p>
                                 )}
                                 {reviewsLoadingId !== c.id && enrichmentsLoadingId !== c.id && timelineEvents.length === 0 && (
-                                  <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>No recorded history yet — currently "new".</p>
+                                  <p style={{ color: 'var(--text-secondary)', fontSize: 13 }}>No recorded history yet — currently "new".</p>
                                 )}
                                 {timelineEvents.length > 0 && (
                                   <div className="di-timeline">
@@ -1714,10 +1714,10 @@ export default function ImportInboxPage() {
         </div>
       )}
 
-      {runsLoading && <p style={{ color: 'var(--text-muted)' }}>Loading…</p>}
+      {runsLoading && <p style={{ color: 'var(--text-secondary)' }}>Loading…</p>}
 
       {!runsLoading && candidateState === 'no-runs' && !runsError && (
-        <p style={{ color: 'var(--text-muted)' }}>No import runs yet.</p>
+        <p style={{ color: 'var(--text-secondary)' }}>No import runs yet.</p>
       )}
 
       {runs.length > 0 && importRunsExpanded && (
@@ -1732,7 +1732,7 @@ export default function ImportInboxPage() {
                 >
                   {run.status}
                 </span>
-                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{run.started_at}</span>
+                <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{run.started_at}</span>
               </div>
               <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8 }}>
                 {run.data_origin_source_name || 'Unknown source'}
