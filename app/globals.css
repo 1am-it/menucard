@@ -1042,14 +1042,16 @@ header, .site-header {
    byte-identical to the prior inline style. */
 .nvwa-header-actions { display: flex; align-items: center; gap: 8px; }
 
+/* Kleurtaal v2: missing allergen data is incomplete data — the neutral
+   status role, not the "old source" attention role (--warning). */
 .nvwa-warning {
-  background: var(--warning-bg);
-  border: 1px solid var(--warning-border);
-  border-left: 3px solid var(--warning);
+  background: var(--status-neutral-bg);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--status-neutral);
   border-radius: var(--radius-md);
   padding: 14px 16px;
   font-size: 13px;
-  color: var(--warning);
+  color: var(--status-neutral);
   margin-bottom: 24px;
   line-height: 1.5;
 }
@@ -1092,7 +1094,7 @@ header, .site-header {
 
 .allergen-yes { font-size: 16px; line-height: 1; }
 .allergen-no  { font-size: 12px; color: var(--text-secondary); }
-.allergen-unknown { font-size: 12px; color: var(--warning); }
+.allergen-unknown { font-size: 12px; color: var(--status-neutral); }
 
 .nvwa-legend {
   margin-top: 20px;
@@ -1153,7 +1155,6 @@ header, .site-header {
   letter-spacing: 0.4px;
 }
 .badge-green { background: var(--status-positive-bg); color: var(--status-positive); border: 1px solid var(--status-positive-border); }
-.badge-warning { background: var(--warning-bg); color: var(--warning); }
 .badge-muted { background: var(--bg-elevated); color: var(--text-secondary); border: 1px solid var(--border); }
 
 /* Empty state */
@@ -1187,12 +1188,15 @@ header, .site-header {
   margin: 12px auto 0;
   padding: 12px 14px;
   border-radius: 10px;
-  border: 1px solid var(--warning-border);
-  background: var(--warning-bg);
-  color: var(--warning);
+  border: 1px solid var(--border);
+  background: var(--status-neutral-bg);
+  color: var(--status-neutral);
   font-size: 13px;
   line-height: 1.5;
 }
+/* Kleurtaal v2: low coverage is incomplete data (neutral); a real load
+   error in the same slot keeps the error role. */
+.low-coverage-note--error { border-color: var(--danger-border); background: var(--status-blocked-bg); color: var(--status-blocked); }
 
 /* Loading */
 .loading {
@@ -1216,7 +1220,7 @@ header, .site-header {
   .allergen-table th { background: #f0f0f0; color: #000; }
   .allergen-table td { border-color: #ccc; }
   .allergen-item-name { color: #000; }
-  .nvwa-warning { border-color: #ffa000; color: #a06000; background: #fff8e1; }
+  .nvwa-warning { border-color: #999; color: #000; background: #f5f5f5; }
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -1677,7 +1681,9 @@ header, .site-header {
    MENU CARDS — Allergen state & highlight
    ───────────────────────────────────────────────────────────────────────────── */
 
-.mc-unknown { border-color: var(--warning-strong-border) !important; }
+/* Kleurtaal v2: unknown allergen data is uncertainty, not an "old source"
+   status — a neutral control border plus the text badge below. */
+.mc-unknown { border-color: var(--input-border) !important; }
 .mc-unsafe  { opacity: 0.4; }
 
 .mc-allergen-status { margin-top: 6px; }
@@ -1688,7 +1694,7 @@ header, .site-header {
   padding: 2px 8px;
   border-radius: 4px;
 }
-.mc-badge-unknown  { background: var(--warning-bg); color: var(--warning); }
+.mc-badge-unknown  { background: var(--status-neutral-bg); color: var(--status-neutral); }
 .mc-badge-contains { background: var(--danger-bg);  color: var(--danger); }
 
 .mc-allergen-icons {
@@ -2142,7 +2148,6 @@ mark.search-highlight {
 /* Informatie is geen succes (Kleurtaal v2): zacht accentvlak, 1px accent. */
 .di-banner-info { background: var(--accent-surface); border: 1px solid var(--accent); color: var(--text-primary); }
 .di-banner-info .di-banner-icon { color: var(--accent); }
-.di-banner-warning { background: var(--status-old-bg); border: 1px solid var(--warning-border); color: var(--status-old); }
 .di-banner-danger { background: var(--status-blocked-bg); border: 1px solid var(--danger-border); color: var(--status-blocked); }
 .di-banner-neutral { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-secondary); }
 

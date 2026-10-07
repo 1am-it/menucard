@@ -514,7 +514,7 @@ export default function OnboardingMenuPage() {
         </div>
 
         {rolesLoaded && !isInternal && !isEditor && (
-          <div className="di-banner di-banner-warning">
+          <div className="di-banner di-banner-neutral">
             <span className="di-banner-icon"><IconDocument /></span>
             <span>Your account has neither the "internal" nor the "editor" role — menu snapshots cannot be shown.</span>
           </div>
@@ -554,7 +554,7 @@ export default function OnboardingMenuPage() {
                 </div>
 
                 {readResult.warning && (
-                  <div className="di-banner di-banner-warning">
+                  <div className="di-banner di-banner-neutral">
                     <span className="di-banner-icon"><IconDocument /></span>
                     <span>{readResult.warning}</span>
                   </div>
@@ -569,7 +569,7 @@ export default function OnboardingMenuPage() {
                     </div>
                     {conceptError && <div style={{ fontSize: 12, color: 'var(--danger)', marginBottom: 8 }}>{conceptError}</div>}
                     {conceptDuplicateOf && (
-                      <div className="di-banner di-banner-warning" style={{ marginBottom: 8 }}>
+                      <div className="di-banner di-banner-neutral" style={{ marginBottom: 8 }}>
                         <span className="di-banner-icon"><IconDocument /></span>
                         <span>
                           Dit lijkt op een al bestaand restaurantconcept. Weet je zeker dat je toch een nieuw concept wilt aanmaken?

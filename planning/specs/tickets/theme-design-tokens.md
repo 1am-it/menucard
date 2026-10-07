@@ -262,9 +262,11 @@ Also aligned: internal navigation active destinations now use
 already prescribes), and every status chip on the import inbox,
 onboarding and profile-draft screens carries an icon next to its text.
 
-Dark: what changed, and its source. Dark is not frozen pixel for pixel;
-these refinements are carried by the design source or by existing
-documentation, everything else in dark is unchanged:
+Dark: what changed, and its source. Dark behaviour, the stored theme
+choice, the runtime default and the base surfaces are unchanged, but dark
+is not frozen pixel for pixel. This is the complete list of visual
+refinements dark receives on this branch, each carried by the design
+source or by existing documentation:
 
 | Dark change | Source |
 |---|---|
@@ -274,6 +276,16 @@ documentation, everything else in dark is unchanged:
 | Readable text from `--text-muted`/`--text-dim`/`--text-faint` to `--text-secondary` | PDF, hard rule for secondary text |
 | No green outside a positive status: moderation approve buttons oker, info banner soft accent, coverage header/headline neutral, WhatsApp reservation button outlined oker instead of a green tint | PDF, "Bestaande groene toepassingen" and "nooit merk, knopkleur" |
 | Internal navigation active destination: `--accent-surface` + 1px `--accent` ring | existing rule in this file / design-reference ("selected chips, active navigation … soft treatment") |
+| Dietary labels (vegetarisch/vegan): green tint → neutral outlined label with a leaf icon | PDF, "dieet is geen successtatus" |
+| Status dots → icon + text badges (open/closed indicators, "Nu open" filter button shows a clock) | PDF, "Waar nu alleen een stip staat: stip vervangen door icoon + tekst" |
+| Public "Open" badge: green only when open at this moment, otherwise a neutral clock line ("Opent vandaag om …", "Nu gesloten · …") | PDF, positive = "Nu open" |
+| `.hours-today`: green → ink-oker day label and primary-text times | PDF, accent as text; today is not a status |
+| Internal status chips per meaning: only approved/complete green, failed import run / failed request red, everything else neutral grey (previously blue, orange, red or green by status name) | PDF status roles; `src/lib/statusRoles.js` |
+| Incomplete data and uncertainty orange → neutral grey: NVWA score, NVWA note and "?" marks, menu-card "Allergeneninformatie onbekend" badge and border, search low-coverage note, Coverage "Partial" and "Menu data is limited", import-inbox missing fields / possible duplicate / phone format / robots unconfirmed / suggestion warnings, profile-draft duplicate note, onboarding conflict note and notice banners; moderation "No domain match" / "Already has an owner" orange → grey | PDF, `--status-old` only for the four source states |
+| Errors that were orange become red: import inbox failed-run banner, search restaurant-load error | PDF, blocked = "laad- en validatiefout" |
+| Coverage secondary text `#8f8f8f` → `--text-secondary` `#aaaaaa` | PDF, hard rule for secondary text |
+| Confidence (onboarding): coloured chip → neutral outlined label "Betrouwbaarheid: …" | not a status (design-reference) |
+| Disabled "Suggest data from website" button: dashed border | keeps the text at AA instead of fading it |
 
 Reverted because neither source covers it: a stronger dark
 `--danger-border` (0.35 alpha) — it is back at the former 20% alpha, in
@@ -299,10 +311,30 @@ not migrated showed the wrong meaning. Fixed:
 - Confidence hoog/middel/laag (onboarding restaurant) is not a status:
   neutral outlined label, no status colour or icon.
 - Incomplete data is not an error: NVWA "grotendeels nog niet
-  vastgelegd" and the onboarding field-conflict note use `--warning`
-  instead of `--danger`.
+  vastgelegd" and the onboarding field-conflict note no longer use
+  `--danger` (first moved to `--warning`; superseded by the second
+  review round below, which makes them neutral).
 - The coverage page's own secondary colour (`--cov-text-subtle`) is
   removed; its secondary text is `--text-secondary`.
+
+Correction (2026-10-07, second review round):
+
+- Public "Open": `MenuView`, `RestaurantDetailView` and the legacy
+  `/restaurants` card showed a green "Open · …" whenever today had
+  opening hours, also at night. Now `src/lib/openingStatus.js` (pure,
+  tested with fixed moments) gives "Nu open · tot …" (positive) only
+  while open, and a neutral clock line otherwise; the browser clock is
+  read after mount (`src/components/useClientNow.js`), so the server
+  render is always neutral.
+- `--warning` (alias of `--status-old`) is no longer used for any
+  content: incomplete data, missing NVWA data, conflicts, duplicates and
+  similar uncertainty use the neutral role; `.di-banner-warning` and the
+  unused `.badge-warning` are removed; real errors in those slots use the
+  error role; the robots.txt block on a read page uses `--status-old`
+  explicitly. The `--warning*` and `--warning-strong-border` tokens stay
+  only as unused compatibility aliases.
+- Moderation neutral states use a neutral dot icon instead of the
+  attention icon; confidence reads "Betrouwbaarheid: …".
 
 Measured (WCAG 2.x; asserted in `src/lib/colourLanguage.test.js`):
 

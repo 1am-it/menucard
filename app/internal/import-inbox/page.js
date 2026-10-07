@@ -1055,7 +1055,7 @@ export default function ImportInboxPage() {
           </div>
 
           {showErrorBanner && (
-            <div className="di-banner di-banner-warning">
+            <div className={`di-banner di-banner-${importRunRole(selectedRun.status) === 'blocked' ? 'danger' : 'neutral'}`}>
               <span className="di-banner-icon">
                 <IconX />
               </span>
@@ -1141,7 +1141,7 @@ export default function ImportInboxPage() {
                       {c.normalized_fields?.website || ''}
                     </div>
                     {c.missing_fields && c.missing_fields.length > 0 && (
-                      <div style={{ fontSize: 12, color: 'var(--warning)', marginTop: 6 }}>Missing: {c.missing_fields.join(', ')}</div>
+                      <div style={{ fontSize: 12, color: 'var(--status-neutral)', marginTop: 6 }}>Missing: {c.missing_fields.join(', ')}</div>
                     )}
                     <button onClick={() => toggleExpand(c.id)} className={`di-link-btn ${expanded ? 'active' : ''}`} style={{ marginTop: 8 }}>
                       {expanded ? 'Hide details' : 'Details & review'}
@@ -1291,7 +1291,7 @@ export default function ImportInboxPage() {
                                   )}
                                   {profileDraftDuplicateByCandidateId[c.id] ? (
                                     <div style={{ display: 'grid', gap: 6 }}>
-                                      <div style={{ color: 'var(--warning)' }}>
+                                      <div style={{ color: 'var(--status-neutral)' }}>
                                         This looks like a possible duplicate of an already-promoted draft. Promoting
                                         anyway is recorded and flagged for later review — it never merges the two.
                                       </div>
@@ -1481,17 +1481,17 @@ export default function ImportInboxPage() {
                                   <div style={{ fontSize: 12, color: 'var(--danger)', marginBottom: 8 }}>{suggestionsErrorByCandidateId[c.id]}</div>
                                 )}
                                 {suggestionsByCandidateId[c.id] && suggestionsByCandidateId[c.id].robots_txt_status === 'disallowed' && (
-                                  <div style={{ fontSize: 12, color: 'var(--warning)', marginBottom: 8 }}>
+                                  <div style={{ fontSize: 12, color: 'var(--status-old)', marginBottom: 8 }}>
                                     This page is disallowed by the site's robots.txt and was not fetched.
                                   </div>
                                 )}
                                 {suggestionsByCandidateId[c.id] && suggestionsByCandidateId[c.id].robots_txt_status === 'unconfirmed' && (
-                                  <div style={{ fontSize: 12, color: 'var(--warning)', marginBottom: 8 }}>
+                                  <div style={{ fontSize: 12, color: 'var(--status-neutral)', marginBottom: 8 }}>
                                     robots.txt could not be confirmed for this site — no suggestion was made.
                                   </div>
                                 )}
                                 {suggestionsByCandidateId[c.id]?.warnings?.length > 0 && (
-                                  <div style={{ fontSize: 12, color: 'var(--warning)', marginBottom: 8 }}>
+                                  <div style={{ fontSize: 12, color: 'var(--status-neutral)', marginBottom: 8 }}>
                                     {suggestionsByCandidateId[c.id].warnings.map((w, i) => (
                                       <div key={i}>⚠ {w}</div>
                                     ))}
@@ -1641,7 +1641,7 @@ export default function ImportInboxPage() {
                                 <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 12 }}>
                                   {c.record_locator} · imported {c.retrieved_at}
                                   {c.normalization?.phone && c.normalization.phone.valid === false && (
-                                    <div style={{ color: 'var(--warning)', marginTop: 4 }}>Phone format not recognized — shown as entered.</div>
+                                    <div style={{ color: 'var(--status-neutral)', marginTop: 4 }}>Phone format not recognized — shown as entered.</div>
                                   )}
                                 </div>
                                 {(reviewsLoadingId === c.id || enrichmentsLoadingId === c.id) && (

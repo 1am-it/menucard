@@ -41,10 +41,11 @@ const COMPLIANCE_TONE = {
   // Reuses the same neutral pill treatment as /internal/moderation's
   // SourceTag (src/lib/moderationFormatting.js), not a new token.
   neutral: { color: 'var(--text-secondary)', bg: 'var(--bg-elevated)',   border: 'var(--border)' },
-  partial: { color: 'var(--warning)', bg: 'var(--warning-bg)',    border: 'var(--warning-border)' },
-  // Kleurtaal v2: weinig vastgelegde allergeneninformatie is onvolledige
-  // data, geen technische fout — dus de aandachtstint, nooit de fouttint.
-  none:    { color: 'var(--warning)', bg: 'var(--warning-bg)',    border: 'var(--warning-border)' },
+  // Kleurtaal v2: gedeeltelijk of grotendeels ontbrekende allergeneninformatie
+  // is onvolledige data — geen fout en geen "oude bron". Neutrale statusrol;
+  // de tekst ernaast draagt de betekenis.
+  partial: { color: 'var(--status-neutral)', bg: 'var(--status-neutral-bg)', border: 'var(--border)' },
+  none:    { color: 'var(--status-neutral)', bg: 'var(--status-neutral-bg)', border: 'var(--border)' },
 }
 
 function ComplianceScore({ items }) {

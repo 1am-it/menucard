@@ -598,7 +598,7 @@ function SearchPageInner() {
         ))}
       </div>
 
-      {restaurantError && <p className="low-coverage-note">{restaurantError}</p>}
+      {restaurantError && <p className="low-coverage-note low-coverage-note--error">{restaurantError}</p>}
 
       {restaurantHasMore && (
         <div className="load-more-wrap">

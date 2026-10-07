@@ -91,14 +91,6 @@ function IconCalendar() {
     </svg>
   )
 }
-function IconAlert() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
-      <path d="M12 9v4M12 17h.01" />
-    </svg>
-  )
-}
 function IconChevronDown() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -385,15 +377,17 @@ export default function CoverageDashboardPage() {
               gap: 10,
               padding: 16,
               borderRadius: 'var(--radius-lg)',
-              border: '1px solid var(--warning-border)',
-              background: 'var(--warning-bg)',
+              // Kleurtaal v2: limited menu data is incomplete data — neutral,
+              // not the "old source" attention role.
+              border: '1px solid var(--border)',
+              background: 'var(--status-neutral-bg)',
             }}
           >
-            <span style={{ width: 18, height: 18, display: 'flex', flexShrink: 0, color: 'var(--warning)', marginTop: 1 }}>
-              <IconAlert />
+            <span style={{ width: 18, height: 18, display: 'flex', flexShrink: 0, color: 'var(--status-neutral)', marginTop: 1 }}>
+              <IconDocument />
             </span>
             <div style={{ minWidth: 0 }}>
-              <strong style={{ color: 'var(--warning)' }}>Menu data is limited</strong>
+              <strong style={{ color: 'var(--status-neutral)' }}>Menu data is limited</strong>
               <div style={{ marginTop: 6, fontSize: 13.5, color: 'var(--text-secondary)', overflowWrap: 'anywhere' }}>
                 Dish search can currently only ever return results from these {data.metrics.menuData.count} restaurants:{' '}
                 {data.metrics.menuData.restaurantIds.join(', ')}. The other{' '}

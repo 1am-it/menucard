@@ -188,7 +188,7 @@ export default function ProfileDraftsOverviewPage() {
               </div>
 
               {d.possible_duplicate_of && (
-                <div style={{ fontSize: 12, color: 'var(--warning)', marginTop: 6 }}>
+                <div style={{ fontSize: 12, color: 'var(--status-neutral)', marginTop: 6 }}>
                   Possibly a duplicate of {d.possible_duplicate_of.candidate_name || 'another draft'} — flagged at
                   creation, never auto-merged.
                 </div>

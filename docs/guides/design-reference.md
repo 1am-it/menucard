@@ -300,17 +300,33 @@ Meaning that must be kept:
 - A status role is used only where the content really is a semantic
   status. A shared CSS class name is no proof that every use means the
   same thing: each screen maps its own states per meaning
-  (`src/lib/statusRoles.js`). Confidence (hoog/middel/laag) is not a
-  status: it is a neutral outlined label (`.di-chip--label`) without
-  status colour or status icon.
+  (`src/lib/statusRoles.js`). Confidence is not a status: it is a
+  neutral outlined label (`.di-chip--label`), written out as
+  "Betrouwbaarheid: hoog/middel/laag", without status colour or status
+  icon.
+- "Nu open" (`--status-positive`, check icon) only when the restaurant
+  is open at this moment, by the browser's clock after the page has
+  loaded (`src/lib/openingStatus.js`, same rule as the existing
+  open-now helpers: open from the opening minute up to the closing
+  minute). Opening hours today alone are not a positive status: before
+  opening, after closing and during the server render the badge is
+  neutral with a clock ("Opent vandaag om 12:00", "Nu gesloten ·
+  vandaag 12:00-23:00", "Vandaag 12:00-23:00") and never says "Open".
+  A chosen other day on `/restaurants` shows its opening hours,
+  neutrally.
 - "Today" in opening hours is a presentation marker, not a status: the
   day label is ink oker (`--accent`), the times primary text, with
   `aria-current="date"`; never `--status-positive`. Whether the
   restaurant is open is shown separately ("Vandaag" badge).
-- Incomplete data and data conflicts are not errors: they use the
-  attention message colour (`--warning`) or a neutral status, never
+- Incomplete data, missing allergen (NVWA) data, data conflicts,
+  possible duplicates and similar uncertainty use the **neutral** role
+  (`--status-neutral`, `-bg`; banners `.di-banner-neutral`). They never
+  use `--warning` (an alias of `--status-old`, which is reserved for the
+  four source states in the table above) and never
   `--danger`/`--status-blocked`. A destructive action (e.g. "Discard")
-  and real load/validation errors keep `--danger`.
+  and real load/validation errors keep `--danger`; a robots.txt block on
+  a page Onze Menukaarten tried to read uses `--status-old` (access
+  limited).
 
 BE-23 mapping (`app/internal/source-workqueue/page.js`): Bereikbaar →
 positive; Niet bereikbaar → blocked; Toegang beperkt, Identiteit
@@ -332,15 +348,17 @@ stays neutral):
   Voorstel aangemaakt, Al voorgesteld → neutral.
 - Restaurant Profile Draft (Active, Discarded, "Profile draft created")
   → neutral: a concept is not an approval.
-- Owner claim: Domain match → positive; No domain match, Already has an
-  owner → neutral.
+- Owner claim: Domain match → positive (check icon); No domain match,
+  Already has an owner → neutral (neutral dot icon, not an attention
+  icon).
 - Coverage metric: Complete → positive; Partial → neutral; None yet →
   `--text-secondary`.
 
 Compatibility: `--green`, `--green-faint`, `--green-border` (→
 `--status-positive*`), `--danger` (→ `--status-blocked`) and `--warning`
 (→ `--status-old`) remain as aliases so other branches do not break
-silently. New code uses the role names. `--tag-*` content tags
+silently. New code uses the role names; no UI in `app/` or `src/` uses
+`--warning` any more (asserted in `src/lib/colourLanguage.test.js`). `--tag-*` content tags
 (Aanbevolen, Dagspecial, Halal, Glutenvrij) are not status roles and keep
 their own tokens.
 

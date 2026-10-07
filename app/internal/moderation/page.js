@@ -320,12 +320,12 @@ export default function ModerationQueuePage() {
                   positief; een mismatch of bestaande eigenaar heeft nog geen
                   besloten rol en blijft neutraal (src/lib/statusRoles.js). */}
               <span className={`status-badge status-badge--${domainMatchRole(claim.domain_match)}`}>
-                <StatusIcon name={claim.domain_match ? 'check' : 'alert'} size={12} />
+                <StatusIcon name={claim.domain_match ? 'check' : 'dot'} size={12} />
                 {claim.domain_match ? 'Domain match' : 'No domain match'}
               </span>
               {hasExistingOwner && (
                 <span className="status-badge status-badge--neutral">
-                  <StatusIcon name="alert" size={12} />
+                  <StatusIcon name="dot" size={12} />
                   Already has an owner
                 </span>
               )}

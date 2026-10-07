@@ -326,7 +326,7 @@ const TEXT_COLOUR_TOKENS = new Set([
   'text-primary', 'text-secondary',
   'accent', 'accent-dim', 'on-accent', 'on-accent-fill', 'wordmark', 'wordmark-icon', 'mark-text',
   'status-positive', 'status-blocked', 'status-neutral', 'status-file', 'status-old', 'status-action',
-  'danger', 'warning',
+  'danger',
   'tag-featured', 'tag-info', 'tag-halal', 'tag-gluten', 'allergy', 'allergy-strong', 'wine',
   'bg-card', // only as text on a full --accent fill (.swq-count), never as readable text on a surface
 ]);
@@ -368,7 +368,7 @@ test('shared chips use role classes, never raw business-state names', () => {
 test('confidence (hoog/middel/laag) is a neutral label, not a positive/blocked status', () => {
   const src = read('app/internal/onboarding-restaurant/page.js');
   assert.doesNotMatch(src, /CONFIDENCE_CHIP_CLASS/);
-  assert.match(src, /<span className="di-chip di-chip--label">\s*\{evidence\.confidence\}/);
+  assert.match(src, /<span className="di-chip di-chip--label">\s*Betrouwbaarheid: \{evidence\.confidence\}\s*<\/span>/, 'explicit label, no status icon');
   const label = css().match(/\.di-chip--label\s*\{([^}]*)\}/);
   assert.ok(label);
   assert.doesNotMatch(label[1], /status|green|danger/);
@@ -416,10 +416,45 @@ test('today in the opening hours is a presentation marker, never a positive stat
   assert.match(read('app/restaurant/[id]/RestaurantDetailView.js'), /aria-current=\{isToday \? 'date' : undefined\}/);
 });
 
-test('incomplete data is not shown as an error: NVWA coverage and field conflicts use the attention tint', () => {
+test('incomplete data and uncertainty use the neutral role — never an error and never --warning (alias of --status-old)', () => {
   const tone = read('app/nvwa/[id]/NvwaView.js').match(/const COMPLIANCE_TONE = \{[\s\S]*?\n\}/)[0];
-  assert.doesNotMatch(tone, /--danger/);
-  assert.match(read('app/internal/onboarding-restaurant/page.js'), /color: 'var\(--warning\)', marginTop: 2 \}\}>\s*Afwijkende waarde/);
+  assert.doesNotMatch(tone, /--danger|--warning|--status-old/);
+  assert.match(tone, /partial: \{ color: 'var\(--status-neutral\)'/);
+  assert.match(tone, /none: +\{ color: 'var\(--status-neutral\)'/);
+  assert.match(read('app/internal/onboarding-restaurant/page.js'), /color: 'var\(--status-neutral\)', marginTop: 2 \}\}>\s*Afwijkende waarde/);
+  const inbox = read('app/internal/import-inbox/page.js');
+  assert.match(inbox, /color: 'var\(--status-neutral\)', marginTop: 6 \}\}>Missing:/);
+  assert.match(inbox, /color: 'var\(--status-neutral\)', marginTop: 4 \}\}>Phone format not recognized/);
+  assert.match(inbox, /color: 'var\(--status-neutral\)' \}\}>\s*This looks like a possible duplicate/);
+  assert.match(inbox, /color: 'var\(--status-neutral\)', marginBottom: 8 \}\}>\s*robots\.txt could not be confirmed/);
+  assert.match(inbox, /color: 'var\(--status-old\)', marginBottom: 8 \}\}>\s*This page is disallowed by the site's robots\.txt/, 'a real access limitation keeps the old role, explicitly');
+  assert.match(inbox, /di-banner-\$\{importRunRole\(selectedRun\.status\) === 'blocked' \? 'danger' : 'neutral'\}/);
+  assert.match(read('app/internal/profile-drafts/page.js'), /color: 'var\(--status-neutral\)', marginTop: 6 \}\}>\s*Possibly a duplicate/);
+  const s = css();
+  for (const rule of ['.nvwa-warning {', '.allergen-unknown {', '.mc-badge-unknown ', '.low-coverage-note {']) {
+    const body = s.slice(s.indexOf(rule), s.indexOf('}', s.indexOf(rule)));
+    assert.ok(s.includes(rule), rule);
+    assert.doesNotMatch(body, /--warning|--status-old|--danger/, rule);
+    assert.match(body, /--status-neutral/, rule);
+  }
+  assert.match(s, /\.mc-unknown \{ border-color: var\(--input-border\) !important; \}/);
+  assert.match(s, /\.low-coverage-note--error \{[^}]*var\(--status-blocked\)/, 'a real load error in the same slot keeps the error role');
+  assert.match(read('app/search/page.js'), /className="low-coverage-note low-coverage-note--error">\{restaurantError\}/);
+  assert.doesNotMatch(read('app/internal/coverage/page.js'), /--warning/);
+});
+
+test('--warning (alias of --status-old) is used by no UI any more', () => {
+  const s = css();
+  const uses = s.split('\n').filter((l) => /var\(--warning/.test(l) && !/^\s*--/.test(l));
+  assert.deepEqual(uses, []);
+  assert.doesNotMatch(s, /\.di-banner-warning|\.badge-warning/);
+  for (const f of jsFiles()) assert.doesNotMatch(read(f), /var\(--warning|di-banner-warning|badge-warning/, f);
+});
+
+test('moderation: neutral claim states use a neutral icon, not the attention icon', () => {
+  const src = read('app/internal/moderation/page.js');
+  assert.match(src, /<StatusIcon name=\{claim\.domain_match \? 'check' : 'dot'\} size=\{12\} \/>/);
+  assert.doesNotMatch(src, /StatusIcon name="alert"|: 'alert'/);
 });
 
 test('moderation: only a domain match is positive; mismatch and existing owner stay neutral', () => {

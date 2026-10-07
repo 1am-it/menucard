@@ -312,7 +312,7 @@ export default function OnboardingRestaurantPage() {
         </div>
 
         {rolesLoaded && !isInternal && (
-          <div className="di-banner di-banner-warning">
+          <div className="di-banner di-banner-neutral">
             <span className="di-banner-icon"><IconDocument /></span>
             <span>Your account does not have the "internal" role — this workflow cannot be used.</span>
           </div>
@@ -361,7 +361,7 @@ export default function OnboardingRestaurantPage() {
                 </div>
 
                 {notes.length > 0 && (
-                  <div className="di-banner di-banner-warning">
+                  <div className="di-banner di-banner-neutral">
                     <span className="di-banner-icon"><IconDocument /></span>
                     <div>
                       {notes.map((note, idx) => (
@@ -389,7 +389,7 @@ export default function OnboardingRestaurantPage() {
                             Bron: {evidence.extractionMethod} — {evidence.sourceUrl}
                           </div>
                           {evidence.contextStatus === 'conflict' && (
-                            <div style={{ fontSize: 11, color: 'var(--warning)', marginTop: 2 }}>
+                            <div style={{ fontSize: 11, color: 'var(--status-neutral)', marginTop: 2 }}>
                               Afwijkende waarde gevonden op een andere pagina van deze site.
                             </div>
                           )}
@@ -398,7 +398,7 @@ export default function OnboardingRestaurantPage() {
                           {/* Betrouwbaarheid is geen status: neutraal label, geen statuskleur
                               of statusicoon (Kleurtaal v2). */}
                           <span className="di-chip di-chip--label">
-                            {evidence.confidence}
+                            Betrouwbaarheid: {evidence.confidence}
                           </span>
                           {!evidence.reviewReady && (
                             <span className="di-chip di-chip--neutral">
@@ -425,7 +425,7 @@ export default function OnboardingRestaurantPage() {
                       </div>
                       {conceptError && <div style={{ fontSize: 12, color: 'var(--danger)', marginBottom: 8 }}>{conceptError}</div>}
                       {conceptDuplicateOf && (
-                        <div className="di-banner di-banner-warning" style={{ marginBottom: 8 }}>
+                        <div className="di-banner di-banner-neutral" style={{ marginBottom: 8 }}>
                           <span className="di-banner-icon"><IconDocument /></span>
                           <span>
                             Dit lijkt op een al bestaand restaurantconcept. Weet je zeker dat je toch een nieuw concept wilt aanmaken?
