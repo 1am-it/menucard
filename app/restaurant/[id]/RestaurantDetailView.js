@@ -6,6 +6,8 @@ import { getReservationActions, getReservationNote, isExternalReservation, isVal
 import Wordmark from '@/src/components/Wordmark'
 import ExternalLinkIcon from '@/src/components/ExternalLinkIcon'
 import StatusIcon from '@/src/components/StatusIcon'
+import useClientNow from '@/src/components/useClientNow'
+import { todayOpening, openingBadge } from '@/src/lib/openingStatus'
 
 const DAYS = ['ma','di','wo','do','vr','za','zo']
 const DAY_LABELS = {
@@ -22,6 +24,9 @@ function getTodayKey() {
 export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
   const todayKey = getTodayKey()
   const [activeDay, setActiveDay] = useState(todayKey)
+  // Kleurtaal v2: "Nu open" only when open at this moment (browser clock,
+  // after mount) — opening hours today alone are not a positive status.
+  const now = useClientNow()
 
   if (!restaurant) {
     return (
@@ -39,8 +44,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
   const primaryReservation = reservationActions[0]
   const priceStr = '€'.repeat(restaurant.priceLevel || 2)
   const openingHours = restaurant.openingHours || {}
-  const todayHours = openingHours[todayKey]
-  const isOpenToday = !!todayHours
+  const todayBadge = openingBadge(now ? todayOpening(openingHours, now) : null, openingHours, todayKey)
 
   return (
     <>
@@ -98,9 +102,9 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
             <div>
               <div className="dip-section-title">Vandaag</div>
               <div style={{ marginBottom: 4 }}>
-                <span className={`status-badge ${isOpenToday ? 'status-badge--positive' : 'status-badge--neutral'}`} style={{ fontSize: 13 }}>
-                  <StatusIcon name={isOpenToday ? 'check' : 'clock'} size={14} />
-                  {isOpenToday ? `Open · ${todayHours}` : 'Gesloten'}
+                <span className={`status-badge status-badge--${todayBadge.role}`} style={{ fontSize: 13 }}>
+                  <StatusIcon name={todayBadge.icon} size={14} />
+                  {todayBadge.text}
                 </span>
               </div>
             </div>

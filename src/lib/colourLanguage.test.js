@@ -286,8 +286,10 @@ test('Bronwerkvoorraad: BE-23 statuses map to the Kleurtaal v2 roles', () => {
 test('open indicators show an icon plus text, never a coloured dot alone', () => {
   for (const f of ['app/menu/[id]/MenuView.js', 'app/restaurant/[id]/RestaurantDetailView.js', 'app/restaurants/page.js']) {
     const src = read(f);
-    assert.match(src, /status-badge--positive/, f);
-    assert.match(src, /<StatusIcon name=\{[^}]*'check' : 'clock'\}/, f);
+    assert.match(src, /import \{ todayOpening, openingBadge \} from '@\/src\/lib\/openingStatus'/, f);
+    assert.match(src, /<span className=\{`status-badge status-badge--\$\{(todayBadge|openBadge)\.role\}`\}[^>]*>\s*<StatusIcon name=\{(todayBadge|openBadge)\.icon\}[^>]*\/>\s*\{(todayBadge|openBadge)\.text\}/, f);
+    assert.doesNotMatch(src, /status-badge--positive/, `${f}: positive only via openingBadge (open at this moment)`);
+    assert.doesNotMatch(src, /`Open · \$\{/, `${f}: no "Open · hours" from opening hours alone`);
     assert.doesNotMatch(src, /borderRadius: '50%'[^}]*var\(--/, `${f}: no colour-only dot`);
   }
   assert.match(read('src/components/RestaurantBrowseCard.js'), /<StatusIcon name=\{restaurant\.openStatus === 'open' \? 'check' : 'clock'\}/);

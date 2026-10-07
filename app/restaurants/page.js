@@ -7,6 +7,8 @@ import restaurantsData from '@/data/restaurants.json'
 import menusData from '@/data/menus.json'
 import Wordmark from '@/src/components/Wordmark'
 import StatusIcon from '@/src/components/StatusIcon'
+import useClientNow from '@/src/components/useClientNow'
+import { todayOpening, openingBadge } from '@/src/lib/openingStatus'
 
 // BE-04 — this is the pre-BE-04 homepage, relocated intact from app/page.js
 // to its own secondary route. Nothing about its behaviour changed — only
@@ -342,9 +344,17 @@ const RESERVATION_ICONS = {
 
 // ─── Restaurant Card ──────────────────────────────────────────────────────────
 
-function RestaurantCard({ restaurant, id, lang, selectedMeal, selectedDay, ingredientMatches, ingredientQuery, excludeAllergens }) {
+function RestaurantCard({ restaurant, id, lang, selectedMeal, selectedDay, ingredientMatches, ingredientQuery, excludeAllergens, now }) {
   const t = T[lang]
   const openStatus = getOpenStatus(restaurant, selectedDay)
+  // Kleurtaal v2: "Nu open" (positive) only for today and only when open at
+  // this moment; a chosen other day shows its opening hours, neutrally.
+  const todayKey = getTodayKey()
+  const openBadge = selectedDay && selectedDay !== todayKey
+    ? (openStatus.open
+        ? { role: 'neutral', icon: 'clock', text: `Openingstijden ${restaurant.openingHours[selectedDay]}` }
+        : { role: 'neutral', icon: 'clock', text: 'Gesloten' })
+    : openingBadge(now ? todayOpening(restaurant.openingHours, now) : null, restaurant.openingHours, todayKey)
   const allLinks = restaurant.menuLinks || []
   // BE-10: exactly one primary action per card, matching "Zie de menukaart
   // vóór je reserveert" — when a menu exists, viewing it is primary and a
@@ -390,9 +400,9 @@ function RestaurantCard({ restaurant, id, lang, selectedMeal, selectedDay, ingre
         <div className="rc-header-top">
           {restaurant.badge && <span className="rc-badge">{restaurant.badge}</span>}
           <div className="rc-open-pill">
-            <span className={`status-badge ${openStatus.open ? 'status-badge--positive' : 'status-badge--neutral'}`} style={{ fontSize: 11 }}>
-              <StatusIcon name={openStatus.open ? 'check' : 'clock'} size={12} />
-              {openStatus.open ? `Open · ${openStatus.closes}` : 'Gesloten'}
+            <span className={`status-badge status-badge--${openBadge.role}`} style={{ fontSize: 11 }}>
+              <StatusIcon name={openBadge.icon} size={12} />
+              {openBadge.text}
             </span>
           </div>
         </div>
@@ -554,6 +564,7 @@ export default function RestaurantsPage() {
   // Guided flow
   const [selectedDay, setSelectedDay] = useState('')
   const [nowOpen, setNowOpen] = useState(false)
+  const now = useClientNow()
   const [selectedMeal, setSelectedMeal] = useState('')
   const [showMenusClicked, setShowMenusClicked] = useState(false)
 
@@ -1055,6 +1066,7 @@ export default function RestaurantsPage() {
                     ingredientMatches={ingredientMatches}
                     ingredientQuery={ingredientQuery}
                     excludeAllergens={excludeAllergens}
+                    now={now}
                   />
                 ))}
               </div>
