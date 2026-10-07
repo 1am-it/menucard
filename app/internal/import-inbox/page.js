@@ -1105,11 +1105,22 @@ export default function ImportInboxPage() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8, gap: 8, flexWrap: 'wrap' }}>
                       <div className="di-row-name" style={{ marginBottom: 0 }}>{c.extracted_fields?.name || '(no name)'}</div>
                       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                        {/* Kleurtaal v2: elke statuschip heeft icoon + tekst. */}
                         <span className={`di-chip ${c.quality_status === 'complete' ? 'di-chip--complete' : 'di-chip--incomplete'}`}>
+                          {c.quality_status === 'complete' ? <IconCheck /> : <IconInfo />}
                           {c.quality_status === 'complete' ? 'Complete' : 'Incomplete'}
                         </span>
-                        {c.possible_duplicate && <span className="di-chip di-chip--incomplete">possible duplicate</span>}
+                        {c.possible_duplicate && (
+                          <span className="di-chip di-chip--incomplete">
+                            <IconInfo />
+                            possible duplicate
+                          </span>
+                        )}
                         <span className={`di-chip di-chip--${c.review_status}`}>
+                          {(() => {
+                            const ChipIcon = TRIAGE_STATUS_ICONS[c.review_status] || IconDocument
+                            return <ChipIcon />
+                          })()}
                           {REVIEW_STATUS_LABELS[c.review_status] || c.review_status}
                         </span>
                       </div>
@@ -1730,6 +1741,7 @@ export default function ImportInboxPage() {
                     run.status === 'succeeded' ? 'di-chip--complete' : run.status === 'failed' ? 'di-chip--rejected' : 'di-chip--deferred'
                   }`}
                 >
+                  {run.status === 'succeeded' ? <IconCheck /> : run.status === 'failed' ? <IconX /> : <IconClock />}
                   {run.status}
                 </span>
                 <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{run.started_at}</span>

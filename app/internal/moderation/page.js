@@ -13,6 +13,7 @@ import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import InternalNav from '@/src/components/InternalNav'
 import { formatFieldName, formatFieldValue, formatSourceLabel, NO_CURRENT_VALUE_LABEL } from '@/src/lib/moderationFormatting'
+import StatusIcon from '@/src/components/StatusIcon'
 
 // A small, neutral "who proposed/verified this" pill — same rounded-pill
 // language the Owner claims section below already uses for its
@@ -250,8 +251,8 @@ export default function ModerationQueuePage() {
                   padding: '8px 14px',
                   borderRadius: 8,
                   border: 'none',
-                  background: 'var(--green)',
-                  color: '#fff',
+                  background: 'var(--accent-fill)',
+                  color: 'var(--on-accent-fill)',
                   fontWeight: 600,
                   cursor: 'pointer',
                 }}
@@ -314,27 +315,14 @@ export default function ModerationQueuePage() {
               Claimant: <strong>{claim.claim_email}</strong>
             </div>
             <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-              <span
-                style={{
-                  fontSize: 12,
-                  padding: '3px 8px',
-                  borderRadius: 999,
-                  background: claim.domain_match ? 'var(--green-faint)' : 'var(--warning-bg)',
-                  color: claim.domain_match ? 'var(--green)' : 'var(--warning)',
-                }}
-              >
+              {/* Kleurtaal v2: statusrol + icoon + tekst. */}
+              <span className={`status-badge ${claim.domain_match ? 'status-badge--positive' : 'status-badge--old'}`}>
+                <StatusIcon name={claim.domain_match ? 'check' : 'alert'} size={12} />
                 {claim.domain_match ? 'Domain match' : 'No domain match'}
               </span>
               {hasExistingOwner && (
-                <span
-                  style={{
-                    fontSize: 12,
-                    padding: '3px 8px',
-                    borderRadius: 999,
-                    background: 'var(--warning-bg)',
-                    color: 'var(--warning)',
-                  }}
-                >
+                <span className="status-badge status-badge--old">
+                  <StatusIcon name="alert" size={12} />
                   Already has an owner
                 </span>
               )}
@@ -347,8 +335,8 @@ export default function ModerationQueuePage() {
                   padding: '8px 14px',
                   borderRadius: 8,
                   border: 'none',
-                  background: 'var(--green)',
-                  color: '#fff',
+                  background: 'var(--accent-fill)',
+                  color: 'var(--on-accent-fill)',
                   fontWeight: 600,
                   cursor: 'pointer',
                 }}

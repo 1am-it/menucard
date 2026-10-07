@@ -6,6 +6,7 @@ import { getReservationActions, isValidPhone } from '@/src/utils/reservation'
 import restaurantsData from '@/data/restaurants.json'
 import menusData from '@/data/menus.json'
 import Wordmark from '@/src/components/Wordmark'
+import StatusIcon from '@/src/components/StatusIcon'
 
 // BE-04 — this is the pre-BE-04 homepage, relocated intact from app/page.js
 // to its own secondary route. Nothing about its behaviour changed — only
@@ -389,8 +390,8 @@ function RestaurantCard({ restaurant, id, lang, selectedMeal, selectedDay, ingre
         <div className="rc-header-top">
           {restaurant.badge && <span className="rc-badge">{restaurant.badge}</span>}
           <div className="rc-open-pill">
-            <span className={`rc-open-dot ${openStatus.open ? 'open' : 'closed'}`} />
-            <span className={`rc-open-label ${openStatus.open ? 'open' : 'closed'}`} style={{ fontSize: 11 }}>
+            <span className={`status-badge ${openStatus.open ? 'status-badge--positive' : 'status-badge--neutral'}`} style={{ fontSize: 11 }}>
+              <StatusIcon name={openStatus.open ? 'check' : 'clock'} size={12} />
               {openStatus.open ? `Open · ${openStatus.closes}` : 'Gesloten'}
             </span>
           </div>
@@ -815,7 +816,7 @@ export default function RestaurantsPage() {
                 if (!nowOpen) setSelectedDay('')
               }}
             >
-              <span className={`rc-open-dot ${nowOpen ? 'open' : ''}`} style={{ width: 7, height: 7, borderRadius: '50%', display: 'inline-block', background: nowOpen ? 'var(--green)' : 'var(--text-faint)', marginRight: 5 }} />
+              <StatusIcon name="clock" size={14} className="now-open-icon" />
               Nu open
             </button>
           </div>

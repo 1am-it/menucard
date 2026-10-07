@@ -7,6 +7,7 @@ import { getReservationActions, getReservationNote, isExternalReservation, isVal
 import { resolveDishTarget } from '@/src/lib/dishDeepLink'
 import Wordmark from '@/src/components/Wordmark'
 import ExternalLinkIcon from '@/src/components/ExternalLinkIcon'
+import StatusIcon from '@/src/components/StatusIcon'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -18,6 +19,10 @@ const TAG_LABELS = {
   halal:       'Halal',
   glutenvrij:  'Glutenvrij',
 }
+
+// Dieetlabels zijn neutrale labels met een blaadje-icoon, geen successtatus
+// (Kleurtaal v2).
+const NEUTRAL_DIET_TAG_KEYS = new Set(['vegetarisch', 'vegan'])
 
 const MEAL_CONFIG = {
   lunch:          { label: '🥗 Lunch',          title: 'Lunchkaart' },
@@ -172,7 +177,10 @@ function MenuItem({ item, query, excludeAllergens, isFiltering, isResolvedTarget
       {item.tags?.length > 0 && (
         <div className="item-tags">
           {item.tags.map(t => (
-            <span key={t} className={`item-tag tag-${t}`}>{TAG_LABELS[t] || t}</span>
+            <span key={t} className={`item-tag tag-${t}`}>
+              {NEUTRAL_DIET_TAG_KEYS.has(t) && <StatusIcon name="leaf" size={11} className="item-tag-icon" />}
+              {TAG_LABELS[t] || t}
+            </span>
           ))}
         </div>
       )}
@@ -434,8 +442,11 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
               <div className="rp-name">{r.name || restaurant.name}</div>
               {cuisineLabel && <div className="rp-line">{cuisineLabel}</div>}
               {restaurant.openingHours && (
-                <div className="rp-line" style={{ color: todayHours ? 'var(--green)' : 'var(--text-secondary)', fontWeight: todayHours ? 600 : 400 }}>
-                  {todayHours ? `Open · ${todayHours}` : 'Gesloten vandaag'}
+                <div className="rp-line">
+                  <span className={`status-badge ${todayHours ? 'status-badge--positive' : 'status-badge--neutral'}`}>
+                    <StatusIcon name={todayHours ? 'check' : 'clock'} size={13} />
+                    {todayHours ? `Open · ${todayHours}` : 'Gesloten vandaag'}
+                  </span>
                 </div>
               )}
               <div className="rp-line">

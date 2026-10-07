@@ -6,6 +6,7 @@ import ThemeToggle from '@/src/components/ThemeToggle'
 import PrimaryNav from '@/src/components/PrimaryNav'
 import RestaurantBrowseCard from '@/src/components/RestaurantBrowseCard'
 import Wordmark from '@/src/components/Wordmark'
+import StatusIcon from '@/src/components/StatusIcon'
 
 // BE-03 — dish-first search results.
 // BE-06 — filters + URL state added on top, see below.
@@ -667,7 +668,7 @@ function SearchPageInner() {
             className={`now-open-btn ${filters.nowOpen ? 'active' : ''}`}
             onClick={() => setFilter('nowOpen', !filters.nowOpen)}
           >
-            <span style={{ width: 7, height: 7, borderRadius: '50%', display: 'inline-block', background: filters.nowOpen ? 'var(--green)' : 'var(--text-faint)', marginRight: 6 }} />
+            <StatusIcon name="clock" size={14} className="now-open-icon" />
             Nu open
           </button>
           <button

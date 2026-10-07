@@ -5,6 +5,7 @@ import ThemeToggle from '@/src/components/ThemeToggle'
 import { getReservationActions, getReservationNote, isExternalReservation, isValidPhone, isValidUrl } from '@/src/utils/reservation'
 import Wordmark from '@/src/components/Wordmark'
 import ExternalLinkIcon from '@/src/components/ExternalLinkIcon'
+import StatusIcon from '@/src/components/StatusIcon'
 
 const DAYS = ['ma','di','wo','do','vr','za','zo']
 const DAY_LABELS = {
@@ -96,15 +97,9 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
             {/* Open status */}
             <div>
               <div className="dip-section-title">Vandaag</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                <span style={{
-                  display: 'inline-block',
-                  width: 8, height: 8,
-                  borderRadius: '50%',
-                  background: isOpenToday ? 'var(--green)' : 'var(--text-dim)',
-                  flexShrink: 0,
-                }} />
-                <span style={{ fontSize: 14, fontWeight: 700, color: isOpenToday ? 'var(--green)' : 'var(--text-secondary)' }}>
+              <div style={{ marginBottom: 4 }}>
+                <span className={`status-badge ${isOpenToday ? 'status-badge--positive' : 'status-badge--neutral'}`} style={{ fontSize: 13 }}>
+                  <StatusIcon name={isOpenToday ? 'check' : 'clock'} size={14} />
                   {isOpenToday ? `Open · ${todayHours}` : 'Gesloten'}
                 </span>
               </div>

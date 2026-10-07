@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import StatusIcon from '@/src/components/StatusIcon'
 
 // BE-11 — the light, text-first restaurant browse card. Built for
 // /alle-restaurants (Fase 1) and extracted here, unchanged, so /search
@@ -90,6 +91,7 @@ export default function RestaurantBrowseCard({ restaurant, headingLevel = 2 }) {
           ) : null}
           {restaurant.openStatus && (
             <span className={`lrc-status is-${restaurant.openStatus}`}>
+              <StatusIcon name={restaurant.openStatus === 'open' ? 'check' : 'clock'} size={12} className="lrc-status-icon" />
               {restaurant.openStatus === 'open' ? 'Open nu' : 'Gesloten'}
             </span>
           )}
