@@ -24,6 +24,20 @@ const PATHS = {
       <path d="M8 4.8v3.6M8 10.9v.1" />
     </>
   ),
+  // Mislukt / afgewezen / verworpen: kruis in cirkel.
+  cross: (
+    <>
+      <circle cx="8" cy="8" r="6.25" />
+      <path d="m5.9 5.9 4.2 4.2M10.1 5.9l-4.2 4.2" />
+    </>
+  ),
+  // Neutrale staat zonder oordeel (bijv. een actief concept): stip in cirkel.
+  dot: (
+    <>
+      <circle cx="8" cy="8" r="6.25" />
+      <circle cx="8" cy="8" r="1.6" fill="currentColor" stroke="none" />
+    </>
+  ),
   // Dieetlabel (vegetarisch/vegan): blaadje. Neutraal, geen successtatus.
   leaf: (
     <>

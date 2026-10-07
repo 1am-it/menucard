@@ -342,6 +342,69 @@ test('every text colour custom property is a reviewed token (CSS and inline styl
   assert.deepEqual(offenders, []);
 });
 
+test('"Actie nodig" is reserved: no business status is linked to --status-action', () => {
+  const s = css();
+  const uses = s.split('\n').filter((l) => /var\(--status-action/.test(l) && !/^\s*--/.test(l));
+  assert.deepEqual(uses.map((l) => l.trim().split(' ')[0]), ['.status-badge--action,'], 'only the generic role class may use it');
+  for (const f of jsFiles()) {
+    assert.doesNotMatch(read(f), /status-badge--action|swq-badge--action|di-chip--action|tone: 'action'/, f);
+  }
+  assert.doesNotMatch(read('docs/guides/design-reference.md'), /Nieuw\s*→\s*action/, 'the canonical design reference does not map Nieuw to Actie nodig');
+});
+
+test('shared chips use role classes, never raw business-state names', () => {
+  const s = css();
+  assert.doesNotMatch(s, /\.di-chip--(new|needs_enrichment|approved_internal|deferred|rejected|complete|incomplete|muted)\b/);
+  assert.doesNotMatch(s, /\.di-summary-icon--(new|needs_enrichment|approved_internal|deferred|rejected)\b/);
+  assert.doesNotMatch(s, /\.di-status-icon--(warning|danger|info|muted)\b/);
+  for (const f of jsFiles()) {
+    assert.doesNotMatch(read(f), /di-chip--(new|needs_enrichment|approved_internal|deferred|rejected|complete|incomplete|muted)\b|di-chip--\$\{(c|s|d)\.|di-summary-icon--\$\{status\}/, f);
+  }
+  assert.match(s, /\.di-chip \{[^}]*border-radius: var\(--status-radius\);/, 'status chips follow the status shape (light pill, dark 6px)');
+});
+
+test('confidence (hoog/middel/laag) is a neutral label, not a positive/blocked status', () => {
+  const src = read('app/internal/onboarding-restaurant/page.js');
+  assert.doesNotMatch(src, /CONFIDENCE_CHIP_CLASS/);
+  assert.match(src, /<span className="di-chip di-chip--label">\s*\{evidence\.confidence\}/);
+  const label = css().match(/\.di-chip--label\s*\{([^}]*)\}/);
+  assert.ok(label);
+  assert.doesNotMatch(label[1], /status|green|danger/);
+});
+
+test('in-progress, not yet reviewed, concept and incomplete states are not success/error/action', () => {
+  const restaurant = read('app/internal/onboarding-restaurant/page.js');
+  const menu = read('app/internal/onboarding-menu/page.js');
+  for (const src of [restaurant, menu]) {
+    assert.match(src, /di-chip--\$\{proposalRequestRole\(status\)\}/);
+    assert.match(src, /pending: 'clock'/, '"Bezig…" shows a clock, not a status colour');
+  }
+  assert.match(menu, /di-chip--\$\{reviewStatusRole\(s\.effective_status\)\}/);
+  assert.match(read('app/internal/profile-drafts/page.js'), /di-chip--\$\{profileDraftRole\(d\.status\)\}/);
+  const inbox = read('app/internal/import-inbox/page.js');
+  assert.match(inbox, /di-chip di-chip--\$\{qualityStatusRole\(c\.quality_status\)\}/, 'list');
+  assert.match(inbox, /di-status-icon--\$\{qualityStatusRole\(c\.quality_status\)\}/, 'detail uses the same role as the list');
+  assert.match(inbox, /<span className="di-chip di-chip--neutral">\s*<IconInfo \/>\s*possible duplicate/);
+  assert.match(inbox, /di-summary-icon--\$\{reviewStatusRole\(status\)\}/);
+  assert.match(inbox, /const statusTone = reviewStatusRole\(c\.review_status\)/);
+  assert.match(inbox, /di-status-icon--\$\{profileDraftRole\(draftLineage\.state\)\}/);
+  assert.match(inbox, /di-chip--\$\{importRunRole\(run\.status\)\}/);
+});
+
+test('status chips on onboarding and profile drafts show an icon next to the text', () => {
+  for (const f of ['app/internal/onboarding-restaurant/page.js', 'app/internal/onboarding-menu/page.js', 'app/internal/profile-drafts/page.js']) {
+    const src = read(f);
+    const re = /<span className=\{?[`"]di-chip di-chip--(?!label)[^>]*>/g;
+    let m;
+    let count = 0;
+    while ((m = re.exec(src))) {
+      count += 1;
+      assert.match(src.slice(m.index + m[0].length, m.index + m[0].length + 160), /^\s*<StatusIcon /, `${f}: ${m[0]}`);
+    }
+    assert.ok(count > 0, f);
+  }
+});
+
 test('today in the opening hours is a presentation marker, never a positive status', () => {
   const s = css();
   const today = s.match(/\.hours-today[^{]*\{[^}]*\}/g) || [];
@@ -349,6 +412,18 @@ test('today in the opening hours is a presentation marker, never a positive stat
   for (const rule of today) assert.doesNotMatch(rule, /status-|green/, rule);
   assert.match(s, /\.hours-today \.hours-day \{ color: var\(--accent\); \}/);
   assert.match(read('app/restaurant/[id]/RestaurantDetailView.js'), /aria-current=\{isToday \? 'date' : undefined\}/);
+});
+
+test('incomplete data is not shown as an error: NVWA coverage and field conflicts use the attention tint', () => {
+  const tone = read('app/nvwa/[id]/NvwaView.js').match(/const COMPLIANCE_TONE = \{[\s\S]*?\n\}/)[0];
+  assert.doesNotMatch(tone, /--danger/);
+  assert.match(read('app/internal/onboarding-restaurant/page.js'), /color: 'var\(--warning\)', marginTop: 2 \}\}>\s*Afwijkende waarde/);
+});
+
+test('moderation: only a domain match is positive; mismatch and existing owner stay neutral', () => {
+  const src = read('app/internal/moderation/page.js');
+  assert.match(src, /status-badge--\$\{domainMatchRole\(claim\.domain_match\)\}/);
+  assert.doesNotMatch(src, /status-badge--old/);
 });
 
 test('dark: only approved refinements — the error border keeps its former 20% alpha', () => {

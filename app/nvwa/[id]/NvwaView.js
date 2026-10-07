@@ -42,7 +42,9 @@ const COMPLIANCE_TONE = {
   // SourceTag (src/lib/moderationFormatting.js), not a new token.
   neutral: { color: 'var(--text-secondary)', bg: 'var(--bg-elevated)',   border: 'var(--border)' },
   partial: { color: 'var(--warning)', bg: 'var(--warning-bg)',    border: 'var(--warning-border)' },
-  none:    { color: 'var(--danger)',  bg: 'var(--danger-bg)',     border: 'var(--danger-border)' },
+  // Kleurtaal v2: weinig vastgelegde allergeneninformatie is onvolledige
+  // data, geen technische fout — dus de aandachtstint, nooit de fouttint.
+  none:    { color: 'var(--warning)', bg: 'var(--warning-bg)',    border: 'var(--warning-border)' },
 }
 
 function ComplianceScore({ items }) {

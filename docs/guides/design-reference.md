@@ -280,7 +280,7 @@ colour, `-bg` and `-border` token; `--status-radius` gives the shape.
 | `--status-blocked` | `#8A1C12` on `#FCE0DA` (7.45:1) | `#FF6B6B` (min. 4.96:1) | Robots geblokkeerd, Niet bereikbaar, load and validation errors |
 | `--status-file` | `#5A3A0A` on `#FEF0D3` (9.11:1) | `#64B4FF` (min. 6.05:1) | Afbeelding/PDF, Klaar voor review |
 | `--status-old` | `#5A3A0A` on `#FEF0D3` (9.11:1) | `#FF9E6B` (min. 6.43:1) | Oude URL, Toegang beperkt, Identiteit gewijzigd, Structuur niet herkend |
-| `--status-action` | `#5A3A0A` on `#FEF1D5` (9.18:1) | `#FFD27A`, fill `rgba(255,210,122,0.10)` (min. **8.70:1**) | Actie nodig: an open task for an editor |
+| `--status-action` | `#5A3A0A` on `#FEF1D5` (9.18:1) | `#FFD27A`, fill `rgba(255,210,122,0.10)` (min. **8.70:1**) | Reserved design role "Actie nodig" (an open task for an editor); not yet assigned to any business state |
 | `--status-neutral` | `#2A2E36` on `#EFEFEF` (11.84:1) | `#AAAAAA` (min. 5.71:1) | Geen bruikbare menulink, Niet beoordeeld, Geen menukaart aangetroffen, closed |
 | `--status-positive` | `#2A2E36` on `#EFEFEF` (11.84:1) | `#06C167` (min. 5.77:1) | Herkenbaar, Bereikbaar, Nu open, goedgekeurd |
 
@@ -297,13 +297,45 @@ Meaning that must be kept:
 - Information is not success: info banners use `--accent-surface` with a
   1px `--accent` border.
 - Approvals and primary action buttons use the oker fill, never green.
+- A status role is used only where the content really is a semantic
+  status. A shared CSS class name is no proof that every use means the
+  same thing: each screen maps its own states per meaning
+  (`src/lib/statusRoles.js`). Confidence (hoog/middel/laag) is not a
+  status: it is a neutral outlined label (`.di-chip--label`) without
+  status colour or status icon.
+- "Today" in opening hours is a presentation marker, not a status: the
+  day label is ink oker (`--accent`), the times primary text, with
+  `aria-current="date"`; never `--status-positive`. Whether the
+  restaurant is open is shown separately ("Vandaag" badge).
+- Incomplete data and data conflicts are not errors: they use the
+  attention message colour (`--warning`) or a neutral status, never
+  `--danger`/`--status-blocked`. A destructive action (e.g. "Discard")
+  and real load/validation errors keep `--danger`.
 
 BE-23 mapping (`app/internal/source-workqueue/page.js`): Bereikbaar →
 positive; Niet bereikbaar → blocked; Toegang beperkt, Identiteit
 gewijzigd, Structuur niet herkend → old; Klaar voor review → file; Niet
-beoordeeld, Geen menukaart aangetroffen → neutral. Import inbox: Nieuw →
-action; Aanvullen / Uitgesteld → old; Goedgekeurd / Complete → positive;
-Afgewezen / Incomplete → blocked.
+beoordeeld, Geen menukaart aangetroffen → neutral.
+
+Other internal screens (`src/lib/statusRoles.js`; conservative until the
+status vocabulary is decided — anything not named by the design source
+stays neutral):
+
+- Import inbox and onboarding menu review status: Approved (internal
+  only) → positive; New, Not yet reviewed, Needs review, Needs
+  enrichment, Deferred, Rejected → neutral.
+- Data completeness: Complete → positive; Incomplete and "possible
+  duplicate" → neutral — the same role in the list and in the detail.
+- Import run: failed → blocked (a real technical error); running,
+  partial and succeeded → neutral.
+- Menu proposal request (onboarding): Mislukt → blocked; Bezig…,
+  Voorstel aangemaakt, Al voorgesteld → neutral.
+- Restaurant Profile Draft (Active, Discarded, "Profile draft created")
+  → neutral: a concept is not an approval.
+- Owner claim: Domain match → positive; No domain match, Already has an
+  owner → neutral.
+- Coverage metric: Complete → positive; Partial → neutral; None yet →
+  `--text-secondary`.
 
 Compatibility: `--green`, `--green-faint`, `--green-border` (→
 `--status-positive*`), `--danger` (→ `--status-blocked`) and `--warning`
@@ -315,8 +347,11 @@ their own tokens.
 Open points (not decided by Kleurtaal v2):
 
 - Where "Actie nodig" sits in the status vocabulary below (which
-  dimension, when it is assigned). The role exists; today only the
-  import inbox's "Nieuw" uses it.
+  dimension, when it is assigned). The role and its tokens exist as a
+  reserved design role, but no business state uses it: assigning it
+  (for example to the import inbox's "New") is a future product
+  decision, as are non-neutral roles for the states listed as neutral
+  above.
 - The Brontriage statuses and the "Brontriage" navigation item stay open
   decisions from that handoff.
 - In light, the "Actie nodig" fill equals the selected-row fill; on a

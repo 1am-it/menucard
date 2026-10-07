@@ -19,6 +19,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import InternalNav from '@/src/components/InternalNav'
+import StatusIcon from '@/src/components/StatusIcon'
+import { profileDraftRole } from '@/src/lib/statusRoles'
 
 const STATUS_LABELS = {
   draft: 'Active',
@@ -174,7 +176,9 @@ export default function ProfileDraftsOverviewPage() {
                 <div className="di-row-name" style={{ marginBottom: 0 }}>
                   {d.candidate_name || '(unnamed candidate)'}
                 </div>
-                <span className={`di-chip ${d.status === 'draft' ? 'di-chip--approved_internal' : 'di-chip--muted'}`}>
+                {/* Kleurtaal v2: een concept is geen goedkeuring — neutraal, icoon + tekst. */}
+                <span className={`di-chip di-chip--${profileDraftRole(d.status)}`}>
+                  <StatusIcon name={d.status === 'discarded' ? 'cross' : 'dot'} size={12} />
                   {STATUS_LABELS[d.status] || d.status}
                 </span>
               </div>

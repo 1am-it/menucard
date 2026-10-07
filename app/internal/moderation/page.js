@@ -14,6 +14,7 @@ import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import InternalNav from '@/src/components/InternalNav'
 import { formatFieldName, formatFieldValue, formatSourceLabel, NO_CURRENT_VALUE_LABEL } from '@/src/lib/moderationFormatting'
 import StatusIcon from '@/src/components/StatusIcon'
+import { domainMatchRole } from '@/src/lib/statusRoles'
 
 // A small, neutral "who proposed/verified this" pill — same rounded-pill
 // language the Owner claims section below already uses for its
@@ -315,13 +316,15 @@ export default function ModerationQueuePage() {
               Claimant: <strong>{claim.claim_email}</strong>
             </div>
             <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-              {/* Kleurtaal v2: statusrol + icoon + tekst. */}
-              <span className={`status-badge ${claim.domain_match ? 'status-badge--positive' : 'status-badge--old'}`}>
+              {/* Kleurtaal v2: statusrol + icoon + tekst. Een domeinmatch is
+                  positief; een mismatch of bestaande eigenaar heeft nog geen
+                  besloten rol en blijft neutraal (src/lib/statusRoles.js). */}
+              <span className={`status-badge status-badge--${domainMatchRole(claim.domain_match)}`}>
                 <StatusIcon name={claim.domain_match ? 'check' : 'alert'} size={12} />
                 {claim.domain_match ? 'Domain match' : 'No domain match'}
               </span>
               {hasExistingOwner && (
-                <span className="status-badge status-badge--old">
+                <span className="status-badge status-badge--neutral">
                   <StatusIcon name="alert" size={12} />
                   Already has an owner
                 </span>

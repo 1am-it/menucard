@@ -38,6 +38,7 @@ import {
   canDiscardCandidateDraft,
   buildDraftLineageSummary,
 } from '@/src/lib/restaurantProfileDrafts'
+import { reviewStatusRole, qualityStatusRole, importRunRole, profileDraftRole } from '@/src/lib/statusRoles'
 
 // Mirrors ops/scripts/import-breda-osm.config.js's own
 // ALLOWED_AMENITY_VALUES — the fixed, complete set of categories this
@@ -935,7 +936,7 @@ export default function ImportInboxPage() {
                       }}
                       className={`di-summary-card ${active ? 'active' : ''}`}
                     >
-                      <span className={`di-summary-icon di-summary-icon--${status}`}>
+                      <span className={`di-summary-icon di-summary-icon--${reviewStatusRole(status)}`}>
                         <Icon />
                       </span>
                       <span className="di-summary-body">
@@ -1105,18 +1106,19 @@ export default function ImportInboxPage() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8, gap: 8, flexWrap: 'wrap' }}>
                       <div className="di-row-name" style={{ marginBottom: 0 }}>{c.extracted_fields?.name || '(no name)'}</div>
                       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                        {/* Kleurtaal v2: elke statuschip heeft icoon + tekst. */}
-                        <span className={`di-chip ${c.quality_status === 'complete' ? 'di-chip--complete' : 'di-chip--incomplete'}`}>
+                        {/* Kleurtaal v2: elke statuschip heeft icoon + tekst; de rol
+                            per betekenis komt uit src/lib/statusRoles.js. */}
+                        <span className={`di-chip di-chip--${qualityStatusRole(c.quality_status)}`}>
                           {c.quality_status === 'complete' ? <IconCheck /> : <IconInfo />}
                           {c.quality_status === 'complete' ? 'Complete' : 'Incomplete'}
                         </span>
                         {c.possible_duplicate && (
-                          <span className="di-chip di-chip--incomplete">
+                          <span className="di-chip di-chip--neutral">
                             <IconInfo />
                             possible duplicate
                           </span>
                         )}
-                        <span className={`di-chip di-chip--${c.review_status}`}>
+                        <span className={`di-chip di-chip--${reviewStatusRole(c.review_status)}`}>
                           {(() => {
                             const ChipIcon = TRIAGE_STATUS_ICONS[c.review_status] || IconDocument
                             return <ChipIcon />
@@ -1148,14 +1150,7 @@ export default function ImportInboxPage() {
                     {expanded && (() => {
                       const draftLineage = buildDraftLineageSummary(c)
                       const StatusIcon = TRIAGE_STATUS_ICONS[c.review_status] || IconDocument
-                      const statusTone =
-                        c.review_status === 'approved_internal'
-                          ? 'positive'
-                          : c.review_status === 'rejected'
-                            ? 'danger'
-                            : c.review_status === 'needs_enrichment' || c.review_status === 'deferred'
-                              ? 'warning'
-                              : 'info'
+                      const statusTone = reviewStatusRole(c.review_status)
                       const statusSublabel =
                         c.review_status === 'approved_internal'
                           ? 'Internal only — not published'
@@ -1198,7 +1193,7 @@ export default function ImportInboxPage() {
                               </span>
                             </div>
                             <div className="di-status-item">
-                              <span className={`di-status-icon di-status-icon--${c.quality_status === 'complete' ? 'positive' : 'warning'}`}>
+                              <span className={`di-status-icon di-status-icon--${qualityStatusRole(c.quality_status)}`}>
                                 {c.quality_status === 'complete' ? <IconCheck /> : <IconInfo />}
                               </span>
                               <span className="di-status-body">
@@ -1210,7 +1205,7 @@ export default function ImportInboxPage() {
                             </div>
                             <div className="di-status-item">
                               <span
-                                className={`di-status-icon di-status-icon--${draftLineage.state === 'active' ? 'positive' : 'muted'}`}
+                                className={`di-status-icon di-status-icon--${profileDraftRole(draftLineage.state)}`}
                               >
                                 {draftLineage.state === 'active' ? <IconCheck /> : <IconDocument />}
                               </span>
@@ -1465,7 +1460,7 @@ export default function ImportInboxPage() {
                                     title={!hasVerifiedWebsiteForSuggestions(c) ? 'Save a verified website first to enable suggestions.' : undefined}
                                     className="di-link-btn"
                                     style={{
-                                      color: hasVerifiedWebsiteForSuggestions(c) ? 'var(--text-secondary)' : 'var(--text-secondary)',
+                                      color: 'var(--text-secondary)',
                                       cursor: hasVerifiedWebsiteForSuggestions(c) ? 'pointer' : 'not-allowed',
                                     }}
                                   >
@@ -1737,9 +1732,7 @@ export default function ImportInboxPage() {
             <div key={run.id} className="di-run-card">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                 <span
-                  className={`di-chip ${
-                    run.status === 'succeeded' ? 'di-chip--complete' : run.status === 'failed' ? 'di-chip--rejected' : 'di-chip--deferred'
-                  }`}
+                  className={`di-chip di-chip--${importRunRole(run.status)}`}
                 >
                   {run.status === 'succeeded' ? <IconCheck /> : run.status === 'failed' ? <IconX /> : <IconClock />}
                   {run.status}

@@ -22,6 +22,8 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import InternalNav from '@/src/components/InternalNav'
+import StatusIcon from '@/src/components/StatusIcon'
+import { proposalRequestRole } from '@/src/lib/statusRoles'
 
 const selectStyle = {
   padding: 8,
@@ -40,10 +42,14 @@ const FIELD_LABELS_NL = {
   website: 'Website',
 }
 
-const CONFIDENCE_CHIP_CLASS = {
-  hoog: 'di-chip--approved_internal',
-  middel: 'di-chip--needs_enrichment',
-  laag: 'di-chip--rejected',
+// Kleurtaal v2: icoon per verzoekstatus; de rol komt uit
+// src/lib/statusRoles.js (alleen "Mislukt" is een echte fout, de rest
+// blijft neutraal — een aangemaakt voorstel is geen goedkeuring).
+const PROPOSAL_REQUEST_ICONS = {
+  pending: 'clock',
+  success: 'check',
+  exists: 'check',
+  error: 'cross',
 }
 
 const MENU_CREATE_STATUS_LABELS = {
@@ -383,17 +389,22 @@ export default function OnboardingRestaurantPage() {
                             Bron: {evidence.extractionMethod} — {evidence.sourceUrl}
                           </div>
                           {evidence.contextStatus === 'conflict' && (
-                            <div style={{ fontSize: 11, color: 'var(--danger)', marginTop: 2 }}>
+                            <div style={{ fontSize: 11, color: 'var(--warning)', marginTop: 2 }}>
                               Afwijkende waarde gevonden op een andere pagina van deze site.
                             </div>
                           )}
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-end' }}>
-                          <span className={`di-chip ${CONFIDENCE_CHIP_CLASS[evidence.confidence] || 'di-chip--muted'}`}>
+                          {/* Betrouwbaarheid is geen status: neutraal label, geen statuskleur
+                              of statusicoon (Kleurtaal v2). */}
+                          <span className="di-chip di-chip--label">
                             {evidence.confidence}
                           </span>
                           {!evidence.reviewReady && (
-                            <span className="di-chip di-chip--muted">Handmatige beoordeling nodig</span>
+                            <span className="di-chip di-chip--neutral">
+                              <StatusIcon name="clock" size={12} />
+                              Handmatige beoordeling nodig
+                            </span>
                           )}
                         </div>
                       </div>
@@ -460,7 +471,8 @@ export default function OnboardingRestaurantPage() {
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
                             <div className="di-row-name" style={{ marginBottom: 0 }}>{menu.name || 'Menu zonder naam'}</div>
                             {status && (
-                              <span className={`di-chip ${status === 'success' ? 'di-chip--approved_internal' : status === 'error' ? 'di-chip--rejected' : 'di-chip--new'}`}>
+                              <span className={`di-chip di-chip--${proposalRequestRole(status)}`}>
+                                <StatusIcon name={PROPOSAL_REQUEST_ICONS[status] || 'dot'} size={12} />
                                 {MENU_CREATE_STATUS_LABELS[status]}
                               </span>
                             )}

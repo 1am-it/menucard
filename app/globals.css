@@ -46,7 +46,8 @@
   /* Semantische statusrollen — alleen voor status, altijd icoon + tekst.
      Donker: statuskleur als tekst en 1px rand, vlak = statuskleur op 10%.
      Minimum gemeten over kaart, verhoogd vlak en zacht accentvlak
-     (src/lib/colourLanguage.test.js). */
+     (src/lib/colourLanguage.test.js). Welke staat welke rol krijgt:
+     src/lib/statusRoles.js; --status-action is gereserveerd. */
   --status-blocked:         #FF6B6B;
   --status-blocked-bg:      rgba(255, 107, 107, 0.10);
   --status-blocked-border:  #FF6B6B;
@@ -1129,7 +1130,9 @@ header, .site-header {
 /* ── Statusbadge (Kleurtaal v2) ──
    Eén vorm voor elke status: icoon + tekst, kleur is nooit de enige drager.
    Licht: pil zonder rand, effen vlak. Donker: 6px radius, 1px rand in de
-   statuskleur, vlak = statuskleur op 10%. De rollen staan in :root. */
+   statuskleur, vlak = statuskleur op 10%. De rollen staan in :root.
+   --action ("Actie nodig") is een gereserveerde ontwerprol: geen
+   businessstatus gebruikt hem tot een expliciet productbesluit. */
 .status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border: 1px solid transparent; border-radius: var(--status-radius); font-size: 12px; font-weight: 600; line-height: 1.35; white-space: nowrap; max-width: 100%; }
 .status-badge svg { flex-shrink: 0; }
 .status-badge--blocked,  .swq-badge--blocked  { color: var(--status-blocked);  background: var(--status-blocked-bg);  border-color: var(--status-blocked-border); }
@@ -2158,14 +2161,12 @@ mark.search-highlight {
 .di-summary-label { font-size: 12px; color: var(--text-secondary); font-weight: 600; white-space: nowrap; }
 .di-summary-count { font-size: 19px; font-weight: 800; color: var(--text-primary); line-height: 1.2; }
 
-/* Kleurtaal v2-statusrollen: nieuw = open taak voor een redacteur (actie
-   nodig), aanvullen/uitgesteld = aandacht, goedgekeurd = positief,
-   afgewezen = geblokkeerd. Het label staat er altijd als tekst naast. */
-.di-summary-icon--new                { background: var(--status-action-bg); color: var(--status-action); }
-.di-summary-icon--needs_enrichment   { background: var(--status-old-bg); color: var(--status-old); }
-.di-summary-icon--approved_internal  { background: var(--status-positive-bg); color: var(--status-positive); }
-.di-summary-icon--deferred           { background: var(--status-old-bg); color: var(--status-old); }
-.di-summary-icon--rejected           { background: var(--status-blocked-bg); color: var(--status-blocked); }
+/* Kleurtaal v2: rolklassen, geen statusnamen. Welke staat welke rol krijgt
+   staat per scherm in src/lib/statusRoles.js (alleen goedgekeurd is
+   positief; de rest blijft neutraal tot een productbesluit). Het label staat
+   er altijd als tekst naast. */
+.di-summary-icon--positive { background: var(--status-positive-bg); color: var(--status-positive); }
+.di-summary-icon--neutral  { background: var(--status-neutral-bg); color: var(--status-neutral); }
 
 /* Labeled filter + search bar */
 .di-filterbar { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px; }
@@ -2200,16 +2201,16 @@ mark.search-highlight {
 .di-row-meta { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
 .di-row-reason { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
 
-.di-chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border: 1px solid transparent; border-radius: var(--radius-pill); font-size: 12px; font-weight: 700; white-space: nowrap; }
+/* Statuschip: zelfde vorm als .status-badge (licht pil, donker 6px).
+   Rolklassen per betekenis, gekozen in src/lib/statusRoles.js. --label is
+   géén status (bijv. betrouwbaarheid hoog/middel/laag): omlijnd, secundaire
+   tekst, geen statuskleur en geen statusicoon. */
+.di-chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border: 1px solid transparent; border-radius: var(--status-radius); font-size: 12px; font-weight: 700; white-space: nowrap; }
 .di-chip svg { width: 12px; height: 12px; }
-.di-chip--complete           { background: var(--status-positive-bg); color: var(--status-positive); border-color: var(--status-positive-border); }
-.di-chip--incomplete         { background: var(--status-blocked-bg); color: var(--status-blocked); border-color: var(--status-blocked-border); }
-.di-chip--new                { background: var(--status-action-bg); color: var(--status-action); border-color: var(--status-action-border); }
-.di-chip--needs_enrichment   { background: var(--status-old-bg); color: var(--status-old); border-color: var(--status-old-border); }
-.di-chip--approved_internal  { background: var(--status-positive-bg); color: var(--status-positive); border-color: var(--status-positive-border); }
-.di-chip--deferred           { background: var(--status-old-bg); color: var(--status-old); border-color: var(--status-old-border); }
-.di-chip--rejected           { background: var(--status-blocked-bg); color: var(--status-blocked); border-color: var(--status-blocked-border); }
-.di-chip--muted              { background: var(--status-neutral-bg); color: var(--status-neutral); border-color: var(--status-neutral-border); }
+.di-chip--positive { background: var(--status-positive-bg); color: var(--status-positive); border-color: var(--status-positive-border); }
+.di-chip--blocked  { background: var(--status-blocked-bg); color: var(--status-blocked); border-color: var(--status-blocked-border); }
+.di-chip--neutral  { background: var(--status-neutral-bg); color: var(--status-neutral); border-color: var(--status-neutral-border); }
+.di-chip--label    { background: transparent; color: var(--text-secondary); box-shadow: inset 0 0 0 1px var(--input-border); }
 
 .di-view-btn {
   display: inline-flex; align-items: center; gap: 4px; padding: 8px 14px; border-radius: var(--radius-md);
@@ -2238,6 +2239,10 @@ mark.search-highlight {
   background: transparent; color: var(--text-secondary); cursor: pointer; transition: all 0.15s;
 }
 .di-link-btn:hover { border-color: var(--border-hover); color: var(--text-primary); }
+/* Uitgeschakeld: gestippelde rand i.p.v. vervaagde tekst, zodat de tekst
+   AA houdt; de zichtbare uitleg eronder draagt de reden. */
+.di-link-btn:disabled { border-style: dashed; }
+.di-link-btn:disabled:hover { border-color: var(--border); color: var(--text-secondary); }
 .di-link-btn.active { background: var(--accent-faint); border-color: var(--accent); color: var(--accent); }
 .di-btn-primary {
   font-size: 13px; font-weight: 700; padding: 9px 16px; border-radius: var(--radius-md); border: none;
@@ -2263,10 +2268,7 @@ mark.search-highlight {
 .di-status-label { font-size: 13px; font-weight: 700; color: var(--text-primary); }
 .di-status-sublabel { font-size: 11.5px; color: var(--text-secondary); }
 .di-status-icon--positive { background: var(--status-positive-bg); color: var(--status-positive); }
-.di-status-icon--warning  { background: var(--status-old-bg); color: var(--status-old); }
-.di-status-icon--danger   { background: var(--status-blocked-bg); color: var(--status-blocked); }
-.di-status-icon--info     { background: var(--status-action-bg); color: var(--status-action); }
-.di-status-icon--muted    { background: var(--status-neutral-bg); color: var(--status-neutral); border: 1px solid var(--border); }
+.di-status-icon--neutral  { background: var(--status-neutral-bg); color: var(--status-neutral); border: 1px solid var(--border); }
 
 .di-accordion { display: grid; gap: 8px; margin-top: 14px; }
 .di-accordion-item { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
