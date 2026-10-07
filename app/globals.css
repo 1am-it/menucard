@@ -627,8 +627,8 @@ header, .site-header {
    van het restaurant; Onze Menukaarten neemt zelf niets aan. */
 .reservation-note { margin: 8px 0 0; font-size: 12px; line-height: 17px; color: var(--text-secondary); }
 .dip-cta .reservation-note { margin-top: 0; }
-.dip-btn-reserve { display: flex; align-items: center; justify-content: center; gap: 6px; }
-.dip-btn-reserve:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+.dip-btn-secondary.dip-btn-reserve { display: flex; align-items: center; justify-content: center; gap: 6px; }
+.dip-btn-secondary.dip-btn-reserve:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
 .rp-source {
