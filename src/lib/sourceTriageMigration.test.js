@@ -95,3 +95,73 @@ test('0015 error codes do not collide with codes used by earlier migrations', ()
   for (const f of earlier) for (const m of fs.readFileSync(path.join(dir, f), 'utf8').matchAll(/errcode = '(P\d{4})'/g)) used.add(m[1]);
   for (const c of ['P0030', 'P0031', 'P0032', 'P0033']) assert.ok(!used.has(c), c);
 });
+
+// ── Exact privilege set (review M1/L1) ──────────────────────────────────
+//
+// Supabase's default privileges grant rights on new tables, sequences and
+// functions in schema public DIRECTLY to anon, authenticated and
+// service_role. Every 0015 object must therefore be revoked from all four
+// explicitly, and service_role may get back only the exact minimum below.
+
+function statements(kind) {
+  return [...code.matchAll(new RegExp(`\\b${kind}\\b[^;]*;`, 'gi'))].map((m) => m[0].replace(/\s+/g, ' ').trim().toLowerCase());
+}
+
+const ALL_ROLES = 'from public, anon, authenticated, service_role;';
+const CREATE_SIG = 'create_source_triage_proposal(uuid, uuid, text, text, text, text, text, text, uuid)';
+const DECIDE_SIG = 'decide_source_triage_proposal(uuid, text, uuid, text)';
+
+test('0015 identity sequence name is derived from the events table, and the migration targets exactly that sequence', () => {
+  assert.match(code, /create table if not exists source_triage_proposal_events \(\s+id\s+bigint generated always as identity primary key,/);
+  const expected = 'public.source_triage_proposal_events_id_seq';
+  const sequences = [...code.matchAll(/on sequence ([\w.]+)/gi)].map((m) => m[1].toLowerCase());
+  assert.ok(sequences.length >= 2, 'a revoke and a grant on the sequence');
+  for (const s of sequences) assert.equal(s, expected);
+});
+
+test('0015 grants are exactly the minimum for service_role — nothing else, no GRANT ALL', () => {
+  assert.deepEqual(statements('grant').sort(), [
+    'grant execute on function ' + CREATE_SIG.toLowerCase() + ' to service_role;',
+    'grant execute on function ' + DECIDE_SIG.toLowerCase() + ' to service_role;',
+    'grant select, insert on public.source_triage_proposal_events to service_role;',
+    'grant select, insert on public.source_triage_proposals to service_role;',
+    'grant update (status, decided_by, decided_at, decision_note) on public.source_triage_proposals to service_role;',
+    'grant usage on schema public to service_role;',
+    'grant usage on sequence public.source_triage_proposal_events_id_seq to service_role;',
+  ].sort());
+  assert.doesNotMatch(code, /grant\s+all\b/i);
+  assert.doesNotMatch(code, /alter default privileges/i);
+});
+
+test('0015 revokes every object from public, anon, authenticated and service_role before granting', () => {
+  const revokes = statements('revoke');
+  const required = [
+    'revoke all on public.source_triage_proposals from public, anon, authenticated;',
+    'revoke all on public.source_triage_proposal_events from public, anon, authenticated;',
+    'revoke all on public.source_triage_proposals from service_role;',
+    'revoke all on public.source_triage_proposal_events from service_role;',
+    'revoke all on sequence public.source_triage_proposal_events_id_seq ' + ALL_ROLES,
+    'revoke all on function ' + CREATE_SIG.toLowerCase() + ' ' + ALL_ROLES,
+    'revoke all on function ' + DECIDE_SIG.toLowerCase() + ' ' + ALL_ROLES,
+  ];
+  for (const r of required) assert.ok(revokes.includes(r), `missing: ${r}`);
+  assert.equal(revokes.length, required.length, 'no unexpected revoke');
+  // Each revoke precedes the grant on the same object.
+  const flat = code.replace(/\s+/g, ' ').toLowerCase();
+  for (const [revoke, grant] of [
+    ['revoke all on sequence public.source_triage_proposal_events_id_seq', 'grant usage on sequence public.source_triage_proposal_events_id_seq'],
+    ['revoke all on function ' + CREATE_SIG.toLowerCase(), 'grant execute on function ' + CREATE_SIG.toLowerCase()],
+    ['revoke all on function ' + DECIDE_SIG.toLowerCase(), 'grant execute on function ' + DECIDE_SIG.toLowerCase()],
+    ['revoke all on public.source_triage_proposals from service_role', 'grant select, insert on public.source_triage_proposals'],
+    ['revoke all on public.source_triage_proposal_events from service_role', 'grant select, insert on public.source_triage_proposal_events'],
+  ]) {
+    assert.ok(flat.indexOf(revoke) >= 0 && flat.indexOf(revoke) < flat.indexOf(grant), `${revoke} before ${grant}`);
+  }
+});
+
+test('0015 functions stay security invoker with a fixed search_path; RLS stays on without policies', () => {
+  assert.equal((code.match(/security invoker/g) || []).length, 2);
+  assert.doesNotMatch(code, /security definer/i);
+  assert.equal((code.match(/set search_path = public/g) || []).length, 2);
+  assert.doesNotMatch(code, /create policy/i);
+});

@@ -102,6 +102,13 @@ create index if not exists idx_source_triage_proposal_events_proposal
 -- authenticated. Internal-only is enforced by the application
 -- (authenticateInternalRequest + isInternalOnly); this is defence in
 -- depth. service_role gets only what the RPCs and the read route need.
+--
+-- Supabase's default privileges in schema public grant rights on every new
+-- table, sequence and function DIRECTLY to anon, authenticated and
+-- service_role — not through PUBLIC. A revoke from PUBLIC alone therefore
+-- leaves them in place. Every object below is revoked explicitly from
+-- public, anon, authenticated and service_role first, and only then gets
+-- the minimal service_role grant it needs.
 
 alter table source_triage_proposals       enable row level security;
 alter table source_triage_proposal_events enable row level security;
@@ -122,7 +129,12 @@ grant update (status, decided_by, decided_at, decision_note)
 
 -- Events: append-only — select + insert, never update or delete.
 grant select, insert on public.source_triage_proposal_events to service_role;
-grant usage, select on sequence public.source_triage_proposal_events_id_seq to service_role;
+
+-- The identity sequence behind source_triage_proposal_events.id: nothing
+-- for anyone except USAGE for service_role (nextval on insert). No SELECT
+-- (currval/last_value) and no UPDATE (setval).
+revoke all on sequence public.source_triage_proposal_events_id_seq from public, anon, authenticated, service_role;
+grant usage on sequence public.source_triage_proposal_events_id_seq to service_role;
 
 -- ── create_source_triage_proposal: the only way to create a proposal ─────
 
@@ -181,7 +193,9 @@ begin
 end;
 $$;
 
-revoke all on function create_source_triage_proposal(uuid, uuid, text, text, text, text, text, text, uuid) from public;
+-- Revoked explicitly from anon and authenticated too: Supabase's default
+-- privileges grant EXECUTE on new functions to them directly.
+revoke all on function create_source_triage_proposal(uuid, uuid, text, text, text, text, text, text, uuid) from public, anon, authenticated, service_role;
 grant execute on function create_source_triage_proposal(uuid, uuid, text, text, text, text, text, text, uuid) to service_role;
 
 -- ── decide_source_triage_proposal: the only way to accept or reject ─────
@@ -237,5 +251,7 @@ begin
 end;
 $$;
 
-revoke all on function decide_source_triage_proposal(uuid, text, uuid, text) from public;
+-- Revoked explicitly from anon and authenticated too: Supabase's default
+-- privileges grant EXECUTE on new functions to them directly.
+revoke all on function decide_source_triage_proposal(uuid, text, uuid, text) from public, anon, authenticated, service_role;
 grant execute on function decide_source_triage_proposal(uuid, text, uuid, text) to service_role;
