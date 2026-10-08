@@ -143,8 +143,8 @@ mirrored in the form:
 - The actor is always the authenticated user id from the server, never a
   value from the request body.
 - Self-review is allowed in v1: the same person may propose and decide.
-  The page will mark it ("Je beoordeelt je eigen voorstel."). Whether a second person is
-  required is an open product decision.
+  The page marks it ("Je beoordeelt je eigen voorstel."). A future
+  second-person rule is a separate product change.
 - The database is defence in depth: RLS on, no policies, writes only
   through two RPCs (see "Privilege model").
 
@@ -307,12 +307,15 @@ explicit merge approval may deploy the app/API/UI.
    abuse limits, privacy review, storage and retention decisions first.
    Not part of this ticket.
 
-## Open product decisions
+## V1 product decisions
 
-- Navigation label and position: `Brontriage` under `Werkvoorraad`, after
-  `Bronwerkvoorraad` (Kleurtaal v2 left the item open).
-- Self-review allowed or not (see "Roles and authorization").
-- The unusable-reason list.
+- Navigation: `Brontriage` is an internal-only item under `Werkvoorraad`,
+  directly after `Bronwerkvoorraad`.
+- Self-review is allowed and visibly marked. A second-person rule remains a
+  separate future product decision, not an implicit requirement for v1.
+- The unusable-reason list is fixed to `site_offline`, `other_business`,
+  `no_menu_on_source`, `access_blocked`, and `other`; `other` requires a
+  short explanation.
 
 ## Verification
 
