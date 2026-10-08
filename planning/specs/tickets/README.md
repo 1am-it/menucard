@@ -215,6 +215,15 @@ of these.
     from existing BE-20 analysis jobs/receipts. Records a data-model gap:
     `Identiteit gewijzigd` and `Geen menukaart aangetroffen` cannot be
     derived yet and are never shown.
+26. [be-24-internal-source-triage.md](./be-24-internal-source-triage.md) —
+    internal, proposal-only Brontriage (`/internal/source-triage`) under
+    Werkvoorraad: record a source proposal (add a candidate URL, replace
+    the source, mark it unusable) and accept or reject it, with an
+    append-only audit trail. Nothing is fetched, analysed or published;
+    accepting changes no published data. Migration `0015` is live
+    (applied and verified 2026-10-08); the app/API/UI is not released yet.
+    V1 decisions: internal-only, directly after Bronwerkvoorraad;
+    self-review allowed and marked; fixed unusable-reason list.
 
 ## PLATFORM-* order (not started)
 

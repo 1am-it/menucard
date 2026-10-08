@@ -42,6 +42,7 @@ the full notes; nothing listed here was removed.
 | `community-submission-status-v1.png` | Community: submission status | `platform-08b-community-evidence-submissions.md` | Directional, mobile only |
 | `onboarding-restaurant-workflow-v1.png` | Internal Onboarding Restaurant flow | `be-20-general-restaurant-source-extraction.md` ("Approved design references", "Visual contract"). Context: `be-19-onboarding-restaurant-via-url.md` (URL intake; does not name this file) | Leading for the workflow panels; **not** for navigation |
 | `internal-navigation-workqueue-v1.png` | Internal navigation shell and Werkvoorraad | `be-20-general-restaurant-source-extraction.md` ("Approved design references", "Visual contract"). Context: `platform-11-role-aware-internal-navigation-home.md` (role filtering, `/internal` home) and decision 014 (orientation standard); neither names this file | **Leading for all internal navigation**; its counts are directional only |
+| `internal-source-triage-v1.png` | `/internal/source-triage` (Brontriage), desktop 1280px, light | `be-24-internal-source-triage.md` | Records the implemented BE-24 layout, captured from a local build with fictional data (not from the Kleurtaal v2 handoff). Mobile stacks list and detail. |
 | `internal-source-workqueue-v1.png` | `/internal/source-workqueue` (Bronwerkvoorraad) | `be-23-internal-source-workqueue.md` | Leading for page content; the ticket's "Deviations from the mockup" win. The "Onze Menukaarten" top bar is a placeholder, not branding. |
 
 **Colour (addition, 2026-10-07).** Colours in every mockup above are
@@ -50,8 +51,11 @@ Kleurtaal v2 (Brontriage)", a PDF handoff that is not stored here: it
 does not follow the `<surface>-vN.png/.html` convention, like the earlier
 Claude Design canvas). Its rules and values are written down in
 `docs/guides/design-reference.md` ("Kleurtaal v2"), which wins over any
-mockup colour. Its Brontriage screens are not a mockup for a built page;
-Brontriage remains an open decision.
+mockup colour. Its Brontriage screens are not a mockup for a built page.
+BE-24 built a first, proposal-only Brontriage on BE-23's layout; its
+implemented layout is recorded as `internal-source-triage-v1.png`. Its
+v1 navigation is decided: internal-only, under `Werkvoorraad`, directly
+after `Bronwerkvoorraad` (that ticket's "V1 product decisions").
 
 Not yet in this directory: a PLATFORM-12 coverage dashboard v2 has no
 committed ticket or mockup in the repository yet. When it lands, add it
@@ -265,6 +269,15 @@ reference instead of ad hoc judgment calls:
   yet arise from real data (no explicit evidence is recorded for them; see
   that ticket's "Datamodelkloof"), so they do not appear in the built
   page's list.
+- [Internal source triage](./internal-source-triage-v1.png) (addition,
+  2026-10-07) — records the implemented layout of `/internal/source-triage`
+  (Brontriage, `planning/specs/tickets/be-24-internal-source-triage.md`):
+  restaurant list and detail side by side from 960px, source status with
+  icon and text, the open proposal with accept/reject, and the audit
+  history. Captured from a local build with fictional data; it is a record
+  of the build, not a design source. Below 960px list and detail stack.
+  It predates the later feedback and unknown-proposal states (described in
+  the ticket's "Design"); the layout itself is unchanged.
 
 ## Naming
 

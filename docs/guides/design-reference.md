@@ -378,8 +378,15 @@ Open points (not decided by Kleurtaal v2):
   (for example to the import inbox's "New") is a future product
   decision, as are non-neutral roles for the states listed as neutral
   above.
-- The Brontriage statuses and the "Brontriage" navigation item stay open
-  decisions from that handoff.
+- The Brontriage screens of that handoff were not adopted as a mockup.
+  BE-24 (`planning/specs/tickets/be-24-internal-source-triage.md`) built a
+  first, proposal-only version on BE-23's layout. Its proposal statuses use
+  only existing roles: `Wacht op controle` → neutral (clock),
+  `Geaccepteerd` → positive (check), `Afgewezen` → neutral (cross); the
+  reserved "Actie nodig" role stays unused. BE-24's v1 product decisions
+  are recorded in that ticket: `Brontriage` is internal-only, under
+  `Werkvoorraad`, directly after `Bronwerkvoorraad`; self-review is
+  allowed and visibly marked; the unusable-reason list is fixed.
 - In light, the "Actie nodig" fill equals the selected-row fill; on a
   selected row the fill disappears, icon and text stay readable.
 - The light values were measured from a generated mockup image (a few
@@ -411,6 +418,8 @@ Sources:
    - `Beheer` → `/internal`;
    - `Nieuwe aanleveringen` → `/internal/import-inbox`;
    - `Bronwerkvoorraad` → `/internal/source-workqueue`;
+   - `Brontriage` → `/internal/source-triage` (BE-24, internal-only;
+     directly after `Bronwerkvoorraad`, decided for v1);
    - `Profielconcepten` → `/internal/profile-drafts`;
    - `Beoordelen` → `/internal/moderation`, editor only.
 4. **Right side:** the shared theme toggle, then `Sign out`.
@@ -430,6 +439,8 @@ Sources:
 - `Beoordelen` groups the existing editor-only Moderation module under
   Werkvoorraad, with route, role gate and data model unchanged (BE-20
   "Visual contract").
+- `Brontriage` is an internal-only Werkvoorraad entry directly after
+  `Bronwerkvoorraad`, without a count (BE-24 "V1 product decisions").
 
 ### Open product decisions
 
