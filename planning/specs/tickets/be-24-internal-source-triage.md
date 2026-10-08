@@ -2,9 +2,20 @@
 
 ## Status
 
-Built locally on `feat/be-24-source-triage`; not pushed, not merged, not
-deployed. Migration `0015` is written and structurally tested only — it
-has not been applied anywhere (see "Release sequencing").
+Nothing is live. BE-24 ships as two separate releases (see "Release
+sequencing"):
+
+1. **Schema release** (this release): migration `0015`, its structural
+   test (`src/lib/sourceTriageMigration.test.js`) and the release-gate
+   alignment in `.github/workflows/production-db-migrate.yml`. `0015`
+   is not applied anywhere yet.
+2. **App release** (a separate, later release): the API routes, the
+   Brontriage page, the internal navigation entry, the mockup and an
+   end-to-end check. It is merged and deployed only after `0015` is
+   confirmed live. It is not part of this release.
+
+The sections "Routes", "Next step per restaurant" and "Design" below
+specify the app release; nothing in them ships with the schema release.
 
 ## Goal
 
@@ -37,7 +48,10 @@ Per restaurant the page shows:
 - No public form, anonymous account, photo upload or file storage.
 - No change to BE-23's classification, BE-20's analysis, BE-22's
   benchmark, public routes, SEO, reservation logic, auth flow,
-  dependencies, workflows or production configuration.
+  dependencies or production configuration. The only workflow change is
+  the release gate for `0015`: the two documented version lists in
+  `production-db-migrate.yml` (applied `0001`–`0014`, release `0015`),
+  following the earlier "align production migration workflow" commits.
 - No bulk actions, no notifications, no counts in the navigation.
 
 ## Three separate things
@@ -122,16 +136,17 @@ mirrored in the form:
   `isInternalOnly` (the `internal` staff role) **before** parsing the
   body, validating input or creating a database client. A missing,
   invalid or non-internal session gets `401`/`403` with zero database
-  calls (tested behaviourally with an injected client).
+  calls (to be tested behaviourally with an injected client in the app
+  release).
 - Proposing, accepting and rejecting all need `internal`. `editor` and
   `owner` alone are refused, as for every other Data-inbox route.
 - The actor is always the authenticated user id from the server, never a
   value from the request body.
 - Self-review is allowed in v1: the same person may propose and decide.
-  The page marks it ("door jou voorgesteld"). Whether a second person is
+  The page will mark it ("Je beoordeelt je eigen voorstel."). Whether a second person is
   required is an open product decision.
-- The database is defence in depth: RLS on, no grants to `anon` or
-  `authenticated`, `service_role` only, writes only through two RPCs.
+- The database is defence in depth: RLS on, no policies, writes only
+  through two RPCs (see "Privilege model").
 
 ## Audit trail
 
@@ -165,17 +180,46 @@ mirrored in the form:
   `mark_unusable`, a note for `other`, decision columns set exactly when
   not `open`, a note for `rejected`. URL columns repeat the 0013 shape
   check (`^https?://`, no `?`/`#`/whitespace, at most 2048 characters).
-- `source_triage_proposal_events` — append-only audit rows.
+- `source_triage_proposal_events` — append-only audit rows; its id comes
+  from the identity sequence `source_triage_proposal_events_id_seq`.
 - `create_source_triage_proposal(...)` and
   `decide_source_triage_proposal(...)` — `security invoker`, fixed
-  `search_path`, `service_role` execute only. Typed errors: `P0030`
+  `search_path`, EXECUTE for `service_role` only. Typed errors: `P0030`
   (an open proposal already exists), `P0031` (proposal not found or not
   open), `P0032` (rejection without a note), `P0033` (invalid decision).
 - The restaurant id is not a foreign key: restaurants live in
   `data/restaurants.json`, not in the database. The API checks that the
   id exists there before writing.
 
-## Routes (all internal)
+## Privilege model (migration `0015`)
+
+Supabase's default privileges in schema `public` grant rights on every
+new table, sequence and function directly to `anon`, `authenticated` and
+`service_role` — not through `PUBLIC`. A revoke from `PUBLIC` alone would
+leave them in place. `0015` therefore:
+
+- revokes both tables from `public`, `anon` and `authenticated`, and
+  separately from `service_role`;
+- revokes the sequence `source_triage_proposal_events_id_seq` from
+  `public`, `anon`, `authenticated` and `service_role`;
+- revokes both RPC functions from `public`, `anon`, `authenticated` and
+  `service_role`;
+- then grants `service_role` exactly this, and nothing else:
+  - SELECT and INSERT on `source_triage_proposals`, plus UPDATE on its
+    four decision columns (`status`, `decided_by`, `decided_at`,
+    `decision_note`);
+  - SELECT and INSERT on `source_triage_proposal_events`;
+  - USAGE on the events sequence (no SELECT, no UPDATE);
+  - EXECUTE on `create_source_triage_proposal` and
+    `decide_source_triage_proposal`;
+  - USAGE on schema `public`.
+
+No GRANT ALL, no DELETE, no TRUNCATE, no policies, no default-privilege
+change. Both functions stay `security invoker` with `search_path = public`.
+`anon` and `authenticated` can therefore not read, write or execute
+anything this migration creates.
+
+## Routes (app release, all internal)
 
 - `GET /api/internal/v1/source-triage` — read only: BE-23's workqueue
   (same queries, same classifier, unchanged) plus the proposals and their
@@ -189,9 +233,10 @@ mirrored in the form:
 
 Route handlers are thin: the logic lives in
 `src/lib/sourceTriageHandlers.js` with injected dependencies, so the
-role checks and "no write before authorization" are tested behaviourally.
+role checks and "no write before authorization" can be tested
+behaviourally in the app release.
 
-## Next step per restaurant
+## Next step per restaurant (app release)
 
 | Situation | Next step |
 |---|---|
@@ -201,7 +246,7 @@ role checks and "no write before authorization" are tested behaviourally.
 | Bron `Toegang beperkt` | Website zelf bekijken; eventueel markeren als onbruikbaar |
 | Any other state | Bron controleren via Onboarding Restaurant (manual start) |
 
-## Design
+## Design (app release)
 
 - Kleurtaal v2 tokens only (`docs/guides/design-reference.md`); no
   hard-coded colours. Light and dark per the existing theme contract.
@@ -217,17 +262,32 @@ role checks and "no write before authorization" are tested behaviourally.
 - Design source: the Kleurtaal v2 handoff "(Brontriage)" is not stored in
   the repository and its Brontriage screens were not adopted as a page
   mockup (`docs/mockups/README.md`). This ticket therefore builds on BE-23's
-  layout and Kleurtaal v2's rules; the implemented layout is recorded as
+  layout and Kleurtaal v2's rules. The app release records its layout as
   `docs/mockups/internal-source-triage-v1.png` (fictional data).
 
 ## Release sequencing
 
-Per `docs/guides/production-migration-pipeline.md`: `0015` must be
-released and verified live first, as a migration-only step, before the
-routes and page that depend on it are deployed. Until then the page shows
-the BE-23 data with a load error for proposals ("Voorstellen konden niet
-worden geladen") and no write succeeds. This branch keeps the migration
-in its own commit so it can be split into its own PR.
+Per `docs/guides/production-migration-pipeline.md`: `0015` is released
+and verified live first, as this migration-only release, before the app
+release that depends on it is merged or deployed.
+
+Release gate: `production-db-migrate.yml` only applies a release whose
+versions match its documented lists. They now read applied `0001`–`0014`,
+release `0015`.
+
+`0014` is live according to existing, read-only audit evidence:
+production-db-migrate.yml run
+https://github.com/1am-it/menucard/actions/runs/36601808246 (2026-09-29,
+success) verified live history as exactly `0001`–`0014` in its own
+read-only post-verification step, and no migrate or history-reconcile run
+has happened since (checked read-only on 2026-10-08). This is evidence,
+not a fresh measurement: a fresh read-only `production-db-preflight.yml`
+run (applied `0001`–`0014`, staged `0015`) is still mandatory before
+`0015` is applied.
+
+Order after merge: preflight → approved `production-db-migrate.yml`
+(release `0015`) → second preflight → live privilege check → record
+"0015 live" in `planning/CONTEXT.md` → only then the app release.
 
 ## Follow-up phases (not built)
 
@@ -246,15 +306,20 @@ in its own commit so it can be split into its own PR.
 - Self-review allowed or not (see "Roles and authorization").
 - The unusable-reason list.
 
-## Verification
+## Verification (schema release)
 
-See the BE-24 report; tests:
+Local, 2026-10-08, on the schema release branch:
 
-- `src/lib/sourceTriage.test.js` — URL validation, input validation,
-  transitions, next steps, view building.
-- `src/lib/sourceTriageHandlers.test.js` — role refusal with zero
-  database calls, validation before writes, RPC-only writes, decisions,
-  no outbound fetch.
-- `src/lib/sourceTriageSurface.test.js` — structural checks on routes,
-  page and migration.
-- `src/lib/internalNav.test.js` — the new Werkvoorraad entry.
+- `node --test src/lib/sourceTriageMigration.test.js`: 13/13. Structural
+  checks on `0015`: the two tables and their constraints, the partial
+  unique index, both RPCs (security invoker, fixed `search_path`, typed
+  errors, an audit event per change), and the exact grant and revoke set
+  of the privilege model above. 17 targeted mutations of the privileges
+  were all caught.
+- `git diff --check` is clean.
+- Not yet verified: a real Postgres replay of `0001`–`0015`. That first
+  happens in the `validate-migrations` CI run on this release (no local
+  database was used).
+
+This release claims no API, page, browser, navigation or mockup
+verification; those belong to the app release.
