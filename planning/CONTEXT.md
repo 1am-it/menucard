@@ -121,6 +121,29 @@ branching behaviour on ad hoc state.
   before the dish-first flow ships, or there will be no way to tell afterward
   whether it actually improved things.
 
+## Production migration record
+
+**2026-09-29 — `0014` live.** Migration
+`0014_be20_restaurant_source_analysis_jobs.sql` was applied through the
+approval-gated production migration pipeline: [run 36601808246](https://github.com/1am-it/menucard/actions/runs/36601808246),
+`success`. Its own read-only post-apply check reported live migration history
+`0001` through `0014`. This records the schema release only; it makes no claim
+about analysis activity or public publication.
+
+**2026-10-08 — `0015` live and verified.** Migration
+`0015_be24_source_triage.sql` was applied alone through the same pipeline:
+[run 37811864210](https://github.com/1am-it/menucard/actions/runs/37811864210),
+`success`. The preflight ([run 37810992211](https://github.com/1am-it/menucard/actions/runs/37810992211)) confirmed
+live history `0001` through `0014` with `0015` staged; the post-migration
+preflight ([run 37812236504](https://github.com/1am-it/menucard/actions/runs/37812236504)) confirmed exact live and local history
+`0001` through `0015`. A subsequent production catalog check was read-only and
+confirmed RLS on both BE-24 tables, no RLS policies, no table/sequence/RPC
+rights for `anon` or `authenticated`, and only the documented minimum rights
+for `service_role`; both RPCs are `SECURITY INVOKER` with
+`search_path=public`. The migration and checks created no source-triage
+proposal or audit-event data. BE-24's app/API/UI branch remains unreleased, so
+this schema release exposes no new user-facing workflow by itself.
+
 ## Parallel track: PLATFORM-*
 
 A second, parallel ticket track (`PLATFORM-01` through `PLATFORM-10`) covers
