@@ -44,7 +44,12 @@ allowed?
   category also match: the name comparison is trimmed and
   case-insensitive, the category comparison is exact. Any mismatch falls
   back to the normal, unhighlighted menu without a notice — it never
-  guesses, but the fallback is silent today.
+  guesses, but the fallback is silent today. The link itself is built by
+  `buildDishMenuHref` (`app/search/page.js`) via `URLSearchParams`; it
+  adds `fromQuery` only when a search query is active.
+- **Definition used in this ticket:** a *gerecht-deeplink* (dish deep
+  link) is the canonical BE-12 link `/menu/[id]?dish=…&name=…&cat=…` with
+  exactly the parameters `dish`, `name` and `cat`.
 - The menu route (`app/menu/[id]/page.js`) has no per-dish metadata, Open
   Graph or link-preview output today.
 - **No analytics or tracking exists** in the product today (no share API
@@ -78,7 +83,11 @@ them. Choosing A records the product owner's intent to pursue v1; it does
 explicit, separately recorded change is required — either an amendment to
 `MARKET-10` itself or a higher decision record — that allows this narrow
 exception and states why each `MARKET-10` dependency is not needed for
-it. `SHARE-0` does not make that change.
+it. That change must also explicitly address `MARKET-10`'s clause that
+the feature is not retrofitted onto today's static consumer read path
+(`data/restaurants.json`/`data/menus.json`, "Out of scope"), because v1
+would run on exactly that path. `SHARE-0` does not make that change: it
+does not modify `MARKET-10` and authorizes no implementation.
 
 The argument such a change would have to weigh: `MARKET-10`'s
 dependencies protect a *new, durable, indefinitely cacheable* public
@@ -122,14 +131,20 @@ In scope:
 - A "Deel gerecht" action per dish on the menu page.
 - The native share sheet (Web Share API), with "Kopieer link" as the
   fallback wherever the share sheet is unavailable.
-- The link is exactly the canonical BE-12 deep link (`dish`, `name`,
-  `cat` on `/menu/[id]`) and nothing else: no share, source, campaign or
-  any other extra query parameter, marker or fragment — also not one that
-  would never be stored. A shared link is indistinguishable from any
-  other BE-12 dish link, by design.
-- Share text handed to the share sheet is composed only from validated
-  menu data of the resolved dish (dish name, restaurant name, city) plus
-  the name BredaEats — never from raw query-string values, and never with
+- The link is a gerecht-deeplink with only the BE-12 parameters `dish`,
+  `name` and `cat` on `/menu/[id]`. Explicitly excluded: `fromQuery`,
+  `q`, `excl`, any fragment, and every other parameter of the current
+  browser URL, as well as any share, source, campaign or marker
+  parameter — also not one that would never be stored. A shared link is
+  indistinguishable from any other gerecht-deeplink, by design.
+- `SHARE-1` builds the link from the resolved dish with the same
+  canonical BE-12 link construction as `buildDishMenuHref` (or a shared
+  helper with identical output), always without a search query so that
+  `fromQuery` is never set. It never copies the current browser URL.
+- Share text handed to the share sheet contains only the dish name and
+  the restaurant name of the dish as resolved through the BE-12 matching
+  rules (opgelost via de BE-12-matchregels), the name BredaEats and the
+  canonical link — no city, never raw query-string values, and never
   price, availability, allergen or ranking language. The visible public
   UI (including the "Deel gerecht" action and the dish page) uses Onze
   Menukaarten, but the share text is an outgoing message and therefore
@@ -174,13 +189,16 @@ Out of scope for v1:
 - A dish link resolves only through the BE-12 checks: position, name
   (trimmed, case-insensitive) and category (exact). There is never a
   "closest" or "probable" match, and never a link to a different dish.
-- **Every** BE-12 dish deep link that does not resolve (moved, renamed,
-  re-categorised or removed) shows a visible, neutral status on the
-  current menu, for example "Dit gerecht staat niet (meer) op deze
-  menukaart.", as icon plus text, never colour alone. No dish is
-  highlighted and none is guessed. This replaces BE-12's silent fallback
-  for all dish deep links, not only shared ones; `SHARE-1` must treat it
-  as an explicit, tested change to BE-12 behaviour.
+- `SHARE-0` does not change BE-12. Only a future `SHARE-1`, after the
+  formal decision, would replace BE-12's silent fallback for **every**
+  gerecht-deeplink that does not resolve (moved, renamed, re-categorised
+  or removed) — not only shared ones, and including those from search
+  results — with a visible, neutral mismatch status on the current menu,
+  for example "Dit gerecht staat niet (meer) op deze menukaart.", as icon
+  plus text, never colour alone. No dish is highlighted and none is
+  guessed. `SHARE-1` would have to treat this as an explicit, tested
+  change to BE-12 behaviour, including BE-12's own out-of-scope rule that
+  rules out such a notice today.
 - If the restaurant or menu no longer exists, the page offers a working
   next step (decision 014: no dead ends) — never a bare error.
 - Stable public dish identities are `MARKET-02`/`MARKET-10` work and are
@@ -213,7 +231,9 @@ The concept boards are input only:
 - Light and dark per the existing theme contract; Kleurtaal v2 tokens
   only; text at least 4.5:1 and focus at least 3:1 in both themes; a
   visible `:focus-visible` treatment; keyboard operable; no horizontal
-  overflow at 320, 390 and 1280 px (decision 014 acceptance checklist).
+  overflow at about 390 px and at desktop width (decision 014 acceptance
+  checklist), plus 320 px as an additional `SHARE-1` limit that decision
+  014 does not itself require.
 - Status and notices are icon plus text, never colour alone. The share
   action is a secondary, outlined control — never styled as an ordering
   or primary action.
@@ -226,14 +246,19 @@ The concept boards are input only:
 - [ ] D1, D2 and D3 are each explicitly decided by the product owner and
       recorded below, with date.
 - [ ] If D1 = A, a separate, explicit change to `MARKET-10` (or a higher
-      decision record) allowing the narrow exception is recorded before
-      `SHARE-1` is created; `SHARE-0` itself changes nothing in
-      `MARKET-10`.
+      decision record) allowing the narrow exception — including its
+      static-read-path clause — is recorded before `SHARE-1` is created;
+      `SHARE-0` itself changes nothing in `MARKET-10` and authorizes no
+      implementation.
 - [ ] D3 stays forbidden unless a separate decision record amends
       `MARKET-10` and decision 011.
-- [ ] The v1 link is exactly the canonical BE-12 deep link, with no
-      extra parameter or marker, and v1 adds no per-dish preview or
+- [ ] The v1 link is a gerecht-deeplink with only `dish`, `name` and
+      `cat` (no `fromQuery`, `q`, `excl`, fragment, marker or other
+      current-URL parameter), built from the resolved dish rather than
+      copied from the browser URL; v1 adds no per-dish preview or
       metadata surface.
+- [ ] Share text contains only dish name, restaurant name, BredaEats and
+      the canonical link.
 - [ ] Dish-page copy is true for every dish deep link; nothing claims a
       link was shared, sent or received.
 - [ ] The v1 boundary keeps the product clearly not an ordering,
@@ -241,8 +266,9 @@ The concept boards are input only:
 - [ ] Privacy, accessibility, light/dark and text-first guardrails are
       recorded as binding for `SHARE-1`.
 - [ ] A changed or disappeared dish can never lead to a guess or a wrong
-      dish: BE-12 checks, a visible neutral status for every
-      non-resolving dish link, no dead end.
+      dish: BE-12 checks, and in a future `SHARE-1` a visible neutral
+      mismatch status for every non-resolving gerecht-deeplink, no dead
+      end. `SHARE-0` itself does not change BE-12.
 - [ ] `SHARE-1` is created only after this decision is taken; it
       references this ticket and the recorded `MARKET-10` change.
 

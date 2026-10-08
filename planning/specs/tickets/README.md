@@ -3,9 +3,9 @@
 This directory contains the executable breakdown of the project's ticket
 tracks: the completed `BE-*` dish-first migration, the `PLATFORM-*`
 data-platform track, the proposed, not-yet-scheduled `MARKET-*`
-market-foundation track, and the decision-first `SHARE-*` track (see its
-own section below). Each track has its own file per ticket. It complements the
-feature-level specs one level up (`planning/specs/*.md`, which describe
+market-foundation track, and the decision-first `SHARE-*` track. Each
+track has its own file per ticket. It complements the feature-level specs
+one level up (`planning/specs/*.md`, which describe
 product behaviour) and the phase overviews in
 `planning/architecture/migration-plan.md` (`BE-*`),
 `planning/architecture/platform-plan.md` (`PLATFORM-*`), and
@@ -381,7 +381,7 @@ implementation (see its own ticket).
     Dutch-hospitality integrations are evaluated without treating a vendor or
     KHN as a universal standard, connector, or partner.
 
-## SHARE-* (decisions, not scheduled)
+## SHARE-* order (decision-first, not scheduled)
 
 Dish sharing for visitors. Decision-first: no implementation ticket exists
 until its decision is recorded. Relates to `MARKET-10`, whose full scope
