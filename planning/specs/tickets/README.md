@@ -380,6 +380,20 @@ implementation (see its own ticket).
     Dutch-hospitality integrations are evaluated without treating a vendor or
     KHN as a universal standard, connector, or partner.
 
+## SHARE-* (decisions, not scheduled)
+
+Dish sharing for visitors. Decision-first: no implementation ticket exists
+until its decision is recorded. Relates to `MARKET-10`, whose full scope
+and dependencies stay unchanged.
+
+1. [share-0-dish-sharing-v1-decision.md](./share-0-dish-sharing-v1-decision.md) —
+   open decision, awaiting the product owner: whether a minimal "Deel
+   gerecht" v1 may reuse the BE-12 dish deep link before `MARKET-02`/`06`/`08`,
+   whether v1 stays free of any measurement, and that public popularity
+   ("Vaak gedeeld", ranking, counters) stays forbidden per `MARKET-10` and
+   decision 011. Recommended default: A/A/A. `SHARE-1` is created only after
+   the decision.
+
 Do not start a ticket whose dependencies aren't done. Each ticket should be
 independently reviewable and deployable where practical. The three tracks
 do not block each other.
