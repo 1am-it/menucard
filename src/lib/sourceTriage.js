@@ -83,7 +83,9 @@ const EVENT_LABELS = {
   rejected: 'Afgewezen',
 };
 
-const NEXT_STEPS = ['review_proposal', 'add_candidate', 'replace_or_mark', 'inspect_or_mark', 'check_via_onboarding'];
+// `proposals_unknown`: the proposals could not be loaded, so whether an open
+// proposal exists is unknown — no step that assumes either answer is shown.
+const NEXT_STEPS = ['review_proposal', 'add_candidate', 'replace_or_mark', 'inspect_or_mark', 'check_via_onboarding', 'proposals_unknown'];
 
 const NEXT_STEP_LABELS = {
   review_proposal: 'Voorstel beoordelen',
@@ -91,6 +93,7 @@ const NEXT_STEP_LABELS = {
   replace_or_mark: 'Bron vervangen of markeren als onbruikbaar',
   inspect_or_mark: 'Website zelf bekijken; eventueel markeren als onbruikbaar',
   check_via_onboarding: 'Bron controleren via Onboarding Restaurant',
+  proposals_unknown: 'Onbekend — voorstellen zijn tijdelijk niet beschikbaar',
 };
 
 const NOTE_MAX = 280;
@@ -269,6 +272,55 @@ function validateDecisionInput(body) {
   return { ok: true, decision: body.decision, note: note.note };
 }
 
+/**
+ * The page's own check before "Voorstel opslaan", mirroring
+ * validateProposalInput. Returns `{ ok: true }` or `{ ok: false, field,
+ * message }`, where `field` ('url' | 'reason' | 'note') is the control that
+ * gets aria-invalid, the error description and focus.
+ */
+function validateProposalForm({ kind, url, reason, note, knownUrl }) {
+  const fail = (field, message) => ({ ok: false, field, message });
+  if (kind === 'add_candidate' || kind === 'replace_source') {
+    const v = validateProposedUrl(url);
+    if (!v.ok) return fail('url', v.message);
+    if (knownUrl && v.url === knownUrl) return fail('url', 'Deze URL is al de bekende bron.');
+  } else if (!UNUSABLE_REASONS.includes(reason)) {
+    return fail('reason', 'Kies een reden.');
+  }
+  const n = normalizeNote(note, { required: kind === 'mark_unusable' && reason === 'other' });
+  if (!n.ok) return fail('note', n.message);
+  return { ok: true };
+}
+
+/** The page's own check before accepting or rejecting; a rejection needs a reason. */
+function validateDecisionForm({ decision, note }) {
+  const n = normalizeNote(note, { required: decision === 'rejected' });
+  if (!n.ok) return { ok: false, field: 'note', message: n.reason === 'note_required' ? 'Geef een reden voor het afwijzen.' : n.message };
+  return { ok: true };
+}
+
+const SAVE_SUCCESS = {
+  create: `Voorstel opgeslagen. ${TRIAGE_NOTICE}`,
+  accepted: 'Voorstel geaccepteerd. Er is niets gepubliceerd en er is geen controle gestart.',
+  rejected: 'Voorstel afgewezen. De bron blijft ongewijzigd.',
+};
+const SAVE_SAVED = { create: 'Voorstel opgeslagen.', accepted: 'Voorstel geaccepteerd.', rejected: 'Voorstel afgewezen.' };
+
+/**
+ * The message after a save. `saved`: the write succeeded; `refreshed`: the
+ * list was reloaded afterwards. A save whose reload failed is still reported
+ * as saved — never as a failure, never as fully up to date.
+ * Returns `{ tone: 'success' | 'notice' | 'error', text }`.
+ */
+function saveFeedback({ action, saved, refreshed, error }) {
+  if (!saved) return { tone: 'error', text: error || 'Opslaan is niet gelukt.' };
+  if (refreshed) return { tone: 'success', text: SAVE_SUCCESS[action] || 'Opgeslagen.' };
+  return {
+    tone: 'notice',
+    text: `${SAVE_SAVED[action] || 'Opgeslagen.'} Verversen is niet gelukt: de getoonde gegevens kunnen verouderd zijn. Laad de pagina opnieuw.`,
+  };
+}
+
 function canTransition(from, to) {
   return Boolean(TRANSITIONS[from] && TRANSITIONS[from].includes(to));
 }
@@ -281,8 +333,11 @@ function isUuid(value) {
 /**
  * The one safe next step for a restaurant. `row` is a BE-23 workqueue row
  * (with `source`) or a "not in queue" entry (with `reason`).
+ * `proposalsKnown: false` (the proposals could not be loaded) gives
+ * `proposals_unknown`: every other step assumes whether a proposal is open.
  */
-function nextStepFor({ row, hasOpenProposal, knownUrl }) {
+function nextStepFor({ row, hasOpenProposal, knownUrl, proposalsKnown = true }) {
+  if (!proposalsKnown) return 'proposals_unknown';
   if (hasOpenProposal) return 'review_proposal';
   if (!knownUrl) return 'add_candidate';
   if (row && (row.source === 'unreachable' || row.source === 'identity_changed')) return 'replace_or_mark';
@@ -315,12 +370,17 @@ function actorRef(userId, viewerId) {
  *   proposals:   stored proposal rows, each optionally with
  *                `source_triage_proposal_events: [...]`
  *   viewerId:    the authenticated user's id (only to mark "jij")
+ *   proposalsAvailable: false when the proposals could not be loaded. Then
+ *                no proposal state is derived at all: every entry gets
+ *                `proposals_known: false`, no open proposal, no history and
+ *                the `proposals_unknown` step — never a made-up "no open
+ *                proposal".
  */
-function buildTriageView({ queue, restaurants, proposals, viewerId }) {
+function buildTriageView({ queue, restaurants, proposals, viewerId, proposalsAvailable = true }) {
   const known = restaurants && typeof restaurants === 'object' ? restaurants : {};
   const byRestaurant = new Map();
   let orphanProposals = 0;
-  for (const p of Array.isArray(proposals) ? proposals : []) {
+  for (const p of proposalsAvailable && Array.isArray(proposals) ? proposals : []) {
     if (!p || typeof p !== 'object') continue;
     const id = String(p.restaurant_id);
     if (!Object.prototype.hasOwnProperty.call(known, id)) {
@@ -349,8 +409,9 @@ function buildTriageView({ queue, restaurants, proposals, viewerId }) {
       not_in_queue_reason: base.reason || null,
       checked_at: base.checkedAt || null,
       attention: attentionFor(base),
-      next_step: nextStepFor({ row: base, hasOpenProposal: Boolean(open), knownUrl }),
+      next_step: nextStepFor({ row: base, hasOpenProposal: Boolean(open), knownUrl, proposalsKnown: proposalsAvailable }),
       open_proposal_id: open ? open.id : null,
+      proposals_known: proposalsAvailable,
       proposals: list,
     });
   };
@@ -386,8 +447,9 @@ function timeValue(value) {
 }
 
 // Open proposals first, then restaurants that need a source action, then
-// the rest; by name within each group.
-const STEP_RANK = { review_proposal: 0, add_candidate: 1, replace_or_mark: 1, inspect_or_mark: 2, check_via_onboarding: 3 };
+// the rest; by name within each group. With unknown proposals every entry
+// has the same step, so the list is by name only.
+const STEP_RANK = { review_proposal: 0, add_candidate: 1, replace_or_mark: 1, inspect_or_mark: 2, check_via_onboarding: 3, proposals_unknown: 0 };
 function sortTriage(entries) {
   return [...entries].sort((a, b) => {
     const r = (STEP_RANK[a.next_step] ?? 9) - (STEP_RANK[b.next_step] ?? 9);
@@ -404,7 +466,13 @@ const TRIAGE_FILTER_LABELS = {
   no_check: 'Nog niet gecontroleerd',
 };
 
+// Filters whose answer depends on the proposal state. With unknown
+// proposals they match nothing, count as `null` (unknown, not 0) and the
+// page falls back to `all`.
+const PROPOSAL_FILTERS = ['open_proposal', 'needs_source'];
+
 function matchesFilter(entry, filter) {
+  if (entry.proposals_known === false && PROPOSAL_FILTERS.includes(filter)) return false;
   switch (filter) {
     case 'open_proposal':
       return Boolean(entry.open_proposal_id);
@@ -426,11 +494,19 @@ function filterTriage(entries, { filter = 'all', query = '' } = {}) {
   });
 }
 
-function countTriage(entries) {
+function countTriage(entries, { proposalsAvailable = true } = {}) {
   const counts = {};
   for (const f of TRIAGE_FILTERS) counts[f] = 0;
   for (const e of Array.isArray(entries) ? entries : []) for (const f of TRIAGE_FILTERS) if (matchesFilter(e, f)) counts[f] += 1;
+  if (!proposalsAvailable) for (const f of PROPOSAL_FILTERS) counts[f] = null;
   return counts;
+}
+
+/** The filter actually applied: a proposal-dependent one falls back to `all` while proposals are unknown. */
+function effectiveFilter(filter, proposalsAvailable) {
+  if (!TRIAGE_FILTERS.includes(filter)) return 'all';
+  if (!proposalsAvailable && PROPOSAL_FILTERS.includes(filter)) return 'all';
+  return filter;
 }
 
 module.exports = {
@@ -454,11 +530,15 @@ module.exports = {
   BLOCKED_TLDS,
   TRIAGE_FILTERS,
   TRIAGE_FILTER_LABELS,
+  PROPOSAL_FILTERS,
   validateProposedUrl,
   canonicalizeKnownWebsite,
   normalizeNote,
   validateProposalInput,
   validateDecisionInput,
+  validateProposalForm,
+  validateDecisionForm,
+  saveFeedback,
   canTransition,
   isUuid,
   nextStepFor,
@@ -467,4 +547,5 @@ module.exports = {
   buildTriageView,
   filterTriage,
   countTriage,
+  effectiveFilter,
 };

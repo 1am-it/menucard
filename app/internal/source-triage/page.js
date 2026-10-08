@@ -37,11 +37,17 @@ import {
   TRIAGE_FILTERS,
   TRIAGE_FILTER_LABELS,
   validateProposedUrl,
+  validateProposalForm,
+  validateDecisionForm,
+  saveFeedback,
   filterTriage,
   countTriage,
+  effectiveFilter,
 } from '@/src/lib/sourceTriage'
 
 const LOAD_ERROR = 'De brontriage kon niet worden geladen.'
+
+const BANNER_CLASS = { success: 'di-banner-info', notice: 'di-banner-neutral', error: 'di-banner-danger' }
 
 function formatDateTime(value) {
   if (!value) return null
@@ -150,12 +156,20 @@ function ProposalSummary({ proposal }) {
 
 function DecisionForm({ proposal, busy, onDecide }) {
   const [note, setNote] = useState('')
-  const [error, setError] = useState(null)
+  const [error, setError] = useState(null) // { message }: a new object per attempt, so focus moves every time
+  const noteRef = useRef(null)
   const noteId = `stg-decision-note-${proposal.id}`
   const errorId = `${noteId}-error`
+
+  // After a refused attempt, focus the note once its error is rendered and linked.
+  useEffect(() => {
+    if (error && noteRef.current) noteRef.current.focus()
+  }, [error])
+
   function submit(decision) {
-    if (decision === 'rejected' && note.trim() === '') {
-      setError('Geef een reden voor het afwijzen.')
+    const check = validateDecisionForm({ decision, note })
+    if (!check.ok) {
+      setError({ message: check.message })
       return
     }
     setError(null)
@@ -171,6 +185,7 @@ function DecisionForm({ proposal, busy, onDecide }) {
       </label>
       <textarea
         id={noteId}
+        ref={noteRef}
         className="stg-textarea"
         rows={2}
         maxLength={NOTE_MAX}
@@ -181,7 +196,7 @@ function DecisionForm({ proposal, busy, onDecide }) {
       />
       {error && (
         <p id={errorId} className="stg-error" role="alert">
-          {error}
+          {error.message}
         </p>
       )}
       <div className="stg-actions">
@@ -203,20 +218,36 @@ function ProposalForm({ entry, busy, onCreate }) {
   const [url, setUrl] = useState('')
   const [reason, setReason] = useState('')
   const [note, setNote] = useState('')
-  const [error, setError] = useState(null)
+  const [error, setError] = useState(null) // { field: 'url' | 'reason' | 'note', message }
+  const urlRef = useRef(null)
+  const reasonRef = useRef(null)
+  const noteRef = useRef(null)
   const base = `stg-new-${entry.restaurant_id}`
+  const errorId = `${base}-error`
   const needsUrl = kind === 'add_candidate' || kind === 'replace_source'
+  const noteRequired = !needsUrl && reason === 'other'
   const preview = needsUrl && url.trim() ? validateProposedUrl(url) : null
+
+  // Only the control the error is about is marked invalid and described.
+  const invalid = (field) => (error && error.field === field ? 'true' : undefined)
+  const describedBy = (field, ...always) => [...always, error && error.field === field ? errorId : null].filter(Boolean).join(' ') || undefined
+  const clearError = (...fields) => {
+    if (error && fields.includes(error.field)) setError(null)
+  }
+
+  // After a refused attempt, focus the control in error once its message is
+  // rendered and linked through aria-describedby.
+  useEffect(() => {
+    const ref = error && { url: urlRef, reason: reasonRef, note: noteRef }[error.field]
+    if (ref && ref.current) ref.current.focus()
+  }, [error])
 
   function submit(e) {
     e.preventDefault()
-    if (needsUrl) {
-      const v = validateProposedUrl(url)
-      if (!v.ok) return setError(v.message)
-      if (entry.known_url && v.url === entry.known_url) return setError('Deze URL is al de bekende bron.')
-    } else {
-      if (!reason) return setError('Kies een reden.')
-      if (reason === 'other' && note.trim() === '') return setError('Geef een korte toelichting.')
+    const check = validateProposalForm({ kind, url, reason, note, knownUrl: entry.known_url })
+    if (!check.ok) {
+      setError({ field: check.field, message: check.message })
+      return
     }
     setError(null)
     onCreate({
@@ -261,6 +292,7 @@ function ProposalForm({ entry, busy, onCreate }) {
           </label>
           <input
             id={`${base}-url`}
+            ref={urlRef}
             className="stg-input"
             type="url"
             inputMode="url"
@@ -268,9 +300,12 @@ function ProposalForm({ entry, busy, onCreate }) {
             spellCheck={false}
             placeholder="https://"
             value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            aria-invalid={error ? 'true' : undefined}
-            aria-describedby={`${base}-url-help${error ? ` ${base}-error` : ''}`}
+            onChange={(e) => {
+              setUrl(e.target.value)
+              clearError('url')
+            }}
+            aria-invalid={invalid('url')}
+            aria-describedby={describedBy('url', `${base}-url-help`)}
           />
           <p id={`${base}-url-help`} className="stg-hint">
             {preview && preview.ok
@@ -285,11 +320,15 @@ function ProposalForm({ entry, busy, onCreate }) {
           </label>
           <select
             id={`${base}-reason`}
+            ref={reasonRef}
             className="stg-input"
             value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            aria-invalid={error ? 'true' : undefined}
-            aria-describedby={error ? `${base}-error` : undefined}
+            onChange={(e) => {
+              setReason(e.target.value)
+              clearError('reason', 'note')
+            }}
+            aria-invalid={invalid('reason')}
+            aria-describedby={describedBy('reason')}
           >
             <option value="">Kies een reden</option>
             {UNUSABLE_REASONS.map((r) => (
@@ -305,15 +344,29 @@ function ProposalForm({ entry, busy, onCreate }) {
         <label htmlFor={`${base}-note`} className="stg-label">
           Toelichting{' '}
           <span className="stg-label-extra">
-            ({!needsUrl && reason === 'other' ? 'verplicht' : 'optioneel'}, max. {NOTE_MAX} tekens, geen persoonsgegevens)
+            ({noteRequired ? 'verplicht bij Andere reden' : 'optioneel'}, max. {NOTE_MAX} tekens, geen persoonsgegevens)
           </span>
         </label>
-        <textarea id={`${base}-note`} className="stg-textarea" rows={2} maxLength={NOTE_MAX} value={note} onChange={(e) => setNote(e.target.value)} />
+        <textarea
+          id={`${base}-note`}
+          ref={noteRef}
+          className="stg-textarea"
+          rows={2}
+          maxLength={NOTE_MAX}
+          value={note}
+          onChange={(e) => {
+            setNote(e.target.value)
+            clearError('note')
+          }}
+          aria-required={noteRequired ? 'true' : undefined}
+          aria-invalid={invalid('note')}
+          aria-describedby={describedBy('note')}
+        />
       </div>
 
       {error && (
-        <p id={`${base}-error`} className="stg-error" role="alert">
-          {error}
+        <p id={errorId} className="stg-error" role="alert">
+          {error.message}
         </p>
       )}
       <div className="stg-actions">
@@ -434,6 +487,26 @@ function Detail({ entry, proposalsAvailable, busy, onCreate, onDecide, headingRe
   )
 }
 
+// Save feedback lives in two live regions that are rendered with the detail
+// pane, before any message exists: a message placed in them later is
+// announced. Success and notice go to the polite status region, errors to
+// the alert region. The wrapper takes focus after every save, so focus is
+// never lost when the submitted form itself disappears.
+function FeedbackRegion({ message, regionRef }) {
+  const isError = Boolean(message) && message.tone === 'error'
+  const banner = message ? <div className={`di-banner ${BANNER_CLASS[message.tone] || 'di-banner-neutral'}`}>{message.text}</div> : null
+  return (
+    <div id="stg-feedback" className="stg-feedback" ref={regionRef} tabIndex={-1}>
+      <div role="status" aria-live="polite" aria-atomic="true">
+        {message && !isError ? banner : null}
+      </div>
+      <div role="alert" aria-atomic="true">
+        {isError ? banner : null}
+      </div>
+    </div>
+  )
+}
+
 export default function SourceTriagePage() {
   const router = useRouter()
   const [session, setSession] = useState(undefined) // undefined = loading, null = no session
@@ -444,9 +517,11 @@ export default function SourceTriagePage() {
   const [query, setQuery] = useState('')
   const [selectedId, setSelectedId] = useState(null)
   const [busy, setBusy] = useState(false)
-  const [message, setMessage] = useState(null) // { tone: 'success' | 'error', text }
+  const [message, setMessage] = useState(null) // saveFeedback(): { tone: 'success' | 'notice' | 'error', text }
   const headingRef = useRef(null)
   const focusDetail = useRef(false)
+  const feedbackRef = useRef(null)
+  const focusFeedback = useRef(false)
 
   useEffect(() => {
     const supabase = getSupabaseBrowser()
@@ -456,22 +531,28 @@ export default function SourceTriagePage() {
     })
   }, [router])
 
-  const load = useCallback(async (token) => {
-    setLoading(true)
-    setError(null)
+  // Returns whether fresh data arrived. A failed load never clears data that
+  // is already shown; `refresh` (after a save) reports through the save
+  // feedback instead of the page-level error.
+  const load = useCallback(async (token, { refresh = false } = {}) => {
+    if (!refresh) {
+      setLoading(true)
+      setError(null)
+    }
     try {
       const res = await fetch('/api/internal/v1/source-triage', { headers: { Authorization: `Bearer ${token}` } })
-      const body = await res.json()
-      if (!res.ok) {
-        setError(body.error || LOAD_ERROR)
-        setData(null)
-        return
+      const body = await res.json().catch(() => ({}))
+      if (!res.ok || !Array.isArray(body.restaurants)) {
+        if (!refresh) setError(body.error || LOAD_ERROR)
+        return false
       }
       setData(body)
+      return true
     } catch {
-      setError(LOAD_ERROR)
+      if (!refresh) setError(LOAD_ERROR)
+      return false
     } finally {
-      setLoading(false)
+      if (!refresh) setLoading(false)
     }
   }, [])
 
@@ -480,8 +561,10 @@ export default function SourceTriagePage() {
   }, [session, load])
 
   const entries = useMemo(() => (data && data.restaurants) || [], [data])
-  const counts = useMemo(() => countTriage(entries), [entries])
-  const visible = useMemo(() => filterTriage(entries, { filter, query }), [entries, filter, query])
+  const proposalsAvailable = Boolean(data && data.proposals_available)
+  const counts = useMemo(() => countTriage(entries, { proposalsAvailable }), [entries, proposalsAvailable])
+  const activeFilter = effectiveFilter(filter, proposalsAvailable)
+  const visible = useMemo(() => filterTriage(entries, { filter: activeFilter, query }), [entries, activeFilter, query])
   const selected = entries.find((e) => e.restaurant_id === selectedId) || null
 
   useEffect(() => {
@@ -491,15 +574,27 @@ export default function SourceTriagePage() {
     }
   }, [selectedId])
 
+  // After a save, move focus to the feedback once it is rendered.
+  useEffect(() => {
+    if (message && focusFeedback.current && feedbackRef.current) {
+      focusFeedback.current = false
+      feedbackRef.current.focus()
+    }
+  }, [message])
+
   function select(id) {
     setMessage(null)
     focusDetail.current = true
     setSelectedId(id)
   }
 
-  async function post(url, payload, successText) {
+  // One write, then a refresh. The message is set only once both are done,
+  // so it reports the real outcome: saved and refreshed, saved but not
+  // refreshed (the last known list stays), or not saved.
+  async function post(url, payload, action) {
     setBusy(true)
     setMessage(null)
+    let outcome
     try {
       const res = await fetch(url, {
         method: 'POST',
@@ -507,28 +602,22 @@ export default function SourceTriagePage() {
         body: JSON.stringify(payload),
       })
       const body = await res.json().catch(() => ({}))
-      if (!res.ok) {
-        setMessage({ tone: 'error', text: body.error || 'Opslaan is niet gelukt.' })
-        return
-      }
-      setMessage({ tone: 'success', text: successText })
-      await load(session.access_token)
+      outcome = res.ok
+        ? { action, saved: true, refreshed: await load(session.access_token, { refresh: true }) }
+        : { action, saved: false, error: body.error }
     } catch {
-      setMessage({ tone: 'error', text: 'Opslaan is niet gelukt.' })
-    } finally {
-      setBusy(false)
+      outcome = { action, saved: false }
     }
+    focusFeedback.current = true
+    setMessage(saveFeedback(outcome))
+    setBusy(false)
   }
 
   function createProposal(payload) {
-    return post('/api/internal/v1/source-triage/proposals', payload, `Voorstel opgeslagen. ${TRIAGE_NOTICE}`)
+    return post('/api/internal/v1/source-triage/proposals', payload, 'create')
   }
   function decideProposal(id, decision, note) {
-    const text =
-      decision === 'accepted'
-        ? 'Voorstel geaccepteerd. Er is niets gepubliceerd en er is geen controle gestart.'
-        : 'Voorstel afgewezen. De bron blijft ongewijzigd.'
-    return post(`/api/internal/v1/source-triage/proposals/${encodeURIComponent(id)}/decision`, { decision, note }, text)
+    return post(`/api/internal/v1/source-triage/proposals/${encodeURIComponent(id)}/decision`, { decision, note }, decision)
   }
 
   if (session === undefined) {
@@ -559,30 +648,48 @@ export default function SourceTriagePage() {
           </p>
         </div>
 
-        {error && (
-          <div className="di-banner di-banner-danger" role="alert">
-            {error}
-          </div>
-        )}
+        <div role="alert" aria-atomic="true">
+          {error && <div className="di-banner di-banner-danger">{error}</div>}
+        </div>
         {loading && !data && <p className="stg-muted">Laden…</p>}
 
         {data && (
           <>
-            {!data.proposals_available && (
-              <div className="di-banner di-banner-neutral" role="status">
-                Voorstellen konden niet worden geladen. De bronstatus hieronder is wel actueel; voorstellen doen en
-                beoordelen kan nu niet.
+            {!proposalsAvailable && (
+              <div className="di-banner di-banner-neutral">
+                Voorstellen zijn tijdelijk niet beschikbaar. De bronstatus hieronder is wel actueel; of er een open
+                voorstel is, is nu onbekend. Voorstellen doen en beoordelen kan nu niet.
               </div>
             )}
 
             <div className="stg-filters">
               <div className="stg-filter-group" role="group" aria-label="Restaurants filteren">
-                {TRIAGE_FILTERS.map((f) => (
-                  <button key={f} type="button" className="stg-filter" aria-pressed={filter === f} onClick={() => setFilter(f)}>
-                    <span>{TRIAGE_FILTER_LABELS[f]}</span>
-                    <span className="stg-count">{counts[f]}</span>
-                  </button>
-                ))}
+                {TRIAGE_FILTERS.map((f) => {
+                  // null = unknown (proposals unavailable): never shown as 0, not selectable.
+                  const unknown = counts[f] === null
+                  return (
+                    <button
+                      key={f}
+                      type="button"
+                      className="stg-filter"
+                      aria-pressed={activeFilter === f}
+                      disabled={unknown}
+                      onClick={() => setFilter(f)}
+                    >
+                      <span>{TRIAGE_FILTER_LABELS[f]}</span>
+                      <span className="stg-count">
+                        {unknown ? (
+                          <>
+                            <span aria-hidden="true">?</span>
+                            <span className="visually-hidden">aantal onbekend</span>
+                          </>
+                        ) : (
+                          counts[f]
+                        )}
+                      </span>
+                    </button>
+                  )
+                })}
               </div>
               <div className="stg-search">
                 <label htmlFor="stg-search" className="visually-hidden">
@@ -620,6 +727,11 @@ export default function SourceTriagePage() {
                             {e.attention && <span className="stg-item-attention">{e.attention}</span>}
                             <span className="stg-item-step">Vervolgstap: {NEXT_STEP_LABELS[e.next_step]}</span>
                             {e.open_proposal_id && <ProposalBadge status="open" />}
+                            {e.proposals_known === false && (
+                              <Badge tone="neutral" icon="dot">
+                                Voorstellen: tijdelijk onbekend
+                              </Badge>
+                            )}
                           </button>
                         </li>
                       )
@@ -629,15 +741,11 @@ export default function SourceTriagePage() {
               </section>
 
               <section id="stg-detail" className="stg-detail" aria-label="Details">
-                {message && (
-                  <div className={`di-banner ${message.tone === 'error' ? 'di-banner-danger' : 'di-banner-info'}`} role={message.tone === 'error' ? 'alert' : 'status'}>
-                    {message.text}
-                  </div>
-                )}
+                <FeedbackRegion message={message} regionRef={feedbackRef} />
                 {selected ? (
                   <Detail
                     entry={selected}
-                    proposalsAvailable={data.proposals_available}
+                    proposalsAvailable={proposalsAvailable}
                     busy={busy}
                     onCreate={createProposal}
                     onDecide={decideProposal}

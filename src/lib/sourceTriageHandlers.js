@@ -90,8 +90,9 @@ function createSourceTriageHandlers(deps) {
     }
     const queue = buildSourceWorkqueue({ restaurants, jobs: jobs || [], receipts });
 
-    // Proposals are optional for the read: before 0015 is applied the page
-    // still shows the BE-23 data and says proposals could not be loaded.
+    // Proposals are optional for the read: when they cannot be loaded the
+    // page still shows the BE-23 data, says proposals are unavailable and
+    // derives no proposal state (buildTriageView, proposalsAvailable).
     const { data: proposals, error: proposalsError } = await supabase
       .from('source_triage_proposals')
       .select(PROPOSAL_COLUMNS)
@@ -99,7 +100,13 @@ function createSourceTriageHandlers(deps) {
       .order('proposed_at', { ascending: false })
       .limit(PROPOSAL_LIMIT);
 
-    const view = buildTriageView({ queue, restaurants, proposals: proposalsError ? [] : proposals || [], viewerId: auth.userId });
+    const view = buildTriageView({
+      queue,
+      restaurants,
+      proposals: proposalsError ? [] : proposals || [],
+      viewerId: auth.userId,
+      proposalsAvailable: !proposalsError,
+    });
     return reply(200, {
       city: 'Breda',
       restaurants: view.restaurants,

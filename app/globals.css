@@ -2697,6 +2697,7 @@ mark.search-highlight {
 .stg-filter { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1px solid var(--input-border); border-radius: var(--radius-md); background: var(--bg-card); color: var(--text-primary); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
 .stg-filter:hover { background: var(--bg-hover); }
 .stg-filter[aria-pressed="true"] { background: var(--accent-surface); color: var(--accent); border-color: var(--accent); }
+.stg-filter:disabled { cursor: not-allowed; border-style: dashed; color: var(--text-secondary); background: var(--bg-card); }
 .stg-count { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; padding: 1px 7px; border-radius: var(--radius-pill); background: var(--bg-hover); color: var(--text-primary); font-size: 12px; font-weight: 700; }
 .stg-search { flex: 1 1 220px; min-width: 0; }
 .stg-search input, .stg-input, .stg-textarea { width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid var(--input-border); border-radius: var(--radius-md); background: var(--bg-input); color: var(--text-primary); font: inherit; font-size: 14px; }
@@ -2716,6 +2717,9 @@ mark.search-highlight {
 .stg-detail-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px; display: grid; gap: 12px; }
 .stg-detail-title { margin: 0; font-size: 20px; font-weight: 800; color: var(--text-primary); overflow-wrap: anywhere; }
 .stg-detail-title:focus { outline: none; }
+.stg-feedback { display: grid; border-radius: var(--radius-md); }
+.stg-feedback:focus { outline: none; }
+.stg-feedback:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
 .stg-detail-title:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 3px; border-radius: var(--radius-sm); }
 .stg-facts { margin: 0; display: grid; gap: 10px; }
 .stg-facts > div { display: grid; gap: 3px; grid-template-columns: minmax(0, 1fr); }

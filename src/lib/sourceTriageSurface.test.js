@@ -60,7 +60,7 @@ test('forms are labelled, errors are announced, and the selected restaurant is e
   assert.match(code, /role="alert"/);
   assert.match(code, /aria-invalid=/);
   assert.match(code, /aria-current=\{isSelected \? 'true' : undefined\}/);
-  assert.match(code, /aria-pressed=\{filter === f\}/);
+  assert.match(code, /aria-pressed=\{activeFilter === f\}/);
   assert.match(code, /tabIndex=\{-1\} ref=\{headingRef\}/, 'focus moves to the detail heading after selecting');
 });
 
@@ -84,4 +84,74 @@ test('styles: visible focus on every control, list + detail from 960px, wrapping
   assert.match(rules, /@media \(min-width: 960px\) \{\s*\.stg-layout \{ grid-template-columns: minmax\(280px, 380px\) minmax\(0, 1fr\); \}/);
   assert.match(rules, /\.stg-url \{ overflow-wrap: anywhere;/);
   assert.match(rules, /\.stg-filters \{ display: flex; flex-wrap: wrap;/);
+});
+
+// ── Accessibility after saving and in forms ───────────────────────────────
+
+function fnSource(name) {
+  const start = code.indexOf(`function ${name}(`);
+  assert.ok(start >= 0, `${name} exists`);
+  const next = code.indexOf('\nfunction ', start + 10);
+  const nextExport = code.indexOf('\nexport default function', start + 10);
+  const ends = [next, nextExport].filter((i) => i > 0);
+  return code.slice(start, ends.length ? Math.min(...ends) : undefined);
+}
+
+test('save feedback uses permanent, pre-rendered live regions; only their content is conditional', () => {
+  const region = fnSource('FeedbackRegion');
+  assert.match(region, /<div role="status" aria-live="polite" aria-atomic="true">\s*\{message && !isError \? banner : null\}\s*<\/div>/);
+  assert.match(region, /<div role="alert" aria-atomic="true">\s*\{isError \? banner : null\}\s*<\/div>/);
+  assert.doesNotMatch(region, /if \(!message\)|message \?\s*\(\s*<div id="stg-feedback"/, 'the regions themselves never depend on a message');
+  // Rendered unconditionally at the top of the detail pane, which exists
+  // whenever data is shown (and every save needs shown data).
+  assert.match(code, /<section id="stg-detail" className="stg-detail" aria-label="Details">\s*<FeedbackRegion message=\{message\} regionRef=\{feedbackRef\} \/>/);
+  assert.doesNotMatch(code, /\{message && \(/, 'no banner that appears together with its own live region');
+  // The page-level load error also sits in a region that exists before the error.
+  assert.match(code, /<div role="alert" aria-atomic="true">\s*\{error && <div className="di-banner di-banner-danger">\{error\}<\/div>\}\s*<\/div>/);
+});
+
+test('after a save or a failed save, focus moves to the feedback, set only after the refresh has finished', () => {
+  assert.match(code, /<div id="stg-feedback" className="stg-feedback" ref=\{regionRef\} tabIndex=\{-1\}>/);
+  assert.match(code, /if \(message && focusFeedback\.current && feedbackRef\.current\) \{\s*focusFeedback\.current = false\s*feedbackRef\.current\.focus\(\)/);
+  const post = code.slice(code.indexOf('async function post('), code.indexOf('function createProposal('));
+  const refresh = post.indexOf('load(session.access_token, { refresh: true })');
+  const focus = post.indexOf('focusFeedback.current = true');
+  const show = post.indexOf('setMessage(saveFeedback(outcome))');
+  assert.ok(refresh > 0 && focus > refresh && show > focus, 'refresh, then focus flag, then the message');
+  assert.doesNotMatch(post, /finally/, 'the message is set on every path, not only on success');
+  const rules = stgRules();
+  assert.match(rules, /\.stg-feedback:focus-visible \{ outline: 2px solid var\(--border-focus\)/);
+  assert.doesNotMatch(rules, /stg-feedback[^{]*\{[^}]*display: none/, 'a live region is never display:none');
+});
+
+test('"Andere reden" without a note: the textarea, not the select, is invalid, described, required and focused', () => {
+  const form = fnSource('ProposalForm');
+  assert.match(form, /const noteRequired = !needsUrl && reason === 'other'/);
+  assert.match(form, /<textarea\s+id=\{`\$\{base\}-note`\}\s+ref=\{noteRef\}[\s\S]*?aria-required=\{noteRequired \? 'true' : undefined\}\s+aria-invalid=\{invalid\('note'\)\}\s+aria-describedby=\{describedBy\('note'\)\}/);
+  assert.match(form, /<select\s+id=\{`\$\{base\}-reason`\}\s+ref=\{reasonRef\}[\s\S]*?aria-invalid=\{invalid\('reason'\)\}\s+aria-describedby=\{describedBy\('reason'\)\}/);
+  assert.match(form, /aria-invalid=\{invalid\('url'\)\}\s+aria-describedby=\{describedBy\('url', `\$\{base\}-url-help`\)\}/);
+  assert.match(form, /const invalid = \(field\) => \(error && error\.field === field \? 'true' : undefined\)/);
+  assert.match(form, /validateProposalForm\(\{ kind, url, reason, note, knownUrl: entry\.known_url \}\)/);
+  assert.match(form, /\{ url: urlRef, reason: reasonRef, note: noteRef \}\[error\.field\]/);
+  assert.match(form, /ref\.current\.focus\(\)/);
+  assert.match(form, /<p id=\{errorId\} className="stg-error" role="alert">\s*\{error\.message\}/);
+  assert.match(form, /verplicht bij Andere reden/);
+  const decision = fnSource('DecisionForm');
+  assert.match(decision, /validateDecisionForm\(\{ decision, note \}\)/);
+  assert.match(decision, /if \(error && noteRef\.current\) noteRef\.current\.focus\(\)/);
+});
+
+test('unknown proposals and a failed refresh never invent state or clear the page', () => {
+  assert.doesNotMatch(code, /setData\(null\)/, 'a failed load keeps the last known list and detail');
+  assert.match(code, /if \(!refresh\) setError\(body\.error \|\| LOAD_ERROR\)\s*return false/);
+  assert.match(code, /countTriage\(entries, \{ proposalsAvailable \}\)/);
+  assert.match(code, /const activeFilter = effectiveFilter\(filter, proposalsAvailable\)/);
+  assert.match(code, /filterTriage\(entries, \{ filter: activeFilter, query \}\)/);
+  assert.match(code, /const unknown = counts\[f\] === null/);
+  assert.match(code, /disabled=\{unknown\}/);
+  assert.match(code, /<span className="visually-hidden">aantal onbekend<\/span>/);
+  assert.match(code, /\{e\.proposals_known === false && \(\s*<Badge tone="neutral" icon="dot">\s*Voorstellen: tijdelijk onbekend/);
+  assert.match(code, /\{!proposalsAvailable \? \(\s*<p className="stg-muted">Voorstellen kunnen nu niet worden geladen of opgeslagen\.<\/p>/, 'forms stay hidden');
+  const rules = stgRules();
+  assert.match(rules, /\.stg-filter:disabled \{[^}]*color: var\(--text-secondary\)/);
 });

@@ -30,6 +30,10 @@ const {
   buildTriageView,
   filterTriage,
   countTriage,
+  effectiveFilter,
+  validateProposalForm,
+  validateDecisionForm,
+  saveFeedback,
 } = require('./sourceTriage');
 const { buildSourceWorkqueue } = require('./sourceWorkqueue');
 
@@ -299,4 +303,88 @@ test('the module is pure: no network, database, React or DOM', () => {
     .filter((l) => !/^\s*(\/\/|\*|\/\*)/.test(l))
     .join('\n');
   assert.doesNotMatch(src, /\bfetch\(|safeOutboundFetch|restaurantSourceFetch|supabase|require\(['"]react|document\.|window\./i);
+});
+
+// ── Unknown proposals (the proposals could not be loaded) ─────────────────
+
+test('nextStepFor: unknown proposals give proposals_unknown, never a step that assumes no open proposal', () => {
+  assert.equal(nextStepFor({ row: { reason: 'no_website' }, knownUrl: null, proposalsKnown: false }), 'proposals_unknown');
+  assert.equal(nextStepFor({ row: { source: 'unreachable' }, knownUrl: 'https://a.example.com/', proposalsKnown: false }), 'proposals_unknown');
+  assert.equal(nextStepFor({ row: { source: 'unreachable' }, hasOpenProposal: true, knownUrl: 'https://a.example.com/', proposalsKnown: false }), 'proposals_unknown');
+});
+
+test('buildTriageView with proposals unavailable derives no proposal state at all', () => {
+  const proposals = [{ id: 'p', restaurant_id: '1', kind: 'add_candidate', status: 'open', proposed_by: VIEWER, proposed_at: '2026-10-03T10:00:00Z' }, { id: 'o', restaurant_id: '99', status: 'open' }];
+  const view = buildTriageView({ queue: queueWithFailedGrillhuis(), restaurants: RESTAURANTS, proposals, viewerId: VIEWER, proposalsAvailable: false });
+  assert.equal(view.orphanProposals, 0);
+  for (const r of view.restaurants) {
+    assert.equal(r.proposals_known, false, r.restaurant_id);
+    assert.equal(r.open_proposal_id, null, r.restaurant_id);
+    assert.deepEqual(r.proposals, [], r.restaurant_id);
+    assert.equal(r.next_step, 'proposals_unknown', r.restaurant_id);
+  }
+  // The source information stays: status, reason, URL and attention are not proposal state.
+  const grill = view.restaurants.find((r) => r.restaurant_id === '3');
+  assert.equal(grill.source, 'unreachable');
+  assert.equal(grill.attention, 'Bron: Niet bereikbaar');
+  // Sorting uses no proposal state: by name only.
+  assert.deepEqual(view.restaurants.map((r) => r.name), ['Fictief Bistro Haven', 'Fictief Eetcafé Molen', 'Fictief Grillhuis']);
+  // Available (the default) still marks proposals as known.
+  const known = buildTriageView({ queue: queueWithFailedGrillhuis(), restaurants: RESTAURANTS, proposals: [], viewerId: VIEWER });
+  assert.ok(known.restaurants.every((r) => r.proposals_known === true));
+});
+
+test('countTriage and filterTriage with unknown proposals: proposal-dependent filters are unknown, never 0 or a guess', () => {
+  const view = buildTriageView({ queue: queueWithFailedGrillhuis(), restaurants: RESTAURANTS, proposals: [], viewerId: VIEWER, proposalsAvailable: false });
+  assert.deepEqual(countTriage(view.restaurants, { proposalsAvailable: false }), { all: 3, open_proposal: null, needs_source: null, no_check: 2 });
+  assert.deepEqual(filterTriage(view.restaurants, { filter: 'open_proposal' }), []);
+  assert.deepEqual(filterTriage(view.restaurants, { filter: 'needs_source' }), []);
+  assert.equal(filterTriage(view.restaurants, { filter: 'no_check' }).length, 2);
+  assert.equal(effectiveFilter('open_proposal', false), 'all');
+  assert.equal(effectiveFilter('needs_source', false), 'all');
+  assert.equal(effectiveFilter('no_check', false), 'no_check');
+  assert.equal(effectiveFilter('open_proposal', true), 'open_proposal');
+  assert.equal(effectiveFilter('bogus', true), 'all');
+});
+
+// ── The page's own form checks (which control gets the error) ─────────────
+
+test('validateProposalForm: "Andere reden" without a note puts the error on the note, not on the reason', () => {
+  const base = { kind: 'mark_unusable', url: '', knownUrl: 'https://bistrohaven.example.com/' };
+  assert.deepEqual(validateProposalForm({ ...base, reason: 'other', note: '   ' }), { ok: false, field: 'note', message: 'Geef een korte toelichting.' });
+  assert.deepEqual(validateProposalForm({ ...base, reason: '', note: '' }), { ok: false, field: 'reason', message: 'Kies een reden.' });
+  assert.deepEqual(validateProposalForm({ ...base, reason: 'not_a_reason', note: '' }), { ok: false, field: 'reason', message: 'Kies een reden.' });
+  assert.deepEqual(validateProposalForm({ ...base, reason: 'other', note: 'Andere zaak op dit adres' }), { ok: true });
+  for (const r of ['site_offline', 'other_business', 'no_menu_on_source', 'access_blocked']) assert.deepEqual(validateProposalForm({ ...base, reason: r, note: '' }), { ok: true }, r);
+  assert.equal(validateProposalForm({ ...base, reason: 'site_offline', note: 'a\u0007b' }).field, 'note');
+});
+
+test('validateProposalForm: URL problems are reported on the URL field; the note is optional for URL proposals', () => {
+  const known = 'https://bistrohaven.example.com/';
+  assert.deepEqual(validateProposalForm({ kind: 'add_candidate', url: '', reason: '', note: '', knownUrl: null }), { ok: false, field: 'url', message: 'Vul een URL in.' });
+  assert.equal(validateProposalForm({ kind: 'add_candidate', url: 'http://10.0.0.1/', reason: '', note: '', knownUrl: null }).field, 'url');
+  assert.deepEqual(validateProposalForm({ kind: 'replace_source', url: 'https://bistrohaven.example.com/?utm=x', reason: '', note: '', knownUrl: known }), { ok: false, field: 'url', message: 'Deze URL is al de bekende bron.' });
+  assert.deepEqual(validateProposalForm({ kind: 'replace_source', url: 'https://haven-nieuw.example.com/', reason: 'other', note: '', knownUrl: known }), { ok: true });
+});
+
+test('validateDecisionForm: a rejection needs a reason on the note; accepting does not', () => {
+  assert.deepEqual(validateDecisionForm({ decision: 'rejected', note: ' ' }), { ok: false, field: 'note', message: 'Geef een reden voor het afwijzen.' });
+  assert.deepEqual(validateDecisionForm({ decision: 'rejected', note: 'Verkeerde pagina' }), { ok: true });
+  assert.deepEqual(validateDecisionForm({ decision: 'accepted', note: '' }), { ok: true });
+});
+
+// ── Feedback after a save ─────────────────────────────────────────────────
+
+test('saveFeedback: saved and refreshed, saved but not refreshed, and not saved are three honest messages', () => {
+  assert.deepEqual(saveFeedback({ action: 'create', saved: true, refreshed: true }), { tone: 'success', text: 'Voorstel opgeslagen. Wijzigingen worden pas na controle verwerkt.' });
+  assert.equal(saveFeedback({ action: 'accepted', saved: true, refreshed: true }).text, 'Voorstel geaccepteerd. Er is niets gepubliceerd en er is geen controle gestart.');
+  assert.equal(saveFeedback({ action: 'rejected', saved: true, refreshed: true }).text, 'Voorstel afgewezen. De bron blijft ongewijzigd.');
+  for (const [action, start] of [['create', 'Voorstel opgeslagen.'], ['accepted', 'Voorstel geaccepteerd.'], ['rejected', 'Voorstel afgewezen.']]) {
+    const f = saveFeedback({ action, saved: true, refreshed: false });
+    assert.equal(f.tone, 'notice', action);
+    assert.ok(f.text.startsWith(`${start} Verversen is niet gelukt`), f.text);
+    assert.match(f.text, /verouderd/);
+  }
+  assert.deepEqual(saveFeedback({ action: 'create', saved: false, error: 'Er staat al een open voorstel voor dit restaurant. Beoordeel dat eerst.' }), { tone: 'error', text: 'Er staat al een open voorstel voor dit restaurant. Beoordeel dat eerst.' });
+  assert.deepEqual(saveFeedback({ action: 'accepted', saved: false }), { tone: 'error', text: 'Opslaan is niet gelukt.' });
 });

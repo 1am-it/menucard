@@ -250,12 +250,19 @@ test('read: only selects (no RPC), combines BE-23 data with proposals, and expos
   assert.doesNotMatch(JSON.stringify(res.body), new RegExp(other));
 });
 
-test('read: before 0015 exists the page still gets the BE-23 data, with proposals marked unavailable', async () => {
+test('read: when proposals cannot be loaded the page still gets the BE-23 data, with no proposal state derived', async () => {
   const { handlers } = setup({ supabase: fakeSupabase({ failTables: ['source_triage_proposals'] }) });
   const res = await handlers.getTriage(req());
   assert.equal(res.status, 200);
   assert.equal(res.body.proposals_available, false);
+  assert.equal(res.body.proposal_limit_reached, false);
   assert.equal(res.body.restaurants.length, 2);
+  for (const r of res.body.restaurants) {
+    assert.equal(r.proposals_known, false);
+    assert.equal(r.open_proposal_id, null);
+    assert.equal(r.next_step, 'proposals_unknown');
+  }
+  assert.doesNotMatch(JSON.stringify(res.body), /42P01|missing/, 'no database error detail reaches the browser');
 });
 
 test('read: a failing workqueue query is a load error, never partial data', async () => {
