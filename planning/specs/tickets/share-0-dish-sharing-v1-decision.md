@@ -129,8 +129,13 @@ In scope:
   other BE-12 dish link, by design.
 - Share text handed to the share sheet is composed only from validated
   menu data of the resolved dish (dish name, restaurant name, city) plus
-  the Onze Menukaarten name — never from raw query-string values, and
-  never with price, availability, allergen or ranking language.
+  the name BredaEats — never from raw query-string values, and never with
+  price, availability, allergen or ranking language. The visible public
+  UI (including the "Deel gerecht" action and the dish page) uses Onze
+  Menukaarten, but the share text is an outgoing message and therefore
+  says BredaEats until a separate brand decision changes it
+  (`docs/guides/design-reference.md`, "Product positioning and
+  branding").
 - The dish page, for **every** BE-12 dish deep link (not only shared
   ones, since sharing is not detectable): the existing menu page with the
   dish highlighted (BE-12 behaviour), plus copy that is true for any dish
