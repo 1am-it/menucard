@@ -1,9 +1,10 @@
 # Ticket specs
 
-This directory contains the executable breakdown of three tracks: the
-completed `BE-*` dish-first migration, the `PLATFORM-*` data-platform
-track, and the proposed, not-yet-scheduled `MARKET-*` market-foundation
-track. Each track has its own file per ticket. It complements the
+This directory contains the executable breakdown of the project's ticket
+tracks: the completed `BE-*` dish-first migration, the `PLATFORM-*`
+data-platform track, the proposed, not-yet-scheduled `MARKET-*`
+market-foundation track, and the decision-first `SHARE-*` track (see its
+own section below). Each track has its own file per ticket. It complements the
 feature-level specs one level up (`planning/specs/*.md`, which describe
 product behaviour) and the phase overviews in
 `planning/architecture/migration-plan.md` (`BE-*`),
@@ -388,12 +389,17 @@ and dependencies stay unchanged.
 
 1. [share-0-dish-sharing-v1-decision.md](./share-0-dish-sharing-v1-decision.md) —
    open decision, awaiting the product owner: whether a minimal "Deel
-   gerecht" v1 may reuse the BE-12 dish deep link before `MARKET-02`/`06`/`08`,
+   gerecht" v1 on the canonical BE-12 dish deep link (no extra parameter,
+   no per-dish preview) should be pursued before `MARKET-02`/`06`/`08`,
    whether v1 stays free of any measurement, and that public popularity
    ("Vaak gedeeld", ranking, counters) stays forbidden per `MARKET-10` and
-   decision 011. Recommended default: A/A/A. `SHARE-1` is created only after
-   the decision.
+   decision 011. Recommended default: A/A/A. `SHARE-0` authorizes no
+   implementation and does not change `MARKET-10`; `SHARE-1` is created
+   only after the decision and, for D1 = A, a separately recorded
+   `MARKET-10` change.
 
 Do not start a ticket whose dependencies aren't done. Each ticket should be
-independently reviewable and deployable where practical. The three tracks
-do not block each other.
+independently reviewable and deployable where practical. The `BE-*`,
+`PLATFORM-*` and `MARKET-*` tracks do not block each other; `SHARE-*`
+waits on its own recorded decisions and on `MARKET-10`, as its section
+states.
