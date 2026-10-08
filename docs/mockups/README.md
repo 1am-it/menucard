@@ -53,8 +53,9 @@ Claude Design canvas). Its rules and values are written down in
 `docs/guides/design-reference.md` ("Kleurtaal v2"), which wins over any
 mockup colour. Its Brontriage screens are not a mockup for a built page.
 BE-24 built a first, proposal-only Brontriage on BE-23's layout; its
-implemented layout is recorded as `internal-source-triage-v1.png`. The
-navigation label and position remain an open decision.
+implemented layout is recorded as `internal-source-triage-v1.png`. Its
+v1 navigation is decided: internal-only, under `Werkvoorraad`, directly
+after `Bronwerkvoorraad` (that ticket's "V1 product decisions").
 
 Not yet in this directory: a PLATFORM-12 coverage dashboard v2 has no
 committed ticket or mockup in the repository yet. When it lands, add it
@@ -275,6 +276,8 @@ reference instead of ad hoc judgment calls:
   icon and text, the open proposal with accept/reject, and the audit
   history. Captured from a local build with fictional data; it is a record
   of the build, not a design source. Below 960px list and detail stack.
+  It predates the later feedback and unknown-proposal states (described in
+  the ticket's "Design"); the layout itself is unchanged.
 
 ## Naming
 

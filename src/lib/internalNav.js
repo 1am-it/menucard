@@ -100,9 +100,9 @@ const INTERNAL_MODULES = [
   { id: 'source-workqueue', label: 'Bronwerkvoorraad', href: '/internal/source-workqueue', requiredRole: 'internal', placement: 'workqueue', subtitle: 'Bron en menukaart per restaurant' },
   // Brontriage — proposal-only source triage (BE-24,
   // planning/specs/tickets/be-24-internal-source-triage.md): record and
-  // accept/reject source proposals; nothing is fetched or published. Label
-  // and position are this build's choice (Kleurtaal v2 left the item open),
-  // flagged for product confirmation. No badge count.
+  // accept/reject source proposals; nothing is fetched or published.
+  // Internal-only, directly after Bronwerkvoorraad: the BE-24 v1 product
+  // decision. No badge count.
   { id: 'source-triage', label: 'Brontriage', href: '/internal/source-triage', requiredRole: 'internal', placement: 'workqueue', subtitle: 'Bronvoorstellen vastleggen en beoordelen' },
   { id: 'profile-drafts', label: 'Profielconcepten', href: '/internal/profile-drafts', requiredRole: 'internal', placement: 'workqueue', subtitle: 'Klaarzetten' },
   // BE-17/PLATFORM-06's existing `editor`-only Moderation module — route,

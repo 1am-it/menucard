@@ -2,20 +2,21 @@
 
 ## Status
 
-Nothing is live. BE-24 ships as two separate releases (see "Release
-sequencing"):
+The schema is live; the app is not released. BE-24 ships as two
+separate releases (see "Release sequencing"):
 
-1. **Schema release** (this release): migration `0015`, its structural
-   test (`src/lib/sourceTriageMigration.test.js`) and the release-gate
+1. **Schema release** (done): migration `0015`, its structural test
+   (`src/lib/sourceTriageMigration.test.js`) and the release-gate
    alignment in `.github/workflows/production-db-migrate.yml`. `0015`
-   is not applied anywhere yet.
-2. **App release** (a separate, later release): the API routes, the
-   Brontriage page, the internal navigation entry, the mockup and an
-   end-to-end check. It is merged and deployed only after `0015` is
-   confirmed live. It is not part of this release.
+   was applied to production and verified on 2026-10-08.
+2. **App release** (not released): the API routes, the Brontriage page,
+   the internal navigation entry and the mockup. It is merged and
+   deployed only after its own independent review and an explicit merge
+   approval.
 
 The sections "Routes", "Next step per restaurant" and "Design" below
-specify the app release; nothing in them ships with the schema release.
+specify the app release; nothing in them shipped with the schema
+release.
 
 ## Goal
 
@@ -48,10 +49,11 @@ Per restaurant the page shows:
 - No public form, anonymous account, photo upload or file storage.
 - No change to BE-23's classification, BE-20's analysis, BE-22's
   benchmark, public routes, SEO, reservation logic, auth flow,
-  dependencies or production configuration. The only workflow change is
-  the release gate for `0015`: the two documented version lists in
-  `production-db-migrate.yml` (applied `0001`–`0014`, release `0015`),
-  following the earlier "align production migration workflow" commits.
+  dependencies or production configuration. The schema release's only
+  workflow change was the release gate for `0015`: the two documented
+  version lists in `production-db-migrate.yml` (applied `0001`–`0014`,
+  release `0015`), following the earlier "align production migration
+  workflow" commits. The app release changes no workflow.
 - No bulk actions, no notifications, no counts in the navigation.
 
 ## Three separate things
@@ -136,8 +138,10 @@ mirrored in the form:
   `isInternalOnly` (the `internal` staff role) **before** parsing the
   body, validating input or creating a database client. A missing,
   invalid or non-internal session gets `401`/`403` with zero database
-  calls (to be tested behaviourally with an injected client in the app
-  release).
+  calls. This is tested behaviourally with an injected client in
+  `src/lib/sourceTriageHandlers.test.js` (no session, expired session, no
+  staff role, `editor`, `owner` and `editor` + `owner`, for all three
+  routes).
 - Proposing, accepting and rejecting all need `internal`. `editor` and
   `owner` alone are refused, as for every other Data-inbox route.
 - The actor is always the authenticated user id from the server, never a
@@ -233,13 +237,14 @@ anything this migration creates.
 
 Route handlers are thin: the logic lives in
 `src/lib/sourceTriageHandlers.js` with injected dependencies, so the
-role checks and "no write before authorization" can be tested
-behaviourally in the app release.
+role checks and "no write before authorization" are tested behaviourally
+(`src/lib/sourceTriageHandlers.test.js`).
 
 ## Next step per restaurant (app release)
 
 | Situation | Next step |
 |---|---|
+| Proposals could not be loaded | Onbekend — voorstellen zijn tijdelijk niet beschikbaar |
 | An open proposal exists | Voorstel beoordelen |
 | No website known | URL toevoegen als kandidaatbron |
 | Bron `Niet bereikbaar` or `Identiteit gewijzigd` | Bron vervangen of markeren als onbruikbaar |
@@ -257,6 +262,26 @@ behaviourally in the app release.
 - Proposal actions are labelled as proposals ("Voorstel opslaan"), never
   as publishing. The accept button says "Voorstel accepteren", with
   "Wijzigingen worden pas na controle verwerkt." next to it.
+- Save feedback sits in two permanent live regions at the top of the
+  detail pane (a polite status region for success and notices, an alert
+  region for errors). They are rendered before any message exists, so a
+  message placed in them is announced. After every save or failed save,
+  focus moves to the feedback, so it is never lost when the submitted
+  form disappears. The message is set only after the list is refreshed.
+  If the save succeeds but the refresh fails, the last known list and
+  detail stay on screen, and the message says the change was saved but
+  the page could not be refreshed.
+- Form errors belong to the control they are about. "Andere reden"
+  without a note marks the note (not the reason select) with
+  `aria-invalid`, links the error through `aria-describedby`, marks it
+  `aria-required`, and moves focus to it. URL and reason errors do the
+  same for their own field.
+- When the proposals cannot be loaded, no proposal state is derived: the
+  next step is "Onbekend — voorstellen zijn tijdelijk niet beschikbaar"
+  for every restaurant. The filters "Open voorstel" and "Bron vraagt
+  aandacht" show an unknown count and are disabled, and the list is
+  sorted by name only. Each item shows "Voorstellen: tijdelijk onbekend".
+  A neutral banner explains this, and the proposal forms stay hidden.
 - No horizontal page overflow at 1280, 390 and 320px.
 - Visible brand: the existing `InternalNav` wordmark (Onze Menukaarten).
 - Design source: the Kleurtaal v2 handoff "(Brontriage)" is not stored in
@@ -273,8 +298,15 @@ deployment. The app release still needs its own review and the product
 decisions listed below.
 
 Release gate: `production-db-migrate.yml` only applies a release whose
-versions match its documented lists. The live history and documented applied
-list now both read `0001`–`0015`; there is no staged migration version.
+versions match its documented lists. The live migration history is
+`0001`–`0015` (evidence below). The workflow file deliberately still
+holds the historical gate of the `0015` release itself:
+`DOCUMENTED_APPLIED_VERSIONS` `0001`–`0014` and
+`DOCUMENTED_RELEASE_VERSIONS` `0015`. These lists describe that release,
+not the current live state. **Follow-up for the next schema release**
+(not part of this app branch, which changes no workflow): move `0015`
+into the applied list and declare the new release version, the same way
+as the earlier "align production migration workflow" commits.
 
 `0014` is live according to production-db-migrate run
 https://github.com/1am-it/menucard/actions/runs/36601808246 (2026-09-29,
@@ -293,9 +325,15 @@ rights for `anon` or `authenticated`, only the documented minimum rights for
 `service_role`, and `SECURITY INVOKER` RPCs with `search_path=public`.
 Neither the migration nor the checks inserted a proposal or audit event.
 
-The remaining release sequence is: resolve the product decisions below,
-complete an independent app review, then open a separate app PR. Only an
-explicit merge approval may deploy the app/API/UI.
+The "`0014` and `0015` live" record for `planning/CONTEXT.md` is a
+separate, docs-only change on branch
+`docs/record-be24-migration-0015-live` (commit `c9fb9a6`). It is not part
+of this app branch, and it lands before the app PR.
+
+Remaining release sequence: that docs change lands, then an independent
+review of this app branch, then one separate app PR. Only an explicit
+merge approval may deploy the app/API/UI. The product decisions are
+recorded below.
 
 ## Follow-up phases (not built)
 
@@ -308,6 +346,8 @@ explicit merge approval may deploy the app/API/UI.
    Not part of this ticket.
 
 ## V1 product decisions
+
+These are decided for v1; none of them is an open product decision.
 
 - Navigation: `Brontriage` is an internal-only item under `Werkvoorraad`,
   directly after `Bronwerkvoorraad`.
@@ -331,15 +371,53 @@ explicit merge approval may deploy the app/API/UI.
   privilege check are recorded above. No app route, page, or API was part of
   the schema release.
 
-### App implementation baseline
+### App release (current)
 
-- The original local app validation on 2026-10-07 reported `src/lib`
-  1148/1149, `app` 79/79, `ops` 315/315, and `src/components` 59/59. The
-  single `src/lib` failure was the known CRLF working-copy check in
-  `menuSnapshotProposals.test.js`, whose files were unchanged by this ticket.
-- That validation also completed a local build and browser check with
-  fictional data and all non-local requests blocked. It covered 1280, 390,
-  and 320px in both themes, keyboard order, client-side validation, and the
-  one-RPC-per-action rule.
-- It was not a production UI/session check. The app/API/UI remains unreleased
-  until its separate PR is independently reviewed and explicitly approved.
+Local, 2026-10-08, on the app branch after the hardening commit
+("make Brontriage feedback, field errors and unknown proposals
+reliable"). No network, no database, fictional data only.
+
+- Targeted `node --test` run: 195/195. Per file:
+  - `sourceTriage.test.js` 29/29
+  - `sourceTriageHandlers.test.js` 17/17
+  - `sourceTriageSurface.test.js` 11/11
+  - `sourceTriageMigration.test.js` 13/13
+  - `internalNav.test.js` 47/47
+  - `sourceWorkqueue.test.js` 40/40
+  - `colourLanguage.test.js` 38/38
+- These tests cover the behaviour and accessibility points in "Design":
+  - Pure helpers, unit tested: `validateProposalForm`,
+    `validateDecisionForm`, `saveFeedback`, `effectiveFilter`, and the
+    unknown-proposals view.
+  - The page wiring is covered by structural tests: permanent live
+    regions, focus to the feedback, field-bound errors, no clearing of
+    data after a failed refresh, and unknown filters.
+  - Six deliberate mutations of the page and library (for example,
+    putting the note error on the select, or making the feedback region
+    conditional) were each caught.
+- Full suites:
+  - `src/lib` 1135/1164
+  - `app` 54/54
+  - `ops` 306/315
+  - `src/components` 59/59
+  - All 38 failures are outside BE-24, and none of them is in a file this
+    ticket changes. They come from missing local dependencies in this
+    worktree: there is no `node_modules` and nothing was installed.
+    `pdfjs-dist` is needed by the PDF extraction tests, and
+    `@supabase/supabase-js` by two import CLI tests. The remaining failure
+    is the known CRLF working-copy check in `menuSnapshotProposals.test.js`.
+- Production build: **not run**. No lockfile-conformant `node_modules`
+  is available locally, and installing was out of scope. As a syntax
+  check only (not a build), the page and the two libraries were parsed
+  with the SWC JSX parser, loaded read-only from another local checkout's
+  `node_modules`.
+- Not done for this head: a browser check (both themes, 1280/390/320px,
+  keyboard, screen-reader announcement of the feedback) and any
+  production UI/session check. The app/API/UI remains unreleased until
+  its separate PR is independently reviewed and explicitly approved.
+
+Historical context only: an earlier local validation on 2026-10-07
+(different base, before the hardening commit) included a local build and
+a browser check with fictional data and all non-local requests blocked.
+Its test totals are not reproducible on this head and are not evidence
+for it.
