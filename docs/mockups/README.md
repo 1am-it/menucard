@@ -43,13 +43,15 @@ the full notes; nothing listed here was removed.
 | `onboarding-restaurant-workflow-v1.png` | Internal Onboarding Restaurant flow | `be-20-general-restaurant-source-extraction.md` ("Approved design references", "Visual contract"). Context: `be-19-onboarding-restaurant-via-url.md` (URL intake; does not name this file) | Leading for the workflow panels; **not** for navigation |
 | `internal-navigation-workqueue-v1.png` | Internal navigation shell and Werkvoorraad | `be-20-general-restaurant-source-extraction.md` ("Approved design references", "Visual contract"). Context: `platform-11-role-aware-internal-navigation-home.md` (role filtering, `/internal` home) and decision 014 (orientation standard); neither names this file | **Leading for all internal navigation**; its counts are directional only |
 | `internal-source-triage-v1.png` | `/internal/source-triage` (Brontriage), desktop 1280px, light | `be-24-internal-source-triage.md` | Records the implemented BE-24 layout, captured from a local build with fictional data (not from the Kleurtaal v2 handoff). Mobile stacks list and detail. |
+| `share-1-dish-sharing-handoff-v1.pdf` | "Deel gerecht" on `/menu/[id]`: share sheet, popover, dish-link context line and mismatch status; desktop and mobile, light and dark | `share-1-dish-sharing-v1.md` | Conceptual implementation reference for the future SHARE-1 build; not a product decision or build authorization on its own (see "Public sharing" below). |
 | `internal-source-workqueue-v1.png` | `/internal/source-workqueue` (Bronwerkvoorraad) | `be-23-internal-source-workqueue.md` | Leading for page content; the ticket's "Deviations from the mockup" win. The "Onze Menukaarten" top bar is a placeholder, not branding. |
 
 **Colour (addition, 2026-10-07).** Colours in every mockup above are
 superseded by **Kleurtaal v2** (final design source "Onze Menukaarten —
-Kleurtaal v2 (Brontriage)", a PDF handoff that is not stored here: it
-does not follow the `<surface>-vN.png/.html` convention, like the earlier
-Claude Design canvas). Its rules and values are written down in
+Kleurtaal v2 (Brontriage)", a PDF handoff whose full version is not
+stored here: it does not follow the `<surface>-vN.png/.html` convention,
+like the earlier Claude Design canvas; only its SHARE-1 selection is
+stored, see "Public sharing" below). Its rules and values are written down in
 `docs/guides/design-reference.md` ("Kleurtaal v2"), which wins over any
 mockup colour. Its Brontriage screens are not a mockup for a built page.
 BE-24 built a first, proposal-only Brontriage on BE-23's layout; its
@@ -278,6 +280,28 @@ reference instead of ad hoc judgment calls:
   of the build, not a design source. Below 960px list and detail stack.
   It predates the later feedback and unknown-proposal states (described in
   the ticket's "Design"); the layout itself is unchanged.
+
+## Public sharing (addition, 2026-10-09)
+
+- [SHARE-1 dish sharing handoff](./share-1-dish-sharing-handoff-v1.pdf) —
+  visual handoff for the future `SHARE-1` build
+  (`planning/specs/tickets/share-1-dish-sharing-v1.md`).
+  - **Status:** conceptual implementation reference. It is not a product
+    decision and not a build authorization on its own; `SHARE-0`, the
+    `MARKET-10` amendment, `SHARE-1` and
+    `docs/guides/design-reference.md` win wherever they differ.
+  - **Colour and theme:** Kleurtaal v2 tokens only, in light and dark;
+    dark stays the runtime default (theme contract unchanged).
+  - **Content:** fictional example data only ("Restaurant Voorbeeld");
+    names, prices and links in it are not real and not copy to adopt.
+  - **Format:** a PDF selection from the "Onze Menukaarten — Kleurtaal v2
+    (Brontriage)" handoff, kept as PDF because it combines several
+    screens with a token mapping and acceptance criteria; named after the
+    `<surface>-v<N>` convention. Its header still says "SHARE-0 (D1–D3
+    open)": that is superseded by the decision of 2026-10-09.
+  - Not adopted from the earlier dish-sharing concept boards: serif
+    type, the restaurant illustration, the account icon and their
+    navigation items.
 
 ## Naming
 

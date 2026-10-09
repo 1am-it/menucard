@@ -233,8 +233,9 @@ Menukaarten brand accent" and "Kleurtaal v2".
 ## Kleurtaal v2 (implemented 2026-10-07)
 
 Source: the final design handoff "Onze Menukaarten — Kleurtaal v2
-(Brontriage)" (PDF, product owner; not stored in the repository, like the
-earlier Claude Design canvas). One colour language for public and
+(Brontriage)" (PDF, product owner; the full version is not stored in the
+repository, like the earlier Claude Design canvas; only its SHARE-1
+selection is, as `docs/mockups/share-1-dish-sharing-handoff-v1.pdf`). One colour language for public and
 internal UI. It is leading for every colour decision; where it and an
 older section of this file disagree, this section wins. Behaviour,
 routes, data, roles and the theme contract (explicit Licht/Donker, dark

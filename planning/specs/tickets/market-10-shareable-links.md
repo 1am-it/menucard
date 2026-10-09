@@ -6,6 +6,10 @@ Proposed, **not started**. Documentation/roadmap definition only — this
 ticket cannot begin implementation until every item in "Dependencies"
 below is satisfied. No UI, API, database, tracking, or code exists yet.
 
+One narrow exception exists for a single dish-share action (`SHARE-1`);
+see "Amendment (2026-10-09, `SHARE-0`)" at the end of this ticket. It
+does not change anything else in this ticket.
+
 ## Depends on
 
 `MARKET-02` (canonical schema — restaurant/menu/item identities),
@@ -236,3 +240,55 @@ surfaces") of `planning/architecture/market-data-foundation-plan.md`,
 sequenced after Wave 4 (`MARKET-08`/`MARKET-09`) since it depends on the
 market foundation, the import/publication pipeline, and a market-aware
 consumer read path all existing first. Not scheduled.
+
+## Amendment (2026-10-09, `SHARE-0`): narrow exception for `SHARE-1` dish sharing v1
+
+Decided by the product owner on 2026-10-09 in
+`planning/specs/tickets/share-0-dish-sharing-v1-decision.md` (D1 = A,
+D2 = A, D3 = A). This amendment records the exception that `SHARE-0` D1
+requires. It is the only place the exception is defined.
+
+**What the exception allows — and nothing more.** `SHARE-1`
+(`planning/specs/tickets/share-1-dish-sharing-v1.md`) may build one
+action: "Deel gerecht", which shares the existing canonical BE-12 dish
+deep link `/menu/[id]?dish=…&name=…&cat=…` on today's static consumer
+read path, via the native share sheet with a copy-link fallback.
+
+For that action only, these clauses of this ticket do not block it:
+
+- **"Depends on" and "Dependencies" items 1–5** (`MARKET-02` stable
+  public identities, `MARKET-06` version/freshness, the trust-filtered
+  risk data, `MARKET-08` consumer route, and the URL/metadata strategy),
+  because the action:
+  - reuses the existing BE-12 link, which resolves only through BE-12's
+    position, name and category checks and never guesses — no new
+    identifier or URL shape;
+  - copies no price, availability, allergen or diet value into the link
+    or the share text;
+  - shows no freshness date; the dish page states only "Prijs en
+    beschikbaarheid kunnen wijzigen.";
+  - opens the existing `/menu/[id]` page, which already shows the same
+    public data;
+  - adds no link preview, Open Graph tags or other per-dish metadata.
+- **"Out of scope": "Any change to today's static consumer read path …
+  is not being retrofitted onto it."** Waived only for this one action
+  and the dish-page context and mismatch status that `SHARE-1`
+  specifies. The static read path's data, routes and behaviour otherwise
+  stay unchanged.
+
+**What stays fully in force.** Everything else in this ticket,
+including:
+
+- full-menu links and personal multi-dish selections;
+- durable dish identities, freshness/version disclosure and
+  trust-gated allergen/diet labels for any new shared surface;
+- any link preview, Open Graph or rich preview card;
+- "Analytics and neutrality principles" — and, stricter for v1 by
+  `SHARE-0` D2: no measurement of any kind (no event, counter, cookie,
+  `localStorage`, unique share ID, marker or dashboard);
+- the neutrality principle, confirmed by `SHARE-0` D3: no "Vaak
+  gedeeld", "Recent gedeeld", ranking, filter, sort, badge or counter
+  based on sharing;
+- decision 011 §6, unchanged.
+
+Any further relaxation needs its own, explicitly recorded amendment.
