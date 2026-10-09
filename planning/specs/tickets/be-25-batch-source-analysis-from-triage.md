@@ -1,4 +1,4 @@
-# BE-25 — Batch-bronanalyse vanuit Brontriage (v1)
+# BE-25 — Batch-bronanalyse vanuit Bronnen beoordelen (v1)
 
 ## Status
 
@@ -6,6 +6,9 @@ Fase 0 (decisions and documentation) is recorded in this ticket. Nothing
 is built: no migration, route, page, worker or test exists for BE-25. The
 next step is migration `0016` (fase 1), which may only be built after
 this documentation is reviewed and on `main` (see "Release sequence").
+The final visual design (v2, 2026-10-09) and the product decisions that
+come with it are recorded in "Design v2 decisions" and "Visual
+references".
 
 ## Voortgang
 
@@ -109,10 +112,11 @@ needs its own infrastructure decision.
 | Automatic retry backoff | 2 minutes before the 2nd attempt, 10 before the 3rd, 30 before the 4th and 5th (no existing pattern in the repository) |
 
 **B5 — Visibility.** Every batch result stays visible in the batch
-history. Only results that need human editorial action are shown in
-Brontriage (see "Where results go"). "Geen bruikbare menukaart gevonden"
-stays visible with a retryable next step and is never presented as
-evidence that no menu exists (BE-22, BE-23).
+history. Only results for known restaurants are shown in Bronnen
+beoordelen (see "Where results go"). "Geen bruikbare menukaart gevonden"
+stays visible with a human next step ("Beoordeel handmatig", see "Design
+v2 decisions") and is never presented as evidence that no menu exists
+(BE-22, BE-23).
 
 ### Rules that follow from B1–B5 (recorded here so fase 1 and 2 need no new decision)
 
@@ -130,6 +134,13 @@ evidence that no menu exists (BE-22, BE-23).
   job (`attempt_count` + 1, `next_attempt_at` per the backoff); it is
   never a new job. After the last attempt, a failed job offers a manual
   "Opnieuw proberen".
+- **Two different manual actions.** "Opnieuw proberen" exists only for
+  "Fout": a technical failure after the last attempt, or a last attempt
+  whose lease expired. It is never offered for "Robots geblokkeerd"
+  (`robots.txt`), "Ongeldige URL" or "Geen bruikbare menukaart
+  gevonden". "Opnieuw analyseren" exists only for "Recent geanalyseerd":
+  a deliberate new, limited analysis of a URL that already has a result
+  of at most 7 days.
 - **Manual re-analysis** ("Opnieuw analyseren" and "Opnieuw proberen")
   always creates a new, explicit batch with exactly that one URL. It
   never adds a job to an existing `batch_id`, and the URL counts towards
@@ -158,7 +169,9 @@ BE-25)". Any further relaxation needs a new amendment.
   references is kept at least 7 days after it was issued; after that the
   existing receipt cleanup approach applies.
 - **Visibility:** every `internal` staff member can see every batch and
-  its results (not only the staff member who started it).
+  its results (not only the staff member who started it). Colleagues see
+  it read-only and never see who started it (see "Design v2
+  decisions").
 - **Turning a result into a URL intake** uses a new, separate RPC
   (working name `create_url_intake_from_batch_job`), never
   `create_url_intake_from_receipt`. Only on this path, the checks below
@@ -176,8 +189,10 @@ BE-25)". Any further relaxation needs a new amendment.
   - the result is at most 7 days old, measured from the receipt's
     `created_at` (which is never updated);
   - the acting account is an `internal` staff member, recorded as the
-    actor of the new `url_intakes` row; it may differ from the staff
-    member who started the batch;
+    actor of the new `url_intakes` row; the contract allows it to differ
+    from the staff member who started the batch, but in v1 the batch
+    page offers result actions only to the starter (see "Design v2
+    decisions");
   - the receipt is consumed in the same transaction;
   - the new `url_intakes` row records the originating job (an additive
     column in 0016, e.g. `issued_via_job_id`).
@@ -219,23 +234,108 @@ BE-25)". Any further relaxation needs a new amendment.
   refused. A repeated submission therefore creates the batch, its jobs
   and its daily-limit usage exactly once.
 
+## Design v2 decisions (product owner, 2026-10-09)
+
+Recorded from the final design handoff
+(`docs/mockups/be-25-batch-analysis-handoff-v2.pdf`, sections 5 and 7).
+Where the handoff and this ticket differ, this ticket wins.
+
+- **Visible terminology.** The visible name of the BE-24 page
+  `Brontriage` becomes **`Bronnen beoordelen`**. The batch page is called
+  `Batchanalyse` and lives under it: breadcrumb `Werkvoorraad / Bronnen
+  beoordelen / Batchanalyse` (mobile: back link `Bronnen beoordelen /
+  Batchanalyse`). The page keeps one fixed heading and breadcrumb; only
+  its state changes (decision 014). Existing technical route and
+  identifier names stay unchanged for now (`/internal/source-triage`,
+  `source_triage_*`, `sourceTriage*`, this ticket's file name).
+- **High-certainty result → "Bevestig bron" (conservative v1 rule).** A
+  result has enough certainty only when restaurant, menu items and host
+  relation all match convincingly in the existing source and trust
+  context — all three of:
+  - the restaurant is known: `restaurant_match_type` = `exact` against
+    `data/restaurants.json` (`src/lib/restaurantHostMatch.js`);
+  - the job succeeded with recognised menu items ("Menukaart gevonden ·
+    controle nodig", BE-23 "Klaar voor review");
+  - the found menu is on exactly the known restaurant's own host.
+
+  Its primary action is "Bevestig bron", next to "Details bekijken".
+  Anything less is "Beoordeel handmatig". The host comparison is
+  deliberately strict in v1: it uses only the existing normalisation
+  (lowercase, a leading `www.` stripped) and nothing more, so a
+  subdomain (for example `menu.` or `order.`) or any other host
+  variant, including a `www` variant that normalisation does not
+  cover, goes to "Beoordeel handmatig". Wider canonicalisation or
+  normalisation of domains is an open technical point for the 0016
+  design (see "Open points"), not a v1 rule.
+- **What "Bevestig bron" does.** A short human confirmation inside the
+  result card (question "Bron bevestigen voor {restaurant}?", the text
+  "… na eigen controle … Er wordt niets gepubliceerd.", buttons
+  "Bevestig bron" and "Annuleren"; no new page or dialog). Confirming
+  creates only an internally confirmed source proposal through BE-24's
+  existing review path: a `source_triage_proposals` proposal for that
+  restaurant with the found URL, recorded and accepted by the confirming
+  staff member, with BE-24's audit trail and its visible self-review
+  marking. It publishes nothing and changes no restaurant data:
+  `data/restaurants.json`, menus, profile drafts and URL intakes stay
+  untouched, exactly as an accepted BE-24 proposal today. "Bevestig
+  bron" does not use B2 or `create_url_intake_from_batch_job`; those
+  stay for "Naar Onboarding Restaurant" only. When the restaurant
+  already has an open BE-24 proposal, "Bevestig bron" is not offered and
+  the result gets "Beoordeel handmatig".
+- **After confirming**, the result shows "Bron bevestigd" with "Bevestigd
+  om {tijd} na menselijke controle. Er is niets gepubliceerd." It never
+  names who confirmed it.
+- **Bulk confirmation.** When at least two results have enough
+  certainty, a block above the list shows "{n} resultaten met voldoende
+  zekerheid" and "Bevestig {n} bronnen". Clicking it opens the same
+  inline step with the list of URLs and restaurants. It is one explicit
+  human action that runs the same checks per result as a single
+  confirmation; it never confirms anything automatically, and it only
+  includes results with enough certainty. "Bevestig bron" stays
+  available on each card. This applies to the batch page only; BE-24's
+  own page keeps no bulk actions.
+- **Every other result is handled by a human.** Doubt ("Controle
+  nodig"), `robots.txt` ("Robots geblokkeerd") and "Geen bruikbare
+  menukaart gevonden" → "Beoordeel handmatig". "Ongeldige URL" → "URL
+  aanpassen". "Fout" → "Opnieuw proberen". "Recent geanalyseerd" →
+  "Opnieuw analyseren" (see "Rules that follow from B1–B5"). "Naar
+  Brontriage" is not used anywhere.
+- **Colleagues are read-only.** Other `internal` staff see the batch
+  read-only: a neutral banner "Analyse tijdelijk gepauzeerd." with "Je
+  kunt deze batch alleen bekijken.", and only "Details bekijken". They
+  see no confirmation, retry, adjust or onboarding buttons, and the
+  starter is never named or made recognisable. "Houd dit scherm open…"
+  and "Gestart door jou" appear only on the starter's own page. Routes
+  refuse result actions from anyone but the starter.
+- **Releasing waiting jobs** stays deliberately without a button, dialog
+  or new status, deferred to the 0016 technical design (see "Open
+  points").
+
 ## Where results go (B5)
 
-| Result | Batch history | Brontriage | Next step offered |
+| Result | Batch history | Bronnen beoordelen | Next step offered |
 |---|---|---|---|
-| Known restaurant (host matches `data/restaurants.json`), menu found | yes | yes, as "Uit batchanalyse" with the result | "Naar Brontriage" (a human makes any proposal) |
-| Known restaurant, menu candidate found but structure not recognised | yes | yes | "Naar Brontriage" |
-| Known restaurant, found source differs from the known website | yes | yes | "Naar Brontriage" |
-| Unknown restaurant, any successful result | yes | no | "Naar Onboarding Restaurant" (new intake) |
-| Geen bruikbare menukaart gevonden | yes | no | "Opnieuw analyseren" |
-| Toegang beperkt, Ongeldige URL, Fout (after the last attempt) | yes | no | "Opnieuw proberen" where allowed |
+| Known restaurant, enough certainty (see "Design v2 decisions") | yes | yes, as "Uit batchanalyse" with the result | "Bevestig bron" (+ "Details bekijken"); included in "Bevestig {n} bronnen" |
+| Known restaurant, menu candidate found but structure not recognised | yes | yes | "Beoordeel handmatig" |
+| Known restaurant, found source differs from the known website, or more than one restaurant matches | yes | yes | "Beoordeel handmatig" |
+| Unknown restaurant, menu found | yes | no | "Naar Onboarding Restaurant" (new intake, B2) |
+| Geen bruikbare menukaart gevonden | yes | known restaurant only | "Beoordeel handmatig" |
+| Robots geblokkeerd (`robots.txt`) | yes | known restaurant only | "Beoordeel handmatig" |
+| Ongeldige URL | yes | no | "URL aanpassen" |
+| Fout (technical failure or expired last attempt) | yes | no | "Opnieuw proberen" (new one-URL batch) |
+| Recent geanalyseerd | yes | as the earlier result | the earlier result's step ("Bevestig bron" only if it had enough certainty) + "Opnieuw analyseren" |
+| Bron bevestigd | yes | yes, as an accepted BE-24 proposal | "Details bekijken" |
 
-- Brontriage only *shows* batch results for known restaurants. It never
-  creates, accepts or rejects a proposal by itself.
+- "Beoordeel handmatig" opens the restaurant in Bronnen beoordelen for a
+  known restaurant, and Onboarding Restaurant for an unknown one.
+- Bronnen beoordelen only *shows* batch results for known restaurants. It
+  never creates, accepts or rejects a proposal by itself; only a human's
+  "Bevestig bron" (single or bulk) or a human decision on its own page
+  does.
 - An existing restaurant without a source check is never a new intake
   (design-reference, "Existing restaurants without a source check are
-  not a new intake"): its batch result goes to Brontriage, never to
-  "Nieuwe aanleveringen".
+  not a new intake"): its batch result goes to Bronnen beoordelen, never
+  to "Nieuwe aanleveringen".
 - BE-23's Bronwerkvoorraad keeps reading all attributable jobs,
   including batch jobs, unchanged.
 
@@ -251,24 +351,37 @@ Fixed copy:
 - "Niets wordt automatisch gepubliceerd."
 - Reason for a URL that already has an open job in another batch: "Deze
   URL staat al in een actieve analysebatch."
+- Page title "Batchanalyse"; breadcrumb "Werkvoorraad / Bronnen
+  beoordelen / Batchanalyse".
+- Confirmation: "Bron bevestigen voor {restaurant}?", "Bevestig bron",
+  "Annuleren"; bulk: "{n} resultaten met voldoende zekerheid", "Bevestig
+  {n} bronnen"; after confirming: "Bevestigd om {tijd} na menselijke
+  controle. Er is niets gepubliceerd."
+- Colleague view: "Analyse tijdelijk gepauzeerd." and "Je kunt deze
+  batch alleen bekijken."
+- Actions: "Beoordeel handmatig", "URL aanpassen", "Opnieuw proberen",
+  "Opnieuw analyseren", "Naar Onboarding Restaurant", "Details
+  bekijken".
 
 Statuses per URL, derived from the job (no new status values in the
 database), always icon plus text with a Kleurtaal v2 status role:
 
-| Shown | Derived from |
-|---|---|
-| In wachtrij | `pending` (with a future `next_attempt_at`: "Nieuwe poging om {tijd}") |
-| Bezig | `running` with a valid lease |
-| Menukaart gevonden · controle nodig | `succeeded`, menu items recognised (BE-23 "Klaar voor review") |
-| Controle nodig | `succeeded`, a menu candidate without a recognised structure |
-| Geen bruikbare menukaart gevonden | `succeeded` without a menu candidate, or `no_reliable_content_found` |
-| Recent geanalyseerd | an existing result of at most 7 days, not fetched again |
-| Toegang beperkt | `robots_disallowed` |
-| Ongeldige URL | rejected by validation, or `unsafe_url` |
-| Fout | any other terminal failure after the last attempt |
+| Shown | Derived from | Role |
+|---|---|---|
+| In wachtrij | `pending` (with a future `next_attempt_at`: "Nieuwe poging om {tijd}") | neutral |
+| Bezig | `running` with a valid lease | neutral |
+| Menukaart gevonden · controle nodig | `succeeded`, menu items recognised (BE-23 "Klaar voor review") | file |
+| Controle nodig | `succeeded`, a menu candidate without a recognised structure, or a doubtful match (see "Where results go") | old (as BE-23 "Structuur niet herkend") |
+| Geen bruikbare menukaart gevonden | `succeeded` without a menu candidate, or `no_reliable_content_found` | neutral |
+| Recent geanalyseerd | an existing result of at most 7 days, not fetched again | neutral |
+| Robots geblokkeerd | `robots_disallowed` | blocked (a `robots.txt` block on a read, as design-reference "Robots geblokkeerd") |
+| Ongeldige URL | rejected by validation, or `unsafe_url` | blocked |
+| Fout | any other terminal failure after the last attempt | blocked |
+| Bron bevestigd | an accepted BE-24 proposal created by "Bevestig bron" for this result | positive |
 
 "Menukaart gevonden" is never shown without "controle nodig": a found
-menu is a reviewable result, not an accepted one.
+menu is a reviewable result, not an accepted one. Only a human's
+"Bevestig bron" turns it into "Bron bevestigd".
 
 **Copy that v1 must not use:** "Je kunt dit scherm gerust verlaten" (or
 any wording that says the analysis continues after the page is closed).
@@ -279,23 +392,35 @@ keeps every result visible.
 
 ## Visual references
 
-Two concept boards from the product owner (a desktop and a mobile
-version of "Bron toevoegen", "Analyse bezig" and "Controle nodig") are
-directional only. They are **not stored or indexed under
-`docs/mockups/`**: the files live outside the repository, they show
-realistic business names, addresses and phone numbers that should not be
-published in this public repository, and they contain copy that v1
-forbids. Where they differ from this ticket, this ticket and
-`docs/guides/design-reference.md` win.
+**Leading (v2, final, 2026-10-09)**, all with fictional `.example`
+data only:
 
-Taken over as direction: the paste field with one URL per line, the
-pre-check of duplicates, the overall progress bar, one card per URL and
-the result cards with "Naar Brontriage". Not taken over: "Je kunt dit
-scherm gerust verlaten" (fase 3 only), "Alleen resultaten met twijfel
-komen in de werkvoorraad" and "Bronnen die we met zekerheid kunnen
-verwerken, worden niet getoond" (B5), serif type, the green-grey "Gereed"
-chip, and the four sub-steps per URL (a fase 3 option; v1 shows one
-status per URL).
+- `docs/mockups/be-25-batch-analysis-desktop-v2.png` — eight states at
+  1280 px (input, analysing, paused colleague view, ready with inline
+  "Bevestig bron", errors per URL, empty state; analysing and bulk
+  confirmation in dark).
+- `docs/mockups/be-25-batch-analysis-mobile-v2.png` — the same states at
+  390 px, plus input and bulk confirmation at 320 px.
+- `docs/mockups/be-25-batch-analysis-handoff-v2.pdf` — tokens, component
+  reuse, status role per state, accessibility, per-width rules and the
+  design decisions recorded above.
+
+**Superseded**: `be-25-batch-analysis-desktop-v1.png` and
+`be-25-batch-analysis-mobile-v1.png` stay in the repository for history
+only and are no longer a reference; the handoff's own statement that
+they remain valid directional references (section 5, item 6) is
+superseded by this ticket. The earlier concept boards with realistic
+business data were never stored and stay out of the repository.
+
+The v2 design is a visual elaboration, not a build authorization. Where
+it differs from this ticket or `docs/guides/design-reference.md`, the
+text wins. Not taken over, as before: any copy saying the screen may be
+closed (fase 3 only), "Alleen resultaten met twijfel komen in de
+werkvoorraad" and "Bronnen die we met zekerheid kunnen verwerken, worden
+niet getoond" (B5), serif type, the green-grey "Gereed" chip, and four
+sub-steps per URL (v1 shows one status per URL). Where the v2 images and
+handoff show "Toegang beperkt" for a `robots.txt` block, v1 uses
+"Robots geblokkeerd" (role blocked).
 
 ## Release sequence
 
@@ -331,10 +456,13 @@ one is merged (and, for fase 1, verified live).
   (unchanged behaviour) and the processor. Internal-only routes: create
   a batch, read a batch, process the next job (exactly one per call,
   within the function time limit), retry one URL, and turn a batch
-  result into a URL intake. One internal page under Werkvoorraad; the
-  starter's open batch page drives processing (B3). Brontriage shows batch
-  results for known restaurants (B5). A wider, database-enforced block on
-  active URLs is only allowed once the single-URL route uses the shared
+  result into a URL intake, confirm one or more sources ("Bevestig
+  bron", through BE-24's existing proposal path). One internal page,
+  `Batchanalyse`, under `Werkvoorraad / Bronnen beoordelen`; the
+  starter's open batch page drives processing (B3). Bronnen beoordelen
+  shows batch results for known restaurants (B5). A wider,
+  database-enforced block on active URLs is only allowed once the
+  single-URL route uses the shared
   enqueue and duplicate handling, in its own migration.
 - **Fase 3 — optional background worker.** Only after a separate
   infrastructure decision (for example Vercel Cron or `pg_cron`, after
@@ -345,9 +473,11 @@ one is merged (and, for fase 1, verified live).
 
 AI/OCR or any vendor call; browser rendering; CSV upload; more than 10
 URLs per action; any crawl or target discovery beyond BE-20; automatic
-publication; automatic Brontriage proposals or decisions; owner or
-editor access to batches; counts in the navigation; changes to the BE-19
-receipt flow.
+publication; automatic proposals or decisions in Bronnen beoordelen;
+automatic confirmation of any source (single or bulk); any change to
+restaurant data by "Bevestig bron"; owner or editor access to batches;
+counts in the navigation; changes to the BE-19 receipt flow; renaming
+routes or technical identifiers.
 
 ## Acceptance criteria
 
@@ -390,17 +520,42 @@ Fase 2:
       be closed.
 - [ ] All fetching goes through the existing safe fetch layer; no AI/OCR
       call and no write to published data (structurally tested).
-- [ ] Results go where "Where results go" says; Brontriage never acts on
-      its own; "Geen bruikbare menukaart gevonden" offers "Opnieuw
-      analyseren" and never claims absence.
+- [ ] Results go where "Where results go" says; Bronnen beoordelen never
+      acts on its own; "Geen bruikbare menukaart gevonden" offers
+      "Beoordeel handmatig" and never claims absence; "Opnieuw proberen"
+      appears only for "Fout" and "Opnieuw analyseren" only for "Recent
+      geanalyseerd".
+- [ ] "Bevestig bron" (single and bulk) is offered only for results with
+      enough certainty, needs the inline human confirmation, creates
+      only an accepted BE-24 proposal per result, and writes no
+      restaurant, menu, profile-draft or published data (structurally
+      tested).
+- [ ] Colleagues get a read-only view without result actions and without
+      the starter's identity; routes refuse their result actions.
+- [ ] The visible label is "Bronnen beoordelen" with the breadcrumb
+      "Werkvoorraad / Bronnen beoordelen / Batchanalyse"; routes and
+      identifiers are unchanged.
 - [ ] Kleurtaal v2 tokens, light and dark, visible focus, keyboard, AA
       contrast and no overflow at 320, 390 and 1280 px are verified.
 - [ ] No new dependency; `0016` is live before the fase 2 PR is merged.
 
 ## Open points (not blocking fase 1)
 
-- The exact page location and navigation label (inside Brontriage or a
-  separate Werkvoorraad entry).
+- How "Bevestig bron" is stored technically, for the 0016 or fase 2
+  design: which BE-24 `kind` it uses (`add_candidate` for the found
+  menu URL is the obvious fit), whether proposing and accepting happen
+  in one RPC call or through BE-24's two existing RPCs, and how the
+  proposal points back to its analysis job so "Bron bevestigd" can be
+  derived (an additive column is likely needed).
+- How a bulk confirmation reports a result that fails its checks while
+  the others pass (per-result outcome or all-or-nothing).
+- Canonicalisation or normalisation of domains beyond the existing
+  `www.` stripping (subdomains, other host variants) for the
+  high-certainty rule; until it is decided, such variants go to
+  "Beoordeel handmatig".
+- When the visible navigation label in `src/lib/internalNav.js` changes
+  from `Brontriage` to `Bronnen beoordelen` (a code change; at the latest
+  with fase 2).
 - Whether the existing single-URL status endpoint should also become
   visible to all `internal` staff (B2 requires this only for batches).
 - How a starter explicitly releases a `pending` job (and whether a
@@ -415,5 +570,5 @@ Fase 2:
 
 Fase 0: one documentation session. Fase 1: medium (migration, RPCs,
 structural tests, pipeline release). Fase 2: large (library extraction,
-five routes, page, Brontriage integration, browser check). Estimate and
+six routes, page, Bronnen beoordelen integration, browser check). Estimate and
 report each work block before starting it.
