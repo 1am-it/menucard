@@ -381,22 +381,25 @@ implementation (see its own ticket).
     Dutch-hospitality integrations are evaluated without treating a vendor or
     KHN as a universal standard, connector, or partner.
 
-## SHARE-* order (decision-first, not scheduled)
+## SHARE-* order (decision-first)
 
-Dish sharing for visitors. Decision-first: no implementation ticket exists
-until its decision is recorded. Relates to `MARKET-10`, whose full scope
-and dependencies stay unchanged.
+Dish sharing for visitors. Decision-first: an implementation ticket is
+created only after its decision is recorded. Relates to `MARKET-10`,
+whose scope and dependencies stay unchanged apart from one recorded,
+narrow amendment.
 
 1. [share-0-dish-sharing-v1-decision.md](./share-0-dish-sharing-v1-decision.md) —
-   open decision, awaiting the product owner: whether a minimal "Deel
-   gerecht" v1 on the canonical BE-12 dish deep link (no extra parameter,
-   no per-dish preview) should be pursued before `MARKET-02`/`06`/`08`,
-   whether v1 stays free of any measurement, and that public popularity
-   ("Vaak gedeeld", ranking, counters) stays forbidden per `MARKET-10` and
-   decision 011. Recommended default: A/A/A. `SHARE-0` authorizes no
-   implementation and does not change `MARKET-10`; `SHARE-1` is created
-   only after the decision and, for D1 = A, a separately recorded
-   `MARKET-10` change.
+   decided 2026-10-09 by the product owner: D1 = A (v1 only via the
+   canonical BE-12 dish link, under the `MARKET-10` amendment of
+   2026-10-09), D2 = A (no measurement of any kind), D3 = A (public
+   popularity stays forbidden). Decision only; no implementation.
+2. [share-1-dish-sharing-v1.md](./share-1-dish-sharing-v1.md) — ready for
+   implementation, not started: "Deel gerecht" per dish with the native
+   share sheet where available and "Kopieer link" as fallback; the link is
+   exactly `/menu/[id]?dish=…&name=…&cat=…`; share text with dish name,
+   restaurant name and BredaEats; a generic dish-link context line and a
+   neutral mismatch status. No price, preview, measurement or popularity.
+   Visual reference: `docs/mockups/share-1-dish-sharing-handoff-v1.pdf`.
 
 Do not start a ticket whose dependencies aren't done. Each ticket should be
 independently reviewable and deployable where practical. The `BE-*`,

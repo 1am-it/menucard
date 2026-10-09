@@ -233,10 +233,12 @@ Menukaarten brand accent" and "Kleurtaal v2".
 ## Kleurtaal v2 (implemented 2026-10-07)
 
 Source: the final design handoff "Onze Menukaarten — Kleurtaal v2
-(Brontriage)" (PDF, product owner; not stored in the repository, like the
-earlier Claude Design canvas). One colour language for public and
-internal UI. It is leading for every colour decision; where it and an
-older section of this file disagree, this section wins. Behaviour,
+(Brontriage)" (PDF, product owner; the full version is not stored in the
+repository, like the earlier Claude Design canvas; only its SHARE-1
+selection is, as `docs/mockups/share-1-dish-sharing-handoff-v1.pdf`).
+One colour language for public and internal UI. It is leading for
+every colour decision; where it and an older section of this file
+disagree, this section wins. Behaviour,
 routes, data, roles and the theme contract (explicit Licht/Donker, dark
 default, no system mode) are unchanged by it.
 
@@ -591,6 +593,12 @@ these restaurants "nieuw", do not route them into
 - Naming is `<surface>-v<N>.png`, or `.html` for an interactive
   prototype. A new version gets a new file (`-v2`). Older files are kept,
   and the index marks which version leads.
+- One recorded exception: `docs/mockups/share-1-dish-sharing-handoff-v1.pdf`
+  (SHARE-1) is a PDF. It is a multi-page handoff that keeps the light,
+  dark, mobile, desktop, mismatch and copy states together with their
+  token mapping and visual acceptance criteria. Its size of about 5.9 MB
+  is deliberately accepted for this one reference. It does not change
+  the convention: other mockups stay `.png` or `.html`.
 - Derived design direction, not a direct rule from decision 002: do not
   commit mockups with restaurant or dish photography.
   - Decision 002 and `CLAUDE.md` forbid that photography in the UI

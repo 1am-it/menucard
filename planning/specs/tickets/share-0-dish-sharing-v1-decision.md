@@ -2,13 +2,16 @@
 
 ## Status
 
-Open decision ticket — **awaiting an explicit product owner decision.**
-Documentation only: no code, route, API, database, analytics, mockup or
-deployment belongs to this ticket. `SHARE-0` authorizes no implementation
-and does not change `MARKET-10`, decision 011 or `BE-12`. `SHARE-1` (the
-implementation ticket) may only be created after the three decisions below
-are explicitly taken and recorded in "Decision record" — and, if D1 = A,
-after the separate `MARKET-10` change described under D1 has been recorded.
+**Decided on 2026-10-09 by the product owner: D1 = A, D2 = A, D3 = A**
+(see "Decision record"). Documentation only: `SHARE-0` itself contains
+no code, route, API, database, analytics, mockup or deployment, and does
+not change BE-12 or decision 011.
+
+The `MARKET-10` change that D1 = A requires is recorded in
+`market-10-shareable-links.md`, "Amendment (2026-10-09, `SHARE-0`)".
+The implementation ticket is `SHARE-1`
+(`share-1-dish-sharing-v1.md`). The text below records the question
+and the options as they were weighed.
 
 ## Question
 
@@ -221,7 +224,11 @@ The concept boards are input only:
   ("Kleurtaal v2"), not the boards. Serif display type, the account icon
   and the navigation items shown on the boards are not adopted.
 - Any v1 mockup committed later follows `docs/mockups/` conventions
-  (`<surface>-v<N>.png`, indexed in `docs/mockups/README.md`).
+  (`<surface>-v<N>.png`, indexed in `docs/mockups/README.md`). The one
+  recorded exception is the SHARE-1 visual handoff
+  `docs/mockups/share-1-dish-sharing-handoff-v1.pdf` (see
+  `docs/guides/design-reference.md`, "Mockups: location, naming and
+  leading references"); the convention itself is unchanged.
 
 ## Privacy, accessibility and design guardrails
 
@@ -243,52 +250,49 @@ The concept boards are input only:
 
 ## Acceptance criteria (for this decision ticket)
 
-- [ ] D1, D2 and D3 are each explicitly decided by the product owner and
+- [x] D1, D2 and D3 are each explicitly decided by the product owner and
       recorded below, with date.
-- [ ] If D1 = A, a separate, explicit change to `MARKET-10` (or a higher
+- [x] If D1 = A, a separate, explicit change to `MARKET-10` (or a higher
       decision record) allowing the narrow exception — including its
       static-read-path clause — is recorded before `SHARE-1` is created;
       `SHARE-0` itself changes nothing in `MARKET-10` and authorizes no
       implementation.
-- [ ] D3 stays forbidden unless a separate decision record amends
+- [x] D3 stays forbidden unless a separate decision record amends
       `MARKET-10` and decision 011.
-- [ ] The v1 link is a gerecht-deeplink with only `dish`, `name` and
+- [x] The v1 link is a gerecht-deeplink with only `dish`, `name` and
       `cat` (no `fromQuery`, `q`, `excl`, fragment, marker or other
       current-URL parameter), built from the resolved dish rather than
       copied from the browser URL; v1 adds no per-dish preview or
       metadata surface.
-- [ ] Share text contains only dish name, restaurant name, BredaEats and
+- [x] Share text contains only dish name, restaurant name, BredaEats and
       the canonical link.
-- [ ] Dish-page copy is true for every dish deep link; nothing claims a
+- [x] Dish-page copy is true for every dish deep link; nothing claims a
       link was shared, sent or received.
-- [ ] The v1 boundary keeps the product clearly not an ordering,
+- [x] The v1 boundary keeps the product clearly not an ordering,
       delivery, booking or review platform.
-- [ ] Privacy, accessibility, light/dark and text-first guardrails are
+- [x] Privacy, accessibility, light/dark and text-first guardrails are
       recorded as binding for `SHARE-1`.
-- [ ] A changed or disappeared dish can never lead to a guess or a wrong
+- [x] A changed or disappeared dish can never lead to a guess or a wrong
       dish: BE-12 checks, and in a future `SHARE-1` a visible neutral
       mismatch status for every non-resolving gerecht-deeplink, no dead
       end. `SHARE-0` itself does not change BE-12.
-- [ ] `SHARE-1` is created only after this decision is taken; it
+- [x] `SHARE-1` is created only after this decision is taken; it
       references this ticket and the recorded `MARKET-10` change.
 
 ## Decision record
 
-To be filled in by the product owner. Until then, nothing is decided.
-
 | Decision | Choice | Date | By |
 |---|---|---|---|
-| D1 — pursue v1 on the BE-12 path before `MARKET-02/06/08` | _open_ (recommended: A) | | |
-| D2 — v1 without any measurement | _open_ (recommended: A) | | |
-| D3 — public popularity stays forbidden | _open_ (recommended: A) | | |
+| D1 — pursue v1 on the BE-12 path before `MARKET-02/06/08` | **A** — only via the canonical BE-12 dish link, and only under the recorded `MARKET-10` exception: `market-10-shareable-links.md`, "Amendment (2026-10-09, `SHARE-0`)" | 2026-10-09 | Product owner |
+| D2 — v1 without any measurement | **A** — no analytics, event, counter, cookie, `localStorage`, unique share ID, marker or dashboard | 2026-10-09 | Product owner |
+| D3 — public popularity stays forbidden | **A** — no "Vaak gedeeld", "Recent gedeeld", ranking, filter, sort, badge or counter | 2026-10-09 | Product owner |
 
-## Follow-up (not created by this ticket)
+## Follow-up
 
-- If D1 = A: an explicit change to `MARKET-10` or a higher decision
-  record that allows the narrow v1 exception.
-- `SHARE-1` — "Deel gerecht" v1 implementation, only after the decision
-  record above is complete and, for D1 = A, the `MARKET-10` change is
-  recorded.
+- Done (2026-10-09): the `MARKET-10` exception, as an amendment in
+  `market-10-shareable-links.md`.
+- Done (2026-10-09): `SHARE-1` — "Deel gerecht" v1, created as a ticket
+  (`share-1-dish-sharing-v1.md`); not implemented.
 - A separate measurement decision, only if D2 is later revisited.
 - A separate decision record amending `MARKET-10`/decision 011, only if
   public popularity is ever reconsidered.
