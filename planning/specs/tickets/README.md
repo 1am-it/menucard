@@ -225,6 +225,16 @@ of these.
     (applied and verified 2026-10-08); the app/API/UI is not released yet.
     V1 decisions: internal-only, directly after Bronwerkvoorraad;
     self-review allowed and marked; fixed unusable-reason list.
+27. [be-25-batch-source-analysis-from-triage.md](./be-25-batch-source-analysis-from-triage.md) —
+    fase 0 recorded (decisions B1–B5, 2026-10-09), nothing built: one
+    explicit `internal` action queues at most 10 validated URLs as one
+    batch (governance amendment in `docs/api/url-intake-schema.md`);
+    limits of 25 URLs per staff member per day, one active job overall
+    and per host, 60 s per host, 7-day reuse, backoff 2/10/30 min; a
+    durable batch binding beside the unchanged ten-minute BE-19 receipt;
+    v1 processes only while the batch page is open. Next: migration
+    `0016` as its own release, then routes and page, then an optional
+    background worker after a separate infrastructure decision.
 
 ## PLATFORM-* order (not started)
 

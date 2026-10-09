@@ -172,6 +172,64 @@ before anything is ever recorded as a restaurant concept or menu
 proposal — see "What this exception does not exempt downstream" above,
 unaffected by this amendment.
 
+### Amendment (2026-10-09, BE-25): one explicit staff batch action, at most 10 URLs
+
+**This amendment narrowly widens the exception above for exactly one
+case: an explicit batch action decided in
+`planning/specs/tickets/be-25-batch-source-analysis-from-triage.md`
+("Vaststaande productkeuzes", B1).** The unamended text and the BE-20
+amendment above both list "any bulk or CSV list of URLs" as excluded.
+This amendment lifts that exclusion only for the bounded action below.
+Every other limit of the exception and of the BE-20 amendment stays
+exactly as it is.
+
+**The batch action, precisely bounded**:
+
+- One explicit action ("Analyse starten") by one authenticated
+  `internal`-role account submits a list of **at most 10 URLs** that
+  the staff member typed or pasted. Each URL is validated server-side
+  before anything is queued. At most 25 URLs per staff member per
+  calendar day (Europe/Amsterdam) may be queued this way.
+- The server queues exactly one analysis job per accepted URL, bound to
+  one batch and to that staff member. **The processor only ever works on
+  the jobs of an existing batch. It never discovers, adds or schedules a
+  target of its own**: no new entry URL, no follow-up batch, no
+  re-analysis of other restaurants, no crawl.
+- Per job, the fetch shape is exactly what this contract already allows
+  for one URL: the entry URL, the BE-20 same-host discovery of at most
+  five candidates, and digital PDFs — under the identical gates
+  (`robots.txt` fail-closed, `src/lib/safeOutboundFetch.js` as the only
+  egress, no login, session or credential, `basic_info`-only data
+  minimisation).
+- Pacing is part of the bound, not an implementation detail: at most one
+  active job overall, at most one active job per host, and at least 60
+  seconds between two analyses of the same host. A failed job may be
+  retried automatically only within the existing maximum of five
+  attempts, waiting 2, 10 and then 30 minutes before each further
+  attempt; a `robots.txt` block, an unsafe URL or an unsupported content
+  type is never retried automatically.
+- In v1 a job is processed only while the staff member who started the
+  batch has that batch's page open, as a direct continuation of their
+  own action. Other `internal` staff may view the batch but do not drive
+  its processing. A scheduled or background processor (a cron, a worker)
+  is **not** authorized by this amendment; it needs its own, separately
+  recorded decision.
+
+**What this amendment does not change**:
+
+- The BE-19 analysis receipt (`url_intake_analysis_receipts`): its
+  ten-minute expiry, actor binding and single use stay exactly as
+  described in "Analysis-result integrity" below. BE-25 adds its own,
+  separate, durable batch binding; it never redeems, extends or relaxes
+  a BE-19 receipt.
+- Downstream review: everything a batch job produces is, at most, a
+  reviewable result. Nothing is published automatically, and every step
+  towards a restaurant concept, a menu proposal or a source proposal
+  stays an explicit human action, exactly as "What this exception does
+  not exempt downstream" above states.
+- OCR, browser rendering, any external AI call and CSV upload stay
+  excluded, exactly as listed in the BE-20 amendment above.
+
 ## `url_intakes` — audit/traceability record, not a review queue
 
 **One row per confirmed human action on an analyzed URL — never one row
