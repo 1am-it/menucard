@@ -43,6 +43,8 @@ the full notes; nothing listed here was removed.
 | `onboarding-restaurant-workflow-v1.png` | Internal Onboarding Restaurant flow | `be-20-general-restaurant-source-extraction.md` ("Approved design references", "Visual contract"). Context: `be-19-onboarding-restaurant-via-url.md` (URL intake; does not name this file) | Leading for the workflow panels; **not** for navigation |
 | `internal-navigation-workqueue-v1.png` | Internal navigation shell and Werkvoorraad | `be-20-general-restaurant-source-extraction.md` ("Approved design references", "Visual contract"). Context: `platform-11-role-aware-internal-navigation-home.md` (role filtering, `/internal` home) and decision 014 (orientation standard); neither names this file | **Leading for all internal navigation**; its counts are directional only |
 | `internal-source-triage-v1.png` | `/internal/source-triage` (Brontriage), desktop 1280px, light | `be-24-internal-source-triage.md` | Records the implemented BE-24 layout, captured from a local build with fictional data (not from the Kleurtaal v2 handoff). Mobile stacks list and detail. |
+| `be-25-batch-analysis-desktop-v1.png` | Future internal batch source analysis, desktop 1280px, light | `be-25-batch-source-analysis-from-triage.md` | Directional phase-2 reference; the ticket and design reference win. No background worker is implied. |
+| `be-25-batch-analysis-mobile-v1.png` | Future internal batch source analysis, mobile 390px, light | `be-25-batch-source-analysis-from-triage.md` | Directional phase-2 reference; the ticket and design reference win. No background worker is implied. |
 | `share-1-dish-sharing-handoff-v1.pdf` | "Deel gerecht" on `/menu/[id]`: share sheet, popover, dish-link context line and mismatch status; desktop and mobile, light and dark | `share-1-dish-sharing-v1.md` | Conceptual implementation reference for the future SHARE-1 build; not a product decision or build authorization on its own (see "Public sharing" below). |
 | `internal-source-workqueue-v1.png` | `/internal/source-workqueue` (Bronwerkvoorraad) | `be-23-internal-source-workqueue.md` | Leading for page content; the ticket's "Deviations from the mockup" win. The "Onze Menukaarten" top bar is a placeholder, not branding. |
 
@@ -59,12 +61,15 @@ implemented layout is recorded as `internal-source-triage-v1.png`. Its
 v1 navigation is decided: internal-only, under `Werkvoorraad`, directly
 after `Bronwerkvoorraad` (that ticket's "V1 product decisions").
 
-Deliberately not in this directory: the BE-25 batch source analysis
-concept boards (desktop and mobile). They are directional only, show
-realistic business names, addresses and phone numbers that do not
-belong in this public repository, and contain copy that v1 forbids; see
-`planning/specs/tickets/be-25-batch-source-analysis-from-triage.md`,
-"Visual references".
+**BE-25 (addition, 2026-10-09).**
+`be-25-batch-analysis-desktop-v1.png` and
+`be-25-batch-analysis-mobile-v1.png` are directional phase-2 references
+for batch source analysis from Brontriage. They use only synthetic
+placeholder data and record the current v1 boundary: analysis runs only
+while the starter's batch page is open; closing the page pauses it until
+that person returns. They do not authorize a background worker,
+automatic publication, or implementation before phase-1 migration
+`0016`. The BE-25 ticket and `design-reference.md` win over these images.
 
 Not yet in this directory: a PLATFORM-12 coverage dashboard v2 has no
 committed ticket or mockup in the repository yet. When it lands, add it
