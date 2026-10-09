@@ -172,6 +172,100 @@ before anything is ever recorded as a restaurant concept or menu
 proposal — see "What this exception does not exempt downstream" above,
 unaffected by this amendment.
 
+### Amendment (2026-10-09, BE-25): one explicit staff batch action, at most 10 URLs
+
+**This amendment narrowly widens the exception above for exactly one
+case: an explicit batch action decided in
+`planning/specs/tickets/be-25-batch-source-analysis-from-triage.md`
+("Vaststaande productkeuzes", B1).** The unamended text and the BE-20
+amendment above both list "any bulk or CSV list of URLs" as excluded.
+This amendment lifts that exclusion only for the bounded action below.
+Every other limit of the exception and of the BE-20 amendment stays
+exactly as it is.
+
+**The batch action, precisely bounded**:
+
+- One explicit action ("Analyse starten") by one authenticated
+  `internal`-role account submits a list of **at most 10 URLs** that
+  the staff member typed or pasted. Each URL is validated server-side
+  before anything is queued. At most 25 URLs per staff member per
+  calendar day (Europe/Amsterdam) may be queued this way.
+- The server queues exactly one analysis job per accepted URL, bound to
+  one batch and to that staff member. **The processor only ever works on
+  the jobs of an existing batch. It never discovers, adds or schedules a
+  target of its own**: no new entry URL, no follow-up batch, no
+  re-analysis of other restaurants, no crawl. A manual "Opnieuw
+  analyseren" of one URL is a new explicit action by a staff member,
+  never a processor step: it always creates a new batch with exactly
+  that one URL (never a job in an existing batch), and that URL counts
+  towards the daily limit.
+- Per job, the fetch shape is exactly what this contract already allows
+  for one URL: the entry URL, the BE-20 same-host discovery of at most
+  five candidates, and digital PDFs — under the identical gates
+  (`robots.txt` fail-closed, `src/lib/safeOutboundFetch.js` as the only
+  egress, no login, session or credential, `basic_info`-only data
+  minimisation).
+- Pacing is part of the bound, not an implementation detail: at most one
+  active job overall, at most one active job per host (active means
+  `running` with a valid lease), and at least 60
+  seconds between two analyses of the same host. A failed job may be
+  retried automatically only within the existing maximum of five
+  attempts, waiting 2, 10 and then 30 minutes before each further
+  attempt; a `robots.txt` block, an unsafe URL or an unsupported content
+  type is never retried automatically.
+- In v1 a job is processed only while the staff member who started the
+  batch has that batch's page open, as a direct continuation of their
+  own action. Only that staff member can claim the batch's jobs; other
+  `internal` staff may view the batch but never process it. A scheduled
+  or background processor (a cron, a worker) is **not** authorized by
+  this amendment; it needs its own, separately recorded decision.
+
+**A second, bounded durable write path — said plainly**: BE-25 adds a
+second way to create a `url_intakes` row, beside BE-19's
+`create_url_intake_from_receipt`. It also narrows BE-20's
+"Batch-readiness" wording that a batch is "never a distinct write
+path": for exactly this path, it is one. And it **does consume** the BE-19 receipt
+its job issued. Precisely:
+
+- **The trusted binding is the batch job**, not the receipt: the job's
+  `batch_id`, its original actor (the staff member who started the
+  batch), its `canonical_source_url`, its stored evidence, and the
+  receipt's stored `analysis_result_hash` and result. The linked receipt
+  serves only as the stored payload (`candidate_summary`) and as the
+  single-use lock (`consumed_at`), so one result becomes at most one
+  `url_intakes` row, whichever path redeems it first.
+- **Only on this batch path** does the combination of that batch
+  binding, the acting account's `internal` role, a match of the original
+  receipt hash, and a result at most seven days old take the place of
+  the actor check and the ten-minute expiry that "Analysis-result
+  integrity" below requires. The hash is recomputed with exactly the
+  original receipt's inputs (its own actor, URL, match type, matched
+  restaurant and candidate summary, with the existing canonicalisation
+  of `src/lib/urlIntakeReceiptHash.js`); the account that redeems it is
+  never part of the hash. That account is recorded as the actor of the
+  new `url_intakes` row.
+- **Cleanup**: a receipt that a batch job references must not be
+  removed until at least seven days after it was issued. After that, the
+  existing cleanup approach for expired, unconsumed receipts applies
+  ("Open questions" below).
+- Any further relaxation — a longer window, a non-batch job, another
+  role, or a different redemption path — needs its own new amendment.
+
+**What this amendment does not change**:
+
+- The BE-19 flow itself: `create_url_intake_from_receipt` and its
+  checks (ten-minute expiry, actor binding, URL binding, hash, single
+  use) stay exactly as described in "Analysis-result integrity" below,
+  for every caller. The batch path above is a separate function; it does
+  not change, extend or call the BE-19 one.
+- Downstream review: everything a batch job produces is, at most, a
+  reviewable result. Nothing is published automatically, and every step
+  towards a restaurant concept, a menu proposal or a source proposal
+  stays an explicit human action, exactly as "What this exception does
+  not exempt downstream" above states.
+- OCR, browser rendering, any external AI call and CSV upload stay
+  excluded, exactly as listed in the BE-20 amendment above.
+
 ## `url_intakes` — audit/traceability record, not a review queue
 
 **One row per confirmed human action on an analyzed URL — never one row
@@ -517,7 +611,9 @@ proposal — see "Hard boundary" above.
 - Cleanup/garbage-collection cadence for expired, unconsumed
   `url_intake_analysis_receipts` rows — see "Analysis-result integrity"
   above; the mechanism itself (a server-side table) is recommended there,
-  its operational cleanup schedule is not fixed here.
+  its operational cleanup schedule is not fixed here. Whatever schedule
+  is chosen must keep a receipt that a batch job references for at least
+  seven days after issue ("Amendment (2026-10-09, BE-25)").
 
 ## Out of scope for this contract
 
@@ -541,6 +637,12 @@ proposal — see "Hard boundary" above.
   unambiguously out of scope" list. This correction restates an existing
   decision for internal consistency only — it does not add a new vendor,
   privacy, migration, or product decision of any kind.
+  **Corrected (2026-10-09), for the same reason**: "bulk/CSV intake of
+  multiple URLs" above no longer holds unconditionally. Only the bounded
+  BE-25 batch action — one explicit `internal` action, at most 10 typed
+  or pasted URLs — is in scope, exactly as "Amendment (2026-10-09,
+  BE-25)" defines it. CSV upload and any other bulk intake stay out of
+  scope.
 - Any change to `menu_snapshot_proposals`/`menu_snapshot_reviews` or
   `0011_be17_menu_snapshot_foundation.sql` — see "Hard boundary" above.
 - Any change to `BE-18`'s current fase-1 functionality.
