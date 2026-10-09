@@ -43,8 +43,11 @@ the full notes; nothing listed here was removed.
 | `onboarding-restaurant-workflow-v1.png` | Internal Onboarding Restaurant flow | `be-20-general-restaurant-source-extraction.md` ("Approved design references", "Visual contract"). Context: `be-19-onboarding-restaurant-via-url.md` (URL intake; does not name this file) | Leading for the workflow panels; **not** for navigation |
 | `internal-navigation-workqueue-v1.png` | Internal navigation shell and Werkvoorraad | `be-20-general-restaurant-source-extraction.md` ("Approved design references", "Visual contract"). Context: `platform-11-role-aware-internal-navigation-home.md` (role filtering, `/internal` home) and decision 014 (orientation standard); neither names this file | **Leading for all internal navigation**; its counts are directional only |
 | `internal-source-triage-v1.png` | `/internal/source-triage` (Brontriage), desktop 1280px, light | `be-24-internal-source-triage.md` | Records the implemented BE-24 layout, captured from a local build with fictional data (not from the Kleurtaal v2 handoff). Mobile stacks list and detail. |
-| `be-25-batch-analysis-desktop-v1.png` | Future internal batch source analysis, desktop 1280px, light | `be-25-batch-source-analysis-from-triage.md` | Directional phase-2 reference; the ticket and design reference win. No background worker is implied. |
-| `be-25-batch-analysis-mobile-v1.png` | Future internal batch source analysis, mobile 390px, light | `be-25-batch-source-analysis-from-triage.md` | Directional phase-2 reference; the ticket and design reference win. No background worker is implied. |
+| `be-25-batch-analysis-desktop-v2.png` | Future internal `Batchanalyse` under `Werkvoorraad / Bronnen beoordelen`, desktop 1280px, light and dark | `be-25-batch-source-analysis-from-triage.md` | **Leading** visual reference for BE-25 fase 2 (final, fictional `.example` data); the ticket and design reference win. No background worker is implied. |
+| `be-25-batch-analysis-mobile-v2.png` | Same, mobile 390px and 320px, light and dark | `be-25-batch-source-analysis-from-triage.md` | **Leading**, together with the desktop v2 file. |
+| `be-25-batch-analysis-handoff-v2.pdf` | BE-25 handoff: tokens, status role per state, accessibility, per-width rules, design decisions | `be-25-batch-source-analysis-from-triage.md` | Accompanies the two v2 PNGs; recorded PDF exception (`design-reference.md`, "Mockups"). Not a build authorization. |
+| `be-25-batch-analysis-desktop-v1.png` | Future internal batch source analysis, desktop 1280px, light | `be-25-batch-source-analysis-from-triage.md` | **Superseded by v2**; kept for history only, not a reference. |
+| `be-25-batch-analysis-mobile-v1.png` | Future internal batch source analysis, mobile 390px, light | `be-25-batch-source-analysis-from-triage.md` | **Superseded by v2**; kept for history only, not a reference. |
 | `share-1-dish-sharing-handoff-v1.pdf` | "Deel gerecht" on `/menu/[id]`: share sheet, popover, dish-link context line and mismatch status; desktop and mobile, light and dark | `share-1-dish-sharing-v1.md` | Conceptual implementation reference for the future SHARE-1 build; not a product decision or build authorization on its own (see "Public sharing" below). |
 | `internal-source-workqueue-v1.png` | `/internal/source-workqueue` (Bronwerkvoorraad) | `be-23-internal-source-workqueue.md` | Leading for page content; the ticket's "Deviations from the mockup" win. The "Onze Menukaarten" top bar is a placeholder, not branding. |
 
@@ -70,6 +73,20 @@ while the starter's batch page is open; closing the page pauses it until
 that person returns. They do not authorize a background worker,
 automatic publication, or implementation before phase-1 migration
 `0016`. The BE-25 ticket and `design-reference.md` win over these images.
+
+**BE-25 v2 (addition, 2026-10-09).** The final Claude Design export
+replaces the v1 pair as the one leading visual reference:
+`be-25-batch-analysis-desktop-v2.png`,
+`be-25-batch-analysis-mobile-v2.png` and
+`be-25-batch-analysis-handoff-v2.pdf`. The v1 PNGs stay for history
+only. The handoff's own statement that v1 remains a valid directional
+reference (its section 5, item 6) is superseded by the BE-25 ticket
+("Visual references"). v2 uses only fictional `.example` data and the
+visible name `Bronnen beoordelen` (formerly shown as `Brontriage`;
+routes and identifiers unchanged). It keeps the same boundary as v1: no
+background worker, no automatic publication, no implementation before
+`0016`. Its product decisions are recorded in the BE-25 ticket ("Design
+v2 decisions"), which wins.
 
 Not yet in this directory: a PLATFORM-12 coverage dashboard v2 has no
 committed ticket or mockup in the repository yet. When it lands, add it

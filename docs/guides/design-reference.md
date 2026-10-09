@@ -343,6 +343,15 @@ positive; Niet bereikbaar → blocked; Toegang beperkt, Identiteit
 gewijzigd, Structuur niet herkend → old; Klaar voor review → file; Niet
 beoordeeld, Geen menukaart aangetroffen → neutral.
 
+BE-25 Batchanalyse mapping (decided 2026-10-09, not built; BE-25
+"Status vocabulary and copy"): In wachtrij, Bezig, Geen bruikbare
+menukaart gevonden, Recent geanalyseerd and the colleague banner →
+neutral; Menukaart gevonden · controle nodig → file; Controle nodig →
+old; Toegang beperkt (a `robots.txt` block on a read), Ongeldige URL,
+Fout → blocked; Bron bevestigd → positive. The same label "Toegang
+beperkt" is old in BE-23 (a source state) and blocked here (a robots
+block on a read); see BE-25 "Open points".
+
 Other internal screens (`src/lib/statusRoles.js`; conservative until the
 status vocabulary is decided — anything not named by the design source
 stays neutral):
@@ -443,6 +452,21 @@ Sources:
   "Visual contract").
 - `Brontriage` is an internal-only Werkvoorraad entry directly after
   `Bronwerkvoorraad`, without a count (BE-24 "V1 product decisions").
+- **Visible name `Bronnen beoordelen`** (decided 2026-10-09, BE-25
+  "Design v2 decisions"; not built yet). The visible label `Brontriage`
+  becomes `Bronnen beoordelen`. BE-25's `Batchanalyse` page lives under
+  it, with the breadcrumb `Werkvoorraad / Bronnen beoordelen /
+  Batchanalyse`. Routes and technical identifiers stay unchanged for now
+  (`/internal/source-triage`, `source_triage_*`, `sourceTriage*`). Until
+  the label in `src/lib/internalNav.js` changes, the live navigation
+  keeps showing `Brontriage` ("Implemented today" above).
+- In BE-25's Batchanalyse, a high-certainty result offers "Bevestig
+  bron": a short inline human confirmation that only records an accepted
+  BE-24 source proposal. It publishes nothing and changes no restaurant
+  data. Bulk confirmation ("Bevestig {n} bronnen") covers only
+  high-certainty results and keeps per-result confirmation available.
+  Other `internal` staff see a batch read-only and never see who
+  started it.
 
 ### Open product decisions
 
@@ -599,6 +623,12 @@ these restaurants "nieuw", do not route them into
   token mapping and visual acceptance criteria. Its size of about 5.9 MB
   is deliberately accepted for this one reference. It does not change
   the convention: other mockups stay `.png` or `.html`.
+- A second recorded exception (2026-10-09):
+  `docs/mockups/be-25-batch-analysis-handoff-v2.pdf` (BE-25), a
+  one-page handoff (about 0.25 MB) that keeps the token mapping, status
+  role per state, accessibility and per-width rules of the two v2 PNGs
+  together. It accompanies those PNGs and does not replace them; the
+  convention above is otherwise unchanged.
 - Derived design direction, not a direct rule from decision 002: do not
   commit mockups with restaurant or dish photography.
   - Decision 002 and `CLAUDE.md` forbid that photography in the UI

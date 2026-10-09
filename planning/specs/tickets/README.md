@@ -234,7 +234,10 @@ of these.
     second, bounded durable write path bound to the batch job, which
     consumes the job's receipt as payload and single-use lock while the
     BE-19 flow stays unchanged; v1 processes only while the starter's
-    batch page is open. Next: migration
+    batch page is open. Final v2 design recorded (2026-10-09): visible
+    name `Bronnen beoordelen` (routes unchanged), inline "Bevestig bron"
+    as an accepted BE-24 proposal without publication, bulk confirmation
+    for high-certainty results only, read-only colleagues. Next: migration
     `0016` as its own release, then routes and page, then an optional
     background worker after a separate infrastructure decision.
 
