@@ -231,8 +231,10 @@ of these.
     batch (governance amendment in `docs/api/url-intake-schema.md`);
     limits of 25 URLs per staff member per day, one active job overall
     and per host, 60 s per host, 7-day reuse, backoff 2/10/30 min; a
-    durable batch binding beside the unchanged ten-minute BE-19 receipt;
-    v1 processes only while the batch page is open. Next: migration
+    second, bounded durable write path bound to the batch job, which
+    consumes the job's receipt as payload and single-use lock while the
+    BE-19 flow stays unchanged; v1 processes only while the starter's
+    batch page is open. Next: migration
     `0016` as its own release, then routes and page, then an optional
     background worker after a separate infrastructure decision.
 

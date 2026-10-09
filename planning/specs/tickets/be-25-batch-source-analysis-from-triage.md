@@ -79,11 +79,14 @@ and never discovers or adds targets of its own. Recorded as
 lifts the "no bulk list" exclusion for exactly this action and nothing
 else.
 
-**B2 — Durable batch binding; the BE-19 receipt is unchanged.** Every
+**B2 — Durable batch binding; the BE-19 flow is unchanged.** Every
 batch result has a durable, internally reviewable binding to its batch,
-its source URL, its evidence and its original job. The ten-minute BE-19
-receipt is not changed, extended or relaxed. See "B2 — batch binding
-contract" below.
+its source URL, its evidence and its original job. This is a second,
+bounded durable write path beside BE-19: it consumes the receipt its job
+issued, as payload and single-use lock only. The BE-19 flow
+(`create_url_intake_from_receipt`, ten minutes, actor-bound) is not
+changed. See "B2 — batch binding contract" below and
+`docs/api/url-intake-schema.md`, "Amendment (2026-10-09, BE-25)".
 
 **B3 — V1 processes only while the batch page is open.** Processing is
 driven by the open batch page of the staff member who started the batch
@@ -117,44 +120,104 @@ evidence that no menu exists (BE-22, BE-23).
   again: it is shown as "Recent geanalyseerd" with that result. It does
   not count towards the daily limit of 25, but it does count towards the
   10 URLs of the batch. Only an explicit "Opnieuw analyseren" on that one
-  URL queues a new job, which does count.
+  URL queues a new job (in a new one-URL batch, see "Manual
+  re-analysis" below), which does count.
 - Automatic retries apply only to transient failures (`fetch_failed`,
   `internal_error`, and a timeout or HTTP 429/5xx reported as
   `fetch_failed`). `robots_disallowed`, `unsafe_url` and
   `unsupported_content_type` are terminal and never retried
-  automatically. After the last attempt, a failed job offers a manual
-  "Opnieuw proberen", which queues a new job and counts towards the daily
-  limit.
+  automatically. An automatic retry inside a batch continues the same
+  job (`attempt_count` + 1, `next_attempt_at` per the backoff); it is
+  never a new job. After the last attempt, a failed job offers a manual
+  "Opnieuw proberen".
+- **Manual re-analysis** ("Opnieuw analyseren" and "Opnieuw proberen")
+  always creates a new, explicit batch with exactly that one URL. It
+  never adds a job to an existing `batch_id`, and the URL counts towards
+  the daily limit. It is offered only once the earlier job for that URL
+  is terminal (`succeeded` or `failed`), expired (a lease that ran out on
+  its last attempt, which recovery records as `failed`), or explicitly
+  released by its starter (see "Open points").
 - The 7-day window also bounds B2: a batch result can be turned into a
   URL intake while it is at most 7 days old; after that it stays visible
   in the history and can only be analysed again.
 
 ## B2 — batch binding contract (input for migration 0016)
 
-- **The binding** is the job row itself: `batch_id`, `actor_user_id`,
-  `canonical_source_url`, `field_evidence` and `result_receipt_id`,
-  which points to the receipt row that holds `candidate_summary` and
-  `analysis_result_hash`. These rows are never deleted.
+This is a second, bounded durable write path to `url_intakes`, recorded
+as such in `docs/api/url-intake-schema.md`, "Amendment (2026-10-09,
+BE-25)". Any further relaxation needs a new amendment.
+
+- **The trusted binding is the batch job**: its `batch_id`, its original
+  actor (`actor_user_id`, the staff member who started the batch),
+  `canonical_source_url`, `field_evidence`, and through
+  `result_receipt_id` the stored `analysis_result_hash` and result.
+- **The receipt is only payload and lock**: it supplies the stored
+  `candidate_summary` and, through `consumed_at`, makes one result
+  become at most one URL intake, whichever path redeems it first.
+- **Retention**: job rows are never deleted. A receipt that a batch job
+  references is kept at least 7 days after it was issued; after that the
+  existing receipt cleanup approach applies.
 - **Visibility:** every `internal` staff member can see every batch and
   its results (not only the staff member who started it).
 - **Turning a result into a URL intake** uses a new, separate RPC
   (working name `create_url_intake_from_batch_job`), never
-  `create_url_intake_from_receipt`. It requires:
+  `create_url_intake_from_receipt`. Only on this path, the checks below
+  take the place of BE-19's actor check and ten-minute expiry:
   - the job belongs to a batch and has status `succeeded`;
   - its receipt exists and is not consumed; the receipt's
     `canonical_source_url` equals the job's;
-  - `analysis_result_hash` is recomputed server-side from the stored
-    `candidate_summary` and matches (the same integrity rule as BE-19);
-  - the job finished at most 7 days ago;
+  - `analysis_result_hash` is recomputed with exactly the original
+    receipt's inputs — the receipt's own `actor_user_id` (the starter),
+    `canonical_source_url`, `restaurant_match_type`,
+    `matched_restaurant_id` and `candidate_summary` — using the existing
+    canonicalisation of `src/lib/urlIntakeReceiptHash.js`, and must
+    match. The account that redeems the result is never part of the
+    hash;
+  - the result is at most 7 days old, measured from the receipt's
+    `created_at` (which is never updated);
   - the acting account is an `internal` staff member, recorded as the
     actor of the new `url_intakes` row; it may differ from the staff
     member who started the batch;
-  - the receipt is consumed in the same transaction, so a result becomes
-    at most one URL intake;
+  - the receipt is consumed in the same transaction;
   - the new `url_intakes` row records the originating job (an additive
     column in 0016, e.g. `issued_via_job_id`).
 - The BE-19 flow (single URL, ten-minute, actor-bound receipt) and
-  `create_url_intake_from_receipt` stay unchanged.
+  `create_url_intake_from_receipt` stay unchanged, for every caller.
+
+## Processing, duplicates and idempotency (input for 0016 and fase 2)
+
+- **Claim scope.** `claim_next_source_analysis_job` takes a `batch_id`
+  and the session's actor, and only claims jobs of that batch whose
+  starter is that actor. Only the starter, from the open batch page, can
+  process a batch; other `internal` staff can view it but never process
+  it (the process route refuses them).
+- **Active.** A job is active only while it is `running` with a valid
+  lease. "One active job overall" and "one active job per host" count
+  only these. A `pending` job is not globally active: it stays visible
+  in its own batch and is resumed when its starter reopens the page.
+- **Expired lease.** A `running` job whose lease has expired is
+  recovered by the claim under the existing attempt and backoff rules:
+  if attempts remain, it returns to `pending` with `attempt_count` + 1
+  and `next_attempt_at` per the backoff; on the last attempt it becomes
+  `failed` (`internal_error`).
+- **Duplicates in 0016.** 0016 adds only the batch-scoped unique index
+  on (`batch_id`, `canonical_source_url`), which prevents duplicates
+  inside one batch. It adds no wider index on the URL, so the existing
+  single-URL route (which inserts a `pending` job) can never fail on a
+  database conflict caused by a batch.
+- **Duplicates across batches.** Enqueue checks for an open job
+  (`pending` or `running`) for the same URL in another batch and does
+  not queue it; it is reported per URL as "Deze URL staat al in een
+  actieve analysebatch." A wider, database-enforced block on active URLs
+  may only be added once the single-URL route (fase 2) uses the same
+  shared enqueue and duplicate handling, so existing behaviour never
+  fails silently on a constraint.
+- **Idempotency.** The page generates one batch UUID per click of
+  "Analyse starten", kept only in memory for that submission, and sends
+  it as the batch `id`. Enqueue with an `id` that already exists for the
+  same actor returns that batch unchanged; for another actor it is
+  refused. A repeated submission therefore creates the batch, its jobs
+  and its daily-limit usage exactly once.
 
 ## Where results go (B5)
 
@@ -186,6 +249,8 @@ Fixed copy:
   scherm open. Sluit je het, dan pauzeert de analyse en gaat hij verder
   zodra je terugkomt."
 - "Niets wordt automatisch gepubliceerd."
+- Reason for a URL that already has an open job in another batch: "Deze
+  URL staat al in een actieve analysebatch."
 
 Statuses per URL, derived from the job (no new status values in the
 database), always icon plus text with a Kleurtaal v2 status role:
@@ -243,13 +308,15 @@ one is merged (and, for fase 1, verified live).
   `restaurant_source_analysis_jobs` and `url_intakes`:
   - `lease_expires_at`, `next_attempt_at` and a normalised `source_host`
     on jobs;
-  - a partial unique index on (`market_id`, `canonical_source_url`)
-    while a job is `pending` or `running`, and a unique index on
-    (`batch_id`, `canonical_source_url`);
+  - a unique index on (`batch_id`, `canonical_source_url`) only — no
+    wider index on the URL (see "Processing, duplicates and
+    idempotency");
   - `issued_via_job_id` on `url_intakes`;
   - RPCs, `security invoker`, fixed `search_path`, `service_role` only:
-    enqueue a batch (atomic, idempotent, enforcing the B4 limits),
-    claim the next job (`FOR UPDATE SKIP LOCKED`, one active job
+    enqueue a batch (atomic, idempotent on the client-generated batch
+    `id` per actor, enforcing the B4 limits and the cross-batch
+    duplicate check), `claim_next_source_analysis_job` (scoped to one
+    `batch_id` and its starter, `FOR UPDATE SKIP LOCKED`, one active job
     overall, one per host, 60 s per host, `next_attempt_at`, recovery of
     expired leases), complete and fail a job (backoff 2/10/30 min within
     the attempt limit), and `create_url_intake_from_batch_job` (B2);
@@ -266,7 +333,9 @@ one is merged (and, for fase 1, verified live).
   within the function time limit), retry one URL, and turn a batch
   result into a URL intake. One internal page under Werkvoorraad; the
   starter's open batch page drives processing (B3). Brontriage shows batch
-  results for known restaurants (B5).
+  results for known restaurants (B5). A wider, database-enforced block on
+  active URLs is only allowed once the single-URL route uses the shared
+  enqueue and duplicate handling, in its own migration.
 - **Fase 3 — optional background worker.** Only after a separate
   infrastructure decision (for example Vercel Cron or `pg_cron`, after
   verifying plan and extension limits). Only then may copy say that the
@@ -293,14 +362,19 @@ Fase 1:
 - [ ] `0016` adds only the columns, indexes and RPCs listed above, with
       the 0015 privilege pattern; its structural tests pin the exact
       grants and revokes.
-- [ ] The claim RPC never hands out a second active job, a second job
+- [ ] The claim RPC only claims jobs of the given batch for its
+      starter, and never hands out a second active job, a second job
       for the same host, or a host within 60 seconds of its last
-      analysis; an expired lease is recovered (tested in the
-      validate-migrations replay).
+      analysis; an expired lease is recovered under the attempt and
+      backoff rules (tested in the validate-migrations replay).
 - [ ] Enqueue rejects more than 10 URLs per batch and more than 25 per
-      staff member per day, and is idempotent for the same batch and
-      URL.
-- [ ] `create_url_intake_from_batch_job` enforces every B2 check;
+      staff member per day; a repeated batch `id` from the same actor
+      returns the same batch without new jobs or limit usage, and from
+      another actor is refused.
+- [ ] 0016 adds no constraint that can make the existing single-URL
+      route fail.
+- [ ] `create_url_intake_from_batch_job` enforces every B2 check,
+      including the hash over the original receipt inputs only;
       `create_url_intake_from_receipt` is unchanged.
 
 Fase 2:
@@ -329,6 +403,11 @@ Fase 2:
   separate Werkvoorraad entry).
 - Whether the existing single-URL status endpoint should also become
   visible to all `internal` staff (B2 requires this only for batches).
+- How a starter explicitly releases a `pending` job (and whether a
+  long-paused batch job ever expires by itself) without a new job status
+  value; to settle in the 0016 design review. Until then a URL with an
+  open job elsewhere shows "Deze URL staat al in een actieve
+  analysebatch."
 - Passing `Retry-After` from `safeOutboundFetch` into the backoff
   (optional refinement; the fixed 2/10/30 min applies without it).
 
