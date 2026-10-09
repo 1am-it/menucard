@@ -347,10 +347,9 @@ BE-25 Batchanalyse mapping (decided 2026-10-09, not built; BE-25
 "Status vocabulary and copy"): In wachtrij, Bezig, Geen bruikbare
 menukaart gevonden, Recent geanalyseerd and the colleague banner →
 neutral; Menukaart gevonden · controle nodig → file; Controle nodig →
-old; Toegang beperkt (a `robots.txt` block on a read), Ongeldige URL,
-Fout → blocked; Bron bevestigd → positive. The same label "Toegang
-beperkt" is old in BE-23 (a source state) and blocked here (a robots
-block on a read); see BE-25 "Open points".
+old; Robots geblokkeerd (a `robots.txt` block on a read), Ongeldige
+URL, Fout → blocked; Bron bevestigd → positive. BE-25 does not use the
+BE-23 source state "Toegang beperkt" (old), which is unchanged.
 
 Other internal screens (`src/lib/statusRoles.js`; conservative until the
 status vocabulary is decided — anything not named by the design source

@@ -136,7 +136,7 @@ v2 decisions") and is never presented as evidence that no menu exists
   "Opnieuw proberen".
 - **Two different manual actions.** "Opnieuw proberen" exists only for
   "Fout": a technical failure after the last attempt, or a last attempt
-  whose lease expired. It is never offered for "Toegang beperkt"
+  whose lease expired. It is never offered for "Robots geblokkeerd"
   (`robots.txt`), "Ongeldige URL" or "Geen bruikbare menukaart
   gevonden". "Opnieuw analyseren" exists only for "Recent geanalyseerd":
   a deliberate new, limited analysis of a URL that already has a result
@@ -248,12 +248,25 @@ Where the handoff and this ticket differ, this ticket wins.
   its state changes (decision 014). Existing technical route and
   identifier names stay unchanged for now (`/internal/source-triage`,
   `source_triage_*`, `sourceTriage*`, this ticket's file name).
-- **High-certainty result → "Bevestig bron".** A result has enough
-  certainty when the restaurant is known (`restaurant_match_type` =
-  `exact`), the job succeeded with recognised menu items ("Menukaart
-  gevonden · controle nodig", BE-23 "Klaar voor review") and the found
-  menu is on the known restaurant's own host. Its primary action is
-  "Bevestig bron", next to "Details bekijken".
+- **High-certainty result → "Bevestig bron" (conservative v1 rule).** A
+  result has enough certainty only when restaurant, menu items and host
+  relation all match convincingly in the existing source and trust
+  context — all three of:
+  - the restaurant is known: `restaurant_match_type` = `exact` against
+    `data/restaurants.json` (`src/lib/restaurantHostMatch.js`);
+  - the job succeeded with recognised menu items ("Menukaart gevonden ·
+    controle nodig", BE-23 "Klaar voor review");
+  - the found menu is on exactly the known restaurant's own host.
+
+  Its primary action is "Bevestig bron", next to "Details bekijken".
+  Anything less is "Beoordeel handmatig". The host comparison is
+  deliberately strict in v1: it uses only the existing normalisation
+  (lowercase, a leading `www.` stripped) and nothing more, so a
+  subdomain (for example `menu.` or `order.`) or any other host
+  variant, including a `www` variant that normalisation does not
+  cover, goes to "Beoordeel handmatig". Wider canonicalisation or
+  normalisation of domains is an open technical point for the 0016
+  design (see "Open points"), not a v1 rule.
 - **What "Bevestig bron" does.** A short human confirmation inside the
   result card (question "Bron bevestigen voor {restaurant}?", the text
   "… na eigen controle … Er wordt niets gepubliceerd.", buttons
@@ -282,7 +295,7 @@ Where the handoff and this ticket differ, this ticket wins.
   available on each card. This applies to the batch page only; BE-24's
   own page keeps no bulk actions.
 - **Every other result is handled by a human.** Doubt ("Controle
-  nodig"), `robots.txt` ("Toegang beperkt") and "Geen bruikbare
+  nodig"), `robots.txt` ("Robots geblokkeerd") and "Geen bruikbare
   menukaart gevonden" → "Beoordeel handmatig". "Ongeldige URL" → "URL
   aanpassen". "Fout" → "Opnieuw proberen". "Recent geanalyseerd" →
   "Opnieuw analyseren" (see "Rules that follow from B1–B5"). "Naar
@@ -307,7 +320,7 @@ Where the handoff and this ticket differ, this ticket wins.
 | Known restaurant, found source differs from the known website, or more than one restaurant matches | yes | yes | "Beoordeel handmatig" |
 | Unknown restaurant, menu found | yes | no | "Naar Onboarding Restaurant" (new intake, B2) |
 | Geen bruikbare menukaart gevonden | yes | known restaurant only | "Beoordeel handmatig" |
-| Toegang beperkt (`robots.txt`) | yes | known restaurant only | "Beoordeel handmatig" |
+| Robots geblokkeerd (`robots.txt`) | yes | known restaurant only | "Beoordeel handmatig" |
 | Ongeldige URL | yes | no | "URL aanpassen" |
 | Fout (technical failure or expired last attempt) | yes | no | "Opnieuw proberen" (new one-URL batch) |
 | Recent geanalyseerd | yes | as the earlier result | the earlier result's step ("Bevestig bron" only if it had enough certainty) + "Opnieuw analyseren" |
@@ -361,7 +374,7 @@ database), always icon plus text with a Kleurtaal v2 status role:
 | Controle nodig | `succeeded`, a menu candidate without a recognised structure, or a doubtful match (see "Where results go") | old (as BE-23 "Structuur niet herkend") |
 | Geen bruikbare menukaart gevonden | `succeeded` without a menu candidate, or `no_reliable_content_found` | neutral |
 | Recent geanalyseerd | an existing result of at most 7 days, not fetched again | neutral |
-| Toegang beperkt | `robots_disallowed` | blocked (a `robots.txt` block on a read, design-reference "Robots geblokkeerd") |
+| Robots geblokkeerd | `robots_disallowed` | blocked (a `robots.txt` block on a read, as design-reference "Robots geblokkeerd") |
 | Ongeldige URL | rejected by validation, or `unsafe_url` | blocked |
 | Fout | any other terminal failure after the last attempt | blocked |
 | Bron bevestigd | an accepted BE-24 proposal created by "Bevestig bron" for this result | positive |
@@ -405,7 +418,9 @@ text wins. Not taken over, as before: any copy saying the screen may be
 closed (fase 3 only), "Alleen resultaten met twijfel komen in de
 werkvoorraad" and "Bronnen die we met zekerheid kunnen verwerken, worden
 niet getoond" (B5), serif type, the green-grey "Gereed" chip, and four
-sub-steps per URL (v1 shows one status per URL).
+sub-steps per URL (v1 shows one status per URL). Where the v2 images and
+handoff show "Toegang beperkt" for a `robots.txt` block, v1 uses
+"Robots geblokkeerd" (role blocked).
 
 ## Release sequence
 
@@ -534,10 +549,10 @@ Fase 2:
   derived (an additive column is likely needed).
 - How a bulk confirmation reports a result that fails its checks while
   the others pass (per-result outcome or all-or-nothing).
-- The label "Toegang beperkt" has two roles: blocked here (a `robots.txt`
-  block on a read) and old in BE-23's Bronwerkvoorraad (a source state).
-  Whether BE-25 should show "Robots geblokkeerd" instead is a copy
-  decision for the product owner.
+- Canonicalisation or normalisation of domains beyond the existing
+  `www.` stripping (subdomains, other host variants) for the
+  high-certainty rule; until it is decided, such variants go to
+  "Beoordeel handmatig".
 - When the visible navigation label in `src/lib/internalNav.js` changes
   from `Brontriage` to `Bronnen beoordelen` (a code change; at the latest
   with fase 2).
