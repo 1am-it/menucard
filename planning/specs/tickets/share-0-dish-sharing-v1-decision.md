@@ -224,7 +224,11 @@ The concept boards are input only:
   ("Kleurtaal v2"), not the boards. Serif display type, the account icon
   and the navigation items shown on the boards are not adopted.
 - Any v1 mockup committed later follows `docs/mockups/` conventions
-  (`<surface>-v<N>.png`, indexed in `docs/mockups/README.md`).
+  (`<surface>-v<N>.png`, indexed in `docs/mockups/README.md`). The one
+  recorded exception is the SHARE-1 visual handoff
+  `docs/mockups/share-1-dish-sharing-handoff-v1.pdf` (see
+  `docs/guides/design-reference.md`, "Mockups: location, naming and
+  leading references"); the convention itself is unchanged.
 
 ## Privacy, accessibility and design guardrails
 

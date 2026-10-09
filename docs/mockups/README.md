@@ -297,8 +297,19 @@ reference instead of ad hoc judgment calls:
   - **Format:** a PDF selection from the "Onze Menukaarten — Kleurtaal v2
     (Brontriage)" handoff, kept as PDF because it combines several
     screens with a token mapping and acceptance criteria; named after the
-    `<surface>-v<N>` convention. Its header still says "SHARE-0 (D1–D3
-    open)": that is superseded by the decision of 2026-10-09.
+    `<surface>-v<N>` convention. It is the one recorded exception to the
+    `.png`/`.html` convention, and its size of about 5.9 MB is
+    deliberately accepted (`docs/guides/design-reference.md`, "Mockups:
+    location, naming and leading references").
+  - **Historical canvas status:** its header and intro banner still say
+    that `SHARE-0` D1–D3 are open. That is the canvas status at the time;
+    the decided `SHARE-0` decision table (2026-10-09) is leading.
+  - **Details settled in the ticket:** the share text uses a middle dot
+    ("{gerechtnaam} bij {restaurantnaam} · BredaEats"), as in this
+    handoff. The mismatch status uses the neutral status role tokens
+    (`--status-neutral`, `-bg`, `-border`); the handoff's
+    "`.di-banner-neutral`-familie" means the existing banner family, not
+    a new class contract.
   - Not adopted from the earlier dish-sharing concept boards: serif
     type, the restaurant illustration, the account icon and their
     navigation items.

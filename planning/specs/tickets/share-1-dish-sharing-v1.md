@@ -64,12 +64,16 @@ booked, reviewed, published, measured or ranked.
 ### 3. The link — exactly the canonical BE-12 dish link
 
 - The shared URL is `{origin}/menu/[id]?dish=…&name=…&cat=…` and
-  nothing else. `{origin}` is the site origin (`window.location.origin`);
-  no other part of the current browser URL is used.
+  nothing else. `{origin}` is the application origin
+  (`window.location.origin`: scheme, host and port). The path, query,
+  fragment or any other part of the current browser URL is never used.
 - Never: `fromQuery`, `q`, `excl`, a fragment, a marker or any other
   parameter.
-- Built from the dish being shared — its route id, category position,
-  item position, name and category — with the same construction as
+- Built from the unfiltered, resolved menu data: the route id, and the
+  category and item positions, name and category of the dish in
+  `r.categories` as loaded — never from the filtered list the page is
+  currently rendering, so an active search, allergen, diet or price
+  filter can never shift a position or category. Same construction as
   `buildDishMenuHref()` (`URLSearchParams`, keys `dish`, `name`, `cat` in
   that order), always without a search query, so `fromQuery` is never
   set. A shared helper with identical output is allowed; a second,
@@ -79,8 +83,10 @@ booked, reviewed, published, measured or ranked.
 
 ### 4. Share text
 
-- `text`: "{gerechtnaam} bij {restaurantnaam} — BredaEats"; `url`: the
-  link from 3. The copy fallback copies only the link.
+- `text`: "{gerechtnaam} bij {restaurantnaam} · BredaEats" (middle dot,
+  as in the visual reference; no general document prescribes another
+  separator); `url`: the link from 3. The copy fallback copies only the
+  link.
 - Only the dish name and restaurant name as rendered on the page, the
   name BredaEats and the link. No city, price, availability, allergen,
   diet, date, ranking or marketing language. Never built from raw
@@ -98,9 +104,19 @@ booked, reviewed, published, measured or ranked.
   - "Prijs en beschikbaarheid kunnen wijzigen." — a caveat, not an
     availability claim;
   - "Bekijk menukaart" → `/menu/[id]` without any parameters.
-- The line stays visible after BE-12's 4 s highlight; scroll position
-  shows the line and the dish together. BE-12's scroll, focus and
-  `aria-live` behaviour stays as it is.
+- The line stays visible after the temporary highlight (BE-12 introduced
+  it at about 2.5–3 s; BE-16 set it to 4 s, the current behaviour); scroll
+  position shows the line and the dish together. BE-12's scroll, focus
+  and `aria-live` behaviour stays as it is.
+- **Arrival with an active filter.** On arrival through a dish deep link,
+  a dish resolved from the unfiltered data is always shown, highlighted
+  and given the context line, even when a filter from the URL (`q`,
+  `excl`) would otherwise hide it. A canonical shared link carries no
+  filter, but older or combined links can. An active filter never turns a
+  resolved dish into a mismatch. After the visitor later changes a filter
+  themselves, normal filter behaviour applies, including hiding the dish.
+  This replaces BE-12's rule that `?q=` stays authoritative on arrival
+  and is part of the BE-12 cross-reference below.
 - The copy never says or implies that the link was shared, sent or
   received.
 
@@ -111,16 +127,21 @@ booked, reviewed, published, measured or ranked.
   - "Dit gerecht staat niet (meer) op deze menukaart." (neutral icon);
   - "Er is geen gerecht gemarkeerd.";
   - "Bekijk menukaart" → `/menu/[id]` without parameters.
-- `role="status"`, `--status-neutral` styling, icon plus text — never
-  the blocked/red role: this is not the visitor's error.
-- No dish is highlighted, focused or guessed. A dish that resolves but is
-  hidden by an active filter keeps BE-12's existing behaviour and is not
-  a mismatch.
+- `role="status"`, icon plus text, styled with the existing neutral
+  status role tokens `--status-neutral`, `--status-neutral-bg` and
+  `--status-neutral-border` (design-reference, "Kleurtaal v2": uncertainty
+  uses the neutral role) in the existing banner shape. No new class name
+  is part of this contract, and never the blocked/red role: this is not
+  the visitor's error. The handoff's mention of the
+  "`.di-banner-neutral`-familie" refers to that existing banner family;
+  where its tokens differ, the neutral role tokens named here win.
+- No dish is highlighted, focused or guessed. A dish that resolves is
+  never a mismatch, whatever filter is active (see section 5).
 - This replaces BE-12's silent fallback for every dish deep link
   (including those from search results). It supersedes BE-12's non-goal
-  "No automatic 'item no longer exists' error message"; the
-  implementation adds a short cross-reference to this ticket in the
-  BE-12 ticket.
+  "No automatic 'item no longer exists' error message" and, with section
+  5, BE-12's arrival-time filter rule; the implementation adds a short
+  cross-reference to this ticket in the BE-12 ticket.
 - A menu or restaurant that no longer exists keeps the existing
   "Menu niet gevonden" page, which already offers a way back (decision
   014, no dead ends).
@@ -183,13 +204,18 @@ illustration, the account icon and their navigation items.
 
 - Unit tests for the link builder: only `dish`, `name` and `cat`; never
   `fromQuery`, `q`, `excl` or a fragment, also when the current page URL
-  has them; round-trip through `resolveDishTarget()` for normal items,
-  same-named items and the first and last positions.
+  has them; only the origin of the current URL is used; round-trip
+  through `resolveDishTarget()` for normal items, same-named items and the
+  first and last positions; and with an active search, allergen, diet or
+  price filter, the link still uses the unfiltered positions and resolves
+  to the same dish.
 - Unit tests for the share text: only dish name, restaurant name,
   BredaEats; no price, city or other fields.
 - Tests for the dish page: the context line for a resolved link; the
   mismatch status (and no highlight) for a changed, removed, malformed
-  or partial link; no mismatch for a resolved but filtered dish.
+  or partial link; a resolved dish arriving with `q` or `excl` in the URL
+  is shown, highlighted and has the context line, never a mismatch; after
+  a later filter change by the visitor, normal filter behaviour applies.
 - Structural tests: no `navigator.share` call without a feature check;
   no analytics, cookie, `localStorage` or tracking; no Open Graph or
   `generateMetadata` change for the menu route; no forbidden copy
@@ -207,17 +233,29 @@ illustration, the account icon and their navigation items.
 - [ ] "Delen met je apps" appears only when the Web Share API exists;
       "Kopieer link" always works, with "Link gekopieerd" as status.
 - [ ] The shared link is exactly `/menu/[id]?dish=…&name=…&cat=…` on the
-      site origin, built from the dish, never from the browser URL, and
-      it resolves back to the same dish.
+      application origin — never the path, query, fragment or any other
+      part of the current browser URL — and it resolves back to the same
+      dish (`MARKET-10` "Amendment (2026-10-09, `SHARE-0`)": only the
+      existing BE-12 link).
+- [ ] With an active search, allergen, diet or price filter, the shared
+      link still uses the unfiltered positions and category and resolves
+      to the intended dish.
 - [ ] The share text contains only dish name, restaurant name, BredaEats
       and the link; visible UI says Onze Menukaarten.
-- [ ] Every resolved dish deep link shows the generic context line and
-      "Bekijk menukaart"; nothing claims sharing, sending or receiving.
+- [ ] Every resolved dish deep link is shown and highlighted on arrival,
+      with the generic context line and "Bekijk menukaart", also when a
+      filter from the URL would hide it; a later filter change by the
+      visitor follows normal filter behaviour. Nothing claims sharing,
+      sending or receiving.
 - [ ] Every non-resolving dish deep link shows the neutral mismatch
-      status; nothing is highlighted or guessed.
-- [ ] No price, date, availability claim, preview, Open Graph,
-      receiving page, share card, social logo, measurement or popularity
-      feature exists.
+      status with the neutral role tokens; nothing is highlighted or
+      guessed; a resolved dish is never shown as a mismatch.
+- [ ] No price, date, availability claim, allergen or diet claim in the
+      share flow, and no preview, Open Graph, receiving page, share card,
+      social logo, measurement or popularity feature exists — the limits
+      under which `MARKET-10` "Amendment (2026-10-09, `SHARE-0`)" lifts
+      its freshness, trust-gate and dependency preconditions for this
+      action.
 - [ ] Kleurtaal v2 tokens, system font, light and dark, visible focus,
       keyboard operation, contrast and no overflow at 320, 390 and
       desktop are verified and recorded.

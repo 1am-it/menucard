@@ -154,7 +154,9 @@ moderation queue.
 - **Showing a stale price, menu, or availability as if current** —
   mitigated by the mandatory freshness/version disclosure and
   trust-model filtering named above; without both, this risk is not
-  adequately addressed.
+  adequately addressed. (The one narrow `SHARE-1` exception avoids this
+  risk by showing no price, date or availability at all; see "Amendment
+  (2026-10-09, `SHARE-0`)".)
 - **A shared page leaking data never meant to be public** (claim
   evidence, internal provenance/moderation notes, personal contact
   details, an owner's private information) — mitigated by scoping the
@@ -210,9 +212,13 @@ moderation queue.
       selection.
 - [ ] The durable/direct-open, factual-content-only, and
       freshness-disclosure principles are recorded as binding
-      requirements for whoever eventually implements this.
+      requirements for whoever eventually implements this. (Not a
+      precondition for the narrow `SHARE-1` action only; see "Amendment
+      (2026-10-09, `SHARE-0`)".)
 - [ ] Allergen/diet-label inclusion is explicitly gated on trust-model
-      confidence, never shown unconditionally.
+      confidence, never shown unconditionally. (Not a precondition for
+      the narrow `SHARE-1` action only; see "Amendment (2026-10-09,
+      `SHARE-0`)".)
 - [ ] No-account sharing via the Web Share API plus a copy-link fallback
       is recorded as the baseline mechanism.
 - [ ] A hard constraint against exposing personal data, private business
@@ -224,7 +230,9 @@ moderation queue.
       -claim constraints.
 - [ ] All four hard dependencies (`MARKET-02`, `MARKET-06`, `MARKET-08`,
       the trust model) plus the still-undecided URL/metadata strategy are
-      recorded as explicit preconditions this ticket cannot bypass.
+      recorded as explicit preconditions this ticket cannot bypass —
+      except for the narrow `SHARE-1` action recorded in "Amendment
+      (2026-10-09, `SHARE-0`)".
 - [ ] The personal-selection default (ephemeral, client-side) is recorded,
       with a save-able/collaborative selection explicitly named as a
       later, separate privacy and product decision — not designed here.
@@ -252,36 +260,50 @@ requires. It is the only place the exception is defined.
 (`planning/specs/tickets/share-1-dish-sharing-v1.md`) may build one
 action: "Deel gerecht", which shares the existing canonical BE-12 dish
 deep link `/menu/[id]?dish=…&name=…&cat=…` on today's static consumer
-read path, via the native share sheet with a copy-link fallback.
+read path, via the native share sheet with a copy-link fallback, plus
+the dish-page context line, the arrival behaviour for a resolved dish and
+the neutral mismatch status that `SHARE-1` specifies.
 
-For that action only, these clauses of this ticket do not block it:
+**Clauses that do not block that one action.** Each stays fully in force
+for everything else in this ticket and for any future surface:
 
 - **"Depends on" and "Dependencies" items 1–5** (`MARKET-02` stable
-  public identities, `MARKET-06` version/freshness, the trust-filtered
-  risk data, `MARKET-08` consumer route, and the URL/metadata strategy),
-  because the action:
-  - reuses the existing BE-12 link, which resolves only through BE-12's
-    position, name and category checks and never guesses — no new
-    identifier or URL shape;
-  - copies no price, availability, allergen or diet value into the link
-    or the share text;
-  - shows no freshness date; the dish page states only "Prijs en
-    beschikbaarheid kunnen wijzigen.";
-  - opens the existing `/menu/[id]` page, which already shows the same
-    public data;
-  - adds no link preview, Open Graph tags or other per-dish metadata.
-- **"Out of scope": "Any change to today's static consumer read path …
-  is not being retrofitted onto it."** Waived only for this one action
-  and the dish-page context and mismatch status that `SHARE-1`
-  specifies. The static read path's data, routes and behaviour otherwise
-  stay unchanged.
+  public identities, `MARKET-06` version/freshness, trust-filtered risk
+  data, `MARKET-08` consumer route, and the URL/metadata strategy).
+  The action reuses the existing BE-12 link, which resolves only through
+  BE-12's position, name and category checks and never guesses; it adds
+  no identifier, URL shape, preview or per-dish metadata, and it opens
+  the existing `/menu/[id]` page, which already shows the same public
+  data.
+- **Scope, "Freshness/version disclosure".** Not abolished. The share
+  action itself shows no price, date or availability — not in the share
+  sheet, the share text, the link or the context line — so there is no
+  shown version to disclose. It is therefore not a precondition for this
+  action only. It stays a binding requirement for every future surface
+  that shows price, availability or a version of the menu as part of a
+  shared link (for example a shared menu page, a selection page or a
+  preview card).
+- **Scope, "Trust-gated allergen/diet labels".** Not abolished. The share
+  action shows and copies no allergen or diet claim, so it is not a
+  precondition for this action only. It stays binding for every future
+  shared surface that shows such labels. The existing `/menu/[id]`
+  page that the link opens is unchanged by `SHARE-1`; its existing
+  labels are outside this exception and are not newly "shared" content.
+- **"Out of scope", this clause in full:** "Any change to today's static
+  consumer read path (`data/restaurants.json` / `data/menus.json`).
+  This feature structurally cannot exist on that path (see Dependencies)
+  and is not being retrofitted onto it." Waived only for this one action
+  and its context line, arrival behaviour and mismatch status: for them,
+  the statement that
+  the feature "structurally cannot exist on that path" no longer holds,
+  because they need nothing beyond the existing BE-12 link and menu data.
+  The static read path's data and routes stay unchanged.
 
-**What stays fully in force.** Everything else in this ticket,
-including:
+**What stays fully in force.** Everything else in this ticket, including:
 
 - full-menu links and personal multi-dish selections;
-- durable dish identities, freshness/version disclosure and
-  trust-gated allergen/diet labels for any new shared surface;
+- durable dish identities, and the freshness/version disclosure and
+  trust-gated labels above for any surface that shows such claims;
 - any link preview, Open Graph or rich preview card;
 - "Analytics and neutrality principles" — and, stricter for v1 by
   `SHARE-0` D2: no measurement of any kind (no event, counter, cookie,
