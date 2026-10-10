@@ -266,6 +266,82 @@ its job issued. Precisely:
 - OCR, browser rendering, any external AI call and CSV upload stay
   excluded, exactly as listed in the BE-20 amendment above.
 
+### Amendment (2026-10-10, CITY-0): één expliciete stadsimport
+
+**This amendment narrowly widens the BE-25 amendment above for exactly
+one more case: one explicit city import ("stadsimport") of at most 250
+URLs.** It does not widen anything else. Every bound of the exception,
+of the BE-20 amendment and of the BE-25 amendment that this section does
+not name stays exactly as it is. Recorded in
+`planning/specs/tickets/be-25-batch-source-analysis-from-triage.md`
+(B1, B4). Documentation only: nothing here is built, and building it
+needs its own reviewed implementation step.
+
+**The city import action, precisely bounded**:
+
+- **One action, one market, at most 250 URLs.** One explicit action by
+  one authenticated `internal`-role account submits a list of at most
+  250 restaurant homepage URLs that the staff member pasted, all within
+  one `market_id`. No CSV upload. Each URL is validated server-side
+  before anything is queued, exactly as for a BE-25 batch.
+- **The input list is fixed.** The processor only works on the URLs of
+  that one list. It never adds a URL, a domain or any other target of
+  its own: no follow-up list, no discovered restaurant, no crawl.
+- **Processed as BE-25 batches.** The list is split internally into
+  batches of at most 10 URLs. Each batch follows the existing BE-25
+  claim rules unchanged: only the starter claims its jobs, from their
+  own open page; the cross-batch duplicate check and the 7-day reuse
+  rule apply.
+- **Its own campaign limit.** For this one action, the limit of 250 URLs
+  takes the place of the ordinary limit of 25 URLs per staff member per
+  day; the city import's URLs do not count towards those 25, and the 25
+  cannot be used to extend a city import. A manual "Opnieuw proberen" or
+  "Opnieuw analyseren" of one URL afterwards stays an ordinary one-URL
+  BE-25 batch that does count towards the 25.
+- **Pacing unchanged.** At most one active job overall, at most one
+  active job per host, at least 60 seconds between two analyses of the
+  same host, and at most five attempts per job, retried automatically
+  only for transient failures with the existing 2/10/30-minute backoff.
+  A `robots.txt` block, an unsafe URL or an unsupported content type is
+  never retried automatically.
+- **Only while the starter's page is open.** No worker, cron, schedule,
+  periodic synchronisation or unattended resumption. Closing the page
+  pauses the import; it continues only when the starter reopens it.
+- **Per website, the acquisition bounds are unchanged**: the same host
+  only, one link step, at most five candidates, `robots.txt` fail-closed,
+  `src/lib/safeOutboundFetch.js` as the only egress, no subdomains, no
+  external sources, no OCR and no AI.
+
+**Downstream, unchanged — said plainly**:
+
+- Nothing becomes active, a concept, canonical or live automatically.
+- A source becomes active only through a human confirmation — a single
+  "Bevestig bron" or the bulk "Bevestig {n} bronnen" — with the same
+  checks per result as BE-25 and BE-26 already require.
+- A concept is formed only as the direct result of that human
+  activation, per `planning/decisions/016-publication-path.md` §2.
+- Publication is unchanged: business data per field and a menu only as
+  one complete version, each through the reviewed export pull request
+  (decision 016, BE-27). There is no combined action that publishes all
+  results of a city import (no "Publiceer {n} concepten").
+- Safe results may later be shown compactly as counts, but the full
+  per-URL list and its audit trail always stay reachable; no result is
+  hidden.
+
+**Why this is not `MARKET-04` bulk acquisition**: an `ImportRun` is
+repeatable, automated acquisition from one registered `Source` at scale,
+gated by a `SourceAuthorizationVersion`. A city import is a fixed list
+of individual restaurants' own websites, typed or pasted by one staff
+member in one action, never repeated by itself. Every URL on it follows,
+on its own, the same bounded and auditable analysis path as a single
+BE-25 URL — its own job, evidence, receipt and review outcome. Bundling
+them changes only how many URLs one action may start, never what is
+fetched per URL or what may be done with the result.
+
+Any further relaxation — more than 250 URLs, more than one market, CSV,
+a background processor or a repeated import — needs its own new
+amendment.
+
 ### Amendment (2026-10-10, decision 016): candidate kinds for source discovery
 
 **This amendment changes only which same-host links the BE-20
@@ -673,6 +749,10 @@ proposal — see "Hard boundary" above.
   or pasted URLs — is in scope, exactly as "Amendment (2026-10-09,
   BE-25)" defines it. CSV upload and any other bulk intake stay out of
   scope.
+  **Corrected (2026-10-10, CITY-0), for the same reason**: one explicit
+  city import of at most 250 pasted URLs within one `market_id` is also
+  in scope, exactly as "Amendment (2026-10-10, CITY-0)" defines it. CSV
+  upload and any other bulk intake still stay out of scope.
 - Any change to `menu_snapshot_proposals`/`menu_snapshot_reviews` or
   `0011_be17_menu_snapshot_foundation.sql` — see "Hard boundary" above.
 - Any change to `BE-18`'s current fase-1 functionality.

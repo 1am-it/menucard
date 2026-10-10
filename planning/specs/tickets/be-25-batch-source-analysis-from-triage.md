@@ -88,6 +88,13 @@ and never discovers or adds targets of its own. Recorded as
 lifts the "no bulk list" exclusion for exactly this action and nothing
 else.
 
+*CITY-0 (2026-10-10):* one explicit city import may submit a fixed list
+of at most 250 pasted homepage URLs within one `market_id` (no CSV). The
+list is split into batches of at most 10 under these same claim rules;
+the processor never adds a URL, domain or target. Sources still become
+active only through a human "Bevestig bron" or "Bevestig {n} bronnen".
+See `docs/api/url-intake-schema.md`, "Amendment (2026-10-10, CITY-0)".
+
 **B2 — Durable batch binding; the BE-19 flow is unchanged.** Every
 batch result has a durable, internally reviewable binding to its batch,
 its source URL, its evidence and its original job. This is a second,
@@ -116,6 +123,7 @@ needs its own infrastructure decision.
 | Reuse of a successful result for the same canonical URL | at most 7 days |
 | Attempts per job | the existing maximum: `attempt_count` ≤ 5 (0014, `MAX_ATTEMPT_COUNT`) |
 | Automatic retry backoff | 2 minutes before the 2nd attempt, 10 before the 3rd, 30 before the 4th and 5th (no existing pattern in the repository) |
+| URLs per CITY-0 city import (one action, one `market_id`) | at most 250, split into batches of at most 10; replaces the daily limit of 25 for this action only (CITY-0, `docs/api/url-intake-schema.md`); every other limit above applies unchanged |
 
 **B5 — Visibility.** Every batch result stays visible in the batch
 history. Only results for known restaurants are shown in Bronnen
