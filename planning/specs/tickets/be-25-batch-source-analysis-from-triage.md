@@ -10,6 +10,12 @@ The final visual design (v2, 2026-10-09) and the product decisions that
 come with it are recorded in "Design v2 decisions" and "Visual
 references".
 
+Fase 1 (2026-10-10): migration `0016_be25_batch_source_analysis.sql` and
+its structural test (`src/lib/batchAnalysisMigration.test.js`) are written
+locally. It is not applied to any database, and no route, page or worker
+exists yet. The three implementation choices of fase 1 are recorded in
+"Processing, duplicates and idempotency".
+
 ## Voortgang
 
 BE-25 VOORTGANG
@@ -234,6 +240,30 @@ BE-25)". Any further relaxation needs a new amendment.
   refused. A repeated submission therefore creates the batch, its jobs
   and its daily-limit usage exactly once.
 
+Fase 1 implementation choices (2026-10-10, built in `0016`):
+
+- **One open batch per starter.** A staff member has at most one open
+  batch at a time (partial unique index on `url_intake_batches`). A new
+  "Analyse starten" while one is open is refused (`P0043`); the page
+  sends them back to the open batch. A batch closes as `completed` as
+  soon as it has no open job left.
+- **Expiry after 24 hours without activity.** A batch whose
+  `last_activity_at` (creation, claim, completion or failure) is more
+  than 24 hours old closes as `expired`; its open jobs get `expired_at`
+  and keep their status (no new status value). This is checked lazily
+  inside enqueue and claim, never by a scheduler. An expired job is shown
+  as "Fout" with "Opnieuw proberen" (a new one-URL batch), and its URL is
+  free again for any batch.
+- **Starter-only result actions in v1, also in the database.**
+  `create_url_intake_from_batch_job` accepts only the batch starter
+  (`P0044`), like claim, complete and fail. The B2 contract still allows
+  another `internal` actor as a ceiling; using it needs a later change.
+- **Further details:** a lease lasts 3 minutes; every line of a batch is
+  stored in `url_intake_batch_items` with its outcome (`queued`,
+  `recent`, `duplicate`, `already_active`, `invalid`; an invalid line
+  without its text), so "Recent geanalyseerd" stays in the batch
+  history without a new job; error codes `P0040`–`P0049`.
+
 ## Design v2 decisions (product owner, 2026-10-09)
 
 Recorded from the final design handoff
@@ -430,17 +460,23 @@ one is merged (and, for fase 1, verified live).
 - **Fase 0 — decisions and documentation** (this ticket and the
   `url-intake-schema.md` amendment). No code.
 - **Fase 1 — migration `0016` and its database release.** Additive to
-  `restaurant_source_analysis_jobs` and `url_intakes`:
-  - `lease_expires_at`, `next_attempt_at` and a normalised `source_host`
-    on jobs;
+  `url_intake_batches`, `restaurant_source_analysis_jobs` and
+  `url_intakes`, plus the new `url_intake_batch_items`:
+  - `last_activity_at`, `closed_at`, `close_reason` and `item_count` on
+    batches;
+  - `lease_expires_at`, `next_attempt_at`, `claimed_at`, `finished_at`,
+    `expired_at` and a normalised `source_host` on jobs;
   - a unique index on (`batch_id`, `canonical_source_url`) only — no
     wider index on the URL (see "Processing, duplicates and
     idempotency");
   - `issued_via_job_id` on `url_intakes`;
   - RPCs, `security invoker`, fixed `search_path`, `service_role` only:
-    enqueue a batch (atomic, idempotent on the client-generated batch
-    `id` per actor, enforcing the B4 limits and the cross-batch
-    duplicate check), `claim_next_source_analysis_job` (scoped to one
+    `enqueue_source_analysis_batch` (atomic, idempotent on the
+    client-generated batch `id` per actor, enforcing the B4 limits, one
+    open batch per starter and the cross-batch duplicate check),
+    `expire_idle_source_analysis_batches` (24-hour expiry, called lazily),
+    `complete_source_analysis_job`, `fail_source_analysis_job`,
+    `claim_next_source_analysis_job` (scoped to one
     `batch_id` and its starter, `FOR UPDATE SKIP LOCKED`, one active job
     overall, one per host, 60 s per host, `next_attempt_at`, recovery of
     expired leases), complete and fail a job (backoff 2/10/30 min within
@@ -572,11 +608,11 @@ Clarification (2026-10-10, source: BE-25 handoff v2):
   with fase 2).
 - Whether the existing single-URL status endpoint should also become
   visible to all `internal` staff (B2 requires this only for batches).
-- How a starter explicitly releases a `pending` job (and whether a
-  long-paused batch job ever expires by itself) without a new job status
-  value; to settle in the 0016 design review. Until then a URL with an
-  open job elsewhere shows "Deze URL staat al in een actieve
-  analysebatch."
+- **Closed (2026-10-10, fase 1):** releasing a waiting `pending` job. A
+  paused batch expires by itself after 24 hours without activity (see
+  "Fase 1 implementation choices"); there is no release button, dialog or
+  new status, as the design decided. Until then a URL with an open job in
+  another batch shows "Deze URL staat al in een actieve analysebatch."
 - Passing `Retry-After` from `safeOutboundFetch` into the backoff
   (optional refinement; the fixed 2/10/30 min applies without it).
 
