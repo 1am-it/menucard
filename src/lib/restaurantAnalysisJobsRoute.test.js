@@ -21,6 +21,22 @@ function readPostRouteSource() {
 function readGetRouteSource() {
   return fs.readFileSync(GET_ROUTE_PATH, 'utf8')
 }
+// BE-25 fase 2: the fetch/analysis step moved, unchanged, into one shared
+// server library used by this route and the batch processor. The safety
+// checks below that concern fetching read that library; the route must
+// delegate to it.
+const PIPELINE_PATH = path.join(REPO_ROOT, 'src/lib/sourceAnalysisPipeline.js')
+function readPipelineSource() {
+  return fs.readFileSync(PIPELINE_PATH, 'utf8')
+}
+
+test('structural safety net: the POST route delegates the whole fetch/analysis step to the shared pipeline, and fetches nothing itself', () => {
+  const source = readPostRouteSource()
+  assert.match(source, /import \{ analyzeSourceUrl \} from ['"]@\/src\/lib\/sourceAnalysisPipeline['"]/)
+  assert.match(source, /const outcome = await analyzeSourceUrl\(sourceUrl\.href\)/)
+  assert.match(source, /respondFailed\(jobId, \['running'\], outcome\.errorReason, outcome\.message, outcome\.httpStatus\)/)
+  assert.doesNotMatch(source, /fetchWebsiteSafely|fetchSameSiteWithRedirects|checkRobotsForUrl/)
+})
 
 // ─── POST /api/internal/v1/restaurant-analysis-jobs ────────────────────────
 
@@ -32,32 +48,34 @@ test('structural safety net: the restaurant-analysis-jobs POST route authenticat
 });
 
 test('structural safety net: only ever fetches via safeOutboundFetch — no second HTTP client, no bare fetch() to an arbitrary URL', () => {
-  const source = readPostRouteSource()
-  assert.match(source, /import \{ fetchWebsiteSafely \} from ['"]@\/src\/lib\/safeOutboundFetch['"]/)
+  const source = readPipelineSource()
+  assert.match(source, /const \{ fetchWebsiteSafely \} = require\(['"]\.\/safeOutboundFetch['"]\)/)
   assert.doesNotMatch(source, /require\(['"]node:https?['"]\)/)
   assert.doesNotMatch(source, /axios/)
+  assert.doesNotMatch(source, /[^.\w]fetch\(/)
+  assert.doesNotMatch(readPostRouteSource(), /require\(['"]node:https?['"]\)|axios/)
 })
 
 test('structural safety net: every non-robots.txt fetch uses encoding: "buffer" — the entry/candidate content may be a PDF, never assumed to be text', () => {
-  const source = readPostRouteSource()
+  const source = readPipelineSource()
   const bufferFetchCount = (source.match(/encoding: 'buffer'/g) || []).length
   assert.ok(bufferFetchCount >= 2, 'expected at least the entry fetch and the candidate fetch to both request encoding: "buffer"')
 })
 
 test('structural safety net: the entry URL is gated by the BE-20 robots.txt gate before the page itself is ever fetched, and a block names its real reason', () => {
-  const source = readPostRouteSource()
+  const source = readPipelineSource()
   assert.match(source, /checkRobotsForUrl\(url, \{ fetchImpl: fetchWebsiteSafely \}\)/)
-  const gateIndex = source.indexOf('const robotsGate = await robotsGateFor(sourceUrl.href)')
-  const entryFetchIndex = source.indexOf('await fetchSameSiteWithRedirects(sourceUrl.href')
+  const gateIndex = source.indexOf('const robotsGate = await robotsGateFor(sourceUrlHref)')
+  const entryFetchIndex = source.indexOf('await fetchSameSiteWithRedirects(sourceUrlHref')
   assert.ok(gateIndex !== -1 && entryFetchIndex !== -1 && gateIndex < entryFetchIndex, 'robots.txt must be checked before the entry fetch')
   assert.match(source, /robotsGate\.shouldFetchPage/)
-  assert.match(source, /'robots_disallowed', describeRobotsBlock\(robotsGate\)/)
+  assert.match(source, /failure\('robots_disallowed', describeRobotsBlock\(robotsGate\)/)
   assert.doesNotMatch(source, /classifyRobotsGate/, 'the shared gate stays in use by BE-18/MARKET-05A only')
 })
 
 test('structural safety net: every entry and candidate fetch follows redirects only through fetchSameSiteWithRedirects, with fetchWebsiteSafely as the only egress and robots.txt re-checked per hop', () => {
-  const source = readPostRouteSource()
-  const calls = source.match(/await fetchSameSiteWithRedirects\([\s\S]*?\}\)\r?\n/g) || []
+  const source = readPipelineSource()
+  const calls = source.match(/await fetchSameSiteWithRedirects\([\s\S]*?\}\);?\r?\n/g) || []
   assert.equal(calls.length, 2, 'expected exactly the entry fetch and the candidate fetch')
   for (const call of calls) {
     assert.match(call, /fetchImpl: fetchWebsiteSafely/)
@@ -66,12 +84,13 @@ test('structural safety net: every entry and candidate fetch follows redirects o
   }
   assert.doesNotMatch(source, /maxRedirects:\s*[1-9]/, "the route never raises safeOutboundFetch's own redirect limit directly")
   assert.doesNotMatch(source, /fetchWebsiteSafely\(sourceUrl/, 'no direct entry fetch bypassing the redirect policy')
+  assert.doesNotMatch(readPostRouteSource(), /fetchSameSiteWithRedirects|fetchWebsiteSafely/, 'the route itself never fetches')
 })
 
 test('structural safety net: the receipt stays bound to the URL the reviewer entered — a followed redirect never changes the BE-19 url-intake binding', () => {
   const source = readPostRouteSource()
   assert.match(source, /const canonical = canonicalizeSourceUrl\(sourceUrl\.href\)/)
-  assert.match(source, /analysis\.notes = \[\.\.\.redirectNotes, \.\.\.analysis\.notes\]/)
+  assert.match(readPipelineSource(), /analysis\.notes = \[\.\.\.redirectNotes, \.\.\.analysis\.notes\]/)
 })
 
 test('structural safety net: never accepts a restaurant field, match type, or analysis hash from the client body — only body.url is ever read', () => {
@@ -112,7 +131,10 @@ test('structural safety net: a succeeded job transition always sets result_recei
 
 test('structural safety net: every respondFailed call site passes one of the closed job-level error reasons — never a bare status without one', () => {
   const source = readPostRouteSource()
-  const failedCallSites = [...source.matchAll(/respondFailed\(jobId, \[[^\]]*\], '([^']+)'/g)].map((m) => m[1])
+  const failedCallSites = [
+    ...[...source.matchAll(/respondFailed\(jobId, \[[^\]]*\], '([^']+)'/g)].map((m) => m[1]),
+    ...[...readPipelineSource().matchAll(/failure\('([^']+)'/g)].map((m) => m[1]),
+  ]
   assert.ok(failedCallSites.length >= 5, 'expected multiple distinct failure call sites')
   const closedErrorReasons = [
     'unsafe_url', 'robots_disallowed', 'unsupported_content_type', 'fetch_failed',
@@ -128,7 +150,7 @@ test('structural safety net: every job-status transition is validated through th
   const source = readPostRouteSource()
   assert.match(
     source,
-    /import \{\s*isValidJobStatus,\s*isValidJobErrorReason,\s*canTransitionJobStatus,\s*rollUpPdfAdapterErrorReason,?\s*\} from ['"]@\/src\/lib\/restaurantSourceAnalysisJobs['"]/
+    /import \{\s*isValidJobStatus,\s*isValidJobErrorReason,\s*canTransitionJobStatus,?\s*\} from ['"]@\/src\/lib\/restaurantSourceAnalysisJobs['"]/
   )
   assert.match(source, /isValidJobStatus\(toStatus\)/)
   assert.match(source, /canTransitionJobStatus\(fromStatus, toStatus\)/)
@@ -177,14 +199,15 @@ test('structural safety net: the entire running-phase of the analysis is wrapped
 })
 
 test('structural safety net: the entry-URL-is-PDF path never re-throws a non-PdfExtractionError — every failure there rolls up to a closed reason', () => {
-  const source = readPostRouteSource()
+  const source = readPipelineSource()
   assert.doesNotMatch(source, /if \(!\(err instanceof PdfExtractionError\)\) throw err/)
 })
 
 test('structural safety net: no raw PDF text excerpt is ever assembled into the entry-URL-is-PDF result — delegates to the shared, already-tested buildUnknownMenuContext helper, never a second inline copy', () => {
-  const source = readPostRouteSource()
+  const source = readPipelineSource()
   assert.doesNotMatch(source, /textPreview/)
-  assert.doesNotMatch(source, /pdfResult\.text/) // no direct raw-text access left in this route at all
+  assert.doesNotMatch(source, /pdfResult\.text/) // no direct raw-text access at all
+  assert.doesNotMatch(readPostRouteSource(), /textPreview|pdfResult\.text/)
   assert.match(source, /await buildUnknownMenuContext\(fetchResult\.bytes, fetchResult\.finalUrl\)/)
 })
 
@@ -196,7 +219,7 @@ test('structural safety net: buildUnknownMenuContext itself (src/lib/restaurantS
 })
 
 test('structural safety net: a PDF closed error is rolled up via rollUpPdfAdapterErrorReason, never passed through as a raw adapter reason', () => {
-  const source = readPostRouteSource()
+  const source = readPipelineSource()
   assert.match(source, /rollUpPdfAdapterErrorReason\(err\.reason\)/)
 })
 

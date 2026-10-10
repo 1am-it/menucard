@@ -45,7 +45,7 @@ import {
   effectiveFilter,
 } from '@/src/lib/sourceTriage'
 
-const LOAD_ERROR = 'De brontriage kon niet worden geladen.'
+const LOAD_ERROR = 'Bronnen beoordelen kon niet worden geladen.'
 
 const BANNER_CLASS = { success: 'di-banner-info', notice: 'di-banner-neutral', error: 'di-banner-danger' }
 
@@ -634,7 +634,13 @@ export default function SourceTriagePage() {
         <InternalNav accessToken={session.access_token} />
 
         <div className="stg-header">
-          <h1 className="di-title">Brontriage</h1>
+          <div className="stg-title-row">
+            <h1 className="di-title">Bronnen beoordelen</h1>
+            <a className="stg-btn-secondary stg-batch-link" href="/internal/source-triage/batch">
+              <span className="stg-batch-link-label">Batchanalyse</span>
+              <span className="stg-batch-link-sub">Meerdere URL&apos;s tegelijk</span>
+            </a>
+          </div>
           <p className="stg-subtitle">
             <span>{(data && data.city) || 'Breda'}</span>
             <span aria-hidden="true"> · </span>
