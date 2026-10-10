@@ -2828,6 +2828,7 @@ mark.search-highlight {
 .bta-facts > div { display: grid; gap: 2px; grid-template-columns: minmax(0, 1fr); }
 .bta-facts dt { font-size: 12px; font-weight: 700; color: var(--text-secondary); }
 .bta-facts dd { margin: 0; min-width: 0; }
+.bta-notes { margin: 0; padding: 8px 10px 8px 26px; display: grid; gap: 4px; border-radius: var(--radius-md); background: var(--bg-elevated); font-size: 13px; color: var(--text-primary); overflow-wrap: anywhere; }
 .bta-confirm { display: grid; gap: 8px; padding: 12px; border: 1px solid var(--accent); border-radius: var(--radius-md); background: var(--accent-surface); }
 .bta-confirm-title { margin: 0; font-size: 14px; font-weight: 700; color: var(--text-primary); }
 .bta-actions { display: flex; flex-wrap: wrap; gap: 8px; }
