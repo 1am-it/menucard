@@ -287,11 +287,30 @@ needs its own reviewed implementation step.
 - **The input list is fixed.** The processor only works on the URLs of
   that one list. It never adds a URL, a domain or any other target of
   its own: no follow-up list, no discovered restaurant, no crawl.
-- **Processed as BE-25 batches.** The list is split internally into
-  batches of at most 10 URLs. Each batch follows the existing BE-25
-  claim rules unchanged: only the starter claims its jobs, from their
-  own open page; the cross-batch duplicate check and the 7-day reuse
-  rule apply.
+- **Processed as fixed, sequential BE-25 batches.** The original human
+  city import action records one fixed list of at most 250 URLs, divided
+  at that moment into fixed sub-batches of at most 10 URLs each. Each
+  sub-batch follows the existing BE-25 claim rules unchanged: only the
+  starter claims its jobs, from their own open page; the cross-batch
+  duplicate check and the 7-day reuse rule apply.
+- **One open sub-batch at a time.** For the same starter and the same
+  city import there is never more than one open sub-batch at a time,
+  consistent with BE-25's "one open batch per starter". Once a sub-batch
+  is terminal (it has no open job left), the page-bound city import
+  coordinator — running only while the starter's page is open — may
+  create exactly **the next fixed sub-batch from that original list**,
+  and nothing else.
+- **The only exception to "no follow-up batch".** Creating that next
+  fixed sub-batch is the only CITY-0 exception to the BE-25 amendment's
+  rule that the processor never creates a follow-up batch. It never
+  allows parallel batches, new input, changed targets, an additional
+  city import, background processing or an automatic follow-up import.
+  Ordinary BE-25 actions keep, unchanged, at most one open batch per
+  starter and at most 10 URLs per action.
+- **Failures stay exceptions.** A failed or blocked URL stays a result
+  for a human, exactly as in BE-25; it does not stop the import. The
+  remaining fixed sub-batches may continue under these CITY-0 rules for
+  as long as the starter's page is open.
 - **Its own campaign limit.** For this one action, the limit of 250 URLs
   takes the place of the ordinary limit of 25 URLs per staff member per
   day; the city import's URLs do not count towards those 25, and the 25
