@@ -75,7 +75,7 @@ test('hasAnyKnownRole: true for any of internal/editor/owner, false for zero row
 
 // ─── resolveVisibleModules — the route/role matrix, enforced in code ───
 
-test('resolveVisibleModules: an internal-only account sees exactly Dekkingsoverzicht, Onboarding Restaurant, Beheer, Nieuwe aanleveringen, Bronwerkvoorraad, Brontriage, and Profielconcepten — not Beoordelen (editor-only)', () => {
+test('resolveVisibleModules: an internal-only account sees exactly Dekkingsoverzicht, Onboarding Restaurant, Beheer, Nieuwe aanleveringen, Bronwerkvoorraad, Bronnen beoordelen, and Profielconcepten — not Beoordelen (editor-only)', () => {
   const modules = resolveVisibleModules([{ role: 'internal' }]);
   const ids = modules.map((m) => m.id);
   assert.deepEqual(ids.sort(), ['coverage', 'import-inbox', 'manage', 'onboarding-restaurant', 'profile-drafts', 'source-triage', 'source-workqueue']);
@@ -292,7 +292,11 @@ test('structural safety net: Werkvoorraad closes on every route change, so a cli
 
 test('structural safety net: every workqueue item marks the active route with aria-current, matching the existing primary-link pattern exactly', () => {
   const source = fs.readFileSync(NAV_COMPONENT_PATH, 'utf8');
-  assert.match(source, /className="internal-nav-workqueue-item"[\s\S]{0,120}aria-current=\{pathname === m\.href \? 'page' : undefined\}/);
+  // BE-25: a subpage (Bronnen beoordelen / Batchanalyse) keeps its parent
+  // item current; primary links and workqueue items share one helper.
+  assert.match(source, /className="internal-nav-workqueue-item"[\s\S]{0,120}aria-current=\{isCurrent\(pathname, m\.href\) \? 'page' : undefined\}/);
+  assert.match(source, /className="internal-nav-link"[\s\S]{0,60}aria-current=\{isCurrent\(pathname, m\.href\) \? 'page' : undefined\}/);
+  assert.match(source, /return pathname === href \|\| \(typeof pathname === 'string' && pathname\.startsWith\(`\$\{href\}\/`\)\)/);
 });
 
 test('structural safety net: no photo, illustration, or new image asset — the wordmark and workqueue icons are inline SVG only', () => {
@@ -406,9 +410,9 @@ test('structural safety net: the theme contract stays as decided — explicit Li
 
 // ─── BE-24 Brontriage ──────────────────────────────────────────────────
 
-test('BE-24: Brontriage is one internal-only Werkvoorraad entry right after Bronwerkvoorraad, without a count', () => {
+test('BE-24/BE-25: Bronnen beoordelen (formerly shown as Brontriage) is one internal-only Werkvoorraad entry right after Bronwerkvoorraad, without a count', () => {
   const entry = INTERNAL_MODULES.find((m) => m.id === 'source-triage');
-  assert.deepEqual(entry, { id: 'source-triage', label: 'Brontriage', href: '/internal/source-triage', requiredRole: 'internal', placement: 'workqueue', subtitle: 'Bronvoorstellen vastleggen en beoordelen' });
+  assert.deepEqual(entry, { id: 'source-triage', label: 'Bronnen beoordelen', href: '/internal/source-triage', requiredRole: 'internal', placement: 'workqueue', subtitle: 'Bronvoorstellen vastleggen en beoordelen' });
   const ids = INTERNAL_MODULES.map((m) => m.id);
   assert.equal(ids.indexOf('source-triage'), ids.indexOf('source-workqueue') + 1);
   assert.equal(ids.filter((id) => id === 'source-triage').length, 1);

@@ -25,8 +25,8 @@ const PROPOSAL_LIMIT = 1000;
 const PROPOSAL_COLUMNS =
   'id, restaurant_id, kind, proposed_url, current_url, unusable_reason, note, status, proposed_by, proposed_at, decided_by, decided_at, decision_note, source_triage_proposal_events(event, actor_user_id, note, created_at)';
 
-const LOAD_ERROR = 'De brontriage kon niet worden geladen.';
-const FORBIDDEN = 'Alleen interne medewerkers kunnen de brontriage gebruiken.';
+const LOAD_ERROR = 'Bronnen beoordelen kon niet worden geladen.';
+const FORBIDDEN = 'Alleen interne medewerkers kunnen bronnen beoordelen.';
 
 function reply(status, body) {
   return { status, body };

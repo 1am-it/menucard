@@ -123,6 +123,14 @@ export default function OnboardingRestaurantPage() {
     })
   }, [router])
 
+  // "Naar Onboarding Restaurant" from Batchanalyse (BE-25) passes the URL as
+  // ?url=…: it only prefills the field. Nothing starts until the staff
+  // member chooses to analyse.
+  useEffect(() => {
+    const value = new URLSearchParams(window.location.search).get('url')
+    if (value && /^https?:\/\//i.test(value) && value.length <= 2048) setSourceUrlInput(value)
+  }, [])
+
   useEffect(() => {
     if (!session) return
     fetch('/api/internal/v1/me', { headers: { Authorization: `Bearer ${session.access_token}` } })

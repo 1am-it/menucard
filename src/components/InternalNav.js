@@ -89,6 +89,13 @@ const WORKQUEUE_ICONS = {
   ),
 }
 
+// The current destination: the page itself or one of its subpages (e.g.
+// Bronnen beoordelen / Batchanalyse), so orientation stays on the parent
+// item (decision 014).
+function isCurrent(pathname, href) {
+  return pathname === href || (typeof pathname === 'string' && pathname.startsWith(`${href}/`))
+}
+
 export default function InternalNav({ accessToken, roles: rolesProp }) {
   const pathname = usePathname()
   const router = useRouter()
@@ -178,7 +185,7 @@ export default function InternalNav({ accessToken, roles: rolesProp }) {
           key={m.id}
           href={m.href}
           className="internal-nav-link"
-          aria-current={pathname === m.href ? 'page' : undefined}
+          aria-current={isCurrent(pathname, m.href) ? 'page' : undefined}
         >
           {m.label}
         </a>
@@ -197,7 +204,7 @@ export default function InternalNav({ accessToken, roles: rolesProp }) {
                 href={m.href}
                 role="menuitem"
                 className="internal-nav-workqueue-item"
-                aria-current={pathname === m.href ? 'page' : undefined}
+                aria-current={isCurrent(pathname, m.href) ? 'page' : undefined}
               >
                 <span className="internal-nav-workqueue-item-icon">{WORKQUEUE_ICONS[m.id]}</span>
                 <span className="internal-nav-workqueue-item-text">
