@@ -117,6 +117,32 @@ Options for whoever implements the backfill, none chosen:
   value in whatever a page/API already returns for that field — a page must
   never issue a separate query per field just to learn its provenance.
 
+## Amendment (2026-10-10, decision 016): website-derived basic data and menus
+
+`planning/decisions/016-publication-path.md` adds a path from an
+activated website source to published data. For that path:
+
+- **Fields.** The v1 `basic_info` fields from
+  `docs/api/source-registry-schema.md` (name, visiting address, general
+  phone, website URL, reservation link) gain the per-field provenance
+  shape above, in addition to the initial five. Opening hours keep their
+  existing place in the initial set but are not filled from a website
+  source in v1.
+- **Business data follows the existing `pending_changes` direction**
+  (0002): a website-derived value is proposed with `source: imported`
+  (it came from an automated read) plus a reference to its analysis job,
+  source URL and content hash. Publishing it is an explicit `internal`
+  staff confirmation and records `source: editor` with `verifiedAt` and
+  `verifiedBy` set — the editor path this contract already requires; it
+  is never a silent upgrade. Extending the `pending_changes`/
+  `field_provenance` field lists is a BE-27 migration, not done here.
+- **Menus follow the existing BE-17 snapshot direction** (0011): a menu
+  is one versioned snapshot proposal with a `content_hash`; trust is
+  recorded per version, not per dish, in v1.
+- **Conflicts never downgrade trust.** A website value that differs from
+  an `owner`- or `editor`-verified value is a blocker for a human, never
+  an automatic overwrite.
+
 ## Out of scope for this contract
 
 - The actual persistence/storage mechanism (`PLATFORM-04`).

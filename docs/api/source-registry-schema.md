@@ -115,6 +115,24 @@ any data a restaurant owner wants to add or correct themselves — see
 `PLATFORM-07`'s existing claim flow, which this principle extends rather
 than replaces.
 
+### Amendment (2026-10-10, decision 016): `basic_info` from a restaurant's own website, v1
+
+`planning/decisions/016-publication-path.md` lets data from an activated
+website source (BE-26) become a concept and, after a human action, be
+published (BE-27). For that path, v1 narrows `basic_info` further; it
+does not widen it:
+
+- **Publishable in v1:** restaurant name, visiting address, general
+  business phone number, website URL and reservation link.
+- **Not in v1:** opening hours (not part of `basic_info` above, and not
+  extracted from a website source in v1), a general business contact
+  address, and the category/type tag.
+- **A reservation page** is recorded at most as the reservation link; it
+  is never read for further data.
+- The exclusions above (natural persons, personal numbers and
+  addresses, likely home addresses) apply unchanged. A value that may be
+  personal data is a blocker in BE-27, never published.
+
 ### `geospatial_reference_data` (added 2026-09-05)
 
 A second, deliberately separate data category for administrative/

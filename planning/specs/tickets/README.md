@@ -240,6 +240,19 @@ of these.
     for high-certainty results only, read-only colleagues. Next: migration
     `0016` as its own release, then routes and page, then an optional
     background worker after a separate infrastructure decision.
+28. [be-26-source-activation.md](./be-26-source-activation.md) —
+    documented 2026-10-10, nothing built (decision 016): a confirmed
+    source with a stored analysis result becomes the restaurant's active
+    source per kind (`menukaart`, `bedrijfsgegevens`, `aanvullend`) with
+    evidence, hash, time and audit trail; no fetch and no public change.
+    After BE-25 fase 1 and 2.
+29. [be-27-concepts-menu-completeness-and-publication.md](./be-27-concepts-menu-completeness-and-publication.md) —
+    documented 2026-10-10, nothing built (decision 016): concepts from an
+    active source (`pending_changes` for business data, BE-17 snapshots
+    for menus), attention points and blockers only by default, identical
+    rejected content never re-raised, business data published per field
+    with one human action, a menu only as one complete version, through a
+    reviewed export pull request with rollback. After BE-26.
 
 ## PLATFORM-* order (not started)
 

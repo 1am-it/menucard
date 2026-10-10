@@ -339,7 +339,9 @@ recorded below.
 
 1. Applying an accepted proposal to the published restaurant data (an
    explicit, reviewed data change), and optionally starting a Broncontrole
-   for an accepted URL by hand.
+   for an accepted URL by hand. Documented 2026-10-10 under decision 016
+   as BE-26 (source activation, no public change) and BE-27 (concepts and
+   publication); not built.
 2. A second-person rule for decisions, if the product owner wants it.
 3. Public URL submissions and photos (PLATFORM-08B direction): moderation,
    abuse limits, privacy review, storage and retention decisions first.
