@@ -543,8 +543,10 @@ Fase 2:
 
 Clarification (2026-10-10, source: BE-25 handoff v2):
 
-- **B5:** decided: a result without high certainty gets the human next
-  step "Beoordeel handmatig"; no automatic retry.
+- **B5:** decided: A successful result without high certainty
+  (`Controle nodig`, `Robots geblokkeerd`, or `Geen bruikbare menukaart
+  gevonden`) gets `Beoordeel handmatig`; such a result is never retried
+  automatically.
 - **Bevestig bron:** decided: it records an accepted BE-24 source
   proposal, without automatic publication or any change to the
   restaurant. Open for `0016`: the proposal kind, one or two RPCs, and
