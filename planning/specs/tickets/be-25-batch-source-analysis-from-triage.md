@@ -516,7 +516,11 @@ one is merged (and, for fase 1, verified live).
 ## Non-goals
 
 AI/OCR or any vendor call; browser rendering; CSV upload; more than 10
-URLs per action; any crawl or target discovery beyond BE-20; automatic
+URLs per ordinary BE-25 action (the only exception is one CITY-0 city
+import: at most 250 fixed, pasted restaurant homepage URLs within one
+`market_id`, with no automatic extension of the list and no automatic
+follow-up import, per `docs/api/url-intake-schema.md`, "Amendment
+(2026-10-10, CITY-0)"); any crawl or target discovery beyond BE-20; automatic
 publication; automatic proposals or decisions in Bronnen beoordelen;
 automatic confirmation of any source (single or bulk); any change to
 restaurant data by "Bevestig bron"; owner or editor access to batches;
