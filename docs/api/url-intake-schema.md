@@ -266,6 +266,36 @@ its job issued. Precisely:
 - OCR, browser rendering, any external AI call and CSV upload stay
   excluded, exactly as listed in the BE-20 amendment above.
 
+### Amendment (2026-10-10, decision 016): candidate kinds for source discovery
+
+**This amendment changes only which same-host links the BE-20
+discovery step may pick, and how each candidate is labelled.** It
+follows `planning/decisions/016-publication-path.md`. Every other bound
+of the exception and of the BE-20 and BE-25 amendments stays exactly as
+it is.
+
+- **Kinds.** Besides menu links (`MENU_KEYWORDS`), the discovery step
+  may also pick same-host links that point to business information
+  (contact, address, reservation or "about" pages) or to an additional
+  relevant page. Each candidate gets exactly one kind: `menukaart`,
+  `bedrijfsgegevens` or `aanvullend`. The keyword lists stay fixed and
+  closed, in code, as `MENU_KEYWORDS` is today.
+- **Bounds, unchanged or stricter:** the same host as the entry URL only
+  (no subdomains, no other domain, no external source such as a business
+  register or a map service), exactly one link step from the entry page,
+  at most five candidates in total across all kinds, the same
+  `robots.txt`, `safeOutboundFetch` and redirect gates, digital PDFs
+  only, no OCR, no AI and no crawl.
+- **Data minimisation.** A `bedrijfsgegevens` candidate may yield only
+  the `basic_info` fields listed for v1 in
+  `docs/api/source-registry-schema.md` ("Amendment (2026-10-10, decision
+  016)"). Opening hours are not extracted in v1. A reservation page is
+  recorded only as a source link, never read for further data.
+- **Downstream, unchanged:** a candidate is a reviewable result. It
+  becomes an active source only through a human confirmation (BE-24,
+  BE-25, BE-26) and reaches public data only through decision 016's
+  publication path. Nothing publishes automatically.
+
 ## `url_intakes` — audit/traceability record, not a review queue
 
 **One row per confirmed human action on an analyzed URL — never one row
