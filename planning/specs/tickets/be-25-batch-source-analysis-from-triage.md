@@ -243,7 +243,7 @@ Where the handoff and this ticket differ, this ticket wins.
 - **Visible terminology.** The visible name of the BE-24 page
   `Brontriage` becomes **`Bronnen beoordelen`**. The batch page is called
   `Batchanalyse` and lives under it: breadcrumb `Werkvoorraad / Bronnen
-  beoordelen / Batchanalyse` (mobile: back link `Bronnen beoordelen /
+  beoordelen / Batchanalyse` (mobile: `← Bronnen beoordelen /
   Batchanalyse`). The page keeps one fixed heading and breadcrumb; only
   its state changes (decision 014). Existing technical route and
   identifier names stay unchanged for now (`/internal/source-triage`,
@@ -374,10 +374,10 @@ database), always icon plus text with a Kleurtaal v2 status role:
 | Controle nodig | `succeeded`, a menu candidate without a recognised structure, or a doubtful match (see "Where results go") | old (as BE-23 "Structuur niet herkend") |
 | Geen bruikbare menukaart gevonden | `succeeded` without a menu candidate, or `no_reliable_content_found` | neutral |
 | Recent geanalyseerd | an existing result of at most 7 days, not fetched again | neutral |
-| Robots geblokkeerd | `robots_disallowed` | blocked (a `robots.txt` block on a read, as design-reference "Robots geblokkeerd") |
+| Robots geblokkeerd | `robots_disallowed` | blocked, lock icon (a `robots.txt` block on a read, as design-reference "Robots geblokkeerd") |
 | Ongeldige URL | rejected by validation, or `unsafe_url` | blocked |
 | Fout | any other terminal failure after the last attempt | blocked |
-| Bron bevestigd | an accepted BE-24 proposal created by "Bevestig bron" for this result | positive |
+| Bron bevestigd | an accepted BE-24 proposal created by "Bevestig bron" for this result | positive, check-circle icon |
 
 "Menukaart gevonden" is never shown without "controle nodig": a found
 menu is a reviewable result, not an accepted one. Only a human's
@@ -540,6 +540,18 @@ Fase 2:
 - [ ] No new dependency; `0016` is live before the fase 2 PR is merged.
 
 ## Open points (not blocking fase 1)
+
+Clarification (2026-10-10, source: BE-25 handoff v2):
+
+- **B5:** decided: a result without high certainty gets the human next
+  step "Beoordeel handmatig"; no automatic retry.
+- **Bevestig bron:** decided: it records an accepted BE-24 source
+  proposal, without automatic publication or any change to the
+  restaurant. Open for `0016`: the proposal kind, one or two RPCs, and
+  provenance to the analysis job.
+- **Bulk confirmation:** decided: it runs the same checks per result as
+  an individual confirmation. Open for `0016`: per-result outcome or
+  all-or-nothing on a partial failure.
 
 - How "Bevestig bron" is stored technically, for the 0016 or fase 2
   design: which BE-24 `kind` it uses (`add_candidate` for the found

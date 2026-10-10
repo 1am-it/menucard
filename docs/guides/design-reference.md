@@ -347,8 +347,9 @@ BE-25 Batchanalyse mapping (decided 2026-10-09, not built; BE-25
 "Status vocabulary and copy"): In wachtrij, Bezig, Geen bruikbare
 menukaart gevonden, Recent geanalyseerd and the colleague banner →
 neutral; Menukaart gevonden · controle nodig → file; Controle nodig →
-old; Robots geblokkeerd (a `robots.txt` block on a read), Ongeldige
-URL, Fout → blocked; Bron bevestigd → positive. BE-25 does not use the
+old; Robots geblokkeerd (a `robots.txt` block on a read; lock icon),
+Ongeldige URL, Fout → blocked; Bron bevestigd → positive (check-circle
+icon). BE-25 does not use the
 BE-23 source state "Toegang beperkt" (old), which is unchanged.
 
 Other internal screens (`src/lib/statusRoles.js`; conservative until the
@@ -455,7 +456,8 @@ Sources:
   "Design v2 decisions"; not built yet). The visible label `Brontriage`
   becomes `Bronnen beoordelen`. BE-25's `Batchanalyse` page lives under
   it, with the breadcrumb `Werkvoorraad / Bronnen beoordelen /
-  Batchanalyse`. Routes and technical identifiers stay unchanged for now
+  Batchanalyse` (mobile: `← Bronnen beoordelen / Batchanalyse`). Routes
+  and technical identifiers stay unchanged for now
   (`/internal/source-triage`, `source_triage_*`, `sourceTriage*`). Until
   the label in `src/lib/internalNav.js` changes, the live navigation
   keeps showing `Brontriage` ("Implemented today" above).
