@@ -32,7 +32,10 @@ data, without a live database read for consumers.
    for v1 only and does not change decision 011.
 2. **Four separate steps, never merged:**
    - *Find* — BE-20/BE-25 analysis, bounded as in
-     `docs/api/url-intake-schema.md`.
+     `docs/api/url-intake-schema.md`: the same host only, one link step,
+     at most five candidates labelled `menukaart`, `bedrijfsgegevens` or
+     `aanvullend`; no subdomains, external sources, OCR or AI. BE-25
+     stays the basis for batch analysis and its migration `0016`.
    - *Activate* — a human confirms a source (an accepted BE-24 proposal)
      and it becomes the restaurant's active source of one kind. No public
      data changes (BE-26).
