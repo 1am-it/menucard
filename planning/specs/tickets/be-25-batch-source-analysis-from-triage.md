@@ -88,6 +88,22 @@ and never discovers or adds targets of its own. Recorded as
 lifts the "no bulk list" exclusion for exactly this action and nothing
 else.
 
+*CITY-0 (2026-10-10):* one explicit city import may submit a fixed list
+of at most 250 pasted homepage URLs within one `market_id` (no CSV). The
+original action divides that list into fixed sub-batches of at most 10,
+processed one at a time under these same claim rules: for the same
+starter and city import there is never more than one open sub-batch.
+Once a sub-batch is terminal, the page-bound coordinator may create only
+the next fixed sub-batch from that original list — the only CITY-0
+exception to "no follow-up batch". It never allows parallel batches, new
+input, changed targets, an additional city import, background processing
+or an automatic follow-up import; a failed or blocked URL stays a result
+for a human and does not stop the remaining sub-batches while the
+starter's page is open. Ordinary BE-25 actions keep at most one open
+batch per starter and at most 10 URLs. Sources still become
+active only through a human "Bevestig bron" or "Bevestig {n} bronnen".
+See `docs/api/url-intake-schema.md`, "Amendment (2026-10-10, CITY-0)".
+
 **B2 — Durable batch binding; the BE-19 flow is unchanged.** Every
 batch result has a durable, internally reviewable binding to its batch,
 its source URL, its evidence and its original job. This is a second,
@@ -116,6 +132,7 @@ needs its own infrastructure decision.
 | Reuse of a successful result for the same canonical URL | at most 7 days |
 | Attempts per job | the existing maximum: `attempt_count` ≤ 5 (0014, `MAX_ATTEMPT_COUNT`) |
 | Automatic retry backoff | 2 minutes before the 2nd attempt, 10 before the 3rd, 30 before the 4th and 5th (no existing pattern in the repository) |
+| URLs per CITY-0 city import (one action, one `market_id`) | at most 250, split by the original action into fixed sub-batches of at most 10, at most one open at a time; replaces the daily limit of 25 for this action only (CITY-0, `docs/api/url-intake-schema.md`); every other limit above applies unchanged |
 
 **B5 — Visibility.** Every batch result stays visible in the batch
 history. Only results for known restaurants are shown in Bronnen
@@ -508,7 +525,11 @@ one is merged (and, for fase 1, verified live).
 ## Non-goals
 
 AI/OCR or any vendor call; browser rendering; CSV upload; more than 10
-URLs per action; any crawl or target discovery beyond BE-20; automatic
+URLs per ordinary BE-25 action (the only exception is one CITY-0 city
+import: at most 250 fixed, pasted restaurant homepage URLs within one
+`market_id`, with no automatic extension of the list and no automatic
+follow-up import, per `docs/api/url-intake-schema.md`, "Amendment
+(2026-10-10, CITY-0)"); any crawl or target discovery beyond BE-20; automatic
 publication; automatic proposals or decisions in Bronnen beoordelen;
 automatic confirmation of any source (single or bulk); any change to
 restaurant data by "Bevestig bron"; owner or editor access to batches;
