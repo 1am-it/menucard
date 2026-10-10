@@ -292,6 +292,14 @@ function ResultCard({ item, isStarter, batchOpen, ownOpenBatchId, confirming, se
         </dl>
       )}
 
+      {details && item.notes.length > 0 && (
+        <ul className="bta-notes" aria-label="Analysedetails">
+          {item.notes.map((note) => (
+            <li key={note}>{note}</li>
+          ))}
+        </ul>
+      )}
+
       {open && (
         <div className="bta-confirm" role="group" aria-labelledby={`bta-confirm-${item.jobId}`}>
           <p id={`bta-confirm-${item.jobId}`} className="bta-confirm-title">
@@ -315,7 +323,7 @@ function ResultCard({ item, isStarter, batchOpen, ownOpenBatchId, confirming, se
       {!open && (
         <div className="bta-actions">
           {actions.map((a, i) => actionButton(a, i === 0))}
-          {(item.foundUrl || item.restaurant) && (
+          {(item.foundUrl || item.restaurant || item.notes.length > 0) && (
             <button type="button" className="stg-btn-secondary bta-btn" aria-expanded={details} onClick={() => setDetails((d) => !d)}>
               Details bekijken
             </button>

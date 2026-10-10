@@ -220,10 +220,21 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
 
     if (fetched.status === 'html') {
       const existingSlugs = new Set(menuContexts.map((m) => m.contextSlug))
-      for (const menu of extractMenusFromHtml(fetched.body)) {
+      const candidateMenus = extractMenusFromHtml(fetched.body)
+      for (const menu of candidateMenus) {
         if (existingSlugs.has(menu.contextSlug)) continue
         menuContexts.push({ ...menu, extractionMethod: 'html', sourceUrl: fetched.finalUrl || candidate.url })
         existingSlugs.add(menu.contextSlug)
+      }
+      if (candidateMenus.length === 0) {
+        // The page a menu link pointed to was read, but holds no menu this
+        // pipeline reads automatically (JSON-LD only; visible-HTML menus are
+        // BE-22's offline benchmark, not production). Name the page for the
+        // human reviewer — never a claim that no menu exists, never a
+        // guessed menu.
+        notes.push(
+          `Mogelijke menupagina gelezen: ${fetched.finalUrl || candidate.url} (link "${String(candidate.matchedOn || '').slice(0, 60)}"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.`
+        )
       }
       const candidateFieldEvidence = extractRestaurantFieldsWithEvidence(fetched.body)
       for (const fieldName of ALLOWED_FIELD_NAMES) {

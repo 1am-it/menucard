@@ -33,7 +33,7 @@ const LOAD_ERROR = 'De batchanalyse kon niet worden geladen.';
 const RECENT_BATCH_LIMIT = 10;
 const BATCH_COLUMNS = 'id, actor_user_id, created_at, last_activity_at, closed_at, close_reason, item_count';
 const JOB_COLUMNS =
-  'id, status, error_reason, attempt_count, next_attempt_at, lease_expires_at, expired_at, finished_at, created_at, updated_at, result_receipt_id, unknown_menu_contexts:field_evidence->unknown_menu_contexts, menu_source_urls:field_evidence->menu_source_urls';
+  'id, status, error_reason, attempt_count, next_attempt_at, lease_expires_at, expired_at, finished_at, created_at, updated_at, result_receipt_id, unknown_menu_contexts:field_evidence->unknown_menu_contexts, menu_source_urls:field_evidence->menu_source_urls, notes:field_evidence->notes';
 const RECEIPT_COLUMNS = 'id, restaurant_match_type, matched_restaurant_id, created_at, menus:candidate_summary->menus';
 const CONFIRM_NOTE = 'Bevestigd vanuit Batchanalyse na menselijke controle.';
 
