@@ -76,7 +76,25 @@ test('0016 new job columns are nullable, so single-URL jobs (batch_id null) stay
   // Duplicates are blocked inside one batch only — no wider unique index on the URL.
   assert.match(code, /create unique index if not exists \w+\s+on restaurant_source_analysis_jobs \(batch_id, canonical_source_url\)\s+where batch_id is not null;/);
   const uniqueOnJobs = [...code.matchAll(/create unique index if not exists \w+\s+on restaurant_source_analysis_jobs \(([^)]*)\)/g)].map((m) => m[1]);
-  assert.deepEqual(uniqueOnJobs, ['batch_id, canonical_source_url']);
+  assert.deepEqual(uniqueOnJobs, ['batch_id, canonical_source_url', 'result_receipt_id']);
+});
+
+test('0016 a receipt binds to at most one job and one URL intake, also under concurrent calls', () => {
+  // Database-level guards on both binding points.
+  assert.match(code, /create unique index if not exists \w+\s+on restaurant_source_analysis_jobs \(result_receipt_id\)\s+where result_receipt_id is not null;/);
+  assert.match(code, /create unique index if not exists \w+\s+on url_intakes \(issued_via_receipt_id\)\s+where issued_via_receipt_id is not null;/);
+  // complete_source_analysis_job is the first RPC that binds a receipt to a job:
+  // it row-locks the receipt and refuses a consumed or already-bound one with P0047.
+  const complete = fn('complete_source_analysis_job');
+  assert.match(complete, /from url_intake_analysis_receipts r where r\.id = p_receipt_id for update;/);
+  assert.match(complete, /or v_receipt\.consumed_at is not null/);
+  assert.match(complete, /other\.result_receipt_id = p_receipt_id and other\.id <> p_job_id[\s\S]*?errcode = 'P0047'/);
+  const lock = complete.indexOf('for update;', complete.indexOf('url_intake_analysis_receipts'));
+  assert.ok(lock >= 0 && lock < complete.indexOf("set status = 'succeeded'"), 'receipt locked before the binding update');
+  // The intake path locks and consumes atomically (unchanged one-time semantics).
+  const intake = fn('create_url_intake_from_batch_job');
+  assert.match(intake, /r\.consumed_at is null\s+for update;/);
+  assert.match(intake, /where id = v_receipt\.id\s+and consumed_at is null;/);
 });
 
 test('0016 batch lifecycle: closed_at/close_reason biconditional, one open batch per starter, item and outcome lists closed', () => {

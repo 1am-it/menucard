@@ -78,6 +78,12 @@ create unique index if not exists idx_restaurant_source_analysis_jobs_batch_url
   on restaurant_source_analysis_jobs (batch_id, canonical_source_url)
   where batch_id is not null;
 
+-- One receipt binds to at most one job. Every job, single-URL included,
+-- already issues its own receipt, so this only forbids reuse.
+create unique index if not exists idx_restaurant_source_analysis_jobs_one_job_per_receipt
+  on restaurant_source_analysis_jobs (result_receipt_id)
+  where result_receipt_id is not null;
+
 create index if not exists idx_restaurant_source_analysis_jobs_batch_queue
   on restaurant_source_analysis_jobs (batch_id, status, next_attempt_at)
   where batch_id is not null;
@@ -130,6 +136,13 @@ alter table url_intakes
 create unique index if not exists idx_url_intakes_issued_via_job
   on url_intakes (issued_via_job_id)
   where issued_via_job_id is not null;
+
+-- One receipt authorizes at most one URL intake, on either path (BE-19 or
+-- batch). consumed_at already makes a receipt single-use; this is the
+-- database-level guard behind it.
+create unique index if not exists idx_url_intakes_one_per_receipt
+  on url_intakes (issued_via_receipt_id)
+  where issued_via_receipt_id is not null;
 
 -- ── Row Level Security and grants ───────────────────────────────────────
 --
@@ -567,11 +580,20 @@ begin
       errcode = 'P0045';
   end if;
 
-  select * into v_receipt from url_intake_analysis_receipts r where r.id = p_receipt_id;
+  -- Binds the receipt to this job. Row-locked, so a concurrent call with
+  -- the same receipt waits and then sees this binding; the unique index
+  -- on result_receipt_id is the final guard. A receipt that is already
+  -- consumed or bound to another job is never bound again.
+  select * into v_receipt from url_intake_analysis_receipts r where r.id = p_receipt_id for update;
   if not found
+     or v_receipt.consumed_at is not null
      or v_receipt.actor_user_id is distinct from v_job.actor_user_id
      or v_receipt.canonical_source_url is distinct from v_job.canonical_source_url
-     or p_field_evidence is null then
+     or p_field_evidence is null
+     or exists (
+       select 1 from restaurant_source_analysis_jobs other
+       where other.result_receipt_id = p_receipt_id and other.id <> p_job_id
+     ) then
     raise exception using
       message = 'Result does not belong to this job',
       errcode = 'P0047';
