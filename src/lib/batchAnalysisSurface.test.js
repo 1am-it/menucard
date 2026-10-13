@@ -58,7 +58,7 @@ test('page: accessible states — progressbar with text, one polite live region,
 
 test('page: never fetches anything but its own internal API; no AI, OCR or external source', () => {
   const fetches = [...PAGE.matchAll(/fetch\(([^,)]+)/g)].map((m) => m[1].trim());
-  for (const target of fetches) assert.match(target, /^`?\$?\{?API|^API|^`\$\{API\}/, target);
+  for (const target of fetches) assert.match(target, /^`?\$?\{?API|^API|^`\$\{API\}|^reanalyze \? `\$\{API\}\/reanalyze` : API$/, target);
   assert.doesNotMatch(PAGE, /openai|anthropic|tesseract|from ['"][^'"]*(ocr|claude)[^'"]*['"]/i);
 });
 
@@ -82,6 +82,12 @@ test('routes: internal-only handlers, process route bounded in time, nothing els
     assert.match(src, /batchAnalysisHandlers/);
     assert.doesNotMatch(src, /export async function (PUT|PATCH|DELETE)/);
   }
+  const reanalyze = read('app/api/internal/v1/batch-analysis/reanalyze/route.js');
+  assert.match(reanalyze, /batchAnalysisHandlers\.reanalyze\(request\)/);
+  assert.doesNotMatch(reanalyze, /export async function (GET|PUT|PATCH|DELETE)/);
+  // Only the explicit "Opnieuw analyseren" click takes the fresh path.
+  assert.match(PAGE, /startBatch\(\[url\], \{ reanalyze: action === 'reanalyze' \}\)/);
+  assert.match(PAGE, /onRerun\(item\.url, action\)/);
   const deps = read('src/lib/batchAnalysisRouteDeps.js');
   assert.match(deps, /authenticate: authenticateInternalRequest/);
   assert.match(deps, /analyze: analyzeSourceUrl/);
