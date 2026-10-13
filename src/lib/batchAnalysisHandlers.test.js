@@ -125,6 +125,7 @@ test('every handler refuses a missing session, editor or owner with 401/403 and 
       () => handlers.createBatch(request({ batch_id: BATCH, urls: ['https://a.nl'] })),
       () => handlers.processNext(request(), BATCH),
       () => handlers.confirmSources(request({ job_ids: [JOB] }), BATCH),
+      () => handlers.reanalyze(request({ batch_id: BATCH, url: 'https://a.nl' })),
     ]) {
       const res = await call();
       assert.equal(res.status, c.status);
@@ -305,4 +306,48 @@ test('overview: a colleague sees the batch read-only, without the starter\'s ide
   const own = await makeHandlers({ userId: STARTER, supabase }).handlers.getOverview(request(), BATCH);
   assert.equal(own.body.detail.batch.is_starter, true);
   assert.equal(own.body.detail.items[0].label, 'Menukaart gevonden · controle nodig');
+});
+
+test('reanalyze ("Opnieuw analyseren"): one canonical URL through enqueue_source_reanalysis with the session actor — never the 7-day-reuse enqueue', async () => {
+  let args;
+  const supabase = fakeSupabase({
+    tables: { markets: [{ id: 'm1', slug: 'breda' }] },
+    rpc: {
+      enqueue_source_reanalysis: (a) => {
+        args = a;
+        return { data: { id: a.p_batch_id }, error: null };
+      },
+    },
+  });
+  const { handlers } = makeHandlers({ supabase });
+  const res = await handlers.reanalyze(request({ batch_id: BATCH, url: 'https://a.nl/menu?x=1', actor: COLLEAGUE }));
+  assert.equal(res.status, 201);
+  assert.deepEqual(args, { p_batch_id: BATCH, p_market_id: 'm1', p_actor_user_id: STARTER, p_url: 'https://a.nl/menu' });
+  assert.equal(supabase.calls.filter((c) => c.rpc === 'enqueue_source_analysis_batch').length, 0);
+  assert.equal((await handlers.reanalyze(request({ batch_id: BATCH, url: 'geen url' }))).status, 400);
+  assert.equal((await handlers.reanalyze(request({ batch_id: 'nope', url: 'https://a.nl' }))).status, 400);
+});
+
+test('reanalyze keeps the daily limit, one-open-batch and actor rules (database codes mapped)', async () => {
+  for (const [code, status, reason] of [['P0040', 409, 'other_actor'], ['P0042', 429, 'daily_limit'], ['P0043', 409, 'open_batch'], ['P0050', 400, 'invalid_url']]) {
+    const failing = fakeSupabase({ tables: { markets: [{ id: 'm1', slug: 'breda' }] }, rpc: { enqueue_source_reanalysis: () => ({ data: null, error: { code } }) } });
+    const res = await makeHandlers({ supabase: failing }).handlers.reanalyze(request({ batch_id: BATCH, url: 'https://a.nl' }));
+    assert.equal(res.status, status);
+    assert.equal(res.body.reason, reason);
+  }
+});
+
+test('after a re-analysis the URL is a fresh queued job, not "Recent geanalyseerd" again', async () => {
+  const supabase = fakeSupabase({
+    tables: {
+      markets: [{ id: 'm1', slug: 'breda' }],
+      url_intake_batches: [{ id: BATCH, market_id: 'm1', actor_user_id: STARTER, created_at: '2026-10-13T12:00:00Z', closed_at: null, close_reason: null, item_count: 1 }],
+      url_intake_batch_items: [{ batch_id: BATCH, item_position: 1, canonical_source_url: 'https://a.nl/', outcome: 'queued', job_id: JOB, reused_job_id: null }],
+      restaurant_source_analysis_jobs: [{ id: JOB, status: 'pending', attempt_count: 1, actor_user_id: STARTER, batch_id: BATCH, created_at: '2026-10-13T12:00:00Z' }],
+    },
+  });
+  const res = await makeHandlers({ supabase }).handlers.getOverview(request(), BATCH);
+  const item = res.body.detail.items[0];
+  assert.equal(item.label, 'In wachtrij');
+  assert.notEqual(item.label, 'Recent geanalyseerd');
 });

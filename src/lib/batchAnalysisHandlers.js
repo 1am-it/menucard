@@ -417,7 +417,42 @@ function createBatchAnalysisHandlers(deps) {
     return reply(200, { results, confirmed: results.filter((r) => r.ok).length });
   }
 
-  return { getOverview, createBatch, processNext, confirmSources };
+  /** POST /reanalyze — "Opnieuw analyseren": one URL, after an explicit
+   * click, through enqueue_source_reanalysis (0017). The same safeguards
+   * as createBatch (session actor, client batch id, one open batch, daily
+   * limit); only the 7-day reuse is skipped, because a fresh analysis was
+   * asked for. */
+  async function reanalyze(request) {
+    const { auth, denied } = await authorize(request);
+    if (denied) return denied;
+    const parsed = await readJson(request);
+    if (!parsed.ok || !parsed.body || typeof parsed.body !== 'object') return reply(400, { error: 'Ongeldig verzoek.' });
+    const { batch_id: batchId, url } = parsed.body;
+    if (!isUuid(batchId)) return reply(400, { error: 'Ongeldig verzoek.' });
+    const canonical = typeof url === 'string' ? canonicalLine(url) : null;
+    if (!canonical) return reply(400, { error: 'Dit is geen geldig webadres.', reason: 'invalid_url' });
+
+    const supabase = getSupabase();
+    const market = await marketId(supabase);
+    if (!market) return reply(500, { error: 'De nieuwe analyse kon niet worden gestart.' });
+
+    const { data, error } = await supabase.rpc('enqueue_source_reanalysis', {
+      p_batch_id: batchId,
+      p_market_id: market,
+      p_actor_user_id: auth.userId,
+      p_url: canonical,
+    });
+    if (error) {
+      if (error.code === 'P0040') return reply(409, { error: 'Deze batch hoort bij een ander account.', reason: 'other_actor' });
+      if (error.code === 'P0042') return reply(429, { error: `Je daglimiet van ${DAILY_URL_LIMIT} URL's is bereikt.`, reason: 'daily_limit' });
+      if (error.code === 'P0043') return reply(409, { error: 'Je hebt al een open batch. Rond die eerst af.', reason: 'open_batch' });
+      if (error.code === 'P0050') return reply(400, { error: 'Dit is geen geldig webadres.', reason: 'invalid_url' });
+      return reply(500, { error: 'De nieuwe analyse kon niet worden gestart.' });
+    }
+    return reply(201, { batch: { id: (data && data.id) || batchId } });
+  }
+
+  return { getOverview, createBatch, processNext, confirmSources, reanalyze };
 }
 
 module.exports = { createBatchAnalysisHandlers, RECENT_BATCH_LIMIT };

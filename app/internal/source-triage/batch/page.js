@@ -135,7 +135,9 @@ export default function BatchAnalysisPage() {
     }
   }, [processingBatchId, token, load])
 
-  async function startBatch(urls) {
+  // `reanalyze`: the explicit "Opnieuw analyseren" click — one URL, a fresh
+  // analysis through enqueue_source_reanalysis (0017), never the 7-day reuse.
+  async function startBatch(urls, { reanalyze = false } = {}) {
     const batchId = newBatchId()
     if (!batchId) {
       setActionError('Deze browser kan geen batch starten.')
@@ -144,14 +146,16 @@ export default function BatchAnalysisPage() {
     setBusy(true)
     setActionError(null)
     try {
-      const res = await fetch(API, {
+      const res = await fetch(reanalyze ? `${API}/reanalyze` : API, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ batch_id: batchId, urls }),
+        body: JSON.stringify(reanalyze ? { batch_id: batchId, url: urls[0] } : { batch_id: batchId, urls }),
       })
       const body = await res.json().catch(() => ({}))
       if (!res.ok) {
-        setActionError(body.error || 'De batch kon niet worden gestart.')
+        const text = body.error || 'De batch kon niet worden gestart.'
+        setActionError(text)
+        if (reanalyze) setMessage({ tone: 'error', text })
         return
       }
       setText('')
@@ -198,9 +202,9 @@ export default function BatchAnalysisPage() {
     }
   }
 
-  async function rerun(url) {
+  async function rerun(url, action) {
     if (ownOpenBatchId || !url) return
-    await startBatch([url])
+    await startBatch([url], { reanalyze: action === 'reanalyze' })
   }
 
   function adjust(url) {

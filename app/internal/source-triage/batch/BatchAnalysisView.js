@@ -257,7 +257,7 @@ function ResultCard({ item, isStarter, batchOpen, ownOpenBatchId, confirming, se
     }
     if (action === 'retry' || action === 'reanalyze') {
       return (
-        <button key={action} type="button" className={cls} onClick={() => onRerun(item.url)} aria-disabled={rerunBlocked ? 'true' : undefined} disabled={busy || !item.url}>
+        <button key={action} type="button" className={cls} onClick={() => onRerun(item.url, action)} aria-disabled={rerunBlocked ? 'true' : undefined} disabled={busy || !item.url}>
           {ACTION_LABELS[action]}
         </button>
       )
