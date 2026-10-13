@@ -189,7 +189,9 @@ function view(key, extra) {
  */
 function deriveItemView({ item, job, receipt, restaurants, proposals, duplicateOf, now, formatTime }) {
   const fmt = typeof formatTime === 'function' ? formatTime : (v) => v;
-  const base = { position: item.item_position, url: item.canonical_source_url || null, jobId: item.job_id || item.reused_job_id || null, restaurant: null, foundUrl: null, high: false };
+  // Reviewer-facing analysis notes (redirects, pages read), never claims.
+  const notes = job && Array.isArray(job.notes) ? job.notes.filter((n) => typeof n === 'string').slice(0, 10) : [];
+  const base = { position: item.item_position, url: item.canonical_source_url || null, jobId: item.job_id || item.reused_job_id || null, restaurant: null, foundUrl: null, high: false, notes };
 
   if (item.outcome === 'invalid') {
     return view('invalid', { ...base, text: 'Geen geldig webadres; pas de regel aan.', actions: ['adjust_url'] });
