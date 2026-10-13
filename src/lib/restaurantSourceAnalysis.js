@@ -81,6 +81,38 @@ const { structurePdfLinesIntoMenu } = require('./pdfMenuStructuring')
 const { rollUpPdfAdapterErrorReason } = require('./restaurantSourceAnalysisJobs')
 const { composeEvidenceBasedDescription } = require('./restaurantConceptDescription')
 const { runClaudeStructuringAdapter } = require('./claudeStructuringAdapter')
+const { extractHtmlMenuStructure } = require('./htmlMenuStructure')
+
+/**
+ * BE-25 fase 2: a menu context from the visible HTML of a discovered menu
+ * page, via the deterministic BE-22 recognizer. Only dishes with one known
+ * price count — a line without a reliable price never becomes a menu item —
+ * and the recognizer's own minimum (MIN_ITEMS) and refusals (opening hours,
+ * events, reservations, service units, ambiguous structures) apply.
+ * Returns `{ menu, itemCount }` or `null`. Never throws into the analysis.
+ */
+function menuFromHtmlStructure(html, usedSlugs) {
+  let result
+  try {
+    result = extractHtmlMenuStructure(html)
+  } catch {
+    return null
+  }
+  if (!result || result.status !== 'parsed') return null
+  const categories = result.sections
+    .map((section) => ({
+      name: section.path.length > 0 ? section.path.join(' — ') : 'Menukaart',
+      items: section.items
+        .filter((item) => item.priceStatus === 'known' && Number.isInteger(item.amountMinorUnits))
+        .map((item) => ({ name: item.name, desc: item.description || null, price: (item.amountMinorUnits / 100).toFixed(2) })),
+    }))
+    .filter((category) => category.items.length > 0)
+  const itemCount = categories.reduce((n, c) => n + c.items.length, 0)
+  if (itemCount === 0) return null
+  let contextSlug = 'menukaart'
+  for (let i = 0; usedSlugs.has(contextSlug); i += 1) contextSlug = `menukaart${String.fromCharCode(97 + (i % 26))}`
+  return { menu: { name: 'Menukaart', contextSlug, categories }, itemCount }
+}
 
 /** A safe, derived signal for a discovered PDF's own review metadata —
  * never the raw text itself. See the "unknown menu context" assembly
@@ -226,12 +258,20 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
         menuContexts.push({ ...menu, extractionMethod: 'html', sourceUrl: fetched.finalUrl || candidate.url })
         existingSlugs.add(menu.contextSlug)
       }
-      if (candidateMenus.length === 0) {
-        // The page a menu link pointed to was read, but holds no menu this
-        // pipeline reads automatically (JSON-LD only; visible-HTML menus are
-        // BE-22's offline benchmark, not production). Name the page for the
-        // human reviewer — never a claim that no menu exists, never a
-        // guessed menu.
+      // No JSON-LD menu on a page a menu link pointed to: read its visible
+      // HTML with the deterministic BE-22 structure recognizer (BE-25 fase
+      // 2) — only priced dishes in recognised structures, never a guess.
+      const htmlMenu = candidateMenus.length === 0 ? menuFromHtmlStructure(fetched.body, existingSlugs) : null
+      if (htmlMenu) {
+        menuContexts.push({ ...htmlMenu.menu, extractionMethod: 'html', sourceUrl: fetched.finalUrl || candidate.url })
+        existingSlugs.add(htmlMenu.menu.contextSlug)
+        notes.push(
+          `Menukaart herkend uit de HTML van ${fetched.finalUrl || candidate.url}: ${htmlMenu.itemCount} gerechten met prijs in ${htmlMenu.menu.categories.length} rubrieken. Controleer rubrieken en prijzen.`
+        )
+      } else if (candidateMenus.length === 0) {
+        // The page was read, but holds no menu this pipeline can read
+        // automatically. Name the page for the human reviewer — never a
+        // claim that no menu exists, never a guessed menu.
         notes.push(
           `Mogelijke menupagina gelezen: ${fetched.finalUrl || candidate.url} (link "${String(candidate.matchedOn || '').slice(0, 60)}"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.`
         )

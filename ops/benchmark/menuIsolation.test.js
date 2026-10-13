@@ -16,6 +16,18 @@ const MENU_MODULES = ['menuExtractionContract.js', 'htmlMenuStructure.js', 'html
 const ALLOWED_MENU_IMPORTS = new Set(['./menuExtractionContract', './htmlMenuStructure', './htmlMenuFixtures', './menuScoring', './menuBenchmark', './scoring', './adapters'])
 const SKIP_DIRS = new Set(['node_modules', '.next', '.git', 'output'])
 
+// BE-25 fase 2 promoted the recognizer and its contract to product code
+// (src/lib/), so the live analysis can use them. ops/benchmark/ keeps a
+// one-line re-export shim per module; the isolation checks below read the
+// promoted source itself. Product code still never imports ops/benchmark/.
+const PROMOTED = {
+  'menuExtractionContract.js': path.join(REPO_ROOT, 'src', 'lib', 'menuExtractionContract.js'),
+  'htmlMenuStructure.js': path.join(REPO_ROOT, 'src', 'lib', 'htmlMenuStructure.js'),
+}
+function moduleSource(name) {
+  return fs.readFileSync(PROMOTED[name] || path.join(__dirname, name), 'utf8')
+}
+
 function sourceFiles(dir) {
   if (!fs.existsSync(dir)) return []
   const out = []
@@ -55,7 +67,7 @@ const EXTRA_ALLOWED_IMPORTS = { 'menuExtractionContract.js': new Set(['node:util
 
 test('the menu modules import only each other and the existing benchmark foundation (plus node:util in the contract only)', () => {
   for (const name of MENU_MODULES) {
-    const source = fs.readFileSync(path.join(__dirname, name), 'utf8')
+    const source = moduleSource(name)
     const extra = EXTRA_ALLOWED_IMPORTS[name] || new Set()
     for (const specifier of importSpecifiers(source)) {
       assert.ok(ALLOWED_MENU_IMPORTS.has(specifier) || extra.has(specifier), `${name} imports ${specifier}`)
@@ -66,7 +78,7 @@ test('the menu modules import only each other and the existing benchmark foundat
 test('node:util is the only non-relative import in the menu modules, used once, in the contract', () => {
   const nonRelative = []
   for (const name of MENU_MODULES) {
-    const source = fs.readFileSync(path.join(__dirname, name), 'utf8')
+    const source = moduleSource(name)
     for (const specifier of importSpecifiers(source)) if (!specifier.startsWith('./')) nonRelative.push(`${name}:${specifier}`)
   }
   assert.deepEqual(nonRelative, ['menuExtractionContract.js:node:util'])
@@ -83,8 +95,16 @@ test('the menu modules contain no network call, provider, browser, child process
     /undici|axios|node-fetch|got\b|playwright|puppeteer|browserless|@anthropic-ai|openai|tesseract/i,
   ]
   for (const name of MENU_MODULES) {
-    const source = fs.readFileSync(path.join(__dirname, name), 'utf8')
+    const source = moduleSource(name)
     for (const pattern of forbidden) assert.ok(!pattern.test(source), `${name} matches ${pattern}`)
+  }
+})
+
+test('the ops/benchmark shims only re-export their promoted src/lib module', () => {
+  for (const name of Object.keys(PROMOTED)) {
+    const source = fs.readFileSync(path.join(__dirname, name), 'utf8')
+    const code = source.replace(/\/\/.*$/gm, '').replace(/'use strict'/, '').trim()
+    assert.equal(code, `module.exports = require('../../src/lib/${name.replace(/\.js$/, '')}')`)
   }
 })
 
