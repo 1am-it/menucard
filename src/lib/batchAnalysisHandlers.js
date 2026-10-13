@@ -27,6 +27,32 @@ const {
   summarizeItems,
   amsterdamDayStart,
 } = require('./batchAnalysis');
+const { liveMenuLines, buildMenuConcept } = require('./menuConcept');
+const { validateSnapshotProposalInput } = require('./menuSnapshotProposals');
+
+// One internal menu concept per restaurant: BE-17 snapshot proposals in
+// the context "<restaurantId>-menukaart", versioned.
+function conceptContext(restaurantId) {
+  return `${restaurantId}-menukaart`;
+}
+const MAX_EDITED_LINES = 500;
+
+/** Only known keys and short values from the client's edits. */
+function sanitizeEdits(raw) {
+  const out = { lines: {}, removed: null };
+  if (!raw || typeof raw !== 'object') return out;
+  if (raw.removed === 'keep' || raw.removed === 'remove') out.removed = raw.removed;
+  const lines = raw.lines && typeof raw.lines === 'object' ? raw.lines : {};
+  for (const [id, e] of Object.entries(lines).slice(0, MAX_EDITED_LINES)) {
+    if (!/^\d+\.\d+\.\d+$/.test(id) || !e || typeof e !== 'object') continue;
+    const clean = {};
+    if (e.exclude === true) clean.exclude = true;
+    if (e.accept === true) clean.accept = true;
+    for (const key of ['name', 'price', 'category']) if (typeof e[key] === 'string' && e[key].length <= 200) clean[key] = e[key];
+    out.lines[id] = clean;
+  }
+  return out;
+}
 
 const FORBIDDEN = 'Alleen interne medewerkers kunnen de batchanalyse gebruiken.';
 const LOAD_ERROR = 'De batchanalyse kon niet worden geladen.';
@@ -52,7 +78,8 @@ function reply(status, body) {
  *   now()                  → Date (injectable for tests)
  */
 function createBatchAnalysisHandlers(deps) {
-  const { authenticate, getSupabase, restaurants, generateId, analyze, computeHash } = deps;
+  const { authenticate, getSupabase, restaurants, generateId, analyze, computeHash, computeMenuHash } = deps;
+  const liveMenus = deps.liveMenus || {};
   const now = deps.now || (() => new Date());
 
   async function authorize(request) {
@@ -129,6 +156,33 @@ function createBatchAnalysisHandlers(deps) {
         duplicateOf: item.outcome === 'duplicate' ? firstPosition.get(item.canonical_source_url) : undefined,
         now: now(),
       });
+    });
+
+    // Menukaartcontrole → concept: for a confirmed source of a known
+    // restaurant, the recognised dishes (receipt), the current published
+    // menu (data/menus.json, read only) and the latest saved concept.
+    const confirmedRestaurantIds = [...new Set(views.filter((v) => v.key === 'confirmed' && v.restaurant).map((v) => v.restaurant.id))];
+    let concepts = [];
+    if (confirmedRestaurantIds.length > 0) {
+      const { data, error } = await supabase
+        .from('menu_snapshot_proposals')
+        .select('id, restaurant_id, menu_context, version, content_hash, created_at')
+        .in('restaurant_id', confirmedRestaurantIds)
+        .order('version', { ascending: false });
+      if (error) return null;
+      concepts = (data || []).filter((c) => c.menu_context === conceptContext(c.restaurant_id));
+    }
+    views.forEach((view, index) => {
+      if (view.key !== 'confirmed' || !view.restaurant) return;
+      const item = items[index];
+      const job = jobById.get(item.job_id || item.reused_job_id) || null;
+      const receipt = job && job.result_receipt_id ? receiptById.get(job.result_receipt_id) || null : null;
+      const latest = concepts.find((c) => c.restaurant_id === view.restaurant.id) || null;
+      view.concept = {
+        menus: (receipt && Array.isArray(receipt.menus) && receipt.menus) || [],
+        liveLines: liveMenuLines(liveMenus, view.restaurant.id),
+        latest: latest ? { version: latest.version, created_at: latest.created_at } : null,
+      };
     });
 
     const isStarter = batch.actor_user_id === viewerId;
@@ -452,7 +506,83 @@ function createBatchAnalysisHandlers(deps) {
     return reply(201, { batch: { id: (data && data.id) || batchId } });
   }
 
-  return { getOverview, createBatch, processNext, confirmSources, reanalyze };
+  /** POST /[id]/concept — save the internal menu concept of a confirmed
+   * source as a BE-17 menu snapshot proposal (needs review, never public).
+   * Refused while any blocker remains; identical content is not saved again. */
+  async function saveConcept(request, batchId) {
+    const { auth, denied } = await authorize(request);
+    if (denied) return denied;
+    if (!isUuid(batchId)) return reply(404, { error: 'Batch niet gevonden.' });
+    const parsed = await readJson(request);
+    const body = parsed.ok && parsed.body && typeof parsed.body === 'object' ? parsed.body : null;
+    if (!body || !isUuid(body.job_id)) return reply(400, { error: 'Ongeldig verzoek.' });
+    const edits = sanitizeEdits(body.edits);
+
+    const supabase = getSupabase();
+    const market = await marketId(supabase);
+    if (!market) return reply(500, { error: 'Het concept kon niet worden opgeslagen.' });
+    const { data: batch, error: batchError } = await supabase.from('url_intake_batches').select(BATCH_COLUMNS).eq('id', batchId).eq('market_id', market).maybeSingle();
+    if (batchError) return reply(500, { error: 'Het concept kon niet worden opgeslagen.' });
+    if (!batch) return reply(404, { error: 'Batch niet gevonden.' });
+    if (batch.actor_user_id !== auth.userId) return reply(403, { error: 'Alleen wie de batch startte, kan het concept opslaan.', reason: 'not_starter' });
+
+    const detail = await loadBatchDetail(supabase, batch, auth.userId);
+    if (!detail) return reply(500, { error: 'Het concept kon niet worden opgeslagen.' });
+    const item = detail.items.find((v) => v.jobId === body.job_id);
+    // Only after a human "Bevestig bron" for a known restaurant.
+    if (!item || item.key !== 'confirmed' || !item.restaurant || !item.concept || !item.foundUrl) {
+      return reply(409, { error: 'Een concept kan pas na een bevestigde bron van een bekend restaurant.', reason: 'not_confirmed' });
+    }
+    const concept = buildMenuConcept({ menus: item.concept.menus, liveLines: item.concept.liveLines, edits });
+    if (!concept.canSave) {
+      return reply(409, { error: 'Los eerst de blokkades op.', reason: 'blockers', blockers: concept.blockers });
+    }
+
+    const capturedContent = { categories: concept.content.categories };
+    const validation = validateSnapshotProposalInput({
+      restaurantId: item.restaurant.id,
+      menuContext: conceptContext(item.restaurant.id),
+      sourceUrl: item.foundUrl,
+      sourceType: 'own_website',
+      qualityScore: 'medium',
+      capturedContent,
+    });
+    if (!validation.valid) return reply(400, { error: 'Het concept is ongeldig.', reason: validation.reason });
+    const contentHash = computeMenuHash(validation.capturedContent);
+
+    const { data: existing, error: existingError } = await supabase
+      .from('menu_snapshot_proposals')
+      .select('id, version, content_hash')
+      .eq('restaurant_id', validation.restaurantId)
+      .eq('menu_context', validation.menuContext)
+      .order('version', { ascending: false })
+      .limit(1);
+    if (existingError) return reply(500, { error: 'Het concept kon niet worden opgeslagen.' });
+    const latest = (existing || [])[0] || null;
+    if (latest && latest.content_hash === contentHash) {
+      return reply(200, { concept: { version: latest.version, unchanged: true } });
+    }
+
+    const version = latest ? latest.version + 1 : 1;
+    const { error } = await supabase.from('menu_snapshot_proposals').insert({
+      restaurant_id: validation.restaurantId,
+      menu_context: validation.menuContext,
+      source_url: validation.sourceUrl,
+      source_type: validation.sourceType,
+      originally_fetched_at: now().toISOString(),
+      content_hash: contentHash,
+      version,
+      quality_score: validation.qualityScore,
+      captured_content: validation.capturedContent,
+    });
+    if (error) {
+      if (error.code === '23505') return reply(409, { error: 'Er is net een nieuwere versie opgeslagen. Laad de pagina opnieuw.', reason: 'version_conflict' });
+      return reply(500, { error: 'Het concept kon niet worden opgeslagen.' });
+    }
+    return reply(201, { concept: { version, unchanged: false } });
+  }
+
+  return { getOverview, createBatch, processNext, confirmSources, reanalyze, saveConcept };
 }
 
 module.exports = { createBatchAnalysisHandlers, RECENT_BATCH_LIMIT };

@@ -207,6 +207,38 @@ export default function BatchAnalysisPage() {
     await startBatch([url], { reanalyze: action === 'reanalyze' })
   }
 
+  // "Concept opslaan": an internal menu concept (BE-17 proposal) for a
+  // confirmed source. The server re-checks every blocker; nothing is public.
+  async function saveConcept(jobId, edits) {
+    if (!viewing) return
+    setBusy(true)
+    setMessage(null)
+    try {
+      const res = await fetch(`${API}/${viewing.batch.id}/concept`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ job_id: jobId, edits }),
+      })
+      const body = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setMessage({ tone: 'error', text: body.error || 'Het concept kon niet worden opgeslagen.' })
+      } else {
+        setMessage({
+          tone: 'success',
+          text:
+            body.concept && body.concept.unchanged
+              ? `Het concept is ongewijzigd (versie ${body.concept.version}). Er is niets gepubliceerd.`
+              : `Concept opgeslagen als versie ${body.concept && body.concept.version}. Het wacht op interne controle; er is niets gepubliceerd.`,
+        })
+        await load(viewing.batch.id)
+      }
+    } catch {
+      setMessage({ tone: 'error', text: 'Het concept kon niet worden opgeslagen.' })
+    } finally {
+      setBusy(false)
+    }
+  }
+
   function adjust(url) {
     if (ownOpenBatchId) return
     setText(url)
@@ -245,6 +277,7 @@ export default function BatchAnalysisPage() {
           onConfirm={confirm}
           onRerun={rerun}
           onAdjust={adjust}
+          onSaveConcept={saveConcept}
           onNew={() => {
             setShowInput(true)
             setMessage(null)

@@ -92,3 +92,18 @@ test('routes: internal-only handlers, process route bounded in time, nothing els
   assert.match(deps, /authenticate: authenticateInternalRequest/);
   assert.match(deps, /analyze: analyzeSourceUrl/);
 });
+
+test('menu review: control view links to the original menu safely; concept is internal and saved only through its own route', () => {
+  const review = read('app/internal/source-triage/batch/MenuReview.js');
+  assert.match(review, /Open originele menukaart/);
+  assert.match(review, /target="_blank" rel="noopener noreferrer"/);
+  assert.match(review, /Menuconcept · intern/);
+  assert.match(review, /Er wordt niets\s+gepubliceerd\./);
+  assert.match(review, /if \(concept\.canSave && !busy\) onSave\(item\.jobId, edits\)/);
+  assert.doesNotMatch(review, /fetch\(/);
+  assert.doesNotMatch(review, /publiceer nu|live zetten|Publiceer \{/i);
+  const route = read('app/api/internal/v1/batch-analysis/[id]/concept/route.js');
+  assert.match(route, /batchAnalysisHandlers\.saveConcept\(request, id\)/);
+  assert.doesNotMatch(route, /export async function (GET|PUT|PATCH|DELETE)/);
+  assert.match(PAGE, /\$\{API\}\/\$\{viewing\.batch\.id\}\/concept/);
+});

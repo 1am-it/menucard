@@ -79,7 +79,7 @@ function fakeSupabase({ tables = {}, rpc = {} } = {}) {
   return client;
 }
 
-function makeHandlers({ userId = STARTER, roles = [{ role: 'internal' }], supabase, analyze } = {}) {
+function makeHandlers({ userId = STARTER, roles = [{ role: 'internal' }], supabase, analyze, liveMenus } = {}) {
   let created = 0;
   const client = supabase || fakeSupabase();
   const handlers = createBatchAnalysisHandlers({
@@ -92,6 +92,8 @@ function makeHandlers({ userId = STARTER, roles = [{ role: 'internal' }], supaba
     generateId: () => '0192f000-0000-7000-8000-0000000000ff',
     analyze: analyze || (async () => ({ ok: false, errorReason: 'fetch_failed' })),
     computeHash: () => 'a'.repeat(64),
+    computeMenuHash: (content) => require('node:crypto').createHash('sha256').update(JSON.stringify(content)).digest('hex'),
+    liveMenus: liveMenus || {},
     now: () => new Date('2026-10-10T12:00:00Z'),
   });
   return { handlers, client, created: () => created };
@@ -350,4 +352,83 @@ test('after a re-analysis the URL is a fresh queued job, not "Recent geanalyseer
   const item = res.body.detail.items[0];
   assert.equal(item.label, 'In wachtrij');
   assert.notEqual(item.label, 'Recent geanalyseerd');
+});
+
+// ─── Menukaartcontrole → concept ───────────────────────────────────────
+
+const FOUND = 'https://www.bistro-fictief-voorbeeld.nl/menukaart';
+const CONCEPT_MENUS = [{ categories: [{ name: 'Koud', items: [{ name: 'Fictieve soep', price: '7.50' }, { name: 'Fictieve salade', price: '12.50' }, { name: 'Fictief tartaar', price: null }] }] }];
+
+function conceptFixture({ actor = STARTER, existing = [] } = {}) {
+  // A confirmed source (accepted BE-24 proposal for the found URL) with a recognised menu.
+  return fakeSupabase({
+    tables: {
+      markets: [{ id: 'm1', slug: 'breda' }],
+      url_intake_batches: [{ id: BATCH, market_id: 'm1', actor_user_id: actor, created_at: '2026-10-10T11:00:00Z', closed_at: '2026-10-10T11:10:00Z', close_reason: 'completed', item_count: 1 }],
+      url_intake_batch_items: [{ batch_id: BATCH, item_position: 1, canonical_source_url: 'https://www.bistro-fictief-voorbeeld.nl/', outcome: 'queued', job_id: JOB, reused_job_id: null }],
+      restaurant_source_analysis_jobs: [{ id: JOB, status: 'succeeded', attempt_count: 1, finished_at: '2026-10-10T11:05:00Z', result_receipt_id: 'r1', unknown_menu_contexts: [], menu_source_urls: [FOUND], actor_user_id: actor, batch_id: BATCH, created_at: '2026-10-10T11:00:00Z' }],
+      url_intake_analysis_receipts: [{ id: 'r1', restaurant_match_type: 'exact', matched_restaurant_id: 'bistro', menus: CONCEPT_MENUS }],
+      source_triage_proposals: [{ id: 'p1', restaurant_id: 'bistro', proposed_url: FOUND, status: 'accepted', decided_at: '2026-10-10T11:20:00Z' }],
+      menu_snapshot_proposals: existing,
+    },
+  });
+}
+
+const LIVE_BISTRO = { 'bistro-diner': { categories: [{ name: 'Koud', items: [{ name: 'Fictieve soep', priceValue: 7.5 }, { name: 'Fictieve mousse', priceValue: 8 }] }] } };
+
+test('overview: a confirmed source carries its concept data (recognised dishes, current menu, latest version)', async () => {
+  const res = await makeHandlers({ supabase: conceptFixture(), liveMenus: LIVE_BISTRO }).handlers.getOverview(request(), BATCH);
+  const item = res.body.detail.items[0];
+  assert.equal(item.label, 'Bron bevestigd');
+  assert.equal(item.menu.itemCount, 3);
+  assert.deepEqual(item.concept.menus, CONCEPT_MENUS);
+  assert.deepEqual(item.concept.liveLines.map((l) => l.name), ['Fictieve soep', 'Fictieve mousse']);
+  assert.equal(item.concept.latest, null);
+});
+
+test('concept: blockers are refused server-side and nothing is written', async () => {
+  const supabase = conceptFixture();
+  const res = await makeHandlers({ supabase, liveMenus: LIVE_BISTRO }).handlers.saveConcept(request({ job_id: JOB, edits: {} }), BATCH);
+  assert.equal(res.status, 409);
+  assert.equal(res.body.reason, 'blockers');
+  assert.deepEqual(res.body.blockers.map((b) => b.status).sort(), ['missing_price', 'removed']);
+  assert.equal(supabase.calls.filter((c) => c.insert).length, 0);
+});
+
+test('concept: once resolved, it is saved as an internal BE-17 proposal (next version, own context) — never published', async () => {
+  const supabase = conceptFixture({ existing: [{ id: 1, restaurant_id: 'bistro', menu_context: 'bistro-menukaart', version: 2, content_hash: 'b'.repeat(64) }] });
+  const edits = { lines: { '0.0.2': { price: '15,5' } }, removed: 'keep' };
+  const res = await makeHandlers({ supabase, liveMenus: LIVE_BISTRO }).handlers.saveConcept(request({ job_id: JOB, edits }), BATCH);
+  assert.equal(res.status, 201);
+  assert.deepEqual(res.body.concept, { version: 3, unchanged: false });
+  const inserts = supabase.calls.filter((c) => c.insert);
+  assert.deepEqual(inserts.map((c) => c.insert), ['menu_snapshot_proposals']);
+  const row = inserts[0].row;
+  assert.equal(row.restaurant_id, 'bistro');
+  assert.equal(row.menu_context, 'bistro-menukaart');
+  assert.equal(row.source_url, FOUND);
+  assert.equal(row.source_type, 'own_website');
+  assert.deepEqual(row.captured_content.categories[0].items.map((i) => `${i.name} ${i.price}`), ['Fictieve soep 7.50', 'Fictieve salade 12.50', 'Fictief tartaar 15.50', 'Fictieve mousse 8.00']);
+  assert.equal(supabase.calls.filter((c) => c.rpc).length, 0);
+});
+
+test('concept: identical content is not saved again', async () => {
+  const edits = { lines: { '0.0.2': { exclude: true } }, removed: 'remove' };
+  const first = conceptFixture();
+  await makeHandlers({ supabase: first, liveMenus: LIVE_BISTRO }).handlers.saveConcept(request({ job_id: JOB, edits }), BATCH);
+  const hash = first.calls.find((c) => c.insert).row.content_hash;
+  const second = conceptFixture({ existing: [{ id: 1, restaurant_id: 'bistro', menu_context: 'bistro-menukaart', version: 1, content_hash: hash }] });
+  const res = await makeHandlers({ supabase: second, liveMenus: LIVE_BISTRO }).handlers.saveConcept(request({ job_id: JOB, edits }), BATCH);
+  assert.equal(res.status, 200);
+  assert.deepEqual(res.body.concept, { version: 1, unchanged: true });
+  assert.equal(second.calls.filter((c) => c.insert).length, 0);
+});
+
+test('concept: only the starter, only for a confirmed known source', async () => {
+  const colleague = await makeHandlers({ userId: COLLEAGUE, supabase: conceptFixture(), liveMenus: LIVE_BISTRO }).handlers.saveConcept(request({ job_id: JOB, edits: {} }), BATCH);
+  assert.equal(colleague.status, 403);
+  const notConfirmed = await makeHandlers({ supabase: confirmFixture({ menuUrl: FOUND }), liveMenus: LIVE_BISTRO }).handlers.saveConcept(request({ job_id: JOB, edits: {} }), BATCH);
+  assert.equal(notConfirmed.status, 409);
+  assert.equal(notConfirmed.body.reason, 'not_confirmed');
+  assert.equal((await makeHandlers({ supabase: conceptFixture() }).handlers.saveConcept(request({ job_id: 'nope' }), BATCH)).status, 400);
 });

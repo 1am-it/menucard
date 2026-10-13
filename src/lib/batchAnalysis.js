@@ -15,6 +15,7 @@
 
 const { canonicalizeSourceUrl } = require('./urlIntakes');
 const { hostOf, observeJob } = require('./sourceWorkqueue');
+const { summarizeRecognisedMenu } = require('./menuConcept');
 
 const MAX_BATCH_URLS = 10;
 const DAILY_URL_LIMIT = 25;
@@ -191,7 +192,9 @@ function deriveItemView({ item, job, receipt, restaurants, proposals, duplicateO
   const fmt = typeof formatTime === 'function' ? formatTime : (v) => v;
   // Reviewer-facing analysis notes (redirects, pages read), never claims.
   const notes = job && Array.isArray(job.notes) ? job.notes.filter((n) => typeof n === 'string').slice(0, 10) : [];
-  const base = { position: item.item_position, url: item.canonical_source_url || null, jobId: item.job_id || item.reused_job_id || null, restaurant: null, foundUrl: null, high: false, notes };
+  // The recognised dishes (the receipt's bounded summary) for the control view.
+  const recognisedMenu = job && job.status === 'succeeded' && receipt && Array.isArray(receipt.menus) && receipt.menus.length > 0 ? summarizeRecognisedMenu(receipt.menus) : null;
+  const base = { position: item.item_position, url: item.canonical_source_url || null, jobId: item.job_id || item.reused_job_id || null, restaurant: null, foundUrl: null, high: false, notes, menu: recognisedMenu && recognisedMenu.itemCount > 0 ? recognisedMenu : null };
 
   if (item.outcome === 'invalid') {
     return view('invalid', { ...base, text: 'Geen geldig webadres; pas de regel aan.', actions: ['adjust_url'] });
