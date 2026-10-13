@@ -202,6 +202,18 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
   for (const menu of extractMenusFromHtml(homepageHtml)) {
     menuContexts.push({ ...menu, extractionMethod: 'json_ld', sourceUrl: homepageUrl })
   }
+  // 1b. No JSON-LD menu on the entry page itself: read its already-fetched
+  // HTML with the same strict recognizer as a discovered menu page (BE-25),
+  // so a menu page entered directly gets the same path. No extra fetch.
+  if (menuContexts.length === 0) {
+    const entryHtmlMenu = menuFromHtmlStructure(homepageHtml, new Set())
+    if (entryHtmlMenu) {
+      menuContexts.push({ ...entryHtmlMenu.menu, extractionMethod: 'html', sourceUrl: homepageUrl })
+      notes.push(
+        `Menukaart herkend uit de HTML van ${homepageUrl}: ${entryHtmlMenu.itemCount} gerechten met prijs in ${entryHtmlMenu.menu.categories.length} rubrieken. Controleer rubrieken en prijzen.`
+      )
+    }
+  }
 
   // 2. Homepage field evidence — first source wins per field for the
   // actual value/evidence/hash a candidate page only ever fills a field

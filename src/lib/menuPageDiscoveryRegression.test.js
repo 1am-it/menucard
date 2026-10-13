@@ -170,6 +170,48 @@ test('analysis: a price-less HTML menu yields no menu, stays conservative and na
   assert.deepEqual(view.notes, result.notes);
 });
 
+test('entry page: a menu page entered directly is read from its already-fetched HTML, without any extra fetch', async () => {
+  const fetched = [];
+  const result = await runRestaurantSourceAnalysis({
+    homepageHtml: MENU_PAGE_LINE_LIST,
+    homepageUrl: MENU_URL,
+    fetchCandidate: async (url) => {
+      fetched.push(url);
+      return { status: 'error' };
+    },
+  });
+  assert.deepEqual(fetched, []); // the page links to no other menu page
+  assert.equal(result.menuContexts.length, 1);
+  assert.equal(result.menuContexts[0].sourceUrl, MENU_URL);
+  assert.equal(result.menuContexts[0].extractionMethod, 'html');
+  assert.equal(result.menuContexts[0].categories.reduce((n, c) => n + c.items.length, 0), 7);
+  assert.ok(result.notes.some((n) => n.startsWith(`Menukaart herkend uit de HTML van ${MENU_URL}: 7 gerechten met prijs in 3 rubrieken.`)));
+  assert.deepEqual(menuSourceUrls(result), [MENU_URL]);
+});
+
+test('entry page: opening hours, events, reservations and price-less lines on the entry page never become a menu', async () => {
+  const pages = [
+    '<h2>Openingstijden</h2><p>Maandag <strong>12.00</strong><br>Dinsdag <strong>12.00</strong><br>Vrijdag <strong>17.30</strong></p>',
+    '<h2>Agenda</h2><p>Pizza avond op 12 oktober <strong>15</strong><br>Wijnproeverij 24 oktober <strong>25</strong><br>Live muziek 2 november <strong>10</strong></p>',
+    '<h2>Reserveren</h2><p>Tafel voor twee <strong>10</strong><br>Tafel voor vier <strong>20</strong><br>Tafel voor zes <strong>30</strong></p>',
+    '<h3>Koud</h3><p>Fictief gerecht een<br>Fictief gerecht twee<br>Fictief gerecht drie</p>',
+  ];
+  for (const body of pages) {
+    const result = await runRestaurantSourceAnalysis({
+      homepageHtml: `<html><body>${body}</body></html>`,
+      homepageUrl: HOME_URL,
+      fetchCandidate: async () => ({ status: 'error' }),
+    });
+    assert.deepEqual(result.menuContexts, [], body.slice(0, 40));
+  }
+});
+
+test('entry page: the homepage-with-discovered-menu-page path is unchanged when the homepage itself holds no menu', async () => {
+  const result = await analyse(MENU_PAGE_LINE_LIST);
+  assert.equal(result.menuContexts.length, 1);
+  assert.equal(result.menuContexts[0].sourceUrl, MENU_URL);
+});
+
 test('analysis: a JSON-LD menu on the page still wins; the HTML recognizer is not used then', async () => {
   const jsonLd = `<script type="application/ld+json">${JSON.stringify({
     '@context': 'https://schema.org',
