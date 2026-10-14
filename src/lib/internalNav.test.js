@@ -78,7 +78,7 @@ test('hasAnyKnownRole: true for any of internal/editor/owner, false for zero row
 test('resolveVisibleModules: an internal-only account sees exactly Dekkingsoverzicht, Onboarding Restaurant, Beheer, Nieuwe aanleveringen, Bronwerkvoorraad, Bronnen beoordelen, and Profielconcepten — not Beoordelen (editor-only)', () => {
   const modules = resolveVisibleModules([{ role: 'internal' }]);
   const ids = modules.map((m) => m.id);
-  assert.deepEqual(ids.sort(), ['coverage', 'import-inbox', 'manage', 'onboarding-restaurant', 'profile-drafts', 'source-triage', 'source-workqueue']);
+  assert.deepEqual(ids.sort(), ['coverage', 'import-inbox', 'manage', 'menu-concepts', 'onboarding-restaurant', 'profile-drafts', 'source-triage', 'source-workqueue']);
 });
 
 test('resolveVisibleModules: an editor-only account sees exactly Beoordelen (moderation) — not any internal-only module', () => {
@@ -98,7 +98,7 @@ test('resolveVisibleModules: an account with no roles at all sees zero modules',
 test('resolveVisibleModules: a multi-role (internal + editor) account sees the full union, not just one role\'s subset', () => {
   const modules = resolveVisibleModules([{ role: 'internal' }, { role: 'editor' }]);
   const ids = modules.map((m) => m.id).sort();
-  assert.deepEqual(ids, ['coverage', 'import-inbox', 'manage', 'moderation', 'onboarding-restaurant', 'profile-drafts', 'source-triage', 'source-workqueue']);
+  assert.deepEqual(ids, ['coverage', 'import-inbox', 'manage', 'menu-concepts', 'moderation', 'onboarding-restaurant', 'profile-drafts', 'source-triage', 'source-workqueue']);
 });
 
 test('resolveVisibleModules: every entry links to an existing internal route with a non-empty label and a recognized required role', () => {
@@ -124,7 +124,7 @@ test('groupModulesByPlacement: splits Dekkingsoverzicht and Onboarding Restauran
   const modules = resolveVisibleModules([{ role: 'internal' }, { role: 'editor' }]);
   const { primary, workqueue } = groupModulesByPlacement(modules);
   assert.deepEqual(primary.map((m) => m.id), ['coverage', 'onboarding-restaurant']);
-  assert.deepEqual(workqueue.map((m) => m.id), ['manage', 'import-inbox', 'source-workqueue', 'source-triage', 'profile-drafts', 'moderation']);
+  assert.deepEqual(workqueue.map((m) => m.id), ['manage', 'import-inbox', 'source-workqueue', 'source-triage', 'menu-concepts', 'profile-drafts', 'moderation']);
 });
 
 test('groupModulesByPlacement: an internal-only account never sees Beoordelen in the workqueue group — role boundaries hold through the grouping step too', () => {
@@ -419,4 +419,13 @@ test('BE-24/BE-25: Bronnen beoordelen (formerly shown as Brontriage) is one inte
   assert.ok(!('count' in entry) && !('badge' in entry));
   assert.ok(!resolveVisibleModules([{ role: 'editor' }]).some((m) => m.id === 'source-triage'));
   assert.ok(!resolveVisibleModules([{ role: 'owner', restaurant_id: '1' }]).some((m) => m.id === 'source-triage'));
+});
+
+test('BE-17 Menuconcepten beoordelen: one internal-only Werkvoorraad entry directly after Bronnen beoordelen, without a count', () => {
+  const ids = INTERNAL_MODULES.map((m) => m.id);
+  const entry = INTERNAL_MODULES.find((m) => m.id === 'menu-concepts');
+  assert.deepEqual(entry, { id: 'menu-concepts', label: 'Menuconcepten beoordelen', href: '/internal/menu-concepts', requiredRole: 'internal', placement: 'workqueue', subtitle: 'Concepten controleren en intern goedkeuren' });
+  assert.equal(ids.indexOf('menu-concepts'), ids.indexOf('source-triage') + 1);
+  assert.ok(!resolveVisibleModules([{ role: 'editor' }]).some((m) => m.id === 'menu-concepts'));
+  assert.ok(!resolveVisibleModules([{ role: 'owner', restaurant_id: '1' }]).some((m) => m.id === 'menu-concepts'));
 });
