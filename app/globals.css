@@ -37,7 +37,7 @@
   --accent-surface:        #2A2109;
   --accent-surface-strong: #3A2D0C;
   --accent-glow:           rgba(242, 195, 91, 0.35);
-  --wordmark:              #F2C35B;
+  --wordmark:              #FFFFFF;
   --wordmark-icon:         #F2C35B;
   --nav-indicator:         #F2C35B;
   --mark-bg:               #3A2D0C;
@@ -448,29 +448,34 @@ header, .site-header {
 }
 
 /* ── Woordmerk: Onze Menukaarten (src/components/Wordmark.js) ──
-   Eén kleur (--wordmark), gestapeld "ONZE / Menukaarten", menukaartmotief.
-   Geen gesplitste accentbehandeling van een woorddeel. */
+   Logo E2 (2026-10-14): okertegel met "om" + gestapeld "onze / menukaarten".
+   Tegel = --accent-fill met --on-accent-fill (zelfde paar als de primaire
+   knop); "onze" rustig in --text-secondary, "menukaarten" vet in --wordmark. */
 .wordmark-wrap { display: inline-flex; align-items: center; gap: 14px; flex-shrink: 0; min-width: 0; }
 .wordmark {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
+  gap: 10px;
   color: var(--wordmark);
   text-decoration: none;
   flex-shrink: 0;
   border-radius: var(--radius-sm);
 }
 .wordmark:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 3px; }
-/* Kleurtaal v2: licht woordmerk-tekst #1A1410 + icoon #B28110; donker beide oker. */
-.wordmark-mark { flex-shrink: 0; color: var(--wordmark-icon); }
-.wordmark-text { display: inline-flex; flex-direction: column; line-height: 1; }
-.wordmark-top { font-size: 9px; font-weight: 700; letter-spacing: 0.32em; text-transform: uppercase; }
-.wordmark-main { font-size: 19px; font-weight: 800; letter-spacing: -0.02em; margin-top: 3px; }
-.wordmark--sm .wordmark-top { font-size: 7px; letter-spacing: 0.3em; }
-.wordmark--sm .wordmark-main { font-size: 15px; margin-top: 2px; }
+.wordmark-mark { flex-shrink: 0; width: 26px; height: 26px; }
+.wordmark-tile { fill: var(--accent-fill); }
+.wordmark-om { stroke: var(--on-accent-fill); }
+.wordmark-text { display: inline-flex; flex-direction: column; line-height: 1.02; letter-spacing: -0.02em; }
+.wordmark-top { font-size: 18px; font-weight: 500; color: var(--text-secondary); }
+.wordmark-main { font-size: 18px; font-weight: 800; margin-top: 1px; }
+.wordmark--sm .wordmark-top,
+.wordmark--sm .wordmark-main { font-size: 15px; }
 .wordmark-descriptor { font-size: 13px; color: var(--text-secondary); white-space: nowrap; }
 @media (max-width: 720px) {
   .wordmark-descriptor { display: none; }
+  .wordmark-wrap .wordmark-mark { width: 24px; height: 24px; }
+  .wordmark-wrap .wordmark-top,
+  .wordmark-wrap .wordmark-main { font-size: 16px; }
 }
 
 .back-btn {
@@ -2354,7 +2359,7 @@ mark.search-highlight {
   border-radius: var(--radius-pill);
 }
 .internal-nav-home svg { width: 16px; height: 16px; flex-shrink: 0; }
-.internal-nav-home .wordmark-mark { width: 20px; height: 20px; }
+.internal-nav-home .wordmark-mark { width: 26px; height: 26px; }
 .internal-nav-home[aria-current="page"] { background: var(--accent-surface); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 .internal-nav-link {
   font-size: 13px;
