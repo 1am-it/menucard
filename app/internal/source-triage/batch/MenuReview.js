@@ -17,7 +17,7 @@
 
 import { useMemo, useState } from 'react'
 import StatusIcon from '@/src/components/StatusIcon'
-import { STATUS, buildMenuConcept, displayPrice, normalizeName } from '@/src/lib/menuConcept'
+import { STATUS, buildMenuConcept, displayPrice, removalKey } from '@/src/lib/menuConcept'
 import { formatPath } from '@/src/lib/menuHierarchy'
 
 /**
@@ -227,11 +227,14 @@ export function RemovedDecisions({ idPrefix, removed, readOnly, onDecide }) {
       </legend>
       <ul className="bta-removed-list">
         {removed.map((l) => {
-          const key = normalizeName(l.name)
+          const key = removalKey(l)
           return (
             <li key={l.id}>
               <div className="bta-removed-head">
-                <span className="bta-dish">{l.name}</span>
+                <span className="bta-dish">
+                  {l.name}
+                  {l.menuScope ? <span className="bta-muted"> · {l.menuScope}</span> : null}
+                </span>
                 <span className="bta-price">{displayPrice(l.price) || 'geen prijs'}</span>
                 {!l.decision && (
                   <span className="status-badge status-badge--neutral bta-badge">

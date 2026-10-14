@@ -35,4 +35,14 @@ function groupHeadingsBefore(categories, index) {
   return current.slice(same).map((label, k) => ({ label, depth: same + k }));
 }
 
-module.exports = { FALLBACK_NAME, cleanLabels, categoryPath, groupHeadingsBefore };
+/**
+ * The menu variant a section belongs to — its outermost group ("Lunch",
+ * "Diner"), exactly the group the export writes; '' for a flat section. The
+ * same dish may appear once in every variant; comparisons are per variant.
+ */
+function menuScopeOf(path) {
+  const labels = cleanLabels(path);
+  return labels.length > 1 ? labels[0] : '';
+}
+
+module.exports = { FALLBACK_NAME, cleanLabels, categoryPath, groupHeadingsBefore, menuScopeOf };
