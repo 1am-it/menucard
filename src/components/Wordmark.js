@@ -1,17 +1,16 @@
 import Link from 'next/link'
 
-// Onze Menukaarten — gedeeld woordmerk (gekozen Claude Design-richting
-// "5 · Oker licht — uitgewerkt", zie docs/guides/design-reference.md,
-// "Wordmark and brand accent").
+// Onze Menukaarten — gedeeld woordmerk, logo E2 "om-tegel" (gekozen
+// 2026-10-14, Claude Design-canvas "Logo richting E", variant E2; zie
+// docs/guides/design-reference.md, "Wordmark and brand accent").
 //
-// - Gestapeld: "ONZE" (klein, spatiëring, hoofdletters via CSS) boven
-//   "Menukaarten". De link krijgt een expliciete toegankelijke naam
-//   (handoff: "Onze Menukaarten, naar de startpagina"): zonder die naam
-//   leest de browser "ONZE Menukaarten" (text-transform), gemeten in Edge.
-// - Eén kleur (--wordmark), geen gesplitste accentbehandeling van een
-//   woorddeel.
-// - Het motief is een gevouwen menukaart: inline SVG, currentColor,
-//   aria-hidden. Geen externe asset, geen font.
+// - Teken: afgeronde tegel in --accent-fill met een getekend "om"-monogram
+//   in --on-accent-fill. Inline SVG, aria-hidden, geen externe asset, geen
+//   font. Dezelfde vorm is de favicon (app/icon.svg).
+// - Tekst: gestapeld "onze" (rustig, --text-secondary) boven "menukaarten"
+//   (vet, --wordmark), in kleine letters, systeemletter. De link krijgt een
+//   expliciete toegankelijke naam (handoff: "Onze Menukaarten, naar de
+//   startpagina"), zodat schermlezers de naam met hoofdletters horen.
 // - De descriptor "Menukaarten in Breda" is optioneel en staat naast het
 //   woordmerk, buiten de link.
 //
@@ -22,23 +21,21 @@ import Link from 'next/link'
 
 export const WORDMARK_HOME_LABEL = 'Onze Menukaarten, naar de startpagina'
 
-export function WordmarkMark({ size = 24 }) {
+export function WordmarkMark({ size = 26 }) {
   return (
     <svg
       className="wordmark-mark"
       width={size}
       height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-      strokeLinejoin="round"
+      viewBox="0 0 32 32"
       aria-hidden="true"
       focusable="false"
     >
-      <path d="M3.5 5.5L11 3.5v17l-7.5 2z" />
-      <path d="M11 3.5l9.5 2v17L11 20.5z" />
-      <path d="M13.8 9.2h4.2M13.8 12.2h4.2M13.8 15.2h2.6" />
+      <rect className="wordmark-tile" width="32" height="32" rx="8" />
+      <g className="wordmark-om" fill="none" strokeWidth="2.8" strokeLinecap="round">
+        <circle cx="10.6" cy="16.8" r="4.1" />
+        <path d="M16.5 20.9v-5.6a2.4 2.4 0 014.8 0v5.6M21.3 15.3a2.4 2.4 0 014.8 0v5.6" />
+      </g>
     </svg>
   )
 }
@@ -46,8 +43,8 @@ export function WordmarkMark({ size = 24 }) {
 function WordmarkText() {
   return (
     <span className="wordmark-text">
-      <span className="wordmark-top">Onze</span>{' '}
-      <span className="wordmark-main">Menukaarten</span>
+      <span className="wordmark-top">onze</span>{' '}
+      <span className="wordmark-main">menukaarten</span>
     </span>
   )
 }
@@ -69,7 +66,7 @@ export default function Wordmark({ href = '/', descriptor = true, size = 'md', l
 export function WordmarkInline() {
   return (
     <span className="wordmark wordmark--sm">
-      <WordmarkMark size={20} />
+      <WordmarkMark size={26} />
       <WordmarkText />
     </span>
   )
