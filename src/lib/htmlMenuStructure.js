@@ -616,7 +616,8 @@ function blockEndPrice(block, budget) {
 /**
  * The blocks of `node` when they form a repeated dish-block structure: at
  * least two blocks with an end price in this element, or — one block per
- * element — in the run of `p`/`div` siblings it belongs to. Otherwise null.
+ * element — in the contiguous run of `p`/`div` dish-block siblings it
+ * belongs to (a heading or any other element ends the run). Otherwise null.
  */
 function formattedBlockRun(node, budget, markerCounter) {
   const blocks = formattedBlocks(node, budget, markerCounter)
@@ -625,17 +626,20 @@ function formattedBlockRun(node, budget, markerCounter) {
   if (priced(blocks) >= 2) return blocks
   const parent = node.parent
   if (!parent) return null
-  if (parent.formattedRunPriced === undefined) {
+  // Only the CONTIGUOUS run of dish-block siblings around this element: a
+  // heading, any other element or text between them ends the run, so blocks
+  // under a next heading (or elsewhere on the page) never count.
+  const fits = (sibling) => (sibling.tag === 'p' || sibling.tag === 'div') && !isHeading(sibling) && formattedBlocks(sibling, budget, markerCounter) !== null
+  const siblings = parent.children
+  let start = node.index
+  while (start > 0 && (budget.spend(1), fits(siblings[start - 1]))) start -= 1
+  if (!parent.formattedRunPriced) parent.formattedRunPriced = new Map()
+  if (!parent.formattedRunPriced.has(start)) {
     let total = 0
-    for (const sibling of parent.children) {
-      budget.spend(1)
-      if (sibling.tag !== 'p' && sibling.tag !== 'div') continue
-      const own = formattedBlocks(sibling, budget, markerCounter)
-      if (own) total += priced(own)
-    }
-    parent.formattedRunPriced = total
+    for (let i = start; i < siblings.length && (budget.spend(1), fits(siblings[i])); i += 1) total += priced(formattedBlocks(siblings[i], budget, markerCounter))
+    parent.formattedRunPriced.set(start, total)
   }
-  return parent.formattedRunPriced >= 2 ? blocks : null
+  return parent.formattedRunPriced.get(start) >= 2 ? blocks : null
 }
 
 /** Unit labels that belong to one of several prices ("glas 5,50 / fles

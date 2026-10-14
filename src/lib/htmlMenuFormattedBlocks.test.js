@@ -103,3 +103,43 @@ test('the existing line_break_list keeps precedence for a price in its own inlin
   const result = extractHtmlMenuStructure(html);
   assert.deepEqual(items(result).map((i) => i[5]), ['line_break_list', 'line_break_list', 'line_break_list']);
 });
+
+test('the sibling run is strictly contiguous: one block under a heading never borrows blocks from under the next heading', () => {
+  const html = `<div>
+    <h2>Special</h2>
+    <p><strong>Fictieve weekspecial</strong><br>verrassing van de chef<br>24</p>
+    <h2>Lunch</h2>
+    <p><strong>Fictieve soep</strong><br>pompoen<br>7,50</p>
+    <p><strong>Fictieve salade</strong><br>geitenkaas<br>13,50</p>
+    <p><strong>Fictief broodje</strong><br>oude kaas<br>8,50</p>
+  </div>`;
+  const result = extractHtmlMenuStructure(html);
+  assert.equal(result.status, 'parsed');
+  assert.deepEqual(items(result).map((i) => [i[0], i[1]]), [['Lunch', 'Fictieve soep'], ['Lunch', 'Fictieve salade'], ['Lunch', 'Fictief broodje']]);
+});
+
+test('a contiguous run of single-block sibling paragraphs under one heading is recognised', () => {
+  const html = `<section><h2>Diner</h2>
+    <p><strong>Fictieve runderstoof</strong><br>25</p>
+    <p><strong>Fictieve zeebaars</strong><br>27,50</p>
+    <p><strong>Fictieve risotto</strong><br>19</p></section>`;
+  const result = extractHtmlMenuStructure(html);
+  assert.deepEqual(items(result).map((i) => [i[1], i[3]]), [['Fictieve runderstoof', 2500], ['Fictieve zeebaars', 2750], ['Fictieve risotto', 1900]]);
+});
+
+test('an ordinary paragraph or another element between single blocks ends the run', () => {
+  const plainParagraph = `<section><h2>Lunch</h2>
+    <p><strong>Fictieve soep</strong><br>7,50</p>
+    <p>Alle gerechten worden vers bereid.</p>
+    <p><strong>Fictieve salade</strong><br>13,50</p>
+    <p>Vraag naar onze dagspecial.</p>
+    <p><strong>Fictief broodje</strong><br>8,50</p></section>`;
+  assert.equal(extractHtmlMenuStructure(plainParagraph).status, 'unparsed');
+  const otherElement = `<section><h2>Lunch</h2>
+    <p><strong>Fictieve soep</strong><br>7,50</p>
+    <hr>
+    <p><strong>Fictieve salade</strong><br>13,50</p>
+    <img src="/fictief.png" alt="">
+    <p><strong>Fictief broodje</strong><br>8,50</p></section>`;
+  assert.equal(extractHtmlMenuStructure(otherElement).status, 'unparsed');
+});
