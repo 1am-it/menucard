@@ -105,6 +105,11 @@ const INTERNAL_MODULES = [
   // Internal-only, directly after Bronwerkvoorraad: the BE-24 v1 product
   // decision. No badge count.
   { id: 'source-triage', label: 'Bronnen beoordelen', href: '/internal/source-triage', requiredRole: 'internal', placement: 'workqueue', subtitle: 'Bronvoorstellen vastleggen en beoordelen' },
+  // BE-17 Menuconcepten beoordelen v1 — review the internal menu concepts
+  // saved from Batchanalyse: correct as a new version, approve internally or
+  // reject. Internal-only, directly after Bronnen beoordelen; nothing is
+  // published. No badge count.
+  { id: 'menu-concepts', label: 'Menuconcepten beoordelen', href: '/internal/menu-concepts', requiredRole: 'internal', placement: 'workqueue', subtitle: 'Concepten controleren en intern goedkeuren' },
   { id: 'profile-drafts', label: 'Profielconcepten', href: '/internal/profile-drafts', requiredRole: 'internal', placement: 'workqueue', subtitle: 'Klaarzetten' },
   // BE-17/PLATFORM-06's existing `editor`-only Moderation module — route,
   // authorization, and data model completely unchanged. Per BE-20's own

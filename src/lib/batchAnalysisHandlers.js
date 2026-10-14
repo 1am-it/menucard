@@ -8,8 +8,9 @@
 //   complete_source_analysis_job, fail_source_analysis_job,
 //   create_source_triage_proposal + decide_source_triage_proposal.
 // Fetching happens only in the injected `analyze` (the shared
-// src/lib/sourceAnalysisPipeline.js). Nothing here publishes, activates a
-// source or creates a concept. Processing runs only when the starter's open
+// src/lib/sourceAnalysisPipeline.js). Nothing here publishes or activates a
+// source; "Concept opslaan" writes an internal concept version only through
+// src/lib/menuConceptStore.js. Processing runs only when the starter's open
 // page calls `process` — there is no worker, cron or schedule.
 
 'use strict';
@@ -27,33 +28,14 @@ const {
   summarizeItems,
   amsterdamDayStart,
 } = require('./batchAnalysis');
-const { liveMenuLines, buildMenuConcept } = require('./menuConcept');
-const { validateSnapshotProposalInput } = require('./menuSnapshotProposals');
+const { liveMenuLines, buildMenuConcept, sanitizeEdits } = require('./menuConcept');
+const { createConceptVersion } = require('./menuConceptStore');
 
 // One internal menu concept per restaurant: BE-17 snapshot proposals in
 // the context "<restaurantId>-menukaart", versioned.
 function conceptContext(restaurantId) {
   return `${restaurantId}-menukaart`;
 }
-const MAX_EDITED_LINES = 500;
-
-/** Only known keys and short values from the client's edits. */
-function sanitizeEdits(raw) {
-  const out = { lines: {}, removed: null };
-  if (!raw || typeof raw !== 'object') return out;
-  if (raw.removed === 'keep' || raw.removed === 'remove') out.removed = raw.removed;
-  const lines = raw.lines && typeof raw.lines === 'object' ? raw.lines : {};
-  for (const [id, e] of Object.entries(lines).slice(0, MAX_EDITED_LINES)) {
-    if (!/^\d+\.\d+\.\d+$/.test(id) || !e || typeof e !== 'object') continue;
-    const clean = {};
-    if (e.exclude === true) clean.exclude = true;
-    if (e.accept === true) clean.accept = true;
-    for (const key of ['name', 'price', 'category']) if (typeof e[key] === 'string' && e[key].length <= 200) clean[key] = e[key];
-    out.lines[id] = clean;
-  }
-  return out;
-}
-
 const FORBIDDEN = 'Alleen interne medewerkers kunnen de batchanalyse gebruiken.';
 const LOAD_ERROR = 'De batchanalyse kon niet worden geladen.';
 const RECENT_BATCH_LIMIT = 10;
@@ -187,6 +169,7 @@ function createBatchAnalysisHandlers(deps) {
       const receipt = job && job.result_receipt_id ? receiptById.get(job.result_receipt_id) || null : null;
       const latest = concepts.find((c) => c.restaurant_id === view.restaurant.id) || null;
       view.concept = {
+        receiptId: receipt ? receipt.id : null,
         menus: (receipt && Array.isArray(receipt.menus) && receipt.menus) || [],
         liveLines: liveMenuLines(liveMenus, view.restaurant.id),
         latest: latest ? { version: latest.version, created_at: latest.created_at } : null,
@@ -546,48 +529,22 @@ function createBatchAnalysisHandlers(deps) {
       return reply(409, { error: 'Los eerst de blokkades op.', reason: 'blockers', blockers: concept.blockers });
     }
 
-    const capturedContent = { categories: concept.content.categories };
-    const validation = validateSnapshotProposalInput({
-      restaurantId: item.restaurant.id,
-      menuContext: conceptContext(item.restaurant.id),
-      sourceUrl: item.foundUrl,
-      sourceType: 'own_website',
-      qualityScore: 'medium',
-      capturedContent,
-    });
-    if (!validation.valid) return reply(400, { error: 'Het concept is ongeldig.', reason: validation.reason });
-    const contentHash = computeMenuHash(validation.capturedContent);
-
-    const { data: existing, error: existingError } = await supabase
-      .from('menu_snapshot_proposals')
-      .select('id, version, content_hash')
-      .eq('restaurant_id', validation.restaurantId)
-      .eq('menu_context', validation.menuContext)
-      .order('version', { ascending: false })
-      .limit(1);
-    if (existingError) return reply(500, { error: 'Het concept kon niet worden opgeslagen.' });
-    const latest = (existing || [])[0] || null;
-    if (latest && latest.content_hash === contentHash) {
-      return reply(200, { concept: { version: latest.version, unchanged: true } });
-    }
-
-    const version = latest ? latest.version + 1 : 1;
-    const { error } = await supabase.from('menu_snapshot_proposals').insert({
-      restaurant_id: validation.restaurantId,
-      menu_context: validation.menuContext,
-      source_url: validation.sourceUrl,
-      source_type: validation.sourceType,
-      originally_fetched_at: now().toISOString(),
-      content_hash: contentHash,
-      version,
-      quality_score: validation.qualityScore,
-      captured_content: validation.capturedContent,
-    });
-    if (error) {
-      if (error.code === '23505') return reply(409, { error: 'Er is net een nieuwere versie opgeslagen. Laad de pagina opnieuw.', reason: 'version_conflict' });
-      return reply(500, { error: 'Het concept kon niet worden opgeslagen.' });
-    }
-    return reply(201, { concept: { version, unchanged: false } });
+    const result = await createConceptVersion(
+      supabase,
+      {
+        restaurantId: item.restaurant.id,
+        menuContext: conceptContext(item.restaurant.id),
+        sourceUrl: item.foundUrl,
+        sourceType: 'own_website',
+        qualityScore: 'medium',
+        content: concept.content,
+        createdBy: auth.userId,
+        originReceiptId: item.concept.receiptId,
+        basedOnSnapshotId: null,
+      },
+      { computeMenuHash, now }
+    );
+    return reply(result.status, result.body);
   }
 
   return { getOverview, createBatch, processNext, confirmSources, reanalyze, saveConcept };

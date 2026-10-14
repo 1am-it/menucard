@@ -102,7 +102,9 @@ test('concept: removing missing dishes is an explicit choice; without a decision
   assert.equal(buildMenuConcept({ menus: MENUS, liveLines: liveMenuLines(LIVE, '9'), edits: base }).canSave, false);
   const removed = buildMenuConcept({ menus: MENUS, liveLines: liveMenuLines(LIVE, '9'), edits: { ...base, removed: 'remove' } });
   assert.equal(removed.canSave, true);
-  assert.ok(!JSON.stringify(removed.content).includes('Fictieve mousse'));
+  assert.ok(!JSON.stringify(removed.content.categories).includes('Fictieve mousse'));
+  // The decision itself travels with the version, so it is never asked again.
+  assert.deepEqual(removed.content.removed, [{ name: 'Fictieve mousse', decision: 'remove' }]);
 });
 
 test('concept: an invalid corrected price stays a blocker; a restaurant without a published menu has no removals', () => {
@@ -110,4 +112,44 @@ test('concept: an invalid corrected price stays a blocker; a restaurant without 
   assert.equal(concept.lines.find((l) => l.id === '0.1.1').status, 'missing_price');
   assert.deepEqual(concept.removed, []);
   assert.ok(concept.lines.filter((l) => l.status === 'new').length >= 2);
+});
+
+test('stored version: choices travel with it — accepted dishes and per-dish decisions are not asked again', () => {
+  const { storedConceptInput, mergeEdits } = require('./menuConcept');
+  const live = liveMenuLines(LIVE, '9');
+  const edits = { lines: { '0.1.1': { price: '19,5' }, '0.2.0': { accept: true }, '0.2.1': { exclude: true } }, removed: { 'fictieve mousse': 'remove' } };
+  const saved = buildMenuConcept({ menus: MENUS, liveLines: live, edits });
+  assert.equal(saved.canSave, true);
+  const stored = storedConceptInput(saved.content);
+  const reloaded = buildMenuConcept({ menus: stored.menus, liveLines: live, edits: stored.edits });
+  assert.deepEqual(reloaded.blockers, []);
+  assert.deepEqual(reloaded.content, saved.content); // a round trip changes nothing, so its hash is identical
+  assert.equal(reloaded.lines.find((l) => l.name === 'Fictief kaasplankje').from, '0.2.0');
+  // A reviewer may undo a stored acceptance; the blocker returns.
+  const undone = buildMenuConcept({ menus: stored.menus, liveLines: live, edits: mergeEdits(stored.edits, { lines: { '0.2.0': { accept: false } } }) });
+  assert.deepEqual(undone.blockers.map((b) => b.status), ['unclear_category']);
+});
+
+test('disappeared dishes are decided one by one; "Klopt zo" never settles a missing price', () => {
+  const live = [...liveMenuLines(LIVE, '9'), { id: 'x', name: 'Fictieve taart', price: '6.00', category: 'Dessert' }];
+  const base = { lines: { '0.1.1': { price: '19,5' }, '0.2.0': { accept: true }, '0.2.1': { exclude: true } } };
+  const half = buildMenuConcept({ menus: MENUS, liveLines: live, edits: { ...base, removed: { 'fictieve mousse': 'keep' } } });
+  assert.deepEqual(half.blockers.map((b) => b.status), ['removed']);
+  assert.match(half.blockers[0].label, /^1 gerecht /);
+  const both = buildMenuConcept({ menus: MENUS, liveLines: live, edits: { ...base, removed: { 'fictieve mousse': 'keep', 'fictieve taart': 'remove' } } });
+  assert.equal(both.canSave, true);
+  assert.deepEqual(both.content.removed, [{ name: 'Fictieve taart', decision: 'remove' }]);
+  const accepted = buildMenuConcept({ menus: MENUS, liveLines: [], edits: { lines: { '0.1.1': { accept: true } } } });
+  assert.equal(accepted.lines.find((l) => l.id === '0.1.1').status, 'missing_price');
+});
+
+test('browser edits are reduced to known keys and short values', () => {
+  const { sanitizeEdits } = require('./menuConcept');
+  const clean = sanitizeEdits({
+    canSave: true,
+    lines: { '0.0.1': { exclude: false, accept: 'yes', price: '9', status: 'new', name: 'x'.repeat(201) }, '../etc': { exclude: true } },
+    removed: { 'fictieve mousse': 'keep', 'fictieve taart': 'misschien' },
+  });
+  assert.deepEqual(clean, { lines: { '0.0.1': { exclude: false, price: '9' } }, removed: { 'fictieve mousse': 'keep' } });
+  assert.deepEqual(sanitizeEdits(null), { lines: {}, removed: null });
 });

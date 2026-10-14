@@ -57,15 +57,23 @@ function isUnclearCategory(name) {
   return UNCLEAR_CATEGORY_NAMES.has(text.toLowerCase()) || text.length > MAX_CATEGORY_NAME;
 }
 
-/** The recognised dishes, flattened with a stable id per line. */
+/**
+ * The recognised dishes, flattened with a stable id per line. `from` is the
+ * line's id in the original analysis result: the id itself for a receipt's
+ * menus, the stored reference for a saved concept (null for a dish kept from
+ * the current menu or a version saved before references were stored).
+ */
 function recognisedLines(menus) {
   const lines = [];
   (Array.isArray(menus) ? menus : []).forEach((menu, m) => {
     ((menu && Array.isArray(menu.categories) && menu.categories) || []).forEach((category, c) => {
       ((category && Array.isArray(category.items) && category.items) || []).forEach((item, i) => {
         if (!item || typeof item.name !== 'string' || !item.name.trim()) return;
+        const id = `${m}.${c}.${i}`;
         lines.push({
-          id: `${m}.${c}.${i}`,
+          id,
+          from: Object.prototype.hasOwnProperty.call(item, 'from') ? (typeof item.from === 'string' ? item.from : null) : id,
+          kept: item.kept === true,
           name: item.name.trim().slice(0, MAX_NAME),
           desc: typeof item.desc === 'string' && item.desc.trim() ? item.desc.trim() : null,
           price: normalizePrice(item.price),
@@ -123,15 +131,124 @@ function liveMenuLines(liveMenus, restaurantId) {
   return lines;
 }
 
+/** The fixed BE-17 rejection reasons (menu_snapshot_reviews.reason), with their visible label. */
+const REJECT_REASONS = {
+  source_unreliable: 'Bron onbetrouwbaar',
+  content_mismatch: 'Inhoud klopt niet met de bron',
+  duplicate_snapshot: 'Dubbel concept',
+  insufficient_content: 'Onvoldoende inhoud',
+  other: 'Andere reden',
+};
+
+const MAX_EDITED_LINES = 500;
+const MAX_EDIT_TEXT = 200;
+
+/**
+ * Edits as sent by a browser, reduced to what the concept understands. Never
+ * trusted beyond that: the concept and its blockers are always recomputed.
+ *   lines:   { [lineId]: { exclude?, accept?, name?, price?, category? } }
+ *            (exclude/accept may be false to undo a stored choice)
+ *   removed: 'keep' | 'remove' (every disappeared dish) or
+ *            { [normalizeName(dish)]: 'keep' | 'remove' }
+ */
+function sanitizeEdits(raw) {
+  const out = { lines: {}, removed: null };
+  if (!raw || typeof raw !== 'object') return out;
+  if (raw.removed === 'keep' || raw.removed === 'remove') out.removed = raw.removed;
+  else if (raw.removed && typeof raw.removed === 'object' && !Array.isArray(raw.removed)) {
+    out.removed = {};
+    for (const [key, decision] of Object.entries(raw.removed).slice(0, MAX_EDITED_LINES)) {
+      if (key.length <= MAX_EDIT_TEXT && (decision === 'keep' || decision === 'remove')) out.removed[key] = decision;
+    }
+  }
+  const lines = raw.lines && typeof raw.lines === 'object' ? raw.lines : {};
+  for (const [id, e] of Object.entries(lines).slice(0, MAX_EDITED_LINES)) {
+    if (!/^\d+\.\d+\.\d+$/.test(id) || !e || typeof e !== 'object') continue;
+    const clean = {};
+    for (const key of ['exclude', 'accept']) if (typeof e[key] === 'boolean') clean[key] = e[key];
+    for (const key of ['name', 'price', 'category']) if (typeof e[key] === 'string' && e[key].length <= MAX_EDIT_TEXT) clean[key] = e[key];
+    out.lines[id] = clean;
+  }
+  return out;
+}
+
+/** A reviewer's edits on top of a stored version's own choices. */
+function mergeEdits(base, delta) {
+  const lines = { ...((base && base.lines) || {}) };
+  for (const [id, e] of Object.entries((delta && delta.lines) || {})) lines[id] = { ...(lines[id] || {}), ...e };
+  const baseRemoved = base && base.removed;
+  const deltaRemoved = delta && delta.removed;
+  let removed = baseRemoved || null;
+  if (typeof deltaRemoved === 'string') removed = deltaRemoved;
+  else if (deltaRemoved && typeof deltaRemoved === 'object') {
+    removed = { ...(baseRemoved && typeof baseRemoved === 'object' ? baseRemoved : {}), ...deltaRemoved };
+  }
+  return { lines, removed };
+}
+
+/**
+ * A saved concept version (captured_content) as concept input: its dishes
+ * (with their reference to the original analysis) and the choices stored
+ * with it — dishes accepted as they are and decisions on disappeared dishes.
+ */
+function storedConceptInput(captured) {
+  const source = captured && Array.isArray(captured.categories) ? captured.categories : [];
+  const lines = {};
+  const categories = source.map((category, c) => ({
+    name: category && typeof category.name === 'string' ? category.name : '',
+    items: ((category && Array.isArray(category.items) && category.items) || []).map((item, i) => {
+      if (item && item.accepted === true) lines[`0.${c}.${i}`] = { accept: true };
+      return {
+        name: item && item.name,
+        desc: item && item.desc,
+        price: item && item.price,
+        from: item && typeof item.from === 'string' ? item.from : null,
+        kept: Boolean(item && item.kept === true),
+      };
+    }),
+  }));
+  const removed = {};
+  for (const r of (captured && Array.isArray(captured.removed) && captured.removed) || []) {
+    if (r && typeof r.name === 'string' && (r.decision === 'keep' || r.decision === 'remove')) removed[normalizeName(r.name)] = r.decision;
+  }
+  return { menus: [{ categories }], edits: { lines, removed } };
+}
+
+/** What a menu shows the public — the projection compared for "previously rejected". */
+function publicMenu(content) {
+  const categories = (content && Array.isArray(content.categories) ? content.categories : []).map((c) => ({
+    name: c && typeof c.name === 'string' ? c.name : '',
+    items: ((c && Array.isArray(c.items) && c.items) || []).map((i) => ({ name: i && i.name, desc: (i && i.desc) || null, price: (i && i.price) || null })),
+  }));
+  return { categories };
+}
+
+function removedDecisionFor(decisions, name) {
+  if (decisions === 'keep' || decisions === 'remove') return decisions;
+  if (decisions && typeof decisions === 'object') {
+    const d = decisions[normalizeName(name)];
+    if (d === 'keep' || d === 'remove') return d;
+  }
+  return null;
+}
+
+function plural(n, one, many) {
+  return `${n} ${n === 1 ? one : many}`;
+}
+
 /**
  * The concept.
- *   menus:     recognised menus (candidate_summary.menus)
+ *   menus:     recognised menus (candidate_summary.menus), or a stored
+ *              version via storedConceptInput(...)
  *   liveLines: liveMenuLines(...) for the restaurant
- *   edits:     { lines: { [id]: { exclude?, name?, price?, category?, accept? } }, removed?: 'keep' | 'remove' }
+ *   edits:     see sanitizeEdits
+ * A missing price, an unclear category, a duplicate and a disappeared dish
+ * without a decision are blockers. "Klopt zo" (accept) only settles an
+ * unclear category or a duplicate, never a missing price.
  */
 function buildMenuConcept({ menus, liveLines, edits }) {
   const lineEdits = (edits && edits.lines && typeof edits.lines === 'object' && edits.lines) || {};
-  const removedDecision = edits && (edits.removed === 'keep' || edits.removed === 'remove') ? edits.removed : null;
+  const decisions = edits ? edits.removed : null;
   const live = Array.isArray(liveLines) ? liveLines : [];
   const liveByName = new Map();
   for (const l of live) if (!liveByName.has(normalizeName(l.name))) liveByName.set(normalizeName(l.name), l);
@@ -142,7 +259,16 @@ function buildMenuConcept({ menus, liveLines, edits }) {
     const editedPrice = e.price !== undefined && e.price !== null && e.price !== '' ? normalizePrice(String(e.price)) : undefined;
     const price = editedPrice !== undefined ? editedPrice : line.price;
     const category = typeof e.category === 'string' && e.category.trim() ? e.category.trim().slice(0, MAX_CATEGORY_NAME) : line.category;
-    return { ...line, original: { name: line.name, price: line.price, category: line.category }, name, price, category, excluded: e.exclude === true, accepted: e.accept === true, edited: Boolean(e.name || e.price || e.category) };
+    return {
+      ...line,
+      original: { name: line.name, price: line.price, category: line.category },
+      name,
+      price,
+      category,
+      excluded: e.exclude === true,
+      accepted: e.accept === true,
+      edited: Boolean(e.name || e.price || e.category),
+    };
   });
 
   const included = lines.filter((l) => !l.excluded);
@@ -151,6 +277,7 @@ function buildMenuConcept({ menus, liveLines, edits }) {
 
   for (const l of lines) {
     const liveMatch = liveByName.get(normalizeName(l.name));
+    const needsAcceptance = isUnclearCategory(l.category) || nameCount.get(normalizeName(l.name)) > 1;
     if (l.excluded) l.status = 'excluded';
     else if (!l.price) l.status = 'missing_price';
     else if (isUnclearCategory(l.category) && !l.accepted) l.status = 'unclear_category';
@@ -158,15 +285,28 @@ function buildMenuConcept({ menus, liveLines, edits }) {
     else if (liveMatch && liveMatch.price && liveMatch.price !== l.price) l.status = 'price_changed';
     else if (liveMatch) l.status = 'unchanged';
     else l.status = 'new';
+    // An acceptance is only kept where it settles something.
+    l.accepted = l.accepted && !l.excluded && Boolean(l.price) && needsAcceptance;
     l.livePrice = liveMatch ? liveMatch.price : null;
+    l.live = liveMatch ? { name: liveMatch.name, desc: liveMatch.desc || null, price: liveMatch.price, category: liveMatch.category } : null;
   }
 
   const recognisedNames = new Set(included.map((l) => normalizeName(l.name)));
-  const removed = live.filter((l) => !recognisedNames.has(normalizeName(l.name)));
+  const removed = live
+    .filter((l) => !recognisedNames.has(normalizeName(l.name)))
+    .map((l) => ({ ...l, decision: removedDecisionFor(decisions, l.name) }));
+  const undecided = removed.filter((l) => !l.decision);
 
-  const blockers = lines.filter((l) => STATUS[l.status].blocker).map((l) => ({ id: l.id, name: l.name, status: l.status, label: STATUS[l.status].label }));
-  if (removed.length > 0 && !removedDecision) {
-    blockers.push({ id: 'removed', name: null, status: 'removed', label: `${removed.length} ${removed.length === 1 ? 'gerecht' : 'gerechten'} van de huidige kaart ontbreken in de bron` });
+  const blockers = lines
+    .filter((l) => STATUS[l.status].blocker)
+    .map((l) => ({ id: l.id, name: l.name, status: l.status, label: STATUS[l.status].label }));
+  if (undecided.length > 0) {
+    blockers.push({
+      id: 'removed',
+      name: null,
+      status: 'removed',
+      label: `${plural(undecided.length, 'gerecht', 'gerechten')} van de huidige kaart zonder keuze behouden of verwijderen`,
+    });
   }
 
   const counts = {};
@@ -181,19 +321,31 @@ function buildMenuConcept({ menus, liveLines, edits }) {
     }
     c.items.push(item);
   };
-  for (const l of included) add(l.category, { name: l.name, desc: l.desc, price: l.price });
-  if (removedDecision === 'keep') for (const l of removed) add(l.category || 'Huidige kaart', { name: l.name, desc: l.desc, price: l.price });
+  for (const l of included) {
+    const item = { name: l.name, desc: l.desc, price: l.price };
+    if (l.from) item.from = l.from;
+    if (l.kept) item.kept = true;
+    if (l.accepted) item.accepted = true;
+    add(l.category, item);
+  }
+  for (const l of removed) {
+    if (l.decision === 'keep') add(l.category || 'Huidige kaart', { name: l.name, desc: l.desc, price: l.price, kept: true });
+  }
+  const content = { categories: conceptCategories };
+  const removedForContent = removed.filter((l) => l.decision === 'remove').map((l) => ({ name: l.name, decision: 'remove' }));
+  if (removedForContent.length > 0) content.removed = removedForContent;
 
+  const uniform = removed.length > 0 && removed.every((l) => l.decision === removed[0].decision) ? removed[0].decision : null;
   return {
     lines,
     removed,
-    removedDecision,
+    removedDecision: uniform,
     blockers,
     canSave: blockers.length === 0 && conceptCategories.some((c) => c.items.length > 0),
     counts,
     safeCount: lines.filter((l) => l.status === 'unchanged' || l.status === 'new').length,
     attentionLines: lines.filter((l) => STATUS[l.status].attention),
-    content: { categories: conceptCategories },
+    content,
   };
 }
 
@@ -207,4 +359,9 @@ module.exports = {
   summarizeRecognisedMenu,
   liveMenuLines,
   buildMenuConcept,
+  sanitizeEdits,
+  mergeEdits,
+  storedConceptInput,
+  publicMenu,
+  REJECT_REASONS,
 };

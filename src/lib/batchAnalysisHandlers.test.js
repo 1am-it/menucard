@@ -33,8 +33,13 @@ function fakeSupabase({ tables = {}, rpc = {} } = {}) {
         },
         insert(row) {
           calls.push({ insert: table, row });
-          (tables[table] = tables[table] || []).push(row);
-          return Promise.resolve({ error: null });
+          const stored = { id: (tables[table] || []).length + 100, ...row };
+          (tables[table] = tables[table] || []).push(stored);
+          const result = { error: null };
+          return {
+            select: () => ({ maybeSingle: () => Promise.resolve({ data: { id: stored.id }, error: null }) }),
+            then: (resolve, reject) => Promise.resolve(result).then(resolve, reject),
+          };
         },
         eq(col, val) {
           state.filters.push((r) => r[col] === val);
@@ -401,7 +406,8 @@ test('concept: once resolved, it is saved as an internal BE-17 proposal (next ve
   const edits = { lines: { '0.0.2': { price: '15,5' } }, removed: 'keep' };
   const res = await makeHandlers({ supabase, liveMenus: LIVE_BISTRO }).handlers.saveConcept(request({ job_id: JOB, edits }), BATCH);
   assert.equal(res.status, 201);
-  assert.deepEqual(res.body.concept, { version: 3, unchanged: false });
+  assert.equal(res.body.concept.version, 3);
+  assert.equal(res.body.concept.unchanged, false);
   const inserts = supabase.calls.filter((c) => c.insert);
   assert.deepEqual(inserts.map((c) => c.insert), ['menu_snapshot_proposals']);
   const row = inserts[0].row;
@@ -409,6 +415,11 @@ test('concept: once resolved, it is saved as an internal BE-17 proposal (next ve
   assert.equal(row.menu_context, 'bistro-menukaart');
   assert.equal(row.source_url, FOUND);
   assert.equal(row.source_type, 'own_website');
+  // Audit (0018): maker, analysis result, and no base version for a fresh concept from the analysis.
+  assert.equal(row.created_by, STARTER);
+  assert.equal(row.origin_receipt_id, 'r1');
+  assert.equal(row.based_on_snapshot_id, null);
+  assert.deepEqual(row.captured_content.categories[0].items.map((i) => i.from), ['0.0.0', '0.0.1', '0.0.2', undefined]);
   assert.deepEqual(row.captured_content.categories[0].items.map((i) => `${i.name} ${i.price}`), ['Fictieve soep 7.50', 'Fictieve salade 12.50', 'Fictief tartaar 15.50', 'Fictieve mousse 8.00']);
   assert.equal(supabase.calls.filter((c) => c.rpc).length, 0);
 });
@@ -445,7 +456,8 @@ test('concept: identical content is not saved again', async () => {
   const second = conceptFixture({ existing: [{ id: 1, restaurant_id: 'bistro', menu_context: 'bistro-menukaart', version: 1, content_hash: hash }] });
   const res = await makeHandlers({ supabase: second, liveMenus: LIVE_BISTRO }).handlers.saveConcept(request({ job_id: JOB, edits }), BATCH);
   assert.equal(res.status, 200);
-  assert.deepEqual(res.body.concept, { version: 1, unchanged: true });
+  assert.equal(res.body.concept.version, 1);
+  assert.equal(res.body.concept.unchanged, true);
   assert.equal(second.calls.filter((c) => c.insert).length, 0);
 });
 

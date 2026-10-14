@@ -2851,11 +2851,13 @@ details.bta-side-card > summary:focus-visible { outline: 2px solid var(--border-
 .bta-recent-item:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
 .bta-recent-when { font-size: 14px; font-weight: 700; }
 .bta-recent-state { font-size: 12px; color: var(--text-secondary); }
-/* Menukaartcontrole → concept (BE-25) */
+/* Menukaartcontrole → concept (BE-25) and Menuconcepten beoordelen (BE-17).
+   Uncertainty (missing price, unclear section, duplicate, disappeared dish)
+   uses the neutral status role, never an error colour (Kleurtaal v2). */
 .bta-control, .bta-concept { display: grid; gap: 10px; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-elevated); min-width: 0; }
 .bta-control-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
 .bta-control-count { margin: 0; font-size: 14px; font-weight: 700; color: var(--text-primary); }
-.bta-attention { padding: 10px 12px; border: 1px solid var(--border); border-left: 3px solid var(--status-old); border-radius: var(--radius-md); background: var(--bg-card); }
+.bta-attention { padding: 10px 12px; border: 1px solid var(--border); border-left: 3px solid var(--status-neutral); border-radius: var(--radius-md); background: var(--bg-card); }
 .bta-attention-title { margin: 0 0 6px; display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700; color: var(--text-primary); }
 .bta-attention ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 13px; }
 .bta-category { border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-card); }
@@ -2866,26 +2868,63 @@ details.bta-side-card > summary:focus-visible { outline: 2px solid var(--border-
 .bta-dishes li { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; padding-top: 6px; border-top: 1px solid var(--border); font-size: 14px; }
 .bta-dish { color: var(--text-primary); overflow-wrap: anywhere; min-width: 0; }
 .bta-price { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--text-primary); white-space: nowrap; }
-.bta-price--missing { color: var(--status-blocked); }
+.bta-price--missing { color: var(--text-secondary); font-style: italic; font-weight: 400; }
 .bta-concept { background: var(--bg-card); }
 .bta-concept-title { margin: 0; font-size: 16px; font-weight: 800; color: var(--text-primary); }
 .bta-concept-lines { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-.bta-concept-line { display: grid; gap: 6px; padding: 10px 12px; border: 1px solid var(--border); border-left: 3px solid var(--status-old); border-radius: var(--radius-md); }
-.bta-concept-line--blocker { border-left-color: var(--status-blocked); }
+.bta-concept-line { display: grid; gap: 8px; padding: 10px 12px; border: 1px solid var(--border); border-left: 3px solid var(--input-border); border-radius: var(--radius-md); background: var(--bg-card); min-width: 0; }
+.bta-concept-line--blocker { border-left-color: var(--status-neutral); }
 .bta-concept-line-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px; align-items: flex-start; }
+.bta-line-name { font-size: 15px; font-weight: 700; }
+.bta-compare { display: grid; gap: 8px; grid-template-columns: minmax(0, 1fr); }
+.bta-compare > div { min-width: 0; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-elevated); }
+.bta-compare-label { margin: 0 0 4px; font-size: 12px; font-weight: 700; color: var(--text-secondary); }
+.bta-compare-value { margin: 0; display: grid; gap: 2px; font-size: 14px; }
+.bta-compare-empty { margin: 0; font-size: 13px; color: var(--text-secondary); font-style: italic; }
 .bta-concept-edit { display: grid; gap: 4px; grid-template-columns: minmax(0, 1fr); font-size: 13px; color: var(--text-primary); }
 .bta-concept-edit label { font-weight: 700; }
-.bta-concept-checks, .bta-removed { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 14px; color: var(--text-primary); }
-.bta-concept-checks label, .bta-removed label, .bta-inline-check { display: inline-flex; align-items: center; gap: 6px; font-weight: 400; min-height: 32px; }
-.bta-removed { flex-direction: column; margin: 0; padding: 10px 12px; border: 1px solid var(--border); border-left: 3px solid var(--status-blocked); border-radius: var(--radius-md); }
+.bta-concept-checks { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 14px; color: var(--text-primary); }
+.bta-concept-checks label, .bta-removed-choices label, .bta-inline-check { display: inline-flex; align-items: center; gap: 6px; font-weight: 400; min-height: 32px; }
+.bta-removed { display: grid; gap: 8px; margin: 0; padding: 10px 12px; border: 1px solid var(--border); border-left: 3px solid var(--status-neutral); border-radius: var(--radius-md); font-size: 14px; color: var(--text-primary); min-width: 0; }
 .bta-removed legend { padding: 0 4px; font-size: 14px; font-weight: 700; }
-.bta-removed .bta-dishes { padding: 0; }
-.bta-concept input[type="checkbox"], .bta-concept input[type="radio"] { accent-color: var(--accent); width: 18px; height: 18px; }
-.bta-concept input:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+.bta-removed-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.bta-removed-list > li { display: grid; gap: 4px; padding-top: 6px; border-top: 1px solid var(--border); }
+.bta-removed-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; }
+.bta-removed-choices { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.bta-concept input[type="checkbox"], .bta-concept input[type="radio"], .mcr-page input[type="checkbox"], .mcr-page input[type="radio"] { accent-color: var(--accent); width: 18px; height: 18px; }
+.bta-concept input:focus-visible, .mcr-page input:focus-visible, .mcr-page textarea:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
 @media (min-width: 720px) {
   .bta-concept-edit { grid-template-columns: max-content minmax(0, 1fr); align-items: center; column-gap: 10px; }
   .bta-concept-checks { grid-column: 1 / -1; }
+  .bta-compare { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
+
+/* Menuconcepten beoordelen (BE-17) — list and review page. */
+.mcr-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.mcr-item { display: grid; gap: 6px; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-card); min-width: 0; }
+.mcr-item-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; }
+.mcr-item-title { margin: 0; font-size: 16px; font-weight: 700; }
+.mcr-item-title a { color: var(--text-primary); text-decoration: underline; text-underline-offset: 3px; }
+.mcr-item-title a:hover { color: var(--accent); }
+.mcr-item-title a:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+.mcr-meta { margin: 0; font-size: 13px; color: var(--text-secondary); overflow-wrap: anywhere; }
+.mcr-section-title { margin: 8px 0 0; font-size: 15px; font-weight: 800; color: var(--text-primary); }
+.mcr-stats { list-style: none; margin: 0; padding: 10px 12px; display: flex; flex-wrap: wrap; gap: 6px 18px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-elevated); font-size: 14px; color: var(--text-primary); }
+.mcr-stats li { display: inline-flex; align-items: center; gap: 6px; }
+.mcr-stats strong { font-variant-numeric: tabular-nums; }
+.mcr-status-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.mcr-status-list li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 8px; align-items: start; font-size: 14px; color: var(--text-primary); }
+.mcr-status-list li > span:last-child { display: grid; gap: 2px; }
+.mcr-status-list .bta-muted { font-size: 13px; }
+.mcr-actions { display: grid; gap: 8px; }
+.mcr-actions .bta-btn { width: 100%; justify-content: center; }
+.mcr-reject { display: grid; gap: 8px; margin: 0; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-md); font-size: 14px; color: var(--text-primary); min-width: 0; }
+.mcr-reject legend { padding: 0 4px; font-weight: 700; }
+.mcr-reject label { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; }
+.mcr-reject textarea { width: 100%; min-height: 64px; box-sizing: border-box; }
+.mcr-history { list-style: none; margin: 0; padding: 0 12px 10px; display: grid; gap: 8px; font-size: 13px; color: var(--text-primary); }
+.mcr-history > li { padding-top: 8px; border-top: 1px solid var(--border); display: grid; gap: 4px; }
+.mcr-history ul { margin: 0; padding-left: 18px; color: var(--text-secondary); }
 .bta-mobile-only { display: none; }
 @media (min-width: 960px) {
   .bta-layout { grid-template-columns: minmax(0, 1fr) 300px; }
