@@ -13,7 +13,8 @@
 // hours and every other restaurant field stay exactly as they are.
 // The files keep their existing formatting (2-space JSON, trailing newline).
 
-const { normalizeName } = require('./menuConcept');
+const { normalizeName, liveEntryLabel } = require('./menuConcept');
+const { menuScopeOf, categoryPath } = require('./menuGroups');
 
 const MENU_SUFFIX = 'menukaart';
 const MENU_LINK_LABEL = '📋 Menukaart';
@@ -49,10 +50,16 @@ function restaurantMenuEntries(menus, restaurantId) {
  */
 function buildMenuEntry({ content, currentEntries, sourceUrl, scraped }) {
   const enrichment = new Map();
-  for (const entry of Object.values(currentEntries || {})) {
+  // Prefer the same dish in the same menu variant (lunch, diner, …).
+  const entries = Object.entries(currentEntries || {});
+  for (const [key, entry] of entries) {
+    const entryScope = entries.length > 1 ? liveEntryLabel(key, entry) : '';
     for (const category of (entry && entry.categories) || []) {
       for (const item of (category && category.items) || []) {
-        if (item && typeof item.name === 'string' && !enrichment.has(normalizeName(item.name))) enrichment.set(normalizeName(item.name), item);
+        if (!item || typeof item.name !== 'string') continue;
+        const scoped = `${normalizeName(menuScopeOf(categoryPath(category)) || entryScope)}|${normalizeName(item.name)}`;
+        if (!enrichment.has(scoped)) enrichment.set(scoped, item);
+        if (!enrichment.has(normalizeName(item.name))) enrichment.set(normalizeName(item.name), item);
       }
     }
   }
@@ -63,7 +70,7 @@ function buildMenuEntry({ content, currentEntries, sourceUrl, scraped }) {
     name: category.name,
     ...(Array.isArray(category.path) && category.path.length > 1 ? { path: category.path } : {}),
     items: (category.items || []).map((item) => {
-      const known = enrichment.get(normalizeName(item.name)) || {};
+      const known = enrichment.get(`${normalizeName(menuScopeOf(categoryPath(category)))}|${normalizeName(item.name)}`) || enrichment.get(normalizeName(item.name)) || {};
       const price = formatEuro(item.price);
       if (!price) throw new Error(`export_incomplete: ${item.name} has no price`);
       const out = {

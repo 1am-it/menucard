@@ -372,7 +372,9 @@ test('a nested menu: preview and review PR carry the same semantic structure (ti
       { name: 'Hoofd', path: ['Diner', 'Hoofd'], sourcePath: ['Fictief seizoensmenu', 'Diner', 'Hoofd'], items: [{ name: 'Fictieve risotto', price: '18.00' }] },
     ] }],
     liveLines: liveMenuLines(LIVE, '1'),
-    edits: { removed: { 'fictieve entrecote': 'remove' } },
+    // The concept is a Diner menu; the published lunch soup is a different
+    // variant and needs its own explicit choice (never matched across variants).
+    edits: { removed: { 'fictieve entrecote': 'remove', 'lunch|fictieve soep': 'remove' } },
   }).content;
   const supabase = world({ snapshots: [snapshotRow(5, 1, nested)] });
   const github = fakeGithub();

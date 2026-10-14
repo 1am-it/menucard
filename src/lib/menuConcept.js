@@ -15,6 +15,7 @@
 'use strict';
 
 const { categoryPath, pathKey, formatPath } = require('./menuHierarchy');
+const { menuScopeOf } = require('./menuGroups');
 
 const UNCLEAR_CATEGORY_NAMES = new Set(['', 'menu', 'menukaart', 'kaart', 'categorie', 'overig', 'overige', 'diversen']);
 const MAX_CATEGORY_NAME = 60;
@@ -105,6 +106,7 @@ function recognisedLines(menus) {
           price: normalizePrice(item.price),
           category: path[path.length - 1],
           categoryPath: path,
+          menuScope: menuScopeOf(path),
           sourcePath: labelsOf(category && category.sourcePath),
           categoryUncertain: Boolean(category && category.uncertain === true),
         });
@@ -137,11 +139,11 @@ function summarizeRecognisedMenu(menus) {
     category.items.push({ id: line.id, name: line.name, price: displayPrice(line.price) });
   }
   const names = new Map();
-  for (const line of lines) names.set(normalizeName(line.name), (names.get(normalizeName(line.name)) || 0) + 1);
+  for (const line of lines) names.set(dishKey(line), (names.get(dishKey(line)) || 0) + 1);
   const attention = [];
   for (const line of lines) {
     if (!line.price) attention.push({ id: line.id, name: line.name, reason: 'Prijs ontbreekt' });
-    else if (names.get(normalizeName(line.name)) > 1) attention.push({ id: line.id, name: line.name, reason: 'Komt meer dan eens voor' });
+    else if (names.get(dishKey(line)) > 1) attention.push({ id: line.id, name: line.name, reason: 'Komt meer dan eens voor' });
     else if (isUnclearCategory(line.category)) attention.push({ id: line.id, name: line.name, reason: 'Rubriek onduidelijk' });
     else if (line.categoryUncertain) attention.push({ id: line.id, name: line.name, reason: 'Rubriekindeling onzeker' });
   }
@@ -153,8 +155,10 @@ function summarizeRecognisedMenu(menus) {
 function liveMenuLines(liveMenus, restaurantId) {
   const lines = [];
   if (!liveMenus || typeof liveMenus !== 'object' || !restaurantId) return lines;
-  for (const [key, menu] of Object.entries(liveMenus)) {
-    if (!key.startsWith(`${restaurantId}-`) || !menu || !Array.isArray(menu.categories)) continue;
+  const entries = Object.entries(liveMenus).filter(([key, menu]) => key.startsWith(`${restaurantId}-`) && menu && Array.isArray(menu.categories));
+  for (const [key, menu] of entries) {
+    // Several published menus (lunch, diner, …) are separate menu variants.
+    const entryScope = entries.length > 1 ? liveEntryLabel(key, menu) : '';
     menu.categories.forEach((category, c) => {
       ((category && Array.isArray(category.items) && category.items) || []).forEach((item, i) => {
         if (!item || typeof item.name !== 'string' || !item.name.trim()) return;
@@ -165,11 +169,35 @@ function liveMenuLines(liveMenus, restaurantId) {
           price: normalizePrice(typeof item.priceValue === 'number' ? item.priceValue : item.price),
           category: category && typeof category.name === 'string' ? category.name.trim() : '',
           categoryPath: categoryPath(category),
+          menuScope: menuScopeOf(categoryPath(category)) || entryScope,
         });
       });
     });
   }
   return lines;
+}
+
+/** The variant label of a published menu entry: its own title, or its
+ * daypart from the key ("6-diner" → "Diner"). */
+function liveEntryLabel(key, menu) {
+  if (menu && typeof menu.title === 'string' && menu.title.trim()) return menu.title.trim();
+  const meal = String(key).split('-').slice(1).join('-');
+  return meal ? meal.charAt(0).toUpperCase() + meal.slice(1) : '';
+}
+
+/** Same dish = same normalised name within the same menu variant. */
+function scopeKey(scope) {
+  return normalizeName(scope || '');
+}
+function dishKey(line) {
+  return `${scopeKey(line.menuScope)}|${normalizeName(line.name)}`;
+}
+/** The key of a keep/remove decision on a disappeared dish: per variant when
+ * the concept has menu variants (`decisionScope`), otherwise by name alone —
+ * the earlier, unchanged key of a flat menu. */
+function removalKey(line) {
+  const scope = line && (line.decisionScope !== undefined ? line.decisionScope : line.menuScope);
+  return scope ? `${scopeKey(scope)}|${normalizeName(line.name)}` : normalizeName(line && line.name);
 }
 
 /** The fixed BE-17 rejection reasons (menu_snapshot_reviews.reason), with their visible label. */
@@ -253,7 +281,7 @@ function storedConceptInput(captured) {
   }));
   const removed = {};
   for (const r of (captured && Array.isArray(captured.removed) && captured.removed) || []) {
-    if (r && typeof r.name === 'string' && (r.decision === 'keep' || r.decision === 'remove')) removed[normalizeName(r.name)] = r.decision;
+    if (r && typeof r.name === 'string' && (r.decision === 'keep' || r.decision === 'remove')) removed[removalKey({ name: r.name, menuScope: typeof r.scope === 'string' ? r.scope : '' })] = r.decision;
   }
   return { menus: [{ title: captured && typeof captured.title === 'string' ? captured.title : null, categories }], edits: { lines, removed } };
 }
@@ -269,13 +297,38 @@ function publicMenu(content) {
   return content && typeof content.title === 'string' ? { title: content.title, categories } : { categories };
 }
 
-function removedDecisionFor(decisions, name) {
+function removedDecisionFor(decisions, line) {
   if (decisions === 'keep' || decisions === 'remove') return decisions;
   if (decisions && typeof decisions === 'object') {
-    const d = decisions[normalizeName(name)];
+    // A decision stored by name alone (an earlier, flat version) still applies.
+    const d = decisions[removalKey(line)] || decisions[normalizeName(line.name)];
     if (d === 'keep' || d === 'remove') return d;
   }
   return null;
+}
+
+/**
+ * The published dishes a concept line corresponds to — the ONE rule for the
+ * comparison (unchanged, price change) and for which published dishes are
+ * still present (everything else is a disappeared dish needing a choice).
+ *   - A flat concept line (no scope) matches by name, as before.
+ *   - A line in a menu variant matches only a published dish of the SAME
+ *     variant. Never across two explicit variants, not even for a unique
+ *     name: a Diner dish never silently moves to Lunch.
+ *   - Compatibility only for an old, unscoped published dish (a restaurant
+ *     with a single flat published menu): that one may match by name.
+ */
+function liveMatches(line, liveByName) {
+  const candidates = liveByName.get(normalizeName(line.name)) || [];
+  if (!line.menuScope) return candidates;
+  const same = candidates.filter((c) => c.menuScope && scopeKey(c.menuScope) === scopeKey(line.menuScope));
+  if (same.length > 0) return same;
+  return candidates.filter((c) => !c.menuScope);
+}
+
+/** The published dish shown next to a concept line: the first of its matches. */
+function matchLive(line, liveByName) {
+  return liveMatches(line, liveByName)[0] || null;
 }
 
 function plural(n, one, many) {
@@ -297,7 +350,11 @@ function buildMenuConcept({ menus, liveLines, edits }) {
   const decisions = edits ? edits.removed : null;
   const live = Array.isArray(liveLines) ? liveLines : [];
   const liveByName = new Map();
-  for (const l of live) if (!liveByName.has(normalizeName(l.name))) liveByName.set(normalizeName(l.name), l);
+  for (const l of live) {
+    const key = normalizeName(l.name);
+    if (!liveByName.has(key)) liveByName.set(key, []);
+    liveByName.get(key).push(l);
+  }
 
   const lines = recognisedLines(menus).map((line) => {
     const e = Object.prototype.hasOwnProperty.call(lineEdits, line.id) ? lineEdits[line.id] || {} : {};
@@ -315,6 +372,7 @@ function buildMenuConcept({ menus, liveLines, edits }) {
       category,
       categoryEdited,
       categoryPath: categoryEdited ? [...linePath.slice(0, -1), category] : linePath,
+      menuScope: menuScopeOf(categoryEdited ? [...linePath.slice(0, -1), category] : linePath),
       excluded: e.exclude === true,
       accepted: e.accept === true,
       edited: Boolean(e.name || e.price || e.category),
@@ -322,19 +380,21 @@ function buildMenuConcept({ menus, liveLines, edits }) {
   });
 
   const included = lines.filter((l) => !l.excluded);
+  // Duplicates only within one menu variant: the same dish on the lunch and
+  // the diner menu is two legitimate dishes.
   const nameCount = new Map();
-  for (const l of included) nameCount.set(normalizeName(l.name), (nameCount.get(normalizeName(l.name)) || 0) + 1);
+  for (const l of included) nameCount.set(dishKey(l), (nameCount.get(dishKey(l)) || 0) + 1);
 
   for (const l of lines) {
-    const liveMatch = liveByName.get(normalizeName(l.name));
+    const liveMatch = matchLive(l, liveByName);
     // An uncertain source structure counts as an unclear section until a
     // human names the section or accepts it ("Klopt zo").
     const unclear = isUnclearCategory(l.category) || (l.categoryUncertain && !l.categoryEdited);
-    const needsAcceptance = unclear || nameCount.get(normalizeName(l.name)) > 1;
+    const needsAcceptance = unclear || nameCount.get(dishKey(l)) > 1;
     if (l.excluded) l.status = 'excluded';
     else if (!l.price) l.status = 'missing_price';
     else if (unclear && !l.accepted) l.status = 'unclear_category';
-    else if (nameCount.get(normalizeName(l.name)) > 1 && !l.accepted) l.status = 'duplicate';
+    else if (nameCount.get(dishKey(l)) > 1 && !l.accepted) l.status = 'duplicate';
     else if (liveMatch && liveMatch.price && liveMatch.price !== l.price) l.status = 'price_changed';
     else if (liveMatch) l.status = 'unchanged';
     else l.status = 'new';
@@ -344,10 +404,17 @@ function buildMenuConcept({ menus, liveLines, edits }) {
     l.live = liveMatch ? { name: liveMatch.name, desc: liveMatch.desc || null, price: liveMatch.price, category: liveMatch.category } : null;
   }
 
-  const recognisedNames = new Set(included.map((l) => normalizeName(l.name)));
+  // A published dish is still present when an included concept line matches
+  // it (per variant); a flat line keeps the earlier by-name rule.
+  const present = new Set();
+  for (const l of included) for (const match of liveMatches(l, liveByName)) present.add(match);
+  const scoped = included.some((l) => l.menuScope);
   const removed = live
-    .filter((l) => !recognisedNames.has(normalizeName(l.name)))
-    .map((l) => ({ ...l, decision: removedDecisionFor(decisions, l.name) }));
+    .filter((l) => !present.has(l))
+    .map((l) => {
+      const withScope = { ...l, decisionScope: scoped ? l.menuScope || '' : '' };
+      return { ...withScope, decision: removedDecisionFor(decisions, withScope) };
+    });
   const undecided = removed.filter((l) => !l.decision);
 
   const blockers = lines
@@ -391,8 +458,12 @@ function buildMenuConcept({ menus, liveLines, edits }) {
     if (l.accepted) item.accepted = true;
     add(l.categoryPath, item, { sourcePath: l.categoryEdited ? null : l.sourcePath, uncertain: l.categoryUncertain && !l.categoryEdited });
   }
+  // A kept dish returns to its own variant when the concept has variants.
   for (const l of removed) {
-    if (l.decision === 'keep') add(l.categoryPath && l.categoryPath.length ? l.categoryPath : [l.category || 'Huidige kaart'], { name: l.name, desc: l.desc, price: l.price, kept: true }, null);
+    if (l.decision !== 'keep') continue;
+    const own = l.categoryPath && l.categoryPath.length ? l.categoryPath : [l.category || 'Huidige kaart'];
+    const keptPath = scoped && l.menuScope && own.length === 1 ? [l.menuScope, ...own] : own;
+    add(keptPath, { name: l.name, desc: l.desc, price: l.price, kept: true }, null);
   }
   // Keys in a stable order (name, path, sourcePath, uncertain, items).
   for (const c of conceptCategories) {
@@ -406,7 +477,7 @@ function buildMenuConcept({ menus, liveLines, edits }) {
   }
   const title = conceptTitle(menus);
   const content = title ? { title, categories: conceptCategories } : { categories: conceptCategories };
-  const removedForContent = removed.filter((l) => l.decision === 'remove').map((l) => ({ name: l.name, decision: 'remove' }));
+  const removedForContent = removed.filter((l) => l.decision === 'remove').map((l) => (l.decisionScope ? { name: l.name, scope: l.decisionScope, decision: 'remove' } : { name: l.name, decision: 'remove' }));
   if (removedForContent.length > 0) content.removed = removedForContent;
 
   const uniform = removed.length > 0 && removed.every((l) => l.decision === removed[0].decision) ? removed[0].decision : null;
@@ -433,6 +504,8 @@ module.exports = {
   summarizeRecognisedMenu,
   liveMenuLines,
   buildMenuConcept,
+  removalKey,
+  liveEntryLabel,
   sanitizeEdits,
   mergeEdits,
   storedConceptInput,
