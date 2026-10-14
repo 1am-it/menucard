@@ -179,6 +179,9 @@ function validateMenuExtraction(result) {
     if (!Array.isArray(section.path) || !section.path.every((label) => label === null || isBoundedString(label))) {
       problems.push(`sections[${s}].path must be an array of short labels (or null for an unlabelled block)`)
     }
+    if (section.uncertain !== undefined && section.uncertain !== true) {
+      problems.push(`sections[${s}].uncertain may only be true (a route the adapter does not trust as structure)`)
+    }
     if (!Array.isArray(section.items) || section.items.length === 0) {
       problems.push(`sections[${s}].items must be a non-empty array`)
       return

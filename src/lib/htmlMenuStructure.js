@@ -686,20 +686,15 @@ function isHeading(node) {
   return /^h[1-6]$/.test(node.tag) || (node.attrs && node.attrs.role === 'heading')
 }
 
-// A section name is short ("Voorgerechten", "A LA CARTE", "Proef het beste
-// van het seizoen"). Longer than this, or a full sentence, is prose.
-const MAX_SECTION_HEADING = 60
 const MIN_SENTENCE_WORDS = 7
 
 /**
- * A descriptive, sentence-like heading: an explanation under a menu section
- * ("Deze gerechten worden geserveerd in verfijnd tussengerecht-formaat…"),
- * never a level of the menu hierarchy. Long text, a sentence of several words
- * ending in . ! ? or …, or two sentences. Generic text shape only.
+ * A heading that clearly reads as a sentence, not as a section name: at least
+ * seven words ending in . ! ? or …, or two sentences. Length alone never
+ * counts — a long section name stays a section name. Generic text shape only.
  */
 function isProseHeading(text) {
   const t = String(text || '').replace(/\s+/g, ' ').trim()
-  if (t.length > MAX_SECTION_HEADING) return true
   const words = t.split(' ').filter(Boolean).length
   if (words >= MIN_SENTENCE_WORDS && /[.!?…]$/.test(t)) return true
   return words >= MIN_SENTENCE_WORDS - 1 && /[.!?]\s+\p{Lu}/u.test(t)
@@ -935,7 +930,9 @@ function extractWithinBudget(html, budget, stats) {
 
   function sectionFor(path) {
     const key = JSON.stringify(path)
-    if (!sectionsByKey.has(key)) sectionsByKey.set(key, { path, items: [], unpriced: [] })
+    // A sentence kept in the route (not safely nested below a real section
+    // heading) is never trusted as structure: the section is uncertain.
+    if (!sectionsByKey.has(key)) sectionsByKey.set(key, { path, items: [], unpriced: [], uncertain: path.some(isProseHeading) })
     return sectionsByKey.get(key)
   }
 
@@ -1109,12 +1106,16 @@ function extractWithinBudget(html, budget, stats) {
       if (isHeading(child)) {
         const raw = textOf(child, { markerCounter, budget })
         const text = clip(raw)
-        // A descriptive, sentence-like heading ("Deze gerechten worden
-        // geserveerd in …") is source context, not menu structure: it never
-        // opens or closes a section, so the dishes below stay in the
-        // enclosing section.
-        if (text && !isProseHeading(raw)) {
+        if (text) {
           const level = headingLevel(child)
+          // A sentence-like heading nested BELOW a real section heading
+          // ("Deze gerechten worden geserveerd in …" under "A LA CARTE") is
+          // context for that section: skipped, the dishes stay in it. On the
+          // same or a higher level it is kept in the route, so its dishes
+          // never join the previous section; the hierarchy then marks that
+          // route uncertain ("Controle nodig").
+          const top = headingStack[headingStack.length - 1]
+          if (top && level > top.level && isProseHeading(raw)) continue
           while (headingStack.length > 0 && headingStack[headingStack.length - 1].level >= level) headingStack.pop()
           headingStack.push({ level, text })
         }
@@ -1125,7 +1126,8 @@ function extractWithinBudget(html, budget, stats) {
         const nested = child.children.filter((c) => c.tag !== '#text' && isList(c))
         if (nested.length > 0) {
           const rawLabel = textOf(child, { skip: isList, markerCounter, budget })
-          const label = isProseHeading(rawLabel) ? '' : clip(rawLabel)
+          // The same rule for a nested list's label: only skipped below real context.
+          const label = isProseHeading(rawLabel) && (headingStack.length > 0 || extraLabel) ? '' : clip(rawLabel)
           for (const list of nested) walk(list, depth + 1, label || extraLabel)
           continue
         }
@@ -1177,7 +1179,7 @@ function extractWithinBudget(html, budget, stats) {
   for (const section of sectionsByKey.values()) {
     if (section.items.length === 0) continue
     for (const line of section.unpriced) reject(line.text, 'missing_price', line.node)
-    sections.push({ path: section.path, items: section.items })
+    sections.push(section.uncertain ? { path: section.path, items: section.items, uncertain: true } : { path: section.path, items: section.items })
   }
   const counted = sections.reduce((n, s) => n + s.items.length, 0)
   stats.counted = counted

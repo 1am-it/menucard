@@ -117,7 +117,7 @@ function menuFromHtmlStructure(html, usedSlugs) {
     .filter((entry) => entry.items.length > 0)
   const itemCount = kept.reduce((n, entry) => n + entry.items.length, 0)
   if (itemCount === 0) return null
-  const hierarchy = normalizeMenuHierarchy(kept.map((entry) => entry.section.path))
+  const hierarchy = normalizeMenuHierarchy(kept.map((entry) => entry.section.path), kept.map((entry) => entry.section.uncertain === true))
   const categories = kept.map((entry, i) => {
     const shape = hierarchy.categories[i]
     const category = { name: shape.name, path: shape.path, sourcePath: shape.sourcePath, position: entry.position, locator: entry.section.items[0].evidence.locator, items: entry.items }
