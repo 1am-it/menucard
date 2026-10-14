@@ -7,7 +7,7 @@
 // review decision on the latest version. Every rule is re-checked on the
 // server; approval stays internal and publishes nothing.
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import InternalNav from '@/src/components/InternalNav'
@@ -24,6 +24,7 @@ export default function MenuConceptReviewPage() {
   const [loadError, setLoadError] = useState(null)
   const [message, setMessage] = useState(null)
   const [busy, setBusy] = useState(false)
+  const exportInFlight = useRef(false)
 
   useEffect(() => {
     getSupabaseBrowser()
@@ -109,6 +110,32 @@ export default function MenuConceptReviewPage() {
     }
   }
 
+  // BE-27 "Maak review-PR": one ordinary GitHub pull request; nothing is merged or published.
+  async function exportReviewPr(expectedVersion) {
+    // A second click before the first response is ignored (the server is idempotent too).
+    if (exportInFlight.current) return
+    exportInFlight.current = true
+    setBusy(true)
+    setMessage(null)
+    try {
+      const { res, body } = await post('export', { expected_version: expectedVersion })
+      if (!res.ok) {
+        setMessage({ tone: 'error', text: body.error || 'De review-PR kon niet worden gemaakt.' })
+      } else {
+        setMessage({
+          tone: 'success',
+          text: `${body.existing ? 'De review-PR bestond al.' : 'Review-PR gemaakt.'} ${body.message || 'Nog niet gepubliceerd. Handmatig mergen vereist.'}`,
+        })
+      }
+      await load()
+    } catch {
+      setMessage({ tone: 'error', text: 'De review-PR kon niet worden gemaakt.' })
+    } finally {
+      exportInFlight.current = false
+      setBusy(false)
+    }
+  }
+
   if (session === undefined) {
     return (
       <div className="di-page">
@@ -121,7 +148,7 @@ export default function MenuConceptReviewPage() {
     <div className="di-page mcr-page">
       <main className="di-main bta-main">
         <InternalNav accessToken={session.access_token} />
-        <ConceptReview key={data ? data.concept.id : 'loading'} data={data} loadError={loadError} message={message} busy={busy} onSaveVersion={saveVersion} onDecide={decide} />
+        <ConceptReview key={data ? data.concept.id : 'loading'} data={data} loadError={loadError} message={message} busy={busy} onSaveVersion={saveVersion} onDecide={decide} onExport={exportReviewPr} />
       </main>
     </div>
   )

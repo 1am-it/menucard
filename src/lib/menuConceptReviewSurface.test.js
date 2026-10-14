@@ -64,3 +64,19 @@ test('the pages talk only to their own internal API; the source opens in a new t
     assert.doesNotMatch(read(file), /status-badge--(blocked|old)|di-banner-danger" role="status"/, `${file}: uncertainty is neutral`);
   }
 });
+
+test('BE-27 export: the route only delegates; the GitHub client cannot merge, delete or move a branch, and its token stays on the server', () => {
+  const route = code('app/api/internal/v1/menu-concepts/[id]/export/route.js');
+  assert.deepEqual([...route.matchAll(/export async function (\w+)/g)].map((m) => m[1]), ['POST']);
+  assert.match(route, /menuConceptExportHandler\.exportToReviewPr\(request, id\)/);
+  const client = code('src/lib/githubClient.js');
+  assert.doesNotMatch(client, /\/merge|'PUT'|'DELETE'|'PATCH'|dispatches/);
+  assert.deepEqual([...client.matchAll(/'POST', '([^']+)'/g)].map((m) => m[1]), ['/git/trees', '/git/commits', '/git/refs', '/pulls']);
+  assert.match(code('src/lib/menuConceptReviewRouteDeps.js'), /process\.env\.GITHUB_EXPORT_TOKEN/);
+  for (const file of ['app/internal/menu-concepts/MenuConceptsView.js', 'app/internal/menu-concepts/[id]/page.js', 'app/internal/menu-concepts/page.js']) {
+    assert.doesNotMatch(read(file), /GITHUB_EXPORT_TOKEN|NEXT_PUBLIC_GITHUB|api\.github\.com/, file);
+  }
+  const exporter = code('src/lib/menuConceptExport.js');
+  assert.deepEqual([...new Set([...exporter.matchAll(/\.from\('(\w+)'\)\s*\.(insert|update)/g)].map((m) => m[1]))], ['menu_snapshot_exports']);
+  assert.doesNotMatch(exporter, /writeFile|require\(['"](node:)?fs['"]\)|analyzeSourceUrl|\.rpc\(/);
+});

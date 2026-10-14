@@ -23,6 +23,7 @@ const { isInternalOnly } = require('./importInbox');
 const { validateSnapshotReviewInput, snapshotReviewValidationMessage, groupReviewsBySnapshotId, deriveEffectiveSnapshotStatus } = require('./menuSnapshotProposals');
 const { liveMenuLines, recognisedLines, buildMenuConcept, storedConceptInput, sanitizeEdits, mergeEdits, REJECT_REASONS } = require('./menuConcept');
 const { loadLineage, wasRejectedBefore, createConceptVersion } = require('./menuConceptStore');
+const { exportForSnapshot } = require('./menuConceptExport');
 
 const FORBIDDEN = 'Alleen interne medewerkers kunnen menuconcepten beoordelen.';
 const LOAD_ERROR = 'De menuconcepten konden niet worden geladen.';
@@ -83,7 +84,7 @@ async function sourceStatus(supabase, { restaurantId, sourceUrl, receiptUrl }) {
   return { confirmed, blocked };
 }
 
-function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurants, liveMenus, computeMenuHash, now = () => new Date() }) {
+function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurants, liveMenus, computeMenuHash, github = null, now = () => new Date() }) {
   async function authorize(request) {
     const auth = await authenticate(request);
     if (!auth || !auth.ok) return { denied: reply((auth && auth.status) || 401, { error: (auth && auth.error) || 'Niet ingelogd.' }) };
@@ -191,6 +192,8 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
     if (receiptError) return reply(500, { error: LOAD_ERROR });
     const source = await sourceStatus(supabase, { restaurantId: snapshot.restaurant_id, sourceUrl: snapshot.source_url, receiptUrl: receipt && receipt.canonical_source_url });
     if (source.error) return reply(500, { error: LOAD_ERROR });
+    const exported = await exportForSnapshot(supabase, github, snapshot.id, now);
+    if (exported.error) return reply(500, { error: LOAD_ERROR });
 
     const originLines = {};
     for (const line of recognisedLines((receipt && receipt.menus) || [])) originLines[line.id] = { name: line.name, desc: line.desc, price: line.price, category: line.category };
@@ -226,6 +229,8 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
         reviews: v.reviews.map((r) => ({ decision: r.decision, reason: r.reason, reasonLabel: r.reason ? REJECT_REASONS[r.reason] || r.reason : null, note: r.note, decidedAt: r.decided_at, bySelf: r.reviewer_id === auth.userId })),
       })),
       rejectReasons: REJECT_REASONS,
+      export: exported.export,
+      githubConfigured: Boolean(github),
     });
   }
 
