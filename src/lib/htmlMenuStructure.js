@@ -686,6 +686,25 @@ function isHeading(node) {
   return /^h[1-6]$/.test(node.tag) || (node.attrs && node.attrs.role === 'heading')
 }
 
+// A section name is short ("Voorgerechten", "A LA CARTE", "Proef het beste
+// van het seizoen"). Longer than this, or a full sentence, is prose.
+const MAX_SECTION_HEADING = 60
+const MIN_SENTENCE_WORDS = 7
+
+/**
+ * A descriptive, sentence-like heading: an explanation under a menu section
+ * ("Deze gerechten worden geserveerd in verfijnd tussengerecht-formaat…"),
+ * never a level of the menu hierarchy. Long text, a sentence of several words
+ * ending in . ! ? or …, or two sentences. Generic text shape only.
+ */
+function isProseHeading(text) {
+  const t = String(text || '').replace(/\s+/g, ' ').trim()
+  if (t.length > MAX_SECTION_HEADING) return true
+  const words = t.split(' ').filter(Boolean).length
+  if (words >= MIN_SENTENCE_WORDS && /[.!?…]$/.test(t)) return true
+  return words >= MIN_SENTENCE_WORDS - 1 && /[.!?]\s+\p{Lu}/u.test(t)
+}
+
 function headingLevel(node) {
   if (/^h[1-6]$/.test(node.tag)) return Number(node.tag[1])
   const level = Number(node.attrs && node.attrs['aria-level'])
@@ -1088,8 +1107,13 @@ function extractWithinBudget(html, budget, stats) {
       // an element for its class, so an item classed "vegan" is still read.
       if (child.tag === '#text') continue
       if (isHeading(child)) {
-        const text = clip(textOf(child, { markerCounter, budget }))
-        if (text) {
+        const raw = textOf(child, { markerCounter, budget })
+        const text = clip(raw)
+        // A descriptive, sentence-like heading ("Deze gerechten worden
+        // geserveerd in …") is source context, not menu structure: it never
+        // opens or closes a section, so the dishes below stay in the
+        // enclosing section.
+        if (text && !isProseHeading(raw)) {
           const level = headingLevel(child)
           while (headingStack.length > 0 && headingStack[headingStack.length - 1].level >= level) headingStack.pop()
           headingStack.push({ level, text })
@@ -1100,7 +1124,8 @@ function extractWithinBudget(html, budget, stats) {
         budget.spend(child.children.length)
         const nested = child.children.filter((c) => c.tag !== '#text' && isList(c))
         if (nested.length > 0) {
-          const label = clip(textOf(child, { skip: isList, markerCounter, budget }))
+          const rawLabel = textOf(child, { skip: isList, markerCounter, budget })
+          const label = isProseHeading(rawLabel) ? '' : clip(rawLabel)
           for (const list of nested) walk(list, depth + 1, label || extraLabel)
           continue
         }
@@ -1208,6 +1233,7 @@ module.exports = {
   isClockText,
   isDateText,
   displayName,
+  isProseHeading,
   extractHtmlMenuStructure,
   createHtmlStructureAdapter,
 }

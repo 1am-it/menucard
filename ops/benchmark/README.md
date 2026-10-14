@@ -110,6 +110,9 @@ untouched.
   sibling elements; only there a bare whole number ("25") is a price. Several
   prices, a price range, a price that is not at the end, a supplement line,
   a service unit, a time or a date reject the block.
+  A descriptive, sentence-like heading (longer than 60 characters, or a
+  sentence of seven or more words) is source context, not structure: it never
+  opens or closes a section, so the dishes below stay in the enclosing one.
   Section headings are returned as the full path; the product analysis keeps
   that path losslessly (`src/lib/menuHierarchy.js`: shared title, a path of
   any depth, the original source route, and an `uncertain` flag) instead of
