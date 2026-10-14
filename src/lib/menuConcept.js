@@ -308,18 +308,27 @@ function removedDecisionFor(decisions, line) {
 }
 
 /**
- * The published dish a concept line corresponds to. A flat line matches by
- * name, as before. A line in a menu variant matches the dish of the same name
- * in the same variant; across variants only when that name is unique on the
- * current menu (otherwise it is never guessed).
+ * The published dishes a concept line corresponds to — the ONE rule for the
+ * comparison (unchanged, price change) and for which published dishes are
+ * still present (everything else is a disappeared dish needing a choice).
+ *   - A flat concept line (no scope) matches by name, as before.
+ *   - A line in a menu variant matches only a published dish of the SAME
+ *     variant. Never across two explicit variants, not even for a unique
+ *     name: a Diner dish never silently moves to Lunch.
+ *   - Compatibility only for an old, unscoped published dish (a restaurant
+ *     with a single flat published menu): that one may match by name.
  */
-function matchLive(line, liveByName) {
+function liveMatches(line, liveByName) {
   const candidates = liveByName.get(normalizeName(line.name)) || [];
-  if (candidates.length === 0) return null;
-  if (!line.menuScope) return candidates[0];
-  const same = candidates.find((c) => scopeKey(c.menuScope) === scopeKey(line.menuScope));
-  if (same) return same;
-  return candidates.length === 1 ? candidates[0] : null;
+  if (!line.menuScope) return candidates;
+  const same = candidates.filter((c) => c.menuScope && scopeKey(c.menuScope) === scopeKey(line.menuScope));
+  if (same.length > 0) return same;
+  return candidates.filter((c) => !c.menuScope);
+}
+
+/** The published dish shown next to a concept line: the first of its matches. */
+function matchLive(line, liveByName) {
+  return liveMatches(line, liveByName)[0] || null;
 }
 
 function plural(n, one, many) {
@@ -398,14 +407,10 @@ function buildMenuConcept({ menus, liveLines, edits }) {
   // A published dish is still present when an included concept line matches
   // it (per variant); a flat line keeps the earlier by-name rule.
   const present = new Set();
-  const flatNames = new Set(included.filter((l) => !l.menuScope).map((l) => normalizeName(l.name)));
-  for (const l of included) {
-    const match = matchLive(l, liveByName);
-    if (match) present.add(match);
-  }
+  for (const l of included) for (const match of liveMatches(l, liveByName)) present.add(match);
   const scoped = included.some((l) => l.menuScope);
   const removed = live
-    .filter((l) => !present.has(l) && !flatNames.has(normalizeName(l.name)))
+    .filter((l) => !present.has(l))
     .map((l) => {
       const withScope = { ...l, decisionScope: scoped ? l.menuScope || '' : '' };
       return { ...withScope, decision: removedDecisionFor(decisions, withScope) };
