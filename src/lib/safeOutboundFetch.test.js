@@ -516,6 +516,33 @@ test('fetchWebsiteSafely: a direct 200 response is returned with its body and co
   }
 });
 
+test('fetchWebsiteSafely: content negotiation like Apache MultiViews — a wildcard Accept gets the HTML page instead of 406; the identifying User-Agent and no cookies stay', async () => {
+  let seen = null;
+  const server = await startTestServer((req, res) => {
+    seen = req.headers;
+    // Like Apache serving /lunch from lunch.php: without a wildcard in Accept
+    // no variant is "acceptable" and the server answers 406.
+    if (!/(^|,)\s*\*\/\*/.test(req.headers.accept || '')) {
+      res.writeHead(406, { 'Content-Type': 'text/html' });
+      res.end('<html><body>Not Acceptable</body></html>');
+      return;
+    }
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end('<html><body><h2>Lunch</h2><p>Fictief gerecht € 12,50</p></body></html>');
+  });
+  try {
+    const { port } = server.address();
+    const result = await fetchWebsiteSafely(`http://${TEST_HOSTNAME}:${port}/lunch`, { lookup: passthroughLookup });
+    assert.equal(result.contentType, 'text/html');
+    assert.match(result.body, /Fictief gerecht/);
+    assert.equal(seen.accept, 'text/html,application/xhtml+xml,*/*;q=0.8');
+    assert.match(seen['user-agent'], /^MenuCardInternalSuggestBot\/1\.0 /);
+    assert.equal(seen.cookie, undefined);
+  } finally {
+    await stopTestServer(server);
+  }
+});
+
 test('fetchWebsiteSafely: encoding "buffer" preserves exact response bytes, never a lossy UTF-8 round-trip — BE-20\'s own PDF-fetch requirement', async () => {
   // Bytes that are NOT valid UTF-8 on their own (0xff 0xd8 — a JPEG-like
   // marker, chosen specifically because naively decoding it as UTF-8 and
