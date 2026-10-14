@@ -2940,3 +2940,19 @@ details.bta-side-card > summary:focus-visible { outline: 2px solid var(--border-
   .bta-start { position: sticky; bottom: 0; z-index: 5; justify-items: stretch; margin: 0 -14px -14px; padding: 12px 14px calc(12px + env(safe-area-inset-bottom)); background: var(--bg-card); border-top: 1px solid var(--border); border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
   .bta-start .bta-btn { width: 100%; min-height: 44px; }
 }
+
+/* Menuconcept — Publicatievoorbeeld (tabs, toggle, preview frame). The menu
+   itself uses the public menu body classes (.cat-section, .menu-grid, …). */
+.mcr-tabs { display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid var(--border); }
+.mcr-tab { min-height: 40px; padding: 8px 14px; border: 1px solid transparent; border-bottom: 3px solid transparent; border-radius: var(--radius-md) var(--radius-md) 0 0; background: none; color: var(--text-secondary); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.mcr-tab[aria-selected="true"] { color: var(--text-primary); border-bottom-color: var(--accent-fill); background: var(--bg-card); }
+.mcr-tab:hover { color: var(--text-primary); }
+.mcr-tab:focus-visible, .mcr-toggle-btn:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+.mcr-preview { display: grid; gap: 12px; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg); min-width: 0; }
+.mcr-preview-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.mcr-toggle { display: inline-flex; flex-wrap: wrap; gap: 0; justify-self: start; border: 1px solid var(--input-border); border-radius: var(--radius-pill); overflow: hidden; }
+.mcr-toggle-btn { min-height: 36px; padding: 6px 14px; border: 0; background: var(--bg-card); color: var(--text-primary); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.mcr-toggle-btn[aria-pressed="true"] { background: var(--accent-fill); color: var(--on-accent-fill); }
+.mcr-preview-menu { min-width: 0; }
+.mcr-preview-entry + .mcr-preview-entry { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); }
+.mcr-preview-entry-title { margin: 0 0 12px; font-size: 18px; font-weight: 800; color: var(--text-primary); }

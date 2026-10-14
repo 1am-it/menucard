@@ -23,7 +23,8 @@ const { isInternalOnly } = require('./importInbox');
 const { validateSnapshotReviewInput, snapshotReviewValidationMessage, groupReviewsBySnapshotId, deriveEffectiveSnapshotStatus } = require('./menuSnapshotProposals');
 const { liveMenuLines, recognisedLines, buildMenuConcept, storedConceptInput, sanitizeEdits, mergeEdits, REJECT_REASONS } = require('./menuConcept');
 const { loadLineage, wasRejectedBefore, createConceptVersion } = require('./menuConceptStore');
-const { exportForSnapshot } = require('./menuConceptExport');
+const { exportForSnapshot, exportMenuEntry } = require('./menuConceptExport');
+const { menuKeyFor, restaurantMenuEntries } = require('./menuExport');
 
 const FORBIDDEN = 'Alleen interne medewerkers kunnen menuconcepten beoordelen.';
 const LOAD_ERROR = 'De menuconcepten konden niet worden geladen.';
@@ -122,6 +123,14 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
       .eq('id', receiptId)
       .maybeSingle();
     return { receipt: data || null, error };
+  }
+
+  function previewFor(snapshot) {
+    const { entry } = exportMenuEntry({ snapshot, menus: liveMenus });
+    return {
+      concept: entry ? { key: menuKeyFor(snapshot.restaurant_id), entry } : null,
+      current: Object.entries(restaurantMenuEntries(liveMenus, snapshot.restaurant_id)).map(([key, entry]) => ({ key, entry })),
+    };
   }
 
   /** GET — every concept lineage's latest version, waiting ones first. */
@@ -230,6 +239,10 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
       })),
       rejectReasons: REJECT_REASONS,
       export: exported.export,
+      // Publicatievoorbeeld: built on the server only. "concept" is exactly
+      // the entry "Maak review-PR" would write; "current" is the restaurant's
+      // unchanged published menus. Nothing is written or exported here.
+      preview: previewFor(snapshot),
       githubConfigured: Boolean(github),
     });
   }

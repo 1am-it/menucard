@@ -8,8 +8,9 @@
 // Visual direction: docs/mockups/menu-concept-review-v1.png (text and
 // Kleurtaal v2 win). Approval stays internal: nothing is published.
 
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import StatusIcon from '@/src/components/StatusIcon'
+import { StaticMenu, menuTitle } from '@/src/components/MenuBody'
 import { buildMenuConcept, storedConceptInput, mergeEdits } from '@/src/lib/menuConcept'
 import {
   plural,
@@ -183,11 +184,8 @@ function RejectForm({ reasons, busy, onCancel, onReject }) {
 
 function History({ history, currentId }) {
   return (
-    <details className="bta-category">
-      <summary>
-        <span className="bta-category-name">Versiegeschiedenis</span>
-        <span className="bta-muted"> · {plural(history.length, 'versie', 'versies')}</span>
-      </summary>
+    <>
+      <p className="bta-muted">{plural(history.length, 'versie', 'versies')}</p>
       <ul className="mcr-history">
         {history.map((v) => (
           <li key={v.id}>
@@ -211,7 +209,118 @@ function History({ history, currentId }) {
           </li>
         ))}
       </ul>
-    </details>
+    </>
+  )
+}
+
+const TABS = [
+  { id: 'preview', label: 'Publicatievoorbeeld' },
+  { id: 'changes', label: 'Wijzigingen' },
+  { id: 'source', label: 'Bron' },
+  { id: 'history', label: 'Versiegeschiedenis' },
+]
+
+/** Accessible tabs: arrow keys, Home and End move between them (WAI-ARIA tabs pattern). */
+function ConceptTabs({ tabs, active, onSelect, idPrefix }) {
+  const refs = useRef({})
+  function onKeyDown(event) {
+    const i = tabs.findIndex((t) => t.id === active)
+    let next = null
+    if (event.key === 'ArrowRight') next = tabs[(i + 1) % tabs.length]
+    if (event.key === 'ArrowLeft') next = tabs[(i - 1 + tabs.length) % tabs.length]
+    if (event.key === 'Home') next = tabs[0]
+    if (event.key === 'End') next = tabs[tabs.length - 1]
+    if (!next) return
+    event.preventDefault()
+    onSelect(next.id)
+    if (refs.current[next.id]) refs.current[next.id].focus()
+  }
+  return (
+    <div className="mcr-tabs" role="tablist" aria-label="Weergave van het menuconcept">
+      {tabs.map((t) => (
+        <button
+          key={t.id}
+          ref={(el) => (refs.current[t.id] = el)}
+          type="button"
+          role="tab"
+          id={`${idPrefix}-tab-${t.id}`}
+          aria-selected={active === t.id}
+          aria-controls={`${idPrefix}-panel-${t.id}`}
+          tabIndex={active === t.id ? 0 : -1}
+          className="mcr-tab"
+          onClick={() => onSelect(t.id)}
+          onKeyDown={onKeyDown}
+        >
+          {t.label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function dishCount(entries) {
+  return entries.reduce((n, { entry }) => n + (entry.categories || []).reduce((m, c) => m + (c.items || []).length, 0), 0)
+}
+
+/**
+ * Publicatievoorbeeld: the menu exactly as the public menu page shows it,
+ * rendered by the same body renderer (src/components/MenuBody.js) from data
+ * built on the server. "Nieuw concept" is the entry "Maak review-PR" writes;
+ * "Huidige publieke kaart" is the unchanged published menu. Read-only.
+ */
+function PublicationPreview({ preview, restaurantName, version, dirty }) {
+  const [mode, setMode] = useState('concept')
+  const entries = mode === 'concept' ? (preview.concept ? [preview.concept] : []) : preview.current
+  const sections = entries.reduce((n, { entry }) => n + (entry.categories || []).length, 0)
+  return (
+    <section className="mcr-preview" aria-labelledby="mcr-preview-title">
+      <div className="mcr-preview-head">
+        <h2 id="mcr-preview-title" className="bta-concept-title">
+          {restaurantName}
+        </h2>
+        <span className="bta-tag">Voorvertoning zoals publiek</span>
+      </div>
+      <div className="mcr-toggle" role="group" aria-label="Welke menukaart tonen">
+        <button type="button" className="mcr-toggle-btn" aria-pressed={mode === 'concept'} onClick={() => setMode('concept')}>
+          Nieuw concept
+        </button>
+        <button type="button" className="mcr-toggle-btn" aria-pressed={mode === 'current'} onClick={() => setMode('current')}>
+          Huidige publieke kaart
+        </button>
+      </div>
+      <p className="bta-muted" aria-live="polite">
+        {mode === 'concept'
+          ? `Precies wat de review-PR voor versie ${version} schrijft. Nog niet gepubliceerd.`
+          : 'Zoals de menukaart nu publiek staat. Deze blijft ongewijzigd tot een review-PR handmatig is gemerged.'}
+      </p>
+      {dirty && mode === 'concept' && (
+        <div className="di-banner di-banner-neutral" role="note">
+          <span>Je niet-opgeslagen correcties staan nog niet in dit voorbeeld. Sla ze eerst op als nieuwe versie.</span>
+        </div>
+      )}
+      <div className="mcr-preview-menu">
+        {entries.length === 0 ? (
+          <p className="bta-muted">
+            {mode === 'concept'
+              ? 'Geen voorbeeld: deze versie heeft nog blokkades. Een gedeeltelijke menukaart wordt nooit getoond of geëxporteerd.'
+              : 'Dit restaurant heeft nog geen publieke menukaart.'}
+          </p>
+        ) : (
+          entries.map(({ key, entry }) => (
+            <div key={key} className="mcr-preview-entry">
+              <h3 className="mcr-preview-entry-title">{menuTitle(key, entry)}</h3>
+              <StaticMenu categories={entry.categories} idPrefix={`mcp-${mode}-${key}`} />
+            </div>
+          ))
+        )}
+      </div>
+      {entries.length > 0 && (
+        <p className="mcr-meta">
+          {plural(dishCount(entries), 'gerecht', 'gerechten')} · {plural(sections, 'rubriek', 'rubrieken')}
+          {mode === 'concept' ? ' · volledige menukaart' : ` · ${plural(entries.length, 'menukaart', 'menukaarten')}`}
+        </p>
+      )}
+    </section>
   )
 }
 
@@ -287,6 +396,7 @@ function PublicationCard({ concept, exportInfo, githubConfigured, canExport, exp
 export function ConceptReview({ data, loadError, message, busy, onSaveVersion, onDecide, onExport }) {
   const { edits, touched, setLineEdit, decideRemoved, reset, dirty } = useConceptEdits()
   const [rejecting, setRejecting] = useState(false)
+  const [tab, setTab] = useState(() => (data && data.concept.status === 'approved' && data.preview && data.preview.concept ? 'preview' : 'changes'))
   const stored = useMemo(() => (data ? storedConceptInput(data.concept.captured) : null), [data])
   const concept = useMemo(
     () => (stored ? buildMenuConcept({ menus: stored.menus, liveLines: data.liveLines, edits: mergeEdits(stored.edits, edits) }) : null),
@@ -388,6 +498,11 @@ export function ConceptReview({ data, loadError, message, busy, onSaveVersion, o
 
       <div className="bta-layout">
         <div className="bta-content">
+          <ConceptTabs tabs={TABS} active={tab} onSelect={setTab} idPrefix={`mcr-${c.id}`} />
+          <div role="tabpanel" id={`mcr-${c.id}-panel-preview`} aria-labelledby={`mcr-${c.id}-tab-preview`} hidden={tab !== 'preview'}>
+            <PublicationPreview preview={data.preview} restaurantName={c.restaurantName} version={c.version} dirty={dirty} />
+          </div>
+          <div role="tabpanel" id={`mcr-${c.id}-panel-changes`} aria-labelledby={`mcr-${c.id}-tab-changes`} hidden={tab !== 'changes'}>
           <section className="bta-concept" aria-labelledby="mcr-changes">
             <h2 id="mcr-changes" className="bta-concept-title">
               Wijzigingen controleren
@@ -417,10 +532,35 @@ export function ConceptReview({ data, loadError, message, busy, onSaveVersion, o
               <p className="bta-muted">Van deze versie is de oorspronkelijke herkenning niet vastgelegd (opgeslagen vóór de auditvelden).</p>
             )}
           </section>
-          <History history={data.history} currentId={c.id} />
+          </div>
+          <div role="tabpanel" id={`mcr-${c.id}-panel-source`} aria-labelledby={`mcr-${c.id}-tab-source`} hidden={tab !== 'source'}>
+            <section className="bta-concept" aria-labelledby="mcr-source">
+              <h2 id="mcr-source" className="bta-concept-title">
+                Bron
+              </h2>
+              <p className="bta-url">{c.sourceUrl}</p>
+              <p className="bta-muted">
+                {c.originRecorded ? 'De oorspronkelijke herkenning van deze bron is bewaard en staat bij Wijzigingen naast elke conceptwaarde.' : 'Van deze versie is de oorspronkelijke herkenning niet vastgelegd.'}
+              </p>
+              <div className="bta-actions">
+                <a className="stg-btn-secondary bta-btn" href={c.sourceUrl} target="_blank" rel="noopener noreferrer">
+                  Open originele menukaart
+                  <span className="bta-sr-only"> (opent in een nieuw tabblad)</span>
+                </a>
+              </div>
+            </section>
+          </div>
+          <div role="tabpanel" id={`mcr-${c.id}-panel-history`} aria-labelledby={`mcr-${c.id}-tab-history`} hidden={tab !== 'history'}>
+            <section className="bta-concept" aria-labelledby="mcr-history-title">
+              <h2 id="mcr-history-title" className="bta-concept-title">
+                Versiegeschiedenis
+              </h2>
+              <History history={data.history} currentId={c.id} />
+            </section>
+          </div>
         </div>
 
-        <aside className="bta-side" aria-label="Conceptstatus en bron">
+        <aside className="bta-side" aria-label="Conceptstatus en publicatie">
           <section className="bta-side-card" aria-labelledby="mcr-status">
             <h2 id="mcr-status" className="bta-side-title">
               Conceptstatus
@@ -529,16 +669,6 @@ export function ConceptReview({ data, loadError, message, busy, onSaveVersion, o
             />
           )}
 
-          <section className="bta-side-card" aria-labelledby="mcr-source">
-            <h2 id="mcr-source" className="bta-side-title">
-              Bron
-            </h2>
-            <p className="bta-url">{c.sourceUrl}</p>
-            <a className="stg-btn-secondary bta-btn" href={c.sourceUrl} target="_blank" rel="noopener noreferrer">
-              Open originele menukaart
-              <span className="bta-sr-only"> (opent in een nieuw tabblad)</span>
-            </a>
-          </section>
         </aside>
       </div>
     </>
