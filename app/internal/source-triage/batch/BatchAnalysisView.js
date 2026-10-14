@@ -8,6 +8,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import StatusIcon from '@/src/components/StatusIcon'
+import { MenuControl, MenuConcept } from './MenuReview'
 import { MAX_BATCH_URLS, DAILY_URL_LIMIT, COPY, ACTION_LABELS, precheckLines, splitLines } from '@/src/lib/batchAnalysis'
 
 function timeOf(value) {
@@ -209,7 +210,7 @@ function InputCard({ text, setText, daily, ownOpenBatchId, onStart, busy, error,
   )
 }
 
-function ResultCard({ item, isStarter, batchOpen, ownOpenBatchId, confirming, setConfirming, onConfirm, onRerun, onAdjust, busy }) {
+function ResultCard({ item, isStarter, batchOpen, ownOpenBatchId, confirming, setConfirming, onConfirm, onRerun, onAdjust, onSaveConcept, busy }) {
   const [details, setDetails] = useState(false)
   const confirmRef = useRef(null)
   const restaurantName = item.restaurant && item.restaurant.name
@@ -283,22 +284,12 @@ function ResultCard({ item, isStarter, batchOpen, ownOpenBatchId, confirming, se
             <dt>Gevonden menukaart</dt>
             <dd className="bta-url">{item.foundUrl}</dd>
           </div>
-          {details && restaurantName && (
-            <div>
-              <dt>Herkende naam</dt>
-              <dd>{restaurantName}</dd>
-            </div>
-          )}
         </dl>
       )}
 
-      {details && item.notes.length > 0 && (
-        <ul className="bta-notes" aria-label="Analysedetails">
-          {item.notes.map((note) => (
-            <li key={note}>{note}</li>
-          ))}
-        </ul>
-      )}
+      {details && <MenuControl item={item} />}
+
+      {item.concept && <MenuConcept item={item} readOnly={!isStarter} busy={busy} onSave={onSaveConcept} />}
 
       {open && (
         <div className="bta-confirm" role="group" aria-labelledby={`bta-confirm-${item.jobId}`}>
@@ -323,9 +314,9 @@ function ResultCard({ item, isStarter, batchOpen, ownOpenBatchId, confirming, se
       {!open && (
         <div className="bta-actions">
           {actions.map((a, i) => actionButton(a, i === 0))}
-          {(item.foundUrl || item.restaurant || item.notes.length > 0) && (
+          {(item.menu || item.foundUrl || item.restaurant || item.notes.length > 0) && (
             <button type="button" className="stg-btn-secondary bta-btn" aria-expanded={details} onClick={() => setDetails((d) => !d)}>
-              Details bekijken
+              {item.menu ? (details ? 'Controle sluiten' : 'Menukaart controleren') : 'Details bekijken'}
             </button>
           )}
         </div>
@@ -337,7 +328,7 @@ function ResultCard({ item, isStarter, batchOpen, ownOpenBatchId, confirming, se
   )
 }
 
-function BatchDetail({ detail, ownOpenBatchId, busy, confirming, setConfirming, onConfirm, onRerun, onAdjust, onNew, notice }) {
+function BatchDetail({ detail, ownOpenBatchId, busy, confirming, setConfirming, onConfirm, onRerun, onAdjust, onSaveConcept, onNew, notice }) {
   const { batch, items, summary } = detail
   const isStarter = batch.is_starter
   const batchOpen = !batch.closed_at
@@ -499,6 +490,7 @@ function BatchDetail({ detail, ownOpenBatchId, busy, confirming, setConfirming, 
             onConfirm={onConfirm}
             onRerun={onRerun}
             onAdjust={onAdjust}
+            onSaveConcept={onSaveConcept}
             busy={busy}
           />
         ))}
@@ -508,7 +500,7 @@ function BatchDetail({ detail, ownOpenBatchId, busy, confirming, setConfirming, 
 }
 
 /** Everything below the internal navigation. */
-export default function BatchAnalysisView({ data, loadError, message, viewing, ownOpenBatchId, busy, confirming, setConfirming, onConfirm, onRerun, onAdjust, onNew, notice, text, setText, onStart, actionError, onShowOpen, onSelect }) {
+export default function BatchAnalysisView({ data, loadError, message, viewing, ownOpenBatchId, busy, confirming, setConfirming, onConfirm, onRerun, onAdjust, onSaveConcept, onNew, notice, text, setText, onStart, actionError, onShowOpen, onSelect }) {
   return (
     <>
       <nav aria-label="Kruimelpad" className="bta-breadcrumb">
@@ -569,6 +561,7 @@ export default function BatchAnalysisView({ data, loadError, message, viewing, o
               onConfirm={onConfirm}
               onRerun={onRerun}
               onAdjust={onAdjust}
+              onSaveConcept={onSaveConcept}
               onNew={onNew}
               notice={notice}
             />

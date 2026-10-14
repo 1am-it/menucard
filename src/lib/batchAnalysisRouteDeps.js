@@ -6,8 +6,10 @@ import { authenticateInternalRequest } from '@/src/lib/internalAuth'
 import { generateUuidV7 } from '@/src/lib/uuidv7'
 import { analyzeSourceUrl } from '@/src/lib/sourceAnalysisPipeline'
 import { computeAnalysisResultHash } from '@/src/lib/urlIntakeReceiptHash'
+import { computeCanonicalContentHash } from '@/src/lib/menuSnapshotHash'
 import { createBatchAnalysisHandlers } from '@/src/lib/batchAnalysisHandlers'
 import restaurantsData from '@/data/restaurants.json'
+import menusData from '@/data/menus.json'
 
 export const batchAnalysisHandlers = createBatchAnalysisHandlers({
   authenticate: authenticateInternalRequest,
@@ -16,4 +18,6 @@ export const batchAnalysisHandlers = createBatchAnalysisHandlers({
   generateId: generateUuidV7,
   analyze: analyzeSourceUrl,
   computeHash: computeAnalysisResultHash,
+  computeMenuHash: computeCanonicalContentHash,
+  liveMenus: menusData,
 })
