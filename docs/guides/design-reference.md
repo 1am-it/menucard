@@ -169,21 +169,25 @@ kleurstudies", variant "5 · Oker licht — uitgewerkt (okergeel)", without
 the colour-gradient variant. The green reference, cobalt and aubergine
 directions were rejected.
 
-- **Wordmark:** `src/components/Wordmark.js`. Stacked `ONZE` /
-  `Menukaarten` with a folded-menu-card line motif (inline SVG,
-  `currentColor`, `aria-hidden`). One colour (`--wordmark`), no split
-  accent on a word part, no external font or asset. The DOM text is
-  "Onze Menukaarten"; `ONZE` is uppercase via CSS only. Kleurtaal v2: in
-  light the text is `--wordmark` (`#1A1410`) and the folded-card icon is
-  `--wordmark-icon` (`#B28110`, decorative); in dark both stay oker. The
-  icon is not a word part, so the no-split rule still holds. Because browsers
-  expose the CSS uppercase in the accessible name ("ONZE Menukaarten",
-  measured in Edge), the link carries an explicit `aria-label`, as in the
-  handoff: "Onze Menukaarten, naar de startpagina" (public) and "Onze
-  Menukaarten, naar het interne overzicht" (`InternalNav`). The descriptor
-  sits next to the link and is hidden below 720px. Every public page
-  header renders exactly one `<Wordmark />`; `InternalNav` uses
-  `WordmarkInline`.
+- **Wordmark (logo E2, 2026-10-14):** `src/components/Wordmark.js`.
+  Chosen by the product owner from the Claude Design canvas "Logo
+  richting E" (variant E2 "Tegel"); it replaces the folded-menu-card
+  motif with stacked `ONZE` / `Menukaarten`. The mark is a rounded tile
+  (32×32, radius 8) in `--accent-fill` with a drawn "om" monogram in
+  `--on-accent-fill` — the same pair as the primary button, so it meets
+  the fill-text contrast in both themes. Inline SVG, `aria-hidden`, colours
+  from tokens via CSS, no external font or asset. Next to it, stacked in
+  lower case: "onze" (weight 500, `--text-secondary`) above "menukaarten"
+  (weight 800, `--wordmark`: `#1A1410` light, `#FFFFFF` dark). No word part
+  is oker. The favicon `app/icon.svg` is the same tile in the light token
+  values. Sizes: public header tile 26px / text 18px (24px / 16px below
+  720px); `InternalNav` tile 26px / text 15px. The link carries an explicit
+  `aria-label` so screen readers hear the capitalised name: "Onze
+  Menukaarten, naar de startpagina" (public) and "Onze Menukaarten, naar
+  het interne overzicht" (`InternalNav`). The descriptor sits next to the
+  link and is hidden below 720px. Every public page header renders exactly
+  one `<Wordmark />`; `InternalNav` uses `WordmarkInline`.
+  `--wordmark-icon` is no longer used by the wordmark and can be retired.
 - **Brand accent tokens** (`app/globals.css`, all three theme blocks):
   `--accent` (text, links, icons, focus), `--accent-fill` /
   `--on-accent-fill` (filled controls), `--accent-faint`,
@@ -193,7 +197,7 @@ directions were rejected.
   `--border-focus` follows `--accent`.
 - **Full okergeel only for three things** (handoff rule): the primary
   button, the homepage keyword marker (and search-term highlight) and an
-  active tab underline. Selected chips, active navigation, the active
+  active tab underline — plus, since logo E2, the wordmark tile itself. Selected chips, active navigation, the active
   theme option and similar toggles use the soft treatment:
   `--accent-surface` background, `--accent` text, 1px `--accent` ring.
 - **Green is never a brand or action accent.** It exists only as the

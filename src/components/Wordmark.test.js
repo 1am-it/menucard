@@ -1,7 +1,7 @@
 'use strict';
 
 // Onze Menukaarten — gekozen Claude Design-richting "5 · Oker licht —
-// uitgewerkt (okergeel)". Zelfde conventie als de andere tests in dit
+// uitgewerkt (okergeel)", woordmerk sinds 2026-10-14: logo E2 "om-tegel". Zelfde conventie als de andere tests in dit
 // project: fs.readFileSync + regex, geen gerenderde DOM-harness.
 // Zie docs/guides/design-reference.md ("Wordmark and brand accent").
 
@@ -47,19 +47,31 @@ function blocks() {
 
 // ── Wordmark component ──────────────────────────────────────────────────
 
-test('Wordmark: stacked "Onze / Menukaarten" as real text, one link to "/" by default', () => {
+test('Wordmark: stacked "onze / menukaarten" as real text, one link to "/" by default', () => {
   const src = read('src/components/Wordmark.js');
-  assert.match(src, /<span className="wordmark-top">Onze<\/span>/);
-  assert.match(src, /<span className="wordmark-main">Menukaarten<\/span>/);
+  assert.match(src, /<span className="wordmark-top">onze<\/span>/);
+  assert.match(src, /<span className="wordmark-main">menukaarten<\/span>/);
   assert.match(src, /href = '\/'/);
   assert.doesNotMatch(src, /BredaEats/, 'the wordmark must not render the old name');
 });
 
-test('Wordmark: the menukaart motif is decorative (aria-hidden, currentColor) and no external asset is used', () => {
+test('Wordmark: the E2 om-tile mark is decorative inline SVG (aria-hidden, token-coloured via CSS) and no external asset is used', () => {
   const src = read('src/components/Wordmark.js');
   assert.match(src, /aria-hidden="true"/);
-  assert.match(src, /stroke="currentColor"/);
+  assert.match(src, /<rect className="wordmark-tile" width="32" height="32" rx="8" \/>/);
+  assert.match(src, /<g className="wordmark-om"/);
+  assert.doesNotMatch(src, /fill="#|stroke="#/, 'mark colours come from tokens in CSS, not hard-coded hex');
   assert.doesNotMatch(src, /<img|\.svg['"]|\.png['"]|fonts\.googleapis/);
+});
+
+test('favicon: app/icon.svg is the same E2 om-tile, in the light token values', () => {
+  const icon = read('app/icon.svg');
+  const src = read('src/components/Wordmark.js');
+  assert.match(icon, /<rect width="32" height="32" rx="8" fill="#F6C057"\/>/);
+  assert.match(icon, /stroke="#1F1600"/);
+  const pathD = (s) => (s.match(/d="(M16\.5[^"]+)"/) || [])[1];
+  assert.ok(pathD(icon) && pathD(icon) === pathD(src), 'favicon and wordmark share one "m" path');
+  assert.match(icon, /<circle cx="10\.6" cy="16\.8" r="4\.1"\/>/);
 });
 
 test('Wordmark: descriptor is "Menukaarten in Breda" and sits outside the link', () => {
@@ -67,11 +79,21 @@ test('Wordmark: descriptor is "Menukaarten in Breda" and sits outside the link',
   assert.match(src, /<\/Link>\s*\{descriptor && <span className="wordmark-descriptor">Menukaarten in Breda<\/span>\}/);
 });
 
-test('Wordmark CSS: one colour (--wordmark), no split accent on a word part', () => {
+test('Wordmark CSS (E2): tile is the primary-button pair, "onze" quiet, "menukaarten" in --wordmark; no oker word part', () => {
   const s = css();
   assert.match(s, /\.wordmark \{[^}]*color: var\(--wordmark\);/);
+  assert.match(s, /\.wordmark-tile \{ fill: var\(--accent-fill\); \}/);
+  assert.match(s, /\.wordmark-om \{ stroke: var\(--on-accent-fill\); \}/);
+  assert.match(s, /\.wordmark-top \{[^}]*color: var\(--text-secondary\);/);
+  assert.doesNotMatch(s, /\.wordmark-main \{[^}]*color:/, 'menukaarten inherits --wordmark');
+  assert.doesNotMatch(s, /\.wordmark-(top|main) \{[^}]*color: var\(--accent/, 'no word part in oker');
   assert.doesNotMatch(s, /\.logo span \{/, 'the old split-colour .logo span rule must be gone');
-  assert.doesNotMatch(s, /\.wordmark-(top|main) \{[^}]*color:/, 'no part of the wordmark gets its own colour');
+});
+
+test('tokens (E2): dark --wordmark is the primary text colour, light stays #1A1410', () => {
+  const { dark, lightAttr } = blocks();
+  assert.equal(tokenIn(dark, 'wordmark'), '#FFFFFF');
+  assert.equal(tokenIn(lightAttr, 'wordmark'), '#1A1410');
 });
 
 const PUBLIC_HEADERS = [
