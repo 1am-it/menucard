@@ -88,6 +88,13 @@ untouched.
   cyclic, over-deep, over-large or otherwise uninspectable structure is
   itself a violation. The shared guard runs this scan before any other
   property read and before scoring, in both runners.
+- `structureCorpus.js`, `structureCorpusRunner.js`, `runStructureCorpus.js`
+  — the menu source structure regression corpus: versioned, fictional
+  `STRUCT-*` cases run through the real product chain (parser → analysis →
+  hierarchy → concept → batch status → Publicatievoorbeeld/export), with a
+  pass/fail report (`npm run benchmark:menu-structure`) and a gate
+  (`npm run test:menu-structure`, part of `npm test`). See
+  `docs/guides/menu-source-structure-regression-corpus.md`.
 - `htmlMenuStructure.js` — a dependency-free HTML tree builder and the
   `html_structure` adapter, bounded in input (2 MB, 50 000 nodes, 1 000
   open elements) AND in work: one linear forward pass (unclosed
