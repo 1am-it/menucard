@@ -10,45 +10,12 @@ import ExternalLinkIcon from '@/src/components/ExternalLinkIcon'
 import StatusIcon from '@/src/components/StatusIcon'
 import useClientNow from '@/src/components/useClientNow'
 import { todayOpening, openingBadge } from '@/src/lib/openingStatus'
+import { EU14, MEAL_CONFIG, menuTitle, itemMatchesAllergens, MenuItem, MenuSection } from '@/src/components/MenuBody'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const TAG_LABELS = {
-  aanbevolen:  'Aanbevolen',
-  dagspecial:  'Dagspecial',
-  vegetarisch: 'Vegetarisch',
-  vegan:       'Vegan',
-  halal:       'Halal',
-  glutenvrij:  'Glutenvrij',
-}
-
-// Dieetlabels zijn neutrale labels met een blaadje-icoon, geen successtatus
-// (Kleurtaal v2).
-const NEUTRAL_DIET_TAG_KEYS = new Set(['vegetarisch', 'vegan'])
-
-const MEAL_CONFIG = {
-  lunch:          { label: '🥗 Lunch',          title: 'Lunchkaart' },
-  diner:          { label: '🍽 Diner',          title: 'Dinerkaart' },
-  borrel:         { label: '🍸 Borrel',         title: 'Borrelkaart' },
-  specialiteiten: { label: '⭐ Specialiteiten', title: 'Specialiteiten' },
-}
-
-const EU14 = [
-  { id: 1,  icon: '🌾', name: 'Gluten' },
-  { id: 2,  icon: '🦞', name: 'Schaaldieren' },
-  { id: 3,  icon: '🥚', name: 'Eieren' },
-  { id: 4,  icon: '🐟', name: 'Vis' },
-  { id: 5,  icon: '🥜', name: "Pinda's" },
-  { id: 6,  icon: '🫘', name: 'Soja' },
-  { id: 7,  icon: '🥛', name: 'Melk' },
-  { id: 8,  icon: '🌰', name: 'Noten' },
-  { id: 9,  icon: '🥬', name: 'Selderij' },
-  { id: 10, icon: '🌿', name: 'Mosterd' },
-  { id: 11, icon: '🌱', name: 'Sesam' },
-  { id: 12, icon: '🍇', name: 'Sulfiet' },
-  { id: 13, icon: '🌻', name: 'Lupine' },
-  { id: 14, icon: '🦑', name: 'Weekdieren' },
-]
+// TAG_LABELS, MEAL_CONFIG and EU14 live in src/components/MenuBody.js, shared
+// with the internal Publicatievoorbeeld.
 
 const DIET_TAGS = [
   { key: 'vegetarisch', icon: '🌿', label: 'Vegetarisch' },
@@ -65,19 +32,6 @@ function parsePrice(priceStr) {
   return match ? parseFloat(match[0]) : null
 }
 
-function highlight(text, query) {
-  if (!query || query.length < 2) return text
-  const idx = text.toLowerCase().indexOf(query.toLowerCase())
-  if (idx === -1) return text
-  return (
-    <>
-      {text.slice(0, idx)}
-      <mark className="search-highlight">{text.slice(idx, idx + query.length)}</mark>
-      {text.slice(idx + query.length)}
-    </>
-  )
-}
-
 function itemMatchesQuery(item, q) {
   if (!q || q.length < 2) return true
   const search = q.toLowerCase()
@@ -87,14 +41,6 @@ function itemMatchesQuery(item, q) {
     (item.sup  || '').toLowerCase().includes(search) ||
     (item.wine || '').toLowerCase().includes(search)
   )
-}
-
-function itemMatchesAllergens(item, excludeIds) {
-  if (!excludeIds.length) return { safe: true, unknown: false }
-  const allergens = item.allergens
-  if (!Array.isArray(allergens)) return { safe: false, unknown: true }
-  const hasExcluded = excludeIds.some(id => allergens.includes(id))
-  return { safe: !hasExcluded, unknown: false }
 }
 
 function itemMatchesDiet(item, dietTags) {
@@ -109,86 +55,7 @@ function itemMatchesPrice(item, maxPrice) {
   return price <= maxPrice
 }
 
-// ─── MenuItem Component ────────────────────────────────────────────────────────
-
-function MenuItem({ item, query, excludeAllergens, isFiltering, isResolvedTarget, showPulse, highlightQuery, innerRef }) {
-  const { safe, unknown } = itemMatchesAllergens(item, excludeAllergens)
-  const hasAllergenFilter = excludeAllergens.length > 0
-  // BE-12 — the resolved dish's own substring mark comes from `fromQuery`,
-  // never the shared `?q=` filter state, and only for this one item; it
-  // stays for as long as this item is the resolved target (the life of
-  // this page view), independent of the separate, temporary `showPulse`
-  // highlight below, which fades after 4s (BE-16, was ~2.5-3s).
-  const displayQuery = isResolvedTarget && highlightQuery ? highlightQuery : query
-
-  return (
-    <div
-      ref={innerRef}
-      tabIndex={isResolvedTarget ? -1 : undefined}
-      className={`menu-card ${hasAllergenFilter && unknown ? 'mc-unknown' : ''} ${hasAllergenFilter && !safe ? 'mc-unsafe' : ''} ${showPulse ? 'menu-card-highlighted' : ''}`}
-    >
-      <div className="card-top">
-        <div className="td-name">{highlight(item.name, displayQuery)}</div>
-        <div className={`td-price ${!item.price ? 'no-price' : ''}`}>
-          {item.price || 'op aanvraag'}
-        </div>
-      </div>
-
-      {item.desc && (
-        <div className="td-desc">{highlight(item.desc, displayQuery)}</div>
-      )}
-      {item.sup  && <div className="td-sup">+ {highlight(item.sup, query)}</div>}
-      {item.wine && <div className="td-wine">🍷 {item.wine}</div>}
-
-      {/* Allergen status badges */}
-      {hasAllergenFilter && (
-        <div className="mc-allergen-status">
-          {unknown && (
-            <span className="mc-badge mc-badge-unknown">
-              ⚠ Allergeneninformatie onbekend
-            </span>
-          )}
-          {!safe && !unknown && (
-            <span className="mc-badge mc-badge-contains">
-              Bevat geselecteerde allergenen
-            </span>
-          )}
-        </div>
-      )}
-
-      {/* Allergen icons for contained allergens */}
-      {Array.isArray(item.allergens) && item.allergens.length > 0 && (
-        <div className="mc-allergen-icons">
-          {item.allergens.map(id => {
-            const a = EU14.find(x => x.id === id)
-            if (!a) return null
-            const isExcluded = excludeAllergens.includes(id)
-            return (
-              <span
-                key={id}
-                className={`mc-allergen-icon ${isExcluded ? 'excluded' : ''}`}
-                title={a.name}
-              >
-                {a.icon}
-              </span>
-            )
-          })}
-        </div>
-      )}
-
-      {item.tags?.length > 0 && (
-        <div className="item-tags">
-          {item.tags.map(t => (
-            <span key={t} className={`item-tag tag-${t}`}>
-              {NEUTRAL_DIET_TAG_KEYS.has(t) && <StatusIcon name="leaf" size={11} className="item-tag-icon" />}
-              {TAG_LABELS[t] || t}
-            </span>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
+// MenuItem and MenuSection: src/components/MenuBody.js (the shared menu body).
 
 // ─── Main View ────────────────────────────────────────────────────────────────
 
@@ -243,7 +110,7 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
 
   const baseId    = id.split('-')[0]
   const mealType  = id.split('-').slice(1).join('-')
-  const subtitle  = MEAL_CONFIG[mealType]?.title || r.subtitle || 'Menukaart'
+  const subtitle  = menuTitle(id, r)
   const primaryReservation = getReservationActions(restaurant)[0]
 
   // BE-12 — resolve the dish deep-link (if any) against this route's own,
@@ -632,19 +499,13 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
             // Find original index for anchor ID
             const origIdx = r.categories.findIndex(c => c.name === cat.name)
             return (
-              <div
+              <MenuSection
                 key={i}
-                className="cat-section"
                 id={`cat-${origIdx}`}
-                ref={el => sectionRefs.current[origIdx] = el}
+                sectionRef={el => sectionRefs.current[origIdx] = el}
+                name={cat.name}
+                count={isFiltering ? cat.items.length : undefined}
               >
-                <div className="cat-title">
-                  {cat.name}
-                  {isFiltering && (
-                    <span className="cat-count">{cat.items.length} gerecht{cat.items.length !== 1 ? 'en' : ''}</span>
-                  )}
-                </div>
-                <div className="menu-grid">
                   {cat.items.map((item, j) => {
                     // BE-12 — identity check against the resolved target's
                     // actual item object, not index matching: robust
@@ -657,7 +518,6 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
                         item={item}
                         query={query}
                         excludeAllergens={excludeAllergens}
-                        isFiltering={isFiltering}
                         isResolvedTarget={isResolvedTarget}
                         showPulse={isResolvedTarget && showPulse}
                         highlightQuery={fromQueryParam}
@@ -665,8 +525,7 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
                       />
                     )
                   })}
-                </div>
-              </div>
+              </MenuSection>
             )
           })
         )}

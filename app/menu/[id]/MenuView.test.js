@@ -16,8 +16,12 @@ const REPO_ROOT = path.join(__dirname, '..', '..', '..');
 const COMPONENT_PATH = path.join(REPO_ROOT, 'app/menu/[id]/MenuView.js');
 const GLOBALS_CSS_PATH = path.join(REPO_ROOT, 'app/globals.css');
 
+// The menu body (MenuItem, MenuSection) moved to src/components/MenuBody.js,
+// shared with the internal Publicatievoorbeeld; this page's source is both.
+const MENU_BODY_PATH = path.join(REPO_ROOT, 'src/components/MenuBody.js');
+
 function readComponentSource() {
-  return fs.readFileSync(COMPONENT_PATH, 'utf8');
+  return fs.readFileSync(COMPONENT_PATH, 'utf8') + '\n' + fs.readFileSync(MENU_BODY_PATH, 'utf8');
 }
 
 function readGlobalsCss() {

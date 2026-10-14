@@ -318,3 +318,49 @@ test('another open review PR for the same restaurant blocks a second export; a c
   assert.equal(next.status, 201);
   assert.equal(supabase.tables.menu_snapshot_exports[0].status, 'closed');
 });
+
+// ─── Publicatievoorbeeld (the approved concept's preview on the review page) ───
+
+const { createMenuConceptReviewHandlers } = require('./menuConceptReviewHandlers');
+
+function reviewHandlers(supabase, github) {
+  return createMenuConceptReviewHandlers({
+    authenticate: async () => ({ ok: true, userId: REVIEWER, roles: [{ role: 'internal' }] }),
+    getSupabase: () => supabase,
+    restaurants: RESTAURANTS,
+    liveMenus: LIVE,
+    computeMenuHash: hash,
+    github,
+  });
+}
+
+test('preview "Nieuw concept" is exactly the entry the review PR writes; building it writes nothing', async () => {
+  const supabase = world();
+  const github = fakeGithub();
+  const detail = await reviewHandlers(supabase, github).detail(request(), '5');
+  assert.equal(detail.status, 200);
+  const { preview } = detail.body;
+  assert.equal(preview.concept.key, '1-menukaart');
+  // Viewing the preview never writes, exports or calls GitHub.
+  assert.equal(supabase.calls.length, 0);
+  assert.equal(github.state.calls.length, 0);
+
+  const res = await go(supabase, github);
+  assert.equal(res.status, 201);
+  const written = JSON.parse(github.state.commits[0].files[0].content)['1-menukaart'];
+  assert.deepEqual(preview.concept.entry, written);
+});
+
+test('preview "Huidige publieke kaart" is the unchanged published menus of this restaurant, every menu type in file order', async () => {
+  const { preview } = (await reviewHandlers(world(), null).detail(request(), '5')).body;
+  assert.deepEqual(preview.current, [
+    { key: '1-lunch', entry: LIVE['1-lunch'] },
+    { key: '1-diner', entry: LIVE['1-diner'] },
+  ]);
+});
+
+test('preview of a version with blockers shows no partial menu', async () => {
+  const { preview } = (await reviewHandlers(world({ snapshots: [snapshotRow(5, 1, approvedContent({}))] }), null).detail(request(), '5')).body;
+  assert.equal(preview.concept, null);
+  assert.equal(preview.current.length, 2);
+});

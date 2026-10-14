@@ -257,7 +257,8 @@ test('dietary labels are neutral outlined tags with a leaf icon, not a success s
   assert.ok(m);
   assert.match(m[1], /color: var\(--text-secondary\)/);
   assert.doesNotMatch(m[1], /status|green/);
-  assert.match(read('app/menu/[id]/MenuView.js'), /NEUTRAL_DIET_TAG_KEYS\.has\(t\) && <StatusIcon name="leaf"/);
+  // The public menu body, shared with the internal Publicatievoorbeeld.
+  assert.match(read('src/components/MenuBody.js'), /NEUTRAL_DIET_TAG_KEYS\.has\(t\) && <StatusIcon name="leaf"/);
 });
 
 test('coverage dashboard: header tint is neutral and the headline number is primary text', () => {

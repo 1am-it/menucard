@@ -37,6 +37,26 @@ function reply(status, body) {
   return { status, body };
 }
 
+/**
+ * The exact data/menus.json entry the review pull request writes for this
+ * concept version, checked against `menus` (GitHub main at export time, the
+ * deployed data/menus.json for the Publicatievoorbeeld). One function for
+ * both, so the preview can never differ from what is exported. `entry` is
+ * null when the version has blockers against `menus` or is incomplete.
+ */
+function exportMenuEntry({ snapshot, menus }) {
+  const rid = snapshot.restaurant_id;
+  const stored = storedConceptInput(snapshot.captured_content);
+  const concept = buildMenuConcept({ menus: stored.menus, liveLines: liveMenuLines(menus, rid), edits: stored.edits });
+  if (!concept.canSave) return { concept, entry: null };
+  try {
+    const entry = buildMenuEntry({ content: concept.content, currentEntries: restaurantMenuEntries(menus, rid), sourceUrl: snapshot.source_url, scraped: String(snapshot.created_at || '').slice(0, 10) });
+    return { concept, entry };
+  } catch {
+    return { concept, entry: null };
+  }
+}
+
 function marker(snapshotId) {
   return `<!-- menucard-export snapshot:${snapshotId} -->`;
 }
@@ -198,13 +218,12 @@ function createMenuConceptExportHandler({ authenticate, getSupabase, restaurants
     if (computeMenuHash(baseEntries) !== computeMenuHash(restaurantMenuEntries(liveMenus, rid))) {
       return reply(409, { error: 'De huidige menukaart op GitHub is gewijzigd sinds dit concept is gecontroleerd. Maak eerst een nieuwe conceptversie.', reason: 'base_changed' });
     }
-    const againstBase = buildMenuConcept({ menus: stored.menus, liveLines: liveMenuLines(before.menus, rid), edits: stored.edits });
+    const { concept: againstBase, entry } = exportMenuEntry({ snapshot, menus: before.menus });
     if (!againstBase.canSave) return reply(409, { error: 'Tegen de huidige menukaart heeft dit concept blokkades.', reason: 'base_changed', blockers: againstBase.blockers });
+    if (!entry) return reply(409, { error: 'Er kon geen volledige menukaart worden gemaakt; er wordt niets geëxporteerd.', reason: 'incomplete' });
 
     let after;
-    let entry;
     try {
-      entry = buildMenuEntry({ content: againstBase.content, currentEntries: baseEntries, sourceUrl: snapshot.source_url, scraped: String(snapshot.created_at || now().toISOString()).slice(0, 10) });
       after = applyExport({ menus: before.menus, restaurants: before.restaurants, restaurantId: rid, entry });
     } catch {
       return reply(409, { error: 'Er kon geen volledige menukaart worden gemaakt; er wordt niets geëxporteerd.', reason: 'incomplete' });
@@ -283,4 +302,4 @@ function createMenuConceptExportHandler({ authenticate, getSupabase, restaurants
   return { exportToReviewPr };
 }
 
-module.exports = { createMenuConceptExportHandler, exportForSnapshot, exportView, marker, NOT_PUBLISHED };
+module.exports = { createMenuConceptExportHandler, exportForSnapshot, exportMenuEntry, exportView, marker, NOT_PUBLISHED };
