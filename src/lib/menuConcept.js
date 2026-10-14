@@ -14,6 +14,8 @@
 
 'use strict';
 
+const { categoryPath, pathKey, formatPath } = require('./menuHierarchy');
+
 const UNCLEAR_CATEGORY_NAMES = new Set(['', 'menu', 'menukaart', 'kaart', 'categorie', 'overig', 'overige', 'diversen']);
 const MAX_CATEGORY_NAME = 60;
 const MAX_NAME = 120;
@@ -57,16 +59,40 @@ function isUnclearCategory(name) {
   return UNCLEAR_CATEGORY_NAMES.has(text.toLowerCase()) || text.length > MAX_CATEGORY_NAME;
 }
 
+function menuTitleOf(menu) {
+  return menu && typeof menu.title === 'string' && menu.title.trim() ? menu.title.trim() : null;
+}
+
+function labelsOf(value) {
+  return Array.isArray(value) ? value.filter((label) => typeof label === 'string' && label.trim()).map((label) => label.trim()) : null;
+}
+
+/**
+ * The shared menu title of a concept: the title of its only menu. With
+ * several menus (e.g. one per page: lunch, diner) each title becomes the
+ * outermost group of its own sections instead, so nothing merges.
+ */
+function conceptTitle(menus) {
+  const withItems = (Array.isArray(menus) ? menus : []).filter((m) => m && Array.isArray(m.categories) && m.categories.length > 0);
+  return withItems.length === 1 ? menuTitleOf(withItems[0]) : null;
+}
+
 /**
  * The recognised dishes, flattened with a stable id per line. `from` is the
  * line's id in the original analysis result: the id itself for a receipt's
  * menus, the stored reference for a saved concept (null for a dish kept from
  * the current menu or a version saved before references were stored).
+ * Every line keeps its section path (src/lib/menuHierarchy.js) — `category`
+ * is the path's last label — and its original source route.
  */
 function recognisedLines(menus) {
   const lines = [];
-  (Array.isArray(menus) ? menus : []).forEach((menu, m) => {
+  const list = Array.isArray(menus) ? menus : [];
+  const several = list.filter((m) => m && Array.isArray(m.categories) && m.categories.length > 0).length > 1;
+  list.forEach((menu, m) => {
+    const title = several ? menuTitleOf(menu) : null;
     ((menu && Array.isArray(menu.categories) && menu.categories) || []).forEach((category, c) => {
+      const path = title ? [title, ...categoryPath(category)] : categoryPath(category);
       ((category && Array.isArray(category.items) && category.items) || []).forEach((item, i) => {
         if (!item || typeof item.name !== 'string' || !item.name.trim()) return;
         const id = `${m}.${c}.${i}`;
@@ -77,7 +103,10 @@ function recognisedLines(menus) {
           name: item.name.trim().slice(0, MAX_NAME),
           desc: typeof item.desc === 'string' && item.desc.trim() ? item.desc.trim() : null,
           price: normalizePrice(item.price),
-          category: category && typeof category.name === 'string' ? category.name.trim() : '',
+          category: path[path.length - 1],
+          categoryPath: path,
+          sourcePath: labelsOf(category && category.sourcePath),
+          categoryUncertain: Boolean(category && category.uncertain === true),
         });
       });
     });
@@ -85,14 +114,24 @@ function recognisedLines(menus) {
   return lines;
 }
 
-/** Summary for the control view: categories with dishes and prices. */
+/** Summary for the control view: sections (with their path and source route) with dishes and prices. */
 function summarizeRecognisedMenu(menus) {
   const lines = recognisedLines(menus);
   const categories = [];
+  const byPath = new Map();
   for (const line of lines) {
-    let category = categories.find((c) => c.name === line.category);
+    const key = pathKey(line.categoryPath);
+    let category = byPath.get(key);
     if (!category) {
-      category = { name: line.category || 'Zonder rubriek', items: [] };
+      category = {
+        name: line.category || 'Zonder rubriek',
+        path: line.categoryPath,
+        label: formatPath(line.categoryPath),
+        sourceRoute: line.sourcePath ? formatPath(line.sourcePath) : null,
+        uncertain: line.categoryUncertain,
+        items: [],
+      };
+      byPath.set(key, category);
       categories.push(category);
     }
     category.items.push({ id: line.id, name: line.name, price: displayPrice(line.price) });
@@ -104,8 +143,9 @@ function summarizeRecognisedMenu(menus) {
     if (!line.price) attention.push({ id: line.id, name: line.name, reason: 'Prijs ontbreekt' });
     else if (names.get(normalizeName(line.name)) > 1) attention.push({ id: line.id, name: line.name, reason: 'Komt meer dan eens voor' });
     else if (isUnclearCategory(line.category)) attention.push({ id: line.id, name: line.name, reason: 'Rubriek onduidelijk' });
+    else if (line.categoryUncertain) attention.push({ id: line.id, name: line.name, reason: 'Rubriekindeling onzeker' });
   }
-  return { itemCount: lines.length, categoryCount: categories.length, categories, attention };
+  return { itemCount: lines.length, categoryCount: categories.length, title: conceptTitle(menus), categories, attention };
 }
 
 /** The restaurant's current published menu lines (data/menus.json entries
@@ -124,6 +164,7 @@ function liveMenuLines(liveMenus, restaurantId) {
           desc: typeof item.desc === 'string' && item.desc.trim() ? item.desc.trim() : null,
           price: normalizePrice(typeof item.priceValue === 'number' ? item.priceValue : item.price),
           category: category && typeof category.name === 'string' ? category.name.trim() : '',
+          categoryPath: categoryPath(category),
         });
       });
     });
@@ -196,6 +237,9 @@ function storedConceptInput(captured) {
   const lines = {};
   const categories = source.map((category, c) => ({
     name: category && typeof category.name === 'string' ? category.name : '',
+    ...(category && Array.isArray(category.path) ? { path: category.path } : {}),
+    ...(category && Array.isArray(category.sourcePath) ? { sourcePath: category.sourcePath } : {}),
+    ...(category && category.uncertain === true ? { uncertain: true } : {}),
     items: ((category && Array.isArray(category.items) && category.items) || []).map((item, i) => {
       if (item && item.accepted === true) lines[`0.${c}.${i}`] = { accept: true };
       return {
@@ -211,16 +255,18 @@ function storedConceptInput(captured) {
   for (const r of (captured && Array.isArray(captured.removed) && captured.removed) || []) {
     if (r && typeof r.name === 'string' && (r.decision === 'keep' || r.decision === 'remove')) removed[normalizeName(r.name)] = r.decision;
   }
-  return { menus: [{ categories }], edits: { lines, removed } };
+  return { menus: [{ title: captured && typeof captured.title === 'string' ? captured.title : null, categories }], edits: { lines, removed } };
 }
 
 /** What a menu shows the public — the projection compared for "previously rejected". */
 function publicMenu(content) {
-  const categories = (content && Array.isArray(content.categories) ? content.categories : []).map((c) => ({
-    name: c && typeof c.name === 'string' ? c.name : '',
-    items: ((c && Array.isArray(c.items) && c.items) || []).map((i) => ({ name: i && i.name, desc: (i && i.desc) || null, price: (i && i.price) || null })),
-  }));
-  return { categories };
+  const categories = (content && Array.isArray(content.categories) ? content.categories : []).map((c) => {
+    const out = { name: c && typeof c.name === 'string' ? c.name : '' };
+    if (c && Array.isArray(c.path) && c.path.length > 1) out.path = c.path;
+    out.items = ((c && Array.isArray(c.items) && c.items) || []).map((i) => ({ name: i && i.name, desc: (i && i.desc) || null, price: (i && i.price) || null }));
+    return out;
+  });
+  return content && typeof content.title === 'string' ? { title: content.title, categories } : { categories };
 }
 
 function removedDecisionFor(decisions, name) {
@@ -258,13 +304,17 @@ function buildMenuConcept({ menus, liveLines, edits }) {
     const name = typeof e.name === 'string' && e.name.trim() ? e.name.trim().slice(0, MAX_NAME) : line.name;
     const editedPrice = e.price !== undefined && e.price !== null && e.price !== '' ? normalizePrice(String(e.price)) : undefined;
     const price = editedPrice !== undefined ? editedPrice : line.price;
-    const category = typeof e.category === 'string' && e.category.trim() ? e.category.trim().slice(0, MAX_CATEGORY_NAME) : line.category;
+    const categoryEdited = typeof e.category === 'string' && e.category.trim() !== '';
+    const category = categoryEdited ? e.category.trim().slice(0, MAX_CATEGORY_NAME) : line.category;
+    const linePath = line.categoryPath || [line.category];
     return {
       ...line,
       original: { name: line.name, price: line.price, category: line.category },
       name,
       price,
       category,
+      categoryEdited,
+      categoryPath: categoryEdited ? [...linePath.slice(0, -1), category] : linePath,
       excluded: e.exclude === true,
       accepted: e.accept === true,
       edited: Boolean(e.name || e.price || e.category),
@@ -277,10 +327,13 @@ function buildMenuConcept({ menus, liveLines, edits }) {
 
   for (const l of lines) {
     const liveMatch = liveByName.get(normalizeName(l.name));
-    const needsAcceptance = isUnclearCategory(l.category) || nameCount.get(normalizeName(l.name)) > 1;
+    // An uncertain source structure counts as an unclear section until a
+    // human names the section or accepts it ("Klopt zo").
+    const unclear = isUnclearCategory(l.category) || (l.categoryUncertain && !l.categoryEdited);
+    const needsAcceptance = unclear || nameCount.get(normalizeName(l.name)) > 1;
     if (l.excluded) l.status = 'excluded';
     else if (!l.price) l.status = 'missing_price';
-    else if (isUnclearCategory(l.category) && !l.accepted) l.status = 'unclear_category';
+    else if (unclear && !l.accepted) l.status = 'unclear_category';
     else if (nameCount.get(normalizeName(l.name)) > 1 && !l.accepted) l.status = 'duplicate';
     else if (liveMatch && liveMatch.price && liveMatch.price !== l.price) l.status = 'price_changed';
     else if (liveMatch) l.status = 'unchanged';
@@ -312,13 +365,23 @@ function buildMenuConcept({ menus, liveLines, edits }) {
   const counts = {};
   for (const l of lines) counts[l.status] = (counts[l.status] || 0) + 1;
 
+  // Sections are grouped by their whole path, never by their last label
+  // only: "Lunch › Voor" and "Diner › Voor" stay two sections. A flat path
+  // stores no `path` key, so older flat concepts keep their exact content.
   const conceptCategories = [];
-  const add = (categoryName, item) => {
-    let c = conceptCategories.find((x) => x.name === categoryName);
+  const byPath = new Map();
+  const add = (pathLabels, item, origin) => {
+    const key = pathKey(pathLabels);
+    let c = byPath.get(key);
     if (!c) {
-      c = { name: categoryName, items: [] };
+      c = { name: pathLabels[pathLabels.length - 1] };
+      if (pathLabels.length > 1) c.path = pathLabels;
+      if (origin && origin.sourcePath) c.sourcePath = origin.sourcePath;
+      c.items = [];
+      byPath.set(key, c);
       conceptCategories.push(c);
     }
+    if (origin && origin.uncertain) c.uncertain = true;
     c.items.push(item);
   };
   for (const l of included) {
@@ -326,12 +389,23 @@ function buildMenuConcept({ menus, liveLines, edits }) {
     if (l.from) item.from = l.from;
     if (l.kept) item.kept = true;
     if (l.accepted) item.accepted = true;
-    add(l.category, item);
+    add(l.categoryPath, item, { sourcePath: l.categoryEdited ? null : l.sourcePath, uncertain: l.categoryUncertain && !l.categoryEdited });
   }
   for (const l of removed) {
-    if (l.decision === 'keep') add(l.category || 'Huidige kaart', { name: l.name, desc: l.desc, price: l.price, kept: true });
+    if (l.decision === 'keep') add(l.categoryPath && l.categoryPath.length ? l.categoryPath : [l.category || 'Huidige kaart'], { name: l.name, desc: l.desc, price: l.price, kept: true }, null);
   }
-  const content = { categories: conceptCategories };
+  // Keys in a stable order (name, path, sourcePath, uncertain, items).
+  for (const c of conceptCategories) {
+    const items = c.items;
+    delete c.items;
+    if (c.uncertain) {
+      delete c.uncertain;
+      c.uncertain = true;
+    }
+    c.items = items;
+  }
+  const title = conceptTitle(menus);
+  const content = title ? { title, categories: conceptCategories } : { categories: conceptCategories };
   const removedForContent = removed.filter((l) => l.decision === 'remove').map((l) => ({ name: l.name, decision: 'remove' }));
   if (removedForContent.length > 0) content.removed = removedForContent;
 

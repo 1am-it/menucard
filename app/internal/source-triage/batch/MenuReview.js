@@ -18,6 +18,43 @@
 import { useMemo, useState } from 'react'
 import StatusIcon from '@/src/components/StatusIcon'
 import { STATUS, buildMenuConcept, displayPrice, normalizeName } from '@/src/lib/menuConcept'
+import { formatPath } from '@/src/lib/menuHierarchy'
+
+/**
+ * The proposed section structure next to its original source route, for
+ * internal review (src/lib/menuHierarchy.js). Uncertain sections say so.
+ */
+export function ConceptStructure({ captured }) {
+  const categories = (captured && Array.isArray(captured.categories) && captured.categories) || []
+  if (categories.length === 0) return null
+  const title = captured && typeof captured.title === 'string' ? captured.title : null
+  return (
+    <details className="bta-category">
+      <summary>
+        <span className="bta-category-name">Structuur</span>
+        <span className="bta-muted"> · {plural(categories.length, 'rubriek', 'rubrieken')}{title ? ` onder "${title}"` : ''}</span>
+      </summary>
+      <ul className="bta-structure">
+        {categories.map((category, i) => {
+          const proposed = formatPath(Array.isArray(category.path) && category.path.length > 0 ? category.path : [category.name])
+          const source = Array.isArray(category.sourcePath) ? formatPath(category.sourcePath) : null
+          return (
+            <li key={i}>
+              <span className="bta-dish">{title ? `${title} › ${proposed}` : proposed}</span>
+              {category.uncertain && (
+                <span className="status-badge status-badge--neutral bta-badge">
+                  <StatusIcon name="warning" />
+                  <span>Rubriekindeling onzeker</span>
+                </span>
+              )}
+              <span className="bta-source-route">Bronroute: {source || 'niet vastgelegd'}</span>
+            </li>
+          )
+        })}
+      </ul>
+    </details>
+  )
+}
 
 export function plural(n, one, many) {
   return `${n} ${n === 1 ? one : many}`
@@ -55,13 +92,22 @@ export function MenuControl({ item }) {
         </div>
       )}
 
+      {menu && menu.title && <p className="bta-control-count">Menutitel: {menu.title}</p>}
+
       {menu &&
         menu.categories.map((category) => (
-          <details key={category.name} className="bta-category">
+          <details key={category.label || category.name} className="bta-category">
             <summary>
-              <span className="bta-category-name">{category.name}</span>
+              <span className="bta-category-name">{category.label || category.name}</span>
               <span className="bta-muted"> · {plural(category.items.length, 'gerecht', 'gerechten')}</span>
+              {category.uncertain && (
+                <span className="status-badge status-badge--neutral bta-badge bta-inline-badge">
+                  <StatusIcon name="warning" />
+                  <span>Rubriekindeling onzeker</span>
+                </span>
+              )}
             </summary>
+            {category.sourceRoute && <p className="bta-source-route">Bronroute: {category.sourceRoute}</p>}
             <ul className="bta-dishes">
               {category.items.map((dish) => (
                 <li key={dish.id}>

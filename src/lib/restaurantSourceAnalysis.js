@@ -71,6 +71,7 @@
 'use strict'
 
 const { extractMenusFromHtml } = require('./menuJsonLdExtraction')
+const { normalizeMenuHierarchy } = require('./menuHierarchy')
 const { findSameHostMenuCandidates } = require('./sameHostDiscovery')
 const { extractRestaurantFieldsWithEvidence } = require('./restaurantFieldEvidence')
 const { ALLOWED_FIELD_NAMES, deriveFieldConfidence, isFieldReviewReady } = require('./fieldConfidence')
@@ -91,6 +92,12 @@ const { extractHtmlMenuStructure } = require('./htmlMenuStructure')
  * events, reservations, service units, ambiguous structures) apply.
  * Returns `{ menu, itemCount }` or `null`. Never throws into the analysis.
  */
+/**
+ * The HTML structure adapter's sections as one menu context. The heading
+ * route is kept losslessly (src/lib/menuHierarchy.js): a shared title, a
+ * path of any depth per section, the original source route, the source
+ * position and locator, and an uncertainty flag — never one flattened name.
+ */
 function menuFromHtmlStructure(html, usedSlugs) {
   let result
   try {
@@ -99,19 +106,35 @@ function menuFromHtmlStructure(html, usedSlugs) {
     return null
   }
   if (!result || result.status !== 'parsed') return null
-  const categories = result.sections
-    .map((section) => ({
-      name: section.path.length > 0 ? section.path.join(' — ') : 'Menukaart',
+  const kept = result.sections
+    .map((section, position) => ({
+      section,
+      position,
       items: section.items
         .filter((item) => item.priceStatus === 'known' && Number.isInteger(item.amountMinorUnits))
         .map((item) => ({ name: item.name, desc: item.description || null, price: (item.amountMinorUnits / 100).toFixed(2) })),
     }))
-    .filter((category) => category.items.length > 0)
-  const itemCount = categories.reduce((n, c) => n + c.items.length, 0)
+    .filter((entry) => entry.items.length > 0)
+  const itemCount = kept.reduce((n, entry) => n + entry.items.length, 0)
   if (itemCount === 0) return null
+  const hierarchy = normalizeMenuHierarchy(kept.map((entry) => entry.section.path))
+  const categories = kept.map((entry, i) => {
+    const shape = hierarchy.categories[i]
+    const category = { name: shape.name, path: shape.path, sourcePath: shape.sourcePath, position: entry.position, locator: entry.section.items[0].evidence.locator, items: entry.items }
+    if (shape.uncertain) category.uncertain = true
+    return category
+  })
   let contextSlug = 'menukaart'
   for (let i = 0; usedSlugs.has(contextSlug); i += 1) contextSlug = `menukaart${String.fromCharCode(97 + (i % 26))}`
-  return { menu: { name: 'Menukaart', contextSlug, categories }, itemCount }
+  return { menu: { name: 'Menukaart', contextSlug, title: hierarchy.title, structure: hierarchy.structure, categories }, itemCount }
+}
+
+/** A plain-language note for a recognised HTML menu. */
+function htmlMenuNote(url, found) {
+  const base = `Menukaart herkend uit de HTML van ${url}: ${found.itemCount} gerechten met prijs in ${found.menu.categories.length} rubrieken.`
+  return found.menu.structure === 'uncertain'
+    ? `${base} De rubriekindeling is onzeker: controleer de bronroute.`
+    : `${base} Controleer rubrieken en prijzen.`
 }
 
 /** A safe, derived signal for a discovered PDF's own review metadata —
@@ -209,9 +232,7 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
     const entryHtmlMenu = menuFromHtmlStructure(homepageHtml, new Set())
     if (entryHtmlMenu) {
       menuContexts.push({ ...entryHtmlMenu.menu, extractionMethod: 'html', sourceUrl: homepageUrl })
-      notes.push(
-        `Menukaart herkend uit de HTML van ${homepageUrl}: ${entryHtmlMenu.itemCount} gerechten met prijs in ${entryHtmlMenu.menu.categories.length} rubrieken. Controleer rubrieken en prijzen.`
-      )
+      notes.push(htmlMenuNote(homepageUrl, entryHtmlMenu))
     }
   }
 
@@ -277,9 +298,7 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
       if (htmlMenu) {
         menuContexts.push({ ...htmlMenu.menu, extractionMethod: 'html', sourceUrl: fetched.finalUrl || candidate.url })
         existingSlugs.add(htmlMenu.menu.contextSlug)
-        notes.push(
-          `Menukaart herkend uit de HTML van ${fetched.finalUrl || candidate.url}: ${htmlMenu.itemCount} gerechten met prijs in ${htmlMenu.menu.categories.length} rubrieken. Controleer rubrieken en prijzen.`
-        )
+        notes.push(htmlMenuNote(fetched.finalUrl || candidate.url, htmlMenu))
       } else if (candidateMenus.length === 0) {
         // The page was read, but holds no menu this pipeline can read
         // automatically. Name the page for the human reviewer — never a

@@ -364,3 +364,23 @@ test('preview of a version with blockers shows no partial menu', async () => {
   assert.equal(preview.concept, null);
   assert.equal(preview.current.length, 2);
 });
+
+test('a nested menu: preview and review PR carry the same semantic structure (title, groups, sections)', async () => {
+  const nested = buildMenuConcept({
+    menus: [{ title: 'Fictief seizoensmenu', categories: [
+      { name: 'Voor', path: ['Diner', 'Voor'], sourcePath: ['Fictief seizoensmenu', 'Diner', 'Voor'], items: [{ name: 'Fictieve soep', price: '8.50' }] },
+      { name: 'Hoofd', path: ['Diner', 'Hoofd'], sourcePath: ['Fictief seizoensmenu', 'Diner', 'Hoofd'], items: [{ name: 'Fictieve risotto', price: '18.00' }] },
+    ] }],
+    liveLines: liveMenuLines(LIVE, '1'),
+    edits: { removed: { 'fictieve entrecote': 'remove' } },
+  }).content;
+  const supabase = world({ snapshots: [snapshotRow(5, 1, nested)] });
+  const github = fakeGithub();
+  const { preview } = (await reviewHandlers(supabase, github).detail(request(), '5')).body;
+  assert.equal(preview.concept.entry.title, 'Fictief seizoensmenu');
+  assert.deepEqual(preview.concept.entry.categories.map((c) => [c.name, c.path]), [['Voor', ['Diner', 'Voor']], ['Hoofd', ['Diner', 'Hoofd']]]);
+  const res = await go(supabase, github);
+  assert.equal(res.status, 201);
+  const written = JSON.parse(github.state.commits[0].files[0].content)['1-menukaart'];
+  assert.deepEqual(preview.concept.entry, written);
+});

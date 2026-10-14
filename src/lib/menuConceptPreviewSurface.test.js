@@ -56,3 +56,12 @@ test('the review-PR action is still the only publication step and the preview sa
   assert.match(VIEW, /<PublicationCard/);
   assert.match(VIEW, /Precies wat de review-PR voor versie \$\{version\} schrijft\. Nog niet gepubliceerd\./);
 });
+
+test('nested menus: the shared body renders group headings; the public page uses the same component and keeps unique anchors', () => {
+  assert.match(BODY, /export function MenuGroupHeadings\(\{ categories, index \}\)/);
+  assert.match(BODY, /groupHeadingsBefore\(categories, index\)/);
+  assert.match(BODY, /export function StaticMenu[\s\S]*<MenuGroupHeadings categories=\{list\} index=\{i\} \/>/);
+  assert.match(PUBLIC, /<MenuGroupHeadings categories=\{filteredCategories\} index=\{i\} \/>/);
+  assert.match(PUBLIC, /c\.name === cat\.name && JSON\.stringify\(c\.path \|\| null\) === JSON\.stringify\(cat\.path \|\| null\)/);
+  assert.match(BODY, /\(entry && entry\.title\)/);
+});

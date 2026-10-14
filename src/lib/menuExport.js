@@ -56,8 +56,12 @@ function buildMenuEntry({ content, currentEntries, sourceUrl, scraped }) {
       }
     }
   }
+  // The section hierarchy travels with the menu (src/lib/menuHierarchy.js):
+  // `path` only for a nested section, `title` only when there is one — a
+  // flat menu keeps exactly the existing data/menus.json shape.
   const categories = ((content && content.categories) || []).map((category) => ({
     name: category.name,
+    ...(Array.isArray(category.path) && category.path.length > 1 ? { path: category.path } : {}),
     items: (category.items || []).map((item) => {
       const known = enrichment.get(normalizeName(item.name)) || {};
       const price = formatEuro(item.price);
@@ -80,7 +84,8 @@ function buildMenuEntry({ content, currentEntries, sourceUrl, scraped }) {
     }),
   }));
   if (!categories.some((c) => c.items.length > 0)) throw new Error('export_incomplete: no dishes');
-  return { subtitle: 'Menukaart', scraped, source: sourceUrl, categories };
+  const title = content && typeof content.title === 'string' && content.title.trim() ? content.title.trim() : null;
+  return { subtitle: 'Menukaart', ...(title ? { title } : {}), scraped, source: sourceUrl, categories };
 }
 
 /**
