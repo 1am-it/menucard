@@ -216,7 +216,75 @@ function History({ history, currentId }) {
 }
 
 /** /internal/menu-concepts/[id] */
-export function ConceptReview({ data, loadError, message, busy, onSaveVersion, onDecide }) {
+const EXPORT_VIEW = {
+  opened: { role: 'neutral', icon: 'clock', label: 'Review-PR open' },
+  merged: { role: 'positive', icon: 'check', label: 'Review-PR gemerged' },
+  closed: { role: 'neutral', icon: 'cross', label: 'Review-PR gesloten zonder merge' },
+  failed: { role: 'neutral', icon: 'cross', label: 'Vorige poging mislukt' },
+  pending: { role: 'neutral', icon: 'progress', label: 'Review-PR wordt gemaakt' },
+}
+
+/** BE-27: "Maak review-PR" for an approved concept, then its pull request and status. Never publishes. */
+function PublicationCard({ concept, exportInfo, githubConfigured, canExport, exportBlockers, busy, onExport }) {
+  const view = exportInfo ? EXPORT_VIEW[exportInfo.status] : null
+  const active = exportInfo && (exportInfo.status === 'opened' || exportInfo.status === 'merged' || exportInfo.status === 'pending')
+  return (
+    <section className="bta-side-card" aria-labelledby="mcr-publication">
+      <h2 id="mcr-publication" className="bta-side-title">
+        Publicatie
+      </h2>
+      {view && (
+        <span className={`status-badge status-badge--${view.role} bta-badge`}>
+          <StatusIcon name={view.icon} />
+          <span>{view.label}</span>
+        </span>
+      )}
+      {exportInfo && exportInfo.prUrl && (
+        <a className="stg-btn-secondary bta-btn" href={exportInfo.prUrl} target="_blank" rel="noopener noreferrer">
+          Review-PR openen
+          <span className="bta-sr-only"> (opent in een nieuw tabblad)</span>
+        </a>
+      )}
+      {exportInfo && exportInfo.status === 'merged' ? (
+        <p className="bta-side-text">Gemerged op GitHub. De menukaart wordt zichtbaar na de normale productie-deploy.</p>
+      ) : (
+        <p className="bta-side-text">
+          <strong>Nog niet gepubliceerd. Handmatig mergen vereist.</strong>
+        </p>
+      )}
+      {exportInfo && exportInfo.branch && (
+        <p className="bta-side-muted mcr-meta">
+          Branch <span className="bta-url">{exportInfo.branch}</span>
+          {exportInfo.commitSha ? ` · commit ${exportInfo.commitSha.slice(0, 7)}` : ''} · conceptversie {concept.version}
+        </p>
+      )}
+      {!active && (
+        <div className="mcr-actions">
+          <button
+            type="button"
+            className="di-btn-primary bta-btn"
+            aria-disabled={!canExport || busy ? 'true' : undefined}
+            aria-describedby="mcr-export-hint"
+            onClick={() => {
+              if (canExport && !busy) onExport(concept.version)
+            }}
+          >
+            Maak review-PR
+          </button>
+          <p id="mcr-export-hint" className="bta-muted">
+            {!githubConfigured
+              ? 'De GitHub-koppeling ontbreekt op de server. Er kan nog geen review-PR worden gemaakt; er is niets gewijzigd.'
+              : exportBlockers.length > 0
+                ? exportBlockers.join(' ')
+                : 'Maakt één gewone GitHub-PR met alleen deze volledige menukaart. Er wordt niets automatisch gemerged of gepubliceerd.'}
+          </p>
+        </div>
+      )}
+    </section>
+  )
+}
+
+export function ConceptReview({ data, loadError, message, busy, onSaveVersion, onDecide, onExport }) {
   const { edits, touched, setLineEdit, decideRemoved, reset, dirty } = useConceptEdits()
   const [rejecting, setRejecting] = useState(false)
   const stored = useMemo(() => (data ? storedConceptInput(data.concept.captured) : null), [data])
@@ -272,6 +340,13 @@ export function ConceptReview({ data, loadError, message, busy, onSaveVersion, o
   if (c.rejectedBefore) approveBlockers.push('Deze menukaart is eerder afgewezen.')
   if (c.status === 'approved') approveBlockers.push('Deze versie is al intern goedgekeurd.')
   const canApprove = c.isLatest && !dirty && approveBlockers.length === 0
+  const exportBlockers = []
+  if (!c.isLatest) exportBlockers.push('Alleen de nieuwste versie kan een review-PR krijgen.')
+  if (c.status !== 'approved') exportBlockers.push('Keur het concept eerst intern goed.')
+  if (concept.blockers.length > 0) exportBlockers.push('Een menukaart met blokkades wordt nooit geëxporteerd.')
+  if (!sourceOk) exportBlockers.push('De bron moet bevestigd en niet geblokkeerd zijn.')
+  if (dirty) exportBlockers.push('Sla eerst je correcties op of maak ze ongedaan.')
+  const canExport = Boolean(data.githubConfigured) && exportBlockers.length === 0
 
   return (
     <>
@@ -441,6 +516,18 @@ export function ConceptReview({ data, loadError, message, busy, onSaveVersion, o
               </div>
             )}
           </section>
+
+          {(c.status === 'approved' || data.export) && (
+            <PublicationCard
+              concept={c}
+              exportInfo={data.export}
+              githubConfigured={data.githubConfigured}
+              canExport={canExport}
+              exportBlockers={exportBlockers}
+              busy={busy}
+              onExport={onExport}
+            />
+          )}
 
           <section className="bta-side-card" aria-labelledby="mcr-source">
             <h2 id="mcr-source" className="bta-side-title">
