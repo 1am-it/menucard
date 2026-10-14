@@ -403,7 +403,10 @@ function fetchWebsiteSafely(targetUrl, options = {}) {
         url.href,
         {
           lookup,
-          headers: { 'User-Agent': USER_AGENT, Accept: 'text/html,application/xhtml+xml' },
+          // The same broad default as ordinary clients: Apache content negotiation
+          // (e.g. MultiViews serving /lunch from lunch.php) answers 406 to an
+          // Accept list without a wildcard, even for a normal HTML page.
+          headers: { 'User-Agent': USER_AGENT, Accept: 'text/html,application/xhtml+xml,*/*;q=0.8' },
           timeout: timeoutMs,
         },
         (res) => {
