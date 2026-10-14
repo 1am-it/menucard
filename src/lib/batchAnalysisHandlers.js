@@ -63,6 +63,13 @@ const JOB_COLUMNS =
 const RECEIPT_COLUMNS = 'id, restaurant_match_type, matched_restaurant_id, created_at, menus:candidate_summary->menus';
 const CONFIRM_NOTE = 'Bevestigd vanuit Batchanalyse na menselijke controle.';
 
+// Display time for result texts ("Bevestigd om 13:20"), in the market's time zone.
+const CLOCK = new Intl.DateTimeFormat('nl-NL', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Amsterdam' });
+function formatClock(iso) {
+  const date = new Date(iso);
+  return Number.isNaN(date.getTime()) ? '' : CLOCK.format(date);
+}
+
 function reply(status, body) {
   return { status, body };
 }
@@ -155,6 +162,7 @@ function createBatchAnalysisHandlers(deps) {
         proposals,
         duplicateOf: item.outcome === 'duplicate' ? firstPosition.get(item.canonical_source_url) : undefined,
         now: now(),
+        formatTime: formatClock,
       });
     });
 

@@ -359,7 +359,7 @@ test('after a re-analysis the URL is a fresh queued job, not "Recent geanalyseer
 const FOUND = 'https://www.bistro-fictief-voorbeeld.nl/menukaart';
 const CONCEPT_MENUS = [{ categories: [{ name: 'Koud', items: [{ name: 'Fictieve soep', price: '7.50' }, { name: 'Fictieve salade', price: '12.50' }, { name: 'Fictief tartaar', price: null }] }] }];
 
-function conceptFixture({ actor = STARTER, existing = [] } = {}) {
+function conceptFixture({ actor = STARTER, existing = [], menus = CONCEPT_MENUS } = {}) {
   // A confirmed source (accepted BE-24 proposal for the found URL) with a recognised menu.
   return fakeSupabase({
     tables: {
@@ -367,7 +367,7 @@ function conceptFixture({ actor = STARTER, existing = [] } = {}) {
       url_intake_batches: [{ id: BATCH, market_id: 'm1', actor_user_id: actor, created_at: '2026-10-10T11:00:00Z', closed_at: '2026-10-10T11:10:00Z', close_reason: 'completed', item_count: 1 }],
       url_intake_batch_items: [{ batch_id: BATCH, item_position: 1, canonical_source_url: 'https://www.bistro-fictief-voorbeeld.nl/', outcome: 'queued', job_id: JOB, reused_job_id: null }],
       restaurant_source_analysis_jobs: [{ id: JOB, status: 'succeeded', attempt_count: 1, finished_at: '2026-10-10T11:05:00Z', result_receipt_id: 'r1', unknown_menu_contexts: [], menu_source_urls: [FOUND], actor_user_id: actor, batch_id: BATCH, created_at: '2026-10-10T11:00:00Z' }],
-      url_intake_analysis_receipts: [{ id: 'r1', restaurant_match_type: 'exact', matched_restaurant_id: 'bistro', menus: CONCEPT_MENUS }],
+      url_intake_analysis_receipts: [{ id: 'r1', restaurant_match_type: 'exact', matched_restaurant_id: 'bistro', menus }],
       source_triage_proposals: [{ id: 'p1', restaurant_id: 'bistro', proposed_url: FOUND, status: 'accepted', decided_at: '2026-10-10T11:20:00Z' }],
       menu_snapshot_proposals: existing,
     },
@@ -380,6 +380,7 @@ test('overview: a confirmed source carries its concept data (recognised dishes, 
   const res = await makeHandlers({ supabase: conceptFixture(), liveMenus: LIVE_BISTRO }).handlers.getOverview(request(), BATCH);
   const item = res.body.detail.items[0];
   assert.equal(item.label, 'Bron bevestigd');
+  assert.equal(item.text, 'Bevestigd om 13:20 na menselijke controle. Er is niets gepubliceerd.');
   assert.equal(item.menu.itemCount, 3);
   assert.deepEqual(item.concept.menus, CONCEPT_MENUS);
   assert.deepEqual(item.concept.liveLines.map((l) => l.name), ['Fictieve soep', 'Fictieve mousse']);
@@ -410,6 +411,30 @@ test('concept: once resolved, it is saved as an internal BE-17 proposal (next ve
   assert.equal(row.source_type, 'own_website');
   assert.deepEqual(row.captured_content.categories[0].items.map((i) => `${i.name} ${i.price}`), ['Fictieve soep 7.50', 'Fictieve salade 12.50', 'Fictief tartaar 15.50', 'Fictieve mousse 8.00']);
   assert.equal(supabase.calls.filter((c) => c.rpc).length, 0);
+});
+
+test('concept: the server re-checks every blocker itself and ignores what the browser claims; a price change does not block', async () => {
+  const menus = [
+    {
+      categories: [
+        { name: 'Koud', items: [{ name: 'Fictieve soep', price: '8.50' }, { name: 'Fictieve salade', price: '12.50' }, { name: 'Fictief tartaar', price: null }] },
+        { name: 'Overig', items: [{ name: 'Fictieve salade', price: '13.00' }, { name: 'Fictief kaasplankje', price: '11.00' }] },
+      ],
+    },
+  ];
+  const forged = { canSave: true, blockers: [], lines: { '0.0.2': { accept: true, price: 'gratis', canSave: true } }, removed: 'nonsense' };
+  const supabase = conceptFixture({ menus });
+  const refused = await makeHandlers({ supabase, liveMenus: LIVE_BISTRO }).handlers.saveConcept(request({ job_id: JOB, edits: forged }), BATCH);
+  assert.equal(refused.status, 409);
+  assert.deepEqual(refused.body.blockers.map((b) => b.status).sort(), ['duplicate', 'missing_price', 'removed', 'unclear_category', 'unclear_category']);
+  assert.equal(supabase.calls.filter((c) => c.insert).length, 0);
+
+  const resolved = { lines: { '0.0.2': { price: '15,50' }, '0.1.0': { exclude: true }, '0.1.1': { category: 'Kaas' } }, removed: 'remove' };
+  const saved = await makeHandlers({ supabase, liveMenus: LIVE_BISTRO }).handlers.saveConcept(request({ job_id: JOB, edits: resolved }), BATCH);
+  assert.equal(saved.status, 201);
+  const items = supabase.calls.find((c) => c.insert).row.captured_content.categories.flatMap((c) => c.items.map((i) => `${i.name} ${i.price}`));
+  // The soup's price went from 7.50 to 8.50: visible as an attention point, never a blocker.
+  assert.deepEqual(items, ['Fictieve soep 8.50', 'Fictieve salade 12.50', 'Fictief tartaar 15.50', 'Fictief kaasplankje 11.00']);
 });
 
 test('concept: identical content is not saved again', async () => {
