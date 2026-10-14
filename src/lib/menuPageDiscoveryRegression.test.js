@@ -126,7 +126,14 @@ test('analysis: the menu page is read once and becomes one priced menu context w
   assert.equal(menu.sourceUrl, MENU_URL);
   assert.equal(menu.extractionMethod, 'html');
   assert.equal(menu.contextSlug, 'menukaart');
-  assert.deepEqual(menu.categories.map((c) => [c.name, c.items.length]), [['Restaurant — Koud', 3], ['Restaurant — Warm', 2], ['Restaurant — Dessert', 2]]);
+  // The heading route is kept losslessly: a shared title, the section path and the full source route.
+  assert.equal(menu.title, 'Restaurant');
+  assert.equal(menu.structure, 'normalized');
+  assert.deepEqual(menu.categories.map((c) => [c.name, c.path, c.sourcePath, c.items.length]), [
+    ['Koud', ['Koud'], ['Restaurant', 'Koud'], 3],
+    ['Warm', ['Warm'], ['Restaurant', 'Warm'], 2],
+    ['Dessert', ['Dessert'], ['Restaurant', 'Dessert'], 2],
+  ]);
   assert.deepEqual(menu.categories[0].items[0], { name: 'Fictieve salade met citroen', desc: null, price: '14.50' });
   assert.ok(menu.categories.every((c) => c.items.every((i) => /^\d+\.\d{2}$/.test(i.price))));
   assert.ok(result.notes.some((n) => n.startsWith(`Menukaart herkend uit de HTML van ${MENU_URL}: 7 gerechten met prijs in 3 rubrieken.`)));

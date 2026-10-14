@@ -6,6 +6,7 @@
 // in MenuView. Classes and markup are the public menu's own (app/globals.css).
 
 import StatusIcon from '@/src/components/StatusIcon'
+import { groupHeadingsBefore } from '@/src/lib/menuGroups'
 
 export const TAG_LABELS = {
   aanbevolen:  'Aanbevolen',
@@ -44,10 +45,30 @@ export const EU14 = [
   { id: 14, icon: '🦑', name: 'Weekdieren' },
 ]
 
-/** The visible title of a data/menus.json entry, e.g. "Dinerkaart" for "6-diner". */
+/** The visible title of a data/menus.json entry, e.g. "Dinerkaart" for
+ * "6-diner", or the menu's own shared title ("Proef het beste van het
+ * seizoen") when it has one. */
 export function menuTitle(key, entry) {
   const mealType = String(key).split('-').slice(1).join('-')
-  return MEAL_CONFIG[mealType]?.title || (entry && entry.subtitle) || 'Menukaart'
+  return MEAL_CONFIG[mealType]?.title || (entry && entry.title) || (entry && entry.subtitle) || 'Menukaart'
+}
+
+/**
+ * Group headings of a nested menu ("Diner" above "Voor", "Tussen", …),
+ * rendered before section `index` when its group differs from the previous
+ * section's. Flat menus (no `path`) render nothing extra.
+ */
+export function MenuGroupHeadings({ categories, index }) {
+  const headings = groupHeadingsBefore(categories, index)
+  if (headings.length === 0) return null
+  return headings.map(({ label, depth }) => {
+    const Tag = depth === 0 ? 'h2' : 'h3'
+    return (
+      <Tag key={`${depth}-${label}`} className={`cat-group cat-group--depth-${Math.min(depth, 2)}`}>
+        {label}
+      </Tag>
+    )
+  })
 }
 
 export function highlight(text, query) {
@@ -171,14 +192,18 @@ export function MenuSection({ id, sectionRef, name, count, children }) {
 
 /** A whole menu entry exactly as the public page shows it, without filters (Publicatievoorbeeld). */
 export function StaticMenu({ categories, idPrefix }) {
+  const list = categories || []
   return (
     <>
-      {(categories || []).map((cat, i) => (
-        <MenuSection key={i} id={`${idPrefix}-cat-${i}`} name={cat.name}>
-          {(cat.items || []).map((item, j) => (
-            <MenuItem key={j} item={item} />
-          ))}
-        </MenuSection>
+      {list.map((cat, i) => (
+        <div key={i} className="cat-block">
+          <MenuGroupHeadings categories={list} index={i} />
+          <MenuSection id={`${idPrefix}-cat-${i}`} name={cat.name}>
+            {(cat.items || []).map((item, j) => (
+              <MenuItem key={j} item={item} />
+            ))}
+          </MenuSection>
+        </div>
       ))}
     </>
   )

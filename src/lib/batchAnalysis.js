@@ -134,6 +134,8 @@ function certaintyOf({ job, receipt, restaurant }) {
   if (!restaurant) return { high: false, reason: 'unknown_restaurant' };
   const observation = observeJob(job, receipt);
   if (observation.kind !== 'classified' || observation.menu !== 'ready_for_review') return { high: false, reason: 'no_recognised_menu' };
+  // An uncertain section structure is never confirmed with one click (menuHierarchy.js).
+  if (receipt && Array.isArray(receipt.menus) && receipt.menus.some((m) => m && m.structure === 'uncertain')) return { high: false, reason: 'structure_uncertain' };
   const urls = Array.isArray(job && job.menu_source_urls) ? job.menu_source_urls.filter((u) => typeof u === 'string') : [];
   if (urls.length === 0) return { high: false, reason: 'menu_source_unknown' };
   const restaurantHost = hostOf(restaurant.website);
@@ -153,6 +155,7 @@ function sameAddress(a, b) {
 }
 
 const NOT_HIGH_TEXT = {
+  structure_uncertain: 'Er is een menukaart gevonden, maar de rubriekindeling is onzeker. Een medewerker controleert de bronroute.',
   menu_source_unknown: 'Er is een menukaart gevonden, maar de vindplaats is niet vastgelegd. Een medewerker beoordeelt hem handmatig.',
   other_host: 'De gevonden menukaart staat niet op de eigen website van dit restaurant. Een medewerker beoordeelt hem handmatig.',
   already_known_source: 'De menukaart staat op de al bekende bron. Een medewerker beoordeelt hem handmatig.',

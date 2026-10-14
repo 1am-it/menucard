@@ -22,6 +22,17 @@
 //                     it on the same line. Only here a one-decimal notation
 //                     ("14.5") counts as a price, because the element holds
 //                     the price alone.
+//   - `formatted_block` a `p`/`div` (split at `br`) holding repeated dish
+//                     blocks: a bold title anchor (`strong`/`b`) at the
+//                     start of a line, an optional description on the same
+//                     and/or following lines, and exactly one price at the
+//                     very end of the block as plain text. Only under a menu
+//                     heading and only when the container (or its run of
+//                     sibling containers) holds at least two priced blocks;
+//                     only there a bare whole number ("25") counts as the end
+//                     price. Several prices, a price that is not at the end,
+//                     a price range, a supplement line, a service unit, a
+//                     time or a date make the block a rejected line.
 // Sections come from semantic headings (`h1`–`h6`, `role="heading"`) and from
 // the label of a list item that contains a nested list; the full heading path
 // is kept (nesting is never flattened away). A description is only taken from
@@ -533,6 +544,104 @@ function lineBreakLines(node, budget, markerCounter) {
   return result.filter((l) => l.price).length >= 2 ? result : null
 }
 
+// ─── formatted_block ───────────────────────────────────────────────────────
+
+const TITLE_ANCHOR_TAGS = new Set(['strong', 'b'])
+// The end price of a formatted block: the last token, preceded by a space or
+// the start of the block text. Whole euros are allowed here (structure gives
+// the meaning), 0,50 – 500,00 only (parsePriceOnly).
+const END_PRICE_PATTERN = /(?:^|\s)((?:€\s*)?\d{1,3}(?:[.,]\d{1,2})?(?:\s*,[-–])?(?:\s*€)?)$/
+// A number right before the end price ("25 / 30", "8,50 - 12,50"): a range or
+// a second price, never one dish price.
+const PRICE_BEFORE_END_PATTERN = /(?:^|\s)(?:€\s*)?\d{1,3}(?:[.,]\d{1,2})?\s*(?:[/|\-–]|of|or|en)?\s*$/i
+// Time context right before a bare number ("open tot 22", "vanaf 17"): never a price.
+const TIME_WORD_BEFORE_PATTERN = /\b(?:vanaf|tot|om|tussen|van|t\/m|tot en met|uur|open|geopend|gesloten|sluit|aanvang|from|until|at)\s*$/i
+
+/** Text of one inline line part (text node or inline element). */
+function partText(part, markerCounter, budget) {
+  return part.tag === '#text' ? part.text : textOf(part, { markerCounter, budget })
+}
+
+/**
+ * The dish blocks of a `p`/`div`: lines split at `br`; a line that starts
+ * with a bold title anchor starts a block, the following lines belong to it.
+ * `null` when the element holds a block-level child, when text comes before
+ * the first title anchor, or when it has no title anchor at all — the shape
+ * is then not a dish-block list (fail closed). Results are cached per node.
+ */
+function formattedBlocks(node, budget, markerCounter) {
+  if (node.formattedBlocks !== undefined) return node.formattedBlocks
+  node.formattedBlocks = null
+  if (node.tag !== 'p' && node.tag !== 'div') return null
+  const lines = [[]]
+  for (const child of node.children) {
+    budget.spend(1)
+    if (child.tag === 'br') {
+      lines.push([])
+      continue
+    }
+    if (child.tag !== '#text' && BLOCK_TAGS.has(child.tag)) return null
+    lines[lines.length - 1].push(child)
+  }
+  const blocks = []
+  let current = null
+  for (const parts of lines) {
+    const meaningful = parts.filter((c) => (c.tag === '#text' ? c.text.trim() !== '' : !isMarker(c) && textOf(c, { markerCounter, budget }) !== ''))
+    if (meaningful.length === 0) continue
+    const first = meaningful[0]
+    const title = first.tag !== '#text' && TITLE_ANCHOR_TAGS.has(first.tag) ? cleanName(textOf(first, { markerCounter, budget })) : ''
+    const isAnchor = title !== '' && isPlausibleItemName(title) && title.length <= 80 && findPrices(title).length === 0 && !END_PRICE_PATTERN.test(title)
+    const rest = (isAnchor ? meaningful.slice(1) : meaningful).map((c) => partText(c, markerCounter, budget)).join(' ').replace(/\s+/g, ' ').trim()
+    if (isAnchor) {
+      current = { title, lines: rest ? [rest] : [] }
+      blocks.push(current)
+    } else {
+      if (!current) return null
+      current.lines.push(rest)
+    }
+  }
+  if (blocks.length === 0) return null
+  node.formattedBlocks = blocks
+  return blocks
+}
+
+function blockEndPrice(block, budget) {
+  const body = block.lines.join(' ').replace(/\s+/g, ' ').trim()
+  budget.spend(1 + Math.ceil(body.length / 16))
+  const match = END_PRICE_PATTERN.exec(body)
+  const price = match ? parsePriceOnly(match[1]) : null
+  return { body, price, priceText: price ? match[1].trim() : '', before: price ? body.slice(0, match.index).trim() : body }
+}
+
+/**
+ * The blocks of `node` when they form a repeated dish-block structure: at
+ * least two blocks with an end price in this element, or — one block per
+ * element — in the contiguous run of `p`/`div` dish-block siblings it
+ * belongs to (a heading or any other element ends the run). Otherwise null.
+ */
+function formattedBlockRun(node, budget, markerCounter) {
+  const blocks = formattedBlocks(node, budget, markerCounter)
+  if (!blocks) return null
+  const priced = (list) => list.filter((b) => blockEndPrice(b, budget).price).length
+  if (priced(blocks) >= 2) return blocks
+  const parent = node.parent
+  if (!parent) return null
+  // Only the CONTIGUOUS run of dish-block siblings around this element: a
+  // heading, any other element or text between them ends the run, so blocks
+  // under a next heading (or elsewhere on the page) never count.
+  const fits = (sibling) => (sibling.tag === 'p' || sibling.tag === 'div') && !isHeading(sibling) && formattedBlocks(sibling, budget, markerCounter) !== null
+  const siblings = parent.children
+  let start = node.index
+  while (start > 0 && (budget.spend(1), fits(siblings[start - 1]))) start -= 1
+  if (!parent.formattedRunPriced) parent.formattedRunPriced = new Map()
+  if (!parent.formattedRunPriced.has(start)) {
+    let total = 0
+    for (let i = start; i < siblings.length && (budget.spend(1), fits(siblings[i])); i += 1) total += priced(formattedBlocks(siblings[i], budget, markerCounter))
+    parent.formattedRunPriced.set(start, total)
+  }
+  return parent.formattedRunPriced.get(start) >= 2 ? blocks : null
+}
+
 /** Unit labels that belong to one of several prices ("glas 5,50 / fles
  * 27,50", "klein 3,50 groot 4,50"); only matched on a short name tail. */
 const DUAL_PRICE_UNIT_SUFFIX = /[\s\-–—|:,/]{0,8}(?:per\s+)?(?:glas|fles|karaf|carafe|bottle|glass|klein|groot|small|large|half|heel)\s*$/i
@@ -908,6 +1017,48 @@ function extractWithinBudget(html, budget, stats) {
     })
   }
 
+  // One block of a `formatted_block` run: the same refusals as handleItem,
+  // plus the strict end-price rule (exactly one price, at the very end).
+  function handleBlock(block, node, headingPath) {
+    stats.candidates += 1
+    const { body, price, priceText, before } = blockEndPrice(block, budget)
+    const fullText = `${block.title} ${body}`.trim()
+    if (fullText.length > MAX_ITEM_TEXT) {
+      budget.spend(Math.ceil(fullText.length / 16))
+      if (findPrices(fullText).length > 0) reject(fullText, 'ambiguous_structure', node)
+      return undefined
+    }
+    budget.spend(fullText.length + 1)
+    if (NON_MENU_HEADING_PATTERN.test(headingPath.join(' '))) {
+      if (price || findPrices(fullText).length > 0 || isClockText(fullText)) reject(fullText, 'non_menu_section', node)
+      return undefined
+    }
+    if (isClockText(fullText)) return reject(fullText, 'clock_time', node)
+    if (isDateText(fullText)) return reject(fullText, 'date', node)
+    if (block.lines.some((line) => MODIFIER_PATTERN.test(line)) || MODIFIER_PATTERN.test(block.title)) return reject(fullText, 'modifier', node)
+    if (hasServiceUnit(fullText) || PER_TABLE_PATTERN.test(fullText)) return reject(fullText, 'service_unit', node)
+    const name = cleanName(block.title)
+    const section = sectionFor(headingPath)
+    if (!price) {
+      // A price that is not the last token is never read as the dish price.
+      if (findPrices(body).length > 0) return reject(fullText, 'ambiguous_structure', node)
+      if (isPlausibleItemName(name) && name.length <= 80) section.unpriced.push({ text: fullText, node })
+      return undefined
+    }
+    if (TIME_WORD_BEFORE_PATTERN.test(before)) return reject(fullText, 'clock_time', node)
+    // A second price, a price range or a price variant before the end price.
+    if (findPrices(before).length > 0 || PRICE_BEFORE_END_PATTERN.test(before)) return reject(fullText, 'ambiguous_structure', node)
+    if (!isPlausibleItemName(name)) return reject(fullText, 'missing_name', node)
+    const description = cleanName(before)
+    return addItem(section, node, 'formatted_block', {
+      name: clip(displayName(name)),
+      priceStatus: 'known',
+      amountMinorUnits: price.amountMinorUnits,
+      currency: price.hasEuroSign || /€/.test(priceText) ? 'EUR' : null,
+      description: description && isPlausibleItemName(description) ? clip(description) : null,
+    })
+  }
+
   function addItem(section, node, pattern, item) {
     const key = `${JSON.stringify(section.path)}|${item.name.toLowerCase()}|${item.priceStatus}|${item.amountMinorUnits}`
     if (seen.has(key)) {
@@ -977,6 +1128,17 @@ function extractWithinBudget(html, budget, stats) {
       if (isRepeatedCard(child, budget) && !findDescendant(child, (n) => (n.tag === 'p' || n.tag === 'div') && n.children.some((c) => c.tag === 'br') && lineBreakLines(n, budget, markerCounter) !== null, budget)) {
         handleItem(child, 'repeated_card', currentPath(extraLabel))
         continue
+      }
+      // Repeated dish blocks (title anchor, description, end price), only
+      // under a menu heading: without a heading the structure is not
+      // trusted (fail closed).
+      if (child.tag === 'p' || child.tag === 'div') {
+        const path = currentPath(extraLabel)
+        const blocks = path.length > 0 ? formattedBlockRun(child, budget, markerCounter) : null
+        if (blocks) {
+          for (const block of blocks) handleBlock(block, child, path)
+          continue
+        }
       }
       walk(child, depth + 1, extraLabel)
     }

@@ -20,6 +20,7 @@ import {
   ExcludedLines,
   ConceptChips,
   BlockerBanner,
+  ConceptStructure,
   useConceptEdits,
   conceptParts,
 } from '../source-triage/batch/MenuReview'
@@ -509,6 +510,7 @@ export function ConceptReview({ data, loadError, message, busy, onSaveVersion, o
             </h2>
             <ConceptChips safe={safe} concept={concept} excluded={excluded} />
             <BlockerBanner concept={concept} />
+            <ConceptStructure captured={c.captured} />
             {editorLines.length > 0 && (
               <ul className="bta-concept-lines" aria-label="Aandachtspunten en blokkades">
                 {editorLines.map((line) => (

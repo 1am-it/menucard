@@ -100,7 +100,20 @@ untouched.
   Supported: heading sections (`h1`–`h6`, `role="heading"`), list items
   (`li`, `role="listitem"`, nested lists as sub-sections), table rows,
   definition lists, and repeated item cards, each with name and price in the
-  same element; a description only inside that same element.
+  same element; a description only inside that same element. Also
+  `line_break_list` (a `p`/`div` split at `br`, each line ending in its own
+  price-only inline element) and `formatted_block`: repeated dish blocks in
+  a `p`/`div` — a bold title (`strong`/`b`) at the start of a line, an
+  optional description on the same or following `br` lines, and exactly one
+  plain-text price at the very end of the block. Only under a menu heading
+  and only with at least two priced blocks in the element or its run of
+  sibling elements; only there a bare whole number ("25") is a price. Several
+  prices, a price range, a price that is not at the end, a supplement line,
+  a service unit, a time or a date reject the block.
+  Section headings are returned as the full path; the product analysis keeps
+  that path losslessly (`src/lib/menuHierarchy.js`: shared title, a path of
+  any depth, the original source route, and an `uncertain` flag) instead of
+  joining it into one name.
   Rejected with a reason: clock times (ranges, weekdays, and a single time
   in clear time context — "vanaf 12.00", "om 21.45", "08.30 uur"); dates in
   clear date/event context ("Fictief feest 24.12", "op 01.06", "15 mei");

@@ -10,7 +10,7 @@ import ExternalLinkIcon from '@/src/components/ExternalLinkIcon'
 import StatusIcon from '@/src/components/StatusIcon'
 import useClientNow from '@/src/components/useClientNow'
 import { todayOpening, openingBadge } from '@/src/lib/openingStatus'
-import { EU14, MEAL_CONFIG, menuTitle, itemMatchesAllergens, MenuItem, MenuSection } from '@/src/components/MenuBody'
+import { EU14, MEAL_CONFIG, menuTitle, itemMatchesAllergens, MenuItem, MenuSection, MenuGroupHeadings } from '@/src/components/MenuBody'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -496,11 +496,13 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
           </div>
         ) : (
           filteredCategories.map((cat, i) => {
-            // Find original index for anchor ID
-            const origIdx = r.categories.findIndex(c => c.name === cat.name)
+            // Find original index for anchor ID (name AND section path: a
+            // nested menu may have "Voor" under both Lunch and Diner)
+            const origIdx = r.categories.findIndex(c => c.name === cat.name && JSON.stringify(c.path || null) === JSON.stringify(cat.path || null))
             return (
+              <div key={i} className="cat-block">
+              <MenuGroupHeadings categories={filteredCategories} index={i} />
               <MenuSection
-                key={i}
                 id={`cat-${origIdx}`}
                 sectionRef={el => sectionRefs.current[origIdx] = el}
                 name={cat.name}
@@ -526,6 +528,7 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
                     )
                   })}
               </MenuSection>
+              </div>
             )
           })
         )}

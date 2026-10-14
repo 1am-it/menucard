@@ -100,14 +100,35 @@ function buildRestaurantCandidateSummary(rawFields) {
  * part of the existing, reviewed preview a staff member sees — never
  * anything beyond what BE-18 itself already extracts and shows).
  */
+function boundedLabels(path) {
+  return Array.isArray(path) ? path.filter((label) => typeof label === 'string').slice(0, 8).map((label) => label.slice(0, 160)) : null;
+}
+
+/** The lossless hierarchy fields of src/lib/menuHierarchy.js, only when present
+ * (flat menus keep exactly their earlier summary shape). */
+function hierarchyFields(category) {
+  const out = {};
+  const pathLabels = boundedLabels(category && category.path);
+  if (pathLabels) out.path = pathLabels;
+  const sourceLabels = boundedLabels(category && category.sourcePath);
+  if (sourceLabels) out.sourcePath = sourceLabels;
+  if (category && Number.isInteger(category.position)) out.position = category.position;
+  if (category && typeof category.locator === 'string') out.locator = category.locator.slice(0, 160);
+  if (category && category.uncertain === true) out.uncertain = true;
+  return out;
+}
+
 function buildMenuCandidateSummary(menus) {
   if (!Array.isArray(menus)) return [];
   return menus.map((menu) => ({
     name: (menu && menu.name) || null,
     contextSlug: menu && menu.contextSlug,
+    ...(menu && typeof menu.title === 'string' ? { title: menu.title.slice(0, 160) } : {}),
+    ...(menu && (menu.structure === 'normalized' || menu.structure === 'uncertain') ? { structure: menu.structure } : {}),
     categories: Array.isArray(menu && menu.categories)
       ? menu.categories.map((category) => ({
           name: (category && category.name) || null,
+          ...hierarchyFields(category),
           items: Array.isArray(category && category.items)
             ? category.items.map((item) => ({
                 name: (item && item.name) || null,

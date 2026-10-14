@@ -2956,3 +2956,14 @@ details.bta-side-card > summary:focus-visible { outline: 2px solid var(--border-
 .mcr-preview-menu { min-width: 0; }
 .mcr-preview-entry + .mcr-preview-entry { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); }
 .mcr-preview-entry-title { margin: 0 0 12px; font-size: 18px; font-weight: 800; color: var(--text-primary); }
+
+/* Nested menu groups (menuHierarchy): a group heading above its sections,
+   e.g. "Diner" above "Voor", "Tussen", … Flat menus render none. */
+.cat-group { margin: 32px 0 12px; font-size: 22px; font-weight: 800; line-height: 1.2; color: var(--text-primary); }
+.cat-block:first-child .cat-group { margin-top: 0; }
+.cat-group--depth-1, .cat-group--depth-2 { margin-top: 20px; font-size: 18px; }
+.bta-source-route { margin: 0; padding: 0 12px 8px; font-size: 13px; color: var(--text-secondary); overflow-wrap: anywhere; }
+.bta-inline-badge { margin-left: 8px; vertical-align: middle; }
+.bta-structure { list-style: none; margin: 0; padding: 0 12px 10px; display: grid; gap: 6px; }
+.bta-structure li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; padding-top: 6px; border-top: 1px solid var(--border); font-size: 14px; }
+.bta-structure .bta-source-route { padding: 0; flex-basis: 100%; }

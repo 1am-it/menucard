@@ -54,7 +54,7 @@ const REJECTION_REASONS = [
 
 /** The evidence patterns the deterministic adapter may cite. A model
  * adapter would cite `model_quote` with a short source locator instead. */
-const EVIDENCE_PATTERNS = ['list_item', 'table_row', 'definition', 'repeated_card', 'line_break_list', 'model_quote']
+const EVIDENCE_PATTERNS = ['list_item', 'table_row', 'definition', 'repeated_card', 'line_break_list', 'formatted_block', 'model_quote']
 
 const FORBIDDEN_TRUST_KEYS = ['confidence', 'reviewReady']
 
