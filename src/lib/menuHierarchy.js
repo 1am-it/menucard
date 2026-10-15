@@ -35,11 +35,12 @@ function isStrictPrefix(prefix, of) {
 
 /**
  * Normalises the heading paths of a menu's sections (in source order).
+ * `untrusted[i]` marks a route the adapter itself does not trust.
  * Returns { title, structure: 'normalized' | 'uncertain', categories: [{
  * name, path, sourcePath, uncertain }] } — one entry per input path, in the
  * same order.
  */
-function normalizeMenuHierarchy(sourcePaths) {
+function normalizeMenuHierarchy(sourcePaths, untrusted = []) {
   const sources = (Array.isArray(sourcePaths) ? sourcePaths : []).map(cleanLabels);
   const labelled = sources.filter((p) => p.length > 0);
   const anyUnlabelled = sources.some((p) => p.length === 0);
@@ -53,6 +54,8 @@ function normalizeMenuHierarchy(sourcePaths) {
   const uncertain = sources.map((p, i) => {
     if (p.length === 0 && labelled.length > 0) return true; // items before any heading, next to headed sections
     if (p.length > MAX_RELIABLE_DEPTH) return true;
+    // The adapter does not trust this route (e.g. a sentence kept as a heading).
+    if (untrusted[i] === true) return true;
     return paths.some((other, j) => j !== i && isStrictPrefix(paths[i], other)); // items at a group level with sub-sections
   });
 

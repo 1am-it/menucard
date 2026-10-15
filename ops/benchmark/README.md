@@ -110,6 +110,14 @@ untouched.
   sibling elements; only there a bare whole number ("25") is a price. Several
   prices, a price range, a price that is not at the end, a supplement line,
   a service unit, a time or a date reject the block.
+  A sentence-like heading (seven or more words ending in . ! ? or …, or two
+  sentences — length alone never counts) nested BELOW a real section heading
+  is that section's context: it is skipped and its dishes stay in the
+  section. On the same or a higher level it stays in the route and the
+  section is returned with `uncertain: true` ("Controle nodig"); its dishes
+  never join the previous section. A nested list's label is never skipped:
+  a sentence-like label keeps its dishes under exactly that label, with the
+  section `uncertain: true`.
   Section headings are returned as the full path; the product analysis keeps
   that path losslessly (`src/lib/menuHierarchy.js`: shared title, a path of
   any depth, the original source route, and an `uncertain` flag) instead of

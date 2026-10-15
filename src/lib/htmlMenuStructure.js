@@ -686,6 +686,20 @@ function isHeading(node) {
   return /^h[1-6]$/.test(node.tag) || (node.attrs && node.attrs.role === 'heading')
 }
 
+const MIN_SENTENCE_WORDS = 7
+
+/**
+ * A heading that clearly reads as a sentence, not as a section name: at least
+ * seven words ending in . ! ? or …, or two sentences. Length alone never
+ * counts — a long section name stays a section name. Generic text shape only.
+ */
+function isProseHeading(text) {
+  const t = String(text || '').replace(/\s+/g, ' ').trim()
+  const words = t.split(' ').filter(Boolean).length
+  if (words >= MIN_SENTENCE_WORDS && /[.!?…]$/.test(t)) return true
+  return words >= MIN_SENTENCE_WORDS - 1 && /[.!?]\s+\p{Lu}/u.test(t)
+}
+
 function headingLevel(node) {
   if (/^h[1-6]$/.test(node.tag)) return Number(node.tag[1])
   const level = Number(node.attrs && node.attrs['aria-level'])
@@ -916,7 +930,9 @@ function extractWithinBudget(html, budget, stats) {
 
   function sectionFor(path) {
     const key = JSON.stringify(path)
-    if (!sectionsByKey.has(key)) sectionsByKey.set(key, { path, items: [], unpriced: [] })
+    // A sentence kept in the route (not safely nested below a real section
+    // heading) is never trusted as structure: the section is uncertain.
+    if (!sectionsByKey.has(key)) sectionsByKey.set(key, { path, items: [], unpriced: [], uncertain: path.some(isProseHeading) })
     return sectionsByKey.get(key)
   }
 
@@ -1088,9 +1104,18 @@ function extractWithinBudget(html, budget, stats) {
       // an element for its class, so an item classed "vegan" is still read.
       if (child.tag === '#text') continue
       if (isHeading(child)) {
-        const text = clip(textOf(child, { markerCounter, budget }))
+        const raw = textOf(child, { markerCounter, budget })
+        const text = clip(raw)
         if (text) {
           const level = headingLevel(child)
+          // A sentence-like heading nested BELOW a real section heading
+          // ("Deze gerechten worden geserveerd in …" under "A LA CARTE") is
+          // context for that section: skipped, the dishes stay in it. On the
+          // same or a higher level it is kept in the route, so its dishes
+          // never join the previous section; the hierarchy then marks that
+          // route uncertain ("Controle nodig").
+          const top = headingStack[headingStack.length - 1]
+          if (top && level > top.level && isProseHeading(raw)) continue
           while (headingStack.length > 0 && headingStack[headingStack.length - 1].level >= level) headingStack.pop()
           headingStack.push({ level, text })
         }
@@ -1100,7 +1125,12 @@ function extractWithinBudget(html, budget, stats) {
         budget.spend(child.children.length)
         const nested = child.children.filter((c) => c.tag !== '#text' && isList(c))
         if (nested.length > 0) {
-          const label = clip(textOf(child, { skip: isList, markerCounter, budget }))
+          const rawLabel = textOf(child, { skip: isList, markerCounter, budget })
+          // A nested list's label is never dropped, not even when it reads as
+          // a sentence: its dishes stay under exactly that source label (never
+          // under a previous sibling section, never flattened into the parent),
+          // and a sentence-like label makes the section uncertain (sectionFor).
+          const label = clip(rawLabel)
           for (const list of nested) walk(list, depth + 1, label || extraLabel)
           continue
         }
@@ -1152,7 +1182,7 @@ function extractWithinBudget(html, budget, stats) {
   for (const section of sectionsByKey.values()) {
     if (section.items.length === 0) continue
     for (const line of section.unpriced) reject(line.text, 'missing_price', line.node)
-    sections.push({ path: section.path, items: section.items })
+    sections.push(section.uncertain ? { path: section.path, items: section.items, uncertain: true } : { path: section.path, items: section.items })
   }
   const counted = sections.reduce((n, s) => n + s.items.length, 0)
   stats.counted = counted
@@ -1208,6 +1238,7 @@ module.exports = {
   isClockText,
   isDateText,
   displayName,
+  isProseHeading,
   extractHtmlMenuStructure,
   createHtmlStructureAdapter,
 }
