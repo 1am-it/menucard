@@ -1,0 +1,96 @@
+# AI Delivery Protocol
+
+## Goal
+
+Deliver complete, reviewable user outcomes with minimal interruption to the
+Product Owner. GitHub issues and pull requests are the shared, auditable relay
+between agents; they are not a claim of direct model-to-model communication.
+
+## Role Boundaries
+
+| Role | Owns | Does not decide alone |
+| --- | --- | --- |
+| Product Owner & Release Approver | Outcome, priority, product trade-offs, release approval | Routine implementation detail |
+| AI Delivery Lead | Build contract, scope, independent review, acceptance gate | Product policy, production release, or external access without approval |
+| AI Product Designer | Mockup or prototype that expresses the approved direction | Final product choice or implementation release |
+| AI Implementation Engineer | Design and code inside the contract, tests, PR evidence | Changes outside the contract or irreversible actions |
+
+## Lifecycle
+
+### 1. Shape
+
+The Delivery Lead converts the requested outcome into one build contract. Use
+`.agent/templates/build-contract.md` as the format. Include a small set of
+representative examples, especially real failure shapes expressed as fictional
+fixtures when possible.
+
+The Product Owner approves the contract once. A separate approval is not
+needed for normal implementation decisions already allowed by that contract.
+
+### Design Gate
+
+A design gate is required only for a new page, materially new user flow, or
+meaningful information-hierarchy or interaction change. The Product Owner
+approves one visual reference: an existing screen, a mockup, or a Claude
+Design prototype. Link that reference from the contract.
+
+The AI Product Designer and Delivery Lead may finish normal responsive,
+accessibility, empty/error-state, theme-token, and small visual details within
+that approved direction. Existing screens that use an established pattern do
+not need a separate design gate. Escalate only if the built experience would
+materially differ from the approved reference or needs a new product choice.
+
+### 2. Build
+
+The Implementation Engineer first synchronizes with the current base and
+reads the contract, linked decisions, nearest `CONTEXT.md`, and affected code.
+It then works continuously within the defined scope.
+
+New defects that violate an acceptance criterion are fixed in the same branch.
+Do not open a chain of micro-PRs merely because a test, fixture, or generic
+edge case was discovered while delivering the agreed outcome.
+
+### 3. Verify
+
+Before handoff, run the smallest relevant checks that prove the contract:
+
+- focused regression tests for each changed behaviour;
+- relevant existing suite and build checks;
+- a visual check when UI behaviour changed;
+- a planned staging or live acceptance check only when the contract calls for
+  it and authorization/access exists.
+
+A production result is not claimed from local or fixture evidence alone.
+
+### 4. Review And Release
+
+The Delivery Lead reviews the diff against the build contract and calls out
+risks, missing evidence, or out-of-scope changes. A green PR is not an
+authorization for merge, migration, source activation, export, or publication.
+
+The Product Owner receives a notification only when there is a real decision,
+a merge or protected-environment approval, a production acceptance action, or
+a blocker that cannot be resolved within the contract.
+
+### 5. Close
+
+After the planned acceptance evidence is collected, record the outcome and any
+known limitation in the issue or PR. Turn a durable rule into a decision,
+guide, or regression case instead of relying on chat memory.
+
+## Handoff Format
+
+Use exactly this structure in the final PR comment or report:
+
+```text
+STATE: READY_FOR_REVIEW | NEEDS_APPROVAL | BLOCKED | DONE
+CONTRACT: #<issue-number or path>
+DELIVERED: <short outcome-oriented summary>
+EVIDENCE: <tests, build, visual or live evidence>
+DESIGN: <not required | matches approved reference>
+OUT OF SCOPE: <none or explicit list>
+DECISION NEEDED: <none or one concrete choice>
+NEXT OWNER: <role>
+```
+
+Keep it short. Do not repeat every command or narrate unchanged polling.
