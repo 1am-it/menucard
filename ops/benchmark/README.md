@@ -115,7 +115,9 @@ untouched.
   is that section's context: it is skipped and its dishes stay in the
   section. On the same or a higher level it stays in the route and the
   section is returned with `uncertain: true` ("Controle nodig"); its dishes
-  never join the previous section.
+  never join the previous section. A nested list's label is never skipped:
+  a sentence-like label keeps its dishes under exactly that label, with the
+  section `uncertain: true`.
   Section headings are returned as the full path; the product analysis keeps
   that path losslessly (`src/lib/menuHierarchy.js`: shared title, a path of
   any depth, the original source route, and an `uncertain` flag) instead of

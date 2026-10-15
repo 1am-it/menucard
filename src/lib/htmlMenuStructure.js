@@ -1126,8 +1126,11 @@ function extractWithinBudget(html, budget, stats) {
         const nested = child.children.filter((c) => c.tag !== '#text' && isList(c))
         if (nested.length > 0) {
           const rawLabel = textOf(child, { skip: isList, markerCounter, budget })
-          // The same rule for a nested list's label: only skipped below real context.
-          const label = isProseHeading(rawLabel) && (headingStack.length > 0 || extraLabel) ? '' : clip(rawLabel)
+          // A nested list's label is never dropped, not even when it reads as
+          // a sentence: its dishes stay under exactly that source label (never
+          // under a previous sibling section, never flattened into the parent),
+          // and a sentence-like label makes the section uncertain (sectionFor).
+          const label = clip(rawLabel)
           for (const list of nested) walk(list, depth + 1, label || extraLabel)
           continue
         }

@@ -75,3 +75,23 @@ test('short real sub-headings stay part of the route, at any depth', async () =>
   assert.deepEqual(menu.categories.map((c) => c.path), [['A LA CARTE', 'Vis'], ['A LA CARTE', 'Vlees']]);
   assert.equal(menu.structure, 'normalized');
 });
+
+test('a sentence-like label of a nested list is never dropped: its dishes stay under exactly that label, uncertain, never under a sibling or the parent', async () => {
+  const html = `<h2>Lunch</h2><ul>
+    <li>Soepen<ul><li>Fictieve tomatensoep <span>€ 7,50</span></li><li>Fictieve uiensoep <span>€ 7,00</span></li></ul></li>
+    <li>${EXPLANATION}<ul><li>Fictief bordje <span>€ 9,50</span></li><li>Fictief plankje <span>€ 11,00</span></li></ul></li>
+  </ul>`;
+  const sections = extractHtmlMenuStructure(html).sections;
+  assert.deepEqual(sections.map((s) => [s.path, s.items.map((i) => i.name), s.uncertain === true]), [
+    [['Lunch', 'Soepen'], ['Fictieve tomatensoep', 'Fictieve uiensoep'], false],
+    [['Lunch', EXPLANATION], ['Fictief bordje', 'Fictief plankje'], true],
+  ]);
+  const { menu, concept } = await analyse(html);
+  assert.equal(menu.structure, 'uncertain');
+  assert.deepEqual(menu.categories.map((c) => [c.sourcePath, c.uncertain === true]), [[['Lunch', 'Soepen'], false], [['Lunch', EXPLANATION], true]]);
+  // The concept keeps the same route; the uncertain section needs a human.
+  const bordje = concept.lines.find((l) => l.name === 'Fictief bordje');
+  assert.deepEqual(bordje.categoryPath, menu.categories[1].path);
+  assert.equal(bordje.status, 'unclear_category');
+  assert.equal(concept.lines.find((l) => l.name === 'Fictieve tomatensoep').status, 'new');
+});
