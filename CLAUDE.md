@@ -195,3 +195,14 @@ full policy and the required commit message / plain-language summary /
 changelog line for every approved step.
 
 Always read the nearest CONTEXT.md before working inside a directory.
+
+
+## Shared AI Delivery Protocol
+
+@AGENTS.md
+@.agent/DELIVERY.md
+
+For an explicitly approved build contract, the delivery protocol governs
+continuous implementation and handoff. The earlier audit-and-stop instruction
+applies only to an unscoped major redesign's first audit, not to an already
+authorized ticket with defined acceptance criteria.
