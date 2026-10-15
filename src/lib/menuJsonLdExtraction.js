@@ -33,6 +33,19 @@
 
 'use strict';
 
+const { decodeEntities } = require('./htmlMenuStructure');
+
+/**
+ * A JSON-LD text value as menu text: trimmed, with HTML character references
+ * decoded exactly once by the same decoder as the HTML path (CMSes often
+ * write "&amp;" or "&lsquo;" inside JSON-LD strings). Null when empty.
+ */
+function menuText(value) {
+  if (typeof value !== 'string') return null;
+  const text = decodeEntities(value).trim();
+  return text ? text : null;
+}
+
 const JSON_LD_SCRIPT_PATTERN = /<script[^>]*type\s*=\s*["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
 
 const RESTAURANT_LIKE_SCHEMA_TYPES = ['restaurant', 'foodestablishment', 'localbusiness', 'cafeorcoffeeshop', 'bar'];
@@ -117,9 +130,9 @@ function extractPrice(itemNode) {
 
 function extractMenuItem(itemNode) {
   if (!itemNode || typeof itemNode !== 'object') return null;
-  const name = typeof itemNode.name === 'string' && itemNode.name.trim() ? itemNode.name.trim() : null;
+  const name = menuText(itemNode.name);
   if (!name) return null;
-  const desc = typeof itemNode.description === 'string' && itemNode.description.trim() ? itemNode.description.trim() : null;
+  const desc = menuText(itemNode.description);
   return { name, desc, price: extractPrice(itemNode) };
 }
 
@@ -136,7 +149,7 @@ function flattenMenuSections(sectionsInput, parentName) {
   const sections = Array.isArray(sectionsInput) ? sectionsInput : sectionsInput ? [sectionsInput] : [];
   for (const section of sections) {
     if (!section || typeof section !== 'object') continue;
-    const sectionName = typeof section.name === 'string' && section.name.trim() ? section.name.trim() : null;
+    const sectionName = menuText(section.name);
     const combinedName = parentName && sectionName ? `${parentName} — ${sectionName}` : sectionName || parentName || 'Categorie';
     if (section.hasMenuSection) {
       categories.push(...flattenMenuSections(section.hasMenuSection, combinedName));
@@ -214,7 +227,7 @@ function extractMenusFromHtml(html) {
   const usedSlugs = new Set();
   const menus = [];
   menuNodes.forEach((menuNode, index) => {
-    const name = typeof menuNode.name === 'string' && menuNode.name.trim() ? menuNode.name.trim() : null;
+    const name = menuText(menuNode.name);
     const categories = flattenMenuSections(menuNode.hasMenuSection, null);
     if (categories.length === 0) return;
     menus.push({

@@ -118,15 +118,47 @@ const VOID_TAGS = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'i
 const SKIPPED_TAGS = new Set(['script', 'style', 'noscript', 'template', 'svg', 'iframe', 'head'])
 const BLOCK_TAGS = new Set(['p', 'div', 'ul', 'ol', 'dl', 'table', 'section', 'article', 'header', 'footer', 'main', 'nav', 'aside', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'tr', 'td', 'th', 'dt', 'dd', 'br'])
 
-const NAMED_ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', euro: '€', ndash: '–', mdash: '—', hellip: '…' }
+// The HTML 4 named character references (case-sensitive: "&Eacute;" is É,
+// "&eacute;" is é): the Latin-1 block U+00A0–U+00FF in code-point order,
+// plus the markup and typographic ones menus use (quotes, dashes, …).
+const LATIN1_ENTITY_NAMES = (
+  'nbsp iexcl cent pound curren yen brvbar sect uml copy ordf laquo not shy reg macr deg plusmn sup2 sup3 acute micro para middot ' +
+  'cedil sup1 ordm raquo frac14 frac12 frac34 iquest Agrave Aacute Acirc Atilde Auml Aring AElig Ccedil Egrave Eacute Ecirc Euml ' +
+  'Igrave Iacute Icirc Iuml ETH Ntilde Ograve Oacute Ocirc Otilde Ouml times Oslash Ugrave Uacute Ucirc Uuml Yacute THORN szlig ' +
+  'agrave aacute acirc atilde auml aring aelig ccedil egrave eacute ecirc euml igrave iacute icirc iuml eth ntilde ograve oacute ' +
+  'ocirc otilde ouml divide oslash ugrave uacute ucirc uuml yacute thorn yuml'
+).split(' ')
+const NAMED_ENTITIES = Object.assign(
+  Object.create(null),
+  Object.fromEntries(LATIN1_ENTITY_NAMES.map((name, i) => [name, String.fromCodePoint(0xa0 + i)])),
+  {
+    nbsp: ' ', // kept as a plain space, as before: menu text never needs a hard space
+    amp: '&', lt: '<', gt: '>', quot: '"', apos: "'",
+    OElig: 'Œ', oelig: 'œ', Scaron: 'Š', scaron: 'š', Yuml: 'Ÿ', fnof: 'ƒ', circ: 'ˆ', tilde: '˜',
+    ensp: ' ', emsp: ' ', thinsp: ' ', zwnj: '‌', zwj: '‍',
+    ndash: '–', mdash: '—', lsquo: '‘', rsquo: '’', sbquo: '‚', ldquo: '“', rdquo: '”', bdquo: '„',
+    dagger: '†', Dagger: '‡', bull: '•', hellip: '…', permil: '‰', prime: '′', Prime: '″', lsaquo: '‹', rsaquo: '›',
+    euro: '€', trade: '™', minus: '−', frasl: '⁄', deg: '°', half: '½',
+  }
+)
+// The markup entities are also accepted in upper case ("&AMP;"), as browsers do.
+const CASE_INSENSITIVE_ENTITIES = new Set(['amp', 'lt', 'gt', 'quot'])
 
+/**
+ * Decodes HTML character references in text that was ALREADY separated from
+ * markup (one text node or attribute value) — the one decoding step for menu
+ * text, applied exactly once: "&amp;lsquo;" becomes the literal "&lsquo;",
+ * never "‘". Unknown names, a bare "&" and invalid code points stay as they
+ * are. Shared with the JSON-LD menu path (menuJsonLdExtraction.js).
+ */
 function decodeEntities(text) {
-  return text.replace(/&(#x[0-9a-f]{1,6}|#\d{1,7}|[a-z]{1,10});/gi, (whole, code) => {
+  return String(text).replace(/&(#[xX][0-9a-fA-F]{1,6}|#\d{1,7}|[A-Za-z][A-Za-z0-9]{1,15});/g, (whole, code) => {
     if (code[0] === '#') {
       const n = code[1] === 'x' || code[1] === 'X' ? parseInt(code.slice(2), 16) : parseInt(code.slice(1), 10)
-      return Number.isFinite(n) && n > 0 && n < 0x110000 ? String.fromCodePoint(n) : whole
+      const valid = Number.isFinite(n) && n > 0 && n < 0x110000 && !(n >= 0xd800 && n <= 0xdfff)
+      return valid ? String.fromCodePoint(n) : whole
     }
-    const named = NAMED_ENTITIES[code.toLowerCase()]
+    const named = NAMED_ENTITIES[code] !== undefined ? NAMED_ENTITIES[code] : CASE_INSENSITIVE_ENTITIES.has(code.toLowerCase()) ? NAMED_ENTITIES[code.toLowerCase()] : undefined
     return named === undefined ? whole : named
   })
 }
@@ -1238,6 +1270,7 @@ module.exports = {
   isClockText,
   isDateText,
   displayName,
+  decodeEntities,
   isProseHeading,
   extractHtmlMenuStructure,
   createHtmlStructureAdapter,

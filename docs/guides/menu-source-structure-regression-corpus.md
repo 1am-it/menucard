@@ -46,7 +46,7 @@ any non-`.invalid` URL and any recognised dish without the "Fictie" prefix.
 
 ```js
 {
-  id: 'STRUCT-023',                 // next free number, never reused
+  id: 'STRUCT-024',                 // next free number, never reused
   name: 'Korte omschrijving van het patroon',
   status: 'classified',             // or 'unclassified' (+ note)
   layers: ['html_parser', 'hierarchy', 'concept'],

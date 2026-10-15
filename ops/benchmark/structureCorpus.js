@@ -393,6 +393,29 @@ const STRUCTURE_CASES = [
     input: site('<h2>Koud</h2><p>Fictieve salade <strong>14,50</strong><br>Fictief tartaar <strong>16,50</strong><br>Fictieve carpaccio <strong>13</strong></p>'),
     expected: { recognized: true, menus: [{ title: null, structure: 'normalized', sections: [[['Koud'], 3, false]] }], evidencePatterns: ['line_break_list'] },
   },
+  {
+    id: 'STRUCT-023',
+    name: 'HTML-entiteiten in titel, rubriek en gerecht worden één keer gedecodeerd, tot in de export',
+    status: 'classified',
+    layers: ['html_parser', 'source_analysis', 'concept', 'export'],
+    input: site(
+      '<h1>Fictief caf&eacute;</h1><h2>Lunch &amp; diner</h2>' +
+        '<ul><li>Fictieve &lsquo;vangst van de dag&rsquo; <span>€ 9,50</span></li><li>Fictieve cr&egrave;me br&ucirc;l&eacute;e <span>€ 8,50</span></li>' +
+        '<li>Fictieve vis &#38; friet <span>€ 17,00</span></li><li>Fictief &amp;lsquo;letterlijk&amp;rsquo; <span>€ 6,00</span></li></ul>'
+    ),
+    expected: {
+      recognized: true,
+      menus: [{ title: 'Fictief café', structure: 'normalized', sections: [[['Lunch & diner'], 4, false]] }],
+      lineStatuses: [
+        ['', 'Fictieve ‘vangst van de dag’', 'new'],
+        ['', 'Fictieve crème brûlée', 'new'],
+        ['', 'Fictieve vis & friet', 'new'],
+        ['', 'Fictief &lsquo;letterlijk&rsquo;', 'new'], // decoded once: an escaped reference stays text
+      ],
+      export: true,
+      mustNot: { dishRecognised: ['Fictieve &lsquo;vangst van de dag&rsquo;', 'Fictieve cr&egrave;me br&ucirc;l&eacute;e'], pathLabelIncludes: ['&amp;', '&eacute;'] },
+    },
+  },
 ]
 
 module.exports = { STRUCTURE_CORPUS_VERSION, LAYERS, HOST, STRUCTURE_CASES }
