@@ -66,3 +66,4 @@ jobs:
             --model sonnet
             --max-turns 16
             --permission-mode acceptEdits
+            --allowedTools "Bash,Read,Edit,Write,Glob,Grep"
