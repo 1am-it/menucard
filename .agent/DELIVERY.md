@@ -94,3 +94,22 @@ NEXT OWNER: <role>
 ```
 
 Keep it short. Do not repeat every command or narrate unchanged polling.
+
+
+## Controlled GitHub Builder
+
+`.github/workflows/claude-build.yml` is the optional implementation relay.
+It starts only when a repository owner, member, or collaborator begins an
+issue comment with `@claude-build`. The issue must already contain an
+approved build contract.
+
+The workflow uses the repository secret `CLAUDE_CODE_OAUTH_TOKEN`, generated
+from the Product Owner's Claude subscription. Do not add `ANTHROPIC_API_KEY`,
+automatic API-credit reload, or any other paid credential to this workflow
+without a new Product Owner decision.
+
+One repository-wide build may run at a time. It has a time and turn limit and
+may prepare only one pull request. It never merges, dispatches or approves
+workflows, deploys, migrates production data, activates sources, publishes
+data, or changes external credentials. A failed or exhausted subscription run
+is reported as a normal handoff; it must not silently switch to paid API use.
