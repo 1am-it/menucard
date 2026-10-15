@@ -44,7 +44,8 @@ const LONG_SECTION = 'Huisgemaakte fictieve pasta en risotto met groenten van lo
  *   parserRejected: reasons that must appear, statuses: { status: count } (exact),
  *   blockers: sorted statuses (exact), removed: [[scope, name]] (exact),
  *   batchLabel, notes: substrings, export: true (concept = preview = export),
- *   mustNot: { pathLabelIncludes: [text], dishInPath: [[dish, path]], dishRecognised: [dish] }
+ *   conceptRoutes: [[dish, full source route, uncertain]] (the route reaching the concept/review),
+ *   mustNot: { pathLabelIncludes: [text], dishInPath: [[dish, full source route]], dishRecognised: [dish] }
  */
 const STRUCTURE_CASES = [
   {
@@ -204,10 +205,25 @@ const STRUCTURE_CASES = [
       </ul>`),
     expected: {
       recognized: true,
-      // The prose label is skipped below "Lunch"; its dishes land in "Lunch"
-      // itself (never in "Soepen"), which next to a sub-section is uncertain.
-      menus: [{ title: null, structure: 'uncertain', sections: [[['Lunch', 'Soepen'], 2, false], [['Lunch'], 2, true]] }],
-      mustNot: { dishInPath: [['Fictief bordje', ['Lunch', 'Soepen']], ['Fictief plankje', ['Lunch', 'Soepen']]], pathLabelIncludes: ['klein gerecht'] },
+      // The sentence-like label is kept: its dishes stay under exactly
+      // "Lunch › <label>" (source route), marked uncertain — never under the
+      // sibling "Soepen", never flattened into "Lunch".
+      menus: [{ title: 'Lunch', structure: 'uncertain', sections: [[['Soepen'], 2, false], [[SENTENCE], 2, true]] }],
+      conceptRoutes: [
+        ['Fictief bordje', ['Lunch', SENTENCE], true],
+        ['Fictief plankje', ['Lunch', SENTENCE], true],
+        ['Fictieve tomatensoep', ['Lunch', 'Soepen'], false],
+      ],
+      statuses: { new: 2, unclear_category: 2 },
+      blockers: ['unclear_category', 'unclear_category'],
+      mustNot: {
+        dishInPath: [
+          ['Fictief bordje', ['Lunch', 'Soepen']],
+          ['Fictief plankje', ['Lunch', 'Soepen']],
+          ['Fictief bordje', ['Lunch']],
+          ['Fictief plankje', ['Lunch']],
+        ],
+      },
       batchLabel: 'Controle nodig',
     },
   },

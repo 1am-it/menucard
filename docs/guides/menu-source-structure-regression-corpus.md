@@ -66,6 +66,9 @@ uncertainty — exact), `parserRejected` (reasons that must appear),
 `batchLabel`, `notes`, `export: true` (concept = Publicatievoorbeeld =
 export, and a stored version reads back identically), `flatExport`, and the
 negative `mustNot` (`pathLabelIncludes`, `dishInPath`, `dishRecognised`).
+`dishInPath` and `conceptRoutes` (`[dish, route, uncertain]`, the route a
+dish has in the concept/review model) compare the full source route, so a
+dish moved to a sibling section or flattened into its parent is caught.
 
 Put batch-status cases on a menu page (`site(...)`), not on the homepage:
 a menu on the already known homepage is "Controle nodig" by an unrelated

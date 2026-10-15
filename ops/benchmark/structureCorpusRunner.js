@@ -88,6 +88,14 @@ function entryStructure(entry) {
   }
 }
 
+/** Concept content as [dish, route (title + section path), uncertain] — what the review shows. */
+function conceptRoutesOf(content) {
+  return content.categories.flatMap((c) => {
+    const route = [...(content.title ? [content.title] : []), ...(c.path || [c.name])]
+    return c.items.map((i) => [i.name, route, c.uncertain === true])
+  })
+}
+
 /** Runs one case through the chain; returns what the chain actually produced. */
 async function observeCase(structCase) {
   const input = structCase.input
@@ -143,7 +151,10 @@ async function observeCase(structCase) {
     batchLabel: view.label,
     notes: analysis.notes,
     exportCheck,
-    dishesByPath: analysis.menuContexts.flatMap((m) => m.categories.flatMap((c) => c.items.map((i) => [i.name, c.path || [c.name]]))),
+    // The full source route of every recognised dish (never the normalised path).
+    dishesByPath: analysis.menuContexts.flatMap((m) => m.categories.flatMap((c) => c.items.map((i) => [i.name, c.sourcePath || c.path || [c.name]]))),
+    // The route a dish has in the concept/review model, with its uncertainty.
+    conceptRoutes: conceptRoutesOf(concept.content),
   }
 }
 
@@ -161,6 +172,7 @@ function compare(expected, actual) {
   if (expected.blockers) check(sameJson(actual.blockers, [...expected.blockers].sort()), `blokkades: verwacht ${JSON.stringify(expected.blockers)}, kreeg ${JSON.stringify(actual.blockers)}`)
   if (expected.removed) check(sameJson(actual.removed, expected.removed), `verdwenen: verwacht ${JSON.stringify(expected.removed)}, kreeg ${JSON.stringify(actual.removed)}`)
   for (const line of expected.lineStatuses || []) check(actual.lineStatuses.some((a) => sameJson(a, line)), `regel ${JSON.stringify(line)} ontbreekt`)
+  for (const route of expected.conceptRoutes || []) check(actual.conceptRoutes.some((a) => sameJson(a, route)), `conceptroute ${JSON.stringify(route)} ontbreekt (kreeg ${JSON.stringify(actual.conceptRoutes)})`)
   if (expected.batchLabel) check(actual.batchLabel === expected.batchLabel, `batchstatus: verwacht "${expected.batchLabel}", kreeg "${actual.batchLabel}"`)
   for (const note of expected.notes || []) check(actual.notes.some((n) => n.includes(note)), `notitie met "${note}" ontbreekt`)
   if (expected.export) {
