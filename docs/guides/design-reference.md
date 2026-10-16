@@ -425,10 +425,14 @@ Sources:
 
 The primary navigation is exactly three plain links, in this order:
 
-1. **`Werkvoorraad`** → `/internal/source-workqueue`. Only concrete human
-   actions that are needed now. Also keeps orienting for
-   `/internal/source-triage`, `/internal/menu-concepts`,
-   `/internal/profile-drafts`, `/internal/import-inbox` and the
+1. **`Werkvoorraad`** → `/internal/workqueue`. The role-aware landing
+   page for the daily, concrete human actions. It lists only actionable
+   queues, each linking to its existing route: `Bronwerkvoorraad`
+   (`/internal/source-workqueue`), `Nieuwe aanleveringen`, `Bronnen
+   beoordelen`, `Menuconcepten beoordelen`, `Profielconcepten`, and — for
+   editors only — `Beoordelen`. `Nieuwe import` is its own primary item
+   and is not repeated as a card. An editor-only account sees just
+   `Beoordelen`. Also keeps orienting for all those routes and the
    Onboarding routes.
 2. **`Nieuwe import`** → `/internal/nieuwe-import`, page title
    **`Websites importeren`**. One field for pasted restaurant URLs, one
@@ -443,10 +447,9 @@ The primary navigation is exactly three plain links, in this order:
    een intern voorstel. Niets wordt automatisch bevestigd of
    gepubliceerd."
 3. **`Beheer`** → `/internal`. Overview, history, settings and reference
-   data (Dekkingsoverzicht, Nieuwe aanleveringen, Bronnen beoordelen,
-   Menuconcepten beoordelen, Profielconcepten, Beoordelen for editors);
-   not a daily action list. This is also an editor-only account's way
-   in.
+   data only (today: `Dekkingsoverzicht`); never a daily review queue.
+   Every account with a staff role can open it, and it points editor-only
+   accounts to Werkvoorraad when there is nothing to manage.
 
 Other rules:
 
@@ -468,7 +471,7 @@ Other rules:
   computed from real, currently open work items (BE-20 "Visual
   contract"). Never a placeholder or hardcoded number.
 - `Beoordelen` (editor-only Moderation) keeps its route, role gate and
-  data model; it is listed under `Beheer`.
+  data model; it is listed in `Werkvoorraad`.
 - In BE-25's import results, a high-certainty result offers "Bevestig
   bron": a short inline human confirmation that only records an accepted
   BE-24 source proposal. It publishes nothing. Bulk confirmation covers
@@ -481,7 +484,8 @@ Other rules:
 ### Rules
 
 - A new internal module is a new entry in `internalNav.js`, usually
-  placed under `Beheer`. It is never a second navigation or a page-local nav.
+  placed in `Werkvoorraad` (daily action) or `Beheer` (overview, history,
+  reference). It is never a second navigation or a page-local nav.
 - Every internal page uses the same order, labels and position. The
   active destination has `aria-current="page"` (decision 014, item 2).
 - Role filtering only hides links. Every route and API keeps its own

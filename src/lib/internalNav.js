@@ -49,6 +49,9 @@ function hasAnyKnownRole(roles) {
 // `placement` decides where a module shows:
 //  - `'primary'` — inline in the top bar (Werkvoorraad, Nieuwe import,
 //    Beheer).
+//  - `'work'` — listed on the Werkvoorraad landing page
+//    (/internal/workqueue): the daily, concrete human action queues, each
+//    linking to its existing route.
 //  - `'beheer'` — listed on the Beheer overview (/internal) only:
 //    overview, history, settings and reference data, never a daily
 //    action list.
@@ -56,6 +59,8 @@ function hasAnyKnownRole(roles) {
 //    follow-up action where the flow asks for it (Onboarding Restaurant,
 //    for an imported website that cannot reliably be linked to an
 //    existing restaurant). The route itself is unchanged.
+// Werkvoorraad is `staff` (either role): an editor-only account's daily
+// action (Beoordelen) lives there.
 //
 // `matches` lists extra path prefixes that keep the item marked current
 // (e.g. the pre-existing batch route that Nieuwe import now fronts), so
@@ -64,15 +69,16 @@ function hasAnyKnownRole(roles) {
 // Nothing here grants access: every route keeps its own server-side
 // authorization; this only classifies what to show.
 const INTERNAL_MODULES = [
-  { id: 'workqueue', label: 'Werkvoorraad', href: '/internal/source-workqueue', requiredRole: 'internal', placement: 'primary', subtitle: 'Wat nu actie van een medewerker nodig heeft', matches: ['/internal/source-triage', '/internal/menu-concepts', '/internal/profile-drafts', '/internal/import-inbox', '/internal/onboarding-restaurant', '/internal/onboarding-menu'] },
+  { id: 'workqueue', label: 'Werkvoorraad', href: '/internal/workqueue', requiredRole: 'staff', placement: 'primary', subtitle: 'Wat nu actie van een medewerker nodig heeft', matches: ['/internal/source-workqueue', '/internal/source-triage', '/internal/menu-concepts', '/internal/profile-drafts', '/internal/import-inbox', '/internal/onboarding-restaurant', '/internal/onboarding-menu', '/internal/moderation'] },
   { id: 'new-import', label: 'Nieuwe import', href: '/internal/nieuwe-import', requiredRole: 'internal', placement: 'primary', subtitle: 'Websites importeren', matches: ['/internal/source-triage/batch'] },
-  { id: 'manage', label: 'Beheer', href: '/internal', requiredRole: 'staff', placement: 'primary', subtitle: 'Overzicht, historie en referentiegegevens', matches: ['/internal/coverage', '/internal/moderation'] },
+  { id: 'manage', label: 'Beheer', href: '/internal', requiredRole: 'staff', placement: 'primary', subtitle: 'Overzicht, historie en referentiegegevens', matches: ['/internal/coverage'] },
+  { id: 'source-workqueue', label: 'Bronwerkvoorraad', href: '/internal/source-workqueue', requiredRole: 'internal', placement: 'work', subtitle: 'Bronnen die een vervolgstap nodig hebben' },
+  { id: 'import-inbox', label: 'Nieuwe aanleveringen', href: '/internal/import-inbox', requiredRole: 'internal', placement: 'work', subtitle: 'Aangeleverde bronnen verwerken' },
+  { id: 'source-triage', label: 'Bronnen beoordelen', href: '/internal/source-triage', requiredRole: 'internal', placement: 'work', subtitle: 'Bronvoorstellen controleren' },
+  { id: 'menu-concepts', label: 'Menuconcepten beoordelen', href: '/internal/menu-concepts', requiredRole: 'internal', placement: 'work', subtitle: 'Concepten controleren en intern goedkeuren' },
+  { id: 'profile-drafts', label: 'Profielconcepten', href: '/internal/profile-drafts', requiredRole: 'internal', placement: 'work', subtitle: 'Klaarzetten voor publicatie' },
+  { id: 'moderation', label: 'Beoordelen', href: '/internal/moderation', requiredRole: 'editor', placement: 'work', subtitle: "Menu's, profielen en eigenaarsclaims" },
   { id: 'coverage', label: 'Dekkingsoverzicht', href: '/internal/coverage', requiredRole: 'internal', placement: 'beheer', subtitle: 'Overzicht van restaurants en bronnen' },
-  { id: 'import-inbox', label: 'Nieuwe aanleveringen', href: '/internal/import-inbox', requiredRole: 'internal', placement: 'beheer', subtitle: 'Aangeleverde bronnen' },
-  { id: 'source-triage', label: 'Bronnen beoordelen', href: '/internal/source-triage', requiredRole: 'internal', placement: 'beheer', subtitle: 'Bronvoorstellen en historie' },
-  { id: 'menu-concepts', label: 'Menuconcepten beoordelen', href: '/internal/menu-concepts', requiredRole: 'internal', placement: 'beheer', subtitle: 'Concepten controleren en intern goedkeuren' },
-  { id: 'profile-drafts', label: 'Profielconcepten', href: '/internal/profile-drafts', requiredRole: 'internal', placement: 'beheer', subtitle: 'Klaarzetten voor publicatie' },
-  { id: 'moderation', label: 'Beoordelen', href: '/internal/moderation', requiredRole: 'editor', placement: 'beheer', subtitle: "Menu's, profielen en eigenaarsclaims" },
   { id: 'onboarding-restaurant', label: 'Onboarding Restaurant', href: '/internal/onboarding-restaurant', requiredRole: 'internal', placement: 'contextual', subtitle: 'Alleen als een restaurant niet gekoppeld kan worden' },
 ];
 
@@ -89,7 +95,7 @@ function resolveVisibleModules(roles) {
   });
 }
 
-/** Splits an already role-filtered module list into `{ primary, beheer }`
+/** Splits an already role-filtered module list into `{ primary, work, beheer }`
  * by `placement`, keeping `INTERNAL_MODULES`'s order. `contextual` and
  * unrecognized placements appear in neither array — fails closed to "not
  * shown." */
@@ -97,6 +103,7 @@ function groupModulesByPlacement(modules) {
   const list = Array.isArray(modules) ? modules : [];
   return {
     primary: list.filter((m) => m && m.placement === 'primary'),
+    work: list.filter((m) => m && m.placement === 'work'),
     beheer: list.filter((m) => m && m.placement === 'beheer'),
   };
 }

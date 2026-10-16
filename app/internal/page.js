@@ -227,6 +227,12 @@ export default function InternalHomePage() {
             </a>
           ))}
 
+          {modules.length === 0 && (
+            <p role="status" style={{ margin: 0, fontSize: 14, color: 'var(--text-secondary)' }}>
+              Er is voor dit account nog niets te beheren. Dagelijks werk staat in de Werkvoorraad.
+            </p>
+          )}
+
           {showOwnerSection && (
             <div
               style={{
