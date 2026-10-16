@@ -1,7 +1,8 @@
 'use client'
 
-// Batchanalyse (BE-25 fase 2) — under Werkvoorraad / Bronnen beoordelen.
-// A staff member pastes at most 10 restaurant URLs and chooses "Analyse
+// Websites importeren (BE-25 fase 2 batch analysis, fronted by Nieuwe import
+// at /internal/nieuwe-import since issue #53; this route stays as an alias).
+// A staff member pastes at most 10 restaurant URLs and chooses "Import
 // starten" once. Processing is page-bound: only the starter's open page
 // asks the server to analyse the next URL, one at a time (no worker, no
 // schedule); closing the page pauses the batch. Colleagues can view a

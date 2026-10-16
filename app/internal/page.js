@@ -28,7 +28,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import InternalNav from '@/src/components/InternalNav'
-import { resolveVisibleModules, isOwnerRole, hasAnyKnownRole } from '@/src/lib/internalNav'
+import { resolveVisibleModules, groupModulesByPlacement, isOwnerRole, hasAnyKnownRole } from '@/src/lib/internalNav'
 
 function IconArrowRight() {
   return (
@@ -107,7 +107,9 @@ export default function InternalHomePage() {
     return <main style={{ ...SHELL_STYLE, color: 'var(--text-secondary)' }}>Loading…</main>
   }
 
-  const modules = resolveVisibleModules(roles)
+  // Beheer lists overview, history and reference modules only; the daily
+  // actions live in Werkvoorraad and Nieuwe import (top navigation).
+  const modules = groupModulesByPlacement(resolveVisibleModules(roles)).beheer
   const showOwnerSection = isOwnerRole(roles)
   const noAccess = !hasAnyKnownRole(roles)
   // No modules and no nav destinations exist for this account, so the
@@ -213,7 +215,12 @@ export default function InternalHomePage() {
                 fontSize: 15,
               }}
             >
-              {m.label}
+              <span style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
+                {m.label}
+                {m.subtitle && (
+                  <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-secondary)' }}>{m.subtitle}</span>
+                )}
+              </span>
               <span style={{ width: 16, height: 16, display: 'flex', flexShrink: 0, color: 'var(--text-secondary)' }}>
                 <IconArrowRight />
               </span>

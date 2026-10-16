@@ -9,7 +9,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import StatusIcon from '@/src/components/StatusIcon'
 import { MenuControl, MenuConcept } from './MenuReview'
-import { MAX_BATCH_URLS, DAILY_URL_LIMIT, COPY, ACTION_LABELS, precheckLines, splitLines } from '@/src/lib/batchAnalysis'
+import { MAX_BATCH_URLS, DAILY_URL_LIMIT, COPY, ACTION_LABELS, IMPORT_STEPS, importScope, precheckLines, splitLines } from '@/src/lib/batchAnalysis'
 
 function timeOf(value) {
   const d = new Date(value)
@@ -47,14 +47,14 @@ function Badge({ role, icon, children }) {
 function Explainer() {
   return (
     <ul className="bta-explainer">
-      <li>Maximaal {MAX_BATCH_URLS} URL&apos;s per batch, handmatig ingevoerd.</li>
+      <li>Eén website of maximaal {MAX_BATCH_URLS} tegelijk, handmatig ingevoerd. Je kiest geen modus.</li>
       <li>De analyse loopt alleen zolang jij deze pagina open hebt. Sluiten pauzeert; terugkomen hervat.</li>
       <li>Geen AI, geen OCR, geen automatische wijziging van restaurantgegevens.</li>
       <li>
         Zeker resultaat: bevestig de bron hier. Twijfel, robots.txt of geen bruikbare menukaart: beoordeel handmatig in
         Bronnen beoordelen.
       </li>
-      <li>Onbekende restaurants gaan naar Onboarding Restaurant.</li>
+      <li>Alleen een website die niet betrouwbaar aan een bestaand restaurant te koppelen is, krijgt de vervolgstap Onboarding Restaurant.</li>
     </ul>
   )
 }
@@ -66,12 +66,12 @@ function SidePanels({ data, selectedId, onSelect }) {
     <>
       <section className="bta-side-card bta-desktop-only" aria-labelledby="bta-how">
         <h2 id="bta-how" className="bta-side-title">
-          Zo werkt deze analyse
+          Zo werkt deze import
         </h2>
         <Explainer />
       </section>
       <details className="bta-side-card bta-mobile-only">
-        <summary className="bta-side-title">Zo werkt deze analyse</summary>
+        <summary className="bta-side-title">Zo werkt deze import</summary>
         <Explainer />
       </details>
       <section className="bta-side-card" aria-labelledby="bta-limit">
@@ -85,10 +85,10 @@ function SidePanels({ data, selectedId, onSelect }) {
       </section>
       <section className="bta-side-card" aria-labelledby="bta-recent">
         <h2 id="bta-recent" className="bta-side-title">
-          Recente batches
+          Recente imports
         </h2>
         {recent.length === 0 ? (
-          <p className="bta-side-muted">Nog geen batches. Je eerste batch verschijnt hier, met elk resultaat.</p>
+          <p className="bta-side-muted">Nog geen imports. Je eerste import verschijnt hier, met elk resultaat.</p>
         ) : (
           <ul className="bta-recent">
             {recent.map((b) => (
@@ -114,11 +114,12 @@ function SidePanels({ data, selectedId, onSelect }) {
 function InputCard({ text, setText, daily, ownOpenBatchId, onStart, busy, error, onShowOpen }) {
   const check = useMemo(() => precheckLines(text), [text])
   const lineCount = splitLines(text).length
+  const scope = importScope(lineCount)
   const remaining = Math.max(0, (daily ? daily.limit : DAILY_URL_LIMIT) - (daily ? daily.used : 0))
   let blocked = null
-  if (ownOpenBatchId) blocked = 'Je hebt al een open batch. Rond die eerst af.'
-  else if (check.tooMany) blocked = `Maximaal ${MAX_BATCH_URLS} regels per batch.`
-  else if (check.queueableCount === 0) blocked = 'Plak minstens één geldige URL om te starten.'
+  if (ownOpenBatchId) blocked = 'Je hebt al een lopende import. Rond die eerst af.'
+  else if (check.tooMany) blocked = `Maximaal ${MAX_BATCH_URLS} regels per import.`
+  else if (check.queueableCount === 0) blocked = 'Plak minstens één geldige URL om de import te starten.'
   else if (check.queueableCount > remaining) blocked = `Je hebt vandaag nog ${remaining} URL's over.`
 
   function submit(e) {
@@ -130,7 +131,7 @@ function InputCard({ text, setText, daily, ownOpenBatchId, onStart, busy, error,
     <form className="bta-card" onSubmit={submit} aria-labelledby="bta-input-title">
       <div className="bta-card-head">
         <h2 id="bta-input-title" className="bta-card-title">
-          URL&apos;s invoeren
+          Restaurant-URL&apos;s invoeren
         </h2>
         <span className="bta-muted">
           {lineCount} van {MAX_BATCH_URLS} regels
@@ -190,11 +191,15 @@ function InputCard({ text, setText, daily, ownOpenBatchId, onStart, busy, error,
         </div>
       )}
 
+      <p id="bta-scope" className="bta-scope" role="status">
+        {scope.text}
+      </p>
+
       <div role="alert">{error && <div className="di-banner di-banner-danger">{error}</div>}</div>
 
       <div className="bta-start">
-        <button type="submit" className="di-btn-primary bta-btn" aria-disabled={blocked || busy ? 'true' : undefined} aria-describedby="bta-start-note">
-          {busy ? 'Bezig met starten…' : COPY.start}
+        <button type="submit" className="di-btn-primary bta-btn" aria-disabled={blocked || busy ? 'true' : undefined} aria-describedby="bta-start-note bta-scope">
+          {busy ? 'Import wordt gestart…' : COPY.start}
         </button>
         <p id="bta-start-note" className="bta-muted">
           {blocked ||
@@ -202,7 +207,7 @@ function InputCard({ text, setText, daily, ownOpenBatchId, onStart, busy, error,
         </p>
         {ownOpenBatchId && (
           <button type="button" className="stg-btn-secondary bta-btn" onClick={onShowOpen}>
-            Naar je open batch
+            Naar je lopende import
           </button>
         )}
       </div>
@@ -360,7 +365,7 @@ function BatchDetail({ detail, ownOpenBatchId, busy, confirming, setConfirming, 
         </div>
         {isStarter && !batchOpen && (
           <button type="button" className="stg-btn-secondary bta-btn" onClick={onNew}>
-            Nieuwe batch
+            Nieuwe import
           </button>
         )}
       </div>
@@ -499,44 +504,46 @@ function BatchDetail({ detail, ownOpenBatchId, busy, confirming, setConfirming, 
   )
 }
 
+// Step shown as current: 0 = Nieuwe import (no batch on screen), 1 =
+// Controleer menukaart (a batch is open or has results to check).
+function currentStep(viewing) {
+  return viewing ? 1 : 0
+}
+
 /** Everything below the internal navigation. */
 export default function BatchAnalysisView({ data, loadError, message, viewing, ownOpenBatchId, busy, confirming, setConfirming, onConfirm, onRerun, onAdjust, onSaveConcept, onNew, notice, text, setText, onStart, actionError, onShowOpen, onSelect }) {
   return (
     <>
       <nav aria-label="Kruimelpad" className="bta-breadcrumb">
-        <span className="bta-desktop-only">Werkvoorraad</span>
-        <span className="bta-desktop-only" aria-hidden="true">
-          /
-        </span>
-        <a href="/internal/source-triage" className="stg-link">
+        <a href="/internal/nieuwe-import" className="stg-link">
           <span className="bta-mobile-only" aria-hidden="true">
             ←{' '}
           </span>
-          Bronnen beoordelen
+          Nieuwe import
         </a>
         <span aria-hidden="true">/</span>
-        <span aria-current="page">Batchanalyse</span>
+        <span aria-current="page">Websites importeren</span>
       </nav>
 
       <div className="bta-header">
         <div className="bta-title-row">
-          <h1 className="di-title">Batchanalyse</h1>
+          <h1 className="di-title">Websites importeren</h1>
           <span className="bta-tag">Alleen intern</span>
         </div>
-        <p className="bta-muted">
-          Analyseer maximaal {MAX_BATCH_URLS} restaurant-URL&apos;s tegelijk. Elk resultaat blijft een voorstel voor
-          menselijke controle.
-        </p>
+        <ol className="bta-steps" aria-label="Voortgang van de import">
+          {IMPORT_STEPS.map((step, i) => (
+            <li key={step} aria-current={i === currentStep(viewing) ? 'step' : undefined}>
+              {step}
+            </li>
+          ))}
+        </ol>
       </div>
 
       <div className="di-banner di-banner-info" role="note">
         <span className="di-banner-icon">
           <StatusIcon name="alert" />
         </span>
-        <span>
-          <strong>{COPY.nothingPublished.replace(/\.$/, '')}.</strong> Elke bevestiging is een menselijke kwaliteitscontrole
-          door een medewerker.
-        </span>
+        <span>{COPY.safety}</span>
       </div>
 
       <div role="alert">{loadError && <div className="di-banner di-banner-danger">{loadError}</div>}</div>
@@ -579,7 +586,7 @@ export default function BatchAnalysisView({ data, loadError, message, viewing, o
             />
           )}
         </div>
-        <aside className="bta-side" aria-label="Over deze analyse">
+        <aside className="bta-side" aria-label="Over deze import">
           {data && <SidePanels data={data} selectedId={viewing ? viewing.batch.id : null} onSelect={onSelect} />}
         </aside>
       </div>
