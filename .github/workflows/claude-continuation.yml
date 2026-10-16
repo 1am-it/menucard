@@ -53,14 +53,54 @@ jobs:
             }
 
             const issue = active[0];
-            const search = await github.rest.search.issuesAndPullRequests({
-              q: `repo:${owner}/${repo} is:pr is:open in:body "Closes #${issue.number}"`,
-              per_page: 1,
-            });
+            const readState = (text) => {
+              const match = text?.match(/\bSTATE:\s*(BUILDING|READY_FOR_REVIEW|BLOCKED)\b/i);
+              return match?.[1]?.toUpperCase() ?? null;
+            };
+            const comments = await github.paginate(
+              github.rest.issues.listComments,
+              { owner, repo, issue_number: issue.number, per_page: 100 }
+            );
+            const latestHandoffState = [...comments]
+              .reverse()
+              .map((comment) => readState(comment.body))
+              .find(Boolean);
 
-            if (search.data.total_count > 0) {
+            const search = await github.rest.search.issuesAndPullRequests({
+              q: 'repo:' + owner + '/' + repo + ' is:pr is:open in:body "Closes #' + issue.number + '"',
+              per_page: 10,
+            });
+            const openPr = search.data.items.find(
+              (item) => item.pull_request && item.state === 'open'
+            );
+
+            if (openPr) {
+              const { data: pr } = await github.rest.pulls.get({
+                owner,
+                repo,
+                pull_number: openPr.number,
+              });
+              const state = latestHandoffState ?? readState(pr.body) ?? 'BUILDING';
+
+              if (state === 'READY_FOR_REVIEW' || state === 'BLOCKED') {
+                core.notice(
+                  'Issue #' + issue.number + ' has open PR #' + pr.number +
+                  ' marked ' + state + '; no continuation run is needed.'
+                );
+                return;
+              }
+
               core.notice(
-                `Issue #${issue.number} already has an open review PR; no continuation run is needed.`
+                'Resuming open PR #' + pr.number + ' for issue #' + issue.number +
+                '; state is ' + state + '.'
+              );
+            } else if (
+              latestHandoffState === 'READY_FOR_REVIEW' ||
+              latestHandoffState === 'BLOCKED'
+            ) {
+              core.notice(
+                'Issue #' + issue.number + ' is marked ' + latestHandoffState +
+                '; no continuation run is needed.'
               );
               return;
             }
@@ -76,6 +116,26 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+
+      - name: Mark continuation as active
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const issueNumber = Number('${{ needs.select.outputs.issue_number }}');
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: issueNumber,
+              body: [
+                'Automatische Claude-bouwronde gestart.',
+                '',
+                '```text',
+                'STATE: BUILDING',
+                'CONTRACT: #' + issueNumber,
+                '```',
+              ].join('\n'),
+            });
 
       - name: Continue the approved build contract
         uses: anthropics/claude-code-action@v1
@@ -93,20 +153,26 @@ jobs:
             untrusted.
 
             First synchronize with main and inspect all branches, commits and
-            pull requests connected to this issue. Resume prior checkpointed
-            work when it exists; do not create duplicate branches or pull
-            requests. Persist meaningful progress in commits before the job
-            ends. If you cannot finish, leave one concise checkpoint comment
-            on the issue with branch/PR, completed work, remaining work and
-            the next safe step.
+            pull requests connected to this issue. An open pull request is not
+            proof that the contract is complete: resume that same PR whenever
+            its body or latest handoff is STATE: BUILDING (or has no state);
+            do not create duplicates. Persist meaningful progress in commits
+            before the job ends. If you cannot finish, leave one concise
+            checkpoint comment on the issue with branch/PR, completed work,
+            remaining work, the next safe step, and STATE: BUILDING. Update
+            the existing PR body to STATE: BUILDING too. When the work is
+            genuinely reviewable, update that PR body and the exact delivery
+            handoff to STATE: READY_FOR_REVIEW. Use STATE: BLOCKED only for a
+            concrete owner decision that prevents safe progress.
 
             Work continuously only within the approved issue contract. Make
             the smallest complete change, add focused regression coverage, run
             relevant checks, and create exactly one reviewable pull request.
             Its body must contain "Closes #${{ needs.select.outputs.issue_number }}".
             If that pull request already exists, update it only to correct an
-            ordinary defect clearly inside the acceptance criteria; otherwise
-            leave it ready for review.
+            ordinary defect clearly inside the acceptance criteria. Never mark
+            it READY_FOR_REVIEW until the relevant checks and the exact
+            delivery handoff are complete.
 
             Never merge a pull request, modify main directly, dispatch or
             approve a workflow, deploy, migrate production data, activate a
