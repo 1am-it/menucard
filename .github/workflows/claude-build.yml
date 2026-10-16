@@ -29,6 +29,26 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Mark build as active
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const issueNumber = context.issue.number;
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: issueNumber,
+              body: [
+                'Claude-bouwronde gestart.',
+                '',
+                '```text',
+                'STATE: BUILDING',
+                'CONTRACT: #' + issueNumber,
+                '```',
+              ].join('\n'),
+            });
+
       - name: Implement the approved build contract
         uses: anthropics/claude-code-action@v1
         with:
