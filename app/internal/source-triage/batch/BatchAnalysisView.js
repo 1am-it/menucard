@@ -115,6 +115,9 @@ function InputCard({ text, setText, daily, ownOpenBatchId, onStart, busy, error,
   const check = useMemo(() => precheckLines(text), [text])
   const lineCount = splitLines(text).length
   const scope = importScope(lineCount)
+  const scopeText = lineCount > 0 && lineCount <= MAX_BATCH_URLS && check.queueableCount !== lineCount
+    ? `${lineCount} regels ingevoerd; ${check.queueableCount} unieke geldige website${check.queueableCount === 1 ? '' : 's'}. Ongeldige en dubbele regels staan hierboven.`
+    : scope.text
   const remaining = Math.max(0, (daily ? daily.limit : DAILY_URL_LIMIT) - (daily ? daily.used : 0))
   let blocked = null
   if (ownOpenBatchId) blocked = 'Je hebt al een lopende import. Rond die eerst af.'
@@ -192,7 +195,7 @@ function InputCard({ text, setText, daily, ownOpenBatchId, onStart, busy, error,
       )}
 
       <p id="bta-scope" className="bta-scope" role="status">
-        {scope.text}
+        {scopeText}
       </p>
 
       <div role="alert">{error && <div className="di-banner di-banner-danger">{error}</div>}</div>
@@ -203,7 +206,7 @@ function InputCard({ text, setText, daily, ownOpenBatchId, onStart, busy, error,
         </button>
         <p id="bta-start-note" className="bta-muted">
           {blocked ||
-            `${check.queueableCount} URL${check.queueableCount === 1 ? '' : "'s"} worden geanalyseerd · telt ${check.queueableCount} van je ${remaining} resterende voor vandaag`}
+            `${check.queueableCount} URL${check.queueableCount === 1 ? '' : "'s"} ${check.queueableCount === 1 ? 'wordt' : 'worden'} geanalyseerd · telt ${check.queueableCount} van je ${remaining} resterende voor vandaag`}
         </p>
         {ownOpenBatchId && (
           <button type="button" className="stg-btn-secondary bta-btn" onClick={onShowOpen}>

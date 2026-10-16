@@ -110,7 +110,7 @@ export function ConceptList({ data, loadError }) {
           <h1 className="di-title">Menuconcepten beoordelen</h1>
           <span className="bta-tag">Alleen intern</span>
         </div>
-        <p className="bta-muted">Controleer menuconcepten uit Batchanalyse. Je ziet alleen de aandachtspunten; veilige gerechten zijn samengevat.</p>
+        <p className="bta-muted">Controleer menuconcepten uit Nieuwe import. Je ziet alleen de aandachtspunten; veilige gerechten zijn samengevat.</p>
       </div>
       <InternalOnlyNote />
       <Messages loadError={loadError} />
@@ -122,7 +122,7 @@ export function ConceptList({ data, loadError }) {
           </h2>
           {waiting.length === 0 ? (
             <p className="bta-muted">
-              Er wachten geen menuconcepten. Een concept ontstaat in <a className="stg-link" href="/internal/source-triage/batch">Batchanalyse</a> na
+              Er wachten geen menuconcepten. Een concept ontstaat in <a className="stg-link" href="/internal/nieuwe-import">Nieuwe import</a> na
               &quot;Bevestig bron&quot; en &quot;Concept opslaan&quot;.
             </p>
           ) : (
@@ -193,7 +193,7 @@ function History({ history, currentId }) {
             <span>
               {v.id === currentId ? <strong>Versie {v.version} (deze)</strong> : <a className="stg-link" href={`/internal/menu-concepts/${v.id}`}>Versie {v.version}</a>} ·{' '}
               {formatMoment(v.createdAt)} {v.createdBySelf ? 'door jou' : 'door een collega'}
-              {v.basedOnVersion ? ` · correctie op versie ${v.basedOnVersion}` : ' · uit Batchanalyse'}
+              {v.basedOnVersion ? ` · correctie op versie ${v.basedOnVersion}` : ' · uit Nieuwe import'}
             </span>
             <StatusBadge status={v.status} />
             {v.reviews.length > 0 && (
@@ -318,7 +318,7 @@ function PublicationPreview({ preview, restaurantName, version, dirty }) {
       {entries.length > 0 && (
         <p className="mcr-meta">
           {plural(dishCount(entries), 'gerecht', 'gerechten')} · {plural(sections, 'rubriek', 'rubrieken')}
-          {mode === 'concept' ? ' · volledige menukaart' : ` · ${plural(entries.length, 'menukaart', 'menukaarten')}`}
+          {mode === 'concept' ? ' · opgenomen in dit concept' : ` · ${plural(entries.length, 'menukaart', 'menukaarten')}`}
         </p>
       )}
     </section>
@@ -441,7 +441,7 @@ export function ConceptReview({ data, loadError, message, busy, onSaveVersion, o
   const c = data.concept
   const readOnly = !c.isLatest
   const { editorLines, safe, excluded, categories } = conceptParts(concept, touched)
-  const sectionCount = new Set(concept.lines.filter((l) => l.status !== 'excluded').map((l) => l.category)).size
+  const sectionCount = concept.content.categories.length
   const dishCount = concept.lines.filter((l) => l.status !== 'excluded').length
   const sourceOk = data.source.confirmed && !data.source.blocked
   const approveBlockers = []

@@ -964,8 +964,10 @@ function extractWithinBudget(html, budget, stats) {
     const key = JSON.stringify(path)
     // A sentence kept in the route (not safely nested below a real section
     // heading) is never trusted as structure: the section is uncertain.
-    if (!sectionsByKey.has(key)) sectionsByKey.set(key, { path, items: [], unpriced: [], uncertain: path.some(isProseHeading) })
-    return sectionsByKey.get(key)
+    if (!sectionsByKey.has(key)) sectionsByKey.set(key, { path, items: [], unpriced: [], uncertain: false })
+    const section = sectionsByKey.get(key)
+    section.uncertain ||= path.some(isProseHeading) || headingStack.some((h) => h.uncertain)
+    return section
   }
 
   function handleItem(node, pattern, headingPath) {
@@ -1083,7 +1085,7 @@ function extractWithinBudget(html, budget, stats) {
     }
     if (isClockText(fullText)) return reject(fullText, 'clock_time', node)
     if (isDateText(fullText)) return reject(fullText, 'date', node)
-    if (block.lines.some((line) => MODIFIER_PATTERN.test(line)) || MODIFIER_PATTERN.test(block.title)) return reject(fullText, 'modifier', node)
+    if (block.lines.some((line) => MODIFIER_PATTERN.test(line)) || MODIFIER_PATTERN.test(block.title) || /\b(supplement|toeslag|surcharge)\b/i.test(body)) return reject(fullText, 'modifier', node)
     if (hasServiceUnit(fullText) || PER_TABLE_PATTERN.test(fullText)) return reject(fullText, 'service_unit', node)
     const name = cleanName(block.title)
     const section = sectionFor(headingPath)
@@ -1135,6 +1137,26 @@ function extractWithinBudget(html, budget, stats) {
       // Markers only matter inside item text (textOf); the walk never skips
       // an element for its class, so an item classed "vegan" is still read.
       if (child.tag === '#text') continue
+      // Preserve the label of a self-contained accordion, including custom
+      // role=button controls. Without an explicit aria-controls link the
+      // source route is retained, but requires a human structure check.
+      budget.spend(child.children.length)
+      const parts = child.children.filter((c) => c.tag !== '#text' || c.text.trim())
+      const [trigger, panel] = parts
+      if (parts.length === 2 && trigger.attrs && panel.tag !== '#text' &&
+          (trigger.tag === 'button' || trigger.attrs.role === 'button') &&
+          ['true', 'false'].includes(trigger.attrs['aria-expanded']) &&
+          findDescendant(panel, isHeading, budget)) {
+        const label = clip(textOf(trigger, { markerCounter, budget }))
+        if (label && !isProseHeading(label)) {
+          const previousHeadings = headingStack.slice()
+          const explicitlyLinked = trigger.attrs['aria-controls'] && trigger.attrs['aria-controls'] === panel.attrs?.id
+          headingStack.push({ level: 0, text: label, uncertain: !explicitlyLinked })
+          walk(panel, depth + 1, extraLabel)
+          headingStack.splice(0, headingStack.length, ...previousHeadings)
+          continue
+        }
+      }
       if (isHeading(child)) {
         const raw = textOf(child, { markerCounter, budget })
         const text = clip(raw)

@@ -172,7 +172,7 @@ function createBatchAnalysisHandlers(deps) {
         receiptId: receipt ? receipt.id : null,
         menus: (receipt && Array.isArray(receipt.menus) && receipt.menus) || [],
         liveLines: liveMenuLines(liveMenus, view.restaurant.id),
-        latest: latest ? { version: latest.version, created_at: latest.created_at } : null,
+        latest: latest ? { id: latest.id, version: latest.version, created_at: latest.created_at } : null,
       };
     });
 

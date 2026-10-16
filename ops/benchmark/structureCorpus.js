@@ -17,7 +17,7 @@
 
 'use strict'
 
-const STRUCTURE_CORPUS_VERSION = '1.0.0'
+const STRUCTURE_CORPUS_VERSION = '1.1.0'
 
 /** The product layers a case can guard. */
 const LAYERS = ['html_parser', 'source_analysis', 'hierarchy', 'concept', 'batch_status', 'export']
@@ -414,6 +414,35 @@ const STRUCTURE_CASES = [
       ],
       export: true,
       mustNot: { dishRecognised: ['Fictieve &lsquo;vangst van de dag&rsquo;', 'Fictieve cr&egrave;me br&ucirc;l&eacute;e'], pathLabelIncludes: ['&amp;', '&eacute;'] },
+    },
+  },
+  {
+    id: 'STRUCT-024',
+    name: 'Een supplement achter de gerechtprijs wordt nooit de hoofdprijs',
+    status: 'classified',
+    layers: ['html_parser', 'source_analysis', 'concept', 'export'],
+    input: site('<h2>Diner</h2><p><strong>Fictieve soep</strong> 8,50<br><strong>Fictieve salade</strong> 12,50<br><strong>Fictieve pasta</strong> 18,50<br><strong>Fictieve runderstoof</strong><br>groenten<br>35 - <em>supplement kaas 9</em></p>'),
+    expected: {
+      recognized: true,
+      parserRejected: ['modifier'],
+      mustNot: { dishRecognised: ['Fictieve runderstoof'] },
+      export: true,
+    },
+  },
+  {
+    id: 'STRUCT-025',
+    name: 'Uitklaplabels blijven bronroutes; zonder expliciete panelkoppeling is controle verplicht',
+    status: 'classified',
+    layers: ['html_parser', 'source_analysis', 'hierarchy', 'concept', 'batch_status'],
+    input: site('<h1>Fictief seizoensmenu</h1>' + ['Lunch', 'Diner'].map((variant) =>
+      `<div><div role="button" aria-expanded="false">${variant}</div><div><h3>Voor</h3><p>Fictieve soep <strong>8.5</strong><br>Fictieve salade <strong>12.5</strong><br>Fictieve tartaar <strong>17.5</strong></p></div></div>`
+    ).join('')),
+    expected: {
+      recognized: true,
+      menus: [{ title: 'Fictief seizoensmenu', structure: 'uncertain', sections: [[['Lunch', 'Voor'], 3, true], [['Diner', 'Voor'], 3, true]] }],
+      statuses: { unclear_category: 6 },
+      batchLabel: 'Controle nodig',
+      mustNot: { pathLabelIncludes: [' — '] },
     },
   },
 ]
