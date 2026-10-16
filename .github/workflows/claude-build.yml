@@ -45,11 +45,16 @@ jobs:
 
             This is a time-bounded autonomous build round. First synchronize
             with main and inspect prior branches, commits and pull requests
-            connected to this issue. Resume existing checkpointed work rather
-            than creating duplicate branches or pull requests. Persist
-            meaningful progress in commits before the job ends. If unfinished,
-            leave a concise checkpoint in the issue with branch/PR, completed
-            work, remaining work and the next safe step.
+            connected to this issue. An open pull request is not proof that
+            the contract is complete: resume that same PR whenever its body or
+            latest handoff is STATE: BUILDING (or has no state); do not create
+            duplicates. Persist meaningful progress in commits before the job
+            ends. If unfinished, leave a concise checkpoint in the issue with
+            branch/PR, completed work, remaining work, the next safe step and
+            STATE: BUILDING; update the existing PR body to STATE: BUILDING
+            too. When genuinely reviewable, update that PR body and the exact
+            delivery handoff to STATE: READY_FOR_REVIEW. Use STATE: BLOCKED
+            only for a concrete owner decision that prevents safe progress.
 
             Work continuously within that contract: make the smallest complete
             change, add focused regression coverage, run relevant checks, and
@@ -60,7 +65,8 @@ jobs:
             the same pull request. Escalate only for a genuine product,
             governance, security, privacy, cost, external-access, or
             production-release decision. When blocked, leave one concise
-            handoff in the issue using the format from .agent/DELIVERY.md.
+            handoff in the issue using the format from .agent/DELIVERY.md and
+            STATE: BLOCKED.
 
             Never merge a pull request, modify main directly, dispatch or
             approve a workflow, deploy, migrate production data, activate a
