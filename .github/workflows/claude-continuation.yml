@@ -122,6 +122,6 @@ jobs:
             not actually run.
           claude_args: >-
             --model sonnet
-            --max-turns 16
+            --max-turns 64
             --permission-mode acceptEdits
             --allowedTools "Bash,Read,Edit,Write,Glob,Grep"
