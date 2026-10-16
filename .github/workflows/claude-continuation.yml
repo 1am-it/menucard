@@ -80,7 +80,7 @@ jobs:
                 repo,
                 pull_number: openPr.number,
               });
-              const state = readState(pr.body) ?? latestHandoffState ?? 'BUILDING';
+              const state = latestHandoffState ?? readState(pr.body) ?? 'BUILDING';
 
               if (state === 'READY_FOR_REVIEW' || state === 'BLOCKED') {
                 core.notice(
@@ -116,6 +116,26 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+
+      - name: Mark continuation as active
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const issueNumber = Number('${{ needs.select.outputs.issue_number }}');
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: issueNumber,
+              body: [
+                'Automatische Claude-bouwronde gestart.',
+                '',
+                '```text',
+                'STATE: BUILDING',
+                'CONTRACT: #' + issueNumber,
+                '```',
+              ].join('\n'),
+            });
 
       - name: Continue the approved build contract
         uses: anthropics/claude-code-action@v1
