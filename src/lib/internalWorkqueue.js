@@ -116,9 +116,8 @@ function conceptSecondary(item) {
   return parts.join(' · ') || null;
 }
 
-// An approved concept is only "Klaar voor publicatie" when its stored export
-// says so. A merged export is live and is not a task; an opened/pending PR
-// still needs the reviewer's attention; a failed/closed one needs inspection.
+// Fallback when the server supplied no readiness object. Stored exports
+// describe PR state, never eligibility or confirmed production deployment.
 function publicationReason(exportRow) {
   const status = exportRow && exportRow.status;
   if (status === 'opened') return 'Review-PR open · merge in GitHub';
@@ -285,7 +284,8 @@ function buildWorkqueue({ roles, providers } = {}) {
     const approved = item.status === 'approved';
     const exportRow = item.export && typeof item.export === 'object' ? item.export : null;
     const publication = item.publication && typeof item.publication === 'object' ? item.publication : null;
-    // A merged export is the live menu: not open work. Its concept still
+    // A merged export has no remaining PR action (deployment is unconfirmed).
+    // Its concept still
     // suppresses a stale generic review row for the same restaurant.
     if (approved && ((publication && publication.state === 'export_merged') || (exportRow && exportRow.status === 'merged'))) continue;
 
@@ -325,8 +325,8 @@ function buildWorkqueue({ roles, providers } = {}) {
       reason,
       secondary: conceptSecondary(item),
       actionLabel,
-      // Open the exact concept's existing publication controls.
-      href: `/internal/menu-concepts/${encodeURIComponent(asString(item.id))}#mcr-publication`,
+      // Review tasks start at the review; only approved tasks target publication.
+      href: `/internal/menu-concepts/${encodeURIComponent(asString(item.id))}${approved ? '#mcr-publication' : ''}`,
       priority: approved ? PRIORITY.menu_publication : PRIORITY.menu_review,
       recordedAt: (exportRow && exportRow.createdAt) || item.createdAt || null,
       requiredRole: 'internal',

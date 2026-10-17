@@ -176,7 +176,7 @@ test('record links: every task opens the exact existing record, including the de
   );
 
   const byId = Object.fromEntries(result.tasks.map((t) => [t.id, t]));
-  assert.equal(byId['menu-concept:concept-1'].href, '/internal/menu-concepts/concept-1#mcr-publication');
+  assert.equal(byId['menu-concept:concept-1'].href, '/internal/menu-concepts/concept-1');
   assert.equal(byId['source-workqueue:24'].href, '/internal/source-workqueue?restaurant=24');
   assert.equal(byId['source-proposal:proposal-1'].href, '/internal/source-triage?restaurant=25');
   assert.equal(

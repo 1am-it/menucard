@@ -345,3 +345,10 @@ test('structural safety net: old internal URLs still exist after the Beheer rebu
   }
 });
 
+test('restaurant selection brings its detail heading into view and keyboard focus', () => {
+  const source = fs.readFileSync(path.join(REPO_ROOT, 'src/components/beheer/RestaurantsPanel.js'), 'utf8');
+  assert.match(source, /detailHeading\.current\.focus\(\)/);
+  assert.match(source, /detailHeading\.current\.scrollIntoView/);
+  assert.match(source, /id="bh-restaurant-detail-title" ref=\{detailHeading\} tabIndex=\{-1\}/);
+});
+

@@ -30,7 +30,14 @@ export default function RestaurantsPanel({ token, active }) {
   const [reloadKey, setReloadKey] = useState(0)
   const [query, setQuery] = useState('')
   const [selectedId, setSelectedId] = useState(null)
+  const detailHeading = useRef(null)
   const loadedAttempt = useRef(-1)
+
+  useEffect(() => {
+    if (!selectedId || !detailHeading.current) return
+    detailHeading.current.focus()
+    detailHeading.current.scrollIntoView({ block: 'start' })
+  }, [selectedId])
 
   const load = useCallback(async () => {
     if (!token) return
@@ -148,7 +155,7 @@ export default function RestaurantsPanel({ token, active }) {
             <article className="bh-detail-card" aria-labelledby="bh-restaurant-detail-title">
               <div className="bh-detail-head">
                 <div>
-                  <h3 id="bh-restaurant-detail-title">{selected.name}</h3>
+                  <h3 id="bh-restaurant-detail-title" ref={detailHeading} tabIndex={-1}>{selected.name}</h3>
                   <p className="bh-muted">{[selected.wijk, selected.domain].filter(Boolean).join(' · ') || null}</p>
                 </div>
                 {selected.openProposal && <span className="bh-chip bh-chip--attention">Open voorstel</span>}

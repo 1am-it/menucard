@@ -237,6 +237,7 @@ export default function SourceWorkqueuePage() {
   const [menuFilter, setMenuFilter] = useState('all')
   const [wijkFilter, setWijkFilter] = useState('all')
   const [query, setQuery] = useState('')
+  const [targetRestaurantId, setTargetRestaurantId] = useState(null)
   const [sortMode, setSortMode] = useState('action_first')
   const [legendOpen, setLegendOpen] = useState(false)
   const [openRow, setOpenRow] = useState(null) // `${view}:${restaurantId}`
@@ -289,6 +290,7 @@ export default function SourceWorkqueuePage() {
       return
     }
     setQuery(row.name)
+    setTargetRestaurantId(String(row.restaurant_id))
     // The table is hidden below 760px in favour of the card view; open the
     // matching one so the exact record is expanded on both layouts.
     const mobileCards = window.matchMedia('(max-width: 760px)').matches
@@ -328,8 +330,8 @@ export default function SourceWorkqueuePage() {
   )
   const counts = (data && data.counts) || { review: 0, source: 0, identity: 0, total: 0 }
   const visible = useMemo(
-    () => sortRows(filterRows(rows, { queue, source: sourceFilter, menu: menuFilter, wijk: wijkFilter, query }), sortMode),
-    [rows, queue, sourceFilter, menuFilter, wijkFilter, query, sortMode]
+    () => sortRows(filterRows(rows, { queue, source: sourceFilter, menu: menuFilter, wijk: wijkFilter, query, restaurantId: targetRestaurantId }), sortMode),
+    [rows, queue, sourceFilter, menuFilter, wijkFilter, query, sortMode, targetRestaurantId]
   )
   const wijken = useMemo(() => wijkOptions(rows), [rows])
   const notInQueue = (data && data.not_in_queue) || []
@@ -414,7 +416,7 @@ export default function SourceWorkqueuePage() {
                   type="search"
                   placeholder="Zoek restaurant of domein"
                   value={query}
-                  onChange={(e) => setQuery(e.target.value)}
+                  onChange={(e) => { setTargetRestaurantId(null); setQuery(e.target.value) }}
                 />
               </div>
               <div className="swq-select">
