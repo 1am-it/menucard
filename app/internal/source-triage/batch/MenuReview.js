@@ -385,6 +385,11 @@ export function MenuConcept({ item, readOnly, busy, onSave }) {
         {latest ? `Laatst opgeslagen: versie ${latest.version}. ` : ''}Een concept wacht op interne controle. Er wordt niets
         gepubliceerd.
       </p>
+      {latest && latest.id && (
+        <p className="bta-muted">
+          <a className="stg-link" href={`/internal/menu-concepts/${latest.id}`}>Opgeslagen concept controleren</a>
+        </p>
+      )}
 
       <ConceptChips safe={safe} concept={concept} excluded={excluded} />
       <BlockerBanner concept={concept} />

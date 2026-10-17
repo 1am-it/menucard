@@ -22,7 +22,8 @@ const DAILY_URL_LIMIT = 25;
 const MAX_ATTEMPTS = 5;
 
 const COPY = {
-  start: 'Analyse starten',
+  start: 'Import starten',
+  safety: 'We halen de website veilig op en maken een intern voorstel. Niets wordt automatisch bevestigd of gepubliceerd.',
   keepOpen: 'Houd dit scherm open. Sluit je het, dan pauzeert de analyse en gaat hij verder zodra je terugkomt.',
   nothingPublished: 'Niets wordt automatisch gepubliceerd.',
   alreadyActive: 'Deze URL staat al in een actieve analysebatch.',
@@ -55,6 +56,22 @@ const ACTION_LABELS = {
   reanalyze: 'Opnieuw analyseren',
   onboarding: 'Naar Onboarding Restaurant',
 };
+
+// Compact visible progress of the whole flow (issue #53).
+const IMPORT_STEPS = ['Importeren', 'Controleren', 'Publiceren'];
+
+/** The recognised import size for a number of pasted lines, in plain
+ * language — staff never choose a technical mode. 1 and 2–{MAX} both run
+ * through the existing batch analysis. More than {MAX} is honestly not
+ * available yet (the bounded city import, CITY-0, is a separate piece of
+ * work) and starts nothing. */
+function importScope(lineCount) {
+  const n = Number.isFinite(lineCount) ? lineCount : 0;
+  if (n <= 0) return { kind: 'empty', text: `Plak één website of maximaal ${MAX_BATCH_URLS} websites, één per regel.` };
+  if (n === 1) return { kind: 'single', text: 'Herkend: 1 website.' };
+  if (n <= MAX_BATCH_URLS) return { kind: 'multiple', text: `Herkend: ${n} websites.` };
+  return { kind: 'too_many', text: `Herkend: ${n} websites. Meer dan ${MAX_BATCH_URLS} tegelijk kan nog niet; er wordt niets gestart. Een grotere stadsimport is een aparte stap die nog niet beschikbaar is.` };
+}
 
 const TERMINAL_KEYS = new Set(['menu_found', 'needs_review', 'no_menu', 'recent', 'robots', 'invalid', 'error', 'confirmed', 'duplicate', 'not_queued']);
 
@@ -286,7 +303,7 @@ function deriveItemView({ item, job, receipt, restaurants, proposals, duplicateO
     }
     return view(menu === 'ready_for_review' ? 'menu_found' : 'needs_review', {
       ...withRestaurant,
-      text: 'Dit restaurant staat nog niet in de catalogus. Een nieuwe aanmelding loopt via Onboarding Restaurant.',
+      text: 'Dit restaurant kan niet betrouwbaar aan een bestaand restaurant worden gekoppeld. Een nieuwe aanmelding loopt via Onboarding Restaurant.',
       actions: ['onboarding'],
     });
   }
@@ -355,6 +372,8 @@ module.exports = {
   COPY,
   STATUSES,
   ACTION_LABELS,
+  IMPORT_STEPS,
+  importScope,
   splitLines,
   canonicalLine,
   precheckLines,

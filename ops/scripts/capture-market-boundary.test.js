@@ -235,10 +235,7 @@ test(
       (() => {
         // canonicalizeGeoJson expects a *raw* GDAL-shaped file path; feed it
         // the same fake output again to recompute independently.
-        const tmp = path.join(dir, 'recheck.geojson');
-        fakeGdalRunner({ outDir: dir });
-        fs.renameSync(path.join(dir, 'extracted.geojson'), tmp);
-        return tmp;
+        return fakeGdalRunner({ outDir: dir });
       })(),
       config.SERIALIZATION_RULE.coordinatePrecisionDecimals
     );

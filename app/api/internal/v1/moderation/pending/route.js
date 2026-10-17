@@ -7,6 +7,7 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/src/lib/supabaseAdmin'
 import { authenticateInternalRequest } from '@/src/lib/internalAuth'
+import restaurantsData from '@/data/restaurants.json'
 
 const LIST_LIMIT = 50
 
@@ -51,6 +52,9 @@ export async function GET(request) {
       current.find(
         (c) => c.restaurant_id === p.restaurant_id && c.field_name === p.field_name && c.field_ref === p.field_ref
       ) || null,
+    // Display-only name from the same static restaurant list the claims
+    // route already uses; never a second source of truth for the record.
+    restaurantName: restaurantsData[p.restaurant_id]?.name || null,
   }))
 
   return NextResponse.json({ items })

@@ -17,13 +17,12 @@ const CSS = read('app/globals.css');
 const BTA_CSS = CSS.slice(CSS.indexOf('/* ── Batchanalyse (BE-25 fase 2)'));
 
 test('page: visible names, breadcrumb (desktop and mobile) and the fixed v1 copy', () => {
-  assert.match(PAGE, /<h1 className="di-title">Batchanalyse<\/h1>/);
-  assert.match(PAGE, /Werkvoorraad<\/span>/);
-  assert.match(PAGE, /href="\/internal\/source-triage"/);
+  assert.match(PAGE, /<h1 className="di-title">Websites importeren<\/h1>/);
+  assert.match(PAGE, /href="\/internal\/nieuwe-import"/);
   assert.match(PAGE, /←\{' '\}/);
-  assert.match(PAGE, /Bronnen beoordelen/);
+  assert.match(PAGE, /COPY\.safety/);
+  assert.match(PAGE, /IMPORT_STEPS\.map/);
   assert.match(PAGE, /COPY\.keepOpen/);
-  assert.match(PAGE, /COPY\.nothingPublished/);
   assert.match(PAGE, /COPY\.colleaguePaused/);
   assert.match(PAGE, /Bron bevestigen voor \{restaurantName\}\?/);
   assert.match(PAGE, /Er wordt niets\s+gepubliceerd\./);

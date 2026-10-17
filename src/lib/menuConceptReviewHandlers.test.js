@@ -121,23 +121,25 @@ function fakeSupabase(tables) {
   };
 }
 
-function world({ snapshots, reviews = [], proposals, jobs } = {}) {
+function world({ snapshots, reviews = [], proposals, jobs, exports = [] } = {}) {
   return fakeSupabase({
     menu_snapshot_proposals: snapshots || [snapshotRow(1, 1, content({ resolved: true }))],
     menu_snapshot_reviews: reviews,
     url_intake_analysis_receipts: [{ id: 'r1', canonical_source_url: SITE, fetched_at: '2026-10-12T09:00:00Z', menus: RECEIPT_MENUS }],
     source_triage_proposals: proposals || [{ id: 'p1', restaurant_id: 'bistro', kind: 'add_candidate', proposed_url: MENU_URL, current_url: null, status: 'accepted', decided_at: '2026-10-12T09:30:00Z' }],
     restaurant_source_analysis_jobs: jobs || [{ id: 'j1', canonical_source_url: SITE, status: 'succeeded', error_reason: null, created_at: '2026-10-12T09:00:00Z' }],
+    menu_snapshot_exports: exports,
   });
 }
 
-function handlersFor(supabase, { userId = REVIEWER, roles = [{ role: 'internal' }] } = {}) {
+function handlersFor(supabase, { userId = REVIEWER, roles = [{ role: 'internal' }], github = null } = {}) {
   return createMenuConceptReviewHandlers({
     authenticate: async () => ({ ok: true, userId, roles }),
     getSupabase: () => supabase,
     restaurants: RESTAURANTS,
     liveMenus: LIVE,
     computeMenuHash: hash,
+    github,
     now: () => new Date('2026-10-13T10:00:00Z'),
   });
 }
@@ -190,6 +192,62 @@ test('list: the latest version per concept, waiting first, with restaurant, sour
   assert.equal(bistro.createdBySelf, true);
   assert.equal(bistro.blockerCount, 0);
   assert.equal(bistro.attentionCount, 2); // the soup's price change and the decided disappeared mousse stay visible
+  assert.equal(inserts(supabase).length + rpcs(supabase).length, 0);
+});
+
+test('list: approved readiness uses every real gate; a missing GitHub integration is not publication-ready', async () => {
+  const supabase = world({
+    snapshots: [snapshotRow(1, 1, content({ resolved: true }))],
+    reviews: [{ id: 1, snapshot_id: 1, decision: 'approved_internal', reason: null, decided_at: '2026-10-12T12:00:00Z' }],
+  });
+  const ready = await handlersFor(supabase, { github: {} }).list(request());
+  assert.equal(ready.status, 200);
+  assert.equal(ready.body.items[0].publication.state, 'ready');
+  assert.equal(ready.body.items[0].publication.label, 'Klaar voor publicatie');
+  assert.equal(ready.body.items[0].publication.canCreateReviewPr, true);
+  assert.ok(ready.body.items[0].publication.checks.every((check) => check.ok));
+
+  const noIntegration = await handlersFor(supabase).list(request());
+  assert.equal(noIntegration.body.items[0].publication.state, 'blocked');
+  assert.ok(noIntegration.body.items[0].publication.reasons.includes('GitHub-koppeling beschikbaar'));
+  assert.equal(noIntegration.body.items[0].publication.canCreateReviewPr, false);
+});
+
+test('detail: readiness is returned with the exact publication controls; no write on navigation', async () => {
+  const supabase = world({
+    snapshots: [snapshotRow(1, 1, content({ resolved: true }))],
+    reviews: [{ id: 1, snapshot_id: 1, decision: 'approved_internal', reason: null, decided_at: '2026-10-12T12:00:00Z' }],
+  });
+  const res = await handlersFor(supabase, { github: {} }).detail(request(), '1');
+  assert.equal(res.status, 200);
+  assert.equal(res.body.publication.state, 'ready');
+  assert.equal(res.body.publication.label, 'Klaar voor publicatie');
+  assert.equal(res.body.export, null);
+  assert.equal(supabase.calls.filter((call) => call.update || call.insert || call.rpc).length, 0);
+});
+
+test('list: an approved concept carries its latest stored export status, read-only; no export stays null', async () => {
+  const supabase = world({
+    snapshots: [
+      snapshotRow(1, 1, content({ resolved: true })),
+      { ...snapshotRow(2, 1, content({ resolved: true })), restaurant_id: 'andere', menu_context: 'andere-menukaart' },
+    ],
+    reviews: [{ id: 1, snapshot_id: 1, decision: 'approved_internal', reason: null, decided_at: '2026-10-12T12:00:00Z' }],
+    exports: [
+      { id: 9, snapshot_id: 1, status: 'opened', pr_url: 'https://github.com/1am-it/menucard/pull/9', created_at: '2026-10-13T09:00:00Z' },
+      { id: 8, snapshot_id: 1, status: 'merged', pr_url: 'https://github.com/1am-it/menucard/pull/8', created_at: '2026-10-12T09:00:00Z' },
+    ],
+  });
+  const res = await handlersFor(supabase).list(request());
+  assert.equal(res.status, 200);
+  const byId = Object.fromEntries(res.body.items.map((i) => [i.id, i]));
+  assert.deepEqual(byId[1].export, {
+    id: 9,
+    status: 'opened',
+    prUrl: 'https://github.com/1am-it/menucard/pull/9',
+    createdAt: '2026-10-13T09:00:00Z',
+  });
+  assert.equal(byId[2].export, null);
   assert.equal(inserts(supabase).length + rpcs(supabase).length, 0);
 });
 
@@ -282,6 +340,19 @@ test('correction: content a human rejected before does not come back as a new ve
   assert.equal(res.status, 409);
   assert.equal(res.body.reason, 'previously_rejected');
   assert.equal(inserts(supabase).length, 0);
+});
+
+test('approve: the current rejected version cannot be approved again unchanged', async () => {
+  const supabase = world({
+    snapshots: [snapshotRow(1, 1, content({ resolved: true }))],
+    reviews: [{ id: 1, snapshot_id: 1, reviewer_id: MAKER, decision: 'rejected', reason: 'content_mismatch', decided_at: '2026-10-12T12:00:00Z' }],
+  });
+  const detail = await handlersFor(supabase).detail(request(), '1');
+  assert.equal(detail.body.concept.rejectedBefore, true);
+  const result = await handlersFor(supabase).decide(request({ expected_version: 1, decision: 'approved_internal' }), '1');
+  assert.equal(result.status, 409);
+  assert.equal(result.body.reason, 'previously_rejected');
+  assert.equal(rpcs(supabase).length, 0);
 });
 
 test('approve: refused with blockers in the stored version, for a stale version, or when the public menu was rejected before', async () => {

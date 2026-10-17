@@ -19,6 +19,7 @@ const {
   INTERNAL_MODULES,
   resolveVisibleModules,
   groupModulesByPlacement,
+  isCurrentModule,
 } = require('./internalNav');
 
 const REPO_ROOT = path.join(__dirname, '..', '..');
@@ -75,15 +76,14 @@ test('hasAnyKnownRole: true for any of internal/editor/owner, false for zero row
 
 // ─── resolveVisibleModules — the route/role matrix, enforced in code ───
 
-test('resolveVisibleModules: an internal-only account sees exactly Dekkingsoverzicht, Onboarding Restaurant, Beheer, Nieuwe aanleveringen, Bronwerkvoorraad, Bronnen beoordelen, and Profielconcepten — not Beoordelen (editor-only)', () => {
-  const modules = resolveVisibleModules([{ role: 'internal' }]);
-  const ids = modules.map((m) => m.id);
-  assert.deepEqual(ids.sort(), ['coverage', 'import-inbox', 'manage', 'menu-concepts', 'onboarding-restaurant', 'profile-drafts', 'source-triage', 'source-workqueue']);
+test('resolveVisibleModules: an internal-only account sees the primary, work, Beheer and contextual modules — not Beoordelen (editor-only)', () => {
+  const ids = resolveVisibleModules([{ role: 'internal' }]).map((m) => m.id);
+  assert.deepEqual(ids.sort(), ['coverage', 'import-inbox', 'manage', 'menu-concepts', 'new-import', 'onboarding-restaurant', 'profile-drafts', 'source-triage', 'source-workqueue', 'workqueue']);
 });
 
-test('resolveVisibleModules: an editor-only account sees exactly Beoordelen (moderation) — not any internal-only module', () => {
-  const modules = resolveVisibleModules([{ role: 'editor' }]);
-  assert.deepEqual(modules.map((m) => m.id), ['moderation']);
+test('resolveVisibleModules: an editor-only account sees Werkvoorraad (with Beoordelen) and Beheer — no internal-only module, no Nieuwe import', () => {
+  const ids = resolveVisibleModules([{ role: 'editor' }]).map((m) => m.id);
+  assert.deepEqual(ids, ['workqueue', 'manage', 'moderation']);
 });
 
 test('resolveVisibleModules: an owner-only account sees zero modules — no invented destination', () => {
@@ -96,66 +96,112 @@ test('resolveVisibleModules: an account with no roles at all sees zero modules',
 });
 
 test('resolveVisibleModules: a multi-role (internal + editor) account sees the full union, not just one role\'s subset', () => {
-  const modules = resolveVisibleModules([{ role: 'internal' }, { role: 'editor' }]);
-  const ids = modules.map((m) => m.id).sort();
-  assert.deepEqual(ids, ['coverage', 'import-inbox', 'manage', 'menu-concepts', 'moderation', 'onboarding-restaurant', 'profile-drafts', 'source-triage', 'source-workqueue']);
+  const ids = resolveVisibleModules([{ role: 'internal' }, { role: 'editor' }]).map((m) => m.id).sort();
+  assert.deepEqual(ids, ['coverage', 'import-inbox', 'manage', 'menu-concepts', 'moderation', 'new-import', 'onboarding-restaurant', 'profile-drafts', 'source-triage', 'source-workqueue', 'workqueue']);
 });
 
-test('resolveVisibleModules: every entry links to an existing internal route with a non-empty label and a recognized required role', () => {
+test('resolveVisibleModules: every entry links to an existing internal route with a non-empty label, a recognized required role and placement', () => {
   for (const m of INTERNAL_MODULES) {
     assert.match(m.href, /^\/internal(\/|$)/);
     assert.ok(m.label.length > 0);
-    assert.ok(['internal', 'editor'].includes(m.requiredRole));
-    assert.ok(['primary', 'workqueue'].includes(m.placement), `${m.id} must have a recognized placement`);
-  }
-});
-
-test('resolveVisibleModules: onboarding-menu is no longer a nav module at all — reachable only from within the Onboarding Restaurant page\'s own content, not the shared nav, for any role', () => {
-  const internalIds = resolveVisibleModules([{ role: 'internal' }]).map((m) => m.id);
-  const editorIds = resolveVisibleModules([{ role: 'editor' }]).map((m) => m.id);
-  assert.ok(!internalIds.includes('onboarding-menu'));
-  assert.ok(!editorIds.includes('onboarding-menu'));
-  assert.ok(!INTERNAL_MODULES.some((m) => m.id === 'onboarding-menu'));
-});
-
-// ─── groupModulesByPlacement — the primary/Werkvoorraad split ──────────
-
-test('groupModulesByPlacement: splits Dekkingsoverzicht and Onboarding Restaurant into primary, everything else into workqueue', () => {
-  const modules = resolveVisibleModules([{ role: 'internal' }, { role: 'editor' }]);
-  const { primary, workqueue } = groupModulesByPlacement(modules);
-  assert.deepEqual(primary.map((m) => m.id), ['coverage', 'onboarding-restaurant']);
-  assert.deepEqual(workqueue.map((m) => m.id), ['manage', 'import-inbox', 'source-workqueue', 'source-triage', 'menu-concepts', 'profile-drafts', 'moderation']);
-});
-
-test('groupModulesByPlacement: an internal-only account never sees Beoordelen in the workqueue group — role boundaries hold through the grouping step too', () => {
-  const modules = resolveVisibleModules([{ role: 'internal' }]);
-  const { workqueue } = groupModulesByPlacement(modules);
-  assert.ok(!workqueue.some((m) => m.id === 'moderation'), 'an internal-only account must never see the editor-only Beoordelen entry');
-});
-
-test('groupModulesByPlacement: both groups are empty for a role with no visible modules — never a default/fallback placement', () => {
-  assert.deepEqual(groupModulesByPlacement([]), { primary: [], workqueue: [] });
-});
-
-test('groupModulesByPlacement: never throws and returns empty groups for non-array input', () => {
-  assert.deepEqual(groupModulesByPlacement(null), { primary: [], workqueue: [] });
-  assert.deepEqual(groupModulesByPlacement(undefined), { primary: [], workqueue: [] });
-});
-
-test('groupModulesByPlacement: every workqueue module carries a non-empty subtitle for the Werkvoorraad panel', () => {
-  const { workqueue } = groupModulesByPlacement(INTERNAL_MODULES);
-  for (const m of workqueue) {
+    assert.ok(['internal', 'editor', 'staff'].includes(m.requiredRole));
+    assert.ok(['primary', 'work', 'beheer', 'contextual'].includes(m.placement), `${m.id} must have a recognized placement`);
     assert.ok(typeof m.subtitle === 'string' && m.subtitle.length > 0, `${m.id} must have a subtitle`);
   }
 });
 
+test('resolveVisibleModules: onboarding-menu is no nav module at all', () => {
+  assert.ok(!INTERNAL_MODULES.some((m) => m.id === 'onboarding-menu'));
+});
+
+// ─── groupModulesByPlacement — Werkvoorraad | Nieuwe import | Beheer ───
+
+test('primary navigation is exactly Werkvoorraad, Nieuwe import, Beheer — in that order, with the decided routes', () => {
+  const { primary } = groupModulesByPlacement(resolveVisibleModules([{ role: 'internal' }]));
+  assert.deepEqual(primary.map((m) => [m.label, m.href]), [
+    ['Werkvoorraad', '/internal/workqueue'],
+    ['Nieuwe import', '/internal/nieuwe-import'],
+    ['Beheer', '/internal'],
+  ]);
+});
+
+test('Onboarding Restaurant is contextual: never in the primary navigation and never a Beheer card', () => {
+  const grouped = groupModulesByPlacement(resolveVisibleModules([{ role: 'internal' }, { role: 'editor' }]));
+  for (const list of [grouped.primary, grouped.beheer]) {
+    assert.ok(!list.some((m) => m.id === 'onboarding-restaurant'));
+  }
+  const entry = INTERNAL_MODULES.find((m) => m.id === 'onboarding-restaurant');
+  assert.equal(entry.placement, 'contextual');
+  assert.equal(entry.href, '/internal/onboarding-restaurant', 'the existing route stays');
+});
+
+test('Werkvoorraad lists the daily action queues with their existing destinations; Nieuwe import is not duplicated there', () => {
+  const { work } = groupModulesByPlacement(resolveVisibleModules([{ role: 'internal' }, { role: 'editor' }]));
+  assert.deepEqual(work.map((m) => [m.label, m.href]), [
+    ['Bronwerkvoorraad', '/internal/source-workqueue'],
+    ['Nieuwe aanleveringen', '/internal/import-inbox'],
+    ['Bronnen beoordelen', '/internal/source-triage'],
+    ['Menuconcepten beoordelen', '/internal/menu-concepts'],
+    ['Profielconcepten', '/internal/profile-drafts'],
+    ['Beoordelen', '/internal/moderation'],
+  ]);
+  assert.ok(!work.some((m) => m.id === 'new-import'));
+});
+
+test('Werkvoorraad is role-aware: internal-only never sees Beoordelen; editor-only sees only Beoordelen', () => {
+  const internal = groupModulesByPlacement(resolveVisibleModules([{ role: 'internal' }])).work.map((m) => m.id);
+  assert.ok(!internal.includes('moderation'));
+  const editor = groupModulesByPlacement(resolveVisibleModules([{ role: 'editor' }])).work.map((m) => m.id);
+  assert.deepEqual(editor, ['moderation']);
+});
+
+test('Beheer lists only overview, history and reference modules — no daily review queue', () => {
+  const { beheer } = groupModulesByPlacement(resolveVisibleModules([{ role: 'internal' }, { role: 'editor' }]));
+  assert.deepEqual(beheer.map((m) => m.id), ['coverage']);
+  const editorOnly = groupModulesByPlacement(resolveVisibleModules([{ role: 'editor' }])).beheer;
+  assert.deepEqual(editorOnly, []);
+});
+
+test('groupModulesByPlacement: an internal-only account never sees Beoordelen — role boundaries hold through the grouping step too', () => {
+  const { primary, work, beheer } = groupModulesByPlacement(resolveVisibleModules([{ role: 'internal' }]));
+  assert.ok(![...primary, ...work, ...beheer].some((m) => m.id === 'moderation'));
+});
+
+test('groupModulesByPlacement: an editor-only account gets Werkvoorraad and Beheer as primary items', () => {
+  const { primary } = groupModulesByPlacement(resolveVisibleModules([{ role: 'editor' }]));
+  assert.deepEqual(primary.map((m) => m.id), ['workqueue', 'manage']);
+});
+
+test('groupModulesByPlacement: empty or non-array input yields empty groups', () => {
+  assert.deepEqual(groupModulesByPlacement([]), { primary: [], work: [], beheer: [] });
+  assert.deepEqual(groupModulesByPlacement(null), { primary: [], work: [], beheer: [] });
+  assert.deepEqual(groupModulesByPlacement(undefined), { primary: [], work: [], beheer: [] });
+});
+
+test('isCurrentModule: old routes keep orienting on the right primary item; the most specific item wins', () => {
+  const byId = (id) => INTERNAL_MODULES.find((m) => m.id === id);
+  const primary = INTERNAL_MODULES.filter((m) => m.placement === 'primary');
+  const current = (pathname) => primary.filter((m) => isCurrentModule(pathname, m, primary)).map((m) => m.id);
+  assert.deepEqual(current('/internal'), ['manage']);
+  assert.deepEqual(current('/internal/workqueue'), ['workqueue']);
+  assert.deepEqual(current('/internal/source-workqueue'), ['workqueue']);
+  assert.deepEqual(current('/internal/moderation'), ['workqueue']);
+  assert.deepEqual(current('/internal/source-triage'), ['workqueue']);
+  assert.deepEqual(current('/internal/onboarding-restaurant'), ['workqueue']);
+  assert.deepEqual(current('/internal/nieuwe-import'), ['new-import']);
+  assert.deepEqual(current('/internal/source-triage/batch'), ['new-import']);
+  assert.deepEqual(current('/internal/coverage'), ['manage']);
+  assert.deepEqual(current('/internal/login'), []);
+  assert.equal(isCurrentModule(null, byId('manage'), primary), false);
+});
+
 // ─── Structural safety net: /internal home page ────────────────────────
 
-test('structural safety net: /internal exists and gates on a signed-in session only, matching every other internal page\'s pattern', () => {
+test('structural safety net: /internal exists and gates on the signed-in session, then on the internal role for its data', () => {
   const source = fs.readFileSync(INTERNAL_HOME_PAGE_PATH, 'utf8');
-  assert.match(source, /getSupabaseBrowser\(\)\.auth\.getSession\(\)/, 'must use the same session-check pattern as every other internal page');
+  assert.match(source, /getSupabaseBrowser\(\)[\s\S]{0,80}\.auth\.getSession\(\)/, 'must use the same session-check pattern as every other internal page');
   assert.match(source, /router\.replace\(['"]\/internal\/login['"]\)/, 'an unauthenticated visitor must be redirected to /internal/login');
-  assert.doesNotMatch(source, /isInternalOnly|isEditorRole/, 'the page itself must not gate on a specific role — /internal is session-gated only, per PLATFORM-11\'s decided matrix row');
+  assert.match(source, /isInternalOnly/, 'issue #53 round 2: only internal staff may receive the administration sections');
 });
 
 test('structural safety net: /internal resolves roles via the shared, read-only /api/internal/v1/me endpoint — no direct Supabase staff_roles query from the browser', () => {
@@ -176,7 +222,7 @@ test('structural safety net: /internal passes its own already-resolved roles int
 test('structural safety net: /internal shows an explicit "no internal access" status with sign out as its only action when no usable role is present', () => {
   const source = fs.readFileSync(INTERNAL_HOME_PAGE_PATH, 'utf8');
   assert.match(source, /hasAnyKnownRole/, 'must use the shared, tested role classifier — never a separately re-implemented check');
-  assert.match(source, /no internal access/i);
+  assert.match(source, /Geen interne toegang voor dit account/);
   assert.match(source, /signOut/);
 });
 
@@ -190,13 +236,14 @@ test('structural safety net: /internal renders InternalNav only when the no-acce
   assert.match(source, /showNoAccessStatus = noAccess && !error/);
 });
 
-test('structural safety net: /internal never invents an owner destination — the owner section is worded as not-yet-available, not a link', () => {
+test('structural safety net: an editor-only account gets no internal-only Beheer sections, only the Werkvoorraad entry point', () => {
   const source = fs.readFileSync(INTERNAL_HOME_PAGE_PATH, 'utf8');
-  assert.match(source, /isOwnerRole/);
-  const ownerBlockMatch = source.match(/\{showOwnerSection && \([\s\S]*?\n {10}\)\}/);
-  assert.ok(ownerBlockMatch, 'expected to find the conditionally-rendered owner section block');
-  assert.doesNotMatch(ownerBlockMatch[0], /<a\s/, 'the owner section must never render as a clickable link to an invented page');
-  assert.match(ownerBlockMatch[0], /not.*yet|nothing.*yet/i, 'must plainly say there is nothing to open yet, never imply a real destination');
+  assert.match(source, /Geen interne beheerinhoud voor dit account/);
+  assert.match(source, /href="\/internal\/workqueue"/);
+  // The admin sections are gated on the internal role, never merely on being
+  // signed in or on the editor role.
+  assert.match(source, /\{canManage && !error && \(/);
+  assert.match(source, /const canManage = isInternalOnly\(roles\)/);
 });
 
 // ─── Structural safety net: decided login redirect ─────────────────────
@@ -249,75 +296,50 @@ test('structural safety net: InternalNav accepts an optional roles prop and skip
   assert.match(source, /if \(rolesProp !== undefined\) return/, 'must skip its own fetch when the caller already provided roles');
 });
 
-// ─── Structural safety net: the Werkvoorraad disclosure (BE-20) ────────
+// ─── Structural safety net: the compact three-item navigation (#53) ────
 
-test('structural safety net: Werkvoorraad reuses groupModulesByPlacement and renders both the top-level primary links and the grouped items — never a second, separately re-implemented module list', () => {
+test('structural safety net: InternalNav renders the primary items as plain links from the shared module list — no disclosure panel', () => {
   const source = fs.readFileSync(NAV_COMPONENT_PATH, 'utf8');
   assert.match(source, /groupModulesByPlacement/);
   assert.match(source, /primary\.map/);
-  assert.match(source, /workqueue\.map/);
+  assert.match(source, /className="internal-nav-link"[\s\S]{0,80}aria-current=\{isCurrentModule\(pathname, m, primary\)/);
+  assert.doesNotMatch(source, /<details|<summary|role="menu"/);
 });
 
-test('structural safety net: Werkvoorraad is a native <details>/<summary> disclosure — real keyboard/click toggling for free, never a hover-only or purely CSS-driven menu', () => {
-  const source = fs.readFileSync(NAV_COMPONENT_PATH, 'utf8');
-  assert.match(source, /<details[^>]*className="internal-nav-workqueue"/);
-  assert.match(source, /<summary[^>]*className="internal-nav-workqueue-trigger"/);
-  assert.doesNotMatch(source, /:hover\s*\{[^}]*display/, 'must never rely on a CSS :hover rule to open the menu');
-  const cssSource = fs.readFileSync(GLOBALS_CSS_PATH, 'utf8');
-  const workqueueCss = cssSource.slice(cssSource.indexOf('.internal-nav-workqueue'));
-  assert.doesNotMatch(workqueueCss.slice(0, 3000), /:hover[^{]*\{[^}]*(display|opacity|visibility)/, 'the Werkvoorraad panel must never open on hover alone');
-});
-
-test('structural safety net: Werkvoorraad closes on Escape and restores focus to its own trigger — never leaves focus stranded on a hidden panel', () => {
-  const source = fs.readFileSync(NAV_COMPONENT_PATH, 'utf8');
-  const fnStart = source.indexOf('function handleKeyDown')
-  const fnBody = source.slice(fnStart, source.indexOf('\n    }', fnStart))
-  assert.match(fnBody, /event\.key !== 'Escape'/)
-  assert.match(fnBody, /details\.open = false/)
-  assert.match(fnBody, /summary\.focus\(\)/)
-});
-
-test('structural safety net: Werkvoorraad closes on an outside click — checks containment before closing, never closes on a click inside its own panel', () => {
-  const source = fs.readFileSync(NAV_COMPONENT_PATH, 'utf8');
-  const fnStart = source.indexOf('function handleClickOutside')
-  const fnBody = source.slice(fnStart, source.indexOf('\n    }', fnStart))
-  assert.match(fnBody, /!details\.contains\(event\.target\)/)
-});
-
-test('structural safety net: Werkvoorraad closes on every route change, so a client-side navigation from inside the panel never leaves it stuck open', () => {
-  const source = fs.readFileSync(NAV_COMPONENT_PATH, 'utf8');
-  assert.match(source, /workqueueRef\.current\.open = false/);
-  assert.match(source, /\}, \[pathname\]\)/);
-});
-
-test('structural safety net: every workqueue item marks the active route with aria-current, matching the existing primary-link pattern exactly', () => {
-  const source = fs.readFileSync(NAV_COMPONENT_PATH, 'utf8');
-  // BE-25: a subpage (Bronnen beoordelen / Batchanalyse) keeps its parent
-  // item current; primary links and workqueue items share one helper.
-  assert.match(source, /className="internal-nav-workqueue-item"[\s\S]{0,120}aria-current=\{isCurrent\(pathname, m\.href\) \? 'page' : undefined\}/);
-  assert.match(source, /className="internal-nav-link"[\s\S]{0,60}aria-current=\{isCurrent\(pathname, m\.href\) \? 'page' : undefined\}/);
-  assert.match(source, /return pathname === href \|\| \(typeof pathname === 'string' && pathname\.startsWith\(`\$\{href\}\/`\)\)/);
-});
-
-test('structural safety net: no photo, illustration, or new image asset — the wordmark and workqueue icons are inline SVG only', () => {
+test('structural safety net: no photo or image asset in the nav — inline SVG wordmark only', () => {
   const source = fs.readFileSync(NAV_COMPONENT_PATH, 'utf8');
   assert.doesNotMatch(source, /<img\b|next\/image|\.jpg|\.png|\.webp/i);
-  assert.match(source, /<svg/);
 });
 
-test('structural safety net: every new interactive element gets a real, visible keyboard-focus style, not only a browser default', () => {
+test('structural safety net: nav links keep a visible keyboard-focus style, and the nav wraps instead of scrolling on narrow screens', () => {
   const cssSource = fs.readFileSync(GLOBALS_CSS_PATH, 'utf8');
-  assert.match(cssSource, /internal-nav-workqueue-trigger:focus-visible/);
-  assert.match(cssSource, /internal-nav-workqueue-item:focus-visible/);
+  assert.match(cssSource, /internal-nav-link:focus-visible/);
+  assert.match(cssSource, /\.internal-nav \{[^}]*flex-wrap: wrap/);
+  assert.doesNotMatch(cssSource, /internal-nav-workqueue/);
 });
 
-test('structural safety net: the Werkvoorraad panel never causes page-level horizontal overflow on a narrow viewport — constrained width plus a static, full-width fallback below 420px', () => {
-  const cssSource = fs.readFileSync(GLOBALS_CSS_PATH, 'utf8');
-  assert.match(cssSource, /max-width:\s*min\(320px,\s*calc\(100vw - 32px\)\)/);
-  const narrowBlocks = cssSource.match(/@media \(max-width: 420px\) \{[\s\S]*?\n\}/g) || [];
-  const workqueueNarrowBlock = narrowBlocks.find((block) => block.includes('.internal-nav-workqueue-panel'));
-  assert.ok(workqueueNarrowBlock, 'expected a max-width: 420px media query block covering .internal-nav-workqueue-panel');
-  assert.match(workqueueNarrowBlock, /\.internal-nav-workqueue-panel\s*\{[^}]*position:\s*static/);
+test('structural safety net: /internal/workqueue shows concrete tasks (issue #53), is session-gated and uses the shared nav with its own roles', () => {
+  const source = fs.readFileSync(path.join(REPO_ROOT, 'app/internal/workqueue/page.js'), 'utf8');
+  assert.match(source, /buildWorkqueue\(/);
+  assert.match(source, /resolveWorkqueueProviders\(/);
+  // The first approved round explicitly replaces the module cards.
+  assert.doesNotMatch(source, /groupModulesByPlacement|resolveVisibleModules/);
+  assert.match(source, /router\.replace\(['"]\/internal\/login['"]\)/);
+  assert.match(source, /\/api\/internal\/v1\/me/);
+  assert.match(source, /<InternalNav\s+accessToken=\{session\.access_token\}\s+roles=\{roles\}\s*\/>/);
+  assert.doesNotMatch(source, /\.from\(['"]/);
+});
+
+test('structural safety net: Beheer renders its four approved sections and /internal/nieuwe-import still fronts the existing batch page', () => {
+  const home = fs.readFileSync(INTERNAL_HOME_PAGE_PATH, 'utf8');
+  assert.match(home, /BeheerNav/);
+  assert.match(home, /OverviewPanel/);
+  assert.match(home, /RestaurantsPanel/);
+  assert.match(home, /ImportHistoryPanel/);
+  assert.match(home, /DecisionsPanel/);
+  assert.doesNotMatch(home, /groupModulesByPlacement|modules\.map\(/, 'no module-card hub remains in Beheer');
+  const importPage = fs.readFileSync(path.join(REPO_ROOT, 'app/internal/nieuwe-import/page.js'), 'utf8');
+  assert.match(importPage, /export \{ default \} from '\.\.\/source-triage\/batch\/page'/);
 });
 
 // ─── Structural safety net: existing pages adopt the shared nav shell,
@@ -410,22 +432,14 @@ test('structural safety net: the theme contract stays as decided — explicit Li
 
 // ─── BE-24 Brontriage ──────────────────────────────────────────────────
 
-test('BE-24/BE-25: Bronnen beoordelen (formerly shown as Brontriage) is one internal-only Werkvoorraad entry right after Bronwerkvoorraad, without a count', () => {
-  const entry = INTERNAL_MODULES.find((m) => m.id === 'source-triage');
-  assert.deepEqual(entry, { id: 'source-triage', label: 'Bronnen beoordelen', href: '/internal/source-triage', requiredRole: 'internal', placement: 'workqueue', subtitle: 'Bronvoorstellen vastleggen en beoordelen' });
-  const ids = INTERNAL_MODULES.map((m) => m.id);
-  assert.equal(ids.indexOf('source-triage'), ids.indexOf('source-workqueue') + 1);
-  assert.equal(ids.filter((id) => id === 'source-triage').length, 1);
-  assert.ok(!('count' in entry) && !('badge' in entry));
-  assert.ok(!resolveVisibleModules([{ role: 'editor' }]).some((m) => m.id === 'source-triage'));
-  assert.ok(!resolveVisibleModules([{ role: 'owner', restaurant_id: '1' }]).some((m) => m.id === 'source-triage'));
-});
-
-test('BE-17 Menuconcepten beoordelen: one internal-only Werkvoorraad entry directly after Bronnen beoordelen, without a count', () => {
-  const ids = INTERNAL_MODULES.map((m) => m.id);
-  const entry = INTERNAL_MODULES.find((m) => m.id === 'menu-concepts');
-  assert.deepEqual(entry, { id: 'menu-concepts', label: 'Menuconcepten beoordelen', href: '/internal/menu-concepts', requiredRole: 'internal', placement: 'workqueue', subtitle: 'Concepten controleren en intern goedkeuren' });
-  assert.equal(ids.indexOf('menu-concepts'), ids.indexOf('source-triage') + 1);
-  assert.ok(!resolveVisibleModules([{ role: 'editor' }]).some((m) => m.id === 'menu-concepts'));
-  assert.ok(!resolveVisibleModules([{ role: 'owner', restaurant_id: '1' }]).some((m) => m.id === 'menu-concepts'));
+test('Bronnen beoordelen and Menuconcepten beoordelen stay internal-only Werkvoorraad entries, without a count', () => {
+  for (const [id, href] of [['source-triage', '/internal/source-triage'], ['menu-concepts', '/internal/menu-concepts']]) {
+    const entry = INTERNAL_MODULES.find((m) => m.id === id);
+    assert.equal(entry.href, href);
+    assert.equal(entry.requiredRole, 'internal');
+    assert.equal(entry.placement, 'work');
+    assert.ok(!('count' in entry) && !('badge' in entry));
+    assert.ok(!resolveVisibleModules([{ role: 'editor' }]).some((m) => m.id === id));
+    assert.ok(!resolveVisibleModules([{ role: 'owner', restaurant_id: '1' }]).some((m) => m.id === id));
+  }
 });

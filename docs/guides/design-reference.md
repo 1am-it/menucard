@@ -421,70 +421,106 @@ Sources:
 - **Live behaviour:** `src/lib/internalNav.js` (config) and
   `src/components/InternalNav.js` (render).
 
-### Implemented today
+### Proposed correction: task flow and administration (issue #53, revision 3)
 
-1. **Onze Menukaarten wordmark** (`WordmarkInline`): the quiet home link
-   to `/internal`.
-2. **Primary items:** `Dekkingsoverzicht` (`/internal/coverage`) and
-   `Onboarding Restaurant` (`/internal/onboarding-restaurant`).
-3. **`Werkvoorraad`:** one accessible `<details>` disclosure. Each entry
-   has a short subtitle; the exact texts live in `INTERNAL_MODULES` in
-   `src/lib/internalNav.js`. The entries are, in order:
-   - `Beheer` → `/internal`;
-   - `Nieuwe aanleveringen` → `/internal/import-inbox`;
-   - `Bronwerkvoorraad` → `/internal/source-workqueue`;
-   - `Brontriage` → `/internal/source-triage` (BE-24, internal-only;
-     directly after `Bronwerkvoorraad`, decided for v1);
-   - `Profielconcepten` → `/internal/profile-drafts`;
-   - `Beoordelen` → `/internal/moderation`, editor only.
-4. **Right side:** the shared theme toggle, then `Sign out`.
-5. **No counts:** no entry shows a count today. BE-23 added
-   `Bronwerkvoorraad` without a badge count and lists "any nav badge
-   count" under "Not built (deliberately)".
+**2026-10-17: Revision 3 approved for implementation; not yet product-accepted.** The
+Product Owner rejected the module-card workqueue and single-link Beheer hub
+as insufficient simplification. The full proposed inventory, screen contract
+and acceptance matrix are in
+`planning/specs/tickets/internal-task-flow-53.md`; its proposed visual reference
+is `docs/mockups/internal-task-flow-v3.html`. Neither a green test run nor
+the earlier proposals v1/v2 approve this revision. Approval is the explicit
+Product Owner decision recorded on issue #53 against commit
+f8b44abd64e8085737e5dad6b225eaf5aef1efc3; the pinned mockup is unchanged.
+
+- Werkvoorraad must show actual pending items with one appropriate next action,
+  opening the exact record without a module-selection or search-again step.
+- Beheer opens Overzicht immediately and provides existing-data views for
+  Restaurants en bronnen, Importhistorie, and Concepten en besluiten. There is
+  no extra landing page consisting of links to those views.
+- Existing role/ownership, history, source checks and review/publication gates
+  remain; one capability inventory prevents losing destinations by omission.
+- User-facing phases are exactly `Importeren -> Controleren -> Publiceren`.
+  An export-eligible approved concept is `Klaar voor publicatie`; `Publiceren`
+  opens its existing publication controls without a separate preparation or
+  extra approval stage. Navigation never writes. `Maak review-PR` remains an
+  explicit guarded action, followed by a human GitHub merge and successful
+  production deployment. Ineligible concepts show their actual blocking reason.
+  Three phases do not mean three clicks or removal of required human decisions.
+- User/role administration has no existing app UI or admin security contract.
+  It is a missing future capability, not a working tab or permission for
+  internal staff to manage accounts. General canonical restaurant CRUD also
+  is not added implicitly by the restaurant/source overview.
+- Build only the approved pinned revision 3; preserve its scope and release gate.
+
+### Current PR candidate (issue #53 — not product-accepted)
+
+The following records the earlier candidate implementation, not the desired
+acceptance contract. It must not override revision 3's proposal after approval.
+
+The primary navigation is exactly three plain links, in this order:
+
+1. **`Werkvoorraad`** → `/internal/workqueue`. The role-aware landing
+   page for the daily, concrete human actions. It lists only actionable
+   queues, each linking to its existing route: `Bronwerkvoorraad`
+   (`/internal/source-workqueue`), `Nieuwe aanleveringen`, `Bronnen
+   beoordelen`, `Menuconcepten beoordelen`, `Profielconcepten`, and — for
+   editors only — `Beoordelen`. `Nieuwe import` is its own primary item
+   and is not repeated as a card. An editor-only account sees just
+   `Beoordelen`. Also keeps orienting for all those routes and the
+   Onboarding routes.
+2. **`Nieuwe import`** → `/internal/nieuwe-import`, page title
+   **`Websites importeren`**. One field for pasted restaurant URLs, one
+   primary action **`Import starten`**. 1 URL and 2–10 URLs both run
+   through the existing safe batch analysis (BE-25); staff never choose a
+   technical mode, the page only states the recognised size ("Herkend: 3
+   websites."). More than 10 starts nothing and says so honestly: the
+   bounded city import (CITY-0, 11–250) is a separate, not yet available
+   backend step. `/internal/source-triage/batch` stays as a working alias.
+   Compact progress: `Importeren → Controleren → Publiceren`. Safety text: "We halen de website veilig op en maken
+   een intern voorstel. Niets wordt automatisch bevestigd of
+   gepubliceerd."
+3. **`Beheer`** → `/internal`. Overview, history, settings and reference
+   data only (today: `Dekkingsoverzicht`); never a daily review queue.
+   Every account with a staff role can open it, and it points editor-only
+   accounts to Werkvoorraad when there is nothing to manage.
+
+Other rules:
+
+- **`Onboarding Restaurant` is not a global navigation choice.** It is
+  offered only as a contextual follow-up on an import result whose
+  website cannot reliably be linked to an existing restaurant. Its route
+  is unchanged.
+- "Interne review" and "Review-PR" stay audit/implementation terms, not
+  the primary user route.
+- The wordmark (`WordmarkInline`) stays the quiet home link; the shared
+  theme toggle and `Sign out` stay on the right.
+- No entry shows a count today.
+- Navigation is a wrapping row (no horizontal scroll on mobile) and uses
+  existing tokens, so light and dark both work.
 
 ### Decided direction (not all built yet)
 
-- Werkvoorraad entries may show counts, but only counts that are
-  provably computed from real, currently open work items. Never show a
-  placeholder or hardcoded number (BE-20 "Visual contract"; BE-20
-  acceptance criterion "Werkvoorraad navigation", tested against a
-  non-zero and a zero-count state).
-- The mockup's 3/2/1 and badge-6 counts are directional only
-  (`docs/mockups/README.md`).
-- `Beoordelen` groups the existing editor-only Moderation module under
-  Werkvoorraad, with route, role gate and data model unchanged (BE-20
-  "Visual contract").
-- `Brontriage` is an internal-only Werkvoorraad entry directly after
-  `Bronwerkvoorraad`, without a count (BE-24 "V1 product decisions").
-- **Visible name `Bronnen beoordelen`** (decided 2026-10-09, BE-25
-  "Design v2 decisions"; not built yet). The visible label `Brontriage`
-  becomes `Bronnen beoordelen`. BE-25's `Batchanalyse` page lives under
-  it, with the breadcrumb `Werkvoorraad / Bronnen beoordelen /
-  Batchanalyse` (mobile: `← Bronnen beoordelen / Batchanalyse`). Routes
-  and technical identifiers stay unchanged for now
-  (`/internal/source-triage`, `source_triage_*`, `sourceTriage*`). Until
-  the label in `src/lib/internalNav.js` changes, the live navigation
-  keeps showing `Brontriage` ("Implemented today" above).
-- In BE-25's Batchanalyse, a high-certainty result offers "Bevestig
+- Navigation entries may later show counts, but only counts provably
+  computed from real, currently open work items (BE-20 "Visual
+  contract"). Never a placeholder or hardcoded number.
+- `Beoordelen` (editor-only Moderation) keeps its route, role gate and
+  data model; it is listed in `Werkvoorraad`.
+- In BE-25's import results, a high-certainty result offers "Bevestig
   bron": a short inline human confirmation that only records an accepted
-  BE-24 source proposal. It publishes nothing and changes no restaurant
-  data. Bulk confirmation ("Bevestig {n} bronnen") covers only
-  high-certainty results and keeps per-result confirmation available.
-  Other `internal` staff see a batch read-only and never see who
-  started it.
-
-### Open product decisions
-
-- **`Beheer` → `/internal`.** BE-20 says `Beheer` is not a separate
-  top-level item. No approved mockup or ticket names its destination. The
-  mapping to `/internal` is the build's own choice, flagged in
-  `src/lib/internalNav.js` for confirmation or correction. Treat it as
-  provisional until the product owner confirms it.
+  BE-24 source proposal. It publishes nothing. Bulk confirmation covers
+  only high-certainty results. Other `internal` staff see a batch
+  read-only and never see who started it.
+- The older `Werkvoorraad` disclosure (with `Brontriage`, `Beheer` and
+  others) and the Dekkingsoverzicht/Onboarding Restaurant primary items
+  from BE-20 are superseded by the three-item structure above.
 
 ### Rules
 
-- A new internal module is a new entry in `internalNav.js`, usually under
-  `Werkvoorraad`. It is never a second navigation or a page-local nav.
+- Map every capability to the shared primary navigation and its actual task
+  or administration view. Register routes/roles in `internalNav.js`; this does
+  not require a module card for every capability. Beheer's secondary view
+  navigation stays within Beheer, never a competing global navigation.
 - Every internal page uses the same order, labels and position. The
   active destination has `aria-current="page"` (decision 014, item 2).
 - Role filtering only hides links. Every route and API keeps its own

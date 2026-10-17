@@ -23,5 +23,9 @@ The active checkpoint belongs in the task's GitHub thread with a verified
 commit and remote status. Do not hardcode a stale BUILDING label here.
 Check actual workflow status; no implicit restart from a read-only monitor.
 
+For the prepared #53 developer takeover, continue from
+`checkpoints/issue-53-handoff.md` in this directory. It is a handoff, not proof
+that DeepSeek has started or that the approved UI is complete.
+
 No automatic package refresh, model switch, credential change, new workflow,
 production action or export-PR creation by this startup procedure.

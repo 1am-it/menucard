@@ -237,10 +237,13 @@ export default function SourceWorkqueuePage() {
   const [menuFilter, setMenuFilter] = useState('all')
   const [wijkFilter, setWijkFilter] = useState('all')
   const [query, setQuery] = useState('')
+  const [targetRestaurantId, setTargetRestaurantId] = useState(null)
   const [sortMode, setSortMode] = useState('action_first')
   const [legendOpen, setLegendOpen] = useState(false)
   const [openRow, setOpenRow] = useState(null) // `${view}:${restaurantId}`
+  const [deepLinkNotice, setDeepLinkNotice] = useState(null)
   const actionRefs = useRef({})
+  const deepLinkApplied = useRef(false)
 
   useEffect(() => {
     const supabase = getSupabaseBrowser()
@@ -273,6 +276,41 @@ export default function SourceWorkqueuePage() {
     if (session) load(session.access_token)
   }, [session, load])
 
+  // Issue #53 deep-link adapter: Werkvoorraad opens one exact restaurant.
+  // `?restaurant=<id>` narrows the list to that row and expands its existing
+  // action panel; it never starts an action by itself.
+  useEffect(() => {
+    if (!data || deepLinkApplied.current) return
+    deepLinkApplied.current = true
+    const restaurantId = new URLSearchParams(window.location.search).get('restaurant')
+    if (!restaurantId) return
+    const row = ((data.rows) || []).find((r) => String(r.restaurant_id) === restaurantId)
+    if (!row) {
+      setDeepLinkNotice('Dit restaurant staat niet meer in de bronwerkvoorraad.')
+      return
+    }
+    setQuery(row.name)
+    setTargetRestaurantId(String(row.restaurant_id))
+    // The table is hidden below 760px in favour of the card view; open the
+    // matching one so the exact record is expanded on both layouts.
+    const mobileCards = window.matchMedia('(max-width: 760px)').matches
+    setOpenRow(`${mobileCards ? 'c' : 't'}:${row.restaurant_id}`)
+  }, [data])
+
+  // Bring the opened panel into view. Both the table and the mobile-card view
+  // render the same open row; scroll whichever one is actually visible.
+  useEffect(() => {
+    if (!openRow) return
+    const restaurantId = openRow.slice(2)
+    for (const prefix of ['t', 'c']) {
+      const el = document.getElementById(`swq-panel-${prefix}-${restaurantId}`)
+      if (el && el.offsetParent !== null) {
+        el.scrollIntoView({ block: 'center' })
+        break
+      }
+    }
+  }, [openRow])
+
   const rows = useMemo(
     () =>
       ((data && data.rows) || []).map((r) => ({
@@ -292,8 +330,8 @@ export default function SourceWorkqueuePage() {
   )
   const counts = (data && data.counts) || { review: 0, source: 0, identity: 0, total: 0 }
   const visible = useMemo(
-    () => sortRows(filterRows(rows, { queue, source: sourceFilter, menu: menuFilter, wijk: wijkFilter, query }), sortMode),
-    [rows, queue, sourceFilter, menuFilter, wijkFilter, query, sortMode]
+    () => sortRows(filterRows(rows, { queue, source: sourceFilter, menu: menuFilter, wijk: wijkFilter, query, restaurantId: targetRestaurantId }), sortMode),
+    [rows, queue, sourceFilter, menuFilter, wijkFilter, query, sortMode, targetRestaurantId]
   )
   const wijken = useMemo(() => wijkOptions(rows), [rows])
   const notInQueue = (data && data.not_in_queue) || []
@@ -340,6 +378,11 @@ export default function SourceWorkqueuePage() {
             {error}
           </div>
         )}
+        {deepLinkNotice && (
+          <div className="di-banner di-banner-neutral" role="status">
+            {deepLinkNotice}
+          </div>
+        )}
         {loading && <p className="swq-muted">Laden…</p>}
 
         {!loading && data && (
@@ -373,7 +416,7 @@ export default function SourceWorkqueuePage() {
                   type="search"
                   placeholder="Zoek restaurant of domein"
                   value={query}
-                  onChange={(e) => setQuery(e.target.value)}
+                  onChange={(e) => { setTargetRestaurantId(null); setQuery(e.target.value) }}
                 />
               </div>
               <div className="swq-select">

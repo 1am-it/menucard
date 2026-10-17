@@ -334,6 +334,16 @@ test('sortRows: "Oudste controle eerst" and "Restaurant (A–Z)"', () => {
   assert.deepEqual(sortRows(rows, 'name').map((r) => r.name), ['Fictief a', 'Fictief B', 'Fictief C']);
 });
 
+test('filterRows: a deep link selects the unique restaurant, not its shared name', () => {
+  const rows = [
+    { restaurantId: 1, name: 'Fictief Gelijk' },
+    { restaurantId: 2, name: 'Fictief Gelijk' },
+  ];
+  assert.deepEqual(filterRows(rows, { restaurantId: '2', query: 'Fictief Gelijk' }), [rows[1]]);
+  assert.deepEqual(filterRows(rows, { restaurantId: 'missing' }), []);
+  assert.equal(filterRows(rows, { query: 'Fictief Gelijk' }).length, 2);
+});
+
 test('filterRows: queue, source, menu, wijk and search on name or domain', () => {
   const rows = [
     row('Fictief Alfa', 'reachable', 'ready_for_review', null, 'Centrum', 'alfa.example.invalid'),

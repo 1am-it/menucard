@@ -392,9 +392,10 @@ function sortRows(rows, mode = 'action_first') {
 /** Filters by queue ('all' or a queue id), source, menu, wijk and a free-text
  * query on restaurant name or domain. Empty/`'all'` filters match
  * everything. */
-function filterRows(rows, { queue = 'all', source = 'all', menu = 'all', wijk = 'all', query = '' } = {}) {
+function filterRows(rows, { queue = 'all', source = 'all', menu = 'all', wijk = 'all', query = '', restaurantId = null } = {}) {
   const q = String(query || '').trim().toLowerCase();
   return (Array.isArray(rows) ? rows : []).filter((row) => {
+    if (restaurantId !== null && String(row.restaurantId) !== String(restaurantId)) return false;
     if (queue !== 'all' && row.queue !== queue) return false;
     if (source !== 'all' && row.source !== source) return false;
     if (menu !== 'all' && row.menu !== menu) return false;

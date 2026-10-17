@@ -65,6 +65,34 @@ test('the pages talk only to their own internal API; the source opens in a new t
   }
 });
 
+test('round 3 publication: readiness needs real checks, merged is not live, and navigation never writes', () => {
+  const view = read('app/internal/menu-concepts/MenuConceptsView.js');
+  assert.match(view, /function PublicationReadiness/);
+  assert.match(view, /Klaar voor publicatie/);
+  assert.match(view, /Nog niet klaar voor publicatie/);
+  assert.match(view, /PublicationReadiness publication=\{publication\}/);
+  assert.match(view, /id="mcr-publication"/);
+  assert.match(view, /window\.location\.hash !== '#mcr-publication'/);
+  assert.match(view, /Maak review-PR/);
+  assert.match(view, /pas bevestigd na een\s+geslaagde deployment/);
+  assert.match(view, /Deze app bevestigt die deployment niet/);
+  assert.doesNotMatch(view, /automatisch mergen|automatisch publiceren/i);
+
+  const handlers = code('src/lib/menuConceptReviewHandlers.js');
+  assert.match(handlers, /readOnlyExportForSnapshot/);
+  assert.doesNotMatch(handlers, /await exportForSnapshot\(/);
+  assert.match(handlers, /derivePublicationReadiness/);
+  assert.match(handlers, /publication,/);
+
+  const exporter = code('src/lib/menuConceptExport.js');
+  assert.match(exporter, /async function readOnlyExportForSnapshot/);
+  assert.doesNotMatch(
+    exporter.match(/async function readOnlyExportForSnapshot[\s\S]*?\n\}/)[0],
+    /\.update\(|\.insert\(/,
+    'the navigation read must not write'
+  );
+});
+
 test('BE-27 export: the route only delegates; the GitHub client cannot merge, delete or move a branch, and its token stays on the server', () => {
   const route = code('app/api/internal/v1/menu-concepts/[id]/export/route.js');
   assert.deepEqual([...route.matchAll(/export async function (\w+)/g)].map((m) => m[1]), ['POST']);

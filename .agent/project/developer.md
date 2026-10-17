@@ -13,8 +13,10 @@ when the changed runtime requires it. Docs-only changes need link, scope and
 snapshot checks; do not claim an app build ran if it did not.
 
 Keep #53 in existing PR #56; follow its approved v3 reference and preserve the
-preview-acceptance fixes already on that branch. Do not edit that branch from
-this separate protocol adoption task. Real menu/source/concept writes need
+preview-acceptance fixes already on that branch. The protocol-adoption task
+itself did not authorize UI work; the explicitly assigned #53 developer may
+now continue its approved contract via checkpoints/issue-53-handoff.md.
+Real menu/source/concept writes need
 the explicit relevant environment authorization; no automatic production use.
 
 The existing runner has a time/turn limit. This protocol does not raise it,

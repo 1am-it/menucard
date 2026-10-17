@@ -252,7 +252,7 @@ test('structural safety net: neither BE-17 route ever references public/canonica
 test('structural safety net: the proposals route computes content_hash itself via computeCanonicalContentHash before inserting', () => {
   const source = fs.readFileSync(PROPOSALS_ROUTE_PATH, 'utf8');
   assert.match(source, /computeCanonicalContentHash\(/);
-  const insertCallIndex = source.indexOf(".from('menu_snapshot_proposals')\n    .insert(");
+  const insertCallIndex = source.search(/\.from\(['"]menu_snapshot_proposals['"]\)\s*\.insert\(/);
   const hashComputedIndex = source.indexOf('computeCanonicalContentHash(');
   assert.ok(hashComputedIndex !== -1 && insertCallIndex !== -1 && hashComputedIndex < insertCallIndex, 'content_hash must be computed before the insert call');
 });

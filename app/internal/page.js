@@ -1,42 +1,33 @@
 'use client'
 
-// PLATFORM-11 (Phase 2) — the single, role-aware /internal home page every
-// successful internal sign-in now lands on (see app/internal/login/page.js
-// and planning/specs/tickets/platform-11-role-aware-internal-navigation-home.md's
-// "Design decision — login destination and role-based access").
+// Issue #53 round 2 — Beheer. Four views over existing capabilities:
+// Overzicht (the existing coverage data), Restaurants en bronnen (existing
+// source-triage records), Importhistorie (existing URL batches + dataset
+// runs) and Concepten en besluiten (recorded concepts/decisions/drafts).
 //
-// Session-gated only — reaching this page requires nothing beyond a
-// signed-in session, exactly like every other internal page (same
-// getSupabaseBrowser().auth.getSession() check, same redirect to
-// /internal/login otherwise). It never itself decides which
-// `staff_roles` a visitor needs; it resolves the session's actual roles
-// via the new, minimal, read-only GET /api/internal/v1/me (a thin
-// reshaping of authenticateInternalRequest, the same check every other
-// internal route already uses) and shows only the module links those
-// roles already unlock — the union of every role's sections for a
-// multi-role account. An account with no usable role (zero staff_roles
-// rows, or defensively only unrecognized values) sees an explicit "no
-// internal access" status with sign out as its only action — never an
-// automatic redirect into any module. `owner` never gets an invented
-// destination while no owner-gated internal page exists.
+// This page is session-gated only, exactly like every other internal page.
+// It resolves the session's roles through the existing read-only
+// GET /api/internal/v1/me. Only an `internal` account sees the four
+// sections; an editor-only (or owner-only) account gets no internal-only
+// administration data and no empty hub, just a pointer to Werkvoorraad.
+// Every provider keeps its own unchanged server-side authorization, and
+// nothing on this page writes, imports, approves or publishes.
 //
-// This page grants no access itself — every existing module route keeps
-// enforcing its own unchanged server-side role check regardless of what
-// renders here.
+// The four tabs are real URLs (`/internal?section=...`) so they remain
+// shareable and Back works; old module URLs stay untouched and reachable.
 
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import InternalNav from '@/src/components/InternalNav'
-import { resolveVisibleModules, isOwnerRole, hasAnyKnownRole } from '@/src/lib/internalNav'
-
-function IconArrowRight() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M5 12h14M13 6l6 6-6 6" />
-    </svg>
-  )
-}
+import { hasAnyKnownRole } from '@/src/lib/internalNav'
+import { isInternalOnly } from '@/src/lib/importInbox'
+import { sectionFromSearch } from '@/src/lib/internalBeheer'
+import BeheerNav from '@/src/components/beheer/BeheerNav'
+import OverviewPanel from '@/src/components/beheer/OverviewPanel'
+import RestaurantsPanel from '@/src/components/beheer/RestaurantsPanel'
+import ImportHistoryPanel from '@/src/components/beheer/ImportHistoryPanel'
+import DecisionsPanel from '@/src/components/beheer/DecisionsPanel'
 
 function IconLock() {
   return (
@@ -47,21 +38,12 @@ function IconLock() {
   )
 }
 
-const SHELL_STYLE = {
-  maxWidth: 960,
-  margin: '0 auto',
-  padding: '0 20px 64px',
-  fontFamily: 'system-ui, sans-serif',
-  color: 'var(--text-primary)',
-  background: 'var(--bg)',
-  minHeight: '100vh',
-}
-
-export default function InternalHomePage() {
+export default function BeheerPage() {
   const router = useRouter()
   const [session, setSession] = useState(undefined) // undefined = loading, null = no session
   const [roles, setRoles] = useState(undefined) // undefined = loading, [] once resolved (possibly empty)
   const [error, setError] = useState(null)
+  const [section, setSection] = useState('overview')
 
   useEffect(() => {
     const supabase = getSupabaseBrowser()
@@ -80,15 +62,15 @@ export default function InternalHomePage() {
       const res = await fetch('/api/internal/v1/me', {
         headers: { Authorization: `Bearer ${token}` },
       })
-      const data = await res.json()
+      const data = await res.json().catch(() => ({}))
       if (!res.ok) {
-        setError(data.error || 'Failed to resolve your internal access')
+        setError(data.error || 'Je interne toegang kon niet worden vastgesteld.')
         setRoles([])
         return
       }
       setRoles(data.roles || [])
     } catch {
-      setError('Failed to resolve your internal access')
+      setError('Je interne toegang kon niet worden vastgesteld.')
       setRoles([])
     }
   }, [])
@@ -97,6 +79,23 @@ export default function InternalHomePage() {
     if (session) loadRoles(session.access_token)
   }, [session, loadRoles])
 
+  // Read the requested section from the real URL and keep Back/Forward in
+  // step. An unknown value fails closed to the default Overzicht.
+  useEffect(() => {
+    setSection(sectionFromSearch(window.location.search))
+    const onPop = () => setSection(sectionFromSearch(window.location.search))
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
+
+  function selectSection(next) {
+    setSection(next)
+    const url = new URL(window.location.href)
+    if (next === 'overview') url.searchParams.delete('section')
+    else url.searchParams.set('section', next)
+    window.history.pushState({}, '', url)
+  }
+
   async function signOut() {
     const supabase = getSupabaseBrowser()
     await supabase.auth.signOut()
@@ -104,140 +103,92 @@ export default function InternalHomePage() {
   }
 
   if (session === undefined || roles === undefined) {
-    return <main style={{ ...SHELL_STYLE, color: 'var(--text-secondary)' }}>Loading…</main>
+    return (
+      <div className="di-page">
+        <main className="di-main" style={{ color: 'var(--text-secondary)' }}>
+          Laden…
+        </main>
+      </div>
+    )
   }
 
-  const modules = resolveVisibleModules(roles)
-  const showOwnerSection = isOwnerRole(roles)
   const noAccess = !hasAnyKnownRole(roles)
-  // No modules and no nav destinations exist for this account, so the
-  // status box below is the page's only navigation-adjacent content —
-  // it carries the page's one sign-out action itself, and the shared nav
-  // (which would otherwise duplicate it) is not rendered alongside it.
+  const canManage = isInternalOnly(roles)
+  // No known role: the status box carries the page's one sign-out action, so
+  // the shared nav (which would duplicate it) is not rendered alongside it.
   const showNoAccessStatus = noAccess && !error
   const roleLabels = [...new Set(roles.map((r) => r.role))]
   const email = session?.user?.email || null
 
   return (
-    <main style={SHELL_STYLE}>
-      {!showNoAccessStatus && <InternalNav accessToken={session.access_token} roles={roles} />}
+    <div className="di-page">
+      <main className="di-main">
+        {!showNoAccessStatus && <InternalNav accessToken={session.access_token} roles={roles} />}
 
-      <div style={{ paddingTop: 28, marginBottom: 24 }}>
-        <h1 style={{ fontSize: 28, margin: '0 0 4px' }}>Beheer</h1>
-        <p style={{ color: 'var(--text-secondary)', fontSize: 13, margin: 0 }}>
-          {email ? `Signed in as ${email}` : 'Signed in'}
-          {roleLabels.length > 0 ? ` · roles: ${roleLabels.join(', ')}` : ''}
-        </p>
-      </div>
-
-      {error && (
-        <div
-          style={{
-            padding: 14,
-            borderRadius: 'var(--radius-lg)',
-            border: '1px solid var(--danger-border)',
-            background: 'var(--danger-bg)',
-            color: 'var(--danger)',
-            marginBottom: 20,
-            fontSize: 14,
-          }}
-        >
-          {error}
+        <div className="bh-page-head">
+          <div>
+            <h1 className="di-title">Beheer</h1>
+            <p>Overzicht, historie en referentiegegevens.</p>
+            <p className="bh-identity">
+              {email ? `Ingelogd als ${email}` : 'Ingelogd'}
+              {roleLabels.length > 0 ? ` · rollen: ${roleLabels.join(', ')}` : ''}
+            </p>
+          </div>
         </div>
-      )}
 
-      {showNoAccessStatus && (
-        <div
-          role="status"
-          style={{
-            padding: 20,
-            borderRadius: 'var(--radius-lg)',
-            border: '1px solid var(--border)',
-            background: 'var(--bg-card)',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-            <span style={{ width: 18, height: 18, display: 'flex', flexShrink: 0, color: 'var(--text-secondary)', marginTop: 1 }}>
+        {error && (
+          <div className="di-banner di-banner-danger" role="alert">
+            <span>{error}</span>
+          </div>
+        )}
+
+        {showNoAccessStatus && (
+          <div role="status" className="bh-empty-state">
+            <span className="bh-empty-icon">
               <IconLock />
             </span>
             <div>
-              <strong style={{ color: 'var(--text-primary)' }}>No internal access for this account.</strong>
-              <p style={{ marginTop: 8, marginBottom: 16, fontSize: 14, color: 'var(--text-secondary)' }}>
-                Your account has no internal role assigned. If you believe this is a mistake, contact an
-                administrator — there is nothing else to do from here.
+              <strong>Geen interne toegang voor dit account.</strong>
+              <p>
+                Aan dit account is geen interne rol toegekend. Neem contact op met een beheerder als dat niet klopt —
+                er is vanaf hier niets anders te doen.
               </p>
-              <button
-                type="button"
-                onClick={signOut}
-                style={{
-                  padding: '8px 14px',
-                  borderRadius: 'var(--radius-md)',
-                  border: '1px solid var(--border)',
-                  background: 'transparent',
-                  color: 'var(--text-primary)',
-                  cursor: 'pointer',
-                  fontSize: 13,
-                }}
-              >
-                Sign out
+              <button type="button" className="bh-action bh-action--secondary" onClick={signOut}>
+                Uitloggen
               </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {!noAccess && (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-            gap: 14,
-          }}
-        >
-          {modules.map((m) => (
-            <a
-              key={m.id}
-              href={m.href}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 10,
-                padding: 18,
-                borderRadius: 'var(--radius-lg)',
-                border: '1px solid var(--border)',
-                background: 'var(--bg-card)',
-                color: 'var(--text-primary)',
-                textDecoration: 'none',
-                fontWeight: 600,
-                fontSize: 15,
-              }}
-            >
-              {m.label}
-              <span style={{ width: 16, height: 16, display: 'flex', flexShrink: 0, color: 'var(--text-secondary)' }}>
-                <IconArrowRight />
-              </span>
-            </a>
-          ))}
-
-          {showOwnerSection && (
-            <div
-              style={{
-                padding: 18,
-                borderRadius: 'var(--radius-lg)',
-                border: '1px dashed var(--border)',
-                background: 'var(--bg-elevated)',
-                color: 'var(--text-secondary)',
-              }}
-            >
-              <div style={{ fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>Owner tools</div>
-              <p style={{ margin: 0, fontSize: 13 }}>
-                Nothing to open yet — no owner-facing internal page exists.
+        {!noAccess && !canManage && !error && (
+          <div role="status" className="bh-empty-state">
+            <div>
+              <strong>Geen interne beheerinhoud voor dit account.</strong>
+              <p>
+                Beheer toont alleen overzichten en historie die voor interne medewerkers zijn bedoeld. Dagelijks werk
+                staat in de Werkvoorraad.
               </p>
+              <a className="bh-action" href="/internal/workqueue">
+                Naar Werkvoorraad
+              </a>
             </div>
-          )}
-        </div>
-      )}
-    </main>
+          </div>
+        )}
+
+        {canManage && !error && (
+          <>
+            <BeheerNav section={section} onSelect={selectSection} />
+            <OverviewPanel token={session.access_token} active={section === 'overview'} />
+            <RestaurantsPanel token={session.access_token} active={section === 'restaurants'} />
+            <ImportHistoryPanel token={session.access_token} active={section === 'imports'} />
+            <DecisionsPanel token={session.access_token} active={section === 'decisions'} />
+            <p className="bh-footnote">
+              Gebruikers en rechten: nog geen beheerscherm beschikbaar. Hiervoor is een afzonderlijk beveiligd
+              beheeronderdeel nodig; deze pagina toont daarom geen schijnbare beheermogelijkheid.
+            </p>
+          </>
+        )}
+      </main>
+    </div>
   )
 }

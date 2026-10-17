@@ -22,6 +22,24 @@ that guide or a ticket disagree, the text wins.
 
 ## Index at a glance (addition, 2026-10-06)
 
+**Issue #53 alignment, 2026-10-17:**
+`internal-task-flow-v3.html` is the proposed reference for a unified item-level
+Werkvoorraad and Beheer with direct content plus secondary administration
+views. Leading contract: `planning/specs/tickets/internal-task-flow-53.md`.
+Status: **approved for implementation**, not yet built or product-accepted.
+Approval is recorded on issue #53 for commit
+`f8b44abd64e8085737e5dad6b225eaf5aef1efc3`; the immutable mockup's original
+waiting-for-approval label records its proposal state, not the live decision.
+It preserves the
+existing identity/Kleurtaal v2 and uses fictional data. The earlier chat v1
+proposal, v2 and module-card candidate are not the accepted final design. User
+and role administration is explicitly unavailable, not a simulated working tab.
+Revision 3 corrects the flow to `Importeren -> Controleren -> Publiceren`:
+an eligible approved menu is `Klaar voor publicatie`, not waiting for a
+separate preparation step. `Publiceren` opens the existing publication phase;
+creating a review PR and merging remain explicit, not automatic. The mockup's
+review-PR buttons simulate fictional states locally and create nothing.
+
 Every file in this directory, with its leading ticket and role. "Leading"
 means the ticket that names the mockup as its design reference;
 "context" means a related ticket that does not. The sections below hold
@@ -41,7 +59,7 @@ the full notes; nothing listed here was removed.
 | `community-add-menu-link-v1.png` | Community: menu link | `platform-08b-community-evidence-submissions.md` | Directional, mobile only |
 | `community-submission-status-v1.png` | Community: submission status | `platform-08b-community-evidence-submissions.md` | Directional, mobile only |
 | `onboarding-restaurant-workflow-v1.png` | Internal Onboarding Restaurant flow | `be-20-general-restaurant-source-extraction.md` ("Approved design references", "Visual contract"). Context: `be-19-onboarding-restaurant-via-url.md` (URL intake; does not name this file) | Leading for the workflow panels; **not** for navigation |
-| `internal-navigation-workqueue-v1.png` | Internal navigation shell and Werkvoorraad | `be-20-general-restaurant-source-extraction.md` ("Approved design references", "Visual contract"). Context: `platform-11-role-aware-internal-navigation-home.md` (role filtering, `/internal` home) and decision 014 (orientation standard); neither names this file | **Leading for all internal navigation**; its counts are directional only |
+| `internal-navigation-workqueue-v1.png` | Internal navigation shell and Werkvoorraad | `be-20-general-restaurant-source-extraction.md` ("Approved design references", "Visual contract"). Context: `platform-11-role-aware-internal-navigation-home.md` (role filtering, `/internal` home) and decision 014 (orientation standard); neither names this file | Direction for the Werkvoorraad (daily action queues) / Beheer (overview, history, reference) split only. The navigation structure is superseded by issue #53: `Werkvoorraad \| Nieuwe import \| Beheer` (see `docs/guides/design-reference.md`). Counts are directional only |
 | `internal-source-triage-v1.png` | `/internal/source-triage` (Brontriage), desktop 1280px, light | `be-24-internal-source-triage.md` | Records the implemented BE-24 layout, captured from a local build with fictional data (not from the Kleurtaal v2 handoff). Mobile stacks list and detail. |
 | `be-25-batch-analysis-desktop-v2.png` | Future internal `Batchanalyse` under `Werkvoorraad / Bronnen beoordelen`, desktop 1280px, light and dark | `be-25-batch-source-analysis-from-triage.md` | **Leading** visual reference for BE-25 fase 2 (final, fictional `.example` data); the ticket and design reference win. No background worker is implied. |
 | `be-25-batch-analysis-mobile-v2.png` | Same, mobile 390px and 320px, light and dark | `be-25-batch-source-analysis-from-triage.md` | **Leading**, together with the desktop v2 file. |
@@ -276,8 +294,11 @@ reference instead of ad hoc judgment calls:
   navigation structure specifically; this mockup governs the workflow
   steps/content shown in its four panels only, never the nav shell.**
 - [Internal navigation and work queue](./internal-navigation-workqueue-v1.png) —
-  **leading, approved visual reference for the simplified internal
-  navigation structure** — supersedes the workflow mockup above wherever
+  approved visual reference for the earlier simplified internal
+  navigation (**its structure is superseded by issue #53**: the main
+  navigation is now `Werkvoorraad | Nieuwe import | Beheer`; no
+  work-queue dropdown; `Onboarding Restaurant` is contextual only; the
+  written design reference wins) — supersedes the workflow mockup above wherever
   the two differ on navigation. The main navigation exposes only
   `Dekkingsoverzicht` and `Onboarding Restaurant`; the BredaEats wordmark
   is the quiet internal home link. `Nieuwe aanleveringen`,

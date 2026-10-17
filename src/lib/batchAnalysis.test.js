@@ -174,3 +174,22 @@ test('fixed copy is verbatim and never says the screen may be closed', () => {
   assert.equal(COPY.nothingPublished, 'Niets wordt automatisch gepubliceerd.');
   assert.doesNotMatch(JSON.stringify(COPY), /gerust verlaten|mag (je )?sluiten/i);
 });
+
+test('import copy (#53): primary action, safety text, three compact steps', () => {
+  const { COPY, IMPORT_STEPS } = require('./batchAnalysis');
+  assert.equal(COPY.start, 'Import starten');
+  assert.equal(COPY.safety, 'We halen de website veilig op en maken een intern voorstel. Niets wordt automatisch bevestigd of gepubliceerd.');
+  assert.deepEqual(IMPORT_STEPS, ['Importeren', 'Controleren', 'Publiceren']);
+});
+
+test('importScope (#53): recognises 1 and 2–10 URLs without a mode choice; more than 10 is honestly not started', () => {
+  const { importScope, MAX_BATCH_URLS } = require('./batchAnalysis');
+  assert.equal(importScope(0).kind, 'empty');
+  assert.deepEqual(importScope(1), { kind: 'single', text: 'Herkend: 1 website.' });
+  assert.deepEqual(importScope(2), { kind: 'multiple', text: 'Herkend: 2 websites.' });
+  assert.equal(importScope(MAX_BATCH_URLS).kind, 'multiple');
+  const big = importScope(MAX_BATCH_URLS + 1);
+  assert.equal(big.kind, 'too_many');
+  assert.match(big.text, /niets gestart/);
+  assert.match(big.text, /nog niet beschikbaar/);
+});
