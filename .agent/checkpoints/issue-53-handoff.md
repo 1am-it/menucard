@@ -1,6 +1,7 @@
 # Issue 53 - Prepared Developer Takeover
 
-STATE: BUILDING (product task); preparation only, developer not started.
+STATE: BUILDING (product task); developer started, round 1 delivered in
+`checkpoints/issue-53-round-1.md` (not READY_FOR_REVIEW).
 CONTRACT: planning/specs/tickets/internal-task-flow-53.md
 ROLE: developer (DeepSeek through Cline); Delivery Lead: ChatGPT/Codex.
 ISSUE: https://github.com/1am-it/menucard/issues/53
