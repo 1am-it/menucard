@@ -23,7 +23,8 @@ const { isInternalOnly } = require('./importInbox');
 const { validateSnapshotReviewInput, snapshotReviewValidationMessage, groupReviewsBySnapshotId, deriveEffectiveSnapshotStatus } = require('./menuSnapshotProposals');
 const { liveMenuLines, recognisedLines, buildMenuConcept, storedConceptInput, sanitizeEdits, mergeEdits, REJECT_REASONS } = require('./menuConcept');
 const { loadLineage, wasRejectedBefore, createConceptVersion } = require('./menuConceptStore');
-const { exportForSnapshot, exportMenuEntry } = require('./menuConceptExport');
+const { readOnlyExportForSnapshot, exportMenuEntry } = require('./menuConceptExport');
+const { derivePublicationReadiness } = require('./menuConceptPublication');
 const { menuKeyFor, restaurantMenuEntries } = require('./menuExport');
 
 const FORBIDDEN = 'Alleen interne medewerkers kunnen menuconcepten beoordelen.';
@@ -140,7 +141,7 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
     const supabase = getSupabase();
     const { data: rows, error } = await supabase
       .from('menu_snapshot_proposals')
-      .select('id, restaurant_id, menu_context, version, source_url, created_at, created_by, captured_content')
+      .select('id, restaurant_id, menu_context, version, source_url, created_at, created_by, captured_content, origin_receipt_id')
       .order('created_at', { ascending: false })
       .limit(LIST_LIMIT);
     if (error) return reply(500, { error: LOAD_ERROR });
@@ -206,6 +207,36 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
         };
       })
       .sort((a, b) => order[a.status] - order[b.status] || String(b.createdAt).localeCompare(String(a.createdAt)));
+
+    // Issue #53 round 3: readiness is a derived display state for approved
+    // latest concepts only. It reuses the existing source/rejection/blocker
+    // rules; a stored export never proves readiness. This read performs no
+    // writes (and no GitHub refresh).
+    for (const item of items) {
+      if (item.status !== 'approved') continue;
+      const row = latest.find((candidate) => candidate.id === item.id);
+      if (!row) continue;
+      const lineage = await loadLineage(supabase, { restaurantId: row.restaurant_id, menuContext: row.menu_context });
+      if (lineage.error) return reply(500, { error: LOAD_ERROR });
+      const { receipt, error: receiptError } = await loadReceipt(supabase, row.origin_receipt_id);
+      if (receiptError) return reply(500, { error: LOAD_ERROR });
+      const source = await sourceStatus(supabase, {
+        restaurantId: row.restaurant_id,
+        sourceUrl: row.source_url,
+        receiptUrl: receipt && receipt.canonical_source_url,
+      });
+      if (source.error) return reply(500, { error: LOAD_ERROR });
+      item.publication = derivePublicationReadiness({
+        isLatest: true,
+        status: item.status,
+        blockerCount: item.blockerCount,
+        source,
+        rejectedBefore: wasRejectedBefore(lineage.versions, row.captured_content, computeMenuHash, row.id),
+        dirty: false,
+        githubConfigured: Boolean(github),
+        exportStatus: item.export && item.export.status ? item.export.status : null,
+      });
+    }
     return reply(200, { items });
   }
 
@@ -228,8 +259,23 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
     if (receiptError) return reply(500, { error: LOAD_ERROR });
     const source = await sourceStatus(supabase, { restaurantId: snapshot.restaurant_id, sourceUrl: snapshot.source_url, receiptUrl: receipt && receipt.canonical_source_url });
     if (source.error) return reply(500, { error: LOAD_ERROR });
-    const exported = await exportForSnapshot(supabase, github, snapshot.id, now);
+    // Read-only on navigation: the stored export status plus a read-only
+    // GitHub PR state, never a database write.
+    const exported = await readOnlyExportForSnapshot(supabase, github, snapshot.id);
     if (exported.error) return reply(500, { error: LOAD_ERROR });
+    const rejectedBefore = wasRejectedBefore(lineage.versions, snapshot.captured_content, computeMenuHash, snapshot.id);
+    const isLatest = !latest || latest.id === snapshot.id;
+    const { concept: publicationConcept } = conceptSummary(snapshot.captured_content, liveMenuLines(liveMenus, snapshot.restaurant_id));
+    const publication = derivePublicationReadiness({
+      isLatest,
+      status: viewStatus(current.status),
+      blockers: publicationConcept.blockers,
+      source,
+      rejectedBefore,
+      dirty: false,
+      githubConfigured: Boolean(github),
+      exportStatus: exported.export && exported.export.status ? exported.export.status : null,
+    });
 
     const originLines = {};
     for (const line of recognisedLines((receipt && receipt.menus) || [])) originLines[line.id] = { name: line.name, desc: line.desc, price: line.price, category: line.category };
@@ -240,7 +286,7 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
         version: snapshot.version,
         latestVersion: latest ? latest.version : snapshot.version,
         latestId: latest ? latest.id : snapshot.id,
-        isLatest: !latest || latest.id === snapshot.id,
+        isLatest,
         restaurantId: snapshot.restaurant_id,
         restaurantName: restaurantName(restaurants, snapshot.restaurant_id),
         menuContext: snapshot.menu_context,
@@ -249,7 +295,7 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
         createdBySelf: snapshot.created_by === auth.userId,
         originRecorded: Boolean(receipt),
         status: viewStatus(current.status),
-        rejectedBefore: wasRejectedBefore(lineage.versions, snapshot.captured_content, computeMenuHash, snapshot.id),
+        rejectedBefore,
         captured: snapshot.captured_content,
       },
       liveLines: liveMenuLines(liveMenus, snapshot.restaurant_id),
@@ -266,6 +312,7 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
       })),
       rejectReasons: REJECT_REASONS,
       export: exported.export,
+      publication,
       // Publicatievoorbeeld: built on the server only. "concept" is exactly
       // the entry "Maak review-PR" would write; "current" is the restaurant's
       // unchanged published menus. Nothing is written or exported here.

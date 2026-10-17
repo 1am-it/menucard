@@ -3055,3 +3055,6 @@ details.bta-side-card > summary:focus-visible { outline: 2px solid var(--border-
   .bh-record-status { flex-direction: row; flex-wrap: wrap; gap: 6px; }
   .bh-panel-head h1, .bh-panel-head h2 { font-size: 23px; }
 }
+.mcr-checks { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 4px; font-size: 12px; color: var(--text-secondary); }
+.mcr-checks li { display: flex; align-items: flex-start; gap: 6px; }
+.mcr-checks svg { width: 13px; height: 13px; flex-shrink: 0; margin-top: 1px; }

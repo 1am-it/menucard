@@ -132,13 +132,14 @@ function world({ snapshots, reviews = [], proposals, jobs, exports = [] } = {}) 
   });
 }
 
-function handlersFor(supabase, { userId = REVIEWER, roles = [{ role: 'internal' }] } = {}) {
+function handlersFor(supabase, { userId = REVIEWER, roles = [{ role: 'internal' }], github = null } = {}) {
   return createMenuConceptReviewHandlers({
     authenticate: async () => ({ ok: true, userId, roles }),
     getSupabase: () => supabase,
     restaurants: RESTAURANTS,
     liveMenus: LIVE,
     computeMenuHash: hash,
+    github,
     now: () => new Date('2026-10-13T10:00:00Z'),
   });
 }
@@ -192,6 +193,37 @@ test('list: the latest version per concept, waiting first, with restaurant, sour
   assert.equal(bistro.blockerCount, 0);
   assert.equal(bistro.attentionCount, 2); // the soup's price change and the decided disappeared mousse stay visible
   assert.equal(inserts(supabase).length + rpcs(supabase).length, 0);
+});
+
+test('list: approved readiness uses every real gate; a missing GitHub integration is not publication-ready', async () => {
+  const supabase = world({
+    snapshots: [snapshotRow(1, 1, content({ resolved: true }))],
+    reviews: [{ id: 1, snapshot_id: 1, decision: 'approved_internal', reason: null, decided_at: '2026-10-12T12:00:00Z' }],
+  });
+  const ready = await handlersFor(supabase, { github: {} }).list(request());
+  assert.equal(ready.status, 200);
+  assert.equal(ready.body.items[0].publication.state, 'ready');
+  assert.equal(ready.body.items[0].publication.label, 'Klaar voor publicatie');
+  assert.equal(ready.body.items[0].publication.canCreateReviewPr, true);
+  assert.ok(ready.body.items[0].publication.checks.every((check) => check.ok));
+
+  const noIntegration = await handlersFor(supabase).list(request());
+  assert.equal(noIntegration.body.items[0].publication.state, 'blocked');
+  assert.ok(noIntegration.body.items[0].publication.reasons.includes('GitHub-koppeling beschikbaar'));
+  assert.equal(noIntegration.body.items[0].publication.canCreateReviewPr, false);
+});
+
+test('detail: readiness is returned with the exact publication controls; no write on navigation', async () => {
+  const supabase = world({
+    snapshots: [snapshotRow(1, 1, content({ resolved: true }))],
+    reviews: [{ id: 1, snapshot_id: 1, decision: 'approved_internal', reason: null, decided_at: '2026-10-12T12:00:00Z' }],
+  });
+  const res = await handlersFor(supabase, { github: {} }).detail(request(), '1');
+  assert.equal(res.status, 200);
+  assert.equal(res.body.publication.state, 'ready');
+  assert.equal(res.body.publication.label, 'Klaar voor publicatie');
+  assert.equal(res.body.export, null);
+  assert.equal(supabase.calls.filter((call) => call.update || call.insert || call.rpc).length, 0);
 });
 
 test('list: an approved concept carries its latest stored export status, read-only; no export stays null', async () => {

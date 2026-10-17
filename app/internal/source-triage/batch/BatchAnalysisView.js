@@ -507,8 +507,9 @@ function BatchDetail({ detail, ownOpenBatchId, busy, confirming, setConfirming, 
   )
 }
 
-// Step shown as current: 0 = Nieuwe import (no batch on screen), 1 =
-// Controleer menukaart (a batch is open or has results to check).
+// Step shown as current: 0 = Importeren (no batch on screen), 1 =
+// Controleren (a batch is open or has results to check). Publiceren is the
+// downstream concept/publication phase, opened from its exact record.
 function currentStep(viewing) {
   return viewing ? 1 : 0
 }

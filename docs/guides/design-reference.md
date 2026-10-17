@@ -477,8 +477,7 @@ The primary navigation is exactly three plain links, in this order:
    websites."). More than 10 starts nothing and says so honestly: the
    bounded city import (CITY-0, 11–250) is a separate, not yet available
    backend step. `/internal/source-triage/batch` stays as a working alias.
-   Compact progress: `Nieuwe import → Controleer menukaart → Klaarzetten
-   voor publicatie`. Safety text: "We halen de website veilig op en maken
+   Compact progress: `Importeren → Controleren → Publiceren`. Safety text: "We halen de website veilig op en maken
    een intern voorstel. Niets wordt automatisch bevestigd of
    gepubliceerd."
 3. **`Beheer`** → `/internal`. Overview, history, settings and reference

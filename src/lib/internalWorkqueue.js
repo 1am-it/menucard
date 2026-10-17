@@ -217,7 +217,7 @@ function candidateTask(candidate) {
       provider: 'import-candidates',
       restaurantId: null,
       restaurantName: name,
-      title: 'Profielconcept klaarzetten',
+      title: 'Profielconcept aanmaken',
       reason: 'Intern goedgekeurd · nog geen profielconcept',
       secondary: candidateSecondary(candidate),
       actionLabel: 'Open kandidaat',
@@ -284,20 +284,49 @@ function buildWorkqueue({ roles, providers } = {}) {
     if (restaurantId) conceptRestaurantIds.add(restaurantId);
     const approved = item.status === 'approved';
     const exportRow = item.export && typeof item.export === 'object' ? item.export : null;
+    const publication = item.publication && typeof item.publication === 'object' ? item.publication : null;
     // A merged export is the live menu: not open work. Its concept still
     // suppresses a stale generic review row for the same restaurant.
-    if (approved && exportRow && exportRow.status === 'merged') continue;
+    if (approved && ((publication && publication.state === 'export_merged') || (exportRow && exportRow.status === 'merged'))) continue;
+
+    let title = approved ? 'Goedgekeurd menuconcept' : 'Nieuwe menukaart';
+    let reason = approved ? publicationReason(exportRow) : menuConceptReason(item);
+    let actionLabel = approved ? publicationAction(exportRow) : 'Controleer menukaart';
+    // `Klaar voor publicatie`/`Publiceren` only when the server-derived
+    // readiness rule proved every existing gate. A missing publication object
+    // stays an explicit "Controleer publicatie", never an optimistic claim.
+    if (approved && publication) {
+      if (publication.state === 'ready') {
+        title = 'Klaar voor publicatie';
+        reason = 'Alle bestaande controles zijn geslaagd';
+        actionLabel = 'Publiceren';
+      } else if (publication.state === 'blocked') {
+        title = 'Nog niet klaar voor publicatie';
+        reason = asArray(publication.reasons).filter(Boolean).join(' · ') || publication.label || 'Controleer het concept';
+        actionLabel = 'Controleer concept';
+      } else if (publication.state === 'export_active') {
+        title = 'Review-PR open';
+        reason = publication.label || publicationReason(exportRow);
+        actionLabel = 'Bekijk publicatie';
+      } else if (publication.state === 'export_attention') {
+        title = 'Publicatie controleren';
+        reason = publication.label || publicationReason(exportRow);
+        actionLabel = 'Controleer publicatie';
+      }
+    }
+
     add({
       id: `menu-concept:${asString(item.id)}`,
       kind: approved ? 'menu_publication' : 'menu_review',
       provider: 'menu-concepts',
       restaurantId: restaurantId || null,
       restaurantName: item.restaurantName || `Restaurant ${restaurantId}`,
-      title: approved ? 'Goedgekeurd menuconcept' : 'Nieuwe menukaart',
-      reason: approved ? publicationReason(exportRow) : menuConceptReason(item),
+      title,
+      reason,
       secondary: conceptSecondary(item),
-      actionLabel: approved ? publicationAction(exportRow) : 'Controleer menukaart',
-      href: `/internal/menu-concepts/${encodeURIComponent(asString(item.id))}`,
+      actionLabel,
+      // Open the exact concept's existing publication controls.
+      href: `/internal/menu-concepts/${encodeURIComponent(asString(item.id))}#mcr-publication`,
       priority: approved ? PRIORITY.menu_publication : PRIORITY.menu_review,
       recordedAt: (exportRow && exportRow.createdAt) || item.createdAt || null,
       requiredRole: 'internal',

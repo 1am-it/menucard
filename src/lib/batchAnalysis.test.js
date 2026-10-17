@@ -179,7 +179,7 @@ test('import copy (#53): primary action, safety text, three compact steps', () =
   const { COPY, IMPORT_STEPS } = require('./batchAnalysis');
   assert.equal(COPY.start, 'Import starten');
   assert.equal(COPY.safety, 'We halen de website veilig op en maken een intern voorstel. Niets wordt automatisch bevestigd of gepubliceerd.');
-  assert.deepEqual(IMPORT_STEPS, ['Nieuwe import', 'Controleer menukaart', 'Klaarzetten voor publicatie']);
+  assert.deepEqual(IMPORT_STEPS, ['Importeren', 'Controleren', 'Publiceren']);
 });
 
 test('importScope (#53): recognises 1 and 2–10 URLs without a mode choice; more than 10 is honestly not started', () => {

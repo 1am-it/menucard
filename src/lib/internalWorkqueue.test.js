@@ -176,7 +176,7 @@ test('record links: every task opens the exact existing record, including the de
   );
 
   const byId = Object.fromEntries(result.tasks.map((t) => [t.id, t]));
-  assert.equal(byId['menu-concept:concept-1'].href, '/internal/menu-concepts/concept-1');
+  assert.equal(byId['menu-concept:concept-1'].href, '/internal/menu-concepts/concept-1#mcr-publication');
   assert.equal(byId['source-workqueue:24'].href, '/internal/source-workqueue?restaurant=24');
   assert.equal(byId['source-proposal:proposal-1'].href, '/internal/source-triage?restaurant=25');
   assert.equal(
@@ -447,6 +447,58 @@ test('ordering and counts: urgent source work first, publication and editor deci
   assert.equal(result.counts.byProvider['source-workqueue'], 1);
   assert.equal(result.counts.byProvider.moderation, 1);
   assert.equal(result.providers.find((p) => p.id === 'claims').count, 1);
+});
+
+test('publication readiness: Publiceren only with proven checks; blocked/active states stay explicit', () => {
+  const base = { ...menuItem, status: 'approved', export: null };
+  const result = build(INTERNAL, baseProviders({
+    'menu-concepts': {
+      ok: true,
+      data: {
+        items: [
+          {
+            ...base,
+            id: 'ready',
+            publication: { state: 'ready', label: 'Klaar voor publicatie', reasons: [], actionLabel: 'Publiceren' },
+          },
+          {
+            ...base,
+            id: 'blocked',
+            publication: { state: 'blocked', label: 'Nog niet klaar voor publicatie', reasons: ['Bron bevestigd', 'Geen blokkades'], actionLabel: 'Controleer concept' },
+          },
+          {
+            ...base,
+            id: 'active',
+            export: { status: 'opened' },
+            publication: { state: 'export_active', label: 'Review-PR open · nog niet gemerged', reasons: [], actionLabel: 'Bekijk publicatie' },
+          },
+          {
+            ...base,
+            id: 'failed',
+            export: { status: 'failed' },
+            publication: { state: 'export_attention', label: 'Publicatie mislukt · controleer de oorzaak', reasons: [], actionLabel: 'Controleer publicatie' },
+          },
+          {
+            ...base,
+            id: 'merged',
+            export: { status: 'merged' },
+            publication: { state: 'export_merged', label: 'Review-PR gemerged · productie nog niet bevestigd' },
+          },
+        ],
+      },
+    },
+  }));
+
+  const byId = Object.fromEntries(result.tasks.map((t) => [t.id, t]));
+  assert.equal(byId['menu-concept:ready'].title, 'Klaar voor publicatie');
+  assert.equal(byId['menu-concept:ready'].actionLabel, 'Publiceren');
+  assert.equal(byId['menu-concept:ready'].href, '/internal/menu-concepts/ready#mcr-publication');
+  assert.equal(byId['menu-concept:blocked'].title, 'Nog niet klaar voor publicatie');
+  assert.match(byId['menu-concept:blocked'].reason, /Bron bevestigd/);
+  assert.equal(byId['menu-concept:blocked'].actionLabel, 'Controleer concept');
+  assert.equal(byId['menu-concept:active'].actionLabel, 'Bekijk publicatie');
+  assert.equal(byId['menu-concept:failed'].actionLabel, 'Controleer publicatie');
+  assert.equal(byId['menu-concept:merged'], undefined);
 });
 
 test('publication: a merged export is not open work; open/failed/closed exports keep their real status', () => {

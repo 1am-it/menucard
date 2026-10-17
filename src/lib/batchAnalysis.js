@@ -58,7 +58,7 @@ const ACTION_LABELS = {
 };
 
 // Compact visible progress of the whole flow (issue #53).
-const IMPORT_STEPS = ['Nieuwe import', 'Controleer menukaart', 'Klaarzetten voor publicatie'];
+const IMPORT_STEPS = ['Importeren', 'Controleren', 'Publiceren'];
 
 /** The recognised import size for a number of pasted lines, in plain
  * language — staff never choose a technical mode. 1 and 2–{MAX} both run

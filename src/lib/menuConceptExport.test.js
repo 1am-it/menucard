@@ -8,7 +8,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const crypto = require('node:crypto');
-const { createMenuConceptExportHandler, marker } = require('./menuConceptExport');
+const { createMenuConceptExportHandler, readOnlyExportForSnapshot, marker } = require('./menuConceptExport');
 const { sourceStatus } = require('./menuConceptReviewHandlers');
 const { buildMenuConcept, liveMenuLines } = require('./menuConcept');
 const { serialize } = require('./menuExport');
@@ -210,6 +210,36 @@ test('export: one branch, one commit with only the two static files, one ordinar
   assert.equal(row.created_by, REVIEWER);
   // No direct public change: only the export row is written in the database.
   assert.deepEqual([...new Set(supabase.calls.map((c) => c.insert || c.update))], ['menu_snapshot_exports']);
+});
+
+test('read-only export status: navigation reads the GitHub PR state without writing the database', async () => {
+  const supabase = world({
+    exports: [
+      {
+        id: 1,
+        snapshot_id: 5,
+        restaurant_id: '1',
+        content_hash: 'a'.repeat(64),
+        status: 'opened',
+        branch: 'menu-export/1-v1-e1',
+        commit_sha: 'b'.repeat(40),
+        pr_number: 40,
+        pr_url: 'https://github.com/voorbeeld/menucard/pull/40',
+        created_at: '2026-10-14T10:00:00Z',
+        updated_at: '2026-10-14T10:00:00Z',
+      },
+    ],
+  });
+  const github = fakeGithub();
+  github.state.pulls.push({ number: 40, state: 'merged' });
+
+  const read = await readOnlyExportForSnapshot(supabase, github, 5);
+  assert.equal(read.export.status, 'merged');
+  assert.equal(supabase.tables.menu_snapshot_exports[0].status, 'opened', 'the stored row must not be mutated by navigation');
+  assert.equal(supabase.calls.filter((call) => call.update || call.insert || call.rpc).length, 0);
+
+  const stored = await readOnlyExportForSnapshot(supabase, null, 5);
+  assert.equal(stored.export.status, 'opened', 'without GitHub the stored status is shown honestly');
 });
 
 test('idempotent: a second click returns the same open pull request, never a second branch or PR', async () => {

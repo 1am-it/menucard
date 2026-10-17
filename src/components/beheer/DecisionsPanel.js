@@ -170,7 +170,7 @@ export default function DecisionsPanel({ token, active }) {
                     <div>
                       <strong>{draft.candidateName}</strong>
                       <span className="bh-muted">
-                        {draft.promotedAt ? `Klaargezet ${formatDate(draft.promotedAt)}` : 'Klaargezet'}
+                        {draft.promotedAt ? `Aangemaakt ${formatDate(draft.promotedAt)}` : 'Aangemaakt'}
                         {draft.discardedAt ? ` · verworpen ${formatDate(draft.discardedAt)}` : ''}
                       </span>
                       {draft.discardNote && <span className="bh-muted">{draft.discardNote}</span>}

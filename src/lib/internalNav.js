@@ -76,7 +76,7 @@ const INTERNAL_MODULES = [
   { id: 'import-inbox', label: 'Nieuwe aanleveringen', href: '/internal/import-inbox', requiredRole: 'internal', placement: 'work', subtitle: 'Aangeleverde bronnen verwerken' },
   { id: 'source-triage', label: 'Bronnen beoordelen', href: '/internal/source-triage', requiredRole: 'internal', placement: 'work', subtitle: 'Bronvoorstellen controleren' },
   { id: 'menu-concepts', label: 'Menuconcepten beoordelen', href: '/internal/menu-concepts', requiredRole: 'internal', placement: 'work', subtitle: 'Concepten controleren en intern goedkeuren' },
-  { id: 'profile-drafts', label: 'Profielconcepten', href: '/internal/profile-drafts', requiredRole: 'internal', placement: 'work', subtitle: 'Klaarzetten voor publicatie' },
+  { id: 'profile-drafts', label: 'Profielconcepten', href: '/internal/profile-drafts', requiredRole: 'internal', placement: 'work', subtitle: 'Intern profielconcept' },
   { id: 'moderation', label: 'Beoordelen', href: '/internal/moderation', requiredRole: 'editor', placement: 'work', subtitle: "Menu's, profielen en eigenaarsclaims" },
   { id: 'coverage', label: 'Dekkingsoverzicht', href: '/internal/coverage', requiredRole: 'internal', placement: 'beheer', subtitle: 'Overzicht van restaurants en bronnen' },
   { id: 'onboarding-restaurant', label: 'Onboarding Restaurant', href: '/internal/onboarding-restaurant', requiredRole: 'internal', placement: 'contextual', subtitle: 'Alleen als een restaurant niet gekoppeld kan worden' },

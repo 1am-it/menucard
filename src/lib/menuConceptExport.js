@@ -114,6 +114,27 @@ async function exportForSnapshot(supabase, github, snapshotId, now) {
   return { export: exportView(await refreshExport(supabase, github, rows[0] || null, now)) };
 }
 
+/**
+ * Read-only variant for page navigation: reads the stored export row and, if
+ * GitHub is available, asks it for the current PR state WITHOUT updating the
+ * database. A GET/navigation must never write. The explicit export action
+ * keeps using exportForSnapshot/refreshExport so its idempotency stays
+ * durable.
+ */
+async function readOnlyExportForSnapshot(supabase, github, snapshotId) {
+  const { rows, error } = await activeExports(supabase, { snapshotId });
+  if (error) return { error };
+  const row = rows[0] || null;
+  if (!row || row.status !== 'opened' || !github) return { export: exportView(row) };
+  try {
+    const state = await github.pullRequestState(row.pr_number);
+    if (state === 'merged' || state === 'closed') return { export: exportView({ ...row, status: state }) };
+  } catch {
+    // GitHub unreachable: show the stored status, still without writing.
+  }
+  return { export: exportView(row) };
+}
+
 function createMenuConceptExportHandler({ authenticate, getSupabase, restaurants, liveMenus, computeMenuHash, github, sourceStatus, now = () => new Date() }) {
   async function authorize(request) {
     const auth = await authenticate(request);
@@ -302,4 +323,12 @@ function createMenuConceptExportHandler({ authenticate, getSupabase, restaurants
   return { exportToReviewPr };
 }
 
-module.exports = { createMenuConceptExportHandler, exportForSnapshot, exportMenuEntry, exportView, marker, NOT_PUBLISHED };
+module.exports = {
+  createMenuConceptExportHandler,
+  exportForSnapshot,
+  readOnlyExportForSnapshot,
+  exportMenuEntry,
+  exportView,
+  marker,
+  NOT_PUBLISHED,
+};
