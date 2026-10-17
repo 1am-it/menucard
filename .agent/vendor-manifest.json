@@ -1,0 +1,235 @@
+{
+  "schema_version": 1,
+  "packages": [
+    {
+      "name": "ai-working-agreement",
+      "repository": "https://github.com/1am-it/ai-working-agreement",
+      "source_commit": "2eaad719b7912c06cb97cc8b7accffe37232f8b1",
+      "version": "0.1.0",
+      "status": "draft"
+    },
+    {
+      "name": "ai-delivery-lead",
+      "repository": "https://github.com/1am-it/ai-delivery-lead",
+      "source_commit": "355c27e004258f946826c4a5376ac97130784fa6",
+      "version": "0.1.0",
+      "status": "draft"
+    },
+    {
+      "name": "ai-product-designer",
+      "repository": "https://github.com/1am-it/ai-product-designer",
+      "source_commit": "023c7bf5ab25400aeeedba6f22b97653b9fb9039",
+      "version": "0.1.0",
+      "status": "draft"
+    },
+    {
+      "name": "ai-developer",
+      "repository": "https://github.com/1am-it/ai-developer",
+      "source_commit": "a256f7af118034a8ba250c819383cc161421b00a",
+      "version": "0.1.0",
+      "status": "draft"
+    }
+  ],
+  "files": [
+    {
+      "path": ".agent/vendor/ai-delivery-lead/.gitignore",
+      "sha256": "4564a2a084a988e2ddb01c429d8c4c8daa89f6ccd23cdcb8c17516a69a73eabc"
+    },
+    {
+      "path": ".agent/vendor/ai-delivery-lead/AGENTS.md",
+      "sha256": "4485dcf79668b12f6ab1e0099d04949fcb09839b1b10b3873337af3893d89dba"
+    },
+    {
+      "path": ".agent/vendor/ai-delivery-lead/CHANGELOG.md",
+      "sha256": "1e6cb4a23c7f722a3c65d6a28d1771dc47e65cb001a4521175a8cfd11b37d0ed"
+    },
+    {
+      "path": ".agent/vendor/ai-delivery-lead/DEPENDENCIES.md",
+      "sha256": "4d4c20f58d8a3e07f5680aea00c6d34d64660298f793d942787661850f49a7a6"
+    },
+    {
+      "path": ".agent/vendor/ai-delivery-lead/INPUT.md",
+      "sha256": "404f2ef8871aa9323d9bf81b473b537cb3e225b44f0a9ead76cce873ed902ac9"
+    },
+    {
+      "path": ".agent/vendor/ai-delivery-lead/OUTPUT.md",
+      "sha256": "15bd9737f4aa306c6cd0b2fca976d55e7a797cf0954d32bfcc4a2b9854e30fe2"
+    },
+    {
+      "path": ".agent/vendor/ai-delivery-lead/README.md",
+      "sha256": "99e4418e90a9b3935894af06e1eda162bcf4325341bd4a8e3cfe88cbd3302efd"
+    },
+    {
+      "path": ".agent/vendor/ai-delivery-lead/ROLE.md",
+      "sha256": "c77c8b300d657fb8eabc1c44fdeb7e4ede7e50edb4c4d4c0dec2a78bc1038d3b"
+    },
+    {
+      "path": ".agent/vendor/ai-delivery-lead/adapters/README.md",
+      "sha256": "24bd91ed7cc7fd0d9f746eae148993624cb7157e34af879cd8b294a008a3d84e"
+    },
+    {
+      "path": ".agent/vendor/ai-delivery-lead/checks/review-checklist.md",
+      "sha256": "8d9dd74f6e08c40d0740e1d8c4dfdd3958a146331fd6eee66323e8587a9731b0"
+    },
+    {
+      "path": ".agent/vendor/ai-delivery-lead/templates/work-round.md",
+      "sha256": "04c4d4ec5e059b19a925c12b4dd7e7ac34498d71a5547197afee8527176ef6a7"
+    },
+    {
+      "path": ".agent/vendor/ai-developer/.gitignore",
+      "sha256": "4564a2a084a988e2ddb01c429d8c4c8daa89f6ccd23cdcb8c17516a69a73eabc"
+    },
+    {
+      "path": ".agent/vendor/ai-developer/AGENTS.md",
+      "sha256": "230ef04b38b7549b3ec4c2bd8c565ee07a92fd970122ffb53090a2b64b87bb4f"
+    },
+    {
+      "path": ".agent/vendor/ai-developer/CHANGELOG.md",
+      "sha256": "dc2b7ee73ec256a3273b760a4e607fe13bbee11931dda7f1376bb3e0bf9de4c2"
+    },
+    {
+      "path": ".agent/vendor/ai-developer/DEPENDENCIES.md",
+      "sha256": "041f2fff5139c01bc4bb9dd7d5f744d27e300e3fab5ea3c127241f3f8fca39cc"
+    },
+    {
+      "path": ".agent/vendor/ai-developer/INPUT.md",
+      "sha256": "cbb2868177146edcaefcc4225f46840edbaa4280b63f09db442767cd03519b51"
+    },
+    {
+      "path": ".agent/vendor/ai-developer/OUTPUT.md",
+      "sha256": "d7ede4f4d3e08dc8f710ba96b840cb91d81c798ab99f643a5b58fe18c307851f"
+    },
+    {
+      "path": ".agent/vendor/ai-developer/README.md",
+      "sha256": "9ae323d7134025296d32b91b9f2feffd9c6c743db301565277a4184f0c432b00"
+    },
+    {
+      "path": ".agent/vendor/ai-developer/ROLE.md",
+      "sha256": "9ec5c46a5e1d2e3f062fc2b857a87818d6dd471e12c12083ee0bd9099866a5f9"
+    },
+    {
+      "path": ".agent/vendor/ai-developer/adapters/README.md",
+      "sha256": "d6cc6b9cc189f6c6a061ec3f254a8b4bd75ed5366166ea0142effcf6a3b9e424"
+    },
+    {
+      "path": ".agent/vendor/ai-developer/checks/acceptance-checklist.md",
+      "sha256": "5e15862427f023278d50b2ee12d10fba721355a913952e44df6594732894cb03"
+    },
+    {
+      "path": ".agent/vendor/ai-developer/templates/checkpoint.md",
+      "sha256": "7d85be6e3e00d052f8a0a2eacd977c6cbc0c71a2854061dabd991d2ac2bec63b"
+    },
+    {
+      "path": ".agent/vendor/ai-product-designer/.gitignore",
+      "sha256": "4564a2a084a988e2ddb01c429d8c4c8daa89f6ccd23cdcb8c17516a69a73eabc"
+    },
+    {
+      "path": ".agent/vendor/ai-product-designer/AGENTS.md",
+      "sha256": "5c05f32fa39d93a6b043d07db4bdf50c3f5862fe2d6e8da4b27cce0348cfa361"
+    },
+    {
+      "path": ".agent/vendor/ai-product-designer/CHANGELOG.md",
+      "sha256": "b61040b79ce04a6ad2d6005115e261fa76d1e40dca1ad81adbdab1b27954cf4b"
+    },
+    {
+      "path": ".agent/vendor/ai-product-designer/DEPENDENCIES.md",
+      "sha256": "6379c2547db71248d09d3fee82d23111afa442b7b8a23b8b1ca24faff3056f0c"
+    },
+    {
+      "path": ".agent/vendor/ai-product-designer/INPUT.md",
+      "sha256": "9e056a6d121028adde9ecfdf2bfc2cb2185029f443a64b8b37510438ebf2eb70"
+    },
+    {
+      "path": ".agent/vendor/ai-product-designer/OUTPUT.md",
+      "sha256": "2378fee14ea5adabf24ee73745997804daf3083b9f44e8cf34e64260f1045fbb"
+    },
+    {
+      "path": ".agent/vendor/ai-product-designer/README.md",
+      "sha256": "9b6cdde396dc124a3a2c64cfce2120a32d9464a0ac6b49ca3eb533da07ce3d41"
+    },
+    {
+      "path": ".agent/vendor/ai-product-designer/ROLE.md",
+      "sha256": "f774ff9178b3490df253b56baa3c3455c96ea1e394ddf02d68d7d9f11171b36a"
+    },
+    {
+      "path": ".agent/vendor/ai-product-designer/adapters/README.md",
+      "sha256": "fa0e4a2876f5d7ba71d65521e6ed56b1161e233395de838f83b152240a0dd04f"
+    },
+    {
+      "path": ".agent/vendor/ai-product-designer/checks/design-checklist.md",
+      "sha256": "aad2358bcb0eb2549e550a86d2f2f274ee90c041ffdd92122673b8810f2f2c09"
+    },
+    {
+      "path": ".agent/vendor/ai-product-designer/templates/design-handoff.md",
+      "sha256": "421783514c0d85fa4843da940c333fd7a636f289703a6c9de7b6187f42481414"
+    },
+    {
+      "path": ".agent/vendor/ai-working-agreement/.gitignore",
+      "sha256": "4564a2a084a988e2ddb01c429d8c4c8daa89f6ccd23cdcb8c17516a69a73eabc"
+    },
+    {
+      "path": ".agent/vendor/ai-working-agreement/AGENTS.md",
+      "sha256": "4ca767d25526a14b9e943aa226f5d687edec14c06c0ec2589cb27190089ab441"
+    },
+    {
+      "path": ".agent/vendor/ai-working-agreement/AI-WORKING-AGREEMENT.md",
+      "sha256": "65cac64be0403c32f9f88796b32b08b1cae678a114353c73a2d849ed0bcae0f3"
+    },
+    {
+      "path": ".agent/vendor/ai-working-agreement/CHANGELOG.md",
+      "sha256": "619dd3434dfacda7089688f186852555bd4effda12dfa4f10613cf94ed10c7f1"
+    },
+    {
+      "path": ".agent/vendor/ai-working-agreement/README.md",
+      "sha256": "ec2761c815d5d0de6abaaa088789e5fcd9a602207b61ad840d9ca5ac0cbfc260"
+    },
+    {
+      "path": ".agent/vendor/ai-working-agreement/VERSION.md",
+      "sha256": "d4fe5ee25b3546cc2311cf6991dafb7030664d4f8c8e44a5bf0d0b7f699c3489"
+    },
+    {
+      "path": ".agent/vendor/ai-working-agreement/prompts/new-project.md",
+      "sha256": "6eacb466cf97f45c3bb96f86582b160c64305970ac26efaf94d5e3baaa15724c"
+    },
+    {
+      "path": ".agent/vendor/ai-working-agreement/prompts/take-over-project.md",
+      "sha256": "6b7961574573689f0317906a606e127ee9713e51b7e5492c922da9b91353c020"
+    },
+    {
+      "path": ".agent/vendor/ai-working-agreement/protocol/checkpoints.md",
+      "sha256": "f1daefa7bd429092b7e7c9e0691a87ebe8e1310be418a5d4e5ca38679e81d718"
+    },
+    {
+      "path": ".agent/vendor/ai-working-agreement/protocol/context-efficiency.md",
+      "sha256": "aadbce4bc8e1a456147ee178c30adaee1e31a620515f5ab5820fd904a3d0f053"
+    },
+    {
+      "path": ".agent/vendor/ai-working-agreement/protocol/delivery.md",
+      "sha256": "484bc0ae099f3b250cc6199d88c95dc5333f9e13373a026e4c0e8cf2460523ce"
+    },
+    {
+      "path": ".agent/vendor/ai-working-agreement/protocol/startup.md",
+      "sha256": "51142b8f7a6923a1a142d5022fcbeab5f27ae57019d153e326e8208e86cc1774"
+    },
+    {
+      "path": ".agent/vendor/ai-working-agreement/templates/build-contract.md",
+      "sha256": "6f0b6e96001dfcd8648d327d2d31f09cae1b4b6e6eff32c799d68b798cabc91b"
+    },
+    {
+      "path": ".agent/vendor/ai-working-agreement/templates/checkpoint.md",
+      "sha256": "1215149c7b206c5899f4845081d47f6e49f8bd23b02b1a82ff5cb97688473bc3"
+    },
+    {
+      "path": ".agent/vendor/ai-working-agreement/templates/project-context.md",
+      "sha256": "e7bc91e1bb8f49cf619745dfb3192390ff96fdcb9fa1636cc6293a2413a1e723"
+    },
+    {
+      "path": ".agent/vendor/ai-working-agreement/templates/review-report.md",
+      "sha256": "ce1cbcb17377b5cf1748aab5cb9dad9f3a695bbe39a3b44c133ffe14746ff1d5"
+    },
+    {
+      "path": ".agent/vendor/ai-working-agreement/templates/work-round.md",
+      "sha256": "bca79525cbcb4b3599cf12653cf474bd5cd55f5143446003ccafa5c7d6224df8"
+    }
+  ]
+}

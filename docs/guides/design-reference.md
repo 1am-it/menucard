@@ -423,13 +423,15 @@ Sources:
 
 ### Proposed correction: task flow and administration (issue #53, revision 3)
 
-**2026-10-17: NEEDS_APPROVAL, not implemented or design-approved.** The
+**2026-10-17: Revision 3 approved for implementation; not yet product-accepted.** The
 Product Owner rejected the module-card workqueue and single-link Beheer hub
 as insufficient simplification. The full proposed inventory, screen contract
 and acceptance matrix are in
 `planning/specs/tickets/internal-task-flow-53.md`; its proposed visual reference
 is `docs/mockups/internal-task-flow-v3.html`. Neither a green test run nor
-the earlier proposals v1/v2 approve this revision.
+the earlier proposals v1/v2 approve this revision. Approval is the explicit
+Product Owner decision recorded on issue #53 against commit
+f8b44abd64e8085737e5dad6b225eaf5aef1efc3; the pinned mockup is unchanged.
 
 - Werkvoorraad must show actual pending items with one appropriate next action,
   opening the exact record without a module-selection or search-again step.
@@ -449,7 +451,7 @@ the earlier proposals v1/v2 approve this revision.
   It is a missing future capability, not a working tab or permission for
   internal staff to manage accounts. General canonical restaurant CRUD also
   is not added implicitly by the restaurant/source overview.
-- Do not build until the Product Owner approves the pinned revision 3 design.
+- Build only the approved pinned revision 3; preserve its scope and release gate.
 
 ### Current PR candidate (issue #53 — not product-accepted)
 

@@ -1,0 +1,15 @@
+# Werkkaart - [Ronde]
+
+STATE: BUILDING
+PROJECT: [repository + root]
+ROLE / OWNER: [rol + uitvoerder]
+TASK / PR: [bestaande opdracht + PR]
+START COMMIT: [geverifieerde commit]
+CONTEXT: [protocolversie, relevante project-MD's + ontwerp/contract]
+RESULTAAT: [een afgebakend deelresultaat]
+BESTANDEN: [gerichte lees-/schrijfgebieden]
+TESTS: [bestaande commando's, geen verzonnen opdrachten]
+GRENZEN: [rechten, geen productie/export, budget indien toegestaan]
+CHECKPOINT: [duurzame locatie, wanneer tussentijds opslaan]
+STOP: [klaar / veilige rondegrens / concreet besluit nodig]
+NEXT: [eerstvolgende stap bij hervatting]

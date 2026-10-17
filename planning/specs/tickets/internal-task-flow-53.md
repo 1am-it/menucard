@@ -2,9 +2,11 @@
 
 ## Status And Authority
 
-2026-10-17: **NEEDS_APPROVAL - design alignment, not implementation**.
-The Product Owner authorized inventory and alignment of the ticket, shared
-documentation and mockups. Revision 3 still needs explicit design approval.
+2026-10-17: **BUILDING - revision 3 approved for implementation**.
+The Product Owner explicitly approved revision 3 in chat: "ok akkoord om te
+bouwen". Issue #53 records that approval against reference commit
+f8b44abd64e8085737e5dad6b225eaf5aef1efc3. This handoff preparation does not
+claim the requested screen changes are built or accepted.
 PR #56's green technical checks do not establish product acceptance.
 
 - Live contract: https://github.com/1am-it/menucard/issues/53
@@ -13,9 +15,10 @@ PR #56's green technical checks do not establish product acceptance.
 - Proposed reference: `docs/mockups/internal-task-flow-v3.html`.
 - Previous proposals v1/v2 are historical, not retroactively approved.
 
-Do not start another Claude build round, change app code, merge or release
-while this revision is awaiting approval. Updating these design documents is
-not permission for production, credentials, migrations or public data writes.
+The design gate is satisfied. Continue only the approved contract in PR #56
+after the isolated handoff; do not start competing Claude/DeepSeek writers.
+No production, credential, migration, public-data, merge or release authority
+is granted by this documentation or the design approval.
 
 ## User Outcome
 

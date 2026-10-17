@@ -26,7 +26,11 @@ that guide or a ticket disagree, the text wins.
 `internal-task-flow-v3.html` is the proposed reference for a unified item-level
 Werkvoorraad and Beheer with direct content plus secondary administration
 views. Leading contract: `planning/specs/tickets/internal-task-flow-53.md`.
-Status: **NEEDS_APPROVAL**, not implemented or approved. It preserves the
+Status: **approved for implementation**, not yet built or product-accepted.
+Approval is recorded on issue #53 for commit
+`f8b44abd64e8085737e5dad6b225eaf5aef1efc3`; the immutable mockup's original
+waiting-for-approval label records its proposal state, not the live decision.
+It preserves the
 existing identity/Kleurtaal v2 and uses fictional data. The earlier chat v1
 proposal, v2 and module-card candidate are not the accepted final design. User
 and role administration is explicitly unavailable, not a simulated working tab.

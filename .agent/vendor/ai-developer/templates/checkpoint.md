@@ -1,0 +1,15 @@
+# Developercheckpunt
+
+STATE: [BUILDING / READY_FOR_REVIEW / NEEDS_APPROVAL / BLOCKED / DONE]
+PROJECT / TASK / ROLE: [binding + uitvoerder]
+CONTRACT / DESIGN: [goedkeuring + exacte versie]
+BRANCH / PR: [bestaande]
+SAVED COMMIT / REMOTE: [exacte commit + bevestigd ja/nee]
+COMPLETED: [deelresultaat]
+TESTS: [werkelijk commando + resultaat + head]
+VISUAL: [bewijs / niet uitgevoerd + reden]
+UNSAVED: [bestanden + veilige duurzame locatie / geen]
+REMAINING: [concrete criteria]
+STOP REASON: [beurten/tijd/quota/fout/gereed/besluit]
+NEXT SAFE STEP / OWNER: [gericht vervolg]
+AUTO RESUME: [niet ingericht / geautoriseerde en geteste voorziening]
