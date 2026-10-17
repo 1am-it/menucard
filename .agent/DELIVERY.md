@@ -52,6 +52,14 @@ edge case was discovered while delivering the agreed outcome.
 
 ### 3. Verify
 
+For an information-architecture or workflow contract, maintain an acceptance
+matrix: scenario, approved reference/version, actual destination/click count,
+role, and evidence. Compare actual screens with the approved mockups, including
+secondary navigation and empty/error states. Verify that existing capabilities
+remain reachable. `Tests passed` is not a substitute for this comparison; a
+product-rejected reference or missing user outcome cannot be called
+`READY_FOR_REVIEW` merely because the technical checks are green.
+
 Before handoff, run the smallest relevant checks that prove the contract:
 
 - focused regression tests for each changed behaviour;

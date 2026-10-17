@@ -22,6 +22,15 @@ that guide or a ticket disagree, the text wins.
 
 ## Index at a glance (addition, 2026-10-06)
 
+**Issue #53 alignment, 2026-10-17:**
+`internal-task-flow-v2.html` is the proposed reference for a unified item-level
+Werkvoorraad and Beheer with direct content plus secondary administration
+views. Leading contract: `planning/specs/tickets/internal-task-flow-53.md`.
+Status: **NEEDS_APPROVAL**, not implemented or approved. It preserves the
+existing identity/Kleurtaal v2 and uses fictional data. The earlier chat v1
+proposal and module-card candidate are not the accepted final design. User
+and role administration is explicitly unavailable, not a simulated working tab.
+
 Every file in this directory, with its leading ticket and role. "Leading"
 means the ticket that names the mockup as its design reference;
 "context" means a related ticket that does not. The sections below hold

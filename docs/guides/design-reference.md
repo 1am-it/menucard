@@ -421,7 +421,33 @@ Sources:
 - **Live behaviour:** `src/lib/internalNav.js` (config) and
   `src/components/InternalNav.js` (render).
 
-### Implemented today (issue #53 — compact source flow)
+### Proposed correction: task flow and administration (issue #53, revision 2)
+
+**2026-10-17: NEEDS_APPROVAL, not implemented or design-approved.** The
+Product Owner rejected the module-card workqueue and single-link Beheer hub
+as insufficient simplification. The full proposed inventory, screen contract
+and acceptance matrix are in
+`planning/specs/tickets/internal-task-flow-53.md`; its proposed visual reference
+is `docs/mockups/internal-task-flow-v2.html`. Neither a green test run nor
+the earlier chat mockup v1 approves this revision.
+
+- Werkvoorraad must show actual pending items with one appropriate next action,
+  opening the exact record without a module-selection or search-again step.
+- Beheer opens Overzicht immediately and provides existing-data views for
+  Restaurants en bronnen, Importhistorie, and Concepten en besluiten. There is
+  no extra landing page consisting of links to those views.
+- Existing role/ownership, history, source checks and review/publication gates
+  remain; one capability inventory prevents losing destinations by omission.
+- User/role administration has no existing app UI or admin security contract.
+  It is a missing future capability, not a working tab or permission for
+  internal staff to manage accounts. General canonical restaurant CRUD also
+  is not added implicitly by the restaurant/source overview.
+- Do not build until the Product Owner approves the pinned revision 2 design.
+
+### Current PR candidate (issue #53 — not product-accepted)
+
+The following records the earlier candidate implementation, not the desired
+acceptance contract. It must not override revision 2's proposal after approval.
 
 The primary navigation is exactly three plain links, in this order:
 
@@ -483,9 +509,10 @@ Other rules:
 
 ### Rules
 
-- A new internal module is a new entry in `internalNav.js`, usually
-  placed in `Werkvoorraad` (daily action) or `Beheer` (overview, history,
-  reference). It is never a second navigation or a page-local nav.
+- Map every capability to the shared primary navigation and its actual task
+  or administration view. Register routes/roles in `internalNav.js`; this does
+  not require a module card for every capability. Beheer's secondary view
+  navigation stays within Beheer, never a competing global navigation.
 - Every internal page uses the same order, labels and position. The
   active destination has `aria-current="page"` (decision 014, item 2).
 - Role filtering only hides links. Every route and API keeps its own

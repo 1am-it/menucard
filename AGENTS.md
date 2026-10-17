@@ -51,6 +51,14 @@ human decision.
 
 ## Design Approval
 
+For a navigation/workflow redesign, the contract must include a complete
+capability-to-destination inventory and user scenarios before implementation.
+Pin the approved mockup version and compare the built screens AND click paths
+against it. Moving existing module links is not evidence that a task flow was
+simplified. Mark missing capabilities honestly; do not silently omit them or
+advertise unimplemented administration features. Technical green checks and
+product acceptance are separate gates.
+
 Require one Product Owner approval of a visual reference only when a contract
 introduces a new page, a materially new user flow, or a meaningful change to
 information hierarchy or interaction. The approved reference may be an
