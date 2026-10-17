@@ -431,7 +431,8 @@ test('structural safety net: Werkvoorraad reports partial/error states and a tru
 test('structural safety net: every legacy destination exposes the exact-record deep-link adapter used by the task hrefs', () => {
   const sourceWorkqueue = fs.readFileSync(SOURCE_WORKQUEUE_PAGE_PATH, 'utf8');
   assert.match(sourceWorkqueue, /new URLSearchParams\(window\.location\.search\)\.get\('restaurant'\)/);
-  assert.match(sourceWorkqueue, /setOpenRow\(`t:\$\{row\.restaurant_id\}`\)/);
+  assert.match(sourceWorkqueue, /window\.matchMedia\('\(max-width: 760px\)'\)\.matches/);
+  assert.match(sourceWorkqueue, /setOpenRow\(`\$\{mobileCards \? 'c' : 't'\}:\$\{row\.restaurant_id\}`\)/);
 
   const sourceTriage = fs.readFileSync(SOURCE_TRIAGE_PAGE_PATH, 'utf8');
   assert.match(sourceTriage, /new URLSearchParams\(window\.location\.search\)\.get\('restaurant'\)/);

@@ -289,7 +289,10 @@ export default function SourceWorkqueuePage() {
       return
     }
     setQuery(row.name)
-    setOpenRow(`t:${row.restaurant_id}`)
+    // The table is hidden below 760px in favour of the card view; open the
+    // matching one so the exact record is expanded on both layouts.
+    const mobileCards = window.matchMedia('(max-width: 760px)').matches
+    setOpenRow(`${mobileCards ? 'c' : 't'}:${row.restaurant_id}`)
   }, [data])
 
   // Bring the opened panel into view. Both the table and the mobile-card view
