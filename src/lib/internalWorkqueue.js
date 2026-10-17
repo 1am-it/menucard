@@ -125,7 +125,15 @@ function publicationReason(exportRow) {
   if (status === 'pending') return 'Review-PR wordt aangemaakt';
   if (status === 'closed') return 'Review-PR gesloten · controleer de publicatie';
   if (status === 'failed') return 'Publicatie mislukt · controleer de oorzaak';
-  return 'Intern goedgekeurd · controleer de publicatiestatus';
+  // No stored export means readiness is simply unknown: never claim that an
+  // approved concept is already "Klaar voor publicatie".
+  return 'Intern goedgekeurd · publicatiestatus niet vastgesteld';
+}
+
+function publicationAction(exportRow) {
+  const status = exportRow && exportRow.status;
+  if (status === 'opened' || status === 'pending') return 'Bekijk publicatie';
+  return 'Controleer publicatie';
 }
 
 function sourceTaskReason(row) {
@@ -288,7 +296,7 @@ function buildWorkqueue({ roles, providers } = {}) {
       title: approved ? 'Goedgekeurd menuconcept' : 'Nieuwe menukaart',
       reason: approved ? publicationReason(exportRow) : menuConceptReason(item),
       secondary: conceptSecondary(item),
-      actionLabel: approved ? 'Open publicatie' : 'Controleer menukaart',
+      actionLabel: approved ? publicationAction(exportRow) : 'Controleer menukaart',
       href: `/internal/menu-concepts/${encodeURIComponent(asString(item.id))}`,
       priority: approved ? PRIORITY.menu_publication : PRIORITY.menu_review,
       recordedAt: (exportRow && exportRow.createdAt) || item.createdAt || null,
@@ -334,7 +342,10 @@ function buildWorkqueue({ roles, providers } = {}) {
     const restaurantId = asString(row.restaurant_id);
     const isReviewRow = row.action === 'review' || row.action === 'review_manually';
     if (isReviewRow && conceptRestaurantIds.has(restaurantId)) continue;
-    if (!isReviewRow && proposalRestaurantIds.has(restaurantId)) continue;
+    // An open proposal replaces the generic source-check step, but never an
+    // identity question: deciding a source URL does not establish which
+    // restaurant an ambiguous source belongs to. That is independent work.
+    if (!isReviewRow && row.queue !== 'identity' && proposalRestaurantIds.has(restaurantId)) continue;
     if (!ACTION_LABELS[row.action]) continue;
     const identity = row.queue === 'identity';
     add({

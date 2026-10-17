@@ -233,6 +233,68 @@ test('duplicate handling: an open source proposal replaces the generic source-ch
   assert.deepEqual(result.tasks.map((t) => t.id), ['source-proposal:proposal-1']);
 });
 
+test('duplicate handling: an identity question survives an open source proposal — it is independent work', () => {
+  const result = build(INTERNAL, baseProviders({
+    'source-triage': { ok: true, data: { restaurants: [proposalEntry] } },
+    'source-workqueue': {
+      ok: true,
+      data: {
+        rows: [
+          {
+            ...sourceRow,
+            restaurant_id: 25,
+            name: 'Eethuis De Kade',
+            source: 'identity_changed',
+            action: 'check_identity',
+            queue: 'identity',
+          },
+        ],
+      },
+    },
+  }));
+  assert.deepEqual(result.tasks.map((t) => t.id), ['source-workqueue:25', 'source-proposal:proposal-1']);
+  assert.equal(result.tasks[0].kind, 'source_identity');
+});
+
+test('duplicate handling: several pending changes and claims for one restaurant stay independent records', () => {
+  const result = build(EDITOR, baseProviders({
+    moderation: {
+      ok: true,
+      data: {
+        items: [
+          { pending: { id: 'p1', restaurant_id: 23, field_name: 'phone' } },
+          { pending: { id: 'p2', restaurant_id: 23, field_name: 'address' } },
+        ],
+      },
+    },
+    claims: {
+      ok: true,
+      data: {
+        items: [
+          { claim: { id: 'c1', restaurant_id: 23 }, restaurantName: 'Bistro Linde' },
+          { claim: { id: 'c2', restaurant_id: 23 }, restaurantName: 'Bistro Linde' },
+        ],
+      },
+    },
+  }));
+  assert.deepEqual(result.tasks.map((t) => t.id), [
+    'moderation:p1',
+    'moderation:p2',
+    'claim:c1',
+    'claim:c2',
+  ]);
+});
+
+test('duplicate handling: two menu contexts for one restaurant remain two concept records', () => {
+  const result = build(INTERNAL, baseProviders({
+    'menu-concepts': {
+      ok: true,
+      data: { items: [menuItem, { ...menuItem, id: 'concept-2', menuContext: 'Diner' }] },
+    },
+  }));
+  assert.deepEqual(result.tasks.map((t) => t.id), ['menu-concept:concept-1', 'menu-concept:concept-2']);
+});
+
 test('duplicate handling: a proposal and a menu review for the same restaurant stay independent steps', () => {
   const result = build(INTERNAL, baseProviders({
     'menu-concepts': { ok: true, data: { items: [{ ...menuItem, restaurantId: 25 }] } },
@@ -254,6 +316,19 @@ test('duplicate handling: an active profile draft covers its candidate — no se
     'profile-drafts': { ok: true, data: { drafts: [draft] } },
   }));
   assert.deepEqual(result.tasks.map((t) => t.id), ['profile-draft:draft-1']);
+});
+
+test('duplicate handling: an active draft does not hide a newer, independent candidate review task', () => {
+  const result = build(INTERNAL, baseProviders({
+    'import-candidates': {
+      ok: true,
+      data: {
+        candidates: [{ ...candidate, id: 'candidate-1', review_status: 'needs_enrichment', profile_draft: { id: 'draft-1' } }],
+      },
+    },
+    'profile-drafts': { ok: true, data: { drafts: [draft] } },
+  }));
+  assert.deepEqual(result.tasks.map((t) => t.id), ['candidate:candidate-1', 'profile-draft:draft-1']);
 });
 
 test('duplicate handling: candidates with the same name but different stable ids are not merged', () => {
@@ -401,9 +476,14 @@ test('publication: a merged export is not open work; open/failed/closed exports 
   assert.equal(byId['menu-concept:merged'], undefined);
   assert.equal(byId['source-workqueue:31'], undefined);
   assert.match(byId['menu-concept:opened'].reason, /Review-PR open/);
+  assert.equal(byId['menu-concept:opened'].actionLabel, 'Bekijk publicatie');
   assert.match(byId['menu-concept:failed'].reason, /mislukt/);
+  assert.equal(byId['menu-concept:failed'].actionLabel, 'Controleer publicatie');
   assert.match(byId['menu-concept:closed'].reason, /gesloten/);
-  assert.match(byId['menu-concept:fresh'].reason, /controleer de publicatiestatus/);
+  assert.match(byId['menu-concept:fresh'].reason, /publicatiestatus niet vastgesteld/);
+  assert.equal(byId['menu-concept:fresh'].actionLabel, 'Controleer publicatie');
+  // An approved concept alone never claims publication readiness.
+  for (const task of result.tasks) assert.doesNotMatch(task.reason, /Klaar voor publicatie/i);
   assert.equal(result.tasks.length, 4);
 });
 

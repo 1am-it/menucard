@@ -197,11 +197,11 @@ test('isCurrentModule: old routes keep orienting on the right primary item; the 
 
 // ─── Structural safety net: /internal home page ────────────────────────
 
-test('structural safety net: /internal exists and gates on a signed-in session only, matching every other internal page\'s pattern', () => {
+test('structural safety net: /internal exists and gates on the signed-in session, then on the internal role for its data', () => {
   const source = fs.readFileSync(INTERNAL_HOME_PAGE_PATH, 'utf8');
-  assert.match(source, /getSupabaseBrowser\(\)\.auth\.getSession\(\)/, 'must use the same session-check pattern as every other internal page');
+  assert.match(source, /getSupabaseBrowser\(\)[\s\S]{0,80}\.auth\.getSession\(\)/, 'must use the same session-check pattern as every other internal page');
   assert.match(source, /router\.replace\(['"]\/internal\/login['"]\)/, 'an unauthenticated visitor must be redirected to /internal/login');
-  assert.doesNotMatch(source, /isInternalOnly|isEditorRole/, 'the page itself must not gate on a specific role — /internal is session-gated only, per PLATFORM-11\'s decided matrix row');
+  assert.match(source, /isInternalOnly/, 'issue #53 round 2: only internal staff may receive the administration sections');
 });
 
 test('structural safety net: /internal resolves roles via the shared, read-only /api/internal/v1/me endpoint — no direct Supabase staff_roles query from the browser', () => {
@@ -222,7 +222,7 @@ test('structural safety net: /internal passes its own already-resolved roles int
 test('structural safety net: /internal shows an explicit "no internal access" status with sign out as its only action when no usable role is present', () => {
   const source = fs.readFileSync(INTERNAL_HOME_PAGE_PATH, 'utf8');
   assert.match(source, /hasAnyKnownRole/, 'must use the shared, tested role classifier — never a separately re-implemented check');
-  assert.match(source, /no internal access/i);
+  assert.match(source, /Geen interne toegang voor dit account/);
   assert.match(source, /signOut/);
 });
 
@@ -236,13 +236,14 @@ test('structural safety net: /internal renders InternalNav only when the no-acce
   assert.match(source, /showNoAccessStatus = noAccess && !error/);
 });
 
-test('structural safety net: /internal never invents an owner destination — the owner section is worded as not-yet-available, not a link', () => {
+test('structural safety net: an editor-only account gets no internal-only Beheer sections, only the Werkvoorraad entry point', () => {
   const source = fs.readFileSync(INTERNAL_HOME_PAGE_PATH, 'utf8');
-  assert.match(source, /isOwnerRole/);
-  const ownerBlockMatch = source.match(/\{showOwnerSection && \([\s\S]*?\n {10}\)\}/);
-  assert.ok(ownerBlockMatch, 'expected to find the conditionally-rendered owner section block');
-  assert.doesNotMatch(ownerBlockMatch[0], /<a\s/, 'the owner section must never render as a clickable link to an invented page');
-  assert.match(ownerBlockMatch[0], /not.*yet|nothing.*yet/i, 'must plainly say there is nothing to open yet, never imply a real destination');
+  assert.match(source, /Geen interne beheerinhoud voor dit account/);
+  assert.match(source, /href="\/internal\/workqueue"/);
+  // The admin sections are gated on the internal role, never merely on being
+  // signed in or on the editor role.
+  assert.match(source, /\{canManage && !error && \(/);
+  assert.match(source, /const canManage = isInternalOnly\(roles\)/);
 });
 
 // ─── Structural safety net: decided login redirect ─────────────────────
@@ -329,9 +330,14 @@ test('structural safety net: /internal/workqueue shows concrete tasks (issue #53
   assert.doesNotMatch(source, /\.from\(['"]/);
 });
 
-test('structural safety net: Beheer shows only the Beheer modules and /internal/nieuwe-import fronts the existing batch page', () => {
+test('structural safety net: Beheer renders its four approved sections and /internal/nieuwe-import still fronts the existing batch page', () => {
   const home = fs.readFileSync(INTERNAL_HOME_PAGE_PATH, 'utf8');
-  assert.match(home, /groupModulesByPlacement\(resolveVisibleModules\(roles\)\)\.beheer/);
+  assert.match(home, /BeheerNav/);
+  assert.match(home, /OverviewPanel/);
+  assert.match(home, /RestaurantsPanel/);
+  assert.match(home, /ImportHistoryPanel/);
+  assert.match(home, /DecisionsPanel/);
+  assert.doesNotMatch(home, /groupModulesByPlacement|modules\.map\(/, 'no module-card hub remains in Beheer');
   const importPage = fs.readFileSync(path.join(REPO_ROOT, 'app/internal/nieuwe-import/page.js'), 'utf8');
   assert.match(importPage, /export \{ default \} from '\.\.\/source-triage\/batch\/page'/);
 });
