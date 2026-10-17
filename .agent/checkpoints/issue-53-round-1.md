@@ -9,9 +9,9 @@ BRANCH: feat/compact-source-flow-53.
 
 ## Saved Commit And Remote
 
-- Round commit: `726d8024789e8ce9e6f0dc120f527ca6960ada0e`.
-- Remote `origin/feat/compact-source-flow-53` verified at the same commit after
-  `git fetch`.
+- Code round commit: `726d8024789e8ce9e6f0dc120f527ca6960ada0e`.
+- Remote `origin/feat/compact-source-flow-53` was verified at that commit after
+  `git fetch`; this checkpoint document is committed on top of it.
 - Base: `74b0cb2` (prepared handoff on top of main `fc12bbc`).
 - No merge, publication, production action or source activation was performed.
 
