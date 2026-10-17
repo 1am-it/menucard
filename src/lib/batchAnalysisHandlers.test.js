@@ -179,6 +179,17 @@ test('process: a non-starter is refused by the claim (P0044) and nothing is anal
   assert.equal(analysed, false);
 });
 
+test('service worker entry uses the same claim path without a browser request', async () => {
+  const supabase = fakeSupabase({
+    rpc: { claim_next_source_analysis_job: () => ({ data: [{ claimed_job_id: null, claim_outcome: 'done' }], error: null }) },
+  });
+  const { handlers } = makeHandlers({ supabase });
+  const res = await handlers.processForWorker(BATCH, STARTER);
+  assert.equal(res.status, 200);
+  assert.equal(res.body.outcome, 'done');
+  assert.equal(supabase.calls.filter((c) => c.rpc === 'claim_next_source_analysis_job').length, 1);
+});
+
 test('process: waiting/busy/done are passed through without analysing', async () => {
   for (const outcome of ['waiting', 'busy', 'done']) {
     let analysed = false;

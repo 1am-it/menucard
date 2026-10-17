@@ -18,7 +18,7 @@
 import { useMemo, useState } from 'react'
 import StatusIcon from '@/src/components/StatusIcon'
 import { STATUS, buildMenuConcept, displayPrice, removalKey } from '@/src/lib/menuConcept'
-import { formatPath } from '@/src/lib/menuHierarchy'
+import { formatPath, pathKey } from '@/src/lib/menuHierarchy'
 
 /**
  * The proposed section structure next to its original source route, for
@@ -60,9 +60,20 @@ export function plural(n, one, many) {
   return `${n} ${n === 1 ? one : many}`
 }
 
+function coverageText(coverage) {
+  if (!coverage) return null
+  if (coverage.status === 'candidate_without_items') {
+    return 'Bron gevonden, maar er zijn geen gerechten met een betrouwbare prijs herkend. Dit is geen geslaagde extractie.'
+  }
+  if (coverage.status === 'no_content_found') return 'Geen bruikbare menukaart gevonden.'
+  const sources = plural(coverage.readCount || 0, 'bron gelezen', 'bronnen gelezen')
+  return `${plural(coverage.itemCount || 0, 'gerecht', 'gerechten')} uit ${sources}; controle nodig.`
+}
+
 export function MenuControl({ item }) {
   const menu = item.menu
   const href = item.foundUrl || item.url
+  const coverage = coverageText(item.coverage)
   return (
     <section className="bta-control" aria-label="Menukaartcontrole">
       <div className="bta-control-head">
@@ -76,6 +87,32 @@ export function MenuControl({ item }) {
           </a>
         )}
       </div>
+
+      {coverage && <p className="bta-muted">{coverage}</p>}
+
+      {item.attentionGroups && item.attentionGroups.length > 0 && (
+        <div className="bta-attention" role="group" aria-label="Gedeelde onzekerheid">
+          <p className="bta-attention-title">
+            <StatusIcon name="warning" /> {plural(item.attentionGroups.length, 'gedeelde onzekerheid', 'gedeelde onzekerheden')}
+          </p>
+          <ul>
+            {item.attentionGroups.map((group) => (
+              <li key={group.id}>
+                <span className="bta-dish">{group.label}</span>{' '}
+                <span className="bta-muted">· {plural(group.itemCount, 'gerecht', 'gerechten')} · rubriekindeling onzeker</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {item.limitations && item.limitations.length > 0 && (
+        <ul className="bta-notes" aria-label="Beperkingen van deze extractie">
+          {item.limitations.map((limitation) => (
+            <li key={limitation}>{limitation}</li>
+          ))}
+        </ul>
+      )}
 
       {menu && menu.attention.length > 0 && (
         <div className="bta-attention" role="group" aria-label="Aandachtspunten">
@@ -370,6 +407,50 @@ export function BlockerBanner({ concept }) {
   )
 }
 
+/**
+ * A shared uncertainty is one decision about the shown section, not an
+ * "accept everything" switch. Price/duplicate/removed blockers stay untouched.
+ */
+function UncertainGroups({ lines, readOnly, onAcceptGroup }) {
+  const groups = []
+  const byPath = new Map()
+  for (const line of lines) {
+    // Only the category blocker is settled here. A duplicate or missing price
+    // on the same line keeps its own blocker and needs its own decision.
+    if (!line.categoryUncertain || line.categoryEdited || line.status !== 'unclear_category') continue
+    const key = pathKey(line.categoryPath || [line.category])
+    let group = byPath.get(key)
+    if (!group) {
+      group = { key, path: line.categoryPath || [line.category], lines: [] }
+      byPath.set(key, group)
+      groups.push(group)
+    }
+    group.lines.push(line)
+  }
+  if (groups.length === 0) return null
+  return (
+    <div className="bta-attention" role="group" aria-label="Gedeelde rubriekonzekerheid">
+      <p className="bta-attention-title">
+        <StatusIcon name="warning" /> {plural(groups.length, 'gedeelde rubriekonzekerheid', 'gedeelde rubriekonzekerheden')}
+      </p>
+      <ul>
+        {groups.map((group) => (
+          <li key={group.key}>
+            <span className="bta-dish">{formatPath(group.path)}</span>{' '}
+            <span className="bta-muted">· {plural(group.lines.length, 'gerecht', 'gerechten')}</span>
+            {!readOnly && (
+              <button type="button" className="stg-btn-secondary bta-btn" onClick={() => onAcceptGroup(group.lines)}>
+                Rubriek klopt zo
+              </button>
+            )}
+          </li>
+        ))}
+      </ul>
+      <p className="bta-muted">Deze keuze geldt alleen voor de getoonde rubriek en lost geen ontbrekende prijzen of andere blokkades op.</p>
+    </div>
+  )
+}
+
 export function MenuConcept({ item, readOnly, busy, onSave }) {
   const { edits, touched, setLineEdit, decideRemoved } = useConceptEdits()
   const concept = useMemo(() => buildMenuConcept({ menus: item.concept.menus, liveLines: item.concept.liveLines, edits }), [item.concept, edits])
@@ -388,6 +469,13 @@ export function MenuConcept({ item, readOnly, busy, onSave }) {
 
       <ConceptChips safe={safe} concept={concept} excluded={excluded} />
       <BlockerBanner concept={concept} />
+      <UncertainGroups
+        lines={concept.lines}
+        readOnly={readOnly}
+        onAcceptGroup={(lines) => {
+          for (const line of lines) setLineEdit(line.id, { accept: true })
+        }}
+      />
 
       {editorLines.length > 0 && (
         <ul className="bta-concept-lines" aria-label="Aandachtspunten en blokkades">

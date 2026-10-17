@@ -210,9 +210,10 @@ function InputCard({ text, setText, daily, ownOpenBatchId, onStart, busy, error,
   )
 }
 
-function ResultCard({ item, isStarter, batchOpen, ownOpenBatchId, confirming, setConfirming, onConfirm, onRerun, onAdjust, onSaveConcept, busy }) {
-  const [details, setDetails] = useState(false)
+function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBatchId, confirming, setConfirming, onConfirm, onRerun, onAdjust, onSaveConcept, busy }) {
+  const [details, setDetails] = useState(focusItem === item.position)
   const confirmRef = useRef(null)
+  const resultRef = useRef(null)
   const restaurantName = item.restaurant && item.restaurant.name
   const knownText = item.restaurant ? `Bekend restaurant · ${restaurantName}` : item.key === 'menu_found' || item.key === 'needs_review' ? 'Onbekend restaurant' : null
   const open = Boolean(item.jobId) && confirming === item.jobId
@@ -221,10 +222,21 @@ function ResultCard({ item, isStarter, batchOpen, ownOpenBatchId, confirming, se
     if (open && confirmRef.current) confirmRef.current.focus()
   }, [open])
 
+  useEffect(() => {
+    if (focusItem !== item.position) return
+    setDetails(true)
+    if (resultRef.current) resultRef.current.scrollIntoView({ block: 'start' })
+  }, [focusItem, item.position])
+
   const canAct = isStarter
   const rerunBlocked = Boolean(ownOpenBatchId) || batchOpen
   const actions = canAct ? item.actions : []
-  const reviewHref = item.restaurant ? '/internal/source-triage' : `/internal/onboarding-restaurant${item.url ? `?url=${encodeURIComponent(item.url)}` : ''}`
+  // A known restaurant's manual result belongs to this exact batch item. The
+  // old unfiltered source-triage list lost the restaurant, source and page;
+  // this link reopens the same result with its source context intact.
+  const reviewHref = item.restaurant && batchId
+    ? `/internal/source-triage/batch?batch=${encodeURIComponent(batchId)}&item=${item.position}`
+    : `/internal/onboarding-restaurant${item.url ? `?url=${encodeURIComponent(item.url)}` : ''}`
 
   function actionButton(action, primary) {
     const cls = primary ? 'di-btn-primary bta-btn' : 'stg-btn-secondary bta-btn'
@@ -267,7 +279,7 @@ function ResultCard({ item, isStarter, batchOpen, ownOpenBatchId, confirming, se
   }
 
   return (
-    <li className={`bta-result${open ? ' bta-result--confirming' : ''}`}>
+    <li ref={resultRef} id={`bta-result-${item.position}`} className={`bta-result${open ? ' bta-result--confirming' : ''}`}>
       <div className="bta-result-head">
         <div className="bta-result-id">
           <span className="bta-url bta-url--strong">{item.url || `Regel ${item.position}`}</span>
@@ -328,7 +340,7 @@ function ResultCard({ item, isStarter, batchOpen, ownOpenBatchId, confirming, se
   )
 }
 
-function BatchDetail({ detail, ownOpenBatchId, busy, confirming, setConfirming, onConfirm, onRerun, onAdjust, onSaveConcept, onNew, notice }) {
+function BatchDetail({ detail, focusItem, ownOpenBatchId, busy, confirming, setConfirming, onConfirm, onRerun, onAdjust, onSaveConcept, onNew, notice }) {
   const { batch, items, summary } = detail
   const isStarter = batch.is_starter
   const batchOpen = !batch.closed_at
@@ -482,6 +494,8 @@ function BatchDetail({ detail, ownOpenBatchId, busy, confirming, setConfirming, 
           <ResultCard
             key={`${item.position}-${item.jobId || 'none'}`}
             item={item}
+            batchId={batch.id}
+            focusItem={focusItem}
             isStarter={isStarter}
             batchOpen={batchOpen}
             ownOpenBatchId={ownOpenBatchId}
@@ -500,7 +514,7 @@ function BatchDetail({ detail, ownOpenBatchId, busy, confirming, setConfirming, 
 }
 
 /** Everything below the internal navigation. */
-export default function BatchAnalysisView({ data, loadError, message, viewing, ownOpenBatchId, busy, confirming, setConfirming, onConfirm, onRerun, onAdjust, onSaveConcept, onNew, notice, text, setText, onStart, actionError, onShowOpen, onSelect }) {
+export default function BatchAnalysisView({ data, loadError, message, viewing, focusItem, ownOpenBatchId, busy, confirming, setConfirming, onConfirm, onRerun, onAdjust, onSaveConcept, onNew, notice, text, setText, onStart, actionError, onShowOpen, onSelect }) {
   return (
     <>
       <nav aria-label="Kruimelpad" className="bta-breadcrumb">
@@ -554,6 +568,7 @@ export default function BatchAnalysisView({ data, loadError, message, viewing, o
           {data && viewing && (
             <BatchDetail
               detail={viewing}
+              focusItem={focusItem}
               ownOpenBatchId={ownOpenBatchId}
               busy={busy}
               confirming={confirming}

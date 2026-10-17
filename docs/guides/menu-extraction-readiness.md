@@ -58,6 +58,24 @@ verliesarm gemaakt. AI-uitvoer met niet-ondersteunde prijs-/supplementvelden
 moet door de validator worden geweigerd of als expliciete beperking worden
 gerapporteerd; nooit afgeplat.
 
+### Additief v1-contract in bestaande JSONB
+
+Geen nieuwe databasetabel of migratie. De bestaande
+`candidate_summary.menus` en `restaurant_source_analysis_jobs.field_evidence`
+krijgen optionele, begrensde velden:
+
+- menu: `sourceId`, `sourceUrl`, `extractionMethod`;
+- item: `evidence: { locator, contentHash? }` (nooit ruwe brontekst);
+- job: `source_inventory[]`, `limitations[]`, `extraction_result` en
+  `protocol { instructionVersion, instructionHash, instructionFile, schemaVersion }`;
+- `extraction_result`: `schemaVersion`, `status`, `sources[]`, `coverage`
+  (`complete:false`, `reviewRequired:true`), `attentionGroups[]` en
+  `limitations[]`.
+
+Oudere rijen zonder deze velden blijven leesbaar; de PDF-fallback leidt dan
+dezelfde menucontext af uit `unknown_menu_contexts`. Publicatie/export leest
+deze metadata niet en erft dus geen nieuwe publieke velden.
+
 ## Uitvoeringsplan
 
 ### Ronde A — canoniek resultaat en PDF-continuatie
@@ -109,6 +127,15 @@ Voorstel voor de adapter, nog niet geactiveerd: 60 s per call, 180 s per job,
 alleen bij timeout/rate-limit/5xx, één call tegelijk per job, kostenplafond
 verplicht door de eigenaar (`null` = weigeren).
 
+De adapterinterface (`src/lib/menuExtractionAdapter.js`) weigert zonder
+geconfigureerde provider, zonder expliciet kostenplafond, bij een te grote
+bronset, bij timeout en bij schema-/bronverwijzingsfouten. `confidence`,
+`reviewReady`, `approved` en `publicationReady` zijn verboden. Een geldige
+uitvoer met prijsvarianten/supplementen/allergenen wordt als
+`unsupportedProductFields` gemeld en niet stilzwijgend naar het concept
+afgeplat. `src/lib/menuExtractionProtocol.js` laadt versie en SHA-256; een
+ontbrekende of onversioned instructie geeft een concrete fout.
+
 ## Testmatrix
 
 | Laag | Bewijs |
@@ -132,9 +159,10 @@ verplicht door de eigenaar (`null` = weigeren).
   Smelt/Blossem-fixtures getest; dat is geen actuele bronacceptatie.
 - Geen geïsoleerde testomgeving of inloggegevens: geen echte browser- of
   schrijfacceptatie. Alleen statische/unit-/buildcontroles zijn aantoonbaar.
-- Zonder server-side scheduler blijft de bestaande batchverwerking
-  pagina-gebonden. Dat is een open acceptatiegat; er wordt geen nieuwe workflow
-  geactiveerd zonder besluit.
+- De service-worker-CLI bestaat, maar er is geen goedgekeurde scheduler of
+  deployment die hem aanroept. Zonder die operationele beslissing blijft de
+  browserpagina de zichtbare trigger; dat is een open acceptatiegat, geen
+  automatische achtergrondclaim.
 
 ## Versiepinning
 

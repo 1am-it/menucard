@@ -312,6 +312,10 @@ export async function POST(request) {
       unknown_menu_contexts: analysis.unknownMenuContexts,
       description: analysis.description,
       notes: analysis.notes,
+      source_inventory: analysis.sourceInventory || [],
+      limitations: analysis.limitations || [],
+      extraction_result: analysis.extractionResult || null,
+      protocol: analysis.protocol || null,
     }
     const succeededConfirmed = await updateJobSucceeded(jobId, ['running'], { receiptId: receipt.id, fieldEvidencePayload })
     if (!succeededConfirmed) {
@@ -338,6 +342,10 @@ export async function POST(request) {
       unknown_menu_contexts: analysis.unknownMenuContexts,
       description: analysis.description,
       notes: analysis.notes,
+      source_inventory: analysis.sourceInventory || [],
+      limitations: analysis.limitations || [],
+      extraction_result: analysis.extractionResult || null,
+      protocol: analysis.protocol || null,
       warning: needsExplicitChoice
         ? 'De bron van deze pagina komt niet automatisch overeen met één bekend restaurant — kies handmatig het juiste restaurant.'
         : null,

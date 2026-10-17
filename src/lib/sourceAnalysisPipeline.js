@@ -25,6 +25,9 @@ const {
 const { runRestaurantSourceAnalysis, buildUnknownMenuContext } = require('./restaurantSourceAnalysis');
 const { PdfExtractionError } = require('./pdfTextExtraction');
 const { rollUpPdfAdapterErrorReason } = require('./restaurantSourceAnalysisJobs');
+const { pdfContextToMenuContext } = require('./pdfMenuContext');
+const { buildExtractionResult } = require('./menuExtractionResult');
+const { loadMenuExtractionProtocol, protocolMetadata, withProtocolMetadata } = require('./menuExtractionProtocol');
 
 // Generous for a real menu PDF but still a real, technical bound — same
 // reasoning src/lib/pdfTextExtraction.js's own DEFAULT_MAX_BYTES already
@@ -90,6 +93,15 @@ function createCandidateFetcher(redirectNotes) {
  * single-URL route has always shown.
  */
 async function analyzeSourceUrl(sourceUrlHref) {
+  // The exact instruction version is a required runtime input. A missing or
+  // unversioned file is a concrete configuration failure, not an empty menu.
+  let protocol;
+  try {
+    protocol = loadMenuExtractionProtocol();
+  } catch {
+    return failure('internal_error', 'De versiegebonden extractie-instructie kon niet worden geladen.', 500);
+  }
+
   // ── robots.txt gate for the entry URL itself ────────────────────────
   const robotsGate = await robotsGateFor(sourceUrlHref);
   if (!robotsGate.shouldFetchPage) {
@@ -128,15 +140,45 @@ async function analyzeSourceUrl(sourceUrlHref) {
     });
   } else if (fetchResult.contentType === 'application/pdf') {
     // The entry URL itself is a digital PDF menu: no same-host discovery is
-    // possible, so exactly one unknown menu context and no restaurant fields.
+    // possible, so exactly one source and no restaurant fields. Recognized
+    // sections are promoted to the same canonical menu context as every other
+    // source, so a direct PDF cannot be "found" while its dishes stay hidden.
+    const sourceUrl = fetchResult.finalUrl;
     try {
+      const pdfContext = await buildUnknownMenuContext(fetchResult.bytes, sourceUrl, 'source-1');
+      const converted = pdfContextToMenuContext(pdfContext, new Set(), { sourceId: 'source-1' });
+      const menuContexts = converted
+        ? [{ ...converted.menu, sourceUrl, sourceId: 'source-1' }]
+        : [];
+      const sourceInventory = [{
+        id: 'source-1',
+        url: sourceUrl,
+        kind: 'pdf',
+        status: 'read',
+        pageCount: pdfContext.pageCount,
+        wordCount: pdfContext.wordCount,
+        contentHash: pdfContext.contentHash,
+        ...(converted ? { itemCount: converted.itemCount } : {}),
+      }];
+      const limitations = [
+        'Deze bron is een PDF zonder bijbehorende HTML-pagina — restaurantgegevens konden hier niet uit worden afgeleid.',
+        ...(converted ? [] : ['De PDF bevat geen betrouwbaar herkenbare gerechten met prijs.']),
+        ...(pdfContext.usedFallback ? ['De PDF is alleen via de tekstfallback gelezen; paginastructuur ontbreekt.'] : []),
+      ];
+      const notes = [
+        ...limitations,
+        ...(converted ? [`Menukaart herkend uit de PDF: ${converted.itemCount} gerechten met prijs in ${converted.menu.categories.length} rubrieken.`] : []),
+      ];
       analysis = {
         restaurantCandidateFields: {},
         fieldEvidence: {},
-        menuContexts: [],
-        unknownMenuContexts: [await buildUnknownMenuContext(fetchResult.bytes, fetchResult.finalUrl)],
+        menuContexts,
+        unknownMenuContexts: [pdfContext],
         description: '',
-        notes: ['Deze bron is een PDF zonder bijbehorende HTML-pagina — restaurantgegevens konden hier niet uit worden afgeleid.'],
+        notes,
+        sourceInventory,
+        limitations,
+        extractionResult: buildExtractionResult({ sourceInventory, menus: menuContexts, unknownMenuContexts: [pdfContext], limitations, notes }),
       };
     } catch (err) {
       const errorReason = err instanceof PdfExtractionError ? rollUpPdfAdapterErrorReason(err.reason) : 'pdf_extraction_failed';
@@ -148,6 +190,8 @@ async function analyzeSourceUrl(sourceUrlHref) {
 
   // Followed redirects are reviewable metadata, shown with the other notes.
   analysis.notes = [...redirectNotes, ...analysis.notes];
+  analysis.protocol = protocolMetadata(protocol);
+  analysis.extractionResult = withProtocolMetadata(analysis.extractionResult, protocol);
   return { ok: true, analysis, finalUrl: fetchResult.finalUrl };
 }
 

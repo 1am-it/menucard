@@ -11,7 +11,8 @@
     "start": "next start",
     "test": "node --test \"src/**/*.test.js\" \"app/**/*.test.js\" \"ops/**/*.test.js\"",
     "test:menu-structure": "node --test ops/benchmark/structureCorpus.test.js",
-    "benchmark:menu-structure": "node ops/benchmark/runStructureCorpus.js"
+    "benchmark:menu-structure": "node ops/benchmark/runStructureCorpus.js",
+    "worker:analysis": "node ops/scripts/process-analysis-jobs.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.4",

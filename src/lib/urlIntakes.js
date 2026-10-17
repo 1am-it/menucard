@@ -118,6 +118,15 @@ function hierarchyFields(category) {
   return out;
 }
 
+/** Short source evidence only — never raw source text. */
+function boundedEvidence(evidence) {
+  if (!evidence || typeof evidence !== 'object') return null;
+  const out = {};
+  if (typeof evidence.locator === 'string' && evidence.locator.trim()) out.locator = evidence.locator.trim().slice(0, 160);
+  if (typeof evidence.contentHash === 'string' && evidence.contentHash.trim()) out.contentHash = evidence.contentHash.trim().slice(0, 128);
+  return out.locator || out.contentHash ? out : null;
+}
+
 function buildMenuCandidateSummary(menus) {
   if (!Array.isArray(menus)) return [];
   return menus.map((menu) => ({
@@ -125,16 +134,26 @@ function buildMenuCandidateSummary(menus) {
     contextSlug: menu && menu.contextSlug,
     ...(menu && typeof menu.title === 'string' ? { title: menu.title.slice(0, 160) } : {}),
     ...(menu && (menu.structure === 'normalized' || menu.structure === 'uncertain') ? { structure: menu.structure } : {}),
+    // Additive provenance, bounded and optional: existing receipts keep their
+    // exact shape, while PDF/HTML review can point back to the source.
+    ...(menu && typeof menu.sourceId === 'string' ? { sourceId: menu.sourceId.slice(0, 80) } : {}),
+    ...(menu && typeof menu.sourceUrl === 'string' ? { sourceUrl: menu.sourceUrl.slice(0, 2048) } : {}),
+    ...(menu && typeof menu.extractionMethod === 'string' ? { extractionMethod: menu.extractionMethod.slice(0, 40) } : {}),
     categories: Array.isArray(menu && menu.categories)
       ? menu.categories.map((category) => ({
           name: (category && category.name) || null,
           ...hierarchyFields(category),
           items: Array.isArray(category && category.items)
-            ? category.items.map((item) => ({
-                name: (item && item.name) || null,
-                desc: (item && item.desc) || null,
-                price: (item && item.price) || null,
-              }))
+            ? category.items.map((item) => {
+                const summary = {
+                  name: (item && item.name) || null,
+                  desc: (item && item.desc) || null,
+                  price: (item && item.price) || null,
+                };
+                const evidence = boundedEvidence(item && item.evidence);
+                if (evidence) summary.evidence = evidence;
+                return summary;
+              })
             : [],
         }))
       : [],

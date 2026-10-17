@@ -1,7 +1,9 @@
 # Menu-extractie - acceptatie en testbewijs
 
-Status: CONCEPT, 2026-10-17. Afgesplitst uit MENU-EXTRACTION.md v0.1.
-Dit document beschrijft vereiste tests, geen reeds uitgevoerde acceptatie.
+Status: acceptatievoorwaarden voor GitHub #59, 2026-10-17. Afgesplitst uit
+MENU-EXTRACTION.md v0.1. Dit document scheidt vereiste tests van het
+daadwerkelijk uitgevoerde bewijs; de echte bron-/provideracceptatie is nog
+niet uitgevoerd.
 
 [Extractie-instructie](../../MENU-EXTRACTION.md) |
 [Implementatieafspraken](menu-extraction-implementation.md)
@@ -35,6 +37,35 @@ Dit document beschrijft vereiste tests, geen reeds uitgevoerde acceptatie.
 
 Geen algemene claim dat alle restaurantwebsites werken op basis van enkele
 voorbeelden. Rapporteer aantoonbare ondersteuning en concrete beperkingen.
+
+## Uitgevoerd bewijs — 2026-10-17
+
+Branch `feat/menu-extraction-59`; protocol `MENU-EXTRACTION.md` v0.2
+(SHA-256 `15510b4c0b74fee722ac2c51a3f40aa21b03e0161ccffdcb2008f3d27350b762`).
+Dit is bewijs van de bouw- en testronde, niet van actuele bronacceptatie.
+
+| Controle | Resultaat |
+| --- | --- |
+| `npm test` | 1890 pass, 0 fail |
+| `npm run test:menu-structure` | 6 pass, 0 fail |
+| `npm run benchmark:menu-structure` | 23 gevallen: 22 pass, 0 fail, 1 unclassified (JSON-LD-hiërarchie) |
+| `npm run build` | exit 0 |
+| `node ops/scripts/verify-pdfjs-server-trace.js` | OK; 164 server scripts gecontroleerd |
+| Smelt-achtige synthetische PDF | herkende sectie → canonieke menucontext → receipt → savebaar concept; test in `restaurantSourceAnalysis.test.js` |
+| Blossem-achtige synthetische HTML | bestaande end-to-end hiërarchietest; gedeelde rubriekonzekerheid heeft een groepshandeling |
+| Providerneutrale adapter | offline fake provider: geldig, ongeldig schema, timeout, budget, verboden trustvelden |
+| Worker | begrensde claim/lease-loop; geen schedule, geen browserafhankelijkheid in de service-entry |
+
+Niet uitgevoerd en daarom geen groene claim:
+
+- de echte Smelt-PDF en Blossem-pagina zijn niet opgehaald; daarvoor ontbreekt
+  expliciet goedgekeurde externe bronproef/toegang in deze sessie;
+- geen echte browser-/schrijfacceptatie of geïsoleerde testomgeving;
+- geen echte providercall, kostenmeting of DPA/EU-retentietest;
+- geen server-side scheduler die de worker automatisch start;
+- geen volledige BE-21-set van 50-100 bronnen of aparte ongeziene set.
+
+Deze gaten zijn blokkades/acceptatievoorwaarden, geen verborgen successen.
 
 Aanvullend: controleer dat samenvatting, detail en conceptopslag hetzelfde
 extractieresultaat gebruiken. Noteer bij ieder resultaat bronversie/hash,

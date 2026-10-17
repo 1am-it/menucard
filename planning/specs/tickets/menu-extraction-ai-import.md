@@ -3,7 +3,10 @@
 GitHub: https://github.com/1am-it/menucard/issues/59
 
 ## Status
-Voorbereid voor technische readinessreview. Deze opdracht maakt het ticket gereed; er is nog geen bouw gestart en geen provider, betaald gebruik, productieactie of workflow geactiveerd.
+Technische readinessreview uitgevoerd; veilige deterministische/adapters/worker
+gebouwd op branch `feat/menu-extraction-59`. Een echte provider, betaald gebruik,
+externe bronproef, productieactie of workflow is niet geactiveerd. De
+provider-/bron-/browseracceptatie blijft een expliciete blokkade.
 
 ## Doel
 Een interne medewerker voert een restaurant-URL in en krijgt een controleerbaar menuconcept met gerechten, omschrijvingen, prijzen en de oorspronkelijke menu-indeling. De backend volgt de versiegebonden instructie `MENU-EXTRACTION.md`. Een aparte agent-app is niet nodig.
@@ -79,9 +82,15 @@ Geen publieke API/MCP, CITY-0/bulkuitbreiding, restauranteditor, automatisch pub
 
 ## Voortgang
 - [x] Ticketinhoud en grenzen voorbereid.
-- [ ] Documenten opgeslagen in Git en commit vastgepind.
-- [ ] Technische readinessreview en echte beslispunten afgehandeld.
-- [ ] Implementatie en regressietests.
+- [x] Documenten opgeslagen in Git en commit vastgepind (`3e49f89`).
+- [x] Technische readinessreview vastgelegd; resterende beslispunten zijn
+  provider/model, kostenbudget, DPA/EU-retentie en externe bronproef.
+- [ ] Implementatie en regressietests — veilige deterministische keten,
+  adapters, worker en tests zijn gebouwd; echte provideractivering en
+  bronacceptatie resteren.
 - [ ] Praktijk-/browseracceptatie en onafhankelijke review.
 - [ ] Afzonderlijk goedgekeurde release.
+
+Bewijs en beperkingen: `docs/guides/menu-extraction-acceptance.md`. De
+oorspronkelijke documenten zijn in commit `3e49f89` opgenomen.
 

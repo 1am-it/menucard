@@ -1,7 +1,9 @@
 # Menu-extractie - implementatieafspraken
 
-Status: CONCEPT, 2026-10-17. Afgesplitst uit MENU-EXTRACTION.md v0.1.
-Geen goedgekeurd bouwticket of uitbreiding van PR #56.
+Status: bouwafspraken voor GitHub #59, 2026-10-17. Afgesplitst uit
+MENU-EXTRACTION.md v0.1. Implementatie is veilig begonnen op
+`feat/menu-extraction-59`; een echte provideractivering en PR #56 blijven
+buiten scope.
 
 [Extractie-instructie](../../MENU-EXTRACTION.md) |
 [Testplan](menu-extraction-acceptance.md)
@@ -22,6 +24,16 @@ Geen goedgekeurd bouwticket of uitbreiding van PR #56.
 - Maak eerst een verliesvrije mapping naar de echte productcontracten. Ontbreekt
   ondersteuning, ontwerp een versiegebonden uitbreiding ter goedkeuring.
   Geen stille afplatting, nieuwe enums of validatoromzeiling.
+
+## Achtergrondverwerking (aanvulling #59)
+
+De bestaande claim/lease-RPC's zijn de enige concurrency-grens. De
+batchhandler heeft naast de geauthenticeerde browserroute één service-entry
+(`processForWorker`) die dezelfde claim-, analyse-, receipt- en fail-stap
+gebruikt. `ops/scripts/process-analysis-jobs.js` roept die begrensd aan met
+`--max`; hij is expliciet géén cron of workflow en wordt niet automatisch
+gestart. Zonder service-role-configuratie weigert hij. De worker schrijft geen
+concept, bevestigt geen bron en publiceert niets.
 
 ## 10. Backendvalidatie en controleerbare overdracht
 
