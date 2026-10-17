@@ -16,6 +16,7 @@
 const { canonicalizeSourceUrl } = require('./urlIntakes');
 const { hostOf, observeJob } = require('./sourceWorkqueue');
 const { summarizeRecognisedMenu } = require('./menuConcept');
+const { menusFromUnknownContexts } = require('./pdfMenuContext');
 
 const MAX_BATCH_URLS = 10;
 const DAILY_URL_LIMIT = 25;
@@ -195,9 +196,27 @@ function deriveItemView({ item, job, receipt, restaurants, proposals, duplicateO
   const fmt = typeof formatTime === 'function' ? formatTime : (v) => v;
   // Reviewer-facing analysis notes (redirects, pages read), never claims.
   const notes = job && Array.isArray(job.notes) ? job.notes.filter((n) => typeof n === 'string').slice(0, 10) : [];
-  // The recognised dishes (the receipt's bounded summary) for the control view.
-  const recognisedMenu = job && job.status === 'succeeded' && receipt && Array.isArray(receipt.menus) && receipt.menus.length > 0 ? summarizeRecognisedMenu(receipt.menus) : null;
-  const base = { position: item.item_position, url: item.canonical_source_url || null, jobId: item.job_id || item.reused_job_id || null, restaurant: null, foundUrl: null, high: false, notes, menu: recognisedMenu && recognisedMenu.itemCount > 0 ? recognisedMenu : null };
+  // The recognised dishes for the control view. The receipt is authoritative;
+  // for an older/job-only PDF result, its recognized sections are converted to
+  // the same menu shape instead of showing "Geen herkende gerechten" beside a
+  // "Menukaart gevonden" badge (the Smelt mismatch).
+  const fallbackMenus = job && job.status === 'succeeded' ? menusFromUnknownContexts(job.unknown_menu_contexts) : [];
+  const reviewMenus = receipt && Array.isArray(receipt.menus) && receipt.menus.length > 0 ? receipt.menus : fallbackMenus;
+  const recognisedMenu = job && job.status === 'succeeded' && reviewMenus.length > 0 ? summarizeRecognisedMenu(reviewMenus) : null;
+  const extraction = job && job.extraction_result && typeof job.extraction_result === 'object' ? job.extraction_result : null;
+  const base = {
+    position: item.item_position,
+    url: item.canonical_source_url || null,
+    jobId: item.job_id || item.reused_job_id || null,
+    restaurant: null,
+    foundUrl: null,
+    high: false,
+    notes,
+    menu: recognisedMenu && recognisedMenu.itemCount > 0 ? recognisedMenu : null,
+    coverage: extraction && extraction.coverage ? extraction.coverage : null,
+    limitations: job && Array.isArray(job.limitations) ? job.limitations.filter((n) => typeof n === 'string').slice(0, 10) : [],
+    attentionGroups: extraction && Array.isArray(extraction.attentionGroups) ? extraction.attentionGroups : [],
+  };
 
   if (item.outcome === 'invalid') {
     return view('invalid', { ...base, text: 'Geen geldig webadres; pas de regel aan.', actions: ['adjust_url'] });
@@ -294,7 +313,7 @@ function deriveItemView({ item, job, receipt, restaurants, proposals, duplicateO
   if (menu === 'structure_not_recognized') {
     return view('needs_review', {
       ...withRestaurant,
-      text: 'Er is een menukaart-kandidaat gevonden, maar de opbouw is niet herkend. Een medewerker beoordeelt hem handmatig in Bronnen beoordelen.',
+      text: 'Er is een menukaart-kandidaat gevonden, maar er zijn geen gerechten met een betrouwbare prijs herkend. Open dit exacte resultaat voor handmatige controle; dit is geen geslaagde extractie.',
       actions: ['review_manually'],
     });
   }

@@ -2,12 +2,13 @@
 
 // Batchanalyse (BE-25 fase 2) — under Werkvoorraad / Bronnen beoordelen.
 // A staff member pastes at most 10 restaurant URLs and chooses "Analyse
-// starten" once. Processing is page-bound: only the starter's open page
-// asks the server to analyse the next URL, one at a time (no worker, no
-// schedule); closing the page pauses the batch. Colleagues can view a
-// batch read-only and never see who started it. Every result stays a
-// reviewable result: "Bevestig bron" records an accepted BE-24 proposal
-// after a short human confirmation, nothing is published. The visible
+// starten" once. The starter's open page can drive the next URL, one at a
+// time; the same claim/lease handler also has an explicit service-worker
+// entry (no cron is installed). Closing the page merely pauses this browser
+// loop; a service worker may resume the same jobs without double processing.
+// Colleagues can view a batch read-only and never see who started it. Every
+// result stays a reviewable result: "Bevestig bron" records an accepted BE-24
+// proposal after a short human confirmation, nothing is published. The visible
 // states live in ./BatchAnalysisView.js.
 // Contract: planning/specs/tickets/be-25-batch-source-analysis-from-triage.md;
 // visual reference: docs/mockups/be-25-batch-analysis-*-v2.png (text wins).
@@ -31,6 +32,7 @@ export default function BatchAnalysisPage() {
   const [data, setData] = useState(null)
   const [loadError, setLoadError] = useState(null)
   const [selectedId, setSelectedId] = useState(null)
+  const [focusItem, setFocusItem] = useState(null)
   const [showInput, setShowInput] = useState(false)
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
@@ -46,8 +48,11 @@ export default function BatchAnalysisPage() {
       if (!sessionData.session) router.replace('/internal/login')
       else setSession(sessionData.session)
     })
-    const fromUrl = new URLSearchParams(window.location.search).get('batch')
+    const params = new URLSearchParams(window.location.search)
+    const fromUrl = params.get('batch')
+    const item = Number(params.get('item'))
     if (fromUrl) setSelectedId(fromUrl)
+    if (Number.isInteger(item) && item > 0) setFocusItem(item)
   }, [router])
 
   const token = session && session.access_token
@@ -250,6 +255,7 @@ export default function BatchAnalysisPage() {
     setShowInput(false)
     setMessage(null)
     setConfirming(null)
+    setFocusItem(null)
     setSelectedId(id)
   }
 
@@ -270,6 +276,7 @@ export default function BatchAnalysisPage() {
           loadError={loadError}
           message={message}
           viewing={viewing}
+          focusItem={focusItem}
           ownOpenBatchId={ownOpenBatchId}
           busy={busy}
           confirming={confirming}

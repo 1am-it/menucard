@@ -163,6 +163,27 @@ test('menu source URLs: only menus with recognised items, canonical, deduplicate
   assert.deepEqual(urls, ['https://a.example/menu', 'https://a.example/kaart.pdf']);
 });
 
+test('a job-only PDF result shows the same recognized dishes as the receipt path — never "0 dishes" beside "menu found"', () => {
+  const pdfJob = job({
+    unknown_menu_contexts: [
+      {
+        sourceUrl: 'https://bistro-voorbeeld.example/menukaart.pdf',
+        sourceId: 'source-2',
+        recognizedSections: [{ name: 'Fondue', items: [{ name: 'Fictieve fondue', price: '24.50', contentHash: 'h' }] }],
+      },
+    ],
+    extraction_result: {
+      coverage: { status: 'items_extracted', itemCount: 1, readCount: 2, complete: false, reviewRequired: true },
+      attentionGroups: [],
+    },
+  });
+  const v = derive({ job: pdfJob, receipt: receipt({ menus: [] }) });
+  assert.equal(v.high, true);
+  assert.equal(v.menu.itemCount, 1);
+  assert.equal(v.menu.categories[0].items[0].name, 'Fictieve fondue');
+  assert.equal(v.coverage.itemCount, 1);
+});
+
 test('daily limit day starts at midnight Europe/Amsterdam, summer and winter time', () => {
   assert.equal(amsterdamDayStart('2026-10-10T11:00:00Z'), '2026-10-09T22:00:00.000Z');
   assert.equal(amsterdamDayStart('2026-01-15T23:30:00Z'), '2026-01-15T23:00:00.000Z');

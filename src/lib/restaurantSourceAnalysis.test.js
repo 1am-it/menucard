@@ -5,6 +5,8 @@ const assert = require('node:assert/strict')
 const fs = require('node:fs')
 
 const { runRestaurantSourceAnalysis } = require('./restaurantSourceAnalysis')
+const { buildCandidateSummary } = require('./urlIntakes')
+const { buildMenuConcept } = require('./menuConcept')
 
 // Reused verbatim from src/lib/pdfTextExtraction.test.js's own,
 // empirically-verified fixtures — a genuinely valid single-page PDF with
@@ -224,6 +226,32 @@ test('runRestaurantSourceAnalysis: a same-host PDF candidate with real menu cont
   assert.equal(unknown.recognizedSections[0].items[0].confidence, 'middel')
 })
 
+test('SMELT-LIKE CHAIN: recognized PDF sections become receipt menus, one concept and a saveable reviewed result — never "PDF found, zero dishes"', async () => {
+  const content = [
+    'BT /F1 12 Tf',
+    textAt(20, 100, '// FICTIEVE FONDUE'),
+    textAt(20, 80, 'Fictieve kaasfondue'),
+    textAt(120, 80, '24.50'),
+    'ET',
+  ].join('\n');
+  const result = await runRestaurantSourceAnalysis({
+    homepageHtml: homepageWithFullRestaurantAndOneMenu(),
+    homepageUrl: 'https://debotanistbreda.nl/',
+    fetchCandidate: async () => ({ status: 'pdf', bytes: buildTestPdf({ contentStream: content }), finalUrl: 'https://debotanistbreda.nl/menukaart.pdf' }),
+  });
+  const pdfMenu = result.menuContexts.find((menu) => menu.extractionMethod === 'pdf_text');
+  assert.ok(pdfMenu);
+  const summary = buildCandidateSummary({ restaurantCandidateFields: result.restaurantCandidateFields, menus: [pdfMenu] });
+  assert.equal(summary.menus[0].sourceUrl, 'https://debotanistbreda.nl/menukaart.pdf');
+  assert.equal(summary.menus[0].sourceId, pdfMenu.sourceId);
+  assert.equal(summary.menus[0].categories[0].items[0].price, '24.50');
+  assert.match(summary.menus[0].categories[0].items[0].evidence.locator, /^pdf:/);
+  const concept = buildMenuConcept({ menus: summary.menus, liveLines: [], edits: {} });
+  assert.equal(concept.canSave, true);
+  assert.equal(concept.content.categories[0].items[0].name, 'Fictieve kaasfondue');
+  assert.equal(result.extractionResult.coverage.itemCount >= 1, true);
+});
+
 test('runRestaurantSourceAnalysis: a same-host PDF candidate with no recognizable menu content still succeeds, with recognizedSections: [] — never fabricated', async () => {
   const result = await runRestaurantSourceAnalysis({
     homepageHtml: homepageWithFullRestaurantAndOneMenu(),
@@ -304,10 +332,17 @@ test('DE BOTANIST REGRESSION CASE — this fix\'s own named production finding, 
   // itself never throws and returns its normal shape.
   assert.ok(result.restaurantCandidateFields)
 
-  // "nul menu's werden gevonden" — no json_ld/html menu on the homepage
-  // or any HTML candidate (there is none here; the only candidate is
-  // the PDF itself).
-  assert.equal(result.menuContexts.length, 0)
+  // No json_ld/html menu exists, but the recognized PDF sections are now
+  // promoted to the SAME canonical menu context the receipt and concept use.
+  // This is the Smelt regression: "PDF found" and "zero dishes" must not be
+  // two separate observations.
+  assert.equal(result.menuContexts.length, 1)
+  assert.equal(result.menuContexts[0].extractionMethod, 'pdf_text')
+  assert.equal(result.menuContexts[0].sourceId, result.unknownMenuContexts[0].sourceId)
+  assert.equal(result.menuContexts[0].categories[0].items.length, 2)
+  assert.equal(result.extractionResult.status, 'items_extracted')
+  assert.equal(result.extractionResult.coverage.itemCount, 2)
+  assert.equal(result.extractionResult.coverage.complete, false)
 
   // "de ontdekte PDF gaf pdf_extraction_failed" — reproduced as NOT
   // reproducing today: the PDF is processed successfully, never

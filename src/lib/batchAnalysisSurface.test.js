@@ -93,6 +93,17 @@ test('routes: internal-only handlers, process route bounded in time, nothing els
   assert.match(deps, /analyze: analyzeSourceUrl/);
 });
 
+test('menu review: manual review reopens the exact batch result, and shared uncertainty has a scoped group action', () => {
+  assert.match(PAGE, /batch=\$\{encodeURIComponent\(batchId\)\}&item=\$\{item\.position\}/);
+  assert.match(PAGE, /id=\{`bta-result-\$\{item\.position\}`\}/);
+  assert.match(PAGE, /if \(focusItem !== item\.position\) return[\s\S]*resultRef\.current/);
+  const review = read('app/internal/source-triage/batch/MenuReview.js');
+  assert.match(review, /Gedeelde onzekerheid/);
+  assert.match(review, /Rubriek klopt zo/);
+  assert.match(review, /lost geen ontbrekende prijzen of andere blokkades op/);
+  assert.match(review, /coverage\.status === 'candidate_without_items'/);
+});
+
 test('menu review: control view links to the original menu safely; concept is internal and saved only through its own route', () => {
   const review = read('app/internal/source-triage/batch/MenuReview.js');
   assert.match(review, /Open originele menukaart/);

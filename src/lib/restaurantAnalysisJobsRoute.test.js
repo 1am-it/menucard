@@ -208,7 +208,7 @@ test('structural safety net: no raw PDF text excerpt is ever assembled into the 
   assert.doesNotMatch(source, /textPreview/)
   assert.doesNotMatch(source, /pdfResult\.text/) // no direct raw-text access at all
   assert.doesNotMatch(readPostRouteSource(), /textPreview|pdfResult\.text/)
-  assert.match(source, /await buildUnknownMenuContext\(fetchResult\.bytes, fetchResult\.finalUrl\)/)
+  assert.match(source, /await buildUnknownMenuContext\(fetchResult\.bytes, sourceUrl, 'source-1'\)/)
 })
 
 test('structural safety net: buildUnknownMenuContext itself (src/lib/restaurantSourceAnalysis.js) never assembles a raw PDF text excerpt — only a derived word count and content-hash', () => {

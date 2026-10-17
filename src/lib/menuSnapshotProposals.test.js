@@ -252,7 +252,10 @@ test('structural safety net: neither BE-17 route ever references public/canonica
 test('structural safety net: the proposals route computes content_hash itself via computeCanonicalContentHash before inserting', () => {
   const source = fs.readFileSync(PROPOSALS_ROUTE_PATH, 'utf8');
   assert.match(source, /computeCanonicalContentHash\(/);
-  const insertCallIndex = source.indexOf(".from('menu_snapshot_proposals')\n    .insert(");
+  // Git may check out CRLF on Windows; assert the call order, not a literal
+  // newline/indentation byte sequence.
+  const insertMatch = /\.from\('menu_snapshot_proposals'\)\s*\.insert\(/.exec(source);
   const hashComputedIndex = source.indexOf('computeCanonicalContentHash(');
+  const insertCallIndex = insertMatch ? insertMatch.index : -1;
   assert.ok(hashComputedIndex !== -1 && insertCallIndex !== -1 && hashComputedIndex < insertCallIndex, 'content_hash must be computed before the insert call');
 });

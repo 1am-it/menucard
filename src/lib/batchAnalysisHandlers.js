@@ -30,6 +30,7 @@ const {
 } = require('./batchAnalysis');
 const { liveMenuLines, buildMenuConcept, sanitizeEdits } = require('./menuConcept');
 const { createConceptVersion } = require('./menuConceptStore');
+const { menusFromUnknownContexts } = require('./pdfMenuContext');
 
 // One internal menu concept per restaurant: BE-17 snapshot proposals in
 // the context "<restaurantId>-menukaart", versioned.
@@ -41,7 +42,7 @@ const LOAD_ERROR = 'De batchanalyse kon niet worden geladen.';
 const RECENT_BATCH_LIMIT = 10;
 const BATCH_COLUMNS = 'id, actor_user_id, created_at, last_activity_at, closed_at, close_reason, item_count';
 const JOB_COLUMNS =
-  'id, status, error_reason, attempt_count, next_attempt_at, lease_expires_at, expired_at, finished_at, created_at, updated_at, result_receipt_id, unknown_menu_contexts:field_evidence->unknown_menu_contexts, menu_source_urls:field_evidence->menu_source_urls, notes:field_evidence->notes';
+  'id, status, error_reason, attempt_count, next_attempt_at, lease_expires_at, expired_at, finished_at, created_at, updated_at, result_receipt_id, unknown_menu_contexts:field_evidence->unknown_menu_contexts, menu_source_urls:field_evidence->menu_source_urls, notes:field_evidence->notes, source_inventory:field_evidence->source_inventory, limitations:field_evidence->limitations, extraction_result:field_evidence->extraction_result, protocol:field_evidence->protocol';
 const RECEIPT_COLUMNS = 'id, restaurant_match_type, matched_restaurant_id, created_at, menus:candidate_summary->menus';
 const CONFIRM_NOTE = 'Bevestigd vanuit Batchanalyse na menselijke controle.';
 
@@ -168,9 +169,14 @@ function createBatchAnalysisHandlers(deps) {
       const job = jobById.get(item.job_id || item.reused_job_id) || null;
       const receipt = job && job.result_receipt_id ? receiptById.get(job.result_receipt_id) || null : null;
       const latest = concepts.find((c) => c.restaurant_id === view.restaurant.id) || null;
+      const receiptMenus = (receipt && Array.isArray(receipt.menus) && receipt.menus) || [];
+      // Receipt is authoritative; a job-only PDF result (older records or a
+      // job whose receipt predates PDF promotion) is converted through the
+      // same canonical helper, never through a second interpretation.
+      const fallbackMenus = menusFromUnknownContexts(job && job.unknown_menu_contexts);
       view.concept = {
         receiptId: receipt ? receipt.id : null,
-        menus: (receipt && Array.isArray(receipt.menus) && receipt.menus) || [],
+        menus: receiptMenus.length > 0 ? receiptMenus : fallbackMenus,
         liveLines: liveMenuLines(liveMenus, view.restaurant.id),
         latest: latest ? { version: latest.version, created_at: latest.created_at } : null,
       };
@@ -328,21 +334,28 @@ function createBatchAnalysisHandlers(deps) {
         description: outcome.analysis.description,
         notes: outcome.analysis.notes,
         menu_source_urls: menuSourceUrls(outcome.analysis),
+        source_inventory: outcome.analysis.sourceInventory || [],
+        limitations: outcome.analysis.limitations || [],
+        extraction_result: outcome.analysis.extractionResult || null,
+        protocol: outcome.analysis.protocol || null,
       },
     });
     return { ok: !error, code: error && error.code };
   }
 
-  /** POST /[id]/process — claim and analyse exactly one job of this batch. */
-  async function processNext(request, batchId) {
-    const { auth, denied } = await authorize(request);
-    if (denied) return denied;
+  /**
+   * Claim and process exactly one job. Shared by the browser route (after
+   * authorization) and the explicit server-side worker (service credentials).
+   * The claim/lease RPC remains the only concurrency guard, so a page and a
+   * worker can never analyse the same job twice.
+   */
+  async function processClaimedJob(batchId, actorUserId) {
     if (!isUuid(batchId)) return reply(404, { error: 'Batch niet gevonden.' });
     const supabase = getSupabase();
 
     const { data: claimRows, error: claimError } = await supabase.rpc('claim_next_source_analysis_job', {
       p_batch_id: batchId,
-      p_actor_user_id: auth.userId,
+      p_actor_user_id: actorUserId,
     });
     if (claimError) {
       if (claimError.code === 'P0044') return reply(403, { error: 'Alleen wie de batch startte, kan hem verwerken.', reason: 'not_starter' });
@@ -381,7 +394,7 @@ function createBatchAnalysisHandlers(deps) {
 
     const { error: failError } = await supabase.rpc('fail_source_analysis_job', {
       p_job_id: job.id,
-      p_actor_user_id: auth.userId,
+      p_actor_user_id: actorUserId,
       p_error_reason: (outcome && outcome.errorReason) || 'internal_error',
     });
     if (failError) {
@@ -389,6 +402,23 @@ function createBatchAnalysisHandlers(deps) {
       return reply(500, { error: 'De analyse kon niet worden voortgezet.' });
     }
     return reply(200, { outcome: 'claimed', job: { id: job.id, status: 'attempted' } });
+  }
+
+  /** POST /[id]/process — authenticated browser route. */
+  async function processNext(request, batchId) {
+    const { auth, denied } = await authorize(request);
+    if (denied) return denied;
+    return processClaimedJob(batchId, auth.userId);
+  }
+
+  /**
+   * Service-worker entry point. Deliberately not wired to a route or schedule;
+   * only a caller holding the service-role credentials can reach it. It still
+   * passes the batch's real actor to the RPC, so the database's own ownership
+   * guard remains in force.
+   */
+  async function processForWorker(batchId, actorUserId) {
+    return processClaimedJob(batchId, actorUserId);
   }
 
   /** POST /[id]/confirm — "Bevestig bron" for one or more high-certainty
@@ -547,7 +577,7 @@ function createBatchAnalysisHandlers(deps) {
     return reply(result.status, result.body);
   }
 
-  return { getOverview, createBatch, processNext, confirmSources, reanalyze, saveConcept };
+  return { getOverview, createBatch, processNext, processForWorker, confirmSources, reanalyze, saveConcept };
 }
 
 module.exports = { createBatchAnalysisHandlers, RECENT_BATCH_LIMIT };

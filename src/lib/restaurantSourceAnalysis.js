@@ -83,6 +83,8 @@ const { rollUpPdfAdapterErrorReason } = require('./restaurantSourceAnalysisJobs'
 const { composeEvidenceBasedDescription } = require('./restaurantConceptDescription')
 const { runClaudeStructuringAdapter } = require('./claudeStructuringAdapter')
 const { extractHtmlMenuStructure } = require('./htmlMenuStructure')
+const { pdfContextToMenuContext } = require('./pdfMenuContext')
+const { buildExtractionResult } = require('./menuExtractionResult')
 
 /**
  * BE-25 fase 2: a menu context from the visible HTML of a discovered menu
@@ -137,6 +139,12 @@ function htmlMenuNote(url, found) {
     : `${base} Controleer rubrieken en prijzen.`
 }
 
+/** A plain-language note for a recognized PDF menu, with page coverage. */
+function pdfMenuNote(url, found, pageCount) {
+  const pages = Number.isInteger(pageCount) ? ` (${pageCount} ${pageCount === 1 ? 'pagina' : "pagina's"})` : ''
+  return `Menukaart herkend uit de PDF van ${url}${pages}: ${found.itemCount} gerechten met prijs in ${found.menu.categories.length} rubrieken. Controleer pagina's, rubrieken en prijzen.`
+}
+
 /** A safe, derived signal for a discovered PDF's own review metadata —
  * never the raw text itself. See the "unknown menu context" assembly
  * below for why: unlike every structured restaurant field elsewhere in
@@ -169,7 +177,7 @@ function countWords(text) {
  * omitted, when nothing reliable was found, or when the fallback path
  * ran and has no position data to structure at all).
  */
-async function buildUnknownMenuContext(pdfBytes, sourceUrl) {
+async function buildUnknownMenuContext(pdfBytes, sourceUrl, sourceId) {
   const result = await extractDigitalPdfTextWithFallback(pdfBytes)
 
   let recognizedSections = []
@@ -192,6 +200,7 @@ async function buildUnknownMenuContext(pdfBytes, sourceUrl) {
 
   return {
     sourceUrl,
+    ...(typeof sourceId === 'string' && sourceId ? { sourceId } : {}),
     extractionMethod: 'pdf_text',
     pageCount: result.pageCount,
     wordCount: countWords(result.text),
@@ -220,10 +229,30 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
   const menuContexts = []
   const unknownMenuContexts = []
   const notes = []
+  const sourceInventory = []
+  const limitations = []
+  let sourceNumber = 0
+
+  function addSource(entry) {
+    sourceNumber += 1
+    const source = { id: `source-${sourceNumber}`, ...entry }
+    sourceInventory.push(source)
+    return source.id
+  }
+
+  // The entry page is a real source even when it yields no menu: the reviewer
+  // must be able to see that it was read (or blocked/failed), not infer it
+  // from free-text notes.
+  const homepageSourceId = addSource({
+    url: homepageUrl,
+    kind: 'html',
+    status: 'read',
+    contentHash: computeFieldEvidenceHash(homepageHtml),
+  })
 
   // 1. Homepage menu structure — BE-18's own extractor, unchanged.
   for (const menu of extractMenusFromHtml(homepageHtml)) {
-    menuContexts.push({ ...menu, extractionMethod: 'json_ld', sourceUrl: homepageUrl })
+    menuContexts.push({ ...menu, extractionMethod: 'json_ld', sourceUrl: homepageUrl, sourceId: homepageSourceId })
   }
   // 1b. No JSON-LD menu on the entry page itself: read its already-fetched
   // HTML with the same strict recognizer as a discovered menu page (BE-25),
@@ -231,7 +260,7 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
   if (menuContexts.length === 0) {
     const entryHtmlMenu = menuFromHtmlStructure(homepageHtml, new Set())
     if (entryHtmlMenu) {
-      menuContexts.push({ ...entryHtmlMenu.menu, extractionMethod: 'html', sourceUrl: homepageUrl })
+      menuContexts.push({ ...entryHtmlMenu.menu, extractionMethod: 'html', sourceUrl: homepageUrl, sourceId: homepageSourceId })
       notes.push(htmlMenuNote(homepageUrl, entryHtmlMenu))
     }
   }
@@ -275,20 +304,31 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
     }
 
     if (!fetched || fetched.status === 'blocked') {
+      addSource({ url: candidate.url, kind: 'other', status: 'blocked', limitation: 'Niet opgehaald: robots.txt of onveilige bron.' })
+      limitations.push(`Niet opgehaald: ${candidate.url} (robots.txt of onveilige bron).`)
       notes.push(`Kon ${candidate.url} niet automatisch raadplegen (robots.txt of een onveilige bron).`)
       continue
     }
     if (fetched.status === 'error') {
+      addSource({ url: candidate.url, kind: 'other', status: 'failed', limitation: 'Ophalen mislukt.' })
+      limitations.push(`Niet gelezen: ${candidate.url} (ophalen mislukt).`)
       notes.push(`Ophalen van ${candidate.url} is mislukt.`)
       continue
     }
 
     if (fetched.status === 'html') {
+      const sourceUrl = fetched.finalUrl || candidate.url
+      const sourceId = addSource({
+        url: sourceUrl,
+        kind: 'html',
+        status: 'read',
+        contentHash: computeFieldEvidenceHash(fetched.body),
+      })
       const existingSlugs = new Set(menuContexts.map((m) => m.contextSlug))
       const candidateMenus = extractMenusFromHtml(fetched.body)
       for (const menu of candidateMenus) {
         if (existingSlugs.has(menu.contextSlug)) continue
-        menuContexts.push({ ...menu, extractionMethod: 'html', sourceUrl: fetched.finalUrl || candidate.url })
+        menuContexts.push({ ...menu, extractionMethod: 'html', sourceUrl, sourceId })
         existingSlugs.add(menu.contextSlug)
       }
       // No JSON-LD menu on a page a menu link pointed to: read its visible
@@ -296,48 +336,65 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
       // 2) — only priced dishes in recognised structures, never a guess.
       const htmlMenu = candidateMenus.length === 0 ? menuFromHtmlStructure(fetched.body, existingSlugs) : null
       if (htmlMenu) {
-        menuContexts.push({ ...htmlMenu.menu, extractionMethod: 'html', sourceUrl: fetched.finalUrl || candidate.url })
+        menuContexts.push({ ...htmlMenu.menu, extractionMethod: 'html', sourceUrl, sourceId })
         existingSlugs.add(htmlMenu.menu.contextSlug)
-        notes.push(htmlMenuNote(fetched.finalUrl || candidate.url, htmlMenu))
+        notes.push(htmlMenuNote(sourceUrl, htmlMenu))
       } else if (candidateMenus.length === 0) {
         // The page was read, but holds no menu this pipeline can read
         // automatically. Name the page for the human reviewer — never a
         // claim that no menu exists, never a guessed menu.
+        limitations.push(`Gelezen zonder automatisch herkende menukaart: ${sourceUrl}.`)
         notes.push(
-          `Mogelijke menupagina gelezen: ${fetched.finalUrl || candidate.url} (link "${String(candidate.matchedOn || '').slice(0, 60)}"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.`
+          `Mogelijke menupagina gelezen: ${sourceUrl} (link "${String(candidate.matchedOn || '').slice(0, 60)}"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.`
         )
       }
       const candidateFieldEvidence = extractRestaurantFieldsWithEvidence(fetched.body)
       for (const fieldName of ALLOWED_FIELD_NAMES) {
-        recordFieldSighting(fieldName, candidateFieldEvidence[fieldName], fetched.finalUrl || candidate.url)
+        recordFieldSighting(fieldName, candidateFieldEvidence[fieldName], sourceUrl)
       }
       continue
     }
 
     if (fetched.status === 'pdf') {
+      const sourceUrl = fetched.finalUrl || candidate.url
+      const sourceId = addSource({ url: sourceUrl, kind: 'pdf', status: 'read' })
+      const source = sourceInventory[sourceInventory.length - 1]
       try {
         // A digital PDF's plain text is never itself a confidently-named,
-        // structured menu context without AI structuring (disabled today
-        // — see runClaudeStructuringAdapter below) — surfaced instead as
-        // an explicit, reviewer-facing "unknown menu context," per the
-        // ticket's own acceptance criterion for a section the system
-        // found but could not confidently categorize. `recognizedSections`
-        // (see buildUnknownMenuContext's own doc comment) is this fix's
-        // own additive, deterministic layer on top of that: real,
-        // reviewable (name, price) candidates when the PDF's own layout
-        // allows them to be found — never a raw text excerpt (an earlier
-        // version of this module kept a bounded raw preview, which an
-        // independent review correctly flagged: unlike every structured
-        // restaurant field elsewhere in this pipeline, a PDF's own
-        // header/footer could incidentally include something outside the
-        // fixed field allowlist).
-        unknownMenuContexts.push(await buildUnknownMenuContext(fetched.bytes, fetched.finalUrl || candidate.url))
+        // structured menu context without AI structuring (disabled today —
+        // see runClaudeStructuringAdapter below). `recognizedSections` is the
+        // deterministic, reviewable layer: real (name, price) candidates when
+        // the PDF's own layout allows them to be found, never a raw excerpt.
+        // The same sections are ALSO promoted to the canonical menu-context
+        // shape, so receipt, summary, detail and concept cannot disagree about
+        // whether this PDF yielded dishes (the Smelt failure mode).
+        const pdfContext = await buildUnknownMenuContext(fetched.bytes, sourceUrl, sourceId)
+        unknownMenuContexts.push(pdfContext)
+        Object.assign(source, {
+          pageCount: pdfContext.pageCount,
+          wordCount: pdfContext.wordCount,
+          contentHash: pdfContext.contentHash,
+        })
+        if (pdfContext.usedFallback) {
+          limitations.push(`PDF ${sourceUrl} is alleen via de tekstfallback gelezen; paginastructuur ontbreekt.`)
+        }
+        const converted = pdfContextToMenuContext(pdfContext, new Set(menuContexts.map((m) => m.contextSlug)), { sourceId })
+        if (converted) {
+          menuContexts.push({ ...converted.menu, sourceUrl, sourceId })
+          source.itemCount = converted.itemCount
+          notes.push(pdfMenuNote(sourceUrl, converted, pdfContext.pageCount))
+        } else {
+          limitations.push(`PDF ${sourceUrl} bevat geen betrouwbaar herkenbare gerechten met prijs.`)
+          notes.push(`PDF op ${sourceUrl} is gelezen, maar bevat geen betrouwbaar herkenbare gerechten met prijs.`)
+        }
       } catch (err) {
         // Any failure here — a properly-typed PdfExtractionError, or, as
         // defense in depth, any other unexpected error — is reported as a
         // plain-language note and never re-thrown: one bad candidate PDF
         // must never crash the rest of this analysis.
         const reason = err instanceof PdfExtractionError ? rollUpPdfAdapterErrorReason(err.reason) : 'pdf_extraction_failed'
+        Object.assign(source, { status: 'failed', limitation: `PDF niet leesbaar (${reason}).` })
+        limitations.push(`PDF ${sourceUrl} kon niet worden gelezen (${reason}).`)
         notes.push(`PDF op ${candidate.url} kon niet worden gelezen (${reason}).`)
       }
       continue
@@ -401,9 +458,18 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
   const claudeResult = await runClaudeStructuringAdapter({ homepageHtml, unknownMenuContexts })
   if (!claudeResult.enabled) {
     notes.push('AI-structurering is niet beschikbaar — resultaten zijn beperkt tot deterministische extractie.')
+    limitations.push('AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.')
   }
 
-  return { restaurantCandidateFields, fieldEvidence, menuContexts, unknownMenuContexts, description, notes }
+  const extractionResult = buildExtractionResult({
+    sourceInventory,
+    menus: menuContexts,
+    unknownMenuContexts,
+    limitations,
+    notes,
+  })
+
+  return { restaurantCandidateFields, fieldEvidence, menuContexts, unknownMenuContexts, description, notes, sourceInventory, limitations, extractionResult }
 }
 
 module.exports = {

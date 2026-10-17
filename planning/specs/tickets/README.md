@@ -1,5 +1,12 @@
 # Ticket specs
 
+## AI menu extraction
+
+- [AI-gestuurde menu-extractie via bestaande URL-import](./menu-extraction-ai-import.md)
+  - [GitHub #59](https://github.com/1am-it/menucard/issues/59).
+  Separate from the navigation scope of issue #53 / PR #56.
+  Readinessreview: [menu-extraction-readiness.md](../../../docs/guides/menu-extraction-readiness.md).
+
 This directory contains the executable breakdown of the project's ticket
 tracks: the completed `BE-*` dish-first migration, the `PLATFORM-*`
 data-platform track, the proposed, not-yet-scheduled `MARKET-*`
