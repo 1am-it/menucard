@@ -1,20 +1,101 @@
 'use client'
 
-// Werkvoorraad (issue #53) — the role-aware landing page for the daily,
-// concrete human actions: the modules with placement 'work' in
-// src/lib/internalNav.js, each linking to its existing route. Nieuwe import
-// is its own primary navigation item and is not repeated here; Beheer holds
-// overview, history and reference data.
+// Werkvoorraad (issue #53) — the staff landing page with one list of
+// concrete human tasks, not module navigation. Each row names the
+// restaurant/item, the task, why attention is needed and exactly one next
+// action that opens the existing record (or the deep-link adapter that
+// legacy screen now understands).
 //
-// Session-gated only, like /internal: it resolves the session's roles via
-// the read-only GET /api/internal/v1/me and only decides what to show.
-// Every linked route keeps its own unchanged server-side authorization.
+// Data comes only from the existing read-only internal APIs, through the
+// pure model in src/lib/internalWorkqueue.js. The page itself resolves the
+// session's roles via GET /api/internal/v1/me and only fetches what those
+// roles may see; every provider keeps its own unchanged server-side
+// authorization. A failed provider is reported as partial/error and is
+// never shown as "no work".
+//
+// This first round replaces the five module cards. Beheer's sections and
+// the shorter publication navigation are later rounds in the same approved
+// contract.
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import InternalNav from '@/src/components/InternalNav'
-import { resolveVisibleModules, groupModulesByPlacement, hasAnyKnownRole } from '@/src/lib/internalNav'
+import { hasAnyKnownRole } from '@/src/lib/internalNav'
+import { buildWorkqueue, resolveWorkqueueProviders } from '@/src/lib/internalWorkqueue'
+
+const PROVIDER_ENDPOINTS = {
+  'source-workqueue': '/api/internal/v1/source-workqueue',
+  'source-triage': '/api/internal/v1/source-triage',
+  'menu-concepts': '/api/internal/v1/menu-concepts',
+  'profile-drafts': '/api/internal/v1/profile-drafts',
+  moderation: '/api/internal/v1/moderation/pending',
+  claims: '/api/internal/v1/claims/pending',
+}
+
+// The candidate list is one API per review status (the endpoint accepts a
+// single `review_status` value). Fetching the three genuine pending states
+// separately avoids silently cutting older pending candidates off a larger
+// unfiltered page.
+const CANDIDATE_STATUSES = ['new', 'needs_enrichment', 'approved_internal']
+const LOAD_ERROR = 'De gegevens konden niet worden geladen.'
+
+async function fetchJson(url, token) {
+  try {
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+    const body = await res.json().catch(() => ({}))
+    if (!res.ok) return { ok: false, data: null, error: body.error || LOAD_ERROR }
+    return { ok: true, data: body, error: null }
+  } catch {
+    return { ok: false, data: null, error: LOAD_ERROR }
+  }
+}
+
+async function fetchImportCandidates(token) {
+  const results = await Promise.all(
+    CANDIDATE_STATUSES.map((status) =>
+      fetchJson(`/api/internal/v1/import-inbox/candidates?review_status=${status}`, token)
+    )
+  )
+  const loaded = results.filter((r) => r.ok)
+  const failed = results.filter((r) => !r.ok)
+  if (loaded.length === 0) {
+    return { ok: false, data: null, error: failed[0]?.error || LOAD_ERROR }
+  }
+  const candidates = loaded.flatMap((r) => (r.data && r.data.candidates) || [])
+  return {
+    ok: failed.length === 0,
+    partial: failed.length > 0,
+    data: { candidates },
+    error: failed.length > 0 ? 'Niet alle importstatussen konden worden geladen.' : null,
+  }
+}
+
+async function fetchProviders(token, roles) {
+  const definitions = resolveWorkqueueProviders(roles)
+  const entries = await Promise.all(
+    definitions.map(async (definition) => {
+      if (definition.id === 'import-candidates') {
+        return [definition.id, await fetchImportCandidates(token)]
+      }
+      const result = await fetchJson(PROVIDER_ENDPOINTS[definition.id], token)
+      // The source-triage API answers 200 even when proposal storage is
+      // unavailable; that is partial information, not "no proposals".
+      if (definition.id === 'source-triage' && result.ok && result.data && result.data.proposals_available === false) {
+        return [definition.id, { ...result, partial: true, error: 'Bronvoorstellen zijn tijdelijk niet beschikbaar.' }]
+      }
+      return [definition.id, result]
+    })
+  )
+  return Object.fromEntries(entries)
+}
+
+function formatDate(value) {
+  if (!value) return null
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return null
+  return date.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })
+}
 
 function IconArrowRight() {
   return (
@@ -33,21 +114,14 @@ function IconLock() {
   )
 }
 
-const SHELL_STYLE = {
-  maxWidth: 960,
-  margin: '0 auto',
-  padding: '0 20px 64px',
-  fontFamily: 'system-ui, sans-serif',
-  color: 'var(--text-primary)',
-  background: 'var(--bg)',
-  minHeight: '100vh',
-}
-
 export default function WerkvoorraadPage() {
   const router = useRouter()
   const [session, setSession] = useState(undefined) // undefined = loading, null = no session
   const [roles, setRoles] = useState(undefined) // undefined = loading, [] once resolved (possibly empty)
-  const [error, setError] = useState(null)
+  const [providerResults, setProviderResults] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [loadError, setLoadError] = useState(null)
+  const [reloadKey, setReloadKey] = useState(0)
 
   useEffect(() => {
     const supabase = getSupabaseBrowser()
@@ -60,28 +134,35 @@ export default function WerkvoorraadPage() {
     })
   }, [router])
 
-  const loadRoles = useCallback(async (token) => {
-    setError(null)
+  const load = useCallback(async (token) => {
+    setLoading(true)
+    setLoadError(null)
     try {
       const res = await fetch('/api/internal/v1/me', {
         headers: { Authorization: `Bearer ${token}` },
       })
-      const data = await res.json()
+      const data = await res.json().catch(() => ({}))
       if (!res.ok) {
-        setError(data.error || 'Failed to resolve your internal access')
+        setLoadError(data.error || 'Je interne toegang kon niet worden vastgesteld.')
         setRoles([])
+        setProviderResults({})
         return
       }
-      setRoles(data.roles || [])
+      const nextRoles = data.roles || []
+      setRoles(nextRoles)
+      setProviderResults(await fetchProviders(token, nextRoles))
     } catch {
-      setError('Failed to resolve your internal access')
+      setLoadError('Je interne toegang kon niet worden vastgesteld.')
       setRoles([])
+      setProviderResults({})
+    } finally {
+      setLoading(false)
     }
   }, [])
 
   useEffect(() => {
-    if (session) loadRoles(session.access_token)
-  }, [session, loadRoles])
+    if (session) load(session.access_token)
+  }, [session, load, reloadKey])
 
   async function signOut() {
     const supabase = getSupabaseBrowser()
@@ -89,136 +170,158 @@ export default function WerkvoorraadPage() {
     router.replace('/internal/login')
   }
 
-  if (session === undefined || roles === undefined) {
-    return <main style={{ ...SHELL_STYLE, color: 'var(--text-secondary)' }}>Loading…</main>
-  }
-
-  // Beheer lists overview, history and reference modules only; the daily
-  // actions live in Werkvoorraad and Nieuwe import (top navigation).
-  const modules = groupModulesByPlacement(resolveVisibleModules(roles)).work
-  const noAccess = !hasAnyKnownRole(roles)
-  // No modules and no nav destinations exist for this account, so the
-  // status box below is the page's only navigation-adjacent content —
-  // it carries the page's one sign-out action itself, and the shared nav
-  // (which would otherwise duplicate it) is not rendered alongside it.
-  const showNoAccessStatus = noAccess && !error
-  const roleLabels = [...new Set(roles.map((r) => r.role))]
+  const model = useMemo(
+    () => (providerResults ? buildWorkqueue({ roles: roles || [], providers: providerResults }) : null),
+    [providerResults, roles]
+  )
+  const noAccess = Array.isArray(roles) && !hasAnyKnownRole(roles)
+  // With no known role there is no task data to show; that status box carries
+  // the page's one sign-out action itself, so the shared nav (which would
+  // duplicate it) is not rendered alongside it.
+  const showNoAccessStatus = noAccess && !loadError
+  const roleLabels = [...new Set((roles || []).map((r) => r.role))]
   const email = session?.user?.email || null
 
-  return (
-    <main style={SHELL_STYLE}>
-      {!showNoAccessStatus && <InternalNav accessToken={session.access_token} roles={roles} />}
-
-      <div style={{ paddingTop: 28, marginBottom: 24 }}>
-        <h1 style={{ fontSize: 28, margin: '0 0 4px' }}>Werkvoorraad</h1>
-        <p style={{ color: 'var(--text-secondary)', fontSize: 13, margin: 0 }}>
-          {email ? `Signed in as ${email}` : 'Signed in'}
-          {roleLabels.length > 0 ? ` · roles: ${roleLabels.join(', ')}` : ''}
-        </p>
+  if (session === undefined || roles === undefined) {
+    return (
+      <div className="di-page">
+        <main className="di-main" style={{ color: 'var(--text-secondary)' }}>
+          Laden…
+        </main>
       </div>
+    )
+  }
 
-      {error && (
-        <div
-          style={{
-            padding: 14,
-            borderRadius: 'var(--radius-lg)',
-            border: '1px solid var(--danger-border)',
-            background: 'var(--danger-bg)',
-            color: 'var(--danger)',
-            marginBottom: 20,
-            fontSize: 14,
-          }}
-        >
-          {error}
+  const knownTasks = model ? model.counts.total : 0
+  const showList = model && !noAccess && !loadError && knownTasks > 0
+  const showEmpty = model && !noAccess && !loadError && model.status === 'empty'
+
+  return (
+    <div className="di-page">
+      <main className="di-main">
+        {!showNoAccessStatus && <InternalNav accessToken={session.access_token} roles={roles} />}
+
+        <div className="wq-head">
+          <div>
+            <h1 className="di-title">Werkvoorraad</h1>
+            <p className="wq-subtitle">Wat nu jouw aandacht nodig heeft.</p>
+            <p className="wq-identity">
+              {email ? `Ingelogd als ${email}` : 'Ingelogd'}
+              {roleLabels.length > 0 ? ` · rollen: ${roleLabels.join(', ')}` : ''}
+            </p>
+          </div>
+          {model && !noAccess && !loadError && (
+            <span className="wq-count">
+              {knownTasks} open {knownTasks === 1 ? 'taak' : 'taken'}
+            </span>
+          )}
         </div>
-      )}
 
-      {showNoAccessStatus && (
-        <div
-          role="status"
-          style={{
-            padding: 20,
-            borderRadius: 'var(--radius-lg)',
-            border: '1px solid var(--border)',
-            background: 'var(--bg-card)',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-            <span style={{ width: 18, height: 18, display: 'flex', flexShrink: 0, color: 'var(--text-secondary)', marginTop: 1 }}>
+        {loadError && (
+          <div className="di-banner di-banner-danger" role="alert">
+            <span>{loadError}</span>
+          </div>
+        )}
+
+        {model && model.status === 'partial' && !loadError && (
+          <div className="di-banner di-banner-neutral" role="status">
+            <span>
+              <strong>De werkvoorraad is mogelijk onvolledig.</strong>{' '}
+              {model.incompleteProviders.map((p) => p.label).join(', ')}{' '}
+              {model.incompleteProviders.length === 1 ? 'kon' : 'konden'} niet volledig worden geladen. Er wordt
+              niets als afgerond gemeld.{' '}
+              <button
+                type="button"
+                className="wq-retry"
+                onClick={() => setReloadKey((key) => key + 1)}
+                disabled={loading}
+              >
+                {loading ? 'Laden…' : 'Opnieuw laden'}
+              </button>
+            </span>
+          </div>
+        )}
+
+        {model && model.status === 'error' && !loadError && (
+          <div className="di-banner di-banner-danger" role="alert">
+            <span>
+              <strong>De werkvoorraad kon niet worden geladen.</strong> Probeer het opnieuw; er wordt niets als
+              afgerond gemeld.{' '}
+              <button
+                type="button"
+                className="wq-retry"
+                onClick={() => setReloadKey((key) => key + 1)}
+                disabled={loading}
+              >
+                {loading ? 'Laden…' : 'Opnieuw laden'}
+              </button>
+            </span>
+          </div>
+        )}
+
+        {showNoAccessStatus && (
+          <div role="status" className="wq-noaccess">
+            <span className="wq-noaccess-icon">
               <IconLock />
             </span>
             <div>
-              <strong style={{ color: 'var(--text-primary)' }}>No internal access for this account.</strong>
-              <p style={{ marginTop: 8, marginBottom: 16, fontSize: 14, color: 'var(--text-secondary)' }}>
-                Your account has no internal role assigned. If you believe this is a mistake, contact an
-                administrator — there is nothing else to do from here.
+              <strong>Geen interne toegang voor dit account.</strong>
+              <p>
+                Aan dit account is geen interne rol toegekend. Neem contact op met een beheerder als dat niet klopt —
+                er is vanaf hier niets anders te doen.
               </p>
-              <button
-                type="button"
-                onClick={signOut}
-                style={{
-                  padding: '8px 14px',
-                  borderRadius: 'var(--radius-md)',
-                  border: '1px solid var(--border)',
-                  background: 'transparent',
-                  color: 'var(--text-primary)',
-                  cursor: 'pointer',
-                  fontSize: 13,
-                }}
-              >
-                Sign out
+              <button type="button" onClick={signOut} className="wq-retry">
+                Uitloggen
               </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {!noAccess && (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-            gap: 14,
-          }}
-        >
-          {modules.map((m) => (
-            <a
-              key={m.id}
-              href={m.href}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 10,
-                padding: 18,
-                borderRadius: 'var(--radius-lg)',
-                border: '1px solid var(--border)',
-                background: 'var(--bg-card)',
-                color: 'var(--text-primary)',
-                textDecoration: 'none',
-                fontWeight: 600,
-                fontSize: 15,
-              }}
-            >
-              <span style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
-                {m.label}
-                {m.subtitle && (
-                  <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-secondary)' }}>{m.subtitle}</span>
-                )}
-              </span>
-              <span style={{ width: 16, height: 16, display: 'flex', flexShrink: 0, color: 'var(--text-secondary)' }}>
-                <IconArrowRight />
-              </span>
-            </a>
-          ))}
+        {!model && !loadError && <p className="wq-loading">Laden…</p>}
 
-          {modules.length === 0 && (
-            <p role="status" style={{ margin: 0, fontSize: 14, color: 'var(--text-secondary)' }}>
-              Geen werk beschikbaar voor dit account.
-            </p>
-          )}
-        </div>
-      )}
-    </main>
+        {showList && (
+          <>
+            <div className="wq-list-head" aria-hidden="true">
+              <span>Restaurant en taak</span>
+              <span>Waarom jouw controle nodig is</span>
+              <span>Volgende actie</span>
+            </div>
+            <ul className="wq-tasks" aria-label="Open taken">
+              {model.tasks.map((task) => {
+                const date = formatDate(task.recordedAt)
+                return (
+                  <li key={task.id} className="wq-task">
+                    <div>
+                      <h2>{task.restaurantName}</h2>
+                      <p className="wq-kind">{task.title}</p>
+                    </div>
+                    <div>
+                      <p className="wq-reason">{task.reason}</p>
+                      {(task.secondary || date) && (
+                        <p className="wq-secondary">{[task.secondary, date].filter(Boolean).join(' · ')}</p>
+                      )}
+                    </div>
+                    <a className="wq-action" href={task.href}>
+                      {task.actionLabel}
+                      <span className="wq-action-icon" aria-hidden="true">
+                        <IconArrowRight />
+                      </span>
+                    </a>
+                  </li>
+                )
+              })}
+            </ul>
+            <p className="wq-footnote">Niets wordt automatisch bevestigd of gepubliceerd.</p>
+          </>
+        )}
+
+        {showEmpty && (
+          <div className="wq-empty" role="status">
+            <strong>Geen openstaand werk.</strong>
+            <p>Nieuwe aanvragen verschijnen hier zodra ze jouw controle nodig hebben.</p>
+          </div>
+        )}
+      </main>
+    </div>
   )
 }

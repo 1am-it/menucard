@@ -518,10 +518,12 @@ export default function SourceTriagePage() {
   const [selectedId, setSelectedId] = useState(null)
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState(null) // saveFeedback(): { tone: 'success' | 'notice' | 'error', text }
+  const [deepLinkNotice, setDeepLinkNotice] = useState(null)
   const headingRef = useRef(null)
   const focusDetail = useRef(false)
   const feedbackRef = useRef(null)
   const focusFeedback = useRef(false)
+  const deepLinkApplied = useRef(false)
 
   useEffect(() => {
     const supabase = getSupabaseBrowser()
@@ -559,6 +561,23 @@ export default function SourceTriagePage() {
   useEffect(() => {
     if (session) load(session.access_token)
   }, [session, load])
+
+  // Issue #53 deep-link adapter: `?restaurant=<id>` opens that exact
+  // restaurant's existing proposal/detail pane. It never decides a proposal
+  // or writes anything; the reviewer still has to use the existing form.
+  useEffect(() => {
+    if (!data || deepLinkApplied.current) return
+    deepLinkApplied.current = true
+    const restaurantId = new URLSearchParams(window.location.search).get('restaurant')
+    if (!restaurantId) return
+    const entry = ((data.restaurants) || []).find((e) => String(e.restaurant_id) === restaurantId)
+    if (!entry) {
+      setDeepLinkNotice('Dit restaurant staat niet meer in de brontriage.')
+      return
+    }
+    setSelectedId(entry.restaurant_id)
+    focusDetail.current = true
+  }, [data])
 
   const entries = useMemo(() => (data && data.restaurants) || [], [data])
   const proposalsAvailable = Boolean(data && data.proposals_available)
@@ -657,6 +676,11 @@ export default function SourceTriagePage() {
         <div role="alert" aria-atomic="true">
           {error && <div className="di-banner di-banner-danger">{error}</div>}
         </div>
+        {deepLinkNotice && (
+          <div className="di-banner di-banner-neutral" role="status">
+            {deepLinkNotice}
+          </div>
+        )}
         {loading && !data && <p className="stg-muted">Laden…</p>}
 
         {data && (

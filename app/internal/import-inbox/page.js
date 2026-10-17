@@ -10,7 +10,7 @@
 // `owner`-only session, or a session with no staff_roles row at all,
 // gets 403 from the API and never sees any of this page's data.
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import InternalNav from '@/src/components/InternalNav'
@@ -557,6 +557,33 @@ export default function ImportInboxPage() {
       loadTriageCandidates(session.access_token, runIdFilter)
     }
   }, [session, runIdFilter, loadTriageCandidates])
+
+  // Issue #53 deep-link adapter: Werkvoorraad opens one exact import run.
+  // `?run=<id>` only sets the existing filter; it never processes or saves a
+  // candidate. The reviewer still uses the existing explicit actions.
+  useEffect(() => {
+    const runId = new URLSearchParams(window.location.search).get('run')
+    if (runId) setRunIdFilter(runId)
+  }, [])
+
+  // Deep link to one exact candidate card: expand it, scroll it into view and
+  // move focus there once the list has rendered. Later filter changes never
+  // re-trigger this (the reviewer is now in control).
+  const deepLinkCandidateApplied = useRef(false)
+  useEffect(() => {
+    if (deepLinkCandidateApplied.current || candidatesLoading) return
+    const candidateId = new URLSearchParams(window.location.search).get('candidate')
+    if (!candidateId) return
+    const element = document.getElementById(`candidate-${candidateId}`)
+    if (!element) return
+    deepLinkCandidateApplied.current = true
+    setExpandedCandidateId(candidateId)
+    requestAnimationFrame(() => {
+      element.scrollIntoView({ block: 'start' })
+      element.setAttribute('tabindex', '-1')
+      element.focus()
+    })
+  }, [candidatesLoading, candidates])
 
   // MARKET-05A — expand/collapse one candidate's detail view. Fetches its
   // review and enrichment history lazily, only on first expand, not on

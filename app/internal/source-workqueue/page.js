@@ -240,7 +240,9 @@ export default function SourceWorkqueuePage() {
   const [sortMode, setSortMode] = useState('action_first')
   const [legendOpen, setLegendOpen] = useState(false)
   const [openRow, setOpenRow] = useState(null) // `${view}:${restaurantId}`
+  const [deepLinkNotice, setDeepLinkNotice] = useState(null)
   const actionRefs = useRef({})
+  const deepLinkApplied = useRef(false)
 
   useEffect(() => {
     const supabase = getSupabaseBrowser()
@@ -272,6 +274,37 @@ export default function SourceWorkqueuePage() {
   useEffect(() => {
     if (session) load(session.access_token)
   }, [session, load])
+
+  // Issue #53 deep-link adapter: Werkvoorraad opens one exact restaurant.
+  // `?restaurant=<id>` narrows the list to that row and expands its existing
+  // action panel; it never starts an action by itself.
+  useEffect(() => {
+    if (!data || deepLinkApplied.current) return
+    deepLinkApplied.current = true
+    const restaurantId = new URLSearchParams(window.location.search).get('restaurant')
+    if (!restaurantId) return
+    const row = ((data.rows) || []).find((r) => String(r.restaurant_id) === restaurantId)
+    if (!row) {
+      setDeepLinkNotice('Dit restaurant staat niet meer in de bronwerkvoorraad.')
+      return
+    }
+    setQuery(row.name)
+    setOpenRow(`t:${row.restaurant_id}`)
+  }, [data])
+
+  // Bring the opened panel into view. Both the table and the mobile-card view
+  // render the same open row; scroll whichever one is actually visible.
+  useEffect(() => {
+    if (!openRow) return
+    const restaurantId = openRow.slice(2)
+    for (const prefix of ['t', 'c']) {
+      const el = document.getElementById(`swq-panel-${prefix}-${restaurantId}`)
+      if (el && el.offsetParent !== null) {
+        el.scrollIntoView({ block: 'center' })
+        break
+      }
+    }
+  }, [openRow])
 
   const rows = useMemo(
     () =>
@@ -338,6 +371,11 @@ export default function SourceWorkqueuePage() {
         {error && (
           <div className="di-banner di-banner-danger" role="alert">
             {error}
+          </div>
+        )}
+        {deepLinkNotice && (
+          <div className="di-banner di-banner-neutral" role="status">
+            {deepLinkNotice}
           </div>
         )}
         {loading && <p className="swq-muted">Laden…</p>}

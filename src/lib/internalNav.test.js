@@ -317,13 +317,15 @@ test('structural safety net: nav links keep a visible keyboard-focus style, and 
   assert.doesNotMatch(cssSource, /internal-nav-workqueue/);
 });
 
-test('structural safety net: /internal/workqueue shows only the work modules, is session-gated only and uses the shared nav with its own roles', () => {
+test('structural safety net: /internal/workqueue shows concrete tasks (issue #53), is session-gated and uses the shared nav with its own roles', () => {
   const source = fs.readFileSync(path.join(REPO_ROOT, 'app/internal/workqueue/page.js'), 'utf8');
-  assert.match(source, /groupModulesByPlacement\(resolveVisibleModules\(roles\)\)\.work/);
+  assert.match(source, /buildWorkqueue\(/);
+  assert.match(source, /resolveWorkqueueProviders\(/);
+  // The first approved round explicitly replaces the module cards.
+  assert.doesNotMatch(source, /groupModulesByPlacement|resolveVisibleModules/);
   assert.match(source, /router\.replace\(['"]\/internal\/login['"]\)/);
   assert.match(source, /\/api\/internal\/v1\/me/);
   assert.match(source, /<InternalNav\s+accessToken=\{session\.access_token\}\s+roles=\{roles\}\s*\/>/);
-  assert.doesNotMatch(source, /isInternalOnly|isEditorRole/);
   assert.doesNotMatch(source, /\.from\(['"]/);
 });
 

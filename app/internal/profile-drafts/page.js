@@ -15,7 +15,7 @@
 // from the browser. `internal`-only, identical gate to every other
 // Data-inbox/profile-drafts surface.
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import InternalNav from '@/src/components/InternalNav'
@@ -62,6 +62,7 @@ export default function ProfileDraftsOverviewPage() {
   const [totalDiscarded, setTotalDiscarded] = useState(0)
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
+  const deepLinkApplied = useRef(false)
 
   useEffect(() => {
     const supabase = getSupabaseBrowser()
@@ -100,6 +101,20 @@ export default function ProfileDraftsOverviewPage() {
   useEffect(() => {
     if (session) loadDrafts(session.access_token)
   }, [session, loadDrafts])
+
+  // Issue #53 deep-link adapter: `#draft-<id>` opens one exact existing draft
+  // card. It is read-only, like this whole overview.
+  useEffect(() => {
+    if (deepLinkApplied.current || drafts.length === 0) return
+    const draftId = window.location.hash.replace(/^#draft-/, '')
+    if (!draftId || draftId === window.location.hash) return
+    const element = document.getElementById(`draft-${draftId}`)
+    if (!element) return
+    deepLinkApplied.current = true
+    element.scrollIntoView({ block: 'start' })
+    element.setAttribute('tabindex', '-1')
+    element.focus()
+  }, [drafts])
 
   if (session === undefined) {
     return (
@@ -169,7 +184,7 @@ export default function ProfileDraftsOverviewPage() {
 
         <div className="di-rows">
           {drafts.map((d) => (
-            <div key={d.id} className="di-candidate-card">
+            <div key={d.id} id={`draft-${d.id}`} className="di-candidate-card">
               <div
                 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, flexWrap: 'wrap' }}
               >

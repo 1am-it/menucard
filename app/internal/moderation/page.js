@@ -8,7 +8,7 @@
 // pattern as every other internal route. No direct Supabase data access
 // from the browser.
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import InternalNav from '@/src/components/InternalNav'
@@ -48,6 +48,7 @@ export default function ModerationQueuePage() {
   const [claimsError, setClaimsError] = useState(null)
   const [claimsLoading, setClaimsLoading] = useState(false)
   const [busyClaimId, setBusyClaimId] = useState(null)
+  const deepLinkApplied = useRef(false)
 
   useEffect(() => {
     const supabase = getSupabaseBrowser()
@@ -108,6 +109,20 @@ export default function ModerationQueuePage() {
       loadClaims(session.access_token)
     }
   }, [session, loadQueue, loadClaims])
+
+  // Issue #53 deep-link adapter: `#pending-<id>` / `#claim-<id>` opens that
+  // exact existing decision card. It never approves or rejects anything.
+  useEffect(() => {
+    if (deepLinkApplied.current) return
+    const targetId = window.location.hash.replace(/^#/, '')
+    if (!targetId) return
+    const element = document.getElementById(targetId)
+    if (!element) return
+    deepLinkApplied.current = true
+    element.scrollIntoView({ block: 'start' })
+    element.setAttribute('tabindex', '-1')
+    element.focus()
+  }, [items, claimItems])
 
   async function decideClaim(claimId, action) {
     setBusyClaimId(claimId)
@@ -189,16 +204,17 @@ export default function ModerationQueuePage() {
       {!loading && items.length === 0 && !error && <p style={{ color: 'var(--text-secondary)' }}>No pending changes.</p>}
 
       <div style={{ display: 'grid', gap: 14 }}>
-        {items.map(({ pending, current }) => {
+        {items.map(({ pending, current, restaurantName }) => {
           const currentDisplay = current ? formatFieldValue(pending.field_name, current.value) || NO_CURRENT_VALUE_LABEL : NO_CURRENT_VALUE_LABEL
           const proposedDisplay = formatFieldValue(pending.field_name, pending.proposed_value) || '(no details)'
           return (
           <div
             key={pending.id}
+            id={`pending-${pending.id}`}
             style={{ border: '1px solid var(--border)', borderRadius: 12, padding: 16, background: 'var(--bg-card)' }}
           >
             <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8 }}>
-              Restaurant {pending.restaurant_id} · {formatFieldName(pending.field_name)}
+              {restaurantName || `Restaurant ${pending.restaurant_id}`} · {formatFieldName(pending.field_name)}
               {pending.field_ref ? ` · ${pending.field_ref}` : ''}
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, marginBottom: 12 }}>
@@ -307,6 +323,7 @@ export default function ModerationQueuePage() {
         {claimItems.map(({ claim, restaurantName, restaurantWebsite, hasExistingOwner }) => (
           <div
             key={claim.id}
+            id={`claim-${claim.id}`}
             style={{ border: '1px solid var(--border)', borderRadius: 12, padding: 16, background: 'var(--bg-card)' }}
           >
             <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8 }}>

@@ -159,6 +159,32 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
       reviews = data || [];
     }
     const bySnapshot = groupReviewsBySnapshotId(reviews);
+    // Issue #53: an approved concept's existing export is part of its real
+    // status. Read-only query (no GitHub refresh, no write) so the
+    // Werkvoorraad can tell an open/failed/merged publication apart instead
+    // of offering a second publication task forever.
+    const approvedIds = latest
+      .filter((row) => viewStatus(deriveEffectiveSnapshotStatus(bySnapshot[row.id] || [])) === 'approved')
+      .map((row) => row.id);
+    const exportBySnapshot = {};
+    if (approvedIds.length > 0) {
+      const { data: exportRows, error: exportError } = await supabase
+        .from('menu_snapshot_exports')
+        .select('id, snapshot_id, status, pr_url, created_at')
+        .in('snapshot_id', approvedIds)
+        .order('created_at', { ascending: false });
+      if (exportError) return reply(500, { error: LOAD_ERROR });
+      for (const row of exportRows || []) {
+        if (!exportBySnapshot[row.snapshot_id]) {
+          exportBySnapshot[row.snapshot_id] = {
+            id: row.id,
+            status: row.status,
+            prUrl: row.pr_url || null,
+            createdAt: row.created_at || null,
+          };
+        }
+      }
+    }
     const order = { waiting: 0, approved: 1, rejected: 2 };
     const items = latest
       .map((row) => {
@@ -176,6 +202,7 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
           dishCount: concept.lines.filter((l) => l.status !== 'excluded').length,
           attentionCount: concept.attentionLines.length + concept.removed.length,
           blockerCount: concept.blockers.length,
+          export: exportBySnapshot[row.id] || null,
         };
       })
       .sort((a, b) => order[a.status] - order[b.status] || String(b.createdAt).localeCompare(String(a.createdAt)));

@@ -121,13 +121,14 @@ function fakeSupabase(tables) {
   };
 }
 
-function world({ snapshots, reviews = [], proposals, jobs } = {}) {
+function world({ snapshots, reviews = [], proposals, jobs, exports = [] } = {}) {
   return fakeSupabase({
     menu_snapshot_proposals: snapshots || [snapshotRow(1, 1, content({ resolved: true }))],
     menu_snapshot_reviews: reviews,
     url_intake_analysis_receipts: [{ id: 'r1', canonical_source_url: SITE, fetched_at: '2026-10-12T09:00:00Z', menus: RECEIPT_MENUS }],
     source_triage_proposals: proposals || [{ id: 'p1', restaurant_id: 'bistro', kind: 'add_candidate', proposed_url: MENU_URL, current_url: null, status: 'accepted', decided_at: '2026-10-12T09:30:00Z' }],
     restaurant_source_analysis_jobs: jobs || [{ id: 'j1', canonical_source_url: SITE, status: 'succeeded', error_reason: null, created_at: '2026-10-12T09:00:00Z' }],
+    menu_snapshot_exports: exports,
   });
 }
 
@@ -190,6 +191,31 @@ test('list: the latest version per concept, waiting first, with restaurant, sour
   assert.equal(bistro.createdBySelf, true);
   assert.equal(bistro.blockerCount, 0);
   assert.equal(bistro.attentionCount, 2); // the soup's price change and the decided disappeared mousse stay visible
+  assert.equal(inserts(supabase).length + rpcs(supabase).length, 0);
+});
+
+test('list: an approved concept carries its latest stored export status, read-only; no export stays null', async () => {
+  const supabase = world({
+    snapshots: [
+      snapshotRow(1, 1, content({ resolved: true })),
+      { ...snapshotRow(2, 1, content({ resolved: true })), restaurant_id: 'andere', menu_context: 'andere-menukaart' },
+    ],
+    reviews: [{ id: 1, snapshot_id: 1, decision: 'approved_internal', reason: null, decided_at: '2026-10-12T12:00:00Z' }],
+    exports: [
+      { id: 9, snapshot_id: 1, status: 'opened', pr_url: 'https://github.com/1am-it/menucard/pull/9', created_at: '2026-10-13T09:00:00Z' },
+      { id: 8, snapshot_id: 1, status: 'merged', pr_url: 'https://github.com/1am-it/menucard/pull/8', created_at: '2026-10-12T09:00:00Z' },
+    ],
+  });
+  const res = await handlersFor(supabase).list(request());
+  assert.equal(res.status, 200);
+  const byId = Object.fromEntries(res.body.items.map((i) => [i.id, i]));
+  assert.deepEqual(byId[1].export, {
+    id: 9,
+    status: 'opened',
+    prUrl: 'https://github.com/1am-it/menucard/pull/9',
+    createdAt: '2026-10-13T09:00:00Z',
+  });
+  assert.equal(byId[2].export, null);
   assert.equal(inserts(supabase).length + rpcs(supabase).length, 0);
 });
 
