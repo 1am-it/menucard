@@ -342,6 +342,19 @@ test('correction: content a human rejected before does not come back as a new ve
   assert.equal(inserts(supabase).length, 0);
 });
 
+test('approve: the current rejected version cannot be approved again unchanged', async () => {
+  const supabase = world({
+    snapshots: [snapshotRow(1, 1, content({ resolved: true }))],
+    reviews: [{ id: 1, snapshot_id: 1, reviewer_id: MAKER, decision: 'rejected', reason: 'content_mismatch', decided_at: '2026-10-12T12:00:00Z' }],
+  });
+  const detail = await handlersFor(supabase).detail(request(), '1');
+  assert.equal(detail.body.concept.rejectedBefore, true);
+  const result = await handlersFor(supabase).decide(request({ expected_version: 1, decision: 'approved_internal' }), '1');
+  assert.equal(result.status, 409);
+  assert.equal(result.body.reason, 'previously_rejected');
+  assert.equal(rpcs(supabase).length, 0);
+});
+
 test('approve: refused with blockers in the stored version, for a stale version, or when the public menu was rejected before', async () => {
   const open = world({ snapshots: [snapshotRow(1, 1, content({ resolved: false }))] });
   const blocked = await handlersFor(open).decide(request({ expected_version: 1, decision: 'approved_internal', canSave: true }), '1');

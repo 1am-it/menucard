@@ -43,9 +43,11 @@ async function loadLineage(supabase, { restaurantId, menuContext }) {
 }
 
 /** True when this public menu equals one a human already rejected in the lineage. */
-function wasRejectedBefore(versions, content, computeMenuHash, exceptId) {
+function wasRejectedBefore(versions, content, computeMenuHash) {
   const target = computeMenuHash(publicMenu(content));
-  return versions.some((v) => v.id !== exceptId && v.status === 'rejected' && computeMenuHash(publicMenu(v.captured_content)) === target);
+  // The current version is evidence too: excluding it allowed a rejected
+  // concept to be approved again without any content correction.
+  return versions.some((v) => v.status === 'rejected' && computeMenuHash(publicMenu(v.captured_content)) === target);
 }
 
 /**
