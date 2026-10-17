@@ -36,12 +36,16 @@ The underlying DeepSeek changes were reviewed independently of their author.
 - Focused source/task tests: 71 pass. Concept-review/export tests: 30 pass.
 - Structure tests: 6 pass. Corpus v1.1.0: 24 pass, 0 fail, 1 known unclassified
   case (STRUCT-018, JSON-LD hierarchy), not a newly introduced failure.
-- Final production build: pending verification in this review checkpoint.
+- Local build passed for the first navigation repairs (ad26fa8 tree). After
+  the rejection guard, the final local build is blocked by repeated Windows
+  EPERM errors creating generated .next subdirectories. Clean-cache retry and
+  explicit .next write permission did not resolve it. No final local success
+  is claimed. Check the actual final-head Vercel result on issue #53 / PR #56.
 - git diff --check clean; no .github/, data/ or supabase/ diff against main.
 - An initial restricted-network run failed on local test connections. With
   network permission the actual full suite passed; those failures were not
-  hidden or "fixed" by weakening tests. A build retry is run separately after
-  a Windows-generated-directory EPERM rather than called successful.
+  hidden or "fixed" by weakening tests. Failed generated-directory builds are
+  reported separately; the precise cause of the Windows EPERM is unresolved.
 
 ## Actual Preview Evidence
 
@@ -55,6 +59,7 @@ read, copied or changed. No new access or account was created.
 | Beheer overview | Real coverage immediately rendered, four secondary links, methodology caveat | Real preview |
 | Restaurants | 25 records, search to Blossem, exact source URLs, status and history | Real preview |
 | Keyboard selection | Enter selects record; detail heading receives focus and scroll | Repaired preview, 320px dark |
+| Back navigation | Importhistorie changes the URL; browser Back restores Overzicht | Real desktop preview |
 | Import history | URL batches separated from dataset imports; exact batch hrefs; bounds explained | Real preview; dataset history empty |
 | Decisions | Latest Zuyd concept, source decisions, empty profile-history state | Real preview |
 | Concept detail | Exact existing Zuyd version, review tabs and public/current preview switch accessible | Read-only; rejected legacy test content not approved |
