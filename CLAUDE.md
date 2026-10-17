@@ -1,5 +1,12 @@
 # BredaEats — Claude Instructions
 
+## Shared Project Entry Point
+
+Read `AGENTS.md` and `.agent/START.md` before starting or taking over a task.
+They route to the shared working agreement and pinned model-independent roles.
+The existing product context below remains applicable; this tool-specific file
+does not grant different permissions or override an approved project contract.
+
 ## Mission
 
 BredaEats helps users answer:
