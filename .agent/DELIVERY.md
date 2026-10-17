@@ -1,5 +1,15 @@
 # AI Delivery Protocol
 
+## Pinned General Protocol
+
+Project entry and ownership: `AGENTS.md`, `.agent/START.md`,
+`.agent/assignments.md`. Exact upstream versions and snapshot hashes are in
+`.agent/versions.md`. Read the relevant project role supplement and pinned
+general delivery/checkpoint protocol before taking over a task.
+The project handoff below remains the output format; add actual saved/remote
+commit, stop reason and next safe step where needed. This documentation does
+not install automatic checkpoint capture/restart or alter workflow limits.
+
 ## Goal
 
 Deliver complete, reviewable user outcomes with minimal interruption to the
