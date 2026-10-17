@@ -421,15 +421,15 @@ Sources:
 - **Live behaviour:** `src/lib/internalNav.js` (config) and
   `src/components/InternalNav.js` (render).
 
-### Proposed correction: task flow and administration (issue #53, revision 2)
+### Proposed correction: task flow and administration (issue #53, revision 3)
 
 **2026-10-17: NEEDS_APPROVAL, not implemented or design-approved.** The
 Product Owner rejected the module-card workqueue and single-link Beheer hub
 as insufficient simplification. The full proposed inventory, screen contract
 and acceptance matrix are in
 `planning/specs/tickets/internal-task-flow-53.md`; its proposed visual reference
-is `docs/mockups/internal-task-flow-v2.html`. Neither a green test run nor
-the earlier chat mockup v1 approves this revision.
+is `docs/mockups/internal-task-flow-v3.html`. Neither a green test run nor
+the earlier proposals v1/v2 approve this revision.
 
 - Werkvoorraad must show actual pending items with one appropriate next action,
   opening the exact record without a module-selection or search-again step.
@@ -438,16 +438,23 @@ the earlier chat mockup v1 approves this revision.
   no extra landing page consisting of links to those views.
 - Existing role/ownership, history, source checks and review/publication gates
   remain; one capability inventory prevents losing destinations by omission.
+- User-facing phases are exactly `Importeren -> Controleren -> Publiceren`.
+  An export-eligible approved concept is `Klaar voor publicatie`; `Publiceren`
+  opens its existing publication controls without a separate preparation or
+  extra approval stage. Navigation never writes. `Maak review-PR` remains an
+  explicit guarded action, followed by a human GitHub merge and successful
+  production deployment. Ineligible concepts show their actual blocking reason.
+  Three phases do not mean three clicks or removal of required human decisions.
 - User/role administration has no existing app UI or admin security contract.
   It is a missing future capability, not a working tab or permission for
   internal staff to manage accounts. General canonical restaurant CRUD also
   is not added implicitly by the restaurant/source overview.
-- Do not build until the Product Owner approves the pinned revision 2 design.
+- Do not build until the Product Owner approves the pinned revision 3 design.
 
 ### Current PR candidate (issue #53 — not product-accepted)
 
 The following records the earlier candidate implementation, not the desired
-acceptance contract. It must not override revision 2's proposal after approval.
+acceptance contract. It must not override revision 3's proposal after approval.
 
 The primary navigation is exactly three plain links, in this order:
 

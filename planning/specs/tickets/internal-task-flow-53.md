@@ -1,17 +1,17 @@
-# Internal Task Flow - Issue 53, Revision 2
+# Internal Task Flow - Issue 53, Revision 3
 
 ## Status And Authority
 
 2026-10-17: **NEEDS_APPROVAL - design alignment, not implementation**.
 The Product Owner authorized inventory and alignment of the ticket, shared
-documentation and mockups. Revision 2 still needs explicit design approval.
+documentation and mockups. Revision 3 still needs explicit design approval.
 PR #56's green technical checks do not establish product acceptance.
 
 - Live contract: https://github.com/1am-it/menucard/issues/53
 - Existing delivery branch/PR: https://github.com/1am-it/menucard/pull/56
 - Shared design rules: `docs/guides/design-reference.md`.
-- Proposed reference: `docs/mockups/internal-task-flow-v2.html`.
-- Previous chat mockup v1 is superseded as a proposal, not retroactively approved.
+- Proposed reference: `docs/mockups/internal-task-flow-v3.html`.
+- Previous proposals v1/v2 are historical, not retroactively approved.
 
 Do not start another Claude build round, change app code, merge or release
 while this revision is awaiting approval. Updating these design documents is
@@ -26,6 +26,31 @@ single-link landing page. Existing capabilities remain reachable.
 
 Primary navigation remains `Werkvoorraad | Nieuwe import | Beheer`.
 
+### Three User-Facing Phases
+
+The compact flow is **Importeren -> Controleren -> Publiceren**. These are
+three phases, not a promise that all required checks take exactly three clicks.
+There is no separate `Klaarzetten voor publicatie` phase, task or approval.
+
+- **Importeren**: use the existing website import and its existing safeguards.
+- **Controleren**: inspect the source/menu, resolve attention points and use
+  the existing explicit source, save and internal-decision controls. Group
+  these within the review experience; do not silently confirm/save/approve
+  or remove required human decisions to reduce the visible phase count.
+- **Publiceren**: an approved, export-eligible concept is `Klaar voor
+  publicatie`; its task action `Publiceren` opens that exact concept's existing
+  publication controls directly, never a preparation screen or module index.
+  The action itself neither creates a PR nor publishes. `Maak review-PR`
+  remains explicit and guarded; afterwards show `Review-PR openen` and the
+  real status. A human still merges in GitHub; only a successful production
+  deployment makes the new menu live. No new in-app merge or automatic export.
+
+An approved concept that fails a source/blocker/version/integration check
+must show the actual reason, not misleadingly claim publication readiness.
+An open/merged/closed export is represented with its existing real status,
+not offered as a second new publication task. Readiness is a derived display
+state, not a new stored workflow state or a migration.
+
 ## Capability Inventory And Destinations
 
 | Capability | Existing evidence | Target destination | Boundary |
@@ -34,7 +59,7 @@ Primary navigation remains `Werkvoorraad | Nieuwe import | Beheer`.
 | Source proposals and decisions | `/internal/source-triage`; source-triage handlers/API and events | Pending decisions in Werkvoorraad; decisions remain inspectable under Beheer | Link to the exact restaurant/proposal, not the unfiltered module index |
 | URL imports, results, retry/reanalysis | `/internal/nieuwe-import`; batch-analysis handlers/API | Input in Nieuwe import; actionable results in Werkvoorraad; earlier batches in Importhistorie | 1-10 URLs and 25/day unchanged; processing/confirmation/save still starter-only |
 | Dataset/source import runs and candidates | `/internal/import-inbox`; GET import-inbox/runs and candidates | Candidate decisions in Werkvoorraad; runs in Importhistorie | Separate run type from URL batches; do not imply the CITY-0 URL engine exists |
-| Menu concepts and version/review history | `/internal/menu-concepts/[id]`; GET menu-concepts, decision/version/export routes | Pending review/publication preparation in Werkvoorraad; recorded concepts/decisions under Beheer | Latest-version, blockers, source and idempotency checks unchanged |
+| Menu concepts and version/review history | `/internal/menu-concepts/[id]`; GET menu-concepts, decision/version/export routes | Pending review/publication in Werkvoorraad; recorded concepts/decisions under Beheer | Latest-version, blockers, source and idempotency checks unchanged; no separate preparation stage |
 | Restaurant profile drafts | `/internal/profile-drafts`; GET profile-drafts includes active/discarded records | Genuine pending draft action in Werkvoorraad; draft history under Beheer | No invented canonical editing, promotion, export or publication capability |
 | Field changes and owner claims | `/internal/moderation`; moderation/pending and claims/pending APIs | Editor-only item-level tasks in Werkvoorraad | Internal is not editor; owners do not gain staff access |
 | Coverage and restaurant/menu data presence | `/internal/coverage`; GET coverage | Beheer > Overzicht (default, directly rendered) | Preserve computation and caveats; data presence is not completeness/verification |
@@ -71,7 +96,8 @@ Primary navigation remains `Werkvoorraad | Nieuwe import | Beheer`.
 - No single/batch mode choice and no global Onboarding Restaurant shortcut.
 - Existing result review and fresh reanalysis remain reachable. Saved concepts
   open directly. Linking an unknown restaurant is contextual to that item.
-- Keep the compact progress labels; no four-step vertical navigation rail.
+- Progress labels are exactly `Importeren -> Controleren -> Publiceren`;
+  no four-step rail and no separate publication-preparation step.
 - No import-engine, fetch, AI/OCR, daily-limit or cache-policy changes here.
 
 ### Beheer
@@ -103,6 +129,9 @@ It is shown as unavailable in the proposed Beheer reference, not a dead button.
 | --- | --- | --- |
 | Open Werkvoorraad | Actual pending restaurant/items visible immediately; zero module cards | Mockup Werkvoorraad |
 | Inspect a pending menu | One task click opens that exact concept/result, not a list to search again | Menu task detail |
+| Finish internal review | Export-eligible approved concept reads `Klaar voor publicatie`; no extra prepare/approve task; ineligible concepts show the real reason | Three phases + publication detail |
+| Open publication | `Publiceren` opens that exact concept's publication controls; no write on navigation; `Maak review-PR` remains explicit; no automatic merge/publication | Publication detail + safety tests |
+| Existing export | Existing PR/status is reused; no duplicate export, no live claim before successful production deployment | Publication status + idempotency tests |
 | Review a source/candidate/profile/claim | Exact authorized record opens; no previously available capability is lost | Inventory + provider-specific tests |
 | Open Beheer | Coverage content visible after one main-nav click; no page with just a coverage link | Beheer > Overzicht |
 | Find restaurant/source | Existing records and separate source/menu states visible under Beheer | Beheer > Restaurants en bronnen |
