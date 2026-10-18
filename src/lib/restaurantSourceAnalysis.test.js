@@ -642,6 +642,101 @@ test('REGRESSION (review P1): a supplement source is reported and refused, never
 
 
 
+test('REGRESSION (review 6246984520): a product gap in source-1 does not block or overwrite the recoverable source-2', async () => {
+  const blockedMenu = {
+    sourceId: 'source-1',
+    sourceUrl: 'https://fixture.example/borrel.pdf',
+    contextSlug: 'borrel',
+    extractionMethod: 'pdf_text',
+    categories: [{ name: 'Borrel', items: [{ name: 'Fictief brood', price: '4.00', priceStatus: 'known' }] }],
+  }
+  const recoverableMenu = {
+    sourceId: 'source-2',
+    sourceUrl: 'https://fixture.example/lunch.pdf',
+    contextSlug: 'lunch',
+    extractionMethod: 'html',
+    categories: [{ name: 'Lunch', items: [{ name: 'Fictieve soep', price: '5.00', priceStatus: 'known' }, { name: 'Fictieve soep', price: '5.00', priceStatus: 'known' }] }],
+  }
+  const menus = [blockedMenu, recoverableMenu]
+  const limitations = []
+  let called = 0
+  let receivedSources = null
+  const result = await applyProviderNeutralExtraction({
+    menuContexts: menus,
+    unknownMenuContexts: [{ sourceId: 'source-1', sourceUrl: blockedMenu.sourceUrl, layout: { supplementLines: 2 } }],
+    sourceInventory: [
+      { id: 'source-1', url: blockedMenu.sourceUrl, kind: 'pdf', status: 'read', itemCount: 1 },
+      { id: 'source-2', url: recoverableMenu.sourceUrl, kind: 'html', status: 'read', itemCount: 2 },
+    ],
+    sourceTexts: new Map([['source-2', 'Fictieve soep 5.00']]),
+    notes: [],
+    limitations,
+    restaurantCandidateFields: {},
+    structuredExtraction: async (input) => {
+      called += 1
+      receivedSources = input.sources.map((source) => source.id)
+      return {
+        enabled: true,
+        ok: true,
+        menus: [
+          {
+            name: 'Lunch',
+            title: 'Lunch',
+            contextSlug: 'ai-1',
+            structure: 'normalized',
+            sourceId: 'source-2',
+            variant: null,
+            order: 0,
+            categories: [{
+              name: 'Lunch',
+              items: [
+                { name: 'Fictieve soep', description: null, priceStatus: 'known', amountMinorUnits: 500, currency: 'EUR', evidence: { sourceId: 'source-2', locator: 'line:1', quote: 'Fictieve soep' } },
+                { name: 'Fictief brood', description: null, priceStatus: 'known', amountMinorUnits: 400, currency: 'EUR', evidence: { sourceId: 'source-2', locator: 'line:2', quote: 'Fictief brood' } },
+              ],
+            }],
+          },
+          {
+            name: 'Borrel',
+            title: 'Borrel',
+            contextSlug: 'ai-2',
+            structure: 'normalized',
+            sourceId: 'source-1',
+            variant: null,
+            order: 0,
+            categories: [{
+              name: 'Borrel',
+              items: [{ name: 'Fictief brood', description: null, priceStatus: 'known', amountMinorUnits: 400, currency: 'EUR', evidence: { sourceId: 'source-1', locator: 'line:1', quote: 'Fictief brood' } }],
+            }],
+          },
+        ],
+      }
+    },
+  })
+
+  // The model is asked once, for the recoverable source only.
+  assert.equal(called, 1)
+  assert.deepEqual(receivedSources, ['source-2'])
+  assert.equal(result.assessment.blockedByProductGap, true)
+  assert.deepEqual(result.assessment.blockedSourceIds, ['source-1'])
+  assert.deepEqual(result.assessment.aiEligibleSourceIds, ['source-2'])
+  assert.deepEqual(result.aiExtraction.blockedSources.map((entry) => entry.sourceId), ['source-1'])
+
+  // The blocked source keeps its own deterministic result and provenance.
+  const kept = menus.find((menu) => menu.sourceId === 'source-1')
+  assert.equal(kept.extractionMethod, 'pdf_text')
+  assert.equal(kept.categories[0].uncertain, true)
+  // The recoverable source is replaced, explicitly marked for review.
+  const replaced = menus.find((menu) => menu.sourceId === 'source-2')
+  assert.equal(replaced.extractionMethod, 'ai_structured')
+  assert.equal(replaced.replacesDeterministic.sourceId, 'source-2')
+  assert.equal(replaced.categories.every((category) => category.uncertain === true), true)
+  // A model menu for the blocked source is refused, with an explicit reason.
+  assert.ok(limitations.some((line) => line.includes('bron source-1') && line.includes('supplementen')))
+  assert.ok(limitations.some((line) => line.includes('source_blocked_by_product_gap')))
+  assert.equal(menus.filter((menu) => menu.sourceId === 'source-1').length, 1)
+})
+
+
 test('REGRESSION (review P1): a validated model menu replaces only the flagged source, explicitly marked for review', async () => {
   const deterministic = deterministicMenu()
   deterministic.categories[0].items = [{ name: 'Fictieve soep', price: '5.00', priceStatus: 'known' }, { name: 'Fictieve soep', price: '5.00', priceStatus: 'known' }] // duplicate → flag

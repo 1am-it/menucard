@@ -80,6 +80,27 @@ test('PDF layout signals are reported, and skipped supplements block a paid call
   assert.ok(layoutOnly.codes.includes(FLAG_CODES.pdf_unrecognised_headings));
 });
 
+test('PDF arrangement lines are a product gap for that source, never silently paid for', () => {
+  const assessment = assessDeterministicMenuQuality({
+    menus: [cleanMenu],
+    unknownMenuContexts: [{ sourceId: 'source-1', sourceUrl: cleanMenu.sourceUrl, layout: { supplementLines: 0, arrangementLines: 1 } }],
+  });
+  assert.equal(assessment.blockedByProductGap, true);
+  assert.deepEqual(assessment.blockedSourceIds, ['source-1']);
+  assert.equal(assessment.requiresAiExtraction, false);
+  assert.ok(assessment.codes.includes(FLAG_CODES.pdf_arrangements_skipped));
+});
+
+test('an HTML source with excluded arrangement sections is a product gap, never sent for flattening', () => {
+  const assessment = assessDeterministicMenuQuality({
+    menus: [cleanMenu],
+    sourceInventory: [{ id: 'source-1', url: cleanMenu.sourceUrl, status: 'read', kind: 'html', excludedSections: 2 }],
+  });
+  assert.equal(assessment.blockedByProductGap, true);
+  assert.deepEqual(assessment.blockedSourceIds, ['source-1']);
+  assert.ok(assessment.codes.includes(FLAG_CODES.html_arrangements_skipped));
+});
+
 test('a read source with zero recognized dishes is never "sufficient"', () => {
   const assessment = assessDeterministicMenuQuality({
     menus: [],
@@ -104,6 +125,40 @@ test('the same dish + price in two sections flags a possibly flattened menu vari
   assert.equal(assessment.requiresAiExtraction, true);
   assert.deepEqual(assessment.reviewTargets, [{ menuIndex: 0, categoryIndex: 0 }, { menuIndex: 0, categoryIndex: 1 }]);
   assert.equal(applyQualityReview([menu], assessment), 2);
+});
+
+test('a product gap in one source never disables repair of another source', () => {
+  const s1 = {
+    contextSlug: 'borrel',
+    sourceId: 'source-1',
+    sourceUrl: 'https://fixture.example/borrel.pdf',
+    categories: [{ name: 'Borrel', items: [item('Brood', { evidence: { sourceId: 'source-1', locator: 'pdf:1', quote: 'Brood' } })] }],
+  };
+  const s2 = {
+    contextSlug: 'lunch',
+    sourceId: 'source-2',
+    sourceUrl: 'https://fixture.example/lunch.pdf',
+    categories: [{ name: 'Lunch', items: [item('Soep', { evidence: { sourceId: 'source-2', locator: 'pdf:1', quote: 'Soep' } }), item('Soep', { evidence: { sourceId: 'source-2', locator: 'pdf:2', quote: 'Soep' } })] }],
+  };
+  const assessment = assessDeterministicMenuQuality({
+    menus: [s1, s2],
+    unknownMenuContexts: [{ sourceId: 'source-1', sourceUrl: s1.sourceUrl, layout: { supplementLines: 2 } }],
+    sourceInventory: [
+      { id: 'source-1', url: s1.sourceUrl, status: 'read', kind: 'pdf' },
+      { id: 'source-2', url: s2.sourceUrl, status: 'read', kind: 'pdf' },
+    ],
+  });
+  assert.equal(assessment.blockedByProductGap, true);
+  assert.deepEqual(assessment.blockedSourceIds, ['source-1']);
+  assert.deepEqual(assessment.aiEligibleSourceIds, ['source-2']);
+  assert.equal(assessment.requiresAiExtraction, true);
+  // The blocked source keeps its own honest flag, never a silent pass.
+  assert.ok(assessment.flags.some((flag) => flag.sourceId === 'source-1' && flag.code === FLAG_CODES.pdf_supplements_skipped));
+
+  // Both the directly flagged s2 category and every s1 category are review work.
+  assert.equal(applyQualityReview([s1, s2], assessment), 2);
+  assert.equal(s1.categories[0].uncertain, true);
+  assert.equal(s2.categories[0].uncertain, true);
 });
 
 test('replacement gate: same-source evidence and at least the coverage ratio are required', () => {

@@ -129,7 +129,31 @@ function menuFromHtmlStructure(html, usedSlugs) {
   })
   let contextSlug = 'menukaart'
   for (let i = 0; usedSlugs.has(contextSlug); i += 1) contextSlug = `menukaart${String.fromCharCode(97 + (i % 26))}`
-  return { menu: { name: 'Menukaart', contextSlug, title: hierarchy.title, structure: hierarchy.structure, categories }, itemCount }
+  const excludedSections = (Array.isArray(result.excludedSections) ? result.excludedSections : [])
+    .filter((entry) => entry && Array.isArray(entry.path) && entry.path.length > 0)
+    .slice(0, 20)
+    .map((entry) => ({ path: entry.path.map((label) => String(label || '').slice(0, 60)), unpricedLines: entry.unpricedLines }))
+  return { menu: { name: 'Menukaart', contextSlug, title: hierarchy.title, structure: hierarchy.structure, categories }, itemCount, excludedSections }
+}
+
+/**
+ * Honest limitations for recognised headings whose content could not be
+ * stored as dishes (typically an arrangement or choice menu whose prices do
+ * not belong to one dish). Never a guessed item, never silence.
+ */
+function htmlMenuExclusionLimitations(url, found) {
+  return ((found && found.excludedSections) || []).map(
+    (entry) => `Menukaart ${url}: sectie "${entry.path.join(' › ')}" is niet als gerechten opgenomen; ${entry.unpricedLines} regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).`,
+  )
+}
+
+/** Records the count (never the content) on the source entry so the quality
+ * gate can treat it as a product gap for exactly that source. */
+function noteHtmlExclusions(sourceInventory, sourceId, found) {
+  const entry = (Array.isArray(sourceInventory) ? sourceInventory : []).find((source) => source && source.id === sourceId)
+  if (!entry) return
+  const count = ((found && found.excludedSections) || []).length
+  if (count > 0) entry.excludedSections = (Number.isInteger(entry.excludedSections) ? entry.excludedSections : 0) + count
 }
 
 /** A plain-language note for a recognised HTML menu. */
@@ -276,6 +300,9 @@ function pdfLayoutLimitations(sourceUrl, layout = {}) {
   if (Number.isInteger(layout.supplementLines) && layout.supplementLines > 0) {
     limitations.push(`PDF ${sourceUrl}: ${layout.supplementLines} supplementregel(s) zijn niet als gerecht opgenomen; het concept ondersteunt supplementen nog niet.`)
   }
+  if (Number.isInteger(layout.arrangementLines) && layout.arrangementLines > 0) {
+    limitations.push(`PDF ${sourceUrl}: ${layout.arrangementLines} arrangement-/keuzeregel(s) zijn niet als gerecht opgenomen; het concept ondersteunt arrangementen nog niet.`)
+  }
   if (Number.isInteger(layout.ambiguousPriceLines) && layout.ambiguousPriceLines > 0) {
     limitations.push(`PDF ${sourceUrl}: ${layout.ambiguousPriceLines} regel(s) met een prijs midden in de regel zijn niet als gerecht overgenomen.`)
   }
@@ -290,8 +317,9 @@ function pdfLayoutLimitations(sourceUrl, layout = {}) {
  * direct-PDF analysis paths. It runs BEFORE any model call:
  *   1. assess the deterministic result (quality/coverage gates);
  *   2. mark exactly the flagged categories "Controle nodig";
- *   3. refuse a model call when the source needs constructs the concept cannot
- *      store (supplements) — such output would be discarded anyway;
+ *   3. refuse a model call for a source that needs constructs the concept
+ *      cannot store (supplements/arrangements) while still allowing repair of
+ *      another source in the same analysis — such output would be discarded;
  *   4. skip the call entirely when the deterministic result is sufficient;
  *   5. otherwise use the validated model result only as an explicit,
  *      source- and version-scoped REPLACEMENT of a flagged deterministic menu,
@@ -321,11 +349,19 @@ async function applyProviderNeutralExtraction({
 
   if (typeof structuredExtraction !== 'function') return { aiExtraction: null, assessment }
 
-  if (assessment.blockedByProductGap) {
+  // Product gaps are per source: a supplement/arrangement in one source must
+  // not silence a recoverable defect in another source. Blocked sources keep
+  // their deterministic result, stay "Controle nodig" and keep their own
+  // provenance; they are never sent to the provider (output would be rejected)
+  // and their model output, if any, is never used.
+  const blockedSourceIds = new Set(assessment.blockedSourceIds || [])
+  const blockedStatus = (assessment.sourceStatus || []).filter((entry) => entry.blockedByProductGap)
+  for (const entry of blockedStatus) {
+    const label = entry.sourceId ? `bron ${entry.sourceId}` : 'een bron zonder bron-ID'
+    const url = entry.sourceUrl ? ` (${entry.sourceUrl})` : ''
     limitations.push(
-      'Geen model-extractie uitgevoerd: de bron bevat supplementen of relaties die het concept nog niet kan opslaan; een modelresultaat zou daarom worden verworpen.',
+      `Geen model-extractie uitgevoerd voor ${label}${url}: de bron bevat supplementen of relaties die het concept nog niet kan opslaan (${entry.flagCodes.join(', ')}). Het deterministische resultaat blijft ongewijzigd, als "Controle nodig" gemarkeerd en niet als volledig beoordeeld.`,
     )
-    return { aiExtraction: { enabled: false, ok: null, skipped: true, reason: 'unsupported_product_gap', quality: assessment.codes }, assessment }
   }
 
   if (menus.length > 0 && assessment.sufficient) {
@@ -333,10 +369,32 @@ async function applyProviderNeutralExtraction({
     return { aiExtraction: { enabled: true, ok: null, skipped: true, reason: 'deterministic_result_sufficient', quality: assessment.codes }, assessment }
   }
 
-  const aiSources = (Array.isArray(sourceInventory) ? sourceInventory : []).map((source) => ({
-    ...source,
-    ...(sourceTexts && sourceTexts.has(source.id) ? { text: sourceTexts.get(source.id) } : {}),
-  }))
+  const eligibleFlagged = (assessment.sourceStatus || []).filter((entry) => entry.requiresAiExtraction)
+  const unscopedBlocked = assessment.unscopedBlockedByProductGap === true
+  const nothingRecoverable =
+    unscopedBlocked ||
+    (menus.length > 0 && eligibleFlagged.length === 0) ||
+    (menus.length === 0 && blockedSourceIds.size > 0 && eligibleFlagged.length === 0 && (assessment.sourceStatus || []).length > 0 && (assessment.sourceStatus || []).every((entry) => entry.blockedByProductGap))
+  if (nothingRecoverable) {
+    return {
+      aiExtraction: {
+        enabled: false,
+        ok: null,
+        skipped: true,
+        reason: 'unsupported_product_gap',
+        quality: assessment.codes,
+        blockedSources: blockedStatus.map((entry) => ({ sourceId: entry.sourceId, sourceUrl: entry.sourceUrl, codes: entry.flagCodes })),
+      },
+      assessment,
+    }
+  }
+
+  const aiSources = (Array.isArray(sourceInventory) ? sourceInventory : [])
+    .filter((source) => !(source && blockedSourceIds.has(source.id)))
+    .map((source) => ({
+      ...source,
+      ...(sourceTexts && sourceTexts.has(source.id) ? { text: sourceTexts.get(source.id) } : {}),
+    }))
   let aiExtraction
   try {
     aiExtraction = await structuredExtraction({ sources: aiSources, restaurantFields: restaurantCandidateFields })
@@ -344,7 +402,13 @@ async function applyProviderNeutralExtraction({
     aiExtraction = { enabled: true, ok: false, reason: 'adapter_failed' }
   }
   if (!aiExtraction || aiExtraction.enabled !== true) return { aiExtraction, assessment }
-  aiExtraction = { ...aiExtraction, quality: assessment.codes }
+  aiExtraction = {
+    ...aiExtraction,
+    quality: assessment.codes,
+    ...(blockedStatus.length > 0
+      ? { blockedSources: blockedStatus.map((entry) => ({ sourceId: entry.sourceId, sourceUrl: entry.sourceUrl, codes: entry.flagCodes })) }
+      : {}),
+  }
 
   if (!aiExtraction.ok || !Array.isArray(aiExtraction.menus) || aiExtraction.menus.length === 0) {
     limitations.push(`Model-extractie niet gebruikt (${aiExtraction.reason || 'onbekende reden'}).`)
@@ -352,7 +416,15 @@ async function applyProviderNeutralExtraction({
   }
 
   if (menus.length === 0) {
-    menus.push(...aiExtraction.menus)
+    const accepted = aiExtraction.menus.filter((menu) => !(menu && blockedSourceIds.has(menu.sourceId)))
+    const rejectedBlocked = aiExtraction.menus.length - accepted.length
+    if (rejectedBlocked > 0) {
+      limitations.push(`${rejectedBlocked} modelmenu('s) voor een bron met een productgat zijn niet gebruikt.`)
+    }
+    if (accepted.length === 0) {
+      return { aiExtraction, assessment }
+    }
+    menus.push(...accepted)
     notes.push('Aanvullende structurering via de geconfigureerde adapter toegevoegd; menselijke controle blijft nodig.')
     return { aiExtraction, assessment }
   }
@@ -369,6 +441,10 @@ async function applyProviderNeutralExtraction({
   const rejected = []
   for (const aiMenu of aiExtraction.menus) {
     const sourceId = aiMenu && typeof aiMenu.sourceId === 'string' ? aiMenu.sourceId : null
+    if (sourceId && blockedSourceIds.has(sourceId)) {
+      rejected.push({ sourceId, reason: 'source_blocked_by_product_gap' })
+      continue
+    }
     if (!sourceId || !flagged.has(sourceId)) {
       rejected.push({ sourceId, reason: 'source_not_flagged' })
       continue
@@ -469,6 +545,8 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
     if (entryHtmlMenu) {
       menuContexts.push({ ...entryHtmlMenu.menu, extractionMethod: 'html', sourceUrl: homepageUrl, sourceId: homepageSourceId })
       notes.push(htmlMenuNote(homepageUrl, entryHtmlMenu))
+      limitations.push(...htmlMenuExclusionLimitations(homepageUrl, entryHtmlMenu))
+      noteHtmlExclusions(sourceInventory, homepageSourceId, entryHtmlMenu)
     }
   }
 
@@ -547,6 +625,8 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
         menuContexts.push({ ...htmlMenu.menu, extractionMethod: 'html', sourceUrl, sourceId })
         existingSlugs.add(htmlMenu.menu.contextSlug)
         notes.push(htmlMenuNote(sourceUrl, htmlMenu))
+        limitations.push(...htmlMenuExclusionLimitations(sourceUrl, htmlMenu))
+        noteHtmlExclusions(sourceInventory, sourceId, htmlMenu)
       } else if (candidateMenus.length === 0) {
         // The page was read, but holds no menu this pipeline can read
         // automatically. Name the page for the human reviewer — never a

@@ -30,6 +30,8 @@ const FLAG_CODES = Object.freeze({
   unresolved_price: 'unresolved_price',
   supplement_as_item: 'supplement_as_item',
   pdf_supplements_skipped: 'pdf_supplements_skipped',
+  pdf_arrangements_skipped: 'pdf_arrangements_skipped',
+  html_arrangements_skipped: 'html_arrangements_skipped',
   pdf_ambiguous_price_lines: 'pdf_ambiguous_price_lines',
   pdf_unrecognised_headings: 'pdf_unrecognised_headings',
 });
@@ -37,7 +39,12 @@ const FLAG_CODES = Object.freeze({
 /** Flags that make the extracted menu incomplete because the product cannot
  * store the relation yet; a model call would produce a result that is
  * discarded by `unsupportedProductFields`. */
-const PRODUCT_GAP_FLAGS = new Set([FLAG_CODES.supplement_as_item, FLAG_CODES.pdf_supplements_skipped]);
+const PRODUCT_GAP_FLAGS = new Set([
+  FLAG_CODES.supplement_as_item,
+  FLAG_CODES.pdf_supplements_skipped,
+  FLAG_CODES.pdf_arrangements_skipped,
+  FLAG_CODES.html_arrangements_skipped,
+]);
 
 function normalizeName(value) {
   return String(value || '')
@@ -74,6 +81,10 @@ function itemList(menu) {
  *   codes: string[],
  *   flaggedSourceIds: string[],
  *   reviewTargets: Array<{menuIndex: number, categoryIndex: number}>,
+ *   sourceStatus: Array<{sourceId: string|null, sourceUrl: string|null, flagCodes: string[], blockedByProductGap: boolean, requiresAiExtraction: boolean}>,
+ *   blockedSourceIds: string[],
+ *   aiEligibleSourceIds: string[],
+ *   unscopedBlockedByProductGap: boolean,
  *   blockedByProductGap: boolean,
  *   requiresAiExtraction: boolean,
  * }}
@@ -83,12 +94,28 @@ function assessDeterministicMenuQuality({ menus, unknownMenuContexts, sourceInve
   const flags = [];
   const reviewTargets = [];
   const flaggedSourceIds = new Set();
+  const sourceById = new Map();
+
+  const sourceEntry = (sourceId, sourceUrl) => {
+    const key = typeof sourceId === 'string' && sourceId ? sourceId : '';
+    if (!sourceById.has(key)) {
+      sourceById.set(key, {
+        sourceId: typeof sourceId === 'string' && sourceId ? sourceId : null,
+        sourceUrl: typeof sourceUrl === 'string' && sourceUrl ? sourceUrl : null,
+        flagCodes: new Set(),
+      });
+    }
+    const entry = sourceById.get(key);
+    if (!entry.sourceUrl && typeof sourceUrl === 'string' && sourceUrl) entry.sourceUrl = sourceUrl;
+    return entry;
+  };
 
   const addFlag = (code, menu, detail, target) => {
     const sourceId = (menu && typeof menu.sourceId === 'string' && menu.sourceId) || null;
     const sourceUrl = (menu && typeof menu.sourceUrl === 'string' && menu.sourceUrl) || null;
     const menuContext = (menu && typeof menu.contextSlug === 'string' && menu.contextSlug) || null;
     if (sourceId) flaggedSourceIds.add(sourceId);
+    sourceEntry(sourceId, sourceUrl).flagCodes.add(code);
     flags.push({ code, sourceId, sourceUrl, menuContext, detail });
     if (target) {
       const key = `${target.menuIndex}:${target.categoryIndex}`;
@@ -148,8 +175,12 @@ function assessDeterministicMenuQuality({ menus, unknownMenuContexts, sourceInve
       sourceId: typeof context.sourceId === 'string' ? context.sourceId : null,
       sourceUrl: typeof context.sourceUrl === 'string' ? context.sourceUrl : null,
     };
+    sourceEntry(contextSummary.sourceId, contextSummary.sourceUrl);
     if (Number.isInteger(layout.supplementLines) && layout.supplementLines > 0) {
       addFlag(FLAG_CODES.pdf_supplements_skipped, contextSummary, `${layout.supplementLines} supplementregel(s) niet als gerecht opgenomen`);
+    }
+    if (Number.isInteger(layout.arrangementLines) && layout.arrangementLines > 0) {
+      addFlag(FLAG_CODES.pdf_arrangements_skipped, contextSummary, `${layout.arrangementLines} arrangement-/keuzeregel(s) niet als gerecht opgenomen`);
     }
     if (Number.isInteger(layout.ambiguousPriceLines) && layout.ambiguousPriceLines > 0) {
       addFlag(FLAG_CODES.pdf_ambiguous_price_lines, contextSummary, `${layout.ambiguousPriceLines} regel(s) met een prijs midden in de regel`);
@@ -161,12 +192,32 @@ function assessDeterministicMenuQuality({ menus, unknownMenuContexts, sourceInve
 
   for (const source of Array.isArray(sourceInventory) ? sourceInventory : []) {
     if (!source || source.status !== 'read') continue;
+    sourceEntry(typeof source.id === 'string' ? source.id : null, typeof source.url === 'string' ? source.url : null);
+    // HTML arrangement/choice sections that were deliberately excluded by the
+    // parser are a product gap for that source, exactly like PDF supplements:
+    // a model could only turn them into ordinary dishes. Reported, never paid.
+    if (Number.isInteger(source.excludedSections) && source.excludedSections > 0) {
+      sourceEntry(typeof source.id === 'string' ? source.id : null, typeof source.url === 'string' ? source.url : null).flagCodes.add(
+        FLAG_CODES.html_arrangements_skipped,
+      );
+      flags.push({
+        code: FLAG_CODES.html_arrangements_skipped,
+        sourceId: typeof source.id === 'string' ? source.id : null,
+        sourceUrl: typeof source.url === 'string' ? source.url : null,
+        menuContext: null,
+        detail: `${source.excludedSections} uitgesloten sectie(s) met alternatieve prijzen`,
+      });
+      if (typeof source.id === 'string') flaggedSourceIds.add(source.id);
+    }
     // Only a PDF is expected to yield dishes by itself. An HTML homepage may
     // legitimately contain no menu (its menu lives on a linked page), so a
     // "zero items" flag there would mark every ordinary homepage as suspect.
     if (source.kind !== 'pdf') continue;
     const hasItems = menuList.some((menu) => menu.sourceId === source.id && itemCount(menu) > 0);
     if (hasItems) continue;
+    sourceEntry(typeof source.id === 'string' ? source.id : null, typeof source.url === 'string' ? source.url : null).flagCodes.add(
+      FLAG_CODES.no_deterministic_items,
+    );
     flags.push({
       code: FLAG_CODES.no_deterministic_items,
       sourceId: typeof source.id === 'string' ? source.id : null,
@@ -178,10 +229,32 @@ function assessDeterministicMenuQuality({ menus, unknownMenuContexts, sourceInve
   }
 
   const codes = [...new Set(flags.map((flag) => flag.code))];
-  const blockedByProductGap = codes.some((code) => PRODUCT_GAP_FLAGS.has(code));
+  // Per-source gate: a product gap in one source must never disable repair of
+  // another source. Each flagged source is classified on its own flags; an
+  // unscoped layout flag (no source id) can only be treated as global.
+  const sourceStatus = [...sourceById.values()].map((entry) => {
+    const flagCodes = [...entry.flagCodes];
+    const blockedByProductGap = flagCodes.some((code) => PRODUCT_GAP_FLAGS.has(code));
+    const hasImprovableFlag = flagCodes.some((code) => !PRODUCT_GAP_FLAGS.has(code));
+    return {
+      sourceId: entry.sourceId,
+      sourceUrl: entry.sourceUrl,
+      flagCodes,
+      blockedByProductGap,
+      requiresAiExtraction: !blockedByProductGap && hasImprovableFlag,
+    };
+  });
+  const scopedStatus = sourceStatus.filter((entry) => entry.sourceId !== null);
+  const blockedSourceIds = scopedStatus.filter((entry) => entry.blockedByProductGap).map((entry) => entry.sourceId);
+  const aiEligibleSourceIds = scopedStatus.filter((entry) => entry.requiresAiExtraction).map((entry) => entry.sourceId);
+  const unscopedBlockedByProductGap = sourceStatus.some((entry) => entry.sourceId === null && entry.blockedByProductGap);
+  const blockedByProductGap = blockedSourceIds.length > 0 || unscopedBlockedByProductGap;
   const sufficient = menuList.length > 0 && flags.length === 0;
-  const hasImprovableFlag = codes.some((code) => !PRODUCT_GAP_FLAGS.has(code));
-  const requiresAiExtraction = menuList.length === 0 || (hasImprovableFlag && !blockedByProductGap);
+  const requiresAiExtraction =
+    !unscopedBlockedByProductGap &&
+    (menuList.length === 0
+      ? scopedStatus.length === 0 || scopedStatus.some((entry) => !entry.blockedByProductGap)
+      : aiEligibleSourceIds.length > 0);
 
   return {
     sufficient,
@@ -189,21 +262,41 @@ function assessDeterministicMenuQuality({ menus, unknownMenuContexts, sourceInve
     codes,
     flaggedSourceIds: [...flaggedSourceIds],
     reviewTargets,
+    sourceStatus,
+    blockedSourceIds,
+    aiEligibleSourceIds,
+    unscopedBlockedByProductGap,
     blockedByProductGap,
     requiresAiExtraction,
   };
 }
 
-/** Marks exactly the flagged categories "Controle nodig"; never clears one. */
+/** Marks exactly the flagged categories "Controle nodig"; never clears one.
+ * Every category of a source blocked by a product gap is marked too: that
+ * menu is known to be incomplete, and keeping it unmarked would present a
+ * partial source as reviewed. */
 function applyQualityReview(menuContexts, assessment) {
   const list = Array.isArray(menuContexts) ? menuContexts : [];
   let marked = 0;
-  for (const target of (assessment && Array.isArray(assessment.reviewTargets) && assessment.reviewTargets) || []) {
-    const menu = list[target.menuIndex];
-    const category = menu && Array.isArray(menu.categories) ? menu.categories[target.categoryIndex] : null;
-    if (!category || category.uncertain === true) continue;
+  const markCategory = (menuIndex, categoryIndex) => {
+    const menu = list[menuIndex];
+    const category = menu && Array.isArray(menu.categories) ? menu.categories[categoryIndex] : null;
+    if (!category || category.uncertain === true) return;
     category.uncertain = true;
     marked += 1;
+  };
+  for (const target of (assessment && Array.isArray(assessment.reviewTargets) && assessment.reviewTargets) || []) {
+    markCategory(target.menuIndex, target.categoryIndex);
+  }
+  const blocked = new Set(
+    (assessment && Array.isArray(assessment.blockedSourceIds) && assessment.blockedSourceIds) || [],
+  );
+  if (blocked.size > 0) {
+    list.forEach((menu, menuIndex) => {
+      if (!menu || !blocked.has(menu.sourceId)) return;
+      const categories = Array.isArray(menu.categories) ? menu.categories : [];
+      categories.forEach((_category, categoryIndex) => markCategory(menuIndex, categoryIndex));
+    });
   }
   return marked;
 }
