@@ -718,17 +718,6 @@ function structurePdfLinesIntoMenu(pages) {
             (word.priceOnlyItem ||
               variantItemIndexes.has(word.itemIndex) ||
               (word.itemLast === true && !words.some((other) => other.priceOnlyItem && other.x > word.x)))
-          // A baseline that holds nothing but price tokens/separators and was
-          // not consumed by a name baseline above it is read content the parser
-          // cannot link to an item. Count it so review sees it; never silently
-          // drop it and never attach it to an unrelated dish.
-          const priceOnlyLine =
-            words.length > 0 && words.every((word) => isPriceToken(word.text) || isPriceVariantSeparator(word.text))
-          if (priceOnlyLine) {
-            layout.unlinkedPriceLines += 1
-            state.lastItem = null
-            continue
-          }
           // A supplement/extra ("+ Bresaola", "+ Gebakken krieltjes 5",
           // "Botersla ... + Bresaola 15") is a relation the current product
           // concept cannot store. Emitting it as an ordinary dish would
@@ -738,6 +727,17 @@ function structurePdfLinesIntoMenu(pages) {
           )
           if (hasSupplementMarker) {
             layout.supplementLines += 1
+            continue
+          }
+          // A baseline that holds nothing but price tokens/separators and was
+          // not consumed by a name baseline above it is read content the parser
+          // cannot link to an item. Count it so review sees it; never silently
+          // drop it and never attach it to an unrelated dish.
+          const priceOnlyLine =
+            words.length > 0 && words.every((word) => isPriceToken(word.text) || isPriceVariantSeparator(word.text))
+          if (priceOnlyLine) {
+            layout.unlinkedPriceLines += 1
+            state.lastItem = null
             continue
           }
           const pricePositions = words.map((word, index) => (isPriceWord(word) ? index : -1)).filter((index) => index >= 0)

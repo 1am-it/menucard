@@ -511,11 +511,12 @@ test('REGRESSION: a supplement line is never disguised as an ordinary dish; it i
       { y: 200, items: [{ str: '// LUNCH', x: 20, y: 200 }] },
       { y: 180, items: [{ str: 'Brood', x: 20, y: 180 }, { str: '6', x: 80, y: 180 }] },
       { y: 160, items: [{ str: '+ Bresaola', x: 20, y: 160 }, { str: '15', x: 110, y: 160 }] },
+      { y: 140, items: [{ str: '+', x: 20, y: 140 }, { str: '5', x: 60, y: 140 }] },
     ],
   }
   const { categories, layout } = structurePdfLinesIntoMenu([page])
   assert.deepEqual(categories[0].items.map((item) => item.name), ['Brood'])
-  assert.equal(layout.supplementLines, 1)
+  assert.equal(layout.supplementLines, 2)
 })
 
 test('REGRESSION (review 6249303096 P1): explicit "Supplement" lines and their lowercase wrapped continuation stay supplements, never ordinary dishes', () => {

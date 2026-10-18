@@ -203,7 +203,7 @@ verwijderd; expliciete supplementregels blijven supplementen.
 | Gerichte #59-tests | vier bestanden (`pdfMenuStructuring`, live-regressies, quality, analysis) | 82 pass, 0 fail |
 | Structuurcorpus | `npm run test:menu-structure` | 6 pass, 0 fail |
 | Benchmark | `npm run benchmark:menu-structure` | 22 pass, 0 fail, 1 unclassified (`STRUCT-018`, bestaande JSON-LD-keuze) |
-| Build | `npm run build` | compiled successfully in 37.9 s |
+| Build | `npm run build` | compiled successfully in 31.2 s |
 | PDF.js-trace | `node ops/scripts/verify-pdfjs-server-trace.js` | OK; 164 server scripts |
 | Smelt/Blossem | read-only probe | exit 0; 37/37 en 43/43; hashes gelijk; alle verschillen 0 |
 | Botanist | read-only heranalyse | 196 items/54 secties; vergelijking ongewijzigd 95/46/5/0/96; limitations 12 supplement / 18 midden-in-regel / 24 niet-gekoppeld |

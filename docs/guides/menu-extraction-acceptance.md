@@ -146,7 +146,7 @@ checkpoint):
 | Gerichte PDF/quality/analysis-tests | 82 pass, 0 fail (`pdfMenuStructuring`, `pdfMenuStructuringLiveRegressions`, `menuExtractionQuality`, `restaurantSourceAnalysis`) |
 | `npm run test:menu-structure` | 6 pass, 0 fail |
 | `npm run benchmark:menu-structure` | 23 gevallen: 22 pass, 0 fail, 1 unclassified (`STRUCT-018`, bestaande JSON-LD-keuze) |
-| `npm run build` | compiled successfully in 37.9 s |
+| `npm run build` | compiled successfully in 31.2 s |
 | `node ops/scripts/verify-pdfjs-server-trace.js` | OK; 164 server scripts, native `pdf.mjs`/`pdf.worker.mjs` |
 | Smelt/Blossem read-only probe | exit 0; Smelt 37/37, Blossem 43/43, byte-/contenthash gelijk, alle verschilcategorieën 0 |
 | Botanist read-only heranalyse | 196 items/54 secties; gecommitte vergelijking ongewijzigd 95 matched / 46 missing / 5 extra / 0 prijsverschil / 96 niet-gekoppeld; limitations: 12 supplementregels, 18 midden-in-de-regel-prijzen, 24 niet-gekoppelde prijsregels |
