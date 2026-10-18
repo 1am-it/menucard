@@ -170,7 +170,7 @@ werkelijk uitgevoerde run, niet een prognose.
 | Praktijk na reparatie | lokale read-only `run-analysis.js` op de drie verplaatste bronnen | De Botanist 196 items/55 secties (95/141 referentiematches), Mr Moos 247 items in 3 menu's (groepsmenu geblokkeerd), Colonia 84 items in 16 secties |
 | Botanist-referentie | `node --test ops/benchmark/botanistReference.test.js` | 3 pass; PDF-hash en 141 referentierijen gepind; wijn/cocktail expliciet niet ondersteund |
 | Browserfixture | `npm run test:browser:menu-review` | 99/99 checks; 11 screenshots; Edge 155; `head: 79319b1`; `worktreeDirty: false`; fail-closed netwerkguard; 0 onverwachte app-faseverzoeken |
-| #56-compatibiliteit | `git merge-tree --write-tree HEAD origin/feat/compact-source-flow-53` | exit 1; drie inhoudelijke conflicten: `page.js`, `htmlMenuStructure.js`, `menuSnapshotProposals.test.js`; geen merge uitgevoerd |
+| #56-compatibiliteit | `git merge-tree --write-tree HEAD origin/feat/compact-source-flow-53` op `144a648` (PR #56 head `00f4151`) | exit 1; drie inhoudelijke conflicten: `app/internal/source-triage/batch/page.js`, `src/lib/htmlMenuStructure.js`, `src/lib/menuSnapshotProposals.test.js`; geen merge uitgevoerd, #56 niet gewijzigd |
 
 De representatieve bronproef is read-only tegen precies de twee expliciet
 toegestane publieke URL's uitgevoerd. De probe-uitvoer bevat een PDF.js-
