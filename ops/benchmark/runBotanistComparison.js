@@ -82,6 +82,7 @@ function norm(value) {
   const sectionAliases = { 'KOREMAN´S': "KOREMAN'S" };
   const parserBySection = new Map();
   const unmapped = [];
+  const unmappedCategoryMeta = [];
   for (const menu of menus) {
     for (const category of menu.categories || []) {
       const top = sectionAliases[category.path[0]] || category.path[0];
@@ -89,6 +90,10 @@ function norm(value) {
       for (const item of category.items || []) {
         if (!target) {
           unmapped.push({ path: category.path, name: item.name, price: item.price });
+          unmappedCategoryMeta.push({
+            sourcePath: Array.isArray(category.sourcePath) ? category.sourcePath : [],
+            categoryUncertain: category.uncertain === true,
+          });
           continue;
         }
         if (!parserBySection.has(target)) parserBySection.set(target, []);
@@ -123,6 +128,44 @@ function norm(value) {
     layout: (analysis.unknownMenuContexts && analysis.unknownMenuContexts[0] && analysis.unknownMenuContexts[0].layout) || null,
     unmapped,
   };
+
+  // A readable name/amount pair whose parser category is absent (an explicit
+  // unheaded block) is not a section match. Report it separately from both
+  // `matched` and `missing`, with the reference sections its name/amount
+  // occurs in, so a reader can see correct reading without a score change.
+  const referenceByRowKey = new Map();
+  for (const section of reference.sections) {
+    for (const item of section.items) {
+      const key = `${norm(item.name)}|${cents(item.price)}`;
+      if (!referenceByRowKey.has(key)) referenceByRowKey.set(key, []);
+      const list = referenceByRowKey.get(key);
+      const label = section.path[0];
+      if (!list.includes(label)) list.push(label);
+    }
+  }
+  report.categoryUnknown = {
+    explanation:
+      'Parser rows whose name and amount match a reference row, but whose own category is absent/unmapped. Never added to matched or coverage.',
+    count: 0,
+    rows: [],
+  };
+  for (let index = 0; index < unmapped.length; index += 1) {
+    const item = unmapped[index];
+    const sections = referenceByRowKey.get(`${norm(item.name)}|${cents(item.price)}`);
+    if (!sections) continue;
+    const meta = unmappedCategoryMeta[index] || {};
+    const parserSourcePath = meta.sourcePath || [];
+    report.categoryUnknown.rows.push({
+      name: item.name,
+      price: item.price,
+      parserPath: item.path,
+      parserSourcePath,
+      parserCategoryStatus: parserSourcePath.length === 0 ? 'unheaded_fallback' : 'other_section',
+      categoryUncertain: meta.categoryUncertain === true,
+      referenceSections: sections,
+    });
+  }
+  report.categoryUnknown.count = report.categoryUnknown.rows.length;
 
   const limitedRows = [];
   const productGapRows = [];

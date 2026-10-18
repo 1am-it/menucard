@@ -235,13 +235,65 @@ elke uitgesloten rij staat met naam, prijs en reden in
 missing binnen de subset; het is een parsergap, geen referentiecorrectie.
 v1 en v2 zijn niet overschreven.
 
+## Herstelronde review 6253408889 — lokaal afwijkend naam-/prijsraster
+
+De vijf leesbare Soof-lemonades op pagina 3 zijn geen parser-slachtoffer meer van
+de ontbrekende tekstkop. De parser gebruikt nu pdfjs' eigen tekstbreedte om te
+zien dat een naam die in de linkerkolom begint, fysiek over de paginakolomgrens
+heen loopt. Als bovendien de rechterkolom op diezelfde baseline uitsluitend
+bedragen/prijsvarianten bevat, wordt dat paar als één lokale rij gelezen.
+
+De reparatie is bewust smal en generiek:
+
+- de linkerkolom mag zelf geen bedrag bevatten;
+- de linkertekst moet een plausibele gerechtsnaam zijn, geen langere prozalijn;
+- minstens één tekstblok moet met pdfjs' eigen `width` aantoonbaar over de
+  kolomgrens heen lopen;
+- de rechterkolom mag uitsluitend prijzen en variantseparatoren bevatten;
+- zonder `width` gebeurt niets (fail closed), nooit een geschatte tekenbreedte.
+
+De gerepareerde rijen worden **niet** in de actieve rubriek overgeërfd. Hun
+koprelatie is niet aantoonbaar, dus ze komen in de bestaande expliciet
+ongerubriceerde/onzekere bucket (`sourcePath: []`, `uncertain: true`). De
+reviewgate blijft ze als `unclear_category` blokkeren tot een mens de rubriek
+benoemt of accepteert. Er is geen rubrieknaam uit het logo of uit de prose
+verzonnen.
+
+Op dezelfde gepinde PDF (SHA-256 `50fef0b6…7f85`):
+
+| Meting | Uitkomst |
+| --- | --- |
+| Parseritems | 215 (was 208) |
+| `layout.bridgedPricePairs` | 7 |
+| `layout.unlinkedPriceLines` | 2 (was 9) |
+| v1 | 124 matched / 11 missing / 4 extra / 0 prijsverschil; noemer 141 |
+| v1 niet-gekoppeld | 87 (was 80) |
+| v3-voorstel | 127 matched / 6 missing / 1 extra / 0 prijsverschil; noemer 139 |
+| v3 `categoryUnknown` | 8 rijen, apart gerapporteerd en niet meegeteld als match |
+
+De zeven gerepareerde rijen zijn vijf Soof-lemonades (naam + 4.8) en twee
+pagina-11-oesters (`Oester naturel` 4.0, `Oester oosters` 4.5) die eerder
+stilzwijgend buiten de parseruitvoer vielen. De OESTERS-sectie zelf blijft
+3/3 gematcht; de twee pagina-11-rijen krijgen geen verzonnen sectie.
+
+De vijf Soof-rijen staan nog steeds als missing in de SOOF-referentiesectie,
+omdat `categoryUnknown` bewust geen match oplevert. `runBotanistComparison.js`
+rapporteert ze nu apart met parserpad, lege `parserSourcePath`,
+`categoryUncertain` en de referentiesectie waarin naam en bedrag voorkomen.
+Zo is "correct gelezen, rubriek onbekend" meetbaar zonder de score op te hogen.
+De beperkte subsetscore blijft 127/128; de totale dekking blijft 127/139.
+
 ## Wat expliciet open blijft
 
-- Het lagere Soof-blok (5 lemonades) wordt niet uitgelezen; het raster wijkt af
-  en er is geen expliciete tekstkop. In v1 zijn die rijen onderdeel van de
-  141-rijenmeetlat; in het v3-voorstel staan ze met naam/prijs als
-  `unsupported_readability` en tellen ze als missing. Dat is een eerlijke
-  beperking, geen lege successtatus.
+- Het lagere Soof-blok (5 lemonades) wordt nu met naam, bedrag, omschrijving en
+  provenance gelezen, maar blijft zonder aantoonbare tekstkop expliciet
+  ongerubriceerd/onzeker. In v1 zijn die rijen onderdeel van de
+  141-rijenmeetlat; in het v3-voorstel tellen ze nog als missing in
+  `SOOF LEMONADES` en apart in `categoryUnknown`. Dat is een eerlijke
+  beperking, geen lege successtatus en geen opgehoogde score.
+- De categoriekoppeling van de vijf rijen is nog niet opgelost; een
+  rubrieksnaam uit het logo/prosablok wordt niet verzonnen. De bestaande
+  reviewgate blokkeert opslaan tot een mens de rubriek benoemt of accepteert.
 - Wijn-, cocktail- en Petite-blokken blijven niet verliesvrij; ze zijn niet
   als volledig geclaimd.
 - Geen OCR, provider, betaalde fallback of browseracceptatie in deze ronde.

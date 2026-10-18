@@ -304,7 +304,13 @@ function groupItemsIntoLines(items, yToleranceUnits = 2) {
     // when a document draws the exact same text twice, a later identical,
     // overlapping copy is treated as an overlay (see
     // src/lib/pdfMenuStructuring.js's own duplicate-layer detection).
-    bucketed.get(bucketKey).push({ str: item.str, x, y, seq: sequence })
+    // `width` is pdfjs's own advance width for the printed run. Downstream
+    // layout code uses it only to measure the real printed end of a run, so
+    // a long dish name that reaches across a page-column boundary is not
+    // mistaken for a short name in the left column with an unrelated amount
+    // in the right column. Omitted when pdfjs gives no usable number.
+    const width = typeof item.width === 'number' && Number.isFinite(item.width) && item.width > 0 ? item.width : null
+    bucketed.get(bucketKey).push({ str: item.str, x, y, seq: sequence, ...(width !== null ? { width } : {}) })
     sequence += 1
   }
   const sortedYs = [...bucketed.keys()].sort((a, b) => b - a) // top of page first

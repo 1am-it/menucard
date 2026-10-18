@@ -69,14 +69,18 @@ test('the committed comparison is the measured one, not a forecast', () => {
   // supplement rows are an explicit product gap, not ordinary dishes.
   assert.equal(comparison.referenceVersion, reference.version);
   assert.equal(comparison.source.menuBytesSha256, reference.source.menuBytesSha256);
-  assert.equal(comparison.parserItems, 208);
+  // Review 6253408889: a readable name/amount grid whose printed name crosses
+  // a page-column boundary is now kept as an explicit unheaded/uncertain row.
+  // That raises the parser count and removes seven unlinked price lines, but
+  // deliberately does not raise `matched`: a missing category is not a match.
+  assert.equal(comparison.parserItems, 215);
   assert.deepEqual(comparison.totals, { matched: 124, missing: 11, extra: 4, priceMismatch: 0 });
-  assert.equal(comparison.unmapped.length, 80);
+  assert.equal(comparison.unmapped.length, 87);
   assert.deepEqual(comparison.layout, {
     duplicateLayerItems: 0,
     duplicateLayerOffsets: [],
     ambiguousPriceLines: 18,
-    unlinkedPriceLines: 9,
+    unlinkedPriceLines: 2,
     supplementLines: 18,
     arrangementLines: 0,
     unrecognizedHeadingLines: 0,
@@ -84,6 +88,7 @@ test('the committed comparison is the measured one, not a forecast', () => {
     inheritedSubheadingColumns: 1,
     nameContinuationLines: 13,
     portionLines: 2,
+    bridgedPricePairs: 7,
     supplementSections: [{ heading: 'SUPPLEMENTEN', pages: [2], lines: 6 }],
   });
   assert.deepEqual(comparison.coverage, {
@@ -109,6 +114,27 @@ test('the committed comparison is the measured one, not a forecast', () => {
   assert.equal(comparison.accounting.balanced, true);
   const sections = Object.keys(comparison.sections);
   assert.equal(sections.length, reference.sections.length);
+
+  // Correctly read name/amount pairs whose own category is absent are reported
+  // separately, never folded into matched or coverage.
+  assert.equal(comparison.categoryUnknown.count, 9);
+  const soofUnknown = comparison.categoryUnknown.rows.filter((row) => row.referenceSections.includes('fritz'));
+  assert.deepEqual(soofUnknown.map((row) => [row.name, row.price]), [
+    ['Blueberry & Lavender Lemonade', '4.8'],
+    ['Rose & Cardamom Lemonade', '4.8'],
+    ['Carrot & Ginger Lemonade', '4.8'],
+    ['Lemongrass & Pear Lemonade', '4.8'],
+    ['Ice Tea Lemonade', '4.8'],
+  ]);
+  assert.equal(
+    soofUnknown.every(
+      (row) =>
+        row.parserSourcePath.length === 0 &&
+        row.parserCategoryStatus === 'unheaded_fallback' &&
+        row.categoryUncertain === true,
+    ),
+    true,
+  );
 });
 
 test('review 6252891629 P1: the explicit supplement section is an accounted product gap, never six ordinary dishes', () => {
@@ -235,9 +261,12 @@ test('proposed v3 restores the five readable Soof rows to the denominator and re
   assert.equal(proposal.denominatorChange.proposed.referenceItems, 139);
   assert.match(proposal.denominatorChange.explanation, /exactly -2/);
 
-  // Measured on the repaired chain: the five Soof rows are missing, and the
-  // six readable supplement rows are an explicit product gap (not matched).
+  // Measured on the repaired chain: the five Soof rows are read with the right
+  // name and amount but kept explicitly unheaded, so they still count as
+  // missing in their reference section; the six readable supplement rows are
+  // an explicit product gap (not matched).
   assert.deepEqual(proposedComparison.totals, { matched: 127, missing: 6, extra: 1, priceMismatch: 0 });
+  assert.equal(proposedComparison.parserItems, 215);
   assert.deepEqual(proposedComparison.sections['SOOF LEMONADES'].missing.map((item) => item.name), [
     'Blueberry & Lavender Lemonade',
     'Rose & Cardamom Lemonade',
@@ -245,6 +274,26 @@ test('proposed v3 restores the five readable Soof rows to the denominator and re
     'Lemongrass & Pear Lemonade',
     'Ice Tea Lemonade',
   ]);
+  // The correct reading is reported separately; the score is not improved by
+  // treating a missing category as a match.
+  assert.equal(proposedComparison.categoryUnknown.count, 8);
+  const soofUnknown = proposedComparison.categoryUnknown.rows.filter((row) => row.referenceSections.includes('SOOF LEMONADES'));
+  assert.deepEqual(soofUnknown.map((row) => [row.name, row.price]), [
+    ['Blueberry & Lavender Lemonade', '4.8'],
+    ['Rose & Cardamom Lemonade', '4.8'],
+    ['Carrot & Ginger Lemonade', '4.8'],
+    ['Lemongrass & Pear Lemonade', '4.8'],
+    ['Ice Tea Lemonade', '4.8'],
+  ]);
+  assert.equal(
+    soofUnknown.every(
+      (row) =>
+        row.parserSourcePath.length === 0 &&
+        row.parserCategoryStatus === 'unheaded_fallback' &&
+        row.categoryUncertain === true,
+    ),
+    true,
+  );
   assert.deepEqual(proposedComparison.coverage, {
     referenceItems: 139,
     matched: 127,

@@ -48,7 +48,7 @@ staat dat als `geblokkeerd` of `niet ondersteund`, niet als groen.
 | HTML | `REP-HTML-001` (STRUCT-001/002/004/005/021/022), `REP-MRMOOS-REAL`, `REP-COLONIE-REAL` | 6/6 corpusgate, 22 classified pass; Mr Moos 247 items in 3 menu's; Colonia 84 items in 16 secties | Mr Moos groepsmenu geblokkeerd; Colonia wijn/brunch/high tea niet verliesvrij; geen universele claim |
 | Uitklappers/tabs | `REP-ACCORDION-001` (synthetisch), `REP-ACCORDION-002` (Blossem) | 3/3 + 43/43 items | paneel zonder DOM-relatie blijft onzeker; arrangementen niet opslaanbaar |
 | Tabellen | `REP-TABLE-001` (STRUCT-019/020) | pass | alleen tabel-/dt-dd-vormen |
-| Tekst-PDF | `REP-PDF-001` (Smelt), `REP-PDF-002` (synthetisch), `REP-DEBOTANIST-REAL` | 37/37 + PDF-tests; Botanist 130/141 referentiematches, 0 prijsverschil bij match | Botanist 11 missing / 4 extra / 80 niet-gekoppeld; wijn/cocktail en het lagere Soof-blok niet verliesvrij; 214 items is geen kwaliteitsbewijs |
+| Tekst-PDF | `REP-PDF-001` (Smelt), `REP-PDF-002` (synthetisch), `REP-DEBOTANIST-REAL` | 37/37 + PDF-tests; Botanist 124/141 referentiematches (v1) / 127/139 (v3-voorstel), 0 prijsverschil bij match | Botanist 11 missing / 4 extra / 87 niet-gekoppeld; wijn/cocktail blijven niet verliesvrij; het lagere Soof-blok wordt met naam/prijs gelezen maar blijft ongerubriceerd/onzeker; 215 items is geen kwaliteitsbewijs |
 | Scan/niet-leesbaar | `REP-SCAN-001` | `pdf_no_text_layer`/`pdf_encrypted`, geen OCR | **klasse niet ondersteund**; eerlijke fout, geen vendor |
 | Taal/vestiging | `REP-LANG-001`, `REP-BRANCH-001`, `REP-BRANCH-002` | Speisekarte gevonden; vestigingsadres behouden; Breda-PDF gelezen | één taalkeyword en één ketenprobe; geen alle-vestigingenclaim |
 | Arrangement | `REP-ARRANGEMENT-001/002` | uitgesloten en gemeld | **niet verliesvrij op te slaan**; v2-ontwerp nodig |
@@ -333,9 +333,44 @@ rondes. Browseracceptatie, app-side AI-activering, een nieuwe holdout,
    representative/usedForTuning; dezelfde gepinde versie mag niet opnieuw als
    holdout worden geëvalueerd. Een nieuwe bron vereist een eigen
    toegangsbeslissing en is in deze ronde niet gepind.
-6. **Botanist-kwaliteit** is niet opgelost: 95/141 referentiematches, 46
-   missing, 5 extra en 95 niet-gekoppelde items. Wijn/cocktail-blokken en
-   glas/fles-varianten zijn expliciet niet ondersteund; dit vraagt schema- en
-   parserwerk, geen succeslabel.
+6. **Botanist-kwaliteit** is niet opgelost: 124/141 referentiematches (v1) en
+   127/139 (v3-voorstel) met 11/6 missing, 4/1 extra en 87 niet-gekoppelde
+   items. Wijn/cocktail-blokken en glas/fles-varianten zijn expliciet niet
+   ondersteund; het lagere Soof-blok is leesbaar maar blijft zonder tekstkop
+   ongerubriceerd/onzeker. Dit vraagt schema- en parserwerk, geen succeslabel.
 7. **#56 samenbrengen** met de drie gemelde conflicten; geen merge in deze
    branch.
+
+## Verificatie review 6253408889 (2026-10-18)
+
+De vijf leesbare Soof-naam-/prijsregels op p. 3 zijn niet meer stil verloren.
+De parser herkent met pdfjs' eigen tekstbreedte dat een naam over de
+paginakolomgrens heen loopt en voegt een prijs-only rechterkolom alleen dan bij
+die naam wanneer de linkerkolom zelf geen bedrag heeft, de tekst een plausibele
+gerechtsnaam is en de rechterkolom uitsluitend prijzen/separatoren bevat. Zonder
+width gebeurt niets. De rij blijft bewust ongerubriceerd/onzeker
+(`sourcePath: []`, `uncertain: true`) en wordt door de bestaande reviewgate als
+`unclear_category` geblokkeerd. Er is geen rubrieknaam uit logo of prose
+verzonnen.
+
+Dezelfde generieke reparatie maakte twee p. 11-oesterregels zichtbaar die eerder
+stierven; de OESTERS-referentiesectie blijft 3/3. Scores zijn niet opgehoogd:
+v1 blijft 124/11/4/0 bij 141 rijen en v3 127/6/1/0 bij 139 rijen. De vijf
+Soof-rijen staan nog in de missing-kolom en apart in `categoryUnknown` met
+parserpad, lege `parserSourcePath`, `categoryUncertain` en referentiesectie.
+
+| Controle | Commando | Resultaat |
+| --- | --- | --- |
+| Gerichte #59-tests | `node --test src/lib/pdfMenuStructuring.test.js src/lib/menuConcept.test.js ops/benchmark/botanistReference.test.js` | 71 pass, 0 fail |
+| Volledige suite | `npm test` | 2061 tests: 2061 pass, 0 fail, 0 skipped |
+| Structuurcorpus | `npm run test:menu-structure` | 6 pass, 0 fail |
+| Benchmark | `npm run benchmark:menu-structure` | 22 pass, 0 fail, 1 unclassified (`STRUCT-018`, bestaande JSON-LD-keuze) |
+| Build | `npm run build` | compiled successfully in 12.1 s; 41/41 statische pagina's |
+| PDF.js-trace | `node ops/scripts/verify-pdfjs-server-trace.js` | OK; 164 server scripts, native `pdf.mjs`/`pdf.worker.mjs` |
+| Botanist v1 | `node ops/benchmark/runBotanistComparison.js --pdf=…/botanist-menu.pdf` | 215 items; 124/11/4/0; 87 niet-gekoppeld; 2 ongelinkte prijsregels; 7 `bridgedPricePairs` |
+| Botanist v3-voorstel | idem met `--reference=…proposed-v3.json` | 139 rijen; 127/6/1/0 + 6 productgap; subset 128/127/1/1/0; 8 `categoryUnknown` |
+| Whitespace | `git diff --check` | schoon |
+
+Browseracceptatie, app-side AI-activering, een nieuwe holdout, #56-overname en
+onafhankelijke review zijn niet uitgevoerd of geclaimd. Deze matrix blijft
+ontwikkelaarsbewijs.

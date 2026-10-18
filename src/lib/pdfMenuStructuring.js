@@ -715,6 +715,88 @@ function splitLineIntoColumns(lineItems) {
   return columns
 }
 
+/** The printed right edge of one text run, when the extraction layer kept
+ * pdfjs's own advance width. `null` when no usable width is available — the
+ * bridge repair below then fails closed instead of guessing a run's length. */
+function printedEndX(item) {
+  if (!item || typeof item.x !== 'number') return null
+  if (typeof item.width !== 'number' || !Number.isFinite(item.width) || item.width <= 0) return null
+  return item.x + item.width
+}
+
+/** Whether any token on these items is price-shaped. A name-internal number
+ * ("Monkey 47") still counts here: the bridge repair is only for a row whose
+ * left side carries no amount at all, so any amount makes it ambiguous and it
+ * is left to the existing, more conservative paths. */
+function containsPriceToken(items) {
+  for (const item of Array.isArray(items) ? items : []) {
+    if (!item || typeof item.str !== 'string') continue
+    for (const token of item.str.trim().split(/\s+/).filter(Boolean)) {
+      if (isPriceToken(token)) return true
+    }
+  }
+  return false
+}
+
+/**
+ * Repairs one local, deviating grid: a dish name that starts in one page
+ * column but is printed long enough to reach across the next column boundary,
+ * with its amount sitting alone in that next column. The real De Botanist
+ * page 3 lower block starts its five lemonade names exactly where the upper
+ * left column prints its amounts (x≈184.4) and keeps the amounts at the right
+ * column's amount x (≈369.0). Splitting by each item's left edge alone throws
+ * those readable name/amount pairs away even though the printed name covers
+ * the boundary.
+ *
+ * The repair only moves a right column into the left one when ALL of these
+ * hold, so an unrelated neighbour's amount is never stolen:
+ *   - the left column has real text and no price token of its own;
+ *   - the left text is a plausible item name, not a longer prose line;
+ *   - one of its printed runs starts before the boundary and ends after it
+ *     (pdfjs's own width, never an estimated character count);
+ *   - the right column contains nothing but amounts and variant separators.
+ * The merged rows are marked as coming from a bridge (`bridgedPriceItems`) so
+ * the parser never inherits a section heading that the source does not prove
+ * covers this local grid.
+ *
+ * Returns the column arrays to use for this one visual line plus how many
+ * rows were repaired.
+ */
+function mergeBridgedPriceColumns(columns, anchors, bridgedPriceItems) {
+  const merged = (Array.isArray(columns) ? columns : []).map((column) => (Array.isArray(column) ? column.slice() : []))
+  if (merged.length < 2 || !Array.isArray(anchors) || anchors.length !== merged.length) {
+    return { columns: merged, repaired: 0 }
+  }
+  let repaired = 0
+  for (let index = 1; index < merged.length; index += 1) {
+    const amountRun = priceOnlyBaseline(merged[index])
+    if (!amountRun) continue
+    const left = merged[index - 1]
+    if (left.length === 0) continue
+    if (containsPriceToken(left)) continue
+    const leftWords = tokenizeLineIntoWords(left)
+    const leftText = joinText(left.map((item) => item.str))
+    if (!looksLikePairableItemName(leftWords, leftText)) continue
+    const boundary = anchors[index] && typeof anchors[index].min === 'number' ? anchors[index].min : null
+    if (boundary === null) continue
+    const bridges = left.some((item) => {
+      const end = printedEndX(item)
+      return typeof item.x === 'number' && item.x < boundary && end !== null && end > boundary
+    })
+    if (!bridges) continue
+    for (const item of merged[index]) {
+      if (!item || typeof item.str !== 'string' || !item.str.trim()) continue
+      merged[index - 1].push(item)
+      if (bridgedPriceItems && typeof bridgedPriceItems.add === 'function') bridgedPriceItems.add(item)
+    }
+    merged[index - 1].sort((a, b) => a.x - b.x)
+    merged[index] = []
+    repaired += 1
+  }
+  return { columns: merged, repaired }
+}
+
+
 /** pdfjs may group a name, its description and its price into one visual
  * "line" even when they sit on slightly different baselines. Keep those
  * baselines separate so a description is never glued onto the dish name. A
@@ -722,6 +804,7 @@ function splitLineIntoColumns(lineItems) {
  * and an amount printed a hair above its own name is paired by the bounded
  * look-behind in the parser, so no larger tolerance is needed here. */
 const BASELINE_TOLERANCE = 1
+
 
 /** The maximum vertical distance (PDF units) between a name baseline and the
  * price-only baseline directly below it in the same column before the two may
@@ -825,6 +908,12 @@ function structurePdfLinesIntoMenu(pages) {
     inheritedSubheadingColumns: 0,
     nameContinuationLines: 0,
     portionLines: 0,
+    // Rows whose own printed name reaches across a page-column boundary and
+    // whose amount sits alone in the next column. Repaired as one local row
+    // and kept explicitly uncategorised/uncertain (see
+    // mergeBridgedPriceColumns); counted so the measurement can report the
+    // repair separately from an ordinary in-column name/price pair.
+    bridgedPricePairs: 0,
     // Bounded provenance for a supplement section: the printed heading and
     // page numbers only. Never the supplement item names or amounts.
     supplementSections: [],
@@ -856,6 +945,11 @@ function structurePdfLinesIntoMenu(pages) {
     return categoriesByKey.get(key)
   }
 
+  // Rows repaired from a local cross-column grid (mergeBridgedPriceColumns).
+  // Their section relation is not proven by this page's own headings, so they
+  // are never inherited into the active section below.
+  const bridgedPriceItems = new WeakSet()
+
   for (const page of Array.isArray(pages) ? pages : []) {
     // A document may draw the same text twice (confirmed in the real Smelt
     // PDF: a complete second left column, 40 units higher). The later copy is
@@ -881,7 +975,10 @@ function structurePdfLinesIntoMenu(pages) {
           !(Number.isInteger(item.seq) && duplicateLayer.suppressedSeqs.has(item.seq)),
       )
       if (items.length === 0) continue
-      const columns = anchors.length > 0 ? splitLineIntoPageColumns(items, anchors) : [items]
+      const pageColumns = anchors.length > 0 ? splitLineIntoPageColumns(items, anchors) : [items]
+      const bridged = mergeBridgedPriceColumns(pageColumns, anchors, bridgedPriceItems)
+      const columns = bridged.columns
+      if (bridged.repaired > 0) layout.bridgedPricePairs += bridged.repaired
       columns.forEach((columnItems, columnIndex) => {
         if (!columnBaselines[columnIndex]) columnBaselines[columnIndex] = []
         for (const baseline of splitColumnByBaseline(columnItems)) columnBaselines[columnIndex].push(baseline)
@@ -1002,6 +1099,15 @@ function structurePdfLinesIntoMenu(pages) {
         lastItemBaselineIndex: -1,
         pendingSupplement: false,
       }
+      // A row repaired across a page-column boundary (mergeBridgedPriceColumns)
+      // has no proven section relation: the printed heading above belongs to a
+      // different local grid. Keep it explicitly unheaded and uncertain so the
+      // existing review gate marks it; never inherit a brand/section name that
+      // the source does not prove covers this block.
+      const categoryForBaseline = (baselineItems) =>
+        baselineItems.some((item) => bridgedPriceItems.has(item))
+          ? categoryFor([], true)
+          : categoryFor(state.categoryPath || [], state.categoryInferred)
       const addItem = (category, item) => {
         category.items.push(item)
         // An item added through an inherited section (or an inferred
@@ -1190,7 +1296,7 @@ function structurePdfLinesIntoMenu(pages) {
             const currentY = Math.max(...baselineItems.map((it) => (typeof it.y === 'number' ? it.y : 0)))
             const distance = previousY - currentY
             if (previousPrices && distance > 0 && distance <= 3) {
-              const category = categoryFor(state.categoryPath || [], state.categoryInferred)
+              const category = categoryForBaseline(baselineItems)
               const priceVariants = previousPrices.prices.length > 1
                 ? previousPrices.prices.map((price) => ({ label: null, price }))
                 : null
@@ -1338,7 +1444,7 @@ function structurePdfLinesIntoMenu(pages) {
           }
 
           if (recognizedItems.length > 0) {
-            const category = categoryFor(state.categoryPath || [], state.categoryInferred)
+            const category = categoryForBaseline(baselineItems)
             // Merge "name price / secondPrice" into ONE item with two named-less
             // price variants. The separator itself is never a dish name. The
             // product contract cannot store variants yet, so `price` stays null;
@@ -1386,7 +1492,7 @@ function structurePdfLinesIntoMenu(pages) {
             ? priceOnlyBaseline(nextBaseline)
             : null
           if (nextPrices && looksLikePairableItemName(words, lineText)) {
-            const category = categoryFor(state.categoryPath || [], state.categoryInferred)
+            const category = categoryForBaseline(baselineItems)
             const priceVariants = nextPrices.prices.length > 1
               ? nextPrices.prices.map((price) => ({ label: null, price }))
               : null

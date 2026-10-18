@@ -766,10 +766,58 @@ Uitgevoerd op code-/testcommit `851fe31` (docs-only wijziging daarna).
 
 ### Resterende gaten (deze ronde)
 
-- De vijf Soof-lemonades blijven ongelezen en tellen in v3 als missing; het
-  raster en de ontbrekende tekstkop zijn niet opgelost.
+- De vijf Soof-lemonades blijven in deze ronde ongelezen en tellen in v3 als
+  missing; het raster en de ontbrekende tekstkop zijn hier niet opgelost.
+  (Achterhaald door de herstelronde review 6253408889 aan het einde van dit
+  document: ze worden nu gelezen maar blijven ongerubriceerd/onzeker.)
 - De zes supplementrijen zijn leesbaar maar blijven een productgap: het concept
   kan de supplementrelatie nog niet opslaan. Ze zijn geen gewone dekking.
+- Wijn-, cocktail-, Petite- en glas/fles-blokken blijven niet verliesvrij.
+- Geen browseracceptatie, app-side AI-activering, kostenbudget, retentie,
+  nieuwe holdout, 50-100-bronnenbenchmark of #56-compatibiliteit in deze ronde.
+- Onafhankelijke herreview door de Delivery Lead staat open. Deze sectie is
+  ontwikkelaarsbewijs, geen productacceptatie of release.
+
+### Herstelronde review 6253408889 — lokaal naam-/prijsraster
+
+De vijf leesbare Soof-lemonades op p. 3 worden nu gelezen; het ontbreken van
+een tekstkop leidt niet meer tot verlies. De parser gebruikt pdfjs' eigen
+tekstbreedte om een naam die over een paginakolomgrens heen loopt te herkennen.
+Een prijs-only rechterkolom wordt alleen dan bij die naam gevoegd als de
+linkerkolom zelf geen bedrag heeft, de linkertekst een plausibele gerechtsnaam
+is en de rechterkolom uitsluitend prijzen/separatoren bevat. Zonder `width`
+gebeurt niets. De rij krijgt bewust geen sectie-erfenis: `sourcePath: []` en
+`uncertain: true`, zodat de bestaande reviewgate hem als `unclear_category`
+blokkeert tot een mens de rubriek benoemt of accepteert.
+
+Dezelfde reparatie raakte generiek twee pagina-11-oesterregels die eerder
+stilzwijgend verdwenen. Ze worden expliciet ongerubriceerd getoond; de
+OESTERS-sectie blijft 3/3 gematcht en er is geen sectie verzonnen.
+
+| Controle | Commando | Resultaat |
+| --- | --- | --- |
+| Gerichte #59-tests | `node --test src/lib/pdfMenuStructuring.test.js src/lib/menuConcept.test.js ops/benchmark/botanistReference.test.js` | 71 pass, 0 fail |
+| Volledige suite | `npm test` | 2061 tests: 2061 pass, 0 fail, 0 skipped |
+| Structuurcorpus | `npm run test:menu-structure` | 6 pass, 0 fail |
+| Benchmark | `npm run benchmark:menu-structure` | 22 pass, 0 fail, 1 unclassified (`STRUCT-018`, bestaande JSON-LD-keuze) |
+| Build | `npm run build` | compiled successfully in 12.1 s; 41/41 statische pagina's |
+| PDF.js-trace | `node ops/scripts/verify-pdfjs-server-trace.js` | OK; 164 server scripts, native `pdf.mjs`/`pdf.worker.mjs` |
+| Botanist v1 | `node ops/benchmark/runBotanistComparison.js --pdf=…/botanist-menu.pdf` | 215 items; 124/11/4/0; 87 niet-gekoppeld; 2 ongelinkte prijsregels; 7 `bridgedPricePairs` |
+| Botanist v3 | idem met `--reference=…proposed-v3.json --out=…proposed-v3.json` | 139 rijen; 127/6/1/0 + 6 productgap; subset 128/127/1/1/0; 8 `categoryUnknown` |
+| Herhaalbaarheid | vergelijking nogmaals naar een tijdelijk bestand | v1 en v3 inhoudelijk gelijk aan de gecommitte JSON |
+| Whitespace | `git diff --check` | schoon |
+
+De vijf Soof-rijen staan nog in de missing-kolom van `SOOF LEMONADES`; ze zijn
+apart zichtbaar in `categoryUnknown` met naam, 4.8, parserpad, lege
+`parserSourcePath`, `categoryUncertain: true` en de referentiesectie. De score
+is niet opgehoogd door de referentie passend te maken.
+
+### Resterende gaten (deze ronde)
+
+- De rubriekkoppeling van de vijf Soof-rijen is nog niet opgelost: er is geen
+  aantoonbare tekstkop en er is geen rubrieknaam verzonnen. Del Sol blijft
+  expliciet open; alleen aantoonbaar bron-/layoutbewijs mag die naam verbeteren.
+- De zes supplementrijen zijn leesbaar maar blijven een productgap.
 - Wijn-, cocktail-, Petite- en glas/fles-blokken blijven niet verliesvrij.
 - Geen browseracceptatie, app-side AI-activering, kostenbudget, retentie,
   nieuwe holdout, 50-100-bronnenbenchmark of #56-compatibiliteit in deze ronde.

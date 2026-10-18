@@ -571,3 +571,43 @@ een nieuwe pagina en de bestaande inline/plus/wrapped vormen.
 limitation en bewijst dat geen modelcall plaatsvindt.
 `botanistReference.test.js` bewaakt de v1-cijfers, de productgap-classificatie
 en het v3-voorstel met beide scores en de uitgesloten rijen.
+
+### 13.16 Lokaal afwijkend naam-/prijsraster (review 6253408889)
+
+**Probleem.** De paginakolommen worden uit marker-/tekstankers afgeleid. Op
+pagina 3 van de gepinde Botanist-PDF begint het lagere Soof-blok zijn namen op
+x≈184.4 — dezelfde x als de bedragen van het bovenste linkerdeel — terwijl de
+bedragen op x≈369.0 staan, de bedrag-x van de rechterkolom. Een scheiding op
+alleen de linker-x van elk tekstblok zet naam en bedrag in verschillende
+kolommen. Het bedrag blijft dan als niet-gekoppelde prijsregel achter en de
+naam verdwijnt, terwijl de bron beide leesbaar drukt.
+
+**Reparatie.** `pdfTextExtraction.groupItemsIntoLines` bewaart nu pdfjs'
+eigen `width` per tekstblok. `pdfMenuStructuring.mergeBridgedPriceColumns`
+controleert per visuele regel of een tekstblok met die width aantoonbaar over
+de volgende ankerrens heen loopt. Alleen dan wordt een rechterkolom die
+uitsluitend uit prijzen/variantseparatoren bestaat bij de linkerkolom gevoegd.
+Extra drempels: de linkerkolom bevat zelf geen prijstoken, de linkertekst is
+een plausibele gerechtsnaam (bestaande `looksLikePairableItemName`), en zonder
+width wordt niets samengevoegd. Een buuritem met een eigen naam op dezelfde
+regel houdt zijn eigen bedrag; de rechterkolom is dan niet prijs-only.
+
+Gerepareerde rijen krijgen bewust geen sectie-erfenis: `categoryForBaseline`
+zet ze in de bestaande ongerubriceerde/onzekere bucket (`path: []`,
+`uncertain: true`). Daardoor blijven provenance (`contentHash` over de
+naam-/bedragregel plus omschrijving) en de reviewblokkade
+(`unclear_category`) intact. `layout.bridgedPricePairs` telt de reparatie.
+
+**Meting op de gepinde PDF.** 215 parseritems (was 208), 7 gerepareerde rijen,
+2 niet-gekoppelde prijsregels (was 9). v1 blijft 124/11/4/0 (141 rijen); v3
+blijft 127/6/1/0 (139 rijen) met subset 127/1/1/0. `categoryUnknown` in
+`runBotanistComparison.js` rapporteert 8 naam/prijs-overeenkomsten met een
+onbekende/andere parserrubriek apart; die tellen niet als match. De vijf
+Soof-rijen staan dus nog in de missing-kolom van hun referentiesectie.
+
+**Regressies.** `pdfMenuStructuring.test.js` dekt het lagere raster onder twee
+eerdere kolommen, asymmetrische kolommen, een korte naam die de grens niet
+haalt, een buuritem met eigen bedrag, omliggend proza, supplementcontext,
+prijsvarianten, provenance en de fail-closed situatie zonder width.
+`botanistReference.test.js` bewaakt de nieuwe parser-/layoutcijfers en de
+aparte `categoryUnknown`-rapportage zonder scoreverhoging.

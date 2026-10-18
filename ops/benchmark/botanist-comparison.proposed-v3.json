@@ -15,7 +15,7 @@
     "networkUsed": false
   },
   "referenceItems": 139,
-  "parserItems": 208,
+  "parserItems": 215,
   "sections": {
     "WARME DRANKEN": {
       "expected": 10,
@@ -266,7 +266,7 @@
     "duplicateLayerItems": 0,
     "duplicateLayerOffsets": [],
     "ambiguousPriceLines": 18,
-    "unlinkedPriceLines": 9,
+    "unlinkedPriceLines": 2,
     "supplementLines": 18,
     "arrangementLines": 0,
     "unrecognizedHeadingLines": 0,
@@ -274,6 +274,7 @@
     "inheritedSubheadingColumns": 1,
     "nameContinuationLines": 13,
     "portionLines": 2,
+    "bridgedPricePairs": 7,
     "supplementSections": [
       {
         "heading": "SUPPLEMENTEN",
@@ -285,6 +286,55 @@
     ]
   },
   "unmapped": [
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Blueberry & Lavender Lemonade",
+      "price": "4.8"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Rose & Cardamom Lemonade",
+      "price": "4.8"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Carrot & Ginger Lemonade",
+      "price": "4.8"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Lemongrass & Pear Lemonade",
+      "price": "4.8"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Ice Tea Lemonade",
+      "price": "4.8"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Oester naturel",
+      "price": "4.0"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Oester oosters",
+      "price": "4.5"
+    },
     {
       "path": [
         "KRACHTIG EN BLOND"
@@ -819,8 +869,7 @@
     },
     {
       "path": [
-        "BORRELPLANKEN EN MEER 11:30 - 22:00",
-        "Oester oosters"
+        "BORRELPLANKEN EN MEER 11:30 - 22:00"
       ],
       "name": "Crispy Coconut Gyoza",
       "price": "12.5"
@@ -861,6 +910,118 @@
       "price": "11.5"
     }
   ],
+  "categoryUnknown": {
+    "explanation": "Parser rows whose name and amount match a reference row, but whose own category is absent/unmapped. Never added to matched or coverage.",
+    "count": 8,
+    "rows": [
+      {
+        "name": "Blueberry & Lavender Lemonade",
+        "price": "4.8",
+        "parserPath": [
+          "Menukaart"
+        ],
+        "parserSourcePath": [],
+        "parserCategoryStatus": "unheaded_fallback",
+        "categoryUncertain": true,
+        "referenceSections": [
+          "SOOF LEMONADES"
+        ]
+      },
+      {
+        "name": "Rose & Cardamom Lemonade",
+        "price": "4.8",
+        "parserPath": [
+          "Menukaart"
+        ],
+        "parserSourcePath": [],
+        "parserCategoryStatus": "unheaded_fallback",
+        "categoryUncertain": true,
+        "referenceSections": [
+          "SOOF LEMONADES"
+        ]
+      },
+      {
+        "name": "Carrot & Ginger Lemonade",
+        "price": "4.8",
+        "parserPath": [
+          "Menukaart"
+        ],
+        "parserSourcePath": [],
+        "parserCategoryStatus": "unheaded_fallback",
+        "categoryUncertain": true,
+        "referenceSections": [
+          "SOOF LEMONADES"
+        ]
+      },
+      {
+        "name": "Lemongrass & Pear Lemonade",
+        "price": "4.8",
+        "parserPath": [
+          "Menukaart"
+        ],
+        "parserSourcePath": [],
+        "parserCategoryStatus": "unheaded_fallback",
+        "categoryUncertain": true,
+        "referenceSections": [
+          "SOOF LEMONADES"
+        ]
+      },
+      {
+        "name": "Ice Tea Lemonade",
+        "price": "4.8",
+        "parserPath": [
+          "Menukaart"
+        ],
+        "parserSourcePath": [],
+        "parserCategoryStatus": "unheaded_fallback",
+        "categoryUncertain": true,
+        "referenceSections": [
+          "SOOF LEMONADES"
+        ]
+      },
+      {
+        "name": "Oester naturel",
+        "price": "4.0",
+        "parserPath": [
+          "Menukaart"
+        ],
+        "parserSourcePath": [],
+        "parserCategoryStatus": "unheaded_fallback",
+        "categoryUncertain": true,
+        "referenceSections": [
+          "OESTERS"
+        ]
+      },
+      {
+        "name": "Oester oosters",
+        "price": "4.5",
+        "parserPath": [
+          "Menukaart"
+        ],
+        "parserSourcePath": [],
+        "parserCategoryStatus": "unheaded_fallback",
+        "categoryUncertain": true,
+        "referenceSections": [
+          "OESTERS"
+        ]
+      },
+      {
+        "name": "Crispy Coconut Gyoza",
+        "price": "12.5",
+        "parserPath": [
+          "BORRELPLANKEN EN MEER 11:30 - 22:00"
+        ],
+        "parserSourcePath": [
+          "BORRELPLANKEN EN MEER 11:30 - 22:00"
+        ],
+        "parserCategoryStatus": "other_section",
+        "categoryUncertain": true,
+        "referenceSections": [
+          "STARTERS"
+        ]
+      }
+    ]
+  },
   "coverage": {
     "referenceItems": 139,
     "matched": 127,

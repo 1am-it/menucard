@@ -63,8 +63,8 @@ function textAt(x, y, text) {
   return `1 0 0 1 ${x} ${y} Tm (${escaped}) Tj`
 }
 
-async function structureFromContentStream(contentStream) {
-  const { pages } = await extractDigitalPdfLines(buildTestPdf({ contentStream }))
+async function structureFromContentStream(contentStream, options = {}) {
+  const { pages } = await extractDigitalPdfLines(buildTestPdf({ contentStream, ...options }))
   return structurePdfLinesIntoMenu(pages)
 }
 
@@ -988,6 +988,177 @@ test('REGRESSION (review 6249657793 P1): a price run from a neighbouring, merged
     ['Cultcha Kombucha', '5.5'],
   ])
   assert.equal(items.some(([name]) => name.startsWith('5.5')), false)
+})
+
+// ---------------------------------------------------------------------------
+// Review 6253408889: a local name/amount grid that does not follow the page's
+// long-range columns. The real De Botanist page 3 prints five readable Soof
+// lemonade names starting at the upper block's amount x and their amounts at
+// the right column's amount x, without a printed text heading for the block.
+// The generic repair must keep those pairs, never invent a section and never
+// take a neighbouring item's amount.
+// ---------------------------------------------------------------------------
+
+function bridgedItems(structured) {
+  return structured.categories
+    .filter((category) => category.name === null)
+    .flatMap((category) => category.items.map((item) => ({ ...item, category })))
+}
+
+test('REGRESSION (review 6253408889): a readable name/amount grid below two earlier columns is kept as explicit unheaded/uncertain rows, never lost for a missing text heading', async () => {
+  const content = [
+    'BT /F1 12 Tf',
+    textAt(20, 520, '// LINKS'),
+    textAt(220, 520, '// RECHTS'),
+    textAt(20, 500, 'Soep'),
+    textAt(110, 500, '4.5'),
+    textAt(220, 500, 'Thee'),
+    textAt(360, 500, '3.5'),
+    textAt(100, 420, 'Onze siropen van natuurlijk fruit'),
+    textAt(120, 400, 'Blueberry & Lavender Lemonade'),
+    textAt(360, 400, '4.8'),
+    textAt(120, 390, 'Blauwe bes, lavendel en appel'),
+    textAt(120, 360, 'Rose & Cardamom Lemonade'),
+    textAt(360, 360, '4.8'),
+    'ET',
+  ].join('\n')
+  const structured = await structureFromContentStream(content, { mediaBox: [0, 0, 520, 600] })
+  const categories = structured.categories
+
+  // The two headed columns keep their own ordinary rows.
+  const left = categories.find((category) => category.name === 'LINKS')
+  const right = categories.find((category) => category.name === 'RECHTS')
+  assert.deepEqual(left.items.map((item) => [item.name, item.price]), [['Soep', '4.5']])
+  assert.deepEqual(right.items.map((item) => [item.name, item.price]), [['Thee', '3.5']])
+
+  // The lower block has no printed heading. Its two pairs stay in one explicit
+  // unheaded, uncertain bucket instead of being inherited into LINKS/RECHTS.
+  const bridged = bridgedItems(structured)
+  assert.deepEqual(bridged.map((item) => [item.name, item.price]), [
+    ['Blueberry & Lavender Lemonade', '4.8'],
+    ['Rose & Cardamom Lemonade', '4.8'],
+  ])
+  assert.equal(bridged[0].category.uncertain, true)
+  assert.equal(Object.prototype.hasOwnProperty.call(bridged[0].category, 'path'), false)
+  assert.equal(bridged[0].desc, 'Blauwe bes, lavendel en appel')
+  // Provenance stays the exact evidence lines (name/amount plus the attached
+  // description), never the invented section.
+  assert.equal(
+    bridged[0].contentHash,
+    computeFieldEvidenceHash('Blueberry & Lavender Lemonade 4.8\nBlauwe bes, lavendel en appel'),
+  )
+  assert.equal(structured.layout.bridgedPricePairs, 2)
+  // Ordinary prose around the block never becomes an item.
+  assert.equal(categories.some((category) => category.items.some((item) => /siropen/i.test(item.name))), false)
+})
+
+test('REGRESSION (review 6253408889): asymmetric columns pair only the run that really crosses the boundary, and a right-column item keeps its own amount', async () => {
+  const content = [
+    'BT /F1 12 Tf',
+    textAt(20, 520, '// LINKS'),
+    textAt(300, 520, '// RECHTS'),
+    textAt(240, 480, 'Lemongrass & Pear Lemonade'),
+    textAt(440, 480, '4.8'),
+    // A short left name that ends before the boundary, next to a right-hand
+    // item with its own amount: the right amount belongs to Thee, not Koffie.
+    textAt(240, 420, 'Koffie'),
+    textAt(320, 420, 'Thee'),
+    textAt(440, 420, '4.0'),
+    'ET',
+  ].join('\n')
+  const structured = await structureFromContentStream(content, { mediaBox: [0, 0, 600, 600] })
+
+  const bridged = bridgedItems(structured)
+  assert.deepEqual(bridged.map((item) => [item.name, item.price]), [['Lemongrass & Pear Lemonade', '4.8']])
+  assert.equal(structured.layout.bridgedPricePairs, 1)
+
+  const right = structured.categories.find((category) => category.name === 'RECHTS')
+  assert.deepEqual(right.items.map((item) => [item.name, item.price]), [['Thee', '4.0']])
+  const allItems = structured.categories.flatMap((category) => category.items)
+  assert.equal(allItems.some((item) => item.name === 'Koffie' && item.price === '4.0'), false)
+})
+
+test('REGRESSION (review 6253408889): a price-only neighbour line never becomes the amount of a name that itself stays incomplete', async () => {
+  const content = [
+    'BT /F1 12 Tf',
+    textAt(20, 520, '// LINKS'),
+    textAt(220, 520, '// RECHTS'),
+    textAt(120, 480, 'Blueberry & Lavender Lemonade'),
+    textAt(220, 480, 'Ginger Beer'),
+    textAt(360, 480, '4.6'),
+    'ET',
+  ].join('\n')
+  const structured = await structureFromContentStream(content, { mediaBox: [0, 0, 520, 600] })
+  const right = structured.categories.find((category) => category.name === 'RECHTS')
+  assert.deepEqual(right.items.map((item) => [item.name, item.price]), [['Ginger Beer', '4.6']])
+  assert.equal(bridgedItems(structured).length, 0)
+  assert.equal(structured.layout.bridgedPricePairs, 0)
+  assert.equal(
+    structured.categories.some((category) => category.items.some((item) => item.name.includes('Blueberry'))),
+    false,
+  )
+})
+
+test('REGRESSION (review 6253408889): a bridged row inside an explicit supplement section keeps the supplement context and never becomes a main dish', async () => {
+  const content = [
+    'BT /F1 12 Tf',
+    textAt(20, 520, '// SUPPLEMENTEN'),
+    textAt(220, 520, '// FRISDRANK'),
+    textAt(120, 480, 'Blueberry & Lavender Lemonade'),
+    textAt(360, 480, '4.8'),
+    'ET',
+  ].join('\n')
+  const structured = await structureFromContentStream(content, { mediaBox: [0, 0, 520, 600] })
+  assert.deepEqual(structured.categories, [])
+  assert.equal(structured.layout.bridgedPricePairs, 1)
+  assert.equal(structured.layout.supplementLines, 1)
+  assert.deepEqual(structured.layout.supplementSections, [{ heading: 'SUPPLEMENTEN', pages: [1], lines: 1 }])
+})
+
+test('REGRESSION (review 6253408889): an explicit price-variant run stays two undecomposed variants in a bridged row', async () => {
+  const content = [
+    'BT /F1 12 Tf',
+    textAt(20, 520, '// LINKS'),
+    textAt(220, 520, '// RECHTS'),
+    textAt(160, 480, 'Lemongrass & Pear Lemonade'),
+    textAt(360, 480, '4.8'),
+    textAt(400, 480, '/'),
+    textAt(420, 480, '6.0'),
+    'ET',
+  ].join('\n')
+  const structured = await structureFromContentStream(content, { mediaBox: [0, 0, 520, 600] })
+  const bridged = bridgedItems(structured)
+  assert.equal(bridged.length, 1)
+  assert.equal(bridged[0].name, 'Lemongrass & Pear Lemonade')
+  assert.equal(bridged[0].price, null)
+  assert.equal(bridged[0].priceStatus, 'multiple_undecomposed')
+  assert.equal(bridged[0].priceText, '4.8 / 6.0')
+  assert.deepEqual(bridged[0].priceVariants, [
+    { label: null, price: '4.8' },
+    { label: null, price: '6.0' },
+  ])
+  assert.equal(structured.layout.bridgedPricePairs, 1)
+})
+
+test('REGRESSION (review 6253408889): without pdfjs text width the bridge repair fails closed instead of estimating a run length', () => {
+  const y = 480
+  const page = {
+    pageNumber: 1,
+    lines: [
+      { y: 520, items: [
+        { str: '// LINKS', x: 20, y: 520, seq: 0 },
+        { str: '// RECHTS', x: 220, y: 520, seq: 1 },
+      ] },
+      { y, items: [
+        { str: 'Blueberry & Lavender Lemonade', x: 120, y, seq: 2 },
+        { str: '4.8', x: 360, y, seq: 3 },
+      ] },
+    ],
+  }
+  const structured = structurePdfLinesIntoMenu([page])
+  assert.deepEqual(structured.categories, [])
+  assert.equal(structured.layout.bridgedPricePairs, 0)
+  assert.equal(structured.layout.unlinkedPriceLines, 1)
 })
 
 test('compactPdfLayoutText: bounded, page-aware, column-aware, and free of the duplicate overlay', () => {

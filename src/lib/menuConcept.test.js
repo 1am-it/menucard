@@ -172,6 +172,37 @@ test('disappeared dishes are decided one by one; "Klopt zo" never settles a miss
   assert.deepEqual(half.blockers.map((b) => b.status), ['removed']);
   assert.match(half.blockers[0].label, /^1 gerecht /);
   const both = buildMenuConcept({ menus: MENUS, liveLines: live, edits: { ...base, removed: { 'fictieve mousse': 'keep', 'fictieve taart': 'remove' } } });
+
+test('REGRESSION (review 6253408889): an explicitly unheaded PDF row is a review blocker, never a silently savable category', () => {
+  // Shapes the parser + pdfMenuContext fallback produce for a bridged row:
+  // the fallback section label is generic, but sourcePath is empty and the
+  // category stays uncertain. The existing gate must keep it unsavable until
+  // a human names or accepts the category.
+  const menus = [
+    {
+      name: 'Menukaart',
+      contextSlug: 'menukaart',
+      categories: [
+        {
+          name: 'Menukaart',
+          path: ['Menukaart'],
+          sourcePath: [],
+          uncertain: true,
+          items: [{ name: 'Blueberry & Lavender Lemonade', price: '4.8' }],
+        },
+      ],
+    },
+  ];
+  const concept = buildMenuConcept({ menus, liveLines: [] });
+  assert.equal(concept.lines[0].categoryUncertain, true);
+  assert.equal(concept.lines[0].status, 'unclear_category');
+  assert.equal(concept.canSave, false);
+  assert.deepEqual(concept.blockers.map((blocker) => blocker.status), ['unclear_category']);
+
+  const accepted = buildMenuConcept({ menus, liveLines: [], edits: { lines: { '0.0.0': { accept: true } } } });
+  assert.equal(accepted.canSave, true);
+});
+
   assert.equal(both.canSave, true);
   assert.deepEqual(both.content.removed, [{ name: 'Fictieve taart', decision: 'remove' }]);
   const accepted = buildMenuConcept({ menus: MENUS, liveLines: [], edits: { lines: { '0.1.1': { accept: true } } } });
