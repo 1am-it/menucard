@@ -378,11 +378,12 @@
       "tests": ["npm run test:browser:menu-review"],
       "status": "executed",
       "evidence": "ops/browser/evidence/menu-review-browser-evidence.json",
-      "result": "72/72 fixture checks pass on Edge 155 at 1024/390/320 px in light and dark: exact links, section paths, prices, duplicate/price/missing-price blockers, grouped uncertainty, disabled save, empty/partial/error, keyboard Enter activation and zero horizontal overflow. 10 screenshots hashed.",
+      "result": "78/78 fixture checks pass on Edge 155 at 1024/390/320 px in light and dark: exact links, section paths, prices, duplicate/price/missing-price blockers, grouped uncertainty, disabled save, read-only colleague boundaries, empty/partial/error, keyboard Enter activation and zero horizontal overflow. 11 screenshots hashed.",
       "usedForTuning": false,
       "limitations": [
         "Fixture evidence only; it is not live integration, staging or production acceptance.",
         "Reaching the review control from the top of the page took 43 Tab stops; no focus trap was found.",
+        "The read-only scenario uses the same fictional API data with no actions; it is not a live colleague session.",
         "The fictional session/API is intercepted in the page; no production Supabase project or credential is used."
       ]
     }

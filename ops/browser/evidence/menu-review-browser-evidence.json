@@ -1,9 +1,9 @@
 {
   "fixtureOnly": true,
   "passed": true,
-  "head": "197425ddbc7d5f7727d8c42808642540197ad02c",
+  "head": "85f1bb218a1a5e6a02b0d9bb71b8ac7afb4d30ab",
   "worktreeDirty": false,
-  "generatedAt": "2026-10-18T09:27:54.283Z",
+  "generatedAt": "2026-10-18T09:36:31.952Z",
   "command": "npm run test:browser:menu-review",
   "environment": {
     "node": "v22.22.3",
@@ -16,6 +16,7 @@
   },
   "fixtures": [
     "review",
+    "readonly",
     "empty",
     "partial",
     "error"
@@ -135,6 +136,36 @@
       "name": "review: \"Controle sluiten\" closes the same panel",
       "passed": true,
       "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=readonly&batch=batch-fictief-0001&item=1&theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "readonly: colleague view is explicitly read-only",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "readonly: no save or group-accept control is offered",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "readonly: no source confirmation is offered",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "readonly: the same concept and blockers are readable",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "readonly: no horizontal overflow at 1024 px",
+      "passed": true,
+      "detail": "overflow=-6"
     },
     {
       "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=empty&theme=dark)",
@@ -390,6 +421,12 @@
       "height": 900
     },
     {
+      "file": "menu-review-readonly-1024-dark.png",
+      "sha256": "625dd8b9a89f70835c285c71ee64514136f103a73b1218faab76624c98ba1375",
+      "width": 1024,
+      "height": 900
+    },
+    {
       "file": "menu-review-empty-dark.png",
       "sha256": "f95cd1b5cbdcff20a7d1361c89bcbb1c1a06c6571a38918cc8a8f3c147eacd1d",
       "width": 1024,
@@ -397,7 +434,7 @@
     },
     {
       "file": "menu-review-partial-390-dark.png",
-      "sha256": "3c12f3c59d7255b0de9fac9a34bdf09b8486d6df1cc8137d22920e426b71ec19",
+      "sha256": "c0219cf303e000a308b96dc9c7f26a43bacdaee68ca71f404a14e4d074f04558",
       "width": 390,
       "height": 900
     },
@@ -409,37 +446,37 @@
     },
     {
       "file": "menu-review-320-light.png",
-      "sha256": "c7718b629385b40a052eaa10153faa19ccc835f4ae6813751139bc2b3af6a45f",
+      "sha256": "364203ec2bedd6d6a42854b2862bea1e595670cd20beb8bfbfc8219d55cbb554",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-320-dark.png",
-      "sha256": "a7d025db17044a444a876d1759909e7c9e4766d2647a1ab4336fff3f6f9913f5",
+      "sha256": "45387dc5d1d4eb4f004f70145db5be72a006f08e74ce2a4a313e125df5c46f00",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-390-light.png",
-      "sha256": "b9003b42c6ec03fd9ec7be4903966bcfcd6dd1710a7e90705a5f48bbfb8e75fd",
+      "sha256": "fdf5923530d9d238865076fb9e81db3d5fde2aac418895d4ce62a704b710cea2",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-390-dark.png",
-      "sha256": "0c61dbf27bf5eb3d07efa907fed47228f7b888f7dd0f1a57c92507b7e586b28d",
+      "sha256": "1ff1281cfa3fa801fc166b862dc66f861da26e65b2372d269e9291978b4e93c0",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-1024-dark.png",
-      "sha256": "b5434c6c716659b8be95a0685aa7cf4e81d534eaaaa28a7b2ff9ab9196e654d4",
+      "sha256": "52de825fc5618c9ed3612db9deabc1a2bc3bb83c4954db48f4041468a335241e",
       "width": 1024,
       "height": 900
     },
     {
       "file": "menu-review-keyboard-390-light.png",
-      "sha256": "5d74d261ae67eb6086f2dfb406d4409b2d2a7abad367304f5abb9266d354bfeb",
+      "sha256": "7a71a70762876fc0ae246b6ddc9ce71b5034b68600527ca63d333ac03c1cd94c",
       "width": 390,
       "height": 900
     }
