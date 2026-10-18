@@ -800,7 +800,7 @@ OESTERS-sectie blijft 3/3 gematcht en er is geen sectie verzonnen.
 | Volledige suite | `npm test` | 2061 tests: 2061 pass, 0 fail, 0 skipped |
 | Structuurcorpus | `npm run test:menu-structure` | 6 pass, 0 fail |
 | Benchmark | `npm run benchmark:menu-structure` | 22 pass, 0 fail, 1 unclassified (`STRUCT-018`, bestaande JSON-LD-keuze) |
-| Build | `npm run build` | compiled successfully in 12.1 s; 41/41 statische pagina's |
+| Build | `npm run build` | compiled successfully in 22.5 s; 41/41 statische pagina's |
 | PDF.js-trace | `node ops/scripts/verify-pdfjs-server-trace.js` | OK; 164 server scripts, native `pdf.mjs`/`pdf.worker.mjs` |
 | Botanist v1 | `node ops/benchmark/runBotanistComparison.js --pdf=…/botanist-menu.pdf` | 215 items; 124/11/4/0; 87 niet-gekoppeld; 2 ongelinkte prijsregels; 7 `bridgedPricePairs` |
 | Botanist v3 | idem met `--reference=…proposed-v3.json --out=…proposed-v3.json` | 139 rijen; 127/6/1/0 + 6 productgap; subset 128/127/1/1/0; 8 `categoryUnknown` |
