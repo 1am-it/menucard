@@ -295,10 +295,15 @@ vóór enige modelaanroep:
 
 ### 13.9 #56-compatibiliteit (alleen gelezen)
 
-- `origin/feat/compact-source-flow-53` (PR #56) is read-only vergeleken vanuit
-  dezelfde `main`-basis (`fc12bbc`). Een in-memory `git merge-tree` geeft twee
-  inhoudelijke conflicten: `app/internal/source-triage/batch/page.js` en
-  `src/lib/menuSnapshotProposals.test.js`.
+- `origin/feat/compact-source-flow-53` (PR #56, head `00f4151`) is read-only
+  vergeleken vanuit dezelfde basis (`fc12bbc`). Een in-memory
+  `git merge-tree --write-tree HEAD origin/feat/compact-source-flow-53` op
+  #59-HEAD `aa6c84a` geeft **drie** inhoudelijke conflicten:
+  `app/internal/source-triage/batch/page.js`, `src/lib/htmlMenuStructure.js` en
+  `src/lib/menuSnapshotProposals.test.js`. De eerdere notitie van twee
+  conflicten was van vóór de latere Blossem-/parserwijzigingen op deze branch;
+  `htmlMenuStructure.js` is nu ook aan beide zijden gewijzigd. Dat is een
+  combinatiegat, geen merge-besluit.
 - Andere overlappende bestanden automergen in die proef
   (`BatchAnalysisView.js`, `MenuReview.js`, `batchAnalysis*.js`,
   `menuConceptReviewHandlers.test.js`). Dat is geen acceptatie en er is geen

@@ -169,5 +169,12 @@ test('an executed browser fixture entry must reference real, passing evidence', 
   assert.equal(evidence.passed, true);
   assert.ok(Array.isArray(evidence.checks) && evidence.checks.length >= 10);
   assert.ok(evidence.checks.every((check) => check.passed === true));
+  for (const required of ['readonly:', 'empty:', 'partial:', 'error:', 'keyboard:', '320px/light:', '390px/dark:', 'no uncaught browser exception']) {
+    assert.ok(evidence.checks.some((check) => check.name.includes(required)), `browser evidence covers ${required}`);
+  }
+  assert.ok(Array.isArray(evidence.screenshots) && evidence.screenshots.length >= 10);
+  assert.ok(evidence.screenshots.some((shot) => shot.width === 320));
+  assert.ok(evidence.screenshots.some((shot) => shot.width === 390));
+  assert.ok(evidence.screenshots.every((shot) => /^[0-9a-f]{64}$/.test(shot.sha256) && shot.width > 0 && shot.height > 0));
   assert.match(evidence.head, /^[0-9a-f]{40}$|^pending-commit$/);
 });

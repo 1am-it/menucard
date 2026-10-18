@@ -128,6 +128,13 @@ Er is geen merge uitgevoerd en #56 is niet in deze branch overgenomen. De
 conflicten moeten bij het samenbrengen van de twee contracten handmatig worden
 beoordeeld; een groene test op deze losse branch bewijst die combinatie niet.
 
+> **Statuscorrectie 2026-10-18:** de actuele read-only merge-tree op #59-HEAD
+> `aa6c84a` meldt **drie** inhoudelijke conflicten: `page.js`,
+> `src/lib/htmlMenuStructure.js` en `menuSnapshotProposals.test.js`. De derde is
+> ontstaan door latere Blossem-/parserwijzigingen op deze branch; de eerdere
+> twee-conflictennotitie is daarmee achterhaald. Er is niets gemerged of
+> gewijzigd aan #56.
+
 **Plan voor het samenbrengen (nog niet uitgevoerd, geen merge-besluit):**
 
 1. `app/internal/source-triage/batch/page.js`: #56 wijzigt de navigatie/review-
@@ -136,12 +143,16 @@ beoordeeld; een groene test op deze losse branch bewijst die combinatie niet.
    overnemen, daarna de `attentionGroups`/`uncertain`-weergave en
    `replacesDeterministic`-markering opnieuw aansluiten. Geen knop of
    accepteer-allesactie toevoegen; de bestaande expliciete reviewstappen blijven.
-2. `src/lib/menuSnapshotProposals.test.js`: beide branches voegen tests toe aan
+2. `src/lib/htmlMenuStructure.js`: zowel #56 als deze branch wijzigen de
+   parser/panelbehandeling. Behoud #56's reviewgedrag en de
+   variant-/paneelregels van deze branch; daarna het volledige structuurcorpus
+   draaien. Geen patroon of assertie verwijderen om het conflict op te lossen.
+3. `src/lib/menuSnapshotProposals.test.js`: beide branches voegen tests toe aan
    hetzelfde bestand. Beide testblokken behouden, gedeelde fixtures
    dedupliceren zonder assertions te verwijderen, en daarna
    `menuSnapshotProposals`, `menuConcept` en de batch-surface-tests opnieuw
    draaien.
-3. Na het samenbrengen: volledige suite, structuurcorpus en de browseracceptatie
+4. Na het samenbrengen: volledige suite, structuurcorpus en de browseracceptatie
    van #56 opnieuw uitvoeren. Tot die tijd geldt: de combinatie is ongetest en
    mag niet als groen worden gerapporteerd.
 
