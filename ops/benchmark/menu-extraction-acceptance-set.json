@@ -1,8 +1,9 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "pinnedAt": "2026-10-18",
+  "revisedAt": "2026-10-18",
   "issue": 59,
-  "note": "Pre-declared #59 acceptance set. It records exact local fixtures and the two explicitly allowed public sources; it never treats a reachable URL, a found PDF or an item count as proof of a complete menu. BE-21's wider vendor/OCR benchmark is out of scope.",
+  "note": "Pre-declared #59 acceptance set. It records exact local fixtures and the six explicitly allowed public sources: the two tuned representative sources (Smelt, Blossem) and the four Product Owner-approved holdouts (De Botanist, Gauchos Grill Breda, Mr Moos, Colonia Breda). A holdout has its own explicit state: unused, evaluated_once, or used_for_tuning. It never treats a reachable URL, a found PDF or an item count as proof of a complete menu. BE-21's wider vendor/OCR benchmark is out of scope.",
   "protocol": {
     "file": "MENU-EXTRACTION.md",
     "version": "0.2",
@@ -378,7 +379,7 @@
       "tests": ["npm run test:browser:menu-review"],
       "status": "executed",
       "evidence": "ops/browser/evidence/menu-review-browser-evidence.json",
-      "result": "78/78 fixture checks pass on Edge 155 at 1024/390/320 px in light and dark: exact links, section paths, prices, duplicate/price/missing-price blockers, grouped uncertainty, disabled save, read-only colleague boundaries, empty/partial/error, keyboard Enter activation and zero horizontal overflow. 11 screenshots hashed.",
+      "result": "99/99 fixture checks pass on Edge 155 at 1024/390/320 px in light and dark: exact links, section paths, prices, duplicate/price/missing-price blockers, grouped uncertainty, disabled save, read-only colleague boundaries, empty/partial/error, keyboard Enter activation, zero horizontal overflow and fail-closed network isolation (external fetch, protocol-relative URL, unknown API write, XHR, WebSocket, CDP subresource/frame navigation). 11 screenshots hashed.",
       "usedForTuning": false,
       "limitations": [
         "Fixture evidence only; it is not live integration, staging or production acceptance.",
@@ -390,62 +391,91 @@
   ],
   "holdout": {
     "pinnedAt": "2026-10-18",
-    "rule": "A holdout entry is executed at most once per pinned source version and is never adjusted after seeing its result. Once an entry is used to change extraction it moves to the representative set and a new holdout entry is required. Smelt and Blossem have already been used for tuning and can never be presented as unseen holdout.",
+    "rule": "A holdout has exactly three explicit states. `unused` is not fetched and carries no result. `evaluated_once` records exactly one independent first evaluation; it is still not a tuning source and may not be executed a second time on the same pinned source version. `used_for_tuning` is no longer a holdout: it must move to the representative set and a new unused holdout must be pinned. Smelt and Blossem were already used for tuning and are representative, never holdout.",
+    "evaluationStates": {
+      "unused": "Pinned but not fetched/evaluated. status is blocked or not_available; evaluationCount 0; no result.",
+      "evaluated_once": "One recorded first evaluation against the pinned source version. status may be executed, executed_with_limitation, blocked, unsupported or not_available; evaluationCount 1; result and firstEvaluatedAt are required; usedForTuning stays false.",
+      "used_for_tuning": "No longer a holdout. Forbidden in the holdout list: move the entry to representative and pin a new, unused holdout."
+    },
     "entries": [
       {
         "id": "HOLD-REAL-01",
-        "class": "html",
-        "provenance": "candidate_unfetched",
-        "sourceRef": "ops/benchmark/manifest.json#real-01-debotanistbreda",
+        "class": "text_pdf",
+        "provenance": "real_source",
+        "sourceRef": "ops/benchmark/holdout-references.json#debotanist",
+        "referenceId": "debotanist",
         "url": "https://debotanistbreda.nl/",
-        "fetched": false,
-        "status": "blocked",
+        "fetched": true,
+        "status": "executed_with_limitation",
+        "evaluationState": "evaluated_once",
+        "evaluationCount": 1,
+        "firstEvaluatedAt": "2026-10-18",
         "usedForTuning": false,
-        "reason": "Named in BE-21 metadata only. Fetching a new public source needs its own access decision; #59 does not silently expand external access."
+        "result": "First pinned evaluation: 151 items in 59 sections from the linked 16-page PDF; entry byte hash matches the pin. 41 overlapping text lines were ignored, 38 mid-line price lines were not taken as dishes, and the quality check flags duplicate/ambiguous price lines. This is a holdout observation, not a complete-menu or accuracy claim.",
+        "reason": "Product Owner-approved public holdout. Recorded once against the pinned source version; not used for tuning.",
+        "limitations": ["The linked menu is a PDF; a no-OCR read may be partial.", "No independent item-by-item human comparison of this source has been performed.", "The 59-section structure has not been accepted as a complete or correct menu."]
       },
       {
         "id": "HOLD-REAL-02",
         "class": "language_branch",
-        "provenance": "candidate_unfetched",
-        "sourceRef": "ops/benchmark/manifest.json#real-03-gauchosgrill",
+        "provenance": "real_source",
+        "sourceRef": "ops/benchmark/holdout-references.json#gauchosgrill",
+        "referenceId": "gauchosgrill",
         "url": "https://www.gauchosgrill.nl/breda",
-        "fetched": false,
+        "fetched": true,
         "status": "blocked",
+        "evaluationState": "evaluated_once",
+        "evaluationCount": 1,
+        "firstEvaluatedAt": "2026-10-18",
         "usedForTuning": false,
-        "reason": "Chain/location candidate in BE-21 metadata; not fetched and not part of #59 acceptance."
+        "result": "First pinned evaluation: the approved Breda entry URL returned HTTP 404. No menu was read. No alternative URL, other branch or crawl was substituted.",
+        "reason": "Product Owner-approved public holdout. Recorded once with the real non-200 outcome; not used for tuning.",
+        "limitations": ["Chain/location source; the approved Breda URL is not readable (404).", "The chain homepage was not substituted; that would exceed the approved source."]
       },
       {
         "id": "HOLD-REAL-03",
-        "class": "accordion_tabs",
-        "provenance": "candidate_unfetched",
-        "sourceRef": "ops/benchmark/manifest.json#real-04-mrmoos",
+        "class": "html",
+        "provenance": "real_source",
+        "sourceRef": "ops/benchmark/holdout-references.json#mrmoos",
+        "referenceId": "mrmoos",
         "url": "https://mrmoos.nl/",
-        "fetched": false,
-        "status": "blocked",
+        "fetched": true,
+        "status": "executed_with_limitation",
+        "evaluationState": "evaluated_once",
+        "evaluationCount": 1,
+        "firstEvaluatedAt": "2026-10-18",
         "usedForTuning": false,
-        "reason": "JavaScript-dependent candidate in BE-21 metadata; not fetched and no browser/rendering vendor is approved."
+        "result": "First pinned evaluation: 0 items and 0 sections. The homepage and /menukaart were read, but no automatically recognizable menu was found; the page needs manual review or rendering. Zero items is recorded as a limitation, not a success.",
+        "reason": "Product Owner-approved public holdout. Recorded once with the real zero-item outcome; not used for tuning.",
+        "limitations": ["JavaScript-dependent page; no browser rendering vendor is approved for the product extraction runtime.", "Zero items is not proof that the restaurant has no menu."]
       },
       {
         "id": "HOLD-REAL-04",
         "class": "html",
-        "provenance": "candidate_unfetched",
-        "sourceRef": "ops/benchmark/manifest.json#real-06-bredacolonie",
+        "provenance": "real_source",
+        "sourceRef": "ops/benchmark/holdout-references.json#colonie",
+        "referenceId": "colonie",
         "url": "https://breda.colonie.nl/",
-        "fetched": false,
-        "status": "blocked",
+        "fetched": true,
+        "status": "executed_with_limitation",
+        "evaluationState": "evaluated_once",
+        "evaluationCount": 1,
+        "firstEvaluatedAt": "2026-10-18",
         "usedForTuning": false,
-        "reason": "Named in BE-21 metadata only; no external access decision for #59."
+        "result": "First pinned evaluation: 0 items and 0 sections. The homepage plus five candidate pages were read, including /menukaart/lunch-diner-dranken/; none yielded an automatically recognized menu. The discovery also treated the gift-card page as a menu candidate, which is reported as a limitation.",
+        "reason": "Product Owner-approved public holdout. Recorded once with the real zero-item outcome; not used for tuning.",
+        "limitations": ["Zero items is not proof that the restaurant has no menu.", "Menu-link discovery is broad (it also followed a gift-card page); this is not tuned in this round.", "No independent human item-by-item comparison has been performed."]
       }
     ]
 
 ,
     "classCoverage": {
-      "html": { "entryIds": ["HOLD-REAL-01", "HOLD-REAL-04"], "status": "blocked" },
-      "accordion_tabs": { "entryIds": ["HOLD-REAL-03"], "status": "blocked" },
+      "html": { "entryIds": ["HOLD-REAL-03", "HOLD-REAL-04"], "status": "evaluated_once" },
+      "accordion_tabs": { "entryIds": [], "status": "not_available" },
       "tables": { "entryIds": [], "status": "not_available" },
-      "text_pdf": { "entryIds": [], "status": "not_available" },
+      "text_pdf": { "entryIds": ["HOLD-REAL-01"], "status": "evaluated_once" },
       "scan_unreadable": { "entryIds": [], "status": "not_available" },
-      "language_branch": { "entryIds": ["HOLD-REAL-02"], "status": "blocked" },
+      "language_branch": { "entryIds": ["HOLD-REAL-02"], "status": "evaluated_once" },
       "arrangement": { "entryIds": [], "status": "not_available" },
       "price_variant": { "entryIds": [], "status": "not_available" },
       "historical_cards": { "entryIds": [], "status": "not_available" },
@@ -454,7 +484,7 @@
       "review_surface": { "entryIds": [], "status": "not_available" },
       "browser_fixture": { "entryIds": [], "status": "not_available" }
     },
-    "classCoverageReason": "No permitted unseen source exists for a class without entries in this round. Smelt and Blossem were already used for tuning and are therefore representative, not holdout. No fixture is fabricated and labelled unseen; a new external source needs its own access decision."
+    "classCoverageReason": "Smelt and Blossem were already used for tuning and are representative, never holdout. The four Product Owner-approved holdouts are pinned and evaluated exactly once: De Botanist produced 151 items in 59 sections (text PDF, partial/quality-limited), Mr Moos and Colonia produced zero items and are recorded as limitations, and the Gauchos Breda entry returned HTTP 404 without substituting another branch. No fixture is fabricated and labelled unseen; a new external source still needs its own access decision."
   },
   "notIncluded": [
     "BE-21's 50-100-source vendor/OCR benchmark; #59 does not close it.",

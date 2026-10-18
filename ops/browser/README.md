@@ -19,6 +19,31 @@ The fictional data is generated through the product's own helpers
 identity, credential, database or write is used, and the check never confirms a
 source, saves a concept, exports, publishes or calls a provider.
 
+## Isolation is fail-closed
+
+The fixture no longer falls back to the browser's native fetch for unknown
+URLs. `lib/network-policy.js` is the single policy for two layers:
+
+- the in-page guard for `fetch`, `XMLHttpRequest`, `WebSocket`, `EventSource`
+  and `sendBeacon`;
+- the CDP `Fetch` interception in the harness, which also covers subresources
+  and frame/document navigation.
+
+Only explicit local app resources and the explicit fictional fixture API
+routes are allowed. Unknown external URLs, protocol-relative external URLs,
+unknown API routes and non-GET app requests are refused with
+`fixture_network_blocked: <reason>` and recorded in
+`window.__FIXTURE_NETWORK_VIOLATIONS__`. Chromium additionally runs with
+`--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE localhost` as defense in depth.
+
+The check deliberately attempts an external fetch, a protocol-relative external
+URL, an unknown local API write and an external WebSocket, plus an external
+image/iframe that only the CDP layer can stop. Those deliberate attempts are
+recorded in the evidence as `network.deliberateViolations`; any unexpected
+app-phase request fails the run. Negative unit regressions run the real
+bootstrap in a Node VM with a native-fetch spy and no network:
+`lib/fixture-page.test.js` and `lib/network-policy.test.js`.
+
 ## Run
 
 ```bash
@@ -51,10 +76,15 @@ the command to reproduce the same fixture evidence.
 - a disabled "Concept opslaan" while blockers remain;
 - empty, partial (source found, zero items) and load-error states;
 - keyboard reachability and Enter activation of the review/section controls;
-- light/dark tokens and 320/390 px without horizontal overflow.
+- light/dark tokens and 320/390 px without horizontal overflow;
+- fail-closed network isolation: external fetch, protocol-relative URL, unknown
+  local API write, XHR, WebSocket, image/iframe subresource and frame
+  navigation are blocked and recorded; the explicit fixture API still answers.
 
 ## Limits
 
 This is fixture evidence. It does not prove a live Supabase session, a real
 source import, a real concept save, a browser rendering of an actual restaurant
 site, or production behaviour. The product extraction runtime remains disabled.
+The fictional session/API is intercepted in the page; it never falls through to
+a real API or an external host.

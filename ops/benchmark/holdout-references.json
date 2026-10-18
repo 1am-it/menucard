@@ -1,0 +1,77 @@
+{
+  "version": "1.0.0",
+  "pinnedAt": "2026-10-18",
+  "capturedAt": "2026-10-18T09:56:58.475Z",
+  "note": "Capture-only references for the four Product Owner-approved #59 holdouts. Read-only; no parser result, item count or publication.",
+  "authorization": {
+    "decision": "Product Owner, 2026-10-18: 'Ja, deze vier bronnen testen'.",
+    "reference": "GitHub #59, explicit instruction 6248411416",
+    "scope": "Public read-only practice probes of exactly these four entry URLs and their relevant public menu links, within the existing safe fetch/source bounds. No login, CAPTCHA bypass, paid service, other location, arbitrary crawl or publication.",
+    "appProviderActivation": false,
+    "note": "This permission is a source-probe permission. It does not activate an app-side AI provider, budget or retention arrangement."
+  },
+  "sources": {
+    "debotanist": {
+      "label": "De Botanist Breda",
+      "url": "https://debotanistbreda.nl/",
+      "finalUrl": "https://debotanistbreda.nl/",
+      "contentType": "text/html",
+      "kind": "html",
+      "bytes": 126831,
+      "bytesSha256": "77c950de558afa1d43cd48320fc0776069a643f25fe6b8d8ce83f08ee41eb5b0",
+      "capturedAt": "2026-10-18T09:56:57.796Z",
+      "captureStatus": "captured",
+      "referenceMode": "capture_only",
+      "groundTruth": null,
+      "authorization": "GitHub #59, explicit instruction 6248411416",
+      "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here."
+    },
+    "gauchosgrill": {
+      "label": "Gauchos Grill Breda",
+      "url": "https://www.gauchosgrill.nl/breda",
+      "finalUrl": null,
+      "contentType": null,
+      "kind": "unsupported",
+      "bytes": 0,
+      "bytesSha256": null,
+      "capturedAt": "2026-10-18T09:56:57.880Z",
+      "captureStatus": "blocked",
+      "httpStatus": 404,
+      "error": "bad-status",
+      "referenceMode": "capture_only",
+      "groundTruth": null,
+      "authorization": "GitHub #59, explicit instruction 6248411416",
+      "note": "The approved entry URL did not yield a readable public source. No alternative URL, other location or crawl was substituted."
+    },
+    "mrmoos": {
+      "label": "Mr Moos Breda",
+      "url": "https://mrmoos.nl/",
+      "finalUrl": "https://mrmoos.nl/",
+      "contentType": "text/html",
+      "kind": "html",
+      "bytes": 53287,
+      "bytesSha256": "20c0d9fa646719c78810e636f3abb3f59948e52972891b2d77a4d16d7fa39580",
+      "capturedAt": "2026-10-18T09:56:58.284Z",
+      "captureStatus": "captured",
+      "referenceMode": "capture_only",
+      "groundTruth": null,
+      "authorization": "GitHub #59, explicit instruction 6248411416",
+      "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here."
+    },
+    "colonie": {
+      "label": "Colonia Breda",
+      "url": "https://breda.colonie.nl/",
+      "finalUrl": "https://breda.colonie.nl/",
+      "contentType": "text/html",
+      "kind": "html",
+      "bytes": 232884,
+      "bytesSha256": "29ed55827a4141647531e473f55410358962e63f5179c7e7a73e715d070ccbdf",
+      "capturedAt": "2026-10-18T09:56:58.352Z",
+      "captureStatus": "captured",
+      "referenceMode": "capture_only",
+      "groundTruth": null,
+      "authorization": "GitHub #59, explicit instruction 6248411416",
+      "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here."
+    }
+  }
+}

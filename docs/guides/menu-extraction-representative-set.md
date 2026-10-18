@@ -22,13 +22,26 @@ Protocol: `MENU-EXTRACTION.md` v0.2, SHA-256
 
 ## Ongeziene set
 
-De holdout is op 2026-10-18 afzonderlijk gepind in het manifest. Vier
-BE-21-kandidaten staan als `candidate_unfetched`/`blocked` en zijn niet
-opgehaald; negen klassen hebben geen toegestane ongeziene bron en staan op
-`not_available`. Er worden geen URL's verzonnen. Smelt en Blossem zijn voor
-tuning gebruikt en mogen daarom nooit als ongeziene holdout worden
-gepresenteerd. Zonder toegang of een vooraf gecontroleerde referentie blijft dit
-expliciet `niet uitgevoerd`.
+De holdout is op 2026-10-18 afzonderlijk gepind in het manifest. De vier door de
+Product Owner goedgekeurde openbare bronnen zijn vóór de meting capture-only
+vastgelegd in
+[`ops/benchmark/holdout-references.json`](../../ops/benchmark/holdout-references.json)
+en daarna elk precies één keer geëvalueerd. De statussen zijn expliciet:
+`unused`, `evaluated_once` en `used_for_tuning`. Een getunede bron mag niet in
+de holdout blijven; die moet naar de representatieve set en een nieuwe holdout
+vragen. Smelt en Blossem zijn voor tuning gebruikt en mogen daarom nooit als
+ongeziene holdout worden gepresenteerd.
+
+| Holdout | Uitkomst eerste meting | Beperking |
+| --- | --- | --- |
+| De Botanist | 151 items in 59 secties uit de gelinkte 16-pagina-PDF; entryhash gelijk aan de pin | 41 dubbele tekstregels genegeerd, 38 prijsregels midden in de regel niet overgenomen, kwaliteitscontrole meldt duplicaten/prijsambigiteit; geen volledigheids- of accuraatheidsclaim |
+| Gauchos Grill Breda | HTTP 404 op de goedgekeurde Breda-URL; geen menu gelezen | Geen alternatieve URL of andere vestiging gebruikt |
+| Mr Moos | 0 items; `/menukaart` gelezen maar niet automatisch herkend | JavaScript-afhankelijk; geen renderingvendor goedgekeurd; nul items is geen bewijs dat er geen menu is |
+| Colonia Breda | 0 items; homepage plus vijf kandidaatpagina's gelezen | Breed ontdekte menu-links (ook cadeaukaart); geen automatische menukaart herkend; niet getuned |
+
+Deze uitkomsten zijn één eerste observatie. Ze zijn niet gebruikt om parser- of
+regels te wijzigen. Zonder een nieuwe, vooraf gepinde holdout is er geen tweede
+onafhankelijke meting.
 
 ## Meetbare drempels (voorstel, vóór acceptatie)
 
@@ -72,10 +85,12 @@ geschreven.
   geautomatiseerde vergelijking met de gecontroleerde capture is uitgevoerd);
 - een onafhankelijke menselijke Blossem-item-voor-itemcontrole (de
   geautomatiseerde vergelijking is uitgevoerd);
-- de 50–100-bronnen BE-21-set en de ongeziene holdout (de holdout is gepind maar
-  niet uitgevoerd);
+- onafhankelijke menselijke item-voor-itemcontroles van de vier holdouts; de
+  eerste meting is automatisch uitgevoerd en als observatie vastgelegd;
+- een tweede holdoutmeting of een nieuwe holdout na eventuele tuning;
+- de 50–100-bronnen BE-21-set;
 - live/staging browser- of schrijfacceptatie in een geïsoleerde omgeving (de
   lokale fixture is uitgevoerd; live niet);
-- echte provideractivering, kostenmeting en DPA/EU-retentietest.
+- echte app-side provideractivering, kostenmeting en DPA/EU-retentietest.
 
 Een groene test of een bereikbare URL is geen bewijs van volledige extractie.

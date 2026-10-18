@@ -19,6 +19,16 @@ fails on any hash or item difference. It is not part of the BE-21 benchmark, is
 deliberately not wired into `npm test` (it needs network access), and never
 writes, confirms or publishes anything.
 
+`holdout-sources.json` and `holdout-references.json` are the #59 holdout pins for
+the four Product Owner-approved public sources (De Botanist, Gauchos Grill Breda,
+Mr Moos, Colonia Breda). The reference is capture-only: it pins the source
+version and the honest read outcome, never a parser result or item count.
+`ops/scripts/capture-menu-extraction-holdout-references.js` creates it once, and
+`ops/scripts/probe-menu-extraction-holdout.js` records exactly one first
+evaluation in `holdout-evaluation.json` (tracked, create-only). Both are not
+npm scripts. A tuned source must move to the representative set with a new,
+unused holdout; a second evaluation on the same pin is refused.
+
 ## What actually exists here
 
 - `manifest.js` / `manifest.json` — a case manifest with three honestly

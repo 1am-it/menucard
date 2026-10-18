@@ -11,6 +11,7 @@ class CdpClient {
     this.nextId = 1;
     this.pending = new Map();
     this.events = [];
+    this.listeners = new Map();
     this.closed = false;
     this.ws = new WebSocket(webSocketUrl);
     this.ready = new Promise((resolve, reject) => {
@@ -37,7 +38,18 @@ class CdpClient {
         if (message.error) reject(new Error(`${message.error.message} (${message.error.code})`));
         else resolve(message.result);
       } else if (message.method) {
-        this.events.push(message);
+        const handlers = this.listeners.get(message.method);
+        if (handlers && handlers.size > 0) {
+          for (const handler of handlers) {
+            try {
+              handler(message.params);
+            } catch {
+              // A broken listener must not break the CDP client itself.
+            }
+          }
+        } else {
+          this.events.push(message);
+        }
       }
     });
     this.ws.addEventListener('close', () => {
@@ -66,6 +78,16 @@ class CdpClient {
     const found = this.events.filter((event) => event.method === method);
     this.events = this.events.filter((event) => event.method !== method);
     return found;
+  }
+
+  on(method, handler) {
+    const handlers = this.listeners.get(method) || new Set();
+    handlers.add(handler);
+    this.listeners.set(method, handlers);
+    return () => {
+      handlers.delete(handler);
+      if (handlers.size === 0) this.listeners.delete(method);
+    };
   }
 
   close() {

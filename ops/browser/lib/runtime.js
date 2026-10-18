@@ -74,6 +74,11 @@ async function startBrowser(browserPath) {
     '--no-default-browser-check',
     '--disable-dev-shm-usage',
     '--disable-background-networking',
+    '--disable-sync',
+    '--no-pings',
+    // Defense in depth: even if a guard were bypassed, the browser cannot
+    // resolve an external host. The local app is explicitly excluded.
+    '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE localhost',
     '--remote-debugging-port=0',
     `--user-data-dir=${userDataDir}`,
     'about:blank',

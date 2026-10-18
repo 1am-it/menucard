@@ -2,13 +2,33 @@
 
 // The in-page fixture: a fictional Supabase session (so the real client-side
 // auth path runs) and fictional same-origin API responses. It never contacts a
-// real Supabase project or production API. The query parameters choose the
-// fixture and the app's own light/dark theme before first paint.
+// real Supabase project or production API.
+//
+// Isolation is fail-closed (Delivery Lead review 6248407225). The previous
+// implementation fell back to the native fetch for unknown URLs. Now every
+// fetch, XHR, WebSocket, EventSource and sendBeacon call is classified against
+// the shared network policy; only explicit local app resources and explicit
+// fictional fixture API routes are allowed. Unknown external URLs, protocol-
+// relative external URLs and unknown API/write routes are rejected and recorded
+// in `window.__FIXTURE_NETWORK_VIOLATIONS__`. The CDP layer in the harness
+// applies the same policy to subresources and navigation.
+//
+// The query parameters choose the fixture and the app's own light/dark theme
+// before first paint.
 
-function fixtureBootstrap(scenarios) {
+const { FIXTURE_API_ROUTES, classifyRequest } = require('./network-policy');
+
+function fixtureBootstrap(scenarios, options = {}) {
+  const config = {
+    appOrigins: options.appOrigins,
+    fixtureRoutes: options.fixtureRoutes || FIXTURE_API_ROUTES,
+    baseUrl: options.baseUrl || 'http://localhost:3137/internal/source-triage/batch',
+  };
   return `(() => {
   try {
     const fixtures = ${JSON.stringify(scenarios)};
+    const policyConfig = ${JSON.stringify(config)};
+    const classify = ${classifyRequest.toString()};
     const params = new URLSearchParams(location.search);
     const fixture = params.get('fixture') || 'review';
     const theme = params.get('theme') === 'light' ? 'light' : 'dark';
@@ -46,29 +66,132 @@ function fixtureBootstrap(scenarios) {
         return nativeRemove.call(this, k);
       };
     }
+    const violations = window.__FIXTURE_NETWORK_VIOLATIONS__ = window.__FIXTURE_NETWORK_VIOLATIONS__ || [];
+    window.__FIXTURE_NETWORK_BLOCKED__ = false;
+    function describeBlocked(verdict) {
+      return 'fixture_network_blocked: ' + (verdict.reason || 'not_allowed') + ' (' + (verdict.method || 'GET') + ' ' + (verdict.url || 'unknown') + ')';
+    }
+    function recordViolation(kind, raw, method, verdict) {
+      if (violations.length < 50) {
+        violations.push({
+          phase: window.__FIXTURE_NETWORK_PHASE__ || 'app',
+          kind: kind,
+          method: String(method || 'GET').toUpperCase(),
+          url: verdict && verdict.url ? verdict.url : String(raw || ''),
+          reason: (verdict && verdict.reason) || 'not_allowed',
+          protocolRelative: Boolean(verdict && verdict.protocolRelative),
+          at: new Date().toISOString(),
+        });
+      }
+      window.__FIXTURE_NETWORK_BLOCKED__ = true;
+    }
+    function jsonResponse(body, status) {
+      return new Response(JSON.stringify(body), { status: status || 200, headers: { 'Content-Type': 'application/json' } });
+    }
+    function fixtureResponse(verdict) {
+      if (verdict.routeId === 'auth') return jsonResponse(session);
+      if (verdict.routeId === 'me') {
+        return jsonResponse({ roles: [{ role: 'internal', restaurant_id: null }, { role: 'editor', restaurant_id: null }] });
+      }
+      if (verdict.routeId === 'batch-analysis-process') return jsonResponse({ outcome: 'done' });
+      if (verdict.routeId === 'batch-analysis') {
+        if (fixture === 'error') {
+          return jsonResponse({ error: 'De batchanalyse kon niet worden geladen.' }, 500);
+        }
+        return jsonResponse(fixtures[fixture] || fixtures.review);
+      }
+      return jsonResponse({ error: 'fixture route not implemented' }, 500);
+    }
+
     const nativeFetch = window.fetch ? window.fetch.bind(window) : null;
     window.fetch = async function (input, init) {
       const raw = typeof input === 'string' ? input : (input && input.url) || '';
-      const url = new URL(raw, location.href);
-      if (url.pathname.includes('/auth/v1/')) {
-        return new Response(JSON.stringify(session), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      const method = String((init && init.method) || (input && input.method) || 'GET').toUpperCase();
+      const verdict = classify(raw, { appOrigins: policyConfig.appOrigins, fixtureRoutes: policyConfig.fixtureRoutes, baseUrl: policyConfig.baseUrl, method: method });
+      if (!verdict.allowed) {
+        recordViolation('fetch', raw, method, verdict);
+        throw new Error(describeBlocked(verdict));
       }
-      if (url.pathname.includes('/api/internal/v1/me')) {
-        return new Response(JSON.stringify({ roles: [{ role: 'internal', restaurant_id: null }, { role: 'editor', restaurant_id: null }] }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      if (verdict.kind === 'fixture_api') return fixtureResponse(verdict);
+      if (!nativeFetch) {
+        recordViolation('fetch_no_native', raw, method, { reason: 'native_fetch_unavailable', url: String(raw) });
+        throw new Error('fixture_network_blocked: native_fetch_unavailable');
       }
-      if (url.pathname.includes('/api/internal/v1/batch-analysis')) {
-        if (fixture === 'error') {
-          return new Response(JSON.stringify({ error: 'De batchanalyse kon niet worden geladen.' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
-        }
-        if (url.pathname.endsWith('/process')) {
-          return new Response(JSON.stringify({ outcome: 'done' }), { status: 200, headers: { 'Content-Type': 'application/json' } });
-        }
-        const body = fixtures[fixture] || fixtures.review;
-        return new Response(JSON.stringify(body), { status: 200, headers: { 'Content-Type': 'application/json' } });
-      }
-      if (nativeFetch) return nativeFetch(input, init);
-      throw new Error('network disabled in fixture');
+      return nativeFetch(input, init);
     };
+
+    const NativeXHR = window.XMLHttpRequest;
+    if (NativeXHR && NativeXHR.prototype) {
+      const nativeOpen = NativeXHR.prototype.open;
+      const nativeSend = NativeXHR.prototype.send;
+      NativeXHR.prototype.open = function (method, url) {
+        this.__fixtureRequest = { method: String(method || 'GET').toUpperCase(), url: String(url || '') };
+        return nativeOpen.apply(this, arguments);
+      };
+      NativeXHR.prototype.send = function (body) {
+        const request = this.__fixtureRequest || { method: 'GET', url: '' };
+        const verdict = classify(request.url, { appOrigins: policyConfig.appOrigins, fixtureRoutes: policyConfig.fixtureRoutes, baseUrl: policyConfig.baseUrl, method: request.method });
+        if (!verdict.allowed || verdict.kind !== 'app_resource') {
+          recordViolation('xhr', request.url, request.method, verdict.reason ? verdict : { reason: 'non_app_resource', url: request.url, method: request.method });
+          const xhr = this;
+          setTimeout(function () {
+            try {
+              const event = new Event('error');
+              xhr.dispatchEvent(event);
+              if (typeof xhr.onerror === 'function') xhr.onerror(event);
+              xhr.dispatchEvent(new Event('loadend'));
+            } catch (ignored) {}
+          }, 0);
+          return undefined;
+        }
+        return nativeSend.apply(this, arguments);
+      };
+    }
+
+    const NativeWebSocket = window.WebSocket;
+    if (NativeWebSocket) {
+      function GuardedWebSocket(url, protocols) {
+        const verdict = classify(url, { appOrigins: policyConfig.appOrigins, fixtureRoutes: policyConfig.fixtureRoutes, baseUrl: policyConfig.baseUrl, method: 'GET' });
+        if (!verdict.allowed || verdict.kind !== 'websocket') {
+          recordViolation('websocket', url, 'GET', verdict);
+          throw new Error(describeBlocked(verdict));
+        }
+        return protocols === undefined ? new NativeWebSocket(url) : new NativeWebSocket(url, protocols);
+      }
+      GuardedWebSocket.prototype = NativeWebSocket.prototype;
+      GuardedWebSocket.CONNECTING = NativeWebSocket.CONNECTING;
+      GuardedWebSocket.OPEN = NativeWebSocket.OPEN;
+      GuardedWebSocket.CLOSING = NativeWebSocket.CLOSING;
+      GuardedWebSocket.CLOSED = NativeWebSocket.CLOSED;
+      window.WebSocket = GuardedWebSocket;
+    }
+
+    const NativeEventSource = window.EventSource;
+    if (NativeEventSource) {
+      function GuardedEventSource(url, options) {
+        const verdict = classify(url, { appOrigins: policyConfig.appOrigins, fixtureRoutes: policyConfig.fixtureRoutes, baseUrl: policyConfig.baseUrl, method: 'GET' });
+        if (!verdict.allowed || verdict.kind !== 'app_resource') {
+          recordViolation('eventsource', url, 'GET', verdict);
+          throw new Error(describeBlocked(verdict));
+        }
+        return new NativeEventSource(url, options);
+      }
+      GuardedEventSource.prototype = NativeEventSource.prototype;
+      window.EventSource = GuardedEventSource;
+    }
+
+    if (window.navigator && typeof window.navigator.sendBeacon === 'function') {
+      const nativeBeacon = window.navigator.sendBeacon.bind(window.navigator);
+      window.navigator.sendBeacon = function (url, data) {
+        const verdict = classify(url, { appOrigins: policyConfig.appOrigins, fixtureRoutes: policyConfig.fixtureRoutes, baseUrl: policyConfig.baseUrl, method: 'POST' });
+        if (!verdict.allowed) {
+          recordViolation('beacon', url, 'POST', verdict);
+          return false;
+        }
+        return nativeBeacon(url, data);
+      };
+    }
+
     window.__FIXTURE_ACTIVE__ = fixture;
   } catch (error) {
     window.__FIXTURE_BOOT_ERROR__ = String((error && error.stack) || error);

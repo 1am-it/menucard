@@ -15,12 +15,15 @@ const crypto = require('node:crypto');
 
 const manifest = require('./menu-extraction-acceptance-set.json');
 const references = require('./source-references.json');
+const holdoutReferences = require('./holdout-references.json');
 const { loadMenuExtractionProtocol } = require('../../src/lib/menuExtractionProtocol');
+const { validateHoldout, validateRepresentative } = require('./acceptanceSetGuard');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
 const STATUSES = new Set(['executed', 'executed_with_limitation', 'blocked', 'unsupported', 'not_available']);
 const PROVENANCE = new Set(['real_source', 'synthetic_fixture', 'historical_dataset', 'candidate_unfetched']);
-const APPROVED_REAL_SOURCES = new Set(['smelt', 'blossem']);
+const REPRESENTATIVE_REAL_SOURCES = new Set(['smelt', 'blossem']);
+const HOLDOUT_REAL_SOURCES = new Set(['debotanist', 'gauchosgrill', 'mrmoos', 'colonie']);
 const BROWSER_EVIDENCE = path.join(REPO_ROOT, 'ops', 'browser', 'evidence', 'menu-review-browser-evidence.json');
 const SHA256 = /^[0-9a-f]{64}$/;
 
@@ -88,21 +91,46 @@ test('every entry is complete and uses the closed status/provenance vocabulary',
     assert.equal(Object.prototype.hasOwnProperty.call(entry, 'expectedItemCount'), false, `${entry.id} must not hardcode an item count`);
     assert.equal(Object.prototype.hasOwnProperty.call(entry, 'expectedCounts'), false, `${entry.id} must not hardcode counts`);
   }
+  for (const entry of manifest.holdout.entries) {
+    assert.ok(['unused', 'evaluated_once', 'used_for_tuning'].includes(entry.evaluationState), `${entry.id} evaluationState`);
+    assert.equal(typeof entry.usedForTuning, 'boolean', `${entry.id} usedForTuning`);
+    assert.equal(Number.isInteger(entry.evaluationCount), true, `${entry.id} evaluationCount`);
+    if (entry.status === 'executed' || entry.status === 'executed_with_limitation') {
+      assert.ok(typeof entry.result === 'string' && entry.result.length > 0, `${entry.id} executed needs a result`);
+      assert.match(entry.firstEvaluatedAt, /^\d{4}-\d{2}-\d{2}$/, `${entry.id} executed needs a date`);
+    }
+  }
 });
 
 
-test('real sources stay limited to the two explicitly allowed public sources', () => {
+test('representative real sources stay limited to the two tuned public sources', () => {
   const real = manifest.representative.filter((entry) => entry.provenance === 'real_source');
   assert.ok(real.length > 0);
   for (const entry of real) {
-    assert.ok(APPROVED_REAL_SOURCES.has(entry.referenceId), `${entry.id} uses unapproved source ${entry.referenceId}`);
+    assert.ok(REPRESENTATIVE_REAL_SOURCES.has(entry.referenceId), `${entry.id} uses unapproved representative source ${entry.referenceId}`);
     const reference = references.sources[entry.referenceId];
     assert.ok(reference, `${entry.id} reference exists`);
     assert.match(reference.bytesSha256, SHA256);
     assert.match(reference.contentHash, SHA256);
     assert.ok(entry.sourceVersion.includes(reference.bytesSha256.slice(0, 8)), `${entry.id} pins the bytes hash prefix`);
   }
-  for (const id of Object.keys(references.sources)) assert.ok(APPROVED_REAL_SOURCES.has(id), `reference ${id}`);
+  for (const id of Object.keys(references.sources)) assert.ok(REPRESENTATIVE_REAL_SOURCES.has(id), `reference ${id}`);
+});
+
+test('holdout real sources are the four approved public sources with capture-only pins', () => {
+  const real = manifest.holdout.entries.filter((entry) => entry.provenance === 'real_source');
+  assert.deepEqual(real.map((entry) => entry.referenceId).sort(), [...HOLDOUT_REAL_SOURCES].sort());
+  for (const entry of real) {
+    const reference = holdoutReferences.sources[entry.referenceId];
+    assert.ok(reference, `${entry.id} has a pinned holdout reference`);
+    assert.equal(reference.referenceMode, 'capture_only');
+    assert.equal(reference.groundTruth, null);
+    assert.equal(entry.usedForTuning, false, `${entry.id} is not a tuning source`);
+    assert.notEqual(entry.evaluationState, 'used_for_tuning', `${entry.id} must move to representative if tuned`);
+    if (reference.captureStatus === 'captured') assert.match(reference.bytesSha256, SHA256);
+    else assert.equal(entry.status, 'blocked', `${entry.id} cannot claim a successful read`);
+  }
+  for (const id of Object.keys(holdoutReferences.sources)) assert.ok(HOLDOUT_REAL_SOURCES.has(id), `holdout reference ${id}`);
 });
 
 test('synthetic fixtures use fictional .invalid hosts; candidates stay unfetched and blocked', () => {
@@ -132,16 +160,19 @@ test('historical cards are a pinned shape snapshot and never current truth', () 
   assert.equal(canonicalHash('data/menus.json'), match[1], 'the pinned snapshot is the file in this commit');
 });
 
-test('representative and holdout are disjoint; holdout never claims tuning or execution', () => {
+test('representative and holdout are disjoint; a holdout is evaluated at most once and never tuned', () => {
   const repIds = new Set(manifest.representative.map((e) => e.id));
   const repSources = new Set(manifest.representative.filter((e) => e.provenance === 'real_source').map((e) => e.referenceId));
   for (const entry of manifest.holdout.entries) {
     assert.equal(repIds.has(entry.id), false, `${entry.id} appears in both sets`);
-    assert.equal(entry.usedForTuning, false, `${entry.id} is not unseen if it was used for tuning`);
-    assert.notEqual(entry.status, 'executed', `${entry.id} cannot be holdout after execution`);
-    assert.notEqual(entry.status, 'executed_with_limitation');
+    assert.equal(entry.usedForTuning, false, `${entry.id} is not a tuning source`);
+    assert.notEqual(entry.evaluationState, 'used_for_tuning', `${entry.id} must move to representative with a new holdout if tuned`);
     if (entry.referenceId) assert.equal(repSources.has(entry.referenceId), false, `${entry.id} reuses a tuned source`);
   }
+  const holdoutValidation = validateHoldout(manifest.holdout);
+  assert.equal(holdoutValidation.ok, true, holdoutValidation.errors.join('; '));
+  const representativeValidation = validateRepresentative(manifest.representative);
+  assert.equal(representativeValidation.ok, true, representativeValidation.errors.join('; '));
   for (const entry of manifest.representative.filter((e) => e.provenance === 'real_source')) {
     assert.equal(entry.usedForTuning, true, `${entry.id} must be marked as used for tuning`);
   }

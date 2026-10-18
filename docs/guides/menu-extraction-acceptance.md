@@ -19,6 +19,17 @@ provideractivering en volledige productacceptatie zijn dat niet.
 > in [menu-extraction-acceptance-matrix.md](menu-extraction-acceptance-matrix.md);
 > oudere secties hieronder blijven als historie staan.
 
+> **Herstelronde 2026-10-18 (review #6248407225).** De fixture-isolatie is
+> fail-closed gemaakt (fetch, XHR, WebSocket, EventSource, sendBeacon,
+> CDP-subresources/navigatie en DNS-lockdown) met negatieve VM-regressies. De
+> holdout-guard onderscheidt nu `unused`, `evaluated_once` en
+> `used_for_tuning`; een eerste evaluatie is vastlegbaar zonder tuning. De vier
+> door de Product Owner goedgekeurde openbare bronnen zijn vóór de meting
+> capture-only gepind en daarna elk één keer read-only geëvalueerd: De Botanist
+> 151 items/59 secties, Mr Moos 0, Colonia 0, Gauchos Breda HTTP 404. Het
+> v2-ontwerp eist nu bewijs per prijsbedrag en een zichtbare rollback. De
+> app-side AI-provider is niet geactiveerd; niets is gemerged of gepubliceerd.
+
 ## 13. Acceptatie: bewijs voordat werking wordt geclaimd
 
 - Blossem: beoordeel de daadwerkelijke uitklapstructuur, behoud lunch/diner en

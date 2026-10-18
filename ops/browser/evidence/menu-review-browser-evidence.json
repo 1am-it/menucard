@@ -1,9 +1,9 @@
 {
   "fixtureOnly": true,
   "passed": true,
-  "head": "85f1bb218a1a5e6a02b0d9bb71b8ac7afb4d30ab",
-  "worktreeDirty": false,
-  "generatedAt": "2026-10-18T09:36:31.952Z",
+  "head": "0c1c5f6db1d4e9df8c4076b4c9788f056fe5865f",
+  "worktreeDirty": true,
+  "generatedAt": "2026-10-18T09:55:22.167Z",
   "command": "npm run test:browser:menu-review",
   "environment": {
     "node": "v22.22.3",
@@ -12,7 +12,8 @@
     "viewportHeights": [
       900
     ],
-    "fixtureOnly": true
+    "fixtureOnly": true,
+    "networkGuard": "in-page fetch/XHR/WebSocket/EventSource/beacon + CDP Fetch + DNS lockdown"
   },
   "fixtures": [
     "review",
@@ -26,6 +27,11 @@
       "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=light)",
       "passed": true,
       "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=light)",
+      "passed": true,
+      "detail": "[]"
     },
     {
       "name": "review: result card and exact source URL are visible",
@@ -143,6 +149,11 @@
       "detail": "ok"
     },
     {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=readonly&batch=batch-fictief-0001&item=1&theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
       "name": "readonly: colleague view is explicitly read-only",
       "passed": true,
       "detail": null
@@ -173,6 +184,11 @@
       "detail": "ok"
     },
     {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=empty&theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
       "name": "empty: the real URL input is present and labelled",
       "passed": true,
       "detail": "Restaurant-URL's, één per regel"
@@ -196,6 +212,11 @@
       "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=partial&batch=batch-fictief-0001&item=1&theme=dark)",
       "passed": true,
       "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=partial&batch=batch-fictief-0001&item=1&theme=dark)",
+      "passed": true,
+      "detail": "[]"
     },
     {
       "name": "partial: a found source with zero items is not a success",
@@ -223,6 +244,11 @@
       "detail": "ok"
     },
     {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=error&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
       "name": "error: the load error is shown in the alert region",
       "passed": true,
       "detail": "De batchanalyse kon niet worden geladen."
@@ -246,6 +272,11 @@
       "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=light&item=1)",
       "passed": true,
       "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=light&item=1)",
+      "passed": true,
+      "detail": "[]"
     },
     {
       "name": "responsive 320px/light: requested theme is active",
@@ -273,6 +304,11 @@
       "detail": "ok"
     },
     {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=dark&item=1)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
       "name": "responsive 320px/dark: requested theme is active",
       "passed": true,
       "detail": "dark"
@@ -296,6 +332,11 @@
       "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=light&item=1)",
       "passed": true,
       "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=light&item=1)",
+      "passed": true,
+      "detail": "[]"
     },
     {
       "name": "responsive 390px/light: requested theme is active",
@@ -323,6 +364,11 @@
       "detail": "ok"
     },
     {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=dark&item=1)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
       "name": "responsive 390px/dark: requested theme is active",
       "passed": true,
       "detail": "dark"
@@ -346,6 +392,11 @@
       "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=dark&item=1)",
       "passed": true,
       "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=dark&item=1)",
+      "passed": true,
+      "detail": "[]"
     },
     {
       "name": "responsive 1024px/dark: requested theme is active",
@@ -378,6 +429,11 @@
       "detail": "ok"
     },
     {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
       "name": "keyboard: the review control is reachable with Tab",
       "passed": true,
       "detail": "[{\"tag\":\"INPUT\",\"text\":\"\",\"href\":null,\"expanded\":null},{\"tag\":\"SUMMARY\",\"text\":\"2 gerechten zonder aandachtspunt · 2 nieuw, 0 ongewijzigd\",\"href\":null,\"expanded\":null},{\"tag\":\"BUTTON\",\"text\":\"Concept opslaan\",\"href\":null,\"expanded\":null},{\"tag\":\"A\",\"text\":\"Beoordeel handmatig\",\"href\":\"/internal/source-triage/batch?batch=batch-fictief-0001&item=1\",\"expanded\":null},{\"tag\":\"BUTTON\",\"text\":\"Menukaart controleren\",\"href\":null,\"expanded\":\"false\"}]"
@@ -396,6 +452,56 @@
       "name": "keyboard: a section summary opens with Enter",
       "passed": true,
       "detail": "focused=true open=true"
+    },
+    {
+      "name": "network guard: external fetch is blocked before native fetch",
+      "passed": true,
+      "detail": "fixture_network_blocked: external_origin (GET https://unapproved.invalid/api/anything)"
+    },
+    {
+      "name": "network guard: protocol-relative external URL is blocked",
+      "passed": true,
+      "detail": "fixture_network_blocked: external_origin (GET http://unapproved.invalid/api/anything)"
+    },
+    {
+      "name": "network guard: unknown local API write is blocked",
+      "passed": true,
+      "detail": "fixture_network_blocked: unknown_api_route (POST http://localhost:3137/api/internal/v1/menu-concepts)"
+    },
+    {
+      "name": "network guard: explicit fixture API still answers",
+      "passed": true,
+      "detail": "200"
+    },
+    {
+      "name": "network guard: XHR to an unknown API write is blocked",
+      "passed": true,
+      "detail": "xhr-error"
+    },
+    {
+      "name": "network guard: external WebSocket is blocked",
+      "passed": true,
+      "detail": "fixture_network_blocked: external_origin (GET ws://unapproved.invalid/socket)"
+    },
+    {
+      "name": "network guard: page-level violations are recorded",
+      "passed": true,
+      "detail": "violations=5"
+    },
+    {
+      "name": "network guard: CDP blocks external subresource and frame navigation",
+      "passed": true,
+      "detail": "[{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/pixel.png\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-18T09:55:21.257Z\",\"resourceType\":\"Image\"},{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/frame\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-18T09:55:21.267Z\",\"resourceType\":\"Document\"}]"
+    },
+    {
+      "name": "network guard: no unexpected CDP traffic during app scenarios",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "network guard: page recorded only deliberate blocked attempts",
+      "passed": true,
+      "detail": "[]"
     },
     {
       "name": "no uncaught browser exception",
@@ -422,7 +528,7 @@
     },
     {
       "file": "menu-review-readonly-1024-dark.png",
-      "sha256": "625dd8b9a89f70835c285c71ee64514136f103a73b1218faab76624c98ba1375",
+      "sha256": "1c744e83410163b51eec8ea1b868b1c4872c6093456944795d67ee9ec3fc6663",
       "width": 1024,
       "height": 900
     },
@@ -434,57 +540,131 @@
     },
     {
       "file": "menu-review-partial-390-dark.png",
-      "sha256": "c0219cf303e000a308b96dc9c7f26a43bacdaee68ca71f404a14e4d074f04558",
+      "sha256": "37d7399d2000bf656fca69bb1dafc55ac64b0129f24a56abd8ce2ada11983a74",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-error-390-light.png",
-      "sha256": "add59e15bc14021b6aad56bb27468634ed88198774788ba2011d42b98ba9c1fe",
+      "sha256": "43fcd65ef25cdbd3a605a29aa27a696343c983c47a3059492f97210974a29f45",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-320-light.png",
-      "sha256": "364203ec2bedd6d6a42854b2862bea1e595670cd20beb8bfbfc8219d55cbb554",
+      "sha256": "a473f0e6dd34af129f655d3cc610ef3d43290e0307d6d4e57a2a8a14ceeaaeda",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-320-dark.png",
-      "sha256": "45387dc5d1d4eb4f004f70145db5be72a006f08e74ce2a4a313e125df5c46f00",
+      "sha256": "50cc4ff28f68b0a0cb6f4aaa6d8cda1ba8a13d13d01c69b4bf452948c5107e86",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-390-light.png",
-      "sha256": "fdf5923530d9d238865076fb9e81db3d5fde2aac418895d4ce62a704b710cea2",
+      "sha256": "0d93ae97e46152f39427ea9c8b9f775760277243f1599379d6e041f454cfed00",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-390-dark.png",
-      "sha256": "1ff1281cfa3fa801fc166b862dc66f861da26e65b2372d269e9291978b4e93c0",
+      "sha256": "4ed360db86be57acca681b28f1dd417be510dcb70ef8ee364be8fd862cca197b",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-1024-dark.png",
-      "sha256": "52de825fc5618c9ed3612db9deabc1a2bc3bb83c4954db48f4041468a335241e",
+      "sha256": "0816a8250fbe17a4d488352ed8f835d4e98d8907caa3ebac55d6883b27a43012",
       "width": 1024,
       "height": 900
     },
     {
       "file": "menu-review-keyboard-390-light.png",
-      "sha256": "7a71a70762876fc0ae246b6ddc9ce71b5034b68600527ca63d333ac03c1cd94c",
+      "sha256": "66be7210c549d36515aae82c3b580f27b6773f1b58f79d192d22b41beda181b8",
       "width": 390,
       "height": 900
     }
   ],
+  "network": {
+    "guard": "in-page fetch/XHR/WebSocket/EventSource/beacon + CDP Fetch + DNS lockdown",
+    "appViolations": [],
+    "deliberateViolations": [
+      {
+        "phase": "negative-probe",
+        "kind": "cdp_fetch",
+        "method": "GET",
+        "url": "https://unapproved.invalid/pixel.png",
+        "reason": "external_origin",
+        "protocolRelative": false,
+        "at": "2026-10-18T09:55:21.257Z",
+        "resourceType": "Image"
+      },
+      {
+        "phase": "negative-probe",
+        "kind": "cdp_fetch",
+        "method": "GET",
+        "url": "https://unapproved.invalid/frame",
+        "reason": "external_origin",
+        "protocolRelative": false,
+        "at": "2026-10-18T09:55:21.267Z",
+        "resourceType": "Document"
+      }
+    ],
+    "pageViolations": [
+      {
+        "phase": "negative-probe",
+        "kind": "fetch",
+        "method": "GET",
+        "url": "https://unapproved.invalid/api/anything",
+        "reason": "external_origin",
+        "protocolRelative": false,
+        "at": "2026-10-18T09:55:21.237Z"
+      },
+      {
+        "phase": "negative-probe",
+        "kind": "fetch",
+        "method": "GET",
+        "url": "http://unapproved.invalid/api/anything",
+        "reason": "external_origin",
+        "protocolRelative": true,
+        "at": "2026-10-18T09:55:21.237Z"
+      },
+      {
+        "phase": "negative-probe",
+        "kind": "fetch",
+        "method": "POST",
+        "url": "http://localhost:3137/api/internal/v1/menu-concepts",
+        "reason": "unknown_api_route",
+        "protocolRelative": false,
+        "at": "2026-10-18T09:55:21.237Z"
+      },
+      {
+        "phase": "negative-probe",
+        "kind": "xhr",
+        "method": "POST",
+        "url": "http://localhost:3137/api/internal/v1/menu-concepts",
+        "reason": "unknown_api_route",
+        "protocolRelative": false,
+        "at": "2026-10-18T09:55:21.238Z"
+      },
+      {
+        "phase": "negative-probe",
+        "kind": "websocket",
+        "method": "GET",
+        "url": "ws://unapproved.invalid/socket",
+        "reason": "external_origin",
+        "protocolRelative": false,
+        "at": "2026-10-18T09:55:21.239Z"
+      }
+    ]
+  },
   "error": null,
   "limitations": [
     "Fixture evidence against the real UI components; it is not live integration, staging or production acceptance.",
     "The session and API responses are fictional and same-origin; no production Supabase project, credential or data is used.",
+    "Unknown external URLs, protocol-relative external URLs and unknown API/write routes are fail-closed. The negative probe deliberately attempts them and proves they never reach the destination.",
     "No source confirmation, concept save, export, provider call or workflow activation is performed."
   ]
 }

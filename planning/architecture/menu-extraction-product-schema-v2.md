@@ -1,10 +1,11 @@
 # Menu-extractie — productschema v2 (ontwerp ter beoordeling)
 
-Status: **ontwerp, niet geïmplementeerd, geen migratie**. Datum: 2026-10-18.
-Hoort bij GitHub #59 / PR #60. Dit document beschrijft een versiegebonden,
-verliesvrije uitbreiding voor menuconstructies die het huidige productcontract
-niet kan opslaan. Het activeert geen provider, migratie, export of publicatie en
-wijzigt #56 niet.
+Status: **ontwerp, niet geïmplementeerd, geen migratie**. Datum: 2026-10-18;
+aangevuld na Delivery Lead-review 6248407225 (prijsbewijs per bedrag en
+zichtbare rollback). Hoort bij GitHub #59 / PR #60. Dit document beschrijft een
+versiegebonden, verliesvrije uitbreiding voor menuconstructies die het huidige
+productcontract niet kan opslaan. Het activeert geen provider, migratie, export
+of publicatie en wijzigt #56 niet.
 
 ## Waarom dit ontwerp nodig is
 
@@ -39,8 +40,7 @@ productcontract. Dit ontwerp is de voorgestelde brug; het is geen goedkeuring.
 4. **Eén primaire prijs, varianten apart.** Een supplement of glasprijs wordt
    nooit de hoofdprijs. Meerdere prijzen krijgen een expliciete status en
    varianten; de backend kiest niet zelf de laagste.
-5. **Bewijs is verplicht voor een geëxtraheerd veld.** Ieder item en iedere
-   prijsvariant verwijst naar source-ID, locator en een korte passage.
+5. **Bewijs is verplicht voor een geëxtraheerd veld, en per prijsbedrag.** Ieder item en iedere prijsvariant verwijst naar source-ID, locator en een korte passage. Een prijsvariant is pas onderbouwd als de eigen `evidence.quote` het bijbehorende bedrag (of het bronlabel plus bedrag) aantoonbaar bevat. Een itemquote die alleen de gerechtnaam of alleen een ander bedrag ondersteunt, is geen prijsbewijs. De validator weigert zo'n variant; hij vult het bedrag niet aan en kiest geen alternatief.
 6. **Geen trustvelden.** `confidence`, `reviewReady`, `approved` en
    `publicationReady` blijven verboden; review en publicatie zijn aparte
 
@@ -69,7 +69,7 @@ productcontract. Dit ontwerp is de voorgestelde brug; het is geen goedkeuring.
               "kind": "dish",
               "name": "Fictieve burrata",
               "description": "Fictieve omschrijving",
-              "price": { "status": "known", "amountMinorUnits": 1300, "currency": "EUR", "text": "13,00", "isFrom": false },
+              "price": { "status": "known", "amountMinorUnits": 1300, "currency": "EUR", "text": "13,00", "isFrom": false, "evidence": { "sourceId": "src-1", "locator": "DINNER > VOOR > regel 1", "quote": "Fictieve burrata 13,00" } },
               "priceVariants": [],
               "primaryPriceRef": null,
               "supplementOf": null,
@@ -84,7 +84,7 @@ productcontract. Dit ontwerp is de voorgestelde brug; het is geen goedkeuring.
               "kind": "beverage",
               "name": "Fictieve wijn",
               "description": null,
-              "price": { "status": "multiple_undecomposed", "amountMinorUnits": null, "currency": "EUR", "text": "6,50 / 25,00", "isFrom": false },
+              "price": { "status": "multiple_undecomposed", "amountMinorUnits": null, "currency": "EUR", "text": "6,50 / 25,00", "isFrom": false, "evidence": { "sourceId": "src-1", "locator": "regel 2", "quote": "Fictieve wijn 6,50 / 25,00" } },
               "priceVariants": [
                 { "id": "pv-1", "label": "Glas", "kind": "glass", "amountMinorUnits": 650, "currency": "EUR", "text": "6,50", "isSupplement": false, "perPerson": false, "evidence": { "sourceId": "src-1", "locator": "regel 2", "quote": "Glas 6,50" } },
                 { "id": "pv-2", "label": "Fles", "kind": "bottle", "amountMinorUnits": 2500, "currency": "EUR", "text": "25,00", "isSupplement": false, "perPerson": false, "evidence": { "sourceId": "src-1", "locator": "regel 2", "quote": "Fles 25,00" } }
@@ -106,6 +106,24 @@ productcontract. Dit ontwerp is de voorgestelde brug; het is geen goedkeuring.
 }
 ```
 
+### Prijsbewijs per bedrag (aanvulling review 6248407225)
+
+Een itemquote is niet genoeg voor een prijs. Voor iedere `price` met status
+`known`/`from` en voor iedere `priceVariants[]` geldt:
+
+1. `evidence.sourceId`, `evidence.locator` en `evidence.quote` zijn verplicht;
+2. de quote bevat het gezaghebbende bedrag in de brontaal (bijvoorbeeld
+   `6,50`, `€ 6,50` of `Glas 6,50`) of het expliciete bronlabel plus bedrag;
+3. een quote die alleen de gerechtnaam, alleen een beschrijving of alleen een
+   ander bedrag bevat, levert `price_evidence_missing` op;
+4. de validator past geen `amountMinorUnits` aan op basis van een andere quote
+   en kiest nooit de laagste of eerste prijs als vervanging;
+5. een variant zonder eigen bewijs blijft zichtbaar als onzeker en blokkeert
+   export, maar verdwijnt niet stil.
+
+Deze regel is ontwerp, geen implementatie. Er is geen validator, DDL of
+exportpad toegevoegd.
+
 ### Gesloten veldregels
 
 - `categories[].kind`: `section`, `choice_group`, `arrangement`, `beverage`.
@@ -121,9 +139,14 @@ productcontract. Dit ontwerp is de voorgestelde brug; het is geen goedkeuring.
   supplementvariant mag nooit de primaire prijs zijn.
 - `allergens.status`: `explicit` of `unknown`. `explicit` vereist een niet-lege
   `sourceText`; `unknown` heeft `codes: []` en betekent niet "vrij van".
-- `evidence` is verplicht per item; per prijsvariant verplicht wanneer de
-  variant een eigen bronpassage heeft. `contentHash` is optioneel maar moet,
-  wanneer aanwezig, de bronpassage dekken.
+- `evidence` is verplicht per item en per prijsbedrag. Iedere `priceVariants[]`
+  heeft een eigen `evidence` met source-ID, locator en een quote die het
+  variantbedrag of het expliciete bronlabel plus bedrag bevat. De primaire
+  `price` heeft, wanneer `status` `known` of `from` is, eveneens een eigen
+  bewijsquote met dat bedrag. Een quote die alleen het gerecht ondersteunt of
+  alleen een ander bedrag noemt, is ongeldig (`price_evidence_missing`), ook als
+  het item zelf wel bewijs heeft. `contentHash` is optioneel maar moet, wanneer
+  aanwezig, de bronpassage dekken.
 - IDs zijn resultaatlokaal en stabiel binnen één analyse; ze zijn geen
   database-IDs en geven geen gebruikersrechten.
 - Geen veld voor modelconfidence, goedkeuring of publicatiestatus.
@@ -183,8 +206,13 @@ ontwerp (bijvoorbeeld migratie `0020_*`) met backfill en rollback.
 - **Hash/versie.** `analysis_result_hash` en `content_hash` moeten de canonieke
   vorm inclusief `schemaVersion` dekken. Een ontbrekende of onbekende versie is
   een harde validatiefout, geen stille default.
-- **Rollback.** De v2-leesflag uitzetten; v2-rijen blijven staan en worden
-  genegeerd. Er is geen destructieve datamigratie.
+- **Rollback en oudere lezers.** De v2-leesflag uitzetten is toegestaan, maar
+  een oudere lezer mag een v2-rij niet stil negeren of als v1 herinterpreteren.
+  De lezer detecteert `schemaVersion` en toont `unsupported_schema_version` in
+  de review/dekking, met behoud van de onbewerkte rij en het bron-ID. Het concept
+  blijft zichtbaar als niet-ondersteund; opslaan, bevestigen, exporteren en
+  publiceren zijn geblokkeerd tot een compatibele lezer of een expliciete
+  heropname. Er is geen destructieve datamigratie.
 - **Export.** Geen exportpad wordt geactiveerd. Tot een goedgekeurd
   `data/menus.json`-contract blokkeert de export ieder item met
   prijsvarianten, supplementen, keuzegroepen, arrangementen of een expliciete
@@ -204,6 +232,7 @@ ontwerp (bijvoorbeeld migratie `0020_*`) met backfill en rollback.
 | Arrangement | `kind:"arrangement"` | aparte sectie | bewaard | **blokkeren** | niet publiceren |
 | Allergenen | `status` + bron | attention/unknown | bewaard | **`allergenStatus` nodig of blokkeren** | niet als leeg publiceren |
 | Bewijs | `evidence` | broncontext | bewaard | niet geëxporteerd | n.v.t. |
+| Onbekende/oudere lezer | `unsupported_schema_version` | zichtbaar niet-ondersteund | onbewerkt bewaard | geblokkeerd | niet publiceren |
 | Dekking | `coverage` | aandacht/beperking | bewaard | niet geëxporteerd | n.v.t. |
 
 De exportkolom is opzettelijk streng: `data/menus.json` kent één `price` en
@@ -224,16 +253,25 @@ terugvallen op de laagste prijs of een lege allergenenlijst is niet toegestaan.
    expliciete bron.
 4. **Onbekend blijft onbekend.** Ontbrekende allergenen zijn `unknown`, geen
    lege "allergeenvrij"-lijst; ontbrekende prijs is `unknown`, geen `0`.
-5. **Bewijs.** Ieder geëxtraheerd item heeft source-ID, locator en quote; een
-   item zonder bewijs komt niet in het concept.
+5. **Bewijs per bedrag.** Ieder geëxtraheerd item heeft source-ID, locator en
+   quote; iedere prijs en prijsvariant heeft een eigen quote die het
+   gezaghebbende bedrag bevat. Een item zonder bewijs of een prijs zonder
+   bedragbewijs komt niet in het concept (`price_evidence_missing`).
 6. **Versie.** Een onbekende `schemaVersion` stopt met een concrete fout; er is
    geen stille v1-default.
 7. **Geen trustvelden.** De bestaande verboden-sleutel-test blijft gelden.
+8. **Rollback is zichtbaar.** Een oudere lezer mag een v2-rij niet stil
+   negeren of als v1 herinterpreteren. `unsupported_schema_version` is zichtbaar
+   in review en dekking, de onbewerkte rij en het bron-ID blijven bewaard, en
+   opslaan/bevestigen/exporteren/publiceren zijn geblokkeerd.
 
 Voorgestelde regressies bij implementatie: een pure `menuExtractionProductV2`
 mapper, een fail-closed exportprojector, receipt/concept read/write rondgang,
-STRUCT-017-achtige concept/export-gelijkheid, en een fixture met glas/fles,
-supplement, keuzegroep, arrangement en expliciete/onbekende allergenen.
+STRUCT-017-achtige concept/export-gelijkheid, een fixture met glas/fles,
+supplement, keuzegroep, arrangement en expliciete/onbekende allergenen, een
+negatieve prijsbewijstest (quote zonder het juiste bedrag), en een
+rollbacktest waarin een oudere lezer een v2-rij zichtbaar als niet-ondersteund
+bewaart in plaats van hem te negeren.
 
 ## Uitrolvolgorde (alleen na goedkeuring)
 
@@ -262,15 +300,24 @@ supplement, keuzegroep, arrangement en expliciete/onbekende allergenen.
    heropname vereist voordat ze in de nieuwe review verschijnen?
 6. **Allergenen:** is `unknown` in de publieke kaart een expliciete status of
    een blokkade voor publicatie? Dit is een product-/juridische keuze, niet
-   iets wat de extractie zelf mag beslissen.
+   iets wat de extractie zelf mag beslissen. Deze keuze staat los van de
+   extractie- en opslagvorm in dit document.
+7. **Publieke allergenenstatus en export:** een additief
+   `allergenStatus`/`priceVariants`-exportcontract is niet goedgekeurd. Tot die
+   aparte beslissing blijft export blokkeren en melden; dit ontwerp activeert
+   geen publieke kaartwijziging.
+8. **App-provider, model, budget en retentie:** de bronproeftoestemming en de
+   developer-prepaidtoestemming activeren geen app-side AI-provider. Modelkeuze,
+   maximaal kostenbudget, DPA/EU-retentie en eventuele betaalde fallback blijven
+   een aparte Product Owner-beslissing.
 
 ## Wat dit document niet doet
 
 - Het implementeert of migreert niets; de code blijft op
   `menu-extraction-output/v1` en `menu-extraction-result/v1`.
+- Het voegt geen prijsbewijsvalidator, schema-lezer of rollbackpad toe; die zijn
+  alleen als ontwerpregel en voorgestelde regressie beschreven.
 - Het wijzigt `data/menus.json`, de receipt- of concepttabellen niet.
 - Het voegt geen nieuw OCR-, browser- of providerplatform toe.
-- Het wijzigt #56 niet en lost de twee bekende integratieconflicten niet op.
+- Het wijzigt #56 niet en lost de drie bekende integratieconflicten niet op.
 - Het is geen bewijs dat een restaurantkaart compleet of actueel is.
-
-   menselijke stappen.

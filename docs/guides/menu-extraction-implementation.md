@@ -293,7 +293,30 @@ vóór enige modelaanroep:
   de probe. De test telt bewust geen items als kwaliteit; alleen de probe tegen
   de echte bron beslist over een bronversie.
 
-### 13.9 #56-compatibiliteit (alleen gelezen)
+### 13.9 Holdoutmeting en fail-closed fixture-isolatie (review 6248407225)
+
+- De vier door de Product Owner goedgekeurde openbare bronnen zijn eerst
+  capture-only gepind in `ops/benchmark/holdout-sources.json` en
+  `ops/benchmark/holdout-references.json`. `capture-menu-extraction-holdout-
+  references.js` schrijft uitsluitend die referentie (create-only) en bevat geen
+  parser-uitkomst, itemaantal of provider.
+- `probe-menu-extraction-holdout.js` leest daarna één keer via de echte
+  analyseketen en schrijft `ops/benchmark/holdout-evaluation.json`
+  (create-only). De uitkomsten zijn observaties: De Botanist 151 items/59
+  secties met kwaliteitsbeperkingen, Mr Moos en Colonia 0 items, Gauchos Breda
+  HTTP 404. Er is geen parserregel op basis van deze uitkomsten gewijzigd.
+- De holdout-guard (`acceptanceSetGuard.js`) kent `unused`, `evaluated_once` en
+  `used_for_tuning`. Een tweede evaluatie en een getunede bron in de holdout
+  worden geweigerd; een getunede bron moet naar representatief plus een nieuwe
+  holdout.
+- De browserfixture is fail-closed: `network-policy.js` is de enige policy voor
+  fetch, XHR, WebSocket, EventSource, sendBeacon en de CDP-laag. Onbekende
+  externe URLs, protocol-relative URLs, onbekende API-/schrijfroutes en niet-GET-
+  apprequests worden geweigerd en geregistreerd. Chromium gebruikt daarnaast
+  `--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE localhost`. Negatieve
+  VM-regressies bewijzen dat de native fetch/XHR niet wordt bereikt.
+
+### 13.10 #56-compatibiliteit (alleen gelezen)
 
 - `origin/feat/compact-source-flow-53` (PR #56, head `00f4151`) is read-only
   vergeleken vanuit dezelfde basis (`fc12bbc`). Een in-memory

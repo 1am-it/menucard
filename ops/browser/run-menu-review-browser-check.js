@@ -15,6 +15,7 @@ const { execFileSync } = require('node:child_process');
 
 const fixtures = require('./fixtures/menuReviewFixtures');
 const { fixtureBootstrap } = require('./lib/fixture-page');
+const { createNetworkGuard, enableFetchGuard, defaultAppOrigins } = require('./lib/network-policy');
 const {
   findBrowser,
   killTree,
@@ -34,11 +35,14 @@ const OUT_DIR = path.join(__dirname, 'output');
 const EVIDENCE_DIR = path.join(__dirname, 'evidence');
 const EVIDENCE_PATH = path.join(EVIDENCE_DIR, 'menu-review-browser-evidence.json');
 const PORT = Number(process.env.BROWSER_FIXTURE_PORT || 3137);
+const APP_ORIGINS = defaultAppOrigins(PORT);
 const BATCH_URL = `http://localhost:${PORT}/internal/source-triage/batch`;
 const BATCH_QUERY = `batch=${encodeURIComponent(fixtures.BATCH_ID)}`;
 
 const checks = [];
 const screenshotFiles = [];
+let networkGuard = null;
+let networkEvidence = null;
 
 function check(name, passed, detail) {
   checks.push({ name, passed: Boolean(passed), detail: detail === undefined ? null : String(detail) });
@@ -63,6 +67,8 @@ async function openRoute(cdp, url, readyExpression) {
   await navigate(cdp, url, readyExpression);
   const bootError = await evalJs(cdp, 'window.__FIXTURE_BOOT_ERROR__ || null');
   check(`fixture bootstrap without error (${url})`, !bootError, bootError || 'ok');
+  const violations = await evalJs(cdp, `(window.__FIXTURE_NETWORK_VIOLATIONS__ || []).filter((entry) => entry.phase === 'app')`);
+  check(`fixture network: no blocked app traffic (${url})`, violations.length === 0, JSON.stringify(violations.slice(0, 3)));
 }
 
 async function bodyText(cdp) {
@@ -281,8 +287,63 @@ function environment(browser) {
     browser: browser && browser.version ? browser.version.Browser : 'unknown',
     viewportHeights: [900],
     fixtureOnly: true,
+    networkGuard: 'in-page fetch/XHR/WebSocket/EventSource/beacon + CDP Fetch + DNS lockdown',
   };
 }
+
+// Deliberate negative probes. Every attempt must fail closed without reaching
+// the destination: the in-page guard covers fetch/XHR/WebSocket, and the CDP
+// layer covers an image subresource and frame navigation that bypass it. The
+// violations are expected in this phase only; any app-phase violation fails the
+// run through `networkGuard.appViolations()`.
+async function networkGuardScenario(cdp, guard) {
+  await setViewport(cdp, 1024, 900);
+  guard.setPhase('negative-probe');
+  await evalJs(cdp, `window.__FIXTURE_NETWORK_PHASE__ = 'negative-probe'`);
+  const result = await evalJs(cdp, `(async () => {
+    const out = {};
+    out.externalFetch = await fetch('https://unapproved.invalid/api/anything').then(() => 'unexpected', (error) => error.message);
+    out.protocolRelative = await fetch('//unapproved.invalid/api/anything').then(() => 'unexpected', (error) => error.message);
+    out.unknownWrite = await fetch('/api/internal/v1/menu-concepts', { method: 'POST' }).then(() => 'unexpected', (error) => error.message);
+    out.knownFixture = await fetch('/api/internal/v1/me').then((response) => response.status, (error) => 'error:' + error.message);
+    out.xhr = await new Promise((resolve) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onerror = () => resolve('xhr-error');
+      xhr.open('POST', '/api/internal/v1/menu-concepts');
+      xhr.send('{}');
+      setTimeout(() => resolve('xhr-timeout'), 1000);
+    });
+    out.websocket = await new Promise((resolve) => {
+      try { new WebSocket('ws://unapproved.invalid/socket'); resolve('unexpected'); }
+      catch (error) { resolve(error.message); }
+    });
+    const image = document.createElement('img');
+    image.src = 'https://unapproved.invalid/pixel.png';
+    document.body.appendChild(image);
+    const frame = document.createElement('iframe');
+    frame.src = 'https://unapproved.invalid/frame';
+    document.body.appendChild(frame);
+    await new Promise((resolve) => setTimeout(resolve, 700));
+    out.pageViolations = (window.__FIXTURE_NETWORK_VIOLATIONS__ || []).length;
+    return out;
+  })()`);
+  check('network guard: external fetch is blocked before native fetch', /fixture_network_blocked: external_origin/.test(result.externalFetch), result.externalFetch);
+  check('network guard: protocol-relative external URL is blocked', /fixture_network_blocked: external_origin/.test(result.protocolRelative), result.protocolRelative);
+  check('network guard: unknown local API write is blocked', /fixture_network_blocked: unknown_api_route/.test(result.unknownWrite), result.unknownWrite);
+  check('network guard: explicit fixture API still answers', result.knownFixture === 200, result.knownFixture);
+  check('network guard: XHR to an unknown API write is blocked', result.xhr === 'xhr-error', result.xhr);
+  check('network guard: external WebSocket is blocked', /fixture_network_blocked: external_origin/.test(result.websocket), result.websocket);
+  check('network guard: page-level violations are recorded', result.pageViolations >= 5, `violations=${result.pageViolations}`);
+
+  const cdpBlocked = guard.violations.filter((entry) => entry.phase === 'negative-probe' && entry.kind === 'cdp_fetch');
+  check('network guard: CDP blocks external subresource and frame navigation', cdpBlocked.length >= 2, JSON.stringify(cdpBlocked.slice(0, 5)));
+
+  await evalJs(cdp, `window.__FIXTURE_NETWORK_PHASE__ = 'app'`);
+  guard.setPhase('app');
+  const appViolations = guard.appViolations();
+  check('network guard: no unexpected CDP traffic during app scenarios', appViolations.length === 0, JSON.stringify(appViolations.slice(0, 5)));
+}
+
 
 function writeEvidence({ passed, head, dirty, error, browser }) {
   const evidence = {
@@ -296,10 +357,12 @@ function writeEvidence({ passed, head, dirty, error, browser }) {
     fixtures: Object.keys(fixtures.scenarios),
     checks,
     screenshots: screenshotFiles,
+    network: networkEvidence,
     error: error || null,
     limitations: [
       'Fixture evidence against the real UI components; it is not live integration, staging or production acceptance.',
       'The session and API responses are fictional and same-origin; no production Supabase project, credential or data is used.',
+      'Unknown external URLs, protocol-relative external URLs and unknown API/write routes are fail-closed. The negative probe deliberately attempts them and proves they never reach the destination.',
       'No source confirmation, concept save, export, provider call or workflow activation is performed.',
     ],
   };
@@ -325,7 +388,11 @@ async function main() {
     await cdp.ready;
     await cdp.send('Page.enable');
     await cdp.send('Runtime.enable');
-    await cdp.send('Page.addScriptToEvaluateOnNewDocument', { source: fixtureBootstrap(fixtures.scenarios) });
+    networkGuard = createNetworkGuard({ appOrigins: APP_ORIGINS, baseUrl: BATCH_URL });
+    await enableFetchGuard(cdp, networkGuard);
+    await cdp.send('Page.addScriptToEvaluateOnNewDocument', {
+      source: fixtureBootstrap(fixtures.scenarios, { appOrigins: APP_ORIGINS, baseUrl: BATCH_URL }),
+    });
 
     await reviewScenario(cdp);
     await readOnlyScenario(cdp);
@@ -338,6 +405,16 @@ async function main() {
     await responsiveScenario(cdp, 1024, 'dark');
     check('light and dark resolve to different background tokens', themeBackgrounds.light !== themeBackgrounds.dark, `${themeBackgrounds.light} / ${themeBackgrounds.dark}`);
     await keyboardScenario(cdp);
+    await networkGuardScenario(cdp, networkGuard);
+
+    const pageViolations = await evalJs(cdp, 'window.__FIXTURE_NETWORK_VIOLATIONS__ || []');
+    check('network guard: page recorded only deliberate blocked attempts', pageViolations.every((entry) => entry.phase === 'negative-probe'), JSON.stringify(pageViolations.filter((entry) => entry.phase !== 'negative-probe').slice(0, 5)));
+    networkEvidence = {
+      guard: 'in-page fetch/XHR/WebSocket/EventSource/beacon + CDP Fetch + DNS lockdown',
+      appViolations: networkGuard.appViolations(),
+      deliberateViolations: networkGuard.negativeViolations(),
+      pageViolations,
+    };
 
     const exceptions = cdp.takeEvents('Runtime.exceptionThrown');
     check('no uncaught browser exception', exceptions.length === 0, JSON.stringify(exceptions.slice(0, 3)));

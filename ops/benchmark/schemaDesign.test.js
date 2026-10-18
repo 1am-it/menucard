@@ -41,6 +41,16 @@ test('the design does not silently replace the shipped v1 contracts', () => {
   assert.equal(fs.existsSync(path.join(REPO_ROOT, 'src', 'lib', 'menuExtractionProductV2.js')), false);
 });
 
+test('the review clarifications are design-only: per-price evidence and visible rollback', () => {
+  const text = fs.readFileSync(DESIGN, 'utf8');
+  assert.match(text, /price_evidence_missing/);
+  assert.match(text, /eigen bewijsquote|per prijsbedrag/i);
+  assert.match(text, /unsupported_schema_version/);
+  assert.match(text, /niet stil negeren|zichtbaar niet-ondersteund/i);
+  assert.match(text, /geen prijsbewijsvalidator/i);
+  assert.equal(fs.existsSync(path.join(REPO_ROOT, 'src', 'lib', 'menuExtractionProductV2.js')), false);
+});
+
 test('the design adds no database migration in this branch', () => {
   const files = fs.readdirSync(MIGRATIONS).filter((name) => name.endsWith('.sql')).sort();
   assert.ok(files.length > 0);
