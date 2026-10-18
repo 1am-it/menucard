@@ -153,3 +153,88 @@ test('advanced fields are reported as unsupported by the current concept, not si
   };
   assert.deepEqual(unsupportedProductFields(advanced), ['priceVariants', 'supplementOf', 'allergens']);
 });
+function ledgerBudget(limit, costEurCents) {
+  const state = { remaining: limit, reserved: 0, calls: [] }
+  return {
+    get costEurCents() {
+      return costEurCents;
+    },
+    reserve(max) {
+      if (max > state.remaining) return false;
+      state.reserved = max;
+      return true;
+    },
+    settle(amount) {
+      state.calls.push(amount);
+      state.remaining -= amount === null ? state.reserved : amount;
+    },
+    get calls() {
+      return state.calls;
+    },
+    get remaining() {
+      return state.remaining;
+    },
+  };
+}
+
+test('REGRESSION (review P1): a known paid failure is booked, never settled as zero', async () => {
+  const invalid = createStructuredExtractionAdapter({ call: async () => ({ ...valid, confidence: 0.9 }) });
+  const guard = ledgerBudget(100, 40);
+  const schema = await runStructuredExtraction({ adapter: invalid, protocol, sources, limits, budget: guard });
+  assert.equal(schema.reason, 'schema_violation');
+  assert.equal(schema.budgetAccounting, 'settled_known_cost');
+  assert.deepEqual(guard.calls, [40]);
+
+  const throwing = createStructuredExtractionAdapter({ call: async () => { throw Object.assign(new Error('boom'), { code: 'provider_unavailable' }); } });
+  const throwingGuard = ledgerBudget(100, 40);
+  const error = await runStructuredExtraction({ adapter: throwing, protocol, sources, limits, budget: throwingGuard });
+  assert.equal(error.reason, 'provider_unavailable');
+  assert.deepEqual(throwingGuard.calls, [40]);
+
+  let aborted = false;
+  const slow = createStructuredExtractionAdapter({
+    call: ({ signal }) => new Promise(() => {
+      signal.addEventListener('abort', () => { aborted = true; });
+    }),
+  });
+  const timeoutGuard = ledgerBudget(100, 40);
+  const timedOut = await runStructuredExtraction({ adapter: slow, protocol, sources, limits: { ...limits, callTimeoutMs: 5 }, budget: timeoutGuard });
+  assert.equal(timedOut.reason, 'timeout');
+  assert.equal(aborted, true);
+  assert.deepEqual(timeoutGuard.calls, [40]);
+});
+
+test('REGRESSION (review P1): an unknown cost keeps the whole reservation charged and cannot be reused', async () => {
+  const throwing = createStructuredExtractionAdapter({ call: async () => { throw Object.assign(new Error('boom'), { code: 'provider_unavailable' }); } });
+  const guard = ledgerBudget(100, undefined);
+  const first = await runStructuredExtraction({ adapter: throwing, protocol, sources, limits, budget: guard });
+  assert.equal(first.reason, 'provider_unavailable');
+  assert.equal(first.budgetAccounting, 'charges_reserved_unknown_cost');
+  assert.deepEqual(guard.calls, [null]);
+  assert.equal(guard.remaining, 0);
+
+  const second = await runStructuredExtraction({ adapter: throwing, protocol, sources, limits, budget: guard });
+  assert.equal(second.reason, 'budget_exceeded');
+  assert.deepEqual(guard.calls, [null]);
+});
+
+test('REGRESSION (review P1): an asynchronous budget guard is refused explicitly, never treated as granted', async () => {
+  let called = 0;
+  const adapter = createStructuredExtractionAdapter({ call: async () => { called += 1; return valid; } });
+  const asyncReserve = { costEurCents: 10, reserve: async () => true, settle: () => {} };
+  const refused = await runStructuredExtraction({ adapter, protocol, sources, limits, budget: asyncReserve });
+  assert.equal(refused.reason, 'async_budget_guard_unsupported');
+  assert.equal(called, 0);
+
+  const asyncSettle = { costEurCents: 10, reserve: () => true, settle: async () => {} };
+  const unsettled = await runStructuredExtraction({ adapter, protocol, sources, limits, budget: asyncSettle });
+  assert.equal(unsettled.ok, false);
+  assert.equal(unsettled.reason, 'async_budget_guard_unsupported');
+  assert.equal(unsettled.budgetAccounting, 'async_guard_unsupported');
+
+  const throwingSettle = { costEurCents: 10, reserve: () => true, settle: () => { throw new Error('ledger down'); } };
+  const unbooked = await runStructuredExtraction({ adapter, protocol, sources, limits, budget: throwingSettle });
+  assert.equal(unbooked.ok, false);
+  assert.equal(unbooked.reason, 'budget_settle_failed');
+  assert.equal(unbooked.output, undefined);
+});

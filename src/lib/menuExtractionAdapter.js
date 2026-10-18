@@ -98,8 +98,52 @@ function reserveBudget(budget, maxCost) {
   } catch {
     return { ok: false, reason: 'budget_exceeded' };
   }
+  // The budget guard is a synchronous ledger. An asynchronous reserve/settle
+  // contract is refused explicitly instead of being treated as granted and
+  // silently never awaited (which would allow unlimited spend).
+  if (reservation && typeof reservation.then === 'function') {
+    return { ok: false, reason: 'async_budget_guard_unsupported' };
+  }
   if (reservation === false || (reservation && reservation.ok === false)) return { ok: false, reason: 'budget_exceeded' };
   return { ok: true, maxCost, reservation };
+}
+
+/** The provider's reported actual cost, or null when it is unknown. */
+function knownCost(budget) {
+  return budget && Number.isInteger(budget.costEurCents) && budget.costEurCents >= 0 ? budget.costEurCents : null;
+}
+
+/**
+ * Books the call's cost on EVERY path that actually invoked the provider.
+ * - a known cost is booked exactly;
+ * - an unknown cost (`null`) keeps the whole reservation charged, because a
+ *   paid failure is not free and the same budget must not be reused;
+ * - a missing/throwing/asynchronous settlement is reported, never silently
+ *   treated as settled.
+ * Returns `{ ok, mode }`; callers must not report a successful extraction if
+ * `ok` is false.
+ */
+function settleBudget(budget, amount) {
+  if (!budget || typeof budget.settle !== 'function') return { ok: true, mode: 'not_applicable' };
+  let result;
+  try {
+    result = budget.settle(amount);
+  } catch {
+    return { ok: false, mode: 'settle_failed' };
+  }
+  if (result && typeof result.then === 'function') return { ok: false, mode: 'async_guard_unsupported' };
+  return { ok: true, mode: amount === null ? 'charges_reserved_unknown_cost' : 'settled_known_cost' };
+}
+
+function failedCall(reason, budget, extra = {}) {
+  const booked = settleBudget(budget, knownCost(budget));
+  return {
+    ok: false,
+    reason,
+    budgetAccounting: booked.mode,
+    ...(booked.ok ? {} : { budgetFailed: true }),
+    ...extra,
+  };
 }
 
 /**
@@ -155,33 +199,45 @@ async function runStructuredExtraction({ adapter, protocol, sources, limits, bud
       timeout,
     ]);
     if (estimateTokens(output) > effective.maxOutputTokens) {
-      if (typeof budget.settle === 'function') budget.settle(0);
-      return { ok: false, reason: 'output_limit' };
+      return failedCall('output_limit', budget);
     }
     if (output && output.coverage && Number.isInteger(output.coverage.pagesRead) && output.coverage.pagesRead > effective.maxPages) {
-      if (typeof budget.settle === 'function') budget.settle(0);
-      return { ok: false, reason: 'page_limit' };
+      return failedCall('page_limit', budget);
     }
     const problems = validateStructuredOutput(output, sourceList);
     if (problems.length > 0) {
-      if (typeof budget.settle === 'function') budget.settle(0);
-      return { ok: false, reason: 'schema_violation', problems };
+      return failedCall('schema_violation', budget, { problems });
     }
-    // Unknown actual cost must never be treated as zero spend.
+    // Unknown actual cost must never be treated as zero spend: the reservation
+    // stays charged, so the same budget cannot fund a second call.
     if (!Number.isInteger(budget.costEurCents) || budget.costEurCents < 0) {
-      if (typeof budget.settle === 'function') budget.settle(0);
-      return { ok: false, reason: 'cost_unknown' };
+      return failedCall('cost_unknown', budget);
     }
     const actualCost = budget.costEurCents;
     if (actualCost > effective.maxCostEurCents) {
-      if (typeof budget.settle === 'function') budget.settle(actualCost);
-      return { ok: false, reason: 'budget_exceeded' };
+      return failedCall('budget_exceeded', budget);
     }
-    if (typeof budget.settle === 'function') budget.settle(actualCost);
-    return { ok: true, output, meta: { adapterVersion: adapter.version, provider: adapter.provider, model: adapter.model, instructionHash: protocol.hash, maxCostEurCents: effective.maxCostEurCents, actualCostEurCents: actualCost } };
+    const booked = settleBudget(budget, actualCost);
+    if (!booked.ok) {
+      // A valid result whose cost could not be booked is not a success.
+      return { ok: false, reason: booked.mode === 'async_guard_unsupported' ? 'async_budget_guard_unsupported' : 'budget_settle_failed', budgetAccounting: booked.mode, meta: { actualCostEurCents: actualCost } };
+    }
+    return {
+      ok: true,
+      output,
+      meta: {
+        adapterVersion: adapter.version,
+        provider: adapter.provider,
+        model: adapter.model,
+        instructionHash: protocol.hash,
+        maxCostEurCents: effective.maxCostEurCents,
+        actualCostEurCents: actualCost,
+        budgetAccounting: booked.mode,
+      },
+    };
   } catch (err) {
-    if (typeof budget.settle === 'function') budget.settle(0);
-    return { ok: false, ...(timedOut ? { recoverable: true, reason: 'timeout' } : classifyAdapterError(err)) };
+    const classified = timedOut ? { recoverable: true, reason: 'timeout' } : classifyAdapterError(err);
+    return failedCall(classified.reason, budget, classified.recoverable ? { recoverable: true } : {});
   } finally {
     clearTimeout(timeoutHandle);
     if (!timedOut) controller.abort();
