@@ -74,6 +74,12 @@ test('the probe stays read-only, bounded and limited to the two named public sou
   assert.match(source, /require\('\.\.\/\.\.\/src\/lib\/sourceAnalysisPipeline'\)/);
   assert.match(source, /require\('\.\.\/\.\.\/src\/lib\/safeOutboundFetch'\)/);
   assert.match(source, /require\('\.\.\/\.\.\/src\/lib\/menuSourceComparison'\)/);
+  // The pass/fail rule is the unit-tested verdict module; the probe must not
+  // grow its own looser check that could ignore a surplus row again.
+  assert.match(source, /probeVerdict/);
+  assert.equal(/function hasDifference/.test(source), false);
+  assert.match(source, /sourceHasDifference/);
+
   // The source list is closed; a new URL needs an explicit decision.
   assert.match(source, /\['all', 'smelt', 'blossem'\]/);
   assert.equal(PROBE_PATH.includes('scripts'), true);

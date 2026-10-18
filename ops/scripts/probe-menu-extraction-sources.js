@@ -12,14 +12,16 @@
 //   node ops/scripts/probe-menu-extraction-sources.js --source=smelt
 //   node ops/scripts/probe-menu-extraction-sources.js --source=blossem
 //
-// Exit code 1 when a source hash changed or any item is missed, extra,
-// mispriced, wrongly linked or duplicated. A count alone is never a pass.
+// Exit code 1 when a source hash changed, a comparison row is unaccounted for,
+// or any item is missed, extra, mispriced, wrongly linked or duplicated. A
+// count alone is never a pass.
 
 const crypto = require('node:crypto');
 const path = require('node:path');
 const { analyzeSourceUrl } = require('../../src/lib/sourceAnalysisPipeline');
 const { fetchWebsiteSafely } = require('../../src/lib/safeOutboundFetch');
 const { compareMenuSource } = require('../../src/lib/menuSourceComparison');
+const { sourceHasDifference } = require('../benchmark/probeVerdict');
 const references = require('../benchmark/source-references.json');
 
 const MAX_PROBE_BYTES = 15 * 1024 * 1024;
@@ -54,18 +56,6 @@ function sourceReport(label, reference, analysis, bytesSha256) {
   };
 }
 
-function hasDifference(report) {
-  return (
-    report.bytesSha256Matches === false ||
-    report.contentHashMatches === false ||
-    report.missing.length > 0 ||
-    report.extra.length > 0 ||
-    report.priceMismatches.length > 0 ||
-    report.categoryMismatches.length > 0 ||
-    report.duplicates.length > 0
-  );
-}
-
 async function main() {
   const selected = argSource(process.argv.slice(2));
   const keys = Object.keys(references.sources).filter((key) => selected === 'all' || selected === key);
@@ -83,13 +73,18 @@ async function main() {
 
   process.stdout.write(JSON.stringify({ capturedAt: references.capturedAt, sources: reports }, null, 2) + '\n');
   for (const report of reports) {
+    const accounting = report.ok === false
+      ? 'no comparison'
+      : `rows ${report.accounting.expected.accounted}/${report.accounting.expected.total} expected, `
+        + `${report.accounting.actual.accounted}/${report.accounting.actual.total} actual`
+        + `${report.accounting.expected.balanced && report.accounting.actual.balanced ? '' : ' UNACCOUNTED'}`;
     process.stderr.write(
       `${report.label}: ${report.ok === false
         ? `FAILED (${report.errorReason})`
-        : `expected ${report.expectedItems}, actual ${report.actualItems}, matched ${report.matched}, missing ${report.missing.length}, extra ${report.extra.length}, price ${report.priceMismatches.length}, category ${report.categoryMismatches.length}, duplicates ${report.duplicates.length}`}\n`,
+        : `expected ${report.expectedItems}, actual ${report.actualItems}, matched ${report.matched}, missing ${report.missing.length}, extra ${report.extra.length}, price ${report.priceMismatches.length}, category ${report.categoryMismatches.length}, duplicates ${report.duplicates.length}; ${accounting}`}\n`,
     );
   }
-  if (reports.some((report) => report.ok === false || hasDifference(report))) process.exitCode = 1;
+  if (reports.some((report) => sourceHasDifference(report))) process.exitCode = 1;
 }
 
 main().catch((err) => {

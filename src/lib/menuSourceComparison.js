@@ -1,9 +1,18 @@
 'use strict';
 
 // Compares one parsed menu source against a controlled reference for that
-// same source (#59, Delivery Lead review 6246984520). It reports missed,
-// extra, mispriced and wrongly-linked items explicitly — it never computes a
-// single "quality score" and never treats an equal item count as proof.
+// same source (#59, Delivery Lead reviews 6246984520 and 6247746317). It
+// reports missed, extra, mispriced and wrongly-linked items explicitly — it
+// never computes a single "quality score" and never treats an equal item count
+// as proof.
+//
+// Strict accounting: every reference row is explained exactly once (matched,
+// price error, wrong section, or missing) and every actual row is explained
+// exactly once (matched, price error, wrong section, or surplus). A row that
+// remains after matching is always surplus — it is never discarded because a
+// same-name/same-price row exists somewhere else in the reference. Matching
+// consumes rows one by one, so legitimate repetitions in the reference are
+// respected as a multiset.
 //
 // Pure and browser-safe: the caller supplies both sides. A reference is a
 // controlled observation of the stated source version, not ground truth for a
@@ -77,6 +86,13 @@ function rowKey(row) {
   return `${row.key}\u0000${row.price}\u0000${row.pathKey}`;
 }
 
+/** Counts rows per exact name+price+section key (multiset accounting). */
+function countRows(rows) {
+  const counts = new Map();
+  for (const row of rows) counts.set(rowKey(row), (counts.get(rowKey(row)) || 0) + 1);
+  return counts;
+}
+
 /**
  * @returns {{
  *   label: string,
@@ -88,6 +104,10 @@ function rowKey(row) {
  *   priceMismatches: Array,
  *   categoryMismatches: Array,
  *   duplicates: Array,
+ *   accounting: {
+ *     expected: { total: number, matched: number, missing: number, priceMismatch: number, categoryMismatch: number, accounted: number, balanced: boolean },
+ *     actual: { total: number, matched: number, extra: number, priceMismatch: number, categoryMismatch: number, accounted: number, balanced: boolean },
+ *   },
  * }}
  */
 function compareMenuSource(reference, menus) {
@@ -142,20 +162,32 @@ function compareMenuSource(reference, menus) {
     .filter((_row, index) => !consumedByExpected.has(index))
     .map((row) => ({ name: row.name, price: row.price, path: row.path }));
 
+  // Every remaining actual row is surplus. Classifying it away because a
+  // same-name/same-price row exists elsewhere in the reference would hide a
+  // dish that sits in an extra section or is repeated once too often.
   const extra = actual
     .filter((_row, index) => !consumed.has(index))
-    .filter((row) => !expected.some((expectedRow) => expectedRow.key === row.key && expectedRow.price === row.price))
     .map((row) => ({ name: row.name, price: row.price, path: row.path }));
 
+  // A repetition is only a duplicate when it exceeds what the reference
+  // legitimately repeats for that exact name+price+section. One occurrence on
+  // each side is covered by the exact match above.
   const duplicates = [];
-  const seen = new Map();
-  for (const row of actual) seen.set(rowKey(row), (seen.get(rowKey(row)) || 0) + 1);
-  for (const [key, count] of seen) {
-    if (count > 1) {
+  const expectedCounts = countRows(expected);
+  const actualCounts = countRows(actual);
+  for (const [key, count] of actualCounts) {
+    const expectedCount = expectedCounts.get(key) || 0;
+    if (count > 1 && count > expectedCount) {
       const row = actual.find((candidate) => rowKey(candidate) === key);
-      duplicates.push({ name: row.name, price: row.price, path: row.path, count });
+      duplicates.push({ name: row.name, price: row.price, path: row.path, count, expectedCount });
     }
   }
+
+  // The probe refuses a green result unless both sides balance. These numbers
+  // are derived from the same lists the caller inspects, so a future change
+  // that silently drops a row breaks the invariant instead of hiding it.
+  const expectedAccounted = matched + priceMismatches.length + categoryMismatches.length + missing.length;
+  const actualAccounted = matched + priceMismatches.length + categoryMismatches.length + extra.length;
 
   return {
     label: bounded(reference && reference.label, 160) || 'bron',
@@ -167,6 +199,26 @@ function compareMenuSource(reference, menus) {
     priceMismatches,
     categoryMismatches,
     duplicates,
+    accounting: {
+      expected: {
+        total: expected.length,
+        matched,
+        missing: missing.length,
+        priceMismatch: priceMismatches.length,
+        categoryMismatch: categoryMismatches.length,
+        accounted: expectedAccounted,
+        balanced: expectedAccounted === expected.length,
+      },
+      actual: {
+        total: actual.length,
+        matched,
+        extra: extra.length,
+        priceMismatch: priceMismatches.length,
+        categoryMismatch: categoryMismatches.length,
+        accounted: actualAccounted,
+        balanced: actualAccounted === actual.length,
+      },
+    },
   };
 }
 
