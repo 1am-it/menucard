@@ -63,9 +63,15 @@ test('unsupported block layouts are named with a reason, not silently omitted', 
 
 test('the committed comparison is the measured one, not a forecast', () => {
   assert.equal(comparison.referenceItems, reference.referenceItemCount);
-  assert.equal(comparison.parserItems, 196);
+  // Review 6249915021 P1: "Monkey 47 10.0" is structurally identical to a
+  // glass/bottle row without a separator, so the parser now reports that line
+  // as ambiguous instead of guessing the name number. The controlled
+  // reference sections and their matched/missing/extra totals are unchanged;
+  // only the unlinked bucket lost that one item (196/96 -> 195/95).
+  assert.equal(comparison.parserItems, 195);
   assert.deepEqual(comparison.totals, { matched: 95, missing: 46, extra: 5, priceMismatch: 0 });
-  assert.equal(comparison.unmapped.length, 96);
+  assert.equal(comparison.unmapped.length, 95);
+  assert.equal(comparison.unmapped.some((entry) => entry.name === 'Monkey 47'), false);
   const sections = Object.keys(comparison.sections);
   assert.equal(sections.length, reference.sections.length);
 });

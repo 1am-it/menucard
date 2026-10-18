@@ -77,22 +77,38 @@ test('isPriceToken: recognizes Dutch/English price shapes, rejects percentages a
   assert.equal(isPriceToken(null), false)
 })
 
-test('classifyNumericEvidence: quantity/unit and trailing-amount evidence, never a bare numeric item as price', () => {
+test('classifyNumericEvidence: quantity/unit and leading-zero evidence stay, while integer, decimal and comma amounts get one and the same ambiguity decision', () => {
   const words = (...texts) => texts.map((text) => ({ text }))
+  // Group words into the pdfjs text items they came from; the grouping may
+  // not change the ambiguity decision either.
+  const grouped = (...items) =>
+    items.flatMap((item, itemIndex) => item.split(/\s+/).filter(Boolean).map((text) => ({ text, itemIndex })))
   // A portion with its unit before the real amount is a quantity.
   assert.deepEqual([...classifyNumericEvidence(words('Oesters', '6', 'st.', '24.00')).nameEmbedded], [1])
   // A serving label after a price without a later amount is not a quantity.
   assert.deepEqual([...classifyNumericEvidence(words('Wijn', '6.5', 'glas')).nameEmbedded], [])
-  // Monkey 47 before the real amount is name text, never price 47.
-  assert.deepEqual([...classifyNumericEvidence(words('Monkey', '47', '10.00')).nameEmbedded], [1])
-  // A decimal that could be a second (glass) amount is ambiguous, not claimed.
-  assert.deepEqual([...classifyNumericEvidence(words('Wijn', '6.5', '25.0')).ambiguous], [1])
+  // A leading 0.0 alcohol-free marker opens the name.
+  assert.deepEqual([...classifyNumericEvidence(words('0.0', 'Regrets', '7.50')).nameEmbedded], [0])
+  // Review 6249915021 P1: neither the amount's writing style nor the pdfjs
+  // text-item grouping may decide whether a row is ambiguous. "6", "6.0" and
+  // "6,00" are exactly the same evidence, split, name-glued or whole-line-glued.
+  for (const amount of ['6', '6.0', '6,00']) {
+    for (const items of [['Wijn', amount, '25'], [`Wijn ${amount}`, '25'], [`Wijn ${amount} 25`]]) {
+      const evidence = classifyNumericEvidence(grouped(...items))
+      const label = `${amount} in ${JSON.stringify(items)}`
+      assert.deepEqual([...evidence.nameEmbedded], [], label)
+      assert.deepEqual([...evidence.ambiguous], [1], label)
+    }
+  }
+  // Without grouping metadata there is no proof: "Monkey 47 10.00" and a
+  // glass/bottle row have the same layout, so neither reading is claimed.
+  const nameNumber = classifyNumericEvidence(words('Monkey', '47', '10.00'))
+  assert.deepEqual([...nameNumber.nameEmbedded], [])
+  assert.deepEqual([...nameNumber.ambiguous], [1])
   // An explicit variant sequence is never ambiguous.
   const variant = classifyNumericEvidence(words('Wijn', '6.5', '/', '25.0'))
   assert.deepEqual([...variant.nameEmbedded], [])
   assert.deepEqual([...variant.ambiguous], [])
-  // A leading 0.0 alcohol-free marker opens the name.
-  assert.deepEqual([...classifyNumericEvidence(words('0.0', 'Regrets', '7.50')).nameEmbedded], [0])
 })
 
 test('pureSectionMarkerNames: matches a whole item of "// NAME" (prefix-only, no closing "//" — the real, verified format), never a substring inside ordinary text', () => {
@@ -441,11 +457,13 @@ test('REGRESSION (review 6249303096 P1): two price variants on the next baseline
   assert.deepEqual(items[0].priceVariants, [{ label: null, price: '6.5' }, { label: null, price: '25.0' }])
 })
 
-test('REGRESSION (review 6249303096 P1): a number inside a name-bearing text item is never a price when a separately positioned price is present', () => {
+test('REGRESSION (review 6249303096 P1 + 6249915021 P1): an unproven number between a name and a separately positioned price is reported, never claimed as price or as name text; explicit evidence still parses', () => {
   const page = {
     pageNumber: 1,
     lines: [
       { y: 400, items: [{ str: '// DRANKEN', x: 20, y: 400 }] },
+      // "Monkey 47" glued by pdfjs is still indistinguishable from a
+      // glass/bottle row: a name number and an amount column look the same.
       { y: 380, items: [{ str: 'Monkey 47', x: 20, y: 380 }, { str: '10.0', x: 100, y: 380 }] },
       { y: 360, items: [{ str: 'Ceremonial Matcha 0.0', x: 20, y: 360 }, { str: '5.5', x: 100, y: 360 }] },
       { y: 340, items: [{ str: 'Proeverij van 4 Kazen van', x: 20, y: 340 }, { str: '14.5', x: 100, y: 340 }] },
@@ -455,14 +473,19 @@ test('REGRESSION (review 6249303096 P1): a number inside a name-bearing text ite
       { y: 300, items: [{ str: 'Fictief Broodje 3.00', x: 20, y: 300 }] },
     ],
   }
-  const { categories } = structurePdfLinesIntoMenu([page])
+  const { categories, layout } = structurePdfLinesIntoMenu([page])
+  // A unit ("6 st."), a leading 0.0 marker, a name word after the number and a
+  // single trailing amount stay provable. The bare "Monkey 47" + "10.0" row
+  // does not: it is reported instead of inventing either reading.
   assert.deepEqual(categories[0].items.map((item) => [item.name, item.price]), [
-    ['Monkey 47', '10.0'],
     ['Ceremonial Matcha 0.0', '5.5'],
     ['Proeverij van 4 Kazen van', '14.5'],
     ['Pornstar Martini Boom 6 st.', '65.0'],
     ['Fictief Broodje', '3.00'],
   ])
+  assert.equal(categories.some((category) => category.items.some((item) => item.price === '47' || item.name === 'Monkey 47')), false)
+  assert.equal(layout.ambiguousPriceLines, 1)
+  assert.equal(layout.unlinkedPriceLines, 0)
 })
 
 test('REGRESSION (review P1): an identical, overlapping second text layer is ignored instead of merging two dish names', () => {
@@ -615,21 +638,23 @@ test('plain sub-headings below a menu heading keep their parent path, and an arr
   assert.equal(layout.arrangementLines, 1)
 })
 
-test('REGRESSION (review 6249657793 P1): name/portion numbers are name evidence whether pdfjs glues or splits them, and a real amount column stays the price', () => {
+test('REGRESSION (review 6249657793 P1 + 6249915021 P1): portions with a unit and a leading 0.0 stay name evidence, while a bare name/number pair is reported instead of guessed, glued or split', () => {
   const page = {
     pageNumber: 1,
     lines: [
       { y: 400, items: [{ str: '// DRANKEN', x: 20, y: 400 }] },
-      // Split by pdfjs: name, gin number and real amount as three items.
+      // Split by pdfjs: name, name number and real amount as three items.
+      // A gin number and a glass amount have this exact same shape, so no
+      // reading is claimed (review 6249915021 P1).
       { y: 380, items: [{ str: 'Monkey', x: 20, y: 380 }, { str: '47', x: 60, y: 380 }, { str: '10.00', x: 120, y: 380 }] },
-      // Glued by pdfjs: the same name and gin number in one item.
+      // Glued by pdfjs: the same unproven shape, same decision.
       { y: 360, items: [{ str: 'Monkey 47', x: 20, y: 360 }, { str: '10.00', x: 120, y: 360 }] },
-      // Split portion with its unit, then the real amount.
+      // Split portion with its unit: the unit is explicit local evidence.
       { y: 340, items: [{ str: 'Oesters', x: 20, y: 340 }, { str: '6', x: 60, y: 340 }, { str: 'st.', x: 75, y: 340 }, { str: '24.00', x: 120, y: 340 }] },
       { y: 320, items: [{ str: 'Oesters 6 st.', x: 20, y: 320 }, { str: '24.00', x: 120, y: 320 }] },
       // Split alcohol-free marker: the leading number starts the name.
       { y: 300, items: [{ str: '0.0', x: 20, y: 300 }, { str: 'Regrets', x: 50, y: 300 }, { str: '7.50', x: 120, y: 300 }] },
-      // A quantity without unit text is still name evidence, not a price.
+      // A bare quantity without unit text is not proven: report the row.
       { y: 280, items: [{ str: 'Oesters', x: 20, y: 280 }, { str: '6', x: 60, y: 280 }, { str: '24.00', x: 120, y: 280 }] },
       // A real integer amount keeps working.
       { y: 260, items: [{ str: 'Soep', x: 20, y: 260 }, { str: '8', x: 120, y: 260 }] },
@@ -637,19 +662,111 @@ test('REGRESSION (review 6249657793 P1): name/portion numbers are name evidence 
   }
   const { categories, layout } = structurePdfLinesIntoMenu([page])
   assert.deepEqual(categories.flatMap((category) => category.items.map((item) => [item.name, item.price, item.priceStatus])), [
-    ['Monkey 47', '10.00', 'known'],
-    ['Monkey 47', '10.00', 'known'],
     ['Oesters 6 st.', '24.00', 'known'],
     ['Oesters 6 st.', '24.00', 'known'],
     ['0.0 Regrets', '7.50', 'known'],
-    ['Oesters 6', '24.00', 'known'],
     ['Soep', '8', 'known'],
   ])
-  // No invented "st." item and no bogus known price 47 or 6 anywhere.
-  assert.equal(categories.some((category) => category.items.some((item) => item.name === 'st.' || ['47', '6'].includes(item.price))), false)
-  assert.equal(layout.ambiguousPriceLines, 0)
+  // No invented "st." item, no bogus known price 47/6 and no invented name.
+  assert.equal(categories.some((category) => category.items.some((item) => item.name === 'st.' || item.name === 'Monkey 47' || item.name === 'Oesters 6' || ['47', '6'].includes(item.price))), false)
+  assert.equal(layout.ambiguousPriceLines, 3)
   assert.equal(layout.unlinkedPriceLines, 0)
   assert.equal(layout.unrecognizedHeadingLines, 0)
+})
+
+test('REGRESSION (review 6249915021 P1): "Wijn 6 25", "Wijn 6.0 25.0" and "Wijn 6,00 25,00" get one identical ambiguity outcome for split items, a name-glued number and a whole-line merge — never a silent name or known price', () => {
+  const run = (items) => {
+    const { categories, layout } = structurePdfLinesIntoMenu([
+      {
+        pageNumber: 1,
+        lines: [
+          { y: 400, items: [{ str: '// DRANKEN', x: 20, y: 400 }] },
+          { y: 380, items },
+        ],
+      },
+    ])
+    return {
+      items: categories.flatMap((category) => category.items.map((item) => [item.name, item.price, item.priceStatus])),
+      ambiguousPriceLines: layout.ambiguousPriceLines,
+      unlinkedPriceLines: layout.unlinkedPriceLines,
+    }
+  }
+  const shapesFor = (second, third) => ({
+    // Split by pdfjs, the reviewer's exact repro geometry and a near variant.
+    split: run([{ str: 'Wijn', x: 20, y: 380 }, { str: second, x: 100, y: 380 }, { str: third, x: 160, y: 380 }]),
+    splitNearName: run([{ str: 'Wijn', x: 20, y: 380 }, { str: second, x: 60, y: 380 }, { str: third, x: 120, y: 380 }]),
+    // Two widely separated amount columns are still two unproven amounts.
+    splitFarColumns: run([{ str: 'Wijn', x: 20, y: 380 }, { str: second, x: 100, y: 380 }, { str: third, x: 220, y: 380 }]),
+    // A number glued into the name item is not proof: pdfjs also merges a name
+    // and a nearby amount into one item.
+    gluedNameNumber: run([{ str: `Wijn ${second}`, x: 20, y: 380 }, { str: third, x: 160, y: 380 }]),
+    // pdfjs merged the whole row: the grouping proves nothing.
+    gluedWholeLine: run([{ str: `Wijn ${second} ${third}`, x: 20, y: 380 }]),
+  })
+  const spellings = [['6', '25'], ['6.0', '25.0'], ['6,00', '25,00']]
+  const byShape = new Map()
+  for (const [second, third] of spellings) {
+    for (const [shape, outcome] of Object.entries(shapesFor(second, third))) {
+      if (!byShape.has(shape)) byShape.set(shape, [])
+      byShape.get(shape).push(JSON.stringify(outcome))
+    }
+  }
+  // The amount's notation never changes the safety decision for one shape.
+  for (const [shape, outcomes] of byShape) assert.equal(new Set(outcomes).size, 1, shape)
+
+  const expected = {
+    split: { items: [], ambiguousPriceLines: 1, unlinkedPriceLines: 0 },
+    splitNearName: { items: [], ambiguousPriceLines: 1, unlinkedPriceLines: 0 },
+    splitFarColumns: { items: [], ambiguousPriceLines: 1, unlinkedPriceLines: 0 },
+    gluedNameNumber: { items: [], ambiguousPriceLines: 1, unlinkedPriceLines: 0 },
+    gluedWholeLine: { items: [], ambiguousPriceLines: 1, unlinkedPriceLines: 0 },
+  }
+  assert.deepEqual(shapesFor('6', '25'), expected)
+})
+
+test('REGRESSION (review 6249915021 P1): explicit units, a separator, a single integer price and multiple dishes/columns keep their proven behaviour', () => {
+  const page = {
+    pageNumber: 1,
+    lines: [
+      { y: 400, items: [{ str: '// ETEN', x: 20, y: 400 }, { str: '// DRANKEN', x: 220, y: 400 }] },
+      {
+        y: 380,
+        items: [
+          { str: 'Oesters', x: 20, y: 380 },
+          { str: '6', x: 60, y: 380 },
+          { str: 'st.', x: 75, y: 380 },
+          { str: '24', x: 100, y: 380 },
+          { str: 'Wijn A', x: 220, y: 380 },
+          { str: '6.5', x: 300, y: 380 },
+          { str: '/', x: 320, y: 380 },
+          { str: '25.0', x: 340, y: 380 },
+        ],
+      },
+      {
+        y: 360,
+        items: [
+          { str: 'Soep', x: 20, y: 360 },
+          { str: '8', x: 100, y: 360 },
+          { str: 'Wijn B', x: 220, y: 360 },
+          { str: '7.5', x: 300, y: 360 },
+          { str: '/', x: 320, y: 360 },
+          { str: '28.0', x: 340, y: 360 },
+        ],
+      },
+    ],
+  }
+  const { categories, layout } = structurePdfLinesIntoMenu([page])
+  const byName = Object.fromEntries(categories.map((category) => [category.name, category.items.map((item) => [item.name, item.price, item.priceStatus, item.priceText])]))
+  assert.deepEqual(byName.ETEN, [
+    ['Oesters 6 st.', '24', 'known', undefined],
+    ['Soep', '8', 'known', undefined],
+  ])
+  assert.deepEqual(byName.DRANKEN, [
+    ['Wijn A', null, 'multiple_undecomposed', '6.5 / 25.0'],
+    ['Wijn B', null, 'multiple_undecomposed', '7.5 / 28.0'],
+  ])
+  assert.equal(layout.ambiguousPriceLines, 0)
+  assert.equal(layout.unlinkedPriceLines, 0)
 })
 
 test('REGRESSION (review 6249657793 P1): two dishes on one row without page anchors, multiple columns, explicit glass/bottle variants and supplements stay safe', () => {

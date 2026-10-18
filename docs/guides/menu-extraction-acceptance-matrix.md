@@ -1,8 +1,9 @@
 # Menu-extractie — acceptatiematrix #59
 
 Status: **ontwikkelaarsbewijs, geen onafhankelijke acceptatie en geen release.**
-Datum: 2026-10-18, bijgewerkt na Delivery Lead-review 6249657793 (eerdere
-herstelronde: 6248740792). Issue #59, branch `feat/menu-extraction-59`, PR #60.
+Datum: 2026-10-18, bijgewerkt na Delivery Lead-review 6249915021 (eerdere
+herstelrondes: 6249657793, 6248740792). Issue #59, branch
+`feat/menu-extraction-59`, PR #60.
 Protocol: `MENU-EXTRACTION.md` v0.2, SHA-256
 `15510b4c0b74fee722ac2c51a3f40aa21b03e0161ccffdcb2008f3d27350b762`.
 
@@ -29,10 +30,10 @@ staat dat als `geblokkeerd` of `niet ondersteund`, niet als groen.
 | 3 | Smelt Breda: echte PDF-inhoud getest; gevonden PDF + 0 items is geen succes; gerechten, prijzen, dekking vergeleken | `node ops/scripts/probe-menu-extraction-sources.js --source=smelt`; `src/lib/pdfMenuStructuring.test.js`; qualitygate | `REP-PDF-001` / `REP-BRANCH-002`: PDF 550738 bytes, bytes `4445a101…27f8`, content `24f23cbd…8a845`, 2 pagina's | 37 referentierijen exact; 8 secties; 0 gemist/extra/prijs/koppeling/duplicaat; supplementen/arrangement expliciet gemeld; nul items nooit succes | probe exit 0: 37/37, 8 secties, alle verschillen 0, boekhouding 37/37; 7 supplementregels, 1 arrangementregel en 1 prijsachtige beschrijvingsregel gemeld | **uitgevoerd met beperking** |
 | 4 | Blossem: lunch/diner, rubrieken en items volgen echte bronrelaties; onzekerheid uitvoerbaar; geen vast aantal | `node ops/scripts/probe-menu-extraction-sources.js --source=blossem`; `src/lib/htmlMenuVariants.test.js`; `src/lib/menuExtractionQuality.test.js`; browserfixture | `REP-ACCORDION-002` / `REP-ARRANGEMENT-002`: HTML 40615 bytes, bytes `da5c632f…0c38`; fictieve reviewfixture voor de UI | DINNER/LUNCH en subrubrieken gescheiden; 43/43; onzekerheid per groep; arrangementen expliciet uitgesloten; geen hardcoded aantallen | probe exit 0: 43/43 in 13 secties, alle verschillen 0; 2 arrangement-/alternatieve prijssecties gemeld; groepshandeling en geen accepteer-alles in de fixture | **uitgevoerd met beperking** |
 | 5 | Bestaande kaarten Wolfslaar, Bardot, Zuyd, T-Huis getoetst; historische aantallen zijn geen waarheid | `node --test src/lib/historicalMenus.test.js` | `REP-HISTORICAL-001`: `data/menus.json`, 11 menu's, laatste `scraped` 2026-03-28, canonieke LF-hash `46c84c0f…9766` | ieder benoemd gerecht één live regel; pad, volgorde en prijs behouden; onbekende prijs null, nooit 0; snapshot is vormregressie, geen actuele waarheid | 3/3 tests slagen voor alle vier restaurants; 25/111/42/189 historische regels (367 totaal) volledig verklaard; live sites niet opnieuw opgehaald | **uitgevoerd met beperking** |
-| 6 | Vooraf vastgelegde representatieve set en aparte holdout dekken HTML, tabs, tabellen, tekst-PDF, scans, taal/vestiging, arrangement en prijsvariant | `ops/benchmark/acceptanceSet.test.js`; `ops/benchmark/acceptanceSetGuard.test.js`; `ops/benchmark/holdoutReferences.test.js`; `ops/benchmark/botanistReference.test.js`; `ops/benchmark/menu-extraction-acceptance-set.json` | 22 representatieve entries; alleen Gauchos Breda als holdout (`HOLD-REAL-02`, capture-only, 404); De Botanist/Mr Moos/Colonia zijn representative met `usedForTuning:true`; 13 dekkingsklassen | iedere klasse heeft een uitgevoerde representant en een expliciete holdout-slot; `unused`/`evaluated_once`/`used_for_tuning` zijn gescheiden; een holdout wordt hoogstens één keer geëvalueerd en blijft buiten tuning | 41 gerichte tests slagen; baseline blijft De Botanist 151/59, Mr Moos 0, Colonia 0, Gauchos 404; na reparatie: Botanist 196 items (95/141 referentiematches, 46 missing, 5 extra, 96 niet-gekoppeld), Mr Moos 247 items in 3 menu's (groepsmenu geblokkeerd), Colonia 84 items in 16 secties; geen nieuwe holdout gepind | **representatief uitgevoerd; holdout één keer uitgevoerd; nieuwe holdout nodig vóór release** |
+| 6 | Vooraf vastgelegde representatieve set en aparte holdout dekken HTML, tabs, tabellen, tekst-PDF, scans, taal/vestiging, arrangement en prijsvariant | `ops/benchmark/acceptanceSet.test.js`; `ops/benchmark/acceptanceSetGuard.test.js`; `ops/benchmark/holdoutReferences.test.js`; `ops/benchmark/botanistReference.test.js`; `ops/benchmark/menu-extraction-acceptance-set.json` | 22 representatieve entries; alleen Gauchos Breda als holdout (`HOLD-REAL-02`, capture-only, 404); De Botanist/Mr Moos/Colonia zijn representative met `usedForTuning:true`; 13 dekkingsklassen | iedere klasse heeft een uitgevoerde representant en een expliciete holdout-slot; `unused`/`evaluated_once`/`used_for_tuning` zijn gescheiden; een holdout wordt hoogstens één keer geëvalueerd en blijft buiten tuning | 41 gerichte tests slagen; baseline blijft De Botanist 151/59, Mr Moos 0, Colonia 0, Gauchos 404; na reparatie: Botanist 195 items (95/141 referentiematches, 46 missing, 5 extra, 95 niet-gekoppeld), Mr Moos 247 items in 3 menu's (groepsmenu geblokkeerd), Colonia 84 items in 16 secties; geen nieuwe holdout gepind | **representatief uitgevoerd; holdout één keer uitgevoerd; nieuwe holdout nodig vóór release** |
 
 | 7 | Dataset, referentie-uitkomsten en meetbare drempels vóór acceptatie vastgelegd; BE-21's 50–100 niet met enkele URL's afgesloten | `ops/benchmark/acceptanceSet.test.js`; `ops/benchmark/sourceReferences.test.js`; `ops/benchmark/structureCorpus.test.js` | manifest `releaseThresholds`: 0 verzonnen gerechten/prijzen, 100% bewijs, 0 onverklaarde dekking, 0 structuur-/prijsfouten; BE-21 expliciet buiten scope | drempels vast en niet verlaagd; BE-21 niet geclaimd | drempels exact gepind; 2 bronnen en 23 structuurgevallen sluiten BE-21 niet af; dat staat expliciet in `notIncluded` | **uitgevoerd** |
-| 8 | Gemiste/verzonnen items, prijsfouten, structuurverlies, bewijsdekking, correctiewerk, tijd en kosten per brontype gerapporteerd | probe; `src/lib/menuSourceComparison.test.js`; `src/lib/historicalMenus.test.js`; `ops/benchmark/botanistReference.test.js`; browserfixture; manifest | Smelt/Blossem referenties; De Botanist layoutreferentie (141 rijen); 23 STRUCT-gevallen; 4 historische kaarten; 5 browserfixtures | per bron/klasse verschil lijsten; 100% bewijs; tijd en kosten alleen als gemeten | Smelt 0/0/0/0/0 en Blossem 0/0/0/0/0; Botanist 95 matched / 46 missing / 5 extra / 0 prijsverschil / 96 niet-gekoppeld; 100% van de referentierijen heeft bewijs; **correctietijd onbekend**; **kosten onbekend, niet 0** | **uitgevoerd; tijd/kosten onbekend** |
+| 8 | Gemiste/verzonnen items, prijsfouten, structuurverlies, bewijsdekking, correctiewerk, tijd en kosten per brontype gerapporteerd | probe; `src/lib/menuSourceComparison.test.js`; `src/lib/historicalMenus.test.js`; `ops/benchmark/botanistReference.test.js`; browserfixture; manifest | Smelt/Blossem referenties; De Botanist layoutreferentie (141 rijen); 23 STRUCT-gevallen; 4 historische kaarten; 5 browserfixtures | per bron/klasse verschil lijsten; 100% bewijs; tijd en kosten alleen als gemeten | Smelt 0/0/0/0/0 en Blossem 0/0/0/0/0; Botanist 95 matched / 46 missing / 5 extra / 0 prijsverschil / 95 niet-gekoppeld; 100% van de referentierijen heeft bewijs; **correctietijd onbekend**; **kosten onbekend, niet 0** | **uitgevoerd; tijd/kosten onbekend** |
 | 9 | Browseracceptatie met klikpaden, rolgrenzen, leeg/fout/partieel, toetsenbord, licht/donker, 320/390 px | `npm run test:browser:menu-review`; `ops/browser/evidence/menu-review-browser-evidence.json` | `REP-BROWSER-001`: fictieve `review`, `readonly`, `empty`, `partial`, `error`; Edge 155; 1024/390/320; licht/donker | exacte links, rubricering, duplicate-/prijsblokkades, leeg/partieel/fout, toetsenbord, thema's, geen horizontale overflow; read-only collega ziet geen save/bevestig | bestaande evidence: 99/99 checks, 11 screenshots met SHA-256; **deze ronde niet opnieuw gedraaid**; **geen live/staging browserbewijs** | **uitgevoerd als fixture (bestaande evidence); live niet** |
 | 10 | Time-out, provideruitval, ongeldige uitvoer, kosten-/paginagrens, herimport, gelijktijdige taken, promptinjectie, verkeerde vestiging, onveilige redirects getest | `src/lib/menuExtractionAdapter.test.js`; `src/lib/safeOutboundFetch.test.js`; `src/lib/restaurantSourceAnalysis.test.js`; `src/lib/batchAnalysisHandlers.test.js`; `src/lib/menuConcept.test.js` | offline fake provider en `.invalid` HTTP-fixtures; veilige fetch/redirect/SSRF-tests | elk pad eindigt met een concrete fout of weigering; geen dubbele call/claim; brontekst blijft data; verkeerde vestiging en redirect worden geweigerd | alle gerichte suites slagen; geen echte provideruitval gemeten | **uitgevoerd (offline)** |
 | 11 | Geen stil dataverlies tussen extractie, receipt, review, concept en export; niet-ondersteunde publicatievelden geblokkeerd/gemeld | `src/lib/menuExtractionRuntime.test.js`; `src/lib/menuExtractionMapping.test.js`; `src/lib/menuConcept.test.js`; `src/lib/menuConceptExport.test.js`; `STRUCT-017`; `planning/architecture/menu-extraction-product-schema-v2.md` | synthetische receipt/concept/export; historische kaarten; v2-ontwerp | dezelfde broncontext en hetzelfde resultaat in iedere laag; onbekend blijft onbekend; export blokkeert wat het bestand niet kan dragen | mapping/exporttests en STRUCT-017 slagen; varianten/supplementen/arrangementen/allergenen zijn expliciet gemeld of geblokkeerd; v2 is **alleen ontwerp** | **uitgevoerd met beperking; v2 niet geïmplementeerd** |
@@ -47,7 +48,7 @@ staat dat als `geblokkeerd` of `niet ondersteund`, niet als groen.
 | HTML | `REP-HTML-001` (STRUCT-001/002/004/005/021/022), `REP-MRMOOS-REAL`, `REP-COLONIE-REAL` | 6/6 corpusgate, 22 classified pass; Mr Moos 247 items in 3 menu's; Colonia 84 items in 16 secties | Mr Moos groepsmenu geblokkeerd; Colonia wijn/brunch/high tea niet verliesvrij; geen universele claim |
 | Uitklappers/tabs | `REP-ACCORDION-001` (synthetisch), `REP-ACCORDION-002` (Blossem) | 3/3 + 43/43 items | paneel zonder DOM-relatie blijft onzeker; arrangementen niet opslaanbaar |
 | Tabellen | `REP-TABLE-001` (STRUCT-019/020) | pass | alleen tabel-/dt-dd-vormen |
-| Tekst-PDF | `REP-PDF-001` (Smelt), `REP-PDF-002` (synthetisch), `REP-DEBOTANIST-REAL` | 37/37 + 63 PDF-tests; Botanist 95/141 referentiematches, 0 prijsverschil bij match | Botanist 46 missing / 5 extra / 96 niet-gekoppeld; wijn/cocktail niet verliesvrij; 196 items is geen kwaliteitsbewijs |
+| Tekst-PDF | `REP-PDF-001` (Smelt), `REP-PDF-002` (synthetisch), `REP-DEBOTANIST-REAL` | 37/37 + 63 PDF-tests; Botanist 95/141 referentiematches, 0 prijsverschil bij match | Botanist 46 missing / 5 extra / 95 niet-gekoppeld; wijn/cocktail niet verliesvrij; 195 items is geen kwaliteitsbewijs |
 | Scan/niet-leesbaar | `REP-SCAN-001` | `pdf_no_text_layer`/`pdf_encrypted`, geen OCR | **klasse niet ondersteund**; eerlijke fout, geen vendor |
 | Taal/vestiging | `REP-LANG-001`, `REP-BRANCH-001`, `REP-BRANCH-002` | Speisekarte gevonden; vestigingsadres behouden; Breda-PDF gelezen | één taalkeyword en één ketenprobe; geen alle-vestigingenclaim |
 | Arrangement | `REP-ARRANGEMENT-001/002` | uitgesloten en gemeld | **niet verliesvrij op te slaan**; v2-ontwerp nodig |
@@ -245,6 +246,44 @@ niet-gekoppeld zijn niet hersteld of geclaimd. Er is geen nieuwe holdout
 geëvalueerd, geen referentie aangepast, geen provider of app-side AI
 geactiveerd, geen concept opgeslagen en geen browseracceptatie uitgevoerd.
 
+## Verificatie review 6249915021 (2026-10-18)
+
+De resterende P1 is hersteld: de ambiguïteitsbeslissing hangt niet langer af
+van integer- versus decimaal- of kommavorm. `classifyNumericEvidence` behandelt
+elk prijsvormig getal tussen een naamrun en een volgend bedrag als onbewezen,
+tenzij een expliciete eenheid (`6 st.`), een leidend `0.0` of een expliciete
+variantreeks (`6.5 / 25.0`) het getal resolveert. Daarmee krijgen `Wijn 6 25`,
+`Wijn 6.0 25.0` en `Wijn 6,00 25,00` bij gelijke geometrie dezelfde uitkomst:
+geen item, geen bekende prijs, `ambiguousPriceLines` + qualitygate + limitation.
+Ook pdfjs-tekstgroepering is geen bewijs: pdfjs voegt een naam en een dichtbij
+gelegen bedrag samen, dus een geplakt naamgetal of een geplakte hele regel
+krijgt dezelfde veilige behandeling.
+
+Gevolg voor de gepinde Botanist-PDF: `Monkey 47 10.0` is structureel gelijk aan
+een glas/fles-regel zonder scheidingsteken. Die regel wordt nu eerlijk als
+ambigu gemeld in plaats van geraden. De referentiesecties en hun totalen
+blijven exact gelijk (141 referentierijen; 95 matched, 46 missing, 5 extra,
+0 prijsverschil); alleen de toch al niet-gekoppelde bucket daalt van 96 naar 95
+en het parsertotaal van 196 naar 195. Er is niets aan de referentie of drempels
+veranderd om dit groen te maken.
+
+| Controle | Commando | Resultaat |
+| --- | --- | --- |
+| Volledige suite | `npm test` | 2038 tests: 2038 pass, 0 fail, 0 skipped |
+| Gerichte #59-tests | vier bestanden (`pdfMenuStructuring`, live-regressies, quality, analysis) | 90 pass, 0 fail |
+| Structuurcorpus | `npm run test:menu-structure` | 6 pass, 0 fail |
+| Benchmark | `npm run benchmark:menu-structure` | 22 pass, 0 fail, 1 unclassified (`STRUCT-018`, bestaande JSON-LD-keuze) |
+| Build | `npm run build` | compiled successfully in 18.7 s |
+| PDF.js-trace | `node ops/scripts/verify-pdfjs-server-trace.js` | OK; 164 server scripts |
+| Botanist | read-only heranalyse van dezelfde gepinde PDF | 195 items/54 secties; layout 19 ambigu / 24 niet-gekoppeld / 12 supplement / 2 onbekende kop; referentiesecties exact gelijk (95/46/5/0); niet-gekoppeld 96 → 95; `Monkey 47` is de ene eerlijk gemelde ambigue regel |
+| Smelt/Blossem | deze ronde niet opnieuw opgehaald | geen nieuwe live bronproef gevraagd; eerdere read-only 37/37 en 43/43 blijven historie, geen nieuwe claim |
+
+De eerdere verificatietabellen blijven de meting van die rondes. De
+Botanist-vergelijking blijft open: 46 ontbrekende referentieregels zijn niet
+hersteld of geclaimd. Er is geen nieuwe holdout geëvalueerd, geen provider of
+app-side AI geactiveerd, geen concept opgeslagen, geen browseracceptatie
+uitgevoerd en niets gemerged of gepubliceerd.
+
 ## Resterende concrete beslissingen
 
 1. **Onafhankelijke review** door de Delivery Lead op de code- en
@@ -263,7 +302,7 @@ geactiveerd, geen concept opgeslagen en geen browseracceptatie uitgevoerd.
    holdout worden geëvalueerd. Een nieuwe bron vereist een eigen
    toegangsbeslissing en is in deze ronde niet gepind.
 6. **Botanist-kwaliteit** is niet opgelost: 95/141 referentiematches, 46
-   missing, 5 extra en 96 niet-gekoppelde items. Wijn/cocktail-blokken en
+   missing, 5 extra en 95 niet-gekoppelde items. Wijn/cocktail-blokken en
    glas/fles-varianten zijn expliciet niet ondersteund; dit vraagt schema- en
    parserwerk, geen succeslabel.
 7. **#56 samenbrengen** met de drie gemelde conflicten; geen merge in deze

@@ -38,14 +38,14 @@ Uitgevoerd op dezelfde PDF-versie met de analyseketen van deze branch:
 | Meting | Resultaat |
 | --- | --- |
 | Referentierijen | 141 |
-| Parseritems totaal | 196 |
+| Parseritems totaal | 195 (na review 6249915021; was 196) |
 | Gematcht op naam binnen dezelfde sectie | 95 |
 | Ontbrekend t.o.v. referentie | 46 |
 | Extra binnen een gematchte sectie | 5 |
 | Prijsverschil bij een naam-match | 0 |
-| Parseritems zonder referentiesectie (wijn/cocktail/lunch/verloren kop) | 96 |
+| Parseritems zonder referentiesectie (wijn/cocktail/lunch/verloren kop) | 95 (na review 6249915021; was 96) |
 
-De 96 niet-gekoppelde items zijn geen dekkingbewijs: ze bevatten onder meer
+De 95 niet-gekoppelde items zijn geen dekkingbewijs: ze bevatten onder meer
 wijn- en cocktailregels en items die hun sectiekop kwijt zijn. De 46 ontbrekende
 referentieregels zitten vooral in drank-/lunch-/wijnblokken waar de parser
 meerregelige blokken of prijsvarianten nog niet lossless leest. De 5 extra's
@@ -64,6 +64,17 @@ gelijk aan de vorige HEAD: 196 items/54 secties, 12 supplementregels, 18
 prijzen midden in de regel, 24 niet-gekoppelde prijsregels en 2 onbekende
 koppen. De 46 ontbrekende en 96 niet-gekoppelde items blijven dus open; er is
 geen referentie aangepast en geen nieuwe holdout geëvalueerd.
+
+Na de P1-herstelronde van review 6249915021 is dezelfde gepinde PDF nogmaals
+read-only geanalyseerd. De ambiguïteitsbeslissing gebruikt geen
+integer-/decimaalnotatie meer. Daardoor is `Monkey 47` (geplakt, zonder
+eenheid, gevolgd door `10.0`) nu de ene extra eerlijk gemelde ambigue regel:
+195 items/54 secties, 19 ambigue regels, 24 niet-gekoppelde prijsregels, 12
+supplementregels en 2 onbekende koppen. De referentiesecties en hun totalen
+blijven exact gelijk (95 matched, 46 missing, 5 extra, 0 prijsverschil); alleen
+de toch al niet-gekoppelde bucket daalt van 96 naar 95. Die ene regel is
+structureel gelijk aan een glas/fles-regel zonder scheidingsteken en wordt dus
+niet geraden. De referentie zelf is niet aangepast.
 
 ## Wat deze ronde aantoonbaar heeft hersteld
 
@@ -95,7 +106,7 @@ geen referentie aangepast en geen nieuwe holdout geëvalueerd.
 - De parser verliest op sommige pagina's nog de sectiekop (items belanden in
   een `Menukaart`-bucket) en maakt van een beschrijvingsregel soms een
   subrubriek. Dat is kwaliteitsbeperking, geen acceptatie.
-- 196 items is geen kwaliteits- of volledigheidsbewijs. De vergelijking hierboven
+- 195 items is geen kwaliteits- of volledigheidsbewijs. De vergelijking hierboven
   is de maat, niet het aantal.
 - Geen OCR, geen renderingvendor, geen extra betaalde dienst en geen
   app-provider zijn geactiveerd.

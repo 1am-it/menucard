@@ -1,6 +1,6 @@
 {
   "referenceItems": 141,
-  "parserItems": 196,
+  "parserItems": 195,
   "sections": {
     "WARME DRANKEN": {
       "expected": 10,
@@ -758,14 +758,6 @@
       ],
       "name": "Something & Nothing",
       "price": "4.6"
-    },
-    {
-      "path": [
-        "GIN & TONIC",
-        "Watermelon Tonic"
-      ],
-      "name": "Monkey 47",
-      "price": "10.0"
     },
     {
       "path": [

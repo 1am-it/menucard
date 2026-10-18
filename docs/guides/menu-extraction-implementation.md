@@ -372,7 +372,9 @@ vóór enige modelaanroep:
   `priceOnlyItem` waar een heel tekstblok uit prijzen/scheidingstekens bestaat,
   plus een expliciete variantreeks (`6.5 / 25.0`). Een getal binnen een
   naamdragend tekstblok is geen prijs zolang er rechts daarvan een echt
-  prijsblok staat (`Monkey 47` → 10.0, `0.0 Regrets` → 7.5, `6 st.` → 65.0).
+  prijsblok staat (`0.0 Regrets` → 7.5, `6 st.` → 65.0). Een naamgetal zonder
+  eenheid is sinds review 6249915021 niet meer te onderscheiden van een
+  glas-/flesbedrag en wordt als ambigu gemeld; zie 13.13.
   Als pdfjs een prijs aan de naam plakt (`Fictief Broodje 3.00`) en er staat
   geen prijsblok rechts, blijft dat slotbedrag de prijs. Zo verdwijnt geen
   geldig gerecht en ontstaat geen verzonnen prijs.
@@ -396,7 +398,38 @@ vóór enige modelaanroep:
   `menuExtractionQuality.test.js` (`pdf_unlinked_price_lines`,
   supplementprefix) en `restaurantSourceAnalysis.test.js` (limitationtekst).
 - **Hercontrole:** Smelt 37/37 en Blossem 43/43 blijven exact; de gecommitte
-  Botanist-vergelijking blijft 196 parseritems, 95/46/5, 0 prijsverschil en
-  96 niet-gekoppeld. De nieuwe analyse meldt 12 supplementregels, 18
-  midden-in-de-regel-prijzen en 24 niet-gekoppelde prijsregels als beperking.
+  Botanist-vergelijking is na review 6249915021 195 parseritems, 95/46/5, 0
+  prijsverschil en 95 niet-gekoppeld (zie 13.13). De nieuwe analyse meldt 12
+  supplementregels, 19 midden-in-de-regel-prijzen en 24 niet-gekoppelde
+  prijsregels als beperking.
   Dat is nog steeds ontwikkelaarsbewijs, geen onafhankelijke bronwaarheid.
+
+### 13.13 Eén ambiguïteitsregel voor hele en decimale bedragen (review 6249915021)
+
+- **Geen notatie-afhankelijke beslissing meer.** `classifyNumericEvidence`
+  gebruikte `/[.,]/` als tie-breaker: `6.0` werd ambigu, `6` werd naamtekst en
+  het volgende getal werd een bekende prijs. Nu is elk prijsvormig getal tussen
+  een naamrun en een volgend bedrag ambigu, tenzij een expliciete eenheid
+  (`6 st.`), een leidend `0.0` of een expliciete variantreeks (`6.5 / 25.0`)
+  het getal resolveert.
+- **Tekstgroepering is geen bewijs.** pdfjs voegt een naam en een dichtbij
+  gelegen bedrag samen (`Fictieve Wijn 6`), dus een geplakt naamgetal of een
+  geplakte hele regel krijgt dezelfde veilige behandeling als een gesplitst
+  item.
+- **Zelfde uitkomst per geometrie.** `Wijn 6 25`, `Wijn 6.0 25.0` en
+  `Wijn 6,00 25,00` leveren bij gelijke geometrie alle drie geen item, geen
+  bekende prijs en één `ambiguousPriceLines`; de metamorfe matrix dekt
+  gesplitst, dicht bij de naam, twee verre bedragkolommen, geplakt naamgetal en
+  een geplakte hele regel.
+- **Gate en limitation.** De teller bereikt `pdf_ambiguous_price_lines` en de
+  plain-language limitation; de ketentest draait de drie notaties door parser →
+  qualitygate → limitation en bewijst dat geen enkele `sufficient` wordt.
+- **Eerlijke Botanist-uitkomst.** `Monkey 47 10.0` is structureel gelijk aan een
+  glas/fles-regel zonder scheidingsteken en wordt nu als ambigu gemeld. De
+  gecommitte vergelijking is 195 parseritems, 95/46/5, 0 prijsverschil en 95
+  niet-gekoppeld; de referentiesecties zijn exact gelijk. Geen drempel of
+  referentie is aangepast om dit groen te maken.
+- **Regressies:** `pdfMenuStructuring.test.js` (metamorfe notatie- en
+  groeperingsmatrix, eenheid, scheidingsteken, echte integerprijs, meerdere
+  gerechten/kolommen), `restaurantSourceAnalysis.test.js` (drie notaties door
+  de keten), `botanistReference.test.js` (gemeten vergelijking).

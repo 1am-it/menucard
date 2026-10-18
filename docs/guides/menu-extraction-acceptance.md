@@ -191,6 +191,39 @@ geactiveerd, geen concept opgeslagen en geen browseracceptatie uitgevoerd. De
 Smelt/Blossem-proef is read-only bronbewijs, geen item-voor-item
 productacceptatie.
 
+### Herstelronde review 6249915021 — 2026-10-18
+
+De Delivery Lead reproduceerde één resterende P1: alleen een decimaal
+tussengetal werd ambigu, terwijl hetzelfde bronbewijs met hele bedragen
+(`Wijn` + `6` + `25`) stil als naam `Wijn 6` en bekende prijs `25` werd
+opgeslagen. De ambiguïteitsbeslissing hing dus af van de schrijfwijze van het
+bedrag.
+
+| Punt | Herstel | Regressie |
+| --- | --- | --- |
+| Hele bedragen werden stil naamtekst | `classifyNumericEvidence` gebruikt geen integer-/decimaalnotatie meer als tie-breaker. Elk prijsvormig getal tussen een naamrun en een volgend bedrag is ambigu, tenzij een expliciete eenheid (`6 st.`), een leidend `0.0` of een expliciete variantreeks (`6.5 / 25.0`) het getal resolveert. Ook de pdfjs-tekstgroepering is geen bewijs: pdfjs voegt een naam en een dichtbij gelegen bedrag samen, dus een geplakt naamgetal krijgt dezelfde veilige behandeling. | `pdfMenuStructuring.test.js`: metamorfe matrix `Wijn 6 25` / `6.0 25.0` / `6,00 25,00` voor gesplitste items, dicht bij de naam, twee verre bedragkolommen, geplakt naamgetal en een geplakte hele regel; eenheid, scheidingsteken, echte integerprijs en meerdere gerechten/kolommen blijven werken |
+| Onzekere regel bereikte de gate niet | Dezelfde `ambiguousPriceLines` bereikt `pdf_ambiguous_price_lines` en de limitation; geen item, geen bekende prijs en nooit `sufficient` | `restaurantSourceAnalysis.test.js`: dezelfde PDF-geometrie in integer-, decimaal- en kommavorm, elk parser → qualitygate → limitation |
+
+Uitgevoerd op deze working tree (commit volgt in het checkpoint):
+
+| Controle | Resultaat |
+| --- | --- |
+| `npm test` | 2038 tests: 2038 pass, 0 fail, 0 skipped |
+| Gerichte PDF/quality/analysis-tests | 90 pass, 0 fail (`pdfMenuStructuring`, live-regressies, quality, analysis) |
+| `npm run test:menu-structure` | 6 pass, 0 fail |
+| `npm run benchmark:menu-structure` | 23 gevallen: 22 pass, 0 fail, 1 unclassified (`STRUCT-018`, bestaande JSON-LD-keuze) |
+| `npm run build` | compiled successfully in 18.7 s |
+| `node ops/scripts/verify-pdfjs-server-trace.js` | OK; 164 server scripts, native `pdf.mjs`/`pdf.worker.mjs` |
+| Botanist read-only heranalyse | dezelfde gepinde PDF: 195 items/54 secties; layout 19 ambigu, 24 niet-gekoppeld, 12 supplement, 2 onbekende kop; referentiesecties exact gelijk (95 matched / 46 missing / 5 extra / 0 prijsverschil); niet-gekoppeld 96 → 95; `Monkey 47` is nu de ene eerlijk gemelde ambigue regel |
+| Smelt/Blossem | deze ronde niet opnieuw opgehaald; de review vroeg geen nieuwe live bronproef. De eerdere read-only 37/37 en 43/43 blijven historie, geen nieuwe claim |
+
+De Botanist-referentie is niet aangepast om de parser groen te maken: alleen de
+gemeten vergelijking is bijgewerkt. `Monkey 47` (geplakt, zonder eenheid) is
+structureel gelijk aan een glas/fles-regel zonder scheidingsteken en wordt
+daarom niet meer geraden. De 46 ontbrekende referentieregels blijven open.
+Geen provider, betaalde call, app-side AI, browseracceptatie, conceptopslag,
+nieuwe holdout, merge of publicatie is uitgevoerd.
+
 ### Echte read-only bronproeven (2026-10-17)
 
 | Bron | Bronversie/observatie | Uitkomst | Status |

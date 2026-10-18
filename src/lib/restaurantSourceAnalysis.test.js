@@ -831,44 +831,55 @@ test('REGRESSION (review 6249303096 P1): an unlinked PDF price line is reported 
   assert.deepEqual(pdfLayoutLimitations('https://fixture.example/menu.pdf', { unlinkedPriceLines: 0 }), [])
 })
 
-test('REGRESSION (review 6249657793 P1): an unresolvable numeric ambiguity survives parser → quality gate → limitation and never becomes a sufficient/review-ready menu', async () => {
-  const content = [
-    'BT /F1 12 Tf',
-    textAt(20, 100, '// FICTIEVE DRANKEN'),
-    // A proven pair (split name/price) and a proven merged pair stay items.
-    textAt(20, 80, 'Fictieve Koffie'),
-    textAt(90, 80, '3.5'),
-    textAt(160, 80, 'Fictief Broodje 4.5'),
-    // 6.5 and 25.0 without a separator: the layout does not prove whether
-    // 6.5 belongs to the name or is a second (glass) amount.
-    textAt(20, 60, 'Fictieve Wijn'),
-    textAt(90, 60, '6.5'),
-    textAt(150, 60, '25.0'),
-    'ET',
-  ].join('\n')
+test('REGRESSION (review 6249657793 P1 + 6249915021 P1): an unresolvable numeric ambiguity survives parser → quality gate → limitation identically for integer, decimal and comma notation and never becomes a sufficient/review-ready menu', async () => {
+  const outcomes = []
+  for (const [second, third] of [['6', '25'], ['6.5', '25.0'], ['6,50', '25,00']]) {
+    const content = [
+      'BT /F1 12 Tf',
+      textAt(20, 100, '// FICTIEVE DRANKEN'),
+      // A proven pair (split name/price) and a proven merged pair stay items.
+      textAt(20, 80, 'Fictieve Koffie'),
+      textAt(90, 80, '3.5'),
+      textAt(160, 80, 'Fictief Broodje 4.5'),
+      // The same geometry with two amounts and no separator: the layout does
+      // not prove whether the first number belongs to the name or is a second
+      // (glass) amount. The amount's writing style must not change that.
+      textAt(20, 60, 'Fictieve Wijn'),
+      textAt(90, 60, second),
+      textAt(150, 60, third),
+      'ET',
+    ].join('\n')
 
-  const { context } = await readPdfMenuSource(
-    buildTestPdf({ contentStream: content }),
-    'https://fixture.example/menu.pdf',
-    'source-1',
-  )
-  assert.equal(context.layout.ambiguousPriceLines, 1)
-  const names = context.recognizedSections.flatMap((category) => category.items.map((item) => item.name))
-  assert.deepEqual(names, ['Fictieve Koffie', 'Fictief Broodje'])
-  // Never a claimed 6.5 amount and never a silent "Fictieve Wijn 6.5" item.
-  assert.equal(context.recognizedSections.some((category) => category.items.some((item) => item.name.includes('Wijn') || item.price === '6.5')), false)
+    const { context } = await readPdfMenuSource(
+      buildTestPdf({ contentStream: content }),
+      'https://fixture.example/menu.pdf',
+      'source-1',
+    )
+    assert.equal(context.layout.ambiguousPriceLines, 1, `${second}/${third}`)
+    const names = context.recognizedSections.flatMap((category) => category.items.map((item) => item.name))
+    assert.deepEqual(names, ['Fictieve Koffie', 'Fictief Broodje'], `${second}/${third}`)
+    // Never a claimed first amount and never a silent "Fictieve Wijn 6" item.
+    assert.equal(context.recognizedSections.some((category) => category.items.some((item) => item.name.includes('Wijn'))), false, `${second}/${third}`)
+    assert.equal(context.recognizedSections.some((category) => category.items.some((item) => [second, third].includes(item.price))), false, `${second}/${third}`)
 
-  const menu = {
-    sourceId: 'source-1',
-    sourceUrl: 'https://fixture.example/menu.pdf',
-    categories: context.recognizedSections,
+    const menu = {
+      sourceId: 'source-1',
+      sourceUrl: 'https://fixture.example/menu.pdf',
+      categories: context.recognizedSections,
+    }
+    const assessment = assessDeterministicMenuQuality({ menus: [menu], unknownMenuContexts: [context] })
+    assert.equal(assessment.sufficient, false, `${second}/${third}`)
+    assert.equal(assessment.blockedByProductGap, false, `${second}/${third}`)
+    assert.ok(assessment.codes.includes('pdf_ambiguous_price_lines'), `${second}/${third}`)
+    assert.deepEqual(assessment.flaggedSourceIds, ['source-1'], `${second}/${third}`)
+
+    const limitations = pdfLayoutLimitations(menu.sourceUrl, context.layout)
+    assert.ok(limitations.some((line) => /niet eenduidig/.test(line) && /niet als gerecht/.test(line)), `${second}/${third}`)
+
+    outcomes.push(JSON.stringify({ names, layout: context.layout, flags: assessment.codes, limitations }))
   }
-  const assessment = assessDeterministicMenuQuality({ menus: [menu], unknownMenuContexts: [context] })
-  assert.equal(assessment.sufficient, false)
-  assert.equal(assessment.blockedByProductGap, false)
-  assert.ok(assessment.codes.includes('pdf_ambiguous_price_lines'))
-  assert.deepEqual(assessment.flaggedSourceIds, ['source-1'])
-
-  const limitations = pdfLayoutLimitations(menu.sourceUrl, context.layout)
-  assert.ok(limitations.some((line) => /niet eenduidig/.test(line) && /niet als gerecht/.test(line)))
+  // Names, layout counters, flag codes and limitation text are identical for
+  // the integer, decimal and comma runs: the safety outcome never depends on
+  // the amount's notation.
+  assert.equal(new Set(outcomes).size, 1)
 })

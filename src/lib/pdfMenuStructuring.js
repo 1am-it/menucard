@@ -457,20 +457,25 @@ function tokenizeLineIntoWords(lineItems) {
 
 /**
  * Splits one baseline's price-shaped tokens into name evidence and amount
- * candidates using the whole local line/column, never a bare numeric block.
+ * candidates using only explicit local evidence, never a bare numeric block
+ * and never the amount's own writing style.
  * pdfjs may keep a name-internal number in the name's own item ("Monkey 47",
- * "6 st.") or split it into its own item ("Monkey", "47"); the second shape
- * used to turn every numeric item into an amount.
+ * "6 st.") or split it into its own item ("Monkey", "47"); neither text-item
+ * shape proves by itself which number belongs to the name and which is the
+ * amount, because pdfjs also merges an ordinary name and its trailing price
+ * into one item ("Fictief Broodje 3.00").
  *   - a number directly followed by a unit is a quantity ("6 st.", "0,3 l");
  *   - a leading "0.0" alcohol-free marker opens the name ("0.0 Regrets"),
  *     never a nameless price; any other leading number is not glued onto the
  *     following name because it may be a neighbouring column's price run;
- *   - a number after a name run with only the trailing amount column after it
- *     belongs to that name ("Monkey 47" -> 10.00, "Oesters 6" -> 24.00).
- *     A decimal token in exactly that position can also be a second
- *     glass/bottle amount and the line itself does not prove which: it is
- *     returned as ambiguous so the caller reports it instead of claiming a
- *     known price. Explicit variants ("6.5 / 25.0") are never ambiguous.
+ *   - every other price-shaped token between a name run and a trailing amount
+ *     is ambiguous, whether it is printed as "6", "6.0" or "6,00". The line
+ *     proves a name run and an amount column, not which number belongs to the
+ *     name; calling the first one name text silently promotes the second to a
+ *     known price (review 6249915021 P1). A pdfjs text item is not proof
+ *     either: pdfjs merges a name and a nearby amount into one item, so
+ *     "Monkey 47 10.0" and a glass/bottle row are the same evidence. Explicit
+ *     variants ("6.5 / 25.0") are never ambiguous.
  * Returns index sets, never source text.
  */
 function classifyNumericEvidence(words) {
@@ -507,18 +512,23 @@ function classifyNumericEvidence(words) {
       nameEmbedded.add(index)
       continue
     }
-    // 3. A name-internal number immediately before the trailing amount.
+    // 3. Any other number between a name run and a trailing amount column.
+    //    This is the only place the previous rule used the amount's writing
+    //    style as a tie-breaker: a decimal became ambiguous while the same
+    //    evidence printed as an integer became name text and thereby promoted
+    //    the next number to a known price ("Wijn 6 25" -> "Wijn 6", 25 known).
+    //    A name number and a glass/bottle amount column are indistinguishable
+    //    here, and pdfjs's own text-item grouping is not independent proof
+    //    (it merges a name and a nearby amount into one item). Report the row;
+    //    only explicit evidence above resolves a number, and no spelling may
+    //    ever change that decision.
     if (!nameBefore || nameAfter) continue
     if (!list.slice(index + 1).some((word) => isPriceToken(word.text))) continue
     if (ZERO_AMOUNT_MARKER_PATTERN.test(list[index].text.trim())) {
       nameEmbedded.add(index)
       continue
     }
-    if (/[.,]/.test(list[index].text)) {
-      ambiguous.add(index)
-      continue
-    }
-    nameEmbedded.add(index)
+    ambiguous.add(index)
   }
   return { nameEmbedded, ambiguous }
 }
