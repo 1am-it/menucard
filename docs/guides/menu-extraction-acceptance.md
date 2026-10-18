@@ -106,6 +106,18 @@ namen en verkeerde rubriektoewijzing. Een volledige BE-21-set, een separate
 ongeziene set, browser-/schrijfacceptatie, een echte providercall en
 DPA/EU-retentietest blijven open.
 
+### Verenigbaarheid met #53/#56
+
+Een read-only `git merge-tree --write-tree` tegen PR #56-head
+`00f415112a29c16d2d0b2b814b6a00308a8f3747` meldt conflict in:
+
+- `app/internal/source-triage/batch/page.js`;
+- `src/lib/menuSnapshotProposals.test.js`.
+
+Er is geen merge uitgevoerd en #56 is niet in deze branch overgenomen. De
+conflicten moeten bij het samenbrengen van de twee contracten handmatig worden
+beoordeeld; een groene test op deze losse branch bewijst die combinatie niet.
+
 ## Uitgevoerde checks na herstel
 
 | Controle | Resultaat |
