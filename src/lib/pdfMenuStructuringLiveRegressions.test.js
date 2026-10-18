@@ -115,3 +115,145 @@ test('a prose fragment ending in punctuation is not promoted to a section', () =
   assert.deepEqual(categories.map((category) => category.path), [['FRISDRANK']]);
   assert.equal(categories[0].items.some((item) => item.name === 'Hun missie?'), false);
 });
+
+// ── Review 6250261342: section/name coverage on the same pinned layout ──────
+// These fixtures reproduce the *shapes* that lost sections/names, not the
+// restaurant: a right-hand column that continues the left heading, a brand
+// marker below its parent section, wrapped names with explicit connectors,
+// a portion label, a description directly below a priced item, and an amount
+// printed a hair above its own name.
+
+test('a column without its own heading continues the adjacent section, marked reviewable', () => {
+  const page = {
+    pageNumber: 1,
+    lines: [
+      line(400, ['// SHARED DINING 17:00 - 21:00', 120]),
+      line(380, ['// STARTERS', 20]),
+      line(360, ['Brood met smeersels', 20], ['8.5', 180], ['Crispy Coconut Gyoza', 220], ['12.5', 360]),
+      line(340, ['Fromage Festif', 20], ['12.5', 180], ['Pepper Beef Tataki', 220], ['16.5', 360]),
+      line(320, ['Il Magnifico', 20], ['14.0', 180], ['Tuna al Mare', 220], ['14.5', 360]),
+    ],
+  };
+  const { categories, layout } = structurePdfLinesIntoMenu([page]);
+  // The centered menu title is not a column heading, so it is never a parent.
+  assert.deepEqual(categories.map((category) => category.path), [['STARTERS']]);
+  assert.deepEqual(categories[0].items.map((item) => [item.name, item.price]), [
+    // Items are grouped per column: the left column's own items first, then the
+    // right column whose section was inherited.
+    ['Brood met smeersels', '8.5'],
+    ['Fromage Festif', '12.5'],
+    ['Il Magnifico', '14.0'],
+    ['Crispy Coconut Gyoza', '12.5'],
+    ['Pepper Beef Tataki', '16.5'],
+    ['Tuna al Mare', '14.5'],
+  ]);
+  assert.equal(categories[0].uncertain, true);
+  assert.equal(layout.inheritedSectionColumns, 1);
+});
+
+test('a brand marker directly below its parent section is nested, not a second top-level section', () => {
+  const page = {
+    pageNumber: 3,
+    lines: [
+      line(546, ['// PREMIUM FRISDRANKEN', 36]),
+      line(526, ['Cultcha Kombucha', 42], ['5.5', 184], ['// Double Dutch', 227]),
+      line(514, ['Passionfruit & Lime', 42], ['Ginger Beer', 227], ['4.6', 369]),
+      line(504, ['Cultcha Kombucha', 42], ['5.5', 184], ['Pink Grapefruit Soda', 227], ['4.6', 369]),
+    ],
+  };
+  const { categories, layout } = structurePdfLinesIntoMenu([page]);
+  assert.deepEqual(categories.map((category) => category.path), [
+    ['PREMIUM FRISDRANKEN'],
+    ['PREMIUM FRISDRANKEN', 'Double Dutch'],
+  ]);
+  assert.deepEqual(categories[0].items.map((item) => [item.name, item.price]), [
+    ['Cultcha Kombucha Passionfruit & Lime', '5.5'],
+    ['Cultcha Kombucha', '5.5'],
+  ]);
+  assert.deepEqual(categories[1].items.map((item) => [item.name, item.price]), [
+    ['Ginger Beer', '4.6'],
+    ['Pink Grapefruit Soda', '4.6'],
+  ]);
+  assert.equal(layout.inheritedSubheadingColumns, 1);
+});
+
+test('wrapped names join on explicit connectors and portions, while portions stay out of the name', () => {
+  const page = {
+    pageNumber: 2,
+    lines: [
+      line(400, ['// DRANKEN', 20]),
+      line(380, ['Lipton Ice Tea Sparkling /', 20], ['3.8', 180]),
+      line(360, ['Ice Tea Green / Ice Tea Peach /', 20]),
+      line(340, ['Ice Tea Green Zero', 20]),
+      line(320, ['Royal Club Tonic / Bitter Lemon', 20], ['3.8', 180]),
+      line(300, ['/ Ginger Ale', 20]),
+      line(280, ['Holtkamp ambachtelijke', 20], ['9.5', 180]),
+      line(260, ['draadjesvlees bitterbal', 20], ['8st.', 140]),
+      line(240, ['Vegan draadjesvlees bitterbal', 20], ['9.5', 180]),
+      line(220, ['8st.', 20]),
+    ],
+  };
+  const { categories, layout } = structurePdfLinesIntoMenu([page]);
+  assert.deepEqual(categories[0].items.map((item) => [item.name, item.price]), [
+    ['Lipton Ice Tea Sparkling / Ice Tea Green / Ice Tea Peach / Ice Tea Green Zero', '3.8'],
+    ['Royal Club Tonic / Bitter Lemon / Ginger Ale', '3.8'],
+    ['Holtkamp ambachtelijke draadjesvlees bitterbal', '9.5'],
+    ['Vegan draadjesvlees bitterbal', '9.5'],
+  ]);
+  assert.equal(layout.nameContinuationLines, 4);
+  assert.equal(layout.portionLines, 2);
+  assert.equal(categories.some((category) => category.items.some((item) => /\b8st\.?$/.test(item.name))), false);
+});
+
+test('a description below a priced item stays a description: it is neither a name continuation nor a heading', () => {
+  const page = {
+    pageNumber: 1,
+    lines: [
+      line(400, ['// BROUWERIJ', 20]),
+      line(380, ['Juice Punch New', 20], ['6.5', 180]),
+      line(360, ['England IPA', 20]),
+      line(340, ['Head First Tropical IPA', 20], ['6.0', 180]),
+      line(320, ['Oester naturel', 20], ['4.0', 180]),
+      line(300, ['met klassieke mignonette-azijn en citroen', 20]),
+      line(280, ['Oester oosters', 20], ['4.5', 180]),
+      line(260, ['Krokante sprinkhaan', 20]),
+      line(240, ['met Kewpie-mayo', 20]),
+    ],
+  };
+  const { categories } = structurePdfLinesIntoMenu([page]);
+  assert.deepEqual(categories.map((category) => category.path), [['BROUWERIJ']]);
+  assert.deepEqual(categories[0].items.map((item) => [item.name, item.desc]), [
+    ['Juice Punch New', 'England IPA'],
+    ['Head First Tropical IPA', null],
+    ['Oester naturel', 'met klassieke mignonette-azijn en citroen'],
+    ['Oester oosters', 'Krokante sprinkhaan met Kewpie-mayo'],
+  ]);
+});
+
+test('a three-word item above a local price-only baseline is paired, never lost', () => {
+  const page = {
+    pageNumber: 1,
+    lines: [line(400, ['// MEDITERRAANS', 20]), line(380, ['Blue Velvet Gnocchi', 20]), line(378, ['13.5', 160])],
+  };
+  const { categories } = structurePdfLinesIntoMenu([page]);
+  assert.deepEqual(categories[0].items.map((item) => [item.name, item.price]), [['Blue Velvet Gnocchi', '13.5']]);
+});
+
+test('an ABV micro-baseline above its own amount is not glued to the name', () => {
+  const page = {
+    pageNumber: 4,
+    lines: [
+      line(400, ['// BIEREN', 20]),
+      line(380, ['Sol', 20], ['5.7', 180]),
+      line(365, ['4.0%', 160], ['5.2', 180]),
+      line(363, ['Mort Subite Kriek', 20]),
+    ],
+  };
+  const { categories, layout } = structurePdfLinesIntoMenu([page]);
+  assert.deepEqual(categories[0].items.map((item) => [item.name, item.price]), [
+    ['Sol', '5.7'],
+    ['Mort Subite Kriek', '5.2'],
+  ]);
+  assert.equal(categories[0].items.some((item) => item.name.includes('%')), false);
+  assert.equal(layout.unlinkedPriceLines, 0);
+});

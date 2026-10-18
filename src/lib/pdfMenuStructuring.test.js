@@ -876,8 +876,13 @@ test('REGRESSION (review 6249657793 P1): a price run from a neighbouring, merged
     ['Pink Grapefruit Soda', '4.6'],
   ])
   // The left column's own 5.5 stays its own item; it is never a name prefix.
-  assert.deepEqual(items.filter(([name]) => name === 'Cultcha Kombucha'), [
-    ['Cultcha Kombucha', '5.5'],
+  // Review 6250261342: the wrapped variant line "Passionfruit & Lime" is now
+  // joined to its own name on explicit evidence (a short "&" variant list and
+  // the repeated "Cultcha" prefix on the next priced item). The price relation
+  // itself is unchanged: the orphan 5.5 never becomes a name and no amount is
+  // borrowed from the right column.
+  assert.deepEqual(items.filter(([name]) => name.startsWith('Cultcha Kombucha')), [
+    ['Cultcha Kombucha Passionfruit & Lime', '5.5'],
     ['Cultcha Kombucha', '5.5'],
   ])
   assert.equal(items.some(([name]) => name.startsWith('5.5')), false)

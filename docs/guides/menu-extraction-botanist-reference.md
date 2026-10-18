@@ -110,3 +110,67 @@ niet geraden. De referentie zelf is niet aangepast.
   is de maat, niet het aantal.
 - Geen OCR, geen renderingvendor, geen extra betaalde dienst en geen
   app-provider zijn geactiveerd.
+
+## Herstelronde review 6250261342 — sectie- en naamdekking
+
+Zelfde gepinde PDF (SHA-256 `50fef0b6…7f85`), read-only, alleen de
+deterministische HTML/PDF-keten. Geen provider, OCR, renderingvendor,
+netwerkactie, referentie-aanpassing of productieactie.
+
+De referentie v1 blijft **ongewijzigd** de meetlat: 141 referentierijen in 21
+secties. Nieuwe meting op dezelfde PDF:
+
+| Meting | Resultaat |
+| --- | --- |
+| Parseritems | 214 in 50 categorieën |
+| Gematcht op naam binnen dezelfde sectie | **130** (was 95) |
+| Ontbrekend t.o.v. referentie | **11** (was 46) |
+| Extra binnen een gematchte sectie | **4** (was 5) |
+| Prijsverschil bij een naam-match | **0** |
+| Parseritems zonder referentiesectie | 80 (was 95) |
+| Layouttellers | 18 ambigu, 9 niet-gekoppelde prijsregels, 12 supplementregels, 4 overgenomen kolomsecties, 1 subrubriek, 13 naamcontinuaties, 2 portieregels |
+
+De vergelijking is reproduceerbaar met
+`node ops/benchmark/runBotanistComparison.js --pdf=<lokale PDF>`; de PDF-hash
+wordt vooraf gecontroleerd en het script schrijft alleen
+`ops/benchmark/botanist-comparison.json`.
+
+### Fouttaxonomie per aanknopingspunt
+
+| Aanknopingspunt | Bronbewijs (zelfde PDF) | Taxonomie | Uitkomst |
+| --- | --- | --- | --- |
+| `PREMIUM FRISDRANKEN` expected 10, actual 0 | p3: `// PREMIUM FRISDRANKEN` x36 y546,5; `// Double Dutch` x227,4 y526,2; namen links x42,8 met bedragen x184; rechts x227,4 met bedragen x369 | verloren kolomkop + prijskolom door paginabrede fallback-ankers; `Double Dutch` is een merk-subkop | **hersteld**: 10 items (3 links + 7 onder `PREMIUM FRISDRANKEN > Double Dutch`), 8 matched. Resterend: `Del Sol Pineapple` (ambigue naamregel) en `Double Dutch Ginger Beer` (inconsistente referentierij) |
+| `fritz` expected 10, actual 0 | p3: `// fritz` x41,9 y436 met vijf fritz-limo-regels x41,9 en bedragen x184 | verloren prijskolom; de vijf lemonades horen bij het lagere Soof-blok, niet bij fritz | **deels hersteld**: 5/5 fritz-limo. De 5 lemonades zijn een **niet-ondersteund** blok (ander raster: namen x184,4, bedragen x369, geen kop) |
+| `FRISDRANK` afgekapte namen | p2: `Sourcy` + `Still Water, Sourcy` y481,3 met één bedrag 3.0; `Sparkling Water (20cl)` y470; `Lipton Ice Tea Sparkling /` + twee vervolgregels; `Royal Club …` + `/ Ginger Ale` | meerregelige naam met expliciete connector/portie versus omschrijving | **Lipton en Royal Club volledig hersteld**; Sourcy als twee familie-/portieregels samengevoegd. v1 splitst die in vier losse gerechten → **voorstel v2** met bronbewijs |
+| `SNACKS`: `Holtkamp ambachtelijke` | p11: y463,7 met bedrag 9,5; y452,5 `draadjesvlees bitterbal` + losse `8st.` | meerregelige naam + losse portie | **hersteld**: volledige naam; `8st.` is geteld als portie en niet als apart gerecht of hoofdprijs |
+| `STARTERS` 5 missing / `DESSERTS` 4 / `LUNCH` 4 | p12/p15/p10: rechterkolom heeft geen eigen kop en zet de sectie van de linkerkolom voort | doorlopende sectie over kolommen | **hersteld**: STARTERS 10/10, DESSERTS 8/8, LUNCH 11/11; koppeling als onzeker gemarkeerd en als limitation/flag gemeld |
+| `MEDITERRAANS` 0 | p13: `Blue Velvet Gnocchi` y520 met bedrag 13,5 op y518 | drie-woordnaam boven lokale prijsregel | **hersteld**: 3/3 |
+| beschrijving werd subrubriek | p4 `England IPA`; p13 `Gemarineerde oesterzwam`; p12 `Krokante sprinkhaan` | beschrijving versus kop | **hersteld**: korte beschrijvingsregel direct onder een geprijsd item blijft omschrijving; geen verzonnen subrubriek |
+| `Desperados` ontbrak | p4: `4.0%`/`5.2` op y365, naam op y363 (1,9 eenheid lager) | ABV-microbaseline boven het bedrag | **hersteld**: bedrag boven de naam binnen 3 eenheden wordt gekoppeld; ABV wordt nooit naam of prijs |
+| wijn/cocktail/Petite | p7-p9, p5-p6, p11 | meerregelige blokken, glas/fles en porties | **niet opgelost / niet ondersteund**: geen lossless bewijs; wijnregels blijven de bekende beperking houden. Petite-porties staan in de naam of zijn als portieregel geteld |
+
+### Voorstel referentie v2 (niet geaccepteerd)
+
+`ops/benchmark/botanist-reference.proposed-v2.json` is een **voorstel** met
+status `proposed_not_accepted`, gebaseerd op v1. Het bevat drie
+brononderbouwde correcties: Sourcy als twee familie-/portieregels, `Ginger
+Beer` zonder merkvoorvoegsel, en de vijf lemonades buiten fritz als
+niet-ondersteund Soof-blok. v1 blijft ongewijzigd de baseline.
+
+Alleen ter controle is het voorstel apart gescoord
+(`botanist-comparison.proposed-v2.json`): 133 matched / 1 missing / 1 extra /
+0 prijsverschil. Die ene resterende rij is `Del Sol Pineapple Hibiscus Soda`:
+de vervolgregel `Hibiscus Soda` heeft geen expliciete connector, portie of
+herhaald prefix. Dezelfde vorm is elders een omschrijving (`England IPA`),
+dus de parser raadt de naam niet. Dat staat als parser-gap in het voorstel en
+is **geen** referentiecorrectie.
+
+### Wat expliciet open blijft
+
+- Het lagere Soof-blok (5 lemonades) wordt niet uitgelezen; het raster wijkt af
+  en er is geen kop. Dat is een eerlijke beperking, geen lege successtatus.
+- Wijn-, cocktail- en Petite-blokken blijven niet verliesvrij; ze zijn niet
+  als volledig geclaimd.
+- Geen OCR, provider, betaalde fallback of browseracceptatie in deze ronde.
+- 130/141 is nog steeds ontwikkelaarsbewijs, geen onafhankelijke
+  bronwaarheid of productacceptatie.

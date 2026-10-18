@@ -312,6 +312,19 @@ function pdfLayoutLimitations(sourceUrl, layout = {}) {
   if (Number.isInteger(layout.unrecognizedHeadingLines) && layout.unrecognizedHeadingLines > 0) {
     limitations.push(`PDF ${sourceUrl}: ${layout.unrecognizedHeadingLines} mogelijke rubriekkop(pen) zijn niet herkend en dus niet als rubriek opgeslagen.`)
   }
+  if (
+    (Number.isInteger(layout.inheritedSectionColumns) && layout.inheritedSectionColumns > 0) ||
+    (Number.isInteger(layout.inheritedSubheadingColumns) && layout.inheritedSubheadingColumns > 0)
+  ) {
+    limitations.push(
+      `PDF ${sourceUrl}: ${layout.inheritedSectionColumns || 0} kolom(men) zonder eigen rubriekkop en ${layout.inheritedSubheadingColumns || 0} merk-/subrubriek(en) zijn als onzekere rubricering overgenomen; controleer de rubriekkoppeling.`,
+    )
+  }
+  if (Number.isInteger(layout.portionLines) && layout.portionLines > 0) {
+    limitations.push(
+      `PDF ${sourceUrl}: ${layout.portionLines} portie-/hoeveelheidsregel(s) zijn niet als los gerecht opgenomen; het concept ondersteunt porties nog niet.`,
+    )
+  }
   return limitations
 }
 

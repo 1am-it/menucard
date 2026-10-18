@@ -433,3 +433,82 @@ vóór enige modelaanroep:
   groeperingsmatrix, eenheid, scheidingsteken, echte integerprijs, meerdere
   gerechten/kolommen), `restaurantSourceAnalysis.test.js` (drie notaties door
   de keten), `botanistReference.test.js` (gemeten vergelijking).
+
+### 13.14 Sectie- en naamdekking op dezelfde PDF-layout (review 6250261342)
+
+De review vroeg om de genoemde sectieblokken en afgekorte naamregels op
+dezelfde gepinde Botanist-PDF te onderzoeken, een fouttaxonomie te maken en
+alleen generiek aantoonbare verliezen te herstellen. De productieparser is
+niet als referentie gebruikt; de referentie v1 is niet aangepast.
+
+**Kolommen.** `pageColumnAnchors` gebruikt na een markerrij nu ook
+sectiemarkers die op een **stabiele tekstkolomstart** staan, ook wanneer de
+markers op verschillende regels staan. Een gecentreerde menutitel
+(`// ONZE COCKTAILS`, `// SHARED DINING`) is geen kolomstart en maakt dus geen
+kolom. De kolom wordt 10 eenheden naar links verbreed omdat een marker iets
+inspringt ten opzichte van zijn eigen items. Hiermee blijven naam en bedrag op
+pagina 3 (`PREMIUM FRISDRANKEN`, `fritz`) in dezelfde kolom.
+
+**Doorlopende secties.** Een kolom zonder eigen kop boven zijn eerste inhoud
+erft de dichtstbijzijnde kop van de naastgelegen kolom (STARTERS, DESSERTS,
+LUNCH). Die koppeling is structureel bewijs, maar wordt als `uncertain`
+gemarkeerd en via `inheritedSectionColumns` /
+`pdf_inherited_sections` gemeld. Een marker die direct onder de bovenliggende
+sectiekop opent (PREMIUM FRISDRANKEN → `// Double Dutch`) wordt een
+subrubriek, geen tweede topsectie; twee markers op dezelfde visuele regel
+(binnen 3 eenheden) blijven broers. Dit voorkomt dat een beschrijvingsregel
+als losse rubriek wordt opgeslagen.
+
+**Meerregelige namen versus omschrijvingen.** Een naam wordt alleen
+uitgebreid bij expliciet bronbewijs:
+
+- een connector aan het einde van de naam (`/`, `&`, `-`, `van`, `met`, `en`,
+  `of`) of aan het begin van de vervolgregel (`/`, `&`, `(`);
+- een losse portielabel op dezelfde regel (`8st.`) of een portie tussen
+  haakjes (`(20cl)`);
+- een korte `&`-variantlijst;
+- een herhaald merk-/naamprefix op het volgende geprijsde item (keuzelijst).
+
+Zonder dat bewijs blijft de regel een omschrijving. Een korte Titel-Case-regel
+direct onder een geprijsd item (`England IPA`, `Hibiscus Soda`) wordt dus geen
+subrubriek en ook geen geraden naam. Een losse portieregel (`8st.`, `6 st.`)
+wordt geteld (`portionLines`) en nooit een gerecht of een hoofdprijs.
+
+**Prijs en hoeveelheid.** Een los ABV-item (`5.0%`) wordt vóór de
+baselinegroepering verwijderd; het is nooit naam of prijs. Een bedrag dat een
+haar boven zijn eigen naam staat (ABV-microbaseline) wordt alleen gekoppeld
+wanneer de prijsregel ongebruikt, prijs-only en binnen 3 eenheden is. Een
+naam boven een lokale prijs-only-baseline mag nu ook drie tot zes woorden
+hebben (`Blue Velvet Gnocchi`, `The Crunchy Caprese`); de koppeling blijft
+begrensd door `MAX_NAME_PRICE_BASELINE_DISTANCE = 24`.
+
+**Nieuwe tellers, limitations en flags.** `inheritedSectionColumns`,
+`inheritedSubheadingColumns`, `nameContinuationLines` en `portionLines` staan
+in `layout`. `pdfLayoutLimitations` meldt overgenomen rubricering en
+portieregels in gewone taal; `menuExtractionQuality` voegt
+`pdf_inherited_sections` (reviewflag) en `pdf_portions_skipped`
+(productgap) toe. Een bron met alleen een overgenomen rubricering is dus niet
+`sufficient`; een portie blokkeert een modelcall die het concept toch niet kan
+opslaan.
+
+**Meting op dezelfde gepinde PDF.** 214 parseritems in 50 categorieën;
+referentie v1 (141 rijen) ongewijzigd: 130 matched / 11 missing / 4 extra /
+0 prijsverschil / 80 niet-gekoppeld. Layout: 18 ambigu, 9 niet-gekoppelde
+prijsregels, 12 supplementregels, 4 overgenomen kolomsecties, 1 subrubriek,
+13 naamcontinuaties en 2 portieregels. Het reproduceerbare script is
+`ops/benchmark/runBotanistComparison.js` (hashcheck, geen netwerk/provider).
+
+**Voorstel, geen acceptatie.** `ops/benchmark/botanist-reference.proposed-v2.json`
+bevat drie brononderbouwde correcties (Sourcy als twee familie-/portieregels,
+`Ginger Beer` zonder merkprefix, lemonades buiten fritz als niet-ondersteund
+Soof-blok). Het voorstel is apart gescoord (133/1/1/0) en vervangt v1 niet.
+De enige resterende rij is de ambigue `Del Sol`-naamuitbreiding; die is als
+parser-gap gedocumenteerd, niet als referentiefout.
+
+**Regressies.** `pdfMenuStructuringLiveRegressions.test.js` dekt
+doorlopende secties, meerdere kolommen, een merk-subkop, expliciete
+naamconnectoren, porties, een beschrijving onder een geprijsd item, een
+driewoordige naam boven een lokale prijsregel en een ABV-microbaseline.
+`pdfMenuStructuring.test.js` behoudt de bestaande prijs-/supplementveiligheid;
+`menuExtractionQuality.test.js` en `restaurantSourceAnalysis.test.js` dekken de
+nieuwe reviewflag, productgap en limitations.

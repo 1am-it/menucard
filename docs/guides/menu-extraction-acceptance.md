@@ -605,3 +605,99 @@ Deze bevestigingscommit is zelf docs-only; de genoemde HEAD is de laatste
 commit waarop de controles zijn uitgevoerd. Browseracceptatie,
 provideractivering, de 50-100-bronnenbenchmark en onafhankelijke review blijven
 open.
+
+## Aanvullende verificatie — 2026-10-18 (review 6250261342)
+
+Deze ronde is een expliciet geautoriseerde lokale developer-continuatie in een
+geïsoleerde clone, binnen #59/PR #60 op `feat/menu-extraction-59`. Geen
+provider, betaalde fallback, merge, publicatie, productieactie of
+workflowwijziging. De publieke Smelt-/Blossem-probe was read-only; er zijn geen
+productiegegevens of secrets gebruikt. #56 is niet overgenomen.
+
+### Reparaties
+
+De review vroeg om dezelfde gepinde Botanist-PDF/layout opnieuw te onderzoeken
+en alleen generiek aantoonbare sectie-/naamverliezen te herstellen. De
+mechanismen staan in `docs/guides/menu-extraction-implementation.md` §13.14:
+
+- stabiele markerkolommen voor markers op verschillende regels;
+- rubriekovererving voor een kolom zonder eigen kop (onzeker gemarkeerd);
+- een merk-subkop onder de bovenliggende sectiekop, met broers op dezelfde
+  visuele regel;
+- naamuitbreiding alleen bij expliciete connector, portie, `&`-variant of
+  herhaald prefix;
+- korte beschrijvingsregels blijven omschrijving, geen verzonnen subrubriek;
+- ABV-microbaselines en een lokaal bedrag boven de naam;
+- drie- tot zeswoordige namen boven een lokale prijs-only-baseline;
+- portieregels worden geteld en nooit een gerecht of hoofdprijs;
+- supplementen worden vóór naamuitbreiding afgevangen (Smelt-regressie).
+
+Nieuwe tellers/limitations/flags: `inheritedSectionColumns`,
+`inheritedSubheadingColumns`, `nameContinuationLines`, `portionLines`,
+`pdf_inherited_sections` en `pdf_portions_skipped`.
+
+### Meting op dezelfde gepinde PDF
+
+`node ops/benchmark/runBotanistComparison.js --pdf=…/botanist-menu.pdf`
+verifieert eerst SHA-256 `50fef0b6…7f85` en schrijft
+`ops/benchmark/botanist-comparison.json`.
+
+| Meting | Resultaat |
+| --- | --- |
+| Referentie v1 | ongewijzigd 141 rijen / 21 secties |
+| Parseritems | 214 in 50 categorieën |
+| Gematcht | **130** (was 95) |
+| Ontbrekend | **11** (was 46) |
+| Extra | **4** (was 5) |
+| Prijsverschil bij match | **0** |
+| Niet gekoppeld | 80 (was 95) |
+| Layout | 18 ambigu, 9 niet-gekoppelde prijsregels, 12 supplementregels, 4 overgenomen kolomsecties, 1 subrubriek, 13 naamcontinuaties, 2 portieregels |
+
+De resterende 11 ontbrekende rijen zijn exact benoemd in
+`botanistReference.test.js`: 4 Sourcy-rijen (v1 splitst één familie-/portieregel
+in vier; voorstel v2), 2 PREMIUM-rijen (`Del Sol`-naamuitbreiding en de
+inconsistente `Double Dutch Ginger Beer`) en 5 lemonades van het lagere
+Soof-blok. Dat blok heeft een ander raster en geen kop; het blijft expliciet
+niet-ondersteund.
+
+### Voorstel referentie v2 (niet geaccepteerd)
+
+`ops/benchmark/botanist-reference.proposed-v2.json` heeft status
+`proposed_not_accepted`, is gebaseerd op v1 en bevat drie brononderbouwde
+correcties. Alleen ter controle apart gescoord:
+`botanist-comparison.proposed-v2.json` = 133 matched / 1 missing / 1 extra /
+0 prijsverschil. v1 blijft de enige meetlat; er is niets groen gemaakt door de
+referentie aan te passen.
+
+### Checks op deze ronde
+
+| Controle | Commando | Resultaat |
+| --- | --- | --- |
+| Gerichte parser-/quality-/limitationtests | `node --test src/lib/pdfMenuStructuring*.test.js src/lib/restaurantSourceAnalysis.test.js src/lib/menuExtractionQuality.test.js` | 98 pass, 0 fail |
+| Volledige suite (na de laatste supplementfix) | `npm test` | 2048 tests: 2048 pass, 0 fail, 0 skipped |
+| Eerdere volledige suite | `npm test` | 2049 tests: 2048 pass, 1 fail in `ops/scripts/capture-market-boundary.test.js` (asynchrone temp-cleanup, niet gewijzigd); die file apart: 25/25 pass |
+| Structuurcorpus | `npm run test:menu-structure` | 6 pass, 0 fail |
+| Benchmark | `npm run benchmark:menu-structure` | 22 pass, 0 fail, 1 unclassified (STRUCT-018 JSON-LD-hiërarchie) |
+| Build | `npm run build` | compiled successfully in 26.7s; 41/41 statische pagina's; `BUILD_ID` `UVXikb4s9S_fCI9lqJ5O5` |
+| PDF.js-trace | `node ops/scripts/verify-pdfjs-server-trace.js` | OK; native `pdf.mjs`/`pdf.worker.mjs`, 164 server scripts, geen gebundelde PDF.js-runtime |
+| Echte bronproef (read-only) | `node ops/scripts/probe-menu-extraction-sources.js --source=all` | Smelt 37/37 en Blossem 43/43; 0 missing/extra/prijs/categorie/duplicaat; boekhouding 37/37 en 43/43 balanced |
+| Botanist-vergelijking | `node ops/benchmark/runBotanistComparison.js --pdf=…` | 214 items; 130/11/4/0; 80 niet-gekoppeld; hashcontrole vóór meting |
+| Voorstel v2 | idem met `--reference=…proposed-v2.json` | 133/1/1/0; alleen als voorstel, niet als baseline |
+| Whitespace | `git diff --check` | schoon; alleen de bestaande LF/CRLF-waarschuwing voor het geregenereerde JSON-bestand |
+
+### Resterende gaten (deze ronde)
+
+- Het lagere Soof-blok (5 lemonades) wordt niet uitgelezen; ander raster en
+  geen kop. Dat is een expliciete beperking, geen lege successtatus.
+- `Del Sol Pineapple Hibiscus Soda` blijft een ambigue naamuitbreiding; de
+  parser raadt niet en meldt de afgekorte naam. Het voorstel v2 noemt dit als
+  parser-gap, niet als referentiefout.
+- Wijn-, cocktail- en Petite-blokken blijven niet verliesvrij; porties staan
+  in de naam of zijn als portieregel geteld.
+- Browseracceptatie (klikpaden, toetsenbord, 320/390 px, licht/donker) is in
+  deze clone niet uitgevoerd; de bestaande UI is niet gewijzigd.
+- Echte provideractivering, kostenplafond en retentie blijven een Product
+  Owner-beslispunt; de runtime blijft disabled.
+- De 50-100-bronnenbenchmark, de aparte ongeziene set, #56-compatibiliteit en
+  onafhankelijke herreview zijn niet afgesloten. Deze sectie is
+  ontwikkelaarsbewijs, geen productacceptatie of release.

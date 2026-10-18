@@ -831,6 +831,21 @@ test('REGRESSION (review 6249303096 P1): an unlinked PDF price line is reported 
   assert.deepEqual(pdfLayoutLimitations('https://fixture.example/menu.pdf', { unlinkedPriceLines: 0 }), [])
 })
 
+test('REGRESSION (review 6250261342): an inherited section and a skipped portion are named limitations, not silent success', () => {
+  const inherited = pdfLayoutLimitations('https://fixture.example/menu.pdf', {
+    inheritedSectionColumns: 1,
+    inheritedSubheadingColumns: 1,
+  })
+  assert.equal(inherited.length, 1)
+  assert.match(inherited[0], /1 kolom\(men\)/)
+  assert.match(inherited[0], /onzekere rubricering/)
+
+  const portions = pdfLayoutLimitations('https://fixture.example/menu.pdf', { portionLines: 2 })
+  assert.equal(portions.length, 1)
+  assert.match(portions[0], /2 portie-/)
+  assert.match(portions[0], /porties nog niet/)
+})
+
 test('REGRESSION (review 6249657793 P1 + 6249915021 P1): an unresolvable numeric ambiguity survives parser → quality gate → limitation identically for integer, decimal and comma notation and never becomes a sufficient/review-ready menu', async () => {
   const outcomes = []
   for (const [second, third] of [['6', '25'], ['6.5', '25.0'], ['6,50', '25,00']]) {

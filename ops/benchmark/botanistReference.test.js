@@ -63,15 +63,81 @@ test('unsupported block layouts are named with a reason, not silently omitted', 
 
 test('the committed comparison is the measured one, not a forecast', () => {
   assert.equal(comparison.referenceItems, reference.referenceItemCount);
-  // Review 6249915021 P1: "Monkey 47 10.0" is structurally identical to a
-  // glass/bottle row without a separator, so the parser now reports that line
-  // as ambiguous instead of guessing the name number. The controlled
-  // reference sections and their matched/missing/extra totals are unchanged;
-  // only the unlinked bucket lost that one item (196/96 -> 195/95).
-  assert.equal(comparison.parserItems, 195);
-  assert.deepEqual(comparison.totals, { matched: 95, missing: 46, extra: 5, priceMismatch: 0 });
-  assert.equal(comparison.unmapped.length, 95);
-  assert.equal(comparison.unmapped.some((entry) => entry.name === 'Monkey 47'), false);
+  // Review 6250261342: stable marker columns, inherited column sections,
+  // nested brand sub-headings, multi-line names with explicit evidence and
+  // longer local name/price pairs. The reference v1 is unchanged.
+  assert.equal(comparison.referenceVersion, reference.version);
+  assert.equal(comparison.source.menuBytesSha256, reference.source.menuBytesSha256);
+  assert.equal(comparison.parserItems, 214);
+  assert.deepEqual(comparison.totals, { matched: 130, missing: 11, extra: 4, priceMismatch: 0 });
+  assert.equal(comparison.unmapped.length, 80);
+  assert.deepEqual(comparison.layout, {
+    duplicateLayerItems: 0,
+    duplicateLayerOffsets: [],
+    ambiguousPriceLines: 18,
+    unlinkedPriceLines: 9,
+    supplementLines: 12,
+    arrangementLines: 0,
+    unrecognizedHeadingLines: 0,
+    inheritedSectionColumns: 4,
+    inheritedSubheadingColumns: 1,
+    nameContinuationLines: 13,
+    portionLines: 2,
+  });
   const sections = Object.keys(comparison.sections);
   assert.equal(sections.length, reference.sections.length);
+});
+
+test('the section/name leads from review 6250261342 are measured individually', () => {
+  const section = (name) => comparison.sections[name];
+  // Fixed: right-column continuations and three-word names above a local amount.
+  assert.equal(section('STARTERS').matched, 10);
+  assert.equal(section('DESSERTS 17:00 - 21:00').matched, 8);
+  assert.equal(section('LUNCH').matched, 11);
+  assert.equal(section('MEDITERRAANS').matched, 3);
+  assert.equal(section('(MIDDEN) - OOSTERS').matched, 3);
+  assert.equal(section('SNACKS').matched, 6);
+  // Fixed: wrapped names with explicit separators and a portion continuation.
+  assert.deepEqual(section('FRISDRANK').missing.map((item) => item.name), [
+    'Sourcy Still Water (20cl)',
+    'Sourcy Sparkling Water (20cl)',
+    'Sourcy Still Water (75cl)',
+    'Sourcy Sparkling Water (75cl)',
+  ]);
+  assert.deepEqual(section('FRISDRANK').extra.map((item) => item.name), [
+    'Sourcy Still Water, Sourcy Sparkling Water (20cl)',
+    'Sourcy Still Water, Sourcy Sparkling Water (75cl)',
+  ]);
+  // Remaining: one unproven multi-line name and one inconsistent reference row.
+  assert.deepEqual(section('PREMIUM FRISDRANKEN').missing.map((item) => item.name), [
+    'Del Sol Pineapple Hibiscus Soda',
+    'Double Dutch Ginger Beer',
+  ]);
+  // Remaining: the lower Soof block is a different grid and stays unsupported.
+  assert.deepEqual(section('fritz').missing.map((item) => item.name), [
+    'Blueberry & Lavender Lemonade',
+    'Rose & Cardamom Lemonade',
+    'Carrot & Ginger Lemonade',
+    'Lemongrass & Pear Lemonade',
+    'Ice Tea Lemonade',
+  ]);
+  assert.equal(section('fritz').matched, 5);
+});
+
+test('the proposed v2 corrections are labelled, source-backed and never replace the v1 baseline', () => {
+  const proposal = require('./botanist-reference.proposed-v2.json');
+  const proposedComparison = require('./botanist-comparison.proposed-v2.json');
+  assert.equal(proposal.status, 'proposed_not_accepted');
+  assert.equal(proposal.basedOn, reference.version);
+  assert.equal(proposal.groundTruth, 'controlled_partial_proposed');
+  assert.equal(proposal.corrections.length, 3);
+  for (const correction of proposal.corrections) {
+    assert.ok(correction.evidence.length > 40, `${correction.change} has source evidence`);
+  }
+  assert.deepEqual(proposedComparison.totals, { matched: 133, missing: 1, extra: 1, priceMismatch: 0 });
+  assert.equal(proposedComparison.unmapped.length, 80);
+  // The accepted baseline is untouched by the proposal.
+  assert.equal(reference.version, '1.0.0');
+  assert.equal(reference.referenceItemCount, 141);
+  assert.equal(comparison.totals.matched, 130);
 });

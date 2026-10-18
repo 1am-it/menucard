@@ -275,6 +275,39 @@ function pageColumnAnchors(page, suppressedSeqs = new Set()) {
     }
   }
   const xs = [...counts.entries()].filter(([, count]) => count >= 2).map(([x]) => x).sort((a, b) => a - b)
+  // A marker that sits at a stable text-column start defines that column even
+  // when no second marker shares its row (De Botanist page 3: PREMIUM
+  // FRISDRANKEN on the left, `// Double Dutch` further down on the right). A
+  // centered menu title ("// ONZE COCKTAILS") is not a column start and must
+  // not create one; requiring a repeated text X filters those out. The column
+  // is widened 10 units to the left because a marker can be indented slightly
+  // relative to its own items (page 14: `// OESTERS` at 217.5, items at 217.5;
+  // page 5: `// KLASSIEKERS` at 220.9, the column starts at 217.5).
+  if (xs.length > 0) {
+    const stableStarts = [...counts.entries()].filter(([, count]) => count >= 3).map(([x]) => x)
+    const markerXs = []
+    for (const line of (page && Array.isArray(page.lines) && page.lines) || []) {
+      for (const item of (line && Array.isArray(line.items) && line.items) || []) {
+        if (!item || typeof item.str !== 'string' || typeof item.x !== 'number') continue
+        if (Number.isInteger(item.seq) && suppressedSeqs.has(item.seq)) continue
+        const match = item.str.trim().match(SECTION_MARKER_PATTERN)
+        if (!match) continue
+        if (!stableStarts.some((x) => Math.abs(x - item.x) <= 20)) continue
+        markerXs.push(item.x)
+      }
+    }
+    const markerStarts = []
+    for (const x of markerXs.sort((a, b) => a - b)) {
+      if (markerStarts.length === 0 || x - markerStarts[markerStarts.length - 1] > 20) markerStarts.push(x)
+    }
+    if (markerStarts.length >= 2) {
+      return markerStarts.map((start, index) => ({
+        min: Math.max(0, start - 10),
+        max: index + 1 < markerStarts.length ? markerStarts[index + 1] - 11 : Infinity,
+        center: start,
+      }))
+    }
+  }
   if (xs.length === 0) return []
   const clusters = [{ min: xs[0], max: xs[0], count: counts.get(xs[0]) }]
   for (const x of xs.slice(1)) {
@@ -430,6 +463,105 @@ function looksLikeUnrecognizedHeading(words, lineText) {
   return /^\p{Lu}/u.test(visible[0].text)
 }
 
+/**
+ * A name that sits on its own baseline directly above a price-only baseline may
+ * be longer than the two-word heuristic used for an *inferred heading*. Real
+ * menus print "Blue Velvet Gnocchi" and "The Crunchy Caprese" on one baseline
+ * with only the amount below it. This predicate is used only for that already
+ * bounded name/price pairing: the price baseline must be within
+ * MAX_NAME_PRICE_BASELINE_DISTANCE and hold nothing but prices/separators, so a
+ * prose sentence is still never promoted to a dish. Commas/semicolons and a
+ * trailing sentence mark stay prose.
+ */
+function looksLikePairableItemName(words, lineText) {
+  const visible = (Array.isArray(words) ? words : []).filter(
+    (word) => word && typeof word.text === 'string' && word.text.trim().length > 0,
+  )
+  if (visible.length === 0 || visible.length > 6) return false
+  if (!isNameWord(visible[0])) return false
+  if (!/^\p{Lu}/u.test(visible[0].text)) return false
+  const lastWord = visible[visible.length - 1].text
+  const endsWithPortionLabel = STANDALONE_PORTION_PATTERN.test(lastWord)
+  if (/[;,:]$/.test(lineText) || /[!?]$/.test(lineText)) return false
+  // A trailing period is a sentence mark, except in a unit abbreviation that
+  // is already recognised as a portion label ("Rendang Croquettes 6st.").
+  if (lineText.endsWith('.') && !endsWithPortionLabel) return false
+  return true
+}
+
+/**
+ * A short Title-Case line directly below a priced item, aligned with its name,
+ * is a description/tasting note in this layout ("England IPA" under "Juice
+ * Punch New", "Hibiscus Soda" under a truncated drink name), not a section
+ * heading. Multi-word headings are never promoted from such a position; a real
+ * heading is still recognised by `//`, a known plain label, or a separate
+ * heading position. ALL-CAPS lines stay headings.
+ */
+function looksLikeShortItemContinuation(lineText) {
+  const text = String(lineText || '').trim()
+  const words = text.split(/\s+/).filter(Boolean)
+  if (words.length < 2 || words.length > 4) return false
+  if (/[0-9]/.test(text) || /[.!?:;,]$/.test(text)) return false
+  if (!/^\p{Lu}/u.test(text)) return false
+  if (text === text.toUpperCase()) return false
+  return true
+}
+
+/**
+ * "8st.", "6 st.", "2 personen" on its own is a portion/quantity label, never
+ * part of a dish name. `QUANTITY_UNIT_PATTERN` already provides the closed unit
+ * vocabulary; this helper only matches the complete token, so "8st." inside a
+ * longer name is left untouched.
+ */
+const STANDALONE_PORTION_PATTERN = /^\d{1,3}\s*(?:st|stk|stuks?|pers|persoon|personen|pp|glas|glazen|fles|flessen|btl|bottel|karaf|cl|ml|liter|l|gram|gr|kg)\.?$/i
+
+function isStandalonePortionToken(str) {
+  return typeof str === 'string' && STANDALONE_PORTION_PATTERN.test(str.trim())
+}
+
+/**
+ * A wrapped item name is only extended when the source itself gives explicit
+ * evidence. Two dishes/shapes are otherwise indistinguishable from a
+ * description:
+ *   - a connector at the end of the name ("Dutch Cucumber &", "Kazen van",
+ *     "Liquid Dessert -") or at the start of the continuation ("/ Ginger Ale",
+ *     "(20cl)");
+ *   - a portion label on the continuation baseline ("8st.") or a parenthesised
+ *     portion inside it ("(20cl)");
+ *   - a short "&" variant list ("Passionfruit & Lime");
+ *   - the same brand/name prefix repeating on the next priced item, which is a
+ *     choice-list pattern ("Cultcha Kombucha X" followed by "Cultcha Kombucha
+ *     Y").
+ * Without one of these, the line stays a description or is reported as an
+ * unresolved continuation; it is never guessed into the name.
+ */
+function nameContinuationEvidence(previousName, continuationText, nextItems, nextLineText, hasStandalonePortion) {
+  const previous = String(previousName || '').trim()
+  const continuation = String(continuationText || '').trim()
+  if (previous.length === 0 || continuation.length === 0) return null
+  const continuationWords = continuation.split(/\s+/).filter(Boolean)
+  const continuationIsNameLike = /^\p{Lu}/u.test(continuation) && continuationWords.length >= 2
+  if (/(?:[/&+\-–—,]|\b(?:van|met|en|of))$/i.test(previous)) return 'name-connector'
+  if (/^[/&+\-–—(]/.test(continuation)) return 'continuation-connector'
+  if (isStandalonePortionToken(continuation) || hasStandalonePortion === true) return 'portion'
+  if (/\(\s*\d{1,3}\s*(?:cl|ml|l|liter|gram|gr|kg|st|stk|pers|personen)\s*\)/i.test(continuation)) return 'portion'
+  if (continuationIsNameLike && continuation.includes('&')) return 'variant-list'
+  const firstWord = previous.split(/\s+/).filter(Boolean)[0]
+  const nextText = joinText((Array.isArray(nextItems) ? nextItems : []).map((item) => item.str))
+  const nextFirstWord = nextText.split(/\s+/).filter(Boolean)[0]
+  if (continuationIsNameLike && firstWord && nextFirstWord && nextFirstWord.toLowerCase() === firstWord.toLowerCase()) {
+    return 'repeated-prefix'
+  }
+  // Look one line further only when that line is the next priced item; the
+  // repeated prefix is the evidence, not the mere presence of another line.
+  const beyondText = String(nextLineText || '').trim()
+  const beyondFirstWord = beyondText.split(/\s+/).filter(Boolean)[0]
+  if (continuationIsNameLike && firstWord && beyondFirstWord && beyondFirstWord.toLowerCase() === firstWord.toLowerCase()) {
+    return 'repeated-prefix'
+  }
+  return null
+}
+
 /** Splits a reconstructed line's own items into individual whitespace-
  * separated words, each still carrying its source text item's X position.
  * pdfjs does not reliably keep a name and its own trailing price as two
@@ -558,7 +690,10 @@ function splitLineIntoColumns(lineItems) {
 
 /** pdfjs may group a name, its description and its price into one visual
  * "line" even when they sit on slightly different baselines. Keep those
- * baselines separate so a description is never glued onto the dish name. */
+ * baselines separate so a description is never glued onto the dish name. A
+ * standalone ABV item is dropped before grouping (see splitColumnByBaseline),
+ * and an amount printed a hair above its own name is paired by the bounded
+ * look-behind in the parser, so no larger tolerance is needed here. */
 const BASELINE_TOLERANCE = 1
 
 /** The maximum vertical distance (PDF units) between a name baseline and the
@@ -586,6 +721,11 @@ function baselinesAreVerticallyAdjacent(nameBaselineItems, priceBaselineItems) {
 function splitColumnByBaseline(columnItems) {
   const groups = []
   for (const item of columnItems) {
+    // An ABV token ("5.0%") is a property, never a name or a price. Dropping a
+    // standalone ABV item before grouping keeps it from being glued onto a name
+    // when pdfjs prints it on a micro-baseline of its own; the amount and the
+    // name remain, and the ABV is not stored anyway.
+    if (item && typeof item.str === 'string' && ABV_TOKEN_PATTERN.test(item.str.trim())) continue
     const y = typeof item.y === 'number' ? item.y : null
     let group = y === null ? null : groups.find((candidate) => candidate.y !== null && Math.abs(candidate.y - y) <= BASELINE_TOLERANCE)
     if (!group) {
@@ -654,6 +794,10 @@ function structurePdfLinesIntoMenu(pages) {
     supplementLines: 0,
     arrangementLines: 0,
     unrecognizedHeadingLines: 0,
+    inheritedSectionColumns: 0,
+    inheritedSubheadingColumns: 0,
+    nameContinuationLines: 0,
+    portionLines: 0,
   }
 
   function categoryFor(path, uncertain) {
@@ -709,8 +853,113 @@ function structurePdfLinesIntoMenu(pages) {
       columnBaselines[columnIndex] = splitColumnByBaseline(baselines.flat())
     })
 
+    // Headings on this page, in visual order. A column that prints no heading of
+    // its own continues the section of the adjacent column above it (a real
+    // magazine layout: the STARTERS heading sits in the left column while the
+    // right column keeps listing starters). That relation is structural evidence,
+    // not a guess, but it stays marked uncertain for review. A marker that opens
+    // a column directly beneath exactly one parent heading is a brand/sub-heading
+    // of that parent (De Botanist: "// PREMIUM FRISDRANKEN" above "// Double
+    // Dutch"), never a second top-level section.
+    const headingEvents = []
+    const stableTextStarts = (() => {
+      const counts = new Map()
+      for (const line of (page && Array.isArray(page.lines) && page.lines) || []) {
+        for (const item of (line && Array.isArray(line.items) && line.items) || []) {
+          if (!item || typeof item.str !== 'string' || !item.str.trim()) continue
+          if (typeof item.x !== 'number' || !/\p{L}/u.test(item.str)) continue
+          if (Number.isInteger(item.seq) && duplicateLayer.suppressedSeqs.has(item.seq)) continue
+          const key = Math.round(item.x)
+          counts.set(key, (counts.get(key) || 0) + 1)
+        }
+      }
+      return [...counts.entries()].filter(([, count]) => count >= 3).map(([x]) => x)
+    })()
     columnBaselines.forEach((baselines, columnIndex) => {
-      const state = { menuName: null, categoryPath: null, categoryInferred: false, lastItem: null, pendingSupplement: false }
+      for (const baseline of baselines) {
+        const items = baseline.filter((item) => item && typeof item.str === 'string' && item.str.trim().length > 0)
+        if (items.length === 0) continue
+        const names = pureSectionMarkerNames(items)
+        const plain = names ? null : pdfSectionLabel(items)
+        if (!names && !plain) continue
+        const leftmostX = Math.min(...items.map((item) => (typeof item.x === 'number' ? item.x : 0)))
+        headingEvents.push({
+          y: Math.max(...items.map((item) => (typeof item.y === 'number' ? item.y : 0))),
+          x: leftmostX,
+          columnIndex,
+          path: names ? [names[0]] : [plain],
+          // A centered menu title ("// SHARED DINING 17:00 - 21:00") is not a
+          // column heading; only a marker at a repeated text-column start can be
+          // the parent of a sub-heading.
+          stableColumnStart: stableTextStarts.some((x) => Math.abs(x - leftmostX) <= 20),
+        })
+      }
+    })
+    const closestAbove = (events, y) => {
+      const above = events.filter((event) => event.y > y + BASELINE_TOLERANCE).sort((a, b) => a.y - b.y)
+      return above.length > 0 ? above[0] : null
+    }
+
+    const SUBHEADING_PARENT_WINDOW = 40
+    // Two section markers on the same printed row can differ by a couple of
+    // text-layer units (De Botanist WITTE/ROSÉ: 1.25). They are siblings, not a
+    // parent/child pair; only a visibly lower marker is a sub-heading.
+    const SIBLING_HEADING_TOLERANCE = 3
+
+    columnBaselines.forEach((baselines, columnIndex) => {
+      const firstContentY = (() => {
+        for (const baseline of baselines) {
+          const items = baseline.filter((item) => item && typeof item.str === 'string' && item.str.trim().length > 0)
+          if (items.length === 0) continue
+          const isHeading = Boolean(pureSectionMarkerNames(items) || pdfSectionLabel(items))
+          if (!isHeading) return Math.max(...items.map((item) => (typeof item.y === 'number' ? item.y : 0)))
+        }
+        return -Infinity
+      })()
+      const ownHeading = closestAbove(
+        headingEvents.filter((event) => event.columnIndex === columnIndex),
+        firstContentY,
+      )
+      let inheritedEvent = null
+      let inheritedAsSubheading = false
+      if (!ownHeading) {
+        inheritedEvent = closestAbove(
+          headingEvents.filter((event) => event.columnIndex !== columnIndex),
+          firstContentY,
+        )
+      } else {
+        const parent = closestAbove(
+          headingEvents.filter((event) => event.columnIndex !== columnIndex && event.stableColumnStart),
+          ownHeading.y,
+        )
+        const distance = parent ? parent.y - ownHeading.y : Infinity
+        if (parent && distance > SIBLING_HEADING_TOLERANCE && distance <= SUBHEADING_PARENT_WINDOW) {
+          inheritedEvent = parent
+          inheritedAsSubheading = true
+        }
+      }
+      const inheritedPath = inheritedEvent ? [...inheritedEvent.path] : null
+      const state = {
+        menuName: inheritedPath ? inheritedPath[0] : null,
+        categoryPath: inheritedPath,
+        categoryInferred: Boolean(inheritedPath),
+        inheritedParentActive: inheritedAsSubheading,
+        inheritedSectionPending: Boolean(inheritedEvent) && !inheritedAsSubheading,
+        lastItem: null,
+        lastItemBaselineIndex: -1,
+        pendingSupplement: false,
+      }
+      const addItem = (category, item) => {
+        category.items.push(item)
+        // An item added through an inherited section (or an inferred
+        // sub-heading) makes the whole category a review target, even when the
+        // category was first created by a confidently headed sibling column.
+        if (state.categoryInferred) category.uncertain = true
+        if (state.inheritedSectionPending) {
+          layout.inheritedSectionColumns += 1
+          state.inheritedSectionPending = false
+        }
+      }
       // A price on its own baseline is consumed by the name line above it;
       // other items on that same baseline (a second column's item) stay.
       const consumedItems = new Set()
@@ -745,10 +994,22 @@ function structurePdfLinesIntoMenu(pages) {
             const headingText = joinText(baselineItems.map((it) => it.str))
             const carriesServiceTime = /\d{1,2}:\d{2}/.test(headingText)
             if (sectionNames) {
-              // An explicit // marker is its own top-level section.
-              state.menuName = sectionNames[0]
-              state.categoryPath = [sectionNames[0]]
-              state.categoryInferred = false
+              if (state.inheritedParentActive && state.categoryPath && state.categoryPath.length > 0) {
+                // A brand/section marker that opens this column directly under
+                // the parent section heading is a subcategory of it, not a new
+                // top-level section. Nested and reviewable, never silently
+                // flattened into the parent name.
+                state.categoryPath = [...state.categoryPath, sectionNames[0]]
+                state.categoryInferred = true
+                state.inheritedParentActive = false
+                state.inheritedSectionPending = false
+                layout.inheritedSubheadingColumns += 1
+              } else {
+                // An explicit // marker is its own top-level section.
+                state.menuName = sectionNames[0]
+                state.categoryPath = [sectionNames[0]]
+                state.categoryInferred = false
+              }
             } else if (carriesServiceTime || !state.menuName) {
               // A plain heading with a service time (DINNER 17:30, LUNCH
               // 12:00–15:00) is the menu level; without one it stays top-level
@@ -764,6 +1025,7 @@ function structurePdfLinesIntoMenu(pages) {
               state.categoryPath = [state.menuName, plainSection]
               state.categoryInferred = true
             }
+            state.inheritedParentActive = false
             state.lastItem = null
             state.pendingSupplement = false
             continue
@@ -791,6 +1053,97 @@ function structurePdfLinesIntoMenu(pages) {
             if (/^\p{Ll}/u.test(lineText)) {
               layout.supplementLines += 1
               state.lastItem = null
+              continue
+            }
+          }
+          // A supplement/extra ("+ Bresaola", "+ Gebakken krieltjes 5",
+          // "Botersla ... + Bresaola 15") is a relation the current product
+          // concept cannot store. Emitting it as an ordinary dish would
+          // disguise a modifier as a main item, so it is skipped and counted.
+          // This must run before name-continuation handling: the leading "+"
+          // is a supplement marker, not a wrapped-name connector.
+          const hasSupplementMarker = words.some(
+            (word) => word.text === '+' || (word.text.startsWith('+') && word.text.length > 1 && !isPriceToken(word.text.slice(1))),
+          )
+          if (hasSupplementMarker) {
+            layout.supplementLines += 1
+            continue
+          }
+          // A portion label on its own ("8st.", "6 st.", "2 personen") is a
+          // relation the product cannot store yet. It is counted, never attached
+          // as a description or appended to the dish name.
+          const visibleItems = baselineItems.filter((it) => it && typeof it.str === 'string' && it.str.trim().length > 0)
+          const portionOnly =
+            visibleItems.length > 0 && visibleItems.every((it) => isStandalonePortionToken(it.str))
+          if (portionOnly) {
+            layout.portionLines += 1
+            if (state.lastItem) state.lastItemBaselineIndex = baselineIndex
+            continue
+          }
+          // A wrapped name is extended only on explicit source evidence (see
+          // nameContinuationEvidence). A same-X line directly below a priced item
+          // that has no such evidence stays a description; it is never promoted
+          // to a section heading.
+          const lineHasPrice = words.some((word) => isPriceToken(word.text))
+          // An amount printed a hair ABOVE its own name (a separate ABV row can
+          // push pdfjs's amount baseline above the name: the real
+          // "Desperados" row is 1.9 units above its name). This must run before
+          // name-continuation handling: the line is a new item, not the tail of
+          // the previous one. Only an unconsumed, price-only baseline
+          // immediately above and within 3 units is used.
+          const previousBaseline = (baselines[baselineIndex - 1] || []).filter((item) => !consumedItems.has(item))
+          if (!lineHasPrice && previousBaseline.length > 0 && looksLikePairableItemName(words, lineText)) {
+            const previousPrices = priceOnlyBaseline(previousBaseline)
+            const previousY = Math.max(...previousBaseline.map((it) => (typeof it.y === 'number' ? it.y : 0)))
+            const currentY = Math.max(...baselineItems.map((it) => (typeof it.y === 'number' ? it.y : 0)))
+            const distance = previousY - currentY
+            if (previousPrices && distance > 0 && distance <= 3) {
+              const category = categoryFor(state.categoryPath || [], state.categoryInferred)
+              const priceVariants = previousPrices.prices.length > 1
+                ? previousPrices.prices.map((price) => ({ label: null, price }))
+                : null
+              const item = {
+                name: lineText,
+                desc: null,
+                price: priceVariants ? null : previousPrices.prices[0],
+                priceStatus: priceVariants ? 'multiple_undecomposed' : 'known',
+                ...(priceVariants ? { priceVariants, priceText: previousPrices.text } : {}),
+                startX: Math.min(...baselineItems.map((it) => it.x)),
+                evidenceText: `${lineText} ${previousPrices.text}`,
+              }
+              addItem(category, item)
+              state.lastItem = item
+              state.lastItemBaselineIndex = baselineIndex
+              for (const priceItem of previousBaseline) {
+                const priceItemText = priceItem.str.trim()
+                if (isPriceToken(priceItemText) || isPriceVariantSeparator(priceItemText)) consumedItems.add(priceItem)
+              }
+              // The baseline was counted as unlinked when it was read; it is
+              // linked now, so the honest counter must not keep it.
+              layout.unlinkedPriceLines = Math.max(0, layout.unlinkedPriceLines - 1)
+              continue
+            }
+          }
+          if (!lineHasPrice && state.lastItem && !state.lastItem.desc) {
+            const nameParts = visibleItems.filter((it) => !isStandalonePortionToken(it.str))
+            const continuationText = joinText(nameParts.map((it) => it.str))
+            const leftmostX = visibleItems.length > 0 ? Math.min(...visibleItems.map((it) => it.x)) : null
+            const aligned = leftmostX !== null && Math.abs(leftmostX - state.lastItem.startX) <= DESCRIPTION_X_ALIGNMENT_TOLERANCE
+            const closeEnough = state.lastItemBaselineIndex >= 0 && baselineIndex - state.lastItemBaselineIndex <= 2
+            const nextLineText = joinText((baselines[baselineIndex + 2] || []).map((it) => it.str))
+            const hasStandalonePortion = visibleItems.some((it) => isStandalonePortionToken(it.str))
+            const evidence =
+              aligned && closeEnough && continuationText.length > 0
+                ? nameContinuationEvidence(state.lastItem.name, continuationText, nextBaseline, nextLineText, hasStandalonePortion)
+                : null
+            const joined = evidence ? joinText([state.lastItem.name, continuationText]) : ''
+            if (evidence && joined.length <= 120) {
+              state.lastItem.name = joined
+              state.lastItem.evidenceText = `${state.lastItem.evidenceText}\n${continuationText}`
+              if (leftmostX !== null) state.lastItem.startX = Math.min(state.lastItem.startX, leftmostX)
+              if (hasStandalonePortion) layout.portionLines += 1
+              state.lastItemBaselineIndex = baselineIndex
+              layout.nameContinuationLines += 1
               continue
             }
           }
@@ -822,17 +1175,6 @@ function structurePdfLinesIntoMenu(pages) {
             (word.priceOnlyItem ||
               variantItemIndexes.has(word.itemIndex) ||
               (word.itemLast === true && !words.some((other) => other.priceOnlyItem && other.x > word.x)))
-          // A supplement/extra ("+ Bresaola", "+ Gebakken krieltjes 5",
-          // "Botersla ... + Bresaola 15") is a relation the current product
-          // concept cannot store. Emitting it as an ordinary dish would
-          // disguise a modifier as a main item, so it is skipped and counted.
-          const hasSupplementMarker = words.some(
-            (word) => word.text === '+' || (word.text.startsWith('+') && word.text.length > 1 && !isPriceToken(word.text.slice(1))),
-          )
-          if (hasSupplementMarker) {
-            layout.supplementLines += 1
-            continue
-          }
           // A baseline that holds nothing but price tokens/separators and was
           // not consumed by a name baseline above it is read content the parser
           // cannot link to an item. Count it so review sees it; never silently
@@ -934,8 +1276,9 @@ function structurePdfLinesIntoMenu(pages) {
                 startX: recognized.startX,
                 evidenceText: lineText,
               }
-              category.items.push(item)
+              addItem(category, item)
               state.lastItem = item
+              state.lastItemBaselineIndex = baselineIndex
             }
             continue
           }
@@ -943,15 +1286,14 @@ function structurePdfLinesIntoMenu(pages) {
           // Name and price on two consecutive baselines in this column.
           // De Botanist prints many items this way ("Cappuccino" then
           // "3.8"); the price is not a description and the name is not a
-          // section heading. Only a line that already looks like a short
-          // capitalized item name is paired, only with a baseline that holds
-          // nothing but prices/separators, and only when that baseline is
-          // demonstrably close: a loose amount hundreds of units further down
-          // the page is never this dish's price (review P1).
+          // section heading. A name may be longer than two words when the
+          // price baseline is demonstrably local (MAX_NAME_PRICE_BASELINE_
+          // DISTANCE) and holds nothing but prices/separators; that is the
+          // real "Blue Velvet Gnocchi" / "The Crunchy Caprese" layout.
           const nextPrices = baselinesAreVerticallyAdjacent(baselineItems, nextBaseline)
             ? priceOnlyBaseline(nextBaseline)
             : null
-          if (nextPrices && looksLikeUnrecognizedHeading(words, lineText)) {
+          if (nextPrices && looksLikePairableItemName(words, lineText)) {
             const category = categoryFor(state.categoryPath || [], state.categoryInferred)
             const priceVariants = nextPrices.prices.length > 1
               ? nextPrices.prices.map((price) => ({ label: null, price }))
@@ -965,8 +1307,9 @@ function structurePdfLinesIntoMenu(pages) {
               startX: Math.min(...baselineItems.map((it) => it.x)),
               evidenceText: `${lineText} ${nextPrices.text}`,
             }
-            category.items.push(item)
+            addItem(category, item)
             state.lastItem = item
+            state.lastItemBaselineIndex = baselineIndex
             for (const priceItem of nextBaseline) {
               const priceItemText = priceItem.str.trim()
               if (isPriceToken(priceItemText) || isPriceVariantSeparator(priceItemText)) consumedItems.add(priceItem)
@@ -977,10 +1320,16 @@ function structurePdfLinesIntoMenu(pages) {
           // A single Title Case word directly below an item, aligned with
           // that item's name, is a flavour/variant continuation ("Red Bull
           // Red Edition" -> "Watermelon", "Texels Skuumkoppe" ->
-          // "Dunkelweizen"), not a new section. Multi-word and ALL-CAPS lines
-          // keep the existing heading path; a plural ("Broodjes", "Oesters")
-          // is treated as a category, not a flavour word.
-          if (/^\p{Lu}[\p{Ll}'-]+$/u.test(lineText) && !/s$/i.test(lineText) && state.lastItem) {
+          // "Dunkelweizen"), not a new section. A short Title-Case line that
+          // directly follows the name is likewise a description/tasting note
+          // ("England IPA", "Hibiscus Soda"), never a guessed sub-heading.
+          // A plural ("Broodjes", "Oesters") is treated as a category.
+          const singleFlavourWord = /^\p{Lu}[\p{Ll}'-]+$/u.test(lineText) && !/s$/i.test(lineText)
+          const shortDescription =
+            looksLikeShortItemContinuation(lineText) &&
+            state.lastItemBaselineIndex >= 0 &&
+            baselineIndex - state.lastItemBaselineIndex === 1
+          if (state.lastItem && (singleFlavourWord || shortDescription)) {
             if (attachDescription(baselineItems)) continue
           }
 

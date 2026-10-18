@@ -1,0 +1,831 @@
+{
+  "version": "2.0.0-proposed",
+  "status": "proposed_not_accepted",
+  "basedOn": "1.0.0",
+  "issue": 59,
+  "label": "De Botanist Breda - proposed reference corrections (v2, not accepted)",
+  "source": {
+    "entryUrl": "https://debotanistbreda.nl/",
+    "entryBytes": 126831,
+    "entryBytesSha256": "77c950de558afa1d43cd48320fc0776069a643f25fe6b8d8ce83f08ee41eb5b0",
+    "menuUrl": "https://debotanistbreda.nl/wp-content/uploads/2022/11/De-Botanist-Breda-Menukaart-voorjaar-20-03-2026_compressed.pdf",
+    "menuBytes": 551498,
+    "menuBytesSha256": "50fef0b6e8d14fbc151273c492f27c0fe70ab1ff909fdc445750cc7bb32a7f85",
+    "menuContentHash": "eb9da86e950463b90f09634f05236ec44925968120923506337678e56e3ade7f",
+    "pageCount": 16
+  },
+  "referenceMode": "controlled_layout_capture",
+  "referenceCompleteness": "partial_structured_sections",
+  "groundTruth": "controlled_partial_proposed",
+  "method": "Proposal built from v1 by correcting only relations that the pinned PDF text layer contradicts. The v1 baseline stays unchanged and remains the measured reference until the Delivery Lead accepts this proposal. No production parser output was used as truth.",
+  "proposalReason": "Review 6250261342 asked for source-verified section/name corrections. The three corrections below are visible in the text layer with coordinates; the five Soof lemonades are moved out of fritz because the page prints no fritz relation for them.",
+  "corrections": [
+    {
+      "section": "FRISDRANK",
+      "change": "Four Sourcy rows replaced by two combined family rows.",
+      "evidence": "PDF page 2: \"Sourcy\" (x221.7) + \"Still Water, Sourcy\" (x254.4) on y481.3, with one amount 3.0 (x369.7); the continuation \"Sparkling Water (20cl)\" is on y470.0 at x221.7. The same shape repeats on y458.8/y447.5 with 6.5. The source prints one still/sparkling family row per portion, not four dishes."
+    },
+    {
+      "section": "PREMIUM FRISDRANKEN",
+      "change": "\"Double Dutch Ginger Beer\" renamed to \"Ginger Beer\".",
+      "evidence": "PDF page 3: \"// Double Dutch\" is a sub-heading at x227.4 y526.2; every item below it (including \"Ginger Beer\" at y515.0) is printed without the brand prefix. Only the first reference row carried it."
+    },
+    {
+      "section": "fritz",
+      "change": "Five lemonades removed from fritz and recorded as an unsupported lower block.",
+      "evidence": "PDF page 3: fritz marker at x41.9 y436.0 and five fritz-limo rows at x41.9 y424.8-379.8. The lemonades start at x184.4 y238.6 with descriptions at x184.4 and amounts at x369.0, next to the \"Soof maakt siropen en frisdranken...\" prose at x42.8 y247.6-127.7. No fritz heading or marker covers that block."
+    }
+  ],
+  "sections": [
+    {
+      "path": [
+        "WARME DRANKEN"
+      ],
+      "items": [
+        {
+          "name": "Koffie",
+          "price": "3.5"
+        },
+        {
+          "name": "Espresso",
+          "price": "3.4"
+        },
+        {
+          "name": "Cappuccino",
+          "price": "3.8"
+        },
+        {
+          "name": "Flat White",
+          "price": "4.6"
+        },
+        {
+          "name": "Latte Macchiato",
+          "price": "4.2"
+        },
+        {
+          "name": "Chai Latte",
+          "price": "4.2"
+        },
+        {
+          "name": "Warme chocolademelk",
+          "price": "3.8"
+        },
+        {
+          "name": "Thee (diverse smaken)",
+          "price": "3.4"
+        },
+        {
+          "name": "Verse muntthee",
+          "price": "3.9"
+        },
+        {
+          "name": "Verse gemberthee",
+          "price": "3.9"
+        }
+      ]
+    },
+    {
+      "path": [
+        "SUPPLEMENTEN"
+      ],
+      "items": [
+        {
+          "name": "Havermelk",
+          "price": "0.5"
+        },
+        {
+          "name": "Hazelnootsiroop",
+          "price": "0.6"
+        },
+        {
+          "name": "Karamelsiroop",
+          "price": "0.6"
+        },
+        {
+          "name": "Witte chocoladesiroop",
+          "price": "0.6"
+        },
+        {
+          "name": "Honing",
+          "price": "0.6"
+        },
+        {
+          "name": "Slagroom",
+          "price": "0.6"
+        }
+      ]
+    },
+    {
+      "path": [
+        "LEKKERS VOOR BIJ DE KOFFIE"
+      ],
+      "items": [
+        {
+          "name": "Chocolade Churros",
+          "price": "11.5"
+        },
+        {
+          "name": "Appelkruimeltaart",
+          "price": "5.2"
+        },
+        {
+          "name": "Mango-passievrucht cheesecake",
+          "price": "5.8"
+        },
+        {
+          "name": "Bonbons per stuk",
+          "price": "2.0"
+        }
+      ]
+    },
+    {
+      "path": [
+        "FRISDRANK"
+      ],
+      "items": [
+        {
+          "name": "Red Bull Energy Drink",
+          "price": "4.5"
+        },
+        {
+          "name": "Red Bull Sugarfree",
+          "price": "4.5"
+        },
+        {
+          "name": "Red Bull Red Edition",
+          "price": "4.5"
+        },
+        {
+          "name": "Sourcy Still Water, Sourcy Sparkling Water (20cl)",
+          "price": "3.0"
+        },
+        {
+          "name": "Sourcy Still Water, Sourcy Sparkling Water (75cl)",
+          "price": "6.5"
+        },
+        {
+          "name": "Pepsi Cola / Pepsi Max",
+          "price": "3.6"
+        },
+        {
+          "name": "Lipton Ice Tea Sparkling / Ice Tea Green / Ice Tea Peach / Ice Tea Green Zero",
+          "price": "3.8"
+        },
+        {
+          "name": "Royal Club Tonic / Bitter Lemon / Ginger Ale",
+          "price": "3.8"
+        },
+        {
+          "name": "Tomatensap / Appelsap",
+          "price": "3.9"
+        },
+        {
+          "name": "Rivella / Sisi / 7-Up",
+          "price": "3.6"
+        },
+        {
+          "name": "Fristi / Chocomel",
+          "price": "3.6"
+        },
+        {
+          "name": "Crystal Clear Framboos-bosbes",
+          "price": "3.8"
+        },
+        {
+          "name": "Verse Jus d'Orange",
+          "price": "4.6"
+        },
+        {
+          "name": "Mango- of aardbeismoothie",
+          "price": "5.5"
+        }
+      ]
+    },
+    {
+      "path": [
+        "PREMIUM FRISDRANKEN"
+      ],
+      "items": [
+        {
+          "name": "Cultcha Kombucha Passionfruit & Lime",
+          "price": "5.5"
+        },
+        {
+          "name": "Cultcha Kombucha Apple & Ginger",
+          "price": "5.5"
+        },
+        {
+          "name": "Del Sol Pineapple Hibiscus Soda",
+          "price": "5.5"
+        },
+        {
+          "name": "Ginger Beer",
+          "price": "4.6"
+        },
+        {
+          "name": "Pink Grapefruit Soda",
+          "price": "4.6"
+        },
+        {
+          "name": "Indian Tonic",
+          "price": "4.6"
+        },
+        {
+          "name": "Elderflower Tonic",
+          "price": "4.6"
+        },
+        {
+          "name": "Cranberry & Ginger Tonic",
+          "price": "4.6"
+        },
+        {
+          "name": "Pomegranate & Basil Tonic",
+          "price": "4.6"
+        },
+        {
+          "name": "Cucumber & Watermelon Tonic",
+          "price": "4.6"
+        }
+      ]
+    },
+    {
+      "path": [
+        "fritz"
+      ],
+      "items": [
+        {
+          "name": "fritz-limo appel, kersen, vlierbes",
+          "price": "4.6"
+        },
+        {
+          "name": "fritz-limo citroen",
+          "price": "4.6"
+        },
+        {
+          "name": "fritz-limo sinaasappel",
+          "price": "4.6"
+        },
+        {
+          "name": "anjola ananas-limoen",
+          "price": "4.6"
+        },
+        {
+          "name": "fritz-spritz apfelschorle",
+          "price": "4.6"
+        }
+      ]
+    },
+    {
+      "path": [
+        "BIER VAN DE TAP"
+      ],
+      "items": [
+        {
+          "name": "Birra Moretti Pilsener",
+          "price": "3.9"
+        },
+        {
+          "name": "Affligem Blond",
+          "price": "5.9"
+        },
+        {
+          "name": "Texels Skuumkoppe",
+          "price": "5.5"
+        },
+        {
+          "name": "Texels Skiller Wit",
+          "price": "5.5"
+        },
+        {
+          "name": "Oedipus Mannenliefde Saison",
+          "price": "5.8"
+        },
+        {
+          "name": "Oedipus Pais Tropical IPA",
+          "price": "5.8"
+        },
+        {
+          "name": "Bier van het moment",
+          "price": "5.5"
+        }
+      ]
+    },
+    {
+      "path": [
+        "RIJK EN DONKER"
+      ],
+      "items": [
+        {
+          "name": "Affligem Dubbel",
+          "price": "5.9"
+        },
+        {
+          "name": "Noordt Dubbel",
+          "price": "6.5"
+        }
+      ]
+    },
+    {
+      "path": [
+        "FRIS EN FRUITIG"
+      ],
+      "items": [
+        {
+          "name": "Sol",
+          "price": "5.7"
+        },
+        {
+          "name": "Mort Subite Kriek",
+          "price": "5.2"
+        },
+        {
+          "name": "Amstel Rosé bier",
+          "price": "4.8"
+        },
+        {
+          "name": "Desperados",
+          "price": "6.0"
+        }
+      ]
+    },
+    {
+      "path": [
+        "BROUWERIJ FRONTAAL"
+      ],
+      "items": [
+        {
+          "name": "Juice Punch New",
+          "price": "6.5"
+        },
+        {
+          "name": "Head First Tropical IPA",
+          "price": "6.0"
+        },
+        {
+          "name": "Blonde Simmie",
+          "price": "6.0"
+        },
+        {
+          "name": "Witte Simmie",
+          "price": "6.0"
+        },
+        {
+          "name": "Andreas Tripel",
+          "price": "6.5"
+        }
+      ]
+    },
+    {
+      "path": [
+        "NON ALCOHOLISCH"
+      ],
+      "items": [
+        {
+          "name": "Heineken",
+          "price": "3.9"
+        },
+        {
+          "name": "Amstel Radler",
+          "price": "3.9"
+        },
+        {
+          "name": "Affligem Wit",
+          "price": "5.0"
+        },
+        {
+          "name": "Affligem Blond",
+          "price": "5.0"
+        },
+        {
+          "name": "Texels Skuumkoppe",
+          "price": "5.0"
+        },
+        {
+          "name": "Juice Punch New",
+          "price": "6.5"
+        }
+      ]
+    },
+    {
+      "path": [
+        "KOREMAN'S"
+      ],
+      "items": [
+        {
+          "name": "Limoncello",
+          "price": "4.5"
+        },
+        {
+          "name": "Orangecello",
+          "price": "5.0"
+        },
+        {
+          "name": "Yuzucello",
+          "price": "5.5"
+        },
+        {
+          "name": "Koreman's proeverij",
+          "price": "9.5"
+        }
+      ]
+    },
+    {
+      "path": [
+        "SNACKS"
+      ],
+      "items": [
+        {
+          "name": "Luxe notenmix",
+          "price": "5.0"
+        },
+        {
+          "name": "Gemarineerde knoflookolijven",
+          "price": "5.0"
+        },
+        {
+          "name": "Brood met smeersels",
+          "price": "8.5"
+        },
+        {
+          "name": "Holtkamp ambachtelijke draadjesvlees bitterbal",
+          "price": "9.5"
+        },
+        {
+          "name": "Vegan draadjesvlees bitterbal",
+          "price": "9.5"
+        },
+        {
+          "name": "Indonesian samosa's",
+          "price": "8.5"
+        }
+      ]
+    },
+    {
+      "path": [
+        "STARTERS"
+      ],
+      "items": [
+        {
+          "name": "Brood met smeersels",
+          "price": "8.5"
+        },
+        {
+          "name": "Fromage Festif",
+          "price": "12.5"
+        },
+        {
+          "name": "Burrata Primavera",
+          "price": "14.5"
+        },
+        {
+          "name": "Spicy Cauli Crunch",
+          "price": "11.5"
+        },
+        {
+          "name": "Il Magnifico",
+          "price": "14.0"
+        },
+        {
+          "name": "Crispy Coconut Gyoza",
+          "price": "12.5"
+        },
+        {
+          "name": "Pepper Beef Tataki",
+          "price": "16.5"
+        },
+        {
+          "name": "Tuna al Mare",
+          "price": "14.5"
+        },
+        {
+          "name": "Salmon au Soleil",
+          "price": "15.0"
+        },
+        {
+          "name": "Crunchy & Healthy",
+          "price": "2.0"
+        }
+      ]
+    },
+    {
+      "path": [
+        "SIDE DISHES"
+      ],
+      "items": [
+        {
+          "name": "Italiaanse frietjes",
+          "price": "6.0"
+        },
+        {
+          "name": "Mexicaanse frietjes",
+          "price": "7.5"
+        },
+        {
+          "name": "Japanse frietjes",
+          "price": "7.0"
+        },
+        {
+          "name": "Indonesische frietjes",
+          "price": "7.5"
+        },
+        {
+          "name": "Hollands frietje",
+          "price": "5.5"
+        },
+        {
+          "name": "Gepofte zoete aardappel",
+          "price": "7.0"
+        },
+        {
+          "name": "Bimi",
+          "price": "7.5"
+        }
+      ]
+    },
+    {
+      "path": [
+        "OESTERS"
+      ],
+      "items": [
+        {
+          "name": "Oester naturel",
+          "price": "4.0"
+        },
+        {
+          "name": "Oester oosters",
+          "price": "4.5"
+        },
+        {
+          "name": "Oester POMA",
+          "price": "5.0"
+        }
+      ]
+    },
+    {
+      "path": [
+        "DESSERTS 17:00 - 21:00"
+      ],
+      "items": [
+        {
+          "name": "Pornstar Martini Bombe",
+          "price": "12.5"
+        },
+        {
+          "name": "Vegan Chocolademousse",
+          "price": "13.5"
+        },
+        {
+          "name": "Pistache Dream",
+          "price": "12.5"
+        },
+        {
+          "name": "Chocolade Churros",
+          "price": "11.5"
+        },
+        {
+          "name": "Grand dessert",
+          "price": "28.5"
+        },
+        {
+          "name": "Proeverij van 4 Kazen van Fromagerie Guillaume",
+          "price": "14.5"
+        },
+        {
+          "name": "Bonbons per stuk",
+          "price": "2.0"
+        },
+        {
+          "name": "Liquid Dessert - Espresso Martini Tiramisu",
+          "price": "12.5"
+        }
+      ]
+    },
+    {
+      "path": [
+        "MEDITERRAANS"
+      ],
+      "items": [
+        {
+          "name": "Blue Velvet Gnocchi",
+          "price": "13.5"
+        },
+        {
+          "name": "Fideua con Gamba",
+          "price": "14.5"
+        },
+        {
+          "name": "Solomillo y Pimientos",
+          "price": "15.5"
+        }
+      ]
+    },
+    {
+      "path": [
+        "(MIDDEN) - OOSTERS"
+      ],
+      "items": [
+        {
+          "name": "Kombu Kiss",
+          "price": "15.0"
+        },
+        {
+          "name": "Oriental Scampi",
+          "price": "16.0"
+        },
+        {
+          "name": "Korean Crunch Belly",
+          "price": "16.5"
+        }
+      ]
+    },
+    {
+      "path": [
+        "LATIJNS-AMERIKAANS"
+      ],
+      "items": [
+        {
+          "name": "Viva la Polenta",
+          "price": "14.0"
+        },
+        {
+          "name": "Blaze & Tropic",
+          "price": "16.0"
+        },
+        {
+          "name": "Caribbean Heat Ribs",
+          "price": "16.5"
+        },
+        {
+          "name": "Nordic Forest",
+          "price": "16.0"
+        },
+        {
+          "name": "Boreal Spring",
+          "price": "17.0"
+        },
+        {
+          "name": "Risoni Nord",
+          "price": "19.5"
+        }
+      ]
+    },
+    {
+      "path": [
+        "LUNCH"
+      ],
+      "items": [
+        {
+          "name": "Fluffy Pancakes",
+          "price": "12.0"
+        },
+        {
+          "name": "The Crunchy Caprese",
+          "price": "14.0"
+        },
+        {
+          "name": "Il Magnifico",
+          "price": "15.5"
+        },
+        {
+          "name": "Italian Eggs",
+          "price": "12.5"
+        },
+        {
+          "name": "La Dolce Pinsa",
+          "price": "16.0"
+        },
+        {
+          "name": "Bollywood Chicken",
+          "price": "15.0"
+        },
+        {
+          "name": "Chili Verde",
+          "price": "14.0"
+        },
+        {
+          "name": "Tuna Deluxe",
+          "price": "13.5"
+        },
+        {
+          "name": "Puff & Spice",
+          "price": "15.5"
+        },
+        {
+          "name": "Surf-Turf-Earth",
+          "price": "19.5"
+        },
+        {
+          "name": "Holtkamp Rundvleeskroketten",
+          "price": "14.0"
+        }
+      ]
+    }
+  ],
+  "referenceItemCount": 134,
+  "unsupportedSections": [
+    {
+      "path": [
+        "ONZE COCKTAILS"
+      ],
+      "pages": [
+        5
+      ],
+      "reason": "Multi-line recipe blocks with signatures, descriptions and variants; the current schema cannot preserve the block structure losslessly."
+    },
+    {
+      "path": [
+        "GIN & TONIC"
+      ],
+      "pages": [
+        6
+      ],
+      "reason": "Multi-line gin/tonic pairs; the parser mixes description lines into section headings and loses part of the name/price pairing. Not claimed as extracted."
+    },
+    {
+      "path": [
+        "SPRITZERS"
+      ],
+      "pages": [
+        6
+      ],
+      "reason": "Readable item/price pairs, but the source page shares a column with gin blocks; not accepted as complete."
+    },
+    {
+      "path": [
+        "HARD SELTZER",
+        "MOCKTAILS"
+      ],
+      "pages": [
+        6
+      ],
+      "reason": "Multi-line blocks and 0.0% labels; names/prices are not accepted as complete."
+    },
+    {
+      "path": [
+        "WITTE WIJNEN",
+        "ROSE WIJNEN",
+        "RODE WIJNEN"
+      ],
+      "pages": [
+        7,
+        8
+      ],
+      "reason": "Wine blocks contain name, region, grape, tasting note and glass/bottle prices in separate lines; the current schema cannot store the variants losslessly."
+    },
+    {
+      "path": [
+        "BIJZONDERE WIJNEN",
+        "BUBBELS",
+        "CHAMPAGNE"
+      ],
+      "pages": [
+        9
+      ],
+      "reason": "Long descriptive wine blocks with bottle prices; not fully itemized."
+    },
+    {
+      "path": [
+        "PETITE CROQUETTES",
+        "BORRELPLANKEN EN MEER"
+      ],
+      "pages": [
+        11
+      ],
+      "reason": "Shared portions (6st./8st.) and multi-line plank descriptions; those price variants are not losslessly representable."
+    },
+    {
+      "path": [
+        "LUNCH"
+      ],
+      "pages": [
+        10
+      ],
+      "reason": "The reference lists the readable lunch items, but supplements and multi-line descriptions interleave; the parser does not yet cover the whole page reliably."
+    },
+    {
+      "path": [
+        "SOOF LEMONADES"
+      ],
+      "pages": [
+        3
+      ],
+      "reason": "Lower page block has a different grid (names x≈184.4, amounts x≈369.0) than the page two columns and no printed section heading. The five lemonades are not losslessly attributable to fritz; kept unsupported instead of guessed."
+    }
+  ],
+  "knownParserGaps": [
+    {
+      "section": "PREMIUM FRISDRANKEN",
+      "item": "Del Sol Pineapple Hibiscus Soda",
+      "gap": "The continuation \"Hibiscus Soda\" (x42.8 y470.0) has no explicit connector, portion or repeated prefix. The same shape occurs as a description elsewhere (\"England IPA\"), so the deterministic parser reports the truncated name instead of guessing. This is a parser gap, not a reference correction."
+    },
+    {
+      "section": "WITTE WIJNEN / ROSÉ WIJNEN / RODE WIJNEN",
+      "gap": "Wine blocks remain unsupported: region, grape, tasting note and glass/bottle amounts are separate lines and the concept cannot store them losslessly."
+    },
+    {
+      "section": "PETITE CROQUETTES",
+      "gap": "Portions (6st./8st.) are kept in the item name or counted as a portion line; the concept cannot store portion variants yet."
+    }
+  ],
+  "referenceVersionNote": "v1 (ops/benchmark/botanist-reference.json) is unchanged and remains the only measured baseline. Do not replace it or green a score by editing the reference."
+}

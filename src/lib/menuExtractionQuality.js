@@ -35,6 +35,8 @@ const FLAG_CODES = Object.freeze({
   pdf_ambiguous_price_lines: 'pdf_ambiguous_price_lines',
   pdf_unlinked_price_lines: 'pdf_unlinked_price_lines',
   pdf_unrecognised_headings: 'pdf_unrecognised_headings',
+  pdf_inherited_sections: 'pdf_inherited_sections',
+  pdf_portions_skipped: 'pdf_portions_skipped',
 });
 
 /** Flags that make the extracted menu incomplete because the product cannot
@@ -45,6 +47,7 @@ const PRODUCT_GAP_FLAGS = new Set([
   FLAG_CODES.pdf_supplements_skipped,
   FLAG_CODES.pdf_arrangements_skipped,
   FLAG_CODES.html_arrangements_skipped,
+  FLAG_CODES.pdf_portions_skipped,
 ]);
 
 function normalizeName(value) {
@@ -191,6 +194,19 @@ function assessDeterministicMenuQuality({ menus, unknownMenuContexts, sourceInve
     }
     if (Number.isInteger(layout.unrecognizedHeadingLines) && layout.unrecognizedHeadingLines > 0) {
       addFlag(FLAG_CODES.pdf_unrecognised_headings, contextSummary, `${layout.unrecognizedHeadingLines} mogelijke rubriekkop(pen) niet herkend`);
+    }
+    if (
+      (Number.isInteger(layout.inheritedSectionColumns) && layout.inheritedSectionColumns > 0) ||
+      (Number.isInteger(layout.inheritedSubheadingColumns) && layout.inheritedSubheadingColumns > 0)
+    ) {
+      addFlag(
+        FLAG_CODES.pdf_inherited_sections,
+        contextSummary,
+        `${layout.inheritedSectionColumns || 0} kolom(men) en ${layout.inheritedSubheadingColumns || 0} subrubriek(en) met een overgenomen rubricering`,
+      );
+    }
+    if (Number.isInteger(layout.portionLines) && layout.portionLines > 0) {
+      addFlag(FLAG_CODES.pdf_portions_skipped, contextSummary, `${layout.portionLines} portie-/hoeveelheidsregel(s) niet als los gerecht opgenomen`);
     }
   }
 

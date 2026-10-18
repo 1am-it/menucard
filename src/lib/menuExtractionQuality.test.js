@@ -96,6 +96,27 @@ test('PDF price content without a demonstrable local name/price relation is repo
   assert.ok(assessment.codes.includes(FLAG_CODES.pdf_unlinked_price_lines));
 });
 
+test('an inherited section relation and a skipped portion are reported, never silently accepted', () => {
+  const inherited = assessDeterministicMenuQuality({
+    menus: [cleanMenu],
+    unknownMenuContexts: [
+      { sourceId: 'source-1', sourceUrl: cleanMenu.sourceUrl, layout: { inheritedSectionColumns: 1, inheritedSubheadingColumns: 1 } },
+    ],
+  });
+  assert.equal(inherited.sufficient, false);
+  assert.equal(inherited.requiresAiExtraction, true);
+  assert.ok(inherited.codes.includes(FLAG_CODES.pdf_inherited_sections));
+
+  const portions = assessDeterministicMenuQuality({
+    menus: [cleanMenu],
+    unknownMenuContexts: [{ sourceId: 'source-1', sourceUrl: cleanMenu.sourceUrl, layout: { portionLines: 2 } }],
+  });
+  assert.equal(portions.blockedByProductGap, true);
+  assert.equal(portions.requiresAiExtraction, false);
+  assert.deepEqual(portions.blockedSourceIds, ['source-1']);
+  assert.ok(portions.codes.includes(FLAG_CODES.pdf_portions_skipped));
+});
+
 test('PDF arrangement lines are a product gap for that source, never silently paid for', () => {
   const assessment = assessDeterministicMenuQuality({
     menus: [cleanMenu],
