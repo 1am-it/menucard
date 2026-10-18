@@ -152,6 +152,22 @@ async function reviewScenario(cdp) {
 }
 
 
+async function readOnlyScenario(cdp) {
+  await setViewport(cdp, 1024, 900);
+  await openRoute(cdp, `${BATCH_URL}?fixture=readonly&${BATCH_QUERY}&item=1&theme=dark`, `document.body.innerText.includes('8 gerechten in 4 rubrieken')`);
+  const snapshot = await evalJs(cdp, `(() => {
+    const text = document.body.innerText;
+    const buttons = [...document.querySelectorAll('button')].map((b) => (b.innerText || '').trim());
+    return { text, buttons, overflow: document.documentElement.scrollWidth - window.innerWidth };
+  })()`);
+  check('readonly: colleague view is explicitly read-only', snapshot.text.includes('alleen lezen') && !snapshot.text.includes('Gestart door jou'));
+  check('readonly: no save or group-accept control is offered', !snapshot.buttons.some((text) => text.includes('Concept opslaan') || text === 'Rubriek klopt zo'));
+  check('readonly: no source confirmation is offered', !snapshot.buttons.some((text) => text.includes('Bevestig')));
+  check('readonly: the same concept and blockers are readable', snapshot.text.includes('Menuconcept · intern') && snapshot.text.includes('6 blokkades'));
+  check('readonly: no horizontal overflow at 1024 px', snapshot.overflow <= 0, `overflow=${snapshot.overflow}`);
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'menu-review-readonly-1024-dark.png'));
+}
+
 async function emptyScenario(cdp) {
   await setViewport(cdp, 1024, 900);
   await openRoute(cdp, `${BATCH_URL}?fixture=empty&theme=dark`, `document.body.innerText.includes("URL's invoeren")`);
@@ -312,6 +328,7 @@ async function main() {
     await cdp.send('Page.addScriptToEvaluateOnNewDocument', { source: fixtureBootstrap(fixtures.scenarios) });
 
     await reviewScenario(cdp);
+    await readOnlyScenario(cdp);
     await emptyScenario(cdp);
     await partialScenario(cdp);
     await errorScenario(cdp);

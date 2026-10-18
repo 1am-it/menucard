@@ -43,6 +43,7 @@ the command to reproduce the same fixture evidence.
 ## Coverage
 
 - exact breadcrumb, source and "handmatig beoordelen" links;
+- the starter view and a read-only colleague view (no save or confirmation);
 - section paths, item counts, prices, a missing price and multiple
   undecomposed prices;
 - duplicate, price and missing-price blockers kept separate;

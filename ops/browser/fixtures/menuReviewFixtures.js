@@ -144,10 +144,20 @@ const overview = (detail) => ({
   daily: { used: detail ? 1 : 0, limit: 25 },
   own_open_batch_id: null,
   recent_batches: detail
-    ? [{ id: BATCH_ID, created_at: detail.batch.created_at, closed_at: detail.batch.closed_at, close_reason: 'completed', item_count: detail.batch.item_count, is_own: true }]
+    ? [{ id: BATCH_ID, created_at: detail.batch.created_at, closed_at: detail.batch.closed_at, close_reason: 'completed', item_count: detail.batch.item_count, is_own: detail.batch.is_starter }]
     : [],
   detail,
 });
+
+function readOnlyDetail() {
+  const detail = JSON.parse(JSON.stringify(reviewDetail));
+  detail.batch.is_starter = false;
+  for (const entry of detail.items) {
+    entry.actions = [];
+    entry.high = false;
+  }
+  return detail;
+}
 
 module.exports = {
   BATCH_ID,
@@ -157,6 +167,7 @@ module.exports = {
   reviewDetail,
   scenarios: {
     review: overview(reviewDetail),
+    readonly: overview(readOnlyDetail()),
     empty: overview(null),
     partial: overview(detailWith([partialItem])),
     error: null,
@@ -168,3 +179,4 @@ module.exports = {
     attentionGroupCount: extraction.attentionGroups.length,
   },
 };
+
