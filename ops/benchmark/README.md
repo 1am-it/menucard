@@ -10,6 +10,15 @@ has a manifest, adapter contract, scorer, and report shape to plug into,
 rather than starting from nothing. Nothing here fetches a real restaurant
 URL, contacts a vendor, or spends any money.
 
+`source-references.json` in this directory is a separate, #59-specific artefact:
+a controlled capture of two real public sources (Smelt Breda PDF, Blossem Breda
+HTML) with byte and content hashes, used only by
+`ops/scripts/probe-menu-extraction-sources.js`. That probe fetches exactly those
+two URLs read-only through `safeOutboundFetch` and the real analysis chain, and
+fails on any hash or item difference. It is not part of the BE-21 benchmark, is
+deliberately not wired into `npm test` (it needs network access), and never
+writes, confirms or publishes anything.
+
 ## What actually exists here
 
 - `manifest.js` / `manifest.json` — a case manifest with three honestly
