@@ -318,7 +318,12 @@ De drie vervolgpunten zijn als volgt afgehandeld:
 | #56-compatibiliteit | `git merge-tree --write-tree HEAD origin/feat/compact-source-flow-53` | 2 inhoudelijke conflicten (`app/internal/source-triage/batch/page.js`, `src/lib/menuSnapshotProposals.test.js`); geen merge uitgevoerd |
 
 De probe is read-only tegen precies de twee benoemde publieke URL's uitgevoerd;
-de referentie is dezelfde gecontroleerde capture als hierboven. De nieuwe
+de referentie is dezelfde gecontroleerde capture als hierboven. De volledige
+suite, het structuurcorpus, de benchmark, de build, de PDF.js-trace en de
+bronprobe zijn na de documentatiecommit herhaald op HEAD
+`b86a8c198e93ce234a3fbdc005b7b8e0b76b8c68` met dezelfde resultaten (1950 pass,
+6 pass, 22 pass + 1 unclassified, build met 41/41 pagina's, trace OK, probe exit
+0). De nieuwe
 `ops/benchmark/sourceReferences.test.js` bewaakt dat een referentie gepinde
 hashes houdt, dat elk item een naam, prijs en pad heeft, dat de referentie zelf
 geen duplicaat bevat, dat de bronlijst gesloten blijft en dat de probe geen
