@@ -42,7 +42,7 @@ test('exactly the four approved public holdouts are pinned, with explicit non-pr
 });
 
 test('the holdout reference pins source versions only, never parser outcomes or ground truth', () => {
-  assert.equal(references.version, '1.0.0');
+  assert.equal(references.version, '1.1.0');
   assert.match(references.pinnedAt, /^\d{4}-\d{2}-\d{2}$/);
   assert.equal(references.authorization.appProviderActivation, false);
   assert.deepEqual(Object.keys(references.sources).sort(), [...EXPECTED_IDS].sort());
