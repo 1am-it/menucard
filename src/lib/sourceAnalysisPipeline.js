@@ -22,7 +22,7 @@ const {
   describeRobotsBlock,
   RedirectPolicyError,
 } = require('./restaurantSourceFetch');
-const { runRestaurantSourceAnalysis, buildUnknownMenuContext } = require('./restaurantSourceAnalysis');
+const { runRestaurantSourceAnalysis, readPdfMenuSource, pdfLayoutLimitations, applyProviderNeutralExtraction } = require('./restaurantSourceAnalysis');
 const { PdfExtractionError } = require('./pdfTextExtraction');
 const { rollUpPdfAdapterErrorReason } = require('./restaurantSourceAnalysisJobs');
 const { pdfContextToMenuContext } = require('./pdfMenuContext');
@@ -52,6 +52,74 @@ function dispatchCandidateResponse(fetchResult) {
   }
   return { status: 'error' };
 }
+
+/**
+ * Direct-PDF analysis: the entry URL itself is a digital PDF menu. Exactly one
+ * source, no restaurant fields. The bounded, page/column-aware PDF text is
+ * handed to the same provider-neutral chain as HTML (so the runtime hook is
+ * never skipped for this path), and the result is the same canonical menu
+ * context every other source produces.
+ */
+async function buildDirectPdfAnalysis({ pdfBytes, sourceUrl, sourceId = 'source-1', structuredExtraction } = {}) {
+  const { context: pdfContext, extractionText, extractionTextTruncated } = await readPdfMenuSource(pdfBytes, sourceUrl, sourceId);
+  const converted = pdfContextToMenuContext(pdfContext, new Set(), { sourceId });
+  const menuContexts = converted ? [{ ...converted.menu, sourceUrl, sourceId }] : [];
+  const sourceInventory = [{
+    id: sourceId,
+    url: sourceUrl,
+    kind: 'pdf',
+    status: 'read',
+    pageCount: pdfContext.pageCount,
+    wordCount: pdfContext.wordCount,
+    contentHash: pdfContext.contentHash,
+    ...(converted ? { itemCount: converted.itemCount } : {}),
+  }];
+  const limitations = [
+    'Deze bron is een PDF zonder bijbehorende HTML-pagina — restaurantgegevens konden hier niet uit worden afgeleid.',
+    ...(converted ? [] : ['De PDF bevat geen betrouwbaar herkenbare gerechten met prijs.']),
+    ...(pdfContext.usedFallback ? ['De PDF is alleen via de tekstfallback gelezen; paginastructuur ontbreekt.'] : []),
+    ...(extractionTextTruncated ? ['De PDF is voor modellezing afgekapt op de veilige tekstlimiet.'] : []),
+    ...pdfLayoutLimitations(sourceUrl, pdfContext.layout || {}),
+  ];
+  const notes = [
+    ...limitations,
+    ...(converted ? [`Menukaart herkend uit de PDF: ${converted.itemCount} gerechten met prijs in ${converted.menu.categories.length} rubrieken.`] : []),
+  ];
+  const sourceTexts = new Map();
+  if (extractionText) sourceTexts.set(sourceId, extractionText);
+  const unknownMenuContexts = [pdfContext];
+  const analysis = {
+    restaurantCandidateFields: {},
+    fieldEvidence: {},
+    menuContexts,
+    unknownMenuContexts,
+    description: '',
+    notes,
+    sourceInventory,
+    limitations,
+  };
+  const { aiExtraction } = await applyProviderNeutralExtraction({
+    menuContexts,
+    unknownMenuContexts,
+    sourceInventory,
+    sourceTexts,
+    notes,
+    limitations,
+    restaurantCandidateFields: {},
+    structuredExtraction,
+  });
+  analysis.aiExtraction = aiExtraction;
+  analysis.extractionResult = buildExtractionResult({ sourceInventory, menus: menuContexts, unknownMenuContexts, limitations, notes });
+  if (aiExtraction && aiExtraction.enabled) {
+    analysis.extractionResult.ai = {
+      ok: aiExtraction.ok === true,
+      reason: aiExtraction.reason || null,
+      meta: aiExtraction.meta || null,
+    };
+  }
+  return analysis;
+}
+
 
 /** The `fetchCandidate` passed into runRestaurantSourceAnalysis: robots.txt,
  * then a buffer fetch with re-checked same-site redirects, dispatched by
@@ -144,43 +212,12 @@ async function analyzeSourceUrl(sourceUrlHref, options = {}) {
     // possible, so exactly one source and no restaurant fields. Recognized
     // sections are promoted to the same canonical menu context as every other
     // source, so a direct PDF cannot be "found" while its dishes stay hidden.
-    const sourceUrl = fetchResult.finalUrl;
     try {
-      const pdfContext = await buildUnknownMenuContext(fetchResult.bytes, sourceUrl, 'source-1');
-      const converted = pdfContextToMenuContext(pdfContext, new Set(), { sourceId: 'source-1' });
-      const menuContexts = converted
-        ? [{ ...converted.menu, sourceUrl, sourceId: 'source-1' }]
-        : [];
-      const sourceInventory = [{
-        id: 'source-1',
-        url: sourceUrl,
-        kind: 'pdf',
-        status: 'read',
-        pageCount: pdfContext.pageCount,
-        wordCount: pdfContext.wordCount,
-        contentHash: pdfContext.contentHash,
-        ...(converted ? { itemCount: converted.itemCount } : {}),
-      }];
-      const limitations = [
-        'Deze bron is een PDF zonder bijbehorende HTML-pagina — restaurantgegevens konden hier niet uit worden afgeleid.',
-        ...(converted ? [] : ['De PDF bevat geen betrouwbaar herkenbare gerechten met prijs.']),
-        ...(pdfContext.usedFallback ? ['De PDF is alleen via de tekstfallback gelezen; paginastructuur ontbreekt.'] : []),
-      ];
-      const notes = [
-        ...limitations,
-        ...(converted ? [`Menukaart herkend uit de PDF: ${converted.itemCount} gerechten met prijs in ${converted.menu.categories.length} rubrieken.`] : []),
-      ];
-      analysis = {
-        restaurantCandidateFields: {},
-        fieldEvidence: {},
-        menuContexts,
-        unknownMenuContexts: [pdfContext],
-        description: '',
-        notes,
-        sourceInventory,
-        limitations,
-        extractionResult: buildExtractionResult({ sourceInventory, menus: menuContexts, unknownMenuContexts: [pdfContext], limitations, notes }),
-      };
+      analysis = await buildDirectPdfAnalysis({
+        pdfBytes: fetchResult.bytes,
+        sourceUrl: fetchResult.finalUrl,
+        structuredExtraction: options.structuredExtraction,
+      });
     } catch (err) {
       const errorReason = err instanceof PdfExtractionError ? rollUpPdfAdapterErrorReason(err.reason) : 'pdf_extraction_failed';
       return failure(errorReason, 'Deze PDF kon niet worden gelezen.', 400);
@@ -196,4 +233,4 @@ async function analyzeSourceUrl(sourceUrlHref, options = {}) {
   return { ok: true, analysis, finalUrl: fetchResult.finalUrl };
 }
 
-module.exports = { analyzeSourceUrl, CANDIDATE_PDF_MAX_BYTES };
+module.exports = { analyzeSourceUrl, buildDirectPdfAnalysis, CANDIDATE_PDF_MAX_BYTES };

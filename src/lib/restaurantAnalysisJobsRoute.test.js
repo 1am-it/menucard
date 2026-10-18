@@ -204,12 +204,17 @@ test('structural safety net: the entry-URL-is-PDF path never re-throws a non-Pdf
   assert.doesNotMatch(source, /if \(!\(err instanceof PdfExtractionError\)\) throw err/)
 })
 
-test('structural safety net: no raw PDF text excerpt is ever assembled into the entry-URL-is-PDF result — delegates to the shared, already-tested buildUnknownMenuContext helper, never a second inline copy', () => {
+test('structural safety net: no raw PDF text excerpt is ever assembled into the entry-URL-is-PDF result — delegates to the shared, already-tested readPdfMenuSource/buildDirectPdfAnalysis helpers, never a second inline copy', () => {
   const source = readPipelineSource()
   assert.doesNotMatch(source, /textPreview/)
   assert.doesNotMatch(source, /pdfResult\.text/) // no direct raw-text access at all
   assert.doesNotMatch(readPostRouteSource(), /textPreview|pdfResult\.text/)
-  assert.match(source, /await buildUnknownMenuContext\(fetchResult\.bytes, sourceUrl, 'source-1'\)/)
+  assert.match(source, /await buildDirectPdfAnalysis\(\{/)
+  assert.match(source, /pdfBytes: fetchResult\.bytes/)
+  // The bounded text is passed separately (sourceTexts) and never placed on
+  // the context/receipt object.
+  assert.match(source, /const \{ context: pdfContext, extractionText, extractionTextTruncated \} = await readPdfMenuSource/)
+  assert.doesNotMatch(source, /unknownMenuContexts\.push\(\{[^}]*text:/)
 })
 
 test('structural safety net: buildUnknownMenuContext itself (src/lib/restaurantSourceAnalysis.js) never assembles a raw PDF text excerpt — only a derived word count and content-hash', () => {

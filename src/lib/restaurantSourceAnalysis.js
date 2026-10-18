@@ -78,13 +78,14 @@ const { ALLOWED_FIELD_NAMES, deriveFieldConfidence, isFieldReviewReady } = requi
 const { computeFieldEvidenceHash } = require('./fieldEvidenceHash')
 const { checkFieldContextStatus } = require('./fieldContextConflict')
 const { extractDigitalPdfLines, extractDigitalPdfTextWithFallback, PdfExtractionError } = require('./pdfTextExtraction')
-const { structurePdfLinesIntoMenu } = require('./pdfMenuStructuring')
+const { structurePdfLinesIntoMenu, compactPdfLayoutText } = require('./pdfMenuStructuring')
 const { rollUpPdfAdapterErrorReason } = require('./restaurantSourceAnalysisJobs')
 const { composeEvidenceBasedDescription } = require('./restaurantConceptDescription')
 const { runClaudeStructuringAdapter } = require('./claudeStructuringAdapter')
 const { extractHtmlMenuStructure } = require('./htmlMenuStructure')
 const { pdfContextToMenuContext } = require('./pdfMenuContext')
-const { buildExtractionResult } = require('./menuExtractionResult')
+const { buildExtractionResult, countMenuItems } = require('./menuExtractionResult')
+const { assessDeterministicMenuQuality, applyQualityReview, aiReplacementGate } = require('./menuExtractionQuality')
 
 /**
  * BE-25 fase 2: a menu context from the visible HTML of a discovered menu
@@ -177,10 +178,13 @@ function countWords(text) {
  * omitted, when nothing reliable was found, or when the fallback path
  * ran and has no position data to structure at all).
  */
-async function buildUnknownMenuContext(pdfBytes, sourceUrl, sourceId) {
+async function readPdfMenuSource(pdfBytes, sourceUrl, sourceId) {
   const result = await extractDigitalPdfTextWithFallback(pdfBytes)
 
   let recognizedSections = []
+  let layout = null
+  let extractionText = result.text
+  let extractionTextTruncated = false
   if (!result.usedFallback) {
     // Structuring is a bonus layered on top of an already-succeeded,
     // structure-aware text extraction — never lets a structuring-
@@ -192,22 +196,223 @@ async function buildUnknownMenuContext(pdfBytes, sourceUrl, sourceId) {
     // validation/budgets to the exact same bytes.
     try {
       const { pages } = await extractDigitalPdfLines(pdfBytes)
-      recognizedSections = structurePdfLinesIntoMenu(pages).categories
+      const structured = structurePdfLinesIntoMenu(pages)
+      recognizedSections = structured.categories
+      layout = structured.layout
+      // The same lines, page- and column-aware, are the only PDF content a
+      // future model adapter receives. They are bounded and kept out of the
+      // context object, the receipt and every log.
+      const compact = compactPdfLayoutText(pages)
+      extractionText = compact.text
+      extractionTextTruncated = compact.truncated
     } catch {
       recognizedSections = []
+      layout = null
+      extractionText = result.text
     }
   }
 
   return {
-    sourceUrl,
-    ...(typeof sourceId === 'string' && sourceId ? { sourceId } : {}),
-    extractionMethod: 'pdf_text',
-    pageCount: result.pageCount,
-    wordCount: countWords(result.text),
-    contentHash: computeFieldEvidenceHash(result.text),
-    usedFallback: result.usedFallback,
-    recognizedSections,
+    context: {
+      sourceUrl,
+      ...(typeof sourceId === 'string' && sourceId ? { sourceId } : {}),
+      extractionMethod: 'pdf_text',
+      pageCount: result.pageCount,
+      wordCount: countWords(result.text),
+      contentHash: computeFieldEvidenceHash(result.text),
+      usedFallback: result.usedFallback,
+      recognizedSections,
+      // Counts only — never source text. Persisted with the job so review can
+      // tell "nothing found" apart from "content deliberately not turned into
+      // an ordinary dish" (supplements, prose prices, unknown headings).
+      ...(layout ? { layout: { ...layout, duplicateLayerOffsets: [...layout.duplicateLayerOffsets] } } : {}),
+    },
+    extractionText,
+    extractionTextTruncated,
   }
+}
+
+/**
+ * The one, single place a discovered PDF (a same-host candidate here,
+ * or the entry URL itself in
+ * `app/api/internal/v1/restaurant-analysis-jobs/route.js`'s own PDF-entry
+ * branch) is turned into an `unknownMenuContexts` entry — shared so both
+ * call sites apply the exact same extraction-with-fallback and menu-
+ * structuring logic, never two subtly different copies.
+ *
+ * Rejects with the underlying `PdfExtractionError` exactly like the
+ * plain `extractDigitalPdfText` used to — every caller's existing
+ * catch/note-and-continue handling stays unchanged. On success, always
+ * returns the same shape as before (`sourceUrl`/`extractionMethod`/
+ * `pageCount`/`wordCount`/`contentHash`) plus additive fields:
+ * `usedFallback` (honest signal that the byte-scanning fallback, not
+ * the structure-aware primary parser, produced this text — see
+ * `src/lib/pdfTextExtraction.js`'s own `extractDigitalPdfTextWithFallback`),
+ * `recognizedSections` (this fix's own new deterministic menu
+ * recognition — see `src/lib/pdfMenuStructuring.js` — always `[]`, never
+ * omitted, when nothing reliable was found, or when the fallback path
+ * ran and has no position data to structure at all) and `layout`
+ * (bounded counts of content that was read but not stored as an ordinary
+ * dish). `readPdfMenuSource` additionally returns the bounded extraction
+ * text, which is NEVER put on this context.
+ */
+async function buildUnknownMenuContext(pdfBytes, sourceUrl, sourceId) {
+  const { context } = await readPdfMenuSource(pdfBytes, sourceUrl, sourceId)
+  return context
+}
+
+
+/**
+ * Plain-language, bounded limitations for PDF content that was read but
+ * deliberately not turned into ordinary dishes. Shared by the discovered-PDF
+ * and direct-PDF paths so both report the same facts. Counts only, never
+ * source text.
+ */
+function pdfLayoutLimitations(sourceUrl, layout = {}) {
+  const limitations = []
+  if (Number.isInteger(layout.duplicateLayerItems) && layout.duplicateLayerItems > 0) {
+    limitations.push(`PDF ${sourceUrl}: een tweede, overlappende tekstlaag is genegeerd (${layout.duplicateLayerItems} dubbele tekstregels).`)
+  }
+  if (Number.isInteger(layout.supplementLines) && layout.supplementLines > 0) {
+    limitations.push(`PDF ${sourceUrl}: ${layout.supplementLines} supplementregel(s) zijn niet als gerecht opgenomen; het concept ondersteunt supplementen nog niet.`)
+  }
+  if (Number.isInteger(layout.ambiguousPriceLines) && layout.ambiguousPriceLines > 0) {
+    limitations.push(`PDF ${sourceUrl}: ${layout.ambiguousPriceLines} regel(s) met een prijs midden in de regel zijn niet als gerecht overgenomen.`)
+  }
+  if (Number.isInteger(layout.unrecognizedHeadingLines) && layout.unrecognizedHeadingLines > 0) {
+    limitations.push(`PDF ${sourceUrl}: ${layout.unrecognizedHeadingLines} mogelijke rubriekkop(pen) zijn niet herkend en dus niet als rubriek opgeslagen.`)
+  }
+  return limitations
+}
+
+/**
+ * Shared provider-neutral extraction step used by both the HTML and the
+ * direct-PDF analysis paths. It runs BEFORE any model call:
+ *   1. assess the deterministic result (quality/coverage gates);
+ *   2. mark exactly the flagged categories "Controle nodig";
+ *   3. refuse a model call when the source needs constructs the concept cannot
+ *      store (supplements) — such output would be discarded anyway;
+ *   4. skip the call entirely when the deterministic result is sufficient;
+ *   5. otherwise use the validated model result only as an explicit,
+ *      source- and version-scoped REPLACEMENT of a flagged deterministic menu,
+ *      never as a silent merge and never as an approval.
+ * Mutates `menuContexts`/`notes`/`limitations` in place and returns
+ * `{ aiExtraction, assessment }`.
+ */
+async function applyProviderNeutralExtraction({
+  menuContexts,
+  unknownMenuContexts,
+  sourceInventory,
+  sourceTexts,
+  notes,
+  limitations,
+  restaurantCandidateFields,
+  structuredExtraction,
+}) {
+  const menus = Array.isArray(menuContexts) ? menuContexts : []
+  const assessment = assessDeterministicMenuQuality({ menus, unknownMenuContexts, sourceInventory })
+  const marked = applyQualityReview(menus, assessment)
+  if (assessment.flags.length > 0) {
+    limitations.push(
+      `Kwaliteitscontrole op de deterministische extractie vraagt aandacht (${assessment.codes.join(', ')}); het resultaat is niet als volledig beoordeeld.`,
+    )
+    if (marked > 0) notes.push(`${marked} rubriek(en) zijn als "Controle nodig" gemarkeerd op basis van de kwaliteitscontrole.`)
+  }
+
+  if (typeof structuredExtraction !== 'function') return { aiExtraction: null, assessment }
+
+  if (assessment.blockedByProductGap) {
+    limitations.push(
+      'Geen model-extractie uitgevoerd: de bron bevat supplementen of relaties die het concept nog niet kan opslaan; een modelresultaat zou daarom worden verworpen.',
+    )
+    return { aiExtraction: { enabled: false, ok: null, skipped: true, reason: 'unsupported_product_gap', quality: assessment.codes }, assessment }
+  }
+
+  if (menus.length > 0 && assessment.sufficient) {
+    notes.push('Model-extractie overgeslagen: de deterministische extractie voldeed aan de kwaliteitscontrole.')
+    return { aiExtraction: { enabled: true, ok: null, skipped: true, reason: 'deterministic_result_sufficient', quality: assessment.codes }, assessment }
+  }
+
+  const aiSources = (Array.isArray(sourceInventory) ? sourceInventory : []).map((source) => ({
+    ...source,
+    ...(sourceTexts && sourceTexts.has(source.id) ? { text: sourceTexts.get(source.id) } : {}),
+  }))
+  let aiExtraction
+  try {
+    aiExtraction = await structuredExtraction({ sources: aiSources, restaurantFields: restaurantCandidateFields })
+  } catch {
+    aiExtraction = { enabled: true, ok: false, reason: 'adapter_failed' }
+  }
+  if (!aiExtraction || aiExtraction.enabled !== true) return { aiExtraction, assessment }
+  aiExtraction = { ...aiExtraction, quality: assessment.codes }
+
+  if (!aiExtraction.ok || !Array.isArray(aiExtraction.menus) || aiExtraction.menus.length === 0) {
+    limitations.push(`Model-extractie niet gebruikt (${aiExtraction.reason || 'onbekende reden'}).`)
+    return { aiExtraction, assessment }
+  }
+
+  if (menus.length === 0) {
+    menus.push(...aiExtraction.menus)
+    notes.push('Aanvullende structurering via de geconfigureerde adapter toegevoegd; menselijke controle blijft nodig.')
+    return { aiExtraction, assessment }
+  }
+
+  // Source-scoped replacement only. A deterministic menu that was not flagged
+  // for this source is kept; a model menu for an unflagged source is not added.
+  const deterministicBySource = new Map()
+  for (const menu of menus) {
+    if (!menu || typeof menu.sourceId !== 'string') continue
+    deterministicBySource.set(menu.sourceId, (deterministicBySource.get(menu.sourceId) || 0) + countMenuItems([menu]))
+  }
+  const flagged = new Set(assessment.flaggedSourceIds)
+  const replaceableBySource = new Map()
+  const rejected = []
+  for (const aiMenu of aiExtraction.menus) {
+    const sourceId = aiMenu && typeof aiMenu.sourceId === 'string' ? aiMenu.sourceId : null
+    if (!sourceId || !flagged.has(sourceId)) {
+      rejected.push({ sourceId, reason: 'source_not_flagged' })
+      continue
+    }
+    const gate = aiReplacementGate({ aiMenu, deterministicItemCount: deterministicBySource.get(sourceId) || 0, sourceId })
+    if (!gate.ok) {
+      rejected.push({ sourceId, reason: gate.reason })
+      continue
+    }
+    if (!replaceableBySource.has(sourceId)) replaceableBySource.set(sourceId, [])
+    replaceableBySource.get(sourceId).push({ aiMenu, gate })
+  }
+
+  if (replaceableBySource.size === 0) {
+    limitations.push('Modelresultaat niet gebruikt: geen onderbouwde verbetering voor de gemarkeerde bron(nen).')
+    if (rejected.length > 0) limitations.push(`Modelresultaat niet samengevoegd (${[...new Set(rejected.map((row) => row.reason))].join(', ')}).`)
+    return { aiExtraction, assessment }
+  }
+
+  const replacedSummary = []
+  for (const [sourceId, entries] of replaceableBySource) {
+    const existingCount = deterministicBySource.get(sourceId) || 0
+    for (let i = menus.length - 1; i >= 0; i -= 1) {
+      if (menus[i] && menus[i].sourceId === sourceId) menus.splice(i, 1)
+    }
+    for (const { aiMenu, gate } of entries) {
+      const categories = (Array.isArray(aiMenu.categories) ? aiMenu.categories : []).map((category) => ({ ...category, uncertain: true }))
+      menus.push({
+        ...aiMenu,
+        extractionMethod: 'ai_structured',
+        replacesDeterministic: { sourceId, itemCount: existingCount, qualityFlags: assessment.codes },
+        categories,
+      })
+      replacedSummary.push(`${sourceId}: ${existingCount} → ${gate.itemCount} gerechten`)
+    }
+  }
+  limitations.push(
+    `Model-extractie verving de deterministische uitkomst voor ${replacedSummary.join('; ')} op basis van de kwaliteitscontrole (${assessment.codes.join(', ')}). Het vervangen resultaat is als "Controle nodig" gemarkeerd en niet automatisch goedgekeurd.`,
+  )
+  notes.push('De modeluitkomst is bron- en versiegebonden vervangen; open het resultaat met broncontext en controleer de gemarkeerde rubrieken.')
+  if (rejected.length > 0) {
+    limitations.push(`Niet gebruikt modelresultaat voor andere bron(nen): ${[...new Set(rejected.map((row) => row.reason))].join(', ')}.`)
+  }
+  return { aiExtraction, assessment }
 }
 
 /**
@@ -371,8 +576,12 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
         // The same sections are ALSO promoted to the canonical menu-context
         // shape, so receipt, summary, detail and concept cannot disagree about
         // whether this PDF yielded dishes (the Smelt failure mode).
-        const pdfContext = await buildUnknownMenuContext(fetched.bytes, sourceUrl, sourceId)
+        const { context: pdfContext, extractionText, extractionTextTruncated } = await readPdfMenuSource(fetched.bytes, sourceUrl, sourceId)
         unknownMenuContexts.push(pdfContext)
+        // The bounded, page/column-aware text is what a future model adapter
+        // reads. It stays in memory only: never on the context, the receipt
+        // or a log line.
+        if (extractionText) sourceTexts.set(sourceId, extractionText)
         Object.assign(source, {
           pageCount: pdfContext.pageCount,
           wordCount: pdfContext.wordCount,
@@ -381,6 +590,10 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
         if (pdfContext.usedFallback) {
           limitations.push(`PDF ${sourceUrl} is alleen via de tekstfallback gelezen; paginastructuur ontbreekt.`)
         }
+        if (extractionTextTruncated) {
+          limitations.push(`PDF ${sourceUrl} is voor modellezing afgekapt op de veilige tekstlimiet.`)
+        }
+        limitations.push(...pdfLayoutLimitations(sourceUrl, pdfContext.layout || {}))
         const converted = pdfContextToMenuContext(pdfContext, new Set(menuContexts.map((m) => m.contextSlug)), { sourceId })
         if (converted) {
           menuContexts.push({ ...converted.menu, sourceUrl, sourceId })
@@ -466,33 +679,19 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
 
   // 7. Optional provider-neutral hook. It is absent/disabled by default; a
   // caller may inject a configured, budget-guarded runtime after the provider
-  // and data-processing decisions. Deterministic menus always win: a model
-  // result is only used when no deterministic menu exists, and is never
-  // silently merged into a different result.
-  let aiExtraction = null
-  if (typeof structuredExtraction === 'function') {
-    const aiSources = sourceInventory.map((source) => ({
-      ...source,
-      ...(sourceTexts.has(source.id) ? { text: sourceTexts.get(source.id) } : {}),
-    }))
-    try {
-      aiExtraction = await structuredExtraction({ sources: aiSources, restaurantFields: restaurantCandidateFields })
-    } catch {
-      aiExtraction = { enabled: true, ok: false, reason: 'adapter_failed' }
-    }
-    if (aiExtraction && aiExtraction.enabled) {
-      if (aiExtraction.ok && Array.isArray(aiExtraction.menus) && aiExtraction.menus.length > 0) {
-        if (menuContexts.length === 0) {
-          menuContexts.push(...aiExtraction.menus)
-          notes.push('Aanvullende structurering via de geconfigureerde adapter toegevoegd.')
-        } else {
-          limitations.push('AI-resultaat niet toegevoegd: er bestaat al een deterministische menukaart.')
-        }
-      } else {
-        limitations.push(`AI-structurering niet gebruikt (${aiExtraction.reason || 'onbekende reden'}).`)
-      }
-    }
-  }
+  // and data-processing decisions. Quality/coverage gates decide whether a
+  // model call is useful at all; a validated result may only replace a
+  // flagged deterministic menu of the SAME source, never merge into it.
+  const { aiExtraction } = await applyProviderNeutralExtraction({
+    menuContexts,
+    unknownMenuContexts,
+    sourceInventory,
+    sourceTexts,
+    notes,
+    limitations,
+    restaurantCandidateFields,
+    structuredExtraction,
+  })
 
   const extractionResult = buildExtractionResult({
     sourceInventory,
@@ -514,6 +713,9 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
 
 module.exports = {
   countWords,
+  readPdfMenuSource,
   buildUnknownMenuContext,
+  pdfLayoutLimitations,
+  applyProviderNeutralExtraction,
   runRestaurantSourceAnalysis,
 }

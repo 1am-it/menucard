@@ -4,7 +4,7 @@ const test = require('node:test')
 const assert = require('node:assert/strict')
 const fs = require('node:fs')
 
-const { runRestaurantSourceAnalysis } = require('./restaurantSourceAnalysis')
+const { runRestaurantSourceAnalysis, applyProviderNeutralExtraction } = require('./restaurantSourceAnalysis')
 const { buildCandidateSummary } = require('./urlIntakes')
 const { buildMenuConcept } = require('./menuConcept')
 
@@ -572,4 +572,157 @@ test('structural safety net: never performs its own network fetch — every I/O 
 test('structural safety net: no OCR, screenshot, image-rendering, or browser-automation dependency', () => {
   const source = fs.readFileSync(require.resolve('./restaurantSourceAnalysis.js'), 'utf8')
   assert.doesNotMatch(source, /tesseract|puppeteer|playwright|browserless|canvas|screenshot/i)
+})
+
+// ─── Provider-neutral quality gate and source-scoped replacement (#59 review) ─
+
+const aiItem = (name, sourceId = 'source-1') => ({
+  name,
+  desc: null,
+  price: '5.00',
+  priceStatus: 'known',
+  evidence: { sourceId, locator: 'line:1', quote: name, sourceUrl: 'https://fixture.example/menu.pdf' },
+})
+const aiMenu = (sourceId = 'source-1') => ({
+  name: 'Kaart',
+  contextSlug: 'ai-1',
+  title: 'Kaart',
+  structure: 'normalized',
+  sourceId,
+  sourceUrl: 'https://fixture.example/menu.pdf',
+  extractionMethod: 'ai_structured',
+  categories: [{ name: 'Voor', items: [aiItem('Fictieve soep', sourceId), aiItem('Fictief brood', sourceId)] }],
+})
+const deterministicMenu = () => ({
+  sourceId: 'source-1',
+  sourceUrl: 'https://fixture.example/menu.pdf',
+  contextSlug: 'pdf-1',
+  extractionMethod: 'pdf_text',
+  categories: [{ name: 'Voor', items: [{ name: 'Fictieve soep', price: '5.00', priceStatus: 'known' }, { name: 'Fictief brood', price: '4.00', priceStatus: 'known' }] }],
+})
+
+test('REGRESSION (review P1): no model call is made when the deterministic result is sufficient', async () => {
+  let called = 0
+  const notes = []
+  const limitations = []
+  const result = await applyProviderNeutralExtraction({
+    menuContexts: [deterministicMenu()],
+    unknownMenuContexts: [],
+    sourceInventory: [{ id: 'source-1', url: 'https://fixture.example/menu.pdf', kind: 'pdf', status: 'read', itemCount: 2 }],
+    sourceTexts: new Map(),
+    notes,
+    limitations,
+    restaurantCandidateFields: {},
+    structuredExtraction: async () => { called += 1; return { enabled: true, ok: true, menus: [aiMenu()] } },
+  })
+  assert.equal(called, 0)
+  assert.equal(result.aiExtraction.skipped, true)
+  assert.equal(result.aiExtraction.reason, 'deterministic_result_sufficient')
+  assert.equal(result.assessment.sufficient, true)
+})
+
+test('REGRESSION (review P1): a supplement source is reported and refused, never paid for and thrown away', async () => {
+  let called = 0
+  const limitations = []
+  const result = await applyProviderNeutralExtraction({
+    menuContexts: [deterministicMenu()],
+    unknownMenuContexts: [{ sourceId: 'source-1', sourceUrl: 'https://fixture.example/menu.pdf', layout: { supplementLines: 2 } }],
+    sourceInventory: [{ id: 'source-1', url: 'https://fixture.example/menu.pdf', kind: 'pdf', status: 'read', itemCount: 2 }],
+    sourceTexts: new Map(),
+    notes: [],
+    limitations,
+    restaurantCandidateFields: {},
+    structuredExtraction: async () => { called += 1; return { enabled: true, ok: true, menus: [aiMenu()] } },
+  })
+  assert.equal(called, 0)
+  assert.equal(result.aiExtraction.reason, 'unsupported_product_gap')
+  assert.equal(result.assessment.blockedByProductGap, true)
+  assert.ok(limitations.some((line) => line.includes('Geen model-extractie uitgevoerd')))
+})
+
+
+
+test('REGRESSION (review P1): a validated model menu replaces only the flagged source, explicitly marked for review', async () => {
+  const deterministic = deterministicMenu()
+  deterministic.categories[0].items = [{ name: 'Fictieve soep', price: '5.00', priceStatus: 'known' }, { name: 'Fictieve soep', price: '5.00', priceStatus: 'known' }] // duplicate → flag
+  const menus = [deterministic]
+  const limitations = []
+  let called = 0
+  const result = await applyProviderNeutralExtraction({
+    menuContexts: menus,
+    unknownMenuContexts: [],
+    sourceInventory: [{ id: 'source-1', url: 'https://fixture.example/menu.pdf', kind: 'pdf', status: 'read', itemCount: 3 }],
+    sourceTexts: new Map(),
+    notes: [],
+    limitations,
+    restaurantCandidateFields: {},
+    structuredExtraction: async () => {
+      called += 1
+      return { enabled: true, ok: true, menus: [aiMenu(), aiMenu('source-9')], meta: { provider: 'fake' } }
+    },
+  })
+  assert.equal(called, 1)
+  assert.equal(menus.length, 1)
+  assert.equal(menus[0].extractionMethod, 'ai_structured')
+  assert.equal(menus[0].sourceId, 'source-1')
+  assert.equal(menus[0].replacesDeterministic.sourceId, 'source-1')
+  assert.equal(menus[0].replacesDeterministic.itemCount, 2)
+  assert.equal(menus[0].categories.every((category) => category.uncertain === true), true)
+  assert.ok(result.assessment.codes.includes('duplicate_item_within_category'))
+  assert.ok(limitations.some((line) => line.includes('Model-extractie verving de deterministische uitkomst')))
+  assert.ok(limitations.some((line) => line.includes('source_not_flagged')))
+})
+
+test('REGRESSION (review P1): a model menu with insufficient coverage never replaces the deterministic one', async () => {
+  const deterministic = deterministicMenu()
+  for (let i = 0; i < 10; i += 1) deterministic.categories[0].items.push({ name: `Fictief gerecht ${i}`, price: '5.00', priceStatus: 'known' })
+  // One duplicate is enough to flag the menu, so the model IS asked; its
+  // materially smaller answer must still not replace the deterministic result.
+  deterministic.categories[0].items.push({ name: 'Fictieve soep', price: '5.00', priceStatus: 'known' })
+  const menus = [deterministic]
+  const limitations = []
+  await applyProviderNeutralExtraction({
+    menuContexts: menus,
+    unknownMenuContexts: [],
+    sourceInventory: [{ id: 'source-1', url: 'https://fixture.example/menu.pdf', kind: 'pdf', status: 'read', itemCount: 12 }],
+    sourceTexts: new Map(),
+    notes: [],
+    limitations,
+    restaurantCandidateFields: {},
+    structuredExtraction: async () => ({ enabled: true, ok: true, menus: [aiMenu()] }),
+  })
+  assert.equal(menus.length, 1)
+  assert.equal(menus[0].extractionMethod, 'pdf_text')
+  assert.ok(limitations.some((line) => line.includes('coverage_below_deterministic')))
+})
+
+test('REGRESSION (review P1): the bounded PDF text reaches the adapter, while context/receipt never carry it', async () => {
+  const menuContent = [
+    'BT /F1 12 Tf',
+    textAt(20, 100, '// FICTIEVE DRANKEN'),
+    textAt(20, 80, 'Fictieve Koffie'),
+    textAt(90, 80, '3.5'),
+    textAt(20, 60, 'Fictieve Koffie'),
+    textAt(90, 60, '3.5'),
+    'ET',
+  ].join('\n')
+  let received
+  const result = await runRestaurantSourceAnalysis({
+    homepageHtml: '<html><body><a href="/menukaart">Download Menukaart</a></body></html>',
+    homepageUrl: 'https://fictieve-botanist.invalid/',
+    fetchCandidate: async () => ({ status: 'pdf', bytes: buildTestPdf({ contentStream: menuContent }), finalUrl: 'https://fictieve-botanist.invalid/menukaart' }),
+    structuredExtraction: async (input) => {
+      received = input
+      return { enabled: true, ok: false, reason: 'provider_unavailable' }
+    },
+  })
+  const pdfSource = received.sources.find((source) => source.id === result.unknownMenuContexts[0].sourceId)
+  assert.match(pdfSource.text, /Pagina 1/)
+  assert.match(pdfSource.text, /Fictieve Koffie 3\.5/)
+  assert.equal(Object.prototype.hasOwnProperty.call(result.unknownMenuContexts[0], 'text'), false)
+  assert.doesNotMatch(JSON.stringify(result.unknownMenuContexts), /Pagina 1/)
+  assert.doesNotMatch(JSON.stringify(result.extractionResult), /Pagina 1/)
+  assert.doesNotMatch(JSON.stringify(result.extractionResult), /Fictieve Koffie/)
+  assert.equal(result.menuContexts.length, 1)
+  assert.equal(result.aiExtraction.reason, 'provider_unavailable')
 })
