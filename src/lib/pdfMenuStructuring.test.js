@@ -10,6 +10,8 @@ const {
   isPriceToken,
   pureSectionMarkerNames,
   structurePdfLinesIntoMenu,
+  duplicateLayoutLayer,
+  compactPdfLayoutText,
 } = require('./pdfMenuStructuring')
 
 // Reused from pdfTextExtraction.test.js's own PDF-fixture-building
@@ -286,8 +288,151 @@ test('structurePdfLinesIntoMenu: a description never carries over across a page 
 })
 
 test('structurePdfLinesIntoMenu: an empty or missing pages array resolves categories: [], never throws', () => {
-  assert.deepEqual(structurePdfLinesIntoMenu([]), { categories: [] })
-  assert.deepEqual(structurePdfLinesIntoMenu(undefined), { categories: [] })
+  assert.deepEqual(structurePdfLinesIntoMenu([]).categories, [])
+  assert.deepEqual(structurePdfLinesIntoMenu(undefined).categories, [])
+})
+
+test('REGRESSION (review P1): columns are stable when a row is empty on one side — a right-hand dish never lands under the left heading', () => {
+  const page = {
+    pageNumber: 1,
+    lines: [
+      { y: 200, items: [{ str: '// LINKS', x: 20, y: 200 }, { str: '// RECHTS', x: 440, y: 200 }] },
+      { y: 180, items: [{ str: 'Linksgerecht', x: 20, y: 180 }, { str: '10.00', x: 100, y: 180 }] },
+      { y: 160, items: [{ str: 'Rechtsgerecht', x: 440, y: 160 }, { str: '12.50', x: 520, y: 160 }] },
+      { y: 140, items: [{ str: 'Nog links', x: 20, y: 140 }, { str: '11.00', x: 100, y: 140 }] },
+    ],
+  }
+  const { categories } = structurePdfLinesIntoMenu([page])
+  const byName = Object.fromEntries(categories.map((category) => [category.name, category.items.map((item) => item.name)]))
+  assert.deepEqual(byName.LINKS, ['Linksgerecht', 'Nog links'])
+  assert.deepEqual(byName.RECHTS, ['Rechtsgerecht'])
+})
+
+test('REGRESSION (review P1): an identical, overlapping second text layer is ignored instead of merging two dish names', () => {
+  const base = [
+    ['Hollands', '27'],
+    ['Zwitsers', '29.5'],
+    ['Truffel', '28'],
+    ['Italiaans', '29.5'],
+    ['Frans', '29.5'],
+    ['Spaans', '27'],
+  ]
+  const lines = [{ y: 300, items: [{ str: '// KAASFONDUE', x: 20, y: 300, seq: 0 }] }]
+  base.forEach(([name, price], i) => {
+    lines.push({ y: 280 - i * 20, items: [{ str: name, x: 20, y: 280 - i * 20, seq: 1 + i * 2 }, { str: price, x: 90, y: 280 - i * 20, seq: 2 + i * 2 }] })
+  })
+  // The overlay: the same block drawn 40 units higher, later in the stream.
+  lines.push({ y: 340, items: [{ str: '// KAASFONDUE', x: 20, y: 340, seq: 40 }] })
+  base.forEach(([name, price], i) => {
+    lines.push({ y: 320 - i * 20, items: [{ str: name, x: 20, y: 320 - i * 20, seq: 41 + i * 2 }, { str: price, x: 90, y: 320 - i * 20, seq: 42 + i * 2 }] })
+  })
+  const { categories, layout } = structurePdfLinesIntoMenu([{ pageNumber: 1, lines }])
+  assert.equal(layout.duplicateLayerItems, 13)
+  assert.deepEqual(categories.flatMap((category) => category.items.map((item) => [item.name, item.price])), base)
+})
+
+test('a legitimately repeated dish list further down the page is never treated as an overlay', () => {
+  const lines = [{ y: 400, items: [{ str: '// LUNCH', x: 20, y: 400, seq: 0 }] }]
+  ;['Soep 5.00', 'Brood 3.00', 'Salade 6.00', 'Taart 4.00', 'Koffie 2.50'].forEach((line, i) => {
+    const [name, price] = line.split(' ')
+    lines.push({ y: 380 - i * 20, items: [{ str: name, x: 20, y: 380 - i * 20, seq: 1 + i * 2 }, { str: price, x: 90, y: 380 - i * 20, seq: 2 + i * 2 }] })
+  })
+  lines.push({ y: 200, items: [{ str: '// DINER', x: 20, y: 200, seq: 30 }] })
+  ;['Soep 5.00', 'Brood 3.00', 'Salade 6.00', 'Taart 4.00', 'Koffie 2.50'].forEach((line, i) => {
+    const [name, price] = line.split(' ')
+    lines.push({ y: 180 - i * 20, items: [{ str: name, x: 20, y: 180 - i * 20, seq: 31 + i * 2 }, { str: price, x: 90, y: 180 - i * 20, seq: 32 + i * 2 }] })
+  })
+  const { categories, layout } = structurePdfLinesIntoMenu([{ pageNumber: 1, lines }])
+  assert.equal(layout.duplicateLayerItems, 0)
+  const byName = Object.fromEntries(categories.map((category) => [category.name, category.items.length]))
+  assert.deepEqual(byName, { LUNCH: 5, DINER: 5 })
+})
+
+test('REGRESSION: a number inside a description never becomes the previous dish\'s price', () => {
+  const page = {
+    pageNumber: 1,
+    lines: [
+      { y: 200, items: [{ str: '// BORREL', x: 20, y: 200 }] },
+      { y: 180, items: [{ str: 'Oude boeren kaas', x: 20, y: 180 }, { str: '8', x: 120, y: 180 }] },
+      { y: 160, items: [{ str: 'Klassieke Stolwijker van 2,5 jaar oud met huisgemaakte chutney', x: 20, y: 160 }] },
+    ],
+  }
+  const { categories, layout } = structurePdfLinesIntoMenu([page])
+  assert.deepEqual(categories[0].items.map((item) => [item.name, item.price]), [['Oude boeren kaas', '8']])
+  assert.equal(categories[0].items[0].desc, 'Klassieke Stolwijker van 2,5 jaar oud met huisgemaakte chutney')
+  assert.equal(layout.ambiguousPriceLines, 1)
+})
+
+test('REGRESSION: a supplement line is never disguised as an ordinary dish; it is skipped and counted', () => {
+  const page = {
+    pageNumber: 1,
+    lines: [
+      { y: 200, items: [{ str: '// LUNCH', x: 20, y: 200 }] },
+      { y: 180, items: [{ str: 'Brood', x: 20, y: 180 }, { str: '6', x: 80, y: 180 }] },
+      { y: 160, items: [{ str: '+ Bresaola', x: 20, y: 160 }, { str: '15', x: 110, y: 160 }] },
+    ],
+  }
+  const { categories, layout } = structurePdfLinesIntoMenu([page])
+  assert.deepEqual(categories[0].items.map((item) => item.name), ['Brood'])
+  assert.equal(layout.supplementLines, 1)
+})
+
+test('plain section labels: a capitalized known heading counts, a lowercase wrapped fragment never does', async () => {
+  const content = [
+    'BT /F1 12 Tf',
+    textAt(20, 200, 'Diner 17:30 - 21:30'),
+    textAt(20, 180, 'Soep'),
+    textAt(100, 180, '5.00'),
+    'ET',
+  ].join('\n')
+  const { pages } = await extractDigitalPdfLines(buildTestPdf({ contentStream: content }))
+  assert.equal(structurePdfLinesIntoMenu(pages).categories[0].name, 'Diner')
+
+  const lower = { pageNumber: 1, lines: [{ y: 200, items: [{ str: 'kaasfondue', x: 20, y: 200 }, { str: 'Soep', x: 20, y: 180 }, { str: '5.00', x: 100, y: 180 }] }] }
+  const structured = structurePdfLinesIntoMenu([lower])
+  assert.deepEqual(structured.categories.map((category) => category.name), [null])
+})
+
+test('compactPdfLayoutText: bounded, page-aware, column-aware, and free of the duplicate overlay', () => {
+  const base = ['Soep 5.00', 'Brood 3.00', 'Salade 6.00', 'Taart 4.00', 'Koffie 2.50']
+  const lines = [{ y: 300, items: [{ str: '// LINKS', x: 20, y: 300, seq: 0 }, { str: '// RECHTS', x: 440, y: 300, seq: 1 }] }]
+  base.forEach((line, i) => {
+    const [name, price] = line.split(' ')
+    lines.push({
+      y: 280 - i * 20,
+      items: [
+        { str: name, x: 20, y: 280 - i * 20, seq: 2 + i * 2 },
+        { str: price, x: 100, y: 280 - i * 20, seq: 3 + i * 2 },
+        ...(i === 0 ? [{ str: 'Bier', x: 440, y: 280, seq: 60 }, { str: '3.00', x: 500, y: 280, seq: 61 }] : []),
+      ],
+    })
+  })
+  // The same left column drawn 40 units higher, later in the stream.
+  lines.push({ y: 340, items: [{ str: '// LINKS', x: 20, y: 340, seq: 40 }] })
+  base.forEach((line, i) => {
+    const [name, price] = line.split(' ')
+    lines.push({
+      y: 320 - i * 20,
+      items: [
+        { str: name, x: 20, y: 320 - i * 20, seq: 41 + i * 2 },
+        { str: price, x: 100, y: 320 - i * 20, seq: 42 + i * 2 },
+      ],
+    })
+  })
+  const { text, truncated } = compactPdfLayoutText([{ pageNumber: 1, lines }], { maxChars: 500 })
+  assert.equal(truncated, false)
+  assert.match(text, /Pagina 1/)
+  assert.match(text, /Soep 5\.00 \| Bier 3\.00/)
+  assert.equal((text.match(/Soep/g) || []).length, 1)
+
+  const bounded = compactPdfLayoutText([{ pageNumber: 1, lines }], { maxChars: 12 })
+  assert.equal(bounded.truncated, true)
+  assert.equal(bounded.text.length <= 12, true)
+})
+
+test('duplicateLayoutLayer: no content-stream sequence means no suppression, never a guess', () => {
+  const page = { lines: [{ y: 100, items: [{ str: 'Soep', x: 20, y: 100 }] }] }
+  assert.deepEqual(duplicateLayoutLayer(page), { suppressedSeqs: new Set(), count: 0, offset: null })
 })
 
 test('structural safety net: never imports an OCR, screenshot, image-rendering, network, or browser-automation dependency', () => {

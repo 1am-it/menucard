@@ -93,6 +93,138 @@ function isPriceVariantSeparator(str) {
   return typeof str === 'string' && PRICE_VARIANT_SEPARATOR_PATTERN.test(str.trim())
 }
 
+/** A document that draws the exact same text twice — an overlay/animation
+ * layer, confirmed against the real Smelt Breda menu PDF: that PDF repeats
+ * the whole left column 40 units higher, including its own section header.
+ * Reading both copies on one baseline pairs unrelated names with each
+ * other's price (the real "Hollands Zwitsers" defect). A duplicate is only
+ * recognized when ALL of these hold, so a legitimately repeated dish on
+ * two menus is never removed:
+ *   - at least this many identical (text, x) pairs share one Y offset;
+ *   - the two copies' vertical spans overlap (a second list further down
+ *     the page, e.g. lunch after dinner, does not);
+ *   - the later-drawn copy (higher content-stream `seq`) is the overlay.
+ * The last rule is a documented convention, not a visual proof. */
+const MIN_DUPLICATE_LAYER_ITEMS = 5
+const DUPLICATE_DELTA_TOLERANCE = 2
+
+function layoutItemKey(item) {
+  return `${item.str.replace(/\s+/g, ' ').trim().toLowerCase()}|${Math.round(item.x)}`
+}
+
+/**
+ * Finds an identical, vertically shifted duplicate text layer on one page.
+ * Returns `{ suppressedSeqs: Set<number>, count, offset }`; an empty set
+ * when the page has no such layer or no item carries a content-stream
+ * `seq` (e.g. a hand-built test fixture).
+ */
+function duplicateLayoutLayer(page) {
+  const byKey = new Map()
+  for (const line of (page && Array.isArray(page.lines) && page.lines) || []) {
+    for (const item of (line && Array.isArray(line.items) && line.items) || []) {
+      if (!item || typeof item.str !== 'string' || !item.str.trim() || typeof item.x !== 'number') continue
+      if (!Number.isInteger(item.seq) || typeof item.y !== 'number') return { suppressedSeqs: new Set(), count: 0, offset: null }
+      const key = layoutItemKey(item)
+      if (!byKey.has(key)) byKey.set(key, [])
+      byKey.get(key).push(item)
+    }
+  }
+
+  const deltaCounts = new Map()
+  for (const list of byKey.values()) {
+    if (list.length < 2) continue
+    // Pair by content-stream order: the later-drawn copy of a block sits at a
+    // consistent signed offset from the earlier one. Absolute offsets would
+    // confuse two different dishes that happen to share a price and an X.
+    const ordered = [...list].sort((a, b) => a.seq - b.seq)
+    for (let i = 0; i < ordered.length; i += 1) {
+      for (let j = i + 1; j < ordered.length; j += 1) {
+        const delta = Math.round((ordered[j].y - ordered[i].y) * 2) / 2
+        if (Math.abs(delta) < DUPLICATE_DELTA_TOLERANCE) continue
+        deltaCounts.set(delta, (deltaCounts.get(delta) || 0) + 1)
+      }
+    }
+  }
+  let modal = null
+  for (const [delta, count] of deltaCounts) if (!modal || count > modal.count) modal = { delta, count }
+  if (!modal || modal.count < MIN_DUPLICATE_LAYER_ITEMS) return { suppressedSeqs: new Set(), count: 0, offset: null }
+
+  const suppressedSeqs = new Set()
+  const primaryYs = []
+  const overlayYs = []
+  for (const list of byKey.values()) {
+    if (list.length < 2) continue
+    const ordered = [...list].sort((a, b) => a.seq - b.seq)
+    for (let i = 0; i < ordered.length; i += 1) {
+      for (let j = i + 1; j < ordered.length; j += 1) {
+        if (Math.abs(ordered[j].y - ordered[i].y - modal.delta) > DUPLICATE_DELTA_TOLERANCE) continue
+        suppressedSeqs.add(ordered[j].seq)
+        primaryYs.push(ordered[i].y)
+        overlayYs.push(ordered[j].y)
+      }
+    }
+  }
+  if (suppressedSeqs.size < MIN_DUPLICATE_LAYER_ITEMS || primaryYs.length === 0) {
+    return { suppressedSeqs: new Set(), count: 0, offset: null }
+  }
+  const overlap =
+    Math.min(Math.max(...primaryYs), Math.max(...overlayYs)) - Math.max(Math.min(...primaryYs), Math.min(...overlayYs))
+  if (overlap <= 0) return { suppressedSeqs: new Set(), count: 0, offset: null }
+  return { suppressedSeqs, count: suppressedSeqs.size, offset: modal.delta }
+}
+
+/**
+ * Stable page-level column anchors. Derived once per page from every item's
+ * X position, never re-derived per line: a row that is empty in one column
+ * must not shift the remaining text into that column's state (the real
+ * "right-hand dish attributed to the left heading" defect).
+ */
+function pageColumnAnchors(page, suppressedSeqs = new Set()) {
+  const xs = []
+  for (const line of (page && Array.isArray(page.lines) && page.lines) || []) {
+    for (const item of (line && Array.isArray(line.items) && line.items) || []) {
+      if (!item || typeof item.str !== 'string' || !item.str.trim()) continue
+      if (typeof item.x !== 'number') continue
+      if (Number.isInteger(item.seq) && suppressedSeqs.has(item.seq)) continue
+      xs.push(item.x)
+    }
+  }
+  if (xs.length === 0) return []
+  xs.sort((a, b) => a - b)
+  const anchors = [{ min: xs[0], max: xs[0] }]
+  for (const x of xs.slice(1)) {
+    const current = anchors[anchors.length - 1]
+    if (x - current.max > COLUMN_GAP) anchors.push({ min: x, max: x })
+    else current.max = x
+  }
+  return anchors.map((anchor) => ({ ...anchor, center: (anchor.min + anchor.max) / 2 }))
+}
+
+function columnIndexForX(anchors, x) {
+  let bestIndex = 0
+  let bestDistance = Infinity
+  anchors.forEach((anchor, index) => {
+    const distance = x < anchor.min ? anchor.min - x : x > anchor.max ? x - anchor.max : 0
+    if (distance < bestDistance) {
+      bestDistance = distance
+      bestIndex = index
+    }
+  })
+  return bestIndex
+}
+
+/** Assign one reconstructed line's items to the page's stable columns. */
+function splitLineIntoPageColumns(lineItems, anchors) {
+  if (anchors.length === 0) return []
+  const columns = anchors.map(() => [])
+  for (const item of Array.isArray(lineItems) ? lineItems : []) {
+    if (!item || typeof item.str !== 'string') continue
+    columns[columnIndexForX(anchors, item.x)].push(item)
+  }
+  return columns
+}
+
+
 /** `null` unless every item on the line is, on its own, a section
  * marker — a line mixing a section marker with ordinary item text is
  * deliberately never split into two independent readings; see this
@@ -138,14 +270,27 @@ const PDF_SECTION_LABELS = new Set([
 
 function pdfSectionLabel(lineItems) {
   if (lineItems.some((item) => isPriceToken(item.str))) return null
-  const text = joinText(lineItems.map((item) => item.str))
-    .replace(/\s+\d{1,2}:\d{2}(?:\s*[–-]\s*\d{1,2}:\d{2})?.*$/, '')
-    .trim()
-  return PDF_SECTION_LABELS.has(text.toLowerCase()) ? text : null
+  const rawText = joinText(lineItems.map((item) => item.str))
+  const text = rawText.replace(/\s+\d{1,2}:\d{2}(?:\s*[–-]\s*\d{1,2}:\d{2})?.*$/, '').trim()
+  const words = text.split(' ').filter(Boolean)
+  // A plain label must start with a capital letter. A wrapped sentence
+  // fragment such as the real Smelt "kaasfondue" (the tail of a burger
+  // description) is lowercase and must never become a section header.
+  const startsWithCapital = (value) => /^\p{Lu}/u.test(value)
+  if (PDF_SECTION_LABELS.has(text.toLowerCase()) && startsWithCapital(text)) return text
+  // A heading may carry a short service note on the same line
+  // ("BORREL Om te delen vanaf 14:30"). That form is only accepted when the
+  // line really contains a time — "Kaasfondue naar keuze" is a menu lead-in,
+  // not a section, and must not capture the items below it.
+  const carriesTime = /\d{1,2}:\d{2}/.test(rawText)
+  if (carriesTime && words.length > 1 && words.length <= 6 && PDF_SECTION_LABELS.has(words[0].toLowerCase()) && startsWithCapital(words[0])) {
+    return words[0]
+  }
+  return null
 }
 
 const PDF_CHROME_PATTERNS = [
-  /^geserveerd met\b/i,
+  /^geserveerd\b/i,
   /^smaak\s*:/i,
   /^wijntip\s*:/i,
   /^vraag onze\b/i,
@@ -157,6 +302,20 @@ const PDF_CHROME_PATTERNS = [
 function isPdfChrome(lineItems) {
   const text = joinText(lineItems.map((item) => item.str))
   return PDF_CHROME_PATTERNS.some((pattern) => pattern.test(text))
+}
+
+/**
+ * A short capitalised, price-less line that is neither chrome nor a known
+ * section nor a description of the previous item is probably a heading this
+ * parser does not recognize (the real Smelt lunch sub-headings "Eieren" and
+ * "Broodjes"). It is never promoted to a category — doing so would invent
+ * structure — but the count is reported so review is honest about it.
+ */
+function looksLikeUnrecognizedHeading(words, lineText) {
+  const visible = (Array.isArray(words) ? words : []).filter((word) => word && word.text.length > 0)
+  if (visible.length === 0 || visible.length > 2) return false
+  if (/[0-9]/.test(lineText) || lineText.endsWith(':')) return false
+  return /^\p{Lu}/u.test(visible[0].text)
 }
 
 /** Splits a reconstructed line's own items into individual whitespace-
@@ -244,6 +403,13 @@ function splitColumnByBaseline(columnItems) {
  */
 function structurePdfLinesIntoMenu(pages) {
   const categoriesByName = new Map() // name (or null) -> { name, items: [] }
+  const layout = {
+    duplicateLayerItems: 0,
+    duplicateLayerOffsets: [],
+    ambiguousPriceLines: 0,
+    supplementLines: 0,
+    unrecognizedHeadingLines: 0,
+  }
 
   function categoryFor(name) {
     if (!categoriesByName.has(name)) categoriesByName.set(name, { name, items: [] })
@@ -251,16 +417,49 @@ function structurePdfLinesIntoMenu(pages) {
   }
 
   for (const page of Array.isArray(pages) ? pages : []) {
-    // A description continuation must come from the immediately preceding
-    // line in the SAME column on the SAME page. Columns have independent
-    // section and continuation state; reset at every page boundary.
-    const columnStates = []
+    // A document may draw the same text twice (confirmed in the real Smelt
+    // PDF: a complete second left column, 40 units higher). The later copy is
+    // an overlay and is ignored; see duplicateLayoutLayer's own header.
+    const duplicateLayer = duplicateLayoutLayer(page)
+    if (duplicateLayer.count > 0) {
+      layout.duplicateLayerItems += duplicateLayer.count
+      layout.duplicateLayerOffsets.push(duplicateLayer.offset)
+    }
+    // Columns are anchored to the whole page, not to one row's index, so an
+    // empty left column never shifts right-hand content into the left state.
+    const anchors = pageColumnAnchors(page, duplicateLayer.suppressedSeqs)
+    const columnStates = anchors.map(() => ({ categoryName: null, lastItem: null }))
 
     for (const line of page.lines || []) {
-      const columns = splitLineIntoColumns(line.items)
+      const items = (line && Array.isArray(line.items) ? line.items : []).filter(
+        (item) =>
+          item &&
+          typeof item.str === 'string' &&
+          !(Number.isInteger(item.seq) && duplicateLayer.suppressedSeqs.has(item.seq)),
+      )
+      if (items.length === 0) continue
+      const columns = anchors.length > 0 ? splitLineIntoPageColumns(items, anchors) : [items]
       columns.forEach((columnItems, columnIndex) => {
         if (!columnStates[columnIndex]) columnStates[columnIndex] = { categoryName: null, lastItem: null }
         const state = columnStates[columnIndex]
+
+        // A description continuation for the immediately preceding item in
+        // the SAME column on the SAME page, only when its leftmost X aligns
+        // with that item's name. Never a new item, never another column.
+        const attachDescription = (baselineItems) => {
+          if (!state.lastItem) return false
+          const visible = (Array.isArray(baselineItems) ? baselineItems : []).filter(
+            (it) => it && typeof it.str === 'string' && it.str.trim().length > 0,
+          )
+          if (visible.length === 0) return false
+          const leftmostX = Math.min(...visible.map((it) => it.x))
+          if (Math.abs(leftmostX - state.lastItem.startX) > DESCRIPTION_X_ALIGNMENT_TOLERANCE) return false
+          const text = joinText(visible.map((it) => it.str))
+          if (text.length === 0) return false
+          state.lastItem.desc = state.lastItem.desc ? `${state.lastItem.desc} ${text}` : text
+          state.lastItem.evidenceText = `${state.lastItem.evidenceText}\n${text}`
+          return true
+        }
         for (const baselineItems of splitColumnByBaseline(columnItems)) {
           const sectionNames = pureSectionMarkerNames(baselineItems)
           const plainSection = sectionNames ? null : pdfSectionLabel(baselineItems)
@@ -276,10 +475,39 @@ function structurePdfLinesIntoMenu(pages) {
           const lineText = joinText(baselineItems.map((it) => it.str))
           if (lineText.length === 0 || isPdfChrome(baselineItems)) continue
 
+          const words = tokenizeLineIntoWords(baselineItems)
+          // A supplement/extra ("+ Bresaola", "+ Gebakken krieltjes 5",
+          // "Botersla ... + Bresaola 15") is a relation the current product
+          // concept cannot store. Emitting it as an ordinary dish would
+          // disguise a modifier as a main item, so it is skipped and counted.
+          const hasSupplementMarker = words.some(
+            (word) => word.text === '+' || (word.text.startsWith('+') && word.text.length > 1 && !isPriceToken(word.text.slice(1))),
+          )
+          if (hasSupplementMarker) {
+            layout.supplementLines += 1
+            continue
+          }
+          const pricePositions = words.map((word, index) => (isPriceToken(word.text) ? index : -1)).filter((index) => index >= 0)
+          // A price in the middle of a line, with no price at the end, is prose:
+          // the real Smelt PDF has "Klassieke Stolwijker van 2,5 jaar oud ..." —
+          // reading that as a dish named "Klassieke Stolwijker van" priced 2,50
+          // invents an item and drops the real description. Two (name, price)
+          // pairs merged into one text string by pdfjs ("Koffie 3.5 Broodje
+          // 4.5", the real De Botanist shape) still end with a price and are
+          // accepted as two items.
+          const priceNotAtLineEnd = pricePositions.length > 0 && pricePositions[pricePositions.length - 1] !== words.length - 1
+          if (priceNotAtLineEnd) {
+            layout.ambiguousPriceLines += 1
+            if (!attachDescription(baselineItems) && looksLikeUnrecognizedHeading(words, lineText)) {
+              layout.unrecognizedHeadingLines += 1
+            }
+            continue
+          }
+
           const recognizedItems = []
           let buffer = []
           let bufferStartX = null
-          for (const word of tokenizeLineIntoWords(baselineItems)) {
+          for (const word of words) {
             if (isPriceToken(word.text)) {
               const name = joinText(buffer)
               if (name.length > 0) recognizedItems.push({ name, price: word.text.trim(), startX: bufferStartX })
@@ -328,16 +556,17 @@ function structurePdfLinesIntoMenu(pages) {
             continue
           }
 
-          // No price token anywhere in this baseline — a description
-          // continuation for the immediately preceding item in the same
-          // column, only when its leftmost X aligns with that item's name.
-          if (state.lastItem && baselineItems.length > 0) {
-            const leftmostX = Math.min(...baselineItems.map((it) => it.x))
-            if (Math.abs(leftmostX - state.lastItem.startX) <= DESCRIPTION_X_ALIGNMENT_TOLERANCE) {
-              state.lastItem.desc = state.lastItem.desc ? `${state.lastItem.desc} ${lineText}` : lineText
-              state.lastItem.evidenceText = `${state.lastItem.evidenceText}\n${lineText}`
-            }
+          // No usable price on this baseline. A short capitalized line is a
+          // possible heading this parser does not recognize; it never becomes
+          // a category and it ends the previous item's description block.
+          if (looksLikeUnrecognizedHeading(words, lineText)) {
+            layout.unrecognizedHeadingLines += 1
+            state.lastItem = null
+            continue
           }
+          // Otherwise: a description continuation for the immediately
+          // preceding item in the same column.
+          attachDescription(baselineItems)
         }
       })
     }
@@ -359,16 +588,70 @@ function structurePdfLinesIntoMenu(pages) {
     }))
     .filter((category) => category.items.length > 0)
 
-  return { categories }
+  return { categories, layout }
+}
+
+const MAX_LAYOUT_TEXT_CHARS = 20_000
+const MAX_LAYOUT_LINE_CHARS = 400
+
+/**
+ * A bounded, page- and column-aware text view of the same lines the menu
+ * parser reads. This is the ONLY PDF source text handed to a future model
+ * adapter: it keeps the page and column relation (a column separator), drops
+ * a duplicate overlay layer, and is truncated honestly. It contains source
+ * text, so callers must never log it or persist it in a receipt.
+ */
+function compactPdfLayoutText(pages, options = {}) {
+  const maxChars = Number.isInteger(options.maxChars) && options.maxChars > 0 ? options.maxChars : MAX_LAYOUT_TEXT_CHARS
+  const parts = []
+  let length = 0
+  let truncated = false
+  for (const page of Array.isArray(pages) ? pages : []) {
+    const duplicateLayer = duplicateLayoutLayer(page)
+    const anchors = pageColumnAnchors(page, duplicateLayer.suppressedSeqs)
+    const lines = []
+    for (const line of (page && Array.isArray(page.lines) && page.lines) || []) {
+      const items = (line && Array.isArray(line.items) ? line.items : []).filter(
+        (item) =>
+          item &&
+          typeof item.str === 'string' &&
+          item.str.trim().length > 0 &&
+          !(Number.isInteger(item.seq) && duplicateLayer.suppressedSeqs.has(item.seq)),
+      )
+      if (items.length === 0) continue
+      const columns = anchors.length > 0 ? splitLineIntoPageColumns(items, anchors) : [items]
+      const text = columns
+        .map((column) => joinText(column.map((item) => item.str)))
+        .filter(Boolean)
+        .join(' | ')
+      if (text) lines.push(text.slice(0, MAX_LAYOUT_LINE_CHARS))
+    }
+    if (lines.length === 0) continue
+    const block = `Pagina ${page.pageNumber}\n${lines.join('\n')}\n`
+    if (length + block.length > maxChars) {
+      parts.push(block.slice(0, Math.max(0, maxChars - length)))
+      truncated = true
+      break
+    }
+    parts.push(block)
+    length += block.length
+  }
+  return { text: parts.join('\n').trim(), truncated }
 }
 
 module.exports = {
   MENU_ITEM_CONFIDENCE,
   SECTION_MARKER_PATTERN,
   PRICE_TOKEN_PATTERN,
+  MIN_DUPLICATE_LAYER_ITEMS,
+  MAX_LAYOUT_TEXT_CHARS,
   isPriceToken,
   isPriceVariantSeparator,
   splitLineIntoColumns,
+  pageColumnAnchors,
+  splitLineIntoPageColumns,
+  duplicateLayoutLayer,
   pureSectionMarkerNames,
+  compactPdfLayoutText,
   structurePdfLinesIntoMenu,
 }

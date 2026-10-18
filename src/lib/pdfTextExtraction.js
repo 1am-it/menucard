@@ -292,13 +292,20 @@ async function extractDigitalPdfText(pdfBytes, options = {}) {
  * to merge two genuinely different rows. */
 function groupItemsIntoLines(items, yToleranceUnits = 2) {
   const bucketed = new Map()
+  let sequence = 0
   for (const item of items) {
     if (!item || typeof item.str !== 'string') continue
     const x = item.transform[4]
     const y = item.transform[5]
     const bucketKey = Math.round(y / yToleranceUnits) * yToleranceUnits
     if (!bucketed.has(bucketKey)) bucketed.set(bucketKey, [])
-    bucketed.get(bucketKey).push({ str: item.str, x, y })
+    // `seq` is the item's own position in the PDF content stream. It is
+    // additive and used only for one honest layout decision downstream:
+    // when a document draws the exact same text twice, a later identical,
+    // overlapping copy is treated as an overlay (see
+    // src/lib/pdfMenuStructuring.js's own duplicate-layer detection).
+    bucketed.get(bucketKey).push({ str: item.str, x, y, seq: sequence })
+    sequence += 1
   }
   const sortedYs = [...bucketed.keys()].sort((a, b) => b - a) // top of page first
   return sortedYs.map((y) => ({
