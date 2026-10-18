@@ -149,28 +149,102 @@ wordt vooraf gecontroleerd en het script schrijft alleen
 | `Desperados` ontbrak | p4: `4.0%`/`5.2` op y365, naam op y363 (1,9 eenheid lager) | ABV-microbaseline boven het bedrag | **hersteld**: bedrag boven de naam binnen 3 eenheden wordt gekoppeld; ABV wordt nooit naam of prijs |
 | wijn/cocktail/Petite | p7-p9, p5-p6, p11 | meerregelige blokken, glas/fles en porties | **niet opgelost / niet ondersteund**: geen lossless bewijs; wijnregels blijven de bekende beperking houden. Petite-porties staan in de naam of zijn als portieregel geteld |
 
-### Voorstel referentie v2 (niet geaccepteerd)
+### Voorstel referentie v2 (historisch, niet geaccepteerd)
 
-`ops/benchmark/botanist-reference.proposed-v2.json` is een **voorstel** met
-status `proposed_not_accepted`, gebaseerd op v1. Het bevat drie
-brononderbouwde correcties: Sourcy als twee familie-/portieregels, `Ginger
-Beer` zonder merkvoorvoegsel, en de vijf lemonades buiten fritz als
-niet-ondersteund Soof-blok. v1 blijft ongewijzigd de baseline.
+`ops/benchmark/botanist-reference.proposed-v2.json` is een **historisch voorstel**
+met status `proposed_not_accepted`, gebaseerd op v1. Het bevat drie
+brononderbouwde correcties: Sourcy als twee familie-/portieregels, `Ginger Beer`
+zonder merkvoorvoegsel, en de vijf lemonades buiten fritz als niet-ondersteund
+Soof-blok. v1 blijft ongewijzigd de baseline. Review 6252891629 verwierp de
+v2-noemer: de vijf leesbare Soof-rijen verdwenen uit de meetlat. De v2-bestanden
+blijven als historie staan en worden niet overschreven; v3 hieronder vervangt
+het voorstel, niet de baseline.
 
 Alleen ter controle is het voorstel apart gescoord
 (`botanist-comparison.proposed-v2.json`): 133 matched / 1 missing / 1 extra /
-0 prijsverschil. Die ene resterende rij is `Del Sol Pineapple Hibiscus Soda`:
-de vervolgregel `Hibiscus Soda` heeft geen expliciete connector, portie of
-herhaald prefix. Dezelfde vorm is elders een omschrijving (`England IPA`),
-dus de parser raadt de naam niet. Dat staat als parser-gap in het voorstel en
-is **geen** referentiecorrectie.
+0 prijsverschil. Die meting hoort bij de keten vóór de supplementreparatie en
+telde de zes supplementrijen nog als gewone gerechten. Ze is daarom historie,
+geen actuele stand.
 
-### Wat expliciet open blijft
+### Herstelronde review 6252891629 — supplementrubriek en referentie v3
+
+Zelfde gepinde PDF (SHA-256 `50fef0b6…7f85`), read-only, alleen de
+deterministische HTML/PDF-keten. Geen provider, OCR, renderingvendor,
+netwerkactie, referentie-aanpassing of productieactie.
+
+### P1: een expliciete supplementrubriek is geen gerechtenlijst
+
+`// SUPPLEMENTEN` op p2 opent nu een supplementsectie voor de hele linkerkolom
+tot de volgende aantoonbare sectiekop. De rechterkolom (`FRISDRANK`) blijft
+onaangetast. Dezelfde regel geldt voor een herkenbare gewone kop
+`SUPPLEMENTEN` of `SUPPLEMENTEN (per stuk)`. De bestaande inlinevormen
+(`Supplement serranoham 2.5`, `+ Bresaola`, de lowercase wrapped continuation)
+blijven ongewijzigd: een losse `Supplement ...`-regel opent geen sectie.
+
+Op de gepinde PDF:
+
+| Meting | Uitkomst |
+| --- | --- |
+| Parseritems | 208 (was 214) |
+| `SUPPLEMENTEN` als gewone categorie | 0 items (was 6 met hoofdprijs) |
+| `layout.supplementLines` | 18 (was 12) |
+| `layout.supplementSections` | `SUPPLEMENTEN`, pagina 2, 6 regels |
+| Quality gate | `pdf_supplements_skipped` met sectie en pagina; bron geblokkeerd als productgap |
+| Limitation | noemt 18 supplementregels in `SUPPLEMENTEN` p. 2 |
+
+De zes visueel gecontroleerde rijen (Havermelk 0.5, Hazelnootsiroop 0.6,
+Karamelsiroop 0.6, Witte chocoladesiroop 0.6, Honing 0.6, Slagroom 0.6) zijn
+geen parseritem meer en kunnen niet als gewoon hoofdgerecht doorstromen. Ze
+blijven als expliciete productgap in de meting zichtbaar.
+
+Referentie v1 (ongewijzigd 141 rijen) opnieuw gemeten: **124 matched / 11
+missing / 4 extra / 0 prijsverschil**, plus **6 expliciete productgap-rijen**
+en 80 niet-gekoppelde items. De daling van 130 naar 124 matched is geen
+kwaliteitsdaling: dezelfde zes bronrijen werden eerder als gewone gerechten
+geteld en zijn nu als productgap geclassificeerd. Boekhouding: 124 + 11 + 6 + 4
+= 145 = 141 referentierijen + 4 extra (balanced).
+
+### P2: referentie v3-voorstel met de vijf Soof-rijen in de noemer
+
+`ops/benchmark/botanist-reference.proposed-v3.json` (`3.0.0-proposed`,
+`proposed_not_accepted`) vervangt niets. Het behoudt de drie bronbevindingen
+(Sourcy, Ginger Beer, fritz-versus-Soof) en zet de vijf leesbare
+Soof-lemonades met naam en 4.8 terug in een sectie `SOOF LEMONADES` met
+`support: unsupported_readability`, `headingEvidence: none_printed` en
+contextbewijs (logo-/prosablok, afwijkend raster). Er is geen itemloze
+`unsupportedSection` meer voor dit blok.
+
+Noemer: 141 − 2 Sourcy = **139**. v2 verwijderde ook de vijf Soof-rijen (134);
+v3 herstelt ze. De vijf tellen dus mee als missing.
+
+Meting v3 op dezelfde PDF:
+
+| Meting | Uitkomst |
+| --- | --- |
+| Referentierijen | 139 |
+| Totaal | 127 matched / 6 missing / 1 extra / 0 prijsverschil |
+| Waarvan productgap | 6 supplementrijen (apart, niet matched) |
+| Totale brondekking | 127/139 = 0.9137 |
+| Expliciet beperkte subset | 128 rijen: 127 matched / 1 missing / 1 extra / 0 prijsverschil = 0.9922 |
+| Uitgesloten rijen | 11: 5 Soof (`unsupported_readability`) + 6 supplementen (`unsupported_product_field`), elk met reden |
+| Boekhouding | 127 + 6 + 6 + 1 = 140 = 139 + 1 extra (balanced) |
+
+De subsetscore vervangt de totale dekking niet en maakt de parser niet groener:
+elke uitgesloten rij staat met naam, prijs en reden in
+`supportedSubset.excludedRows`. Het Del Sol-naamprobleem blijft de enige
+missing binnen de subset; het is een parsergap, geen referentiecorrectie.
+v1 en v2 zijn niet overschreven.
+
+## Wat expliciet open blijft
 
 - Het lagere Soof-blok (5 lemonades) wordt niet uitgelezen; het raster wijkt af
-  en er is geen kop. Dat is een eerlijke beperking, geen lege successtatus.
+  en er is geen expliciete tekstkop. In v1 zijn die rijen onderdeel van de
+  141-rijenmeetlat; in het v3-voorstel staan ze met naam/prijs als
+  `unsupported_readability` en tellen ze als missing. Dat is een eerlijke
+  beperking, geen lege successtatus.
 - Wijn-, cocktail- en Petite-blokken blijven niet verliesvrij; ze zijn niet
   als volledig geclaimd.
 - Geen OCR, provider, betaalde fallback of browseracceptatie in deze ronde.
-- 130/141 is nog steeds ontwikkelaarsbewijs, geen onafhankelijke
-  bronwaarheid of productacceptatie.
+- 124/141 (v1) en 127/139 (v3-voorstel) zijn ontwikkelaarsbewijs, geen
+  onafhankelijke bronwaarheid of productacceptatie. De supplementproductgap is
+  apart zichtbaar en mag niet als gewone dekking worden geteld.

@@ -898,3 +898,67 @@ test('REGRESSION (review 6249657793 P1 + 6249915021 P1): an unresolvable numeric
   // the amount's notation.
   assert.equal(new Set(outcomes).size, 1)
 })
+
+test('REGRESSION (review 6252891629 P1): a supplement section survives parser → analysis → quality gate as an explicit product gap, never as ordinary dishes or a paid call', async () => {
+  const content = [
+    'BT /F1 12 Tf',
+    textAt(20, 200, '// SUPPLEMENTEN'),
+    textAt(20, 180, 'Havermelk'),
+    textAt(120, 180, '0.5'),
+    textAt(20, 160, 'Honing'),
+    textAt(120, 160, '0.6'),
+    textAt(20, 120, '// DESSERTS'),
+    textAt(20, 100, 'Fictieve Taart'),
+    textAt(120, 100, '6.0'),
+    'ET',
+  ].join('\n')
+  const { context } = await readPdfMenuSource(
+    buildTestPdf({ contentStream: content }),
+    'https://fixture.example/menu.pdf',
+    'source-1',
+  )
+
+  // Parser: the two supplement rows are not dishes; the real section after
+  // them still is.
+  assert.deepEqual(context.recognizedSections.map((category) => category.name), ['DESSERTS'])
+  assert.deepEqual(context.recognizedSections[0].items.map((item) => [item.name, item.price]), [['Fictieve Taart', '6.0']])
+  assert.deepEqual(context.layout.supplementSections, [{ heading: 'SUPPLEMENTEN', pages: [1], lines: 2 }])
+  assert.equal(context.layout.supplementLines, 2)
+
+  // Quality gate: an explicit product gap, not a repairable menu.
+  const menu = { sourceId: 'source-1', sourceUrl: 'https://fixture.example/menu.pdf', categories: context.recognizedSections }
+  const assessment = assessDeterministicMenuQuality({ menus: [menu], unknownMenuContexts: [context] })
+  assert.equal(assessment.sufficient, false)
+  assert.equal(assessment.blockedByProductGap, true)
+  assert.equal(assessment.requiresAiExtraction, false)
+  assert.deepEqual(assessment.blockedSourceIds, ['source-1'])
+  assert.ok(assessment.codes.includes('pdf_supplements_skipped'))
+  const flag = assessment.flags.find((entry) => entry.code === 'pdf_supplements_skipped')
+  assert.match(flag.detail, /SUPPLEMENTEN/)
+  assert.match(flag.detail, /p\. 1/)
+
+  // The same fact is a plain-language limitation with its source provenance.
+  const limitations = pdfLayoutLimitations(menu.sourceUrl, context.layout)
+  const supplementLimitation = limitations.find((line) => line.includes('supplementregel'))
+  assert.ok(supplementLimitation)
+  assert.match(supplementLimitation, /SUPPLEMENTEN/)
+  assert.match(supplementLimitation, /p\. 1/)
+
+  // No provider call is made for a source blocked by this product gap.
+  let providerCalls = 0
+  const result = await applyProviderNeutralExtraction({
+    menuContexts: [menu],
+    unknownMenuContexts: [context],
+    sourceInventory: [{ id: 'source-1', url: menu.sourceUrl, kind: 'pdf', status: 'read' }],
+    notes: [],
+    limitations: [],
+    restaurantCandidateFields: {},
+    structuredExtraction: async () => {
+      providerCalls += 1
+      return { enabled: true, ok: true, menus: [] }
+    },
+  })
+  assert.equal(providerCalls, 0)
+  assert.equal(result.aiExtraction.skipped, true)
+  assert.equal(result.aiExtraction.reason, 'unsupported_product_gap')
+})

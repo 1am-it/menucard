@@ -298,7 +298,18 @@ function pdfLayoutLimitations(sourceUrl, layout = {}) {
     limitations.push(`PDF ${sourceUrl}: een tweede, overlappende tekstlaag is genegeerd (${layout.duplicateLayerItems} dubbele tekstregels).`)
   }
   if (Number.isInteger(layout.supplementLines) && layout.supplementLines > 0) {
-    limitations.push(`PDF ${sourceUrl}: ${layout.supplementLines} supplementregel(s) zijn niet als gerecht opgenomen; het concept ondersteunt supplementen nog niet.`)
+    const supplementSections = Array.isArray(layout.supplementSections) ? layout.supplementSections : []
+    const where = supplementSections
+      .filter((section) => section && typeof section.heading === 'string' && section.heading.trim())
+      .map((section) => {
+        const pages = Array.isArray(section.pages) && section.pages.length > 0 ? ` p. ${section.pages.join(', ')}` : ''
+        const lines = Number.isInteger(section.lines) ? `, ${section.lines} regel(s)` : ''
+        return `${section.heading}${pages}${lines}`
+      })
+      .join('; ')
+    limitations.push(
+      `PDF ${sourceUrl}: ${layout.supplementLines} supplementregel(s)${where ? ` in ${where}` : ''} zijn niet als gerecht opgenomen; het concept ondersteunt supplementen nog niet.`,
+    )
   }
   if (Number.isInteger(layout.arrangementLines) && layout.arrangementLines > 0) {
     limitations.push(`PDF ${sourceUrl}: ${layout.arrangementLines} arrangement-/keuzeregel(s) zijn niet als gerecht opgenomen; het concept ondersteunt arrangementen nog niet.`)

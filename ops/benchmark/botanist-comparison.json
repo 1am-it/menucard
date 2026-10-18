@@ -15,7 +15,7 @@
     "networkUsed": false
   },
   "referenceItems": 141,
-  "parserItems": 214,
+  "parserItems": 208,
   "sections": {
     "WARME DRANKEN": {
       "expected": 10,
@@ -23,15 +23,18 @@
       "matched": 10,
       "missing": [],
       "extra": [],
-      "priceMismatch": 0
+      "priceMismatch": 0,
+      "limited": 0
     },
     "SUPPLEMENTEN": {
       "expected": 6,
-      "actual": 6,
-      "matched": 6,
+      "actual": 0,
+      "matched": 0,
       "missing": [],
       "extra": [],
-      "priceMismatch": 0
+      "priceMismatch": 0,
+      "limited": 0,
+      "productGap": 6
     },
     "LEKKERS VOOR BIJ DE KOFFIE": {
       "expected": 4,
@@ -39,7 +42,8 @@
       "matched": 4,
       "missing": [],
       "extra": [],
-      "priceMismatch": 0
+      "priceMismatch": 0,
+      "limited": 0
     },
     "FRISDRANK": {
       "expected": 16,
@@ -79,7 +83,8 @@
           ]
         }
       ],
-      "priceMismatch": 0
+      "priceMismatch": 0,
+      "limited": 0
     },
     "PREMIUM FRISDRANKEN": {
       "expected": 10,
@@ -112,7 +117,8 @@
           ]
         }
       ],
-      "priceMismatch": 0
+      "priceMismatch": 0,
+      "limited": 0
     },
     "fritz": {
       "expected": 10,
@@ -141,7 +147,8 @@
         }
       ],
       "extra": [],
-      "priceMismatch": 0
+      "priceMismatch": 0,
+      "limited": 0
     },
     "BIER VAN DE TAP": {
       "expected": 7,
@@ -149,7 +156,8 @@
       "matched": 7,
       "missing": [],
       "extra": [],
-      "priceMismatch": 0
+      "priceMismatch": 0,
+      "limited": 0
     },
     "RIJK EN DONKER": {
       "expected": 2,
@@ -157,7 +165,8 @@
       "matched": 2,
       "missing": [],
       "extra": [],
-      "priceMismatch": 0
+      "priceMismatch": 0,
+      "limited": 0
     },
     "FRIS EN FRUITIG": {
       "expected": 4,
@@ -165,7 +174,8 @@
       "matched": 4,
       "missing": [],
       "extra": [],
-      "priceMismatch": 0
+      "priceMismatch": 0,
+      "limited": 0
     },
     "BROUWERIJ FRONTAAL": {
       "expected": 5,
@@ -173,7 +183,8 @@
       "matched": 5,
       "missing": [],
       "extra": [],
-      "priceMismatch": 0
+      "priceMismatch": 0,
+      "limited": 0
     },
     "NON ALCOHOLISCH": {
       "expected": 6,
@@ -181,7 +192,8 @@
       "matched": 6,
       "missing": [],
       "extra": [],
-      "priceMismatch": 0
+      "priceMismatch": 0,
+      "limited": 0
     },
     "KOREMAN'S": {
       "expected": 4,
@@ -189,7 +201,8 @@
       "matched": 4,
       "missing": [],
       "extra": [],
-      "priceMismatch": 0
+      "priceMismatch": 0,
+      "limited": 0
     },
     "SNACKS": {
       "expected": 6,
@@ -197,7 +210,8 @@
       "matched": 6,
       "missing": [],
       "extra": [],
-      "priceMismatch": 0
+      "priceMismatch": 0,
+      "limited": 0
     },
     "STARTERS": {
       "expected": 10,
@@ -205,7 +219,8 @@
       "matched": 10,
       "missing": [],
       "extra": [],
-      "priceMismatch": 0
+      "priceMismatch": 0,
+      "limited": 0
     },
     "SIDE DISHES": {
       "expected": 7,
@@ -213,7 +228,8 @@
       "matched": 7,
       "missing": [],
       "extra": [],
-      "priceMismatch": 0
+      "priceMismatch": 0,
+      "limited": 0
     },
     "OESTERS": {
       "expected": 3,
@@ -221,7 +237,8 @@
       "matched": 3,
       "missing": [],
       "extra": [],
-      "priceMismatch": 0
+      "priceMismatch": 0,
+      "limited": 0
     },
     "DESSERTS 17:00 - 21:00": {
       "expected": 8,
@@ -229,7 +246,8 @@
       "matched": 8,
       "missing": [],
       "extra": [],
-      "priceMismatch": 0
+      "priceMismatch": 0,
+      "limited": 0
     },
     "MEDITERRAANS": {
       "expected": 3,
@@ -237,7 +255,8 @@
       "matched": 3,
       "missing": [],
       "extra": [],
-      "priceMismatch": 0
+      "priceMismatch": 0,
+      "limited": 0
     },
     "(MIDDEN) - OOSTERS": {
       "expected": 3,
@@ -245,7 +264,8 @@
       "matched": 3,
       "missing": [],
       "extra": [],
-      "priceMismatch": 0
+      "priceMismatch": 0,
+      "limited": 0
     },
     "LATIJNS-AMERIKAANS": {
       "expected": 6,
@@ -253,7 +273,8 @@
       "matched": 6,
       "missing": [],
       "extra": [],
-      "priceMismatch": 0
+      "priceMismatch": 0,
+      "limited": 0
     },
     "LUNCH": {
       "expected": 11,
@@ -261,11 +282,12 @@
       "matched": 11,
       "missing": [],
       "extra": [],
-      "priceMismatch": 0
+      "priceMismatch": 0,
+      "limited": 0
     }
   },
   "totals": {
-    "matched": 130,
+    "matched": 124,
     "missing": 11,
     "extra": 4,
     "priceMismatch": 0
@@ -275,13 +297,22 @@
     "duplicateLayerOffsets": [],
     "ambiguousPriceLines": 18,
     "unlinkedPriceLines": 9,
-    "supplementLines": 12,
+    "supplementLines": 18,
     "arrangementLines": 0,
     "unrecognizedHeadingLines": 0,
     "inheritedSectionColumns": 4,
     "inheritedSubheadingColumns": 1,
     "nameContinuationLines": 13,
-    "portionLines": 2
+    "portionLines": 2,
+    "supplementSections": [
+      {
+        "heading": "SUPPLEMENTEN",
+        "pages": [
+          2
+        ],
+        "lines": 6
+      }
+    ]
   },
   "unmapped": [
     {
@@ -859,5 +890,78 @@
       "name": "Croquettes mix 8st.",
       "price": "11.5"
     }
-  ]
+  ],
+  "coverage": {
+    "referenceItems": 141,
+    "matched": 124,
+    "missing": 11,
+    "productGap": 6,
+    "extra": 4,
+    "priceMismatch": 0,
+    "matchedRatio": 0.8794,
+    "limitedRows": 0
+  },
+  "supportedSubset": {
+    "label": "rows_with_unsupported_readability_or_product_fields_excluded",
+    "referenceItems": 135,
+    "matched": 124,
+    "missing": 11,
+    "extra": 4,
+    "priceMismatch": 0,
+    "matchedRatio": 0.9185,
+    "excludedRows": [
+      {
+        "section": "SUPPLEMENTEN",
+        "name": "Havermelk",
+        "price": "0.5",
+        "support": "unsupported_product_field",
+        "reason": "Explicit supplement section: the rows are readable, but the product concept cannot store supplement relations. They must never flow through as ordinary dishes with a main price."
+      },
+      {
+        "section": "SUPPLEMENTEN",
+        "name": "Hazelnootsiroop",
+        "price": "0.6",
+        "support": "unsupported_product_field",
+        "reason": "Explicit supplement section: the rows are readable, but the product concept cannot store supplement relations. They must never flow through as ordinary dishes with a main price."
+      },
+      {
+        "section": "SUPPLEMENTEN",
+        "name": "Karamelsiroop",
+        "price": "0.6",
+        "support": "unsupported_product_field",
+        "reason": "Explicit supplement section: the rows are readable, but the product concept cannot store supplement relations. They must never flow through as ordinary dishes with a main price."
+      },
+      {
+        "section": "SUPPLEMENTEN",
+        "name": "Witte chocoladesiroop",
+        "price": "0.6",
+        "support": "unsupported_product_field",
+        "reason": "Explicit supplement section: the rows are readable, but the product concept cannot store supplement relations. They must never flow through as ordinary dishes with a main price."
+      },
+      {
+        "section": "SUPPLEMENTEN",
+        "name": "Honing",
+        "price": "0.6",
+        "support": "unsupported_product_field",
+        "reason": "Explicit supplement section: the rows are readable, but the product concept cannot store supplement relations. They must never flow through as ordinary dishes with a main price."
+      },
+      {
+        "section": "SUPPLEMENTEN",
+        "name": "Slagroom",
+        "price": "0.6",
+        "support": "unsupported_product_field",
+        "reason": "Explicit supplement section: the rows are readable, but the product concept cannot store supplement relations. They must never flow through as ordinary dishes with a main price."
+      }
+    ]
+  },
+  "accounting": {
+    "referenceItems": 141,
+    "matched": 124,
+    "missing": 11,
+    "productGap": 6,
+    "extra": 4,
+    "explainedRows": 145,
+    "expectedRows": 145,
+    "balanced": true
+  }
 }

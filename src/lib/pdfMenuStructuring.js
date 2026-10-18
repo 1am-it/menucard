@@ -64,6 +64,33 @@ const MENU_ITEM_CONFIDENCE = 'middel'
  * URL fragment, a date) is never mistaken for a section header. */
 const SECTION_MARKER_PATTERN = /^\/\/\s*(.+)$/
 
+/** A standalone supplement label opens a supplement SECTION, whose rows are
+ * relations the current product concept cannot store. It must be exactly the
+ * label (optionally with a parenthetical note or trailing colon), so the real
+ * inline forms "Supplement serranoham 2.5" and "Supplement krokante" stay the
+ * existing one-row inline markers instead of swallowing the next ordinary
+ * dish. A plain (no "//") label is only accepted in its plural form for the
+ * same reason. See review 6252891629 P1. */
+const SUPPLEMENT_HEADING_PATTERN = /^supplement(?:en)?(?:\s*\([^)]*\))?\s*:?$/i
+
+function isSupplementHeadingText(value, { explicitMarker = false } = {}) {
+  const text = String(value || '').trim()
+  if (!SUPPLEMENT_HEADING_PATTERN.test(text)) return false
+  // A "//" marker is explicit source evidence whether it prints singular or
+  // plural; a plain label must be the plural section form and capitalized,
+  // exactly like every other plain section label in this file.
+  if (!explicitMarker && !/^supplementen\b/i.test(text)) return false
+  return explicitMarker || /^\p{Lu}/u.test(text)
+}
+
+/** The plain-text supplement section label, or null. Never a price-bearing
+ * line: "Supplement serranoham 2.5" is an inline marker, not a heading. */
+function plainSupplementHeading(lineItems) {
+  if (lineItems.some((item) => isPriceToken(String(item.str).trim()))) return null
+  const text = joinText(lineItems.map((item) => item.str))
+  return isSupplementHeadingText(text) ? text.replace(/\s*:$/, '').trim() : null
+}
+
 /** A price-looking token: an integer of one to three digits (real menus
  * commonly print "8", "12", "28"), or one to four digits with a decimal
  * separator and one/two fraction digits. Deliberately does NOT match a
@@ -798,6 +825,22 @@ function structurePdfLinesIntoMenu(pages) {
     inheritedSubheadingColumns: 0,
     nameContinuationLines: 0,
     portionLines: 0,
+    // Bounded provenance for a supplement section: the printed heading and
+    // page numbers only. Never the supplement item names or amounts.
+    supplementSections: [],
+  }
+
+  // A supplement heading applies to the whole section in its own column until
+  // the next demonstrable section heading. The same heading may occur on more
+  // than one page; merge it into one provenance entry with a line count.
+  const supplementSectionProvenance = new Map()
+  const recordSupplementSection = (heading, pageNumber) => {
+    if (!supplementSectionProvenance.has(heading)) {
+      supplementSectionProvenance.set(heading, { heading, pages: new Set(), lines: 0 })
+    }
+    const entry = supplementSectionProvenance.get(heading)
+    if (Number.isInteger(pageNumber)) entry.pages.add(pageNumber)
+    return entry
   }
 
   function categoryFor(path, uncertain) {
@@ -939,12 +982,22 @@ function structurePdfLinesIntoMenu(pages) {
         }
       }
       const inheritedPath = inheritedEvent ? [...inheritedEvent.path] : null
+      // A "//" supplement marker is explicit, so a column with no heading of
+      // its own may inherit it. Such a column must never turn supplement rows
+      // into ordinary dishes (that was review 6252891629 P1).
+      const inheritedSupplement = Boolean(
+        inheritedPath &&
+          inheritedPath.length === 1 &&
+          isSupplementHeadingText(inheritedPath[0], { explicitMarker: true }),
+      )
+      const currentPageNumber = Number.isInteger(page.pageNumber) ? page.pageNumber : null
       const state = {
-        menuName: inheritedPath ? inheritedPath[0] : null,
-        categoryPath: inheritedPath,
-        categoryInferred: Boolean(inheritedPath),
-        inheritedParentActive: inheritedAsSubheading,
-        inheritedSectionPending: Boolean(inheritedEvent) && !inheritedAsSubheading,
+        menuName: inheritedPath && !inheritedSupplement ? inheritedPath[0] : null,
+        categoryPath: inheritedSupplement ? null : inheritedPath,
+        categoryInferred: Boolean(inheritedPath) && !inheritedSupplement,
+        inheritedParentActive: inheritedAsSubheading && !inheritedSupplement,
+        inheritedSectionPending: Boolean(inheritedEvent) && !inheritedAsSubheading && !inheritedSupplement,
+        supplementSection: inheritedSupplement ? recordSupplementSection(inheritedPath[0], currentPageNumber) : null,
         lastItem: null,
         lastItemBaselineIndex: -1,
         pendingSupplement: false,
@@ -987,12 +1040,38 @@ function structurePdfLinesIntoMenu(pages) {
           const nextBaseline = (baselines[baselineIndex + 1] || []).filter((item) => !consumedItems.has(item))
           const sectionNames = pureSectionMarkerNames(baselineItems)
           const plainSection = sectionNames ? null : pdfSectionLabel(baselineItems)
-          if (sectionNames || plainSection) {
+          const plainSupplement = sectionNames ? null : plainSupplementHeading(baselineItems)
+          if (sectionNames || plainSection || plainSupplement) {
             // On a single combined row only the first marker is used, exactly
             // as before. When a real column split exists, each column keeps its
             // own active section.
             const headingText = joinText(baselineItems.map((it) => it.str))
             const carriesServiceTime = /\d{1,2}:\d{2}/.test(headingText)
+            // Review 6252891629 P1: an explicit supplement heading applies to
+            // the whole section in this column, not only to the heading row.
+            // Every row below it is a modifier relation the product cannot
+            // store, so none may become an ordinary dish with a main price.
+            const markerSupplement = Boolean(
+              sectionNames &&
+                sectionNames.length > 0 &&
+                sectionNames.every((name) => isSupplementHeadingText(name, { explicitMarker: true })),
+            )
+            const supplementHeading = markerSupplement ? sectionNames[0] : plainSupplement
+            if (supplementHeading) {
+              state.supplementSection = recordSupplementSection(supplementHeading, currentPageNumber)
+              state.menuName = null
+              state.categoryPath = null
+              state.categoryInferred = false
+              state.inheritedParentActive = false
+              state.inheritedSectionPending = false
+              state.lastItem = null
+              state.pendingSupplement = false
+              continue
+            }
+            // Any other demonstrable section heading closes an active
+            // supplement section; content below it is ordinary menu content
+            // again.
+            state.supplementSection = null
             if (sectionNames) {
               if (state.inheritedParentActive && state.categoryPath && state.categoryPath.length > 0) {
                 // A brand/section marker that opens this column directly under
@@ -1033,6 +1112,19 @@ function structurePdfLinesIntoMenu(pages) {
 
           const lineText = joinText(baselineItems.map((it) => it.str))
           if (lineText.length === 0 || isPdfChrome(baselineItems)) continue
+
+          // Inside an explicit supplement section every content line is a
+          // modifier relation, never an ordinary dish. Count it with bounded
+          // provenance (heading + page, never the item name/amount) so review
+          // sees an explicit product gap instead of a plausible main price.
+          if (state.supplementSection) {
+            layout.supplementLines += 1
+            state.supplementSection.lines += 1
+            if (Number.isInteger(currentPageNumber)) state.supplementSection.pages.add(currentPageNumber)
+            state.lastItem = null
+            state.pendingSupplement = false
+            continue
+          }
 
           const words = tokenizeLineIntoWords(baselineItems)
           // A line explicitly labelled "Supplement ..." is a relation the
@@ -1380,6 +1472,16 @@ function structurePdfLinesIntoMenu(pages) {
       })),
     }))
     .filter((category) => category.items.length > 0)
+
+  // Bounded provenance, deterministic order: a review can see WHICH explicit
+  // supplement section and pages were deliberately not stored as dishes.
+  layout.supplementSections = [...supplementSectionProvenance.values()]
+    .map((entry) => ({
+      heading: entry.heading,
+      pages: [...entry.pages].sort((a, b) => a - b),
+      lines: entry.lines,
+    }))
+    .sort((a, b) => (a.pages[0] || 0) - (b.pages[0] || 0) || a.heading.localeCompare(b.heading))
 
   return { categories, layout }
 }

@@ -586,6 +586,108 @@ test('REGRESSION (review 6249303096 P1): explicit "Supplement" lines and their l
   assert.equal(layout.supplementLines, 4)
 })
 
+test('REGRESSION (review 6252891629 P1): an explicit // supplement heading protects the whole section until the next real section', () => {
+  const rows = [
+    ['Havermelk', '0.5'],
+    ['Hazelnootsiroop', '0.6'],
+    ['Karamelsiroop', '0.6'],
+    ['Witte chocoladesiroop', '0.6'],
+    ['Honing', '0.6'],
+    ['Slagroom', '0.6'],
+  ]
+  const lines = [
+    { y: 400, items: [{ str: '// WARME DRANKEN', x: 20, y: 400 }] },
+    { y: 380, items: [{ str: 'Koffie', x: 20, y: 380 }, { str: '3.5', x: 100, y: 380 }] },
+    { y: 360, items: [{ str: '// SUPPLEMENTEN', x: 20, y: 360 }] },
+    ...rows.map(([name, price], index) => ({
+      y: 340 - index * 20,
+      items: [{ str: name, x: 20, y: 340 - index * 20 }, { str: price, x: 100, y: 340 - index * 20 }],
+    })),
+    { y: 200, items: [{ str: '// DESSERTS', x: 20, y: 200 }] },
+    { y: 180, items: [{ str: 'Taart', x: 20, y: 180 }, { str: '6', x: 100, y: 180 }] },
+  ]
+  const { categories, layout } = structurePdfLinesIntoMenu([{ pageNumber: 2, lines }])
+  // The supplement rows never become ordinary dishes with a main price.
+  assert.deepEqual(categories.map((category) => [category.name, category.items.map((item) => item.name)]), [
+    ['WARME DRANKEN', ['Koffie']],
+    ['DESSERTS', ['Taart']],
+  ])
+  assert.equal(layout.supplementLines, 6)
+  // Bounded provenance: heading and page, never item text.
+  assert.deepEqual(layout.supplementSections, [{ heading: 'SUPPLEMENTEN', pages: [2], lines: 6 }])
+  assert.deepEqual(categories.find((category) => category.name === 'DESSERTS').items.map((item) => [item.name, item.price]), [
+    ['Taart', '6'],
+  ])
+  assert.equal(layout.unlinkedPriceLines, 0)
+})
+
+test('REGRESSION (review 6252891629 P1): a recognizable plain supplement heading opens the same section, while a singular inline "Supplement" row does not', () => {
+  const plain = {
+    pageNumber: 1,
+    lines: [
+      { y: 400, items: [{ str: 'SUPPLEMENTEN (per stuk)', x: 20, y: 400 }] },
+      { y: 380, items: [{ str: 'Havermelk', x: 20, y: 380 }, { str: '0.5', x: 100, y: 380 }] },
+      { y: 360, items: [{ str: 'Honing', x: 20, y: 360 }, { str: '0.6', x: 100, y: 360 }] },
+      { y: 340, items: [{ str: '// DESSERTS', x: 20, y: 340 }] },
+      { y: 320, items: [{ str: 'Taart', x: 20, y: 320 }, { str: '6', x: 100, y: 320 }] },
+    ],
+  }
+  const structured = structurePdfLinesIntoMenu([plain])
+  assert.deepEqual(structured.categories.map((category) => category.name), ['DESSERTS'])
+  assert.equal(structured.layout.supplementLines, 2)
+  assert.deepEqual(structured.layout.supplementSections, [{ heading: 'SUPPLEMENTEN (per stuk)', pages: [1], lines: 2 }])
+
+  // The existing inline forms keep working: a capitalized dish after the
+  // wrapped "Supplement ..." continuation is not swallowed by a section.
+  const inline = {
+    pageNumber: 1,
+    lines: [
+      { y: 400, items: [{ str: '// LUNCH', x: 20, y: 400 }] },
+      { y: 380, items: [{ str: 'Supplement krokante', x: 20, y: 380 }] },
+      { y: 360, items: [{ str: 'prosciutto', x: 20, y: 360 }, { str: '2.5', x: 100, y: 360 }] },
+      { y: 340, items: [{ str: 'Burrata Primavera', x: 20, y: 340 }, { str: '14.5', x: 100, y: 340 }] },
+    ],
+  }
+  const inlineStructured = structurePdfLinesIntoMenu([inline])
+  assert.deepEqual(inlineStructured.categories.flatMap((category) => category.items.map((item) => item.name)), ['Burrata Primavera'])
+  assert.equal(inlineStructured.layout.supplementLines, 2)
+  assert.deepEqual(inlineStructured.layout.supplementSections, [])
+})
+
+test('REGRESSION (review 6252891629 P1): a supplement section is column- and page-safe and never captures a neighbouring column', () => {
+  const page = {
+    pageNumber: 2,
+    lines: [
+      { y: 400, items: [{ str: '// SUPPLEMENTEN', x: 20, y: 400 }, { str: '// FRISDRANK', x: 220, y: 400 }] },
+      { y: 380, items: [{ str: 'Havermelk', x: 20, y: 380 }, { str: '0.5', x: 100, y: 380 }, { str: 'Pepsi', x: 220, y: 380 }, { str: '3.6', x: 300, y: 380 }] },
+      { y: 360, items: [{ str: 'Honing', x: 20, y: 360 }, { str: '0.6', x: 100, y: 360 }, { str: 'Fristi', x: 220, y: 360 }, { str: '3.6', x: 300, y: 360 }] },
+      { y: 340, items: [{ str: '// DESSERTS', x: 20, y: 340 }] },
+      { y: 320, items: [{ str: 'Taart', x: 20, y: 320 }, { str: '6', x: 100, y: 320 }] },
+    ],
+  }
+  const { categories, layout } = structurePdfLinesIntoMenu([page])
+  const byName = Object.fromEntries(categories.map((category) => [category.name, category.items.map((item) => item.name)]))
+  assert.deepEqual(byName.FRISDRANK, ['Pepsi', 'Fristi'])
+  assert.deepEqual(byName.DESSERTS, ['Taart'])
+  assert.equal(categories.some((category) => category.items.some((item) => ['Havermelk', 'Honing'].includes(item.name))), false)
+  assert.deepEqual(layout.supplementSections, [{ heading: 'SUPPLEMENTEN', pages: [2], lines: 2 }])
+  assert.equal(layout.supplementLines, 2)
+
+  // A new page starts without supplement state: its rows are ordinary content
+  // and are never swallowed by the previous page's section.
+  const nextPage = {
+    pageNumber: 3,
+    lines: [
+      { y: 400, items: [{ str: '// LUNCH', x: 20, y: 400 }] },
+      { y: 380, items: [{ str: 'Soep', x: 20, y: 380 }, { str: '5', x: 100, y: 380 }] },
+    ],
+  }
+  const next = structurePdfLinesIntoMenu([page, nextPage])
+  assert.equal(next.categories.some((category) => category.items.some((item) => item.name === 'Soep')), true)
+  assert.deepEqual(next.layout.supplementSections, [{ heading: 'SUPPLEMENTEN', pages: [2], lines: 2 }])
+})
+
+
 test('plain section labels: a capitalized known heading counts, a lowercase wrapped fragment never does', async () => {
   const content = [
     'BT /F1 12 Tf',

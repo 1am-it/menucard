@@ -181,7 +181,20 @@ function assessDeterministicMenuQuality({ menus, unknownMenuContexts, sourceInve
     };
     sourceEntry(contextSummary.sourceId, contextSummary.sourceUrl);
     if (Number.isInteger(layout.supplementLines) && layout.supplementLines > 0) {
-      addFlag(FLAG_CODES.pdf_supplements_skipped, contextSummary, `${layout.supplementLines} supplementregel(s) niet als gerecht opgenomen`);
+      const supplementSections = Array.isArray(layout.supplementSections) ? layout.supplementSections : [];
+      const where = supplementSections
+        .filter((section) => section && typeof section.heading === 'string' && section.heading.trim())
+        .map((section) => {
+          const pages = Array.isArray(section.pages) && section.pages.length > 0 ? ` p. ${section.pages.join(', ')}` : '';
+          const lines = Number.isInteger(section.lines) ? `, ${section.lines} regel(s)` : '';
+          return `${section.heading}${pages}${lines}`;
+        })
+        .join('; ');
+      addFlag(
+        FLAG_CODES.pdf_supplements_skipped,
+        contextSummary,
+        `${layout.supplementLines} supplementregel(s)${where ? ` in ${where}` : ''} niet als gerecht opgenomen`,
+      );
     }
     if (Number.isInteger(layout.arrangementLines) && layout.arrangementLines > 0) {
       addFlag(FLAG_CODES.pdf_arrangements_skipped, contextSummary, `${layout.arrangementLines} arrangement-/keuzeregel(s) niet als gerecht opgenomen`);

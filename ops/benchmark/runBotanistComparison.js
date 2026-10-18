@@ -45,6 +45,21 @@ function cents(value) {
   return Number(match[1]) * 100 + Number((match[2] || '').padEnd(2, '0'));
 }
 
+function ratio(matched, total) {
+  return total > 0 ? Number((matched / total).toFixed(4)) : null;
+}
+
+/** A row marked with an unsupported readability/support class stays in the
+ * reference and in the total denominator. It is only excluded from the
+ * explicitly limited subset score, never from source coverage. */
+function supportOf(section, item) {
+  return (item && item.support) || (section && section.support) || null;
+}
+
+function isLimitedSupport(support) {
+  return typeof support === 'string' && support.length > 0 && support !== 'supported';
+}
+
 function norm(value) {
   return String(value || '')
     .toLowerCase()
@@ -109,34 +124,133 @@ function norm(value) {
     unmapped,
   };
 
+  const limitedRows = [];
+  const productGapRows = [];
+  const supportedSubset = { referenceItems: 0, matched: 0, missing: 0, extra: 0, priceMismatch: 0 };
+  // A printed supplement section is readable but cannot be stored as ordinary
+  // dishes with a main price. Its rows stay in the reference and in the total
+  // denominator; they are classified as an explicit product gap, never as
+  // matched dishes and never silently dropped.
+  const supplementHeadings = new Set(
+    ((report.layout && Array.isArray(report.layout.supplementSections) && report.layout.supplementSections) || [])
+      .map((entry) => (entry && typeof entry.heading === 'string' ? entry.heading.trim() : ''))
+      .filter(Boolean),
+  );
+
   for (const section of reference.sections) {
     const key = section.path[0];
     const actual = parserBySection.get(key) || [];
+    if (supplementHeadings.has(String(key).trim())) {
+      const extra = actual.map((item) => ({ name: item.name, price: item.price, path: item.path }));
+      report.sections[key] = {
+        expected: section.items.length,
+        actual: actual.length,
+        matched: 0,
+        missing: [],
+        extra,
+        priceMismatch: 0,
+        limited: 0,
+        productGap: section.items.length,
+      };
+      report.totals.extra += extra.length;
+      for (const item of section.items) {
+        productGapRows.push({
+          section: key,
+          name: item.name,
+          price: item.price,
+          support: 'unsupported_product_field',
+          reason:
+            'Explicit supplement section: the rows are readable, but the product concept cannot store supplement relations. They must never flow through as ordinary dishes with a main price.',
+        });
+      }
+      continue;
+    }
     const usedActual = new Set();
     const missing = [];
     let matched = 0;
     let priceMismatch = 0;
+    let limited = 0;
     for (const expectedItem of section.items) {
+      const support = supportOf(section, expectedItem);
+      const limitedRow = isLimitedSupport(support);
+      if (limitedRow) {
+        limited += 1;
+        limitedRows.push({
+          section: key,
+          name: expectedItem.name,
+          price: expectedItem.price,
+          support,
+          reason: expectedItem.supportReason || section.supportReason || null,
+        });
+      }
       const index = actual.findIndex(
         (candidate, candidateIndex) => !usedActual.has(candidateIndex) && norm(candidate.name) === norm(expectedItem.name),
       );
       if (index === -1) {
         missing.push(expectedItem);
+        if (!limitedRow) supportedSubset.missing += 1;
         continue;
       }
       usedActual.add(index);
       matched += 1;
-      if (cents(actual[index].price) !== cents(expectedItem.price)) priceMismatch += 1;
+      if (!limitedRow) supportedSubset.matched += 1;
+      if (cents(actual[index].price) !== cents(expectedItem.price)) {
+        priceMismatch += 1;
+        if (!limitedRow) supportedSubset.priceMismatch += 1;
+      }
     }
     const extra = actual
       .filter((_, index) => !usedActual.has(index))
       .map((item) => ({ name: item.name, price: item.price, path: item.path }));
-    report.sections[key] = { expected: section.items.length, actual: actual.length, matched, missing, extra, priceMismatch };
+    report.sections[key] = { expected: section.items.length, actual: actual.length, matched, missing, extra, priceMismatch, limited };
     report.totals.matched += matched;
     report.totals.missing += missing.length;
     report.totals.extra += extra.length;
     report.totals.priceMismatch += priceMismatch;
+    supportedSubset.referenceItems += section.items.length - limited;
+    supportedSubset.extra += extra.length;
   }
+
+  // Two honest views on the same measurement:
+  // - coverage: every readable reference row counts, even when the parser
+  //   cannot read its grid or the product cannot store the relation;
+  //   unsupported itemless blocks stay out of the denominator and are named
+  //   separately in the reference;
+  // - supportedSubset: the same score with explicitly limited readability
+  //   classes and explicit product-gap rows excluded, including the excluded
+  //   rows and their reason.
+  report.coverage = {
+    referenceItems: report.referenceItems,
+    matched: report.totals.matched,
+    missing: report.totals.missing,
+    productGap: productGapRows.length,
+    extra: report.totals.extra,
+    priceMismatch: report.totals.priceMismatch,
+    matchedRatio: ratio(report.totals.matched, report.referenceItems),
+    limitedRows: limitedRows.length,
+  };
+  report.supportedSubset = {
+    label: 'rows_with_unsupported_readability_or_product_fields_excluded',
+    referenceItems: supportedSubset.referenceItems,
+    matched: supportedSubset.matched,
+    missing: supportedSubset.missing,
+    extra: supportedSubset.extra,
+    priceMismatch: supportedSubset.priceMismatch,
+    matchedRatio: ratio(supportedSubset.matched, supportedSubset.referenceItems),
+    excludedRows: [...limitedRows, ...productGapRows],
+  };
+  report.accounting = {
+    referenceItems: report.referenceItems,
+    matched: report.totals.matched,
+    missing: report.totals.missing,
+    productGap: productGapRows.length,
+    extra: report.totals.extra,
+    explainedRows: report.totals.matched + report.totals.missing + productGapRows.length + report.totals.extra,
+    expectedRows: report.referenceItems + report.totals.extra,
+    balanced:
+      report.totals.matched + report.totals.missing + productGapRows.length + report.totals.extra ===
+      report.referenceItems + report.totals.extra,
+  };
 
   fs.writeFileSync(outPath, `${JSON.stringify(report, null, 2)}\n`);
 
@@ -146,6 +260,16 @@ function norm(value) {
     );
   }
   console.log('TOTALS', report.totals, 'unmapped', unmapped.length);
+  console.log('COVERAGE', report.coverage);
+  console.log('SUPPORTED SUBSET', {
+    referenceItems: report.supportedSubset.referenceItems,
+    matched: report.supportedSubset.matched,
+    missing: report.supportedSubset.missing,
+    extra: report.supportedSubset.extra,
+    priceMismatch: report.supportedSubset.priceMismatch,
+    matchedRatio: report.supportedSubset.matchedRatio,
+    excludedRows: report.supportedSubset.excludedRows.length,
+  });
   console.log('LAYOUT', JSON.stringify(report.layout));
   console.log('wrote', path.relative(process.cwd(), outPath));
 })().catch((error) => {

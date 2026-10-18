@@ -76,6 +76,25 @@ test('PDF layout signals are reported, and skipped supplements block a paid call
   assert.equal(supplements.requiresAiExtraction, false);
   assert.ok(supplements.codes.includes(FLAG_CODES.pdf_supplements_skipped));
 
+  // Review 6252891629 P1: the flag names the explicit section and page, so a
+  // supplement block can be found and reviewed instead of looking like a
+  // generic count.
+  const withProvenance = assessDeterministicMenuQuality({
+    menus: [cleanMenu],
+    unknownMenuContexts: [
+      {
+        sourceId: 'source-1',
+        sourceUrl: cleanMenu.sourceUrl,
+        layout: { supplementLines: 6, supplementSections: [{ heading: 'SUPPLEMENTEN', pages: [2], lines: 6 }] },
+      },
+    ],
+  });
+  const supplementFlag = withProvenance.flags.find((entry) => entry.code === FLAG_CODES.pdf_supplements_skipped);
+  assert.match(supplementFlag.detail, /6 supplementregel/);
+  assert.match(supplementFlag.detail, /SUPPLEMENTEN/);
+  assert.match(supplementFlag.detail, /p\. 2/);
+  assert.equal(withProvenance.blockedByProductGap, true);
+
   const layoutOnly = assessDeterministicMenuQuality({
     menus: [cleanMenu],
     unknownMenuContexts: [{ sourceId: 'source-1', layout: { supplementLines: 0, ambiguousPriceLines: 1, unrecognizedHeadingLines: 2 } }],

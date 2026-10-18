@@ -391,7 +391,13 @@ vóór enige modelaanroep:
   `Supplementen` begint, en de lowercase wrapped continuation daarvan, wordt
   geteld in `layout.supplementLines` en nooit als gewoon gerecht opgeslagen.
   De kwaliteitscontrole herkent ook `${name}` met dat prefix als
-  `supplement_as_item`.
+  `supplement_as_item`. Sinds review 6252891629 opent een losse kop
+  `// SUPPLEMENTEN` of een herkenbare gewone kop `SUPPLEMENTEN` /
+  `SUPPLEMENTEN (per stuk)` een supplementsectie voor de hele kolom tot de
+  volgende aantoonbare sectiekop. Alle regels eronder worden geteld en als
+  `layout.supplementSections` (kop + pagina + regelcount) gemeld; geen ervan
+  wordt een gerecht of een hoofdprijs. Een losse `Supplement ...`-regel blijft
+  de bestaande inlinevorm en opent geen sectie.
 - **Regressies:** `pdfMenuStructuring.test.js` (sparse linkerkolom + twee
   wijnvarianten, losse voettekst, korte/grote baselineafstand, twee kolommen,
   varianten op de volgende baseline, naamgetallen, supplementblokken),
@@ -501,9 +507,9 @@ prijsregels, 12 supplementregels, 4 overgenomen kolomsecties, 1 subrubriek,
 **Voorstel, geen acceptatie.** `ops/benchmark/botanist-reference.proposed-v2.json`
 bevat drie brononderbouwde correcties (Sourcy als twee familie-/portieregels,
 `Ginger Beer` zonder merkprefix, lemonades buiten fritz als niet-ondersteund
-Soof-blok). Het voorstel is apart gescoord (133/1/1/0) en vervangt v1 niet.
-De enige resterende rij is de ambigue `Del Sol`-naamuitbreiding; die is als
-parser-gap gedocumenteerd, niet als referentiefout.
+Soof-blok). Dat voorstel is historisch apart gescoord (133/1/1/0) en vervangt v1
+niet; die meting hoort nog bij de keten vóór de supplementreparatie. Zie 13.15
+voor het v3-voorstel, dat de vijf leesbare Soof-rijen in de noemer herstelt.
 
 **Regressies.** `pdfMenuStructuringLiveRegressions.test.js` dekt
 doorlopende secties, meerdere kolommen, een merk-subkop, expliciete
@@ -512,3 +518,54 @@ driewoordige naam boven een lokale prijsregel en een ABV-microbaseline.
 `pdfMenuStructuring.test.js` behoudt de bestaande prijs-/supplementveiligheid;
 `menuExtractionQuality.test.js` en `restaurantSourceAnalysis.test.js` dekken de
 nieuwe reviewflag, productgap en limitations.
+
+### 13.15 Supplementrubriek en referentiedekking (review 6252891629)
+
+**P1 — hele supplementrubriek, niet één regel.** Een `// SUPPLEMENTEN`-marker
+of een herkenbare gewone kop `SUPPLEMENTEN` / `SUPPLEMENTEN (per stuk)` zet de
+kolom in supplementcontext. Elke volgende regel tot de volgende aantoonbare
+sectiekop wordt geteld in `layout.supplementLines` en nooit als gerecht
+opgeslagen. De context is per kolom en per pagina: de rechterkolom en de
+volgende pagina erven hem niet. Een losse `Supplement ...`-regel blijft de
+bestaande inlinevorm; anders zou een gewrapte supplementnaam de volgende
+gewone gerechten opslokken.
+
+`layout.supplementSections` bevat alleen de begrensde herkomst: kop, pagina's
+en aantal regels. Nooit supplementnamen of bedragen. `pdfLayoutLimitations`
+en `menuExtractionQuality` noemen de sectie en pagina, zodat de review het
+blok kan terugvinden. `pdf_supplements_skipped` blijft een productgap-flag en
+blokkeert een modelcall voor die bron.
+
+Op de gepinde PDF: 208 parseritems, `SUPPLEMENTEN` 0 items (was 6 met
+hoofdprijs), 18 supplementregels en `supplementSections` = `SUPPLEMENTEN`,
+p. 2, 6 regels.
+
+**P2 — noemer en twee scores.** Het v3-voorstel
+(`botanist-reference.proposed-v3.json`) houdt de vijf leesbare Soof-lemonades
+met naam en 4.8 in de meetlat als `unsupported_readability`; er is geen
+itemloze `unsupportedSection` meer voor dat blok. v1 en v2 blijven ongewijzigd.
+
+`runBotanistComparison.js` rapporteert nu:
+
+- `coverage`: alle referentierijen, met `matched`, `missing`, `productGap`,
+  `extra` en `matchedRatio`;
+- `supportedSubset`: dezelfde score zonder expliciet beperkte rijen, met
+  `excludedRows` (naam, prijs, support, reden);
+- `accounting`: sluitende boekhouding (`matched + missing + productGap + extra`
+  tegen `referenceItems + extra`).
+
+De zes supplementrijen worden op basis van `layout.supplementSections` als
+`unsupported_product_field` geclassificeerd: ze zijn leesbaar, maar mogen geen
+gewoon gerecht worden. Ze gelden niet als match en niet als missing.
+Gemeten op dezelfde PDF: v1 124/11/4/0 + 6 productgap (totaal 141);
+v3-voorstel 127/6/1/0 + 6 productgap (totaal 139), subset 128 rijen
+127/1/1/0. Het verschil 130 → 124 is de geclassificeerde productgap, geen
+kwaliteitsdaling.
+
+**Regressies.** `pdfMenuStructuring.test.js` dekt `//`- en gewone
+supplementkoppen, meerdere rijen, een naburige kolom, de volgende echte sectie,
+een nieuwe pagina en de bestaande inline/plus/wrapped vormen.
+`restaurantSourceAnalysis.test.js` dekt parser → analyse → qualitygate →
+limitation en bewijst dat geen modelcall plaatsvindt.
+`botanistReference.test.js` bewaakt de v1-cijfers, de productgap-classificatie
+en het v3-voorstel met beide scores en de uitgesloten rijen.
