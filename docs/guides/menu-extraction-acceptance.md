@@ -47,7 +47,7 @@ Dit is bewijs van de bouw- en testronde, niet van actuele bronacceptatie.
 
 | Controle | Resultaat |
 | --- | --- |
-| `npm test` | 1890 pass, 0 fail |
+| `npm test` | 1903 pass, 0 fail (na herstel) |
 | `npm run test:menu-structure` | 6 pass, 0 fail |
 | `npm run benchmark:menu-structure` | 23 gevallen: 22 pass, 0 fail, 1 unclassified (JSON-LD-hiërarchie) |
 | `npm run build` | exit 0 |
