@@ -423,7 +423,15 @@ async function main() {
     check('every page used the fictional fixture', (await evalJs(cdp, 'window.__FIXTURE_ACTIVE__ || null')) !== null);
 
     const head = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: REPO_ROOT }).toString().trim();
-    const dirty = execFileSync('git', ['status', '--porcelain'], { cwd: REPO_ROOT }).toString().trim().length > 0;
+    // The evidence file is this run's own output and is written after this
+    // check. Exclude it so a clean code tree is not reported dirty merely
+    // because a previous evidence run is being replaced.
+    const statusLines = execFileSync('git', ['status', '--porcelain'], { cwd: REPO_ROOT })
+      .toString()
+      .split(/\r?\n/)
+      .filter(Boolean)
+      .filter((line) => !line.includes('ops/browser/evidence/menu-review-browser-evidence.json'));
+    const dirty = statusLines.length > 0;
     const passed = checks.every((entry) => entry.passed);
     const evidence = writeEvidence({ passed, head, dirty, browser });
 
