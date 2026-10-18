@@ -284,6 +284,38 @@ hersteld of geclaimd. Er is geen nieuwe holdout geëvalueerd, geen provider of
 app-side AI geactiveerd, geen concept opgeslagen, geen browseracceptatie
 uitgevoerd en niets gemerged of gepubliceerd.
 
+## Verificatie review 6252891629 (2026-10-18)
+
+De bevestigde P1 is hersteld: `// SUPPLEMENTEN` (en een herkenbare gewone
+`SUPPLEMENTEN`-kop) opent een supplementcontext voor de hele kolom tot de
+volgende aantoonbare sectiekop. De zes supplementrijen op p2 zijn geen gewone
+categorie-items met hoofdprijs meer; de rechterkolom en de volgende pagina
+blijven buiten de context. `layout.supplementSections` bewaart alleen kop,
+pagina en regelcount; quality gate en limitation noemen die herkomst.
+
+De v2-noemer is niet overgenomen. Het nieuwe v3-voorstel houdt de vijf leesbare
+Soof-lemonades met naam en 4.8 in de meetlat als `unsupported_readability`.
+`runBotanistComparison.js` rapporteert nu totale brondekking én een expliciet
+beperkte subset, met alle uitgesloten rijen en reden. v1 en v2 zijn niet
+overschreven.
+
+| Controle | Commando | Resultaat |
+| --- | --- | --- |
+| Gerichte #59-tests | vijf bestanden (`pdfMenuStructuring`, live-regressies, quality, analysis, botanistReference) | 110 pass, 0 fail |
+| Volledige suite | `npm test` | 2054 tests: 2054 pass, 0 fail, 0 skipped |
+| Structuurcorpus | `npm run test:menu-structure` | 6 pass, 0 fail |
+| Benchmark | `npm run benchmark:menu-structure` | 22 pass, 0 fail, 1 unclassified (`STRUCT-018`, bestaande JSON-LD-keuze) |
+| Build | `npm run build` | compiled successfully in 14.4 s; 41/41 statische pagina's; `BUILD_ID` `YzErRlFY50iYggxIW9s9r` |
+| PDF.js-trace | `node ops/scripts/verify-pdfjs-server-trace.js` | OK; 164 server scripts |
+| Botanist v1 | read-only heranalyse van dezelfde gepinde PDF | 208 items; 124/11/4/0 + 6 productgap; 18 supplementregels; `SUPPLEMENTEN` p. 2 |
+| Botanist v3-voorstel | idem met `--reference=…proposed-v3.json` | 139 rijen; 127/6/1/0 + 6 productgap; totale dekking 127/139; subset 128/127/1/1/0; 11 uitgesloten rijen met reden |
+| Smelt/Blossem | deze ronde niet opnieuw opgehaald | geen nieuwe live bronproef gevraagd; eerdere read-only 37/37 en 43/43 blijven historie |
+
+De controles zijn uitgevoerd op code-/testcommit `851fe31`; de documentatie is
+daarna toegevoegd. De eerdere verificatietabellen blijven de meting van die
+rondes. Browseracceptatie, app-side AI-activering, een nieuwe holdout,
+#56-compatibiliteit en onafhankelijke review zijn niet afgesloten.
+
 ## Resterende concrete beslissingen
 
 1. **Onafhankelijke review** door de Delivery Lead op de code- en

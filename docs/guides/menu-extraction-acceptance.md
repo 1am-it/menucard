@@ -701,3 +701,77 @@ referentie aan te passen.
 - De 50-100-bronnenbenchmark, de aparte ongeziene set, #56-compatibiliteit en
   onafhankelijke herreview zijn niet afgesloten. Deze sectie is
   ontwikkelaarsbewijs, geen productacceptatie of release.
+
+## Aanvullende verificatie — 2026-10-18 (review 6252891629)
+
+Lokale developer-continuatie binnen #59/PR #60 op `feat/menu-extraction-59`.
+Geen provider, app-side AI, OCR/renderingvendor, nieuwe bron, holdout, merge,
+publicatie of productieactie. Dezelfde gepinde Botanist-PDF is read-only
+opnieuw gemeten; Smelt/Blossem zijn deze ronde niet opnieuw opgehaald, omdat de
+review expliciet geen nieuwe externe bron vroeg. Hun eerdere read-only
+uitkomsten (37/37 en 43/43) blijven historie.
+
+### P1 — expliciete supplementrubriek
+
+Een losse kop `// SUPPLEMENTEN` of een herkenbare gewone kop `SUPPLEMENTEN` /
+`SUPPLEMENTEN (per stuk)` opent nu een supplementcontext voor de hele kolom tot
+de volgende aantoonbare sectiekop. Elke regel eronder wordt geteld en nooit als
+gewoon gerecht met hoofdprijs opgeslagen. De context is per kolom en per pagina;
+de bestaande inline-/plus-/wrapped-supplementvormen blijven ongewijzigd.
+`layout.supplementSections` bewaart alleen kop, pagina en regelcount.
+
+Op de gepinde PDF (SHA-256 `50fef0b6…7f85`):
+
+- parseritems 208 (was 214); `SUPPLEMENTEN` 0 items (was 6 met hoofdprijs);
+- `layout.supplementLines` 18 (was 12);
+- `layout.supplementSections` = `[{ heading: 'SUPPLEMENTEN', pages: [2], lines: 6 }]`;
+- quality gate `pdf_supplements_skipped` noemt `SUPPLEMENTEN` en p. 2 en
+  blokkeert de bron als productgap; de limitation doet hetzelfde;
+- de zes visueel gecontroleerde rijen (Havermelk 0.5, Hazelnootsiroop 0.6,
+  Karamelsiroop 0.6, Witte chocoladesiroop 0.6, Honing 0.6, Slagroom 0.6) zijn
+  geen parseritem meer.
+
+### Referentie v1 en v3-voorstel
+
+| Meting | Resultaat |
+| --- | --- |
+| v1 (ongewijzigd 141 rijen) | 124 matched / 11 missing / 4 extra / 0 prijsverschil + 6 productgap; 80 niet-gekoppeld |
+| v3-voorstel (139 rijen) | 127 matched / 6 missing / 1 extra / 0 prijsverschil + 6 productgap |
+| v3 totale brondekking | 127/139 = 0.9137 |
+| v3 expliciet beperkte subset | 128 rijen: 127 matched / 1 missing / 1 extra / 0 prijsverschil = 0.9922 |
+| v3 uitgesloten rijen | 11: 5 Soof (`unsupported_readability`) + 6 supplementen (`unsupported_product_field`), met reden |
+| Boekhouding | balanced: 124+11+6+4 = 141+4; 127+6+6+1 = 139+1 |
+
+De vijf leesbare Soof-lemonades staan in
+`botanist-reference.proposed-v3.json` met naam en 4.8 als
+`unsupported_readability`; er is geen itemloze `unsupportedSection` meer voor
+dat blok. v1 en v2 zijn niet overschreven. Het v3-voorstel is
+`proposed_not_accepted` en vervangt de meetlat niet.
+
+### Checks op deze ronde
+
+Uitgevoerd op code-/testcommit `851fe31` (docs-only wijziging daarna).
+
+| Controle | Commando | Resultaat |
+| --- | --- | --- |
+| Gerichte #59-tests | `node --test src/lib/pdfMenuStructuring.test.js src/lib/pdfMenuStructuringLiveRegressions.test.js src/lib/menuExtractionQuality.test.js src/lib/restaurantSourceAnalysis.test.js ops/benchmark/botanistReference.test.js` | 110 pass, 0 fail |
+| Volledige suite | `npm test` | 2054 tests: 2054 pass, 0 fail, 0 skipped |
+| Structuurcorpus | `npm run test:menu-structure` | 6 pass, 0 fail |
+| Benchmark | `npm run benchmark:menu-structure` | 22 pass, 0 fail, 1 unclassified (STRUCT-018 JSON-LD-hiërarchie) |
+| Build | `npm run build` | compiled successfully in 14.4s; 41/41 statische pagina's; `BUILD_ID` `YzErRlFY50iYggxIW9s9r` |
+| PDF.js-trace | `node ops/scripts/verify-pdfjs-server-trace.js` | OK; 164 server scripts, native `pdf.mjs`/`pdf.worker.mjs` |
+| Botanist v1 | `node ops/benchmark/runBotanistComparison.js --pdf=…/botanist-menu.pdf` | 208 items; 124/11/4/0 + 6 productgap; 18 supplementregels; `SUPPLEMENTEN` p. 2 |
+| Botanist v3 | idem met `--reference=…proposed-v3.json --out=…proposed-v3.json` | 139 rijen; 127/6/1/0 + 6 productgap; subset 128/127/1/1/0; 11 uitgesloten rijen |
+| Whitespace | `git diff --check` | schoon |
+
+### Resterende gaten (deze ronde)
+
+- De vijf Soof-lemonades blijven ongelezen en tellen in v3 als missing; het
+  raster en de ontbrekende tekstkop zijn niet opgelost.
+- De zes supplementrijen zijn leesbaar maar blijven een productgap: het concept
+  kan de supplementrelatie nog niet opslaan. Ze zijn geen gewone dekking.
+- Wijn-, cocktail-, Petite- en glas/fles-blokken blijven niet verliesvrij.
+- Geen browseracceptatie, app-side AI-activering, kostenbudget, retentie,
+  nieuwe holdout, 50-100-bronnenbenchmark of #56-compatibiliteit in deze ronde.
+- Onafhankelijke herreview door de Delivery Lead staat open. Deze sectie is
+  ontwikkelaarsbewijs, geen productacceptatie of release.

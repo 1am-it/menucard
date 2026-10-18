@@ -497,12 +497,14 @@ portieregels in gewone taal; `menuExtractionQuality` voegt
 `sufficient`; een portie blokkeert een modelcall die het concept toch niet kan
 opslaan.
 
-**Meting op dezelfde gepinde PDF.** 214 parseritems in 50 categorieën;
-referentie v1 (141 rijen) ongewijzigd: 130 matched / 11 missing / 4 extra /
-0 prijsverschil / 80 niet-gekoppeld. Layout: 18 ambigu, 9 niet-gekoppelde
-prijsregels, 12 supplementregels, 4 overgenomen kolomsecties, 1 subrubriek,
-13 naamcontinuaties en 2 portieregels. Het reproduceerbare script is
+**Historische meting (vóór review 6252891629).** 214 parseritems in 50
+categorieën; referentie v1 (141 rijen) ongewijzigd: 130 matched / 11 missing /
+4 extra / 0 prijsverschil / 80 niet-gekoppeld. Layout: 18 ambigu, 9
+niet-gekoppelde prijsregels, 12 supplementregels, 4 overgenomen kolomsecties, 1
+subrubriek, 13 naamcontinuaties en 2 portieregels. Het reproduceerbare script is
 `ops/benchmark/runBotanistComparison.js` (hashcheck, geen netwerk/provider).
+Na review 6252891629 zijn de zes supplementrijen als productgap geclassificeerd;
+zie 13.15 voor de actuele meting.
 
 **Voorstel, geen acceptatie.** `ops/benchmark/botanist-reference.proposed-v2.json`
 bevat drie brononderbouwde correcties (Sourcy als twee familie-/portieregels,
