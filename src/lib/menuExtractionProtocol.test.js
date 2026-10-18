@@ -22,10 +22,28 @@ test('loads the pinned instruction with a stable SHA-256 and no local machine pa
   const protocol = loadMenuExtractionProtocol();
   assert.equal(protocol.version, '0.2');
   assert.equal(protocol.file, 'MENU-EXTRACTION.md');
-  assert.equal(protocol.hash.length, 64);
+  // Pinned LF hash of the committed instruction (MENU-EXTRACTION.md v0.2).
+  // The same hash is recorded in docs/guides/menu-extraction-acceptance.md and
+  // docs/guides/menu-extraction-representative-set.md.
+  assert.equal(protocol.hash, '15510b4c0b74fee722ac2c51a3f40aa21b03e0161ccffdcb2008f3d27350b762');
   assert.match(protocol.text, /Modelonafhankelijke extractie-instructie/);
+  assert.doesNotMatch(protocol.text, /\r/);
   assert.deepEqual(Object.keys(protocolMetadata(protocol)).sort(), ['instructionFile', 'instructionHash', 'instructionVersion', 'schemaVersion']);
   assert.doesNotMatch(JSON.stringify(protocolMetadata(protocol)), /C:\\\\|Documents/);
+});
+
+test('the instruction hash is checkout-independent: CRLF and LF give the same hash', () => {
+  const lf = '# MENU-EXTRACTION - Menucard\n\nStatus: CONCEPT v0.2 - test\n';
+  const crlf = lf.replace(/\n/g, '\r\n');
+  const hashOf = (content) => {
+    const root = tempRoot({ 'MENU-EXTRACTION.md': content });
+    return loadMenuExtractionProtocol({ root });
+  };
+  const lfProtocol = hashOf(lf);
+  const crlfProtocol = hashOf(crlf);
+  assert.equal(crlfProtocol.hash, lfProtocol.hash);
+  assert.equal(crlfProtocol.text, lfProtocol.text);
+  assert.equal(crlfProtocol.hash.length, 64);
 });
 
 test('a missing instruction fails with a concrete, non-secret reason', () => {

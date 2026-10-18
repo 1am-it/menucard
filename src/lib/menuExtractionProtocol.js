@@ -39,6 +39,18 @@ class MenuExtractionProtocolError extends Error {
   }
 }
 
+/**
+ * The instruction hash must identify the committed instruction, not the
+ * checkout that happens to read it. A Windows checkout with core.autocrlf
+ * returns CRLF while the Git blob (and every Linux/CI checkout) is LF; hashing
+ * the raw working-tree bytes would produce two different hashes for the same
+ * protocol version. Normalise line endings before hashing and before handing
+ * the text to the model, so the recorded `instructionHash` is reproducible.
+ */
+function canonicalProtocolText(text) {
+  return typeof text === 'string' ? text.replace(/\r\n?/g, '\n') : text;
+}
+
 function parseProtocol(text) {
   if (typeof text !== 'string' || text.trim().length === 0) {
     throw new MenuExtractionProtocolError('protocol_unavailable', 'MENU-EXTRACTION.md is empty.');
@@ -71,13 +83,14 @@ function loadMenuExtractionProtocol(options = {}) {
     throw new MenuExtractionProtocolError('protocol_unavailable', `Cannot read ${PROTOCOL_FILE}.`);
   }
   const parsed = parseProtocol(text);
+  const canonicalText = canonicalProtocolText(text);
   return {
     version: parsed.version,
     status: parsed.status,
     schemaVersion: PROTOCOL_SCHEMA_VERSION,
-    hash: createHash('sha256').update(text).digest('hex'),
+    hash: createHash('sha256').update(canonicalText).digest('hex'),
     file: PROTOCOL_FILE,
-    text,
+    text: canonicalText,
   };
 }
 
