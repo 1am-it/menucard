@@ -105,7 +105,9 @@ function recognisedLines(menus) {
           name: item.name.trim().slice(0, MAX_NAME),
           desc: typeof item.desc === 'string' && item.desc.trim() ? item.desc.trim() : null,
           price: normalizePrice(item.price),
-          priceStatus: item.priceStatus === 'multiple_undecomposed' ? 'multiple_undecomposed' : item.price ? 'known' : 'unknown',
+          priceStatus: ['multiple_undecomposed', 'on_request', 'unknown'].includes(item.priceStatus)
+            ? item.priceStatus
+            : item.price ? 'known' : 'unknown',
           ...(typeof item.priceText === 'string' && item.priceText.trim() ? { priceText: item.priceText.trim().slice(0, 160) } : {}),
           ...(Array.isArray(item.priceVariants)
             ? {

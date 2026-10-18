@@ -167,7 +167,12 @@ async function runStructuredExtraction({ adapter, protocol, sources, limits, bud
       if (typeof budget.settle === 'function') budget.settle(0);
       return { ok: false, reason: 'schema_violation', problems };
     }
-    const actualCost = Number.isInteger(budget.costEurCents) ? budget.costEurCents : 0;
+    // Unknown actual cost must never be treated as zero spend.
+    if (!Number.isInteger(budget.costEurCents) || budget.costEurCents < 0) {
+      if (typeof budget.settle === 'function') budget.settle(0);
+      return { ok: false, reason: 'cost_unknown' };
+    }
+    const actualCost = budget.costEurCents;
     if (actualCost > effective.maxCostEurCents) {
       if (typeof budget.settle === 'function') budget.settle(actualCost);
       return { ok: false, reason: 'budget_exceeded' };
@@ -191,7 +196,7 @@ function unsupportedProductFields(output) {
       for (const item of category.items || []) {
         if (Array.isArray(item.priceVariants) && item.priceVariants.length > 0) unsupported.add('priceVariants');
         if (item.isFrom === true) unsupported.add('isFrom');
-        if (item.supplement) unsupported.add('supplement');
+        if (item.supplementOf) unsupported.add('supplementOf');
         // Unknown is not "allergen-free"; either state cannot be stored by the
         // current concept, so both are reported rather than silently dropped.
         if (item.allergens) unsupported.add('allergens');

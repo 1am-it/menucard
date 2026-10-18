@@ -155,7 +155,7 @@ function buildMenuCandidateSummary(menus) {
                 };
                 const evidence = boundedEvidence(item && item.evidence);
                 if (evidence) summary.evidence = evidence;
-                if (item && item.priceStatus === 'multiple_undecomposed') summary.priceStatus = 'multiple_undecomposed';
+                if (item && ['multiple_undecomposed', 'on_request', 'unknown'].includes(item.priceStatus)) summary.priceStatus = item.priceStatus;
                 if (item && typeof item.priceText === 'string' && item.priceText.trim()) summary.priceText = item.priceText.trim().slice(0, 160);
                 if (item && Array.isArray(item.priceVariants)) {
                   summary.priceVariants = item.priceVariants

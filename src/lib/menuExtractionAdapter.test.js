@@ -51,9 +51,11 @@ test('valid structured output passes independent source and price validation; on
       return valid;
     },
   });
-  const result = await runStructuredExtraction({ adapter, protocol, sources, limits, budget: budget() });
+  const guarded = budget();
+  const result = await runStructuredExtraction({ adapter, protocol, sources, limits, budget: guarded });
   assert.equal(result.ok, true);
   assert.equal(result.meta.provider, 'fake');
+  assert.deepEqual(guarded.calls, [['reserve', 100], ['settle', 25]]);
   assert.equal(received.protocolHash, protocol.hash);
   assert.deepEqual(received.tools, []);
   assert.equal(received.schema.version, 'menu-extraction-output/v1');
@@ -80,6 +82,9 @@ test('timeout and budget limits stop the call; unknown cost is not treated as ze
   assert.equal((await runStructuredExtraction({ adapter: slow, protocol, sources, limits: { callTimeoutMs: 5, maxCostEurCents: 100 }, budget: budget() })).reason, 'timeout');
   assert.equal((await runStructuredExtraction({ adapter: slow, protocol, sources, limits: { callTimeoutMs: 5, maxCostEurCents: null }, budget: budget() })).reason, 'budget_not_configured');
   assert.equal((await runStructuredExtraction({ adapter: slow, protocol, sources, limits, budget: { ...budget(200), costEurCents: 200 } })).reason, 'budget_exceeded');
+  const fast = createStructuredExtractionAdapter({ call: async () => valid });
+  const unknownCost = { reserve: () => true, settle: () => {} };
+  assert.equal((await runStructuredExtraction({ adapter: fast, protocol, sources, limits, budget: unknownCost })).reason, 'cost_unknown');
 });
 
 test('REGRESSION: strict schema rejects invalid coverage, unknown nested fields, missing evidence quote and overlong values', async () => {
@@ -144,7 +149,7 @@ test('a future paid call cannot run without a budget reservation guard', async (
 
 test('advanced fields are reported as unsupported by the current concept, not silently flattened', () => {
   const advanced = {
-    menus: [{ ...valid.menus[0], categories: [{ ...valid.menus[0].categories[0], items: [{ ...valid.menus[0].categories[0].items[0], priceVariants: [{ label: 'Glas', amountMinorUnits: 350 }], supplement: { ofItem: 'x' }, allergens: { status: 'explicit', values: ['melk'] } }] }] }],
+    menus: [{ ...valid.menus[0], categories: [{ ...valid.menus[0].categories[0], items: [{ ...valid.menus[0].categories[0].items[0], priceVariants: [{ label: 'Glas', amountMinorUnits: 350, currency: 'EUR' }], supplementOf: 'Basisgerecht', allergens: { status: 'explicit', values: ['melk'] } }] }] }],
   };
-  assert.deepEqual(unsupportedProductFields(advanced), ['priceVariants', 'supplement', 'allergens']);
+  assert.deepEqual(unsupportedProductFields(advanced), ['priceVariants', 'supplementOf', 'allergens']);
 });
