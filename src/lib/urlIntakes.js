@@ -142,6 +142,10 @@ function buildMenuCandidateSummary(menus) {
     ...(menu && typeof menu.sourceId === 'string' ? { sourceId: menu.sourceId.slice(0, 80) } : {}),
     ...(menu && typeof menu.sourceUrl === 'string' ? { sourceUrl: menu.sourceUrl.slice(0, 2048) } : {}),
     ...(menu && typeof menu.extractionMethod === 'string' ? { extractionMethod: menu.extractionMethod.slice(0, 40) } : {}),
+    // Explicit menu variant/order from a validated extraction survive into the
+    // receipt instead of disappearing at this mapping step.
+    ...(menu && typeof menu.variant === 'string' && menu.variant.trim() ? { variant: menu.variant.trim().slice(0, 160) } : {}),
+    ...(menu && Number.isInteger(menu.order) && menu.order >= 0 ? { order: menu.order } : {}),
     categories: Array.isArray(menu && menu.categories)
       ? menu.categories.map((category) => ({
           name: (category && category.name) || null,

@@ -75,6 +75,7 @@ test('INTEGRATION: protocol, source content, strict schema and validated result 
   assert.equal(concept.content.categories[0].items[0].name, 'Fictieve soep');
   assert.equal(concept.content.categories[0].items[0].price, '6.50');
   assert.equal(concept.content.categories[0].items[0].evidence.quote, 'Fictieve soep 6.50');
+  assert.equal(concept.content.categories[0].items[0].evidence.sourceId, 'source-1');
 });
 
 test('a disabled runtime is connected but makes no model call and leaves deterministic output unchanged', async () => {
