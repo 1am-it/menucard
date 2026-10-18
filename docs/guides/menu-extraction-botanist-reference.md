@@ -51,6 +51,13 @@ referentieregels zitten vooral in drank-/lunch-/wijnblokken waar de parser
 meerregelige blokken of prijsvarianten nog niet lossless leest. De 5 extra's
 zijn concrete naamverschillen (bijvoorbeeld een afgekapte naam).
 
+Na de P1-herstelronde van review 6249303096 is dezelfde gepinde PDF opnieuw
+read-only geanalyseerd. De vergelijking met deze referentie bleef exact gelijk
+(196 parseritems, 95/46/5, 0 prijsverschil, 96 niet-gekoppeld), maar de
+analyse meldt nu eerlijk 12 supplementregels, 18 prijzen midden in de regel en
+24 niet-gekoppelde prijsregels. Die laatste categorie is nieuw zichtbaar
+gemaakt in plaats van stilzwijgend weggelaten.
+
 ## Wat deze ronde aantoonbaar heeft hersteld
 
 - Een herhaalde prijs (`4.2`, `0.6`) werd ten onrechte als tweede tekstlaag
@@ -64,6 +71,12 @@ zijn concrete naamverschillen (bijvoorbeeld een afgekapte naam).
   dishes.
 - Een enkel Title-Case woord onder een item is een smaakvariant/description,
   geen nieuwe rubriek; prozatekst met leesteken wordt geen rubriek.
+- Prijsbewijs is niet meer paginabreed: een dunne kolom behoudt haar geldige
+  bedrag, naamgetallen (`Monkey 47`, `0.0`, `6 st.`) worden niet als prijs
+  gelezen zolang er een echt prijsblok rechts staat, en een naam+prijs op twee
+  baselines wordt alleen binnen 24 PDF-eenheden gekoppeld. Supplementregels
+  met een expliciet `Supplement`-label worden geteld en niet als gerecht
+  opgeslagen. Regressies in `pdfMenuStructuring.test.js`.
 - HTML: een class-gebaseerd prijselement met hele euro's of één decimaal wordt
   als prijs gelezen (Colonia), en een cadeaukaartlink is geen menulink.
 

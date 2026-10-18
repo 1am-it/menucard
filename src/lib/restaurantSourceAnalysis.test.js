@@ -4,7 +4,7 @@ const test = require('node:test')
 const assert = require('node:assert/strict')
 const fs = require('node:fs')
 
-const { runRestaurantSourceAnalysis, applyProviderNeutralExtraction } = require('./restaurantSourceAnalysis')
+const { runRestaurantSourceAnalysis, applyProviderNeutralExtraction, pdfLayoutLimitations } = require('./restaurantSourceAnalysis')
 const { buildCandidateSummary } = require('./urlIntakes')
 const { buildMenuConcept } = require('./menuConcept')
 
@@ -820,4 +820,12 @@ test('REGRESSION (review P1): the bounded PDF text reaches the adapter, while co
   assert.doesNotMatch(JSON.stringify(result.extractionResult), /Fictieve Koffie/)
   assert.equal(result.menuContexts.length, 1)
   assert.equal(result.aiExtraction.reason, 'provider_unavailable')
+})
+
+test('REGRESSION (review 6249303096 P1): an unlinked PDF price line is reported as a limitation instead of disappearing', () => {
+  const limitations = pdfLayoutLimitations('https://fixture.example/menu.pdf', { unlinkedPriceLines: 2 })
+  assert.equal(limitations.length, 1)
+  assert.match(limitations[0], /2 prijsregel\(s\)/)
+  assert.match(limitations[0], /naam-\/prijskoppeling/)
+  assert.deepEqual(pdfLayoutLimitations('https://fixture.example/menu.pdf', { unlinkedPriceLines: 0 }), [])
 })

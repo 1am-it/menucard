@@ -37,7 +37,7 @@ verplaatst; zij zijn geen holdout meer.
 
 | Bron | Uitkomst eerste meting (baseline) | Beperking / huidige status |
 | --- | --- | --- |
-| De Botanist | 151 items in 59 secties uit de gelinkte 16-pagina-PDF; entryhash gelijk aan de pin | Baseline blijft staan. Na reparatie 196 items/55 secties; layoutreferentie 95/141 matched, 46 missing, 5 extra, 96 niet-gekoppeld. **Representatief/usedForTuning**, geen holdout. |
+| De Botanist | 151 items in 59 secties uit de gelinkte 16-pagina-PDF; entryhash gelijk aan de pin | Baseline blijft staan. Na reparatie 196 items/54 secties; layoutreferentie 95/141 matched, 46 missing, 5 extra, 96 niet-gekoppeld. **Representatief/usedForTuning**, geen holdout. |
 | Gauchos Grill Breda | HTTP 404 op de goedgekeurde Breda-URL; geen menu gelezen | Geen alternatieve URL of andere vestiging gebruikt. **Enige overgebleven holdout**. |
 | Mr Moos | 0 items; `/menukaart` gelezen maar niet automatisch herkend | Na begrensde hubdetectie 247 items in 3 menu's; `/groepsmenu` geblokkeerd. **Representatief/usedForTuning**, geen holdout. |
 | Colonia Breda | 0 items; homepage plus vijf kandidaatpagina's gelezen | Na HTML-prijselementreparatie 84 items in 16 secties; wijn/brunch/high tea gemeld als niet verliesvrij. **Representatief/usedForTuning**, geen holdout. |

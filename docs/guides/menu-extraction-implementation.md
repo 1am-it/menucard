@@ -362,3 +362,41 @@ vóór enige modelaanroep:
   96 niet-gekoppelde items. Dat is een kwaliteitsbeperking, geen acceptatie.
 - De PDF-fixes zijn tegen Smelt en Blossem opnieuw uitgevoerd: 37/37 en 43/43,
   byte-/contenthash gelijk en alle verschilcategorieën 0.
+
+### 13.12 Prijsbewijs per tekstblok en lokale naam/prijsrelatie (review 6249303096)
+
+- **Geen pagina-brede prijsankers meer.** De oude regel telde herhaalde
+  numerieke X-posities over de hele pagina; twee prijsposities rechts konden
+  daardoor het enige geldige bedrag in een dun bezette linkerkolom schrappen.
+  Prijsbewijs gebruikt nu het tekstblok dat pdfjs zelf levert:
+  `priceOnlyItem` waar een heel tekstblok uit prijzen/scheidingstekens bestaat,
+  plus een expliciete variantreeks (`6.5 / 25.0`). Een getal binnen een
+  naamdragend tekstblok is geen prijs zolang er rechts daarvan een echt
+  prijsblok staat (`Monkey 47` → 10.0, `0.0 Regrets` → 7.5, `6 st.` → 65.0).
+  Als pdfjs een prijs aan de naam plakt (`Fictief Broodje 3.00`) en er staat
+  geen prijsblok rechts, blijft dat slotbedrag de prijs. Zo verdwijnt geen
+  geldig gerecht en ontstaat geen verzonnen prijs.
+- **Verticale nabijheid.** Een naam+prijs op twee baselines wordt alleen
+  gekoppeld binnen `MAX_NAME_PRICE_BASELINE_DISTANCE = 24` PDF-eenheden.
+  Gemeten op de gepinde Botanist-PDF: echte paren liggen 1,2–18,5 eenheden
+  uit elkaar, de mediane regelafstand is ~11,2; de losse 127,8-eenheid en de
+  550-eenheid voettekst in de reviewreproductie zijn geen paren.
+- **Eerlijke onzekerheid.** `layout.unlinkedPriceLines` telt prijshoudende
+  regels die zonder lokaal naam/prijsbewijs niet als gerecht zijn opgenomen.
+  `pdfLayoutLimitations` en `menuExtractionQuality` (`pdf_unlinked_price_lines`)
+  melden dat als beperking; een PDF met zulke regels is niet `sufficient`.
+- **Supplementen blijven supplementen.** Een regel die met `Supplement` /
+  `Supplementen` begint, en de lowercase wrapped continuation daarvan, wordt
+  geteld in `layout.supplementLines` en nooit als gewoon gerecht opgeslagen.
+  De kwaliteitscontrole herkent ook `${name}` met dat prefix als
+  `supplement_as_item`.
+- **Regressies:** `pdfMenuStructuring.test.js` (sparse linkerkolom + twee
+  wijnvarianten, losse voettekst, korte/grote baselineafstand, twee kolommen,
+  varianten op de volgende baseline, naamgetallen, supplementblokken),
+  `menuExtractionQuality.test.js` (`pdf_unlinked_price_lines`,
+  supplementprefix) en `restaurantSourceAnalysis.test.js` (limitationtekst).
+- **Hercontrole:** Smelt 37/37 en Blossem 43/43 blijven exact; de gecommitte
+  Botanist-vergelijking blijft 196 parseritems, 95/46/5, 0 prijsverschil en
+  96 niet-gekoppeld. De nieuwe analyse meldt 12 supplementregels, 18
+  midden-in-de-regel-prijzen en 24 niet-gekoppelde prijsregels als beperking.
+  Dat is nog steeds ontwikkelaarsbewijs, geen onafhankelijke bronwaarheid.

@@ -410,24 +410,25 @@ function looksLikeUnrecognizedHeading(words, lineText) {
 }
 
 /** Splits a reconstructed line's own items into individual whitespace-
- * separated words, each still carrying an approximate X position —
- * necessary, not merely convenient: confirmed empirically that
- * `pdfjs-dist` does not reliably keep a name and its own trailing price
- * as two separate text items. Whether it does depends on the exact
- * visual gap between them (its own internal text-layer heuristic, not
- * something this module controls) — the exact same real PDF this fix
- * diagnosed against showed both behaviors on different lines. Scanning
- * per-word rather than per-item is what makes price detection reliable
- * regardless of which way pdfjs happened to split (or not split) a
- * given line's own items. A word past the first one to come from a
- * multi-word item reuses that item's own start X — an approximation,
- * since pdfjs does not hand back per-word positions, but a strictly
- * better one than treating the whole merged string as unsplittable. */
+ * separated words, each still carrying its source text item's X position.
+ * pdfjs does not reliably keep a name and its own trailing price as two
+ * separate text items; whether it does depends on the exact visual gap (its
+ * own internal text-layer heuristic, not something this module controls).
+ * `priceOnlyItem` therefore records the one positional fact the PDF itself
+ * gives us: an item whose whole text is prices/separators is a price run,
+ * while a number that is merely part of a name-bearing item
+ * ("Monkey 47", "0.0 Regrets", "6 st.") is not a price position. A price
+ * variant sequence ("Wijn 6.5 / 25.0" merged into one item) is recognized at
+ * line level by the caller. */
 function tokenizeLineIntoWords(lineItems) {
   const words = []
-  for (const item of lineItems) {
-    for (const word of item.str.split(/\s+/)) {
-      if (word.length > 0) words.push({ text: word, x: item.x })
+  for (let itemIndex = 0; itemIndex < lineItems.length; itemIndex += 1) {
+    const item = lineItems[itemIndex]
+    const parts = item.str.split(/\s+/).filter((part) => part.length > 0)
+    if (parts.length === 0) continue
+    const priceOnlyItem = parts.every((part) => isPriceToken(part) || isPriceVariantSeparator(part))
+    for (let partIndex = 0; partIndex < parts.length; partIndex += 1) {
+      words.push({ text: parts[partIndex], x: item.x, priceOnlyItem, itemIndex, itemLast: partIndex === parts.length - 1 })
     }
   }
   return words
@@ -461,6 +462,28 @@ function splitLineIntoColumns(lineItems) {
  * baselines separate so a description is never glued onto the dish name. */
 const BASELINE_TOLERANCE = 1
 
+/** The maximum vertical distance (PDF units) between a name baseline and the
+ * price-only baseline directly below it in the same column before the two may
+ * be read as one item. Measured against the pinned De Botanist PDF: genuine
+ * name/price pairs sit 1.2–18.5 units apart while the median printed row gap
+ * is ~11.2; the one 127.8-unit candidate is a loose amount, not a pair. A
+ * footer amount hundreds of units away is therefore never that dish's price
+ * (review P1), and a price at a normal second-baseline distance still is. */
+const MAX_NAME_PRICE_BASELINE_DISTANCE = 24
+
+function baselinesAreVerticallyAdjacent(nameBaselineItems, priceBaselineItems) {
+  const ys = (items) =>
+    (Array.isArray(items) ? items : [])
+      .map((item) => (item && typeof item.y === 'number' ? item.y : null))
+      .filter((y) => y !== null)
+  const nameYs = ys(nameBaselineItems)
+  const priceYs = ys(priceBaselineItems)
+  if (nameYs.length === 0 || priceYs.length === 0) return false
+  // Within a baseline all items are at most BASELINE_TOLERANCE apart, so the
+  // topmost Y is a stable representative of that baseline.
+  return Math.abs(Math.max(...nameYs) - Math.max(...priceYs)) <= MAX_NAME_PRICE_BASELINE_DISTANCE
+}
+
 function splitColumnByBaseline(columnItems) {
   const groups = []
   for (const item of columnItems) {
@@ -490,7 +513,7 @@ function splitColumnByBaseline(columnItems) {
  * treating the price as a description and the name as a section heading
  * invents both a category and a missing dish. Returns null unless every
  * visible token is a price or a separator. */
-function priceOnlyBaseline(baselineItems, priceAnchors = []) {
+function priceOnlyBaseline(baselineItems) {
   const visible = (Array.isArray(baselineItems) ? baselineItems : []).filter(
     (item) => item && typeof item.str === 'string' && item.str.trim().length > 0,
   )
@@ -498,47 +521,11 @@ function priceOnlyBaseline(baselineItems, priceAnchors = []) {
   const prices = []
   for (const item of visible) {
     const text = item.str.trim()
-    if (isPriceToken(text) && (priceAnchors.length === 0 || priceAnchors.some((x) => Math.abs(item.x - x) <= 8))) prices.push(text)
+    if (isPriceToken(text)) prices.push(text)
     else if (!isPriceVariantSeparator(text)) return null
   }
   if (prices.length === 0) return null
   return { prices, text: joinText(visible.map((item) => item.str)) }
-}
-
-/**
- * X positions that recur for numeric tokens on this page, i.e. real price
- * columns. A number inside a dish name ("Monkey 47") sits at the name's own
- * X and is not a price; a number at a recurring right-hand X is. The rule is
- * only applied when the page offers at least two candidate positions, and the
- * caller falls back to accepting any price token otherwise.
- */
-function priceXAnchors(page, suppressedSeqs = new Set()) {
-  const counts = new Map()
-  for (const line of (page && Array.isArray(page.lines) && page.lines) || []) {
-    const items = (line && Array.isArray(line.items) ? line.items : []).filter(
-      (item) =>
-        item &&
-        typeof item.str === 'string' &&
-        item.str.trim().length > 0 &&
-        typeof item.x === 'number' &&
-        !(Number.isInteger(item.seq) && suppressedSeqs.has(item.seq)),
-    )
-    for (let index = 0; index < items.length; index += 1) {
-      const item = items[index]
-      if (!isPriceToken(item.str.trim())) continue
-      // "6 st." / "12 personen" is a variant label, not a price column.
-      const next = items[index + 1]
-      if (next && isPriceVariantUnit(next.str)) continue
-      const key = Math.round(item.x)
-      counts.set(key, (counts.get(key) || 0) + 1)
-    }
-  }
-  const anchors = [...counts.entries()].filter(([, count]) => count >= 2).map(([x]) => x)
-  return anchors.length >= 2 ? anchors : []
-}
-
-function isPriceVariantUnit(text) {
-  return /^(?:st\.?|stuks?|glas|fles|karaf|personen|pp|p\.p\.?|per\b)/i.test(String(text || '').trim())
 }
 
 /**
@@ -564,6 +551,7 @@ function structurePdfLinesIntoMenu(pages) {
     duplicateLayerItems: 0,
     duplicateLayerOffsets: [],
     ambiguousPriceLines: 0,
+    unlinkedPriceLines: 0,
     supplementLines: 0,
     arrangementLines: 0,
     unrecognizedHeadingLines: 0,
@@ -594,9 +582,6 @@ function structurePdfLinesIntoMenu(pages) {
     // Columns are anchored to the whole page, not to one row's index, so an
     // empty left column never shifts right-hand content into the left state.
     const anchors = pageColumnAnchors(page, duplicateLayer.suppressedSeqs)
-    const priceAnchors = priceXAnchors(page, duplicateLayer.suppressedSeqs)
-    const isPriceWord = (word) =>
-      isPriceToken(word.text) && (priceAnchors.length === 0 || priceAnchors.some((x) => Math.abs(word.x - x) <= 8))
     // Collect every column's visual baselines for the whole page first: a
     // look-ahead (arrangement lead-in -> serving range) must see the next
     // line, not only another item on the same line.
@@ -626,7 +611,7 @@ function structurePdfLinesIntoMenu(pages) {
     })
 
     columnBaselines.forEach((baselines, columnIndex) => {
-      const state = { menuName: null, categoryPath: null, categoryInferred: false, lastItem: null }
+      const state = { menuName: null, categoryPath: null, categoryInferred: false, lastItem: null, pendingSupplement: false }
       // A price on its own baseline is consumed by the name line above it;
       // other items on that same baseline (a second column's item) stay.
       const consumedItems = new Set()
@@ -681,6 +666,7 @@ function structurePdfLinesIntoMenu(pages) {
               state.categoryInferred = true
             }
             state.lastItem = null
+            state.pendingSupplement = false
             continue
           }
 
@@ -688,6 +674,61 @@ function structurePdfLinesIntoMenu(pages) {
           if (lineText.length === 0 || isPdfChrome(baselineItems)) continue
 
           const words = tokenizeLineIntoWords(baselineItems)
+          // A line explicitly labelled "Supplement ..." is a relation the
+          // product cannot store. It is never emitted as an ordinary dish,
+          // whether the amount is printed inline ("Supplement serranoham 2.5")
+          // or on the wrapped continuation of the supplement name
+          // ("Supplement krokante" then lowercase "prosciutto 2.5").
+          if (/^supplement(?:en)?\b/i.test(lineText)) {
+            state.pendingSupplement = !words.some((word) => isPriceToken(word.text))
+            layout.supplementLines += 1
+            state.lastItem = null
+            continue
+          }
+          if (state.pendingSupplement) {
+            state.pendingSupplement = false
+            // Only a lowercase wrapped continuation belongs to the supplement
+            // name; a capitalized line is a new dish and must stay one.
+            if (/^\p{Ll}/u.test(lineText)) {
+              layout.supplementLines += 1
+              state.lastItem = null
+              continue
+            }
+          }
+          // A price is credible when its own PDF text item consists solely of
+          // prices/separators ("4.50"), when it is part of an explicit variant
+          // sequence ("6.5 / 25.0"), or when pdfjs merged a trailing price into
+          // a name-bearing item ("Fictief Broodje 3.00") and no separately
+          // positioned price run sits to its right. A price-shaped number inside
+          // a name is never a price when a real price run is printed to its
+          // right ("Monkey 47" -> 10.0, "0.0 Regrets" -> 7.5, "6 st." -> 65.0).
+          // (review 6249303096 P1)
+          const variantItemIndexes = new Set()
+          for (let index = 0; index + 2 < words.length; index += 1) {
+            if (
+              isPriceToken(words[index].text) &&
+              isPriceVariantSeparator(words[index + 1].text) &&
+              isPriceToken(words[index + 2].text)
+            ) {
+              for (const variantWord of words.slice(index, index + 3)) variantItemIndexes.add(variantWord.itemIndex)
+            }
+          }
+          const isPriceWord = (word) =>
+            isPriceToken(word.text) &&
+            (word.priceOnlyItem ||
+              variantItemIndexes.has(word.itemIndex) ||
+              (word.itemLast === true && !words.some((other) => other.priceOnlyItem && other.x > word.x)))
+          // A baseline that holds nothing but price tokens/separators and was
+          // not consumed by a name baseline above it is read content the parser
+          // cannot link to an item. Count it so review sees it; never silently
+          // drop it and never attach it to an unrelated dish.
+          const priceOnlyLine =
+            words.length > 0 && words.every((word) => isPriceToken(word.text) || isPriceVariantSeparator(word.text))
+          if (priceOnlyLine) {
+            layout.unlinkedPriceLines += 1
+            state.lastItem = null
+            continue
+          }
           // A supplement/extra ("+ Bresaola", "+ Gebakken krieltjes 5",
           // "Botersla ... + Bresaola 15") is a relation the current product
           // concept cannot store. Emitting it as an ordinary dish would
@@ -700,6 +741,18 @@ function structurePdfLinesIntoMenu(pages) {
             continue
           }
           const pricePositions = words.map((word, index) => (isPriceWord(word) ? index : -1)).filter((index) => index >= 0)
+          const priceShapedPositions = words
+            .map((word, index) => (isPriceToken(word.text) ? index : -1))
+            .filter((index) => index >= 0)
+          // The line ends in a price-shaped token, but its own text item also
+          // contains name text (or a unit) instead of being a price run. Do not
+          // guess an item, do not attach the line to the previous dish, and do
+          // not throw it away silently: count it as an unlinked price line.
+          if (pricePositions.length === 0 && priceShapedPositions.length > 0 && priceShapedPositions[priceShapedPositions.length - 1] === words.length - 1) {
+            layout.unlinkedPriceLines += 1
+            state.lastItem = null
+            continue
+          }
           // A price in the middle of a line, with no price at the end, is prose:
           // the real Smelt PDF has "Klassieke Stolwijker van 2,5 jaar oud ..." —
           // reading that as a dish named "Klassieke Stolwijker van" priced 2,50
@@ -775,9 +828,13 @@ function structurePdfLinesIntoMenu(pages) {
           // De Botanist prints many items this way ("Cappuccino" then
           // "3.8"); the price is not a description and the name is not a
           // section heading. Only a line that already looks like a short
-          // capitalized item name is paired, and only with a baseline that
-          // holds nothing but prices/separators.
-          const nextPrices = priceOnlyBaseline(nextBaseline, priceAnchors)
+          // capitalized item name is paired, only with a baseline that holds
+          // nothing but prices/separators, and only when that baseline is
+          // demonstrably close: a loose amount hundreds of units further down
+          // the page is never this dish's price (review P1).
+          const nextPrices = baselinesAreVerticallyAdjacent(baselineItems, nextBaseline)
+            ? priceOnlyBaseline(nextBaseline)
+            : null
           if (nextPrices && looksLikeUnrecognizedHeading(words, lineText)) {
             const category = categoryFor(state.categoryPath || [], state.categoryInferred)
             const priceVariants = nextPrices.prices.length > 1

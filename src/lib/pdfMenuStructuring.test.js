@@ -308,6 +308,144 @@ test('REGRESSION (review P1): columns are stable when a row is empty on one side
   assert.deepEqual(byName.RECHTS, ['Rechtsgerecht'])
 })
 
+test('REGRESSION (review 6249303096 P1): price evidence is per column — a sparse left column keeps its only valid amount when the right column repeats two price positions', () => {
+  const page = {
+    pageNumber: 1,
+    lines: [
+      { y: 400, items: [{ str: '// ETEN', x: 20, y: 400 }, { str: '// DRANKEN', x: 220, y: 400 }] },
+      {
+        y: 380,
+        items: [
+          { str: 'Soep', x: 20, y: 380 },
+          { str: '8.5', x: 100, y: 380 },
+          { str: 'Wijn A', x: 220, y: 380 },
+          { str: '6.5', x: 300, y: 380 },
+          { str: '/', x: 320, y: 380 },
+          { str: '25.0', x: 340, y: 380 },
+        ],
+      },
+      {
+        y: 360,
+        items: [
+          { str: 'Wijn B', x: 220, y: 360 },
+          { str: '7.5', x: 300, y: 360 },
+          { str: '/', x: 320, y: 360 },
+          { str: '28.0', x: 340, y: 360 },
+        ],
+      },
+    ],
+  }
+  const { categories, layout } = structurePdfLinesIntoMenu([page])
+  const eten = categories.find((category) => category.name === 'ETEN')
+  const dranken = categories.find((category) => category.name === 'DRANKEN')
+  assert.deepEqual(eten.items.map((item) => [item.name, item.price, item.priceStatus]), [['Soep', '8.5', 'known']])
+  assert.deepEqual(
+    dranken.items.map((item) => [item.name, item.price, item.priceStatus, item.priceText]),
+    [
+      ['Wijn A', null, 'multiple_undecomposed', '6.5 / 25.0'],
+      ['Wijn B', null, 'multiple_undecomposed', '7.5 / 28.0'],
+    ],
+  )
+  assert.deepEqual(dranken.items[0].priceVariants, [{ label: null, price: '6.5' }, { label: null, price: '25.0' }])
+  assert.deepEqual(dranken.items[1].priceVariants, [{ label: null, price: '7.5' }, { label: null, price: '28.0' }])
+  assert.equal(layout.ambiguousPriceLines, 0)
+  assert.equal(layout.unlinkedPriceLines, 0)
+})
+
+test('REGRESSION (review 6249303096 P1): a loose amount far below a name is never linked as its price, and the unlinked price is reported', () => {
+  const page = {
+    pageNumber: 1,
+    lines: [
+      { y: 700, items: [{ str: '// DRANKEN', x: 20, y: 700 }] },
+      { y: 650, items: [{ str: 'Koffie', x: 20, y: 650 }] },
+      { y: 100, items: [{ str: '25.00', x: 100, y: 100 }] },
+    ],
+  }
+  const { categories, layout } = structurePdfLinesIntoMenu([page])
+  const items = categories.flatMap((category) => category.items)
+  assert.equal(items.some((item) => item.name === 'Koffie'), false)
+  assert.equal(items.some((item) => item.price === '25.00'), false)
+  assert.equal(layout.unlinkedPriceLines, 1)
+})
+
+test('REGRESSION (review 6249303096 P1): a normal second-baseline distance is still a local name/price relation, a large gap in the same column is not', () => {
+  const page = (gap) => ({
+    pageNumber: 1,
+    lines: [
+      { y: 400, items: [{ str: '// WARME DRANKEN', x: 20, y: 400 }] },
+      { y: 380, items: [{ str: 'Cappuccino', x: 20, y: 380 }] },
+      { y: 380 - gap, items: [{ str: '3.8', x: 100, y: 380 - gap }] },
+    ],
+  })
+  const near = structurePdfLinesIntoMenu([page(7)])
+  assert.deepEqual(near.categories[0].items.map((item) => [item.name, item.price, item.priceStatus]), [
+    ['Cappuccino', '3.8', 'known'],
+  ])
+  assert.equal(near.layout.unlinkedPriceLines, 0)
+
+  const far = structurePdfLinesIntoMenu([page(60)])
+  assert.deepEqual(far.categories.flatMap((category) => category.items), [])
+  assert.equal(far.layout.unlinkedPriceLines, 1)
+})
+
+test('REGRESSION (review 6249303096 P1): name/price baselines in two columns never borrow the other column’s amount', () => {
+  const page = {
+    pageNumber: 1,
+    lines: [
+      { y: 400, items: [{ str: '// ETEN', x: 20, y: 400 }, { str: '// DRANKEN', x: 220, y: 400 }] },
+      { y: 380, items: [{ str: 'Soep', x: 20, y: 380 }, { str: 'Wijn A', x: 220, y: 380 }] },
+      { y: 373, items: [{ str: '8.5', x: 100, y: 373 }, { str: '6.5', x: 300, y: 373 }] },
+    ],
+  }
+  const { categories } = structurePdfLinesIntoMenu([page])
+  const byName = Object.fromEntries(categories.map((category) => [category.name, category.items.map((item) => [item.name, item.price])]))
+  assert.deepEqual(byName.ETEN, [['Soep', '8.5']])
+  assert.deepEqual(byName.DRANKEN, [['Wijn A', '6.5']])
+})
+
+test('REGRESSION (review 6249303096 P1): two price variants on the next baseline stay one blocked item, never a silent main price', () => {
+  const page = {
+    pageNumber: 1,
+    lines: [
+      { y: 380, items: [{ str: 'Wijn A', x: 220, y: 380 }] },
+      { y: 374, items: [{ str: '6.5', x: 300, y: 374 }, { str: '/', x: 320, y: 374 }, { str: '25.0', x: 340, y: 374 }] },
+      { y: 360, items: [{ str: 'Wijn B', x: 220, y: 360 }] },
+      { y: 354, items: [{ str: '7.5', x: 300, y: 354 }, { str: '/', x: 320, y: 354 }, { str: '28.0', x: 340, y: 354 }] },
+    ],
+  }
+  const { categories } = structurePdfLinesIntoMenu([page])
+  const items = categories.flatMap((category) => category.items)
+  assert.deepEqual(items.map((item) => [item.name, item.price, item.priceStatus, item.priceText]), [
+    ['Wijn A', null, 'multiple_undecomposed', '6.5 / 25.0'],
+    ['Wijn B', null, 'multiple_undecomposed', '7.5 / 28.0'],
+  ])
+  assert.deepEqual(items[0].priceVariants, [{ label: null, price: '6.5' }, { label: null, price: '25.0' }])
+})
+
+test('REGRESSION (review 6249303096 P1): a number inside a name-bearing text item is never a price when a separately positioned price is present', () => {
+  const page = {
+    pageNumber: 1,
+    lines: [
+      { y: 400, items: [{ str: '// DRANKEN', x: 20, y: 400 }] },
+      { y: 380, items: [{ str: 'Monkey 47', x: 20, y: 380 }, { str: '10.0', x: 100, y: 380 }] },
+      { y: 360, items: [{ str: 'Ceremonial Matcha 0.0', x: 20, y: 360 }, { str: '5.5', x: 100, y: 360 }] },
+      { y: 340, items: [{ str: 'Proeverij van 4 Kazen van', x: 20, y: 340 }, { str: '14.5', x: 100, y: 340 }] },
+      { y: 320, items: [{ str: 'Pornstar Martini Boom 6 st.', x: 20, y: 320 }, { str: '65.0', x: 100, y: 320 }] },
+      // pdfjs can merge a trailing price into the name item; with no separate
+      // price run on the line, that trailing amount is still the price.
+      { y: 300, items: [{ str: 'Fictief Broodje 3.00', x: 20, y: 300 }] },
+    ],
+  }
+  const { categories } = structurePdfLinesIntoMenu([page])
+  assert.deepEqual(categories[0].items.map((item) => [item.name, item.price]), [
+    ['Monkey 47', '10.0'],
+    ['Ceremonial Matcha 0.0', '5.5'],
+    ['Proeverij van 4 Kazen van', '14.5'],
+    ['Pornstar Martini Boom 6 st.', '65.0'],
+    ['Fictief Broodje', '3.00'],
+  ])
+})
+
 test('REGRESSION (review P1): an identical, overlapping second text layer is ignored instead of merging two dish names', () => {
   const base = [
     ['Hollands', '27'],
@@ -360,7 +498,10 @@ test('REGRESSION: a number inside a description never becomes the previous dish\
   const { categories, layout } = structurePdfLinesIntoMenu([page])
   assert.deepEqual(categories[0].items.map((item) => [item.name, item.price]), [['Oude boeren kaas', '8']])
   assert.equal(categories[0].items[0].desc, 'Klassieke Stolwijker van 2,5 jaar oud met huisgemaakte chutney')
-  assert.equal(layout.ambiguousPriceLines, 1)
+  // The number inside the prose is not a price position at all now, so it is
+  // neither an item nor an ambiguous price line.
+  assert.equal(layout.ambiguousPriceLines, 0)
+  assert.equal(layout.unlinkedPriceLines, 0)
 })
 
 test('REGRESSION: a supplement line is never disguised as an ordinary dish; it is skipped and counted', () => {
@@ -375,6 +516,31 @@ test('REGRESSION: a supplement line is never disguised as an ordinary dish; it i
   const { categories, layout } = structurePdfLinesIntoMenu([page])
   assert.deepEqual(categories[0].items.map((item) => item.name), ['Brood'])
   assert.equal(layout.supplementLines, 1)
+})
+
+test('REGRESSION (review 6249303096 P1): explicit "Supplement" lines and their lowercase wrapped continuation stay supplements, never ordinary dishes', () => {
+  const page = {
+    pageNumber: 1,
+    lines: [
+      { y: 400, items: [{ str: '// LUNCH', x: 20, y: 400 }] },
+      { y: 380, items: [{ str: 'Brood', x: 20, y: 380 }, { str: '6', x: 80, y: 380 }] },
+      { y: 360, items: [{ str: 'Supplement serranoham', x: 20, y: 360 }, { str: '2.5', x: 100, y: 360 }] },
+      { y: 340, items: [{ str: 'Supplement krokante', x: 20, y: 340 }] },
+      { y: 320, items: [{ str: 'prosciutto', x: 20, y: 320 }, { str: '2.5', x: 100, y: 320 }] },
+      { y: 300, items: [{ str: 'Burrata Primavera', x: 20, y: 300 }, { str: '14.5', x: 100, y: 300 }] },
+      { y: 280, items: [{ str: 'Supplement dun gesneden', x: 20, y: 280 }] },
+      { y: 260, items: [{ str: 'Spicy Cauli Crunch', x: 20, y: 260 }, { str: '11.5', x: 100, y: 260 }] },
+    ],
+  }
+  const { categories, layout } = structurePdfLinesIntoMenu([page])
+  assert.deepEqual(categories[0].items.map((item) => [item.name, item.price]), [
+    ['Brood', '6'],
+    ['Burrata Primavera', '14.5'],
+    ['Spicy Cauli Crunch', '11.5'],
+  ])
+  // Inline supplement, wrapped supplement heading + continuation, and the
+  // heading whose next line is a real capitalized dish are all handled.
+  assert.equal(layout.supplementLines, 4)
 })
 
 test('plain section labels: a capitalized known heading counts, a lowercase wrapped fragment never does', async () => {

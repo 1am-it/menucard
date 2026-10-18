@@ -306,6 +306,9 @@ function pdfLayoutLimitations(sourceUrl, layout = {}) {
   if (Number.isInteger(layout.ambiguousPriceLines) && layout.ambiguousPriceLines > 0) {
     limitations.push(`PDF ${sourceUrl}: ${layout.ambiguousPriceLines} regel(s) met een prijs midden in de regel zijn niet als gerecht overgenomen.`)
   }
+  if (Number.isInteger(layout.unlinkedPriceLines) && layout.unlinkedPriceLines > 0) {
+    limitations.push(`PDF ${sourceUrl}: ${layout.unlinkedPriceLines} prijsregel(s) konden zonder aantoonbare lokale naam-/prijskoppeling niet als gerecht worden opgenomen.`)
+  }
   if (Number.isInteger(layout.unrecognizedHeadingLines) && layout.unrecognizedHeadingLines > 0) {
     limitations.push(`PDF ${sourceUrl}: ${layout.unrecognizedHeadingLines} mogelijke rubriekkop(pen) zijn niet herkend en dus niet als rubriek opgeslagen.`)
   }

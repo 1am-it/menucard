@@ -124,7 +124,41 @@ brontekst, schema en gevalideerd resultaat door de analyseketen naar
 receipt/concept lopen. `docs/guides/menu-extraction-representative-set.md` legt
 de referentieset, ongeziene set en drempels vast.
 
-### Echte read-only bronproeven
+### Herstelronde review 6249303096 — 2026-10-18
+
+Twee reproduceerbare P1-fouten in `pdfMenuStructuring.js` zijn hersteld met
+generieke regressies; er is geen bron- of providerspecifieke uitzondering
+toegevoegd.
+
+| Punt | Herstel | Regressie |
+| --- | --- | --- |
+| Paginabrede prijsankers verwijderden een geldig gerecht in een andere kolom | Prijsbewijs is per PDF-tekstblok/kolom: een prijsrun of expliciete variantreeks is een prijs; een getal in een naamdragend blok niet zolang er rechts een echt prijsblok staat. De dunne linkerkolom (`Soep 8.5`) blijft behouden en de wijnregels houden beide bedragen als `multiple_undecomposed`. | `pdfMenuStructuring.test.js`: exacte reviewfixture, twee kolommen, twee varianten op de volgende baseline, naamgetallen (`Monkey 47`, `0.0`, `6 st.`) en een geplakt slotbedrag |
+| Een volgende baseline werd zonder afstandsbewijs een bekende prijs | Naam+prijs op twee baselines alleen binnen 24 PDF-eenheden; een losse voettekst/verre regel wordt niet gekoppeld en als `unlinkedPriceLines` gemeld | `pdfMenuStructuring.test.js`: korte echte afstand, 60-eenheden witruimte, 550-eenheden voettekst, twee kolommen, twee varianten |
+| Prijsregels verdwenen stilzwijgend | `layout.unlinkedPriceLines`, `pdf_unlinked_price_lines` en een plain-language limitation; een PDF met zulke regels is niet `sufficient` | `menuExtractionQuality.test.js`, `restaurantSourceAnalysis.test.js` |
+| Supplementregels konden als gewone gerechten verschijnen | `Supplement`/`Supplementen` plus lowercase wrapped continuation worden geteld in `supplementLines` en niet opgeslagen; quality flagt het prefix | `pdfMenuStructuring.test.js`, `menuExtractionQuality.test.js` |
+
+Uitgevoerd op deze working tree boven `7c0fb3a` (commit volgt in het
+checkpoint):
+
+| Controle | Resultaat |
+| --- | --- |
+| `npm test` | 2030 tests: 2030 pass, 0 fail, 0 skipped |
+| Gerichte PDF/quality/analysis-tests | 82 pass, 0 fail (`pdfMenuStructuring`, `pdfMenuStructuringLiveRegressions`, `menuExtractionQuality`, `restaurantSourceAnalysis`) |
+| `npm run test:menu-structure` | 6 pass, 0 fail |
+| `npm run benchmark:menu-structure` | 23 gevallen: 22 pass, 0 fail, 1 unclassified (`STRUCT-018`, bestaande JSON-LD-keuze) |
+| `npm run build` | compiled successfully in 37.9 s |
+| `node ops/scripts/verify-pdfjs-server-trace.js` | OK; 164 server scripts, native `pdf.mjs`/`pdf.worker.mjs` |
+| Smelt/Blossem read-only probe | exit 0; Smelt 37/37, Blossem 43/43, byte-/contenthash gelijk, alle verschilcategorieën 0 |
+| Botanist read-only heranalyse | 196 items/54 secties; gecommitte vergelijking ongewijzigd 95 matched / 46 missing / 5 extra / 0 prijsverschil / 96 niet-gekoppeld; limitations: 12 supplementregels, 18 midden-in-de-regel-prijzen, 24 niet-gekoppelde prijsregels |
+
+De Botanist-referentie blijft een door de developer opgestelde, gecontroleerde
+partiële layoutcapture — geen onafhankelijk vastgestelde bronwaarheid. De
+Smelt/Blossem-uitkomsten zijn read-only bronproeven, geen item-voor-item
+productacceptatie. Een echte providercall, app-side AI-activering,
+browser-/schrijfacceptatie, een nieuwe holdout en #56-compatibiliteit zijn in
+deze ronde niet uitgevoerd en blijven afzonderlijke gaten.
+
+### Echte read-only bronproeven (2026-10-17)
 
 | Bron | Bronversie/observatie | Uitkomst | Status |
 | --- | --- | --- | --- |

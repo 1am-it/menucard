@@ -188,6 +188,33 @@ ongezien gepresenteerd. Twee niet-vastgelegde De Botanist-verkenningen vóór de
 pin en één niet-geparseerde hostcheck na de Gauchos-404 zijn expliciet in de
 evidence als scope-notitie vastgelegd.
 
+## Verificatie review 6249303096 (2026-10-18)
+
+De twee reproduceerbare P1-fouten zijn hersteld: prijsbewijs is niet meer
+paginabreed (een dunne linkerkolom behoudt haar geldige bedrag en beide
+wijnbedragen blijven geblokkeerde varianten), en een naam+prijs op twee
+baselines wordt alleen binnen 24 PDF-eenheden gekoppeld. Onzekere
+prijsregels worden als `unlinkedPriceLines` gemeld in plaats van stil
+verwijderd; expliciete supplementregels blijven supplementen.
+
+| Controle | Commando | Resultaat |
+| --- | --- | --- |
+| Volledige suite | `npm test` | 2030 tests: 2030 pass, 0 fail, 0 skipped |
+| Gerichte #59-tests | vier bestanden (`pdfMenuStructuring`, live-regressies, quality, analysis) | 82 pass, 0 fail |
+| Structuurcorpus | `npm run test:menu-structure` | 6 pass, 0 fail |
+| Benchmark | `npm run benchmark:menu-structure` | 22 pass, 0 fail, 1 unclassified (`STRUCT-018`, bestaande JSON-LD-keuze) |
+| Build | `npm run build` | compiled successfully in 37.9 s |
+| PDF.js-trace | `node ops/scripts/verify-pdfjs-server-trace.js` | OK; 164 server scripts |
+| Smelt/Blossem | read-only probe | exit 0; 37/37 en 43/43; hashes gelijk; alle verschillen 0 |
+| Botanist | read-only heranalyse | 196 items/54 secties; vergelijking ongewijzigd 95/46/5/0/96; limitations 12 supplement / 18 midden-in-regel / 24 niet-gekoppeld |
+
+De eerdere verificatietabel hierboven blijft de meting van die ronde. De
+eerste holdoutmeting blijft ongewijzigd 151 items/59 secties en is niet naar
+de parseruitkomst herschreven. De Botanist-referentie is nog steeds een
+developer-capture, geen onafhankelijke bronwaarheid. Browseracceptatie,
+app-side AI-activering, een nieuwe holdout en #56-compatibiliteit zijn in
+deze ronde niet uitgevoerd.
+
 ## Resterende concrete beslissingen
 
 1. **Onafhankelijke review** door de Delivery Lead op de code- en

@@ -9,6 +9,12 @@ Blossem zijn expliciet toegestaan en read-only gepropt; bredere externe toegang,
 een echte provider, betaald gebruik, productieactie of workflow is niet
 geactiveerd. De provider-/livebrowser-/onafhankelijke acceptatie blijft een
 expliciete blokkade. Zie `docs/guides/menu-extraction-acceptance-matrix.md`.
+Review 6249303096 is verwerkt: prijsbewijs is per PDF-tekstblok/kolom in plaats
+van paginabreed, een tweede baseline wordt alleen binnen 24 PDF-eenheden aan
+een naam gekoppeld, onzekere prijsregels worden als `unlinkedPriceLines`
+gemeld en expliciete supplementregels blijven supplementen. Regressies,
+volledige suite, build en de read-only Smelt/Blossem-proeven zijn gedraaid; de
+onafhankelijke review en de resterende acceptatiegaten staan nog open.
 
 ## Doel
 Een interne medewerker voert een restaurant-URL in en krijgt een controleerbaar menuconcept met gerechten, omschrijvingen, prijzen en de oorspronkelijke menu-indeling. De backend volgt de versiegebonden instructie `MENU-EXTRACTION.md`. Een aparte agent-app is niet nodig.
@@ -94,6 +100,8 @@ Geen publieke API/MCP, CITY-0/bulkuitbreiding, restauranteditor, automatisch pub
 - [ ] Implementatie en regressietests — veilige deterministische keten,
   adapters, worker, acceptatiematrix en geïsoleerde browserfixture zijn
   gebouwd; echte provideractivering en live bron-/browseracceptatie resteren.
+  Review 6249303096 is technisch hersteld en met regressies plus de volledige
+  suite/build bewezen; de onafhankelijke herreview resteert.
 - [ ] Praktijk-/browseracceptatie en onafhankelijke review — fixturebewijs is
   opgeslagen; live previewtoegang en de Delivery Lead-review resteren.
 - [ ] Afzonderlijk goedgekeurde release.

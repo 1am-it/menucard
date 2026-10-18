@@ -33,6 +33,7 @@ const FLAG_CODES = Object.freeze({
   pdf_arrangements_skipped: 'pdf_arrangements_skipped',
   html_arrangements_skipped: 'html_arrangements_skipped',
   pdf_ambiguous_price_lines: 'pdf_ambiguous_price_lines',
+  pdf_unlinked_price_lines: 'pdf_unlinked_price_lines',
   pdf_unrecognised_headings: 'pdf_unrecognised_headings',
 });
 
@@ -144,7 +145,7 @@ function assessDeterministicMenuQuality({ menus, unknownMenuContexts, sourceInve
         if (name.length > MAX_NAME_LENGTH || name.split(/\s+/).filter(Boolean).length > MAX_NAME_WORDS) {
           addFlag(FLAG_CODES.long_item_name, menu, 'verdacht lange gerechtsnaam (mogelijk samengevoegde regel)', target);
         }
-        if (name.startsWith('+')) addFlag(FLAG_CODES.supplement_as_item, menu, 'supplement als zelfstandig gerecht', target);
+        if (name.startsWith('+') || /^supplement(?:en)?\b/i.test(name)) addFlag(FLAG_CODES.supplement_as_item, menu, 'supplement als zelfstandig gerecht', target);
         if (item.priceStatus !== undefined && item.priceStatus !== 'known') {
           addFlag(FLAG_CODES.unresolved_price, menu, 'prijs niet als één bekend bedrag vastgelegd', target);
         }
@@ -184,6 +185,9 @@ function assessDeterministicMenuQuality({ menus, unknownMenuContexts, sourceInve
     }
     if (Number.isInteger(layout.ambiguousPriceLines) && layout.ambiguousPriceLines > 0) {
       addFlag(FLAG_CODES.pdf_ambiguous_price_lines, contextSummary, `${layout.ambiguousPriceLines} regel(s) met een prijs midden in de regel`);
+    }
+    if (Number.isInteger(layout.unlinkedPriceLines) && layout.unlinkedPriceLines > 0) {
+      addFlag(FLAG_CODES.pdf_unlinked_price_lines, contextSummary, `${layout.unlinkedPriceLines} prijsregel(s) zonder aantoonbare lokale naam-/prijskoppeling`);
     }
     if (Number.isInteger(layout.unrecognizedHeadingLines) && layout.unrecognizedHeadingLines > 0) {
       addFlag(FLAG_CODES.pdf_unrecognised_headings, contextSummary, `${layout.unrecognizedHeadingLines} mogelijke rubriekkop(pen) niet herkend`);

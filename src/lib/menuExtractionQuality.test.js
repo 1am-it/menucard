@@ -60,6 +60,11 @@ test('a supplement cannot be turned into an ordinary dish, so a model call is re
   assert.equal(assessment.requiresAiExtraction, false);
   assert.equal(assessment.sufficient, false);
   assert.ok(assessment.codes.includes(FLAG_CODES.supplement_as_item));
+
+  const labelled = { contextSlug: 'kaart', sourceId: 'source-1', categories: [{ name: 'Lunch', items: [item('Brood'), item('Supplement serranoham')] }] };
+  const labelledAssessment = assessDeterministicMenuQuality({ menus: [labelled] });
+  assert.equal(labelledAssessment.blockedByProductGap, true);
+  assert.ok(labelledAssessment.codes.includes(FLAG_CODES.supplement_as_item));
 });
 
 test('PDF layout signals are reported, and skipped supplements block a paid call', () => {
@@ -78,6 +83,17 @@ test('PDF layout signals are reported, and skipped supplements block a paid call
   assert.equal(layoutOnly.requiresAiExtraction, true);
   assert.ok(layoutOnly.codes.includes(FLAG_CODES.pdf_ambiguous_price_lines));
   assert.ok(layoutOnly.codes.includes(FLAG_CODES.pdf_unrecognised_headings));
+});
+
+test('PDF price content without a demonstrable local name/price relation is reported, never a sufficient menu', () => {
+  const assessment = assessDeterministicMenuQuality({
+    menus: [cleanMenu],
+    unknownMenuContexts: [{ sourceId: 'source-1', sourceUrl: cleanMenu.sourceUrl, layout: { unlinkedPriceLines: 2 } }],
+  });
+  assert.equal(assessment.sufficient, false);
+  assert.equal(assessment.blockedByProductGap, false);
+  assert.equal(assessment.requiresAiExtraction, true);
+  assert.ok(assessment.codes.includes(FLAG_CODES.pdf_unlinked_price_lines));
 });
 
 test('PDF arrangement lines are a product gap for that source, never silently paid for', () => {
