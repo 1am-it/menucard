@@ -355,3 +355,90 @@ Eerlijke beperkingen per bron uit dezelfde probe:
   automatisch.
 - **Onafhankelijke herreview** door de Delivery Lead staat open. Deze sectie is
   developer-bewijs, geen acceptatie.
+
+## Aanvullende verificatie — 2026-10-18 (review 6247746317)
+
+Deze ronde is een expliciet geautoriseerde lokale developer-continuatie in een
+geïsoleerde clone, binnen #59/PR #60 op `feat/menu-extraction-59`. Er is geen
+provider geactiveerd, geen productieactie, merge, publicatie of
+workflowwijziging uitgevoerd en #56 is niet overgenomen of gewijzigd. Er zijn
+geen productiegegevens of secrets gebruikt; de bronproef is read-only tegen
+dezelfde twee publieke URL's.
+
+### P1-reparatie: bronvergelijking gaf vals groen bij een extra gerecht
+
+`compareMenuSource` filterde elke resterende werkelijke rij weg zodra ergens in
+de referentie dezelfde naam+prijs bestond, zonder rubriek of multipliciteit
+mee te nemen. Een correcte rij plus hetzelfde gerecht in een extra rubriek gaf
+daardoor `actualItems=2`, `expectedItems=1`, `matched=1` en tegelijk lege
+`missing`/`extra`/prijs/koppeling/duplicaat: de probe zou groen blijven.
+
+Herstel in `src/lib/menuSourceComparison.js`:
+
+- alle na het matchen resterende werkelijke rijen zijn surplus in `extra`,
+  ongeacht of dezelfde naam+prijs elders in de referentie voorkomt;
+- matchen blijft rij-voor-rij, dus een herhaling die de referentie zelf
+  verwacht levert meerdere matches en geen verschil (multiset);
+- `duplicates` meldt alleen herhalingen boven de verwachte multipliciteit, met
+  `count` en `expectedCount`, en is daarmee consistent met `extra`;
+- `accounting` verklaart per zijde elke rij precies één keer (expected:
+  match/gemist/prijs/koppeling; actual: match/surplus/prijs/koppeling) en
+  rapporteert `balanced`.
+
+`ops/benchmark/probeVerdict.js` is nu de enige pass/fail-regel van de probe en
+faalt op een hashverschil, mislukte analyse, ontbrekende verschillenlijst,
+niet-sluitende boekhouding of één enkele rij in een verschillenlijst. De probe
+drukt de boekhouding per bron af en kan niet meer groen eindigen bij een
+onverklaarde rij.
+
+Nieuwe regressies:
+
+- `menuSourceComparison.test.js`: extra identiek gerecht in een andere rubriek;
+  extra identieke rij in dezelfde rubriek; verwachte herhaling (2/2 match) en
+  gedeeltelijke levering (1 van 2 = gemist). De bestaande duplicaatverwachting
+  is aangescherpt: die rij is óók surplus en wordt niet meer weggelaten. Elke
+  bestaande assertie is aangevuld met de boekhoudingsinvariant; geen bestaande
+  verwachting is afgezwakt.
+- `probeVerdict.test.js`: elke verschillenlijst is fataal, een ontbrekende
+  lijst is fataal, een niet-sluitende boekhouding is fataal, een
+  hash-/analysefout is fataal en het exacte reviewrepro (zelfde gerecht in
+  rubriek B) faalt de verdict.
+- `sourceReferences.test.js`: de probe moet de geteste verdictmodule gebruiken
+  en mag geen eigen lossere `hasDifference` hebben.
+
+### Checks op deze ronde
+
+Uitgevoerd op de werkboom die als codecommit
+`7426ee3f88a5ed377bf18897c800def3a8678975` is vastgelegd; deze run bevatte nog
+geen documentatiewijziging.
+
+| Controle | Commando | Resultaat |
+| --- | --- | --- |
+| Gerichte regressies | `node --test src/lib/menuSourceComparison.test.js ops/benchmark/probeVerdict.test.js ops/benchmark/sourceReferences.test.js` | 16 pass, 0 fail |
+| Volledige suite | `npm test` | 1959 tests: 1959 pass, 0 fail, 0 skipped |
+| Structuurcorpus | `npm run test:menu-structure` | 6 pass, 0 fail |
+| Benchmark | `npm run benchmark:menu-structure` | 23 gevallen: 22 pass, 0 fail, 1 unclassified (STRUCT-018, JSON-LD-hiërarchie) |
+| Build | `npm run build` | compiled successfully, 41/41 statische pagina's, `BUILD_ID` aanwezig |
+| PDF.js-trace | `node ops/scripts/verify-pdfjs-server-trace.js` | OK; 164 server scripts, native `pdf.mjs`/`pdf.worker.mjs`, geen gebundelde PDF.js-runtime |
+| Echte bronproef | `node ops/scripts/probe-menu-extraction-sources.js --source=all` | exit 0; Smelt 37/37 en Blossem 43/43, byte- en contenthash gelijk, 0 gemist/extra/prijs/koppeling/duplicaat, boekhouding 37/37 en 43/43 |
+
+De bronproef gebruikt de aangescherpte vergelijking: elke bronrij is exact
+eenmaal verklaard en de som van de verschillenlijsten is nul. Dat is
+itembewijs voor deze twee bronversies, geen productacceptatie en geen
+benchmarkafsluiting.
+
+### Resterende gaten (deze ronde)
+
+- De bredere representatieve set, de aparte ongeziene set en BE-21's
+  50-100-bronnenbenchmark zijn niet uitgevoerd; twee bronnen sluiten die niet
+  af.
+- Browseracceptatie (klikpaden, toetsenbord, 320/390 px, licht/donker) is in
+  deze clone niet uitgevoerd; de bestaande UI is niet gewijzigd.
+- Echte provideractivering, kostenplafond en retentie blijven een Product
+  Owner-beslispunt; de runtime blijft disabled.
+- Arrangementen, supplementen, allergenen en prijsvarianten zijn nog niet
+  verliesvrij op te slaan; ze worden gemeld of geblokkeerd, niet verzonnen.
+- Server-side scheduler en #56-compatibiliteit zijn niet opnieuw getest in
+  deze ronde; de eerdere read-only conflicteanalyse blijft staan.
+- Onafhankelijke herreview door de Delivery Lead staat open. Deze sectie is
+  ontwikkelaarsbewijs, geen acceptatie en geen release.

@@ -260,11 +260,28 @@ vóór enige modelaanroep:
   met de daadwerkelijke menucontexten en rapporteert afzonderlijk: gemist,
   extra, prijsafwijking, verkeerd gekoppelde rubriek en duplicaat. Er is geen
   samengestelde kwaliteitsscore en een gelijk aantal is geen bewijs.
+  - Strikte boekhouding: elke referentierij wordt precies één keer verklaard
+    (match, prijsfout, verkeerde rubriek of gemist) en elke werkelijke rij
+    precies één keer (match, prijsfout, verkeerde rubriek of surplus). Een rij
+    die na het matchen overblijft is altijd surplus; hij verdwijnt niet omdat
+    dezelfde naam+prijs ergens anders in de referentie voorkomt (review
+    6247746317). Hetzelfde gerecht in een extra rubriek of een tweede
+    identieke rij in dezelfde rubriek is dus zichtbaar verschil.
+  - Matchen consumeert rijen één voor één, zodat een herhaling die de
+    referentie zelf verwacht als meerdere matches telt. `duplicates` meldt
+    alleen herhalingen boven de verwachte multipliciteit, met `count` en
+    `expectedCount`.
+  - `accounting` geeft per zijde totaal, verklaringen en `balanced`. De probe
+    weigert groen wanneer een zijde niet sluit.
 - `ops/scripts/probe-menu-extraction-sources.js` haalt uitsluitend de twee
   benoemde publieke bronnen read-only op via `safeOutboundFetch` en de echte
   analyseketen, vergelijkt met `ops/benchmark/source-references.json` en
   controleert byte-/contenthash. Geen database, geen bevestiging, geen
   publicatie, geen provider.
+- `ops/benchmark/probeVerdict.js` bevat de pass/fail-regel en is apart getest:
+  een hashverschil, een mislukte analyse, een ontbrekende verschillenlijst,
+  een niet-sluitende boekhouding of één enkele rij in `missing`/`extra`/
+  prijs/koppeling/duplicaat laat de probe met exitcode 1 eindigen.
 - De referentie is een gecontroleerde capture met bronhashes, geen
   waarheidsclaim voor een latere bronversie. Een hash- of itemverschil laat de
   probe met exitcode 1 eindigen.
