@@ -7,7 +7,17 @@ provideractivering en volledige productacceptatie zijn dat niet.
 
 [Extractie-instructie](../../MENU-EXTRACTION.md) |
 [Implementatieafspraken](menu-extraction-implementation.md) |
-[Representatieve set en drempels](menu-extraction-representative-set.md)
+[Representatieve set en drempels](menu-extraction-representative-set.md) |
+[Acceptatiematrix #59](menu-extraction-acceptance-matrix.md)
+
+> **Statuscorrectie 2026-10-18 (review #6248014804).** De documenten zijn in
+> `3e49f89` gepusht. De read-only proeven op de twee expliciet toegestane
+> openbare bronnen (Smelt, Blossem) zijn uitgevoerd. De geïsoleerde
+> browserfixture is uitgevoerd; live/staging browseracceptatie niet.
+> Representatieve set en holdout zijn gepind in
+> `ops/benchmark/menu-extraction-acceptance-set.json`. De actuele matrix staat
+> in [menu-extraction-acceptance-matrix.md](menu-extraction-acceptance-matrix.md);
+> oudere secties hieronder blijven als historie staan.
 
 ## 13. Acceptatie: bewijs voordat werking wordt geclaimd
 

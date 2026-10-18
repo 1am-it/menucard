@@ -6,7 +6,9 @@ Implementatie is veilig begonnen op `feat/menu-extraction-59`; een echte
 provideractivering en PR #56 blijven buiten scope.
 
 [Extractie-instructie](../../MENU-EXTRACTION.md) |
-[Testplan](menu-extraction-acceptance.md)
+[Testplan](menu-extraction-acceptance.md) |
+[Acceptatiematrix](menu-extraction-acceptance-matrix.md) |
+[V2-schemaontwerp (niet geïmplementeerd)](../../planning/architecture/menu-extraction-product-schema-v2.md)
 
 ## Architectuur en contractmapping
 

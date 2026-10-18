@@ -1,7 +1,11 @@
 # Menu-extractie — representatieve set en acceptatiedrempels
 
 Status: meetplan voor #59, vastgelegd 2026-10-17 vóór de definitieve
-acceptatievergelijking. Dit is geen claim dat de set al volledig is uitgevoerd.
+acceptatievergelijking. Herzien 2026-10-18: de representatieve set en holdout
+zijn machineleesbaar gepind in
+[`ops/benchmark/menu-extraction-acceptance-set.json`](../../ops/benchmark/menu-extraction-acceptance-set.json);
+de representatieve set is uitgevoerd, de holdout niet. Zie de
+[acceptatiematrix](menu-extraction-acceptance-matrix.md).
 Protocol: `MENU-EXTRACTION.md` v0.2, SHA-256
 `15510b4c0b74fee722ac2c51a3f40aa21b03e0161ccffdcb2008f3d27350b762`.
 
@@ -18,10 +22,13 @@ Protocol: `MENU-EXTRACTION.md` v0.2, SHA-256
 
 ## Ongeziene set
 
-De ongeziene set wordt pas na de implementatieronde gekozen uit nog niet
-gebruikte, toegestane bronnen. Er worden hier geen URL's verzonnen. Zonder
-toegang of een vooraf gecontroleerde referentie blijft dit expliciet
-`niet uitgevoerd`; Smelt en Blossem alleen zijn geen volledige dekking.
+De holdout is op 2026-10-18 afzonderlijk gepind in het manifest. Vier
+BE-21-kandidaten staan als `candidate_unfetched`/`blocked` en zijn niet
+opgehaald; negen klassen hebben geen toegestane ongeziene bron en staan op
+`not_available`. Er worden geen URL's verzonnen. Smelt en Blossem zijn voor
+tuning gebruikt en mogen daarom nooit als ongeziene holdout worden
+gepresenteerd. Zonder toegang of een vooraf gecontroleerde referentie blijft dit
+expliciet `niet uitgevoerd`.
 
 ## Meetbare drempels (voorstel, vóór acceptatie)
 
@@ -65,8 +72,10 @@ geschreven.
   geautomatiseerde vergelijking met de gecontroleerde capture is uitgevoerd);
 - een onafhankelijke menselijke Blossem-item-voor-itemcontrole (de
   geautomatiseerde vergelijking is uitgevoerd);
-- de 50–100-bronnen BE-21-set en de ongeziene set;
-- browser-/schrijfacceptatie in een geïsoleerde omgeving;
+- de 50–100-bronnen BE-21-set en de ongeziene holdout (de holdout is gepind maar
+  niet uitgevoerd);
+- live/staging browser- of schrijfacceptatie in een geïsoleerde omgeving (de
+  lokale fixture is uitgevoerd; live niet);
 - echte provideractivering, kostenmeting en DPA/EU-retentietest.
 
 Een groene test of een bereikbare URL is geen bewijs van volledige extractie.

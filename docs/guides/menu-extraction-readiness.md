@@ -154,11 +154,13 @@ ontbrekende of onversioned instructie geeft een concrete fout.
 
 - Geen goedgekeurde backendprovider, providerconfiguratie, DPA/EU-retentie of
   kostenbudget: echte AI-calls worden niet gebouwd of geactiveerd.
-- Geen expliciet goedgekeurde externe bronproef: de echte Smelt-PDF en Blossem-
-  pagina worden niet opgehaald. Wel worden representatieve synthetische
-  Smelt/Blossem-fixtures getest; dat is geen actuele bronacceptatie.
-- Geen geïsoleerde testomgeving of inloggegevens: geen echte browser- of
-  schrijfacceptatie. Alleen statische/unit-/buildcontroles zijn aantoonbaar.
+- De twee openbare bronnen Smelt en Blossem zijn expliciet toegestaan en
+  read-only geprobeerd; de bredere representatieve/ongeziene set en nieuwe
+  externe toegang wachten op een apart besluit. De probes zijn geen
+  productacceptatie.
+- Er is een geïsoleerde lokale browserfixture zonder productiecredentials of
+  -data; live staging-/productiebrowseracceptatie en echte schrijfacceptatie
+  ontbreken nog.
 - De service-worker-CLI bestaat, maar er is geen goedgekeurde scheduler of
   deployment die hem aanroept. Zonder die operationele beslissing blijft de
   browserpagina de zichtbare trigger; dat is een open acceptatiegat, geen
@@ -166,7 +168,12 @@ ontbrekende of onversioned instructie geeft een concrete fout.
 
 ## Versiepinning
 
-- Protocol: `MENU-EXTRACTION.md`, concept v0.2.
+- Protocol: `MENU-EXTRACTION.md`, concept v0.2, SHA-256
+  `15510b4c0b74fee722ac2c51a3f40aa21b03e0161ccffdcb2008f3d27350b762`.
 - Resultaatschema: `menu-extraction-result/v1`.
 - Ticket: https://github.com/1am-it/menucard/issues/59
 - Branch: `feat/menu-extraction-59`
+- Acceptatiematrix en bewijs: `docs/guides/menu-extraction-acceptance-matrix.md`.
+- Representatieve set en holdout: `ops/benchmark/menu-extraction-acceptance-set.json`.
+- Verliesvrij v2-ontwerp (niet geïmplementeerd):
+  `planning/architecture/menu-extraction-product-schema-v2.md`.

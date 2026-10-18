@@ -4,9 +4,11 @@ GitHub: https://github.com/1am-it/menucard/issues/59
 
 ## Status
 Technische readinessreview uitgevoerd; veilige deterministische/adapters/worker
-gebouwd op branch `feat/menu-extraction-59`. Een echte provider, betaald gebruik,
-externe bronproef, productieactie of workflow is niet geactiveerd. De
-provider-/bron-/browseracceptatie blijft een expliciete blokkade.
+gebouwd op branch `feat/menu-extraction-59`. De twee openbare bronnen Smelt en
+Blossem zijn expliciet toegestaan en read-only gepropt; bredere externe toegang,
+een echte provider, betaald gebruik, productieactie of workflow is niet
+geactiveerd. De provider-/livebrowser-/onafhankelijke acceptatie blijft een
+expliciete blokkade. Zie `docs/guides/menu-extraction-acceptance-matrix.md`.
 
 ## Doel
 Een interne medewerker voert een restaurant-URL in en krijgt een controleerbaar menuconcept met gerechten, omschrijvingen, prijzen en de oorspronkelijke menu-indeling. De backend volgt de versiegebonden instructie `MENU-EXTRACTION.md`. Een aparte agent-app is niet nodig.
@@ -26,7 +28,9 @@ Een gevonden PDF of bevestigde bron is niet hetzelfde als een uitgelezen menukaa
 - `docs/guides/menu-extraction-acceptance.md`: acceptatie en testbewijs.
 - `planning/specs/tickets/menu-extraction-ai-import.md`: lokale ticketspecificatie.
 
-Deze nieuwe documenten zijn bij ticketvoorbereiding alleen lokaal aanwezig en nog niet gecommit/gepusht. Neem ze als eerste mee in de afzonderlijke documentatie-/bouwbranch en pin daarna hun commit. De runtime mag nooit afhankelijk zijn van een lokaal Windows-pad of alleen deze chat.
+Deze documenten zijn in commit `3e49f89` opgenomen en gepusht. Hun runtime
+resolveert vanuit de repositoryroot, nooit vanuit een lokaal Windows-pad of
+alleen deze chat.
 
 ## Scope
 1. **Contractmapping:** breng bestaande extractie-, receipt-, concept- en exportcontracten in kaart. Leg vast waar menuvarianten, geneste rubrieken, prijsvarianten, keuzes, supplementen, allergenen, bronbewijs en dekkingsinformatie verliesvrij passen. Het benchmarkcontract is niet automatisch het productcontract. Voor noodzakelijke schema-uitbreidingen eerst een beoordeeld versiegebonden ontwerp; niet stilzwijgend afplatten.
@@ -84,11 +88,14 @@ Geen publieke API/MCP, CITY-0/bulkuitbreiding, restauranteditor, automatisch pub
 - [x] Ticketinhoud en grenzen voorbereid.
 - [x] Documenten opgeslagen in Git en commit vastgepind (`3e49f89`).
 - [x] Technische readinessreview vastgelegd; resterende beslispunten zijn
-  provider/model, kostenbudget, DPA/EU-retentie en externe bronproef.
+  provider/model, kostenbudget, DPA/EU-retentie en aanvullende externe toegang.
+  De read-only proeven op de twee expliciet toegestane openbare bronnen zijn
+  uitgevoerd.
 - [ ] Implementatie en regressietests — veilige deterministische keten,
-  adapters, worker en tests zijn gebouwd; echte provideractivering en
-  bronacceptatie resteren.
-- [ ] Praktijk-/browseracceptatie en onafhankelijke review.
+  adapters, worker, acceptatiematrix en geïsoleerde browserfixture zijn
+  gebouwd; echte provideractivering en live bron-/browseracceptatie resteren.
+- [ ] Praktijk-/browseracceptatie en onafhankelijke review — fixturebewijs is
+  opgeslagen; live previewtoegang en de Delivery Lead-review resteren.
 - [ ] Afzonderlijk goedgekeurde release.
 
 Bewijs en beperkingen: `docs/guides/menu-extraction-acceptance.md`. De

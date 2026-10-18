@@ -1,0 +1,91 @@
+# Menu-extractie — acceptatiematrix #59
+
+Status: **ontwikkelaarsbewijs, geen onafhankelijke acceptatie en geen release.**
+Datum: 2026-10-18. Issue #59, branch `feat/menu-extraction-59`, PR #60.
+Protocol: `MENU-EXTRACTION.md` v0.2, SHA-256
+`15510b4c0b74fee722ac2c51a3f40aa21b03e0161ccffdcb2008f3d27350b762`.
+
+Deze matrix koppelt ieder bestaand acceptatiecriterium aan een test, een exacte
+fixture-/bron-ID, de verwachte uitkomst, het werkelijk uitgevoerde resultaat en
+de status. Criteria zijn niet weggezet of verzwakt. Waar iets niet is uitgevoerd,
+staat dat als `geblokkeerd` of `niet ondersteund`, niet als groen.
+
+## Acceptatiecriteria
+
+| # | Criterium | Bewijs / test | Fixture of bron | Verwacht | Resultaat | Status |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | Exact protocol en schema versiegebonden; ontbrekende configuratie stopt concreet | `src/lib/menuExtractionProtocol.test.js`; `src/lib/menuExtractionAdapter.test.js`; `ops/benchmark/acceptanceSet.test.js` | `MENU-EXTRACTION.md` v0.2 hash `15510b4c…b762`; ontbrekende/onversioned temp-root; offline fake provider | versie 0.2 en vaste LF-hash; `protocol_unavailable`/`protocol_unversioned`; geen provider = `provider_not_approved`; `maxCostEurCents:null` weigert | 5 protocoltests en adaptertests slagen; CRLF en LF geven dezelfde hash; suite 1975 pass | **uitgevoerd** |
+| 2 | URL → lezen → extractie → menselijke correctie → conceptopslag met traceerbare broncontext | `src/lib/restaurantSourceAnalysis.test.js` (SMELT-LIKE CHAIN, receipt→concept); `src/lib/menuConcept.test.js`; `src/lib/batchAnalysisHandlers.test.js`; browserfixture | synthetische Smelt-achtige PDF/HTML; `REP-BROWSER-001` (fictieve reviewfixture) | dezelfde gevalideerde uitkomst in samenvatting, detail en concept; correctie/blokkades; bron-ID, locator en quote blijven; geen automatische opslag | offline keten en 72/72 browserchecks slagen; **geen echte conceptopslag of bronbevestiging uitgevoerd** | **uitgevoerd (offline/fixture); echte opslag niet** |
+| 3 | Smelt Breda: echte PDF-inhoud getest; gevonden PDF + 0 items is geen succes; gerechten, prijzen, dekking vergeleken | `node ops/scripts/probe-menu-extraction-sources.js --source=smelt`; `src/lib/pdfMenuStructuring.test.js`; qualitygate | `REP-PDF-001` / `REP-BRANCH-002`: PDF 550738 bytes, bytes `4445a101…27f8`, content `24f23cbd…8a845`, 2 pagina's | 37 referentierijen exact; 8 secties; 0 gemist/extra/prijs/koppeling/duplicaat; supplementen/arrangement expliciet gemeld; nul items nooit succes | probe exit 0: 37/37, 8 secties, alle verschillen 0, boekhouding 37/37; 7 supplementregels, 1 arrangementregel en 1 prijsachtige beschrijvingsregel gemeld | **uitgevoerd met beperking** |
+| 4 | Blossem: lunch/diner, rubrieken en items volgen echte bronrelaties; onzekerheid uitvoerbaar; geen vast aantal | `node ops/scripts/probe-menu-extraction-sources.js --source=blossem`; `src/lib/htmlMenuVariants.test.js`; `src/lib/menuExtractionQuality.test.js`; browserfixture | `REP-ACCORDION-002` / `REP-ARRANGEMENT-002`: HTML 40615 bytes, bytes `da5c632f…0c38`; fictieve reviewfixture voor de UI | DINNER/LUNCH en subrubrieken gescheiden; 43/43; onzekerheid per groep; arrangementen expliciet uitgesloten; geen hardcoded aantallen | probe exit 0: 43/43 in 13 secties, alle verschillen 0; 2 arrangement-/alternatieve prijssecties gemeld; groepshandeling en geen accepteer-alles in de fixture | **uitgevoerd met beperking** |
+| 5 | Bestaande kaarten Wolfslaar, Bardot, Zuyd, T-Huis getoetst; historische aantallen zijn geen waarheid | `node --test src/lib/historicalMenus.test.js` | `REP-HISTORICAL-001`: `data/menus.json`, 11 menu's, laatste `scraped` 2026-03-28, canonieke LF-hash `46c84c0f…9766` | ieder benoemd gerecht één live regel; pad, volgorde en prijs behouden; onbekende prijs null, nooit 0; snapshot is vormregressie, geen actuele waarheid | 3/3 tests slagen voor alle vier restaurants; 25/111/42/189 historische regels (367 totaal) volledig verklaard; live sites niet opnieuw opgehaald | **uitgevoerd met beperking** |
+| 7 | Dataset, referentie-uitkomsten en meetbare drempels vóór acceptatie vastgelegd; BE-21's 50–100 niet met enkele URL's afgesloten | `ops/benchmark/acceptanceSet.test.js`; `ops/benchmark/sourceReferences.test.js`; `ops/benchmark/structureCorpus.test.js` | manifest `releaseThresholds`: 0 verzonnen gerechten/prijzen, 100% bewijs, 0 onverklaarde dekking, 0 structuur-/prijsfouten; BE-21 expliciet buiten scope | drempels vast en niet verlaagd; BE-21 niet geclaimd | drempels exact gepind; 2 bronnen en 23 structuurgevallen sluiten BE-21 niet af; dat staat expliciet in `notIncluded` | **uitgevoerd** |
+| 8 | Gemiste/verzonnen items, prijsfouten, structuurverlies, bewijsdekking, correctiewerk, tijd en kosten per brontype gerapporteerd | probe; `src/lib/menuSourceComparison.test.js`; `src/lib/historicalMenus.test.js`; browserfixture; manifest | Smelt/Blossem referenties; 23 STRUCT-gevallen; 4 historische kaarten; 5 browserfixtures | per bron/klasse verschil lijsten; 100% bewijs; tijd en kosten alleen als gemeten | Smelt 0/0/0/0/0 en Blossem 0/0/0/0/0; 100% van de referentierijen heeft bewijs; **correctietijd onbekend**; **kosten onbekend, niet 0** | **uitgevoerd; tijd/kosten onbekend** |
+| 9 | Browseracceptatie met klikpaden, rolgrenzen, leeg/fout/partieel, toetsenbord, licht/donker, 320/390 px | `npm run test:browser:menu-review`; `ops/browser/evidence/menu-review-browser-evidence.json` | `REP-BROWSER-001`: fictieve `review`, `readonly`, `empty`, `partial`, `error`; Edge 155; 1024/390/320; licht/donker | exacte links, rubricering, duplicate-/prijsblokkades, leeg/partieel/fout, toetsenbord, thema's, geen horizontale overflow; read-only collega ziet geen save/bevestig | na de read-only uitbreiding opnieuw uit te voeren; eerdere run 72/72 zonder dat scenario; **geen live/staging browserbewijs** | **uitgevoerd als fixture; live niet** |
+| 10 | Time-out, provideruitval, ongeldige uitvoer, kosten-/paginagrens, herimport, gelijktijdige taken, promptinjectie, verkeerde vestiging, onveilige redirects getest | `src/lib/menuExtractionAdapter.test.js`; `src/lib/safeOutboundFetch.test.js`; `src/lib/restaurantSourceAnalysis.test.js`; `src/lib/batchAnalysisHandlers.test.js`; `src/lib/menuConcept.test.js` | offline fake provider en `.invalid` HTTP-fixtures; veilige fetch/redirect/SSRF-tests | elk pad eindigt met een concrete fout of weigering; geen dubbele call/claim; brontekst blijft data; verkeerde vestiging en redirect worden geweigerd | alle gerichte suites slagen; geen echte provideruitval gemeten | **uitgevoerd (offline)** |
+| 11 | Geen stil dataverlies tussen extractie, receipt, review, concept en export; niet-ondersteunde publicatievelden geblokkeerd/gemeld | `src/lib/menuExtractionRuntime.test.js`; `src/lib/menuExtractionMapping.test.js`; `src/lib/menuConcept.test.js`; `src/lib/menuConceptExport.test.js`; `STRUCT-017`; `planning/architecture/menu-extraction-product-schema-v2.md` | synthetische receipt/concept/export; historische kaarten; v2-ontwerp | dezelfde broncontext en hetzelfde resultaat in iedere laag; onbekend blijft onbekend; export blokkeert wat het bestand niet kan dragen | mapping/exporttests en STRUCT-017 slagen; varianten/supplementen/arrangementen/allergenen zijn expliciet gemeld of geblokkeerd; v2 is **alleen ontwerp** | **uitgevoerd met beperking; v2 niet geïmplementeerd** |
+| 12 | Geen regressie in rollen, bronbevestiging, audit, publicatiegates, beveiliging of geheimenbeheer | volledige suite; `statusRoles`, `menuConceptReviewHandlers`, `importInbox`, `internalAuth`-gerelateerde tests; browser read-only | bestaande tests en fictieve rollen `internal`+`editor`; geen productiecredentials | rollen en gates ongewijzigd; geen geheimen in browser of log; read-only kan niet opslaan/bevestigen | suite 1975 pass / 0 fail / 0 skipped; browser read-only toont geen save/bevestig; geen productieauth omzeild | **uitgevoerd** |
+| 13 | Onafhankelijke review met exacte commit, checks, bron-/protocolversies, resultaten, beperkingen en volgende stap; groene unit-tests zijn geen productacceptatie | Delivery Lead-review op PR #60 | deze matrix + checkpoint | onafhankelijke reviewer beoordeelt commit, checks en beperkingen | **nog niet uitgevoerd**; deze matrix is ontwikkelaarsbewijs en claimt geen onafhankelijke acceptatie | **geblokkeerd: wacht op Delivery Lead** |
+
+
+## Resultaten per dekkingsklasse
+
+| Klasse | Representant(en) | Uitkomst | Eerlijke beperking |
+| --- | --- | --- | --- |
+| HTML | `REP-HTML-001` (STRUCT-001/002/004/005/021/022) | 6/6 corpusgate, 22 classified pass | alleen de gepinde vormen, geen universele claim |
+| Uitklappers/tabs | `REP-ACCORDION-001` (synthetisch), `REP-ACCORDION-002` (Blossem) | 3/3 + 43/43 items | paneel zonder DOM-relatie blijft onzeker; arrangementen niet opslaanbaar |
+| Tabellen | `REP-TABLE-001` (STRUCT-019/020) | pass | alleen tabel-/dt-dd-vormen |
+| Tekst-PDF | `REP-PDF-001` (Smelt), `REP-PDF-002` (synthetisch) | 37/37 + 63 PDF-tests | supplementen/arrangementen gemeld, niet opgeslagen |
+| Scan/niet-leesbaar | `REP-SCAN-001` | `pdf_no_text_layer`/`pdf_encrypted`, geen OCR | **klasse niet ondersteund**; eerlijke fout, geen vendor |
+| Taal/vestiging | `REP-LANG-001`, `REP-BRANCH-001`, `REP-BRANCH-002` | Speisekarte gevonden; vestigingsadres behouden; Breda-PDF gelezen | één taalkeyword en één ketenprobe; geen alle-vestigingenclaim |
+| Arrangement | `REP-ARRANGEMENT-001/002` | uitgesloten en gemeld | **niet verliesvrij op te slaan**; v2-ontwerp nodig |
+| Prijsvariant | `REP-PRICE-001/002` | meerdere/vanaf expliciet; 0 prijsfouten op referenties | **niet verliesvrij op te slaan**; blokkade voor correctie |
+| Historische kaarten | `REP-HISTORICAL-001` | 367 regels volledig gemapt | geen actuele bronvergelijking |
+| Veiligheid/fouten | `REP-SAFETY-001` | offline suites pass | geen echte provideruitval |
+| Contractmapping | `REP-CONTRACT-001` | mapping/export/STRUCT-017 pass | één prijs per regel; v2 alleen ontwerp |
+| Reviewsurface | `REP-REVIEW-001` | groeps-/duplicaat-/prijsscheiding pass | componenttests plus fixture, geen live sessie |
+| Browserfixture | `REP-BROWSER-001` | 72/72 checks vóór read-only; read-only volgt | **alleen fixture**, geen live integratie |
+
+## Wat expliciet niet is uitgevoerd of niet wordt geclaimd
+
+- **Onafhankelijke item-voor-item menselijke controle** van Smelt/Blossem: niet
+  uitgevoerd; de vergelijking is geautomatiseerd tegen een gecontroleerde
+  capture.
+- **Live provideractivering, kostenmeting en DPA/EU-retentie**: geblokkeerd door
+  een Product Owner-besluit; geen provider aangeroepen.
+- **BE-21's 50–100-bronnen/OCR-/vendorbenchmark**: buiten #59; niet afgesloten.
+- **Live/staging browseracceptatie**: geen previewtoegang; alleen de lokale
+  fixture op Edge 155.
+- **Echte bronbevestiging, conceptopslag, export, merge of publicatie**: niet
+  uitgevoerd en niet geautoriseerd.
+- **Holdout met echte ongeziene bronnen**: 4 BE-21-kandidaten staan op
+  `blocked`/niet-opgehaald; 9 klassen hebben geen toegestane ongeziene bron.
+- **Scans/OCR**: expliciet niet ondersteund; de uitkomst is een eerlijke fout.
+- **Arrangementen, supplementen, glas/fles, allergenen**: nog niet verliesvrij
+  op te slaan; het v2-ontwerp ligt ter beoordeling, er is niets gemigreerd.
+- **Correctietijd en kosten**: onbekend, niet als nul gerapporteerd.
+- **#56-combinatie**: niet gemerged; de twee conflicten
+  (`app/internal/source-triage/batch/page.js`,
+  `src/lib/menuSnapshotProposals.test.js`) blijven een combinatiegat.
+
+## Reparaties in deze ronde
+
+1. **Protocolhash is checkout-onafhankelijk.** De loader hasht nu canonieke LF-
+   tekst; voorheen gaf een Windows-CRLF-checkout `d4b349…` in plaats van de
+   gepinde `15510b4…`. Regressie: CRLF- en LF-temp-root geven dezelfde hash.
+2. **Historische kaarten hebben een vormregressie.** Nieuwe test bewijst dat
+   Wolfslaar, Bardot, Zuyd en T-Huis zonder verlies door `liveMenuLines` en het
+   concept gaan; de snapshot is op hash en datum gepind.
+3. **Isolated browserfixture voor de bestaande import/review-UI.** Echte
+   componenten, fictieve sessie/API, 72 checks, 10 screenshots, 320/390 px,
+   licht/donker en toetsenbord; de read-only collega-scenario wordt in dezelfde
+   ronde toegevoegd.
+4. **Acceptatieset en holdout zijn machineleesbaar gepind.** Guardtest weigert
+   een ontbrekende klasse, een extra echte bron, een ongeziene claim voor
+   getunede bronnen, een verlaagde drempel of een niet-uitgevoerde
+   browserclaim.
+5. **Verliesvrij v2-ontwerp toegevoegd.** Alleen ontwerp met migratie-impact en
+   compatibiliteitsmatrix; een test bewaakt dat er geen migratie of
+   schema-implementatie is bijgekomen.
+
+| 6 | Vooraf vastgelegde representatieve set en aparte holdout dekken HTML, tabs, tabellen, tekst-PDF, scans, taal/vestiging, arrangement en prijsvariant | `ops/benchmark/acceptanceSet.test.js`; `ops/benchmark/menu-extraction-acceptance-set.json` | 19 representatieve entries; 4 holdout-kandidaten; 13 dekkingsklassen | iedere klasse heeft een uitgevoerde representant en een expliciete holdout-slot; holdout is disjunct, ongebruikt en niet uitgevoerd | 9/9 guardtests slagen; holdout: 4 geblokkeerde BE-21-kandidaten en 9 klassen `not_available` wegens geen toegestane ongeziene bron | **representatief uitgevoerd; holdout geblokkeerd** |
