@@ -154,7 +154,10 @@ De holdoutmeting is read-only tegen precies de vier door de Product Owner
 goedgekeurde URL's uitgevoerd, met vooraf vastgelegde capture-hashes. De
 Gauchos-entry gaf HTTP 404; er is geen andere URL of vestiging ingevuld. De
 nul-uitkomsten van Mr Moos en Colonia zijn als beperking vastgelegd, niet als
-succes. Geen parserregel is op basis van deze uitkomsten gewijzigd.
+succes. Geen parserregel is op basis van deze uitkomsten gewijzigd. Twee
+niet-vastgelegde De Botanist-verkenningen vóór de pin en één niet-geparseerde
+hostcheck na de Gauchos-404 zijn expliciet in de evidence als scope-notitie
+vastgelegd; ze zijn niet voor tuning gebruikt.
 
 ## Resterende concrete beslissingen
 

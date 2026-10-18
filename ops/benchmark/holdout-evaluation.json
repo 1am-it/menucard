@@ -15,6 +15,8 @@
     "note": "This permission is a source-probe permission. It does not activate an app-side AI provider, budget or retention arrangement."
   },
   "noTuning": true,
+  "prePinReconnaissance": "Before the capture pin was written, two unrecorded read-only connectivity/analysis calls on De Botanist were made while checking the runner. They were not used for tuning, are not treated as the recorded evaluation, and no parser or rule was changed. The pinned first recorded evaluation is the one in this file.",
+  "scopeNote": "The approved Gauchos Breda entry returned HTTP 404. One additional unparsed read-only request to the chain homepage was used only to confirm that the host itself was reachable; it was not stored, parsed or treated as a source, and no other branch, location or menu page was followed.",
   "note": "First recorded evaluation against the pinned holdout source versions. No parser or rule was changed from these outcomes; a later tuning use must move the source to representative and pin a new holdout.",
   "results": {
     "HOLD-REAL-01": {
