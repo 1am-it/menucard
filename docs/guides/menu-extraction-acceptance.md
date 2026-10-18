@@ -118,6 +118,23 @@ Er is geen merge uitgevoerd en #56 is niet in deze branch overgenomen. De
 conflicten moeten bij het samenbrengen van de twee contracten handmatig worden
 beoordeeld; een groene test op deze losse branch bewijst die combinatie niet.
 
+**Plan voor het samenbrengen (nog niet uitgevoerd, geen merge-besluit):**
+
+1. `app/internal/source-triage/batch/page.js`: #56 wijzigt de navigatie/review-
+   surface; deze branch voegt kwaliteitsmarkering en bronbewijs toe aan dezelfde
+   pagina. Behoud beide: eerst #56's goedgekeurde v3-navigatie en klikpaden
+   overnemen, daarna de `attentionGroups`/`uncertain`-weergave en
+   `replacesDeterministic`-markering opnieuw aansluiten. Geen knop of
+   accepteer-allesactie toevoegen; de bestaande expliciete reviewstappen blijven.
+2. `src/lib/menuSnapshotProposals.test.js`: beide branches voegen tests toe aan
+   hetzelfde bestand. Beide testblokken behouden, gedeelde fixtures
+   dedupliceren zonder assertions te verwijderen, en daarna
+   `menuSnapshotProposals`, `menuConcept` en de batch-surface-tests opnieuw
+   draaien.
+3. Na het samenbrengen: volledige suite, structuurcorpus en de browseracceptatie
+   van #56 opnieuw uitvoeren. Tot die tijd geldt: de combinatie is ongetest en
+   mag niet als groen worden gerapporteerd.
+
 ## Uitgevoerde checks na herstel
 
 | Controle | Resultaat |
@@ -130,3 +147,64 @@ beoordeeld; een groene test op deze losse branch bewijst die combinatie niet.
 
 Deze tellingen zijn van de herstelronde; de definitieve commit/CI-status wordt
 in PR #60 en issue #59 vastgelegd.
+
+
+## Herstelronde na review #6244808974 — 2026-10-18
+
+Branch `feat/menu-extraction-59`. Deze ronde herstelt de vijf open reviewpunten
+en herhaalt de bronproeven. Er is **geen provider geactiveerd**, geen betaalde
+call gedaan, geen browseracceptatie uitgevoerd en geen onafhankelijke review
+geclaimd. De LLM-tests gebruiken uitsluitend offline fakes.
+
+### Herstelde punten
+
+| Reviewpunt | Herstel | Bewijs |
+| --- | --- | --- |
+| P1 kolomstatus per rij-index | Kolommen worden één keer per pagina verankerd op X-posities; een lege kolom verschuift niets meer. Een tweede, identiek overlappende PDF-tekstlaag (echte Smelt-bron: hele linkerkolom 40 eenheden hoger) wordt als overlay genegeerd. | `pdfMenuStructuring.test.js`: reviewrepro LINKS/RECHTS, overlay-regressie, legitieme herhaalde lijst blijft behouden |
+| P1 betaalde foutpaden als nul | Elk pad dat de provider daadwerkelijk aanriep boekt de bekende kosten; onbekende kosten houden de reservering volledig bezet (`settle(null)`) zodat budget niet hergebruikt wordt. Asynchrone reserve/settle-contracten worden expliciet geweigerd. | `menuExtractionAdapter.test.js`: schema/timeout/exception boeken 40; onbekend → reservering op 0 resterend; tweede call `budget_exceeded`; async guard geweigerd vóór de call |
+| P1 AI kan defecte PDF-uitkomst niet herstellen | Voorafgaande kwaliteits-/dekkingstoets. Een voldoende deterministisch resultaat geeft géén modelcall; een bron met supplementen (die het concept niet kan opslaan) geeft géén betaalde call; anders mag een gevalideerd modelresultaat alleen de gemarkeerde bron vervangen, met dekkingseis (≥80%), bewijsplicht en `Controle nodig`. | `menuExtractionQuality.test.js`, `restaurantSourceAnalysis.test.js`: skip bij voldoende, weigeren bij supplementen, bron-scoped vervanging, te kleine dekking wordt geweigerd |
+| P1 PDF-inhoud ontbreekt voor AI | `readPdfMenuSource` levert begrensde, pagina-/kolombewuste tekst (inclusief paginamarkering) via dezelfde keten voor zowel een gevonden PDF als een directe PDF-url. De tekst staat alleen in het geheugen, nooit op context/receipt. | `sourceAnalysisPipeline.test.js` (directe PDF), `restaurantSourceAnalysis.test.js` (gevonden PDF), beide met lekcontrole op `Pagina 1` |
+| P2 mapping verliest varianten/bewijs | `menu.variant`/`menu.order` blijven behouden tot in de receipt-samenvatting; `structure` wordt `uncertain` zodra een rubriek onzeker is; `evidence.sourceId`/`quote` overleven mapping → receipt → concept. | `menuExtractionMapping.test.js`, `urlIntakes.test.js`, `menuExtractionRuntime.test.js` |
+
+Aanvullend: de kwaliteitscontrole markeert hetzelfde gerecht in twee rubrieken
+als mogelijke samengevoegde menuvarianten (`duplicate_item_across_categories`),
+zodat Blossem-achtige panelen een uitvoerbare review krijgen in plaats van een
+stilzwijgend platgeslagen menu.
+
+### Echte read-only bronvergelijking
+
+| Bron | Bronversie | Uitkomst na herstel | Status |
+| --- | --- | --- | --- |
+| Smelt Breda | `restaurantsmelt.nl/wp-content/uploads/2026/05/smelt_menu_breda_nederlands.pdf`; 550.738 bytes, 2 pagina's, 894 woorden; teksthash `24f23cbd…8a845` (ongewijzigd t.o.v. eerdere ronde), bytehash `4445a101…27f8` | **37 gerechten in 7 rubrieken** (was 50 in 6 met samengevoegde namen): KAASFONDUE 7 (Hollands 27; Zwitsers 29,50; Truffel 28; Italiaans 29,50; Frans 29,50; Bossche Bierfondue 27; Spaans 27), Vooraf 5, Hoofd 3, Desserts 4, BORREL 10, LUNCH 5, Overig 3. 88 regels van de dubbele tekstlaag genegeerd; 7 supplementregels niet als gerecht opgenomen; 1 regel met een prijs midden in de tekst als beschrijving behandeld; 3 mogelijke niet-herkende rubriekkoppen gemeld. | **verbeterd, niet volledig geaccepteerd**: supplementen en de niet-herkende subkoppen (BIJGERECHTEN/Eieren/Broodjes) blijven een expliciete beperking |
+| Blossem Breda | `restaurantblossem.nl/nl/restaurant`; HTML 40.615 bytes, bytehash `da5c632f…0c38` (ongewijzigd) | 23 gerechten in 8 rubrieken, prijzen aanwezig (bijv. Gamba 19,50). De bron bevat twee accordionpanelen (DINNER: VOOR/TUSSEN/HOOFD/BIJGERECHTEN/DESSERT; LUNCH: KOUD/WARM/BIJGERECHTEN/BROOD/DESSERT). De paneeltitels zijn `span role=button` en worden niet als kop herkend, waardoor varianten plat slaan en gelijknamige rubrieken samenvoegen. Vier rubrieken (VOOR, TUSSEN, KOUD, WARM) zijn nu als `Controle nodig` gemarkeerd met vier attention-groups. | **gedeeltelijk**: item-/prijsinhoud klopt voor de herkende rubrieken; variantrelatie en arrangementen (BITES/BITTERBAL, BLOSSEM MENU, WIJNARRANGEMENT) zijn nog niet verliesvrij |
+
+Beide bronnen zijn uitsluitend read-only opgehaald; er is niets opgeslagen,
+bevestigd of gepubliceerd.
+
+### Checks in deze ronde
+
+| Controle | Resultaat |
+| --- | --- |
+| `npm test` | 1934 tests: 1931 pass, 1 fail, 2 skipped |
+| `npm run test:menu-structure` | 6 pass, 0 fail |
+| `npm run benchmark:menu-structure` | 23 cases: 22 pass, 1 unclassified (JSON-LD-hiërarchie) |
+| Gerichte regressies | pdf 63 pass; adapter 13 pass; quality 7 pass; analyse + directe PDF 30 pass; route 28 pass; mapping/receipt/concept 46 pass |
+| `npm run build` | **niet uitvoerbaar in deze sandbox**: `EPERM` bij `mkdir .next/.../[id]`; handmatige `mkdir` met `[id]` faalt hier eveneens. Geen buildresultaat geclaimd |
+| `node ops/scripts/verify-pdfjs-server-trace.js` | **niet uitgevoerd**: vereist `.next` en is daarom door dezelfde sandboxbeperking geblokkeerd |
+
+De ene falende test is `ops/scripts/capture-market-boundary.test.js` (EPERM bij
+`renameSync` in de sandbox-temp). Die faalt ook op de onveranderde basis
+`8c6a4caf692525d39a80c5c8430daebd1287ddd6` in een aparte worktree en is dus
+geen regressie van deze branch.
+
+### Resterende gaten
+
+- Echte provideractivering, kostenplafond en retentie blijven een
+  Product Owner-beslispunt; zonder die keuze blijft de runtime disabled.
+- Browseracceptatie (klikpaden, toetsenbord, 320/390 px, licht/donker) is niet
+  uitgevoerd in deze ronde.
+- Blossem accordion-/menuvariantrelaties en arrangementen zijn nog niet
+  verliesvrij; de review ziet nu wel de onzekerheid per rubriek.
+- Smelt supplementen en niet-herkende subkoppen blijven expliciet beperkt.
+- De combinatie met #56/#53 is nog niet getest; het conflictplan staat hierboven.
+- Onafhankelijke herreview door de Delivery Lead staat open.

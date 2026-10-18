@@ -1,9 +1,9 @@
 # Menu-extractie - implementatieafspraken
 
-Status: bouwafspraken voor GitHub #59, 2026-10-17. Afgesplitst uit
-MENU-EXTRACTION.md v0.1. Implementatie is veilig begonnen op
-`feat/menu-extraction-59`; een echte provideractivering en PR #56 blijven
-buiten scope.
+Status: bouwafspraken voor GitHub #59, 2026-10-17; herstelronde na review
+#6244808974 op 2026-10-18. Afgesplitst uit MENU-EXTRACTION.md v0.1.
+Implementatie is veilig begonnen op `feat/menu-extraction-59`; een echte
+provideractivering en PR #56 blijven buiten scope.
 
 [Extractie-instructie](../../MENU-EXTRACTION.md) |
 [Testplan](menu-extraction-acceptance.md)
@@ -123,3 +123,73 @@ Lever mapping van protocolstap naar bestaande code, ontbrekende onderdelen,
 verliespunten in het schema, benodigde hulpmiddelen, concrete kosten-/taaklimieten,
 testplan en beslispunten. Dit concept autoriseert nog geen implementatie,
 providerkeuze, credentials, nieuwe schema's of publicatie.
+
+
+## 13. Herstelronde na review #6244808974 (2026-10-18)
+
+Deze afspraken gelden naast de bovenstaande secties en vervangen ze niet.
+
+### 13.1 Budgetcontract (provider-neutraal)
+
+- `budget.reserve(maxCostEurCents)` en `budget.settle(amount)` zijn een
+  **synchrone** grootboekinterface. Een thenable/promise wordt expliciet
+  geweigerd (`async_budget_guard_unsupported`) vóórdat de provider wordt
+  aangeroepen; een asynchroon contract wordt nooit stilzwijgend als verleend
+  behandeld.
+- Elk pad dat de provider daadwerkelijk aanriep boekt kosten: bekende kosten
+  exact, onbekende kosten als `null`. `null` betekent "reservering volledig
+  laten staan", zodat een betaalde mislukking niet als nul wordt afgeboekt en
+  hetzelfde budget niet voor een tweede call hergebruikt kan worden.
+- Een geslaagde provideruitvoer zonder geboekte kosten is geen succes
+  (`budget_settle_failed`/`async_budget_guard_unsupported`); het resultaat wordt
+  dan niet aan de analyse doorgegeven.
+- Ontbrekende of gooiende guards blijven `budget_guard_required` /
+  `budget_exceeded`; er is geen impliciet "onbeperkt" budget.
+
+### 13.2 Kwaliteits- en dekkingspoort vóór een modelcall
+
+`src/lib/menuExtractionQuality.js` beoordeelt het deterministische resultaat
+vóór enige modelaanroep:
+
+- vlaggen: ontbrekende rubriek, rubriekmarkering in een gerechtsnaam,
+  duplicaat binnen een rubriek, hetzelfde gerecht in twee rubrieken (mogelijk
+  platgeslagen menuvariant), verdacht lange naam, niet-eenduidige prijs,
+  supplement als gerecht, en PDF-signalen (overgeslagen supplementregels,
+  prijs midden in een regel, niet-herkende rubriekkoppen);
+- alleen de gemarkeerde rubrieken worden `uncertain` ("Controle nodig"),
+  nooit het hele menu en nooit een automatische goedkeuring;
+- een voldoende deterministisch resultaat geeft **geen** modelcall
+  (`deterministic_result_sufficient`);
+- een bron met supplementen/relaties die het concept niet kan opslaan geeft
+  **geen** modelcall (`unsupported_product_gap`), omdat
+  `unsupportedProductFields` dat resultaat zou verwerpen;
+- anders mag een gevalideerd modelresultaat uitsluitend de gemarkeerde bron
+  vervangen: dekking ≥ 80% van het deterministische aantal, bewijsplicht per
+  gerecht voor dezelfde bron, `replacesDeterministic`-metadata en alle
+  rubrieken op `Controle nodig`. Geen samenvoeging, geen automatische
+  goedkeuring, en een te klein resultaat wordt met reden geweigerd.
+
+### 13.3 PDF-brontekst voor de adapter
+
+- `readPdfMenuSource` (in `src/lib/restaurantSourceAnalysis.js`) levert naast de
+  bestaande context een begrensde, pagina- en kolombewuste tekst
+  (`compactPdfLayoutText`). Paginamarkeringen en een `|`-scheiding tussen
+  kolommen behouden vindplaatsinformatie; de tekst is afgekapt op een vaste
+  limiet en meldt dat (`extractionTextTruncated`).
+- Dezelfde keten geldt voor een gevonden PDF én voor een directe PDF-url
+  (`buildDirectPdfAnalysis` in `src/lib/sourceAnalysisPipeline.js`); de
+  runtimehook wordt dus niet meer overgeslagen voor de directe PDF-tak.
+- De tekst leeft alleen in het geheugen (`sourceTexts`) en komt nooit op
+  `unknownMenuContexts`, de receipt, de notities of een logregel. Alleen
+  telbare layoutmetadata (duplicaatlaag, supplementregels, onduidelijke
+  prijsregels, niet-herkende koppen) wordt bewaard.
+
+### 13.4 Mapping en provenance
+
+- `menuExtractionMapping` behoudt `variant` en `order`, zet `structure` op
+  `uncertain` zodra een rubriek onzeker is, en laat `evidence.sourceId`,
+  `quote` en `locator` intact (met de menu-bron als terugval).
+- `buildMenuCandidateSummary` neemt `variant`/`order` en de volledige korte
+  evidence over, zodat receipt en concept dezelfde broncontext houden.
+- Niet-ondersteunde constructen (supplementen, allergenen, beschikbaarheid)
+  worden nog steeds expliciet gemeld of geblokkeerd, nooit stil afgeplat.
