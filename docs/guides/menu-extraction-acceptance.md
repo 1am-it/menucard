@@ -442,3 +442,22 @@ benchmarkafsluiting.
   deze ronde; de eerdere read-only conflicteanalyse blijft staan.
 - Onafhankelijke herreview door de Delivery Lead staat open. Deze sectie is
   ontwikkelaarsbewijs, geen acceptatie en geen release.
+
+### Bevestiging op de documentatie-HEAD
+
+Na de documentatiecommit zijn dezelfde controles herhaald op HEAD
+`6d3956784fadba0ebe09150f70ea26f7b709bac3` (docs-only verschil met codecommit
+`7426ee3`): gerichte regressies 16 pass, volledige suite 1959 pass / 0 fail /
+0 skipped, structuurcorpus 6 pass, benchmark 22 pass + 1 unclassified
+(STRUCT-018), bronproef exit 0 met Smelt 37/37 en Blossem 43/43 en boekhouding
+37/37 en 43/43, build compiled successfully met 41/41 statische pagina's en
+`BUILD_ID` `iJZ2x6mzfiuqoXLDDWp26`, PDF.js-trace OK met 164 gecontroleerde
+server scripts. De eerste trace-aanroep tijdens het wegschrijven van de
+buildtracering faalde op een ontbrekend traceringsbestand; na afronding van
+dezelfde build slaagde de trace zonder codewijziging. Dat verschil is als
+build-race gedocumenteerd, niet als productresultaat.
+
+Deze bevestigingscommit is zelf docs-only; de genoemde HEAD is de laatste
+commit waarop de controles zijn uitgevoerd. Browseracceptatie,
+provideractivering, de 50-100-bronnenbenchmark en onafhankelijke review blijven
+open.
