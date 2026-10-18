@@ -123,8 +123,11 @@ function boundedEvidence(evidence) {
   if (!evidence || typeof evidence !== 'object') return null;
   const out = {};
   if (typeof evidence.locator === 'string' && evidence.locator.trim()) out.locator = evidence.locator.trim().slice(0, 160);
+  if (typeof evidence.sourceId === 'string' && evidence.sourceId.trim()) out.sourceId = evidence.sourceId.trim().slice(0, 80);
+  if (typeof evidence.sourceUrl === 'string' && evidence.sourceUrl.trim()) out.sourceUrl = evidence.sourceUrl.trim().slice(0, 2048);
+  if (typeof evidence.quote === 'string' && evidence.quote.trim()) out.quote = evidence.quote.trim().slice(0, 500);
   if (typeof evidence.contentHash === 'string' && evidence.contentHash.trim()) out.contentHash = evidence.contentHash.trim().slice(0, 128);
-  return out.locator || out.contentHash ? out : null;
+  return Object.keys(out).length > 0 ? out : null;
 }
 
 function buildMenuCandidateSummary(menus) {
@@ -152,6 +155,17 @@ function buildMenuCandidateSummary(menus) {
                 };
                 const evidence = boundedEvidence(item && item.evidence);
                 if (evidence) summary.evidence = evidence;
+                if (item && item.priceStatus === 'multiple_undecomposed') summary.priceStatus = 'multiple_undecomposed';
+                if (item && typeof item.priceText === 'string' && item.priceText.trim()) summary.priceText = item.priceText.trim().slice(0, 160);
+                if (item && Array.isArray(item.priceVariants)) {
+                  summary.priceVariants = item.priceVariants
+                    .filter((variant) => variant && typeof variant.price === 'string')
+                    .slice(0, 10)
+                    .map((variant) => ({
+                      label: typeof variant.label === 'string' ? variant.label.slice(0, 80) : null,
+                      price: variant.price.slice(0, 40),
+                    }));
+                }
                 return summary;
               })
             : [],

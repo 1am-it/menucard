@@ -252,6 +252,31 @@ test('SMELT-LIKE CHAIN: recognized PDF sections become receipt menus, one concep
   assert.equal(result.extractionResult.coverage.itemCount >= 1, true);
 });
 
+test('REGRESSION: an ambiguous PDF price reaches concept as one explicit blocker, not a fake "/" dish', async () => {
+  const content = [
+    'BT /F1 12 Tf',
+    textAt(20, 100, '// DRANKEN'),
+    textAt(20, 80, 'Chardonnay 6.50 / 25.00'),
+    'ET',
+  ].join('\n');
+  const result = await runRestaurantSourceAnalysis({
+    homepageHtml: homepageWithFullRestaurantAndOneMenu(),
+    homepageUrl: 'https://debotanistbreda.nl/',
+    fetchCandidate: async () => ({ status: 'pdf', bytes: buildTestPdf({ contentStream: content }), finalUrl: 'https://debotanistbreda.nl/kaart.pdf' }),
+  });
+  const pdfMenu = result.menuContexts.find((menu) => menu.extractionMethod === 'pdf_text');
+  assert.ok(pdfMenu);
+  assert.equal(pdfMenu.categories[0].items.length, 1);
+  assert.equal(pdfMenu.categories[0].items[0].name, 'Chardonnay');
+  assert.equal(pdfMenu.categories[0].items[0].price, null);
+  const summary = buildCandidateSummary({ restaurantCandidateFields: {}, menus: [pdfMenu] });
+  const concept = buildMenuConcept({ menus: summary.menus, liveLines: [], edits: {} });
+  assert.equal(concept.canSave, false);
+  assert.deepEqual(concept.blockers.map((b) => b.status), ['multiple_prices']);
+  assert.equal(concept.content.categories[0].items[0].name, 'Chardonnay');
+  assert.equal(concept.content.categories[0].items[0].price, null);
+});
+
 test('runRestaurantSourceAnalysis: a same-host PDF candidate with no recognizable menu content still succeeds, with recognizedSections: [] — never fabricated', async () => {
   const result = await runRestaurantSourceAnalysis({
     homepageHtml: homepageWithFullRestaurantAndOneMenu(),

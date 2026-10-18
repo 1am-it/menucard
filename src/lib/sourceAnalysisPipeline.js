@@ -92,7 +92,7 @@ function createCandidateFetcher(redirectNotes) {
  * to the job's closed error vocabulary; the messages are the ones the
  * single-URL route has always shown.
  */
-async function analyzeSourceUrl(sourceUrlHref) {
+async function analyzeSourceUrl(sourceUrlHref, options = {}) {
   // The exact instruction version is a required runtime input. A missing or
   // unversioned file is a concrete configuration failure, not an empty menu.
   let protocol;
@@ -137,6 +137,7 @@ async function analyzeSourceUrl(sourceUrlHref) {
       homepageHtml: fetchResult.bytes.toString('utf8'),
       homepageUrl: fetchResult.finalUrl,
       fetchCandidate: createCandidateFetcher(redirectNotes),
+      structuredExtraction: options.structuredExtraction,
     });
   } else if (fetchResult.contentType === 'application/pdf') {
     // The entry URL itself is a digital PDF menu: no same-host discovery is

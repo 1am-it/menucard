@@ -435,6 +435,24 @@ test('concept: once resolved, it is saved as an internal BE-17 proposal (next ve
   assert.equal(supabase.calls.filter((c) => c.rpc).length, 0);
 });
 
+test('REGRESSION: server-side concept save keeps duplicate blockers after group category acceptance', async () => {
+  const menus = [
+    {
+      categories: [
+        { name: 'Warm', uncertain: true, items: [{ name: 'Fictieve soep', price: '6.50' }, { name: 'Fictieve soep', price: '6.50' }] },
+      ],
+    },
+  ];
+  const supabase = conceptFixture({ menus });
+  const res = await makeHandlers({ supabase, liveMenus: {} }).handlers.saveConcept(
+    request({ job_id: JOB, edits: { lines: { '0.0.0': { acceptCategory: true }, '0.0.1': { acceptCategory: true } } } }),
+    BATCH
+  );
+  assert.equal(res.status, 409);
+  assert.deepEqual(res.body.blockers.map((b) => b.status), ['duplicate', 'duplicate']);
+  assert.equal(supabase.calls.filter((c) => c.insert).length, 0);
+});
+
 test('concept: the server re-checks every blocker itself and ignores what the browser claims; a price change does not block', async () => {
   const menus = [
     {

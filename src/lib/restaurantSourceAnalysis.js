@@ -225,11 +225,12 @@ async function buildUnknownMenuContext(pdfBytes, sourceUrl, sourceId) {
  * only reads `name`/`contextSlug`/`categories` from each entry, so those
  * additions are inert to the existing, unchanged receipt/promotion path.
  */
-async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCandidate }) {
+async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCandidate, structuredExtraction }) {
   const menuContexts = []
   const unknownMenuContexts = []
   const notes = []
   const sourceInventory = []
+  const sourceTexts = new Map()
   const limitations = []
   let sourceNumber = 0
 
@@ -249,6 +250,7 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
     status: 'read',
     contentHash: computeFieldEvidenceHash(homepageHtml),
   })
+  sourceTexts.set(homepageSourceId, homepageHtml)
 
   // 1. Homepage menu structure — BE-18's own extractor, unchanged.
   for (const menu of extractMenusFromHtml(homepageHtml)) {
@@ -324,6 +326,7 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
         status: 'read',
         contentHash: computeFieldEvidenceHash(fetched.body),
       })
+      sourceTexts.set(sourceId, fetched.body)
       const existingSlugs = new Set(menuContexts.map((m) => m.contextSlug))
       const candidateMenus = extractMenusFromHtml(fetched.body)
       for (const menu of candidateMenus) {
@@ -461,6 +464,36 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
     limitations.push('AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.')
   }
 
+  // 7. Optional provider-neutral hook. It is absent/disabled by default; a
+  // caller may inject a configured, budget-guarded runtime after the provider
+  // and data-processing decisions. Deterministic menus always win: a model
+  // result is only used when no deterministic menu exists, and is never
+  // silently merged into a different result.
+  let aiExtraction = null
+  if (typeof structuredExtraction === 'function') {
+    const aiSources = sourceInventory.map((source) => ({
+      ...source,
+      ...(sourceTexts.has(source.id) ? { text: sourceTexts.get(source.id) } : {}),
+    }))
+    try {
+      aiExtraction = await structuredExtraction({ sources: aiSources, restaurantFields: restaurantCandidateFields })
+    } catch {
+      aiExtraction = { enabled: true, ok: false, reason: 'adapter_failed' }
+    }
+    if (aiExtraction && aiExtraction.enabled) {
+      if (aiExtraction.ok && Array.isArray(aiExtraction.menus) && aiExtraction.menus.length > 0) {
+        if (menuContexts.length === 0) {
+          menuContexts.push(...aiExtraction.menus)
+          notes.push('Aanvullende structurering via de geconfigureerde adapter toegevoegd.')
+        } else {
+          limitations.push('AI-resultaat niet toegevoegd: er bestaat al een deterministische menukaart.')
+        }
+      } else {
+        limitations.push(`AI-structurering niet gebruikt (${aiExtraction.reason || 'onbekende reden'}).`)
+      }
+    }
+  }
+
   const extractionResult = buildExtractionResult({
     sourceInventory,
     menus: menuContexts,
@@ -468,8 +501,15 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
     limitations,
     notes,
   })
+  if (aiExtraction && aiExtraction.enabled) {
+    extractionResult.ai = {
+      ok: aiExtraction.ok === true,
+      reason: aiExtraction.reason || null,
+      meta: aiExtraction.meta || null,
+    }
+  }
 
-  return { restaurantCandidateFields, fieldEvidence, menuContexts, unknownMenuContexts, description, notes, sourceInventory, limitations, extractionResult }
+  return { restaurantCandidateFields, fieldEvidence, menuContexts, unknownMenuContexts, description, notes, sourceInventory, limitations, extractionResult, aiExtraction }
 }
 
 module.exports = {

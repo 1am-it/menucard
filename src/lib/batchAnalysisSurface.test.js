@@ -90,7 +90,8 @@ test('routes: internal-only handlers, process route bounded in time, nothing els
   assert.match(PAGE, /onRerun\(item\.url, action\)/);
   const deps = read('src/lib/batchAnalysisRouteDeps.js');
   assert.match(deps, /authenticate: authenticateInternalRequest/);
-  assert.match(deps, /analyze: analyzeSourceUrl/);
+  assert.match(deps, /analyze: \(url\) => analyzeSourceUrl\(url, \{ structuredExtraction \}\)/);
+  assert.match(deps, /disabledMenuExtractionRuntime/);
 });
 
 test('menu review: manual review reopens the exact batch result, and shared uncertainty has a scoped group action', () => {

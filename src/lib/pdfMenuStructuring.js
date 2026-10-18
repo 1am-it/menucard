@@ -64,15 +64,14 @@ const MENU_ITEM_CONFIDENCE = 'middel'
  * URL fragment, a date) is never mistaken for a section header. */
 const SECTION_MARKER_PATTERN = /^\/\/\s*(.+)$/
 
-/** A price-looking token: one to four digits, a decimal separator
- * (`.`/`,`, matching both English- and Dutch-formatted menus), and one
- * or two fraction digits — and nothing else on the token. Deliberately
- * does NOT match a value with a trailing `%` (an ABV/alcohol
- * percentage, e.g. `6.5%`, is never a price) or a value that is part of
- * a larger token. A "8.5 / 24.0"-style glass/bottle dual price is
- * currently only recognized as its first token — a named, explicit gap,
- * not a silent wrong answer (see this file's own header). */
-const PRICE_TOKEN_PATTERN = /^\d{1,4}[.,]\d{1,2}$/
+/** A price-looking token: an integer of one to three digits (real menus
+ * commonly print "8", "12", "28"), or one to four digits with a decimal
+ * separator and one/two fraction digits. Deliberately does NOT match a
+ * four-digit integer (a year, e.g. `2026`), a trailing `%` (ABV), or a
+ * value inside a larger token. A "8.5 / 24.0"-style dual price is kept as
+ * explicit variants by the line parser below, never silently reduced to
+ * the first token. */
+const PRICE_TOKEN_PATTERN = /^(?:\d{1,3}|\d{1,4}[.,]\d{1,2})$/
 
 /** How close (in the PDF's own coordinate units) a no-price line's own
  * leftmost X must be to the immediately preceding item's own leftmost X
@@ -82,8 +81,16 @@ const PRICE_TOKEN_PATTERN = /^\d{1,4}[.,]\d{1,2}$/
  * guard. */
 const DESCRIPTION_X_ALIGNMENT_TOLERANCE = 20
 
+/** A separator between two prices on one visual line: "6.50 / 25.00".
+ * It is never a dish name and never a second item. */
+const PRICE_VARIANT_SEPARATOR_PATTERN = /^[/|,;+&–—-]+$/
+
 function isPriceToken(str) {
   return typeof str === 'string' && PRICE_TOKEN_PATTERN.test(str.trim())
+}
+
+function isPriceVariantSeparator(str) {
+  return typeof str === 'string' && PRICE_VARIANT_SEPARATOR_PATTERN.test(str.trim())
 }
 
 /** `null` unless every item on the line is, on its own, a section
@@ -111,6 +118,47 @@ function joinText(strs) {
     .trim()
 }
 
+/** Real PDFs often use plain headings (no `//`) and repeat a service time on
+ * the same line. Only this explicitly known vocabulary is treated as a
+ * section; arbitrary prose is never promoted to a category. */
+const PDF_SECTION_LABELS = new Set([
+  'kaasfondue',
+  'diner',
+  'lunch',
+  'borrel',
+  'vooraf',
+  'hoofd',
+  'dessert',
+  'desserts',
+  'overig',
+  'dranken',
+  'warme dranken',
+  'frisdrank',
+])
+
+function pdfSectionLabel(lineItems) {
+  if (lineItems.some((item) => isPriceToken(item.str))) return null
+  const text = joinText(lineItems.map((item) => item.str))
+    .replace(/\s+\d{1,2}:\d{2}(?:\s*[–-]\s*\d{1,2}:\d{2})?.*$/, '')
+    .trim()
+  return PDF_SECTION_LABELS.has(text.toLowerCase()) ? text : null
+}
+
+const PDF_CHROME_PATTERNS = [
+  /^geserveerd met\b/i,
+  /^smaak\s*:/i,
+  /^wijntip\s*:/i,
+  /^vraag onze\b/i,
+  /^voor \d/i,
+  /^allergenen\b/i,
+  /^v\s*=\s*vegetarisch\b/i,
+]
+
+function isPdfChrome(lineItems) {
+  const text = joinText(lineItems.map((item) => item.str))
+  return PDF_CHROME_PATTERNS.some((pattern) => pattern.test(text))
+}
+
 /** Splits a reconstructed line's own items into individual whitespace-
  * separated words, each still carrying an approximate X position —
  * necessary, not merely convenient: confirmed empirically that
@@ -135,6 +183,48 @@ function tokenizeLineIntoWords(lineItems) {
   return words
 }
 
+/** A horizontal gap larger than this is a separate menu column, not the
+ * normal name-to-price gap. The real Smelt PDF uses x≈23 and x≈442. */
+const COLUMN_GAP = 150
+
+/**
+ * Split one visual line into independent columns. Without this a two-column
+ * PDF concatenates a left dish with a right dish on the same baseline, which
+ * is exactly how real menus acquire invented names and prices.
+ */
+function splitLineIntoColumns(lineItems) {
+  const items = (Array.isArray(lineItems) ? lineItems : []).filter((item) => item && item.str.trim().length > 0)
+  if (items.length === 0) return []
+  const byX = [...items].sort((a, b) => a.x - b.x)
+  const columns = [[byX[0]]]
+  for (let i = 1; i < byX.length; i += 1) {
+    const current = byX[i]
+    const previous = byX[i - 1]
+    if (current.x - previous.x > COLUMN_GAP) columns.push([current])
+    else columns[columns.length - 1].push(current)
+  }
+  return columns
+}
+
+/** pdfjs may group a name, its description and its price into one visual
+ * "line" even when they sit on slightly different baselines. Keep those
+ * baselines separate so a description is never glued onto the dish name. */
+const BASELINE_TOLERANCE = 1
+
+function splitColumnByBaseline(columnItems) {
+  const groups = []
+  for (const item of columnItems) {
+    const y = typeof item.y === 'number' ? item.y : null
+    let group = y === null ? null : groups.find((candidate) => candidate.y !== null && Math.abs(candidate.y - y) <= BASELINE_TOLERANCE)
+    if (!group) {
+      group = { y, items: [] }
+      groups.push(group)
+    }
+    group.items.push(item)
+  }
+  return groups.map((group) => group.items)
+}
+
 /**
  * The one entry point. `pages` is exactly `extractDigitalPdfLines`'s own
  * `{ pages }` array (or `extractDigitalPdfTextWithFallback`'s fallback
@@ -154,7 +244,6 @@ function tokenizeLineIntoWords(lineItems) {
  */
 function structurePdfLinesIntoMenu(pages) {
   const categoriesByName = new Map() // name (or null) -> { name, items: [] }
-  let currentCategoryName = null
 
   function categoryFor(name) {
     if (!categoriesByName.has(name)) categoriesByName.set(name, { name, items: [] })
@@ -162,69 +251,95 @@ function structurePdfLinesIntoMenu(pages) {
   }
 
   for (const page of Array.isArray(pages) ? pages : []) {
-    // A description continuation must come from the immediately
-    // preceding line on the SAME page — reset at every page boundary,
-    // since cross-page attribution is never valid (see this file's own
-    // header).
-    let lastItemOnThisPage = null
+    // A description continuation must come from the immediately preceding
+    // line in the SAME column on the SAME page. Columns have independent
+    // section and continuation state; reset at every page boundary.
+    const columnStates = []
 
     for (const line of page.lines || []) {
-      const sectionNames = pureSectionMarkerNames(line.items)
-      if (sectionNames) {
-        // Multiple side-by-side headers on one row: only the first
-        // becomes the active section — a documented, explicit
-        // limitation, never a guess at which item belongs to which of
-        // several simultaneous headers.
-        currentCategoryName = sectionNames[0]
-        lastItemOnThisPage = null
-        continue
-      }
-
-      const lineText = joinText(line.items.map((it) => it.str))
-      if (lineText.length === 0) continue
-
-      const recognizedItems = []
-      let buffer = []
-      let bufferStartX = null
-      for (const word of tokenizeLineIntoWords(line.items)) {
-        if (isPriceToken(word.text)) {
-          const name = joinText(buffer)
-          if (name.length > 0) {
-            recognizedItems.push({ name, price: word.text.trim(), startX: bufferStartX })
+      const columns = splitLineIntoColumns(line.items)
+      columns.forEach((columnItems, columnIndex) => {
+        if (!columnStates[columnIndex]) columnStates[columnIndex] = { categoryName: null, lastItem: null }
+        const state = columnStates[columnIndex]
+        for (const baselineItems of splitColumnByBaseline(columnItems)) {
+          const sectionNames = pureSectionMarkerNames(baselineItems)
+          const plainSection = sectionNames ? null : pdfSectionLabel(baselineItems)
+          if (sectionNames || plainSection) {
+            // On a single combined row only the first marker is used, exactly
+            // as before. When a real column split exists, each column keeps its
+            // own active section.
+            state.categoryName = sectionNames ? sectionNames[0] : plainSection
+            state.lastItem = null
+            continue
           }
-          buffer = []
-          bufferStartX = null
-        } else {
-          if (buffer.length === 0) bufferStartX = word.x
-          buffer.push(word.text)
-        }
-      }
 
-      if (recognizedItems.length > 0) {
-        const category = categoryFor(currentCategoryName)
-        for (const { name, price, startX } of recognizedItems) {
-          const item = { name, desc: null, price, startX, evidenceText: lineText }
-          category.items.push(item)
-          lastItemOnThisPage = item
-        }
-        continue
-      }
+          const lineText = joinText(baselineItems.map((it) => it.str))
+          if (lineText.length === 0 || isPdfChrome(baselineItems)) continue
 
-      // No price token anywhere on this line — a candidate description
-      // continuation for the immediately preceding item, but only when
-      // its own leftmost X aligns with that item's own name column
-      // (see DESCRIPTION_X_ALIGNMENT_TOLERANCE's own doc comment).
-      // Never creates a new, price-less "item" — that would not be a
-      // reviewable menu candidate, just unattributed text.
-      if (lastItemOnThisPage && line.items.length > 0) {
-        const leftmostX = Math.min(...line.items.map((it) => it.x))
-        if (Math.abs(leftmostX - lastItemOnThisPage.startX) <= DESCRIPTION_X_ALIGNMENT_TOLERANCE) {
-          lastItemOnThisPage.desc = lastItemOnThisPage.desc ? `${lastItemOnThisPage.desc} ${lineText}` : lineText
-          lastItemOnThisPage.evidenceText = `${lastItemOnThisPage.evidenceText}\n${lineText}`
+          const recognizedItems = []
+          let buffer = []
+          let bufferStartX = null
+          for (const word of tokenizeLineIntoWords(baselineItems)) {
+            if (isPriceToken(word.text)) {
+              const name = joinText(buffer)
+              if (name.length > 0) recognizedItems.push({ name, price: word.text.trim(), startX: bufferStartX })
+              buffer = []
+              bufferStartX = null
+            } else {
+              if (buffer.length === 0) bufferStartX = word.x
+              buffer.push(word.text)
+            }
+          }
+
+          if (recognizedItems.length > 0) {
+            const category = categoryFor(state.categoryName)
+            // Merge "name price / secondPrice" into ONE item with two named-less
+            // price variants. The separator itself is never a dish name. The
+            // product contract cannot store variants yet, so `price` stays null;
+            // the concept layer turns this into an explicit blocker rather than
+            // silently choosing the first/lowest price or creating "/".
+            const lineItems = []
+            for (const recognized of recognizedItems) {
+              if (isPriceVariantSeparator(recognized.name) && lineItems.length > 0) {
+                const previous = lineItems[lineItems.length - 1]
+                if (!previous.priceVariants) {
+                  previous.priceVariants = [{ label: null, price: previous.price }]
+                  previous.priceText = previous.price
+                }
+                previous.priceVariants.push({ label: null, price: recognized.price })
+                previous.priceText = `${previous.priceText} / ${recognized.price}`
+                continue
+              }
+              lineItems.push({ ...recognized })
+            }
+            for (const recognized of lineItems) {
+              const item = {
+                name: recognized.name,
+                desc: null,
+                price: recognized.priceVariants ? null : recognized.price,
+                priceStatus: recognized.priceVariants ? 'multiple_undecomposed' : 'known',
+                ...(recognized.priceVariants ? { priceVariants: recognized.priceVariants, priceText: recognized.priceText } : {}),
+                startX: recognized.startX,
+                evidenceText: lineText,
+              }
+              category.items.push(item)
+              state.lastItem = item
+            }
+            continue
+          }
+
+          // No price token anywhere in this baseline — a description
+          // continuation for the immediately preceding item in the same
+          // column, only when its leftmost X aligns with that item's name.
+          if (state.lastItem && baselineItems.length > 0) {
+            const leftmostX = Math.min(...baselineItems.map((it) => it.x))
+            if (Math.abs(leftmostX - state.lastItem.startX) <= DESCRIPTION_X_ALIGNMENT_TOLERANCE) {
+              state.lastItem.desc = state.lastItem.desc ? `${state.lastItem.desc} ${lineText}` : lineText
+              state.lastItem.evidenceText = `${state.lastItem.evidenceText}\n${lineText}`
+            }
+          }
         }
-        // Outside the tolerance: dropped, never attached — an unrelated
-        // column's text must never become a fabricated description.
-      }
+      })
     }
   }
 
@@ -235,6 +350,9 @@ function structurePdfLinesIntoMenu(pages) {
         name: item.name,
         desc: item.desc,
         price: item.price,
+        priceStatus: item.priceStatus,
+        ...(item.priceVariants ? { priceVariants: item.priceVariants } : {}),
+        ...(item.priceText ? { priceText: item.priceText } : {}),
         confidence: MENU_ITEM_CONFIDENCE,
         contentHash: computeFieldEvidenceHash(item.evidenceText),
       })),
@@ -249,6 +367,8 @@ module.exports = {
   SECTION_MARKER_PATTERN,
   PRICE_TOKEN_PATTERN,
   isPriceToken,
+  isPriceVariantSeparator,
+  splitLineIntoColumns,
   pureSectionMarkerNames,
   structurePdfLinesIntoMenu,
 }

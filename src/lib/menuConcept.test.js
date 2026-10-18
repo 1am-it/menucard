@@ -130,6 +130,33 @@ test('stored version: choices travel with it — accepted dishes and per-dish de
   assert.deepEqual(undone.blockers.map((b) => b.status), ['unclear_category']);
 });
 
+test('REGRESSION: a shared category acceptance never settles duplicate dishes; the server keeps the duplicate blocker', () => {
+  const menus = [
+    {
+      categories: [
+        { name: 'Warm', uncertain: true, items: [{ name: 'Fictieve soep', price: '6.50' }, { name: 'Fictieve soep', price: '6.50' }] },
+      ],
+    },
+  ];
+  const categoryAccepted = buildMenuConcept({
+    menus,
+    liveLines: [],
+    edits: { lines: { '0.0.0': { acceptCategory: true }, '0.0.1': { acceptCategory: true } } },
+  });
+  assert.deepEqual(categoryAccepted.lines.map((l) => l.status), ['duplicate', 'duplicate']);
+  assert.equal(categoryAccepted.canSave, false);
+  assert.deepEqual(categoryAccepted.blockers.map((b) => b.status), ['duplicate', 'duplicate']);
+  assert.equal(categoryAccepted.lines.every((l) => l.categoryAccepted === true && l.duplicateAccepted === false), true);
+
+  const duplicateAccepted = buildMenuConcept({
+    menus,
+    liveLines: [],
+    edits: { lines: { '0.0.0': { acceptDuplicate: true }, '0.0.1': { acceptDuplicate: true } } },
+  });
+  assert.deepEqual(duplicateAccepted.lines.map((l) => l.status), ['unclear_category', 'unclear_category']);
+  assert.equal(duplicateAccepted.canSave, false);
+});
+
 test('disappeared dishes are decided one by one; "Klopt zo" never settles a missing price', () => {
   const live = [...liveMenuLines(LIVE, '9'), { id: 'x', name: 'Fictieve taart', price: '6.00', category: 'Dessert' }];
   const base = { lines: { '0.1.1': { price: '19,5' }, '0.2.0': { accept: true }, '0.2.1': { exclude: true } } };

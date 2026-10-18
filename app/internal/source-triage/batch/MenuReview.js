@@ -149,7 +149,9 @@ export function MenuControl({ item }) {
               {category.items.map((dish) => (
                 <li key={dish.id}>
                   <span className="bta-dish">{dish.name}</span>
-                  <span className={dish.price ? 'bta-price' : 'bta-price bta-price--missing'}>{dish.price || 'geen prijs'}</span>
+                  <span className={dish.price ? 'bta-price' : 'bta-price bta-price--missing'}>
+                    {dish.price || (dish.priceText ? `${dish.priceText} · meerdere prijzen` : 'geen prijs')}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -185,7 +187,8 @@ function DishValue({ value, empty }) {
  */
 export function LineEditor({ idPrefix, line, edit, setEdit, categories, readOnly, compare }) {
   const id = `${idPrefix}-${line.id}`
-  const canAccept = line.status === 'duplicate' || line.status === 'unclear_category' || line.accepted === true
+  const canAcceptCategory = line.categoryNeedsAcceptance === true || line.categoryAccepted === true
+  const canAcceptDuplicate = line.duplicateNeedsAcceptance === true || line.duplicateAccepted === true
   const status = STATUS[line.status]
   const resolved = !status.attention
   return (
@@ -214,7 +217,7 @@ export function LineEditor({ idPrefix, line, edit, setEdit, categories, readOnly
         </div>
       ) : (
         <p className="bta-muted">
-          {line.category || 'Zonder rubriek'} · {displayPrice(line.price) || 'geen prijs'}
+          {line.category || 'Zonder rubriek'} · {displayPrice(line.price) || (line.priceText ? `${line.priceText} (meerdere prijzen)` : 'geen prijs')}
           {line.status === 'price_changed' && line.livePrice ? ` (nu live ${displayPrice(line.livePrice)})` : ''}
         </p>
       )}
@@ -242,9 +245,14 @@ export function LineEditor({ idPrefix, line, edit, setEdit, categories, readOnly
             <label>
               <input type="checkbox" checked={line.excluded === true} onChange={(e) => setEdit({ exclude: e.target.checked })} /> Uitsluiten
             </label>
-            {canAccept && (
+            {canAcceptCategory && (
               <label>
-                <input type="checkbox" checked={line.accepted === true} onChange={(e) => setEdit({ accept: e.target.checked })} /> Klopt zo
+                <input type="checkbox" checked={line.categoryAccepted === true} onChange={(e) => setEdit({ acceptCategory: e.target.checked })} /> Rubriek klopt zo
+              </label>
+            )}
+            {canAcceptDuplicate && (
+              <label>
+                <input type="checkbox" checked={line.duplicateAccepted === true} onChange={(e) => setEdit({ acceptDuplicate: e.target.checked })} /> Duplicaat klopt zo
               </label>
             )}
           </div>
@@ -473,7 +481,7 @@ export function MenuConcept({ item, readOnly, busy, onSave }) {
         lines={concept.lines}
         readOnly={readOnly}
         onAcceptGroup={(lines) => {
-          for (const line of lines) setLineEdit(line.id, { accept: true })
+          for (const line of lines) setLineEdit(line.id, { acceptCategory: true })
         }}
       />
 

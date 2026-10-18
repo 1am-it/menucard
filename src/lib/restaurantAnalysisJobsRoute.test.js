@@ -33,7 +33,8 @@ function readPipelineSource() {
 test('structural safety net: the POST route delegates the whole fetch/analysis step to the shared pipeline, and fetches nothing itself', () => {
   const source = readPostRouteSource()
   assert.match(source, /import \{ analyzeSourceUrl \} from ['"]@\/src\/lib\/sourceAnalysisPipeline['"]/)
-  assert.match(source, /const outcome = await analyzeSourceUrl\(sourceUrl\.href\)/)
+  assert.match(source, /const outcome = await analyzeSourceUrl\(sourceUrl\.href, \{ structuredExtraction \}\)/)
+  assert.match(source, /disabledMenuExtractionRuntime\(\)/)
   assert.match(source, /respondFailed\(jobId, \['running'\], outcome\.errorReason, outcome\.message, outcome\.httpStatus\)/)
   assert.doesNotMatch(source, /fetchWebsiteSafely|fetchSameSiteWithRedirects|checkRobotsForUrl/)
 })

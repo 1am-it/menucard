@@ -224,6 +224,54 @@ test('structurePdfLinesIntoMenu: multiple sections on one page are each recogniz
   assert.equal(categories[1].items[0].name, 'Item B')
 })
 
+test('REGRESSION: "Chardonnay 6.50 / 25.00" is one item with price variants, never a second item named "/"', async () => {
+  const content = [
+    'BT /F1 12 Tf',
+    textAt(20, 100, '// DRANKEN'),
+    textAt(20, 80, 'Chardonnay 6.50 / 25.00'),
+    'ET',
+  ].join('\n')
+  const { categories } = await structureFromContentStream(content)
+  assert.equal(categories[0].items.length, 1)
+  const [item] = categories[0].items
+  assert.equal(item.name, 'Chardonnay')
+  assert.equal(item.price, null)
+  assert.equal(item.priceStatus, 'multiple_undecomposed')
+  assert.equal(item.priceText, '6.50 / 25.00')
+  assert.deepEqual(item.priceVariants, [{ label: null, price: '6.50' }, { label: null, price: '25.00' }])
+  assert.equal(categories[0].items.some((i) => i.name === '/'), false)
+});
+
+test('REGRESSION: two real PDF columns and separate baselines never merge into one invented dish', async () => {
+  const { categories } = structurePdfLinesIntoMenu([
+    {
+      lines: [
+        {
+          items: [
+            { x: 22.7, y: 486.98, str: 'Hollands' },
+            { x: 72.8, y: 486.98, str: '27' },
+            { x: 442.2, y: 486.98, str: 'Lucques olijven' },
+            { x: 442.2, y: 485.33, str: 'Frisse olijven uit de Languedoc' },
+            { x: 527.3, y: 486.98, str: '8' },
+          ],
+        },
+      ],
+    },
+  ])
+  const items = categories.flatMap((category) => category.items)
+  assert.deepEqual(items.map((item) => [item.name, item.price]), [
+    ['Hollands', '27'],
+    ['Lucques olijven', '8'],
+  ])
+  assert.equal(items[1].desc, 'Frisse olijven uit de Languedoc')
+});
+
+test('integer prices are recognized, but a four-digit year is not', async () => {
+  assert.equal(isPriceToken('8'), true)
+  assert.equal(isPriceToken('27'), true)
+  assert.equal(isPriceToken('2026'), false)
+});
+
 test('structurePdfLinesIntoMenu: a description never carries over across a page boundary — reset per page', async () => {
   const { pages } = await extractDigitalPdfLines(
     buildTestPdf({

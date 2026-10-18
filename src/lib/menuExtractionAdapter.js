@@ -10,98 +10,31 @@
 // It does not turn an invalid/partial result into a successful empty menu.
 
 const { DEFAULT_EXTRACTION_LIMITS } = require('./menuExtractionProtocol');
+const schema = require('./menuExtractionSchema');
 
-const PRICE_STATUSES = ['known', 'multiple_undecomposed', 'on_request', 'unknown'];
-const FORBIDDEN_TRUST_KEYS = ['confidence', 'reviewReady', 'approved', 'publicationReady'];
-const MAX_ITEMS = 1000;
-const MAX_SECTIONS = 100;
-const MAX_TEXT = 500;
-
-const RECOVERABLE_ERRORS = new Set(['timeout', 'rate_limited', 'provider_unavailable']);
-const EXTRACTION_OUTPUT_SCHEMA = Object.freeze({
-  version: 'menu-extraction-output/v1',
-  topLevel: ['menus', 'rejected', 'coverage'],
-  forbiddenTrustKeys: FORBIDDEN_TRUST_KEYS,
+const PRICE_STATUSES = schema.PRICE_STATUSES;
+const FORBIDDEN_TRUST_KEYS = schema.FORBIDDEN_TRUST_KEYS;
+const EXTRACTION_OUTPUT_SCHEMA = {
+  ...schema.EXTRACTION_OUTPUT_SCHEMA,
   allowedTools: [],
-});
+};
+const RECOVERABLE_ERRORS = new Set(['timeout', 'rate_limited', 'provider_unavailable']);
 
-function createStructuredExtractionAdapter({ provider, model, call } = {}) {
+function createStructuredExtractionAdapter({ provider, model, call, cancel } = {}) {
   return {
     configured: typeof call === 'function',
     provider: typeof provider === 'string' ? provider : null,
     model: typeof model === 'string' ? model : null,
     version: typeof provider === 'string' && typeof model === 'string' ? `${provider}/${model}` : null,
     extract: typeof call === 'function' ? call : null,
+    cancel: typeof cancel === 'function' ? cancel : null,
   };
 }
 
-function findForbiddenKey(value, depth = 0) {
-  if (depth > 12 || value === null || typeof value !== 'object') return null;
-  if (Array.isArray(value)) {
-    for (const entry of value) {
-      const found = findForbiddenKey(entry, depth + 1);
-      if (found) return found;
-    }
-    return null;
-  }
-  for (const [key, entry] of Object.entries(value)) {
-    if (FORBIDDEN_TRUST_KEYS.includes(key)) return key;
-    const found = findForbiddenKey(entry, depth + 1);
-    if (found) return found;
-  }
-  return null;
-}
-
-function text(value, max = MAX_TEXT) {
-  return typeof value === 'string' && value.trim() ? value.trim().slice(0, max) : null;
-}
-
-/**
- * Validates the model's declared shape. `sources` is the source inventory the
- * backend already fetched; every source reference must point into it.
- */
+/** Kept as the adapter's public validation entry point; the strict schema and
+ * all nested/coverage checks live in src/lib/menuExtractionSchema.js. */
 function validateStructuredOutput(output, sources) {
-  const problems = [];
-  if (!output || typeof output !== 'object' || Array.isArray(output)) return ['output must be an object'];
-  const forbidden = findForbiddenKey(output);
-  if (forbidden) problems.push(`forbidden trust key: ${forbidden}`);
-  const allowedTop = new Set(['menus', 'rejected', 'coverage']);
-  for (const key of Object.keys(output)) if (!allowedTop.has(key)) problems.push(`unknown top-level field: ${key}`);
-  const sourceIds = new Set((Array.isArray(sources) ? sources : []).map((s) => s && s.id).filter(Boolean));
-  if (!Array.isArray(output.menus)) return ['menus must be an array'];
-  if (output.menus.length > MAX_SECTIONS) problems.push(`more than ${MAX_SECTIONS} menus`);
-  let itemCount = 0;
-  output.menus.forEach((menu, m) => {
-    if (!menu || typeof menu !== 'object') return problems.push(`menus[${m}] must be an object`);
-    if (!text(menu.title)) problems.push(`menus[${m}].title is required`);
-    if (!text(menu.sourceId) || !sourceIds.has(menu.sourceId)) problems.push(`menus[${m}].sourceId must reference the source inventory`);
-    if (!Array.isArray(menu.categories)) return problems.push(`menus[${m}].categories must be an array`);
-    menu.categories.forEach((category, c) => {
-      if (!category || typeof category !== 'object') return problems.push(`menus[${m}].categories[${c}] must be an object`);
-      if (!text(category.name)) problems.push(`menus[${m}].categories[${c}].name is required`);
-      if (!Array.isArray(category.items)) return problems.push(`menus[${m}].categories[${c}].items must be an array`);
-      category.items.forEach((item, i) => {
-        itemCount += 1;
-        const where = `menus[${m}].categories[${c}].items[${i}]`;
-        if (!item || typeof item !== 'object') return problems.push(`${where} must be an object`);
-        if (!text(item.name)) problems.push(`${where}.name is required`);
-        if (!PRICE_STATUSES.includes(item.priceStatus)) problems.push(`${where}.priceStatus is invalid`);
-        if (item.priceStatus === 'known' && !(Number.isInteger(item.amountMinorUnits) && item.amountMinorUnits >= 0)) {
-          problems.push(`${where}.amountMinorUnits must be a non-negative integer for a known price`);
-        }
-        if (item.priceStatus !== 'known' && item.amountMinorUnits !== undefined && item.amountMinorUnits !== null) {
-          problems.push(`${where}.amountMinorUnits must be absent/null unless known`);
-        }
-        if (item.evidence && (!text(item.evidence.sourceId) || !sourceIds.has(item.evidence.sourceId) || !text(item.evidence.locator))) {
-          problems.push(`${where}.evidence must reference a source and locator`);
-        }
-        if (!item.evidence) problems.push(`${where}.evidence is required`);
-      });
-    });
-  });
-  if (itemCount > MAX_ITEMS) problems.push(`more than ${MAX_ITEMS} items`);
-  if (output.rejected !== undefined && !Array.isArray(output.rejected)) problems.push('rejected must be an array');
-  return problems;
+  return schema.validateStructuredOutput(output, sources);
 }
 
 function classifyAdapterError(err) {
@@ -114,26 +47,99 @@ function timer(ms, onTimeout) {
   return setTimeout(onTimeout, ms);
 }
 
+const LIMIT_RULES = {
+  callTimeoutMs: 1,
+  jobDeadlineMs: 1,
+  maxInputTokens: 1,
+  maxOutputTokens: 1,
+  maxDocuments: 1,
+  maxPages: 1,
+  maxRetries: 0,
+  maxCostEurCents: 0,
+  maxConcurrency: 1,
+};
+
+function validateLimits(raw) {
+  const limits = { ...DEFAULT_EXTRACTION_LIMITS, ...(raw || {}) };
+  const problems = [];
+  for (const [key, minimum] of Object.entries(LIMIT_RULES)) {
+    // null is the explicit "no budget configured" state, reported separately.
+    if (key === 'maxCostEurCents' && limits[key] === null) continue;
+    if (!Number.isInteger(limits[key])) problems.push(`${key} must be an integer`);
+    else if (limits[key] < minimum) problems.push(`${key} must be at least ${minimum}`);
+  }
+  if (problems.length > 0) return { ok: false, reason: 'invalid_limits', problems, limits };
+  if (!Number.isInteger(limits.maxCostEurCents)) return { ok: false, reason: 'budget_not_configured', limits };
+  return { ok: true, limits };
+}
+
+function estimateTokens(value) {
+  const text = typeof value === 'string' ? value : JSON.stringify(value);
+  return Math.ceil((text || '').length / 4);
+}
+
+function sourcePages(sources) {
+  return (Array.isArray(sources) ? sources : []).reduce((sum, source) => sum + (source && Number.isInteger(source.pageCount) ? source.pageCount : 0), 0);
+}
+
+function reserveBudget(budget, maxCost) {
+  if (!budget || typeof budget.reserve !== 'function' || typeof budget.settle !== 'function') {
+    return { ok: false, reason: 'budget_guard_required' };
+  }
+  if (budget.costEurCents !== undefined && (!Number.isInteger(budget.costEurCents) || budget.costEurCents < 0)) {
+    return { ok: false, reason: 'budget_exceeded' };
+  }
+  if (Number.isInteger(budget.costEurCents) && budget.costEurCents > maxCost) {
+    return { ok: false, reason: 'budget_exceeded' };
+  }
+  let reservation;
+  try {
+    reservation = budget.reserve(maxCost);
+  } catch {
+    return { ok: false, reason: 'budget_exceeded' };
+  }
+  if (reservation === false || (reservation && reservation.ok === false)) return { ok: false, reason: 'budget_exceeded' };
+  return { ok: true, maxCost, reservation };
+}
+
 /**
  * One bounded call. The adapter must already be configured by an approved
- * caller; this function still refuses absent adapters and over-budget jobs.
+ * caller; this function still refuses absent adapters, invalid limits and
+ * over-budget jobs. Timeout aborts the provider signal and invokes an optional
+ * adapter.cancel() so a future provider cannot keep running invisibly.
  */
 async function runStructuredExtraction({ adapter, protocol, sources, limits, budget } = {}) {
   if (!adapter || adapter.configured !== true || typeof adapter.extract !== 'function') {
     return { ok: false, reason: 'provider_not_configured' };
   }
   if (!protocol || !protocol.text || !protocol.hash) return { ok: false, reason: 'protocol_unavailable' };
-  const effective = { ...DEFAULT_EXTRACTION_LIMITS, ...(limits || {}) };
+  const checked = validateLimits(limits);
+  if (!checked.ok) return { ok: false, reason: checked.reason, problems: checked.problems };
+  const effective = checked.limits;
   const sourceList = Array.isArray(sources) ? sources : [];
   if (sourceList.length > effective.maxDocuments) return { ok: false, reason: 'document_limit' };
-  if (budget && Number.isInteger(budget.costEurCents) && effective.maxCostEurCents !== null && budget.costEurCents > effective.maxCostEurCents) {
-    return { ok: false, reason: 'budget_exceeded' };
-  }
-  if (!Number.isInteger(effective.maxCostEurCents)) return { ok: false, reason: 'budget_not_configured' };
+  if (sourcePages(sourceList) > effective.maxPages) return { ok: false, reason: 'page_limit' };
+  if (estimateTokens(protocol.text) + estimateTokens(sourceList) > effective.maxInputTokens) return { ok: false, reason: 'input_limit' };
 
+  const reservation = reserveBudget(budget, effective.maxCostEurCents);
+  if (!reservation.ok) return { ok: false, reason: reservation.reason };
+
+  const controller = new AbortController();
   let timeoutHandle;
+  let timedOut = false;
   const timeout = new Promise((_, reject) => {
-    timeoutHandle = timer(effective.callTimeoutMs, () => reject(Object.assign(new Error('timeout'), { code: 'timeout' })));
+    timeoutHandle = timer(effective.callTimeoutMs, () => {
+      timedOut = true;
+      controller.abort();
+      if (typeof adapter.cancel === 'function') {
+        try {
+          adapter.cancel('timeout');
+        } catch {
+          // Cancellation is best-effort; the bounded timeout result still wins.
+        }
+      }
+      reject(Object.assign(new Error('timeout'), { code: 'timeout' }));
+    });
   });
   try {
     const output = await Promise.race([
@@ -144,16 +150,36 @@ async function runStructuredExtraction({ adapter, protocol, sources, limits, bud
         tools: [],
         sources: sourceList,
         limits: effective,
+        signal: controller.signal,
       }),
       timeout,
     ]);
+    if (estimateTokens(output) > effective.maxOutputTokens) {
+      if (typeof budget.settle === 'function') budget.settle(0);
+      return { ok: false, reason: 'output_limit' };
+    }
+    if (output && output.coverage && Number.isInteger(output.coverage.pagesRead) && output.coverage.pagesRead > effective.maxPages) {
+      if (typeof budget.settle === 'function') budget.settle(0);
+      return { ok: false, reason: 'page_limit' };
+    }
     const problems = validateStructuredOutput(output, sourceList);
-    if (problems.length > 0) return { ok: false, reason: 'schema_violation', problems };
-    return { ok: true, output, meta: { adapterVersion: adapter.version, provider: adapter.provider, model: adapter.model, instructionHash: protocol.hash } };
+    if (problems.length > 0) {
+      if (typeof budget.settle === 'function') budget.settle(0);
+      return { ok: false, reason: 'schema_violation', problems };
+    }
+    const actualCost = Number.isInteger(budget.costEurCents) ? budget.costEurCents : 0;
+    if (actualCost > effective.maxCostEurCents) {
+      if (typeof budget.settle === 'function') budget.settle(actualCost);
+      return { ok: false, reason: 'budget_exceeded' };
+    }
+    if (typeof budget.settle === 'function') budget.settle(actualCost);
+    return { ok: true, output, meta: { adapterVersion: adapter.version, provider: adapter.provider, model: adapter.model, instructionHash: protocol.hash, maxCostEurCents: effective.maxCostEurCents, actualCostEurCents: actualCost } };
   } catch (err) {
-    return { ok: false, ...classifyAdapterError(err) };
+    if (typeof budget.settle === 'function') budget.settle(0);
+    return { ok: false, ...(timedOut ? { recoverable: true, reason: 'timeout' } : classifyAdapterError(err)) };
   } finally {
     clearTimeout(timeoutHandle);
+    if (!timedOut) controller.abort();
   }
 }
 

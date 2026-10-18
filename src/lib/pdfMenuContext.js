@@ -59,12 +59,23 @@ function pdfContextToMenuContext(context, usedSlugs, options = {}) {
           const evidence = { locator: `pdf:${position + 1}:item:${itemIndex + 1}` };
           const contentHash = boundedNonEmpty(item && item.contentHash);
           if (contentHash) evidence.contentHash = contentHash;
-          return {
+          const itemOut = {
             name: itemName,
             desc: boundedText(item && item.desc),
             price: boundedText(item && item.price),
             evidence,
           };
+          if (item && item.priceStatus === 'multiple_undecomposed') {
+            itemOut.priceStatus = 'multiple_undecomposed';
+            if (boundedText(item.priceText)) itemOut.priceText = boundedText(item.priceText);
+            if (Array.isArray(item.priceVariants)) {
+              itemOut.priceVariants = item.priceVariants
+                .filter((variant) => variant && typeof variant.price === 'string')
+                .slice(0, 10)
+                .map((variant) => ({ label: boundedText(variant.label), price: boundedText(variant.price) }));
+            }
+          }
+          return itemOut;
         })
         .filter(Boolean);
       return { name, position, items };
