@@ -4,7 +4,8 @@ const test = require('node:test')
 const assert = require('node:assert/strict')
 const fs = require('node:fs')
 
-const { runRestaurantSourceAnalysis, applyProviderNeutralExtraction, pdfLayoutLimitations } = require('./restaurantSourceAnalysis')
+const { runRestaurantSourceAnalysis, applyProviderNeutralExtraction, pdfLayoutLimitations, readPdfMenuSource } = require('./restaurantSourceAnalysis')
+const { assessDeterministicMenuQuality } = require('./menuExtractionQuality')
 const { buildCandidateSummary } = require('./urlIntakes')
 const { buildMenuConcept } = require('./menuConcept')
 
@@ -828,4 +829,46 @@ test('REGRESSION (review 6249303096 P1): an unlinked PDF price line is reported 
   assert.match(limitations[0], /2 prijsregel\(s\)/)
   assert.match(limitations[0], /naam-\/prijskoppeling/)
   assert.deepEqual(pdfLayoutLimitations('https://fixture.example/menu.pdf', { unlinkedPriceLines: 0 }), [])
+})
+
+test('REGRESSION (review 6249657793 P1): an unresolvable numeric ambiguity survives parser → quality gate → limitation and never becomes a sufficient/review-ready menu', async () => {
+  const content = [
+    'BT /F1 12 Tf',
+    textAt(20, 100, '// FICTIEVE DRANKEN'),
+    // A proven pair (split name/price) and a proven merged pair stay items.
+    textAt(20, 80, 'Fictieve Koffie'),
+    textAt(90, 80, '3.5'),
+    textAt(160, 80, 'Fictief Broodje 4.5'),
+    // 6.5 and 25.0 without a separator: the layout does not prove whether
+    // 6.5 belongs to the name or is a second (glass) amount.
+    textAt(20, 60, 'Fictieve Wijn'),
+    textAt(90, 60, '6.5'),
+    textAt(150, 60, '25.0'),
+    'ET',
+  ].join('\n')
+
+  const { context } = await readPdfMenuSource(
+    buildTestPdf({ contentStream: content }),
+    'https://fixture.example/menu.pdf',
+    'source-1',
+  )
+  assert.equal(context.layout.ambiguousPriceLines, 1)
+  const names = context.recognizedSections.flatMap((category) => category.items.map((item) => item.name))
+  assert.deepEqual(names, ['Fictieve Koffie', 'Fictief Broodje'])
+  // Never a claimed 6.5 amount and never a silent "Fictieve Wijn 6.5" item.
+  assert.equal(context.recognizedSections.some((category) => category.items.some((item) => item.name.includes('Wijn') || item.price === '6.5')), false)
+
+  const menu = {
+    sourceId: 'source-1',
+    sourceUrl: 'https://fixture.example/menu.pdf',
+    categories: context.recognizedSections,
+  }
+  const assessment = assessDeterministicMenuQuality({ menus: [menu], unknownMenuContexts: [context] })
+  assert.equal(assessment.sufficient, false)
+  assert.equal(assessment.blockedByProductGap, false)
+  assert.ok(assessment.codes.includes('pdf_ambiguous_price_lines'))
+  assert.deepEqual(assessment.flaggedSourceIds, ['source-1'])
+
+  const limitations = pdfLayoutLimitations(menu.sourceUrl, context.layout)
+  assert.ok(limitations.some((line) => /niet eenduidig/.test(line) && /niet als gerecht/.test(line)))
 })

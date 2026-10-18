@@ -98,6 +98,27 @@ function isPriceVariantSeparator(str) {
   return typeof str === 'string' && PRICE_VARIANT_SEPARATOR_PATTERN.test(str.trim())
 }
 
+/** A unit directly after a number makes that number a portion/quantity
+ * ("6 st.", "2 personen", "0,3 l"), never an amount. Deliberately a closed
+ * vocabulary: an unknown word after a number is not treated as a unit, so a
+ * real price is never reclassified because of a stray label. */
+const QUANTITY_UNIT_PATTERN = /^(?:st|stk|stuks?|pers|persoon|personen|pp|glas|glazen|fles|flessen|btl|bottel|karaf|cl|ml|liter|l|gram|gr|kg|cm|%)\.?$/i
+
+/** "0.0"/"0,00" is the common alcohol-free marker ("0.0 Regrets"), never a
+ * price: a genuinely free item is printed as "gratis", not as a zero amount. */
+const ZERO_AMOUNT_MARKER_PATTERN = /^0[.,]0+$/
+
+function isQuantityUnit(str) {
+  return typeof str === 'string' && QUANTITY_UNIT_PATTERN.test(str.trim())
+}
+
+/** Whether a token carries name text. An ABV token is a property, not a
+ * name, so it never counts as a name boundary here. */
+function isNameWord(word) {
+  const text = word && typeof word.text === 'string' ? word.text : ''
+  return /\p{L}/u.test(text) && !ABV_TOKEN_PATTERN.test(text)
+}
+
 /** A document that draws the exact same text twice — an overlay/animation
  * layer, confirmed against the real Smelt Breda menu PDF: that PDF repeats
  * the whole left column 40 units higher, including its own section header.
@@ -434,6 +455,74 @@ function tokenizeLineIntoWords(lineItems) {
   return words
 }
 
+/**
+ * Splits one baseline's price-shaped tokens into name evidence and amount
+ * candidates using the whole local line/column, never a bare numeric block.
+ * pdfjs may keep a name-internal number in the name's own item ("Monkey 47",
+ * "6 st.") or split it into its own item ("Monkey", "47"); the second shape
+ * used to turn every numeric item into an amount.
+ *   - a number directly followed by a unit is a quantity ("6 st.", "0,3 l");
+ *   - a leading "0.0" alcohol-free marker opens the name ("0.0 Regrets"),
+ *     never a nameless price; any other leading number is not glued onto the
+ *     following name because it may be a neighbouring column's price run;
+ *   - a number after a name run with only the trailing amount column after it
+ *     belongs to that name ("Monkey 47" -> 10.00, "Oesters 6" -> 24.00).
+ *     A decimal token in exactly that position can also be a second
+ *     glass/bottle amount and the line itself does not prove which: it is
+ *     returned as ambiguous so the caller reports it instead of claiming a
+ *     known price. Explicit variants ("6.5 / 25.0") are never ambiguous.
+ * Returns index sets, never source text.
+ */
+function classifyNumericEvidence(words) {
+  const nameEmbedded = new Set()
+  const ambiguous = new Set()
+  const list = Array.isArray(words) ? words : []
+  const nameAt = list.map((word) => isNameWord(word))
+  const variantSequenceAt = (index) =>
+    (index >= 2 && isPriceToken(list[index - 2].text) && isPriceVariantSeparator(list[index - 1].text)) ||
+    (index + 2 < list.length && isPriceVariantSeparator(list[index + 1].text) && isPriceToken(list[index + 2].text))
+  for (let index = 0; index < list.length; index += 1) {
+    if (!isPriceToken(list[index].text)) continue
+    if (variantSequenceAt(index)) continue
+    const next = list[index + 1]
+    // 1. A number followed by a unit and then by a real amount is a
+    //    quantity, not an amount ("Oesters 6 st. 24.00", "1 fles 25.00").
+    //    Without a later amount the number keeps its ordinary reading, so a
+    //    genuine "Wijn 6.5 glas" price is not silently reclassified.
+    if (
+      next &&
+      isQuantityUnit(next.text) &&
+      list.slice(index + 2).some((word) => isPriceToken(word.text))
+    ) {
+      nameEmbedded.add(index)
+      continue
+    }
+    const nameBefore = nameAt.slice(0, index).some(Boolean)
+    const nameAfter = nameAt.slice(index + 1).some(Boolean)
+    // 2. A leading "0.0" alcohol-free marker opens the name ("0.0 Regrets")
+    //    instead of becoming a nameless price. Any other leading number keeps
+    //    the conservative reading: it is a price run that may belong to a
+    //    neighbouring column, so it is never glued onto the following name.
+    if (!nameBefore && nameAfter && ZERO_AMOUNT_MARKER_PATTERN.test(list[index].text.trim())) {
+      nameEmbedded.add(index)
+      continue
+    }
+    // 3. A name-internal number immediately before the trailing amount.
+    if (!nameBefore || nameAfter) continue
+    if (!list.slice(index + 1).some((word) => isPriceToken(word.text))) continue
+    if (ZERO_AMOUNT_MARKER_PATTERN.test(list[index].text.trim())) {
+      nameEmbedded.add(index)
+      continue
+    }
+    if (/[.,]/.test(list[index].text)) {
+      ambiguous.add(index)
+      continue
+    }
+    nameEmbedded.add(index)
+  }
+  return { nameEmbedded, ambiguous }
+}
+
 /** A horizontal gap larger than this is a separate menu column, not the
  * normal name-to-price gap. The real Smelt PDF uses x≈23 and x≈442. */
 const COLUMN_GAP = 150
@@ -695,14 +784,18 @@ function structurePdfLinesIntoMenu(pages) {
               continue
             }
           }
+          // Name-internal numbers are name evidence whether pdfjs glued them
+          // into the name's own item or split them into a separate numeric
+          // item: the whole local line/column (name run, unit, trailing amount
+          // position) decides, never a bare numeric block.
+          // (review 6249303096 P1, review 6249657793 P1)
+          const numericEvidence = classifyNumericEvidence(words)
           // A price is credible when its own PDF text item consists solely of
           // prices/separators ("4.50"), when it is part of an explicit variant
           // sequence ("6.5 / 25.0"), or when pdfjs merged a trailing price into
           // a name-bearing item ("Fictief Broodje 3.00") and no separately
-          // positioned price run sits to its right. A price-shaped number inside
-          // a name is never a price when a real price run is printed to its
-          // right ("Monkey 47" -> 10.0, "0.0 Regrets" -> 7.5, "6 st." -> 65.0).
-          // (review 6249303096 P1)
+          // positioned price run sits to its right. A price-shaped number that
+          // classifyNumericEvidence placed inside the name is never a price.
           const variantItemIndexes = new Set()
           for (let index = 0; index + 2 < words.length; index += 1) {
             if (
@@ -713,8 +806,9 @@ function structurePdfLinesIntoMenu(pages) {
               for (const variantWord of words.slice(index, index + 3)) variantItemIndexes.add(variantWord.itemIndex)
             }
           }
-          const isPriceWord = (word) =>
+          const isPriceWord = (word, index) =>
             isPriceToken(word.text) &&
+            !numericEvidence.nameEmbedded.has(index) &&
             (word.priceOnlyItem ||
               variantItemIndexes.has(word.itemIndex) ||
               (word.itemLast === true && !words.some((other) => other.priceOnlyItem && other.x > word.x)))
@@ -740,7 +834,16 @@ function structurePdfLinesIntoMenu(pages) {
             state.lastItem = null
             continue
           }
-          const pricePositions = words.map((word, index) => (isPriceWord(word) ? index : -1)).filter((index) => index >= 0)
+          // A decimal number between the name and the trailing amount can be
+          // either name text or a second glass/bottle amount; the line itself
+          // does not prove which. Report it and claim no price at all: a
+          // guessed known amount or an invented name is never acceptable.
+          if (numericEvidence.ambiguous.size > 0) {
+            layout.ambiguousPriceLines += 1
+            state.lastItem = null
+            continue
+          }
+          const pricePositions = words.map((word, index) => (isPriceWord(word, index) ? index : -1)).filter((index) => index >= 0)
           const priceShapedPositions = words
             .map((word, index) => (isPriceToken(word.text) ? index : -1))
             .filter((index) => index >= 0)
@@ -756,10 +859,12 @@ function structurePdfLinesIntoMenu(pages) {
           // A price in the middle of a line, with no price at the end, is prose:
           // the real Smelt PDF has "Klassieke Stolwijker van 2,5 jaar oud ..." —
           // reading that as a dish named "Klassieke Stolwijker van" priced 2,50
-          // invents an item and drops the real description. Two (name, price)
-          // pairs merged into one text string by pdfjs ("Koffie 3.5 Broodje
-          // 4.5", the real De Botanist shape) still end with a price and are
-          // accepted as two items.
+          // invents an item and drops the real description. A row that pdfjs
+          // merged into ONE string can hold two side-by-side (name, price)
+          // pairs ("Koffie 3.5 Broodje 4.5"); only the trailing amount is
+          // proven, so the interior number stays in the name rather than being
+          // split at an unproven boundary. A real two-column row is separated
+          // by the page column anchors before this point.
           const priceNotAtLineEnd = pricePositions.length > 0 && pricePositions[pricePositions.length - 1] !== words.length - 1
           if (priceNotAtLineEnd) {
             layout.ambiguousPriceLines += 1
@@ -772,8 +877,9 @@ function structurePdfLinesIntoMenu(pages) {
           const recognizedItems = []
           let buffer = []
           let bufferStartX = null
-          for (const word of words) {
-            if (isPriceWord(word)) {
+          for (let wordIndex = 0; wordIndex < words.length; wordIndex += 1) {
+            const word = words[wordIndex]
+            if (isPriceWord(word, wordIndex)) {
               const name = joinText(buffer)
               if (name.length > 0) recognizedItems.push({ name, price: word.text.trim(), startX: bufferStartX })
               buffer = []
@@ -975,6 +1081,7 @@ module.exports = {
   MAX_LAYOUT_TEXT_CHARS,
   isPriceToken,
   isPriceVariantSeparator,
+  classifyNumericEvidence,
   splitLineIntoColumns,
   splitColumnByBaseline,
   pageColumnAnchors,

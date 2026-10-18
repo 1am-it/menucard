@@ -1,8 +1,8 @@
 # Menu-extractie — acceptatiematrix #59
 
 Status: **ontwikkelaarsbewijs, geen onafhankelijke acceptatie en geen release.**
-Datum: 2026-10-18, herstelronde na Delivery Lead-review 6248740792. Issue #59,
-branch `feat/menu-extraction-59`, PR #60.
+Datum: 2026-10-18, bijgewerkt na Delivery Lead-review 6249657793 (eerdere
+herstelronde: 6248740792). Issue #59, branch `feat/menu-extraction-59`, PR #60.
 Protocol: `MENU-EXTRACTION.md` v0.2, SHA-256
 `15510b4c0b74fee722ac2c51a3f40aa21b03e0161ccffdcb2008f3d27350b762`.
 
@@ -214,6 +214,36 @@ de parseruitkomst herschreven. De Botanist-referentie is nog steeds een
 developer-capture, geen onafhankelijke bronwaarheid. Browseracceptatie,
 app-side AI-activering, een nieuwe holdout en #56-compatibiliteit zijn in
 deze ronde niet uitgevoerd.
+
+## Verificatie review 6249657793 (2026-10-18)
+
+De resterende P1 is hersteld: een volledig numeriek pdfjs-tekstitem is niet
+langer onvoorwaardelijk een prijs. `classifyNumericEvidence` gebruikt de lokale
+naamrun, de echte bedragpositie en een gesloten eenhedenlijst. Daarmee blijven
+`Monkey 47` → 10.00, `Oesters 6 st.` → 24.00 en `0.0 Regrets` → 7.50 intact,
+terwijl `Monkey` + `47` + `10.00` en `Oesters` + `6` + `st.` + `24.00` geen
+bekende prijs 47/6 en geen nepitem `st.` meer opleveren. Een decimaalgetal
+zonder scheidingsteken tussen naam en bedrag wordt als `ambiguousPriceLines`
+gemeld en levert geen bekende prijs; de ketentest bewijst dat zo'n PDF niet
+`sufficient` wordt. Een prijsrun uit een naburige, samengevoegde kolom wordt
+niet aan de volgende naam geplakt.
+
+| Controle | Commando | Resultaat |
+| --- | --- | --- |
+| Volledige suite | `npm test` | 2036 tests: 2036 pass, 0 fail, 0 skipped |
+| Gerichte #59-tests | vier bestanden (`pdfMenuStructuring`, live-regressies, quality, analysis) | 88 pass, 0 fail |
+| Structuurcorpus | `npm run test:menu-structure` | 6 pass, 0 fail |
+| Benchmark | `npm run benchmark:menu-structure` | 22 pass, 0 fail, 1 unclassified (`STRUCT-018`, bestaande JSON-LD-keuze) |
+| Build | `npm run build` | compiled successfully in 32.6 s |
+| PDF.js-trace | `node ops/scripts/verify-pdfjs-server-trace.js` | OK; 164 server scripts |
+| Smelt/Blossem | read-only probe | Smelt 37/37 en Blossem 43/43; hashes gelijk; alle verschillen 0 |
+| Botanist | read-only heranalyse van dezelfde gepinde PDF | 196 items/54 secties; layout 18 ambigu / 24 niet-gekoppeld / 12 supplement / 2 onbekende kop; itemlijst en tellers gelijk aan HEAD (0 gewijzigde rijen) |
+
+De eerdere verificatietabel blijft de meting van die ronde. De
+Botanist-vergelijking blijft ongewijzigd open: 46 ontbrekend en 96
+niet-gekoppeld zijn niet hersteld of geclaimd. Er is geen nieuwe holdout
+geëvalueerd, geen referentie aangepast, geen provider of app-side AI
+geactiveerd, geen concept opgeslagen en geen browseracceptatie uitgevoerd.
 
 ## Resterende concrete beslissingen
 

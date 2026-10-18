@@ -8,6 +8,7 @@ const { computeFieldEvidenceHash } = require('./fieldEvidenceHash')
 const {
   MENU_ITEM_CONFIDENCE,
   isPriceToken,
+  classifyNumericEvidence,
   pureSectionMarkerNames,
   structurePdfLinesIntoMenu,
   duplicateLayoutLayer,
@@ -74,6 +75,24 @@ test('isPriceToken: recognizes Dutch/English price shapes, rejects percentages a
   assert.equal(isPriceToken('Soep'), false)
   assert.equal(isPriceToken(''), false)
   assert.equal(isPriceToken(null), false)
+})
+
+test('classifyNumericEvidence: quantity/unit and trailing-amount evidence, never a bare numeric item as price', () => {
+  const words = (...texts) => texts.map((text) => ({ text }))
+  // A portion with its unit before the real amount is a quantity.
+  assert.deepEqual([...classifyNumericEvidence(words('Oesters', '6', 'st.', '24.00')).nameEmbedded], [1])
+  // A serving label after a price without a later amount is not a quantity.
+  assert.deepEqual([...classifyNumericEvidence(words('Wijn', '6.5', 'glas')).nameEmbedded], [])
+  // Monkey 47 before the real amount is name text, never price 47.
+  assert.deepEqual([...classifyNumericEvidence(words('Monkey', '47', '10.00')).nameEmbedded], [1])
+  // A decimal that could be a second (glass) amount is ambiguous, not claimed.
+  assert.deepEqual([...classifyNumericEvidence(words('Wijn', '6.5', '25.0')).ambiguous], [1])
+  // An explicit variant sequence is never ambiguous.
+  const variant = classifyNumericEvidence(words('Wijn', '6.5', '/', '25.0'))
+  assert.deepEqual([...variant.nameEmbedded], [])
+  assert.deepEqual([...variant.ambiguous], [])
+  // A leading 0.0 alcohol-free marker opens the name.
+  assert.deepEqual([...classifyNumericEvidence(words('0.0', 'Regrets', '7.50')).nameEmbedded], [0])
 })
 
 test('pureSectionMarkerNames: matches a whole item of "// NAME" (prefix-only, no closing "//" — the real, verified format), never a substring inside ordinary text', () => {
@@ -594,6 +613,157 @@ test('plain sub-headings below a menu heading keep their parent path, and an arr
   const rillette = categories[0].items.find((item) => item.name === 'Rillette van gerookte makreel')
   assert.equal(rillette.desc, 'Met zwarte peper mayonaise en bruschetta')
   assert.equal(layout.arrangementLines, 1)
+})
+
+test('REGRESSION (review 6249657793 P1): name/portion numbers are name evidence whether pdfjs glues or splits them, and a real amount column stays the price', () => {
+  const page = {
+    pageNumber: 1,
+    lines: [
+      { y: 400, items: [{ str: '// DRANKEN', x: 20, y: 400 }] },
+      // Split by pdfjs: name, gin number and real amount as three items.
+      { y: 380, items: [{ str: 'Monkey', x: 20, y: 380 }, { str: '47', x: 60, y: 380 }, { str: '10.00', x: 120, y: 380 }] },
+      // Glued by pdfjs: the same name and gin number in one item.
+      { y: 360, items: [{ str: 'Monkey 47', x: 20, y: 360 }, { str: '10.00', x: 120, y: 360 }] },
+      // Split portion with its unit, then the real amount.
+      { y: 340, items: [{ str: 'Oesters', x: 20, y: 340 }, { str: '6', x: 60, y: 340 }, { str: 'st.', x: 75, y: 340 }, { str: '24.00', x: 120, y: 340 }] },
+      { y: 320, items: [{ str: 'Oesters 6 st.', x: 20, y: 320 }, { str: '24.00', x: 120, y: 320 }] },
+      // Split alcohol-free marker: the leading number starts the name.
+      { y: 300, items: [{ str: '0.0', x: 20, y: 300 }, { str: 'Regrets', x: 50, y: 300 }, { str: '7.50', x: 120, y: 300 }] },
+      // A quantity without unit text is still name evidence, not a price.
+      { y: 280, items: [{ str: 'Oesters', x: 20, y: 280 }, { str: '6', x: 60, y: 280 }, { str: '24.00', x: 120, y: 280 }] },
+      // A real integer amount keeps working.
+      { y: 260, items: [{ str: 'Soep', x: 20, y: 260 }, { str: '8', x: 120, y: 260 }] },
+    ],
+  }
+  const { categories, layout } = structurePdfLinesIntoMenu([page])
+  assert.deepEqual(categories.flatMap((category) => category.items.map((item) => [item.name, item.price, item.priceStatus])), [
+    ['Monkey 47', '10.00', 'known'],
+    ['Monkey 47', '10.00', 'known'],
+    ['Oesters 6 st.', '24.00', 'known'],
+    ['Oesters 6 st.', '24.00', 'known'],
+    ['0.0 Regrets', '7.50', 'known'],
+    ['Oesters 6', '24.00', 'known'],
+    ['Soep', '8', 'known'],
+  ])
+  // No invented "st." item and no bogus known price 47 or 6 anywhere.
+  assert.equal(categories.some((category) => category.items.some((item) => item.name === 'st.' || ['47', '6'].includes(item.price))), false)
+  assert.equal(layout.ambiguousPriceLines, 0)
+  assert.equal(layout.unlinkedPriceLines, 0)
+  assert.equal(layout.unrecognizedHeadingLines, 0)
+})
+
+test('REGRESSION (review 6249657793 P1): two dishes on one row without page anchors, multiple columns, explicit glass/bottle variants and supplements stay safe', () => {
+  // No repeated letter-bearing X positions: the page has no column anchors, so
+  // this row must still be read as two independent (name, price) pairs.
+  const singleRow = {
+    pageNumber: 1,
+    lines: [
+      { y: 400, items: [{ str: '// ETEN', x: 20, y: 400 }] },
+      { y: 380, items: [{ str: 'Soep', x: 20, y: 380 }, { str: '8', x: 100, y: 380 }, { str: 'Wijn', x: 220, y: 380 }, { str: '6', x: 300, y: 380 }] },
+    ],
+  }
+  const row = structurePdfLinesIntoMenu([singleRow])
+  assert.deepEqual(row.categories.flatMap((category) => category.items.map((item) => [item.name, item.price])), [
+    ['Soep', '8'],
+    ['Wijn', '6'],
+  ])
+  assert.equal(row.layout.ambiguousPriceLines, 0)
+
+  // Two real marker-defined columns, a split quantity in the left column, an
+  // explicit glass/bottle variant in the right column and a supplement line.
+  const page = {
+    pageNumber: 1,
+    lines: [
+      { y: 400, items: [{ str: '// ETEN', x: 20, y: 400 }, { str: '// DRANKEN', x: 220, y: 400 }] },
+      {
+        y: 380,
+        items: [
+          { str: 'Soep', x: 20, y: 380 },
+          { str: '8.5', x: 100, y: 380 },
+          { str: 'Wijn A', x: 220, y: 380 },
+          { str: '6.5', x: 300, y: 380 },
+          { str: '/', x: 320, y: 380 },
+          { str: '25.0', x: 340, y: 380 },
+        ],
+      },
+      {
+        y: 360,
+        items: [
+          { str: 'Brood', x: 20, y: 360 },
+          { str: '6', x: 100, y: 360 },
+          { str: 'Wijn B', x: 220, y: 360 },
+          { str: '7.5', x: 300, y: 360 },
+          { str: '/', x: 320, y: 360 },
+          { str: '28.0', x: 340, y: 360 },
+        ],
+      },
+      { y: 340, items: [{ str: '+ Bresaola', x: 20, y: 340 }, { str: '15', x: 100, y: 340 }] },
+      { y: 320, items: [{ str: 'Oesters', x: 20, y: 320 }, { str: '6', x: 60, y: 320 }, { str: 'st.', x: 75, y: 320 }, { str: '24.00', x: 120, y: 320 }] },
+    ],
+  }
+  const structured = structurePdfLinesIntoMenu([page])
+  const eten = structured.categories.find((category) => category.name === 'ETEN')
+  const dranken = structured.categories.find((category) => category.name === 'DRANKEN')
+  assert.deepEqual(eten.items.map((item) => [item.name, item.price]), [
+    ['Soep', '8.5'],
+    ['Brood', '6'],
+    ['Oesters 6 st.', '24.00'],
+  ])
+  assert.deepEqual(dranken.items.map((item) => [item.name, item.price, item.priceStatus, item.priceText]), [
+    ['Wijn A', null, 'multiple_undecomposed', '6.5 / 25.0'],
+    ['Wijn B', null, 'multiple_undecomposed', '7.5 / 28.0'],
+  ])
+  assert.equal(structured.layout.supplementLines, 1)
+  assert.equal(structured.layout.ambiguousPriceLines, 0)
+  assert.equal(structured.layout.unlinkedPriceLines, 0)
+})
+
+test('REGRESSION (review 6249657793 P1): a decimal number before the trailing amount with no separator is reported as ambiguous, never claimed as a known price or silently turned into a name', () => {
+  const page = {
+    pageNumber: 1,
+    lines: [
+      { y: 400, items: [{ str: '// DRANKEN', x: 20, y: 400 }] },
+      { y: 380, items: [{ str: 'Koffie', x: 20, y: 380 }, { str: '3.5', x: 120, y: 380 }] },
+      // "Wijn 6.5 25.0" without "/" could be a name number or a glass price:
+      // the layout does not prove which, so no item and no price are claimed.
+      { y: 360, items: [{ str: 'Wijn', x: 20, y: 360 }, { str: '6.5', x: 60, y: 360 }, { str: '25.0', x: 120, y: 360 }] },
+      { y: 340, items: [{ str: 'Soep', x: 20, y: 340 }, { str: '5.0', x: 120, y: 340 }] },
+    ],
+  }
+  const { categories, layout } = structurePdfLinesIntoMenu([page])
+  assert.deepEqual(categories.flatMap((category) => category.items.map((item) => [item.name, item.price])), [
+    ['Koffie', '3.5'],
+    ['Soep', '5.0'],
+  ])
+  assert.equal(layout.ambiguousPriceLines, 1)
+  assert.equal(layout.unlinkedPriceLines, 0)
+})
+
+test('REGRESSION (review 6249657793 P1): a price run from a neighbouring, merged column cluster is never glued onto the following right-hand name', () => {
+  // The real De Botanist shape: a left-column price (5.5) shares a baseline
+  // with a right-hand name/price pair, and the page anchors merge those X
+  // positions into one cluster. The orphan price must not become a name prefix.
+  const page = {
+    pageNumber: 3,
+    lines: [
+      { y: 546, items: [{ str: '// PREMIUM FRISDRANKEN', x: 36, y: 546 }] },
+      { y: 526, items: [{ str: 'Cultcha Kombucha', x: 42, y: 526 }, { str: '5.5', x: 184, y: 526 }, { str: '// Double Dutch', x: 227, y: 526 }] },
+      { y: 514, items: [{ str: 'Passionfruit & Lime', x: 42, y: 514 }, { str: 'Ginger Beer', x: 227, y: 514 }, { str: '4.6', x: 369, y: 514 }] },
+      { y: 504, items: [{ str: 'Cultcha Kombucha', x: 42, y: 504 }, { str: '5.5', x: 184, y: 504 }, { str: 'Pink Grapefruit Soda', x: 227, y: 504 }, { str: '4.6', x: 369, y: 504 }] },
+    ],
+  }
+  const { categories } = structurePdfLinesIntoMenu([page])
+  const items = categories.flatMap((category) => category.items.map((item) => [item.name, item.price]))
+  assert.deepEqual(items.filter(([name]) => /Ginger Beer|Grapefruit Soda/.test(name)), [
+    ['Ginger Beer', '4.6'],
+    ['Pink Grapefruit Soda', '4.6'],
+  ])
+  // The left column's own 5.5 stays its own item; it is never a name prefix.
+  assert.deepEqual(items.filter(([name]) => name === 'Cultcha Kombucha'), [
+    ['Cultcha Kombucha', '5.5'],
+    ['Cultcha Kombucha', '5.5'],
+  ])
+  assert.equal(items.some(([name]) => name.startsWith('5.5')), false)
 })
 
 test('compactPdfLayoutText: bounded, page-aware, column-aware, and free of the duplicate overlay', () => {

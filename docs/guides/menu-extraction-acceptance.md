@@ -158,6 +158,39 @@ productacceptatie. Een echte providercall, app-side AI-activering,
 browser-/schrijfacceptatie, een nieuwe holdout en #56-compatibiliteit zijn in
 deze ronde niet uitgevoerd en blijven afzonderlijke gaten.
 
+### Herstelronde review 6249657793 — 2026-10-18
+
+De Delivery Lead reproduceerde één resterende P1: een volledig numeriek
+pdfjs-tekstitem gold onvoorwaardelijk als prijs. Daardoor werd een gesplitst
+naam- of portiegetal (`Monkey` + `47` + `10.00`; `Oesters` + `6` + `st.` +
+`24.00`) als bekende prijs 47/6 gelezen, verdween het echte bedrag en ontstond
+een nepitem `st.`. De reparatie gebruikt nu de hele lokale regel/kolom.
+
+| Punt | Herstel | Regressie |
+| --- | --- | --- |
+| Gesplitst naam-/portiegetal werd een bekende prijs | `classifyNumericEvidence` in `pdfMenuStructuring.js`: een getal direct vóór een eenheid (`st.`, `pers.`, `glas`, `cl`, …) is een hoeveelheid; een getal na een naamrun met alleen de echte bedragkolom erna is naamtekst; een leidend `0.0` opent de naam; een expliciete variantreeks blijft een variant. Een decimaalgetal op die naampositie zonder scheidingsteken is niet bewijsbaar en wordt als `ambiguousPriceLines` gemeld in plaats van als bekende prijs of stille naam. Een prijsrun uit een naburige, samengevoegde kolom wordt nooit aan de volgende naam geplakt. | `pdfMenuStructuring.test.js`: geplakte en gesplitste `Monkey 47`, `Oesters 6 st.`, gesplitste `0.0 Regrets`, hoeveelheid zonder `st.`, echte integerprijs, twee gerechten op één regel, twee kolommen, glas/fles-varianten, supplementen en de echte Botanist-vorm (`5.5` + `Pink Grapefruit Soda`); `restaurantSourceAnalysis.test.js`: parser → qualitygate → limitation |
+| Waarschuwing verdween onderweg | Dezelfde layoutteller bereikt `pdf_ambiguous_price_lines` en de plain-language limitation; een PDF met zo'n regel is niet `sufficient` | ketentest vanaf een echte PDF-fixture: twee geldige items blijven, de ambigue regel levert geen item/prijs, `assessment.sufficient === false`, code en limitation aanwezig |
+
+Uitgevoerd op deze working tree (commit volgt in het checkpoint):
+
+| Controle | Resultaat |
+| --- | --- |
+| `npm test` | 2036 tests: 2036 pass, 0 fail, 0 skipped |
+| Gerichte PDF/quality/analysis-tests | 88 pass, 0 fail (`pdfMenuStructuring`, live-regressies, quality, analysis) |
+| `npm run test:menu-structure` | 6 pass, 0 fail |
+| `npm run benchmark:menu-structure` | 23 gevallen: 22 pass, 0 fail, 1 unclassified (`STRUCT-018`, bestaande JSON-LD-keuze) |
+| `npm run build` | compiled successfully in 32.6 s |
+| `node ops/scripts/verify-pdfjs-server-trace.js` | OK; 164 server scripts, native `pdf.mjs`/`pdf.worker.mjs` |
+| Smelt/Blossem read-only probe | Smelt 37/37, Blossem 43/43; byte- en contenthash gelijk; alle verschilcategorieën 0 en boekhouding gebalanceerd |
+| Botanist read-only heranalyse | dezelfde gepinde PDF (551498 bytes, `50fef0b6…7f85`, content `eb9da86e…3ade7f`): 196 items/54 secties; layout 18 ambigu, 24 niet-gekoppeld, 12 supplement, 2 onbekende kop; itemlijst en tellers regel voor regel gelijk aan HEAD (0 gewijzigde rijen) |
+
+De Botanist-vergelijking blijft ongewijzigd open: 46 ontbrekende en 96
+niet-gekoppelde items zijn niet hersteld of geclaimd. Er is geen nieuwe holdout
+geëvalueerd, geen referentie aangepast, geen provider of app-side AI
+geactiveerd, geen concept opgeslagen en geen browseracceptatie uitgevoerd. De
+Smelt/Blossem-proef is read-only bronbewijs, geen item-voor-item
+productacceptatie.
+
 ### Echte read-only bronproeven (2026-10-17)
 
 | Bron | Bronversie/observatie | Uitkomst | Status |

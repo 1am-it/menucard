@@ -304,7 +304,7 @@ function pdfLayoutLimitations(sourceUrl, layout = {}) {
     limitations.push(`PDF ${sourceUrl}: ${layout.arrangementLines} arrangement-/keuzeregel(s) zijn niet als gerecht opgenomen; het concept ondersteunt arrangementen nog niet.`)
   }
   if (Number.isInteger(layout.ambiguousPriceLines) && layout.ambiguousPriceLines > 0) {
-    limitations.push(`PDF ${sourceUrl}: ${layout.ambiguousPriceLines} regel(s) met een prijs midden in de regel zijn niet als gerecht overgenomen.`)
+    limitations.push(`PDF ${sourceUrl}: ${layout.ambiguousPriceLines} regel(s) met een prijs- of hoeveelheidsgetal dat niet eenduidig aan een gerecht is te koppelen, zijn niet als gerecht overgenomen.`)
   }
   if (Number.isInteger(layout.unlinkedPriceLines) && layout.unlinkedPriceLines > 0) {
     limitations.push(`PDF ${sourceUrl}: ${layout.unlinkedPriceLines} prijsregel(s) konden zonder aantoonbare lokale naam-/prijskoppeling niet als gerecht worden opgenomen.`)

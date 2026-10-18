@@ -184,7 +184,7 @@ function assessDeterministicMenuQuality({ menus, unknownMenuContexts, sourceInve
       addFlag(FLAG_CODES.pdf_arrangements_skipped, contextSummary, `${layout.arrangementLines} arrangement-/keuzeregel(s) niet als gerecht opgenomen`);
     }
     if (Number.isInteger(layout.ambiguousPriceLines) && layout.ambiguousPriceLines > 0) {
-      addFlag(FLAG_CODES.pdf_ambiguous_price_lines, contextSummary, `${layout.ambiguousPriceLines} regel(s) met een prijs midden in de regel`);
+      addFlag(FLAG_CODES.pdf_ambiguous_price_lines, contextSummary, `${layout.ambiguousPriceLines} regel(s) met een prijs- of hoeveelheidsgetal dat niet eenduidig is te koppelen`);
     }
     if (Number.isInteger(layout.unlinkedPriceLines) && layout.unlinkedPriceLines > 0) {
       addFlag(FLAG_CODES.pdf_unlinked_price_lines, contextSummary, `${layout.unlinkedPriceLines} prijsregel(s) zonder aantoonbare lokale naam-/prijskoppeling`);

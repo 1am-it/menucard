@@ -58,6 +58,13 @@ analyse meldt nu eerlijk 12 supplementregels, 18 prijzen midden in de regel en
 24 niet-gekoppelde prijsregels. Die laatste categorie is nieuw zichtbaar
 gemaakt in plaats van stilzwijgend weggelaten.
 
+Na de P1-herstelronde van review 6249657793 is dezelfde gepinde PDF nogmaals
+read-only geanalyseerd. De itemlijst en de layouttellers zijn regel voor regel
+gelijk aan de vorige HEAD: 196 items/54 secties, 12 supplementregels, 18
+prijzen midden in de regel, 24 niet-gekoppelde prijsregels en 2 onbekende
+koppen. De 46 ontbrekende en 96 niet-gekoppelde items blijven dus open; er is
+geen referentie aangepast en geen nieuwe holdout geëvalueerd.
+
 ## Wat deze ronde aantoonbaar heeft hersteld
 
 - Een herhaalde prijs (`4.2`, `0.6`) werd ten onrechte als tweede tekstlaag
