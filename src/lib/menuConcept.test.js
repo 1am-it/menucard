@@ -155,6 +155,14 @@ test('REGRESSION: a shared category acceptance never settles duplicate dishes; t
   });
   assert.deepEqual(duplicateAccepted.lines.map((l) => l.status), ['unclear_category', 'unclear_category']);
   assert.equal(duplicateAccepted.canSave, false);
+
+  const legacyAccept = buildMenuConcept({
+    menus,
+    liveLines: [],
+    edits: { lines: { '0.0.0': { accept: true }, '0.0.1': { accept: true } } },
+  });
+  assert.deepEqual(legacyAccept.lines.map((l) => l.status), ['duplicate', 'duplicate']);
+  assert.equal(legacyAccept.canSave, false);
 });
 
 test('disappeared dishes are decided one by one; "Klopt zo" never settles a missing price', () => {
