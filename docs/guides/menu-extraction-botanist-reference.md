@@ -166,7 +166,7 @@ Alleen ter controle is het voorstel apart gescoord
 telde de zes supplementrijen nog als gewone gerechten. Ze is daarom historie,
 geen actuele stand.
 
-### Herstelronde review 6252891629 — supplementrubriek en referentie v3
+## Herstelronde review 6252891629 — supplementrubriek en referentie v3
 
 Zelfde gepinde PDF (SHA-256 `50fef0b6…7f85`), read-only, alleen de
 deterministische HTML/PDF-keten. Geen provider, OCR, renderingvendor,
