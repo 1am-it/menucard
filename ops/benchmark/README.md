@@ -29,6 +29,15 @@ evaluation in `holdout-evaluation.json` (tracked, create-only). Both are not
 npm scripts. A tuned source must move to the representative set with a new,
 unused holdout; a second evaluation on the same pin is refused.
 
+After the 2026-10-18 repair round, De Botanist, Mr Moos and Colonia are
+representative/used-for-tuning; only Gauchos Breda remains an
+`evaluated_once` holdout. `holdout-references.json` also pins the actual later
+menu sources (the Botanist PDF and the Mr Moos/Colonia menu pages) because the
+entry-page hash does not cover them. `botanist-reference.json` is a controlled
+partial layout reference for the Botanist PDF; its misses/extras and unsupported
+wine/cocktail blocks are documented in
+`docs/guides/menu-extraction-botanist-reference.md`.
+
 ## What actually exists here
 
 - `manifest.js` / `manifest.json` — a case manifest with three honestly

@@ -992,7 +992,20 @@ function readItem(node, pattern, markerCounter, budget) {
     if (findPrices(outside).length > 0) return { name: '', priceText: '', description: '', fullText, ambiguous: true }
     const descEl = findDescendant(node, (n) => n !== nameEl && n !== priceEl && isDescriptionElement(n), budget)
     const description = descEl ? textOf(descEl, { budget }) : ''
-    return { name: textOf(nameEl, { budget }), priceText: textOf(priceEl, { budget }), description, fullText }
+    const priceText = textOf(priceEl, { budget })
+    // A dedicated price element (class/itemprop "price"/"prijs") is
+    // structural evidence, exactly like the trailing price element of a
+    // list item above. Menus commonly print whole euros ("18") or one
+    // decimal ("15.5") there, which the generic prose scanner deliberately
+    // refuses; the strict price-only rule (0,50–500,00) applies instead.
+    const price = parsePriceOnly(priceText)
+    return {
+      name: textOf(nameEl, { budget }),
+      priceText,
+      description,
+      fullText,
+      ...(price ? { price } : {}),
+    }
   }
   // No explicit name/price elements: the name is the text before the first
   // price, the description what follows the last one (inside this element).

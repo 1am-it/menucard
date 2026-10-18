@@ -8,6 +8,7 @@ provideractivering en PR #56 blijven buiten scope.
 [Extractie-instructie](../../MENU-EXTRACTION.md) |
 [Testplan](menu-extraction-acceptance.md) |
 [Acceptatiematrix](menu-extraction-acceptance-matrix.md) |
+[Botanist-referentie](menu-extraction-botanist-reference.md) |
 [V2-schemaontwerp (niet geïmplementeerd)](../../planning/architecture/menu-extraction-product-schema-v2.md)
 
 ## Architectuur en contractmapping
@@ -331,3 +332,33 @@ vóór enige modelaanroep:
   (`BatchAnalysisView.js`, `MenuReview.js`, `batchAnalysis*.js`,
   `menuConceptReviewHandlers.test.js`). Dat is geen acceptatie en er is geen
   merge uitgevoerd; de #56-branch is niet overgenomen of gewijzigd.
+
+
+### 13.11 Praktijkdiagnose en gerichte reparaties (review 6248740792)
+
+- De eerste vier holdoutuitkomsten blijven ongewijzigd in
+  `holdout-evaluation.json`. De Botanist, Mr Moos en Colonia zijn daarna voor
+  reparatie gebruikt en expliciet naar `representative` met
+  `usedForTuning: true` verplaatst. Alleen Gauchos Breda blijft holdout
+  (`evaluated_once`, HTTP 404). Een nieuwe holdout is nog niet gepind.
+- **Colonia**: de menukaart gebruikt herhaalde kaarten met een eigen
+  class-gebaseerd prijselement (`p.gerecht-prijs`) met hele euro's en één
+  decimaal. Dat is nu structureel prijsbewijs via de bestaande strikte
+  prijsregel. De cadeaukaartlink is geen menulink meer. Resultaat: 84 items in
+  16 secties; wijn/brunch/high tea blijven gemeld als niet verliesvrij.
+- **Mr Moos**: `/menukaart` is alleen een hub. De analyse volgt nu één
+  begrensd niveau naar dezelfde-site-menulinks, binnen het bestaande
+  `MAX_CANDIDATES`-fetchbudget; geen tweede hub, geen cross-host, geen extra
+  budget. Resultaat: 247 items in 3 menu's; `/groepsmenu` werd in de meting
+  door de robots/rate-gate geblokkeerd en is als beperking gemeld.
+- **De Botanist**: de PDF-tekstlaag veroorzaakte vier concrete fouten:
+  herhaalde prijzen werden als tweede tekstlaag onderdrukt, naam en prijs op
+  nabije baselines werden gescheiden, ABV-percentages werden als naam/prijs
+  gelezen, en twee kolommen werden als één sectie gelezen. Deze zijn hersteld
+  met regressies in `pdfMenuStructuringLiveRegressions.test.js`. Een
+  gecontroleerde referentie uit de PDF-layout staat in
+  `botanist-reference.json` en `docs/guides/menu-extraction-botanist-reference.md`.
+  De vergelijking is 95/141 matched, 46 missing, 5 extra, 0 prijsverschil en
+  96 niet-gekoppelde items. Dat is een kwaliteitsbeperking, geen acceptatie.
+- De PDF-fixes zijn tegen Smelt en Blossem opnieuw uitgevoerd: 37/37 en 43/43,
+  byte-/contenthash gelijk en alle verschilcategorieën 0.

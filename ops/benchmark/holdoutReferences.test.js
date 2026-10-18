@@ -18,6 +18,7 @@ const acceptance = require('./menu-extraction-acceptance-set.json');
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
 const SHA256 = /^[0-9a-f]{64}$/;
 const EXPECTED_IDS = ['debotanist', 'gauchosgrill', 'mrmoos', 'colonie'];
+const HOLD_RESULT_IDS = ['HOLD-REAL-01', 'HOLD-REAL-02', 'HOLD-REAL-03', 'HOLD-REAL-04'];
 const EXPECTED_URLS = [
   'https://debotanistbreda.nl/',
   'https://www.gauchosgrill.nl/breda',
@@ -70,10 +71,10 @@ test('the holdout reference pins source versions only, never parser outcomes or 
 });
 
 
-test('each approved holdout records exactly one honest evaluation and no tuning', () => {
-  const entries = acceptance.holdout.entries.filter((entry) => entry.provenance === 'real_source');
-  assert.deepEqual(entries.map((entry) => entry.referenceId).sort(), [...EXPECTED_IDS].sort());
-  for (const entry of entries) {
+test('each approved source records exactly one honest evaluation; repaired sources are no longer holdouts', () => {
+  const holdoutEntries = acceptance.holdout.entries.filter((entry) => entry.provenance === 'real_source');
+  assert.deepEqual(holdoutEntries.map((entry) => entry.referenceId).sort(), ['gauchosgrill']);
+  for (const entry of holdoutEntries) {
     assert.equal(entry.evaluationState, 'evaluated_once', entry.id);
     assert.equal(entry.evaluationCount, 1, entry.id);
     assert.equal(entry.usedForTuning, false, entry.id);
@@ -85,10 +86,18 @@ test('each approved holdout records exactly one honest evaluation and no tuning'
       assert.equal(entry.status, 'blocked', `${entry.id} must not claim a successful read`);
     }
   }
+  for (const referenceId of ['debotanist', 'mrmoos', 'colonie']) {
+    const entry = acceptance.representative.find((candidate) => candidate.referenceId === referenceId);
+    assert.ok(entry, `${referenceId} is moved to representative`);
+    assert.equal(entry.usedForTuning, true, `${referenceId} is marked used for tuning`);
+    assert.equal(entry.evaluationCount, 1, `${referenceId} records the one first evaluation`);
+    assert.match(entry.firstEvaluatedAt, /^\d{4}-\d{2}-\d{2}$/, referenceId);
+    assert.match(entry.result, /preserved unchanged/i, `${referenceId} preserves the baseline evaluation`);
+  }
   const output = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'ops', 'benchmark', 'holdout-evaluation.json'), 'utf8'));
   assert.equal(output.noTuning, true);
   assert.match(output.note, /No parser or rule was changed/i);
-  assert.deepEqual(Object.keys(output.results).sort(), entries.map((entry) => entry.id).sort());
+  assert.deepEqual(Object.keys(output.results).sort(), [...HOLD_RESULT_IDS].sort());
 });
 
 test('the holdout scripts stay read-only and cannot run from a package script', () => {

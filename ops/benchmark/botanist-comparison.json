@@ -1,0 +1,1112 @@
+{
+  "referenceItems": 141,
+  "parserItems": 196,
+  "sections": {
+    "WARME DRANKEN": {
+      "expected": 10,
+      "actual": 10,
+      "matched": 10,
+      "missing": [],
+      "extra": [],
+      "priceMismatch": 0
+    },
+    "SUPPLEMENTEN": {
+      "expected": 6,
+      "actual": 6,
+      "matched": 6,
+      "missing": [],
+      "extra": [],
+      "priceMismatch": 0
+    },
+    "LEKKERS VOOR BIJ DE KOFFIE": {
+      "expected": 4,
+      "actual": 4,
+      "matched": 4,
+      "missing": [],
+      "extra": [],
+      "priceMismatch": 0
+    },
+    "FRISDRANK": {
+      "expected": 16,
+      "actual": 14,
+      "matched": 10,
+      "missing": [
+        {
+          "name": "Sourcy Still Water (20cl)",
+          "price": "3.0"
+        },
+        {
+          "name": "Sourcy Sparkling Water (20cl)",
+          "price": "3.0"
+        },
+        {
+          "name": "Sourcy Still Water (75cl)",
+          "price": "6.5"
+        },
+        {
+          "name": "Sourcy Sparkling Water (75cl)",
+          "price": "6.5"
+        },
+        {
+          "name": "Lipton Ice Tea Sparkling / Ice Tea Green / Ice Tea Peach / Ice Tea Green Zero",
+          "price": "3.8"
+        },
+        {
+          "name": "Royal Club Tonic / Bitter Lemon / Ginger Ale",
+          "price": "3.8"
+        }
+      ],
+      "extra": [
+        {
+          "name": "Sourcy Still Water, Sourcy",
+          "price": "3.0",
+          "path": [
+            "FRISDRANK"
+          ]
+        },
+        {
+          "name": "Sourcy Still Water, Sourcy",
+          "price": "6.5",
+          "path": [
+            "FRISDRANK"
+          ]
+        },
+        {
+          "name": "Lipton Ice Tea Sparkling /",
+          "price": "3.8",
+          "path": [
+            "FRISDRANK"
+          ]
+        },
+        {
+          "name": "Royal Club Tonic / Bitter Lemon",
+          "price": "3.8",
+          "path": [
+            "FRISDRANK"
+          ]
+        }
+      ],
+      "priceMismatch": 0
+    },
+    "PREMIUM FRISDRANKEN": {
+      "expected": 10,
+      "actual": 0,
+      "matched": 0,
+      "missing": [
+        {
+          "name": "Cultcha Kombucha Passionfruit & Lime",
+          "price": "5.5"
+        },
+        {
+          "name": "Cultcha Kombucha Apple & Ginger",
+          "price": "5.5"
+        },
+        {
+          "name": "Del Sol Pineapple Hibiscus Soda",
+          "price": "5.5"
+        },
+        {
+          "name": "Double Dutch Ginger Beer",
+          "price": "4.6"
+        },
+        {
+          "name": "Pink Grapefruit Soda",
+          "price": "4.6"
+        },
+        {
+          "name": "Indian Tonic",
+          "price": "4.6"
+        },
+        {
+          "name": "Elderflower Tonic",
+          "price": "4.6"
+        },
+        {
+          "name": "Cranberry & Ginger Tonic",
+          "price": "4.6"
+        },
+        {
+          "name": "Pomegranate & Basil Tonic",
+          "price": "4.6"
+        },
+        {
+          "name": "Cucumber & Watermelon Tonic",
+          "price": "4.6"
+        }
+      ],
+      "extra": [],
+      "priceMismatch": 0
+    },
+    "fritz": {
+      "expected": 10,
+      "actual": 0,
+      "matched": 0,
+      "missing": [
+        {
+          "name": "fritz-limo appel, kersen, vlierbes",
+          "price": "4.6"
+        },
+        {
+          "name": "fritz-limo citroen",
+          "price": "4.6"
+        },
+        {
+          "name": "fritz-limo sinaasappel",
+          "price": "4.6"
+        },
+        {
+          "name": "anjola ananas-limoen",
+          "price": "4.6"
+        },
+        {
+          "name": "fritz-spritz apfelschorle",
+          "price": "4.6"
+        },
+        {
+          "name": "Blueberry & Lavender Lemonade",
+          "price": "4.8"
+        },
+        {
+          "name": "Rose & Cardamom Lemonade",
+          "price": "4.8"
+        },
+        {
+          "name": "Carrot & Ginger Lemonade",
+          "price": "4.8"
+        },
+        {
+          "name": "Lemongrass & Pear Lemonade",
+          "price": "4.8"
+        },
+        {
+          "name": "Ice Tea Lemonade",
+          "price": "4.8"
+        }
+      ],
+      "extra": [],
+      "priceMismatch": 0
+    },
+    "BIER VAN DE TAP": {
+      "expected": 7,
+      "actual": 7,
+      "matched": 7,
+      "missing": [],
+      "extra": [],
+      "priceMismatch": 0
+    },
+    "RIJK EN DONKER": {
+      "expected": 2,
+      "actual": 2,
+      "matched": 2,
+      "missing": [],
+      "extra": [],
+      "priceMismatch": 0
+    },
+    "FRIS EN FRUITIG": {
+      "expected": 4,
+      "actual": 3,
+      "matched": 3,
+      "missing": [
+        {
+          "name": "Desperados",
+          "price": "6.0"
+        }
+      ],
+      "extra": [],
+      "priceMismatch": 0
+    },
+    "BROUWERIJ FRONTAAL": {
+      "expected": 5,
+      "actual": 5,
+      "matched": 5,
+      "missing": [],
+      "extra": [],
+      "priceMismatch": 0
+    },
+    "NON ALCOHOLISCH": {
+      "expected": 6,
+      "actual": 6,
+      "matched": 6,
+      "missing": [],
+      "extra": [],
+      "priceMismatch": 0
+    },
+    "KOREMAN'S": {
+      "expected": 4,
+      "actual": 4,
+      "matched": 4,
+      "missing": [],
+      "extra": [],
+      "priceMismatch": 0
+    },
+    "SNACKS": {
+      "expected": 6,
+      "actual": 6,
+      "matched": 5,
+      "missing": [
+        {
+          "name": "Holtkamp ambachtelijke draadjesvlees bitterbal",
+          "price": "9.5"
+        }
+      ],
+      "extra": [
+        {
+          "name": "Holtkamp ambachtelijke",
+          "price": "9.5",
+          "path": [
+            "SNACKS"
+          ]
+        }
+      ],
+      "priceMismatch": 0
+    },
+    "STARTERS": {
+      "expected": 10,
+      "actual": 5,
+      "matched": 5,
+      "missing": [
+        {
+          "name": "Crispy Coconut Gyoza",
+          "price": "12.5"
+        },
+        {
+          "name": "Pepper Beef Tataki",
+          "price": "16.5"
+        },
+        {
+          "name": "Tuna al Mare",
+          "price": "14.5"
+        },
+        {
+          "name": "Salmon au Soleil",
+          "price": "15.0"
+        },
+        {
+          "name": "Crunchy & Healthy",
+          "price": "2.0"
+        }
+      ],
+      "extra": [],
+      "priceMismatch": 0
+    },
+    "SIDE DISHES": {
+      "expected": 7,
+      "actual": 7,
+      "matched": 7,
+      "missing": [],
+      "extra": [],
+      "priceMismatch": 0
+    },
+    "OESTERS": {
+      "expected": 3,
+      "actual": 3,
+      "matched": 3,
+      "missing": [],
+      "extra": [],
+      "priceMismatch": 0
+    },
+    "DESSERTS 17:00 - 21:00": {
+      "expected": 8,
+      "actual": 4,
+      "matched": 4,
+      "missing": [
+        {
+          "name": "Grand dessert",
+          "price": "28.5"
+        },
+        {
+          "name": "Proeverij van 4 Kazen van Fromagerie Guillaume",
+          "price": "14.5"
+        },
+        {
+          "name": "Bonbons per stuk",
+          "price": "2.0"
+        },
+        {
+          "name": "Liquid Dessert - Espresso Martini Tiramisu",
+          "price": "12.5"
+        }
+      ],
+      "extra": [],
+      "priceMismatch": 0
+    },
+    "MEDITERRAANS": {
+      "expected": 3,
+      "actual": 0,
+      "matched": 0,
+      "missing": [
+        {
+          "name": "Blue Velvet Gnocchi",
+          "price": "13.5"
+        },
+        {
+          "name": "Fideua con Gamba",
+          "price": "14.5"
+        },
+        {
+          "name": "Solomillo y Pimientos",
+          "price": "15.5"
+        }
+      ],
+      "extra": [],
+      "priceMismatch": 0
+    },
+    "(MIDDEN) - OOSTERS": {
+      "expected": 3,
+      "actual": 3,
+      "matched": 3,
+      "missing": [],
+      "extra": [],
+      "priceMismatch": 0
+    },
+    "LATIJNS-AMERIKAANS": {
+      "expected": 6,
+      "actual": 6,
+      "matched": 6,
+      "missing": [],
+      "extra": [],
+      "priceMismatch": 0
+    },
+    "LUNCH": {
+      "expected": 11,
+      "actual": 5,
+      "matched": 5,
+      "missing": [
+        {
+          "name": "The Crunchy Caprese",
+          "price": "14.0"
+        },
+        {
+          "name": "La Dolce Pinsa",
+          "price": "16.0"
+        },
+        {
+          "name": "Tuna Deluxe",
+          "price": "13.5"
+        },
+        {
+          "name": "Puff & Spice",
+          "price": "15.5"
+        },
+        {
+          "name": "Surf-Turf-Earth",
+          "price": "19.5"
+        },
+        {
+          "name": "Holtkamp Rundvleeskroketten",
+          "price": "14.0"
+        }
+      ],
+      "extra": [],
+      "priceMismatch": 0
+    }
+  },
+  "totals": {
+    "matched": 95,
+    "missing": 46,
+    "extra": 5,
+    "priceMismatch": 0
+  },
+  "unmapped": [
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Ginger Beer",
+      "price": "4.6"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Pink Grapefruit Soda",
+      "price": "4.6"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Indian Tonic",
+      "price": "4.6"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Elderflower Tonic",
+      "price": "4.6"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Cranberry & Ginger Tonic",
+      "price": "4.6"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Pomegranate & Basil Tonic",
+      "price": "4.6"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Cucumber & Watermelon Tonic",
+      "price": "4.6"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Blueberry & Lavender Lemonade",
+      "price": "4.8"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Rose & Cardamom Lemonade",
+      "price": "4.8"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Carrot & Ginger Lemonade",
+      "price": "4.8"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Lemongrass & Pear Lemonade",
+      "price": "4.8"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Ice Tea Lemonade",
+      "price": "4.8"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Pick me",
+      "price": "11.0"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Rum Forrest Rum",
+      "price": "13.0"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Tuna Deluxe",
+      "price": "13.5"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Puff & Spice",
+      "price": "15.5"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Surf-Turf-Earth",
+      "price": "19.5"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Holtkamp Rundvleeskroketten",
+      "price": "14.0"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Crispy Coconut Gyoza",
+      "price": "12.5"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Pepper Beef Tataki",
+      "price": "16.5"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Tuna al Mare",
+      "price": "14.5"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Salmon au Soleil",
+      "price": "15.0"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Crunchy & Healthy",
+      "price": "2.0"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Grand dessert",
+      "price": "28.5"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Proeverij van 4 Kazen van",
+      "price": "14.5"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Bonbons per stuk",
+      "price": "2.0"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Liquid Dessert -",
+      "price": "12.5"
+    },
+    {
+      "path": [
+        "ONZE SIGNATURES"
+      ],
+      "name": "St. Germain, Kersenlikeur, karaf",
+      "price": "24.0"
+    },
+    {
+      "path": [
+        "ONZE SIGNATURES",
+        "Tempranillo, limoensap,"
+      ],
+      "name": "Sunset Mojito",
+      "price": "10.5"
+    },
+    {
+      "path": [
+        "ONZE SIGNATURES",
+        "Brandy, abrikozenpuree,"
+      ],
+      "name": "Ook beschikbaar in",
+      "price": "8.0"
+    },
+    {
+      "path": [
+        "ONZE SIGNATURES",
+        "Brandy, abrikozenpuree,"
+      ],
+      "name": "Ruby Bliss",
+      "price": "12.0"
+    },
+    {
+      "path": [
+        "ONZE SIGNATURES",
+        "Brandy, abrikozenpuree,"
+      ],
+      "name": "Smooth Operator",
+      "price": "11.5"
+    },
+    {
+      "path": [
+        "ONZE SIGNATURES",
+        "Prosecco Foam"
+      ],
+      "name": "One More",
+      "price": "13.5"
+    },
+    {
+      "path": [
+        "ONZE SIGNATURES",
+        "Prosecco Foam"
+      ],
+      "name": "Botanist Martini",
+      "price": "11.0"
+    },
+    {
+      "path": [
+        "KLASSIEKERS MET EEN TWIST"
+      ],
+      "name": "Pornstar Martini",
+      "price": "11.5"
+    },
+    {
+      "path": [
+        "KLASSIEKERS MET EEN TWIST"
+      ],
+      "name": "Espresso Martini",
+      "price": "11.5"
+    },
+    {
+      "path": [
+        "KLASSIEKERS MET EEN TWIST"
+      ],
+      "name": "Amaretto Sour",
+      "price": "11.0"
+    },
+    {
+      "path": [
+        "KLASSIEKERS MET EEN TWIST"
+      ],
+      "name": "Pornstar Martini Boom 6 st.",
+      "price": "65.0"
+    },
+    {
+      "path": [
+        "KLASSIEKERS MET EEN TWIST"
+      ],
+      "name": "Pornstar Martini Boom 12 st.",
+      "price": "120.0"
+    },
+    {
+      "path": [
+        "GIN & TONIC"
+      ],
+      "name": "Bombay Sapphire",
+      "price": "6.0"
+    },
+    {
+      "path": [
+        "GIN & TONIC"
+      ],
+      "name": "Double Dutch Indian Tonic",
+      "price": "4.6"
+    },
+    {
+      "path": [
+        "GIN & TONIC"
+      ],
+      "name": "Drumchanbo Gunpowder",
+      "price": "6.5"
+    },
+    {
+      "path": [
+        "GIN & TONIC"
+      ],
+      "name": "Royal Club ginger ale",
+      "price": "3.8"
+    },
+    {
+      "path": [
+        "GIN & TONIC"
+      ],
+      "name": "Nolet’s Silver",
+      "price": "8.5"
+    },
+    {
+      "path": [
+        "GIN & TONIC"
+      ],
+      "name": "Double Dutch Elderflower",
+      "price": "4.6"
+    },
+    {
+      "path": [
+        "GIN & TONIC"
+      ],
+      "name": "Hendrick’s",
+      "price": "8.0"
+    },
+    {
+      "path": [
+        "GIN & TONIC"
+      ],
+      "name": "Double Dutch Cucumber &",
+      "price": "4.6"
+    },
+    {
+      "path": [
+        "GIN & TONIC",
+        "Watermelon Tonic"
+      ],
+      "name": "Botanist Pink Gin",
+      "price": "7.5"
+    },
+    {
+      "path": [
+        "GIN & TONIC",
+        "Watermelon Tonic"
+      ],
+      "name": "Something & Nothing",
+      "price": "4.6"
+    },
+    {
+      "path": [
+        "GIN & TONIC",
+        "Watermelon Tonic"
+      ],
+      "name": "Monkey 47",
+      "price": "10.0"
+    },
+    {
+      "path": [
+        "GIN & TONIC",
+        "Watermelon Tonic"
+      ],
+      "name": "Double Dutch Indian Tonic",
+      "price": "4.6"
+    },
+    {
+      "path": [
+        "GIN & TONIC",
+        "Watermelon Tonic"
+      ],
+      "name": "The Botanist",
+      "price": "8.0"
+    },
+    {
+      "path": [
+        "GIN & TONIC",
+        "Watermelon Tonic"
+      ],
+      "name": "Double Dutch Indian Tonic",
+      "price": "4.6"
+    },
+    {
+      "path": [
+        "GIN & TONIC",
+        "Watermelon Tonic"
+      ],
+      "name": "Gin Mare",
+      "price": "9.0"
+    },
+    {
+      "path": [
+        "GIN & TONIC",
+        "Watermelon Tonic"
+      ],
+      "name": "Double Dutch Ginger Beer",
+      "price": "4.6"
+    },
+    {
+      "path": [
+        "GIN & TONIC",
+        "Watermelon Tonic"
+      ],
+      "name": "Bobby’s Schiedam Dry",
+      "price": "7.5"
+    },
+    {
+      "path": [
+        "GIN & TONIC",
+        "Watermelon Tonic"
+      ],
+      "name": "Double Dutch Cranberry &",
+      "price": "4.6"
+    },
+    {
+      "path": [
+        "SPRITZERS"
+      ],
+      "name": "Aperol Spritz",
+      "price": "9.0"
+    },
+    {
+      "path": [
+        "SPRITZERS"
+      ],
+      "name": "Limoncello Spritz",
+      "price": "9.0"
+    },
+    {
+      "path": [
+        "SPRITZERS"
+      ],
+      "name": "St. Germain Spritz",
+      "price": "9.5"
+    },
+    {
+      "path": [
+        "SPRITZERS"
+      ],
+      "name": "Watermelon Spritz",
+      "price": "9.5"
+    },
+    {
+      "path": [
+        "HARD SELTZER"
+      ],
+      "name": "Stëltz Mango",
+      "price": "5.0"
+    },
+    {
+      "path": [
+        "HARD SELTZER"
+      ],
+      "name": "Stëltz Iced Tea Peach",
+      "price": "5.0"
+    },
+    {
+      "path": [
+        "HARD SELTZER"
+      ],
+      "name": "Stëltz Iced Tea Lemon",
+      "price": "5.0"
+    },
+    {
+      "path": [
+        "MOCKTAILS"
+      ],
+      "name": "Ceremonial Matcha 0.0",
+      "price": "5.5"
+    },
+    {
+      "path": [
+        "MOCKTAILS"
+      ],
+      "name": "Tropic Like it’s Hot 0.0",
+      "price": "8.0"
+    },
+    {
+      "path": [
+        "MOCKTAILS"
+      ],
+      "name": "0.0 Regrets",
+      "price": "7.5"
+    },
+    {
+      "path": [
+        "MOCKTAILS",
+        "Monin Rose"
+      ],
+      "name": "Tanqueray 0.0 Gin",
+      "price": "10.0"
+    },
+    {
+      "path": [
+        "WITTE WIJNEN"
+      ],
+      "name": "Spanje, Cuenca",
+      "price": "30.5"
+    },
+    {
+      "path": [
+        "WITTE WIJNEN"
+      ],
+      "name": "Frankrijk, Pays d’Oc",
+      "price": "32.0"
+    },
+    {
+      "path": [
+        "WITTE WIJNEN"
+      ],
+      "name": "Provence, Frankrijk",
+      "price": "35.0"
+    },
+    {
+      "path": [
+        "WITTE WIJNEN",
+        "Grenache Blanc"
+      ],
+      "name": "Duitsland, Rheinhessen",
+      "price": "36.0"
+    },
+    {
+      "path": [
+        "WITTE WIJNEN",
+        "Sauvignon Blanc"
+      ],
+      "name": "Frankrijk, Côtes de Gascogne",
+      "price": "37.5"
+    },
+    {
+      "path": [
+        "WITTE WIJNEN",
+        "Sauvignon Blanc"
+      ],
+      "name": "Torres Celeste Verdejo",
+      "price": "36.0"
+    },
+    {
+      "path": [
+        "WITTE WIJNEN",
+        "Verdejo"
+      ],
+      "name": "Gérard Bertrand Art de Vivre",
+      "price": "38.0"
+    },
+    {
+      "path": [
+        "WITTE WIJNEN",
+        "Clairette"
+      ],
+      "name": "Ken Forrester",
+      "price": "40.0"
+    },
+    {
+      "path": [
+        "WITTE WIJNEN",
+        "Zuid-Afrika, Stellenbosch"
+      ],
+      "name": "Baigorri Rioja Blanco",
+      "price": "40.0"
+    },
+    {
+      "path": [
+        "ROSÉ WIJNEN"
+      ],
+      "name": "Spanje, Cuenca",
+      "price": "30.5"
+    },
+    {
+      "path": [
+        "ROSÉ WIJNEN"
+      ],
+      "name": "Provence, Frankrijk",
+      "price": "35.0"
+    },
+    {
+      "path": [
+        "ROSÉ WIJNEN",
+        "Sauvignon"
+      ],
+      "name": "Gérard Bertrand Art de",
+      "price": "38.0"
+    },
+    {
+      "path": [
+        "RODE WIJNEN"
+      ],
+      "name": "Spanje, Castilla-La Mancha",
+      "price": "30.5"
+    },
+    {
+      "path": [
+        "RODE WIJNEN"
+      ],
+      "name": "Italië, Puglia",
+      "price": "34.5"
+    },
+    {
+      "path": [
+        "RODE WIJNEN"
+      ],
+      "name": "Crianza",
+      "price": "35.0"
+    },
+    {
+      "path": [
+        "RODE WIJNEN",
+        "Tempranillo"
+      ],
+      "name": "Argentinië, Mendoza",
+      "price": "35.5"
+    },
+    {
+      "path": [
+        "RODE WIJNEN",
+        "Malbec Reserve"
+      ],
+      "name": "Gérard Bertrand Art de Vivre",
+      "price": "38.0"
+    },
+    {
+      "path": [
+        "RODE WIJNEN",
+        "Grenache, Syrah"
+      ],
+      "name": "Bottega Valpolicella Ripasso",
+      "price": "40.0"
+    },
+    {
+      "path": [
+        "BIJZONDERE WIJNEN"
+      ],
+      "name": "Joseph Cattin",
+      "price": "34.5"
+    },
+    {
+      "path": [
+        "BIJZONDERE WIJNEN"
+      ],
+      "name": "Luis Felipe Edwards",
+      "price": "34.5"
+    },
+    {
+      "path": [
+        "BUBBELS"
+      ],
+      "name": "Italie, Veneto",
+      "price": "32.5"
+    },
+    {
+      "path": [
+        "BUBBELS"
+      ],
+      "name": "Spanje, Penedès",
+      "price": "30.0"
+    },
+    {
+      "path": [
+        "CHAMPAGNE"
+      ],
+      "name": "Moët & Chandon Brut",
+      "price": "74.5"
+    },
+    {
+      "path": [
+        "SOEPEN EN SALADES"
+      ],
+      "name": "Doperwtensoepje",
+      "price": "9.5"
+    },
+    {
+      "path": [
+        "SOEPEN EN SALADES"
+      ],
+      "name": "Bisque van Langoustine",
+      "price": "12.5"
+    },
+    {
+      "path": [
+        "SOEPEN EN SALADES"
+      ],
+      "name": "Salade Primavera",
+      "price": "17.5"
+    },
+    {
+      "path": [
+        "SOEPEN EN SALADES"
+      ],
+      "name": "Salade Il Magnifico",
+      "price": "16.5"
+    },
+    {
+      "path": [
+        "BORRELPLANKEN EN MEER 11:30 - 22:00",
+        "Oester oosters"
+      ],
+      "name": "Crispy Coconut Gyoza",
+      "price": "12.5"
+    }
+  ]
+}

@@ -72,7 +72,7 @@
 
 const { extractMenusFromHtml } = require('./menuJsonLdExtraction')
 const { normalizeMenuHierarchy } = require('./menuHierarchy')
-const { findSameHostMenuCandidates } = require('./sameHostDiscovery')
+const { findSameHostMenuCandidates, MAX_CANDIDATES } = require('./sameHostDiscovery')
 const { extractRestaurantFieldsWithEvidence } = require('./restaurantFieldEvidence')
 const { ALLOWED_FIELD_NAMES, deriveFieldConfidence, isFieldReviewReady } = require('./fieldConfidence')
 const { computeFieldEvidenceHash } = require('./fieldEvidenceHash')
@@ -575,12 +575,24 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
     recordFieldSighting(fieldName, homepageFieldEvidence[fieldName], homepageUrl)
   }
 
-  // 3. Bounded same-host discovery — at most sameHostDiscovery.js's own
-  // MAX_CANDIDATES links, each fetched at most once, never a second hop
-  // from any of them (this loop never itself calls findSameHostMenuCandidates
-  // again on a candidate's own body).
-  const candidates = findSameHostMenuCandidates(homepageHtml, homepageUrl)
-  for (const candidate of candidates) {
+  // 3. Bounded same-host discovery. MAX_CANDIDATES is the budget for the
+  // whole analysis: at most five candidate fetches beyond the already-fetched
+  // entry page. A discovered page that holds no menu but links to several
+  // same-host menu variants (a "menu hub" such as /menukaart -> /lunch,
+  // /diner, /dranken) may contribute its own links, but only one level deeper
+  // and only while that same budget lasts. Never a second-level hub
+  // expansion, never a cross-host link, never a re-fetch of the entry page.
+  const candidateQueue = findSameHostMenuCandidates(homepageHtml, homepageUrl).map((candidate) => ({ ...candidate, depth: 1 }))
+  const queuedCandidates = new Set(candidateQueue.map((candidate) => candidate.url))
+  const visitedCandidates = new Set()
+  let candidateFetches = 0
+
+  while (candidateQueue.length > 0 && candidateFetches < MAX_CANDIDATES) {
+    const candidate = candidateQueue.shift()
+    if (visitedCandidates.has(candidate.url)) continue
+    visitedCandidates.add(candidate.url)
+    candidateFetches += 1
+
     let fetched
     try {
       fetched = await fetchCandidate(candidate.url)
@@ -635,6 +647,26 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
         notes.push(
           `Mogelijke menupagina gelezen: ${sourceUrl} (link "${String(candidate.matchedOn || '').slice(0, 60)}"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.`
         )
+        // A menu overview page (for example /menukaart with tiles for lunch,
+        // diner and drinks) is not itself a menu. Its own same-host menu links
+        // are relevant follow-up pages; they are followed only one level below
+        // this page and only from the shared MAX_CANDIDATES budget.
+        if (candidate.depth === 1) {
+          const hubLinks = findSameHostMenuCandidates(fetched.body, sourceUrl)
+            .filter((link) => !visitedCandidates.has(link.url) && !queuedCandidates.has(link.url))
+          if (hubLinks.length >= 2) {
+            const remaining = MAX_CANDIDATES - candidateFetches
+            for (const link of hubLinks.slice(0, remaining)) {
+              candidateQueue.push({ ...link, depth: 2 })
+              queuedCandidates.add(link.url)
+            }
+            if (remaining > 0) {
+              notes.push(
+                `Menukaartpagina ${sourceUrl} is een tussenpagina; ${Math.min(hubLinks.length, remaining)} relevante menulink(s) binnen dezelfde site zijn gevolgd.`
+              )
+            }
+          }
+        }
       }
       const candidateFieldEvidence = extractRestaurantFieldsWithEvidence(fetched.body)
       for (const fieldName of ALLOWED_FIELD_NAMES) {

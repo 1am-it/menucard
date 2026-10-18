@@ -30,6 +30,18 @@ provideractivering en volledige productacceptatie zijn dat niet.
 > v2-ontwerp eist nu bewijs per prijsbedrag en een zichtbare rollback. De
 > app-side AI-provider is niet geactiveerd; niets is gemerged of gepubliceerd.
 
+> **Praktijkronde 2026-10-18 (review #6248740792).** De eerste vier
+> holdoutuitkomsten blijven ongewijzigd als baseline. De Botanist, Mr Moos en
+> Colonia zijn daarna voor reparatie gebruikt en staan nu als representatief
+> met `usedForTuning: true`; alleen Gauchos Breda blijft holdout (HTTP 404).
+> Hersteld zijn een class-gebaseerd HTML-prijselement (Colonia 84 items), één
+> begrensd menuhubniveau (Mr Moos 247 items) en vier PDF-tekstlaagfouten. De
+> Botanist heeft een gecontroleerde layoutreferentie van 141 rijen: 95 matched,
+> 46 missing, 5 extra, 0 prijsverschil en 96 niet-gekoppelde items. Wijn- en
+> cocktailblokken blijven expliciet niet ondersteund. Zie
+> [menu-extraction-botanist-reference.md](menu-extraction-botanist-reference.md).
+
+
 ## 13. Acceptatie: bewijs voordat werking wordt geclaimd
 
 - Blossem: beoordeel de daadwerkelijke uitklapstructuur, behoud lunch/diner en

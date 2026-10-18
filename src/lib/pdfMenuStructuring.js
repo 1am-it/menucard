@@ -73,6 +73,11 @@ const SECTION_MARKER_PATTERN = /^\/\/\s*(.+)$/
  * the first token. */
 const PRICE_TOKEN_PATTERN = /^(?:\d{1,3}|\d{1,4}[.,]\d{1,2})$/
 
+/** An alcohol-by-volume token ("5.0%", "6,8 %vol"). It is never a dish name
+ * and never a price; leaving it in a name turns "Texels Skiller Wit 5.0%"
+ * into a different item name and can create a name-only fake item. */
+const ABV_TOKEN_PATTERN = /^\d{1,2}(?:[.,]\d{1,2})?\s*%$/i
+
 /** How close (in the PDF's own coordinate units) a no-price line's own
  * leftmost X must be to the immediately preceding item's own leftmost X
  * before this module ever treats it as that item's description
@@ -119,11 +124,13 @@ function layoutItemKey(item) {
  * `seq` (e.g. a hand-built test fixture).
  */
 function duplicateLayoutLayer(page) {
+  let totalItems = 0
   const byKey = new Map()
   for (const line of (page && Array.isArray(page.lines) && page.lines) || []) {
     for (const item of (line && Array.isArray(line.items) && line.items) || []) {
       if (!item || typeof item.str !== 'string' || !item.str.trim() || typeof item.x !== 'number') continue
       if (!Number.isInteger(item.seq) || typeof item.y !== 'number') return { suppressedSeqs: new Set(), count: 0, offset: null }
+      totalItems += 1
       const key = layoutItemKey(item)
       if (!byKey.has(key)) byKey.set(key, [])
       byKey.get(key).push(item)
@@ -167,10 +174,51 @@ function duplicateLayoutLayer(page) {
   if (suppressedSeqs.size < MIN_DUPLICATE_LAYER_ITEMS || primaryYs.length === 0) {
     return { suppressedSeqs: new Set(), count: 0, offset: null }
   }
+  // A real second text layer covers a substantial part of the page (the
+  // confirmed Smelt case repeats a whole column). Repeated prices and repeated
+  // short labels on an ordinary menu (De Botanist: five "0.6" syrups and two
+  // "4.2" drinks) can otherwise look like a shifted layer and would silently
+  // delete real items. Fail closed: a partial coincidence is not an overlay.
+  const minimumCoverage = Math.max(MIN_DUPLICATE_LAYER_ITEMS, Math.ceil(totalItems * 0.3))
+  if (suppressedSeqs.size < minimumCoverage) {
+    return { suppressedSeqs: new Set(), count: 0, offset: null }
+  }
   const overlap =
     Math.min(Math.max(...primaryYs), Math.max(...overlayYs)) - Math.max(Math.min(...primaryYs), Math.min(...overlayYs))
   if (overlap <= 0) return { suppressedSeqs: new Set(), count: 0, offset: null }
   return { suppressedSeqs, count: suppressedSeqs.size, offset: modal.delta }
+}
+
+/**
+ * Some real menu PDFs place two long section markers on one visual row
+ * (De Botanist: "// WARME DRANKEN" left, "// FRISDRANK" right). That row is
+ * direct evidence of two columns. Using every text X position instead merges
+ * the columns, because the gutter between the left price and the right name
+ * is narrower than the name-to-price gap inside either column. The marker row
+ * therefore defines the column starts when it exists; otherwise the previous
+ * position-clustering fallback applies.
+ */
+function markerRowColumnStarts(page, suppressedSeqs = new Set()) {
+  let best = null
+  for (const line of (page && Array.isArray(page.lines) && page.lines) || []) {
+    const items = (line && Array.isArray(line.items) ? line.items : []).filter(
+      (item) =>
+        item &&
+        typeof item.str === 'string' &&
+        item.str.trim().length > 0 &&
+        typeof item.x === 'number' &&
+        !(Number.isInteger(item.seq) && suppressedSeqs.has(item.seq)),
+    )
+    if (items.length < 2) continue
+    if (!pureSectionMarkerNames(items)) continue
+    if (!best || items.length > best.length) best = items
+  }
+  if (!best) return null
+  const starts = []
+  for (const x of best.map((item) => item.x).sort((a, b) => a - b)) {
+    if (starts.length === 0 || x - starts[starts.length - 1] > 20) starts.push(x)
+  }
+  return starts.length >= 2 ? starts : null
 }
 
 /**
@@ -180,24 +228,49 @@ function duplicateLayoutLayer(page) {
  * "right-hand dish attributed to the left heading" defect).
  */
 function pageColumnAnchors(page, suppressedSeqs = new Set()) {
-  const xs = []
+  const markerStarts = markerRowColumnStarts(page, suppressedSeqs)
+  if (markerStarts) {
+    return markerStarts.map((start, index) => ({
+      min: start,
+      max: index + 1 < markerStarts.length ? markerStarts[index + 1] - 1 : Infinity,
+      center: start,
+    }))
+  }
+  // No row with two markers. The page may still have two columns whose
+  // headings sit on different rows (LUNCH left, SOEPEN EN SALADES right).
+  // Count the X positions of text that carries letters; a position that
+  // occurs at least twice is a real text column, while a one-off page title
+  // or prose fragment is not. Prices are numeric and therefore never define
+  // a column here.
+  const counts = new Map()
   for (const line of (page && Array.isArray(page.lines) && page.lines) || []) {
     for (const item of (line && Array.isArray(line.items) && line.items) || []) {
       if (!item || typeof item.str !== 'string' || !item.str.trim()) continue
       if (typeof item.x !== 'number') continue
       if (Number.isInteger(item.seq) && suppressedSeqs.has(item.seq)) continue
-      xs.push(item.x)
+      if (!/\p{L}/u.test(item.str)) continue
+      const key = Math.round(item.x)
+      counts.set(key, (counts.get(key) || 0) + 1)
     }
   }
+  const xs = [...counts.entries()].filter(([, count]) => count >= 2).map(([x]) => x).sort((a, b) => a - b)
   if (xs.length === 0) return []
-  xs.sort((a, b) => a - b)
-  const anchors = [{ min: xs[0], max: xs[0] }]
+  const clusters = [{ min: xs[0], max: xs[0], count: counts.get(xs[0]) }]
   for (const x of xs.slice(1)) {
-    const current = anchors[anchors.length - 1]
-    if (x - current.max > COLUMN_GAP) anchors.push({ min: x, max: x })
-    else current.max = x
+    const current = clusters[clusters.length - 1]
+    if (x - current.max > 50) clusters.push({ min: x, max: x, count: counts.get(x) })
+    else {
+      current.max = x
+      current.count += counts.get(x)
+    }
   }
-  return anchors.map((anchor) => ({ ...anchor, center: (anchor.min + anchor.max) / 2 }))
+  const usable = clusters.filter((cluster) => cluster.count >= 3)
+  if (usable.length === 0) return []
+  return usable.map((cluster, index) => ({
+    min: cluster.min,
+    max: index + 1 < usable.length ? usable[index + 1].min - 1 : Infinity,
+    center: cluster.min,
+  }))
 }
 
 function columnIndexForX(anchors, x) {
@@ -331,6 +404,8 @@ function looksLikeUnrecognizedHeading(words, lineText) {
   const visible = (Array.isArray(words) ? words : []).filter((word) => word && word.text.length > 0)
   if (visible.length === 0 || visible.length > 2) return false
   if (/[0-9]/.test(lineText) || lineText.endsWith(':')) return false
+  // A question/exclamation/period is prose, not a section label.
+  if (/[.!?]$/.test(lineText)) return false
   return /^\p{Lu}/u.test(visible[0].text)
 }
 
@@ -397,7 +472,73 @@ function splitColumnByBaseline(columnItems) {
     }
     group.items.push(item)
   }
-  return groups.map((group) => group.items)
+  // Visual order is left-to-right within a baseline and top-to-bottom across
+  // baselines. The PDF content stream is not guaranteed to be in either
+  // order: De Botanist emits a price a fraction above its own name, so the
+  // price would otherwise be read first and pushed into the ambiguous-prose
+  // path. Sorting here keeps every item's own name before its price.
+  groups.sort((a, b) => {
+    if (a.y === null || b.y === null) return a.y === b.y ? 0 : a.y === null ? 1 : -1
+    return b.y - a.y
+  })
+  return groups.map((group) => group.items.slice().sort((a, b) => a.x - b.x))
+}
+
+/** A baseline that holds only one or more price tokens (and variant
+ * separators) is the price of the name line directly above it in the same
+ * column. Real De Botanist prints "Cappuccino" and "3.8" on two baselines;
+ * treating the price as a description and the name as a section heading
+ * invents both a category and a missing dish. Returns null unless every
+ * visible token is a price or a separator. */
+function priceOnlyBaseline(baselineItems, priceAnchors = []) {
+  const visible = (Array.isArray(baselineItems) ? baselineItems : []).filter(
+    (item) => item && typeof item.str === 'string' && item.str.trim().length > 0,
+  )
+  if (visible.length === 0) return null
+  const prices = []
+  for (const item of visible) {
+    const text = item.str.trim()
+    if (isPriceToken(text) && (priceAnchors.length === 0 || priceAnchors.some((x) => Math.abs(item.x - x) <= 8))) prices.push(text)
+    else if (!isPriceVariantSeparator(text)) return null
+  }
+  if (prices.length === 0) return null
+  return { prices, text: joinText(visible.map((item) => item.str)) }
+}
+
+/**
+ * X positions that recur for numeric tokens on this page, i.e. real price
+ * columns. A number inside a dish name ("Monkey 47") sits at the name's own
+ * X and is not a price; a number at a recurring right-hand X is. The rule is
+ * only applied when the page offers at least two candidate positions, and the
+ * caller falls back to accepting any price token otherwise.
+ */
+function priceXAnchors(page, suppressedSeqs = new Set()) {
+  const counts = new Map()
+  for (const line of (page && Array.isArray(page.lines) && page.lines) || []) {
+    const items = (line && Array.isArray(line.items) ? line.items : []).filter(
+      (item) =>
+        item &&
+        typeof item.str === 'string' &&
+        item.str.trim().length > 0 &&
+        typeof item.x === 'number' &&
+        !(Number.isInteger(item.seq) && suppressedSeqs.has(item.seq)),
+    )
+    for (let index = 0; index < items.length; index += 1) {
+      const item = items[index]
+      if (!isPriceToken(item.str.trim())) continue
+      // "6 st." / "12 personen" is a variant label, not a price column.
+      const next = items[index + 1]
+      if (next && isPriceVariantUnit(next.str)) continue
+      const key = Math.round(item.x)
+      counts.set(key, (counts.get(key) || 0) + 1)
+    }
+  }
+  const anchors = [...counts.entries()].filter(([, count]) => count >= 2).map(([x]) => x)
+  return anchors.length >= 2 ? anchors : []
+}
+
+function isPriceVariantUnit(text) {
+  return /^(?:st\.?|stuks?|glas|fles|karaf|personen|pp|p\.p\.?|per\b)/i.test(String(text || '').trim())
 }
 
 /**
@@ -453,6 +594,9 @@ function structurePdfLinesIntoMenu(pages) {
     // Columns are anchored to the whole page, not to one row's index, so an
     // empty left column never shifts right-hand content into the left state.
     const anchors = pageColumnAnchors(page, duplicateLayer.suppressedSeqs)
+    const priceAnchors = priceXAnchors(page, duplicateLayer.suppressedSeqs)
+    const isPriceWord = (word) =>
+      isPriceToken(word.text) && (priceAnchors.length === 0 || priceAnchors.some((x) => Math.abs(word.x - x) <= 8))
     // Collect every column's visual baselines for the whole page first: a
     // look-ahead (arrangement lead-in -> serving range) must see the next
     // line, not only another item on the same line.
@@ -472,9 +616,20 @@ function structurePdfLinesIntoMenu(pages) {
         for (const baseline of splitColumnByBaseline(columnItems)) columnBaselines[columnIndex].push(baseline)
       })
     }
+    // pdfjs often emits a name and its own price as separate visual lines that
+    // differ by less than one coordinate unit (De Botanist: "Cappuccino" at
+    // 502.97, "3.8" at 503.74). Merge across the original lines after all
+    // items of the page are known, so such a pair is one baseline and reads
+    // as "name price" instead of a price-only line plus a heading-like name.
+    columnBaselines.forEach((baselines, columnIndex) => {
+      columnBaselines[columnIndex] = splitColumnByBaseline(baselines.flat())
+    })
 
     columnBaselines.forEach((baselines, columnIndex) => {
       const state = { menuName: null, categoryPath: null, categoryInferred: false, lastItem: null }
+      // A price on its own baseline is consumed by the name line above it;
+      // other items on that same baseline (a second column's item) stay.
+      const consumedItems = new Set()
 
         // A description continuation for the immediately preceding item in
         // the SAME column on the SAME page, only when its leftmost X aligns
@@ -494,8 +649,9 @@ function structurePdfLinesIntoMenu(pages) {
           return true
         }
         for (let baselineIndex = 0; baselineIndex < baselines.length; baselineIndex += 1) {
-          const baselineItems = baselines[baselineIndex]
-          const nextBaseline = baselines[baselineIndex + 1] || []
+          const baselineItems = baselines[baselineIndex].filter((item) => !consumedItems.has(item))
+          if (baselineItems.length === 0) continue
+          const nextBaseline = (baselines[baselineIndex + 1] || []).filter((item) => !consumedItems.has(item))
           const sectionNames = pureSectionMarkerNames(baselineItems)
           const plainSection = sectionNames ? null : pdfSectionLabel(baselineItems)
           if (sectionNames || plainSection) {
@@ -543,7 +699,7 @@ function structurePdfLinesIntoMenu(pages) {
             layout.supplementLines += 1
             continue
           }
-          const pricePositions = words.map((word, index) => (isPriceToken(word.text) ? index : -1)).filter((index) => index >= 0)
+          const pricePositions = words.map((word, index) => (isPriceWord(word) ? index : -1)).filter((index) => index >= 0)
           // A price in the middle of a line, with no price at the end, is prose:
           // the real Smelt PDF has "Klassieke Stolwijker van 2,5 jaar oud ..." —
           // reading that as a dish named "Klassieke Stolwijker van" priced 2,50
@@ -564,11 +720,14 @@ function structurePdfLinesIntoMenu(pages) {
           let buffer = []
           let bufferStartX = null
           for (const word of words) {
-            if (isPriceToken(word.text)) {
+            if (isPriceWord(word)) {
               const name = joinText(buffer)
               if (name.length > 0) recognizedItems.push({ name, price: word.text.trim(), startX: bufferStartX })
               buffer = []
               bufferStartX = null
+            } else if (ABV_TOKEN_PATTERN.test(word.text)) {
+              // ABV is a property, not part of the dish name.
+              continue
             } else {
               if (buffer.length === 0) bufferStartX = word.x
               buffer.push(word.text)
@@ -610,6 +769,46 @@ function structurePdfLinesIntoMenu(pages) {
               state.lastItem = item
             }
             continue
+          }
+
+          // Name and price on two consecutive baselines in this column.
+          // De Botanist prints many items this way ("Cappuccino" then
+          // "3.8"); the price is not a description and the name is not a
+          // section heading. Only a line that already looks like a short
+          // capitalized item name is paired, and only with a baseline that
+          // holds nothing but prices/separators.
+          const nextPrices = priceOnlyBaseline(nextBaseline, priceAnchors)
+          if (nextPrices && looksLikeUnrecognizedHeading(words, lineText)) {
+            const category = categoryFor(state.categoryPath || [], state.categoryInferred)
+            const priceVariants = nextPrices.prices.length > 1
+              ? nextPrices.prices.map((price) => ({ label: null, price }))
+              : null
+            const item = {
+              name: lineText,
+              desc: null,
+              price: priceVariants ? null : nextPrices.prices[0],
+              priceStatus: priceVariants ? 'multiple_undecomposed' : 'known',
+              ...(priceVariants ? { priceVariants, priceText: nextPrices.text } : {}),
+              startX: Math.min(...baselineItems.map((it) => it.x)),
+              evidenceText: `${lineText} ${nextPrices.text}`,
+            }
+            category.items.push(item)
+            state.lastItem = item
+            for (const priceItem of nextBaseline) {
+              const priceItemText = priceItem.str.trim()
+              if (isPriceToken(priceItemText) || isPriceVariantSeparator(priceItemText)) consumedItems.add(priceItem)
+            }
+            continue
+          }
+
+          // A single Title Case word directly below an item, aligned with
+          // that item's name, is a flavour/variant continuation ("Red Bull
+          // Red Edition" -> "Watermelon", "Texels Skuumkoppe" ->
+          // "Dunkelweizen"), not a new section. Multi-word and ALL-CAPS lines
+          // keep the existing heading path; a plural ("Broodjes", "Oesters")
+          // is treated as a category, not a flavour word.
+          if (/^\p{Lu}[\p{Ll}'-]+$/u.test(lineText) && !/s$/i.test(lineText) && state.lastItem) {
+            if (attachDescription(baselineItems)) continue
           }
 
           // No usable price on this baseline. A short capitalized line is a
@@ -720,6 +919,7 @@ module.exports = {
   isPriceToken,
   isPriceVariantSeparator,
   splitLineIntoColumns,
+  splitColumnByBaseline,
   pageColumnAnchors,
   splitLineIntoPageColumns,
   duplicateLayoutLayer,

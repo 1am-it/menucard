@@ -24,7 +24,19 @@
       "referenceMode": "capture_only",
       "groundTruth": null,
       "authorization": "GitHub #59, explicit instruction 6248411416",
-      "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here."
+      "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here.",
+      "menuSources": [
+        {
+          "url": "https://debotanistbreda.nl/wp-content/uploads/2022/11/De-Botanist-Breda-Menukaart-voorjaar-20-03-2026_compressed.pdf",
+          "kind": "pdf",
+          "bytes": 551498,
+          "bytesSha256": "50fef0b6e8d14fbc151273c492f27c0fe70ab1ff909fdc445750cc7bb32a7f85",
+          "contentHash": "eb9da86e950463b90f09634f05236ec44925968120923506337678e56e3ade7f",
+          "pageCount": 16,
+          "readAt": "2026-10-18T09:58:44.489Z",
+          "note": "The actual linked PDF read by the analysis; the entry-page hash does not cover this file."
+        }
+      ]
     },
     "gauchosgrill": {
       "label": "Gauchos Grill Breda",
@@ -56,7 +68,34 @@
       "referenceMode": "capture_only",
       "groundTruth": null,
       "authorization": "GitHub #59, explicit instruction 6248411416",
-      "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here."
+      "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here.",
+      "menuSources": [
+        {
+          "url": "https://mrmoos.nl/menukaart",
+          "kind": "html",
+          "bytes": 51115,
+          "bytesSha256": "1f1c09800eef8cfa6094cfadd6014449cdeb776cb6e82f09c978edebc5433775",
+          "note": "Menu overview/hub; holds no menu itself, only the links below."
+        },
+        {
+          "url": "https://mrmoos.nl/lunch",
+          "kind": "html",
+          "bytes": 65341,
+          "bytesSha256": "1653ef0c32b346ee2eed1e76876ab4abaf6cbaabfa88e33e45f2f8bda381877a"
+        },
+        {
+          "url": "https://mrmoos.nl/diner",
+          "kind": "html",
+          "bytes": 71868,
+          "bytesSha256": "adbf8f42072d1b49ee8c688c2c163fbb3f0cdcaaa3c8d8faa1ee1ee9e29923e8"
+        },
+        {
+          "url": "https://mrmoos.nl/dranken",
+          "kind": "html",
+          "bytes": 102700,
+          "bytesSha256": "0006b26a54c00860597f3fbed76d31b8a4b20930d657fe5158d386fb737210d5"
+        }
+      ]
     },
     "colonie": {
       "label": "Colonia Breda",
@@ -71,7 +110,16 @@
       "referenceMode": "capture_only",
       "groundTruth": null,
       "authorization": "GitHub #59, explicit instruction 6248411416",
-      "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here."
+      "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here.",
+      "menuSources": [
+        {
+          "url": "https://breda.colonie.nl/menukaart/lunch-diner-dranken/",
+          "kind": "html",
+          "bytes": 234894,
+          "bytesSha256": "09c4935bf9360a38316fb4496caad78eb2f99ee9e750cd6e8848b8ca01942333",
+          "note": "The actual menu page read by the analysis; the entry-page hash does not cover it."
+        }
+      ]
     }
   }
 }

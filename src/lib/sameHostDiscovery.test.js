@@ -30,6 +30,19 @@ test('anchorLooksLikeMenuLink: never matched on null/undefined text or href', ()
   assert.equal(anchorLooksLikeMenuLink(undefined, undefined), false);
 });
 
+test('anchorLooksLikeMenuLink: a drinks page is a menu variant', () => {
+  assert.equal(anchorLooksLikeMenuLink('/dranken', 'Bekijken'), true);
+  assert.equal(anchorLooksLikeMenuLink('/en/drinks', 'View'), true);
+});
+
+test('anchorLooksLikeMenuLink: a gift card or voucher is never a menu link', () => {
+  assert.equal(anchorLooksLikeMenuLink('/over-ons/cadeaukaart/', 'Cadeaukaart'), false);
+  assert.equal(anchorLooksLikeMenuLink('/cadeaubon', 'Cadeaubon'), false);
+  assert.equal(anchorLooksLikeMenuLink('/gift-card', 'Gift card'), false);
+});
+
+
+
 test('MENU_KEYWORDS: fixed, closed list — every entry is already lowercase', () => {
   for (const keyword of MENU_KEYWORDS) {
     assert.equal(keyword, keyword.toLowerCase());

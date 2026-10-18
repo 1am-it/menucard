@@ -48,9 +48,17 @@ const MENU_KEYWORDS = [
   'dinerkaart',
   'lunchkaart',
   'borrelkaart',
+  'dranken',
+  'drinks',
   'carte',
   'speisekarte',
 ];
+
+// A gift card or voucher is not a menu even though its name contains
+// "kaart"/"card". Excluded before the keyword match so a real menu link
+// behind it keeps its place in the bounded candidate budget.
+const NON_MENU_LINK_PATTERN = /\b(?:cadeaukaart|cadeaubon|geschenk(?:bon)?|gift\s?card|giftcard|voucher|tegoedbon)\b/i
+
 
 const ANCHOR_PATTERN = /<a\b[^>]*href\s*=\s*["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
 
@@ -71,6 +79,7 @@ function anchorLooksLikeMenuLink(hrefPath, visibleText) {
     typeof hrefPath === 'string' ? hrefPath.toLowerCase() : '',
     typeof visibleText === 'string' ? visibleText.toLowerCase() : '',
   ];
+  if (haystacks.some((h) => NON_MENU_LINK_PATTERN.test(h))) return false;
   return MENU_KEYWORDS.some((keyword) => haystacks.some((h) => h.includes(keyword)));
 }
 

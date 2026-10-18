@@ -4,8 +4,9 @@ Status: meetplan voor #59, vastgelegd 2026-10-17 vóór de definitieve
 acceptatievergelijking. Herzien 2026-10-18: de representatieve set en holdout
 zijn machineleesbaar gepind in
 [`ops/benchmark/menu-extraction-acceptance-set.json`](../../ops/benchmark/menu-extraction-acceptance-set.json);
-de representatieve set is uitgevoerd, de holdout niet. Zie de
-[acceptatiematrix](menu-extraction-acceptance-matrix.md).
+de representatieve set is uitgevoerd. De drie gerepareerde praktijkbronnen zijn
+na hun eenmalige meting naar representatief verplaatst; alleen Gauchos Breda
+blijft holdout. Zie de [acceptatiematrix](menu-extraction-acceptance-matrix.md).
 Protocol: `MENU-EXTRACTION.md` v0.2, SHA-256
 `15510b4c0b74fee722ac2c51a3f40aa21b03e0161ccffdcb2008f3d27350b762`.
 
@@ -30,18 +31,21 @@ en daarna elk precies één keer geëvalueerd. De statussen zijn expliciet:
 `unused`, `evaluated_once` en `used_for_tuning`. Een getunede bron mag niet in
 de holdout blijven; die moet naar de representatieve set en een nieuwe holdout
 vragen. Smelt en Blossem zijn voor tuning gebruikt en mogen daarom nooit als
-ongeziene holdout worden gepresenteerd.
+ongeziene holdout worden gepresenteerd. De Botanist, Mr Moos en Colonia zijn na
+hun eerste meting voor reparatie gebruikt en daarom naar representatief
+verplaatst; zij zijn geen holdout meer.
 
-| Holdout | Uitkomst eerste meting | Beperking |
+| Bron | Uitkomst eerste meting (baseline) | Beperking / huidige status |
 | --- | --- | --- |
-| De Botanist | 151 items in 59 secties uit de gelinkte 16-pagina-PDF; entryhash gelijk aan de pin | 41 dubbele tekstregels genegeerd, 38 prijsregels midden in de regel niet overgenomen, kwaliteitscontrole meldt duplicaten/prijsambigiteit; geen volledigheids- of accuraatheidsclaim |
-| Gauchos Grill Breda | HTTP 404 op de goedgekeurde Breda-URL; geen menu gelezen | Geen alternatieve URL of andere vestiging gebruikt |
-| Mr Moos | 0 items; `/menukaart` gelezen maar niet automatisch herkend | JavaScript-afhankelijk; geen renderingvendor goedgekeurd; nul items is geen bewijs dat er geen menu is |
-| Colonia Breda | 0 items; homepage plus vijf kandidaatpagina's gelezen | Breed ontdekte menu-links (ook cadeaukaart); geen automatische menukaart herkend; niet getuned |
+| De Botanist | 151 items in 59 secties uit de gelinkte 16-pagina-PDF; entryhash gelijk aan de pin | Baseline blijft staan. Na reparatie 196 items/55 secties; layoutreferentie 95/141 matched, 46 missing, 5 extra, 96 niet-gekoppeld. **Representatief/usedForTuning**, geen holdout. |
+| Gauchos Grill Breda | HTTP 404 op de goedgekeurde Breda-URL; geen menu gelezen | Geen alternatieve URL of andere vestiging gebruikt. **Enige overgebleven holdout**. |
+| Mr Moos | 0 items; `/menukaart` gelezen maar niet automatisch herkend | Na begrensde hubdetectie 247 items in 3 menu's; `/groepsmenu` geblokkeerd. **Representatief/usedForTuning**, geen holdout. |
+| Colonia Breda | 0 items; homepage plus vijf kandidaatpagina's gelezen | Na HTML-prijselementreparatie 84 items in 16 secties; wijn/brunch/high tea gemeld als niet verliesvrij. **Representatief/usedForTuning**, geen holdout. |
 
-Deze uitkomsten zijn één eerste observatie. Ze zijn niet gebruikt om parser- of
-regels te wijzigen. Zonder een nieuwe, vooraf gepinde holdout is er geen tweede
-onafhankelijke meting.
+Deze uitkomsten zijn één eerste observatie. De reparaties zijn niet in de
+holdoutuitkomst teruggeschreven; de oorspronkelijke waarden staan in
+`holdout-evaluation.json`. Zonder een nieuwe, vooraf gepinde holdout is er geen
+tweede onafhankelijke meting.
 
 ## Meetbare drempels (voorstel, vóór acceptatie)
 
@@ -85,9 +89,11 @@ geschreven.
   geautomatiseerde vergelijking met de gecontroleerde capture is uitgevoerd);
 - een onafhankelijke menselijke Blossem-item-voor-itemcontrole (de
   geautomatiseerde vergelijking is uitgevoerd);
-- onafhankelijke menselijke item-voor-itemcontroles van de vier holdouts; de
-  eerste meting is automatisch uitgevoerd en als observatie vastgelegd;
-- een tweede holdoutmeting of een nieuwe holdout na eventuele tuning;
+- onafhankelijke menselijke item-voor-itemcontroles van de vier oorspronkelijke
+  praktijkbronnen; de eerste meting is automatisch uitgevoerd en als observatie
+  vastgelegd, en de drie gerepareerde bronnen zijn daarna representatief;
+- een tweede holdoutmeting of een nieuwe holdout na de tuning; die is nog niet
+  gepind;
 - de 50–100-bronnen BE-21-set;
 - live/staging browser- of schrijfacceptatie in een geïsoleerde omgeving (de
   lokale fixture is uitgevoerd; live niet);

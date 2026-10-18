@@ -22,8 +22,9 @@ const { validateHoldout, validateRepresentative } = require('./acceptanceSetGuar
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
 const STATUSES = new Set(['executed', 'executed_with_limitation', 'blocked', 'unsupported', 'not_available']);
 const PROVENANCE = new Set(['real_source', 'synthetic_fixture', 'historical_dataset', 'candidate_unfetched']);
-const REPRESENTATIVE_REAL_SOURCES = new Set(['smelt', 'blossem']);
-const HOLDOUT_REAL_SOURCES = new Set(['debotanist', 'gauchosgrill', 'mrmoos', 'colonie']);
+const REPRESENTATIVE_REAL_SOURCES = new Set(['smelt', 'blossem', 'debotanist', 'mrmoos', 'colonie']);
+const HOLDOUT_REAL_SOURCES = new Set(['gauchosgrill']);
+const MOVED_HOLDOUT_SOURCES = new Set(['debotanist', 'mrmoos', 'colonie']);
 const BROWSER_EVIDENCE = path.join(REPO_ROOT, 'ops', 'browser', 'evidence', 'menu-review-browser-evidence.json');
 const SHA256 = /^[0-9a-f]{64}$/;
 
@@ -103,21 +104,24 @@ test('every entry is complete and uses the closed status/provenance vocabulary',
 });
 
 
-test('representative real sources stay limited to the two tuned public sources', () => {
+test('representative real sources are the tuned public sources with pinned hashes', () => {
   const real = manifest.representative.filter((entry) => entry.provenance === 'real_source');
   assert.ok(real.length > 0);
   for (const entry of real) {
     assert.ok(REPRESENTATIVE_REAL_SOURCES.has(entry.referenceId), `${entry.id} uses unapproved representative source ${entry.referenceId}`);
-    const reference = references.sources[entry.referenceId];
+    const reference = references.sources[entry.referenceId] || holdoutReferences.sources[entry.referenceId];
     assert.ok(reference, `${entry.id} reference exists`);
     assert.match(reference.bytesSha256, SHA256);
-    assert.match(reference.contentHash, SHA256);
-    assert.ok(entry.sourceVersion.includes(reference.bytesSha256.slice(0, 8)), `${entry.id} pins the bytes hash prefix`);
+    const contentHash = reference.contentHash
+      || (Array.isArray(reference.menuSources) ? reference.menuSources.map((source) => source.contentHash).find((hash) => hash) : null);
+    if (contentHash) assert.match(contentHash, SHA256, `${entry.id} content hash`);
+    const hashes = [reference.bytesSha256, ...(reference.menuSources || []).map((source) => source.bytesSha256)].filter(Boolean);
+    assert.ok(hashes.some((hash) => entry.sourceVersion.includes(hash.slice(0, 8))), `${entry.id} pins a bytes hash prefix`);
   }
   for (const id of Object.keys(references.sources)) assert.ok(REPRESENTATIVE_REAL_SOURCES.has(id), `reference ${id}`);
 });
 
-test('holdout real sources are the four approved public sources with capture-only pins', () => {
+test('holdout real sources are the remaining approved public source with capture-only pins', () => {
   const real = manifest.holdout.entries.filter((entry) => entry.provenance === 'real_source');
   assert.deepEqual(real.map((entry) => entry.referenceId).sort(), [...HOLDOUT_REAL_SOURCES].sort());
   for (const entry of real) {
@@ -130,7 +134,10 @@ test('holdout real sources are the four approved public sources with capture-onl
     if (reference.captureStatus === 'captured') assert.match(reference.bytesSha256, SHA256);
     else assert.equal(entry.status, 'blocked', `${entry.id} cannot claim a successful read`);
   }
-  for (const id of Object.keys(holdoutReferences.sources)) assert.ok(HOLDOUT_REAL_SOURCES.has(id), `holdout reference ${id}`);
+  for (const id of Object.keys(holdoutReferences.sources)) {
+    assert.ok(HOLDOUT_REAL_SOURCES.has(id) || MOVED_HOLDOUT_SOURCES.has(id), `holdout reference ${id}`);
+  }
+  for (const id of MOVED_HOLDOUT_SOURCES) assert.ok(REPRESENTATIVE_REAL_SOURCES.has(id), `moved source ${id} is representative`);
 });
 
 test('synthetic fixtures use fictional .invalid hosts; candidates stay unfetched and blocked', () => {
