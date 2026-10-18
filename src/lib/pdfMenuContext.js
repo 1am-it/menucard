@@ -51,7 +51,12 @@ function pdfContextToMenuContext(context, usedSlugs, options = {}) {
 
   const sections = context.recognizedSections
     .map((section, position) => {
-      const name = boundedText(section && section.name);
+      const sourcePath = (Array.isArray(section && section.path) ? section.path : [])
+        .map((label) => boundedText(label))
+        .filter(Boolean);
+      const name = boundedText(section && section.name) || (sourcePath.length > 0 ? sourcePath[sourcePath.length - 1] : null);
+      const path = sourcePath.length > 0 ? sourcePath : name ? [name] : [];
+      const uncertain = Boolean(section && section.uncertain === true);
       const items = ((section && Array.isArray(section.items) && section.items) || [])
         .map((item, itemIndex) => {
           const itemName = boundedText(item && item.name);
@@ -78,15 +83,15 @@ function pdfContextToMenuContext(context, usedSlugs, options = {}) {
           return itemOut;
         })
         .filter(Boolean);
-      return { name, position, items };
+      return { name, path, uncertain, position, items };
     })
     .filter((section) => section.items.length > 0);
 
   if (sections.length === 0) return null;
 
   const hierarchy = normalizeMenuHierarchy(
-    sections.map((section) => (section.name ? [section.name] : [])),
-    sections.map((section) => !section.name)
+    sections.map((section) => (section.path.length > 0 ? section.path : [])),
+    sections.map((section) => !section.name || section.uncertain)
   );
 
   const categories = sections.map((section, index) => {

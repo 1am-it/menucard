@@ -393,6 +393,42 @@ test('plain section labels: a capitalized known heading counts, a lowercase wrap
   assert.deepEqual(structured.categories.map((category) => category.name), [null])
 })
 
+test('plain sub-headings below a menu heading keep their parent path, and an arrangement lead-in is not glued to a dish', () => {
+  const line = (y, left, right) => {
+    const items = []
+    if (left) items.push({ str: left, x: 20, y })
+    if (right) items.push({ str: right, x: 440, y })
+    return { y, items }
+  }
+  const pair = (y, name, price, xName, xPrice) => ({ y, items: [{ str: name, x: xName, y }, { str: price, x: xPrice, y }] })
+  const lines = [
+    line(500, 'BORREL Om te delen vanaf 14:30', 'LUNCH 12:00 – 15:00'),
+    line(480, null, 'Eieren'),
+    pair(470, 'Brood', '6', 20, 100),
+    pair(450, 'Omelette du fromage (V)', '11', 440, 560),
+    pair(430, 'Rillette van gerookte makreel', '12', 20, 100),
+    line(410, 'Met zwarte peper mayonaise en bruschetta', null),
+    line(400, null, 'Broodjes'),
+    pair(390, 'Groninger mozzarella (V)', '12', 440, 560),
+    line(370, 'Kaasfondue naar keuze', null),
+    line(360, 'Voor 1, 2 of 4 personen', null),
+    line(350, null, 'Overig'),
+    pair(340, 'Tosti (V)', '8', 440, 560),
+  ]
+  const { categories, layout } = structurePdfLinesIntoMenu([{ pageNumber: 2, lines }])
+  assert.deepEqual(categories.map((category) => category.path), [
+    ['BORREL'],
+    ['LUNCH', 'Eieren'],
+    ['LUNCH', 'Broodjes'],
+    ['LUNCH', 'Overig'],
+  ])
+  // The nesting is inferred from order, never typography: it stays reviewable.
+  assert.deepEqual(categories.filter((category) => category.path[0] === 'LUNCH').map((category) => category.uncertain === true), [true, true, true])
+  const rillette = categories[0].items.find((item) => item.name === 'Rillette van gerookte makreel')
+  assert.equal(rillette.desc, 'Met zwarte peper mayonaise en bruschetta')
+  assert.equal(layout.arrangementLines, 1)
+})
+
 test('compactPdfLayoutText: bounded, page-aware, column-aware, and free of the duplicate overlay', () => {
   const base = ['Soep 5.00', 'Brood 3.00', 'Salade 6.00', 'Taart 4.00', 'Koffie 2.50']
   const lines = [{ y: 300, items: [{ str: '// LINKS', x: 20, y: 300, seq: 0 }, { str: '// RECHTS', x: 440, y: 300, seq: 1 }] }]

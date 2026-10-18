@@ -710,12 +710,59 @@ const NON_MENU_HEADING_PATTERN = /\b(openingstijden|openingsuren|opening hours|c
 // ─── Structure detection ───────────────────────────────────────────────────
 
 const CARD_CLASS_PATTERN = /(menu[-_ ]?item|menu[-_ ]?card|dish|gerecht|product|item|card)/i
+// A layout container (accordion panel, column, section) is never one dish,
+// even when its class also looks card-like ("menucard__column").
+const CONTAINER_CLASS_PATTERN = /(?:^|[-_ ]+)(columns?|panel|section|group|grid|list|wrapper|inner)(?:$|[-_ ]+)/i
 const NAME_CLASS_PATTERN = /(name|naam|title|titel)/i
 const PRICE_CLASS_PATTERN = /(price|prijs)/i
 const DESC_CLASS_PATTERN = /(desc|omschrijving|beschrijving|ingredi|info|text)/i
 
 function isHeading(node) {
   return /^h[1-6]$/.test(node.tag) || (node.attrs && node.attrs.role === 'heading')
+}
+
+/**
+ * A structural panel toggle is a menu-variant label, not decoration: a real
+ * clickable header that declares both an expanded state and the panel it
+ * controls (aria-controls, or a selector in data-target) only counts when
+ * that panel element actually exists inside the same block. This keeps a
+ * cookie/banner button from ever becoming a menu heading.
+ */
+function panelTargetId(attrs) {
+  const raw = (attrs && (attrs['aria-controls'] || attrs['data-target'])) || '';
+  if (typeof raw !== 'string' || raw.trim().length === 0) return null;
+  const quoted = raw.match(/['"]([^'"]+)['"]/);
+  if (quoted) return quoted[1].trim();
+  const idSelector = raw.match(/#([A-Za-z0-9_-]+)/);
+  if (idSelector) return idSelector[1];
+  return /^[A-Za-z0-9_-]+$/.test(raw.trim()) ? raw.trim() : null;
+}
+
+const PANEL_LABEL_EXCLUDE = /\b(cookies?|accepteer|accepteren|accept|instellingen|settings|zoeken|zoek|search|login|inloggen|bestellen|bestel|order|reserveren|reserveer|reserve|sluiten|sluit|close|openen|open|menu|navigatie|navigation|filter|filters)\b/i
+
+function panelHasMenuContent(panel, budget) {
+  return Boolean(
+    findDescendant(panel, (n) => isHeading(n), budget) ||
+      findDescendant(panel, (n) => isList(n) && n.children.filter((c) => isListItem(c)).length >= 3, budget) ||
+      findDescendant(panel, (n) => (n.tag === 'p' || n.tag === 'div') && n.children.some((c) => c.tag === 'br'), budget),
+  )
+}
+
+function isPanelHeading(node, budget) {
+  const attrs = node.attrs || {};
+  if (attrs.role !== 'button' && node.tag !== 'button') return false;
+  if (typeof attrs['aria-expanded'] !== 'string') return false;
+  const label = textOf(node, { budget }).replace(/\s+/g, ' ').trim();
+  if (!label || label.length > 80 || label.split(' ').filter(Boolean).length > 6 || /\d/.test(label)) return false;
+  if (PANEL_LABEL_EXCLUDE.test(label)) return false;
+  const targetId = panelTargetId(attrs);
+  if (!targetId || !node.parent) return false;
+  const panel = findDescendant(node.parent, (n) => {
+    const a = n.attrs || {};
+    return a.id === targetId || a['san-id'] === targetId || a.name === targetId;
+  }, budget);
+  if (!panel || panel === node) return false;
+  return panelHasMenuContent(panel, budget);
 }
 
 const MIN_SENTENCE_WORDS = 7
@@ -761,6 +808,27 @@ function isRepeatedCard(node, budget) {
     }
   }
   return (parent.cardKeyCounts.get(`${node.tag}\u0000${cls}`) || 0) >= 2
+}
+
+/**
+ * A card-like repeated block can itself be a container around a whole menu
+ * (an accordion panel with several sub-headings and lists). Counting its
+ * nested list items and table rows keeps that block from being read as one
+ * giant "dish"; a normal dish card (one name heading) stays an item.
+ */
+function looksLikeMenuContainer(node, budget) {
+  let listItems = 0
+  let rows = 0
+  const queue = [...node.children]
+  for (let head = 0; head < queue.length; head += 1) {
+    const current = queue[head]
+    if (budget) budget.spend(1)
+    if (!current || current.tag === '#text') continue
+    if (isListItem(current)) listItems += 1
+    if (current.tag === 'tr') rows += 1
+    for (const child of current.children) queue.push(child)
+  }
+  return listItems >= 3 || rows >= 2
 }
 
 function findDescendant(node, predicate, budget) {
@@ -849,6 +917,24 @@ const isNameElement = (n) => classMatches(n, NAME_CLASS_PATTERN) || /^h[3-6]$/.t
 const isPriceElement = (n) => classMatches(n, PRICE_CLASS_PATTERN) || (n.attrs && n.attrs.itemprop === 'price')
 const isDescriptionElement = (n) => classMatches(n, DESC_CLASS_PATTERN) || n.tag === 'p' || (n.attrs && n.attrs.itemprop === 'description')
 
+/**
+ * The last inline element of an item, when it is a price-only tail such as
+ * `<strong>4.5</strong>`. Menus commonly print one decimal ("4.5"), which the
+ * generic money scanner deliberately does not accept in prose; a dedicated
+ * trailing element is structural evidence, so the strict `parsePriceOnly`
+ * (0,50–500,00) applies here instead. This is what keeps a real list item
+ * from silently becoming an unpriced line.
+ */
+function trailingPriceElement(node, budget, markerCounter) {
+  const meaningful = node.children.filter((child) => (child.tag === '#text' ? child.text.trim() !== '' : textOf(child, { markerCounter, budget }) !== ''))
+  const last = meaningful[meaningful.length - 1]
+  if (!last || last.tag === '#text' || !LINE_PRICE_TAGS.has(last.tag)) return null
+  const text = textOf(last, { markerCounter, budget }).trim()
+  if (!text) return null
+  const price = parsePriceOnly(text)
+  return price ? { element: last, text, price } : null
+}
+
 /** Splits one item element into { name, priceText, description, fullText }.
  * `ambiguous: true` marks an element holding several independent
  * name/price pairs — never read as one item, never partially. */
@@ -880,6 +966,18 @@ function readItem(node, pattern, markerCounter, budget) {
   }
   // Markers are counted once, on the full-text pass only.
   const fullText = textOf(node, { markerCounter, budget })
+  // A real price-only tail element is stronger evidence than a prose scan and
+  // accepts the common one-decimal format ("4.5"). A second price anywhere
+  // before it still makes the element ambiguous.
+  if (pattern === 'list_item') {
+    const tail = trailingPriceElement(node, budget, markerCounter)
+    if (tail) {
+      const outside = textOf(node, { skip: (n) => n === tail.element, budget }).trim()
+      budget.spend(Math.ceil(outside.length / 16))
+      if (findPrices(outside).length > 0) return { name: '', priceText: '', description: '', fullText, ambiguous: true }
+      return { name: outside, priceText: tail.text, description: '', fullText, price: tail.price }
+    }
+  }
   // Name elements inside a description (a <strong> word in a <p>) are not
   // independent names; nested matches count once (outermost only).
   const nameEls = findOutermost(node, isNameElement, budget, { skip: isDescriptionElement })
@@ -952,8 +1050,31 @@ function extractWithinBudget(html, budget, stats) {
 
   const markerCounter = { count: 0 }
   const sectionsByKey = new Map() // path key -> { path, items, unpriced: [] }
+  const excludedByPath = new Map() // path key -> { path, unpricedLines, reason }
   const rejected = []
   const seen = new Set()
+
+  function noteExcludedContent(path, reason) {
+    if (!Array.isArray(path) || path.length === 0) return
+    const key = JSON.stringify(path)
+    const entry = excludedByPath.get(key) || { path, unpricedLines: 0, reason }
+    entry.unpricedLines += 1
+    excludedByPath.set(key, entry)
+  }
+
+  /** Several alternative end prices on one line ("3 gangen 57 | 4 gangen 66 |
+   * 5 gangen 76", "glas 5,50 / fles 27,50") cannot be one dish price. Such a
+   * block is reported as excluded content instead of being flattened. */
+  function hasAlternativeEndPrices(text) {
+    const parts = String(text || '').split(/\s*[|/]\s*/).filter((part) => part.trim().length > 0)
+    if (parts.length < 2) return false
+    let priced = 0
+    for (const part of parts) {
+      const match = part.match(/(\d{1,3}(?:[.,]\d{1,2})?)\s*$/)
+      if (match && parsePriceOnly(match[1])) priced += 1
+    }
+    return priced >= 2
+  }
 
   function reject(text, reason, node) {
     stats.rejected += 1
@@ -995,7 +1116,9 @@ function extractWithinBudget(html, budget, stats) {
     if (item.ambiguous) return reject(fullText, 'ambiguous_structure', node)
 
     const name = cleanName(item.name)
-    const prices = findPrices(item.priceText)
+    const prices = item.price
+      ? [{ raw: item.priceText, amountMinorUnits: item.price.amountMinorUnits, hasEuroSign: false }]
+      : findPrices(item.priceText)
     const section = sectionFor(headingPath)
     if (prices.length === 0) {
       if (ON_REQUEST_PATTERN.test(fullText) && isPlausibleItemName(name.replace(ON_REQUEST_PATTERN, ''))) {
@@ -1120,6 +1243,10 @@ function extractWithinBudget(html, budget, stats) {
 
   // Document-order walk with an explicit heading stack; bounded depth.
   const headingStack = []
+  // Panel labels are siblings even when each panel holds deeper h3 sections,
+  // so their level is anchored once (below the surrounding heading), not
+  // re-derived from the deepest section of the previous panel.
+  let panelLevel = null
   function currentPath(extra) {
     const labels = headingStack.map((h) => h.text)
     return extra ? [...labels, extra] : labels
@@ -1135,19 +1262,31 @@ function extractWithinBudget(html, budget, stats) {
       // Markers only matter inside item text (textOf); the walk never skips
       // an element for its class, so an item classed "vegan" is still read.
       if (child.tag === '#text') continue
-      if (isHeading(child)) {
+      const panelHeading = !isHeading(child) && isPanelHeading(child, budget)
+      if (isHeading(child) || panelHeading) {
         const raw = textOf(child, { markerCounter, budget })
         const text = clip(raw)
         if (text) {
-          const level = headingLevel(child)
+          const top = headingStack[headingStack.length - 1]
+          // A panel label (DINNER/LUNCH) is a menu-variant level above the
+          // h3 sections inside its panel. An explicit aria-level always wins;
+          // otherwise it sits at level 2 so a later h3 section can never pop
+          // the variant back out of the route.
+          if (panelHeading && !Number.isInteger(panelLevel)) panelLevel = 2
+          const level = panelHeading
+            ? (Number(child.attrs && child.attrs['aria-level']) || panelLevel)
+            : headingLevel(child)
           // A sentence-like heading nested BELOW a real section heading
           // ("Deze gerechten worden geserveerd in …" under "A LA CARTE") is
           // context for that section: skipped, the dishes stay in it. On the
           // same or a higher level it is kept in the route, so its dishes
           // never join the previous section; the hierarchy then marks that
           // route uncertain ("Controle nodig").
-          const top = headingStack[headingStack.length - 1]
-          if (top && level > top.level && isProseHeading(raw)) continue
+          if (!panelHeading && top && level > top.level && isProseHeading(raw)) continue
+          // A section heading identical to the enclosing label (Blossem:
+          // panel "BITES" containing h3 "BITES") adds a level but no
+          // information; it is not duplicated in the route.
+          if (top && top.text === text && level >= top.level) continue
           while (headingStack.length > 0 && headingStack[headingStack.length - 1].level >= level) headingStack.pop()
           headingStack.push({ level, text })
         }
@@ -1186,8 +1325,15 @@ function extractWithinBudget(html, budget, stats) {
       }
       // A "card" that itself holds a priced line list (BE-25) is a container
       // around a whole menu (an accordion panel, a column), not one dish:
-      // walk into it instead of reading it as a single item.
-      if (isRepeatedCard(child, budget) && !findDescendant(child, (n) => (n.tag === 'p' || n.tag === 'div') && n.children.some((c) => c.tag === 'br') && lineBreakLines(n, budget, markerCounter) !== null, budget)) {
+      // walk into it instead of reading it as a single item. The same applies
+      // to an accordion panel whose content is a list or several sub-headings
+      // (the real Blossem BITES panel).
+      if (
+        isRepeatedCard(child, budget) &&
+        !classMatches(child, CONTAINER_CLASS_PATTERN) &&
+        !looksLikeMenuContainer(child, budget) &&
+        !findDescendant(child, (n) => (n.tag === 'p' || n.tag === 'div') && n.children.some((c) => c.tag === 'br') && lineBreakLines(n, budget, markerCounter) !== null, budget)
+      ) {
         handleItem(child, 'repeated_card', currentPath(extraLabel))
         continue
       }
@@ -1201,6 +1347,18 @@ function extractWithinBudget(html, budget, stats) {
           for (const block of blocks) handleBlock(block, child, path)
           continue
         }
+        // A paragraph without line breaks that carries several alternative
+        // end prices is an arrangement/choice offer, not one dish. It is
+        // reported under its heading, never flattened into a fake item.
+        if (
+          path.length > 0 &&
+          !child.children.some((c) => c.tag === 'br') &&
+          child.children.every((c) => c.tag === '#text' || LINE_PRICE_TAGS.has(c.tag)) &&
+          hasAlternativeEndPrices(textOf(child, { markerCounter, budget }))
+        ) {
+          noteExcludedContent(path, 'alternative_prices')
+          continue
+        }
       }
       walk(child, depth + 1, extraLabel)
     }
@@ -1212,17 +1370,24 @@ function extractWithinBudget(html, budget, stats) {
   // items — a navigation list never becomes rejected-line noise.
   const sections = []
   for (const section of sectionsByKey.values()) {
-    if (section.items.length === 0) continue
+    if (section.items.length === 0) {
+      // A recognised heading whose content yielded no dish with a readable
+      // price (an arrangement/choice menu, or unreadable price lines) is
+      // never silently discarded: the path and the line count are reported.
+      if (section.unpriced.length > 0 && section.path.length > 0) noteExcludedContent(section.path, 'no_recognized_price')
+      continue
+    }
     for (const line of section.unpriced) reject(line.text, 'missing_price', line.node)
     sections.push(section.uncertain ? { path: section.path, items: section.items, uncertain: true } : { path: section.path, items: section.items })
   }
+  const excludedSections = [...excludedByPath.values()]
   const counted = sections.reduce((n, s) => n + s.items.length, 0)
   stats.counted = counted
   stats.workUnits = budget.used
 
   if (counted < MIN_ITEMS) return unparsed(counted === 0 ? 'no_structured_items' : 'too_few_items', rejected, stats)
   if (sections.length > MAX_SECTIONS || counted > MAX_ITEMS) return unparsed('too_many_items', rejected, stats)
-  return { contractVersion: MENU_EXTRACTION_CONTRACT_VERSION, status: 'parsed', reason: null, sections, rejected, stats, cost: emptyCost() }
+  return { contractVersion: MENU_EXTRACTION_CONTRACT_VERSION, status: 'parsed', reason: null, sections, excludedSections, rejected, stats, cost: emptyCost() }
 }
 
 /** The `html_structure` adapter — the same AdapterResult envelope as

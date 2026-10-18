@@ -305,6 +305,22 @@ function isPdfChrome(lineItems) {
 }
 
 /**
+ * A short, capitalized price-less line directly above an explicit serving
+ * range ("Voor 1, 2 of 4 personen") introduces an arrangement/choice menu.
+ * It is not a description of the previous dish; making it one silently
+ * attaches arrangement text to an unrelated item (the real Smelt BORREL
+ * "Kaasfondue naar keuze" line). Counted, never stored as a dish.
+ */
+function looksLikeArrangementLeadIn(lineText, nextText) {
+  const text = String(lineText || '').trim()
+  const words = text.split(/\s+/).filter(Boolean)
+  if (words.length < 2 || words.length > 4) return false
+  if (!/^\p{Lu}/u.test(text)) return false
+  if (/[.,:;!?]$/.test(text)) return false
+  return /^(voor|vanaf)\s+\d/i.test(String(nextText || '').trim())
+}
+
+/**
  * A short capitalised, price-less line that is neither chrome nor a known
  * section nor a description of the previous item is probably a heading this
  * parser does not recognize (the real Smelt lunch sub-headings "Eieren" and
@@ -402,18 +418,27 @@ function splitColumnByBaseline(columnItems) {
  * included.
  */
 function structurePdfLinesIntoMenu(pages) {
-  const categoriesByName = new Map() // name (or null) -> { name, items: [] }
+  const categoriesByKey = new Map() // JSON path -> { name, path, items: [], uncertain }
   const layout = {
     duplicateLayerItems: 0,
     duplicateLayerOffsets: [],
     ambiguousPriceLines: 0,
     supplementLines: 0,
+    arrangementLines: 0,
     unrecognizedHeadingLines: 0,
   }
 
-  function categoryFor(name) {
-    if (!categoriesByName.has(name)) categoriesByName.set(name, { name, items: [] })
-    return categoriesByName.get(name)
+  function categoryFor(path, uncertain) {
+    const key = JSON.stringify(path)
+    if (!categoriesByKey.has(key)) {
+      categoriesByKey.set(key, {
+        name: path.length > 0 ? path[path.length - 1] : null,
+        path,
+        items: [],
+        uncertain: uncertain === true,
+      })
+    }
+    return categoriesByKey.get(key)
   }
 
   for (const page of Array.isArray(pages) ? pages : []) {
@@ -428,7 +453,10 @@ function structurePdfLinesIntoMenu(pages) {
     // Columns are anchored to the whole page, not to one row's index, so an
     // empty left column never shifts right-hand content into the left state.
     const anchors = pageColumnAnchors(page, duplicateLayer.suppressedSeqs)
-    const columnStates = anchors.map(() => ({ categoryName: null, lastItem: null }))
+    // Collect every column's visual baselines for the whole page first: a
+    // look-ahead (arrangement lead-in -> serving range) must see the next
+    // line, not only another item on the same line.
+    const columnBaselines = anchors.map(() => [])
 
     for (const line of page.lines || []) {
       const items = (line && Array.isArray(line.items) ? line.items : []).filter(
@@ -440,8 +468,13 @@ function structurePdfLinesIntoMenu(pages) {
       if (items.length === 0) continue
       const columns = anchors.length > 0 ? splitLineIntoPageColumns(items, anchors) : [items]
       columns.forEach((columnItems, columnIndex) => {
-        if (!columnStates[columnIndex]) columnStates[columnIndex] = { categoryName: null, lastItem: null }
-        const state = columnStates[columnIndex]
+        if (!columnBaselines[columnIndex]) columnBaselines[columnIndex] = []
+        for (const baseline of splitColumnByBaseline(columnItems)) columnBaselines[columnIndex].push(baseline)
+      })
+    }
+
+    columnBaselines.forEach((baselines, columnIndex) => {
+      const state = { menuName: null, categoryPath: null, categoryInferred: false, lastItem: null }
 
         // A description continuation for the immediately preceding item in
         // the SAME column on the SAME page, only when its leftmost X aligns
@@ -460,14 +493,37 @@ function structurePdfLinesIntoMenu(pages) {
           state.lastItem.evidenceText = `${state.lastItem.evidenceText}\n${text}`
           return true
         }
-        for (const baselineItems of splitColumnByBaseline(columnItems)) {
+        for (let baselineIndex = 0; baselineIndex < baselines.length; baselineIndex += 1) {
+          const baselineItems = baselines[baselineIndex]
+          const nextBaseline = baselines[baselineIndex + 1] || []
           const sectionNames = pureSectionMarkerNames(baselineItems)
           const plainSection = sectionNames ? null : pdfSectionLabel(baselineItems)
           if (sectionNames || plainSection) {
             // On a single combined row only the first marker is used, exactly
             // as before. When a real column split exists, each column keeps its
             // own active section.
-            state.categoryName = sectionNames ? sectionNames[0] : plainSection
+            const headingText = joinText(baselineItems.map((it) => it.str))
+            const carriesServiceTime = /\d{1,2}:\d{2}/.test(headingText)
+            if (sectionNames) {
+              // An explicit // marker is its own top-level section.
+              state.menuName = sectionNames[0]
+              state.categoryPath = [sectionNames[0]]
+              state.categoryInferred = false
+            } else if (carriesServiceTime || !state.menuName) {
+              // A plain heading with a service time (DINNER 17:30, LUNCH
+              // 12:00–15:00) is the menu level; without one it stays top-level
+              // when nothing is active.
+              state.menuName = plainSection
+              state.categoryPath = [plainSection]
+              state.categoryInferred = false
+            } else {
+              // A plain heading below an active menu heading is a subcategory
+              // (Smelt: LUNCH > Eieren/Broodjes/Overig). The level is inferred
+              // from order and column state, not typography, so it is marked
+              // uncertain for review.
+              state.categoryPath = [state.menuName, plainSection]
+              state.categoryInferred = true
+            }
             state.lastItem = null
             continue
           }
@@ -520,7 +576,7 @@ function structurePdfLinesIntoMenu(pages) {
           }
 
           if (recognizedItems.length > 0) {
-            const category = categoryFor(state.categoryName)
+            const category = categoryFor(state.categoryPath || [], state.categoryInferred)
             // Merge "name price / secondPrice" into ONE item with two named-less
             // price variants. The separator itself is never a dish name. The
             // product contract cannot store variants yet, so `price` stays null;
@@ -557,10 +613,25 @@ function structurePdfLinesIntoMenu(pages) {
           }
 
           // No usable price on this baseline. A short capitalized line is a
-          // possible heading this parser does not recognize; it never becomes
-          // a category and it ends the previous item's description block.
+          // possible heading this parser does not recognize; it ends the
+          // previous item's description block. Below an active menu heading it
+          // is kept as an inferred subcategory (marked uncertain), so its
+          // dishes never join the parent section.
           if (looksLikeUnrecognizedHeading(words, lineText)) {
+            if (state.menuName) {
+              state.categoryPath = [state.menuName, lineText]
+              state.categoryInferred = true
+              state.lastItem = null
+              continue
+            }
             layout.unrecognizedHeadingLines += 1
+            state.lastItem = null
+            continue
+          }
+          // "Kaasfondue naar keuze" followed by "Voor 1, 2 of 4 personen" is an
+          // arrangement lead-in, not a description of the previous dish.
+          if (state.menuName && looksLikeArrangementLeadIn(lineText, joinText(nextBaseline.map((it) => it.str)))) {
+            layout.arrangementLines += 1
             state.lastItem = null
             continue
           }
@@ -570,11 +641,12 @@ function structurePdfLinesIntoMenu(pages) {
         }
       })
     }
-  }
 
-  const categories = [...categoriesByName.values()]
+  const categories = [...categoriesByKey.values()]
     .map((category) => ({
       name: category.name,
+      ...(category.path.length > 0 ? { path: category.path } : {}),
+      ...(category.uncertain ? { uncertain: true } : {}),
       items: category.items.map((item) => ({
         name: item.name,
         desc: item.desc,
