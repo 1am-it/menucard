@@ -47,14 +47,24 @@ toegang of een vooraf gecontroleerde referentie blijft dit expliciet
 | Blossem Breda HTML | 23 items in 8 rubrieken, titel `PROEF HET BESTE VAN HET SEIZOEN`, bron `/nl/restaurant` | extractie loopt; nog geen onafhankelijke item-voor-item acceptatie |
 | Smelt homepage | geen menulink gevonden op de landingspagina; Breda-pagina bevat de PDF-link | homepage alleen is geen extractiebewijs |
 
+Deze observaties zijn van 2026-10-17 en daarmee achterhaald door de
+gecontroleerde bronvergelijking van 2026-10-18 in
+`menu-extraction-acceptance.md`: Smelt 37/37 en Blossem 43/43 items exact, met
+byte-/contenthash en expliciete uitsluitingen. Ze blijven hier als historie
+staan; de nieuwste vergelijking is leidend. Die vergelijking is geautomatiseerd
+tegen een gecontroleerde capture en is geen onafhankelijke menselijke
+acceptatie.
+
 Deze resultaten zijn read-only verkregen via de bestaande robots-, SSRF-,
 redirect- en omvangscontroles. Er zijn geen productiegegevens of concepten
 geschreven.
 
 ## Niet-uitgevoerd
 
-- onafhankelijke menselijke vergelijking van alle Smelt-regels met de PDF;
-- een volledige Blossem-item-voor-itemcontrole;
+- onafhankelijke menselijke vergelijking van alle Smelt-regels met de PDF (de
+  geautomatiseerde vergelijking met de gecontroleerde capture is uitgevoerd);
+- een onafhankelijke menselijke Blossem-item-voor-itemcontrole (de
+  geautomatiseerde vergelijking is uitgevoerd);
 - de 50–100-bronnen BE-21-set en de ongeziene set;
 - browser-/schrijfacceptatie in een geïsoleerde omgeving;
 - echte provideractivering, kostenmeting en DPA/EU-retentietest.

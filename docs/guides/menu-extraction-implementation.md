@@ -181,8 +181,8 @@ vóór enige modelaanroep:
   runtimehook wordt dus niet meer overgeslagen voor de directe PDF-tak.
 - De tekst leeft alleen in het geheugen (`sourceTexts`) en komt nooit op
   `unknownMenuContexts`, de receipt, de notities of een logregel. Alleen
-  telbare layoutmetadata (duplicaatlaag, supplementregels, onduidelijke
-  prijsregels, niet-herkende koppen) wordt bewaard.
+  telbare layoutmetadata (duplicaatlaag, supplementregels, arrangementregels,
+  onduidelijke prijsregels, niet-herkende koppen) wordt bewaard.
 
 ### 13.4 Mapping en provenance
 
@@ -193,3 +193,94 @@ vóór enige modelaanroep:
   evidence over, zodat receipt en concept dezelfde broncontext houden.
 - Niet-ondersteunde constructen (supplementen, allergenen, beschikbaarheid)
   worden nog steeds expliciet gemeld of geblokkeerd, nooit stil afgeplat.
+
+### 13.5 Bronoverschrijdende kwaliteitspoort (review 6246984520)
+
+- `assessDeterministicMenuQuality` beoordeelt elke bron afzonderlijk. Naast de
+  bestaande totalen (`flags`, `codes`, `blockedByProductGap`,
+  `requiresAiExtraction`) levert het `sourceStatus`, `blockedSourceIds`,
+  `aiEligibleSourceIds` en `unscopedBlockedByProductGap`.
+- Een productgat (supplement of arrangement) in bron s1 blokkeert alleen s1:
+  s1 houdt zijn deterministische resultaat, blijft als "Controle nodig"
+  gemarkeerd en houdt zijn eigen bron-ID/URL in de beperking. Een herstelbare
+  fout in s2 leidt nog steeds tot de modelstap voor s2.
+- Alleen niet-geblokkeerde bronnen gaan naar de adapter. Modeluitvoer voor een
+  geblokkeerde bron wordt geweigerd met `source_blocked_by_product_gap`.
+- `blockedByProductGap` blijft bestaan als "minstens één bron geblokkeerd" voor
+  compatibiliteit; het is niet langer de schakelaar voor de hele analyse.
+- Een layoutflag zonder bron-ID (`unscopedBlockedByProductGap`) blijft bewust
+  globaal: zonder herkomst kan geen andere bron veilig worden toegestaan.
+- Regressies: `menuExtractionQuality.test.js` (twee bronnen, reviewmarkering)
+  en `restaurantSourceAnalysis.test.js` (s1 geblokkeerd, s2 hersteld, s1-
+  modelmenu geweigerd, provenance behouden).
+
+### 13.6 Blossem-achtige menuvarianten en arrangementen
+
+- Een paneelkop met structureel bewijs (`role="button"`/`button`,
+  `aria-expanded`, en een bestaand `aria-controls`/`data-target`-doel in
+  dezelfde blok) wordt een menuvariantniveau. Een cookieknop zonder
+  paneeldoel wordt nooit een kop.
+- De variant blijft in het pad staan (`DINNER › VOOR`, `LUNCH › KOUD`), zodat
+  gelijknamige rubrieken in lunch en diner niet meer samenvoegen.
+- Een accordeonpaneel dat meerdere subkoppen en lijsten bevat, wordt als
+  container gelezen en niet als één gerecht. Layoutklassen
+  (`column`/`panel`/`section`/…) worden nooit als gerecht gelezen.
+- Een prijselement aan het einde van een lijstitem (`<strong>4.5</strong>`)
+  wordt via de strikte `parsePriceOnly`-regel gelezen; de algemene
+  geldscanner accepteert bewust geen één-decimaalbedragen in lopende tekst.
+- Een blok met meerdere alternatieve eindprijzen (`3 gangen 57 | 4 gangen 66`)
+  wordt niet afgeplat tot een gerecht maar als uitgesloten sectie met pad en
+  regelaantal gemeld (`excludedSections`, reden `alternative_prices`).
+  `restaurantSourceAnalysis` zet dit om in een expliciete beperking en telt het
+  op de bron; de kwaliteitspoort markeert die bron met
+  `html_arrangements_skipped` als productgat, zodat een model de arrangementen
+  niet als gewone gerechten kan terugzetten.
+- Regressie: `htmlMenuVariants.test.js` (paneelvarianten, één-decimaalprijzen,
+  cookieknop, arrangement-uitsluiting).
+
+### 13.7 Smelt-achtige PDF-subrubrieken en arrangementregels
+
+- `pdfMenuStructuring` houdt per kolom naast een rubriek ook de actieve
+  menukop bij. Een kop met servicetijd (`LUNCH 12:00 – 15:00`) is het
+  menuniveau; een prijsloze kop daaronder wordt een subrubriek
+  (`LUNCH › Eieren`, `LUNCH › Broodjes`, `LUNCH › Overig`).
+- Die nesting is uit volgorde/kolom afgeleid, niet uit typografie, en wordt
+  daarom `uncertain` gemarkeerd. `pdfMenuContext` gebruikt het `path`-veld en
+  behoudt zo dezelfde hiërarchie in receipt, review en concept.
+- Een korte, hoofdletterige prijsloze regel direct boven een expliciet
+  serveerbereik (`Voor 1, 2 of 4 personen`) geldt als arrangementintro en
+  wordt niet als beschrijving aan het vorige gerecht geplakt; hij wordt geteld
+  in `layout.arrangementLines` en als beperking gemeld.
+- Regressie: `pdfMenuStructuring.test.js` (subrubrieken, onzekerheid,
+  arrangementintro, schone Rillette-beschrijving).
+
+### 13.8 Bronvaste vergelijking en read-only probe
+
+- `src/lib/menuSourceComparison.js` vergelijkt een gecontroleerde referentie
+  met de daadwerkelijke menucontexten en rapporteert afzonderlijk: gemist,
+  extra, prijsafwijking, verkeerd gekoppelde rubriek en duplicaat. Er is geen
+  samengestelde kwaliteitsscore en een gelijk aantal is geen bewijs.
+- `ops/scripts/probe-menu-extraction-sources.js` haalt uitsluitend de twee
+  benoemde publieke bronnen read-only op via `safeOutboundFetch` en de echte
+  analyseketen, vergelijkt met `ops/benchmark/source-references.json` en
+  controleert byte-/contenthash. Geen database, geen bevestiging, geen
+  publicatie, geen provider.
+- De referentie is een gecontroleerde capture met bronhashes, geen
+  waarheidsclaim voor een latere bronversie. Een hash- of itemverschil laat de
+  probe met exitcode 1 eindigen.
+- `ops/benchmark/sourceReferences.test.js` bewaakt de referentie zelf: gepinde
+  byte-/contenthash, elk item met naam, prijs en pad, geen voorafgaand
+  duplicaat, een gesloten bronlijst en geen schrijf-, provider- of geheimpad in
+  de probe. De test telt bewust geen items als kwaliteit; alleen de probe tegen
+  de echte bron beslist over een bronversie.
+
+### 13.9 #56-compatibiliteit (alleen gelezen)
+
+- `origin/feat/compact-source-flow-53` (PR #56) is read-only vergeleken vanuit
+  dezelfde `main`-basis (`fc12bbc`). Een in-memory `git merge-tree` geeft twee
+  inhoudelijke conflicten: `app/internal/source-triage/batch/page.js` en
+  `src/lib/menuSnapshotProposals.test.js`.
+- Andere overlappende bestanden automergen in die proef
+  (`BatchAnalysisView.js`, `MenuReview.js`, `batchAnalysis*.js`,
+  `menuConceptReviewHandlers.test.js`). Dat is geen acceptatie en er is geen
+  merge uitgevoerd; de #56-branch is niet overgenomen of gewijzigd.

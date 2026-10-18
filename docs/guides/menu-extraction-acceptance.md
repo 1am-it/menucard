@@ -1,6 +1,6 @@
 # Menu-extractie - acceptatie en testbewijs
 
-Status: acceptatievoorwaarden voor GitHub #59, herzien 2026-10-17. Afgesplitst
+Status: acceptatievoorwaarden voor GitHub #59, herzien 2026-10-18. Afgesplitst
 uit MENU-EXTRACTION.md v0.1. Dit document scheidt vereiste tests van het
 daadwerkelijk uitgevoerde bewijs. Read-only bronproeven zijn uitgevoerd; echte
 provideractivering en volledige productacceptatie zijn dat niet.
@@ -208,3 +208,145 @@ geen regressie van deze branch.
 - Smelt supplementen en niet-herkende subkoppen blijven expliciet beperkt.
 - De combinatie met #56/#53 is nog niet getest; het conflictplan staat hierboven.
 - Onafhankelijke herreview door de Delivery Lead staat open.
+
+## Uitgevoerd bewijs — 2026-10-18 (review 6246984520)
+
+Branch `feat/menu-extraction-59`. Deze ronde repareert de bronoverschrijdende
+kwaliteitspoort, rondt de Blossem-varianten/arrangementen en de Smelt-
+structuurvergelijking af, en voegt een bronvaste vergelijkingsprobe toe.
+Provideractivering, productieacties en #56 zijn niet uitgevoerd.
+
+### Reparaties in deze ronde
+
+- Productgat in één bron blokkeert niet langer een andere bron: de poort is
+  per bron, met behoud van blokkade, provenance en "Controle nodig" voor de
+  geblokkeerde bron. Twee-bronnenregressies toegevoegd.
+- Blossem: paneelkoppen (`role=button` + `aria-expanded` + bestaand doel)
+  worden menuvarianten; `DINNER › VOOR` en `LUNCH › KOUD` blijven gescheiden.
+  Het BITES-paneel met lijsten wordt niet meer als één gerecht gelezen.
+  Eén-decimaalprijzen in een prijselement (`<strong>4.5</strong>`) worden
+  gelezen. Arrangementen (`BLOSSEM MENU`, `WIJNARRANGEMENT`) worden expliciet
+  als uitgesloten sectie met pad gemeld, niet als gerecht.
+- Smelt: PDF-subrubrieken (`LUNCH › Eieren/Broodjes/Overig`,
+  `DINER › Vooraf/Hoofd/Desserts`) blijven in het pad behouden en zijn als
+  afgeleide nesting `uncertain`; de arrangementintro "Kaasfondue naar keuze"
+  wordt niet meer aan de Rillette-beschrijving geplakt en wordt als
+  arrangementregel gemeld.
+- `src/lib/menuSourceComparison.js` + `ops/scripts/probe-menu-extraction-sources.js`
+  rapporteren gemist/extra/prijs/koppeling/duplicaat per bron met byte- en
+  contenthash. Geen kwaliteitsscore, geen automatische acceptatie.
+- Promptinjectie-regressie in `menuExtractionAdapter.test.js`: brontekst met
+  "ignore previous instructions" blijft data; tools blijven leeg, schema en
+  instructie komen van de backend, en een `confidence`-veld wordt geweigerd.
+
+### Echte read-only bronvergelijking
+
+| Bron | Bronversie | Uitkomst | Status |
+| --- | --- | --- | --- |
+| Smelt Breda | PDF 550.738 bytes; bytehash `4445a101…27f8`; teksthash `24f23cbd…8a845` | **37/37 items exact**, 8 secties (`KAASFONDUE`, `DINER › Vooraf/Hoofd/Desserts`, `BORREL`, `LUNCH › Eieren/Broodjes/Overig`); 0 gemist, 0 extra, 0 prijsfout, 0 verkeerde koppeling, 0 duplicaat. Expliciet uitgesloten: 7 supplementregels, 1 arrangementregel; 1 prijsachtige regel midden in een beschrijving gemeld. | **item- en prijsniveau gecontroleerd**; supplementen/arrangementen blijven productbeperking |
+| Blossem Breda | HTML 40.615 bytes; bytehash `da5c632f…0c38` | **43/43 items exact**, 13 secties; varianten `BITES`, `DINNER`, `LUNCH` en subrubrieken behouden; 0 gemist, 0 extra, 0 prijsfout, 0 verkeerde koppeling, 0 duplicaat. `BLOSSEM MENU` en `WIJNARRANGEMENT` expliciet als uitgesloten alternatieve-prijssectie gemeld. | **item- en structuurniveau gecontroleerd**; arrangementopslag ontbreekt nog |
+
+De referentie (`ops/benchmark/source-references.json`) is een gecontroleerde
+capture van de genoemde bronversie, geen waarheidsclaim voor een latere versie.
+De probe faalt bij een hash- of itemverschil. Beide bronnen zijn uitsluitend
+read-only opgehaald; niets is opgeslagen, bevestigd of gepubliceerd.
+
+Smelt en Blossem krijgen door hun supplementen/arrangementen een expliciete
+productgatstatus per bron (`pdf_supplements_skipped`,
+`pdf_arrangements_skipped`, `html_arrangements_skipped`). Een andere, herstelbare
+bron in dezelfde analyse blijft daardoor wel in aanmerking komen voor
+modelherstel; de geblokkeerde bron houdt zijn eigen resultaat en bewijs.
+
+### Checks in deze ronde
+
+| Controle | Resultaat |
+| --- | --- |
+| `npm test` | 1947 tests: 1947 pass, 0 fail, 0 skipped |
+| `npm run test:menu-structure` | 6 pass, 0 fail |
+| `npm run benchmark:menu-structure` | 23 gevallen: 22 pass, 0 fail, 1 unclassified (JSON-LD-hiërarchie) |
+| Gerichte regressies | 106 pass: `node --test "src/lib/menuExtraction*.test.js" src/lib/restaurantSourceAnalysis.test.js src/lib/pdfMenuStructuring.test.js src/lib/pdfMenuContext.test.js src/lib/htmlMenuVariants.test.js src/lib/menuSourceComparison.test.js`; 57 pass: `node --test src/lib/htmlMenuFormattedBlocks.test.js src/lib/htmlMenuProseHeadings.test.js src/lib/htmlMenuVariants.test.js src/lib/menuHierarchy.test.js src/lib/menuTextEntities.test.js src/lib/menuJsonLdExtraction.test.js ops/benchmark/structureCorpus.test.js` |
+| `node ops/scripts/probe-menu-extraction-sources.js --source=all` | exit 0; Smelt 37/37 en Blossem 43/43; byte-/contenthash gelijk |
+| `npm run build` | geslaagd: compiled successfully, 41/41 statische pagina's, build-id aanwezig |
+| `node ops/scripts/verify-pdfjs-server-trace.js` | OK; 164 server scripts gecontroleerd, native `pdf.mjs`/`pdf.worker.mjs` getraceerd, geen gebundelde PDF.js-runtime |
+
+### Resterende gaten (deze ronde)
+
+- Echte provideractivering, kostenplafond en retentie blijven een Product
+  Owner-beslispunt. De runtime blijft disabled; deze ronde heeft geen
+  provider aangeroepen.
+- Browseracceptatie (klikpaden, toetsenbord, 320/390 px, licht/donker) is
+  **niet uitgevoerd**: deze geïsoleerde clone heeft geen browserautomatisering
+  in `package.json`/`node_modules` en geen `.env.local`/dev-serverconfiguratie.
+  De extractieketen is server-side getest; de bestaande UI is niet gewijzigd.
+- Arrangementen, supplementen, allergenen en prijsvarianten kunnen nog niet
+  verliesvrij worden opgeslagen; ze worden gemeld of geblokkeerd, niet verzonnen.
+- JSON-LD met geneste secties blijft het ene unclassified benchmarkgeval.
+- #56 is alleen read-only vergeleken; de in-memory merge geeft conflicten in
+  `app/internal/source-triage/batch/page.js` en
+  `src/lib/menuSnapshotProposals.test.js`. Geen merge of overname uitgevoerd.
+
+## Aanvullende verificatie — 2026-10-18 (review 6247230719)
+
+Deze ronde is een expliciet geautoriseerde lokale developer-continuatie in een
+geïsoleerde clone. Geen provider, productieactie, merge, publicatie of
+workflowwijziging is uitgevoerd. Code-HEAD vóór de documentatiecommit van deze
+ronde: `5ebc96442f222d0947391f147046203d38141ca4`.
+
+De drie vervolgpunten zijn als volgt afgehandeld:
+
+1. Bronoverschrijdende kwaliteitspoort: per bron, met twee-bronnenregressies in
+   `menuExtractionQuality.test.js` en `restaurantSourceAnalysis.test.js`
+   (s1 geblokkeerd en behouden met eigen provenance, s2 hersteld, een s1-
+   modelmenu geweigerd met `source_blocked_by_product_gap`).
+2. Blossem-varianten/arrangementen en de bronvaste Smelt-vergelijking: paneel-
+   varianten en subrubrieken behouden, arrangementen expliciet uitgesloten, en
+   een item-voor-itemvergelijking zonder kwaliteitsscore
+   (`menuSourceComparison.js` + probe).
+3. Rest van het contract: volledige suite, build en PDF.js-trace opnieuw op deze
+   HEAD gedraaid; browseracceptatie is opnieuw **niet** mogelijk in deze clone.
+
+### Checks op deze HEAD
+
+| Controle | Commando | Resultaat |
+| --- | --- | --- |
+| Volledige suite | `npm test` | 1950 tests: 1950 pass, 0 fail, 0 skipped |
+| Structuurcorpus | `npm run test:menu-structure` | 6 pass, 0 fail |
+| Benchmark | `npm run benchmark:menu-structure` | 23 gevallen: 22 pass, 0 fail, 1 unclassified (JSON-LD-hiërarchie) |
+| Build | `npm run build` | compiled successfully, 41/41 statische pagina's, `BUILD_ID` aanwezig |
+| PDF.js-trace | `node ops/scripts/verify-pdfjs-server-trace.js` | OK; 164 server scripts, native `pdf.mjs`/`pdf.worker.mjs`, geen gebundelde PDF.js-runtime |
+| Echte bronproef | `node ops/scripts/probe-menu-extraction-sources.js --source=all` | exit 0; Smelt 37/37 en Blossem 43/43; byte- en contenthash gelijk; 0 gemist, 0 extra, 0 prijsfout, 0 verkeerde koppeling, 0 duplicaat |
+| #56-compatibiliteit | `git merge-tree --write-tree HEAD origin/feat/compact-source-flow-53` | 2 inhoudelijke conflicten (`app/internal/source-triage/batch/page.js`, `src/lib/menuSnapshotProposals.test.js`); geen merge uitgevoerd |
+
+De probe is read-only tegen precies de twee benoemde publieke URL's uitgevoerd;
+de referentie is dezelfde gecontroleerde capture als hierboven. De nieuwe
+`ops/benchmark/sourceReferences.test.js` bewaakt dat een referentie gepinde
+hashes houdt, dat elk item een naam, prijs en pad heeft, dat de referentie zelf
+geen duplicaat bevat, dat de bronlijst gesloten blijft en dat de probe geen
+schrijf-, provider- of geheimpad krijgt. Die test telt bewust geen items als
+kwaliteit.
+
+Eerlijke beperkingen per bron uit dezelfde probe:
+
+- Smelt: 7 supplementregels, 1 arrangementregel en 1 prijsregel midden in een
+  beschrijving zijn niet als gerecht opgenomen; 88 dubbele tekstregels zijn
+  genegeerd. `duplicate_item_across_categories` blijft gemeld.
+- Blossem: `PROEF HET BESTE VAN HET SEIZOEN › DINNER › BLOSSEM MENU` en
+  `› DINNER › WIJNARRANGEMENT` zijn als alternatieve-prijssectie uitgesloten en
+  gemeld; `duplicate_item_across_categories` blijft gemeld omdat hetzelfde
+  gerecht in lunch en diner staat.
+
+### Niet uitgevoerd — geen claim
+
+- **Browseracceptatie** (klikpaden, toetsenbord, 320/390 px, licht/donker):
+  deze geïsoleerde clone heeft geen browserautomatisering in `package.json` of
+  `node_modules` (geen Playwright/Puppeteer) en geen `.env.local`/dev-server-
+  configuratie. De bestaande UI is in deze ronde niet gewijzigd; de
+  extractieketen is server-side getest.
+- **Echte provideractivering**, kostenmeting en retentie: blijven een Product
+  Owner-beslispunt. De runtime blijft disabled; er is geen provider aangeroepen.
+- **BE-21's 50-100-bronnenbenchmark en de aparte ongeziene set**: niet
+  uitgevoerd. Twee bronnen zijn geen benchmarkafsluiting.
+- **Server-side scheduler**: de worker is begrensd getest, maar start niet
+  automatisch.
+- **Onafhankelijke herreview** door de Delivery Lead staat open. Deze sectie is
+  developer-bewijs, geen acceptatie.
