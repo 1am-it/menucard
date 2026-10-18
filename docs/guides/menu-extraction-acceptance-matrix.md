@@ -125,10 +125,11 @@ staat dat als `geblokkeerd` of `niet ondersteund`, niet als groen.
 
 ## Verificatie op de definitieve code-/evidence-HEAD
 
-Deze ronde is uitgevoerd op de werkboom die als codecommit op
-`feat/menu-extraction-59` wordt vastgelegd. De browserfixture wordt na die
-codecommit opnieuw op een schone werkboom gedraaid; de evidence-commit noemt
-daarom de exacte code-HEAD. De onderstaande aantallen zijn de werkelijk
+Deze ronde is uitgevoerd op codecommit `4bba81e` en de daaropvolgende
+harness-only dirty-checkcommit `79319b1`. De browserfixture is op een schone
+werkboom gedraaid; de evidence noemt `head: 79319b1`, `worktreeDirty: false`.
+De code onder test is gelijk aan `4bba81e`; `79319b1` wijzigt alleen de
+dirty-check van de harness. De onderstaande aantallen zijn de werkelijk
 uitgevoerde run, niet een prognose.
 
 | Controle | Commando | Resultaat |
@@ -141,7 +142,7 @@ uitgevoerde run, niet een prognose.
 | PDF.js-trace | `node ops/scripts/verify-pdfjs-server-trace.js` | OK; 164 server scripts, native `pdf.mjs`/`pdf.worker.mjs`, geen gebundelde PDF.js-runtime |
 | Echte bronproef (representatief) | `node ops/scripts/probe-menu-extraction-sources.js --source=all` | exit 0; Smelt 37/37 en Blossem 43/43; byte- en contenthash gelijk; 0 gemist/extra/prijs/koppeling/duplicaat; boekhouding 37/37 en 43/43 |
 | Holdout eerste meting | `node ops/scripts/probe-menu-extraction-holdout.js` (eenmalig) | De Botanist 151 items/59 secties, Mr Moos 0, Colonia 0, Gauchos 404; alle vier `evaluated_once`, `usedForTuning:false` |
-| Browserfixture | `npm run test:browser:menu-review` | 99/99 checks; 11 screenshots; Edge 155; fail-closed netwerkguard; evidence-HEAD volgt in de evidencecommit |
+| Browserfixture | `npm run test:browser:menu-review` | 99/99 checks; 11 screenshots; Edge 155; `head: 79319b1`; `worktreeDirty: false`; fail-closed netwerkguard; 0 onverwachte app-faseverzoeken |
 | #56-compatibiliteit | `git merge-tree --write-tree HEAD origin/feat/compact-source-flow-53` | exit 1; drie inhoudelijke conflicten: `page.js`, `htmlMenuStructure.js`, `menuSnapshotProposals.test.js`; geen merge uitgevoerd |
 
 De representatieve bronproef is read-only tegen precies de twee expliciet

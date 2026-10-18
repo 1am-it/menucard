@@ -379,7 +379,7 @@
       "tests": ["npm run test:browser:menu-review"],
       "status": "executed",
       "evidence": "ops/browser/evidence/menu-review-browser-evidence.json",
-      "result": "99/99 fixture checks pass on Edge 155 at 1024/390/320 px in light and dark: exact links, section paths, prices, duplicate/price/missing-price blockers, grouped uncertainty, disabled save, read-only colleague boundaries, empty/partial/error, keyboard Enter activation, zero horizontal overflow and fail-closed network isolation (external fetch, protocol-relative URL, unknown API write, XHR, WebSocket, CDP subresource/frame navigation). 11 screenshots hashed.",
+      "result": "99/99 fixture checks pass on Edge 155 at 1024/390/320 px in light and dark (evidence head 79319b1, worktreeDirty false): exact links, section paths, prices, duplicate/price/missing-price blockers, grouped uncertainty, disabled save, read-only colleague boundaries, empty/partial/error, keyboard Enter activation, zero horizontal overflow and fail-closed network isolation (external fetch, protocol-relative URL, unknown API write, XHR, WebSocket, CDP subresource/frame navigation). 11 screenshots hashed.",
       "usedForTuning": false,
       "limitations": [
         "Fixture evidence only; it is not live integration, staging or production acceptance.",

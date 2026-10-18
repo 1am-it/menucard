@@ -1,9 +1,9 @@
 {
   "fixtureOnly": true,
   "passed": true,
-  "head": "0c1c5f6db1d4e9df8c4076b4c9788f056fe5865f",
-  "worktreeDirty": true,
-  "generatedAt": "2026-10-18T09:55:22.167Z",
+  "head": "79319b15056194a078848b1fe16fef826a6745f9",
+  "worktreeDirty": false,
+  "generatedAt": "2026-10-18T10:14:41.754Z",
   "command": "npm run test:browser:menu-review",
   "environment": {
     "node": "v22.22.3",
@@ -491,7 +491,7 @@
     {
       "name": "network guard: CDP blocks external subresource and frame navigation",
       "passed": true,
-      "detail": "[{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/pixel.png\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-18T09:55:21.257Z\",\"resourceType\":\"Image\"},{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/frame\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-18T09:55:21.267Z\",\"resourceType\":\"Document\"}]"
+      "detail": "[{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/pixel.png\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-18T10:14:40.779Z\",\"resourceType\":\"Image\"},{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/frame\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-18T10:14:40.795Z\",\"resourceType\":\"Document\"}]"
     },
     {
       "name": "network guard: no unexpected CDP traffic during app scenarios",
@@ -528,7 +528,7 @@
     },
     {
       "file": "menu-review-readonly-1024-dark.png",
-      "sha256": "1c744e83410163b51eec8ea1b868b1c4872c6093456944795d67ee9ec3fc6663",
+      "sha256": "45baec6ca3005023874d1776de26b3718eb657a678655267f112f15a5caaff07",
       "width": 1024,
       "height": 900
     },
@@ -540,37 +540,37 @@
     },
     {
       "file": "menu-review-partial-390-dark.png",
-      "sha256": "37d7399d2000bf656fca69bb1dafc55ac64b0129f24a56abd8ce2ada11983a74",
+      "sha256": "61f7cb0d7b157f3f51daa51223fb8545626f4eb17c26085051742882298792b4",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-error-390-light.png",
-      "sha256": "43fcd65ef25cdbd3a605a29aa27a696343c983c47a3059492f97210974a29f45",
+      "sha256": "add59e15bc14021b6aad56bb27468634ed88198774788ba2011d42b98ba9c1fe",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-320-light.png",
-      "sha256": "a473f0e6dd34af129f655d3cc610ef3d43290e0307d6d4e57a2a8a14ceeaaeda",
+      "sha256": "364203ec2bedd6d6a42854b2862bea1e595670cd20beb8bfbfc8219d55cbb554",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-320-dark.png",
-      "sha256": "50cc4ff28f68b0a0cb6f4aaa6d8cda1ba8a13d13d01c69b4bf452948c5107e86",
+      "sha256": "7c7cb96b70509cdecb0c36c9e09c08a73ac975a36de4d45e125e6cbd9fdfe13a",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-390-light.png",
-      "sha256": "0d93ae97e46152f39427ea9c8b9f775760277243f1599379d6e041f454cfed00",
+      "sha256": "c13d78cabdfd170f0f6777440f141ce32f928a02f1a59f3ff47105242e75d408",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-390-dark.png",
-      "sha256": "4ed360db86be57acca681b28f1dd417be510dcb70ef8ee364be8fd862cca197b",
+      "sha256": "c3a50becb9a1a8d3260b6ee508b2bbf2e5268de815e75b385cb46eb3c52d4963",
       "width": 390,
       "height": 900
     },
@@ -582,7 +582,7 @@
     },
     {
       "file": "menu-review-keyboard-390-light.png",
-      "sha256": "66be7210c549d36515aae82c3b580f27b6773f1b58f79d192d22b41beda181b8",
+      "sha256": "ef30d233749481989a1bc6494e620555bb0f70bffc78bc0cea2f9843db580248",
       "width": 390,
       "height": 900
     }
@@ -598,7 +598,7 @@
         "url": "https://unapproved.invalid/pixel.png",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-18T09:55:21.257Z",
+        "at": "2026-10-18T10:14:40.779Z",
         "resourceType": "Image"
       },
       {
@@ -608,7 +608,7 @@
         "url": "https://unapproved.invalid/frame",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-18T09:55:21.267Z",
+        "at": "2026-10-18T10:14:40.795Z",
         "resourceType": "Document"
       }
     ],
@@ -620,7 +620,7 @@
         "url": "https://unapproved.invalid/api/anything",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-18T09:55:21.237Z"
+        "at": "2026-10-18T10:14:40.748Z"
       },
       {
         "phase": "negative-probe",
@@ -629,7 +629,7 @@
         "url": "http://unapproved.invalid/api/anything",
         "reason": "external_origin",
         "protocolRelative": true,
-        "at": "2026-10-18T09:55:21.237Z"
+        "at": "2026-10-18T10:14:40.749Z"
       },
       {
         "phase": "negative-probe",
@@ -638,7 +638,7 @@
         "url": "http://localhost:3137/api/internal/v1/menu-concepts",
         "reason": "unknown_api_route",
         "protocolRelative": false,
-        "at": "2026-10-18T09:55:21.237Z"
+        "at": "2026-10-18T10:14:40.749Z"
       },
       {
         "phase": "negative-probe",
@@ -647,7 +647,7 @@
         "url": "http://localhost:3137/api/internal/v1/menu-concepts",
         "reason": "unknown_api_route",
         "protocolRelative": false,
-        "at": "2026-10-18T09:55:21.238Z"
+        "at": "2026-10-18T10:14:40.749Z"
       },
       {
         "phase": "negative-probe",
@@ -656,7 +656,7 @@
         "url": "ws://unapproved.invalid/socket",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-18T09:55:21.239Z"
+        "at": "2026-10-18T10:14:40.754Z"
       }
     ]
   },
