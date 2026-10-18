@@ -239,7 +239,7 @@
       "provenance": "real_source",
       "referenceId": "blossem",
       "sourceRef": "ops/benchmark/source-references.json#blossem; source-references.json#smelt",
-      "sourceVersion": "Blossem HTML and Smelt PDF versions pinned by hash",
+      "sourceVersion": "Blossem HTML bytesSha256 da5c632f...0c38 and Smelt PDF bytesSha256 4445a101...27f8; content hashes pinned in source-references.json",
       "expected": [
         "BLOSSEM MENU, WIJNARRANGEMENT and the Smelt arrangement line are reported as excluded, not stored as dishes.",
         "The quality gate marks the source incomplete and does not present a partial menu as complete."
@@ -272,7 +272,7 @@
       "provenance": "real_source",
       "referenceId": "smelt",
       "sourceRef": "ops/benchmark/source-references.json#smelt; source-references.json#blossem",
-      "sourceVersion": "Smelt PDF and Blossem HTML hashes pinned",
+      "sourceVersion": "Smelt PDF bytesSha256 4445a101...27f8 and Blossem HTML bytesSha256 da5c632f...0c38; content hashes pinned in source-references.json",
       "expected": [
         "No supplement becomes a main price and no lowest price is chosen silently.",
         "Alternative menu prices are excluded and reported rather than attached to a dish."
@@ -376,11 +376,15 @@
         "Keyboard navigation, light/dark and 320/390 px have no horizontal overflow and keep the same content."
       ],
       "tests": ["npm run test:browser:menu-review"],
-      "status": "blocked",
-      "reason": "The isolated browser harness has not been executed yet in this commit.",
-      "result": "Not yet executed in this round; the harness is being built and this entry is updated only with real output.",
+      "status": "executed",
+      "evidence": "ops/browser/evidence/menu-review-browser-evidence.json",
+      "result": "72/72 fixture checks pass on Edge 155 at 1024/390/320 px in light and dark: exact links, section paths, prices, duplicate/price/missing-price blockers, grouped uncertainty, disabled save, empty/partial/error, keyboard Enter activation and zero horizontal overflow. 10 screenshots hashed.",
       "usedForTuning": false,
-      "limitations": ["Fixture evidence only; it is not live integration, staging or production acceptance."]
+      "limitations": [
+        "Fixture evidence only; it is not live integration, staging or production acceptance.",
+        "Reaching the review control from the top of the page took 43 Tab stops; no focus trap was found.",
+        "The fictional session/API is intercepted in the page; no production Supabase project or credential is used."
+      ]
     }
   ],
   "holdout": {

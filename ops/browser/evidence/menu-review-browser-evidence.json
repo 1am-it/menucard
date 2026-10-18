@@ -1,0 +1,453 @@
+{
+  "fixtureOnly": true,
+  "passed": true,
+  "head": "197425ddbc7d5f7727d8c42808642540197ad02c",
+  "worktreeDirty": false,
+  "generatedAt": "2026-10-18T09:27:54.283Z",
+  "command": "npm run test:browser:menu-review",
+  "environment": {
+    "node": "v22.22.3",
+    "platform": "win32",
+    "browser": "Edg/155.0.4283.45",
+    "viewportHeights": [
+      900
+    ],
+    "fixtureOnly": true
+  },
+  "fixtures": [
+    "review",
+    "empty",
+    "partial",
+    "error"
+  ],
+  "checks": [
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "review: result card and exact source URL are visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review: control is collapsed before the click path",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review: \"Menukaart controleren\" is a real button",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review: click opens the recognised menu",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review: item and section counts come from the fixture",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review: original section paths are shown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review: prices are shown per dish",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review: multiple undecomposed prices stay explicit",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review: a missing price is not zero",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review: duplicate, price and missing-price attention are visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review: shared uncertainty is grouped per section",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review: concept is internal and blocked, not savable",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review: save is disabled while blockers remain",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "review: group action is per section and not accept-all",
+      "passed": true,
+      "detail": "groupButtons=2"
+    },
+    {
+      "name": "review: coverage and limitations are visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review: breadcrumb link is exact",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "review: original menu link is exact and safe",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review: \"handmatig beoordelen\" opens the same batch item",
+      "passed": true,
+      "detail": "/internal/source-triage/batch?batch=batch-fictief-0001&item=1"
+    },
+    {
+      "name": "review: light theme is active",
+      "passed": true,
+      "detail": "light/#fcfaf4"
+    },
+    {
+      "name": "review: address bar keeps the batch context",
+      "passed": true,
+      "detail": "http://localhost:3137/internal/source-triage/batch?fixture=review&theme=light&batch=batch-fictief-0001"
+    },
+    {
+      "name": "review: no horizontal overflow at 1024 px",
+      "passed": true,
+      "detail": "overflow=-6"
+    },
+    {
+      "name": "review: \"Controle sluiten\" closes the same panel",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=empty&theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "empty: the real URL input is present and labelled",
+      "passed": true,
+      "detail": "Restaurant-URL's, één per regel"
+    },
+    {
+      "name": "empty: the empty recent-batches state is honest",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "empty: no fabricated result is shown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "empty: dark theme is active",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=partial&batch=batch-fictief-0001&item=1&theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "partial: a found source with zero items is not a success",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "partial: the limitation is visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "partial: no concept is offered for an empty result",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "partial: no horizontal overflow at 390 px",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=error&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "error: the load error is shown in the alert region",
+      "passed": true,
+      "detail": "De batchanalyse kon niet worden geladen."
+    },
+    {
+      "name": "error: no stale result is shown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "error: light theme is active",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "error: no horizontal overflow at 390 px",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=light&item=1)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "responsive 320px/light: requested theme is active",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "responsive 320px/light: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "responsive 320px/light: navigation and save control stay visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "responsive 320px/light: the menu content is unchanged",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=dark&item=1)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "responsive 320px/dark: requested theme is active",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "responsive 320px/dark: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "responsive 320px/dark: navigation and save control stay visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "responsive 320px/dark: the menu content is unchanged",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=light&item=1)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "responsive 390px/light: requested theme is active",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "responsive 390px/light: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "responsive 390px/light: navigation and save control stay visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "responsive 390px/light: the menu content is unchanged",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=dark&item=1)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "responsive 390px/dark: requested theme is active",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "responsive 390px/dark: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "responsive 390px/dark: navigation and save control stay visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "responsive 390px/dark: the menu content is unchanged",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=dark&item=1)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "responsive 1024px/dark: requested theme is active",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "responsive 1024px/dark: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=-6"
+    },
+    {
+      "name": "responsive 1024px/dark: navigation and save control stay visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "responsive 1024px/dark: the menu content is unchanged",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "light and dark resolve to different background tokens",
+      "passed": true,
+      "detail": "#fcfaf4 / #0a0a0a"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "keyboard: the review control is reachable with Tab",
+      "passed": true,
+      "detail": "[{\"tag\":\"INPUT\",\"text\":\"\",\"href\":null,\"expanded\":null},{\"tag\":\"SUMMARY\",\"text\":\"2 gerechten zonder aandachtspunt · 2 nieuw, 0 ongewijzigd\",\"href\":null,\"expanded\":null},{\"tag\":\"BUTTON\",\"text\":\"Concept opslaan\",\"href\":null,\"expanded\":null},{\"tag\":\"A\",\"text\":\"Beoordeel handmatig\",\"href\":\"/internal/source-triage/batch?batch=batch-fictief-0001&item=1\",\"expanded\":null},{\"tag\":\"BUTTON\",\"text\":\"Menukaart controleren\",\"href\":null,\"expanded\":\"false\"}]"
+    },
+    {
+      "name": "keyboard: Tab moves focus through the page",
+      "passed": true,
+      "detail": "tabs=43"
+    },
+    {
+      "name": "keyboard: Enter opens the review panel",
+      "passed": true,
+      "detail": "opened=true expanded=true"
+    },
+    {
+      "name": "keyboard: a section summary opens with Enter",
+      "passed": true,
+      "detail": "focused=true open=true"
+    },
+    {
+      "name": "no uncaught browser exception",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "no fixture bootstrap error at the end",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "every page used the fictional fixture",
+      "passed": true,
+      "detail": null
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "menu-review-desktop-light.png",
+      "sha256": "901b0ce819fc6f1c18ca5db09910b204297f984ad87b3f6f2dc6c12bb1af142a",
+      "width": 1024,
+      "height": 900
+    },
+    {
+      "file": "menu-review-empty-dark.png",
+      "sha256": "f95cd1b5cbdcff20a7d1361c89bcbb1c1a06c6571a38918cc8a8f3c147eacd1d",
+      "width": 1024,
+      "height": 900
+    },
+    {
+      "file": "menu-review-partial-390-dark.png",
+      "sha256": "3c12f3c59d7255b0de9fac9a34bdf09b8486d6df1cc8137d22920e426b71ec19",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "menu-review-error-390-light.png",
+      "sha256": "add59e15bc14021b6aad56bb27468634ed88198774788ba2011d42b98ba9c1fe",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "menu-review-320-light.png",
+      "sha256": "c7718b629385b40a052eaa10153faa19ccc835f4ae6813751139bc2b3af6a45f",
+      "width": 320,
+      "height": 900
+    },
+    {
+      "file": "menu-review-320-dark.png",
+      "sha256": "a7d025db17044a444a876d1759909e7c9e4766d2647a1ab4336fff3f6f9913f5",
+      "width": 320,
+      "height": 900
+    },
+    {
+      "file": "menu-review-390-light.png",
+      "sha256": "b9003b42c6ec03fd9ec7be4903966bcfcd6dd1710a7e90705a5f48bbfb8e75fd",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "menu-review-390-dark.png",
+      "sha256": "0c61dbf27bf5eb3d07efa907fed47228f7b888f7dd0f1a57c92507b7e586b28d",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "menu-review-1024-dark.png",
+      "sha256": "b5434c6c716659b8be95a0685aa7cf4e81d534eaaaa28a7b2ff9ab9196e654d4",
+      "width": 1024,
+      "height": 900
+    },
+    {
+      "file": "menu-review-keyboard-390-light.png",
+      "sha256": "5d74d261ae67eb6086f2dfb406d4409b2d2a7abad367304f5abb9266d354bfeb",
+      "width": 390,
+      "height": 900
+    }
+  ],
+  "error": null,
+  "limitations": [
+    "Fixture evidence against the real UI components; it is not live integration, staging or production acceptance.",
+    "The session and API responses are fictional and same-origin; no production Supabase project, credential or data is used.",
+    "No source confirmation, concept save, export, provider call or workflow activation is performed."
+  ]
+}
