@@ -109,7 +109,7 @@ productcontract. Dit ontwerp is de voorgestelde brug; het is geen goedkeuring.
 }
 ```
 
-### Prijsbewijs per bedrag (aanvullingen review 6248407225 en 6273510672)
+### Prijsbewijs per bedrag (aanvullingen review 6248407225, 6273510672 en 6274281958)
 
 Een itemquote is niet genoeg voor een prijs. Voor iedere `price` met status
 `known`/`from` en voor iedere `priceVariants[]` geldt:
@@ -119,25 +119,36 @@ Een itemquote is niet genoeg voor een prijs. Voor iedere `price` met status
    bijvoorbeeld `13`, `13,00`, `€ 1.250,00`, `13,00 euro` of `Glas 6,50`;
 3. het integerdeel van een ander bedrag is nooit bewijs. `13,00` wordt niet
    bewezen door `13,50`, `13.50`, `13,5`, `13,50,00`, `113` of `113,00`;
-4. decimale komma en punt zijn beide geldig. Een punt met groepen van drie
+4. de volledige monetaire lexeme telt, inclusief een voorloopdecimaal. `.50`,
+   `,50`, `EUR .50` en `EUR ,50` zijn ambigu en bewijzen nooit 50 euro. Er wordt
+   geen bronnotatie stil als 50 cent gelezen en niets afgerond;
+5. een expliciet teken vóór het bedrag maakt het token ondertekend of
+   toeslagachtig. Een minteken (ook `−`, `–`, `—`) of plus, met of zonder
+   valutamarker tussen teken en cijfers (`- EUR 13,50`, `-€ 13,50`,
+   `€ -13,50`, `+ € 2,50`), bewijst in dit niet-negatieve schema nooit een
+   positieve `known`-prijs. Een bedrag zonder teken blijft geldig;
+6. decimale komma en punt zijn beide geldig. Een punt met groepen van drie
    cijfers is Nederlandse duizendnotatie (`1.250,00`, `1.250`); gemengde
    notaties zijn alleen eenduidig wanneer de rechter scheiding decimaal is
    (`1.250,00`, `1,250.00`). Een enkele komma met drie cijfers (`13,000`) is
    ambigu en wordt geweigerd. Er wordt niets afgerond;
-5. een getal is alleen prijsbewijs in prijscontext: een valutateken of
+7. een getal is alleen prijsbewijs in prijscontext: een valutateken of
    prijssuffix ernaast (`€`, `EUR`, `euro`, `p.p.`, `per persoon`), of een
    zelfstandig bedrag. Een kaal jaartal 1900-2099 zonder valutateken,
    hoeveelheden met een eenheid (`4 personen`, `13 gangen`, `13 gram`) en
    labels (`nr. 13`, `pagina 13`) zijn geen prijsbewijs;
-6. een quote die alleen de gerechtnaam, alleen een beschrijving of alleen een
+8. een quote die alleen de gerechtnaam, alleen een beschrijving of alleen een
    ander bedrag bevat, levert `price_evidence_missing` op. Bij ambiguïteit
    weigert de validator dus in plaats van een ander bedrag te kiezen;
-7. de validator past geen `amountMinorUnits` aan op basis van een andere quote
+9. de validator past geen `amountMinorUnits` aan op basis van een andere quote
    en kiest nooit de laagste of eerste prijs als vervanging;
-8. een variant zonder eigen bewijs blijft zichtbaar als onzeker en blokkeert
-   export, maar verdwijnt niet stil.
+10. een variant zonder eigen bewijs blijft zichtbaar als onzeker en blokkeert
+    export, maar verdwijnt niet stil.
 
-Deze regels zijn geïmplementeerd in de pure laag en met fictieve fixtures
+Een koppelteken dat als redactioneel streepje tussen twee bedragen staat, is in
+de bron niet te onderscheiden van een teken. De tweede helft van zo'n reeks
+wordt daarom conservatief geweigerd; dat is een expliciete beperking, geen
+nieuwe prijsinterpretatie. Deze regels zijn geïmplementeerd in de pure laag en met fictieve fixtures
 getest. Er is geen validator, DDL of exportpad aan een route gekoppeld.
 
 ### Gesloten veldregels

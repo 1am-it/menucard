@@ -2,9 +2,10 @@
 
 Status: **ontwikkelaarsbewijs, geen onafhankelijke review en geen release.**
 Datum: 2026-10-19. Issue #59, branch `feat/menu-extraction-59`, PR #60.
-Kandidaat-codehead: `5e3e3a54ddce4b004f9a26b12037bf99561a463b` (pure v2
-prijsbewijsreparatie na review 6273510672; deze documentatie volgt als aparte
-commit). Protocol:
+Kandidaat-codehead: `2b994cd0e5743ecbd2096381680fadf12ac31e13` (pure v2
+prijsbewijsreparatie na review 6274281958; deze documentatie volgt als aparte
+commit). Vorige codehead: `5e3e3a54ddce4b004f9a26b12037bf99561a463b`
+(review 6273510672). Protocol:
 `MENU-EXTRACTION.md` v0.2, SHA-256
 `15510b4c0b74fee722ac2c51a3f40aa21b03e0161ccffdcb2008f3d27350b762`.
 De runtime blijft zonder provider; alle bronproeven zijn read-only. De pure
@@ -65,19 +66,20 @@ ander besluit of eigenaar.
 | 9 | Browseracceptatie met klikpaden, rolgrenzen, leeg/fout/partieel, toetsenbord, licht/donker, 320/390 px | `npm run test:browser:menu-review`: 99/99 checks op head `5a7f99a` (historisch; niet herhaald op `5e3e3a5`), 11 screenshots, Edge 155.0.4283.45, 1024/390/320 px, licht/donker, keyboard Enter, read-only collega, empty/partial/error, fail-closed netwerkguard | B | **bewezen met beperking** | Alleen fixture; geen live/staging browserbewijs en geen echte authenticated sessie. De fixture is geen productieacceptatie | Product Owner/ops voor previewtoegang; Delivery Lead voor live acceptatie |
 | 10 | Time-out, provideruitval, ongeldige uitvoer, kosten-/paginagrens, herimport, gelijktijdige taken, promptinjectie, verkeerde vestiging, onveilige redirects getest | `menuExtractionAdapter.test.js`, `safeOutboundFetch.test.js`, `restaurantSourceAnalysis.test.js`, `batchAnalysisHandlers.test.js`, `menuConcept.test.js`; offline fake provider en `.invalid`-fixtures; geen dubbele call/claim | T | **bewezen met beperking** | Alleen offline; een echte provideruitval, echte kostenmeting en echte gelijktijdige productietaken zijn niet gemeten | Product Owner voor provider/budget; developer voor een latere live meting |
 | 11 | Geen stil dataverlies tussen extractie, receipt, review, concept en export; niet-ondersteunde publicatievelden geblokkeerd/gemeld | `menuProductSchemaV2.test.js`, `menuProductMappingV2.test.js`, `schemaDesign.test.js`, `menuExtractionRuntime.test.js`, `menuExtractionAdapter.test.js`, `menuExtractionQuality.test.js`, `menuConceptExport.test.js`, `STRUCT-017`; de pure v2-laag mapt glas/fles, vanafprijzen, meerdere menu's en supplementen en weigert verliesgevende projecties | T | **bewezen met beperking** | De laag is niet aangesloten op receipt/review/concept/export; geen echte bron→conceptopslag. De bestaande v1-routes blijven geblokkeerd voor deze constructies | Developer voor aansluiting na besluit; Delivery Lead voor review |
-| 12 | Geen regressie in rollen, bronbevestiging, audit, publicatiegates, beveiliging of geheimenbeheer | Volledige suite 2105/2105 op head `5e3e3a5`; browserfixture read-only zonder save/bevestig; netwerkguard blokkeert externe fetch, protocol-relative URL, onbekende API-write, XHR, WebSocket en CDP-subresources | T+B | **bewezen met beperking** | Geen productiecredentials, productieauth of echte database gebruikt; dat is bewust niet getest | Product Owner/ops voor productieacceptatie |
+| 12 | Geen regressie in rollen, bronbevestiging, audit, publicatiegates, beveiliging of geheimenbeheer | Volledige suite 2112/2112 op head `2b994cd` (2105/2105 op `5e3e3a5`); browserfixture read-only zonder save/bevestig; netwerkguard blokkeert externe fetch, protocol-relative URL, onbekende API-write, XHR, WebSocket en CDP-subresources | T+B | **bewezen met beperking** | Geen productiecredentials, productieauth of echte database gebruikt; dat is bewust niet getest | Product Owner/ops voor productieacceptatie |
 | 13 | Onafhankelijke review met exacte commit, checks, bron-/protocolversies, resultaten, beperkingen en volgende stap; groene unit-tests zijn geen productacceptatie | Deze matrix + checkpoint op PR #60 | I | **geblokkeerd** | De Delivery Lead heeft deze afrondingsronde nog niet onafhankelijk beoordeeld; deze matrix is ontwikkelaarsbewijs | Delivery Lead |
 
 ## Pure v2 schema-/mappinglaag (ronde 2026-10-19)
 
 Status: **gebouwd en getest, niet aangesloten; geen DDL, migratie, writeflag of
 publicatie.** Codehead prijsbewijsreparatie:
-`5e3e3a54ddce4b004f9a26b12037bf99561a463b` (review 6273510672).
+`2b994cd0e5743ecbd2096381680fadf12ac31e13` (review 6274281958); vorige
+codehead `5e3e3a54ddce4b004f9a26b12037bf99561a463b` (review 6273510672).
 
 | Onderdeel | Bewijs | Uitkomst |
 | --- | --- | --- |
-| Versiegebonden schema en validator | `menuProductSchemaV2.test.js`: 23 tests | `menu-extraction-product/v2`; onbekende/ontbrekende versie faalt concreet; verboden trustvelden op elke diepte; unieke menu-/rubriek-/item-/variant-ID's |
-| Prijsbewijs per bedrag | `menuProductSchemaV2.test.js` (helper + validator), `menuProductMappingV2.test.js` (v1→v2 primair én glas/fles) | Een `known`/`from`-prijs en iedere variant hebben een eigen quote met het volledige bedrag. Het integerdeel telt niet: `13,00` wordt niet bewezen door `13,50`, `13.50`, `13,5` of `113,00`; `price_evidence_missing` bij een ander of ambigu bedrag. Integerbedragen, decimale komma/punt, euro-/spatienotatie en Nederlandse duizendnotatie blijven geldig; jaartallen, hoeveelheden en labels zijn geen prijsbewijs |
+| Versiegebonden schema en validator | `menuProductSchemaV2.test.js`: 27 tests | `menu-extraction-product/v2`; onbekende/ontbrekende versie faalt concreet; verboden trustvelden op elke diepte; unieke menu-/rubriek-/item-/variant-ID's |
+| Prijsbewijs per bedrag | `menuProductSchemaV2.test.js` (helper + validator), `menuProductMappingV2.test.js` (v1→v2 primair én glas/fles) | Een `known`/`from`-prijs en iedere variant hebben een eigen quote met het volledige bedrag. Het integerdeel telt niet: `13,00` wordt niet bewezen door `13,50`, `13.50`, `13,5` of `113,00`. Een voorloopdecimaal (`.50`, `,50`, `EUR .50`) bewijst nooit 50 euro, en een expliciet teken (`- 13,50`, `- EUR 13,50`, `-€ 13,50`, `+ € 2,50`) nooit een positieve `known`-prijs. `price_evidence_missing` bij een ander, ambigu of ondertekend bedrag. Integerbedragen, decimale komma/punt, euro-/spatienotatie en Nederlandse duizendnotatie zonder teken blijven geldig; jaartallen, hoeveelheden en labels zijn geen prijsbewijs |
 | Supplementen en keuzes | `menuProductSchemaV2.test.js`: unresolved/resolved/self/chain/choice | Onopgelost doel vereist bewezen menu-/rubriekcontext en limitation; resolved doel moet bestaan, niet zichzelf en geen supplement zijn; keuzegroep moet een `choice_group` met geldige min/max zijn |
 | Allergenen | `menuProductSchemaV2.test.js` | `explicit` vereist codes en `recorded`/`not_isolated`; `unknown` heeft geen codes en betekent niet "vrij van"; een geïsoleerde passage moet in de bron staan |
 | v1 → v2-mapping | `menuProductMappingV2.test.js` | Fictief: 2 menu's, 7 items, glas/fles, vanafprijs, meerdere prijzen, supplement, expliciete/onbekende allergenen; inhoud en dekking blijven gelijk |
@@ -97,7 +99,31 @@ Regressies staan op de helper, de directe v2-validator en de v1→v2-mapping voo
 de primaire prijs én glas/fles-varianten. Er is geen route, DB, RPC, DDL,
 provider of UI aangesloten om dit te repareren.
 
-### Nog niet aangesloten
+### Reparatie review 6274281958
+
+De herreview op `5e3e3a5` liet twee resterende tokenranden zien, beide met één
+fictief gerecht, volledige dekking en de exacte quote in `source.text`:
+
+- `Fictief gerecht EUR .50` met claim `5000` werd geaccepteerd, doordat de
+  scanner bij `50` begon en de leidende punt negeerde;
+- `Fictief gerecht - EUR 13,50` en `Fictief gerecht -€ 13,50` met claim `1350`
+  werden als positieve `known`-prijs geaccepteerd, doordat alleen het teken
+  direct vóór het cijfer werd bekeken.
+
+`quoteContainsAmount` leest nu de volledige monetaire prefix: witruimte,
+valutamarker(s), een optioneel teken en een eventuele voorloopseparator. Een
+voorloopdecimaal is ambigu en levert `price_evidence_missing` op; er wordt geen
+50 cent of ander bedrag geraden. Een expliciet teken (min, unicode-min,
+en/em-dash of plus), ook met valuta tussen teken en cijfers, bewijst nooit een
+positieve `known`-prijs. Onondertekende bedragen en de bestaande decimale-,
+duizend- en integergevallen blijven ongewijzigd.
+
+Regressies staan op de pure helper, de directe v2-validator en de v1→v2-mapping
+voor de primaire prijs én glas/fles-varianten. Bewust geaccepteerde beperking:
+een koppelteken tussen twee bedragen (`13,50 - 25,00`) is niet te
+onderscheiden van een teken, dus de tweede helft wordt conservatief geweigerd.
+Er is geen route, DB, RPC, DDL, provider, writeflag of UI aangesloten.
+
 
 Receipt-write/read, de RPC-projectie `candidate_summary -> 'menus'`,
 conceptopslag/-read, review, export-PR en de publieke kaart gebruiken nog
@@ -220,11 +246,14 @@ nieuw publiek veld toegevoegd en geen publicatieveld verzonnen.
 | Controle | Commando | Resultaat |
 | --- | --- | --- |
 | Gerichte v2-tests | `node --test` op `menuProductSchemaV2.test.js`, `menuProductMappingV2.test.js`, `schemaDesign.test.js` | **47 pass, 0 fail, 0 skipped** (head `5e3e3a5`) |
+| Gerichte prijsbewijs-/v2-tests (review 6274281958) | `node --test` op `menuProductSchemaV2.test.js` (27), `menuProductMappingV2.test.js` (21), `schemaDesign.test.js` (6), `menuExtractionRuntime.test.js` (3), `menuExtractionAdapter.test.js` (14), `claudeStructuringAdapter.test.js` (5) | **76 pass, 0 fail, 0 skipped** (head `2b994cd`) |
 | Gerichte #59-tests | `node --test` op acceptanceSet, acceptanceSetGuard, holdoutReferences, botanistReference, htmlMenuPriceElement, menuHubDiscoveryRegression, pdfMenuStructuringLiveRegressions, sameHostDiscovery, menuExtractionAdapter, menuExtractionRuntime | **88 pass, 0 fail, 0 skipped** (eerdere head) |
 | Volledige suite | `npm test` | **2105 tests: 2105 pass, 0 fail, 0 skipped** (head `5e3e3a5`; TAP, 102,1 s) |
+| Volledige suite (review 6274281958) | `npm test` | **2112 tests: 2112 pass, 0 fail, 0 skipped** (head `2b994cd`; TAP, 51,0 s) |
 | Structuurcorpus | `npm run test:menu-structure` | **6 pass, 0 fail** (head `5e3e3a5`) |
 | Benchmark | `npm run benchmark:menu-structure` | 23 gevallen: **22 pass, 0 fail, 1 unclassified** (`STRUCT-018`, bestaande JSON-LD-hiërarchiekeuze; head `5e3e3a5`) |
 | Build | `npm run build` | **compiled successfully in 30,5 s; 41/41 statische pagina's; exit 0** (head `5e3e3a5`) |
+| Build (review 6274281958) | `npm run build` | **compiled successfully in 51 s; 41/41 statische pagina's** (head `2b994cd`) |
 | PDF.js-serverpad | `node ops/scripts/verify-pdfjs-server-trace.js` | **OK**; 164 server scripts, native `pdf.mjs`/`pdf.worker.mjs`, geen gebundelde PDF.js-runtime (head `5e3e3a5`) |
 | Browserfixture | `npm run test:browser:menu-review` | **99/99 checks**, 11 screenshots, head `5a7f99a` (historisch; niet herhaald op `5e3e3a5`), `worktreeDirty:false`, Edge 155.0.4283.45, gegenereerd 2026-10-19T16:49:19Z |
 | Echte bronproef | `node ops/scripts/probe-menu-extraction-sources.js --source=all` | **exit 0**; Smelt 37/37 (8 secties), Blossem 43/43 (13 secties); beide byte-/contenthash identiek; 0 gemist/extra/prijs/koppeling/duplicaat; boekhouding 37/37 en 43/43 |
@@ -239,11 +268,12 @@ eindigde met exit 0. Dat is een observatie, geen productacceptatie.
 De bronproef en de Botanist-vergelijking zijn uitgevoerd op code `4519e93`;
 commit `5a7f99a` wijzigt uitsluitend twee testbestanden en geen
 extractie-/runtimecode. De volledige suite en build zijn op `5e3e3a5` opnieuw
-uitgevoerd (2105/2105; build exit 0). De browserfixture is op `5a7f99a`
-gegenereerd en niet opnieuw uitgevoerd; `5e3e3a5` wijzigt alleen de pure
-prijsbewijshulp en tests, geen UI-, fetch- of parsercode. De bronproef en
-Botanist-vergelijking zijn evenmin herhaald; hun bewijs blijft aan `4519e93`
-gekoppeld.
+uitgevoerd (2105/2105; build exit 0). De prijsbewijsreparatie van review
+6274281958 is op `2b994cd` opnieuw met 76 gerichte tests, de volledige suite
+(2112/2112) en de build gecontroleerd; de browserfixture, bronproef en
+Botanist-vergelijking zijn daar niet op herhaald. `2b994cd` wijzigt alleen de
+pure prijsbewijshulp en tests, geen UI-, fetch- of parsercode. Hun bewijs blijft
+aan `5a7f99a` respectievelijk `4519e93` gekoppeld.
 
 ## Wat expliciet niet is uitgevoerd of geclaimd
 
@@ -277,7 +307,7 @@ gekoppeld.
 | 2 | Een nieuwe, nog ongeziene holdout en de toegangsbeslissing daarvoor | Zonder nieuwe holdout is er geen releaseclaim; de gebruikte bronnen zijn representatief/getuned | Product Owner, met Delivery Lead |
 | 3 | Live preview-/stagingtoegang en expliciete schrijfautorisatie voor bronbevestiging, conceptopslag en export | De fixture bewijst geen echte Supabase-sessie of schrijfactie; geen bypass toegestaan | Product Owner/ops |
 | 4 | Aansluiting van de pure v2-laag op receipt/review/concept/export: dual-read, opt-in writer, exportcontract en eventuele migratie | De pure laag is gebouwd en getest, maar heeft geen route, DDL of publieke werking; het exportcontract en een eventuele migratie zijn nog niet besloten | Delivery Lead/architect; Product Owner voor export-/migratiebesluit |
-| 5 | Onafhankelijke review van codehead `5e3e3a5` en deze documentatie | Criterium 13; groene tests zijn geen productacceptatie | Delivery Lead |
+| 5 | Onafhankelijke review van codehead `2b994cd` en deze documentatie | Criterium 13; groene tests zijn geen productacceptatie | Delivery Lead |
 | 6 | Timing en uitvoering van de #56-integratie na afronding van #56 | Drie conflicten en tien overlappende bestanden; geen merge in deze branch | Delivery Lead beslist; developer voert na de merge uit |
 | 7 | BE-21's 50–100-bronnen/OCR-/vendorbenchmark | Expliciet buiten #59; twee bronnen sluiten die niet af | BE-21-eigenaar |
 | 8 | Gauchos Breda vervangen of als holdout laten vallen | De entry is 404/502 en levert geen broninhoud | Product Owner |
@@ -300,8 +330,9 @@ in [menu-extraction-acceptance.md](menu-extraction-acceptance.md).
 ## Overdracht
 
 **Aanbevolen status: READY_FOR_REVIEW voor dit afrondingsdossier, niet DONE voor
-#59.** Het dossier is toetsbaar op codehead `5e3e3a5` (pure v2
-prijsbewijsreparatie) en de daarop volgende documentatiecommit. Volledige
+#59.** Het dossier is toetsbaar op codehead `2b994cd` (pure v2
+prijsbewijsreparatie na review 6274281958) en de daarop volgende
+documentatiecommit. Volledige
 productacceptatie blijft afhankelijk van de beslissingen hierboven. De eerstvolgende veilige stap is onafhankelijke review
 door de Delivery Lead; daarna kan de Product Owner de resterende
 provider-, holdout-, toegangs- en migratiebesluiten nemen. Er is niets gemerged,
