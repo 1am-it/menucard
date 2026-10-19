@@ -1,11 +1,14 @@
 # Menu-extractie — productschema v2 (ontwerp ter beoordeling)
 
-Status: **ontwerp, niet geïmplementeerd, geen migratie**. Datum: 2026-10-18;
-aangevuld na Delivery Lead-review 6248407225 (prijsbewijs per bedrag en
-zichtbare rollback). Hoort bij GitHub #59 / PR #60. Dit document beschrijft een
-versiegebonden, verliesvrije uitbreiding voor menuconstructies die het huidige
-productcontract niet kan opslaan. Het activeert geen provider, migratie, export
-of publicatie en wijzigt #56 niet.
+Status: **ontwerp + pure schema-/mappinglaag geïmplementeerd; geen route, geen
+migratie en geen publicatie**. Datum: 2026-10-18, aangevuld na Delivery
+Lead-review 6248407225 (prijsbewijs per bedrag en zichtbare rollback) en na de
+goedgekeurde bouwronde van 2026-10-19 (interne varianten/supplementen). Hoort bij
+GitHub #59 / PR #60. Dit document beschrijft een versiegebonden, verliesvrije
+uitbreiding voor menuconstructies die het huidige productcontract niet kan
+opslaan. Het activeert geen provider, migratie, export of publicatie en wijzigt
+#56 niet. De pure laag en de read-only integratie-inventaris staan in
+[menu-extraction-v2-integration.md](../../docs/guides/menu-extraction-v2-integration.md).
 
 ## Waarom dit ontwerp nodig is
 
@@ -151,6 +154,64 @@ exportpad toegevoegd.
   database-IDs en geven geen gebruikersrechten.
 - Geen veld voor modelconfidence, goedkeuring of publicatiestatus.
 
+
+## Implementatie-aanvullingen (ronde 2026-10-19)
+
+De pure laag in `src/lib/menuProductSchemaV2.js` en
+`src/lib/menuProductMappingV2.js` maakt de regels hierboven uitvoerbaar. Vijf
+punten die in het eerste voorbeeld nog impliciet waren, zijn nu contractueel
+expliciet:
+
+1. **Herkomst per veld.** Ieder item heeft `origins: { name, description,
+   price, allergens, supplementOf, availability, kind }` met de gesloten waarden
+   `extracted`, `manual` of `unknown`. Een prijsvariant heeft `origin`. Zo zijn
+   handmatige en geëxtraheerde waarden gescheiden zonder nieuwe UI of
+   schrijfroute.
+2. **Allergenenbron.** `allergens` heeft naast `status`, `codes` en `sourceText`
+   ook `sourceTextStatus`: `recorded` (de passage is geïsoleerd en moet in de
+   bron voorkomen), `not_isolated` (de bron vermeldt waarden, maar v1 bewaarde
+   geen aparte passage) of `unknown`. `explicit` vereist minstens één code;
+   `unknown` heeft geen codes en geen brontekst.
+3. **Supplementrelatie.** `supplementOf` is `null`, of
+   `{ status: "resolved", itemId }`, of
+   `{ status: "unresolved", label, context: { menuId, categoryId }, limitation }`.
+   Een opgelost doel moet in dezelfde menu bestaan, mag niet het supplement
+   zelf zijn en mag geen supplement zijn (zodat een keten/cyclus onmogelijk is).
+   Een onopgelost doel vereist de bewezen menu-/rubriekcontext en een expliciete
+   beperking; er wordt geen basisgerecht verzonnen.
+4. **Bronpad.** `sourcePath` is `null` wanneer de v1-invoer geen apart
+   bronpad had. De mapper verzint geen tweede pad; `path` blijft de
+   gereconstrueerde sectieroute.
+5. **Itemsoort.** v1 kent geen `kind`; gewone regels worden `kind: "unknown"`,
+   een v1-supplement wordt `kind: "supplement"`. Dat is een expliciete
+   onbekende, geen stille toewijzing als `dish`.
+
+Daarnaast:
+
+- **Prijsbewijs.** De validator controleert per bedrag dat de eigen quote het
+  bedrag in de brontaal bevat (met begrenzingen, zodat `13,00` niet in `113,00`
+  past). De mapper leidt een variantbewijs alleen af uit de itemquote als die
+  quote het variantbedrag bevat; anders weigert de hele mapping met
+  `price_evidence_missing`. Er wordt niets aangevuld of gekozen.
+- **Projectie.** `projectProductV2ToV1` slaagt alleen als naam, omschrijving,
+  prijs, pad, volgorde, relatie, allergenenwaarde en bewijsregel behouden
+  blijven. `primaryPriceRef`, keuzegroepen, arrangementen, opgeloste
+  supplementen, afwijkende variantmetadata, een geïsoleerde allergenenpassage
+  en een afwijkende veldherkomst weigeren met `unsupported_v1_projection`.
+- **Export.** `checkProductV2ExportSuitability` produceert geen bestand en
+  weigert in deze ronde ieder v2-item: `data/menus.json` kan expliciet, onbekend
+  en "geen allergenen" niet onderscheiden en heeft één prijs. Dat is de
+  goedgekeurde geblokkeerde toestand, geen stille terugval.
+- **Rollback.** `readProductRecord` leest een v2-rij alleen als v2, een
+  onbekende versie als `unsupported_schema_version` met bewaarde ruwe rij en
+  geblokkeerde acties, en een v1-rij als legacy. De bestaande v1-lezer
+  (`mapStructuredOutputToMenuContexts`) gooit een concrete fout op een
+  v2-envelop in plaats van hem als v1 te interpreteren.
+
+De laag is **niet aangesloten** op een receipt-, review-, concept-, export- of
+publieke route; er is geen DDL, migratie, backfill of writeflag. De exacte
+aansluitpunten en de latere SQL-wijzigingen staan in
+[menu-extraction-v2-integration.md](../../docs/guides/menu-extraction-v2-integration.md).
 
 ## Mapping van v1 naar v2
 
@@ -313,10 +374,11 @@ bewaart in plaats van hem te negeren.
 
 ## Wat dit document niet doet
 
-- Het implementeert of migreert niets; de code blijft op
+- Het implementeert of migreert geen route: de actieve productcode blijft op
   `menu-extraction-output/v1` en `menu-extraction-result/v1`.
-- Het voegt geen prijsbewijsvalidator, schema-lezer of rollbackpad toe; die zijn
-  alleen als ontwerpregel en voorgestelde regressie beschreven.
+- De pure prijsbewijsvalidator, schema-lezer, v1→v2-mapper en fail-closed
+  projecties bestaan wel (zie de implementatie-aanvullingen), maar zijn op geen
+  enkele receipt-, review-, concept-, export- of publieke route aangesloten.
 - Het wijzigt `data/menus.json`, de receipt- of concepttabellen niet.
 - Het voegt geen nieuw OCR-, browser- of providerplatform toe.
 - Het wijzigt #56 niet en lost de drie bekende integratieconflicten niet op.

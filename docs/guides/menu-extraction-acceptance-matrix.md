@@ -2,10 +2,12 @@
 
 Status: **ontwikkelaarsbewijs, geen onafhankelijke review en geen release.**
 Datum: 2026-10-19. Issue #59, branch `feat/menu-extraction-59`, PR #60.
-Kandidaat-codehead: `5a7f99ac0f822f6471c948ae017641d4d1925b19` (test-/regressiecommit;
-deze documentatie volgt als aparte commit). Protocol: `MENU-EXTRACTION.md` v0.2,
-SHA-256 `15510b4c0b74fee722ac2c51a3f40aa21b03e0161ccffdcb2008f3d27350b762`.
-De runtime blijft zonder provider; alle bronproeven zijn read-only.
+Kandidaat-codehead: `6b67a2c4cf44bfb485e475400fb07b88786e63cc` (pure v2
+schema-/mappingcommit; deze documentatie volgt als aparte commit). Protocol:
+`MENU-EXTRACTION.md` v0.2, SHA-256
+`15510b4c0b74fee722ac2c51a3f40aa21b03e0161ccffdcb2008f3d27350b762`.
+De runtime blijft zonder provider; alle bronproeven zijn read-only. De pure
+v2-laag is gebouwd en getest, maar is op geen route aangesloten.
 
 Deze matrix vervangt de status in oudere PR-teksten en eerdere matrixversies.
 De volledige rondehistorie blijft in Git en in
@@ -21,13 +23,15 @@ Smelt- en Blossem-bronversies (37/37 en 43/43 exact tegen de gecontroleerde
 capture). De Botanist is meetbaar gedeeltelijk (124/141 referentierijen,
 11 gemist, 4 extra, 0 prijsverschil) en de Mr Moos/Colonia-aantallen zijn
 live observaties zonder referentie-uitkomst. Bewust geblokkeerd of niet
-ondersteund blijven: scans/OCR, verliesvrije wijn-/cocktail-/glas-fles-/
-supplement-/arrangement-/allergenenopslag, product-schema v2, echte
-provideractivering, echte bronbevestiging/conceptopslag/export/publicatie,
-Gauchos Breda (onbereikbaar), een nieuwe ongeziene holdout en BE-21's
-50–100-bronnenbenchmark. Volledige productacceptatie vereist nog een
-Product Owner-besluit over provider/model/budget/DPA, een nieuwe holdout,
-live preview-/schrijftoegang en onafhankelijke review door de Delivery Lead.
+ondersteund blijven: scans/OCR, de aansluiting van product-schema v2 op
+receipt/review/concept/export/publicatie, echte provideractivering, echte
+bronbevestiging/conceptopslag/export/publicatie, Gauchos Breda (onbereikbaar),
+een nieuwe ongeziene holdout en BE-21's 50–100-bronnenbenchmark. De pure v2
+schema-/mappinglaag is wel gebouwd en met fictieve round-trip- en
+weigeringsfixtures getest; zij heeft geen route, DDL, writeflag of publieke
+werking. Volledige productacceptatie vereist nog een Product Owner-besluit over
+provider/model/budget/DPA, een nieuwe holdout, live preview-/schrijftoegang en
+onafhankelijke review door de Delivery Lead.
 
 ## Bewijstype en status
 
@@ -57,13 +61,45 @@ ander besluit of eigenaar.
 | 7 | Dataset, referentie-uitkomsten en meetbare drempels vóór acceptatie vastgelegd; BE-21's 50–100 niet met enkele URL's afgesloten | `manifest.json` `releaseThresholds`: 0 verzonnen gerechten/prijzen, 100% bewijs, 0 onverklaarde dekking, 0 structuur-/prijsfouten; `sourceReferences.test.js`; 23 structuurgevallen | T | **bewezen met beperking** | Drempels zijn vast en niet verlaagd; BE-21 is expliciet buiten #59 en niet afgesloten met twee bronnen | BE-21-eigenaar; Delivery Lead voor scopebewaking |
 
 | 8 | Gemiste/verzonnen items, prijsfouten, structuurverlies, bewijsdekking, correctiewerk, tijd en kosten per brontype gerapporteerd | Per-brontabel hieronder; Smelt/Blossem 0 verschillen; Botanist v1 124/11/4/0, 87 niet-gekoppeld; Mr Moos/Colonia zonder referentie; deterministische analysetijd per bron gemeten | R+T | **bewezen met beperking** | Correctietijd is onbekend; productiekosten zijn onbekend; de gemeten analysetijd is geen menselijke correctietijd. Modelkosten in deze run zijn €0 omdat geen provider is aangeroepen | Developer voor een correctietijdmeting; Product Owner voor kostenbesluit |
-| 9 | Browseracceptatie met klikpaden, rolgrenzen, leeg/fout/partieel, toetsenbord, licht/donker, 320/390 px | `npm run test:browser:menu-review`: 99/99 checks op head `5a7f99a`, 11 screenshots, Edge 155.0.4283.45, 1024/390/320 px, licht/donker, keyboard Enter, read-only collega, empty/partial/error, fail-closed netwerkguard | B | **bewezen met beperking** | Alleen fixture; geen live/staging browserbewijs en geen echte authenticated sessie. De fixture is geen productieacceptatie | Product Owner/ops voor previewtoegang; Delivery Lead voor live acceptatie |
+| 9 | Browseracceptatie met klikpaden, rolgrenzen, leeg/fout/partieel, toetsenbord, licht/donker, 320/390 px | `npm run test:browser:menu-review`: 99/99 checks op head `5a7f99a` (historisch; niet herhaald op `6b67a2c`), 11 screenshots, Edge 155.0.4283.45, 1024/390/320 px, licht/donker, keyboard Enter, read-only collega, empty/partial/error, fail-closed netwerkguard | B | **bewezen met beperking** | Alleen fixture; geen live/staging browserbewijs en geen echte authenticated sessie. De fixture is geen productieacceptatie | Product Owner/ops voor previewtoegang; Delivery Lead voor live acceptatie |
 | 10 | Time-out, provideruitval, ongeldige uitvoer, kosten-/paginagrens, herimport, gelijktijdige taken, promptinjectie, verkeerde vestiging, onveilige redirects getest | `menuExtractionAdapter.test.js`, `safeOutboundFetch.test.js`, `restaurantSourceAnalysis.test.js`, `batchAnalysisHandlers.test.js`, `menuConcept.test.js`; offline fake provider en `.invalid`-fixtures; geen dubbele call/claim | T | **bewezen met beperking** | Alleen offline; een echte provideruitval, echte kostenmeting en echte gelijktijdige productietaken zijn niet gemeten | Product Owner voor provider/budget; developer voor een latere live meting |
-| 11 | Geen stil dataverlies tussen extractie, receipt, review, concept en export; niet-ondersteunde publicatievelden geblokkeerd/gemeld | `menuExtractionRuntime.test.js` (nieuw: glas/fles-varianten + supplement + allergenen worden geweigerd), `menuExtractionAdapter.test.js` (ook `isFrom`), `menuExtractionQuality.test.js` (supplement/arrangement/portie blokkeren een betaalde call), `menuConceptExport.test.js`, `STRUCT-017` | T | **bewezen met beperking** | Varianten, supplementen, arrangementen, allergenen en glas/fles zijn nog niet verliesvrij op te slaan; v2 is **alleen ontwerp**, niets gemigreerd | Delivery Lead/architect voor v2-ontwerp; Product Owner voor migratiebesluit |
-| 12 | Geen regressie in rollen, bronbevestiging, audit, publicatiegates, beveiliging of geheimenbeheer | Volledige suite 2062/2062; browserfixture read-only zonder save/bevestig; netwerkguard blokkeert externe fetch, protocol-relative URL, onbekende API-write, XHR, WebSocket en CDP-subresources | T+B | **bewezen met beperking** | Geen productiecredentials, productieauth of echte database gebruikt; dat is bewust niet getest | Product Owner/ops voor productieacceptatie |
+| 11 | Geen stil dataverlies tussen extractie, receipt, review, concept en export; niet-ondersteunde publicatievelden geblokkeerd/gemeld | `menuProductSchemaV2.test.js`, `menuProductMappingV2.test.js`, `schemaDesign.test.js`, `menuExtractionRuntime.test.js`, `menuExtractionAdapter.test.js`, `menuExtractionQuality.test.js`, `menuConceptExport.test.js`, `STRUCT-017`; de pure v2-laag mapt glas/fles, vanafprijzen, meerdere menu's en supplementen en weigert verliesgevende projecties | T | **bewezen met beperking** | De laag is niet aangesloten op receipt/review/concept/export; geen echte bron→conceptopslag. De bestaande v1-routes blijven geblokkeerd voor deze constructies | Developer voor aansluiting na besluit; Delivery Lead voor review |
+| 12 | Geen regressie in rollen, bronbevestiging, audit, publicatiegates, beveiliging of geheimenbeheer | Volledige suite 2096/2096; browserfixture read-only zonder save/bevestig; netwerkguard blokkeert externe fetch, protocol-relative URL, onbekende API-write, XHR, WebSocket en CDP-subresources | T+B | **bewezen met beperking** | Geen productiecredentials, productieauth of echte database gebruikt; dat is bewust niet getest | Product Owner/ops voor productieacceptatie |
 | 13 | Onafhankelijke review met exacte commit, checks, bron-/protocolversies, resultaten, beperkingen en volgende stap; groene unit-tests zijn geen productacceptatie | Deze matrix + checkpoint op PR #60 | I | **geblokkeerd** | De Delivery Lead heeft deze afrondingsronde nog niet onafhankelijk beoordeeld; deze matrix is ontwikkelaarsbewijs | Delivery Lead |
 
-## Bewijs per bron (read-only, 2026-10-19)
+## Pure v2 schema-/mappinglaag (ronde 2026-10-19)
+
+Status: **gebouwd en getest, niet aangesloten; geen DDL, migratie, writeflag of
+publicatie.** Codehead: `6b67a2c4cf44bfb485e475400fb07b88786e63cc`.
+
+| Onderdeel | Bewijs | Uitkomst |
+| --- | --- | --- |
+| Versiegebonden schema en validator | `menuProductSchemaV2.test.js`: 17 tests | `menu-extraction-product/v2`; onbekende/ontbrekende versie faalt concreet; verboden trustvelden op elke diepte; unieke menu-/rubriek-/item-/variant-ID's |
+| Prijsbewijs per bedrag | `menuProductSchemaV2.test.js`, `quoteContainsAmount` | Een `known`/`from`-prijs en iedere variant hebben een eigen quote met het bedrag; `113,00` ondersteunt `13,00` niet; `price_evidence_missing` bij een quote zonder het juiste bedrag |
+| Supplementen en keuzes | `menuProductSchemaV2.test.js`: unresolved/resolved/self/chain/choice | Onopgelost doel vereist bewezen menu-/rubriekcontext en limitation; resolved doel moet bestaan, niet zichzelf en geen supplement zijn; keuzegroep moet een `choice_group` met geldige min/max zijn |
+| Allergenen | `menuProductSchemaV2.test.js` | `explicit` vereist codes en `recorded`/`not_isolated`; `unknown` heeft geen codes en betekent niet "vrij van"; een geïsoleerde passage moet in de bron staan |
+| v1 → v2-mapping | `menuProductMappingV2.test.js` | Fictief: 2 menu's, 7 items, glas/fles, vanafprijs, meerdere prijzen, supplement, expliciete/onbekende allergenen; inhoud en dekking blijven gelijk |
+| Verliesvrije terugprojectie | `menuProductMappingV2.test.js` | Round-trip zonder verlies van naam, omschrijving, prijs, pad, volgorde, variant, allergenenwaarde of bewijs; weigert bij primary price, keuzegroep, arrangement, opgelost supplement, afwijkende variantmetadata, geïsoleerde allergenenpassage, afwijkende veldherkomst en een apart sourcePath |
+| Exportguard | `menuProductMappingV2.test.js` | Produceert geen bestand; blokkeert ieder v2-item omdat `data/menus.json` één prijs en geen ondubbelzinnige allergenenstatus kan dragen; een leeg menu is `empty_menu`, geen succes |
+| Fail-closed lezer | `menuProductSchemaV2.test.js` | v1 blijft v1; v2 wordt alleen als v2 gelezen; onbekende versie → `unsupported_schema_version` met bewaarde ruwe rij en geblokkeerde `save`/`confirm`/`export`/`publish`; een v1-rij met trustveld wordt geweigerd |
+| Oude lezer | `menuProductMappingV2.test.js` | `mapStructuredOutputToMenuContexts` gooit een concrete fout op een v2-envelop in plaats van hem als v1 te lezen |
+| Grensbewaking | `ops/benchmark/schemaDesign.test.js` | Geen `app/`-route importeert de nieuwe modules; de pure laag heeft geen fetch/database/env/filesystem; v1-contractversies blijven gelijk; geen migratie na `0019` |
+
+### Nog niet aangesloten
+
+Receipt-write/read, de RPC-projectie `candidate_summary -> 'menus'`,
+conceptopslag/-read, review, export-PR en de publieke kaart gebruiken nog
+uitsluitend v1. De exacte latere aansluitpunten, de benodigde SQL-wijziging en
+de rollbackvolgorde staan in
+[menu-extraction-v2-integration.md](menu-extraction-v2-integration.md). Deze
+ronde activeert geen dual-read, writeflag of publieke werking.
+
+De bronproef, Botanist-vergelijking en browserfixture zijn in deze ronde **niet
+opnieuw** uitgevoerd: er is geen fetch-, parser-, runtime- of UI-code gewijzigd.
+Hun eerdere bewijs blijft aan de eerdere head gekoppeld en wordt niet op deze
+commit geclaimd.
+
+
 
 Alle onderstaande bronnen zijn de al toegestane openbare entry-URL's en hun
 relevante menulinks. Er is geen login, CAPTCHA-bypass, andere vestiging,
@@ -162,24 +198,26 @@ Colonia en een geblokkeerd groepsmenu bij Mr Moos.
 De bestaande concept-/exportgates zijn niet verzwakt: `menuConcept.js` blijft
 prijs-, duplicaat- en rubriekblokkades opleggen en `menuConceptExport.js`
 blijft een niet-opgeslagen of geblokkeerd concept weigeren. Het product-schema
-v2 blijft **alleen ontwerp** in
-`planning/architecture/menu-extraction-product-schema-v2.md`; er is niets
-gemigreerd, geen nieuw veld toegevoegd en geen publicatieveld verzonnen.
+v2 is niet meer alleen ontwerp: de pure schema-/mappinglaag staat in
+`src/lib/menuProductSchemaV2.js` en `src/lib/menuProductMappingV2.js` en is met
+fictieve fixtures getest. Er is niets gemigreerd, geen route aangesloten, geen
+nieuw publiek veld toegevoegd en geen publicatieveld verzonnen.
 
 ## Uitgevoerde checks op deze kandidaat
 
 | Controle | Commando | Resultaat |
 | --- | --- | --- |
-| Gerichte #59-tests | `node --test` op acceptanceSet, acceptanceSetGuard, holdoutReferences, botanistReference, htmlMenuPriceElement, menuHubDiscoveryRegression, pdfMenuStructuringLiveRegressions, sameHostDiscovery, menuExtractionAdapter, menuExtractionRuntime | **88 pass, 0 fail, 0 skipped** |
-| Volledige suite | `npm test` | **2062 tests: 2062 pass, 0 fail, 0 skipped** (38,2 s; exit 0) |
+| Gerichte v2-tests | `node --test` op `menuProductSchemaV2.test.js`, `menuProductMappingV2.test.js`, `schemaDesign.test.js` | **38 pass, 0 fail, 0 skipped** |
+| Gerichte #59-tests | `node --test` op acceptanceSet, acceptanceSetGuard, holdoutReferences, botanistReference, htmlMenuPriceElement, menuHubDiscoveryRegression, pdfMenuStructuringLiveRegressions, sameHostDiscovery, menuExtractionAdapter, menuExtractionRuntime | **88 pass, 0 fail, 0 skipped** (eerdere head) |
+| Volledige suite | `npm test` | **2096 tests: 2096 pass, 0 fail, 0 skipped** (46,9 s; exit 0) |
 | Structuurcorpus | `npm run test:menu-structure` | **6 pass, 0 fail** |
 | Benchmark | `npm run benchmark:menu-structure` | 23 gevallen: **22 pass, 0 fail, 1 unclassified** (`STRUCT-018`, bestaande JSON-LD-hiërarchiekeuze) |
-| Build | `npm run build` | **compiled successfully in 25,3 s; 41/41 statische pagina's; exit 0** |
+| Build | `npm run build` | **compiled successfully in 18,1 s; 41/41 statische pagina's; exit 0** |
 | PDF.js-serverpad | `node ops/scripts/verify-pdfjs-server-trace.js` | **OK**; 164 server scripts, native `pdf.mjs`/`pdf.worker.mjs`, geen gebundelde PDF.js-runtime |
-| Browserfixture | `npm run test:browser:menu-review` | **99/99 checks**, 11 screenshots, head `5a7f99a`, `worktreeDirty:false`, Edge 155.0.4283.45, gegenereerd 2026-10-19T16:49:19Z |
+| Browserfixture | `npm run test:browser:menu-review` | **99/99 checks**, 11 screenshots, head `5a7f99a` (historisch; niet herhaald op `6b67a2c`), `worktreeDirty:false`, Edge 155.0.4283.45, gegenereerd 2026-10-19T16:49:19Z |
 | Echte bronproef | `node ops/scripts/probe-menu-extraction-sources.js --source=all` | **exit 0**; Smelt 37/37 (8 secties), Blossem 43/43 (13 secties); beide byte-/contenthash identiek; 0 gemist/extra/prijs/koppeling/duplicaat; boekhouding 37/37 en 43/43 |
 | Botanist-vergelijking | `node ops/benchmark/runBotanistComparison.js --pdf=…/botanist-menu.pdf` (v1 en v3-voorstel) | **exact reproductie** van de vastgelegde v1 (124/11/4/0; 215 items; 87 niet-gekoppeld; 9 `categoryUnknown`) en v3-voorstel (127/6/1/0; 5 beperkt; 8 `categoryUnknown`); PDF-hash gelijk |
-| #56-compatibiliteit | `git merge-tree --write-tree --name-only HEAD origin/feat/compact-source-flow-53` | **exit 1**; 3 inhoudelijke conflicten; 10 overlappende bestanden; geen merge uitgevoerd |
+| #56-compatibiliteit | `git merge-tree --write-tree --name-only HEAD origin/feat/compact-source-flow-53` | **op `5a7f99a`: exit 1**; 3 inhoudelijke conflicten; 10 overlappende bestanden; niet herhaald op `6b67a2c`, geen merge uitgevoerd |
 | Whitespace | `git diff --check` | schoon |
 
 De probe-uitvoer bevat de bestaande PDF.js-waarschuwing over
@@ -188,8 +226,11 @@ eindigde met exit 0. Dat is een observatie, geen productacceptatie.
 
 De bronproef en de Botanist-vergelijking zijn uitgevoerd op code `4519e93`;
 commit `5a7f99a` wijzigt uitsluitend twee testbestanden en geen
-extractie-/runtimecode. De volledige suite, build en browserfixture zijn op
-`5a7f99a` uitgevoerd. De runtime is dus identiek voor beide metingen.
+extractie-/runtimecode. De volledige suite en build zijn op `6b67a2c` opnieuw
+uitgevoerd (2096/2096; 18,1 s). De browserfixture is op `5a7f99a` gegenereerd en
+niet opnieuw uitgevoerd; `6b67a2c` wijzigt geen UI-, fetch- of parsercode. De
+bronproef en Botanist-vergelijking zijn evenmin herhaald; hun bewijs blijft aan
+`4519e93` gekoppeld.
 
 ## Wat expliciet niet is uitgevoerd of geclaimd
 
@@ -207,8 +248,10 @@ extractie-/runtimecode. De volledige suite, build en browserfixture zijn op
   uitgevoerd; alleen de lokale fixture op Edge 155.
 - **BE-21's 50–100-bronnen/OCR-/vendorbenchmark**: buiten #59; niet afgesloten.
 - **Scans/OCR**: expliciet niet ondersteund; de uitkomst is een eerlijke fout.
-- **Product-schema v2, supplementen, arrangementen, glas/fles, allergenen**:
-  alleen ontwerp; niet verliesvrij opgeslagen en niet publiceerbaar gemaakt.
+- **Aansluiting van product-schema v2 op receipt/review/concept/export/
+  publicatie**: niet uitgevoerd. De pure schema-/mappinglaag bestaat en is met
+  fictieve fixtures getest, maar er is geen route, DDL, writeflag, migratie of
+  publieke werking.
 - **Correctietijd en productiekosten per brontype**: onbekend, niet als nul
   gerapporteerd. Alleen de deterministische analysetijd is gemeten.
 - **#56-integratie**: niet uitgevoerd; alleen de read-only conflictaanalyse.
@@ -220,8 +263,8 @@ extractie-/runtimecode. De volledige suite, build en browserfixture zijn op
 | 1 | Provider/model, maximaal kostenbudget, DPA/EU-retentie en app-side AI-activering | De runtime staat bewust uit. De bronproeftoestemming en de developer-prepaidtoestemming dekken dit niet | Product Owner |
 | 2 | Een nieuwe, nog ongeziene holdout en de toegangsbeslissing daarvoor | Zonder nieuwe holdout is er geen releaseclaim; de gebruikte bronnen zijn representatief/getuned | Product Owner, met Delivery Lead |
 | 3 | Live preview-/stagingtoegang en expliciete schrijfautorisatie voor bronbevestiging, conceptopslag en export | De fixture bewijst geen echte Supabase-sessie of schrijfactie; geen bypass toegestaan | Product Owner/ops |
-| 4 | Beoordeeld product-schema v2 en exportcontract (prijsbewijs per bedrag, zichtbare rollback, supplementen/arrangementen/glas-fles/allergenen) | Het huidige schema kan deze betekenis niet verliesvrij dragen; v2 is alleen ontwerp | Delivery Lead/architect; daarna Product Owner voor migratie |
-| 5 | Onafhankelijke review van codehead `5a7f99a` en deze documentatie | Criterium 13; groene tests zijn geen productacceptatie | Delivery Lead |
+| 4 | Aansluiting van de pure v2-laag op receipt/review/concept/export: dual-read, opt-in writer, exportcontract en eventuele migratie | De pure laag is gebouwd en getest, maar heeft geen route, DDL of publieke werking; het exportcontract en een eventuele migratie zijn nog niet besloten | Delivery Lead/architect; Product Owner voor export-/migratiebesluit |
+| 5 | Onafhankelijke review van codehead `6b67a2c` en deze documentatie | Criterium 13; groene tests zijn geen productacceptatie | Delivery Lead |
 | 6 | Timing en uitvoering van de #56-integratie na afronding van #56 | Drie conflicten en tien overlappende bestanden; geen merge in deze branch | Delivery Lead beslist; developer voert na de merge uit |
 | 7 | BE-21's 50–100-bronnen/OCR-/vendorbenchmark | Expliciet buiten #59; twee bronnen sluiten die niet af | BE-21-eigenaar |
 | 8 | Gauchos Breda vervangen of als holdout laten vallen | De entry is 404/502 en levert geen broninhoud | Product Owner |
@@ -244,9 +287,9 @@ in [menu-extraction-acceptance.md](menu-extraction-acceptance.md).
 ## Overdracht
 
 **Aanbevolen status: READY_FOR_REVIEW voor dit afrondingsdossier, niet DONE voor
-#59.** Het dossier is toetsbaar op codehead `5a7f99a` en de daarop volgende
-documentatiecommit. Volledige productacceptatie blijft afhankelijk van de
-beslissingen hierboven. De eerstvolgende veilige stap is onafhankelijke review
+#59.** Het dossier is toetsbaar op codehead `6b67a2c` (pure v2
+schema-/mappinglaag) en de daarop volgende documentatiecommit. Volledige
+productacceptatie blijft afhankelijk van de beslissingen hierboven. De eerstvolgende veilige stap is onafhankelijke review
 door de Delivery Lead; daarna kan de Product Owner de resterende
 provider-, holdout-, toegangs- en migratiebesluiten nemen. Er is niets gemerged,
 gepusht naar een andere branch, gedeployed of gepubliceerd.

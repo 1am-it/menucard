@@ -11,6 +11,29 @@ provideractivering en PR #56 blijven buiten scope.
 [Botanist-referentie](menu-extraction-botanist-reference.md) |
 [V2-schemaontwerp (niet geïmplementeerd)](../../planning/architecture/menu-extraction-product-schema-v2.md)
 
+## Pure v2 schema-/mappinglaag (ronde 2026-10-19, niet aangesloten)
+
+De goedgekeurde interne bouwronde voegt een pure, versiegebonden laag toe voor
+menuvarianten, prijsvarianten en supplementen:
+
+- `src/lib/menuProductSchemaV2.js`: canonieke
+  `menu-extraction-product/v2`-validator met unieke IDs, verwijsscope,
+  prijsbewijs per bedrag, expliciete `unknown`/`origins`, allergenenstatus en
+  een fail-closed `readProductRecord`;
+- `src/lib/menuProductMappingV2.js`: `mapV1ToProductV2`,
+  `projectProductV2ToV1` (weigert met `unsupported_v1_projection`) en
+  `checkProductV2ExportSuitability` (weigert, schrijft niets);
+- `src/lib/menuExtractionMapping.js` weigert nu een v2/onbekende envelop in
+  plaats van hem als v1 te lezen.
+
+De laag heeft geen netwerk, databaseclient, credential, schrijfroute of
+provider. Bestaande v1-invoer en routes zijn ongewijzigd; de publieke export
+blijft geblokkeerd. De read-only inventaris van receipt/concept/JSONB/RPC/hash/
+audit/idempotentie/export en de latere, nog niet uitgevoerde SQL-aanpassingen
+staan in [menu-extraction-v2-integration.md](menu-extraction-v2-integration.md).
+Dit is geen echte bron → conceptopslag, geen browseracceptatie en niet DONE voor
+#59.
+
 ## Architectuur en contractmapping
 
 - De backend voert veilige ophaling, modelaanroepen, tools, onafhankelijke
