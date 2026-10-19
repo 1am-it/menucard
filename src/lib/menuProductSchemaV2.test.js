@@ -109,6 +109,64 @@ test('a known price needs its own quote containing the amount (price_evidence_mi
   assert.ok(problems.some((problem) => problem.includes('price_evidence_missing')));
 });
 
+test('the v2 validator refuses a whole-euro amount proven only by a leading decimal', () => {
+  const sources = [{ id: 'src-1', text: 'Fictief gerecht EUR .50 Fictief gerecht EUR ,50 Fictieve wijn EUR .50 / 25,00' }];
+  for (const quote of ['Fictief gerecht EUR .50', 'Fictief gerecht EUR ,50']) {
+    const item = simpleItem({
+      price: knownPrice(5000, quote),
+      evidence: { sourceId: 'src-1', locator: 'regel 1', quote },
+    });
+    const problems = validateMenuProductV2(productWith([item]), sources);
+    assert.ok(problems.some((problem) => problem.includes('price.evidence.quote does not contain the claimed amount (price_evidence_missing)')), quote);
+    assert.equal(problems.some((problem) => problem.includes('is not present in the cited source')), false, quote);
+  }
+
+  const wine = simpleItem({
+    id: 'item-2',
+    kind: 'beverage',
+    name: 'Fictieve wijn',
+    price: { status: 'multiple_undecomposed', amountMinorUnits: null, currency: null, text: 'EUR .50 / 25,00', isFrom: false, evidence: null },
+    priceVariants: [
+      { id: 'pv-1', label: 'Glas', kind: 'glass', amountMinorUnits: 5000, currency: 'EUR', text: null, isSupplement: false, perPerson: false, evidence: { sourceId: 'src-1', locator: 'regel 2', quote: 'Fictieve wijn EUR .50 / 25,00' }, origin: 'extracted' },
+      { id: 'pv-2', label: 'Fles', kind: 'bottle', amountMinorUnits: 2500, currency: 'EUR', text: null, isSupplement: false, perPerson: false, evidence: { sourceId: 'src-1', locator: 'regel 2', quote: 'Fictieve wijn EUR .50 / 25,00' }, origin: 'extracted' },
+    ],
+    evidence: { sourceId: 'src-1', locator: 'regel 2', quote: 'Fictieve wijn EUR .50 / 25,00' },
+    origins: origins({ price: 'unknown' }),
+  });
+  const problems = validateMenuProductV2(productWith([wine]), sources);
+  assert.ok(problems.some((problem) => problem.includes('priceVariants[0].evidence.quote does not contain the claimed amount (price_evidence_missing)')));
+  assert.equal(problems.some((problem) => problem.includes('priceVariants[1]') && problem.includes('price_evidence_missing')), false);
+});
+
+test('the v2 validator refuses signed primary and variant prices, also with currency between sign and digits', () => {
+  const sources = [{ id: 'src-1', text: 'Fictief gerecht - EUR 13,50 Fictief gerecht -€ 13,50 Fictieve wijn - € 6,50 / 25,00' }];
+  for (const quote of ['Fictief gerecht - EUR 13,50', 'Fictief gerecht -€ 13,50']) {
+    const item = simpleItem({
+      price: knownPrice(1350, quote),
+      evidence: { sourceId: 'src-1', locator: 'regel 1', quote },
+    });
+    const problems = validateMenuProductV2(productWith([item]), sources);
+    assert.ok(problems.some((problem) => problem.includes('price.evidence.quote does not contain the claimed amount (price_evidence_missing)')), quote);
+    assert.equal(problems.some((problem) => problem.includes('is not present in the cited source')), false, quote);
+  }
+
+  const wine = simpleItem({
+    id: 'item-2',
+    kind: 'beverage',
+    name: 'Fictieve wijn',
+    price: { status: 'multiple_undecomposed', amountMinorUnits: null, currency: null, text: '- € 6,50 / 25,00', isFrom: false, evidence: null },
+    priceVariants: [
+      { id: 'pv-1', label: 'Glas', kind: 'glass', amountMinorUnits: 650, currency: 'EUR', text: null, isSupplement: false, perPerson: false, evidence: { sourceId: 'src-1', locator: 'regel 2', quote: 'Fictieve wijn - € 6,50 / 25,00' }, origin: 'extracted' },
+      { id: 'pv-2', label: 'Fles', kind: 'bottle', amountMinorUnits: 2500, currency: 'EUR', text: null, isSupplement: false, perPerson: false, evidence: { sourceId: 'src-1', locator: 'regel 2', quote: 'Fictieve wijn - € 6,50 / 25,00' }, origin: 'extracted' },
+    ],
+    evidence: { sourceId: 'src-1', locator: 'regel 2', quote: 'Fictieve wijn - € 6,50 / 25,00' },
+    origins: origins({ price: 'unknown' }),
+  });
+  const problems = validateMenuProductV2(productWith([wine]), sources);
+  assert.ok(problems.some((problem) => problem.includes('priceVariants[0].evidence.quote does not contain the claimed amount (price_evidence_missing)')));
+  assert.equal(problems.some((problem) => problem.includes('priceVariants[1]') && problem.includes('price_evidence_missing')), false);
+});
+
 test('every price variant needs its own quote containing its own amount', () => {
   const item = simpleItem({
     id: 'item-2',
@@ -327,6 +385,54 @@ test('ambiguous or malformed notation is refused instead of rounded or reinterpr
   assert.equal(quoteContainsAmount('Fictief gerecht 1.250.00', 125000), false);
   assert.equal(quoteContainsAmount('Fictief gerecht 13,50,00', 135000), false);
   assert.equal(quoteContainsAmount('Fictief gerecht 13,50,00', 1350), false);
+});
+
+test('a leading decimal separator never proves a whole-euro amount', () => {
+  const quotes = [
+    'Fictief gerecht .50',
+    'Fictief gerecht ,50',
+    'Fictief gerecht EUR .50',
+    'Fictief gerecht EUR ,50',
+    'Fictief gerecht € .50',
+    'Fictief gerecht € ,50',
+    'Fictief gerecht EUR . 50',
+    'Fictief gerecht . 50',
+  ];
+  for (const quote of quotes) {
+    assert.equal(quoteContainsAmount(quote, 5000), false, quote);
+    assert.equal(quoteContainsAmount(quote, 500), false, quote);
+    assert.equal(quoteContainsAmount(quote, 50), false, quote);
+  }
+});
+
+test('a signed amount never proves a non-negative price, also with currency between sign and digits', () => {
+  const signed = [
+    'Fictief gerecht -13,50',
+    'Fictief gerecht - 13,50',
+    'Fictief gerecht -€ 13,50',
+    'Fictief gerecht -€13,50',
+    'Fictief gerecht - € 13,50',
+    'Fictief gerecht € -13,50',
+    'Fictief gerecht €- 13,50',
+    'Fictief gerecht - EUR 13,50',
+    'Fictief gerecht -EUR 13,50',
+    'Fictief gerecht EUR -13,50',
+    'Fictief gerecht EUR - 13,50',
+    'Fictief gerecht − € 13,50',
+    'Fictief gerecht – € 13,50',
+    'Fictief gerecht — € 13,50',
+    'Fictief gerecht + € 2,50',
+    'Fictief gerecht +EUR 2,50',
+  ];
+  for (const quote of signed) {
+    assert.equal(quoteContainsAmount(quote, 1350), false, quote);
+    assert.equal(quoteContainsAmount(quote, 250), false, quote);
+  }
+  // Correct unsigned amounts keep working, also next to a rejected signed one.
+  assert.equal(quoteContainsAmount('Fictief gerecht 13,50 | korting - € 2,50', 1350), true);
+  assert.equal(quoteContainsAmount('Fictief gerecht 13,50 | korting - € 2,50', 250), false);
+  assert.equal(quoteContainsAmount('Fictief gerecht €13,50', 1350), true);
+  assert.equal(quoteContainsAmount('Fictief gerecht EUR 13,50', 1350), true);
 });
 
 test('years, quantities, identifiers and labels are not price evidence', () => {

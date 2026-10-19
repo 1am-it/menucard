@@ -147,13 +147,22 @@ function findForbiddenKey(value, depth = 0) {
 //   - a plain integer is an amount only in a price position: a currency marker
 //     next to it, or a standalone number. A bare 1900-2099 value without a
 //     currency marker is year-like and ambiguous; quantities, units,
-//     identifiers and labels are not price evidence.
+//     identifiers and labels are not price evidence;
+//   - the whole monetary prefix is part of the token: a leading separator
+//     (`.50`, `EUR ,50`) is an ambiguous leading decimal and never proves 50
+//     euro, and an explicit sign in front of the amount — also when a currency
+//     marker sits between sign and digits — makes it a signed/surcharge token,
+//     not a positive known price. Nothing is rounded or turned into 50 cents.
 // Anything ambiguous is not evidence, so the validator reports
 // `price_evidence_missing`; nothing is rounded, adjusted or replaced.
 const CURRENCY_BEFORE = /(?:€|\bEUR|\beuro)\s*$/i;
 const PRICE_SUFFIX = /^[\s-]*(?:€|\bEUR\b|\beuro\b|p\.?\s*p\.?(?![A-Za-z])|pp\b|per\s+pers(?:oon|on)\b)/i;
 const NON_PRICE_UNIT_AFTER = /^[\s-]*(?:personen|persoon|pers\.?|stuks?|stuk|st\.?|gram|gr\.?|kg|kilo(?:gram)?|ml|cl|dl|liter|l|el|tl|eetlepel|theelepel|jaar|jaren|maand(?:en)?|mnd\.?|weken?|dagen?|uren?|uur|minuten?|min\.?|seconden?|sec\.?|gangen|gang|keer|x|%|procent)(?![A-Za-z])/i;
 const NON_PRICE_PREFIX = /(?:#|\bnr\.?|\bno\.?|\bnummer|\bcode|\btafel|\bkamer|\bmaat|\bsize|\bartikel|\bpostcode|\bhuisnummer|\bpagina|\bpag\.?|\bpage|\bjaargang|\boogst|\banno|\buit)\s*$/i;
+// A sign is not a price prefix to strip: it changes the meaning of the amount.
+// Minus-like signs can be negative, a plus commonly marks a surcharge.
+const MONETARY_SIGNS = ['-', '−', '–', '—', '+'];
+const CURRENCY_WORDS = ['euro', 'eur'];
 
 function toMinorUnits(whole, fraction) {
   const cents = `${fraction}00`.slice(0, 2);
@@ -230,6 +239,63 @@ function isPricePosition(quote, raw, start, end) {
   return true;
 }
 
+/**
+ * Length of a currency word immediately ending at `end`, or 0. The word must
+ * start at a word boundary so "TEUR 13,00" is not read as "EUR 13,00".
+ */
+function currencyWordLengthBefore(quote, end) {
+  for (const word of CURRENCY_WORDS) {
+    const start = end - word.length;
+    if (start < 0) continue;
+    if (quote.slice(start, end).toLowerCase() !== word) continue;
+    if (start > 0 && /[A-Za-z0-9_]/.test(quote[start - 1])) continue;
+    return word.length;
+  }
+  return 0;
+}
+
+/**
+ * Reads the monetary prefix that belongs to a numeric run: whitespace, currency
+ * markers and an optional sign, in any order. The result is only usable when
+ * the token is unsigned and unambiguous:
+ *   - any sign makes the token signed/surcharge-like and therefore no evidence
+ *     for a non-negative known price;
+ *   - a separator in the prefix (`.50`, `EUR ,50`, also with whitespace) is an
+ *     ambiguous leading decimal, never a whole-euro amount;
+ *   - more than one sign is ambiguous.
+ * The walk stops at the first character that cannot belong to the monetary
+ * prefix, so ordinary words before the amount are not part of the token.
+ */
+function readMonetaryPrefix(quote, start) {
+  let index = start;
+  let signs = 0;
+  let ambiguous = false;
+  while (index > 0) {
+    const char = quote[index - 1];
+    if (/\s/.test(char)) {
+      index -= 1;
+      continue;
+    }
+    if (MONETARY_SIGNS.includes(char)) {
+      signs += 1;
+      index -= 1;
+      continue;
+    }
+    if (char === '€') {
+      index -= 1;
+      continue;
+    }
+    const currencyLength = currencyWordLengthBefore(quote, index);
+    if (currencyLength > 0) {
+      index -= currencyLength;
+      continue;
+    }
+    if (char === '.' || char === ',') ambiguous = true;
+    break;
+  }
+  return { signed: signs > 0, ambiguous: ambiguous || signs > 1 };
+}
+
 /** True only when `quote` itself contains the claimed amount as a full token. */
 function quoteContainsAmount(quote, amountMinorUnits) {
   if (typeof quote !== 'string' || !isNonNegativeInteger(amountMinorUnits)) return false;
@@ -238,6 +304,8 @@ function quoteContainsAmount(quote, amountMinorUnits) {
   while ((match = numericRun.exec(quote)) !== null) {
     const start = match.index;
     const end = start + match[0].length;
+    const prefix = readMonetaryPrefix(quote, start);
+    if (prefix.signed || prefix.ambiguous) continue;
     if (!isPricePosition(quote, match[0], start, end)) continue;
     if (parseAmountToken(match[0]) === amountMinorUnits) return true;
   }

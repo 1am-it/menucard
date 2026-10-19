@@ -114,6 +114,23 @@ function mapped() {
   return result.value;
 }
 
+function itemOutput(item) {
+  return {
+    menus: [
+      {
+        title: 'Fictief Diner',
+        sourceId: 'src-1',
+        variant: 'DINNER',
+        order: 1,
+        categories: [
+          { name: 'Voorgerechten', path: ['DINNER', 'VOOR'], items: [item] },
+        ],
+      },
+    ],
+    coverage: { status: 'complete', sourcesRead: 1, pagesRead: 1, itemsExtracted: 1, unreadSources: [], limitations: [] },
+  };
+}
+
 test('v1 maps to complete v2 objects with variants, from-prices, supplements and explicit unknowns', () => {
   const value = mapped();
   assert.equal(value.schemaVersion, 'menu-extraction-product/v2');
@@ -319,6 +336,99 @@ test('the reviewed one-item complete 13,50 quote cannot prove a 13,00 primary pr
   const result = mapV1ToProductV2(output, sources);
   assert.equal(result.ok, false);
   assert.equal(result.reason, 'price_evidence_missing');
+  assert.equal(result.preservedInput, output);
+});
+
+test('v1 to v2 refuses a whole-euro 50,00 claim proven only by a leading decimal', () => {
+  const sources = [{ id: 'src-1', text: 'Fictief gerecht EUR .50 | Fictief gerecht EUR ,50' }];
+  for (const quote of ['Fictief gerecht EUR .50', 'Fictief gerecht EUR ,50']) {
+    const output = itemOutput({
+      name: 'Fictief gerecht',
+      priceStatus: 'known',
+      amountMinorUnits: 5000,
+      currency: 'EUR',
+      priceText: '.50',
+      evidence: evidence(quote),
+    });
+    const result = mapV1ToProductV2(output, sources);
+    assert.equal(result.ok, false, quote);
+    assert.equal(result.reason, 'price_evidence_missing', quote);
+    assert.ok(result.blockers.some((blocker) => blocker.path === 'menus[0].categories[0].items[0].price.evidence'), quote);
+    assert.equal(result.preservedInput, output, quote);
+  }
+});
+
+test('v1 to v2 refuses signed prices and a signed glass variant while unsigned amounts keep working', () => {
+  const sources = [{
+    id: 'src-1',
+    text: 'Fictief gerecht - EUR 13,50 | Fictief gerecht -€ 13,50 | Fictieve wijn - € 6,50 / 25,00 | Fictieve wijn 6,50 / 25,00',
+  }];
+  for (const quote of ['Fictief gerecht - EUR 13,50', 'Fictief gerecht -€ 13,50']) {
+    const output = itemOutput({
+      name: 'Fictief gerecht',
+      priceStatus: 'known',
+      amountMinorUnits: 1350,
+      currency: 'EUR',
+      priceText: quote.slice(-5),
+      evidence: evidence(quote),
+    });
+    const result = mapV1ToProductV2(output, sources);
+    assert.equal(result.ok, false, quote);
+    assert.equal(result.reason, 'price_evidence_missing', quote);
+    assert.ok(result.blockers.some((blocker) => blocker.path === 'menus[0].categories[0].items[0].price.evidence'), quote);
+    assert.equal(result.preservedInput, output, quote);
+  }
+
+  const signedWine = itemOutput({
+    name: 'Fictieve wijn',
+    priceStatus: 'multiple_undecomposed',
+    priceText: '- € 6,50 / 25,00',
+    priceVariants: [
+      { label: 'Glas', amountMinorUnits: 650, currency: 'EUR' },
+      { label: 'Fles', amountMinorUnits: 2500, currency: 'EUR' },
+    ],
+    evidence: evidence('Fictieve wijn - € 6,50 / 25,00'),
+  });
+  const refused = mapV1ToProductV2(signedWine, sources);
+  assert.equal(refused.ok, false);
+  assert.equal(refused.reason, 'price_evidence_missing');
+  assert.ok(refused.blockers.some((blocker) => blocker.path === 'menus[0].categories[0].items[0].priceVariants[0].evidence'));
+  assert.equal(refused.preservedInput, signedWine);
+
+  const unsignedWine = itemOutput({
+    name: 'Fictieve wijn',
+    priceStatus: 'multiple_undecomposed',
+    priceText: '6,50 / 25,00',
+    priceVariants: [
+      { label: 'Glas', amountMinorUnits: 650, currency: 'EUR' },
+      { label: 'Fles', amountMinorUnits: 2500, currency: 'EUR' },
+    ],
+    evidence: evidence('Fictieve wijn 6,50 / 25,00'),
+  });
+  const accepted = mapV1ToProductV2(unsignedWine, sources);
+  assert.equal(accepted.ok, true, JSON.stringify(accepted.problems));
+  assert.deepEqual(
+    accepted.value.menus[0].categories[0].items[0].priceVariants.map((variant) => [variant.label, variant.amountMinorUnits]),
+    [['Glas', 650], ['Fles', 2500]],
+  );
+});
+
+test('v1 to v2 refuses a glass amount proven only by a leading decimal', () => {
+  const sources = [{ id: 'src-1', text: 'Fictieve wijn EUR .50 / 25,00' }];
+  const output = itemOutput({
+    name: 'Fictieve wijn',
+    priceStatus: 'multiple_undecomposed',
+    priceText: 'EUR .50 / 25,00',
+    priceVariants: [
+      { label: 'Glas', amountMinorUnits: 5000, currency: 'EUR' },
+      { label: 'Fles', amountMinorUnits: 2500, currency: 'EUR' },
+    ],
+    evidence: evidence('Fictieve wijn EUR .50 / 25,00'),
+  });
+  const result = mapV1ToProductV2(output, sources);
+  assert.equal(result.ok, false);
+  assert.equal(result.reason, 'price_evidence_missing');
+  assert.ok(result.blockers.some((blocker) => blocker.path === 'menus[0].categories[0].items[0].priceVariants[0].evidence'));
   assert.equal(result.preservedInput, output);
 });
 
