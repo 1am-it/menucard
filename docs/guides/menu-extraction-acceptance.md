@@ -1,9 +1,11 @@
 # Menu-extractie - acceptatie en testbewijs
 
-Status: acceptatievoorwaarden voor GitHub #59, herzien 2026-10-18. Afgesplitst
+Status: acceptatievoorwaarden voor GitHub #59, bijgewerkt 2026-10-19. Afgesplitst
 uit MENU-EXTRACTION.md v0.1. Dit document scheidt vereiste tests van het
 daadwerkelijk uitgevoerde bewijs. Read-only bronproeven zijn uitgevoerd; echte
-provideractivering en volledige productacceptatie zijn dat niet.
+provideractivering en volledige productacceptatie zijn dat niet. De actuele
+afrondingsmatrix staat in
+[menu-extraction-acceptance-matrix.md](menu-extraction-acceptance-matrix.md).
 
 [Extractie-instructie](../../MENU-EXTRACTION.md) |
 [Implementatieafspraken](menu-extraction-implementation.md) |
@@ -18,6 +20,19 @@ provideractivering en volledige productacceptatie zijn dat niet.
 > `ops/benchmark/menu-extraction-acceptance-set.json`. De actuele matrix staat
 > in [menu-extraction-acceptance-matrix.md](menu-extraction-acceptance-matrix.md);
 > oudere secties hieronder blijven als historie staan.
+
+> **Afrondingsronde 2026-10-19.** De actuele acceptatiematrix staat in
+> [menu-extraction-acceptance-matrix.md](menu-extraction-acceptance-matrix.md)
+> en is gemeten op codehead `5a7f99ac0f822f6471c948ae017641d4d1925b19`:
+> 88 gerichte tests, 2062/2062 volledige suite, browserfixture 99/99 op
+> dezelfde head, Smelt 37/37 en Blossem 43/43 met identieke byte-/contenthash,
+> De Botanist v1 124/11/4/0 bij 215 items, Mr Moos 247 items in 3 menu's,
+> Colonia 84 items in 16 secties en Gauchos Breda HTTP 404. Geen provider,
+> geen echte opslag, geen #56-merge. De status blijft ontwikkelaarsbewijs;
+> onafhankelijke review en de resterende beslissingen staan in de matrix.
+> De hieronder staande 95/46/5-notitie is een eerdere referentievariant en
+> geen actuele status; de actuele v1 is 124/11/4/0 op 141 rijen bij 215
+> parseritems en 87 niet-gekoppelde items.
 
 > **Herstelronde 2026-10-18 (review #6248407225).** De fixture-isolatie is
 > fail-closed gemaakt (fetch, XHR, WebSocket, EventSource, sendBeacon,
@@ -37,7 +52,10 @@ provideractivering en volledige productacceptatie zijn dat niet.
 > Hersteld zijn een class-gebaseerd HTML-prijselement (Colonia 84 items), één
 > begrensd menuhubniveau (Mr Moos 247 items) en vier PDF-tekstlaagfouten. De
 > Botanist heeft een gecontroleerde layoutreferentie van 141 rijen: 95 matched,
-> 46 missing, 5 extra, 0 prijsverschil en 96 niet-gekoppelde items. Wijn- en
+> 46 missing, 5 extra, 0 prijsverschil en 96 niet-gekoppelde items. **Deze
+> 95/46/5 hoort bij de eerste referentievariant; de latere gecontroleerde v1 is
+> 124 matched / 11 missing / 4 extra / 0 prijsverschil op 141 rijen bij 215
+> parseritems en 87 niet-gekoppelde items (zie de actuele matrix).** Wijn- en
 > cocktailblokken blijven expliciet niet ondersteund. Zie
 > [menu-extraction-botanist-reference.md](menu-extraction-botanist-reference.md).
 
