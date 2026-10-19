@@ -1,9 +1,9 @@
 {
   "fixtureOnly": true,
   "passed": true,
-  "head": "d7e37fe8640c841efa0a18d5e85098f9007f68d7",
+  "head": "0f9ea9dd59c36b13b270cb140030466db11d6d8d",
   "worktreeDirty": true,
-  "generatedAt": "2026-10-19T19:43:19.627Z",
+  "generatedAt": "2026-10-19T19:50:47.292Z",
   "command": "npm run test:browser:menu-review",
   "environment": {
     "node": "v22.22.3",
@@ -632,7 +632,7 @@
     {
       "name": "network guard: CDP blocks external subresource and frame navigation",
       "passed": true,
-      "detail": "[{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/pixel.png\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-19T19:43:18.531Z\",\"resourceType\":\"Image\"},{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/frame\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-19T19:43:18.534Z\",\"resourceType\":\"Document\"}]"
+      "detail": "[{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/frame\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-19T19:50:46.343Z\",\"resourceType\":\"Document\"},{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/pixel.png\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-19T19:50:46.346Z\",\"resourceType\":\"Image\"}]"
     },
     {
       "name": "network guard: no unexpected CDP traffic during app scenarios",
@@ -669,7 +669,7 @@
     },
     {
       "file": "menu-review-readonly-1024-dark.png",
-      "sha256": "7df6ff9a35687ade2e1f7b34b2762b2b471174826d9485eee41ef22b4354bb32",
+      "sha256": "ac5d633e935c0f4bca5f3bafa006da6e6ef19841708d3e59934aabc21ed81fd1",
       "width": 1024,
       "height": 900
     },
@@ -681,7 +681,7 @@
     },
     {
       "file": "menu-review-partial-390-dark.png",
-      "sha256": "580ef1de88a3f79cdc8c1f7fdaa2ca4b3c75eaaa8f2e14abdbda2403ae6427a4",
+      "sha256": "8e3926efefb01ecc6c3bb8b77555d1eb35ca65288b76aad8bb7a16927ad370cf",
       "width": 390,
       "height": 900
     },
@@ -705,25 +705,25 @@
     },
     {
       "file": "menu-review-320-light.png",
-      "sha256": "79239894b8cd28d0d059df4301e55fd038da0b0e0c05779e75d715ad60ba385e",
+      "sha256": "813df208033a811475f713b4b3f6a3a91231f9bdbc489d4764d7a8f4d187f23f",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-320-dark.png",
-      "sha256": "86270dcef1edf2e2fa106704131c2767c270b96df94f667d0c932060b15f6c74",
+      "sha256": "9eab8a47b13ea7c04087a4fbaa4430679520053fd6db19947d780fe948752f47",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-390-light.png",
-      "sha256": "5ed477738847bdb4395173de7b7fe80f4a5be62c3327260d8a60ed3792b34f4f",
+      "sha256": "1c822f8ad37300f15bcd690e7dc4b84fddcf2cd79f3c302f3b2edd7bed9afad6",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-390-dark.png",
-      "sha256": "65c369368b3b33921ff3b8ea63dfed0239312a1fc638663cd12e0ee108b93e2b",
+      "sha256": "12611e35dfea7537946bac73b65a79e77ba9cd57ba8153733675821e4c027ba5",
       "width": 390,
       "height": 900
     },
@@ -735,7 +735,7 @@
     },
     {
       "file": "menu-review-keyboard-390-light.png",
-      "sha256": "36859ca2d4d7212810daa277af992d6465c810174e8d5aee8b904c3dfd6773eb",
+      "sha256": "705c6a45b8e7c74c74217e4d284ccb42bc5737514c19e89f315ce065fb1f4ab9",
       "width": 390,
       "height": 900
     }
@@ -748,21 +748,21 @@
         "phase": "negative-probe",
         "kind": "cdp_fetch",
         "method": "GET",
-        "url": "https://unapproved.invalid/pixel.png",
+        "url": "https://unapproved.invalid/frame",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-19T19:43:18.531Z",
-        "resourceType": "Image"
+        "at": "2026-10-19T19:50:46.343Z",
+        "resourceType": "Document"
       },
       {
         "phase": "negative-probe",
         "kind": "cdp_fetch",
         "method": "GET",
-        "url": "https://unapproved.invalid/frame",
+        "url": "https://unapproved.invalid/pixel.png",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-19T19:43:18.534Z",
-        "resourceType": "Document"
+        "at": "2026-10-19T19:50:46.346Z",
+        "resourceType": "Image"
       }
     ],
     "pageViolations": [
@@ -773,7 +773,7 @@
         "url": "https://unapproved.invalid/api/anything",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-19T19:43:18.505Z"
+        "at": "2026-10-19T19:50:46.309Z"
       },
       {
         "phase": "negative-probe",
@@ -782,7 +782,7 @@
         "url": "http://unapproved.invalid/api/anything",
         "reason": "external_origin",
         "protocolRelative": true,
-        "at": "2026-10-19T19:43:18.506Z"
+        "at": "2026-10-19T19:50:46.311Z"
       },
       {
         "phase": "negative-probe",
@@ -791,7 +791,7 @@
         "url": "http://localhost:3137/api/internal/v1/menu-concepts",
         "reason": "unknown_api_route",
         "protocolRelative": false,
-        "at": "2026-10-19T19:43:18.506Z"
+        "at": "2026-10-19T19:50:46.311Z"
       },
       {
         "phase": "negative-probe",
@@ -800,7 +800,7 @@
         "url": "http://localhost:3137/api/internal/v1/menu-concepts",
         "reason": "unknown_api_route",
         "protocolRelative": false,
-        "at": "2026-10-19T19:43:18.507Z"
+        "at": "2026-10-19T19:50:46.312Z"
       },
       {
         "phase": "negative-probe",
@@ -809,7 +809,7 @@
         "url": "ws://unapproved.invalid/socket",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-19T19:43:18.507Z"
+        "at": "2026-10-19T19:50:46.312Z"
       }
     ]
   },
