@@ -5,6 +5,12 @@
 // current concept cannot store losslessly is rejected by the caller before this
 // function is used (see unsupportedProductFields); a price that has no known
 // amount stays null and becomes an explicit review blocker downstream.
+//
+// This is a v1-only reader. A v2 (or any unknown) envelope must never be
+// silently reinterpreted as v1: it is rejected with a concrete error so the
+// caller can keep the raw row and use a compatible reader.
+
+const { MENU_PRODUCT_SCHEMA_VERSION, LEGACY_OUTPUT_SCHEMA_VERSION } = require('./menuProductSchemaV2');
 
 function bounded(value, max) {
   return typeof value === 'string' && value.trim() ? value.trim().slice(0, max) : null;
@@ -30,6 +36,10 @@ function mapItem(item, sourceUrl, menuSourceId) {
 }
 
 function mapStructuredOutputToMenuContexts(output, sources) {
+  if (output && output.schemaVersion !== undefined && output.schemaVersion !== LEGACY_OUTPUT_SCHEMA_VERSION) {
+    const version = output.schemaVersion === MENU_PRODUCT_SCHEMA_VERSION ? MENU_PRODUCT_SCHEMA_VERSION : String(output.schemaVersion);
+    throw new Error(`unsupported_schema_version: ${version} requires a compatible reader`);
+  }
   const sourceById = new Map((Array.isArray(sources) ? sources : []).map((source) => [source.id, source]));
   return (Array.isArray(output && output.menus) ? output.menus : []).map((menu, index) => {
     const source = sourceById.get(menu.sourceId) || null;
