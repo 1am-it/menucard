@@ -122,10 +122,10 @@ Geen migratie, backfill, RLS- of RPC-wijziging is toegepast.
    (`priceVariants`/`allergenStatus`) of blijvend blokkeren (Product Owner).
 3. De v2-writeflag, een versiebewuste `url_intakes`-RPC, eventuele latere
    normalisatie/migratie en het exportcontract (Product Owner + Delivery Lead).
-   De read-only dual-read is op `db09ff2` gebouwd; de writer is dat niet.
+   De read-only dual-read is op `d7e37fe` gebouwd; de writer is dat niet.
 4. Een nieuwe ongeziene holdout en de toegang daarvoor (Product Owner).
 5. Een echte geïsoleerde preview-/schrijfronde: bron → v2-receipt → concept →
    authenticated browser, met expliciete schrijfautorisatie (Product Owner/ops).
-6. Onafhankelijke review van codehead `db09ff2` en deze documentatie (Delivery
+6. Onafhankelijke review van codehead `d7e37fe` en deze documentatie (Delivery
    Lead).
 
