@@ -33,10 +33,15 @@ test('the generic snapshot route validates before hashing or inserting; the revi
   assert.doesNotMatch(handler, /\.update\(|\.delete\(|menus\.json|analyzeSourceUrl/);
 });
 
-test('url-intakes refuses a v2 receipt before the redemption RPC', () => {
-  const route = code('app/api/internal/v1/url-intakes/route.js');
-  before(route, 'readReceiptProduct(receiptRow.candidate_summary)', "supabase.rpc('create_url_intake_from_receipt'", 'url-intakes');
-  assert.doesNotMatch(route, /candidate_summary\.menus|menuExtractionV2\s*=/);
+test('url-intakes and profile-drafts refuse a v2 receipt before the redemption RPC', () => {
+  for (const [file, rpc] of [
+    ['app/api/internal/v1/url-intakes/route.js', "supabase.rpc('create_url_intake_from_receipt'"],
+    ['app/api/internal/v1/profile-drafts/route.js', "supabase.rpc('create_url_intake_from_receipt'"],
+  ]) {
+    const route = code(file);
+    before(route, 'readReceiptProduct(', rpc, file);
+    assert.doesNotMatch(route, /candidate_summary\.menus|menuExtractionV2\s*=/);
+  }
 });
 
 test('review, export and batch handlers guard before every side effect', () => {
@@ -50,6 +55,13 @@ test('review, export and batch handlers guard before every side effect', () => {
   before(exportHandler, "productActionRefusal('export'", 'github.', 'export');
   const batch = code('src/lib/batchAnalysisHandlers.js');
   before(batch, 'productActionRefusal(\'save\'', 'createConceptVersion(', 'batch concept save');
+});
+
+test('the v1 intake proposal route never turns an empty or v2-shaped context into a snapshot', () => {
+  const route = code('app/api/internal/v1/url-intakes/[id]/menu-proposals/route.js');
+  before(route, 'categories.length === 0', 'validateSnapshotProposalInput(', 'intake proposal');
+  assert.match(route, /const capturedContent = \{ categories \}/);
+  assert.doesNotMatch(route, /menu\.categories \|\| \[\]\s*\}\s*\n\s*const validation/);
 });
 
 test('the v1 concept reader is guarded and never flattens a versioned envelope', () => {
