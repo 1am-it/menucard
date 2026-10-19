@@ -109,23 +109,36 @@ productcontract. Dit ontwerp is de voorgestelde brug; het is geen goedkeuring.
 }
 ```
 
-### Prijsbewijs per bedrag (aanvulling review 6248407225)
+### Prijsbewijs per bedrag (aanvullingen review 6248407225 en 6273510672)
 
 Een itemquote is niet genoeg voor een prijs. Voor iedere `price` met status
 `known`/`from` en voor iedere `priceVariants[]` geldt:
 
 1. `evidence.sourceId`, `evidence.locator` en `evidence.quote` zijn verplicht;
-2. de quote bevat het gezaghebbende bedrag in de brontaal (bijvoorbeeld
-   `6,50`, `€ 6,50` of `Glas 6,50`) of het expliciete bronlabel plus bedrag;
-3. een quote die alleen de gerechtnaam, alleen een beschrijving of alleen een
-   ander bedrag bevat, levert `price_evidence_missing` op;
-4. de validator past geen `amountMinorUnits` aan op basis van een andere quote
+2. de quote bevat het gezaghebbende bedrag als één volledig monetair token,
+   bijvoorbeeld `13`, `13,00`, `€ 1.250,00`, `13,00 euro` of `Glas 6,50`;
+3. het integerdeel van een ander bedrag is nooit bewijs. `13,00` wordt niet
+   bewezen door `13,50`, `13.50`, `13,5`, `13,50,00`, `113` of `113,00`;
+4. decimale komma en punt zijn beide geldig. Een punt met groepen van drie
+   cijfers is Nederlandse duizendnotatie (`1.250,00`, `1.250`); gemengde
+   notaties zijn alleen eenduidig wanneer de rechter scheiding decimaal is
+   (`1.250,00`, `1,250.00`). Een enkele komma met drie cijfers (`13,000`) is
+   ambigu en wordt geweigerd. Er wordt niets afgerond;
+5. een getal is alleen prijsbewijs in prijscontext: een valutateken of
+   prijssuffix ernaast (`€`, `EUR`, `euro`, `p.p.`, `per persoon`), of een
+   zelfstandig bedrag. Een kaal jaartal 1900-2099 zonder valutateken,
+   hoeveelheden met een eenheid (`4 personen`, `13 gangen`, `13 gram`) en
+   labels (`nr. 13`, `pagina 13`) zijn geen prijsbewijs;
+6. een quote die alleen de gerechtnaam, alleen een beschrijving of alleen een
+   ander bedrag bevat, levert `price_evidence_missing` op. Bij ambiguïteit
+   weigert de validator dus in plaats van een ander bedrag te kiezen;
+7. de validator past geen `amountMinorUnits` aan op basis van een andere quote
    en kiest nooit de laagste of eerste prijs als vervanging;
-5. een variant zonder eigen bewijs blijft zichtbaar als onzeker en blokkeert
+8. een variant zonder eigen bewijs blijft zichtbaar als onzeker en blokkeert
    export, maar verdwijnt niet stil.
 
-Deze regel is ontwerp, geen implementatie. Er is geen validator, DDL of
-exportpad toegevoegd.
+Deze regels zijn geïmplementeerd in de pure laag en met fictieve fixtures
+getest. Er is geen validator, DDL of exportpad aan een route gekoppeld.
 
 ### Gesloten veldregels
 

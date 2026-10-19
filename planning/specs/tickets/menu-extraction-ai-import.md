@@ -102,6 +102,9 @@ Geen publieke API/MCP, CITY-0/bulkuitbreiding, restauranteditor, automatisch pub
   gebouwd; echte provideractivering en live bron-/browseracceptatie resteren.
   Review 6249303096 is technisch hersteld en met regressies plus de volledige
   suite/build bewezen; de onafhankelijke herreview resteert.
+  Review 6273510672 (volledig monetair token) is op codehead `5e3e3a5`
+  hersteld; 47 gerichte v2-tests en 2105/2105 volledige suite zijn groen.
+  De Delivery Lead-herreview van deze reparatie resteert.
 - [ ] Praktijk-/browseracceptatie en onafhankelijke review — fixturebewijs is
   opgeslagen; live previewtoegang en de Delivery Lead-review resteren.
 - [ ] Afzonderlijk goedgekeurde release.

@@ -13,6 +13,7 @@ door een bestaande route mag.
 | Onderdeel | Bestand | Aard |
 | --- | --- | --- |
 | Versiegebonden schema en validator | `src/lib/menuProductSchemaV2.js` | puur; geen I/O |
+| Volledig prijsbewijs per token | `src/lib/menuProductSchemaV2.js` (`quoteContainsAmount`) | puur; integerdeel, jaartal, hoeveelheid, label en ambigue notatie zijn geen bewijs |
 | Fail-closed lezer voor opgeslagen enveloppen | `src/lib/menuProductSchemaV2.js` (`readProductRecord`) | puur; bewaart de onbewerkte rij bij weigering |
 | v1 → v2-mapping | `src/lib/menuProductMappingV2.js` (`mapV1ToProductV2`) | puur; verliest geen naam/prijs/pad/volgorde/bewijs |
 | Verliesvrije v1-terugprojectie | `src/lib/menuProductMappingV2.js` (`projectProductV2ToV1`) | weigert met `unsupported_v1_projection` |
