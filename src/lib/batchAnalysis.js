@@ -17,6 +17,7 @@ const { canonicalizeSourceUrl } = require('./urlIntakes');
 const { hostOf, observeJob } = require('./sourceWorkqueue');
 const { summarizeRecognisedMenu } = require('./menuConcept');
 const { menusFromUnknownContexts } = require('./pdfMenuContext');
+const { readReceiptProjection, summarizeProductMenu } = require('./menuProductIntegrationV2');
 
 const MAX_BATCH_URLS = 10;
 const DAILY_URL_LIMIT = 25;
@@ -201,8 +202,12 @@ function deriveItemView({ item, job, receipt, restaurants, proposals, duplicateO
   // the same menu shape instead of showing "Geen herkende gerechten" beside a
   // "Menukaart gevonden" badge (the Smelt mismatch).
   const fallbackMenus = job && job.status === 'succeeded' ? menusFromUnknownContexts(job.unknown_menu_contexts) : [];
-  const reviewMenus = receipt && Array.isArray(receipt.menus) && receipt.menus.length > 0 ? receipt.menus : fallbackMenus;
-  const recognisedMenu = job && job.status === 'succeeded' && reviewMenus.length > 0 ? summarizeRecognisedMenu(reviewMenus) : null;
+  const receiptProduct = readReceiptProjection(receipt);
+  const productBlocked = receiptProduct.kind !== 'v1';
+  const reviewMenus = !productBlocked && receipt && Array.isArray(receipt.menus) && receipt.menus.length > 0 ? receipt.menus : (productBlocked ? [] : fallbackMenus);
+  const recognisedMenu = productBlocked
+    ? summarizeProductMenu(receiptProduct.view)
+    : job && job.status === 'succeeded' && reviewMenus.length > 0 ? summarizeRecognisedMenu(reviewMenus) : null;
   const extraction = job && job.extraction_result && typeof job.extraction_result === 'object' ? job.extraction_result : null;
   const base = {
     position: item.item_position,
@@ -213,6 +218,12 @@ function deriveItemView({ item, job, receipt, restaurants, proposals, duplicateO
     high: false,
     notes,
     menu: recognisedMenu && recognisedMenu.itemCount > 0 ? recognisedMenu : null,
+    // A versioned envelope is shown through the same bounded, sanitized view
+    // as the review page; its legacy `menus` projection is never displayed.
+    product: productBlocked ? receiptProduct.view : null,
+    productBlocked,
+    productReason: productBlocked ? receiptProduct.reason : null,
+    productSchemaVersion: productBlocked ? receiptProduct.schemaVersion || null : null,
     coverage: extraction && extraction.coverage ? extraction.coverage : null,
     limitations: job && Array.isArray(job.limitations) ? job.limitations.filter((n) => typeof n === 'string').slice(0, 10) : [],
     attentionGroups: extraction && Array.isArray(extraction.attentionGroups) ? extraction.attentionGroups : [],

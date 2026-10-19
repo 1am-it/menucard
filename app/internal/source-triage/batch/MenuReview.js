@@ -60,6 +60,205 @@ export function plural(n, one, many) {
   return `${n} ${n === 1 ? one : many}`
 }
 
+const PRODUCT_KIND_LABELS = {
+  dish: 'Gerecht',
+  choice: 'Keuze',
+  supplement: 'Supplement',
+  arrangement: 'Arrangement',
+  beverage: 'Drank',
+  unknown: 'Soort onbekend',
+  section: 'Rubriek',
+  choice_group: 'Keuzegroep',
+};
+
+const PRODUCT_PRICE_LABELS = {
+  multiple_undecomposed: 'Meerdere prijzen',
+  on_request: 'Prijs op aanvraag',
+  unknown: 'Prijs onbekend',
+};
+
+function productPriceText(price) {
+  if (!price) return 'Prijs onbekend';
+  if (price.status === 'known' || price.status === 'from') {
+    const amount = price.display || (price.text ? price.text : null);
+    if (amount) return price.isFrom ? `Vanaf ${amount}` : amount;
+    return 'Prijs onbekend';
+  }
+  if (price.text) return price.text;
+  return PRODUCT_PRICE_LABELS[price.status] || 'Prijs onbekend';
+}
+
+/**
+ * Read-only, version-faithful rendering of a validated menu-extraction v2
+ * view: variants, nested sections, multiple/glass/bottle prices, supplements,
+ * explicit or unknown allergens, and source evidence. Source text is rendered
+ * as plain React text, never as HTML or an instruction.
+ */
+export function ProductReview({ product }) {
+  if (!product) return null;
+  const coverage = product.coverage || {};
+  return (
+    <div className="bta-product" aria-label="Menukaart v2, alleen-lezen">
+      <div className="di-banner di-banner-neutral" role="status">
+        <span className="di-banner-icon">
+          <StatusIcon name="warning" />
+        </span>
+        <span>
+          <strong>Alleen-lezen.</strong> {product.blockers.map((blocker) => blocker.label).join(' ')}
+        </span>
+      </div>
+      <ul className="bta-chips" aria-label="Aantallen in deze kaart">
+        <li className="bta-chip">{plural(product.counts.items, 'item', 'items')}</li>
+        <li className="bta-chip">{plural(product.counts.categories, 'rubriek', 'rubrieken')}</li>
+        {product.counts.priceVariants > 0 && <li className="bta-chip">{plural(product.counts.priceVariants, 'prijsvariant', 'prijsvarianten')}</li>}
+        {product.counts.supplements > 0 && <li className="bta-chip">{plural(product.counts.supplements, 'supplement', 'supplementen')}</li>}
+      </ul>
+
+      {product.notes.length > 0 && (
+        <ul className="bta-notes" aria-label="Aandachtspunten in deze kaart">
+          {product.notes.map((note) => (
+            <li key={`${note.code}-${note.label}`}>
+              {note.name ? <strong>{note.name}</strong> : null}
+              {note.name ? ' · ' : null}
+              {note.label}
+            </li>
+          ))}
+        </ul>
+      )}
+      {product.menus.map((menu) => (
+        <section key={menu.id} className="bta-product-menu" aria-label={menu.title || 'Menukaart'}>
+          <h3 className="bta-concept-title">{menu.title || 'Naamloze menukaart'}</h3>
+          {(menu.variant.label || menu.variant.sourceLabel) && (
+            <p className="bta-muted">
+              Variant: {menu.variant.label || 'onbekend'}
+              {menu.variant.sourceLabel && menu.variant.sourceLabel !== menu.variant.label ? ` · bronlabel: ${menu.variant.sourceLabel}` : ''}
+              {menu.variant.locale ? ` · taal: ${menu.variant.locale}` : ''}
+              {menu.variant.location ? ` · vestiging: ${menu.variant.location}` : ''}
+            </p>
+          )}
+          {menu.categories.map((category) => (
+            <details key={category.id} className="bta-category">
+              <summary>
+                <span className="bta-category-name">{category.name || 'Zonder rubriek'}</span>
+                <span className="bta-muted"> · {plural(category.items.length, 'item', 'items')}</span>
+                {category.kind !== 'section' && (
+                  <span className="status-badge status-badge--neutral bta-badge bta-inline-badge">
+                    <span>{PRODUCT_KIND_LABELS[category.kind] || category.kind}</span>
+                  </span>
+                )}
+                {category.uncertain && (
+                  <span className="status-badge status-badge--neutral bta-badge bta-inline-badge">
+                    <StatusIcon name="warning" />
+                    <span>Rubriekindeling onzeker</span>
+                  </span>
+                )}
+              </summary>
+              {category.path.length > 1 && <p className="bta-source-route">Pad: {formatPath(category.path)}</p>}
+              {category.sourcePath.length > 0 && <p className="bta-source-route">Bronroute: {formatPath(category.sourcePath)}</p>}
+              {category.choice && (
+                <p className="bta-muted">
+                  Keuzegroep{category.choice.count !== null ? ` · ${category.choice.count} keuzes` : ''}
+                  {category.choice.min !== null || category.choice.max !== null ? ` (min ${category.choice.min ?? '?'}, max ${category.choice.max ?? '?'})` : ''}
+                </p>
+              )}
+              <ul className="bta-dishes">
+                {category.items.map((item) => (
+                  <li key={item.id} className="bta-product-item">
+                    <div>
+                      <span className="bta-dish">{item.name || 'Naam ontbreekt'}</span>{' '}
+                      <span className="bta-muted">· {PRODUCT_KIND_LABELS[item.kind] || item.kind}</span>
+                    </div>
+                    {item.description && <p className="bta-muted">{item.description}</p>}
+                    <span className={item.price.status === 'known' || item.price.status === 'from' ? 'bta-price' : 'bta-price bta-price--missing'}>
+                      {productPriceText(item.price)}
+                    </span>
+                    {item.priceVariants.length > 0 && (
+                      <ul className="bta-notes" aria-label={`Prijsvarianten van ${item.name || 'dit item'}`}>
+                        {item.priceVariants.map((variant) => (
+                          <li key={variant.id}>
+                            {variant.label || PRODUCT_KIND_LABELS[variant.kind] || 'Variant'}: {variant.display || variant.text || 'onbekend'}
+                            {variant.isSupplement ? ' · supplement' : ''}
+                            {variant.perPerson ? ' · per persoon' : ''}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {item.supplementOf && (
+                      <p className="bta-muted">
+                        {item.supplementOf.status === 'resolved'
+                          ? `Supplement bij item ${item.supplementOf.itemId}.`
+                          : `Supplement${item.supplementOf.label ? `: ${item.supplementOf.label}` : ''}; doel niet vastgelegd (context ${item.supplementOf.context.menuId || '?'} / ${item.supplementOf.context.categoryId || '?'}). ${item.supplementOf.limitation || ''}`}
+                      </p>
+                    )}
+                    <p className="bta-muted">
+                      {item.allergens.status === 'explicit'
+                        ? `Allergenen: ${item.allergens.codes.join(', ') || 'geen code vermeld'}`
+                        : 'Allergenen onbekend (geen bronvermelding)'}
+                      {item.dietaryLabels.length > 0 ? ` · ${item.dietaryLabels.join(', ')}` : ''}
+                    </p>
+                    {item.evidence && (
+                      <details className="bta-evidence">
+                        <summary>Bronbewijs</summary>
+                        <p className="bta-muted">
+                          {item.evidence.sourceId || 'bron onbekend'} · {item.evidence.locator || 'vindplaats onbekend'}
+                        </p>
+                        {item.evidence.quote && <p className="bta-quote">{item.evidence.quote}</p>}
+                      </details>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </details>
+          ))}
+        </section>
+      ))}
+
+      <details className="bta-category">
+        <summary>
+          <span className="bta-category-name">Dekking</span>
+          <span className="bta-muted"> · {coverage.status || 'onbekend'} · {plural(coverage.itemsExtracted || 0, 'item', 'items')}</span>
+        </summary>
+        <p className="bta-muted">
+          {plural(coverage.sourcesRead || 0, 'bron gelezen', 'bronnen gelezen')} · {plural(coverage.pagesRead || 0, 'pagina', "pagina's")}
+        </p>
+        {coverage.unreadSources.length > 0 && (
+          <ul className="bta-notes" aria-label="Niet-gelezen bronnen">
+            {coverage.unreadSources.map((source, index) => (
+              <li key={`${source.sourceId}-${source.locator}-${index}`}>
+                {source.sourceId || 'bron onbekend'} · {source.locator || 'vindplaats onbekend'} · {source.reason || 'reden onbekend'}
+              </li>
+            ))}
+          </ul>
+        )}
+        {coverage.limitations.length > 0 && (
+          <ul className="bta-notes" aria-label="Beperkingen">
+            {coverage.limitations.map((limitation) => (
+              <li key={limitation}>{limitation}</li>
+            ))}
+          </ul>
+        )}
+      </details>
+
+      {product.rejected.length > 0 && (
+        <details className="bta-category">
+          <summary>
+            <span className="bta-category-name">Niet opgenomen regels</span>
+            <span className="bta-muted"> · {product.rejected.length}</span>
+          </summary>
+          <ul className="bta-notes">
+            {product.rejected.map((row, index) => (
+              <li key={`${row.sourceId}-${row.locator}-${index}`}>
+                {row.text || 'Geen tekst'} · {row.reason} · {row.sourceId || 'bron onbekend'} / {row.locator || 'vindplaats onbekend'}
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+
+    </div>
+  );
+}
+
 function coverageText(coverage) {
   if (!coverage) return null
   if (coverage.status === 'candidate_without_items') {
@@ -89,6 +288,20 @@ export function MenuControl({ item }) {
       </div>
 
       {coverage && <p className="bta-muted">{coverage}</p>}
+
+      {item.productBlocked && !item.product && (
+        <div className="di-banner di-banner-neutral" role="status">
+          <span className="di-banner-icon">
+            <StatusIcon name="warning" />
+          </span>
+          <span>
+            <strong>Alleen-lezen.</strong> Deze analyse bevat een versiegebonden kaart die niet als v1 kan worden gelezen
+            {item.productReason ? ` (${item.productReason}).` : '.'} Opslaan, bevestigen en exporteren zijn geblokkeerd.
+          </span>
+        </div>
+      )}
+
+      {item.product && <ProductReview product={item.product} />}
 
       {item.attentionGroups && item.attentionGroups.length > 0 && (
         <div className="bta-attention" role="group" aria-label="Gedeelde onzekerheid">
@@ -461,7 +674,34 @@ function UncertainGroups({ lines, readOnly, onAcceptGroup }) {
 
 export function MenuConcept({ item, readOnly, busy, onSave }) {
   const { edits, touched, setLineEdit, decideRemoved } = useConceptEdits()
-  const concept = useMemo(() => buildMenuConcept({ menus: item.concept.menus, liveLines: item.concept.liveLines, edits }), [item.concept, edits])
+  const productBlocked = item.concept.productBlocked === true
+  const concept = useMemo(
+    () => (productBlocked ? null : buildMenuConcept({ menus: item.concept.menus, liveLines: item.concept.liveLines, edits })),
+    [item.concept, edits, productBlocked]
+  )
+  if (productBlocked) {
+    return (
+      <section className="bta-concept" aria-labelledby={`bta-concept-${item.jobId}`}>
+        <h3 id={`bta-concept-${item.jobId}`} className="bta-concept-title">
+          Menuconcept · intern
+        </h3>
+        <div className="di-banner di-banner-neutral" role="status">
+          <span className="di-banner-icon">
+            <StatusIcon name="warning" />
+          </span>
+          <span>
+            <strong>Alleen-lezen.</strong> Deze kaart is versiegebonden (v2) en kan in deze ronde niet als v1-concept worden
+            opgeslagen, goedgekeurd of geëxporteerd.
+          </span>
+        </div>
+        <p className="bta-muted">
+          De volledige, versiegetrouwe kaart staat bij <strong>Menukaart controleren</strong> hierboven
+          {item.concept.product ? ` (${item.concept.product.counts.items} items, ${item.concept.product.counts.priceVariants} prijsvarianten).` : '.'}
+          {!item.concept.product && item.concept.productReason ? ` Reden: ${item.concept.productReason}.` : ''}
+        </p>
+      </section>
+    )
+  }
   const { editorLines, safe, excluded, categories } = conceptParts(concept, touched)
   const latest = item.concept.latest
 

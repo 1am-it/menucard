@@ -1,9 +1,9 @@
 {
   "fixtureOnly": true,
   "passed": true,
-  "head": "5a7f99ac0f822f6471c948ae017641d4d1925b19",
-  "worktreeDirty": false,
-  "generatedAt": "2026-10-19T16:49:19.612Z",
+  "head": "6fb54cad76dd4f2b7996667777d82c0db5789b04",
+  "worktreeDirty": true,
+  "generatedAt": "2026-10-19T19:30:25.545Z",
   "command": "npm run test:browser:menu-review",
   "environment": {
     "node": "v22.22.3",
@@ -20,6 +20,7 @@
     "readonly",
     "empty",
     "partial",
+    "v2",
     "error"
   ],
   "checks": [
@@ -235,6 +236,146 @@
     },
     {
       "name": "partial: no horizontal overflow at 390 px",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=v2&batch=batch-fictief-0001&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=v2&batch=batch-fictief-0001&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "v2 1024px/light: the real review control is present",
+      "passed": true,
+      "detail": "true/false"
+    },
+    {
+      "name": "v2 1024px/light: \"Menukaart controleren\" is a real button",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "v2 1024px/light: the versioned menu becomes readable",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "v2 1024px/light: glass and bottle prices stay separate",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "v2 1024px/light: no invented primary price is shown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "v2 1024px/light: supplement relation and limitation stay visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "v2 1024px/light: unknown allergens stay unknown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "v2 1024px/light: structural validity is not source verification",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "v2 1024px/light: coverage limitation is visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "v2 1024px/light: v2 is read-only, without a save or approve action",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "v2 1024px/light: requested theme is active",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "v2 1024px/light: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=-6"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=v2&batch=batch-fictief-0001&theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=v2&batch=batch-fictief-0001&theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "v2 390px/dark: the real review control is present",
+      "passed": true,
+      "detail": "true/false"
+    },
+    {
+      "name": "v2 390px/dark: \"Menukaart controleren\" is a real button",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "v2 390px/dark: the versioned menu becomes readable",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "v2 390px/dark: glass and bottle prices stay separate",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "v2 390px/dark: no invented primary price is shown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "v2 390px/dark: supplement relation and limitation stay visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "v2 390px/dark: unknown allergens stay unknown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "v2 390px/dark: structural validity is not source verification",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "v2 390px/dark: coverage limitation is visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "v2 390px/dark: v2 is read-only, without a save or approve action",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "v2 390px/dark: requested theme is active",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "v2 390px/dark: no horizontal overflow",
       "passed": true,
       "detail": "overflow=0"
     },
@@ -491,7 +632,7 @@
     {
       "name": "network guard: CDP blocks external subresource and frame navigation",
       "passed": true,
-      "detail": "[{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/pixel.png\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-19T16:49:18.724Z\",\"resourceType\":\"Image\"},{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/frame\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-19T16:49:18.726Z\",\"resourceType\":\"Document\"}]"
+      "detail": "[{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/pixel.png\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-19T19:30:24.653Z\",\"resourceType\":\"Image\"},{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/frame\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-19T19:30:24.654Z\",\"resourceType\":\"Document\"}]"
     },
     {
       "name": "network guard: no unexpected CDP traffic during app scenarios",
@@ -528,7 +669,7 @@
     },
     {
       "file": "menu-review-readonly-1024-dark.png",
-      "sha256": "88b946f42d62eb6112941498cb6ca318a7036a709ad041d7bef8b74027f0b969",
+      "sha256": "887fe97fb6d800361b87814cba0a7d503000fdf967a4f92e0ca99923241b8999",
       "width": 1024,
       "height": 900
     },
@@ -540,7 +681,19 @@
     },
     {
       "file": "menu-review-partial-390-dark.png",
-      "sha256": "0809b16268a6ac50bd6126b78dcc8d1712beae23665601cf5f1c62efc7d167b1",
+      "sha256": "da6cb65e84a4e5ff5f3331477e5a49aada8b058787a80339c4b46412422e6436",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "menu-review-v2-1024-light.png",
+      "sha256": "38d7a4d151d700eee8e10883b6d89546df90af16421dda64b37d7e934ed12440",
+      "width": 1024,
+      "height": 900
+    },
+    {
+      "file": "menu-review-v2-390-dark.png",
+      "sha256": "b1195ad65edb1686c42bf80bc63ecd5362194390ab454daaeaf778953cdd8219",
       "width": 390,
       "height": 900
     },
@@ -552,13 +705,13 @@
     },
     {
       "file": "menu-review-320-light.png",
-      "sha256": "d72fbd8e8bfab09b4ca17f759f969244e95bab831f76fd87d470c30b1ff0855c",
+      "sha256": "1c640f19602232a71d3f91adc1e7b9c62457d6a12095b0a5f986a54de879b732",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-320-dark.png",
-      "sha256": "568c5c55d4b8e159812659bb65c8172746bb70dc641b7a863481b9785245dad7",
+      "sha256": "3eee553004e727916f77aa1041c00c29924a9161b45b3352571881bda3bc1cea",
       "width": 320,
       "height": 900
     },
@@ -570,19 +723,19 @@
     },
     {
       "file": "menu-review-390-dark.png",
-      "sha256": "4fd74cf3f5897b725ee5a6e42e66dbdacefa90600fa4dc2c7b3d6209bc8e98be",
+      "sha256": "f711a41e5ed0b01f0d6cfe793711c0bc32f6efbfa8827da36818bf1b84fca134",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-1024-dark.png",
-      "sha256": "5dbfeae6526bdc09cb027ce1c4b55c96c5a2f14907cadad6385f985658bc3eac",
+      "sha256": "40c621dd700020bd93a3aef41b1f083d5f9b940f3f7290022ca2e7937d2498fe",
       "width": 1024,
       "height": 900
     },
     {
       "file": "menu-review-keyboard-390-light.png",
-      "sha256": "7a71a70762876fc0ae246b6ddc9ce71b5034b68600527ca63d333ac03c1cd94c",
+      "sha256": "63f430e137cf821ef595bbc68dd4451d1e477e04d1bfa7307bffc57a9256ff2d",
       "width": 390,
       "height": 900
     }
@@ -598,7 +751,7 @@
         "url": "https://unapproved.invalid/pixel.png",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-19T16:49:18.724Z",
+        "at": "2026-10-19T19:30:24.653Z",
         "resourceType": "Image"
       },
       {
@@ -608,7 +761,7 @@
         "url": "https://unapproved.invalid/frame",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-19T16:49:18.726Z",
+        "at": "2026-10-19T19:30:24.654Z",
         "resourceType": "Document"
       }
     ],
@@ -620,7 +773,7 @@
         "url": "https://unapproved.invalid/api/anything",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-19T16:49:18.703Z"
+        "at": "2026-10-19T19:30:24.633Z"
       },
       {
         "phase": "negative-probe",
@@ -629,7 +782,7 @@
         "url": "http://unapproved.invalid/api/anything",
         "reason": "external_origin",
         "protocolRelative": true,
-        "at": "2026-10-19T16:49:18.704Z"
+        "at": "2026-10-19T19:30:24.634Z"
       },
       {
         "phase": "negative-probe",
@@ -638,7 +791,7 @@
         "url": "http://localhost:3137/api/internal/v1/menu-concepts",
         "reason": "unknown_api_route",
         "protocolRelative": false,
-        "at": "2026-10-19T16:49:18.704Z"
+        "at": "2026-10-19T19:30:24.634Z"
       },
       {
         "phase": "negative-probe",
@@ -647,7 +800,7 @@
         "url": "http://localhost:3137/api/internal/v1/menu-concepts",
         "reason": "unknown_api_route",
         "protocolRelative": false,
-        "at": "2026-10-19T16:49:18.704Z"
+        "at": "2026-10-19T19:30:24.634Z"
       },
       {
         "phase": "negative-probe",
@@ -656,7 +809,7 @@
         "url": "ws://unapproved.invalid/socket",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-19T16:49:18.705Z"
+        "at": "2026-10-19T19:30:24.634Z"
       }
     ]
   },

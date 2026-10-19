@@ -227,8 +227,13 @@ test('structural safety net: only "internal" may create a proposal, only "editor
 
   const reviewsSource = fs.readFileSync(REVIEWS_ROUTE_PATH, 'utf8');
   const postReviews = reviewsSource.slice(reviewsSource.indexOf('export async function POST'));
-  assert.match(postReviews, /isEditor\(auth\.roles\)/);
+  // The route delegates to the testable handler; the editor-only rule lives
+  // there and is still the only role accepted for a review decision.
+  assert.match(postReviews, /handlers\.record\(request, id\)/);
   assert.doesNotMatch(postReviews, /isInternalOnly\(auth\.roles\)/);
+  const reviewsHandler = fs.readFileSync(path.join(REPO_ROOT, 'src/lib/menuSnapshotReviewHandlers.js'), 'utf8');
+  assert.match(reviewsHandler, /isEditor\(auth\.roles\)/);
+  assert.doesNotMatch(reviewsHandler, /isInternalOnly/);
 });
 
 test('structural safety net: neither BE-17 route ever calls .update( or .delete( on either table, and content_hash is never accepted from the request body', () => {

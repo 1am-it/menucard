@@ -20,6 +20,7 @@
 // returns a derived status or a validation result.
 
 const { isValidHttpUrl } = require('./importInbox')
+const { isUnsupportedConceptEnvelope } = require('./menuProductIntegrationV2')
 
 /**
  * Picks the single latest row from one snapshot's full review
@@ -121,6 +122,11 @@ function validateSnapshotProposalInput({ restaurantId, menuContext, sourceUrl, s
   if (capturedContent === null || capturedContent === undefined || typeof capturedContent !== 'object') {
     return { valid: false, reason: 'invalid-captured-content' }
   }
+  // v2 writes are off in this round. A versioned product envelope, or an
+  // unversioned v2-shaped menu array, must never be stored as a v1 concept.
+  if (isUnsupportedConceptEnvelope(capturedContent)) {
+    return { valid: false, reason: 'unsupported-product-schema' }
+  }
 
   return {
     valid: true,
@@ -140,6 +146,7 @@ function snapshotProposalValidationMessage(reason) {
   if (reason === 'invalid-source-type') return `source_type must be one of: ${ALLOWED_SOURCE_TYPES.join(', ')}.`
   if (reason === 'invalid-quality-score') return `quality_score must be one of: ${ALLOWED_QUALITY_SCORES.join(', ')}.`
   if (reason === 'invalid-captured-content') return 'captured_content must be a JSON object or array.'
+  if (reason === 'unsupported-product-schema') return 'captured_content must be legacy v1 concept content; a versioned product envelope cannot be stored through this route.'
   return 'Invalid request.'
 }
 

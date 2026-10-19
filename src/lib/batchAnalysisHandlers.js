@@ -31,6 +31,7 @@ const {
 const { liveMenuLines, buildMenuConcept, sanitizeEdits } = require('./menuConcept');
 const { createConceptVersion } = require('./menuConceptStore');
 const { menusFromUnknownContexts } = require('./pdfMenuContext');
+const { readReceiptProjection, productActionRefusal } = require('./menuProductIntegrationV2');
 
 // One internal menu concept per restaurant: BE-17 snapshot proposals in
 // the context "<restaurantId>-menukaart", versioned.
@@ -43,7 +44,7 @@ const RECENT_BATCH_LIMIT = 10;
 const BATCH_COLUMNS = 'id, actor_user_id, created_at, last_activity_at, closed_at, close_reason, item_count';
 const JOB_COLUMNS =
   'id, status, error_reason, attempt_count, next_attempt_at, lease_expires_at, expired_at, finished_at, created_at, updated_at, result_receipt_id, unknown_menu_contexts:field_evidence->unknown_menu_contexts, menu_source_urls:field_evidence->menu_source_urls, notes:field_evidence->notes, source_inventory:field_evidence->source_inventory, limitations:field_evidence->limitations, extraction_result:field_evidence->extraction_result, protocol:field_evidence->protocol';
-const RECEIPT_COLUMNS = 'id, restaurant_match_type, matched_restaurant_id, created_at, menus:candidate_summary->menus';
+const RECEIPT_COLUMNS = 'id, restaurant_match_type, matched_restaurant_id, created_at, menus:candidate_summary->menus, product:candidate_summary->menuExtractionV2';
 const CONFIRM_NOTE = 'Bevestigd vanuit Batchanalyse na menselijke controle.';
 
 // Display time for result texts ("Bevestigd om 13:20"), in the market's time zone.
@@ -170,13 +171,21 @@ function createBatchAnalysisHandlers(deps) {
       const receipt = job && job.result_receipt_id ? receiptById.get(job.result_receipt_id) || null : null;
       const latest = concepts.find((c) => c.restaurant_id === view.restaurant.id) || null;
       const receiptMenus = (receipt && Array.isArray(receipt.menus) && receipt.menus) || [];
+      // A v2 receipt is authoritative over the legacy `menus` projection. Its
+      // validated view is sent; the old projection is not used for a concept.
+      const receiptProduct = readReceiptProjection(receipt);
+      const productBlocked = receiptProduct.kind !== 'v1';
       // Receipt is authoritative; a job-only PDF result (older records or a
       // job whose receipt predates PDF promotion) is converted through the
       // same canonical helper, never through a second interpretation.
       const fallbackMenus = menusFromUnknownContexts(job && job.unknown_menu_contexts);
       view.concept = {
         receiptId: receipt ? receipt.id : null,
-        menus: receiptMenus.length > 0 ? receiptMenus : fallbackMenus,
+        menus: productBlocked ? [] : (receiptMenus.length > 0 ? receiptMenus : fallbackMenus),
+        product: productBlocked ? receiptProduct.view : null,
+        productBlocked,
+        productReason: productBlocked ? receiptProduct.reason : null,
+        productSchemaVersion: productBlocked ? receiptProduct.schemaVersion || null : null,
         liveLines: liveMenuLines(liveMenus, view.restaurant.id),
         latest: latest ? { version: latest.version, created_at: latest.created_at } : null,
       };
@@ -553,6 +562,13 @@ function createBatchAnalysisHandlers(deps) {
     // Only after a human "Bevestig bron" for a known restaurant.
     if (!item || item.key !== 'confirmed' || !item.restaurant || !item.concept || !item.foundUrl) {
       return reply(409, { error: 'Een concept kan pas na een bevestigde bron van een bekend restaurant.', reason: 'not_confirmed' });
+    }
+    if (item.concept.productBlocked) {
+      return productActionRefusal('save', {
+        reason: item.concept.productReason || 'product_v2_read_only',
+        schemaVersion: item.concept.productSchemaVersion || null,
+        problems: [],
+      });
     }
     const concept = buildMenuConcept({ menus: item.concept.menus, liveLines: item.concept.liveLines, edits });
     if (!concept.canSave) {

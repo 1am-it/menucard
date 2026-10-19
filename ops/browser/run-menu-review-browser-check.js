@@ -204,6 +204,50 @@ async function partialScenario(cdp) {
   screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'menu-review-partial-390-dark.png'));
 }
 
+async function v2Scenario(cdp) {
+  for (const [width, theme] of [[1024, 'light'], [390, 'dark']]) {
+    await setViewport(cdp, width, 900);
+    await openRoute(cdp, `${BATCH_URL}?fixture=v2&${BATCH_QUERY}&theme=${theme}`, `document.body.innerText.includes('Fictief Brasserie Noord')`);
+    const controlReady = await waitFor(cdp, `[...document.querySelectorAll('button')].some((b) => (b.innerText || '').includes('Menukaart controleren'))`, 15000);
+    const alreadyOpen = await evalJs(cdp, `document.body.innerText.includes('Controle sluiten')`);
+    check(`v2 ${width}px/${theme}: the real review control is present`, controlReady || alreadyOpen === true, `${controlReady}/${alreadyOpen}`);
+    if (controlReady) {
+      const clicked = await clickButton(cdp, 'Menukaart controleren');
+      check(`v2 ${width}px/${theme}: "Menukaart controleren" is a real button`, clicked === true, clicked);
+    }
+    const expanded = await waitFor(cdp, `document.body.innerText.includes('Fictieve wijn')`, 15000);
+    check(`v2 ${width}px/${theme}: the versioned menu becomes readable`, expanded);
+    await evalJs(cdp, `(() => {
+      for (const summary of document.querySelectorAll('details.bta-category > summary')) {
+        if (!summary.parentElement.open) summary.click();
+      }
+      return true;
+    })()`);
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    const snapshot = await evalJs(cdp, `(() => {
+      const text = document.body.innerText;
+      return {
+        text,
+        buttons: [...document.querySelectorAll('button')].map((b) => (b.innerText || '').trim()),
+        overflow: document.documentElement.scrollWidth - window.innerWidth,
+        theme: document.documentElement.getAttribute('data-theme'),
+      };
+    })()`);
+    const text = snapshot.text;
+    check(`v2 ${width}px/${theme}: glass and bottle prices stay separate`, text.includes('Glas: € 6,50') && text.includes('Fles: € 25,00'));
+    check(`v2 ${width}px/${theme}: no invented primary price is shown`, !text.includes('Vanaf €') && !text.includes('€ 0,00'));
+    check(`v2 ${width}px/${theme}: supplement relation and limitation stay visible`, text.includes('Supplement') && text.includes('doel niet vastgelegd') && text.includes('Geen expliciet doelitem'));
+    check(`v2 ${width}px/${theme}: unknown allergens stay unknown`, text.includes('Allergenen onbekend') && !text.includes('allergeenvrij'));
+    check(`v2 ${width}px/${theme}: structural validity is not source verification`, text.includes('niet bronbevestigd'));
+    check(`v2 ${width}px/${theme}: coverage limitation is visible`, text.includes('Fictieve v2-beperking'));
+    check(`v2 ${width}px/${theme}: v2 is read-only, without a save or approve action`, !snapshot.buttons.some((b) => b.includes('Concept opslaan') || b.includes('Concept goedkeuren')) && text.includes('Alleen-lezen'));
+    check(`v2 ${width}px/${theme}: requested theme is active`, snapshot.theme === theme, snapshot.theme);
+    check(`v2 ${width}px/${theme}: no horizontal overflow`, snapshot.overflow <= 0, `overflow=${snapshot.overflow}`);
+    screenshotFiles.push(await screenshot(cdp, OUT_DIR, `menu-review-v2-${width}-${theme}.png`));
+  }
+}
+
+
 async function errorScenario(cdp) {
   await setViewport(cdp, 390, 900);
   await openRoute(cdp, `${BATCH_URL}?fixture=error&theme=light`, `document.body.innerText.includes('De batchanalyse kon niet worden geladen.')`);
@@ -398,6 +442,7 @@ async function main() {
     await readOnlyScenario(cdp);
     await emptyScenario(cdp);
     await partialScenario(cdp);
+    await v2Scenario(cdp);
     await errorScenario(cdp);
     for (const width of [320, 390]) {
       for (const theme of ['light', 'dark']) await responsiveScenario(cdp, width, theme);

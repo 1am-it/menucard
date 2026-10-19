@@ -375,7 +375,7 @@ test('after a re-analysis the URL is a fresh queued job, not "Recent geanalyseer
 const FOUND = 'https://www.bistro-fictief-voorbeeld.nl/menukaart';
 const CONCEPT_MENUS = [{ categories: [{ name: 'Koud', items: [{ name: 'Fictieve soep', price: '7.50' }, { name: 'Fictieve salade', price: '12.50' }, { name: 'Fictief tartaar', price: null }] }] }];
 
-function conceptFixture({ actor = STARTER, existing = [], menus = CONCEPT_MENUS } = {}) {
+function conceptFixture({ actor = STARTER, existing = [], menus = CONCEPT_MENUS, receiptProduct = null } = {}) {
   // A confirmed source (accepted BE-24 proposal for the found URL) with a recognised menu.
   return fakeSupabase({
     tables: {
@@ -383,7 +383,7 @@ function conceptFixture({ actor = STARTER, existing = [], menus = CONCEPT_MENUS 
       url_intake_batches: [{ id: BATCH, market_id: 'm1', actor_user_id: actor, created_at: '2026-10-10T11:00:00Z', closed_at: '2026-10-10T11:10:00Z', close_reason: 'completed', item_count: 1 }],
       url_intake_batch_items: [{ batch_id: BATCH, item_position: 1, canonical_source_url: 'https://www.bistro-fictief-voorbeeld.nl/', outcome: 'queued', job_id: JOB, reused_job_id: null }],
       restaurant_source_analysis_jobs: [{ id: JOB, status: 'succeeded', attempt_count: 1, finished_at: '2026-10-10T11:05:00Z', result_receipt_id: 'r1', unknown_menu_contexts: [], menu_source_urls: [FOUND], actor_user_id: actor, batch_id: BATCH, created_at: '2026-10-10T11:00:00Z' }],
-      url_intake_analysis_receipts: [{ id: 'r1', restaurant_match_type: 'exact', matched_restaurant_id: 'bistro', menus }],
+      url_intake_analysis_receipts: [{ id: 'r1', restaurant_match_type: 'exact', matched_restaurant_id: 'bistro', menus, product: receiptProduct }],
       source_triage_proposals: [{ id: 'p1', restaurant_id: 'bistro', proposed_url: FOUND, status: 'accepted', decided_at: '2026-10-10T11:20:00Z' }],
       menu_snapshot_proposals: existing,
     },
@@ -497,4 +497,67 @@ test('concept: only the starter, only for a confirmed known source', async () =>
   assert.equal(notConfirmed.status, 409);
   assert.equal(notConfirmed.body.reason, 'not_confirmed');
   assert.equal((await makeHandlers({ supabase: conceptFixture() }).handlers.saveConcept(request({ job_id: 'nope' }), BATCH)).status, 400);
+});
+
+function v2ProductFixture() {
+  return {
+    schemaVersion: 'menu-extraction-product/v2',
+    menus: [{
+      id: 'menu-1',
+      title: 'Fictief Diner',
+      sourceId: 'src-1',
+      variant: { id: 'variant-1', label: 'Diner', sourceLabel: 'DINNER', locale: null, location: null, order: 1 },
+      categories: [{
+        id: 'cat-1',
+        name: 'Koud',
+        path: ['Diner', 'Koud'],
+        sourcePath: ['DINNER', 'KOUD'],
+        kind: 'section',
+        choice: null,
+        uncertain: false,
+        items: [{
+          id: 'item-1',
+          kind: 'dish',
+          name: 'Fictieve soep',
+          description: null,
+          price: { status: 'known', amountMinorUnits: 750, currency: 'EUR', text: null, isFrom: false, evidence: { sourceId: 'src-1', locator: 'regel 1', quote: 'Fictieve soep 7,50' } },
+          priceVariants: [],
+          primaryPriceRef: null,
+          supplementOf: null,
+          choiceGroupRef: null,
+          allergens: { status: 'unknown', codes: [], sourceText: null, sourceTextStatus: 'unknown' },
+          dietaryLabels: [],
+          availability: null,
+          evidence: { sourceId: 'src-1', locator: 'regel 1', quote: 'Fictieve soep 7,50' },
+          origins: { name: 'extracted', description: 'unknown', price: 'extracted', allergens: 'unknown', supplementOf: 'unknown', availability: 'unknown', kind: 'unknown' },
+        }],
+      }],
+    }],
+    rejected: [],
+    coverage: { status: 'partial', sourcesRead: 1, pagesRead: 1, itemsExtracted: 1, unreadSources: [], limitations: ['Fictieve beperking.'] },
+  };
+}
+
+test('overview: a v2 receipt shows the versioned view and never the older v1 menus projection', async () => {
+  const supabase = conceptFixture({ menus: [{ categories: [{ name: 'Verouderd', items: [{ name: 'Oude projectie', price: '1.00' }] }] }], receiptProduct: v2ProductFixture() });
+  const res = await makeHandlers({ supabase, liveMenus: LIVE_BISTRO }).handlers.getOverview(request(), BATCH);
+  const item = res.body.detail.items[0];
+  assert.equal(item.productBlocked, true);
+  assert.equal(item.product.schemaVersion, 'menu-extraction-product/v2');
+  assert.equal(item.product.counts.items, 1);
+  assert.equal(item.menu.itemCount, 1);
+  assert.equal(item.menu.supplementCount, 0);
+  assert.deepEqual(item.concept.menus, []);
+  assert.equal(item.concept.productBlocked, true);
+  assert.equal(item.concept.product.schemaVersion, 'menu-extraction-product/v2');
+});
+
+test('concept: a v2 receipt is refused before any version, hash or insert', async () => {
+  const supabase = conceptFixture({ receiptProduct: v2ProductFixture() });
+  const res = await makeHandlers({ supabase, liveMenus: LIVE_BISTRO }).handlers.saveConcept(request({ job_id: JOB, edits: {} }), BATCH);
+  assert.equal(res.status, 409);
+  assert.equal(res.body.reason, 'product_v2_read_only');
+  assert.deepEqual(res.body.blockedActions, ['save', 'confirm', 'export', 'publish']);
+  assert.equal(supabase.calls.filter((c) => c.insert).length, 0);
+  assert.equal(supabase.calls.filter((c) => c.rpc).length, 0);
 });

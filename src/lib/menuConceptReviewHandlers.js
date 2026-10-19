@@ -25,6 +25,12 @@ const { liveMenuLines, recognisedLines, buildMenuConcept, storedConceptInput, sa
 const { loadLineage, wasRejectedBefore, createConceptVersion } = require('./menuConceptStore');
 const { exportForSnapshot, exportMenuEntry } = require('./menuConceptExport');
 const { menuKeyFor, restaurantMenuEntries } = require('./menuExport');
+const {
+  readConceptProduct,
+  readReceiptProjection,
+  productActionRefusal,
+  PRODUCT_READ_ONLY_MESSAGE,
+} = require('./menuProductIntegrationV2');
 
 const FORBIDDEN = 'Alleen interne medewerkers kunnen menuconcepten beoordelen.';
 const LOAD_ERROR = 'De menuconcepten konden niet worden geladen.';
@@ -51,9 +57,11 @@ function restaurantName(restaurants, id) {
 }
 
 function conceptSummary(captured, liveLines) {
+  const product = readConceptProduct(captured);
+  if (product.kind !== 'v1') return { concept: null, input: null, product };
   const input = storedConceptInput(captured);
   const concept = buildMenuConcept({ menus: input.menus, liveLines, edits: input.edits });
-  return { concept, input };
+  return { concept, input, product };
 }
 
 /**
@@ -119,17 +127,27 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
     if (!receiptId) return { receipt: null };
     const { data, error } = await supabase
       .from('url_intake_analysis_receipts')
-      .select('id, canonical_source_url, fetched_at, menus:candidate_summary->menus')
+      // The versioned envelope is read explicitly next to the legacy
+      // projection, so a v2 receipt is never validated from `menus` alone.
+      .select('id, canonical_source_url, fetched_at, menus:candidate_summary->menus, product:candidate_summary->menuExtractionV2')
       .eq('id', receiptId)
       .maybeSingle();
-    return { receipt: data || null, error };
+    const receipt = data ? { ...data, productInfo: readReceiptProjection(data) } : null;
+    return { receipt, error };
   }
 
-  function previewFor(snapshot) {
+  function receiptBlock(receipt) {
+    if (!receipt || !receipt.productInfo || receipt.productInfo.kind === 'v1') return null;
+    return { ...receipt.productInfo, reason: 'receipt_product_v2_authoritative' };
+  }
+
+  function previewFor(snapshot, blocked) {
+    const current = Object.entries(restaurantMenuEntries(liveMenus, snapshot.restaurant_id)).map(([key, entry]) => ({ key, entry }));
+    if (blocked) return { concept: null, current, blocked: blocked.reason, blockers: blocked.blockers || [] };
     const { entry } = exportMenuEntry({ snapshot, menus: liveMenus });
     return {
       concept: entry ? { key: menuKeyFor(snapshot.restaurant_id), entry } : null,
-      current: Object.entries(restaurantMenuEntries(liveMenus, snapshot.restaurant_id)).map(([key, entry]) => ({ key, entry })),
+      current,
     };
   }
 
@@ -140,7 +158,7 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
     const supabase = getSupabase();
     const { data: rows, error } = await supabase
       .from('menu_snapshot_proposals')
-      .select('id, restaurant_id, menu_context, version, source_url, created_at, created_by, captured_content')
+      .select('id, restaurant_id, menu_context, version, source_url, created_at, created_by, captured_content, origin_receipt_id')
       .order('created_at', { ascending: false })
       .limit(LIST_LIMIT);
     if (error) return reply(500, { error: LOAD_ERROR });
@@ -152,6 +170,19 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
       if (!seen || row.version > seen.version) latestByLineage.set(key, row);
     }
     const latest = [...latestByLineage.values()];
+    let receipts = [];
+    if (latest.length > 0) {
+      const ids = [...new Set(latest.map((r) => r.origin_receipt_id).filter(Boolean))];
+      if (ids.length > 0) {
+        const { data: receiptRows, error: receiptError } = await supabase
+          .from('url_intake_analysis_receipts')
+          .select('id, product:candidate_summary->menuExtractionV2')
+          .in('id', ids);
+        if (receiptError) return reply(500, { error: LOAD_ERROR });
+        receipts = receiptRows || [];
+      }
+    }
+    const productByReceipt = new Map(receipts.map((r) => [r.id, readReceiptProjection(r)]));
     let reviews = [];
     if (latest.length > 0) {
       const { data, error: reviewError } = await supabase.from('menu_snapshot_reviews').select('id, snapshot_id, decided_at, decision').in('snapshot_id', latest.map((r) => r.id));
@@ -162,7 +193,23 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
     const order = { waiting: 0, approved: 1, rejected: 2 };
     const items = latest
       .map((row) => {
-        const { concept } = conceptSummary(row.captured_content, liveMenuLines(liveMenus, row.restaurant_id));
+        const summary = conceptSummary(row.captured_content, liveMenuLines(liveMenus, row.restaurant_id));
+        const productBlocked = summary.product && summary.product.kind !== 'v1';
+        const receiptProduct = row.origin_receipt_id ? productByReceipt.get(row.origin_receipt_id) : null;
+        const receiptBlocked = Boolean(receiptProduct && receiptProduct.kind !== 'v1');
+        const blocked = Boolean(productBlocked || receiptBlocked);
+        const productView = (productBlocked && summary.product.view) || (receiptBlocked && receiptProduct.view) || null;
+        const counts = blocked
+          ? {
+              dishCount: productView ? productView.counts.items : 0,
+              attentionCount: productView ? productView.notes.length : 0,
+              blockerCount: productView ? productView.blockers.length : 1,
+            }
+          : {
+              dishCount: summary.concept.lines.filter((l) => l.status !== 'excluded').length,
+              attentionCount: summary.concept.attentionLines.length + summary.concept.removed.length,
+              blockerCount: summary.concept.blockers.length,
+            };
         return {
           id: row.id,
           restaurantId: row.restaurant_id,
@@ -173,9 +220,14 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
           createdAt: row.created_at,
           createdBySelf: row.created_by === auth.userId,
           status: viewStatus(deriveEffectiveSnapshotStatus(bySnapshot[row.id] || [])),
-          dishCount: concept.lines.filter((l) => l.status !== 'excluded').length,
-          attentionCount: concept.attentionLines.length + concept.removed.length,
-          blockerCount: concept.blockers.length,
+          dishCount: counts.dishCount,
+          attentionCount: counts.attentionCount,
+          blockerCount: counts.blockerCount,
+          readOnly: blocked,
+          schemaVersion: productBlocked ? (summary.product.schemaVersion || null) : (receiptBlocked ? (receiptProduct.schemaVersion || null) : null),
+          blockedReason: blocked
+            ? (productBlocked ? summary.product.reason : 'receipt_product_v2_authoritative')
+            : null,
         };
       })
       .sort((a, b) => order[a.status] - order[b.status] || String(b.createdAt).localeCompare(String(a.createdAt)));
@@ -204,8 +256,21 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
     const exported = await exportForSnapshot(supabase, github, snapshot.id, now);
     if (exported.error) return reply(500, { error: LOAD_ERROR });
 
+    const summary = conceptSummary(snapshot.captured_content, liveMenuLines(liveMenus, snapshot.restaurant_id));
+    const productBlock = summary.product && summary.product.kind !== 'v1' ? summary.product : null;
+    const receiptBlockInfo = receiptBlock(receipt);
+    const block = productBlock
+      ? { ...productBlock, blockers: productBlock.view ? productBlock.view.blockers : [] }
+      : receiptBlockInfo
+        ? { ...receiptBlockInfo, blockers: receiptBlockInfo.view ? receiptBlockInfo.view.blockers : [] }
+        : null;
+    const productView = (productBlock && productBlock.view) || (receiptBlockInfo && receiptBlockInfo.view) || null;
+    const blocked = Boolean(block);
+
     const originLines = {};
-    for (const line of recognisedLines((receipt && receipt.menus) || [])) originLines[line.id] = { name: line.name, desc: line.desc, price: line.price, category: line.category };
+    if (!blocked) {
+      for (const line of recognisedLines((receipt && receipt.menus) || [])) originLines[line.id] = { name: line.name, desc: line.desc, price: line.price, category: line.category };
+    }
     const byId = new Map(lineage.versions.map((v) => [v.id, v]));
     return reply(200, {
       concept: {
@@ -222,9 +287,21 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
         createdBySelf: snapshot.created_by === auth.userId,
         originRecorded: Boolean(receipt),
         status: viewStatus(current.status),
-        rejectedBefore: wasRejectedBefore(lineage.versions, snapshot.captured_content, computeMenuHash, snapshot.id),
-        captured: snapshot.captured_content,
+        rejectedBefore: blocked ? false : wasRejectedBefore(lineage.versions, snapshot.captured_content, computeMenuHash, snapshot.id),
+        captured: blocked ? null : snapshot.captured_content,
+        readOnly: blocked,
+        schemaVersion: block ? block.schemaVersion || null : null,
+        blocked: block
+          ? {
+              reason: block.reason,
+              message: block.message || PRODUCT_READ_ONLY_MESSAGE,
+              problems: Array.isArray(block.problems) ? block.problems : [],
+              blockedActions: block.blockedActions || [],
+              blockers: block.blockers,
+            }
+          : null,
       },
+      product: productView,
       liveLines: liveMenuLines(liveMenus, snapshot.restaurant_id),
       originLines,
       source: { confirmed: source.confirmed, blocked: source.blocked },
@@ -242,7 +319,7 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
       // Publicatievoorbeeld: built on the server only. "concept" is exactly
       // the entry "Maak review-PR" would write; "current" is the restaurant's
       // unchanged published menus. Nothing is written or exported here.
-      preview: previewFor(snapshot),
+      preview: previewFor(snapshot, block),
       githubConfigured: Boolean(github),
     });
   }
@@ -259,6 +336,12 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
     const { snapshot, error } = await loadSnapshot(supabase, id);
     if (error) return reply(500, { error: 'Het concept kon niet worden opgeslagen.' });
     if (!snapshot) return reply(404, { error: 'Menuconcept niet gevonden.' });
+    const product = readConceptProduct(snapshot.captured_content);
+    if (product.kind !== 'v1') return productActionRefusal('save', product);
+    const receiptState = await loadReceipt(supabase, snapshot.origin_receipt_id);
+    if (receiptState.error) return reply(500, { error: 'Het concept kon niet worden opgeslagen.' });
+    const originBlock = receiptBlock(receiptState.receipt);
+    if (originBlock) return productActionRefusal('save', originBlock);
     const lineage = await loadLineage(supabase, { restaurantId: snapshot.restaurant_id, menuContext: snapshot.menu_context });
     if (lineage.error) return reply(500, { error: 'Het concept kon niet worden opgeslagen.' });
     if (snapshot.version !== body.expected_version || (lineage.versions[0] && lineage.versions[0].id !== snapshot.id)) {
@@ -307,6 +390,12 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
     const { snapshot, error } = await loadSnapshot(supabase, id);
     if (error) return reply(500, { error: 'Het besluit kon niet worden vastgelegd.' });
     if (!snapshot) return reply(404, { error: 'Menuconcept niet gevonden.' });
+    const product = readConceptProduct(snapshot.captured_content);
+    if (product.kind !== 'v1') return productActionRefusal('decide', product);
+    const receiptState = await loadReceipt(supabase, snapshot.origin_receipt_id);
+    if (receiptState.error) return reply(500, { error: 'Het besluit kon niet worden vastgelegd.' });
+    const originBlock = receiptBlock(receiptState.receipt);
+    if (originBlock) return productActionRefusal('decide', originBlock);
     const lineage = await loadLineage(supabase, { restaurantId: snapshot.restaurant_id, menuContext: snapshot.menu_context });
     if (lineage.error) return reply(500, { error: 'Het besluit kon niet worden vastgelegd.' });
     const latest = lineage.versions[0];
@@ -320,8 +409,7 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
       if (wasRejectedBefore(lineage.versions, snapshot.captured_content, computeMenuHash, snapshot.id)) {
         return reply(409, { error: 'Deze menukaart is eerder afgewezen.', reason: 'previously_rejected' });
       }
-      const { receipt, error: receiptError } = await loadReceipt(supabase, snapshot.origin_receipt_id);
-      if (receiptError) return reply(500, { error: 'Het besluit kon niet worden vastgelegd.' });
+      const { receipt } = receiptState;
       const source = await sourceStatus(supabase, { restaurantId: snapshot.restaurant_id, sourceUrl: snapshot.source_url, receiptUrl: receipt && receipt.canonical_source_url });
       if (source.error) return reply(500, { error: 'Het besluit kon niet worden vastgelegd.' });
       if (!source.confirmed) return reply(409, { error: 'De bron van dit concept is niet (meer) bevestigd.', reason: 'source_not_confirmed' });

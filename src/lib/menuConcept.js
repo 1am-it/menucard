@@ -16,6 +16,7 @@
 
 const { categoryPath, pathKey, formatPath } = require('./menuHierarchy');
 const { menuScopeOf } = require('./menuGroups');
+const { assertLegacyConceptContent } = require('./menuProductIntegrationV2');
 
 const UNCLEAR_CATEGORY_NAMES = new Set(['', 'menu', 'menukaart', 'kaart', 'categorie', 'overig', 'overige', 'diversen']);
 const MAX_CATEGORY_NAME = 60;
@@ -298,6 +299,9 @@ function mergeEdits(base, delta) {
  * with it — dishes accepted as they are and decisions on disappeared dishes.
  */
 function storedConceptInput(captured) {
+  // A versioned product envelope is not v1 concept content. Refuse here so no
+  // caller can flatten it by accident; routes show the concrete refusal.
+  assertLegacyConceptContent(captured);
   const source = captured && Array.isArray(captured.categories) ? captured.categories : [];
   const lines = {};
   const categories = source.map((category, c) => ({
