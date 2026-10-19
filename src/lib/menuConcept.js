@@ -16,7 +16,7 @@
 
 const { categoryPath, pathKey, formatPath } = require('./menuHierarchy');
 const { menuScopeOf } = require('./menuGroups');
-const { assertLegacyConceptContent } = require('./menuProductIntegrationV2');
+const { assertLegacyConceptContent } = require('./menuProductGuardsV2');
 
 const UNCLEAR_CATEGORY_NAMES = new Set(['', 'menu', 'menukaart', 'kaart', 'categorie', 'overig', 'overige', 'diversen']);
 const MAX_CATEGORY_NAME = 60;

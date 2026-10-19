@@ -55,7 +55,7 @@ test('review, export and batch handlers guard before every side effect', () => {
 test('the v1 concept reader is guarded and never flattens a versioned envelope', () => {
   const concept = code('src/lib/menuConcept.js');
   before(concept, 'assertLegacyConceptContent(captured)', 'captured.categories', 'storedConceptInput');
-  assert.match(concept, /require\('\.\/menuProductIntegrationV2'\)/);
+  assert.match(concept, /require\('\.\/menuProductGuardsV2'\)/);
 });
 
 test('UI renders the v2 view as text only and keeps the v1 click path', () => {

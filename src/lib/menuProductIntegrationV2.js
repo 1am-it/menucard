@@ -30,9 +30,13 @@ const {
   READER_BLOCKED_ACTIONS,
   readProductRecord,
 } = require('./menuProductSchemaV2');
+const {
+  CONCEPT_SCHEMA_KEY,
+  isUnsupportedConceptEnvelope,
+  UnsupportedProductSchemaError,
+} = require('./menuProductGuardsV2');
 
 const RECEIPT_PRODUCT_KEY = 'menuExtractionV2';
-const CONCEPT_SCHEMA_KEY = 'schemaVersion';
 
 const PRODUCT_READ_ONLY_MESSAGE = 'Deze menukaart gebruikt menu-extractieproduct v2. Weergeven is alleen-lezen: opslaan, bevestigen, goedkeuren en exporteren zijn in deze ronde geblokkeerd.';
 const RECEIPT_AUTHORITATIVE_MESSAGE = 'De oorspronkelijke analyse bevat een v2-envelope. Een oudere v1-projectie is daarnaast niet gezaghebbend; opslaan, goedkeuren en exporteren zijn geblokkeerd.';
@@ -433,26 +437,10 @@ function readConceptProduct(capturedContent) {
 }
 
 /**
- * The generic snapshot write path accepts only legacy v1 concept content. A
- * versioned envelope (or a v2-shaped `menus` array without a version) is
- * refused before any request validation can pass it to a hash or insert.
+ * The generic snapshot write path accepts only legacy v1 concept content. The
+ * shallow guard lives in `menuProductGuardsV2.js`; this enriched wrapper keeps
+ * the precise `v2`/`invalid` reason for the integration tests and callers.
  */
-function isUnsupportedConceptEnvelope(value) {
-  if (!isObject(value)) return false;
-  if (hasOwn(value, CONCEPT_SCHEMA_KEY)) return true;
-  return Array.isArray(value.menus) && !Array.isArray(value.categories);
-}
-
-class UnsupportedProductSchemaError extends Error {
-  constructor(message, productInfo) {
-    super(message);
-    this.name = 'UnsupportedProductSchemaError';
-    this.code = 'unsupported_product_schema';
-    this.productInfo = productInfo || null;
-  }
-}
-
-/** Guard for the existing v1 concept reader; never flattens or guesses. */
 function assertLegacyConceptContent(value) {
   if (!isUnsupportedConceptEnvelope(value)) return value;
   const info = hasOwn(value, CONCEPT_SCHEMA_KEY)

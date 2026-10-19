@@ -20,7 +20,7 @@
 // returns a derived status or a validation result.
 
 const { isValidHttpUrl } = require('./importInbox')
-const { isUnsupportedConceptEnvelope } = require('./menuProductIntegrationV2')
+const { isUnsupportedConceptEnvelope } = require('./menuProductGuardsV2')
 
 /**
  * Picks the single latest row from one snapshot's full review
