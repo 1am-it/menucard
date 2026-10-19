@@ -176,9 +176,9 @@ test('a future paid call cannot run without a budget reservation guard', async (
 
 test('advanced fields are reported as unsupported by the current concept, not silently flattened', () => {
   const advanced = {
-    menus: [{ ...valid.menus[0], categories: [{ ...valid.menus[0].categories[0], items: [{ ...valid.menus[0].categories[0].items[0], priceVariants: [{ label: 'Glas', amountMinorUnits: 350, currency: 'EUR' }], supplementOf: 'Basisgerecht', allergens: { status: 'explicit', values: ['melk'] } }] }] }],
+    menus: [{ ...valid.menus[0], categories: [{ ...valid.menus[0].categories[0], items: [{ ...valid.menus[0].categories[0].items[0], priceVariants: [{ label: 'Glas', amountMinorUnits: 350, currency: 'EUR' }, { label: 'Fles', amountMinorUnits: 2100, currency: 'EUR' }], isFrom: true, supplementOf: 'Basisgerecht', allergens: { status: 'explicit', values: ['melk'] } }] }] }],
   };
-  assert.deepEqual(unsupportedProductFields(advanced), ['priceVariants', 'supplementOf', 'allergens']);
+  assert.deepEqual(unsupportedProductFields(advanced), ['priceVariants', 'isFrom', 'supplementOf', 'allergens']);
 });
 function ledgerBudget(limit, costEurCents) {
   const state = { remaining: limit, reserved: 0, calls: [] }

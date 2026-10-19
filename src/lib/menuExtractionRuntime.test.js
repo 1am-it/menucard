@@ -78,6 +78,66 @@ test('INTEGRATION: protocol, source content, strict schema and validated result 
   assert.equal(concept.content.categories[0].items[0].evidence.sourceId, 'source-1');
 });
 
+test('REGRESSION: glass/bottle variants, supplements and allergens are refused, never flattened into a saveable concept', async () => {
+  const advanced = {
+    menus: [
+      {
+        ...output.menus[0],
+        categories: [
+          {
+            name: 'Wijn',
+            items: [
+              {
+                name: 'Fictieve wijn',
+                priceStatus: 'multiple_undecomposed',
+                amountMinorUnits: null,
+                currency: null,
+                priceVariants: [
+                  { label: 'Glas', amountMinorUnits: 350, currency: 'EUR' },
+                  { label: 'Fles', amountMinorUnits: 2100, currency: 'EUR' },
+                ],
+                supplementOf: 'Fictieve soep',
+                allergens: { status: 'explicit', values: ['sulfiet'] },
+                evidence: { sourceId: 'source-1', locator: 'body:1', quote: 'Fictieve soep 6.50' },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    rejected: [],
+    coverage: { status: 'complete', sourcesRead: 1, pagesRead: 1, itemsExtracted: 1, unreadSources: [], limitations: [] },
+  };
+  let called = 0;
+  const adapter = createStructuredExtractionAdapter({
+    provider: 'fake',
+    model: 'fixture',
+    call: async () => {
+      called += 1;
+      return advanced;
+    },
+  });
+  const runtime = createMenuExtractionRuntime({
+    adapter,
+    limits: { callTimeoutMs: 100, maxCostEurCents: 100 },
+    budget: budget(),
+  });
+  const analysis = await runRestaurantSourceAnalysis({
+    homepageHtml: page,
+    homepageUrl: 'https://fictief.example/',
+    fetchCandidate: async () => ({ status: 'blocked' }),
+    structuredExtraction: runtime,
+  });
+
+  assert.equal(called, 1, 'the bounded call happened, so the refusal is not a skipped call');
+  assert.equal(analysis.aiExtraction.enabled, true);
+  assert.equal(analysis.aiExtraction.ok, false);
+  assert.equal(analysis.aiExtraction.reason, 'unsupported_product_fields');
+  assert.deepEqual(analysis.aiExtraction.unsupported, ['priceVariants', 'supplementOf', 'allergens']);
+  assert.equal(analysis.menuContexts.length, 0, 'no flattened menu reaches the summary or concept');
+  assert.equal(buildCandidateSummary({ restaurantCandidateFields: {}, menus: analysis.menuContexts }).menus.length, 0);
+});
+
 test('a disabled runtime is connected but makes no model call and leaves deterministic output unchanged', async () => {
   let called = 0;
   const adapter = createStructuredExtractionAdapter({ call: async () => { called += 1; return output; } });
