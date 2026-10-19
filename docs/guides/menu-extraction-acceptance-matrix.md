@@ -186,6 +186,11 @@ De probe-uitvoer bevat de bestaande PDF.js-waarschuwing over
 `standardFontDataUrl`; die verandert de tekstlaag niet en de vergelijking
 eindigde met exit 0. Dat is een observatie, geen productacceptatie.
 
+De bronproef en de Botanist-vergelijking zijn uitgevoerd op code `4519e93`;
+commit `5a7f99a` wijzigt uitsluitend twee testbestanden en geen
+extractie-/runtimecode. De volledige suite, build en browserfixture zijn op
+`5a7f99a` uitgevoerd. De runtime is dus identiek voor beide metingen.
+
 ## Wat expliciet niet is uitgevoerd of geclaimd
 
 - **Item-voor-item menselijke hercontrole** van Smelt/Blossem: niet uitgevoerd;
