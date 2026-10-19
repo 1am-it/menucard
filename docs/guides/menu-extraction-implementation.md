@@ -9,9 +9,9 @@ provideractivering en PR #56 blijven buiten scope.
 [Testplan](menu-extraction-acceptance.md) |
 [Acceptatiematrix](menu-extraction-acceptance-matrix.md) |
 [Botanist-referentie](menu-extraction-botanist-reference.md) |
-[V2-schemaontwerp (niet geïmplementeerd)](../../planning/architecture/menu-extraction-product-schema-v2.md)
+[V2-schemaontwerp (read-only geïmplementeerd)](../../planning/architecture/menu-extraction-product-schema-v2.md)
 
-## Pure v2 schema-/mappinglaag (ronde 2026-10-19, niet aangesloten)
+## V2 schema-/mappinglaag en read-only aansluiting (ronde 2026-10-19)
 
 De goedgekeurde interne bouwronde voegt een pure, versiegebonden laag toe voor
 menuvarianten, prijsvarianten en supplementen:
@@ -24,13 +24,17 @@ menuvarianten, prijsvarianten en supplementen:
   `projectProductV2ToV1` (weigert met `unsupported_v1_projection`) en
   `checkProductV2ExportSuitability` (weigert, schrijft niets);
 - `src/lib/menuExtractionMapping.js` weigert nu een v2/onbekende envelop in
-  plaats van hem als v1 te lezen.
+  plaats van hem als v1 te lezen;
+- `src/lib/menuProductIntegrationV2.js` is de enige read-only brug naar de
+  bestaande receipt-, review-, concept-, batch-, workqueue- en exportpaden:
+  één gesaneerde, begrensde view, expliciete `sourceVerification: "unverified"`
+  en één concrete weigering vóór hash, claim, insert, update, RPC of GitHub.
 
-De laag heeft geen netwerk, databaseclient, credential, schrijfroute of
-provider. Bestaande v1-invoer en routes zijn ongewijzigd; de publieke export
-blijft geblokkeerd. De read-only inventaris van receipt/concept/JSONB/RPC/hash/
-audit/idempotentie/export en de latere, nog niet uitgevoerde SQL-aanpassingen
-staan in [menu-extraction-v2-integration.md](menu-extraction-v2-integration.md).
+De integratie heeft geen netwerk, databaseclient, credential, v2-writeflag of
+provider. Bestaande v1-invoer en routes blijven werken; de publieke export
+blijft geblokkeerd. De inventaris van receipt/concept/JSONB/RPC/hash/audit/
+idempotentie/export en de latere, nog niet uitgevoerde SQL-aanpassingen staan
+in [menu-extraction-v2-integration.md](menu-extraction-v2-integration.md).
 Dit is geen echte bron → conceptopslag, geen browseracceptatie en niet DONE voor
 #59.
 

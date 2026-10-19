@@ -1,13 +1,15 @@
 # Menu-extractie — productschema v2 (ontwerp ter beoordeling)
 
-Status: **ontwerp + pure schema-/mappinglaag geïmplementeerd; geen route, geen
-migratie en geen publicatie**. Datum: 2026-10-18, aangevuld na Delivery
-Lead-review 6248407225 (prijsbewijs per bedrag en zichtbare rollback) en na de
-goedgekeurde bouwronde van 2026-10-19 (interne varianten/supplementen). Hoort bij
+Status: **ontwerp + pure schema-/mappinglaag + read-only integratie
+geïmplementeerd; geen v2-schrijver, migratie of publicatie**. Datum: 2026-10-18,
+aangevuld na Delivery Lead-review 6248407225 (prijsbewijs per bedrag en zichtbare
+rollback), na de goedgekeurde bouwronde van 2026-10-19 (interne
+varianten/supplementen) en na de read-only aansluiting op de bestaande
+receipt/review/concept/batch/exportpaden (codehead `db09ff2`). Hoort bij
 GitHub #59 / PR #60. Dit document beschrijft een versiegebonden, verliesvrije
 uitbreiding voor menuconstructies die het huidige productcontract niet kan
 opslaan. Het activeert geen provider, migratie, export of publicatie en wijzigt
-#56 niet. De pure laag en de read-only integratie-inventaris staan in
+#56 niet. De read-only integratie en de resterende schrijfstappen staan in
 [menu-extraction-v2-integration.md](../../docs/guides/menu-extraction-v2-integration.md).
 
 ## Waarom dit ontwerp nodig is
