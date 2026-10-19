@@ -126,6 +126,54 @@ test('every price variant needs its own quote containing its own amount', () => 
   assert.ok(problems.some((problem) => problem.includes('priceVariants[1].evidence.quote does not contain the claimed amount')));
 });
 
+test('the v2 validator refuses a primary price proven only by a different decimal amount', () => {
+  const sources = [{ id: 'src-1', text: 'Fictief gerecht 13,50 Fictief gerecht 13,5 Fictief gerecht 13 Fictief gerecht 13,00' }];
+  const wrong = simpleItem({ evidence: { sourceId: 'src-1', locator: 'regel 1', quote: 'Fictief gerecht 13,50' } });
+  assert.ok(validateMenuProductV2(productWith([wrong]), sources).some((problem) => problem.includes('price.evidence.quote does not contain the claimed amount (price_evidence_missing)')));
+
+  const integer = simpleItem({ evidence: { sourceId: 'src-1', locator: 'regel 1', quote: 'Fictief gerecht 13' } });
+  assert.deepEqual(validateMenuProductV2(productWith([integer]), sources), []);
+
+  const decimal = simpleItem({
+    price: knownPrice(1350, 'Fictief gerecht 13,5'),
+    evidence: { sourceId: 'src-1', locator: 'regel 1', quote: 'Fictief gerecht 13,5' },
+  });
+  assert.deepEqual(validateMenuProductV2(productWith([decimal]), sources), []);
+});
+
+test('the v2 validator refuses a glass variant proven only by the bottle amount', () => {
+  const sources = [{ id: 'src-1', text: 'Fictieve wijn 13,50 / 25,00 Fictieve wijn 13,5 / 25,00' }];
+  const item = simpleItem({
+    id: 'item-2',
+    kind: 'beverage',
+    name: 'Fictieve wijn',
+    price: { status: 'multiple_undecomposed', amountMinorUnits: null, currency: null, text: '13,50 / 25,00', isFrom: false, evidence: null },
+    priceVariants: [
+      { id: 'pv-1', label: 'Glas', kind: 'glass', amountMinorUnits: 1300, currency: 'EUR', text: null, isSupplement: false, perPerson: false, evidence: { sourceId: 'src-1', locator: 'regel 1', quote: '13,50' }, origin: 'extracted' },
+      { id: 'pv-2', label: 'Fles', kind: 'bottle', amountMinorUnits: 2500, currency: 'EUR', text: null, isSupplement: false, perPerson: false, evidence: { sourceId: 'src-1', locator: 'regel 1', quote: '25,00' }, origin: 'extracted' },
+    ],
+    evidence: { sourceId: 'src-1', locator: 'regel 1', quote: 'Fictieve wijn 13,50 / 25,00' },
+    origins: origins({ price: 'unknown' }),
+  });
+  const problems = validateMenuProductV2(productWith([item]), sources);
+  assert.ok(problems.some((problem) => problem.includes('priceVariants[0].evidence.quote does not contain the claimed amount (price_evidence_missing)')));
+  assert.equal(problems.some((problem) => problem.includes('priceVariants[1]') && problem.includes('price_evidence_missing')), false);
+
+  const correct = simpleItem({
+    id: 'item-2',
+    kind: 'beverage',
+    name: 'Fictieve wijn',
+    price: { status: 'multiple_undecomposed', amountMinorUnits: null, currency: null, text: '13,5 / 25,00', isFrom: false, evidence: null },
+    priceVariants: [
+      { id: 'pv-1', label: 'Glas', kind: 'glass', amountMinorUnits: 1350, currency: 'EUR', text: null, isSupplement: false, perPerson: false, evidence: { sourceId: 'src-1', locator: 'regel 1', quote: '13,5' }, origin: 'extracted' },
+      { id: 'pv-2', label: 'Fles', kind: 'bottle', amountMinorUnits: 2500, currency: 'EUR', text: null, isSupplement: false, perPerson: false, evidence: { sourceId: 'src-1', locator: 'regel 1', quote: '25,00' }, origin: 'extracted' },
+    ],
+    evidence: { sourceId: 'src-1', locator: 'regel 1', quote: 'Fictieve wijn 13,5 / 25,00' },
+    origins: origins({ price: 'unknown' }),
+  });
+  assert.deepEqual(validateMenuProductV2(productWith([correct]), sources), []);
+});
+
 test('a supplement variant can never be the primary price and a primary reference must exist', () => {
   const item = simpleItem({
     id: 'item-2',
@@ -249,6 +297,51 @@ test('amount matching is conservative and does not accept a different price', ()
   assert.equal(quoteContainsAmount('Glas 6,5', 650), true);
   assert.equal(quoteContainsAmount('Fles 25,00', 2500), true);
   assert.equal(quoteContainsAmount('Fles 125,00', 2500), false);
+});
+
+test('a full amount token is required; the integer part of another decimal price proves nothing', () => {
+  for (const quote of ['Fictief gerecht 13,50', 'Fictief gerecht 13.50', 'Fictief gerecht 13,5', 'Fictief gerecht 13.5']) {
+    assert.equal(quoteContainsAmount(quote, 1300), false, quote);
+  }
+  assert.equal(quoteContainsAmount('Fictief gerecht 13,50', 1350), true);
+  assert.equal(quoteContainsAmount('Fictief gerecht 13.50', 1350), true);
+  assert.equal(quoteContainsAmount('Fictief gerecht 13,5', 1350), true);
+  assert.equal(quoteContainsAmount('Fictief gerecht 13', 1300), true);
+  assert.equal(quoteContainsAmount('Fictief gerecht 13,00', 1300), true);
+  assert.equal(quoteContainsAmount('Fictief gerecht 13.00', 1300), true);
+  assert.equal(quoteContainsAmount('Fictief gerecht 113', 1300), false);
+  assert.equal(quoteContainsAmount('Fictief gerecht 113', 11300), true);
+});
+
+test('euro, space and Dutch thousands notations are read as one unambiguous token', () => {
+  for (const quote of ['€ 1.250,00', '€1.250,00', '1.250,00 euro', 'EUR 1.250,00', '1.250,00', '1,250.00', '1.250']) {
+    assert.equal(quoteContainsAmount(quote, 125000), true, quote);
+  }
+  assert.equal(quoteContainsAmount('1250', 125000), true);
+  assert.equal(quoteContainsAmount('1.250,5', 125050), true);
+  assert.equal(quoteContainsAmount('1.250', 1250), false);
+});
+
+test('ambiguous or malformed notation is refused instead of rounded or reinterpreted', () => {
+  assert.equal(quoteContainsAmount('Fictief gerecht 12,345', 1234500), false);
+  assert.equal(quoteContainsAmount('Fictief gerecht 1.250.00', 125000), false);
+  assert.equal(quoteContainsAmount('Fictief gerecht 13,50,00', 135000), false);
+  assert.equal(quoteContainsAmount('Fictief gerecht 13,50,00', 1350), false);
+});
+
+test('years, quantities, identifiers and labels are not price evidence', () => {
+  assert.equal(quoteContainsAmount('Wijn uit 2013', 201300), false);
+  assert.equal(quoteContainsAmount('Wijn 2013', 201300), false);
+  assert.equal(quoteContainsAmount('Wijn 2013 EUR', 201300), true);
+  assert.equal(quoteContainsAmount('4 personen', 400), false);
+  assert.equal(quoteContainsAmount('Gerecht 13,00 personen', 1300), false);
+  assert.equal(quoteContainsAmount('13 gangen', 1300), false);
+  assert.equal(quoteContainsAmount('13 stuks', 1300), false);
+  assert.equal(quoteContainsAmount('13 gram', 1300), false);
+  assert.equal(quoteContainsAmount('nr. 13', 1300), false);
+  assert.equal(quoteContainsAmount('2 x 13,00', 200), false);
+  assert.equal(quoteContainsAmount('2 x 13,00', 1300), true);
+  assert.equal(quoteContainsAmount('Gerecht 13,00 p.p.', 1300), true);
 });
 
 test('the reader classifies v1, v2 and unknown versions without reinterpreting v2 as v1', () => {

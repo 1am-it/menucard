@@ -15,8 +15,10 @@
 //   - a primary price is never guessed: `primaryPriceRef` is null unless the
 //     producer recorded an explicit relation, and a supplement variant can
 //     never be primary;
-//   - every item and every price amount needs its own source evidence; a quote
-//     that does not contain the claimed amount is `price_evidence_missing`;
+//   - every item and every price amount needs its own source evidence; the
+//     quote must contain the claimed amount as a complete monetary token, not
+//     merely as the integer part of another amount, otherwise it is
+//     `price_evidence_missing`;
 //   - a supplement may point at an unknown target only when the menu/category
 //     context is proven, and it then carries an explicit limitation;
 //   - unknown is not zero and not an empty list: allergens stay explicit or
@@ -130,40 +132,116 @@ function findForbiddenKey(value, depth = 0) {
   return null;
 }
 
+// A quote is only price evidence when it contains the claimed amount as a
+// complete monetary token. Matching the integer part of a longer amount is
+// forbidden: 13,00 must never be proven by 13,50, 13.50 or 113,00.
+//
+// Token reading follows one deterministic, source-language matrix:
+//   - a dot or comma followed by one or two digits is a decimal separator;
+//   - dot groups of exactly three digits are Dutch thousands (1.250,00);
+//   - mixed separators are unambiguous only when the rightmost separator is
+//     decimal (1.250,00 and 1,250.00);
+//   - a single comma followed by exactly three digits (13,000) is ambiguous
+//     between Dutch three decimals and English thousands and is refused;
+//   - malformed runs such as 13,50,00 are refused as a whole, never split;
+//   - a plain integer is an amount only in a price position: a currency marker
+//     next to it, or a standalone number. A bare 1900-2099 value without a
+//     currency marker is year-like and ambiguous; quantities, units,
+//     identifiers and labels are not price evidence.
+// Anything ambiguous is not evidence, so the validator reports
+// `price_evidence_missing`; nothing is rounded, adjusted or replaced.
+const CURRENCY_BEFORE = /(?:€|\bEUR|\beuro)\s*$/i;
+const PRICE_SUFFIX = /^[\s-]*(?:€|\bEUR\b|\beuro\b|p\.?\s*p\.?(?![A-Za-z])|pp\b|per\s+pers(?:oon|on)\b)/i;
+const NON_PRICE_UNIT_AFTER = /^[\s-]*(?:personen|persoon|pers\.?|stuks?|stuk|st\.?|gram|gr\.?|kg|kilo(?:gram)?|ml|cl|dl|liter|l|el|tl|eetlepel|theelepel|jaar|jaren|maand(?:en)?|mnd\.?|weken?|dagen?|uren?|uur|minuten?|min\.?|seconden?|sec\.?|gangen|gang|keer|x|%|procent)(?![A-Za-z])/i;
+const NON_PRICE_PREFIX = /(?:#|\bnr\.?|\bno\.?|\bnummer|\bcode|\btafel|\bkamer|\bmaat|\bsize|\bartikel|\bpostcode|\bhuisnummer|\bpagina|\bpag\.?|\bpage|\bjaargang|\boogst|\banno|\buit)\s*$/i;
+
+function toMinorUnits(whole, fraction) {
+  const cents = `${fraction}00`.slice(0, 2);
+  const digits = `${whole}${cents}`;
+  if (!/^\d+$/.test(digits)) return null;
+  const value = Number(digits);
+  return Number.isSafeInteger(value) ? value : null;
+}
+
 /**
- * The exact source-language renderings a claimed amount may have in a quote.
- * Deliberately conservative: no conversion, no rounding, and only the common
- * Dutch thousands notation. A quote that contains none of these forms is not
- * price evidence.
+ * Reads one complete numeric run as euros. Returns null when the notation is
+ * malformed or its decimal/thousands meaning is ambiguous. No rounding.
  */
-function amountRenderings(amountMinorUnits) {
-  if (!isNonNegativeInteger(amountMinorUnits)) return [];
-  const euros = Math.floor(amountMinorUnits / 100);
-  const cents = amountMinorUnits % 100;
-  const twoDigits = String(cents).padStart(2, '0');
-  const forms = new Set([`${euros},${twoDigits}`, `${euros}.${twoDigits}`]);
-  if (cents % 10 === 0) {
-    forms.add(`${euros},${cents / 10}`);
-    forms.add(`${euros}.${cents / 10}`);
+function parseAmountToken(raw) {
+  const token = raw.replace(/[.,]+$/, '');
+  if (!/^\d[\d.,]*$/.test(token)) return null;
+  const marks = [...token.matchAll(/[.,]/g)].map((match) => ({ char: match[0], index: match.index }));
+  if (marks.length === 0) return toMinorUnits(token, '');
+
+  const kinds = new Set(marks.map((mark) => mark.char));
+  const last = marks[marks.length - 1];
+  const trailingDigits = token.length - last.index - 1;
+  let decimalIndex = -1;
+  let groupingSeparator = null;
+
+  if (trailingDigits >= 1 && trailingDigits <= 2) {
+    // The same separator cannot be both grouping and decimal: 1.250.00.
+    if (marks.length > 1 && kinds.size === 1) return null;
+    decimalIndex = last.index;
+    if (kinds.size > 1) groupingSeparator = [...kinds].find((kind) => kind !== last.char);
+  } else if (trailingDigits === 3) {
+    if (kinds.size > 1) return null;
+    const separator = [...kinds][0];
+    // 13,000 is Dutch three decimals or English thousands: refuse ambiguity.
+    if (separator === ',' && marks.length === 1) return null;
+    groupingSeparator = separator;
+  } else {
+    return null;
   }
-  if (cents === 0) forms.add(String(euros));
-  if (euros >= 1000) {
-    const grouped = String(euros).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-    forms.add(`${grouped},${twoDigits}`);
-    if (cents === 0) forms.add(grouped);
+
+  const integerPart = decimalIndex === -1 ? token : token.slice(0, decimalIndex);
+  const fractionPart = decimalIndex === -1 ? '' : token.slice(decimalIndex + 1);
+  let whole = integerPart;
+  if (groupingSeparator) {
+    const groups = integerPart.split(groupingSeparator);
+    if (groups.length < 2) return null;
+    if (!/^\d{1,3}$/.test(groups[0])) return null;
+    if (!groups.slice(1).every((group) => /^\d{3}$/.test(group))) return null;
+    whole = groups.join('');
+  } else if (!/^\d+$/.test(integerPart)) {
+    return null;
   }
-  return [...forms];
+  return toMinorUnits(whole, fractionPart);
 }
 
-function containsNumericToken(text, token) {
-  const escaped = token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return new RegExp(`(?:^|[^0-9])${escaped}(?:[^0-9]|$)`).test(text);
+function isPricePosition(quote, raw, start, end) {
+  const before = quote.slice(0, start);
+  const after = quote.slice(end);
+  if (start > 0 && /[A-Za-z0-9_]/.test(quote[start - 1])) return false;
+  if (start > 0 && /[-−–]/.test(quote[start - 1])) return false;
+  if (NON_PRICE_PREFIX.test(before)) return false;
+  const priceSuffix = PRICE_SUFFIX.test(after);
+  if (!priceSuffix && NON_PRICE_UNIT_AFTER.test(after)) return false;
+
+  const currencyContext = CURRENCY_BEFORE.test(before) || priceSuffix;
+  if (!currencyContext) {
+    if (/^[A-Za-z0-9_]/.test(after)) return false;
+    const token = raw.replace(/[.,]+$/, '');
+    if (/^\d{4}$/.test(token)) {
+      const year = Number(token);
+      if (year >= 1900 && year <= 2099) return false;
+    }
+  }
+  return true;
 }
 
-/** True only when `quote` itself contains the claimed amount in the source. */
+/** True only when `quote` itself contains the claimed amount as a full token. */
 function quoteContainsAmount(quote, amountMinorUnits) {
-  if (typeof quote !== 'string') return false;
-  return amountRenderings(amountMinorUnits).some((token) => containsNumericToken(quote, token));
+  if (typeof quote !== 'string' || !isNonNegativeInteger(amountMinorUnits)) return false;
+  const numericRun = /\d[\d.,]*/g;
+  let match;
+  while ((match = numericRun.exec(quote)) !== null) {
+    const start = match.index;
+    const end = start + match[0].length;
+    if (!isPricePosition(quote, match[0], start, end)) continue;
+    if (parseAmountToken(match[0]) === amountMinorUnits) return true;
+  }
+  return false;
 }
 
 function normalizeText(value) {
@@ -730,7 +808,6 @@ module.exports = {
   READER_BLOCKED_ACTIONS,
   LIMITS,
   findForbiddenKey,
-  amountRenderings,
   quoteContainsAmount,
   validateMenuProductV2,
   detectProductSchema,

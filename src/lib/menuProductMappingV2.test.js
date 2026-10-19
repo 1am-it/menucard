@@ -26,6 +26,19 @@ const SOURCES = [
   },
 ];
 
+const WRONG_AMOUNT_SOURCES = [
+  {
+    id: 'src-1',
+    text: [
+      SOURCES[0].text,
+      'Fictief gerecht 13,50',
+      'Fictief gerecht 13',
+      'Fictieve wijn 13,50 / 25,00',
+      'Fictieve wijn 13,5 / 25,00',
+    ].join(' | '),
+  },
+];
+
 function evidence(quote, locator = 'regel 1') {
   return { sourceId: 'src-1', locator, quote };
 }
@@ -262,6 +275,73 @@ test('a known v1 price whose quote only names the dish is refused, not given a c
   assert.equal(result.ok, false);
   assert.equal(result.reason, 'price_evidence_missing');
   assert.equal(result.preservedInput, output);
+});
+
+test('v1 to v2 refuses a primary price proven only by a different decimal amount', () => {
+  const output = v1Output();
+  output.menus[0].categories[0].items[0].evidence = evidence('Fictief gerecht 13,50');
+  const result = mapV1ToProductV2(output, WRONG_AMOUNT_SOURCES);
+  assert.equal(result.ok, false);
+  assert.equal(result.reason, 'price_evidence_missing');
+  assert.ok(result.blockers.some((blocker) => blocker.path === 'menus[0].categories[0].items[0].price.evidence'));
+  assert.equal(result.preservedInput, output);
+
+  const integer = v1Output();
+  integer.menus[0].categories[0].items[0].evidence = evidence('Fictief gerecht 13');
+  const integerResult = mapV1ToProductV2(integer, WRONG_AMOUNT_SOURCES);
+  assert.equal(integerResult.ok, true, JSON.stringify(integerResult.problems));
+  assert.equal(integerResult.value.menus[0].categories[0].items[0].price.amountMinorUnits, 1300);
+  assert.equal(integerResult.value.menus[0].categories[0].items[0].price.evidence.quote, 'Fictief gerecht 13');
+});
+
+test('the reviewed one-item complete 13,50 quote cannot prove a 13,00 primary price', () => {
+  const sources = [{ id: 'src-1', text: 'Fictief gerecht 13,50' }];
+  const output = {
+    menus: [
+      {
+        title: 'Fictief Diner',
+        sourceId: 'src-1',
+        variant: 'DINNER',
+        order: 1,
+        categories: [
+          {
+            name: 'Voorgerechten',
+            path: ['DINNER', 'VOOR'],
+            items: [
+              { name: 'Fictief gerecht', priceStatus: 'known', amountMinorUnits: 1300, currency: 'EUR', priceText: '13,50', evidence: evidence('Fictief gerecht 13,50') },
+            ],
+          },
+        ],
+      },
+    ],
+    coverage: { status: 'complete', sourcesRead: 1, pagesRead: 1, itemsExtracted: 1, unreadSources: [], limitations: [] },
+  };
+  const result = mapV1ToProductV2(output, sources);
+  assert.equal(result.ok, false);
+  assert.equal(result.reason, 'price_evidence_missing');
+  assert.equal(result.preservedInput, output);
+});
+
+test('v1 to v2 refuses a glass variant proven by the bottle amount but keeps a correct decimal pair', () => {
+  const wrong = v1Output();
+  const wrongWine = wrong.menus[0].categories[0].items[1];
+  wrongWine.evidence = evidence('Fictieve wijn 13,50 / 25,00');
+  wrongWine.priceText = '13,50 / 25,00';
+  wrongWine.priceVariants[0].amountMinorUnits = 1300;
+  const refused = mapV1ToProductV2(wrong, WRONG_AMOUNT_SOURCES);
+  assert.equal(refused.ok, false);
+  assert.equal(refused.reason, 'price_evidence_missing');
+  assert.ok(refused.blockers.some((blocker) => blocker.path === 'menus[0].categories[0].items[1].priceVariants[0].evidence'));
+
+  const correct = v1Output();
+  const correctWine = correct.menus[0].categories[0].items[1];
+  correctWine.evidence = evidence('Fictieve wijn 13,5 / 25,00');
+  correctWine.priceText = '13,5 / 25,00';
+  correctWine.priceVariants[0].amountMinorUnits = 1350;
+  const accepted = mapV1ToProductV2(correct, WRONG_AMOUNT_SOURCES);
+  assert.equal(accepted.ok, true, JSON.stringify(accepted.problems));
+  const variants = accepted.value.menus[0].categories[0].items[1].priceVariants;
+  assert.deepEqual(variants.map((variant) => [variant.label, variant.amountMinorUnits]), [['Glas', 1350], ['Fles', 2500]]);
 });
 
 test('an unknown version, an invalid v1 result and a foreign quote are refused concretely', () => {
