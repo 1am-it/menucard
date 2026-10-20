@@ -146,3 +146,31 @@ and green tests alone do not prove product acceptance. Keep an acceptance matrix
 Use `.agent/DELIVERY.md` for the established project handoff. The new protocol
 adds small work rounds, context-efficiency and durable checkpoints; it does not
 install a new runner or authorize changing the existing workflow limits.
+
+## Zelfstandig Doorwerken Tot Afronding
+
+Claude Code en DeepSeek voeren de volledige goedgekeurde bouw-, test-,
+herstel- en reviewcyclus zelfstandig uit tot de acceptatiecriteria aantoonbaar
+zijn gehaald, of een echte externe blokkade verdere uitvoering verhindert.
+
+- DeepSeek herstelt concrete in-scope bevindingen en levert bewijs.
+- Claude beoordeelt het checkpoint en geeft waar nodig direct een concrete
+  vervolgopdracht. De Product Owner is geen doorgeefluik tussen agents.
+- Een checkpoint, overdracht of groene deelsuite is geen reden om te stoppen
+  wanneer nog veilig uitvoerbaar werk binnen het contract resteert.
+- De volgende eigenaar neemt de overdracht expliciet op. De Lead controleert
+  daadwerkelijke opname en verse voortgang; alleen een verzonden opdracht telt niet.
+- Wachten op een developer betekent niet dat de Lead niets doet: resterende
+  acceptatie en testvoorwaarden voorbereiden waar dat veilig parallel kan.
+- Eén schrijver per werkkopie. Geen dubbele start, blinde herhaling, speculatieve
+  verbeteringen of heropening van gesloten bevindingen zonder nieuw bewijs.
+- Geen nieuw productakkoord vragen voor al goedgekeurde gewone engineering.
+- Wel stoppen bij ontbrekende noodzakelijke toegang, onzekere veiligheid of een
+  nieuwe materiële scope-, kosten-, privacy- of productiebeslissing.
+- Bij stilgevallen uitvoering: onderzoek veilig, behoud werk en meld de echte
+  blokkade. Presenteer stilstand nooit als voortgang.
+- DONE betekent bewezen contractacceptatie, niet alleen "developer klaar".
+
+Deze afspraak verleent geen onbeperkt budget, nieuwe toegang of toestemming om
+beveiligingsgrenzen te omzeilen. Claim geen continue achtergrondactiviteit als
+de gebruikte uitvoering die niet daadwerkelijk ondersteunt.
