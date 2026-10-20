@@ -1,10 +1,12 @@
 # Menu-extractie — afrondingsmatrix #59
 
 Status: **ontwikkelaarsbewijs, geen onafhankelijke review en geen release.**
-Datum: 2026-10-19. Issue #59, branch `feat/menu-extraction-59`, PR #60.
-Kandidaat-codehead: `0f9ea9dd59c36b13b270cb140030466db11d6d8d` (read-only
-v2-aansluiting op de bestaande receipt-/review-/concept-/batch-/exportpaden;
-deze documentatie volgt als aparte commit). Vorige codehead:
+Datum: 2026-10-20. Issue #59, branch `feat/menu-extraction-59`, PR #60.
+Kandidaat-codehead: `6728897c814bce80aa2b9a44d53d8322b3adc72a` (herstel van
+review 6283658271 op de read-only v2-aansluiting; deze documentatie volgt als
+aparte commit). Vorige heads:
+`ab89d14c0a2dfb19c559126a0a8ca0bb62746d16` (documentatie),
+`0f9ea9dd59c36b13b270cb140030466db11d6d8d` (read-only aansluiting) en
 `6fb54cad76dd4f2b7996667777d82c0db5789b04` (volledig-lexeem prijsbewijs).
 Protocol:
 `MENU-EXTRACTION.md` v0.2, SHA-256
@@ -69,13 +71,13 @@ ander besluit of eigenaar.
 | 7 | Dataset, referentie-uitkomsten en meetbare drempels vóór acceptatie vastgelegd; BE-21's 50–100 niet met enkele URL's afgesloten | `manifest.json` `releaseThresholds`: 0 verzonnen gerechten/prijzen, 100% bewijs, 0 onverklaarde dekking, 0 structuur-/prijsfouten; `sourceReferences.test.js`; 23 structuurgevallen | T | **bewezen met beperking** | Drempels zijn vast en niet verlaagd; BE-21 is expliciet buiten #59 en niet afgesloten met twee bronnen | BE-21-eigenaar; Delivery Lead voor scopebewaking |
 
 | 8 | Gemiste/verzonnen items, prijsfouten, structuurverlies, bewijsdekking, correctiewerk, tijd en kosten per brontype gerapporteerd | Per-brontabel hieronder; Smelt/Blossem 0 verschillen; Botanist v1 124/11/4/0, 87 niet-gekoppeld; Mr Moos/Colonia zonder referentie; deterministische analysetijd per bron gemeten | R+T | **bewezen met beperking** | Correctietijd is onbekend; productiekosten zijn onbekend; de gemeten analysetijd is geen menselijke correctietijd. Modelkosten in deze run zijn €0 omdat geen provider is aangeroepen | Developer voor een correctietijdmeting; Product Owner voor kostenbesluit |
-| 9 | Browseracceptatie met klikpaden, rolgrenzen, leeg/fout/partieel, toetsenbord, licht/donker, 320/390 px | `npm run test:browser:menu-review`: 127/127 checks op de werkboom die als `0f9ea9d` is gecommit (de evidence noemt head `0f9ea9d` + dirty worktree), inclusief de nieuwe v2-scenario's op 1024/390 px en licht/donker, 13 screenshots, Edge 155.0.4283.45, keyboard Enter, read-only collega, empty/partial/error, fail-closed netwerkguard | B | **bewezen met beperking** | Alleen fixture; geen live/staging browserbewijs en geen echte authenticated sessie. De fixture is geen productieacceptatie | Product Owner/ops voor previewtoegang; Delivery Lead voor live acceptatie |
+| 9 | Browseracceptatie met klikpaden, rolgrenzen, leeg/fout/partieel, toetsenbord, licht/donker, 320/390 px | `npm run test:browser:menu-review`: 127/127 checks op de werkboom die als `0f9ea9d` is gecommit (de evidence noemt head `0f9ea9d` + dirty worktree), inclusief de nieuwe v2-scenario's op 1024/390 px en licht/donker, 13 screenshots, Edge 155.0.4283.45, keyboard Enter, read-only collega, empty/partial/error, fail-closed netwerkguard | B | **bewezen met beperking** | Alleen fixture; geen live/staging browserbewijs en geen echte authenticated sessie. De fixture is geen productieacceptatie en is na `0f9ea9d` niet opnieuw gedraaid; `6728897` wijzigt geen UI-bestand | Product Owner/ops voor previewtoegang; Delivery Lead voor live acceptatie |
 | 10 | Time-out, provideruitval, ongeldige uitvoer, kosten-/paginagrens, herimport, gelijktijdige taken, promptinjectie, verkeerde vestiging, onveilige redirects getest | `menuExtractionAdapter.test.js`, `safeOutboundFetch.test.js`, `restaurantSourceAnalysis.test.js`, `batchAnalysisHandlers.test.js`, `menuConcept.test.js`; offline fake provider en `.invalid`-fixtures; geen dubbele call/claim | T | **bewezen met beperking** | Alleen offline; een echte provideruitval, echte kostenmeting en echte gelijktijdige productietaken zijn niet gemeten | Product Owner voor provider/budget; developer voor een latere live meting |
 | 11 | Geen stil dataverlies tussen extractie, receipt, review, concept en export; niet-ondersteunde publicatievelden geblokkeerd/gemeld | `menuProductIntegrationV2.test.js`, `menuProductGuardsV2.test.js`, `menuConceptV2ReviewHandlers.test.js`, `menuConceptExportV2.test.js`, `sourceWorkqueueV2.test.js`, `menuProductV2Surface.test.js`; de bestaande review toont glas/fles, supplementen, bewijs en dekking via één gesaneerde view; save/approve/reject/export/confirm weigeren v2 vóór hun effect | T+B | **bewezen met beperking** | Alleen fictieve in-memory/browserfixtures; geen echte v2-rij in Supabase en geen live bronbevestiging. Een v2-writeflag/exportcontract blijft niet gebouwd | Developer voor live preview; Delivery Lead voor review |
-| 12 | Geen regressie in rollen, bronbevestiging, audit, publicatiegates, beveiliging of geheimenbeheer | Volledige suite 2151/2151 op head `0f9ea9d`; browserfixture 127/127 (inclusief v2 op 1024/390 px, licht/donker); v1-gedrag en bestaande rechten blijven groen; netwerkguard blokkeert externe fetch, protocol-relative URL, onbekende API-write, XHR, WebSocket en CDP-subresources | T+B | **bewezen met beperking** | Geen productiecredentials, productieauth of echte database gebruikt; dat is bewust niet getest | Product Owner/ops voor productieacceptatie |
+| 12 | Geen regressie in rollen, bronbevestiging, audit, publicatiegates, beveiliging of geheimenbeheer | Volledige suite 2160/2160 op head `6728897`; browserfixture 127/127 gegenereerd op `0f9ea9d` (na die head niet opnieuw gedraaid); v1-gedrag en bestaande rechten blijven groen; netwerkguard blokkeert externe fetch, protocol-relative URL, onbekende API-write, XHR, WebSocket en CDP-subresources | T+B | **bewezen met beperking** | Geen productiecredentials, productieauth of echte database gebruikt; dat is bewust niet getest | Product Owner/ops voor productieacceptatie |
 | 13 | Onafhankelijke review met exacte commit, checks, bron-/protocolversies, resultaten, beperkingen en volgende stap; groene unit-tests zijn geen productacceptatie | Deze matrix + checkpoint op PR #60 | I | **geblokkeerd** | De Delivery Lead heeft deze afrondingsronde nog niet onafhankelijk beoordeeld; deze matrix is ontwikkelaarsbewijs | Delivery Lead |
 | 14 | Een v2-envelope wordt in de bestaande interne controle/beoordeling versiegetrouw herkenbaar: varianten, glas/fles, supplementen, bewijs en dekking; niets afgeplat | `menuProductIntegrationV2.test.js`, `menuProductGuardsV2.test.js`, `menuConceptV2ReviewHandlers.test.js`, `menuConceptExportV2.test.js`, `sourceWorkqueueV2.test.js`, `batchAnalysisHandlers.test.js` (v2-cases), `menuProductV2Surface.test.js`; browserfixture `v2` op 1024/390 px | T+B | **bewezen met beperking** | Alleen fictieve in-memory/browserfixtures; geen echte v2-rij in Supabase, geen live bron en geen authenticated preview | Developer voor live preview; Product Owner/ops voor toegang |
-| 15 | Onbekende/ongeldige/onvoldoende onderbouwde v2 wordt vóór alle zijeffecten geweigerd; v1 blijft ongewijzigd | `menuProductV2Surface.test.js`, `menuSnapshotReviewHandlers.test.js`, `menuSnapshotProposals.test.js`; save/approve/export/reviews/url-intake guards vóór hash, claim, insert, update, RPC of GitHub; bestaande v1-suite groen | T | **bewezen met beperking** | Geen echte database-/GitHub-side-effectmeting; de tests bewijzen de volgorde met fakes. Bronverificatie blijft bewust onbekend | Delivery Lead voor onafhankelijke review |
+| 15 | Onbekende/ongeldige/onvoldoende onderbouwde v2 wordt vóór alle zijeffecten geweigerd; v1 blijft ongewijzigd | `menuProductV2Surface.test.js`, `menuSnapshotReviewHandlers.test.js`, `menuSnapshotProposals.test.js`, `menuConceptV2ReviewHandlers.test.js`, `menuConceptExportV2.test.js`; save/approve/export/reviews/url-intake guards vóór hash, claim, insert, update, RPC of GitHub; de generieke editorreview leest nu ook de oorsprongsreceipt (`menuOriginReceiptGuard`), detail classificeert vóór de exportrefresh en een onversioned v2-vorm is een concrete blokkade; bestaande v1-suite groen | T | **bewezen met beperking** | Geen echte database-/GitHub-side-effectmeting; de tests bewijzen de volgorde met fakes. Bronverificatie blijft bewust onbekend | Delivery Lead voor onafhankelijke review |
 
 ## Pure v2 schema-/mappinglaag (ronde 2026-10-19)
 
@@ -83,7 +85,8 @@ Status: **gebouwd en getest; sinds `0f9ea9d` read-only aangesloten op de
 bestaande lezers, nog steeds geen v2-writeflag, DDL, migratie of publicatie.**
 Codehead prijsbewijsreparatie:
 `2b994cd0e5743ecbd2096381680fadf12ac31e13` (review 6274281958); de read-only
-integratie staat op `0f9ea9dd59c36b13b270cb140030466db11d6d8d`.
+integratie staat op `0f9ea9dd59c36b13b270cb140030466db11d6d8d` en is op
+`6728897c814bce80aa2b9a44d53d8322b3adc72a` hersteld na review 6283658271.
 
 | Onderdeel | Bewijs | Uitkomst |
 | --- | --- | --- |
@@ -199,19 +202,21 @@ gecontroleerde referentiebestanden (`holdout-references.json`,
 `source-references.json`, `botanist-reference.json`,
 `menu-extraction-acceptance-set.json`) bevatten de volledige vastgepinde waarden.
 
-## Read-only v2-aansluiting (ronde 2026-10-19, codehead `0f9ea9d`)
+## Read-only v2-aansluiting (ronde 2026-10-19, codehead `0f9ea9d`; herstel op `6728897` na review 6283658271 op 2026-10-20)
 
 Status: **gebouwd, getest met fictieve clients en lokaal in de browserfixture;
 geen v2-schrijver, DDL, migratie, provider of publieke wijziging.**
 
 | Bestaande ingang | Aansluiting | Bewijs |
 | --- | --- | --- |
-| Receipt lezen | `batchAnalysisHandlers.RECEIPT_COLUMNS`, `sourceTriageHandlers.RECEIPT_COLUMNS`, `menuConceptReviewHandlers.loadReceipt` en `menuConceptExport` selecteren `candidate_summary.menuExtractionV2` expliciet naast `menus`; `readReceiptProjection` maakt v2 gezaghebbend | `menuProductIntegrationV2.test.js`, `batchAnalysisHandlers.test.js`, `sourceWorkqueueV2.test.js` |
+| Receipt lezen | `batchAnalysisHandlers.RECEIPT_COLUMNS`, `sourceTriageHandlers.RECEIPT_COLUMNS`, `menuOriginReceiptGuard.loadOriginReceipt` (gedeeld door `menuConceptReviewHandlers` en `menuSnapshotReviewHandlers`) en `menuConceptExport` selecteren `candidate_summary.menuExtractionV2` expliciet naast `menus`; `readReceiptProjection` maakt v2 gezaghebbend | `menuProductIntegrationV2.test.js`, `batchAnalysisHandlers.test.js`, `sourceWorkqueueV2.test.js` |
 | Batchcontrole | `batchAnalysis.deriveItemView` geeft een gesaneerde `product`-view en v2-tellingen; `MenuReview.MenuControl` toont glas/fles, supplementen, bewijs en dekking via `ProductReview`; de v1-sectielijst draait niet op v2 | `menuProductV2Surface.test.js`, browserfixture `v2` |
-| Concept/beoordeling | `storedConceptInput` gooit fail-closed; `conceptSummary`/`detail` leveren een read-only `product`-view, `captured: null`, een concrete `blocked.reason` en een geblokkeerd publicatievoorbeeld; `MenuConceptsView.ProductConceptReview` toont geen opslaan/goedkeuren | `menuConceptV2ReviewHandlers.test.js`, browserfixture `v2` |
+| Concept/beoordeling | `storedConceptInput` gooit fail-closed; `readConceptProduct` gebruikt dezelfde legacy-predicate, zodat een onversioned v2-vorm een concrete blokkade oplevert in lijst, detail en elke write-ingang (geen ongehandelde 500 en geen v1-succes); `conceptSummary`/`detail` leveren een read-only `product`-view, `captured: null`, een concrete `blocked.reason` en een geblokkeerd publicatievoorbeeld; `MenuConceptsView.ProductConceptReview` toont geen opslaan/goedkeuren | `menuConceptV2ReviewHandlers.test.js`, browserfixture `v2` |
 | Save/approve/reject | `saveVersion` en `decide` weigeren v2/onbekend/ongeldig vóór lineage, hash, insert en `record_menu_snapshot_decision`; ook een v1-concept met een v2-oorsprongsreceipt wordt geweigerd | `menuConceptV2ReviewHandlers.test.js`, `menuProductV2Surface.test.js` |
-| Generieke snapshots | `validateSnapshotProposalInput` weigert versioned/v2-vormige `captured_content` vóór `computeCanonicalContentHash` en insert; de editorroute `menuSnapshotReviewHandlers.record` weigert v2 vóór de reviewinsert | `menuSnapshotReviewHandlers.test.js`, `menuSnapshotProposals.test.js` |
+| Generieke snapshots | `validateSnapshotProposalInput` weigert versioned/v2-vormige `captured_content` vóór `computeCanonicalContentHash` en insert; de editorroute `menuSnapshotReviewHandlers.record` weigert v2 vóór de reviewinsert | `menuSnapshotReviewHandlers.test.js`, `menuSnapshotProposals.test.js`; een v1-projectie met een v2/onbekende/ongeldige oorsprongsreceipt wordt ook hier geweigerd, een receipt-lookupfout fail-closed |
+| Oorsprongsreceipt bij elke ingang | `menuOriginReceiptGuard.loadOriginReceipt` leest één begrensde projectie (`menus` + `menuExtractionV2`) via `origin_receipt_id`; `originReceiptBlock` weigert v2/onbekend/ongeldig vóór insert, RPC, claim of GitHub. De generieke editorreview gebruikt dezelfde guard als de interne review- en exportroute | `menuSnapshotReviewHandlers.test.js` (approved_internal, rejected, needs_review, deferred, v2/onbekend/ongeldig, lookupfout, ongewijzigd v1 en geen receipt), `menuConceptV2ReviewHandlers.test.js`, `menuConceptExportV2.test.js` |
 | Export | `exportToReviewPr` weigert v2 en een v2-oorsprongsreceipt vóór `menu_snapshot_exports`, branch, commit, PR of GitHub-call; `exportMenuEntry` geeft geen entry | `menuConceptExportV2.test.js` |
+| Exportrefresh bij een geblokkeerde kaart | `detail` classificeert concept én oorsprongsreceipt vóór de exportrefresh; een geblokkeerde kaart gebruikt `storedExportForSnapshot` en toont alleen opgeslagen metadata: geen `pullRequestState`, geen statusupdate naar merged/closed en geen claim. Een v1-kaart houdt het bestaande refreshgedrag | `menuConceptV2ReviewHandlers.test.js`, `menuProductV2Surface.test.js` |
 | Receipt → url_intake | de routes `url-intakes` en `profile-drafts` weigeren een v2-receipt vóór `create_url_intake_from_receipt`; de bestaande RPC/SQL is ongewijzigd | `menuProductV2Surface.test.js` |
 | Bronverificatie | iedere v2-view draagt `sourceVerification: "unverified"` en een `source_not_verified`-blokkade; er is geen bronbevestiging uit een quote of modelveld | `menuProductIntegrationV2.test.js`, browserfixture `v2` |
 
@@ -285,15 +290,18 @@ nieuw publiek veld toegevoegd en geen publicatieveld verzonnen.
 | Gerichte v2-tests | `node --test` op `menuProductSchemaV2.test.js`, `menuProductMappingV2.test.js`, `schemaDesign.test.js` | **47 pass, 0 fail, 0 skipped** (head `5e3e3a5`) |
 | Gerichte prijsbewijs-/v2-tests (review 6274281958) | `node --test` op `menuProductSchemaV2.test.js` (27), `menuProductMappingV2.test.js` (21), `schemaDesign.test.js` (6), `menuExtractionRuntime.test.js` (3), `menuExtractionAdapter.test.js` (14), `claudeStructuringAdapter.test.js` (5) | **76 pass, 0 fail, 0 skipped** (head `2b994cd`) |
 | Gerichte #59-tests | `node --test` op acceptanceSet, acceptanceSetGuard, holdoutReferences, botanistReference, htmlMenuPriceElement, menuHubDiscoveryRegression, pdfMenuStructuringLiveRegressions, sameHostDiscovery, menuExtractionAdapter, menuExtractionRuntime | **88 pass, 0 fail, 0 skipped** (eerdere head) |
-| Gerichte read-only v2-tests (deze ronde) | `node --test` op `menuProductIntegrationV2.test.js`, `menuProductGuardsV2.test.js`, `menuConceptV2ReviewHandlers.test.js`, `menuConceptExportV2.test.js`, `menuSnapshotReviewHandlers.test.js`, `sourceWorkqueueV2.test.js`, `menuProductV2Surface.test.js` | **37 pass, 0 fail, 0 skipped** (codehead `0f9ea9d`) |
+| Gerichte read-only v2-tests (deze ronde) | `node --test` op `menuProductIntegrationV2.test.js`, `menuProductGuardsV2.test.js`, `menuConceptV2ReviewHandlers.test.js`, `menuConceptExportV2.test.js`, `menuSnapshotReviewHandlers.test.js`, `sourceWorkqueueV2.test.js`, `menuProductV2Surface.test.js` | **46 pass, 0 fail, 0 skipped** (codehead `6728897`) |
+| Onafhankelijke repro review 6283658271 | losse fixture gelijk aan de review (editorreview, exportrefresh, onversioned lijst) | **P1a 409 `receipt_product_v2_authoritative` met 0 reviewinserts; P1b 200 read-only met 0 GitHub-calls en 0 exportupdates terwijl de opgeslagen status `opened` blijft; P2 `invalid` + lijst 200 met één concrete blokkade naast een v1-rij** (codehead `6728897`) |
 | Volledige suite | `npm test` | **2105 tests: 2105 pass, 0 fail, 0 skipped** (head `5e3e3a5`; TAP, 102,1 s) |
 | Volledige suite (review 6274281958) | `npm test` | **2112 tests: 2112 pass, 0 fail, 0 skipped** (head `2b994cd`; TAP, 51,0 s) |
 | Volledige suite (read-only v2-aansluiting) | `npm test` | **2151 tests: 2151 pass, 0 fail, 0 skipped** (codehead `0f9ea9d`; TAP, 23,6 s) |
+| Volledige suite (herstel review 6283658271) | `npm test` | **2160 tests: 2160 pass, 0 fail, 0 skipped** (codehead `6728897`; TAP, 26,9 s) |
 | Structuurcorpus | `npm run test:menu-structure` | **6 pass, 0 fail** (head `5e3e3a5`) |
 | Benchmark | `npm run benchmark:menu-structure` | 23 gevallen: **22 pass, 0 fail, 1 unclassified** (`STRUCT-018`, bestaande JSON-LD-hiërarchiekeuze; head `5e3e3a5`) |
 | Build | `npm run build` | **compiled successfully in 30,5 s; 41/41 statische pagina's; exit 0** (head `5e3e3a5`) |
 | Build (review 6274281958) | `npm run build` | **compiled successfully in 51 s; 41/41 statische pagina's** (head `2b994cd`) |
 | Build (read-only v2-aansluiting) | `npm run build` | **compiled successfully in 18,7 s; 41/41 statische pagina's; exit 0** (codehead `0f9ea9d`) |
+| Build (herstel review 6283658271) | `npm run build` | **compiled successfully in 15,8 s; 41/41 statische pagina's; exit 0** (codehead `6728897`) |
 | PDF.js-serverpad | `node ops/scripts/verify-pdfjs-server-trace.js` | **OK**; 164 server scripts, native `pdf.mjs`/`pdf.worker.mjs`, geen gebundelde PDF.js-runtime (head `5e3e3a5`) |
 | Browserfixture (read-only v2-aansluiting) | `npm run test:browser:menu-review` | **127/127 checks**, 13 screenshots (incl. `v2-1024-light` en `v2-390-dark`), Edge 155.0.4283.45, gegenereerd op head `0f9ea9d` (dirty worktree door deze documentatie), evidence `passed: true` |
 | Echte bronproef | `node ops/scripts/probe-menu-extraction-sources.js --source=all` | **exit 0**; Smelt 37/37 (8 secties), Blossem 43/43 (13 secties); beide byte-/contenthash identiek; 0 gemist/extra/prijs/koppeling/duplicaat; boekhouding 37/37 en 43/43 |
@@ -307,6 +315,14 @@ eindigde met exit 0. Dat is een observatie, geen productacceptatie.
 
 De read-only v2-aansluiting is op codehead `0f9ea9d` met 37 gerichte tests, de
 volledige suite (2151/2151), de build en de browserfixture (127/127) uitgevoerd.
+Het herstel na review 6283658271 staat op codehead `6728897`: 46 gerichte tests,
+de volledige suite (2160/2160) en de build (41/41 pagina's, exit 0). Daarbij zijn
+de drie gemelde paden met een losse fixture opnieuw uitgevoerd: de generieke
+editorreview weigert een v1-projectie met v2-oorsprongsreceipt vóór de insert,
+detail doet voor een geblokkeerde kaart geen GitHub-call en geen exportupdate,
+en een onversioned v2-vorm levert een concrete blokkade in de lijst naast een
+geldige v1-rij. De browserfixture is niet opnieuw gedraaid: `6728897` wijzigt
+geen UI-bestand, dus het browsergedrag is gelijk aan de fixture op `0f9ea9d`.
 De fixture is op codehead `0f9ea9d` gegenereerd (dirty worktree door deze documentatie); de evidence noemt head `0f9ea9d` + dirty worktree. De bronproef en de
 Botanist-vergelijking zijn niet herhaald: `0f9ea9d` wijzigt geen fetch-,
 parser-, PDF- of extractorruntime. Hun bewijs blijft aan de eerdere codeheads
@@ -351,9 +367,9 @@ gekoppeld. Er is geen echte database-, GitHub- of providerwrite uitgevoerd.
 | 1 | Provider/model, maximaal kostenbudget, DPA/EU-retentie en app-side AI-activering | De runtime staat bewust uit. De bronproeftoestemming en de developer-prepaidtoestemming dekken dit niet | Product Owner |
 | 2 | Een nieuwe, nog ongeziene holdout en de toegangsbeslissing daarvoor | Zonder nieuwe holdout is er geen releaseclaim; de gebruikte bronnen zijn representatief/getuned | Product Owner, met Delivery Lead |
 | 3 | Live preview-/stagingtoegang en expliciete schrijfautorisatie voor bronbevestiging, conceptopslag en export | De fixture bewijst geen echte Supabase-sessie of schrijfactie; geen bypass toegestaan | Product Owner/ops |
-| 4 | Read-only v2-aansluiting is op `0f9ea9d` gebouwd; nog te besluiten: opt-in v2-writer, additief exportcontract, versiebewuste `url_intakes`-RPC en eventuele migratie | De read-only dual-read/guards zijn getest met fakes; er is geen writer, DDL of publieke werking. Het exportcontract en een eventuele migratie zijn nog niet besloten | Delivery Lead/architect; Product Owner voor writer-/export-/migratiebesluit |
+| 4 | Read-only v2-aansluiting is op `0f9ea9d` gebouwd en op `6728897` hersteld na review 6283658271; nog te besluiten: opt-in v2-writer, additief exportcontract, versiebewuste `url_intakes`-RPC en eventuele migratie | De read-only dual-read/guards zijn getest met fakes; er is geen writer, DDL of publieke werking. Het exportcontract en een eventuele migratie zijn nog niet besloten | Delivery Lead/architect; Product Owner voor writer-/export-/migratiebesluit |
 | 4b | Echte preview-/schrijfacceptatie van een v2-rij: bron → receipt → concept → authenticated browser | De fixture bewijst alleen fictieve data; er is geen echte v2-rij, live bron of Supabase-sessie gebruikt | Product Owner/ops; Developer voert na toegang uit |
-| 5 | Onafhankelijke review van codehead `0f9ea9d` en deze documentatie | Criterium 13; groene tests zijn geen productacceptatie | Delivery Lead |
+| 5 | Onafhankelijke review van codehead `6728897` en deze documentatie | Criterium 13; groene tests zijn geen productacceptatie | Delivery Lead |
 | 6 | Timing en uitvoering van de #56-integratie na afronding van #56 | Drie conflicten en tien overlappende bestanden; geen merge in deze branch | Delivery Lead beslist; developer voert na de merge uit |
 | 7 | BE-21's 50–100-bronnen/OCR-/vendorbenchmark | Expliciet buiten #59; twee bronnen sluiten die niet af | BE-21-eigenaar |
 | 8 | Gauchos Breda vervangen of als holdout laten vallen | De entry is 404/502 en levert geen broninhoud | Product Owner |
@@ -376,10 +392,12 @@ in [menu-extraction-acceptance.md](menu-extraction-acceptance.md).
 ## Overdracht
 
 **Aanbevolen status: READY_FOR_REVIEW voor dit afrondingsdossier, niet DONE voor
-#59.** Het dossier is toetsbaar op codehead `0f9ea9d` (read-only
-v2-aansluiting op de bestaande receipt-/review-/concept-/batch-/exportpaden)
-en de daarop volgende documentatiecommit. De volledige suite is 2151/2151 en
-de lokale browserfixture 127/127, maar dat is geen echte bron → database →
+#59.** Het dossier is toetsbaar op codehead `6728897` (herstel van review
+6283658271 op de read-only v2-aansluiting van de bestaande
+receipt-/review-/concept-/batch-/exportpaden) en de daarop volgende
+documentatiecommit. De volledige suite is 2160/2160 en de build is exit 0 met
+41/41 pagina's; de lokale browserfixture is 127/127 op `0f9ea9d` en is na die
+head niet opnieuw gedraaid, maar dat is hoe dan ook geen echte bron → database →
 authenticated browseracceptatie. Volledige productacceptatie blijft afhankelijk
 van de beslissingen hierboven: een echte preview-/schrijfronde, een eventuele
 v2-writer/exportcontract/migratie, provider/budget/DPA en een nieuwe holdout.

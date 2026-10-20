@@ -1,8 +1,8 @@
 # Menu-extractie — v2-integratie (read-only aansluiting)
 
 Status: **read-only lezers en guards aangesloten; geen v2-schrijver, DDL of
-publieke wijziging.** Datum: 2026-10-19. Issue #59, branch
-`feat/menu-extraction-59`, PR #60.
+publieke wijziging.** Datum: 2026-10-20 (herstel review 6283658271). Issue #59,
+branch `feat/menu-extraction-59`, PR #60.
 Ontwerp: [menu-extraction-product-schema-v2.md](../../planning/architecture/menu-extraction-product-schema-v2.md).
 Deze pagina beschrijft waar receipt, review, concept, hash, audit, idempotentie
 en export nu langs lopen, welke bestaande ingangen een v2-/onbekende envelope
@@ -23,6 +23,8 @@ v2-rij door een bestaande route mag worden geschreven.
 | Eén read-only integratielezer en view | `src/lib/menuProductIntegrationV2.js` | puur; detecteert receipt- en conceptenveloppen, saneert en begrenst de weergave, weigert met één concreet actiereden |
 | Bestaande conceptlezer is fail-closed | `src/lib/menuConcept.js` (`storedConceptInput`) | gooit `unsupported_product_schema`; geen stille v1-terugval |
 | Receipt-, review-, export- en batchguards | `src/lib/menuConceptReviewHandlers.js`, `src/lib/menuConceptExport.js`, `src/lib/menuSnapshotReviewHandlers.js`, `src/lib/batchAnalysisHandlers.js`, `app/api/internal/v1/url-intakes/route.js` | weigeren v2 vóór hash, claim, insert, update, RPC of GitHub |
+| Oorsprongsreceipt-guard | `src/lib/menuOriginReceiptGuard.js` | leest één begrensde receiptprojectie via `origin_receipt_id`; v2/onbekend/ongeldig weigert vóór insert, RPC of claim; een lookupfout fail-closed |
+| Read-only exportmetadata bij een geblokkeerde kaart | `src/lib/menuConceptExport.js` (`storedExportForSnapshot`), `src/lib/menuConceptReviewHandlers.js` (`detail`) | classificeert concept én receipt vóór de exportrefresh; geen GitHub-call, statusupdate of claim |
 | Generieke snapshotwrite | `src/lib/menuSnapshotProposals.js` (`validateSnapshotProposalInput`) en de `menu-proposals`-route | weigeren een versioned of v2-vormige `captured_content` vóór de hash en insert; een intakecontext zonder rubrieken wordt eveneens geweigerd |
 | Bestaande controle/beoordeling leest v2 | `src/lib/batchAnalysis.js`, `src/lib/sourceWorkqueue.js`, `src/lib/menuConceptReviewHandlers.js`, `app/internal/source-triage/batch/MenuReview.js`, `app/internal/menu-concepts/MenuConceptsView.js` | toont varianten, glas/fles, supplementen, bewijs en dekking; alleen-lezen |
 | Regressies | `src/lib/menuProductIntegrationV2.test.js`, `menuConceptV2ReviewHandlers.test.js`, `menuConceptExportV2.test.js`, `menuSnapshotReviewHandlers.test.js`, `sourceWorkqueueV2.test.js`, `menuProductV2Surface.test.js` | fictieve in-memory clients; nul echte netwerk-, database- of GitHubwrites |
@@ -31,14 +33,40 @@ De bestaande v1-invoer, routes en klikpaden blijven werken. Er is geen
 v2-route, writeflag, dual-write, provider, modelcall, migratie of wijziging aan
 `data/menus.json` of de publieke kaart.
 
+## Herstel na review 6283658271 (2026-10-20, codehead `6728897`)
+
+De onafhankelijke review vond drie gewone fouten in de aansluiting. Ze zijn in
+dezelfde branch hersteld, zonder schema-, DDL-, provider- of UI-wijziging:
+
+1. De generieke editorreview (`menuSnapshotReviewHandlers.record`) negeerde
+   `origin_receipt_id`. Hij leest nu dezelfde begrensde receiptprojectie als de
+   interne review- en exportroute en weigert een v1-projectie met een
+   v2/onbekende/ongeldige oorsprongsreceipt vóór de reviewinsert. Een
+   receipt-lookupfout geeft 500 en nooit een stille v1-terugval.
+2. `detail` voerde de exportrefresh (GitHub `pullRequestState` plus een update
+   van `menu_snapshot_exports`) uit vóór de versieguard. Concept en
+   oorsprongsreceipt worden nu eerst geclassificeerd; een geblokkeerde kaart
+   toont alleen opgeslagen exportmetadata via `storedExportForSnapshot`.
+3. `readConceptProduct` en `storedConceptInput` gebruikten verschillende
+   predicates voor een onversioned v2-vorm. Beide gebruiken nu
+   `isUnsupportedConceptEnvelope`, zodat lijst, detail en elke write-ingang
+   dezelfde concrete blokkade geven in plaats van een ongehandelde 500 of
+   v1-succes.
+
+Bewijs: 46 gerichte v2-tests, de volledige suite (2160/2160), de build (exit 0,
+41/41 pagina's) en een losse fixture die de drie reviewpaden exact naspeelt
+(0 reviewinserts, 0 GitHub-calls, 0 exportupdates). De UI is ongewijzigd; de
+browserfixture blijft daarom de eerdere 127/127 op `0f9ea9d`.
+
 ## Read-only inventaris van de bestaande paden
+
 
 | Artefact | Huidige opslag | Huidige schrijf-/leesroute | v2-impact | Nu gewijzigd? |
 | --- | --- | --- | --- | --- |
 | Receipt | `url_intake_analysis_receipts.candidate_summary` (JSONB), `analysis_result_hash` | tabel `supabase/migrations/0013_be19_url_intakes.sql:37-84`; schrijven `src/lib/batchAnalysisHandlers.js:300-325`; hash `src/lib/urlIntakeReceiptHash.js:51-62`; lezen `src/lib/batchAnalysisHandlers.js:46`, `src/lib/sourceTriageHandlers.js:22`, `src/lib/sourceWorkqueue.js:141` | Een v2-object staat als aparte, versiegebonden sleutel `candidate_summary.menuExtractionV2` naast `menus`. De bestaande lezers selecteren die sleutel nu expliciet; `menus` alleen is niet gezaghebbend meer. De hash dekt de nieuwe sleutel al via de canonieke vorm. | **ja** (lezen/guard; geen schrijver) |
 | Receipt → url_intake | `url_intakes.menu_candidate_summary` | SQL `0013_be19_url_intakes.sql:387-392` en `0016_be25_batch_source_analysis.sql:810-815` projecteren letterlijk `candidate_summary -> 'menus'` | De RPC is ongewijzigd. De routes `app/api/internal/v1/url-intakes/route.js` en `app/api/internal/v1/profile-drafts/route.js` weigeren een v2-receipt nu **vóór** de RPC, zodat geen oudere/lege v1-projectie wordt opgeslagen. Versiebewuste SQL blijft een latere beslissing. | **ja** (routeguard; SQL nee) |
 | Concept | `menu_snapshot_proposals.captured_content` (JSONB), `content_hash`, `version` | tabel `supabase/migrations/0011_be17_menu_snapshot_foundation.sql:36-75`; schrijven `app/api/internal/v1/menu-snapshots/route.js:104-141`; hash `src/lib/menuSnapshotHash.js:54-57` | `computeCanonicalContentHash` sorteert alle objectkeys en arrays behouden hun volgorde; een `schemaVersion` verandert de hash automatisch. De generieke write weigert nu iedere versioned/v2-vormige inhoud; `storedConceptInput` gooit fail-closed. | **ja** (lezen/guard; geen v2-write) |
-| Review | receipt `menus` + `captured_content` | `src/lib/menuConceptReviewHandlers.js` (`conceptSummary`, `loadReceipt`, `detail`); `src/lib/menuProductIntegrationV2.js`; `app/internal/menu-concepts/MenuConceptsView.js` | Een v2-concept gaat door dezelfde gevalideerde lezer en wordt getoond via één begrensde, gesaneerde view. Er is geen tweede samenvatting en geen v1-afplatting; de pagina is alleen-lezen. | **ja** (read-only) |
+| Review | receipt `menus` + `captured_content` | `src/lib/menuConceptReviewHandlers.js` (`conceptSummary`, `detail`); `src/lib/menuOriginReceiptGuard.js`; `src/lib/menuProductIntegrationV2.js`; `app/internal/menu-concepts/MenuConceptsView.js` | Een v2-concept gaat door dezelfde gevalideerde lezer en wordt getoond via één begrensde, gesaneerde view. Er is geen tweede samenvatting en geen v1-afplatting; de pagina is alleen-lezen. | **ja** (read-only) |
 | Reviewbeslissing | `menu_snapshot_reviews` | RPC `record_menu_snapshot_decision` (`supabase/migrations/0018_be17_menu_concept_review.sql:41`) | Ongewijzigd. `menuConceptReviewHandlers.decide` en `menuSnapshotReviewHandlers.record` weigeren een v2-rij nu vóór de RPC/insert; ook afwijzen is in deze ronde geblokkeerd. | **ja** (guard) |
 | Export | `menu_snapshot_exports`, daarna GitHub-PR met `data/menus.json`/`data/restaurants.json` | `src/lib/menuConceptExport.js` (`exportMenuEntry`, `exportToReviewPr`); `src/lib/menuExport.js`; tabel `supabase/migrations/0019_be27_menu_concept_exports.sql:17-40` | De export weigert v2 nu vóór de claim, `menu_snapshot_exports`, branch, commit of GitHub-call. `checkProductV2ExportSuitability` blijft de pure ontwerplaag; geen publiek exportveld is goedgekeurd. | **ja** (guard) |
 | Publieke kaart/search | `data/menus.json` → `app/menu`, `app/restaurant`, `app/nvwa`, `src/services/dishSearch` | bestaande lezers | Ongewijzigd; geen additief veld toegevoegd. | nee |
@@ -122,10 +150,11 @@ Geen migratie, backfill, RLS- of RPC-wijziging is toegepast.
    (`priceVariants`/`allergenStatus`) of blijvend blokkeren (Product Owner).
 3. De v2-writeflag, een versiebewuste `url_intakes`-RPC, eventuele latere
    normalisatie/migratie en het exportcontract (Product Owner + Delivery Lead).
-   De read-only dual-read is op `0f9ea9d` gebouwd; de writer is dat niet.
+   De read-only dual-read is op `0f9ea9d` gebouwd en op `6728897` hersteld na
+   review 6283658271; de writer is dat niet.
 4. Een nieuwe ongeziene holdout en de toegang daarvoor (Product Owner).
 5. Een echte geïsoleerde preview-/schrijfronde: bron → v2-receipt → concept →
    authenticated browser, met expliciete schrijfautorisatie (Product Owner/ops).
-6. Onafhankelijke review van codehead `0f9ea9d` en deze documentatie (Delivery
+6. Onafhankelijke review van codehead `6728897` en deze documentatie (Delivery
    Lead).
 
