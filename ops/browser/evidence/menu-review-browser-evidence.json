@@ -1,9 +1,9 @@
 {
   "fixtureOnly": true,
   "passed": true,
-  "head": "0f9ea9dd59c36b13b270cb140030466db11d6d8d",
-  "worktreeDirty": true,
-  "generatedAt": "2026-10-19T19:50:47.292Z",
+  "head": "26839eb4b9dfb5fb0a04fbc977ae3a7561f7000a",
+  "worktreeDirty": false,
+  "generatedAt": "2026-10-20T16:31:42.557Z",
   "command": "npm run test:browser:menu-review",
   "environment": {
     "node": "v22.22.3",
@@ -13,6 +13,12 @@
       900
     ],
     "fixtureOnly": true,
+    "loopback": {
+      "app": "http://localhost:3137",
+      "server": "the local next-dev process started and stopped by this harness",
+      "browser": "the local Edge/Chrome process started and stopped by this harness over CDP",
+      "scope": "only these own processes are exercised; no remote host"
+    },
     "networkGuard": "in-page fetch/XHR/WebSocket/EventSource/beacon + CDP Fetch + DNS lockdown"
   },
   "fixtures": [
@@ -21,8 +27,18 @@
     "empty",
     "partial",
     "v2",
-    "error"
+    "error",
+    "concepts",
+    "concepts-empty",
+    "concepts-error",
+    "concepts-no-access"
   ],
+  "conceptFixtures": {
+    "v1": "concept-v1-0001",
+    "v2": "concept-v2-0002",
+    "invalid": "concept-invalid-0003",
+    "empty": "concept-empty-0004"
+  },
   "checks": [
     {
       "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=light)",
@@ -595,6 +611,571 @@
       "detail": "focused=true open=true"
     },
     {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts?theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts?theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept list: all four fictional rows are shown",
+      "passed": true,
+      "detail": "onze\nmenukaarten\nDekkingsoverzicht\nOnboarding Restaurant\nLicht\nDonker\nSign out\nWerkvoorraad\n/\nMenuconcepten beoordelen\nMenuconcepten beoordelen\nAlleen intern\n\nControleer menuconcepten uit Batchanalyse. Je ziet alleen de aandachtspunten; veilige gerechten zijn samengevat.\n\nGoedkeuren blijft intern: e"
+    },
+    {
+      "name": "concept list: a valid v1 row is usable next to blocked rows",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept list: the v2 row is marked v2 and read-only",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept list: the unknown version row is marked read-only",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept list: every row links to its own exact concept id",
+      "passed": true,
+      "detail": "[{\"text\":\"\",\"href\":\"/internal/menu-concepts\"},{\"text\":\"Fictief Concept Lunch\",\"href\":\"/internal/menu-concepts/concept-v1-0001\"},{\"text\":\"Fictief Concept Diner\",\"href\":\"/internal/menu-concepts/concept-v2-0002\"},{\"text\":\"Fictief Concept Onbekend\",\"href\":\"/internal/menu-concepts/concept-invalid-0003\"},{\"text\":\"Fictief Concept Leeg\",\"href\":\"/internal/menu-concepts/concept-empty-0004\"}]"
+    },
+    {
+      "name": "concept list: light theme and no horizontal overflow",
+      "passed": true,
+      "detail": "light/-6"
+    },
+    {
+      "name": "concept click: valid v1 row opens its own detail id",
+      "passed": true,
+      "detail": "/internal/menu-concepts/concept-v1-0001/true"
+    },
+    {
+      "name": "concept v1: still usable - approve and reject are present and enabled",
+      "passed": true,
+      "detail": "approve=true/null reject=true"
+    },
+    {
+      "name": "concept v1: no blockers and the exact source URL is kept",
+      "passed": true,
+      "detail": "https://fictief-brasserie.invalid/menu"
+    },
+    {
+      "name": "concept v1: the selected id did not jump to another row",
+      "passed": true,
+      "detail": "/internal/menu-concepts/concept-v1-0001"
+    },
+    {
+      "name": "concept v1: the Bron tab keeps the exact source reference",
+      "passed": true,
+      "detail": "true/true"
+    },
+    {
+      "name": "concept v1: the public preview still renders the stored dishes",
+      "passed": true,
+      "detail": "true/true"
+    },
+    {
+      "name": "concept click: back returns to the real list",
+      "passed": true,
+      "detail": "/internal/menu-concepts/true"
+    },
+    {
+      "name": "concept click: the v2 row opens the v2 detail id",
+      "passed": true,
+      "detail": "/internal/menu-concepts/concept-v2-0002/true"
+    },
+    {
+      "name": "concept v2: the raw stored v2 envelope is never shown as v1",
+      "passed": true,
+      "detail": "/internal/menu-concepts/concept-v2-0002/Licht|Donker|Sign out"
+    },
+    {
+      "name": "concept click: v2 back returns to the real list",
+      "passed": true,
+      "detail": "/internal/menu-concepts/true"
+    },
+    {
+      "name": "concept click: the unknown row opens its own detail id",
+      "passed": true,
+      "detail": "/internal/menu-concepts/concept-invalid-0003/true"
+    },
+    {
+      "name": "concept invalid: visibly blocked, never flattened to v1",
+      "passed": true,
+      "detail": "/internal/menu-concepts/concept-invalid-0003"
+    },
+    {
+      "name": "concept click: the exact menus:[] row opens its own detail id",
+      "passed": true,
+      "detail": "/internal/menu-concepts/concept-empty-0004/true"
+    },
+    {
+      "name": "concept empty: an exact empty v2 menu stays visibly blocked",
+      "passed": true,
+      "detail": "/internal/menu-concepts/concept-empty-0004"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts/concept-v2-0002?theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts/concept-v2-0002?theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept v2 read-only: glass and bottle prices stay separate",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept v2 read-only: no invented primary price is shown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept v2 read-only: supplement relation stays explicit",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept v2 read-only: unknown allergens stay unknown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept v2 read-only: provenance and its quote are visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept v2 read-only: coverage and its limitation are visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept v2 read-only: counts keep both items, the variant and the supplement",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept v2 read-only: save, approve, reject and export are absent",
+      "passed": true,
+      "detail": "Licht|Donker|Sign out"
+    },
+    {
+      "name": "concept v2 read-only: the blocked actions are named, not hidden",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept v2 read-only: the exact source link is kept",
+      "passed": true,
+      "detail": "[{\"text\":\"Open originele menukaart\\n(opent in een nieuw tabblad)\",\"href\":\"https://fictief-brasserie.invalid/menu\"}]"
+    },
+    {
+      "name": "concept v2 read-only: light theme and no horizontal overflow",
+      "passed": true,
+      "detail": "light/-6"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts/concept-invalid-0003?theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts/concept-invalid-0003?theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept invalid: the unknown version is named with its concrete problem",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept invalid: the raw row stays preserved and nothing is converted",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept invalid: no save, approve, reject or export action exists",
+      "passed": true,
+      "detail": "Licht|Donker|Sign out"
+    },
+    {
+      "name": "concept invalid: the selected id did not jump to another row",
+      "passed": true,
+      "detail": "Fictief Concept Onbekend"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts/concept-empty-0004?theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts/concept-empty-0004?theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept empty: an exact empty v2 menu is not a success",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept empty: it never becomes a usable v1 concept",
+      "passed": true,
+      "detail": "Licht|Donker|Sign out"
+    },
+    {
+      "name": "concept empty: the selected id did not jump to another row",
+      "passed": true,
+      "detail": "Fictief Concept Leeg"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts?fixture=concepts-empty&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts?fixture=concepts-empty&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept list empty: the honest empty state is shown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept list empty: light theme and no horizontal overflow",
+      "passed": true,
+      "detail": "light/0"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts?fixture=concepts-error&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts?fixture=concepts-error&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept list error: the load error is in the alert region",
+      "passed": true,
+      "detail": "De menuconcepten konden niet worden geladen."
+    },
+    {
+      "name": "concept list error: no stale or fabricated row is shown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept list error: no horizontal overflow at 390 px",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts?fixture=concepts-no-access&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts?fixture=concepts-no-access&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept list no-access: the server refusal is shown, not an empty success",
+      "passed": true,
+      "detail": "Alleen interne medewerkers kunnen menuconcepten beoordelen."
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts/concept-v1-0001?fixture=concepts-error&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts/concept-v1-0001?fixture=concepts-error&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept detail error: the load error is shown and no stale detail remains",
+      "passed": true,
+      "detail": "Het menuconcept kon niet worden geladen."
+    },
+    {
+      "name": "concept detail error: a real back link stays available",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts/concept-missing-9999?theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts/concept-missing-9999?theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept detail missing id: a 404 is reported, not an empty concept",
+      "passed": true,
+      "detail": "Menuconcept niet gevonden."
+    },
+    {
+      "name": "concept detail missing id: a real back link stays available",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts/concept-v1-0001?theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts/concept-v1-0001?theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept forced write: the real approve click shows the refusal and stays on the page",
+      "passed": true,
+      "detail": "true/true//internal/menu-concepts/concept-v1-0001"
+    },
+    {
+      "name": "concept forced write: no internal approval is claimed",
+      "passed": true,
+      "detail": "Het besluit kon niet worden vastgelegd."
+    },
+    {
+      "name": "concept forced write: the decision POST is blocked before a handler",
+      "passed": true,
+      "detail": "[{\"method\":\"POST\",\"url\":\"http://localhost:3137/api/internal/v1/menu-concepts/concept-v1-0001/decision\",\"reason\":\"unknown_api_route\",\"phase\":\"negative-probe\"}]"
+    },
+    {
+      "name": "concept forced write: decision, versions and export POSTs are all refused",
+      "passed": true,
+      "detail": "{\"decision\":\"fixture_network_blocked: unknown_api_route (POST http://localhost:3137/api/internal/v1/menu-concepts/concept-v2-0002/decision)\",\"versions\":\"fixture_network_blocked: unknown_api_route (POST http://localhost:3137/api/internal/v1/menu-concepts/concept-v2-0002/versions)\",\"export\":\"fixture_network_blocked: unknown_api_route (POST http://localhost:3137/api/internal/v1/menu-concepts/concept-v2-0002/export)\",\"listWrite\":\"fixture_network_blocked: method_not_allowed (POST http://localhost:3137/api/internal/v1/menu-concepts)\",\"detailWrite\":\"fixture_network_blocked: method_not_allowed (POST http://localhost:3137/api/internal/v1/menu-concepts/concept-v2-0002)\",\"provider\":\"fixture_network_blocked: external_origin (GET https://unapproved.invalid/provider)\",\"violations\":7}"
+    },
+    {
+      "name": "concept forced write: the concept list and detail POSTs are refused",
+      "passed": true,
+      "detail": "fixture_network_blocked: method_not_allowed (POST http://localhost:3137/api/internal/v1/menu-concepts) / fixture_network_blocked: method_not_allowed (POST http://localhost:3137/api/internal/v1/menu-concepts/concept-v2-0002)"
+    },
+    {
+      "name": "concept forced write: an external provider POST is refused too",
+      "passed": true,
+      "detail": "fixture_network_blocked: external_origin (GET https://unapproved.invalid/provider)"
+    },
+    {
+      "name": "concept forced write: every attempt is recorded as a deliberate violation",
+      "passed": true,
+      "detail": "0->7, phase=7"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts/concept-v2-0002?theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts/concept-v2-0002?theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept responsive 320px/light: requested theme is active",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "concept responsive 320px/light: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "concept responsive 320px/light: the v2 content and read-only banner stay visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts/concept-v2-0002?theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts/concept-v2-0002?theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept responsive 390px/light: requested theme is active",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "concept responsive 390px/light: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "concept responsive 390px/light: the v2 content and read-only banner stay visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts/concept-v2-0002?theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts/concept-v2-0002?theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept responsive 390px/dark: requested theme is active",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "concept responsive 390px/dark: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "concept responsive 390px/dark: the v2 content and read-only banner stay visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts/concept-v2-0002?theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts/concept-v2-0002?theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept responsive 1024px/dark: requested theme is active",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "concept responsive 1024px/dark: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=-6"
+    },
+    {
+      "name": "concept responsive 1024px/dark: the v2 content and read-only banner stay visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts?theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts?theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept list responsive 320px/light: requested theme is active",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "concept list responsive 320px/light: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "concept list responsive 320px/light: all rows remain readable",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts?theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts?theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept list responsive 390px/dark: requested theme is active",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "concept list responsive 390px/dark: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "concept list responsive 390px/dark: all rows remain readable",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept light and dark resolve to different background tokens",
+      "passed": true,
+      "detail": "#fcfaf4 / #0a0a0a"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts?theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts?theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept keyboard: the v2 row is reachable with Tab",
+      "passed": true,
+      "detail": "[{\"tag\":\"BUTTON\",\"text\":\"Donker\",\"href\":null,\"expanded\":null},{\"tag\":\"BUTTON\",\"text\":\"Sign out\",\"href\":null,\"expanded\":null},{\"tag\":\"A\",\"text\":\"Fictief Concept Lunch\",\"href\":\"/internal/menu-concepts/concept-v1-0001\",\"expanded\":null},{\"tag\":\"A\",\"text\":\"Fictief Concept Diner\",\"href\":\"/internal/menu-concepts/concept-v2-0002\",\"expanded\":null}]"
+    },
+    {
+      "name": "concept keyboard: Tab moves focus through the list",
+      "passed": true,
+      "detail": "tabs=9"
+    },
+    {
+      "name": "concept keyboard: Enter opens the correct detail page",
+      "passed": true,
+      "detail": "/internal/menu-concepts/concept-v2-0002"
+    },
+    {
+      "name": "concept keyboard: the return link is reachable with Tab",
+      "passed": true,
+      "detail": "[{\"tag\":\"SUMMARY\",\"text\":\"Hoofd · 2 items\",\"href\":null,\"expanded\":null},{\"tag\":\"SUMMARY\",\"text\":\"Dekking · partial · 2 items\",\"href\":null,\"expanded\":null},{\"tag\":\"A\",\"text\":\"Open originele menukaart\\n(opent in een nieuw tabblad)\",\"href\":\"https://fictief-brasserie.invalid/menu\",\"expanded\":null},{\"tag\":\"A\",\"text\":\"Terug naar Menuconcepten beoordelen\",\"href\":\"/internal/menu-concepts\",\"expanded\":null}]"
+    },
+    {
+      "name": "concept keyboard: Enter returns to the list",
+      "passed": true,
+      "detail": "/internal/menu-concepts"
+    },
+    {
       "name": "network guard: external fetch is blocked before native fetch",
       "passed": true,
       "detail": "fixture_network_blocked: external_origin (GET https://unapproved.invalid/api/anything)"
@@ -607,7 +1188,12 @@
     {
       "name": "network guard: unknown local API write is blocked",
       "passed": true,
-      "detail": "fixture_network_blocked: unknown_api_route (POST http://localhost:3137/api/internal/v1/menu-concepts)"
+      "detail": "fixture_network_blocked: unknown_api_route (POST http://localhost:3137/api/internal/v1/unrelated-write)"
+    },
+    {
+      "name": "network guard: the explicit concept write is still refused",
+      "passed": true,
+      "detail": "fixture_network_blocked: method_not_allowed (POST http://localhost:3137/api/internal/v1/menu-concepts)"
     },
     {
       "name": "network guard: explicit fixture API still answers",
@@ -615,7 +1201,7 @@
       "detail": "200"
     },
     {
-      "name": "network guard: XHR to an unknown API write is blocked",
+      "name": "network guard: XHR to the concept write is blocked",
       "passed": true,
       "detail": "xhr-error"
     },
@@ -627,12 +1213,12 @@
     {
       "name": "network guard: page-level violations are recorded",
       "passed": true,
-      "detail": "violations=5"
+      "detail": "violations=6"
     },
     {
       "name": "network guard: CDP blocks external subresource and frame navigation",
       "passed": true,
-      "detail": "[{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/frame\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-19T19:50:46.343Z\",\"resourceType\":\"Document\"},{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/pixel.png\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-19T19:50:46.346Z\",\"resourceType\":\"Image\"}]"
+      "detail": "[{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/pixel.png\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-20T16:31:41.613Z\",\"resourceType\":\"Image\"},{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/frame\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-20T16:31:41.616Z\",\"resourceType\":\"Document\"}]"
     },
     {
       "name": "network guard: no unexpected CDP traffic during app scenarios",
@@ -660,16 +1246,94 @@
       "detail": null
     }
   ],
+  "clickpaths": [
+    {
+      "name": "concept list -> exact detail -> back",
+      "steps": [
+        {
+          "action": "click list row",
+          "target": "Fictief Concept Lunch",
+          "href": "/internal/menu-concepts/concept-v1-0001",
+          "pathname": "/internal/menu-concepts/concept-v1-0001",
+          "arrived": true
+        },
+        {
+          "action": "click breadcrumb back",
+          "href": "/internal/menu-concepts",
+          "pathname": "/internal/menu-concepts",
+          "arrived": true
+        },
+        {
+          "action": "click list row",
+          "target": "Fictief Concept Diner",
+          "href": "/internal/menu-concepts/concept-v2-0002",
+          "pathname": "/internal/menu-concepts/concept-v2-0002",
+          "arrived": true
+        },
+        {
+          "action": "click bottom back link",
+          "href": "/internal/menu-concepts",
+          "pathname": "/internal/menu-concepts",
+          "arrived": true
+        },
+        {
+          "action": "click list row",
+          "target": "Fictief Concept Onbekend",
+          "href": "/internal/menu-concepts/concept-invalid-0003",
+          "pathname": "/internal/menu-concepts/concept-invalid-0003",
+          "arrived": true
+        },
+        {
+          "action": "click list row",
+          "target": "Fictief Concept Leeg",
+          "href": "/internal/menu-concepts/concept-empty-0004",
+          "pathname": "/internal/menu-concepts/concept-empty-0004",
+          "arrived": true
+        }
+      ],
+      "passed": true,
+      "detail": "[{\"action\":\"click list row\",\"target\":\"Fictief Concept Lunch\",\"href\":\"/internal/menu-concepts/concept-v1-0001\",\"pathname\":\"/internal/menu-concepts/concept-v1-0001\",\"arrived\":true},{\"action\":\"click breadcrumb back\",\"href\":\"/internal/menu-concepts\",\"pathname\":\"/internal/menu-concepts\",\"arrived\":true},{\"action\":\"click list row\",\"target\":\"Fictief Concept Diner\",\"href\":\"/internal/menu-concepts/concept-v2-0002\",\"pathname\":\"/internal/menu-concepts/concept-v2-0002\",\"arrived\":true},{\"action\":\"click bottom back link\",\"href\":\"/internal/menu-concepts\",\"pathname\":\"/internal/menu-concepts\",\"arrived\":true},{\"action\":\"click list row\",\"target\":\"Fictief Concept Onbekend\",\"href\":\"/internal/menu-concepts/concept-invalid-0003\",\"pathname\":\"/internal/menu-concepts/concept-invalid-0003\",\"arrived\":true},{\"action\":\"click list row\",\"target\":\"Fictief Concept Leeg\",\"href\":\"/internal/menu-concepts/concept-empty-0004\",\"pathname\":\"/internal/menu-concepts/concept-empty-0004\",\"arrived\":true}]"
+    },
+    {
+      "name": "concept keyboard list -> detail -> list",
+      "steps": [
+        {
+          "action": "Tab to list row",
+          "target": "Fictief Concept Diner",
+          "reached": true,
+          "tabs": 9
+        },
+        {
+          "action": "Enter on list row",
+          "pathname": "/internal/menu-concepts/concept-v2-0002",
+          "arrived": true
+        },
+        {
+          "action": "Tab to return link",
+          "target": "Terug naar Menuconcepten beoordelen",
+          "reached": true,
+          "tabs": 12
+        },
+        {
+          "action": "Enter on return link",
+          "pathname": "/internal/menu-concepts",
+          "arrived": true
+        }
+      ],
+      "passed": true,
+      "detail": "[{\"action\":\"Tab to list row\",\"target\":\"Fictief Concept Diner\",\"reached\":true,\"tabs\":9},{\"action\":\"Enter on list row\",\"pathname\":\"/internal/menu-concepts/concept-v2-0002\",\"arrived\":true},{\"action\":\"Tab to return link\",\"target\":\"Terug naar Menuconcepten beoordelen\",\"reached\":true,\"tabs\":12},{\"action\":\"Enter on return link\",\"pathname\":\"/internal/menu-concepts\",\"arrived\":true}]"
+    }
+  ],
   "screenshots": [
     {
       "file": "menu-review-desktop-light.png",
-      "sha256": "7c60dfc92f5dcc30596979419c10fa8b30ad5ef7156f30ba43a65d8d7a80f9e9",
+      "sha256": "528e83eb451f3f48d56626e7c4e0dfcfaf967668e70b99493394841dbadc9109",
       "width": 1024,
       "height": 900
     },
     {
       "file": "menu-review-readonly-1024-dark.png",
-      "sha256": "ac5d633e935c0f4bca5f3bafa006da6e6ef19841708d3e59934aabc21ed81fd1",
+      "sha256": "3f27d81d60ad01ba686df1206af7fff1e909ef3bdbb905e2e6c9ee0db6945467",
       "width": 1024,
       "height": 900
     },
@@ -681,19 +1345,19 @@
     },
     {
       "file": "menu-review-partial-390-dark.png",
-      "sha256": "8e3926efefb01ecc6c3bb8b77555d1eb35ca65288b76aad8bb7a16927ad370cf",
+      "sha256": "beba7098dc6c95c36dfe581e43ebf254104dcb62c5cf7fc43806f7ccab4bdb56",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-v2-1024-light.png",
-      "sha256": "38d7a4d151d700eee8e10883b6d89546df90af16421dda64b37d7e934ed12440",
+      "sha256": "2ad756d9362ab57700f3ee57d83f654cad1f165c99038171871d29fd54bc5d56",
       "width": 1024,
       "height": 900
     },
     {
       "file": "menu-review-v2-390-dark.png",
-      "sha256": "b1195ad65edb1686c42bf80bc63ecd5362194390ab454daaeaf778953cdd8219",
+      "sha256": "b00c9e5362cddb1384e8fdf7d026ee2fdcd8d4ab8ce026462c75ea6675ca8592",
       "width": 390,
       "height": 900
     },
@@ -705,37 +1369,157 @@
     },
     {
       "file": "menu-review-320-light.png",
-      "sha256": "813df208033a811475f713b4b3f6a3a91231f9bdbc489d4764d7a8f4d187f23f",
+      "sha256": "364203ec2bedd6d6a42854b2862bea1e595670cd20beb8bfbfc8219d55cbb554",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-320-dark.png",
-      "sha256": "9eab8a47b13ea7c04087a4fbaa4430679520053fd6db19947d780fe948752f47",
+      "sha256": "417eb9e1672ddb18419ccbf2df62226f39edb5518719ddab1f144985caae6df7",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-390-light.png",
-      "sha256": "1c822f8ad37300f15bcd690e7dc4b84fddcf2cd79f3c302f3b2edd7bed9afad6",
+      "sha256": "cadc7d50e38dfd177b7d8e36365268f816c1f61c9352e289a31b2e46cbe1e09e",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-390-dark.png",
-      "sha256": "12611e35dfea7537946bac73b65a79e77ba9cd57ba8153733675821e4c027ba5",
+      "sha256": "4ed360db86be57acca681b28f1dd417be510dcb70ef8ee364be8fd862cca197b",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-1024-dark.png",
-      "sha256": "9733ab327e1c57f5c595df5e972772ce00175fa35edafaab4123b4c38d9069ec",
+      "sha256": "015813c24262aec5182d83a4387ba9e6db1ec2adc8148d2818312f733b472d7b",
       "width": 1024,
       "height": 900
     },
     {
       "file": "menu-review-keyboard-390-light.png",
-      "sha256": "705c6a45b8e7c74c74217e4d284ccb42bc5737514c19e89f315ce065fb1f4ab9",
+      "sha256": "0f3ed04dd61d65a4f6021cf0f8174296b94696dffbd90fb9a4c3036d9e40960a",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "concept-list-1024-light.png",
+      "sha256": "b09dc9300fe1d3c8baf125cf56f5f3184ca2966c8acbdbbbaabe375e7dfdd69a",
+      "width": 1024,
+      "height": 900
+    },
+    {
+      "file": "concept-detail-v1-1024-clickpath.png",
+      "sha256": "7d2459db0263666dbb7df04d43a4445e58de7126f0f530f5257bfa9122511bfa",
+      "width": 1024,
+      "height": 900
+    },
+    {
+      "file": "concept-detail-v2-1024-clickpath.png",
+      "sha256": "fc73b1c97b1b25bb9ba989e21754f1c24e3a5ec2dd1f60fc41d28b8dded5bc71",
+      "width": 1024,
+      "height": 900
+    },
+    {
+      "file": "concept-detail-invalid-1024-clickpath.png",
+      "sha256": "2641357a168ba7383e8c9ca1394a0c0494c899b89129a663312fdb73ebdddd28",
+      "width": 1024,
+      "height": 900
+    },
+    {
+      "file": "concept-detail-empty-1024-clickpath.png",
+      "sha256": "2dadce3024d0cd0a80580959ec5b88f306b9f807896751f491d34ef5315ec6fc",
+      "width": 1024,
+      "height": 900
+    },
+    {
+      "file": "concept-detail-v2-readonly-1024-light.png",
+      "sha256": "3e0ce2139e72488aead90e9f04b55f61fd6a79a5f9504c8c896e97c0c14cb943",
+      "width": 1024,
+      "height": 900
+    },
+    {
+      "file": "concept-detail-invalid-1024-light.png",
+      "sha256": "3aa77eb1cb981404ba3acf222c86a4044f99e8aa133eeab2da484c589c69dc66",
+      "width": 1024,
+      "height": 900
+    },
+    {
+      "file": "concept-detail-empty-1024-dark.png",
+      "sha256": "2dadce3024d0cd0a80580959ec5b88f306b9f807896751f491d34ef5315ec6fc",
+      "width": 1024,
+      "height": 900
+    },
+    {
+      "file": "concept-list-empty-390-light.png",
+      "sha256": "81f2ec71b8735a0b99b44d2a008563e125459a0d68729fd9f3c98696a611b231",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "concept-list-error-390-light.png",
+      "sha256": "c27e117bf249cd74544cea5e95503d51c5d839de73487116e80c83490038c6a4",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "concept-list-no-access-390-light.png",
+      "sha256": "6996a7ace3bfa31f80820af8d0e1883b11a0110c081f6d80ccc64c4629946cd5",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "concept-detail-error-390-light.png",
+      "sha256": "0b1e4d9603ce996c85a0ccd2d1f2d812e4412ee712afb4210a5ca5291e481bcc",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "concept-detail-missing-390-light.png",
+      "sha256": "38372402dc60308bc22b008512017d628304c78fcdb39a0d7a2379778c1ec91b",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "concept-detail-v2-320-light.png",
+      "sha256": "b70f78fa2e1379899a7866ad80cc5cb5791baab8937ff499587d6f00b332eae5",
+      "width": 320,
+      "height": 900
+    },
+    {
+      "file": "concept-detail-v2-390-light.png",
+      "sha256": "309bdf2e28b90f7380665a6925f47d4b2f84e8b26fc70cbdacd7a4679fa8801e",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "concept-detail-v2-390-dark.png",
+      "sha256": "df9f62d8519bd1944b5808ab78a182a99f0d87b842ffe1e56c0314d4dcfb68e1",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "concept-detail-v2-1024-dark.png",
+      "sha256": "fc73b1c97b1b25bb9ba989e21754f1c24e3a5ec2dd1f60fc41d28b8dded5bc71",
+      "width": 1024,
+      "height": 900
+    },
+    {
+      "file": "concept-list-320-light.png",
+      "sha256": "025999d65c49893f9906f8a394560340fc5ba7ce8943ddf4ebbc6da85f3f9e44",
+      "width": 320,
+      "height": 900
+    },
+    {
+      "file": "concept-list-390-dark.png",
+      "sha256": "8e12f3419dafcfe88f580ccf3871af80560ac2be405eb44c9e6380101b8bb706",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "concept-keyboard-390-clickpath.png",
+      "sha256": "8e12f3419dafcfe88f580ccf3871af80560ac2be405eb44c9e6380101b8bb706",
       "width": 390,
       "height": 900
     }
@@ -748,21 +1532,21 @@
         "phase": "negative-probe",
         "kind": "cdp_fetch",
         "method": "GET",
-        "url": "https://unapproved.invalid/frame",
+        "url": "https://unapproved.invalid/pixel.png",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-19T19:50:46.343Z",
-        "resourceType": "Document"
+        "at": "2026-10-20T16:31:41.613Z",
+        "resourceType": "Image"
       },
       {
         "phase": "negative-probe",
         "kind": "cdp_fetch",
         "method": "GET",
-        "url": "https://unapproved.invalid/pixel.png",
+        "url": "https://unapproved.invalid/frame",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-19T19:50:46.346Z",
-        "resourceType": "Image"
+        "at": "2026-10-20T16:31:41.616Z",
+        "resourceType": "Document"
       }
     ],
     "pageViolations": [
@@ -773,7 +1557,7 @@
         "url": "https://unapproved.invalid/api/anything",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-19T19:50:46.309Z"
+        "at": "2026-10-20T16:31:41.599Z"
       },
       {
         "phase": "negative-probe",
@@ -782,25 +1566,34 @@
         "url": "http://unapproved.invalid/api/anything",
         "reason": "external_origin",
         "protocolRelative": true,
-        "at": "2026-10-19T19:50:46.311Z"
+        "at": "2026-10-20T16:31:41.599Z"
       },
       {
         "phase": "negative-probe",
         "kind": "fetch",
         "method": "POST",
         "url": "http://localhost:3137/api/internal/v1/menu-concepts",
+        "reason": "method_not_allowed",
+        "protocolRelative": false,
+        "at": "2026-10-20T16:31:41.600Z"
+      },
+      {
+        "phase": "negative-probe",
+        "kind": "fetch",
+        "method": "POST",
+        "url": "http://localhost:3137/api/internal/v1/unrelated-write",
         "reason": "unknown_api_route",
         "protocolRelative": false,
-        "at": "2026-10-19T19:50:46.311Z"
+        "at": "2026-10-20T16:31:41.600Z"
       },
       {
         "phase": "negative-probe",
         "kind": "xhr",
         "method": "POST",
         "url": "http://localhost:3137/api/internal/v1/menu-concepts",
-        "reason": "unknown_api_route",
+        "reason": "method_not_allowed",
         "protocolRelative": false,
-        "at": "2026-10-19T19:50:46.312Z"
+        "at": "2026-10-20T16:31:41.600Z"
       },
       {
         "phase": "negative-probe",
@@ -809,15 +1602,44 @@
         "url": "ws://unapproved.invalid/socket",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-19T19:50:46.312Z"
+        "at": "2026-10-20T16:31:41.600Z"
       }
     ]
   },
+  "forcedWrites": {
+    "uiClick": {
+      "clicked": true,
+      "failed": true,
+      "pathname": "/internal/menu-concepts/concept-v1-0001",
+      "approveStillPresent": true,
+      "violations": [
+        {
+          "method": "POST",
+          "url": "http://localhost:3137/api/internal/v1/menu-concepts/concept-v1-0001/decision",
+          "reason": "unknown_api_route",
+          "phase": "negative-probe"
+        }
+      ]
+    },
+    "scripted": {
+      "decision": "fixture_network_blocked: unknown_api_route (POST http://localhost:3137/api/internal/v1/menu-concepts/concept-v2-0002/decision)",
+      "versions": "fixture_network_blocked: unknown_api_route (POST http://localhost:3137/api/internal/v1/menu-concepts/concept-v2-0002/versions)",
+      "export": "fixture_network_blocked: unknown_api_route (POST http://localhost:3137/api/internal/v1/menu-concepts/concept-v2-0002/export)",
+      "listWrite": "fixture_network_blocked: method_not_allowed (POST http://localhost:3137/api/internal/v1/menu-concepts)",
+      "detailWrite": "fixture_network_blocked: method_not_allowed (POST http://localhost:3137/api/internal/v1/menu-concepts/concept-v2-0002)",
+      "provider": "fixture_network_blocked: external_origin (GET https://unapproved.invalid/provider)",
+      "violations": 7
+    },
+    "note": "Only the in-page fixture guard is proven here. It received no handler and made no real network call; src/lib/menuConceptReviewHandlers.test.js remains the authority for server-side refusal."
+  },
   "error": null,
   "limitations": [
-    "Fixture evidence against the real UI components; it is not live integration, staging or production acceptance.",
+    "Fixture evidence against the real UI components; it is not live integration, staging, production or authenticated acceptance.",
     "The session and API responses are fictional and same-origin; no production Supabase project, credential or data is used.",
+    "Only two fictional concept reads are mocked: GET /api/internal/v1/menu-concepts and GET /api/internal/v1/menu-concepts/<id>. Every concept POST (versions, decision, export) and every unknown API route is refused at the network layer.",
+    "Forced write probes prove the in-page guard, not the server. src/lib/menuConceptReviewHandlers.test.js remains the authority for server-side refusal.",
     "Unknown external URLs, protocol-relative external URLs and unknown API/write routes are fail-closed. The negative probe deliberately attempts them and proves they never reach the destination.",
-    "No source confirmation, concept save, export, provider call or workflow activation is performed."
+    "The harness only exercises the local loopback next-dev process it starts and the local Edge/Chrome instance it starts over CDP; no remote host, real auth provider, database, GitHub or AI provider is contacted.",
+    "No source confirmation, concept save, decision, export, provider call or workflow activation is performed."
   ]
 }
