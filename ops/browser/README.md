@@ -1,8 +1,9 @@
 # Isolated browser fixture — #59 menu import/review
 
 This directory holds the reproducible **fixture-only** browser check for the
-existing batch import and menu-review UI. It is not live integration, staging or
-production acceptance.
+existing batch import and menu-review UI, and for the existing concept list and
+detail pages. It is not live integration, staging, authenticated or production
+acceptance.
 
 ## What it does
 
@@ -10,19 +11,52 @@ production acceptance.
 with fictional `NEXT_PUBLIC_SUPABASE_*` values, launches a locally installed
 Edge/Chrome through the Chrome DevTools Protocol, installs a fictional
 in-page session and same-origin API responses, and drives the real
-`/internal/source-triage/batch` route with the real `BatchAnalysisView` and
-`MenuReview` components.
+`/internal/source-triage/batch`, `/internal/menu-concepts` and
+`/internal/menu-concepts/[id]` routes with the real
+`BatchAnalysisView`, `MenuReview`, `ConceptList` and `ConceptReview`
+components. No HTML is rebuilt in the harness.
 
 The fictional data is generated through the product's own helpers
-(`summarizeRecognisedMenu`, `buildMenuConcept`, `buildExtractionResult`) in
+(`summarizeRecognisedMenu`, `buildMenuConcept`, `buildExtractionResult`,
+`readConceptProduct`, `buildProductReviewView`, `storedConceptInput`) in
 `fixtures/menuReviewFixtures.js`. Every URL is on `.invalid`. No production
 identity, credential, database or write is used, and the check never confirms a
-source, saves a concept, exports, publishes or calls a provider.
+source, saves a concept, records a decision, exports, publishes or calls a
+provider.
+
+## Concept list and detail coverage
+
+Four fictional lineages exercise the existing pages:
+
+- a valid v1 concept with no blockers (approve/reject remain usable);
+- a stored `menu-extraction-product/v2` envelope, read-only, with separate
+  glass/bottle prices, an unresolved supplement, unknown allergens, provenance
+  quotes and coverage limitations;
+- an unknown/invalid versioned-looking row that must not become v1;
+- an exact `menus: []` v2 envelope, visibly empty and blocked.
+
+The check performs real list → exact detail → back clicks, asserts that each
+selected id and restaurant name match, and covers empty list, load error,
+missing access (403), detail error and a 404. It also covers keyboard focus and
+Enter activation, light/dark tokens and 320/390/1024 px.
+`clickpaths` in the evidence records the concrete click inventory.
+
+Only these fictional concept reads are mocked:
+
+- `GET /api/internal/v1/menu-concepts` (list);
+- `GET /api/internal/v1/menu-concepts/<id>` (detail, exactly one segment).
+
+Every concept write (`POST` list/detail, `versions`, `decision`, `export`) and
+every unknown or nested API route is refused by the guard before a handler or
+native fetch is reached. A forced approve click and forced script POSTs are
+recorded as deliberate negative probes. That proves the network guard only:
+`src/lib/menuConceptReviewHandlers.test.js` remains the authority for
+server-side refusal. The UI block is not presented as proof that a server
+would refuse.
 
 ## Isolation is fail-closed
 
-The fixture no longer falls back to the browser's native fetch for unknown
-URLs. `lib/network-policy.js` is the single policy for two layers:
+`lib/network-policy.js` is the single policy for two layers:
 
 - the in-page guard for `fetch`, `XMLHttpRequest`, `WebSocket`, `EventSource`
   and `sendBeacon`;
@@ -44,6 +78,14 @@ app-phase request fails the run. Negative unit regressions run the real
 bootstrap in a Node VM with a native-fetch spy and no network:
 `lib/fixture-page.test.js` and `lib/network-policy.test.js`.
 
+## Loopback and CDP boundary
+
+The harness starts and stops its own `next dev` process on
+`http://localhost:3137` (override with `BROWSER_FIXTURE_PORT`) and its own local
+Edge/Chrome process with a temporary profile, controlled over CDP. It only
+exercises those two processes; no remote host is contacted. The evidence names
+this boundary under `environment.loopback` and marks the run `fixtureOnly`.
+
 ## Run
 
 ```bash
@@ -58,9 +100,10 @@ Generated artifacts (gitignored):
 
 - `output/next-dev.log` — local dev-server log;
 - `output/*.png` — screenshots at 320/390/1024 px, light/dark and the
-  empty/partial/error/keyboard states;
+  empty/partial/error/concept states;
 - `evidence/menu-review-browser-evidence.json` — machine-readable result with
-  every check and each screenshot's SHA-256 and dimensions.
+  every check, clickpath, each screenshot's SHA-256 and dimensions, the mocked
+  reads and the deliberate refusals.
 
 The evidence file is committed; screenshots stay local. A reviewer can rerun
 the command to reproduce the same fixture evidence.
@@ -75,16 +118,24 @@ the command to reproduce the same fixture evidence.
 - shared uncertainty grouped per section, with no accept-all action;
 - a disabled "Concept opslaan" while blockers remain;
 - empty, partial (source found, zero items) and load-error states;
-- keyboard reachability and Enter activation of the review/section controls;
+- concept list: four lineages, exact row hrefs, valid v1 next to blocked rows;
+- concept detail: v1 usable, v2 read-only with glass/bottle/supplement/
+  unknown allergens/provenance/coverage, invalid and exact `menus: []` blocked;
+- concept states: empty list, load error, missing access, detail error and 404;
+- concept keyboard reachability and Enter navigation; light/dark and 320/390 px
+  without horizontal overflow;
+- keyboard reachability and Enter activation of the batch review controls;
 - light/dark tokens and 320/390 px without horizontal overflow;
-- fail-closed network isolation: external fetch, protocol-relative URL, unknown
-  local API write, XHR, WebSocket, image/iframe subresource and frame
-  navigation are blocked and recorded; the explicit fixture API still answers.
+- fail-closed network isolation: external fetch, protocol-relative URL, concept
+  write, unknown local API write, XHR, WebSocket, image/iframe subresource and
+  frame navigation are blocked and recorded; the explicit fixture API still
+  answers.
 
 ## Limits
 
 This is fixture evidence. It does not prove a live Supabase session, a real
-source import, a real concept save, a browser rendering of an actual restaurant
-site, or production behaviour. The product extraction runtime remains disabled.
-The fictional session/API is intercepted in the page; it never falls through to
-a real API or an external host.
+source import, a real concept save or decision, a browser rendering of an
+actual restaurant site, or production behaviour. The product extraction
+runtime remains disabled. The fictional session/API is intercepted in the page;
+it never falls through to a real API or an external host. A green browser run
+is not independent review and not authenticated acceptance.

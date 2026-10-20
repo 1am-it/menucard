@@ -128,7 +128,14 @@ async function evalJs(cdp, expression) {
 async function waitFor(cdp, expression, timeoutMs = 30000) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
-    if (await evalJs(cdp, expression)) return true;
+    // During a document navigation `document.body` can be null and a page
+    // expression can throw. That is not a failed check; keep polling until the
+    // new document is ready or the deadline expires.
+    try {
+      if (await evalJs(cdp, expression)) return true;
+    } catch {
+      // navigation in progress
+    }
     await new Promise((resolve) => setTimeout(resolve, 150));
   }
   return false;

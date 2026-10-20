@@ -20,6 +20,11 @@
 const FIXTURE_API_ROUTES = [
   { id: 'batch-analysis-process', match: 'exact', path: '/api/internal/v1/batch-analysis/process', methods: ['POST'] },
   { id: 'batch-analysis', match: 'prefix', path: '/api/internal/v1/batch-analysis', methods: ['GET'] },
+  // GET only, and the detail form allows exactly one path segment. The real
+  // concept pages need these two reads; every save/decision/export POST stays
+  // unknown and is refused before it can reach a handler.
+  { id: 'menu-concepts-list', match: 'exact', path: '/api/internal/v1/menu-concepts', methods: ['GET'] },
+  { id: 'menu-concepts-detail', match: 'detail', path: '/api/internal/v1/menu-concepts/', methods: ['GET'] },
   { id: 'me', match: 'exact', path: '/api/internal/v1/me', methods: ['GET'] },
   { id: 'auth', match: 'prefix', path: '/auth/v1/', methods: ['GET', 'POST'] },
 ];
@@ -80,14 +85,20 @@ function classifyRequest(input, options) {
 
   function matchingRoute(pathname) {
     // Exact routes win over prefix routes so the explicit process write is not
-    // swallowed by its GET-only parent route.
+    // swallowed by its GET-only parent route. A `detail` route accepts exactly
+    // one segment below its path (e.g. `/menu-concepts/<id>`), so a nested
+    // `/versions` or `/decision` GET is not silently promoted to a read.
     const ordered = fixtureRoutes.slice().sort((a, b) => (a.match === 'exact' ? 0 : 1) - (b.match === 'exact' ? 0 : 1));
     for (const route of ordered) {
       const exact = pathname === route.path;
+      const rest = pathname.indexOf(route.path) === 0 ? pathname.slice(route.path.length) : null;
+      const detail = rest !== null && rest.length > 0 && rest.indexOf('/') === -1;
       const prefix = route.path.charAt(route.path.length - 1) === '/'
         ? pathname.indexOf(route.path) === 0
         : (pathname === route.path || pathname.indexOf(route.path + '/') === 0);
-      if ((route.match === 'exact' && exact) || (route.match !== 'exact' && prefix)) return route;
+      if (route.match === 'exact' && exact) return route;
+      if (route.match === 'detail' && detail) return route;
+      if (route.match === 'prefix' && prefix) return route;
     }
     return null;
   }

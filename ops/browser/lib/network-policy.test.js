@@ -35,7 +35,11 @@ test('external URLs and protocol-relative external URLs fail closed', () => {
 });
 
 test('unknown local API and write routes fail closed', () => {
-  assert.equal(classify('/api/internal/v1/menu-concepts', 'POST').reason, 'unknown_api_route');
+  assert.equal(classify('/api/internal/v1/menu-concepts', 'POST').reason, 'method_not_allowed');
+  assert.equal(classify('/api/internal/v1/menu-concepts/concept-v2-0002', 'POST').reason, 'method_not_allowed');
+  assert.equal(classify('/api/internal/v1/menu-concepts/concept-v2-0002/decision', 'POST').reason, 'unknown_api_route');
+  assert.equal(classify('/api/internal/v1/menu-concepts/concept-v2-0002/versions', 'GET').reason, 'unknown_api_route');
+  assert.equal(classify('/api/internal/v1/menu-concepts/').reason, 'unknown_api_route');
   assert.equal(classify('/api/internal/v1/me', 'POST').reason, 'method_not_allowed');
   assert.equal(classify('/api/internal/v1/batch-analysis', 'POST').reason, 'method_not_allowed');
   assert.equal(classify('/_next/static/chunk.js', 'POST').reason, 'method_not_allowed');
@@ -45,9 +49,17 @@ test('unknown local API and write routes fail closed', () => {
 test('only explicit local app and fixture routes are allowed', () => {
   assert.equal(classify('/_next/static/chunk.js').kind, 'app_resource');
   assert.equal(classify('/internal/source-triage/batch?fixture=review').kind, 'app_resource');
+  assert.equal(classify('/internal/menu-concepts').kind, 'app_resource');
+  assert.equal(classify('/internal/menu-concepts/concept-v2-0002').kind, 'app_resource');
   assert.equal(classify('/api/internal/v1/me').kind, 'fixture_api');
   assert.equal(classify('/api/internal/v1/batch-analysis').kind, 'fixture_api');
   assert.equal(classify('/api/internal/v1/batch-analysis/process', 'POST').kind, 'fixture_api');
+  const list = classify('/api/internal/v1/menu-concepts');
+  assert.equal(list.kind, 'fixture_api');
+  assert.equal(list.routeId, 'menu-concepts-list');
+  const detail = classify('/api/internal/v1/menu-concepts/concept-v1-0001');
+  assert.equal(detail.kind, 'fixture_api');
+  assert.equal(detail.routeId, 'menu-concepts-detail');
   assert.equal(classify('/auth/v1/token?grant_type=password', 'POST').kind, 'fixture_api');
   assert.equal(classify('data:text/plain,fixture').kind, 'inline');
   assert.equal(classify('ws://localhost:3137/_next/webpack-hmr').kind, 'websocket');
@@ -97,6 +109,11 @@ test('the CDP fetch guard continues local traffic and fails external traffic', a
     request: { url: 'https://unapproved.invalid/pixel.png', method: 'GET' },
   });
   cdp.emit('Fetch.requestPaused', {
+    requestId: 'allowed-detail-1',
+    resourceType: 'Fetch',
+    request: { url: 'http://localhost:3137/api/internal/v1/menu-concepts/concept-v2-0002', method: 'GET' },
+  });
+  cdp.emit('Fetch.requestPaused', {
     requestId: 'blocked-2',
     resourceType: 'XHR',
     request: { url: 'http://localhost:3137/api/internal/v1/menu-concepts', method: 'POST' },
@@ -105,8 +122,8 @@ test('the CDP fetch guard continues local traffic and fails external traffic', a
 
   const continued = calls.filter((call) => call.method === 'Fetch.continueRequest').map((call) => call.params.requestId);
   const failed = calls.filter((call) => call.method === 'Fetch.failRequest').map((call) => call.params.requestId);
-  assert.deepEqual(continued, ['allowed-1']);
+  assert.deepEqual(continued, ['allowed-1', 'allowed-detail-1']);
   assert.deepEqual(failed, ['blocked-1', 'blocked-2']);
   assert.equal(guard.appViolations().length, 2);
-  assert.deepEqual(guard.appViolations().map((entry) => entry.reason).sort(), ['external_origin', 'unknown_api_route']);
+  assert.deepEqual(guard.appViolations().map((entry) => entry.reason).sort(), ['external_origin', 'method_not_allowed']);
 });

@@ -30,7 +30,12 @@ function fixtureBootstrap(scenarios, options = {}) {
     const policyConfig = ${JSON.stringify(config)};
     const classify = ${classifyRequest.toString()};
     const params = new URLSearchParams(location.search);
-    const fixture = params.get('fixture') || 'review';
+    const pathname = location.pathname || (location.href ? new URL(location.href).pathname : '');
+    const requestedFixture = params.get('fixture');
+    // A real click from the list to a detail drops the query string. The path
+    // therefore chooses the concept dataset, so the click path is exercised
+    // without inventing a fixture-only link.
+    const fixture = requestedFixture || (pathname.indexOf('/internal/menu-concepts') === 0 ? 'concepts' : 'review');
     const theme = params.get('theme') === 'light' ? 'light' : 'dark';
     const session = {
       access_token: 'fixture-token',
@@ -99,6 +104,23 @@ function fixtureBootstrap(scenarios, options = {}) {
           return jsonResponse({ error: 'De batchanalyse kon niet worden geladen.' }, 500);
         }
         return jsonResponse(fixtures[fixture] || fixtures.review);
+      }
+      if (verdict.routeId === 'menu-concepts-list' || verdict.routeId === 'menu-concepts-detail') {
+        const scenario = fixtures[fixture];
+        if (!scenario) return jsonResponse({ error: 'Fictief conceptenscenario ontbreekt.' }, 500);
+        if (verdict.routeId === 'menu-concepts-list') {
+          if (scenario.listStatus && scenario.listStatus !== 200) {
+            return jsonResponse({ error: scenario.listError || 'De menuconcepten konden niet worden geladen.' }, scenario.listStatus);
+          }
+          return jsonResponse(scenario.list || { items: [] });
+        }
+        if (scenario.detailStatus && scenario.detailStatus !== 200) {
+          return jsonResponse({ error: scenario.detailError || 'Het menuconcept kon niet worden geladen.' }, scenario.detailStatus);
+        }
+        const prefix = '/api/internal/v1/menu-concepts/';
+        const id = decodeURIComponent(new URL(verdict.url).pathname.slice(prefix.length));
+        const detail = (scenario.detail || {})[id];
+        return detail ? jsonResponse(detail) : jsonResponse({ error: 'Menuconcept niet gevonden.' }, 404);
       }
       return jsonResponse({ error: 'fixture route not implemented' }, 500);
     }

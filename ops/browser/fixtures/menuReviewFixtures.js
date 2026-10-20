@@ -6,9 +6,16 @@
 // browser sees the same shapes the server sends. No production data, identity,
 // credential or URL is used; every URL is on the .invalid TLD.
 
-const { summarizeRecognisedMenu, buildMenuConcept } = require('../../../src/lib/menuConcept');
+const { summarizeRecognisedMenu, buildMenuConcept, storedConceptInput, recognisedLines } = require('../../../src/lib/menuConcept');
 const { buildExtractionResult } = require('../../../src/lib/menuExtractionResult');
-const { buildProductReviewView, summarizeProductMenu } = require('../../../src/lib/menuProductIntegrationV2');
+const {
+  buildProductReviewView,
+  summarizeProductMenu,
+  readConceptProduct,
+  PRODUCT_READ_ONLY_MESSAGE,
+  UNSUPPORTED_MESSAGE,
+  INVALID_MESSAGE,
+} = require('../../../src/lib/menuProductIntegrationV2');
 
 const BATCH_ID = 'batch-fictief-0001';
 const RESTAURANT = { id: '9001', name: 'Fictief Brasserie Noord', known: true };
@@ -248,14 +255,236 @@ function readOnlyDetail() {
   return detail;
 }
 
+// ── Existing concept list + detail routes (#59 review 6295223157) ───────────
+//
+// Four fictional lineages for the REAL /internal/menu-concepts list and
+// /internal/menu-concepts/[id] pages. Each detail payload is built through the
+// same reader the server handlers use (`readConceptProduct`,
+// `buildProductReviewView`, `storedConceptInput`, `buildMenuConcept`), so the
+// browser cannot be shown a shape the product does not produce. The ids are
+// fictional and stable; `conceptDetails` is keyed by the route segment, so a
+// click that selects the wrong row is detectable instead of masked.
+
+const CONCEPT_IDS = {
+  v1: 'concept-v1-0001',
+  v2: 'concept-v2-0002',
+  invalid: 'concept-invalid-0003',
+  empty: 'concept-empty-0004',
+};
+const CONCEPT_RESTAURANTS = {
+  v1: 'Fictief Concept Lunch',
+  v2: 'Fictief Concept Diner',
+  invalid: 'Fictief Concept Onbekend',
+  empty: 'Fictief Concept Leeg',
+};
+const CONCEPT_CREATED = {
+  v1: '2026-10-18T09:00:00.000Z',
+  v2: '2026-10-18T09:05:00.000Z',
+  invalid: '2026-10-18T09:10:00.000Z',
+  empty: '2026-10-18T09:15:00.000Z',
+};
+
+const v1Captured = {
+  title: CONCEPT_RESTAURANTS.v1,
+  categories: [
+    {
+      name: 'Voorgerechten',
+      path: [CONCEPT_RESTAURANTS.v1, 'Voorgerechten'],
+      sourcePath: ['LUNCH', 'VOOR'],
+      items: [
+        { from: '0.0.0', name: 'Fictieve tomatensoep', price: '6,50', evidence: evidence('LUNCH > VOOR > regel 1', 'Fictieve tomatensoep 6,50') },
+        { from: '0.0.1', name: 'Fictieve salade', desc: 'Fictieve groenten', price: '9,00', evidence: evidence('LUNCH > VOOR > regel 2', 'Fictieve salade 9,00') },
+      ],
+    },
+    {
+      name: 'Hoofdgerechten',
+      path: [CONCEPT_RESTAURANTS.v1, 'Hoofdgerechten'],
+      sourcePath: ['LUNCH', 'HOOFD'],
+      items: [{ from: '0.1.0', name: 'Fictieve pasta', price: '15,50', evidence: evidence('LUNCH > HOOFD > regel 1', 'Fictieve pasta 15,50') }],
+    },
+  ],
+};
+const v1Stored = storedConceptInput(v1Captured);
+const v1Concept = buildMenuConcept({ menus: v1Stored.menus, liveLines: [], edits: v1Stored.edits });
+const v1OriginLines = Object.fromEntries(
+  recognisedLines(v1Stored.menus).map((line) => [line.id, { name: line.name, desc: line.desc, price: line.price, category: line.category }])
+);
+const v1Preview = {
+  concept: { key: '9002-lunch', entry: { title: CONCEPT_RESTAURANTS.v1, categories: v1Captured.categories } },
+  current: [],
+};
+
+
+// The raw stored v2 envelope: exactly what a read-only row may contain.
+const v2Captured = v2Product;
+const emptyCaptured = {
+  schemaVersion: 'menu-extraction-product/v2',
+  menus: [],
+  rejected: [],
+  coverage: { status: 'no_items', sourcesRead: 1, pagesRead: 1, itemsExtracted: 0, unreadSources: [], limitations: ['Fictief: geen leesbare gerechten.'] },
+};
+// A versioned-looking array without a schemaVersion is NOT legacy v1 content.
+const invalidCaptured = { menus: [{ id: 'menu-1', title: 'Fictief Onbekend', categories: [] }] };
+
+const v2Info = readConceptProduct(v2Captured);
+const emptyInfo = readConceptProduct(emptyCaptured);
+const invalidInfo = readConceptProduct(invalidCaptured);
+
+function blockedReason(info) {
+  const message = info.reason === 'product_v2_read_only'
+    ? PRODUCT_READ_ONLY_MESSAGE
+    : info.reason === 'unsupported_schema_version'
+      ? UNSUPPORTED_MESSAGE
+      : INVALID_MESSAGE;
+  return {
+    reason: info.reason,
+    message,
+    problems: info.problems,
+    blockedActions: info.blockedActions,
+    blockers: info.view ? info.view.blockers : [],
+  };
+}
+
+function conceptDetail({ id, key, name, captured, info, product, status }) {
+  const blocked = Boolean(info && info.kind !== 'v1');
+  const createdAt = CONCEPT_CREATED[key];
+  return {
+    concept: {
+      id,
+      version: 1,
+      latestVersion: 1,
+      latestId: id,
+      isLatest: true,
+      restaurantId: '9002',
+      restaurantName: name,
+      menuContext: 'lunch',
+      sourceUrl: SOURCE_URL,
+      createdAt,
+      createdBySelf: true,
+      originRecorded: true,
+      status,
+      rejectedBefore: false,
+      captured: blocked ? null : captured,
+      readOnly: blocked,
+      schemaVersion: info && info.schemaVersion ? info.schemaVersion : null,
+      blocked: blocked ? blockedReason(info) : null,
+    },
+    product: blocked && product ? product : null,
+    liveLines: [],
+    originLines: blocked ? {} : v1OriginLines,
+    source: { confirmed: true, blocked: null },
+    history: [{ id, version: 1, createdAt, createdBySelf: true, basedOnVersion: null, status, reviews: [] }],
+    rejectReasons: { wrong_menu: 'Verkeerde menukaart', broken_source: 'Bron onbruikbaar', other: 'Anders' },
+    export: null,
+    preview: blocked
+      ? { concept: null, current: [], blocked: info.reason, blockers: info.view ? info.view.blockers : [] }
+      : v1Preview,
+    githubConfigured: false,
+  };
+}
+
+
+function conceptRow({ id, key, name, counts, readOnly, schemaVersion, blockedReason: reason, status = 'waiting' }) {
+  return {
+    id,
+    restaurantId: '9002',
+    restaurantName: name,
+    menuContext: 'lunch',
+    version: 1,
+    sourceUrl: SOURCE_URL,
+    createdAt: CONCEPT_CREATED[key],
+    createdBySelf: true,
+    status,
+    dishCount: counts.dishCount,
+    attentionCount: counts.attentionCount,
+    blockerCount: counts.blockerCount,
+    readOnly,
+    schemaVersion,
+    blockedReason: reason || null,
+  };
+}
+
+const conceptList = {
+  items: [
+    conceptRow({
+      id: CONCEPT_IDS.v1,
+      key: 'v1',
+      name: CONCEPT_RESTAURANTS.v1,
+      counts: {
+        dishCount: v1Concept.lines.filter((line) => line.status !== 'excluded').length,
+        attentionCount: v1Concept.attentionLines.length + v1Concept.removed.length,
+        blockerCount: v1Concept.blockers.length,
+      },
+      readOnly: false,
+      schemaVersion: null,
+    }),
+    conceptRow({
+      id: CONCEPT_IDS.v2,
+      key: 'v2',
+      name: CONCEPT_RESTAURANTS.v2,
+      counts: { dishCount: v2Info.view.counts.items, attentionCount: v2Info.view.notes.length, blockerCount: v2Info.view.blockers.length },
+      readOnly: true,
+      schemaVersion: 'menu-extraction-product/v2',
+      blockedReason: v2Info.reason,
+    }),
+    conceptRow({
+      id: CONCEPT_IDS.invalid,
+      key: 'invalid',
+      name: CONCEPT_RESTAURANTS.invalid,
+      counts: { dishCount: 0, attentionCount: 0, blockerCount: 1 },
+      readOnly: true,
+      schemaVersion: null,
+      blockedReason: invalidInfo.reason,
+    }),
+    conceptRow({
+      id: CONCEPT_IDS.empty,
+      key: 'empty',
+      name: CONCEPT_RESTAURANTS.empty,
+      counts: { dishCount: 0, attentionCount: emptyInfo.view.notes.length, blockerCount: emptyInfo.view.blockers.length },
+      readOnly: true,
+      schemaVersion: 'menu-extraction-product/v2',
+      blockedReason: emptyInfo.reason,
+    }),
+  ],
+};
+
+const conceptDetails = {
+  [CONCEPT_IDS.v1]: conceptDetail({ id: CONCEPT_IDS.v1, key: 'v1', name: CONCEPT_RESTAURANTS.v1, captured: v1Captured, info: { kind: 'v1' }, product: null, status: 'waiting' }),
+  [CONCEPT_IDS.v2]: conceptDetail({ id: CONCEPT_IDS.v2, key: 'v2', name: CONCEPT_RESTAURANTS.v2, captured: v2Captured, info: v2Info, product: v2Info.view, status: 'waiting' }),
+  [CONCEPT_IDS.invalid]: conceptDetail({ id: CONCEPT_IDS.invalid, key: 'invalid', name: CONCEPT_RESTAURANTS.invalid, captured: invalidCaptured, info: invalidInfo, product: null, status: 'waiting' }),
+  [CONCEPT_IDS.empty]: conceptDetail({ id: CONCEPT_IDS.empty, key: 'empty', name: CONCEPT_RESTAURANTS.empty, captured: emptyCaptured, info: emptyInfo, product: emptyInfo.view, status: 'waiting' }),
+};
+
+const conceptScenarios = {
+  concepts: { list: conceptList, detail: conceptDetails },
+  'concepts-empty': { list: { items: [] }, detail: {} },
+  'concepts-error': {
+    listStatus: 500,
+    listError: 'De menuconcepten konden niet worden geladen.',
+    detailStatus: 500,
+    detailError: 'Het menuconcept kon niet worden geladen.',
+  },
+  'concepts-no-access': {
+    listStatus: 403,
+    listError: 'Alleen interne medewerkers kunnen menuconcepten beoordelen.',
+    detailStatus: 403,
+    detailError: 'Alleen interne medewerkers kunnen menuconcepten beoordelen.',
+  },
+};
+
+
 module.exports = {
   BATCH_ID,
   RESTAURANT,
   SOURCE_URL,
   FOUND_URL,
+  CONCEPT_IDS,
+  CONCEPT_RESTAURANTS,
   reviewDetail,
   v2Product,
   v2View,
+  conceptList,
+  conceptDetails,
   scenarios: {
     review: overview(reviewDetail),
     readonly: overview(readOnlyDetail()),
@@ -263,6 +492,7 @@ module.exports = {
     partial: overview(detailWith([partialItem])),
     v2: overview(detailWith([v2Item])),
     error: null,
+    ...conceptScenarios,
   },
   expected: {
     conceptBlockers: concept.blockers.map((blocker) => blocker.status),

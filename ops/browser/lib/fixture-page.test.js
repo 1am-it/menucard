@@ -16,7 +16,7 @@ const { defaultAppOrigins } = require('./network-policy');
 const APP_ORIGINS = defaultAppOrigins(3137);
 const BASE_URL = 'http://localhost:3137/internal/source-triage/batch?fixture=review';
 
-function loadFixture() {
+function loadFixture(options = {}) {
   const nativeFetchCalls = [];
   const nativeXhrSends = [];
   const nativeWebSockets = [];
@@ -76,7 +76,7 @@ function loadFixture() {
         return true;
       },
     },
-    location: { href: BASE_URL, search: '?fixture=review' },
+    location: { href: options.url || BASE_URL, search: options.search === undefined ? '?fixture=review' : options.search },
     fetch: async function nativeFetch(input, init) {
       nativeFetchCalls.push({ input, init });
       return new Response('native-app-resource', { status: 200 });
@@ -85,7 +85,7 @@ function loadFixture() {
   context.window = context;
   context.globalThis = context;
   vm.createContext(context);
-  vm.runInContext(fixtureBootstrap({ review: { detail: null } }, { appOrigins: APP_ORIGINS, baseUrl: BASE_URL }), context);
+  vm.runInContext(fixtureBootstrap(options.scenarios || { review: { detail: null } }, { appOrigins: APP_ORIGINS, baseUrl: BASE_URL }), context);
 
   return {
     context,
@@ -134,10 +134,17 @@ test('an unknown local API write is blocked before the native fetch', async () =
   const fixture = loadFixture();
   await assert.rejects(
     fixture.context.fetch('/api/internal/v1/menu-concepts', { method: 'POST' }),
+    /fixture_network_blocked: method_not_allowed/,
+  );
+  await assert.rejects(
+    fixture.context.fetch('/api/internal/v1/unrelated-write', { method: 'POST' }),
     /fixture_network_blocked: unknown_api_route/,
   );
   assert.equal(fixture.nativeFetchCalls.length, 0);
-  assert.equal(fixture.context.__FIXTURE_NETWORK_VIOLATIONS__[0].reason, 'unknown_api_route');
+  assert.equal(
+    fixture.context.__FIXTURE_NETWORK_VIOLATIONS__.map((entry) => entry.reason).join(','),
+    'method_not_allowed,unknown_api_route',
+  );
 });
 
 test('an explicit fixture API route is answered without native traffic', async () => {
@@ -146,6 +153,62 @@ test('an explicit fixture API route is answered without native traffic', async (
   assert.equal(response.status, 200);
   const body = await response.json();
   assert.equal(body.roles[0].role, 'internal');
+  assert.equal(fixture.nativeFetchCalls.length, 0);
+});
+
+test('concept list and detail GETs are answered from the fictional fixture', async () => {
+  const scenarios = {
+    concepts: {
+      list: { items: [{ id: 'concept-v1-0001', restaurantName: 'Fictief Concept Lunch' }] },
+      detail: { 'concept-v1-0001': { concept: { id: 'concept-v1-0001', restaurantName: 'Fictief Concept Lunch' } } },
+    },
+  };
+  const fixture = loadFixture({
+    scenarios,
+    url: 'http://localhost:3137/internal/menu-concepts',
+    search: '',
+  });
+  const list = await fixture.context.fetch('/api/internal/v1/menu-concepts');
+  assert.equal(list.status, 200);
+  assert.equal((await list.json()).items[0].id, 'concept-v1-0001');
+  const detail = await fixture.context.fetch('/api/internal/v1/menu-concepts/concept-v1-0001');
+  assert.equal(detail.status, 200);
+  assert.equal((await detail.json()).concept.restaurantName, 'Fictief Concept Lunch');
+  const missing = await fixture.context.fetch('/api/internal/v1/menu-concepts/concept-unknown-9999');
+  assert.equal(missing.status, 404);
+  assert.equal(fixture.nativeFetchCalls.length, 0);
+  assert.equal(fixture.context.__FIXTURE_NETWORK_VIOLATIONS__.length, 0);
+});
+
+test('the concept pages are chosen by path when a real click drops the fixture query', () => {
+  const scenarios = { concepts: { list: { items: [] }, detail: {} } };
+  const fixture = loadFixture({
+    scenarios,
+    url: 'http://localhost:3137/internal/menu-concepts/concept-v1-0001',
+    search: '',
+  });
+  assert.equal(fixture.context.__FIXTURE_ACTIVE__, 'concepts');
+});
+
+test('concept writes stay blocked even though the read routes are allowed', async () => {
+  const scenarios = { concepts: { list: { items: [] }, detail: {} } };
+  const fixture = loadFixture({ scenarios });
+  await assert.rejects(
+    fixture.context.fetch('/api/internal/v1/menu-concepts', { method: 'POST' }),
+    /fixture_network_blocked: method_not_allowed/,
+  );
+  await assert.rejects(
+    fixture.context.fetch('/api/internal/v1/menu-concepts/concept-v1-0001', { method: 'POST' }),
+    /fixture_network_blocked: method_not_allowed/,
+  );
+  await assert.rejects(
+    fixture.context.fetch('/api/internal/v1/menu-concepts/concept-v1-0001/decision', { method: 'POST' }),
+    /fixture_network_blocked: unknown_api_route/,
+  );
+  await assert.rejects(
+    fixture.context.fetch('/api/internal/v1/menu-concepts/concept-v1-0001/versions', { method: 'GET' }),
+    /fixture_network_blocked: unknown_api_route/,
+  );
   assert.equal(fixture.nativeFetchCalls.length, 0);
 });
 
@@ -166,7 +229,7 @@ test('XHR to an external URL or unknown API write is blocked', async () => {
   assert.deepEqual(errors.sort(), ['external', 'write']);
   assert.equal(fixture.nativeXhrSends.length, 0);
   const reasons = fixture.context.__FIXTURE_NETWORK_VIOLATIONS__.map((entry) => entry.reason).sort();
-  assert.equal(reasons.join(','), 'external_origin,unknown_api_route');
+  assert.equal(reasons.join(','), 'external_origin,method_not_allowed');
 });
 
 test('XHR to a local app resource still reaches the native send', () => {
