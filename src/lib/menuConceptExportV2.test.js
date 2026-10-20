@@ -176,3 +176,26 @@ test('an invalid v2 row is also refused before any side effect', async () => {
   assert.deepEqual(github.calls, []);
 });
 
+// P2 regression (review 6283658271): an unversioned v2-shaped concept row is
+// not v1 content, so export refuses it with a concrete reason instead of a
+// parser exception or a claim.
+test('an unversioned v2-shaped concept is refused before the export claim, branch or pull request', async () => {
+  for (const captured of [
+    { menus: [{ categories: [] }] },
+    { menus: [], categories: 'geen lijst' },
+  ]) {
+    const supabase = world({ captured });
+    const github = fakeGithub();
+    const res = await handlerFor(supabase, github).exportToReviewPr(request({ expected_version: 1 }), '5');
+    assert.equal(res.status, 409);
+    assert.equal(res.body.reason, 'unsupported_schema_version');
+    assert.equal(res.body.schemaVersion, null);
+    assert.deepEqual(effects(supabase), []);
+    assert.deepEqual(github.calls, []);
+    const entry = exportMenuEntry({ snapshot: snapshotRow(captured), menus: LIVE });
+    assert.equal(entry.entry, null);
+    assert.equal(entry.concept, null);
+    assert.equal(entry.blocked.reason, 'unsupported_schema_version');
+  }
+});
+

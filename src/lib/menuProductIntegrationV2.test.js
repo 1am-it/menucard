@@ -180,12 +180,39 @@ test('an unknown, missing or malformed version is never a v1 default', () => {
 
   const { schemaVersion, ...withoutVersion } = fixtureProduct();
   assert.equal(readReceiptProduct({ [RECEIPT_PRODUCT_KEY]: withoutVersion }).kind, 'unsupported');
-  assert.equal(readConceptProduct(withoutVersion).kind, 'v1', 'legacy concept content has no version at all');
+  // An unversioned value that still has the v2 menu-array shape is not legacy
+  // concept content. `readConceptProduct` and `storedConceptInput` must agree:
+  // classifying it as v1 here would make the v1 reader throw afterwards.
+  const unversionedProduct = readConceptProduct(withoutVersion);
+  assert.equal(unversionedProduct.kind, 'invalid');
+  assert.equal(unversionedProduct.reason, 'unsupported_schema_version');
+  assert.ok(unversionedProduct.problems.length > 0);
+  assert.equal(unversionedProduct.view, null);
 
   const invalid = readConceptProduct({ ...fixtureProduct(), coverage: { status: 'complete', sourcesRead: 0, pagesRead: 0, itemsExtracted: 99, unreadSources: [], limitations: [] } });
   assert.equal(invalid.kind, 'invalid');
   assert.equal(invalid.reason, 'invalid_product_version');
   assert.equal(invalid.view, null);
+});
+
+test('readConceptProduct uses the same legacy predicate as the v1 reader, including mixed legacy fields', () => {
+  // Pure legacy concept content and content with an extra legacy key stay v1.
+  assert.equal(readConceptProduct({ title: 'Fictief', categories: [] }).kind, 'v1');
+  assert.equal(readConceptProduct({ title: 'Fictief', categories: [], menus: [] }).kind, 'v1', 'an extra menus key next to categories is left to the v1 reader');
+  // The v2-shaped value without a version is refused, exactly as the shallow
+  // guard refuses it before `storedConceptInput` could throw.
+  for (const captured of [
+    { menus: [{ categories: [] }] },
+    { menus: [], categories: 'geen lijst' },
+    { menus: [], rejected: [], coverage: { status: 'complete' } },
+  ]) {
+    assert.equal(isUnsupportedConceptEnvelope(captured), true);
+    const info = readConceptProduct(captured);
+    assert.equal(info.kind, 'invalid');
+    assert.equal(info.reason, 'unsupported_schema_version');
+    assert.deepEqual(info.blockedActions, ['save', 'confirm', 'export', 'publish']);
+    assert.throws(() => assertLegacyConceptContent(captured), (error) => error.code === 'unsupported_product_schema' && error.productInfo.reason === 'unsupported_schema_version');
+  }
 });
 
 test('the existing concept reader is guarded and never flattens a versioned envelope', () => {

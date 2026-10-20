@@ -20,7 +20,7 @@ const V2_CONTENT = {
   coverage: { status: 'no_items', sourcesRead: 1, pagesRead: 1, itemsExtracted: 0, unreadSources: [], limitations: [] },
 };
 
-function fakeSupabase(tables) {
+function fakeSupabase(tables, { failTables = [] } = {}) {
   const calls = [];
   return {
     calls,
@@ -30,7 +30,11 @@ function fakeSupabase(tables) {
       const builder = {
         select() { return builder; },
         eq(col, val) { filters.push((r) => r[col] === val); return builder; },
-        maybeSingle() { calls.push({ select: table }); return Promise.resolve({ data: rows()[0] || null, error: null }); },
+        maybeSingle() {
+          calls.push({ select: table });
+          if (failTables.includes(table)) return Promise.resolve({ data: null, error: { code: 'XX000' } });
+          return Promise.resolve({ data: rows()[0] || null, error: null });
+        },
         insert(row) {
           calls.push({ insert: table, row });
           const list = (tables[table] = tables[table] || []);
@@ -41,6 +45,25 @@ function fakeSupabase(tables) {
       return builder;
     },
   };
+}
+
+function receiptWorld({ product = null, originReceiptId = 'r1', captured = LEGACY_CONTENT, failTables = [] } = {}) {
+  const tables = {
+    menu_snapshot_proposals: [{ id: '7', captured_content: captured, origin_receipt_id: originReceiptId }],
+    menu_snapshot_reviews: [],
+  };
+  if (originReceiptId) {
+    tables.url_intake_analysis_receipts = [
+      {
+        id: originReceiptId,
+        canonical_source_url: 'https://fictief.example/menu',
+        fetched_at: '2026-10-19T09:00:00Z',
+        menus: [{ categories: [{ name: 'Koud', items: [{ name: 'Fictieve soep', price: '8.50' }] }] }],
+        product,
+      },
+    ];
+  }
+  return fakeSupabase(tables, { failTables });
 }
 
 function handlerFor(supabase, roles = [{ role: 'editor' }]) {
@@ -113,4 +136,56 @@ test('the generic snapshot proposal validator refuses a versioned or v2-shaped e
   }
   assert.equal(validateSnapshotProposalInput({ ...base, capturedContent: LEGACY_CONTENT }).valid, true);
 });
+
+test('editor: every decision is refused when the origin receipt carries a v2 envelope, before the review insert', async () => {
+  const decisions = [
+    { decision: 'approved_internal' },
+    { decision: 'rejected', reason: 'other' },
+    { decision: 'needs_review' },
+    { decision: 'deferred' },
+  ];
+  for (const body of decisions) {
+    const supabase = receiptWorld({ product: V2_CONTENT });
+    const res = await handlerFor(supabase).record(request(body), '7');
+    assert.equal(res.status, 409, body.decision);
+    assert.equal(res.body.reason, 'receipt_product_v2_authoritative');
+    assert.equal(res.body.schemaVersion, MENU_PRODUCT_SCHEMA_VERSION);
+    assert.deepEqual(res.body.blockedActions, ['save', 'confirm', 'export', 'publish']);
+    assert.deepEqual(inserts(supabase), [], body.decision);
+    assert.ok(supabase.calls.some((c) => c.select === 'url_intake_analysis_receipts'), 'the bounded origin receipt is read before the decision');
+  }
+});
+
+test('editor: an unknown or invalid origin receipt version is refused, never downgraded to v1', async () => {
+  for (const [product, expectedSchemaVersion] of [
+    [{ ...V2_CONTENT, schemaVersion: 'menu-extraction-product/v9' }, 'menu-extraction-product/v9'],
+    [{ ...V2_CONTENT, coverage: { status: 'complete', sourcesRead: 0, pagesRead: 0, itemsExtracted: 99, unreadSources: [], limitations: ['x'] } }, MENU_PRODUCT_SCHEMA_VERSION],
+  ]) {
+    const supabase = receiptWorld({ product });
+    const res = await handlerFor(supabase).record(request({ decision: 'approved_internal' }), '7');
+    assert.equal(res.status, 409);
+    assert.equal(res.body.reason, 'receipt_product_v2_authoritative');
+    assert.equal(res.body.schemaVersion, expectedSchemaVersion);
+    assert.deepEqual(inserts(supabase), []);
+  }
+});
+
+test('editor: a receipt lookup error fails closed without an insert', async () => {
+  const supabase = receiptWorld({ failTables: ['url_intake_analysis_receipts'] });
+  const res = await handlerFor(supabase).record(request({ decision: 'approved_internal' }), '7');
+  assert.equal(res.status, 500);
+  assert.deepEqual(inserts(supabase), []);
+});
+
+test('editor: an unchanged v1 receipt or no receipt at all still records one review row', async () => {
+  for (const originReceiptId of ['r1', null]) {
+    const supabase = receiptWorld({ originReceiptId });
+    const res = await handlerFor(supabase).record(request({ decision: 'approved_internal', note: 'Fictief' }), '7');
+    assert.equal(res.status, 201, String(originReceiptId));
+    assert.deepEqual(inserts(supabase).map((c) => c.insert), ['menu_snapshot_reviews']);
+    const receiptReads = supabase.calls.filter((c) => c.select === 'url_intake_analysis_receipts');
+    assert.equal(receiptReads.length, originReceiptId ? 1 : 0, 'no receipt id means no receipt lookup');
+  }
+});
+
 

@@ -23,8 +23,9 @@ const { isInternalOnly } = require('./importInbox');
 const { validateSnapshotReviewInput, snapshotReviewValidationMessage, groupReviewsBySnapshotId, deriveEffectiveSnapshotStatus } = require('./menuSnapshotProposals');
 const { liveMenuLines, recognisedLines, buildMenuConcept, storedConceptInput, sanitizeEdits, mergeEdits, REJECT_REASONS } = require('./menuConcept');
 const { loadLineage, wasRejectedBefore, createConceptVersion } = require('./menuConceptStore');
-const { exportForSnapshot, exportMenuEntry } = require('./menuConceptExport');
+const { exportForSnapshot, storedExportForSnapshot, exportMenuEntry } = require('./menuConceptExport');
 const { menuKeyFor, restaurantMenuEntries } = require('./menuExport');
+const { loadOriginReceipt, originReceiptBlock } = require('./menuOriginReceiptGuard');
 const {
   readConceptProduct,
   readReceiptProjection,
@@ -124,21 +125,13 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
   }
 
   async function loadReceipt(supabase, receiptId) {
-    if (!receiptId) return { receipt: null };
-    const { data, error } = await supabase
-      .from('url_intake_analysis_receipts')
-      // The versioned envelope is read explicitly next to the legacy
-      // projection, so a v2 receipt is never validated from `menus` alone.
-      .select('id, canonical_source_url, fetched_at, menus:candidate_summary->menus, product:candidate_summary->menuExtractionV2')
-      .eq('id', receiptId)
-      .maybeSingle();
-    const receipt = data ? { ...data, productInfo: readReceiptProjection(data) } : null;
-    return { receipt, error };
+    // Shared with every other ingress so the receipt version is read the same
+    // way; a lookup error is returned and never downgraded to "no receipt".
+    return loadOriginReceipt(supabase, receiptId);
   }
 
   function receiptBlock(receipt) {
-    if (!receipt || !receipt.productInfo || receipt.productInfo.kind === 'v1') return null;
-    return { ...receipt.productInfo, reason: 'receipt_product_v2_authoritative' };
+    return originReceiptBlock(receipt);
   }
 
   function previewFor(snapshot, blocked) {
@@ -253,9 +246,10 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
     if (receiptError) return reply(500, { error: LOAD_ERROR });
     const source = await sourceStatus(supabase, { restaurantId: snapshot.restaurant_id, sourceUrl: snapshot.source_url, receiptUrl: receipt && receipt.canonical_source_url });
     if (source.error) return reply(500, { error: LOAD_ERROR });
-    const exported = await exportForSnapshot(supabase, github, snapshot.id, now);
-    if (exported.error) return reply(500, { error: LOAD_ERROR });
 
+    // Classify concept AND origin receipt before touching the export path. A
+    // blocked card may show its stored export metadata, but the export refresh
+    // (GitHub lookup, status update, claim) may never run for it.
     const summary = conceptSummary(snapshot.captured_content, liveMenuLines(liveMenus, snapshot.restaurant_id));
     const productBlock = summary.product && summary.product.kind !== 'v1' ? summary.product : null;
     const receiptBlockInfo = receiptBlock(receipt);
@@ -266,6 +260,11 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
         : null;
     const productView = (productBlock && productBlock.view) || (receiptBlockInfo && receiptBlockInfo.view) || null;
     const blocked = Boolean(block);
+
+    const exported = blocked
+      ? await storedExportForSnapshot(supabase, snapshot.id)
+      : await exportForSnapshot(supabase, github, snapshot.id, now);
+    if (exported.error) return reply(500, { error: LOAD_ERROR });
 
     const originLines = {};
     if (!blocked) {

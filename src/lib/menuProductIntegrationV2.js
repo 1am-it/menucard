@@ -418,6 +418,12 @@ function readReceiptProjection(receipt) {
  * Reads stored concept content. Legacy v1 concept content has no
  * `schemaVersion`; any versioned value is fail-closed and returns a view or a
  * concrete problem list.
+ *
+ * The legacy test is the same shallow predicate `storedConceptInput` uses
+ * (`isUnsupportedConceptEnvelope`): an unversioned value that is still shaped
+ * like a v2 menu array (`menus` without `categories`) is NOT v1 concept
+ * content. Reporting it here as v1 would let `storedConceptInput` throw after
+ * this guard already accepted the row, so both must agree exactly.
  */
 function readConceptProduct(capturedContent) {
   if (!isObject(capturedContent)) {
@@ -431,6 +437,16 @@ function readConceptProduct(capturedContent) {
     };
   }
   if (!hasOwn(capturedContent, CONCEPT_SCHEMA_KEY)) {
+    if (isUnsupportedConceptEnvelope(capturedContent)) {
+      return {
+        kind: 'invalid',
+        schemaVersion: null,
+        reason: 'unsupported_schema_version',
+        problems: ['unsupported_schema_version: a menu array without a schemaVersion is not legacy v1 concept content'],
+        blockedActions: [...READER_BLOCKED_ACTIONS],
+        view: null,
+      };
+    }
     return { kind: 'v1', schemaVersion: null, reason: null, problems: [], blockedActions: [], view: null };
   }
   return readVersionedEnvelope(capturedContent);
@@ -439,7 +455,8 @@ function readConceptProduct(capturedContent) {
 /**
  * The generic snapshot write path accepts only legacy v1 concept content. The
  * shallow guard lives in `menuProductGuardsV2.js`; this enriched wrapper keeps
- * the precise `v2`/`invalid` reason for the integration tests and callers.
+ * the precise `v2`/`invalid` reason for the integration tests and callers. It
+ * refuses exactly the values `readConceptProduct` does not classify as v1.
  */
 function assertLegacyConceptContent(value) {
   if (!isUnsupportedConceptEnvelope(value)) return value;

@@ -117,6 +117,18 @@ async function exportForSnapshot(supabase, github, snapshotId, now) {
   return { export: exportView(await refreshExport(supabase, github, rows[0] || null, now)) };
 }
 
+/**
+ * The latest stored export of a version without any refresh: no GitHub call,
+ * no status update and no claim. Used when the card itself is blocked (v2,
+ * unknown or invalid content), so displaying stored metadata can never cause a
+ * side effect.
+ */
+async function storedExportForSnapshot(supabase, snapshotId) {
+  const { rows, error } = await activeExports(supabase, { snapshotId });
+  if (error) return { error };
+  return { export: exportView(rows[0] || null) };
+}
+
 function createMenuConceptExportHandler({ authenticate, getSupabase, restaurants, liveMenus, computeMenuHash, github, sourceStatus, now = () => new Date() }) {
   async function authorize(request) {
     const auth = await authenticate(request);
@@ -316,4 +328,4 @@ function createMenuConceptExportHandler({ authenticate, getSupabase, restaurants
   return { exportToReviewPr };
 }
 
-module.exports = { createMenuConceptExportHandler, exportForSnapshot, exportMenuEntry, exportView, marker, NOT_PUBLISHED };
+module.exports = { createMenuConceptExportHandler, exportForSnapshot, storedExportForSnapshot, exportMenuEntry, exportView, marker, NOT_PUBLISHED };

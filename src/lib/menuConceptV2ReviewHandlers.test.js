@@ -135,6 +135,15 @@ function fakeSupabase(tables) {
           tables[table].push({ ...row, id: tables[table].length + 1 });
           return { select: () => ({ single: () => Promise.resolve({ data: { id: tables[table].length }, error: null }) }) };
         },
+        update(patch) {
+          calls.push({ update: table, patch });
+          return {
+            eq(col, val) {
+              for (const row of tables[table] || []) if (row[col] === val) Object.assign(row, patch);
+              return Promise.resolve({ data: null, error: null });
+            },
+          };
+        },
         then(resolve) { calls.push({ select: table }); return resolve({ data: rows(), error: null }); },
       };
       return builder;
@@ -146,23 +155,53 @@ function fakeSupabase(tables) {
   };
 }
 
-function world({ captured, receiptProduct = undefined } = {}) {
+function world({ captured, receiptProduct = undefined, exportRow = null } = {}) {
   return fakeSupabase({
     menu_snapshot_proposals: [snapshotRow(1, captured || productFixture())],
     menu_snapshot_reviews: [],
     url_intake_analysis_receipts: [{ id: 'r1', canonical_source_url: SITE, fetched_at: '2026-10-19T09:00:00Z', menus: [{ categories: [{ name: 'Koud', items: [{ name: 'Fictieve soep', price: '8.50' }] }] }], product: receiptProduct }],
     source_triage_proposals: [{ id: 'p1', restaurant_id: 'bistro', kind: 'add_candidate', proposed_url: MENU_URL, current_url: null, status: 'accepted', decided_at: '2026-10-19T09:30:00Z' }],
     restaurant_source_analysis_jobs: [{ id: 'j1', canonical_source_url: SITE, status: 'succeeded', error_reason: null, created_at: '2026-10-19T09:00:00Z' }],
+    menu_snapshot_exports: exportRow ? [exportRow] : [],
   });
 }
 
-function handlersFor(supabase, { roles = [{ role: 'internal' }] } = {}) {
+function exportRowFixture(overrides = {}) {
+  return {
+    id: 9,
+    snapshot_id: 1,
+    restaurant_id: 'bistro',
+    content_hash: 'fictief',
+    export_hash: null,
+    status: 'opened',
+    branch: 'menu/fictief',
+    commit_sha: 'abcdef1',
+    pr_number: 9,
+    pr_url: 'https://github.invalid/9',
+    error_reason: null,
+    created_by: MAKER,
+    created_at: '2026-10-19T10:15:00Z',
+    updated_at: '2026-10-19T10:15:00Z',
+    ...overrides,
+  };
+}
+
+function githubSpy(state = 'merged') {
+  const calls = [];
+  return {
+    calls,
+    async pullRequestState(prNumber) { calls.push(prNumber); return state; },
+  };
+}
+
+function handlersFor(supabase, { roles = [{ role: 'internal' }], github = null } = {}) {
   return createMenuConceptReviewHandlers({
     authenticate: async () => ({ ok: true, userId: REVIEWER, roles }),
     getSupabase: () => supabase,
     restaurants: RESTAURANTS,
     liveMenus: LIVE,
     computeMenuHash: hash,
+    github,
     now: () => new Date('2026-10-19T10:30:00Z'),
   });
 }
@@ -282,5 +321,93 @@ test('rights are unchanged: editor, owner and a missing session never reach the 
   }
 });
 
+// P1 regression (review 6283658271): detail used to refresh the export (a
+// GitHub lookup plus a menu_snapshot_exports status update) before it
+// classified the concept and origin receipt. A blocked card must not cause any
+// of those side effects; only its stored metadata may be shown.
+test('detail: a blocked concept or origin receipt never calls GitHub or rewrites export status', async () => {
+  const cases = [
+    ['v2 concept', { captured: productFixture() }, 'product_v2_read_only'],
+    ['unknown concept version', { captured: { ...productFixture(), schemaVersion: 'menu-extraction-product/v9' } }, 'unsupported_schema_version'],
+    ['invalid concept version', { captured: { ...productFixture(), coverage: { status: 'complete', sourcesRead: 0, pagesRead: 0, itemsExtracted: 99, unreadSources: [], limitations: [] } } }, 'invalid_product_version'],
+    ['v1 concept with a v2 origin receipt', { captured: legacyContent(), receiptProduct: productFixture() }, 'receipt_product_v2_authoritative'],
+  ];
+  for (const [label, options, reason] of cases) {
+    for (const state of ['merged', 'closed']) {
+      const supabase = world({ ...options, exportRow: exportRowFixture() });
+      const github = githubSpy(state);
+      const res = await handlersFor(supabase, { github }).detail(request(null), '1');
+      assert.equal(res.status, 200, label);
+      assert.equal(res.body.concept.readOnly, true, label);
+      assert.equal(res.body.concept.blocked.reason, reason, label);
+      assert.equal(res.body.export.status, 'opened', `${label}: stored metadata is shown as stored`);
+      assert.equal(res.body.export.prNumber, 9, label);
+      assert.deepEqual(github.calls, [], `${label}: no GitHub call`);
+      assert.deepEqual(supabase.calls.filter((c) => c.update), [], `${label}: no export status write`);
+      assert.deepEqual(inserts(supabase), [], label);
+      assert.deepEqual(rpcs(supabase), [], label);
+    }
+  }
+});
 
+test('detail: the intended v1 behaviour still refreshes an opened export and records merged', async () => {
+  const supabase = world({ captured: legacyContent(), exportRow: exportRowFixture() });
+  const github = githubSpy('merged');
+  const res = await handlersFor(supabase, { github }).detail(request(null), '1');
+  assert.equal(res.status, 200);
+  assert.equal(res.body.concept.readOnly, false);
+  assert.deepEqual(github.calls, [9], 'a v1 card still asks GitHub once');
+  const updates = supabase.calls.filter((c) => c.update);
+  assert.equal(updates.length, 1);
+  assert.equal(updates[0].update, 'menu_snapshot_exports');
+  assert.equal(updates[0].patch.status, 'merged');
+  assert.equal(res.body.export.status, 'merged');
+});
 
+// P2 regression (review 6283658271): an unversioned v2-shaped row used to be
+// classified v1 by readConceptProduct and then throw from storedConceptInput,
+// turning the whole list into an unhandled 500.
+test('list and detail: an unversioned v2-shaped row is a concrete block next to a valid v1 row', async () => {
+  const invalidContent = { menus: [{ categories: [] }], rejected: [], coverage: { status: 'complete' } };
+  const supabase = fakeSupabase({
+    menu_snapshot_proposals: [
+      snapshotRow(1, invalidContent, { menu_context: 'bistro-menukaart' }),
+      snapshotRow(2, legacyContent(), { menu_context: 'bistro-lunch', origin_receipt_id: null }),
+    ],
+    menu_snapshot_reviews: [],
+    url_intake_analysis_receipts: [{ id: 'r1', canonical_source_url: SITE, fetched_at: '2026-10-19T09:00:00Z', menus: [{ categories: [] }], product: null }],
+    source_triage_proposals: [],
+    restaurant_source_analysis_jobs: [],
+    menu_snapshot_exports: [],
+  });
+  const handlers = handlersFor(supabase);
+
+  const list = await handlers.list(request(null));
+  assert.equal(list.status, 200, 'one invalid row never breaks the list');
+  const blockedRow = list.body.items.find((item) => item.id === 1);
+  const validRow = list.body.items.find((item) => item.id === 2);
+  assert.equal(blockedRow.readOnly, true);
+  assert.equal(blockedRow.blockedReason, 'unsupported_schema_version');
+  assert.equal(blockedRow.schemaVersion, null);
+  assert.equal(blockedRow.dishCount, 0);
+  assert.equal(validRow.readOnly, false, 'the valid v1 row keeps its normal counts');
+  assert.ok(validRow.dishCount >= 1);
+  assert.equal(validRow.blockedReason, null);
+
+  const detail = await handlers.detail(request(null), '1');
+  assert.equal(detail.status, 200);
+  assert.equal(detail.body.concept.readOnly, true);
+  assert.equal(detail.body.concept.blocked.reason, 'unsupported_schema_version');
+  assert.ok(detail.body.concept.blocked.problems.length > 0);
+  assert.equal(detail.body.product, null);
+  assert.equal(detail.body.concept.captured, null);
+
+  const save = await handlers.saveVersion(request({ expected_version: 1, edits: {} }), '1');
+  const approve = await handlers.decide(request({ expected_version: 1, decision: 'approved_internal' }), '1');
+  for (const res of [save, approve]) {
+    assert.equal(res.status, 409);
+    assert.equal(res.body.reason, 'unsupported_schema_version');
+  }
+  assert.deepEqual(inserts(supabase), []);
+  assert.deepEqual(rpcs(supabase), []);
+});

@@ -30,6 +30,7 @@ test('the generic snapshot route validates before hashing or inserting; the revi
   assert.match(reviews, /handlers\.record\(request, id\)/);
   const handler = code('src/lib/menuSnapshotReviewHandlers.js');
   before(handler, 'readConceptProduct(', ".from('menu_snapshot_reviews')", 'reviews POST');
+  before(handler, 'loadOriginReceipt(', ".from('menu_snapshot_reviews')", 'reviews POST: origin receipt authority');
   assert.doesNotMatch(handler, /\.update\(|\.delete\(|menus\.json|analyzeSourceUrl/);
 });
 
@@ -48,6 +49,12 @@ test('review, export and batch handlers guard before every side effect', () => {
   const review = code('src/lib/menuConceptReviewHandlers.js');
   before(review, 'productActionRefusal(\'save\'', 'createConceptVersion(', 'saveVersion');
   before(review, 'productActionRefusal(\'decide\'', 'record_menu_snapshot_decision', 'decide');
+  // Detail must classify concept and origin receipt before the export path:
+  // `exportForSnapshot` refreshes GitHub and may update menu_snapshot_exports.
+  const detail = review.slice(review.indexOf('async function detail'));
+  before(detail, 'receiptBlock(receipt)', 'exportForSnapshot(', 'detail classifies before the export refresh');
+  before(detail, 'productBlock', 'exportForSnapshot(', 'detail classifies the concept before the export refresh');
+
   const exporter = code('src/lib/menuConceptExport.js');
   const exportHandler = exporter.slice(exporter.indexOf('async function exportToReviewPr'));
   before(exportHandler, "productActionRefusal('export'", 'activeExports(', 'export');

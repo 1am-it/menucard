@@ -11,6 +11,7 @@
 
 const { validateSnapshotReviewInput, snapshotReviewValidationMessage } = require('./menuSnapshotProposals');
 const { readConceptProduct, productActionRefusal } = require('./menuProductIntegrationV2');
+const { loadOriginReceipt, originReceiptBlock } = require('./menuOriginReceiptGuard');
 
 function isEditor(roles) {
   return Array.isArray(roles) && roles.some((r) => r && r.role === 'editor');
@@ -49,7 +50,7 @@ function createMenuSnapshotReviewHandlers({ authenticate, getSupabase }) {
     const supabase = getSupabase();
     const { data: snapshot, error: loadError } = await supabase
       .from('menu_snapshot_proposals')
-      .select('id, captured_content')
+      .select('id, captured_content, origin_receipt_id')
       .eq('id', rawId)
       .maybeSingle();
     if (loadError) return reply(500, { error: 'Recording the review failed' });
@@ -57,6 +58,15 @@ function createMenuSnapshotReviewHandlers({ authenticate, getSupabase }) {
 
     const product = readConceptProduct(snapshot.captured_content);
     if (product.kind !== 'v1') return productActionRefusal('decide', product);
+
+    // The same receipt-authority guard as the internal review route: a v1
+    // projection next to a v2/unknown/invalid origin receipt may not be
+    // approved through this generic editor row either. A lookup error fails
+    // closed instead of downgrading to "no receipt".
+    const receiptState = await loadOriginReceipt(supabase, snapshot.origin_receipt_id);
+    if (receiptState.error) return reply(500, { error: 'Recording the review failed' });
+    const originBlock = originReceiptBlock(receiptState.receipt);
+    if (originBlock) return productActionRefusal('decide', originBlock);
 
     const { data, error } = await supabase
       .from('menu_snapshot_reviews')
