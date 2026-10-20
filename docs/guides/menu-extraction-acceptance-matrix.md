@@ -2,9 +2,14 @@
 
 Status: **ontwikkelaarsbewijs, geen onafhankelijke review en geen release.**
 Datum: 2026-10-20. Issue #59, branch `feat/menu-extraction-59`, PR #60.
-Kandidaat-codehead: `6728897c814bce80aa2b9a44d53d8322b3adc72a` (herstel van
-review 6283658271 op de read-only v2-aansluiting; deze documentatie volgt als
-aparte commit). Vorige heads:
+Kandidaat-codehead: `26839eb4b9dfb5fb0a04fbc977ae3a7561f7000a`
+(browserdekking van de bestaande conceptlijst en detailpagina na review
+6295223157; deze documentatie volgt als aparte commit).
+Bewijscommit: `0f6fce86c0cc75cbcaab05574b7ae83975e3a16c`
+(`ops/browser/evidence/menu-review-browser-evidence.json`, gegenereerd op
+`26839eb` met schone werkboom). Vorige heads:
+`b621582223515ee7b9f2b81dada56b8a4d044955` (reviewdocumentatie),
+`6728897c814bce80aa2b9a44d53d8322b3adc72a` (herstel van review 6283658271),
 `ab89d14c0a2dfb19c559126a0a8ca0bb62746d16` (documentatie),
 `0f9ea9dd59c36b13b270cb140030466db11d6d8d` (read-only aansluiting) en
 `6fb54cad76dd4f2b7996667777d82c0db5789b04` (volledig-lexeem prijsbewijs).
@@ -30,7 +35,11 @@ capture), en sinds deze ronde de **read-only v2-aansluiting**: bestaande
 receipt-, review-, concept-, batch-, workqueue- en exportlezers herkennen een
 versioned envelope, tonen varianten/glas/fles/supplementen en bewijs via één
 gesaneerde view, en weigeren v2 vóór hash, claim, insert, update, RPC of
-GitHub. De Botanist is meetbaar gedeeltelijk (124/141 referentierijen,
+GitHub. Sinds deze ronde is ook de bestaande conceptlijst en detailpagina met
+echte klikken in de fixture gedekt: geldige v1 blijft bruikbaar, v2 blijft
+read-only met glas/fles/supplement/allergenen/provenance/dekking, en onbekende
+of exact lege `menus: []`-rijen blijven zichtbaar geblokkeerd. De Botanist is
+meetbaar gedeeltelijk (124/141 referentierijen,
 11 gemist, 4 extra, 0 prijsverschil) en de Mr Moos/Colonia-aantallen zijn
 live observaties zonder referentie-uitkomst. Bewust geblokkeerd of niet
 ondersteund blijven: scans/OCR, v2-**schrijvers**/activering, echte
@@ -71,13 +80,50 @@ ander besluit of eigenaar.
 | 7 | Dataset, referentie-uitkomsten en meetbare drempels vóór acceptatie vastgelegd; BE-21's 50–100 niet met enkele URL's afgesloten | `manifest.json` `releaseThresholds`: 0 verzonnen gerechten/prijzen, 100% bewijs, 0 onverklaarde dekking, 0 structuur-/prijsfouten; `sourceReferences.test.js`; 23 structuurgevallen | T | **bewezen met beperking** | Drempels zijn vast en niet verlaagd; BE-21 is expliciet buiten #59 en niet afgesloten met twee bronnen | BE-21-eigenaar; Delivery Lead voor scopebewaking |
 
 | 8 | Gemiste/verzonnen items, prijsfouten, structuurverlies, bewijsdekking, correctiewerk, tijd en kosten per brontype gerapporteerd | Per-brontabel hieronder; Smelt/Blossem 0 verschillen; Botanist v1 124/11/4/0, 87 niet-gekoppeld; Mr Moos/Colonia zonder referentie; deterministische analysetijd per bron gemeten | R+T | **bewezen met beperking** | Correctietijd is onbekend; productiekosten zijn onbekend; de gemeten analysetijd is geen menselijke correctietijd. Modelkosten in deze run zijn €0 omdat geen provider is aangeroepen | Developer voor een correctietijdmeting; Product Owner voor kostenbesluit |
-| 9 | Browseracceptatie met klikpaden, rolgrenzen, leeg/fout/partieel, toetsenbord, licht/donker, 320/390 px | `npm run test:browser:menu-review`: 127/127 checks op de werkboom die als `0f9ea9d` is gecommit (de evidence noemt head `0f9ea9d` + dirty worktree), inclusief de nieuwe v2-scenario's op 1024/390 px en licht/donker, 13 screenshots, Edge 155.0.4283.45, keyboard Enter, read-only collega, empty/partial/error, fail-closed netwerkguard | B | **bewezen met beperking** | Alleen fixture; geen live/staging browserbewijs en geen echte authenticated sessie. De fixture is geen productieacceptatie en is na `0f9ea9d` niet opnieuw gedraaid; `6728897` wijzigt geen UI-bestand | Product Owner/ops voor previewtoegang; Delivery Lead voor live acceptatie |
+| 9 | Browseracceptatie met klikpaden, rolgrenzen, leeg/fout/partieel, toetsenbord, licht/donker, 320/390 px | `npm run test:browser:menu-review`: **241/241 checks** op codehead `26839eb`, evidence met schone werkboom en SHA-256 `F5B2CD715FCC8B7CF2F382988C7F316D8D22CB6615AEFFC95EB4F2D05970C583`; 33 screenshots, 2 clickpathinventories. Bestaande batchchecks blijven groen. Nieuw: echte klikken lijst→exact detail→terug voor vier fictieve lineage-ids (geldige v1, v2, onbekende versie, exact `menus: []`), product-read-only met glas/fles/supplement/onbekende allergenen/provenance/dekking, afwezige save/approve/reject/export, 403/404/leeg/fout, keyboard/focus, licht/donker en 320/390/1024 px, 0 app-fase netwerkviolations; geforceerde approve-klik en script-POSTs worden geweigerd en als bewuste probe vastgelegd | B | **bewezen met beperking** | Alleen fixture: geen live/staging browserbewijs en geen echte authenticated sessie. Alleen `GET /api/internal/v1/menu-concepts` en `GET /api/internal/v1/menu-concepts/<id>` zijn fictief beantwoord; alle concept-POST's (`versions`, `decision`, `export`, lijst/detail) en onbekende API-routes zijn geweigerd. De UI-blokkade bewijst de server niet; `menuConceptReviewHandlers.test.js` blijft daarvoor leidend | Product Owner/ops voor previewtoegang; Delivery Lead voor live acceptatie |
 | 10 | Time-out, provideruitval, ongeldige uitvoer, kosten-/paginagrens, herimport, gelijktijdige taken, promptinjectie, verkeerde vestiging, onveilige redirects getest | `menuExtractionAdapter.test.js`, `safeOutboundFetch.test.js`, `restaurantSourceAnalysis.test.js`, `batchAnalysisHandlers.test.js`, `menuConcept.test.js`; offline fake provider en `.invalid`-fixtures; geen dubbele call/claim | T | **bewezen met beperking** | Alleen offline; een echte provideruitval, echte kostenmeting en echte gelijktijdige productietaken zijn niet gemeten | Product Owner voor provider/budget; developer voor een latere live meting |
 | 11 | Geen stil dataverlies tussen extractie, receipt, review, concept en export; niet-ondersteunde publicatievelden geblokkeerd/gemeld | `menuProductIntegrationV2.test.js`, `menuProductGuardsV2.test.js`, `menuConceptV2ReviewHandlers.test.js`, `menuConceptExportV2.test.js`, `sourceWorkqueueV2.test.js`, `menuProductV2Surface.test.js`; de bestaande review toont glas/fles, supplementen, bewijs en dekking via één gesaneerde view; save/approve/reject/export/confirm weigeren v2 vóór hun effect | T+B | **bewezen met beperking** | Alleen fictieve in-memory/browserfixtures; geen echte v2-rij in Supabase en geen live bronbevestiging. Een v2-writeflag/exportcontract blijft niet gebouwd | Developer voor live preview; Delivery Lead voor review |
 | 12 | Geen regressie in rollen, bronbevestiging, audit, publicatiegates, beveiliging of geheimenbeheer | Volledige suite 2160/2160 op head `6728897`; browserfixture 127/127 gegenereerd op `0f9ea9d` (na die head niet opnieuw gedraaid); v1-gedrag en bestaande rechten blijven groen; netwerkguard blokkeert externe fetch, protocol-relative URL, onbekende API-write, XHR, WebSocket en CDP-subresources | T+B | **bewezen met beperking** | Geen productiecredentials, productieauth of echte database gebruikt; dat is bewust niet getest | Product Owner/ops voor productieacceptatie |
 | 13 | Onafhankelijke review met exacte commit, checks, bron-/protocolversies, resultaten, beperkingen en volgende stap; groene unit-tests zijn geen productacceptatie | Deze matrix + checkpoint op PR #60 | I | **geblokkeerd** | De Delivery Lead heeft deze afrondingsronde nog niet onafhankelijk beoordeeld; deze matrix is ontwikkelaarsbewijs | Delivery Lead |
 | 14 | Een v2-envelope wordt in de bestaande interne controle/beoordeling versiegetrouw herkenbaar: varianten, glas/fles, supplementen, bewijs en dekking; niets afgeplat | `menuProductIntegrationV2.test.js`, `menuProductGuardsV2.test.js`, `menuConceptV2ReviewHandlers.test.js`, `menuConceptExportV2.test.js`, `sourceWorkqueueV2.test.js`, `batchAnalysisHandlers.test.js` (v2-cases), `menuProductV2Surface.test.js`; browserfixture `v2` op 1024/390 px | T+B | **bewezen met beperking** | Alleen fictieve in-memory/browserfixtures; geen echte v2-rij in Supabase, geen live bron en geen authenticated preview | Developer voor live preview; Product Owner/ops voor toegang |
 | 15 | Onbekende/ongeldige/onvoldoende onderbouwde v2 wordt vóór alle zijeffecten geweigerd; v1 blijft ongewijzigd | `menuProductV2Surface.test.js`, `menuSnapshotReviewHandlers.test.js`, `menuSnapshotProposals.test.js`, `menuConceptV2ReviewHandlers.test.js`, `menuConceptExportV2.test.js`; save/approve/export/reviews/url-intake guards vóór hash, claim, insert, update, RPC of GitHub; de generieke editorreview leest nu ook de oorsprongsreceipt (`menuOriginReceiptGuard`), detail classificeert vóór de exportrefresh en een onversioned v2-vorm is een concrete blokkade; bestaande v1-suite groen | T | **bewezen met beperking** | Geen echte database-/GitHub-side-effectmeting; de tests bewijzen de volgorde met fakes. Bronverificatie blijft bewust onbekend | Delivery Lead voor onafhankelijke review |
+
+### Browserbewijs conceptlijst/detail (review 6295223157)
+
+De browserfixture dekt nu ook de bestaande pagina's
+`/internal/menu-concepts` en `/internal/menu-concepts/[id]`, met de echte
+`ConceptList`, `ConceptReview` en `ProductReview`-componenten. De fixture bouwt
+de payloads met dezelfde productreaders als de server
+(`readConceptProduct`, `buildProductReviewView`, `storedConceptInput`,
+`buildMenuConcept`); er is geen nagebouwde HTML.
+
+- **Wel fictief beantwoord (GET):** alleen
+  `GET /api/internal/v1/menu-concepts` en
+  `GET /api/internal/v1/menu-concepts/<id>` met precies één padsegment.
+- **Geweigerd vóór een handler of native fetch:** `POST` op lijst en detail,
+  `POST .../versions`, `.../decision`, `.../export`, geneste GET zoals
+  `.../versions`, alle onbekende `/api/...`-routes, externe URL's,
+  protocol-relatieve URL's en een externe WebSocket/providerfetch.
+- **Echte klikpaden:** lijst → v1/v2/onbekend/`menus: []`-detail → terug, met
+  per stap het exacte pad en de unieke restaurantnaam; de geselecteerde id
+  springt niet naar een andere rij. Een tweede inventory legt de
+  toetsenbordroute lijst → detail → lijst vast.
+- **Read-only v2:** glas/fles blijven gescheiden, het supplement en zijn
+  onopgeloste doel blijven zichtbaar, allergenen blijven onbekend, bronbewijs
+  en dekkingsbeperking blijven staan; save/approve/reject/export zijn afwezig.
+- **Geblokkeerde staten:** onbekende/onversioned versie en exact `menus: []`
+  blijven zichtbaar geblokkeerd; lege lijst, 500, 403, detailfout en 404 tonen
+  een eerlijke melding en geen verzonnen concept.
+- **Geforceerde actie:** een echte klik op "Concept goedkeuren" en script-POSTs
+  naar `versions`/`decision`/`export` worden door de netwerkguard geweigerd en
+  als bewuste `negative-probe` vastgelegd. Dat bewijst alleen de guard, niet de
+  server; de serverhandlerregressies blijven leidend.
+- **Bereik:** 241/241 checks, 33 screenshots, 2 clickpathinventories,
+  0 app-fase-violations en 2 CDP-negatieve probes (afbeelding/iframe), op
+  codehead `26839eb` met schone werkboom. `fixtureOnly: true`; de harness
+  start alleen zijn eigen loopback-`next dev` en eigen Edge via CDP. Dit is
+  geen echte authenticated acceptatie.
+
 
 ## Pure v2 schema-/mappinglaag (ronde 2026-10-19)
 
@@ -303,6 +349,10 @@ nieuw publiek veld toegevoegd en geen publicatieveld verzonnen.
 | Build (read-only v2-aansluiting) | `npm run build` | **compiled successfully in 18,7 s; 41/41 statische pagina's; exit 0** (codehead `0f9ea9d`) |
 | Build (herstel review 6283658271) | `npm run build` | **compiled successfully in 15,8 s; 41/41 statische pagina's; exit 0** (codehead `6728897`) |
 | PDF.js-serverpad | `node ops/scripts/verify-pdfjs-server-trace.js` | **OK**; 164 server scripts, native `pdf.mjs`/`pdf.worker.mjs`, geen gebundelde PDF.js-runtime (head `5e3e3a5`) |
+| Volledige suite (conceptlijst/detail) | `npm test` | **2163 tests: 2163 pass, 0 fail, 0 skipped** (codehead `26839eb`; TAP, 41,4 s) |
+| Structuurcorpus (deze ronde) | `npm run test:menu-structure` | **6 pass, 0 fail** (codehead `26839eb`) |
+| Build (conceptlijst/detail) | `npm run build` | **compiled successfully in 14,5 s; 41/41 statische pagina's; exit 0** (codehead `26839eb`) |
+| Browserfixture (conceptlijst/detail) | `npm run test:browser:menu-review` | **241/241 checks**, 33 screenshots, 2 clickpathinventories, Edge 155.0.4283.45, gegenereerd op codehead `26839eb` met schone werkboom; evidence `passed: true`, SHA-256 `F5B2CD715FCC8B7CF2F382988C7F316D8D22CB6615AEFFC95EB4F2D05970C583`; 0 app-fase-violations, 2 CDP-negatieve probes |
 | Browserfixture (read-only v2-aansluiting) | `npm run test:browser:menu-review` | **127/127 checks**, 13 screenshots (incl. `v2-1024-light` en `v2-390-dark`), Edge 155.0.4283.45, gegenereerd op head `0f9ea9d` (dirty worktree door deze documentatie), evidence `passed: true` |
 | Echte bronproef | `node ops/scripts/probe-menu-extraction-sources.js --source=all` | **exit 0**; Smelt 37/37 (8 secties), Blossem 43/43 (13 secties); beide byte-/contenthash identiek; 0 gemist/extra/prijs/koppeling/duplicaat; boekhouding 37/37 en 43/43 |
 | Botanist-vergelijking | `node ops/benchmark/runBotanistComparison.js --pdf=…/botanist-menu.pdf` (v1 en v3-voorstel) | **exact reproductie** van de vastgelegde v1 (124/11/4/0; 215 items; 87 niet-gekoppeld; 9 `categoryUnknown`) en v3-voorstel (127/6/1/0; 5 beperkt; 8 `categoryUnknown`); PDF-hash gelijk |
@@ -328,6 +378,15 @@ Botanist-vergelijking zijn niet herhaald: `0f9ea9d` wijzigt geen fetch-,
 parser-, PDF- of extractorruntime. Hun bewijs blijft aan de eerdere codeheads
 gekoppeld. Er is geen echte database-, GitHub- of providerwrite uitgevoerd.
 
+De conceptlijst/detailronde staat op codehead `26839eb`: `npm test` 2163/2163,
+`npm run test:menu-structure` 6/6, `npm run build` 41/41 pagina's met exit 0 en
+de browserfixture 241/241 op een schone werkboom. De evidence staat in commit
+`0f6fce8` en noemt head `26839eb`. Alleen de twee concept-GET's zijn fictief
+beantwoord; alle concept-POST's en onbekende routes zijn geweigerd. De
+geforceerde approve-klik en script-POST's bewijzen de netwerkguard, niet de
+server; de serverhandlerregressies blijven daarvoor leidend. Er is geen echte
+authenticated browser-, database-, GitHub- of providerwrite uitgevoerd.
+
 ## Wat expliciet niet is uitgevoerd of geclaimd
 
 - **Item-voor-item menselijke hercontrole** van Smelt/Blossem: niet uitgevoerd;
@@ -341,7 +400,10 @@ gekoppeld. Er is geen echte database-, GitHub- of providerwrite uitgevoerd.
 - **Echte bronbevestiging, conceptopslag, export, publicatie, merge of release**:
   niet uitgevoerd en niet geautoriseerd.
 - **Live/staging browseracceptatie en echte authenticated sessie**: niet
-  uitgevoerd; alleen de lokale fixture op Edge 155.
+  uitgevoerd; alleen de lokale fixture op Edge 155, inclusief de conceptlijst en
+  detailpagina met fictieve GET's. De fixture bewijst geen echte Supabase-sessie,
+  geen echte conceptrij en geen serverweigering; die laatste blijft via de
+  serverhandlerregressies bewezen.
 - **BE-21's 50–100-bronnen/OCR-/vendorbenchmark**: buiten #59; niet afgesloten.
 - **Scans/OCR**: expliciet niet ondersteund; de uitkomst is een eerlijke fout.
 - **Echte v2-rij of v2-writeflag**: niet aangemaakt of geactiveerd; alle
@@ -369,7 +431,7 @@ gekoppeld. Er is geen echte database-, GitHub- of providerwrite uitgevoerd.
 | 3 | Live preview-/stagingtoegang en expliciete schrijfautorisatie voor bronbevestiging, conceptopslag en export | De fixture bewijst geen echte Supabase-sessie of schrijfactie; geen bypass toegestaan | Product Owner/ops |
 | 4 | Read-only v2-aansluiting is op `0f9ea9d` gebouwd en op `6728897` hersteld na review 6283658271; nog te besluiten: opt-in v2-writer, additief exportcontract, versiebewuste `url_intakes`-RPC en eventuele migratie | De read-only dual-read/guards zijn getest met fakes; er is geen writer, DDL of publieke werking. Het exportcontract en een eventuele migratie zijn nog niet besloten | Delivery Lead/architect; Product Owner voor writer-/export-/migratiebesluit |
 | 4b | Echte preview-/schrijfacceptatie van een v2-rij: bron → receipt → concept → authenticated browser | De fixture bewijst alleen fictieve data; er is geen echte v2-rij, live bron of Supabase-sessie gebruikt | Product Owner/ops; Developer voert na toegang uit |
-| 5 | Onafhankelijke review van codehead `6728897` en deze documentatie | Criterium 13; groene tests zijn geen productacceptatie | Delivery Lead |
+| 5 | Onafhankelijke review van codehead `26839eb`, evidence `0f6fce8` en deze documentatie | Criterium 13; groene tests en een fixture-browserrun zijn geen productacceptatie | Delivery Lead |
 | 6 | Timing en uitvoering van de #56-integratie na afronding van #56 | Drie conflicten en tien overlappende bestanden; geen merge in deze branch | Delivery Lead beslist; developer voert na de merge uit |
 | 7 | BE-21's 50–100-bronnen/OCR-/vendorbenchmark | Expliciet buiten #59; twee bronnen sluiten die niet af | BE-21-eigenaar |
 | 8 | Gauchos Breda vervangen of als holdout laten vallen | De entry is 404/502 en levert geen broninhoud | Product Owner |
@@ -392,15 +454,16 @@ in [menu-extraction-acceptance.md](menu-extraction-acceptance.md).
 ## Overdracht
 
 **Aanbevolen status: READY_FOR_REVIEW voor dit afrondingsdossier, niet DONE voor
-#59.** Het dossier is toetsbaar op codehead `6728897` (herstel van review
-6283658271 op de read-only v2-aansluiting van de bestaande
-receipt-/review-/concept-/batch-/exportpaden) en de daarop volgende
-documentatiecommit. De volledige suite is 2160/2160 en de build is exit 0 met
-41/41 pagina's; de lokale browserfixture is 127/127 op `0f9ea9d` en is na die
-head niet opnieuw gedraaid, maar dat is hoe dan ook geen echte bron → database →
-authenticated browseracceptatie. Volledige productacceptatie blijft afhankelijk
-van de beslissingen hierboven: een echte preview-/schrijfronde, een eventuele
-v2-writer/exportcontract/migratie, provider/budget/DPA en een nieuwe holdout.
-De eerstvolgende veilige stap is onafhankelijke review door de Delivery Lead;
-daarna kan de Product Owner de resterende besluiten nemen. Er is niets
-gemerged, gepusht naar een andere branch, gedeployed of gepubliceerd.
+#59.** Het dossier is toetsbaar op codehead `26839eb` (browserdekking van de
+bestaande conceptlijst en detailpagina na de reparaties van review 6283658271),
+de evidencecommit `0f6fce8` en de daarop volgende documentatiecommit. De
+volledige suite is 2163/2163, het structuurcorpus 6/6 en de build is exit 0 met
+41/41 pagina's. De lokale browserfixture is 241/241 op een schone werkboom op
+`26839eb`, met 33 screenshots en 2 clickpathinventories; dat is hoe dan ook geen
+echte bron → database → authenticated browseracceptatie. Volledige
+productacceptatie blijft afhankelijk van de beslissingen hierboven: een echte
+preview-/schrijfronde, een eventuele v2-writer/exportcontract/migratie,
+provider/budget/DPA en een nieuwe holdout. De eerstvolgende veilige stap is
+onafhankelijke review door de Delivery Lead; daarna kan de Product Owner de
+resterende besluiten nemen. Er is niets gemerged, gepusht naar een andere
+branch, gedeployed of gepubliceerd.
