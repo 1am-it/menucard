@@ -84,11 +84,21 @@ alleen deze chat.
 Geen publieke API/MCP, CITY-0/bulkuitbreiding, restauranteditor, automatisch publiceren, productiegegevens wijzigen of volledig nieuwe menu-UI. Geen nieuw OCR/browserplatform zonder de bijbehorende keuze. Geen universele claim dat alle websites werken.
 
 ## Oplevering en rolverdeling
-- AI Developer (bijvoorbeeld DeepSeek/Cline): technische review en later uitvoering binnen het vrijgegeven contract.
-- AI Delivery Lead: scopebewaking en onafhankelijke acceptatie; geen eigen bouw als onafhankelijke review voorstellen.
+Eigenaarsbesluit 20-10-2026; zie `.agent/assignments.md`.
+- AI Developer: DeepSeek via de goedgekeurde lokale Cline-runner; uitvoering binnen het vrijgegeven contract en de laatste Lead-order.
+- AI Delivery Lead: Claude Code (enige Lead); orders, voortgangsbewaking, testvoorwaarden en onafhankelijke acceptatie; geen eigen bouw als onafhankelijke review voorstellen. Codex heeft geen standaardrol of reviewpoort.
 - Product Owner: alleen product-, governance-, privacy-, kosten-, toegang- en releasebesluiten.
 - Checkpoint op dit issue met branch/PR, opgeslagen en gepushte commit, testbewijs, resterend werk en eerstvolgende veilige stap.
 - Geen concurrerende Claude-/DeepSeek-uitvoerders. Dit ticket triggert geen automatische bouwronde.
+
+### Projectspecifieke toestemmingen (#59)
+- Bestaand DeepSeek-prepaid voor de lokale developer, zonder extra dagbudget of taaklooptijd; geen automatische opwaardering of providerwissel. Dit is geen toestemming voor betaalde AI in de app.
+- Read-only openbare bronnen: Smelt/Blossem, debotanistbreda.nl, gauchosgrill.nl/breda, mrmoos.nl, breda.colonie.nl. Geen nieuwe bronnen en geen omzeiling van login of CAPTCHA.
+- Een disposable lokale testomgeving (database/auth/REST), uitsluitend op loopback, met de bestaande migraties op een lege database, fictieve test-identiteiten en testwrites alleen daarin. Geen productie-`.env`, echte accounts, productie-DDL of datakopie.
+- Niet toegestaan: productie, merge/rebase/force-push, release/publicatie/export-PR, workflowactivering, #56-integratie.
+
+### Bewijs en afronding
+Bewijs wordt gelabeld als developerbewijs, onafhankelijke controle, fixturebewijs of echte praktijkacceptatie (`.agent/DELIVERY.md`). Echte praktijkacceptatie van #59 vraagt minimaal de keten bron → receipt → menselijke controle/correctie → conceptsave → uitloggen/inloggen → exacte persistente reload in de echte app, met echte lokale auth en database. #59 is pas DONE als de acceptatiecriteria hierboven aantoonbaar zijn gehaald.
 
 ## Voortgang
 - [x] Ticketinhoud en grenzen voorbereid.

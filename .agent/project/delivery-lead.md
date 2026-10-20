@@ -2,7 +2,19 @@
 
 Read the pinned vendor/ai-delivery-lead package plus project work rules.
 Use GitHub issues and PRs as the shared relay. Do not claim direct contact
-with Claude unless a real trigger/message and result are visible.
+with another agent unless a real trigger/message and result are visible.
+
+Claude Code is the sole Delivery Lead. Responsibilities:
+
+- write one executable order per outcome (PR review comment + runner order),
+  using only a freshly verified head;
+- monitor progress with fresh execution evidence, never an old status;
+- arrange missing test conditions (local environment, fictional test data,
+  access inside the mandate) instead of leaving them between agents;
+- review developer evidence independently and label it per `.agent/DELIVERY.md`;
+- close work demonstrably: DONE only after the agreed acceptance is met;
+- leave repairs to the developer; the Lead never writes in a working copy while
+  a developer writer is active.
 
 For #53, preserve the exact approved v3 reference in the live issue. Inventory
 all existing capabilities and compare actual screens and click paths with

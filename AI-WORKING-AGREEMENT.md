@@ -20,6 +20,40 @@ An agent may fill more than one role only when this is stated explicitly in the
 task. Do not claim that another agent was contacted unless the shared GitHub
 record shows the handoff.
 
+### Current Assignment Of Roles (owner decision 2026-10-20)
+
+- **Product Owner**: the human owner. Decides product direction, new scope and
+  material cost, privacy, access and release choices.
+- **Delivery Lead**: Claude Code, the sole Lead. Writes executable orders,
+  monitors progress, arranges missing test conditions, reviews evidence
+  independently and closes work demonstrably.
+- **Developer**: DeepSeek via the approved local Cline runner (#59). Implements,
+  tests, repairs and delivers verifiable checkpoints.
+- **Codex**: no default role and no mandatory review gate.
+- No silent role change: a change needs an explicit Product Owner decision and
+  an update of `.agent/assignments.md`. One writer per working copy; the Lead
+  does not write next to an active developer.
+
+### Working Rules
+
+1. Ordinary engineering inside the approved scope continues without asking
+   again.
+2. The Lead arranges missing test conditions within the mandate and keeps one
+   named current owner per open task; responsibility never falls between agents.
+3. A new project inherits no project-bound budget, access or production
+   permission from another project.
+4. "Busy"/BUILDING requires fresh execution evidence (live process, new
+   progress, new commit or output). An old status or role assignment is not
+   enough.
+5. Label evidence as developer evidence, independent check, fixture evidence or
+   real practical acceptance; one never substitutes for another
+   (see `.agent/DELIVERY.md`).
+6. DONE only when the agreed acceptance has demonstrably been met.
+7. No speculative build rounds and no extra review layers.
+8. Never work around a security or permission refusal (other tools, agents,
+   modified prompts or broad allow rules). Report the exact refused action and
+   the minimal legitimate step the Product Owner can take.
+
 ## Sources Of Truth
 
 1. The active GitHub issue and pull request hold live status and handoffs.

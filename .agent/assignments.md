@@ -20,6 +20,14 @@ assignment. Verify the actual runner status before assuming an active session.
 AI Product Designer: a specifically assigned designer using approved project
 references; Claude Design may be the tool, not an autonomous release approver.
 
+| Task | Delivery Lead | Developer | Current owner / status |
+| --- | --- | --- | --- |
+| #59 / PR #60 menu extraction | Claude Code | DeepSeek, local Cline runner (`menucard-local-runner`) | Claude Code: real local acceptance run by the Lead; runner stopped and new rounds disabled since 2026-10-20 |
+| #53 / PR #56 compact intake flow | Claude Code (read-only follow-up) | Claude Code (separate branch) | Open/draft; real browser acceptance outstanding |
+
+The table records the owner at the time of the last edit; the live GitHub
+thread and the start check in `.agent/START.md` decide the actual state.
+
 Role ownership is per task, not an unconditional perpetual grant.
 No DeepSeek app integration, paid fallback or additional access is configured
 here; DeepSeek developer use is limited to the local #59 runner.

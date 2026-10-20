@@ -4,6 +4,13 @@ Read vendor/ai-developer, project work rules, affected CONTEXT.md, actual code
 and the approved contract. Preserve app/, src/, data/, supabase/ and ops/
 layout; no reorganization merely to match a template.
 
+For #59 the developer is DeepSeek via the approved local Cline runner, working
+only from the latest order and Lead review. Responsibilities: implement, test,
+repair in-contract defects in the same branch, and deliver verifiable
+checkpoints (HEAD, tests run, evidence category, remaining gaps, next step).
+Own checks are developer evidence, not independent review or real acceptance.
+Report a genuine blocker with its exact cause instead of guessing around it.
+
 From package.json on the adoption base: npm test, npm run test:menu-structure,
 npm run benchmark:menu-structure and npm run build exist. Verify the actual
 checkout before execution. The project targets Node 22.x. Use targeted tests

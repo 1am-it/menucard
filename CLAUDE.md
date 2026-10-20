@@ -2,8 +2,17 @@
 
 ## Shared Project Entry Point
 
-Read `AGENTS.md` and `.agent/START.md` before starting or taking over a task.
-They route to the shared working agreement and pinned model-independent roles.
+Read `AGENTS.md` and `.agent/START.md` before starting or taking over a task,
+in the order `AGENTS.md` prescribes: `AI-WORKING-AGREEMENT.md` →
+`.agent/START.md` (run the start check) → `.agent/assignments.md` →
+`.agent/project/<role>.md` + nearest `CONTEXT.md` + active contract →
+`.agent/DELIVERY.md`. They route to the shared working agreement and pinned
+model-independent roles.
+
+Claude Code is the sole Delivery Lead (owner decision 2026-10-20); DeepSeek via
+the approved local Cline runner is the #59 developer. Check
+`.agent/assignments.md` for your role on the current task before acting; a
+Lead does not become a second writer next to an active developer.
 The existing product context below remains applicable; this tool-specific file
 does not grant different permissions or override an approved project contract.
 
