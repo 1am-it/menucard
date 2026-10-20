@@ -108,6 +108,13 @@ Generated artifacts (gitignored):
 The evidence file is committed; screenshots stay local. A reviewer can rerun
 the command to reproduce the same fixture evidence.
 
+Screenshots whose name ends in `-clickpath.png` follow a real link and therefore
+use the fixture's default dark theme: a real click drops the query string.
+Explicit light/dark evidence comes from the direct-URL scenarios, including
+`concept-detail-v2-1024-light.png`, `concept-detail-v2-1024-dark.png`,
+`concept-detail-v2-390-light.png`, `concept-detail-v2-390-dark.png` and
+`concept-detail-v2-320-light.png`.
+
 ## Coverage
 
 - exact breadcrumb, source and "handmatig beoordelen" links;
