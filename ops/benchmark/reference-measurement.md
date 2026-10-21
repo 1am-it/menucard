@@ -4,6 +4,8 @@ Gemeten op 4 van 5 vastgezette bronversies met de huidige code op de vastgezette
 
 De referenties zijn vooraf uit de brontekst opgesteld; deze meting is geen ongeziene holdout en geen productieacceptatie. Er is geen OCR, provider of publicatie gebruikt.
 
+Bij een verzonnen rij bestaat per definitie geen referentie-citaat; de regel noemt dan de passage of locator die de extractor zelf bij dat item gaf, of “geen bronpassage”.
+
 ## Totalen (alleen gemeten bronnen)
 
 | Maat | Waarde |
@@ -78,7 +80,7 @@ De referenties zijn vooraf uit de brontekst opgesteld; deze meting is geen ongez
 - `Kip loempia’s` — Menukaart › Warme voorgerechten — prijs 8.00 — citaat: “Kip loempia’s, €8,00 Oosterse loempiarollen gevuld met gekruide kip en groente (2 st)” (Menukaart › Warme voorgerechten › regel 4)
 
 **Verzonnen (2)**
-- `€` — Menukaart — prijs 39.50 — broncitaat: “”
+- `€` — Menukaart — prijs 39.50 — geen bronpassage (extractor-locator: pdf:1:item:1)
 - `Geraspte kaas` — Menukaart › Pasta's — prijs 2.00 — broncitaat: “Geraspte kaas meerprijs €2,00”
 
 **Prijsfouten (0)**

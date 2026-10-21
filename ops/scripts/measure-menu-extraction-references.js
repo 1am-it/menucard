@@ -243,6 +243,8 @@ function renderMarkdown(report) {
   lines.push('');
   lines.push('De referenties zijn vooraf uit de brontekst opgesteld; deze meting is geen ongeziene holdout en geen productieacceptatie. Er is geen OCR, provider of publicatie gebruikt.');
   lines.push('');
+  lines.push('Bij een verzonnen rij bestaat per definitie geen referentie-citaat; de regel noemt dan de passage of locator die de extractor zelf bij dat item gaf, of “geen bronpassage”.');
+  lines.push('');
   lines.push('## Totalen (alleen gemeten bronnen)');
   lines.push('');
   lines.push('| Maat | Waarde |');
@@ -288,7 +290,11 @@ function renderMarkdown(report) {
     lines.push(`**Verzonnen (${source.inventedDishes.length})**`);
     if (source.inventedDishes.length === 0) lines.push('- geen');
     for (const row of source.inventedDishes) {
-      lines.push(`- \`${clean(row.name, 120)}\` — ${clean(row.path.join(' › '), 200)} — prijs ${row.prices.join(' / ') || 'n.v.t.'} — broncitaat: “${quote(row)}”`);
+      const evidence = clean(row.quote, 300);
+      const support = evidence
+        ? `broncitaat: “${evidence}”`
+        : `geen bronpassage${row.locator ? ` (extractor-locator: ${clean(row.locator, 200)})` : ''}`;
+      lines.push(`- \`${clean(row.name, 120)}\` — ${clean(row.path.join(' › '), 200)} — prijs ${row.prices.join(' / ') || 'n.v.t.'} — ${support}`);
     }
     lines.push('');
     lines.push(`**Prijsfouten (${source.priceErrorRows.length})**`);

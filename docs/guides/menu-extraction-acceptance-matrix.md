@@ -94,7 +94,9 @@ geen alternatieve URL of omzeiling gebruikt.
 Senang Makan is geblokkeerd en telt niet mee in de totalen. De vier foutsoorten
 staan afzonderlijk in `reference-measurement.json` en
 `reference-measurement.md`, met per afwijking het item, het rubriekpad en het
-broncitaat. De meting is deterministisch en herhaalbaar op dezelfde bytes
+broncitaat; bij een verzonnen rij staat de passage of locator die de extractor
+zelf gaf, of expliciet “geen bronpassage”. De meting is deterministisch en
+herhaalbaar op dezelfde bytes
 (`node ops/scripts/measure-menu-extraction-references.js`); er is geen netwerk-,
 provider- of database-oproep in de meetroute.
 
