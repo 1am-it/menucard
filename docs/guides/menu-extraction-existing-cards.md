@@ -28,7 +28,8 @@ Artefacten:
 - [`ops/benchmark/existing-card-references.json`](../../ops/benchmark/existing-card-references.json)
   — create-only capture met bytes/hash/tijd.
 - [`ops/benchmark/existing-card-comparison.json`](../../ops/benchmark/existing-card-comparison.json)
-  — laatste live vergelijking (regenerable).
+  — laatste live vergelijking (regenerable; elke run vervangt dit rapport,
+  terwijl de capture-pin onveranderlijk blijft).
 
 ## Uitkomst per bron
 
