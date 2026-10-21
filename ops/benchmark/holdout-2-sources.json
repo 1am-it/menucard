@@ -28,9 +28,10 @@
         "www.restaurant-chocolat.nl"
       ],
       "selectionRank": "0c9c67d8cd723a2920a26b74e31dd654dcf88c232041ea3c05cd54fb6d2e5632",
-      "evaluationState": "unused",
-      "evaluationCount": 0,
-      "usedForTuning": false
+      "evaluationState": "evaluated_once",
+      "evaluationCount": 1,
+      "usedForTuning": false,
+      "firstEvaluatedAt": "2026-10-21"
     },
     {
       "id": "H2-02",
@@ -42,9 +43,10 @@
         "www.pellens.nl"
       ],
       "selectionRank": "105e3ab1f829ff8ee754bbb0c367ee8a5ce7abc52d7917fd3cde343b092cc2bd",
-      "evaluationState": "unused",
-      "evaluationCount": 0,
-      "usedForTuning": false
+      "evaluationState": "evaluated_once",
+      "evaluationCount": 1,
+      "usedForTuning": false,
+      "firstEvaluatedAt": "2026-10-21"
     },
     {
       "id": "H2-03",
@@ -56,9 +58,10 @@
         "www.dolceesalato.nl"
       ],
       "selectionRank": "3c5b773f85f91aadacc8c16c217db2c2305a88413d5de55f89094f01c935daa9",
-      "evaluationState": "unused",
-      "evaluationCount": 0,
-      "usedForTuning": false
+      "evaluationState": "evaluated_once",
+      "evaluationCount": 1,
+      "usedForTuning": false,
+      "firstEvaluatedAt": "2026-10-21"
     },
     {
       "id": "H2-04",
@@ -70,9 +73,10 @@
         "www.trattoriaperron.nl"
       ],
       "selectionRank": "6231e4fe35c2ccd801130188c7fb2035d56c24109c58f3935ea4b6758c5a25a0",
-      "evaluationState": "unused",
-      "evaluationCount": 0,
-      "usedForTuning": false
+      "evaluationState": "evaluated_once",
+      "evaluationCount": 1,
+      "usedForTuning": false,
+      "firstEvaluatedAt": "2026-10-21"
     },
     {
       "id": "H2-05",
@@ -84,9 +88,10 @@
         "www.senangmakan.nl"
       ],
       "selectionRank": "652bc52046fd19b93cad339b03dfe9e42866061702f49f02b6b8fe8ecba867f6",
-      "evaluationState": "unused",
-      "evaluationCount": 0,
-      "usedForTuning": false
+      "evaluationState": "evaluated_once",
+      "evaluationCount": 1,
+      "usedForTuning": false,
+      "firstEvaluatedAt": "2026-10-21"
     },
     {
       "id": "H2-06",
@@ -98,9 +103,10 @@
         "www.restaurantzenza.nl"
       ],
       "selectionRank": "6e59f37e331a418fbdf06627dbbca0cf70308f3fe7bd89be3394b78c060de1ed",
-      "evaluationState": "unused",
-      "evaluationCount": 0,
-      "usedForTuning": false
+      "evaluationState": "evaluated_once",
+      "evaluationCount": 1,
+      "usedForTuning": false,
+      "firstEvaluatedAt": "2026-10-21"
     },
     {
       "id": "H2-07",
@@ -112,9 +118,10 @@
         "www.salondeprovence.nl"
       ],
       "selectionRank": "730a06824446c37ce92cedf94a92f430ea7164959e46fc67c78a1845284f9e7f",
-      "evaluationState": "unused",
-      "evaluationCount": 0,
-      "usedForTuning": false
+      "evaluationState": "evaluated_once",
+      "evaluationCount": 1,
+      "usedForTuning": false,
+      "firstEvaluatedAt": "2026-10-21"
     },
     {
       "id": "H2-08",
@@ -126,9 +133,10 @@
         "www.aldentebreda.nl"
       ],
       "selectionRank": "7ea9b657e14f4fb723fbf0763c152365184c5f083994a2a2a650cde0b67c84d5",
-      "evaluationState": "unused",
-      "evaluationCount": 0,
-      "usedForTuning": false
+      "evaluationState": "evaluated_once",
+      "evaluationCount": 1,
+      "usedForTuning": false,
+      "firstEvaluatedAt": "2026-10-21"
     },
     {
       "id": "H2-09",
@@ -140,9 +148,10 @@
         "www.thechaiaffairs.nl"
       ],
       "selectionRank": "902d898420c37d8a49459a46a8662508984364f0772354a39a2508bd2ba6086e",
-      "evaluationState": "unused",
-      "evaluationCount": 0,
-      "usedForTuning": false
+      "evaluationState": "evaluated_once",
+      "evaluationCount": 1,
+      "usedForTuning": false,
+      "firstEvaluatedAt": "2026-10-21"
     },
     {
       "id": "H2-10",
@@ -154,9 +163,10 @@
         "www.andalous-breda.nl"
       ],
       "selectionRank": "9089be1220b0a30b65d2e19bf304f1e42d9e46e87711f4e2b10b19aa90fdf33a",
-      "evaluationState": "unused",
-      "evaluationCount": 0,
-      "usedForTuning": false
+      "evaluationState": "evaluated_once",
+      "evaluationCount": 1,
+      "usedForTuning": false,
+      "firstEvaluatedAt": "2026-10-21"
     },
     {
       "id": "H2-11",
@@ -168,9 +178,10 @@
         "www.beyerd.nl"
       ],
       "selectionRank": "9c156c085101b69004afcb5609aa713d4451c1f886734bf2073e05e8e8f273c5",
-      "evaluationState": "unused",
-      "evaluationCount": 0,
-      "usedForTuning": false
+      "evaluationState": "evaluated_once",
+      "evaluationCount": 1,
+      "usedForTuning": false,
+      "firstEvaluatedAt": "2026-10-21"
     },
     {
       "id": "H2-12",
@@ -182,9 +193,10 @@
         "www.restaurantruitersbosch.nl"
       ],
       "selectionRank": "a24c6d2dfd15183c82b95b44770bd98346519cc618062a0242f4ac7742354ef5",
-      "evaluationState": "unused",
-      "evaluationCount": 0,
-      "usedForTuning": false
+      "evaluationState": "evaluated_once",
+      "evaluationCount": 1,
+      "usedForTuning": false,
+      "firstEvaluatedAt": "2026-10-21"
     },
     {
       "id": "H2-13",
@@ -196,9 +208,10 @@
         "www.makananbreda.nl"
       ],
       "selectionRank": "af861a5fe2632d543a60d38966a3b5043cb9ccce0f2eef83badc01e2e53fc76c",
-      "evaluationState": "unused",
-      "evaluationCount": 0,
-      "usedForTuning": false
+      "evaluationState": "evaluated_once",
+      "evaluationCount": 1,
+      "usedForTuning": false,
+      "firstEvaluatedAt": "2026-10-21"
     },
     {
       "id": "H2-14",
@@ -210,9 +223,10 @@
         "www.klein-java.nl"
       ],
       "selectionRank": "b45a00ce97657066fce60620d57d2b827f5acf79fb4585a8f7707e25bdb7c989",
-      "evaluationState": "unused",
-      "evaluationCount": 0,
-      "usedForTuning": false
+      "evaluationState": "evaluated_once",
+      "evaluationCount": 1,
+      "usedForTuning": false,
+      "firstEvaluatedAt": "2026-10-21"
     },
     {
       "id": "H2-15",
@@ -224,9 +238,10 @@
         "www.gantauvillage.nl"
       ],
       "selectionRank": "b5804b2e963a2468376c6678ad899c58aea5017440c33b4bed24811a01adf631",
-      "evaluationState": "unused",
-      "evaluationCount": 0,
-      "usedForTuning": false
+      "evaluationState": "evaluated_once",
+      "evaluationCount": 1,
+      "usedForTuning": false,
+      "firstEvaluatedAt": "2026-10-21"
     },
     {
       "id": "H2-16",
@@ -238,9 +253,10 @@
         "www.restaurantconfuego.com"
       ],
       "selectionRank": "b96a1163213e94e73f3e597b8f005d191631e81d3f33a3a70516f80d784cba2d",
-      "evaluationState": "unused",
-      "evaluationCount": 0,
-      "usedForTuning": false
+      "evaluationState": "evaluated_once",
+      "evaluationCount": 1,
+      "usedForTuning": false,
+      "firstEvaluatedAt": "2026-10-21"
     },
     {
       "id": "H2-17",
@@ -252,9 +268,10 @@
         "www.masalabreda.nl"
       ],
       "selectionRank": "c33e3defb4437221f1d516c03837fb4245e9f9932f5c2c60e04626c92d78ed2d",
-      "evaluationState": "unused",
-      "evaluationCount": 0,
-      "usedForTuning": false
+      "evaluationState": "evaluated_once",
+      "evaluationCount": 1,
+      "usedForTuning": false,
+      "firstEvaluatedAt": "2026-10-21"
     },
     {
       "id": "H2-18",
@@ -266,9 +283,10 @@
         "www.restaurantuijttewaal.nl"
       ],
       "selectionRank": "f4d65ec21bfaf09e8267b8467037b88b55673ca64697085a140a0cf019926f25",
-      "evaluationState": "unused",
-      "evaluationCount": 0,
-      "usedForTuning": false
+      "evaluationState": "evaluated_once",
+      "evaluationCount": 1,
+      "usedForTuning": false,
+      "firstEvaluatedAt": "2026-10-21"
     },
     {
       "id": "H2-19",
@@ -280,9 +298,12 @@
         "www.beersbarrels.nl"
       ],
       "selectionRank": "f9cc1d104d71d9adc293688047e452697ee2aa79750aa7e3e6df813ee2bfba5a",
-      "evaluationState": "unused",
-      "evaluationCount": 0,
-      "usedForTuning": false
+      "evaluationState": "evaluated_once",
+      "evaluationCount": 1,
+      "usedForTuning": false,
+      "firstEvaluatedAt": "2026-10-21"
     }
-  ]
+  ],
+  "evaluatedBy": "Delivery Lead (Claude Code), 2026-10-21; see holdout-2-evaluation.json (commit 82eba8f)",
+  "nextState": "Findings are handed to the developer for repair; from that order on these sources count as used_for_tuning and are representative, not holdout. No unused unseen restaurant remains in data/restaurants.json."
 }
