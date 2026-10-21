@@ -155,6 +155,59 @@ donker). **Geen van de vijf vastgezette bronnen bleek een afbeeldingsmenu**: de
 route is daarom met een fictieve fixture bewezen, niet met een echte
 afbeeldingsbron. Senang Makan is geblokkeerd, niet afbeeldings-only.
 
+### Herstelronde 2026-10-21 — Lead-review 6319894232 (R1–R5)
+
+Basis: `ec4b20cceac9a514e50bd7bb4abd41baac16efda`. De vijf bevindingen zijn
+hersteld **zonder** de telregels, de meetcode of de extractie te wijzigen en
+**zonder nieuwe fetch**: alle referentiewijzigingen komen uit dezelfde
+vastgezette bytes (dezelfde SHA-256 per capture).
+
+| Bevinding | Herstel | Bewijs uit de vastgezette bytes |
+| --- | --- | --- |
+| **R1 Pellens** | 13 à-la-cartegerechten van het dinerpaneel toegevoegd: `À la carte › Pellens` (6), `Groenten` (6) en `Dessert` (1), met dezelfde prijsvarianten (o.a. Langoustine 23,00/38,00 en Wilde eend 24,00/39,00). De onjuiste beperking "de diner-tab bevat alleen arrangementen" is vervangen. | Regressie eist dat elke dinerquote **binnen** `id="kaart-diner"` staat en dat de lunchrijen ernaast blijven bestaan (telregel 5: twee rubrieken = twee items). |
+| **R2 Andalous** | `Loaded Fries Scampi` (€17,00) toegevoegd onder `Hoofdgerechten*`; de locator noemt de h4-subrubriek `Visgerechten` die de bron daar toont. | Regressie bewijst dat het gerecht tussen de koppen `Hoofdgerechten*` en `Pasta's` staat, dus in dat blok en niet in het eerdere `Visgerechten`. |
+| **R3 Zuyd** | De wijnarrangement- en ½-glasprijzen van de verrassingsmenu's toegevoegd als arrangementprijzen: 32/22, 40/27,50, 48/33 en 56/38,50. | Regressie controleert elk bedrag in de diner-capture en dat er geen gerecht van wordt gemaakt. |
+| **R4 detail** | De batchreden staat nu in het detail van precies het restaurant dat de link noemt: reden, betekenis en een passende vervolgstap. De generieke route blijft als secundaire regel zichtbaar; de banner is alleen nog de terugvalroute zonder precies restaurant. | Browserfixture: reden en vervolgstap in `.stg-followup`, geen banner ernaast, klikpad `image-only result -> Bronnen beoordelen` geslaagd. |
+| **R5 reden** | Bij "Bron markeren als onbruikbaar" wordt de bestaande reden `other` voorgeselecteerd, met een vaste, zichtbare en verplichte toelichting. **Geen nieuwe DB-waarde, geen migratie en geen versoepeling.** | Fixture leest `reason=other`, `aria-required="true"`, de ingevulde toelichting en een `aria-describedby` naar de uitleg. |
+
+Meting na herstel (zelfde code, dezelfde bytes, alleen de referenties hersteld):
+
+| Bron | Referentie | Extractie | Match | Gemist | Verzonnen | Prijsfouten | Rubriekfouten | Precisie | Recall |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Zuyd | 36 | 25 | 23 | 11 | 0 | 2 | 0 | 92,00% | 63,89% |
+| Andalous | 87 | 81 | 77 | 8 | 2 | 0 | 2 | 95,06% | 88,51% |
+| Pellens | 36 | 27 | 0 | 32 | 23 | 0 | 4 | 0,00% | 0,00% |
+| Chocolat | 26 | 24 | 20 | 2 | 0 | 0 | 4 | 83,33% | 76,92% |
+| **Totaal (4 gemeten)** | **185** | **157** | **120** | **53** | **25** | **2** | **10** | **76,43%** | **64,86%** |
+
+Verschil met de vorige meting: Zuyd 36/23/11/0/2/0 → ongewijzigd (de
+arrangementprijzen tellen niet als gerecht), Andalous 86→87 referenties en
+7→8 gemist, Pellens 23→36 referenties en 19→32 gemist, totaal 171→185
+referenties en 39→53 gemist. **De uitkomst werd slechter; dat is niet
+bijgestuurd.** Er zijn geen extractieverbeteringen gedaan om de score te
+herstellen — dat is een aparte opdracht na deze herstelronde.
+
+### Bewijs op deze herstelronde
+
+- **Codeheads:** referenties en meting `175f253`; UI-herstel R4/R5 `6f7bedf`;
+  fixture-screenshots `cac67ab`. De meting blijft deterministisch: tweemaal
+  hetzelfde rapport (`reference-measurement.json` SHA-256 `d4413783…4d70f`,
+  `.md` `e6744877…fe22`).
+- **`npm test`:** 2297/2297 geslaagd op `cac67ab`. Een eerste volledige run had
+  één niet-gerelateerde flake (`ops/scripts/capture-market-boundary.test.js`,
+  Docker/omgeving); dat bestand slaagt op dezelfde head afzonderlijk met 25/25
+  en de herhaalde volledige run is groen. Dat is een omgevingsflake, geen
+  groenverklaring achteraf.
+- **`npm run test:menu-structure`:** 6/6 geslaagd.
+- **`npm run build`:** geslaagd, 41/41 statische pagina's.
+- **PDF.js serverpackagingcheck:** OK (166 server scripts; `pdf.mjs` en
+  `pdf.worker.mjs` getraceerd).
+- **Browserfixture:** 303/303 op een schone worktree op `cac67ab`, 42
+  screenshots en 4 klikpaden; de nieuwe checks dekken de reden en de
+  vervolgstap in het detail, de voorgeselecteerde reden, de verplichte
+  toelichting en dat de keuze zelf niets opslaat. Evidence:
+  `ops/browser/evidence/menu-review-browser-evidence.json`.
+
 ### Status per #59-acceptatiecriterium in deze ronde
 
 “Verschoven” betekent hier: expliciet naar BE-21 of een latere beslissing, niet

@@ -802,3 +802,34 @@ geblokkeerde bron (Senang Makan: HTTP 503 op robots.txt) blijft zichtbaar en
 telt niet als lege of geslaagde extractie. De vijf referentiebronnen zijn geen
 ongeziene holdout; de bredere benchmark en een nieuwe holdout blijven BE-21.
 
+
+Een herstelronde mag de referentie alleen uit **dezelfde vastgezette bytes**
+corrigeren; de telregels, de meetcode en de extractie blijven dan ongewijzigd en
+de meting wordt opnieuw gedraaid en gerapporteerd, ook als de uitkomst slechter
+wordt (Lead-review 6319894232).
+
+## Afbeeldingsmenu: de reden hoort in het detail (review 6319894232)
+
+Een batchresultaat "Menu alleen als afbeelding: niet ondersteund" linkt naar
+`/internal/source-triage?restaurant=<id>&reason=image_only`. Die reden is
+**pagina-context en nooit een opgeslagen bronstatus**:
+
+- `readFollowUp()` leest alleen tekst uit de URL; een onbekende of misvormde
+  waarde levert `null` op.
+- `followUpForEntry()` koppelt de reden aan precies dat restaurant. Zonder
+  (of met een ander) restaurant blijft het een paginanoot en verschijnt de
+  reden nooit bij het verkeerde restaurant.
+- Het detail toont reden, betekenis en een passende vervolgstap; de generieke
+  route (bijv. "Bron controleren via Onboarding Restaurant") blijft als
+  secundaire regel zichtbaar in plaats van als enige antwoord.
+- Bij "Bron markeren als onbruikbaar" wordt de **bestaande** reden `other`
+  voorgeselecteerd met een vaste, zichtbare en verplichte toelichting
+  ("Menu alleen als afbeelding of scan; niet met OCR te lezen."). Geen nieuwe
+  DB-waarde, geen migratie en geen versoepeling van de notitieplicht; de mens
+  kiest de actie en dient het voorstel nog steeds zelf in.
+
+Regressies: `src/lib/sourceTriageFollowUp.test.js` (parsing, koppeling,
+notitieplicht, paginabedrading) en de browserfixture
+`ops/browser/run-menu-review-browser-check.js` (detail, voorgeselecteerde reden,
+`aria-required`, geen opslag).
+

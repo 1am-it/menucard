@@ -283,3 +283,9 @@ Makan returned HTTP 503 to the safe route) stays visible and is never counted as
 an empty or successful menu. The five sources are a controlled set to steer on,
 not an unseen holdout; the broader benchmark and a new holdout remain BE-21.
 
+A reference may only be corrected from the same pinned bytes (Lead review
+6319894232 repaired the Pellens diner panel, one Andalous dish and the Zuyd
+wine-arrangement prices that way). Such a repair re-runs the measurement and
+reports the new table next to the old one, even when the outcome gets worse;
+the counting rules and the measurement code stay unchanged.
+
