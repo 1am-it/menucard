@@ -1,0 +1,1705 @@
+{
+  "version": "1.0.0",
+  "pinnedAt": "2026-10-21",
+  "issue": 59,
+  "countingRules": {
+    "path": "docs/guides/menu-extraction-reference-counting-rules.md",
+    "sha256": "0f09b74fdd9f33ecd58af4e3df8ab3c711ee70d32030bc4296f3af78adc2f09c"
+  },
+  "captureMetadata": {
+    "path": "ops/benchmark/reference-captures.json",
+    "bytesSha256": "a042e47a0241359aa9f94283875c1c9127488d25a611ced40b80c629ef8361ce"
+  },
+  "referenceIndex": "ops/benchmark/reference-references/index.json",
+  "method": "Current extraction replayed on the pinned bytes through the offline capture fetcher. No network, provider, OCR or database write. The four deviation classes and precision/recall are computed by ops/benchmark/referenceComparison.js.",
+  "totals": {
+    "sources": 5,
+    "capturedSources": 4,
+    "blockedSources": 1,
+    "referenceItems": 171,
+    "actualItems": 157,
+    "matched": 120,
+    "missing": 39,
+    "invented": 25,
+    "priceErrors": 2,
+    "categoryErrors": 10,
+    "precision": 76.43,
+    "recall": 70.18,
+    "blocked": [
+      {
+        "id": "senang-makan",
+        "label": "Senang Makan",
+        "reason": "robots.txt van deze site was niet bereikbaar (HTTP 503) — de pagina is niet opgehaald."
+      }
+    ]
+  },
+  "sources": [
+    {
+      "label": "Restaurant Zuyd",
+      "sourceId": "zuyd",
+      "referenceItems": 36,
+      "actualItems": 25,
+      "matched": 23,
+      "missing": 11,
+      "invented": 0,
+      "priceErrors": 2,
+      "categoryErrors": 0,
+      "precision": 92,
+      "recall": 63.89,
+      "missingDishes": [
+        {
+          "name": "Eendenlever",
+          "prices": [
+            "28.00"
+          ],
+          "path": [
+            "Diner",
+            "A LA CARTE"
+          ],
+          "quote": "Eendenlever gebakken lever │ macaron │ crème van lever │ peer │ steranijs 28",
+          "locator": "Diner › A LA CARTE › regel 7",
+          "captureKey": "ops/benchmark/output/reference-captures/zuyd/03-diner-128cae10ca14.html"
+        },
+        {
+          "name": "Kaasassortiment",
+          "prices": [
+            "13.00",
+            "19.50"
+          ],
+          "path": [
+            "Diner",
+            "A LA CARTE"
+          ],
+          "quote": "Kaasassortiment selectie van kazen │ Zuydvruchtencompote │ brood vier stuks 13 - zes stuks 19,50 - in plaats van dessert, supplement 8,50",
+          "locator": "Diner › A LA CARTE › regel 9",
+          "captureKey": "ops/benchmark/output/reference-captures/zuyd/03-diner-128cae10ca14.html"
+        },
+        {
+          "name": "Kaasgerecht ‘3 x Epoisses’",
+          "prices": [
+            "17.00"
+          ],
+          "path": [
+            "Diner",
+            "A LA CARTE"
+          ],
+          "quote": "Kaasgerecht ‘3 x Epoisses’ - 17 - in plaats van dessert, supplement 8,50",
+          "locator": "Diner › A LA CARTE › regel 8",
+          "captureKey": "ops/benchmark/output/reference-captures/zuyd/03-diner-128cae10ca14.html"
+        },
+        {
+          "name": "Ossenhaas",
+          "prices": [
+            "35.00"
+          ],
+          "path": [
+            "Diner",
+            "A LA CARTE"
+          ],
+          "quote": "Ossenhaas rosé gebraden ossenhaas │ runderstoverij │ 'triple fried' pont-neuf │ paprika │ jus Stroganoff 35 - supplement eendenlever 9",
+          "locator": "Diner › A LA CARTE › regel 6",
+          "captureKey": "ops/benchmark/output/reference-captures/zuyd/03-diner-128cae10ca14.html"
+        },
+        {
+          "name": "Oesterproeverij Deluxe",
+          "prices": [
+            "29.50"
+          ],
+          "path": [
+            "Diner",
+            "BITES - voor bij het aperitief"
+          ],
+          "quote": "Oesterproeverij Deluxe - 6 stuks opgemaakte oesters - 29,50",
+          "locator": "Diner › BITES - voor bij het aperitief › regel 2",
+          "captureKey": "ops/benchmark/output/reference-captures/zuyd/03-diner-128cae10ca14.html"
+        },
+        {
+          "name": "Eendenlever",
+          "prices": [
+            "28.00"
+          ],
+          "path": [
+            "Lunch",
+            "A LA CARTE"
+          ],
+          "quote": "Eendenlever gebakken lever │ macaron │ crème van lever │ peer │ steranijs 28",
+          "locator": "Lunch › A LA CARTE › regel 7",
+          "captureKey": "ops/benchmark/output/reference-captures/zuyd/02-lunch-389470158b72.html"
+        },
+        {
+          "name": "Kaasassortiment",
+          "prices": [
+            "13.00",
+            "19.50"
+          ],
+          "path": [
+            "Lunch",
+            "A LA CARTE"
+          ],
+          "quote": "Kaasassortiment selectie van kazen │ Zuydvruchtencompote │ brood vier stuks 13 - zes stuks 19,50 - in plaats van dessert, supplement 8,50",
+          "locator": "Lunch › A LA CARTE › regel 9",
+          "captureKey": "ops/benchmark/output/reference-captures/zuyd/02-lunch-389470158b72.html"
+        },
+        {
+          "name": "Kaasgerecht ‘3 x Epoisses’",
+          "prices": [
+            "17.00"
+          ],
+          "path": [
+            "Lunch",
+            "A LA CARTE"
+          ],
+          "quote": "Kaasgerecht ‘3 x Epoisses’ - 17 - in plaats van dessert, supplement 8,50",
+          "locator": "Lunch › A LA CARTE › regel 8",
+          "captureKey": "ops/benchmark/output/reference-captures/zuyd/02-lunch-389470158b72.html"
+        },
+        {
+          "name": "Ossenhaas",
+          "prices": [
+            "35.00"
+          ],
+          "path": [
+            "Lunch",
+            "A LA CARTE"
+          ],
+          "quote": "Ossenhaas rosé gebraden ossenhaas │ runderstoverij │ 'triple fried' pont-neuf │ paprika │ jus Stroganoff 35 - supplement eendenlever 9",
+          "locator": "Lunch › A LA CARTE › regel 6",
+          "captureKey": "ops/benchmark/output/reference-captures/zuyd/02-lunch-389470158b72.html"
+        },
+        {
+          "name": "Lobster roll",
+          "prices": [
+            "25.00"
+          ],
+          "path": [
+            "Lunch",
+            "SANDWICHES"
+          ],
+          "quote": "Lobster roll brioche │ kreeft │ frisse salade │ kreeftensoep 25",
+          "locator": "Lunch › SANDWICHES › regel 2",
+          "captureKey": "ops/benchmark/output/reference-captures/zuyd/02-lunch-389470158b72.html"
+        },
+        {
+          "name": "Sandwich Zuyd",
+          "prices": [
+            "19.50"
+          ],
+          "path": [
+            "Lunch",
+            "SANDWICHES"
+          ],
+          "quote": "Sandwich Zuyd krentenbrood │ dungesneden ossenhaas │ eendenlever │ rucola │ truffel │ kaas 19,50",
+          "locator": "Lunch › SANDWICHES › regel 1",
+          "captureKey": "ops/benchmark/output/reference-captures/zuyd/02-lunch-389470158b72.html"
+        }
+      ],
+      "inventedDishes": [],
+      "priceErrorRows": [
+        {
+          "name": "Zeetongfilet",
+          "path": [
+            "Diner",
+            "A LA CARTE"
+          ],
+          "expectedPrices": [
+            "39.00"
+          ],
+          "actualPrices": [
+            "28.00"
+          ],
+          "actualPriceText": null,
+          "quote": "Zeetongfilet - gebakken zeetongfilet │ Hollandse garnaal │ saffraan │ pompoen │ bouillabaisse 39",
+          "locator": "Diner › A LA CARTE › regel 5",
+          "captureKey": "ops/benchmark/output/reference-captures/zuyd/03-diner-128cae10ca14.html",
+          "actualLocator": "html>body>div>p[3]"
+        },
+        {
+          "name": "Zeetongfilet",
+          "path": [
+            "Lunch",
+            "A LA CARTE"
+          ],
+          "expectedPrices": [
+            "39.00"
+          ],
+          "actualPrices": [
+            "28.00"
+          ],
+          "actualPriceText": null,
+          "quote": "Zeetongfilet - gebakken zeetongfilet │ Hollandse garnaal │ saffraan │ pompoen │ bouillabaisse 39",
+          "locator": "Lunch › A LA CARTE › regel 5",
+          "captureKey": "ops/benchmark/output/reference-captures/zuyd/02-lunch-389470158b72.html",
+          "actualLocator": "html>body>div>p[5]"
+        }
+      ],
+      "categoryErrorRows": [],
+      "duplicates": [],
+      "accounting": {
+        "reference": {
+          "total": 36,
+          "matched": 23,
+          "missing": 11,
+          "priceErrors": 2,
+          "categoryErrors": 0,
+          "accounted": 36,
+          "balanced": true
+        },
+        "actual": {
+          "total": 25,
+          "matched": 23,
+          "invented": 0,
+          "priceErrors": 2,
+          "categoryErrors": 0,
+          "accounted": 25,
+          "balanced": true
+        }
+      },
+      "captureStatus": "captured",
+      "blockedReason": null,
+      "limitations": [
+        "Lunch en diner zijn twee afzonderlijke menuvarianten; beide zijn als eigen menu opgenomen.",
+        "De kerstmenu- en afhaalpagina's zijn arrangementen; hun gangen hebben geen eigen prijs en zijn geen losse referentiegerechten.",
+        "De vastgezette menupagina's bevatten geen allergenenlegenda per gerecht; allergenen blijven onbekend, niet allergeenvrij.",
+        "Deze referentie is uit de vastgezette brontekst opgesteld en niet uit de parseruitvoer.",
+        "Gelezen zonder automatisch herkende menukaart: https://www.restaurantzuyd.nl/kerstmenu.",
+        "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+      ],
+      "sourceVersion": {
+        "entryUrl": "https://www.restaurantzuyd.nl",
+        "captureStatus": "captured",
+        "captures": [
+          {
+            "order": 1,
+            "requestedUrl": "https://www.restaurantzuyd.nl",
+            "finalUrl": "https://www.restaurantzuyd.nl/",
+            "contentType": "text/html",
+            "kind": "html",
+            "bytes": 6235,
+            "bytesSha256": "f4f685da725f353d1a2f69243b168d66a98e1310aae8a6e11bdfcac087f7624f",
+            "captureStatus": "captured",
+            "error": null
+          },
+          {
+            "order": 2,
+            "requestedUrl": "https://www.restaurantzuyd.nl/lunch",
+            "finalUrl": "https://www.restaurantzuyd.nl/lunch",
+            "contentType": "text/html",
+            "kind": "html",
+            "bytes": 9877,
+            "bytesSha256": "389470158b72f9809c9b35d3212bf0ea44fde9b4c1bcbdc877538dee80394338",
+            "captureStatus": "captured",
+            "error": null
+          },
+          {
+            "order": 3,
+            "requestedUrl": "https://www.restaurantzuyd.nl/diner",
+            "finalUrl": "https://www.restaurantzuyd.nl/diner",
+            "contentType": "text/html",
+            "kind": "html",
+            "bytes": 9832,
+            "bytesSha256": "128cae10ca14ab9cc2e8b92f2a1b7736c6a787fa02ab32e43f929ccf94723a04",
+            "captureStatus": "captured",
+            "error": null
+          },
+          {
+            "order": 4,
+            "requestedUrl": "https://www.restaurantzuyd.nl/kerstmenu",
+            "finalUrl": "https://www.restaurantzuyd.nl/kerstmenu",
+            "contentType": "text/html",
+            "kind": "html",
+            "bytes": 7759,
+            "bytesSha256": "2bfaf63e7814766e57eb3e71619dd8f9eba73b4960c73b96295808430a48b789",
+            "captureStatus": "captured",
+            "error": null
+          },
+          {
+            "order": 5,
+            "requestedUrl": "https://www.restaurantzuyd.nl/zuydvoorthuys",
+            "finalUrl": "https://www.restaurantzuyd.nl/zuydvoorthuys",
+            "contentType": "text/html",
+            "kind": "html",
+            "bytes": 10326,
+            "bytesSha256": "644810dfc971a0dfe958e59335d9f9f8f9aa80018eb2da875d28aa1dac4818f9",
+            "captureStatus": "captured",
+            "error": null
+          },
+          {
+            "order": 6,
+            "requestedUrl": "https://www.restaurantzuyd.nl/nieuws",
+            "finalUrl": "https://www.restaurantzuyd.nl/nieuws",
+            "contentType": "text/html",
+            "kind": "html",
+            "bytes": 6863,
+            "bytesSha256": "c9c130c079b7ba52b28f9535b599c787fb527ad9c2be0485dc0acf7791f05a1c",
+            "captureStatus": "captured",
+            "error": null
+          }
+        ]
+      }
+    },
+    {
+      "label": "Andalous Restaurant Breda",
+      "sourceId": "andalous",
+      "referenceItems": 86,
+      "actualItems": 81,
+      "matched": 77,
+      "missing": 7,
+      "invented": 2,
+      "priceErrors": 0,
+      "categoryErrors": 2,
+      "precision": 95.06,
+      "recall": 89.53,
+      "missingDishes": [
+        {
+          "name": "Mixed Grill Andalous",
+          "prices": [
+            "27.50",
+            "48.50"
+          ],
+          "path": [
+            "Menukaart",
+            "Hoofdgerechten*"
+          ],
+          "quote": "Mixed Grill Andalous, €27,50 (1 pers.) / €48,50 (2 pers.) Mix van Ribeye South America, Lams-Rack, Marokkaanse kefta, kipfilet geserveerd met champignonsaus",
+          "locator": "Menukaart › Hoofdgerechten* › regel 7",
+          "captureKey": "ops/benchmark/output/reference-captures/andalous/02-menukaart-93b11284b922.html"
+        },
+        {
+          "name": "Grillburger Andalous",
+          "prices": [
+            "11.50"
+          ],
+          "path": [
+            "Menukaart",
+            "Kindermenu"
+          ],
+          "quote": "Grillburger Andalous, €11 ,50 Gegrilde rundergehakt in een speciaal hamburgerbrood met cheddar, mayonaise, ketchup, sla en tomaat geserveerd met friet.",
+          "locator": "Menukaart › Kindermenu › regel 3",
+          "captureKey": "ops/benchmark/output/reference-captures/andalous/02-menukaart-93b11284b922.html"
+        },
+        {
+          "name": "Pasta bolognese",
+          "prices": [
+            "13.00"
+          ],
+          "path": [
+            "Menukaart",
+            "Pasta's"
+          ],
+          "quote": "Pasta bolognese, €13,00 Klassieke pasta met gekruid rundergehakt in tomatensaus met basilicum",
+          "locator": "Menukaart › Pasta's › regel 3",
+          "captureKey": "ops/benchmark/output/reference-captures/andalous/02-menukaart-93b11284b922.html"
+        },
+        {
+          "name": "Pasta funghi",
+          "prices": [
+            "11.00"
+          ],
+          "path": [
+            "Menukaart",
+            "Pasta's"
+          ],
+          "quote": "Pasta funghi , €11,00 V Heerlijke romige vegetarische pasta met champignons en uitjes",
+          "locator": "Menukaart › Pasta's › regel 2",
+          "captureKey": "ops/benchmark/output/reference-captures/andalous/02-menukaart-93b11284b922.html"
+        },
+        {
+          "name": "Pasta zalm",
+          "prices": [
+            "16.00"
+          ],
+          "path": [
+            "Menukaart",
+            "Pasta's"
+          ],
+          "quote": "Pasta zalm, €16,00 Pasta met zalm, spinazie en diverse groente in een romige witte saus",
+          "locator": "Menukaart › Pasta's › regel 1",
+          "captureKey": "ops/benchmark/output/reference-captures/andalous/02-menukaart-93b11284b922.html"
+        },
+        {
+          "name": "Gamba croquettes",
+          "prices": [
+            "9.50"
+          ],
+          "path": [
+            "Menukaart",
+            "Visgerechten"
+          ],
+          "quote": "Gamba croquettes, €9,50 Verfijnde croquettes gevuld met ragouts en gerold in kruim van geroosterd brood, geserveerd met een huisgemaakte saus",
+          "locator": "Menukaart › Visgerechten › regel 1",
+          "captureKey": "ops/benchmark/output/reference-captures/andalous/02-menukaart-93b11284b922.html"
+        },
+        {
+          "name": "Kip loempia’s",
+          "prices": [
+            "8.00"
+          ],
+          "path": [
+            "Menukaart",
+            "Warme voorgerechten"
+          ],
+          "quote": "Kip loempia’s, €8,00 Oosterse loempiarollen gevuld met gekruide kip en groente (2 st)",
+          "locator": "Menukaart › Warme voorgerechten › regel 4",
+          "captureKey": "ops/benchmark/output/reference-captures/andalous/02-menukaart-93b11284b922.html"
+        }
+      ],
+      "inventedDishes": [
+        {
+          "name": "€",
+          "prices": [
+            "39.50"
+          ],
+          "path": [
+            "Menukaart"
+          ],
+          "quote": null,
+          "locator": "pdf:1:item:1",
+          "sourceUrl": "https://andalous-breda.nl/wp-content/uploads/2026/02/Ramadan-menu-kaart-Essaouira-_20240316_170004_0000.pdf_compressed-1.pdf"
+        },
+        {
+          "name": "Geraspte kaas",
+          "prices": [
+            "2.00"
+          ],
+          "path": [
+            "Menukaart",
+            "Pasta's"
+          ],
+          "quote": "Geraspte kaas meerprijs €2,00",
+          "locator": "html>body>div[1]>div>div[3]>div[1]>div>div>div[2]>div[2]>div>div>div>div[8]>div[2]>div[2]>div>div>div>div>p[4]",
+          "sourceUrl": "https://www.andalous-breda.nl/menukaart/"
+        }
+      ],
+      "priceErrorRows": [],
+      "categoryErrorRows": [
+        {
+          "name": "Pil Pil",
+          "expectedPath": [
+            "Menukaart",
+            "Visgerechten"
+          ],
+          "actualPath": [
+            "Menukaart",
+            "Warme voorgerechten",
+            "Visgerechten"
+          ],
+          "price": [
+            "11.00"
+          ],
+          "quote": "Pil Pil, €11,00 Gamba’s op Spaanse manier bereid in knoflook en peper",
+          "locator": "Menukaart › Visgerechten › regel 2",
+          "captureKey": "ops/benchmark/output/reference-captures/andalous/02-menukaart-93b11284b922.html",
+          "actualLocator": "html>body>div[1]>div>div[3]>div[1]>div>div>div[2]>div[2]>div>div>div>div[4]>div[2]>div[2]>div>div>div>div>p[2]"
+        },
+        {
+          "name": "Pil Pil a la Andalous",
+          "expectedPath": [
+            "Menukaart",
+            "Visgerechten"
+          ],
+          "actualPath": [
+            "Menukaart",
+            "Warme voorgerechten",
+            "Visgerechten"
+          ],
+          "price": [
+            "12.00"
+          ],
+          "quote": "Pil Pil a la Andalous, €12,00 Gamba’s in een huisgemaakte saus met knoflook, tomaat, citroen en verse kruiden",
+          "locator": "Menukaart › Visgerechten › regel 3",
+          "captureKey": "ops/benchmark/output/reference-captures/andalous/02-menukaart-93b11284b922.html",
+          "actualLocator": "html>body>div[1]>div>div[3]>div[1]>div>div>div[2]>div[2]>div>div>div>div[4]>div[2]>div[2]>div>div>div>div>p[3]"
+        }
+      ],
+      "duplicates": [],
+      "accounting": {
+        "reference": {
+          "total": 86,
+          "matched": 77,
+          "missing": 7,
+          "priceErrors": 0,
+          "categoryErrors": 2,
+          "accounted": 86,
+          "balanced": true
+        },
+        "actual": {
+          "total": 81,
+          "matched": 77,
+          "invented": 2,
+          "priceErrors": 0,
+          "categoryErrors": 2,
+          "accounted": 81,
+          "balanced": true
+        }
+      },
+      "captureStatus": "captured",
+      "blockedReason": null,
+      "limitations": [
+        "De Ramadan-PDF is een seizoensarrangement; de gangen hebben geen eigen prijs en zijn geen losse referentiegerechten.",
+        "De Frans-talige ramadanpagina en de pagina's /thuisbezorgd en /werken zijn gelezen maar bevatten geen menukaart met losse gerechten; ze zijn geen referentiebron.",
+        "De pagina /ramadan is naar /ramadan-menu/ doorgestuurd en telt als één pagina (telregel 5).",
+        "De bron bevat alleen een algemene allergenenmededeling, geen allergenenlegenda per gerecht; allergenen blijven onbekend.",
+        "Deze referentie is uit de vastgezette brontekst en PDF-tekst opgesteld en niet uit de parseruitvoer.",
+        "Menukaart https://www.andalous-breda.nl/menukaart/: sectie \"Menukaart › Koude dranken › Meer informatie\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
+        "Menukaart https://www.andalous-breda.nl/menukaart/: sectie \"Menukaart › Koude dranken › Contactgegevens\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
+        "Gelezen zonder automatisch herkende menukaart: https://www.andalous-breda.nl/ramadan-menu/.",
+        "Doorgestuurd naar een al gelezen pagina; niet nogmaals verwerkt: https://www.andalous-breda.nl/ramadan → https://www.andalous-breda.nl/ramadan-menu/.",
+        "PDF https://andalous-breda.nl/wp-content/uploads/2026/02/Ramadan-menu-kaart-Essaouira-_20240316_170004_0000.pdf_compressed-1.pdf: 20 mogelijke rubriekkop(pen) zijn niet herkend en dus niet als rubriek opgeslagen.",
+        "Gelezen zonder automatisch herkende menukaart: https://www.andalous-breda.nl/fr/ramadan-menu/.",
+        "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.",
+        "Kwaliteitscontrole op de deterministische extractie vraagt aandacht (pdf_unrecognised_headings, html_arrangements_skipped); het resultaat is niet als volledig beoordeeld."
+      ],
+      "sourceVersion": {
+        "entryUrl": "https://www.andalous-breda.nl",
+        "captureStatus": "captured",
+        "captures": [
+          {
+            "order": 1,
+            "requestedUrl": "https://www.andalous-breda.nl",
+            "finalUrl": "https://www.andalous-breda.nl/",
+            "contentType": "text/html",
+            "kind": "html",
+            "bytes": 88853,
+            "bytesSha256": "8c2fb5e31c5f417504ca46ba162acdfced9d443f4958827c92bcdcb34d31ee89",
+            "captureStatus": "captured",
+            "error": null
+          },
+          {
+            "order": 2,
+            "requestedUrl": "https://www.andalous-breda.nl/menukaart/",
+            "finalUrl": "https://www.andalous-breda.nl/menukaart/",
+            "contentType": "text/html",
+            "kind": "html",
+            "bytes": 89785,
+            "bytesSha256": "93b11284b922471712df5b389abbccf489da582016d2d5860768667c775677c9",
+            "captureStatus": "captured",
+            "error": null
+          },
+          {
+            "order": 3,
+            "requestedUrl": "https://www.andalous-breda.nl/ramadan-menu/",
+            "finalUrl": "https://www.andalous-breda.nl/ramadan-menu/",
+            "contentType": "text/html",
+            "kind": "html",
+            "bytes": 52907,
+            "bytesSha256": "69b1011c07776a2ef481fb18027ccab05990d512c8fa01d5b55b837af1eac0a6",
+            "captureStatus": "captured",
+            "error": null
+          },
+          {
+            "order": 4,
+            "requestedUrl": "https://www.andalous-breda.nl/ramadan",
+            "finalUrl": "https://www.andalous-breda.nl/ramadan-menu/",
+            "contentType": "text/html",
+            "kind": "html",
+            "bytes": 52907,
+            "bytesSha256": "1faa547bd4b385ac1afbfc5df566a24cb26ccae6aeb540849125a41e2fc8d03a",
+            "captureStatus": "captured",
+            "error": null
+          },
+          {
+            "order": 5,
+            "requestedUrl": "https://www.andalous-breda.nl/thuisbezorgd",
+            "finalUrl": "https://www.andalous-breda.nl/thuisbezorgd/",
+            "contentType": "text/html",
+            "kind": "html",
+            "bytes": 53276,
+            "bytesSha256": "a22fb64af8d979088627ac87ade176576ae7cc1fa7ae85a577ae61629ecf73ed",
+            "captureStatus": "captured",
+            "error": null
+          },
+          {
+            "order": 6,
+            "requestedUrl": "https://www.andalous-breda.nl/werken",
+            "finalUrl": "https://www.andalous-breda.nl/werken/",
+            "contentType": "text/html",
+            "kind": "html",
+            "bytes": 67036,
+            "bytesSha256": "a469bf6ab62bf149235f271c75dba2ab1486da52ca70d659e9c0240db805381f",
+            "captureStatus": "captured",
+            "error": null
+          },
+          {
+            "order": 7,
+            "requestedUrl": "https://andalous-breda.nl/wp-content/uploads/2026/02/Ramadan-menu-kaart-Essaouira-_20240316_170004_0000.pdf_compressed-1.pdf",
+            "finalUrl": "https://andalous-breda.nl/wp-content/uploads/2026/02/Ramadan-menu-kaart-Essaouira-_20240316_170004_0000.pdf_compressed-1.pdf",
+            "contentType": "application/pdf",
+            "kind": "pdf",
+            "bytes": 384596,
+            "bytesSha256": "9a32541b2a5a8b95a1a2ed4e9619a31c86130d7b87731b7e3e88a7f9689a55ac",
+            "captureStatus": "captured",
+            "error": null
+          },
+          {
+            "order": 8,
+            "requestedUrl": "https://www.andalous-breda.nl/fr/ramadan-menu/",
+            "finalUrl": "https://www.andalous-breda.nl/fr/ramadan-menu/",
+            "contentType": "text/html",
+            "kind": "html",
+            "bytes": 56413,
+            "bytesSha256": "521e389ce669ad7d9982c2f606e81071e4af24cd1392e93080b2e4ecd8474735",
+            "captureStatus": "captured",
+            "error": null
+          }
+        ]
+      }
+    },
+    {
+      "label": "Restaurant Pellens",
+      "sourceId": "pellens",
+      "referenceItems": 23,
+      "actualItems": 27,
+      "matched": 0,
+      "missing": 19,
+      "invented": 23,
+      "priceErrors": 0,
+      "categoryErrors": 4,
+      "precision": 0,
+      "recall": 0,
+      "missingDishes": [
+        {
+          "name": "Verveine",
+          "prices": [
+            "14.00"
+          ],
+          "path": [
+            "Onze kaart",
+            "Lunch",
+            "À la carte",
+            "Dessert"
+          ],
+          "quote": "Verveine karnemelk, peer €14,00",
+          "locator": "Lunch › À la carte › Dessert › regel 1",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
+        },
+        {
+          "name": "Eekhoorntjesbrood",
+          "prices": [
+            "22.00",
+            "26.00"
+          ],
+          "path": [
+            "Onze kaart",
+            "Lunch",
+            "À la carte",
+            "Groenten"
+          ],
+          "quote": "Eekhoorntjesbrood biet, koffie €22,00 €26,00",
+          "locator": "Lunch › À la carte › Groenten › regel 5",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
+        },
+        {
+          "name": "Fruits de Terre",
+          "prices": [
+            "18.00"
+          ],
+          "path": [
+            "Onze kaart",
+            "Lunch",
+            "À la carte",
+            "Groenten"
+          ],
+          "quote": "Fruits de Terre wisselende samenstelling €18,00 —",
+          "locator": "Lunch › À la carte › Groenten › regel 1",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
+        },
+        {
+          "name": "Meloes-ui",
+          "prices": [
+            "17.00"
+          ],
+          "path": [
+            "Onze kaart",
+            "Lunch",
+            "À la carte",
+            "Groenten"
+          ],
+          "quote": "Meloes-ui balsamico, oude kaas €17,00 —",
+          "locator": "Lunch › À la carte › Groenten › regel 4",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
+        },
+        {
+          "name": "Spitskool",
+          "prices": [
+            "18.00",
+            "24.00"
+          ],
+          "path": [
+            "Onze kaart",
+            "Lunch",
+            "À la carte",
+            "Groenten"
+          ],
+          "quote": "Spitskool huacatay, pommes dauphine €18,00 €24,00",
+          "locator": "Lunch › À la carte › Groenten › regel 6",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
+        },
+        {
+          "name": "Vijgenblad",
+          "prices": [
+            "18.00"
+          ],
+          "path": [
+            "Onze kaart",
+            "Lunch",
+            "À la carte",
+            "Groenten"
+          ],
+          "quote": "Vijgenblad radijs, gerookte boter €18,00 —",
+          "locator": "Lunch › À la carte › Groenten › regel 2",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
+        },
+        {
+          "name": "Wortel",
+          "prices": [
+            "19.00"
+          ],
+          "path": [
+            "Onze kaart",
+            "Lunch",
+            "À la carte",
+            "Groenten"
+          ],
+          "quote": "Wortel venkel, shiso €19,00 —",
+          "locator": "Lunch › À la carte › Groenten › regel 3",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
+        },
+        {
+          "name": "Beekridder",
+          "prices": [
+            "21.00",
+            "31.00"
+          ],
+          "path": [
+            "Onze kaart",
+            "Lunch",
+            "À la carte",
+            "Pellens"
+          ],
+          "quote": "Beekridder vijgenblad, gerookte boter €21,00 €31,00",
+          "locator": "Lunch › À la carte › Pellens › regel 2",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
+        },
+        {
+          "name": "Hamachi",
+          "prices": [
+            "22.00"
+          ],
+          "path": [
+            "Onze kaart",
+            "Lunch",
+            "À la carte",
+            "Pellens"
+          ],
+          "quote": "Hamachi druif, prei €22,00 —",
+          "locator": "Lunch › À la carte › Pellens › regel 1",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
+        },
+        {
+          "name": "Hollands melkrund",
+          "prices": [
+            "37.00"
+          ],
+          "path": [
+            "Onze kaart",
+            "Lunch",
+            "À la carte",
+            "Pellens"
+          ],
+          "quote": "Hollands melkrund beenmerg, pommes dauphine — €37,00",
+          "locator": "Lunch › À la carte › Pellens › regel 6",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
+        },
+        {
+          "name": "Langoustine",
+          "prices": [
+            "23.00",
+            "38.00"
+          ],
+          "path": [
+            "Onze kaart",
+            "Lunch",
+            "À la carte",
+            "Pellens"
+          ],
+          "quote": "Langoustine wortel, bouillabaisse €23,00 €38,00",
+          "locator": "Lunch › À la carte › Pellens › regel 3",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
+        },
+        {
+          "name": "Meloes-ui",
+          "prices": [
+            "17.00"
+          ],
+          "path": [
+            "Onze kaart",
+            "Lunch",
+            "À la carte",
+            "Pellens"
+          ],
+          "quote": "Meloes-ui balsamico, oude kaas €17,00 —",
+          "locator": "Lunch › À la carte › Pellens › regel 4",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
+        },
+        {
+          "name": "Wilde eend",
+          "prices": [
+            "24.00",
+            "39.00"
+          ],
+          "path": [
+            "Onze kaart",
+            "Lunch",
+            "À la carte",
+            "Pellens"
+          ],
+          "quote": "Wilde eend biet, koffie €24,00 €39,00",
+          "locator": "Lunch › À la carte › Pellens › regel 5",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
+        },
+        {
+          "name": "Entrecôte",
+          "prices": [
+            "21.50"
+          ],
+          "path": [
+            "Onze kaart",
+            "Lunch",
+            "Brioches"
+          ],
+          "quote": "Entrecôte zwarte knoflook €21,50",
+          "locator": "Lunch › Brioches › regel 1",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
+        },
+        {
+          "name": "Ui oude kaas",
+          "prices": [
+            "12.50"
+          ],
+          "path": [
+            "Onze kaart",
+            "Lunch",
+            "Brioches"
+          ],
+          "quote": "Ui oude kaas €12,50",
+          "locator": "Lunch › Brioches › regel 4",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
+        },
+        {
+          "name": "Wagyu A5 Miyazaki",
+          "prices": [
+            "47.00"
+          ],
+          "path": [
+            "Onze kaart",
+            "Lunch",
+            "Brioches"
+          ],
+          "quote": "Wagyu A5 Miyazaki €47,00",
+          "locator": "Lunch › Brioches › regel 5",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
+        },
+        {
+          "name": "Entrecôte",
+          "prices": [
+            "24.50"
+          ],
+          "path": [
+            "Onze kaart",
+            "Lunch",
+            "Salades"
+          ],
+          "quote": "Entrecôte €24,50",
+          "locator": "Lunch › Salades › regel 1",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
+        },
+        {
+          "name": "Van onze boerderij",
+          "prices": [
+            "17.50"
+          ],
+          "path": [
+            "Onze kaart",
+            "Lunch",
+            "Salades"
+          ],
+          "quote": "Van onze boerderij €17,50",
+          "locator": "Lunch › Salades › regel 3",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
+        },
+        {
+          "name": "Zeevruchten",
+          "prices": [
+            "22.50"
+          ],
+          "path": [
+            "Onze kaart",
+            "Lunch",
+            "Salades"
+          ],
+          "quote": "Zeevruchten €22,50",
+          "locator": "Lunch › Salades › regel 2",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
+        }
+      ],
+      "inventedDishes": [
+        {
+          "name": "Brioche",
+          "prices": [
+            "12.50"
+          ],
+          "path": [
+            "Welkom bij Pellens",
+            "Les Brioches"
+          ],
+          "quote": "Brioche Ui · oude kaas€12.50",
+          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[2]>div>div>div>div[1]>div>div[4]",
+          "sourceUrl": "https://pellens.nl/"
+        },
+        {
+          "name": "Brioche",
+          "prices": [
+            "15.50"
+          ],
+          "path": [
+            "Welkom bij Pellens",
+            "Les Brioches"
+          ],
+          "quote": "Brioche Pulled pork€15.50",
+          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[2]>div>div>div>div[1]>div>div[2]",
+          "sourceUrl": "https://pellens.nl/"
+        },
+        {
+          "name": "Brioche",
+          "prices": [
+            "19.50"
+          ],
+          "path": [
+            "Welkom bij Pellens",
+            "Les Brioches"
+          ],
+          "quote": "Brioche Jamón Ibérico€19.50",
+          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[2]>div>div>div>div[1]>div>div[3]",
+          "sourceUrl": "https://pellens.nl/"
+        },
+        {
+          "name": "Brioche",
+          "prices": [
+            "21.50"
+          ],
+          "path": [
+            "Welkom bij Pellens",
+            "Les Brioches"
+          ],
+          "quote": "Brioche Entrecôte · zwarte knoflook€21.50",
+          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[2]>div>div>div>div[1]>div>div[1]",
+          "sourceUrl": "https://pellens.nl/"
+        },
+        {
+          "name": "Brioche",
+          "prices": [
+            "47.00"
+          ],
+          "path": [
+            "Welkom bij Pellens",
+            "Les Brioches"
+          ],
+          "quote": "Brioche Wagyu A5 Miyazaki€47.00",
+          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[2]>div>div>div>div[1]>div>div[5]",
+          "sourceUrl": "https://pellens.nl/"
+        },
+        {
+          "name": "Verveinekarnemelk, peer",
+          "prices": [
+            "14.00"
+          ],
+          "path": [
+            "Welkom bij Pellens",
+            "Onze kaart",
+            "À la carte",
+            "Dessert"
+          ],
+          "quote": "Verveinekarnemelk, peer €14,00",
+          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[1]>section>div>section>dl>div>dt",
+          "sourceUrl": "https://pellens.nl/"
+        },
+        {
+          "name": "2 gangenvoor- en hoofdgerecht of hoofdgerecht en dessert",
+          "prices": [
+            "45.00"
+          ],
+          "path": [
+            "Welkom bij Pellens",
+            "Onze kaart",
+            "À la carte",
+            "Formule du Jour"
+          ],
+          "quote": "2 gangenvoor- en hoofdgerecht of hoofdgerecht en dessert €45,00",
+          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[2]>div[3]>dl>div[1]>dt",
+          "sourceUrl": "https://pellens.nl/"
+        },
+        {
+          "name": "3 gangenvoor-, hoofdgerecht en dessert",
+          "prices": [
+            "55.00"
+          ],
+          "path": [
+            "Welkom bij Pellens",
+            "Onze kaart",
+            "À la carte",
+            "Formule du Jour"
+          ],
+          "quote": "3 gangenvoor-, hoofdgerecht en dessert €55,00",
+          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[2]>div[3]>dl>div[2]>dt",
+          "sourceUrl": "https://pellens.nl/"
+        },
+        {
+          "name": "Fruits de Terrewisselende samenstelling",
+          "prices": [
+            "18.00"
+          ],
+          "path": [
+            "Welkom bij Pellens",
+            "Onze kaart",
+            "À la carte",
+            "Groenten"
+          ],
+          "quote": "Fruits de Terrewisselende samenstelling €18,00 —",
+          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[1]>section>div>div>section[2]>table>tbody>tr[1]",
+          "sourceUrl": "https://pellens.nl/"
+        },
+        {
+          "name": "Meloes-uibalsamico, oude kaas",
+          "prices": [
+            "17.00"
+          ],
+          "path": [
+            "Welkom bij Pellens",
+            "Onze kaart",
+            "À la carte",
+            "Groenten"
+          ],
+          "quote": "Meloes-uibalsamico, oude kaas €17,00 —",
+          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[1]>section>div>div>section[2]>table>tbody>tr[4]",
+          "sourceUrl": "https://pellens.nl/"
+        },
+        {
+          "name": "Vijgenbladradijs, gerookte boter",
+          "prices": [
+            "18.00"
+          ],
+          "path": [
+            "Welkom bij Pellens",
+            "Onze kaart",
+            "À la carte",
+            "Groenten"
+          ],
+          "quote": "Vijgenbladradijs, gerookte boter €18,00 —",
+          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[1]>section>div>div>section[2]>table>tbody>tr[2]",
+          "sourceUrl": "https://pellens.nl/"
+        },
+        {
+          "name": "Wortelvenkel, shiso",
+          "prices": [
+            "19.00"
+          ],
+          "path": [
+            "Welkom bij Pellens",
+            "Onze kaart",
+            "À la carte",
+            "Groenten"
+          ],
+          "quote": "Wortelvenkel, shiso €19,00 —",
+          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[1]>section>div>div>section[2]>table>tbody>tr[3]",
+          "sourceUrl": "https://pellens.nl/"
+        },
+        {
+          "name": "Hamachidruif, prei",
+          "prices": [
+            "22.00"
+          ],
+          "path": [
+            "Welkom bij Pellens",
+            "Onze kaart",
+            "À la carte",
+            "Pellens"
+          ],
+          "quote": "Hamachidruif, prei €22,00 —",
+          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[1]>section>div>div>section[1]>table>tbody>tr[1]",
+          "sourceUrl": "https://pellens.nl/"
+        },
+        {
+          "name": "Hollands melkrundbeenmerg, pommes dauphine",
+          "prices": [
+            "37.00"
+          ],
+          "path": [
+            "Welkom bij Pellens",
+            "Onze kaart",
+            "À la carte",
+            "Pellens"
+          ],
+          "quote": "Hollands melkrundbeenmerg, pommes dauphine — €37,00",
+          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[1]>section>div>div>section[1]>table>tbody>tr[6]",
+          "sourceUrl": "https://pellens.nl/"
+        },
+        {
+          "name": "Meloes-uibalsamico, oude kaas",
+          "prices": [
+            "17.00"
+          ],
+          "path": [
+            "Welkom bij Pellens",
+            "Onze kaart",
+            "À la carte",
+            "Pellens"
+          ],
+          "quote": "Meloes-uibalsamico, oude kaas €17,00 —",
+          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[1]>section>div>div>section[1]>table>tbody>tr[4]",
+          "sourceUrl": "https://pellens.nl/"
+        },
+        {
+          "name": "Entrecôtezwarte knoflook",
+          "prices": [
+            "21.50"
+          ],
+          "path": [
+            "Welkom bij Pellens",
+            "Onze kaart",
+            "Brioches"
+          ],
+          "quote": "Entrecôtezwarte knoflook €21,50",
+          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[1]>div[3]>section[1]>dl>div[1]>dt",
+          "sourceUrl": "https://pellens.nl/"
+        },
+        {
+          "name": "Uioude kaas",
+          "prices": [
+            "12.50"
+          ],
+          "path": [
+            "Welkom bij Pellens",
+            "Onze kaart",
+            "Brioches"
+          ],
+          "quote": "Uioude kaas €12,50",
+          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[1]>div[3]>section[1]>dl>div[4]>dt",
+          "sourceUrl": "https://pellens.nl/"
+        },
+        {
+          "name": "Wagyu A5Miyazaki",
+          "prices": [
+            "47.00"
+          ],
+          "path": [
+            "Welkom bij Pellens",
+            "Onze kaart",
+            "Brioches"
+          ],
+          "quote": "Wagyu A5Miyazaki €47,00",
+          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[1]>div[3]>section[1]>dl>div[5]>dt",
+          "sourceUrl": "https://pellens.nl/"
+        },
+        {
+          "name": "2 gangenvoor- en hoofdgerecht of hoofdgerecht en dessert",
+          "prices": [
+            "45.00"
+          ],
+          "path": [
+            "Welkom bij Pellens",
+            "Onze kaart",
+            "Formule du Jour"
+          ],
+          "quote": "2 gangenvoor- en hoofdgerecht of hoofdgerecht en dessert €45,00",
+          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[1]>div[2]>dl>div[1]>dt",
+          "sourceUrl": "https://pellens.nl/"
+        },
+        {
+          "name": "3 gangenvoor-, hoofdgerecht en dessert",
+          "prices": [
+            "55.00"
+          ],
+          "path": [
+            "Welkom bij Pellens",
+            "Onze kaart",
+            "Formule du Jour"
+          ],
+          "quote": "3 gangenvoor-, hoofdgerecht en dessert €55,00",
+          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[1]>div[2]>dl>div[2]>dt",
+          "sourceUrl": "https://pellens.nl/"
+        },
+        {
+          "name": "Salade",
+          "prices": [
+            "17.50"
+          ],
+          "path": [
+            "Welkom bij Pellens",
+            "Salades"
+          ],
+          "quote": "Salade Van de boerderij€17.50",
+          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[2]>div>div>div>div[2]>div>div[1]",
+          "sourceUrl": "https://pellens.nl/"
+        },
+        {
+          "name": "Salade",
+          "prices": [
+            "22.50"
+          ],
+          "path": [
+            "Welkom bij Pellens",
+            "Salades"
+          ],
+          "quote": "Salade Zeevruchten€22.50",
+          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[2]>div>div>div>div[2]>div>div[2]",
+          "sourceUrl": "https://pellens.nl/"
+        },
+        {
+          "name": "Salade",
+          "prices": [
+            "24.50"
+          ],
+          "path": [
+            "Welkom bij Pellens",
+            "Salades"
+          ],
+          "quote": "Salade Entrecôte€24.50",
+          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[2]>div>div>div>div[2]>div>div[3]",
+          "sourceUrl": "https://pellens.nl/"
+        }
+      ],
+      "priceErrorRows": [],
+      "categoryErrorRows": [
+        {
+          "name": "Jamón Ibérico",
+          "expectedPath": [
+            "Onze kaart",
+            "Lunch",
+            "Brioches"
+          ],
+          "actualPath": [
+            "Welkom bij Pellens",
+            "Onze kaart",
+            "Brioches"
+          ],
+          "price": [
+            "19.50"
+          ],
+          "quote": "Jamón Ibérico €19,50",
+          "locator": "Lunch › Brioches › regel 2",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html",
+          "actualLocator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[1]>div[3]>section[1]>dl>div[2]>dt"
+        },
+        {
+          "name": "Pulled pork",
+          "expectedPath": [
+            "Onze kaart",
+            "Lunch",
+            "Brioches"
+          ],
+          "actualPath": [
+            "Welkom bij Pellens",
+            "Onze kaart",
+            "Brioches"
+          ],
+          "price": [
+            "15.50"
+          ],
+          "quote": "Pulled pork €15,50",
+          "locator": "Lunch › Brioches › regel 3",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html",
+          "actualLocator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[1]>div[3]>section[1]>dl>div[3]>dt"
+        },
+        {
+          "name": "Frites met mayonaise",
+          "expectedPath": [
+            "Onze kaart",
+            "Lunch",
+            "Erbij"
+          ],
+          "actualPath": [
+            "Welkom bij Pellens",
+            "Erbij"
+          ],
+          "price": [
+            "6.00"
+          ],
+          "quote": "Frites met mayonaise €6,00",
+          "locator": "Lunch › Erbij › regel 2",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html",
+          "actualLocator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[2]>div>div>div>div[4]>div>div[2]"
+        },
+        {
+          "name": "Salade van onze boerderij",
+          "expectedPath": [
+            "Onze kaart",
+            "Lunch",
+            "Erbij"
+          ],
+          "actualPath": [
+            "Welkom bij Pellens",
+            "Erbij"
+          ],
+          "price": [
+            "7.00"
+          ],
+          "quote": "Salade van onze boerderij €7,00",
+          "locator": "Lunch › Erbij › regel 1",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html",
+          "actualLocator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[2]>div>div>div>div[4]>div>div[1]"
+        }
+      ],
+      "duplicates": [
+        {
+          "name": "Brioche",
+          "path": [
+            "Welkom bij Pellens",
+            "Les Brioches"
+          ],
+          "count": 5,
+          "expectedCount": 0,
+          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[2]>div>div>div>div[1]>div>div[5]"
+        },
+        {
+          "name": "Salade",
+          "path": [
+            "Welkom bij Pellens",
+            "Salades"
+          ],
+          "count": 3,
+          "expectedCount": 0,
+          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[2]>div>div>div>div[2]>div>div[3]"
+        }
+      ],
+      "accounting": {
+        "reference": {
+          "total": 23,
+          "matched": 0,
+          "missing": 19,
+          "priceErrors": 0,
+          "categoryErrors": 4,
+          "accounted": 23,
+          "balanced": true
+        },
+        "actual": {
+          "total": 27,
+          "matched": 0,
+          "invented": 23,
+          "priceErrors": 0,
+          "categoryErrors": 4,
+          "accounted": 27,
+          "balanced": true
+        }
+      },
+      "captureStatus": "captured",
+      "blockedReason": null,
+      "limitations": [
+        "De diner-tab bevat alleen arrangementen (Menu Pellens, Menu légumes, Formule du Jour) en geen losse gerechten; er is daarom geen diner-gerechtreferentie.",
+        "De pagina bevat een verborgen tweede weergave van brioches en salades; die is geen tweede gerecht en telt één keer.",
+        "De allergeninformatie staat alleen in de algemene FAQ; allergenen per gerecht blijven onbekend.",
+        "Deze referentie is uit de vastgezette brontekst opgesteld en niet uit de parseruitvoer.",
+        "Menukaart https://pellens.nl/: sectie \"Welkom bij Pellens › Onze kaart › À la carte › Menu Pellens\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
+        "Menukaart https://pellens.nl/: sectie \"Welkom bij Pellens › Onze kaart › À la carte › Menu légumes\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
+        "Menukaart https://pellens.nl/: sectie \"Welkom bij Pellens › Menu Pellens\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
+        "Menukaart https://pellens.nl/: sectie \"Welkom bij Pellens › Menu légumes\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
+        "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.",
+        "Kwaliteitscontrole op de deterministische extractie vraagt aandacht (duplicate_item_across_categories, duplicate_item_within_category, html_arrangements_skipped); het resultaat is niet als volledig beoordeeld."
+      ],
+      "sourceVersion": {
+        "entryUrl": "https://pellens.nl",
+        "captureStatus": "captured",
+        "captures": [
+          {
+            "order": 1,
+            "requestedUrl": "https://pellens.nl",
+            "finalUrl": "https://pellens.nl/",
+            "contentType": "text/html",
+            "kind": "html",
+            "bytes": 117199,
+            "bytesSha256": "66f57e2672894a1bf76bea5d52acdf6749000140d99fd12ff20fa5207b5e2d7a",
+            "captureStatus": "captured",
+            "error": null
+          }
+        ]
+      }
+    },
+    {
+      "label": "Restaurant Chocolat",
+      "sourceId": "chocolat",
+      "referenceItems": 26,
+      "actualItems": 24,
+      "matched": 20,
+      "missing": 2,
+      "invented": 0,
+      "priceErrors": 0,
+      "categoryErrors": 4,
+      "precision": 83.33,
+      "recall": 76.92,
+      "missingDishes": [
+        {
+          "name": "SANDWICH CHOCOLAT",
+          "prices": [
+            "18.00"
+          ],
+          "path": [
+            "LUNCHKAART CHOCOLAT",
+            "LUNCHGERECHTEN"
+          ],
+          "quote": "SANDWICH CHOCOLAT €18 Steak Tartare · Pata Negra · Truffel Roerei (supp. ganzenlever €4)",
+          "locator": "LUNCHKAART CHOCOLAT › LUNCHGERECHTEN › regel 6",
+          "captureKey": "ops/benchmark/output/reference-captures/chocolat/03-lunch-4ac64c425f1c.html"
+        },
+        {
+          "name": "STEAK TARTARE",
+          "prices": [
+            "17.00"
+          ],
+          "path": [
+            "LUNCHKAART CHOCOLAT",
+            "LUNCHGERECHTEN"
+          ],
+          "quote": "STEAK TARTARE 90 GRAM €17 Gerookte Ei-dooier · Kappertjes · Zoetzuur (supp. 130 gr. €8)",
+          "locator": "LUNCHKAART CHOCOLAT › LUNCHGERECHTEN › regel 1",
+          "captureKey": "ops/benchmark/output/reference-captures/chocolat/03-lunch-4ac64c425f1c.html"
+        }
+      ],
+      "inventedDishes": [],
+      "priceErrorRows": [],
+      "categoryErrorRows": [
+        {
+          "name": "CHOCOLAT & CHOCOLAT PUUR",
+          "expectedPath": [
+            "DINERKAART CHOCOLAT",
+            "NAGERECHTEN"
+          ],
+          "actualPath": [
+            "NAGERECHTEN"
+          ],
+          "price": [
+            "19.00"
+          ],
+          "quote": "CHOCOLAT & CHOCOLAT PUUR 19 Bereidingen van pure Chocolat",
+          "locator": "DINERKAART CHOCOLAT › NAGERECHTEN › regel 2",
+          "captureKey": "ops/benchmark/output/reference-captures/chocolat/04-diner-7122b5d1c92b.html",
+          "actualLocator": "html>body>div>div>div>article>div>div>div>div[3]>div>div>div[4]>div>p[4]"
+        },
+        {
+          "name": "CHOCOLAT & CHOCOLAT WIT",
+          "expectedPath": [
+            "DINERKAART CHOCOLAT",
+            "NAGERECHTEN"
+          ],
+          "actualPath": [
+            "NAGERECHTEN"
+          ],
+          "price": [
+            "19.00"
+          ],
+          "quote": "CHOCOLAT & CHOCOLAT WIT 19 Bereidingen witte Chocolat",
+          "locator": "DINERKAART CHOCOLAT › NAGERECHTEN › regel 3",
+          "captureKey": "ops/benchmark/output/reference-captures/chocolat/04-diner-7122b5d1c92b.html",
+          "actualLocator": "html>body>div>div>div>article>div>div>div>div[3]>div>div>div[4]>div>p[6]"
+        },
+        {
+          "name": "KAAS ASSORTIMENT",
+          "expectedPath": [
+            "DINERKAART CHOCOLAT",
+            "NAGERECHTEN"
+          ],
+          "actualPath": [
+            "NAGERECHTEN"
+          ],
+          "price": [
+            "22.00"
+          ],
+          "quote": "KAAS ASSORTIMENT 22 4 Soorten · Wortel Gember Compôte · Kletzenbrood",
+          "locator": "DINERKAART CHOCOLAT › NAGERECHTEN › regel 4",
+          "captureKey": "ops/benchmark/output/reference-captures/chocolat/04-diner-7122b5d1c92b.html",
+          "actualLocator": "html>body>div>div>div>article>div>div>div>div[3]>div>div>div[4]>div>p[8]"
+        },
+        {
+          "name": "SURPRISE",
+          "expectedPath": [
+            "DINERKAART CHOCOLAT",
+            "NAGERECHTEN"
+          ],
+          "actualPath": [
+            "NAGERECHTEN"
+          ],
+          "price": [
+            "18.00"
+          ],
+          "quote": "SURPRISE 18 Wisselend dessert van onze Patissier",
+          "locator": "DINERKAART CHOCOLAT › NAGERECHTEN › regel 1",
+          "captureKey": "ops/benchmark/output/reference-captures/chocolat/04-diner-7122b5d1c92b.html",
+          "actualLocator": "html>body>div>div>div>article>div>div>div>div[3]>div>div>div[4]>div>p[2]"
+        }
+      ],
+      "duplicates": [],
+      "accounting": {
+        "reference": {
+          "total": 26,
+          "matched": 20,
+          "missing": 2,
+          "priceErrors": 0,
+          "categoryErrors": 4,
+          "accounted": 26,
+          "balanced": true
+        },
+        "actual": {
+          "total": 24,
+          "matched": 20,
+          "invented": 0,
+          "priceErrors": 0,
+          "categoryErrors": 4,
+          "accounted": 24,
+          "balanced": true
+        }
+      },
+      "captureStatus": "captured",
+      "blockedReason": null,
+      "limitations": [
+        "De /menu-pagina toont alleen tegels naar de lunch- en dinerkaart en is geen menukaart.",
+        "De pagina /arrangementen bevat arrangementprijzen voor gezelschappen en geen losse gerechten.",
+        "De allergeninformatie is een algemene mededeling; allergenen per gerecht blijven onbekend.",
+        "Deze referentie is uit de vastgezette brontekst opgesteld en niet uit de parseruitvoer.",
+        "Gelezen zonder automatisch herkende menukaart: https://www.restaurant-chocolat.nl/menu/.",
+        "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+      ],
+      "sourceVersion": {
+        "entryUrl": "https://www.restaurant-chocolat.nl",
+        "captureStatus": "captured",
+        "captures": [
+          {
+            "order": 1,
+            "requestedUrl": "https://www.restaurant-chocolat.nl",
+            "finalUrl": "https://www.restaurant-chocolat.nl/",
+            "contentType": "text/html",
+            "kind": "html",
+            "bytes": 221980,
+            "bytesSha256": "186958b4753f5a350203363f846fcd663097e2da6ed44fb089755e4eaeb91ce8",
+            "captureStatus": "captured",
+            "error": null
+          },
+          {
+            "order": 2,
+            "requestedUrl": "https://www.restaurant-chocolat.nl/menu/",
+            "finalUrl": "https://www.restaurant-chocolat.nl/menu/",
+            "contentType": "text/html",
+            "kind": "html",
+            "bytes": 154178,
+            "bytesSha256": "0754bdd2f6ca8d143b68d6d1ce5ddae6f44b3d69cfbbb173d9e96add00cab73c",
+            "captureStatus": "captured",
+            "error": null
+          },
+          {
+            "order": 3,
+            "requestedUrl": "https://www.restaurant-chocolat.nl/lunch",
+            "finalUrl": "https://www.restaurant-chocolat.nl/lunch/",
+            "contentType": "text/html",
+            "kind": "html",
+            "bytes": 159440,
+            "bytesSha256": "4ac64c425f1c630cdc0b83bfb10af3a4c193a321be6a99b24d708782be928f74",
+            "captureStatus": "captured",
+            "error": null
+          },
+          {
+            "order": 4,
+            "requestedUrl": "https://www.restaurant-chocolat.nl/diner",
+            "finalUrl": "https://www.restaurant-chocolat.nl/diner/",
+            "contentType": "text/html",
+            "kind": "html",
+            "bytes": 159176,
+            "bytesSha256": "7122b5d1c92bba8122d3d6db42c2191d228b6873bd0071a86ec462ba6c5335ac",
+            "captureStatus": "captured",
+            "error": null
+          },
+          {
+            "order": 5,
+            "requestedUrl": "https://www.restaurant-chocolat.nl/cadeaubon",
+            "finalUrl": "https://www.restaurant-chocolat.nl/cadeaubon/",
+            "contentType": "text/html",
+            "kind": "html",
+            "bytes": 170522,
+            "bytesSha256": "3acbf4874eeda7b77dfd50f7e6f4ff3b6bfc9a387354107804eeace213f3a7e1",
+            "captureStatus": "captured",
+            "error": null
+          },
+          {
+            "order": 6,
+            "requestedUrl": "https://www.restaurant-chocolat.nl/arrangementen",
+            "finalUrl": "https://www.restaurant-chocolat.nl/arrangementen/",
+            "contentType": "text/html",
+            "kind": "html",
+            "bytes": 167937,
+            "bytesSha256": "a35ee43d2d681cb983d2f006412873b646b78310a6c1ed3cd0587d067d8c699d",
+            "captureStatus": "captured",
+            "error": null
+          }
+        ]
+      }
+    },
+    {
+      "sourceId": "senang-makan",
+      "label": "Senang Makan",
+      "captureStatus": "blocked",
+      "blockedReason": "robots.txt van deze site was niet bereikbaar (HTTP 503) — de pagina is niet opgehaald.",
+      "referenceItems": 0,
+      "actualItems": 0,
+      "matched": 0,
+      "missing": 0,
+      "invented": 0,
+      "priceErrors": 0,
+      "categoryErrors": 0,
+      "precision": null,
+      "recall": null,
+      "missingDishes": [],
+      "inventedDishes": [],
+      "priceErrorRows": [],
+      "categoryErrorRows": [],
+      "duplicates": [],
+      "limitations": [
+        "Geen vastgezette bytes en dus geen referentie: de bron was op het moment van vastleggen niet leesbaar via de bestaande veilige route (HTTP 503 op robots.txt).",
+        "Dit is een bronbeperking, geen lege menukaart en geen succesvolle extractie.",
+        "De afhaal-PDF is niet vastgelegd omdat de website zelf niet leesbaar was; de PDF-URL is niet geraden."
+      ],
+      "sourceVersion": {
+        "entryUrl": "https://www.senangmakan.nl",
+        "captureStatus": "blocked",
+        "captures": [
+          {
+            "order": 1,
+            "requestedUrl": "https://www.senangmakan.nl",
+            "finalUrl": null,
+            "contentType": null,
+            "kind": "unsupported",
+            "bytes": 0,
+            "bytesSha256": null,
+            "captureStatus": "blocked",
+            "error": "robots.txt van deze site was niet bereikbaar (HTTP 503) — de pagina is niet opgehaald."
+          }
+        ]
+      },
+      "accounting": {
+        "reference": {
+          "total": 0,
+          "matched": 0,
+          "missing": 0,
+          "priceErrors": 0,
+          "categoryErrors": 0,
+          "accounted": 0,
+          "balanced": true
+        },
+        "actual": {
+          "total": 0,
+          "matched": 0,
+          "invented": 0,
+          "priceErrors": 0,
+          "categoryErrors": 0,
+          "accounted": 0,
+          "balanced": true
+        }
+      }
+    }
+  ]
+}

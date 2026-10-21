@@ -1,0 +1,86 @@
+{
+  "version": "1.0.0",
+  "sourceId": "pellens",
+  "label": "Restaurant Pellens",
+  "entryUrl": "https://pellens.nl",
+  "captureStatus": "captured",
+  "note": "Authored from the pinned one-page capture. Dish names are the names the menu shows before the preparation/description. The lunch tab carries the dishes; the diner tab is arrangement-only. The page's hidden duplicate markup is counted once.",
+  "menus": [
+    {
+      "title": "Onze kaart",
+      "sourceUrl": "https://pellens.nl/",
+      "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html",
+      "categories": [
+        {
+          "path": ["Onze kaart", "Lunch", "Brioches"],
+          "items": [
+            {"name": "Entrecôte", "price": "21.50", "locator": "Lunch › Brioches › regel 1", "quote": "Entrecôte zwarte knoflook €21,50"},
+            {"name": "Jamón Ibérico", "price": "19.50", "locator": "Lunch › Brioches › regel 2", "quote": "Jamón Ibérico €19,50"},
+            {"name": "Pulled pork", "price": "15.50", "locator": "Lunch › Brioches › regel 3", "quote": "Pulled pork €15,50"},
+            {"name": "Ui oude kaas", "price": "12.50", "locator": "Lunch › Brioches › regel 4", "quote": "Ui oude kaas €12,50"},
+            {"name": "Wagyu A5 Miyazaki", "price": "47.00", "locator": "Lunch › Brioches › regel 5", "quote": "Wagyu A5 Miyazaki €47,00"}
+          ]
+        },
+        {
+          "path": ["Onze kaart", "Lunch", "Salades"],
+          "items": [
+            {"name": "Entrecôte", "price": "24.50", "locator": "Lunch › Salades › regel 1", "quote": "Entrecôte €24,50"},
+            {"name": "Zeevruchten", "price": "22.50", "locator": "Lunch › Salades › regel 2", "quote": "Zeevruchten €22,50"},
+            {"name": "Van onze boerderij", "price": "17.50", "locator": "Lunch › Salades › regel 3", "quote": "Van onze boerderij €17,50"}
+          ]
+        },
+        {
+          "path": ["Onze kaart", "Lunch", "Erbij"],
+          "items": [
+            {"name": "Salade van onze boerderij", "price": "7.00", "locator": "Lunch › Erbij › regel 1", "quote": "Salade van onze boerderij €7,00"},
+            {"name": "Frites met mayonaise", "price": "6.00", "locator": "Lunch › Erbij › regel 2", "quote": "Frites met mayonaise €6,00"}
+          ]
+        },
+        {
+          "path": ["Onze kaart", "Lunch", "À la carte", "Pellens"],
+          "items": [
+            {"name": "Hamachi", "price": "22.00", "locator": "Lunch › À la carte › Pellens › regel 1", "quote": "Hamachi druif, prei €22,00 —"},
+            {"name": "Beekridder", "priceVariants": [{"label": "Klein", "price": "21.00"}, {"label": "Hoofd", "price": "31.00"}], "locator": "Lunch › À la carte › Pellens › regel 2", "quote": "Beekridder vijgenblad, gerookte boter €21,00 €31,00"},
+            {"name": "Langoustine", "priceVariants": [{"label": "Klein", "price": "23.00"}, {"label": "Hoofd", "price": "38.00"}], "locator": "Lunch › À la carte › Pellens › regel 3", "quote": "Langoustine wortel, bouillabaisse €23,00 €38,00"},
+            {"name": "Meloes-ui", "price": "17.00", "locator": "Lunch › À la carte › Pellens › regel 4", "quote": "Meloes-ui balsamico, oude kaas €17,00 —"},
+            {"name": "Wilde eend", "priceVariants": [{"label": "Klein", "price": "24.00"}, {"label": "Hoofd", "price": "39.00"}], "locator": "Lunch › À la carte › Pellens › regel 5", "quote": "Wilde eend biet, koffie €24,00 €39,00"},
+            {"name": "Hollands melkrund", "price": "37.00", "locator": "Lunch › À la carte › Pellens › regel 6", "quote": "Hollands melkrund beenmerg, pommes dauphine — €37,00"}
+          ]
+        },
+        {
+          "path": ["Onze kaart", "Lunch", "À la carte", "Groenten"],
+          "items": [
+            {"name": "Fruits de Terre", "price": "18.00", "locator": "Lunch › À la carte › Groenten › regel 1", "quote": "Fruits de Terre wisselende samenstelling €18,00 —"},
+            {"name": "Vijgenblad", "price": "18.00", "locator": "Lunch › À la carte › Groenten › regel 2", "quote": "Vijgenblad radijs, gerookte boter €18,00 —"},
+            {"name": "Wortel", "price": "19.00", "locator": "Lunch › À la carte › Groenten › regel 3", "quote": "Wortel venkel, shiso €19,00 —"},
+            {"name": "Meloes-ui", "price": "17.00", "locator": "Lunch › À la carte › Groenten › regel 4", "quote": "Meloes-ui balsamico, oude kaas €17,00 —"},
+            {"name": "Eekhoorntjesbrood", "priceVariants": [{"label": "Klein", "price": "22.00"}, {"label": "Hoofd", "price": "26.00"}], "locator": "Lunch › À la carte › Groenten › regel 5", "quote": "Eekhoorntjesbrood biet, koffie €22,00 €26,00"},
+            {"name": "Spitskool", "priceVariants": [{"label": "Klein", "price": "18.00"}, {"label": "Hoofd", "price": "24.00"}], "locator": "Lunch › À la carte › Groenten › regel 6", "quote": "Spitskool huacatay, pommes dauphine €18,00 €24,00"}
+          ]
+        },
+        {
+          "path": ["Onze kaart", "Lunch", "À la carte", "Dessert"],
+          "items": [
+            {"name": "Verveine", "price": "14.00", "locator": "Lunch › À la carte › Dessert › regel 1", "quote": "Verveine karnemelk, peer €14,00"}
+          ]
+        }
+      ]
+    }
+  ],
+  "arrangements": [
+    {"name": "Formule du Jour", "path": ["Onze kaart", "Lunch", "Formule du Jour"], "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html", "prices": [{"label": "2 gangen", "price": "45.00"}, {"label": "3 gangen", "price": "55.00"}], "quote": "Formule du Jour 2 gangen voor- en hoofdgerecht of hoofdgerecht en dessert €45,00 3 gangen voor-, hoofdgerecht en dessert €55,00", "note": "Keuzemenu; de gangen zijn geen losse gerechten."},
+    {"name": "Menu Pellens", "path": ["Diner", "Menu Pellens"], "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html", "prices": [{"label": "4 gangen", "price": "75.00"}, {"label": "5 gangen", "price": "85.00"}, {"label": "6 gangen", "price": "92.50"}, {"label": "7 gangen", "price": "100.00"}], "quote": "Menu Pellens Hamachi druif, prei Beekridder vijgenblad, gerookte boter bij 4 gangen Langoustine wortel, bouillabaisse bij 7 gangen Meloes-ui balsamico, oude kaas bij 5 gangen Wilde eend biet, koffie bij 6 gangen Hollands melkrund beenmerg, pommes dauphine Verveine karnemelk, peer 4 gangen €75,00 5 gangen €85,00 6 gangen €92,50 7 gangen €100,00", "note": "Gangenarrangement; de gangen hebben geen eigen losse prijs."},
+    {"name": "Menu légumes", "path": ["Diner", "Menu légumes"], "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html", "prices": [{"label": "4 gangen", "price": "65.00"}, {"label": "5 gangen", "price": "75.00"}, {"label": "6 gangen", "price": "82.50"}, {"label": "7 gangen", "price": "90.00"}], "quote": "Menu légumes Fruits de Terre wisselende samenstelling Vijgenblad radijs, gerookte boter bij 4 gangen Wortel venkel, shiso bij 7 gangen Meloes-ui balsamico, oude kaas bij 5 gangen Eekhoorntjesbrood biet, koffie bij 6 gangen Spitskool huacatay, pommes dauphine Verveine karnemelk, peer 4 gangen €65,00 5 gangen €75,00 6 gangen €82,50 7 gangen €90,00", "note": "Vegetarisch gangenarrangement; de gangen hebben geen eigen losse prijs. De alternatieve 'Keuzemenu'-weergave noemt dezelfde bedragen en telt één keer."}
+  ],
+  "supplements": [],
+  "ambiguous": [
+    {"item": "Verborgen tweede lijst (Les Brioches / Salade ...)", "reason": "De pagina bevat naast de zichtbare kaart een verborgen alternatieve weergave van dezelfde brioches en salades. Volgens telregel 5 telt dezelfde pagina één keer; een tweede extractie van die verborgen lijst is een verzonnen duplicaat.", "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"},
+    {"item": "À-la-cartetabel klein/hoofd", "reason": "Een '—' in de kolom betekent geen aanbieding in die portie, geen ontbrekende prijs. Alleen de genoemde bedragen zijn prijsvarianten.", "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"}
+  ],
+  "limitations": [
+    "De diner-tab bevat alleen arrangementen (Menu Pellens, Menu légumes, Formule du Jour) en geen losse gerechten; er is daarom geen diner-gerechtreferentie.",
+    "De pagina bevat een verborgen tweede weergave van brioches en salades; die is geen tweede gerecht en telt één keer.",
+    "De allergeninformatie staat alleen in de algemene FAQ; allergenen per gerecht blijven onbekend.",
+    "Deze referentie is uit de vastgezette brontekst opgesteld en niet uit de parseruitvoer."
+  ]
+}

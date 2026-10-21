@@ -1,0 +1,54 @@
+{
+  "version": "1.0.0",
+  "pinnedAt": "2026-10-21",
+  "issue": 59,
+  "authorization": {
+    "decision": "Product Owner issuecomment-6318192386 (1a, 2a, 3a); Delivery Lead review 6318225879",
+    "reference": "GitHub #59 developeropdracht: gecontroleerde referenties, afbeeldingsmenu-route en criteria",
+    "scope": "Public read-only capture of the five named entry URLs and their relevant same-host menu pages or PDFs through the existing safe fetch, with robots and redirect checks. No login, CAPTCHA bypass, paid service, other location, arbitrary crawl, production action or publication.",
+    "appProviderActivation": false,
+    "note": "This is a source-capture permission. It does not activate an app-side AI provider, OCR, budget or retention arrangement."
+  },
+  "sources": [
+    {
+      "id": "zuyd",
+      "label": "Restaurant Zuyd",
+      "entryUrl": "https://www.restaurantzuyd.nl",
+      "allowedHosts": ["restaurantzuyd.nl", "www.restaurantzuyd.nl"],
+      "class": "html_menu_pages",
+      "shapeHypothesis": "Hub page with separate lunch and diner menu pages; both variants must stay separate."
+    },
+    {
+      "id": "andalous",
+      "label": "Andalous Restaurant Breda",
+      "entryUrl": "https://www.andalous-breda.nl",
+      "allowedHosts": ["andalous-breda.nl", "www.andalous-breda.nl"],
+      "class": "html_menu_page",
+      "shapeHypothesis": "Landing page linking one long menukaart page with flat section headings."
+    },
+    {
+      "id": "pellens",
+      "label": "Restaurant Pellens",
+      "entryUrl": "https://pellens.nl",
+      "allowedHosts": ["pellens.nl", "www.pellens.nl"],
+      "class": "html_tabs",
+      "shapeHypothesis": "One page with lunch/diner tabs, arrangement menus and an a-la-carte table with klein/hoofd columns."
+    },
+    {
+      "id": "chocolat",
+      "label": "Restaurant Chocolat",
+      "entryUrl": "https://www.restaurant-chocolat.nl",
+      "allowedHosts": ["restaurant-chocolat.nl", "www.restaurant-chocolat.nl"],
+      "class": "html_menu_pages",
+      "shapeHypothesis": "Hub page with separate lunch and diner menu pages and arrangement prices."
+    },
+    {
+      "id": "senang-makan",
+      "label": "Senang Makan",
+      "entryUrl": "https://www.senangmakan.nl",
+      "allowedHosts": ["senangmakan.nl", "www.senangmakan.nl"],
+      "class": "html_and_pdf",
+      "shapeHypothesis": "Website plus a takeaway PDF. If the safe route cannot reach the public source, that is recorded as blocked, never as an empty menu."
+    }
+  ]
+}
