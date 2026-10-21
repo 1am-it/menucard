@@ -299,18 +299,79 @@ async function imageOnlyScenario(cdp) {
   const clicked = await clickLink(cdp, 'Bronnen beoordelen');
   const arrived = await waitForPath(cdp, '/internal/source-triage', 'Bronnen beoordelen', 30000);
   steps.push({ action: 'click Bronnen beoordelen', href: clicked, reached: Boolean(clicked), arrived });
-  const triage = await evalJs(cdp, `(() => ({
-    pathname: location.pathname,
-    search: location.search,
-    text: document.body.innerText,
-    detailTitle: (document.querySelector('.stg-detail-title') || {}).innerText || '',
-    note: (document.querySelector('.di-banner-neutral[role="note"]') || {}).innerText || '',
-  }))()`);
+  const triage = await evalJs(cdp, `(() => {
+    const detail = document.querySelector('.stg-detail-card');
+    const block = document.querySelector('.stg-followup');
+    return {
+      pathname: location.pathname,
+      search: location.search,
+      text: document.body.innerText,
+      detailTitle: (document.querySelector('.stg-detail-title') || {}).innerText || '',
+      detailText: detail ? detail.innerText : '',
+      followupText: block ? block.innerText : '',
+      banner: (document.querySelector('.di-banner-neutral[role="note"]') || {}).innerText || '',
+    };
+  })()`);
   check('image-only follow-up: the existing Bronnen beoordelen page opens', arrived && triage.pathname === '/internal/source-triage');
-  check('image-only follow-up: the reason is visible on the human route', triage.note.includes('alleen als afbeelding of scan'));
   check('image-only follow-up: the restaurant is preselected', triage.detailTitle.includes('Fictief Brasserie Noord'));
+  check(
+    'image-only follow-up: the detail names the real reason',
+    triage.detailText.includes('Menu alleen als afbeelding of scan: niet ondersteund'),
+    triage.followupText,
+  );
+  check(
+    'image-only follow-up: the detail names the fitting next step',
+    triage.detailText.includes('Kies een andere tekst- of pdf-bron of markeer deze bron als onbruikbaar'),
+    triage.detailText.slice(0, 200),
+  );
+  check(
+    'image-only follow-up: the reason is not only a page banner',
+    triage.followupText.length > 0 && triage.banner === '',
+    `followup=${triage.followupText.slice(0, 80)} banner=${triage.banner.slice(0, 40)}`,
+  );
+  check(
+    'image-only follow-up: the generic onboarding route stays visible as secondary context',
+    triage.detailText.includes('Algemene route: Bron controleren via Onboarding Restaurant'),
+    triage.detailText.slice(0, 200),
+  );
+  check('image-only follow-up: no menu status or confirmation is claimed', !triage.text.includes('Bron bevestigd') && !triage.text.includes('Menukaart gevonden'));
   check('image-only follow-up: the context is kept in the address bar', triage.search.includes('restaurant=9001') && triage.search.includes('reason=image_only'));
   check('image-only follow-up: no proposal or publication happened', triage.text.includes('Leg een voorstel vast') && !triage.text.includes('Bron bevestigd'));
+
+  // R5: a fitting "unusable" reason exists. The human still chooses the action;
+  // the existing `other` reason is preselected with its fixed, required note.
+  const suggestion = await evalJs(cdp, `(async () => {
+    const radio = document.querySelector('input[type="radio"][value="mark_unusable"]');
+    if (!radio) return { found: false };
+    radio.click();
+    await new Promise((resolve) => setTimeout(resolve, 150));
+    const select = document.querySelector('select[id$="-reason"]');
+    const note = document.querySelector('textarea[id$="-note"]');
+    const hint = document.querySelector('p[id$="-reason-help"]');
+    return {
+      found: Boolean(select),
+      reason: select ? select.value : null,
+      note: note ? note.value : null,
+      required: note ? note.getAttribute('aria-required') : null,
+      describedBy: select ? (select.getAttribute('aria-describedby') || '') : '',
+      hint: hint ? hint.innerText : '',
+      text: (document.querySelector('.stg-detail-card') || {}).innerText || '',
+    };
+  })()`);
+  check('image-only follow-up: an unusable proposal can be prepared', suggestion.found);
+  check('image-only follow-up: a fitting reason is preselected', suggestion.reason === 'other', String(suggestion.reason));
+  check(
+    'image-only follow-up: the fixed explanation is visible and filled in',
+    (suggestion.note || '').includes('alleen als afbeelding of scan') && suggestion.hint.length > 0,
+    `${suggestion.note} | ${suggestion.hint}`,
+  );
+  check('image-only follow-up: the preselected reason is described to assistive tech', suggestion.describedBy.includes('-reason-help'), suggestion.describedBy);
+  check('image-only follow-up: the note stays required', suggestion.required === 'true', String(suggestion.required));
+  check(
+    'image-only follow-up: choosing the reason saves nothing by itself',
+    suggestion.text.includes('Voorstel opslaan') && !suggestion.text.includes('Voorstel opgeslagen'),
+  );
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'menu-review-image-only-follow-up-reason-320-dark.png'));
   screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'menu-review-image-only-follow-up-320-dark.png'));
   recordClickpath('image-only result -> Bronnen beoordelen', steps, steps.every((step) => step.reached !== false && step.arrived !== false), JSON.stringify(steps));
 }

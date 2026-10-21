@@ -128,7 +128,7 @@ test('"Andere reden" without a note: the textarea, not the select, is invalid, d
   const form = fnSource('ProposalForm');
   assert.match(form, /const noteRequired = !needsUrl && reason === 'other'/);
   assert.match(form, /<textarea\s+id=\{`\$\{base\}-note`\}\s+ref=\{noteRef\}[\s\S]*?aria-required=\{noteRequired \? 'true' : undefined\}\s+aria-invalid=\{invalid\('note'\)\}\s+aria-describedby=\{describedBy\('note'\)\}/);
-  assert.match(form, /<select\s+id=\{`\$\{base\}-reason`\}\s+ref=\{reasonRef\}[\s\S]*?aria-invalid=\{invalid\('reason'\)\}\s+aria-describedby=\{describedBy\('reason'\)\}/);
+  assert.match(form, /<select\s+id=\{`\$\{base\}-reason`\}\s+ref=\{reasonRef\}[\s\S]*?aria-invalid=\{invalid\('reason'\)\}\s+aria-describedby=\{describedBy\('reason', suggested && suggestion \? `\$\{base\}-reason-help` : null\)\}/);
   assert.match(form, /aria-invalid=\{invalid\('url'\)\}\s+aria-describedby=\{describedBy\('url', `\$\{base\}-url-help`\)\}/);
   assert.match(form, /const invalid = \(field\) => \(error && error\.field === field \? 'true' : undefined\)/);
   assert.match(form, /validateProposalForm\(\{ kind, url, reason, note, knownUrl: entry\.known_url \}\)/);
