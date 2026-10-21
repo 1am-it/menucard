@@ -1,14 +1,14 @@
 {
   "fixtureOnly": true,
   "passed": true,
-  "head": "26839eb4b9dfb5fb0a04fbc977ae3a7561f7000a",
-  "worktreeDirty": false,
-  "generatedAt": "2026-10-20T16:31:42.557Z",
+  "head": "b625c8d97626364795959525f1509eac704c0fff",
+  "worktreeDirty": true,
+  "generatedAt": "2026-10-21T04:51:56.578Z",
   "command": "npm run test:browser:menu-review",
   "environment": {
     "node": "v22.22.3",
     "platform": "win32",
-    "browser": "Edg/155.0.4283.45",
+    "browser": "Chrome/155.0.8059.85",
     "viewportHeights": [
       900
     ],
@@ -24,6 +24,8 @@
   "fixtures": [
     "review",
     "readonly",
+    "structure",
+    "structure-readonly",
     "empty",
     "partial",
     "v2",
@@ -254,6 +256,171 @@
       "name": "partial: no horizontal overflow at 390 px",
       "passed": true,
       "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=structure&batch=batch-fictief-0001&item=1&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=structure&batch=batch-fictief-0001&item=1&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "structure: the existing \"Menukaart controleren\" path shows the section control",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "structure: each uncertain section carries its path, source route and locator",
+      "passed": true,
+      "detail": "[\"Fictief Lunch › Koud\\n1 gerecht · vindplaats: paneel Lunch, regel 1\\n\\nBronroute: LUNCH › KOUD\\n\\nRubriek klopt zo\\nRubriek corrigeren\",\"Fictief Diner › Voor\\n1 gerecht · vindplaats: paneel Diner, regel 1\\n\\nBronroute: DINNER › VOOR\\n\\nRubriek klopt zo\\nRubriek corrigeren\"]"
+    },
+    {
+      "name": "structure: nothing is treated before the human acts",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "structure: the progress counter starts at 0 van 2",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "structure: no one-click confirmation is offered before handling",
+      "passed": true,
+      "detail": "[\"Licht\",\"Donker\",\"Sign out\",\"Nieuwe batch\",\"Rubriekindeling controleren\",\"Controle sluiten\",\"18 okt 11:00\\n1 URL · klaar voor controle\"]"
+    },
+    {
+      "name": "structure: no accept-all action exists",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "structure: light theme is active",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "structure: no horizontal overflow at 1024 px",
+      "passed": true,
+      "detail": "overflow=-6"
+    },
+    {
+      "name": "structure: handling one section is not enough",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "structure: correcting a section opens a labelled path field",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "structure: all sections treated only after a real corrected path",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "structure: the confirm control appears only now and is enabled",
+      "passed": true,
+      "detail": "{\"text\":\"Bevestig bron\",\"disabled\":false}"
+    },
+    {
+      "name": "structure: the confirmation shows the handled decisions before writing",
+      "passed": true,
+      "detail": "onze\nmenukaarten\nDekkingsoverzicht\nOnboarding Restaurant\nLicht\nDonker\nSign out\nWerkvoorraad\n/\nBronnen beoordelen\n/\nBatchanalyse\nBatchanalyse\nAlleen intern\n\nAnalyseer maximaal 10 restaurant-URL's tegelijk. Elk resultaat blijft een voorstel voor menselijke controle.\n\nNiets wordt automatisch gepublicee"
+    },
+    {
+      "name": "structure: no write request leaves the browser in the fixture",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=structure&batch=batch-fictief-0001&item=1&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=structure&batch=batch-fictief-0001&item=1&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "structure keyboard: Tab reaches a section decision and Space selects it",
+      "passed": true,
+      "detail": "tabs=1"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=structure&batch=batch-fictief-0001&item=1&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=structure&batch=batch-fictief-0001&item=1&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "structure light: the requested theme is active",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "structure light: no horizontal overflow at 390 px",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "structure light: the correction field stays inside the viewport",
+      "passed": true,
+      "detail": "width=272"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=structure&batch=batch-fictief-0001&item=1&theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=structure&batch=batch-fictief-0001&item=1&theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "structure dark: the requested theme is active",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "structure dark: no horizontal overflow at 390 px",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "structure dark: the correction field stays inside the viewport",
+      "passed": true,
+      "detail": "width=272"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=structure-readonly&batch=batch-fictief-0001&item=1&theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=structure-readonly&batch=batch-fictief-0001&item=1&theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "structure readonly: the same sections stay readable",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "structure readonly: the decisions are disabled and no confirmation is offered",
+      "passed": true,
+      "detail": null
     },
     {
       "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=v2&batch=batch-fictief-0001&theme=light)",
@@ -1218,7 +1385,7 @@
     {
       "name": "network guard: CDP blocks external subresource and frame navigation",
       "passed": true,
-      "detail": "[{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/pixel.png\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-20T16:31:41.613Z\",\"resourceType\":\"Image\"},{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/frame\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-20T16:31:41.616Z\",\"resourceType\":\"Document\"}]"
+      "detail": "[{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/pixel.png\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-21T04:51:55.479Z\",\"resourceType\":\"Image\"},{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/frame\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-21T04:51:55.482Z\",\"resourceType\":\"Document\"}]"
     },
     {
       "name": "network guard: no unexpected CDP traffic during app scenarios",
@@ -1247,6 +1414,33 @@
     }
   ],
   "clickpaths": [
+    {
+      "name": "batch result -> Menukaart controleren -> keep/correct each uncertain section -> Bevestig bron (panel only)",
+      "steps": [
+        {
+          "step": "uncertain result opens the section control",
+          "arrived": true
+        },
+        {
+          "step": "keep the first uncertain section",
+          "arrived": true
+        },
+        {
+          "step": "correct the second uncertain section with a path",
+          "arrived": true
+        },
+        {
+          "step": "all sections treated",
+          "arrived": true
+        },
+        {
+          "step": "confirmation panel shows the handled decisions",
+          "arrived": true
+        }
+      ],
+      "passed": true,
+      "detail": "{\"required\":[\"Fictief Lunch › Koud\",\"Fictief Diner › Voor\"]}"
+    },
     {
       "name": "concept list -> exact detail -> back",
       "steps": [
@@ -1327,13 +1521,13 @@
   "screenshots": [
     {
       "file": "menu-review-desktop-light.png",
-      "sha256": "528e83eb451f3f48d56626e7c4e0dfcfaf967668e70b99493394841dbadc9109",
+      "sha256": "8e7a5f8d969a61d1133c4a3f3f78a6a1dbd2d033f4d2f99dcefe290aabd5b1eb",
       "width": 1024,
       "height": 900
     },
     {
       "file": "menu-review-readonly-1024-dark.png",
-      "sha256": "3f27d81d60ad01ba686df1206af7fff1e909ef3bdbb905e2e6c9ee0db6945467",
+      "sha256": "851a6f524e30acc6bf76d992c368e8c85b688623ec1797fd645dd2604be79d96",
       "width": 1024,
       "height": 900
     },
@@ -1345,8 +1539,38 @@
     },
     {
       "file": "menu-review-partial-390-dark.png",
-      "sha256": "beba7098dc6c95c36dfe581e43ebf254104dcb62c5cf7fc43806f7ccab4bdb56",
+      "sha256": "bd5efb7b6950268343cfbbeccc0d179a669ccaedbf4aef9738763a71877956ad",
       "width": 390,
+      "height": 900
+    },
+    {
+      "file": "menu-review-structure-1024-light.png",
+      "sha256": "942e1815ef208bf3f1950822473f46367fc0e466779aa4e4f3fd33948c05b1b3",
+      "width": 1024,
+      "height": 900
+    },
+    {
+      "file": "menu-review-structure-keyboard-390-light.png",
+      "sha256": "2bd3f028750da3bcf2f0e8b0c226e7ce95ab73b0695f539dad3c7ea9806bdb2d",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "menu-review-structure-390-light.png",
+      "sha256": "3cfaa1d92c798e075adc9fc465b32694851d0fead24b9f6302fe0f488445919f",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "menu-review-structure-390-dark.png",
+      "sha256": "37be8992aaef80e14ca260437f6e2af052533c535b3f539fce3c76c954b4ae22",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "menu-review-structure-readonly-1024-dark.png",
+      "sha256": "a93f06195780526decc05aecf69742880e0813c7581c9dd8b502206e4611367d",
+      "width": 1024,
       "height": 900
     },
     {
@@ -1357,7 +1581,7 @@
     },
     {
       "file": "menu-review-v2-390-dark.png",
-      "sha256": "b00c9e5362cddb1384e8fdf7d026ee2fdcd8d4ab8ce026462c75ea6675ca8592",
+      "sha256": "a29a59dbfe24761807f309b80e91280926b50d863ab120c301d760e40b6d97f7",
       "width": 390,
       "height": 900
     },
@@ -1369,37 +1593,37 @@
     },
     {
       "file": "menu-review-320-light.png",
-      "sha256": "364203ec2bedd6d6a42854b2862bea1e595670cd20beb8bfbfc8219d55cbb554",
+      "sha256": "b114e085d2467017990b51238c03796047da5ae11ee5577aec90ba0cca9a132e",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-320-dark.png",
-      "sha256": "417eb9e1672ddb18419ccbf2df62226f39edb5518719ddab1f144985caae6df7",
+      "sha256": "50cc4ff28f68b0a0cb6f4aaa6d8cda1ba8a13d13d01c69b4bf452948c5107e86",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-390-light.png",
-      "sha256": "cadc7d50e38dfd177b7d8e36365268f816c1f61c9352e289a31b2e46cbe1e09e",
+      "sha256": "0f472a9b84b650d8506e75734789e8bd6ea8ce8cb844c47cb92c0b9b779f8d53",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-390-dark.png",
-      "sha256": "4ed360db86be57acca681b28f1dd417be510dcb70ef8ee364be8fd862cca197b",
+      "sha256": "381b89d3007edb17dac75e05048f7423e2c378e3b7f8c19e579d8df23a819641",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-1024-dark.png",
-      "sha256": "015813c24262aec5182d83a4387ba9e6db1ec2adc8148d2818312f733b472d7b",
+      "sha256": "95de02404a7abecc466bc5785d63d7c487d3325dab4109bc78b019808aad0273",
       "width": 1024,
       "height": 900
     },
     {
       "file": "menu-review-keyboard-390-light.png",
-      "sha256": "0f3ed04dd61d65a4f6021cf0f8174296b94696dffbd90fb9a4c3036d9e40960a",
+      "sha256": "66be7210c549d36515aae82c3b580f27b6773f1b58f79d192d22b41beda181b8",
       "width": 390,
       "height": 900
     },
@@ -1423,7 +1647,7 @@
     },
     {
       "file": "concept-detail-invalid-1024-clickpath.png",
-      "sha256": "2641357a168ba7383e8c9ca1394a0c0494c899b89129a663312fdb73ebdddd28",
+      "sha256": "47cbcf2fbcad810a15ac1e14105f51ab75dcc5ba7978134aa8bbcdba313017dd",
       "width": 1024,
       "height": 900
     },
@@ -1435,7 +1659,7 @@
     },
     {
       "file": "concept-detail-v2-readonly-1024-light.png",
-      "sha256": "3e0ce2139e72488aead90e9f04b55f61fd6a79a5f9504c8c896e97c0c14cb943",
+      "sha256": "42bd617861c18424f5efd0c43ef54350a2b536935ea7a263663975595851bbc1",
       "width": 1024,
       "height": 900
     },
@@ -1465,13 +1689,13 @@
     },
     {
       "file": "concept-list-no-access-390-light.png",
-      "sha256": "6996a7ace3bfa31f80820af8d0e1883b11a0110c081f6d80ccc64c4629946cd5",
+      "sha256": "ede66721ef55b20daa9775d1d337217d3b60fc90485519678c0521ac1d95d1b6",
       "width": 390,
       "height": 900
     },
     {
       "file": "concept-detail-error-390-light.png",
-      "sha256": "0b1e4d9603ce996c85a0ccd2d1f2d812e4412ee712afb4210a5ca5291e481bcc",
+      "sha256": "bd11c8e8c843cb8c0bfd1fef33d66c2ef684939c6a3554f5b781355746f32acd",
       "width": 390,
       "height": 900
     },
@@ -1535,7 +1759,7 @@
         "url": "https://unapproved.invalid/pixel.png",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-20T16:31:41.613Z",
+        "at": "2026-10-21T04:51:55.479Z",
         "resourceType": "Image"
       },
       {
@@ -1545,7 +1769,7 @@
         "url": "https://unapproved.invalid/frame",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-20T16:31:41.616Z",
+        "at": "2026-10-21T04:51:55.482Z",
         "resourceType": "Document"
       }
     ],
@@ -1557,7 +1781,7 @@
         "url": "https://unapproved.invalid/api/anything",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-20T16:31:41.599Z"
+        "at": "2026-10-21T04:51:55.431Z"
       },
       {
         "phase": "negative-probe",
@@ -1566,7 +1790,7 @@
         "url": "http://unapproved.invalid/api/anything",
         "reason": "external_origin",
         "protocolRelative": true,
-        "at": "2026-10-20T16:31:41.599Z"
+        "at": "2026-10-21T04:51:55.431Z"
       },
       {
         "phase": "negative-probe",
@@ -1575,7 +1799,7 @@
         "url": "http://localhost:3137/api/internal/v1/menu-concepts",
         "reason": "method_not_allowed",
         "protocolRelative": false,
-        "at": "2026-10-20T16:31:41.600Z"
+        "at": "2026-10-21T04:51:55.431Z"
       },
       {
         "phase": "negative-probe",
@@ -1584,7 +1808,7 @@
         "url": "http://localhost:3137/api/internal/v1/unrelated-write",
         "reason": "unknown_api_route",
         "protocolRelative": false,
-        "at": "2026-10-20T16:31:41.600Z"
+        "at": "2026-10-21T04:51:55.432Z"
       },
       {
         "phase": "negative-probe",
@@ -1593,7 +1817,7 @@
         "url": "http://localhost:3137/api/internal/v1/menu-concepts",
         "reason": "method_not_allowed",
         "protocolRelative": false,
-        "at": "2026-10-20T16:31:41.600Z"
+        "at": "2026-10-21T04:51:55.432Z"
       },
       {
         "phase": "negative-probe",
@@ -1602,7 +1826,7 @@
         "url": "ws://unapproved.invalid/socket",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-20T16:31:41.600Z"
+        "at": "2026-10-21T04:51:55.432Z"
       }
     ]
   },

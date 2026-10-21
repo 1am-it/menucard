@@ -247,6 +247,183 @@ async function partialScenario(cdp) {
   screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'menu-review-partial-390-dark.png'));
 }
 
+async function tabUntilInput(cdp, matches, maxTabs = 80) {
+  const seen = [];
+  for (let i = 0; i < maxTabs; i += 1) {
+    await pressKey(cdp, 'Tab', 'Tab', 9);
+    const info = await evalJs(cdp, `(() => {
+      const el = document.activeElement;
+      if (!el) return null;
+      return { tag: el.tagName, type: el.getAttribute('type'), id: el.id, text: (el.innerText || '').trim().slice(0, 80) };
+    })()`);
+    if (info) {
+      seen.push(info);
+      if (matches(info)) return { info, tabs: i + 1, seen };
+    }
+  }
+  return { info: null, tabs: maxTabs, seen };
+}
+
+// #59 review 6307703713: an uncertain section structure must be reviewable per
+// section and only then confirmable. The harness drives the real control; the
+// final confirmation POST is deliberately not sent (the guard refuses writes
+// and the server re-check is covered by the unit regressions).
+async function structureScenario(cdp) {
+  const url = (theme) => `${BATCH_URL}?fixture=structure&${BATCH_QUERY}&item=1&theme=${theme}`;
+  await setViewport(cdp, 1024, 900);
+  await openRoute(cdp, url('light'), `document.body.innerText.includes('Rubriekindeling controleren')`);
+
+  const initial = await evalJs(cdp, `(() => {
+    const text = document.body.innerText;
+    const buttons = [...document.querySelectorAll('button')].map((b) => ({ text: (b.innerText || '').trim(), disabled: b.disabled }));
+    const radios = [...document.querySelectorAll('.bta-structure-choices input[type="radio"]')].map((r) => ({ name: r.name, checked: r.checked, disabled: r.disabled }));
+    const rows = [...document.querySelectorAll('.bta-structure-row')].map((row) => (row.innerText || '').trim());
+    return {
+      text, buttons, radios, rows,
+      theme: document.documentElement.getAttribute('data-theme'),
+      overflow: document.documentElement.scrollWidth - window.innerWidth,
+    };
+  })()`);
+  check('structure: the existing "Menukaart controleren" path shows the section control', initial.text.includes('Rubriekindeling controleren'));
+  check(
+    'structure: each uncertain section carries its path, source route and locator',
+    initial.rows.length === 2 &&
+      initial.rows[0].includes(fixtures.structureSections[0].label) &&
+      initial.rows[0].includes(fixtures.structureSections[0].sourceRoute) &&
+      initial.rows[0].includes(fixtures.structureSections[0].locator) &&
+      initial.rows[1].includes(fixtures.structureSections[1].label) &&
+      initial.rows[1].includes(fixtures.structureSections[1].locator),
+    JSON.stringify(initial.rows),
+  );
+  check('structure: nothing is treated before the human acts', initial.radios.length === 4 && initial.radios.every((r) => !r.checked));
+  check('structure: the progress counter starts at 0 van 2', initial.text.includes('0 van 2 behandeld'));
+  check(
+    'structure: no one-click confirmation is offered before handling',
+    !initial.buttons.some((b) => b.text.includes('Bevestig bron')),
+    JSON.stringify(initial.buttons.map((b) => b.text)),
+  );
+  check('structure: no accept-all action exists', !/alles accepteren|accepteer alles|alles goedkeuren/i.test(initial.text));
+  check('structure: light theme is active', initial.theme === 'light');
+  check('structure: no horizontal overflow at 1024 px', initial.overflow <= 0, `overflow=${initial.overflow}`);
+
+  const keptFirst = await evalJs(cdp, `(() => {
+    const row = document.querySelectorAll('.bta-structure-row')[0];
+    const radio = row && row.querySelector('input[type="radio"]');
+    if (!radio) return false;
+    radio.click();
+    return true;
+  })()`);
+  await waitFor(cdp, `document.body.innerText.includes('1 van 2 behandeld')`, 10000);
+
+  const correctSecond = await evalJs(cdp, `(() => {
+    const row = document.querySelectorAll('.bta-structure-row')[1];
+    const radios = row ? row.querySelectorAll('input[type="radio"]') : [];
+    if (!radios[1]) return false;
+    radios[1].click();
+    return true;
+  })()`);
+  const inputReady = await waitFor(cdp, `Boolean(document.querySelector('input[id$="-structure-1-path"]'))`, 10000);
+  const typed = await evalJs(cdp, `(() => {
+    const input = document.querySelector('input[id$="-structure-1-path"]');
+    if (!input) return false;
+    input.focus();
+    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+    setter.call(input, 'Fictief Diner › Voorgerechten');
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    return true;
+  })()`);
+  const completed = await waitFor(cdp, `document.body.innerText.includes('2 van 2 behandeld')`, 10000);
+
+  const handled = await evalJs(cdp, `(() => {
+    const buttons = [...document.querySelectorAll('button')].map((b) => ({ text: (b.innerText || '').trim(), disabled: b.disabled }));
+    const input = document.querySelector('input[id$="-structure-1-path"]');
+    return { buttons, value: input ? input.value : null, invalid: input ? input.getAttribute('aria-invalid') : null };
+  })()`);
+  const confirmTrigger = handled.buttons.find((b) => b.text === 'Bevestig bron');
+  check('structure: handling one section is not enough', keptFirst === true && correctSecond === true);
+  check('structure: correcting a section opens a labelled path field', inputReady && typed === true);
+  check('structure: all sections treated only after a real corrected path', completed && handled.value === 'Fictief Diner › Voorgerechten' && handled.invalid === null);
+  check('structure: the confirm control appears only now and is enabled', Boolean(confirmTrigger) && confirmTrigger.disabled === false, JSON.stringify(confirmTrigger));
+
+  const opened = await clickButton(cdp, 'Bevestig bron');
+  const panel = opened && (await waitFor(cdp, `document.body.innerText.includes('2 onzekere rubrieken behandeld')`, 10000));
+  const panelText = await bodyText(cdp);
+  check(
+    'structure: the confirmation shows the handled decisions before writing',
+    panel && panelText.includes('1 gehandhaafd') && panelText.includes('1 gecorrigeerd'),
+    panelText.slice(0, 300),
+  );
+  const violations = await evalJs(cdp, `(window.__FIXTURE_NETWORK_VIOLATIONS__ || []).filter((entry) => entry.phase === 'app')`);
+  check('structure: no write request leaves the browser in the fixture', violations.length === 0, JSON.stringify(violations.slice(0, 3)));
+  recordClickpath(
+    'batch result -> Menukaart controleren -> keep/correct each uncertain section -> Bevestig bron (panel only)',
+    [
+      { step: 'uncertain result opens the section control', arrived: initial.text.includes('Rubriekindeling controleren') },
+      { step: 'keep the first uncertain section', arrived: keptFirst === true },
+      { step: 'correct the second uncertain section with a path', arrived: Boolean(inputReady && typed) },
+      { step: 'all sections treated', arrived: completed === true },
+      { step: 'confirmation panel shows the handled decisions', arrived: Boolean(panel) },
+    ],
+    Boolean(panel),
+    JSON.stringify({ required: fixtures.structureSections.map((section) => section.label) }),
+  );
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'menu-review-structure-1024-light.png'));
+
+  // Keyboard: a fresh page at 390 px, Tab to the first decision radio, Space selects it.
+  await setViewport(cdp, 390, 900);
+  await openRoute(cdp, url('light'), `document.body.innerText.includes('Rubriekindeling controleren')`);
+  const reach = await tabUntilInput(cdp, (info) => info.tag === 'INPUT' && info.type === 'radio');
+  let keyboardOk = false;
+  if (reach.info) {
+    await pressKey(cdp, ' ', 'Space', 32, ' ');
+    const selected = await waitFor(cdp, `document.body.innerText.includes('1 van 2 behandeld')`, 10000);
+    const checked = await evalJs(cdp, `Boolean(document.querySelector('.bta-structure-choices input[type="radio"]:checked'))`);
+    keyboardOk = selected && checked;
+  }
+  check('structure keyboard: Tab reaches a section decision and Space selects it', keyboardOk, reach.info ? `tabs=${reach.tabs}` : JSON.stringify(reach.seen.slice(-6)));
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'menu-review-structure-keyboard-390-light.png'));
+
+  // Responsive: 390 px in both themes, with the correction field open.
+  for (const theme of ['light', 'dark']) {
+    await setViewport(cdp, 390, 900);
+    await openRoute(cdp, url(theme), `document.body.innerText.includes('Rubriekindeling controleren')`);
+    await evalJs(cdp, `(() => {
+      for (const row of document.querySelectorAll('.bta-structure-row')) {
+        const radios = row.querySelectorAll('input[type="radio"]');
+        if (radios[1]) radios[1].click();
+      }
+      return true;
+    })()`);
+    await waitFor(cdp, `Boolean(document.querySelector('input[id$="-structure-1-path"]'))`, 10000);
+    const snapshot = await evalJs(cdp, `(() => ({
+      theme: document.documentElement.getAttribute('data-theme'),
+      bg: getComputedStyle(document.documentElement).getPropertyValue('--bg').trim().toLowerCase(),
+      overflow: document.documentElement.scrollWidth - window.innerWidth,
+      inputWidth: (document.querySelector('input[id$="-structure-1-path"]') || {}).clientWidth || 0,
+    }))()`);
+    check(`structure ${theme}: the requested theme is active`, snapshot.theme === theme, snapshot.theme);
+    check(`structure ${theme}: no horizontal overflow at 390 px`, snapshot.overflow <= 0, `overflow=${snapshot.overflow}`);
+    check(`structure ${theme}: the correction field stays inside the viewport`, snapshot.inputWidth > 0 && snapshot.inputWidth <= 390, `width=${snapshot.inputWidth}`);
+    screenshotFiles.push(await screenshot(cdp, OUT_DIR, `menu-review-structure-390-${theme}.png`));
+  }
+
+  // A colleague sees the same result read-only and never gets a confirmation.
+  await setViewport(cdp, 1024, 900);
+  await openRoute(
+    cdp,
+    `${BATCH_URL}?fixture=structure-readonly&${BATCH_QUERY}&item=1&theme=dark`,
+    `document.body.innerText.includes('Rubriekindeling controleren')`,
+  );
+  const readonly = await evalJs(cdp, `(() => ({
+    text: document.body.innerText,
+    buttons: [...document.querySelectorAll('button')].map((b) => (b.innerText || '').trim()),
+    disabledRadios: [...document.querySelectorAll('.bta-structure-choices input[type="radio"]')].every((r) => r.disabled),
+  }))()`);
+  check('structure readonly: the same sections stay readable', readonly.text.includes(fixtures.structureSections[0].label));
+  check('structure readonly: the decisions are disabled and no confirmation is offered', readonly.disabledRadios && !readonly.buttons.some((text) => text.includes('Bevestig')));
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'menu-review-structure-readonly-1024-dark.png'));
+}
+
 async function v2Scenario(cdp) {
   for (const [width, theme] of [[1024, 'light'], [390, 'dark']]) {
     await setViewport(cdp, width, 900);
@@ -836,6 +1013,7 @@ async function main() {
     await readOnlyScenario(cdp);
     await emptyScenario(cdp);
     await partialScenario(cdp);
+    await structureScenario(cdp);
     await v2Scenario(cdp);
     await errorScenario(cdp);
     for (const width of [320, 390]) {

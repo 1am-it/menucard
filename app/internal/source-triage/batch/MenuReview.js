@@ -17,8 +17,9 @@
 
 import { useMemo, useState } from 'react'
 import StatusIcon from '@/src/components/StatusIcon'
-import { STATUS, buildMenuConcept, displayPrice, removalKey } from '@/src/lib/menuConcept'
+import { STATUS, buildMenuConcept, displayPrice, mergeEdits, removalKey } from '@/src/lib/menuConcept'
 import { formatPath, pathKey } from '@/src/lib/menuHierarchy'
+import { parsePathText, reviewKey } from '@/src/lib/menuStructureReview'
 
 /**
  * The proposed section structure next to its original source route, for
@@ -382,6 +383,135 @@ export function MenuControl({ item }) {
   )
 }
 
+/**
+ * The explicit human control of an uncertain section structure (#59 review
+ * 6307703713). Every uncertain section of THIS source version is shown with
+ * its source route and locator; a reviewer keeps it or corrects its whole
+ * path. Only a complete set can be confirmed — the server re-checks the same
+ * paths against the stored receipt. No "accept everything" action.
+ */
+export function StructureReview({ idPrefix, review, value, readOnly, onChange }) {
+  const required = (review && Array.isArray(review.required) && review.required) || []
+  if (required.length === 0) return null
+  const titleId = `${idPrefix}-structure-title`
+  const decisions = (review && Array.isArray(review.treated) && review.treated) || []
+  const handled = required.filter((section) => {
+    const choice = value[section.key]
+    if (!choice) return false
+    if (choice.action === 'keep') return true
+    if (choice.action !== 'correct') return false
+    const corrected = parsePathText(choice.text || '')
+    return Boolean(corrected && reviewKey(corrected) !== section.key)
+  })
+  return (
+    <div className="bta-structure-review" role="group" aria-labelledby={titleId}>
+      <p id={titleId} className="bta-attention-title">
+        <StatusIcon name="warning" /> Rubriekindeling controleren
+      </p>
+      <p className="bta-muted">
+        {plural(required.length, 'onzekere rubriek', 'onzekere rubrieken')} in deze bronversie. Handhaaf of corrigeer elke
+        rubriek met het bronpad en de vindplaats erbij. Daarna kun je de bron bevestigen.
+      </p>
+      <p className="bta-structure-count" role="status">
+        {handled.length} van {required.length} behandeld
+      </p>
+      {review.storeAvailable === false && (
+        <div className="di-banner di-banner-neutral" role="status">
+          <span className="di-banner-icon">
+            <StatusIcon name="warning" />
+          </span>
+          <span>
+            <strong>Controle niet beschikbaar.</strong> De opgeslagen rubriekcontrole kan niet worden gelezen. Er kan nu
+            niets worden bevestigd; probeer het later opnieuw.
+          </span>
+        </div>
+      )}
+      <ol className="bta-structure-list">
+        {required.map((section, index) => {
+          const choice = value[section.key] || {}
+          const corrected = choice.action === 'correct'
+          const correctedPath = corrected ? parsePathText(choice.text || '') : null
+          const invalid = corrected && (!correctedPath || reviewKey(correctedPath) === section.key)
+          const fieldId = `${idPrefix}-structure-${index}`
+          const treated = decisions.find((decision) => decision.key === section.key) || null
+          return (
+            <li key={section.key} className="bta-structure-row">
+              <div className="bta-structure-head">
+                <span className="bta-dish">{section.label}</span>
+                <span className="bta-muted">
+                  {plural(section.itemCount || 0, 'gerecht', 'gerechten')}
+                  {section.locator ? ` · vindplaats: ${section.locator}` : ''}
+                </span>
+              </div>
+              <p className="bta-source-route">Bronroute: {section.sourceRoute || 'niet vastgelegd'}</p>
+              {treated && (
+                <p className="bta-muted">
+                  Al behandeld{treated.reviewedAt ? ` op ${reviewedText(treated.reviewedAt)}` : ''}:{' '}
+                  {treated.action === 'correct' ? `gecorrigeerd naar ${formatPath(treated.correctedPath)}` : 'gehandhaafd'}.
+                </p>
+              )}
+              <div className="bta-structure-choices" role="radiogroup" aria-label={`Beslissing voor ${section.label}`}>
+                <label>
+                  <input
+                    type="radio"
+                    name={`${fieldId}-decision`}
+                    checked={choice.action === 'keep'}
+                    disabled={readOnly || review.storeAvailable === false}
+                    onChange={() => onChange(section.key, { action: 'keep', text: formatPath(section.path) })}
+                  />{' '}
+                  Rubriek klopt zo
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name={`${fieldId}-decision`}
+                    checked={corrected}
+                    disabled={readOnly || review.storeAvailable === false}
+                    onChange={() =>
+                      onChange(section.key, { action: 'correct', text: choice.action === 'correct' ? choice.text : formatPath(section.path) })
+                    }
+                  />{' '}
+                  Rubriek corrigeren
+                </label>
+              </div>
+              {corrected && (
+                <div className="bta-structure-edit">
+                  <label htmlFor={`${fieldId}-path`}>Gecorrigeerde rubriek en pad</label>
+                  <input
+                    id={`${fieldId}-path`}
+                    className="stg-input"
+                    value={choice.text || ''}
+                    disabled={readOnly || review.storeAvailable === false}
+                    placeholder="bijv. Diner › Voorgerechten"
+                    aria-describedby={`${fieldId}-hint`}
+                    aria-invalid={invalid ? 'true' : undefined}
+                    onChange={(event) => onChange(section.key, { action: 'correct', text: event.target.value })}
+                  />
+                  <p id={`${fieldId}-hint`} className="bta-muted">
+                    {invalid
+                      ? 'Vul een ander pad in dan het onzekere bronpad; gebruik › tussen niveaus.'
+                      : 'Gebruik › tussen niveaus, bijvoorbeeld Diner › Voorgerechten.'}
+                  </p>
+                </div>
+              )}
+            </li>
+          )
+        })}
+      </ol>
+      <p className="bta-muted">
+        Deze controle geldt alleen voor deze bronversie. Ontbrekende prijzen en andere blokkades los je daarna in het
+        concept op. Er wordt niets gepubliceerd.
+      </p>
+    </div>
+  )
+}
+
+function reviewedText(value) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return 'onbekend moment'
+  return date.toLocaleString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+}
+
 function DishValue({ value, empty }) {
   if (!value) return <p className="bta-compare-empty">{empty}</p>
   return (
@@ -591,6 +721,31 @@ export function useConceptEdits() {
   return { edits, touched, setLineEdit, decideRemoved, reset, dirty }
 }
 
+/** The human structure decisions that were part of the confirmed source version. */
+function StructureTrail({ review }) {
+  const treated = (review && Array.isArray(review.treated) && review.treated) || []
+  if (treated.length === 0) return null
+  return (
+    <details className="bta-category">
+      <summary>
+        <span className="bta-category-name">Rubriekcontrole</span>
+        <span className="bta-muted"> · {plural(treated.length, 'rubriek', 'rubrieken')} behandeld</span>
+      </summary>
+      <ul className="bta-notes">
+        {treated.map((decision) => (
+          <li key={decision.key}>
+            {formatPath(decision.path)} → {decision.action === 'correct' ? formatPath(decision.correctedPath) : 'gehandhaafd'}
+            {decision.reviewedAt ? ` · ${reviewedText(decision.reviewedAt)}` : ''}
+          </li>
+        ))}
+      </ul>
+      <p className="bta-muted">
+        Deze keuzes horen bij de bevestigde bronversie en zitten als edits in dit concept. Er is niets gepubliceerd.
+      </p>
+    </details>
+  )
+}
+
 /** Splits a concept into the editor list, the safe lines and the excluded lines. */
 export function conceptParts(concept, touched) {
   const inEditor = (l) => l.status !== 'excluded' && (STATUS[l.status].attention || touched.has(l.id))
@@ -675,9 +830,20 @@ function UncertainGroups({ lines, readOnly, onAcceptGroup }) {
 export function MenuConcept({ item, readOnly, busy, onSave }) {
   const { edits, touched, setLineEdit, decideRemoved } = useConceptEdits()
   const productBlocked = item.concept.productBlocked === true
+  // The confirmed source's human structure decisions are the base edits; the
+  // reviewer's own line corrections apply on top. The server recomputes the
+  // same base on save, so preview and version stay identical.
+  const structureEdits = item.concept.structureEdits && typeof item.concept.structureEdits === 'object' ? item.concept.structureEdits : null
   const concept = useMemo(
-    () => (productBlocked ? null : buildMenuConcept({ menus: item.concept.menus, liveLines: item.concept.liveLines, edits })),
-    [item.concept, edits, productBlocked]
+    () =>
+      productBlocked
+        ? null
+        : buildMenuConcept({
+            menus: item.concept.menus,
+            liveLines: item.concept.liveLines,
+            edits: structureEdits ? mergeEdits({ lines: structureEdits, removed: null }, edits) : edits,
+          }),
+    [item.concept, edits, productBlocked, structureEdits]
   )
   if (productBlocked) {
     return (
@@ -716,6 +882,7 @@ export function MenuConcept({ item, readOnly, busy, onSave }) {
       </p>
 
       <ConceptChips safe={safe} concept={concept} excluded={excluded} />
+      <StructureTrail review={item.concept.structureReview} />
       <BlockerBanner concept={concept} />
       <UncertainGroups
         lines={concept.lines}

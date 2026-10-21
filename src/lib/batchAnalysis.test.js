@@ -195,3 +195,87 @@ test('fixed copy is verbatim and never says the screen may be closed', () => {
   assert.equal(COPY.nothingPublished, 'Niets wordt automatisch gepubliceerd.');
   assert.doesNotMatch(JSON.stringify(COPY), /gerust verlaten|mag (je )?sluiten/i);
 });
+
+// #59 (review 6307703713) — an uncertain section structure stays "Controle
+// nodig" and is never high certainty; it gets a separate, explicitly human
+// per-section route that only relaxes the structure rule.
+const { uncertainSections } = require('./menuStructureReview');
+
+const STRUCTURE_MENUS = [
+  {
+    title: 'Fictief Diner',
+    structure: 'uncertain',
+    categories: [
+      { name: 'Voor', path: ['Voor'], sourcePath: ['DINNER', 'VOOR'], locator: 'paneel Diner, regel 1', uncertain: true, items: [{ name: 'Fictieve burrata', price: '13.00' }] },
+      { name: 'Hoofd', path: ['Hoofd'], sourcePath: ['DINNER', 'HOOFD'], items: [{ name: 'Fictieve zeebaars', price: '24.00' }] },
+    ],
+  },
+  {
+    title: 'Fictief Lunch',
+    structure: 'uncertain',
+    categories: [
+      { name: 'Koud', path: ['Koud'], sourcePath: ['LUNCH', 'KOUD'], locator: 'paneel Lunch, regel 1', uncertain: true, items: [{ name: 'Fictieve salade', price: '12.50' }] },
+      { name: 'Warm', path: ['Warm'], sourcePath: ['LUNCH', 'WARM'], items: [{ name: 'Fictieve pasta', price: '14.50' }] },
+    ],
+  },
+];
+const structureReceipt = (extra) => receipt({ analysis_result_hash: 'a'.repeat(64), menus: STRUCTURE_MENUS, ...extra });
+const STRUCTURE_SECTIONS = uncertainSections(STRUCTURE_MENUS);
+
+test('uncertain structure: never high certainty, but a per-section human route is offered', () => {
+  const v = derive({ receipt: structureReceipt() });
+  assert.equal(v.key, 'needs_review');
+  assert.equal(v.high, false);
+  assert.equal(v.label, 'Controle nodig');
+  assert.deepEqual(v.actions, ['review_structure']);
+  assert.equal(v.structureReview.eligible, true);
+  assert.equal(v.structureReview.receiptHash, 'a'.repeat(64));
+  assert.deepEqual(v.structureReview.required.map((s) => s.label), ['Fictief Diner › Voor', 'Fictief Lunch › Koud']);
+  assert.deepEqual(v.structureReview.treated, []);
+  assert.equal(v.structureReview.handledCount, 0);
+  assert.match(v.text, /Controleer elke onzekere rubriek/);
+  assert.equal(ACTION_LABELS.review_structure, 'Rubriekindeling controleren');
+});
+
+test('uncertain structure: confirmation only after every section was explicitly recorded', () => {
+  const half = derive({
+    receipt: structureReceipt(),
+    recordedReviews: [{ key: STRUCTURE_SECTIONS[0].key, path: STRUCTURE_SECTIONS[0].path, action: 'keep', correctedPath: null }],
+  });
+  assert.deepEqual(half.actions, ['review_structure']);
+  assert.equal(half.structureReview.handledCount, 1);
+
+  const complete = derive({
+    receipt: structureReceipt(),
+    recordedReviews: STRUCTURE_SECTIONS.map((section) => ({ key: section.key, path: section.path, action: 'keep', correctedPath: null })),
+  });
+  assert.deepEqual(complete.actions, ['confirm']);
+  assert.equal(complete.structureReview.handledCount, 2);
+  assert.equal(complete.high, false);
+});
+
+test('uncertain structure: the human route never widens the own-source rule', () => {
+  const v = derive({ receipt: structureReceipt(), job: job({ menu_source_urls: ['https://other.example/menu'] }) });
+  assert.equal(v.key, 'needs_review');
+  assert.equal(v.structureReview.eligible, false);
+  assert.deepEqual(v.actions, ['review_manually']);
+  assert.match(v.text, /eigen website/);
+  // No receipt menus at all: nothing to review per section.
+  const noMenus = derive({ receipt: receipt({ analysis_result_hash: 'a'.repeat(64), menus: [] }) });
+  assert.notEqual(noMenus.key, 'confirmed');
+  assert.ok(!noMenus.structureReview || noMenus.structureReview.eligible !== true);
+  assert.ok(!noMenus.actions.includes('confirm'));
+});
+
+test('uncertain structure: a confirmed proposal is shown as confirmed, never as high certainty', () => {
+  const v = derive({
+    receipt: structureReceipt(),
+    proposals: [
+      { restaurant_id: 'bistro', proposed_url: 'https://bistro-voorbeeld.example/menukaart.pdf', status: 'accepted', decided_at: '2026-10-10T11:30:00Z' },
+    ],
+  });
+  assert.equal(v.key, 'confirmed');
+  assert.equal(v.label, 'Bron bevestigd');
+  assert.equal(v.high, false);
+  assert.equal(v.structureReview.eligible, true);
+});

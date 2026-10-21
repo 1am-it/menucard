@@ -115,6 +115,19 @@ Explicit light/dark evidence comes from the direct-URL scenarios, including
 `concept-detail-v2-390-light.png`, `concept-detail-v2-390-dark.png` and
 `concept-detail-v2-320-light.png`.
 
+## Uncertain section structure (#59 review 6307703713)
+
+`fixture=structure` drives a result whose section structure the extractor marks
+uncertain. The check opens "Menukaart controleren", asserts that each uncertain
+section shows its path, source route and locator, keeps one section and corrects
+the other with a real typed path, and only then finds an enabled "Bevestig bron"
+that opens the existing confirmation panel with "gehandhaafd"/"gecorrigeerd".
+The final write is deliberately not sent: the fixture guard refuses non-GET app
+requests, so this is UI evidence, not a saved confirmation. The same scenario
+runs at 390 px in light and dark, by keyboard (Tab + Space) and read-only for a
+colleague. `fixture=structure-readonly` proves the colleague never gets an
+enabled decision or a confirmation button.
+
 ## Coverage
 
 - exact breadcrumb, source and "handmatig beoordelen" links;

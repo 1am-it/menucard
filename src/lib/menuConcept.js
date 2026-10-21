@@ -15,7 +15,7 @@
 'use strict';
 
 const { categoryPath, pathKey, formatPath } = require('./menuHierarchy');
-const { menuScopeOf } = require('./menuGroups');
+const { cleanLabels, menuScopeOf } = require('./menuGroups');
 const { assertLegacyConceptContent } = require('./menuProductGuardsV2');
 
 const UNCLEAR_CATEGORY_NAMES = new Set(['', 'menu', 'menukaart', 'kaart', 'categorie', 'overig', 'overige', 'diversen']);
@@ -123,12 +123,41 @@ function recognisedLines(menus) {
           categoryPath: path,
           menuScope: menuScopeOf(path),
           sourcePath: labelsOf(category && category.sourcePath),
+          ...(typeof category.locator === 'string' && category.locator.trim() ? { locator: category.locator.trim().slice(0, 160) } : {}),
           categoryUncertain: Boolean(category && category.uncertain === true),
         });
       });
     });
   });
   return lines;
+}
+
+/**
+ * Section metadata of recognised menus, in source order and with exactly the
+ * same path rule as `recognisedLines` — the one source for "which sections
+ * does this result contain, where do they come from, and which are
+ * uncertain". Used by the human structure review (src/lib/menuStructureReview.js)
+ * so the server re-checks the same paths the reviewer saw.
+ */
+function menuSections(menus) {
+  const list = Array.isArray(menus) ? menus : [];
+  const several = list.filter((m) => m && Array.isArray(m.categories) && m.categories.length > 0).length > 1;
+  const sections = [];
+  list.forEach((menu, m) => {
+    const title = several ? menuTitleOf(menu) : null;
+    ((menu && Array.isArray(menu.categories) && menu.categories) || []).forEach((category, c) => {
+      const path = title ? [title, ...categoryPath(category)] : categoryPath(category);
+      sections.push({
+        id: `${m}.${c}`,
+        path,
+        sourcePath: labelsOf(category && category.sourcePath),
+        ...(typeof category.locator === 'string' && category.locator.trim() ? { locator: category.locator.trim().slice(0, 160) } : {}),
+        uncertain: Boolean(category && category.uncertain === true),
+        itemCount: ((category && Array.isArray(category.items) && category.items) || []).filter((item) => item && typeof item.name === 'string' && item.name.trim()).length,
+      });
+    });
+  });
+  return sections;
 }
 
 /** Summary for the control view: sections (with their path and source route) with dishes and prices. */
@@ -238,10 +267,12 @@ const MAX_EDIT_TEXT = 200;
  * Edits as sent by a browser, reduced to what the concept understands. Never
  * trusted beyond that: the concept and its blockers are always recomputed.
  *   lines:   { [lineId]: { exclude?, acceptCategory?, acceptDuplicate?, name?,
- *              price?, category? } }
+ *              price?, category?, path? } }
  *            (all booleans may be false to undo a stored choice). `accept` is
  *            accepted only as a legacy alias for `acceptCategory`; it can
- *            never settle a duplicate.
+ *            never settle a duplicate. `path` is the whole corrected section
+ *            path (used by the human structure review); `category` stays the
+ *            single-label correction.
  *   removed: 'keep' | 'remove' (every disappeared dish) or
  *            { [normalizeName(dish)]: 'keep' | 'remove' }
  */
@@ -264,6 +295,12 @@ function sanitizeEdits(raw) {
     // uncertainty. It is never interpreted as duplicate acceptance.
     if (typeof e.accept === 'boolean' && clean.acceptCategory === undefined) clean.acceptCategory = e.accept;
     for (const key of ['name', 'price', 'category']) if (typeof e[key] === 'string' && e[key].length <= MAX_EDIT_TEXT) clean[key] = e[key];
+    // A whole corrected section path (human structure review): labels only,
+    // bounded, never trusted beyond the concept's own limits.
+    if (Array.isArray(e.path)) {
+      const path = cleanLabels(e.path.filter((label) => typeof label === 'string' && label.length <= MAX_EDIT_TEXT));
+      if (path.length > 0) clean.path = path;
+    }
     out.lines[id] = clean;
   }
   return out;
@@ -414,9 +451,14 @@ function buildMenuConcept({ menus, liveLines, edits }) {
     // An explicit correction chooses a price on purpose; an untouched
     // multiple-price extraction stays a blocker.
     const priceStatus = editedPrice !== undefined ? (editedPrice ? 'known' : 'unknown') : line.priceStatus;
-    const categoryEdited = typeof e.category === 'string' && e.category.trim() !== '';
-    const category = categoryEdited ? e.category.trim().slice(0, MAX_CATEGORY_NAME) : line.category;
+    const categoryEdited = (Array.isArray(e.path) && cleanLabels(e.path).length > 0) || (typeof e.category === 'string' && e.category.trim() !== '');
     const linePath = line.categoryPath || [line.category];
+    const categoryPath = Array.isArray(e.path) && cleanLabels(e.path).length > 0
+      ? cleanLabels(e.path)
+      : categoryEdited
+        ? [...linePath.slice(0, -1), e.category.trim().slice(0, MAX_CATEGORY_NAME)]
+        : linePath;
+    const category = categoryPath[categoryPath.length - 1];
     return {
       ...line,
       original: { name: line.name, price: line.price, category: line.category },
@@ -425,15 +467,15 @@ function buildMenuConcept({ menus, liveLines, edits }) {
       priceStatus,
       category,
       categoryEdited,
-      categoryPath: categoryEdited ? [...linePath.slice(0, -1), category] : linePath,
-      menuScope: menuScopeOf(categoryEdited ? [...linePath.slice(0, -1), category] : linePath),
+      categoryPath,
+      menuScope: menuScopeOf(categoryPath),
       excluded: e.exclude === true,
       // Direct callers (and older stored versions) may still carry the
       // ambiguous `accept`; it means category-only. Duplicate acceptance can
       // only arrive through `acceptDuplicate`.
       categoryAccepted: e.acceptCategory === true ? true : e.acceptCategory === false ? false : e.accept === true,
       duplicateAccepted: e.acceptDuplicate === true,
-      edited: Boolean(e.name || e.price || e.category),
+      edited: Boolean(e.name || e.price || e.category || (Array.isArray(e.path) && e.path.length > 0)),
     };
   });
 
@@ -568,6 +610,7 @@ module.exports = {
   displayPrice,
   isUnclearCategory,
   recognisedLines,
+  menuSections,
   summarizeRecognisedMenu,
   liveMenuLines,
   buildMenuConcept,

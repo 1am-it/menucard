@@ -2967,3 +2967,20 @@ details.bta-side-card > summary:focus-visible { outline: 2px solid var(--border-
 .bta-structure { list-style: none; margin: 0; padding: 0 12px 10px; display: grid; gap: 6px; }
 .bta-structure li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; padding-top: 6px; border-top: 1px solid var(--border); font-size: 14px; }
 .bta-structure .bta-source-route { padding: 0; flex-basis: 100%; }
+
+/* Human structure review of an uncertain section structure (#59 review
+   6307703713): one row per uncertain section, with its source route and
+   locator. Kept in the existing neutral/uncertain colour language, never an
+   error colour, and it must fit 320 px without horizontal scrolling. */
+.bta-structure-review { display: grid; gap: 8px; padding: 12px; border: 1px solid var(--border); border-left: 3px solid var(--status-neutral); border-radius: var(--radius-md); background: var(--bg-card); min-width: 0; }
+.bta-structure-count { margin: 0; font-size: 13px; font-weight: 700; color: var(--text-primary); }
+.bta-structure-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; min-width: 0; }
+.bta-structure-row { display: grid; gap: 4px; padding: 10px 0 0; border-top: 1px solid var(--border); min-width: 0; }
+.bta-structure-row:first-child { padding-top: 0; border-top: 0; }
+.bta-structure-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; min-width: 0; }
+.bta-structure-choices { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 13px; color: var(--text-primary); }
+.bta-structure-choices label { display: inline-flex; align-items: center; gap: 6px; min-height: 24px; }
+.bta-structure-edit { display: grid; gap: 4px; grid-template-columns: minmax(0, 1fr); font-size: 13px; color: var(--text-primary); }
+.bta-structure-edit label { font-weight: 700; }
+.bta-structure-edit .stg-input { width: 100%; min-width: 0; }
+.bta-structure-review .bta-muted { overflow-wrap: anywhere; }

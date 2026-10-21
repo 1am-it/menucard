@@ -8,8 +8,53 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import StatusIcon from '@/src/components/StatusIcon'
-import { MenuControl, MenuConcept } from './MenuReview'
+import { MenuControl, MenuConcept, StructureReview, plural } from './MenuReview'
 import { MAX_BATCH_URLS, DAILY_URL_LIMIT, COPY, ACTION_LABELS, precheckLines, splitLines } from '@/src/lib/batchAnalysis'
+import { formatPath } from '@/src/lib/menuHierarchy'
+import { parsePathText, reviewKey } from '@/src/lib/menuStructureReview'
+
+/** The local per-section state starts from the already recorded decisions. */
+function seedStructure(review) {
+  const seed = {}
+  if (!review || !Array.isArray(review.required)) return seed
+  const treated = new Map(((Array.isArray(review.treated) && review.treated) || []).map((entry) => [entry.key, entry]))
+  for (const section of review.required) {
+    const decision = treated.get(section.key)
+    if (!decision) continue
+    seed[section.key] = decision.action === 'correct'
+      ? { action: 'correct', text: formatPath(decision.correctedPath) }
+      : { action: 'keep', text: formatPath(section.path) }
+  }
+  return seed
+}
+
+/**
+ * The exact payload the server re-checks: every uncertain section of the
+ * stored receipt, the receipt hash, and only "keep" or a real correction.
+ * Incomplete input never produces a confirmable payload.
+ */
+function structurePayload(item, review, value) {
+  const sections = []
+  let complete = true
+  for (const section of review.required) {
+    const choice = value[section.key]
+    if (!choice || (choice.action !== 'keep' && choice.action !== 'correct')) {
+      complete = false
+      continue
+    }
+    if (choice.action === 'keep') {
+      sections.push({ path: section.path, action: 'keep' })
+      continue
+    }
+    const corrected = parsePathText(choice.text || '')
+    if (!corrected || reviewKey(corrected) === section.key) {
+      complete = false
+      continue
+    }
+    sections.push({ path: section.path, action: 'correct', corrected_path: corrected })
+  }
+  return { complete, payload: { job_id: item.jobId, receipt_hash: review.receiptHash || null, sections } }
+}
 
 function timeOf(value) {
   const d = new Date(value)
@@ -218,6 +263,20 @@ function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBat
   const knownText = item.restaurant ? `Bekend restaurant · ${restaurantName}` : item.key === 'menu_found' || item.key === 'needs_review' ? 'Onbekend restaurant' : null
   const open = Boolean(item.jobId) && confirming === item.jobId
 
+  // Human structure review (#59 review 6307703713). Only an exactly eligible
+  // result offers it; the server re-validates the same paths on confirm.
+  const structureReview = item.structureReview && item.structureReview.eligible === true ? item.structureReview : null
+  const [structure, setStructure] = useState(() => seedStructure(structureReview))
+  const structureState = structureReview ? structurePayload(item, structureReview, structure) : null
+  const structureReady = Boolean(
+    structureReview && structureState.complete && structureReview.receiptHash && structureReview.storeAvailable !== false
+  )
+  const structureRef = useRef(null)
+
+  function changeStructure(key, patch) {
+    setStructure((prev) => ({ ...prev, [key]: { ...(prev[key] || {}), ...patch } }))
+  }
+
   useEffect(() => {
     if (open && confirmRef.current) confirmRef.current.focus()
   }, [open])
@@ -244,6 +303,24 @@ function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBat
       return (
         <button key={action} type="button" className={cls} onClick={() => setConfirming(item.jobId)} disabled={busy}>
           {ACTION_LABELS.confirm}
+        </button>
+      )
+    }
+    if (action === 'review_structure') {
+      return (
+        <button
+          key={action}
+          type="button"
+          className={cls}
+          disabled={busy}
+          onClick={() => {
+            setDetails(true)
+            window.requestAnimationFrame(() => {
+              if (structureRef.current) structureRef.current.scrollIntoView({ block: 'start' })
+            })
+          }}
+        >
+          {ACTION_LABELS.review_structure}
         </button>
       )
     }
@@ -299,9 +376,30 @@ function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBat
         </dl>
       )}
 
+      {details && structureReview && (
+        <div ref={structureRef}>
+          <StructureReview
+            idPrefix={`bta-${item.position}-${item.jobId || 'geen'}`}
+            review={structureReview}
+            value={structure}
+            readOnly={!isStarter}
+            onChange={changeStructure}
+          />
+        </div>
+      )}
+
       {details && <MenuControl item={item} />}
 
       {item.concept && <MenuConcept item={item} readOnly={!isStarter} busy={busy} onSave={onSaveConcept} />}
+
+      {!open && details && structureReview && structureReady && canAct && item.key === 'needs_review' && !item.actions.includes('confirm') && (
+        <div className="bta-actions">
+          <button type="button" className="di-btn-primary bta-btn" disabled={busy} onClick={() => setConfirming(item.jobId)}>
+            {ACTION_LABELS.confirm}
+          </button>
+          <p className="bta-muted">Alle {structureReview.required.length} onzekere rubrieken zijn behandeld. Bevestig daarna de bron; er wordt niets gepubliceerd.</p>
+        </div>
+      )}
 
       {open && (
         <div className="bta-confirm" role="group" aria-labelledby={`bta-confirm-${item.jobId}`}>
@@ -312,8 +410,22 @@ function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBat
             Je bevestigt na eigen controle dat deze menukaart de bron van {restaurantName} is. Er wordt niets
             gepubliceerd.
           </p>
+          {structureReview && structureState && (
+            <p className="bta-muted">
+              {plural(structureState.payload.sections.length, 'onzekere rubriek', 'onzekere rubrieken')} behandeld:{' '}
+              {structureState.payload.sections.filter((section) => section.action === 'keep').length} gehandhaafd,{' '}
+              {structureState.payload.sections.filter((section) => section.action === 'correct').length} gecorrigeerd. Deze
+              keuzes worden als edits in het concept opgenomen.
+            </p>
+          )}
           <div className="bta-actions">
-            <button ref={confirmRef} type="button" className="di-btn-primary bta-btn" disabled={busy} onClick={() => onConfirm([item.jobId])}>
+            <button
+              ref={confirmRef}
+              type="button"
+              className="di-btn-primary bta-btn"
+              disabled={busy || (structureReview && !structureReady)}
+              onClick={() => onConfirm([item.jobId], structureReview && structureState ? [structureState.payload] : undefined)}
+            >
               {ACTION_LABELS.confirm}
             </button>
             <button type="button" className="stg-btn-secondary bta-btn" onClick={() => setConfirming(null)}>

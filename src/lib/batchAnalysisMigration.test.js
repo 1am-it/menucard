@@ -38,10 +38,14 @@ function statements(kind) {
   return [...code.matchAll(new RegExp(`\\b${kind}\\b[^;]*;`, 'gi'))].map((m) => m[0].replace(/\s+/g, ' ').trim().toLowerCase());
 }
 
-test('0016 has a unique migration number; BE-25 has exactly 0016 (schema) and 0017 (re-analysis)', () => {
+test('0016 has a unique migration number; BE-25 has exactly 0016 (schema), 0017 (re-analysis) and 0020 (human structure review)', () => {
   const files = fs.readdirSync(MIGRATIONS).filter((f) => f.endsWith('.sql')).sort();
   assert.deepEqual(files.filter((f) => f.startsWith('0016')), ['0016_be25_batch_source_analysis.sql']);
-  assert.deepEqual(files.filter((f) => /be25/.test(f)), ['0016_be25_batch_source_analysis.sql', '0017_be25_reanalyze_one_url.sql']);
+  assert.deepEqual(files.filter((f) => /be25/.test(f)), [
+    '0016_be25_batch_source_analysis.sql',
+    '0017_be25_reanalyze_one_url.sql',
+    '0020_be25_menu_structure_reviews.sql',
+  ]);
 });
 
 test('0016 is additive: one new table, new functions, and only added columns/constraints on existing tables', () => {

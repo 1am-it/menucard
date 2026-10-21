@@ -7,6 +7,7 @@
 // credential or URL is used; every URL is on the .invalid TLD.
 
 const { summarizeRecognisedMenu, buildMenuConcept, storedConceptInput, recognisedLines } = require('../../../src/lib/menuConcept');
+const { uncertainSections } = require('../../../src/lib/menuStructureReview');
 const { buildExtractionResult } = require('../../../src/lib/menuExtractionResult');
 const {
   buildProductReviewView,
@@ -222,6 +223,86 @@ function detailWith(items) {
 }
 
 const reviewDetail = detailWith([item()]);
+
+// ── Uncertain section structure (#59 review 6307703713) ─────────────────────
+//
+// Two menu variants whose sections the extractor marks uncertain. The paths
+// are built exactly like a receipt stores them (menu title + relative
+// category path), and `required` comes from the same helper the server uses,
+// so the fixture cannot invent a review shape the product does not produce.
+const structureMenus = [
+  {
+    title: 'Fictief Lunch',
+    structure: 'uncertain',
+    categories: [
+      {
+        name: 'Koud',
+        path: ['Koud'],
+        sourcePath: ['LUNCH', 'KOUD'],
+        locator: 'paneel Lunch, regel 1',
+        uncertain: true,
+        items: [{ name: 'Fictieve salade', price: '12.50', evidence: evidence('LUNCH > KOUD > regel 1', 'Fictieve salade 12,50') }],
+      },
+      {
+        name: 'Warm',
+        path: ['Warm'],
+        sourcePath: ['LUNCH', 'WARM'],
+        items: [{ name: 'Fictieve pasta', price: '14.50', evidence: evidence('LUNCH > WARM > regel 1', 'Fictieve pasta 14,50') }],
+      },
+    ],
+  },
+  {
+    title: 'Fictief Diner',
+    structure: 'uncertain',
+    categories: [
+      {
+        name: 'Voor',
+        path: ['Voor'],
+        sourcePath: ['DINNER', 'VOOR'],
+        locator: 'paneel Diner, regel 1',
+        uncertain: true,
+        items: [{ name: 'Fictieve burrata', price: '13.00', evidence: evidence('DINNER > VOOR > regel 1', 'Fictieve burrata 13,00') }],
+      },
+      {
+        name: 'Hoofd',
+        path: ['Hoofd'],
+        sourcePath: ['DINNER', 'HOOFD'],
+        items: [{ name: 'Fictieve zeebaars', price: '24.00', evidence: evidence('DINNER > HOOFD > regel 1', 'Fictieve zeebaars 24,00') }],
+      },
+    ],
+  },
+];
+const structureMenu = summarizeRecognisedMenu(structureMenus);
+const structureSections = uncertainSections(structureMenus);
+const structureItem = item({
+  key: 'needs_review',
+  label: 'Controle nodig',
+  role: 'old',
+  icon: 'warning',
+  high: false,
+  actions: ['review_structure'],
+  text: 'Er is een menukaart gevonden, maar de rubriekindeling is onzeker. Controleer elke onzekere rubriek hieronder en handhaaf of corrigeer hem; pas daarna kun je de bron bevestigen.',
+  menu: structureMenu,
+  concept: null,
+  foundUrl: FOUND_URL,
+  notes: ['Fictief: de rubriekindeling is onzeker; elke rubriek is apart beoordeeld.'],
+  structureReview: {
+    eligible: true,
+    foundUrl: FOUND_URL,
+    receiptHash: 'a'.repeat(64),
+    storeAvailable: true,
+    required: structureSections,
+    treated: [],
+    handledCount: 0,
+  },
+});
+const structureDetail = detailWith([structureItem]);
+const structureReadOnlyDetail = (() => {
+  const detail = JSON.parse(JSON.stringify(structureDetail));
+  detail.batch.is_starter = false;
+  for (const entry of detail.items) entry.actions = [];
+  return detail;
+})();
 
 const partialItem = item({
   key: 'no_menu',
@@ -481,6 +562,8 @@ module.exports = {
   CONCEPT_IDS,
   CONCEPT_RESTAURANTS,
   reviewDetail,
+  structureItem,
+  structureSections,
   v2Product,
   v2View,
   conceptList,
@@ -488,6 +571,8 @@ module.exports = {
   scenarios: {
     review: overview(reviewDetail),
     readonly: overview(readOnlyDetail()),
+    structure: overview(structureDetail),
+    'structure-readonly': overview(structureReadOnlyDetail),
     empty: overview(null),
     partial: overview(detailWith([partialItem])),
     v2: overview(detailWith([v2Item])),

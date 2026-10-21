@@ -638,3 +638,48 @@ haalt, een buuritem met eigen bedrag, omliggend proza, supplementcontext,
 prijsvarianten, provenance en de fail-closed situatie zonder width.
 `botanistReference.test.js` bewaakt de nieuwe parser-/layoutcijfers en de
 aparte `categoryUnknown`-rapportage zonder scoreverhoging.
+
+## Menselijke controle van een onzekere rubriekindeling (review 6307703713)
+
+Een receipt met `structure: 'uncertain'` blijft "Controle nodig": de
+conservatieve zekerheidsregel in `src/lib/batchAnalysis.js` (`certaintyOf`)
+wordt niet versoepeld en een onzekere structuur is nooit `high`. De praktijk
+wees uit dat daardoor geen enkele representatieve bron de keten tot een concept
+kon doorlopen; daarom is er één aparte, expliciet menselijke en servergevalideerde
+route bijgekomen.
+
+- **UI.** "Menukaart controleren" toont per onzekere rubriek een rij met het
+  (bron)pad, de bronroute en de vindplaats, plus de keuze *Rubriek klopt zo* of
+  *Rubriek corrigeren* met het volledige pad (bijvoorbeeld `Diner ›
+  Voorgerechten`). De teller "x van y behandeld" en de knop "Bevestig bron"
+  verschijnen pas als élke onzekere rubriek is behandeld. Een collega ziet
+  dezelfde rijen alleen-lezen, zonder bevestiging. Geen accepteer-alles.
+- **Server.** `POST /api/internal/v1/batch-analysis/[id]/confirm` accepteert
+  naast `job_ids` een optionele `structure_reviews: [{ job_id, receipt_hash,
+  sections: [{ path, action: 'keep'|'correct', corrected_path? }] }]`. De
+  server leest de opgeslagen receipt opnieuw, controleert de receiptbinding
+  (opnieuw berekende `analysis_result_hash`), eist exact de verzameling onzekere
+  paden uit die receipt (geen ontbrekend, onbekend of dubbel pad, geen
+  "correctie" naar hetzelfde pad) en weigert anders zonder enige schrijfactie.
+  Daarna volgt de bestaande BE-24-bevestiging; alleen `internal` en alleen de
+  starter van de batch.
+- **Opslag.** `supabase/migrations/0020_be25_menu_structure_reviews.sql` voegt
+  één additieve, append-only tabel toe (wie, wanneer, batch/job/receipt, oud →
+  nieuw pad, unieke `(receipt_id, path_key)`; alleen `select`/`insert` voor
+  `service_role`). Zonder deze migratie blijft de bestaande pagina werken; de
+  nieuwe route weigert dan expliciet met `structure_store_unavailable` in
+  plaats van stil te bevestigen. De migratie is nog niet op een omgeving
+  toegepast.
+- **Concept.** `src/lib/menuStructureReview.js` vertaalt de opgeslagen
+  beslissingen naar de bestaande concept-edits (`handhaven` = rubriek expliciet
+  accepteren, `corrigeren` = het pad van precies die regels vervangen). De
+  zelfde basis gaat naar de browser (preview) en naar `saveConcept` (versie,
+  concepthash en idempotentie ongewijzigd). Ontbrekende prijzen, duplicaten en
+  verdwenen gerechten blijven blokkades.
+- **Bewijs.** `menuStructureReview.test.js`, de nieuwe regressies in
+  `batchAnalysis.test.js` en `batchAnalysisHandlers.test.js`,
+  `menuStructureReviewMigration.test.js` en de fixture-browsercontrole
+  (`fixture=structure`, sectie in `ops/browser/README.md`). Dat is
+  developer-/fixturebewijs; echte bronacceptatie en onafhankelijke review
+  blijven aparte stappen.
+

@@ -173,7 +173,7 @@ export default function BatchAnalysisPage() {
     }
   }
 
-  async function confirm(jobIds) {
+  async function confirm(jobIds, structureReviews) {
     if (!viewing) return
     setBusy(true)
     setMessage(null)
@@ -181,7 +181,9 @@ export default function BatchAnalysisPage() {
       const res = await fetch(`${API}/${viewing.batch.id}/confirm`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ job_ids: jobIds }),
+        body: JSON.stringify(
+          structureReviews && structureReviews.length > 0 ? { job_ids: jobIds, structure_reviews: structureReviews } : { job_ids: jobIds }
+        ),
       })
       const body = await res.json().catch(() => ({}))
       if (!res.ok) {
@@ -189,13 +191,33 @@ export default function BatchAnalysisPage() {
       } else {
         const failed = (body.results || []).filter((r) => !r.ok)
         const openExists = failed.some((r) => r.reason === 'open_proposal_exists' || r.reason === 'left_open')
+        // The server re-checks the human structure review against the stored
+        // receipt; a stale or incomplete review is reported concretely.
+        const structureIssue = failed.find((r) =>
+          [
+            'structure_unreviewed',
+            'structure_unknown_section',
+            'structure_invalid',
+            'structure_required',
+            'structure_sections_unknown',
+            'structure_already_reviewed',
+            'structure_conflict',
+            'structure_save_failed',
+            'structure_store_unavailable',
+            'receipt_mismatch',
+            'receipt_unavailable',
+            'receipt_binding_mismatch',
+          ].includes(r.reason)
+        )
+        const detail = structureIssue
+          ? ' De rubriekcontrole is niet opgeslagen; controleer elke onzekere rubriek opnieuw.'
+          : openExists
+            ? ' Voor een restaurant staat al een open voorstel; beoordeel dat in Bronnen beoordelen.'
+            : ''
         setMessage(
           failed.length === 0
             ? { tone: 'success', text: `${body.confirmed} ${body.confirmed === 1 ? 'bron' : 'bronnen'} bevestigd. Er is niets gepubliceerd.` }
-            : {
-                tone: 'notice',
-                text: `${body.confirmed} bevestigd, ${failed.length} niet.${openExists ? ' Voor een restaurant staat al een open voorstel; beoordeel dat in Bronnen beoordelen.' : ''}`,
-              }
+            : { tone: 'notice', text: `${body.confirmed} bevestigd, ${failed.length} niet.${detail}` }
         )
       }
       setConfirming(null)
