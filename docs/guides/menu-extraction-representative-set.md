@@ -35,6 +35,13 @@ ongeziene holdout worden gepresenteerd. De Botanist, Mr Moos en Colonia zijn na
 hun eerste meting voor reparatie gebruikt en daarom naar representatief
 verplaatst; zij zijn geen holdout meer.
 
+Op 2026-10-21 is een tweede ongeziene set van 19 bronnen vooraf gepind in
+[`holdout-2-sources.json`](../../ops/benchmark/holdout-2-sources.json). Die set
+wordt niet door de ontwikkelaar opgehaald of geïnspecteerd; de capture en de
+enige evaluatie gebeuren door de Delivery Lead met een expliciet manifest. Zie
+[holdouttooling](menu-extraction-holdout-tooling.md) voor de werkwijze,
+uitvoerbestanden en regressies.
+
 | Bron | Uitkomst eerste meting (baseline) | Beperking / huidige status |
 | --- | --- | --- |
 | De Botanist | 151 items in 59 secties uit de gelinkte 16-pagina-PDF; entryhash gelijk aan de pin | Baseline blijft staan. Na reparatie 195 items/54 secties; layoutreferentie 95/141 matched, 46 missing, 5 extra, 95 niet-gekoppeld. **Representatief/usedForTuning**, geen holdout. |

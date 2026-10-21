@@ -1,14 +1,18 @@
 #!/usr/bin/env node
 'use strict';
 
-// Pin the source version of the four Product Owner-approved public holdouts
-// BEFORE any parser outcome is recorded or used. This script only fetches the
-// exact approved entry URLs through safeOutboundFetch, computes a byte hash and
-// writes capture metadata. It does not parse a menu, call a provider, touch a
-// database or publish anything.
+// Pin the source version of an approved public holdout BEFORE any parser
+// outcome is recorded or used. A manifest must be passed explicitly for a
+// second holdout; the default stays the original four-source pin so that the
+// holdout-1 files remain byte-identical (#59 Delivery Lead review 6315269210).
+//
+// This script only fetches the pinned entry URLs through safeOutboundFetch,
+// computes a byte hash and writes capture metadata. It does not parse a menu,
+// call a provider, touch a database or publish anything.
 //
 // Usage:
 //   node ops/scripts/capture-menu-extraction-holdout-references.js
+//   node ops/scripts/capture-menu-extraction-holdout-references.js --manifest ops/benchmark/holdout-2-sources.json
 //
 // The reference file is create-only: a second run refuses to overwrite it, so
 // the pinned version cannot be silently replaced. A legitimate new source
@@ -19,32 +23,35 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const { fetchWebsiteSafely } = require('../../src/lib/safeOutboundFetch');
+const {
+  assertApprovedHost,
+  validateHoldoutManifest,
+  holdoutOutputPaths,
+  resolveManifestArgument,
+} = require('../benchmark/holdoutManifest');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
-const SOURCES_PATH = path.join(REPO_ROOT, 'ops', 'benchmark', 'holdout-sources.json');
-const REFERENCES_PATH = path.join(REPO_ROOT, 'ops', 'benchmark', 'holdout-references.json');
 const MAX_BYTES = 15 * 1024 * 1024;
 
 function sha256(bytes) {
   return crypto.createHash('sha256').update(bytes).digest('hex');
 }
 
-function assertApprovedHost(url, allowedHosts) {
-  const parsed = new URL(url);
-  if (parsed.protocol !== 'https:') throw new Error(`holdout capture refused: ${url} is not https`);
-  if (parsed.username || parsed.password) throw new Error(`holdout capture refused: credentials in ${url}`);
-  if (!allowedHosts.includes(parsed.hostname)) {
-    throw new Error(`holdout capture refused: ${parsed.hostname} is not an approved holdout host`);
-  }
-}
-
 async function main() {
-  const manifest = JSON.parse(fs.readFileSync(SOURCES_PATH, 'utf8'));
-  if (manifest.authorization.appProviderActivation !== false) {
-    throw new Error('holdout capture refused: app provider activation must remain false');
+  const manifestPath = resolveManifestArgument(process.argv.slice(2), REPO_ROOT);
+  const manifestBytes = fs.readFileSync(manifestPath);
+  const manifest = JSON.parse(manifestBytes.toString('utf8'));
+  const validation = validateHoldoutManifest(manifest, { mode: 'capture' });
+  if (!validation.ok) {
+    throw new Error(`holdout capture refused: ${validation.errors.join('; ')}`);
   }
-  if (fs.existsSync(REFERENCES_PATH)) {
-    throw new Error(`holdout capture refused: ${path.relative(REPO_ROOT, REFERENCES_PATH)} already exists; the pinned source version is immutable`);
+  // A copy is allowed, but never a second capture of the same manifest: a
+  // re-pin after evaluation would silently replace the pinned source version.
+  const written = holdoutOutputPaths(manifestPath);
+  const legacyReferences = path.join(REPO_ROOT, 'ops', 'benchmark', 'holdout-references.json');
+  const referencesPath = written.references === legacyReferences ? legacyReferences : written.references;
+  if (fs.existsSync(referencesPath)) {
+    throw new Error(`holdout capture refused: ${path.relative(REPO_ROOT, referencesPath)} already exists; the pinned source version is immutable`);
   }
 
   const captured = {};
@@ -97,15 +104,20 @@ async function main() {
   }
 
   const references = {
-    version: '1.0.0',
+    version: '1.1.0',
     pinnedAt: manifest.pinnedAt,
     capturedAt: new Date().toISOString(),
-    note: 'Capture-only references for the four Product Owner-approved #59 holdouts. Read-only; no parser result, item count or publication.',
+    manifest: {
+      path: path.relative(REPO_ROOT, manifestPath).split(path.sep).join('/'),
+      bytesSha256: sha256(manifestBytes),
+      sourceCount: manifest.sources.length,
+    },
+    note: 'Capture-only references for the pinned #59 holdout. Read-only; no parser result, item count or publication.',
     authorization: manifest.authorization,
     sources: captured,
   };
-  fs.writeFileSync(REFERENCES_PATH, `${JSON.stringify(references, null, 2)}\n`, { flag: 'wx' });
-  process.stdout.write(`${JSON.stringify({ captured: Object.keys(captured), path: path.relative(REPO_ROOT, REFERENCES_PATH) }, null, 2)}\n`);
+  fs.writeFileSync(referencesPath, `${JSON.stringify(references, null, 2)}\n`, { flag: 'wx' });
+  process.stdout.write(`${JSON.stringify({ captured: Object.keys(captured), path: path.relative(REPO_ROOT, referencesPath) }, null, 2)}\n`);
 }
 
 main().catch((error) => {
