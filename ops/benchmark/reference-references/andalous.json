@@ -1,9 +1,10 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "sourceId": "andalous",
   "label": "Andalous Restaurant Breda",
   "entryUrl": "https://www.andalous-breda.nl",
   "captureStatus": "captured",
+  "correction": "Herstel na Lead-review 6319894232 (R2): 'Loaded Fries Scampi' (€17,00) is toegevoegd. Uitsluitend opgesteld uit de vastgezette bytes; de telregels zijn ongewijzigd.",
   "note": "Authored from the pinned menukaart capture and the pinned Ramadan PDF. Section paths follow the flat headings the source actually shows. Supplements, arrangement prices and arrangement components are kept out of the dish reference.",
   "menus": [
     {
@@ -61,7 +62,8 @@
             {"name": "Moroccan rice Al hoceima", "price": "19.00", "locator": "Menukaart › Hoofdgerechten* › regel 15", "quote": "Moroccan rice Al hoceima, €19,00 Marokkaans rijstgerecht met malse kip overgoten met heerlijke tajinesaus"},
             {"name": "Moroccan rice Marrakech", "price": "21.00", "locator": "Menukaart › Hoofdgerechten* › regel 16", "quote": "Moroccan rice Marrakech, €21,00 Marokkaans rijstgerecht met lamsvlees overgoten met heerlijke tajinesaus"},
             {"name": "Couscous Al Hoceima", "price": "19.00", "locator": "Menukaart › Hoofdgerechten* › regel 17", "quote": "Couscous Al Hoceima, €19,00 Gemalen Marokkaanse couscous met kip, diverse groentes en gekarameliseerde rozijnen en ui, overgoten met tajinesaus"},
-            {"name": "Couscous Marrakesh", "price": "21.00", "locator": "Menukaart › Hoofdgerechten* › regel 18", "quote": "Couscous Marrakesh, €21,00 Gemalen Marokkaanse couscous met lamsvlees, diverse groentes en abrikozen en pruimen"}
+            {"name": "Couscous Marrakesh", "price": "21.00", "locator": "Menukaart › Hoofdgerechten* › regel 18", "quote": "Couscous Marrakesh, €21,00 Gemalen Marokkaanse couscous met lamsvlees, diverse groentes en abrikozen en pruimen"},
+            {"name": "Loaded Fries Scampi", "price": "17.00", "locator": "Menukaart › Hoofdgerechten* › Visgerechten › regel 1", "quote": "Loaded Fries Scampi, €17,00 Gekruide friet met gemarineerde scampi garnalen overgoten met kaassaus en diverse groentes"}
           ]
         },
         {
@@ -175,7 +177,8 @@
   "ambiguous": [
     {"item": "Grillburger Andalous (Burgers)", "reason": "De bron splitst het bedrag als '€8,0 0'; gelezen als €8,00. De kinderversie staat apart in het Kindermenu met €11,50.", "captureKey": "ops/benchmark/output/reference-captures/andalous/02-menukaart-93b11284b922.html"},
     {"item": "Pasta Veggie Pesto", "reason": "De bron noemt het bedrag zonder euroteken ('11,00 V'); gelezen als €11,00.", "captureKey": "ops/benchmark/output/reference-captures/andalous/02-menukaart-93b11284b922.html"},
-    {"item": "Ramadan-PDF", "reason": "De PDF noemt arrangementprijzen en gangen zonder eigen prijs. Er is daarom geen gerechtelijke referentie per gang; een extractie die een arrangementprijs als gerecht opvoert, telt als verzonnen gerecht.", "captureKey": "ops/benchmark/output/reference-captures/andalous/07-ramadan-menu-kaart-essaouira-20240316-170004-0000-pdf-compressed-1-pdf-9a32541b2a5a.pdf"}
+    {"item": "Ramadan-PDF", "reason": "De PDF noemt arrangementprijzen en gangen zonder eigen prijs. Er is daarom geen gerechtelijke referentie per gang; een extractie die een arrangementprijs als gerecht opvoert, telt als verzonnen gerecht.", "captureKey": "ops/benchmark/output/reference-captures/andalous/07-ramadan-menu-kaart-essaouira-20240316-170004-0000-pdf-compressed-1-pdf-9a32541b2a5a.pdf"},
+    {"item": "Herhaalde h4 'Visgerechten'", "reason": "De pagina toont twee keer een h4 'Visgerechten': een keer direct na de warme voorgerechten (Gamba croquettes, Pil Pil, Pil Pil a la Andalous) en een keer binnen Hoofdgerechten* (Loaded Fries Scampi). De eerste is als eigen categorie opgenomen, de tweede als laatste regel van Hoofdgerechten* met de subrubriek in de locator. Beide zijn uit de vastgezette bytes gelezen.", "captureKey": "ops/benchmark/output/reference-captures/andalous/02-menukaart-93b11284b922.html"}
   ],
   "limitations": [
     "De Ramadan-PDF is een seizoensarrangement; de gangen hebben geen eigen prijs en zijn geen losse referentiegerechten.",

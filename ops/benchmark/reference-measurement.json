@@ -16,15 +16,15 @@
     "sources": 5,
     "capturedSources": 4,
     "blockedSources": 1,
-    "referenceItems": 171,
+    "referenceItems": 185,
     "actualItems": 157,
     "matched": 120,
-    "missing": 39,
+    "missing": 53,
     "invented": 25,
     "priceErrors": 2,
     "categoryErrors": 10,
     "precision": 76.43,
-    "recall": 70.18,
+    "recall": 64.86,
     "blocked": [
       {
         "id": "senang-makan",
@@ -340,16 +340,29 @@
     {
       "label": "Andalous Restaurant Breda",
       "sourceId": "andalous",
-      "referenceItems": 86,
+      "referenceItems": 87,
       "actualItems": 81,
       "matched": 77,
-      "missing": 7,
+      "missing": 8,
       "invented": 2,
       "priceErrors": 0,
       "categoryErrors": 2,
       "precision": 95.06,
-      "recall": 89.53,
+      "recall": 88.51,
       "missingDishes": [
+        {
+          "name": "Loaded Fries Scampi",
+          "prices": [
+            "17.00"
+          ],
+          "path": [
+            "Menukaart",
+            "Hoofdgerechten*"
+          ],
+          "quote": "Loaded Fries Scampi, €17,00 Gekruide friet met gemarineerde scampi garnalen overgoten met kaassaus en diverse groentes",
+          "locator": "Menukaart › Hoofdgerechten* › Visgerechten › regel 1",
+          "captureKey": "ops/benchmark/output/reference-captures/andalous/02-menukaart-93b11284b922.html"
+        },
         {
           "name": "Mixed Grill Andalous",
           "prices": [
@@ -514,12 +527,12 @@
       "duplicates": [],
       "accounting": {
         "reference": {
-          "total": 86,
+          "total": 87,
           "matched": 77,
-          "missing": 7,
+          "missing": 8,
           "priceErrors": 0,
           "categoryErrors": 2,
-          "accounted": 86,
+          "accounted": 87,
           "balanced": true
         },
         "actual": {
@@ -647,16 +660,216 @@
     {
       "label": "Restaurant Pellens",
       "sourceId": "pellens",
-      "referenceItems": 23,
+      "referenceItems": 36,
       "actualItems": 27,
       "matched": 0,
-      "missing": 19,
+      "missing": 32,
       "invented": 23,
       "priceErrors": 0,
       "categoryErrors": 4,
       "precision": 0,
       "recall": 0,
       "missingDishes": [
+        {
+          "name": "Verveine",
+          "prices": [
+            "14.00"
+          ],
+          "path": [
+            "Onze kaart",
+            "Diner",
+            "À la carte",
+            "Dessert"
+          ],
+          "quote": "Verveine karnemelk, peer €14,00",
+          "locator": "Diner › À la carte › Dessert › regel 1",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
+        },
+        {
+          "name": "Eekhoorntjesbrood",
+          "prices": [
+            "22.00",
+            "26.00"
+          ],
+          "path": [
+            "Onze kaart",
+            "Diner",
+            "À la carte",
+            "Groenten"
+          ],
+          "quote": "Eekhoorntjesbrood biet, koffie €22,00 €26,00",
+          "locator": "Diner › À la carte › Groenten › regel 5",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
+        },
+        {
+          "name": "Fruits de Terre",
+          "prices": [
+            "18.00"
+          ],
+          "path": [
+            "Onze kaart",
+            "Diner",
+            "À la carte",
+            "Groenten"
+          ],
+          "quote": "Fruits de Terre wisselende samenstelling €18,00 —",
+          "locator": "Diner › À la carte › Groenten › regel 1",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
+        },
+        {
+          "name": "Meloes-ui",
+          "prices": [
+            "17.00"
+          ],
+          "path": [
+            "Onze kaart",
+            "Diner",
+            "À la carte",
+            "Groenten"
+          ],
+          "quote": "Meloes-ui balsamico, oude kaas €17,00 —",
+          "locator": "Diner › À la carte › Groenten › regel 4",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
+        },
+        {
+          "name": "Spitskool",
+          "prices": [
+            "18.00",
+            "24.00"
+          ],
+          "path": [
+            "Onze kaart",
+            "Diner",
+            "À la carte",
+            "Groenten"
+          ],
+          "quote": "Spitskool huacatay, pommes dauphine €18,00 €24,00",
+          "locator": "Diner › À la carte › Groenten › regel 6",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
+        },
+        {
+          "name": "Vijgenblad",
+          "prices": [
+            "18.00"
+          ],
+          "path": [
+            "Onze kaart",
+            "Diner",
+            "À la carte",
+            "Groenten"
+          ],
+          "quote": "Vijgenblad radijs, gerookte boter €18,00 —",
+          "locator": "Diner › À la carte › Groenten › regel 2",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
+        },
+        {
+          "name": "Wortel",
+          "prices": [
+            "19.00"
+          ],
+          "path": [
+            "Onze kaart",
+            "Diner",
+            "À la carte",
+            "Groenten"
+          ],
+          "quote": "Wortel venkel, shiso €19,00 —",
+          "locator": "Diner › À la carte › Groenten › regel 3",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
+        },
+        {
+          "name": "Beekridder",
+          "prices": [
+            "21.00",
+            "31.00"
+          ],
+          "path": [
+            "Onze kaart",
+            "Diner",
+            "À la carte",
+            "Pellens"
+          ],
+          "quote": "Beekridder vijgenblad, gerookte boter €21,00 €31,00",
+          "locator": "Diner › À la carte › Pellens › regel 2",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
+        },
+        {
+          "name": "Hamachi",
+          "prices": [
+            "22.00"
+          ],
+          "path": [
+            "Onze kaart",
+            "Diner",
+            "À la carte",
+            "Pellens"
+          ],
+          "quote": "Hamachi druif, prei €22,00 —",
+          "locator": "Diner › À la carte › Pellens › regel 1",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
+        },
+        {
+          "name": "Hollands melkrund",
+          "prices": [
+            "37.00"
+          ],
+          "path": [
+            "Onze kaart",
+            "Diner",
+            "À la carte",
+            "Pellens"
+          ],
+          "quote": "Hollands melkrund beenmerg, pommes dauphine — €37,00",
+          "locator": "Diner › À la carte › Pellens › regel 6",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
+        },
+        {
+          "name": "Langoustine",
+          "prices": [
+            "23.00",
+            "38.00"
+          ],
+          "path": [
+            "Onze kaart",
+            "Diner",
+            "À la carte",
+            "Pellens"
+          ],
+          "quote": "Langoustine wortel, bouillabaisse €23,00 €38,00",
+          "locator": "Diner › À la carte › Pellens › regel 3",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
+        },
+        {
+          "name": "Meloes-ui",
+          "prices": [
+            "17.00"
+          ],
+          "path": [
+            "Onze kaart",
+            "Diner",
+            "À la carte",
+            "Pellens"
+          ],
+          "quote": "Meloes-ui balsamico, oude kaas €17,00 —",
+          "locator": "Diner › À la carte › Pellens › regel 4",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
+        },
+        {
+          "name": "Wilde eend",
+          "prices": [
+            "24.00",
+            "39.00"
+          ],
+          "path": [
+            "Onze kaart",
+            "Diner",
+            "À la carte",
+            "Pellens"
+          ],
+          "quote": "Wilde eend biet, koffie €24,00 €39,00",
+          "locator": "Diner › À la carte › Pellens › regel 5",
+          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
+        },
         {
           "name": "Verveine",
           "prices": [
@@ -1373,12 +1586,12 @@
       ],
       "accounting": {
         "reference": {
-          "total": 23,
+          "total": 36,
           "matched": 0,
-          "missing": 19,
+          "missing": 32,
           "priceErrors": 0,
           "categoryErrors": 4,
-          "accounted": 23,
+          "accounted": 36,
           "balanced": true
         },
         "actual": {
@@ -1394,7 +1607,7 @@
       "captureStatus": "captured",
       "blockedReason": null,
       "limitations": [
-        "De diner-tab bevat alleen arrangementen (Menu Pellens, Menu légumes, Formule du Jour) en geen losse gerechten; er is daarom geen diner-gerechtreferentie.",
+        "De diner-tab bevat naast de arrangementen (Menu Pellens, Menu légumes, Formule du Jour) dezelfde à-la-cartekaart als de lunch-tab: À la carte › Pellens (6), Groenten (6) en Dessert (1). Die dertien gerechten staan volgens telregel 5 als eigen referentie-items onder het pad Diner.",
         "De pagina bevat een verborgen tweede weergave van brioches en salades; die is geen tweede gerecht en telt één keer.",
         "De allergeninformatie staat alleen in de algemene FAQ; allergenen per gerecht blijven onbekend.",
         "Deze referentie is uit de vastgezette brontekst opgesteld en niet uit de parseruitvoer.",

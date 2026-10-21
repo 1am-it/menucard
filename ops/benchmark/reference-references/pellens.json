@@ -1,10 +1,11 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "sourceId": "pellens",
   "label": "Restaurant Pellens",
   "entryUrl": "https://pellens.nl",
   "captureStatus": "captured",
-  "note": "Authored from the pinned one-page capture. Dish names are the names the menu shows before the preparation/description. The lunch tab carries the dishes; the diner tab is arrangement-only. The page's hidden duplicate markup is counted once.",
+  "correction": "Herstel na Lead-review 6319894232 (R1): de dertien à-la-cartegerechten van het dinerpaneel zijn toegevoegd. Uitsluitend opgesteld uit de vastgezette bytes; de telregels zijn ongewijzigd.",
+  "note": "Authored from the pinned one-page capture. Dish names are the names the menu shows before the preparation/description. The lunch tab and the diner tab each carry the same a-la-carte table (Pellens, Groenten, Dessert); per counting rule 5 the diner copy is a second rubric and counts as thirteen extra dishes. The page's hidden duplicate markup is counted once.",
   "menus": [
     {
       "title": "Onze kaart",
@@ -63,6 +64,34 @@
           "items": [
             {"name": "Verveine", "price": "14.00", "locator": "Lunch › À la carte › Dessert › regel 1", "quote": "Verveine karnemelk, peer €14,00"}
           ]
+        },
+        {
+          "path": ["Onze kaart", "Diner", "À la carte", "Pellens"],
+          "items": [
+            {"name": "Hamachi", "price": "22.00", "locator": "Diner › À la carte › Pellens › regel 1", "quote": "Hamachi druif, prei €22,00 —"},
+            {"name": "Beekridder", "priceVariants": [{"label": "Klein", "price": "21.00"}, {"label": "Hoofd", "price": "31.00"}], "locator": "Diner › À la carte › Pellens › regel 2", "quote": "Beekridder vijgenblad, gerookte boter €21,00 €31,00"},
+            {"name": "Langoustine", "priceVariants": [{"label": "Klein", "price": "23.00"}, {"label": "Hoofd", "price": "38.00"}], "locator": "Diner › À la carte › Pellens › regel 3", "quote": "Langoustine wortel, bouillabaisse €23,00 €38,00"},
+            {"name": "Meloes-ui", "price": "17.00", "locator": "Diner › À la carte › Pellens › regel 4", "quote": "Meloes-ui balsamico, oude kaas €17,00 —"},
+            {"name": "Wilde eend", "priceVariants": [{"label": "Klein", "price": "24.00"}, {"label": "Hoofd", "price": "39.00"}], "locator": "Diner › À la carte › Pellens › regel 5", "quote": "Wilde eend biet, koffie €24,00 €39,00"},
+            {"name": "Hollands melkrund", "price": "37.00", "locator": "Diner › À la carte › Pellens › regel 6", "quote": "Hollands melkrund beenmerg, pommes dauphine — €37,00"}
+          ]
+        },
+        {
+          "path": ["Onze kaart", "Diner", "À la carte", "Groenten"],
+          "items": [
+            {"name": "Fruits de Terre", "price": "18.00", "locator": "Diner › À la carte › Groenten › regel 1", "quote": "Fruits de Terre wisselende samenstelling €18,00 —"},
+            {"name": "Vijgenblad", "price": "18.00", "locator": "Diner › À la carte › Groenten › regel 2", "quote": "Vijgenblad radijs, gerookte boter €18,00 —"},
+            {"name": "Wortel", "price": "19.00", "locator": "Diner › À la carte › Groenten › regel 3", "quote": "Wortel venkel, shiso €19,00 —"},
+            {"name": "Meloes-ui", "price": "17.00", "locator": "Diner › À la carte › Groenten › regel 4", "quote": "Meloes-ui balsamico, oude kaas €17,00 —"},
+            {"name": "Eekhoorntjesbrood", "priceVariants": [{"label": "Klein", "price": "22.00"}, {"label": "Hoofd", "price": "26.00"}], "locator": "Diner › À la carte › Groenten › regel 5", "quote": "Eekhoorntjesbrood biet, koffie €22,00 €26,00"},
+            {"name": "Spitskool", "priceVariants": [{"label": "Klein", "price": "18.00"}, {"label": "Hoofd", "price": "24.00"}], "locator": "Diner › À la carte › Groenten › regel 6", "quote": "Spitskool huacatay, pommes dauphine €18,00 €24,00"}
+          ]
+        },
+        {
+          "path": ["Onze kaart", "Diner", "À la carte", "Dessert"],
+          "items": [
+            {"name": "Verveine", "price": "14.00", "locator": "Diner › À la carte › Dessert › regel 1", "quote": "Verveine karnemelk, peer €14,00"}
+          ]
         }
       ]
     }
@@ -75,10 +104,12 @@
   "supplements": [],
   "ambiguous": [
     {"item": "Verborgen tweede lijst (Les Brioches / Salade ...)", "reason": "De pagina bevat naast de zichtbare kaart een verborgen alternatieve weergave van dezelfde brioches en salades. Volgens telregel 5 telt dezelfde pagina één keer; een tweede extractie van die verborgen lijst is een verzonnen duplicaat.", "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"},
-    {"item": "À-la-cartetabel klein/hoofd", "reason": "Een '—' in de kolom betekent geen aanbieding in die portie, geen ontbrekende prijs. Alleen de genoemde bedragen zijn prijsvarianten.", "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"}
+    {"item": "À-la-cartetabel klein/hoofd", "reason": "Een '—' in de kolom betekent geen aanbieding in die portie, geen ontbrekende prijs. Alleen de genoemde bedragen zijn prijsvarianten.", "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"},
+    {"item": "À-la-cartekaart in zowel de lunch- als de diner-tab", "reason": "Beide panelen (id kaart-lunch en id kaart-diner) bevatten exact dezelfde tabel met Pellens (6), Groenten (6) en Dessert (1). Volgens telregel 5 is het dinerpaneel een tweede rubriekpad en tellen die dertien gerechten daar apart; het zijn geen duplicaten van de lunchregels en ook geen verzonnen rijen.", "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"},
+    {"item": "Formule du Jour", "reason": "Het arrangement staat in de lunch- en in de diner-tab met dezelfde bedragen (2 gangen €45,00, 3 gangen €55,00). Als arrangement één keer geteld; de diner-tab voegt alleen de toelichting 'Niet op vrijdag- en zaterdagavond' toe.", "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"}
   ],
   "limitations": [
-    "De diner-tab bevat alleen arrangementen (Menu Pellens, Menu légumes, Formule du Jour) en geen losse gerechten; er is daarom geen diner-gerechtreferentie.",
+    "De diner-tab bevat naast de arrangementen (Menu Pellens, Menu légumes, Formule du Jour) dezelfde à-la-cartekaart als de lunch-tab: À la carte › Pellens (6), Groenten (6) en Dessert (1). Die dertien gerechten staan volgens telregel 5 als eigen referentie-items onder het pad Diner.",
     "De pagina bevat een verborgen tweede weergave van brioches en salades; die is geen tweede gerecht en telt één keer.",
     "De allergeninformatie staat alleen in de algemene FAQ; allergenen per gerecht blijven onbekend.",
     "Deze referentie is uit de vastgezette brontekst opgesteld en niet uit de parseruitvoer."

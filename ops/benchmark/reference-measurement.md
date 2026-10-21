@@ -11,23 +11,23 @@ Bij een verzonnen rij bestaat per definitie geen referentie-citaat; de regel noe
 | Maat | Waarde |
 | --- | --- |
 | Bronnen gemeten / geblokkeerd | 4 / 1 |
-| Referentiegerechten | 171 |
+| Referentiegerechten | 185 |
 | Geëxtraheerde gerechten | 157 |
 | Exact gematcht | 120 |
-| Gemiste gerechten | 39 |
+| Gemiste gerechten | 53 |
 | Verzonnen gerechten | 25 |
 | Prijsfouten | 2 |
 | Rubriekfouten | 10 |
 | Precisie | 76.43% |
-| Recall | 70.18% |
+| Recall | 64.86% |
 
 ## Per bron
 
 | Bron | Status | Referentie | Extractie | Match | Gemist | Verzonnen | Prijsfouten | Rubriekfouten | Precisie | Recall |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | Restaurant Zuyd | gemeten | 36 | 25 | 23 | 11 | 0 | 2 | 0 | 92.00% | 63.89% |
-| Andalous Restaurant Breda | gemeten | 86 | 81 | 77 | 7 | 2 | 0 | 2 | 95.06% | 89.53% |
-| Restaurant Pellens | gemeten | 23 | 27 | 0 | 19 | 23 | 0 | 4 | 0.00% | 0.00% |
+| Andalous Restaurant Breda | gemeten | 87 | 81 | 77 | 8 | 2 | 0 | 2 | 95.06% | 88.51% |
+| Restaurant Pellens | gemeten | 36 | 27 | 0 | 32 | 23 | 0 | 4 | 0.00% | 0.00% |
 | Restaurant Chocolat | gemeten | 26 | 24 | 20 | 2 | 0 | 0 | 4 | 83.33% | 76.92% |
 | Senang Makan | geblokkeerd | 0 | 0 | 0 | 0 | 0 | 0 | 0 | n.v.t. | n.v.t. |
 
@@ -70,7 +70,8 @@ Bij een verzonnen rij bestaat per definitie geen referentie-citaat; de regel noe
 
 ### Andalous Restaurant Breda
 
-**Gemist (7)**
+**Gemist (8)**
+- `Loaded Fries Scampi` — Menukaart › Hoofdgerechten* — prijs 17.00 — citaat: “Loaded Fries Scampi, €17,00 Gekruide friet met gemarineerde scampi garnalen overgoten met kaassaus en diverse groentes” (Menukaart › Hoofdgerechten* › Visgerechten › regel 1)
 - `Mixed Grill Andalous` — Menukaart › Hoofdgerechten* — prijs 27.50 / 48.50 — citaat: “Mixed Grill Andalous, €27,50 (1 pers.) / €48,50 (2 pers.) Mix van Ribeye South America, Lams-Rack, Marokkaanse kefta, kipfilet geserveerd met champignonsaus” (Menukaart › Hoofdgerechten* › regel 7)
 - `Grillburger Andalous` — Menukaart › Kindermenu — prijs 11.50 — citaat: “Grillburger Andalous, €11 ,50 Gegrilde rundergehakt in een speciaal hamburgerbrood met cheddar, mayonaise, ketchup, sla en tomaat geserveerd met friet.” (Menukaart › Kindermenu › regel 3)
 - `Pasta bolognese` — Menukaart › Pasta's — prijs 13.00 — citaat: “Pasta bolognese, €13,00 Klassieke pasta met gekruid rundergehakt in tomatensaus met basilicum” (Menukaart › Pasta's › regel 3)
@@ -109,7 +110,20 @@ Bij een verzonnen rij bestaat per definitie geen referentie-citaat; de regel noe
 
 ### Restaurant Pellens
 
-**Gemist (19)**
+**Gemist (32)**
+- `Verveine` — Onze kaart › Diner › À la carte › Dessert — prijs 14.00 — citaat: “Verveine karnemelk, peer €14,00” (Diner › À la carte › Dessert › regel 1)
+- `Eekhoorntjesbrood` — Onze kaart › Diner › À la carte › Groenten — prijs 22.00 / 26.00 — citaat: “Eekhoorntjesbrood biet, koffie €22,00 €26,00” (Diner › À la carte › Groenten › regel 5)
+- `Fruits de Terre` — Onze kaart › Diner › À la carte › Groenten — prijs 18.00 — citaat: “Fruits de Terre wisselende samenstelling €18,00 —” (Diner › À la carte › Groenten › regel 1)
+- `Meloes-ui` — Onze kaart › Diner › À la carte › Groenten — prijs 17.00 — citaat: “Meloes-ui balsamico, oude kaas €17,00 —” (Diner › À la carte › Groenten › regel 4)
+- `Spitskool` — Onze kaart › Diner › À la carte › Groenten — prijs 18.00 / 24.00 — citaat: “Spitskool huacatay, pommes dauphine €18,00 €24,00” (Diner › À la carte › Groenten › regel 6)
+- `Vijgenblad` — Onze kaart › Diner › À la carte › Groenten — prijs 18.00 — citaat: “Vijgenblad radijs, gerookte boter €18,00 —” (Diner › À la carte › Groenten › regel 2)
+- `Wortel` — Onze kaart › Diner › À la carte › Groenten — prijs 19.00 — citaat: “Wortel venkel, shiso €19,00 —” (Diner › À la carte › Groenten › regel 3)
+- `Beekridder` — Onze kaart › Diner › À la carte › Pellens — prijs 21.00 / 31.00 — citaat: “Beekridder vijgenblad, gerookte boter €21,00 €31,00” (Diner › À la carte › Pellens › regel 2)
+- `Hamachi` — Onze kaart › Diner › À la carte › Pellens — prijs 22.00 — citaat: “Hamachi druif, prei €22,00 —” (Diner › À la carte › Pellens › regel 1)
+- `Hollands melkrund` — Onze kaart › Diner › À la carte › Pellens — prijs 37.00 — citaat: “Hollands melkrund beenmerg, pommes dauphine — €37,00” (Diner › À la carte › Pellens › regel 6)
+- `Langoustine` — Onze kaart › Diner › À la carte › Pellens — prijs 23.00 / 38.00 — citaat: “Langoustine wortel, bouillabaisse €23,00 €38,00” (Diner › À la carte › Pellens › regel 3)
+- `Meloes-ui` — Onze kaart › Diner › À la carte › Pellens — prijs 17.00 — citaat: “Meloes-ui balsamico, oude kaas €17,00 —” (Diner › À la carte › Pellens › regel 4)
+- `Wilde eend` — Onze kaart › Diner › À la carte › Pellens — prijs 24.00 / 39.00 — citaat: “Wilde eend biet, koffie €24,00 €39,00” (Diner › À la carte › Pellens › regel 5)
 - `Verveine` — Onze kaart › Lunch › À la carte › Dessert — prijs 14.00 — citaat: “Verveine karnemelk, peer €14,00” (Lunch › À la carte › Dessert › regel 1)
 - `Eekhoorntjesbrood` — Onze kaart › Lunch › À la carte › Groenten — prijs 22.00 / 26.00 — citaat: “Eekhoorntjesbrood biet, koffie €22,00 €26,00” (Lunch › À la carte › Groenten › regel 5)
 - `Fruits de Terre` — Onze kaart › Lunch › À la carte › Groenten — prijs 18.00 — citaat: “Fruits de Terre wisselende samenstelling €18,00 —” (Lunch › À la carte › Groenten › regel 1)
@@ -169,7 +183,7 @@ Bij een verzonnen rij bestaat per definitie geen referentie-citaat; de regel noe
 - `Salade` — Welkom bij Pellens › Salades — 3 keer (referentiefrequentie 0)
 
 **Beperkingen**
-- De diner-tab bevat alleen arrangementen (Menu Pellens, Menu légumes, Formule du Jour) en geen losse gerechten; er is daarom geen diner-gerechtreferentie.
+- De diner-tab bevat naast de arrangementen (Menu Pellens, Menu légumes, Formule du Jour) dezelfde à-la-cartekaart als de lunch-tab: À la carte › Pellens (6), Groenten (6) en Dessert (1). Die dertien gerechten staan volgens telregel 5 als eigen referentie-items onder het pad Diner.
 - De pagina bevat een verborgen tweede weergave van brioches en salades; die is geen tweede gerecht en telt één keer.
 - De allergeninformatie staat alleen in de algemene FAQ; allergenen per gerecht blijven onbekend.
 - Deze referentie is uit de vastgezette brontekst opgesteld en niet uit de parseruitvoer.

@@ -9,7 +9,7 @@ const path = require('node:path');
 const index = require('./reference-references/index.json');
 const metadata = require('./reference-captures.json');
 const { extractDigitalPdfText } = require('../../src/lib/pdfTextExtraction');
-const { htmlVisibleText, validateReferenceShape, verifyReferenceQuotes } = require('./referenceIntegrity');
+const { htmlVisibleText, normalizeQuoteText, validateReferenceShape, verifyReferenceQuotes } = require('./referenceIntegrity');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
 
@@ -112,3 +112,115 @@ test('every reference quote is present in the pinned bytes', async (t) => {
     assert.deepEqual(result.errors, [], `${entry.id}: ${result.errors.join('; ')}`);
   }
 });
+
+// ── Lead-review 6319894232: the repaired references, from the pinned bytes ──
+
+function capturedText(captureKey) {
+  const file = path.join(REPO_ROOT, captureKey);
+  if (!fs.existsSync(file)) return null;
+  return fs.readFileSync(file, 'utf8');
+}
+
+/** Visible text of the HTML between two unique markers, in document order. */
+function textBetween(html, fromMarker, toMarker) {
+  const start = html.indexOf(fromMarker);
+  const end = html.indexOf(toMarker, start + 1);
+  assert.ok(start >= 0, `marker not found: ${fromMarker}`);
+  assert.ok(end > start, `closing marker not found after ${fromMarker}: ${toMarker}`);
+  return htmlVisibleText(html.slice(start, end));
+}
+
+function referenceItems(ref) {
+  return ref.menus.flatMap((menu) =>
+    menu.categories.flatMap((category) => category.items.map((item) => ({ item, path: category.path }))));
+}
+
+test('Pellens: the diner tab carries the same a-la-carte table and its dishes are separate reference items (R1)', (t) => {
+  const ref = reference('pellens');
+  const menu = ref.menus[0];
+  const html = capturedText(menu.captureKey);
+  if (!html) {
+    t.skip('local gitignored capture bytes are not present in this checkout');
+    return;
+  }
+  // The diner panel is its own tab panel; its bytes decide the reference.
+  const dinerText = normalizeQuoteText(textBetween(html, 'id="kaart-diner"', 'id="kaart-vragen"'));
+  const dinerItems = referenceItems(ref).filter(({ path }) => path.includes('Diner'));
+  assert.equal(dinerItems.length, 13, 'six a-la-carte dishes, six vegetable dishes and one dessert');
+  for (const { item } of dinerItems) {
+    assert.ok(
+      dinerText.includes(normalizeQuoteText(item.quote)),
+      `${item.name}: the quote must occur inside the diner panel, not only elsewhere on the page`,
+    );
+  }
+  // The same dish in two rubrics is two reference items (counting rule 5).
+  const lunch = new Set(referenceItems(ref).filter(({ path }) => path.includes('Lunch')).map(({ item }) => item.name));
+  for (const { item } of dinerItems) {
+    assert.ok(lunch.has(item.name), `${item.name}: the lunch rubric keeps its own row`);
+  }
+  // The old limitation ("the diner tab is arrangement-only") was false.
+  const limitations = ref.limitations.join(' ');
+  assert.doesNotMatch(limitations, /alleen arrangementen/);
+  assert.match(limitations, /dezelfde à-la-cartekaart/);
+  const dinerPrices = dinerItems.map(({ item }) => item.price || item.priceVariants.map((variant) => variant.price).join('/'));
+  assert.ok(dinerPrices.includes('23.00/38.00'), 'Langoustine keeps both portion prices');
+  assert.ok(dinerPrices.includes('24.00/39.00'), 'Wilde eend keeps both portion prices');
+});
+
+test('Andalous: Loaded Fries Scampi sits inside the Hoofdgerechten* block and is a reference dish (R2)', (t) => {
+  const ref = reference('andalous');
+  const menu = ref.menus[0];
+  const html = capturedText(menu.captureKey);
+  if (!html) {
+    t.skip('local gitignored capture bytes are not present in this checkout');
+    return;
+  }
+  const text = htmlVisibleText(html);
+  const heading = text.indexOf('Hoofdgerechten*');
+  const nextSection = text.indexOf("Pasta's", heading + 1);
+  const dish = text.indexOf('Loaded Fries Scampi');
+  assert.ok(heading >= 0 && nextSection > heading, 'both section headings are in the pinned text');
+  assert.ok(dish > heading, 'the dish is in the menukaart after the Hoofdgerechten* heading');
+  assert.ok(dish < nextSection, 'the dish is inside the Hoofdgerechten* block, before the Pasta section');
+  const row = referenceItems(ref).find(({ item }) => item.name === 'Loaded Fries Scampi');
+  assert.ok(row, 'the reference carries the dish');
+  assert.equal(row.item.price, '17.00');
+  assert.match(row.item.locator, /Hoofdgerechten\*/);
+  assert.match(row.item.locator, /Visgerechten/, 'the h4 subsection the source shows stays visible in the locator');
+  assert.ok(row.path.includes('Hoofdgerechten*'), 'the rubric is the section the source shows');
+});
+
+test('Zuyd: the surprise menus carry the wine-arrangement prices the source row shows (R3)', (t) => {
+  const ref = reference('zuyd');
+  const arrangement = ref.arrangements.find((entry) => entry.name === "VERRASSINGSMENU'S");
+  assert.ok(arrangement, 'the surprise menus are a reference arrangement');
+  const capture = metadata.sources.zuyd.captures.find((candidate) => candidate.localPath === arrangement.captureKey);
+  assert.ok(capture, 'the arrangement is pinned to the diner capture');
+  const html = capturedText(arrangement.captureKey);
+  if (!html) {
+    t.skip('local gitignored capture bytes are not present in this checkout');
+    return;
+  }
+  const text = htmlVisibleText(html);
+  // Four menu prices, four wine arrangements and four half-glass arrangements.
+  assert.equal(arrangement.prices.length, 12);
+  assert.equal(arrangement.prices.filter((price) => /wijnarrangement/.test(price.label) && !/½ glas/.test(price.label)).length, 4);
+  assert.equal(arrangement.prices.filter((price) => /½ glas wijnarrangement/.test(price.label)).length, 4);
+  for (const amount of ['32.00', '22.00', '40.00', '27.50', '48.00', '33.00', '56.00', '38.50']) {
+    assert.ok(arrangement.prices.some((price) => price.price === amount), `the wine price ${amount} is recorded`);
+    // The source writes whole euros without decimals ("wijnarr. 32") and half
+    // euros with a comma ("27,50"); accept the notation the pinned bytes use.
+    const notations = [amount, amount.replace('.', ','), String(Number(amount)), String(Number(amount)).replace('.', ',')];
+    assert.ok(
+      notations.some((candidate) => normalizeQuoteText(text).includes(normalizeQuoteText(candidate))),
+      `the amount ${amount} occurs in the pinned bytes`,
+    );
+  }
+  // Arrangement prices never become dish rows: no dish is a wine arrangement.
+  const dishNames = referenceItems(ref).map(({ item }) => item.name);
+  for (const name of dishNames) {
+    assert.doesNotMatch(name, /wijnarr|glas wijnarrangement|verrassingsmenu/i, `${name} is not a dish`);
+  }
+});
+
+
