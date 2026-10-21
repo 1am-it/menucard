@@ -594,6 +594,28 @@ function containsBr(node, budget) {
 }
 
 /**
+ * A shallow copy of `element` holding only the parts of its first line.
+ * A CMS routinely closes a bold dish title with a `br` inside the bold element
+ * (`<strong>Ossenhaas <br></strong>rosé …`), and a flattened line would lose
+ * the title's own markup — the block then depended on a capitalisation guess
+ * and dishes such as "Ossenhaas" or "Pasta zalm" disappeared. The copy keeps
+ * the element's identity (tag/attrs) for exactly the text before the break;
+ * later lines keep their own parts. (#59 review 6323277596)
+ */
+function inlineLineHead(element, parts) {
+  return {
+    tag: element.tag,
+    attrs: element.attrs,
+    children: parts,
+    parent: element.parent,
+    index: element.index,
+    sameTagIndex: element.sameTagIndex,
+    tagCounts: Object.create(null),
+    hidden: element.hidden,
+  }
+}
+
+/**
  * The lines of one inline element, split at a `br` at any depth. A CMS often
  * wraps a whole dish line list in a `<span>` (`<span><br>NAME 25<br>
  * description</span>`, the live Chocolat dinnerkaart), so a line is not only
@@ -616,7 +638,7 @@ function inlineLines(node, budget) {
     if (containsBr(child, budget)) {
       const inner = inlineLines(child, budget)
       if (!inner) return null
-      if (inner[0].length > 0) lines[lines.length - 1].push(...inner[0])
+      if (inner[0].length > 0) lines[lines.length - 1].push(inlineLineHead(child, inner[0]))
       for (let i = 1; i < inner.length; i += 1) lines.push(inner[i])
       continue
     }
@@ -643,7 +665,7 @@ function splitLines(node, budget) {
     if (containsBr(child, budget)) {
       const inner = inlineLines(child, budget)
       if (!inner) return null
-      if (inner[0].length > 0) lines[lines.length - 1].push(...inner[0])
+      if (inner[0].length > 0) lines[lines.length - 1].push(inlineLineHead(child, inner[0]))
       for (let i = 1; i < inner.length; i += 1) lines.push(inner[i])
       continue
     }
@@ -690,14 +712,33 @@ const END_PRICE_PATTERN = /(?:^|\s)((?:€\s*)?\d{1,3}(?:[.,]\d{1,2})?(?:(?:\s*,
 // A number right before the end price ("25 / 30", "8,50 - 12,50"): a range or
 // a second price, never one dish price.
 const PRICE_BEFORE_END_PATTERN = /(?:^|\s)(?:€\s*)?\d{1,3}(?:[.,]\d{1,2})?\s*(?:[/|\-–]|of|or|en)?\s*$/i
-// An explicit supplement or surcharge clause at the very end of a dish block
-// ("35 - supplement eendenlever 9", "17 - in plaats van dessert, supplement
-// 8,50"). Its amount may never become the dish's main price (#59 Delivery
-// Lead review 6315269210; the live Zuyd source triggered this).
-const TRAILING_SUPPLEMENT_PATTERN = /\b(?:supplement(?:en)?|toeslag)\b[^€\d]{0,40}?(?:€\s*)?\d{1,3}(?:[.,]\d{1,2})?\s*(?:(?:,\s*|\s+)[-–])?\s*$/i
+// An explicit supplement or surcharge clause ANYWHERE in a dish block, not
+// only at its very end: "35 - supplement eendenlever 9", "17 - in plaats van
+// dessert, supplement 8,50", "(supp. ganzenlever €4)", "meerprijs". Its amount
+// may never become the dish's main price (#59 reviews 6315269210 and
+// 6323277596; the live Zuyd/Chocolat/Andalous sources triggered this).
+const SUPPLEMENT_MARKER_PATTERN = /\b(?:supplement(?:en)?|suppl\.?|supp|toeslag|meerprijs)\b/i
+
+/**
+ * Splits one line at its first explicit supplement marker. `rest` keeps the
+ * text on the dish side (including the main price before the marker),
+ * `clause` is the supplement text itself. A marker without an amount still
+ * marks the line as a supplement ("Geraspte kaas … meerprijs").
+ */
+function splitSupplementClause(line) {
+  const value = String(line || '')
+  const match = SUPPLEMENT_MARKER_PATTERN.exec(value)
+  if (!match) return null
+  const before = value.slice(0, match.index)
+  return {
+    rest: before.replace(/[\s\-–—,(]+$/, '').trim(),
+    clause: value.slice(match.index).trim(),
+  }
+}
+
 // A supplement marker directly before the only amount of a line: that amount
 // is not the line's dish price, so the line is refused instead of mispriced.
-const SUPPLEMENT_BEFORE_PRICE_PATTERN = /\b(?:supplement(?:en)?|toeslag)\b[^€\d]{0,40}$/i
+const SUPPLEMENT_BEFORE_PRICE_PATTERN = /\b(?:supplement(?:en)?|suppl\.?|supp|toeslag|meerprijs)\b[^€\d]{0,40}$/i
 // A bulleted legend/footnote line after a standalone price; it is not a dish
 // description and cannot be the end price of the block.
 const LEGEND_LINE_PATTERN = /^[○●•·*†‡]\s*/;
@@ -785,6 +826,12 @@ function formattedBlocks(node, budget, markerCounter) {
         titlePrice = priced
       } else if (isPlausibleItemName(anchorText) && anchorText.length <= 80 && findPrices(anchorText).length === 0 && !END_PRICE_PATTERN.test(anchorText)) {
         title = anchorText
+      } else if (findPrices(anchorText).length > 1) {
+        // A bold title with two amounts ("Mixed Grill, €27,50 (1 pers.) /
+        // €48,50 (2 pers.)") is a dish with price variants. The deterministic
+        // context stores one price per dish, so this block is counted as an
+        // explicit, visible limit by the walk — never flattened to one price.
+        node.multiPriceAnchorLines = (node.multiPriceAnchorLines || 0) + 1
       }
     } else {
       const text = meaningful.map((c) => partText(c, markerCounter, budget)).join(' ').replace(/\s+/g, ' ').trim()
@@ -825,31 +872,93 @@ function formattedBlocks(node, budget, markerCounter) {
   return blocks
 }
 
+/**
+ * Amounts on the dish side of a supplement clause, in source order. Whole
+ * euros count here because the clause proves the line is a dish line
+ * ("… ossenhaas 35 - supplement eendenlever 9"); a bare quantity such as
+ * "6 stuks" or "2 personen" is still not an amount.
+ */
+function amountsBeforeClause(text) {
+  const found = []
+  for (const match of String(text || '').matchAll(/(?:^|[\s(])((?:€\s*)?\d{1,3}(?:[.,]\d{1,2})?)(?=\s*(?:$|[-–—,()]))/g)) {
+    const price = parsePriceOnly(match[1])
+    if (price) found.push({ price, raw: match[1].trim(), index: match.index + match[0].indexOf(match[1]) })
+  }
+  return found
+}
+
 function blockEndPrice(block, budget) {
-  const rawLines = (block.lines || [])
+  const sourceLines = (block.lines || [])
     .map((line) => String(line || '').replace(/\s+/g, ' ').trim())
     .filter(Boolean)
-  budget.spend(1 + Math.ceil(rawLines.join(' ').length / 16))
-  // A trailing supplement is not the dish's price. Strip the explicit clause
-  // first, so "35 - supplement eendenlever 9" stays 35 and never becomes 9.
+  // Bulleted legend/footnote lines after a dish are neither its description
+  // nor its price ("○ crème brûlée │ …" after "Kaasgerecht … 29,50"): they
+  // never block the end price of the dish above them.
+  while (sourceLines.length > 0 && LEGEND_LINE_PATTERN.test(sourceLines[sourceLines.length - 1])) sourceLines.pop()
+  budget.spend(1 + Math.ceil(sourceLines.join(' ').length / 16))
+  // An explicit supplement clause anywhere in the block belongs to the dish
+  // price BEFORE it; the amount after the marker is never that price. The
+  // original text stays in `sourceBody` for the review quote.
   let supplementText = null
-  if (rawLines.length > 0) {
-    const last = rawLines[rawLines.length - 1]
-    const supplementMatch = TRAILING_SUPPLEMENT_PATTERN.exec(last)
-    if (supplementMatch) {
-      supplementText = supplementMatch[0].trim()
-      const rest = last.slice(0, supplementMatch.index).trim()
-      if (rest) rawLines[rawLines.length - 1] = rest
-      else rawLines.pop()
+  const rawLines = []
+  for (const line of sourceLines) {
+    const split = splitSupplementClause(line)
+    if (!split) {
+      rawLines.push(line)
+      continue
+    }
+    supplementText = supplementText ? `${supplementText} ${split.clause}` : split.clause
+    if (split.rest) rawLines.push(split.rest)
+  }
+  const sourceBody = sourceLines.join(' ').trim()
+  const rawBody = rawLines.join(' ').trim()
+  if (supplementText) {
+    const amounts = amountsBeforeClause(rawBody)
+    if (amounts.length === 1) {
+      const only = amounts[0]
+      return {
+        body: rawBody,
+        rawBody: sourceBody,
+        supplementText,
+        price: only.price,
+        priceText: only.raw,
+        before: cleanName(rawBody.slice(0, only.index)),
+        priceBeforeSupplement: true,
+      }
+    }
+    // The block carries its price in the title and only a supplement below it.
+    if (amounts.length === 0 && block.titlePrice && findPrices(supplementText).length > 0) {
+      return {
+        body: rawBody,
+        rawBody: sourceBody,
+        supplementText,
+        price: block.titlePrice.price,
+        priceText: block.titlePrice.priceText,
+        before: rawBody,
+        priceFromTitle: true,
+      }
+    }
+    // A block that declares itself a supplement without any amount
+    // ("Geraspte kaas, €2,00 / meerprijs") is a surcharge, never a dish.
+    if (amounts.length === 0 && findPrices(supplementText).length === 0) {
+      return { body: rawBody, rawBody: sourceBody, supplementText, price: null, priceText: '', before: rawBody, supplementOnly: true }
+    }
+    return {
+      body: rawBody,
+      rawBody: sourceBody,
+      supplementText,
+      price: null,
+      priceText: '',
+      before: rawBody,
+      ...(amounts.length > 1 ? { priceVariants: true } : {}),
     }
   }
-  const rawBody = rawLines.join(' ').trim()
   const match = END_PRICE_PATTERN.exec(rawBody)
   if (match) {
     const price = parsePriceOnly(match[1])
     return {
       body: rawBody,
-      rawBody,
+      rawBody: sourceBody,
       supplementText,
       price,
       priceText: price ? match[1].trim() : '',
@@ -862,7 +971,7 @@ function blockEndPrice(block, budget) {
     const bodyHasPrice = findPrices(rawBody).length > 0
     return {
       body: rawBody,
-      rawBody,
+      rawBody: sourceBody,
       supplementText,
       price: bodyHasPrice ? null : block.titlePrice.price,
       priceText: bodyHasPrice ? '' : block.titlePrice.priceText,
@@ -879,7 +988,7 @@ function blockEndPrice(block, budget) {
     const body = rawLines.slice(0, index + 1).join(' ')
     return {
       body,
-      rawBody,
+      rawBody: sourceBody,
       supplementText,
       price: priceOnly,
       priceText: rawLines[index],
@@ -887,7 +996,7 @@ function blockEndPrice(block, budget) {
       ignoredLegendLines: after.length,
     }
   }
-  return { body: rawBody, rawBody, supplementText, price: null, priceText: '', before: rawBody }
+  return { body: rawBody, rawBody: sourceBody, supplementText, price: null, priceText: '', before: rawBody, ...(findPrices(rawBody).length > 1 ? { priceVariants: true } : {}) }
 }
 
 /**
@@ -948,10 +1057,15 @@ function hasNameBetweenPrices(priceText, prices) {
 /** A trailing alcohol percentage ("Fictief bier 5,0%", "… 8,5% vol") is
  * removed from the displayed name only; never anything mid-name, never 100%. */
 const TRAILING_ALCOHOL_PERCENT = /\s*[(\-–]?\s*(?<![\d.,])\d{1,2}(?:[.,]\d{1,2})?\s*%\s*(?:vol\.?|abv|alc\.?)?\s*\)?$/i
+/** A trailing spelled-out weight ("STEAK TARTARE 90 GRAM") is a serving size,
+ * not the dish name; it stays visible in the full quote. Abbreviated units
+ * ("250 g", "500 ml", "0,75 l") are left in the name: the source prints those
+ * as part of the item, and the corpus fixtures rely on that. */
+const TRAILING_PORTION_PATTERN = /\s*\(?\b\d{1,4}\s*(?:gram|grams)\b\.?\)?\s*$/i
 
 function displayName(name) {
   const tail = name.length > 32 ? name.slice(-32) : name
-  const stripped = tail.replace(TRAILING_ALCOHOL_PERCENT, '')
+  const stripped = tail.replace(TRAILING_ALCOHOL_PERCENT, '').replace(TRAILING_PORTION_PATTERN, '')
   const result = cleanName(name.slice(0, name.length - tail.length) + stripped)
   return isPlausibleItemName(result) ? result : name
 }
@@ -1281,7 +1395,7 @@ function readItem(node, pattern, markerCounter, budget) {
 // ─── The extraction ────────────────────────────────────────────────────────
 
 function emptyStats() {
-  return { candidates: 0, counted: 0, rejected: 0, duplicatesRemoved: 0, ignoredMarkers: 0, depthLimited: false, workUnits: 0, injectedBlocksSkipped: 0 }
+  return { candidates: 0, counted: 0, rejected: 0, duplicatesRemoved: 0, ignoredMarkers: 0, depthLimited: false, workUnits: 0, injectedBlocksSkipped: 0, priceVariantLines: 0, priceVariantItems: 0 }
 }
 
 function unparsed(reason, rejected, stats) {
@@ -1477,8 +1591,10 @@ function extractWithinBudget(html, budget, stats) {
   // plus the strict end-price rule (exactly one price, at the very end).
   function handleBlock(block, node, headingPath) {
     stats.candidates += 1
-    const { body, price, priceText, before, supplementText, priceFromTitle } = blockEndPrice(block, budget)
-    const fullText = `${block.title} ${body}`.trim()
+    const { body, rawBody, price, priceText, before, supplementText, priceFromTitle, priceVariants, supplementOnly } = blockEndPrice(block, budget)
+    // The quote keeps the source line, including an explicit supplement clause;
+    // only the price decision is made on the stripped text.
+    const fullText = `${block.title} ${rawBody || body}`.trim()
     if (fullText.length > MAX_ITEM_TEXT) {
       budget.spend(Math.ceil(fullText.length / 16))
       if (findPrices(fullText).length > 0) reject(fullText, 'ambiguous_structure', node)
@@ -1496,6 +1612,16 @@ function extractWithinBudget(html, budget, stats) {
     const name = cleanName(block.title)
     const section = sectionFor(headingPath)
     if (!price) {
+      // A block that declares itself a supplement ("meerprijs") is never a dish.
+      if (supplementOnly) return reject(fullText, 'supplement_price', node)
+      // Several prices without one end price are price variants (sizes, course
+      // counts, glass/bottle). The deterministic context stores one price per
+      // dish, so they are refused and counted as an explicit, visible limit —
+      // never flattened to one of them.
+      if (priceVariants || amountsBeforeClause(body).length > 1) {
+        stats.priceVariantLines += 1
+        return reject(fullText, 'ambiguous_structure', node)
+      }
       // A price that is not the last token is never read as the dish price.
       if (findPrices(body).length > 0) return reject(fullText, 'ambiguous_structure', node)
       if (isPlausibleItemName(name) && name.length <= 80) section.unpriced.push({ text: fullText, node })
@@ -1503,7 +1629,10 @@ function extractWithinBudget(html, budget, stats) {
     }
     if (TIME_WORD_BEFORE_PATTERN.test(before)) return reject(fullText, 'clock_time', node)
     // A second price, a price range or a price variant before the end price.
-    if (findPrices(before).length > 0 || (!priceFromTitle && PRICE_BEFORE_END_PATTERN.test(before))) {
+    // Whole euros count as well ("vier stuks 13 - zes stuks 19,50"): a second
+    // amount on the dish's own line is a variant, never part of the price.
+    if (findPrices(before).length > 0 || amountsBeforeClause(before).length > 0 || (!priceFromTitle && PRICE_BEFORE_END_PATTERN.test(before))) {
+      stats.priceVariantLines += 1
       return reject(fullText, 'ambiguous_structure', node)
     }
     if (!isPlausibleItemName(name)) return reject(fullText, 'missing_name', node)
@@ -1534,6 +1663,7 @@ function extractWithinBudget(html, budget, stats) {
       }
     }
     section.items.push({ ...item, evidence })
+    if (item.priceStatus === 'multiple_undecomposed') stats.priceVariantItems += 1
     return undefined
   }
 
@@ -1543,6 +1673,10 @@ function extractWithinBudget(html, budget, stats) {
   // so their level is anchored once (below the surrounding heading), not
   // re-derived from the deepest section of the previous panel.
   let panelLevel = null
+  // The first h1 labels the menu document. A CMS often prints a later h1 for
+  // just one more section (the live Chocolat "NAGERECHTEN"); that must not pop
+  // the menu title out of the route (#59 review 6323277596).
+  let documentTitleSeen = false
   function currentPath(extra) {
     const labels = headingStack.map((h) => h.text)
     return extra ? [...labels, extra] : labels
@@ -1580,9 +1714,16 @@ function extractWithinBudget(html, budget, stats) {
           // otherwise it sits at level 2 so a later h3 section can never pop
           // the variant back out of the route.
           if (panelHeading && !Number.isInteger(panelLevel)) panelLevel = 2
-          const level = panelHeading
+          let level = panelHeading
             ? (Number(child.attrs && child.attrs['aria-level']) || panelLevel)
             : headingLevel(child)
+          // The first h1 is the menu document's own title. A later h1 that
+          // introduces one more section ("NAGERECHTEN" after the dinner
+          // sections) sits directly below that title instead of replacing it.
+          if (!panelHeading && level === 1) {
+            if (documentTitleSeen) level = 2
+            else documentTitleSeen = true
+          }
           // A sentence-like heading nested BELOW a real section heading
           // ("Deze gerechten worden geserveerd in …" under "A LA CARTE") is
           // context for that section: skipped, the dishes stay in it. On the
@@ -1650,6 +1791,10 @@ function extractWithinBudget(html, budget, stats) {
       if (child.tag === 'p' || child.tag === 'div') {
         const path = currentPath(extraLabel)
         const blocks = path.length > 0 ? formattedBlockRun(child, budget, markerCounter) : null
+        if (child.multiPriceAnchorLines) {
+          stats.priceVariantLines += child.multiPriceAnchorLines
+          child.multiPriceAnchorLines = 0
+        }
         if (blocks) {
           for (const block of blocks) handleBlock(block, child, path)
           continue

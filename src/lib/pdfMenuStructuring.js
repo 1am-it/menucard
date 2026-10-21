@@ -1462,6 +1462,13 @@ function structurePdfLinesIntoMenu(pages) {
                 previous.priceText = `${previous.priceText} / ${recognized.price}`
                 continue
               }
+              // A price with no usable words before it (a lone "€", a separator)
+              // is never a dish name: report it as an unlinked price line
+              // instead of inventing an item. (#59 review 6323277596)
+              if ((recognized.name.match(/\p{L}/gu) || []).length < 2) {
+                layout.unlinkedPriceLines += 1
+                continue
+              }
               lineItems.push({ ...recognized })
             }
             for (const recognized of lineItems) {

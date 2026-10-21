@@ -12,48 +12,38 @@ Bij een verzonnen rij bestaat per definitie geen referentie-citaat; de regel noe
 | --- | --- |
 | Bronnen gemeten / geblokkeerd | 4 / 1 |
 | Referentiegerechten | 185 |
-| Geëxtraheerde gerechten | 157 |
-| Exact gematcht | 120 |
-| Gemiste gerechten | 53 |
-| Verzonnen gerechten | 25 |
-| Prijsfouten | 2 |
-| Rubriekfouten | 10 |
-| Precisie | 76.43% |
-| Recall | 64.86% |
+| Geëxtraheerde gerechten | 171 |
+| Exact gematcht | 141 |
+| Gemiste gerechten | 37 |
+| Verzonnen gerechten | 23 |
+| Prijsfouten | 0 |
+| Rubriekfouten | 7 |
+| Precisie | 82.46% |
+| Recall | 76.22% |
 
 ## Per bron
 
 | Bron | Status | Referentie | Extractie | Match | Gemist | Verzonnen | Prijsfouten | Rubriekfouten | Precisie | Recall |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Restaurant Zuyd | gemeten | 36 | 25 | 23 | 11 | 0 | 2 | 0 | 92.00% | 63.89% |
-| Andalous Restaurant Breda | gemeten | 87 | 81 | 77 | 8 | 2 | 0 | 2 | 95.06% | 88.51% |
+| Restaurant Zuyd | gemeten | 36 | 34 | 34 | 2 | 0 | 0 | 0 | 100.00% | 94.44% |
+| Andalous Restaurant Breda | gemeten | 87 | 84 | 81 | 3 | 0 | 0 | 3 | 96.43% | 93.10% |
 | Restaurant Pellens | gemeten | 36 | 27 | 0 | 32 | 23 | 0 | 4 | 0.00% | 0.00% |
-| Restaurant Chocolat | gemeten | 26 | 24 | 20 | 2 | 0 | 0 | 4 | 83.33% | 76.92% |
+| Restaurant Chocolat | gemeten | 26 | 26 | 26 | 0 | 0 | 0 | 0 | 100.00% | 100.00% |
 | Senang Makan | geblokkeerd | 0 | 0 | 0 | 0 | 0 | 0 | 0 | n.v.t. | n.v.t. |
 
 ## Afwijkingen per bron
 
 ### Restaurant Zuyd
 
-**Gemist (11)**
-- `Eendenlever` — Diner › A LA CARTE — prijs 28.00 — citaat: “Eendenlever gebakken lever │ macaron │ crème van lever │ peer │ steranijs 28” (Diner › A LA CARTE › regel 7)
+**Gemist (2)**
 - `Kaasassortiment` — Diner › A LA CARTE — prijs 13.00 / 19.50 — citaat: “Kaasassortiment selectie van kazen │ Zuydvruchtencompote │ brood vier stuks 13 - zes stuks 19,50 - in plaats van dessert, supplement 8,50” (Diner › A LA CARTE › regel 9)
-- `Kaasgerecht ‘3 x Epoisses’` — Diner › A LA CARTE — prijs 17.00 — citaat: “Kaasgerecht ‘3 x Epoisses’ - 17 - in plaats van dessert, supplement 8,50” (Diner › A LA CARTE › regel 8)
-- `Ossenhaas` — Diner › A LA CARTE — prijs 35.00 — citaat: “Ossenhaas rosé gebraden ossenhaas │ runderstoverij │ 'triple fried' pont-neuf │ paprika │ jus Stroganoff 35 - supplement eendenlever 9” (Diner › A LA CARTE › regel 6)
-- `Oesterproeverij Deluxe` — Diner › BITES - voor bij het aperitief — prijs 29.50 — citaat: “Oesterproeverij Deluxe - 6 stuks opgemaakte oesters - 29,50” (Diner › BITES - voor bij het aperitief › regel 2)
-- `Eendenlever` — Lunch › A LA CARTE — prijs 28.00 — citaat: “Eendenlever gebakken lever │ macaron │ crème van lever │ peer │ steranijs 28” (Lunch › A LA CARTE › regel 7)
 - `Kaasassortiment` — Lunch › A LA CARTE — prijs 13.00 / 19.50 — citaat: “Kaasassortiment selectie van kazen │ Zuydvruchtencompote │ brood vier stuks 13 - zes stuks 19,50 - in plaats van dessert, supplement 8,50” (Lunch › A LA CARTE › regel 9)
-- `Kaasgerecht ‘3 x Epoisses’` — Lunch › A LA CARTE — prijs 17.00 — citaat: “Kaasgerecht ‘3 x Epoisses’ - 17 - in plaats van dessert, supplement 8,50” (Lunch › A LA CARTE › regel 8)
-- `Ossenhaas` — Lunch › A LA CARTE — prijs 35.00 — citaat: “Ossenhaas rosé gebraden ossenhaas │ runderstoverij │ 'triple fried' pont-neuf │ paprika │ jus Stroganoff 35 - supplement eendenlever 9” (Lunch › A LA CARTE › regel 6)
-- `Lobster roll` — Lunch › SANDWICHES — prijs 25.00 — citaat: “Lobster roll brioche │ kreeft │ frisse salade │ kreeftensoep 25” (Lunch › SANDWICHES › regel 2)
-- `Sandwich Zuyd` — Lunch › SANDWICHES — prijs 19.50 — citaat: “Sandwich Zuyd krentenbrood │ dungesneden ossenhaas │ eendenlever │ rucola │ truffel │ kaas 19,50” (Lunch › SANDWICHES › regel 1)
 
 **Verzonnen (0)**
 - geen
 
-**Prijsfouten (2)**
-- `Zeetongfilet` — Diner › A LA CARTE — verwacht 39.00; geëxtraheerd 28.00 — citaat: “Zeetongfilet - gebakken zeetongfilet │ Hollandse garnaal │ saffraan │ pompoen │ bouillabaisse 39” (Diner › A LA CARTE › regel 5)
-- `Zeetongfilet` — Lunch › A LA CARTE — verwacht 39.00; geëxtraheerd 28.00 — citaat: “Zeetongfilet - gebakken zeetongfilet │ Hollandse garnaal │ saffraan │ pompoen │ bouillabaisse 39” (Lunch › A LA CARTE › regel 5)
+**Prijsfouten (0)**
+- geen
 
 **Rubriekfouten (0)**
 - geen
@@ -63,6 +53,8 @@ Bij een verzonnen rij bestaat per definitie geen referentie-citaat; de regel noe
 - De kerstmenu- en afhaalpagina's zijn arrangementen; hun gangen hebben geen eigen prijs en zijn geen losse referentiegerechten.
 - De vastgezette menupagina's bevatten geen allergenenlegenda per gerecht; allergenen blijven onbekend, niet allergeenvrij.
 - Deze referentie is uit de vastgezette brontekst opgesteld en niet uit de parseruitvoer.
+- Menukaart https://www.restaurantzuyd.nl/lunch: 1 gerecht(en)/regel(s) met meerdere prijzen (prijsvarianten zoals klein/hoofd, glas/fles of aantal stuks) zijn niet als losse prijs opgeslagen; de deterministische context ondersteunt één prijs per gerecht en er is geen prijs geraden.
+- Menukaart https://www.restaurantzuyd.nl/diner: 1 gerecht(en)/regel(s) met meerdere prijzen (prijsvarianten zoals klein/hoofd, glas/fles of aantal stuks) zijn niet als losse prijs opgeslagen; de deterministische context ondersteunt één prijs per gerecht en er is geen prijs geraden.
 - Gelezen zonder automatisch herkende menukaart: https://www.restaurantzuyd.nl/kerstmenu.
 - AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.
 
@@ -70,24 +62,19 @@ Bij een verzonnen rij bestaat per definitie geen referentie-citaat; de regel noe
 
 ### Andalous Restaurant Breda
 
-**Gemist (8)**
+**Gemist (3)**
 - `Loaded Fries Scampi` — Menukaart › Hoofdgerechten* — prijs 17.00 — citaat: “Loaded Fries Scampi, €17,00 Gekruide friet met gemarineerde scampi garnalen overgoten met kaassaus en diverse groentes” (Menukaart › Hoofdgerechten* › Visgerechten › regel 1)
 - `Mixed Grill Andalous` — Menukaart › Hoofdgerechten* — prijs 27.50 / 48.50 — citaat: “Mixed Grill Andalous, €27,50 (1 pers.) / €48,50 (2 pers.) Mix van Ribeye South America, Lams-Rack, Marokkaanse kefta, kipfilet geserveerd met champignonsaus” (Menukaart › Hoofdgerechten* › regel 7)
 - `Grillburger Andalous` — Menukaart › Kindermenu — prijs 11.50 — citaat: “Grillburger Andalous, €11 ,50 Gegrilde rundergehakt in een speciaal hamburgerbrood met cheddar, mayonaise, ketchup, sla en tomaat geserveerd met friet.” (Menukaart › Kindermenu › regel 3)
-- `Pasta bolognese` — Menukaart › Pasta's — prijs 13.00 — citaat: “Pasta bolognese, €13,00 Klassieke pasta met gekruid rundergehakt in tomatensaus met basilicum” (Menukaart › Pasta's › regel 3)
-- `Pasta funghi` — Menukaart › Pasta's — prijs 11.00 — citaat: “Pasta funghi , €11,00 V Heerlijke romige vegetarische pasta met champignons en uitjes” (Menukaart › Pasta's › regel 2)
-- `Pasta zalm` — Menukaart › Pasta's — prijs 16.00 — citaat: “Pasta zalm, €16,00 Pasta met zalm, spinazie en diverse groente in een romige witte saus” (Menukaart › Pasta's › regel 1)
-- `Gamba croquettes` — Menukaart › Visgerechten — prijs 9.50 — citaat: “Gamba croquettes, €9,50 Verfijnde croquettes gevuld met ragouts en gerold in kruim van geroosterd brood, geserveerd met een huisgemaakte saus” (Menukaart › Visgerechten › regel 1)
-- `Kip loempia’s` — Menukaart › Warme voorgerechten — prijs 8.00 — citaat: “Kip loempia’s, €8,00 Oosterse loempiarollen gevuld met gekruide kip en groente (2 st)” (Menukaart › Warme voorgerechten › regel 4)
 
-**Verzonnen (2)**
-- `€` — Menukaart — prijs 39.50 — geen bronpassage (extractor-locator: pdf:1:item:1)
-- `Geraspte kaas` — Menukaart › Pasta's — prijs 2.00 — broncitaat: “Geraspte kaas meerprijs €2,00”
+**Verzonnen (0)**
+- geen
 
 **Prijsfouten (0)**
 - geen
 
-**Rubriekfouten (2)**
+**Rubriekfouten (3)**
+- `Gamba croquettes` — verwacht Menukaart › Visgerechten; geëxtraheerd Menukaart › Warme voorgerechten › Visgerechten — citaat: “Gamba croquettes, €9,50 Verfijnde croquettes gevuld met ragouts en gerold in kruim van geroosterd brood, geserveerd met een huisgemaakte saus”
 - `Pil Pil` — verwacht Menukaart › Visgerechten; geëxtraheerd Menukaart › Warme voorgerechten › Visgerechten — citaat: “Pil Pil, €11,00 Gamba’s op Spaanse manier bereid in knoflook en peper”
 - `Pil Pil a la Andalous` — verwacht Menukaart › Visgerechten; geëxtraheerd Menukaart › Warme voorgerechten › Visgerechten — citaat: “Pil Pil a la Andalous, €12,00 Gamba’s in een huisgemaakte saus met knoflook, tomaat, citroen en verse kruiden”
 
@@ -99,12 +86,15 @@ Bij een verzonnen rij bestaat per definitie geen referentie-citaat; de regel noe
 - Deze referentie is uit de vastgezette brontekst en PDF-tekst opgesteld en niet uit de parseruitvoer.
 - Menukaart https://www.andalous-breda.nl/menukaart/: sectie "Menukaart › Koude dranken › Meer informatie" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).
 - Menukaart https://www.andalous-breda.nl/menukaart/: sectie "Menukaart › Koude dranken › Contactgegevens" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).
+- Menukaart https://www.andalous-breda.nl/menukaart/: 1 gerecht(en)/regel(s) met meerdere prijzen (prijsvarianten zoals klein/hoofd, glas/fles of aantal stuks) zijn niet als losse prijs opgeslagen; de deterministische context ondersteunt één prijs per gerecht en er is geen prijs geraden.
 - Gelezen zonder automatisch herkende menukaart: https://www.andalous-breda.nl/ramadan-menu/.
 - Doorgestuurd naar een al gelezen pagina; niet nogmaals verwerkt: https://www.andalous-breda.nl/ramadan → https://www.andalous-breda.nl/ramadan-menu/.
+- PDF https://andalous-breda.nl/wp-content/uploads/2026/02/Ramadan-menu-kaart-Essaouira-_20240316_170004_0000.pdf_compressed-1.pdf: 1 prijsregel(s) konden zonder aantoonbare lokale naam-/prijskoppeling niet als gerecht worden opgenomen.
 - PDF https://andalous-breda.nl/wp-content/uploads/2026/02/Ramadan-menu-kaart-Essaouira-_20240316_170004_0000.pdf_compressed-1.pdf: 20 mogelijke rubriekkop(pen) zijn niet herkend en dus niet als rubriek opgeslagen.
+- PDF https://andalous-breda.nl/wp-content/uploads/2026/02/Ramadan-menu-kaart-Essaouira-_20240316_170004_0000.pdf_compressed-1.pdf bevat geen betrouwbaar herkenbare gerechten met prijs.
 - Gelezen zonder automatisch herkende menukaart: https://www.andalous-breda.nl/fr/ramadan-menu/.
 - AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.
-- Kwaliteitscontrole op de deterministische extractie vraagt aandacht (pdf_unrecognised_headings, html_arrangements_skipped); het resultaat is niet als volledig beoordeeld.
+- Kwaliteitscontrole op de deterministische extractie vraagt aandacht (pdf_unlinked_price_lines, pdf_unrecognised_headings, html_arrangements_skipped, no_deterministic_items); het resultaat is niet als volledig beoordeeld.
 
 **Vastgezette bronversie:** 8 capture(s); html 8c2fb5e31c5f, html 93b11284b922, html 69b1011c0777, html 1faa547bd4b3, html a22fb64af8d9, html a469bf6ab62b, pdf 9a32541b2a5a, html 521e389ce669
 
@@ -191,6 +181,7 @@ Bij een verzonnen rij bestaat per definitie geen referentie-citaat; de regel noe
 - Menukaart https://pellens.nl/: sectie "Welkom bij Pellens › Onze kaart › À la carte › Menu légumes" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).
 - Menukaart https://pellens.nl/: sectie "Welkom bij Pellens › Menu Pellens" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).
 - Menukaart https://pellens.nl/: sectie "Welkom bij Pellens › Menu légumes" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).
+- Menukaart https://pellens.nl/: 5 gerecht(en)/regel(s) met meerdere prijzen (prijsvarianten zoals klein/hoofd, glas/fles of aantal stuks) zijn niet als losse prijs opgeslagen; de deterministische context ondersteunt één prijs per gerecht en er is geen prijs geraden.
 - AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.
 - Kwaliteitscontrole op de deterministische extractie vraagt aandacht (duplicate_item_across_categories, duplicate_item_within_category, html_arrangements_skipped); het resultaat is niet als volledig beoordeeld.
 
@@ -198,9 +189,8 @@ Bij een verzonnen rij bestaat per definitie geen referentie-citaat; de regel noe
 
 ### Restaurant Chocolat
 
-**Gemist (2)**
-- `SANDWICH CHOCOLAT` — LUNCHKAART CHOCOLAT › LUNCHGERECHTEN — prijs 18.00 — citaat: “SANDWICH CHOCOLAT €18 Steak Tartare · Pata Negra · Truffel Roerei (supp. ganzenlever €4)” (LUNCHKAART CHOCOLAT › LUNCHGERECHTEN › regel 6)
-- `STEAK TARTARE` — LUNCHKAART CHOCOLAT › LUNCHGERECHTEN — prijs 17.00 — citaat: “STEAK TARTARE 90 GRAM €17 Gerookte Ei-dooier · Kappertjes · Zoetzuur (supp. 130 gr. €8)” (LUNCHKAART CHOCOLAT › LUNCHGERECHTEN › regel 1)
+**Gemist (0)**
+- geen
 
 **Verzonnen (0)**
 - geen
@@ -208,11 +198,8 @@ Bij een verzonnen rij bestaat per definitie geen referentie-citaat; de regel noe
 **Prijsfouten (0)**
 - geen
 
-**Rubriekfouten (4)**
-- `CHOCOLAT & CHOCOLAT PUUR` — verwacht DINERKAART CHOCOLAT › NAGERECHTEN; geëxtraheerd NAGERECHTEN — citaat: “CHOCOLAT & CHOCOLAT PUUR 19 Bereidingen van pure Chocolat”
-- `CHOCOLAT & CHOCOLAT WIT` — verwacht DINERKAART CHOCOLAT › NAGERECHTEN; geëxtraheerd NAGERECHTEN — citaat: “CHOCOLAT & CHOCOLAT WIT 19 Bereidingen witte Chocolat”
-- `KAAS ASSORTIMENT` — verwacht DINERKAART CHOCOLAT › NAGERECHTEN; geëxtraheerd NAGERECHTEN — citaat: “KAAS ASSORTIMENT 22 4 Soorten · Wortel Gember Compôte · Kletzenbrood”
-- `SURPRISE` — verwacht DINERKAART CHOCOLAT › NAGERECHTEN; geëxtraheerd NAGERECHTEN — citaat: “SURPRISE 18 Wisselend dessert van onze Patissier”
+**Rubriekfouten (0)**
+- geen
 
 **Beperkingen**
 - De /menu-pagina toont alleen tegels naar de lunch- en dinerkaart en is geen menukaart.

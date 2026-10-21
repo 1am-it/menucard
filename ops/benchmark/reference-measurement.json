@@ -17,14 +17,14 @@
     "capturedSources": 4,
     "blockedSources": 1,
     "referenceItems": 185,
-    "actualItems": 157,
-    "matched": 120,
-    "missing": 53,
-    "invented": 25,
-    "priceErrors": 2,
-    "categoryErrors": 10,
-    "precision": 76.43,
-    "recall": 64.86,
+    "actualItems": 171,
+    "matched": 141,
+    "missing": 37,
+    "invented": 23,
+    "priceErrors": 0,
+    "categoryErrors": 7,
+    "precision": 82.46,
+    "recall": 76.22,
     "blocked": [
       {
         "id": "senang-makan",
@@ -38,28 +38,15 @@
       "label": "Restaurant Zuyd",
       "sourceId": "zuyd",
       "referenceItems": 36,
-      "actualItems": 25,
-      "matched": 23,
-      "missing": 11,
+      "actualItems": 34,
+      "matched": 34,
+      "missing": 2,
       "invented": 0,
-      "priceErrors": 2,
+      "priceErrors": 0,
       "categoryErrors": 0,
-      "precision": 92,
-      "recall": 63.89,
+      "precision": 100,
+      "recall": 94.44,
       "missingDishes": [
-        {
-          "name": "Eendenlever",
-          "prices": [
-            "28.00"
-          ],
-          "path": [
-            "Diner",
-            "A LA CARTE"
-          ],
-          "quote": "Eendenlever gebakken lever │ macaron │ crème van lever │ peer │ steranijs 28",
-          "locator": "Diner › A LA CARTE › regel 7",
-          "captureKey": "ops/benchmark/output/reference-captures/zuyd/03-diner-128cae10ca14.html"
-        },
         {
           "name": "Kaasassortiment",
           "prices": [
@@ -75,58 +62,6 @@
           "captureKey": "ops/benchmark/output/reference-captures/zuyd/03-diner-128cae10ca14.html"
         },
         {
-          "name": "Kaasgerecht ‘3 x Epoisses’",
-          "prices": [
-            "17.00"
-          ],
-          "path": [
-            "Diner",
-            "A LA CARTE"
-          ],
-          "quote": "Kaasgerecht ‘3 x Epoisses’ - 17 - in plaats van dessert, supplement 8,50",
-          "locator": "Diner › A LA CARTE › regel 8",
-          "captureKey": "ops/benchmark/output/reference-captures/zuyd/03-diner-128cae10ca14.html"
-        },
-        {
-          "name": "Ossenhaas",
-          "prices": [
-            "35.00"
-          ],
-          "path": [
-            "Diner",
-            "A LA CARTE"
-          ],
-          "quote": "Ossenhaas rosé gebraden ossenhaas │ runderstoverij │ 'triple fried' pont-neuf │ paprika │ jus Stroganoff 35 - supplement eendenlever 9",
-          "locator": "Diner › A LA CARTE › regel 6",
-          "captureKey": "ops/benchmark/output/reference-captures/zuyd/03-diner-128cae10ca14.html"
-        },
-        {
-          "name": "Oesterproeverij Deluxe",
-          "prices": [
-            "29.50"
-          ],
-          "path": [
-            "Diner",
-            "BITES - voor bij het aperitief"
-          ],
-          "quote": "Oesterproeverij Deluxe - 6 stuks opgemaakte oesters - 29,50",
-          "locator": "Diner › BITES - voor bij het aperitief › regel 2",
-          "captureKey": "ops/benchmark/output/reference-captures/zuyd/03-diner-128cae10ca14.html"
-        },
-        {
-          "name": "Eendenlever",
-          "prices": [
-            "28.00"
-          ],
-          "path": [
-            "Lunch",
-            "A LA CARTE"
-          ],
-          "quote": "Eendenlever gebakken lever │ macaron │ crème van lever │ peer │ steranijs 28",
-          "locator": "Lunch › A LA CARTE › regel 7",
-          "captureKey": "ops/benchmark/output/reference-captures/zuyd/02-lunch-389470158b72.html"
-        },
-        {
           "name": "Kaasassortiment",
           "prices": [
             "13.00",
@@ -139,118 +74,29 @@
           "quote": "Kaasassortiment selectie van kazen │ Zuydvruchtencompote │ brood vier stuks 13 - zes stuks 19,50 - in plaats van dessert, supplement 8,50",
           "locator": "Lunch › A LA CARTE › regel 9",
           "captureKey": "ops/benchmark/output/reference-captures/zuyd/02-lunch-389470158b72.html"
-        },
-        {
-          "name": "Kaasgerecht ‘3 x Epoisses’",
-          "prices": [
-            "17.00"
-          ],
-          "path": [
-            "Lunch",
-            "A LA CARTE"
-          ],
-          "quote": "Kaasgerecht ‘3 x Epoisses’ - 17 - in plaats van dessert, supplement 8,50",
-          "locator": "Lunch › A LA CARTE › regel 8",
-          "captureKey": "ops/benchmark/output/reference-captures/zuyd/02-lunch-389470158b72.html"
-        },
-        {
-          "name": "Ossenhaas",
-          "prices": [
-            "35.00"
-          ],
-          "path": [
-            "Lunch",
-            "A LA CARTE"
-          ],
-          "quote": "Ossenhaas rosé gebraden ossenhaas │ runderstoverij │ 'triple fried' pont-neuf │ paprika │ jus Stroganoff 35 - supplement eendenlever 9",
-          "locator": "Lunch › A LA CARTE › regel 6",
-          "captureKey": "ops/benchmark/output/reference-captures/zuyd/02-lunch-389470158b72.html"
-        },
-        {
-          "name": "Lobster roll",
-          "prices": [
-            "25.00"
-          ],
-          "path": [
-            "Lunch",
-            "SANDWICHES"
-          ],
-          "quote": "Lobster roll brioche │ kreeft │ frisse salade │ kreeftensoep 25",
-          "locator": "Lunch › SANDWICHES › regel 2",
-          "captureKey": "ops/benchmark/output/reference-captures/zuyd/02-lunch-389470158b72.html"
-        },
-        {
-          "name": "Sandwich Zuyd",
-          "prices": [
-            "19.50"
-          ],
-          "path": [
-            "Lunch",
-            "SANDWICHES"
-          ],
-          "quote": "Sandwich Zuyd krentenbrood │ dungesneden ossenhaas │ eendenlever │ rucola │ truffel │ kaas 19,50",
-          "locator": "Lunch › SANDWICHES › regel 1",
-          "captureKey": "ops/benchmark/output/reference-captures/zuyd/02-lunch-389470158b72.html"
         }
       ],
       "inventedDishes": [],
-      "priceErrorRows": [
-        {
-          "name": "Zeetongfilet",
-          "path": [
-            "Diner",
-            "A LA CARTE"
-          ],
-          "expectedPrices": [
-            "39.00"
-          ],
-          "actualPrices": [
-            "28.00"
-          ],
-          "actualPriceText": null,
-          "quote": "Zeetongfilet - gebakken zeetongfilet │ Hollandse garnaal │ saffraan │ pompoen │ bouillabaisse 39",
-          "locator": "Diner › A LA CARTE › regel 5",
-          "captureKey": "ops/benchmark/output/reference-captures/zuyd/03-diner-128cae10ca14.html",
-          "actualLocator": "html>body>div>p[3]"
-        },
-        {
-          "name": "Zeetongfilet",
-          "path": [
-            "Lunch",
-            "A LA CARTE"
-          ],
-          "expectedPrices": [
-            "39.00"
-          ],
-          "actualPrices": [
-            "28.00"
-          ],
-          "actualPriceText": null,
-          "quote": "Zeetongfilet - gebakken zeetongfilet │ Hollandse garnaal │ saffraan │ pompoen │ bouillabaisse 39",
-          "locator": "Lunch › A LA CARTE › regel 5",
-          "captureKey": "ops/benchmark/output/reference-captures/zuyd/02-lunch-389470158b72.html",
-          "actualLocator": "html>body>div>p[5]"
-        }
-      ],
+      "priceErrorRows": [],
       "categoryErrorRows": [],
       "duplicates": [],
       "accounting": {
         "reference": {
           "total": 36,
-          "matched": 23,
-          "missing": 11,
-          "priceErrors": 2,
+          "matched": 34,
+          "missing": 2,
+          "priceErrors": 0,
           "categoryErrors": 0,
           "accounted": 36,
           "balanced": true
         },
         "actual": {
-          "total": 25,
-          "matched": 23,
+          "total": 34,
+          "matched": 34,
           "invented": 0,
-          "priceErrors": 2,
+          "priceErrors": 0,
           "categoryErrors": 0,
-          "accounted": 25,
+          "accounted": 34,
           "balanced": true
         }
       },
@@ -261,6 +107,8 @@
         "De kerstmenu- en afhaalpagina's zijn arrangementen; hun gangen hebben geen eigen prijs en zijn geen losse referentiegerechten.",
         "De vastgezette menupagina's bevatten geen allergenenlegenda per gerecht; allergenen blijven onbekend, niet allergeenvrij.",
         "Deze referentie is uit de vastgezette brontekst opgesteld en niet uit de parseruitvoer.",
+        "Menukaart https://www.restaurantzuyd.nl/lunch: 1 gerecht(en)/regel(s) met meerdere prijzen (prijsvarianten zoals klein/hoofd, glas/fles of aantal stuks) zijn niet als losse prijs opgeslagen; de deterministische context ondersteunt één prijs per gerecht en er is geen prijs geraden.",
+        "Menukaart https://www.restaurantzuyd.nl/diner: 1 gerecht(en)/regel(s) met meerdere prijzen (prijsvarianten zoals klein/hoofd, glas/fles of aantal stuks) zijn niet als losse prijs opgeslagen; de deterministische context ondersteunt één prijs per gerecht en er is geen prijs geraden.",
         "Gelezen zonder automatisch herkende menukaart: https://www.restaurantzuyd.nl/kerstmenu.",
         "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
       ],
@@ -341,14 +189,14 @@
       "label": "Andalous Restaurant Breda",
       "sourceId": "andalous",
       "referenceItems": 87,
-      "actualItems": 81,
-      "matched": 77,
-      "missing": 8,
-      "invented": 2,
+      "actualItems": 84,
+      "matched": 81,
+      "missing": 3,
+      "invented": 0,
       "priceErrors": 0,
-      "categoryErrors": 2,
-      "precision": 95.06,
-      "recall": 88.51,
+      "categoryErrors": 3,
+      "precision": 96.43,
+      "recall": 93.1,
       "missingDishes": [
         {
           "name": "Loaded Fries Scampi",
@@ -389,102 +237,30 @@
           "quote": "Grillburger Andalous, €11 ,50 Gegrilde rundergehakt in een speciaal hamburgerbrood met cheddar, mayonaise, ketchup, sla en tomaat geserveerd met friet.",
           "locator": "Menukaart › Kindermenu › regel 3",
           "captureKey": "ops/benchmark/output/reference-captures/andalous/02-menukaart-93b11284b922.html"
-        },
-        {
-          "name": "Pasta bolognese",
-          "prices": [
-            "13.00"
-          ],
-          "path": [
-            "Menukaart",
-            "Pasta's"
-          ],
-          "quote": "Pasta bolognese, €13,00 Klassieke pasta met gekruid rundergehakt in tomatensaus met basilicum",
-          "locator": "Menukaart › Pasta's › regel 3",
-          "captureKey": "ops/benchmark/output/reference-captures/andalous/02-menukaart-93b11284b922.html"
-        },
-        {
-          "name": "Pasta funghi",
-          "prices": [
-            "11.00"
-          ],
-          "path": [
-            "Menukaart",
-            "Pasta's"
-          ],
-          "quote": "Pasta funghi , €11,00 V Heerlijke romige vegetarische pasta met champignons en uitjes",
-          "locator": "Menukaart › Pasta's › regel 2",
-          "captureKey": "ops/benchmark/output/reference-captures/andalous/02-menukaart-93b11284b922.html"
-        },
-        {
-          "name": "Pasta zalm",
-          "prices": [
-            "16.00"
-          ],
-          "path": [
-            "Menukaart",
-            "Pasta's"
-          ],
-          "quote": "Pasta zalm, €16,00 Pasta met zalm, spinazie en diverse groente in een romige witte saus",
-          "locator": "Menukaart › Pasta's › regel 1",
-          "captureKey": "ops/benchmark/output/reference-captures/andalous/02-menukaart-93b11284b922.html"
-        },
+        }
+      ],
+      "inventedDishes": [],
+      "priceErrorRows": [],
+      "categoryErrorRows": [
         {
           "name": "Gamba croquettes",
-          "prices": [
-            "9.50"
-          ],
-          "path": [
+          "expectedPath": [
             "Menukaart",
             "Visgerechten"
           ],
+          "actualPath": [
+            "Menukaart",
+            "Warme voorgerechten",
+            "Visgerechten"
+          ],
+          "price": [
+            "9.50"
+          ],
           "quote": "Gamba croquettes, €9,50 Verfijnde croquettes gevuld met ragouts en gerold in kruim van geroosterd brood, geserveerd met een huisgemaakte saus",
           "locator": "Menukaart › Visgerechten › regel 1",
-          "captureKey": "ops/benchmark/output/reference-captures/andalous/02-menukaart-93b11284b922.html"
+          "captureKey": "ops/benchmark/output/reference-captures/andalous/02-menukaart-93b11284b922.html",
+          "actualLocator": "html>body>div[1]>div>div[3]>div[1]>div>div>div[2]>div[2]>div>div>div>div[4]>div[2]>div[2]>div>div>div>div>p[1]"
         },
-        {
-          "name": "Kip loempia’s",
-          "prices": [
-            "8.00"
-          ],
-          "path": [
-            "Menukaart",
-            "Warme voorgerechten"
-          ],
-          "quote": "Kip loempia’s, €8,00 Oosterse loempiarollen gevuld met gekruide kip en groente (2 st)",
-          "locator": "Menukaart › Warme voorgerechten › regel 4",
-          "captureKey": "ops/benchmark/output/reference-captures/andalous/02-menukaart-93b11284b922.html"
-        }
-      ],
-      "inventedDishes": [
-        {
-          "name": "€",
-          "prices": [
-            "39.50"
-          ],
-          "path": [
-            "Menukaart"
-          ],
-          "quote": null,
-          "locator": "pdf:1:item:1",
-          "sourceUrl": "https://andalous-breda.nl/wp-content/uploads/2026/02/Ramadan-menu-kaart-Essaouira-_20240316_170004_0000.pdf_compressed-1.pdf"
-        },
-        {
-          "name": "Geraspte kaas",
-          "prices": [
-            "2.00"
-          ],
-          "path": [
-            "Menukaart",
-            "Pasta's"
-          ],
-          "quote": "Geraspte kaas meerprijs €2,00",
-          "locator": "html>body>div[1]>div>div[3]>div[1]>div>div>div[2]>div[2]>div>div>div>div[8]>div[2]>div[2]>div>div>div>div>p[4]",
-          "sourceUrl": "https://www.andalous-breda.nl/menukaart/"
-        }
-      ],
-      "priceErrorRows": [],
-      "categoryErrorRows": [
         {
           "name": "Pil Pil",
           "expectedPath": [
@@ -528,20 +304,20 @@
       "accounting": {
         "reference": {
           "total": 87,
-          "matched": 77,
-          "missing": 8,
+          "matched": 81,
+          "missing": 3,
           "priceErrors": 0,
-          "categoryErrors": 2,
+          "categoryErrors": 3,
           "accounted": 87,
           "balanced": true
         },
         "actual": {
-          "total": 81,
-          "matched": 77,
-          "invented": 2,
+          "total": 84,
+          "matched": 81,
+          "invented": 0,
           "priceErrors": 0,
-          "categoryErrors": 2,
-          "accounted": 81,
+          "categoryErrors": 3,
+          "accounted": 84,
           "balanced": true
         }
       },
@@ -555,12 +331,15 @@
         "Deze referentie is uit de vastgezette brontekst en PDF-tekst opgesteld en niet uit de parseruitvoer.",
         "Menukaart https://www.andalous-breda.nl/menukaart/: sectie \"Menukaart › Koude dranken › Meer informatie\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
         "Menukaart https://www.andalous-breda.nl/menukaart/: sectie \"Menukaart › Koude dranken › Contactgegevens\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
+        "Menukaart https://www.andalous-breda.nl/menukaart/: 1 gerecht(en)/regel(s) met meerdere prijzen (prijsvarianten zoals klein/hoofd, glas/fles of aantal stuks) zijn niet als losse prijs opgeslagen; de deterministische context ondersteunt één prijs per gerecht en er is geen prijs geraden.",
         "Gelezen zonder automatisch herkende menukaart: https://www.andalous-breda.nl/ramadan-menu/.",
         "Doorgestuurd naar een al gelezen pagina; niet nogmaals verwerkt: https://www.andalous-breda.nl/ramadan → https://www.andalous-breda.nl/ramadan-menu/.",
+        "PDF https://andalous-breda.nl/wp-content/uploads/2026/02/Ramadan-menu-kaart-Essaouira-_20240316_170004_0000.pdf_compressed-1.pdf: 1 prijsregel(s) konden zonder aantoonbare lokale naam-/prijskoppeling niet als gerecht worden opgenomen.",
         "PDF https://andalous-breda.nl/wp-content/uploads/2026/02/Ramadan-menu-kaart-Essaouira-_20240316_170004_0000.pdf_compressed-1.pdf: 20 mogelijke rubriekkop(pen) zijn niet herkend en dus niet als rubriek opgeslagen.",
+        "PDF https://andalous-breda.nl/wp-content/uploads/2026/02/Ramadan-menu-kaart-Essaouira-_20240316_170004_0000.pdf_compressed-1.pdf bevat geen betrouwbaar herkenbare gerechten met prijs.",
         "Gelezen zonder automatisch herkende menukaart: https://www.andalous-breda.nl/fr/ramadan-menu/.",
         "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.",
-        "Kwaliteitscontrole op de deterministische extractie vraagt aandacht (pdf_unrecognised_headings, html_arrangements_skipped); het resultaat is niet als volledig beoordeeld."
+        "Kwaliteitscontrole op de deterministische extractie vraagt aandacht (pdf_unlinked_price_lines, pdf_unrecognised_headings, html_arrangements_skipped, no_deterministic_items); het resultaat is niet als volledig beoordeeld."
       ],
       "sourceVersion": {
         "entryUrl": "https://www.andalous-breda.nl",
@@ -1615,6 +1394,7 @@
         "Menukaart https://pellens.nl/: sectie \"Welkom bij Pellens › Onze kaart › À la carte › Menu légumes\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
         "Menukaart https://pellens.nl/: sectie \"Welkom bij Pellens › Menu Pellens\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
         "Menukaart https://pellens.nl/: sectie \"Welkom bij Pellens › Menu légumes\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
+        "Menukaart https://pellens.nl/: 5 gerecht(en)/regel(s) met meerdere prijzen (prijsvarianten zoals klein/hoofd, glas/fles of aantal stuks) zijn niet als losse prijs opgeslagen; de deterministische context ondersteunt één prijs per gerecht en er is geen prijs geraden.",
         "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.",
         "Kwaliteitscontrole op de deterministische extractie vraagt aandacht (duplicate_item_across_categories, duplicate_item_within_category, html_arrangements_skipped); het resultaat is niet als volledig beoordeeld."
       ],
@@ -1640,132 +1420,36 @@
       "label": "Restaurant Chocolat",
       "sourceId": "chocolat",
       "referenceItems": 26,
-      "actualItems": 24,
-      "matched": 20,
-      "missing": 2,
+      "actualItems": 26,
+      "matched": 26,
+      "missing": 0,
       "invented": 0,
       "priceErrors": 0,
-      "categoryErrors": 4,
-      "precision": 83.33,
-      "recall": 76.92,
-      "missingDishes": [
-        {
-          "name": "SANDWICH CHOCOLAT",
-          "prices": [
-            "18.00"
-          ],
-          "path": [
-            "LUNCHKAART CHOCOLAT",
-            "LUNCHGERECHTEN"
-          ],
-          "quote": "SANDWICH CHOCOLAT €18 Steak Tartare · Pata Negra · Truffel Roerei (supp. ganzenlever €4)",
-          "locator": "LUNCHKAART CHOCOLAT › LUNCHGERECHTEN › regel 6",
-          "captureKey": "ops/benchmark/output/reference-captures/chocolat/03-lunch-4ac64c425f1c.html"
-        },
-        {
-          "name": "STEAK TARTARE",
-          "prices": [
-            "17.00"
-          ],
-          "path": [
-            "LUNCHKAART CHOCOLAT",
-            "LUNCHGERECHTEN"
-          ],
-          "quote": "STEAK TARTARE 90 GRAM €17 Gerookte Ei-dooier · Kappertjes · Zoetzuur (supp. 130 gr. €8)",
-          "locator": "LUNCHKAART CHOCOLAT › LUNCHGERECHTEN › regel 1",
-          "captureKey": "ops/benchmark/output/reference-captures/chocolat/03-lunch-4ac64c425f1c.html"
-        }
-      ],
+      "categoryErrors": 0,
+      "precision": 100,
+      "recall": 100,
+      "missingDishes": [],
       "inventedDishes": [],
       "priceErrorRows": [],
-      "categoryErrorRows": [
-        {
-          "name": "CHOCOLAT & CHOCOLAT PUUR",
-          "expectedPath": [
-            "DINERKAART CHOCOLAT",
-            "NAGERECHTEN"
-          ],
-          "actualPath": [
-            "NAGERECHTEN"
-          ],
-          "price": [
-            "19.00"
-          ],
-          "quote": "CHOCOLAT & CHOCOLAT PUUR 19 Bereidingen van pure Chocolat",
-          "locator": "DINERKAART CHOCOLAT › NAGERECHTEN › regel 2",
-          "captureKey": "ops/benchmark/output/reference-captures/chocolat/04-diner-7122b5d1c92b.html",
-          "actualLocator": "html>body>div>div>div>article>div>div>div>div[3]>div>div>div[4]>div>p[4]"
-        },
-        {
-          "name": "CHOCOLAT & CHOCOLAT WIT",
-          "expectedPath": [
-            "DINERKAART CHOCOLAT",
-            "NAGERECHTEN"
-          ],
-          "actualPath": [
-            "NAGERECHTEN"
-          ],
-          "price": [
-            "19.00"
-          ],
-          "quote": "CHOCOLAT & CHOCOLAT WIT 19 Bereidingen witte Chocolat",
-          "locator": "DINERKAART CHOCOLAT › NAGERECHTEN › regel 3",
-          "captureKey": "ops/benchmark/output/reference-captures/chocolat/04-diner-7122b5d1c92b.html",
-          "actualLocator": "html>body>div>div>div>article>div>div>div>div[3]>div>div>div[4]>div>p[6]"
-        },
-        {
-          "name": "KAAS ASSORTIMENT",
-          "expectedPath": [
-            "DINERKAART CHOCOLAT",
-            "NAGERECHTEN"
-          ],
-          "actualPath": [
-            "NAGERECHTEN"
-          ],
-          "price": [
-            "22.00"
-          ],
-          "quote": "KAAS ASSORTIMENT 22 4 Soorten · Wortel Gember Compôte · Kletzenbrood",
-          "locator": "DINERKAART CHOCOLAT › NAGERECHTEN › regel 4",
-          "captureKey": "ops/benchmark/output/reference-captures/chocolat/04-diner-7122b5d1c92b.html",
-          "actualLocator": "html>body>div>div>div>article>div>div>div>div[3]>div>div>div[4]>div>p[8]"
-        },
-        {
-          "name": "SURPRISE",
-          "expectedPath": [
-            "DINERKAART CHOCOLAT",
-            "NAGERECHTEN"
-          ],
-          "actualPath": [
-            "NAGERECHTEN"
-          ],
-          "price": [
-            "18.00"
-          ],
-          "quote": "SURPRISE 18 Wisselend dessert van onze Patissier",
-          "locator": "DINERKAART CHOCOLAT › NAGERECHTEN › regel 1",
-          "captureKey": "ops/benchmark/output/reference-captures/chocolat/04-diner-7122b5d1c92b.html",
-          "actualLocator": "html>body>div>div>div>article>div>div>div>div[3]>div>div>div[4]>div>p[2]"
-        }
-      ],
+      "categoryErrorRows": [],
       "duplicates": [],
       "accounting": {
         "reference": {
           "total": 26,
-          "matched": 20,
-          "missing": 2,
+          "matched": 26,
+          "missing": 0,
           "priceErrors": 0,
-          "categoryErrors": 4,
+          "categoryErrors": 0,
           "accounted": 26,
           "balanced": true
         },
         "actual": {
-          "total": 24,
-          "matched": 20,
+          "total": 26,
+          "matched": 26,
           "invented": 0,
           "priceErrors": 0,
-          "categoryErrors": 4,
-          "accounted": 24,
+          "categoryErrors": 0,
+          "accounted": 26,
           "balanced": true
         }
       },

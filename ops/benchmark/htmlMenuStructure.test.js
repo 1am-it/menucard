@@ -515,7 +515,13 @@ test('N5: a trailing explicit supplement never becomes the main price', () => {
   assert.equal(ossenhaas.item.amountMinorUnits, 3500)
   assert.match(ossenhaas.item.evidence.supplementText, /supplement fictieve eendenlever 9/i)
   assert.equal(result.sections.some((section) => section.items.some((item) => item.amountMinorUnits === 850)), false, 'the 8,50 supplement never becomes a dish price')
-  assert.equal(findItem(result, 'Fictieve kaas'), null, 'a dish with only supplement/prose prices is not invented')
+  // #59 review 6323277596: a main price printed before its supplement clause
+  // ("… - 17 - … supplement 8,50") stays the dish price. The supplement is
+  // kept as evidence and is still never a price of its own.
+  const kaas = findItem(result, 'Fictieve kaas')
+  assert.ok(kaas, 'the dish with a supplement clause keeps its own main price')
+  assert.equal(kaas.item.amountMinorUnits, 1700)
+  assert.match(kaas.item.evidence.supplementText, /supplement 8,50/i)
 })
 
 test('N5: a dish whose only amount is a supplement is not priced', () => {

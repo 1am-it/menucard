@@ -116,6 +116,11 @@ function menuFromHtmlStructure(html, usedSlugs, report = null) {
     report.reason = (result && result.reason) || null
     report.injectedBlocksSkipped = (result && result.stats && result.stats.injectedBlocksSkipped) || 0
     report.contentSuspicion = (result && result.stats && result.stats.contentSuspicion) || null
+    // Price variants (sizes, course counts, glass/bottle) and other multi-price
+    // lines are never flattened to one amount. They are counted so the review
+    // can see exactly what the deterministic context did not store.
+    report.priceVariantLines =
+      ((result && result.stats && result.stats.priceVariantLines) || 0) + ((result && result.stats && result.stats.priceVariantItems) || 0)
   }
   if (!result || result.status !== 'parsed') return null
   const kept = result.sections
@@ -149,7 +154,8 @@ function menuFromHtmlStructure(html, usedSlugs, report = null) {
     .filter((entry) => entry && Array.isArray(entry.path) && entry.path.length > 0)
     .slice(0, 20)
     .map((entry) => ({ path: entry.path.map((label) => String(label || '').slice(0, 60)), unpricedLines: entry.unpricedLines }))
-  return { menu: { name: 'Menukaart', contextSlug, title: hierarchy.title, structure: hierarchy.structure, categories }, itemCount, excludedSections }
+  const priceVariantLines = (report && typeof report === 'object' && Number.isInteger(report.priceVariantLines) ? report.priceVariantLines : 0)
+  return { menu: { name: 'Menukaart', contextSlug, title: hierarchy.title, structure: hierarchy.structure, categories }, itemCount, excludedSections, priceVariantLines }
 }
 
 /**
@@ -158,9 +164,19 @@ function menuFromHtmlStructure(html, usedSlugs, report = null) {
  * not belong to one dish). Never a guessed item, never silence.
  */
 function htmlMenuExclusionLimitations(url, found) {
-  return ((found && found.excludedSections) || []).map(
+  const limitations = ((found && found.excludedSections) || []).map(
     (entry) => `Menukaart ${url}: sectie "${entry.path.join(' › ')}" is niet als gerechten opgenomen; ${entry.unpricedLines} regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).`,
   )
+  // A dish with several prices (sizes, course counts, glass/bottle) is not
+  // flattened to one amount. The deterministic context stores one price per
+  // dish, so this stays an explicit, visible limit with the real cause.
+  const variants = found && Number.isInteger(found.priceVariantLines) ? found.priceVariantLines : 0
+  if (variants > 0) {
+    limitations.push(
+      `Menukaart ${url}: ${variants} gerecht(en)/regel(s) met meerdere prijzen (prijsvarianten zoals klein/hoofd, glas/fles of aantal stuks) zijn niet als losse prijs opgeslagen; de deterministische context ondersteunt één prijs per gerecht en er is geen prijs geraden.`,
+    )
+  }
+  return limitations
 }
 
 /** JSON-LD menus from one page, refused as non-menu content when their own
