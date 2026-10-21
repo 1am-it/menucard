@@ -269,22 +269,56 @@ test('process: a failed analysis is recorded through fail_source_analysis_job wi
   assert.equal(failArgs.p_error_reason, 'internal_error');
 });
 
-function confirmFixture({ actor = STARTER, menuUrl = 'https://www.bistro-fictief-voorbeeld.nl/menukaart' } = {}) {
+// A stateful stand-in for the 0015 RPCs when a test needs the real effects:
+// the proposal row, its primary key (the confirmation idempotency guard) and
+// the accepted/rejected events. `ledger.rows` is the live proposals array.
+function ledgerRpc(tables, ledger) {
+  if (!Array.isArray(ledger.events)) ledger.events = [];
+  ledger.rows = tables.source_triage_proposals;
+  return {
+    create_source_triage_proposal: (a) => {
+      // 0015 maps any unique_violation to P0030, including the primary key.
+      if (tables.source_triage_proposals.some((p) => p.id === a.p_proposal_id)) return { data: null, error: { code: 'P0030' } };
+      const row = { id: a.p_proposal_id, restaurant_id: a.p_restaurant_id, proposed_url: a.p_proposed_url, status: 'open', decided_at: null, note: a.p_note };
+      tables.source_triage_proposals.push(row);
+      ledger.events.push({ event: 'proposed', proposal_id: a.p_proposal_id });
+      return { data: row, error: null };
+    },
+    decide_source_triage_proposal: (a) => {
+      const row = tables.source_triage_proposals.find((p) => p.id === a.p_proposal_id && p.status === 'open');
+      if (!row) return { data: null, error: { code: 'P0031' } };
+      row.status = a.p_decision;
+      row.decided_at = '2026-10-10T11:05:30Z';
+      ledger.events.push({ event: a.p_decision, proposal_id: a.p_proposal_id });
+      return { data: row, error: null };
+    },
+  };
+}
+
+function confirmFixture({
+  actor = STARTER,
+  menuUrl = 'https://www.bistro-fictief-voorbeeld.nl/menukaart',
+  proposal = null,
+  ledger = null,
+} = {}) {
+  const tables = {
+    markets: [{ id: 'm1', slug: 'breda' }],
+    url_intake_batches: [{ id: BATCH, market_id: 'm1', actor_user_id: actor, created_at: '2026-10-10T11:00:00Z', closed_at: '2026-10-10T11:10:00Z', close_reason: 'completed', item_count: 1 }],
+    url_intake_batch_items: [{ batch_id: BATCH, item_position: 1, canonical_source_url: 'https://www.bistro-fictief-voorbeeld.nl/', outcome: 'queued', job_id: JOB, reused_job_id: null }],
+    restaurant_source_analysis_jobs: [
+      { id: JOB, status: 'succeeded', attempt_count: 1, finished_at: '2026-10-10T11:05:00Z', result_receipt_id: 'r1', unknown_menu_contexts: [], menu_source_urls: [menuUrl], actor_user_id: actor, batch_id: BATCH, created_at: '2026-10-10T11:00:00Z' },
+    ],
+    url_intake_analysis_receipts: [{ id: 'r1', restaurant_match_type: 'exact', matched_restaurant_id: 'bistro', menus: [{ categories: [{ items: [{ name: 'Soep' }] }] }] }],
+    source_triage_proposals: proposal ? [proposal] : [],
+  };
   return fakeSupabase({
-    tables: {
-      markets: [{ id: 'm1', slug: 'breda' }],
-      url_intake_batches: [{ id: BATCH, market_id: 'm1', actor_user_id: actor, created_at: '2026-10-10T11:00:00Z', closed_at: '2026-10-10T11:10:00Z', close_reason: 'completed', item_count: 1 }],
-      url_intake_batch_items: [{ batch_id: BATCH, item_position: 1, canonical_source_url: 'https://www.bistro-fictief-voorbeeld.nl/', outcome: 'queued', job_id: JOB, reused_job_id: null }],
-      restaurant_source_analysis_jobs: [
-        { id: JOB, status: 'succeeded', attempt_count: 1, finished_at: '2026-10-10T11:05:00Z', result_receipt_id: 'r1', unknown_menu_contexts: [], menu_source_urls: [menuUrl], actor_user_id: actor, batch_id: BATCH, created_at: '2026-10-10T11:00:00Z' },
-      ],
-      url_intake_analysis_receipts: [{ id: 'r1', restaurant_match_type: 'exact', matched_restaurant_id: 'bistro', menus: [{ categories: [{ items: [{ name: 'Soep' }] }] }] }],
-      source_triage_proposals: [],
-    },
-    rpc: {
-      create_source_triage_proposal: (a) => ({ data: { id: a.p_proposal_id, status: 'open' }, error: null }),
-      decide_source_triage_proposal: () => ({ data: { status: 'accepted' }, error: null }),
-    },
+    tables,
+    rpc: ledger
+      ? ledgerRpc(tables, ledger)
+      : {
+          create_source_triage_proposal: (a) => ({ data: { id: a.p_proposal_id, status: 'open' }, error: null }),
+          decide_source_triage_proposal: () => ({ data: { status: 'accepted' }, error: null }),
+        },
   });
 }
 
@@ -592,7 +626,7 @@ const STRUCTURE_MENUS = [
 const VOOR_PATH = ['Fictief Diner', 'Voor'];
 const KOUD_PATH = ['Fictief Lunch', 'Koud'];
 
-function structureFixture({ menus = STRUCTURE_MENUS, reviews = [], proposal = null, receiptHash = STRUCTURE_HASH, storedReviewError = null, existing = [] } = {}) {
+function structureFixture({ menus = STRUCTURE_MENUS, reviews = [], proposal = null, receiptHash = STRUCTURE_HASH, storedReviewError = null, existing = [], ledger = null } = {}) {
   const tables = {
     markets: [{ id: 'm1', slug: 'breda' }],
     url_intake_batches: [{ id: BATCH, market_id: 'm1', actor_user_id: STARTER, created_at: '2026-10-10T11:00:00Z', closed_at: '2026-10-10T11:10:00Z', close_reason: 'completed', item_count: 1 }],
@@ -618,10 +652,12 @@ function structureFixture({ menus = STRUCTURE_MENUS, reviews = [], proposal = nu
   };
   const supabase = fakeSupabase({
     tables,
-    rpc: {
-      create_source_triage_proposal: (a) => ({ data: { id: a.p_proposal_id, status: 'open' }, error: null }),
-      decide_source_triage_proposal: () => ({ data: { status: 'accepted' }, error: null }),
-    },
+    rpc: ledger
+      ? ledgerRpc(tables, ledger)
+      : {
+          create_source_triage_proposal: (a) => ({ data: { id: a.p_proposal_id, status: 'open' }, error: null }),
+          decide_source_triage_proposal: () => ({ data: { status: 'accepted' }, error: null }),
+        },
   });
   if (storedReviewError) {
     const base = supabase.from;
@@ -791,6 +827,94 @@ test('structure review: a retry with the same decisions is idempotent, a contrad
   assert.equal(contradiction.body.results[0].reason, 'structure_already_reviewed');
   assert.equal(changed.calls.filter((c) => c.insert).length, 0);
   assert.equal(changed.calls.filter((c) => c.rpc).length, 0);
+});
+
+test('confirm: an already confirmed result is never confirmed again by the human structure route', async () => {
+  // The Lead's reproduction: a second POST with the same complete, valid
+  // structure_reviews for a result that already has its accepted proposal.
+  const supabase = confirmedStructureFixture();
+  const res = await makeHandlers({ supabase, liveMenus: {} }).handlers.confirmSources(
+    request({ job_ids: [JOB], structure_reviews: [structureReview([KEEP_VOOR, CORRECT_KOUD])] }),
+    BATCH
+  );
+  assert.equal(res.status, 200);
+  assert.deepEqual(res.body.results, [{ job_id: JOB, ok: false, reason: 'already_confirmed' }]);
+  assert.equal(res.body.confirmed, 0);
+  // Nothing at all is written: no proposal, no event, no audit review.
+  assert.equal(supabase.calls.filter((c) => c.insert).length, 0);
+  assert.equal(supabase.calls.filter((c) => c.rpc).length, 0);
+});
+
+test('confirm: an already confirmed result is never confirmed again by the one-click route', async () => {
+  const supabase = confirmFixture({ proposal: { id: 'p1', restaurant_id: 'bistro', proposed_url: FOUND, status: 'accepted', decided_at: '2026-10-10T11:20:00Z' } });
+  const res = await makeHandlers({ supabase }).handlers.confirmSources(request({ job_ids: [JOB] }), BATCH);
+  assert.deepEqual(res.body.results, [{ job_id: JOB, ok: false, reason: 'already_confirmed' }]);
+  assert.equal(res.body.confirmed, 0);
+  assert.equal(supabase.calls.filter((c) => c.insert).length, 0);
+  assert.equal(supabase.calls.filter((c) => c.rpc).length, 0);
+});
+
+test('confirm: two confirmations of one result leave exactly one accepted proposal, whatever the route', async () => {
+  // A real first confirmation through the human structure route, then the
+  // same request again on the same stored state.
+  const ledger = { events: [] };
+  const supabase = structureFixture({ ledger });
+  const handlers = makeHandlers({ supabase, liveMenus: {} }).handlers;
+  const body = { job_ids: [JOB], structure_reviews: [structureReview([KEEP_VOOR, CORRECT_KOUD])] };
+
+  const first = await handlers.confirmSources(request(body), BATCH);
+  assert.deepEqual(first.body.results, [{ job_id: JOB, ok: true }]);
+  assert.equal(ledger.rows.filter((p) => p.status === 'accepted').length, 1);
+
+  const second = await handlers.confirmSources(request(body), BATCH);
+  assert.deepEqual(second.body.results, [{ job_id: JOB, ok: false, reason: 'already_confirmed' }]);
+  assert.equal(second.body.confirmed, 0);
+  assert.equal(ledger.rows.filter((p) => p.status === 'accepted').length, 1, 'never a second accepted proposal');
+  assert.deepEqual(ledger.events.map((e) => e.event), ['proposed', 'accepted']);
+  // The audit trail is written once; the retry adds no review row.
+  assert.equal(supabase.calls.filter((c) => c.insert === 'menu_structure_reviews').length, 1);
+  assert.equal(ledger.rows.length, 1);
+});
+
+test('confirm: a simultaneous double request still yields exactly one accepted proposal', async () => {
+  // Both requests pass the "not yet confirmed" check before either writes.
+  // The derived proposal id is the primary key of 0015, so the second create
+  // collides (P0030) instead of adding a second accepted proposal.
+  const ledger = { events: [] };
+  const supabase = confirmFixture({ ledger });
+  const handlers = makeHandlers({ supabase }).handlers;
+  const [a, b] = await Promise.all([
+    handlers.confirmSources(request({ job_ids: [JOB] }), BATCH),
+    handlers.confirmSources(request({ job_ids: [JOB] }), BATCH),
+  ]);
+  const responses = [a, b];
+  assert.equal(responses.filter((r) => r.body.confirmed === 1).length, 1);
+  const loser = responses.find((r) => r.body.confirmed === 0);
+  assert.equal(loser.body.results[0].ok, false);
+  assert.ok(['open_proposal_exists', 'already_confirmed'].includes(loser.body.results[0].reason), loser.body.results[0].reason);
+  assert.equal(ledger.rows.length, 1, 'one proposal row');
+  assert.equal(ledger.rows.filter((p) => p.status === 'accepted').length, 1, 'one accepted proposal');
+  assert.deepEqual(ledger.events.map((e) => e.event), ['proposed', 'accepted'], 'one proposed and one accepted event');
+});
+
+test('confirm: a rejected proposal is reported as such, not as an open one or a second confirmation', async () => {
+  const ledger = { events: [] };
+  const supabase = confirmFixture({ ledger });
+  // The acceptance itself fails: 0015 leaves the proposal open for Bronnen.
+  const baseRpc = supabase.rpc;
+  supabase.rpc = (name, args) =>
+    name === 'decide_source_triage_proposal' ? Promise.resolve({ data: null, error: { code: 'P0031' } }) : baseRpc(name, args);
+  const handlers = makeHandlers({ supabase }).handlers;
+  const left = await handlers.confirmSources(request({ job_ids: [JOB] }), BATCH);
+  assert.deepEqual(left.body.results, [{ job_id: JOB, ok: false, reason: 'left_open' }]);
+  assert.equal(ledger.rows[0].status, 'open');
+
+  // A human rejects that proposal in Bronnen beoordelen; the result is not confirmed.
+  ledger.rows[0].status = 'rejected';
+  const retry = await handlers.confirmSources(request({ job_ids: [JOB] }), BATCH);
+  assert.deepEqual(retry.body.results, [{ job_id: JOB, ok: false, reason: 'proposal_rejected' }]);
+  assert.equal(ledger.rows.length, 1);
+  assert.deepEqual(ledger.events.map((e) => e.event), ['proposed']);
 });
 
 test('structure review: an unavailable store is an honest refusal, never a silent confirmation', async () => {

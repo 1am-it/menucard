@@ -4,7 +4,7 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { normalizePrice, summarizeRecognisedMenu, liveMenuLines, buildMenuConcept } = require('./menuConcept');
+const { normalizePrice, summarizeRecognisedMenu, liveMenuLines, buildMenuConcept, conceptSectionCount } = require('./menuConcept');
 
 const MENUS = [
   {
@@ -112,6 +112,25 @@ test('concept: an invalid corrected price stays a blocker; a restaurant without 
   assert.equal(concept.lines.find((l) => l.id === '0.1.1').status, 'missing_price');
   assert.deepEqual(concept.removed, []);
   assert.ok(concept.lines.filter((l) => l.status === 'new').length >= 2);
+});
+
+test('section count: the same section name under two parents is two rubrieken, exactly as the concept stores them', () => {
+  // Regression P3 of review 6309694854: counting by the last label merged
+  // "Lunch › Dessert" and "Diner › Dessert" into one, so the overview said
+  // fewer rubrieken than the structure card of the same concept.
+  const menus = [
+    { title: 'Lunch', categories: [{ name: 'Dessert', path: ['Dessert'], items: [{ name: 'Fictieve mousse', price: '8.50' }] }] },
+    { title: 'Diner', categories: [{ name: 'Dessert', path: ['Dessert'], items: [{ name: 'Fictief ijs', price: '9.50' }] }] },
+  ];
+  const concept = buildMenuConcept({ menus, liveLines: [], edits: {} });
+  assert.deepEqual(concept.content.categories.map((c) => c.path), [['Lunch', 'Dessert'], ['Diner', 'Dessert']]);
+  assert.equal(conceptSectionCount(concept), 2);
+  // What the old count did: one section name, one rubriek.
+  assert.equal(new Set(concept.lines.map((l) => l.category)).size, 1);
+  // The count follows the concept: excluding one dish removes its section.
+  const withoutDiner = buildMenuConcept({ menus, liveLines: [], edits: { lines: { '1.0.0': { exclude: true } } } });
+  assert.equal(conceptSectionCount(withoutDiner), 1);
+  assert.equal(conceptSectionCount(null), 0);
 });
 
 test('stored version: choices travel with it — accepted dishes and per-dish decisions are not asked again', () => {

@@ -11,7 +11,7 @@
 import { useMemo, useRef, useState } from 'react'
 import StatusIcon from '@/src/components/StatusIcon'
 import { StaticMenu, menuTitle } from '@/src/components/MenuBody'
-import { buildMenuConcept, storedConceptInput, mergeEdits } from '@/src/lib/menuConcept'
+import { buildMenuConcept, storedConceptInput, mergeEdits, conceptSectionCount } from '@/src/lib/menuConcept'
 import {
   plural,
   LineEditor,
@@ -539,7 +539,10 @@ export function ConceptReview({ data, loadError, message, busy, onSaveVersion, o
   const c = data.concept
   const readOnly = !c.isLatest
   const { editorLines, safe, excluded, categories } = conceptParts(concept, touched)
-  const sectionCount = new Set(concept.lines.filter((l) => l.status !== 'excluded').map((l) => l.category)).size
+  // One rule for the whole concept: sections per full path, exactly as the
+  // concept stores them. Counting by the last label merged "Lunch › Dessert"
+  // with "Diner › Dessert" and disagreed with the structure card.
+  const sectionCount = conceptSectionCount(concept)
   const dishCount = concept.lines.filter((l) => l.status !== 'excluded').length
   const sourceOk = data.source.confirmed && !data.source.blocked
   const approveBlockers = []
@@ -608,7 +611,9 @@ export function ConceptReview({ data, loadError, message, busy, onSaveVersion, o
             </h2>
             <ConceptChips safe={safe} concept={concept} excluded={excluded} />
             <BlockerBanner concept={concept} />
-            <ConceptStructure captured={c.captured} />
+            {/* The same built concept as the counters, so the section count can
+                never disagree with the overview. */}
+            <ConceptStructure captured={concept.content} />
             {editorLines.length > 0 && (
               <ul className="bta-concept-lines" aria-label="Aandachtspunten en blokkades">
                 {editorLines.map((line) => (

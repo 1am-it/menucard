@@ -639,6 +639,40 @@ prijsvarianten, provenance en de fail-closed situatie zonder width.
 `botanistReference.test.js` bewaakt de nieuwe parser-/layoutcijfers en de
 aparte `categoryUnknown`-rapportage zonder scoreverhoging.
 
+## Dubbele bevestiging en één rubriekentelling (review 6309694854)
+
+Twee praktijkbevindingen zijn hier gericht gerepareerd; de geaccepteerde
+correctieroute en de bestaande keten zijn niet herbouwd.
+
+- **Geen tweede bevestiging.** Een resultaat met een opgeslagen geaccepteerd
+  BE-24-voorstel is definitief bevestigd. Zowel de één-klikroute als de
+  menselijke structuurroute (`humanStructure` in `confirmSources`) weigert het
+  nu vóór elke schrijfactie met `ok: false, reason: 'already_confirmed'`; er
+  komt geen voorstel, event of `menu_structure_reviews`-rij bij. Een retry van
+  dezelfde beslissingen blijft daarmee onschadelijk.
+- **Idempotentiesleutel.** Het voorstel-ID van een bevestiging wordt
+  deterministisch afgeleid van het opgeslagen resultaat (job, restaurant en
+  gevonden URL) in `src/lib/sourceConfirmation.js` (RFC 9562-vormige UUIDv8).
+  De bestaande primaire sleutel van `source_triage_proposals` is daarmee de rem
+  op een gelijktijdige dubbele aanvraag: de tweede insert botst en 0015 vertaalt
+  dat naar `P0030`. Geen schemawijziging en geen versoepeling. Omdat alle
+  bestaande voorstel-ID's UUIDv7 zijn, kan een afgeleide v8 nooit met een
+  ongerelateerd voorstel botsen. De handler vertaalt `P0030` naar
+  `already_confirmed`, `proposal_rejected` (een mens wees het voorstel in
+  Bronnen beoordelen af) of het bestaande `open_proposal_exists`; de
+  batchpagina zegt dan dat er niets dubbel is opgeslagen.
+- **Eén rubriekentelling.** Het conceptdetail telt rubrieken per volledig pad
+  via `conceptSectionCount` (`content.categories`), dezelfde regel als de
+  structuurkaart. `Lunch › Dessert` en `Diner › Dessert` zijn twee rubrieken;
+  de kaart toont hetzelfde gebouwde concept als de teller, zodat bovenaan en
+  bij Structuur nooit meer een ander getal staat.
+- **Bewijs.** `sourceConfirmation.test.js`, de nieuwe regressies in
+  `batchAnalysisHandlers.test.js` (twee keer bevestigen via beide routes,
+  gelijktijdig dubbel, afgewezen voorstel), `menuConcept.test.js` (zelfde
+  rubrieknaam onder twee ouders) en de surface-tests. Dat is
+  developer-/fixturebewijs; de Delivery Lead herhaalt de echte
+  praktijkcontrole.
+
 ## Menselijke controle van een onzekere rubriekindeling (review 6307703713)
 
 Een receipt met `structure: 'uncertain'` blijft "Controle nodig": de

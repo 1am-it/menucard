@@ -33,6 +33,7 @@ const { createConceptVersion } = require('./menuConceptStore');
 const { menusFromUnknownContexts } = require('./pdfMenuContext');
 const { readReceiptProjection, productActionRefusal } = require('./menuProductIntegrationV2');
 const { validateStructureReviews, structureEdits, recordedSections, reviewKey } = require('./menuStructureReview');
+const { confirmationProposalId } = require('./sourceConfirmation');
 
 // One internal menu concept per restaurant: BE-17 snapshot proposals in
 // the context "<restaurantId>-menukaart", versioned.
@@ -524,6 +525,22 @@ function createBatchAnalysisHandlers(deps) {
     return { ok: true };
   }
 
+  /**
+   * Explains a P0030 from 0015 for this confirmation without writing anything.
+   * The proposal id is derived from this exact result (src/lib/sourceConfirmation.js),
+   * so the row it collides with is this result's own confirmation: accepted
+   * means it is already confirmed, rejected means a human decided it in
+   * Bronnen, open means the decision is still in flight. Any other conflict is
+   * the existing one-open-proposal-per-restaurant rule.
+   */
+  async function confirmationConflictReason(supabase, proposalId) {
+    const { data: row, error } = await supabase.from('source_triage_proposals').select('id, status').eq('id', proposalId).maybeSingle();
+    if (error || !row) return 'open_proposal_exists';
+    if (row.status === 'accepted') return 'already_confirmed';
+    if (row.status === 'rejected') return 'proposal_rejected';
+    return 'open_proposal_exists';
+  }
+
   /** POST /[id]/confirm — "Bevestig bron" for one or more results. A result
    * is eligible through the one-click rule, or through the separate human
    * structure route: every uncertain section of the stored receipt was
@@ -563,6 +580,15 @@ function createBatchAnalysisHandlers(deps) {
     const results = [];
     for (const jobId of jobIds) {
       const item = detail.items.find((v) => v.jobId === jobId);
+      // A stored accepted proposal for this exact result is final. No route —
+      // one click or the human structure route — may confirm it again: that
+      // would add a second accepted proposal and a second event to the audit
+      // trail. An identical retry is refused with an explicit reason and
+      // writes nothing.
+      if (item && item.key === 'confirmed') {
+        results.push({ job_id: jobId, ok: false, reason: 'already_confirmed' });
+        continue;
+      }
       // One-click: only a high-certainty, unconfirmed result of this batch.
       const oneClick = Boolean(item && item.high && item.foundUrl && item.restaurant && item.actions.includes('confirm'));
       // Human structure route: offered only for an exactly eligible result.
@@ -615,8 +641,13 @@ function createBatchAnalysisHandlers(deps) {
         continue;
       }
       const v = validation.value;
+      // The proposal id is the idempotency guard: it is derived from this
+      // stored result, so the primary key of 0015 refuses a second proposal
+      // for the same confirmation even when two requests race. No schema
+      // change and no relaxation of the existing constraints.
+      const proposalId = confirmationProposalId({ jobId, restaurantId: v.restaurant_id, url: v.proposed_url });
       const { data: proposal, error: createError } = await supabase.rpc('create_source_triage_proposal', {
-        p_proposal_id: generateId(),
+        p_proposal_id: proposalId,
         p_market_id: market,
         p_restaurant_id: v.restaurant_id,
         p_kind: v.kind,
@@ -627,7 +658,11 @@ function createBatchAnalysisHandlers(deps) {
         p_actor_user_id: auth.userId,
       });
       if (createError) {
-        results.push({ job_id: jobId, ok: false, reason: createError.code === 'P0030' ? 'open_proposal_exists' : 'save_failed' });
+        if (createError.code === 'P0030') {
+          results.push({ job_id: jobId, ok: false, reason: await confirmationConflictReason(supabase, proposalId) });
+          continue;
+        }
+        results.push({ job_id: jobId, ok: false, reason: 'save_failed' });
         continue;
       }
       const { error: decideError } = await supabase.rpc('decide_source_triage_proposal', {

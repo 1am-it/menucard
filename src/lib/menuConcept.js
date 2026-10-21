@@ -603,6 +603,17 @@ function buildMenuConcept({ menus, liveLines, edits }) {
   };
 }
 
+/**
+ * The number of sections of one built concept, counted per full path exactly
+ * as the concept itself stores them (`content.categories`). Never by the last
+ * label only: "Lunch › Dessert" and "Diner › Dessert" are two sections. Every
+ * place that shows a section count uses this one rule, so the overview and
+ * the structure card of the same concept can never disagree.
+ */
+function conceptSectionCount(concept) {
+  return concept && concept.content && Array.isArray(concept.content.categories) ? concept.content.categories.length : 0;
+}
+
 module.exports = {
   STATUS,
   normalizeName,
@@ -614,6 +625,7 @@ module.exports = {
   summarizeRecognisedMenu,
   liveMenuLines,
   buildMenuConcept,
+  conceptSectionCount,
   removalKey,
   liveEntryLabel,
   sanitizeEdits,

@@ -191,6 +191,10 @@ export default function BatchAnalysisPage() {
       } else {
         const failed = (body.results || []).filter((r) => !r.ok)
         const openExists = failed.some((r) => r.reason === 'open_proposal_exists' || r.reason === 'left_open')
+        // An already confirmed result can never be confirmed twice: the server
+        // refuses it and writes nothing. Say so instead of asking for a repair.
+        const allAlready = body.confirmed === 0 && failed.length > 0 && failed.every((r) => r.reason === 'already_confirmed')
+        const rejected = failed.some((r) => r.reason === 'proposal_rejected')
         // The server re-checks the human structure review against the stored
         // receipt; a stale or incomplete review is reported concretely.
         const structureIssue = failed.find((r) =>
@@ -211,13 +215,17 @@ export default function BatchAnalysisPage() {
         )
         const detail = structureIssue
           ? ' De rubriekcontrole is niet opgeslagen; controleer elke onzekere rubriek opnieuw.'
-          : openExists
-            ? ' Voor een restaurant staat al een open voorstel; beoordeel dat in Bronnen beoordelen.'
-            : ''
+          : rejected
+            ? ' Dit resultaat is in Bronnen beoordeeld en afgewezen; start zo nodig een nieuwe analyse.'
+            : openExists
+              ? ' Voor een restaurant staat al een open voorstel; beoordeel dat in Bronnen beoordelen.'
+              : ''
         setMessage(
           failed.length === 0
             ? { tone: 'success', text: `${body.confirmed} ${body.confirmed === 1 ? 'bron' : 'bronnen'} bevestigd. Er is niets gepubliceerd.` }
-            : { tone: 'notice', text: `${body.confirmed} bevestigd, ${failed.length} niet.${detail}` }
+            : allAlready
+              ? { tone: 'notice', text: 'Deze bron was al bevestigd. Er is niets dubbel opgeslagen.' }
+              : { tone: 'notice', text: `${body.confirmed} bevestigd, ${failed.length} niet.${detail}` }
         )
       }
       setConfirming(null)

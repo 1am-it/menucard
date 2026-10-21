@@ -62,6 +62,12 @@ test('page: never fetches anything but its own internal API; no AI, OCR or exter
   assert.doesNotMatch(PAGE, /openai|anthropic|tesseract|from ['"][^'"]*(ocr|claude)[^'"]*['"]/i);
 });
 
+test('page: an already confirmed source is reported as such and never as a new confirmation', () => {
+  assert.match(PAGE, /r\.reason === 'already_confirmed'/);
+  assert.match(PAGE, /Deze bron was al bevestigd\. Er is niets dubbel opgeslagen\./);
+  assert.match(PAGE, /r\.reason === 'proposal_rejected'/);
+});
+
 test('styles: Kleurtaal v2 tokens only, 44px targets and no horizontal overflow on mobile, reduced motion respected', () => {
   assert.ok(BTA_CSS.length > 0);
   assert.doesNotMatch(BTA_CSS, /#[0-9a-fA-F]{3,8}\b|rgba?\(/);
