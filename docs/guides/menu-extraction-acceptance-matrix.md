@@ -118,6 +118,28 @@ Belangrijkste bevindingen, zonder ze weg te poetsen:
   geen nul-gerechten-succes.
 
 
+### Bewijs op deze ronde
+
+- **Codehead `346acb0c361c2f919d6b095d7e4c4a11643a9854`** (afbeeldingsroute en
+  documentatie); de referentietooling staat in `c093d1d`.
+- **`npm test`:** 2288/2288 geslaagd.
+- **`npm run test:menu-structure`:** 6/6 geslaagd.
+- **`npm run build`:** geslaagd, 41/41 statische pagina's.
+- **PDF.js serverpackagingcheck:** OK (166 server scripts; `pdf.mjs` en
+  `pdf.worker.mjs` getraceerd).
+- **Browserfixture:** 293/293 op een schone worktree op `346acb0`; 41
+  screenshots, inclusief de afbeeldingsroute op 390 px licht en 320 px donker en
+  de klik naar Bronnen beoordelen. Evidence:
+  `ops/browser/evidence/menu-review-browser-evidence.json`.
+- **Meetroute:** deterministisch; hetzelfde script op dezelfde bytes gaf
+  tweemaal een byte-identiek rapport.
+
+De vastgezette bytes staan in deze clone onder
+`ops/benchmark/output/reference-captures/` (gitignored). De Delivery Lead kan die
+map naar dezelfde relatieve locatie in de acceptatie-checkout kopiëren om iedere
+hash, quote en meting onafhankelijk te herhalen; zonder die bytes is alleen de
+metadata controleerbaar, niet de referentietekst.
+
 ### Afbeeldingsmenu: expliciete status en menselijke route
 
 Een menu dat alleen als afbeelding of scan bestaat, krijgt in de batch de
@@ -149,7 +171,7 @@ stil geschrapt.
 | 9 | Browseracceptatie met klikpaden, rollen, leeg/fout/partieel, toetsenbord, licht/donker, 320/390 px | **gedeeltelijk** | Nieuwe afbeeldingsroute is in de fixture op 390 px licht en 320 px donker getest; de bestaande suite dekt de overige paden. Geen echte authenticated browseracceptatie |
 | 10 | Time-out, provideruitval, ongeldige uitvoer, limieten, herimport, gelijktijdige taken, promptinjectie, verkeerde vestiging, onveilige redirects | **gedeeltelijk** | Eerder bewezen met regressies; deze ronde herhaalt die set niet en voegt geen provider toe |
 | 11 | Geen stil dataverlies tussen extractie, receipt, review, concept en export | **gedeeltelijk** | De afbeeldingsstatus is expliciet en blokkeert een schijnsucces; de v2-read-onlygrens blijft ongewijzigd; geen echte schrijfketen getest |
-| 12 | Geen regressie in rollen, bronbevestiging, audit, publicatiegates, beveiliging of geheimenbeheer | **gehaald (ontwikkelaarsbewijs)** | Volledige suite en build in deze ronde; zie checkpoint. Geen productiecredentials gebruikt |
+| 12 | Geen regressie in rollen, bronbevestiging, audit, publicatiegates, beveiliging of geheimenbeheer | **gehaald (ontwikkelaarsbewijs)** | `npm test` 2288/2288 en build 41/41 op codehead `346acb0`; geen productiecredentials gebruikt |
 | 13 | Onafhankelijke review met exacte commit, checks, versies, resultaten en beperkingen | **verschoven** | De Delivery Lead moet deze ronde nog onafhankelijk beoordelen; groene tests zijn geen productacceptatie |
 
 
