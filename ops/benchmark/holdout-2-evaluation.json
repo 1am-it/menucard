@@ -1,0 +1,3098 @@
+{
+  "version": "1.0.0",
+  "issue": 59,
+  "evaluatedAt": "2026-10-21T12:43:03.155Z",
+  "manifest": {
+    "path": "ops/benchmark/holdout-2-sources.json",
+    "bytesSha256": "151c34c0a383438a1227d71b1751f947b64a94e2397e69e00b4cbc89f283c2c8",
+    "sourceCount": 19
+  },
+  "protocol": {
+    "file": "MENU-EXTRACTION.md",
+    "version": "0.2",
+    "sha256": "15510b4c0b74fee722ac2c51a3f40aa21b03e0161ccffdcb2008f3d27350b762"
+  },
+  "authorization": {
+    "decision": "Product Owner, 2026-10-21: akkoord op optie 1 (vier bestaande kaarten plus een ongeziene set van maximaal 20 restaurants uit data/restaurants.json).",
+    "reference": "GitHub #59 issuecomment-6315226470",
+    "scope": "Public read-only probes of exactly these entry URLs and their relevant public menu links, within the existing safe fetch/source bounds. No login, CAPTCHA bypass, paid service, other location, arbitrary crawl, publication or app-side AI.",
+    "appProviderActivation": false
+  },
+  "noTuning": true,
+  "note": "First recorded evaluation against the pinned holdout source versions. No parser or rule was changed from these outcomes; a later tuning use must move the source to representative and pin a new holdout.",
+  "aggregate": {
+    "version": "1.0.0",
+    "generatedAt": "2026-10-21T12:43:03.157Z",
+    "note": "Aggregate of one pinned first evaluation. Evidence percentages come from per-item extractor locators/patterns/hashes, never from model confidence. Invented-item and missing-item counts require a controlled reference per source and are therefore reported as not measurable here.",
+    "thresholdsDocument": "docs/guides/menu-extraction-representative-set.md",
+    "thresholds": {
+      "inventedDishes": 0,
+      "inventedPrices": 0,
+      "sourceIdPercent": 100,
+      "locatorPercent": 100,
+      "supportPercent": 100,
+      "missingReasonPercent": 100
+    },
+    "groups": {
+      "no_menu": {
+        "sourceCount": 10,
+        "sources": [
+          "H2-01",
+          "H2-05",
+          "H2-07",
+          "H2-08",
+          "H2-09",
+          "H2-10",
+          "H2-11",
+          "H2-14",
+          "H2-16",
+          "H2-19"
+        ],
+        "itemCount": 0,
+        "sectionCount": 0,
+        "evidence": {
+          "withSourceId": 0,
+          "withLocator": 0,
+          "withSupport": 0,
+          "sourceIdPercent": null,
+          "locatorPercent": null,
+          "supportPercent": null
+        },
+        "thresholds": {
+          "inventedDishes": {
+            "target": 0,
+            "measured": null,
+            "status": "not_measurable_without_controlled_reference"
+          },
+          "inventedPrices": {
+            "target": 0,
+            "measured": null,
+            "status": "not_measurable_without_controlled_reference"
+          },
+          "sourceId": {
+            "target": 100,
+            "measured": null,
+            "status": "no_items"
+          },
+          "locator": {
+            "target": 100,
+            "measured": null,
+            "status": "no_items"
+          },
+          "support": {
+            "target": 100,
+            "measured": null,
+            "status": "no_items"
+          },
+          "missingReason": {
+            "target": 100,
+            "measured": null,
+            "status": "not_measurable_without_controlled_reference"
+          }
+        }
+      },
+      "html": {
+        "sourceCount": 5,
+        "sources": [
+          "H2-02",
+          "H2-03",
+          "H2-04",
+          "H2-06",
+          "H2-18"
+        ],
+        "itemCount": 296,
+        "sectionCount": 45,
+        "evidence": {
+          "withSourceId": 296,
+          "withLocator": 121,
+          "withSupport": 121,
+          "sourceIdPercent": 100,
+          "locatorPercent": 41,
+          "supportPercent": 41
+        },
+        "thresholds": {
+          "inventedDishes": {
+            "target": 0,
+            "measured": null,
+            "status": "not_measurable_without_controlled_reference"
+          },
+          "inventedPrices": {
+            "target": 0,
+            "measured": null,
+            "status": "not_measurable_without_controlled_reference"
+          },
+          "sourceId": {
+            "target": 100,
+            "measured": 100,
+            "status": "pass"
+          },
+          "locator": {
+            "target": 100,
+            "measured": 41,
+            "status": "fail"
+          },
+          "support": {
+            "target": 100,
+            "measured": 41,
+            "status": "fail"
+          },
+          "missingReason": {
+            "target": 100,
+            "measured": null,
+            "status": "not_measurable_without_controlled_reference"
+          }
+        }
+      },
+      "blocked": {
+        "sourceCount": 4,
+        "sources": [
+          "H2-12",
+          "H2-13",
+          "H2-15",
+          "H2-17"
+        ],
+        "itemCount": 0,
+        "sectionCount": 0,
+        "evidence": {
+          "withSourceId": 0,
+          "withLocator": 0,
+          "withSupport": 0,
+          "sourceIdPercent": null,
+          "locatorPercent": null,
+          "supportPercent": null
+        },
+        "thresholds": {
+          "inventedDishes": {
+            "target": 0,
+            "measured": null,
+            "status": "not_measurable_without_controlled_reference"
+          },
+          "inventedPrices": {
+            "target": 0,
+            "measured": null,
+            "status": "not_measurable_without_controlled_reference"
+          },
+          "sourceId": {
+            "target": 100,
+            "measured": null,
+            "status": "no_items"
+          },
+          "locator": {
+            "target": 100,
+            "measured": null,
+            "status": "no_items"
+          },
+          "support": {
+            "target": 100,
+            "measured": null,
+            "status": "no_items"
+          },
+          "missingReason": {
+            "target": 100,
+            "measured": null,
+            "status": "not_measurable_without_controlled_reference"
+          }
+        }
+      }
+    },
+    "sources": [
+      {
+        "id": "H2-01",
+        "label": "Restaurant Chocolat",
+        "type": "no_menu",
+        "status": "executed_with_limitation",
+        "kind": "html",
+        "sourceVersionMatches": false,
+        "itemCount": 0,
+        "sectionCount": 0,
+        "menuCount": 0,
+        "priceStatus": {},
+        "coverage": {
+          "status": "no_content_found",
+          "sourceCount": 5,
+          "readCount": 5,
+          "blockedCount": 0,
+          "failedCount": 0,
+          "candidateCount": 0,
+          "menuCount": 0,
+          "itemCount": 0,
+          "complete": false,
+          "reviewRequired": true
+        },
+        "evidence": {
+          "itemCount": 0,
+          "categoryCount": 0,
+          "menuCount": 0,
+          "priceStatus": {},
+          "knownWithoutAmount": 0,
+          "sourceIdPercent": null,
+          "locatorPercent": null,
+          "supportPercent": null,
+          "withSourceId": 0,
+          "withLocator": 0,
+          "withSupport": 0,
+          "missingSourceId": [],
+          "missingLocator": [],
+          "missingSupport": []
+        },
+        "limitations": [
+          "Gelezen zonder automatisch herkende menukaart: https://www.restaurant-chocolat.nl/menu/.",
+          "Gelezen zonder automatisch herkende menukaart: https://www.restaurant-chocolat.nl/lunch/.",
+          "Gelezen zonder automatisch herkende menukaart: https://www.restaurant-chocolat.nl/diner/.",
+          "Gelezen zonder automatisch herkende menukaart: https://www.restaurant-chocolat.nl/menu/.",
+          "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+        ],
+        "errors": null,
+        "blockedReason": null,
+        "missingReasons": [
+          "Gelezen zonder automatisch herkende menukaart: https://www.restaurant-chocolat.nl/menu/.",
+          "Gelezen zonder automatisch herkende menukaart: https://www.restaurant-chocolat.nl/lunch/.",
+          "Gelezen zonder automatisch herkende menukaart: https://www.restaurant-chocolat.nl/diner/.",
+          "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+        ]
+      },
+      {
+        "id": "H2-02",
+        "label": "Pellens",
+        "type": "html",
+        "status": "executed_with_limitation",
+        "kind": "html",
+        "sourceVersionMatches": true,
+        "itemCount": 27,
+        "sectionCount": 9,
+        "menuCount": 1,
+        "priceStatus": {
+          "known": 27
+        },
+        "coverage": {
+          "status": "items_extracted",
+          "sourceCount": 1,
+          "readCount": 1,
+          "blockedCount": 0,
+          "failedCount": 0,
+          "candidateCount": 1,
+          "menuCount": 1,
+          "itemCount": 27,
+          "complete": false,
+          "reviewRequired": true
+        },
+        "evidence": {
+          "itemCount": 27,
+          "categoryCount": 9,
+          "menuCount": 1,
+          "priceStatus": {
+            "known": 27
+          },
+          "knownWithoutAmount": 0,
+          "sourceIdPercent": 100,
+          "locatorPercent": 100,
+          "supportPercent": 100,
+          "withSourceId": 27,
+          "withLocator": 27,
+          "withSupport": 27,
+          "missingSourceId": [],
+          "missingLocator": [],
+          "missingSupport": []
+        },
+        "limitations": [
+          "Menukaart https://pellens.nl/: sectie \"Welkom bij Pellens › Onze kaart › À la carte › Menu Pellens\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
+          "Menukaart https://pellens.nl/: sectie \"Welkom bij Pellens › Onze kaart › À la carte › Menu légumes\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
+          "Menukaart https://pellens.nl/: sectie \"Welkom bij Pellens › Menu Pellens\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
+          "Menukaart https://pellens.nl/: sectie \"Welkom bij Pellens › Menu légumes\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
+          "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.",
+          "Kwaliteitscontrole op de deterministische extractie vraagt aandacht (duplicate_item_across_categories, duplicate_item_within_category, html_arrangements_skipped); het resultaat is niet als volledig beoordeeld."
+        ],
+        "errors": null,
+        "blockedReason": null,
+        "missingReasons": [
+          "Menukaart https://pellens.nl/: sectie \"Welkom bij Pellens › Onze kaart › À la carte › Menu Pellens\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
+          "Menukaart https://pellens.nl/: sectie \"Welkom bij Pellens › Onze kaart › À la carte › Menu légumes\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
+          "Menukaart https://pellens.nl/: sectie \"Welkom bij Pellens › Menu Pellens\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
+          "Menukaart https://pellens.nl/: sectie \"Welkom bij Pellens › Menu légumes\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
+          "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.",
+          "Kwaliteitscontrole op de deterministische extractie vraagt aandacht (duplicate_item_across_categories, duplicate_item_within_category, html_arrangements_skipped); het resultaat is niet als volledig beoordeeld."
+        ]
+      },
+      {
+        "id": "H2-03",
+        "label": "Dolce e Salato",
+        "type": "html",
+        "status": "executed_with_limitation",
+        "kind": "html",
+        "sourceVersionMatches": true,
+        "itemCount": 31,
+        "sectionCount": 9,
+        "menuCount": 2,
+        "priceStatus": {
+          "known": 31
+        },
+        "coverage": {
+          "status": "items_extracted",
+          "sourceCount": 3,
+          "readCount": 3,
+          "blockedCount": 0,
+          "failedCount": 0,
+          "candidateCount": 2,
+          "menuCount": 2,
+          "itemCount": 31,
+          "complete": false,
+          "reviewRequired": true
+        },
+        "evidence": {
+          "itemCount": 31,
+          "categoryCount": 9,
+          "menuCount": 2,
+          "priceStatus": {
+            "known": 31
+          },
+          "knownWithoutAmount": 0,
+          "sourceIdPercent": 100,
+          "locatorPercent": 39,
+          "supportPercent": 39,
+          "withSourceId": 31,
+          "withLocator": 12,
+          "withSupport": 12,
+          "missingSourceId": [],
+          "missingLocator": [
+            "Insalata Caprese",
+            "Carpaccio di Carne",
+            "Vitello Tonnato",
+            "Calamari Fritti",
+            "Antipasto Misto"
+          ],
+          "missingSupport": [
+            "Insalata Caprese",
+            "Carpaccio di Carne",
+            "Vitello Tonnato",
+            "Calamari Fritti",
+            "Antipasto Misto"
+          ]
+        },
+        "limitations": [
+          "Gelezen zonder automatisch herkende menukaart: https://dolceesalato.nl/stempelkaart/.",
+          "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+        ],
+        "errors": null,
+        "blockedReason": null,
+        "missingReasons": [
+          "Gelezen zonder automatisch herkende menukaart: https://dolceesalato.nl/stempelkaart/.",
+          "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+        ]
+      },
+      {
+        "id": "H2-04",
+        "label": "Trattoria Perron",
+        "type": "html",
+        "status": "executed_with_limitation",
+        "kind": "html",
+        "sourceVersionMatches": true,
+        "itemCount": 156,
+        "sectionCount": 25,
+        "menuCount": 2,
+        "priceStatus": {
+          "known": 146,
+          "unknown": 10
+        },
+        "coverage": {
+          "status": "items_extracted",
+          "sourceCount": 3,
+          "readCount": 3,
+          "blockedCount": 0,
+          "failedCount": 0,
+          "candidateCount": 2,
+          "menuCount": 2,
+          "itemCount": 156,
+          "complete": false,
+          "reviewRequired": true
+        },
+        "evidence": {
+          "itemCount": 156,
+          "categoryCount": 25,
+          "menuCount": 2,
+          "priceStatus": {
+            "known": 146,
+            "unknown": 10
+          },
+          "knownWithoutAmount": 0,
+          "sourceIdPercent": 100,
+          "locatorPercent": 0,
+          "supportPercent": 0,
+          "withSourceId": 156,
+          "withLocator": 0,
+          "withSupport": 0,
+          "missingSourceId": [],
+          "missingLocator": [
+            "Appeltaart",
+            "Dudok truffeltaart",
+            "Cannoli",
+            "Pollo al pesto Trattoria Perron",
+            "Porchetta, friarielli e mostarda"
+          ],
+          "missingSupport": [
+            "Appeltaart",
+            "Dudok truffeltaart",
+            "Cannoli",
+            "Pollo al pesto Trattoria Perron",
+            "Porchetta, friarielli e mostarda"
+          ]
+        },
+        "limitations": [
+          "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.",
+          "Kwaliteitscontrole op de deterministische extractie vraagt aandacht (duplicate_item_across_categories); het resultaat is niet als volledig beoordeeld."
+        ],
+        "errors": null,
+        "blockedReason": null,
+        "missingReasons": [
+          "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.",
+          "Kwaliteitscontrole op de deterministische extractie vraagt aandacht (duplicate_item_across_categories); het resultaat is niet als volledig beoordeeld."
+        ]
+      },
+      {
+        "id": "H2-05",
+        "label": "Senang Makan",
+        "type": "no_menu",
+        "status": "executed_with_limitation",
+        "kind": "html",
+        "sourceVersionMatches": true,
+        "itemCount": 0,
+        "sectionCount": 0,
+        "menuCount": 0,
+        "priceStatus": {},
+        "coverage": {
+          "status": "no_content_found",
+          "sourceCount": 2,
+          "readCount": 2,
+          "blockedCount": 0,
+          "failedCount": 0,
+          "candidateCount": 0,
+          "menuCount": 0,
+          "itemCount": 0,
+          "complete": false,
+          "reviewRequired": true
+        },
+        "evidence": {
+          "itemCount": 0,
+          "categoryCount": 0,
+          "menuCount": 0,
+          "priceStatus": {},
+          "knownWithoutAmount": 0,
+          "sourceIdPercent": null,
+          "locatorPercent": null,
+          "supportPercent": null,
+          "withSourceId": 0,
+          "withLocator": 0,
+          "withSupport": 0,
+          "missingSourceId": [],
+          "missingLocator": [],
+          "missingSupport": []
+        },
+        "limitations": [
+          "Gelezen zonder automatisch herkende menukaart: https://www.senangmakan.nl/afhaal-menu-nieuw/.",
+          "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+        ],
+        "errors": null,
+        "blockedReason": null,
+        "missingReasons": [
+          "Gelezen zonder automatisch herkende menukaart: https://www.senangmakan.nl/afhaal-menu-nieuw/.",
+          "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+        ]
+      },
+      {
+        "id": "H2-06",
+        "label": "Restaurant Zenza",
+        "type": "html",
+        "status": "executed_with_limitation",
+        "kind": "html",
+        "sourceVersionMatches": false,
+        "itemCount": 72,
+        "sectionCount": 1,
+        "menuCount": 1,
+        "priceStatus": {
+          "known": 72
+        },
+        "coverage": {
+          "status": "items_extracted",
+          "sourceCount": 2,
+          "readCount": 1,
+          "blockedCount": 0,
+          "failedCount": 1,
+          "candidateCount": 1,
+          "menuCount": 1,
+          "itemCount": 72,
+          "complete": false,
+          "reviewRequired": true
+        },
+        "evidence": {
+          "itemCount": 72,
+          "categoryCount": 1,
+          "menuCount": 1,
+          "priceStatus": {
+            "known": 72
+          },
+          "knownWithoutAmount": 0,
+          "sourceIdPercent": 100,
+          "locatorPercent": 100,
+          "supportPercent": 100,
+          "withSourceId": 72,
+          "withLocator": 72,
+          "withSupport": 72,
+          "missingSourceId": [],
+          "missingLocator": [],
+          "missingSupport": []
+        },
+        "limitations": [
+          "Menukaart https://restaurantzenza.nl/: sectie \"Home › Spiloplevelsen hos Unibet i Danmark › Fordele for spillerne\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
+          "Menukaart https://restaurantzenza.nl/: sectie \"Home › Moderne Unterhaltung mit erstklassigen Sportwetten › Sicherheit und Vielfalt im Blick\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
+          "Menukaart https://restaurantzenza.nl/: sectie \"Home › Descubre la experiencia de apuestas definitiva en 20bet › Ventajas competitivas del operador\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
+          "Niet gelezen: https://restaurantzenza.nl/menu/ (ophalen mislukt).",
+          "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.",
+          "Kwaliteitscontrole op de deterministische extractie vraagt aandacht (duplicate_item_within_category, html_arrangements_skipped); het resultaat is niet als volledig beoordeeld."
+        ],
+        "errors": null,
+        "blockedReason": null,
+        "missingReasons": [
+          "Menukaart https://restaurantzenza.nl/: sectie \"Home › Spiloplevelsen hos Unibet i Danmark › Fordele for spillerne\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
+          "Menukaart https://restaurantzenza.nl/: sectie \"Home › Moderne Unterhaltung mit erstklassigen Sportwetten › Sicherheit und Vielfalt im Blick\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
+          "Menukaart https://restaurantzenza.nl/: sectie \"Home › Descubre la experiencia de apuestas definitiva en 20bet › Ventajas competitivas del operador\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
+          "Niet gelezen: https://restaurantzenza.nl/menu/ (ophalen mislukt).",
+          "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.",
+          "Kwaliteitscontrole op de deterministische extractie vraagt aandacht (duplicate_item_within_category, html_arrangements_skipped); het resultaat is niet als volledig beoordeeld."
+        ]
+      },
+      {
+        "id": "H2-07",
+        "label": "Salon de Provence",
+        "type": "no_menu",
+        "status": "executed_with_limitation",
+        "kind": "html",
+        "sourceVersionMatches": true,
+        "itemCount": 0,
+        "sectionCount": 0,
+        "menuCount": 0,
+        "priceStatus": {},
+        "coverage": {
+          "status": "no_content_found",
+          "sourceCount": 1,
+          "readCount": 1,
+          "blockedCount": 0,
+          "failedCount": 0,
+          "candidateCount": 0,
+          "menuCount": 0,
+          "itemCount": 0,
+          "complete": false,
+          "reviewRequired": true
+        },
+        "evidence": {
+          "itemCount": 0,
+          "categoryCount": 0,
+          "menuCount": 0,
+          "priceStatus": {},
+          "knownWithoutAmount": 0,
+          "sourceIdPercent": null,
+          "locatorPercent": null,
+          "supportPercent": null,
+          "withSourceId": 0,
+          "withLocator": 0,
+          "withSupport": 0,
+          "missingSourceId": [],
+          "missingLocator": [],
+          "missingSupport": []
+        },
+        "limitations": [
+          "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+        ],
+        "errors": null,
+        "blockedReason": null,
+        "missingReasons": [
+          "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+        ]
+      },
+      {
+        "id": "H2-08",
+        "label": "Al Dente Ristorante",
+        "type": "no_menu",
+        "status": "executed_with_limitation",
+        "kind": "html",
+        "sourceVersionMatches": false,
+        "itemCount": 0,
+        "sectionCount": 0,
+        "menuCount": 0,
+        "priceStatus": {},
+        "coverage": {
+          "status": "no_content_found",
+          "sourceCount": 3,
+          "readCount": 3,
+          "blockedCount": 0,
+          "failedCount": 0,
+          "candidateCount": 0,
+          "menuCount": 0,
+          "itemCount": 0,
+          "complete": false,
+          "reviewRequired": true
+        },
+        "evidence": {
+          "itemCount": 0,
+          "categoryCount": 0,
+          "menuCount": 0,
+          "priceStatus": {},
+          "knownWithoutAmount": 0,
+          "sourceIdPercent": null,
+          "locatorPercent": null,
+          "supportPercent": null,
+          "withSourceId": 0,
+          "withLocator": 0,
+          "withSupport": 0,
+          "missingSourceId": [],
+          "missingLocator": [],
+          "missingSupport": []
+        },
+        "limitations": [
+          "Gelezen zonder automatisch herkende menukaart: https://www.aldentebreda.nl/menukaart-restaurant-2/.",
+          "Gelezen zonder automatisch herkende menukaart: https://www.aldentebreda.nl/menu-classico/.",
+          "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+        ],
+        "errors": null,
+        "blockedReason": null,
+        "missingReasons": [
+          "Gelezen zonder automatisch herkende menukaart: https://www.aldentebreda.nl/menukaart-restaurant-2/.",
+          "Gelezen zonder automatisch herkende menukaart: https://www.aldentebreda.nl/menu-classico/.",
+          "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+        ]
+      },
+      {
+        "id": "H2-09",
+        "label": "The Chai Affairs",
+        "type": "no_menu",
+        "status": "executed_with_limitation",
+        "kind": "html",
+        "sourceVersionMatches": true,
+        "itemCount": 0,
+        "sectionCount": 0,
+        "menuCount": 0,
+        "priceStatus": {},
+        "coverage": {
+          "status": "no_content_found",
+          "sourceCount": 1,
+          "readCount": 1,
+          "blockedCount": 0,
+          "failedCount": 0,
+          "candidateCount": 0,
+          "menuCount": 0,
+          "itemCount": 0,
+          "complete": false,
+          "reviewRequired": true
+        },
+        "evidence": {
+          "itemCount": 0,
+          "categoryCount": 0,
+          "menuCount": 0,
+          "priceStatus": {},
+          "knownWithoutAmount": 0,
+          "sourceIdPercent": null,
+          "locatorPercent": null,
+          "supportPercent": null,
+          "withSourceId": 0,
+          "withLocator": 0,
+          "withSupport": 0,
+          "missingSourceId": [],
+          "missingLocator": [],
+          "missingSupport": []
+        },
+        "limitations": [
+          "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+        ],
+        "errors": null,
+        "blockedReason": null,
+        "missingReasons": [
+          "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+        ]
+      },
+      {
+        "id": "H2-10",
+        "label": "Andalous",
+        "type": "no_menu",
+        "status": "executed_with_limitation",
+        "kind": "html",
+        "sourceVersionMatches": false,
+        "itemCount": 0,
+        "sectionCount": 0,
+        "menuCount": 0,
+        "priceStatus": {},
+        "coverage": {
+          "status": "no_content_found",
+          "sourceCount": 6,
+          "readCount": 6,
+          "blockedCount": 0,
+          "failedCount": 0,
+          "candidateCount": 0,
+          "menuCount": 0,
+          "itemCount": 0,
+          "complete": false,
+          "reviewRequired": true
+        },
+        "evidence": {
+          "itemCount": 0,
+          "categoryCount": 0,
+          "menuCount": 0,
+          "priceStatus": {},
+          "knownWithoutAmount": 0,
+          "sourceIdPercent": null,
+          "locatorPercent": null,
+          "supportPercent": null,
+          "withSourceId": 0,
+          "withLocator": 0,
+          "withSupport": 0,
+          "missingSourceId": [],
+          "missingLocator": [],
+          "missingSupport": []
+        },
+        "limitations": [
+          "Gelezen zonder automatisch herkende menukaart: https://www.andalous-breda.nl/menukaart/.",
+          "Gelezen zonder automatisch herkende menukaart: https://www.andalous-breda.nl/ramadan-menu/.",
+          "Gelezen zonder automatisch herkende menukaart: https://www.andalous-breda.nl/menukaart/.",
+          "Gelezen zonder automatisch herkende menukaart: https://www.andalous-breda.nl/ramadan-menu/.",
+          "Gelezen zonder automatisch herkende menukaart: https://www.andalous-breda.nl/fr/menukaart/.",
+          "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+        ],
+        "errors": null,
+        "blockedReason": null,
+        "missingReasons": [
+          "Gelezen zonder automatisch herkende menukaart: https://www.andalous-breda.nl/menukaart/.",
+          "Gelezen zonder automatisch herkende menukaart: https://www.andalous-breda.nl/ramadan-menu/.",
+          "Gelezen zonder automatisch herkende menukaart: https://www.andalous-breda.nl/fr/menukaart/.",
+          "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+        ]
+      },
+      {
+        "id": "H2-11",
+        "label": "De Beyerd",
+        "type": "no_menu",
+        "status": "executed_with_limitation",
+        "kind": "html",
+        "sourceVersionMatches": true,
+        "itemCount": 0,
+        "sectionCount": 0,
+        "menuCount": 0,
+        "priceStatus": {},
+        "coverage": {
+          "status": "no_content_found",
+          "sourceCount": 6,
+          "readCount": 3,
+          "blockedCount": 0,
+          "failedCount": 3,
+          "candidateCount": 0,
+          "menuCount": 0,
+          "itemCount": 0,
+          "complete": false,
+          "reviewRequired": true
+        },
+        "evidence": {
+          "itemCount": 0,
+          "categoryCount": 0,
+          "menuCount": 0,
+          "priceStatus": {},
+          "knownWithoutAmount": 0,
+          "sourceIdPercent": null,
+          "locatorPercent": null,
+          "supportPercent": null,
+          "withSourceId": 0,
+          "withLocator": 0,
+          "withSupport": 0,
+          "missingSourceId": [],
+          "missingLocator": [],
+          "missingSupport": []
+        },
+        "limitations": [
+          "Gelezen zonder automatisch herkende menukaart: https://www.beyerd.nl/untappd-menu-location4321-theme13562/.",
+          "Gelezen zonder automatisch herkende menukaart: https://www.beyerd.nl/cafe-lunchkaart/.",
+          "Niet gelezen: https://www.beyerd.nl/wp-content/uploads/2025/05/Lunchkaart-2025-3.4.jpg (ophalen mislukt).",
+          "Niet gelezen: https://www.beyerd.nl/wp-content/uploads/2025/05/Lunchkaart-2025-3.42.jpg (ophalen mislukt).",
+          "Niet gelezen: https://www.beyerd.nl/wp-content/uploads/2025/05/Lunchkaart-2025-Engels.jpg (ophalen mislukt).",
+          "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+        ],
+        "errors": null,
+        "blockedReason": null,
+        "missingReasons": [
+          "Gelezen zonder automatisch herkende menukaart: https://www.beyerd.nl/untappd-menu-location4321-theme13562/.",
+          "Gelezen zonder automatisch herkende menukaart: https://www.beyerd.nl/cafe-lunchkaart/.",
+          "Niet gelezen: https://www.beyerd.nl/wp-content/uploads/2025/05/Lunchkaart-2025-3.4.jpg (ophalen mislukt).",
+          "Niet gelezen: https://www.beyerd.nl/wp-content/uploads/2025/05/Lunchkaart-2025-3.42.jpg (ophalen mislukt).",
+          "Niet gelezen: https://www.beyerd.nl/wp-content/uploads/2025/05/Lunchkaart-2025-Engels.jpg (ophalen mislukt).",
+          "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+        ]
+      },
+      {
+        "id": "H2-12",
+        "label": "Restaurant Ruitersbosch",
+        "type": "blocked",
+        "status": "blocked",
+        "kind": "unsupported",
+        "sourceVersionMatches": null,
+        "itemCount": 0,
+        "sectionCount": 0,
+        "menuCount": 0,
+        "priceStatus": null,
+        "coverage": null,
+        "evidence": null,
+        "limitations": [
+          "The approved entry URL did not yield a readable public source. No alternative URL, other location or crawl was substituted."
+        ],
+        "errors": "request-error",
+        "blockedReason": "The approved entry URL did not yield a readable public source (request-error). No alternative URL or other location was substituted.",
+        "missingReasons": [
+          "The approved entry URL did not yield a readable public source (request-error). No alternative URL or other location was substituted.",
+          "The approved entry URL did not yield a readable public source. No alternative URL, other location or crawl was substituted.",
+          "request-error"
+        ]
+      },
+      {
+        "id": "H2-13",
+        "label": "Makanan",
+        "type": "blocked",
+        "status": "blocked",
+        "kind": "unsupported",
+        "sourceVersionMatches": null,
+        "itemCount": 0,
+        "sectionCount": 0,
+        "menuCount": 0,
+        "priceStatus": null,
+        "coverage": null,
+        "evidence": null,
+        "limitations": [
+          "The approved entry URL did not yield a readable public source. No alternative URL, other location or crawl was substituted."
+        ],
+        "errors": "fetch_failed",
+        "blockedReason": "The approved entry URL did not yield a readable public source (fetch_failed). No alternative URL or other location was substituted.",
+        "missingReasons": [
+          "The approved entry URL did not yield a readable public source (fetch_failed). No alternative URL or other location was substituted.",
+          "The approved entry URL did not yield a readable public source. No alternative URL, other location or crawl was substituted.",
+          "fetch_failed"
+        ]
+      },
+      {
+        "id": "H2-14",
+        "label": "Klein Java",
+        "type": "no_menu",
+        "status": "executed_with_limitation",
+        "kind": "html",
+        "sourceVersionMatches": true,
+        "itemCount": 0,
+        "sectionCount": 0,
+        "menuCount": 0,
+        "priceStatus": {},
+        "coverage": {
+          "status": "no_content_found",
+          "sourceCount": 2,
+          "readCount": 2,
+          "blockedCount": 0,
+          "failedCount": 0,
+          "candidateCount": 0,
+          "menuCount": 0,
+          "itemCount": 0,
+          "complete": false,
+          "reviewRequired": true
+        },
+        "evidence": {
+          "itemCount": 0,
+          "categoryCount": 0,
+          "menuCount": 0,
+          "priceStatus": {},
+          "knownWithoutAmount": 0,
+          "sourceIdPercent": null,
+          "locatorPercent": null,
+          "supportPercent": null,
+          "withSourceId": 0,
+          "withLocator": 0,
+          "withSupport": 0,
+          "missingSourceId": [],
+          "missingLocator": [],
+          "missingSupport": []
+        },
+        "limitations": [
+          "Gelezen zonder automatisch herkende menukaart: https://www.klein-java.nl/blog/afwijkende-openingstijden-kerstmenu-2025-klein-java.",
+          "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+        ],
+        "errors": null,
+        "blockedReason": null,
+        "missingReasons": [
+          "Gelezen zonder automatisch herkende menukaart: https://www.klein-java.nl/blog/afwijkende-openingstijden-kerstmenu-2025-klein-java.",
+          "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+        ]
+      },
+      {
+        "id": "H2-15",
+        "label": "Gantau Village",
+        "type": "blocked",
+        "status": "blocked",
+        "kind": "unsupported",
+        "sourceVersionMatches": null,
+        "itemCount": 0,
+        "sectionCount": 0,
+        "menuCount": 0,
+        "priceStatus": null,
+        "coverage": null,
+        "evidence": null,
+        "limitations": [
+          "The approved entry URL did not yield a readable public source. No alternative URL, other location or crawl was substituted."
+        ],
+        "errors": "request-error",
+        "blockedReason": "The approved entry URL did not yield a readable public source (request-error). No alternative URL or other location was substituted.",
+        "missingReasons": [
+          "The approved entry URL did not yield a readable public source (request-error). No alternative URL or other location was substituted.",
+          "The approved entry URL did not yield a readable public source. No alternative URL, other location or crawl was substituted.",
+          "request-error"
+        ]
+      },
+      {
+        "id": "H2-16",
+        "label": "Con Fuego",
+        "type": "no_menu",
+        "status": "executed_with_limitation",
+        "kind": "html",
+        "sourceVersionMatches": true,
+        "itemCount": 0,
+        "sectionCount": 0,
+        "menuCount": 0,
+        "priceStatus": {},
+        "coverage": {
+          "status": "no_content_found",
+          "sourceCount": 1,
+          "readCount": 1,
+          "blockedCount": 0,
+          "failedCount": 0,
+          "candidateCount": 0,
+          "menuCount": 0,
+          "itemCount": 0,
+          "complete": false,
+          "reviewRequired": true
+        },
+        "evidence": {
+          "itemCount": 0,
+          "categoryCount": 0,
+          "menuCount": 0,
+          "priceStatus": {},
+          "knownWithoutAmount": 0,
+          "sourceIdPercent": null,
+          "locatorPercent": null,
+          "supportPercent": null,
+          "withSourceId": 0,
+          "withLocator": 0,
+          "withSupport": 0,
+          "missingSourceId": [],
+          "missingLocator": [],
+          "missingSupport": []
+        },
+        "limitations": [
+          "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+        ],
+        "errors": null,
+        "blockedReason": null,
+        "missingReasons": [
+          "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+        ]
+      },
+      {
+        "id": "H2-17",
+        "label": "Masala",
+        "type": "blocked",
+        "status": "blocked",
+        "kind": "unsupported",
+        "sourceVersionMatches": null,
+        "itemCount": 0,
+        "sectionCount": 0,
+        "menuCount": 0,
+        "priceStatus": null,
+        "coverage": null,
+        "evidence": null,
+        "limitations": [
+          "The approved entry URL did not yield a readable public source. No alternative URL, other location or crawl was substituted."
+        ],
+        "errors": "request-error",
+        "blockedReason": "The approved entry URL did not yield a readable public source (request-error). No alternative URL or other location was substituted.",
+        "missingReasons": [
+          "The approved entry URL did not yield a readable public source (request-error). No alternative URL or other location was substituted.",
+          "The approved entry URL did not yield a readable public source. No alternative URL, other location or crawl was substituted.",
+          "request-error"
+        ]
+      },
+      {
+        "id": "H2-18",
+        "label": "Restaurant Uijttewaal",
+        "type": "html",
+        "status": "executed_with_limitation",
+        "kind": "html",
+        "sourceVersionMatches": true,
+        "itemCount": 10,
+        "sectionCount": 1,
+        "menuCount": 1,
+        "priceStatus": {
+          "known": 10
+        },
+        "coverage": {
+          "status": "items_extracted",
+          "sourceCount": 4,
+          "readCount": 3,
+          "blockedCount": 0,
+          "failedCount": 1,
+          "candidateCount": 2,
+          "menuCount": 1,
+          "itemCount": 10,
+          "complete": false,
+          "reviewRequired": true
+        },
+        "evidence": {
+          "itemCount": 10,
+          "categoryCount": 1,
+          "menuCount": 1,
+          "priceStatus": {
+            "known": 10
+          },
+          "knownWithoutAmount": 0,
+          "sourceIdPercent": 100,
+          "locatorPercent": 100,
+          "supportPercent": 100,
+          "withSourceId": 10,
+          "withLocator": 10,
+          "withSupport": 10,
+          "missingSourceId": [],
+          "missingLocator": [],
+          "missingSupport": []
+        },
+        "limitations": [
+          "Gelezen zonder automatisch herkende menukaart: https://www.restaurantuijttewaal.nl/menu.",
+          "PDF https://www.restaurantuijttewaal.nl/_files/ugd/977c56_bb0d186158ab469ea8f09b4855b40c93.pdf: 4 supplementregel(s) zijn niet als gerecht opgenomen; het concept ondersteunt supplementen nog niet.",
+          "PDF https://www.restaurantuijttewaal.nl/_files/ugd/977c56_bb0d186158ab469ea8f09b4855b40c93.pdf: 1 prijsregel(s) konden zonder aantoonbare lokale naam-/prijskoppeling niet als gerecht worden opgenomen.",
+          "PDF https://www.restaurantuijttewaal.nl/_files/ugd/977c56_bb0d186158ab469ea8f09b4855b40c93.pdf: 11 mogelijke rubriekkop(pen) zijn niet herkend en dus niet als rubriek opgeslagen.",
+          "PDF https://www.restaurantuijttewaal.nl/_files/ugd/977c56_9cbe108301f94af59c722342a41ec5e7.pdf kon niet worden gelezen (pdf_extraction_failed).",
+          "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.",
+          "Kwaliteitscontrole op de deterministische extractie vraagt aandacht (duplicate_item_within_category, pdf_supplements_skipped, pdf_unlinked_price_lines, pdf_unrecognised_headings); het resultaat is niet als volledig beoordeeld."
+        ],
+        "errors": null,
+        "blockedReason": null,
+        "missingReasons": [
+          "Gelezen zonder automatisch herkende menukaart: https://www.restaurantuijttewaal.nl/menu.",
+          "PDF https://www.restaurantuijttewaal.nl/_files/ugd/977c56_bb0d186158ab469ea8f09b4855b40c93.pdf: 4 supplementregel(s) zijn niet als gerecht opgenomen; het concept ondersteunt supplementen nog niet.",
+          "PDF https://www.restaurantuijttewaal.nl/_files/ugd/977c56_bb0d186158ab469ea8f09b4855b40c93.pdf: 1 prijsregel(s) konden zonder aantoonbare lokale naam-/prijskoppeling niet als gerecht worden opgenomen.",
+          "PDF https://www.restaurantuijttewaal.nl/_files/ugd/977c56_bb0d186158ab469ea8f09b4855b40c93.pdf: 11 mogelijke rubriekkop(pen) zijn niet herkend en dus niet als rubriek opgeslagen.",
+          "PDF https://www.restaurantuijttewaal.nl/_files/ugd/977c56_9cbe108301f94af59c722342a41ec5e7.pdf kon niet worden gelezen (pdf_extraction_failed).",
+          "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.",
+          "Kwaliteitscontrole op de deterministische extractie vraagt aandacht (duplicate_item_within_category, pdf_supplements_skipped, pdf_unlinked_price_lines, pdf_unrecognised_headings); het resultaat is niet als volledig beoordeeld."
+        ]
+      },
+      {
+        "id": "H2-19",
+        "label": "Beers & Barrels",
+        "type": "no_menu",
+        "status": "executed_with_limitation",
+        "kind": "html",
+        "sourceVersionMatches": true,
+        "itemCount": 0,
+        "sectionCount": 0,
+        "menuCount": 0,
+        "priceStatus": {},
+        "coverage": {
+          "status": "no_content_found",
+          "sourceCount": 2,
+          "readCount": 2,
+          "blockedCount": 0,
+          "failedCount": 0,
+          "candidateCount": 0,
+          "menuCount": 0,
+          "itemCount": 0,
+          "complete": false,
+          "reviewRequired": true
+        },
+        "evidence": {
+          "itemCount": 0,
+          "categoryCount": 0,
+          "menuCount": 0,
+          "priceStatus": {},
+          "knownWithoutAmount": 0,
+          "sourceIdPercent": null,
+          "locatorPercent": null,
+          "supportPercent": null,
+          "withSourceId": 0,
+          "withLocator": 0,
+          "withSupport": 0,
+          "missingSourceId": [],
+          "missingLocator": [],
+          "missingSupport": []
+        },
+        "limitations": [
+          "Gelezen zonder automatisch herkende menukaart: https://www.beersbarrels.nl/en/.",
+          "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+        ],
+        "errors": null,
+        "blockedReason": null,
+        "missingReasons": [
+          "Gelezen zonder automatisch herkende menukaart: https://www.beersbarrels.nl/en/.",
+          "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+        ]
+      }
+    ]
+  },
+  "results": {
+    "H2-01": {
+      "id": "H2-01",
+      "referenceId": "H2-01",
+      "label": "Restaurant Chocolat",
+      "class": null,
+      "kind": "html",
+      "url": "https://www.restaurant-chocolat.nl",
+      "pinnedBytesSha256": "070974a5ac1922c4bf0c4372614556d4ea4624e711e9d4d8eb5b2f71f30d52c8",
+      "captureStatus": "captured",
+      "evaluatedAt": "2026-10-21T12:42:15.115Z",
+      "status": "executed_with_limitation",
+      "completed": true,
+      "bytesSha256": "49c296aed3e3f91932b64eeb3523ba79aada5611ed7688b88355696fb0e37d14",
+      "sourceVersionMatches": false,
+      "finalUrl": "https://www.restaurant-chocolat.nl/",
+      "itemCount": 0,
+      "categoryCount": 0,
+      "menuCount": 0,
+      "menus": [],
+      "priceStatus": {},
+      "evidence": {
+        "itemCount": 0,
+        "categoryCount": 0,
+        "menuCount": 0,
+        "priceStatus": {},
+        "knownWithoutAmount": 0,
+        "sourceIdPercent": null,
+        "locatorPercent": null,
+        "supportPercent": null,
+        "withSourceId": 0,
+        "withLocator": 0,
+        "withSupport": 0,
+        "missingSourceId": [],
+        "missingLocator": [],
+        "missingSupport": []
+      },
+      "sourceInventory": [
+        {
+          "url": "https://www.restaurant-chocolat.nl/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "6284c4eeb39cc4065502df66c8e31b2e54e6c3e064597b2c74035f74e153158c"
+        },
+        {
+          "url": "https://www.restaurant-chocolat.nl/menu/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "6614384627b71af0b41611a42fc2bb70625a2a283dd0a460fca9b35b00da803b"
+        },
+        {
+          "url": "https://www.restaurant-chocolat.nl/lunch/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "1795cede8c03149058d1ece202412462e48255ca41694e44809aee93b62565eb"
+        },
+        {
+          "url": "https://www.restaurant-chocolat.nl/diner/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "e8edf0a88e3a2d03f72a838f885d5973d70e79b6c9b012480ab5b7af68e11de3"
+        },
+        {
+          "url": "https://www.restaurant-chocolat.nl/menu/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "b78b1786b5c4cda79a9c8e4811d98305432afb3e9513e76e08733bd2cec763a0"
+        }
+      ],
+      "coverage": {
+        "status": "no_content_found",
+        "sourceCount": 5,
+        "readCount": 5,
+        "blockedCount": 0,
+        "failedCount": 0,
+        "candidateCount": 0,
+        "menuCount": 0,
+        "itemCount": 0,
+        "complete": false,
+        "reviewRequired": true
+      },
+      "attentionGroupCount": 0,
+      "limitations": [
+        "Gelezen zonder automatisch herkende menukaart: https://www.restaurant-chocolat.nl/menu/.",
+        "Gelezen zonder automatisch herkende menukaart: https://www.restaurant-chocolat.nl/lunch/.",
+        "Gelezen zonder automatisch herkende menukaart: https://www.restaurant-chocolat.nl/diner/.",
+        "Gelezen zonder automatisch herkende menukaart: https://www.restaurant-chocolat.nl/menu/.",
+        "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+      ],
+      "notes": [
+        "Doorgestuurd van https://www.restaurant-chocolat.nl/lunch naar https://www.restaurant-chocolat.nl/lunch/ (HTTP 301).",
+        "Doorgestuurd van https://www.restaurant-chocolat.nl/diner naar https://www.restaurant-chocolat.nl/diner/ (HTTP 301).",
+        "Doorgestuurd van https://www.restaurant-chocolat.nl/menu naar https://www.restaurant-chocolat.nl/menu/ (HTTP 301).",
+        "Mogelijke menupagina gelezen: https://www.restaurant-chocolat.nl/menu/ (link \"Menu\"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.",
+        "Mogelijke menupagina gelezen: https://www.restaurant-chocolat.nl/lunch/ (link \"LUNCHKAART\"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.",
+        "Mogelijke menupagina gelezen: https://www.restaurant-chocolat.nl/diner/ (link \"DINERKAART\"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.",
+        "Mogelijke menupagina gelezen: https://www.restaurant-chocolat.nl/menu/ (link \"Menu\"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.",
+        "AI-structurering is niet beschikbaar — resultaten zijn beperkt tot deterministische extractie."
+      ],
+      "result": "No items were extracted. The source is recorded as an honest limitation, not as a successful menu.",
+      "elapsedMs": 3720
+    },
+    "H2-02": {
+      "id": "H2-02",
+      "referenceId": "H2-02",
+      "label": "Pellens",
+      "class": null,
+      "kind": "html",
+      "url": "https://pellens.nl",
+      "pinnedBytesSha256": "66f57e2672894a1bf76bea5d52acdf6749000140d99fd12ff20fa5207b5e2d7a",
+      "captureStatus": "captured",
+      "evaluatedAt": "2026-10-21T12:42:18.835Z",
+      "status": "executed_with_limitation",
+      "completed": true,
+      "bytesSha256": "66f57e2672894a1bf76bea5d52acdf6749000140d99fd12ff20fa5207b5e2d7a",
+      "sourceVersionMatches": true,
+      "finalUrl": "https://pellens.nl/",
+      "itemCount": 27,
+      "categoryCount": 9,
+      "menuCount": 1,
+      "menus": [
+        {
+          "title": "Welkom bij Pellens",
+          "sourceId": "source-1",
+          "categoryCount": 9,
+          "itemCount": 27,
+          "categories": [
+            {
+              "name": "Formule du Jour",
+              "path": [
+                "Onze kaart",
+                "Formule du Jour"
+              ],
+              "sourcePath": [
+                "Welkom bij Pellens",
+                "Onze kaart",
+                "Formule du Jour"
+              ],
+              "uncertain": true,
+              "itemCount": 2
+            },
+            {
+              "name": "Brioches",
+              "path": [
+                "Onze kaart",
+                "Brioches"
+              ],
+              "sourcePath": [
+                "Welkom bij Pellens",
+                "Onze kaart",
+                "Brioches"
+              ],
+              "uncertain": true,
+              "itemCount": 5
+            },
+            {
+              "name": "Pellens",
+              "path": [
+                "Onze kaart",
+                "À la carte",
+                "Pellens"
+              ],
+              "sourcePath": [
+                "Welkom bij Pellens",
+                "Onze kaart",
+                "À la carte",
+                "Pellens"
+              ],
+              "uncertain": true,
+              "itemCount": 3
+            },
+            {
+              "name": "Groenten",
+              "path": [
+                "Onze kaart",
+                "À la carte",
+                "Groenten"
+              ],
+              "sourcePath": [
+                "Welkom bij Pellens",
+                "Onze kaart",
+                "À la carte",
+                "Groenten"
+              ],
+              "uncertain": true,
+              "itemCount": 4
+            },
+            {
+              "name": "Dessert",
+              "path": [
+                "Onze kaart",
+                "À la carte",
+                "Dessert"
+              ],
+              "sourcePath": [
+                "Welkom bij Pellens",
+                "Onze kaart",
+                "À la carte",
+                "Dessert"
+              ],
+              "uncertain": true,
+              "itemCount": 1
+            },
+            {
+              "name": "Formule du Jour",
+              "path": [
+                "Onze kaart",
+                "À la carte",
+                "Formule du Jour"
+              ],
+              "sourcePath": [
+                "Welkom bij Pellens",
+                "Onze kaart",
+                "À la carte",
+                "Formule du Jour"
+              ],
+              "uncertain": true,
+              "itemCount": 2
+            },
+            {
+              "name": "Les Brioches",
+              "path": [
+                "Les Brioches"
+              ],
+              "sourcePath": [
+                "Welkom bij Pellens",
+                "Les Brioches"
+              ],
+              "uncertain": true,
+              "itemCount": 5
+            },
+            {
+              "name": "Salades",
+              "path": [
+                "Salades"
+              ],
+              "sourcePath": [
+                "Welkom bij Pellens",
+                "Salades"
+              ],
+              "uncertain": true,
+              "itemCount": 3
+            },
+            {
+              "name": "Erbij",
+              "path": [
+                "Erbij"
+              ],
+              "sourcePath": [
+                "Welkom bij Pellens",
+                "Erbij"
+              ],
+              "uncertain": true,
+              "itemCount": 2
+            }
+          ]
+        }
+      ],
+      "priceStatus": {
+        "known": 27
+      },
+      "evidence": {
+        "itemCount": 27,
+        "categoryCount": 9,
+        "menuCount": 1,
+        "priceStatus": {
+          "known": 27
+        },
+        "knownWithoutAmount": 0,
+        "sourceIdPercent": 100,
+        "locatorPercent": 100,
+        "supportPercent": 100,
+        "withSourceId": 27,
+        "withLocator": 27,
+        "withSupport": 27,
+        "missingSourceId": [],
+        "missingLocator": [],
+        "missingSupport": []
+      },
+      "sourceInventory": [
+        {
+          "url": "https://pellens.nl/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "66f57e2672894a1bf76bea5d52acdf6749000140d99fd12ff20fa5207b5e2d7a"
+        }
+      ],
+      "coverage": {
+        "status": "items_extracted",
+        "sourceCount": 1,
+        "readCount": 1,
+        "blockedCount": 0,
+        "failedCount": 0,
+        "candidateCount": 1,
+        "menuCount": 1,
+        "itemCount": 27,
+        "complete": false,
+        "reviewRequired": true
+      },
+      "attentionGroupCount": 9,
+      "limitations": [
+        "Menukaart https://pellens.nl/: sectie \"Welkom bij Pellens › Onze kaart › À la carte › Menu Pellens\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
+        "Menukaart https://pellens.nl/: sectie \"Welkom bij Pellens › Onze kaart › À la carte › Menu légumes\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
+        "Menukaart https://pellens.nl/: sectie \"Welkom bij Pellens › Menu Pellens\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
+        "Menukaart https://pellens.nl/: sectie \"Welkom bij Pellens › Menu légumes\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
+        "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.",
+        "Kwaliteitscontrole op de deterministische extractie vraagt aandacht (duplicate_item_across_categories, duplicate_item_within_category, html_arrangements_skipped); het resultaat is niet als volledig beoordeeld."
+      ],
+      "notes": [
+        "Menukaart herkend uit de HTML van https://pellens.nl/: 27 gerechten met prijs in 9 rubrieken. Controleer rubrieken en prijzen.",
+        "AI-structurering is niet beschikbaar — resultaten zijn beperkt tot deterministische extractie.",
+        "9 rubriek(en) zijn als \"Controle nodig\" gemarkeerd op basis van de kwaliteitscontrole."
+      ],
+      "result": "27 items in 9 sections across 1 menu context(s). This is a first holdout observation, not a complete-menu or accuracy claim.",
+      "elapsedMs": 2031
+    },
+    "H2-03": {
+      "id": "H2-03",
+      "referenceId": "H2-03",
+      "label": "Dolce e Salato",
+      "class": null,
+      "kind": "html",
+      "url": "https://dolceesalato.nl",
+      "pinnedBytesSha256": "378dc3db722adc2483c5fc7584fb22c21bceea06f2a4153d07570272072a1837",
+      "captureStatus": "captured",
+      "evaluatedAt": "2026-10-21T12:42:20.866Z",
+      "status": "executed_with_limitation",
+      "completed": true,
+      "bytesSha256": "378dc3db722adc2483c5fc7584fb22c21bceea06f2a4153d07570272072a1837",
+      "sourceVersionMatches": true,
+      "finalUrl": "https://dolceesalato.nl/",
+      "itemCount": 31,
+      "categoryCount": 9,
+      "menuCount": 2,
+      "menus": [
+        {
+          "title": "Italiaans restaurant in hartje BredaItalian restaurant in the heart of Breda",
+          "sourceId": "source-1",
+          "categoryCount": 3,
+          "itemCount": 12,
+          "categories": [
+            {
+              "name": "Pizza",
+              "path": [
+                "Uit onze keukenFrom our kitchen",
+                "Pizza"
+              ],
+              "sourcePath": [
+                "Italiaans restaurant in hartje BredaItalian restaurant in the heart of Breda",
+                "Uit onze keukenFrom our kitchen",
+                "Pizza"
+              ],
+              "uncertain": false,
+              "itemCount": 4
+            },
+            {
+              "name": "Pasta",
+              "path": [
+                "Uit onze keukenFrom our kitchen",
+                "Pasta"
+              ],
+              "sourcePath": [
+                "Italiaans restaurant in hartje BredaItalian restaurant in the heart of Breda",
+                "Uit onze keukenFrom our kitchen",
+                "Pasta"
+              ],
+              "uncertain": false,
+              "itemCount": 4
+            },
+            {
+              "name": "Antipasti & dolciAntipasti & dolci",
+              "path": [
+                "Uit onze keukenFrom our kitchen",
+                "Antipasti & dolciAntipasti & dolci"
+              ],
+              "sourcePath": [
+                "Italiaans restaurant in hartje BredaItalian restaurant in the heart of Breda",
+                "Uit onze keukenFrom our kitchen",
+                "Antipasti & dolciAntipasti & dolci"
+              ],
+              "uncertain": false,
+              "itemCount": 4
+            }
+          ]
+        },
+        {
+          "title": null,
+          "sourceId": "source-2",
+          "categoryCount": 6,
+          "itemCount": 19,
+          "categories": [
+            {
+              "name": "Antipasti",
+              "path": [],
+              "sourcePath": null,
+              "uncertain": false,
+              "itemCount": 5
+            },
+            {
+              "name": "Pizza",
+              "path": [],
+              "sourcePath": null,
+              "uncertain": false,
+              "itemCount": 5
+            },
+            {
+              "name": "Pasta",
+              "path": [],
+              "sourcePath": null,
+              "uncertain": false,
+              "itemCount": 4
+            },
+            {
+              "name": "Keuzemenu",
+              "path": [],
+              "sourcePath": null,
+              "uncertain": false,
+              "itemCount": 1
+            },
+            {
+              "name": "Vlees & Vis",
+              "path": [],
+              "sourcePath": null,
+              "uncertain": false,
+              "itemCount": 2
+            },
+            {
+              "name": "Dessert",
+              "path": [],
+              "sourcePath": null,
+              "uncertain": false,
+              "itemCount": 2
+            }
+          ]
+        }
+      ],
+      "priceStatus": {
+        "known": 31
+      },
+      "evidence": {
+        "itemCount": 31,
+        "categoryCount": 9,
+        "menuCount": 2,
+        "priceStatus": {
+          "known": 31
+        },
+        "knownWithoutAmount": 0,
+        "sourceIdPercent": 100,
+        "locatorPercent": 39,
+        "supportPercent": 39,
+        "withSourceId": 31,
+        "withLocator": 12,
+        "withSupport": 12,
+        "missingSourceId": [],
+        "missingLocator": [
+          "Insalata Caprese",
+          "Carpaccio di Carne",
+          "Vitello Tonnato",
+          "Calamari Fritti",
+          "Antipasto Misto"
+        ],
+        "missingSupport": [
+          "Insalata Caprese",
+          "Carpaccio di Carne",
+          "Vitello Tonnato",
+          "Calamari Fritti",
+          "Antipasto Misto"
+        ]
+      },
+      "sourceInventory": [
+        {
+          "url": "https://dolceesalato.nl/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "378dc3db722adc2483c5fc7584fb22c21bceea06f2a4153d07570272072a1837"
+        },
+        {
+          "url": "https://dolceesalato.nl/menu/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "0a7f47013b631d2ae4e674bf06e0b783a8575406fbb1ecdc18754989655c7378"
+        },
+        {
+          "url": "https://dolceesalato.nl/stempelkaart/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "34ef88dbc6080cebb18115db86263f6e9ad8e91128a9faf52c2f40dd10bb4d7e"
+        }
+      ],
+      "coverage": {
+        "status": "items_extracted",
+        "sourceCount": 3,
+        "readCount": 3,
+        "blockedCount": 0,
+        "failedCount": 0,
+        "candidateCount": 2,
+        "menuCount": 2,
+        "itemCount": 31,
+        "complete": false,
+        "reviewRequired": true
+      },
+      "attentionGroupCount": 0,
+      "limitations": [
+        "Gelezen zonder automatisch herkende menukaart: https://dolceesalato.nl/stempelkaart/.",
+        "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+      ],
+      "notes": [
+        "Menukaart herkend uit de HTML van https://dolceesalato.nl/: 12 gerechten met prijs in 3 rubrieken. Controleer rubrieken en prijzen.",
+        "Mogelijke menupagina gelezen: https://dolceesalato.nl/stempelkaart/ (link \"Hoe werkt het? How it works\"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.",
+        "AI-structurering is niet beschikbaar — resultaten zijn beperkt tot deterministische extractie."
+      ],
+      "result": "31 items in 9 sections across 2 menu context(s). This is a first holdout observation, not a complete-menu or accuracy claim.",
+      "elapsedMs": 358
+    },
+    "H2-04": {
+      "id": "H2-04",
+      "referenceId": "H2-04",
+      "label": "Trattoria Perron",
+      "class": null,
+      "kind": "html",
+      "url": "https://www.trattoriaperron.nl",
+      "pinnedBytesSha256": "dd2aa70beedf56edf9d3b9e3b9f126db6a311d7fe557cebba5eeeb573a4e1773",
+      "captureStatus": "captured",
+      "evaluatedAt": "2026-10-21T12:42:21.224Z",
+      "status": "executed_with_limitation",
+      "completed": true,
+      "bytesSha256": "dd2aa70beedf56edf9d3b9e3b9f126db6a311d7fe557cebba5eeeb573a4e1773",
+      "sourceVersionMatches": true,
+      "finalUrl": "https://www.trattoriaperron.nl/",
+      "itemCount": 156,
+      "categoryCount": 25,
+      "menuCount": 2,
+      "menus": [
+        {
+          "title": null,
+          "sourceId": "source-2",
+          "categoryCount": 19,
+          "itemCount": 146,
+          "categories": [
+            {
+              "name": "Bij de koffie",
+              "path": [],
+              "sourcePath": null,
+              "uncertain": true,
+              "itemCount": 3
+            },
+            {
+              "name": "Panini",
+              "path": [],
+              "sourcePath": null,
+              "uncertain": false,
+              "itemCount": 8
+            },
+            {
+              "name": "Maaltijdsalades",
+              "path": [],
+              "sourcePath": null,
+              "uncertain": false,
+              "itemCount": 4
+            },
+            {
+              "name": "Soepen",
+              "path": [],
+              "sourcePath": null,
+              "uncertain": false,
+              "itemCount": 2
+            },
+            {
+              "name": "Warme lunchgerechten",
+              "path": [],
+              "sourcePath": null,
+              "uncertain": false,
+              "itemCount": 3
+            },
+            {
+              "name": "Antipasti",
+              "path": [],
+              "sourcePath": null,
+              "uncertain": false,
+              "itemCount": 6
+            },
+            {
+              "name": "Bruschette",
+              "path": [],
+              "sourcePath": null,
+              "uncertain": false,
+              "itemCount": 5
+            },
+            {
+              "name": "Aperitivo",
+              "path": [],
+              "sourcePath": null,
+              "uncertain": false,
+              "itemCount": 6
+            },
+            {
+              "name": "Pasta & risotto",
+              "path": [],
+              "sourcePath": null,
+              "uncertain": false,
+              "itemCount": 8
+            },
+            {
+              "name": "Pizza",
+              "path": [],
+              "sourcePath": null,
+              "uncertain": false,
+              "itemCount": 8
+            },
+            {
+              "name": "Bambini",
+              "path": [],
+              "sourcePath": null,
+              "uncertain": false,
+              "itemCount": 2
+            },
+            {
+              "name": "Dolci",
+              "path": [],
+              "sourcePath": null,
+              "uncertain": true,
+              "itemCount": 6
+            },
+            {
+              "name": "Frisdranken",
+              "path": [],
+              "sourcePath": null,
+              "uncertain": false,
+              "itemCount": 19
+            },
+            {
+              "name": "Wijn",
+              "path": [],
+              "sourcePath": null,
+              "uncertain": false,
+              "itemCount": 11
+            },
+            {
+              "name": "Cocktails",
+              "path": [],
+              "sourcePath": null,
+              "uncertain": true,
+              "itemCount": 10
+            },
+            {
+              "name": "Bier",
+              "path": [],
+              "sourcePath": null,
+              "uncertain": false,
+              "itemCount": 11
+            },
+            {
+              "name": "Mocktails",
+              "path": [],
+              "sourcePath": null,
+              "uncertain": true,
+              "itemCount": 5
+            },
+            {
+              "name": "Aperitieven & digestieven",
+              "path": [],
+              "sourcePath": null,
+              "uncertain": false,
+              "itemCount": 12
+            },
+            {
+              "name": "Warme dranken",
+              "path": [],
+              "sourcePath": null,
+              "uncertain": false,
+              "itemCount": 17
+            }
+          ]
+        },
+        {
+          "title": null,
+          "sourceId": "source-3",
+          "categoryCount": 6,
+          "itemCount": 10,
+          "categories": [
+            {
+              "name": "Aperitivo",
+              "path": [],
+              "sourcePath": null,
+              "uncertain": false,
+              "itemCount": 1
+            },
+            {
+              "name": "Amuse",
+              "path": [],
+              "sourcePath": null,
+              "uncertain": false,
+              "itemCount": 1
+            },
+            {
+              "name": "Antipasti",
+              "path": [],
+              "sourcePath": null,
+              "uncertain": false,
+              "itemCount": 3
+            },
+            {
+              "name": "Primo piatto",
+              "path": [],
+              "sourcePath": null,
+              "uncertain": false,
+              "itemCount": 1
+            },
+            {
+              "name": "Secondi piatti",
+              "path": [],
+              "sourcePath": null,
+              "uncertain": false,
+              "itemCount": 3
+            },
+            {
+              "name": "Dolce",
+              "path": [],
+              "sourcePath": null,
+              "uncertain": false,
+              "itemCount": 1
+            }
+          ]
+        }
+      ],
+      "priceStatus": {
+        "known": 146,
+        "unknown": 10
+      },
+      "evidence": {
+        "itemCount": 156,
+        "categoryCount": 25,
+        "menuCount": 2,
+        "priceStatus": {
+          "known": 146,
+          "unknown": 10
+        },
+        "knownWithoutAmount": 0,
+        "sourceIdPercent": 100,
+        "locatorPercent": 0,
+        "supportPercent": 0,
+        "withSourceId": 156,
+        "withLocator": 0,
+        "withSupport": 0,
+        "missingSourceId": [],
+        "missingLocator": [
+          "Appeltaart",
+          "Dudok truffeltaart",
+          "Cannoli",
+          "Pollo al pesto Trattoria Perron",
+          "Porchetta, friarielli e mostarda"
+        ],
+        "missingSupport": [
+          "Appeltaart",
+          "Dudok truffeltaart",
+          "Cannoli",
+          "Pollo al pesto Trattoria Perron",
+          "Porchetta, friarielli e mostarda"
+        ]
+      },
+      "sourceInventory": [
+        {
+          "url": "https://www.trattoriaperron.nl/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "dd2aa70beedf56edf9d3b9e3b9f126db6a311d7fe557cebba5eeeb573a4e1773"
+        },
+        {
+          "url": "https://www.trattoriaperron.nl/menu/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "d47146bef242101ee0d3eb86abedaedb592de20c7e3ef713450c8d89ffb1b498"
+        },
+        {
+          "url": "https://www.trattoriaperron.nl/kerstavond-2026/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "1a4e7ff64c5b57993c495baf3627b2146c08de5ca742400f62b052cf1a632d71"
+        }
+      ],
+      "coverage": {
+        "status": "items_extracted",
+        "sourceCount": 3,
+        "readCount": 3,
+        "blockedCount": 0,
+        "failedCount": 0,
+        "candidateCount": 2,
+        "menuCount": 2,
+        "itemCount": 156,
+        "complete": false,
+        "reviewRequired": true
+      },
+      "attentionGroupCount": 1,
+      "limitations": [
+        "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.",
+        "Kwaliteitscontrole op de deterministische extractie vraagt aandacht (duplicate_item_across_categories); het resultaat is niet als volledig beoordeeld."
+      ],
+      "notes": [
+        "AI-structurering is niet beschikbaar — resultaten zijn beperkt tot deterministische extractie.",
+        "4 rubriek(en) zijn als \"Controle nodig\" gemarkeerd op basis van de kwaliteitscontrole."
+      ],
+      "result": "156 items in 25 sections across 2 menu context(s). This is a first holdout observation, not a complete-menu or accuracy claim.",
+      "elapsedMs": 1664
+    },
+    "H2-05": {
+      "id": "H2-05",
+      "referenceId": "H2-05",
+      "label": "Senang Makan",
+      "class": null,
+      "kind": "html",
+      "url": "https://www.senangmakan.nl",
+      "pinnedBytesSha256": "aa8a5dbd18214db4da51d110aba7601036b79f39a95d265ec42746d83d8b5d64",
+      "captureStatus": "captured",
+      "evaluatedAt": "2026-10-21T12:42:22.888Z",
+      "status": "executed_with_limitation",
+      "completed": true,
+      "bytesSha256": "aa8a5dbd18214db4da51d110aba7601036b79f39a95d265ec42746d83d8b5d64",
+      "sourceVersionMatches": true,
+      "finalUrl": "https://www.senangmakan.nl/",
+      "itemCount": 0,
+      "categoryCount": 0,
+      "menuCount": 0,
+      "menus": [],
+      "priceStatus": {},
+      "evidence": {
+        "itemCount": 0,
+        "categoryCount": 0,
+        "menuCount": 0,
+        "priceStatus": {},
+        "knownWithoutAmount": 0,
+        "sourceIdPercent": null,
+        "locatorPercent": null,
+        "supportPercent": null,
+        "withSourceId": 0,
+        "withLocator": 0,
+        "withSupport": 0,
+        "missingSourceId": [],
+        "missingLocator": [],
+        "missingSupport": []
+      },
+      "sourceInventory": [
+        {
+          "url": "https://www.senangmakan.nl/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "aa8a5dbd18214db4da51d110aba7601036b79f39a95d265ec42746d83d8b5d64"
+        },
+        {
+          "url": "https://www.senangmakan.nl/afhaal-menu-nieuw/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "ec4f00f1bff361476889b780ee97c65b990ad9b5bd0c7895fe51a56e19e3d334"
+        }
+      ],
+      "coverage": {
+        "status": "no_content_found",
+        "sourceCount": 2,
+        "readCount": 2,
+        "blockedCount": 0,
+        "failedCount": 0,
+        "candidateCount": 0,
+        "menuCount": 0,
+        "itemCount": 0,
+        "complete": false,
+        "reviewRequired": true
+      },
+      "attentionGroupCount": 0,
+      "limitations": [
+        "Gelezen zonder automatisch herkende menukaart: https://www.senangmakan.nl/afhaal-menu-nieuw/.",
+        "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+      ],
+      "notes": [
+        "Mogelijke menupagina gelezen: https://www.senangmakan.nl/afhaal-menu-nieuw/ (link \"Warm\"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.",
+        "AI-structurering is niet beschikbaar — resultaten zijn beperkt tot deterministische extractie."
+      ],
+      "result": "No items were extracted. The source is recorded as an honest limitation, not as a successful menu.",
+      "elapsedMs": 3353
+    },
+    "H2-06": {
+      "id": "H2-06",
+      "referenceId": "H2-06",
+      "label": "Restaurant Zenza",
+      "class": null,
+      "kind": "html",
+      "url": "https://www.restaurantzenza.nl",
+      "pinnedBytesSha256": "dcd192649e2b2209ad1f0332c9489a0f6cc7ad6736679c4fdbf5d5ac17b112bb",
+      "captureStatus": "captured",
+      "evaluatedAt": "2026-10-21T12:42:26.241Z",
+      "status": "executed_with_limitation",
+      "completed": true,
+      "bytesSha256": "c3907ce963c92223f0bff2af297d5d2d8a9731acdf72f87bd6d17513292e8624",
+      "sourceVersionMatches": false,
+      "finalUrl": "https://restaurantzenza.nl/",
+      "itemCount": 72,
+      "categoryCount": 1,
+      "menuCount": 1,
+      "menus": [
+        {
+          "title": "Home",
+          "sourceId": "source-1",
+          "categoryCount": 1,
+          "itemCount": 72,
+          "categories": [
+            {
+              "name": "Al onze gerechten zijn 100% halal",
+              "path": [
+                "Al onze gerechten zijn 100% halal"
+              ],
+              "sourcePath": [
+                "Home",
+                "Al onze gerechten zijn 100% halal"
+              ],
+              "uncertain": true,
+              "itemCount": 72
+            }
+          ]
+        }
+      ],
+      "priceStatus": {
+        "known": 72
+      },
+      "evidence": {
+        "itemCount": 72,
+        "categoryCount": 1,
+        "menuCount": 1,
+        "priceStatus": {
+          "known": 72
+        },
+        "knownWithoutAmount": 0,
+        "sourceIdPercent": 100,
+        "locatorPercent": 100,
+        "supportPercent": 100,
+        "withSourceId": 72,
+        "withLocator": 72,
+        "withSupport": 72,
+        "missingSourceId": [],
+        "missingLocator": [],
+        "missingSupport": []
+      },
+      "sourceInventory": [
+        {
+          "url": "https://restaurantzenza.nl/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "c3907ce963c92223f0bff2af297d5d2d8a9731acdf72f87bd6d17513292e8624"
+        },
+        {
+          "url": "https://restaurantzenza.nl/menu/",
+          "kind": "other",
+          "status": "failed",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": null
+        }
+      ],
+      "coverage": {
+        "status": "items_extracted",
+        "sourceCount": 2,
+        "readCount": 1,
+        "blockedCount": 0,
+        "failedCount": 1,
+        "candidateCount": 1,
+        "menuCount": 1,
+        "itemCount": 72,
+        "complete": false,
+        "reviewRequired": true
+      },
+      "attentionGroupCount": 1,
+      "limitations": [
+        "Menukaart https://restaurantzenza.nl/: sectie \"Home › Spiloplevelsen hos Unibet i Danmark › Fordele for spillerne\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
+        "Menukaart https://restaurantzenza.nl/: sectie \"Home › Moderne Unterhaltung mit erstklassigen Sportwetten › Sicherheit und Vielfalt im Blick\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
+        "Menukaart https://restaurantzenza.nl/: sectie \"Home › Descubre la experiencia de apuestas definitiva en 20bet › Ventajas competitivas del operador\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
+        "Niet gelezen: https://restaurantzenza.nl/menu/ (ophalen mislukt).",
+        "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.",
+        "Kwaliteitscontrole op de deterministische extractie vraagt aandacht (duplicate_item_within_category, html_arrangements_skipped); het resultaat is niet als volledig beoordeeld."
+      ],
+      "notes": [
+        "Doorgestuurd van https://www.restaurantzenza.nl/ naar https://restaurantzenza.nl/ (HTTP 301).",
+        "Menukaart herkend uit de HTML van https://restaurantzenza.nl/: 72 gerechten met prijs in 1 rubrieken. Controleer rubrieken en prijzen.",
+        "Ophalen van https://restaurantzenza.nl/menu/ is mislukt.",
+        "AI-structurering is niet beschikbaar — resultaten zijn beperkt tot deterministische extractie.",
+        "1 rubriek(en) zijn als \"Controle nodig\" gemarkeerd op basis van de kwaliteitscontrole."
+      ],
+      "result": "72 items in 1 sections across 1 menu context(s). This is a first holdout observation, not a complete-menu or accuracy claim.",
+      "elapsedMs": 1823
+    },
+    "H2-07": {
+      "id": "H2-07",
+      "referenceId": "H2-07",
+      "label": "Salon de Provence",
+      "class": null,
+      "kind": "html",
+      "url": "https://www.salondeprovence.nl",
+      "pinnedBytesSha256": "ce02f460c79e3e83720b85c41e9e0dbcf4013990222270af680418c07c3a960f",
+      "captureStatus": "captured",
+      "evaluatedAt": "2026-10-21T12:42:28.064Z",
+      "status": "executed_with_limitation",
+      "completed": true,
+      "bytesSha256": "ce02f460c79e3e83720b85c41e9e0dbcf4013990222270af680418c07c3a960f",
+      "sourceVersionMatches": true,
+      "finalUrl": "https://www.salondeprovence.nl/",
+      "itemCount": 0,
+      "categoryCount": 0,
+      "menuCount": 0,
+      "menus": [],
+      "priceStatus": {},
+      "evidence": {
+        "itemCount": 0,
+        "categoryCount": 0,
+        "menuCount": 0,
+        "priceStatus": {},
+        "knownWithoutAmount": 0,
+        "sourceIdPercent": null,
+        "locatorPercent": null,
+        "supportPercent": null,
+        "withSourceId": 0,
+        "withLocator": 0,
+        "withSupport": 0,
+        "missingSourceId": [],
+        "missingLocator": [],
+        "missingSupport": []
+      },
+      "sourceInventory": [
+        {
+          "url": "https://www.salondeprovence.nl/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "ce02f460c79e3e83720b85c41e9e0dbcf4013990222270af680418c07c3a960f"
+        }
+      ],
+      "coverage": {
+        "status": "no_content_found",
+        "sourceCount": 1,
+        "readCount": 1,
+        "blockedCount": 0,
+        "failedCount": 0,
+        "candidateCount": 0,
+        "menuCount": 0,
+        "itemCount": 0,
+        "complete": false,
+        "reviewRequired": true
+      },
+      "attentionGroupCount": 0,
+      "limitations": [
+        "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+      ],
+      "notes": [
+        "AI-structurering is niet beschikbaar — resultaten zijn beperkt tot deterministische extractie."
+      ],
+      "result": "No items were extracted. The source is recorded as an honest limitation, not as a successful menu.",
+      "elapsedMs": 188
+    },
+    "H2-08": {
+      "id": "H2-08",
+      "referenceId": "H2-08",
+      "label": "Al Dente Ristorante",
+      "class": null,
+      "kind": "html",
+      "url": "https://www.aldentebreda.nl",
+      "pinnedBytesSha256": "9b4041b72f50046a3715bb246d4d3a641b38c6ecd822c7e9a59db44e65ff9a09",
+      "captureStatus": "captured",
+      "evaluatedAt": "2026-10-21T12:42:28.252Z",
+      "status": "executed_with_limitation",
+      "completed": true,
+      "bytesSha256": "2d1970afc511a469b41b41b8ef59d0cf5b21ce840950afb967ee6ffb14704ab4",
+      "sourceVersionMatches": false,
+      "finalUrl": "https://www.aldentebreda.nl/",
+      "itemCount": 0,
+      "categoryCount": 0,
+      "menuCount": 0,
+      "menus": [],
+      "priceStatus": {},
+      "evidence": {
+        "itemCount": 0,
+        "categoryCount": 0,
+        "menuCount": 0,
+        "priceStatus": {},
+        "knownWithoutAmount": 0,
+        "sourceIdPercent": null,
+        "locatorPercent": null,
+        "supportPercent": null,
+        "withSourceId": 0,
+        "withLocator": 0,
+        "withSupport": 0,
+        "missingSourceId": [],
+        "missingLocator": [],
+        "missingSupport": []
+      },
+      "sourceInventory": [
+        {
+          "url": "https://www.aldentebreda.nl/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "d4b14a4c8daaa3538d64a173814dfafff579ce508c7e1b48c30f3b8cae827a97"
+        },
+        {
+          "url": "https://www.aldentebreda.nl/menukaart-restaurant-2/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "014ab9bad22d897694022cb859becf3fb0e6dfc98bb88162c6dddb59afaa6391"
+        },
+        {
+          "url": "https://www.aldentebreda.nl/menu-classico/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "2bebd0d7f7bd8988f2a5301ff4ee1d816b4f9a1a4e06ee1c1c2125b7785db7ad"
+        }
+      ],
+      "coverage": {
+        "status": "no_content_found",
+        "sourceCount": 3,
+        "readCount": 3,
+        "blockedCount": 0,
+        "failedCount": 0,
+        "candidateCount": 0,
+        "menuCount": 0,
+        "itemCount": 0,
+        "complete": false,
+        "reviewRequired": true
+      },
+      "attentionGroupCount": 0,
+      "limitations": [
+        "Gelezen zonder automatisch herkende menukaart: https://www.aldentebreda.nl/menukaart-restaurant-2/.",
+        "Gelezen zonder automatisch herkende menukaart: https://www.aldentebreda.nl/menu-classico/.",
+        "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+      ],
+      "notes": [
+        "Mogelijke menupagina gelezen: https://www.aldentebreda.nl/menukaart-restaurant-2/ (link \"Menukaart Restaurant\"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.",
+        "Mogelijke menupagina gelezen: https://www.aldentebreda.nl/menu-classico/ (link \"Menu Classico\"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.",
+        "AI-structurering is niet beschikbaar — resultaten zijn beperkt tot deterministische extractie."
+      ],
+      "result": "No items were extracted. The source is recorded as an honest limitation, not as a successful menu.",
+      "elapsedMs": 1770
+    },
+    "H2-09": {
+      "id": "H2-09",
+      "referenceId": "H2-09",
+      "label": "The Chai Affairs",
+      "class": null,
+      "kind": "html",
+      "url": "https://www.thechaiaffairs.nl",
+      "pinnedBytesSha256": "ecb4b277f11ef4ddb837883fafb0b7a6473b090d622a1a6ea1b53eb90459589a",
+      "captureStatus": "captured",
+      "evaluatedAt": "2026-10-21T12:42:30.022Z",
+      "status": "executed_with_limitation",
+      "completed": true,
+      "bytesSha256": "ecb4b277f11ef4ddb837883fafb0b7a6473b090d622a1a6ea1b53eb90459589a",
+      "sourceVersionMatches": true,
+      "finalUrl": "https://www.thechaiaffairs.nl/",
+      "itemCount": 0,
+      "categoryCount": 0,
+      "menuCount": 0,
+      "menus": [],
+      "priceStatus": {},
+      "evidence": {
+        "itemCount": 0,
+        "categoryCount": 0,
+        "menuCount": 0,
+        "priceStatus": {},
+        "knownWithoutAmount": 0,
+        "sourceIdPercent": null,
+        "locatorPercent": null,
+        "supportPercent": null,
+        "withSourceId": 0,
+        "withLocator": 0,
+        "withSupport": 0,
+        "missingSourceId": [],
+        "missingLocator": [],
+        "missingSupport": []
+      },
+      "sourceInventory": [
+        {
+          "url": "https://www.thechaiaffairs.nl/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "ecb4b277f11ef4ddb837883fafb0b7a6473b090d622a1a6ea1b53eb90459589a"
+        }
+      ],
+      "coverage": {
+        "status": "no_content_found",
+        "sourceCount": 1,
+        "readCount": 1,
+        "blockedCount": 0,
+        "failedCount": 0,
+        "candidateCount": 0,
+        "menuCount": 0,
+        "itemCount": 0,
+        "complete": false,
+        "reviewRequired": true
+      },
+      "attentionGroupCount": 0,
+      "limitations": [
+        "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+      ],
+      "notes": [
+        "AI-structurering is niet beschikbaar — resultaten zijn beperkt tot deterministische extractie."
+      ],
+      "result": "No items were extracted. The source is recorded as an honest limitation, not as a successful menu.",
+      "elapsedMs": 556
+    },
+    "H2-10": {
+      "id": "H2-10",
+      "referenceId": "H2-10",
+      "label": "Andalous",
+      "class": null,
+      "kind": "html",
+      "url": "https://www.andalous-breda.nl",
+      "pinnedBytesSha256": "05e08dad114775dea7ee9f8a38aac4389728136f9a58b34a938259457829f086",
+      "captureStatus": "captured",
+      "evaluatedAt": "2026-10-21T12:42:30.579Z",
+      "status": "executed_with_limitation",
+      "completed": true,
+      "bytesSha256": "42455531a9d3104f4d25b969b98f089993f5c9ac7256148009ea883158ab62bc",
+      "sourceVersionMatches": false,
+      "finalUrl": "https://www.andalous-breda.nl/",
+      "itemCount": 0,
+      "categoryCount": 0,
+      "menuCount": 0,
+      "menus": [],
+      "priceStatus": {},
+      "evidence": {
+        "itemCount": 0,
+        "categoryCount": 0,
+        "menuCount": 0,
+        "priceStatus": {},
+        "knownWithoutAmount": 0,
+        "sourceIdPercent": null,
+        "locatorPercent": null,
+        "supportPercent": null,
+        "withSourceId": 0,
+        "withLocator": 0,
+        "withSupport": 0,
+        "missingSourceId": [],
+        "missingLocator": [],
+        "missingSupport": []
+      },
+      "sourceInventory": [
+        {
+          "url": "https://www.andalous-breda.nl/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "0145c88af9d3228934529acfe3fa3bb5d53a61769607895ccc135555ff1474c8"
+        },
+        {
+          "url": "https://www.andalous-breda.nl/menukaart/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "9058325f27263f30d63d6214935399a7135049736cd120710a97ef789249bbec"
+        },
+        {
+          "url": "https://www.andalous-breda.nl/ramadan-menu/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "544e089cab267139b7f50155a486e6482ea11a724106cfd2411d1b9be234817a"
+        },
+        {
+          "url": "https://www.andalous-breda.nl/menukaart/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "cfefd2e47bb435dc4777b5fec06ac25a226525705419246308b122e2a268dd98"
+        },
+        {
+          "url": "https://www.andalous-breda.nl/ramadan-menu/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "6879b1eb0218a5317aa41790bc7878371efac8a3b8110052abe2773a8e4326a3"
+        },
+        {
+          "url": "https://www.andalous-breda.nl/fr/menukaart/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "e146ccaa55a16ae7ecc6a206c8c8a1138f4665dbd72923023706cf14b3ab9f27"
+        }
+      ],
+      "coverage": {
+        "status": "no_content_found",
+        "sourceCount": 6,
+        "readCount": 6,
+        "blockedCount": 0,
+        "failedCount": 0,
+        "candidateCount": 0,
+        "menuCount": 0,
+        "itemCount": 0,
+        "complete": false,
+        "reviewRequired": true
+      },
+      "attentionGroupCount": 0,
+      "limitations": [
+        "Gelezen zonder automatisch herkende menukaart: https://www.andalous-breda.nl/menukaart/.",
+        "Gelezen zonder automatisch herkende menukaart: https://www.andalous-breda.nl/ramadan-menu/.",
+        "Gelezen zonder automatisch herkende menukaart: https://www.andalous-breda.nl/menukaart/.",
+        "Gelezen zonder automatisch herkende menukaart: https://www.andalous-breda.nl/ramadan-menu/.",
+        "Gelezen zonder automatisch herkende menukaart: https://www.andalous-breda.nl/fr/menukaart/.",
+        "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+      ],
+      "notes": [
+        "Doorgestuurd van https://www.andalous-breda.nl/menukaart naar https://www.andalous-breda.nl/menukaart/ (HTTP 301).",
+        "Doorgestuurd van https://www.andalous-breda.nl/ramadan naar https://www.andalous-breda.nl/ramadan-menu/ (HTTP 301).",
+        "Mogelijke menupagina gelezen: https://www.andalous-breda.nl/menukaart/ (link \"Menu\"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.",
+        "Menukaartpagina https://www.andalous-breda.nl/menukaart/ is een tussenpagina; 2 relevante menulink(s) binnen dezelfde site zijn gevolgd.",
+        "Mogelijke menupagina gelezen: https://www.andalous-breda.nl/ramadan-menu/ (link \"Ramadan Menu\"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.",
+        "Menukaartpagina https://www.andalous-breda.nl/ramadan-menu/ is een tussenpagina; 3 relevante menulink(s) binnen dezelfde site zijn gevolgd.",
+        "Mogelijke menupagina gelezen: https://www.andalous-breda.nl/menukaart/ (link \"/menukaart\"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.",
+        "Mogelijke menupagina gelezen: https://www.andalous-breda.nl/ramadan-menu/ (link \"bekijk het menu\"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.",
+        "Mogelijke menupagina gelezen: https://www.andalous-breda.nl/fr/menukaart/ (link \"/fr/menukaart/\"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.",
+        "AI-structurering is niet beschikbaar — resultaten zijn beperkt tot deterministische extractie."
+      ],
+      "result": "No items were extracted. The source is recorded as an honest limitation, not as a successful menu.",
+      "elapsedMs": 4800
+    },
+    "H2-11": {
+      "id": "H2-11",
+      "referenceId": "H2-11",
+      "label": "De Beyerd",
+      "class": null,
+      "kind": "html",
+      "url": "https://www.beyerd.nl",
+      "pinnedBytesSha256": "2a736399d86dfbe6277ea2f001502e7df131ebeb74644d414cca465f8eee09cb",
+      "captureStatus": "captured",
+      "evaluatedAt": "2026-10-21T12:42:35.379Z",
+      "status": "executed_with_limitation",
+      "completed": true,
+      "bytesSha256": "2a736399d86dfbe6277ea2f001502e7df131ebeb74644d414cca465f8eee09cb",
+      "sourceVersionMatches": true,
+      "finalUrl": "https://www.beyerd.nl/",
+      "itemCount": 0,
+      "categoryCount": 0,
+      "menuCount": 0,
+      "menus": [],
+      "priceStatus": {},
+      "evidence": {
+        "itemCount": 0,
+        "categoryCount": 0,
+        "menuCount": 0,
+        "priceStatus": {},
+        "knownWithoutAmount": 0,
+        "sourceIdPercent": null,
+        "locatorPercent": null,
+        "supportPercent": null,
+        "withSourceId": 0,
+        "withLocator": 0,
+        "withSupport": 0,
+        "missingSourceId": [],
+        "missingLocator": [],
+        "missingSupport": []
+      },
+      "sourceInventory": [
+        {
+          "url": "https://www.beyerd.nl/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "2a736399d86dfbe6277ea2f001502e7df131ebeb74644d414cca465f8eee09cb"
+        },
+        {
+          "url": "https://www.beyerd.nl/untappd-menu-location4321-theme13562/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "e0ce2e3f61cb7eff2986818d2619869ac34b266d666198a75c92b3e95678a287"
+        },
+        {
+          "url": "https://www.beyerd.nl/cafe-lunchkaart/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "09871801d1b01ae167755aa47dd8e3cb9994a301c76be31a6fa3016e9857ba24"
+        },
+        {
+          "url": "https://www.beyerd.nl/wp-content/uploads/2025/05/Lunchkaart-2025-3.4.jpg",
+          "kind": "other",
+          "status": "failed",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": null
+        },
+        {
+          "url": "https://www.beyerd.nl/wp-content/uploads/2025/05/Lunchkaart-2025-3.42.jpg",
+          "kind": "other",
+          "status": "failed",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": null
+        },
+        {
+          "url": "https://www.beyerd.nl/wp-content/uploads/2025/05/Lunchkaart-2025-Engels.jpg",
+          "kind": "other",
+          "status": "failed",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": null
+        }
+      ],
+      "coverage": {
+        "status": "no_content_found",
+        "sourceCount": 6,
+        "readCount": 3,
+        "blockedCount": 0,
+        "failedCount": 3,
+        "candidateCount": 0,
+        "menuCount": 0,
+        "itemCount": 0,
+        "complete": false,
+        "reviewRequired": true
+      },
+      "attentionGroupCount": 0,
+      "limitations": [
+        "Gelezen zonder automatisch herkende menukaart: https://www.beyerd.nl/untappd-menu-location4321-theme13562/.",
+        "Gelezen zonder automatisch herkende menukaart: https://www.beyerd.nl/cafe-lunchkaart/.",
+        "Niet gelezen: https://www.beyerd.nl/wp-content/uploads/2025/05/Lunchkaart-2025-3.4.jpg (ophalen mislukt).",
+        "Niet gelezen: https://www.beyerd.nl/wp-content/uploads/2025/05/Lunchkaart-2025-3.42.jpg (ophalen mislukt).",
+        "Niet gelezen: https://www.beyerd.nl/wp-content/uploads/2025/05/Lunchkaart-2025-Engels.jpg (ophalen mislukt).",
+        "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+      ],
+      "notes": [
+        "Mogelijke menupagina gelezen: https://www.beyerd.nl/untappd-menu-location4321-theme13562/ (link \"UNTAPPD\"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.",
+        "Mogelijke menupagina gelezen: https://www.beyerd.nl/cafe-lunchkaart/ (link \"Café Lunchkaart\"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.",
+        "Menukaartpagina https://www.beyerd.nl/cafe-lunchkaart/ is een tussenpagina; 3 relevante menulink(s) binnen dezelfde site zijn gevolgd.",
+        "Ophalen van https://www.beyerd.nl/wp-content/uploads/2025/05/Lunchkaart-2025-3.4.jpg is mislukt.",
+        "Ophalen van https://www.beyerd.nl/wp-content/uploads/2025/05/Lunchkaart-2025-3.42.jpg is mislukt.",
+        "Ophalen van https://www.beyerd.nl/wp-content/uploads/2025/05/Lunchkaart-2025-Engels.jpg is mislukt.",
+        "AI-structurering is niet beschikbaar — resultaten zijn beperkt tot deterministische extractie."
+      ],
+      "result": "No items were extracted. The source is recorded as an honest limitation, not as a successful menu.",
+      "elapsedMs": 16860
+    },
+    "H2-12": {
+      "id": "H2-12",
+      "referenceId": "H2-12",
+      "label": "Restaurant Ruitersbosch",
+      "class": null,
+      "kind": "unsupported",
+      "url": "https://www.restaurantruitersbosch.nl",
+      "pinnedBytesSha256": null,
+      "captureStatus": "failed",
+      "evaluatedAt": "2026-10-21T12:42:52.239Z",
+      "status": "blocked",
+      "completed": true,
+      "itemCount": 0,
+      "categoryCount": 0,
+      "menuCount": 0,
+      "blockedReason": "The approved entry URL did not yield a readable public source (request-error). No alternative URL or other location was substituted.",
+      "errors": "request-error",
+      "result": "The approved entry URL did not yield a readable public source (request-error). No alternative URL or other location was substituted.",
+      "elapsedMs": 0,
+      "limitations": [
+        "The approved entry URL did not yield a readable public source. No alternative URL, other location or crawl was substituted."
+      ]
+    },
+    "H2-13": {
+      "id": "H2-13",
+      "referenceId": "H2-13",
+      "label": "Makanan",
+      "class": null,
+      "kind": "unsupported",
+      "url": "https://www.makananbreda.nl",
+      "pinnedBytesSha256": null,
+      "captureStatus": "failed",
+      "evaluatedAt": "2026-10-21T12:42:52.239Z",
+      "status": "blocked",
+      "completed": true,
+      "itemCount": 0,
+      "categoryCount": 0,
+      "menuCount": 0,
+      "blockedReason": "The approved entry URL did not yield a readable public source (fetch_failed). No alternative URL or other location was substituted.",
+      "errors": "fetch_failed",
+      "result": "The approved entry URL did not yield a readable public source (fetch_failed). No alternative URL or other location was substituted.",
+      "elapsedMs": 0,
+      "limitations": [
+        "The approved entry URL did not yield a readable public source. No alternative URL, other location or crawl was substituted."
+      ]
+    },
+    "H2-14": {
+      "id": "H2-14",
+      "referenceId": "H2-14",
+      "label": "Klein Java",
+      "class": null,
+      "kind": "html",
+      "url": "https://www.klein-java.nl",
+      "pinnedBytesSha256": "076214e3a560b97e250863eb083d41ad6827684c1d8337e921bcbda44a636c2e",
+      "captureStatus": "captured",
+      "evaluatedAt": "2026-10-21T12:42:52.239Z",
+      "status": "executed_with_limitation",
+      "completed": true,
+      "bytesSha256": "076214e3a560b97e250863eb083d41ad6827684c1d8337e921bcbda44a636c2e",
+      "sourceVersionMatches": true,
+      "finalUrl": "https://www.klein-java.nl/",
+      "itemCount": 0,
+      "categoryCount": 0,
+      "menuCount": 0,
+      "menus": [],
+      "priceStatus": {},
+      "evidence": {
+        "itemCount": 0,
+        "categoryCount": 0,
+        "menuCount": 0,
+        "priceStatus": {},
+        "knownWithoutAmount": 0,
+        "sourceIdPercent": null,
+        "locatorPercent": null,
+        "supportPercent": null,
+        "withSourceId": 0,
+        "withLocator": 0,
+        "withSupport": 0,
+        "missingSourceId": [],
+        "missingLocator": [],
+        "missingSupport": []
+      },
+      "sourceInventory": [
+        {
+          "url": "https://www.klein-java.nl/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "076214e3a560b97e250863eb083d41ad6827684c1d8337e921bcbda44a636c2e"
+        },
+        {
+          "url": "https://www.klein-java.nl/blog/afwijkende-openingstijden-kerstmenu-2025-klein-java",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "7ba5a3b0feb380135790d986cfc745d58c123e7fbf2a720c4a00d6e1668e0573"
+        }
+      ],
+      "coverage": {
+        "status": "no_content_found",
+        "sourceCount": 2,
+        "readCount": 2,
+        "blockedCount": 0,
+        "failedCount": 0,
+        "candidateCount": 0,
+        "menuCount": 0,
+        "itemCount": 0,
+        "complete": false,
+        "reviewRequired": true
+      },
+      "attentionGroupCount": 0,
+      "limitations": [
+        "Gelezen zonder automatisch herkende menukaart: https://www.klein-java.nl/blog/afwijkende-openingstijden-kerstmenu-2025-klein-java.",
+        "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+      ],
+      "notes": [
+        "Mogelijke menupagina gelezen: https://www.klein-java.nl/blog/afwijkende-openingstijden-kerstmenu-2025-klein-java (link \"Afwijkende openingstijden met kerst\"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.",
+        "AI-structurering is niet beschikbaar — resultaten zijn beperkt tot deterministische extractie."
+      ],
+      "result": "No items were extracted. The source is recorded as an honest limitation, not as a successful menu.",
+      "elapsedMs": 299
+    },
+    "H2-15": {
+      "id": "H2-15",
+      "referenceId": "H2-15",
+      "label": "Gantau Village",
+      "class": null,
+      "kind": "unsupported",
+      "url": "https://www.gantauvillage.nl",
+      "pinnedBytesSha256": null,
+      "captureStatus": "failed",
+      "evaluatedAt": "2026-10-21T12:42:52.538Z",
+      "status": "blocked",
+      "completed": true,
+      "itemCount": 0,
+      "categoryCount": 0,
+      "menuCount": 0,
+      "blockedReason": "The approved entry URL did not yield a readable public source (request-error). No alternative URL or other location was substituted.",
+      "errors": "request-error",
+      "result": "The approved entry URL did not yield a readable public source (request-error). No alternative URL or other location was substituted.",
+      "elapsedMs": 1,
+      "limitations": [
+        "The approved entry URL did not yield a readable public source. No alternative URL, other location or crawl was substituted."
+      ]
+    },
+    "H2-16": {
+      "id": "H2-16",
+      "referenceId": "H2-16",
+      "label": "Con Fuego",
+      "class": null,
+      "kind": "html",
+      "url": "https://www.restaurantconfuego.com",
+      "pinnedBytesSha256": "a980e64d62453cbdc884072c57153744375037ad2087d6f2ca00c71f8f59fb80",
+      "captureStatus": "captured",
+      "evaluatedAt": "2026-10-21T12:42:52.539Z",
+      "status": "executed_with_limitation",
+      "completed": true,
+      "bytesSha256": "a980e64d62453cbdc884072c57153744375037ad2087d6f2ca00c71f8f59fb80",
+      "sourceVersionMatches": true,
+      "finalUrl": "https://www.restaurantconfuego.com/",
+      "itemCount": 0,
+      "categoryCount": 0,
+      "menuCount": 0,
+      "menus": [],
+      "priceStatus": {},
+      "evidence": {
+        "itemCount": 0,
+        "categoryCount": 0,
+        "menuCount": 0,
+        "priceStatus": {},
+        "knownWithoutAmount": 0,
+        "sourceIdPercent": null,
+        "locatorPercent": null,
+        "supportPercent": null,
+        "withSourceId": 0,
+        "withLocator": 0,
+        "withSupport": 0,
+        "missingSourceId": [],
+        "missingLocator": [],
+        "missingSupport": []
+      },
+      "sourceInventory": [
+        {
+          "url": "https://www.restaurantconfuego.com/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "a980e64d62453cbdc884072c57153744375037ad2087d6f2ca00c71f8f59fb80"
+        }
+      ],
+      "coverage": {
+        "status": "no_content_found",
+        "sourceCount": 1,
+        "readCount": 1,
+        "blockedCount": 0,
+        "failedCount": 0,
+        "candidateCount": 0,
+        "menuCount": 0,
+        "itemCount": 0,
+        "complete": false,
+        "reviewRequired": true
+      },
+      "attentionGroupCount": 0,
+      "limitations": [
+        "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+      ],
+      "notes": [
+        "AI-structurering is niet beschikbaar — resultaten zijn beperkt tot deterministische extractie."
+      ],
+      "result": "No items were extracted. The source is recorded as an honest limitation, not as a successful menu.",
+      "elapsedMs": 248
+    },
+    "H2-17": {
+      "id": "H2-17",
+      "referenceId": "H2-17",
+      "label": "Masala",
+      "class": null,
+      "kind": "unsupported",
+      "url": "https://www.masalabreda.nl",
+      "pinnedBytesSha256": null,
+      "captureStatus": "failed",
+      "evaluatedAt": "2026-10-21T12:42:52.787Z",
+      "status": "blocked",
+      "completed": true,
+      "itemCount": 0,
+      "categoryCount": 0,
+      "menuCount": 0,
+      "blockedReason": "The approved entry URL did not yield a readable public source (request-error). No alternative URL or other location was substituted.",
+      "errors": "request-error",
+      "result": "The approved entry URL did not yield a readable public source (request-error). No alternative URL or other location was substituted.",
+      "elapsedMs": 0,
+      "limitations": [
+        "The approved entry URL did not yield a readable public source. No alternative URL, other location or crawl was substituted."
+      ]
+    },
+    "H2-18": {
+      "id": "H2-18",
+      "referenceId": "H2-18",
+      "label": "Restaurant Uijttewaal",
+      "class": null,
+      "kind": "html",
+      "url": "https://www.restaurantuijttewaal.nl",
+      "pinnedBytesSha256": "5b9eac97da192645cf2c0994f40a8e2c10295a3f2c1ac622634fda4988255682",
+      "captureStatus": "captured",
+      "evaluatedAt": "2026-10-21T12:42:52.787Z",
+      "status": "executed_with_limitation",
+      "completed": true,
+      "bytesSha256": "5b9eac97da192645cf2c0994f40a8e2c10295a3f2c1ac622634fda4988255682",
+      "sourceVersionMatches": true,
+      "finalUrl": "https://www.restaurantuijttewaal.nl/",
+      "itemCount": 10,
+      "categoryCount": 1,
+      "menuCount": 1,
+      "menus": [
+        {
+          "title": null,
+          "sourceId": "source-3",
+          "categoryCount": 1,
+          "itemCount": 10,
+          "categories": [
+            {
+              "name": "Menukaart",
+              "path": [
+                "Menukaart"
+              ],
+              "sourcePath": [],
+              "uncertain": true,
+              "itemCount": 10
+            }
+          ]
+        }
+      ],
+      "priceStatus": {
+        "known": 10
+      },
+      "evidence": {
+        "itemCount": 10,
+        "categoryCount": 1,
+        "menuCount": 1,
+        "priceStatus": {
+          "known": 10
+        },
+        "knownWithoutAmount": 0,
+        "sourceIdPercent": 100,
+        "locatorPercent": 100,
+        "supportPercent": 100,
+        "withSourceId": 10,
+        "withLocator": 10,
+        "withSupport": 10,
+        "missingSourceId": [],
+        "missingLocator": [],
+        "missingSupport": []
+      },
+      "sourceInventory": [
+        {
+          "url": "https://www.restaurantuijttewaal.nl/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "5b9eac97da192645cf2c0994f40a8e2c10295a3f2c1ac622634fda4988255682"
+        },
+        {
+          "url": "https://www.restaurantuijttewaal.nl/menu",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "ab9cd5ebe4d34259ed5fa8d7f5c8ca70c3ce737262400d0e2bdd447ff60c0bb9"
+        },
+        {
+          "url": "https://www.restaurantuijttewaal.nl/_files/ugd/977c56_bb0d186158ab469ea8f09b4855b40c93.pdf",
+          "kind": "pdf",
+          "status": "read",
+          "pageCount": 2,
+          "wordCount": 434,
+          "itemCount": 10,
+          "contentHash": "79258a095a18fcec99c818a28f88b7672cf55504b4228ff272e85352cc223734"
+        },
+        {
+          "url": "https://www.restaurantuijttewaal.nl/_files/ugd/977c56_9cbe108301f94af59c722342a41ec5e7.pdf",
+          "kind": "pdf",
+          "status": "failed",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": null
+        }
+      ],
+      "coverage": {
+        "status": "items_extracted",
+        "sourceCount": 4,
+        "readCount": 3,
+        "blockedCount": 0,
+        "failedCount": 1,
+        "candidateCount": 2,
+        "menuCount": 1,
+        "itemCount": 10,
+        "complete": false,
+        "reviewRequired": true
+      },
+      "attentionGroupCount": 1,
+      "limitations": [
+        "Gelezen zonder automatisch herkende menukaart: https://www.restaurantuijttewaal.nl/menu.",
+        "PDF https://www.restaurantuijttewaal.nl/_files/ugd/977c56_bb0d186158ab469ea8f09b4855b40c93.pdf: 4 supplementregel(s) zijn niet als gerecht opgenomen; het concept ondersteunt supplementen nog niet.",
+        "PDF https://www.restaurantuijttewaal.nl/_files/ugd/977c56_bb0d186158ab469ea8f09b4855b40c93.pdf: 1 prijsregel(s) konden zonder aantoonbare lokale naam-/prijskoppeling niet als gerecht worden opgenomen.",
+        "PDF https://www.restaurantuijttewaal.nl/_files/ugd/977c56_bb0d186158ab469ea8f09b4855b40c93.pdf: 11 mogelijke rubriekkop(pen) zijn niet herkend en dus niet als rubriek opgeslagen.",
+        "PDF https://www.restaurantuijttewaal.nl/_files/ugd/977c56_9cbe108301f94af59c722342a41ec5e7.pdf kon niet worden gelezen (pdf_extraction_failed).",
+        "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.",
+        "Kwaliteitscontrole op de deterministische extractie vraagt aandacht (duplicate_item_within_category, pdf_supplements_skipped, pdf_unlinked_price_lines, pdf_unrecognised_headings); het resultaat is niet als volledig beoordeeld."
+      ],
+      "notes": [
+        "Mogelijke menupagina gelezen: https://www.restaurantuijttewaal.nl/menu (link \"MENU\"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.",
+        "Menukaartpagina https://www.restaurantuijttewaal.nl/menu is een tussenpagina; 2 relevante menulink(s) binnen dezelfde site zijn gevolgd.",
+        "Menukaart herkend uit de PDF van https://www.restaurantuijttewaal.nl/_files/ugd/977c56_bb0d186158ab469ea8f09b4855b40c93.pdf (2 pagina's): 10 gerechten met prijs in 1 rubrieken. Controleer pagina's, rubrieken en prijzen.",
+        "PDF op https://www.restaurantuijttewaal.nl/_files/ugd/977c56_9cbe108301f94af59c722342a41ec5e7.pdf kon niet worden gelezen (pdf_extraction_failed).",
+        "AI-structurering is niet beschikbaar — resultaten zijn beperkt tot deterministische extractie."
+      ],
+      "result": "10 items in 1 sections across 1 menu context(s). This is a first holdout observation, not a complete-menu or accuracy claim.",
+      "elapsedMs": 9888
+    },
+    "H2-19": {
+      "id": "H2-19",
+      "referenceId": "H2-19",
+      "label": "Beers & Barrels",
+      "class": null,
+      "kind": "html",
+      "url": "https://www.beersbarrels.nl/en/locations/breda/",
+      "pinnedBytesSha256": "1a112904f2860beee2d77563a7ae3ce99c6ca5cf6f6dff321bf3407f8826b097",
+      "captureStatus": "captured",
+      "evaluatedAt": "2026-10-21T12:43:02.675Z",
+      "status": "executed_with_limitation",
+      "completed": true,
+      "bytesSha256": "1a112904f2860beee2d77563a7ae3ce99c6ca5cf6f6dff321bf3407f8826b097",
+      "sourceVersionMatches": true,
+      "finalUrl": "https://www.beersbarrels.nl/en/locations/breda/",
+      "itemCount": 0,
+      "categoryCount": 0,
+      "menuCount": 0,
+      "menus": [],
+      "priceStatus": {},
+      "evidence": {
+        "itemCount": 0,
+        "categoryCount": 0,
+        "menuCount": 0,
+        "priceStatus": {},
+        "knownWithoutAmount": 0,
+        "sourceIdPercent": null,
+        "locatorPercent": null,
+        "supportPercent": null,
+        "withSourceId": 0,
+        "withLocator": 0,
+        "withSupport": 0,
+        "missingSourceId": [],
+        "missingLocator": [],
+        "missingSupport": []
+      },
+      "sourceInventory": [
+        {
+          "url": "https://www.beersbarrels.nl/en/locations/breda/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "1a112904f2860beee2d77563a7ae3ce99c6ca5cf6f6dff321bf3407f8826b097"
+        },
+        {
+          "url": "https://www.beersbarrels.nl/en/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "7a05f64738863a122ce2a7280a5eb049b451cac5d2db5c6112b59bc91986b1b8"
+        }
+      ],
+      "coverage": {
+        "status": "no_content_found",
+        "sourceCount": 2,
+        "readCount": 2,
+        "blockedCount": 0,
+        "failedCount": 0,
+        "candidateCount": 0,
+        "menuCount": 0,
+        "itemCount": 0,
+        "complete": false,
+        "reviewRequired": true
+      },
+      "attentionGroupCount": 0,
+      "limitations": [
+        "Gelezen zonder automatisch herkende menukaart: https://www.beersbarrels.nl/en/.",
+        "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+      ],
+      "notes": [
+        "Mogelijke menupagina gelezen: https://www.beersbarrels.nl/en/ (link \"Menu\"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.",
+        "AI-structurering is niet beschikbaar — resultaten zijn beperkt tot deterministische extractie."
+      ],
+      "result": "No items were extracted. The source is recorded as an honest limitation, not as a successful menu.",
+      "elapsedMs": 480
+    }
+  }
+}
