@@ -54,6 +54,11 @@ test('only explicit local app and fixture routes are allowed', () => {
   assert.equal(classify('/api/internal/v1/me').kind, 'fixture_api');
   assert.equal(classify('/api/internal/v1/batch-analysis').kind, 'fixture_api');
   assert.equal(classify('/api/internal/v1/batch-analysis/process', 'POST').kind, 'fixture_api');
+  const triage = classify('/api/internal/v1/source-triage');
+  assert.equal(triage.kind, 'fixture_api');
+  assert.equal(triage.routeId, 'source-triage');
+  assert.equal(classify('/api/internal/v1/source-triage', 'POST').reason, 'method_not_allowed');
+  assert.equal(classify('/api/internal/v1/source-triage/proposals', 'POST').reason, 'unknown_api_route');
   const list = classify('/api/internal/v1/menu-concepts');
   assert.equal(list.kind, 'fixture_api');
   assert.equal(list.routeId, 'menu-concepts-list');

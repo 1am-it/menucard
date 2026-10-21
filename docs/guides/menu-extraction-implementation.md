@@ -770,3 +770,35 @@ developer-/fixturebewijs; de representatieve nameting en de onafhankelijke
 review blijven aparte stappen.
 
 
+
+## Gecontroleerde referenties op vastgezette bytes (review 6318225879)
+
+De vijf bronnen uit de developeropdracht (Zuyd, Andalous, Pellens, Chocolat en
+Senang Makan) worden één keer vastgezet met de bestaande veilige fetch:
+
+```
+node ops/scripts/capture-menu-extraction-reference-sources.js
+```
+
+De bytes blijven lokaal en gitignored onder
+`ops/benchmark/output/reference-captures/`; `ops/benchmark/reference-captures.json`
+bevat alleen URL, content-type, tijd, bytegrootte en SHA-256. De capture is
+create-only. De referenties staan per bron in
+`ops/benchmark/reference-references/` en zijn uit de vastgezette tekst opgesteld,
+met een rubriekpad, citaat/locator en prijs of prijsvarianten per gerecht.
+Arrangementen en supplementen staan apart.
+
+De meting:
+
+```
+node ops/scripts/measure-menu-extraction-references.js
+```
+
+leest alleen de vastgezette bytes (offline fetcher, geen netwerk), verifieert
+elke hash en elke referentiequote, en schrijft
+`ops/benchmark/reference-measurement.json` en `.md`. Ze rapporteert gemiste,
+verzonnen, prijs- en rubriekfouten afzonderlijk plus precisie en recall. Een
+geblokkeerde bron (Senang Makan: HTTP 503 op robots.txt) blijft zichtbaar en
+telt niet als lege of geslaagde extractie. De vijf referentiebronnen zijn geen
+ongeziene holdout; de bredere benchmark en een nieuwe holdout blijven BE-21.
+

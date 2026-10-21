@@ -8,6 +8,7 @@
 
 const { summarizeRecognisedMenu, buildMenuConcept, storedConceptInput, recognisedLines } = require('../../../src/lib/menuConcept');
 const { uncertainSections } = require('../../../src/lib/menuStructureReview');
+const { buildTriageView } = require('../../../src/lib/sourceTriage');
 const { buildExtractionResult } = require('../../../src/lib/menuExtractionResult');
 const {
   buildProductReviewView,
@@ -317,6 +318,63 @@ const partialItem = item({
   attentionGroups: [],
 });
 
+// A fictional source whose only menu is an image/scan. The shape is exactly the
+// one src/lib/batchAnalysis.js derives: no success, no confirm, a visible reason
+// and the two human routes (Bronnen beoordelen / URL aanpassen).
+const imageOnlyItem = item({
+  key: 'image_only',
+  label: 'Menu alleen als afbeelding: niet ondersteund',
+  role: 'blocked',
+  icon: 'warning',
+  terminal: true,
+  actions: ['review_source', 'adjust_url'],
+  text: 'De menukaart is alleen als afbeelding of scan beschikbaar. Deze import leest geen beeld en gebruikt geen OCR, dus er is niets als gerecht opgeslagen. Beoordeel de bron of kies een tekst- of pdf-bron.',
+  reason: 'image_only_menu',
+  menu: null,
+  concept: null,
+  foundUrl: null,
+  coverage: { status: 'no_items', sourcesRead: 1, pagesRead: 1, itemsExtracted: 0, unreadSources: [], limitations: ['Fictief: alleen afbeeldingen.'] },
+  attentionGroups: [],
+  limitations: ['Menukaart lijkt alleen als afbeelding beschikbaar op https://fictief-brasserie.invalid/menu (2 afbeelding(en)); beeldanalyse/OCR is niet geconfigureerd.'],
+  notes: [],
+});
+
+// The existing Bronnen beoordelen page, built through the same view builder the
+// server uses. One known restaurant is enough to prove the follow-up route and
+// the preselection; no proposal is pre-filled.
+const triagePayload = (() => {
+  const view = buildTriageView({
+    queue: {
+      rows: [
+        {
+          restaurantId: RESTAURANT.id,
+          name: RESTAURANT.name,
+          wijk: 'Centrum',
+          domain: 'fictief-brasserie.invalid',
+          source: 'reachable',
+          menu: 'not_assessed',
+          checkedAt: '2026-10-18T09:01:00.000Z',
+          reason: null,
+        },
+      ],
+      notInQueue: [],
+    },
+    restaurants: { [RESTAURANT.id]: { name: RESTAURANT.name, website: 'https://fictief-brasserie.invalid/' } },
+    proposals: [],
+    viewerId: 'fixture-user',
+    proposalsAvailable: true,
+  });
+  return {
+    city: 'Breda',
+    restaurants: view.restaurants,
+    proposals_available: true,
+    proposal_limit_reached: false,
+    orphan_proposals: view.orphanProposals,
+    unattributed_checks: 0,
+    job_limit_reached: false,
+  };
+})();
+
 const overview = (detail) => ({
   daily: { used: detail ? 1 : 0, limit: 25 },
   own_open_batch_id: null,
@@ -564,6 +622,8 @@ module.exports = {
   reviewDetail,
   structureItem,
   structureSections,
+  imageOnlyItem,
+  triagePayload,
   v2Product,
   v2View,
   conceptList,
@@ -575,6 +635,8 @@ module.exports = {
     'structure-readonly': overview(structureReadOnlyDetail),
     empty: overview(null),
     partial: overview(detailWith([partialItem])),
+    image_only: { batch: overview(detailWith([imageOnlyItem])), triage: triagePayload },
+    triage: { batch: overview(detailWith([imageOnlyItem])), triage: triagePayload },
     v2: overview(detailWith([v2Item])),
     error: null,
     ...conceptScenarios,

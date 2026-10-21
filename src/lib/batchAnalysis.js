@@ -41,6 +41,7 @@ const STATUSES = {
   menu_found: { label: 'Menukaart gevonden · controle nodig', role: 'file', icon: 'file' },
   needs_review: { label: 'Controle nodig', role: 'old', icon: 'warning' },
   no_menu: { label: 'Geen bruikbare menukaart gevonden', role: 'neutral', icon: 'minus' },
+  image_only: { label: 'Menu alleen als afbeelding: niet ondersteund', role: 'blocked', icon: 'warning' },
   recent: { label: 'Recent geanalyseerd', role: 'neutral', icon: 'recent' },
   robots: { label: 'Robots geblokkeerd', role: 'blocked', icon: 'lock' },
   invalid: { label: 'Ongeldige URL', role: 'blocked', icon: 'cross' },
@@ -57,10 +58,39 @@ const ACTION_LABELS = {
   adjust_url: 'URL aanpassen',
   retry: 'Opnieuw proberen',
   reanalyze: 'Opnieuw analyseren',
+  review_source: 'Bronnen beoordelen',
   onboarding: 'Naar Onboarding Restaurant',
 };
 
-const TERMINAL_KEYS = new Set(['menu_found', 'needs_review', 'no_menu', 'recent', 'robots', 'invalid', 'error', 'confirmed', 'duplicate', 'not_queued']);
+const TERMINAL_KEYS = new Set(['menu_found', 'needs_review', 'no_menu', 'image_only', 'recent', 'robots', 'invalid', 'error', 'confirmed', 'duplicate', 'not_queued']);
+
+// The exact status copy for a menu that exists only as an image or scan. It
+// never claims a successful extraction and always names the working human
+// follow-up route (Bronnen beoordelen) plus the option to try another URL.
+const IMAGE_ONLY_TEXT =
+  'De menukaart is alleen als afbeelding of scan beschikbaar. Deze import leest geen beeld en gebruikt geen OCR, dus er is niets als gerecht opgeslagen. Beoordeel de bron of kies een tekst- of pdf-bron.';
+const IMAGE_ONLY_TEXT_PDF =
+  'De PDF bevat geen leesbare tekstlaag; het menu lijkt alleen als afbeelding of scan beschikbaar. Deze import leest geen beeld en gebruikt geen OCR, dus er is niets als gerecht opgeslagen. Beoordeel de bron of kies een tekst- of pdf-bron.';
+
+function imageOnlyText(reason) {
+  return reason === 'pdf_no_text_layer' ? IMAGE_ONLY_TEXT_PDF : IMAGE_ONLY_TEXT;
+}
+
+/** True only on a concrete image/scan signal; never inferred from "no menu". */
+function imageOnlyReason(job, recognisedMenu) {
+  if (!job || typeof job !== 'object') return null;
+  if (job.status === 'failed' && job.error_reason === 'pdf_no_text_layer') return 'pdf_no_text_layer';
+  if (job.status !== 'succeeded') return null;
+  if (recognisedMenu && Number.isInteger(recognisedMenu.itemCount) && recognisedMenu.itemCount > 0) return null;
+  const limitations = Array.isArray(job.limitations) ? job.limitations.filter((line) => typeof line === 'string') : [];
+  if (limitations.some((line) => /alleen als afbeelding|beeldanalyse\/OCR is niet geconfigureerd/i.test(line))) {
+    return 'image_only_menu';
+  }
+  if (limitations.some((line) => /pdf_no_text_layer|geen (?:leesbare )?tekstlaag|no text layer/i.test(line))) {
+    return 'pdf_no_text_layer';
+  }
+  return null;
+}
 
 /** The non-empty, trimmed lines of a pasted list, in order. */
 function splitLines(text) {
@@ -320,6 +350,15 @@ function deriveItemView({ item, job, receipt, restaurants, proposals, duplicateO
   if (job.status === 'running') return view('running', { ...withRestaurant });
 
   if (job.status === 'failed') {
+    const imageOnly = imageOnlyReason(job, recognisedMenu);
+    if (imageOnly) {
+      return view('image_only', {
+        ...withRestaurant,
+        text: imageOnlyText(imageOnly),
+        actions: ['review_source', 'adjust_url'],
+        reason: imageOnly,
+      });
+    }
     if (job.error_reason === 'robots_disallowed') {
       return view('robots', {
         ...withRestaurant,
@@ -348,6 +387,19 @@ function deriveItemView({ item, job, receipt, restaurants, proposals, duplicateO
 
   const observation = observeJob(job, receipt);
   const menu = observation.kind === 'classified' ? observation.menu : 'not_assessed';
+
+  // A source whose only menu is an image/scan gets its own explicit status. It
+  // must never fall through to "no usable menu" (which reads as a verdict about
+  // the restaurant) or to "menu found" (which reads as success).
+  const imageOnly = imageOnlyReason(job, recognisedMenu);
+  if (imageOnly) {
+    return view('image_only', {
+      ...withRestaurant,
+      text: imageOnlyText(imageOnly),
+      actions: ['review_source', 'adjust_url'],
+      reason: imageOnly,
+    });
+  }
 
   if (menu === 'not_assessed') {
     return view('no_menu', {
@@ -487,6 +539,8 @@ module.exports = {
   ownSourceOf,
   structureReviewFor,
   deriveItemView,
+  imageOnlyReason,
+  IMAGE_ONLY_TEXT,
   summarizeItems,
   amsterdamDayStart,
 };

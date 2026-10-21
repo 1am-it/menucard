@@ -258,3 +258,28 @@ node --test ops/benchmark/*.test.js
 
 Both are fully offline and safe to run repeatedly — no network call, no
 secret, no external state.
+
+## #59 controlled reference captures (review 6318225879)
+
+This is a separate, capture-first track next to the BE-21 foundation. Five
+public sources are pinned once through the existing safe fetch (robots and
+redirect checks), the response bytes stay local and gitignored under
+`ops/benchmark/output/reference-captures/`, and only URL, content-type, time,
+size and SHA-256 are committed in `ops/benchmark/reference-captures.json`.
+References are authored from that pinned text, never from parser output.
+
+```
+node ops/scripts/capture-menu-extraction-reference-sources.js
+node ops/scripts/measure-menu-extraction-references.js
+```
+
+The capture command is create-only: a second run is refused so a source version
+cannot be silently replaced. The measurement command replays the current
+pipeline on exactly the pinned bytes (offline fetcher, no network), verifies
+every capture hash and every reference quote, and writes
+`reference-measurement.json` / `.md`. It reports missed, invented, price and
+rubric errors separately, with precision and recall. A blocked source (Senang
+Makan returned HTTP 503 to the safe route) stays visible and is never counted as
+an empty or successful menu. The five sources are a controlled set to steer on,
+not an unseen holdout; the broader benchmark and a new holdout remain BE-21.
+

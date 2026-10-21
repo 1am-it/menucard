@@ -76,6 +76,54 @@ test('doubt, robots.txt and no usable menu → "Beoordeel handmatig"; "Robots ge
   assert.ok(!none.actions.includes('retry'));
 });
 
+test('an image-or-scan-only menu gets an explicit non-supported status and a working human route', () => {
+  const failedPdf = derive({
+    job: job({ status: 'failed', error_reason: 'pdf_no_text_layer', result_receipt_id: null }),
+    receipt: null,
+  });
+  assert.equal(failedPdf.key, 'image_only');
+  assert.equal(failedPdf.label, 'Menu alleen als afbeelding: niet ondersteund');
+  assert.equal(failedPdf.role, 'blocked');
+  assert.equal(failedPdf.high, false);
+  assert.equal(failedPdf.terminal, true);
+  assert.deepEqual(failedPdf.actions, ['review_source', 'adjust_url']);
+  assert.equal(failedPdf.reason, 'pdf_no_text_layer');
+  assert.match(failedPdf.text, /geen leesbare tekstlaag/);
+  assert.match(failedPdf.text, /geen OCR/);
+  assert.equal(ACTION_LABELS.review_source, 'Bronnen beoordelen');
+
+  const imagePage = derive({
+    job: job({
+      limitations: ['Menukaart lijkt alleen als afbeelding beschikbaar op https://bistro-voorbeeld.example/menu (2 afbeelding(en)); beeldanalyse/OCR is niet geconfigureerd.'],
+    }),
+    receipt: receipt({ menus: [] }),
+  });
+  assert.equal(imagePage.key, 'image_only');
+  assert.equal(imagePage.reason, 'image_only_menu');
+  assert.deepEqual(imagePage.actions, ['review_source', 'adjust_url']);
+  assert.ok(!imagePage.actions.includes('confirm'));
+
+  // A scan PDF inside a site analysis is named as a text-layer limitation.
+  const scanPdf = derive({
+    job: job({ limitations: ['PDF https://bistro-voorbeeld.example/menu.pdf kon niet worden gelezen (pdf_no_text_layer).'] }),
+    receipt: receipt({ menus: [] }),
+  });
+  assert.equal(scanPdf.key, 'image_only');
+  assert.equal(scanPdf.reason, 'pdf_no_text_layer');
+
+  // Never inferred from a real menu or a different failure.
+  const realMenu = derive({
+    job: job({ limitations: ['Menukaart lijkt alleen als afbeelding beschikbaar; beeldanalyse/OCR is niet geconfigureerd.'] }),
+  });
+  assert.notEqual(realMenu.key, 'image_only');
+  const corrupt = derive({ job: job({ status: 'failed', error_reason: 'pdf_corrupt', result_receipt_id: null }), receipt: null });
+  assert.notEqual(corrupt.key, 'image_only');
+
+  const summary = summarizeItems([failedPdf, imagePage, corrupt]);
+  assert.equal(summary.done, 3);
+  assert.equal(summary.byAction.review_source, 2);
+});
+
 test('"Opnieuw proberen" only for a technical failure or an expired job; an invalid URL gets "URL aanpassen"', () => {
   const failed = derive({ job: job({ status: 'failed', error_reason: 'fetch_failed', attempt_count: 5, result_receipt_id: null }), receipt: null });
   assert.equal(failed.label, 'Fout');

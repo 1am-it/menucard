@@ -20,6 +20,9 @@
 const FIXTURE_API_ROUTES = [
   { id: 'batch-analysis-process', match: 'exact', path: '/api/internal/v1/batch-analysis/process', methods: ['POST'] },
   { id: 'batch-analysis', match: 'prefix', path: '/api/internal/v1/batch-analysis', methods: ['GET'] },
+  // The image/scan follow-up opens the existing Bronnen beoordelen page. Only
+  // its read is fictionalised; every proposal write stays unknown/refused.
+  { id: 'source-triage', match: 'exact', path: '/api/internal/v1/source-triage', methods: ['GET'] },
   // GET only, and the detail form allows exactly one path segment. The real
   // concept pages need these two reads; every save/decision/export POST stays
   // unknown and is refused before it can reach a handler.

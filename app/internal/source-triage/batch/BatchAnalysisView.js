@@ -256,7 +256,7 @@ function InputCard({ text, setText, daily, ownOpenBatchId, onStart, busy, error,
 }
 
 function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBatchId, confirming, setConfirming, onConfirm, onRerun, onAdjust, onSaveConcept, busy }) {
-  const [details, setDetails] = useState(focusItem === item.position)
+  const [details, setDetails] = useState(focusItem === item.position || item.key === 'image_only')
   const confirmRef = useRef(null)
   const resultRef = useRef(null)
   const restaurantName = item.restaurant && item.restaurant.name
@@ -296,6 +296,12 @@ function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBat
   const reviewHref = item.restaurant && batchId
     ? `/internal/source-triage/batch?batch=${encodeURIComponent(batchId)}&item=${item.position}`
     : `/internal/onboarding-restaurant${item.url ? `?url=${encodeURIComponent(item.url)}` : ''}`
+  // The image/scan route deliberately leaves the batch: the existing Bronnen
+  // beoordelen page lets a human propose another text/PDF source or mark this
+  // one unusable. The reason travels with the link so it stays visible.
+  const reviewSourceHref = item.restaurant
+    ? `/internal/source-triage?restaurant=${encodeURIComponent(item.restaurant.id)}&reason=image_only`
+    : '/internal/source-triage?reason=image_only'
 
   function actionButton(action, primary) {
     const cls = primary ? 'di-btn-primary bta-btn' : 'stg-btn-secondary bta-btn'
@@ -328,6 +334,13 @@ function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBat
       return (
         <a key={action} className={cls} href={reviewHref}>
           {ACTION_LABELS.review_manually}
+        </a>
+      )
+    }
+    if (action === 'review_source') {
+      return (
+        <a key={action} className={cls} href={reviewSourceHref}>
+          {ACTION_LABELS.review_source}
         </a>
       )
     }
@@ -438,7 +451,7 @@ function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBat
       {!open && (
         <div className="bta-actions">
           {actions.map((a, i) => actionButton(a, i === 0))}
-          {(item.menu || item.foundUrl || item.restaurant || item.notes.length > 0) && (
+          {(item.menu || item.foundUrl || item.restaurant || item.notes.length > 0 || item.limitations.length > 0 || item.key === 'image_only') && (
             <button type="button" className="stg-btn-secondary bta-btn" aria-expanded={details} onClick={() => setDetails((d) => !d)}>
               {item.menu ? (details ? 'Controle sluiten' : 'Menukaart controleren') : 'Details bekijken'}
             </button>

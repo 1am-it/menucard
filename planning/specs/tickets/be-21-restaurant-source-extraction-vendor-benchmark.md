@@ -178,6 +178,32 @@ never assumed, never left implicit:
 - [ ] No product code, route, migration, or UI reachable from
       `/internal/*` was added or changed to run this benchmark.
 
+## Wat #59 (review 6318225879) expliciet naar dit ticket verschuift
+
+#59 heeft vijf gecontroleerde referenties (Zuyd, Andalous, Pellens, Chocolat en
+het geblokkeerde Senang Makan) en een deterministische meting van gemiste,
+verzonnen, prijs- en rubriekfouten opgeleverd. Dat is **geen** afsluiting van
+BE-21 en geen brede benchmark. Expliciet naar dit ticket verschoven, zonder iets
+stil te schrappen:
+
+1. **De brede, onafhankelijke benchmark over 50–100 bronnen**, inclusief de zes
+   verplichte bronnen en de per-brontype uitsplitsing.
+2. **Een nieuwe, nog ongeziene holdoutset.** De vijf #59-referentiebronnen zijn
+   bekend en juist bedoeld om op bij te sturen; ze zijn geen holdout.
+3. **De OCR-/browser-rendering-vendorvergelijking** met gemeten kosten, latency
+   en kwaliteit per vendor, plus DPA, EU-verwerking, retentie/no-training en een
+   owner-bevestigd kostenplafond.
+4. **Menselijke correctietijd en kosten per brontype** over de bredere set; #59
+   meet alleen de deterministische analysetijd en heeft geen providerkosten.
+5. **De echte scan-/afbeeldingsklasse op schaal.** #59 levert de expliciete
+   “menu alleen als afbeelding: niet ondersteund”-status en een werkende
+   menselijke route, maar geen echte afbeeldingsbron of OCR-meting.
+6. **Keten-/vestigingsvariatie, meertaligheid en arrangementen op schaal** buiten
+   de vijf #59-bronnen.
+
+Een vendor wordt in dit ticket nog steeds niet aanbevolen zonder de gemeten
+cijfers ernaast. #59's vijf bronnen sluiten de 50–100-bronnenbenchmark niet af.
+
 ## Non-goals (explicitly out of scope)
 
 - Implementing OCR, Browserless, self-hosted Playwright, or any other

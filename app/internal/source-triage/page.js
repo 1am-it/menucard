@@ -516,6 +516,7 @@ export default function SourceTriagePage() {
   const [filter, setFilter] = useState('all')
   const [query, setQuery] = useState('')
   const [selectedId, setSelectedId] = useState(null)
+  const [followUp, setFollowUp] = useState(null)
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState(null) // saveFeedback(): { tone: 'success' | 'notice' | 'error', text }
   const headingRef = useRef(null)
@@ -560,12 +561,33 @@ export default function SourceTriagePage() {
     if (session) load(session.access_token)
   }, [session, load])
 
+  // A batch result whose menu exists only as an image/scan links here with its
+  // reason, so the human route keeps that reason visible instead of silently
+  // turning it into a generic source page.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('reason') === 'image_only') {
+      setFollowUp(
+        'Vervolg van de batchanalyse: het menu is alleen als afbeelding of scan beschikbaar en wordt niet met OCR gelezen. Kies een andere tekst- of pdf-bron of markeer de bron als onbruikbaar.',
+      )
+    }
+  }, [])
+
   const entries = useMemo(() => (data && data.restaurants) || [], [data])
   const proposalsAvailable = Boolean(data && data.proposals_available)
   const counts = useMemo(() => countTriage(entries, { proposalsAvailable }), [entries, proposalsAvailable])
   const activeFilter = effectiveFilter(filter, proposalsAvailable)
   const visible = useMemo(() => filterTriage(entries, { filter: activeFilter, query }), [entries, activeFilter, query])
   const selected = entries.find((e) => e.restaurant_id === selectedId) || null
+
+  // A batch follow-up link may name the restaurant explicitly. Only an entry
+  // that is actually in the loaded list is selected; an unknown id changes
+  // nothing and is never invented into the list.
+  useEffect(() => {
+    if (selectedId) return
+    const requested = new URLSearchParams(window.location.search).get('restaurant')
+    if (requested && entries.some((entry) => entry.restaurant_id === requested)) setSelectedId(requested)
+  }, [entries, selectedId])
 
   useEffect(() => {
     if (focusDetail.current && headingRef.current) {
@@ -653,6 +675,12 @@ export default function SourceTriagePage() {
             start geen controle.
           </p>
         </div>
+
+        {followUp && (
+          <div className="di-banner di-banner-neutral" role="note">
+            {followUp}
+          </div>
+        )}
 
         <div role="alert" aria-atomic="true">
           {error && <div className="di-banner di-banner-danger">{error}</div>}

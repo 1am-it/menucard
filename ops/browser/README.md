@@ -138,6 +138,9 @@ enabled decision or a confirmation button.
 - shared uncertainty grouped per section, with no accept-all action;
 - a disabled "Concept opslaan" while blockers remain;
 - empty, partial (source found, zero items) and load-error states;
+- an image/scan-only menu with the explicit non-supported status, the reason, no
+  confirmation, and a working click into Bronnen beoordelen with the restaurant
+  preselected and the reason still visible;
 - concept list: four lineages, exact row hrefs, valid v1 next to blocked rows;
 - concept detail: v1 usable, v2 read-only with glass/bottle/supplement/
   unknown allergens/provenance/coverage, invalid and exact `menus: []` blocked;

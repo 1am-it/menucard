@@ -34,8 +34,12 @@ function fixtureBootstrap(scenarios, options = {}) {
     const requestedFixture = params.get('fixture');
     // A real click from the list to a detail drops the query string. The path
     // therefore chooses the concept dataset, so the click path is exercised
-    // without inventing a fixture-only link.
-    const fixture = requestedFixture || (pathname.indexOf('/internal/menu-concepts') === 0 ? 'concepts' : 'review');
+    // without inventing a fixture-only link. The same applies to the image/
+    // scan follow-up into Bronnen beoordelen.
+    const fixture = requestedFixture
+      || (pathname.indexOf('/internal/menu-concepts') === 0
+        ? 'concepts'
+        : pathname === '/internal/source-triage' ? 'triage' : 'review');
     const theme = params.get('theme') === 'light' ? 'light' : 'dark';
     const session = {
       access_token: 'fixture-token',
@@ -103,7 +107,13 @@ function fixtureBootstrap(scenarios, options = {}) {
         if (fixture === 'error') {
           return jsonResponse({ error: 'De batchanalyse kon niet worden geladen.' }, 500);
         }
-        return jsonResponse(fixtures[fixture] || fixtures.review);
+        const scenario = fixtures[fixture] || fixtures.review;
+        return jsonResponse(scenario && scenario.batch ? scenario.batch : scenario);
+      }
+      if (verdict.routeId === 'source-triage') {
+        const scenario = fixtures[fixture] || fixtures.triage;
+        const triage = scenario && scenario.triage ? scenario.triage : (fixtures.triage && fixtures.triage.triage);
+        return triage ? jsonResponse(triage) : jsonResponse({ error: 'Fictief brontriagescenario ontbreekt.' }, 500);
       }
       if (verdict.routeId === 'menu-concepts-list' || verdict.routeId === 'menu-concepts-detail') {
         const scenario = fixtures[fixture];

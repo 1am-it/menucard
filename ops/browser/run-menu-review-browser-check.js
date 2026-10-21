@@ -247,6 +247,75 @@ async function partialScenario(cdp) {
   screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'menu-review-partial-390-dark.png'));
 }
 
+async function imageOnlyScenario(cdp) {
+  await setViewport(cdp, 390, 900);
+  await openRoute(
+    cdp,
+    `${BATCH_URL}?fixture=image_only&${BATCH_QUERY}&item=1&theme=light`,
+    `document.body.innerText.includes('Menu alleen als afbeelding: niet ondersteund')`,
+  );
+  const snapshot = await evalJs(cdp, `(() => {
+    const text = document.body.innerText;
+    const link = [...document.querySelectorAll('a')].find((a) => (a.innerText || '').trim() === 'Bronnen beoordelen');
+    const confirm = [...document.querySelectorAll('button')].find((b) => (b.innerText || '').includes('Bevestig bron'));
+    return {
+      text,
+      link: link ? link.getAttribute('href') : null,
+      hasConfirm: Boolean(confirm),
+      overflow: document.documentElement.scrollWidth - window.innerWidth,
+      theme: document.documentElement.getAttribute('data-theme'),
+    };
+  })()`);
+  check('image-only: the explicit non-supported status is shown', snapshot.text.includes('Menu alleen als afbeelding: niet ondersteund'));
+  check('image-only: no successful extraction is claimed', !snapshot.text.includes('Menukaart gevonden') && !snapshot.text.includes('Bron bevestigd'));
+  check('image-only: the reason stays visible', snapshot.text.includes('beeldanalyse/OCR is niet geconfigureerd'));
+  check('image-only: no confirm action is offered', !snapshot.hasConfirm);
+  check(
+    'image-only: the human route is linked with restaurant and reason',
+    snapshot.link === '/internal/source-triage?restaurant=9001&reason=image_only',
+    snapshot.link,
+  );
+  check('image-only: no horizontal overflow at 390 px', snapshot.overflow <= 0, `overflow=${snapshot.overflow}`);
+  check('image-only: light theme is active', snapshot.theme === 'light');
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'menu-review-image-only-390-light.png'));
+
+  await setViewport(cdp, 320, 900);
+  await openRoute(
+    cdp,
+    `${BATCH_URL}?fixture=image_only&${BATCH_QUERY}&item=1&theme=dark`,
+    `document.body.innerText.includes('Menu alleen als afbeelding: niet ondersteund')`,
+  );
+  const small = await evalJs(cdp, `(() => ({
+    text: document.body.innerText,
+    theme: document.documentElement.getAttribute('data-theme'),
+    overflow: document.documentElement.scrollWidth - window.innerWidth,
+  }))()`);
+  check('image-only: the status and reason also hold at 320 px/dark', small.text.includes('Menu alleen als afbeelding: niet ondersteund') && small.text.includes('beeldanalyse/OCR is niet geconfigureerd'));
+  check('image-only: no horizontal overflow at 320 px', small.overflow <= 0, `overflow=${small.overflow}`);
+  check('image-only: dark theme is active at 320 px', small.theme === 'dark');
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'menu-review-image-only-320-dark.png'));
+
+  const steps = [{ action: 'open batch result', reached: true }];
+  const clicked = await clickLink(cdp, 'Bronnen beoordelen');
+  const arrived = await waitForPath(cdp, '/internal/source-triage', 'Bronnen beoordelen', 30000);
+  steps.push({ action: 'click Bronnen beoordelen', href: clicked, reached: Boolean(clicked), arrived });
+  const triage = await evalJs(cdp, `(() => ({
+    pathname: location.pathname,
+    search: location.search,
+    text: document.body.innerText,
+    detailTitle: (document.querySelector('.stg-detail-title') || {}).innerText || '',
+    note: (document.querySelector('.di-banner-neutral[role="note"]') || {}).innerText || '',
+  }))()`);
+  check('image-only follow-up: the existing Bronnen beoordelen page opens', arrived && triage.pathname === '/internal/source-triage');
+  check('image-only follow-up: the reason is visible on the human route', triage.note.includes('alleen als afbeelding of scan'));
+  check('image-only follow-up: the restaurant is preselected', triage.detailTitle.includes('Fictief Brasserie Noord'));
+  check('image-only follow-up: the context is kept in the address bar', triage.search.includes('restaurant=9001') && triage.search.includes('reason=image_only'));
+  check('image-only follow-up: no proposal or publication happened', triage.text.includes('Leg een voorstel vast') && !triage.text.includes('Bron bevestigd'));
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'menu-review-image-only-follow-up-320-dark.png'));
+  recordClickpath('image-only result -> Bronnen beoordelen', steps, steps.every((step) => step.reached !== false && step.arrived !== false), JSON.stringify(steps));
+}
+
+
 async function tabUntilInput(cdp, matches, maxTabs = 80) {
   const seen = [];
   for (let i = 0; i < maxTabs; i += 1) {
@@ -1013,6 +1082,7 @@ async function main() {
     await readOnlyScenario(cdp);
     await emptyScenario(cdp);
     await partialScenario(cdp);
+    await imageOnlyScenario(cdp);
     await structureScenario(cdp);
     await v2Scenario(cdp);
     await errorScenario(cdp);

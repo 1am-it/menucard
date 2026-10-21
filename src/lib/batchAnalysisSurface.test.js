@@ -62,6 +62,13 @@ test('page: never fetches anything but its own internal API; no AI, OCR or exter
   assert.doesNotMatch(PAGE, /openai|anthropic|tesseract|from ['"][^'"]*(ocr|claude)[^'"]*['"]/i);
 });
 
+test('page: an image/scan-only menu keeps its reason and opens the existing Bronnen beoordelen route', () => {
+  assert.match(PAGE, /review_source/);
+  assert.match(PAGE, /\/internal\/source-triage\?restaurant=/);
+  assert.match(PAGE, /reason=image_only/);
+  assert.match(PAGE, /item\.key === 'image_only'/);
+});
+
 test('page: an already confirmed source is reported as such and never as a new confirmation', () => {
   assert.match(PAGE, /r\.reason === 'already_confirmed'/);
   assert.match(PAGE, /Deze bron was al bevestigd\. Er is niets dubbel opgeslagen\./);

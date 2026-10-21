@@ -1,13 +1,15 @@
 # Menu-extractie — afrondingsmatrix #59
 
 Status: **ontwikkelaarsbewijs, geen onafhankelijke review en geen release.**
-Datum: 2026-10-20. Issue #59, branch `feat/menu-extraction-59`, PR #60.
-Kandidaat-codehead: `26839eb4b9dfb5fb0a04fbc977ae3a7561f7000a`
-(browserdekking van de bestaande conceptlijst en detailpagina na review
-6295223157; deze documentatie volgt als aparte commit).
-Bewijscommit: `0f6fce86c0cc75cbcaab05574b7ae83975e3a16c`
-(`ops/browser/evidence/menu-review-browser-evidence.json`, gegenereerd op
-`26839eb` met schone werkboom). Vorige heads:
+Datum: 2026-10-21 (nieuwe ronde review 6318225879; de rondehistorie van
+2026-10-20 blijft hieronder ongewijzigd).
+Issue #59, branch `feat/menu-extraction-59`, PR #60.
+De nieuwe ronde staat in “Ronde 2026-10-21 — vijf gecontroleerde referenties”.
+De oudere kandidaat-codehead `26839eb4b9dfb5fb0a04fbc977ae3a7561f7000a` en
+bewijscommit `0f6fce86c0cc75cbcaab05574b7ae83975e3a16c` horen bij de vorige
+ronde en gelden niet als head van deze ronde; de exacte checkpoint-HEAD staat
+in de PR #60-checkpoint.
+Vorige heads:
 `b621582223515ee7b9f2b81dada56b8a4d044955` (reviewdocumentatie),
 `6728897c814bce80aa2b9a44d53d8322b3adc72a` (herstel van review 6283658271),
 `ab89d14c0a2dfb19c559126a0a8ca0bb62746d16` (documentatie),
@@ -51,6 +53,134 @@ integratie zijn met fictieve fixtures getest; er is geen DDL, writeflag of
 publieke werking. Volledige productacceptatie vereist nog een Product
 Owner-besluit over provider/model/budget/DPA, een nieuwe holdout, live
 preview-/schrijftoegang en onafhankelijke review door de Delivery Lead.
+
+## Ronde 2026-10-21 — vijf gecontroleerde referenties (review 6318225879)
+
+Deze ronde voegt **gecontroleerde referenties voor vijf bronnen** toe en meet de
+huidige code op **exact de vastgezette bytes**. De referenties zijn uit de
+brontekst opgesteld, niet uit de parseruitvoer; iedere referentieregel heeft een
+rubriekpad, een citaat of locator en (voor een gerecht) een prijs of
+prijsvarianten. De telregels zijn vooraf gepind in
+[menu-extraction-reference-counting-rules.md](menu-extraction-reference-counting-rules.md)
+(SHA-256 `0f09b74f…f09c`).
+
+### Vastgezette bronversies
+
+| Bron | Status | Vastgelegd | SHA-256 (verkort) |
+| --- | --- | --- | --- |
+| Zuyd | gelezen | home, lunch, diner, kerstmenu, Zuyd voor Thuys, nieuws | `f4f685da725f`, `389470158b72`, `128cae10ca14`, `2bfaf63e7814`, `644810dfc971`, `c9c130c079b7` |
+| Andalous | gelezen | home, menukaart, ramadan-menu (incl. redirect), thuisbezorgd, werken, Ramadan-PDF, /fr/ramadan-menu | `8c2fb5e31c5f`, `93b11284b922`, `69b1011c0777`, `1faa547bd4b3`, `a22fb64af8d9`, `a469bf6ab62b`, `9a32541b2a5a`, `521e389ce669` |
+| Pellens | gelezen | één pagina met lunch/diner-tabs en verborgen tweede weergave | `66f57e267289` |
+| Chocolat | gelezen | home, menu, lunch, diner, cadeaubon, arrangementen | `186958b4753f`, `0754bdd2f6ca`, `4ac64c425f1c`, `7122b5d1c92b`, `3acbf4874eed`, `a35ee43d2d68` |
+| Senang Makan | **geblokkeerd** | robots.txt gaf HTTP 503; niets opgehaald | geen bytes; reden vastgelegd |
+
+De bytes staan lokaal en gitignored onder
+`ops/benchmark/output/reference-captures/`; in Git staan alleen URL,
+content-type, tijd, bytegrootte en SHA-256
+(`ops/benchmark/reference-captures.json`). Senang Makan is **geen lege of
+geslaagde extractie**: de veilige route kon de publieke bron niet lezen en er is
+geen alternatieve URL of omzeiling gebruikt.
+
+### Meetresultaat (huidige code op de vastgezette bytes)
+
+| Bron | Referentie | Extractie | Match | Gemist | Verzonnen | Prijsfouten | Rubriekfouten | Precisie | Recall |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Zuyd | 36 | 25 | 23 | 11 | 0 | 2 | 0 | 92,00% | 63,89% |
+| Andalous | 86 | 81 | 77 | 7 | 2 | 0 | 2 | 95,06% | 89,53% |
+| Pellens | 23 | 27 | 0 | 19 | 23 | 0 | 4 | 0,00% | 0,00% |
+| Chocolat | 26 | 24 | 20 | 2 | 0 | 0 | 4 | 83,33% | 76,92% |
+| **Totaal (4 gemeten)** | **171** | **157** | **120** | **39** | **25** | **2** | **10** | **76,43%** | **70,18%** |
+
+Senang Makan is geblokkeerd en telt niet mee in de totalen. De vier foutsoorten
+staan afzonderlijk in `reference-measurement.json` en
+`reference-measurement.md`, met per afwijking het item, het rubriekpad en het
+broncitaat. De meting is deterministisch en herhaalbaar op dezelfde bytes
+(`node ops/scripts/measure-menu-extraction-references.js`); er is geen netwerk-,
+provider- of database-oproep in de meetroute.
+
+Belangrijkste bevindingen, zonder ze weg te poetsen:
+
+- **Zuyd** mist beide sandwiches en vier à-la-cartegerechten per menuvariant;
+  `Zeetongfilet` krijgt 28,00 in plaats van 39,00. De parser leest de
+  arrangementen niet als gerecht (goed), maar mist ook losse gerechten.
+- **Andalous** mist zeven gerechten (o.a. drie pasta's, de Mixed Grill met twee
+  varianten, de kindergrillburger en de kip-loempia's), voegt `Geraspte kaas` als
+  gerecht toe (het is een meerprijs) en zet de visgerechten onder
+  `Warme voorgerechten > Visgerechten` in plaats van `Visgerechten`.
+- **Pellens** is de zwaarste uitkomst: de parser plakt namen en beschrijvingen
+  aan elkaar (`Entrecôtezwarte knoflook`), leest de verborgen tweede weergave
+  als extra gerechten en laat het lunch/diner-onderscheid weg. Dat levert 0
+  exacte matches, 19 gemiste en 23 verzonnen rijen. Dit is een echte
+  structuur-/naamfout, geen referentiefout.
+- **Chocolat** mist `STEAK TARTARE` en `SANDWICH CHOCOLAT`; de vier
+  diner-nagerechten krijgen geen `DINERKAART CHOCOLAT`-pad.
+- **Senang Makan** is niet gemeten; HTTP 503 op robots.txt is een bronblokkade,
+  geen nul-gerechten-succes.
+
+
+### Afbeeldingsmenu: expliciete status en menselijke route
+
+Een menu dat alleen als afbeelding of scan bestaat, krijgt in de batch de
+expliciete status **“Menu alleen als afbeelding: niet ondersteund”**. Er is geen
+succesmelding, geen bevestigknop en geen stille uitval. De vervolgstap
+**“Bronnen beoordelen”** opent de bestaande brontriage met het restaurant en de
+reden in de URL; daar kan een medewerker een andere tekst- of pdf-bron voorstellen
+of de bron als onbruikbaar markeren. De reden blijft op die pagina zichtbaar.
+Dit is met regressies en een browserfixture bewezen (390 px licht en 320 px
+donker). **Geen van de vijf vastgezette bronnen bleek een afbeeldingsmenu**: de
+route is daarom met een fictieve fixture bewezen, niet met een echte
+afbeeldingsbron. Senang Makan is geblokkeerd, niet afbeeldings-only.
+
+### Status per #59-acceptatiecriterium in deze ronde
+
+“Verschoven” betekent hier: expliciet naar BE-21 of een latere beslissing, niet
+stil geschrapt.
+
+| # | Criterium (verkort) | Status | Bewijs / reden |
+| ---: | --- | --- | --- |
+| 1 | Protocol en schema versiegebonden; ontbrekende configuratie stopt concreet | **gehaald** | `MENU-EXTRACTION.md` v0.2 met SHA-256; `menuExtractionProtocol`-regressies blijven groen |
+| 2 | URL → lezen → extractie → menselijke correctie → conceptopslag met broncontext | **gedeeltelijk** | Bestaande keten en fixture bewijzen de vorm; geen echte Supabase-sessie of conceptopslag in deze ronde |
+| 3 | Smelt: echte PDF-inhoud, 0 items is geen succes, gerechten/prijzen/dekking vergeleken | **gehaald in eerdere ronde** | 37/37 referentierijen op de gepinde PDF; deze ronde meet Smelt niet opnieuw |
+| 4 | Blossem: lunch/diner, rubrieken en items volgens de bron; onzekerheid reviewbaar | **gehaald in eerdere ronde** | 43/43 op de gepinde HTML; deze ronde meet Blossem niet opnieuw |
+| 5 | Bestaande kaarten (Wolfslaar, Bardot, Zuyd, T-Huis) tegen gecontroleerde bronnen | **gedeeltelijk** | Zuyd heeft nu een gecontroleerde referentie en meting (23/36 match, 11 gemist, 2 prijsfouten); de andere drie blijven historische vormregressie zonder nieuwe referentie |
+| 6 | Representatieve set plus een aparte ongeziene set; eerlijke beperking per klasse | **gedeeltelijk / verschoven** | Vijf gecontroleerde bronnen toegevoegd; een nieuwe ongeziene holdout bestaat niet en gaat naar BE-21 |
+| 7 | Dataset, referentie-uitkomsten en meetbare drempels vóór implementatieacceptatie | **gedeeltelijk** | Referenties, telregels en een deterministische meting bestaan; de brede 50–100-bronnenbenchmark en vrijgavedrempels blijven BE-21 |
+| 8 | Gemiste/verzonnen items, prijsfouten, structuurverlies, bewijsdekking, correctiewerk, tijd en kosten per brontype | **gedeeltelijk** | Vier foutsoorten per bron en totaal zijn gemeten; menselijke correctietijd en kosten zijn onbekend (geen provider); scan-/afbeeldingsklasse alleen als fixture |
+| 9 | Browseracceptatie met klikpaden, rollen, leeg/fout/partieel, toetsenbord, licht/donker, 320/390 px | **gedeeltelijk** | Nieuwe afbeeldingsroute is in de fixture op 390 px licht en 320 px donker getest; de bestaande suite dekt de overige paden. Geen echte authenticated browseracceptatie |
+| 10 | Time-out, provideruitval, ongeldige uitvoer, limieten, herimport, gelijktijdige taken, promptinjectie, verkeerde vestiging, onveilige redirects | **gedeeltelijk** | Eerder bewezen met regressies; deze ronde herhaalt die set niet en voegt geen provider toe |
+| 11 | Geen stil dataverlies tussen extractie, receipt, review, concept en export | **gedeeltelijk** | De afbeeldingsstatus is expliciet en blokkeert een schijnsucces; de v2-read-onlygrens blijft ongewijzigd; geen echte schrijfketen getest |
+| 12 | Geen regressie in rollen, bronbevestiging, audit, publicatiegates, beveiliging of geheimenbeheer | **gehaald (ontwikkelaarsbewijs)** | Volledige suite en build in deze ronde; zie checkpoint. Geen productiecredentials gebruikt |
+| 13 | Onafhankelijke review met exacte commit, checks, versies, resultaten en beperkingen | **verschoven** | De Delivery Lead moet deze ronde nog onafhankelijk beoordelen; groene tests zijn geen productacceptatie |
+
+
+- Geen extractieverbeteringen om de referentiescore te verhogen; dat is een
+  aparte opdracht na de review van de Delivery Lead.
+- Geen OCR, geen provider, geen app-AI, geen productie, geen publicatie en geen
+  merge.
+- Geen nieuwe bronnen buiten de vijf en geen #56-werk.
+- De vijf referentiebronnen zijn **geen ongeziene holdout**: ze zijn juist
+  bedoeld om op bij te sturen.
+
+### Verschuivingen naar BE-21 (concreet, niets stil geschrapt)
+
+De volgende eisen gaan expliciet naar
+`planning/specs/tickets/be-21-restaurant-source-extraction-vendor-benchmark.md`
+en worden daar als openstaand vastgelegd:
+
+1. De brede, onafhankelijke benchmark over 50–100 bronnen, inclusief de zes
+   verplichte bronnen.
+2. Een nieuwe, nog ongeziene holdoutset; de vijf referentiebronnen tellen daar
+   niet voor.
+3. De OCR-/browser-rendering-vendorvergelijking met DPA, EU-verwerking,
+   retentie/no-training en een kostenplafond.
+4. Kosten, latency en menselijke correctietijd per brontype over die bredere set.
+5. De echte scan-/afbeeldingsklasse op schaal; deze ronde levert alleen de
+   route en een fixture, geen echte afbeeldingsbron.
+6. Keten-/vestigingsvariatie, meertaligheid en arrangementen op schaal buiten
+   deze vijf bronnen.
+
+Deze ronde **sluit BE-21 niet** en doet geen uitspraak over de beste vendor of
+over alle websites.
 
 ## Bewijstype en status
 
