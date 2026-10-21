@@ -166,6 +166,23 @@ test('runRestaurantSourceAnalysis: an HTML candidate contributes a new menu cont
   assert.equal(result.fieldEvidence.phone.sourceUrl, 'https://bobbisbar.nl/menukaart')
 })
 
+test('runRestaurantSourceAnalysis: an HTML menu item keeps its own locator, pattern and quote for review', async () => {
+  const homepage = '<html><body><a href="/menukaart">Menukaart</a></body></html>'
+  const candidateHtml = '<h2>Fictieve kaart</h2><ul><li>Fictieve soep 4,50</li><li>Fictieve salade 5,50</li><li>Fictief brood 3,00</li></ul>'
+  const result = await runRestaurantSourceAnalysis({
+    homepageHtml: homepage,
+    homepageUrl: 'https://bobbisbar.nl/',
+    fetchCandidate: async () => ({ status: 'html', body: candidateHtml, finalUrl: 'https://bobbisbar.nl/menukaart' }),
+  })
+  const menu = result.menuContexts.find((entry) => entry.extractionMethod === 'html')
+  assert.ok(menu, 'the structured HTML menu is a real menu context')
+  const item = menu.categories.flatMap((category) => category.items).find((entry) => entry.name === 'Fictieve soep')
+  assert.ok(item)
+  assert.match(item.evidence.locator, /^ul>li\[1\]$/)
+  assert.equal(typeof item.evidence.pattern, 'string')
+  assert.match(item.evidence.quote, /Fictieve soep/)
+})
+
 test('runRestaurantSourceAnalysis: the homepage field always wins over a same-host candidate for the same field — never overridden', async () => {
   const homepageWithPhone = jsonLdScript({ '@type': 'Restaurant', name: 'Mr. Moos', telephone: '076 0000000' }) +
     '<a href="/menukaart">Menukaart</a>'

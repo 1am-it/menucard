@@ -134,7 +134,11 @@ test('analysis: the menu page is read once and becomes one priced menu context w
     ['Warm', ['Warm'], ['Restaurant', 'Warm'], 2],
     ['Dessert', ['Dessert'], ['Restaurant', 'Dessert'], 2],
   ]);
-  assert.deepEqual(menu.categories[0].items[0], { name: 'Fictieve salade met citroen', desc: null, price: '14.50' });
+  const firstItem = menu.categories[0].items[0];
+  assert.deepEqual({ name: firstItem.name, desc: firstItem.desc, price: firstItem.price }, { name: 'Fictieve salade met citroen', desc: null, price: '14.50' });
+  // The exact source line travels with the item since #59 review 6315269210.
+  assert.match(firstItem.evidence.locator, /p\[1\]$/);
+  assert.match(firstItem.evidence.quote, /Fictieve salade met citroen/);
   assert.ok(menu.categories.every((c) => c.items.every((i) => /^\d+\.\d{2}$/.test(i.price))));
   assert.ok(result.notes.some((n) => n.startsWith(`Menukaart herkend uit de HTML van ${MENU_URL}: 7 gerechten met prijs in 3 rubrieken.`)));
   assert.deepEqual(menuSourceUrls(result), [MENU_URL]);

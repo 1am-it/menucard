@@ -499,3 +499,55 @@ test('N4: many table cells are processed linearly and every cell classification 
   const cells = 8000
   assert.ok(large.stats.workUnits - parseBudget.used >= cells * 5, `read cost ${large.stats.workUnits - parseBudget.used} for ${cells} cells`)
 })
+
+// ─── N5: an explicit supplement is never the dish price (#59 review 6315269210) ──
+
+test('N5: a trailing explicit supplement never becomes the main price', () => {
+  const html = `<h2>Fictieve kaart</h2>
+    <p><strong>Fictieve ossenhaas</strong><br />Fictief rundvlees met fictieve jus<br />35 - <em>supplement fictieve eendenlever 9</em><br /><br />
+    <strong>Fictieve soep</strong> 8,00<br /><br />
+    <strong>Fictieve salade</strong> 9,00<br /><br />
+    <strong>Fictieve kaas</strong> - 17 - <em>in plaats van dessert, supplement 8,50</em></p>`
+  const result = extractHtmlMenuStructure(html)
+  assert.equal(result.status, 'parsed')
+  const ossenhaas = findItem(result, 'Fictieve ossenhaas')
+  assert.ok(ossenhaas, 'the dish stays, its main price is 35')
+  assert.equal(ossenhaas.item.amountMinorUnits, 3500)
+  assert.match(ossenhaas.item.evidence.supplementText, /supplement fictieve eendenlever 9/i)
+  assert.equal(result.sections.some((section) => section.items.some((item) => item.amountMinorUnits === 850)), false, 'the 8,50 supplement never becomes a dish price')
+  assert.equal(findItem(result, 'Fictieve kaas'), null, 'a dish with only supplement/prose prices is not invented')
+})
+
+test('N5: a dish whose only amount is a supplement is not priced', () => {
+  const html = `<h2>Fictieve kaart</h2>
+    <p><strong>Fictieve soep</strong> 8,00<br /><br />
+    <strong>Fictieve salade</strong> 9,00<br /><br />
+    <strong>Fictief gerecht</strong> supplement fictieve olie 2,50<br /><br />
+    <strong>Fictief brood</strong> 3,00</p>`
+  const result = extractHtmlMenuStructure(html)
+  assert.equal(result.status, 'parsed')
+  assert.equal(findItem(result, 'Fictief gerecht'), null, 'never an item with the supplement as its main price')
+  assert.equal(result.sections.some((section) => section.items.some((item) => item.amountMinorUnits === 250)), false)
+  assert.ok(findItem(result, 'Fictief brood'))
+})
+
+test('N5: a supplement immediately before the only amount is refused, not mispriced', () => {
+  const result = extractHtmlMenuStructure('<h2>Fictief</h2><ul><li>Fictieve soep 4,50</li><li>Fictieve salade 5,50</li><li>Fictief gerecht supplement 2,50</li><li>Fictief brood 3,00</li></ul>')
+  assert.equal(result.status, 'parsed')
+  assert.equal(findItem(result, 'Fictief gerecht'), null)
+  assert.ok(result.rejected.some((line) => line.reason === 'supplement_price'))
+})
+
+test('N5: a standalone dish price followed only by a bulleted legend stays an item', () => {
+  const html = `<h2>Fictieve kaart</h2>
+    <p><strong>Fictieve soep</strong> 8,00<br /><br />
+    <strong>Fictieve salade</strong> 9,00<br /><br />
+    <strong>Fictief dessert</strong> - laat u fictief verrassen…<br />16,50<br /><em>○ Fictieve legende over allergenen</em><br /><em>○ Fictieve legende over dieetwensen</em></p>`
+  const result = extractHtmlMenuStructure(html)
+  assert.equal(result.status, 'parsed')
+  const dessert = findItem(result, 'Fictief dessert')
+  assert.ok(dessert, 'the dish with a legend after its own price is kept')
+  assert.equal(dessert.item.amountMinorUnits, 1650)
+  assert.match(dessert.item.description, /laat u fictief verrassen/)
+  assert.equal(/legende/.test(dessert.item.description || ''), false, 'the legend is not part of the dish description')
+})

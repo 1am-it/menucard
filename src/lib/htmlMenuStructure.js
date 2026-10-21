@@ -528,7 +528,7 @@ function isPlausibleItemName(name) {
 const LINE_PRICE_TAGS = new Set(['strong', 'b', 'span', 'em'])
 // A price element holding a price and nothing else: "14.5", "14,50", "9",
 // "€ 12,50", "12,-". Amounts from 0,50 up to 500,00 only.
-const PRICE_ONLY_PATTERN = /^(€\s*)?(\d{1,3})(?:[.,](\d{1,2}))?(?:\s*,[-–])?(\s*€)?$/
+const PRICE_ONLY_PATTERN = /^(€\s*)?(\d{1,3})(?:[.,](\d{1,2}))?(?:(?:\s*,\s*|\s+)[-–])?(\s*€)?$/
 
 function parsePriceOnly(text) {
   const match = PRICE_ONLY_PATTERN.exec(String(text || '').trim())
@@ -582,10 +582,22 @@ const TITLE_ANCHOR_TAGS = new Set(['strong', 'b'])
 // The end price of a formatted block: the last token, preceded by a space or
 // the start of the block text. Whole euros are allowed here (structure gives
 // the meaning), 0,50 – 500,00 only (parsePriceOnly).
-const END_PRICE_PATTERN = /(?:^|\s)((?:€\s*)?\d{1,3}(?:[.,]\d{1,2})?(?:\s*,[-–])?(?:\s*€)?)$/
+const END_PRICE_PATTERN = /(?:^|\s)((?:€\s*)?\d{1,3}(?:[.,]\d{1,2})?(?:(?:\s*,\s*|\s+)[-–])?(?:\s*€)?)$/
 // A number right before the end price ("25 / 30", "8,50 - 12,50"): a range or
 // a second price, never one dish price.
 const PRICE_BEFORE_END_PATTERN = /(?:^|\s)(?:€\s*)?\d{1,3}(?:[.,]\d{1,2})?\s*(?:[/|\-–]|of|or|en)?\s*$/i
+// An explicit supplement or surcharge clause at the very end of a dish block
+// ("35 - supplement eendenlever 9", "17 - in plaats van dessert, supplement
+// 8,50"). Its amount may never become the dish's main price (#59 Delivery
+// Lead review 6315269210; the live Zuyd source triggered this).
+const TRAILING_SUPPLEMENT_PATTERN = /\b(?:supplement(?:en)?|toeslag)\b[^€\d]{0,40}?(?:€\s*)?\d{1,3}(?:[.,]\d{1,2})?\s*(?:(?:,\s*|\s+)[-–])?\s*$/i
+// A supplement marker directly before the only amount of a line: that amount
+// is not the line's dish price, so the line is refused instead of mispriced.
+const SUPPLEMENT_BEFORE_PRICE_PATTERN = /\b(?:supplement(?:en)?|toeslag)\b[^€\d]{0,40}$/i
+// A bulleted legend/footnote line after a standalone price; it is not a dish
+// description and cannot be the end price of the block.
+const LEGEND_LINE_PATTERN = /^[○●•·*†‡]\s*/;
+
 // Time context right before a bare number ("open tot 22", "vanaf 17"): never a price.
 const TIME_WORD_BEFORE_PATTERN = /\b(?:vanaf|tot|om|tussen|van|t\/m|tot en met|uur|open|geopend|gesloten|sluit|aanvang|from|until|at)\s*$/i
 
@@ -638,11 +650,54 @@ function formattedBlocks(node, budget, markerCounter) {
 }
 
 function blockEndPrice(block, budget) {
-  const body = block.lines.join(' ').replace(/\s+/g, ' ').trim()
-  budget.spend(1 + Math.ceil(body.length / 16))
-  const match = END_PRICE_PATTERN.exec(body)
-  const price = match ? parsePriceOnly(match[1]) : null
-  return { body, price, priceText: price ? match[1].trim() : '', before: price ? body.slice(0, match.index).trim() : body }
+  const rawLines = (block.lines || [])
+    .map((line) => String(line || '').replace(/\s+/g, ' ').trim())
+    .filter(Boolean)
+  budget.spend(1 + Math.ceil(rawLines.join(' ').length / 16))
+  // A trailing supplement is not the dish's price. Strip the explicit clause
+  // first, so "35 - supplement eendenlever 9" stays 35 and never becomes 9.
+  let supplementText = null
+  if (rawLines.length > 0) {
+    const last = rawLines[rawLines.length - 1]
+    const supplementMatch = TRAILING_SUPPLEMENT_PATTERN.exec(last)
+    if (supplementMatch) {
+      supplementText = supplementMatch[0].trim()
+      const rest = last.slice(0, supplementMatch.index).trim()
+      if (rest) rawLines[rawLines.length - 1] = rest
+      else rawLines.pop()
+    }
+  }
+  const rawBody = rawLines.join(' ').trim()
+  const match = END_PRICE_PATTERN.exec(rawBody)
+  if (match) {
+    const price = parsePriceOnly(match[1])
+    return {
+      body: rawBody,
+      rawBody,
+      supplementText,
+      price,
+      priceText: price ? match[1].trim() : '',
+      before: price ? rawBody.slice(0, match.index).trim() : rawBody,
+    }
+  }
+  // A dish price can sit on its own line followed only by a bulleted legend
+  // ("16,50" then "○ …"). That line is the dish price; the legend is not.
+  for (let index = rawLines.length - 2; index >= 0; index -= 1) {
+    const priceOnly = parsePriceOnly(rawLines[index])
+    const after = rawLines.slice(index + 1)
+    if (!priceOnly || after.length === 0 || !after.every((line) => LEGEND_LINE_PATTERN.test(line))) continue
+    const body = rawLines.slice(0, index + 1).join(' ')
+    return {
+      body,
+      rawBody,
+      supplementText,
+      price: priceOnly,
+      priceText: rawLines[index],
+      before: rawLines.slice(0, index).join(' ').trim(),
+      ignoredLegendLines: after.length,
+    }
+  }
+  return { body: rawBody, rawBody, supplementText, price: null, priceText: '', before: rawBody }
 }
 
 /**
@@ -1135,12 +1190,19 @@ function extractWithinBudget(html, budget, stats) {
     const section = sectionFor(headingPath)
     if (prices.length === 0) {
       if (ON_REQUEST_PATTERN.test(fullText) && isPlausibleItemName(name.replace(ON_REQUEST_PATTERN, ''))) {
-        return addItem(section, node, pattern, { name: cleanName(name.replace(ON_REQUEST_PATTERN, '')), priceStatus: 'on_request', amountMinorUnits: null, currency: null, description: null })
+        return addItem(section, node, pattern, { name: cleanName(name.replace(ON_REQUEST_PATTERN, '')), priceStatus: 'on_request', amountMinorUnits: null, currency: null, description: null }, { quote: fullText })
       }
       if (isPlausibleItemName(name) && name.length <= 80) section.unpriced.push({ text: fullText, node })
       return undefined
     }
     if (!isPlausibleItemName(name) || item.nameHasPrice) return reject(fullText, 'missing_name', node)
+    // An explicit supplement/surcharge directly before the only amount is not
+    // the dish's main price; refuse the line instead of inventing a price.
+    if (prices.length === 1) {
+      const priceIndex = fullText.lastIndexOf(prices[0].raw)
+      const beforePrice = priceIndex >= 0 ? fullText.slice(0, priceIndex) : fullText
+      if (SUPPLEMENT_BEFORE_PRICE_PATTERN.test(beforePrice)) return reject(fullText, 'supplement_price', node)
+    }
     if (prices.length > 1 && hasNameBetweenPrices(item.priceText, prices)) return reject(fullText, 'ambiguous_structure', node)
     const description = cleanName(item.description)
     const descriptionValue = description && findPrices(description).length === 0 && isPlausibleItemName(description) ? clip(description) : null
@@ -1155,7 +1217,7 @@ function extractWithinBudget(html, budget, stats) {
         amountMinorUnits: null,
         currency: null,
         description: descriptionValue,
-      })
+      }, { quote: fullText })
     }
     const price = prices[0]
     return addItem(section, node, pattern, {
@@ -1164,7 +1226,7 @@ function extractWithinBudget(html, budget, stats) {
       amountMinorUnits: price.amountMinorUnits,
       currency: price.hasEuroSign || /€/.test(item.priceText) ? 'EUR' : null,
       description: descriptionValue,
-    })
+    }, { quote: fullText })
   }
 
   // One dish line of a `line_break_list`: the same refusals as handleItem
@@ -1198,14 +1260,14 @@ function extractWithinBudget(html, budget, stats) {
       amountMinorUnits: line.price.amountMinorUnits,
       currency: line.price.hasEuroSign ? 'EUR' : null,
       description: null,
-    })
+    }, { quote: fullText })
   }
 
   // One block of a `formatted_block` run: the same refusals as handleItem,
   // plus the strict end-price rule (exactly one price, at the very end).
   function handleBlock(block, node, headingPath) {
     stats.candidates += 1
-    const { body, price, priceText, before } = blockEndPrice(block, budget)
+    const { body, price, priceText, before, supplementText } = blockEndPrice(block, budget)
     const fullText = `${block.title} ${body}`.trim()
     if (fullText.length > MAX_ITEM_TEXT) {
       budget.spend(Math.ceil(fullText.length / 16))
@@ -1240,17 +1302,23 @@ function extractWithinBudget(html, budget, stats) {
       amountMinorUnits: price.amountMinorUnits,
       currency: price.hasEuroSign || /€/.test(priceText) ? 'EUR' : null,
       description: description && isPlausibleItemName(description) ? clip(description) : null,
-    })
+    }, supplementText ? { quote: fullText, supplementText } : { quote: fullText })
   }
 
-  function addItem(section, node, pattern, item) {
+  function addItem(section, node, pattern, item, evidenceExtra = null) {
     const key = `${JSON.stringify(section.path)}|${item.name.toLowerCase()}|${item.priceStatus}|${item.amountMinorUnits}`
     if (seen.has(key)) {
       stats.duplicatesRemoved += 1
       return undefined
     }
     seen.add(key)
-    section.items.push({ ...item, evidence: { pattern, locator: locatorOf(node, budget) } })
+    const evidence = { pattern, locator: locatorOf(node, budget) }
+    if (evidenceExtra && typeof evidenceExtra === 'object') {
+      for (const [name, value] of Object.entries(evidenceExtra)) {
+        if (typeof value === 'string' && value.trim()) evidence[name] = value.trim().slice(0, 200)
+      }
+    }
+    section.items.push({ ...item, evidence })
     return undefined
   }
 

@@ -115,7 +115,14 @@ function menuFromHtmlStructure(html, usedSlugs) {
       position,
       items: section.items
         .filter((item) => item.priceStatus === 'known' && Number.isInteger(item.amountMinorUnits))
-        .map((item) => ({ name: item.name, desc: item.description || null, price: (item.amountMinorUnits / 100).toFixed(2) })),
+        .map((item) => {
+          const mapped = { name: item.name, desc: item.description || null, price: (item.amountMinorUnits / 100).toFixed(2) }
+          // Keep the extractor's own locator/pattern/quote with the item: the
+          // review and receipt must be able to point at the exact source line,
+          // not only at the section (#59 Delivery Lead review 6315269210).
+          if (item.evidence && typeof item.evidence === 'object') mapped.evidence = { ...item.evidence }
+          return mapped
+        }),
     }))
     .filter((entry) => entry.items.length > 0)
   const itemCount = kept.reduce((n, entry) => n + entry.items.length, 0)
