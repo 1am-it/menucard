@@ -18,7 +18,7 @@ Protocol: `MENU-EXTRACTION.md` v0.2, SHA-256
 | R2 | `https://www.restaurantblossem.nl/` → `/nl/restaurant` | HTML, tab/uitklapstructuur | echte Blossem-case; lunch/diner-achtige rubrieken |
 | R3 | bestaande structuurcorpus `ops/benchmark/structureCorpus.js` | synthetische HTML-fixtures | plat, genest, tabellen, kaarten, `br`-regels |
 | R4 | bestaande PDF-fixtures | synthetische tekst-PDF's | prijs, kolom, geen tekstlaag, fallback |
-| R5 | `data/menus.json` (Wolfslaar, Bardot, Zuyd, T-Huis) | gecontroleerde historische export | vorm-/mappingregressie, nooit actuele waarheid |
+| R5 | `data/menus.json` (Wolfslaar, Bardot, Zuyd, T-Huis) | gecontroleerde historische export | vorm-/mappingregressie, nooit actuele waarheid; live vergeleken op 2026-10-21, zie [bestaande kaarten](menu-extraction-existing-cards.md) |
 | R6 | ongeldige/lege/geblokkeerde bronfixtures | fouten | time-out, robots, verkeerde vestiging, duplicaat |
 
 ## Ongeziene set

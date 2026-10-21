@@ -1,0 +1,294 @@
+{
+  "version": "1.0.0",
+  "pinnedAt": "2026-10-21",
+  "capturedAt": "2026-10-21T12:13:00.735Z",
+  "manifest": {
+    "path": "ops/benchmark/existing-card-sources.json",
+    "bytesSha256": "98df21f988cd237e85b2b121d906ee2735ac4f88a2e6650007c67dd737067042",
+    "sourceCount": 4
+  },
+  "note": "Capture-only references for the four #59 existing-card sources. The historical data/menus.json rows are dated observations, not ground truth for a later source version.",
+  "authorization": {
+    "decision": "Product Owner 2026-10-21, option 1 (four existing cards plus an unseen set), reference GitHub #59 issuecomment-6315226470; Delivery Lead order review 6315269210.",
+    "reference": "GitHub #59 review 6315269210",
+    "scope": "Public read-only comparison of exactly these four existing-card sources and the menu sub-pages/PDFs that the historical data/menus.json export itself names. No login, CAPTCHA bypass, other restaurant, arbitrary crawl, publication, production write or app-side AI.",
+    "appProviderActivation": false
+  },
+  "sources": {
+    "wolfslaar": {
+      "label": "Restaurant Wolfslaar",
+      "restaurantId": "1",
+      "entryUrl": "https://www.restaurantwolfslaar.com",
+      "allowedHosts": [
+        "restaurantwolfslaar.com",
+        "www.restaurantwolfslaar.com"
+      ],
+      "captures": [
+        {
+          "url": "https://www.restaurantwolfslaar.com",
+          "finalUrl": null,
+          "contentType": null,
+          "kind": "unsupported",
+          "bytes": 0,
+          "bytesSha256": null,
+          "capturedAt": "2026-10-21T12:12:22.115Z",
+          "captureStatus": "failed",
+          "httpStatus": null,
+          "error": "request-error",
+          "note": "The pinned URL did not yield a readable public source. No alternative URL, other location or crawl was substituted."
+        },
+        {
+          "url": "https://www.restaurantwolfslaar.com/nl/menu-lunch",
+          "finalUrl": null,
+          "contentType": null,
+          "kind": "unsupported",
+          "bytes": 0,
+          "bytesSha256": null,
+          "capturedAt": "2026-10-21T12:12:34.193Z",
+          "captureStatus": "failed",
+          "httpStatus": null,
+          "error": "request-error",
+          "note": "The pinned URL did not yield a readable public source. No alternative URL, other location or crawl was substituted."
+        },
+        {
+          "url": "https://www.restaurantwolfslaar.com/nl/menu-diner",
+          "finalUrl": null,
+          "contentType": null,
+          "kind": "unsupported",
+          "bytes": 0,
+          "bytesSha256": null,
+          "capturedAt": "2026-10-21T12:12:46.224Z",
+          "captureStatus": "failed",
+          "httpStatus": null,
+          "error": "request-error",
+          "note": "The pinned URL did not yield a readable public source. No alternative URL, other location or crawl was substituted."
+        }
+      ],
+      "captureStatus": "failed",
+      "historical": [
+        {
+          "key": "1-lunch",
+          "name": "Restaurant Wolfslaar",
+          "subtitle": "Lunchkaart",
+          "scraped": "2026-03-25",
+          "sourceUrl": "https://www.restaurantwolfslaar.com/nl/menu-lunch",
+          "itemCount": 3
+        },
+        {
+          "key": "1-diner",
+          "name": "Restaurant Wolfslaar",
+          "subtitle": "Dinerkaart",
+          "scraped": "2026-03-25",
+          "sourceUrl": "https://www.restaurantwolfslaar.com/nl/menu-diner",
+          "itemCount": 22
+        }
+      ]
+    },
+    "bardot": {
+      "label": "Brasserie Bardot",
+      "restaurantId": "6",
+      "entryUrl": "https://www.brasseriebardot.nl",
+      "allowedHosts": [
+        "brasseriebardot.nl",
+        "www.brasseriebardot.nl"
+      ],
+      "captures": [
+        {
+          "url": "https://www.brasseriebardot.nl",
+          "finalUrl": "https://brasseriebardot.nl/",
+          "contentType": "text/html",
+          "kind": "html",
+          "bytes": 93309,
+          "bytesSha256": "fc058ebee25a78da9929bb924f555ab4930eff1b26dd99db9190cdd3160de7f7",
+          "capturedAt": "2026-10-21T12:12:58.262Z",
+          "captureStatus": "captured",
+          "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here."
+        },
+        {
+          "url": "https://www.brasseriebardot.nl/brasserie-bardot/",
+          "finalUrl": "https://brasseriebardot.nl/brasserie-bardot/",
+          "contentType": "text/html",
+          "kind": "html",
+          "bytes": 135411,
+          "bytesSha256": "43139ae295484fa2a8e30d0c4bffb215c2a6a9b4fa0188161920bf8d3193e82a",
+          "capturedAt": "2026-10-21T12:12:59.693Z",
+          "captureStatus": "captured",
+          "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here."
+        },
+        {
+          "url": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf",
+          "finalUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf",
+          "contentType": "application/pdf",
+          "kind": "pdf",
+          "bytes": 1833458,
+          "bytesSha256": "487ba29f4bf8dbeca9de161d5e2a3839ed9cbd0eb6c77ce76ffbd62a6f2a7597",
+          "capturedAt": "2026-10-21T12:13:00.128Z",
+          "captureStatus": "captured",
+          "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here."
+        }
+      ],
+      "captureStatus": "captured",
+      "historical": [
+        {
+          "key": "6-diner",
+          "name": "Brasserie Bardot",
+          "subtitle": "Dinerkaart",
+          "scraped": "2026-03-25",
+          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf",
+          "itemCount": 29
+        },
+        {
+          "key": "6-lunch",
+          "name": "Brasserie Bardot",
+          "subtitle": "Lunchkaart",
+          "scraped": "2026-03-24",
+          "sourceUrl": "https://www.brasseriebardot.nl/brasserie-bardot/",
+          "itemCount": 36
+        },
+        {
+          "key": "6-borrel",
+          "name": "Brasserie Bardot",
+          "subtitle": "Borrelkaart",
+          "scraped": "2026-03-25",
+          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf",
+          "itemCount": 43
+        },
+        {
+          "key": "6-specialiteiten",
+          "name": "Brasserie Bardot",
+          "subtitle": "Specialiteiten",
+          "scraped": "2026-03-25",
+          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf",
+          "itemCount": 3
+        }
+      ]
+    },
+    "zuyd": {
+      "label": "Restaurant Zuyd",
+      "restaurantId": "19",
+      "entryUrl": "https://www.restaurantzuyd.nl",
+      "allowedHosts": [
+        "restaurantzuyd.nl",
+        "www.restaurantzuyd.nl"
+      ],
+      "captures": [
+        {
+          "url": "https://www.restaurantzuyd.nl",
+          "finalUrl": "https://www.restaurantzuyd.nl/",
+          "contentType": "text/html",
+          "kind": "html",
+          "bytes": 6227,
+          "bytesSha256": "427eb7d66f02239f6b02dcc86a50dc82c8db59c071a8abe5ec5ba3f22bf3197e",
+          "capturedAt": "2026-10-21T12:13:00.295Z",
+          "captureStatus": "captured",
+          "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here."
+        },
+        {
+          "url": "https://www.restaurantzuyd.nl/lunch",
+          "finalUrl": "https://www.restaurantzuyd.nl/lunch",
+          "contentType": "text/html",
+          "kind": "html",
+          "bytes": 9885,
+          "bytesSha256": "94aaa5716cc325e0c86a342d7f8a7dd679bc2a326962a86fd7a349eb15594063",
+          "capturedAt": "2026-10-21T12:13:00.443Z",
+          "captureStatus": "captured",
+          "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here."
+        },
+        {
+          "url": "https://www.restaurantzuyd.nl/diner",
+          "finalUrl": "https://www.restaurantzuyd.nl/diner",
+          "contentType": "text/html",
+          "kind": "html",
+          "bytes": 9836,
+          "bytesSha256": "5738eab5602736d81b9f59141378d23c6819fe99b7e25487cf8557d3f460a4d7",
+          "capturedAt": "2026-10-21T12:13:00.504Z",
+          "captureStatus": "captured",
+          "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here."
+        }
+      ],
+      "captureStatus": "captured",
+      "historical": [
+        {
+          "key": "19-lunch",
+          "name": "Restaurant Zuyd",
+          "subtitle": "Lunchkaart",
+          "scraped": "2026-03-28",
+          "sourceUrl": "https://www.restaurantzuyd.nl/lunch",
+          "itemCount": 22
+        },
+        {
+          "key": "19-diner",
+          "name": "Restaurant Zuyd",
+          "subtitle": "Dinerkaart",
+          "scraped": "2026-03-28",
+          "sourceUrl": "https://www.restaurantzuyd.nl/diner",
+          "itemCount": 20
+        }
+      ]
+    },
+    "thuis": {
+      "label": "T-Huis",
+      "restaurantId": "23",
+      "entryUrl": "https://t-huis.online",
+      "allowedHosts": [
+        "t-huis.online",
+        "www.t-huis.online"
+      ],
+      "captures": [
+        {
+          "url": "https://t-huis.online",
+          "finalUrl": null,
+          "contentType": null,
+          "kind": "unsupported",
+          "bytes": 0,
+          "bytesSha256": null,
+          "capturedAt": "2026-10-21T12:13:00.522Z",
+          "captureStatus": "failed",
+          "httpStatus": 301,
+          "error": "too-many-redirects",
+          "note": "The pinned URL did not yield a readable public source. No alternative URL, other location or crawl was substituted."
+        },
+        {
+          "url": "https://t-huis.online/menu/",
+          "finalUrl": null,
+          "contentType": null,
+          "kind": "unsupported",
+          "bytes": 0,
+          "bytesSha256": null,
+          "capturedAt": "2026-10-21T12:13:00.665Z",
+          "captureStatus": "failed",
+          "httpStatus": 301,
+          "error": "too-many-redirects",
+          "note": "The pinned URL did not yield a readable public source. No alternative URL, other location or crawl was substituted."
+        }
+      ],
+      "captureStatus": "failed",
+      "historical": [
+        {
+          "key": "23-lunch",
+          "name": "T-Huis",
+          "subtitle": "Lunchkaart",
+          "scraped": "2026-03-28",
+          "sourceUrl": "https://t-huis.online/menu/",
+          "itemCount": 25
+        },
+        {
+          "key": "23-diner",
+          "name": "T-Huis",
+          "subtitle": "Dinerkaart",
+          "scraped": "2026-03-28",
+          "sourceUrl": "https://t-huis.online/menu/",
+          "itemCount": 26
+        },
+        {
+          "key": "23-borrel",
+          "name": "T-Huis",
+          "subtitle": "Borrelkaart",
+          "scraped": "2026-03-28",
+          "sourceUrl": "https://t-huis.online/menu/",
+          "itemCount": 138
+        }
+      ]
+    }
+  }
+}
