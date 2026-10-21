@@ -14,6 +14,8 @@ const {
   recordedSections,
   parsePathText,
   reviewKey,
+  boundedLocator,
+  MAX_LOCATOR,
 } = require('./menuStructureReview');
 const { buildMenuConcept, recognisedLines } = require('./menuConcept');
 
@@ -250,6 +252,18 @@ test('structureEdits: accepting a section never settles a duplicate or a missing
   // missing price remain blockers (the same rule as the manual line editor).
   assert.deepEqual(concept.blockers.map((b) => b.status).sort(), ['duplicate', 'duplicate', 'missing_price']);
   assert.equal(concept.canSave, false);
+});
+
+test('uncertainSections: a locator is trimmed and bounded exactly like the concept shows it', () => {
+  const [bounded, empty] = uncertainSections([
+    { title: 'Fictief', structure: 'uncertain', categories: [{ name: 'X', path: ['X'], uncertain: true, locator: `  ${'x'.repeat(200)}  `, items: [] }] },
+    { title: 'Fictief 2', structure: 'uncertain', categories: [{ name: 'Y', path: ['Y'], uncertain: true, locator: '   ', items: [] }] },
+  ]);
+  assert.equal(bounded.locator.length, MAX_LOCATOR);
+  assert.equal(bounded.locator, 'x'.repeat(MAX_LOCATOR));
+  assert.equal(empty.locator, null);
+  // A non-text locator is never invented into a value.
+  assert.equal(boundedLocator(42), null);
 });
 
 test('parsePathText: reviewer input becomes bounded labels, or null', () => {

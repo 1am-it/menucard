@@ -279,3 +279,27 @@ test('uncertain structure: a confirmed proposal is shown as confirmed, never as 
   assert.equal(v.high, false);
   assert.equal(v.structureReview.eligible, true);
 });
+
+// Regression (d) of the order: a certain (normalized) structure must behave
+// exactly as before — the one-click rule stays high and no structure review is
+// offered or required.
+test('certain outcome (regression d): a normalized structure keeps the unchanged one-click rule', () => {
+  const v = derive({ receipt: receipt({ analysis_result_hash: 'b'.repeat(64) }) });
+  assert.equal(v.key, 'menu_found');
+  assert.equal(v.high, true);
+  assert.deepEqual(v.actions, ['confirm']);
+  assert.equal(v.foundUrl, 'https://bistro-voorbeeld.example/menukaart.pdf');
+  // No human section route is attached to a certain result.
+  assert.equal(v.structureReview, undefined);
+  // And an uncertain-looking receipt without flagged sections is never
+  // silently treated as normalized: it falls back to the manual review.
+  const inconsistent = derive({
+    receipt: receipt({
+      analysis_result_hash: 'b'.repeat(64),
+      menus: [{ structure: 'uncertain', categories: [{ name: 'Koud', path: ['Koud'], items: [{ name: 'Soep', price: '6.00' }] }] }],
+    }),
+  });
+  assert.equal(inconsistent.high, false);
+  assert.equal(inconsistent.structureReview.eligible, false);
+  assert.deepEqual(inconsistent.actions, ['review_manually']);
+});

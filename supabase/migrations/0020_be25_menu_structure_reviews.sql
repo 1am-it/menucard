@@ -53,3 +53,10 @@ revoke all on public.menu_structure_reviews from public, anon, authenticated;
 revoke all on public.menu_structure_reviews from service_role;
 
 grant select, insert on public.menu_structure_reviews to service_role;
+
+-- The identity sequence behind menu_structure_reviews.id: nothing may use it
+-- except service_role, which needs it for an insert (same posture as 0015 and
+-- 0019). Supabase's default privileges grant sequence rights directly to the
+-- API roles, so a revoke from PUBLIC alone would leave them in place.
+revoke all on sequence public.menu_structure_reviews_id_seq from public, anon, authenticated, service_role;
+grant usage, select on sequence public.menu_structure_reviews_id_seq to service_role;

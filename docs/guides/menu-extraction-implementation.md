@@ -666,16 +666,24 @@ route bijgekomen.
 - **Opslag.** `supabase/migrations/0020_be25_menu_structure_reviews.sql` voegt
   één additieve, append-only tabel toe (wie, wanneer, batch/job/receipt, oud →
   nieuw pad, unieke `(receipt_id, path_key)`; alleen `select`/`insert` voor
-  `service_role`). Zonder deze migratie blijft de bestaande pagina werken; de
-  nieuwe route weigert dan expliciet met `structure_store_unavailable` in
-  plaats van stil te bevestigen. De migratie is nog niet op een omgeving
-  toegepast.
+  `service_role`). De identiteitssequentie krijgt dezelfde expliciete
+  `revoke`/`grant usage, select` als 0015/0019; zonder die grant kan een insert
+  onder `service_role` falen of blijft de sequentie voor andere rollen
+  bereikbaar. Een rubrieklocator wordt vóór weergave, opslag en vergelijking
+  getrimd en op 160 tekens begrensd — dezelfde grens die het concept al
+  gebruikt — zodat een uitzonderlijk lange bronlocator de auditinsert niet laat
+  klappen. Zonder deze migratie blijft de bestaande pagina werken; de nieuwe
+  route weigert dan expliciet met `structure_store_unavailable` in plaats van
+  stil te bevestigen. De migratie is nog niet op een omgeving toegepast; de
+  Delivery Lead past hem zelf toe op de geïsoleerde testdatabase.
 - **Concept.** `src/lib/menuStructureReview.js` vertaalt de opgeslagen
   beslissingen naar de bestaande concept-edits (`handhaven` = rubriek expliciet
   accepteren, `corrigeren` = het pad van precies die regels vervangen). De
   zelfde basis gaat naar de browser (preview) en naar `saveConcept` (versie,
   concepthash en idempotentie ongewijzigd). Ontbrekende prijzen, duplicaten en
-  verdwenen gerechten blijven blokkades.
+  verdwenen gerechten blijven blokkades. Twee onzekere rubrieken naar hetzelfde
+  pad corrigeren is toegestaan: het oud → nieuw-spoor blijft bewaard en het
+  concept toont de resulterende structuur, zonder stilzwijgend verlies.
 - **Bewijs.** `menuStructureReview.test.js`, de nieuwe regressies in
   `batchAnalysis.test.js` en `batchAnalysisHandlers.test.js`,
   `menuStructureReviewMigration.test.js` en de fixture-browsercontrole

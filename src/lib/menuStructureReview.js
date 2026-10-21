@@ -25,6 +25,15 @@ const MAX_SECTIONS = 200;
 const MAX_PATH_LABELS = 6;
 const MAX_LABEL = 120;
 const MAX_PATH_TEXT = 1024;
+// Same display bound the concept uses for a section's locator (menuConcept).
+const MAX_LOCATOR = 160;
+
+/** A section locator as the review shows and 0020 stores it: trimmed, bounded. */
+function boundedLocator(value) {
+  if (typeof value !== 'string') return null;
+  const text = value.replace(/\s+/g, ' ').trim();
+  return text === '' ? null : text.slice(0, MAX_LOCATOR);
+}
 
 /** Path labels as the review stores them: bounded, trimmed, non-empty. */
 function normalizePath(value) {
@@ -75,7 +84,7 @@ function uncertainSections(menus) {
       label: formatPath(section.path),
       sourcePath: Array.isArray(section.sourcePath) ? section.sourcePath : null,
       sourceRoute: Array.isArray(section.sourcePath) ? formatPath(section.sourcePath) : null,
-      locator: section.locator || null,
+      locator: boundedLocator(section.locator),
       itemCount: section.itemCount,
     }));
 }
@@ -181,10 +190,12 @@ module.exports = {
   MAX_SECTIONS,
   MAX_PATH_LABELS,
   MAX_LABEL,
+  MAX_LOCATOR,
   normalizePath,
   parsePathText,
   reviewKey,
   storedPath,
+  boundedLocator,
   uncertainSections,
   structureUncertain,
   validateStructureReviews,

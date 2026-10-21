@@ -35,13 +35,22 @@ test('0020 has a unique number and is additive: one new table, no dropped or cha
 test('0020 keeps the trail append-only: select + insert for service_role only, no update or delete anywhere', () => {
   assert.match(flat, /alter table menu_structure_reviews enable row level security;/);
   const grants = [...flat.matchAll(/\bgrant [^;]*;/g)].map((m) => m[0]);
-  assert.deepEqual(grants, ['grant select, insert on public.menu_structure_reviews to service_role;']);
+  assert.deepEqual(grants, [
+    'grant select, insert on public.menu_structure_reviews to service_role;',
+    'grant usage, select on sequence public.menu_structure_reviews_id_seq to service_role;',
+  ]);
   const revoke = 'revoke all on public.menu_structure_reviews from public, anon, authenticated;';
   assert.ok(flat.indexOf(revoke) >= 0);
   assert.ok(flat.indexOf(revoke) < flat.indexOf(grants[0]));
   assert.match(flat, /revoke all on public\.menu_structure_reviews from service_role;/);
+  // The identity sequence needs the same explicit revoke/grant as 0015/0019,
+  // otherwise an insert can fail or the sequence stays reachable for other roles.
+  const sequenceRevoke = 'revoke all on sequence public.menu_structure_reviews_id_seq from public, anon, authenticated, service_role;';
+  assert.ok(flat.includes(sequenceRevoke));
+  assert.ok(flat.indexOf(sequenceRevoke) < flat.indexOf(grants[1]));
   assert.doesNotMatch(flat, /grant [^;]*(update|delete)/i);
   assert.doesNotMatch(flat, /to (public|anon|authenticated)\b/i);
+  assert.doesNotMatch(flat, /grant [^;]* on (?:all )?sequences? in schema/i);
 });
 
 test('0020 pins a decision to one receipt section, with an auditable old → new path', () => {

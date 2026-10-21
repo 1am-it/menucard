@@ -877,4 +877,23 @@ test('concept after a structure review: an unreadable review trail refuses the c
   assert.equal(supabase.calls.filter((c) => c.insert === 'menu_snapshot_proposals').length, 0);
 });
 
+// Regression (d) of the order: a certain (normalized) receipt keeps the
+// unchanged one-click confirmation. A client-sent structure_reviews list never
+// activates the human route and never writes an audit row for it.
+test('certain outcome (regression d): a normalized receipt confirms one-click and ignores a sent structure list', async () => {
+  const supabase = confirmFixture();
+  const res = await makeHandlers({ supabase, liveMenus: {} }).handlers.confirmSources(
+    request({
+      job_ids: [JOB],
+      structure_reviews: [{ job_id: JOB, receipt_hash: 'a'.repeat(64), sections: [{ path: ['Fictief'], action: 'keep' }] }],
+    }),
+    BATCH
+  );
+  assert.equal(res.status, 200);
+  assert.deepEqual(res.body.results, [{ job_id: JOB, ok: true }]);
+  const create = supabase.calls.find((c) => c.rpc === 'create_source_triage_proposal').args;
+  assert.equal(create.p_note, 'Bevestigd vanuit Batchanalyse na menselijke controle.');
+  assert.equal(supabase.calls.filter((c) => c.insert === 'menu_structure_reviews').length, 0);
+});
+
 
