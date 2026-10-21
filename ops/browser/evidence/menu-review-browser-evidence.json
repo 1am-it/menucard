@@ -1,14 +1,14 @@
 {
   "fixtureOnly": true,
   "passed": true,
-  "head": "b625c8d97626364795959525f1509eac704c0fff",
-  "worktreeDirty": true,
-  "generatedAt": "2026-10-21T04:51:56.578Z",
+  "head": "f783059b80b4b98c09fca5490553203768e962d8",
+  "worktreeDirty": false,
+  "generatedAt": "2026-10-21T05:45:08.759Z",
   "command": "npm run test:browser:menu-review",
   "environment": {
     "node": "v22.22.3",
     "platform": "win32",
-    "browser": "Chrome/155.0.8059.85",
+    "browser": "Edg/155.0.4283.45",
     "viewportHeights": [
       900
     ],
@@ -1385,7 +1385,7 @@
     {
       "name": "network guard: CDP blocks external subresource and frame navigation",
       "passed": true,
-      "detail": "[{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/pixel.png\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-21T04:51:55.479Z\",\"resourceType\":\"Image\"},{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/frame\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-21T04:51:55.482Z\",\"resourceType\":\"Document\"}]"
+      "detail": "[{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/pixel.png\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-21T05:45:07.637Z\",\"resourceType\":\"Image\"},{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/frame\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-21T05:45:07.680Z\",\"resourceType\":\"Document\"}]"
     },
     {
       "name": "network guard: no unexpected CDP traffic during app scenarios",
@@ -1521,13 +1521,13 @@
   "screenshots": [
     {
       "file": "menu-review-desktop-light.png",
-      "sha256": "8e7a5f8d969a61d1133c4a3f3f78a6a1dbd2d033f4d2f99dcefe290aabd5b1eb",
+      "sha256": "528e83eb451f3f48d56626e7c4e0dfcfaf967668e70b99493394841dbadc9109",
       "width": 1024,
       "height": 900
     },
     {
       "file": "menu-review-readonly-1024-dark.png",
-      "sha256": "851a6f524e30acc6bf76d992c368e8c85b688623ec1797fd645dd2604be79d96",
+      "sha256": "be21bbfc15b909e3cb9c700a6a84c4ffc0b40527fcc4def37c487aebf4ec8783",
       "width": 1024,
       "height": 900
     },
@@ -1539,25 +1539,25 @@
     },
     {
       "file": "menu-review-partial-390-dark.png",
-      "sha256": "bd5efb7b6950268343cfbbeccc0d179a669ccaedbf4aef9738763a71877956ad",
+      "sha256": "4261e0d5ef7c2815eab2a730c0dd528966cf6e90543e05e7472ac4ac169259b8",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-structure-1024-light.png",
-      "sha256": "942e1815ef208bf3f1950822473f46367fc0e466779aa4e4f3fd33948c05b1b3",
+      "sha256": "af63c7af5f60cdacdbbb8102282b09f832bf01e2dc0b725fb4b48eae21283e98",
       "width": 1024,
       "height": 900
     },
     {
       "file": "menu-review-structure-keyboard-390-light.png",
-      "sha256": "2bd3f028750da3bcf2f0e8b0c226e7ce95ab73b0695f539dad3c7ea9806bdb2d",
+      "sha256": "02f4eaf3fb56490ccdc97e7e1edaae2d2ca82dd3808f1017205c85afcae978ca",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-structure-390-light.png",
-      "sha256": "3cfaa1d92c798e075adc9fc465b32694851d0fead24b9f6302fe0f488445919f",
+      "sha256": "7f40fa48561024b4d4d47c1fee900518e27189b64a8536e2ecb139698f65e00f",
       "width": 390,
       "height": 900
     },
@@ -1569,13 +1569,13 @@
     },
     {
       "file": "menu-review-structure-readonly-1024-dark.png",
-      "sha256": "a93f06195780526decc05aecf69742880e0813c7581c9dd8b502206e4611367d",
+      "sha256": "b0092a80448f808453def8aecf8a9a2f3cb01b27a9b72fe695312e12627f808a",
       "width": 1024,
       "height": 900
     },
     {
       "file": "menu-review-v2-1024-light.png",
-      "sha256": "2ad756d9362ab57700f3ee57d83f654cad1f165c99038171871d29fd54bc5d56",
+      "sha256": "30c12ec53d8c238fe4e5d8a040c7e4344278822ddc56209a6247d8d6d702affe",
       "width": 1024,
       "height": 900
     },
@@ -1593,37 +1593,37 @@
     },
     {
       "file": "menu-review-320-light.png",
-      "sha256": "b114e085d2467017990b51238c03796047da5ae11ee5577aec90ba0cca9a132e",
+      "sha256": "813df208033a811475f713b4b3f6a3a91231f9bdbc489d4764d7a8f4d187f23f",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-320-dark.png",
-      "sha256": "50cc4ff28f68b0a0cb6f4aaa6d8cda1ba8a13d13d01c69b4bf452948c5107e86",
+      "sha256": "58be1003f375c2228159c178e29921c5753dbdd313e49de2fc0afccf0c8919a2",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-390-light.png",
-      "sha256": "0f472a9b84b650d8506e75734789e8bd6ea8ce8cb844c47cb92c0b9b779f8d53",
+      "sha256": "f631c7bbc7838ac16fbe614915d5bb95b43f92a8d7abe5cb0873dc1589fddf15",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-390-dark.png",
-      "sha256": "381b89d3007edb17dac75e05048f7423e2c378e3b7f8c19e579d8df23a819641",
+      "sha256": "c370e7d7c1842cc53e586b6fa62323388ad417ef9a69815671ac95f2c4f5b7eb",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-1024-dark.png",
-      "sha256": "95de02404a7abecc466bc5785d63d7c487d3325dab4109bc78b019808aad0273",
+      "sha256": "409f0add119383a35cccbccd80312ea5646fe0d3df7b30222c132f347d3a8e8b",
       "width": 1024,
       "height": 900
     },
     {
       "file": "menu-review-keyboard-390-light.png",
-      "sha256": "66be7210c549d36515aae82c3b580f27b6773f1b58f79d192d22b41beda181b8",
+      "sha256": "9873e637e1d53a3b48c289c6d0ab51a904d1288b8088789eaeab1bd9ccad4103",
       "width": 390,
       "height": 900
     },
@@ -1647,7 +1647,7 @@
     },
     {
       "file": "concept-detail-invalid-1024-clickpath.png",
-      "sha256": "47cbcf2fbcad810a15ac1e14105f51ab75dcc5ba7978134aa8bbcdba313017dd",
+      "sha256": "2641357a168ba7383e8c9ca1394a0c0494c899b89129a663312fdb73ebdddd28",
       "width": 1024,
       "height": 900
     },
@@ -1659,7 +1659,7 @@
     },
     {
       "file": "concept-detail-v2-readonly-1024-light.png",
-      "sha256": "42bd617861c18424f5efd0c43ef54350a2b536935ea7a263663975595851bbc1",
+      "sha256": "3e0ce2139e72488aead90e9f04b55f61fd6a79a5f9504c8c896e97c0c14cb943",
       "width": 1024,
       "height": 900
     },
@@ -1689,7 +1689,7 @@
     },
     {
       "file": "concept-list-no-access-390-light.png",
-      "sha256": "ede66721ef55b20daa9775d1d337217d3b60fc90485519678c0521ac1d95d1b6",
+      "sha256": "6996a7ace3bfa31f80820af8d0e1883b11a0110c081f6d80ccc64c4629946cd5",
       "width": 390,
       "height": 900
     },
@@ -1701,7 +1701,7 @@
     },
     {
       "file": "concept-detail-missing-390-light.png",
-      "sha256": "38372402dc60308bc22b008512017d628304c78fcdb39a0d7a2379778c1ec91b",
+      "sha256": "8bb6f9bcbe5c00560d4a2f81b4a54523a11d2546d5f55838dac74a2c0772d3cb",
       "width": 390,
       "height": 900
     },
@@ -1759,7 +1759,7 @@
         "url": "https://unapproved.invalid/pixel.png",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-21T04:51:55.479Z",
+        "at": "2026-10-21T05:45:07.637Z",
         "resourceType": "Image"
       },
       {
@@ -1769,7 +1769,7 @@
         "url": "https://unapproved.invalid/frame",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-21T04:51:55.482Z",
+        "at": "2026-10-21T05:45:07.680Z",
         "resourceType": "Document"
       }
     ],
@@ -1781,7 +1781,7 @@
         "url": "https://unapproved.invalid/api/anything",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-21T04:51:55.431Z"
+        "at": "2026-10-21T05:45:07.601Z"
       },
       {
         "phase": "negative-probe",
@@ -1790,7 +1790,7 @@
         "url": "http://unapproved.invalid/api/anything",
         "reason": "external_origin",
         "protocolRelative": true,
-        "at": "2026-10-21T04:51:55.431Z"
+        "at": "2026-10-21T05:45:07.602Z"
       },
       {
         "phase": "negative-probe",
@@ -1799,7 +1799,7 @@
         "url": "http://localhost:3137/api/internal/v1/menu-concepts",
         "reason": "method_not_allowed",
         "protocolRelative": false,
-        "at": "2026-10-21T04:51:55.431Z"
+        "at": "2026-10-21T05:45:07.602Z"
       },
       {
         "phase": "negative-probe",
@@ -1808,7 +1808,7 @@
         "url": "http://localhost:3137/api/internal/v1/unrelated-write",
         "reason": "unknown_api_route",
         "protocolRelative": false,
-        "at": "2026-10-21T04:51:55.432Z"
+        "at": "2026-10-21T05:45:07.603Z"
       },
       {
         "phase": "negative-probe",
@@ -1817,7 +1817,7 @@
         "url": "http://localhost:3137/api/internal/v1/menu-concepts",
         "reason": "method_not_allowed",
         "protocolRelative": false,
-        "at": "2026-10-21T04:51:55.432Z"
+        "at": "2026-10-21T05:45:07.603Z"
       },
       {
         "phase": "negative-probe",
@@ -1826,7 +1826,7 @@
         "url": "ws://unapproved.invalid/socket",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-21T04:51:55.432Z"
+        "at": "2026-10-21T05:45:07.603Z"
       }
     ]
   },
