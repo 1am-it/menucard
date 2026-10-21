@@ -337,6 +337,7 @@ async function imageOnlyScenario(cdp) {
   check('image-only follow-up: no menu status or confirmation is claimed', !triage.text.includes('Bron bevestigd') && !triage.text.includes('Menukaart gevonden'));
   check('image-only follow-up: the context is kept in the address bar', triage.search.includes('restaurant=9001') && triage.search.includes('reason=image_only'));
   check('image-only follow-up: no proposal or publication happened', triage.text.includes('Leg een voorstel vast') && !triage.text.includes('Bron bevestigd'));
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'menu-review-image-only-follow-up-320-dark.png'));
 
   // R5: a fitting "unusable" reason exists. The human still chooses the action;
   // the existing `other` reason is preselected with its fixed, required note.
@@ -365,14 +366,14 @@ async function imageOnlyScenario(cdp) {
     (suggestion.note || '').includes('alleen als afbeelding of scan') && suggestion.hint.length > 0,
     `${suggestion.note} | ${suggestion.hint}`,
   );
-  check('image-only follow-up: the preselected reason is described to assistive tech', suggestion.describedBy.includes('-reason-help'), suggestion.describedBy);
+  check('image-only follow-up: the preselected reason is described to assistive tech', String(suggestion.describedBy || '').includes('-reason-help'), suggestion.describedBy);
   check('image-only follow-up: the note stays required', suggestion.required === 'true', String(suggestion.required));
   check(
     'image-only follow-up: choosing the reason saves nothing by itself',
     suggestion.text.includes('Voorstel opslaan') && !suggestion.text.includes('Voorstel opgeslagen'),
   );
   screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'menu-review-image-only-follow-up-reason-320-dark.png'));
-  screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'menu-review-image-only-follow-up-320-dark.png'));
+
   recordClickpath('image-only result -> Bronnen beoordelen', steps, steps.every((step) => step.reached !== false && step.arrived !== false), JSON.stringify(steps));
 }
 
