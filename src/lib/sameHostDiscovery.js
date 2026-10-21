@@ -151,7 +151,7 @@ function collectAnchors(html, baseUrl) {
  * (one extra path segment, short text, no ordinary navigation label), in
  * document order, at most MAX_CANDIDATES, never another host.
  */
-const SUB_PAGE_LABEL_EXCLUDE = /^(?:home|start|over(?:\s+ons)?|about|contact|reserveren|reserveer|reserve|bestellen|bestel|order|cart|winkelwagen|login|inloggen|account|privacy|disclaimer|cookies?|vacatures?|jobs?|gallery|galerij|foto'?s?|impressie|blog|nieuws|news|events?|agenda|catering|verhuur|kerst(?:menu)?|bekijk|lees\s+meer|more|terug|back)$/i
+const SUB_PAGE_LABEL_EXCLUDE = /^(?:home|start|over(?:\s+ons)?|about|contact|reserveren|reserveer|reserve|bestellen|bestel|order|cart|winkelwagen|login|inloggen|account|privacy|disclaimer|cookies?|vacatures?|jobs?|gallery|galerij|foto'?s?|impressie|blog|nieuws|news|events?|agenda|catering|verhuur|bekijk|lees\s+meer|more|terug|back)$/i
 
 function findSameHostSubPageLinks(html, baseUrl) {
   let base
