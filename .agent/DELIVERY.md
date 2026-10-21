@@ -28,7 +28,9 @@ between agents; they are not a claim of direct model-to-model communication.
 Assigned executors (owner decision 2026-10-20): Claude Code is the sole AI
 Delivery Lead; DeepSeek via the local Cline runner is the #59 implementation
 engineer; Codex has no default role and is not a review gate. See
-`.agent/assignments.md`.
+`.agent/assignments.md`. The Lead does not implement; every change to code,
+tests, tooling or runners goes to the developer as one bounded order in the
+format of `.agent/templates/developer-order.md`.
 
 ## Evidence Categories
 

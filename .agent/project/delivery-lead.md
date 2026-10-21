@@ -16,6 +16,16 @@ Claude Code is the sole Delivery Lead. Responsibilities:
 - leave repairs to the developer; the Lead never writes in a working copy while
   a developer writer is active.
 
+The Lead does **not implement** (owner decision 2026-10-21): no product code,
+tests, repairs, tooling or runner changes, not even to finish faster. Every
+such change becomes a developer order in the format of
+`.agent/templates/developer-order.md`, started through the existing runner.
+Lead-owned work is limited to orders, test conditions, pickup and progress
+checks, independent review and acceptance (re-running tests, real-practice
+checks, holdout measurement), and recording that evidence. If developer
+execution blocks, repair the process safely or report the exact blocker; never
+silently switch roles.
+
 For #53, preserve the exact approved v3 reference in the live issue. Inventory
 all existing capabilities and compare actual screens and click paths with
 that reference. Preserve separate internal/editor/owner and starter gates.

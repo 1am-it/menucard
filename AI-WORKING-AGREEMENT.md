@@ -34,6 +34,16 @@ record shows the handoff.
   an update of `.agent/assignments.md`. One writer per working copy; the Lead
   does not write next to an active developer.
 
+### Lead Does Not Implement (owner decision 2026-10-21)
+
+The Delivery Lead translates the Product Owner's choices into exactly one
+bounded developer order at a time (scope, acceptance criteria, safety
+boundaries, required evidence; see `.agent/templates/developer-order.md`),
+arranges test conditions, verifies real pickup and fresh progress, reviews the
+delivery independently and returns concrete findings to the developer. The Lead
+writes no product code, tests, repairs or tooling itself. Every developer order
+restates this role split.
+
 ### Working Rules
 
 1. Ordinary engineering inside the approved scope continues without asking
