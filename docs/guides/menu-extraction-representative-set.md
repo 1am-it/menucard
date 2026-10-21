@@ -36,11 +36,49 @@ hun eerste meting voor reparatie gebruikt en daarom naar representatief
 verplaatst; zij zijn geen holdout meer.
 
 Op 2026-10-21 is een tweede ongeziene set van 19 bronnen vooraf gepind in
-[`holdout-2-sources.json`](../../ops/benchmark/holdout-2-sources.json). Die set
-wordt niet door de ontwikkelaar opgehaald of geïnspecteerd; de capture en de
-enige evaluatie gebeuren door de Delivery Lead met een expliciet manifest. Zie
+[`holdout-2-sources.json`](../../ops/benchmark/holdout-2-sources.json). De
+Delivery Lead heeft die set één keer geëvalueerd (zie
 [holdouttooling](menu-extraction-holdout-tooling.md) voor de werkwijze,
-uitvoerbestanden en regressies.
+uitvoerbestanden en regressies). Na die enige eerste meting zijn de 19 bronnen
+via de tooling op `used_for_tuning` gezet: **representatief, geen holdout meer.**
+Er is in `data/restaurants.json` geen ongeziene bron meer over.
+
+### Holdout-2: eerste meting en representatieve nameting
+
+Eerste meting: `holdout-2-evaluation.json` (Lead, 2026-10-21). Nameting:
+`holdout-2-representative-measurement.json`, dezelfde 19 entry-URL's en dezelfde
+meetcode als de eenmalige probe, uitgevoerd op 2026-10-21 na de generieke
+herstellingen. Percentages zijn locatordekking; bewijsdekking is gelijk.
+
+| Bron | Eerste meting | Nameting | Uitkomst / beperking na de nameting |
+| --- | --- | --- | --- |
+| Chocolat | 0 items, 0 secties | 24 items, 4 secties, 100% | diner- en lunchkaart zonder prijsmarkup gelezen; `/menu/` blijft een linkpagina |
+| Pellens | 27 items, 9 secties, 100% | 27 items, 9 secties, 100% | arrangementen blijven als beperking gemeld |
+| Dolce e Salato | 31 items, 9 secties, 39% | 41 items, 11 secties, 100% | JSON-LD-items kregen hun bronpad; extra afhaalpagina |
+| Trattoria Perron | 156 items, 25 secties, **0%** | 156 items, 25 secties, **100%** | JSON-LD-pad leverde de locator + passage; geen bron-specifieke truc |
+| Senang Makan | 0 items | 24 items, 1 sectie, 100% | één same-host PDF-menulink gevolgd; supplementen/onherkende koppen eerlijk gemeld |
+| Zenza | 72 items, 1 sectie, 100% | 72 items, 1 sectie, 100% | 14 verborgen geïnjecteerde spam-/casinoblokken niet gelezen en gemeld; de 72 items zijn de zichtbare gerechten |
+| Salon de Provence | 0 | 0 | bron meldt definitieve sluiting; geen menu verzonnen |
+| Al Dente | 0 | 0 | menu alleen als afbeelding (7 scans); geen OCR, eerlijk gemeld |
+| The Chai Affairs | 0 | 0 | bron meldt permanente sluiting |
+| Andalous | 0 | 81 items, 14 secties, 100% | prijs in bold titelregel gelezen; dubbele menupagina (www/slash/redirect) één keer verwerkt |
+| De Beyerd | 0 | 0 | menu alleen als afbeelding (4 scans); geen OCR |
+| Ruitersbosch | geblokkeerd | geblokkeerd | TLS-certificaat past niet bij de host; geen omzeiling |
+| Makanan | geblokkeerd | geblokkeerd | DNS/fetchfout; geen alternatieve URL |
+| Klein Java | 0 | 20 items, 4 secties, 100% | categoriehub `/gerechten` één niveau gevolgd; bloglink niet meer als menu |
+| Gantau Village | geblokkeerd | geblokkeerd | TLS-verbinding mislukt; geen omzeiling |
+| Con Fuego | 0 | 0 | geen menulink op de bronpagina gevonden; eerlijk gemeld |
+| Masala | geblokkeerd | geblokkeerd | hostnaam niet resolvebaar; geen alternatieve URL |
+| Uijttewaal | 10 items, 1 sectie, 100% | 10 items, 1 sectie, 100% | PDF-supplementen/onherkende koppen blijven gemeld |
+| Beers & Barrels | 0 | 0 | menu alleen als PDF op `static.rce.eu` (andere host); niet opgehaald |
+
+HTML-aggregaat van de nameting: 9 bronnen, 455 items, 70 secties, **100%
+bron-ID, 100% locator en 100% ondersteunend bewijs**. Dat is een
+representatieve meting, geen holdout en geen acceptatie: verzonnen items en
+prijzen blijven `not_measurable_without_controlled_reference` en de drempels
+zijn niet verlaagd. De eerste meting (41% locator/bewijs over 296 items) blijft
+ongewijzigd in `holdout-2-evaluation.json` staan.
+
 
 | Bron | Uitkomst eerste meting (baseline) | Beperking / huidige status |
 | --- | --- | --- |

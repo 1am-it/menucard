@@ -72,7 +72,7 @@
 
 const { extractMenusFromHtml } = require('./menuJsonLdExtraction')
 const { normalizeMenuHierarchy } = require('./menuHierarchy')
-const { findSameHostMenuCandidates, findSameHostSubPageLinks, collectAnchors, MAX_CANDIDATES } = require('./sameHostDiscovery')
+const { findSameHostMenuCandidates, findSameHostSubPageLinks, collectAnchors, sameHostPageKey, MAX_CANDIDATES } = require('./sameHostDiscovery')
 const { extractRestaurantFieldsWithEvidence } = require('./restaurantFieldEvidence')
 const { ALLOWED_FIELD_NAMES, deriveFieldConfidence, isFieldReviewReady } = require('./fieldConfidence')
 const { computeFieldEvidenceHash } = require('./fieldEvidenceHash')
@@ -693,9 +693,10 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
       notes.push(htmlMenuNote(homepageUrl, entryHtmlMenu))
       limitations.push(...htmlMenuExclusionLimitations(homepageUrl, entryHtmlMenu))
       noteHtmlExclusions(sourceInventory, homepageSourceId, entryHtmlMenu)
-    } else {
-      limitations.push(...htmlMenuRefusalLimitations(homepageUrl, entryReport))
     }
+    // Reports a refused page (content_not_menu_suspected) and any skipped
+    // injected block, also when the visible menu itself was readable.
+    limitations.push(...htmlMenuRefusalLimitations(homepageUrl, entryReport))
   }
 
   // 2. Homepage field evidence — first source wins per field for the
@@ -733,11 +734,15 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
   const candidateQueue = findSameHostMenuCandidates(homepageHtml, homepageUrl).map((candidate) => ({ ...candidate, depth: 1 }))
   const queuedCandidates = new Set(candidateQueue.map((candidate) => candidate.url))
   const visitedCandidates = new Set()
+  // Every page that was actually read (including redirect targets), so a
+  // second link to the same page never produces a duplicate menu.
+  const readPageKeys = new Set([sameHostPageKey(homepageUrl)])
   let candidateFetches = 0
 
   while (candidateQueue.length > 0 && candidateFetches < MAX_CANDIDATES) {
     const candidate = candidateQueue.shift()
     if (visitedCandidates.has(candidate.url)) continue
+    if (readPageKeys.has(sameHostPageKey(candidate.url))) continue
     visitedCandidates.add(candidate.url)
     candidateFetches += 1
 
@@ -763,6 +768,15 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
 
     if (fetched.status === 'html') {
       const sourceUrl = fetched.finalUrl || candidate.url
+      const sourceKey = sameHostPageKey(sourceUrl)
+      // A redirect can land on a page this analysis already read under
+      // another URL (a link to `/ramadan` and to `/ramadan-menu/`). Never
+      // record or extract the same page twice.
+      if (readPageKeys.has(sourceKey)) {
+        limitations.push(`Doorgestuurd naar een al gelezen pagina; niet nogmaals verwerkt: ${candidate.url} → ${sourceUrl}.`)
+        continue
+      }
+      readPageKeys.add(sourceKey)
       const sourceId = addSource({
         url: sourceUrl,
         kind: 'html',
@@ -813,10 +827,14 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
             const keywordLinks = findSameHostMenuCandidates(fetched.body, sourceUrl)
             const subPageLinks = findSameHostSubPageLinks(fetched.body, sourceUrl)
             const seenHub = new Set([...visitedCandidates, ...queuedCandidates])
+            const seenHubKeys = new Set([...readPageKeys, ...[...seenHub].map((url) => sameHostPageKey(url))])
             const hubLinks = []
             for (const link of [...keywordLinks, ...subPageLinks]) {
               if (!link || !link.url || seenHub.has(link.url)) continue
+              const key = sameHostPageKey(link.url)
+              if (seenHubKeys.has(key)) continue
               seenHub.add(link.url)
+              seenHubKeys.add(key)
               hubLinks.push(link)
             }
             // A single same-host PDF menu link is unambiguous enough to follow;
@@ -846,6 +864,7 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
 
     if (fetched.status === 'pdf') {
       const sourceUrl = fetched.finalUrl || candidate.url
+      readPageKeys.add(sameHostPageKey(sourceUrl))
       const sourceId = addSource({ url: sourceUrl, kind: 'pdf', status: 'read' })
       const source = sourceInventory[sourceInventory.length - 1]
       try {

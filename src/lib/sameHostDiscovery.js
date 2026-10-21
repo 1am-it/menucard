@@ -186,6 +186,23 @@ function findSameHostSubPageLinks(html, baseUrl) {
   return links
 }
 
+/**
+ * One page, regardless of a `www.` prefix or a trailing slash. `/menukaart`
+ * and `https://www.example.nl/menukaart/` are the same page; a live source
+ * linked both and the second pass duplicated every dish (#59 review
+ * 6316295818, Andalous).
+ */
+function sameHostPageKey(url) {
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.replace(/^www\./i, '').toLowerCase();
+    const path = parsed.pathname.replace(/\/+$/, '') || '/';
+    return `${host}${path}`;
+  } catch (err) {
+    return String(url);
+  }
+}
+
 function findSameHostMenuCandidates(html, baseUrl) {
   const anchors = collectAnchors(html, baseUrl);
   if (anchors.length === 0) return [];
@@ -215,8 +232,13 @@ function findSameHostMenuCandidates(html, baseUrl) {
 
     if (!anchorLooksLikeMenuLink(anchor.hrefPath, anchor.visibleText)) continue;
 
-    if (seen.has(normalizedCandidateUrl)) continue; // de-duplicate same-URL anchors
-    seen.add(normalizedCandidateUrl);
+    // De-duplicate on the same host without `www.` and without a trailing
+    // slash: `/menukaart` and `https://www.…/menukaart/` are one page, and
+    // fetching both produced two identical menus for a live source (#59
+    // review 6316295818, Andalous).
+    const seenKey = `${candidateHost}${anchor.url.pathname.replace(/\/+$/, '') || '/'}`;
+    if (seen.has(seenKey)) continue;
+    seen.add(seenKey);
 
     candidates.push({
       url: normalizedCandidateUrl,
@@ -234,4 +256,5 @@ module.exports = {
   collectAnchors,
   findSameHostMenuCandidates,
   findSameHostSubPageLinks,
+  sameHostPageKey,
 };

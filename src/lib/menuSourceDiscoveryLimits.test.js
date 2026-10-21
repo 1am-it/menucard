@@ -175,6 +175,29 @@ test('a PDF menu on another host is reported, never fetched around the source sc
   assert.ok(result.limitations.some((line) => /andere host/.test(line) && /static\.elders\.example/.test(line)));
 });
 
+test('the same menu page reached through a redirect, www or trailing slash is read once', async () => {
+  const home = `<html><body>
+    <a href="/menukaart">Menukaart</a>
+    <a href="https://www.fictief.example/menukaart/">Onze kaart</a>
+    <a href="/ramadan-menu">Ramadan menu</a>
+    <a href="/ramadan-menu/">Ramadan</a>
+  </body></html>`;
+  const menu = menuPage(['Fictieve nasi', 'Fictieve bami', 'Fictief broodje']);
+  const fetched = [];
+  const result = await runRestaurantSourceAnalysis({
+    homepageHtml: home,
+    homepageUrl: HOME,
+    fetchCandidate: async (url) => {
+      fetched.push(url);
+      if (url === `${HOME}menukaart`) return { status: 'html', body: menu, finalUrl: 'https://www.fictief.example/menukaart/' };
+      if (url === `${HOME}ramadan-menu`) return { status: 'html', body: '<h1>Ramadan</h1>', finalUrl: `${HOME}ramadan-menu/` };
+      return { status: 'error' };
+    },
+  });
+  assert.deepEqual(fetched, [`${HOME}menukaart`, `${HOME}ramadan-menu`]);
+  assert.equal(result.menuContexts.length, 1);
+});
+
 test('a source that reports its own closure is reported honestly, without a menu guess', async () => {
   const home = `<html><body><p>Na zes jaar heeft Fictief Restaurant per 27 december haar deuren gesloten.</p></body></html>`;
   const { result } = await analyse(home, new Map());

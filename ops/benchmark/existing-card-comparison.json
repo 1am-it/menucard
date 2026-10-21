@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "issue": 59,
-  "generatedAt": "2026-10-21T12:26:33.047Z",
+  "generatedAt": "2026-10-21T13:31:26.829Z",
   "note": "Read-only live comparison of the four existing #59 cards. Developer evidence, not independent review or browser acceptance. Historical data/menus.json rows are dated observations; missing/extra/price differences are reported per historical menu key and never hidden by an equal count.",
   "dataExport": {
     "file": "data/menus.json",
@@ -105,8 +105,8 @@
       "label": "Restaurant Zuyd",
       "captureStatus": "captured",
       "sourceVersionMatches": false,
-      "liveItemCount": 29,
-      "liveCategoryCount": 5,
+      "liveItemCount": 25,
+      "liveCategoryCount": 4,
       "historicalItemCount": 42,
       "historicalKeys": [
         "19-lunch",
@@ -115,12 +115,12 @@
       "totals": {
         "historicalItems": 42,
         "strictMissing": 33,
-        "strictExtra": 20,
+        "strictExtra": 16,
         "strictPriceMismatches": 0,
         "strictCategoryMismatches": 9,
-        "namePriceMissing": 25,
+        "namePriceMissing": 29,
         "namePriceExtra": 12,
-        "namePriceMismatches": 8
+        "namePriceMismatches": 4
       },
       "probeErrors": [],
       "limitations": 2
@@ -2168,15 +2168,15 @@
           "finalUrl": "https://www.restaurantzuyd.nl/",
           "contentType": "text/html",
           "bytes": 6231,
-          "bytesSha256": "4aec5172e9a4f2e6862707882ef7a951464c10c1262c855395d22dd004ad3569",
+          "bytesSha256": "68eef94152aafab2c206831a62c2cf8923f8819dd5917c84394ef54cff136417",
           "sourceVersionMatches": false,
           "limitations": [
             "Gelezen zonder automatisch herkende menukaart: https://www.restaurantzuyd.nl/kerstmenu.",
             "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
           ],
           "notes": [
-            "Menukaart herkend uit de HTML van https://www.restaurantzuyd.nl/lunch: 16 gerechten met prijs in 3 rubrieken. Controleer rubrieken en prijzen.",
-            "Menukaart herkend uit de HTML van https://www.restaurantzuyd.nl/diner: 13 gerechten met prijs in 2 rubrieken. Controleer rubrieken en prijzen.",
+            "Menukaart herkend uit de HTML van https://www.restaurantzuyd.nl/lunch: 13 gerechten met prijs in 2 rubrieken. Controleer rubrieken en prijzen.",
+            "Menukaart herkend uit de HTML van https://www.restaurantzuyd.nl/diner: 12 gerechten met prijs in 2 rubrieken. Controleer rubrieken en prijzen.",
             "Mogelijke menupagina gelezen: https://www.restaurantzuyd.nl/kerstmenu (link \"Kerstmenu\"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.",
             "AI-structurering is niet beschikbaar — resultaten zijn beperkt tot deterministische extractie."
           ],
@@ -2188,7 +2188,7 @@
               "itemCount": null,
               "pageCount": null,
               "wordCount": null,
-              "contentHash": "ee6d72d328665f6cf468aa2caf9f11f9bd5af02b8c7432ea069d398af8a6734b",
+              "contentHash": "e683d168bbb5bda937ebc0a630c0a6394caa3999201dd091355c2a4b09533498",
               "excludedSections": null
             },
             {
@@ -2198,7 +2198,7 @@
               "itemCount": null,
               "pageCount": null,
               "wordCount": null,
-              "contentHash": "cf1916b3324b6fa05d0e7e3eac5ae26b9e82c2e815e17febaf54a58d3e28967c",
+              "contentHash": "5b5d974b61ef8e50dcb25389db728e98b09e99b184915703db680049bb661050",
               "excludedSections": null
             },
             {
@@ -2208,7 +2208,7 @@
               "itemCount": null,
               "pageCount": null,
               "wordCount": null,
-              "contentHash": "933652efabaf17c1f4192ab8a0414446bcc5a0d773eaff77105c6b2aad558903",
+              "contentHash": "a3e17b04dba7bfbe9178e595d8f2175cf223e78523a5328f5100a19625700128",
               "excludedSections": null
             },
             {
@@ -2230,16 +2230,16 @@
           "ok": true,
           "finalUrl": "https://www.restaurantzuyd.nl/lunch",
           "contentType": "text/html",
-          "bytes": 9877,
-          "bytesSha256": "a717843722899a41adc11221ae4e00b640c9a8da9e1476d3649bc536d65d27e7",
+          "bytes": 9885,
+          "bytesSha256": "1f8674a89969b99298824bbd603d298d58f91a7c39f79fcaa1eb9578f2da476a",
           "sourceVersionMatches": false,
           "limitations": [
             "Gelezen zonder automatisch herkende menukaart: https://www.restaurantzuyd.nl/kerstmenu.",
             "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
           ],
           "notes": [
-            "Menukaart herkend uit de HTML van https://www.restaurantzuyd.nl/lunch: 16 gerechten met prijs in 3 rubrieken. Controleer rubrieken en prijzen.",
-            "Menukaart herkend uit de HTML van https://www.restaurantzuyd.nl/diner: 13 gerechten met prijs in 2 rubrieken. Controleer rubrieken en prijzen.",
+            "Menukaart herkend uit de HTML van https://www.restaurantzuyd.nl/lunch: 13 gerechten met prijs in 2 rubrieken. Controleer rubrieken en prijzen.",
+            "Menukaart herkend uit de HTML van https://www.restaurantzuyd.nl/diner: 12 gerechten met prijs in 2 rubrieken. Controleer rubrieken en prijzen.",
             "Mogelijke menupagina gelezen: https://www.restaurantzuyd.nl/kerstmenu (link \"Kerstmenu\"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.",
             "AI-structurering is niet beschikbaar — resultaten zijn beperkt tot deterministische extractie."
           ],
@@ -2251,7 +2251,7 @@
               "itemCount": null,
               "pageCount": null,
               "wordCount": null,
-              "contentHash": "6f1be59b28eb876bffb9f96298a18dfea4d6fddbaa0811e7b4e6249c3188dffb",
+              "contentHash": "f2b4cb7186081186097e0651d911691e3b56ea0ba46584628606a521d79bc059",
               "excludedSections": null
             },
             {
@@ -2261,7 +2261,7 @@
               "itemCount": null,
               "pageCount": null,
               "wordCount": null,
-              "contentHash": "fa1c7c33a52d160759307b29b840128c52379f459a46cac9828f1d11ef72f3f4",
+              "contentHash": "5178a136104754bb92705e01531e4f4b9d65325d44faa3d493ea46d1830e6c8c",
               "excludedSections": null
             },
             {
@@ -2284,15 +2284,15 @@
           "finalUrl": "https://www.restaurantzuyd.nl/diner",
           "contentType": "text/html",
           "bytes": 9832,
-          "bytesSha256": "8c991015eb40c4da01111170b9728ed7a9ba8676764d464e28a1cc6f5fc454b4",
+          "bytesSha256": "e3db8113ab9769df2a620919b4f40fca8629d2fbc477a2580cefc537290c7ccf",
           "sourceVersionMatches": false,
           "limitations": [
             "Gelezen zonder automatisch herkende menukaart: https://www.restaurantzuyd.nl/kerstmenu.",
             "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
           ],
           "notes": [
-            "Menukaart herkend uit de HTML van https://www.restaurantzuyd.nl/diner: 13 gerechten met prijs in 2 rubrieken. Controleer rubrieken en prijzen.",
-            "Menukaart herkend uit de HTML van https://www.restaurantzuyd.nl/lunch: 16 gerechten met prijs in 3 rubrieken. Controleer rubrieken en prijzen.",
+            "Menukaart herkend uit de HTML van https://www.restaurantzuyd.nl/diner: 12 gerechten met prijs in 2 rubrieken. Controleer rubrieken en prijzen.",
+            "Menukaart herkend uit de HTML van https://www.restaurantzuyd.nl/lunch: 13 gerechten met prijs in 2 rubrieken. Controleer rubrieken en prijzen.",
             "Mogelijke menupagina gelezen: https://www.restaurantzuyd.nl/kerstmenu (link \"Kerstmenu\"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.",
             "AI-structurering is niet beschikbaar — resultaten zijn beperkt tot deterministische extractie."
           ],
@@ -2314,7 +2314,7 @@
               "itemCount": null,
               "pageCount": null,
               "wordCount": null,
-              "contentHash": "3457a54696350ecc9708cc605eebe51ddbb89ebf6b2205ce2b37a16470660bed",
+              "contentHash": "3b672672c8960e4327dbb14f27c158391e0280f1b02d0adb605b17c6be42d691",
               "excludedSections": null
             },
             {
@@ -2332,17 +2332,17 @@
       ],
       "live": {
         "menuCount": 2,
-        "itemCount": 29,
-        "categoryCount": 5,
+        "itemCount": 25,
+        "categoryCount": 4,
         "priceStatus": {
-          "known": 29
+          "known": 25
         },
         "knownWithoutAmount": 0,
         "evidence": {
-          "itemCount": 29,
-          "withSourceId": 29,
-          "withLocator": 29,
-          "withSupport": 29,
+          "itemCount": 25,
+          "withSourceId": 25,
+          "withLocator": 25,
+          "withSupport": 25,
           "sourceIdPercent": 100,
           "locatorPercent": 100,
           "supportPercent": 100,
@@ -2367,18 +2367,10 @@
               },
               {
                 "path": [
-                  "SANDWICHES"
-                ],
-                "name": "SANDWICHES",
-                "itemCount": 2,
-                "uncertain": false
-              },
-              {
-                "path": [
                   "A LA CARTE"
                 ],
                 "name": "A LA CARTE",
-                "itemCount": 7,
+                "itemCount": 6,
                 "uncertain": false
               }
             ],
@@ -2426,18 +2418,6 @@
                 "locator": "html>body>div>p[1]"
               },
               {
-                "name": "Sandwich Zuyd",
-                "price": "19.50",
-                "priceStatus": null,
-                "locator": "html>body>div>p[4]"
-              },
-              {
-                "name": "Lobster roll",
-                "price": "25.00",
-                "priceStatus": null,
-                "locator": "html>body>div>p[4]"
-              },
-              {
                 "name": "Steak tartaar",
                 "price": "27.50",
                 "priceStatus": null,
@@ -2463,19 +2443,13 @@
               },
               {
                 "name": "Zeetongfilet",
-                "price": "39.00",
-                "priceStatus": null,
-                "locator": "html>body>div>p[5]"
-              },
-              {
-                "name": "Ossenhaas",
-                "price": "35.00",
-                "priceStatus": null,
-                "locator": "html>body>div>p[5]"
-              },
-              {
-                "name": "Eendenlever",
                 "price": "28.00",
+                "priceStatus": null,
+                "locator": "html>body>div>p[5]"
+              },
+              {
+                "name": "Dessert",
+                "price": "16.50",
                 "priceStatus": null,
                 "locator": "html>body>div>p[5]"
               }
@@ -2500,7 +2474,7 @@
                   "A LA CARTE"
                 ],
                 "name": "A LA CARTE",
-                "itemCount": 7,
+                "itemCount": 6,
                 "uncertain": false
               }
             ],
@@ -2567,19 +2541,13 @@
               },
               {
                 "name": "Zeetongfilet",
-                "price": "39.00",
-                "priceStatus": null,
-                "locator": "html>body>div>p[3]"
-              },
-              {
-                "name": "Ossenhaas",
-                "price": "35.00",
-                "priceStatus": null,
-                "locator": "html>body>div>p[3]"
-              },
-              {
-                "name": "Eendenlever",
                 "price": "28.00",
+                "priceStatus": null,
+                "locator": "html>body>div>p[3]"
+              },
+              {
+                "name": "Dessert",
+                "price": "16.50",
                 "priceStatus": null,
                 "locator": "html>body>div>p[3]"
               }
@@ -2607,7 +2575,7 @@
             "strictComparison": {
               "label": "19-lunch Lunchkaart",
               "expectedItems": 22,
-              "actualItems": 16,
+              "actualItems": 13,
               "matched": 0,
               "missing": [
                 {
@@ -2650,6 +2618,20 @@
                   "price": "75.00",
                   "path": [
                     "Lunchmenu's"
+                  ]
+                },
+                {
+                  "name": "Sandwich Zuyd",
+                  "price": "19.50",
+                  "path": [
+                    "Sandwiches"
+                  ]
+                },
+                {
+                  "name": "Lobster roll",
+                  "price": "25.00",
+                  "path": [
+                    "Sandwiches"
                   ]
                 },
                 {
@@ -2714,13 +2696,6 @@
                   "path": [
                     "À la carte"
                   ]
-                },
-                {
-                  "name": "Dessert",
-                  "price": "16.50",
-                  "path": [
-                    "À la carte"
-                  ]
                 }
               ],
               "extra": [
@@ -2775,20 +2750,6 @@
                 },
                 {
                   "name": "Zeetongfilet",
-                  "price": "39.00",
-                  "path": [
-                    "A LA CARTE"
-                  ]
-                },
-                {
-                  "name": "Ossenhaas",
-                  "price": "35.00",
-                  "path": [
-                    "A LA CARTE"
-                  ]
-                },
-                {
-                  "name": "Eendenlever",
                   "price": "28.00",
                   "path": [
                     "A LA CARTE"
@@ -2838,23 +2799,13 @@
                   ]
                 },
                 {
-                  "name": "Sandwich Zuyd",
-                  "price": "19.50",
+                  "name": "Dessert",
+                  "price": "16.50",
                   "expectedPath": [
-                    "Sandwiches"
+                    "À la carte"
                   ],
                   "actualPath": [
-                    "SANDWICHES"
-                  ]
-                },
-                {
-                  "name": "Lobster roll",
-                  "price": "25.00",
-                  "expectedPath": [
-                    "Sandwiches"
-                  ],
-                  "actualPath": [
-                    "SANDWICHES"
+                    "A LA CARTE"
                   ]
                 }
               ],
@@ -2863,27 +2814,27 @@
                 "expected": {
                   "total": 22,
                   "matched": 0,
-                  "missing": 16,
+                  "missing": 17,
                   "priceMismatch": 0,
-                  "categoryMismatch": 6,
+                  "categoryMismatch": 5,
                   "accounted": 22,
                   "balanced": true
                 },
                 "actual": {
-                  "total": 16,
+                  "total": 13,
                   "matched": 0,
-                  "extra": 10,
+                  "extra": 8,
                   "priceMismatch": 0,
-                  "categoryMismatch": 6,
-                  "accounted": 16,
+                  "categoryMismatch": 5,
+                  "accounted": 13,
                   "balanced": true
                 }
               }
             },
             "namePriceComparison": {
               "referenceItems": 22,
-              "actualItems": 16,
-              "matched": 6,
+              "actualItems": 13,
+              "matched": 5,
               "missing": [
                 {
                   "name": "Crumpet met huis gerookte zalm",
@@ -2906,6 +2857,14 @@
                   "price": "75.00"
                 },
                 {
+                  "name": "Sandwich Zuyd",
+                  "price": "19.50"
+                },
+                {
+                  "name": "Lobster roll",
+                  "price": "25.00"
+                },
+                {
                   "name": "Kreeft (½)",
                   "price": "29.00"
                 },
@@ -2922,16 +2881,20 @@
                   "price": "29.00"
                 },
                 {
+                  "name": "Ossenhaas",
+                  "price": "32.50"
+                },
+                {
+                  "name": "Eendenlever",
+                  "price": "27.00"
+                },
+                {
                   "name": "Kaasassortiment",
                   "price": "€12.00/€18,00"
                 },
                 {
                   "name": "Kaasgerecht",
                   "price": "17.00"
-                },
-                {
-                  "name": "Dessert",
-                  "price": "16.50"
                 }
               ],
               "extra": [
@@ -2957,7 +2920,7 @@
                 },
                 {
                   "name": "Zeetongfilet",
-                  "price": "39.00"
+                  "price": "28.00"
                 }
               ],
               "priceMismatches": [
@@ -2970,16 +2933,6 @@
                   "name": "Steak tartaar",
                   "expectedPrice": "26.00",
                   "actualPrice": "27.50"
-                },
-                {
-                  "name": "Ossenhaas",
-                  "expectedPrice": "32.50",
-                  "actualPrice": "35.00"
-                },
-                {
-                  "name": "Eendenlever",
-                  "expectedPrice": "27.00",
-                  "actualPrice": "28.00"
                 }
               ],
               "balanced": true
@@ -2997,7 +2950,7 @@
             "strictComparison": {
               "label": "19-diner Dinerkaart",
               "expectedItems": 20,
-              "actualItems": 13,
+              "actualItems": 12,
               "matched": 0,
               "missing": [
                 {
@@ -3111,13 +3064,6 @@
                   "path": [
                     "À la carte"
                   ]
-                },
-                {
-                  "name": "Dessert",
-                  "price": "16.50",
-                  "path": [
-                    "À la carte"
-                  ]
                 }
               ],
               "extra": [
@@ -3172,20 +3118,6 @@
                 },
                 {
                   "name": "Zeetongfilet",
-                  "price": "39.00",
-                  "path": [
-                    "A LA CARTE"
-                  ]
-                },
-                {
-                  "name": "Ossenhaas",
-                  "price": "35.00",
-                  "path": [
-                    "A LA CARTE"
-                  ]
-                },
-                {
-                  "name": "Eendenlever",
                   "price": "28.00",
                   "path": [
                     "A LA CARTE"
@@ -3223,6 +3155,16 @@
                   "actualPath": [
                     "BITES - voor bij het aperitief"
                   ]
+                },
+                {
+                  "name": "Dessert",
+                  "price": "16.50",
+                  "expectedPath": [
+                    "À la carte"
+                  ],
+                  "actualPath": [
+                    "A LA CARTE"
+                  ]
                 }
               ],
               "duplicates": [],
@@ -3230,27 +3172,27 @@
                 "expected": {
                   "total": 20,
                   "matched": 0,
-                  "missing": 17,
+                  "missing": 16,
                   "priceMismatch": 0,
-                  "categoryMismatch": 3,
+                  "categoryMismatch": 4,
                   "accounted": 20,
                   "balanced": true
                 },
                 "actual": {
-                  "total": 13,
+                  "total": 12,
                   "matched": 0,
-                  "extra": 10,
+                  "extra": 8,
                   "priceMismatch": 0,
-                  "categoryMismatch": 3,
-                  "accounted": 13,
+                  "categoryMismatch": 4,
+                  "accounted": 12,
                   "balanced": true
                 }
               }
             },
             "namePriceComparison": {
               "referenceItems": 20,
-              "actualItems": 13,
-              "matched": 3,
+              "actualItems": 12,
+              "matched": 4,
               "missing": [
                 {
                   "name": "Oesterproeverij Deluxe",
@@ -3293,16 +3235,20 @@
                   "price": "29.00"
                 },
                 {
+                  "name": "Ossenhaas",
+                  "price": "32.50"
+                },
+                {
+                  "name": "Eendenlever",
+                  "price": "27.00"
+                },
+                {
                   "name": "Kaasassortiment",
                   "price": "€12.00/€18,00"
                 },
                 {
                   "name": "Kaasgerecht",
                   "price": "17.00"
-                },
-                {
-                  "name": "Dessert",
-                  "price": "16.50"
                 }
               ],
               "extra": [
@@ -3328,7 +3274,7 @@
                 },
                 {
                   "name": "Zeetongfilet",
-                  "price": "39.00"
+                  "price": "28.00"
                 }
               ],
               "priceMismatches": [
@@ -3341,16 +3287,6 @@
                   "name": "Steak tartaar",
                   "expectedPrice": "26.00",
                   "actualPrice": "27.50"
-                },
-                {
-                  "name": "Ossenhaas",
-                  "expectedPrice": "32.50",
-                  "actualPrice": "35.00"
-                },
-                {
-                  "name": "Eendenlever",
-                  "expectedPrice": "27.00",
-                  "actualPrice": "28.00"
                 }
               ],
               "balanced": true
@@ -3360,12 +3296,12 @@
         "totals": {
           "historicalItems": 42,
           "strictMissing": 33,
-          "strictExtra": 20,
+          "strictExtra": 16,
           "strictPriceMismatches": 0,
           "strictCategoryMismatches": 9,
-          "namePriceMissing": 25,
+          "namePriceMissing": 29,
           "namePriceExtra": 12,
-          "namePriceMismatches": 8
+          "namePriceMismatches": 4
         }
       },
       "limitations": [
@@ -3373,7 +3309,7 @@
         "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
       ],
       "errors": [],
-      "result": "29 live items in 5 sections across 2 menu context(s); 0 probe(s) failed. This is a read-only comparison, not an acceptance claim."
+      "result": "25 live items in 4 sections across 2 menu context(s); 0 probe(s) failed. This is a read-only comparison, not an acceptance claim."
     },
     "thuis": {
       "id": "thuis",

@@ -125,7 +125,26 @@ De site stuurt in een lus tussen `https://t-huis.online/maintenance.html` en
 redirectgrens; er is geen omzeiling, alternatieve URL of andere vestiging
 gebruikt. De onderhoudspagina is geen menukaart en levert dus geen successtatus.
 
-## Herstel in deze ronde
+## Tweede nameting na de generieke herstellingen (2026-10-21, review 6316295818)
+
+Dezelfde vier kaarten zijn opnieuw read-only vergeleken met
+`compare-menu-extraction-existing-cards.js`. `existing-card-comparison.json` is
+overschreven (regenerable); de capture-pin is ongewijzigd.
+
+| Bron | Uitkomst | Bewijs |
+| --- | --- | --- |
+| Wolfslaar | 0 items; entry en beide menupaden falen met `request-error` (TLS) | externe blokkade, geen omzeiling |
+| Bardot | 0 items; alle gepinde URL's geven `bad-status` (503) | externe blokkade |
+| Zuyd | 25 items in 4 secties (lunch 13, diner 12); `sourceVersionMatches: false` | 100% bron-ID, locator en bewijs; echte prijswijzigingen t.o.v. de historische export (4 naam+prijsverschillen, 16 extra, 33 ontbrekend) |
+| T-Huis | 0 items; `too-many-redirects` naar de onderhoudspagina | externe blokkade, geen omzeiling |
+
+Zuyd-specifiek: `Dessert 16,50` wordt nu wél gelezen doordat een `<br>` binnen
+een inline element als regelgrens telt; de lunchsectie `Sandwiches` komt in deze
+bronversie niet meer voor (25 i.p.v. de eerdere 29 items). Dat is
+bronverschil, geen stille daling: de vergelijking meldt elke ontbrekende en extra
+rij en `sourceVersionMatches: false`. De historische aantallen zijn geen
+waarheid en de drempels zijn niet verlaagd.
+
 
 | Bevinding | Herstel | Regressie |
 | --- | --- | --- |
