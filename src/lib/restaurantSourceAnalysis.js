@@ -72,7 +72,7 @@
 
 const { extractMenusFromHtml } = require('./menuJsonLdExtraction')
 const { normalizeMenuHierarchy } = require('./menuHierarchy')
-const { findSameHostMenuCandidates, MAX_CANDIDATES } = require('./sameHostDiscovery')
+const { findSameHostMenuCandidates, findSameHostSubPageLinks, collectAnchors, MAX_CANDIDATES } = require('./sameHostDiscovery')
 const { extractRestaurantFieldsWithEvidence } = require('./restaurantFieldEvidence')
 const { ALLOWED_FIELD_NAMES, deriveFieldConfidence, isFieldReviewReady } = require('./fieldConfidence')
 const { computeFieldEvidenceHash } = require('./fieldEvidenceHash')
@@ -82,10 +82,11 @@ const { structurePdfLinesIntoMenu, compactPdfLayoutText } = require('./pdfMenuSt
 const { rollUpPdfAdapterErrorReason } = require('./restaurantSourceAnalysisJobs')
 const { composeEvidenceBasedDescription } = require('./restaurantConceptDescription')
 const { runClaudeStructuringAdapter } = require('./claudeStructuringAdapter')
-const { extractHtmlMenuStructure } = require('./htmlMenuStructure')
+const { extractHtmlMenuStructure, spamSignals } = require('./htmlMenuStructure')
 const { pdfContextToMenuContext } = require('./pdfMenuContext')
 const { buildExtractionResult, countMenuItems } = require('./menuExtractionResult')
 const { assessDeterministicMenuQuality, applyQualityReview, aiReplacementGate } = require('./menuExtractionQuality')
+const { applyItemEvidenceGate } = require('./menuItemEvidence')
 
 /**
  * BE-25 fase 2: a menu context from the visible HTML of a discovered menu
@@ -101,12 +102,20 @@ const { assessDeterministicMenuQuality, applyQualityReview, aiReplacementGate } 
  * path of any depth per section, the original source route, the source
  * position and locator, and an uncertainty flag — never one flattened name.
  */
-function menuFromHtmlStructure(html, usedSlugs) {
+function menuFromHtmlStructure(html, usedSlugs, report = null) {
   let result
   try {
     result = extractHtmlMenuStructure(html)
   } catch {
     return null
+  }
+  // The refusal reason/limits are reviewable information too: a page that was
+  // read but refused as non-menu content must not look like an empty page.
+  if (report && typeof report === 'object') {
+    report.status = (result && result.status) || 'unparsed'
+    report.reason = (result && result.reason) || null
+    report.injectedBlocksSkipped = (result && result.stats && result.stats.injectedBlocksSkipped) || 0
+    report.contentSuspicion = (result && result.stats && result.stats.contentSuspicion) || null
   }
   if (!result || result.status !== 'parsed') return null
   const kept = result.sections
@@ -152,6 +161,108 @@ function htmlMenuExclusionLimitations(url, found) {
   return ((found && found.excludedSections) || []).map(
     (entry) => `Menukaart ${url}: sectie "${entry.path.join(' › ')}" is niet als gerechten opgenomen; ${entry.unpricedLines} regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).`,
   )
+}
+
+/** JSON-LD menus from one page, refused as non-menu content when their own
+ * names/sections carry clear spam/injection signals (#59 review
+ * 6316295818). A hijacked page can also inject a schema.org Menu. */
+function jsonLdMenusForPage(menus, url, limitations) {
+  const signals = new Set()
+  for (const menu of Array.isArray(menus) ? menus : []) {
+    for (const category of (menu && Array.isArray(menu.categories) && menu.categories) || []) {
+      for (const signal of spamSignals(category && category.name)) signals.add(signal)
+      for (const item of (category && Array.isArray(category.items) && category.items) || []) {
+        for (const signal of spamSignals(`${(item && item.name) || ''} ${(item && item.desc) || ''}`)) signals.add(signal)
+      }
+    }
+  }
+  if (signals.size < 2) return menus
+  limitations.push(
+    `Inhoud van ${url} is niet als menukaart gebruikt (content_not_menu_suspected): spam-/injectiesignalen (${[...signals].slice(0, 3).join(', ')}).`,
+  )
+  return []
+}
+
+/** Honest limitations for a page the recognizer refused as non-menu content
+ * or where hidden injected text was skipped. Never a guessed menu. */
+function htmlMenuRefusalLimitations(url, report) {
+  if (!report || typeof report !== 'object') return []
+  const limitations = []
+  if (report.reason === 'content_not_menu_suspected') {
+    const signals = report.contentSuspicion && Array.isArray(report.contentSuspicion.signals) ? report.contentSuspicion.signals.slice(0, 3).join(', ') : null
+    limitations.push(
+      `Inhoud van ${url} is niet als menukaart gebruikt (content_not_menu_suspected)${signals ? `: spam-/injectiesignalen (${signals})` : ': duidelijke spam-/injectiesignalen'}.`,
+    )
+  }
+  if (Number.isInteger(report.injectedBlocksSkipped) && report.injectedBlocksSkipped > 0) {
+    limitations.push(`Verborgen geïnjecteerde inhoud op ${url} is niet gelezen (${report.injectedBlocksSkipped} blok(ken) met spam-/injectiesignalen).`)
+  }
+  return limitations
+}
+
+const MENU_IMAGE_URL_PATTERN = /\.(?:jpe?g|png|webp)(?:[?#]|$)/i
+const MENU_MEDIA_HINT = /(?:menu|menukaart|kaart|lunch|diner|dinner|gerechten|spijskaart|food)/i
+const PDF_URL_PATTERN = /\.pdf(?:[?#]|$)/i
+// Narrow: a restaurant saying it is closed for good, never an opening-hours
+// line such as "op zondag gesloten".
+const SOURCE_CLOSURE_PATTERN = /\b(?:deuren\s+(?:definitief\s+)?gesloten|definitief\s+gesloten|permanently\s+closed|heeft\s+[^.]{0,80}deuren\s+gesloten)\b/i
+
+function plainTextOfHtml(html) {
+  return String(html || '')
+    .replace(/<script\b[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style\b[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+/** True when the page itself says the restaurant has closed for good. */
+function sourceClosureSignal(html) {
+  return SOURCE_CLOSURE_PATTERN.test(plainTextOfHtml(html).slice(0, 20000))
+}
+
+/**
+ * What this deterministic, non-AI route cannot read from one already-fetched
+ * page: a menu published only as an image (no OCR configured) or only as a
+ * PDF on another host (outside the approved source scope). Reported per
+ * source, never guessed and never fetched around the boundary.
+ */
+function menuMediaLimitations(html, pageUrl) {
+  const limitations = []
+  let base
+  try {
+    base = new URL(pageUrl)
+  } catch (err) {
+    return limitations
+  }
+  const pageHost = base.hostname.replace(/^www\./i, '').toLowerCase()
+  const images = []
+  for (const match of String(html || '').matchAll(/<img\b[^>]*>/gi)) {
+    const tag = match[0]
+    const src = (tag.match(/(?:src|data-src)\s*=\s*["']([^"']+)["']/i) || [])[1]
+    if (!src || !MENU_IMAGE_URL_PATTERN.test(src)) continue
+    const alt = (tag.match(/alt\s*=\s*["']([^"']*)["']/i) || [])[1] || ''
+    if (!MENU_MEDIA_HINT.test(src) && !MENU_MEDIA_HINT.test(alt)) continue
+    images.push(src)
+  }
+  if (images.length > 0) {
+    limitations.push(
+      `Menukaart lijkt alleen als afbeelding beschikbaar op ${pageUrl} (${images.length} afbeelding(en), o.a. ${String(images[0]).slice(0, 120)}); beeldanalyse/OCR is niet geconfigureerd.`,
+    )
+  }
+  const externalPdfHosts = []
+  for (const anchor of collectAnchors(html, pageUrl)) {
+    if (!PDF_URL_PATTERN.test(anchor.url.pathname)) continue
+    const host = anchor.url.hostname.replace(/^www\./i, '').toLowerCase()
+    if (host !== pageHost && !externalPdfHosts.includes(anchor.url.origin)) externalPdfHosts.push(anchor.url.origin)
+  }
+  if (externalPdfHosts.length > 0) {
+    limitations.push(
+      `Menukaart lijkt alleen als PDF op een andere host beschikbaar (${externalPdfHosts.slice(0, 3).join(', ')}); die is niet opgehaald binnen het bronbereik.`,
+    )
+  }
+  return limitations
 }
 
 /** Records the count (never the content) on the source entry so the quality
@@ -568,19 +679,22 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
   sourceTexts.set(homepageSourceId, homepageHtml)
 
   // 1. Homepage menu structure — BE-18's own extractor, unchanged.
-  for (const menu of extractMenusFromHtml(homepageHtml)) {
+  for (const menu of jsonLdMenusForPage(extractMenusFromHtml(homepageHtml), homepageUrl, limitations)) {
     menuContexts.push({ ...menu, extractionMethod: 'json_ld', sourceUrl: homepageUrl, sourceId: homepageSourceId })
   }
   // 1b. No JSON-LD menu on the entry page itself: read its already-fetched
   // HTML with the same strict recognizer as a discovered menu page (BE-25),
   // so a menu page entered directly gets the same path. No extra fetch.
   if (menuContexts.length === 0) {
-    const entryHtmlMenu = menuFromHtmlStructure(homepageHtml, new Set())
+    const entryReport = {}
+    const entryHtmlMenu = menuFromHtmlStructure(homepageHtml, new Set(), entryReport)
     if (entryHtmlMenu) {
       menuContexts.push({ ...entryHtmlMenu.menu, extractionMethod: 'html', sourceUrl: homepageUrl, sourceId: homepageSourceId })
       notes.push(htmlMenuNote(homepageUrl, entryHtmlMenu))
       limitations.push(...htmlMenuExclusionLimitations(homepageUrl, entryHtmlMenu))
       noteHtmlExclusions(sourceInventory, homepageSourceId, entryHtmlMenu)
+    } else {
+      limitations.push(...htmlMenuRefusalLimitations(homepageUrl, entryReport))
     }
   }
 
@@ -657,7 +771,7 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
       })
       sourceTexts.set(sourceId, fetched.body)
       const existingSlugs = new Set(menuContexts.map((m) => m.contextSlug))
-      const candidateMenus = extractMenusFromHtml(fetched.body)
+      const candidateMenus = jsonLdMenusForPage(extractMenusFromHtml(fetched.body), sourceUrl, limitations)
       for (const menu of candidateMenus) {
         if (existingSlugs.has(menu.contextSlug)) continue
         menuContexts.push({ ...menu, extractionMethod: 'html', sourceUrl, sourceId })
@@ -666,7 +780,9 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
       // No JSON-LD menu on a page a menu link pointed to: read its visible
       // HTML with the deterministic BE-22 structure recognizer (BE-25 fase
       // 2) — only priced dishes in recognised structures, never a guess.
-      const htmlMenu = candidateMenus.length === 0 ? menuFromHtmlStructure(fetched.body, existingSlugs) : null
+      const htmlMenuReport = {}
+      const htmlMenu = candidateMenus.length === 0 ? menuFromHtmlStructure(fetched.body, existingSlugs, htmlMenuReport) : null
+      limitations.push(...htmlMenuRefusalLimitations(sourceUrl, htmlMenuReport))
       if (htmlMenu) {
         menuContexts.push({ ...htmlMenu.menu, extractionMethod: 'html', sourceUrl, sourceId })
         existingSlugs.add(htmlMenu.menu.contextSlug)
@@ -681,23 +797,42 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
         notes.push(
           `Mogelijke menupagina gelezen: ${sourceUrl} (link "${String(candidate.matchedOn || '').slice(0, 60)}"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.`
         )
-        // A menu overview page (for example /menukaart with tiles for lunch,
-        // diner and drinks) is not itself a menu. Its own same-host menu links
-        // are relevant follow-up pages; they are followed only one level below
-        // this page and only from the shared MAX_CANDIDATES budget.
-        if (candidate.depth === 1) {
-          const hubLinks = findSameHostMenuCandidates(fetched.body, sourceUrl)
-            .filter((link) => !visitedCandidates.has(link.url) && !queuedCandidates.has(link.url))
-          if (hubLinks.length >= 2) {
-            const remaining = MAX_CANDIDATES - candidateFetches
-            for (const link of hubLinks.slice(0, remaining)) {
-              candidateQueue.push({ ...link, depth: 2 })
-              queuedCandidates.add(link.url)
+        // Name what this deterministic, non-AI route cannot read: an image
+        // menu, a PDF on another host, or a source that reports its own
+        // closure. Never a guessed menu, never an OCR call.
+        limitations.push(...menuMediaLimitations(fetched.body, sourceUrl))
+        if (sourceClosureSignal(fetched.body)) {
+          limitations.push(`De bron ${sourceUrl} meldt dat het restaurant gesloten is; er is geen menukaart meer opgehaald.`)
+        } else {
+          // A menu overview page (for example /menukaart with tiles for lunch,
+          // diner and drinks) is not itself a menu. Its own same-host menu
+          // links — and, for a CMS category hub, its own labelled child pages
+          // — are relevant follow-up pages, only one level below this page and
+          // only from the shared MAX_CANDIDATES budget.
+          if (candidate.depth === 1) {
+            const keywordLinks = findSameHostMenuCandidates(fetched.body, sourceUrl)
+            const subPageLinks = findSameHostSubPageLinks(fetched.body, sourceUrl)
+            const seenHub = new Set([...visitedCandidates, ...queuedCandidates])
+            const hubLinks = []
+            for (const link of [...keywordLinks, ...subPageLinks]) {
+              if (!link || !link.url || seenHub.has(link.url)) continue
+              seenHub.add(link.url)
+              hubLinks.push(link)
             }
-            if (remaining > 0) {
-              notes.push(
-                `Menukaartpagina ${sourceUrl} is een tussenpagina; ${Math.min(hubLinks.length, remaining)} relevante menulink(s) binnen dezelfde site zijn gevolgd.`
-              )
+            // A single same-host PDF menu link is unambiguous enough to follow;
+            // a single HTML link is not (it may be any page).
+            const singlePdf = hubLinks.length === 1 && /\.pdf(?:[?#]|$)/i.test(hubLinks[0].url)
+            if (hubLinks.length >= 2 || singlePdf) {
+              const remaining = MAX_CANDIDATES - candidateFetches
+              for (const link of hubLinks.slice(0, remaining)) {
+                candidateQueue.push({ ...link, depth: candidate.depth + 1 })
+                queuedCandidates.add(link.url)
+              }
+              if (remaining > 0) {
+                notes.push(
+                  `Menukaartpagina ${sourceUrl} is een tussenpagina; ${Math.min(hubLinks.length, remaining)} relevante menulink(s) binnen dezelfde site zijn gevolgd.`
+                )
+              }
             }
           }
         }
@@ -760,6 +895,33 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
         notes.push(`PDF op ${candidate.url} kon niet worden gelezen (${reason}).`)
       }
       continue
+    }
+  }
+
+  // 3a. Nothing recognisable anywhere: say so once, per source, and name the
+  // media form this route cannot read (image menu / external PDF) or a
+  // source-reported closure. A read page is never presented as "no menu".
+  if (menuContexts.length === 0 && unknownMenuContexts.length === 0) {
+    limitations.push(`Geen menukaart gevonden op ${homepageUrl} of in de gevolgde menulinks.`)
+    limitations.push(...menuMediaLimitations(homepageHtml, homepageUrl))
+    if (sourceClosureSignal(homepageHtml)) {
+      limitations.push(`De bron ${homepageUrl} meldt dat het restaurant gesloten is; er is geen menukaart meer opgehaald.`)
+    }
+  }
+
+  // 3b. Every accepted item must carry its own locator + supporting passage
+  // (#59 Delivery Lead review 6316295818). The gate refuses what a path lost
+  // and names it, so no consumer can show a "dish" that cannot be pointed at
+  // in the source. This runs before the quality gate and any model call.
+  const evidenceGate = applyItemEvidenceGate(menuContexts)
+  if (evidenceGate.droppedCount > 0) {
+    const perSource = new Map()
+    for (const dropped of evidenceGate.dropped) {
+      const key = dropped.sourceUrl || dropped.sourceId || 'onbekende bron'
+      perSource.set(key, (perSource.get(key) || 0) + 1)
+    }
+    for (const [source, count] of perSource) {
+      limitations.push(`${count} item(s) zonder bronbewijs (locator + ondersteunende passage) zijn niet als gerecht opgenomen: ${source}.`)
     }
   }
 

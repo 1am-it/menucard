@@ -69,22 +69,38 @@ function nodeIsRestaurantLike(node) {
  * candidateSuggestions.js's own `extractFromJsonLd`.
  */
 function collectJsonLdNodes(html) {
-  const nodes = [];
+  return collectJsonLdEntries(html).map((entry) => entry.node);
+}
+
+/**
+ * The same nodes, each with the place it was read from (#59 Delivery Lead
+ * review 6316295818): the 1-based `<script type="application/ld+json">`
+ * index, the exact JSON path inside that script, and the script's own raw
+ * text so an item can quote the source instead of a re-serialised object.
+ */
+function collectJsonLdEntries(html) {
+  const entries = [];
+  let scriptIndex = 0;
   for (const match of html.matchAll(JSON_LD_SCRIPT_PATTERN)) {
+    scriptIndex += 1;
+    const raw = match[1];
     let parsed;
     try {
-      parsed = JSON.parse(match[1]);
+      parsed = JSON.parse(raw);
     } catch (err) {
       continue;
     }
+    const base = { scriptIndex, raw };
     if (Array.isArray(parsed)) {
-      nodes.push(...parsed);
+      parsed.forEach((node, index) => entries.push({ ...base, node, path: `[${index}]` }));
     } else if (parsed && typeof parsed === 'object') {
-      nodes.push(parsed);
-      if (Array.isArray(parsed['@graph'])) nodes.push(...parsed['@graph']);
+      entries.push({ ...base, node: parsed, path: '' });
+      if (Array.isArray(parsed['@graph'])) {
+        parsed['@graph'].forEach((node, index) => entries.push({ ...base, node, path: `@graph[${index}]` }));
+      }
     }
   }
-  return nodes;
+  return entries;
 }
 
 /**
@@ -114,6 +130,36 @@ function findMenuNodes(nodes) {
   return menuNodes;
 }
 
+/**
+ * The same menus as `findMenuNodes`, but every entry keeps the exact JSON
+ * path it was read from: `script[type="application/ld+json"][n]`, the JSON
+ * path inside that block, and the `@type=Menu` / `hasMenu` segment. That
+ * locator is what makes a JSON-LD item reviewable against its source.
+ */
+function findMenuEntries(entries) {
+  const found = [];
+  for (const entry of entries) {
+    const node = entry.node;
+    if (!node || typeof node !== 'object') continue;
+    const base = `script[type="application/ld+json"][${entry.scriptIndex}]${entry.path ? `>${entry.path}` : ''}`;
+    if (nodeHasSchemaType(node, 'Menu')) {
+      found.push({ node, raw: entry.raw, locator: `${base}>@type=Menu` });
+      continue;
+    }
+    if (!nodeIsRestaurantLike(node)) continue;
+    const property = node.hasMenu ? 'hasMenu' : node.menu ? 'menu' : null;
+    const menuProp = property ? node[property] : null;
+    if (!property || !menuProp) continue;
+    const candidates = Array.isArray(menuProp) ? menuProp : [menuProp];
+    candidates.forEach((candidate, index) => {
+      if (!candidate || typeof candidate !== 'object') return;
+      const segment = Array.isArray(menuProp) ? `${property}[${index}]` : property;
+      found.push({ node: candidate, raw: entry.raw, locator: `${base}>${segment}` });
+    });
+  }
+  return found;
+}
+
 function extractPrice(itemNode) {
   const offers = itemNode.offers;
   const offerList = Array.isArray(offers) ? offers : offers ? [offers] : [];
@@ -128,12 +174,41 @@ function extractPrice(itemNode) {
   return null;
 }
 
-function extractMenuItem(itemNode) {
+/**
+ * A bounded, real passage from the JSON-LD script around the item's own
+ * name, so the reviewer can see the source text. Never a re-serialised
+ * object, never a fabricated fragment: null when the name cannot be found.
+ */
+function sourceQuote(raw, name) {
+  if (typeof raw !== 'string' || !raw || typeof name !== 'string' || !name) return null;
+  const decoded = decodeEntities(name);
+  const escaped = JSON.stringify(decoded).slice(1, -1);
+  const needles = [...new Set([escaped, JSON.stringify(name).slice(1, -1), decoded])].filter(Boolean);
+  for (const needle of needles) {
+    const index = raw.indexOf(needle);
+    if (index < 0) continue;
+    const start = Math.max(0, index - 60);
+    const end = Math.min(raw.length, index + needle.length + 140);
+    const passage = raw.slice(start, end).replace(/\s+/g, ' ').trim();
+    if (passage) return passage.slice(0, 200);
+  }
+  return null;
+}
+
+function extractMenuItem(itemNode, evidenceContext = null) {
   if (!itemNode || typeof itemNode !== 'object') return null;
   const name = menuText(itemNode.name);
   if (!name) return null;
   const desc = menuText(itemNode.description);
-  return { name, desc, price: extractPrice(itemNode) };
+  const price = extractPrice(itemNode);
+  const item = { name, desc, price };
+  if (evidenceContext && typeof evidenceContext === 'object' && typeof evidenceContext.locator === 'string' && evidenceContext.locator) {
+    const evidence = { pattern: 'json_ld', locator: evidenceContext.locator.slice(0, 200) };
+    const quote = sourceQuote(evidenceContext.raw, name);
+    if (quote) evidence.quote = quote;
+    item.evidence = evidence;
+  }
+  return item;
 }
 
 /**
@@ -144,23 +219,35 @@ function extractMenuItem(itemNode) {
  * with its parent's so no information is silently dropped. A section
  * with no items at all (after flattening) contributes no category.
  */
-function flattenMenuSections(sectionsInput, parentName) {
+function flattenMenuSections(sectionsInput, parentName, context = null) {
   const categories = [];
   const sections = Array.isArray(sectionsInput) ? sectionsInput : sectionsInput ? [sectionsInput] : [];
-  for (const section of sections) {
-    if (!section || typeof section !== 'object') continue;
+  sections.forEach((section, sectionIndex) => {
+    if (!section || typeof section !== 'object') return;
+    const sectionLocator = context && context.locator ? `${context.locator}>hasMenuSection[${sectionIndex}]` : null;
     const sectionName = menuText(section.name);
     const combinedName = parentName && sectionName ? `${parentName} — ${sectionName}` : sectionName || parentName || 'Categorie';
     if (section.hasMenuSection) {
-      categories.push(...flattenMenuSections(section.hasMenuSection, combinedName));
-      continue;
+      categories.push(
+        ...flattenMenuSections(section.hasMenuSection, combinedName, sectionLocator ? { locator: sectionLocator, raw: context.raw } : null),
+      );
+      return;
     }
     const itemsInput = Array.isArray(section.hasMenuItem) ? section.hasMenuItem : section.hasMenuItem ? [section.hasMenuItem] : [];
-    const items = itemsInput.map(extractMenuItem).filter(Boolean);
+    const items = itemsInput
+      .map((itemNode, itemIndex) =>
+        extractMenuItem(
+          itemNode,
+          sectionLocator ? { locator: `${sectionLocator}>hasMenuItem[${itemIndex}]`, raw: context.raw } : null,
+        ),
+      )
+      .filter(Boolean);
     if (items.length > 0) {
-      categories.push({ name: combinedName, items });
+      const category = { name: combinedName, items };
+      if (sectionLocator) category.locator = sectionLocator.slice(0, 200);
+      categories.push(category);
     }
-  }
+  });
   return categories;
 }
 
@@ -222,13 +309,12 @@ function deriveUniqueMenuContextSlug(menuName, index, usedSlugs) {
  */
 function extractMenusFromHtml(html) {
   if (typeof html !== 'string') return [];
-  const nodes = collectJsonLdNodes(html);
-  const menuNodes = findMenuNodes(nodes);
+  const menuEntries = findMenuEntries(collectJsonLdEntries(html));
   const usedSlugs = new Set();
   const menus = [];
-  menuNodes.forEach((menuNode, index) => {
-    const name = menuText(menuNode.name);
-    const categories = flattenMenuSections(menuNode.hasMenuSection, null);
+  menuEntries.forEach((entry, index) => {
+    const name = menuText(entry.node.name);
+    const categories = flattenMenuSections(entry.node.hasMenuSection, null, { locator: entry.locator, raw: entry.raw });
     if (categories.length === 0) return;
     menus.push({
       name,
@@ -241,7 +327,9 @@ function extractMenusFromHtml(html) {
 
 module.exports = {
   collectJsonLdNodes,
+  collectJsonLdEntries,
   findMenuNodes,
+  findMenuEntries,
   flattenMenuSections,
   extractMenuItem,
   extractPrice,

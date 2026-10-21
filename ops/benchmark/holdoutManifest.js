@@ -107,11 +107,36 @@ function validateHoldoutManifest(manifest, { mode = 'evaluation' } = {}) {
     if (!EVALUATION_STATES.includes(source.evaluationState)) {
       errors.push(`${where}: evaluationState must be one of ${EVALUATION_STATES.join(', ')}`);
     }
-    if (source.usedForTuning !== false) {
-      errors.push(`${where}: a holdout may not be used for tuning`);
-    }
     if (!Number.isInteger(source.evaluationCount) || source.evaluationCount < 0) {
       errors.push(`${where}: evaluationCount must be a non-negative integer`);
+    }
+
+    if (mode === 'representative') {
+      // A representative (tuned) source is no longer a holdout. Its recorded
+      // state must prove the two legitimate steps: exactly one first
+      // evaluation, bound to the committed evaluation file and to this
+      // source selection, followed by an explicit tuning decision.
+      if (source.evaluationState !== 'used_for_tuning') {
+        errors.push(`${where}: a representative source must be recorded as used_for_tuning`);
+      }
+      if (source.evaluationCount !== 1) {
+        errors.push(`${where}: a representative source has exactly one recorded evaluation`);
+      }
+      if (source.usedForTuning !== true) {
+        errors.push(`${where}: a representative source must carry usedForTuning: true`);
+      }
+      const first = source.firstEvaluation;
+      if (!first || typeof first !== 'object' || !nonEmptyString(first.path) || !nonEmptyString(first.sha256) || !nonEmptyString(first.selectionDigest)) {
+        errors.push(`${where}: firstEvaluation with path, sha256 and selectionDigest is required`);
+      }
+      if (!source.tuningDecision || !nonEmptyString(source.tuningDecision.reference)) {
+        errors.push(`${where}: a tuningDecision reference is required`);
+      }
+      continue;
+    }
+
+    if (source.usedForTuning !== false) {
+      errors.push(`${where}: a holdout may not be used for tuning`);
     }
     if (source.evaluationState === 'used_for_tuning') {
       errors.push(`${where}: a tuned source is no longer a holdout; pin a new holdout`);
@@ -128,7 +153,44 @@ function validateHoldoutManifest(manifest, { mode = 'evaluation' } = {}) {
       }
     }
   }
+
+  // A representative manifest must also identify the tuning decision at the
+  // top level, so the status change is never an unexplained edit.
+  if (mode === 'representative') {
+    if (!manifest.representative || !nonEmptyString(manifest.representative.reference)) {
+      errors.push('manifest: representative.reference is required');
+    }
+  }
   return { ok: errors.length === 0, errors };
+}
+
+/**
+ * The repository's canonical text hash: line endings normalised to LF before
+ * hashing. This checkout uses `core.autocrlf=true`, so the working tree has
+ * CRLF while the committed blob and every hash recorded in the pinned
+ * evaluation are LF. Hashing raw working-tree bytes would make the same
+ * committed file look different on another checkout.
+ */
+function repositoryTextSha256(input) {
+  const crypto = require('node:crypto');
+  const text = Buffer.isBuffer(input) ? input.toString('utf8') : String(input);
+  return crypto.createHash('sha256').update(text.replace(/\r\n/g, '\n'), 'utf8').digest('hex');
+}
+
+/**
+ * The exact source selection digest pinned with the first evaluation:
+ * `sha256(JSON.stringify(sources.map(s => [s.id, s.restaurantId, s.url])))`.
+ * It stays stable when only the evaluation state changes, so the later
+ * `used_for_tuning` step can prove it still belongs to the same selection.
+ */
+function holdoutSelectionDigest(manifest) {
+  const crypto = require('node:crypto');
+  const rows = (Array.isArray(manifest && manifest.sources) ? manifest.sources : []).map((source) => [
+    source.id,
+    source.restaurantId === undefined ? null : source.restaurantId,
+    source.url,
+  ]);
+  return crypto.createHash('sha256').update(JSON.stringify(rows)).digest('hex');
 }
 
 /** True when the manifest carries its own evaluation state (holdout-2 shape). */
@@ -207,5 +269,7 @@ module.exports = {
   evaluationEntriesFromManifest,
   holdoutOutputPaths,
   resolveManifestArgument,
+  holdoutSelectionDigest,
+  repositoryTextSha256,
 };
 

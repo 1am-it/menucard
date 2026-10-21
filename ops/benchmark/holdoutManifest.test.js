@@ -12,6 +12,7 @@ const path = require('node:path');
 
 const holdout1 = require('./holdout-sources.json');
 const holdout2 = require('./holdout-2-sources.json');
+const fs = require('node:fs');
 const {
   DEFAULT_MANIFEST,
   assertApprovedHost,
@@ -20,6 +21,8 @@ const {
   evaluationEntriesFromManifest,
   holdoutOutputPaths,
   resolveManifestArgument,
+  holdoutSelectionDigest,
+  repositoryTextSha256,
 } = require('./holdoutManifest');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
@@ -44,17 +47,35 @@ function manifest(overrides = {}) {
   };
 }
 
-test('the pinned holdout manifests are valid and holdout-2 is manifest-driven', () => {
+test('the pinned holdout manifests are valid and holdout-2 is recorded as representative', () => {
   assert.equal(validateHoldoutManifest(holdout1, { mode: 'capture' }).ok, true);
-  const second = validateHoldoutManifest(holdout2, { mode: 'capture' });
+  const second = validateHoldoutManifest(holdout2, { mode: 'representative' });
   assert.deepEqual(second.errors, []);
   assert.equal(holdout2.sources.length, 19);
   assert.equal(holdout2.authorization.appProviderActivation, false);
   assert.equal(isManifestDriven(holdout1), false, 'holdout-1 keeps its acceptance-set state');
   assert.equal(isManifestDriven(holdout2), true);
-  assert.equal(holdout2.sources.every((source) => source.evaluationState === 'unused'), true);
-  assert.equal(holdout2.sources.every((source) => source.usedForTuning === false), true);
+  assert.equal(holdout2.sources.every((source) => source.evaluationState === 'used_for_tuning'), true);
+  assert.equal(holdout2.sources.every((source) => source.usedForTuning === true), true);
+  assert.equal(holdout2.sources.every((source) => source.evaluationCount === 1), true);
+  // The first evaluation is a real, committed one: every source points at the
+  // same evaluation file and at the same source selection.
+  const evaluationBytes = fs.readFileSync(path.join(REPO_ROOT, 'ops', 'benchmark', 'holdout-2-evaluation.json'));
+  const evaluationSha256 = repositoryTextSha256(evaluationBytes);
+  const selectionDigest = holdoutSelectionDigest(holdout2);
+  for (const source of holdout2.sources) {
+    assert.equal(source.firstEvaluation.path, 'ops/benchmark/holdout-2-evaluation.json');
+    assert.equal(source.firstEvaluation.sha256, evaluationSha256);
+    assert.equal(source.firstEvaluation.selectionDigest, selectionDigest);
+    assert.equal(source.firstEvaluation.manifestBytesSha256, '151c34c0a383438a1227d71b1751f947b64a94e2397e69e00b4cbc89f283c2c8');
+    assert.match(source.tuningDecision.reference, /6316295818/);
+  }
+  assert.equal(holdout2.representative.evaluation.sha256, evaluationSha256);
+  // The same manifest can no longer be captured or evaluated as a holdout.
+  assert.equal(validateHoldoutManifest(holdout2, { mode: 'capture' }).ok, false);
+  assert.equal(validateHoldoutManifest(holdout2, { mode: 'evaluation' }).ok, false);
 });
+
 
 test('a holdout manifest refuses a tuned, already evaluated or second-pin source', () => {
   const tuned = manifest();

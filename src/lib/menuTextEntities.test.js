@@ -65,7 +65,11 @@ test('JSON-LD path: menu, section, dish name and description are decoded once by
   const [menu] = extractMenusFromHtml(`<script type="application/ld+json">${JSON.stringify(ld)}</script>`);
   assert.equal(menu.name, 'Fictief café');
   assert.equal(menu.categories[0].name, 'Lunch & diner');
-  assert.deepEqual(menu.categories[0].items[0], { name: 'Fictieve ‘vangst’', desc: '2 à 3 &amp; meer', price: '9.50' });
+  const [item] = menu.categories[0].items;
+  assert.deepEqual({ name: item.name, desc: item.desc, price: item.price }, { name: 'Fictieve ‘vangst’', desc: '2 à 3 &amp; meer', price: '9.50' });
+  // #59 review 6316295818: a JSON-LD item keeps its own source locator.
+  assert.equal(item.evidence.pattern, 'json_ld');
+  assert.match(item.evidence.locator, /application\/ld\+json.*hasMenuSection\[0\].*hasMenuItem\[0\]/);
 });
 
 test('through the chain: analysis → concept → export carry the decoded text, decoded once', async () => {

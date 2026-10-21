@@ -52,12 +52,22 @@ const MENU_KEYWORDS = [
   'drinks',
   'carte',
   'speisekarte',
+  // #59 Delivery Lead review 6316295818: generic menu-page words a live
+  // source used for its real menu (`/gerechten`, an `afhaalmenu` link, a
+  // `takeaway` page). Still a closed list of menu words, never a domain list.
+  'gerechten',
+  'afhaalmenu',
+  'takeaway',
+  'spijskaart',
 ];
 
 // A gift card or voucher is not a menu even though its name contains
 // "kaart"/"card". Excluded before the keyword match so a real menu link
-// behind it keeps its place in the bounded candidate budget.
-const NON_MENU_LINK_PATTERN = /\b(?:cadeaukaart|cadeaubon|geschenk(?:bon)?|gift\s?card|giftcard|voucher|tegoedbon)\b/i
+// behind it keeps its place in the bounded candidate budget. A blog/news/
+// event/opening-hours path is an article about the restaurant, never the
+// menu page itself (the live Klein Java source linked a "kerstmenu" blog post
+// that consumed the only candidate slot).
+const NON_MENU_LINK_PATTERN = /\b(?:cadeaukaart|cadeaubon|geschenk(?:bon)?|gift\s?card|giftcard|voucher|tegoedbon)\b|(?:^|\/)(?:blog|blogs|nieuws|news|artikel|articles?|events?|evenementen|agenda|openingstijden)(?:\/|$)/i
 
 
 const ANCHOR_PATTERN = /<a\b[^>]*href\s*=\s*["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
@@ -133,6 +143,49 @@ function collectAnchors(html, baseUrl) {
  * itself (that page is already being read), and never more than one
  * entry for the same resolved URL.
  */
+/**
+ * The same-host child pages directly below `baseUrl` (`/gerechten` ->
+ * `/gerechten/basisgerechten`, ...). A menu hub often shows only category
+ * labels, none of which contains a menu keyword; the hub itself is never a
+ * menu, but its own children are the real menu pages. Label-like links only
+ * (one extra path segment, short text, no ordinary navigation label), in
+ * document order, at most MAX_CANDIDATES, never another host.
+ */
+const SUB_PAGE_LABEL_EXCLUDE = /^(?:home|start|over(?:\s+ons)?|about|contact|reserveren|reserveer|reserve|bestellen|bestel|order|cart|winkelwagen|login|inloggen|account|privacy|disclaimer|cookies?|vacatures?|jobs?|gallery|galerij|foto'?s?|impressie|blog|nieuws|news|events?|agenda|catering|verhuur|kerst(?:menu)?|bekijk|lees\s+meer|more|terug|back)$/i
+
+function findSameHostSubPageLinks(html, baseUrl) {
+  let base
+  try {
+    base = new URL(baseUrl)
+  } catch (err) {
+    return []
+  }
+  const baseHost = normalizeHostname(base.href)
+  if (!baseHost) return []
+  const basePath = base.pathname.replace(/\/+$/, '') || '/'
+  const seen = new Set()
+  const links = []
+  for (const anchor of collectAnchors(html, baseUrl)) {
+    if (links.length >= MAX_CANDIDATES) break
+    if (normalizeHostname(anchor.url.href) !== baseHost) continue
+    const path = anchor.url.pathname.replace(/\/+$/, '') || '/'
+    if (path === basePath) continue
+    const prefix = basePath === '/' ? '/' : `${basePath}/`
+    if (!path.startsWith(prefix)) continue
+    const rest = path.slice(prefix.length)
+    if (!rest || rest.includes('/')) continue
+    const text = (anchor.visibleText || '').trim()
+    if (!text || text.length > 40) continue
+    const words = text.split(/\s+/).filter(Boolean)
+    if (words.length === 0 || words.length > 4) continue
+    if (SUB_PAGE_LABEL_EXCLUDE.test(text)) continue
+    if (seen.has(path)) continue
+    seen.add(path)
+    links.push({ url: `${anchor.url.origin}${path}`, matchedOn: text })
+  }
+  return links
+}
+
 function findSameHostMenuCandidates(html, baseUrl) {
   const anchors = collectAnchors(html, baseUrl);
   if (anchors.length === 0) return [];
@@ -180,4 +233,5 @@ module.exports = {
   anchorLooksLikeMenuLink,
   collectAnchors,
   findSameHostMenuCandidates,
+  findSameHostSubPageLinks,
 };

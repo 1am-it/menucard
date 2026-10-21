@@ -16,6 +16,8 @@ const REPO_ROOT = path.resolve(__dirname, '..', '..');
 const TMP_DIR = path.join(__dirname, '.holdout-tooling-test');
 const CAPTURE = path.join(REPO_ROOT, 'ops', 'scripts', 'capture-menu-extraction-holdout-references.js');
 const PROBE = path.join(REPO_ROOT, 'ops', 'scripts', 'probe-menu-extraction-holdout.js');
+const TRANSITION = path.join(REPO_ROOT, 'ops', 'scripts', 'transition-menu-extraction-holdout.js');
+const { repositoryTextSha256, validateHoldoutManifest, holdoutSelectionDigest } = require('./holdoutManifest');
 
 function fixtureManifest(name, overrides = {}) {
   const definition = {
@@ -118,3 +120,89 @@ test('a tuned source is refused as a holdout', () => {
   assert.equal(result.status, 1);
   assert.match(result.stderr, /no longer a holdout/);
 });
+
+// ─── the tooling-only holdout lifecycle (#59 review 6316295818) ───────────
+
+/** A complete, self-consistent fixture: manifest + capture + evaluation. */
+function lifecycleFixture(name, { evaluationManifestHash = null, evaluationBytesSuffix = '' } = {}) {
+  const manifestFile = fixtureManifest(name);
+  const prefix = path.basename(manifestFile, '-sources.json');
+  const manifestBytes = fs.readFileSync(manifestFile);
+  const manifestHash = repositoryTextSha256(manifestBytes);
+  const relativeManifest = path.relative(REPO_ROOT, manifestFile).split(path.sep).join('/');
+  const evaluation = {
+    version: '1.0.0',
+    evaluatedAt: '2026-10-21T10:00:00.000Z',
+    manifest: { path: relativeManifest, bytesSha256: evaluationManifestHash || manifestHash, sourceCount: 1 },
+    results: { 'FIX-01': { pinnedBytesSha256: 'a'.repeat(64), status: 'executed_with_limitation' } },
+  };
+  const references = {
+    version: '1.1.0',
+    manifest: { path: relativeManifest, bytesSha256: manifestHash, sourceCount: 1 },
+    sources: { 'FIX-01': { captureStatus: 'captured', bytesSha256: 'a'.repeat(64) } },
+  };
+  fs.writeFileSync(path.join(TMP_DIR, `${prefix}-evaluation.json`), `${JSON.stringify(evaluation, null, 2)}\n${evaluationBytesSuffix}`);
+  fs.writeFileSync(path.join(TMP_DIR, `${prefix}-references.json`), `${JSON.stringify(references, null, 2)}\n`);
+  return { manifestFile, prefix, manifestHash, evaluation, references };
+}
+
+function runTransition(manifestFile, ...args) {
+  return spawnSync(process.execPath, [TRANSITION, '--manifest', path.relative(REPO_ROOT, manifestFile), ...args], {
+    cwd: REPO_ROOT,
+    encoding: 'utf8',
+    timeout: 30000,
+  });
+}
+
+test('the lifecycle tool records exactly one evaluation and then the tuning decision', () => {
+  const { manifestFile, manifestHash, evaluation } = lifecycleFixture('lifecycle');
+  const first = runTransition(manifestFile, '--step', 'evaluated_once', '--at', '2026-10-22');
+  assert.equal(first.status, 0, first.stderr);
+  let manifest = JSON.parse(fs.readFileSync(manifestFile, 'utf8'));
+  assert.equal(manifest.sources[0].evaluationState, 'evaluated_once');
+  assert.equal(manifest.sources[0].evaluationCount, 1);
+  assert.equal(manifest.sources[0].usedForTuning, false);
+  assert.equal(manifest.sources[0].firstEvaluation.manifestBytesSha256, manifestHash);
+  assert.equal(manifest.sources[0].firstEvaluation.evaluatedAt, evaluation.evaluatedAt);
+  assert.equal(manifest.sources[0].firstEvaluation.selectionDigest, holdoutSelectionDigest(manifest));
+
+  // A second first-evaluation is refused, both by the tool and the guard.
+  const again = runTransition(manifestFile, '--step', 'evaluated_once');
+  assert.equal(again.status, 1);
+  assert.match(again.stderr, /only an unused source may be evaluated|at most once/);
+
+  // The tuning step needs an explicit decision.
+  const withoutDecision = runTransition(manifestFile, '--step', 'used_for_tuning');
+  assert.equal(withoutDecision.status, 1);
+  assert.match(withoutDecision.stderr, /--decision is required/);
+
+  const tuned = runTransition(manifestFile, '--step', 'used_for_tuning', '--decision', 'fixture-decision', '--at', '2026-10-22');
+  assert.equal(tuned.status, 0, tuned.stderr);
+  manifest = JSON.parse(fs.readFileSync(manifestFile, 'utf8'));
+  assert.equal(manifest.sources[0].evaluationState, 'used_for_tuning');
+  assert.equal(manifest.sources[0].usedForTuning, true);
+  assert.equal(manifest.sources[0].tuningDecision.reference, 'fixture-decision');
+  assert.equal(manifest.representative.reference, 'fixture-decision');
+  assert.equal(validateHoldoutManifest(manifest, { mode: 'representative' }).ok, true);
+  assert.equal(validateHoldoutManifest(manifest, { mode: 'evaluation' }).ok, false);
+  assert.equal(validateHoldoutManifest(manifest, { mode: 'capture' }).ok, false);
+
+  // No third state, no repeated tuning step.
+  assert.equal(runTransition(manifestFile, '--step', 'used_for_tuning', '--decision', 'again').status, 1);
+});
+
+test('the lifecycle tool refuses an evaluation from another manifest version or a changed evaluation file', () => {
+  const wrongHash = lifecycleFixture('lifecycle-wrong-hash', { evaluationManifestHash: 'b'.repeat(64) });
+  const refused = runTransition(wrongHash.manifestFile, '--step', 'evaluated_once');
+  assert.equal(refused.status, 1);
+  assert.match(refused.stderr, /does not belong to this pinned manifest/);
+
+  const changed = lifecycleFixture('lifecycle-changed');
+  assert.equal(runTransition(changed.manifestFile, '--step', 'evaluated_once').status, 0);
+  const evaluationFile = path.join(TMP_DIR, `${changed.prefix}-evaluation.json`);
+  fs.appendFileSync(evaluationFile, '\n');
+  const stepTwo = runTransition(changed.manifestFile, '--step', 'used_for_tuning', '--decision', 'fixture-decision');
+  assert.equal(stepTwo.status, 1);
+  assert.match(stepTwo.stderr, /evaluation file changed/);
+});
+

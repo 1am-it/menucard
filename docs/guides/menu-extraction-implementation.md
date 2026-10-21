@@ -724,4 +724,49 @@ route bijgekomen.
   (`fixture=structure`, sectie in `ops/browser/README.md`). Dat is
   developer-/fixturebewijs; echte bronacceptatie en onafhankelijke review
   blijven aparte stappen.
+## Generieke herstellingen na de holdout-2-meting (review 6316295818)
+
+De eerste ongeziene meting van holdout-2 liet drie generieke fouten zien. Ze zijn
+zonder bron-specifieke trucs hersteld; de drempels zijn niet verlaagd.
+
+1. **Geen menu uit niet-menu-inhoud.** Een gekaapte pagina kan verborgen of
+   zichtbare casino-/spamtekst met bedragen injecteren. `src/lib/htmlMenuStructure.js`
+   leest een verborgen blok niet wanneer het ≥80 tekens telt en ≥2 verschillende
+   spam-/injectiesignalen bevat (`stats.injectedBlocksSkipped`); een pagina waarvan
+   de *geaccepteerde* secties/items zelf ≥2 signalen dragen, wordt geweigerd met
+   `content_not_menu_suspected` (0 items, geen successtatus). Dezelfde contrôle
+   geldt voor een geïnjecteerde JSON-LD-menu. De vocabulaire is generiek
+   (operator-/goktermen), nooit een domeinlijst.
+2. **Elk geaccepteerd item heeft locator én bewijs.** `src/lib/menuItemEvidence.js`
+   (`applyItemEvidenceGate`) weigert elk item zonder `evidence.locator` plus
+   quote/patroon/contenthash, verwijdert een lege rubriek/menu en meldt het aantal
+   per bron. De JSON-LD-route (`src/lib/menuJsonLdExtraction.js`) levert nu per
+   item een echte JSON-padlocator (`script[type="application/ld+json"][n]>…`)
+   en, wanneer vindbaar, een bronpassage; de HTML-route behield zijn locator al.
+3. **Meer menuvormen herkend, of eerlijk benoemd.** Zonder prijsmarkup:
+   `NAME 25` + omschrijvingsregel in één alinea (ook wanneer de regels in een
+   `<span>` met `<br>` zitten) en een bold titel die zelf op een prijs eindigt
+   (`NAME, €7,50`). Een reeks kale namen met prijzen zonder omschrijving blijft
+   geweigerd. Lege CMS-spacer-alinea's onderbreken een gerechtenreeks niet meer.
+   Discovery: `/gerechten`, `afhaalmenu`, `takeaway` en `spijskaart` zijn
+   menutrefwoorden; blog-/nieuws-/evenementpaden zijn dat niet. Een hub zonder
+   trefwoorden op de kinderen volgt één niveau zelfde-host kindpagina's, en één
+   same-host PDF-menulink wordt gevolgd. Wat niet kan, staat per bron in de
+   beperkingen: `alleen als afbeelding` (geen OCR), `PDF op een andere host`
+   (buiten het bronbereik) of `bron meldt sluiting`.
+4. **Tooling en meting.** `ops/scripts/transition-menu-extraction-holdout.js`
+   legt `unused → evaluated_once → used_for_tuning` vast met de capture- en
+   evaluatiehashes; `ops/scripts/measure-menu-extraction-representative.js`
+   meet dezelfde 19 bronnen opnieuw met dezelfde code als de eenmalige probe en
+   schrijft `holdout-2-representative-measurement.json`. Zie
+   [holdouttooling](menu-extraction-holdout-tooling.md) en de bijgewerkte
+   [representatieve set](menu-extraction-representative-set.md).
+
+**Bewijs.** `src/lib/htmlMenuContentSignals.test.js`,
+`src/lib/menuSourceDiscoveryLimits.test.js`, de uitgebreide
+`sameHostDiscovery.test.js`/`menuTextEntities.test.js`, en de
+toolingregressies in `holdoutManifest.test.js`/`holdoutTooling.test.js`. Dat is
+developer-/fixturebewijs; de representatieve nameting en de onafhankelijke
+review blijven aparte stappen.
+
 

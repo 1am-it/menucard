@@ -9,6 +9,7 @@ const {
   anchorLooksLikeMenuLink,
   collectAnchors,
   findSameHostMenuCandidates,
+  findSameHostSubPageLinks,
 } = require('./sameHostDiscovery');
 
 // ─── anchorLooksLikeMenuLink ────────────────────────────────────────────
@@ -162,3 +163,39 @@ test('findSameHostMenuCandidates: a candidate carries which text/path it matched
   const candidates = findSameHostMenuCandidates(html, 'https://example.nl/');
   assert.equal(candidates[0].matchedOn, 'Onze Menukaart 2026');
 });
+
+test('findSameHostMenuCandidates: a category hub (/gerechten) is a menu page, not an article', () => {
+  assert.equal(anchorLooksLikeMenuLink('/gerechten', 'Onze gerechten'), true);
+  assert.equal(anchorLooksLikeMenuLink('/afhaalmenu', 'Afhalen'), true);
+  assert.equal(anchorLooksLikeMenuLink('/takeaway', 'Take away'), true);
+  assert.equal(anchorLooksLikeMenuLink('/blog/afwijkende-openingstijden-kerstmenu-2025-klein-java', 'Kerstmenu'), false);
+  assert.equal(anchorLooksLikeMenuLink('/nieuws/nieuwe-kaart', 'Nieuwe kaart'), false);
+  assert.equal(anchorLooksLikeMenuLink('/evenementen/wijnproeverij', 'Wijnproeverij'), false);
+});
+
+test('findSameHostSubPageLinks: only direct same-host child pages with a short label', () => {
+  const html = `<a href="/gerechten/basisgerechten">Basisgerechten</a>
+    <a href="/gerechten/combi-maaltijden">Combi Maaltijden</a>
+    <a href="/gerechten/soepen">Soepen</a>
+    <a href="/gerechten/soepen">Soepen</a>
+    <a href="/gerechten/te-diep/extra">Te diep</a>
+    <a href="/contact">Contact</a>
+    <a href="https://elders.example/gerechten/x">Andere host</a>
+    <a href="/gerechten">Zelfde pagina</a>
+    <a href="/gerechten/lang-label">Dit is een veel te lang label voor een categorie</a>`;
+  const links = findSameHostSubPageLinks(html, 'https://fictief.example/gerechten');
+  assert.deepEqual(links.map((link) => link.url), [
+    'https://fictief.example/gerechten/basisgerechten',
+    'https://fictief.example/gerechten/combi-maaltijden',
+    'https://fictief.example/gerechten/soepen',
+  ]);
+  assert.equal(links[0].matchedOn, 'Basisgerechten');
+});
+
+test('findSameHostSubPageLinks: never more than MAX_CANDIDATES and never another host', () => {
+  const links = [];
+  for (let i = 0; i < MAX_CANDIDATES + 5; i += 1) links.push(`<a href="/hub/kind-${i}">Kind ${i}</a>`);
+  assert.equal(findSameHostSubPageLinks(links.join(''), 'https://fictief.example/hub').length, MAX_CANDIDATES);
+  assert.deepEqual(findSameHostSubPageLinks('<a href="https://elders.example/hub/x">X</a>', 'https://fictief.example/hub'), []);
+});
+

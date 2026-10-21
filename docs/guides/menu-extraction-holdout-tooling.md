@@ -18,9 +18,10 @@ de toestand per bron in het manifest zelf:
 ```
 
 Toegestane toestanden: `unused`, `evaluated_once`, `used_for_tuning`. Een bron
-met `used_for_tuning` is geen holdout meer en wordt door de tooling geweigerd;
-die hoort naar de representatieve set en vraagt een nieuwe, vooraf gepinde
-holdout.
+met `used_for_tuning` is geen holdout meer en wordt door de evaluatietooling
+geweigerd; die hoort naar de representatieve set en vraagt een nieuwe, vooraf
+gepinde holdout. Holdout-2 staat sinds 2026-10-21 op `used_for_tuning` (zie
+[statusovergang](#statusovergang-na-de-enige-evaluatie-review-6316295818)).
 
 ## Capture-first, create-only
 
@@ -83,12 +84,67 @@ ondersteunend bewijs, en een reden voor ontbrekende onderdelen.
 - Een bron zonder items krijgt het type `no_menu`; dat is een eerlijke
   uitkomst, geen geslaagde menukaart.
 
+## Statusovergang na de enige evaluatie (review 6316295818)
+
+De staten worden niet met de hand gezet. `ops/scripts/transition-menu-extraction-holdout.js`
+doet precies één overgang per aanroep en controleert eerst het bewijs:
+
+```powershell
+# 1) unused -> evaluated_once (na de ene, gecommitte evaluatie)
+node ops/scripts/transition-menu-extraction-holdout.js `
+  --manifest ops/benchmark/holdout-2-sources.json --step evaluated_once
+
+# 2) evaluated_once -> used_for_tuning (representatief; alleen met besluit)
+node ops/scripts/transition-menu-extraction-holdout.js `
+  --manifest ops/benchmark/holdout-2-sources.json --step used_for_tuning `
+  --decision "GitHub #59 review 6316295818: ..."
+```
+
+- Stap 1 eist dat het manifest nog `unused` is, dat de capture- én
+  evaluatiebytes-hash bij dit manifest horen en dat elk resultaat tegen de
+  gepinde bronhash is gemeten. Het schrijft per bron `evaluationState`,
+  `evaluationCount: 1`, `firstEvaluatedAt` en `firstEvaluation` (pad, SHA-256,
+  manifesthash, `selectionDigest` en bronhash).
+- Stap 2 eist `evaluated_once` en een expliciete `--decision`; het controleert
+  dat het evaluatiebestand sindsdien niet is gewijzigd en dat de
+  `selectionDigest` (`sha256(JSON.stringify([[id, restaurantId, url], …]))`)
+  gelijk is gebleven. Daarna staat per bron `used_for_tuning`,
+  `usedForTuning: true` en `tuningDecision`, plus één top-level
+  `representative`-blok.
+- Een overgeslagen stap, een herhaalde stap, een ontbrekend besluit of een
+  gewijzigd evaluatiebestand wordt geweigerd. `validateHoldoutManifest` kent
+  daarom de modus `representative`; de modi `capture` en `evaluation` weigeren
+  een dergelijk manifest.
+- Hashes worden als repositorytekst (LF) berekend: deze checkout gebruikt
+  `core.autocrlf=true`, terwijl de gecommitte blobs en de gepinde hashes LF
+  zijn.
+
+## Representatieve nameting
+
+```powershell
+node ops/scripts/measure-menu-extraction-representative.js
+```
+
+- Weigert zonder een geldig `representative`-manifest en leest alleen de
+  gepinde entry-URL's via `safeOutboundFetch` + dezelfde analyseketen.
+- Gebruikt exact dezelfde meetcode als de eenmalige probe
+  (`ops/benchmark/holdoutEvaluation.js`) en schrijft per bron voor/na: status,
+  items, secties, menucontexten, locator-/bewijsdekking, bronversiegelijkheid,
+  blokkadereden en beperkingen.
+- Schrijft `ops/benchmark/holdout-2-representative-measurement.json`
+  (regenereerbaar). Het is **geen** holdout en geen acceptatie: verzonnen
+  items/prijzen blijven zonder gecontroleerde referentie niet meetbaar en de
+  drempels blijven ongewijzigd.
+
 ## Harde holdoutregel voor ontwikkelaars
 
-De 19 URL's in `holdout-2-sources.json` worden niet door de ontwikkelaar
-opgehaald, geïnspecteerd of gebruikt om op te tunen. Alleen de Delivery Lead
-voert de capture en de ene evaluatie uit. Regressies voor deze tooling gebruiken
-uitsluitend fixtures en `.invalid`-hosts.
+De 19 URL's in `holdout-2-sources.json` zijn na de enige eerste evaluatie door
+de Delivery Lead op 2026-10-21 als `used_for_tuning` vastgelegd. Vanaf dat
+moment zijn ze representatief, geen holdout: de ontwikkelaar mag ze voor de
+gevraagde nameting lezen, maar niet als ongeziene set presenteren. Een nieuwe
+holdout vraagt een aparte, vooraf gepinde selectie. Regressies voor deze tooling
+gebruiken uitsluitend fixtures en `.invalid`-hosts.
+
 
 ## Regressies
 

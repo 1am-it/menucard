@@ -194,7 +194,24 @@ function closingTagPattern(tag) {
 }
 
 function newElement(tag, attrs) {
-  return { tag, attrs, children: [], parent: null, index: 0, sameTagIndex: 1, tagCounts: Object.create(null) }
+  return { tag, attrs, children: [], parent: null, index: 0, sameTagIndex: 1, tagCounts: Object.create(null), hidden: false }
+}
+
+/**
+ * CSS-based invisibility only (`hidden`, `display:none`, `visibility:hidden`,
+ * `opacity:0`, a 0/1px clipped box). Such a subtree is never shown to a
+ * visitor. It is not skipped by default — a tab panel may use it for real
+ * menu content — but it is never trusted for injected third-party text
+ * either (see SPAM_PATTERN below). `aria-hidden` stays a marker: assistive
+ * technology hiding is a different signal and already handled by isMarker.
+ */
+const HIDDEN_STYLE_PATTERN = /(?:^|;)\s*(?:display\s*:\s*none|visibility\s*:\s*hidden|opacity\s*:\s*0(?:\.0+)?(?:[;\s]|$)|height\s*:\s*(?:0|1)(?:px|rem|em)\b|clip\s*:\s*rect\(\s*0)/i
+
+function isHiddenElement(node) {
+  const attrs = node.attrs || {}
+  if (Object.prototype.hasOwnProperty.call(attrs, 'hidden')) return true
+  const style = attrs.style
+  return typeof style === 'string' && HIDDEN_STYLE_PATTERN.test(style)
 }
 
 /**
@@ -243,6 +260,7 @@ function parseHtml(html, budget = createBudget()) {
     const parent = stack[stack.length - 1]
     node.parent = parent
     node.index = parent.children.length
+    node.hidden = parent.hidden === true || isHiddenElement(node)
     parent.children.push(node)
     if (node.tag !== '#text') {
       parent.tagCounts[node.tag] = (parent.tagCounts[node.tag] || 0) + 1
@@ -407,6 +425,23 @@ function locatorOf(node, budget) {
   return joined.length > MAX_TEXT ? `…${joined.slice(joined.length - (MAX_TEXT - 1))}` : joined
 }
 
+// ─── Injected / non-menu content (#59 Delivery Lead review 6316295818) ─────
+//
+// A restaurant site can be hijacked: third-party gambling/pharmacy text is
+// injected, sometimes invisible, and carries its own "prices". The extractor
+// must never turn that into accepted dishes. The pattern below is a generic
+// vocabulary, never a per-domain allow/deny list. One strong operator name is
+// already a signal; two distinct signals are enough to refuse the content.
+const SPAM_PATTERN = /\b(?:unibet|bet365|1xbet|20bet|bwin|betway|casino|casinos|sportsvæddemål|sportwetten|pengespil|spilleautomater|spiloplevelser|apuestas|bookmakers?|betting|viagra|cialis|payday(?:\s+loans?)?|forex)\b/gi
+
+function spamSignals(text) {
+  const found = new Set()
+  for (const match of String(text || '').matchAll(SPAM_PATTERN)) found.add(match[0].toLowerCase())
+  return found
+}
+
+const INJECTION_BLOCK_MIN_CHARS = 80
+
 const EDGE_PUNCTUATION = new Set([' ', '.', '-', '–', '—', '|', ':', '·', '…', '•', ','])
 
 /** Trims separators from both ends with plain loops (no backtracking regex). */
@@ -540,13 +575,58 @@ function parsePriceOnly(text) {
   return { amountMinorUnits, hasEuroSign: Boolean(match[1] || match[4]) }
 }
 
+/** True when a descendant of `node` is a `br` (cached per node). */
+function containsBr(node, budget) {
+  if (node.hasBrDescendant !== undefined) return node.hasBrDescendant
+  let found = false
+  const stack = [...node.children]
+  while (stack.length > 0 && !found) {
+    const current = stack.pop()
+    if (budget) budget.spend(1)
+    if (current.tag === 'br') {
+      found = true
+      break
+    }
+    for (const child of current.children || []) stack.push(child)
+  }
+  node.hasBrDescendant = found
+  return found
+}
+
 /**
- * The lines of a `p`/`div` split at `br`, when at least two lines end in
- * their own price-only inline element; otherwise `null`. A line holding a
- * block element is never a dish line (the structure is not a plain list).
- * Every inspected child is charged to `budget`.
+ * The lines of one inline element, split at a `br` at any depth. A CMS often
+ * wraps a whole dish line list in a `<span>` (`<span><br>NAME 25<br>
+ * description</span>`, the live Chocolat dinnerkaart), so a line is not only
+ * defined by a `br` that is a direct child. A block-level child means the
+ * element is not a line list: `null` (fail closed).
  */
-function lineBreakLines(node, budget, markerCounter) {
+function inlineLines(node, budget) {
+  const lines = [[]]
+  for (const child of node.children) {
+    budget.spend(1)
+    if (child.tag === 'br') {
+      lines.push([])
+      continue
+    }
+    if (child.tag === '#text') {
+      lines[lines.length - 1].push(child)
+      continue
+    }
+    if (BLOCK_TAGS.has(child.tag)) return null
+    if (containsBr(child, budget)) {
+      const inner = inlineLines(child, budget)
+      if (!inner) return null
+      if (inner[0].length > 0) lines[lines.length - 1].push(...inner[0])
+      for (let i = 1; i < inner.length; i += 1) lines.push(inner[i])
+      continue
+    }
+    lines[lines.length - 1].push(child)
+  }
+  return lines
+}
+
+/** The `p`/`div` as line parts, flattening inline elements that hold a `br`. */
+function splitLines(node, budget) {
   if (node.tag !== 'p' && node.tag !== 'div') return null
   const lines = [[]]
   for (const child of node.children) {
@@ -555,9 +635,33 @@ function lineBreakLines(node, budget, markerCounter) {
       lines.push([])
       continue
     }
-    if (child.tag !== '#text' && BLOCK_TAGS.has(child.tag)) return null
+    if (child.tag === '#text') {
+      lines[lines.length - 1].push(child)
+      continue
+    }
+    if (BLOCK_TAGS.has(child.tag)) return null
+    if (containsBr(child, budget)) {
+      const inner = inlineLines(child, budget)
+      if (!inner) return null
+      if (inner[0].length > 0) lines[lines.length - 1].push(...inner[0])
+      for (let i = 1; i < inner.length; i += 1) lines.push(inner[i])
+      continue
+    }
     lines[lines.length - 1].push(child)
   }
+  return lines
+}
+
+/**
+ * The lines of a `p`/`div` split at `br`, when at least two lines end in
+ * their own price-only inline element; otherwise `null`. A line holding a
+ * block element is never a dish line (the structure is not a plain list).
+ * Every inspected child is charged to `budget`.
+ */
+function lineBreakLines(node, budget, markerCounter) {
+  if (node.tag !== 'p' && node.tag !== 'div') return null
+  const lines = splitLines(node, budget)
+  if (!lines) return null
   const result = []
   for (const parts of lines) {
     const meaningful = parts.filter((c) => (c.tag === '#text' ? c.text.trim() !== '' : !isMarker(c) && textOf(c, { markerCounter, budget }) !== ''))
@@ -606,43 +710,115 @@ function partText(part, markerCounter, budget) {
   return part.tag === '#text' ? part.text : textOf(part, { markerCounter, budget })
 }
 
+// A price at the end of a title line (`<strong>Soep, €7,50</strong>` or
+// `NAME 25`), optionally followed by a compact diet/allergen notation such as
+// "V" or "(V)". The notation is never interpreted; it is only not part of the
+// name. Whole euros are allowed because the line structure gives the meaning.
+const TITLE_PRICE_PATTERN = /\s*((?:€\s*)?\d{1,3}(?:[.,]\d{1,2})?)\s*(?:\(\s*(?:V|VG|VE|GF|G|N|S)\s*\)|\b(?:V|VG|VE|GF|N)\b)?\s*$/i
+
 /**
- * The dish blocks of a `p`/`div`: lines split at `br`; a line that starts
- * with a bold title anchor starts a block, the following lines belong to it.
- * `null` when the element holds a block-level child, when text comes before
- * the first title anchor, or when it has no title anchor at all — the shape
- * is then not a dish-block list (fail closed). Results are cached per node.
+ * `name` + trailing price of one title line, or null. Never when the name
+ * itself holds another price (that is a variant/range, not one dish).
+ */
+function splitTitlePrice(text) {
+  const value = String(text || '').trim()
+  const match = TITLE_PRICE_PATTERN.exec(value)
+  if (!match) return null
+  const name = cleanName(value.slice(0, match.index))
+  if (!isPlausibleItemName(name) || name.length > 80) return null
+  // A second price before this one is never collapsed into one dish price.
+  if (findPrices(name).length > 0) return null
+  const price = parsePriceOnly(match[1])
+  if (!price) return null
+  return { name, price, priceText: match[1].trim() }
+}
+
+/**
+ * A `NAME 25` line without bold markup is only a dish name when it looks
+ * like a printed menu line: short, no sentence punctuation, and either
+ * upper-case or consistently capitalised. This keeps ordinary prose that
+ * happens to end in a number out of the menu (fail closed).
+ */
+function looksLikePlainDishLine(text) {
+  const value = String(text || '').trim()
+  if (!value || value.length > 80) return false
+  if (/[.!?;:]$/.test(value)) return false
+  const words = value.split(/\s+/).filter(Boolean)
+  if (words.length === 0 || words.length > 10) return false
+  if ((value.match(/\p{L}/gu) || []).length < 2) return false
+  if ((value.match(/\p{Ll}/gu) || []).length === 0) return true
+  const capitalised = words.filter((word) => /^\p{Lu}/u.test(word)).length
+  return capitalised >= Math.ceil(words.length * 0.6)
+}
+
+/**
+ * The dish blocks of a `p`/`div`: lines split at `br` (also inside an inline
+ * wrapper). A block starts with a bold title anchor — including the common
+ * `NAME, €7,50` anchor — or, when the CMS prints no bold markup, with a
+ * clearly menu-shaped `NAME 25` line that is directly followed by a
+ * description line. Any other text before a block start refuses the whole
+ * element (fail closed). Results are cached per node.
  */
 function formattedBlocks(node, budget, markerCounter) {
   if (node.formattedBlocks !== undefined) return node.formattedBlocks
   node.formattedBlocks = null
   if (node.tag !== 'p' && node.tag !== 'div') return null
-  const lines = [[]]
-  for (const child of node.children) {
-    budget.spend(1)
-    if (child.tag === 'br') {
-      lines.push([])
+  const lines = splitLines(node, budget)
+  if (!lines) return null
+  const lineInfo = []
+  for (const parts of lines) {
+    const meaningful = parts.filter((c) => (c.tag === '#text' ? c.text.trim() !== '' : !isMarker(c) && textOf(c, { markerCounter, budget }) !== ''))
+    if (meaningful.length === 0) {
+      lineInfo.push(null)
       continue
     }
-    if (child.tag !== '#text' && BLOCK_TAGS.has(child.tag)) return null
-    lines[lines.length - 1].push(child)
+    const first = meaningful[0]
+    const firstText = partText(first, markerCounter, budget).replace(/\s+/g, ' ').trim()
+    const anchorText = first.tag !== '#text' && TITLE_ANCHOR_TAGS.has(first.tag) ? cleanName(firstText) : ''
+    let title = ''
+    let titlePrice = null
+    let linePrice = null
+    if (anchorText) {
+      const priced = splitTitlePrice(anchorText)
+      if (priced) {
+        title = priced.name
+        titlePrice = priced
+      } else if (isPlausibleItemName(anchorText) && anchorText.length <= 80 && findPrices(anchorText).length === 0 && !END_PRICE_PATTERN.test(anchorText)) {
+        title = anchorText
+      }
+    } else {
+      const text = meaningful.map((c) => partText(c, markerCounter, budget)).join(' ').replace(/\s+/g, ' ').trim()
+      const priced = splitTitlePrice(text)
+      if (priced && looksLikePlainDishLine(priced.name)) linePrice = priced
+    }
+    const rest = (title ? meaningful.slice(1) : meaningful).map((c) => partText(c, markerCounter, budget)).join(' ').replace(/\s+/g, ' ').trim()
+    lineInfo.push({ title, titlePrice, linePrice, rest })
   }
   const blocks = []
   let current = null
-  for (const parts of lines) {
-    const meaningful = parts.filter((c) => (c.tag === '#text' ? c.text.trim() !== '' : !isMarker(c) && textOf(c, { markerCounter, budget }) !== ''))
-    if (meaningful.length === 0) continue
-    const first = meaningful[0]
-    const title = first.tag !== '#text' && TITLE_ANCHOR_TAGS.has(first.tag) ? cleanName(textOf(first, { markerCounter, budget })) : ''
-    const isAnchor = title !== '' && isPlausibleItemName(title) && title.length <= 80 && findPrices(title).length === 0 && !END_PRICE_PATTERN.test(title)
-    const rest = (isAnchor ? meaningful.slice(1) : meaningful).map((c) => partText(c, markerCounter, budget)).join(' ').replace(/\s+/g, ' ').trim()
-    if (isAnchor) {
-      current = { title, lines: rest ? [rest] : [] }
+  for (let index = 0; index < lineInfo.length; index += 1) {
+    const info = lineInfo[index]
+    if (!info) continue
+    if (info.title) {
+      current = { title: info.title, lines: info.rest ? [info.rest] : [] }
+      if (info.titlePrice) current.titlePrice = info.titlePrice
       blocks.push(current)
-    } else {
-      if (!current) return null
-      current.lines.push(rest)
+      continue
     }
+    if (info.linePrice) {
+      // A marked-up title that happens to end in a price (`<b>Soep 7,50</b>`)
+      // was already handled above; this is the unmarked line-list shape. It
+      // needs a following description line, never a run of bare priced names.
+      const next = lineInfo[index + 1]
+      if (next && next.rest && !next.title && !next.linePrice) {
+        current = { title: info.linePrice.name, lines: [], titlePrice: info.linePrice, plain: true }
+        blocks.push(current)
+        continue
+      }
+    }
+    if (!info.rest) continue
+    if (!current) return null
+    current.lines.push(info.rest)
   }
   if (blocks.length === 0) return null
   node.formattedBlocks = blocks
@@ -678,6 +854,20 @@ function blockEndPrice(block, budget) {
       price,
       priceText: price ? match[1].trim() : '',
       before: price ? rawBody.slice(0, match.index).trim() : rawBody,
+    }
+  }
+  // The title line itself carries the price (`NAME, €7,50` / `NAME 25`). It
+  // is the dish price only when the description below holds no amount.
+  if (block.titlePrice) {
+    const bodyHasPrice = findPrices(rawBody).length > 0
+    return {
+      body: rawBody,
+      rawBody,
+      supplementText,
+      price: bodyHasPrice ? null : block.titlePrice.price,
+      priceText: bodyHasPrice ? '' : block.titlePrice.priceText,
+      before: rawBody,
+      priceFromTitle: !bodyHasPrice,
     }
   }
   // A dish price can sit on its own line followed only by a bulleted legend
@@ -717,13 +907,24 @@ function formattedBlockRun(node, budget, markerCounter) {
   // heading, any other element or text between them ends the run, so blocks
   // under a next heading (or elsewhere on the page) never count.
   const fits = (sibling) => (sibling.tag === 'p' || sibling.tag === 'div') && !isHeading(sibling) && formattedBlocks(sibling, budget, markerCounter) !== null
+  // A CMS spacer paragraph (`<p>&nbsp;</p>`, an empty `<p>`) is not a dish
+  // and must not split one printed menu into two runs (the live Chocolat
+  // dinnerkaart separates every dish with one).
+  const spacer = (sibling) => {
+    if (sibling.tag !== 'p' && sibling.tag !== 'div') return false
+    if (isHeading(sibling)) return false
+    return !sibling.children.some((child) => child.tag !== '#text' || child.text.trim() !== '')
+  }
   const siblings = parent.children
   let start = node.index
-  while (start > 0 && (budget.spend(1), fits(siblings[start - 1]))) start -= 1
+  while (start > 0 && (budget.spend(1), fits(siblings[start - 1]) || spacer(siblings[start - 1]))) start -= 1
   if (!parent.formattedRunPriced) parent.formattedRunPriced = new Map()
   if (!parent.formattedRunPriced.has(start)) {
     let total = 0
-    for (let i = start; i < siblings.length && (budget.spend(1), fits(siblings[i])); i += 1) total += priced(formattedBlocks(siblings[i], budget, markerCounter))
+    for (let i = start; i < siblings.length && (budget.spend(1), fits(siblings[i]) || spacer(siblings[i])); i += 1) {
+      if (!fits(siblings[i])) continue
+      total += priced(formattedBlocks(siblings[i], budget, markerCounter))
+    }
     parent.formattedRunPriced.set(start, total)
   }
   return parent.formattedRunPriced.get(start) >= 2 ? blocks : null
@@ -1080,7 +1281,7 @@ function readItem(node, pattern, markerCounter, budget) {
 // ─── The extraction ────────────────────────────────────────────────────────
 
 function emptyStats() {
-  return { candidates: 0, counted: 0, rejected: 0, duplicatesRemoved: 0, ignoredMarkers: 0, depthLimited: false, workUnits: 0 }
+  return { candidates: 0, counted: 0, rejected: 0, duplicatesRemoved: 0, ignoredMarkers: 0, depthLimited: false, workUnits: 0, injectedBlocksSkipped: 0 }
 }
 
 function unparsed(reason, rejected, stats) {
@@ -1147,6 +1348,15 @@ function extractWithinBudget(html, budget, stats) {
   function reject(text, reason, node) {
     stats.rejected += 1
     if (rejected.length < MAX_REJECTED) rejected.push({ text: clip(text, MAX_REJECTED_TEXT) || '(leeg)', reason, locator: locatorOf(node, budget) || '(root)' })
+  }
+
+  /** The spam signals of a hidden block, when it is long enough to be an
+   * injected third-party section rather than a short hidden label. */
+  function injectedContentSignals(node, markerCounter, budget) {
+    const text = textOf(node, { markerCounter, budget })
+    if (text.length < INJECTION_BLOCK_MIN_CHARS) return null
+    const signals = spamSignals(text)
+    return signals.size >= 2 ? [...signals] : null
   }
 
   function sectionFor(path) {
@@ -1267,7 +1477,7 @@ function extractWithinBudget(html, budget, stats) {
   // plus the strict end-price rule (exactly one price, at the very end).
   function handleBlock(block, node, headingPath) {
     stats.candidates += 1
-    const { body, price, priceText, before, supplementText } = blockEndPrice(block, budget)
+    const { body, price, priceText, before, supplementText, priceFromTitle } = blockEndPrice(block, budget)
     const fullText = `${block.title} ${body}`.trim()
     if (fullText.length > MAX_ITEM_TEXT) {
       budget.spend(Math.ceil(fullText.length / 16))
@@ -1293,16 +1503,21 @@ function extractWithinBudget(html, budget, stats) {
     }
     if (TIME_WORD_BEFORE_PATTERN.test(before)) return reject(fullText, 'clock_time', node)
     // A second price, a price range or a price variant before the end price.
-    if (findPrices(before).length > 0 || PRICE_BEFORE_END_PATTERN.test(before)) return reject(fullText, 'ambiguous_structure', node)
+    if (findPrices(before).length > 0 || (!priceFromTitle && PRICE_BEFORE_END_PATTERN.test(before))) {
+      return reject(fullText, 'ambiguous_structure', node)
+    }
     if (!isPlausibleItemName(name)) return reject(fullText, 'missing_name', node)
     const description = cleanName(before)
+    // The quote must show the amount a reviewer has to check. A title-price
+    // block keeps its price outside `body`, so it is appended here.
+    const quoteText = price && priceText && !fullText.includes(priceText) ? `${fullText} ${priceText}` : fullText
     return addItem(section, node, 'formatted_block', {
       name: clip(displayName(name)),
       priceStatus: 'known',
       amountMinorUnits: price.amountMinorUnits,
       currency: price.hasEuroSign || /€/.test(priceText) ? 'EUR' : null,
       description: description && isPlausibleItemName(description) ? clip(description) : null,
-    }, supplementText ? { quote: fullText, supplementText } : { quote: fullText })
+    }, supplementText ? { quote: quoteText, supplementText } : { quote: quoteText })
   }
 
   function addItem(section, node, pattern, item, evidenceExtra = null) {
@@ -1340,6 +1555,17 @@ function extractWithinBudget(html, budget, stats) {
     }
     for (const child of node.children) {
       budget.spend(1)
+      // Hidden, third-party injected text (a hijacked restaurant site) is
+      // never read as menu content. Only a hidden block with at least two
+      // distinct spam/injection signals is skipped: a hidden tab panel with
+      // real dishes keeps its current, tested behaviour.
+      if (child.hidden && child.tag !== '#text') {
+        const injected = injectedContentSignals(child, markerCounter, budget)
+        if (injected) {
+          stats.injectedBlocksSkipped += 1
+          continue
+        }
+      }
       // Markers only matter inside item text (textOf); the walk never skips
       // an element for its class, so an item classed "vegan" is still read.
       if (child.tag === '#text') continue
@@ -1447,6 +1673,26 @@ function extractWithinBudget(html, budget, stats) {
   walk(root, 0, null)
   stats.ignoredMarkers = markerCounter.count
 
+  // No menu from non-menu content: when the sections/items this run accepted
+  // carry two or more distinct spam/injection signals, the page is not a
+  // menu. Nothing is accepted and the caller gets one explicit reason instead
+  // of 72 "dishes" from a hijacked block.
+  const acceptedSignals = new Set()
+  for (const section of sectionsByKey.values()) {
+    if (section.items.length === 0) continue
+    for (const label of section.path) for (const signal of spamSignals(label)) acceptedSignals.add(signal)
+    for (const item of section.items) {
+      const evidence = item.evidence && typeof item.evidence === 'object' ? item.evidence : {}
+      for (const signal of spamSignals(`${item.name || ''} ${item.description || ''} ${evidence.quote || ''}`)) acceptedSignals.add(signal)
+    }
+  }
+  if (acceptedSignals.size >= 2) {
+    stats.workUnits = budget.used
+    stats.counted = 0
+    stats.contentSuspicion = { reason: 'content_not_menu_suspected', signals: [...acceptedSignals].slice(0, 10) }
+    return unparsed('content_not_menu_suspected', rejected, stats)
+  }
+
   // Unpriced lines are only reported where the same section has priced
   // items — a navigation list never becomes rejected-line noise.
   const sections = []
@@ -1520,4 +1766,5 @@ module.exports = {
   isProseHeading,
   extractHtmlMenuStructure,
   createHtmlStructureAdapter,
+  spamSignals,
 }
