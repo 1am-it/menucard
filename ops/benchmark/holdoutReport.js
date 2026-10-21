@@ -43,6 +43,13 @@ function itemSupport(item) {
   return bounded(evidence.quote, 200) || bounded(evidence.pattern, 80) || bounded(evidence.contentHash, 200) || null;
 }
 
+function itemPriceStatus(item) {
+  if (item && typeof item.priceStatus === 'string' && item.priceStatus.trim()) return item.priceStatus.trim();
+  if (item && Number.isInteger(item.amountMinorUnits)) return 'known';
+  if (item && typeof item.price === 'string' && /^\d{1,3}([.,]\d{1,2})?$/.test(item.price.trim())) return 'known';
+  return 'unknown';
+}
+
 /** Items, sections, price status and evidence coverage for one result. */
 function summarizeMenus(menus) {
   const rows = itemList(menus);
@@ -55,9 +62,11 @@ function summarizeMenus(menus) {
   let locatorMissing = 0;
   let supportMissing = 0;
   for (const { item, menu } of rows) {
-    const status = bounded(item.priceStatus, 40) || (Number.isInteger(item.amountMinorUnits) ? 'known' : 'unknown');
+    const status = itemPriceStatus(item);
     priceStatus[status] = (priceStatus[status] || 0) + 1;
-    if (status === 'known' && !Number.isInteger(item.amountMinorUnits)) knownWithoutAmount += 1;
+    const hasAmount = Number.isInteger(item.amountMinorUnits)
+      || (typeof item.price === 'string' && /^\d{1,3}([.,]\d{1,2})?$/.test(item.price.trim()));
+    if (status === 'known' && !hasAmount) knownWithoutAmount += 1;
     const evidence = item.evidence && typeof item.evidence === 'object' ? item.evidence : null;
     const sourceId = bounded((evidence && evidence.sourceId) || (menu && menu.sourceId), 80);
     const locator = bounded(evidence && evidence.locator, 200);

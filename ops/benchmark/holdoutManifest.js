@@ -9,8 +9,8 @@
 //
 // This module never fetches, reads a provider, writes a database or publishes.
 // It only validates a manifest, derives the two create-only output paths and
-// normalises the sources into an evaluation plan. The scripts keep their own
-// explicit `safeOutboundFetch` call, so a non-pinned host can never be read.
+// normalises the sources into an evaluation plan. The capture and probe scripts
+// keep their own explicit network call, so a non-pinned host is never read.
 //
 // A source used for tuning is not a holdout any more: `used_for_tuning` is
 // refused here instead of being silently accepted.

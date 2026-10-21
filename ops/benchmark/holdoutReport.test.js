@@ -51,6 +51,15 @@ test('a missing-evidence count above the sample limit still lowers the percentag
   assert.equal(summary.evidence.missingLocator.length, 5, 'samples are bounded');
 });
 
+test('a menu-context price string counts as known, not as unknown', () => {
+  const summary = summarizeMenus([menu([
+    { name: 'Soep', price: '7.50', evidence: { locator: 'ul>li[1]', quote: 'Soep 7,50' } },
+    { name: 'Onbekend', price: null, priceStatus: 'on_request', evidence: { locator: 'ul>li[2]', quote: 'Onbekend' } },
+  ])]);
+  assert.deepEqual(summary.priceStatus, { known: 1, on_request: 1 });
+  assert.equal(summary.knownWithoutAmount, 0);
+});
+
 test('support can be a pattern, a content hash or a quote, never a confidence value', () => {
   assert.equal(itemSupport({ evidence: { locator: 'x', pattern: 'table_row' } }), 'table_row');
   assert.equal(itemSupport({ evidence: { locator: 'x', contentHash: 'abc' } }), 'abc');
