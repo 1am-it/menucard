@@ -38,6 +38,25 @@ Deze documenten zijn in commit `3e49f89` opgenomen en gepusht. Hun runtime
 resolveert vanuit de repositoryroot, nooit vanuit een lokaal Windows-pad of
 alleen deze chat.
 
+### Handmatige AI-importproef, fase 1 (aanvulling 2026-10-22)
+
+Het eigenaarsbesluit van 2026-10-22 (optie A) voegt een **begrensde, handmatige**
+proef toe: de app exporteert een prompt op basis van het vaste protocol, een
+mens plakt die in een AI naar keuze, en de AI-JSON wordt als onbetrouwbare
+invoer geïmporteerd, gecontroleerd, menselijk gecorrigeerd en pas daarna als
+concept opgeslagen. Uitgewerkt in
+[`menu-extraction-manual-ai-import.md`](./menu-extraction-manual-ai-import.md)
+(hergebruiksinventaris, gebruikersstroom, meetplan, bouwplan voor fase 2) met de
+visuele referentie [`docs/mockups/manual-ai-import-v1.html`](../../../docs/mockups/manual-ai-import-v1.html),
+status **ter goedkeuring**.
+
+Fase 1 bevat geen product-, route-, schema- of databasewijziging. De proef
+vervangt de toekomstige automatische URL-verwerking **niet** en activeert geen
+automatische bevestiging, publicatie, v2-schrijver, betaalde API of credentials.
+Het BE-21-API-voorstel blijft NEEDS_APPROVAL en is niet gekozen. Fase 2 start
+pas na goedkeuring van de mockup door de Product Owner.
+
+
 ## Scope
 1. **Contractmapping:** breng bestaande extractie-, receipt-, concept- en exportcontracten in kaart. Leg vast waar menuvarianten, geneste rubrieken, prijsvarianten, keuzes, supplementen, allergenen, bronbewijs en dekkingsinformatie verliesvrij passen. Het benchmarkcontract is niet automatisch het productcontract. Voor noodzakelijke schema-uitbreidingen eerst een beoordeeld versiegebonden ontwerp; niet stilzwijgend afplatten.
 2. **Instructie laden:** laad de vastgepinde instructie server-side en geef broninhoud, schema, toegestane tools en limieten mee. Registreer instructieversie/hash, bronversie en model-/adapterversie.
@@ -103,6 +122,12 @@ Bewijs wordt gelabeld als developerbewijs, onafhankelijke controle, fixturebewij
 ## Voortgang
 - [x] Ticketinhoud en grenzen voorbereid.
 - [x] Documenten opgeslagen in Git en commit vastgepind (`3e49f89`).
+- [x] Fase 1 van de handmatige AI-importproef ontworpen (2026-10-22): spec
+  `planning/specs/tickets/menu-extraction-manual-ai-import.md` (K1 hergebruik,
+  K2 stroom, K4 meetplan, K5 bouwplan), mockup
+  `docs/mockups/manual-ai-import-v1.html` en indexstatus **ter goedkeuring**.
+  Geen product-, route-, schema- of databasewijziging; fase 2 wacht op
+  goedkeuring van de mockup door de Product Owner.
 - [x] Technische readinessreview vastgelegd; resterende beslispunten zijn
   provider/model, kostenbudget, DPA/EU-retentie en aanvullende externe toegang.
   De read-only proeven op de twee expliciet toegestane openbare bronnen zijn

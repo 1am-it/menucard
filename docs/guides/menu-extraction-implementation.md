@@ -9,7 +9,8 @@ provideractivering en PR #56 blijven buiten scope.
 [Testplan](menu-extraction-acceptance.md) |
 [Acceptatiematrix](menu-extraction-acceptance-matrix.md) |
 [Botanist-referentie](menu-extraction-botanist-reference.md) |
-[V2-schemaontwerp (read-only geïmplementeerd)](../../planning/architecture/menu-extraction-product-schema-v2.md)
+[V2-schemaontwerp (read-only geïmplementeerd)](../../planning/architecture/menu-extraction-product-schema-v2.md) |
+[Handmatige AI-import, fase 1 (ter goedkeuring)](../../planning/specs/tickets/menu-extraction-manual-ai-import.md)
 
 ## V2 schema-/mappinglaag en read-only aansluiting (ronde 2026-10-19)
 

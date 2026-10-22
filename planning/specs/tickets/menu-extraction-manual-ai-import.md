@@ -1,0 +1,485 @@
+# Handmatige AI-import: ontwerp fase 1 (#59)
+
+GitHub: https://github.com/1am-it/menucard/issues/59 · PR #60 (draft)
+
+Status: **ontwerp ter goedkeuring**, 2026-10-22. Fase 1 van 2: alleen
+documentatie en één statische mockup. Geen product-, route-, schema- of
+databasewijziging. Fase 2 (bouw) start pas na goedkeuring van de mockup door de
+Product Owner.
+
+Basis: `5492d2cc36c5f195082e3154df4f6d31612c05cf`.
+
+## Eigenaarsbesluit en afbakening (2026-10-22, optie A)
+
+Een begrensde, **handmatige** AI-importproef:
+
+1. De app exporteert een prompt op basis van het vaste protocol.
+2. De eigenaar plakt die in een AI naar keuze.
+3. De AI-JSON wordt als **onbetrouwbare invoer** geïmporteerd, gecontroleerd,
+   door een mens gecorrigeerd en pas daarna als concept opgeslagen.
+
+Dit vervangt **niet** de toekomstige automatische verwerking van grote aantallen
+URL's. Niet toegestaan en hier niet ontworpen: automatische bevestiging,
+publicatie, activering van de v2-schrijver, een betaalde API, en wijzigingen aan
+accounts, abonnementen of credentials. Een geldige JSON of een gevonden quote is
+geen kwaliteitsacceptatie. Het BE-21-voorstel voor een API-proef (`5492d2c`)
+blijft NEEDS_APPROVAL en is **niet** gekozen.
+
+Fase 2 is pas aan de orde na expliciete goedkeuring van
+`docs/mockups/manual-ai-import-v1.html` door de Product Owner; deze spec is geen
+bouwopdracht.
+
+## Referenties
+
+| Onderdeel | Bron |
+| --- | --- |
+| Instructie en versie | [`MENU-EXTRACTION.md`](../../../MENU-EXTRACTION.md), concept v0.2 |
+| Protocol laden/hash | `src/lib/menuExtractionProtocol.js` |
+| Uitvoerschema/validator | `src/lib/menuExtractionSchema.js` |
+| Adapter en niet-opslaanbare velden | `src/lib/menuExtractionAdapter.js` |
+| Bronidentiteit en bon | `src/lib/urlIntakeReceiptHash.js`, `src/lib/menuOriginReceiptGuard.js` |
+| Menselijke controle en correctie | `app/internal/source-triage/batch/MenuReview.js`, `src/lib/menuStructureReview.js` |
+| v2-mapping zonder afvlakking (alleen-lezen) | `src/lib/menuProductMappingV2.js`, `src/lib/menuProductGuardsV2.js` |
+| Telregels | [`menu-extraction-reference-counting-rules.md`](../../../docs/guides/menu-extraction-reference-counting-rules.md) |
+| Vastgezette referenties | `ops/benchmark/reference-references/index.json` |
+| Mockup | [`manual-ai-import-v1.html`](../../../docs/mockups/manual-ai-import-v1.html) |
+| #59-hoofdspec | [`menu-extraction-ai-import.md`](./menu-extraction-ai-import.md) |
+
+
+## K1 Hergebruiksinventaris
+
+Per onderdeel van de gevraagde stroom: welk bestaand bestand, welke functie, wat
+er al is en wat **precies** ontbreekt. Niets in deze tabel is in fase 1
+gewijzigd.
+
+| Stap | Bestaand bestand | Functie / constante | Wat er is | Wat precies ontbreekt |
+| --- | --- | --- | --- | --- |
+| Startpunt | `app/internal/source-triage/batch/page.js`, `BatchAnalysisView.js` | `BatchAnalysisPage`, `BatchDetail`, `MenuControl`-aanroep | Interne batchpagina met per resultaat "Menukaart controleren" en "Concept opslaan" | Geen startpunt voor een prompt-export; de kaart toont alleen het al geparseerde resultaat |
+| Instructie | `MENU-EXTRACTION.md`, `src/lib/menuExtractionProtocol.js` | `loadMenuExtractionProtocol`, `canonicalProtocolText`, `protocolMetadata`, `DEFAULT_EXTRACTION_LIMITS` | Versiegebonden laden, LF-genormaliseerde SHA-256, metadata zonder tekst, concrete fout bij ontbreken | Geen prompt-samensteller; de tekst gaat volgens de modulecommentaar nooit naar een browser (T1) |
+| Uitvoerschema | `src/lib/menuExtractionSchema.js` | `EXTRACTION_OUTPUT_SCHEMA`, `EXTRACTION_OUTPUT_SCHEMA_VERSION`, `LIMITS`, `validateStructuredOutput`, `findForbiddenKey` | Exacte sleutels, limieten, quote-in-brontekst-controle, verbod op `confidence`/`reviewReady`/`approved`/`publicationReady` | Geen importenvelop, geen schemaversie ín de JSON (T3), geen mensgerichte foutlabels |
+| Niet-opslaanbaar | `src/lib/menuExtractionAdapter.js` | `unsupportedProductFields` | Meldt `priceVariants`, `isFrom`, `supplementOf`, `allergens`, `availability` | Alleen veldnamen, geen regels/items; UI kan geen regel blokkeren of labelen (T9) |
+| Bron en bon | `src/lib/urlIntakeReceiptHash.js`, `src/lib/menuOriginReceiptGuard.js`, `supabase/migrations/0013_be19_url_intakes.sql` | `computeAnalysisResultHash`, `loadOriginReceipt`, `originReceiptBlock`, `ORIGIN_RECEIPT_SELECT` | Canonieke URL, `fetched_at`, `candidate_summary`, `analysis_result_hash` (64 hex), autoritatieve bon | Bon verloopt na 10 minuten (T5); geen per-bron ophaaltijd (T6); geen bewaarde brontekst (T7) |
+| Broninventaris | `src/lib/restaurantSourceAnalysis.js`, `src/lib/menuExtractionResult.js` | `addSource`, `buildExtractionResult`, `sanitizeSource` | `id`, `url`, `kind`, `status`, `contentHash` (SHA-256 van de tekst), tellingen, beperking | `contentHash` is optioneel en `kind` is html/pdf/other; geen ophaaltijd, geen tekst, geen scanindicator (T6, T7) |
+| JSON naar receipt | `src/lib/menuExtractionMapping.js` | `mapStructuredOutputToMenuContexts` | Zet een gevalideerde uitvoer om naar de bestaande receiptvorm, `extractionMethod: 'ai_structured'`, `contextSlug: ai-N`, `structure: 'uncertain'` bij onzekerheid | Leest geen importcontext (wie, welke AI, welk bundel); geen bronhashcontrole |
+| Menselijke controle | `app/internal/source-triage/batch/MenuReview.js`, `src/lib/menuStructureReview.js` | `MenuControl`, `MenuConcept`, `LineEditor`, `BlockerBanner`, `uncertainSections`, `validateStructureReviews`, `structureEdits` | Per regel corrigeren/uitsluiten, per onzekere rubriek handhaven/corrigeren, gegroepeerde onzekerheid, blokkades vóór opslaan | Gebonden aan een opgeslagen receipt; geen route voor onopgeslagen import-JSON; geen label "bewijs niet automatisch controleerbaar" |
+| Concept | `src/lib/menuConcept.js`, `src/lib/menuConceptStore.js` | `buildMenuConcept`, `sanitizeEdits`, `mergeEdits`, `normalizePrice`, `displayPrice`, `createConceptVersion`, `computeMenuHash` | Versiegebonden, auditeerbare, idempotente opslag; blokkades; geen automatische stap | `normalizePrice` weigert 0 en > € 500,00 terwijl het schema elke niet-negatieve integer toestaat (T8); geen importherkomst in de conceptversie |
+| Poorten | `src/lib/menuConceptReviewHandlers.js`, `src/lib/menuConceptExport.js`, `src/lib/menuProductIntegrationV2.js` | goedkeurings- en exportpoorten, `readReceiptProjection`, `readProductRecord` | Interne goedkeuring, export en publicatie blijven aparte, fail-closed poorten | Geen wijziging nodig en geen wijziging toegestaan; de handmatige import mag hier niets aan verbreden |
+
+### Tegenstrijdigheden met bestaande documenten en code
+
+Deze punten zijn echte ontwerpvragen. Fase 2 mag ze niet stilzwijgend oplossen.
+
+- **T1 — Instructietekst en browser.** `src/lib/menuExtractionProtocol.js`
+  (regels 3-7) zegt dat de tekst nooit naar een browser of log gaat. Een
+  handmatige export doet dat per definitie wél. Nodig: een expliciete, begrensde
+  uitzondering (alleen intern, geen log, niet in browseropslag, alleen de gepinde
+  tekst) met een eigen ontwerpnotitie; anders is de export in strijd met de
+  module-afspraak.
+- **T2 — Twee versienummers.** `PROTOCOL_SCHEMA_VERSION` is
+  `menu-extraction-result/v1` (`menuExtractionProtocol.js`), terwijl
+  `EXTRACTION_OUTPUT_SCHEMA_VERSION` `menu-extraction-output/v1` is
+  (`menuExtractionSchema.js`). De opdracht spreekt van "schemaversie": de export
+  moet **beide** expliciet tonen en vastleggen, met dezelfde namen als de code.
+- **T3 — De JSON draagt geen eigen versie.** `allowedTopLevel` is exact
+  `menus`, `rejected`, `coverage`; een `version`- of `protocolHash`-veld in de
+  JSON is een schemavalidatiefout. Protocolhash en schemaversie kunnen dus
+  **niet** uit de geplakte JSON worden gecontroleerd.
+- **T4 — Geen modelclaim als versiebewijs.** Omdat T3 geldt, is de enige
+  betrouwbare bron van protocolhash en schemaversie het exportbundel in de app
+  zelf. De import hoort daarom bij een **bestaand exportbundel** (gekozen door de
+  mens), niet bij een versie die de AI of de plakker beweert.
+- **T5 — Bon van 10 minuten.** `RECEIPT_TTL_MS` in `src/lib/urlIntakes.js` is
+  10 minuten. Een mens die een prompt in een AI plakt en later terugkomt, haalt
+  dat niet. Nodig: óf een eigen, begrensde levensduur voor het exportbundel met
+  hercontrole van de bronhash, óf een expliciete herbevestiging/heranalyse. Een
+  verlopen bon mag nooit als geldige import gelden.
+- **T6 — Ophaaltijd per bron ontbreekt.** Alleen de bon heeft `fetched_at`
+  (`0013`, regel 57). `sourceInventory` heeft geen `fetchedAt`. De gevraagde
+  "ophaaltijd per bron" bestaat vandaag niet; de export moet óf de bon-tijd als
+  één tijd voor de hele set tonen (met die beperking erbij), óf per bron een
+  nieuwe meting doen. Niet doen alsof elke bron apart is opgehaald.
+- **T7 — Brontekst wordt niet bewaard.** `boundedEvidence` in
+  `src/lib/urlIntakes.js` bewaart expliciet "never raw source text"; het
+  data-minimalisatiebeleid (`docs/api/url-intake-schema.md`) is de reden. De
+  quote-controle in `validateStructuredOutput` heeft echter `sources[].text`
+  nodig. Zonder tekst is een quote niet automatisch controleerbaar — precies het
+  geval dat de opdracht voor scans en afbeeldingen noemt. Voor HTML/PDF met tekst
+  moet de tekst dus opnieuw veilig worden gelezen (met hashvergelijking) of er is
+  een expliciet opslagbesluit nodig; geen van beide bestaat nu.
+- **T8 — Prijsgrens verschilt.** Het schema staat elke niet-negatieve
+  `amountMinorUnits` toe; `normalizePrice` in `src/lib/menuConcept.js` accepteert
+  alleen `> 0` en `≤ 500,00`. Een schema-geldige prijs van `0` of `60000` is dus
+  niet op te slaan. De controle moet dat vóór de conceptstap als blokkade melden,
+  niet pas bij opslaan.
+- **T9 — Meldingsvorm van niet-opslaanbare velden.** `unsupportedProductFields`
+  geeft een lijst veldnamen. De opdracht vraagt per **regel** zichtbaar maken en
+  blokkeren. Nodig: een additieve, regelgebonden rapportage bovenop dezelfde
+  validator; de validator en zijn verboden velden blijven ongewijzigd.
+- **T10 — Arrangementen passen niet in v1.** Het uitvoerschema kent geen
+  categorie- of itemsoort "arrangement"/"keuzegroep"; v2 kent die soorten wél
+  (`menuProductSchemaV2`/`menuProductMappingV2`, met blokkades als
+  `unsupported_item_kind`). Een arrangement als losse gerechten wegschrijven is
+  dus verboden afvlakking; het moet als niet-opslaanbaar geblokkeerd worden tot
+  een versiegebonden ontwerp is goedgekeurd.
+- **T11 — "Herkomstwaarde `ai_structured`" is smaller dan hij klinkt.** De
+  waarde bestaat als `extraction_method` (`src/lib/fieldConfidence.js`, regel 58)
+  en als `menu.extractionMethod` in de receipt (`menuExtractionMapping.js`), maar
+  **niet** als `source_type` van een menukaartsnapshot (dat is `own_website`,
+  `restaurant_pdf_menu`, …). `docs/guides/menu-extraction-readiness.md` (regel 53)
+  noemt dat expliciet een gat. De handmatige herkomst mag daarom nooit
+  stilzwijgend als `source_type` worden geschreven.
+
+
+## K2 Gebruikersstroom
+
+De stroom is één rechte lijn met twee menselijke momenten (plakken en
+controleren) en één opslagmoment. Er is geen pad naar een concept zonder
+menselijke handeling. Alle bedragen, limieten en labels hieronder zijn ontwerp;
+fase 2 implementeert ze en niets daarbuiten.
+
+### 1. Startpunt
+
+- Bestaande batchpagina `/internal/source-triage/batch`, in het detail van één
+  resultaat, naast "Menukaart controleren".
+- Nieuwe knop **"AI-prompt exporteren"**, alleen zichtbaar voor een interne
+  gebruiker (`isInternalOnly`, dezelfde poort als bevestigen). Een collega die
+  alleen meeleest ziet de knop niet en kan ook niet importeren; dat volgt de
+  bestaande rolregel dat een niet-starter alleen-lezen is.
+- Zonder een geanalyseerd resultaat met minstens één leesbare bron is de knop
+  uitgeschakeld met de reden erbij (geen prompt over een lege of geblokkeerde
+  bron).
+
+### 2. Prompt exporteren
+
+De export bestaat uit vier blokken, in deze volgorde:
+
+1. **Vaste instructie**: de exacte tekst van `MENU-EXTRACTION.md`, geladen met
+   `loadMenuExtractionProtocol()` (LF-genormaliseerd). Er wordt niets
+   bijgeschreven, samengevat of vertaald.
+2. **Vaste afspraken**: protocolversie (`version`), protocolhash (`hash`),
+   schemaversie van de instructie (`schemaVersion`, `menu-extraction-result/v1`)
+   én de schemaversie van de uitvoer (`menu-extraction-output/v1`), plus de
+   limieten uit `LIMITS` en `DEFAULT_EXTRACTION_LIMITS` die voor de AI gelden
+   (o.a. maximaal 5 documenten, 30 pagina's, 1000 items, quotelengte 500).
+3. **Het exacte uitvoerschema** (`EXTRACTION_OUTPUT_SCHEMA`) als JSON, met de
+   mededeling dat uitsluitend dit schema is toegestaan: geen extra velden, geen
+   `confidence`, geen `reviewReady`, geen goedkeuring of dekkingclaim.
+4. **Per bron** een blok met: vaste `sourceId` (de bestaande inventaris-id, bv.
+   `source-1`), URL, ophaaltijd, `kind`, `status` en **SHA-256 van de
+   bronbytes** (`contentHash`), gevolgd door de brontekst als platte tekst.
+   - Is er tekst (HTML/PDF-tekstlaag): de tekst gaat mee, met de vindplaatsen die
+     de AI mag citeren.
+   - Is er geen tekst (scan, afbeelding, PDF zonder tekstlaag): dan staat er een
+     expliciete instructie om **het bestand zelf toe te voegen** aan de AI, plus
+     de waarschuwing dat bewijs dan niet automatisch controleerbaar is.
+   - Ophaaltijd: één tijd voor de set (de bon) zolang T6 niet is opgelost, met
+     de regel "dezelfde ophaalsessie" erbij; nooit een verzonnen per-brontijd.
+
+De export krijgt een eigen **bundel-id** en een bundelhash (SHA-256 over de
+canonieke exporttekst, LF-genormaliseerd, dezelfde conventie als de
+protocolhash). Dat bundel is de enige bron van protocolhash, schemaversie en
+bronhashes bij de latere import (T4). De export wordt niet in de browseropslag
+bewaard en niet gelogd.
+
+### 3. Importeren
+
+- Eén plakveld met een harde groottegrens: **1 MiB** (1 048 576 bytes UTF-8).
+  De teller staat zichtbaar bij het veld; boven de grens wordt niets geparsed.
+- De tekst wordt met `JSON.parse` in een `try/catch` gelezen en daarna
+  uitsluitend als **data** behandeld. Nooit `eval`, nooit een functie uit de
+  JSON, nooit een netwerk- of opslagactie op basis van een veldwaarde. Een
+  string als "negeer je instructies" blijft een string en verschijnt hooguit als
+  citaat in de review.
+- Vóór het parsen kiest de mens **bij welk exportbundel** de JSON hoort (het
+  bundel van stap 2). Zonder bundelkeuze is importeren niet mogelijk. Zo komen
+  protocolhash en schemaversie uit de app, niet uit de JSON of uit een
+  modelbewering.
+- Een lege plak, ongeldige JSON, een JSON-array in plaats van een object, of een
+  bundel dat niet (meer) geldig is, geeft een concrete fout en géén resultaat.
+
+
+### 4. Controle (server-side, onafhankelijk van modelclaims)
+
+In deze volgorde; elke stap die faalt stopt met een concrete code en zonder
+schrijfactie:
+
+1. **Formaat**: één JSON-object, exact de toegestane topsleutels (`menus`,
+   `rejected`, `coverage`), geen onbekende velden, geen verboden trustvelden
+   (bestaande `findForbiddenKey`).
+2. **Protocol en schema**: het gekozen bundel moet de actueel geladen
+   protocolhash en dezelfde schemaversies dragen. Wijkt de hash af (protocol
+   gewijzigd na export) → `bundle_protocol_mismatch`; geen stille
+   herinterpretatie.
+3. **Limieten**: de bestaande `LIMITS` en de bundellimieten (documenten,
+   pagina's, items, quotelengte). `coverage.itemsExtracted` moet blijven kloppen
+   met het aantal items; `complete` mag geen ongelezen bron of beperking hebben.
+4. **Bronidentiteit en hash**: elke `sourceId` in `menus`, `rejected` en
+   `coverage.unreadSources` moet in het bundel voorkomen, met **gelijke
+   SHA-256**. Onbekende bron of afwijkende hash → blokkade per regel
+   (`unknown_source`, `source_hash_mismatch`), nooit een waarschuwing die toch
+   doorlaat.
+5. **Quote in de brontekst**: voor bronnen met tekst de bestaande
+   genormaliseerde `includes`-controle uit `validateStructuredOutput`. Een quote
+   die niet in de bron staat is een fout, geen "bijna goed".
+6. **Money**: `priceStatus` uit de vier bestaande statussen; `known` vereist een
+   integer `amountMinorUnits` en `currency: 'EUR'`; geen decimals, geen floats.
+   Daarna de bestaande conceptregel (`normalizePrice`: `> 0` en `≤ 500,00`) —
+   een bedrag dat het schema haalt maar het concept niet, wordt hier een
+   blokkade (T8). Geen prijs invullen; "onbekend" is niet nul.
+7. **Relaties**: `priceVariants`, `supplementOf`, `isFrom`, `allergens`,
+   `availability` en arrangementachtige structuren worden expliciet
+   geclassificeerd. Een variant wordt nooit tot één prijs teruggebracht, een
+   supplement nooit hoofdprijs, een arrangement nooit een gewoon gerecht (T10).
+8. **Dekking**: `coverage` wordt getoond zoals de AI hem aanleverde, maar geldt
+   nooit als bewijs. Nul items of `no_items` is geen geslaagde extractie; een
+   `partial` resultaat blijft zichtbaar partieel.
+
+Het resultaat is per regel één van vier toestanden: **geldig**, **fout**,
+**niet automatisch controleerbaar**, **niet opslaanbaar**.
+
+### 5. Bewijs bij scans en afbeeldingen
+
+- Zonder brontekst kan een quote niet automatisch worden gecontroleerd. Elke
+  regel die aan zo'n bron hangt krijgt het zichtbare label **"bewijs niet
+  automatisch controleerbaar"** (statusrol `--status-old`, icoon plus tekst) en
+  de vindplaats erbij.
+- De mens moet zo'n regel **per regel** bevestigen of corrigeren. Er is geen
+  "alles bevestigen" voor deze groep: een gedeeld label is geen gedeelde
+  zekerheid.
+- Het label verdwijnt pas als er aantoonbaar brontekst is (tekstlaag, of een
+  later goedgekeurde OCR-route). Het label is geen goedkeuring en geen
+  afkeuring; het is een eerlijke beperking.
+
+### 6. Menselijke controle en correctie vóór opslag
+
+- Na de controle opent het bestaande reviewpatroon: per rubriek de bronroute en
+  vindplaats, per regel naam, omschrijving, prijs, bewijs (bron-id, vindplaats,
+  quote) en de vier toestanden.
+- De mens kan per regel corrigeren (naam, omschrijving, prijs, rubriekpad),
+  uitsluiten of expliciet accepteren, en per onzekere rubriek handhaven of
+  corrigeren — dezelfde regels als `LineEditor`/`StructureReview`.
+- **Geen pad zonder menselijke handeling**: er is geen knop die een import
+  automatisch omzet in een concept, geen bulk-acceptatie en geen vooraf
+  aangevinkte bevestiging.
+- "Concept opslaan" blijft `aria-disabled` zolang er blokkades zijn en zegt
+  waarom ("Kan pas zonder blokkades"), net als in het bestaande conceptpaneel.
+  Opslaan maakt een interne conceptversie; er wordt niets gepubliceerd,
+  goedgekeurd of geëxporteerd.
+
+### 7. Varianten, supplementen en arrangementen
+
+- Wat het huidige concept niet kan opslaan, wordt **nooit stil afgevlakt**. Het
+  blijft met herkomst zichtbaar en wordt expliciet geblokkeerd of gemarkeerd:
+  - `priceVariants` (glas/fles, klein/groot, per stuk/portie): alle varianten
+    zichtbaar; nooit de laagste prijs kiezen.
+  - `supplementOf`: supplement blijft supplement; nooit als hoofdprijs.
+  - arrangementen en keuzegroepen: als niet-opslaanbaar geblokkeerd (T10), niet
+    als losse gerechten.
+  - allergenen: alleen expliciet uit de bron of legenda; ontbreken betekent
+    onbekend, niet allergeenvrij.
+- De blokkade noemt het veld, de regel en de reden, zodat dezelfde set na een
+  latere schema-uitbreiding opnieuw beoordeeld kan worden.
+
+
+### 8. Herkomst
+
+Vastgelegd bij de import:
+
+- **importmethode**: de vaste tekst `handmatige AI-import`;
+- **AI-naam**: door de mens opgegeven, met het label **"zelfgerapporteerd en
+  onbewezen"** — de app kan niet vaststellen welke AI of welk model is gebruikt;
+- **tijd**: het moment van importeren en het moment van opslaan;
+- **protocolhash** en **schemaversies** uit het exportbundel;
+- **bronhashes**: per bron de SHA-256 uit het bundel, plus de bundelhash;
+- **wie**: de interne gebruiker die exporteerde en importeerde.
+
+De bestaande receipt-velden dragen dit maar ten dele: `extractionMethod` is
+begrensd tot 40 tekens en bevat vandaag `ai_structured`. De handmatige
+specifieke velden (AI-naam, bundel-id, bundelhash) hebben **geen bestaand veld**.
+Fase 2 slaat ze daarom niet ergens "wel" op: óf een additief, versiegebonden veld
+is vooraf ontworpen en beoordeeld, óf de import meldt bij opslaan expliciet dat
+deze herkomst niet duurzaam wordt bewaard. Stilzwijgend weglaten is niet
+toegestaan. De importmethode mag nooit als `source_type` worden geschreven (T11).
+
+### 9. Fout-, lege en randtoestanden
+
+| Situatie | Zichtbaar |
+| --- | --- |
+| Geen exportbundel | Importveld uitgeschakeld met "Kies eerst een exportbundel" |
+| Lege plak | "Plak de JSON uit de AI"; geen parse, geen resultaat |
+| Ongeldige JSON | `import_json_invalid` met regelnummer; niets opgeslagen |
+| Groter dan 1 MiB | `import_too_large` met de gemeten grootte; niets geparsed |
+| Verboden trustveld | `forbidden_trust_key` met het veldpad |
+| Onbekende bron / hashverschil | `unknown_source` / `source_hash_mismatch` per regel |
+| Nul items / `no_items` | "Geen gerechten geëxtraheerd. Dit is geen geslaagde extractie." |
+| Partieel | Blijft zichtbaar partieel met de ongelezen bronnen en beperkingen |
+| Bundel of bon verlopen | `bundle_expired`; opnieuw exporteren of opnieuw analyseren |
+| AI-antwoord met alleen tekst | "Geen JSON gevonden"; geen interpretatie van proza |
+| Netwerk-/opslagfout bij opslaan | Bestaande foutbanner; de invoer blijft staan, niets half opgeslagen |
+
+- **Toetsenbord**: alle stappen zijn met Tab te bereiken in leesorde; het
+  plakveld, de bundelkeuze, de regelkeuzes en de opslaanknop hebben een
+  zichtbare focusring (`--border-focus`). De vaste statusiconen zijn decoratief
+  (`aria-hidden`), de tekst draagt de betekenis.
+- **Licht en donker**: beide thema's gebruiken uitsluitend Kleurtaal
+  v2-tokens; donker blijft de standaard, licht is een expliciete keuze. Status
+  is nooit alleen kleur: icoon plus tekst.
+- **320 en 390 px**: één kolom, geen horizontale scroll, knoppen minimaal 40 px
+  hoog, quotes en hashes breken af (`overflow-wrap: anywhere`).
+- **Schermlezer**: het controleresultaat is een `role="status"`, fouten een
+  `role="alert"`, en de vier toestanden staan als tekst in de regel, niet als
+  kleurcodering.
+
+
+## K3 Visuele referentie
+
+Eén compact, statisch bestand: [`docs/mockups/manual-ai-import-v1.html`](../../../docs/mockups/manual-ai-import-v1.html).
+
+- Fictieve gegevens (`Restaurant Voorbeeld`, `.example`-URL's), geen
+  restaurantfoto's, geen echte namen of prijzen.
+- Bestaande interne stijl: Kleurtaal v2-tokens uit `app/globals.css`, de
+  lay-out van de BE-25-batchanalyse (kruimelpad, titel plus "Alleen intern",
+  info-banner, kaarten, zijpaneel), status altijd icoon plus tekst.
+- Drie toestanden, onder elkaar zodat één scherm ze samen toont:
+  1. **Prompt exporteren** — vaste versies en hashes, bronnenlijst met id, URL,
+     ophaaltijd en SHA-256, instructie voor PDF/scan, bundel-id, kopieerknop.
+  2. **Importeren met controleresultaat** — plakveld met teller, en per regel
+     geldig / fout / niet automatisch controleerbaar / niet-opslaanbare variant,
+     plus een compacte lege en fouttoestand.
+  3. **Menselijke controle vóór opslaan** — regelbewijs, correctie, blokkades,
+     uitgeschakelde opslaanknop met reden.
+- Licht en donker in hetzelfde bestand via de bestaande segmented-controlvorm
+  (`Licht`/`Donker`, donker als standaard); `#licht` en `#donker` openen de
+  mockup direct in die stand.
+- Geen breed herontwerp: geen nieuwe navigatie, geen nieuwe paginahiërarchie.
+- Status in de index (`docs/mockups/README.md`): **ter goedkeuring**. De mockup
+  is geen buildautorisatie; de Product Owner keurt goed, daarna pas fase 2.
+
+
+## K4 Meetplan voor de proef
+
+De proef meet per **werkelijk geteste AI** en per bron, met dezelfde referenties
+en telregels als #59:
+
+- Referenties: `ops/benchmark/reference-references/index.json` (Zuyd, Andalous,
+  Pellens, Chocolat, Senang Makan) met de vastgezette bytes uit
+  `ops/benchmark/reference-captures.json`; Senang Makan blijft "blocked", niet
+  "leeg".
+- Telregels: `docs/guides/menu-extraction-reference-counting-rules.md`
+  (SHA-256 in de index). Die regels worden voor deze proef **niet** gewijzigd.
+- Alleen de al toegestane openbare bronnen in de geïsoleerde omgeving; geen
+  nieuwe bronnen, geen login, geen CAPTCHA-omzeiling.
+- De brontekst die de AI krijgt, moet de vastgezette bronversie zijn (hash gelijk
+  aan de capture). Is dat niet zo, dan is de meting niet vergelijkbaar en wordt
+  ze niet gerapporteerd.
+
+Te meten per AI en per bron, apart en nooit samengevoegd:
+
+| Maat | Definitie |
+| --- | --- |
+| Gemiste gerechten | referentie-item zonder match in het geïmporteerde resultaat |
+| Verzonnen gerechten | geïmporteerd item zonder match in de referentie |
+| Prijsfouten | gematchte gerechten met een verkeerde, ontbrekende of extra prijs(variant), inclusief supplement als hoofdprijs |
+| Variantrelaties | glas/fles, klein/groot, per stuk/portie: terecht als variant, niet als los gerecht en niet afgeplat |
+| Rubriekfouten | item in een ander pad dan de referentie (bron leidt, niet de correctie) |
+| Bewijsdekking | aandeel items met een quote die aantoonbaar in de vastgezette bron staat; plus het aantal regels met "niet automatisch controleerbaar" |
+| Correctiewerk | aantal menselijke correcties, uitsluitingen en rubriekbeslissingen vóór opslaan |
+| Tijd | minuten van export tot import, en van import tot opgeslagen concept |
+
+Rapportage:
+
+- per AI één regel met de acht maten, met het label **"handmatige proef, geen
+  schaalacceptatie"**;
+- expliciet welke bronversie (URL plus SHA-256) en welke protocolhash is
+  gebruikt;
+- niet-ondersteunde klassen (scans, afbeeldingen, arrangementen) worden als
+  beperking gerapporteerd, niet als fout weggelaten;
+- **geen** universele claim dat "alle websites" of "deze AI" menus correct leest;
+  de uitkomst geldt alleen voor de geteste bronversies;
+- bewijscategorie: developerbewijs/fixturebewijs is geen praktijkacceptatie; de
+  proef zelf is een handmatige proef, geen onafhankelijke review.
+
+
+## K5 Bouwplan voor fase 2
+
+Pas na goedkeuring van de mockup. Geen regel hiervan is in fase 1 uitgevoerd.
+
+### Bestanden (voorstel, nog niet aangemaakt)
+
+| Bestand | Rol |
+| --- | --- |
+| `src/lib/manualAiImportBundle.js` | Pure samensteller: protocolmetadata, schema, limieten en broninventaris → prompttekst plus bundelhash. Geen fetch, geen opslag. |
+| `src/lib/manualAiImportValidation.js` | Pure controle op onbetrouwbare JSON: groottegrens, `JSON.parse` in `try/catch`, `validateStructuredOutput`, bronhashvergelijking, Money-conversie, regelgebonden rapport voor niet-opslaanbaar en "niet controleerbaar". |
+| `src/lib/manualAiImportHandlers.js` | Server-side: bundel kiezen, bon opnieuw lezen, `mapStructuredOutputToMenuContexts`, bestaande conceptopslag; fail-closed vóór elke schrijfactie. |
+| `app/api/internal/v1/batch-analysis/[id]/manual-import/route.js` | Interne route, `isInternalOnly`; geen provider, geen netwerkoproep. |
+| `app/internal/source-triage/batch/ManualAiImport.js` | UI in de bestaande batchkaart; hergebruikt `MenuReview`-onderdelen. |
+| `app/internal/source-triage/batch/BatchAnalysisView.js` | Eén extra knop plus paneel; bestaande staten ongewijzigd. |
+
+### Regressies (minimaal)
+
+1. Injectie in de geplakte JSON: een string met instructies blijft data, wordt
+   niet uitgevoerd, veroorzaakt geen netwerk-, opslag- of toolaanroep.
+2. Hashverschil: protocolhash, bundelhash of bronhash wijkt af → blokkade.
+3. Te groot: boven 1 MiB wordt niets geparsed.
+4. Onbekende `sourceId`: blokkade per regel.
+5. Supplement als hoofdprijs: geblokkeerd, supplement blijft supplement.
+6. Variantverlies: glas/fles en klein/groot blijven beide zichtbaar; geen
+   laagste prijs.
+7. Opslaan zonder menselijke handeling: geen route, geen knop, geen API-pad.
+8. Verboden trustvelden (`confidence`, `reviewReady`, `approved`,
+   `publicationReady`) → `forbidden_trust_key`.
+9. Nul items / `no_items` → geen successtatus.
+10. Quote niet in de bron → fout; zonder brontekst → label "niet automatisch
+    controleerbaar" en per regel bevestigen.
+11. Idempotentie: dezelfde import twee keer → één conceptversie, tweede keer
+    `unchanged` of een versieconflict zoals de bestaande opslag.
+12. Rollen: niet-intern of niet-starter → 403/alleen-lezen; niets opgeslagen.
+13. Verlopen bundel of bon → `bundle_expired`, niets opgeslagen.
+14. PDF/scan zonder tekstlaag → expliciete beperking, geen verzonnen items.
+
+### Risico's
+
+- **Instructietekst naar de browser** (T1): nieuwe blootstelling; alleen intern,
+  geen log, geen browseropslag. Zonder deze afspraak niet bouwen.
+- **Mensen vertrouwen de AI**: daarom is er geen successtatus op een geldige
+  JSON, geen accepteer-alles en een verplichte menselijke stap.
+- **Injectie via geplakte JSON** (promptinjectie of een enorme string): data
+  blijft data, groottegrens en schema-eisen gelden.
+- **Bon van 10 minuten** (T5): een mens haalt dat niet; zonder eigen
+  bundellevensduur of herbevestiging is de stroom niet betrouwbaar.
+- **Geen duurzame herkomstopslag** (T11, stap 8): zonder additief ontwerp is de
+  AI-naam niet bewijsbaar en verdwijnt hij of wordt hij gemeld als beperking.
+- **Brontekst niet bewaard** (T7): herlezen kan de bron hebben gewijzigd; dan
+  blokkeert de hashvergelijking en moet de analyse opnieuw.
+- **Arrangementen en scans** (T7, T10): blijven beperking; geen schijnvolledige
+  kaart.
+- **Dubbel werk naast de toekomstige automatische route**: de handmatige proef
+  is expliciet geen vervanging en wordt niet de standaardroute.
+
+## K6 Voortgang
+
+Per K is één regel vastgelegd in `ops/benchmark/output/criteria-progress.json`
+onder ronde `6345294413` (K1 t/m K6). Dat bestand is volgens BE-21 gitignored;
+de vorige ronde blijft bewaard in `criteria-progress.round-6334231310.json`.
+
+## Grenzen van deze fase
+
+Niet gedaan en niet toegestaan in fase 1: productcode, routes, migraties,
+schemawijzigingen, v2-schrijver, betaalde API, providerconfiguratie, nieuwe
+bronnen, wijzigingen aan de #59-referenties, telregels of meetcode, #56-integratie,
+merge, rebase, force-push, release of publicatie. PR #60 blijft draft.
+
+## Openstaande beslissingen (voor de Lead, niet voor de developer)
+
+1. **Brontekst voor de prompt**: veilig herlezen met hashcontrole (geen opslag)
+   of een expliciet, beoordeeld opslagbesluit? Beïnvloedt T7 en de
+   quote-controle.
+2. **Levensduur en herbinding van het exportbundel** ten opzichte van de
+   tienminutenbon (T5): eigen bundellevensduur met hashhercontrole, of
+   verplichte heranalyse.
+3. **Duurzame herkomstopslag** voor AI-naam (zelfgerapporteerd), bundel-id en
+   tijd (T11): additief veld na ontwerp, of expliciet gemelde beperking.
+4. **Exportrecht van collega's**: alleen de starter, of iedere interne gebruiker
+   met dezelfde reviewrol? Voorstel hierboven: alleen de starter, collega's
+   alleen-lezen.
+
