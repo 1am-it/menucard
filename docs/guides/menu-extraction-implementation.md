@@ -871,6 +871,15 @@ waar de vorm niet bewijsbaar is:
    prijsvarianten (`Klein`/`Hoofd`, glas/fles) blijven een expliciete
    beperking met eigen tekst en vragen een schema-ontwerp.
 
-Regressies: `src/lib/menuExtractionCardShapeRepairs.test.js` (15 tests, per
+Regressies: `src/lib/menuExtractionCardShapeRepairs.test.js` (16 tests, per
 vorm minstens één fictieve fixture en de fail-closed tegenhanger).
+
+**Naambehoud bij een portie (zijbevinding van de bronproef).** De vorige ronde
+voegde een regel toe die een uitgeschreven portie aan het eind van een naam
+wegliet ("… 90 gram"). Die regel kapte ook een bronnaam af wanneer de portie
+achter een expliciet scheidingsteken stond (`Pata negra | 80 gram`), wat de
+telregels juist verbieden. `stripTrailingPortion` laat de portie nu staan zodra
+er een `|`, `/`, `-`, `–`, `—`, `:` of `·` vóór staat; zonder scheidingsteken
+blijft het een portiegrootte. Regressie: “a portion behind an explicit separator
+stays part of the source name”.
 

@@ -345,3 +345,16 @@ test('K4: course prices of a named arrangement are an arrangement, not dishes', 
     `expected an arrangement limitation, got: ${analysis.limitations.join(' | ')}`,
   )
 })
+
+// ─── Naambehoud: een portie achter een scheidingsteken ─────────────────────
+
+test('name: a portion behind an explicit separator stays part of the source name', () => {
+  const { displayName } = require('./htmlMenuStructure')
+  // The source prints one label with a separator; truncating it would be the
+  // "afgekapte naam" the counting rules forbid (Blossem probe, review 6334231310).
+  assert.equal(displayName('Fictief gerecht | 80 gram'), 'Fictief gerecht | 80 gram')
+  assert.equal(displayName('Fictief gerecht / 4 stuks | 90 gram'), 'Fictief gerecht / 4 stuks | 90 gram')
+  // A serving size appended directly to the name is still not the name.
+  assert.equal(displayName('Fictief gerecht 90 gram'), 'Fictief gerecht')
+  assert.equal(displayName('Fictief gerecht (90 gram)'), 'Fictief gerecht')
+})

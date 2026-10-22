@@ -117,18 +117,33 @@ vastgezette bytes met identieke SHA-256 (`reference-measurement.json`
   “een verborgen tweede weergave van dezelfde kaart is één keer geteld; 10
   gerecht(en) zijn niet dubbel opgenomen”. Verborgen inhoud zónder zichtbare
   tegenhanger blijft opgenomen en wordt als controlebehoeftig gemeld.
+- **Zijbevinding, gevonden door de goedgekeurde bronproef opnieuw te draaien:**
+  de portie-regel uit `1b22121` kapte een bronnaam af. Blossem noteert
+  `<li>Pata negra | 80 gram <strong>17.0</strong></li>`; de extractie maakte
+  daar "Pata negra" van (1 gemist, 1 verzonnen) terwijl de referentie
+  "Pata negra | 80 gram" telt en de vorige 43/43-meting van vóór `1b22121`
+  stamde. Generiek hersteld: een portie achter een expliciet scheidingsteken
+  (`|`, `/`, `-`, `:`, `·`) hoort bij de bronnaam en blijft staan; een portie
+  die direct aan de naam vast zit ("… 90 gram") blijft een portiegrootte.
+  Nieuwe meting: **Smelt 37/37 en Blossem 43/43**, regressie
+  `menuExtractionCardShapeRepairs.test.js` (“a portion behind an explicit
+  separator stays part of the source name”).
 - **Uijttewaal en de overige representatieve bronnen zijn niet opnieuw
-  gemeten**: de opdracht betrof de vijf vastgezette referenties. De vorige,
-  eerlijke stand (Uijttewaal 10 → 6 op een gewijzigde bronversie) blijft van
-  kracht en is niet mooier gemaakt.
+  gemeten**: de opdracht betrof de vijf vastgezette referenties en de
+  goedgekeurde Smelt/Blossem-proef. De vorige, eerlijke stand (Uijttewaal
+  10 → 6 op een gewijzigde bronversie) blijft van kracht en is niet mooier
+  gemaakt.
 
 ### Overig bewijs in deze ronde
 
-- `npm test`: **2321/2321** groen (inclusief de 15 nieuwe regressies K1–K4).
+- `npm test`: **2322/2322** groen (inclusief de 16 nieuwe regressies K1–K4 en
+  het naambehoud).
 - `npm run test:menu-structure`: **6/6** groen; `npm run build`: **exit 0**,
   41/41 pagina's; `node ops/scripts/verify-pdfjs-server-trace.js`: **OK**
   (166 server scripts, `pdf.mjs` + `pdf.worker.mjs` getraceerd, geen gebundelde
-  PDF.js-runtime).
+  PDF.js-runtime). De goedgekeurde read-only bronproef
+  (`probe-menu-extraction-sources.js --source=all`) geeft **Smelt 37/37** en
+  **Blossem 43/43** op dezelfde bytes (`bytesSha256Matches: true`).
 - De CSS-hidinglezer is lineair: de corpus-test met een 2 MB `<style>`-payload
   blijft binnen de werkbudgetgrens (`ops/benchmark/htmlMenuStructure.test.js`).
 - Status: **ontwikkelaarsbewijs**. Geen onafhankelijke review, geen provider,
@@ -459,7 +474,7 @@ ander besluit of eigenaar.
 | 9 | Browseracceptatie met klikpaden, rolgrenzen, leeg/fout/partieel, toetsenbord, licht/donker, 320/390 px | `npm run test:browser:menu-review`: **241/241 checks** op codehead `26839eb`, evidence met schone werkboom en SHA-256 `F5B2CD715FCC8B7CF2F382988C7F316D8D22CB6615AEFFC95EB4F2D05970C583`; 33 screenshots, 2 clickpathinventories. Bestaande batchchecks blijven groen. Nieuw: echte klikken lijst→exact detail→terug voor vier fictieve lineage-ids (geldige v1, v2, onbekende versie, exact `menus: []`), product-read-only met glas/fles/supplement/onbekende allergenen/provenance/dekking, afwezige save/approve/reject/export, 403/404/leeg/fout, keyboard/focus, licht/donker en 320/390/1024 px, 0 app-fase netwerkviolations; geforceerde approve-klik en script-POSTs worden geweigerd en als bewuste probe vastgelegd | B | **bewezen met beperking** | Alleen fixture: geen live/staging browserbewijs en geen echte authenticated sessie. Alleen `GET /api/internal/v1/menu-concepts` en `GET /api/internal/v1/menu-concepts/<id>` zijn fictief beantwoord; alle concept-POST's (`versions`, `decision`, `export`, lijst/detail) en onbekende API-routes zijn geweigerd. De UI-blokkade bewijst de server niet; `menuConceptReviewHandlers.test.js` blijft daarvoor leidend | Product Owner/ops voor previewtoegang; Delivery Lead voor live acceptatie |
 | 10 | Time-out, provideruitval, ongeldige uitvoer, kosten-/paginagrens, herimport, gelijktijdige taken, promptinjectie, verkeerde vestiging, onveilige redirects getest | `menuExtractionAdapter.test.js`, `safeOutboundFetch.test.js`, `restaurantSourceAnalysis.test.js`, `batchAnalysisHandlers.test.js`, `menuConcept.test.js`; offline fake provider en `.invalid`-fixtures; geen dubbele call/claim | T | **bewezen met beperking** | Alleen offline; een echte provideruitval, echte kostenmeting en echte gelijktijdige productietaken zijn niet gemeten | Product Owner voor provider/budget; developer voor een latere live meting |
 | 11 | Geen stil dataverlies tussen extractie, receipt, review, concept en export; niet-ondersteunde publicatievelden geblokkeerd/gemeld | `menuProductIntegrationV2.test.js`, `menuProductGuardsV2.test.js`, `menuConceptV2ReviewHandlers.test.js`, `menuConceptExportV2.test.js`, `sourceWorkqueueV2.test.js`, `menuProductV2Surface.test.js`; de bestaande review toont glas/fles, supplementen, bewijs en dekking via één gesaneerde view; save/approve/reject/export/confirm weigeren v2 vóór hun effect | T+B | **bewezen met beperking** | Alleen fictieve in-memory/browserfixtures; geen echte v2-rij in Supabase en geen live bronbevestiging. Een v2-writeflag/exportcontract blijft niet gebouwd | Developer voor live preview; Delivery Lead voor review |
-| 12 | Geen regressie in rollen, bronbevestiging, audit, publicatiegates, beveiliging of geheimenbeheer | **Nieuwste ronde:** volledige suite **2321/2321** groen op de checkpoint-head `8e58893` (inclusief 15 nieuwe regressies K1–K4), plus `npm run test:menu-structure` 6/6, `npm run build` exit 0 met 41/41 pagina's en de PDF.js-packagingcheck OK. Oudere ronde: 2306/2306 op `1b22121`, 2160/2160 op `6728897`; v1-gedrag en bestaande rechten blijven groen; netwerkguard blokkeert externe fetch, protocol-relative URL, onbekende API-write, XHR, WebSocket en CDP-subresources | T+B | **bewezen met beperking** | Geen productiecredentials, productieauth of echte database gebruikt; dat is bewust niet getest. De browserfixture is in deze ronde niet opnieuw gedraaid (geen UI-wijziging) | Product Owner/ops voor productieacceptatie |
+| 12 | Geen regressie in rollen, bronbevestiging, audit, publicatiegates, beveiliging of geheimenbeheer | **Nieuwste ronde:** volledige suite **2322/2322** groen (inclusief 16 nieuwe regressies K1–K4 en het naambehoud), plus `npm run test:menu-structure` 6/6, `npm run build` exit 0 met 41/41 pagina's, de PDF.js-packagingcheck OK en de goedgekeurde bronproef Smelt 37/37 + Blossem 43/43. Oudere ronde: 2306/2306 op `1b22121`, 2160/2160 op `6728897`; v1-gedrag en bestaande rechten blijven groen; netwerkguard blokkeert externe fetch, protocol-relative URL, onbekende API-write, XHR, WebSocket en CDP-subresources | T+B | **bewezen met beperking** | Geen productiecredentials, productieauth of echte database gebruikt; dat is bewust niet getest. De browserfixture is in deze ronde niet opnieuw gedraaid (geen UI-wijziging) | Product Owner/ops voor productieacceptatie |
 | 13 | Onafhankelijke review met exacte commit, checks, bron-/protocolversies, resultaten, beperkingen en volgende stap; groene unit-tests zijn geen productacceptatie | Deze matrix + checkpoint op PR #60 | I | **geblokkeerd** | De Delivery Lead heeft deze afrondingsronde nog niet onafhankelijk beoordeeld; deze matrix is ontwikkelaarsbewijs | Delivery Lead |
 | 14 | Een v2-envelope wordt in de bestaande interne controle/beoordeling versiegetrouw herkenbaar: varianten, glas/fles, supplementen, bewijs en dekking; niets afgeplat | `menuProductIntegrationV2.test.js`, `menuProductGuardsV2.test.js`, `menuConceptV2ReviewHandlers.test.js`, `menuConceptExportV2.test.js`, `sourceWorkqueueV2.test.js`, `batchAnalysisHandlers.test.js` (v2-cases), `menuProductV2Surface.test.js`; browserfixture `v2` op 1024/390 px | T+B | **bewezen met beperking** | Alleen fictieve in-memory/browserfixtures; geen echte v2-rij in Supabase, geen live bron en geen authenticated preview | Developer voor live preview; Product Owner/ops voor toegang |
 | 15 | Onbekende/ongeldige/onvoldoende onderbouwde v2 wordt vóór alle zijeffecten geweigerd; v1 blijft ongewijzigd | `menuProductV2Surface.test.js`, `menuSnapshotReviewHandlers.test.js`, `menuSnapshotProposals.test.js`, `menuConceptV2ReviewHandlers.test.js`, `menuConceptExportV2.test.js`; save/approve/export/reviews/url-intake guards vóór hash, claim, insert, update, RPC of GitHub; de generieke editorreview leest nu ook de oorsprongsreceipt (`menuOriginReceiptGuard`), detail classificeert vóór de exportrefresh en een onversioned v2-vorm is een concrete blokkade; bestaande v1-suite groen | T | **bewezen met beperking** | Geen echte database-/GitHub-side-effectmeting; de tests bewijzen de volgorde met fakes. Bronverificatie blijft bewust onbekend | Delivery Lead voor onafhankelijke review |
@@ -830,9 +845,13 @@ in [menu-extraction-acceptance.md](menu-extraction-acceptance.md).
 ## Overdracht
 
 **Aanbevolen status: READY_FOR_REVIEW voor dit afrondingsdossier, niet DONE voor
-#59.** De nieuwste ronde is `8e58893`: volledige suite **2321/2321**, het
+#59.** De nieuwste ronde eindigt op de commits `8e58893` (reparaties +
+regressies + meting), `41b7036` (documentatie) en de daaropvolgende
+naambehoud-fix: volledige suite **2322/2322**, het
 structuurcorpus 6/6, de build exit 0 met 41/41 pagina's, de PDF.js-packagingcheck
-OK en de referentiemeting 165/185 (deterministisch, `cf38be89…`). De
+OK, de referentiemeting 165/185 (deterministisch, `cf38be89…`) en de
+goedgekeurde bronproef Smelt 37/37 + Blossem 43/43. Het exacte checkpoint-HEAD
+staat in de PR #60-checkpoint. De
 browserfixture (241/241 op `26839eb`) is in deze ronde niet opnieuw gedraaid
 omdat er geen UI is gewijzigd; dat blijft ontwikkelaarsbewijs op een oudere
 head en is geen browseracceptatie. De oudere codehead `26839eb`, evidencecommit

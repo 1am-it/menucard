@@ -1333,10 +1333,26 @@ const TRAILING_ALCOHOL_PERCENT = /\s*[(\-–]?\s*(?<![\d.,])\d{1,2}(?:[.,]\d{1,2
  * ("250 g", "500 ml", "0,75 l") are left in the name: the source prints those
  * as part of the item, and the corpus fixtures rely on that. */
 const TRAILING_PORTION_PATTERN = /\s*\(?\b\d{1,4}\s*(?:gram|grams)\b\.?\)?\s*$/i
+/**
+ * A trailing spelled-out weight ("STEAK TARTARE 90 GRAM") is a serving size,
+ * not the dish name. A portion that stands behind an explicit separator
+ * ("Pata negra | 80 gram") is part of the source's own label and is kept —
+ * truncating it produced exactly the "afgekapte naam" the counting rules
+ * forbid (#59 review 6334231310, found by re-running the Blossem probe).
+ */
+const PORTION_SEPARATOR_BEFORE = /[|/\-–—:·]\s*$/
+
+function stripTrailingPortion(text) {
+  const match = TRAILING_PORTION_PATTERN.exec(text)
+  if (!match) return text
+  const before = text.slice(0, match.index)
+  if (PORTION_SEPARATOR_BEFORE.test(before)) return text
+  return before
+}
 
 function displayName(name) {
   const tail = name.length > 32 ? name.slice(-32) : name
-  const stripped = tail.replace(TRAILING_ALCOHOL_PERCENT, '').replace(TRAILING_PORTION_PATTERN, '')
+  const stripped = stripTrailingPortion(tail.replace(TRAILING_ALCOHOL_PERCENT, ''))
   const result = cleanName(name.slice(0, name.length - tail.length) + stripped)
   return isPlausibleItemName(result) ? result : name
 }
