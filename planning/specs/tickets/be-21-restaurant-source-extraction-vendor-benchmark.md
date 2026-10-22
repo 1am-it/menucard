@@ -204,6 +204,159 @@ stil te schrappen:
 Een vendor wordt in dit ticket nog steeds niet aanbevolen zonder de gemeten
 cijfers ernaast. #59's vijf bronnen sluiten de 50–100-bronnenbenchmark niet af.
 
+## Voorstel begrensde AI-proef (2026-10-22) — NEEDS_APPROVAL
+
+Opgesteld door de Delivery Lead (Claude Code). Uitvoering door DeepSeek.
+**Status: NEEDS_APPROVAL.** Er wordt niets betaald, geen account aangemaakt en
+geen sleutel gebruikt totdat de Product Owner provider/model, budget en
+gegevensverwerking expliciet goedkeurt. Deze proef levert gemeten cijfers voor
+dit ticket. Het is geen productieactivering en geen definitieve vendorkeuze.
+
+### Wat al bestaat (geverifieerd in de code)
+
+| Onderdeel | Pad | Stand |
+| --- | --- | --- |
+| Extractieprotocol | `MENU-EXTRACTION.md` (repo-root, v0.2, "niet actief") | Klaar; wordt met hash geladen door `src/lib/menuExtractionProtocol.js` |
+| Providerneutrale adapter | `src/lib/menuExtractionAdapter.js` | Klaar: limieten, verplicht kostenplafond (`null` = weigeren), synchrone budgetreservering/-afrekening, time-out met annulering, schemavalidatie, verbod op `confidence`/`reviewReady` |
+| Uitvoerschema en validator | `src/lib/menuExtractionSchema.js` | Klaar; elk veld met `sourceId`, `locator`, `quote`; quote wordt tegen brontekst getoetst |
+| Runtime-hook | `src/lib/menuExtractionRuntime.js` | Klaar, overal uitgeschakeld (`disabledMenuExtractionRuntime` in `app/api/internal/v1/restaurant-analysis-jobs/route.js` en `src/lib/batchAnalysisRouteDeps.js`) |
+| Standaardlimieten | `DEFAULT_EXTRACTION_LIMITS` | 60 s/call, 180 s/job, 50.000 in-, 10.000 uittokens, 5 documenten, 30 pagina's, 1 retry, 1 tegelijk |
+| Benchmarkadapter | `ops/benchmark/adapters.js` (`ai_structured`) | Bewust uitgeschakelde stub |
+| Referentiemeting | `ops/scripts/measure-menu-extraction-references.js`, `ops/benchmark/referenceComparison.js` (`compareControlledReference`) | Klaar, gepinde telregels |
+
+**Gevonden tegenstrijdigheden (niet als waarheid overgenomen):**
+- `docs/guides/menu-extraction-readiness.md` noemt `src/lib/claudeStructuringAdapter.js`
+  "vervangen", maar die oude BE-20-grens wordt nog aangeroepen in
+  `src/lib/restaurantSourceAnalysis.js`. Hij faalt altijd gesloten. De proef
+  gebruikt hem niet en verandert hem niet; opruimen is apart werk.
+- Dit ticket zegt dat er geen vendor wordt aanbevolen zonder een
+  50–100-bronnenmeting. Deze proef is kleiner. Ze levert daarom alleen
+  gemeten bewijs voor de vervolgkeuze, geen productieaanbeveling.
+- De acceptatiematrix van #59 markeert criterium 5 als "begrensd" terwijl het
+  besluit van de Product Owner nog openstaat.
+
+### Wat nog ontbreekt (bouwwerk voor DeepSeek na akkoord)
+1. **Providercall** als kleine module die de bestaande `call`-interface vult
+   (bijvoorbeeld `src/lib/menuExtractionAnthropicCall.js`) met de officiële
+   `@anthropic-ai/sdk`, alleen server-side. Protocol als `system`, bronnen als
+   tekst-, PDF- of afbeeldingsblokken, uitvoer via structured outputs
+   (`output_config.format`) op het bestaande schema, en de `signal` doorgeven.
+2. **Kostenafrekening uit `usage`** met een vaste, gedateerde prijstabel in de
+   code, zodat `costEurCents` exact wordt gezet. Een onbekende kost blijft
+   "onbekend", nooit nul.
+3. **Synchrone, persistente budgetlog** voor de proef, die `reserve`/`settle`
+   van de adapter invult, met het proefplafond hieronder.
+4. **Beeldbronnen**: de validator toetst een quote alleen tegen tekst. Bij een
+   afbeelding is de quote een transcriptie die niet automatisch te controleren
+   is. Die velden worden gemarkeerd als "visueel bewijs, menselijke controle
+   verplicht".
+5. **Benchmarkkoppeling**: de `ai_structured`-adapter vullen voor gepinde
+   captures, de AI-uitvoer omzetten naar de vorm die
+   `compareControlledReference` verwacht, en meten met dezelfde referenties en
+   telregels.
+6. **Geen productkoppeling**: de runtime blijft in de app uitgeschakeld. De proef
+   draait uitsluitend als ops-script in de geïsoleerde omgeving, in een aparte
+   branch en PR (#59-contract, bouwvolgorde stap 3), zodat #59 los kan worden
+   gemerged.
+
+### Voorstel: provider, model en ondersteuning
+- **Provider:** Anthropic, Claude API (first-party).
+- **Model:** `claude-haiku-5-5` als proefmodel. Daarnaast één vergelijkingsarm
+  met `claude-sonnet-5-5` op exact dezelfde bronnen, om te zien of de 20x
+  hogere prijs aantoonbaar betere extractie oplevert. Bron: Anthropic Models
+  overview (geraadpleegd 2026-10-22). Haiku 5.5 is daar omschreven als model
+  "for high-volume, latency-sensitive tasks such as classification,
+  extraction"; alle huidige modellen ondersteunen tekst- en beeldinvoer.
+- **Tekst:** HTML-tekst en tekst-PDF (PDF als documentblok, of de bestaande
+  PDF-tekstextractie).
+- **Beeld:** menu's als foto of scan (JPEG/PNG/WebP). Modellen vanaf
+  Claude 4.7 lezen in hoge resolutie: maximaal 2.576 px op de lange zijde,
+  ten hoogste 4.784 beeldtokens per afbeelding.
+- **Gestructureerde uitvoer:** structured outputs op het bestaande schema. De
+  eigen validator blijft daarnaast leidend.
+
+### Verwachte kosten per menu (officiële prijzen, USD, 2026-10-22)
+Prijzen: Haiku 5.5 $0,10 per miljoen inputtokens en $0,50 per miljoen
+outputtokens (prompts tot 100.000 tokens); Sonnet 5.5 $2 / $10. Bron: Anthropic
+Pricing. Denkstappen tellen als outputtokens.
+
+| Situatie | Tokens (in / uit) | Haiku 5.5 | Sonnet 5.5 |
+| --- | --- | --- | --- |
+| Typisch tekstmenu | ~20.000 / ~8.000 | ~$0,006 | ~$0,12 |
+| Beeldmenu, 4 pagina's | ~24.000 / ~10.000 | ~$0,007 | ~$0,15 |
+| Plafond per call (50.000 / 16.000) | — | $0,013 | $0,26 |
+
+### Proefbudget en harde stopgrenzen
+- **Proefset:** de gepinde captures van Zuyd, Andalous, Pellens en Chocolat,
+  Smelt (PDF) en Blossem, plus één echt beeldmenu (De Beyerd, alleen via de
+  bestaande veilige route en robots.txt). Per bron 2 runs (stabiliteit) × 2
+  modellen = maximaal 28 calls.
+- **Verwachte totale kosten:** onder $5 (Haiku ≈ $0,20; Sonnet ≈ $4).
+- **Proefplafond:** **$10**, hard op drie niveaus:
+  1. een eigen Console-workspace voor deze proef met een **spend limit van $10**,
+     **auto-reload uit**, en alleen vooraf gekochte credits;
+  2. de budgetlog van de adapter stopt bij **900 eurocent cumulatief** (USD 1:1
+     gerekend, dus conservatief) vóór de workspace-limiet;
+  3. per call `maxCostEurCents: 30`, maximaal 40 calls in totaal, 1 tegelijk,
+     1 retry alleen bij time-out, rate limit of 5xx. Voor de proef gaat
+     `maxOutputTokens` van 10.000 naar 16.000, omdat denkstappen meetellen.
+     Alle andere standaardlimieten blijven gelijk.
+- **Directe stop** bij `cost_unknown`, `budget_settle_failed`, een schemafout
+  boven de 50% van de calls, of elke poging tot een niet-gepinde bron.
+- **Geen** Batch API, Files API, betaalde fallback, providerwissel of automatische
+  opwaardering.
+
+### Privacy en retentie
+- **Gegevens:** alleen openbare menu-inhoud van de toegestane bronnen. Geen
+  gebruikers- of accountgegevens, geen productiedata.
+- **Training:** volgens Anthropic worden API-gegevens niet voor training
+  gebruikt zonder uitdrukkelijke toestemming (API and data retention,
+  geraadpleegd 2026-10-22).
+- **Retentie:** de developerdocumentatie zegt dat prompts en uitvoer standaard
+  niet worden bewaard, behalve bij "Covered Models" (Fable/Mythos, die hier niet
+  gebruikt worden). Het privacy center zegt dat inputs en outputs binnen 30
+  dagen worden verwijderd. Deze twee bronnen zijn niet identiek; de proef gaat
+  uit van **maximaal 30 dagen**. ZDR is alleen via sales en is voor deze proef
+  niet nodig.
+- **Verwerkingslocatie:** de first-party API kent alleen `inference_geo`
+  `"global"` (standaard) of `"us"` (1,1x prijs), en workspace-opslag is `"us"`.
+  **EU-only verwerking kan niet via de first-party API.** Is EU-verwerking een
+  harde eis, dan is het alternatief Claude via Google Cloud in een EU-regio
+  (partner-operated, Google als verwerker, eigen prijzen, met een
+  regiotoeslag). Dat vraagt een Google Cloud-account en is dan een aparte keuze.
+- **Verwerkersovereenkomst (DPA):** te bevestigen bij het aanmaken van het
+  account, vóór de eerste call. Wordt niet aangenomen.
+- **Sleutel:** alleen in de gitignored lokale proefomgeving, nooit in de repo,
+  de app, CI of productie. Na de proef wordt de sleutel ingetrokken.
+
+### Meting en acceptatie van de proef (door de Lead, onafhankelijk)
+Per bron en model, met dezelfde referenties en telregels als #59: gerechten
+(match, gemist, verzonnen), prijzen en prijsvarianten, rubrieken,
+bewijsdekking (quote aantoonbaar in de brontekst, of visueel en gemarkeerd),
+schemafouten, stabiliteit tussen de twee runs, en **werkelijke kosten uit
+`usage`**, naast de deterministische extractie van #59. Geen
+productieconclusie zonder deze cijfers. Een protocolbestand is geen garantie
+op juiste AI-uitvoer.
+
+### Benodigde goedkeuring van de Product Owner
+1. Provider en model: Anthropic Claude API, `claude-haiku-5-5`, met
+   vergelijkingsarm `claude-sonnet-5-5`.
+2. Proefbudget: $10 hard (workspace-limiet, auto-reload uit).
+3. Gegevensverwerking: openbare menu's via globale routing (geen EU-only),
+   geen training, retentie maximaal 30 dagen; of in plaats daarvan de
+   EU-variant via Google Cloud.
+4. Accountactie door de eigenaar: een Console-workspace met spend limit en een
+   API-sleutel, gedeeld via de lokale gitignored proefomgeving.
+
+Bronnen: [Models overview](https://platform.claude.com/docs/en/about-claude/models/overview),
+[Pricing](https://platform.claude.com/docs/en/about-claude/pricing),
+[Vision](https://platform.claude.com/docs/en/build-with-claude/vision),
+[Data residency](https://platform.claude.com/docs/en/manage-claude/data-residency),
+[API and data retention](https://platform.claude.com/docs/en/manage-claude/api-and-data-retention),
+[Commerciële retentie](https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data),
+[Workspaces en spend limits](https://support.claude.com/en/articles/9796807-create-and-manage-workspaces-in-the-claude-console),
+[Betaling en auto-reload](https://support.claude.com/en/articles/8977456-how-do-i-pay-for-my-claude-api-usage).
+
 ## Non-goals (explicitly out of scope)
 
 - Implementing OCR, Browserless, self-hosted Playwright, or any other

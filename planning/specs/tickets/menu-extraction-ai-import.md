@@ -60,7 +60,7 @@ alleen deze chat.
 
 ## Bouwvolgorde en beslispoorten
 1. Readinessreview: verifieer werkelijke code en actieve branches/writers; lever mapping, schemagaps, hergebruik, taakontwerp en concrete limieten op.
-2. Leg uitsluitend echte beslissingen voor: provider/model, maximaal kostenbudget, externe toegang/retentie en eventuele migratie of nieuw workflowmechanisme. Geen kosten of privacyvoorwaarden impliciet goedkeuren met dit ticket.
+2. Leg uitsluitend echte beslissingen voor: provider/model, maximaal kostenbudget, externe toegang/retentie en eventuele migratie of nieuw workflowmechanisme. Geen kosten of privacyvoorwaarden impliciet goedkeuren met dit ticket. Het voorstel voor een begrensde AI-proef staat in [BE-21, "Voorstel begrensde AI-proef (2026-10-22)"](be-21-restaurant-source-extraction-vendor-benchmark.md). Status: **NEEDS_APPROVAL**; betaalde uitvoering blijft uit tot de Product Owner expliciet akkoord geeft.
 3. Na vastgelegde keuzes: bouw in een aparte branch/PR. Bestaande navigatie en review hergebruiken; bij materieel nieuwe interactie eerst ontwerp vastleggen.
 4. Draai geautomatiseerde regressies, representatieve bronproeven en de browseracceptatie. Los gewone fouten binnen dit contract zelf op.
 5. Onafhankelijke review met bronbewijs. Pas daarna klaar voor review melden; merge en productierelease blijven afzonderlijke besluiten.
