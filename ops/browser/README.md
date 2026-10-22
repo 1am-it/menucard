@@ -128,6 +128,38 @@ runs at 390 px in light and dark, by keyboard (Tab + Space) and read-only for a
 colleague. `fixture=structure-readonly` proves the colleague never gets an
 enabled decision or a confirmation button.
 
+## Handmatige AI-import (#59 fase 2, review 6348147293)
+
+`fixture=manual` drives the new internal page `/internal/menu-import` in its
+three steps. Step 1 makes the prompt from a fictional source and shows the
+source line in plain language plus the collapsed technical details. Step 2
+pastes a fictional answer, and the check asserts that the paste field is
+cleared after checking and that the page shows only
+"✓ Antwoord ontvangen: 1 menukaart, 3 gerechten" — never the pasted JSON.
+Step 3 resolves the two open points the way a human must: choose a price for
+the line with two prices, then confirm the line that is not in the source with a
+required reason, after which "Concept opslaan" becomes enabled and reports the
+existing concept-route result with "niets gepubliceerd". The same page is
+checked by keyboard (Tab + Enter makes the prompt) and at 320/390 px in light
+and dark.
+
+Only these fictional writes are mocked, all with the fixed import id
+`fixture-import`:
+
+- `POST /api/internal/v1/manual-menu-import/bundles`;
+- `POST /api/internal/v1/manual-menu-import/imports`;
+- `POST /api/internal/v1/manual-menu-import/imports/fixture-import/decisions`;
+- `POST /api/internal/v1/manual-menu-import/imports/fixture-import/follow-up`;
+- `POST /api/internal/v1/manual-menu-import/imports/fixture-import/save`.
+
+The fixture data is built with the product modules themselves
+(`buildImportBundle`, `buildImportReport`, `decideRow`, `reviewView`,
+`buildConceptDraft`), so the browser sees the real shapes. Every other import
+path — another id, another method, the real `/usage` read — stays unknown and is
+refused by the guard. The app calls no provider in any scenario, so there is no
+AI traffic to intercept. This remains fixture evidence: no real source, no real
+concept write, no independent review.
+
 ## Coverage
 
 - exact breadcrumb, source and "handmatig beoordelen" links;
