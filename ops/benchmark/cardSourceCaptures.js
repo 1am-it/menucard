@@ -237,7 +237,7 @@ function validateCardSourceCaptures(pin, state) {
     if (capture.role === 'entry' && capture.status === 'captured') entryCaptures += 1;
     if (nonEmptyString(capture.requestedUrl) && capture.status !== 'blocked') capturedUrls.add(capture.requestedUrl);
   }
-  if (entryCaptures !== 1) errors.push('pin: exactly one readable entry capture is required');
+  if (entryCaptures !== 1 && pin.captureStatus !== 'blocked') errors.push('pin: exactly one readable entry capture is required');
   if (pin.captureStatus === 'captured' && capturedMenus === 0) {
     errors.push('pin: a captured source needs at least one readable menu capture');
   }

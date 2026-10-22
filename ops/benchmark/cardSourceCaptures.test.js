@@ -181,6 +181,24 @@ test('the seed plan keeps the entry first and the historical URLs stable', () =>
   assert.equal(pageKey('https://www.t-huis.online/menu/'), pageKey('https://t-huis.online/menu'));
 });
 
+test('a fully blocked source is representable, and keeps its own entry error', () => {
+  const blocked = clone(PINS.thuis);
+  for (const capture of blocked.captures) {
+    capture.status = 'blocked';
+    capture.error = 'request-error: connect ENETUNREACH';
+    capture.localPath = null;
+    capture.bytes = 0;
+    capture.bytesSha256 = null;
+  }
+  blocked.captureStatus = 'blocked';
+  blocked.blockedReason = 'the entry page is not readable';
+  assert.deepEqual(validate(blocked, 'thuis').errors, []);
+  blocked.blockedReason = '';
+  const result = validate(blocked, 'thuis');
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.some((error) => /a blocked source names its reason/.test(error)));
+});
+
 test('a maintenance page and a page without decimal amounts are recognised honestly', () => {
   assert.equal(looksLikeMaintenance('Deze website is in onderhoud. Probeer het later opnieuw.'), true);
   assert.equal(looksLikeMaintenance('Signature Menu Maarten Camps'), false);

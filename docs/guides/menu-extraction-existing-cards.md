@@ -243,6 +243,98 @@ gewone bytehash.
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | Brasserie Bardot | 112 | 74 | 0 | 76 | 38 | 0 | 36 | 0,00% | 0,00% |
 | Restaurant Zuyd | 36 | 34 | 34 | 2 | 0 | 0 | 0 | 100,00% | 94,44% |
+
+## Ronde 2026-10-22 — Wolfslaar en T-Huis vastgelegd, vier kaarten gemeten (review 6349832755)
+
+Basis `2108842`. De bronproef van de vorige ronde liet zien dat beide kaarten
+weer leesbaar waren; deze ronde legt de bytes eenmalig vast, stelt de referentie
+op uit alleen die bytes en meet met de bestaande meetcode en telregels. Geen
+extractiecode, bestaande referentie, telregel of vergelijkingslogica gewijzigd;
+geen provider, geen OCR, geen productie.
+
+```powershell
+node ops/scripts/capture-menu-extraction-card-source-bytes.js --source wolfslaar --dry-run
+node ops/scripts/capture-menu-extraction-card-source-bytes.js --source wolfslaar
+node ops/scripts/capture-menu-extraction-card-source-bytes.js --source thuis --dry-run
+node ops/scripts/capture-menu-extraction-card-source-bytes.js --source thuis
+node ops/scripts/measure-menu-extraction-card-reference.js
+```
+
+Het capturescript is create-only (`flag: 'wx'`): één leesronde per URL, geen
+tweede poging en geen andere URL. De toegestane set is gesloten: de gepinde
+entry-URL, de menu-URL's die de historische export noemt, de eerder gepinde
+probe-URL's en — alleen vanaf de vastgelegde entrypagina — de same-host
+menulinks die die pagina zelf noemt (één hop, via de bestaande
+`findSameHostMenuCandidates`). De bytes staan gitignored onder
+`ops/benchmark/output/card-captures/`; alleen hash, grootte, content-type, rol en
+tijd worden gecommit.
+
+### K1 — Vastgelegde bytes
+
+| Kaart | Capture | Rol | Bytes | SHA-256 |
+| --- | --- | --- | ---: | --- |
+| Wolfslaar | `https://www.restaurantwolfslaar.com` | entry | 105.453 | `14abdb9e…` |
+| Wolfslaar | `/nl/menu-lunch` | menu (historische export) | 70.597 | `22d60179…` |
+| Wolfslaar | `/nl/menu-diner` | menu (historische export) | 69.108 | `bc35f9ca…` |
+| Wolfslaar | `/menu-1` | menu (door de entrypagina zelf genoemd) | 66.272 | `19abbe4a…` |
+| T-Huis | `https://t-huis.online` | entry | 121.349 | `d074fd18…` |
+| T-Huis | `/menu/` | menu (historische export) | 91.835 | `c4808261…` |
+
+De T-Huis-hashes zijn identiek aan de eerdere probe; de Wolfslaar-hashes horen bij
+deze vastgelegde versie. Beide pins zijn `captured`; geen pagina was onbereikbaar
+en geen pagina hoefde als `not-a-menu` te worden geregistreerd.
+
+### K2 — Referenties uit alleen die bytes
+
+- `reference-references/wolfslaar.json`: twee menu's (`Menukaart lunch`,
+  `Menukaart diner`), samen 30 gerechten in 6 rubriekpaden, plus 4 arrangementen,
+  3 supplementen en 3 twijfelgevallen. Elk gerecht heeft naam, prijs of
+  prijsvarianten, rubriekpad, locator en een letterlijk citaat. Bijzonderheden:
+  `Royal Belgian Platinum Caviar` heeft twee gewichten (65 / 98) en `Mechelse
+  Koekoek` twee varianten (44 / 54); de lunchpagina bevat ook het Lunchmenu; de
+  dinerpagina splitst de naam `Conference Peer` in de HTML (`C onference`), wat
+  in het citaat zichtbaar blijft.
+- `reference-references/thuis.json`: **geen** gerecht. De vastgezette menupagina
+  zet de vijf kaarten (Food, Lunch, Wijn, Drank, Dessert) als SVG-afbeelding in
+  tabpanelen. Zonder beeldanalyse/OCR is er geen tekstbewijs; T-Huis staat
+  daarom op `blocked` met reden en vijf benoemde panelen. Dat is geen lege kaart
+  en geen geslaagde extractie.
+
+### K3 — Meting met de bestaande meetcode
+
+`card-reference-measurement.json` (`111afa90…`) en `.md` (`36db1907…`), tweemaal
+identiek op dezelfde bytes:
+
+| Kaart | Referentie | Extractie | Match | Gemist | Verzonnen | Prijs | Rubriek | Precisie | Recall |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Brasserie Bardot | 112 | 74 | 0 | 76 | 38 | 0 | 36 | 0,00% | 0,00% |
+| Restaurant Zuyd | 36 | 34 | 34 | 2 | 0 | 0 | 0 | 100,00% | 94,44% |
+| Restaurant Wolfslaar | 30 | 29 | 0 | 5 | 4 | 0 | 25 | 0,00% | 0,00% |
+| T-Huis | 0 | 0 | 0 | 0 | 0 | 0 | 0 | n.v.t. | n.v.t. |
+
+Wolfslaar leest naam en prijs van 25 rijen correct, maar zonder menutitel, dus
+elk van die rijen is een rubriekfout. De 5 missers zijn de twee prijsvarianten en
+de gesplitste naam; de 4 “verzonnen” rijen zijn dezelfde gerechten met alleen de
+laatst gelezen variant — de ongewijzigde telregels boeken dat als gemist én
+verzonnen. T-Huis wordt niet meegeteld in de totalen (3 van 4 kaarten gemeten).
+
+### K4 en K5 — Matrix en voortgang
+
+De matrix staat in `docs/guides/menu-extraction-acceptance-matrix.md` (nieuwe
+rondesectie, de rij criterium 5 in “Actuele acceptatiematrix” en de per-kaarttabel)
+met verwijzing naar het eigenaarsbesluit (issuecomment-6315226470, optie 1).
+Per K staat één regel met `name` in `ops/benchmark/output/criteria-progress.json`
+onder ronde `6349832755` (gitignored per BE-21).
+
+### Wat deze ronde expliciet niet doet
+
+- Geen extractieherstel voor Bardot-PDF of Wolfslaar (menutitel, prijsvarianten,
+  gesplitste namen): dat is een aparte opdracht.
+- Geen OCR of beeldanalyse voor T-Huis; geen ophaal van de SVG's.
+- Geen robots.txt-controle in deze benchmarkroute; de eerdere documentatie
+  suggereerde dat wel, deze ronde herhaalt die claim niet.
+- Geen productie, publicatie, merge, provider of app-side AI.
+
 | **Totaal (2 gemeten)** | **148** | **108** | **34** | **78** | **38** | **0** | **36** | **31,48%** | **22,97%** |
 
 De Zuyd-uitkomst is gelijk aan de bestaande referentiemeting (34/36): dezelfde
@@ -263,6 +355,10 @@ node ops/scripts/probe-menu-extraction-blocked-cards.js
 Eén read-only poging per gepinde URL via de bestaande veilige route (inclusief
 `robots.txt`), vastgelegd in `ops/benchmark/existing-card-probe-attempts.json`
 (SHA-256 `6ea987c1…`, create-only):
+
+> **Correctie (ronde 6349832755):** de code voert geen `robots.txt`-controle uit,
+> ook al suggereert de regel hierboven dat. Die eerdere tekst is niet stil
+> herschreven; de nieuwe capture- en meetdocumentatie herhaalt de claim niet.
 
 | Kaart | Tijd | Uitkomst | Bewijs |
 | --- | --- | --- | --- |
