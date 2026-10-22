@@ -1,11 +1,14 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "sourceId": "pellens",
   "label": "Restaurant Pellens",
   "entryUrl": "https://pellens.nl",
   "captureStatus": "captured",
   "correction": "Herstel na Lead-review 6319894232 (R1): de dertien à-la-cartegerechten van het dinerpaneel zijn toegevoegd. Uitsluitend opgesteld uit de vastgezette bytes; de telregels zijn ongewijzigd.",
-  "note": "Authored from the pinned one-page capture. Dish names are the names the menu shows before the preparation/description. The lunch tab and the diner tab each carry the same a-la-carte table (Pellens, Groenten, Dessert); per counting rule 5 the diner copy is a second rubric and counts as thirteen extra dishes. The page's hidden duplicate markup is counted once.",
+  "decisions": [
+    "2026-10-22, Lead-besluit #59: consistent met de bronstructuur naam+span, zoals Entrecôte; beoordeeld op bytes 66f57e267289"
+  ],
+  "note": "Authored from the pinned one-page capture. Dish names are the names the menu shows before the preparation/description. A dish whose description sits in the source's own inline span keeps that description in its own `description` field, exactly like its siblings (Lead decision 2026-10-22: `Ui` + `oude kaas`, `Wagyu A5` + `Miyazaki`). The lunch tab and the diner tab each carry the same a-la-carte table (Pellens, Groenten, Dessert); per counting rule 5 the diner copy is a second rubric and counts as thirteen extra dishes. The page's hidden duplicate markup is counted once.",
   "menus": [
     {
       "title": "Onze kaart",
@@ -18,8 +21,8 @@
             {"name": "Entrecôte", "price": "21.50", "locator": "Lunch › Brioches › regel 1", "quote": "Entrecôte zwarte knoflook €21,50"},
             {"name": "Jamón Ibérico", "price": "19.50", "locator": "Lunch › Brioches › regel 2", "quote": "Jamón Ibérico €19,50"},
             {"name": "Pulled pork", "price": "15.50", "locator": "Lunch › Brioches › regel 3", "quote": "Pulled pork €15,50"},
-            {"name": "Ui oude kaas", "price": "12.50", "locator": "Lunch › Brioches › regel 4", "quote": "Ui oude kaas €12,50"},
-            {"name": "Wagyu A5 Miyazaki", "price": "47.00", "locator": "Lunch › Brioches › regel 5", "quote": "Wagyu A5 Miyazaki €47,00"}
+            {"name": "Ui", "description": "oude kaas", "price": "12.50", "locator": "Lunch › Brioches › regel 4", "quote": "Ui oude kaas €12,50"},
+            {"name": "Wagyu A5", "description": "Miyazaki", "price": "47.00", "locator": "Lunch › Brioches › regel 5", "quote": "Wagyu A5 Miyazaki €47,00"}
           ]
         },
         {

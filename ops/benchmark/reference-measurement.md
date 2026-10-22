@@ -13,13 +13,13 @@ Bij een verzonnen rij bestaat per definitie geen referentie-citaat; de regel noe
 | Bronnen gemeten / geblokkeerd | 4 / 1 |
 | Referentiegerechten | 185 |
 | Geëxtraheerde gerechten | 170 |
-| Exact gematcht | 165 |
-| Gemiste gerechten | 17 |
-| Verzonnen gerechten | 2 |
+| Exact gematcht | 167 |
+| Gemiste gerechten | 15 |
+| Verzonnen gerechten | 0 |
 | Prijsfouten | 0 |
 | Rubriekfouten | 3 |
-| Precisie | 97.06% |
-| Recall | 89.19% |
+| Precisie | 98.24% |
+| Recall | 90.27% |
 
 ## Per bron
 
@@ -27,7 +27,7 @@ Bij een verzonnen rij bestaat per definitie geen referentie-citaat; de regel noe
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | Restaurant Zuyd | gemeten | 36 | 34 | 34 | 2 | 0 | 0 | 0 | 100.00% | 94.44% |
 | Andalous Restaurant Breda | gemeten | 87 | 84 | 81 | 3 | 0 | 0 | 3 | 96.43% | 93.10% |
-| Restaurant Pellens | gemeten | 36 | 26 | 24 | 12 | 2 | 0 | 0 | 92.31% | 66.67% |
+| Restaurant Pellens | gemeten | 36 | 26 | 26 | 10 | 0 | 0 | 0 | 100.00% | 72.22% |
 | Restaurant Chocolat | gemeten | 26 | 26 | 26 | 0 | 0 | 0 | 0 | 100.00% | 100.00% |
 | Senang Makan | geblokkeerd | 0 | 0 | 0 | 0 | 0 | 0 | 0 | n.v.t. | n.v.t. |
 
@@ -103,7 +103,7 @@ Bij een verzonnen rij bestaat per definitie geen referentie-citaat; de regel noe
 
 ### Restaurant Pellens
 
-**Gemist (12)**
+**Gemist (10)**
 - `Eekhoorntjesbrood` — Onze kaart › Diner › À la carte › Groenten — prijs 22.00 / 26.00 — citaat: “Eekhoorntjesbrood biet, koffie €22,00 €26,00” (Diner › À la carte › Groenten › regel 5)
 - `Spitskool` — Onze kaart › Diner › À la carte › Groenten — prijs 18.00 / 24.00 — citaat: “Spitskool huacatay, pommes dauphine €18,00 €24,00” (Diner › À la carte › Groenten › regel 6)
 - `Beekridder` — Onze kaart › Diner › À la carte › Pellens — prijs 21.00 / 31.00 — citaat: “Beekridder vijgenblad, gerookte boter €21,00 €31,00” (Diner › À la carte › Pellens › regel 2)
@@ -114,12 +114,9 @@ Bij een verzonnen rij bestaat per definitie geen referentie-citaat; de regel noe
 - `Beekridder` — Onze kaart › Lunch › À la carte › Pellens — prijs 21.00 / 31.00 — citaat: “Beekridder vijgenblad, gerookte boter €21,00 €31,00” (Lunch › À la carte › Pellens › regel 2)
 - `Langoustine` — Onze kaart › Lunch › À la carte › Pellens — prijs 23.00 / 38.00 — citaat: “Langoustine wortel, bouillabaisse €23,00 €38,00” (Lunch › À la carte › Pellens › regel 3)
 - `Wilde eend` — Onze kaart › Lunch › À la carte › Pellens — prijs 24.00 / 39.00 — citaat: “Wilde eend biet, koffie €24,00 €39,00” (Lunch › À la carte › Pellens › regel 5)
-- `Ui oude kaas` — Onze kaart › Lunch › Brioches — prijs 12.50 — citaat: “Ui oude kaas €12,50” (Lunch › Brioches › regel 4)
-- `Wagyu A5 Miyazaki` — Onze kaart › Lunch › Brioches — prijs 47.00 — citaat: “Wagyu A5 Miyazaki €47,00” (Lunch › Brioches › regel 5)
 
-**Verzonnen (2)**
-- `Ui` — Onze kaart › Lunch › Brioches — prijs 12.50 — broncitaat: “Ui oude kaas €12,50”
-- `Wagyu A5` — Onze kaart › Lunch › Brioches — prijs 47.00 — broncitaat: “Wagyu A5 Miyazaki €47,00”
+**Verzonnen (0)**
+- geen
 
 **Prijsfouten (0)**
 - geen
