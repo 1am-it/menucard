@@ -1057,7 +1057,10 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
           limitations.push(`PDF ${sourceUrl} is voor modellezing afgekapt op de veilige tekstlimiet.`)
         }
         limitations.push(...pdfLayoutLimitations(sourceUrl, pdfContext.layout || {}))
-        const converted = pdfContextToMenuContext(pdfContext, new Set(menuContexts.map((m) => m.contextSlug)), { sourceId })
+        const converted = pdfContextToMenuContext(pdfContext, new Set(menuContexts.map((m) => m.contextSlug)), {
+          sourceId,
+          titleFallback: pdfContext.layout && pdfContext.layout.documentTitle,
+        })
         if (converted) {
           menuContexts.push({ ...converted.menu, sourceUrl, sourceId })
           source.itemCount = converted.itemCount

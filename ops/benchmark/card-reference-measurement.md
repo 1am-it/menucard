@@ -10,13 +10,13 @@ Het eigenaarsbesluit voor deze vier kaarten is GitHub #59 issuecomment-631522647
 | --- | --- |
 | Kaarten gemeten / geblokkeerd | 3 / 1 |
 | Referentiegerechten | 178 |
-| Geëxtraheerde gerechten | 138 |
+| Geëxtraheerde gerechten | 150 |
 | Exact gematcht | 63 |
-| Gemiste gerechten | 79 |
-| Verzonnen gerechten | 39 |
+| Gemiste gerechten | 64 |
+| Verzonnen gerechten | 36 |
 | Prijsfouten | 0 |
-| Rubriekfouten | 36 |
-| Precisie | 45.65% |
+| Rubriekfouten | 51 |
+| Precisie | 42.00% |
 | Recall | 35.39% |
 
 De totalen zijn per kaart afzonderlijk te lezen en worden nooit tot één succescijfer samengevoegd.
@@ -25,7 +25,7 @@ De totalen zijn per kaart afzonderlijk te lezen en worden nooit tot één succes
 
 | Kaart | Status | Referentie | Extractie | Match | Gemist | Verzonnen | Prijsfouten | Rubriekfouten | Precisie | Recall |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Brasserie Bardot | gemeten | 112 | 74 | 0 | 76 | 38 | 0 | 36 | 0.00% | 0.00% |
+| Brasserie Bardot | gemeten | 112 | 86 | 0 | 61 | 35 | 0 | 51 | 0.00% | 0.00% |
 | Restaurant Zuyd | gemeten | 36 | 34 | 34 | 2 | 0 | 0 | 0 | 100.00% | 94.44% |
 | Restaurant Wolfslaar | gemeten | 30 | 30 | 29 | 1 | 1 | 0 | 0 | 96.67% | 96.67% |
 | T-Huis | geblokkeerd | 0 | 0 | 0 | 0 | 0 | 0 | 0 | n.v.t. | n.v.t. |
@@ -34,17 +34,12 @@ De totalen zijn per kaart afzonderlijk te lezen en worden nooit tot één succes
 
 ### Brasserie Bardot
 
-**Gemist (76)**
-- `Café complet` — Dinerkaart › DESSERT — prijs 13.95 — citaat: “Café complet, zoete lekkernijen met koffie of thee naar keuze” (Dinerkaart › DESSERT › pagina 3, kolom links, y=356)
+**Gemist (61)**
+- `Rode Port Ruby / Witte port` — Dinerkaart › APERATIEF — prijs 5.00 — citaat: “Rode Port Ruby / Witte port” (Dinerkaart › APERATIEF › pagina 3, kolom rechts, y=710)
 - `Chocolade truffels` — Dinerkaart › DESSERT — prijs 3.75 — citaat: “Chocolade truffels (2 stuks)” (Dinerkaart › DESSERT › pagina 3, kolom links, y=324)
-- `Mousse au chocolat` — Dinerkaart › DESSERT — prijs 12.95 — citaat: “Mousse au chocolat, gezouten pecan, karamel” (Dinerkaart › DESSERT › pagina 3, kolom links, y=434)
 - `Plateau de fromage` — Dinerkaart › DESSERT — prijs 10.95 / 15.95 — citaat: “Plateau de fromage, kweeperengelei, rozijnenbrood” (Dinerkaart › DESSERT › pagina 3, kolom links, y=400 (3 stuks) en y=390 (5 stuks))
 - `Likeuren en Grappa` — Dinerkaart › DIGESTIVES — prijs 6.25 — citaat: “Likeuren en Grappa” (Dinerkaart › DIGESTIVES › pagina 3, kolom rechts, y=632)
-- `Desem stokbrood met seizoensroomboter en olijfolie` — Dinerkaart › ExTRA BIjGERECHTEN — prijs 5.95 — citaat: “Desem stokbrood met seizoensroomboter en olijfolie” (Dinerkaart › ExTRA BIjGERECHTEN › pagina 3, kolom links, y=774 (bedrag op y=776))
-- `Frisse botersalade` — Dinerkaart › ExTRA BIjGERECHTEN — prijs 5.50 — citaat: “Frisse botersalade” (Dinerkaart › ExTRA BIjGERECHTEN › pagina 3, kolom links, y=740 (bedrag op y=742))
-- `Seizoensgroenten` — Dinerkaart › ExTRA BIjGERECHTEN — prijs 6.75 — citaat: “Seizoensgroenten” (Dinerkaart › ExTRA BIjGERECHTEN › pagina 3, kolom links, y=730 (bedrag op y=732))
-- `Verse frites met Belgische mayonaise` — Dinerkaart › ExTRA BIjGERECHTEN — prijs 4.75 — citaat: “Verse frites met Belgische mayonaise” (Dinerkaart › ExTRA BIjGERECHTEN › pagina 3, kolom links, y=762 (bedrag op y=764))
-- `Verse frites met truffelmayonaise en parmezaan` — Dinerkaart › ExTRA BIjGERECHTEN — prijs 5.75 — citaat: “Verse frites met truffelmayonaise en parmezaan” (Dinerkaart › ExTRA BIjGERECHTEN › pagina 3, kolom links, y=752 (bedrag op y=754))
+- `Limoncello Primo` — Dinerkaart › DIGESTIVES — prijs 5.75 — citaat: “Limoncello Primo” (Dinerkaart › DIGESTIVES › pagina 3, kolom rechts, y=622)
 - `Canard à l'orange` — Dinerkaart › HOOFDGERECHTEN — prijs 27.95 — citaat: “Canard à l'orange, knolselderij gratin, rode bietencrème, gele biet, Amsterdamse ui, sinaasappel gevogelte saus.” (Dinerkaart › HOOFDGERECHTEN › pagina 2, kolom rechts, y=364)
 - `Gnocchi` — Dinerkaart › HOOFDGERECHTEN — prijs 22.95 — citaat: “Gnocchi, saffraan, venkel, parmezaan” (Dinerkaart › HOOFDGERECHTEN › pagina 2, kolom rechts, y=88)
 - `Hele dorade van de grill` — Dinerkaart › HOOFDGERECHTEN — prijs 26.95 — citaat: “Hele dorade van de grill , kruidenolie van salie,” (Dinerkaart › HOOFDGERECHTEN › pagina 2, kolom rechts, y=176)
@@ -52,111 +47,117 @@ De totalen zijn per kaart afzonderlijk te lezen en worden nooit tot één succes
 - `Chateaubriand (om te delen 450 gr.)` — Dinerkaart › HOOFDGERECHTEN › SPECIALITEITEN VAN BARDOT — prijs 74.95 — citaat: “Chateaubriand (om te delen 450 gr.), het beste stuk van de ossenhaas met Persillade boter of Béarnaise of Blauwe kaas of Groene pepersaus” (Dinerkaart › HOOFDGERECHTEN › SPECIALITEITEN VAN BARDOT › pagina 2, kolom rechts, y=564)
 - `Poussin` — Dinerkaart › HOOFDGERECHTEN › SPECIALITEITEN VAN BARDOT — prijs 20.95 — citaat: “Poussin, krielkippetje van onze huisrotisserie met citroen, tijm en appelcompote” (Dinerkaart › HOOFDGERECHTEN › SPECIALITEITEN VAN BARDOT › pagina 2, kolom rechts, y=674)
 - `Tournedos (170 gr.)` — Dinerkaart › HOOFDGERECHTEN — prijs 37.95 — citaat: “Tournedos (170 gr.), spinazie, champignons, truffeljus” (Dinerkaart › HOOFDGERECHTEN › pagina 2, kolom rechts, y=242)
-- `Charcuterie` — Dinerkaart › KLASSIEKE BORRELHAPPEN — prijs 16.95 — citaat: “Charcuterie, diverse vleeswaren” (Dinerkaart › KLASSIEKE BORRELHAPPEN › pagina 2, kolom links, y=578)
-- `Kaviaar 'Osietra'` — Dinerkaart › KLASSIEKE BORRELHAPPEN — prijs 35.00 — citaat: “Kaviaar 'Osietra', 10 gram” (Dinerkaart › KLASSIEKE BORRELHAPPEN › pagina 2, kolom links, y=490)
 - `Oesters: Naturel` — Dinerkaart › KLASSIEKE BORRELHAPPEN — prijs 4.00 — citaat: “Naturel met sjalottenvinaigrette en citroen” (Dinerkaart › KLASSIEKE BORRELHAPPEN › pagina 2, kolom links, y=742 (bedrag op y=744))
-- `Paling` — Dinerkaart › KLASSIEKE BORRELHAPPEN — prijs 13.95 — citaat: “Paling, brioche, rode biet, Per 2 stuks crème fraîche en roze peper” (Dinerkaart › KLASSIEKE BORRELHAPPEN › pagina 2, kolom links, y=534)
-- `Pata Negra (70 gr.)` — Dinerkaart › KLASSIEKE BORRELHAPPEN — prijs 21.95 — citaat: “Pata Negra (70 gr.), Spaanse Ibericoham” (Dinerkaart › KLASSIEKE BORRELHAPPEN › pagina 2, kolom links, y=644)
-- `Paté en croute` — Dinerkaart › KLASSIEKE BORRELHAPPEN — prijs 16.95 — citaat: “Paté en croute, gefrituurde kappertjes, uienconfit” (Dinerkaart › KLASSIEKE BORRELHAPPEN › pagina 2, kolom links, y=610 (bedrag op y=612))
-- `Espresso Martini` — Dinerkaart › MIX / COCKTAILS / GIN & TONIC — prijs 11.75 — citaat: “Espresso Martini” (Dinerkaart › MIX / COCKTAILS / GIN & TONIC › pagina 3, kolom rechts, y=544)
+- `Pornstar Martini` — Dinerkaart › MIX / COCKTAILS / GIN & TONIC — prijs 11.75 — citaat: “Pornstar Martini” (Dinerkaart › MIX / COCKTAILS / GIN & TONIC › pagina 3, kolom rechts, y=534)
 - `Copperhead gin 0.0% – Fever Tree` — Dinerkaart › MOCKTAILS — prijs 8.75 — citaat: “Copperhead gin 0.0% – Fever Tree” (Dinerkaart › MOCKTAILS › pagina 3, kolom rechts, y=434)
 - `Pornstar Martini 0.0%` — Dinerkaart › MOCKTAILS — prijs 10.75 — citaat: “Pornstar Martini 0.0%” (Dinerkaart › MOCKTAILS › pagina 3, kolom rechts, y=412)
 - `Spiced Mule 0.0%` — Dinerkaart › MOCKTAILS — prijs 6.95 — citaat: “Spiced Mule 0.0%” (Dinerkaart › MOCKTAILS › pagina 3, kolom rechts, y=424)
-- `Kipfilet of witvis` — Dinerkaart › VOOR ONZE KLEINE GASTEN — prijs 15.95 — citaat: “Kipfilet of witvis, frites, salade” (Dinerkaart › VOOR ONZE KLEINE GASTEN › pagina 3, kolom links, y=696 (bedrag op y=698))
-- `Bisque de homard` — Dinerkaart › VOORGERECHTEN — prijs 13.95 — citaat: “Bisque de homard, rivierkreeft, saffraanrouille” (Dinerkaart › VOORGERECHTEN › pagina 2, kolom links, y=374)
-- `Boudin Noir` — Dinerkaart › VOORGERECHTEN — prijs 18.95 — citaat: “Boudin Noir, gebakken bloedworst, brioche, appel, Calvados, gebakken eendenlever” (Dinerkaart › VOORGERECHTEN › pagina 2, kolom links, y=132)
 - `Escargots` — Dinerkaart › VOORGERECHTEN — prijs 12.95 — citaat: “Escargots, persillade, knoflooksabayon, croutons” (Dinerkaart › VOORGERECHTEN › pagina 2, kolom links, y=308)
 - `Garnalenkroketten` — Dinerkaart › VOORGERECHTEN — prijs 21.95 — citaat: “Garnalenkroketten (2 st.) met citroenmayonaise” (Dinerkaart › VOORGERECHTEN › pagina 2, kolom links, y=340 (bedrag op y=342))
-- `Gravad lax` — Dinerkaart › VOORGERECHTEN — prijs 17.95 — citaat: “Gravad lax, toast, aardappel, dragonmayonaise, venkel, citroen” (Dinerkaart › VOORGERECHTEN › pagina 2, kolom links, y=186 (bedrag op y=188))
-- `Klassieke steak tartaar (90 gram)` — Dinerkaart › VOORGERECHTEN — prijs 15.95 — citaat: “Klassieke steak tartaar (90 gram)” (Dinerkaart › VOORGERECHTEN › pagina 2, kolom links, y=230 (bedrag op y=232))
-- `Stracciatella` — Dinerkaart › VOORGERECHTEN — prijs 16.95 — citaat: “Stracciatella, tomaat, pruim, amandel en basilicum” (Dinerkaart › VOORGERECHTEN › pagina 2, kolom links, y=274 (bedrag op y=276))
+- `Chivas Regal 12 yrs.` — Dinerkaart › WHISKY — prijs 7.75 — citaat: “Chivas Regal 12 yrs.” (Dinerkaart › WHISKY › pagina 3, kolom rechts, y=270)
+- `Glenfiddich 12 yrs.` — Dinerkaart › WHISKY — prijs 8.00 — citaat: “Glenfiddich 12 yrs.” (Dinerkaart › WHISKY › pagina 3, kolom rechts, y=280)
+- `Oban 14 yrs.` — Dinerkaart › WHISKY — prijs 10.75 — citaat: “Oban 14 yrs.” (Dinerkaart › WHISKY › pagina 3, kolom rechts, y=258)
+- `Sauternes, Le Terre du Lys d'Or` — Dinerkaart › WIJNEN & PORT — prijs 7.25 — citaat: “Sauternes, Le Terre du Lys d'Or” (Dinerkaart › WIJNEN & PORT › pagina 3, kolom rechts, y=786)
 - `Champagne Charles LaFITTE, ODF Rosé` — Dinerkaart › WIJNKAART › MOUSSERENDE WIJNEN — prijs 89.75 — citaat: “Champagne Charles LaFITTE, ODF Rosé” (Dinerkaart › WIJNKAART › MOUSSERENDE WIJNEN › pagina 4, kolom rechts, y=150 (alleen flesprijs))
 - `Champagne Charles LaFITTE, ODF` — Dinerkaart › WIJNKAART › MOUSSERENDE WIJNEN — prijs 79.75 — citaat: “Champagne Charles LaFITTE, ODF” (Dinerkaart › WIJNKAART › MOUSSERENDE WIJNEN › pagina 4, kolom rechts, y=178 (alleen flesprijs))
-- `Champagne Louis Roederer Brut` — Dinerkaart › WIJNKAART › MOUSSERENDE WIJNEN — prijs 99.00 — citaat: “Champagne Louis Roederer Brut” (Dinerkaart › WIJNKAART › MOUSSERENDE WIJNEN › pagina 4, kolom rechts, y=94 (alleen flesprijs))
-- `Champagne Ruinart Brut Blanc de Blancs` — Dinerkaart › WIJNKAART › MOUSSERENDE WIJNEN — prijs 165.00 — citaat: “Champagne Ruinart Brut Blanc de Blancs” (Dinerkaart › WIJNKAART › MOUSSERENDE WIJNEN › pagina 4, kolom rechts, y=76 (alleen flesprijs))
 - `Champagne Vranken` — Dinerkaart › WIJNKAART › MOUSSERENDE WIJNEN — prijs 55.00 / 95.00 / 185.00 — citaat: “Champagne Vranken cuvée Diamant Brut” (Dinerkaart › WIJNKAART › MOUSSERENDE WIJNEN › pagina 4, kolom rechts, y=132 (0,375 ltr.), y=122 (0.750 ltr.) en y=112 (1,5 ltr))
-- … en 36 meer in het JSON-rapport
+- `Crémant de Bourgogne` — Dinerkaart › WIJNKAART › MOUSSERENDE WIJNEN — prijs 7.75 / 45.75 — citaat: “Crémant de Bourgogne Cave de Viré Brut” (Dinerkaart › WIJNKAART › MOUSSERENDE WIJNEN › pagina 4, kolom rechts, y=234)
+- `Pizzolato organic 0.0% 0,20 ltr.` — Dinerkaart › WIJNKAART › MOUSSERENDE WIJNEN — prijs 7.95 — citaat: “Pizzolato organic 0.0% 0,20 ltr.” (Dinerkaart › WIJNKAART › MOUSSERENDE WIJNEN › pagina 4, kolom rechts, y=56 (bedrag op y=58))
+- `La Consulta 100% Malbec, Catena` — Dinerkaart › WIJNKAART › RODE WIJNEN › Argentinië — prijs 7.75 / 42.50 — citaat: “La Consulta 100% Malbec, Catena” (Dinerkaart › WIJNKAART › RODE WIJNEN › Argentinië › pagina 4, kolom rechts, y=508)
+- `Bordeaux Lalande de Pomerol` — Dinerkaart › WIJNKAART › RODE WIJNEN › Frankrijk — prijs 8.75 / 48.00 — citaat: “Bordeaux Lalande de Pomerol, Château La Pensée, Merlot 80%, Cabernet Sauvignon, Cabernet Franc” (Dinerkaart › WIJNKAART › RODE WIJNEN › Frankrijk › pagina 4, kolom rechts, y=748)
+- `Bordeaux Margaux, Château de Clairefont` — Dinerkaart › WIJNKAART › RODE WIJNEN › Frankrijk — prijs 79.00 — citaat: “Bordeaux Margaux, Château de Clairefont” (Dinerkaart › WIJNKAART › RODE WIJNEN › Frankrijk › pagina 4, kolom rechts, y=698 (alleen flesprijs))
+- `Bordeaux Saint-Émilion Grand Cru` — Dinerkaart › WIJNKAART › RODE WIJNEN › Frankrijk — prijs 8.50 / 46.75 — citaat: “Bordeaux Saint-Émilion Grand Cru Château La Fleur Cravignac” (Dinerkaart › WIJNKAART › RODE WIJNEN › Frankrijk › pagina 4, kolom rechts, y=798)
+- `Côtes du Rhône, Paul Jaboulet` — Dinerkaart › WIJNKAART › RODE WIJNEN › Frankrijk — prijs 7.25 / 39.75 — citaat: “Côtes du Rhône, Paul Jaboulet Aîné Parallèle 45, Grenache, Syrah” (Dinerkaart › WIJNKAART › RODE WIJNEN › Frankrijk › pagina 4, kolom links, y=68)
+- `Languedoc Pinot Noir Réserve` — Dinerkaart › WIJNKAART › RODE WIJNEN › Frankrijk — prijs 6.50 / 35.75 — citaat: “Languedoc Pinot Noir Réserve, Château Paul Mas” (Dinerkaart › WIJNKAART › RODE WIJNEN › Frankrijk › pagina 4, kolom links, y=98 (bedragen op y=94))
+- `Piemonte 100% Nebbiolo Serre dei Roveri Barolo Riserva` — Dinerkaart › WIJNKAART › RODE WIJNEN › Italië — prijs 12.75 / 69.50 — citaat: “Piemonte 100% Nebbiolo Serre dei Roveri Barolo Riserva” (Dinerkaart › WIJNKAART › RODE WIJNEN › Italië › pagina 4, kolom rechts, y=588)
+- `Primitivo Quota 29, Menhir Salento, Puglia` — Dinerkaart › WIJNKAART › RODE WIJNEN › Italië — prijs 7.50 / 41.75 — citaat: “Primitivo Quota 29, Menhir Salento, Puglia” (Dinerkaart › WIJNKAART › RODE WIJNEN › Italië › pagina 4, kolom rechts, y=658)
+- `Zenato Ripassa della Valpolicella` — Dinerkaart › WIJNKAART › RODE WIJNEN › Italië — prijs 8.75 / 48.00 — citaat: “Zenato Ripassa della Valpolicella, Ripasso Superiore, Veneto” (Dinerkaart › WIJNKAART › RODE WIJNEN › Italië › pagina 4, kolom rechts, y=628)
+- `Rioja Coto de Imaz Reserva, 100% Tempranillo` — Dinerkaart › WIJNKAART › RODE WIJNEN › Spanje — prijs 7.50 / 41.75 — citaat: “Rioja Coto de Imaz Reserva, 100% Tempranillo” (Dinerkaart › WIJNKAART › RODE WIJNEN › Spanje › pagina 4, kolom rechts, y=548)
+- `Cali Shark California Red` — Dinerkaart › WIJNKAART › RODE WIJNEN › USA — prijs 7.50 / 41.75 — citaat: “Cali Shark California Red” (Dinerkaart › WIJNKAART › RODE WIJNEN › USA › pagina 4, kolom rechts, y=478)
+- `Côtes d'Azur Rosé CHIC, Grenache, Cinsault, Château du Rouët` — Dinerkaart › WIJNKAART › ROSÉ WIJNEN — prijs 6.50 / 35.75 — citaat: “Côtes d'Azur Rosé CHIC, Grenache, Cinsault, Château du Rouët” (Dinerkaart › WIJNKAART › ROSÉ WIJNEN › pagina 4, kolom rechts, y=398)
+- … en 21 meer in het JSON-rapport
 
-**Verzonnen (38)**
-- `(2 stuks)` — DESSERT — prijs 3.75 — geen bronpassage (extractor-locator: pdf:2:item:6)
-- `3 stuks` — DESSERT — prijs 10.95 — geen bronpassage (extractor-locator: pdf:2:item:3)
-- `5 stuks` — DESSERT — prijs 15.95 — geen bronpassage (extractor-locator: pdf:2:item:4)
-- `bol vanille-ijs` — DESSERT — prijs 2.50 — geen bronpassage (extractor-locator: pdf:2:item:1)
-- `gezouten pecan, karamel` — DESSERT — prijs 12.95 — geen bronpassage (extractor-locator: pdf:2:item:2)
-- `zoete lekkernijen met` — DESSERT — prijs 13.95 — geen bronpassage (extractor-locator: pdf:2:item:5)
-- `0,375 ltr.` — Menukaart — prijs 55.00 — geen bronpassage (extractor-locator: pdf:1:item:66)
-- `0.750 ltr.` — Menukaart — prijs 95.00 — geen bronpassage (extractor-locator: pdf:1:item:67)
-- `1,5 ltr` — Menukaart — prijs 185.00 — geen bronpassage (extractor-locator: pdf:1:item:68)
-- `10 gram` — Menukaart — prijs 35.00 — geen bronpassage (extractor-locator: pdf:1:item:7)
-- `(2 st.) met citroenmayonaise` — Menukaart — prijs 21.95 — geen bronpassage (extractor-locator: pdf:1:item:10)
-- `(90 gram)` — Menukaart — prijs 15.95 — geen bronpassage (extractor-locator: pdf:1:item:12)
-- `blini’s en zure room` — Menukaart — prijs 5.00 — geen bronpassage (extractor-locator: pdf:1:item:8)
-- `Bourgogne Chardonnay Meursault, Seguin Manuel Les Clos` — Menukaart — prijs 105.00 — geen bronpassage (extractor-locator: pdf:1:item:62)
-- `Bourgogne Chardonnay Saint Aubin Domaine du Château Philippe le Hardi` — Menukaart — prijs 89.00 — geen bronpassage (extractor-locator: pdf:1:item:61)
-- `Canard à l’orange, knolselderij gratin, rode bietencrème, gele biet, Amsterdamse ui, sinaasappel gevogelte saus.` — Menukaart — prijs 27.95 — geen bronpassage (extractor-locator: pdf:1:item:18)
-- `Chateaubriand (om te delen 450 gr.), het beste stuk van de ossenhaas met Persillade boter of Béarnaise of` — Menukaart — prijs 74.95 — geen bronpassage (extractor-locator: pdf:1:item:16)
-- `Copperhead gin – Fever Tree` — Menukaart — prijs 8.75 — geen bronpassage (extractor-locator: pdf:1:item:48)
-- `diverse vleeswaren` — Menukaart — prijs 16.95 — geen bronpassage (extractor-locator: pdf:1:item:5)
-- `eendenlever` — Menukaart — prijs 6.75 — geen bronpassage (extractor-locator: pdf:1:item:13)
-- `Escargots, persillade, knoflooksabayon, croutons` — Menukaart — prijs 12.95 — geen bronpassage (extractor-locator: pdf:1:item:1)
-- `Espresso Martini M I x / COCKTAILS / G IN & T ONIC :` — Menukaart — prijs 11.75 — geen bronpassage (extractor-locator: pdf:1:item:36)
-- `gebakken bloedworst, brioche,` — Menukaart — prijs 18.95 — geen bronpassage (extractor-locator: pdf:1:item:14)
-- `gefrituurde kappertjes, uienconfit` — Menukaart — prijs 16.95 — geen bronpassage (extractor-locator: pdf:1:item:4)
-- `Gnocchi, saffraan, venkel, parmezaan` — Menukaart — prijs 22.95 — geen bronpassage (extractor-locator: pdf:1:item:22)
-- `Hele dorade van de grill , kruidenolie van salie, Zeetong à la meunière Dagprijs` — Menukaart — prijs 26.95 — geen bronpassage (extractor-locator: pdf:1:item:21)
-- `Likeuren en Grappa v.a.` — Menukaart — prijs 6.25 — geen bronpassage (extractor-locator: pdf:1:item:34)
-- `Per 2 stuks` — Menukaart — prijs 13.95 — geen bronpassage (extractor-locator: pdf:1:item:6)
-- `Per fles` — Menukaart — prijs 8.50 / 46.75 — geen bronpassage (extractor-locator: pdf:1:item:65)
-- `Per stuk` — Menukaart — prijs 4.00 — geen bronpassage (extractor-locator: pdf:1:item:2)
-- `Pornstar Martini C OGNAC & C ALVADOS :` — Menukaart — prijs 10.75 — geen bronpassage (extractor-locator: pdf:1:item:50)
-- `Poussin, krielkippetje van onze` — Menukaart — prijs 20.95 — geen bronpassage (extractor-locator: pdf:1:item:15)
-- `rivierkreeft, saffraanrouille` — Menukaart — prijs 13.95 — geen bronpassage (extractor-locator: pdf:1:item:9)
-- `Runderentrecote (220 gr.), met beurre de Paris` — Menukaart — prijs 37.95 — geen bronpassage (extractor-locator: pdf:1:item:19)
-- `Spaanse Ibericoham` — Menukaart — prijs 21.95 — geen bronpassage (extractor-locator: pdf:1:item:3)
-- `Spiced Mule` — Menukaart — prijs 6.95 — geen bronpassage (extractor-locator: pdf:1:item:49)
-- `tomaat, pruim, amandel` — Menukaart — prijs 16.95 — geen bronpassage (extractor-locator: pdf:1:item:11)
-- `Tournedos (170 gr.), spinazie, champignons, truffeljus` — Menukaart — prijs 37.95 — geen bronpassage (extractor-locator: pdf:1:item:20)
+**Verzonnen (35)**
+- `Likeuren en Grappa v.a.` — DINERKAART › D ESSERT w I j NEN & PORT: › D IGESTIVES : — prijs 6.25 — geen bronpassage (extractor-locator: pdf:12:item:2)
+- `Copperhead gin – Fever Tree` — DINERKAART › D ESSERT w I j NEN & PORT: › MOCKTAILS — prijs 8.75 — geen bronpassage (extractor-locator: pdf:14:item:1)
+- `Pornstar Martini` — DINERKAART › D ESSERT w I j NEN & PORT: › MOCKTAILS — prijs 10.75 — geen bronpassage (extractor-locator: pdf:14:item:3)
+- `Spiced Mule` — DINERKAART › D ESSERT w I j NEN & PORT: › MOCKTAILS — prijs 6.95 — geen bronpassage (extractor-locator: pdf:14:item:2)
+- `Chocolade truffels (2 stuks)` — DINERKAART › Ex TRA BI j › Sauternes — prijs 3.75 — geen bronpassage (extractor-locator: pdf:8:item:5)
+- `kweeperengelei` — DINERKAART › Ex TRA BI j › Sauternes — prijs 15.95 — geen bronpassage (extractor-locator: pdf:8:item:3)
+- `Plateau de fromage` — DINERKAART › Ex TRA BI j › Sauternes — prijs 10.95 — geen bronpassage (extractor-locator: pdf:8:item:2)
+- `Poussin, krielkippetje van onze` — DINERKAART › HOOFDGEREC HTEN › BARDOT — prijs 20.95 — geen bronpassage (extractor-locator: pdf:4:item:1)
+- `Canard à l’orange, knolselderij gratin, rode bietencrème, gele biet, Amsterdamse ui, sinaasappel gevogelte saus.` — DINERKAART › HOOFDGEREC HTEN › Bogle Chardonnay — prijs 27.95 — geen bronpassage (extractor-locator: pdf:5:item:3)
+- `Chateaubriand (om te delen 450 gr.), het beste stuk van de ossenhaas met Persillade boter of Béarnaise of` — DINERKAART › HOOFDGEREC HTEN › Bogle Chardonnay — prijs 74.95 — geen bronpassage (extractor-locator: pdf:5:item:1)
+- `Gnocchi, saffraan, venkel, parmezaan` — DINERKAART › HOOFDGEREC HTEN › Bogle Chardonnay — prijs 22.95 — geen bronpassage (extractor-locator: pdf:5:item:7)
+- `Hele dorade van de grill , kruidenolie van salie, Zeetong à la meunière Dagprijs` — DINERKAART › HOOFDGEREC HTEN › Bogle Chardonnay — prijs 26.95 — geen bronpassage (extractor-locator: pdf:5:item:6)
+- `Runderentrecote (220 gr.), met beurre de Paris` — DINERKAART › HOOFDGEREC HTEN › Bogle Chardonnay — prijs 37.95 — geen bronpassage (extractor-locator: pdf:5:item:4)
+- `Tournedos (170 gr.), spinazie, champignons, truffeljus` — DINERKAART › HOOFDGEREC HTEN › Bogle Chardonnay — prijs 37.95 — geen bronpassage (extractor-locator: pdf:5:item:5)
+- `Garnalenkroketten (2 st.) met citroenmayonaise` — DINERKAART › KL ASSIEKE BORRELHAPPEN › Chablis Chardonnay — prijs 21.95 — geen bronpassage (extractor-locator: pdf:2:item:7)
+- `Extra topping: Gin Tonic schuim & Sinaasappel` — DINERKAART › KL ASSIEKE BORRELHAPPEN — prijs 0.95 — geen bronpassage (extractor-locator: pdf:1:item:2)
+- `Naturel met sjalottenvinaigrette en citroen Per stuk` — DINERKAART › KL ASSIEKE BORRELHAPPEN — prijs 4.00 — geen bronpassage (extractor-locator: pdf:1:item:1)
+- `1,5 ltr` — DINERKAART › Menukaart — prijs 185.00 — geen bronpassage (extractor-locator: pdf:3:item:6)
+- `Bordeaux Margaux` — DINERKAART › Menukaart — prijs 79.00 — geen bronpassage (extractor-locator: pdf:3:item:5)
+- `Escargots, persillade, knoflooksabayon, croutons` — DINERKAART › Menukaart — prijs 12.95 — geen bronpassage (extractor-locator: pdf:3:item:1)
+- `GERECHTEN : Sauternes` — DINERKAART › Menukaart — prijs 7.25 — geen bronpassage (extractor-locator: pdf:3:item:3)
+- `z E KLEINE GASTEN Rode Port Ruby / Witte port` — DINERKAART › Menukaart — prijs 5.00 — geen bronpassage (extractor-locator: pdf:3:item:4)
+- `DESSERT Pornstar Martini` — DINERKAART › N AAST DE KAART — prijs 11.75 — geen bronpassage (extractor-locator: pdf:9:item:2)
+- `Indien wij rekening dienen te houden Chivas Regal 12 yrs.` — DINERKAART › N AAST DE KAART — prijs 7.75 — geen bronpassage (extractor-locator: pdf:9:item:4)
+- `met een allergie` — DINERKAART › N AAST DE KAART — prijs 10.75 — geen bronpassage (extractor-locator: pdf:9:item:5)
+- `Niet alle ingrediënten worden vermeld. Glenfiddich 12 yrs.` — DINERKAART › N AAST DE KAART — prijs 8.00 — geen bronpassage (extractor-locator: pdf:9:item:3)
+- `w I j w ISSELEND E Limoncello Primo` — DINERKAART › N AAST DE KAART — prijs 5.75 — geen bronpassage (extractor-locator: pdf:9:item:1)
+- `Champagne Charles LaFITTE` — DINERKAART › USA › MOUSSERENDE w I j NEN: — prijs 79.75 — geen bronpassage (extractor-locator: pdf:19:item:1)
+- `Champagne Charles LaFITTE` — DINERKAART › USA › MOUSSERENDE w I j NEN: — prijs 89.75 — geen bronpassage (extractor-locator: pdf:19:item:2)
+- `Champagne Vranken 0` — DINERKAART › USA › MOUSSERENDE w I j NEN: — prijs 55.00 — geen bronpassage (extractor-locator: pdf:19:item:3)
+- `cuvée Diamant Brut 0.750 ltr.` — DINERKAART › USA › MOUSSERENDE w I j NEN: — prijs 95.00 — geen bronpassage (extractor-locator: pdf:19:item:4)
+- `Languedoc-Roussillion` — DINERKAART › USA › ROSÉ w I j NEN: — prijs 41.25 — geen bronpassage (extractor-locator: pdf:18:item:1)
+- `Ultimate Provence Rosé` — DINERKAART › USA › ROSÉ w I j NEN: — prijs 42.50 — geen bronpassage (extractor-locator: pdf:18:item:2)
+- `Bourgogne Chardonnay Meursault, Seguin Manuel Les Clos` — DINERKAART › w I j NKAART › Fèvre-Fèvre — prijs 105.00 — geen bronpassage (extractor-locator: pdf:16:item:2)
+- `Bourgogne Chardonnay Saint Aubin Domaine du Château Philippe le Hardi` — DINERKAART › w I j NKAART › Fèvre-Fèvre — prijs 89.00 — geen bronpassage (extractor-locator: pdf:16:item:1)
 
 **Prijsfouten (0)**
 - geen
 
-**Rubriekfouten (36)**
-- `Crodino (alcoholvrij)` — verwacht Dinerkaart › APERATIEF — gelezen Menukaart
-- `Martha's Porto 10 yrs.` — verwacht Dinerkaart › APERATIEF — gelezen Menukaart
-- `Pernod / Ricard / Martini Bianco / Martini Rosso / Campari` — verwacht Dinerkaart › APERATIEF — gelezen Menukaart
-- `Rode Port Ruby / Witte port` — verwacht Dinerkaart › APERATIEF — gelezen Menukaart
-- `Armagnac VSOP` — verwacht Dinerkaart › COGNAC & CALVADOS — gelezen Menukaart
-- `Calvados Père Magloire VSOP` — verwacht Dinerkaart › COGNAC & CALVADOS — gelezen Menukaart
-- `Courvoisier VS` — verwacht Dinerkaart › COGNAC & CALVADOS — gelezen Menukaart
-- `Martell VS` — verwacht Dinerkaart › COGNAC & CALVADOS — gelezen Menukaart
-- `Rémy Martin VSOP` — verwacht Dinerkaart › COGNAC & CALVADOS — gelezen Menukaart
-- `Crème brûlée` — verwacht Dinerkaart › DESSERT — gelezen Menukaart
-- `Café Spécial` — verwacht Dinerkaart › DIGESTIVES — gelezen Menukaart
-- `Espresso Martini` — verwacht Dinerkaart › DIGESTIVES — gelezen Menukaart
-- `Limoncello Primo` — verwacht Dinerkaart › DIGESTIVES — gelezen Menukaart
-- `Klassieke steak tartaar (150 gram)` — verwacht Dinerkaart › HOOFDGERECHTEN — gelezen Menukaart
-- `Amaretto Sour` — verwacht Dinerkaart › MIX / COCKTAILS / GIN & TONIC — gelezen Menukaart
-- `Aperol Spritz` — verwacht Dinerkaart › MIX / COCKTAILS / GIN & TONIC — gelezen Menukaart
-- `Copperhead gin – Fever Tree` — verwacht Dinerkaart › MIX / COCKTAILS / GIN & TONIC — gelezen Menukaart
-- `Hendrick's gin – Fever Tree` — verwacht Dinerkaart › MIX / COCKTAILS / GIN & TONIC — gelezen Menukaart
-- `Limoncello Spritz` — verwacht Dinerkaart › MIX / COCKTAILS / GIN & TONIC — gelezen Menukaart
-- `Mimosa` — verwacht Dinerkaart › MIX / COCKTAILS / GIN & TONIC — gelezen Menukaart
-- `Moscow mule` — verwacht Dinerkaart › MIX / COCKTAILS / GIN & TONIC — gelezen Menukaart
-- `Negroni` — verwacht Dinerkaart › MIX / COCKTAILS / GIN & TONIC — gelezen Menukaart
-- `Pornstar Martini` — verwacht Dinerkaart › MIX / COCKTAILS / GIN & TONIC — gelezen Menukaart
-- `Whisky Sour` — verwacht Dinerkaart › MIX / COCKTAILS / GIN & TONIC — gelezen Menukaart
-- `Chivas Regal 12 yrs.` — verwacht Dinerkaart › WHISKY — gelezen Menukaart
-- `Glenfiddich 12 yrs.` — verwacht Dinerkaart › WHISKY — gelezen Menukaart
-- `Jack Daniel's` — verwacht Dinerkaart › WHISKY — gelezen Menukaart
-- `Jameson` — verwacht Dinerkaart › WHISKY — gelezen Menukaart
-- `Oban 14 yrs.` — verwacht Dinerkaart › WHISKY — gelezen Menukaart
-- `Banyuls Traditionnel Aphrodis` — verwacht Dinerkaart › WIJNEN & PORT — gelezen Menukaart
-- `Martha's Porto 10 yrs.` — verwacht Dinerkaart › WIJNEN & PORT — gelezen Menukaart
-- `Muscat de Beaumes de Venise` — verwacht Dinerkaart › WIJNEN & PORT — gelezen Menukaart
-- `Pedro Ximénez, Mil Pesetas, Jerez` — verwacht Dinerkaart › WIJNEN & PORT — gelezen Menukaart
-- `Sauternes, Le Terre du Lys d'Or` — verwacht Dinerkaart › WIJNEN & PORT — gelezen Menukaart
-- `Pays d'Oc Merlot, Croix d'Or` — verwacht Dinerkaart › WIJNKAART › RODE WIJNEN › Frankrijk — gelezen Menukaart
-- `Viognier Condrieu Noordelijk Rhônegebied` — verwacht Dinerkaart › WIJNKAART › WITTE WIJNEN › Frankrijk — gelezen Menukaart
+**Rubriekfouten (51)**
+- `Crodino (alcoholvrij)` — verwacht Dinerkaart › APERATIEF — gelezen DINERKAART › D ESSERT w I j NEN & PORT: › APERATIEF:
+- `Martha's Porto 10 yrs.` — verwacht Dinerkaart › APERATIEF — gelezen DINERKAART › D ESSERT w I j NEN & PORT: › APERATIEF:
+- `Pernod / Ricard / Martini Bianco / Martini Rosso / Campari` — verwacht Dinerkaart › APERATIEF — gelezen DINERKAART › D ESSERT w I j NEN & PORT: › APERATIEF:
+- `Armagnac VSOP` — verwacht Dinerkaart › COGNAC & CALVADOS — gelezen DINERKAART › D ESSERT w I j NEN & PORT: › C OGNAC & C ALVADOS :
+- `Calvados Père Magloire VSOP` — verwacht Dinerkaart › COGNAC & CALVADOS — gelezen DINERKAART › D ESSERT w I j NEN & PORT: › C OGNAC & C ALVADOS :
+- `Courvoisier VS` — verwacht Dinerkaart › COGNAC & CALVADOS — gelezen DINERKAART › D ESSERT w I j NEN & PORT: › C OGNAC & C ALVADOS :
+- `Martell VS` — verwacht Dinerkaart › COGNAC & CALVADOS — gelezen DINERKAART › D ESSERT w I j NEN & PORT: › C OGNAC & C ALVADOS :
+- `Rémy Martin VSOP` — verwacht Dinerkaart › COGNAC & CALVADOS — gelezen DINERKAART › D ESSERT w I j NEN & PORT: › C OGNAC & C ALVADOS :
+- `Café complet` — verwacht Dinerkaart › DESSERT — gelezen DINERKAART › Ex TRA BI j › Sauternes
+- `Crème brûlée` — verwacht Dinerkaart › DESSERT — gelezen DINERKAART › Menukaart
+- `Mousse au chocolat` — verwacht Dinerkaart › DESSERT — gelezen DINERKAART › Ex TRA BI j › Sauternes
+- `Café Spécial` — verwacht Dinerkaart › DIGESTIVES — gelezen DINERKAART › D ESSERT w I j NEN & PORT: › D IGESTIVES :
+- `Espresso Martini` — verwacht Dinerkaart › DIGESTIVES — gelezen DINERKAART › D ESSERT w I j NEN & PORT: › D IGESTIVES :
+- `Desem stokbrood met seizoensroomboter en olijfolie` — verwacht Dinerkaart › ExTRA BIjGERECHTEN — gelezen DINERKAART › Ex TRA BI j
+- `Frisse botersalade` — verwacht Dinerkaart › ExTRA BIjGERECHTEN — gelezen DINERKAART › Ex TRA BI j
+- `Seizoensgroenten` — verwacht Dinerkaart › ExTRA BIjGERECHTEN — gelezen DINERKAART › Ex TRA BI j
+- `Verse frites met Belgische mayonaise` — verwacht Dinerkaart › ExTRA BIjGERECHTEN — gelezen DINERKAART › Ex TRA BI j
+- `Verse frites met truffelmayonaise en parmezaan` — verwacht Dinerkaart › ExTRA BIjGERECHTEN — gelezen DINERKAART › Ex TRA BI j
+- `Klassieke steak tartaar (150 gram)` — verwacht Dinerkaart › HOOFDGERECHTEN — gelezen DINERKAART › HOOFDGEREC HTEN › Bogle Chardonnay
+- `Charcuterie` — verwacht Dinerkaart › KLASSIEKE BORRELHAPPEN — gelezen DINERKAART › KL ASSIEKE BORRELHAPPEN › Chablis Chardonnay
+- `Kaviaar 'Osietra'` — verwacht Dinerkaart › KLASSIEKE BORRELHAPPEN — gelezen DINERKAART › KL ASSIEKE BORRELHAPPEN › Chablis Chardonnay
+- `Paling` — verwacht Dinerkaart › KLASSIEKE BORRELHAPPEN — gelezen DINERKAART › KL ASSIEKE BORRELHAPPEN › Chablis Chardonnay
+- `Pata Negra (70 gr.)` — verwacht Dinerkaart › KLASSIEKE BORRELHAPPEN — gelezen DINERKAART › KL ASSIEKE BORRELHAPPEN › Chablis Chardonnay
+- `Paté en croute` — verwacht Dinerkaart › KLASSIEKE BORRELHAPPEN — gelezen DINERKAART › KL ASSIEKE BORRELHAPPEN › Chablis Chardonnay
+- `Amaretto Sour` — verwacht Dinerkaart › MIX / COCKTAILS / GIN & TONIC — gelezen DINERKAART › D ESSERT w I j NEN & PORT: › M I x / COCKTAILS / G IN & T ONIC :
+- `Aperol Spritz` — verwacht Dinerkaart › MIX / COCKTAILS / GIN & TONIC — gelezen DINERKAART › D ESSERT w I j NEN & PORT: › M I x / COCKTAILS / G IN & T ONIC :
+- `Copperhead gin – Fever Tree` — verwacht Dinerkaart › MIX / COCKTAILS / GIN & TONIC — gelezen DINERKAART › D ESSERT w I j NEN & PORT: › M I x / COCKTAILS / G IN & T ONIC :
+- `Espresso Martini` — verwacht Dinerkaart › MIX / COCKTAILS / GIN & TONIC — gelezen DINERKAART › D ESSERT w I j NEN & PORT: › M I x / COCKTAILS / G IN & T ONIC :
+- `Hendrick's gin – Fever Tree` — verwacht Dinerkaart › MIX / COCKTAILS / GIN & TONIC — gelezen DINERKAART › D ESSERT w I j NEN & PORT: › M I x / COCKTAILS / G IN & T ONIC :
+- `Limoncello Spritz` — verwacht Dinerkaart › MIX / COCKTAILS / GIN & TONIC — gelezen DINERKAART › D ESSERT w I j NEN & PORT: › M I x / COCKTAILS / G IN & T ONIC :
+- `Mimosa` — verwacht Dinerkaart › MIX / COCKTAILS / GIN & TONIC — gelezen DINERKAART › D ESSERT w I j NEN & PORT: › M I x / COCKTAILS / G IN & T ONIC :
+- `Moscow mule` — verwacht Dinerkaart › MIX / COCKTAILS / GIN & TONIC — gelezen DINERKAART › D ESSERT w I j NEN & PORT: › M I x / COCKTAILS / G IN & T ONIC :
+- `Negroni` — verwacht Dinerkaart › MIX / COCKTAILS / GIN & TONIC — gelezen DINERKAART › D ESSERT w I j NEN & PORT: › M I x / COCKTAILS / G IN & T ONIC :
+- `Whisky Sour` — verwacht Dinerkaart › MIX / COCKTAILS / GIN & TONIC — gelezen DINERKAART › D ESSERT w I j NEN & PORT: › M I x / COCKTAILS / G IN & T ONIC :
+- `Kipfilet of witvis` — verwacht Dinerkaart › VOOR ONZE KLEINE GASTEN — gelezen DINERKAART › Ex TRA BI j › V OOR ON
+- `Bisque de homard` — verwacht Dinerkaart › VOORGERECHTEN — gelezen DINERKAART › KL ASSIEKE BORRELHAPPEN › Chablis Chardonnay
+- `Boudin Noir` — verwacht Dinerkaart › VOORGERECHTEN — gelezen DINERKAART › KL ASSIEKE BORRELHAPPEN › Chablis Chardonnay
+- `Gravad lax` — verwacht Dinerkaart › VOORGERECHTEN — gelezen DINERKAART › KL ASSIEKE BORRELHAPPEN › Chablis Chardonnay
+- `Klassieke steak tartaar (90 gram)` — verwacht Dinerkaart › VOORGERECHTEN — gelezen DINERKAART › KL ASSIEKE BORRELHAPPEN › Chablis Chardonnay
+- `Stracciatella` — verwacht Dinerkaart › VOORGERECHTEN — gelezen DINERKAART › KL ASSIEKE BORRELHAPPEN › Chablis Chardonnay
 
 **Beperkingen**
 - Alleen de dinerkaart-PDF (2025-11) is vastgezet en gebruikt. De twee HTML-pagina's uit dezelfde capture gaven bij verificatie andere bytes dan de gepinde hash en leveren daarom geen referentie.
@@ -167,11 +168,11 @@ De totalen zijn per kaart afzonderlijk te lezen en worden nooit tot één succes
 - 'v.a. 6,25' bij Likeuren en Grappa is als prijsvariant met label 'vanaf' vastgelegd; de bron noemt geen ander bedrag.
 - Deze referentie is uit de vastgezette PDF-tekst en de paginageometrie opgesteld, niet uit de parseruitvoer.
 - Deze bron is een PDF zonder bijbehorende HTML-pagina — restaurantgegevens konden hier niet uit worden afgeleid.
-- PDF https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf: 7 supplementregel(s) zijn niet als gerecht opgenomen; het concept ondersteunt supplementen nog niet.
-- PDF https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf: 15 regel(s) met een prijs- of hoeveelheidsgetal dat niet eenduidig aan een gerecht is te koppelen, zijn niet als gerecht overgenomen.
-- PDF https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf: 31 prijsregel(s) konden zonder aantoonbare lokale naam-/prijskoppeling niet als gerecht worden opgenomen.
-- PDF https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf: 44 mogelijke rubriekkop(pen) zijn niet herkend en dus niet als rubriek opgeslagen.
-- Kwaliteitscontrole op de deterministische extractie vraagt aandacht (long_item_name, duplicate_item_within_category, unresolved_price, pdf_supplements_skipped, pdf_ambiguous_price_lines, pdf_unlinked_price_lines, pdf_unrecognised_headings); het resultaat is niet als volledig beoordeeld.
+- PDF https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf: 6 supplementregel(s) zijn niet als gerecht opgenomen; het concept ondersteunt supplementen nog niet.
+- PDF https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf: 27 regel(s) met een prijs- of hoeveelheidsgetal dat niet eenduidig aan een gerecht is te koppelen, zijn niet als gerecht overgenomen.
+- PDF https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf: 4 prijsregel(s) konden zonder aantoonbare lokale naam-/prijskoppeling niet als gerecht worden opgenomen.
+- PDF https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf: 5 mogelijke rubriekkop(pen) zijn niet herkend en dus niet als rubriek opgeslagen.
+- Kwaliteitscontrole op de deterministische extractie vraagt aandacht (long_item_name, duplicate_item_across_categories, unresolved_price, duplicate_item_within_category, pdf_supplements_skipped, pdf_ambiguous_price_lines, pdf_unlinked_price_lines, pdf_unrecognised_headings); het resultaat is niet als volledig beoordeeld.
 
 **Vastgezette bronversie:** 3 capture(s); html 9c6422963d28, html 45e96b351f93, pdf 487ba29f4bf8
 

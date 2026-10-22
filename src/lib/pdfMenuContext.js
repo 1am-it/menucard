@@ -114,7 +114,11 @@ function pdfContextToMenuContext(context, usedSlugs, options = {}) {
   const menu = {
     name: 'Menukaart',
     contextSlug: sourceSlug,
-    title: hierarchy.title,
+    // A PDF whose sections print no shared heading of their own keeps every
+    // section path as printed and takes the card's own cover title as the menu
+    // title ("Dinerkaart"), so the route stays complete and nothing is invented
+    // (#59 Lead review 6351417692 K1).
+    title: hierarchy.title || boundedText(options.titleFallback),
     structure: hierarchy.structure,
     categories,
     extractionMethod: 'pdf_text',

@@ -797,6 +797,168 @@ function mergeBridgedPriceColumns(columns, anchors, bridgedPriceItems) {
 }
 
 
+/** In a text PDF that prints its amounts in their own column, an amount belongs
+ *  to the dish name printed on the SAME row. pdfjs may group the four
+ *  coordinates of one row as two or three page columns, so this is the one
+ *  cross-column relation the parser uses. Measured on a real card whose amount
+ *  column sits two units above the name's own baseline. */
+const SAME_ROW_BASELINE_TOLERANCE = 3
+
+/** The highest baseline Y of one grouped baseline. */
+function baselineTopY(baseline) {
+  return Math.max(...(Array.isArray(baseline) ? baseline : []).map((item) => (typeof item.y === 'number' ? item.y : 0)))
+}
+
+
+/**
+ * A price-less line that reads as a printed section heading: printed entirely in
+ * capitals ("KLASSIEKE BORRELHAPPEN") or set in letter-spaced chunks
+ * ("Ex TRA BI j GERECHTEN", "w I j NEN & PORT:"). It becomes a rubriek with the
+ * literal text the card prints and never a dish. Bounded by length and word
+ * count so a capitalised sentence or an ordinary dish line is never read as a
+ * heading, and never used when the dish's own amount is printed on the row
+ * directly below the capitals.
+ */
+const HEADING_MAX_CHARS = 60
+const HEADING_MAX_WORDS = 12
+
+function isPrintedSectionHeading(lineText) {
+  const text = String(lineText || '').replace(/\s+/g, ' ').trim()
+  if (!text || text.length > HEADING_MAX_CHARS) return false
+  const words = text.split(' ').filter(Boolean)
+  if (words.length === 0 || words.length > HEADING_MAX_WORDS) return false
+  const letters = text.match(/\p{L}/gu) || []
+  if (letters.length < 3) return false
+  const upperOnly = letters.every((letter) => !/\p{Ll}/u.test(letter))
+  if (upperOnly && words.length <= 6) return true
+  // Letter-spaced chunks: three or more short runs including at least one
+  // single letter, and at least one capitalised chunk. A dish line
+  // ("Lipton Ice Tea Sparkling /") has no single-letter run and never qualifies.
+  const chunks = words.filter((word) => /^[\p{L}&/:|.,-]+$/u.test(word))
+  if (chunks.length < 3 || !chunks.some((chunk) => /^\p{Lu}/u.test(chunk))) return false
+  if (!chunks.some((chunk) => (chunk.match(/\p{L}/gu) || []).length === 1)) return false
+  const short = chunks.filter((chunk) => (chunk.match(/\p{L}/gu) || []).length <= 3)
+  return short.length >= Math.ceil(chunks.length * 0.5) && letters.length >= 6
+}
+
+/**
+ * A cover page prints the card's own title as letter-spaced single characters
+ * ("D I N E R K A A R T"). Joined in reading order that is the one name the card
+ * gives itself, so it can label the menu without inventing anything. Only a
+ * page that prints no amount at all can be the cover, and only the first such
+ * line in the document counts.
+ */
+function letterSpacedTitle(page) {
+  for (const line of (page && Array.isArray(page.lines) && page.lines) || []) {
+    const letters = ((line && Array.isArray(line.items) ? line.items : []) || [])
+      .map((item) => (item && typeof item.str === 'string' ? item.str.trim() : ''))
+      .filter(Boolean)
+    if (letters.length < 5) continue
+    if (!letters.every((text) => /^\p{L}$/u.test(text))) continue
+    const title = letters.join('')
+    if (title.length < 5 || title.length > 40) continue
+    return title
+  }
+  return null
+}
+
+function pageHasAnyAmount(page) {
+  for (const line of (page && Array.isArray(page.lines) && page.lines) || []) {
+    for (const item of (line && Array.isArray(line.items) ? line.items : []) || []) {
+      if (item && typeof item.str === 'string' && isPriceToken(item.str.trim())) return true
+    }
+  }
+  return false
+}
+
+/**
+ * The printed designation of a dish line and the description printed after it
+ * ("Pata Negra (70 gr.), Spaanse Ibericoham", "Paté en croute, gefrituurde
+ * kappertjes, uienconfit"). Split at the first comma whose tail continues in
+ * lower case; without such a comma the whole line stays the name. The printed
+ * line itself stays in the item's evidence text.
+ */
+function splitPrintedDesignation(text) {
+  const value = String(text || '').replace(/\s+/g, ' ').trim()
+  const match = /^([^,]{2,80}),\s*(.{3,})$/u.exec(value)
+  if (!match) return null
+  const name = match[1].trim()
+  const description = match[2].trim()
+  if ((name.match(/\p{L}/gu) || []).length < 2 || description.length < 3) return null
+  return { name, description }
+}
+/**
+ * A card may print a dish's name in one column and its description with the
+ * amount in the next ("Pata Negra (70 gr.)," | "Spaanse Ibericoham 21.95"). That
+ * second column is a continuation of the first, not a second menu, and the page
+ * itself proves it: at least three of its rows carry an amount while the nearest
+ * left column carries none at all. Only then are same-row rows joined, so a
+ * normal two-column menu, a printed heading and a call-to-action keep their own
+ * row. The moved items stay marked as printed in an amount column.
+ */
+const CONTINUATION_MIN_ROWS = 3
+
+function joinContinuationColumns(columnBaselines) {
+  const columns = Array.isArray(columnBaselines) ? columnBaselines : []
+  if (columns.length < 2) return 0
+  const stats = columns.map((column) => {
+    let withAmount = 0
+    let textOnly = 0
+    for (const baseline of column || []) {
+      const hasText = (baseline || []).some((item) => item && typeof item.str === 'string' && /\p{L}/u.test(item.str))
+      if (containsPriceToken(baseline)) withAmount += 1
+      else if (hasText) textOnly += 1
+    }
+    return { withAmount, textOnly }
+  })
+  const consumed = new Set()
+  const repairs = []
+  for (let index = 1; index < columns.length; index += 1) {
+    if (stats[index].withAmount < CONTINUATION_MIN_ROWS) continue
+    let left = -1
+    for (let candidate = index - 1; candidate >= 0; candidate -= 1) {
+      if ((columns[candidate] || []).length > 0) {
+        left = candidate
+        break
+      }
+    }
+    if (left < 0) continue
+    // The left column must be, in essence, a name column: three times fewer
+    // rows with an amount than the continuation column. A normal two-column
+    // menu (both columns priced) never qualifies.
+    if (stats[left].textOnly < CONTINUATION_MIN_ROWS) continue
+    if (stats[left].withAmount * 3 > stats[index].withAmount) continue
+    for (const amountBaseline of columns[index] || []) {
+      if (consumed.has(amountBaseline) || !containsPriceToken(amountBaseline)) continue
+      const y = baselineTopY(amountBaseline)
+      const targets = (columns[left] || []).filter(
+        (baseline) =>
+          !consumed.has(baseline) &&
+          !containsPriceToken(baseline) &&
+          (baseline || []).some((item) => item && typeof item.str === 'string' && /\p{L}/u.test(item.str)) &&
+          Math.abs(baselineTopY(baseline) - y) <= SAME_ROW_BASELINE_TOLERANCE,
+      )
+      if (targets.length !== 1) continue
+      repairs.push({ target: targets[0], amountBaseline })
+      consumed.add(amountBaseline)
+    }
+  }
+  if (repairs.length === 0) return 0
+  for (const repair of repairs) {
+    for (const item of repair.amountBaseline) {
+      item.sameRowAmount = true
+      repair.target.push(item)
+    }
+    repair.target.sort((a, b) => a.x - b.x)
+  }
+  for (const column of columns) {
+    for (let index = column.length - 1; index >= 0; index -= 1) {
+      if (consumed.has(column[index]) || column[index].length === 0) column.splice(index, 1)
+    }
+  }
+  return repairs.length
+}
+
 /** pdfjs may group a name, its description and its price into one visual
  * "line" even when they sit on slightly different baselines. Keep those
  * baselines separate so a description is never glued onto the dish name. A
@@ -914,6 +1076,14 @@ function structurePdfLinesIntoMenu(pages) {
     // mergeBridgedPriceColumns); counted so the measurement can report the
     // repair separately from an ordinary in-column name/price pair.
     bridgedPricePairs: 0,
+    // Rows whose amount is printed in its own column on the SAME printed row as
+    // the dish name. Joined as one row (mergeSameRowPriceColumns) so the name
+    // keeps its own amount and the text printed between them stays the
+    // description; counted so review can see the repair separately.
+    sameRowPricePairs: 0,
+    // The card's own title, when its cover page prints it as letter-spaced
+    // characters ("D I N E R K A A R T"). Never guessed from a filename.
+    documentTitle: null,
     // Bounded provenance for a supplement section: the printed heading and
     // page numbers only. Never the supplement item names or amounts.
     supplementSections: [],
@@ -951,6 +1121,13 @@ function structurePdfLinesIntoMenu(pages) {
   const bridgedPriceItems = new WeakSet()
 
   for (const page of Array.isArray(pages) ? pages : []) {
+    // A cover page that prints no amount at all can carry the card's own title
+    // as letter-spaced characters. Only the first page that proves one supplies
+    // the menu title, and nothing is derived from a file name or a URL.
+    if (!layout.documentTitle && !pageHasAnyAmount(page)) {
+      const title = letterSpacedTitle(page)
+      if (title) layout.documentTitle = title
+    }
     // A document may draw the same text twice (confirmed in the real Smelt
     // PDF: a complete second left column, 40 units higher). The later copy is
     // an overlay and is ignored; see duplicateLayoutLayer's own header.
@@ -992,6 +1169,13 @@ function structurePdfLinesIntoMenu(pages) {
     columnBaselines.forEach((baselines, columnIndex) => {
       columnBaselines[columnIndex] = splitColumnByBaseline(baselines.flat())
     })
+    // A card that prints a dish's description and amount in the next column
+    // prints them on the SAME row as the name. The page itself proves that
+    // relation (no amount at all in the name column), so the row is joined
+    // before anything is read: the name keeps its own amount and the text
+    // printed between them stays the description, never a dish.
+    const sameRowRepairs = joinContinuationColumns(columnBaselines)
+    if (sameRowRepairs > 0) layout.sameRowPricePairs += sameRowRepairs
 
     // Headings on this page, in visual order. A column that prints no heading of
     // its own continues the section of the adjacent column above it (a real
@@ -1233,6 +1417,35 @@ function structurePdfLinesIntoMenu(pages) {
           }
 
           const words = tokenizeLineIntoWords(baselineItems)
+          // A price-less line printed entirely in capitals heads a section on a
+          // printed card ("KLASSIEKE BORRELHAPPEN"), whatever the wording: it
+          // becomes a rubriek and never a dish. Bounded by length and word count,
+          // and never used when the dish's own amount is printed on the row
+          // directly below the capitals.
+          if (
+            isPrintedSectionHeading(lineText) &&
+            !words.some((word) => isPriceToken(word.text)) &&
+            !(priceOnlyBaseline(nextBaseline) && baselinesAreVerticallyAdjacent(baselineItems, nextBaseline))
+          ) {
+            state.supplementSection = null
+            if (state.inheritedParentActive && state.categoryPath && state.categoryPath.length > 0) {
+              state.categoryPath = [...state.categoryPath, lineText]
+              state.categoryInferred = true
+              state.inheritedParentActive = false
+              state.inheritedSectionPending = false
+              layout.inheritedSubheadingColumns += 1
+            } else if (!state.menuName) {
+              state.menuName = lineText
+              state.categoryPath = [lineText]
+              state.categoryInferred = false
+            } else {
+              state.categoryPath = [state.menuName, lineText]
+              state.categoryInferred = true
+            }
+            state.lastItem = null
+            state.pendingSupplement = false
+            continue
+          }
           // A line explicitly labelled "Supplement ..." is a relation the
           // product cannot store. It is never emitted as an ordinary dish,
           // whether the amount is printed inline ("Supplement serranoham 2.5")
@@ -1480,6 +1693,10 @@ function structurePdfLinesIntoMenu(pages) {
                 ...(recognized.priceVariants ? { priceVariants: recognized.priceVariants, priceText: recognized.priceText } : {}),
                 startX: recognized.startX,
                 evidenceText: lineText,
+                // The amount of this row was printed in its own column; the
+                // printed designation and the text after it are separated once,
+                // in the item mapping below, and never guessed here.
+                ...(baselineItems.some((it) => it && it.sameRowAmount === true) ? { priceColumnRow: true } : {}),
               }
               addItem(category, item)
               state.lastItem = item
@@ -1573,16 +1790,24 @@ function structurePdfLinesIntoMenu(pages) {
       name: category.name,
       ...(category.path.length > 0 ? { path: category.path } : {}),
       ...(category.uncertain ? { uncertain: true } : {}),
-      items: category.items.map((item) => ({
-        name: item.name,
-        desc: item.desc,
-        price: item.price,
-        priceStatus: item.priceStatus,
-        ...(item.priceVariants ? { priceVariants: item.priceVariants } : {}),
-        ...(item.priceText ? { priceText: item.priceText } : {}),
-        confidence: MENU_ITEM_CONFIDENCE,
-        contentHash: computeFieldEvidenceHash(item.evidenceText),
-      })),
+      items: category.items.map((item) => {
+        // A row whose amount is printed in its own column keeps the printed
+        // designation as the dish and the printed text after it as the
+        // description ("Pata Negra (70 gr.), Spaanse Ibericoham"). The whole
+        // printed line stays in the evidence content hash.
+        const printed = item.priceColumnRow ? splitPrintedDesignation(item.name) : null
+        const desc = printed ? [printed.description, item.desc].filter(Boolean).join(' ') || null : item.desc
+        return {
+          name: printed ? printed.name : item.name,
+          desc,
+          price: item.price,
+          priceStatus: item.priceStatus,
+          ...(item.priceVariants ? { priceVariants: item.priceVariants } : {}),
+          ...(item.priceText ? { priceText: item.priceText } : {}),
+          confidence: MENU_ITEM_CONFIDENCE,
+          contentHash: computeFieldEvidenceHash(item.evidenceText),
+        }
+      }),
     }))
     .filter((category) => category.items.length > 0)
 

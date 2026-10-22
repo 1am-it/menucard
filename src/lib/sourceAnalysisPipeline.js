@@ -62,7 +62,10 @@ function dispatchCandidateResponse(fetchResult) {
  */
 async function buildDirectPdfAnalysis({ pdfBytes, sourceUrl, sourceId = 'source-1', structuredExtraction } = {}) {
   const { context: pdfContext, extractionText, extractionTextTruncated } = await readPdfMenuSource(pdfBytes, sourceUrl, sourceId);
-  const converted = pdfContextToMenuContext(pdfContext, new Set(), { sourceId });
+  const converted = pdfContextToMenuContext(pdfContext, new Set(), {
+    sourceId,
+    titleFallback: pdfContext.layout && pdfContext.layout.documentTitle,
+  });
   const menuContexts = converted ? [{ ...converted.menu, sourceUrl, sourceId }] : [];
   const sourceInventory = [{
     id: sourceId,

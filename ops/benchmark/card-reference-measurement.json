@@ -59,13 +59,13 @@
     "capturedSources": 3,
     "blockedSources": 1,
     "referenceItems": 178,
-    "actualItems": 138,
+    "actualItems": 150,
     "matched": 63,
-    "missing": 79,
-    "invented": 39,
+    "missing": 64,
+    "invented": 36,
     "priceErrors": 0,
-    "categoryErrors": 36,
-    "precision": 45.65,
+    "categoryErrors": 51,
+    "precision": 42,
     "recall": 35.39,
     "blocked": [
       {
@@ -80,26 +80,26 @@
       "label": "Brasserie Bardot",
       "sourceId": "bardot",
       "referenceItems": 112,
-      "actualItems": 74,
+      "actualItems": 86,
       "matched": 0,
-      "missing": 76,
-      "invented": 38,
+      "missing": 61,
+      "invented": 35,
       "priceErrors": 0,
-      "categoryErrors": 36,
+      "categoryErrors": 51,
       "precision": 0,
       "recall": 0,
       "missingDishes": [
         {
-          "name": "Café complet",
+          "name": "Rode Port Ruby / Witte port",
           "prices": [
-            "13.95"
+            "5.00"
           ],
           "path": [
             "Dinerkaart",
-            "DESSERT"
+            "APERATIEF"
           ],
-          "quote": "Café complet, zoete lekkernijen met koffie of thee naar keuze",
-          "locator": "Dinerkaart › DESSERT › pagina 3, kolom links, y=356",
+          "quote": "Rode Port Ruby / Witte port",
+          "locator": "Dinerkaart › APERATIEF › pagina 3, kolom rechts, y=710",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf"
         },
         {
@@ -113,19 +113,6 @@
           ],
           "quote": "Chocolade truffels (2 stuks)",
           "locator": "Dinerkaart › DESSERT › pagina 3, kolom links, y=324",
-          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf"
-        },
-        {
-          "name": "Mousse au chocolat",
-          "prices": [
-            "12.95"
-          ],
-          "path": [
-            "Dinerkaart",
-            "DESSERT"
-          ],
-          "quote": "Mousse au chocolat, gezouten pecan, karamel",
-          "locator": "Dinerkaart › DESSERT › pagina 3, kolom links, y=434",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf"
         },
         {
@@ -156,68 +143,16 @@
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf"
         },
         {
-          "name": "Desem stokbrood met seizoensroomboter en olijfolie",
-          "prices": [
-            "5.95"
-          ],
-          "path": [
-            "Dinerkaart",
-            "ExTRA BIjGERECHTEN"
-          ],
-          "quote": "Desem stokbrood met seizoensroomboter en olijfolie",
-          "locator": "Dinerkaart › ExTRA BIjGERECHTEN › pagina 3, kolom links, y=774 (bedrag op y=776)",
-          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf"
-        },
-        {
-          "name": "Frisse botersalade",
-          "prices": [
-            "5.50"
-          ],
-          "path": [
-            "Dinerkaart",
-            "ExTRA BIjGERECHTEN"
-          ],
-          "quote": "Frisse botersalade",
-          "locator": "Dinerkaart › ExTRA BIjGERECHTEN › pagina 3, kolom links, y=740 (bedrag op y=742)",
-          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf"
-        },
-        {
-          "name": "Seizoensgroenten",
-          "prices": [
-            "6.75"
-          ],
-          "path": [
-            "Dinerkaart",
-            "ExTRA BIjGERECHTEN"
-          ],
-          "quote": "Seizoensgroenten",
-          "locator": "Dinerkaart › ExTRA BIjGERECHTEN › pagina 3, kolom links, y=730 (bedrag op y=732)",
-          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf"
-        },
-        {
-          "name": "Verse frites met Belgische mayonaise",
-          "prices": [
-            "4.75"
-          ],
-          "path": [
-            "Dinerkaart",
-            "ExTRA BIjGERECHTEN"
-          ],
-          "quote": "Verse frites met Belgische mayonaise",
-          "locator": "Dinerkaart › ExTRA BIjGERECHTEN › pagina 3, kolom links, y=762 (bedrag op y=764)",
-          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf"
-        },
-        {
-          "name": "Verse frites met truffelmayonaise en parmezaan",
+          "name": "Limoncello Primo",
           "prices": [
             "5.75"
           ],
           "path": [
             "Dinerkaart",
-            "ExTRA BIjGERECHTEN"
+            "DIGESTIVES"
           ],
-          "quote": "Verse frites met truffelmayonaise en parmezaan",
-          "locator": "Dinerkaart › ExTRA BIjGERECHTEN › pagina 3, kolom links, y=752 (bedrag op y=754)",
+          "quote": "Limoncello Primo",
+          "locator": "Dinerkaart › DIGESTIVES › pagina 3, kolom rechts, y=622",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf"
         },
         {
@@ -314,32 +249,6 @@
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf"
         },
         {
-          "name": "Charcuterie",
-          "prices": [
-            "16.95"
-          ],
-          "path": [
-            "Dinerkaart",
-            "KLASSIEKE BORRELHAPPEN"
-          ],
-          "quote": "Charcuterie, diverse vleeswaren",
-          "locator": "Dinerkaart › KLASSIEKE BORRELHAPPEN › pagina 2, kolom links, y=578",
-          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf"
-        },
-        {
-          "name": "Kaviaar 'Osietra'",
-          "prices": [
-            "35.00"
-          ],
-          "path": [
-            "Dinerkaart",
-            "KLASSIEKE BORRELHAPPEN"
-          ],
-          "quote": "Kaviaar 'Osietra', 10 gram",
-          "locator": "Dinerkaart › KLASSIEKE BORRELHAPPEN › pagina 2, kolom links, y=490",
-          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf"
-        },
-        {
           "name": "Oesters: Naturel",
           "prices": [
             "4.00"
@@ -353,46 +262,7 @@
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf"
         },
         {
-          "name": "Paling",
-          "prices": [
-            "13.95"
-          ],
-          "path": [
-            "Dinerkaart",
-            "KLASSIEKE BORRELHAPPEN"
-          ],
-          "quote": "Paling, brioche, rode biet, Per 2 stuks crème fraîche en roze peper",
-          "locator": "Dinerkaart › KLASSIEKE BORRELHAPPEN › pagina 2, kolom links, y=534",
-          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf"
-        },
-        {
-          "name": "Pata Negra (70 gr.)",
-          "prices": [
-            "21.95"
-          ],
-          "path": [
-            "Dinerkaart",
-            "KLASSIEKE BORRELHAPPEN"
-          ],
-          "quote": "Pata Negra (70 gr.), Spaanse Ibericoham",
-          "locator": "Dinerkaart › KLASSIEKE BORRELHAPPEN › pagina 2, kolom links, y=644",
-          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf"
-        },
-        {
-          "name": "Paté en croute",
-          "prices": [
-            "16.95"
-          ],
-          "path": [
-            "Dinerkaart",
-            "KLASSIEKE BORRELHAPPEN"
-          ],
-          "quote": "Paté en croute, gefrituurde kappertjes, uienconfit",
-          "locator": "Dinerkaart › KLASSIEKE BORRELHAPPEN › pagina 2, kolom links, y=610 (bedrag op y=612)",
-          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf"
-        },
-        {
-          "name": "Espresso Martini",
+          "name": "Pornstar Martini",
           "prices": [
             "11.75"
           ],
@@ -400,8 +270,8 @@
             "Dinerkaart",
             "MIX / COCKTAILS / GIN & TONIC"
           ],
-          "quote": "Espresso Martini",
-          "locator": "Dinerkaart › MIX / COCKTAILS / GIN & TONIC › pagina 3, kolom rechts, y=544",
+          "quote": "Pornstar Martini",
+          "locator": "Dinerkaart › MIX / COCKTAILS / GIN & TONIC › pagina 3, kolom rechts, y=534",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf"
         },
         {
@@ -444,45 +314,6 @@
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf"
         },
         {
-          "name": "Kipfilet of witvis",
-          "prices": [
-            "15.95"
-          ],
-          "path": [
-            "Dinerkaart",
-            "VOOR ONZE KLEINE GASTEN"
-          ],
-          "quote": "Kipfilet of witvis, frites, salade",
-          "locator": "Dinerkaart › VOOR ONZE KLEINE GASTEN › pagina 3, kolom links, y=696 (bedrag op y=698)",
-          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf"
-        },
-        {
-          "name": "Bisque de homard",
-          "prices": [
-            "13.95"
-          ],
-          "path": [
-            "Dinerkaart",
-            "VOORGERECHTEN"
-          ],
-          "quote": "Bisque de homard, rivierkreeft, saffraanrouille",
-          "locator": "Dinerkaart › VOORGERECHTEN › pagina 2, kolom links, y=374",
-          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf"
-        },
-        {
-          "name": "Boudin Noir",
-          "prices": [
-            "18.95"
-          ],
-          "path": [
-            "Dinerkaart",
-            "VOORGERECHTEN"
-          ],
-          "quote": "Boudin Noir, gebakken bloedworst, brioche, appel, Calvados, gebakken eendenlever",
-          "locator": "Dinerkaart › VOORGERECHTEN › pagina 2, kolom links, y=132",
-          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf"
-        },
-        {
           "name": "Escargots",
           "prices": [
             "12.95"
@@ -509,42 +340,55 @@
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf"
         },
         {
-          "name": "Gravad lax",
+          "name": "Chivas Regal 12 yrs.",
           "prices": [
-            "17.95"
+            "7.75"
           ],
           "path": [
             "Dinerkaart",
-            "VOORGERECHTEN"
+            "WHISKY"
           ],
-          "quote": "Gravad lax, toast, aardappel, dragonmayonaise, venkel, citroen",
-          "locator": "Dinerkaart › VOORGERECHTEN › pagina 2, kolom links, y=186 (bedrag op y=188)",
+          "quote": "Chivas Regal 12 yrs.",
+          "locator": "Dinerkaart › WHISKY › pagina 3, kolom rechts, y=270",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf"
         },
         {
-          "name": "Klassieke steak tartaar (90 gram)",
+          "name": "Glenfiddich 12 yrs.",
           "prices": [
-            "15.95"
+            "8.00"
           ],
           "path": [
             "Dinerkaart",
-            "VOORGERECHTEN"
+            "WHISKY"
           ],
-          "quote": "Klassieke steak tartaar (90 gram)",
-          "locator": "Dinerkaart › VOORGERECHTEN › pagina 2, kolom links, y=230 (bedrag op y=232)",
+          "quote": "Glenfiddich 12 yrs.",
+          "locator": "Dinerkaart › WHISKY › pagina 3, kolom rechts, y=280",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf"
         },
         {
-          "name": "Stracciatella",
+          "name": "Oban 14 yrs.",
           "prices": [
-            "16.95"
+            "10.75"
           ],
           "path": [
             "Dinerkaart",
-            "VOORGERECHTEN"
+            "WHISKY"
           ],
-          "quote": "Stracciatella, tomaat, pruim, amandel en basilicum",
-          "locator": "Dinerkaart › VOORGERECHTEN › pagina 2, kolom links, y=274 (bedrag op y=276)",
+          "quote": "Oban 14 yrs.",
+          "locator": "Dinerkaart › WHISKY › pagina 3, kolom rechts, y=258",
+          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf"
+        },
+        {
+          "name": "Sauternes, Le Terre du Lys d'Or",
+          "prices": [
+            "7.25"
+          ],
+          "path": [
+            "Dinerkaart",
+            "WIJNEN & PORT"
+          ],
+          "quote": "Sauternes, Le Terre du Lys d'Or",
+          "locator": "Dinerkaart › WIJNEN & PORT › pagina 3, kolom rechts, y=786",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf"
         },
         {
@@ -573,34 +417,6 @@
           ],
           "quote": "Champagne Charles LaFITTE, ODF",
           "locator": "Dinerkaart › WIJNKAART › MOUSSERENDE WIJNEN › pagina 4, kolom rechts, y=178 (alleen flesprijs)",
-          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf"
-        },
-        {
-          "name": "Champagne Louis Roederer Brut",
-          "prices": [
-            "99.00"
-          ],
-          "path": [
-            "Dinerkaart",
-            "WIJNKAART",
-            "MOUSSERENDE WIJNEN"
-          ],
-          "quote": "Champagne Louis Roederer Brut",
-          "locator": "Dinerkaart › WIJNKAART › MOUSSERENDE WIJNEN › pagina 4, kolom rechts, y=94 (alleen flesprijs)",
-          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf"
-        },
-        {
-          "name": "Champagne Ruinart Brut Blanc de Blancs",
-          "prices": [
-            "165.00"
-          ],
-          "path": [
-            "Dinerkaart",
-            "WIJNKAART",
-            "MOUSSERENDE WIJNEN"
-          ],
-          "quote": "Champagne Ruinart Brut Blanc de Blancs",
-          "locator": "Dinerkaart › WIJNKAART › MOUSSERENDE WIJNEN › pagina 4, kolom rechts, y=76 (alleen flesprijs)",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf"
         },
         {
@@ -896,20 +712,6 @@
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf"
         },
         {
-          "name": "Miraval Rosé Côtes de Provence",
-          "prices": [
-            "49.00"
-          ],
-          "path": [
-            "Dinerkaart",
-            "WIJNKAART",
-            "ROSÉ WIJNEN"
-          ],
-          "quote": "Miraval Rosé Côtes de Provence",
-          "locator": "Dinerkaart › WIJNKAART › ROSÉ WIJNEN › pagina 4, kolom rechts, y=308 (alleen flesprijs)",
-          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf"
-        },
-        {
           "name": "Ultimate Provence Rosé, 100% Grenache",
           "prices": [
             "42.50"
@@ -1180,207 +982,17 @@
       ],
       "inventedDishes": [
         {
-          "name": "(2 stuks)",
+          "name": "Likeuren en Grappa v.a.",
           "prices": [
-            "3.75"
+            "6.25"
           ],
           "path": [
-            "DESSERT"
+            "DINERKAART",
+            "D ESSERT w I j NEN & PORT:",
+            "D IGESTIVES :"
           ],
           "quote": null,
-          "locator": "pdf:2:item:6",
-          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
-        },
-        {
-          "name": "3 stuks",
-          "prices": [
-            "10.95"
-          ],
-          "path": [
-            "DESSERT"
-          ],
-          "quote": null,
-          "locator": "pdf:2:item:3",
-          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
-        },
-        {
-          "name": "5 stuks",
-          "prices": [
-            "15.95"
-          ],
-          "path": [
-            "DESSERT"
-          ],
-          "quote": null,
-          "locator": "pdf:2:item:4",
-          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
-        },
-        {
-          "name": "bol vanille-ijs",
-          "prices": [
-            "2.50"
-          ],
-          "path": [
-            "DESSERT"
-          ],
-          "quote": null,
-          "locator": "pdf:2:item:1",
-          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
-        },
-        {
-          "name": "gezouten pecan, karamel",
-          "prices": [
-            "12.95"
-          ],
-          "path": [
-            "DESSERT"
-          ],
-          "quote": null,
-          "locator": "pdf:2:item:2",
-          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
-        },
-        {
-          "name": "zoete lekkernijen met",
-          "prices": [
-            "13.95"
-          ],
-          "path": [
-            "DESSERT"
-          ],
-          "quote": null,
-          "locator": "pdf:2:item:5",
-          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
-        },
-        {
-          "name": "0,375 ltr.",
-          "prices": [
-            "55.00"
-          ],
-          "path": [
-            "Menukaart"
-          ],
-          "quote": null,
-          "locator": "pdf:1:item:66",
-          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
-        },
-        {
-          "name": "0.750 ltr.",
-          "prices": [
-            "95.00"
-          ],
-          "path": [
-            "Menukaart"
-          ],
-          "quote": null,
-          "locator": "pdf:1:item:67",
-          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
-        },
-        {
-          "name": "1,5 ltr",
-          "prices": [
-            "185.00"
-          ],
-          "path": [
-            "Menukaart"
-          ],
-          "quote": null,
-          "locator": "pdf:1:item:68",
-          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
-        },
-        {
-          "name": "10 gram",
-          "prices": [
-            "35.00"
-          ],
-          "path": [
-            "Menukaart"
-          ],
-          "quote": null,
-          "locator": "pdf:1:item:7",
-          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
-        },
-        {
-          "name": "(2 st.) met citroenmayonaise",
-          "prices": [
-            "21.95"
-          ],
-          "path": [
-            "Menukaart"
-          ],
-          "quote": null,
-          "locator": "pdf:1:item:10",
-          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
-        },
-        {
-          "name": "(90 gram)",
-          "prices": [
-            "15.95"
-          ],
-          "path": [
-            "Menukaart"
-          ],
-          "quote": null,
-          "locator": "pdf:1:item:12",
-          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
-        },
-        {
-          "name": "blini’s en zure room",
-          "prices": [
-            "5.00"
-          ],
-          "path": [
-            "Menukaart"
-          ],
-          "quote": null,
-          "locator": "pdf:1:item:8",
-          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
-        },
-        {
-          "name": "Bourgogne Chardonnay Meursault, Seguin Manuel Les Clos",
-          "prices": [
-            "105.00"
-          ],
-          "path": [
-            "Menukaart"
-          ],
-          "quote": null,
-          "locator": "pdf:1:item:62",
-          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
-        },
-        {
-          "name": "Bourgogne Chardonnay Saint Aubin Domaine du Château Philippe le Hardi",
-          "prices": [
-            "89.00"
-          ],
-          "path": [
-            "Menukaart"
-          ],
-          "quote": null,
-          "locator": "pdf:1:item:61",
-          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
-        },
-        {
-          "name": "Canard à l’orange, knolselderij gratin, rode bietencrème, gele biet, Amsterdamse ui, sinaasappel gevogelte saus.",
-          "prices": [
-            "27.95"
-          ],
-          "path": [
-            "Menukaart"
-          ],
-          "quote": null,
-          "locator": "pdf:1:item:18",
-          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
-        },
-        {
-          "name": "Chateaubriand (om te delen 450 gr.), het beste stuk van de ossenhaas met Persillade boter of Béarnaise of",
-          "prices": [
-            "74.95"
-          ],
-          "path": [
-            "Menukaart"
-          ],
-          "quote": null,
-          "locator": "pdf:1:item:16",
+          "locator": "pdf:12:item:2",
           "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
         },
         {
@@ -1389,215 +1001,26 @@
             "8.75"
           ],
           "path": [
-            "Menukaart"
+            "DINERKAART",
+            "D ESSERT w I j NEN & PORT:",
+            "MOCKTAILS"
           ],
           "quote": null,
-          "locator": "pdf:1:item:48",
+          "locator": "pdf:14:item:1",
           "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
         },
         {
-          "name": "diverse vleeswaren",
-          "prices": [
-            "16.95"
-          ],
-          "path": [
-            "Menukaart"
-          ],
-          "quote": null,
-          "locator": "pdf:1:item:5",
-          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
-        },
-        {
-          "name": "eendenlever",
-          "prices": [
-            "6.75"
-          ],
-          "path": [
-            "Menukaart"
-          ],
-          "quote": null,
-          "locator": "pdf:1:item:13",
-          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
-        },
-        {
-          "name": "Escargots, persillade, knoflooksabayon, croutons",
-          "prices": [
-            "12.95"
-          ],
-          "path": [
-            "Menukaart"
-          ],
-          "quote": null,
-          "locator": "pdf:1:item:1",
-          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
-        },
-        {
-          "name": "Espresso Martini M I x / COCKTAILS / G IN & T ONIC :",
-          "prices": [
-            "11.75"
-          ],
-          "path": [
-            "Menukaart"
-          ],
-          "quote": null,
-          "locator": "pdf:1:item:36",
-          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
-        },
-        {
-          "name": "gebakken bloedworst, brioche,",
-          "prices": [
-            "18.95"
-          ],
-          "path": [
-            "Menukaart"
-          ],
-          "quote": null,
-          "locator": "pdf:1:item:14",
-          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
-        },
-        {
-          "name": "gefrituurde kappertjes, uienconfit",
-          "prices": [
-            "16.95"
-          ],
-          "path": [
-            "Menukaart"
-          ],
-          "quote": null,
-          "locator": "pdf:1:item:4",
-          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
-        },
-        {
-          "name": "Gnocchi, saffraan, venkel, parmezaan",
-          "prices": [
-            "22.95"
-          ],
-          "path": [
-            "Menukaart"
-          ],
-          "quote": null,
-          "locator": "pdf:1:item:22",
-          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
-        },
-        {
-          "name": "Hele dorade van de grill , kruidenolie van salie, Zeetong à la meunière Dagprijs",
-          "prices": [
-            "26.95"
-          ],
-          "path": [
-            "Menukaart"
-          ],
-          "quote": null,
-          "locator": "pdf:1:item:21",
-          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
-        },
-        {
-          "name": "Likeuren en Grappa v.a.",
-          "prices": [
-            "6.25"
-          ],
-          "path": [
-            "Menukaart"
-          ],
-          "quote": null,
-          "locator": "pdf:1:item:34",
-          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
-        },
-        {
-          "name": "Per 2 stuks",
-          "prices": [
-            "13.95"
-          ],
-          "path": [
-            "Menukaart"
-          ],
-          "quote": null,
-          "locator": "pdf:1:item:6",
-          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
-        },
-        {
-          "name": "Per fles",
-          "prices": [
-            "8.50",
-            "46.75"
-          ],
-          "path": [
-            "Menukaart"
-          ],
-          "quote": null,
-          "locator": "pdf:1:item:65",
-          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
-        },
-        {
-          "name": "Per stuk",
-          "prices": [
-            "4.00"
-          ],
-          "path": [
-            "Menukaart"
-          ],
-          "quote": null,
-          "locator": "pdf:1:item:2",
-          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
-        },
-        {
-          "name": "Pornstar Martini C OGNAC & C ALVADOS :",
+          "name": "Pornstar Martini",
           "prices": [
             "10.75"
           ],
           "path": [
-            "Menukaart"
+            "DINERKAART",
+            "D ESSERT w I j NEN & PORT:",
+            "MOCKTAILS"
           ],
           "quote": null,
-          "locator": "pdf:1:item:50",
-          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
-        },
-        {
-          "name": "Poussin, krielkippetje van onze",
-          "prices": [
-            "20.95"
-          ],
-          "path": [
-            "Menukaart"
-          ],
-          "quote": null,
-          "locator": "pdf:1:item:15",
-          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
-        },
-        {
-          "name": "rivierkreeft, saffraanrouille",
-          "prices": [
-            "13.95"
-          ],
-          "path": [
-            "Menukaart"
-          ],
-          "quote": null,
-          "locator": "pdf:1:item:9",
-          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
-        },
-        {
-          "name": "Runderentrecote (220 gr.), met beurre de Paris",
-          "prices": [
-            "37.95"
-          ],
-          "path": [
-            "Menukaart"
-          ],
-          "quote": null,
-          "locator": "pdf:1:item:19",
-          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
-        },
-        {
-          "name": "Spaanse Ibericoham",
-          "prices": [
-            "21.95"
-          ],
-          "path": [
-            "Menukaart"
-          ],
-          "quote": null,
-          "locator": "pdf:1:item:3",
+          "locator": "pdf:14:item:3",
           "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
         },
         {
@@ -1606,22 +1029,138 @@
             "6.95"
           ],
           "path": [
-            "Menukaart"
+            "DINERKAART",
+            "D ESSERT w I j NEN & PORT:",
+            "MOCKTAILS"
           ],
           "quote": null,
-          "locator": "pdf:1:item:49",
+          "locator": "pdf:14:item:2",
           "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
         },
         {
-          "name": "tomaat, pruim, amandel",
+          "name": "Chocolade truffels (2 stuks)",
           "prices": [
-            "16.95"
+            "3.75"
           ],
           "path": [
-            "Menukaart"
+            "DINERKAART",
+            "Ex TRA BI j",
+            "Sauternes"
           ],
           "quote": null,
-          "locator": "pdf:1:item:11",
+          "locator": "pdf:8:item:5",
+          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
+        },
+        {
+          "name": "kweeperengelei",
+          "prices": [
+            "15.95"
+          ],
+          "path": [
+            "DINERKAART",
+            "Ex TRA BI j",
+            "Sauternes"
+          ],
+          "quote": null,
+          "locator": "pdf:8:item:3",
+          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
+        },
+        {
+          "name": "Plateau de fromage",
+          "prices": [
+            "10.95"
+          ],
+          "path": [
+            "DINERKAART",
+            "Ex TRA BI j",
+            "Sauternes"
+          ],
+          "quote": null,
+          "locator": "pdf:8:item:2",
+          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
+        },
+        {
+          "name": "Poussin, krielkippetje van onze",
+          "prices": [
+            "20.95"
+          ],
+          "path": [
+            "DINERKAART",
+            "HOOFDGEREC HTEN",
+            "BARDOT"
+          ],
+          "quote": null,
+          "locator": "pdf:4:item:1",
+          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
+        },
+        {
+          "name": "Canard à l’orange, knolselderij gratin, rode bietencrème, gele biet, Amsterdamse ui, sinaasappel gevogelte saus.",
+          "prices": [
+            "27.95"
+          ],
+          "path": [
+            "DINERKAART",
+            "HOOFDGEREC HTEN",
+            "Bogle Chardonnay"
+          ],
+          "quote": null,
+          "locator": "pdf:5:item:3",
+          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
+        },
+        {
+          "name": "Chateaubriand (om te delen 450 gr.), het beste stuk van de ossenhaas met Persillade boter of Béarnaise of",
+          "prices": [
+            "74.95"
+          ],
+          "path": [
+            "DINERKAART",
+            "HOOFDGEREC HTEN",
+            "Bogle Chardonnay"
+          ],
+          "quote": null,
+          "locator": "pdf:5:item:1",
+          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
+        },
+        {
+          "name": "Gnocchi, saffraan, venkel, parmezaan",
+          "prices": [
+            "22.95"
+          ],
+          "path": [
+            "DINERKAART",
+            "HOOFDGEREC HTEN",
+            "Bogle Chardonnay"
+          ],
+          "quote": null,
+          "locator": "pdf:5:item:7",
+          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
+        },
+        {
+          "name": "Hele dorade van de grill , kruidenolie van salie, Zeetong à la meunière Dagprijs",
+          "prices": [
+            "26.95"
+          ],
+          "path": [
+            "DINERKAART",
+            "HOOFDGEREC HTEN",
+            "Bogle Chardonnay"
+          ],
+          "quote": null,
+          "locator": "pdf:5:item:6",
+          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
+        },
+        {
+          "name": "Runderentrecote (220 gr.), met beurre de Paris",
+          "prices": [
+            "37.95"
+          ],
+          "path": [
+            "DINERKAART",
+            "HOOFDGEREC HTEN",
+            "Bogle Chardonnay"
+          ],
+          "quote": null,
+          "locator": "pdf:5:item:4",
           "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
         },
         {
@@ -1630,10 +1169,294 @@
             "37.95"
           ],
           "path": [
+            "DINERKAART",
+            "HOOFDGEREC HTEN",
+            "Bogle Chardonnay"
+          ],
+          "quote": null,
+          "locator": "pdf:5:item:5",
+          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
+        },
+        {
+          "name": "Garnalenkroketten (2 st.) met citroenmayonaise",
+          "prices": [
+            "21.95"
+          ],
+          "path": [
+            "DINERKAART",
+            "KL ASSIEKE BORRELHAPPEN",
+            "Chablis Chardonnay"
+          ],
+          "quote": null,
+          "locator": "pdf:2:item:7",
+          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
+        },
+        {
+          "name": "Extra topping: Gin Tonic schuim & Sinaasappel",
+          "prices": [
+            "0.95"
+          ],
+          "path": [
+            "DINERKAART",
+            "KL ASSIEKE BORRELHAPPEN"
+          ],
+          "quote": null,
+          "locator": "pdf:1:item:2",
+          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
+        },
+        {
+          "name": "Naturel met sjalottenvinaigrette en citroen Per stuk",
+          "prices": [
+            "4.00"
+          ],
+          "path": [
+            "DINERKAART",
+            "KL ASSIEKE BORRELHAPPEN"
+          ],
+          "quote": null,
+          "locator": "pdf:1:item:1",
+          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
+        },
+        {
+          "name": "1,5 ltr",
+          "prices": [
+            "185.00"
+          ],
+          "path": [
+            "DINERKAART",
             "Menukaart"
           ],
           "quote": null,
-          "locator": "pdf:1:item:20",
+          "locator": "pdf:3:item:6",
+          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
+        },
+        {
+          "name": "Bordeaux Margaux",
+          "prices": [
+            "79.00"
+          ],
+          "path": [
+            "DINERKAART",
+            "Menukaart"
+          ],
+          "quote": null,
+          "locator": "pdf:3:item:5",
+          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
+        },
+        {
+          "name": "Escargots, persillade, knoflooksabayon, croutons",
+          "prices": [
+            "12.95"
+          ],
+          "path": [
+            "DINERKAART",
+            "Menukaart"
+          ],
+          "quote": null,
+          "locator": "pdf:3:item:1",
+          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
+        },
+        {
+          "name": "GERECHTEN : Sauternes",
+          "prices": [
+            "7.25"
+          ],
+          "path": [
+            "DINERKAART",
+            "Menukaart"
+          ],
+          "quote": null,
+          "locator": "pdf:3:item:3",
+          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
+        },
+        {
+          "name": "z E KLEINE GASTEN Rode Port Ruby / Witte port",
+          "prices": [
+            "5.00"
+          ],
+          "path": [
+            "DINERKAART",
+            "Menukaart"
+          ],
+          "quote": null,
+          "locator": "pdf:3:item:4",
+          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
+        },
+        {
+          "name": "DESSERT Pornstar Martini",
+          "prices": [
+            "11.75"
+          ],
+          "path": [
+            "DINERKAART",
+            "N AAST DE KAART"
+          ],
+          "quote": null,
+          "locator": "pdf:9:item:2",
+          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
+        },
+        {
+          "name": "Indien wij rekening dienen te houden Chivas Regal 12 yrs.",
+          "prices": [
+            "7.75"
+          ],
+          "path": [
+            "DINERKAART",
+            "N AAST DE KAART"
+          ],
+          "quote": null,
+          "locator": "pdf:9:item:4",
+          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
+        },
+        {
+          "name": "met een allergie",
+          "prices": [
+            "10.75"
+          ],
+          "path": [
+            "DINERKAART",
+            "N AAST DE KAART"
+          ],
+          "quote": null,
+          "locator": "pdf:9:item:5",
+          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
+        },
+        {
+          "name": "Niet alle ingrediënten worden vermeld. Glenfiddich 12 yrs.",
+          "prices": [
+            "8.00"
+          ],
+          "path": [
+            "DINERKAART",
+            "N AAST DE KAART"
+          ],
+          "quote": null,
+          "locator": "pdf:9:item:3",
+          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
+        },
+        {
+          "name": "w I j w ISSELEND E Limoncello Primo",
+          "prices": [
+            "5.75"
+          ],
+          "path": [
+            "DINERKAART",
+            "N AAST DE KAART"
+          ],
+          "quote": null,
+          "locator": "pdf:9:item:1",
+          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
+        },
+        {
+          "name": "Champagne Charles LaFITTE",
+          "prices": [
+            "79.75"
+          ],
+          "path": [
+            "DINERKAART",
+            "USA",
+            "MOUSSERENDE w I j NEN:"
+          ],
+          "quote": null,
+          "locator": "pdf:19:item:1",
+          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
+        },
+        {
+          "name": "Champagne Charles LaFITTE",
+          "prices": [
+            "89.75"
+          ],
+          "path": [
+            "DINERKAART",
+            "USA",
+            "MOUSSERENDE w I j NEN:"
+          ],
+          "quote": null,
+          "locator": "pdf:19:item:2",
+          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
+        },
+        {
+          "name": "Champagne Vranken 0",
+          "prices": [
+            "55.00"
+          ],
+          "path": [
+            "DINERKAART",
+            "USA",
+            "MOUSSERENDE w I j NEN:"
+          ],
+          "quote": null,
+          "locator": "pdf:19:item:3",
+          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
+        },
+        {
+          "name": "cuvée Diamant Brut 0.750 ltr.",
+          "prices": [
+            "95.00"
+          ],
+          "path": [
+            "DINERKAART",
+            "USA",
+            "MOUSSERENDE w I j NEN:"
+          ],
+          "quote": null,
+          "locator": "pdf:19:item:4",
+          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
+        },
+        {
+          "name": "Languedoc-Roussillion",
+          "prices": [
+            "41.25"
+          ],
+          "path": [
+            "DINERKAART",
+            "USA",
+            "ROSÉ w I j NEN:"
+          ],
+          "quote": null,
+          "locator": "pdf:18:item:1",
+          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
+        },
+        {
+          "name": "Ultimate Provence Rosé",
+          "prices": [
+            "42.50"
+          ],
+          "path": [
+            "DINERKAART",
+            "USA",
+            "ROSÉ w I j NEN:"
+          ],
+          "quote": null,
+          "locator": "pdf:18:item:2",
+          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
+        },
+        {
+          "name": "Bourgogne Chardonnay Meursault, Seguin Manuel Les Clos",
+          "prices": [
+            "105.00"
+          ],
+          "path": [
+            "DINERKAART",
+            "w I j NKAART",
+            "Fèvre-Fèvre"
+          ],
+          "quote": null,
+          "locator": "pdf:16:item:2",
+          "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
+        },
+        {
+          "name": "Bourgogne Chardonnay Saint Aubin Domaine du Château Philippe le Hardi",
+          "prices": [
+            "89.00"
+          ],
+          "path": [
+            "DINERKAART",
+            "w I j NKAART",
+            "Fèvre-Fèvre"
+          ],
+          "quote": null,
+          "locator": "pdf:16:item:1",
           "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
         }
       ],
@@ -1646,7 +1469,9 @@
             "APERATIEF"
           ],
           "actualPath": [
-            "Menukaart"
+            "DINERKAART",
+            "D ESSERT w I j NEN & PORT:",
+            "APERATIEF:"
           ],
           "price": [
             "5.00"
@@ -1654,7 +1479,7 @@
           "quote": "Crodino (alcoholvrij)",
           "locator": "Dinerkaart › APERATIEF › pagina 3, kolom rechts, y=688",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:32"
+          "actualLocator": "pdf:11:item:3"
         },
         {
           "name": "Martha's Porto 10 yrs.",
@@ -1663,7 +1488,9 @@
             "APERATIEF"
           ],
           "actualPath": [
-            "Menukaart"
+            "DINERKAART",
+            "D ESSERT w I j NEN & PORT:",
+            "APERATIEF:"
           ],
           "price": [
             "6.75"
@@ -1671,7 +1498,7 @@
           "quote": "Martha's Porto 10 yrs.",
           "locator": "Dinerkaart › APERATIEF › pagina 3, kolom rechts, y=698",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:31"
+          "actualLocator": "pdf:11:item:2"
         },
         {
           "name": "Pernod / Ricard / Martini Bianco / Martini Rosso / Campari",
@@ -1680,7 +1507,9 @@
             "APERATIEF"
           ],
           "actualPath": [
-            "Menukaart"
+            "DINERKAART",
+            "D ESSERT w I j NEN & PORT:",
+            "APERATIEF:"
           ],
           "price": [
             "5.00"
@@ -1688,24 +1517,7 @@
           "quote": "Pernod / Ricard / Martini Bianco / Martini Rosso / Campari",
           "locator": "Dinerkaart › APERATIEF › pagina 3, kolom rechts, y=732",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:29"
-        },
-        {
-          "name": "Rode Port Ruby / Witte port",
-          "expectedPath": [
-            "Dinerkaart",
-            "APERATIEF"
-          ],
-          "actualPath": [
-            "Menukaart"
-          ],
-          "price": [
-            "5.00"
-          ],
-          "quote": "Rode Port Ruby / Witte port",
-          "locator": "Dinerkaart › APERATIEF › pagina 3, kolom rechts, y=710",
-          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:30"
+          "actualLocator": "pdf:11:item:1"
         },
         {
           "name": "Armagnac VSOP",
@@ -1714,7 +1526,9 @@
             "COGNAC & CALVADOS"
           ],
           "actualPath": [
-            "Menukaart"
+            "DINERKAART",
+            "D ESSERT w I j NEN & PORT:",
+            "C OGNAC & C ALVADOS :"
           ],
           "price": [
             "8.75"
@@ -1722,7 +1536,7 @@
           "quote": "Armagnac VSOP",
           "locator": "Dinerkaart › COGNAC & CALVADOS › pagina 3, kolom rechts, y=346",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:54"
+          "actualLocator": "pdf:15:item:4"
         },
         {
           "name": "Calvados Père Magloire VSOP",
@@ -1731,7 +1545,9 @@
             "COGNAC & CALVADOS"
           ],
           "actualPath": [
-            "Menukaart"
+            "DINERKAART",
+            "D ESSERT w I j NEN & PORT:",
+            "C OGNAC & C ALVADOS :"
           ],
           "price": [
             "9.00"
@@ -1739,7 +1555,7 @@
           "quote": "Calvados Père Magloire VSOP",
           "locator": "Dinerkaart › COGNAC & CALVADOS › pagina 3, kolom rechts, y=336",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:55"
+          "actualLocator": "pdf:15:item:5"
         },
         {
           "name": "Courvoisier VS",
@@ -1748,7 +1564,9 @@
             "COGNAC & CALVADOS"
           ],
           "actualPath": [
-            "Menukaart"
+            "DINERKAART",
+            "D ESSERT w I j NEN & PORT:",
+            "C OGNAC & C ALVADOS :"
           ],
           "price": [
             "9.00"
@@ -1756,7 +1574,7 @@
           "quote": "Courvoisier VS",
           "locator": "Dinerkaart › COGNAC & CALVADOS › pagina 3, kolom rechts, y=380",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:51"
+          "actualLocator": "pdf:15:item:1"
         },
         {
           "name": "Martell VS",
@@ -1765,7 +1583,9 @@
             "COGNAC & CALVADOS"
           ],
           "actualPath": [
-            "Menukaart"
+            "DINERKAART",
+            "D ESSERT w I j NEN & PORT:",
+            "C OGNAC & C ALVADOS :"
           ],
           "price": [
             "10.75"
@@ -1773,7 +1593,7 @@
           "quote": "Martell VS",
           "locator": "Dinerkaart › COGNAC & CALVADOS › pagina 3, kolom rechts, y=368",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:52"
+          "actualLocator": "pdf:15:item:2"
         },
         {
           "name": "Rémy Martin VSOP",
@@ -1782,7 +1602,9 @@
             "COGNAC & CALVADOS"
           ],
           "actualPath": [
-            "Menukaart"
+            "DINERKAART",
+            "D ESSERT w I j NEN & PORT:",
+            "C OGNAC & C ALVADOS :"
           ],
           "price": [
             "11.75"
@@ -1790,7 +1612,26 @@
           "quote": "Rémy Martin VSOP",
           "locator": "Dinerkaart › COGNAC & CALVADOS › pagina 3, kolom rechts, y=358",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:53"
+          "actualLocator": "pdf:15:item:3"
+        },
+        {
+          "name": "Café complet",
+          "expectedPath": [
+            "Dinerkaart",
+            "DESSERT"
+          ],
+          "actualPath": [
+            "DINERKAART",
+            "Ex TRA BI j",
+            "Sauternes"
+          ],
+          "price": [
+            "13.95"
+          ],
+          "quote": "Café complet, zoete lekkernijen met koffie of thee naar keuze",
+          "locator": "Dinerkaart › DESSERT › pagina 3, kolom links, y=356",
+          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
+          "actualLocator": "pdf:8:item:4"
         },
         {
           "name": "Crème brûlée",
@@ -1799,6 +1640,7 @@
             "DESSERT"
           ],
           "actualPath": [
+            "DINERKAART",
             "Menukaart"
           ],
           "price": [
@@ -1807,7 +1649,26 @@
           "quote": "Crème brûlée",
           "locator": "Dinerkaart › DESSERT › pagina 3, kolom links, y=488",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:23"
+          "actualLocator": "pdf:3:item:2"
+        },
+        {
+          "name": "Mousse au chocolat",
+          "expectedPath": [
+            "Dinerkaart",
+            "DESSERT"
+          ],
+          "actualPath": [
+            "DINERKAART",
+            "Ex TRA BI j",
+            "Sauternes"
+          ],
+          "price": [
+            "12.95"
+          ],
+          "quote": "Mousse au chocolat, gezouten pecan, karamel",
+          "locator": "Dinerkaart › DESSERT › pagina 3, kolom links, y=434",
+          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
+          "actualLocator": "pdf:8:item:1"
         },
         {
           "name": "Café Spécial",
@@ -1816,7 +1677,9 @@
             "DIGESTIVES"
           ],
           "actualPath": [
-            "Menukaart"
+            "DINERKAART",
+            "D ESSERT w I j NEN & PORT:",
+            "D IGESTIVES :"
           ],
           "price": [
             "9.95"
@@ -1824,7 +1687,7 @@
           "quote": "Café Spécial: French, Irish, Italian, Spanish, Bardot",
           "locator": "Dinerkaart › DIGESTIVES › pagina 3, kolom rechts, y=654",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:33"
+          "actualLocator": "pdf:12:item:1"
         },
         {
           "name": "Espresso Martini",
@@ -1833,7 +1696,9 @@
             "DIGESTIVES"
           ],
           "actualPath": [
-            "Menukaart"
+            "DINERKAART",
+            "D ESSERT w I j NEN & PORT:",
+            "D IGESTIVES :"
           ],
           "price": [
             "11.75"
@@ -1841,24 +1706,97 @@
           "quote": "Espresso Martini",
           "locator": "Dinerkaart › DIGESTIVES › pagina 3, kolom rechts, y=610",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:40"
+          "actualLocator": "pdf:12:item:3"
         },
         {
-          "name": "Limoncello Primo",
+          "name": "Desem stokbrood met seizoensroomboter en olijfolie",
           "expectedPath": [
             "Dinerkaart",
-            "DIGESTIVES"
+            "ExTRA BIjGERECHTEN"
           ],
           "actualPath": [
-            "Menukaart"
+            "DINERKAART",
+            "Ex TRA BI j"
+          ],
+          "price": [
+            "5.95"
+          ],
+          "quote": "Desem stokbrood met seizoensroomboter en olijfolie",
+          "locator": "Dinerkaart › ExTRA BIjGERECHTEN › pagina 3, kolom links, y=774 (bedrag op y=776)",
+          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
+          "actualLocator": "pdf:6:item:1"
+        },
+        {
+          "name": "Frisse botersalade",
+          "expectedPath": [
+            "Dinerkaart",
+            "ExTRA BIjGERECHTEN"
+          ],
+          "actualPath": [
+            "DINERKAART",
+            "Ex TRA BI j"
+          ],
+          "price": [
+            "5.50"
+          ],
+          "quote": "Frisse botersalade",
+          "locator": "Dinerkaart › ExTRA BIjGERECHTEN › pagina 3, kolom links, y=740 (bedrag op y=742)",
+          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
+          "actualLocator": "pdf:6:item:4"
+        },
+        {
+          "name": "Seizoensgroenten",
+          "expectedPath": [
+            "Dinerkaart",
+            "ExTRA BIjGERECHTEN"
+          ],
+          "actualPath": [
+            "DINERKAART",
+            "Ex TRA BI j"
+          ],
+          "price": [
+            "6.75"
+          ],
+          "quote": "Seizoensgroenten",
+          "locator": "Dinerkaart › ExTRA BIjGERECHTEN › pagina 3, kolom links, y=730 (bedrag op y=732)",
+          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
+          "actualLocator": "pdf:6:item:5"
+        },
+        {
+          "name": "Verse frites met Belgische mayonaise",
+          "expectedPath": [
+            "Dinerkaart",
+            "ExTRA BIjGERECHTEN"
+          ],
+          "actualPath": [
+            "DINERKAART",
+            "Ex TRA BI j"
+          ],
+          "price": [
+            "4.75"
+          ],
+          "quote": "Verse frites met Belgische mayonaise",
+          "locator": "Dinerkaart › ExTRA BIjGERECHTEN › pagina 3, kolom links, y=762 (bedrag op y=764)",
+          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
+          "actualLocator": "pdf:6:item:2"
+        },
+        {
+          "name": "Verse frites met truffelmayonaise en parmezaan",
+          "expectedPath": [
+            "Dinerkaart",
+            "ExTRA BIjGERECHTEN"
+          ],
+          "actualPath": [
+            "DINERKAART",
+            "Ex TRA BI j"
           ],
           "price": [
             "5.75"
           ],
-          "quote": "Limoncello Primo",
-          "locator": "Dinerkaart › DIGESTIVES › pagina 3, kolom rechts, y=622",
+          "quote": "Verse frites met truffelmayonaise en parmezaan",
+          "locator": "Dinerkaart › ExTRA BIjGERECHTEN › pagina 3, kolom links, y=752 (bedrag op y=754)",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:35"
+          "actualLocator": "pdf:6:item:3"
         },
         {
           "name": "Klassieke steak tartaar (150 gram)",
@@ -1867,7 +1805,9 @@
             "HOOFDGERECHTEN"
           ],
           "actualPath": [
-            "Menukaart"
+            "DINERKAART",
+            "HOOFDGEREC HTEN",
+            "Bogle Chardonnay"
           ],
           "price": [
             "24.95"
@@ -1875,7 +1815,102 @@
           "quote": "Klassieke steak tartaar (150 gram)",
           "locator": "Dinerkaart › HOOFDGERECHTEN › pagina 2, kolom rechts, y=418",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:17"
+          "actualLocator": "pdf:5:item:2"
+        },
+        {
+          "name": "Charcuterie",
+          "expectedPath": [
+            "Dinerkaart",
+            "KLASSIEKE BORRELHAPPEN"
+          ],
+          "actualPath": [
+            "DINERKAART",
+            "KL ASSIEKE BORRELHAPPEN",
+            "Chablis Chardonnay"
+          ],
+          "price": [
+            "16.95"
+          ],
+          "quote": "Charcuterie, diverse vleeswaren",
+          "locator": "Dinerkaart › KLASSIEKE BORRELHAPPEN › pagina 2, kolom links, y=578",
+          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
+          "actualLocator": "pdf:2:item:3"
+        },
+        {
+          "name": "Kaviaar 'Osietra'",
+          "expectedPath": [
+            "Dinerkaart",
+            "KLASSIEKE BORRELHAPPEN"
+          ],
+          "actualPath": [
+            "DINERKAART",
+            "KL ASSIEKE BORRELHAPPEN",
+            "Chablis Chardonnay"
+          ],
+          "price": [
+            "35.00"
+          ],
+          "quote": "Kaviaar 'Osietra', 10 gram",
+          "locator": "Dinerkaart › KLASSIEKE BORRELHAPPEN › pagina 2, kolom links, y=490",
+          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
+          "actualLocator": "pdf:2:item:5"
+        },
+        {
+          "name": "Paling",
+          "expectedPath": [
+            "Dinerkaart",
+            "KLASSIEKE BORRELHAPPEN"
+          ],
+          "actualPath": [
+            "DINERKAART",
+            "KL ASSIEKE BORRELHAPPEN",
+            "Chablis Chardonnay"
+          ],
+          "price": [
+            "13.95"
+          ],
+          "quote": "Paling, brioche, rode biet, Per 2 stuks crème fraîche en roze peper",
+          "locator": "Dinerkaart › KLASSIEKE BORRELHAPPEN › pagina 2, kolom links, y=534",
+          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
+          "actualLocator": "pdf:2:item:4"
+        },
+        {
+          "name": "Pata Negra (70 gr.)",
+          "expectedPath": [
+            "Dinerkaart",
+            "KLASSIEKE BORRELHAPPEN"
+          ],
+          "actualPath": [
+            "DINERKAART",
+            "KL ASSIEKE BORRELHAPPEN",
+            "Chablis Chardonnay"
+          ],
+          "price": [
+            "21.95"
+          ],
+          "quote": "Pata Negra (70 gr.), Spaanse Ibericoham",
+          "locator": "Dinerkaart › KLASSIEKE BORRELHAPPEN › pagina 2, kolom links, y=644",
+          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
+          "actualLocator": "pdf:2:item:1"
+        },
+        {
+          "name": "Paté en croute",
+          "expectedPath": [
+            "Dinerkaart",
+            "KLASSIEKE BORRELHAPPEN"
+          ],
+          "actualPath": [
+            "DINERKAART",
+            "KL ASSIEKE BORRELHAPPEN",
+            "Chablis Chardonnay"
+          ],
+          "price": [
+            "16.95"
+          ],
+          "quote": "Paté en croute, gefrituurde kappertjes, uienconfit",
+          "locator": "Dinerkaart › KLASSIEKE BORRELHAPPEN › pagina 2, kolom links, y=610 (bedrag op y=612)",
+          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
+          "actualLocator": "pdf:2:item:2"
         },
         {
           "name": "Amaretto Sour",
@@ -1884,7 +1919,9 @@
             "MIX / COCKTAILS / GIN & TONIC"
           ],
           "actualPath": [
-            "Menukaart"
+            "DINERKAART",
+            "D ESSERT w I j NEN & PORT:",
+            "M I x / COCKTAILS / G IN & T ONIC :"
           ],
           "price": [
             "10.75"
@@ -1892,7 +1929,7 @@
           "quote": "Amaretto Sour",
           "locator": "Dinerkaart › MIX / COCKTAILS / GIN & TONIC › pagina 3, kolom rechts, y=512",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:43"
+          "actualLocator": "pdf:13:item:6"
         },
         {
           "name": "Aperol Spritz",
@@ -1901,7 +1938,9 @@
             "MIX / COCKTAILS / GIN & TONIC"
           ],
           "actualPath": [
-            "Menukaart"
+            "DINERKAART",
+            "D ESSERT w I j NEN & PORT:",
+            "M I x / COCKTAILS / G IN & T ONIC :"
           ],
           "price": [
             "9.25"
@@ -1909,7 +1948,7 @@
           "quote": "Aperol Spritz",
           "locator": "Dinerkaart › MIX / COCKTAILS / GIN & TONIC › pagina 3, kolom rechts, y=566",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:38"
+          "actualLocator": "pdf:13:item:2"
         },
         {
           "name": "Copperhead gin – Fever Tree",
@@ -1918,7 +1957,9 @@
             "MIX / COCKTAILS / GIN & TONIC"
           ],
           "actualPath": [
-            "Menukaart"
+            "DINERKAART",
+            "D ESSERT w I j NEN & PORT:",
+            "M I x / COCKTAILS / G IN & T ONIC :"
           ],
           "price": [
             "13.25"
@@ -1926,7 +1967,26 @@
           "quote": "Copperhead gin – Fever Tree",
           "locator": "Dinerkaart › MIX / COCKTAILS / GIN & TONIC › pagina 3, kolom rechts, y=468",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:47"
+          "actualLocator": "pdf:13:item:10"
+        },
+        {
+          "name": "Espresso Martini",
+          "expectedPath": [
+            "Dinerkaart",
+            "MIX / COCKTAILS / GIN & TONIC"
+          ],
+          "actualPath": [
+            "DINERKAART",
+            "D ESSERT w I j NEN & PORT:",
+            "M I x / COCKTAILS / G IN & T ONIC :"
+          ],
+          "price": [
+            "11.75"
+          ],
+          "quote": "Espresso Martini",
+          "locator": "Dinerkaart › MIX / COCKTAILS / GIN & TONIC › pagina 3, kolom rechts, y=544",
+          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
+          "actualLocator": "pdf:13:item:4"
         },
         {
           "name": "Hendrick's gin – Fever Tree",
@@ -1935,7 +1995,9 @@
             "MIX / COCKTAILS / GIN & TONIC"
           ],
           "actualPath": [
-            "Menukaart"
+            "DINERKAART",
+            "D ESSERT w I j NEN & PORT:",
+            "M I x / COCKTAILS / G IN & T ONIC :"
           ],
           "price": [
             "11.75"
@@ -1943,7 +2005,7 @@
           "quote": "Hendrick's gin – Fever Tree",
           "locator": "Dinerkaart › MIX / COCKTAILS / GIN & TONIC › pagina 3, kolom rechts, y=478",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:46"
+          "actualLocator": "pdf:13:item:9"
         },
         {
           "name": "Limoncello Spritz",
@@ -1952,7 +2014,9 @@
             "MIX / COCKTAILS / GIN & TONIC"
           ],
           "actualPath": [
-            "Menukaart"
+            "DINERKAART",
+            "D ESSERT w I j NEN & PORT:",
+            "M I x / COCKTAILS / G IN & T ONIC :"
           ],
           "price": [
             "9.25"
@@ -1960,7 +2024,7 @@
           "quote": "Limoncello Spritz",
           "locator": "Dinerkaart › MIX / COCKTAILS / GIN & TONIC › pagina 3, kolom rechts, y=556",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:39"
+          "actualLocator": "pdf:13:item:3"
         },
         {
           "name": "Mimosa",
@@ -1969,7 +2033,9 @@
             "MIX / COCKTAILS / GIN & TONIC"
           ],
           "actualPath": [
-            "Menukaart"
+            "DINERKAART",
+            "D ESSERT w I j NEN & PORT:",
+            "M I x / COCKTAILS / G IN & T ONIC :"
           ],
           "price": [
             "8.25"
@@ -1977,7 +2043,7 @@
           "quote": "Mimosa",
           "locator": "Dinerkaart › MIX / COCKTAILS / GIN & TONIC › pagina 3, kolom rechts, y=578",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:37"
+          "actualLocator": "pdf:13:item:1"
         },
         {
           "name": "Moscow mule",
@@ -1986,7 +2052,9 @@
             "MIX / COCKTAILS / GIN & TONIC"
           ],
           "actualPath": [
-            "Menukaart"
+            "DINERKAART",
+            "D ESSERT w I j NEN & PORT:",
+            "M I x / COCKTAILS / G IN & T ONIC :"
           ],
           "price": [
             "9.75"
@@ -1994,7 +2062,7 @@
           "quote": "Moscow mule",
           "locator": "Dinerkaart › MIX / COCKTAILS / GIN & TONIC › pagina 3, kolom rechts, y=522",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:42"
+          "actualLocator": "pdf:13:item:5"
         },
         {
           "name": "Negroni",
@@ -2003,7 +2071,9 @@
             "MIX / COCKTAILS / GIN & TONIC"
           ],
           "actualPath": [
-            "Menukaart"
+            "DINERKAART",
+            "D ESSERT w I j NEN & PORT:",
+            "M I x / COCKTAILS / G IN & T ONIC :"
           ],
           "price": [
             "9.75"
@@ -2011,24 +2081,7 @@
           "quote": "Negroni",
           "locator": "Dinerkaart › MIX / COCKTAILS / GIN & TONIC › pagina 3, kolom rechts, y=490",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:45"
-        },
-        {
-          "name": "Pornstar Martini",
-          "expectedPath": [
-            "Dinerkaart",
-            "MIX / COCKTAILS / GIN & TONIC"
-          ],
-          "actualPath": [
-            "Menukaart"
-          ],
-          "price": [
-            "11.75"
-          ],
-          "quote": "Pornstar Martini",
-          "locator": "Dinerkaart › MIX / COCKTAILS / GIN & TONIC › pagina 3, kolom rechts, y=534",
-          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:41"
+          "actualLocator": "pdf:13:item:8"
         },
         {
           "name": "Whisky Sour",
@@ -2037,7 +2090,9 @@
             "MIX / COCKTAILS / GIN & TONIC"
           ],
           "actualPath": [
-            "Menukaart"
+            "DINERKAART",
+            "D ESSERT w I j NEN & PORT:",
+            "M I x / COCKTAILS / G IN & T ONIC :"
           ],
           "price": [
             "11.75"
@@ -2045,41 +2100,121 @@
           "quote": "Whisky Sour",
           "locator": "Dinerkaart › MIX / COCKTAILS / GIN & TONIC › pagina 3, kolom rechts, y=500",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:44"
+          "actualLocator": "pdf:13:item:7"
         },
         {
-          "name": "Chivas Regal 12 yrs.",
+          "name": "Kipfilet of witvis",
           "expectedPath": [
             "Dinerkaart",
-            "WHISKY"
+            "VOOR ONZE KLEINE GASTEN"
           ],
           "actualPath": [
-            "Menukaart"
+            "DINERKAART",
+            "Ex TRA BI j",
+            "V OOR ON"
           ],
           "price": [
-            "7.75"
+            "15.95"
           ],
-          "quote": "Chivas Regal 12 yrs.",
-          "locator": "Dinerkaart › WHISKY › pagina 3, kolom rechts, y=270",
+          "quote": "Kipfilet of witvis, frites, salade",
+          "locator": "Dinerkaart › VOOR ONZE KLEINE GASTEN › pagina 3, kolom links, y=696 (bedrag op y=698)",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:59"
+          "actualLocator": "pdf:7:item:1"
         },
         {
-          "name": "Glenfiddich 12 yrs.",
+          "name": "Bisque de homard",
           "expectedPath": [
             "Dinerkaart",
-            "WHISKY"
+            "VOORGERECHTEN"
           ],
           "actualPath": [
-            "Menukaart"
+            "DINERKAART",
+            "KL ASSIEKE BORRELHAPPEN",
+            "Chablis Chardonnay"
           ],
           "price": [
-            "8.00"
+            "13.95"
           ],
-          "quote": "Glenfiddich 12 yrs.",
-          "locator": "Dinerkaart › WHISKY › pagina 3, kolom rechts, y=280",
+          "quote": "Bisque de homard, rivierkreeft, saffraanrouille",
+          "locator": "Dinerkaart › VOORGERECHTEN › pagina 2, kolom links, y=374",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:58"
+          "actualLocator": "pdf:2:item:6"
+        },
+        {
+          "name": "Boudin Noir",
+          "expectedPath": [
+            "Dinerkaart",
+            "VOORGERECHTEN"
+          ],
+          "actualPath": [
+            "DINERKAART",
+            "KL ASSIEKE BORRELHAPPEN",
+            "Chablis Chardonnay"
+          ],
+          "price": [
+            "18.95"
+          ],
+          "quote": "Boudin Noir, gebakken bloedworst, brioche, appel, Calvados, gebakken eendenlever",
+          "locator": "Dinerkaart › VOORGERECHTEN › pagina 2, kolom links, y=132",
+          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
+          "actualLocator": "pdf:2:item:11"
+        },
+        {
+          "name": "Gravad lax",
+          "expectedPath": [
+            "Dinerkaart",
+            "VOORGERECHTEN"
+          ],
+          "actualPath": [
+            "DINERKAART",
+            "KL ASSIEKE BORRELHAPPEN",
+            "Chablis Chardonnay"
+          ],
+          "price": [
+            "17.95"
+          ],
+          "quote": "Gravad lax, toast, aardappel, dragonmayonaise, venkel, citroen",
+          "locator": "Dinerkaart › VOORGERECHTEN › pagina 2, kolom links, y=186 (bedrag op y=188)",
+          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
+          "actualLocator": "pdf:2:item:10"
+        },
+        {
+          "name": "Klassieke steak tartaar (90 gram)",
+          "expectedPath": [
+            "Dinerkaart",
+            "VOORGERECHTEN"
+          ],
+          "actualPath": [
+            "DINERKAART",
+            "KL ASSIEKE BORRELHAPPEN",
+            "Chablis Chardonnay"
+          ],
+          "price": [
+            "15.95"
+          ],
+          "quote": "Klassieke steak tartaar (90 gram)",
+          "locator": "Dinerkaart › VOORGERECHTEN › pagina 2, kolom links, y=230 (bedrag op y=232)",
+          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
+          "actualLocator": "pdf:2:item:9"
+        },
+        {
+          "name": "Stracciatella",
+          "expectedPath": [
+            "Dinerkaart",
+            "VOORGERECHTEN"
+          ],
+          "actualPath": [
+            "DINERKAART",
+            "KL ASSIEKE BORRELHAPPEN",
+            "Chablis Chardonnay"
+          ],
+          "price": [
+            "16.95"
+          ],
+          "quote": "Stracciatella, tomaat, pruim, amandel en basilicum",
+          "locator": "Dinerkaart › VOORGERECHTEN › pagina 2, kolom links, y=274 (bedrag op y=276)",
+          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
+          "actualLocator": "pdf:2:item:8"
         },
         {
           "name": "Jack Daniel's",
@@ -2088,7 +2223,9 @@
             "WHISKY"
           ],
           "actualPath": [
-            "Menukaart"
+            "DINERKAART",
+            "D ESSERT w I j NEN & PORT:",
+            "C OGNAC & C ALVADOS :"
           ],
           "price": [
             "6.25"
@@ -2096,7 +2233,7 @@
           "quote": "Jack Daniel's",
           "locator": "Dinerkaart › WHISKY › pagina 3, kolom rechts, y=292",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:57"
+          "actualLocator": "pdf:15:item:7"
         },
         {
           "name": "Jameson",
@@ -2105,7 +2242,9 @@
             "WHISKY"
           ],
           "actualPath": [
-            "Menukaart"
+            "DINERKAART",
+            "D ESSERT w I j NEN & PORT:",
+            "C OGNAC & C ALVADOS :"
           ],
           "price": [
             "6.25"
@@ -2113,24 +2252,7 @@
           "quote": "Jameson",
           "locator": "Dinerkaart › WHISKY › pagina 3, kolom rechts, y=302",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:56"
-        },
-        {
-          "name": "Oban 14 yrs.",
-          "expectedPath": [
-            "Dinerkaart",
-            "WHISKY"
-          ],
-          "actualPath": [
-            "Menukaart"
-          ],
-          "price": [
-            "10.75"
-          ],
-          "quote": "Oban 14 yrs.",
-          "locator": "Dinerkaart › WHISKY › pagina 3, kolom rechts, y=258",
-          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:60"
+          "actualLocator": "pdf:15:item:6"
         },
         {
           "name": "Banyuls Traditionnel Aphrodis",
@@ -2139,7 +2261,8 @@
             "WIJNEN & PORT"
           ],
           "actualPath": [
-            "Menukaart"
+            "DINERKAART",
+            "D ESSERT w I j NEN & PORT:"
           ],
           "price": [
             "6.25"
@@ -2147,7 +2270,7 @@
           "quote": "Banyuls Traditionnel Aphrodis",
           "locator": "Dinerkaart › WIJNEN & PORT › pagina 3, kolom rechts, y=808",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:24"
+          "actualLocator": "pdf:10:item:1"
         },
         {
           "name": "Martha's Porto 10 yrs.",
@@ -2156,7 +2279,8 @@
             "WIJNEN & PORT"
           ],
           "actualPath": [
-            "Menukaart"
+            "DINERKAART",
+            "D ESSERT w I j NEN & PORT:"
           ],
           "price": [
             "6.75"
@@ -2164,7 +2288,7 @@
           "quote": "Martha's Porto 10 yrs.",
           "locator": "Dinerkaart › WIJNEN & PORT › pagina 3, kolom rechts, y=764",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:28"
+          "actualLocator": "pdf:10:item:4"
         },
         {
           "name": "Muscat de Beaumes de Venise",
@@ -2173,7 +2297,8 @@
             "WIJNEN & PORT"
           ],
           "actualPath": [
-            "Menukaart"
+            "DINERKAART",
+            "D ESSERT w I j NEN & PORT:"
           ],
           "price": [
             "6.25"
@@ -2181,7 +2306,7 @@
           "quote": "Muscat de Beaumes de Venise",
           "locator": "Dinerkaart › WIJNEN & PORT › pagina 3, kolom rechts, y=798",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:25"
+          "actualLocator": "pdf:10:item:2"
         },
         {
           "name": "Pedro Ximénez, Mil Pesetas, Jerez",
@@ -2190,7 +2315,8 @@
             "WIJNEN & PORT"
           ],
           "actualPath": [
-            "Menukaart"
+            "DINERKAART",
+            "D ESSERT w I j NEN & PORT:"
           ],
           "price": [
             "6.75"
@@ -2198,24 +2324,47 @@
           "quote": "Pedro Ximénez, Mil Pesetas, Jerez",
           "locator": "Dinerkaart › WIJNEN & PORT › pagina 3, kolom rechts, y=776",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:27"
+          "actualLocator": "pdf:10:item:3"
         },
         {
-          "name": "Sauternes, Le Terre du Lys d'Or",
+          "name": "Champagne Louis Roederer Brut",
           "expectedPath": [
             "Dinerkaart",
-            "WIJNEN & PORT"
+            "WIJNKAART",
+            "MOUSSERENDE WIJNEN"
           ],
           "actualPath": [
-            "Menukaart"
+            "DINERKAART",
+            "USA",
+            "MOUSSERENDE w I j NEN:"
           ],
           "price": [
-            "7.25"
+            "99.00"
           ],
-          "quote": "Sauternes, Le Terre du Lys d'Or",
-          "locator": "Dinerkaart › WIJNEN & PORT › pagina 3, kolom rechts, y=786",
+          "quote": "Champagne Louis Roederer Brut",
+          "locator": "Dinerkaart › WIJNKAART › MOUSSERENDE WIJNEN › pagina 4, kolom rechts, y=94 (alleen flesprijs)",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:26"
+          "actualLocator": "pdf:19:item:5"
+        },
+        {
+          "name": "Champagne Ruinart Brut Blanc de Blancs",
+          "expectedPath": [
+            "Dinerkaart",
+            "WIJNKAART",
+            "MOUSSERENDE WIJNEN"
+          ],
+          "actualPath": [
+            "DINERKAART",
+            "USA",
+            "MOUSSERENDE w I j NEN:"
+          ],
+          "price": [
+            "165.00"
+          ],
+          "quote": "Champagne Ruinart Brut Blanc de Blancs",
+          "locator": "Dinerkaart › WIJNKAART › MOUSSERENDE WIJNEN › pagina 4, kolom rechts, y=76 (alleen flesprijs)",
+          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
+          "actualLocator": "pdf:19:item:6"
         },
         {
           "name": "Pays d'Oc Merlot, Croix d'Or",
@@ -2226,7 +2375,9 @@
             "Frankrijk"
           ],
           "actualPath": [
-            "Menukaart"
+            "DINERKAART",
+            "w I j NKAART",
+            "Frankrijk"
           ],
           "price": [
             "5.50",
@@ -2235,7 +2386,27 @@
           "quote": "Pays d'Oc Merlot, Croix d'Or",
           "locator": "Dinerkaart › WIJNKAART › RODE WIJNEN › Frankrijk › pagina 4, kolom links, y=118 (bedragen op y=116)",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:64"
+          "actualLocator": "pdf:17:item:1"
+        },
+        {
+          "name": "Miraval Rosé Côtes de Provence",
+          "expectedPath": [
+            "Dinerkaart",
+            "WIJNKAART",
+            "ROSÉ WIJNEN"
+          ],
+          "actualPath": [
+            "DINERKAART",
+            "USA",
+            "ROSÉ w I j NEN:"
+          ],
+          "price": [
+            "49.00"
+          ],
+          "quote": "Miraval Rosé Côtes de Provence",
+          "locator": "Dinerkaart › WIJNKAART › ROSÉ WIJNEN › pagina 4, kolom rechts, y=308 (alleen flesprijs)",
+          "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
+          "actualLocator": "pdf:18:item:3"
         },
         {
           "name": "Viognier Condrieu Noordelijk Rhônegebied",
@@ -2246,7 +2417,9 @@
             "Frankrijk"
           ],
           "actualPath": [
-            "Menukaart"
+            "DINERKAART",
+            "w I j NKAART",
+            "Fèvre-Fèvre"
           ],
           "price": [
             "89.00"
@@ -2254,46 +2427,39 @@
           "quote": "Viognier Condrieu Noordelijk Rhônegebied Christophe Semaska Lys d'Or 2021",
           "locator": "Dinerkaart › WIJNKAART › WITTE WIJNEN › Frankrijk › pagina 4, kolom links, y=436 (alleen flesprijs)",
           "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
-          "actualLocator": "pdf:1:item:63"
+          "actualLocator": "pdf:16:item:3"
         }
       ],
       "duplicates": [
         {
-          "name": "Martha’s Porto 10 yrs.",
+          "name": "Champagne Charles LaFITTE",
           "path": [
-            "Menukaart"
+            "DINERKAART",
+            "USA",
+            "MOUSSERENDE w I j NEN:"
           ],
           "count": 2,
           "expectedCount": 0,
-          "locator": "pdf:1:item:31"
-        },
-        {
-          "name": "Copperhead gin – Fever Tree",
-          "path": [
-            "Menukaart"
-          ],
-          "count": 2,
-          "expectedCount": 0,
-          "locator": "pdf:1:item:48"
+          "locator": "pdf:19:item:2"
         }
       ],
       "accounting": {
         "reference": {
           "total": 112,
           "matched": 0,
-          "missing": 76,
+          "missing": 61,
           "priceErrors": 0,
-          "categoryErrors": 36,
+          "categoryErrors": 51,
           "accounted": 112,
           "balanced": true
         },
         "actual": {
-          "total": 74,
+          "total": 86,
           "matched": 0,
-          "invented": 38,
+          "invented": 35,
           "priceErrors": 0,
-          "categoryErrors": 36,
-          "accounted": 74,
+          "categoryErrors": 51,
+          "accounted": 86,
           "balanced": true
         }
       },
@@ -2344,11 +2510,11 @@
         "'v.a. 6,25' bij Likeuren en Grappa is als prijsvariant met label 'vanaf' vastgelegd; de bron noemt geen ander bedrag.",
         "Deze referentie is uit de vastgezette PDF-tekst en de paginageometrie opgesteld, niet uit de parseruitvoer.",
         "Deze bron is een PDF zonder bijbehorende HTML-pagina — restaurantgegevens konden hier niet uit worden afgeleid.",
-        "PDF https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf: 7 supplementregel(s) zijn niet als gerecht opgenomen; het concept ondersteunt supplementen nog niet.",
-        "PDF https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf: 15 regel(s) met een prijs- of hoeveelheidsgetal dat niet eenduidig aan een gerecht is te koppelen, zijn niet als gerecht overgenomen.",
-        "PDF https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf: 31 prijsregel(s) konden zonder aantoonbare lokale naam-/prijskoppeling niet als gerecht worden opgenomen.",
-        "PDF https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf: 44 mogelijke rubriekkop(pen) zijn niet herkend en dus niet als rubriek opgeslagen.",
-        "Kwaliteitscontrole op de deterministische extractie vraagt aandacht (long_item_name, duplicate_item_within_category, unresolved_price, pdf_supplements_skipped, pdf_ambiguous_price_lines, pdf_unlinked_price_lines, pdf_unrecognised_headings); het resultaat is niet als volledig beoordeeld."
+        "PDF https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf: 6 supplementregel(s) zijn niet als gerecht opgenomen; het concept ondersteunt supplementen nog niet.",
+        "PDF https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf: 27 regel(s) met een prijs- of hoeveelheidsgetal dat niet eenduidig aan een gerecht is te koppelen, zijn niet als gerecht overgenomen.",
+        "PDF https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf: 4 prijsregel(s) konden zonder aantoonbare lokale naam-/prijskoppeling niet als gerecht worden opgenomen.",
+        "PDF https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf: 5 mogelijke rubriekkop(pen) zijn niet herkend en dus niet als rubriek opgeslagen.",
+        "Kwaliteitscontrole op de deterministische extractie vraagt aandacht (long_item_name, duplicate_item_across_categories, unresolved_price, duplicate_item_within_category, pdf_supplements_skipped, pdf_ambiguous_price_lines, pdf_unlinked_price_lines, pdf_unrecognised_headings); het resultaat is niet als volledig beoordeeld."
       ],
       "priceProofs": [
         {
