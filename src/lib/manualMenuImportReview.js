@@ -296,11 +296,19 @@ function repairMenus({ report, decisions } = {}) {
     categories.forEach((category, c) => {
       const basePath = Array.isArray(category.path) && category.path.length > 0 ? category.path : [category.name];
       const items = Array.isArray(category.items) ? category.items : [];
+      // Een rubriek die de AI onzeker noemt, blijft onzeker zolang niet elke
+      // regel eruit door een mens is afgehandeld. Zo verdwijnt de onzekerheid
+      // nooit stilzwijgend en blijft de bestaande conceptblokkade werken.
+      const allDecided = items.every((_item, i) => {
+        const row = rowById.get(`${m}.${c}.${i}`);
+        return !row || map.has(row.id);
+      });
+      const sourceCategory = category.uncertain === true && !allDecided ? category : { ...category, uncertain: false };
       items.forEach((item, i) => {
         const row = rowById.get(`${m}.${c}.${i}`);
         const decision = row ? map.get(row.id) : null;
         if (!row || !decision) {
-          pushItem(rebuilt, byPath, basePath, item, category);
+          pushItem(rebuilt, byPath, basePath, item, sourceCategory);
           return;
         }
         if (decision.action === 'drop' || (decision.action === 'confirm' && row.code === 'supplement_as_main_price')) {
@@ -316,7 +324,7 @@ function repairMenus({ report, decisions } = {}) {
           const next = { ...item, priceStatus: 'known', amountMinorUnits: variant ? variant.amountMinorUnits : item.amountMinorUnits, currency: 'EUR' };
           delete next.priceVariants;
           delete next.supplementOf;
-          pushItem(rebuilt, byPath, basePath, next, category);
+          pushItem(rebuilt, byPath, basePath, next, sourceCategory);
           return;
         }
         if (decision.action === 'correct') {
@@ -332,10 +340,10 @@ function repairMenus({ report, decisions } = {}) {
             delete next.isFrom;
           }
           const targetPath = Array.isArray(correction.path) && correction.path.length > 0 ? correction.path : basePath;
-          pushItem(rebuilt, byPath, targetPath, next, category);
+          pushItem(rebuilt, byPath, targetPath, next, sourceCategory);
           return;
         }
-        pushItem(rebuilt, byPath, basePath, item, category);
+        pushItem(rebuilt, byPath, basePath, item, sourceCategory);
       });
     });
     menu.categories = rebuilt;

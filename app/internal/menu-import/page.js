@@ -40,7 +40,7 @@ function sourceLine(source) {
 function stateBadge(row) {
   if (row.state === 'valid') return { tone: 'positive', label: 'in orde' }
   if (row.state === 'error') return { tone: 'blocked', label: 'staat niet in de bron' }
-  if (row.state === 'unverifiable') return { tone: 'old', label: 'uit scan, controleer' }
+  if (row.state === 'unverifiable') return { tone: 'old', label: row.label || 'uit scan, controleer' }
   if (row.code === 'price_variant') return { tone: 'old', label: 'twee prijzen' }
   if (row.code === 'supplement_as_main_price') return { tone: 'old', label: 'is een toeslag' }
   return { tone: 'old', label: 'niet op te slaan' }

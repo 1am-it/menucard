@@ -43,6 +43,7 @@ const ROW_CODES = {
   unknown_source: { state: 'error', label: 'staat niet in de bron', askAi: false },
   locator_invalid: { state: 'error', label: 'staat niet in de bron', askAi: true },
   scan_unverified: { state: 'unverifiable', label: 'uit scan, controleer', askAi: true },
+  category_uncertain: { state: 'unverifiable', label: 'rubriek controleren', askAi: true },
   price_variant: { state: 'unsupported', label: 'twee prijzen', askAi: false },
   supplement_as_main_price: { state: 'unsupported', label: 'is een toeslag', askAi: true },
   from_price: { state: 'unsupported', label: 'niet op te slaan', askAi: true },
@@ -221,6 +222,7 @@ function classifyRow({ item, menu, category, source, rowProblemCodes }) {
   else if (relations.length > 0) code = relations[0];
   else if (priceOutOfRange) code = 'price_out_of_concept_range';
   else if (rowProblemCodes.length > 0) code = rowProblemCodes[0];
+  else if (category && category.uncertain === true) code = 'category_uncertain';
   else if (source && !source.hasText) code = 'scan_unverified';
 
   if (code) {

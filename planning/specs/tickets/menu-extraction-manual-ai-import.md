@@ -652,7 +652,7 @@ review, geen echte bronacceptatie en geen productieactie.
 | K2 prompt exporteren | `src/lib/manualMenuImportBundle.js`, `src/lib/manualMenuImportPrompt.js`, `src/lib/manualMenuImportSource.js` | `manualMenuImport.test.js`: protocol-/schemahash, per bron id/URL/tijd/SHA-256, samenvatting-plus-codeblok, scaninstructie, geen tekst in de metadata |
 | K3 veilig importeren | `src/lib/manualMenuImportImport.js`, `src/lib/manualMenuImportHandlers.js`, `app/api/internal/v1/manual-menu-import/*` | 1 MiB-grens, codeblokextractie, gewone melding, `validateStructuredOutput`, bundelbinding, Money- en relatieregels, AI-naamveld, nooit JSON in de respons |
 | K4 bewijs bij scans | `src/lib/manualMenuImportImport.js`, `app/internal/menu-import/page.js` | regel "uit scan, controleer", per regel bevestigen, geen accepteer-alles |
-| K5 menselijke controle | `src/lib/manualMenuImportReview.js`, `app/internal/menu-import/page.js` | variant → prijskeuze of weglaten; supplement → zichtbaar "als toeslag weggelaten"; verplichte reden bij "staat niet in de bron"; opslaan pas zonder open punten; herkomst in `importProvenance` |
+| K5 menselijke controle | `src/lib/manualMenuImportReview.js`, `app/internal/menu-import/page.js` | variant → prijskeuze of weglaten; supplement → zichtbaar "als toeslag weggelaten"; onzekere rubriek → per regel bevestigen of corrigeren; verplichte reden bij "staat niet in de bron"; opslaan pas zonder open punten; herkomst in `importProvenance` |
 | K6 Vraag AI | `src/lib/manualMenuImportPrompt.js`, `src/lib/manualMenuImportReview.js` | één prompt per regel, 20 per import, 8 KiB broncontext, dezelfde validator, vervangt alleen die regel, geen Vraag AI bij twee prijzen |
 | K7 gebruiksexport | `src/lib/manualMenuImportUsage.js`, `GET /api/internal/v1/manual-menu-import/usage` | alleen metagegevens, vast schema, `via abonnement, niet gemeten` zonder meting, geen menu-inhoud |
 | K8 regressies | `src/lib/manualMenuImport.test.js`, `src/lib/manualMenuImportHandlers.test.js`, `ops/browser/run-menu-review-browser-check.js` | injectie, hash-mismatch, te groot, onbekende bron, supplement als hoofdprijs, variantverlies, opslaan zonder menselijke stap, reden verplicht, vervolgantwoord buiten de regel, tekst rond het codeblok, ongeldige JSON; browserfixture voor de drie stappen in licht/donker op 320/390 px en met het toetsenbord |
@@ -676,6 +676,13 @@ Bewuste beperkingen van deze ronde, eerlijk gemeld in plaats van opgelost:
   "voeg het bestand zelf toe" mee en bewijs eruit blijft menselijk werk (T7).
 - De AI-naam is zelfgerapporteerd. Hij staat in `captured_content.importProvenance`
   (additief, geen schemawijziging) en in het gebruiksexport; het is geen bewijs.
+- Een rubriek die de AI `uncertain` noemt, blijft een open punt tot een mens
+  elke regel eruit heeft bevestigd of gecorrigeerd; pas dan verdwijnt de
+  onzekerheidsvlag en kan het bestaande concept de rubriek opslaan. De
+  bestaande `MenuReview`-component is niet hergebruikt: die is gebonden aan een
+  opgeslagen receipt, terwijl deze import nog geen receipt heeft. Hergebruikt
+  zijn wel dezelfde conceptregels (`buildMenuConcept`, `normalizePrice`), de
+ zelfde mapping en dezelfde opslagroute.
 - Er is geen provider, geen betaalde API en geen automatische bevestiging,
   publicatie of export. Rollen, bronbevestiging en publicatiepoorten zijn niet
   gewijzigd.

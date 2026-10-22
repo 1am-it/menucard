@@ -692,3 +692,23 @@ test('K8: injectie in de geplakte tekst blijft data en kan geen goedkeuring zett
   assert.match(blocked.problems.join(' '), /forbidden trust key: approved/);
 });
 
+
+test('K5: een onzekere rubriek vraagt per regel een menselijke beslissing', () => {
+  const output = fixtureOutput();
+  output.menus[0].categories[0].uncertain = true;
+  const report = buildReport(output);
+  assert.equal(report.ok, true, JSON.stringify(report.problems || report.message));
+  const salad = report.rows.find((entry) => entry.name === 'Broodplank');
+  assert.equal(salad.state, 'unverifiable');
+  assert.equal(salad.label, 'rubriek controleren');
+  assert.equal(salad.askAi, true);
+  assert.equal(reviewView({ report, decisions: new Map() }).canSave, false);
+  const decisions = fullyReviewed(report);
+  const draft = buildConceptDraft({ report, decisions, restaurantId: '23' });
+  assert.equal(draft.ok, true, JSON.stringify(draft.blockers || []));
+  // De onzekerheid is door de mens afgehandeld, dus niet meer als blokkade
+  // opgeslagen; de beslissingen zelf staan in de herkomst.
+  assert.equal(draft.content.categories.some((category) => category.uncertain === true), false);
+  assert.ok(draft.provenance.rows.length >= report.rows.length - report.summary.valid);
+});
+
