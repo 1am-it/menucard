@@ -88,7 +88,9 @@ test('K1: elke stap geeft een nieuw token met een eigen IV', () => {
 test('K1: een gewijzigd token, een vreemd token en een gewijzigd voorvoegsel worden geweigerd', () => {
   const sealed = cipher().seal(state());
   const parts = sealed.token.split('.');
-  const flipped = `${parts[0]}.${parts[1]}.${parts[2].slice(0, -1)}${parts[2].slice(-1) === 'A' ? 'B' : 'A'}.${parts[3]}`;
+  const at = 5;
+  const swapped = parts[2][at] === 'A' ? 'B' : 'A';
+  const flipped = `${parts[0]}.${parts[1]}.${parts[2].slice(0, at)}${swapped}${parts[2].slice(at + 1)}.${parts[3]}`;
   assert.equal(cipher().open(flipped).code, 'state_invalid');
   assert.equal(cipher().open('mmis1.abc.def.ghi').code, 'state_invalid');
   assert.equal(cipher().open('iets anders').code, 'state_invalid');

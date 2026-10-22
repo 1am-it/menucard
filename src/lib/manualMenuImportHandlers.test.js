@@ -246,7 +246,11 @@ test('K1: een gewijzigd token wordt geweigerd, ook tussen twee instanties', asyn
   const step1 = await createBundle(h.next());
   const step2 = await importAnswer(h.next(), step1);
   const parts = step2.state.split('.');
-  const flipped = `${parts[0]}.${parts[1]}.${parts[2].slice(0, -1)}${parts[2].slice(-1) === 'A' ? 'B' : 'A'}.${parts[3]}`;
+  // Een teken in het midden van de ciphertext wijzigen: aan het eind kunnen
+  // ongebruikte base64-bits toevallig dezelfde bytes opleveren.
+  const at = 5;
+  const swapped = parts[2][at] === 'A' ? 'B' : 'A';
+  const flipped = `${parts[0]}.${parts[1]}.${parts[2].slice(0, at)}${swapped}${parts[2].slice(at + 1)}.${parts[3]}`;
   const result = await h.next().decide(
     request({ state: flipped, decision: { rowId: step2.import.rows[0].id, action: 'confirm' } }),
     step2.import.importId,
