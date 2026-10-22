@@ -1,0 +1,85 @@
+{
+  "version": "1.0.0",
+  "issue": 59,
+  "sourceId": "thuis",
+  "label": "T-Huis",
+  "entryUrl": "https://t-huis.online",
+  "allowedHosts": [
+    "t-huis.online",
+    "www.t-huis.online"
+  ],
+  "capturedAt": "2026-10-22T19:53:38.951Z",
+  "oneShot": true,
+  "captureStatus": "captured",
+  "method": "One read-only attempt per URL through the existing safe fetch (SSRF guards, redirect limit, timeout and byte cap). Bytes are stored under the gitignored ops/benchmark/output/card-captures/; only SHA-256, size, content type, role and time are committed here. A readable page without menu content is recorded as not-a-menu, an unreadable page as blocked. The decimalAmountCount per capture only counts amounts printed with a decimal part; a whole-euro menu (Wolfslaar) therefore reports 0 and the reference, not this counter, proves its prices.",
+  "authorization": {
+    "decision": "Product Owner 2026-10-21, option 1 (four existing cards plus an unseen set), reference GitHub #59 issuecomment-6315226470; Delivery Lead order review 6315269210.",
+    "reference": "GitHub #59 review 6315269210",
+    "scope": "Public read-only comparison of exactly these four existing-card sources and the menu sub-pages/PDFs that the historical data/menus.json export itself names. No login, CAPTCHA bypass, other restaurant, arbitrary crawl, publication, production write or app-side AI.",
+    "appProviderActivation": false
+  },
+  "previousCardCapture": {
+    "path": "ops/benchmark/existing-card-references.json",
+    "bytesSha256": "dcb0e92b9cbefc7b56e5c934c722850078d3340c805498dd0e23bebbe2705bc4",
+    "previousCaptureStatus": "failed",
+    "note": "The 2026-10-21 capture of this source failed. Review 6349832755 K1 is the one honest read-only re-attempt; these bytes are pinned for the first time."
+  },
+  "historicalUrls": [
+    "https://t-huis.online/menu/"
+  ],
+  "seeds": [
+    {
+      "url": "https://t-huis.online",
+      "origin": "entry"
+    },
+    {
+      "url": "https://t-huis.online/menu/",
+      "origin": "historical"
+    }
+  ],
+  "captures": [
+    {
+      "requestedUrl": "https://t-huis.online",
+      "finalUrl": "https://t-huis.online/",
+      "contentType": "text/html",
+      "kind": "html",
+      "role": "entry",
+      "discovery": null,
+      "discoveredFrom": null,
+      "bytes": 121349,
+      "bytesSha256": "d074fd18a1974ad4b4604e29f24c888e20c2cba020652870952afddb44ad28f2",
+      "capturedAt": "2026-10-22T19:53:38.952Z",
+      "localPath": "ops/benchmark/output/card-captures/thuis/01-html-d074fd18a197.html",
+      "status": "captured",
+      "reason": null,
+      "error": null,
+      "note": null,
+      "seedOrigin": "entry",
+      "decimalAmountCount": 0
+    },
+    {
+      "requestedUrl": "https://t-huis.online/menu/",
+      "finalUrl": "https://t-huis.online/menu/",
+      "contentType": "text/html",
+      "kind": "html",
+      "role": "menu",
+      "discovery": null,
+      "discoveredFrom": null,
+      "bytes": 91835,
+      "bytesSha256": "c48082618f2516f296f48a27d0ebae3c9567dbbf792e9bb2cd55d75abdbeb7ac",
+      "capturedAt": "2026-10-22T19:53:39.569Z",
+      "localPath": "ops/benchmark/output/card-captures/thuis/02-html-c48082618f25.html",
+      "status": "captured",
+      "reason": null,
+      "error": null,
+      "note": null,
+      "seedOrigin": "historical",
+      "decimalAmountCount": 0
+    }
+  ],
+  "limitations": [
+    "One read-only attempt per URL through the existing safe fetch; robots.txt is not consulted by this benchmark capture route, exactly like the accepted Bardot capture.",
+    "Only the pinned entry URL, the menu URLs the historical export names, the pinned probe URLs and the same-host menu links the entry page itself names (one hop). No crawl, no alternative URL, no other location.",
+    "A readable page that is not a menu is recorded as not-a-menu; an unreadable page as blocked. Neither is ever counted as a menu."
+  ]
+}
