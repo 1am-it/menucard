@@ -1,7 +1,8 @@
 # Runner-verbruiksexport - beperkte herstelronde (#59)
 
-Status: **developeropgeleverd inclusief herstelronde E1, nog geen onafhankelijke
-review of ingebruikname**. Datum: 2026-10-21. Basis:
+Status: **developeropgeleverd inclusief herstelronde E1; de E1-build is de
+huidige live runner, nog geen onafhankelijke review van de K1-K6-ronde of
+ingebruikname daarvan**. Datum: 2026-10-21. Basis:
 `aabcf7abf74480646659865e95492e80eb300ed3` (`feat/menu-extraction-59`, PR #60).
 Opdrachten: Lead-reviews 6321467897 en 6321713308 (bevinding E1);
 eigenaarsbesluit issuecomment-6320004560; uitzondering vastgelegd in
@@ -11,6 +12,12 @@ De herziene runner staat **naast** de live runner buiten deze repository en is
 hier alleen met hash en bewijs vastgelegd. Deze notitie verandert geen
 productcode, provider, budget, ordervalidatie, writer-lock, git, prompt,
 GitHub-afhandeling, herstelbeleid of configuratie.
+
+Let op: de E1-build (`e090c4b0...`) is inmiddels de live `runner.cjs`. Op het pad
+`runner.next.cjs` staat nu de K1-K6-build voor begrensd GitHub-herstel; zie
+[runner-handoff-recovery-repair.md](runner-handoff-recovery-repair.md). De tabel
+hieronder blijft de E1-levering van 2026-10-21 beschrijven.
+
 
 ## Levering
 
