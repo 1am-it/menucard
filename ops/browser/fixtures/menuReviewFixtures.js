@@ -639,7 +639,13 @@ module.exports = {
     triage: { batch: overview(detailWith([imageOnlyItem])), triage: triagePayload },
     v2: overview(detailWith([v2Item])),
     error: null,
-    manual: { manual: manualImportScenario() },
+    // Lazy: de fictieve import gebruikt de echte productmodules en mag pas
+    // draaien nadat die hieronder zijn geladen (geen TDZ bij module-init).
+    manual: {
+      get manual() {
+        return manualImportScenario();
+      },
+    },
     ...conceptScenarios,
   },
   expected: {

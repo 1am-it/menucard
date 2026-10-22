@@ -337,7 +337,6 @@ class ManualImportBundleStore {
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
       .slice(0, limit);
   }
-
   isExpired(bundle) {
     return new Date(bundle.expiresAt).getTime() <= this.now().getTime();
   }
