@@ -1,6 +1,6 @@
-'use strict';
+﻿'use strict';
 
-// #59 fase 2 — de exportbundel van de handmatige AI-import.
+// #59 fase 2 â€” de exportbundel van de handmatige AI-import.
 // (planning/specs/tickets/menu-extraction-manual-ai-import.md, K2.)
 //
 // Een bundel is de enige bron van waarheid voor de latere import: de
@@ -8,12 +8,14 @@
 // URL, ophaaltijd en SHA-256, en de brontekst die de AI heeft gezien. De
 // geplakte JSON levert die waarden nooit; een modelbewering telt niet.
 //
-// Bewust server-only (node:crypto) en bewust in-memory:
-//   - de bundel wordt nooit gelogd, nooit in de browseropslag bewaard en
-//     nooit naar de database geschreven;
-//   - de opslag is begrensd (aantal bundels en levensduur), zodat een herstart
-//     of verlopen bundel een concrete `bundle_expired` geeft en nooit een
-//     stilzwijgend andere bron;
+// Bewust server-only (node:crypto). De bundel wordt nooit gelogd, nooit in de
+// browseropslag bewaard en nooit naar de database geschreven. Sinds herstel-
+// ronde 6350337273 reist hij uitsluitend mee in het ondertekende en
+// versleutelde toestandstoken van src/lib/manualMenuImportState.js: geen
+// gedeeld geheugen, geen tabel en geen migratie.
+//   - de levensduur en de bronhashes staan in dat token; een verlopen of
+//     gewijzigd token geeft een gewone melding en nooit een stilzwijgend andere
+//     bron;
 //   - dezelfde tekst die in de prompt gaat, is de tekst waartegen de quote-
 //     controle later plaatsvindt. Zo controleert de validator wat de AI zag.
 //
@@ -27,7 +29,6 @@ const { DEFAULT_EXTRACTION_LIMITS } = require('./menuExtractionProtocol');
 const BUNDLE_VERSION = 'manual-ai-import-bundle/v1';
 const PROVENANCE_KIND = 'handmatige_ai_import';
 const DEFAULT_BUNDLE_TTL_MS = 30 * 60 * 1000;
-const MAX_BUNDLES = 50;
 const MAX_SOURCE_TEXT_CHARS = 120_000;
 const MAX_TOTAL_TEXT_CHARS = 400_000;
 const MAX_SOURCES = DEFAULT_EXTRACTION_LIMITS.maxDocuments;
@@ -179,7 +180,7 @@ function normalizeProtocol(protocol) {
 }
 
 /**
- * Bouwt één exportbundel. `bundleId` en `now` worden ingevoerd zodat de
+ * Bouwt Ã©Ã©n exportbundel. `bundleId` en `now` worden ingevoerd zodat de
  * handler en de tests dezelfde, controleerbare waarden gebruiken.
  */
 function buildImportBundle({ bundleId, actorUserId, restaurantId, restaurantName, fetchedAt, sources, protocol, now = new Date() } = {}) {
@@ -290,82 +291,14 @@ function bundleMetadata(bundle) {
   };
 }
 
-class ManualImportBundleStore {
-  constructor({ ttlMs = DEFAULT_BUNDLE_TTL_MS, maxBundles = MAX_BUNDLES, now = () => new Date() } = {}) {
-    this.ttlMs = ttlMs;
-    this.maxBundles = maxBundles;
-    this.now = now;
-    this.bundles = new Map();
-  }
-
-  put(bundle) {
-    this.prune();
-    // De opslag bezit de levensduur: een bundel kan nooit langer leven dan de
-    // begrensde TTL van deze opslag.
-    const withTtl = {
-      ...bundle,
-      expiresAt: new Date(new Date(bundle.createdAt).getTime() + this.ttlMs).toISOString(),
-    };
-    this.bundles.set(withTtl.bundleId, withTtl);
-    while (this.bundles.size > this.maxBundles) {
-      const oldest = this.bundles.keys().next().value;
-      this.bundles.delete(oldest);
-    }
-    return withTtl;
-  }
-
-  /** Null voor onbekend én verlopen; de handler meldt dat als `bundle_expired`. */
-  get(bundleId) {
-    if (typeof bundleId !== 'string') return null;
-    const bundle = this.bundles.get(bundleId);
-    if (!bundle) return null;
-    if (this.isExpired(bundle)) {
-      this.bundles.delete(bundleId);
-      return null;
-    }
-    return bundle;
-  }
-
-  /**
-   * Geldige bundels van deze gebruiker voor dit resultaat, nieuwste eerst.
-   * Twee kandidaten betekent: de mens kiest ("14:12 of 14:40") — de app gokt
-   * niet. Nul kandidaten betekent: geen import zonder nieuwe export.
-   */
-  validFor({ actorUserId, restaurantId, limit = 2 }) {
-    return [...this.bundles.values()]
-      .filter((bundle) => bundle.actorUserId === actorUserId && bundle.restaurantId === restaurantId && !this.isExpired(bundle))
-      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-      .slice(0, limit);
-  }
-  isExpired(bundle) {
-    return new Date(bundle.expiresAt).getTime() <= this.now().getTime();
-  }
-
-  prune() {
-    for (const [id, bundle] of this.bundles) {
-      if (this.isExpired(bundle)) this.bundles.delete(id);
-    }
-  }
-
-  size() {
-    return this.bundles.size;
-  }
-}
-
-/** Eén procesbrede opslag; geen database, geen bestand, geen browser. */
-const sharedBundleStore = new ManualImportBundleStore();
-
 module.exports = {
   BUNDLE_VERSION,
   PROVENANCE_KIND,
   DEFAULT_BUNDLE_TTL_MS,
-  MAX_BUNDLES,
   MAX_SOURCES,
   MAX_SOURCE_TEXT_CHARS,
   MAX_TOTAL_TEXT_CHARS,
   ManualImportBundleError,
-  ManualImportBundleStore,
-  sharedBundleStore,
   canonicalText,
   canonicalJson,
   sha256,
@@ -374,4 +307,3 @@ module.exports = {
   buildImportBundle,
   bundleMetadata,
 };
-

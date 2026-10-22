@@ -1,6 +1,6 @@
-'use strict';
+﻿'use strict';
 
-// #59 fase 2 — de menselijke controle vóór opslaan (K4, K5, K6).
+// #59 fase 2 â€” de menselijke controle vÃ³Ã³r opslaan (K4, K5, K6).
 //
 // De regels komen uit de bestaande conceptwereld: niets wordt afgevlakt, er is
 // geen accepteer-alles, en opslaan kan pas als elk open punt door een mens is
@@ -12,8 +12,10 @@
 //   - een regel die niet in de bron staat vraagt een korte verplichte reden, die
 //     met de herkomst wordt bewaard (eigenaarsbesluit 2026-10-22d).
 //
-// Puur en zonder fetch/database. De opslag hieronder is in-memory en begrensd;
-// de handler schrijft pas via de bestaande conceptroute.
+// Puur en zonder fetch/database. De beslissingen en de Vraag AI-teller reizen
+// sinds herstelronde 6350337273 mee in het ondertekende toestandstoken
+// (src/lib/manualMenuImportState.js); er is geen opslag op moduleniveau meer.
+// De handler schrijft pas via de bestaande conceptroute.
 
 const { normalizePrice, buildMenuConcept } = require('./menuConcept');
 const { mapStructuredOutputToMenuContexts } = require('./menuExtractionMapping');
@@ -25,8 +27,6 @@ const MAX_NOTE = 300;
 const MAX_REASONS = 200;
 const MAX_FOLLOW_UPS_PER_IMPORT = 20;
 const MAX_FOLLOW_UPS_PER_ROW = 1;
-const IMPORT_TTL_MS = 60 * 60 * 1000;
-const MAX_IMPORTS = 50;
 
 const ACTIONS = ['confirm', 'correct', 'drop', 'choose_price'];
 
@@ -64,17 +64,17 @@ function normalizePath(value) {
   return labels;
 }
 
-/** Eén beslissing: altijd voor precies één regel, nooit een bulkclaim. */
+/** EÃ©n beslissing: altijd voor precies Ã©Ã©n regel, nooit een bulkclaim. */
 function validateDecision({ row, decision } = {}) {
   if (!row) return { ok: false, code: 'unknown_row', message: 'Deze regel hoort niet bij deze import.' };
   if (!decision || typeof decision !== 'object' || Array.isArray(decision)) {
-    return { ok: false, code: 'decision_invalid', message: 'Kies één handeling voor deze regel.' };
+    return { ok: false, code: 'decision_invalid', message: 'Kies Ã©Ã©n handeling voor deze regel.' };
   }
   if (decision.acceptAll === true || decision.rows !== undefined) {
     return { ok: false, code: 'accept_all_forbidden', message: 'Er is geen "alles accepteren". Beoordeel elke regel apart.' };
   }
   const action = decision.action;
-  if (!ACTIONS.includes(action)) return { ok: false, code: 'decision_invalid', message: 'Kies één handeling voor deze regel.' };
+  if (!ACTIONS.includes(action)) return { ok: false, code: 'decision_invalid', message: 'Kies Ã©Ã©n handeling voor deze regel.' };
   if (row.state === 'valid') {
     return { ok: false, code: 'row_not_open', message: 'Deze regel is al in orde.' };
   }
@@ -108,7 +108,7 @@ function validateDecision({ row, decision } = {}) {
         return {
           ok: false,
           code: 'correction_incomplete',
-          message: 'Vul een prijs in die het concept kan opslaan (groter dan € 0,00 en maximaal € 500,00).',
+          message: 'Vul een prijs in die het concept kan opslaan (groter dan â‚¬ 0,00 en maximaal â‚¬ 500,00).',
         };
       }
     }
@@ -134,7 +134,7 @@ function validateDecision({ row, decision } = {}) {
 }
 
 
-/** Past één gevalideerde beslissing toe op de beslissingenlijst. */
+/** Past Ã©Ã©n gevalideerde beslissing toe op de beslissingenlijst. */
 function decideRow({ report, decisions, decision } = {}) {
   if (!report || !Array.isArray(report.rows)) {
     return { ok: false, code: 'unknown_import', message: 'Deze import hoort niet bij deze sessie.' };
@@ -165,7 +165,7 @@ function decideRow({ report, decisions, decision } = {}) {
 
 /**
  * Het schermbeeld: per regel de toestand plus de menselijke beslissing. Een
- * bevestigd supplement is zichtbaar "als toeslag weggelaten" — nooit stil
+ * bevestigd supplement is zichtbaar "als toeslag weggelaten" â€” nooit stil
  * verdwenen en nooit als gerecht opgeslagen.
  */
 function rowForView(row, decision) {
@@ -205,7 +205,7 @@ function reviewView({ report, decisions } = {}) {
     rows,
     summary: {
       ...report.summary,
-      // "in orde" telt wat daadwerkelijk is afgehandeld én automatisch klopte;
+      // "in orde" telt wat daadwerkelijk is afgehandeld Ã©n automatisch klopte;
       // "nalopen" is het aantal nog open punten.
       valid: handled.length,
       pending: pending.length,
@@ -282,7 +282,7 @@ function pathKeyOf(labels) {
 /**
  * De uitvoer zoals de mens hem na de controle bedoelt: weggehaalde regels weg,
  * gekozen prijzen en correcties toegepast. Alleen expliciete menselijke
- * beslissingen veranderen iets; een variant wordt nooit vanzelf één prijs.
+ * beslissingen veranderen iets; een variant wordt nooit vanzelf Ã©Ã©n prijs.
  */
 function repairMenus({ report, decisions } = {}) {
   const map = decisions instanceof Map ? decisions : new Map();
@@ -364,7 +364,7 @@ function pushItem(rebuilt, byPath, pathLabels, item, sourceCategory) {
   category.items.push(item);
 }
 
-/** `${restaurantId}-${letters}` — de bestaande menu_context-vorm, niets nieuws. */
+/** `${restaurantId}-${letters}` â€” de bestaande menu_context-vorm, niets nieuws. */
 function menuContextFor(restaurantId, menus) {
   const title = (Array.isArray(menus) ? menus : []).map((menu) => menu && menu.title).find((value) => typeof value === 'string' && value.trim());
   const letters = String(title || 'import')
@@ -438,7 +438,7 @@ function applyFollowUp({ report, bundle, rowId, answer, followUpCount = 0 } = {}
   const row = report.rows.find((entry) => entry.id === rowId);
   if (!row) return { ok: false, code: 'unknown_row', message: 'Deze regel hoort niet bij deze import.' };
   if (followUpCount >= MAX_FOLLOW_UPS_PER_ROW) {
-    return { ok: false, code: 'follow_up_used', message: 'Deze regel is al één keer gevraagd. Pas zelf aan of laat de regel weg.' };
+    return { ok: false, code: 'follow_up_used', message: 'Deze regel is al Ã©Ã©n keer gevraagd. Pas zelf aan of laat de regel weg.' };
   }
   if (!row.askAi) {
     return {
@@ -497,7 +497,7 @@ function normalizeRowName(value) {
 }
 
 /**
- * Eén antwoord voor alle open punten (K6). Elk item moet bij precies één
+ * EÃ©n antwoord voor alle open punten (K6). Elk item moet bij precies Ã©Ã©n
  * openstaande regel horen, uit dezelfde bron. Een antwoord dat een andere regel
  * raakt of een nieuwe regel toevoegt, wordt volledig geweigerd: er is geen
  * "alles overnemen". Daarna beslist de mens nog per regel.
@@ -556,95 +556,14 @@ function applyOpenPointsAnswer({ report, bundle, answer, maxRows = MAX_FOLLOW_UP
   return { ok: true, report: next, rowIds: replacements.map((entry) => entry.row.id) };
 }
 
-
-
-/**
- * Begrensde, in-memory sessieopslag voor één import: het gevalideerde rapport,
- * de bundel, de menselijke beslissingen en de Vraag AI-teller. Niets hiervan
- * gaat naar de browseropslag of een log, en niets wordt naar de database
- * geschreven vóór de bestaande conceptroute.
- */
-class ManualImportStore {
-  constructor({ ttlMs = IMPORT_TTL_MS, maxImports = MAX_IMPORTS, now = () => new Date() } = {}) {
-    this.ttlMs = ttlMs;
-    this.maxImports = maxImports;
-    this.now = now;
-    this.entries = new Map();
-  }
-
-  prune() {
-    const now = this.now().getTime();
-    for (const [id, entry] of this.entries) {
-      if (entry.expiresAt <= now) this.entries.delete(id);
-    }
-  }
-
-  put({ report, bundle, actorUserId, restaurantId }) {
-    this.prune();
-    const entry = {
-      report,
-      bundle,
-      actorUserId,
-      restaurantId,
-      decisions: new Map(),
-      followUps: new Map(),
-      followUpTotal: 0,
-      createdAt: this.now().getTime(),
-      expiresAt: this.now().getTime() + this.ttlMs,
-    };
-    this.entries.set(report.importId, entry);
-    while (this.entries.size > this.maxImports) {
-      const oldest = this.entries.keys().next().value;
-      this.entries.delete(oldest);
-    }
-    return entry;
-  }
-
-  get(importId, actorUserId) {
-    this.prune();
-    const entry = typeof importId === 'string' ? this.entries.get(importId) : null;
-    if (!entry) return null;
-    if (typeof actorUserId === 'string' && entry.actorUserId !== actorUserId) return null;
-    return entry;
-  }
-
-  replaceReport(entry, report) {
-    entry.report = report;
-    return entry;
-  }
-
-  remainingFollowUps(entry) {
-    return Math.max(0, MAX_FOLLOW_UPS_PER_IMPORT - entry.followUpTotal);
-  }
-
-  countFollowUp(entry, rowId) {
-    entry.followUps.set(rowId, (entry.followUps.get(rowId) || 0) + 1);
-    entry.followUpTotal += 1;
-    return entry;
-  }
-
-  followUpsFor(entry, rowId) {
-    return entry.followUps.get(rowId) || 0;
-  }
-
-  size() {
-    return this.entries.size;
-  }
-}
-
-const sharedImportStore = new ManualImportStore();
-
 module.exports = {
   MAX_NOTE,
   MAX_REASONS,
   MAX_FOLLOW_UPS_PER_IMPORT,
   MAX_FOLLOW_UPS_PER_ROW,
-  IMPORT_TTL_MS,
   ACTIONS,
   MISSING_REASONS,
   ManualImportReviewError,
-  ManualImportStore,
-  sharedImportStore,
   validateDecision,
   decideRow,
   reviewView,
@@ -656,4 +575,3 @@ module.exports = {
   applyFollowUp,
   applyOpenPointsAnswer,
 };
-

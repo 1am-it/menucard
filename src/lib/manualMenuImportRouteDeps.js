@@ -2,6 +2,12 @@
 // (server only). Hergebruikt de bestaande veilige ophaalroute, de bestaande
 // protocollezer en de bestaande conceptopslag. Geen provider, geen AI-call en
 // geen nieuwe schrijver.
+//
+// Sinds herstelronde 6350337273 (K1) is er geen gedeeld geheugen meer nodig: de
+// tussenstap reist in een AES-GCM-token waarvan de sleutel met HKDF uit het
+// bestaande `SUPABASE_SERVICE_ROLE_KEY` komt. Dat is geen nieuw geheim en geen
+// nieuwe env-variabele. Ontbreekt het geheim, dan geeft de handler een concrete
+// fout in plaats van stil door te gaan.
 
 import { authenticateInternalRequest } from '@/src/lib/internalAuth'
 import { generateUuidV7 } from '@/src/lib/uuidv7'
@@ -12,10 +18,10 @@ import { computeCanonicalContentHash } from '@/src/lib/menuSnapshotHash'
 import { createConceptVersion } from '@/src/lib/menuConceptStore'
 import { getSupabaseAdmin } from '@/src/lib/supabaseAdmin'
 import { readManualImportSources } from '@/src/lib/manualMenuImportSource'
-import { sharedBundleStore } from '@/src/lib/manualMenuImportBundle'
-import { sharedImportStore } from '@/src/lib/manualMenuImportReview'
 import { sharedUsageLedger } from '@/src/lib/manualMenuImportUsage'
+import { createManualImportStateCipher } from '@/src/lib/manualMenuImportState'
 import { createManualMenuImportHandlers } from '@/src/lib/manualMenuImportHandlers'
+import restaurantsData from '@/data/restaurants.json'
 
 const MAX_SOURCE_BYTES = 15 * 1024 * 1024
 
@@ -60,7 +66,10 @@ export const manualMenuImportHandlers = createManualMenuImportHandlers({
   loadProtocol: () => loadMenuExtractionProtocol(),
   generateId: generateUuidV7,
   saveConcept,
-  bundleStore: sharedBundleStore,
-  importStore: sharedImportStore,
+  // De sleutel wordt pas bij de eerste stap afgeleid; een ontbrekend geheim
+  // geeft dan een concrete fout (state_config_missing) en nooit een stille
+  // doorgang.
+  stateCipher: createManualImportStateCipher({ secret: process.env.SUPABASE_SERVICE_ROLE_KEY }),
+  restaurants: restaurantsData,
   usageLedger: sharedUsageLedger,
 })

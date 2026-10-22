@@ -11,7 +11,6 @@ const { loadMenuExtractionProtocol } = require('./menuExtractionProtocol');
 const {
   buildImportBundle,
   bundleMetadata,
-  ManualImportBundleStore,
   computeBundleHash,
   sourceHashForText,
   MAX_SOURCE_TEXT_CHARS,
@@ -227,15 +226,13 @@ test('K3: een te grote bron wordt geweigerd in plaats van stil afgekapt', () => 
   );
 });
 
-test('K2: de bundelopslag is begrensd en een verlopen bundel bestaat niet meer', () => {
-  let clock = new Date('2026-10-22T12:00:00.000Z');
-  const store = new ManualImportBundleStore({ ttlMs: 1000, maxBundles: 2, now: () => clock });
-  const first = buildBundle({ bundleId: 'AI-1' });
-  store.put(first);
-  assert.equal(store.get('AI-1').bundleId, 'AI-1');
-  clock = new Date('2026-10-22T12:00:02.000Z');
-  assert.equal(store.get('AI-1'), null);
-  assert.equal(store.size(), 0);
+test('K2: de bundel draagt zijn eigen bronhash en levensduur, zonder brontekst in de metadata', () => {
+  const bundle = buildBundle();
+  const metadata = bundleMetadata(bundle);
+  assert.equal(metadata.bundleHash, bundle.bundleHash);
+  assert.equal(metadata.sources[0].sha256, sourceHashForText(HTML_TEXT));
+  assert.ok(metadata.expiresAt);
+  assert.equal(JSON.stringify(metadata).includes('Broodplank 8,50'), false);
 });
 
 test('K3: de AI-naam is verplicht en zelfgerapporteerd', () => {
