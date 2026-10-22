@@ -1,30 +1,35 @@
 # Runner-overdracht - begrensd GitHub-herstel (#59)
 
-Status: **developeropgeleverd, nog geen onafhankelijke review of ingebruikname**.
-Datum: 2026-10-22. Basis: `29c6c3dc145c8408dcd5ed95aa8567fe2c8cb608`
-(`feat/menu-extraction-59`, PR #60). Opdracht: Lead-review 6344569495;
+Status: **developeropgeleverd inclusief herstelronde R2 (TDZ in het orderpad);
+nog geen onafhankelijke review of ingebruikname**. Datum: 2026-10-22. Basis:
+`1de84c09f0b372e4800fb9209886fdbc0350072a` (`feat/menu-extraction-59`, PR #60).
+Opdrachten: Lead-reviews 6344569495 (K1-K6) en 6346259831 (R2, K1-K5);
 eigenaarsbesluit issuecomment-6343978758. Dezelfde beperkte uitzondering als de
 verbruiksexport, vastgelegd in [developerrol](../../.agent/project/developer.md).
 
 De herziene runner staat **naast** de live runner buiten deze repository en is
 hier alleen met hash en bewijs vastgelegd. Deze notitie verandert geen
-productcode, provider, budget, orderselectie, writer-lock, herstelbeleid buiten
-K6, prompt of configuratie.
+productcode, provider, budget, orderselectie, writer-lock, herstelbeleid,
+prompt of configuratie.
 
 ## Levering
 
 | Bestand | SHA-256 | Opmerking |
 | --- | --- | --- |
-| `runner.next.cjs` | `5a8e30c1ffacd09b793698f7b6030d442fa1ae9434a3baf65ea7e325b1927cf5` | volledige herziene runner, 736 regels, inclusief K1-K6 |
-| `runner.handoff.test.cjs` | `62192bb796d460e33154f09f1aad570a4da18610b339fcacd06921732e08053a` | 12 gerichte regressies op K1-K6 |
+| `runner.next.cjs` | `f9291ec9f6491e5ea4c0ff86149ae0d0c252e1b936d1f666a3f6e4a51c6b1da1` | volledige herziene runner, 761 regels, inclusief K1-K6 en R2 |
+| `runner.e2e.test.cjs` | `161ace2f00868c027e37c56592080509abd8798796b8749c946e04e35d2eabfd` | 5 end-to-end-regressies op het echte orderpad (R2) |
+| `runner.handoff.test.cjs` | `62192bb796d460e33154f09f1aad570a4da18610b339fcacd06921732e08053a` | 12 gerichte regressies op K1-K6, **ongewijzigd** |
 | `runner.next.test.cjs` | `decb29738aeffe3654602ae68e971eee7db8751717ec55f663c4874d2d310930` | bestaande verbruiksregressies, **ongewijzigd** |
+| `runner.test.cjs` | `f2e7188643a1ed346646848dfdcf0d627edf2a4d4f4c2f36af56e7631e298749` | bestaande orderregressies, **ongewijzigd** |
 | `runner.cjs` (live) | `e090c4b0bb90152a782eb9a99721701f8875441972da2325440f9284a60a12c8` | **niet gewijzigd** |
 
-De bestaande verbruiksexport (regels 102-284 van de live runner) is ongewijzigd
-overgenomen. De diff tegen de live runner is 323 regels toegevoegd en 16 regels
-gewijzigd; die wijzigingen zijn `saveJson` (injecteerbare `fs`), `command`
-(classificatiegegevens in het geheugen, geen uitvoer bewaard), het nieuwe
-overdrachtsblok, de `tick`-lus en de exports.
+De mislukte tussenlevering van 22-10 16:02 UTC staat als
+`5a8e30c1ffacd09b793698f7b6030d442fa1ae9434a3baf65ea7e325b1927cf5` in
+`recovery/handoff-fix-20261022/runner.cjs.failed-tdz`; R2 herstelt die versie.
+`runner.next.cjs` wijkt daarvan 60 regels toegevoegd en 35 verwijderd af. Tegen
+de live runner is dat 372 regels toegevoegd en 40 verwijderd; die wijzigingen zijn
+`saveJson` (injecteerbare `fs`), `command` (classificatiegegevens in het geheugen),
+het overdrachtsblok, de `tick`-lus, de testsnaad en de exports.
 
 ## Uitvoering per eis
 
@@ -75,7 +80,70 @@ record als `failed_permanent` met `reviewedByLeadAt` en publiceert niets. Zonder
 deze markering blijft de dispatcher bij een pending overdracht wachten; dat is de
 bedoelde begrenzing, geen automatische zelfgoedkeuring.
 
+## Herstelronde R2 - TDZ in het orderpad en end-to-end bewaking
+
+Bevinding (Lead, 22-10 16:02 UTC): de ingezette build `5a8e30c1…` stopte bij de
+eerste echte order met `Cannot access 'state' before initialization`. Oorzaak: in
+`tick` declareerde `const state = { ... }` (het rondeverslag) een blokgebonden
+`state` in hetzelfde `try`-blok waarin eerder `state.processed` werd gelezen. Die
+binnenste binding schaduwde de buitenste momentopname en zat op het leesmoment
+nog in de temporal dead zone. De bestaande tests dekten dit niet, omdat geen
+enkele test `tick` met een echte order doorliep; de poorttest stopte vóór die
+regel.
+
+Herstel, beperkt tot het orderpad:
+
+- Het rondeverslag heet nu `roundState`; de buitenste momentopname blijft
+  `state`. Geen enkele regel orderselectie, writer-lock, provider, budget, prompt
+  of configuratie is gewijzigd.
+- `tick` heeft een expliciete testsnaad `deps` (`dispatcherIo`): `dir`, `gh`,
+  `git`, `runAgent`, `api` en `now`. Zonder injectie is elk veld exact de
+  bestaande productiefunctie en wijst `dir` naar de runnermap; `main()` geeft
+  niets mee. De snijdt dus geen nieuwe configuratie, geen nieuwe provider en
+  geen tweede writer-pad.
+- `buildHandoff` krijgt `now: io.now`; in productie is dat dezelfde
+  `() => new Date()`, in tests een vaste tijd.
+
+Nieuwe regressies in `runner.e2e.test.cjs` (echte `state.json`,
+`handoff-pending.json`, `handoff-history.json`, `last-handoff.md`, `writer.lock`
+en `last-run.json` in een tijdelijke map; `gh`, `git` en de agent geïnjecteerd):
+
+1. een nieuwe order doorloopt het volledige pad, publiceert de overdracht
+   eenmalig en laat `state.json` op `awaiting_review` met de verbruikte orderkey;
+2. een tijdelijke publicatiefout geeft `pending` (drie pogingen), de ronde blijft
+   `awaiting_review`, en een herstart publiceert de opgeslagen tekst eenmalig
+   zonder de developeropdracht opnieuw te starten;
+3. een permanente fout (`HTTP 403`) wordt niet herhaald, blijft
+   `failed_permanent` en verandert de developeruitkomst niet;
+4. de duplicaatcontrole: een herstart met dezelfde ordercomment start geen
+   tweede agentronde en levert geen tweede comment;
+5. een onzekere publicatie (comment mogelijk geplaatst, markercontrole mislukt)
+   blijft `pending` en wordt bij herstart op de markering geadopteerd
+   (`recovered: true`) zonder nieuwe publicatiepoging.
+
+Bewijs (developer evidence): `node --check` op beide bestanden exit 0; alle
+suites tegen de herstelde runner 36/36 (10 + 9 + 12 + 5). Dezelfde suite tegen
+een kopie met alleen de oude bloknaam teruggezet: de 31 bestaande tests blijven
+groen en alle 5 nieuwe tests falen met exact
+`Cannot access 'state' before initialization` - dat is de reproductie van de
+praktijkfout en het bewijs dat de nieuwe tests die fout nu wél afvangen.
+Volledige uitvoer, hashes en diff: `delivery/handoff-tdz-fix-20261022/` naast de
+runner.
+
+Bekende begrenzing (niet stilzwijgend opgelost): na een geslaagde
+herstartpublicatie meldt `tick` daarna `waiting_for_order` (de order is immers
+verbruikt) en blijft het rondeverslag in `state.json` de publicatiestand van die
+eerste ronde (`pending`) houden. De publicatie zelf staat als `published` in
+`handoff-history.json` en het bestand `handoff-pending.json` is weg; dat is het
+leidende bewijs. Wie de live publicatiestand wil zien, kijkt dus in de
+overdrachtshistorie, niet in `state.json`. Dat is bewust zo gelaten: het
+rondeverslag vastleggen is geen live-statuskanaal en aanpassen zou verder gaan
+dan deze opdracht.
+
 ## Bewijs (developer evidence, geen onafhankelijke acceptatie)
+
+Onderstaande uitvoer is de eerste levering (K1-K6). R2 herhaalde alle suites op
+de herstelde runner: 36/36, zie "Herstelronde R2" hierboven.
 
 Uitgevoerd in `menucard-local-runner` op Node `v22.22.3`:
 
@@ -118,13 +186,20 @@ runnermap zijn niet door de tests gewijzigd.
 
 ## Resterende stappen
 
-- De Lead controleert de diff en de testuitvoer en zet `runner.next.cjs` pas in
-  wanneer geen developer en geen dispatcher actief zijn, naast
+- De Lead controleert de diff (`delivery/handoff-tdz-fix-20261022/`) en de
+  testuitvoer en zet `runner.next.cjs` pas in wanneer geen developer en geen
+  dispatcher actief zijn, naast `runner.e2e.test.cjs` **en**
   `runner.handoff.test.cjs`. Daarna precies één dispatcher herstarten.
+- De Lead herhaalt na de wissel één echte order: de ronde moet nu niet meer op de
+  TDZ stoppen en de overdracht moet eenmalig op issue #59 verschijnen. Dat is
+  praktijkacceptatie en hier niet uitgevoerd.
 - De Lead beoordeelt in een gecontroleerde lokale ronde het echte gedrag:
   publicatie, een tijdelijke fout die `pending` wordt, een herstart die opnieuw
   publiceert, en de blokkade van een nieuwe order. Dat is praktijkacceptatie en
   hier niet uitgevoerd.
+- De eerdere mislukte inzet is als feit vastgelegd, niet verdoezeld: build
+  `5a8e30c1…` stopte op de TDZ, is teruggezet en R2 vervangt die build. De Lead
+  bepaalt of de mislukte build als incident wordt gemeld.
 - Niet gedaan: live runner vervangen, dispatcher starten/stoppen, echte
   publicatie, provider-, budget- of configuratiewijziging, merge of release.
 - Begrenzing: de wachttijd- en pogingcyclus is per aanroep begrensd; in
