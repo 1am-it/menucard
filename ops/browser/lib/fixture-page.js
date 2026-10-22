@@ -128,6 +128,14 @@ function fixtureBootstrap(scenarios, options = {}) {
         if (verdict.routeId === 'manual-bundles') {
           return jsonResponse({ bundle: manual.bundle, prompt: manual.prompt, state: nextToken(), validUntil: manual.validUntil });
         }
+        // K5: een verlopen stap is een gewone melding; de pagina biedt daarna
+        // "Opnieuw maken". Alleen met ?manualFail=expired, dus nooit stil.
+        if (verdict.routeId === 'manual-imports' && params.get('manualFail') === 'expired') {
+          return jsonResponse(
+            { error: 'Deze stap is verlopen. Maak opnieuw een prompt.', reason: 'state_expired' },
+            409,
+          );
+        }
         if (verdict.routeId === 'manual-imports') {
           return jsonResponse({
             import: manual.import,

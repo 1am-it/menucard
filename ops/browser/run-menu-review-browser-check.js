@@ -1171,6 +1171,19 @@ function manualSearchUrl(theme) {
   return `${MANUAL_URL}?${params.toString()}`;
 }
 
+// K5: de fixture antwoordt op stap 2 met een verlopen toestand.
+function manualExpiredUrl(theme) {
+  const params = new URLSearchParams({
+    fixture: 'manual',
+    restaurant: fixtures.RESTAURANT.id,
+    name: fixtures.RESTAURANT.name,
+    url: 'https://fictief-brasserie.invalid/menu',
+    manualFail: 'expired',
+    theme,
+  });
+  return `${MANUAL_URL}?${params.toString()}`;
+}
+
 async function manualImportScenario(cdp) {
   await setViewport(cdp, 390, 900);
 
@@ -1431,6 +1444,24 @@ async function manualReviewSteps(cdp) {
     summary: document.body.innerText.includes('Antwoord geplakt'),
   }))()`);
   check('manual import: after wiping, the empty paste field returns', afterWipe.field === true && afterWipe.summary === false, JSON.stringify(afterWipe));
+  // K5 — een verlopen stap geeft een gewone melding met [Opnieuw maken].
+  await openRoute(cdp, manualExpiredUrl('light'), `document.body.innerText.includes('Prompt maken')`);
+  await clickButton(cdp, 'Prompt maken');
+  await waitFor(cdp, `document.body.innerText.includes('gaat mee in de prompt')`, 15000);
+  await setFieldValue(cdp, '#mai-answer', 'Korte samenvatting zonder codeblok.');
+  await waitFor(cdp, `document.body.innerText.includes('Antwoord geplakt')`, 15000);
+  await clickButton(cdp, 'Controleren');
+  const expiredNotice = await waitFor(cdp, `document.body.innerText.includes('Deze stap is verlopen')`, 15000);
+  check('manual import: an expired step is a plain message, not a technical error', expiredNotice);
+  const retryButton = await evalJs(cdp, `(() => {
+    const button = [...document.querySelectorAll('button')].find((b) => b.innerText.trim() === 'Opnieuw maken');
+    return button ? { disabled: button.disabled } : null;
+  })()`);
+  check('manual import: an expired step offers "Opnieuw maken"', Boolean(retryButton) && retryButton.disabled === false, JSON.stringify(retryButton));
+  await clickButton(cdp, 'Opnieuw maken');
+  const remade = await waitFor(cdp, `document.body.innerText.includes('Prompt gemaakt')`, 15000);
+  check('manual import: "Opnieuw maken" creates a new prompt from the same sources', remade);
+
 }
 
 main();
