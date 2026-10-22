@@ -46,7 +46,8 @@ the full notes; nothing listed here was removed.
 | `be-25-batch-analysis-desktop-v2.png` | Future internal `Batchanalyse` under `Werkvoorraad / Bronnen beoordelen`, desktop 1280px, light and dark | `be-25-batch-source-analysis-from-triage.md` | **Leading** visual reference for BE-25 fase 2 (final, fictional `.example` data); the ticket and design reference win. No background worker is implied. |
 | `be-25-batch-analysis-mobile-v2.png` | Same, mobile 390px and 320px, light and dark | `be-25-batch-source-analysis-from-triage.md` | **Leading**, together with the desktop v2 file. |
 | `be-25-batch-analysis-handoff-v2.pdf` | BE-25 handoff: tokens, status role per state, accessibility, per-width rules, design decisions | `be-25-batch-source-analysis-from-triage.md` | Accompanies the two v2 PNGs; recorded PDF exception (`design-reference.md`, "Mockups"). Not a build authorization. |
-| `manual-ai-import-v1.html` | Internal manual AI import (#59 phase 1): export the prompt, import the AI JSON with its control result, human review before saving; light and dark, 320/390 px | `planning/specs/tickets/menu-extraction-manual-ai-import.md` (context: issue #59 / PR #60) | **Ter goedkeuring.** Static reference with fictional `.example` data; no product code. Not leading until the Product Owner approves it. |
+| `manual-ai-import-v2.html` | Internal manual AI import v2 (#59 phase 1): one column, three plain-language steps (make the prompt, paste the answer, check and save), per-line "Vraag AI" follow-up prompts, technical details collapsed; light and dark, 320/390 px | `planning/specs/tickets/menu-extraction-manual-ai-import.md` (context: issue #59 / PR #60) | **Ter goedkeuring.** Replaces v1. Static reference with fictional `.example` data; no product code. Not leading until the Product Owner approves it. |
+| `manual-ai-import-v1.html` | Internal manual AI import (#59 phase 1): export the prompt, import the AI JSON with its control result, human review before saving; light and dark, 320/390 px | `planning/specs/tickets/menu-extraction-manual-ai-import.md` (context: issue #59 / PR #60) | **Vervangen door v2**; kept for history only, not a reference. |
 | `be-25-batch-analysis-desktop-v1.png` | Future internal batch source analysis, desktop 1280px, light | `be-25-batch-source-analysis-from-triage.md` | **Superseded by v2**; kept for history only, not a reference. |
 | `be-25-batch-analysis-mobile-v1.png` | Future internal batch source analysis, mobile 390px, light | `be-25-batch-source-analysis-from-triage.md` | **Superseded by v2**; kept for history only, not a reference. |
 | `share-1-dish-sharing-handoff-v1.pdf` | "Deel gerecht" on `/menu/[id]`: share sheet, popover, dish-link context line and mismatch status; desktop and mobile, light and dark | `share-1-dish-sharing-v1.md` | Conceptual implementation reference for the future SHARE-1 build; not a product decision or build authorization on its own (see "Public sharing" below). |
@@ -89,18 +90,25 @@ background worker, no automatic publication, no implementation before
 `0016`. Its product decisions are recorded in the BE-25 ticket ("Design
 v2 decisions"), which wins.
 
-**Handmatige AI-import (addition, 2026-10-22).**
-`manual-ai-import-v1.html` is the phase-1 visual reference for the manually
+**Handmatige AI-import (addition, 2026-10-22; v2 the same day).**
+`manual-ai-import-v2.html` is the current phase-1 proposal for the manually
 approved AI import trial in #59 (`planning/specs/tickets/menu-extraction-manual-ai-import.md`).
-It shows three states in one static file: exporting the prompt (protocol and
-schema versions, per-source id, URL, fetch time and SHA-256), importing the AI
-JSON with its control result (valid, error, not automatically checkable,
-non-storable variant or arrangement) and the human review before saving. It
-uses only fictional `.example` data, Kleurtaal v2 tokens, the BE-25 batch
-layout, and a Licht/Donker switch (`#licht` / `#donker` deep links). **Status:
+It follows the owner's 2026-10-22 decisions — as simple as possible and one
+targeted follow-up prompt per unclear line — and shows one column with three
+steps in plain language: make the prompt (restaurant name, one line per source
+with a check or a warning such as "voeg het bestand zelf toe", "Kopieer
+prompt"), paste the answer ("Welke AI gebruikte je?" plus "Anders", the paste
+field, "Controleren") and check and save ("9 gerechten · 5 in orde · 4
+nalopen", only the attention lines open, "Vraag AI" per line where the AI can
+add something, one button for all open points, and "Concept opslaan" disabled
+until everything has been reviewed). Protocol and schema versions, hashes and
+source IDs sit in one collapsed "Technische details" section and are still
+recorded and checked. It uses only fictional `.example` data, Kleurtaal v2
+tokens and a Licht/Donker switch (`#licht` / `#donker` deep links). **Status:
 ter goedkeuring** — it is not a build authorization and does not lead until the
 Product Owner approves it. It adds no route, schema, database or provider; the
 spec text and the ticket contracts win over the mockup.
+`manual-ai-import-v1.html` is kept for history only and is superseded by v2.
 
 Not yet in this directory: a PLATFORM-12 coverage dashboard v2 has no
 committed ticket or mockup in the repository yet. When it lands, add it

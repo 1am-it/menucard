@@ -2,12 +2,19 @@
 
 GitHub: https://github.com/1am-it/menucard/issues/59 · PR #60 (draft)
 
-Status: **ontwerp ter goedkeuring**, 2026-10-22. Fase 1 van 2: alleen
-documentatie en één statische mockup. Geen product-, route-, schema- of
-databasewijziging. Fase 2 (bouw) start pas na goedkeuring van de mockup door de
-Product Owner.
+Status: **ontwerp ter goedkeuring**, 2026-10-22; herzien als v2 op dezelfde dag
+na het eigenaarsbesluit "zo eenvoudig mogelijk" en de Lead-opdracht
+`6346726670`. Fase 1 van 2: alleen documentatie en één statische mockup. Geen
+product-, route-, schema- of databasewijziging. Fase 2 (bouw) start pas na
+goedkeuring van de mockup door de Product Owner.
 
-Basis: `5492d2cc36c5f195082e3154df4f6d31612c05cf`.
+Basis: `317866ecb47b9228349baf9318dff66d20d48546`; de v1-tekst stond op
+`5492d2cc36c5f195082e3154df4f6d31612c05cf`.
+
+Visuele referentie: `docs/mockups/manual-ai-import-v2.html` (**ter
+goedkeuring**). `manual-ai-import-v1.html` is vervangen en blijft alleen voor de
+geschiedenis. Waar de v1-flow en deze v2-tekst verschillen, wint v2; de
+controle- en poortregels van K2 §4–§9 en K5 gelden onverkort.
 
 ## Eigenaarsbesluit en afbakening (2026-10-22, optie A)
 
@@ -26,8 +33,137 @@ geen kwaliteitsacceptatie. Het BE-21-voorstel voor een API-proef (`5492d2c`)
 blijft NEEDS_APPROVAL en is **niet** gekozen.
 
 Fase 2 is pas aan de orde na expliciete goedkeuring van
-`docs/mockups/manual-ai-import-v1.html` door de Product Owner; deze spec is geen
+`docs/mockups/manual-ai-import-v2.html` door de Product Owner; deze spec is geen
 bouwopdracht.
+
+## Herziening v2: de vereenvoudigde stroom (eigenaarsbesluit 2026-10-22)
+
+De Product Owner koos op 22-10 twee dingen: (1) **zo eenvoudig mogelijk** — één
+kolom, drie stappen, gewone taal en zo min mogelijk scrollen; (2) **per
+onduidelijkheid één gerichte vervolgprompt** ("Vraag AI"), plus één knop voor
+alle open punten tegelijk. Deze herziening vervangt de drieluik-presentatie van
+v1. De controle-, bewijs- en poortregels in K2 §4–§9 en K5 blijven ongewijzigd
+gelden: niets wordt afgevlakt, niets automatisch bevestigd.
+
+### De stroom in drie stappen
+
+1. **Prompt maken.** Bovenaan de restaurantnaam. Daaronder per bron één regel
+   met een vinkje of een waarschuwing in gewone taal: "Lunch (website): gaat mee
+   in de prompt", "Diner (scan): voeg het bestand zelf toe". Eén knop
+   **Kopieer prompt**. De inhoud van de prompt verandert niet (vaste instructie,
+   schema, limieten, per bron id/URL/hash/tekst); die staat alleen niet meer in
+   de hoofdweergave. Onder de bronnen staat wat de mens zelf moet doen: de scan
+   toevoegen.
+2. **Antwoord plakken.** Het veld **Welke AI gebruikte je?** (zie hieronder),
+   het plakveld met teller en de knop **Controleren**. De app bindt de import
+   aan de meest recente geldige export van deze gebruiker voor dit resultaat en
+   toont die binding in "Technische details". Zijn er twee geldige exports, dan
+   vraagt de app kort welke prompt is gebruikt ("14:12 of 14:40") in plaats van
+   te gokken. Zonder geldige export is importeren niet mogelijk. De garantie
+   blijft: protocolhash en schemaversies komen uit het bundel, nooit uit de JSON
+   of uit een modelbewering.
+3. **Nalopen en opslaan.** De samenvatting in gewone taal: "9 gerechten · 5 in
+   orde · 4 nalopen". Alleen de regels die aandacht vragen staan open; elke
+   regel heeft één korte reden en passende knoppen:
+   - "twee prijzen" → [Kies] (glas/fles/weglaten), **zonder** Vraag AI;
+   - "uit scan, controleer" → [Klopt] [Wijzig] [Weglaten] [Vraag AI];
+   - "is een toeslag" → [Klopt] [Wijzig] [Weglaten] [Vraag AI];
+   - "staat niet in de bron" → [Klopt] [Wijzig] [Weglaten] [Vraag AI].
+   De regels die in orde zijn, staan ingeklapt. **Concept opslaan** blijft
+   uitgeschakeld tot alle open punten zijn nagelopen, met de reden en het aantal
+   open punten erbij. Er is geen accepteer-alles.
+
+De vier technische toestanden uit §4 blijven bestaan; v2 toont ze in gewone
+taal en houdt de betekenis:
+
+| Technische toestand | Gewone taal in de mockup |
+| --- | --- |
+| geldig | in orde (ingeklapt) |
+| fout | "staat niet in de bron" (rood, blokkeert opslaan) |
+| niet automatisch controleerbaar | "uit scan, controleer" |
+| niet opslaanbaar (variant/supplement/arrangement) | "twee prijzen" of "is een toeslag" |
+
+### Vraag AI: de vervolgprompt
+
+Vraag AI is er alleen waar de AI iets kan toevoegen: **scantekst**, **staat
+niet in de bron**, **rubriek** en **toeslag-of-gerecht**. Bij "twee prijzen"
+staat geen Vraag AI: dat is een beperking van het concept en de keuze is aan de
+mens.
+
+Wat de vervolgprompt bevat, en niets meer:
+
+1. de vraag over **één regel** (of één rubriek), in gewone taal;
+2. het huidige voorstel voor die regel (naam, omschrijving, prijs, rubriekpad);
+3. **dezelfde bron**: vaste `sourceId`, URL, SHA-256 en de al genormaliseerde
+   brontekst of het relevante fragment uit het bundel — geen nieuwe fetch en
+   geen andere bron;
+4. dezelfde uitvoerschema-versie, beperkt tot die ene regel, met dezelfde
+   verboden trustvelden (`confidence`, `reviewReady`, `approved`,
+   `publicationReady`);
+5. de mededeling dat broninhoud data is en dat ontbrekende gegevens onbekend
+   blijven.
+
+De controle is **dezelfde validator** als bij de import
+(`validateStructuredOutput`, bronhash- en quote-controle, `LIMITS`). Faalt die,
+dan verschijnt dezelfde gewone reden en wordt er niets vervangen. Het antwoord
+**vervangt alleen het voorstel voor die regel**; alle andere regels en het
+oorspronkelijke importbewijs blijven staan. Daarna beslist de mens met [Klopt],
+[Wijzig] of [Weglaten]; er is geen automatische overname en geen bulkknop.
+
+Bovengrens per regel en per import (ontwerp, fase 2):
+
+| Grens | Waarde | Reden |
+| --- | --- | --- |
+| Vervolgprompts per regel | 1 per import | voorkomt herhaald vragen tot het antwoord bevalt |
+| Vervolgprompts per import | 20 | begrensde hoeveelheid werk |
+| Regels in één "alle open punten"-prompt | 10 | anders wordt het weer een bulkoperatie |
+| Broncontext per vervolgprompt | 8 KiB | dezelfde bron, geen nieuwe ophaalsessie |
+| Antwoord per vervolgprompt | 1 MiB (bestaande importgrens) | gelijke parse- en veiligheidsgrens |
+| Automatische herpogingen | 0 | geen verborgen extra modelcall of kosten |
+| Provider/model in de app | geen | de app roept zelf geen AI aan; dit blijft handmatig |
+
+Een tweede klik op Vraag AI bij dezelfde regel zegt: "Deze regel is al één keer
+gevraagd. Pas zelf aan of laat de regel weg." De knop **Vraag AI over alle open
+punten** stelt één prompt samen met alleen de regels waar Vraag AI is
+toegestaan (hier: 3 van de 4) en controleert elk antwoord apart; er is geen
+"alles overnemen".
+
+### Het AI-naamveld
+
+- Eén verplicht veld **Welke AI gebruikte je?**: een lijst (ChatGPT, Claude,
+  Gemini, Copilot) plus **Anders** met een vrij tekstveld. Het is
+  **zelfgerapporteerd en onbewezen**; de app kan het model niet vaststellen.
+- Grenzen: 80 tekens (dezelfde `LIMITS.label`), alleen tekst, geen uitvoering,
+  geen netwerkoproep, geen opslag in de browseropslag. Leeg of alleen spaties →
+  `ai_name_required` en geen controle.
+- De naam gaat als herkomst mee (zie §8) en in het gebruiksexport hieronder.
+  Hij is nooit bewijs van kwaliteit, dekking of goedkeuring.
+
+### App-AI-gebruiksexport (eigenaarsbesluit 22-10)
+
+Het export bevat **alleen metagegevens**, geen brontekst, geen AI-antwoorden en
+geen persoonsgegevens:
+
+| Veld | Inhoud |
+| --- | --- |
+| toepassing | vaste waarde `handmatige-ai-import` |
+| route | het interne pad of de handler die de stap uitvoerde |
+| aiNaam | de zelfgerapporteerde naam uit het AI-veld |
+| aantallen | per stap: prompts gemaakt, imports gecontroleerd, vervolgprompts, opgeslagen concepten, geweigerd |
+| tijd | datum plus tijdvak; geen vrije tekst |
+| kosten | alleen als gemeten (bedrag en valuta); anders letterlijk **"via abonnement, niet gemeten"** |
+
+Geen automatische prijstabel, geen schatting en geen totaal dat "gemeten"
+suggereert. Het export is geen facturatie, geen kostenbewaking en geen bewijs
+dat een model is gebruikt.
+
+### Wat v2 niet verandert
+
+Geen automatische bevestiging, geen publicatie, geen export, geen v2-schrijver,
+geen provider of betaalde API in de app, geen accepteer-alles en geen nieuwe
+bron. De technische details (protocol- en schemaversies, hashes, bron-ID's,
+AI-naam) worden nog steeds vastgelegd en gecontroleerd; ze staan alleen
+ingeklapt.
 
 ## Referenties
 
@@ -42,7 +178,7 @@ bouwopdracht.
 | v2-mapping zonder afvlakking (alleen-lezen) | `src/lib/menuProductMappingV2.js`, `src/lib/menuProductGuardsV2.js` |
 | Telregels | [`menu-extraction-reference-counting-rules.md`](../../../docs/guides/menu-extraction-reference-counting-rules.md) |
 | Vastgezette referenties | `ops/benchmark/reference-references/index.json` |
-| Mockup | [`manual-ai-import-v1.html`](../../../docs/mockups/manual-ai-import-v1.html) |
+| Mockup | [`manual-ai-import-v2.html`](../../../docs/mockups/manual-ai-import-v2.html) (**ter goedkeuring**; v1 is vervangen) |
 | #59-hoofdspec | [`menu-extraction-ai-import.md`](./menu-extraction-ai-import.md) |
 
 
@@ -137,21 +273,28 @@ controleren) en één opslagmoment. Er is geen pad naar een concept zonder
 menselijke handeling. Alle bedragen, limieten en labels hieronder zijn ontwerp;
 fase 2 implementeert ze en niets daarbuiten.
 
+De **zichtbare** stroom staat in "Herziening v2" hierboven: één kolom, drie
+stappen en gewone taal. §1–§3 beschrijven dezelfde stappen in v1-vorm en gelden
+alleen voor zover v2 ze niet vervangt; §4–§9 gelden volledig.
+
 ### 1. Startpunt
 
 - Bestaande batchpagina `/internal/source-triage/batch`, in het detail van één
   resultaat, naast "Menukaart controleren".
-- Nieuwe knop **"AI-prompt exporteren"**, alleen zichtbaar voor een interne
-  gebruiker (`isInternalOnly`, dezelfde poort als bevestigen). Een collega die
-  alleen meeleest ziet de knop niet en kan ook niet importeren; dat volgt de
-  bestaande rolregel dat een niet-starter alleen-lezen is.
+- Nieuwe knop **"Menu importeren met AI"** (in v1 nog "AI-prompt exporteren"),
+  alleen zichtbaar voor een interne gebruiker (`isInternalOnly`, dezelfde poort
+  als bevestigen). Een collega die alleen meeleest ziet de knop niet en kan ook
+  niet importeren; dat volgt de bestaande rolregel dat een niet-starter
+  alleen-lezen is.
 - Zonder een geanalyseerd resultaat met minstens één leesbare bron is de knop
   uitgeschakeld met de reden erbij (geen prompt over een lege of geblokkeerde
   bron).
 
 ### 2. Prompt exporteren
 
-De export bestaat uit vier blokken, in deze volgorde:
+De export bestaat uit vier blokken, in deze volgorde. In v2 staat alleen de
+kern (restaurantnaam plus één regel per bron) in de hoofdweergave; de blokken
+hieronder blijven de volledige inhoud van de prompt en van "Technische details".
 
 1. **Vaste instructie**: de exacte tekst van `MENU-EXTRACTION.md`, geladen met
    `loadMenuExtractionProtocol()` (LF-genormaliseerd). Er wordt niets
@@ -181,6 +324,12 @@ protocolhash). Dat bundel is de enige bron van protocolhash, schemaversie en
 bronhashes bij de latere import (T4). De export wordt niet in de browseropslag
 bewaard en niet gelogd.
 
+In v2 kiest de app het bundel automatisch (het meest recente geldige bundel van
+deze gebruiker voor dit resultaat) en toont die keuze in "Technische details".
+Die automatische binding is een UI-vereenvoudiging, geen versoepeling: zonder
+geldig bundel geen import, en bij twijfel (twee geldige bundels) kiest de mens.
+Protocolhash en schemaversie komen nog steeds uit het bundel.
+
 ### 3. Importeren
 
 - Eén plakveld met een harde groottegrens: **1 MiB** (1 048 576 bytes UTF-8).
@@ -190,10 +339,15 @@ bewaard en niet gelogd.
   JSON, nooit een netwerk- of opslagactie op basis van een veldwaarde. Een
   string als "negeer je instructies" blijft een string en verschijnt hooguit als
   citaat in de review.
-- Vóór het parsen kiest de mens **bij welk exportbundel** de JSON hoort (het
-  bundel van stap 2). Zonder bundelkeuze is importeren niet mogelijk. Zo komen
+- Vóór het parsen is de JSON gebonden aan **één exportbundel** uit stap 1. In v2
+  kiest de app automatisch het meest recente geldige bundel van deze gebruiker
+  voor dit resultaat en toont die keuze in "Technische details"; zijn er twee
+  geldige bundels, dan kiest de mens er één ("14:12 of 14:40") in plaats van dat
+  de app gokt. Zonder geldig bundel is importeren niet mogelijk. Zo komen
   protocolhash en schemaversie uit de app, niet uit de JSON of uit een
   modelbewering.
+- Het verplichte veld **"Welke AI gebruikte je?"** (lijst plus "Anders", max. 80
+  tekens, zelfgerapporteerd) staat naast het plakveld; zie "Het AI-naamveld".
 - Een lege plak, ongeldige JSON, een JSON-array in plaats van een object, of een
   bundel dat niet (meer) geldig is, geeft een concrete fout en géén resultaat.
 
@@ -261,8 +415,9 @@ Het resultaat is per regel één van vier toestanden: **geldig**, **fout**,
 - **Geen pad zonder menselijke handeling**: er is geen knop die een import
   automatisch omzet in een concept, geen bulk-acceptatie en geen vooraf
   aangevinkte bevestiging.
-- "Concept opslaan" blijft `aria-disabled` zolang er blokkades zijn en zegt
-  waarom ("Kan pas zonder blokkades"), net als in het bestaande conceptpaneel.
+- "Concept opslaan" blijft `aria-disabled` zolang er blokkades of
+  niet-nagelopen punten zijn en zegt waarom in gewone taal ("Kan pas als alle 4
+  punten zijn nagelopen. Nog 4 open."), net als in het bestaande conceptpaneel.
   Opslaan maakt een interne conceptversie; er wordt niets gepubliceerd,
   goedgekeurd of geëxporteerd.
 
@@ -286,8 +441,9 @@ Het resultaat is per regel één van vier toestanden: **geldig**, **fout**,
 Vastgelegd bij de import:
 
 - **importmethode**: de vaste tekst `handmatige AI-import`;
-- **AI-naam**: door de mens opgegeven, met het label **"zelfgerapporteerd en
-  onbewezen"** — de app kan niet vaststellen welke AI of welk model is gebruikt;
+- **AI-naam**: uit het verplichte veld "Welke AI gebruikte je?" (lijst plus
+  "Anders", max. 80 tekens), met het label **"zelfgerapporteerd en onbewezen"** —
+  de app kan niet vaststellen welke AI of welk model is gebruikt;
 - **tijd**: het moment van importeren en het moment van opslaan;
 - **protocolhash** en **schemaversies** uit het exportbundel;
 - **bronhashes**: per bron de SHA-256 uit het bundel, plus de bundelhash;
@@ -317,6 +473,12 @@ toegestaan. De importmethode mag nooit als `source_type` worden geschreven (T11)
 | AI-antwoord met alleen tekst | "Geen JSON gevonden"; geen interpretatie van proza |
 | Netwerk-/opslagfout bij opslaan | Bestaande foutbanner; de invoer blijft staan, niets half opgeslagen |
 
+De technische codes hierboven zijn voor de ontwikkelaar en het export; de
+medewerker ziet dezelfde oorzaak in gewone taal ("staat niet in de bron", "uit
+scan, controleer", "twee prijzen", "is een toeslag"). De code blijft ernaast
+staan in "Technische details". Een v2-regel die aandacht vraagt heeft altijd
+één korte reden en nooit alleen een kleur.
+
 - **Toetsenbord**: alle stappen zijn met Tab te bereiken in leesorde; het
   plakveld, de bundelkeuze, de regelkeuzes en de opslaanknop hebben een
   zichtbare focusring (`--border-focus`). De vaste statusiconen zijn decoratief
@@ -333,27 +495,37 @@ toegestaan. De importmethode mag nooit als `source_type` worden geschreven (T11)
 
 ## K3 Visuele referentie
 
-Eén compact, statisch bestand: [`docs/mockups/manual-ai-import-v1.html`](../../../docs/mockups/manual-ai-import-v1.html).
+Eén compact, statisch bestand:
+[`docs/mockups/manual-ai-import-v2.html`](../../../docs/mockups/manual-ai-import-v2.html).
+`manual-ai-import-v1.html` blijft staan als geschiedenis en is **vervangen**.
 
 - Fictieve gegevens (`Restaurant Voorbeeld`, `.example`-URL's), geen
   restaurantfoto's, geen echte namen of prijzen.
-- Bestaande interne stijl: Kleurtaal v2-tokens uit `app/globals.css`, de
-  lay-out van de BE-25-batchanalyse (kruimelpad, titel plus "Alleen intern",
-  info-banner, kaarten, zijpaneel), status altijd icoon plus tekst.
-- Drie toestanden, onder elkaar zodat één scherm ze samen toont:
-  1. **Prompt exporteren** — vaste versies en hashes, bronnenlijst met id, URL,
-     ophaaltijd en SHA-256, instructie voor PDF/scan, bundel-id, kopieerknop.
-  2. **Importeren met controleresultaat** — plakveld met teller, en per regel
-     geldig / fout / niet automatisch controleerbaar / niet-opslaanbare variant,
-     plus een compacte lege en fouttoestand.
-  3. **Menselijke controle vóór opslaan** — regelbewijs, correctie, blokkades,
-     uitgeschakelde opslaanknop met reden.
-- Licht en donker in hetzelfde bestand via de bestaande segmented-controlvorm
-  (`Licht`/`Donker`, donker als standaard); `#licht` en `#donker` openen de
-  mockup direct in die stand.
-- Geen breed herontwerp: geen nieuwe navigatie, geen nieuwe paginahiërarchie.
-- Status in de index (`docs/mockups/README.md`): **ter goedkeuring**. De mockup
-  is geen buildautorisatie; de Product Owner keurt goed, daarna pas fase 2.
+- Bestaande interne stijl: Kleurtaal v2-tokens uit `app/globals.css`, interne
+  kaarten, kruimelpad, titel plus "Alleen intern", status altijd icoon plus
+  tekst. Eén kolom; geen zijpaneel en geen nieuwe navigatie of paginahiërarchie.
+- Drie stappen in gewone taal:
+  1. **Prompt maken** — restaurantnaam; per bron één regel met vinkje of
+     waarschuwing ("Lunch (website): gaat mee in de prompt", "Diner (scan): voeg
+     het bestand zelf toe"); "Kopieer prompt".
+  2. **Antwoord plakken** — "Welke AI gebruikte je?" (lijst plus "Anders"),
+     plakveld met teller, "Controleren".
+  3. **Nalopen en opslaan** — "9 gerechten · 5 in orde · 4 nalopen"; alleen de
+     vier aandachtsregels open met [Klopt] [Wijzig] [Weglaten] (en [Kies] bij
+     twee prijzen); Vraag AI per regel waar dat mag, met één uitgewerkt
+     voorbeeld met dezelfde bron en een plakveld; één knop "Vraag AI over alle
+     open punten"; de 5 goede regels ingeklapt; "Concept opslaan" uitgeschakeld
+     met reden en aantal open punten.
+- **Technische details** staan in één ingeklapte sectie (protocol- en
+  schemaversie, hashes, bron-ID's, AI-naam, importtijd) en worden nog steeds
+  vastgelegd en gecontroleerd.
+- Licht en donker in hetzelfde bestand (`Licht`/`Donker`, donker als standaard);
+  `#licht` en `#donker` openen de mockup direct in die stand. Ontworpen voor 320
+  en 390 px (één kolom, geen horizontale scroll, knoppen minimaal 40 px) en met
+  het toetsenbord te bedienen.
+- Status in de index (`docs/mockups/README.md`): v2 **ter goedkeuring**, v1
+  **vervangen**. De mockup is geen buildautorisatie; de Product Owner keurt
+  goed, daarna pas fase 2.
 
 
 ## K4 Meetplan voor de proef
@@ -459,8 +631,10 @@ Pas na goedkeuring van de mockup. Geen regel hiervan is in fase 1 uitgevoerd.
 ## K6 Voortgang
 
 Per K is één regel vastgelegd in `ops/benchmark/output/criteria-progress.json`
-onder ronde `6345294413` (K1 t/m K6). Dat bestand is volgens BE-21 gitignored;
-de vorige ronde blijft bewaard in `criteria-progress.round-6334231310.json`.
+onder ronde `6346726670` (K1 = mockup v2, K2 = deze spec, K3 = voortgang). Dat
+bestand is volgens BE-21 gitignored en wordt daarom niet gecommit; de vorige
+ronde blijft bewaard onder `6345294413`. De mockup en deze spec zijn wel
+gecommit op `feat/menu-extraction-59`.
 
 ## Grenzen van deze fase
 
@@ -482,4 +656,8 @@ merge, rebase, force-push, release of publicatie. PR #60 blijft draft.
 4. **Exportrecht van collega's**: alleen de starter, of iedere interne gebruiker
    met dezelfde reviewrol? Voorstel hierboven: alleen de starter, collega's
    alleen-lezen.
+5. **Automatische bundelbinding en de Vraag AI-bovengrens** (nieuw in v2): de app
+   kiest het bundel automatisch en de spec begrenst Vraag AI op 1 per regel, 20
+   per import en 8 KiB broncontext. Beide zijn UI-/ontwerpkeuzes zonder nieuwe
+   bevoegdheid; de Lead beoordeelt of ze zo in fase 2 mogen.
 
