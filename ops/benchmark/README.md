@@ -289,3 +289,31 @@ wine-arrangement prices that way). Such a repair re-runs the measurement and
 reports the new table next to the old one, even when the outcome gets worse;
 the counting rules and the measurement code stay unchanged.
 
+## #59 criterion 5 — existing cards, Bardot next to Zuyd (order 6347355753)
+
+A separate capture-first track for the four existing cards. The 2025-11 Bardot
+dinerkaart PDF is the only pinned Bardot document that still matches its
+captured SHA-256, so it is the only one that carries a reference.
+
+```
+node ops/scripts/verify-menu-extraction-card-reference-bytes.js   # once, create-only
+node ops/scripts/measure-menu-extraction-card-reference.js        # offline, repeatable
+node ops/scripts/probe-menu-extraction-blocked-cards.js           # once, create-only
+```
+
+- `card-reference-captures.json` — the one verification attempt: which pinned
+  card URL still has the pinned bytes and which one changed (a source change,
+  recorded without bytes).
+- `reference-references/bardot.json` — the controlled Bardot reference: name,
+  price variants, rubric path, locator, literal quote and, per amount, a price
+  proof (page, column, baseline) that `cardReferenceIntegrity.js` resolves back
+  to the pinned row. Supplements, arrangements and doubt cases are separate
+  lists; a `Dagprijs` dish without an amount is a doubt case, never a guessed
+  price.
+- `card-reference-measurement.json` / `.md` — the current extraction on those
+  pinned bytes, with Bardot and Zuyd reported separately and never merged into
+  one success figure. Deterministic: no network and no wall-clock time.
+- `existing-card-probe-attempts.json` — one honest re-attempt for the two cards
+  that were blocked before (Wolfslaar, T-Huis). A readable page is recorded as
+  reachable, never as a read or extracted menu.
+

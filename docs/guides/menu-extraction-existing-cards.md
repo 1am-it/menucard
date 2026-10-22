@@ -167,3 +167,134 @@ waarheid en de drempels zijn niet verlaagd.
   zijn externe blokkades; zonder nieuwe bronmeting is er geen live vergelijking.
 - Geen browseracceptatie, geen onafhankelijke review, geen productie- of
   publicatieactie.
+
+## Ronde 2026-10-22 — criterium 5: Bardot-referentie en meting (review 6347355753)
+
+Deze ronde voert K1–K5 van de Lead-opdracht uit: één gecontroleerde
+Bardot-referentie uit de vastgezette bytes, een meting met de bestaande
+meetcode en telregels naast Zuyd, één eerlijke nieuwe poging voor Wolfslaar en
+T-Huis, een bijgewerkte matrix en een voortgangsregel per K. Referenties van
+andere bronnen, de telregels, de meetcode en de bestaande Zuyd-referentie zijn
+**niet** gewijzigd; er is geen extractiecode, provider, publicatie of merge
+aangeraakt.
+
+### K1 — Bardot-referentie uit de vastgezette bytes
+
+De kaartcapture (`existing-card-references.json`, SHA-256 `dcb0e92b…`) legde
+alleen URL, content-type, bytegrootte en SHA-256 vast, geen bytes. Eén
+verificatiepoging via de bestaande veilige route (`robots.txt` en
+redirectcontrole) is daarom apart vastgelegd in
+`ops/benchmark/card-reference-captures.json` (SHA-256 `06c00c16…`):
+
+| Gepinde URL | Uitkomst | SHA-256 |
+| --- | --- | --- |
+| `https://www.brasseriebardot.nl` | **bron gewijzigd** (93.233 bytes, was 93.309) | `9c642296…` |
+| `https://www.brasseriebardot.nl/brasserie-bardot/` | **bron gewijzigd** (135.407 bytes, was 135.411) | `45e96b35…` |
+| `…/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf` | **identiek aan de pin** | `487ba29f…` |
+
+De twee HTML-pagina's zijn dus een bronwijziging en leveren geen referentie; de
+dinerkaart-PDF is byte-identiek en is de enige referentiebron. Status van de pin:
+`partially-verified`, één poging (`oneShot: true`).
+
+De referentie `ops/benchmark/reference-references/bardot.json` (SHA-256
+`63d39733…`) is uit die PDF opgesteld: **112 gerechten in 29 rubriekpaden**,
+**7 supplementen**, **8 twijfelgevallen** en **0 arrangementen**. Elk gerecht
+draagt een rubriekpad, een locator met pagina/kolom/baseline, een letterlijk
+citaat uit de vastgezette tekst en per bedrag een prijsbewijs. Alle **143**
+prijsbewijzen zijn machinematig tegen de vastgezette paginarijen gecontroleerd
+(`ops/benchmark/cardReferenceIntegrity.js`); die controle weigert een verkeerde
+baseline, kolom of bedrag.
+
+Vastgelegde keuzes, zodat niets stil wordt afgeplat:
+
+- **Dranken tellen mee** (telregel 1): wijnkaart, cocktails, mocktails,
+  digestieven en whisky staan als rubrieken in de referentie.
+- **Dagprijs zonder bedrag** (`Kreeft (500/600 gr.)`, `Kreeft, pasta aglio e
+  olio`): wel bronregels, geen bedrag. Ze staan met de letterlijke regel in
+  `ambiguous`, niet als geprijsd item, omdat de bestaande referentiecontrole een
+  bedrag per item eist. Een extractie die ze leeg levert, verschijnt daardoor als
+  verzonnen rij; dat staat erbij.
+- **HOOFDGERECHTEN versus SPECIALITEITEN VAN BARDOT**: de rechterkolom print
+  beide koppen; Poussin en Chateaubriand staan als subsectie, de rest als
+  HOOFDGERECHTEN. De vlakke lezing staat als twijfelgeval beschreven; de
+  kreeft-pasta tussen beide koppen valt onder dezelfde twijfel.
+- **Oestertoppings** (`Asian Style`, `Rockefeller met daslook`), **Royal de
+  Jarras, Brut Rosé** (geen eigen bedrag), **French sparkling wine**
+  (omschrijving), **magnumregels** (eigen regel versus flesvariant) en
+  **bronduplicaten** (`Espresso Martini`, `Martha's Porto`) staan met reden in
+  `ambiguous`.
+
+### K2 — Meting met de bestaande meetcode, Bardot naast Zuyd
+
+```powershell
+node ops/scripts/measure-menu-extraction-card-reference.js
+```
+
+Het script leest geen netwerk: het herspeelt de huidige pijplijn op de
+vastgezette bytes, gebruikt `referenceComparison.js` en de telregels ongewijzigd
+en schrijft `ops/benchmark/card-reference-measurement.json` (SHA-256
+`b68f9760…`) en `.md` (`85cd33bb…`). Tweemaal uitgevoerd op dezelfde bytes:
+identieke hashes. Alle hashes van tekstbestanden zijn EOL-stabiele
+repositoryhashes (`repositoryTextSha256`, het bestaande projecthulpmiddel), zodat
+een checkout met CRLF dezelfde waarden geeft; de vastgezette PDF-bytes houden de
+gewone bytehash.
+
+| Kaart | Referentie | Extractie | Match | Gemist | Verzonnen | Prijsfouten | Rubriekfouten | Precisie | Recall |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Brasserie Bardot | 112 | 74 | 0 | 76 | 38 | 0 | 36 | 0,00% | 0,00% |
+| Restaurant Zuyd | 36 | 34 | 34 | 2 | 0 | 0 | 0 | 100,00% | 94,44% |
+| **Totaal (2 gemeten)** | **148** | **108** | **34** | **78** | **38** | **0** | **36** | **31,48%** | **22,97%** |
+
+De Zuyd-uitkomst is gelijk aan de bestaande referentiemeting (34/36): dezelfde
+referentie, dezelfde telregels, dezelfde code. De Bardot-uitkomst is de eerlijke
+stand van de PDF-layoutlezing: 36 gerechten worden qua naam gevonden maar in een
+verkeerde rubriek geplaatst, 38 rijen zijn beschrijvingsfragmenten
+(`Per stuk`, `10 gram`, `gefrituurde kappertjes, uienconfit`) en 76
+referentiegerechten worden niet gevonden. Nul prijsfouten betekent hier niet
+"goed": de meeste rijen matchen niet eens op naam, dus er valt geen prijs te
+vergelijken.
+
+### K3 — Eén nieuwe poging voor Wolfslaar en T-Huis
+
+```powershell
+node ops/scripts/probe-menu-extraction-blocked-cards.js
+```
+
+Eén read-only poging per gepinde URL via de bestaande veilige route (inclusief
+`robots.txt`), vastgelegd in `ops/benchmark/existing-card-probe-attempts.json`
+(SHA-256 `6ea987c1…`, create-only):
+
+| Kaart | Tijd | Uitkomst | Bewijs |
+| --- | --- | --- | --- |
+| Wolfslaar `/`, `/nl/menu-lunch`, `/nl/menu-diner` | 2026-10-22T18:06:09Z–18:06:10Z | **leesbaar** (`text/html`) | 105.453 / 70.597 / 69.108 bytes, `c202d9f8…` / `1e36ad74…` / `3e311a54…` |
+| T-Huis `/`, `/menu/` | 2026-10-22T18:06:10Z | **leesbaar** (`text/html`) | 121.349 / 91.835 bytes, `d074fd18…` / `c4808261…` |
+
+Beide kaarten zijn dus **niet meer geblokkeerd** vanuit deze omgeving; de eerdere
+TLS-fout en redirect-lus traden nu niet op. Er is **geen** menu uit gelezen: deze
+poging legt alleen bereikbaarheid vast, bewaart geen bytes en maakt geen
+referentie. Criterium 5 staat voor deze twee kaarten daarmee op "bron
+bereikbaar, referentiemeting open" — niet "gemeten" en niet "geblokkeerd".
+
+### K4 — Matrix
+
+Criterium 5 staat in `docs/guides/menu-extraction-acceptance-matrix.md` per
+kaart bijgewerkt (gemeten, of bereikbaar zonder referentie, met de reden) met
+verwijzing naar het eigenaarsbesluit (issuecomment-6315226470, optie 1). De
+onjuiste kwalificatie "begrensd" is verwijderd.
+
+### K5 — Voortgang
+
+Per K staat één regel met naam in `ops/benchmark/output/criteria-progress.json`
+(volgens de BE-21-afspraak gitignored) onder ronde `6347355753`; dezelfde regels
+staan in de checkpoint op PR #60.
+
+### Wat deze ronde expliciet niet doet
+
+- Geen referentie of meting voor Wolfslaar en T-Huis: daarvoor is een nieuwe
+  opdracht nodig (bytes vastleggen, referentie opstellen, meten). De bron is nu
+  aantoonbaar bereikbaar, dus dat is de eerstvolgende zinvolle stap.
+- Geen wijziging aan extractiecode, telregels, meetcode of bestaande
+  referenties; geen provider, geen betaalde dienst, geen app-side AI, geen
+  productie-, publicatie- of mergeactie.
+- Dit blijft ontwikkelaarsbewijs: geen onafhankelijke review en geen
+  productieacceptatie.

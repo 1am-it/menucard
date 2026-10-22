@@ -1,0 +1,107 @@
+{
+  "version": "1.0.0",
+  "issue": 59,
+  "purpose": "criterion 5 - one honest re-attempt for the two blocked existing cards",
+  "oneShot": true,
+  "authorization": {
+    "decision": "Product Owner 2026-10-21, option 1 (four existing cards plus an unseen set), reference GitHub #59 issuecomment-6315226470; Delivery Lead order review 6315269210.",
+    "reference": "GitHub #59 review 6315269210",
+    "scope": "Public read-only comparison of exactly these four existing-card sources and the menu sub-pages/PDFs that the historical data/menus.json export itself names. No login, CAPTCHA bypass, other restaurant, arbitrary crawl, publication, production write or app-side AI.",
+    "appProviderActivation": false
+  },
+  "cardCapture": {
+    "path": "ops/benchmark/existing-card-references.json",
+    "bytesSha256": "dcb0e92b9cbefc7b56e5c934c722850078d3340c805498dd0e23bebbe2705bc4"
+  },
+  "method": "One read-only attempt per pinned probe URL through the existing safe fetch, which also performs the robots.txt check. A failure is recorded as blocked with its reason, HTTP status and time; no alternative URL, other location, crawl or bypass is used.",
+  "sources": [
+    {
+      "id": "wolfslaar",
+      "label": "Restaurant Wolfslaar",
+      "entryUrl": "https://www.restaurantwolfslaar.com",
+      "allowedHosts": [
+        "restaurantwolfslaar.com",
+        "www.restaurantwolfslaar.com"
+      ],
+      "attemptedAt": "2026-10-22T18:06:09.891Z",
+      "attempts": [
+        {
+          "url": "https://www.restaurantwolfslaar.com",
+          "at": "2026-10-22T18:06:09.891Z",
+          "status": "readable",
+          "finalUrl": "https://www.restaurantwolfslaar.com/",
+          "contentType": "text/html",
+          "kind": "html",
+          "bytes": 105453,
+          "bytesSha256": "c202d9f87c4d81387610c91cc4b00de1f82aaba510ae829926b5dbb624d88827",
+          "error": null,
+          "note": "The safe route returned a readable public document. This attempt pins nothing; the card capture stays unchanged."
+        },
+        {
+          "url": "https://www.restaurantwolfslaar.com/nl/menu-lunch",
+          "at": "2026-10-22T18:06:10.174Z",
+          "status": "readable",
+          "finalUrl": "https://www.restaurantwolfslaar.com/nl/menu-lunch",
+          "contentType": "text/html",
+          "kind": "html",
+          "bytes": 70597,
+          "bytesSha256": "1e36ad74c014318eb1a1106a6af307c8c4675dbf9185409594318a4211502fda",
+          "error": null,
+          "note": "The safe route returned a readable public document. This attempt pins nothing; the card capture stays unchanged."
+        },
+        {
+          "url": "https://www.restaurantwolfslaar.com/nl/menu-diner",
+          "at": "2026-10-22T18:06:10.288Z",
+          "status": "readable",
+          "finalUrl": "https://www.restaurantwolfslaar.com/nl/menu-diner",
+          "contentType": "text/html",
+          "kind": "html",
+          "bytes": 69108,
+          "bytesSha256": "3e311a543e3e9c90130391dcbebfd905c2f532c5bb4d24cdf2a5ef445280d669",
+          "error": null,
+          "note": "The safe route returned a readable public document. This attempt pins nothing; the card capture stays unchanged."
+        }
+      ],
+      "outcome": "readable",
+      "blockingReason": null
+    },
+    {
+      "id": "thuis",
+      "label": "T-Huis",
+      "entryUrl": "https://t-huis.online",
+      "allowedHosts": [
+        "t-huis.online",
+        "www.t-huis.online"
+      ],
+      "attemptedAt": "2026-10-22T18:06:10.394Z",
+      "attempts": [
+        {
+          "url": "https://t-huis.online",
+          "at": "2026-10-22T18:06:10.394Z",
+          "status": "readable",
+          "finalUrl": "https://t-huis.online/",
+          "contentType": "text/html",
+          "kind": "html",
+          "bytes": 121349,
+          "bytesSha256": "d074fd18a1974ad4b4604e29f24c888e20c2cba020652870952afddb44ad28f2",
+          "error": null,
+          "note": "The safe route returned a readable public document. This attempt pins nothing; the card capture stays unchanged."
+        },
+        {
+          "url": "https://t-huis.online/menu/",
+          "at": "2026-10-22T18:06:10.582Z",
+          "status": "readable",
+          "finalUrl": "https://t-huis.online/menu/",
+          "contentType": "text/html",
+          "kind": "html",
+          "bytes": 91835,
+          "bytesSha256": "c48082618f2516f296f48a27d0ebae3c9567dbbf792e9bb2cd55d75abdbeb7ac",
+          "error": null,
+          "note": "The safe route returned a readable public document. This attempt pins nothing; the card capture stays unchanged."
+        }
+      ],
+      "outcome": "readable",
+      "blockingReason": null
+    }
+  ]
+}
