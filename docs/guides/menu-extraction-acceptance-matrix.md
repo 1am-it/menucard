@@ -1,12 +1,13 @@
 # Menu-extractie — afrondingsmatrix #59
 
 Status: **ontwikkelaarsbewijs, geen onafhankelijke review en geen release.**
-Datum: 2026-10-21 (nieuwste ronde: review 6323277596, generiek extractieherstel;
-de rondehistorie hieronder blijft ongewijzigd).
+Datum: 2026-10-22 (nieuwste ronde: Lead-review 6334231310, de vier
+kaartvormklassen van Pellens generiek hersteld; de rondehistorie hieronder
+blijft ongewijzigd).
 Issue #59, branch `feat/menu-extraction-59`, PR #60.
-De nieuwste ronde staat in “Ronde 2026-10-21 — generiek extractieherstel
-(review 6323277596)”; de ronde daarvoor in “Ronde 2026-10-21 — vijf
-gecontroleerde referenties”.
+De nieuwste ronde staat in “Ronde 2026-10-22 — Pellens-kaartvormen generiek
+hersteld (review 6334231310)”; de ronde daarvoor in “Ronde 2026-10-21 —
+generiek extractieherstel (review 6323277596)”.
 De oudere kandidaat-codehead `26839eb4b9dfb5fb0a04fbc977ae3a7561f7000a` en
 bewijscommit `0f6fce86c0cc75cbcaab05574b7ae83975e3a16c` horen bij de vorige
 ronde en gelden niet als head van deze ronde; de exacte checkpoint-HEAD staat
@@ -52,9 +53,86 @@ bronverificatie zonder geregistreerde brontekst/hashcontext, Gauchos Breda
 (onbereikbaar), een nieuwe ongeziene holdout en BE-21's
 50–100-bronnenbenchmark. De pure v2 schema-/mappinglaag en de read-only
 integratie zijn met fictieve fixtures getest; er is geen DDL, writeflag of
-publieke werking. Volledige productacceptatie vereist nog een Product
+publieke werking. Sinds 2026-10-22 zijn de vier gemeten kaartvormklassen
+(K1–K4: naam/omschrijving in één cel, kaarttitel en tabbladen, verborgen
+tweede weergave, arrangement met per-gangprijzen) generiek hersteld: de
+referentiestand is 165/185 match met 17 gemist en 2 verzonnen (precisie 97,06%,
+recall 89,19%), Pellens gaat van 0 naar 24 van 36, en geen enkele bron verliest
+een match. Twee referentieregels en de prijsvarianten blijven bewust open.
+Volledige productacceptatie vereist nog een Product
 Owner-besluit over provider/model/budget/DPA, een nieuwe holdout, live
 preview-/schrijftoegang en onafhankelijke review door de Delivery Lead.
+
+## Ronde 2026-10-22 — Pellens-kaartvormen generiek hersteld (review 6334231310)
+
+Aanleiding: de Lead stelde vast dat de referentie van Pellens consequent de
+bronvorm volgt (naam als losse tekst, omschrijving in een `span`) en dat de 0
+matches uit vier extractiefouten kwamen. Deze ronde herstelt die vier klassen
+**generiek** — zonder domein, restaurantnaam, gerechtnaam of vast aantal — en
+begrenst wat aantoonbaar niet kan. Referenties, telregels, captures en meetcode
+zijn **niet** gewijzigd; er is geen slaande test verwijderd.
+
+### Uitkomst naast elkaar (zelfde referenties, zelfde telregels)
+
+| Bron | Ref | Match oud → nieuw | Gemist oud → nieuw | Verzonnen oud → nieuw | Prijsfouten oud → nieuw | Rubriekfouten oud → nieuw |
+| --- | ---: | --- | --- | --- | --- | --- |
+| Zuyd | 36 | 34 → 34 | 2 → 2 | 0 → 0 | 0 → 0 | 0 → 0 |
+| Andalous | 87 | 81 → 81 | 3 → 3 | 0 → 0 | 0 → 0 | 3 → 3 |
+| Pellens | 36 | 0 → **24** | 32 → **12** | 23 → **2** | 0 → 0 | 4 → **0** |
+| Chocolat | 26 | 26 → 26 | 0 → 0 | 0 → 0 | 0 → 0 | 0 → 0 |
+| **Totaal (4 gemeten)** | **185** | **141 → 165** | **37 → 17** | **23 → 2** | **0 → 0** | **7 → 3** |
+| Precisie / recall | | 82,46% → **97,06%** | | | | 76,22% → **89,19%** |
+
+Geen bron verliest een match; Zuyd, Andalous en Chocolat blijven gelijk in
+uitkomst. De meting is deterministisch: tweemaal uitgevoerd op dezelfde
+vastgezette bytes met identieke SHA-256 (`reference-measurement.json`
+`cf38be89d7591487e4dfdd96d7cd5131f072c6c70839792621bfedcaadab0864`,
+`reference-measurement.md`
+`ab333f1774274e5a7fab210fc47a63f9e6e0c18aa41c0fac0fb6581d7a9edc02`).
+
+### Per foutklasse: criterium 8
+
+| # | Klasse (review 6334231310) | Generieke regel in de code | Bewijs (fictieve fixture) | Status |
+| --- | --- | --- | --- | --- |
+| K1 | Naam en omschrijving samengevoegd: `Hamachidruif, prei`, `Uioude kaas`, en daardoor ook `2 gangenvoor- en hoofdgerecht` | `splitInlineHead`: een rij-/termcel waarvan de eerste tekstnode de naam is en één inline kind (`span`, `em`, …) de omschrijving, houdt beide apart; geldt voor `th`, `dt` en `li`. Een prijs in één van beide helften, een tweede inline element of tekst ná de omschrijving splitsen niet (fail closed). Een `dl` met twee of meer `dt`-paren is een lijst gerechten, geen enkel gerecht | `menuExtractionCardShapeRepairs.test.js` K1 (5 tests) | **opgelost**, met één begrenzing: twee inline kinderen blijven samengevoegd |
+| K2 | Paginatitel `Welkom bij …` werd menutitel en de tablaag Lunch/Diner viel weg | Een kop die exact de `aria-label` is van het omringende element (`<section aria-label="Onze kaart"><h2>Onze kaart</h2>`) vervangt de paginatitel alleen wanneer er niets anders dan die paginatitel boven staat; een gelabeld tabblad (`role="tab"` + `aria-controls`) wordt een padniveau en de route wordt na het paneel exact hersteld | `menuExtractionCardShapeRepairs.test.js` K2 (3 tests) | **opgelost** |
+| K3 | De verborgen tweede weergave (vijf keer "Brioche") werd als extra gerechten geteld | Verborgen = `hidden`, `aria-hidden="true"`, inline `display:none` of een onvoorwaardelijke `display:none`-regel in de eigen stylesheet (id/klasse/attribuut, `>`, `:not()`, `:has()`); nooit een `@media`-blok. Een verborgen sectie telt één keer **alleen** wanneer de zichtbare kant aantoonbaar dezelfde bedragen draagt; anders blijft ze staan en verschijnt een beperking. Een tabpaneel is een variant, nooit een duplicaat | `menuExtractionCardShapeRepairs.test.js` K3 (6 tests) | **opgelost**, fail-closed begrensd |
+| K4 | De gangen van de Formule du Jour werden losse gerechten (`2 gangen` €45,00) | Een regel met een arrangement-/gang-eenheid in een benoemde sectie wordt als arrangement geweigerd; de sectie verschijnt met reden `service_unit` en een eigen beperkingstekst in plaats van losse gerechten | `menuExtractionCardShapeRepairs.test.js` K4 (1 test) | **opgelost** |
+
+### Wat bewust begrensd blijft (met bewijs)
+
+- **Tien van de twaalf resterende gemiste Pellens-regels zijn prijsvarianten**
+  (`Klein`/`Hoofd` per gerecht). Het schema ondersteunt één prijs per gerecht;
+  dit blijft de bestaande, expliciete beperking met eigen tekst
+  (“10 gerecht(en)/regel(s) met meerdere prijzen …”) en vraagt een
+  schema-ontwerp, geen gok. De Lead accepteerde deze klasse eerder als begrensd.
+- **Twee referentieregels wijken af van de nieuwe, strikte scheiding.** De bron
+  schrijft `<dt>Ui<span>oude kaas</span></dt>` en
+  `<dt>Wagyu A5<span>Miyazaki</span></dt>`; K1 leest daar "Ui" + "oude kaas" en
+  "Wagyu A5" + "Miyazaki", terwijl de referentie "Ui oude kaas" en
+  "Wagyu A5 Miyazaki" als naam vastlegt. Dat is **niet** met brongerichte code
+  of een referentiewijziging opgelost: het staat als 1 gemist + 1 verzonnen per
+  regel in de meting en is een expliciet beslispunt voor de Delivery Lead.
+- **Het verborgen duplicaat is geen stille weglating.** De analyse meldt
+  “een verborgen tweede weergave van dezelfde kaart is één keer geteld; 10
+  gerecht(en) zijn niet dubbel opgenomen”. Verborgen inhoud zónder zichtbare
+  tegenhanger blijft opgenomen en wordt als controlebehoeftig gemeld.
+- **Uijttewaal en de overige representatieve bronnen zijn niet opnieuw
+  gemeten**: de opdracht betrof de vijf vastgezette referenties. De vorige,
+  eerlijke stand (Uijttewaal 10 → 6 op een gewijzigde bronversie) blijft van
+  kracht en is niet mooier gemaakt.
+
+### Overig bewijs in deze ronde
+
+- `npm test`: **2321/2321** groen (inclusief de 15 nieuwe regressies K1–K4).
+- `npm run test:menu-structure`: **6/6** groen; `npm run build`: **exit 0**,
+  41/41 pagina's; `node ops/scripts/verify-pdfjs-server-trace.js`: **OK**
+  (166 server scripts, `pdf.mjs` + `pdf.worker.mjs` getraceerd, geen gebundelde
+  PDF.js-runtime).
+- De CSS-hidinglezer is lineair: de corpus-test met een 2 MB `<style>`-payload
+  blijft binnen de werkbudgetgrens (`ops/benchmark/htmlMenuStructure.test.js`).
+- Status: **ontwikkelaarsbewijs**. Geen onafhankelijke review, geen provider,
+  geen productie, geen publicatie en geen merge.
 
 ## Ronde 2026-10-21 — generiek extractieherstel (review 6323277596)
 
@@ -377,11 +455,11 @@ ander besluit of eigenaar.
 | 6 | Vooraf vastgelegde representatieve set en aparte holdout dekken HTML, tabs, tabellen, tekst-PDF, scans, taal/vestiging, arrangement en prijsvariant | `acceptanceSet.test.js`, `acceptanceSetGuard.test.js`, `holdoutReferences.test.js`, `botanistReference.test.js`; 22 representatieve entries en 13 dekkingsklassen; De Botanist/Mr Moos/Colonia zijn `representative` + `usedForTuning`; Gauchos Breda is de enige holdout (`evaluated_once`, 404) | T+R | **open** | Er is geen nieuwe, nog ongeziene holdout; scans/OCR blijft `niet ondersteund`; Gauchos levert geen inhoud. Een releaseclaim kan hier niet op rusten | Product Owner voor nieuwe bron-/toegangsbeslissing; Delivery Lead voor de acceptatieclaim |
 | 7 | Dataset, referentie-uitkomsten en meetbare drempels vóór acceptatie vastgelegd; BE-21's 50–100 niet met enkele URL's afgesloten | `manifest.json` `releaseThresholds`: 0 verzonnen gerechten/prijzen, 100% bewijs, 0 onverklaarde dekking, 0 structuur-/prijsfouten; `sourceReferences.test.js`; 23 structuurgevallen | T | **bewezen met beperking** | Drempels zijn vast en niet verlaagd; BE-21 is expliciet buiten #59 en niet afgesloten met twee bronnen | BE-21-eigenaar; Delivery Lead voor scopebewaking |
 
-| 8 | Gemiste/verzonnen items, prijsfouten, structuurverlies, bewijsdekking, correctiewerk, tijd en kosten per brontype gerapporteerd | **Nieuwste ronde (review 6323277596):** gecontroleerde meting 141/185 match (was 120), 37 gemist (was 53), 23 verzonnen (was 25), 0 prijsfouten (was 2), 7 rubriekfouten (was 10); precisie 82,46% / recall 76,22%. Per foutklasse een generieke herstelling of een **zichtbare begrenzing** met reden, met per klasse een fictieve regressie (`src/lib/menuExtractionRepair.test.js` A–F). Zie “Ronde 2026-10-21 — generiek extractieherstel”. Oudere ronde: Smelt/Blossem 0 verschillen; Botanist v1 124/11/4/0 | R+T | **bewezen met beperking** | Criterium 8 is per klasse afgehandeld, maar **niet opgelost voor Pellens** (referentie-/productbeslissing nodig) en niet voor prijsvarianten, losse containerblokken en geneste h4-koppen (bewust begrensd). Correctietijd en modelkosten blijven onbekend (€0, geen provider). Uijttewaal 10 → 6 op een gewijzigde bronversie is gemeld | Delivery Lead voor de Pellens-beslissing; Product Owner voor een schema-ontwerp voor varianten; developer voor een correctietijdmeting |
+| 8 | Gemiste/verzonnen items, prijsfouten, structuurverlies, bewijsdekking, correctiewerk, tijd en kosten per brontype gerapporteerd | **Nieuwste ronde (review 6334231310):** gecontroleerde meting 165/185 match (was 141), 17 gemist (was 37), 2 verzonnen (was 23), 0 prijsfouten, 3 rubriekfouten (was 7); precisie 97,06% / recall 89,19%. De vier kaartvormklassen K1–K4 zijn generiek hersteld met per klasse een fictieve regressie (`src/lib/menuExtractionCardShapeRepairs.test.js`); zie “Ronde 2026-10-22 — Pellens-kaartvormen generiek hersteld”. Oudere ronde: Smelt/Blossem 0 verschillen; Botanist v1 124/11/4/0 | R+T | **bewezen met beperking** | Prijsvarianten (`Klein`/`Hoofd`, 10 van de 12 resterende gemiste Pellens-regels) blijven bewust begrensd tot een schema-ontwerp; twee referentieregels (`Ui oude kaas`, `Wagyu A5 Miyazaki`) wijken af van de strikte naam/omschrijving-scheiding en zijn een **beslispunt voor de Delivery Lead**, niet stil opgelost; losse containerblokken en geneste h4-koppen blijven begrensd. Correctietijd en modelkosten blijven onbekend (€0, geen provider) | Delivery Lead voor de twee referentieregels; Product Owner voor een schema-ontwerp voor varianten; developer voor een correctietijdmeting |
 | 9 | Browseracceptatie met klikpaden, rolgrenzen, leeg/fout/partieel, toetsenbord, licht/donker, 320/390 px | `npm run test:browser:menu-review`: **241/241 checks** op codehead `26839eb`, evidence met schone werkboom en SHA-256 `F5B2CD715FCC8B7CF2F382988C7F316D8D22CB6615AEFFC95EB4F2D05970C583`; 33 screenshots, 2 clickpathinventories. Bestaande batchchecks blijven groen. Nieuw: echte klikken lijst→exact detail→terug voor vier fictieve lineage-ids (geldige v1, v2, onbekende versie, exact `menus: []`), product-read-only met glas/fles/supplement/onbekende allergenen/provenance/dekking, afwezige save/approve/reject/export, 403/404/leeg/fout, keyboard/focus, licht/donker en 320/390/1024 px, 0 app-fase netwerkviolations; geforceerde approve-klik en script-POSTs worden geweigerd en als bewuste probe vastgelegd | B | **bewezen met beperking** | Alleen fixture: geen live/staging browserbewijs en geen echte authenticated sessie. Alleen `GET /api/internal/v1/menu-concepts` en `GET /api/internal/v1/menu-concepts/<id>` zijn fictief beantwoord; alle concept-POST's (`versions`, `decision`, `export`, lijst/detail) en onbekende API-routes zijn geweigerd. De UI-blokkade bewijst de server niet; `menuConceptReviewHandlers.test.js` blijft daarvoor leidend | Product Owner/ops voor previewtoegang; Delivery Lead voor live acceptatie |
 | 10 | Time-out, provideruitval, ongeldige uitvoer, kosten-/paginagrens, herimport, gelijktijdige taken, promptinjectie, verkeerde vestiging, onveilige redirects getest | `menuExtractionAdapter.test.js`, `safeOutboundFetch.test.js`, `restaurantSourceAnalysis.test.js`, `batchAnalysisHandlers.test.js`, `menuConcept.test.js`; offline fake provider en `.invalid`-fixtures; geen dubbele call/claim | T | **bewezen met beperking** | Alleen offline; een echte provideruitval, echte kostenmeting en echte gelijktijdige productietaken zijn niet gemeten | Product Owner voor provider/budget; developer voor een latere live meting |
 | 11 | Geen stil dataverlies tussen extractie, receipt, review, concept en export; niet-ondersteunde publicatievelden geblokkeerd/gemeld | `menuProductIntegrationV2.test.js`, `menuProductGuardsV2.test.js`, `menuConceptV2ReviewHandlers.test.js`, `menuConceptExportV2.test.js`, `sourceWorkqueueV2.test.js`, `menuProductV2Surface.test.js`; de bestaande review toont glas/fles, supplementen, bewijs en dekking via één gesaneerde view; save/approve/reject/export/confirm weigeren v2 vóór hun effect | T+B | **bewezen met beperking** | Alleen fictieve in-memory/browserfixtures; geen echte v2-rij in Supabase en geen live bronbevestiging. Een v2-writeflag/exportcontract blijft niet gebouwd | Developer voor live preview; Delivery Lead voor review |
-| 12 | Geen regressie in rollen, bronbevestiging, audit, publicatiegates, beveiliging of geheimenbeheer | **Nieuwste ronde:** volledige suite **2306/2306** groen op de checkpoint-head (inclusief 9 nieuwe regressies per foutklasse). Oudere ronde: 2160/2160 op `6728897`; browserfixture 127/127 gegenereerd op `0f9ea9d` (na die head niet opnieuw gedraaid); v1-gedrag en bestaande rechten blijven groen; netwerkguard blokkeert externe fetch, protocol-relative URL, onbekende API-write, XHR, WebSocket en CDP-subresources | T+B | **bewezen met beperking** | Geen productiecredentials, productieauth of echte database gebruikt; dat is bewust niet getest | Product Owner/ops voor productieacceptatie |
+| 12 | Geen regressie in rollen, bronbevestiging, audit, publicatiegates, beveiliging of geheimenbeheer | **Nieuwste ronde:** volledige suite **2321/2321** groen op de checkpoint-head `8e58893` (inclusief 15 nieuwe regressies K1–K4), plus `npm run test:menu-structure` 6/6, `npm run build` exit 0 met 41/41 pagina's en de PDF.js-packagingcheck OK. Oudere ronde: 2306/2306 op `1b22121`, 2160/2160 op `6728897`; v1-gedrag en bestaande rechten blijven groen; netwerkguard blokkeert externe fetch, protocol-relative URL, onbekende API-write, XHR, WebSocket en CDP-subresources | T+B | **bewezen met beperking** | Geen productiecredentials, productieauth of echte database gebruikt; dat is bewust niet getest. De browserfixture is in deze ronde niet opnieuw gedraaid (geen UI-wijziging) | Product Owner/ops voor productieacceptatie |
 | 13 | Onafhankelijke review met exacte commit, checks, bron-/protocolversies, resultaten, beperkingen en volgende stap; groene unit-tests zijn geen productacceptatie | Deze matrix + checkpoint op PR #60 | I | **geblokkeerd** | De Delivery Lead heeft deze afrondingsronde nog niet onafhankelijk beoordeeld; deze matrix is ontwikkelaarsbewijs | Delivery Lead |
 | 14 | Een v2-envelope wordt in de bestaande interne controle/beoordeling versiegetrouw herkenbaar: varianten, glas/fles, supplementen, bewijs en dekking; niets afgeplat | `menuProductIntegrationV2.test.js`, `menuProductGuardsV2.test.js`, `menuConceptV2ReviewHandlers.test.js`, `menuConceptExportV2.test.js`, `sourceWorkqueueV2.test.js`, `batchAnalysisHandlers.test.js` (v2-cases), `menuProductV2Surface.test.js`; browserfixture `v2` op 1024/390 px | T+B | **bewezen met beperking** | Alleen fictieve in-memory/browserfixtures; geen echte v2-rij in Supabase, geen live bron en geen authenticated preview | Developer voor live preview; Product Owner/ops voor toegang |
 | 15 | Onbekende/ongeldige/onvoldoende onderbouwde v2 wordt vóór alle zijeffecten geweigerd; v1 blijft ongewijzigd | `menuProductV2Surface.test.js`, `menuSnapshotReviewHandlers.test.js`, `menuSnapshotProposals.test.js`, `menuConceptV2ReviewHandlers.test.js`, `menuConceptExportV2.test.js`; save/approve/export/reviews/url-intake guards vóór hash, claim, insert, update, RPC of GitHub; de generieke editorreview leest nu ook de oorsprongsreceipt (`menuOriginReceiptGuard`), detail classificeert vóór de exportrefresh en een onversioned v2-vorm is een concrete blokkade; bestaande v1-suite groen | T | **bewezen met beperking** | Geen echte database-/GitHub-side-effectmeting; de tests bewijzen de volgorde met fakes. Bronverificatie blijft bewust onbekend | Delivery Lead voor onafhankelijke review |
@@ -752,16 +830,20 @@ in [menu-extraction-acceptance.md](menu-extraction-acceptance.md).
 ## Overdracht
 
 **Aanbevolen status: READY_FOR_REVIEW voor dit afrondingsdossier, niet DONE voor
-#59.** Het dossier is toetsbaar op codehead `26839eb` (browserdekking van de
-bestaande conceptlijst en detailpagina na de reparaties van review 6283658271),
-de evidencecommit `0f6fce8` en de daarop volgende documentatiecommit. De
-volledige suite is 2163/2163, het structuurcorpus 6/6 en de build is exit 0 met
-41/41 pagina's. De lokale browserfixture is 241/241 op een schone werkboom op
-`26839eb`, met 33 screenshots en 2 clickpathinventories; dat is hoe dan ook geen
+#59.** De nieuwste ronde is `8e58893`: volledige suite **2321/2321**, het
+structuurcorpus 6/6, de build exit 0 met 41/41 pagina's, de PDF.js-packagingcheck
+OK en de referentiemeting 165/185 (deterministisch, `cf38be89…`). De
+browserfixture (241/241 op `26839eb`) is in deze ronde niet opnieuw gedraaid
+omdat er geen UI is gewijzigd; dat blijft ontwikkelaarsbewijs op een oudere
+head en is geen browseracceptatie. De oudere codehead `26839eb`, evidencecommit
+`0f6fce8` en browserdekking van de conceptlijst/detailpagina blijven als
+historisch bewijs staan. De lokale browserfixture is hoe dan ook geen
 echte bron → database → authenticated browseracceptatie. Volledige
 productacceptatie blijft afhankelijk van de beslissingen hierboven: een echte
 preview-/schrijfronde, een eventuele v2-writer/exportcontract/migratie,
-provider/budget/DPA en een nieuwe holdout. De eerstvolgende veilige stap is
+provider/budget/DPA en een nieuwe holdout. De twee afwijkende referentieregels
+(`Ui oude kaas`, `Wagyu A5 Miyazaki`) en het schema-ontwerp voor prijsvarianten
+zijn de eerstvolgende inhoudelijke beslispunten. De eerstvolgende veilige stap is
 onafhankelijke review door de Delivery Lead; daarna kan de Product Owner de
 resterende besluiten nemen. Er is niets gemerged, gepusht naar een andere
 branch, gedeployed of gepubliceerd.

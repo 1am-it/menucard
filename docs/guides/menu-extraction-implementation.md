@@ -833,3 +833,44 @@ notitieplicht, paginabedrading) en de browserfixture
 `ops/browser/run-menu-review-browser-check.js` (detail, voorgeselecteerde reden,
 `aria-required`, geen opslag).
 
+## Kaartvormen: naam/omschrijving, kaarttitel, tabbladen en verborgen weergaven (review 6334231310)
+
+De HTML-structuurlezer (`src/lib/htmlMenuStructure.js`) herkent vier vormen die
+in de gecontroleerde referentiemeting ontbraken. Ze zijn generiek beschreven —
+geen domein, restaurantnaam, gerechtnaam of vast aantal — en falen gesloten
+waar de vorm niet bewijsbaar is:
+
+1. **Naam en omschrijving in één cel (K1).** `splitInlineHead` splitst een
+   rij-/termcel (`th`, `dt`, `li`) wanneer de eerste tekstnode de naam is en
+   precies één inline kind (`span`, `em`, `i`, `small`, …) de omschrijving
+   draagt. Niet gesplitst: een prijs in één van beide helften, een tweede
+   inline element, of tekst ná de omschrijving (behalve een kale prijs). Een
+   `dl` met twee of meer `dt`-paren is een lijst gerechten, geen enkel gerecht.
+2. **Kaarttitel en tabbladen (K2).** Een kop die exact de `aria-label` is van
+   het omringende element is de titel van de kaart zelf; die vervangt de
+   paginatitel alleen wanneer er niets anders dan die paginatitel boven staat.
+   Een gelabeld tabblad (`role="tab"` + `aria-controls`, doelpaneel bestaat)
+   wordt een padniveau; na het paneel wordt de route exact hersteld, zodat een
+   volgende variant op hetzelfde niveau begint.
+3. **Verborgen alternatieve weergave (K3).** Verborgen betekent: `hidden`,
+   `aria-hidden="true"`, inline `display:none`/`visibility:hidden`, of een
+   **onvoorwaardelijke** `display:none`-regel in de eigen stylesheet (id, klasse,
+   attribuut, `>`, `:not()`, `:has()`); `@media`- en andere at-rule-blokken
+   worden nooit toegepast en een niet volledig begrepen selector wordt
+   overgeslagen. Een verborgen sectie telt **alleen** één keer wanneer de
+   zichtbare kant aantoonbaar dezelfde bedragen per gerecht draagt; anders
+   blijft ze opgenomen en verschijnt de beperking "alleen in een verborgen
+   weergave zonder zichtbare tegenhanger". Een tabpaneel is een variant en nooit
+   een duplicaat. De stylesheetlezer is lineair (geen `[\s\S]*?` over de hele
+   pagina), zodat een vijandige pagina met veel `<style>`-tags binnen het
+   werkbudget blijft.
+4. **Arrangement met per-gangprijzen (K4).** Een regel met een
+   arrangement-/gang-eenheid in een benoemde sectie wordt geen gerecht; de
+   sectie verschijnt met reden `service_unit` en een eigen beperkingstekst. De
+   deterministische context slaat nog steeds één prijs per gerecht op, dus
+   prijsvarianten (`Klein`/`Hoofd`, glas/fles) blijven een expliciete
+   beperking met eigen tekst en vragen een schema-ontwerp.
+
+Regressies: `src/lib/menuExtractionCardShapeRepairs.test.js` (15 tests, per
+vorm minstens één fictieve fixture en de fail-closed tegenhanger).
+
