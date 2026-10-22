@@ -345,6 +345,7 @@ function validateUsageExport(doc) {
     if (source.provenanceKind !== PROVENANCE_KIND) problems.push('source.provenanceKind is not supported');
     for (const key of ['rowsRead', 'rowsUsed', 'rowsIgnored']) if (!isCount(source[key])) problems.push(`source.${key} must be a non-negative integer`);
     if (!isCount(source.limit) || source.limit === 0) problems.push('source.limit must be a positive integer');
+    if (isCount(source.limit) && source.limit > MAX_SOURCE_ROWS) problems.push('source.limit is above the fixed maximum');
     if (typeof source.bounded !== 'boolean') problems.push('source.bounded must be a boolean');
     if (isCount(source.rowsRead) && isCount(source.rowsUsed) && isCount(source.rowsIgnored) && source.rowsRead !== source.rowsUsed + source.rowsIgnored) {
       problems.push('source.rowsRead must equal rowsUsed + rowsIgnored');

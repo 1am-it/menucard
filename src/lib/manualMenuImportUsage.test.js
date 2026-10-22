@@ -253,6 +253,11 @@ test('K4: het schema weigert een 0, een oude versie en vreemde velden', () => {
   notTrackedWithCount.notTracked[0].counts = 0;
   assert.ok(validateUsageExport(notTrackedWithCount).includes('notTracked entries must not carry counts'));
 
+  // De leesgrens is vast; een ruimer document is niet ondersteund.
+  const tooWide = base();
+  tooWide.source = { ...tooWide.source, limit: 5001 };
+  assert.ok(validateUsageExport(tooWide).includes('source.limit is above the fixed maximum'));
+
   // Een duurzame route mag niet als "niet bijgehouden" staan.
   const duplicated = base();
   duplicated.notTracked = [...duplicated.notTracked, { route: 'manual-menu-import/save', action: 'concept_saved', reason: 'x' }];
