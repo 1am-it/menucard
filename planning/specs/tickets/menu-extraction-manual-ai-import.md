@@ -3,7 +3,9 @@
 GitHub: https://github.com/1am-it/menucard/issues/59 · PR #60 (draft)
 
 Status: **fase 2 gebouwd** (2026-10-22, developerronde na review
-`6348147293`). Fase 1 was het ontwerp; de eigenaar keurde mockup v2 op
+`6348147293`; herstelronde na review `6350337273`: toestandsloos token in plaats
+van geheugenopslag, restaurantkeuze op naam, plakveld zonder JSON en zichtbare
+geldigheid). Fase 1 was het ontwerp; de eigenaar keurde mockup v2 op
 2026-10-22 goed en voegde vier punten (a)–(d) toe. Die staan in
 `docs/mockups/manual-ai-import-v3.html`, dat v2 vervangt. Deze ronde bouwt de
 drie stappen, de begrensde import en de bijbehorende regressies; er is geen
