@@ -97,6 +97,67 @@ const { applyItemEvidenceGate } = require('./menuItemEvidence')
  * Returns `{ menu, itemCount }` or `null`. Never throws into the analysis.
  */
 /**
+ * A site's own link label for a menu page can name that card ("Menukaart
+ * diner", "Lunchkaart"); a label that only says "menu"/"menukaart"/"kaart"
+ * adds nothing and must not become a title. Matched as a whole label.
+ */
+const GENERIC_MENU_LABEL =
+  /^(?:(?:de|het|ons|onze|the|our|la|le)\s+)?(?:menus?|menu'?s|menukaart|menu ?kaart|menukaarten|kaart|spijskaart|drankenkaart|wijnkaart|menucard|menu ?card|carte|card|menu of the day)$/i
+const MAX_MENU_TITLE_LENGTH = 60
+const GENERIC_MENU_WORDS = new Set(['menu', 'menus', 'menukaart', 'kaart', 'card', 'carte', 'menucard', 'spijskaart', 'drankenkaart', 'wijnkaart'])
+
+/**
+ * The name a site itself uses for one menu page, taken from its own links to
+ * that page ("Menukaart diner"). A label only counts when it shares a word with
+ * the page's own address that is not a generic menu word, so a call-to-action
+ * ("Ontdek ons menu") never becomes a card name. Purely from the source's own
+ * link text: nothing is invented and no route level is added.
+ */
+function menuTitleFromLinkLabels(labels, sourceUrl) {
+  const slugWords = new Set(
+    String(sourceUrl || '')
+      .toLowerCase()
+      .split(/[^a-z0-9]+/)
+      .filter((word) => word.length >= 3),
+  )
+  const candidates = [...(labels instanceof Set ? labels : new Set(Array.isArray(labels) ? labels : []))]
+    .map((label) => String(label || '').replace(/\s+/g, ' ').trim())
+    .filter((label) => label.length > 0 && label.length <= MAX_MENU_TITLE_LENGTH)
+    .filter((label) => (label.match(/\p{L}/gu) || []).length >= 3)
+    .filter((label) => !GENERIC_MENU_LABEL.test(label))
+    .map((label) => ({
+      label,
+      score: label
+        .toLowerCase()
+        .split(/[^\p{L}\p{N}]+/u)
+        .filter((word) => word.length >= 3 && slugWords.has(word) && !GENERIC_MENU_WORDS.has(word)).length,
+    }))
+    .filter((entry) => entry.score > 0)
+    .sort((a, b) => b.score - a.score || a.label.length - b.label.length || a.label.localeCompare(b.label))
+  return candidates.length > 0 ? candidates[0].label : null
+}
+
+/**
+ * Fills the menu title of a discovered HTML menu that printed no shared card
+ * heading of its own, using the site's own link label for that exact page.
+ * Never overwrites a title the page itself prints, and never renames a section.
+ */
+function applyLinkLabelMenuTitles(menuContexts, labelsByPageKey) {
+  let filled = 0
+  for (const menu of Array.isArray(menuContexts) ? menuContexts : []) {
+    if (!menu || menu.extractionMethod !== 'html') continue
+    if (typeof menu.title === 'string' && menu.title.trim()) continue
+    const labels = labelsByPageKey instanceof Map ? labelsByPageKey.get(sameHostPageKey(menu.sourceUrl)) : null
+    const title = menuTitleFromLinkLabels(labels, menu.sourceUrl)
+    if (!title) continue
+    menu.title = title
+    menu.titleSource = 'link_label'
+    filled += 1
+  }
+  return filled
+}
+
+/**
  * The HTML structure adapter's sections as one menu context. The heading
  * route is kept losslessly (src/lib/menuHierarchy.js): a shared title, a
  * path of any depth per section, the original source route, the source
@@ -133,9 +194,28 @@ function menuFromHtmlStructure(html, usedSlugs, report = null) {
       section,
       position,
       items: section.items
-        .filter((item) => item.priceStatus === 'known' && Number.isInteger(item.amountMinorUnits))
+        .filter(
+          (item) =>
+            (item.priceStatus === 'known' && Number.isInteger(item.amountMinorUnits)) ||
+            item.priceStatus === 'multiple_undecomposed',
+        )
         .map((item) => {
-          const mapped = { name: item.name, desc: item.description || null, price: (item.amountMinorUnits / 100).toFixed(2) }
+          // A dish with several printed amounts keeps every amount as a named
+          // variant; it is never flattened to one price and never dropped
+          // (criterium 5/8, review 6351417692 K2).
+          const mapped =
+            item.priceStatus === 'multiple_undecomposed'
+              ? { name: item.name, desc: item.description || null, price: null, priceStatus: 'multiple_undecomposed' }
+              : { name: item.name, desc: item.description || null, price: (item.amountMinorUnits / 100).toFixed(2) }
+          if (item.priceStatus === 'multiple_undecomposed') {
+            if (typeof item.priceText === 'string' && item.priceText.trim()) mapped.priceText = item.priceText
+            if (Array.isArray(item.priceVariants)) {
+              mapped.priceVariants = item.priceVariants
+                .filter((variant) => variant && typeof variant.price === 'string')
+                .slice(0, 10)
+                .map((variant) => ({ label: typeof variant.label === 'string' && variant.label.trim() ? variant.label : null, price: variant.price }))
+            }
+          }
           // Keep the extractor's own locator/pattern/quote with the item: the
           // review and receipt must be able to point at the exact source line,
           // not only at the section (#59 Delivery Lead review 6315269210).
@@ -168,7 +248,20 @@ function menuFromHtmlStructure(html, usedSlugs, report = null) {
   const priceVariantLines = (report && typeof report === 'object' && Number.isInteger(report.priceVariantLines) ? report.priceVariantLines : 0)
   const hiddenViewsMerged = (report && typeof report === 'object' && Number.isInteger(report.hiddenViewsMerged) ? report.hiddenViewsMerged : 0)
   const hiddenUniqueItems = (report && typeof report === 'object' && Number.isInteger(report.hiddenUniqueItems) ? report.hiddenUniqueItems : 0)
-  return { menu: { name: 'Menukaart', contextSlug, title: hierarchy.title, structure: hierarchy.structure, categories }, itemCount, excludedSections, priceVariantLines, hiddenViewsMerged, hiddenUniqueItems }
+  return {
+    menu: {
+      name: 'Menukaart',
+      contextSlug,
+      title: hierarchy.title,
+      structure: hierarchy.structure,
+      categories,
+    },
+    itemCount,
+    excludedSections,
+    priceVariantLines,
+    hiddenViewsMerged,
+    hiddenUniqueItems,
+  }
 }
 
 /**
@@ -187,13 +280,14 @@ function htmlMenuExclusionLimitations(url, found) {
     }
     return `Menukaart ${url}: sectie "${route}" is niet als gerechten opgenomen; ${lines} regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).`
   })
-  // A dish with several prices (sizes, course counts, glass/bottle) is not
-  // flattened to one amount. The deterministic context stores one price per
-  // dish, so this stays an explicit, visible limit with the real cause.
+  // A dish with several prices (sizes, course counts, glass/bottle) keeps every
+  // printed amount as its own variant with the label the source prints; none of
+  // them becomes "the" price. The count stays visible so a review knows which
+  // dishes need a variant check.
   const variants = found && Number.isInteger(found.priceVariantLines) ? found.priceVariantLines : 0
   if (variants > 0) {
     limitations.push(
-      `Menukaart ${url}: ${variants} gerecht(en)/regel(s) met meerdere prijzen (prijsvarianten zoals klein/hoofd, glas/fles of aantal stuks) zijn niet als losse prijs opgeslagen; de deterministische context ondersteunt één prijs per gerecht en er is geen prijs geraden.`,
+      `Menukaart ${url}: ${variants} gerecht(en) met meerdere prijzen (prijsvarianten zoals aantal stuks, gewicht, glas/fles of een basis- en een uitgebreide prijs) zijn als prijsvarianten opgeslagen met het bedrag en het label dat de bron print; geen enkel bedrag is tot één prijs teruggebracht.`,
     )
   }
   // A page may print the same card twice; the hidden copy is counted once when
@@ -780,6 +874,22 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
   // expansion, never a cross-host link, never a re-fetch of the entry page.
   const candidateQueue = findSameHostMenuCandidates(homepageHtml, homepageUrl).map((candidate) => ({ ...candidate, depth: 1 }))
   const queuedCandidates = new Set(candidateQueue.map((candidate) => candidate.url))
+  // Every link label the site itself uses for a page, keyed by page. A menu
+  // page that prints no shared card heading keeps its own printed structure and
+  // takes its name from this label ("Menukaart diner"), never from a guess.
+  const linkLabelsByPageKey = new Map()
+  const recordLinkLabel = (url, label) => {
+    const text = typeof label === 'string' ? label.replace(/\s+/g, ' ').trim() : ''
+    if (!url || !text) return
+    const key = sameHostPageKey(url)
+    if (!linkLabelsByPageKey.has(key)) linkLabelsByPageKey.set(key, new Set())
+    if (linkLabelsByPageKey.get(key).size < 6) linkLabelsByPageKey.get(key).add(text)
+  }
+  for (const candidate of candidateQueue) recordLinkLabel(candidate.url, candidate.matchedOn)
+  // The entry page's own labels for its same-host pages are evidence too.
+  for (const anchor of collectAnchors(homepageHtml, homepageUrl)) {
+    recordLinkLabel(`${anchor.url.origin}${anchor.url.pathname}`, anchor.visibleText)
+  }
   const visitedCandidates = new Set()
   // Every page that was actually read (including redirect targets), so a
   // second link to the same page never produces a duplicate menu.
@@ -831,6 +941,12 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
         contentHash: computeFieldEvidenceHash(fetched.body),
       })
       sourceTexts.set(sourceId, fetched.body)
+      // The site's own labels for its other same-host pages. A menu page that
+      // prints no shared heading of its own takes its name from this label
+      // ("Menukaart diner"), never from a guess (K2, review 6351417692).
+      for (const anchor of collectAnchors(fetched.body, sourceUrl)) {
+        recordLinkLabel(`${anchor.url.origin}${anchor.url.pathname}`, anchor.visibleText)
+      }
       const existingSlugs = new Set(menuContexts.map((m) => m.contextSlug))
       const candidateMenus = jsonLdMenusForPage(extractMenusFromHtml(fetched.body), sourceUrl, limitations)
       for (const menu of candidateMenus) {
@@ -964,7 +1080,17 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
     }
   }
 
-  // 3a. Nothing recognisable anywhere: say so once, per source, and name the
+  // 3a. A discovered menu page that printed no shared card heading of its own
+  // keeps its own section paths and takes its name from the site's own link
+  // label for that page. No route level is added, renamed or flattened.
+  const titlesFromLinks = applyLinkLabelMenuTitles(menuContexts, linkLabelsByPageKey)
+  if (titlesFromLinks > 0) {
+    notes.push(
+      `${titlesFromLinks} menutitel(s) zijn overgenomen uit de linklabels van de site zelf; de pagina's drukken geen eigen kaarttitel en de rubriekpaden zijn ongewijzigd.`,
+    )
+  }
+
+  // 3b. Nothing recognisable anywhere: say so once, per source, and name the
   // media form this route cannot read (image menu / external PDF) or a
   // source-reported closure. A read page is never presented as "no menu".
   if (menuContexts.length === 0 && unknownMenuContexts.length === 0) {

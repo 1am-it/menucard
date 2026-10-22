@@ -10,14 +10,14 @@ Het eigenaarsbesluit voor deze vier kaarten is GitHub #59 issuecomment-631522647
 | --- | --- |
 | Kaarten gemeten / geblokkeerd | 3 / 1 |
 | Referentiegerechten | 178 |
-| Geëxtraheerde gerechten | 137 |
-| Exact gematcht | 34 |
-| Gemiste gerechten | 83 |
-| Verzonnen gerechten | 42 |
+| Geëxtraheerde gerechten | 138 |
+| Exact gematcht | 63 |
+| Gemiste gerechten | 79 |
+| Verzonnen gerechten | 39 |
 | Prijsfouten | 0 |
-| Rubriekfouten | 61 |
-| Precisie | 24.82% |
-| Recall | 19.10% |
+| Rubriekfouten | 36 |
+| Precisie | 45.65% |
+| Recall | 35.39% |
 
 De totalen zijn per kaart afzonderlijk te lezen en worden nooit tot één succescijfer samengevoegd.
 
@@ -27,7 +27,7 @@ De totalen zijn per kaart afzonderlijk te lezen en worden nooit tot één succes
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | Brasserie Bardot | gemeten | 112 | 74 | 0 | 76 | 38 | 0 | 36 | 0.00% | 0.00% |
 | Restaurant Zuyd | gemeten | 36 | 34 | 34 | 2 | 0 | 0 | 0 | 100.00% | 94.44% |
-| Restaurant Wolfslaar | gemeten | 30 | 29 | 0 | 5 | 4 | 0 | 25 | 0.00% | 0.00% |
+| Restaurant Wolfslaar | gemeten | 30 | 30 | 29 | 1 | 1 | 0 | 0 | 96.67% | 96.67% |
 | T-Huis | geblokkeerd | 0 | 0 | 0 | 0 | 0 | 0 | 0 | n.v.t. | n.v.t. |
 
 ## Afwijkingen per kaart
@@ -196,9 +196,9 @@ De totalen zijn per kaart afzonderlijk te lezen en worden nooit tot één succes
 - De vastgezette menupagina's bevatten geen allergenenlegenda per gerecht; allergenen blijven onbekend, niet allergeenvrij.
 - Deze referentie is uit de vastgezette brontekst opgesteld en niet uit de parseruitvoer.
 - Menukaart https://www.restaurantzuyd.nl/lunch: sectie "Lunch › LUNCHMENU'S" is niet als gerechten opgenomen; 4 regel(s) horen bij een arrangement of keuzemenu (prijs per gang of portie) en zijn geen losse gerechten.
-- Menukaart https://www.restaurantzuyd.nl/lunch: 1 gerecht(en)/regel(s) met meerdere prijzen (prijsvarianten zoals klein/hoofd, glas/fles of aantal stuks) zijn niet als losse prijs opgeslagen; de deterministische context ondersteunt één prijs per gerecht en er is geen prijs geraden.
+- Menukaart https://www.restaurantzuyd.nl/lunch: 1 gerecht(en) met meerdere prijzen (prijsvarianten zoals aantal stuks, gewicht, glas/fles of een basis- en een uitgebreide prijs) zijn als prijsvarianten opgeslagen met het bedrag en het label dat de bron print; geen enkel bedrag is tot één prijs teruggebracht.
 - Menukaart https://www.restaurantzuyd.nl/diner: sectie "Diner › VERRASSINGSMENU'S" is niet als gerechten opgenomen; 4 regel(s) horen bij een arrangement of keuzemenu (prijs per gang of portie) en zijn geen losse gerechten.
-- Menukaart https://www.restaurantzuyd.nl/diner: 1 gerecht(en)/regel(s) met meerdere prijzen (prijsvarianten zoals klein/hoofd, glas/fles of aantal stuks) zijn niet als losse prijs opgeslagen; de deterministische context ondersteunt één prijs per gerecht en er is geen prijs geraden.
+- Menukaart https://www.restaurantzuyd.nl/diner: 1 gerecht(en) met meerdere prijzen (prijsvarianten zoals aantal stuks, gewicht, glas/fles of een basis- en een uitgebreide prijs) zijn als prijsvarianten opgeslagen met het bedrag en het label dat de bron print; geen enkel bedrag is tot één prijs teruggebracht.
 - Gelezen zonder automatisch herkende menukaart: https://www.restaurantzuyd.nl/kerstmenu.
 - AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.
 - Kwaliteitscontrole op de deterministische extractie vraagt aandacht (html_arrangements_skipped); het resultaat is niet als volledig beoordeeld.
@@ -207,48 +207,17 @@ De totalen zijn per kaart afzonderlijk te lezen en worden nooit tot één succes
 
 ### Restaurant Wolfslaar
 
-**Gemist (5)**
-- `Mechelse Koekoek` — Menukaart diner › Hoofdgerechten — prijs 44.00 / 54.00 — citaat: “Mechelse Koekoek 44 zacht gegaard | stoof van dijen | witlof | geweckte wintertruffel inclusief gebakken ganzenlever 54” (Menukaart diner › Hoofdgerechten › regel 3)
+**Gemist (1)**
 - `Conference Peer` — Menukaart diner › Nagerechten — prijs 18.00 — citaat: “C onference Peer 18 pecannoot | kardemom | karamel | vanille” (Menukaart diner › Nagerechten › regel 2)
-- `Royal Belgian Platinum Caviar` — Menukaart diner › Voorgerechten — prijs 65.00 / 98.00 — citaat: “Royal Belgian Platinum Caviar blini’s | bieslook | crème fraîche 30 gram 65 | 50 gram 98” (Menukaart diner › Voorgerechten › regel 6)
-- `Mechelse Koekoek` — Menukaart lunch › Hoofdgerechten — prijs 44.00 / 54.00 — citaat: “Mechelse Koekoek 44 zacht gegaard | stoof van dijen | witlof | geweckte wintertruffel inclusief gebakken ganzenlever 54” (Menukaart lunch › Hoofdgerechten › regel 3)
-- `Royal Belgian Platinum Caviar` — Menukaart lunch › Voorgerechten — prijs 65.00 / 98.00 — citaat: “Royal Belgian Platinum Caviar blini’s | bieslook | crème fraîche 30 gram 65 | 50 gram 98” (Menukaart lunch › Voorgerechten › regel 6)
 
-**Verzonnen (4)**
-- `Mechelse Koekoek` — Hoofdgerechten — prijs 54.00 — broncitaat: “Mechelse Koekoek zacht gegaard | stoof van dijen | witlof | geweckte wintertruffel inclusief gebakken ganzenlever 54”
-- `Mechelse Koekoek` — Hoofdgerechten — prijs 54.00 — broncitaat: “Mechelse Koekoek zacht gegaard | stoof van dijen | witlof | geweckte wintertruffel inclusief gebakken ganzenlever 54”
-- `Royal Belgian Platinum Caviar` — Voorgerechten — prijs 98.00 — broncitaat: “Royal Belgian Platinum Caviar blini’s | bieslook | crème fraîche 30 gram 65 | 50 gram 98”
-- `Royal Belgian Platinum Caviar` — Voorgerechten — prijs 98.00 — broncitaat: “Royal Belgian Platinum Caviar blini’s | bieslook | crème fraîche 30 gram 65 | 50 gram 98”
+**Verzonnen (1)**
+- `C onference Peer` — Menukaart diner › Nagerechten — prijs 18.00 — broncitaat: “C onference Peer pecannoot | kardemom | karamel | vanille 18”
 
 **Prijsfouten (0)**
 - geen
 
-**Rubriekfouten (25)**
-- `Grain-fed Entrecote` — verwacht Menukaart diner › Hoofdgerechten — gelezen Hoofdgerechten
-- `Tarbot` — verwacht Menukaart diner › Hoofdgerechten — gelezen Hoofdgerechten
-- `Tournedos` — verwacht Menukaart diner › Hoofdgerechten — gelezen Hoofdgerechten
-- `Zeetong` — verwacht Menukaart diner › Hoofdgerechten — gelezen Hoofdgerechten
-- `Kaaswagen` — verwacht Menukaart diner › Nagerechten — gelezen Nagerechten
-- `Madeleines` — verwacht Menukaart diner › Nagerechten — gelezen Nagerechten
-- `Passie Curd` — verwacht Menukaart diner › Nagerechten — gelezen Nagerechten
-- `Limburgs Kloostervarken` — verwacht Menukaart diner › Voorgerechten — gelezen Voorgerechten
-- `Noordzeekrab` — verwacht Menukaart diner › Voorgerechten — gelezen Voorgerechten
-- `Tartaar` — verwacht Menukaart diner › Voorgerechten — gelezen Voorgerechten
-- `Witte Heilbot` — verwacht Menukaart diner › Voorgerechten — gelezen Voorgerechten
-- `Zeebaars` — verwacht Menukaart diner › Voorgerechten — gelezen Voorgerechten
-- `Grain-fed Entrecote` — verwacht Menukaart lunch › Hoofdgerechten — gelezen Hoofdgerechten
-- `Tarbot` — verwacht Menukaart lunch › Hoofdgerechten — gelezen Hoofdgerechten
-- `Tournedos` — verwacht Menukaart lunch › Hoofdgerechten — gelezen Hoofdgerechten
-- `Zeetong` — verwacht Menukaart lunch › Hoofdgerechten — gelezen Hoofdgerechten
-- `Conference Peer` — verwacht Menukaart lunch › Nagerechten — gelezen Nagerechten
-- `Kaaswagen` — verwacht Menukaart lunch › Nagerechten — gelezen Nagerechten
-- `Madeleines` — verwacht Menukaart lunch › Nagerechten — gelezen Nagerechten
-- `Passie Curd` — verwacht Menukaart lunch › Nagerechten — gelezen Nagerechten
-- `Limburgs Kloostervarken` — verwacht Menukaart lunch › Voorgerechten — gelezen Voorgerechten
-- `Noordzeekrab` — verwacht Menukaart lunch › Voorgerechten — gelezen Voorgerechten
-- `Tartaar` — verwacht Menukaart lunch › Voorgerechten — gelezen Voorgerechten
-- `Witte Heilbot` — verwacht Menukaart lunch › Voorgerechten — gelezen Voorgerechten
-- `Zeebaars` — verwacht Menukaart lunch › Voorgerechten — gelezen Voorgerechten
+**Rubriekfouten (0)**
+- geen
 
 **Beperkingen**
 - De lunch- en dinerpagina drukken dezelfde à la carte; elke pagina is in deze referentie een eigen menu, zodat structuurverlies per pagina zichtbaar blijft.
@@ -262,11 +231,13 @@ De totalen zijn per kaart afzonderlijk te lezen en worden nooit tot één succes
 - Menukaart https://www.restaurantwolfslaar.com/nl/menu-diner: sectie "Over ons" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).
 - Menukaart https://www.restaurantwolfslaar.com/nl/menu-diner: sectie "Menu en Wijnen" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).
 - Menukaart https://www.restaurantwolfslaar.com/nl/menu-diner: sectie "Agenda en Blog" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).
+- Menukaart https://www.restaurantwolfslaar.com/nl/menu-diner: 2 gerecht(en) met meerdere prijzen (prijsvarianten zoals aantal stuks, gewicht, glas/fles of een basis- en een uitgebreide prijs) zijn als prijsvarianten opgeslagen met het bedrag en het label dat de bron print; geen enkel bedrag is tot één prijs teruggebracht.
 - Menukaart https://www.restaurantwolfslaar.com/nl/menu-lunch: sectie "Over ons" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).
 - Menukaart https://www.restaurantwolfslaar.com/nl/menu-lunch: sectie "Menu en Wijnen" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).
 - Menukaart https://www.restaurantwolfslaar.com/nl/menu-lunch: sectie "Agenda en Blog" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).
+- Menukaart https://www.restaurantwolfslaar.com/nl/menu-lunch: 2 gerecht(en) met meerdere prijzen (prijsvarianten zoals aantal stuks, gewicht, glas/fles of een basis- en een uitgebreide prijs) zijn als prijsvarianten opgeslagen met het bedrag en het label dat de bron print; geen enkel bedrag is tot één prijs teruggebracht.
 - AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.
-- Kwaliteitscontrole op de deterministische extractie vraagt aandacht (html_arrangements_skipped); het resultaat is niet als volledig beoordeeld.
+- Kwaliteitscontrole op de deterministische extractie vraagt aandacht (unresolved_price, html_arrangements_skipped); het resultaat is niet als volledig beoordeeld.
 
 **Vastgezette bronversie:** 4 capture(s); html 14abdb9e684e, html 22d60179c67b, html bc35f9ca7a5c, html 19abbe4aa63a
 

@@ -1064,6 +1064,20 @@ function looksLikePlainDishLine(text) {
 }
 
 /**
+ * The bold/anchor text a line starts with: the part itself when it is a
+ * `strong`/`b`, or the first meaningful child when the part is an inline
+ * wrapper around one (`<span><strong>C</strong></span>`). The text is taken
+ * exactly as printed — no de-spacing and no case change.
+ */
+function lineAnchorText(part, markerCounter, budget) {
+  if (!part || part.tag === '#text') return ''
+  if (TITLE_ANCHOR_TAGS.has(part.tag)) return cleanName(partText(part, markerCounter, budget))
+  const child = (part.children || []).find((c) => (c.tag === '#text' ? c.text.trim() !== '' : textOf(c, { markerCounter, budget }) !== ''))
+  if (child && child.tag !== '#text' && TITLE_ANCHOR_TAGS.has(child.tag)) return cleanName(partText(child, markerCounter, budget))
+  return ''
+}
+
+/**
  * The dish blocks of a `p`/`div`: lines split at `br` (also inside an inline
  * wrapper). A block starts with a bold title anchor — including the common
  * `NAME, €7,50` anchor — or, when the CMS prints no bold markup, with a
@@ -1086,7 +1100,48 @@ function formattedBlocks(node, budget, markerCounter) {
     }
     const first = meaningful[0]
     const firstText = partText(first, markerCounter, budget).replace(/\s+/g, ' ').trim()
-    const anchorText = first.tag !== '#text' && TITLE_ANCHOR_TAGS.has(first.tag) ? cleanName(firstText) : ''
+    // The bold run that carries the dish title can be the first part of the
+    // line or a later one: a CMS splits one printed name over two runs
+    // ("<strong>C</strong><span><strong>onference Peer 18</strong></span>").
+    // The printed order is kept and the runs join with the space the source
+    // prints between them — never de-spaced into a guessed word, never dropped.
+    let titleIndex = -1
+    let anchorText = ''
+    let fragment = ''
+    for (let partIndex = 0; partIndex < meaningful.length; partIndex += 1) {
+      const candidate = lineAnchorText(meaningful[partIndex], markerCounter, budget)
+      if (!candidate) break
+      const priced = splitTitlePrice(candidate)
+      const nameLike = isPlausibleItemName(candidate) && candidate.length <= 80 && findPrices(candidate).length === 0 && !END_PRICE_PATTERN.test(candidate)
+      // A printed dish name starts with a capital. A bold run that starts in
+      // lower case and has no printed fragment in front of it ("inclusief
+      // gebakken ganzenlever 54") is the continuation of the dish above, never
+      // a new dish of its own.
+      const startsLowercase = /^\p{Ll}/u.test(candidate)
+      if (priced && (!startsLowercase || fragment)) {
+        titleIndex = partIndex
+        anchorText = candidate
+        break
+      }
+      if (partIndex === 0 && nameLike && !startsLowercase) {
+        titleIndex = partIndex
+        anchorText = candidate
+        break
+      }
+      if (partIndex > 0) break
+      if (findPrices(candidate).length > 1) {
+        // A bold title with two amounts ("Mixed Grill, €27,50 (1 pers.) /
+        // €48,50 (2 pers.)") is a dish with price variants; the walk turns it
+        // into one item with every printed amount.
+        node.multiPriceAnchorLines = (node.multiPriceAnchorLines || 0) + 1
+        break
+      }
+      if (/^\p{L}{1,3}$/u.test(candidate)) {
+        fragment = candidate
+        continue
+      }
+      break
+    }
     let title = ''
     let titlePrice = null
     let linePrice = null
@@ -1095,22 +1150,31 @@ function formattedBlocks(node, budget, markerCounter) {
       if (priced) {
         title = priced.name
         titlePrice = priced
-      } else if (isPlausibleItemName(anchorText) && anchorText.length <= 80 && findPrices(anchorText).length === 0 && !END_PRICE_PATTERN.test(anchorText)) {
+      } else {
         title = anchorText
-      } else if (findPrices(anchorText).length > 1) {
-        // A bold title with two amounts ("Mixed Grill, €27,50 (1 pers.) /
-        // €48,50 (2 pers.)") is a dish with price variants. The deterministic
-        // context stores one price per dish, so this block is counted as an
-        // explicit, visible limit by the walk — never flattened to one price.
-        node.multiPriceAnchorLines = (node.multiPriceAnchorLines || 0) + 1
       }
+      if (fragment) title = `${fragment} ${title}`
     } else {
       const text = meaningful.map((c) => partText(c, markerCounter, budget)).join(' ').replace(/\s+/g, ' ').trim()
       const priced = splitTitlePrice(text)
       if (priced && looksLikePlainDishLine(priced.name)) linePrice = priced
     }
-    const rest = (title ? meaningful.slice(1) : meaningful).map((c) => partText(c, markerCounter, budget)).join(' ').replace(/\s+/g, ' ').trim()
-    lineInfo.push({ title, titlePrice, linePrice, rest })
+    const restStart = titleIndex >= 0 ? titleIndex + 1 : 0
+    const rest = meaningful.slice(restStart).map((c) => partText(c, markerCounter, budget)).join(' ').replace(/\s+/g, ' ').trim()
+    lineInfo.push({ title, titlePrice, linePrice, rest, fragment: titleIndex >= 0 ? '' : fragment })
+  }
+  // A dish title the CMS split over two markup runs keeps exactly the printed
+  // text: a bold fragment ("C") directly followed by a line whose title
+  // continues in lower case ("onference Peer 18") is ONE title, joined with the
+  // space the source prints between the runs. Never de-spaced into a guessed
+  // word, and never dropped into the previous dish's description.
+  for (let index = 0; index + 1 < lineInfo.length; index += 1) {
+    const info = lineInfo[index]
+    const next = lineInfo[index + 1]
+    if (!info || !info.fragment || !next || !next.title) continue
+    if (!/^\p{Ll}/u.test(next.title)) continue
+    next.title = `${info.fragment} ${next.title}`
+    lineInfo[index] = null
   }
   const blocks = []
   let current = null
@@ -1156,6 +1220,117 @@ function amountsBeforeClause(text) {
     if (price) found.push({ price, raw: match[1].trim(), index: match.index + match[0].indexOf(match[1]) })
   }
   return found
+}
+
+/** How many printed words directly before an amount may label that amount
+ *  ("2 stuks", "inclusief gebakken ganzenlever"). */
+const VARIANT_LABEL_MAX_WORDS = 4
+const VARIANT_SEPARATOR_PATTERN = /[|/·•–—]+/g
+/** A bare whole-euro amount ("65", "98"): the shape a printed card uses when it
+ *  leaves out the cents. Never a number glued to a decimal, a unit or a year. */
+const WHOLE_EURO_AMOUNT = /(?<![\d.,€])(\d{1,3})(?![\d.,]*\d)(?!\s*%)/g
+const QUANTITY_UNIT_AFTER = /^(?:gram|grams|gr|kg|kilo|cl|ml|dl|ltr|liter|liters|st|stk|stuks|pers|persoon|personen|pp|glas|glazen|fles|flessen|btl|karaf|gangen|gang|uur|mnd|min)\b/i
+/** The tokens a gap between two amounts of ONE dish may hold: the label of the
+ *  next amount ("50 gram") and printed separators. Any other word means the gap
+ *  names something of its own, so the two amounts are not one dish's variants. */
+const VARIANT_GAP_TOKEN = /^(?:[|/·•–—,()+-]+|\d{1,4}|gram|grams|gr|kg|kilo|cl|ml|dl|ltr|liter|liters|st|stk|stuks|pers|persoon|personen|pp|glas|glazen|fles|flessen|btl|karaf|gangen|gang|uur|met|of|en|and|or|from|vanaf|inclusief|incl)$/i
+
+/**
+ * The short printed label directly before one amount of a variant row. Only
+ * the words the source itself prints are used (never an invented "klein"/
+ * "groot"), a portion pair directly before the amount ("30 gram") is the whole
+ * label, the separators (`|`, `/`) are not part of it, and a label that is
+ * really a whole sentence is refused.
+ */
+function variantLabel(text) {
+  const words = cleanName(String(text || '').replace(VARIANT_SEPARATOR_PATTERN, ' '))
+    .split(/\s+/)
+    .filter(Boolean)
+  if (words.length === 0) return null
+  const portion = words.length >= 2 && /^\d{1,4}$/.test(words[words.length - 2]) && QUANTITY_UNIT_AFTER.test(words[words.length - 1])
+  const label = portion ? words.slice(-2).join(' ') : words.slice(-VARIANT_LABEL_MAX_WORDS).join(' ')
+  return label.length > 0 && label.length <= 40 ? label : null
+}
+
+/** One comparable amount per variant, in the same two-decimal form the
+ *  reference comparison and the price fields use ("65.00"). */
+function variantAmount(amountMinorUnits) {
+  return (amountMinorUnits / 100).toFixed(2)
+}
+
+/** The one comparable price field of a multi-price dish: every printed amount,
+ *  never one of them. The printed form stays in the item's quote. */
+function variantsPriceText(variants) {
+  return variants.map((variant) => variantAmount(variant.amountMinorUnits)).join(' / ')
+}
+
+/** Bare whole-euro amounts of one row, in source order; an amount directly
+ *  followed by a unit ("30 gram") is a portion label, not an amount. */
+function wholeEuroAmounts(text) {
+  const found = []
+  for (const match of String(text || '').matchAll(WHOLE_EURO_AMOUNT)) {
+    const after = text.slice(match.index + match[0].length).replace(/^[\s|/·•,]+/, '')
+    if (after && QUANTITY_UNIT_AFTER.test(after)) continue
+    const value = Number(match[1])
+    if (!Number.isFinite(value) || value < 1 || value > 500) continue
+    found.push({ index: match.index, length: match[1].length, raw: match[1], amountMinorUnits: value * 100 })
+  }
+  return found
+}
+
+/**
+ * Every amount of one dish line with the label printed directly before it, in
+ * source order ("30 gram 65 | 50 gram 98"). Only a row that ENDS in an amount
+ * and whose amounts are separated by nothing but labels and separators is a
+ * variant row: "Soep 6,50 Salade 7,50" and "Pizza 12,50 met 3 soorten kaas" are
+ * never one dish with variants. Returns null otherwise.
+ */
+function pricesVariantsFromRow(text) {
+  const source = String(text || '')
+  const found = [...findPrices(source), ...wholeEuroAmounts(source)]
+    .sort((a, b) => a.index - b.index)
+  const amounts = []
+  for (const option of found) {
+    const previous = amounts[amounts.length - 1]
+    if (previous && option.index < previous.index + previous.length) continue
+    amounts.push(option)
+  }
+  if (amounts.length < 2) return null
+  const tail = source.slice(amounts[amounts.length - 1].index + amounts[amounts.length - 1].length)
+  if (!/^[\s|/·•,.)-]*$/.test(tail)) return null
+  const variants = []
+  let cursor = 0
+  for (const amount of amounts) {
+    const gap = source.slice(cursor, amount.index)
+    if (cursor > 0) {
+      const gapWords = gap.split(/\s+/).filter(Boolean)
+      if (gapWords.length > 5 || !gapWords.every((word) => VARIANT_GAP_TOKEN.test(word))) return null
+    }
+    variants.push({ label: variantLabel(gap), amountMinorUnits: amount.amountMinorUnits })
+    cursor = amount.index + amount.length
+  }
+  return { variants, prefix: source.slice(0, amounts[0].index), suffix: tail }
+}
+
+/** A trailing printed portion label ("… room 20 gram") is the label of the
+ *  next variant, not part of the dish description. */
+const TRAILING_VARIANT_LABEL = /\s+\d{1,4}\s*(?:gram|grams|gr|kg|cl|ml|dl|ltr|liter|st|stk|stuks|pers|persoon|personen|pp|glas|glazen|fles|flessen)$/i
+
+function stripTrailingVariantLabel(text) {
+  return String(text || '').replace(TRAILING_VARIANT_LABEL, '').trim()
+}
+
+/** Shape stored on an item: priceStatus multiple_undecomposed with the
+ *  printed labels and the comparable amount text. */
+function variantItemFields(variants) {
+  const stored = variants.map((variant) => ({ label: variant.label || null, price: variantAmount(variant.amountMinorUnits) }))
+  return {
+    priceStatus: 'multiple_undecomposed',
+    amountMinorUnits: null,
+    currency: null,
+    priceVariants: stored,
+    priceText: variantsPriceText(variants),
+  }
 }
 
 function blockEndPrice(block, budget) {
@@ -1996,14 +2171,17 @@ function extractWithinBudget(html, budget, stats) {
     const descriptionValue = description && findPrices(description).length === 0 && isPlausibleItemName(description) ? clip(description) : null
     if (prices.length > 1) {
       // A dual price ("glas 5,50 / fles 27,50"): the unit label before the
-      // first price belongs to that price, not to the dish name.
+      // first price belongs to that price, not to the dish name. Every printed
+      // amount is kept as its own variant — never one of them as "the" price.
       const tail = name.length > 48 ? name.slice(-48) : name
       const dualName = cleanName(name.slice(0, name.length - tail.length) + tail.replace(DUAL_PRICE_UNIT_SUFFIX, ''))
+      const row = pricesVariantsFromRow(item.priceText)
+      const variants = row
+        ? row.variants
+        : prices.map((price) => ({ label: null, amountMinorUnits: price.amountMinorUnits }))
       return addItem(section, node, pattern, {
         name: clip(displayName(isPlausibleItemName(dualName) ? dualName : name)),
-        priceStatus: 'multiple_undecomposed',
-        amountMinorUnits: null,
-        currency: null,
+        ...variantItemFields(variants),
         description: descriptionValue,
       }, { quote: fullText })
     }
@@ -2081,13 +2259,27 @@ function extractWithinBudget(html, budget, stats) {
     }
     const name = cleanName(block.title)
     const section = sectionFor(headingPath)
+    // A dish whose row prints several amounts is ONE dish with price variants
+    // ("30 gram 65 | 50 gram 98", a base amount in the title with the inclusive
+    // amount at the end of the row). Every printed amount is kept with the label
+    // the source prints before it; none of them becomes "the" price and none is
+    // dropped. Two name+price pairs never reach this point
+    // (pricesVariantsFromRow refuses them), and a supplement clause keeps its
+    // own refusal below.
+    const rowVariants = pricesVariantsFromRow(body)
     if (!price) {
       // A block that declares itself a supplement ("meerprijs") is never a dish.
       if (supplementOnly) return reject(fullText, 'supplement_price', node)
-      // Several prices without one end price are price variants (sizes, course
-      // counts, glass/bottle). The deterministic context stores one price per
-      // dish, so they are refused and counted as an explicit, visible limit —
-      // never flattened to one of them.
+      if (rowVariants && isPlausibleItemName(name)) {
+        const variantDescription = stripTrailingVariantLabel(cleanName(rowVariants.prefix))
+        return addItem(section, node, 'formatted_block', {
+          name: clip(displayName(name)),
+          ...variantItemFields(rowVariants.variants),
+          description: variantDescription && isPlausibleItemName(variantDescription) ? clip(variantDescription) : null,
+        }, { quote: fullText })
+      }
+      // Several prices without one provable relation to the dish (no label, or a
+      // second dish name between them) stay an explicit, visible limit.
       if (priceVariants || amountsBeforeClause(body).length > 1) {
         stats.priceVariantLines += 1
         return reject(fullText, 'ambiguous_structure', node)
@@ -2098,6 +2290,37 @@ function extractWithinBudget(html, budget, stats) {
       return undefined
     }
     if (TIME_WORD_BEFORE_PATTERN.test(before)) return reject(fullText, 'clock_time', node)
+    if (!isPlausibleItemName(name)) return reject(fullText, 'missing_name', node)
+    if (rowVariants) {
+      // The last amount of the row is the one `blockEndPrice` took; the earlier
+      // amounts of the same row belong to the same dish.
+      const variantDescription = stripTrailingVariantLabel(cleanName(rowVariants.prefix))
+      return addItem(section, node, 'formatted_block', {
+        name: clip(displayName(name)),
+        ...variantItemFields(rowVariants.variants),
+        description: variantDescription && isPlausibleItemName(variantDescription) ? clip(variantDescription) : null,
+      }, { quote: fullText })
+    }
+    // A title that carries the base amount and a row that ends in a second,
+    // labelled amount ("Mechelse Koekoek 44 … inclusief gebakken ganzenlever 54")
+    // prints two prices for one dish. Keeping only the row amount invents a
+    // different dish; both are kept as variants.
+    if (block.titlePrice && priceFromTitle !== true) {
+      // The label of the second amount is the printed text of the row it ends:
+      // "… inclusief gebakken ganzenlever 54" → "inclusief gebakken ganzenlever".
+      const lastLine =
+        [...(block.lines || [])].reverse().find((line) => typeof line === 'string' && line.trim() && END_PRICE_PATTERN.test(line.trim())) || ''
+      const label = variantLabel(lastLine.trim().replace(/(?:€\s*)?\d{1,3}(?:[.,]\d{1,2})?\s*$/, ''))
+      const descriptionText = label && before.trim().endsWith(label) ? before.trim().slice(0, before.trim().length - label.length) : before
+      return addItem(section, node, 'formatted_block', {
+        name: clip(displayName(name)),
+        ...variantItemFields([
+          { label: null, amountMinorUnits: block.titlePrice.price.amountMinorUnits },
+          { label, amountMinorUnits: price.amountMinorUnits },
+        ]),
+        description: cleanName(descriptionText) && isPlausibleItemName(cleanName(descriptionText)) ? clip(cleanName(descriptionText)) : null,
+      }, { quote: fullText })
+    }
     // A second price, a price range or a price variant before the end price.
     // Whole euros count as well ("vier stuks 13 - zes stuks 19,50"): a second
     // amount on the dish's own line is a variant, never part of the price.
@@ -2105,7 +2328,6 @@ function extractWithinBudget(html, budget, stats) {
       stats.priceVariantLines += 1
       return reject(fullText, 'ambiguous_structure', node)
     }
-    if (!isPlausibleItemName(name)) return reject(fullText, 'missing_name', node)
     const description = cleanName(before)
     // The quote must show the amount a reviewer has to check. A title-price
     // block keeps its price outside `body`, so it is appended here.

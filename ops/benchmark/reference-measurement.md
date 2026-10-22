@@ -12,14 +12,14 @@ Bij een verzonnen rij bestaat per definitie geen referentie-citaat; de regel noe
 | --- | --- |
 | Bronnen gemeten / geblokkeerd | 4 / 1 |
 | Referentiegerechten | 185 |
-| Geëxtraheerde gerechten | 170 |
-| Exact gematcht | 167 |
-| Gemiste gerechten | 15 |
+| Geëxtraheerde gerechten | 180 |
+| Exact gematcht | 177 |
+| Gemiste gerechten | 5 |
 | Verzonnen gerechten | 0 |
 | Prijsfouten | 0 |
 | Rubriekfouten | 3 |
-| Precisie | 98.24% |
-| Recall | 90.27% |
+| Precisie | 98.33% |
+| Recall | 95.68% |
 
 ## Per bron
 
@@ -27,7 +27,7 @@ Bij een verzonnen rij bestaat per definitie geen referentie-citaat; de regel noe
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | Restaurant Zuyd | gemeten | 36 | 34 | 34 | 2 | 0 | 0 | 0 | 100.00% | 94.44% |
 | Andalous Restaurant Breda | gemeten | 87 | 84 | 81 | 3 | 0 | 0 | 3 | 96.43% | 93.10% |
-| Restaurant Pellens | gemeten | 36 | 26 | 26 | 10 | 0 | 0 | 0 | 100.00% | 72.22% |
+| Restaurant Pellens | gemeten | 36 | 36 | 36 | 0 | 0 | 0 | 0 | 100.00% | 100.00% |
 | Restaurant Chocolat | gemeten | 26 | 26 | 26 | 0 | 0 | 0 | 0 | 100.00% | 100.00% |
 | Senang Makan | geblokkeerd | 0 | 0 | 0 | 0 | 0 | 0 | 0 | n.v.t. | n.v.t. |
 
@@ -54,9 +54,9 @@ Bij een verzonnen rij bestaat per definitie geen referentie-citaat; de regel noe
 - De vastgezette menupagina's bevatten geen allergenenlegenda per gerecht; allergenen blijven onbekend, niet allergeenvrij.
 - Deze referentie is uit de vastgezette brontekst opgesteld en niet uit de parseruitvoer.
 - Menukaart https://www.restaurantzuyd.nl/lunch: sectie "Lunch › LUNCHMENU'S" is niet als gerechten opgenomen; 4 regel(s) horen bij een arrangement of keuzemenu (prijs per gang of portie) en zijn geen losse gerechten.
-- Menukaart https://www.restaurantzuyd.nl/lunch: 1 gerecht(en)/regel(s) met meerdere prijzen (prijsvarianten zoals klein/hoofd, glas/fles of aantal stuks) zijn niet als losse prijs opgeslagen; de deterministische context ondersteunt één prijs per gerecht en er is geen prijs geraden.
+- Menukaart https://www.restaurantzuyd.nl/lunch: 1 gerecht(en) met meerdere prijzen (prijsvarianten zoals aantal stuks, gewicht, glas/fles of een basis- en een uitgebreide prijs) zijn als prijsvarianten opgeslagen met het bedrag en het label dat de bron print; geen enkel bedrag is tot één prijs teruggebracht.
 - Menukaart https://www.restaurantzuyd.nl/diner: sectie "Diner › VERRASSINGSMENU'S" is niet als gerechten opgenomen; 4 regel(s) horen bij een arrangement of keuzemenu (prijs per gang of portie) en zijn geen losse gerechten.
-- Menukaart https://www.restaurantzuyd.nl/diner: 1 gerecht(en)/regel(s) met meerdere prijzen (prijsvarianten zoals klein/hoofd, glas/fles of aantal stuks) zijn niet als losse prijs opgeslagen; de deterministische context ondersteunt één prijs per gerecht en er is geen prijs geraden.
+- Menukaart https://www.restaurantzuyd.nl/diner: 1 gerecht(en) met meerdere prijzen (prijsvarianten zoals aantal stuks, gewicht, glas/fles of een basis- en een uitgebreide prijs) zijn als prijsvarianten opgeslagen met het bedrag en het label dat de bron print; geen enkel bedrag is tot één prijs teruggebracht.
 - Gelezen zonder automatisch herkende menukaart: https://www.restaurantzuyd.nl/kerstmenu.
 - AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.
 - Kwaliteitscontrole op de deterministische extractie vraagt aandacht (html_arrangements_skipped); het resultaat is niet als volledig beoordeeld.
@@ -89,7 +89,7 @@ Bij een verzonnen rij bestaat per definitie geen referentie-citaat; de regel noe
 - Deze referentie is uit de vastgezette brontekst en PDF-tekst opgesteld en niet uit de parseruitvoer.
 - Menukaart https://www.andalous-breda.nl/menukaart/: sectie "Menukaart › Koude dranken › Meer informatie" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).
 - Menukaart https://www.andalous-breda.nl/menukaart/: sectie "Menukaart › Koude dranken › Contactgegevens" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).
-- Menukaart https://www.andalous-breda.nl/menukaart/: 1 gerecht(en)/regel(s) met meerdere prijzen (prijsvarianten zoals klein/hoofd, glas/fles of aantal stuks) zijn niet als losse prijs opgeslagen; de deterministische context ondersteunt één prijs per gerecht en er is geen prijs geraden.
+- Menukaart https://www.andalous-breda.nl/menukaart/: 1 gerecht(en) met meerdere prijzen (prijsvarianten zoals aantal stuks, gewicht, glas/fles of een basis- en een uitgebreide prijs) zijn als prijsvarianten opgeslagen met het bedrag en het label dat de bron print; geen enkel bedrag is tot één prijs teruggebracht.
 - Gelezen zonder automatisch herkende menukaart: https://www.andalous-breda.nl/ramadan-menu/.
 - Doorgestuurd naar een al gelezen pagina; niet nogmaals verwerkt: https://www.andalous-breda.nl/ramadan → https://www.andalous-breda.nl/ramadan-menu/.
 - PDF https://andalous-breda.nl/wp-content/uploads/2026/02/Ramadan-menu-kaart-Essaouira-_20240316_170004_0000.pdf_compressed-1.pdf: 1 prijsregel(s) konden zonder aantoonbare lokale naam-/prijskoppeling niet als gerecht worden opgenomen.
@@ -103,17 +103,8 @@ Bij een verzonnen rij bestaat per definitie geen referentie-citaat; de regel noe
 
 ### Restaurant Pellens
 
-**Gemist (10)**
-- `Eekhoorntjesbrood` — Onze kaart › Diner › À la carte › Groenten — prijs 22.00 / 26.00 — citaat: “Eekhoorntjesbrood biet, koffie €22,00 €26,00” (Diner › À la carte › Groenten › regel 5)
-- `Spitskool` — Onze kaart › Diner › À la carte › Groenten — prijs 18.00 / 24.00 — citaat: “Spitskool huacatay, pommes dauphine €18,00 €24,00” (Diner › À la carte › Groenten › regel 6)
-- `Beekridder` — Onze kaart › Diner › À la carte › Pellens — prijs 21.00 / 31.00 — citaat: “Beekridder vijgenblad, gerookte boter €21,00 €31,00” (Diner › À la carte › Pellens › regel 2)
-- `Langoustine` — Onze kaart › Diner › À la carte › Pellens — prijs 23.00 / 38.00 — citaat: “Langoustine wortel, bouillabaisse €23,00 €38,00” (Diner › À la carte › Pellens › regel 3)
-- `Wilde eend` — Onze kaart › Diner › À la carte › Pellens — prijs 24.00 / 39.00 — citaat: “Wilde eend biet, koffie €24,00 €39,00” (Diner › À la carte › Pellens › regel 5)
-- `Eekhoorntjesbrood` — Onze kaart › Lunch › À la carte › Groenten — prijs 22.00 / 26.00 — citaat: “Eekhoorntjesbrood biet, koffie €22,00 €26,00” (Lunch › À la carte › Groenten › regel 5)
-- `Spitskool` — Onze kaart › Lunch › À la carte › Groenten — prijs 18.00 / 24.00 — citaat: “Spitskool huacatay, pommes dauphine €18,00 €24,00” (Lunch › À la carte › Groenten › regel 6)
-- `Beekridder` — Onze kaart › Lunch › À la carte › Pellens — prijs 21.00 / 31.00 — citaat: “Beekridder vijgenblad, gerookte boter €21,00 €31,00” (Lunch › À la carte › Pellens › regel 2)
-- `Langoustine` — Onze kaart › Lunch › À la carte › Pellens — prijs 23.00 / 38.00 — citaat: “Langoustine wortel, bouillabaisse €23,00 €38,00” (Lunch › À la carte › Pellens › regel 3)
-- `Wilde eend` — Onze kaart › Lunch › À la carte › Pellens — prijs 24.00 / 39.00 — citaat: “Wilde eend biet, koffie €24,00 €39,00” (Lunch › À la carte › Pellens › regel 5)
+**Gemist (0)**
+- geen
 
 **Verzonnen (0)**
 - geen
@@ -133,10 +124,10 @@ Bij een verzonnen rij bestaat per definitie geen referentie-citaat; de regel noe
 - Menukaart https://pellens.nl/: sectie "Onze kaart › Diner › Menu Pellens" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).
 - Menukaart https://pellens.nl/: sectie "Onze kaart › Diner › Menu légumes" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).
 - Menukaart https://pellens.nl/: sectie "Onze kaart › Diner › À la carte › Formule du Jour" is niet als gerechten opgenomen; 2 regel(s) horen bij een arrangement of keuzemenu (prijs per gang of portie) en zijn geen losse gerechten.
-- Menukaart https://pellens.nl/: 10 gerecht(en)/regel(s) met meerdere prijzen (prijsvarianten zoals klein/hoofd, glas/fles of aantal stuks) zijn niet als losse prijs opgeslagen; de deterministische context ondersteunt één prijs per gerecht en er is geen prijs geraden.
+- Menukaart https://pellens.nl/: 10 gerecht(en) met meerdere prijzen (prijsvarianten zoals aantal stuks, gewicht, glas/fles of een basis- en een uitgebreide prijs) zijn als prijsvarianten opgeslagen met het bedrag en het label dat de bron print; geen enkel bedrag is tot één prijs teruggebracht.
 - Menukaart https://pellens.nl/: een verborgen tweede weergave van dezelfde kaart is één keer geteld; 10 gerecht(en) zijn niet dubbel opgenomen.
 - AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.
-- Kwaliteitscontrole op de deterministische extractie vraagt aandacht (duplicate_item_across_categories, html_arrangements_skipped); het resultaat is niet als volledig beoordeeld.
+- Kwaliteitscontrole op de deterministische extractie vraagt aandacht (unresolved_price, duplicate_item_across_categories, html_arrangements_skipped); het resultaat is niet als volledig beoordeeld.
 
 **Vastgezette bronversie:** 1 capture(s); html 66f57e267289
 

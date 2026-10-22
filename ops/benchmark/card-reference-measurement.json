@@ -59,14 +59,14 @@
     "capturedSources": 3,
     "blockedSources": 1,
     "referenceItems": 178,
-    "actualItems": 137,
-    "matched": 34,
-    "missing": 83,
-    "invented": 42,
+    "actualItems": 138,
+    "matched": 63,
+    "missing": 79,
+    "invented": 39,
     "priceErrors": 0,
-    "categoryErrors": 61,
-    "precision": 24.82,
-    "recall": 19.1,
+    "categoryErrors": 36,
+    "precision": 45.65,
+    "recall": 35.39,
     "blocked": [
       {
         "id": "thuis",
@@ -3861,9 +3861,9 @@
         "De vastgezette menupagina's bevatten geen allergenenlegenda per gerecht; allergenen blijven onbekend, niet allergeenvrij.",
         "Deze referentie is uit de vastgezette brontekst opgesteld en niet uit de parseruitvoer.",
         "Menukaart https://www.restaurantzuyd.nl/lunch: sectie \"Lunch › LUNCHMENU'S\" is niet als gerechten opgenomen; 4 regel(s) horen bij een arrangement of keuzemenu (prijs per gang of portie) en zijn geen losse gerechten.",
-        "Menukaart https://www.restaurantzuyd.nl/lunch: 1 gerecht(en)/regel(s) met meerdere prijzen (prijsvarianten zoals klein/hoofd, glas/fles of aantal stuks) zijn niet als losse prijs opgeslagen; de deterministische context ondersteunt één prijs per gerecht en er is geen prijs geraden.",
+        "Menukaart https://www.restaurantzuyd.nl/lunch: 1 gerecht(en) met meerdere prijzen (prijsvarianten zoals aantal stuks, gewicht, glas/fles of een basis- en een uitgebreide prijs) zijn als prijsvarianten opgeslagen met het bedrag en het label dat de bron print; geen enkel bedrag is tot één prijs teruggebracht.",
         "Menukaart https://www.restaurantzuyd.nl/diner: sectie \"Diner › VERRASSINGSMENU'S\" is niet als gerechten opgenomen; 4 regel(s) horen bij een arrangement of keuzemenu (prijs per gang of portie) en zijn geen losse gerechten.",
-        "Menukaart https://www.restaurantzuyd.nl/diner: 1 gerecht(en)/regel(s) met meerdere prijzen (prijsvarianten zoals klein/hoofd, glas/fles of aantal stuks) zijn niet als losse prijs opgeslagen; de deterministische context ondersteunt één prijs per gerecht en er is geen prijs geraden.",
+        "Menukaart https://www.restaurantzuyd.nl/diner: 1 gerecht(en) met meerdere prijzen (prijsvarianten zoals aantal stuks, gewicht, glas/fles of een basis- en een uitgebreide prijs) zijn als prijsvarianten opgeslagen met het bedrag en het label dat de bron print; geen enkel bedrag is tot één prijs teruggebracht.",
         "Gelezen zonder automatisch herkende menukaart: https://www.restaurantzuyd.nl/kerstmenu.",
         "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.",
         "Kwaliteitscontrole op de deterministische extractie vraagt aandacht (html_arrangements_skipped); het resultaat is niet als volledig beoordeeld."
@@ -3873,29 +3873,15 @@
       "label": "Restaurant Wolfslaar",
       "sourceId": "wolfslaar",
       "referenceItems": 30,
-      "actualItems": 29,
-      "matched": 0,
-      "missing": 5,
-      "invented": 4,
+      "actualItems": 30,
+      "matched": 29,
+      "missing": 1,
+      "invented": 1,
       "priceErrors": 0,
-      "categoryErrors": 25,
-      "precision": 0,
-      "recall": 0,
+      "categoryErrors": 0,
+      "precision": 96.67,
+      "recall": 96.67,
       "missingDishes": [
-        {
-          "name": "Mechelse Koekoek",
-          "prices": [
-            "44.00",
-            "54.00"
-          ],
-          "path": [
-            "Menukaart diner",
-            "Hoofdgerechten"
-          ],
-          "quote": "Mechelse Koekoek 44 zacht gegaard | stoof van dijen | witlof | geweckte wintertruffel inclusief gebakken ganzenlever 54",
-          "locator": "Menukaart diner › Hoofdgerechten › regel 3",
-          "captureKey": "ops/benchmark/output/card-captures/wolfslaar/03-html-bc35f9ca7a5c.html"
-        },
         {
           "name": "Conference Peer",
           "prices": [
@@ -3908,673 +3894,43 @@
           "quote": "C onference Peer 18 pecannoot | kardemom | karamel | vanille",
           "locator": "Menukaart diner › Nagerechten › regel 2",
           "captureKey": "ops/benchmark/output/card-captures/wolfslaar/03-html-bc35f9ca7a5c.html"
-        },
-        {
-          "name": "Royal Belgian Platinum Caviar",
-          "prices": [
-            "65.00",
-            "98.00"
-          ],
-          "path": [
-            "Menukaart diner",
-            "Voorgerechten"
-          ],
-          "quote": "Royal Belgian Platinum Caviar blini’s | bieslook | crème fraîche 30 gram 65 | 50 gram 98",
-          "locator": "Menukaart diner › Voorgerechten › regel 6",
-          "captureKey": "ops/benchmark/output/card-captures/wolfslaar/03-html-bc35f9ca7a5c.html"
-        },
-        {
-          "name": "Mechelse Koekoek",
-          "prices": [
-            "44.00",
-            "54.00"
-          ],
-          "path": [
-            "Menukaart lunch",
-            "Hoofdgerechten"
-          ],
-          "quote": "Mechelse Koekoek 44 zacht gegaard | stoof van dijen | witlof | geweckte wintertruffel inclusief gebakken ganzenlever 54",
-          "locator": "Menukaart lunch › Hoofdgerechten › regel 3",
-          "captureKey": "ops/benchmark/output/card-captures/wolfslaar/02-html-22d60179c67b.html"
-        },
-        {
-          "name": "Royal Belgian Platinum Caviar",
-          "prices": [
-            "65.00",
-            "98.00"
-          ],
-          "path": [
-            "Menukaart lunch",
-            "Voorgerechten"
-          ],
-          "quote": "Royal Belgian Platinum Caviar blini’s | bieslook | crème fraîche 30 gram 65 | 50 gram 98",
-          "locator": "Menukaart lunch › Voorgerechten › regel 6",
-          "captureKey": "ops/benchmark/output/card-captures/wolfslaar/02-html-22d60179c67b.html"
         }
       ],
       "inventedDishes": [
         {
-          "name": "Mechelse Koekoek",
+          "name": "C onference Peer",
           "prices": [
-            "54.00"
+            "18.00"
           ],
           "path": [
-            "Hoofdgerechten"
+            "Menukaart diner",
+            "Nagerechten"
           ],
-          "quote": "Mechelse Koekoek zacht gegaard | stoof van dijen | witlof | geweckte wintertruffel inclusief gebakken ganzenlever 54",
-          "locator": "html>body>div[3]>main>section[2]>div>div>div[1]>div>p[2]",
+          "quote": "C onference Peer pecannoot | kardemom | karamel | vanille 18",
+          "locator": "html>body>div[3]>main>section[2]>div>div>div[2]>div>div>div>div>p",
           "sourceUrl": "https://www.restaurantwolfslaar.com/nl/menu-diner"
-        },
-        {
-          "name": "Mechelse Koekoek",
-          "prices": [
-            "54.00"
-          ],
-          "path": [
-            "Hoofdgerechten"
-          ],
-          "quote": "Mechelse Koekoek zacht gegaard | stoof van dijen | witlof | geweckte wintertruffel inclusief gebakken ganzenlever 54",
-          "locator": "html>body>div[3]>main>section[2]>div>div>div[1]>div>p[2]",
-          "sourceUrl": "https://www.restaurantwolfslaar.com/nl/menu-lunch"
-        },
-        {
-          "name": "Royal Belgian Platinum Caviar",
-          "prices": [
-            "98.00"
-          ],
-          "path": [
-            "Voorgerechten"
-          ],
-          "quote": "Royal Belgian Platinum Caviar blini’s | bieslook | crème fraîche 30 gram 65 | 50 gram 98",
-          "locator": "html>body>div[3]>main>section[2]>div>div>div[1]>div>div>div>div>p",
-          "sourceUrl": "https://www.restaurantwolfslaar.com/nl/menu-diner"
-        },
-        {
-          "name": "Royal Belgian Platinum Caviar",
-          "prices": [
-            "98.00"
-          ],
-          "path": [
-            "Voorgerechten"
-          ],
-          "quote": "Royal Belgian Platinum Caviar blini’s | bieslook | crème fraîche 30 gram 65 | 50 gram 98",
-          "locator": "html>body>div[3]>main>section[2]>div>div>div[1]>div>div>div>div>p",
-          "sourceUrl": "https://www.restaurantwolfslaar.com/nl/menu-lunch"
         }
       ],
       "priceErrorRows": [],
-      "categoryErrorRows": [
-        {
-          "name": "Grain-fed Entrecote",
-          "expectedPath": [
-            "Menukaart diner",
-            "Hoofdgerechten"
-          ],
-          "actualPath": [
-            "Hoofdgerechten"
-          ],
-          "price": [
-            "52.00"
-          ],
-          "quote": "Grain-fed Entrecote 52 gegrild op de konro grill | knolselderij | boleet | zwarte boon",
-          "locator": "Menukaart diner › Hoofdgerechten › regel 5",
-          "captureKey": "ops/benchmark/output/card-captures/wolfslaar/03-html-bc35f9ca7a5c.html",
-          "actualLocator": "html>body>div[3]>main>section[2]>div>div>div[1]>div>p[2]"
-        },
-        {
-          "name": "Tarbot",
-          "expectedPath": [
-            "Menukaart diner",
-            "Hoofdgerechten"
-          ],
-          "actualPath": [
-            "Hoofdgerechten"
-          ],
-          "price": [
-            "62.00"
-          ],
-          "quote": "Tarbot 62 gebakken in boerenboter | artisjok | polenta | bouillabaisse",
-          "locator": "Menukaart diner › Hoofdgerechten › regel 1",
-          "captureKey": "ops/benchmark/output/card-captures/wolfslaar/03-html-bc35f9ca7a5c.html",
-          "actualLocator": "html>body>div[3]>main>section[2]>div>div>div[1]>div>p[2]"
-        },
-        {
-          "name": "Tournedos",
-          "expectedPath": [
-            "Menukaart diner",
-            "Hoofdgerechten"
-          ],
-          "actualPath": [
-            "Hoofdgerechten"
-          ],
-          "price": [
-            "52.00"
-          ],
-          "quote": "Tournedos 52 blonde d’acquitaine rund | seizoensgroenten | sjalot jus",
-          "locator": "Menukaart diner › Hoofdgerechten › regel 4",
-          "captureKey": "ops/benchmark/output/card-captures/wolfslaar/03-html-bc35f9ca7a5c.html",
-          "actualLocator": "html>body>div[3]>main>section[2]>div>div>div[1]>div>p[2]"
-        },
-        {
-          "name": "Zeetong",
-          "expectedPath": [
-            "Menukaart diner",
-            "Hoofdgerechten"
-          ],
-          "actualPath": [
-            "Hoofdgerechten"
-          ],
-          "price": [
-            "69.00"
-          ],
-          "quote": "Zeetong 69 à la meuniere | spinazie | pont neuf",
-          "locator": "Menukaart diner › Hoofdgerechten › regel 2",
-          "captureKey": "ops/benchmark/output/card-captures/wolfslaar/03-html-bc35f9ca7a5c.html",
-          "actualLocator": "html>body>div[3]>main>section[2]>div>div>div[1]>div>p[2]"
-        },
-        {
-          "name": "Kaaswagen",
-          "expectedPath": [
-            "Menukaart diner",
-            "Nagerechten"
-          ],
-          "actualPath": [
-            "Nagerechten"
-          ],
-          "price": [
-            "25.00"
-          ],
-          "quote": "Kaaswagen 25 kazen uit het seizoen | notenbrood | bijpassende garnituren",
-          "locator": "Menukaart diner › Nagerechten › regel 4",
-          "captureKey": "ops/benchmark/output/card-captures/wolfslaar/03-html-bc35f9ca7a5c.html",
-          "actualLocator": "html>body>div[3]>main>section[2]>div>div>div[2]>div>div>div>div>p[1]"
-        },
-        {
-          "name": "Madeleines",
-          "expectedPath": [
-            "Menukaart diner",
-            "Nagerechten"
-          ],
-          "actualPath": [
-            "Nagerechten"
-          ],
-          "price": [
-            "10.00"
-          ],
-          "quote": "Madeleines 10 twee warme madeleines | crème surprise",
-          "locator": "Menukaart diner › Nagerechten › regel 1",
-          "captureKey": "ops/benchmark/output/card-captures/wolfslaar/03-html-bc35f9ca7a5c.html",
-          "actualLocator": "html>body>div[3]>main>section[2]>div>div>div[2]>div>div>div>div>p[1]"
-        },
-        {
-          "name": "Passie Curd",
-          "expectedPath": [
-            "Menukaart diner",
-            "Nagerechten"
-          ],
-          "actualPath": [
-            "Nagerechten"
-          ],
-          "price": [
-            "18.00"
-          ],
-          "quote": "Passie Curd 18 mango | passievrucht | meringue | sorbet",
-          "locator": "Menukaart diner › Nagerechten › regel 3",
-          "captureKey": "ops/benchmark/output/card-captures/wolfslaar/03-html-bc35f9ca7a5c.html",
-          "actualLocator": "html>body>div[3]>main>section[2]>div>div>div[2]>div>div>div>div>p[1]"
-        },
-        {
-          "name": "Limburgs Kloostervarken",
-          "expectedPath": [
-            "Menukaart diner",
-            "Voorgerechten"
-          ],
-          "actualPath": [
-            "Voorgerechten"
-          ],
-          "price": [
-            "26.00"
-          ],
-          "quote": "Limburgs Kloostervarken 26 bospeen | paksoy | xo | yuzu",
-          "locator": "Menukaart diner › Voorgerechten › regel 5",
-          "captureKey": "ops/benchmark/output/card-captures/wolfslaar/03-html-bc35f9ca7a5c.html",
-          "actualLocator": "html>body>div[3]>main>section[2]>div>div>div[1]>div>div>div>div>p"
-        },
-        {
-          "name": "Noordzeekrab",
-          "expectedPath": [
-            "Menukaart diner",
-            "Voorgerechten"
-          ],
-          "actualPath": [
-            "Voorgerechten"
-          ],
-          "price": [
-            "38.00"
-          ],
-          "quote": "Noordzeekrab 38 als cocktail geserveerd | struikselderij | granny Smith | piment d’espelette",
-          "locator": "Menukaart diner › Voorgerechten › regel 3",
-          "captureKey": "ops/benchmark/output/card-captures/wolfslaar/03-html-bc35f9ca7a5c.html",
-          "actualLocator": "html>body>div[3]>main>section[2]>div>div>div[1]>div>div>div>div>p"
-        },
-        {
-          "name": "Tartaar",
-          "expectedPath": [
-            "Menukaart diner",
-            "Voorgerechten"
-          ],
-          "actualPath": [
-            "Voorgerechten"
-          ],
-          "price": [
-            "26.00"
-          ],
-          "quote": "Tartaar 26 blonde d’aquitaine rund | kapperappel | radijs | witte aceto balsamico",
-          "locator": "Menukaart diner › Voorgerechten › regel 4",
-          "captureKey": "ops/benchmark/output/card-captures/wolfslaar/03-html-bc35f9ca7a5c.html",
-          "actualLocator": "html>body>div[3]>main>section[2]>div>div>div[1]>div>div>div>div>p"
-        },
-        {
-          "name": "Witte Heilbot",
-          "expectedPath": [
-            "Menukaart diner",
-            "Voorgerechten"
-          ],
-          "actualPath": [
-            "Voorgerechten"
-          ],
-          "price": [
-            "32.00"
-          ],
-          "quote": "Witte Heilbot 32 zeeuwse mossel | sjalot | escabeche",
-          "locator": "Menukaart diner › Voorgerechten › regel 1",
-          "captureKey": "ops/benchmark/output/card-captures/wolfslaar/03-html-bc35f9ca7a5c.html",
-          "actualLocator": "html>body>div[3]>main>section[2]>div>div>div[1]>div>div>div>div>p"
-        },
-        {
-          "name": "Zeebaars",
-          "expectedPath": [
-            "Menukaart diner",
-            "Voorgerechten"
-          ],
-          "actualPath": [
-            "Voorgerechten"
-          ],
-          "price": [
-            "34.00"
-          ],
-          "quote": "Zeebaars 34 geschroeid | oester | shiitake | kombucha",
-          "locator": "Menukaart diner › Voorgerechten › regel 2",
-          "captureKey": "ops/benchmark/output/card-captures/wolfslaar/03-html-bc35f9ca7a5c.html",
-          "actualLocator": "html>body>div[3]>main>section[2]>div>div>div[1]>div>div>div>div>p"
-        },
-        {
-          "name": "Grain-fed Entrecote",
-          "expectedPath": [
-            "Menukaart lunch",
-            "Hoofdgerechten"
-          ],
-          "actualPath": [
-            "Hoofdgerechten"
-          ],
-          "price": [
-            "52.00"
-          ],
-          "quote": "Grain-fed Entrecote 52 gegrild op de konro grill | knolselderij | boleet | zwarte boon",
-          "locator": "Menukaart lunch › Hoofdgerechten › regel 5",
-          "captureKey": "ops/benchmark/output/card-captures/wolfslaar/02-html-22d60179c67b.html",
-          "actualLocator": "html>body>div[3]>main>section[2]>div>div>div[1]>div>p[2]"
-        },
-        {
-          "name": "Tarbot",
-          "expectedPath": [
-            "Menukaart lunch",
-            "Hoofdgerechten"
-          ],
-          "actualPath": [
-            "Hoofdgerechten"
-          ],
-          "price": [
-            "62.00"
-          ],
-          "quote": "Tarbot 62 gebakken in boerenboter | artisjok | polenta | bouillabaisse",
-          "locator": "Menukaart lunch › Hoofdgerechten › regel 1",
-          "captureKey": "ops/benchmark/output/card-captures/wolfslaar/02-html-22d60179c67b.html",
-          "actualLocator": "html>body>div[3]>main>section[2]>div>div>div[1]>div>p[2]"
-        },
-        {
-          "name": "Tournedos",
-          "expectedPath": [
-            "Menukaart lunch",
-            "Hoofdgerechten"
-          ],
-          "actualPath": [
-            "Hoofdgerechten"
-          ],
-          "price": [
-            "52.00"
-          ],
-          "quote": "Tournedos 52 blonde d’acquitaine rund | seizoensgroenten | sjalot jus",
-          "locator": "Menukaart lunch › Hoofdgerechten › regel 4",
-          "captureKey": "ops/benchmark/output/card-captures/wolfslaar/02-html-22d60179c67b.html",
-          "actualLocator": "html>body>div[3]>main>section[2]>div>div>div[1]>div>p[2]"
-        },
-        {
-          "name": "Zeetong",
-          "expectedPath": [
-            "Menukaart lunch",
-            "Hoofdgerechten"
-          ],
-          "actualPath": [
-            "Hoofdgerechten"
-          ],
-          "price": [
-            "69.00"
-          ],
-          "quote": "Zeetong 69 à la meuniere | spinazie | pont neuf",
-          "locator": "Menukaart lunch › Hoofdgerechten › regel 2",
-          "captureKey": "ops/benchmark/output/card-captures/wolfslaar/02-html-22d60179c67b.html",
-          "actualLocator": "html>body>div[3]>main>section[2]>div>div>div[1]>div>p[2]"
-        },
-        {
-          "name": "Conference Peer",
-          "expectedPath": [
-            "Menukaart lunch",
-            "Nagerechten"
-          ],
-          "actualPath": [
-            "Nagerechten"
-          ],
-          "price": [
-            "18.00"
-          ],
-          "quote": "Conference Peer 18 pecannoot | kardemom | karamel | vanille",
-          "locator": "Menukaart lunch › Nagerechten › regel 2",
-          "captureKey": "ops/benchmark/output/card-captures/wolfslaar/02-html-22d60179c67b.html",
-          "actualLocator": "html>body>div[3]>main>section[2]>div>div>div[2]>div>div>div>div>p[1]"
-        },
-        {
-          "name": "Kaaswagen",
-          "expectedPath": [
-            "Menukaart lunch",
-            "Nagerechten"
-          ],
-          "actualPath": [
-            "Nagerechten"
-          ],
-          "price": [
-            "25.00"
-          ],
-          "quote": "Kaaswagen 25 kazen uit het seizoen | notenbrood | bijpassende garnituren",
-          "locator": "Menukaart lunch › Nagerechten › regel 4",
-          "captureKey": "ops/benchmark/output/card-captures/wolfslaar/02-html-22d60179c67b.html",
-          "actualLocator": "html>body>div[3]>main>section[2]>div>div>div[2]>div>div>div>div>p"
-        },
-        {
-          "name": "Madeleines",
-          "expectedPath": [
-            "Menukaart lunch",
-            "Nagerechten"
-          ],
-          "actualPath": [
-            "Nagerechten"
-          ],
-          "price": [
-            "10.00"
-          ],
-          "quote": "Madeleines 10 twee warme madeleines | crème surprise",
-          "locator": "Menukaart lunch › Nagerechten › regel 1",
-          "captureKey": "ops/benchmark/output/card-captures/wolfslaar/02-html-22d60179c67b.html",
-          "actualLocator": "html>body>div[3]>main>section[2]>div>div>div[2]>div>div>div>div>p"
-        },
-        {
-          "name": "Passie Curd",
-          "expectedPath": [
-            "Menukaart lunch",
-            "Nagerechten"
-          ],
-          "actualPath": [
-            "Nagerechten"
-          ],
-          "price": [
-            "18.00"
-          ],
-          "quote": "Passie Curd 18 mango | passievrucht | meringue | sorbet",
-          "locator": "Menukaart lunch › Nagerechten › regel 3",
-          "captureKey": "ops/benchmark/output/card-captures/wolfslaar/02-html-22d60179c67b.html",
-          "actualLocator": "html>body>div[3]>main>section[2]>div>div>div[2]>div>div>div>div>p"
-        },
-        {
-          "name": "Limburgs Kloostervarken",
-          "expectedPath": [
-            "Menukaart lunch",
-            "Voorgerechten"
-          ],
-          "actualPath": [
-            "Voorgerechten"
-          ],
-          "price": [
-            "26.00"
-          ],
-          "quote": "Limburgs Kloostervarken 26 bospeen | paksoy | xo | yuzu",
-          "locator": "Menukaart lunch › Voorgerechten › regel 5",
-          "captureKey": "ops/benchmark/output/card-captures/wolfslaar/02-html-22d60179c67b.html",
-          "actualLocator": "html>body>div[3]>main>section[2]>div>div>div[1]>div>div>div>div>p"
-        },
-        {
-          "name": "Noordzeekrab",
-          "expectedPath": [
-            "Menukaart lunch",
-            "Voorgerechten"
-          ],
-          "actualPath": [
-            "Voorgerechten"
-          ],
-          "price": [
-            "38.00"
-          ],
-          "quote": "Noordzeekrab 38 als cocktail geserveerd | struikselderij | granny Smith | piment d’espelette",
-          "locator": "Menukaart lunch › Voorgerechten › regel 3",
-          "captureKey": "ops/benchmark/output/card-captures/wolfslaar/02-html-22d60179c67b.html",
-          "actualLocator": "html>body>div[3]>main>section[2]>div>div>div[1]>div>div>div>div>p"
-        },
-        {
-          "name": "Tartaar",
-          "expectedPath": [
-            "Menukaart lunch",
-            "Voorgerechten"
-          ],
-          "actualPath": [
-            "Voorgerechten"
-          ],
-          "price": [
-            "26.00"
-          ],
-          "quote": "Tartaar 26 blonde d’aquitaine rund | kapperappel | radijs | witte aceto balsamico",
-          "locator": "Menukaart lunch › Voorgerechten › regel 4",
-          "captureKey": "ops/benchmark/output/card-captures/wolfslaar/02-html-22d60179c67b.html",
-          "actualLocator": "html>body>div[3]>main>section[2]>div>div>div[1]>div>div>div>div>p"
-        },
-        {
-          "name": "Witte Heilbot",
-          "expectedPath": [
-            "Menukaart lunch",
-            "Voorgerechten"
-          ],
-          "actualPath": [
-            "Voorgerechten"
-          ],
-          "price": [
-            "32.00"
-          ],
-          "quote": "Witte Heilbot 32 zeeuwse mossel | sjalot | escabeche",
-          "locator": "Menukaart lunch › Voorgerechten › regel 1",
-          "captureKey": "ops/benchmark/output/card-captures/wolfslaar/02-html-22d60179c67b.html",
-          "actualLocator": "html>body>div[3]>main>section[2]>div>div>div[1]>div>div>div>div>p"
-        },
-        {
-          "name": "Zeebaars",
-          "expectedPath": [
-            "Menukaart lunch",
-            "Voorgerechten"
-          ],
-          "actualPath": [
-            "Voorgerechten"
-          ],
-          "price": [
-            "34.00"
-          ],
-          "quote": "Zeebaars 34 geschroeid | oester | shiitake | kombucha",
-          "locator": "Menukaart lunch › Voorgerechten › regel 2",
-          "captureKey": "ops/benchmark/output/card-captures/wolfslaar/02-html-22d60179c67b.html",
-          "actualLocator": "html>body>div[3]>main>section[2]>div>div>div[1]>div>div>div>div>p"
-        }
-      ],
-      "duplicates": [
-        {
-          "name": "Witte Heilbot",
-          "path": [
-            "Voorgerechten"
-          ],
-          "count": 2,
-          "expectedCount": 0,
-          "locator": "html>body>div[3]>main>section[2]>div>div>div[1]>div>div>div>div>p"
-        },
-        {
-          "name": "Zeebaars",
-          "path": [
-            "Voorgerechten"
-          ],
-          "count": 2,
-          "expectedCount": 0,
-          "locator": "html>body>div[3]>main>section[2]>div>div>div[1]>div>div>div>div>p"
-        },
-        {
-          "name": "Noordzeekrab",
-          "path": [
-            "Voorgerechten"
-          ],
-          "count": 2,
-          "expectedCount": 0,
-          "locator": "html>body>div[3]>main>section[2]>div>div>div[1]>div>div>div>div>p"
-        },
-        {
-          "name": "Tartaar",
-          "path": [
-            "Voorgerechten"
-          ],
-          "count": 2,
-          "expectedCount": 0,
-          "locator": "html>body>div[3]>main>section[2]>div>div>div[1]>div>div>div>div>p"
-        },
-        {
-          "name": "Limburgs Kloostervarken",
-          "path": [
-            "Voorgerechten"
-          ],
-          "count": 2,
-          "expectedCount": 0,
-          "locator": "html>body>div[3]>main>section[2]>div>div>div[1]>div>div>div>div>p"
-        },
-        {
-          "name": "Royal Belgian Platinum Caviar",
-          "path": [
-            "Voorgerechten"
-          ],
-          "count": 2,
-          "expectedCount": 0,
-          "locator": "html>body>div[3]>main>section[2]>div>div>div[1]>div>div>div>div>p"
-        },
-        {
-          "name": "Tarbot",
-          "path": [
-            "Hoofdgerechten"
-          ],
-          "count": 2,
-          "expectedCount": 0,
-          "locator": "html>body>div[3]>main>section[2]>div>div>div[1]>div>p[2]"
-        },
-        {
-          "name": "Zeetong",
-          "path": [
-            "Hoofdgerechten"
-          ],
-          "count": 2,
-          "expectedCount": 0,
-          "locator": "html>body>div[3]>main>section[2]>div>div>div[1]>div>p[2]"
-        },
-        {
-          "name": "Mechelse Koekoek",
-          "path": [
-            "Hoofdgerechten"
-          ],
-          "count": 2,
-          "expectedCount": 0,
-          "locator": "html>body>div[3]>main>section[2]>div>div>div[1]>div>p[2]"
-        },
-        {
-          "name": "Tournedos",
-          "path": [
-            "Hoofdgerechten"
-          ],
-          "count": 2,
-          "expectedCount": 0,
-          "locator": "html>body>div[3]>main>section[2]>div>div>div[1]>div>p[2]"
-        },
-        {
-          "name": "Grain-fed Entrecote",
-          "path": [
-            "Hoofdgerechten"
-          ],
-          "count": 2,
-          "expectedCount": 0,
-          "locator": "html>body>div[3]>main>section[2]>div>div>div[1]>div>p[2]"
-        },
-        {
-          "name": "Madeleines",
-          "path": [
-            "Nagerechten"
-          ],
-          "count": 2,
-          "expectedCount": 0,
-          "locator": "html>body>div[3]>main>section[2]>div>div>div[2]>div>div>div>div>p[1]"
-        },
-        {
-          "name": "Passie Curd",
-          "path": [
-            "Nagerechten"
-          ],
-          "count": 2,
-          "expectedCount": 0,
-          "locator": "html>body>div[3]>main>section[2]>div>div>div[2]>div>div>div>div>p[1]"
-        },
-        {
-          "name": "Kaaswagen",
-          "path": [
-            "Nagerechten"
-          ],
-          "count": 2,
-          "expectedCount": 0,
-          "locator": "html>body>div[3]>main>section[2]>div>div>div[2]>div>div>div>div>p[1]"
-        }
-      ],
+      "categoryErrorRows": [],
+      "duplicates": [],
       "accounting": {
         "reference": {
           "total": 30,
-          "matched": 0,
-          "missing": 5,
+          "matched": 29,
+          "missing": 1,
           "priceErrors": 0,
-          "categoryErrors": 25,
+          "categoryErrors": 0,
           "accounted": 30,
           "balanced": true
         },
         "actual": {
-          "total": 29,
-          "matched": 0,
-          "invented": 4,
+          "total": 30,
+          "matched": 29,
+          "invented": 1,
           "priceErrors": 0,
-          "categoryErrors": 25,
-          "accounted": 29,
+          "categoryErrors": 0,
+          "accounted": 30,
           "balanced": true
         }
       },
@@ -4642,11 +3998,13 @@
         "Menukaart https://www.restaurantwolfslaar.com/nl/menu-diner: sectie \"Over ons\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
         "Menukaart https://www.restaurantwolfslaar.com/nl/menu-diner: sectie \"Menu en Wijnen\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
         "Menukaart https://www.restaurantwolfslaar.com/nl/menu-diner: sectie \"Agenda en Blog\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
+        "Menukaart https://www.restaurantwolfslaar.com/nl/menu-diner: 2 gerecht(en) met meerdere prijzen (prijsvarianten zoals aantal stuks, gewicht, glas/fles of een basis- en een uitgebreide prijs) zijn als prijsvarianten opgeslagen met het bedrag en het label dat de bron print; geen enkel bedrag is tot één prijs teruggebracht.",
         "Menukaart https://www.restaurantwolfslaar.com/nl/menu-lunch: sectie \"Over ons\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
         "Menukaart https://www.restaurantwolfslaar.com/nl/menu-lunch: sectie \"Menu en Wijnen\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
         "Menukaart https://www.restaurantwolfslaar.com/nl/menu-lunch: sectie \"Agenda en Blog\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
+        "Menukaart https://www.restaurantwolfslaar.com/nl/menu-lunch: 2 gerecht(en) met meerdere prijzen (prijsvarianten zoals aantal stuks, gewicht, glas/fles of een basis- en een uitgebreide prijs) zijn als prijsvarianten opgeslagen met het bedrag en het label dat de bron print; geen enkel bedrag is tot één prijs teruggebracht.",
         "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.",
-        "Kwaliteitscontrole op de deterministische extractie vraagt aandacht (html_arrangements_skipped); het resultaat is niet als volledig beoordeeld."
+        "Kwaliteitscontrole op de deterministische extractie vraagt aandacht (unresolved_price, html_arrangements_skipped); het resultaat is niet als volledig beoordeeld."
       ],
       "priceProofs": [],
       "priceProofCount": 0

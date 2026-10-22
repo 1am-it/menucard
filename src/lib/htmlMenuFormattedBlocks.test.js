@@ -55,7 +55,7 @@ test('one block per paragraph counts when its run of sibling paragraphs repeats 
   assert.deepEqual(items(result).map((i) => [i[1], i[3]]), [['Fictief voorgerecht', 1250], ['Fictief hoofdgerecht', 2800], ['Fictief nagerecht', 950]]);
 });
 
-test('several prices, a price range, a supplement, an arrangement, a time and a price that is not at the end are rejected, never read as dishes', () => {
+test('two printed amounts on one dish row become variants, while a supplement, an arrangement, a time and a price that is not at the end stay rejected', () => {
   const html = `<h2>Lunch</h2>
     <p><strong>Fictieve soep</strong> pompoen 7,50<br>
        <strong>Fictieve wijn</strong> glas 5,50 fles 27,50<br>
@@ -68,8 +68,16 @@ test('several prices, a price range, a supplement, an arrangement, a time and a 
        <strong>Fictief broodje</strong> oude kaas 8,50</p>`;
   const result = extractHtmlMenuStructure(html);
   assert.equal(result.status, 'parsed');
-  assert.deepEqual(items(result).map((i) => i[1]), ['Fictieve soep', 'Fictieve salade', 'Fictief broodje']);
-  assert.deepEqual(rejected(result).sort(), ['ambiguous_structure', 'ambiguous_structure', 'ambiguous_structure', 'clock_time', 'modifier', 'service_unit'].sort());
+  assert.deepEqual(items(result).map((i) => i[1]), ['Fictieve soep', 'Fictieve wijn', 'Fictieve pizza', 'Fictieve salade', 'Fictief broodje']);
+  // #59 Lead review 6351417692 K2: every printed amount is kept as its own
+  // variant — never one invented price, never a dropped amount.
+  const wine = result.sections[0].items.find((item) => item.name === 'Fictieve wijn');
+  assert.equal(wine.priceStatus, 'multiple_undecomposed');
+  assert.deepEqual(wine.priceVariants, [{ label: 'glas', price: '5.50' }, { label: 'fles', price: '27.50' }]);
+  assert.equal(wine.priceText, '5.50 / 27.50');
+  const pizza = result.sections[0].items.find((item) => item.name === 'Fictieve pizza');
+  assert.deepEqual(pizza.priceVariants.map((variant) => variant.price), ['12.00', '16.00']);
+  assert.deepEqual(rejected(result).sort(), ['ambiguous_structure', 'clock_time', 'modifier', 'service_unit'].sort());
 });
 
 test('opening hours, reservations and events under their own heading never become dishes', () => {

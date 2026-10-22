@@ -1016,6 +1016,57 @@ test('K2 (criterion 10, wrong establishment): a same-host page carrying another 
   assert.deepEqual(names, ['Fictieve soep', 'Fictieve salade', 'Fictief brood'])
 })
 
+test('K2 (criterion 5, missing card title): a menu page without its own card heading takes the name the site itself links it with, and keeps its section paths', async () => {
+  const homepage = `<nav>
+      <a href="/menu-diner">Menukaart diner</a>
+      <a href="/menu-lunch">Menukaart lunch</a>
+    </nav>`
+  const dinerPage = `<h2>Voorgerechten</h2><ul><li>Fictieve soep 7,50</li><li>Fictieve salade 8,50</li></ul>
+    <h2>Hoofdgerechten</h2><ul><li>Fictief gerecht 18,50</li></ul>`
+  const lunchPage = dinerPage.replace('Fictief gerecht', 'Fictief lunchgerecht')
+
+  const result = await runRestaurantSourceAnalysis({
+    homepageHtml: homepage,
+    homepageUrl: 'https://fictieve-kaart.invalid/',
+    fetchCandidate: async (url) => ({
+      status: 'html',
+      body: url.includes('lunch') ? lunchPage : dinerPage,
+      finalUrl: url,
+    }),
+  })
+
+  const menus = result.menuContexts.filter((menu) => menu.extractionMethod === 'html')
+  const diner = menus.find((menu) => menu.sourceUrl.endsWith('/menu-diner'))
+  const lunch = menus.find((menu) => menu.sourceUrl.endsWith('/menu-lunch'))
+  assert.ok(diner && lunch, 'both menu pages are real menu contexts')
+  // The site's own label for that exact page becomes the menu title …
+  assert.equal(diner.title, 'Menukaart diner')
+  assert.equal(lunch.title, 'Menukaart lunch')
+  // … and the printed section paths are not renamed, extended or flattened.
+  assert.deepEqual(diner.categories.map((category) => category.path), [['Voorgerechten'], ['Hoofdgerechten']])
+  assert.deepEqual(
+    diner.categories.flatMap((category) => category.items.map((item) => item.name)),
+    ['Fictieve soep', 'Fictieve salade', 'Fictief gerecht'],
+  )
+})
+
+test('K2 (criterion 5, missing card title): a call-to-action link never becomes a card title', async () => {
+  const homepage = '<a href="/onze-kaart">Ontdek ons menu</a>'
+  const menuPage = `<h2>Voorgerechten</h2><ul><li>Fictieve soep 7,50</li><li>Fictieve salade 8,50</li><li>Fictief gerecht 18,50</li></ul>`
+
+  const result = await runRestaurantSourceAnalysis({
+    homepageHtml: homepage,
+    homepageUrl: 'https://fictieve-cta.invalid/',
+    fetchCandidate: async (url) => ({ status: 'html', body: menuPage, finalUrl: url }),
+  })
+
+  const menu = result.menuContexts.find((entry) => entry.extractionMethod === 'html')
+  assert.ok(menu, 'the menu page is a real menu context')
+  // No name of its own is proven for this page, so no title is invented.
+  assert.equal(menu.title, null)
+  assert.deepEqual(menu.categories.map((category) => category.path), [['Voorgerechten']])
+})
+
 test('K3 (criterion 11): a supplement gap and a two-price row stay named through analysis → receipt summary → concept — never a guessed price and never a silent drop', async () => {
   const content = [
     'BT /F1 12 Tf',
