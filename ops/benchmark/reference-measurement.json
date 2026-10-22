@@ -17,14 +17,14 @@
     "capturedSources": 4,
     "blockedSources": 1,
     "referenceItems": 185,
-    "actualItems": 171,
-    "matched": 141,
-    "missing": 37,
-    "invented": 23,
+    "actualItems": 170,
+    "matched": 165,
+    "missing": 17,
+    "invented": 2,
     "priceErrors": 0,
-    "categoryErrors": 7,
-    "precision": 82.46,
-    "recall": 76.22,
+    "categoryErrors": 3,
+    "precision": 97.06,
+    "recall": 89.19,
     "blocked": [
       {
         "id": "senang-makan",
@@ -107,10 +107,13 @@
         "De kerstmenu- en afhaalpagina's zijn arrangementen; hun gangen hebben geen eigen prijs en zijn geen losse referentiegerechten.",
         "De vastgezette menupagina's bevatten geen allergenenlegenda per gerecht; allergenen blijven onbekend, niet allergeenvrij.",
         "Deze referentie is uit de vastgezette brontekst opgesteld en niet uit de parseruitvoer.",
+        "Menukaart https://www.restaurantzuyd.nl/lunch: sectie \"Lunch › LUNCHMENU'S\" is niet als gerechten opgenomen; 4 regel(s) horen bij een arrangement of keuzemenu (prijs per gang of portie) en zijn geen losse gerechten.",
         "Menukaart https://www.restaurantzuyd.nl/lunch: 1 gerecht(en)/regel(s) met meerdere prijzen (prijsvarianten zoals klein/hoofd, glas/fles of aantal stuks) zijn niet als losse prijs opgeslagen; de deterministische context ondersteunt één prijs per gerecht en er is geen prijs geraden.",
+        "Menukaart https://www.restaurantzuyd.nl/diner: sectie \"Diner › VERRASSINGSMENU'S\" is niet als gerechten opgenomen; 4 regel(s) horen bij een arrangement of keuzemenu (prijs per gang of portie) en zijn geen losse gerechten.",
         "Menukaart https://www.restaurantzuyd.nl/diner: 1 gerecht(en)/regel(s) met meerdere prijzen (prijsvarianten zoals klein/hoofd, glas/fles of aantal stuks) zijn niet als losse prijs opgeslagen; de deterministische context ondersteunt één prijs per gerecht en er is geen prijs geraden.",
         "Gelezen zonder automatisch herkende menukaart: https://www.restaurantzuyd.nl/kerstmenu.",
-        "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+        "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.",
+        "Kwaliteitscontrole op de deterministische extractie vraagt aandacht (html_arrangements_skipped); het resultaat is niet als volledig beoordeeld."
       ],
       "sourceVersion": {
         "entryUrl": "https://www.restaurantzuyd.nl",
@@ -440,30 +443,15 @@
       "label": "Restaurant Pellens",
       "sourceId": "pellens",
       "referenceItems": 36,
-      "actualItems": 27,
-      "matched": 0,
-      "missing": 32,
-      "invented": 23,
+      "actualItems": 26,
+      "matched": 24,
+      "missing": 12,
+      "invented": 2,
       "priceErrors": 0,
-      "categoryErrors": 4,
-      "precision": 0,
-      "recall": 0,
+      "categoryErrors": 0,
+      "precision": 92.31,
+      "recall": 66.67,
       "missingDishes": [
-        {
-          "name": "Verveine",
-          "prices": [
-            "14.00"
-          ],
-          "path": [
-            "Onze kaart",
-            "Diner",
-            "À la carte",
-            "Dessert"
-          ],
-          "quote": "Verveine karnemelk, peer €14,00",
-          "locator": "Diner › À la carte › Dessert › regel 1",
-          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
-        },
         {
           "name": "Eekhoorntjesbrood",
           "prices": [
@@ -478,36 +466,6 @@
           ],
           "quote": "Eekhoorntjesbrood biet, koffie €22,00 €26,00",
           "locator": "Diner › À la carte › Groenten › regel 5",
-          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
-        },
-        {
-          "name": "Fruits de Terre",
-          "prices": [
-            "18.00"
-          ],
-          "path": [
-            "Onze kaart",
-            "Diner",
-            "À la carte",
-            "Groenten"
-          ],
-          "quote": "Fruits de Terre wisselende samenstelling €18,00 —",
-          "locator": "Diner › À la carte › Groenten › regel 1",
-          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
-        },
-        {
-          "name": "Meloes-ui",
-          "prices": [
-            "17.00"
-          ],
-          "path": [
-            "Onze kaart",
-            "Diner",
-            "À la carte",
-            "Groenten"
-          ],
-          "quote": "Meloes-ui balsamico, oude kaas €17,00 —",
-          "locator": "Diner › À la carte › Groenten › regel 4",
           "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
         },
         {
@@ -527,36 +485,6 @@
           "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
         },
         {
-          "name": "Vijgenblad",
-          "prices": [
-            "18.00"
-          ],
-          "path": [
-            "Onze kaart",
-            "Diner",
-            "À la carte",
-            "Groenten"
-          ],
-          "quote": "Vijgenblad radijs, gerookte boter €18,00 —",
-          "locator": "Diner › À la carte › Groenten › regel 2",
-          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
-        },
-        {
-          "name": "Wortel",
-          "prices": [
-            "19.00"
-          ],
-          "path": [
-            "Onze kaart",
-            "Diner",
-            "À la carte",
-            "Groenten"
-          ],
-          "quote": "Wortel venkel, shiso €19,00 —",
-          "locator": "Diner › À la carte › Groenten › regel 3",
-          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
-        },
-        {
           "name": "Beekridder",
           "prices": [
             "21.00",
@@ -570,36 +498,6 @@
           ],
           "quote": "Beekridder vijgenblad, gerookte boter €21,00 €31,00",
           "locator": "Diner › À la carte › Pellens › regel 2",
-          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
-        },
-        {
-          "name": "Hamachi",
-          "prices": [
-            "22.00"
-          ],
-          "path": [
-            "Onze kaart",
-            "Diner",
-            "À la carte",
-            "Pellens"
-          ],
-          "quote": "Hamachi druif, prei €22,00 —",
-          "locator": "Diner › À la carte › Pellens › regel 1",
-          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
-        },
-        {
-          "name": "Hollands melkrund",
-          "prices": [
-            "37.00"
-          ],
-          "path": [
-            "Onze kaart",
-            "Diner",
-            "À la carte",
-            "Pellens"
-          ],
-          "quote": "Hollands melkrund beenmerg, pommes dauphine — €37,00",
-          "locator": "Diner › À la carte › Pellens › regel 6",
           "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
         },
         {
@@ -619,21 +517,6 @@
           "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
         },
         {
-          "name": "Meloes-ui",
-          "prices": [
-            "17.00"
-          ],
-          "path": [
-            "Onze kaart",
-            "Diner",
-            "À la carte",
-            "Pellens"
-          ],
-          "quote": "Meloes-ui balsamico, oude kaas €17,00 —",
-          "locator": "Diner › À la carte › Pellens › regel 4",
-          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
-        },
-        {
           "name": "Wilde eend",
           "prices": [
             "24.00",
@@ -647,21 +530,6 @@
           ],
           "quote": "Wilde eend biet, koffie €24,00 €39,00",
           "locator": "Diner › À la carte › Pellens › regel 5",
-          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
-        },
-        {
-          "name": "Verveine",
-          "prices": [
-            "14.00"
-          ],
-          "path": [
-            "Onze kaart",
-            "Lunch",
-            "À la carte",
-            "Dessert"
-          ],
-          "quote": "Verveine karnemelk, peer €14,00",
-          "locator": "Lunch › À la carte › Dessert › regel 1",
           "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
         },
         {
@@ -681,36 +549,6 @@
           "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
         },
         {
-          "name": "Fruits de Terre",
-          "prices": [
-            "18.00"
-          ],
-          "path": [
-            "Onze kaart",
-            "Lunch",
-            "À la carte",
-            "Groenten"
-          ],
-          "quote": "Fruits de Terre wisselende samenstelling €18,00 —",
-          "locator": "Lunch › À la carte › Groenten › regel 1",
-          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
-        },
-        {
-          "name": "Meloes-ui",
-          "prices": [
-            "17.00"
-          ],
-          "path": [
-            "Onze kaart",
-            "Lunch",
-            "À la carte",
-            "Groenten"
-          ],
-          "quote": "Meloes-ui balsamico, oude kaas €17,00 —",
-          "locator": "Lunch › À la carte › Groenten › regel 4",
-          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
-        },
-        {
           "name": "Spitskool",
           "prices": [
             "18.00",
@@ -724,36 +562,6 @@
           ],
           "quote": "Spitskool huacatay, pommes dauphine €18,00 €24,00",
           "locator": "Lunch › À la carte › Groenten › regel 6",
-          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
-        },
-        {
-          "name": "Vijgenblad",
-          "prices": [
-            "18.00"
-          ],
-          "path": [
-            "Onze kaart",
-            "Lunch",
-            "À la carte",
-            "Groenten"
-          ],
-          "quote": "Vijgenblad radijs, gerookte boter €18,00 —",
-          "locator": "Lunch › À la carte › Groenten › regel 2",
-          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
-        },
-        {
-          "name": "Wortel",
-          "prices": [
-            "19.00"
-          ],
-          "path": [
-            "Onze kaart",
-            "Lunch",
-            "À la carte",
-            "Groenten"
-          ],
-          "quote": "Wortel venkel, shiso €19,00 —",
-          "locator": "Lunch › À la carte › Groenten › regel 3",
           "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
         },
         {
@@ -773,36 +581,6 @@
           "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
         },
         {
-          "name": "Hamachi",
-          "prices": [
-            "22.00"
-          ],
-          "path": [
-            "Onze kaart",
-            "Lunch",
-            "À la carte",
-            "Pellens"
-          ],
-          "quote": "Hamachi druif, prei €22,00 —",
-          "locator": "Lunch › À la carte › Pellens › regel 1",
-          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
-        },
-        {
-          "name": "Hollands melkrund",
-          "prices": [
-            "37.00"
-          ],
-          "path": [
-            "Onze kaart",
-            "Lunch",
-            "À la carte",
-            "Pellens"
-          ],
-          "quote": "Hollands melkrund beenmerg, pommes dauphine — €37,00",
-          "locator": "Lunch › À la carte › Pellens › regel 6",
-          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
-        },
-        {
           "name": "Langoustine",
           "prices": [
             "23.00",
@@ -819,21 +597,6 @@
           "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
         },
         {
-          "name": "Meloes-ui",
-          "prices": [
-            "17.00"
-          ],
-          "path": [
-            "Onze kaart",
-            "Lunch",
-            "À la carte",
-            "Pellens"
-          ],
-          "quote": "Meloes-ui balsamico, oude kaas €17,00 —",
-          "locator": "Lunch › À la carte › Pellens › regel 4",
-          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
-        },
-        {
           "name": "Wilde eend",
           "prices": [
             "24.00",
@@ -847,20 +610,6 @@
           ],
           "quote": "Wilde eend biet, koffie €24,00 €39,00",
           "locator": "Lunch › À la carte › Pellens › regel 5",
-          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
-        },
-        {
-          "name": "Entrecôte",
-          "prices": [
-            "21.50"
-          ],
-          "path": [
-            "Onze kaart",
-            "Lunch",
-            "Brioches"
-          ],
-          "quote": "Entrecôte zwarte knoflook €21,50",
-          "locator": "Lunch › Brioches › regel 1",
           "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
         },
         {
@@ -890,496 +639,58 @@
           "quote": "Wagyu A5 Miyazaki €47,00",
           "locator": "Lunch › Brioches › regel 5",
           "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
-        },
-        {
-          "name": "Entrecôte",
-          "prices": [
-            "24.50"
-          ],
-          "path": [
-            "Onze kaart",
-            "Lunch",
-            "Salades"
-          ],
-          "quote": "Entrecôte €24,50",
-          "locator": "Lunch › Salades › regel 1",
-          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
-        },
-        {
-          "name": "Van onze boerderij",
-          "prices": [
-            "17.50"
-          ],
-          "path": [
-            "Onze kaart",
-            "Lunch",
-            "Salades"
-          ],
-          "quote": "Van onze boerderij €17,50",
-          "locator": "Lunch › Salades › regel 3",
-          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
-        },
-        {
-          "name": "Zeevruchten",
-          "prices": [
-            "22.50"
-          ],
-          "path": [
-            "Onze kaart",
-            "Lunch",
-            "Salades"
-          ],
-          "quote": "Zeevruchten €22,50",
-          "locator": "Lunch › Salades › regel 2",
-          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html"
         }
       ],
       "inventedDishes": [
         {
-          "name": "Brioche",
+          "name": "Ui",
           "prices": [
             "12.50"
           ],
           "path": [
-            "Welkom bij Pellens",
-            "Les Brioches"
-          ],
-          "quote": "Brioche Ui · oude kaas€12.50",
-          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[2]>div>div>div>div[1]>div>div[4]",
-          "sourceUrl": "https://pellens.nl/"
-        },
-        {
-          "name": "Brioche",
-          "prices": [
-            "15.50"
-          ],
-          "path": [
-            "Welkom bij Pellens",
-            "Les Brioches"
-          ],
-          "quote": "Brioche Pulled pork€15.50",
-          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[2]>div>div>div>div[1]>div>div[2]",
-          "sourceUrl": "https://pellens.nl/"
-        },
-        {
-          "name": "Brioche",
-          "prices": [
-            "19.50"
-          ],
-          "path": [
-            "Welkom bij Pellens",
-            "Les Brioches"
-          ],
-          "quote": "Brioche Jamón Ibérico€19.50",
-          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[2]>div>div>div>div[1]>div>div[3]",
-          "sourceUrl": "https://pellens.nl/"
-        },
-        {
-          "name": "Brioche",
-          "prices": [
-            "21.50"
-          ],
-          "path": [
-            "Welkom bij Pellens",
-            "Les Brioches"
-          ],
-          "quote": "Brioche Entrecôte · zwarte knoflook€21.50",
-          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[2]>div>div>div>div[1]>div>div[1]",
-          "sourceUrl": "https://pellens.nl/"
-        },
-        {
-          "name": "Brioche",
-          "prices": [
-            "47.00"
-          ],
-          "path": [
-            "Welkom bij Pellens",
-            "Les Brioches"
-          ],
-          "quote": "Brioche Wagyu A5 Miyazaki€47.00",
-          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[2]>div>div>div>div[1]>div>div[5]",
-          "sourceUrl": "https://pellens.nl/"
-        },
-        {
-          "name": "Verveinekarnemelk, peer",
-          "prices": [
-            "14.00"
-          ],
-          "path": [
-            "Welkom bij Pellens",
             "Onze kaart",
-            "À la carte",
-            "Dessert"
-          ],
-          "quote": "Verveinekarnemelk, peer €14,00",
-          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[1]>section>div>section>dl>div>dt",
-          "sourceUrl": "https://pellens.nl/"
-        },
-        {
-          "name": "2 gangenvoor- en hoofdgerecht of hoofdgerecht en dessert",
-          "prices": [
-            "45.00"
-          ],
-          "path": [
-            "Welkom bij Pellens",
-            "Onze kaart",
-            "À la carte",
-            "Formule du Jour"
-          ],
-          "quote": "2 gangenvoor- en hoofdgerecht of hoofdgerecht en dessert €45,00",
-          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[2]>div[3]>dl>div[1]>dt",
-          "sourceUrl": "https://pellens.nl/"
-        },
-        {
-          "name": "3 gangenvoor-, hoofdgerecht en dessert",
-          "prices": [
-            "55.00"
-          ],
-          "path": [
-            "Welkom bij Pellens",
-            "Onze kaart",
-            "À la carte",
-            "Formule du Jour"
-          ],
-          "quote": "3 gangenvoor-, hoofdgerecht en dessert €55,00",
-          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[2]>div[3]>dl>div[2]>dt",
-          "sourceUrl": "https://pellens.nl/"
-        },
-        {
-          "name": "Fruits de Terrewisselende samenstelling",
-          "prices": [
-            "18.00"
-          ],
-          "path": [
-            "Welkom bij Pellens",
-            "Onze kaart",
-            "À la carte",
-            "Groenten"
-          ],
-          "quote": "Fruits de Terrewisselende samenstelling €18,00 —",
-          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[1]>section>div>div>section[2]>table>tbody>tr[1]",
-          "sourceUrl": "https://pellens.nl/"
-        },
-        {
-          "name": "Meloes-uibalsamico, oude kaas",
-          "prices": [
-            "17.00"
-          ],
-          "path": [
-            "Welkom bij Pellens",
-            "Onze kaart",
-            "À la carte",
-            "Groenten"
-          ],
-          "quote": "Meloes-uibalsamico, oude kaas €17,00 —",
-          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[1]>section>div>div>section[2]>table>tbody>tr[4]",
-          "sourceUrl": "https://pellens.nl/"
-        },
-        {
-          "name": "Vijgenbladradijs, gerookte boter",
-          "prices": [
-            "18.00"
-          ],
-          "path": [
-            "Welkom bij Pellens",
-            "Onze kaart",
-            "À la carte",
-            "Groenten"
-          ],
-          "quote": "Vijgenbladradijs, gerookte boter €18,00 —",
-          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[1]>section>div>div>section[2]>table>tbody>tr[2]",
-          "sourceUrl": "https://pellens.nl/"
-        },
-        {
-          "name": "Wortelvenkel, shiso",
-          "prices": [
-            "19.00"
-          ],
-          "path": [
-            "Welkom bij Pellens",
-            "Onze kaart",
-            "À la carte",
-            "Groenten"
-          ],
-          "quote": "Wortelvenkel, shiso €19,00 —",
-          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[1]>section>div>div>section[2]>table>tbody>tr[3]",
-          "sourceUrl": "https://pellens.nl/"
-        },
-        {
-          "name": "Hamachidruif, prei",
-          "prices": [
-            "22.00"
-          ],
-          "path": [
-            "Welkom bij Pellens",
-            "Onze kaart",
-            "À la carte",
-            "Pellens"
-          ],
-          "quote": "Hamachidruif, prei €22,00 —",
-          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[1]>section>div>div>section[1]>table>tbody>tr[1]",
-          "sourceUrl": "https://pellens.nl/"
-        },
-        {
-          "name": "Hollands melkrundbeenmerg, pommes dauphine",
-          "prices": [
-            "37.00"
-          ],
-          "path": [
-            "Welkom bij Pellens",
-            "Onze kaart",
-            "À la carte",
-            "Pellens"
-          ],
-          "quote": "Hollands melkrundbeenmerg, pommes dauphine — €37,00",
-          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[1]>section>div>div>section[1]>table>tbody>tr[6]",
-          "sourceUrl": "https://pellens.nl/"
-        },
-        {
-          "name": "Meloes-uibalsamico, oude kaas",
-          "prices": [
-            "17.00"
-          ],
-          "path": [
-            "Welkom bij Pellens",
-            "Onze kaart",
-            "À la carte",
-            "Pellens"
-          ],
-          "quote": "Meloes-uibalsamico, oude kaas €17,00 —",
-          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[1]>section>div>div>section[1]>table>tbody>tr[4]",
-          "sourceUrl": "https://pellens.nl/"
-        },
-        {
-          "name": "Entrecôtezwarte knoflook",
-          "prices": [
-            "21.50"
-          ],
-          "path": [
-            "Welkom bij Pellens",
-            "Onze kaart",
+            "Lunch",
             "Brioches"
           ],
-          "quote": "Entrecôtezwarte knoflook €21,50",
-          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[1]>div[3]>section[1]>dl>div[1]>dt",
-          "sourceUrl": "https://pellens.nl/"
-        },
-        {
-          "name": "Uioude kaas",
-          "prices": [
-            "12.50"
-          ],
-          "path": [
-            "Welkom bij Pellens",
-            "Onze kaart",
-            "Brioches"
-          ],
-          "quote": "Uioude kaas €12,50",
+          "quote": "Ui oude kaas €12,50",
           "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[1]>div[3]>section[1]>dl>div[4]>dt",
           "sourceUrl": "https://pellens.nl/"
         },
         {
-          "name": "Wagyu A5Miyazaki",
+          "name": "Wagyu A5",
           "prices": [
             "47.00"
           ],
           "path": [
-            "Welkom bij Pellens",
             "Onze kaart",
+            "Lunch",
             "Brioches"
           ],
-          "quote": "Wagyu A5Miyazaki €47,00",
+          "quote": "Wagyu A5 Miyazaki €47,00",
           "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[1]>div[3]>section[1]>dl>div[5]>dt",
-          "sourceUrl": "https://pellens.nl/"
-        },
-        {
-          "name": "2 gangenvoor- en hoofdgerecht of hoofdgerecht en dessert",
-          "prices": [
-            "45.00"
-          ],
-          "path": [
-            "Welkom bij Pellens",
-            "Onze kaart",
-            "Formule du Jour"
-          ],
-          "quote": "2 gangenvoor- en hoofdgerecht of hoofdgerecht en dessert €45,00",
-          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[1]>div[2]>dl>div[1]>dt",
-          "sourceUrl": "https://pellens.nl/"
-        },
-        {
-          "name": "3 gangenvoor-, hoofdgerecht en dessert",
-          "prices": [
-            "55.00"
-          ],
-          "path": [
-            "Welkom bij Pellens",
-            "Onze kaart",
-            "Formule du Jour"
-          ],
-          "quote": "3 gangenvoor-, hoofdgerecht en dessert €55,00",
-          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[1]>div[2]>dl>div[2]>dt",
-          "sourceUrl": "https://pellens.nl/"
-        },
-        {
-          "name": "Salade",
-          "prices": [
-            "17.50"
-          ],
-          "path": [
-            "Welkom bij Pellens",
-            "Salades"
-          ],
-          "quote": "Salade Van de boerderij€17.50",
-          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[2]>div>div>div>div[2]>div>div[1]",
-          "sourceUrl": "https://pellens.nl/"
-        },
-        {
-          "name": "Salade",
-          "prices": [
-            "22.50"
-          ],
-          "path": [
-            "Welkom bij Pellens",
-            "Salades"
-          ],
-          "quote": "Salade Zeevruchten€22.50",
-          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[2]>div>div>div>div[2]>div>div[2]",
-          "sourceUrl": "https://pellens.nl/"
-        },
-        {
-          "name": "Salade",
-          "prices": [
-            "24.50"
-          ],
-          "path": [
-            "Welkom bij Pellens",
-            "Salades"
-          ],
-          "quote": "Salade Entrecôte€24.50",
-          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[2]>div>div>div>div[2]>div>div[3]",
           "sourceUrl": "https://pellens.nl/"
         }
       ],
       "priceErrorRows": [],
-      "categoryErrorRows": [
-        {
-          "name": "Jamón Ibérico",
-          "expectedPath": [
-            "Onze kaart",
-            "Lunch",
-            "Brioches"
-          ],
-          "actualPath": [
-            "Welkom bij Pellens",
-            "Onze kaart",
-            "Brioches"
-          ],
-          "price": [
-            "19.50"
-          ],
-          "quote": "Jamón Ibérico €19,50",
-          "locator": "Lunch › Brioches › regel 2",
-          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html",
-          "actualLocator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[1]>div[3]>section[1]>dl>div[2]>dt"
-        },
-        {
-          "name": "Pulled pork",
-          "expectedPath": [
-            "Onze kaart",
-            "Lunch",
-            "Brioches"
-          ],
-          "actualPath": [
-            "Welkom bij Pellens",
-            "Onze kaart",
-            "Brioches"
-          ],
-          "price": [
-            "15.50"
-          ],
-          "quote": "Pulled pork €15,50",
-          "locator": "Lunch › Brioches › regel 3",
-          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html",
-          "actualLocator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[1]>div>div>section>section[1]>div[3]>section[1]>dl>div[3]>dt"
-        },
-        {
-          "name": "Frites met mayonaise",
-          "expectedPath": [
-            "Onze kaart",
-            "Lunch",
-            "Erbij"
-          ],
-          "actualPath": [
-            "Welkom bij Pellens",
-            "Erbij"
-          ],
-          "price": [
-            "6.00"
-          ],
-          "quote": "Frites met mayonaise €6,00",
-          "locator": "Lunch › Erbij › regel 2",
-          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html",
-          "actualLocator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[2]>div>div>div>div[4]>div>div[2]"
-        },
-        {
-          "name": "Salade van onze boerderij",
-          "expectedPath": [
-            "Onze kaart",
-            "Lunch",
-            "Erbij"
-          ],
-          "actualPath": [
-            "Welkom bij Pellens",
-            "Erbij"
-          ],
-          "price": [
-            "7.00"
-          ],
-          "quote": "Salade van onze boerderij €7,00",
-          "locator": "Lunch › Erbij › regel 1",
-          "captureKey": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html",
-          "actualLocator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[2]>div>div>div>div[4]>div>div[1]"
-        }
-      ],
-      "duplicates": [
-        {
-          "name": "Brioche",
-          "path": [
-            "Welkom bij Pellens",
-            "Les Brioches"
-          ],
-          "count": 5,
-          "expectedCount": 0,
-          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[2]>div>div>div>div[1]>div>div[5]"
-        },
-        {
-          "name": "Salade",
-          "path": [
-            "Welkom bij Pellens",
-            "Salades"
-          ],
-          "count": 3,
-          "expectedCount": 0,
-          "locator": "html>body>div[1]>div>div>div[4]>div>div>div>div>div>div[2]>div>div>div>div[2]>div>div[3]"
-        }
-      ],
+      "categoryErrorRows": [],
+      "duplicates": [],
       "accounting": {
         "reference": {
           "total": 36,
-          "matched": 0,
-          "missing": 32,
+          "matched": 24,
+          "missing": 12,
           "priceErrors": 0,
-          "categoryErrors": 4,
+          "categoryErrors": 0,
           "accounted": 36,
           "balanced": true
         },
         "actual": {
-          "total": 27,
-          "matched": 0,
-          "invented": 23,
+          "total": 26,
+          "matched": 24,
+          "invented": 2,
           "priceErrors": 0,
-          "categoryErrors": 4,
-          "accounted": 27,
+          "categoryErrors": 0,
+          "accounted": 26,
           "balanced": true
         }
       },
@@ -1390,13 +701,14 @@
         "De pagina bevat een verborgen tweede weergave van brioches en salades; die is geen tweede gerecht en telt één keer.",
         "De allergeninformatie staat alleen in de algemene FAQ; allergenen per gerecht blijven onbekend.",
         "Deze referentie is uit de vastgezette brontekst opgesteld en niet uit de parseruitvoer.",
-        "Menukaart https://pellens.nl/: sectie \"Welkom bij Pellens › Onze kaart › À la carte › Menu Pellens\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
-        "Menukaart https://pellens.nl/: sectie \"Welkom bij Pellens › Onze kaart › À la carte › Menu légumes\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
-        "Menukaart https://pellens.nl/: sectie \"Welkom bij Pellens › Menu Pellens\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
-        "Menukaart https://pellens.nl/: sectie \"Welkom bij Pellens › Menu légumes\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
-        "Menukaart https://pellens.nl/: 5 gerecht(en)/regel(s) met meerdere prijzen (prijsvarianten zoals klein/hoofd, glas/fles of aantal stuks) zijn niet als losse prijs opgeslagen; de deterministische context ondersteunt één prijs per gerecht en er is geen prijs geraden.",
+        "Menukaart https://pellens.nl/: sectie \"Onze kaart › Lunch › Formule du Jour\" is niet als gerechten opgenomen; 2 regel(s) horen bij een arrangement of keuzemenu (prijs per gang of portie) en zijn geen losse gerechten.",
+        "Menukaart https://pellens.nl/: sectie \"Onze kaart › Diner › Menu Pellens\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
+        "Menukaart https://pellens.nl/: sectie \"Onze kaart › Diner › Menu légumes\" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).",
+        "Menukaart https://pellens.nl/: sectie \"Onze kaart › Diner › À la carte › Formule du Jour\" is niet als gerechten opgenomen; 2 regel(s) horen bij een arrangement of keuzemenu (prijs per gang of portie) en zijn geen losse gerechten.",
+        "Menukaart https://pellens.nl/: 10 gerecht(en)/regel(s) met meerdere prijzen (prijsvarianten zoals klein/hoofd, glas/fles of aantal stuks) zijn niet als losse prijs opgeslagen; de deterministische context ondersteunt één prijs per gerecht en er is geen prijs geraden.",
+        "Menukaart https://pellens.nl/: een verborgen tweede weergave van dezelfde kaart is één keer geteld; 10 gerecht(en) zijn niet dubbel opgenomen.",
         "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.",
-        "Kwaliteitscontrole op de deterministische extractie vraagt aandacht (duplicate_item_across_categories, duplicate_item_within_category, html_arrangements_skipped); het resultaat is niet als volledig beoordeeld."
+        "Kwaliteitscontrole op de deterministische extractie vraagt aandacht (duplicate_item_across_categories, html_arrangements_skipped); het resultaat is niet als volledig beoordeeld."
       ],
       "sourceVersion": {
         "entryUrl": "https://pellens.nl",

@@ -121,6 +121,11 @@ function menuFromHtmlStructure(html, usedSlugs, report = null) {
     // can see exactly what the deterministic context did not store.
     report.priceVariantLines =
       ((result && result.stats && result.stats.priceVariantLines) || 0) + ((result && result.stats && result.stats.priceVariantItems) || 0)
+    // A hidden alternative view of the same card that was counted once, and
+    // hidden content kept because it has no visible counterpart. Both are
+    // reviewable facts, never a silent omission (#59 review 6334231310, K3).
+    report.hiddenViewsMerged = (result && result.stats && result.stats.hiddenViewsMerged) || 0
+    report.hiddenUniqueItems = (result && result.stats && result.stats.hiddenUniqueItems) || 0
   }
   if (!result || result.status !== 'parsed') return null
   const kept = result.sections
@@ -153,9 +158,17 @@ function menuFromHtmlStructure(html, usedSlugs, report = null) {
   const excludedSections = (Array.isArray(result.excludedSections) ? result.excludedSections : [])
     .filter((entry) => entry && Array.isArray(entry.path) && entry.path.length > 0)
     .slice(0, 20)
-    .map((entry) => ({ path: entry.path.map((label) => String(label || '').slice(0, 60)), unpricedLines: entry.unpricedLines }))
+    .map((entry) => ({
+      path: entry.path.map((label) => String(label || '').slice(0, 60)),
+      unpricedLines: entry.unpricedLines,
+      // The reason decides the wording: an arrangement with course prices is a
+      // different fact from a section without any readable price (K4).
+      ...(entry.reason === 'service_unit' ? { reason: 'service_unit' } : {}),
+    }))
   const priceVariantLines = (report && typeof report === 'object' && Number.isInteger(report.priceVariantLines) ? report.priceVariantLines : 0)
-  return { menu: { name: 'Menukaart', contextSlug, title: hierarchy.title, structure: hierarchy.structure, categories }, itemCount, excludedSections, priceVariantLines }
+  const hiddenViewsMerged = (report && typeof report === 'object' && Number.isInteger(report.hiddenViewsMerged) ? report.hiddenViewsMerged : 0)
+  const hiddenUniqueItems = (report && typeof report === 'object' && Number.isInteger(report.hiddenUniqueItems) ? report.hiddenUniqueItems : 0)
+  return { menu: { name: 'Menukaart', contextSlug, title: hierarchy.title, structure: hierarchy.structure, categories }, itemCount, excludedSections, priceVariantLines, hiddenViewsMerged, hiddenUniqueItems }
 }
 
 /**
@@ -164,9 +177,16 @@ function menuFromHtmlStructure(html, usedSlugs, report = null) {
  * not belong to one dish). Never a guessed item, never silence.
  */
 function htmlMenuExclusionLimitations(url, found) {
-  const limitations = ((found && found.excludedSections) || []).map(
-    (entry) => `Menukaart ${url}: sectie "${entry.path.join(' › ')}" is niet als gerechten opgenomen; ${entry.unpricedLines} regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).`,
-  )
+  const limitations = ((found && found.excludedSections) || []).map((entry) => {
+    const route = entry.path.join(' › ')
+    const lines = entry.unpricedLines
+    // A course/portion price of an arrangement is a different fact from a
+    // section without any readable price: report the real reason (K4).
+    if (entry.reason === 'service_unit') {
+      return `Menukaart ${url}: sectie "${route}" is niet als gerechten opgenomen; ${lines} regel(s) horen bij een arrangement of keuzemenu (prijs per gang of portie) en zijn geen losse gerechten.`
+    }
+    return `Menukaart ${url}: sectie "${route}" is niet als gerechten opgenomen; ${lines} regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).`
+  })
   // A dish with several prices (sizes, course counts, glass/bottle) is not
   // flattened to one amount. The deterministic context stores one price per
   // dish, so this stays an explicit, visible limit with the real cause.
@@ -175,6 +195,17 @@ function htmlMenuExclusionLimitations(url, found) {
     limitations.push(
       `Menukaart ${url}: ${variants} gerecht(en)/regel(s) met meerdere prijzen (prijsvarianten zoals klein/hoofd, glas/fles of aantal stuks) zijn niet als losse prijs opgeslagen; de deterministische context ondersteunt één prijs per gerecht en er is geen prijs geraden.`,
     )
+  }
+  // A page may print the same card twice; the hidden copy is counted once when
+  // the visible side provably carries the same priced dishes, and hidden
+  // content without a visible counterpart is kept and reported (K3).
+  const merged = found && Number.isInteger(found.hiddenViewsMerged) ? found.hiddenViewsMerged : 0
+  if (merged > 0) {
+    limitations.push(`Menukaart ${url}: een verborgen tweede weergave van dezelfde kaart is één keer geteld; ${merged} gerecht(en) zijn niet dubbel opgenomen.`)
+  }
+  const hiddenUnique = found && Number.isInteger(found.hiddenUniqueItems) ? found.hiddenUniqueItems : 0
+  if (hiddenUnique > 0) {
+    limitations.push(`Menukaart ${url}: ${hiddenUnique} gerecht(en) staan alleen in een verborgen weergave zonder zichtbare tegenhanger; ze zijn toch opgenomen en vragen controle.`)
   }
   return limitations
 }

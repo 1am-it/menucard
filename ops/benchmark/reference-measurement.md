@@ -12,14 +12,14 @@ Bij een verzonnen rij bestaat per definitie geen referentie-citaat; de regel noe
 | --- | --- |
 | Bronnen gemeten / geblokkeerd | 4 / 1 |
 | Referentiegerechten | 185 |
-| Geëxtraheerde gerechten | 171 |
-| Exact gematcht | 141 |
-| Gemiste gerechten | 37 |
-| Verzonnen gerechten | 23 |
+| Geëxtraheerde gerechten | 170 |
+| Exact gematcht | 165 |
+| Gemiste gerechten | 17 |
+| Verzonnen gerechten | 2 |
 | Prijsfouten | 0 |
-| Rubriekfouten | 7 |
-| Precisie | 82.46% |
-| Recall | 76.22% |
+| Rubriekfouten | 3 |
+| Precisie | 97.06% |
+| Recall | 89.19% |
 
 ## Per bron
 
@@ -27,7 +27,7 @@ Bij een verzonnen rij bestaat per definitie geen referentie-citaat; de regel noe
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | Restaurant Zuyd | gemeten | 36 | 34 | 34 | 2 | 0 | 0 | 0 | 100.00% | 94.44% |
 | Andalous Restaurant Breda | gemeten | 87 | 84 | 81 | 3 | 0 | 0 | 3 | 96.43% | 93.10% |
-| Restaurant Pellens | gemeten | 36 | 27 | 0 | 32 | 23 | 0 | 4 | 0.00% | 0.00% |
+| Restaurant Pellens | gemeten | 36 | 26 | 24 | 12 | 2 | 0 | 0 | 92.31% | 66.67% |
 | Restaurant Chocolat | gemeten | 26 | 26 | 26 | 0 | 0 | 0 | 0 | 100.00% | 100.00% |
 | Senang Makan | geblokkeerd | 0 | 0 | 0 | 0 | 0 | 0 | 0 | n.v.t. | n.v.t. |
 
@@ -53,10 +53,13 @@ Bij een verzonnen rij bestaat per definitie geen referentie-citaat; de regel noe
 - De kerstmenu- en afhaalpagina's zijn arrangementen; hun gangen hebben geen eigen prijs en zijn geen losse referentiegerechten.
 - De vastgezette menupagina's bevatten geen allergenenlegenda per gerecht; allergenen blijven onbekend, niet allergeenvrij.
 - Deze referentie is uit de vastgezette brontekst opgesteld en niet uit de parseruitvoer.
+- Menukaart https://www.restaurantzuyd.nl/lunch: sectie "Lunch › LUNCHMENU'S" is niet als gerechten opgenomen; 4 regel(s) horen bij een arrangement of keuzemenu (prijs per gang of portie) en zijn geen losse gerechten.
 - Menukaart https://www.restaurantzuyd.nl/lunch: 1 gerecht(en)/regel(s) met meerdere prijzen (prijsvarianten zoals klein/hoofd, glas/fles of aantal stuks) zijn niet als losse prijs opgeslagen; de deterministische context ondersteunt één prijs per gerecht en er is geen prijs geraden.
+- Menukaart https://www.restaurantzuyd.nl/diner: sectie "Diner › VERRASSINGSMENU'S" is niet als gerechten opgenomen; 4 regel(s) horen bij een arrangement of keuzemenu (prijs per gang of portie) en zijn geen losse gerechten.
 - Menukaart https://www.restaurantzuyd.nl/diner: 1 gerecht(en)/regel(s) met meerdere prijzen (prijsvarianten zoals klein/hoofd, glas/fles of aantal stuks) zijn niet als losse prijs opgeslagen; de deterministische context ondersteunt één prijs per gerecht en er is geen prijs geraden.
 - Gelezen zonder automatisch herkende menukaart: https://www.restaurantzuyd.nl/kerstmenu.
 - AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.
+- Kwaliteitscontrole op de deterministische extractie vraagt aandacht (html_arrangements_skipped); het resultaat is niet als volledig beoordeeld.
 
 **Vastgezette bronversie:** 6 capture(s); html f4f685da725f, html 389470158b72, html 128cae10ca14, html 2bfaf63e7814, html 644810dfc971, html c9c130c079b7
 
@@ -100,90 +103,43 @@ Bij een verzonnen rij bestaat per definitie geen referentie-citaat; de regel noe
 
 ### Restaurant Pellens
 
-**Gemist (32)**
-- `Verveine` — Onze kaart › Diner › À la carte › Dessert — prijs 14.00 — citaat: “Verveine karnemelk, peer €14,00” (Diner › À la carte › Dessert › regel 1)
+**Gemist (12)**
 - `Eekhoorntjesbrood` — Onze kaart › Diner › À la carte › Groenten — prijs 22.00 / 26.00 — citaat: “Eekhoorntjesbrood biet, koffie €22,00 €26,00” (Diner › À la carte › Groenten › regel 5)
-- `Fruits de Terre` — Onze kaart › Diner › À la carte › Groenten — prijs 18.00 — citaat: “Fruits de Terre wisselende samenstelling €18,00 —” (Diner › À la carte › Groenten › regel 1)
-- `Meloes-ui` — Onze kaart › Diner › À la carte › Groenten — prijs 17.00 — citaat: “Meloes-ui balsamico, oude kaas €17,00 —” (Diner › À la carte › Groenten › regel 4)
 - `Spitskool` — Onze kaart › Diner › À la carte › Groenten — prijs 18.00 / 24.00 — citaat: “Spitskool huacatay, pommes dauphine €18,00 €24,00” (Diner › À la carte › Groenten › regel 6)
-- `Vijgenblad` — Onze kaart › Diner › À la carte › Groenten — prijs 18.00 — citaat: “Vijgenblad radijs, gerookte boter €18,00 —” (Diner › À la carte › Groenten › regel 2)
-- `Wortel` — Onze kaart › Diner › À la carte › Groenten — prijs 19.00 — citaat: “Wortel venkel, shiso €19,00 —” (Diner › À la carte › Groenten › regel 3)
 - `Beekridder` — Onze kaart › Diner › À la carte › Pellens — prijs 21.00 / 31.00 — citaat: “Beekridder vijgenblad, gerookte boter €21,00 €31,00” (Diner › À la carte › Pellens › regel 2)
-- `Hamachi` — Onze kaart › Diner › À la carte › Pellens — prijs 22.00 — citaat: “Hamachi druif, prei €22,00 —” (Diner › À la carte › Pellens › regel 1)
-- `Hollands melkrund` — Onze kaart › Diner › À la carte › Pellens — prijs 37.00 — citaat: “Hollands melkrund beenmerg, pommes dauphine — €37,00” (Diner › À la carte › Pellens › regel 6)
 - `Langoustine` — Onze kaart › Diner › À la carte › Pellens — prijs 23.00 / 38.00 — citaat: “Langoustine wortel, bouillabaisse €23,00 €38,00” (Diner › À la carte › Pellens › regel 3)
-- `Meloes-ui` — Onze kaart › Diner › À la carte › Pellens — prijs 17.00 — citaat: “Meloes-ui balsamico, oude kaas €17,00 —” (Diner › À la carte › Pellens › regel 4)
 - `Wilde eend` — Onze kaart › Diner › À la carte › Pellens — prijs 24.00 / 39.00 — citaat: “Wilde eend biet, koffie €24,00 €39,00” (Diner › À la carte › Pellens › regel 5)
-- `Verveine` — Onze kaart › Lunch › À la carte › Dessert — prijs 14.00 — citaat: “Verveine karnemelk, peer €14,00” (Lunch › À la carte › Dessert › regel 1)
 - `Eekhoorntjesbrood` — Onze kaart › Lunch › À la carte › Groenten — prijs 22.00 / 26.00 — citaat: “Eekhoorntjesbrood biet, koffie €22,00 €26,00” (Lunch › À la carte › Groenten › regel 5)
-- `Fruits de Terre` — Onze kaart › Lunch › À la carte › Groenten — prijs 18.00 — citaat: “Fruits de Terre wisselende samenstelling €18,00 —” (Lunch › À la carte › Groenten › regel 1)
-- `Meloes-ui` — Onze kaart › Lunch › À la carte › Groenten — prijs 17.00 — citaat: “Meloes-ui balsamico, oude kaas €17,00 —” (Lunch › À la carte › Groenten › regel 4)
 - `Spitskool` — Onze kaart › Lunch › À la carte › Groenten — prijs 18.00 / 24.00 — citaat: “Spitskool huacatay, pommes dauphine €18,00 €24,00” (Lunch › À la carte › Groenten › regel 6)
-- `Vijgenblad` — Onze kaart › Lunch › À la carte › Groenten — prijs 18.00 — citaat: “Vijgenblad radijs, gerookte boter €18,00 —” (Lunch › À la carte › Groenten › regel 2)
-- `Wortel` — Onze kaart › Lunch › À la carte › Groenten — prijs 19.00 — citaat: “Wortel venkel, shiso €19,00 —” (Lunch › À la carte › Groenten › regel 3)
 - `Beekridder` — Onze kaart › Lunch › À la carte › Pellens — prijs 21.00 / 31.00 — citaat: “Beekridder vijgenblad, gerookte boter €21,00 €31,00” (Lunch › À la carte › Pellens › regel 2)
-- `Hamachi` — Onze kaart › Lunch › À la carte › Pellens — prijs 22.00 — citaat: “Hamachi druif, prei €22,00 —” (Lunch › À la carte › Pellens › regel 1)
-- `Hollands melkrund` — Onze kaart › Lunch › À la carte › Pellens — prijs 37.00 — citaat: “Hollands melkrund beenmerg, pommes dauphine — €37,00” (Lunch › À la carte › Pellens › regel 6)
 - `Langoustine` — Onze kaart › Lunch › À la carte › Pellens — prijs 23.00 / 38.00 — citaat: “Langoustine wortel, bouillabaisse €23,00 €38,00” (Lunch › À la carte › Pellens › regel 3)
-- `Meloes-ui` — Onze kaart › Lunch › À la carte › Pellens — prijs 17.00 — citaat: “Meloes-ui balsamico, oude kaas €17,00 —” (Lunch › À la carte › Pellens › regel 4)
 - `Wilde eend` — Onze kaart › Lunch › À la carte › Pellens — prijs 24.00 / 39.00 — citaat: “Wilde eend biet, koffie €24,00 €39,00” (Lunch › À la carte › Pellens › regel 5)
-- `Entrecôte` — Onze kaart › Lunch › Brioches — prijs 21.50 — citaat: “Entrecôte zwarte knoflook €21,50” (Lunch › Brioches › regel 1)
 - `Ui oude kaas` — Onze kaart › Lunch › Brioches — prijs 12.50 — citaat: “Ui oude kaas €12,50” (Lunch › Brioches › regel 4)
 - `Wagyu A5 Miyazaki` — Onze kaart › Lunch › Brioches — prijs 47.00 — citaat: “Wagyu A5 Miyazaki €47,00” (Lunch › Brioches › regel 5)
-- `Entrecôte` — Onze kaart › Lunch › Salades — prijs 24.50 — citaat: “Entrecôte €24,50” (Lunch › Salades › regel 1)
-- `Van onze boerderij` — Onze kaart › Lunch › Salades — prijs 17.50 — citaat: “Van onze boerderij €17,50” (Lunch › Salades › regel 3)
-- `Zeevruchten` — Onze kaart › Lunch › Salades — prijs 22.50 — citaat: “Zeevruchten €22,50” (Lunch › Salades › regel 2)
 
-**Verzonnen (23)**
-- `Brioche` — Welkom bij Pellens › Les Brioches — prijs 12.50 — broncitaat: “Brioche Ui · oude kaas€12.50”
-- `Brioche` — Welkom bij Pellens › Les Brioches — prijs 15.50 — broncitaat: “Brioche Pulled pork€15.50”
-- `Brioche` — Welkom bij Pellens › Les Brioches — prijs 19.50 — broncitaat: “Brioche Jamón Ibérico€19.50”
-- `Brioche` — Welkom bij Pellens › Les Brioches — prijs 21.50 — broncitaat: “Brioche Entrecôte · zwarte knoflook€21.50”
-- `Brioche` — Welkom bij Pellens › Les Brioches — prijs 47.00 — broncitaat: “Brioche Wagyu A5 Miyazaki€47.00”
-- `Verveinekarnemelk, peer` — Welkom bij Pellens › Onze kaart › À la carte › Dessert — prijs 14.00 — broncitaat: “Verveinekarnemelk, peer €14,00”
-- `2 gangenvoor- en hoofdgerecht of hoofdgerecht en dessert` — Welkom bij Pellens › Onze kaart › À la carte › Formule du Jour — prijs 45.00 — broncitaat: “2 gangenvoor- en hoofdgerecht of hoofdgerecht en dessert €45,00”
-- `3 gangenvoor-, hoofdgerecht en dessert` — Welkom bij Pellens › Onze kaart › À la carte › Formule du Jour — prijs 55.00 — broncitaat: “3 gangenvoor-, hoofdgerecht en dessert €55,00”
-- `Fruits de Terrewisselende samenstelling` — Welkom bij Pellens › Onze kaart › À la carte › Groenten — prijs 18.00 — broncitaat: “Fruits de Terrewisselende samenstelling €18,00 —”
-- `Meloes-uibalsamico, oude kaas` — Welkom bij Pellens › Onze kaart › À la carte › Groenten — prijs 17.00 — broncitaat: “Meloes-uibalsamico, oude kaas €17,00 —”
-- `Vijgenbladradijs, gerookte boter` — Welkom bij Pellens › Onze kaart › À la carte › Groenten — prijs 18.00 — broncitaat: “Vijgenbladradijs, gerookte boter €18,00 —”
-- `Wortelvenkel, shiso` — Welkom bij Pellens › Onze kaart › À la carte › Groenten — prijs 19.00 — broncitaat: “Wortelvenkel, shiso €19,00 —”
-- `Hamachidruif, prei` — Welkom bij Pellens › Onze kaart › À la carte › Pellens — prijs 22.00 — broncitaat: “Hamachidruif, prei €22,00 —”
-- `Hollands melkrundbeenmerg, pommes dauphine` — Welkom bij Pellens › Onze kaart › À la carte › Pellens — prijs 37.00 — broncitaat: “Hollands melkrundbeenmerg, pommes dauphine — €37,00”
-- `Meloes-uibalsamico, oude kaas` — Welkom bij Pellens › Onze kaart › À la carte › Pellens — prijs 17.00 — broncitaat: “Meloes-uibalsamico, oude kaas €17,00 —”
-- `Entrecôtezwarte knoflook` — Welkom bij Pellens › Onze kaart › Brioches — prijs 21.50 — broncitaat: “Entrecôtezwarte knoflook €21,50”
-- `Uioude kaas` — Welkom bij Pellens › Onze kaart › Brioches — prijs 12.50 — broncitaat: “Uioude kaas €12,50”
-- `Wagyu A5Miyazaki` — Welkom bij Pellens › Onze kaart › Brioches — prijs 47.00 — broncitaat: “Wagyu A5Miyazaki €47,00”
-- `2 gangenvoor- en hoofdgerecht of hoofdgerecht en dessert` — Welkom bij Pellens › Onze kaart › Formule du Jour — prijs 45.00 — broncitaat: “2 gangenvoor- en hoofdgerecht of hoofdgerecht en dessert €45,00”
-- `3 gangenvoor-, hoofdgerecht en dessert` — Welkom bij Pellens › Onze kaart › Formule du Jour — prijs 55.00 — broncitaat: “3 gangenvoor-, hoofdgerecht en dessert €55,00”
-- `Salade` — Welkom bij Pellens › Salades — prijs 17.50 — broncitaat: “Salade Van de boerderij€17.50”
-- `Salade` — Welkom bij Pellens › Salades — prijs 22.50 — broncitaat: “Salade Zeevruchten€22.50”
-- `Salade` — Welkom bij Pellens › Salades — prijs 24.50 — broncitaat: “Salade Entrecôte€24.50”
+**Verzonnen (2)**
+- `Ui` — Onze kaart › Lunch › Brioches — prijs 12.50 — broncitaat: “Ui oude kaas €12,50”
+- `Wagyu A5` — Onze kaart › Lunch › Brioches — prijs 47.00 — broncitaat: “Wagyu A5 Miyazaki €47,00”
 
 **Prijsfouten (0)**
 - geen
 
-**Rubriekfouten (4)**
-- `Jamón Ibérico` — verwacht Onze kaart › Lunch › Brioches; geëxtraheerd Welkom bij Pellens › Onze kaart › Brioches — citaat: “Jamón Ibérico €19,50”
-- `Pulled pork` — verwacht Onze kaart › Lunch › Brioches; geëxtraheerd Welkom bij Pellens › Onze kaart › Brioches — citaat: “Pulled pork €15,50”
-- `Frites met mayonaise` — verwacht Onze kaart › Lunch › Erbij; geëxtraheerd Welkom bij Pellens › Erbij — citaat: “Frites met mayonaise €6,00”
-- `Salade van onze boerderij` — verwacht Onze kaart › Lunch › Erbij; geëxtraheerd Welkom bij Pellens › Erbij — citaat: “Salade van onze boerderij €7,00”
-
-**Duplicaten in de extractie**
-- `Brioche` — Welkom bij Pellens › Les Brioches — 5 keer (referentiefrequentie 0)
-- `Salade` — Welkom bij Pellens › Salades — 3 keer (referentiefrequentie 0)
+**Rubriekfouten (0)**
+- geen
 
 **Beperkingen**
 - De diner-tab bevat naast de arrangementen (Menu Pellens, Menu légumes, Formule du Jour) dezelfde à-la-cartekaart als de lunch-tab: À la carte › Pellens (6), Groenten (6) en Dessert (1). Die dertien gerechten staan volgens telregel 5 als eigen referentie-items onder het pad Diner.
 - De pagina bevat een verborgen tweede weergave van brioches en salades; die is geen tweede gerecht en telt één keer.
 - De allergeninformatie staat alleen in de algemene FAQ; allergenen per gerecht blijven onbekend.
 - Deze referentie is uit de vastgezette brontekst opgesteld en niet uit de parseruitvoer.
-- Menukaart https://pellens.nl/: sectie "Welkom bij Pellens › Onze kaart › À la carte › Menu Pellens" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).
-- Menukaart https://pellens.nl/: sectie "Welkom bij Pellens › Onze kaart › À la carte › Menu légumes" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).
-- Menukaart https://pellens.nl/: sectie "Welkom bij Pellens › Menu Pellens" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).
-- Menukaart https://pellens.nl/: sectie "Welkom bij Pellens › Menu légumes" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).
-- Menukaart https://pellens.nl/: 5 gerecht(en)/regel(s) met meerdere prijzen (prijsvarianten zoals klein/hoofd, glas/fles of aantal stuks) zijn niet als losse prijs opgeslagen; de deterministische context ondersteunt één prijs per gerecht en er is geen prijs geraden.
+- Menukaart https://pellens.nl/: sectie "Onze kaart › Lunch › Formule du Jour" is niet als gerechten opgenomen; 2 regel(s) horen bij een arrangement of keuzemenu (prijs per gang of portie) en zijn geen losse gerechten.
+- Menukaart https://pellens.nl/: sectie "Onze kaart › Diner › Menu Pellens" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).
+- Menukaart https://pellens.nl/: sectie "Onze kaart › Diner › Menu légumes" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).
+- Menukaart https://pellens.nl/: sectie "Onze kaart › Diner › À la carte › Formule du Jour" is niet als gerechten opgenomen; 2 regel(s) horen bij een arrangement of keuzemenu (prijs per gang of portie) en zijn geen losse gerechten.
+- Menukaart https://pellens.nl/: 10 gerecht(en)/regel(s) met meerdere prijzen (prijsvarianten zoals klein/hoofd, glas/fles of aantal stuks) zijn niet als losse prijs opgeslagen; de deterministische context ondersteunt één prijs per gerecht en er is geen prijs geraden.
+- Menukaart https://pellens.nl/: een verborgen tweede weergave van dezelfde kaart is één keer geteld; 10 gerecht(en) zijn niet dubbel opgenomen.
 - AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.
-- Kwaliteitscontrole op de deterministische extractie vraagt aandacht (duplicate_item_across_categories, duplicate_item_within_category, html_arrangements_skipped); het resultaat is niet als volledig beoordeeld.
+- Kwaliteitscontrole op de deterministische extractie vraagt aandacht (duplicate_item_across_categories, html_arrangements_skipped); het resultaat is niet als volledig beoordeeld.
 
 **Vastgezette bronversie:** 1 capture(s); html 66f57e267289
 

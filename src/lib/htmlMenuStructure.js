@@ -210,8 +210,270 @@ const HIDDEN_STYLE_PATTERN = /(?:^|;)\s*(?:display\s*:\s*none|visibility\s*:\s*h
 function isHiddenElement(node) {
   const attrs = node.attrs || {}
   if (Object.prototype.hasOwnProperty.call(attrs, 'hidden')) return true
+  // `aria-hidden="true"` removes the subtree from the accessibility tree: a
+  // different signal from CSS, but a real "not shown" declaration.
+  if (typeof attrs['aria-hidden'] === 'string' && attrs['aria-hidden'].trim().toLowerCase() === 'true') return true
   const style = attrs.style
   return typeof style === 'string' && HIDDEN_STYLE_PATTERN.test(style)
+}
+
+/**
+ * A page can hide an alternative view of the same card with its own stylesheet
+ * (the live Pellens page hides a legacy duplicate module with
+ * `… .fl-module:not(…) {display:none!important}`), not only with an inline
+ * style or a `hidden` attribute. Only an explicitly hiding declaration counts;
+ * a conditional (`@media`, `@supports`, `@keyframes`) block is never applied,
+ * because its effect depends on a viewport or feature this reader does not
+ * have. A selector this small matcher does not fully understand is skipped —
+ * never half-applied — so an unreadable rule can never silently hide a menu.
+ * Hiding only changes what the walk *prefers*: a hidden subtree is counted
+ * once only when the visible side provably carries the same priced dishes (see
+ * the hidden-view gate in extractWithinBudget); otherwise it stays visible as
+ * an explicit limitation.
+ */
+const MAX_HIDDEN_RULES = 40
+const MAX_HIDDEN_SELECTOR_TEXT = 400
+// A page's stylesheet is read up to this many characters; a bigger block is
+// not silently trusted for hiding, it is simply not scanned.
+const MAX_CSS_TEXT = 256 * 1024
+const CSS_HIDES_PATTERN = /(?:^|[;{])\s*(?:display\s*:\s*none|visibility\s*:\s*hidden)\b/i
+const CSS_STYLE_OPEN = /<style\b([^>]*)>/gi
+// Global on purpose: `exec` only honours `lastIndex` on a global/sticky regex,
+// so the closing tag must be searched from the end of the opening tag.
+const CSS_STYLE_CLOSE = /<\/style/gi
+const CSS_AT_RULE = /^@/
+
+/** Reads a balanced `(…)` group starting at `start` (the index of "("). */
+function readParenGroup(text, start) {
+  let depth = 0
+  for (let i = start; i < text.length; i += 1) {
+    if (text[i] === '(') depth += 1
+    else if (text[i] === ')') {
+      depth -= 1
+      if (depth === 0) return { body: text.slice(start + 1, i), next: i + 1 }
+    }
+  }
+  return null
+}
+
+/** One compound selector: tag, #id, .class, [attr], :not(…), :has(…). */
+function parseCssCompound(text) {
+  if (typeof text !== 'string' || text.length === 0 || text.length > MAX_HIDDEN_SELECTOR_TEXT) return null
+  const compound = { tag: null, ids: [], classes: [], attrs: [], nots: [], has: [] }
+  let i = 0
+  const tagMatch = /^([a-zA-Z][a-zA-Z0-9-]*)/.exec(text)
+  if (tagMatch) {
+    compound.tag = tagMatch[1].toLowerCase()
+    i = tagMatch[0].length
+  }
+  while (i < text.length) {
+    const ch = text[i]
+    if (ch === '#' || ch === '.') {
+      const match = (ch === '#' ? /^#([\w-]+)/ : /^\.([\w-]+)/).exec(text.slice(i))
+      if (!match) return null
+      ;(ch === '#' ? compound.ids : compound.classes).push(match[1])
+      i += match[0].length
+      continue
+    }
+    if (ch === '[') {
+      const end = text.indexOf(']', i)
+      if (end < 0) return null
+      const body = text.slice(i + 1, end).trim()
+      const match = /^([\w-]+)\s*(?:([~^$*|]?=)\s*(?:"([^"]*)"|'([^']*)'|([^\s\]]*))\s*)?$/.exec(body)
+      if (!match) return null
+      const value = match[3] !== undefined ? match[3] : match[4] !== undefined ? match[4] : match[5]
+      compound.attrs.push({ name: match[1].toLowerCase(), op: match[2] || null, value: value === undefined ? '' : value })
+      i = end + 1
+      continue
+    }
+    if (text.slice(i, i + 5) === ':not(') {
+      const group = readParenGroup(text, i + 4)
+      if (!group) return null
+      const parts = group.body.split(',').map((part) => parseCssCompound(part.trim()))
+      if (parts.some((part) => part === null)) return null
+      compound.nots.push(parts)
+      i = group.next
+      continue
+    }
+    if (text.slice(i, i + 5) === ':has(') {
+      const group = readParenGroup(text, i + 4)
+      if (!group) return null
+      const parts = parseCssSelector(group.body.trim())
+      if (!parts) return null
+      compound.has.push(parts)
+      i = group.next
+      continue
+    }
+    // Any other pseudo-class (`:first-child`, `:nth-child(…), :empty`) or a
+    // pseudo-element is not applied: skip the whole selector (fail closed).
+    return null
+  }
+  if (compound.tag === null && compound.ids.length === 0 && compound.classes.length === 0 && compound.attrs.length === 0 && compound.nots.length === 0 && compound.has.length === 0) return null
+  return compound
+}
+
+/** A selector chain (compounds + combinators); `null` when unsupported. */
+function parseCssSelector(text) {
+  if (typeof text !== 'string' || text.length === 0 || text.length > MAX_HIDDEN_SELECTOR_TEXT) return null
+  const parts = []
+  let buffer = ''
+  let depth = 0
+  let combinator = null
+  const flush = () => {
+    const compound = parseCssCompound(buffer.trim())
+    if (!compound) return false
+    parts.push({ combinator: parts.length === 0 ? null : combinator, compound })
+    buffer = ''
+    return true
+  }
+  for (let i = 0; i < text.length; i += 1) {
+    const ch = text[i]
+    if (ch === '(') depth += 1
+    if (ch === ')') depth -= 1
+    if (depth === 0 && (ch === '>' || /\s/.test(ch))) {
+      // "a > b", "a>b" and "a b": a child combinator is kept once seen,
+      // surrounding whitespace never adds another level.
+      if (buffer.trim()) {
+        if (!flush()) return false
+        combinator = ch === '>' ? '>' : ' '
+      } else if (ch === '>') {
+        combinator = '>'
+      }
+      continue
+    }
+    buffer += ch
+  }
+  if (buffer.trim()) {
+    if (!flush()) return null
+  }
+  if (parts.length === 0) return null
+  if (parts[0].combinator !== null) return null
+  return parts
+}
+
+/** Collects the selectors of unconditional hiding rules in the page's own CSS. */
+function collectHiddenSelectors(html) {
+  const selectors = []
+  CSS_STYLE_OPEN.lastIndex = 0
+  let open
+  // One forward pass: each `<style>` block is consumed up to its own closing
+  // tag, so a hostile page with many unclosed tags can never re-scan the input
+  // (a lazy `[\s\S]*?` over a multi-megabyte body would).
+  while (selectors.length < MAX_HIDDEN_RULES && (open = CSS_STYLE_OPEN.exec(html))) {
+    const bodyStart = open.index + open[0].length
+    CSS_STYLE_CLOSE.lastIndex = bodyStart
+    const close = CSS_STYLE_CLOSE.exec(html)
+    if (!close) break
+    CSS_STYLE_OPEN.lastIndex = close.index + close[0].length
+    if (/\bmedia\s*=/i.test(open[1] || '')) continue
+    const css = html.slice(bodyStart, Math.min(close.index, bodyStart + MAX_CSS_TEXT))
+    const stack = []
+    let preludeStart = 0
+    let i = 0
+    while (i < css.length && selectors.length < MAX_HIDDEN_RULES) {
+      const ch = css[i]
+      if (ch === '{') {
+        const prelude = css.slice(preludeStart, i).trim()
+        const atRule = CSS_AT_RULE.test(prelude)
+        if (!atRule && !stack.some((entry) => entry)) {
+          const end = css.indexOf('}', i)
+          if (end < 0) break
+          if (CSS_HIDES_PATTERN.test(css.slice(i + 1, end))) {
+            for (const part of prelude.split(',')) {
+              const parsed = parseCssSelector(part.trim())
+              if (parsed) selectors.push(parsed)
+              if (selectors.length >= MAX_HIDDEN_RULES) break
+            }
+          }
+          i = end + 1
+          preludeStart = i
+          continue
+        }
+        stack.push(atRule)
+        i += 1
+        preludeStart = i
+        continue
+      }
+      if (ch === '}') {
+        stack.pop()
+        i += 1
+        preludeStart = i
+        continue
+      }
+      i += 1
+    }
+  }
+  return selectors
+}
+
+function hasClassToken(attrs, name) {
+  return typeof attrs.class === 'string' && attrs.class.split(/\s+/).includes(name)
+}
+
+function attrMatches(attrs, condition) {
+  const present = Object.prototype.hasOwnProperty.call(attrs, condition.name)
+  if (!condition.op) return present
+  if (!present) return false
+  const value = String(attrs[condition.name])
+  switch (condition.op) {
+    case '=':
+      return value === condition.value
+    case '~=':
+      return condition.value !== '' && value.split(/\s+/).includes(condition.value)
+    case '^=':
+      return condition.value !== '' && value.startsWith(condition.value)
+    case '$=':
+      return condition.value !== '' && value.endsWith(condition.value)
+    case '*=':
+      return condition.value !== '' && value.includes(condition.value)
+    case '|=':
+      return value === condition.value || value.startsWith(`${condition.value}-`)
+    default:
+      return false
+  }
+}
+
+function matchesCssCompound(node, compound, budget) {
+  if (!node || node.tag === '#text' || node.tag === '#root') return false
+  if (budget) budget.spend(1)
+  const attrs = node.attrs || {}
+  if (compound.tag && node.tag !== compound.tag) return false
+  for (const id of compound.ids) if (attrs.id !== id) return false
+  for (const name of compound.classes) if (!hasClassToken(attrs, name)) return false
+  for (const condition of compound.attrs) if (!attrMatches(attrs, condition)) return false
+  for (const alternatives of compound.nots) {
+    if (alternatives.some((part) => matchesCssCompound(node, part, budget))) return false
+  }
+  for (const parts of compound.has) {
+    if (!hasDescendantMatching(node, parts, budget)) return false
+  }
+  return true
+}
+
+function matchesCssSelector(node, parts, budget, index = parts.length - 1) {
+  if (!node || index < 0) return false
+  const part = parts[index]
+  if (!matchesCssCompound(node, part.compound, budget)) return false
+  if (index === 0) return true
+  if (part.combinator === '>') return matchesCssSelector(node.parent, parts, budget, index - 1)
+  for (let ancestor = node.parent; ancestor; ancestor = ancestor.parent) {
+    if (matchesCssSelector(ancestor, parts, budget, index - 1)) return true
+  }
+  return false
+}
+
+function hasDescendantMatching(node, parts, budget) {
+  if (budget) budget.spend(node.children.length)
+  const queue = [...node.children]
+  for (let head = 0; head < queue.length; head += 1) {
+    const current = queue[head]
+    if (budget) budget.spend(1)
+    if (current.tag === '#text') continue
+    if (matchesCssSelector(current, parts, budget)) return true
+    if (budget) budget.spend(current.children.length)
+    for (const child of current.children) queue.push(child)
+  }
+  return false
 }
 
 /**
@@ -233,6 +495,15 @@ function parseHtml(html, budget = createBudget()) {
   const root = newElement('#root', {})
   const stack = [root]
   const openCounts = Object.create(null)
+  // Rules from the page's own stylesheet that hide a subtree unconditionally.
+  const hiddenSelectors = source.includes('<style') ? collectHiddenSelectors(source) : []
+  const matchesHiddenCss = (node) => {
+    if (hiddenSelectors.length === 0 || node.tag === '#text') return false
+    for (const parts of hiddenSelectors) {
+      if (matchesCssSelector(node, parts, budget)) return true
+    }
+    return false
+  }
   let nodeCount = 0
   let pos = 0
   let nextLt = -2
@@ -260,7 +531,7 @@ function parseHtml(html, budget = createBudget()) {
     const parent = stack[stack.length - 1]
     node.parent = parent
     node.index = parent.children.length
-    node.hidden = parent.hidden === true || isHiddenElement(node)
+    node.hidden = parent.hidden === true || isHiddenElement(node) || matchesHiddenCss(node)
     parent.children.push(node)
     if (node.tag !== '#text') {
       parent.tagCounts[node.tag] = (parent.tagCounts[node.tag] || 0) + 1
@@ -1135,6 +1406,53 @@ function isPanelHeading(node, budget) {
   return panelHasMenuContent(panel, budget);
 }
 
+const MIN_TAB_PANELS = 1
+const MAX_TAB_PANELS = 24
+
+/**
+ * A labelled tab control (`role="tab"` with `aria-controls`/`data-target`)
+ * declares a menu variant a visitor can switch to; the panel with that id is
+ * where the variant's dishes live. Only a control whose target id exists in
+ * the document can add a route level — a stray `role="tab"` never does (K2).
+ */
+function collectTabPanels(root, budget) {
+  const panels = new Map()
+  if (budget) budget.spend(root.children.length)
+  const queue = [...root.children]
+  for (let head = 0; head < queue.length && panels.size < MAX_TAB_PANELS; head += 1) {
+    const node = queue[head]
+    if (budget) budget.spend(1)
+    if (node.tag === '#text') continue
+    const attrs = node.attrs || {}
+    if (attrs.role === 'tab' && typeof attrs['aria-controls'] === 'string') {
+      const targetId = panelTargetId(attrs)
+      const label = targetId ? clip(textOf(node, { budget })) : ''
+      if (targetId && label) panels.set(targetId, label)
+    }
+    if (budget) budget.spend(node.children.length)
+    for (const child of node.children) queue.push(child)
+  }
+  return panels.size >= MIN_TAB_PANELS ? panels : new Map()
+}
+
+/**
+ * A heading whose text is exactly the declared accessible name of an element
+ * around it (`<section aria-label="Onze kaart"><h2>Onze kaart</h2>`) is the
+ * source's OWN card title. When a page title is printed above it ("Welkom bij
+ * …"), that page title must not become the menu title (K2).
+ */
+function isRegionTitle(node, text) {
+  const wanted = String(text || '').replace(/\s+/g, ' ').trim().toLowerCase()
+  if (!wanted) return false
+  let depth = 0
+  for (let parent = node.parent; parent && depth < MAX_DEPTH; parent = parent.parent, depth += 1) {
+    const attrs = parent.attrs || {}
+    const label = typeof attrs['aria-label'] === 'string' ? attrs['aria-label'].replace(/\s+/g, ' ').trim().toLowerCase() : ''
+    if (label && label === wanted) return true
+  }
+  return false
+}
+
 const MIN_SENTENCE_WORDS = 7
 
 /**
@@ -1189,6 +1507,7 @@ function isRepeatedCard(node, budget) {
 function looksLikeMenuContainer(node, budget) {
   let listItems = 0
   let rows = 0
+  let termPairs = 0
   const queue = [...node.children]
   for (let head = 0; head < queue.length; head += 1) {
     const current = queue[head]
@@ -1196,9 +1515,12 @@ function looksLikeMenuContainer(node, budget) {
     if (!current || current.tag === '#text') continue
     if (isListItem(current)) listItems += 1
     if (current.tag === 'tr') rows += 1
+    // Two or more terms make it a definition LIST around several dishes (a
+    // `dl.pm-dishes` block with its own `dt`/`dd` rows), never one dish.
+    if (current.tag === 'dt') termPairs += 1
     for (const child of current.children) queue.push(child)
   }
-  return listItems >= 3 || rows >= 2
+  return listItems >= 3 || rows >= 2 || termPairs >= 2
 }
 
 function findDescendant(node, predicate, budget) {
@@ -1287,6 +1609,63 @@ const isNameElement = (n) => classMatches(n, NAME_CLASS_PATTERN) || /^h[3-6]$/.t
 const isPriceElement = (n) => classMatches(n, PRICE_CLASS_PATTERN) || (n.attrs && n.attrs.itemprop === 'price')
 const isDescriptionElement = (n) => classMatches(n, DESC_CLASS_PATTERN) || n.tag === 'p' || (n.attrs && n.attrs.itemprop === 'description')
 
+// ─── A name with its own description in one cell (K1) ──────────────────────
+
+/** Inline elements that can hold a dish description next to the name. */
+const INLINE_DESC_TAGS = new Set(['span', 'em', 'i', 'small', 'b', 'strong', 'a', 'mark', 'cite', 'q', 'sub', 'sup'])
+
+/**
+ * A row/term cell whose first text run is the dish name and whose ONE inline
+ * child element holds the description — `<th scope="row">Naam<span>druif,
+ * prei</span></th>`, `<dt>Naam<span>zwarte knoflook</span></dt>`,
+ * `<li>Naam<span>…</span></li>`. Read as one merged string the name would be
+ * wrong ("Naamdruif, prei"), and a merged word can even hide a service unit
+ * ("2 gangenvoor- en hoofdgerecht"). Only this exact shape is split: exactly
+ * one inline element, no block element, no price in either half, and after it
+ * at most a bare price. Anything else keeps the previous behaviour (fail
+ * closed, never a guessed description).
+ */
+function splitInlineHead(node, markerCounter, budget) {
+  const children = node.children || []
+  if (children.length < 2 || isMarker(node)) return null
+  let inline = null
+  let headText = ''
+  let restText = ''
+  for (const child of children) {
+    budget.spend(1)
+    if (child.tag === '#text') {
+      if (inline === null) headText += child.text
+      else restText += child.text
+      continue
+    }
+    if (inline !== null) return null
+    if (!INLINE_DESC_TAGS.has(child.tag)) return null
+    inline = child
+  }
+  if (!inline || isMarker(inline) || isPriceElement(inline)) return null
+  const head = headText.replace(/\s+/g, ' ').trim()
+  const tail = textOf(inline, { markerCounter, budget }).replace(/\s+/g, ' ').trim()
+  if (!head || !tail) return null
+  if (head.length > MAX_ITEM_TEXT || tail.length > MAX_ITEM_TEXT) return null
+  if (findPrices(head).length > 0 || findPrices(tail).length > 0) return null
+  if (letterCount(head) < 2 || letterCount(tail) < 1) return null
+  // Only a bare price may follow the description, never more text.
+  const rest = restText.replace(/\s+/g, ' ').trim()
+  if (rest) {
+    const prices = findPrices(rest)
+    if (prices.length === 0) return null
+    let leftover = ''
+    let from = 0
+    for (const price of prices) {
+      leftover += rest.slice(from, price.index)
+      from = price.index + price.length
+    }
+    leftover = (leftover + rest.slice(from)).replace(/[€\s.,:;()\-–—]/g, '')
+    if (leftover.length > 0) return null
+  }
+  return { head, tail, priceText: rest }
+}
+
 /**
  * The last inline element of an item, when it is a price-only tail such as
  * `<strong>4.5</strong>`. Menus commonly print one decimal ("4.5"), which the
@@ -1311,28 +1690,48 @@ function trailingPriceElement(node, budget, markerCounter) {
 function readItem(node, pattern, markerCounter, budget) {
   if (pattern === 'table_row') {
     // Linear: each cell is classified once (charged), membership by index.
+    // A cell of the shape "name + one inline description" keeps its two halves
+    // apart instead of becoming one merged name (K1).
     const cells = []
     for (const c of node.children) {
       budget.spend(1)
-      if (c.tag === 'td' || c.tag === 'th') cells.push(textOf(c, { markerCounter, budget }))
+      if (c.tag === 'td' || c.tag === 'th') {
+        const split = splitInlineHead(c, markerCounter, budget)
+        cells.push({ text: split ? `${split.head} ${split.tail}` : textOf(c, { markerCounter, budget }), split })
+      }
     }
     const kinds = cells.map((cell) => {
-      budget.spend(1 + Math.ceil(Math.min(cell.length, MAX_ITEM_TEXT) / 16))
-      return classifyCell(cell)
+      budget.spend(1 + Math.ceil(Math.min(cell.text.length, MAX_ITEM_TEXT) / 16))
+      return classifyCell(cell.text)
     })
-    const fullText = cells.join(' ')
+    const fullText = cells.map((cell) => cell.text).join(' ')
     if (rowHasSeveralNamePricePairs(kinds)) return { name: '', priceText: '', description: '', fullText, ambiguous: true }
     const priceCells = cells.filter((cell, i) => kinds[i] === 'price')
-    const other = cells.filter((cell, i) => kinds[i] !== 'price' && kinds[i] !== 'variant' && cell.length > 0)
-    return { name: other[0] || '', priceText: priceCells.join(' '), description: other.slice(1).join(' '), fullText }
+    const other = cells.filter((cell, i) => kinds[i] !== 'price' && kinds[i] !== 'variant' && cell.text.length > 0)
+    const first = other[0] || null
+    const description = [
+      first && first.split ? first.split.tail : '',
+      ...other.slice(1).map((cell) => cell.text),
+    ].filter(Boolean).join(' ')
+    return { name: first ? (first.split ? first.split.head : first.text) : '', priceText: priceCells.map((cell) => cell.text).join(' '), description, fullText }
   }
   if (pattern === 'definition') {
-    const name = textOf(node, { markerCounter, budget })
+    // A term cell "name + inline description" is split; the term keeps its own
+    // name and the description stays its description (K1).
+    const split = splitInlineHead(node, markerCounter, budget)
+    const name = split ? split.head : textOf(node, { markerCounter, budget })
     const dds = []
     const siblings = node.parent.children
     for (let i = node.index + 1; i < siblings.length && siblings[i].tag === 'dd'; i += 1) dds.push(textOf(siblings[i], { markerCounter, budget }))
     const ddText = dds.join(' ')
-    return { name, priceText: ddText, description: '', fullText: `${name} ${ddText}`.trim(), nameHasPrice: findPrices(name).length > 0 }
+    const priceText = [ddText, split ? split.priceText : ''].filter(Boolean).join(' ')
+    return {
+      name,
+      priceText,
+      description: split ? split.tail : '',
+      fullText: `${split ? `${split.head} ${split.tail}` : name} ${priceText}`.trim(),
+      nameHasPrice: findPrices(name).length > 0,
+    }
   }
   // Markers are counted once, on the full-text pass only.
   const fullText = textOf(node, { markerCounter, budget })
@@ -1346,6 +1745,16 @@ function readItem(node, pattern, markerCounter, budget) {
       budget.spend(Math.ceil(outside.length / 16))
       if (findPrices(outside).length > 0) return { name: '', priceText: '', description: '', fullText, ambiguous: true }
       return { name: outside, priceText: tail.text, description: '', fullText, price: tail.price }
+    }
+    // "Name + one inline description (+ a bare price)": no merged name (K1).
+    const split = splitInlineHead(node, markerCounter, budget)
+    if (split) {
+      return {
+        name: split.head,
+        priceText: split.priceText,
+        description: split.tail,
+        fullText: `${split.head} ${split.tail}${split.priceText ? ` ${split.priceText}` : ''}`,
+      }
     }
   }
   // Name elements inside a description (a <strong> word in a <p>) are not
@@ -1395,7 +1804,23 @@ function readItem(node, pattern, markerCounter, budget) {
 // ─── The extraction ────────────────────────────────────────────────────────
 
 function emptyStats() {
-  return { candidates: 0, counted: 0, rejected: 0, duplicatesRemoved: 0, ignoredMarkers: 0, depthLimited: false, workUnits: 0, injectedBlocksSkipped: 0, priceVariantLines: 0, priceVariantItems: 0 }
+  return {
+    candidates: 0,
+    counted: 0,
+    rejected: 0,
+    duplicatesRemoved: 0,
+    ignoredMarkers: 0,
+    depthLimited: false,
+    workUnits: 0,
+    injectedBlocksSkipped: 0,
+    priceVariantLines: 0,
+    priceVariantItems: 0,
+    // A hidden alternative view of the same card that was counted once
+    // (items) and hidden content without a visible counterpart that was kept
+    // and reported instead (items). Never a silent omission (K3).
+    hiddenViewsMerged: 0,
+    hiddenUniqueItems: 0,
+  }
 }
 
 function unparsed(reason, rejected, stats) {
@@ -1434,15 +1859,33 @@ function extractWithinBudget(html, budget, stats) {
   const markerCounter = { count: 0 }
   const sectionsByKey = new Map() // path key -> { path, items, unpriced: [] }
   const excludedByPath = new Map() // path key -> { path, unpricedLines, reason }
+  // Headings the page hides: their excluded content is not a source-level
+  // limitation (it is hidden on purpose), so it is not reported as one.
+  const hiddenHeadingPaths = new Set()
   const rejected = []
   const seen = new Set()
 
-  function noteExcludedContent(path, reason) {
+  function noteExcludedContent(path, reason, lines = 1) {
     if (!Array.isArray(path) || path.length === 0) return
     const key = JSON.stringify(path)
     const entry = excludedByPath.get(key) || { path, unpricedLines: 0, reason }
-    entry.unpricedLines += 1
+    entry.unpricedLines += lines
     excludedByPath.set(key, entry)
+  }
+
+  // A line refused as a service unit (a course/portion price of an arrangement)
+  // is kept per heading path. When that whole section yields no dish it is
+  // reported as an arrangement, never as a missing dish (K4).
+  const serviceUnitByPath = new Map()
+  function noteServiceUnit(path) {
+    if (!Array.isArray(path) || path.length === 0) return
+    // Register the section even when every one of its lines was refused, so an
+    // arrangement stays visible instead of disappearing from the report (K4).
+    sectionFor(path)
+    const key = JSON.stringify(path)
+    const entry = serviceUnitByPath.get(key) || { path, lines: 0 }
+    entry.lines += 1
+    serviceUnitByPath.set(key, entry)
   }
 
   /** Several alternative end prices on one line ("3 gangen 57 | 4 gangen 66 |
@@ -1502,7 +1945,12 @@ function extractWithinBudget(html, budget, stats) {
     if (isClockText(fullText)) return reject(fullText, 'clock_time', node)
     if (isDateText(fullText)) return reject(fullText, 'date', node)
     if (MODIFIER_PATTERN.test(fullText)) return reject(fullText, 'modifier', node)
-    if (hasServiceUnit(fullText) || PER_TABLE_PATTERN.test(fullText)) return reject(fullText, 'service_unit', node)
+    if (hasServiceUnit(fullText) || PER_TABLE_PATTERN.test(fullText)) {
+      // A course/portion price of an arrangement is not a dish; when nothing
+      // else in that section is a dish it is reported as an arrangement (K4).
+      if (hasServiceUnit(fullText)) noteServiceUnit(headingPath)
+      return reject(fullText, 'service_unit', node)
+    }
     // Several independent name/price pairs (table row, card, list item):
     // never one item, never the first pair alone.
     if (item.ambiguous) return reject(fullText, 'ambiguous_structure', node)
@@ -1569,7 +2017,10 @@ function extractWithinBudget(html, budget, stats) {
     if (isClockText(fullText)) return reject(fullText, 'clock_time', node)
     if (isDateText(fullText)) return reject(fullText, 'date', node)
     if (MODIFIER_PATTERN.test(fullText)) return reject(fullText, 'modifier', node)
-    if (hasServiceUnit(fullText) || PER_TABLE_PATTERN.test(fullText)) return reject(fullText, 'service_unit', node)
+    if (hasServiceUnit(fullText) || PER_TABLE_PATTERN.test(fullText)) {
+      if (hasServiceUnit(fullText)) noteServiceUnit(headingPath)
+      return reject(fullText, 'service_unit', node)
+    }
     const name = cleanName(line.name)
     const section = sectionFor(headingPath)
     if (!line.price) {
@@ -1608,7 +2059,10 @@ function extractWithinBudget(html, budget, stats) {
     if (isClockText(fullText)) return reject(fullText, 'clock_time', node)
     if (isDateText(fullText)) return reject(fullText, 'date', node)
     if (block.lines.some((line) => MODIFIER_PATTERN.test(line)) || MODIFIER_PATTERN.test(block.title)) return reject(fullText, 'modifier', node)
-    if (hasServiceUnit(fullText) || PER_TABLE_PATTERN.test(fullText)) return reject(fullText, 'service_unit', node)
+    if (hasServiceUnit(fullText) || PER_TABLE_PATTERN.test(fullText)) {
+      if (hasServiceUnit(fullText)) noteServiceUnit(headingPath)
+      return reject(fullText, 'service_unit', node)
+    }
     const name = cleanName(block.title)
     const section = sectionFor(headingPath)
     if (!price) {
@@ -1657,6 +2111,11 @@ function extractWithinBudget(html, budget, stats) {
     }
     seen.add(key)
     const evidence = { pattern, locator: locatorOf(node, budget) }
+    // A dish read from a subtree the page hides stays traceable, and a dish
+    // from a labelled tab panel is a deliberate variant — never a "hidden
+    // duplicate view" (K2/K3).
+    if (node.hidden === true) evidence.hidden = 'true'
+    if (openPanelDepth > 0) evidence.panel = 'tab'
     if (evidenceExtra && typeof evidenceExtra === 'object') {
       for (const [name, value] of Object.entries(evidenceExtra)) {
         if (typeof value === 'string' && value.trim()) evidence[name] = value.trim().slice(0, 200)
@@ -1669,6 +2128,11 @@ function extractWithinBudget(html, budget, stats) {
 
   // Document-order walk with an explicit heading stack; bounded depth.
   const headingStack = []
+  // Labelled tab panels (`role="tab"` + aria-controls) are menu variants: the
+  // label becomes a route level, and their content is never treated as a
+  // "hidden duplicate view" (a variant is a deliberate second path).
+  const tabPanels = collectTabPanels(root, budget)
+  let openPanelDepth = 0
   // Panel labels are siblings even when each panel holds deeper h3 sections,
   // so their level is anchored once (below the surrounding heading), not
   // re-derived from the deepest section of the previous panel.
@@ -1724,6 +2188,24 @@ function extractWithinBudget(html, budget, stats) {
             if (documentTitleSeen) level = 2
             else documentTitleSeen = true
           }
+          // The source's OWN card title — a heading that is exactly the
+          // declared name of the region around it — replaces a page title that
+          // is printed directly above it ("Welkom bij …" above "Onze kaart").
+          // Only at that position (nothing but the page title would survive
+          // this heading); a nested region label keeps its place in the route
+          // (K2).
+          if (
+            !panelHeading &&
+            level > 1 &&
+            headingStack.length > 0 &&
+            headingStack[0].level === 1 &&
+            headingStack.filter((entry) => entry.level < level).length === 1 &&
+            isRegionTitle(child, text)
+          ) {
+            headingStack.length = 0
+            headingStack.push({ level: 1, text })
+            continue
+          }
           // A sentence-like heading nested BELOW a real section heading
           // ("Deze gerechten worden geserveerd in …" under "A LA CARTE") is
           // context for that section: skipped, the dishes stay in it. On the
@@ -1737,8 +2219,29 @@ function extractWithinBudget(html, budget, stats) {
           if (top && top.text === text && level >= top.level) continue
           while (headingStack.length > 0 && headingStack[headingStack.length - 1].level >= level) headingStack.pop()
           headingStack.push({ level, text })
+          if (child.hidden === true) hiddenHeadingPaths.add(JSON.stringify(currentPath()))
         }
         continue
+      }
+      // A labelled tab panel is a menu variant: its label sits above the
+      // sections inside it, and the label is removed again once the panel ends
+      // so the next variant starts at the same level (K2).
+      const tabLabel = !isHeading(child) && child.attrs && typeof child.attrs.id === 'string' ? tabPanels.get(child.attrs.id) : null
+      if (tabLabel) {
+        if (!Number.isInteger(panelLevel)) panelLevel = 2
+        const level = Number(child.attrs['aria-level']) || panelLevel
+        const label = clip(tabLabel)
+        if (label) {
+          // Restore exactly the route that existed before the panel: the
+          // enclosing section heading must survive a variant's own sections.
+          const savedDepth = headingStack.length
+          headingStack.push({ level, text: label })
+          openPanelDepth += 1
+          walk(child, depth + 1, extraLabel)
+          openPanelDepth -= 1
+          headingStack.length = savedDepth
+          continue
+        }
       }
       if (isListItem(child)) {
         budget.spend(child.children.length)
@@ -1838,15 +2341,64 @@ function extractWithinBudget(html, budget, stats) {
     return unparsed('content_not_menu_suspected', rejected, stats)
   }
 
+  // ─── A hidden alternative view of the same card is counted once (K3) ─────
+  //
+  // A source can print the same card twice: the real (tabbed) view and a
+  // legacy/duplicate block that its own CSS hides. Such a hidden section is
+  // only dropped when the visible side provably carries the same priced dishes
+  // (every amount of the hidden section is still available on the visible
+  // side, by count). Hidden content without that counterpart is KEPT — a
+  // unique card is never silently dropped — and only counted as a visible
+  // limitation. A hidden section from a labelled tab panel is a variant, never
+  // a duplicate.
+  const isHiddenOnlySection = (section) =>
+    section.items.length > 0 &&
+    section.items.every((item) => {
+      const evidence = item.evidence && typeof item.evidence === 'object' ? item.evidence : {}
+      return evidence.hidden === 'true' && evidence.panel !== 'tab'
+    })
+  const allSections = [...sectionsByKey.values()].filter((section) => section.items.length > 0)
+  const visibleAmounts = new Map()
+  for (const section of allSections) {
+    if (isHiddenOnlySection(section)) continue
+    for (const item of section.items) {
+      if (Number.isInteger(item.amountMinorUnits)) visibleAmounts.set(item.amountMinorUnits, (visibleAmounts.get(item.amountMinorUnits) || 0) + 1)
+    }
+  }
+  const duplicateHiddenSections = new Set()
+  for (const section of allSections) {
+    if (!isHiddenOnlySection(section)) continue
+    const needed = new Map()
+    let verifiable = section.items.length >= 2
+    for (const item of section.items) {
+      if (!Number.isInteger(item.amountMinorUnits)) {
+        verifiable = false
+        break
+      }
+      needed.set(item.amountMinorUnits, (needed.get(item.amountMinorUnits) || 0) + 1)
+    }
+    const duplicated = verifiable && [...needed].every(([amount, count]) => (visibleAmounts.get(amount) || 0) >= count)
+    if (duplicated) {
+      duplicateHiddenSections.add(section)
+      stats.hiddenViewsMerged += section.items.length
+    } else {
+      stats.hiddenUniqueItems += section.items.length
+    }
+  }
+
   // Unpriced lines are only reported where the same section has priced
   // items — a navigation list never becomes rejected-line noise.
   const sections = []
   for (const section of sectionsByKey.values()) {
+    if (duplicateHiddenSections.has(section)) continue
     if (section.items.length === 0) {
       // A recognised heading whose content yielded no dish with a readable
       // price (an arrangement/choice menu, or unreadable price lines) is
       // never silently discarded: the path and the line count are reported.
+      const serviceUnit = serviceUnitByPath.get(JSON.stringify(section.path))
+      if (hiddenHeadingPaths.has(JSON.stringify(section.path))) continue
       if (section.unpriced.length > 0 && section.path.length > 0) noteExcludedContent(section.path, 'no_recognized_price')
+      else if (serviceUnit && section.path.length > 0) noteExcludedContent(section.path, 'service_unit', serviceUnit.lines)
       continue
     }
     for (const line of section.unpriced) reject(line.text, 'missing_price', line.node)
