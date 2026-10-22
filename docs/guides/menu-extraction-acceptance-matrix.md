@@ -1,18 +1,25 @@
 # Menu-extractie — afrondingsmatrix #59
 
 Status: **ontwikkelaarsbewijs, geen onafhankelijke review en geen release.**
-Datum: 2026-10-22 (nieuwste ronde: Lead-review 6334231310, de vier
-kaartvormklassen van Pellens generiek hersteld; de rondehistorie hieronder
-blijft ongewijzigd).
-Issue #59, branch `feat/menu-extraction-59`, PR #60.
-De nieuwste ronde staat in “Ronde 2026-10-22 — Pellens-kaartvormen generiek
-hersteld (review 6334231310)”; de ronde daarvoor in “Ronde 2026-10-21 —
+Datum: 2026-10-22 (nieuwste ronde: Lead-review 6344039571, afrondingsronde
+K1–K5: één door de Lead besliste referentiecorrectie, robuustheids- en
+ketenregressies op deze head, en de eindmatrix per criterium; de rondehistorie
+hieronder blijft ongewijzigd).
+Issue #59, branch `feat/menu-extraction-59`, PR #60 (draft).
+De nieuwste ronde staat in “Ronde 2026-10-22 — afrondingsronde (review
+6344039571)”; de ronde daarvoor in “Ronde 2026-10-22 — Pellens-kaartvormen
+generiek hersteld (review 6334231310)” en daarvoor “Ronde 2026-10-21 —
 generiek extractieherstel (review 6323277596)”.
-De oudere kandidaat-codehead `26839eb4b9dfb5fb0a04fbc977ae3a7561f7000a` en
-bewijscommit `0f6fce86c0cc75cbcaab05574b7ae83975e3a16c` horen bij de vorige
-ronde en gelden niet als head van deze ronde; de exacte checkpoint-HEAD staat
-in de PR #60-checkpoint.
+De afrondingsronde wijzigt **uitsluitend** twee referentieregels op uitdrukkelijk
+Lead-besluit (`Ui` + oude kaas, `Wagyu A5` + Miyazaki); telregels, captures,
+meetcode en brongerichte code zijn niet gewijzigd. De oudere
+kandidaat-codehead `26839eb4b9dfb5fb0a04fbc977ae3a7561f7000a` en
+bewijscommit `0f6fce86c0cc75cbcaab05574b7ae83975e3a16c` horen bij de
+browserfixture-ronde en gelden niet als head; de exacte checkpoint-HEAD van
+deze ronde staat in de PR #60-checkpoint.
 Vorige heads:
+`abe42c5400c74d4a5c3e759e18055b5910506204` (geaccepteerd door de Lead,
+review 6344039571),
 `b621582223515ee7b9f2b81dada56b8a4d044955` (reviewdocumentatie),
 `6728897c814bce80aa2b9a44d53d8322b3adc72a` (herstel van review 6283658271),
 `ab89d14c0a2dfb19c559126a0a8ca0bb62746d16` (documentatie),
@@ -36,32 +43,138 @@ Met bewijs werkt: de versiegebonden protocol-/schemalading, de bestaande
 analyseketen met begrensde veilige fetch, de review-/conceptfixture, de
 rol- en netwerkgrenzen, de read-only extractie van de toegestane
 Smelt- en Blossem-bronversies (37/37 en 43/43 exact tegen de gecontroleerde
-capture), en sinds deze ronde de **read-only v2-aansluiting**: bestaande
+capture), en de **read-only v2-aansluiting**: bestaande
 receipt-, review-, concept-, batch-, workqueue- en exportlezers herkennen een
 versioned envelope, tonen varianten/glas/fles/supplementen en bewijs via één
 gesaneerde view, en weigeren v2 vóór hash, claim, insert, update, RPC of
-GitHub. Sinds deze ronde is ook de bestaande conceptlijst en detailpagina met
+GitHub. De bestaande conceptlijst en detailpagina zijn met
 echte klikken in de fixture gedekt: geldige v1 blijft bruikbaar, v2 blijft
 read-only met glas/fles/supplement/allergenen/provenance/dekking, en onbekende
 of exact lege `menus: []`-rijen blijven zichtbaar geblokkeerd. De Botanist is
 meetbaar gedeeltelijk (124/141 referentierijen,
 11 gemist, 4 extra, 0 prijsverschil) en de Mr Moos/Colonia-aantallen zijn
-live observaties zonder referentie-uitkomst. Bewust geblokkeerd of niet
+live observaties zonder referentie-uitkomst. Sinds de afrondingsronde staat de
+gecontroleerde meting op **167/185 match, 15 gemist, 0 verzonnen, 0
+prijsfouten, 3 rubriekfouten (precisie 98,24%, recall 90,27%)**: Pellens gaat
+van 24 naar **26 van 36** en verliest zijn laatste twee verzonnen rijen, omdat
+de Lead de twee `naam`+`span`-referentieregels op de bronstructuur heeft
+rechtgezet. Bewust geblokkeerd of niet
 ondersteund blijven: scans/OCR, v2-**schrijvers**/activering, echte
 provideractivering, echte bronbevestiging/conceptopslag/export/publicatie,
 bronverificatie zonder geregistreerde brontekst/hashcontext, Gauchos Breda
-(onbereikbaar), een nieuwe ongeziene holdout en BE-21's
+(onbereikbaar), een nieuwe ongeziene holdout, prijsvarianten in het
+productconcept (schema-ontwerp nodig) en BE-21's
 50–100-bronnenbenchmark. De pure v2 schema-/mappinglaag en de read-only
 integratie zijn met fictieve fixtures getest; er is geen DDL, writeflag of
-publieke werking. Sinds 2026-10-22 zijn de vier gemeten kaartvormklassen
+publieke werking. De vier gemeten kaartvormklassen
 (K1–K4: naam/omschrijving in één cel, kaarttitel en tabbladen, verborgen
-tweede weergave, arrangement met per-gangprijzen) generiek hersteld: de
-referentiestand is 165/185 match met 17 gemist en 2 verzonnen (precisie 97,06%,
-recall 89,19%), Pellens gaat van 0 naar 24 van 36, en geen enkele bron verliest
-een match. Twee referentieregels en de prijsvarianten blijven bewust open.
-Volledige productacceptatie vereist nog een Product
+tweede weergave, arrangement met per-gangprijzen) zijn generiek hersteld met
+per klasse een fictieve regressie; de tien resterende gemiste Pellens-regels
+zijn alle tien prijsvarianten (`Klein`/`Hoofd`) en staan als begrensd in de
+matrix. Volledige productacceptatie vereist nog een Product
 Owner-besluit over provider/model/budget/DPA, een nieuwe holdout, live
 preview-/schrijftoegang en onafhankelijke review door de Delivery Lead.
+
+## Ronde 2026-10-22 — afrondingsronde (review 6344039571)
+
+Aanleiding: de Lead accepteerde `1b22121..abe42c5` byte-identiek en gaf één
+afrondingsopdracht (K1–K5), met de twee Pellens-referentieregels als **enige**
+toegestane referentiewijziging. Basis:
+`abe42c5400c74d4a5c3e759e18055b5910506204`. Telregels (`0f09b74f…`, gepind in
+`reference-references/index.json`), captures en meetcode zijn niet gewijzigd; er
+is geen brongerichte code, provider, OCR, app-AI, productieactie, publicatie of
+merge bijgekomen. De app-side AI-activering blijft expliciet **niet**
+goedgekeurd; alleen de lokale developer-prepay is gebruikt voor read-only
+bronproeven.
+
+### K1 — referentiecorrectie: oud en nieuw naast elkaar
+
+De bron schrijft `<dt>Ui<span>oude kaas</span></dt>` en
+`<dt>Wagyu A5<span>Miyazaki</span></dt>`, precies zoals
+`<dt>Entrecôte<span>zwarte knoflook</span></dt>` dat al als naam+omschrijving
+vastlegt. Alleen die twee regels zijn aangepast; het bestand bevat nu de
+letterlijke notitie “2026-10-22, Lead-besluit #59: consistent met de
+bronstructuur naam+span, zoals Entrecôte; beoordeeld op bytes 66f57e267289”
+(`decisions`), en de referentieversie is 1.2.0.
+
+| Regel | Referentie oud | Referentie nieuw | Extractie (onveranderd) |
+| --- | --- | --- | --- |
+| Lunch › Brioches › regel 4 | naam `Ui oude kaas` | naam `Ui`, omschrijving `oude kaas` | naam `Ui`, omschrijving `oude kaas`, €12,50 |
+| Lunch › Brioches › regel 5 | naam `Wagyu A5 Miyazaki` | naam `Wagyu A5`, omschrijving `Miyazaki` | naam `Wagyu A5`, omschrijving `Miyazaki`, €47,00 |
+
+| Meting (zelfde code, zelfde bytes, alleen deze twee referentieregels) | oud `abe42c5` | nieuw |
+| --- | ---: | ---: |
+| Match / referentiegerechten | 165 / 185 | **167 / 185** |
+| Gemist | 17 | **15** |
+| Verzonnen | 2 | **0** |
+| Prijsfouten / rubriekfouten | 0 / 3 | 0 / 3 |
+| Precisie / recall | 97,06% / 89,19% | **98,24% / 90,27%** |
+| Pellens match / gemist / verzonnen | 24 / 12 / 2 | **26 / 10 / 0** |
+
+Deterministisch: twee keer uitgevoerd op dezelfde vastgezette bytes met
+identieke hashes — `ops/benchmark/reference-measurement.json`
+`79a8b13381f550c884f88e78f1937f929ab9d5e351ad379e43a3adf4f4014035` en
+`ops/benchmark/reference-measurement.md`
+`c21f6193a1522493014ee33567110313b9182dbcc2237f6cf255a605f7621099`. Zuyd,
+Andalous en Chocolat blijven gelijk in uitkomst; geen bron verliest een match.
+De tien resterende gemiste Pellens-regels zijn alle tien prijsvarianten
+(`Klein`/`Hoofd`); die klasse blijft bewust **begrensd** (zie criterium 8).
+
+
+### K2 — robuustheid (criterium 10) op deze head
+
+Alle onderdelen zijn op deze head daadwerkelijk gedraaid; per regel staat de
+regressie die het onderdeel afdekt. Ontbrak een regressie, dan is er één
+minimale toegevoegd (gemarkeerd **nieuw**).
+
+| Onderdeel | Regressie | Bewijs op deze head |
+| --- | --- | --- |
+| Time-out | `menuExtractionAdapter.test.js`: “REGRESSION: timeout aborts the provider signal and calls the cancellation hook”; “timeout and budget limits stop the call; unknown cost is not treated as zero” | 14/14 pass |
+| Provideruitval | `menuExtractionAdapter.test.js`: “REGRESSION (review P1): a known paid failure is booked, never settled as zero”; “an unknown cost keeps the whole reservation charged and cannot be reused” | 14/14 pass |
+| Ongeldige uitvoer | `menuExtractionAdapter.test.js`: “REGRESSION: strict schema rejects invalid coverage, unknown nested fields, missing evidence quote and overlong values”; “forbidden confidence/reviewReady and unreferenced sources are rejected” | 14/14 pass |
+| Kosten- en paginagrens | `menuExtractionAdapter.test.js`: “REGRESSION: input, page and output limits are enforced, not merely passed through”; “REGRESSION: limits reject negative/zero configuration before calling the provider”; `safeOutboundFetch.test.js`: “a response exceeding maxBytes is aborted, never buffered in full” | 14/14 + 77/77 pass |
+| Herimport | `batchAnalysisHandlers.test.js`: “concept: identical content is not saved again”; “structure review: a retry with the same decisions is idempotent, a contradicting retry is refused”; `menuConceptExport.test.js`: “idempotent: a second click returns the same open pull request, never a second branch or PR”; `batchAnalysisMigration.test.js`: “0016 enqueue: serialized, idempotent per client batch id…” | 66/66 pass |
+| Gelijktijdige taken | `batchAnalysisHandlers.test.js`: “confirm: a simultaneous double request still yields exactly one accepted proposal”; `batchAnalysisMigration.test.js`: “0016 a receipt binds to at most one job and one URL intake, also under concurrent calls”; “0016 claim: … one active job overall, 60 s per host, …, 3-minute lease”; `analysisWorker.test.js`: “never exceeds maxJobs even when the first batch keeps claiming” | 66/66 pass |
+| Promptinjectie | `menuExtractionAdapter.test.js`: “REGRESSION: source text is data — injection text cannot add tools, trust fields or change the schema”; `htmlMenuStructure.test.js` (verborgen/gekaapte blokken) | 14/14 + 85/85 pass |
+| Verkeerde vestiging | **nieuw** `restaurantSourceAnalysis.test.js`: “K2 (criterion 10, wrong establishment): a same-host page carrying another branch address never lends that address to this branch, and the menu read there keeps its own source URL”; bestaand: “contextStatus "conflict" — a demonstrably different Dutch postcode … caps the field at laag”; `restaurantHostMatch.test.js`: “multiple restaurants sharing the same hostname is reported, never guessed” | 36/36 + 77/77 pass |
+| Onveilige redirects | `safeOutboundFetch.test.js`: “follows one redirect and re-validates the target the same way”; “a redirect to a literal, disallowed IP address is rejected mid-chain, with no request ever issued to it”; “exceeding maxRedirects is rejected, never followed indefinitely”; `restaurantSourceFetch.test.js`: “fetchSameSiteWithRedirects: an external host, another subdomain, a private IP, localhost, a non-HTTP(S) scheme, credentials, a fragment and a downgrade all fail closed”; “a redirect target is gated by robots.txt before it is ever requested”; “integration: a same-site www redirect whose hostname resolves to a private address is still refused by the SSRF guard” | 77/77 pass |
+
+Begrenzing, eerlijk benoemd: alles is offline/fixture-bewijs. Een echte
+provideruitval, een echte kostenmeting en echte gelijktijdige productietaken zijn
+niet gemeten (geen provider, geen productietoegang). De vestigingscontrole is
+host- en adresniveau; een gerecht wordt niet per vestiging geattribueerd.
+
+
+### K3 — geen stil dataverlies (criterium 11)
+
+De keten is per stap met een regressie afgedekt; de nieuwe regel bewijst de keten
+in één test met fictieve PDF-bytes.
+
+| Stap | Regressie | Wat het bewijst |
+| --- | --- | --- |
+| Extractie → receipt | **nieuw** `restaurantSourceAnalysis.test.js`: “K3 (criterion 11): a supplement gap and a two-price row stay named through analysis → receipt summary → concept”; bestaand: “SMELT-LIKE CHAIN: recognized PDF sections become receipt menus, one concept and a saveable reviewed result” | dezelfde bron-ID en -URL in receipt en analyse; supplementregel benoemd en geen gerecht; beide bedragen blijven letterlijk staan (`priceText` “6.50 / 25.00”, `priceVariants` 6.50 + 25.00, `priceStatus: multiple_undecomposed`); geen prijs geraden |
+| Receipt → review | `menuSnapshotReviewHandlers.test.js`, `menuConceptReviewHandlers.test.js`, `sourceWorkqueueV2.test.js` (“a v2 receipt with items is ready for review even without the legacy menus key”) | review leest het opgeslagen resultaat, niet een tweede extractie; v2 blijft read-only zichtbaar |
+| Review → concept | `menuConcept.test.js` (blokkers, correcties, expliciete keuzes), `menuScope.test.js`: “no dish disappears silently: a dish missing from one variant needs a per-variant keep/remove decision”; **nieuw** K3-regel: blokkers `multiple_prices` + `unclear_category` met de gerechtnamen, gerechten blijven in het concept staan | onopgeloste prijs en onzekere rubriek worden blokkades, geen stil verlies en geen gok |
+| Concept → export | `menuConceptExport.test.js`: “refused: stale version, not approved, rejected, blockers, rejected-before content”; “preview of a version with blockers shows no partial menu”; `menuConceptExportV2.test.js`: “a v2 concept is refused before the export claim, branch, commit, pull request or GitHub call” | een geblokkeerd of niet-ondersteund concept bereikt export nooit half |
+| Onbekende/nieuwe velden | `menuProductIntegrationV2.test.js`, `menuProductGuardsV2.test.js`, `menuProductV2Surface.test.js`, `menuConceptV2ReviewHandlers.test.js`, `sourceWorkqueueV2.test.js` | v2-velden (glas/fles, supplementen, allergenen, bewijs, dekking) worden getoond of vóór elk effect geweigerd — nooit stil afgeplat |
+
+### K4 — eindmatrix per criterium
+
+De eindstand per criterium 1–13 staat in “Actuele acceptatiematrix” hieronder,
+met per criterium de eindstatus (gehaald / begrensd / verschoven naar BE-21 /
+open), het bewijs met commit en de bewijscategorie (T/R/B/I). Prijsvarianten
+staan daar expliciet als **begrensd** met de reden: het deterministische concept
+ondersteunt één prijs per gerecht; de varianten worden wél bewaard
+(`priceVariants`, `priceText`) en als blokkade gemeld, maar niet als losse
+prijzen opgeslagen. Uitbreiding vergt een beoordeeld versiegebonden
+schema-ontwerp (Product Owner) — geen stille afplatting.
+
+### K5 — voortgang per criterium
+
+`ops/benchmark/output/criteria-progress.json` bevat per criterium (K1–K5) een
+regel met status en bewijs. Dat pad staat volgens de BE-21-afspraak in
+`.gitignore` (gegenereerde benchmarkoutput) en wordt daarom niet gecommit; de
+inhoud staat hierboven en in de checkpoint op PR #60.
 
 ## Ronde 2026-10-22 — Pellens-kaartvormen generiek hersteld (review 6334231310)
 
@@ -460,6 +573,37 @@ ander besluit of eigenaar.
 
 ## Actuele acceptatiematrix
 
+### Eindstand criterium 1–13 (afrondingsronde review 6344039571)
+
+Basis `abe42c5`, developerhead met bewijs `b1e4abc` (referentiecorrectie +
+meeting) en de daaropvolgende documentatiecommit. Status: **gehaald** =
+uitgevoerd en geslaagd op deze head; **gehaald, begrensd** = geslaagd binnen een
+expliciet genoemd bereik; **begrensd** = bewust niet verder gebouwd; **verschoven
+naar BE-21**; **open** = nog niet uitgevoerd of niet aantoonbaar.
+
+| # | Criterium | Eindstatus | Bewijs met commit en categorie |
+| --- | --- | --- | --- |
+| 1 | Exact protocol en schema versiegebonden; ontbrekende configuratie stopt concreet | **gehaald** | `menuExtractionProtocol.test.js`, `menuExtractionAdapter.test.js` (14/14 op `b1e4abc`); loader levert v0.2 met vaste hash; ontbrekende provider is een concrete weigering (`provider_not_configured`), nooit een lege “geslaagde” extractie — **T** |
+| 2 | URL → lezen → extractie → menselijke correctie → conceptopslag met traceerbare broncontext | **gehaald, begrensd** | “SMELT-LIKE CHAIN” + de nieuwe K3-ketenregel (`restaurantSourceAnalysis.test.js`, 36/36 op `b1e4abc`); browserfixture 241/241 op `26839eb` (lijst → detail → terug, correctie, geblokkeerde opslag). Echte conceptopslag, bronbevestiging en een authenticated sessie zijn niet uitgevoerd — **T+B** |
+| 3 | Smelt Breda: echte PDF-inhoud; gevonden PDF + 0 items is geen succes | **gehaald, begrensd** | Goedgekeurde read-only bronproef op deze head: PDF 2 pagina's, bytes `4445a101…27f8`, content `24f23cbd…8a845`, 37/37 referentierijen, 0 gemist/extra/prijs/koppeling/duplicaat, boekhouding 37/37; 7 supplementregels en 1 arrangement worden benoemd. Geen item-voor-item menselijke hercontrole — **R+T** |
+| 4 | Blossem: lunch/diner, rubrieken en items volgens de echte bronrelaties; geen vast aantal | **gehaald, begrensd** | Bronproef: bytes `da5c632f…0c38`, 43/43 in 13 secties, 0 verschillen, DINNER/LUNCH gescheiden, 12 secties als onzeker gemarkeerd; 2 arrangement-/wijnarrangement-secties benoemd en niet opgeslagen — **R+T+B** |
+| 5 | Bestaande kaarten Wolfslaar, Bardot, Zuyd, T-Huis; historische aantallen zijn geen waarheid | **begrensd** | `historicalMenus.test.js`: 367 historische regels (25/111/42/189) volledig door de vormketen; onbekende prijs blijft null. De live sites zijn niet opnieuw opgehaald — **T** |
+| 6 | Vooraf vastgelegde representatieve set en aparte ongeziene holdout | **verschoven naar BE-21** | `acceptanceSet.test.js`, `acceptanceSetGuard.test.js`, `holdoutReferences.test.js`: 22 representatieve entries, 13 dekkingsklassen; De Botanist/Mr Moos/Colonia zijn `representative` + `usedForTuning`; Gauchos Breda is de enige holdout (404). Een nieuwe ongeziene set valt buiten deze afrondingsronde — **T+R** |
+| 7 | Dataset, referentie-uitkomsten en meetbare drempels vóór acceptatie; BE-21's 50–100 niet met enkele URL's afgesloten | **gehaald, begrensd** | `manifest.json` `releaseThresholds` ongewijzigd (0 verzonnen, 100% bewijs, 0 onverklaarde dekking, 0 structuur-/prijsfouten); BE-21 blijft expliciet buiten #59 — **T** |
+| 8 | Gemiste/verzonnen items, prijsfouten, structuurverlies, bewijsdekking, correctiewerk, tijd en kosten per brontype | **gehaald, begrensd** | Meting op `b1e4abc`: **167/185 match, 15 gemist, 0 verzonnen, 0 prijsfouten, 3 rubriekfouten, precisie 98,24% / recall 90,27%** (json `79a8b133…`, md `c21f6193…`, tweemaal identiek). **Prijsvarianten zijn begrensd**: 10 van de 15 missers zijn Pellens `Klein`/`Hoofd`; het deterministische concept ondersteunt één prijs per gerecht, de varianten worden bewaard (`priceVariants`, `priceText`) en als blokkade gemeld, nooit afgeplat of geraden — uitbreiding vergt een beoordeeld schema-ontwerp. Correctietijd en modelkosten blijven onbekend (€0, geen provider) — **R+T** |
+| 9 | Browseracceptatie met klikpaden, rolgrenzen, leeg/fout/partieel, toetsenbord, licht/donker, 320/390 px | **begrensd** | `npm run test:browser:menu-review`: 241/241 checks, 33 screenshots, 2 clickpathinventories op codehead `26839eb` (SHA-256-bewijs `F5B2CD71…C583`). In deze ronde niet opnieuw gedraaid omdat er geen UI is gewijzigd; het blijft fixture-bewijs zonder live/staging-sessie — **B** |
+| 10 | Time-out, provideruitval, ongeldige uitvoer, kosten-/paginagrens, herimport, gelijktijdige taken, promptinjectie, verkeerde vestiging, onveilige redirects | **gehaald, begrensd** | K2-tabel hierboven: adapter 14/14, fetch/host 77/77, batch/export 66/66, analyse 36/36, structuurcorpus 85/85 op deze head; één nieuwe regressie voor “verkeerde vestiging”. Alles offline/fixture — **T** |
+| 11 | Geen stil dataverlies tussen extractie, receipt, review, concept en export; niet-ondersteunde velden geblokkeerd/gemeld | **gehaald, begrensd** | K3-tabel: nieuwe ketenregel bewijst benoemde supplementregel, bewaarde bedragen (`priceText`/`priceVariants`), blokkades `multiple_prices` + `unclear_category` en behoud van beide gerechten; export weigert geblokkeerde en v2-concepten vóór elk effect. Geen echte v2-rij in Supabase, geen live bronbevestiging — **T+B** |
+| 12 | Geen regressie in rollen, bronbevestiging, audit, publicatiegates, beveiliging of geheimenbeheer | **gehaald, begrensd** | Op deze head: volledige suite **2324/2324**, `test:menu-structure` **6/6**, `npm run build` exit 0 met 41/41 pagina's, PDF.js-packagingcheck **OK** (166 server scripts), bronproef Smelt 37/37 + Blossem 43/43. Geen productiecredentials, productieauth of echte database gebruikt — **T+B** |
+| 13 | Onafhankelijke review met exacte commit, checks, bron-/protocolversies, resultaten, beperkingen en volgende stap | **open** | Deze matrix en de checkpoint op PR #60 zijn ontwikkelaarsbewijs; de onafhankelijke beoordeling van deze head door de Delivery Lead staat nog open — **I** |
+
+De tabel hieronder is de gedetailleerde bewijstabel van de vorige ronde en blijft
+als historie staan; bij verschil geldt de eindstand hierboven. Let op: in die
+historische tabel staat bij criterium 8 nog het open beslispunt over de twee
+Pellens-referentieregels (`Ui oude kaas`, `Wagyu A5 Miyazaki`). Dat punt is in
+deze afrondingsronde door de Lead beslist en verwerkt (zie K1); de bijbehorende
+regels in de oude tabel zijn niet herschreven, zodat de rondehistorie klopt.
+
 | # | Criterium | Bewijs op deze kandidaat | Type | Status | Resterend / impact | Volgende eigenaar |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Exact protocol en schema versiegebonden; ontbrekende configuratie stopt concreet | `menuExtractionProtocol.test.js`, `menuExtractionAdapter.test.js`, `acceptanceSet.test.js`; loader geeft v0.2 + vaste LF-hash; ontbrekende/onversioned root en ontbrekende provider geven een concrete weigering | T | **bewezen** | Geen provider geconfigureerd, dus alleen offline bewezen | Developer |
@@ -845,13 +989,13 @@ in [menu-extraction-acceptance.md](menu-extraction-acceptance.md).
 ## Overdracht
 
 **Aanbevolen status: READY_FOR_REVIEW voor dit afrondingsdossier, niet DONE voor
-#59.** De nieuwste ronde eindigt op de commits `8e58893` (reparaties +
-regressies + meting), `41b7036` (documentatie) en de daaropvolgende
-naambehoud-fix: volledige suite **2322/2322**, het
-structuurcorpus 6/6, de build exit 0 met 41/41 pagina's, de PDF.js-packagingcheck
-OK, de referentiemeting 165/185 (deterministisch, `cf38be89…`) en de
-goedgekeurde bronproef Smelt 37/37 + Blossem 43/43. Het exacte checkpoint-HEAD
-staat in de PR #60-checkpoint. De
+#59.** De afrondingsronde (review 6344039571) eindigt op `b1e4abc`
+(referentiecorrectie + opnieuw gemeten, deterministische referentiemeting:
+**167/185**, `79a8b133…`) en de documentatiecommit met de eindmatrix. Bewijs op
+die head: volledige suite **2324/2324**, het structuurcorpus 6/6, de build
+exit 0 met 41/41 pagina's, de PDF.js-packagingcheck OK (166 server scripts) en de
+goedgekeurde read-only bronproef Smelt 37/37 + Blossem 43/43 op dezelfde
+vastgezette bytes. Het exacte checkpoint-HEAD staat in de PR #60-checkpoint. De
 browserfixture (241/241 op `26839eb`) is in deze ronde niet opnieuw gedraaid
 omdat er geen UI is gewijzigd; dat blijft ontwikkelaarsbewijs op een oudere
 head en is geen browseracceptatie. De oudere codehead `26839eb`, evidencecommit
@@ -860,9 +1004,11 @@ historisch bewijs staan. De lokale browserfixture is hoe dan ook geen
 echte bron → database → authenticated browseracceptatie. Volledige
 productacceptatie blijft afhankelijk van de beslissingen hierboven: een echte
 preview-/schrijfronde, een eventuele v2-writer/exportcontract/migratie,
-provider/budget/DPA en een nieuwe holdout. De twee afwijkende referentieregels
-(`Ui oude kaas`, `Wagyu A5 Miyazaki`) en het schema-ontwerp voor prijsvarianten
-zijn de eerstvolgende inhoudelijke beslispunten. De eerstvolgende veilige stap is
-onafhankelijke review door de Delivery Lead; daarna kan de Product Owner de
-resterende besluiten nemen. Er is niets gemerged, gepusht naar een andere
-branch, gedeployed of gepubliceerd.
+provider/budget/DPA en een nieuwe holdout. Het enige inhoudelijke beslispunt dat
+nog in deze code ligt is het **schema-ontwerp voor prijsvarianten** (Product
+Owner); de tien resterende gemiste Pellens-regels zijn precies die klasse en
+staan als begrensd, niet als fout. De twee referentieregels zijn beslist en
+verwerkt. De eerstvolgende veilige stap is
+onafhankelijke review van deze head door de Delivery Lead; daarna kan de Product
+Owner de resterende besluiten nemen. Er is niets gemerged, naar een andere
+branch gepusht, gedeployed of gepubliceerd.
