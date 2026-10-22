@@ -2985,3 +2985,111 @@ details.bta-side-card > summary:focus-visible { outline: 2px solid var(--border-
 .bta-structure-edit label { font-weight: 700; }
 .bta-structure-edit .stg-input { width: 100%; min-width: 0; }
 .bta-structure-review .bta-muted { overflow-wrap: anywhere; }
+
+/* ── #59 fase 2: handmatige AI-import (drie stappen) ─────────────────────────
+   Kleurtaal v2-tokens only; licht/donker via de bestaande tokens. Status is
+   altijd icoon of tekst plus kleur (.status-badge). Mobile-first: één kolom,
+   geen horizontale overflow op 320 en 390 px. */
+
+.mai-steps { display: grid; gap: 16px; min-width: 0; }
+.mai-step-head { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.mai-step-title { margin: 0; font-size: 18px; font-weight: 800; color: var(--text-primary); }
+.mai-field { display: grid; gap: 6px; min-width: 0; }
+.mai-input,
+.mai-select {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-md);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 14px;
+}
+.mai-input:focus-visible,
+.mai-select:focus-visible,
+.mai-btn:focus-visible,
+.mai-details > summary:focus-visible,
+.mai-prompt:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+.mai-urls { min-height: 96px; }
+.mai-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; min-width: 0; }
+.mai-actions .bta-muted { flex: 1 1 220px; min-width: 0; }
+.mai-source-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; min-width: 0; }
+.mai-source {
+  display: grid;
+  gap: 2px 10px;
+  grid-template-columns: 20px minmax(0, 1fr);
+  align-items: baseline;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--status-positive);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  font-size: 13px;
+  min-width: 0;
+}
+.mai-source--ask { border-left-color: var(--status-old); }
+.mai-source-mark { grid-row: 1 / span 3; font-weight: 800; color: var(--status-positive); }
+.mai-source--ask .mai-source-mark { color: var(--status-old); }
+.mai-source-name { font-weight: 700; color: var(--text-primary); overflow-wrap: anywhere; }
+.mai-source-line { color: var(--text-secondary); }
+.mai-source-url {
+  color: var(--text-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.mai-details { border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-elevated); padding: 8px 12px; min-width: 0; }
+.mai-details > summary { cursor: pointer; font-size: 13px; font-weight: 700; color: var(--text-primary); min-height: 24px; }
+.mai-details[open] > summary { margin-bottom: 8px; }
+.mai-prompt {
+  margin: 0;
+  max-height: 320px;
+  overflow: auto;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.mai-received { margin: 0; padding: 10px 12px; border-radius: var(--radius-md); background: var(--status-positive-bg); color: var(--status-positive); font-weight: 700; font-size: 14px; }
+.mai-summary { margin: 0; font-size: 16px; font-weight: 800; color: var(--text-primary); }
+.mai-review-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; min-width: 0; }
+.mai-review-row {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--status-old);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  min-width: 0;
+}
+.mai-review-row--blocked { border-left-color: var(--status-blocked); }
+.mai-review-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px; min-width: 0; }
+.mai-review-name { font-weight: 700; color: var(--text-primary); overflow-wrap: anywhere; }
+.mai-review-price { font-weight: 600; color: var(--text-secondary); }
+.mai-why { margin: 0; font-size: 13px; color: var(--text-secondary); overflow-wrap: anywhere; }
+.mai-quote { margin: 0; padding-left: 10px; border-left: 2px solid var(--border-strong); font-size: 13px; color: var(--text-secondary); overflow-wrap: anywhere; }
+.mai-row-actions { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
+.mai-row-actions .mai-select { flex: 1 1 200px; }
+.mai-btn { min-height: 40px; padding: 8px 14px; font-size: 14px; }
+.mai-panel { display: grid; gap: 8px; padding: 10px 12px; border: 1px solid var(--accent-border); border-radius: var(--radius-md); background: var(--bg-card); min-width: 0; }
+.mai-panel-title { margin: 0; font-size: 14px; font-weight: 800; color: var(--text-primary); }
+.mai-done-list { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 13px; color: var(--text-secondary); }
+
+@media (min-width: 720px) {
+  .mai-steps { gap: 20px; }
+  .mai-review-row { padding: 14px 16px; }
+}
+
