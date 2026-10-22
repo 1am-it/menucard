@@ -979,3 +979,96 @@ test('REGRESSION (review 6252891629 P1): a supplement section survives parser �
   assert.equal(result.aiExtraction.skipped, true)
   assert.equal(result.aiExtraction.reason, 'unsupported_product_gap')
 })
+
+// ── Lead-review 6344039571 (finish round): criterion 10 and 11 ──
+
+test('K2 (criterion 10, wrong establishment): a same-host page carrying another branch address never lends that address to this branch, and the menu read there keeps its own source URL', async () => {
+  const homepageWithBredaAddress = jsonLdScript({
+    '@type': 'Restaurant',
+    name: 'Fictieve Keten Breda',
+    address: { streetAddress: 'Tolbrugstraat 19', postalCode: '4811 WN', addressLocality: 'Breda' },
+  }) + '<a href="/menukaart">Menukaart</a>'
+  // A chain-wide template prints the head office of another branch next to
+  // this branch's own menu. The address is a genuine conflict and the menu
+  // keeps the page it was actually read from, so a reviewer can see both.
+  const otherBranchPage = `<address>Hoofdkantoor 1, 1011 AB Amsterdam</address>
+    <h2>Fictieve lunchkaart</h2><ul><li>Fictieve soep 4,50</li><li>Fictieve salade 5,50</li><li>Fictief brood 3,00</li></ul>`
+
+  const result = await runRestaurantSourceAnalysis({
+    homepageHtml: homepageWithBredaAddress,
+    homepageUrl: 'https://fictieve-keten.invalid/',
+    fetchCandidate: async () => ({ status: 'html', body: otherBranchPage, finalUrl: 'https://fictieve-keten.invalid/menukaart' }),
+  })
+
+  // The other branch's address is never accepted as this branch's address.
+  assert.equal(result.fieldEvidence.address.contextStatus, 'conflict')
+  assert.equal(result.fieldEvidence.address.confidence, 'laag')
+  assert.equal(result.fieldEvidence.address.reviewReady, false)
+  assert.doesNotMatch(JSON.stringify(result.restaurantCandidateFields.address), /Amsterdam/)
+  assert.doesNotMatch(result.description, /Amsterdam/)
+
+  // The menu itself is not detached from its own page: the source URL stays
+  // the open review context, and only that page's own dishes are read.
+  const menu = result.menuContexts.find((entry) => entry.extractionMethod === 'html')
+  assert.ok(menu, 'the page menu is a real menu context')
+  assert.equal(menu.sourceUrl, 'https://fictieve-keten.invalid/menukaart')
+  const names = menu.categories.flatMap((category) => category.items.map((item) => item.name))
+  assert.deepEqual(names, ['Fictieve soep', 'Fictieve salade', 'Fictief brood'])
+})
+
+test('K3 (criterion 11): a supplement gap and a two-price row stay named through analysis → receipt summary → concept — never a guessed price and never a silent drop', async () => {
+  const content = [
+    'BT /F1 12 Tf',
+    textAt(20, 200, '// SUPPLEMENTEN'),
+    textAt(20, 180, 'Fictieve Havermelk'),
+    textAt(120, 180, '0.5'),
+    textAt(20, 140, '// DRANKEN'),
+    textAt(20, 120, 'Fictieve Wijn 6.50 / 25.00'),
+    textAt(20, 100, 'Fictieve Thee'),
+    textAt(120, 100, '2.5'),
+    'ET',
+  ].join('\n')
+  const result = await runRestaurantSourceAnalysis({
+    homepageHtml: homepageWithFullRestaurantAndOneMenu(),
+    homepageUrl: 'https://debotanistbreda.nl/',
+    fetchCandidate: async () => ({ status: 'pdf', bytes: buildTestPdf({ contentStream: content }), finalUrl: 'https://debotanistbreda.nl/menukaart.pdf' }),
+  })
+  const pdfMenu = result.menuContexts.find((menu) => menu.extractionMethod === 'pdf_text')
+  assert.ok(pdfMenu)
+
+  // Extraction: the supplement row is not a dish; the two-price row keeps its
+  // name and both amounts verbatim (priceText), never flattened to one amount;
+  // both facts are named for the reviewer.
+  const extracted = pdfMenu.categories.flatMap((category) => category.items)
+  assert.deepEqual(extracted.map((item) => item.name), ['Fictieve Wijn', 'Fictieve Thee'])
+  assert.equal(extracted[0].price, null)
+  assert.equal(extracted[0].priceText, '6.50 / 25.00')
+  assert.equal(extracted[1].price, '2.5')
+  assert.ok(result.limitations.some((line) => /supplementregel/.test(line) && /SUPPLEMENTEN/.test(line)), 'the supplement rows are named')
+  assert.ok(result.limitations.some((line) => /unresolved_price/.test(line)), 'the unresolved price is named')
+
+  // Receipt summary: exactly the same validated result, nothing re-extracted
+  // and both amounts preserved verbatim as price variants.
+  const summary = buildCandidateSummary({ restaurantCandidateFields: result.restaurantCandidateFields, menus: [pdfMenu] })
+  assert.equal(summary.menus[0].sourceId, pdfMenu.sourceId)
+  assert.equal(summary.menus[0].sourceUrl, 'https://debotanistbreda.nl/menukaart.pdf')
+  assert.deepEqual(
+    summary.menus[0].categories.flatMap((category) => category.items.map((item) => [item.name, item.price])),
+    [['Fictieve Wijn', null], ['Fictieve Thee', '2.5']],
+  )
+  const carriedVariant = summary.menus[0].categories[0].items[0]
+  assert.equal(carriedVariant.priceStatus, 'multiple_undecomposed')
+  assert.deepEqual(carriedVariant.priceVariants.map((variant) => variant.price), ['6.50', '25.00'])
+
+  // Concept: the unresolved price and the uncertain rubric are explicit
+  // blockers; no amount is guessed and no dish disappears.
+  const concept = buildMenuConcept({ menus: summary.menus, liveLines: [], edits: {} })
+  assert.equal(concept.canSave, false)
+  assert.deepEqual(concept.blockers.map((blocker) => [blocker.name, blocker.status]), [
+    ['Fictieve Wijn', 'multiple_prices'],
+    ['Fictieve Thee', 'unclear_category'],
+  ])
+  const conceptItems = concept.content.categories.flatMap((category) => category.items)
+  // The concept normalises a price notation ("2.5" → "2.50") but never invents one.
+  assert.deepEqual(conceptItems.map((item) => [item.name, item.price]), [['Fictieve Wijn', null], ['Fictieve Thee', '2.50']])
+})
