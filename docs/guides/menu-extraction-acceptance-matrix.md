@@ -1,15 +1,18 @@
 # Menu-extractie — afrondingsmatrix #59
 
 Status: **ontwikkelaarsbewijs, geen onafhankelijke review en geen release.**
-Datum: 2026-10-22 (nieuwste ronde: Lead-review 6344039571, afrondingsronde
-K1–K5: één door de Lead besliste referentiecorrectie, robuustheids- en
-ketenregressies op deze head, en de eindmatrix per criterium; de rondehistorie
-hieronder blijft ongewijzigd).
+Datum: 2026-10-22 (nieuwste ronde: Lead-review 6349832755, criterium 5:
+Wolfslaar en T-Huis eenmalig vastgelegd, vier kaarten in één meting, T-Huis
+eerlijk als niet-meetbaar begrensd; de rondehistorie hieronder blijft
+ongewijzigd).
 Issue #59, branch `feat/menu-extraction-59`, PR #60 (draft).
-De nieuwste ronde staat in “Ronde 2026-10-22 — afrondingsronde (review
-6344039571)”; de ronde daarvoor in “Ronde 2026-10-22 — Pellens-kaartvormen
-generiek hersteld (review 6334231310)” en daarvoor “Ronde 2026-10-21 —
-generiek extractieherstel (review 6323277596)”.
+De nieuwste ronde staat in “Ronde 2026-10-22 — criterium 5: Wolfslaar en T-Huis
+vastgelegd, vier kaarten in één meting (review 6349832755)”; de ronde daarvoor
+in “Ronde 2026-10-22 — criterium 5: Bardot naast Zuyd, Wolfslaar/T-Huis
+geprobeerd (review 6347355753)” en daarvoor “Ronde 2026-10-22 — afrondingsronde
+(review 6344039571)”.
+Deze ronde wijzigt **geen** extractiecode, bestaande referentie, telregel of
+vergelijkingslogica; de meetcode is alleen uitgebreid met de twee nieuwe kaarten.
 De afrondingsronde wijzigt **uitsluitend** twee referentieregels op uitdrukkelijk
 Lead-besluit (`Ui` + oude kaas, `Wagyu A5` + Miyazaki); telregels, captures,
 meetcode en brongerichte code zijn niet gewijzigd. De oudere
