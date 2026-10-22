@@ -19,7 +19,14 @@ const { isInternalOnly } = require('./importInbox');
 const { buildImportBundle, bundleMetadata, ManualImportBundleError } = require('./manualMenuImportBundle');
 const { buildImportPrompt, buildFollowUpPrompt, buildOpenPointsPrompt } = require('./manualMenuImportPrompt');
 const { extractCodeBlock, buildImportReport, checkBundleBinding, publicImportReport } = require('./manualMenuImportImport');
-const { decideRow, reviewView, buildConceptDraft, applyFollowUp, ManualImportReviewError } = require('./manualMenuImportReview');
+const {
+  decideRow,
+  reviewView,
+  buildConceptDraft,
+  applyFollowUp,
+  applyOpenPointsAnswer,
+  ManualImportReviewError,
+} = require('./manualMenuImportReview');
 const { buildUsageExport, ROUTES } = require('./manualMenuImportUsage');
 
 const FORBIDDEN = 'Alleen interne medewerkers kunnen een menu importeren.';
@@ -247,6 +254,27 @@ function createManualMenuImportHandlers(deps = {}) {
     if (!entry) return reply(404, { error: 'Deze import is verlopen. Plak het antwoord opnieuw.' });
     const rows = entry.report.rows.filter((row) => row.askAi && !entry.decisions.has(row.id));
     if (rows.length === 0) return reply(422, { error: 'Er zijn geen open punten waar de AI iets kan toevoegen.', reason: 'no_open_points' });
+    if (typeof parsed.body.answer === 'string') {
+      // Het gecombineerde antwoord gaat door dezelfde validatie; elk item moet
+      // bij precies één openstaande regel horen en verder verandert er niets.
+      const result = applyOpenPointsAnswer({
+        report: entry.report,
+        bundle: entry.bundle,
+        answer: parsed.body.answer,
+        maxRows: Math.max(1, importStore.remainingFollowUps(entry)),
+      });
+      if (!result.ok) {
+        record(ROUTES.followUp, 'rejected', entry.report.aiName);
+        return reply(422, { error: result.message, reason: result.code });
+      }
+      importStore.replaceReport(entry, result.report);
+      for (const rowId of result.rowIds) importStore.countFollowUp(entry, rowId);
+      record(ROUTES.followUp, 'follow_up', entry.report.aiName);
+      return reply(200, {
+        import: publicImportReport(result.report),
+        review: reviewView({ report: entry.report, decisions: entry.decisions }),
+      });
+    }
     try {
       const prompt = buildOpenPointsPrompt({ bundle: entry.bundle, rows: rows.slice(0, 10), question: parsed.body.question });
       return reply(200, { prompt });

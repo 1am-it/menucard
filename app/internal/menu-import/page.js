@@ -72,6 +72,8 @@ export default function ManualMenuImportPage() {
   const [askFor, setAskFor] = useState(null)
   const [askPrompt, setAskPrompt] = useState('')
   const [askAnswer, setAskAnswer] = useState('')
+  const [allPrompt, setAllPrompt] = useState('')
+  const [allAnswer, setAllAnswer] = useState('')
   const [saved, setSaved] = useState(null)
 
   useEffect(() => {
@@ -205,6 +207,32 @@ export default function ManualMenuImportPage() {
       setAskPrompt('')
       setAskAnswer('')
       setMessage('Het antwoord is gecontroleerd. Alleen deze regel is bijgewerkt; jij beslist daarna.')
+    }
+    setBusy(false)
+  }
+
+  async function askAllOpen() {
+    setBusy(true)
+    setError(null)
+    setAllPrompt('')
+    setAllAnswer('')
+    const result = await api(`/imports/${report.importId}/open-points`, {})
+    if (!result.ok) setError(result.error)
+    else setAllPrompt(result.data.prompt.text)
+    setBusy(false)
+  }
+
+  async function submitAllOpen() {
+    setBusy(true)
+    setError(null)
+    const result = await api(`/imports/${report.importId}/open-points`, { answer: allAnswer })
+    if (!result.ok) setError(result.error)
+    else {
+      setReport(result.data.import)
+      setReview(result.data.review)
+      setAllPrompt('')
+      setAllAnswer('')
+      setMessage('De antwoorden zijn per regel gecontroleerd. Jij beslist daarna per regel.')
     }
     setBusy(false)
   }
@@ -486,6 +514,41 @@ export default function ManualMenuImportPage() {
                   Alleen de regels die aandacht vragen staan open. De regels die in orde zijn, zitten ingeklapt. Er is geen
                   &quot;alles accepteren&quot;.
                 </p>
+
+                <div className="mai-actions">
+                  <button type="button" className="stg-btn-secondary mai-btn" disabled={busy || openRows.filter((row) => row.askAi).length === 0} onClick={askAllOpen}>
+                    Vraag AI over alle open punten
+                  </button>
+                  <span className="bta-muted">
+                    Eén vraag over de punten waar de AI iets kan toevoegen. Elk antwoord wordt apart gecontroleerd; er is geen
+                    &quot;alles overnemen&quot;.
+                  </span>
+                </div>
+
+                {allPrompt ? (
+                  <div className="mai-panel">
+                    <p className="mai-panel-title">Vraag AI over alle open punten</p>
+                    <pre className="mai-prompt" tabIndex="0">
+                      {allPrompt}
+                    </pre>
+                    <textarea
+                      className="bta-textarea"
+                      value={allAnswer}
+                      onChange={(event) => setAllAnswer(event.target.value)}
+                      placeholder="Plak hier het antwoord over deze regels"
+                      aria-label="Antwoord over alle open punten"
+                    />
+                    <div className="mai-row-actions">
+                      <button type="button" className="di-btn-primary mai-btn" disabled={busy || !allAnswer.trim()} onClick={submitAllOpen}>
+                        Controleren
+                      </button>
+                      <button type="button" className="stg-btn-secondary mai-btn" onClick={() => setAllPrompt('')}>
+                        Annuleer
+                      </button>
+                    </div>
+                    <p className="mai-why">Maximaal 10 regels per vraag. Een antwoord dat een andere regel raakt, wordt geweigerd.</p>
+                  </div>
+                ) : null}
 
                 <ul className="mai-review-list">
                   {openRows.map((row) => {

@@ -480,6 +480,75 @@ function applyFollowUp({ report, bundle, rowId, answer, followUpCount = 0 } = {}
   return { ok: true, report: next, row: next.rows.find((entry) => entry.id === rowId) || null };
 }
 
+function normalizeRowName(value) {
+  return String(value || '')
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+/**
+ * Eén antwoord voor alle open punten (K6). Elk item moet bij precies één
+ * openstaande regel horen, uit dezelfde bron. Een antwoord dat een andere regel
+ * raakt of een nieuwe regel toevoegt, wordt volledig geweigerd: er is geen
+ * "alles overnemen". Daarna beslist de mens nog per regel.
+ */
+function applyOpenPointsAnswer({ report, bundle, answer, maxRows = MAX_FOLLOW_UPS_PER_IMPORT } = {}) {
+  if (!report || !Array.isArray(report.rows)) {
+    return { ok: false, code: 'unknown_import', message: 'Deze import hoort niet bij deze sessie.' };
+  }
+  const parsed = extractCodeBlock(answer);
+  if (!parsed.ok) return parsed;
+  const items = collectItems(parsed.value);
+  if (items.length === 0) {
+    return { ok: false, code: 'follow_up_out_of_scope', message: 'Het antwoord bevat geen regels.' };
+  }
+  if (items.length > Math.min(maxRows, 10)) {
+    return { ok: false, code: 'follow_up_out_of_scope', message: 'Het antwoord gaat over te veel regels. Vraag AI over een kleinere set open punten.' };
+  }
+  const openRows = report.rows.filter((row) => row.askAi && row.state !== 'valid');
+  const byKey = new Map(openRows.map((row) => [`${row.sourceId}\u0000${normalizeRowName(row.name)}`, row]));
+  const used = new Set();
+  const replacements = [];
+  for (const entry of items) {
+    const sourceId = entry.item && entry.item.evidence && typeof entry.item.evidence.sourceId === 'string' ? entry.item.evidence.sourceId : null;
+    const key = `${sourceId}\u0000${normalizeRowName(entry.item && entry.item.name)}`;
+    const row = byKey.get(key);
+    if (!row || used.has(row.id)) {
+      return {
+        ok: false,
+        code: 'follow_up_out_of_scope',
+        message: 'Het antwoord raakt een regel die niet openstaat of een andere bron. Vraag de AI om alleen de open punten.',
+      };
+    }
+    used.add(row.id);
+    replacements.push({ row, item: entry.item });
+  }
+  const menus = cloneMenus(report.validated.menus);
+  for (const { row, item: replacement } of replacements) {
+    const category = menus[row.menuIndex] && menus[row.menuIndex].categories[row.categoryIndex];
+    if (!category || !Array.isArray(category.items) || !category.items[row.itemIndex]) {
+      return { ok: false, code: 'unknown_row', message: 'Deze regel hoort niet bij deze import.' };
+    }
+    category.items[row.itemIndex] = replacement;
+  }
+  const next = buildImportReport({
+    importId: report.importId,
+    bundle,
+    output: {
+      menus,
+      coverage: report.validated.coverage,
+      ...(Array.isArray(report.validated.rejected) && report.validated.rejected.length > 0 ? { rejected: report.validated.rejected } : {}),
+    },
+    aiName: report.aiName,
+    now: new Date(report.importedAt),
+  });
+  if (!next.ok) return next;
+  return { ok: true, report: next, rowIds: replacements.map((entry) => entry.row.id) };
+}
+
+
 
 /**
  * Begrensde, in-memory sessieopslag voor één import: het gevalideerde rapport,
@@ -577,5 +646,6 @@ module.exports = {
   menuContextFor,
   buildConceptDraft,
   applyFollowUp,
+  applyOpenPointsAnswer,
 };
 

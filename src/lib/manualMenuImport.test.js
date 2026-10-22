@@ -18,7 +18,7 @@ const {
 } = require('./manualMenuImportBundle');
 const { buildImportPrompt, buildFollowUpPrompt, buildOpenPointsPrompt } = require('./manualMenuImportPrompt');
 const { extractCodeBlock, buildImportReport, checkBundleBinding, summaryLine, MAX_ANSWER_BYTES } = require('./manualMenuImportImport');
-const { decideRow, reviewView, buildConceptDraft, applyFollowUp, menuContextFor, MISSING_REASONS } = require('./manualMenuImportReview');
+const { decideRow, reviewView, buildConceptDraft, applyFollowUp, applyOpenPointsAnswer, menuContextFor, MISSING_REASONS } = require('./manualMenuImportReview');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const PROTOCOL = loadMenuExtractionProtocol({ root: ROOT });
@@ -585,5 +585,90 @@ test('K2: de samenvatting in gewone taal telt orde en nalopen', () => {
   assert.equal(summaryLine(report), `${report.summary.items} gerechten · ${report.summary.valid} in orde · ${report.summary.needsReview} nalopen`);
   assert.equal(menuContextFor('23', [{ title: 'Lunch' }]), '23-lunch');
   assert.equal(menuContextFor('23', [{ title: 'Chef\u2019s menu' }]), '23-chefsmenu');
+});
+
+
+test('K6: één antwoord voor alle open punten vervangt alleen die regels', () => {
+  const report = buildReport();
+  const combined = {
+    menus: [
+      {
+        title: 'Lunch',
+        sourceId: 'source-1',
+        categories: [
+          {
+            name: 'Bites',
+            items: [
+              {
+                name: 'Koffie',
+                priceStatus: 'on_request',
+                evidence: { sourceId: 'source-1', locator: 'Bites · regel 1', quote: 'Espresso 2,50' },
+              },
+              {
+                name: 'Dagschotel',
+                priceStatus: 'on_request',
+                evidence: { sourceId: 'source-2', locator: 'scan pagina 1', quote: 'Dagschotel 12,50' },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    coverage: { status: 'partial', sourcesRead: 2, pagesRead: 2, itemsExtracted: 3, unreadSources: [], limitations: ['Vervolgvraag'] },
+  };
+  const result = applyOpenPointsAnswer({
+    report,
+    bundle: buildBundle(),
+    answer: 'Kort.\n```json\n' + JSON.stringify(combined) + '\n```',
+  });
+  assert.equal(result.ok, true, JSON.stringify(result.message || result.problems || []));
+  assert.equal(result.rowIds.length, 2);
+  const coffee = result.report.rows.find((entry) => entry.name === 'Koffie');
+  const daily = result.report.rows.find((entry) => entry.name === 'Dagschotel');
+  // Een regel uit een scan blijft ook na een AI-antwoord "uit scan, controleer":
+  // zonder brontekst is bewijs nooit automatisch te controleren.
+  assert.equal(daily.state, 'unverifiable');
+  assert.equal(coffee.state, 'valid');
+  // De wijn met twee prijzen staat niet in deze vraag en blijft open.
+  const wine = result.report.rows.find((entry) => entry.name === 'Glas huiswijn');
+  assert.equal(wine.state, 'unsupported');
+  const untouched = report.rows.find((entry) => entry.name === 'Broodplank');
+  assert.deepEqual(
+    { ...result.report.rows.find((entry) => entry.id === untouched.id), id: undefined },
+    { ...untouched, id: undefined },
+  );
+});
+
+test('K6: een antwoord over een regel die niet openstaat wordt volledig geweigerd', () => {
+  const report = buildReport();
+  const combined = {
+    menus: [
+      {
+        title: 'Lunch',
+        sourceId: 'source-1',
+        categories: [
+          {
+            name: 'Bites',
+            items: [
+              {
+                name: 'Koffie',
+                priceStatus: 'on_request',
+                evidence: { sourceId: 'source-1', locator: 'Bites · regel 1', quote: 'Broodplank 8,50' },
+              },
+              {
+                name: 'Een nieuwe regel',
+                priceStatus: 'on_request',
+                evidence: { sourceId: 'source-1', locator: 'Bites · regel 1', quote: 'Broodplank 8,50' },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    coverage: { status: 'partial', sourcesRead: 2, pagesRead: 2, itemsExtracted: 2, unreadSources: [], limitations: ['Vervolgvraag'] },
+  };
+  const result = applyOpenPointsAnswer({ report, bundle: buildBundle(), answer: JSON.stringify(combined) });
+  assert.equal(result.ok, false);
+  assert.equal(result.code, 'follow_up_out_of_scope');
 });
 
