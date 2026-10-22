@@ -639,6 +639,7 @@ module.exports = {
     triage: { batch: overview(detailWith([imageOnlyItem])), triage: triagePayload },
     v2: overview(detailWith([v2Item])),
     error: null,
+    manual: { manual: manualImportScenario() },
     ...conceptScenarios,
   },
   expected: {
@@ -648,4 +649,101 @@ module.exports = {
     attentionGroupCount: extraction.attentionGroups.length,
   },
 };
+
+
+// ── #59 fase 2: fictieve handmatige AI-import in drie stappen ───────────────
+// Gebouwd met de echte productmodules, zodat de browser precies de vormen ziet
+// die de server stuurt. Fictieve bron, fictief antwoord, geen netwerk.
+
+const path = require('node:path');
+const { loadMenuExtractionProtocol } = require('../../../src/lib/menuExtractionProtocol');
+const { buildImportBundle, bundleMetadata, sourceHashForText } = require('../../../src/lib/manualMenuImportBundle');
+const { buildImportPrompt } = require('../../../src/lib/manualMenuImportPrompt');
+const { buildImportReport, publicImportReport } = require('../../../src/lib/manualMenuImportImport');
+const { decideRow, reviewView, buildConceptDraft } = require('../../../src/lib/manualMenuImportReview');
+
+function manualImportScenario() {
+  const protocol = loadMenuExtractionProtocol({ root: path.resolve(__dirname, '..', '..', '..') });
+  const text = ['FICTIEF LUNCH', 'Bites', 'Fictieve salade 12,50', 'Fictief glas wijn 4,50', 'Fictief fles wijn 24,00'].join('\n');
+  const bundle = buildImportBundle({
+    bundleId: 'AI-FICTIEF-0001',
+    actorUserId: 'fixture-user',
+    restaurantId: RESTAURANT.id,
+    restaurantName: RESTAURANT.name,
+    fetchedAt: '2026-10-22T12:00:00.000Z',
+    sources: [{ id: 'source-1', url: 'https://fictief-brasserie.invalid/menu', kind: 'html', status: 'read', text }],
+    protocol,
+    now: new Date('2026-10-22T12:00:00.000Z'),
+  });
+  const evidenceFor = (locator, quote) => ({ sourceId: 'source-1', locator, quote });
+  const output = {
+    menus: [
+      {
+        title: 'Fictief Lunch',
+        sourceId: 'source-1',
+        categories: [
+          {
+            name: 'Bites',
+            items: [
+              { name: 'Fictieve salade', priceStatus: 'known', amountMinorUnits: 1250, currency: 'EUR', evidence: evidenceFor('Bites · 1', 'Fictieve salade 12,50') },
+              {
+                name: 'Fictief glas wijn',
+                priceStatus: 'multiple_undecomposed',
+                priceVariants: [
+                  { label: 'Glas', amountMinorUnits: 450, currency: 'EUR' },
+                  { label: 'Fles', amountMinorUnits: 2400, currency: 'EUR' },
+                ],
+                evidence: evidenceFor('Bites · 2', 'Fictief glas wijn 4,50'),
+              },
+              {
+                name: 'Fictieve koffie',
+                priceStatus: 'known',
+                amountMinorUnits: 280,
+                currency: 'EUR',
+                evidence: evidenceFor('Bites · 9', 'Fictieve koffie 2,80'),
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    coverage: { status: 'complete', sourcesRead: 1, pagesRead: 1, itemsExtracted: 3, unreadSources: [], limitations: [] },
+  };
+  const report = buildImportReport({
+    importId: 'fixture-import',
+    bundle,
+    output,
+    aiName: 'Claude',
+    now: new Date('2026-10-22T12:05:00.000Z'),
+  });
+  if (!report.ok) throw new Error(`manual fixture invalid: ${report.code}`);
+  const wine = report.rows.find((row) => row.code === 'price_variant');
+  const coffee = report.rows.find((row) => row.code === 'quote_not_in_source');
+  const first = decideRow({ report, decisions: new Map(), decision: { rowId: wine.id, action: 'choose_price', variantIndex: 1 } });
+  const second = decideRow({
+    report,
+    decisions: first.decisions,
+    decision: { rowId: coffee.id, action: 'confirm', reasonCode: 'niet_in_bron', note: 'Fictief op de papieren kaart gezien.' },
+  });
+  const draft = buildConceptDraft({ report, decisions: second.decisions, restaurantId: RESTAURANT.id });
+  return {
+    bundle: bundleMetadata(bundle),
+    prompt: buildImportPrompt(bundle),
+    import: publicImportReport(report),
+    reviews: [
+      reviewView({ report, decisions: new Map() }),
+      reviewView({ report, decisions: first.decisions }),
+      reviewView({ report, decisions: second.decisions }),
+    ],
+    followUpPrompt: {
+      text: '# Vervolgvraag over één regel\n\nFictief.\n\n```text\nFictieve brontekst.\n```',
+      byteLength: 120,
+      rowIds: [coffee.id],
+    },
+    saved: {
+      concept: { id: 'concept-fictief-import-1', version: 1, unchanged: false },
+      provenance: draft.ok ? draft.provenance : null,
+    },
+  };
+}
 

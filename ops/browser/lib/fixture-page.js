@@ -97,12 +97,28 @@ function fixtureBootstrap(scenarios, options = {}) {
     function jsonResponse(body, status) {
       return new Response(JSON.stringify(body), { status: status || 200, headers: { 'Content-Type': 'application/json' } });
     }
+    const fixtureState = { manualStep: 0 };
     function fixtureResponse(verdict) {
       if (verdict.routeId === 'auth') return jsonResponse(session);
       if (verdict.routeId === 'me') {
         return jsonResponse({ roles: [{ role: 'internal', restaurant_id: null }, { role: 'editor', restaurant_id: null }] });
       }
       if (verdict.routeId === 'batch-analysis-process') return jsonResponse({ outcome: 'done' });
+      if (typeof verdict.routeId === 'string' && verdict.routeId.indexOf('manual-') === 0) {
+        const scenario = fixtures[fixture];
+        const manual = scenario && scenario.manual;
+        if (!manual) return jsonResponse({ error: 'Fictief importszenario ontbreekt.' }, 500);
+        if (verdict.routeId === 'manual-bundles') return jsonResponse({ bundle: manual.bundle, prompt: manual.prompt });
+        if (verdict.routeId === 'manual-imports') {
+          return jsonResponse({ import: manual.import, review: manual.reviews[0] });
+        }
+        if (verdict.routeId === 'manual-follow-up') return jsonResponse({ prompt: manual.followUpPrompt });
+        if (verdict.routeId === 'manual-decisions') {
+          fixtureState.manualStep = Math.min(fixtureState.manualStep + 1, manual.reviews.length - 1);
+          return jsonResponse({ row: null, review: manual.reviews[fixtureState.manualStep] });
+        }
+        if (verdict.routeId === 'manual-save') return jsonResponse(manual.saved);
+      }
       if (verdict.routeId === 'batch-analysis') {
         if (fixture === 'error') {
           return jsonResponse({ error: 'De batchanalyse kon niet worden geladen.' }, 500);

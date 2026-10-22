@@ -28,6 +28,14 @@ const FIXTURE_API_ROUTES = [
   // unknown and is refused before it can reach a handler.
   { id: 'menu-concepts-list', match: 'exact', path: '/api/internal/v1/menu-concepts', methods: ['GET'] },
   { id: 'menu-concepts-detail', match: 'detail', path: '/api/internal/v1/menu-concepts/', methods: ['GET'] },
+  // #59 fase 2: the manual AI import. Only these exact fictional paths are
+  // answered; the fixed fixture import id keeps every unknown import path
+  // refused. The app itself never calls a provider, so no AI traffic exists.
+  { id: 'manual-bundles', match: 'exact', path: '/api/internal/v1/manual-menu-import/bundles', methods: ['POST'] },
+  { id: 'manual-imports', match: 'exact', path: '/api/internal/v1/manual-menu-import/imports', methods: ['POST'] },
+  { id: 'manual-decisions', match: 'exact', path: '/api/internal/v1/manual-menu-import/imports/fixture-import/decisions', methods: ['POST'] },
+  { id: 'manual-follow-up', match: 'exact', path: '/api/internal/v1/manual-menu-import/imports/fixture-import/follow-up', methods: ['POST'] },
+  { id: 'manual-save', match: 'exact', path: '/api/internal/v1/manual-menu-import/imports/fixture-import/save', methods: ['POST'] },
   { id: 'me', match: 'exact', path: '/api/internal/v1/me', methods: ['GET'] },
   { id: 'auth', match: 'prefix', path: '/auth/v1/', methods: ['GET', 'POST'] },
 ];

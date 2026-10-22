@@ -37,6 +37,7 @@ const EVIDENCE_PATH = path.join(EVIDENCE_DIR, 'menu-review-browser-evidence.json
 const PORT = Number(process.env.BROWSER_FIXTURE_PORT || 3137);
 const APP_ORIGINS = defaultAppOrigins(PORT);
 const BATCH_URL = `http://localhost:${PORT}/internal/source-triage/batch`;
+const MANUAL_URL = `http://localhost:${PORT}/internal/menu-import`;
 const BATCH_QUERY = `batch=${encodeURIComponent(fixtures.BATCH_ID)}`;
 const CONCEPTS_URL = `http://localhost:${PORT}/internal/menu-concepts`;
 const CONCEPT_DETAIL = (id) => `${CONCEPTS_URL}/${encodeURIComponent(id)}`;
@@ -1129,6 +1130,62 @@ function writeEvidence({ passed, head, dirty, error, browser }) {
   return evidence;
 }
 
+// ── #59 fase 2: handmatige AI-import, drie stappen (fixture only) ──────────
+// De fixture antwoordt alleen op de vijf vaste paden met een fictieve bundel,
+// een fictief antwoord en twee fictieve beslissingen. De app doet zelf geen
+// modeloproep; er is dus ook geen AI-verkeer om te blokkeren.
+
+async function setFieldValue(cdp, selector, value) {
+  return evalJs(cdp, `(() => {
+    const el = document.querySelector(${JSON.stringify(selector)});
+    if (!el) return false;
+    const proto = el.tagName === 'SELECT'
+      ? window.HTMLSelectElement.prototype
+      : el.tagName === 'TEXTAREA' ? window.HTMLTextAreaElement.prototype : window.HTMLInputElement.prototype;
+    const setter = Object.getOwnPropertyDescriptor(proto, 'value').set;
+    setter.call(el, ${JSON.stringify(value)});
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+    return true;
+  })()`);
+}
+
+function manualUrl(theme) {
+  const params = new URLSearchParams({
+    fixture: 'manual',
+    restaurant: fixtures.RESTAURANT.id,
+    name: fixtures.RESTAURANT.name,
+    url: 'https://fictief-brasserie.invalid/menu',
+    theme,
+  });
+  return `${MANUAL_URL}?${params.toString()}`;
+}
+
+async function manualImportScenario(cdp) {
+  await setViewport(cdp, 390, 900);
+  await openRoute(cdp, manualUrl('light'), `document.body.innerText.includes('Menu importeren met AI')`);
+
+  // Stap 1 — prompt maken.
+  await clickButton(cdp, 'Prompt maken');
+  const step1 = await waitFor(cdp, `document.body.innerText.includes('gaat mee in de prompt')`, 15000);
+  check('manual import: step 1 shows the source line in plain language', step1);
+  const step1Text = await bodyText(cdp);
+  check('manual import: step 1 offers "Kopieer prompt"', step1Text.includes('Kopieer prompt'));
+  check('manual import: technische details name the pinned instruction', step1Text.includes('MENU-EXTRACTION.md'));
+
+  // Stap 2 — antwoord plakken; nooit JSON op het scherm.
+  await setFieldValue(cdp, '#mai-answer', 'Korte samenvatting.\n```json\n{"menus":[],"coverage":{}}\n```');
+  await clickButton(cdp, 'Controleren');
+  const step2 = await waitFor(cdp, `document.body.innerText.includes('Antwoord ontvangen')`, 15000);
+  check('manual import: step 2 confirms the received counts', step2);
+  const step2Text = await bodyText(cdp);
+  check(
+    'manual import: step 2 never shows the pasted JSON',
+    !step2Text.includes('"menus"') && !step2Text.includes('"coverage"'),
+    step2Text.slice(0, 120),
+  );
+  check('manual import: step 2 shows "1 menukaart, 3 gerechten"', step2Text.includes('1 menukaart, 3 gerechten'));
+
 async function main() {
   const browserPath = findBrowser();
   if (!browserPath) {
@@ -1158,6 +1215,7 @@ async function main() {
     await partialScenario(cdp);
     await imageOnlyScenario(cdp);
     await structureScenario(cdp);
+    await manualImportScenario(cdp);
     await v2Scenario(cdp);
     await errorScenario(cdp);
     for (const width of [320, 390]) {
@@ -1235,6 +1293,86 @@ async function main() {
       }
     }
   }
+}
+
+
+  // Stap 3 — de twee open punten, elk met een eigen handeling.
+  const step3 = await waitFor(cdp, `document.body.innerText.includes('3 gerechten · 1 in orde · 2 nalopen')`, 15000);
+  check('manual import: step 3 summarises in plain language', step3);
+  const saveBefore = await evalJs(cdp, `(() => {
+    const button = [...document.querySelectorAll('button')].find((b) => b.innerText.includes('Concept opslaan'));
+    return button ? button.disabled : null;
+  })()`);
+  check('manual import: saving is disabled while points are open', saveBefore === true);
+
+  await setFieldValue(cdp, 'select[aria-label="Kies de prijs voor Fictief glas wijn"]', '1');
+  await clickButton(cdp, 'Kies');
+  const afterPrice = await waitFor(cdp, `document.body.innerText.includes('1 nalopen')`, 15000);
+  check('manual import: choosing a price resolves that line', afterPrice);
+
+  await clickButton(cdp, 'Klopt');
+  const reasonPanel = await waitFor(cdp, `document.body.innerText.includes('Waarom staat deze regel er toch?')`, 15000);
+  check('manual import: "staat niet in de bron" asks for a reason', reasonPanel);
+  const guardsReason = await evalJs(cdp, `(() => {
+    const button = [...document.querySelectorAll('button')].find((b) => b.innerText.includes('Reden opslaan'));
+    return button ? button.disabled : null;
+  })()`);
+  check('manual import: the reason cannot be saved empty', guardsReason === true);
+  await setFieldValue(cdp, 'input[aria-label="Korte toelichting"]', 'Fictief op de papieren kaart gezien.');
+  await clickButton(cdp, 'Reden opslaan');
+  const afterReason = await waitFor(cdp, `document.body.innerText.includes('Alle punten zijn nagelopen')`, 15000);
+  check('manual import: after the reason every point is handled', afterReason);
+
+  const saveEnabled = await evalJs(cdp, `(() => {
+    const button = [...document.querySelectorAll('button')].find((b) => b.innerText.includes('Concept opslaan'));
+    return button ? { disabled: button.disabled } : null;
+  })()`);
+  check('manual import: saving is enabled only after all human steps', Boolean(saveEnabled) && saveEnabled.disabled === false, JSON.stringify(saveEnabled));
+  await clickButton(cdp, 'Concept opslaan');
+  const saved = await waitFor(cdp, `document.body.innerText.includes('Concept opgeslagen als versie 1')`, 15000);
+  check('manual import: the existing concept route result is shown', saved);
+  const savedText = await bodyText(cdp);
+  check('manual import: the confirmation says nothing was published', savedText.includes('niets gepubliceerd'));
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'manual-ai-import-390-light.png'));
+
+  // Toetsenbord: stap 1 is met Tab en Enter te bereiken en te activeren.
+  await openRoute(cdp, manualUrl('dark'), `document.body.innerText.includes('Prompt maken')`);
+  const reach = await tabUntil(cdp, 'Prompt maken', 60);
+  check('manual import keyboard: "Prompt maken" is reachable with Tab', Boolean(reach.info), JSON.stringify(reach.seen.slice(-5)));
+  if (reach.info) {
+    await pressKey(cdp, 'Enter', 'Enter', 13, '\r');
+    const opened = await waitFor(cdp, `document.body.innerText.includes('gaat mee in de prompt')`, 15000);
+    check('manual import keyboard: Enter makes the prompt', opened);
+  }
+
+  // Licht/donker en 320/390 px op dezelfde stap-pagina.
+  for (const [width, theme] of [[320, 'light'], [390, 'dark']]) {
+    await setViewport(cdp, width, 900);
+    await openRoute(cdp, manualUrl(theme), `document.body.innerText.includes('Menu importeren met AI')`);
+    const snapshot = await evalJs(cdp, `(() => ({
+      theme: document.documentElement.getAttribute('data-theme'),
+      bg: getComputedStyle(document.documentElement).getPropertyValue('--bg').trim().toLowerCase(),
+      overflow: document.documentElement.scrollWidth - window.innerWidth,
+      steps: [...document.querySelectorAll('h2')].map((h) => h.innerText),
+      text: document.body.innerText,
+    }))()`);
+    check(`manual import ${width}px/${theme}: requested theme is active`, snapshot.theme === theme, snapshot.theme);
+    check(`manual import ${width}px/${theme}: no horizontal overflow`, snapshot.overflow <= 0, `overflow=${snapshot.overflow}`);
+    check(
+      `manual import ${width}px/${theme}: all three steps are present`,
+      snapshot.steps.join('|').includes('Prompt maken') &&
+        snapshot.steps.join('|').includes('Antwoord plakken') &&
+        snapshot.steps.join('|').includes('Nalopen en opslaan'),
+    );
+    check(`manual import ${width}px/${theme}: the plain-language intro is shown`, snapshot.text.includes('drie stappen'));
+    themeBackgrounds[`manual-${theme}`] = snapshot.bg;
+    screenshotFiles.push(await screenshot(cdp, OUT_DIR, `manual-ai-import-${width}-${theme}.png`));
+  }
+  check(
+    'manual import light and dark resolve to different background tokens',
+    themeBackgrounds['manual-light'] !== themeBackgrounds['manual-dark'],
+    `${themeBackgrounds['manual-light']} / ${themeBackgrounds['manual-dark']}`,
+  );
 }
 
 main();
