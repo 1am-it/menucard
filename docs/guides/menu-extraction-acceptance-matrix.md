@@ -1,18 +1,22 @@
 # Menu-extractie — afrondingsmatrix #59
 
 Status: **ontwikkelaarsbewijs, geen onafhankelijke review en geen release.**
-Datum: 2026-10-22 (nieuwste ronde: Lead-review 6349832755, criterium 5:
-Wolfslaar en T-Huis eenmalig vastgelegd, vier kaarten in één meting, T-Huis
-eerlijk als niet-meetbaar begrensd; de rondehistorie hieronder blijft
-ongewijzigd).
+Datum: 2026-10-22 (nieuwste ronde: Lead-review 6351417692, criterium 5/8:
+extractieherstel Bardot (prijs op dezelfde gedrukte regel, rubriekkoppen) en
+Wolfslaar (menutitel uit de linklabels van de site, prijsvarianten, gesplitste
+naam letterlijk); Bardot blijft op 0 matches door de letter-gespatieerde
+rubriekkoppen in de tekstlaag, Wolfslaar gaat van 0/30 naar 29/30. De
+rondehistorie hieronder blijft ongewijzigd).
 Issue #59, branch `feat/menu-extraction-59`, PR #60 (draft).
-De nieuwste ronde staat in “Ronde 2026-10-22 — criterium 5: Wolfslaar en T-Huis
-vastgelegd, vier kaarten in één meting (review 6349832755)”; de ronde daarvoor
-in “Ronde 2026-10-22 — criterium 5: Bardot naast Zuyd, Wolfslaar/T-Huis
-geprobeerd (review 6347355753)” en daarvoor “Ronde 2026-10-22 — afrondingsronde
-(review 6344039571)”.
-Deze ronde wijzigt **geen** extractiecode, bestaande referentie, telregel of
-vergelijkingslogica; de meetcode is alleen uitgebreid met de twee nieuwe kaarten.
+De nieuwste ronde staat in “Ronde 2026-10-22 — criterium 5/8: extractieherstel
+Bardot en Wolfslaar (review 6351417692)”; de ronde daarvoor in “Ronde 2026-10-22
+— criterium 5: Wolfslaar en T-Huis vastgelegd, vier kaarten in één meting (review
+6349832755)”, daarvoor “Ronde 2026-10-22 — criterium 5: Bardot naast Zuyd,
+Wolfslaar/T-Huis geprobeerd (review 6347355753)” en daarvoor “Ronde 2026-10-22 —
+afrondingsronde (review 6344039571)”.
+Deze ronde wijzigt de extractie zelf (generiek, met fictieve fixtures), niet de
+referenties, telregels, captures of meetcode: dezelfde scripts en dezelfde
+referenties zijn opnieuw gedraaid en oud/nieuw staat hieronder naast elkaar.
 De afrondingsronde wijzigt **uitsluitend** twee referentieregels op uitdrukkelijk
 Lead-besluit (`Ui` + oude kaas, `Wagyu A5` + Miyazaki); telregels, captures,
 meetcode en brongerichte code zijn niet gewijzigd. De oudere
@@ -77,6 +81,64 @@ zijn alle tien prijsvarianten (`Klein`/`Hoofd`) en staan als begrensd in de
 matrix. Volledige productacceptatie vereist nog een Product
 Owner-besluit over provider/model/budget/DPA, een nieuwe holdout, live
 preview-/schrijftoegang en onafhankelijke review door de Delivery Lead.
+
+## Ronde 2026-10-22 — criterium 5/8: extractieherstel Bardot en Wolfslaar (review 6351417692)
+
+Basis `1ebef30`. Uitvoering van K1–K5 van de Lead-opdracht. Bewijscategorie: **R+T** (echte read-only bronproef + tests). Dit is ontwikkelaarsbewijs, geen onafhankelijke review en geen productieacceptatie. Referenties, telregels (`0f09b74f…`), captures en meetcode zijn **niet** gewijzigd; de extractie is generiek hersteld en met dezelfde scripts en dezelfde referenties opnieuw gemeten.
+
+| K | Naam | Stand | Bewijs |
+| --- | --- | --- | --- |
+| K1 | Bardot-PDF: prijs op dezelfde regel | **gedaan, met begrensde rubricering** | Een kaart die zijn bedragen in een eigen kolom drukt, koppelt een bedrag nu aan de naam op **dezelfde gedrukte regel** (3 eenheden baseline-tolerantie). De pagina bewijst die relatie zelf: de naamkolom draagt minstens drie keer minder bedragen dan de vervolgkolom, anders wordt er niets verplaatst. De tekst tussen naam en bedrag wordt de omschrijving en nooit een gerecht; de gedrukte komma scheidt naam en omschrijving. Een prijsloze regel in kapitalen of in letter-gespatieerde stukken wordt een rubriek met de letterlijke gedrukte tekst en nooit een gerecht; een omslagpagina die zijn titel als losse letters drukt, levert de menutitel (`DINERKAART`). Fictieve PDF-fixture: `menuExtractionPriceColumnRepairs.test.js` (3 tests) |
+| K2 | Wolfslaar-structuur | **gedaan** | Een menupagina zonder eigen kaartkop houdt zijn rubriekpaden ongewijzigd en krijgt de naam die de site zelf voor die pagina gebruikt (`Menukaart diner` / `Menukaart lunch`), alleen als dat label een niet-generiek woord met het adres van de pagina deelt; een call-to-action (`Ontdek ons menu`) wordt nooit een titel. Prijsvarianten (`65/98`, `44/54`, `glas/fles`) worden één gerecht met elk bedrag als variant en het gedrukte label; een gesplitste naam (`C onference Peer`) blijft letterlijk staan. Regressies: `menuExtractionVariantShapeRepairs.test.js` (4) en twee K2-tests in `restaurantSourceAnalysis.test.js` |
+| K3 | Meting oud/nieuw | **gedaan** | `card-reference-measurement.json` SHA-256 `b1b06641…` (was `111afa90…`) en `reference-measurement.json` `5eda188a…`; beide tweemaal identiek op dezelfde bytes. Zie de tabellen hieronder. **Geen enkele bron verloor matches**: Zuyd 34, Andalous 81, Chocolat 26 en Pellens 36 (was 26) blijven gelijk of gaan vooruit; Smelt 37/37 en Blossem 43/43 blijven gelijk (probe exit 0) |
+| K4 | Begrenzing waar nodig | **gedaan** | zie “Wat begrensd blijft” hieronder en de twee bijgewerkte rijen in “Actuele acceptatiematrix” (criterium 5 en 8) |
+| K5 | Voortgang met naam | **gedaan** | `ops/benchmark/output/criteria-progress.json`, ronde `6351417692`, per K één regel met `name` (gitignored per BE-21); dezelfde regels staan hier en in de checkpoint |
+
+### Oud en nieuw naast elkaar (zelfde referenties, zelfde telregels)
+
+Bestaande kaarten (`card-reference-measurement.json`, oud `111afa90…` → nieuw `b1b06641…`):
+
+| Kaart | Referentie | Extractie oud → nieuw | Match oud → nieuw | Gemist | Verzonnen | Prijsfouten | Rubriekfouten |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Brasserie Bardot | 112 | 74 → **86** | 0 → 0 | 76 → **61** | 38 → **35** | 0 → 0 | 36 → 51 |
+| Restaurant Zuyd | 36 | 34 → 34 | 34 → 34 | 2 → 2 | 0 → 0 | 0 → 0 | 0 → 0 |
+| Restaurant Wolfslaar | 30 | 29 → **30** | 0 → **29** | 5 → **1** | 4 → **1** | 0 → 0 | 25 → **0** |
+| T-Huis | 0 | geblokkeerd → geblokkeerd | n.v.t. | n.v.t. | n.v.t. | n.v.t. | n.v.t. |
+| **Totaal (drie gemeten)** | 178 | 137 → **150** | 34 → **63** | 83 → **64** | 42 → **36** | 0 → 0 | 61 → **51** |
+
+Precisie 24,82% → **42,00%**, recall 19,10% → **35,39%**. De totalen zijn nooit één succescijfer: elke kaart staat hierboven apart.
+
+Referentieset (`reference-measurement.json`, oud `79a8b133…` → nieuw `5eda188a…`):
+
+| Bron | Referentie | Match oud → nieuw | Gemist | Verzonnen | Prijsfouten | Rubriekfouten |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Restaurant Zuyd | 36 | 34 → 34 | 2 → 2 | 0 → 0 | 0 → 0 | 0 → 0 |
+| Andalous Restaurant Breda | 87 | 81 → 81 | 3 → 3 | 0 → 0 | 0 → 0 | 3 → 3 |
+| Restaurant Pellens | 36 | 26 → **36** | 10 → **0** | 0 → 0 | 0 → 0 | 0 → 0 |
+| Restaurant Chocolat | 26 | 26 → 26 | 0 → 0 | 0 → 0 | 0 → 0 | 0 → 0 |
+| **Totaal (vier gemeten)** | 185 | 167 → **177** | 15 → **5** | 0 → 0 | 0 → 0 | 3 → 3 |
+
+Precisie 98,24% → **98,33%**, recall 90,27% → **95,68%**. De tien gewonnen Pellens-rijen zijn de `Klein`/`Hoofd`-prijsvarianten die nu als variant bewaard blijven in plaats van weggegooid.
+
+### Wat generiek is opgelost
+
+- Een bedrag in een eigen prijskolom hoort bij de naam op dezelfde gedrukte regel; de tekst ertussen is de omschrijving (`Pata Negra (70 gr.)` + `Spaanse Ibericoham` + `21.95`, `Paté en croute` + `gefrituurde kappertjes, uienconfit` + `16.95`).
+- Een gedrukte rubriekkop in kapitalen of in letter-gespatieerde stukken wordt een rubriek (`FICTIEVE BORRELHAPPEN`, `Ex TRA BI j GERECHTEN :`) en nooit een gerecht; de letterlijke gedrukte tekst blijft bewaard.
+- De omslagtitel in losse letters levert de menutitel (`DINERKAART`), zonder pad te vervormen of een bestandsnaam te gebruiken.
+- Een menu zonder eigen kaartkop krijgt de naam die de site zelf voor die pagina gebruikt, bewezen doordat een niet-generiek woord met het adres van de pagina wordt gedeeld.
+- Meerdere gedrukte bedragen op één gerechtregel worden één gerecht met varianten (label + bedrag), nooit één gekozen bedrag en nooit een weggevallen bedrag; twee naam+prijs-paren op één regel blijven geweigerd.
+- Een gesplitste naam blijft letterlijk (`C onference Peer`), en een prijsloze vetgedrukte vervolgregel wordt nooit een eigen gerecht.
+
+### Wat begrensd blijft (criterium 8)
+
+- **Bardot-rubrieken: 0 matches is een tekstlaagbeperking, geen extractiefout.** De kaart drukt zijn rubriekkoppen met letter-spatiëring (`KL ASSIEKE BORRELHAPPEN`, `VOORGEREC HTEN`, `Ex TRA BI j GERECHTEN`) die de tekstlaag als losse stukken levert. De referentie leest die koppen zoals ze *gerenderd* zijn. Zonder woordenboek of gok is dat niet te reconstrueren; de extractie bewaart daarom de letterlijke gedrukte tekst. 51 Bardot-rijen hebben de juiste naam en het juiste bedrag onder zo'n letterlijke rubriekkop en worden als **rubriekverschil** gerapporteerd, niet als match. Elke rij houdt zijn citaat, locator en bedrag, dus dit is een expliciete grens en geen stil verlies.
+- **Bardot-dranken/-dessertpagina's:** koppen en gerechten staan daar in verschoven, letter-gespatieerde tekstregels; een deel van die rijen komt met een gefragmenteerd label in het rapport (zichtbaar als verzonnen rij met citaat). Niet stil opgelost en niet als match geteld.
+- **Wolfslaar `C onference Peer`:** de bron splitst de naam over twee markup-runs; de referentie schrijft hem aaneen. De extractie houdt de bron letterlijk aan (K2: geen gok), dus 1 gemiste + 1 verzonnen rij blijft als bewezen verschil staan.
+- **Zuyd 2 gemiste rijen** blijven onveranderd; die horen bij de bestaande begrenzing van de referentieset, niet bij deze ronde.
+- **T-Huis:** afbeeldingsmenu, niet ondersteund. Valt onder **eigenaarsbesluit 3a (afbeeldingsmenu niet ondersteund)**; de kaart blijft `blocked` met reden en wordt nooit als lege of geslaagde extractie geteld. Er is geen OCR bijgebouwd.
+- Geen nieuwe bron, geen OCR, geen provider, geen publicatie, geen merge.
+
+Regressies van deze ronde: `menuExtractionVariantShapeRepairs.test.js` (4), `menuExtractionPriceColumnRepairs.test.js` (3), twee K2-tests in `restaurantSourceAnalysis.test.js`, de bijgewerkte fixture-verwachting in `htmlMenuFormattedBlocks.test.js` en `structureCorpus.js` (STRUCT-012: twee gedrukte bedragen zijn nu varianten, twee naam+prijs-paren blijven geweigerd). Volledige suite **2443/2443** groen; `npm run test:menu-structure` 6/6; bronproef Smelt 37/37 + Blossem 43/43 (exit 0).
 
 ## Ronde 2026-10-22 — criterium 5: Bardot naast Zuyd, Wolfslaar/T-Huis geprobeerd (review 6347355753)
 
@@ -671,11 +733,11 @@ regels in de oude tabel zijn niet herschreven, zodat de rondehistorie klopt.
 | 2 | URL → lezen → extractie → menselijke correctie → conceptopslag met traceerbare broncontext | `restaurantSourceAnalysis.test.js` (SMELT-LIKE CHAIN), `menuConcept.test.js`, `batchAnalysisHandlers.test.js`; browserfixture toont resultaat, review, correctie en geblokkeerde conceptopslag | T+B | **bewezen met beperking** | Echte conceptopslag, bronbevestiging en een live sessie zijn niet uitgevoerd; de fixture bewijst geen Supabase-schrijfsessie | Product Owner/ops voor live toegang; developer voor de resterende keten |
 | 3 | Smelt Breda: echte PDF-inhoud getest; gevonden PDF + 0 items is geen succes; gerechten, prijzen en dekking vergeleken | `probe-menu-extraction-sources.js --source=all`: PDF 2 pagina's, bytes `4445a101…27f8`, content `24f23cbd…8a845`; 37/37 referentierijen, 8 secties, 0 gemist/extra/prijs/koppeling/duplicaat, boekhouding 37/37 | R+T | **bewezen met beperking** | 7 supplementregels en 1 arrangementregel worden gemeld, niet opgeslagen; geen item-voor-item menselijke hercontrole in deze ronde; vestiging alleen via URL/bestandsnaam, niet uit de PDF-tekst | Developer voor itemcontrole; Product Owner voor schema-uitbreiding |
 | 4 | Blossem: lunch/diner, rubrieken en items volgen de echte bronrelaties; onzekerheid uitvoerbaar; geen vast aantal | `probe-menu-extraction-sources.js --source=all`: HTML bytes `da5c632f…0c38`; 43/43 in 13 secties, 0 verschillen, boekhouding 43/43; DINNER/LUNCH blijven gescheiden; 12 secties gemarkeerd als onzeker | R+T+B | **bewezen met beperking** | 2 arrangement-/wijnarrangement-secties worden gemeld en niet opgeslagen; de fixture toont groepshandeling zonder accepteer-alles; geen live sessie | Developer voor itemcontrole; Product Owner voor schema-uitbreiding |
-| 5 | Bestaande kaarten Wolfslaar, Bardot, Zuyd, T-Huis getoetst tegen gecontroleerde bronnen (eigenaarsbesluit issuecomment-6315226470, optie 1); historische aantallen zijn geen waarheid | **Ronde 6349832755 (nieuwste):** Bardot 0/112 match (76 gemist, 38 verzonnen, 36 rubriekfouten), Zuyd 34/36, Wolfslaar 30 referentierijen / 29 extractie / 0 match (5 gemist, 4 verzonnen, 25 rubriekfouten), T-Huis geblokkeerd omdat de menupagina alleen SVG-kaarten levert. Pins `card-reference-captures.wolfslaar.json` (`0705abdd…`) en `.thuis.json` (`49ad24e9…`), referenties `reference-references/wolfslaar.json` en `thuis.json`, meting `card-reference-measurement.json` (`111afa90…`, tweemaal identiek) | R+T | **gedeeltelijk: drie kaarten gemeten, één eerlijk niet-meetbaar** | Wolfslaar: menutitel ontbreekt (25 rubriekfouten), prijsvarianten gaan verloren (Caviar 65/98, Koekoek 44/54) en de gesplitste naam `C onference Peer` mist; Bardot heeft dezelfde soort structuurfouten. T-Huis vraagt OCR/beeldanalyse, wat niet in #59 zit. Oplossen is een aparte extractieopdracht; de Delivery Lead moet de referenties onafhankelijk controleren | Developer voor de extractieopdracht; Delivery Lead voor onafhankelijke referentiecontrole |
+| 5 | Bestaande kaarten Wolfslaar, Bardot, Zuyd, T-Huis getoetst tegen gecontroleerde bronnen (eigenaarsbesluit issuecomment-6315226470, optie 1); historische aantallen zijn geen waarheid | **Nieuwste ronde (review 6351417692):** Bardot 0/112 match maar 86 rijen geëxtraheerd (was 74), 61 gemist (was 76), 35 verzonnen (was 38), 0 prijsfouten; de 51 rijen met de juiste naam en het juiste bedrag staan onder een letterlijke, letter-gespatieerde rubriekkop en tellen als rubriekverschil (begrensd). Zuyd 34/36 onveranderd. Wolfslaar **29/30** match (was 0), 1 gemist + 1 verzonnen (de letterlijk gesplitste naam `C onference Peer`), 0 prijs- en 0 rubriekfouten. T-Huis `blocked` (afbeeldingsmenu, eigenaarsbesluit 3a). Meting `card-reference-measurement.json` (`b1b06641…`, tweemaal identiek) | R+T | **gedeeltelijk: drie kaarten gemeten, één eerlijk niet-meetbaar; Bardot-rubrieken begrensd** | Bardot: 61 gemiste en 35 verzonnen rijen blijven, vooral op de dranken-/dessertpagina's waar koppen en gerechten in verschoven letter-gespatieerde tekstregels staan; de rubriekkoppen zijn zonder woordenboek of gok niet te reconstrueren. Wolfslaar: 1 rij blijft een bewezen verschil. T-Huis vraagt OCR/beeldanalyse, wat niet in #59 zit. De Delivery Lead moet de referenties onafhankelijk controleren | Developer voor de resterende Bardot-fragmentatie; Delivery Lead voor onafhankelijke referentiecontrole; Product Owner voor een afbeeldings-/OCR-besluit |
 | 6 | Vooraf vastgelegde representatieve set en aparte holdout dekken HTML, tabs, tabellen, tekst-PDF, scans, taal/vestiging, arrangement en prijsvariant | `acceptanceSet.test.js`, `acceptanceSetGuard.test.js`, `holdoutReferences.test.js`, `botanistReference.test.js`; 22 representatieve entries en 13 dekkingsklassen; De Botanist/Mr Moos/Colonia zijn `representative` + `usedForTuning`; Gauchos Breda is de enige holdout (`evaluated_once`, 404) | T+R | **open** | Er is geen nieuwe, nog ongeziene holdout; scans/OCR blijft `niet ondersteund`; Gauchos levert geen inhoud. Een releaseclaim kan hier niet op rusten | Product Owner voor nieuwe bron-/toegangsbeslissing; Delivery Lead voor de acceptatieclaim |
 | 7 | Dataset, referentie-uitkomsten en meetbare drempels vóór acceptatie vastgelegd; BE-21's 50–100 niet met enkele URL's afgesloten | `manifest.json` `releaseThresholds`: 0 verzonnen gerechten/prijzen, 100% bewijs, 0 onverklaarde dekking, 0 structuur-/prijsfouten; `sourceReferences.test.js`; 23 structuurgevallen | T | **bewezen met beperking** | Drempels zijn vast en niet verlaagd; BE-21 is expliciet buiten #59 en niet afgesloten met twee bronnen | BE-21-eigenaar; Delivery Lead voor scopebewaking |
 
-| 8 | Gemiste/verzonnen items, prijsfouten, structuurverlies, bewijsdekking, correctiewerk, tijd en kosten per brontype gerapporteerd | **Nieuwste ronde (review 6334231310):** gecontroleerde meting 165/185 match (was 141), 17 gemist (was 37), 2 verzonnen (was 23), 0 prijsfouten, 3 rubriekfouten (was 7); precisie 97,06% / recall 89,19%. De vier kaartvormklassen K1–K4 zijn generiek hersteld met per klasse een fictieve regressie (`src/lib/menuExtractionCardShapeRepairs.test.js`); zie “Ronde 2026-10-22 — Pellens-kaartvormen generiek hersteld”. Oudere ronde: Smelt/Blossem 0 verschillen; Botanist v1 124/11/4/0 | R+T | **bewezen met beperking** | Prijsvarianten (`Klein`/`Hoofd`, 10 van de 12 resterende gemiste Pellens-regels) blijven bewust begrensd tot een schema-ontwerp; twee referentieregels (`Ui oude kaas`, `Wagyu A5 Miyazaki`) wijken af van de strikte naam/omschrijving-scheiding en zijn een **beslispunt voor de Delivery Lead**, niet stil opgelost; losse containerblokken en geneste h4-koppen blijven begrensd. Correctietijd en modelkosten blijven onbekend (€0, geen provider) | Delivery Lead voor de twee referentieregels; Product Owner voor een schema-ontwerp voor varianten; developer voor een correctietijdmeting |
+| 8 | Gemiste/verzonnen items, prijsfouten, structuurverlies, bewijsdekking, correctiewerk, tijd en kosten per brontype gerapporteerd | **Nieuwste ronde (review 6351417692):** gecontroleerde meting **177/185 match** (was 167), 5 gemist (was 15), 0 verzonnen, 0 prijsfouten, 3 rubriekfouten; precisie 98,33% / recall 95,68% (`reference-measurement.json` `5eda188a…`). Kaarten: Bardot 0/112 match, 61 gemist, 35 verzonnen, 0 prijsfouten, 51 rubriekfouten; Zuyd 34/36; Wolfslaar 29/30 (`card-reference-measurement.json` `b1b06641…`). De generieke herstelklassen van deze ronde: zelfde-regel prijskoppeling in een aparte prijskolom, rubriekkoppen in kapitalen/letter-spatiëring, omslagtitel, menutitel uit de linklabels van de site, prijsvarianten als varianten (met fictieve fixtures per klasse). Oudere ronde: Smelt/Blossem 0 verschillen | R+T | **bewezen met beperking** | De 61 gemiste en 35 verzonnen Bardot-rijen zijn zichtbaar begrensd: de rubriekkoppen staan letter-gespatieerd in de tekstlaag en zijn zonder woordenboek of gok niet te reconstrueren, en de dranken-/dessertpagina's leveren verschoven tekstregels. Eén Wolfslaar-rij blijft een bewezen verschil (letterlijk gesplitste naam). T-Huis blijft `blocked` (eigenaarsbesluit 3a). Correctietijd en modelkosten blijven onbekend (€0, geen provider) | Developer voor de Bardot-fragmentatie; Delivery Lead voor onafhankelijke referentiecontrole; Product Owner voor een afbeeldings-/OCR-besluit |
 | 9 | Browseracceptatie met klikpaden, rolgrenzen, leeg/fout/partieel, toetsenbord, licht/donker, 320/390 px | `npm run test:browser:menu-review`: **241/241 checks** op codehead `26839eb`, evidence met schone werkboom en SHA-256 `F5B2CD715FCC8B7CF2F382988C7F316D8D22CB6615AEFFC95EB4F2D05970C583`; 33 screenshots, 2 clickpathinventories. Bestaande batchchecks blijven groen. Nieuw: echte klikken lijst→exact detail→terug voor vier fictieve lineage-ids (geldige v1, v2, onbekende versie, exact `menus: []`), product-read-only met glas/fles/supplement/onbekende allergenen/provenance/dekking, afwezige save/approve/reject/export, 403/404/leeg/fout, keyboard/focus, licht/donker en 320/390/1024 px, 0 app-fase netwerkviolations; geforceerde approve-klik en script-POSTs worden geweigerd en als bewuste probe vastgelegd | B | **bewezen met beperking** | Alleen fixture: geen live/staging browserbewijs en geen echte authenticated sessie. Alleen `GET /api/internal/v1/menu-concepts` en `GET /api/internal/v1/menu-concepts/<id>` zijn fictief beantwoord; alle concept-POST's (`versions`, `decision`, `export`, lijst/detail) en onbekende API-routes zijn geweigerd. De UI-blokkade bewijst de server niet; `menuConceptReviewHandlers.test.js` blijft daarvoor leidend | Product Owner/ops voor previewtoegang; Delivery Lead voor live acceptatie |
 | 10 | Time-out, provideruitval, ongeldige uitvoer, kosten-/paginagrens, herimport, gelijktijdige taken, promptinjectie, verkeerde vestiging, onveilige redirects getest | `menuExtractionAdapter.test.js`, `safeOutboundFetch.test.js`, `restaurantSourceAnalysis.test.js`, `batchAnalysisHandlers.test.js`, `menuConcept.test.js`; offline fake provider en `.invalid`-fixtures; geen dubbele call/claim | T | **bewezen met beperking** | Alleen offline; een echte provideruitval, echte kostenmeting en echte gelijktijdige productietaken zijn niet gemeten | Product Owner voor provider/budget; developer voor een latere live meting |
 | 11 | Geen stil dataverlies tussen extractie, receipt, review, concept en export; niet-ondersteunde publicatievelden geblokkeerd/gemeld | `menuProductIntegrationV2.test.js`, `menuProductGuardsV2.test.js`, `menuConceptV2ReviewHandlers.test.js`, `menuConceptExportV2.test.js`, `sourceWorkqueueV2.test.js`, `menuProductV2Surface.test.js`; de bestaande review toont glas/fles, supplementen, bewijs en dekking via één gesaneerde view; save/approve/reject/export/confirm weigeren v2 vóór hun effect | T+B | **bewezen met beperking** | Alleen fictieve in-memory/browserfixtures; geen echte v2-rij in Supabase en geen live bronbevestiging. Een v2-writeflag/exportcontract blijft niet gebouwd | Developer voor live preview; Delivery Lead voor review |
