@@ -803,11 +803,11 @@ clientklok). Is de stap verlopen, dan volgt een gewone melding met
 | onbekend restaurant, zoeken op naam, GET-route en rolregel | `src/lib/manualMenuImportHandlers.test.js` |
 | AES-GCM/HKDF-eigenschappen: heen en terug, geen leesbare brontekst, andere sleutel, IV per token, TTL | `src/lib/manualMenuImportState.test.js` |
 
-Uitgevoerd op `a059a88`: `npm test` **2434/2434**, `npm run build` compiled
-successfully met 42/42 statische pagina's, browserfixture **351/351**
-(`ops/browser/evidence/menu-review-browser-evidence.json`, head `a059a88`,
-schone werkmap). Dit blijft fixture- en developerbewijs, geen browseracceptatie
-door de Lead.
+Bewijs van deze ronde: browserfixture **356/356** op `ba99a3c` (schone
+werkmap, vóór de test-only tamper-fix in `d668574`); `npm test` **2434/2434** op
+`d668574` met die evidence in de werkmap; `npm run build` compiled successfully
+met 42/42 statische pagina's op `a059a88` (de app-code is daarna niet gewijzigd).
+Dit blijft fixture- en developerbewijs, geen browseracceptatie door de Lead.
 
 ### K7 — voortgang
 
