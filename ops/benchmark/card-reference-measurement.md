@@ -1,21 +1,23 @@
-# Menu-extractie: bestaande kaarten, Bardot naast Zuyd (#59 criterium 5)
+# Menu-extractie: bestaande kaarten, Bardot, Zuyd, Wolfslaar en T-Huis (#59 criterium 5)
 
-Ontwikkelaarsbewijs op de vastgezette bytes. Bardot is gemeten op de dinerkaart-PDF waarvan de SHA-256 gelijk is aan de hash in de kaartcapture; Zuyd op de al gepinde HTML-menupagina's. Geen netwerk, geen provider, geen database en geen publicatie.
+Ontwikkelaarsbewijs op de vastgezette bytes. Bardot is gemeten op de dinerkaart-PDF waarvan de SHA-256 gelijk is aan de hash in de kaartcapture; Zuyd op de al gepinde HTML-menupagina's; Wolfslaar op de entrypagina, beide menupagina's en de menu-1-overzichtspagina die review 6349832755 K1 eenmalig vastlegde. T-Huis is vastgelegd maar niet meetbaar: de menupagina levert de vijf kaarten alleen als SVG-afbeelding. Geen netwerk, geen provider, geen database en geen publicatie.
+
+Het eigenaarsbesluit voor deze vier kaarten is GitHub #59 issuecomment-6315226470 (optie 1, vier bestaande kaarten plus een ongeziene set).
 
 ## Totalen (alleen gemeten kaarten)
 
 | Maat | Waarde |
 | --- | --- |
-| Kaarten gemeten / geblokkeerd | 2 / 0 |
-| Referentiegerechten | 148 |
-| Geëxtraheerde gerechten | 108 |
+| Kaarten gemeten / geblokkeerd | 3 / 1 |
+| Referentiegerechten | 178 |
+| Geëxtraheerde gerechten | 137 |
 | Exact gematcht | 34 |
-| Gemiste gerechten | 78 |
-| Verzonnen gerechten | 38 |
+| Gemiste gerechten | 83 |
+| Verzonnen gerechten | 42 |
 | Prijsfouten | 0 |
-| Rubriekfouten | 36 |
-| Precisie | 31.48% |
-| Recall | 22.97% |
+| Rubriekfouten | 61 |
+| Precisie | 24.82% |
+| Recall | 19.10% |
 
 De totalen zijn per kaart afzonderlijk te lezen en worden nooit tot één succescijfer samengevoegd.
 
@@ -25,6 +27,8 @@ De totalen zijn per kaart afzonderlijk te lezen en worden nooit tot één succes
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | Brasserie Bardot | gemeten | 112 | 74 | 0 | 76 | 38 | 0 | 36 | 0.00% | 0.00% |
 | Restaurant Zuyd | gemeten | 36 | 34 | 34 | 2 | 0 | 0 | 0 | 100.00% | 94.44% |
+| Restaurant Wolfslaar | gemeten | 30 | 29 | 0 | 5 | 4 | 0 | 25 | 0.00% | 0.00% |
+| T-Huis | geblokkeerd | 0 | 0 | 0 | 0 | 0 | 0 | 0 | n.v.t. | n.v.t. |
 
 ## Afwijkingen per kaart
 
@@ -201,14 +205,88 @@ De totalen zijn per kaart afzonderlijk te lezen en worden nooit tot één succes
 
 **Vastgezette bronversie:** 6 capture(s); html f4f685da725f, html 389470158b72, html 128cae10ca14, html 2bfaf63e7814, html 644810dfc971, html c9c130c079b7
 
+### Restaurant Wolfslaar
+
+**Gemist (5)**
+- `Mechelse Koekoek` — Menukaart diner › Hoofdgerechten — prijs 44.00 / 54.00 — citaat: “Mechelse Koekoek 44 zacht gegaard | stoof van dijen | witlof | geweckte wintertruffel inclusief gebakken ganzenlever 54” (Menukaart diner › Hoofdgerechten › regel 3)
+- `Conference Peer` — Menukaart diner › Nagerechten — prijs 18.00 — citaat: “C onference Peer 18 pecannoot | kardemom | karamel | vanille” (Menukaart diner › Nagerechten › regel 2)
+- `Royal Belgian Platinum Caviar` — Menukaart diner › Voorgerechten — prijs 65.00 / 98.00 — citaat: “Royal Belgian Platinum Caviar blini’s | bieslook | crème fraîche 30 gram 65 | 50 gram 98” (Menukaart diner › Voorgerechten › regel 6)
+- `Mechelse Koekoek` — Menukaart lunch › Hoofdgerechten — prijs 44.00 / 54.00 — citaat: “Mechelse Koekoek 44 zacht gegaard | stoof van dijen | witlof | geweckte wintertruffel inclusief gebakken ganzenlever 54” (Menukaart lunch › Hoofdgerechten › regel 3)
+- `Royal Belgian Platinum Caviar` — Menukaart lunch › Voorgerechten — prijs 65.00 / 98.00 — citaat: “Royal Belgian Platinum Caviar blini’s | bieslook | crème fraîche 30 gram 65 | 50 gram 98” (Menukaart lunch › Voorgerechten › regel 6)
+
+**Verzonnen (4)**
+- `Mechelse Koekoek` — Hoofdgerechten — prijs 54.00 — broncitaat: “Mechelse Koekoek zacht gegaard | stoof van dijen | witlof | geweckte wintertruffel inclusief gebakken ganzenlever 54”
+- `Mechelse Koekoek` — Hoofdgerechten — prijs 54.00 — broncitaat: “Mechelse Koekoek zacht gegaard | stoof van dijen | witlof | geweckte wintertruffel inclusief gebakken ganzenlever 54”
+- `Royal Belgian Platinum Caviar` — Voorgerechten — prijs 98.00 — broncitaat: “Royal Belgian Platinum Caviar blini’s | bieslook | crème fraîche 30 gram 65 | 50 gram 98”
+- `Royal Belgian Platinum Caviar` — Voorgerechten — prijs 98.00 — broncitaat: “Royal Belgian Platinum Caviar blini’s | bieslook | crème fraîche 30 gram 65 | 50 gram 98”
+
+**Prijsfouten (0)**
+- geen
+
+**Rubriekfouten (25)**
+- `Grain-fed Entrecote` — verwacht Menukaart diner › Hoofdgerechten — gelezen Hoofdgerechten
+- `Tarbot` — verwacht Menukaart diner › Hoofdgerechten — gelezen Hoofdgerechten
+- `Tournedos` — verwacht Menukaart diner › Hoofdgerechten — gelezen Hoofdgerechten
+- `Zeetong` — verwacht Menukaart diner › Hoofdgerechten — gelezen Hoofdgerechten
+- `Kaaswagen` — verwacht Menukaart diner › Nagerechten — gelezen Nagerechten
+- `Madeleines` — verwacht Menukaart diner › Nagerechten — gelezen Nagerechten
+- `Passie Curd` — verwacht Menukaart diner › Nagerechten — gelezen Nagerechten
+- `Limburgs Kloostervarken` — verwacht Menukaart diner › Voorgerechten — gelezen Voorgerechten
+- `Noordzeekrab` — verwacht Menukaart diner › Voorgerechten — gelezen Voorgerechten
+- `Tartaar` — verwacht Menukaart diner › Voorgerechten — gelezen Voorgerechten
+- `Witte Heilbot` — verwacht Menukaart diner › Voorgerechten — gelezen Voorgerechten
+- `Zeebaars` — verwacht Menukaart diner › Voorgerechten — gelezen Voorgerechten
+- `Grain-fed Entrecote` — verwacht Menukaart lunch › Hoofdgerechten — gelezen Hoofdgerechten
+- `Tarbot` — verwacht Menukaart lunch › Hoofdgerechten — gelezen Hoofdgerechten
+- `Tournedos` — verwacht Menukaart lunch › Hoofdgerechten — gelezen Hoofdgerechten
+- `Zeetong` — verwacht Menukaart lunch › Hoofdgerechten — gelezen Hoofdgerechten
+- `Conference Peer` — verwacht Menukaart lunch › Nagerechten — gelezen Nagerechten
+- `Kaaswagen` — verwacht Menukaart lunch › Nagerechten — gelezen Nagerechten
+- `Madeleines` — verwacht Menukaart lunch › Nagerechten — gelezen Nagerechten
+- `Passie Curd` — verwacht Menukaart lunch › Nagerechten — gelezen Nagerechten
+- `Limburgs Kloostervarken` — verwacht Menukaart lunch › Voorgerechten — gelezen Voorgerechten
+- `Noordzeekrab` — verwacht Menukaart lunch › Voorgerechten — gelezen Voorgerechten
+- `Tartaar` — verwacht Menukaart lunch › Voorgerechten — gelezen Voorgerechten
+- `Witte Heilbot` — verwacht Menukaart lunch › Voorgerechten — gelezen Voorgerechten
+- `Zeebaars` — verwacht Menukaart lunch › Voorgerechten — gelezen Voorgerechten
+
+**Beperkingen**
+- De lunch- en dinerpagina drukken dezelfde à la carte; elke pagina is in deze referentie een eigen menu, zodat structuurverlies per pagina zichtbaar blijft.
+- Prijzen staan als hele euro's zonder decimalen of valutateken. De quote houdt de gedrukte vorm; alleen het vergelijkbare prijsveld is als 00 cent geschreven.
+- De lunchpagina bevat daarnaast het Lunchmenu; de dinerpagina niet.
+- De pagina's noemen geen allergenen per gerecht; er staat alleen een algemene mededeling over allergieën en diëten. Allergenen blijven onbekend, niet allergeenvrij.
+- De vastgezette pagina's bevatten geen menutitel; dat is een structuurbevinding in de meting en is hier niet weggepoetst.
+- Deze referentie is uit de vastgezette brontekst opgesteld en niet uit de parseruitvoer.
+- Gelezen zonder automatisch herkende menukaart: https://www.restaurantwolfslaar.com/menu-1.
+- Menukaart lijkt alleen als afbeelding beschikbaar op https://www.restaurantwolfslaar.com/menu-1 (11 afbeelding(en), o.a. https://www.restaurantwolfslaar.com/assets/thumbs/640-1000-fit/Afbeeldingen/Nieuwe-foto-indeling/Food-fotografie/2026/St); beeldanalyse/OCR is niet geconfigureerd.
+- Menukaart https://www.restaurantwolfslaar.com/nl/menu-diner: sectie "Over ons" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).
+- Menukaart https://www.restaurantwolfslaar.com/nl/menu-diner: sectie "Menu en Wijnen" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).
+- Menukaart https://www.restaurantwolfslaar.com/nl/menu-diner: sectie "Agenda en Blog" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).
+- Menukaart https://www.restaurantwolfslaar.com/nl/menu-lunch: sectie "Over ons" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).
+- Menukaart https://www.restaurantwolfslaar.com/nl/menu-lunch: sectie "Menu en Wijnen" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).
+- Menukaart https://www.restaurantwolfslaar.com/nl/menu-lunch: sectie "Agenda en Blog" is niet als gerechten opgenomen; 1 regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).
+- AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.
+- Kwaliteitscontrole op de deterministische extractie vraagt aandacht (html_arrangements_skipped); het resultaat is niet als volledig beoordeeld.
+
+**Vastgezette bronversie:** 4 capture(s); html 14abdb9e684e, html 22d60179c67b, html bc35f9ca7a5c, html 19abbe4aa63a
+
+### T-Huis
+
+- **Geblokkeerd:** De vastgezette menupagina levert geen tekst: de vijf kaarten (Food, Lunch, Wijn, Drank, Dessert) staan als SVG-afbeelding in de tabpanelen. Zonder beeldanalyse/OCR is er geen gerecht, prijs of rubriek uit de vastgezette bytes te bewijzen. Daarom is er geen referentie en wordt T-Huis niet als lege of geslaagde extractie geteld.
+
 ## Integriteit en herhaalbaarheid
 
 - Telregels: `docs/guides/menu-extraction-reference-counting-rules.md`, SHA-256 `0f09b74fdd9f33ecd58af4e3df8ab3c711ee70d32030bc4296f3af78adc2f09c` (ongewijzigd).
 - Kaartcapture: `ops/benchmark/existing-card-references.json`, SHA-256 `dcb0e92b9cbefc7b56e5c934c722850078d3340c805498dd0e23bebbe2705bc4`.
 - Bardot-pin: `ops/benchmark/card-reference-captures.json`, SHA-256 `06c00c1611289347d3afbf24e6ede7f2b489b8e659655b8a61f527637fc1304d`.
+- Wolfslaar-pin: `ops/benchmark/card-reference-captures.wolfslaar.json`, SHA-256 `0705abddd1344f8728c0f936ced9f1e43cf8ec765206e0f6c9c293c74c236ed7`.
+- T-Huis-pin: `ops/benchmark/card-reference-captures.thuis.json`, SHA-256 `49ad24e90eb83b79a5fa29e8d85c8d760c81dfe12b78fe8a81185448f69e866f`.
 - Bardot-referentie: `ops/benchmark/reference-references/bardot.json`, SHA-256 `63d39733858c7ff2ccc7d3db0fd000eed5723d9bdbe83d3e308a38a0b807e9f1`, 112 items in 29 rubriekpaden en 7 supplementen.
 - Zuyd-referentie: `ops/benchmark/reference-references/zuyd.json`, SHA-256 `fab4723f1d1d7dcc08fbac04eceb18d3d2214fc1e57a35ad3d893c6e7c7fca5b` (ongewijzigd).
+- Wolfslaar-referentie: `ops/benchmark/reference-references/wolfslaar.json`, SHA-256 `69413b2155f4918ad5e5fe07ec83a981ad98edff86a3683ff075fc569d3be2d8`, 30 items in 6 rubriekpaden, 4 arrangementen en 3 supplementen.
+- T-Huis-referentie: `ops/benchmark/reference-references/thuis.json`, SHA-256 `c4f0594dbf09c11de3b4c9d3e3d0cebb5971adc1793a1623e0f63568b3889a14`; status `blocked`, geen item.
 - Iedere Bardot-referentiequote is tegen de vastgezette PDF-tekst gecontroleerd; 143 prijsbewijzen zijn opnieuw aan de vastgezette paginarij gekoppeld.
+- Iedere Wolfslaar-referentiequote is tegen de vastgezette HTML-tekst gecontroleerd; een quote die niet in de vastgezette bytes staat, stopt de meting.
 - De analyse is op de vastgezette bytes herhaald zonder netwerkoproep; hetzelfde script op dezelfde bytes levert hetzelfde rapport.
-- Deze twee kaarten zijn geen ongeziene holdout en dit is geen productieacceptatie.
+- Deze vier kaarten zijn geen ongeziene holdout en dit is geen productieacceptatie.
 

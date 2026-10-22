@@ -2,14 +2,19 @@
 'use strict';
 
 // Criterion-5 measurement of the existing cards (#59 Delivery Lead order
-// 6347355753, K2). Bardot is measured next to Zuyd in one report, on the pinned
-// bytes only:
+// 6347355753 K2, extended to four cards by review 6349832755 K3). Bardot,
+// Zuyd, Wolfslaar and T-Huis are measured in one report, on pinned bytes only:
 //
 //   - Bardot: the 2025-11 dinerkaart PDF whose SHA-256 equals the hash in
 //     ops/benchmark/existing-card-references.json (verified once by
 //     ops/scripts/verify-menu-extraction-card-reference-bytes.js).
 //   - Zuyd: the two HTML menu pages already pinned in
 //     ops/benchmark/reference-captures.json.
+//   - Wolfslaar: the entry page, both menu pages and the menu-1 overview page
+//     pinned once by ops/scripts/capture-menu-extraction-card-source-bytes.js.
+//   - T-Huis: the entry page and the menu page pinned by the same script. The
+//     pinned menu page carries its five cards as SVG images only, so it is
+//     reported as blocked with that reason and never as an empty success.
 //
 // The comparison, the four deviation classes and precision/recall come from
 // ops/benchmark/referenceComparison.js unchanged; the counting rules are the
@@ -37,12 +42,18 @@ const { aggregateControlledReferences, compareControlledReference } = require('.
 const { repositoryTextSha256 } = require('../benchmark/holdoutManifest');
 const { htmlVisibleText, validateReferenceShape, verifyReferenceQuotes } = require('../benchmark/referenceIntegrity');
 const { validateCardReferenceCapturePin } = require('../benchmark/cardReferenceCaptures');
+const { validateCardSourceCapturePin } = require('../benchmark/cardSourceCaptures');
 const { verifyCardPriceProofs } = require('../benchmark/cardReferenceIntegrity');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
 const CARD_PIN_PATH = path.join(REPO_ROOT, 'ops', 'benchmark', 'card-reference-captures.json');
 const CARD_CAPTURE_PATH = path.join(REPO_ROOT, 'ops', 'benchmark', 'existing-card-references.json');
+const CARD_SOURCE_MANIFEST_PATH = path.join(REPO_ROOT, 'ops', 'benchmark', 'existing-card-sources.json');
 const BARDOT_REFERENCE_PATH = path.join(REPO_ROOT, 'ops', 'benchmark', 'reference-references', 'bardot.json');
+const WOLFSLAAR_PIN_PATH = path.join(REPO_ROOT, 'ops', 'benchmark', 'card-reference-captures.wolfslaar.json');
+const THUIS_PIN_PATH = path.join(REPO_ROOT, 'ops', 'benchmark', 'card-reference-captures.thuis.json');
+const WOLFSLAAR_REFERENCE_PATH = path.join(REPO_ROOT, 'ops', 'benchmark', 'reference-references', 'wolfslaar.json');
+const THUIS_REFERENCE_PATH = path.join(REPO_ROOT, 'ops', 'benchmark', 'reference-references', 'thuis.json');
 const REFERENCE_METADATA_PATH = path.join(REPO_ROOT, 'ops', 'benchmark', 'reference-captures.json');
 const REFERENCE_INDEX_PATH = path.join(REPO_ROOT, 'ops', 'benchmark', 'reference-references', 'index.json');
 const OUT_JSON = path.join(REPO_ROOT, 'ops', 'benchmark', 'card-reference-measurement.json');
@@ -176,6 +187,115 @@ async function measureZuyd(metadata, reference) {
 }
 
 
+/** A card whose pinned bytes carry no readable text menu: reported, never scored. */
+function blockedCardResult({ label, sourceId, blockedReason, pin, limitations }) {
+  return {
+    label,
+    sourceId,
+    captureStatus: 'blocked',
+    blockedReason,
+    referenceItems: 0,
+    actualItems: 0,
+    matched: 0,
+    missing: 0,
+    invented: 0,
+    priceErrors: 0,
+    categoryErrors: 0,
+    precision: null,
+    recall: null,
+    missingDishes: [],
+    inventedDishes: [],
+    priceErrorRows: [],
+    categoryErrorRows: [],
+    duplicates: [],
+    accounting: {
+      reference: { total: 0, matched: 0, missing: 0, priceErrors: 0, categoryErrors: 0, accounted: 0, balanced: true },
+      actual: { total: 0, matched: 0, invented: 0, priceErrors: 0, categoryErrors: 0, accounted: 0, balanced: true },
+    },
+    sourceVersion: {
+      entryUrl: pin.entryUrl,
+      captureStatus: pin.captureStatus,
+      captures: pin.captures.map((capture) => ({
+        requestedUrl: capture.requestedUrl,
+        finalUrl: capture.finalUrl,
+        contentType: capture.contentType,
+        kind: capture.kind,
+        role: capture.role,
+        bytes: capture.bytes,
+        bytesSha256: capture.bytesSha256,
+        captureStatus: capture.status,
+        error: capture.error || null,
+      })),
+    },
+    limitations,
+    priceProofs: [],
+    priceProofCount: 0,
+  };
+}
+
+/**
+ * Wolfslaar: the pinned card captures replayed through the real pipeline. The
+ * entry page is the one pinned entry capture; every other captured page is
+ * served from its own bytes, so no request can change what was measured.
+ */
+async function measurePinnedCard({ pin, reference, sourceId }) {
+  const captures = pin.captures
+    .filter((capture) => capture.status === 'captured')
+    .map((capture) => ({
+      ...capture,
+      url: capture.requestedUrl,
+      captureStatus: 'captured',
+      bytesBuffer: readVerifiedBytes(capture.localPath, capture.bytesSha256, sourceId),
+    }));
+  const entry = captures.find((capture) => capture.role === 'entry');
+  if (!entry) throw new Error(`${sourceId}: no captured entry page`);
+  const { fetchCandidate, missing } = createOfflineCandidateFetcher(captures);
+  const analysis = await runRestaurantSourceAnalysis({
+    homepageHtml: entry.bytesBuffer.toString('utf8'),
+    homepageUrl: entry.finalUrl,
+    fetchCandidate,
+  });
+  if (missing.length > 0) throw new Error(`${sourceId}: the pinned capture set is incomplete; the pipeline requested ${missing.join(', ')}`);
+
+  const texts = new Map();
+  const captureKeys = new Set();
+  for (const menu of reference.menus) captureKeys.add(menu.captureKey);
+  for (const row of [...(reference.arrangements || []), ...(reference.supplements || [])]) captureKeys.add(row.captureKey);
+  for (const key of captureKeys) {
+    const capture = captures.find((candidate) => candidate.localPath === key);
+    if (!capture) throw new Error(`${sourceId}: reference capture ${key} is not pinned`);
+    texts.set(key, await capturedText(capture));
+  }
+  const quotes = verifyReferenceQuotes(reference, texts);
+  if (!quotes.ok) throw new Error(`${sourceId}: reference quote integrity failed: ${quotes.errors.join('; ')}`);
+
+  const comparison = compareControlledReference(reference, analysis.menuContexts, { sourceId, label: reference.label });
+  return {
+    ...comparison,
+    captureStatus: 'captured',
+    blockedReason: null,
+    sourceVersion: {
+      entryUrl: pin.entryUrl,
+      captureStatus: pin.captureStatus,
+      captures: pin.captures.map((capture) => ({
+        requestedUrl: capture.requestedUrl,
+        finalUrl: capture.finalUrl,
+        contentType: capture.contentType,
+        kind: capture.kind,
+        role: capture.role,
+        bytes: capture.bytes,
+        bytesSha256: capture.bytesSha256,
+        captureStatus: capture.status,
+        error: capture.error || null,
+      })),
+    },
+    limitations: [...(reference.limitations || []), ...(analysis.limitations || []).map((line) => String(line).slice(0, 500))],
+    priceProofs: [],
+    priceProofCount: 0,
+  };
+}
+
+
 function fmtPercent(value) {
   return typeof value === 'number' ? `${value.toFixed(2)}%` : 'n.v.t.';
 }
@@ -186,9 +306,11 @@ function clean(value, max = 400) {
 
 function renderMarkdown(report) {
   const lines = [];
-  lines.push('# Menu-extractie: bestaande kaarten, Bardot naast Zuyd (#59 criterium 5)');
+  lines.push('# Menu-extractie: bestaande kaarten, Bardot, Zuyd, Wolfslaar en T-Huis (#59 criterium 5)');
   lines.push('');
-  lines.push('Ontwikkelaarsbewijs op de vastgezette bytes. Bardot is gemeten op de dinerkaart-PDF waarvan de SHA-256 gelijk is aan de hash in de kaartcapture; Zuyd op de al gepinde HTML-menupagina\'s. Geen netwerk, geen provider, geen database en geen publicatie.');
+  lines.push('Ontwikkelaarsbewijs op de vastgezette bytes. Bardot is gemeten op de dinerkaart-PDF waarvan de SHA-256 gelijk is aan de hash in de kaartcapture; Zuyd op de al gepinde HTML-menupagina\'s; Wolfslaar op de entrypagina, beide menupagina\'s en de menu-1-overzichtspagina die review 6349832755 K1 eenmalig vastlegde. T-Huis is vastgelegd maar niet meetbaar: de menupagina levert de vijf kaarten alleen als SVG-afbeelding. Geen netwerk, geen provider, geen database en geen publicatie.');
+  lines.push('');
+  lines.push('Het eigenaarsbesluit voor deze vier kaarten is GitHub #59 issuecomment-6315226470 (optie 1, vier bestaande kaarten plus een ongeziene set).');
   lines.push('');
   lines.push('## Totalen (alleen gemeten kaarten)');
   lines.push('');
@@ -263,11 +385,16 @@ function renderMarkdown(report) {
   lines.push(`- Telregels: \`${report.countingRules.path}\`, SHA-256 \`${report.countingRules.sha256}\` (ongewijzigd).`);
   lines.push(`- Kaartcapture: \`${report.cardCapture.path}\`, SHA-256 \`${report.cardCapture.bytesSha256}\`.`);
   lines.push(`- Bardot-pin: \`${report.cardPin.path}\`, SHA-256 \`${report.cardPin.bytesSha256}\`.`);
+  lines.push(`- Wolfslaar-pin: \`${report.cardPins[0].path}\`, SHA-256 \`${report.cardPins[0].bytesSha256}\`.`);
+  lines.push(`- T-Huis-pin: \`${report.cardPins[1].path}\`, SHA-256 \`${report.cardPins[1].bytesSha256}\`.`);
   lines.push(`- Bardot-referentie: \`${report.bardotReference.path}\`, SHA-256 \`${report.bardotReference.bytesSha256}\`, ${report.bardotReference.items} items in ${report.bardotReference.categories} rubriekpaden en ${report.bardotReference.supplements} supplementen.`);
   lines.push(`- Zuyd-referentie: \`${report.zuydReference.path}\`, SHA-256 \`${report.zuydReference.bytesSha256}\` (ongewijzigd).`);
+  lines.push(`- Wolfslaar-referentie: \`${report.wolfslaarReference.path}\`, SHA-256 \`${report.wolfslaarReference.bytesSha256}\`, ${report.wolfslaarReference.items} items in ${report.wolfslaarReference.categories} rubriekpaden, ${report.wolfslaarReference.arrangements} arrangementen en ${report.wolfslaarReference.supplements} supplementen.`);
+  lines.push(`- T-Huis-referentie: \`${report.thuisReference.path}\`, SHA-256 \`${report.thuisReference.bytesSha256}\`; status \`${report.thuisReference.status}\`, geen item.`);
   lines.push(`- Iedere Bardot-referentiequote is tegen de vastgezette PDF-tekst gecontroleerd; ${report.bardotReference.priceProofs} prijsbewijzen zijn opnieuw aan de vastgezette paginarij gekoppeld.`);
+  lines.push('- Iedere Wolfslaar-referentiequote is tegen de vastgezette HTML-tekst gecontroleerd; een quote die niet in de vastgezette bytes staat, stopt de meting.');
   lines.push('- De analyse is op de vastgezette bytes herhaald zonder netwerkoproep; hetzelfde script op dezelfde bytes levert hetzelfde rapport.');
-  lines.push('- Deze twee kaarten zijn geen ongeziene holdout en dit is geen productieacceptatie.');
+  lines.push('- Deze vier kaarten zijn geen ongeziene holdout en dit is geen productieacceptatie.');
   lines.push('');
   return `${lines.join('\n')}\n`;
 }
@@ -302,21 +429,57 @@ async function main() {
   }
   const metadata = readJson(REFERENCE_METADATA_PATH);
 
+  // The two pins of review 6349832755 K1, validated against the same pinned card
+  // capture and the same closed seed rules the capture script used.
+  const cardSources = readJson(CARD_SOURCE_MANIFEST_PATH).sources;
+  const wolfslaarBytes = fs.readFileSync(WOLFSLAAR_PIN_PATH);
+  const thuisBytes = fs.readFileSync(THUIS_PIN_PATH);
+  const wolfslaarPin = JSON.parse(wolfslaarBytes.toString('utf8'));
+  const thuisPin = JSON.parse(thuisBytes.toString('utf8'));
+  for (const [id, pin, sourceId] of [['wolfslaar', wolfslaarPin, 'wolfslaar'], ['thuis', thuisPin, 'thuis']]) {
+    const cardSource = cardSources.find((candidate) => candidate.id === sourceId);
+    if (!cardSource) throw new Error(`${id}: the card source manifest has no ${sourceId} entry`);
+    const historical = ((cardReferences.sources[sourceId] || {}).historical || []).map((row) => row.sourceUrl).filter(Boolean);
+    const check = validateCardSourceCapturePin(pin, cardSource, { historicalUrls: historical, cardCaptureSha256: textSha256(cardBytes) });
+    if (!check.ok) throw new Error(`${id} pin is invalid: ${check.errors.join('; ')}`);
+  }
+  const wolfslaarReferenceBytes = fs.readFileSync(WOLFSLAAR_REFERENCE_PATH);
+  const thuisReferenceBytes = fs.readFileSync(THUIS_REFERENCE_PATH);
+  const wolfslaarReference = JSON.parse(wolfslaarReferenceBytes.toString('utf8'));
+  const thuisReference = JSON.parse(thuisReferenceBytes.toString('utf8'));
+  for (const [id, reference] of [['wolfslaar', wolfslaarReference], ['thuis', thuisReference]]) {
+    const shape = validateReferenceShape(reference);
+    if (!shape.ok) throw new Error(`${id}: reference is not comparable: ${shape.errors.join('; ')}`);
+  }
+
   const sources = [
     await measureBardot(pin, cardSource, bardotReference),
     await measureZuyd(metadata, zuydReference),
+    await measurePinnedCard({ pin: wolfslaarPin, reference: wolfslaarReference, sourceId: 'wolfslaar' }),
+    blockedCardResult({
+      label: thuisReference.label,
+      sourceId: 'thuis',
+      blockedReason: thuisReference.blockedReason,
+      pin: thuisPin,
+      limitations: thuisReference.limitations || [],
+    }),
   ];
   const totals = aggregateControlledReferences(sources);
   const bardotItems = bardotReference.menus.reduce((sum, menu) => sum + menu.categories.reduce((inner, category) => inner + category.items.length, 0), 0);
   const bardotCategories = bardotReference.menus.reduce((sum, menu) => sum + menu.categories.length, 0);
+  const wolfslaarItems = wolfslaarReference.menus.reduce((sum, menu) => sum + menu.categories.reduce((inner, category) => inner + category.items.length, 0), 0);
 
   const report = {
     version: '1.0.0',
     issue: 59,
-    criterion: 'criterion 5 - existing cards against controlled sources (Bardot next to Zuyd)',
+    criterion: 'criterion 5 - existing cards against controlled sources (Bardot, Zuyd, Wolfslaar, T-Huis)',
     countingRules: referenceIndex.countingRules,
     cardCapture: { path: repositoryPath(CARD_CAPTURE_PATH), bytesSha256: textSha256(cardBytes) },
     cardPin: { path: repositoryPath(CARD_PIN_PATH), bytesSha256: textSha256(fs.readFileSync(CARD_PIN_PATH)) },
+    cardPins: [
+      { path: repositoryPath(WOLFSLAAR_PIN_PATH), bytesSha256: textSha256(wolfslaarBytes) },
+      { path: repositoryPath(THUIS_PIN_PATH), bytesSha256: textSha256(thuisBytes) },
+    ],
     bardotReference: {
       path: repositoryPath(BARDOT_REFERENCE_PATH),
       bytesSha256: textSha256(bardotReferenceBytes),
@@ -327,7 +490,23 @@ async function main() {
       priceProofs: sources[0].priceProofCount || 0,
     },
     zuydReference: { path: repositoryPath(zuydReferencePath), bytesSha256: textSha256(zuydReferenceBytes) },
-    method: 'Offline replay of the current pipeline on the pinned bytes only. Bardot: the hash-verified 2025-11 dinerkaart PDF, measured directly. Zuyd: the already pinned HTML menu pages replayed through the real analysis. Comparison, deviation classes and precision/recall come from ops/benchmark/referenceComparison.js unchanged; the counting rules are the pinned ones. No network, provider, OCR or database write.',
+    wolfslaarReference: {
+      path: repositoryPath(WOLFSLAAR_REFERENCE_PATH),
+      bytesSha256: textSha256(wolfslaarReferenceBytes),
+      items: wolfslaarItems,
+      categories: wolfslaarReference.menus.reduce((sum, menu) => sum + menu.categories.length, 0),
+      arrangements: wolfslaarReference.arrangements.length,
+      supplements: wolfslaarReference.supplements.length,
+      ambiguous: wolfslaarReference.ambiguous.length,
+    },
+    thuisReference: {
+      path: repositoryPath(THUIS_REFERENCE_PATH),
+      bytesSha256: textSha256(thuisReferenceBytes),
+      status: thuisReference.captureStatus,
+      items: 0,
+      blockedReason: thuisReference.blockedReason,
+    },
+    method: 'Offline replay of the current pipeline on the pinned bytes only. Bardot: the hash-verified 2025-11 dinerkaart PDF, measured directly. Zuyd: the already pinned HTML menu pages replayed through the real analysis. Wolfslaar: the entry page, both menu pages and the menu-1 overview page pinned once by review 6349832755 K1. T-Huis: the pinned entry and menu pages are reported, but the menu page carries its five cards as SVG images only, so it stays blocked instead of counting as an empty success. Comparison, deviation classes and precision/recall come from ops/benchmark/referenceComparison.js unchanged; the counting rules are the pinned ones. No network, provider, OCR or database write.',
     totals,
     sources,
   };
