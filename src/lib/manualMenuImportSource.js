@@ -50,7 +50,7 @@ function htmlToPlainText(html) {
 }
 
 function failureSource({ id, url, kind, status, limitation }) {
-  return { id, url, kind, status, text: '', sha256: null, limitation, fetchedAt: null };
+  return { id, url, kind, status, text: '', hasText: false, sha256: null, limitation, fetchedAt: null };
 }
 
 /**
@@ -93,6 +93,7 @@ async function readManualImportSource({ id, url, fetchImpl, robotsCheck, now = n
       kind: 'pdf',
       status: 'read',
       text: '',
+      hasText: false,
       sha256,
       fetchedAt,
       limitation: 'PDF opgehaald zonder tekstlaagcontrole; voeg het bestand zelf toe aan de AI.',
@@ -115,6 +116,7 @@ async function readManualImportSource({ id, url, fetchImpl, robotsCheck, now = n
     kind: 'html',
     status: 'read',
     text,
+    hasText: true,
     sha256: sourceHashForText(text),
     fetchedAt,
     limitation: null,

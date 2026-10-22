@@ -2,19 +2,22 @@
 
 GitHub: https://github.com/1am-it/menucard/issues/59 · PR #60 (draft)
 
-Status: **ontwerp ter goedkeuring**, 2026-10-22; herzien als v2 op dezelfde dag
-na het eigenaarsbesluit "zo eenvoudig mogelijk" en de Lead-opdracht
-`6346726670`. Fase 1 van 2: alleen documentatie en één statische mockup. Geen
-product-, route-, schema- of databasewijziging. Fase 2 (bouw) start pas na
-goedkeuring van de mockup door de Product Owner.
+Status: **fase 2 gebouwd** (2026-10-22, developerronde na review
+`6348147293`). Fase 1 was het ontwerp; de eigenaar keurde mockup v2 op
+2026-10-22 goed en voegde vier punten (a)–(d) toe. Die staan in
+`docs/mockups/manual-ai-import-v3.html`, dat v2 vervangt. Deze ronde bouwt de
+drie stappen, de begrensde import en de bijbehorende regressies; er is geen
+provider, geen betaalde API en geen publicatie geactiveerd en er is niets
+gemerged. De onafhankelijke review en de handmatige proef (K9) blijven bij de
+Lead en de eigenaar.
 
-Basis: `317866ecb47b9228349baf9318dff66d20d48546`; de v1-tekst stond op
-`5492d2cc36c5f195082e3154df4f6d31612c05cf`.
+Basis: `c86aaad6e85af44acfa83591343f0741f908b0b0`; de v1-tekst stond op
+`5492d2cc36c5f195082e3154df4f6d31612c05cf`, de v2-tekst op `8430773`.
 
-Visuele referentie: `docs/mockups/manual-ai-import-v2.html` (**ter
-goedkeuring**). `manual-ai-import-v1.html` is vervangen en blijft alleen voor de
-geschiedenis. Waar de v1-flow en deze v2-tekst verschillen, wint v2; de
-controle- en poortregels van K2 §4–§9 en K5 gelden onverkort.
+Visuele referentie: `docs/mockups/manual-ai-import-v3.html` (**goedgekeurd**).
+`manual-ai-import-v2.html` en `manual-ai-import-v1.html` zijn vervangen en
+blijven alleen voor de geschiedenis. Waar de v1-flow en deze tekst verschillen,
+wint v3; de controle- en poortregels van K2 §4–§9 en K5 gelden onverkort.
 
 ## Eigenaarsbesluit en afbakening (2026-10-22, optie A)
 
@@ -32,9 +35,10 @@ accounts, abonnementen of credentials. Een geldige JSON of een gevonden quote is
 geen kwaliteitsacceptatie. Het BE-21-voorstel voor een API-proef (`5492d2c`)
 blijft NEEDS_APPROVAL en is **niet** gekozen.
 
-Fase 2 is pas aan de orde na expliciete goedkeuring van
-`docs/mockups/manual-ai-import-v2.html` door de Product Owner; deze spec is geen
-bouwopdracht.
+Fase 2 is gestart na de expliciete goedkeuring van het ontwerp door de Product
+Owner (mockup v2 plus (a)–(d), review `6348147293`). Deze ronde bouwt alleen wat
+hieronder staat; de produktie-achtige acceptatie (echte bronnen, browser en
+onafhankelijke review) blijft bij de Lead en de eigenaar.
 
 ## Herziening v2: de vereenvoudigde stroom (eigenaarsbesluit 2026-10-22)
 
@@ -178,7 +182,7 @@ ingeklapt.
 | v2-mapping zonder afvlakking (alleen-lezen) | `src/lib/menuProductMappingV2.js`, `src/lib/menuProductGuardsV2.js` |
 | Telregels | [`menu-extraction-reference-counting-rules.md`](../../../docs/guides/menu-extraction-reference-counting-rules.md) |
 | Vastgezette referenties | `ops/benchmark/reference-references/index.json` |
-| Mockup | [`manual-ai-import-v2.html`](../../../docs/mockups/manual-ai-import-v2.html) (**ter goedkeuring**; v1 is vervangen) |
+| Mockup | [`manual-ai-import-v3.html`](../../../docs/mockups/manual-ai-import-v3.html) (**goedgekeurd**; v2 en v1 zijn vervangen) |
 | #59-hoofdspec | [`menu-extraction-ai-import.md`](./menu-extraction-ai-import.md) |
 
 
@@ -636,28 +640,81 @@ bestand is volgens BE-21 gitignored en wordt daarom niet gecommit; de vorige
 ronde blijft bewaard onder `6345294413`. De mockup en deze spec zijn wel
 gecommit op `feat/menu-extraction-59`.
 
+## Fase 2 — implementatie en bewijs (deze ronde)
+
+Deze ronde bouwt de goedgekeurde stroom. Per onderdeel staat waar het staat en
+welke regressie het bewijst. Alles is **developerbewijs**: geen onafhankelijke
+review, geen echte bronacceptatie en geen productieactie.
+
+| Onderdeel | Bestand | Bewijs |
+| --- | --- | --- |
+| K1 mockup v3 + spec | `docs/mockups/manual-ai-import-v3.html`, `docs/mockups/README.md` | v3 vervangt v2 in de index; (a)–(d) staan in de mockup |
+| K2 prompt exporteren | `src/lib/manualMenuImportBundle.js`, `src/lib/manualMenuImportPrompt.js`, `src/lib/manualMenuImportSource.js` | `manualMenuImport.test.js`: protocol-/schemahash, per bron id/URL/tijd/SHA-256, samenvatting-plus-codeblok, scaninstructie, geen tekst in de metadata |
+| K3 veilig importeren | `src/lib/manualMenuImportImport.js`, `src/lib/manualMenuImportHandlers.js`, `app/api/internal/v1/manual-menu-import/*` | 1 MiB-grens, codeblokextractie, gewone melding, `validateStructuredOutput`, bundelbinding, Money- en relatieregels, AI-naamveld, nooit JSON in de respons |
+| K4 bewijs bij scans | `src/lib/manualMenuImportImport.js`, `app/internal/menu-import/page.js` | regel "uit scan, controleer", per regel bevestigen, geen accepteer-alles |
+| K5 menselijke controle | `src/lib/manualMenuImportReview.js`, `app/internal/menu-import/page.js` | variant → prijskeuze of weglaten; supplement → zichtbaar "als toeslag weggelaten"; verplichte reden bij "staat niet in de bron"; opslaan pas zonder open punten; herkomst in `importProvenance` |
+| K6 Vraag AI | `src/lib/manualMenuImportPrompt.js`, `src/lib/manualMenuImportReview.js` | één prompt per regel, 20 per import, 8 KiB broncontext, dezelfde validator, vervangt alleen die regel, geen Vraag AI bij twee prijzen |
+| K7 gebruiksexport | `src/lib/manualMenuImportUsage.js`, `GET /api/internal/v1/manual-menu-import/usage` | alleen metagegevens, vast schema, `via abonnement, niet gemeten` zonder meting, geen menu-inhoud |
+| K8 regressies | `src/lib/manualMenuImport.test.js`, `src/lib/manualMenuImportHandlers.test.js`, `ops/browser/run-menu-review-browser-check.js` | injectie, hash-mismatch, te groot, onbekende bron, supplement als hoofdprijs, variantverlies, opslaan zonder menselijke stap, reden verplicht, vervolgantwoord buiten de regel, tekst rond het codeblok, ongeldige JSON; browserfixture voor de drie stappen in licht/donker op 320/390 px en met het toetsenbord |
+| K9 handmatige proef | `ops/scripts/measure-manual-ai-import.js` (+ test) | meet gemist, verzonnen, prijzen, varianten, rubrieken en bewijsdekking met het label "handmatige proef, geen schaalacceptatie"; de uitvoering zelf blijft bij Lead en eigenaar |
+
+Bewuste beperkingen van deze ronde, eerlijk gemeld in plaats van opgelost:
+
+- De bundel- en importopslag is **in-memory en begrensd** (50 bundels, 30
+  minuten; 50 imports, 60 minuten). Een herstart geeft `bundle_expired` en
+  vraagt een nieuwe export; er is geen duurzame opslag en dus ook geen
+  herkomstbewijs na een herstart behalve wat in het opgeslagen concept staat.
+- De prompttekst en de brontekst gaan één keer naar de interne browser; dat is
+  de in de spec geaccepteerde blootstelling (T1). Ze worden niet gelogd en niet
+  in de browseropslag bewaard, maar de DOM bevat de prompt zolang de pagina
+  openstaat.
+- De bron-SHA-256 is de hash van de genormaliseerde tekst die de AI zag (of van
+  de PDF-bytes); dat is niet automatisch dezelfde waarde als `contentHash` uit
+  een eerdere analyse. De import vergelijkt daarom tegen **deze** bundel, niet
+  tegen een oude bon.
+- Een PDF wordt in deze ronde niet van een tekstlaag voorzien: hij gaat als
+  "voeg het bestand zelf toe" mee en bewijs eruit blijft menselijk werk (T7).
+- De AI-naam is zelfgerapporteerd. Hij staat in `captured_content.importProvenance`
+  (additief, geen schemawijziging) en in het gebruiksexport; het is geen bewijs.
+- Er is geen provider, geen betaalde API en geen automatische bevestiging,
+  publicatie of export. Rollen, bronbevestiging en publicatiepoorten zijn niet
+  gewijzigd.
+
+
 ## Grenzen van deze fase
 
-Niet gedaan en niet toegestaan in fase 1: productcode, routes, migraties,
-schemawijzigingen, v2-schrijver, betaalde API, providerconfiguratie, nieuwe
-bronnen, wijzigingen aan de #59-referenties, telregels of meetcode, #56-integratie,
-merge, rebase, force-push, release of publicatie. PR #60 blijft draft.
+Niet gedaan en niet toegestaan in deze ronde: migraties, schemawijzigingen,
+v2-schrijver, betaalde API, providerconfiguratie, nieuwe bronnen, wijzigingen aan
+de #59-referenties, telregels of meetcode, #56-integratie, merge, rebase,
+force-push, release of publicatie. PR #60 blijft draft.
+
+Fase 1 (ontwerp) blijft ongewijzigd staan; wat hierboven onder "Fase 2" staat is
+de enige toegevoegde bouw.
 
 ## Openstaande beslissingen (voor de Lead, niet voor de developer)
 
-1. **Brontekst voor de prompt**: veilig herlezen met hashcontrole (geen opslag)
-   of een expliciet, beoordeeld opslagbesluit? Beïnvloedt T7 en de
-   quote-controle.
-2. **Levensduur en herbinding van het exportbundel** ten opzichte van de
-   tienminutenbon (T5): eigen bundellevensduur met hashhercontrole, of
-   verplichte heranalyse.
-3. **Duurzame herkomstopslag** voor AI-naam (zelfgerapporteerd), bundel-id en
-   tijd (T11): additief veld na ontwerp, of expliciet gemelde beperking.
-4. **Exportrecht van collega's**: alleen de starter, of iedere interne gebruiker
-   met dezelfde reviewrol? Voorstel hierboven: alleen de starter, collega's
-   alleen-lezen.
-5. **Automatische bundelbinding en de Vraag AI-bovengrens** (nieuw in v2): de app
-   kiest het bundel automatisch en de spec begrenst Vraag AI op 1 per regel, 20
-   per import en 8 KiB broncontext. Beide zijn UI-/ontwerpkeuzes zonder nieuwe
-   bevoegdheid; de Lead beoordeelt of ze zo in fase 2 mogen.
+Wat deze ronde feitelijk doet staat erbij; de beslissing blijft aan de Lead.
+
+1. **Brontekst voor de prompt**: de prompt leest de bron bij het maken opnieuw
+   via de bestaande veilige route en legt de tekst alleen in het tijdelijke
+   bundel vast (geen database, geen browseropslag). Een expliciet
+   opslagbesluit voor herlezen zonder nieuwe fetch is nog niet genomen.
+2. **Levensduur en herbinding van het exportbundel** (T5): het bundel leeft 30
+   minuten in het procesgeheugen en de import hercontroleert de bundelhash;
+   na een herstart of na 30 minuten volgt `bundle_expired`. Of dat genoeg is
+   voor de handmatige proef, beslist de Lead.
+3. **Duurzame herkomstopslag** (T11): de AI-naam, tijd, protocol- en
+   bronhashes en de redenen staan additief in
+   `captured_content.importProvenance`. Dat is geen nieuwe kolom en geen nieuwe
+   `source_type`; het verdwijnt niet stil, maar het is ook geen apart
+   auditrecord.
+4. **Exportrecht van collega's**: alleen de starter kan zijn eigen bundel en
+   import gebruiken; een collega krijgt 404/geen toegang tot dat bundel. Dit
+   volgt het voorstel in deze spec.
+5. **Automatische bundelbinding en de Vraag AI-bovengrens**: geïmplementeerd als
+   ontworpen (1 per regel, 20 per import, 10 regels per "alle open punten",
+   8 KiB broncontext). De app kiest geen bundel meer automatisch: de gebruiker
+   maakt de prompt in dezelfde pagina, dus het bundel is altijd het zojuist
+   gemaakte bundel en de UI toont het.
+
 
