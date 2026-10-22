@@ -23,10 +23,9 @@ const path = require('node:path');
 const { loadMenuExtractionProtocol } = require('./menuExtractionProtocol');
 const { sourceHashForText } = require('./manualMenuImportBundle');
 const {
-  ManualImportUsageLedger,
-  buildUsageExport,
   validateUsageExport,
   NOT_MEASURED_LABEL,
+  NOT_TRACKED_LABEL,
 } = require('./manualMenuImportUsage');
 const { createManualImportStateCipher } = require('./manualMenuImportState');
 const { createManualMenuImportHandlers, searchRestaurantChoices } = require('./manualMenuImportHandlers');
@@ -95,15 +94,14 @@ function output() {
 }
 
 /**
- * Elke aanroep maakt een nieuwe handlerinstantie. Alleen de cipher, de
- * teller en de opgeslagen concepten worden gedeeld, precies zoals de
- * serverless-runtime alleen het geheim en de database deelt.
+ * Elke aanroep maakt een nieuwe handlerinstantie. Alleen de cipher en de
+ * opgeslagen concepten worden gedeeld, precies zoals de serverless-runtime
+ * alleen het geheim en de database deelt.
  */
 function harness(overrides = {}) {
   let counter = 0;
   const saved = [];
   const clock = { now: NOW };
-  const usageLedger = overrides.usageLedger || new ManualImportUsageLedger({ now: () => clock.now });
   const stateCipher =
     overrides.stateCipher || createManualImportStateCipher({ secret: TEST_SECRET, now: () => clock.now });
   const create = (extra = {}) =>
@@ -129,11 +127,25 @@ function harness(overrides = {}) {
       },
       stateCipher,
       restaurants: RESTAURANTS,
-      usageLedger,
+      // Dezelfde duurzame bron als de GET en het ops-exportscript: de
+      // opgeslagen concepten met hun importProvenance.
+      readUsageRows:
+        extra.readUsageRows ||
+        overrides.readUsageRows ||
+        (async () => ({
+          ok: true,
+          rows: saved.map((input, index) => ({
+            id: `concept-${index + 1}`,
+            created_at: NOW.toISOString(),
+            captured_content: input.content,
+          })),
+          limit: 5000,
+          bounded: false,
+        })),
       now: () => clock.now,
       ...extra,
     });
-  return { next: create, saved, clock, usageLedger, stateCipher };
+  return { next: create, saved, clock, stateCipher };
 }
 
 async function createBundle(handlers, body = {}) {
@@ -220,14 +232,19 @@ test('K1/K2/K3/K5/K7: de hele keten werkt over aparte handler-instanties', async
     false,
   );
 
+  // K3: hetzelfde document als het ops-exportscript, uit de opgeslagen
+  // concepten — niet uit een teller in het geheugen.
   const usage = await h.next().usage(request({}));
   assert.equal(usage.status, 200);
   assert.deepEqual(validateUsageExport(usage.body.usage), []);
+  assert.equal(usage.body.usage.source.kind, 'durable');
+  assert.equal(usage.body.usage.source.rowsUsed, 1);
   assert.equal(usage.body.usage.costs.status, 'not_measured');
   assert.equal(usage.body.usage.costs.label, NOT_MEASURED_LABEL);
-  assert.equal(usage.body.usage.totals.promptCreated, 1);
-  assert.equal(usage.body.usage.totals.importChecked, 1);
   assert.equal(usage.body.usage.totals.conceptSaved, 1);
+  assert.equal(usage.body.usage.ai[0].aiName, 'Claude');
+  assert.equal(usage.body.usage.totals.promptCreated, NOT_TRACKED_LABEL);
+  assert.equal(usage.body.usage.totals.importChecked, NOT_TRACKED_LABEL);
   assert.equal(JSON.stringify(usage.body.usage).includes('Broodplank'), false);
 });
 
@@ -455,23 +472,46 @@ test('K6: een vervolgantwoord dat andere regels raakt wordt geweigerd', async ()
   assert.equal(result.body.reason, 'follow_up_out_of_scope');
 });
 
-test('K7: de gebruiksexport is begrensd, zonder inhoud en zonder gemeten kosten', () => {
-  const ledger = new ManualImportUsageLedger({ now: () => NOW });
-  ledger.record({ route: 'manual-menu-import/bundles', action: 'prompt_created', aiName: 'ChatGPT' });
-  ledger.record({ route: 'manual-menu-import/imports', action: 'import_checked', aiName: 'ChatGPT' });
-  ledger.record({ route: 'onbekend/pad', action: 'prompt_created', aiName: 'x' });
-  ledger.record({ route: 'manual-menu-import/bundles', action: 'onbekend', aiName: 'x' });
-  const doc = buildUsageExport({ ledger, generatedAt: NOW });
-  assert.deepEqual(validateUsageExport(doc), []);
-  assert.equal(doc.totals.promptCreated, 1);
-  assert.deepEqual(doc.ai, [
-    { aiName: 'ChatGPT', selfReported: true, counts: { prompt_created: 1, import_checked: 1, follow_up: 0, concept_saved: 0, rejected: 0 } },
-  ]);
-  const measured = buildUsageExport({ ledger, generatedAt: NOW, cost: { amount: 1.5, currency: 'eur' } });
-  assert.equal(measured.costs.status, 'measured');
-  assert.equal(measured.costs.amount, 1.5);
-  const zero = buildUsageExport({ ledger, generatedAt: NOW, cost: { amount: 0, currency: 'EUR' } });
-  assert.equal(zero.costs.status, 'not_measured');
-  assert.equal(JSON.stringify(doc).includes('meta van de bron'), false);
+test('K1: prompts en gecontroleerde imports zonder opslag tellen niet mee', async () => {
+  // De oude teller gaf hier promptCreated 1 en importChecked 1. Die waarden
+  // werden nergens duurzaam bewaard en zijn dus geen waarheid (F6).
+  const h = harness();
+  const step1 = await createBundle(h.next());
+  await importAnswer(h.next(), step1);
+  const usage = await h.next().usage(request({}));
+  assert.equal(usage.status, 200);
+  assert.equal(usage.body.usage.totals.conceptSaved, 0);
+  assert.equal(usage.body.usage.totals.promptCreated, NOT_TRACKED_LABEL);
+  assert.equal(usage.body.usage.totals.importChecked, NOT_TRACKED_LABEL);
+  assert.deepEqual(usage.body.usage.ai, []);
+  assert.deepEqual(validateUsageExport(usage.body.usage), []);
+});
+
+test('K3: zonder duurzame leesroute stopt de export met een concrete fout', async () => {
+  const withoutSource = createManualMenuImportHandlers({
+    authenticate: async () => ({ ok: true, userId: 'user-1', roles: [{ role: 'internal' }] }),
+    now: () => NOW,
+  });
+  const result = await withoutSource.usage(request({}));
+  assert.equal(result.status, 500);
+  assert.equal(result.body.reason, 'usage_source_missing');
+  assert.equal(result.body.usage, undefined);
+});
+
+test('K3: een leesfout geeft 503 en nooit een leeg of verzonnen document', async () => {
+  const failed = harness({ readUsageRows: async () => ({ ok: false, code: 'read_failed' }) });
+  const result = await failed.next().usage(request({}));
+  assert.equal(result.status, 503);
+  assert.equal(result.body.reason, 'usage_source_unavailable');
+  assert.equal(result.body.usage, undefined);
+
+  const throwing = harness({
+    readUsageRows: async () => {
+      throw new Error('database onbereikbaar');
+    },
+  });
+  const thrown = await throwing.next().usage(request({}));
+  assert.equal(thrown.status, 503);
+  assert.equal(thrown.body.usage, undefined);
 });
 

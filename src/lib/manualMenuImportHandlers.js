@@ -17,7 +17,9 @@
 //   - het restaurant komt uit de bestaande statische lijst, nooit uit vrije
 //     invoer;
 //   - geen automatische bevestiging, geen accepteer-alles, geen publicatie;
-//   - de AI-naam is zelfgerapporteerd en gaat als herkomst mee.
+//   - de AI-naam is zelfgerapporteerd en gaat als herkomst mee;
+//   - het gebruiksdocument wordt niet in het geheugen geteld maar afgeleid uit
+//     de opgeslagen concepten (Lead-bevinding F6, zie manualMenuImportUsage.js).
 //
 // Dependency-injected en zonder eigen netwerk of database, zodat elke regel met
 // een fake te bewijzen is. De enige echte schrijfactie is de bestaande
@@ -35,7 +37,7 @@ const {
   applyOpenPointsAnswer,
   MAX_FOLLOW_UPS_PER_IMPORT,
 } = require('./manualMenuImportReview');
-const { buildUsageExport, ROUTES } = require('./manualMenuImportUsage');
+const { buildUsageExport } = require('./manualMenuImportUsage');
 const { ManualImportStateError, stateMessage } = require('./manualMenuImportState');
 
 const FORBIDDEN = 'Alleen interne medewerkers kunnen een menu importeren.';
@@ -121,7 +123,7 @@ function nextState(state, patch) {
  *   saveConcept(input)    → { status, body } via the existing concept route
  *   stateCipher           → src/lib/manualMenuImportState.js createManualImportStateCipher
  *   restaurants           → data/restaurants.json (server-side, read-only)
- *   usageLedger           → bounded usage counters
+ *   readUsageRows()       → duurzame gebruiksgegevens (manualMenuImportUsageSource.js)
  *   now()                 → Date
  */
 function createManualMenuImportHandlers(deps = {}) {
@@ -133,7 +135,7 @@ function createManualMenuImportHandlers(deps = {}) {
     saveConcept,
     stateCipher,
     restaurants,
-    usageLedger,
+    readUsageRows,
   } = deps;
   const now = deps.now || (() => new Date());
 
@@ -159,10 +161,6 @@ function createManualMenuImportHandlers(deps = {}) {
     } catch {
       return null;
     }
-  }
-
-  function record(route, action, aiName) {
-    if (usageLedger && typeof usageLedger.record === 'function') usageLedger.record({ route, action, aiName });
   }
 
   function stateFailure(err) {
@@ -292,7 +290,6 @@ function createManualMenuImportHandlers(deps = {}) {
         followUpTotal: 0,
       });
       if (next.reply) return next.reply;
-      record(ROUTES.bundles, 'prompt_created', null);
       return reply(201, { bundle: bundleMetadata(bundle), prompt, state: next.state, validUntil: next.validUntil });
     } catch (err) {
       if (err instanceof ManualImportBundleError) return reply(422, { error: err.message, reason: err.code });
@@ -326,7 +323,6 @@ function createManualMenuImportHandlers(deps = {}) {
 
     const code = extractCodeBlock(parsed.body.answer);
     if (!code.ok) {
-      record(ROUTES.imports, 'rejected', null);
       return reply(422, { error: code.message, reason: code.code });
     }
     const report = buildImportReport({
@@ -337,12 +333,10 @@ function createManualMenuImportHandlers(deps = {}) {
       now: now(),
     });
     if (!report.ok) {
-      record(ROUTES.imports, 'rejected', report.aiName);
       return reply(422, { error: report.message, reason: report.code, problems: report.problems });
     }
     const next = sealNext(nextState(state, { report, decisions: [], followUps: {}, followUpTotal: 0 }));
     if (next.reply) return next.reply;
-    record(ROUTES.imports, 'import_checked', report.aiName);
     return reply(201, {
       import: publicImportReport(report),
       review: reviewView({ report, decisions: new Map() }),
@@ -423,7 +417,6 @@ function createManualMenuImportHandlers(deps = {}) {
       followUpCount: followUpsFor(state, row.id),
     });
     if (!result.ok) {
-      record(ROUTES.followUp, 'rejected', step.report.aiName);
       return reply(422, { error: result.message, reason: result.code });
     }
     const followUps = { ...(state.followUps || {}), [row.id]: followUpsFor(state, row.id) + 1 };
@@ -435,7 +428,6 @@ function createManualMenuImportHandlers(deps = {}) {
       }),
     );
     if (next.reply) return next.reply;
-    record(ROUTES.followUp, 'follow_up', step.report.aiName);
     return reply(200, {
       row: result.row,
       import: publicImportReport(result.report),
@@ -470,7 +462,6 @@ function createManualMenuImportHandlers(deps = {}) {
         maxRows: Math.max(1, remainingFollowUps(state)),
       });
       if (!result.ok) {
-        record(ROUTES.followUp, 'rejected', step.report.aiName);
         return reply(422, { error: result.message, reason: result.code });
       }
       const followUps = { ...(state.followUps || {}) };
@@ -483,7 +474,6 @@ function createManualMenuImportHandlers(deps = {}) {
         }),
       );
       if (next.reply) return next.reply;
-      record(ROUTES.followUp, 'follow_up', step.report.aiName);
       return reply(200, {
         import: publicImportReport(result.report),
         review: reviewView({ report: result.report, decisions }),
@@ -520,7 +510,6 @@ function createManualMenuImportHandlers(deps = {}) {
       restaurantId: state.restaurantId,
     });
     if (!draft.ok) {
-      record(ROUTES.save, 'rejected', step.report.aiName);
       return reply(409, { error: draft.message, reason: draft.code, blockers: draft.blockers || [], pending: draft.pending || [] });
     }
     const firstSource = (step.report.technical.sources || [])[0] || null;
@@ -535,8 +524,6 @@ function createManualMenuImportHandlers(deps = {}) {
       originallyFetchedAt: state.bundle.fetchedAt,
       expectedVersion: Number.isInteger(parsed.body.expected_version) ? parsed.body.expected_version : undefined,
     });
-    if (result.status >= 200 && result.status < 300) record(ROUTES.save, 'concept_saved', step.report.aiName);
-    else record(ROUTES.save, 'rejected', step.report.aiName);
     return reply(result.status, {
       ...result.body,
       provenance: draft.provenance,
@@ -544,13 +531,30 @@ function createManualMenuImportHandlers(deps = {}) {
     });
   }
 
-  /** GET — K7: alleen metagegevens, geen menu-inhoud en geen prompts. */
+  /**
+   * GET — K3: het gebruiksdocument komt uit dezelfde duurzame bron als het
+   * ops-exportscript (opgeslagen concepten met importProvenance). Ontbreekt de
+   * leesroute of de configuratie, dan is dat een concrete fout en nooit een
+   * leeg of verzonnen document.
+   */
   async function usage(request) {
     const { denied } = await authorize(request);
     if (denied) return denied;
+    if (typeof readUsageRows !== 'function') {
+      return reply(500, { error: 'De duurzame gebruiksgegevens zijn niet aangesloten.', reason: 'usage_source_missing' });
+    }
+    let read;
+    try {
+      read = await readUsageRows();
+    } catch {
+      read = { ok: false, code: 'read_failed' };
+    }
+    if (!read || read.ok !== true) {
+      return reply(503, { error: 'De gebruikscijfers konden niet worden gelezen.', reason: 'usage_source_unavailable' });
+    }
     const stamp = now();
     return reply(200, {
-      usage: buildUsageExport({ ledger: usageLedger, from: null, to: stamp.toISOString(), generatedAt: stamp }),
+      usage: buildUsageExport({ rows: read.rows, limit: read.limit, bounded: read.bounded, generatedAt: stamp }),
     });
   }
 

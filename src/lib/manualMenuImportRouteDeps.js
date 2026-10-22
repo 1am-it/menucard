@@ -18,7 +18,7 @@ import { computeCanonicalContentHash } from '@/src/lib/menuSnapshotHash'
 import { createConceptVersion } from '@/src/lib/menuConceptStore'
 import { getSupabaseAdmin } from '@/src/lib/supabaseAdmin'
 import { readManualImportSources } from '@/src/lib/manualMenuImportSource'
-import { sharedUsageLedger } from '@/src/lib/manualMenuImportUsage'
+import { readDurableUsageRows } from '@/src/lib/manualMenuImportUsageSource'
 import { createManualImportStateCipher } from '@/src/lib/manualMenuImportState'
 import { createManualMenuImportHandlers } from '@/src/lib/manualMenuImportHandlers'
 import restaurantsData from '@/data/restaurants.json'
@@ -71,5 +71,6 @@ export const manualMenuImportHandlers = createManualMenuImportHandlers({
   // doorgang.
   stateCipher: createManualImportStateCipher({ secret: process.env.SUPABASE_SERVICE_ROLE_KEY }),
   restaurants: restaurantsData,
-  usageLedger: sharedUsageLedger,
+  // Alleen lezend: dezelfde functie die het ops-exportscript gebruikt.
+  readUsageRows: () => readDurableUsageRows(getSupabaseAdmin()),
 })
