@@ -736,6 +736,13 @@ function manualImportScenario() {
     bundle: bundleMetadata(bundle),
     prompt: buildImportPrompt(bundle),
     import: publicImportReport(report),
+    // K5: een zichtbare geldigheid in de browserfixture (de echte waarde komt
+    // uit het toestandstoken). K3: de bestaande restaurantkeuze op naam.
+    validUntil: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+    restaurants: [
+      { id: RESTAURANT.id, name: RESTAURANT.name, buurt: 'Centrum' },
+      { id: '1', name: 'Restaurant Wolfslaar', buurt: 'Wolfslaar' },
+    ],
     reviews: [
       reviewView({ report, decisions: new Map() }),
       reviewView({ report, decisions: first.decisions }),

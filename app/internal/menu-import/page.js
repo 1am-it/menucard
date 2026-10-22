@@ -31,6 +31,13 @@ function bytesOf(text) {
   return new TextEncoder().encode(text).length
 }
 
+function clockOf(value) {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  return date.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
+}
+
 function sourceLine(source) {
   if (source.status === 'blocked') return 'robots.txt staat ophalen niet toe'
   if (source.status === 'failed') return 'niet opgehaald'
@@ -49,17 +56,23 @@ function stateBadge(row) {
 export default function ManualMenuImportPage() {
   const router = useRouter()
   const [session, setSession] = useState(undefined)
-  const [restaurantId, setRestaurantId] = useState('')
-  const [restaurantName, setRestaurantName] = useState('')
+  const [restaurantQuery, setRestaurantQuery] = useState('')
+  const [restaurantChoices, setRestaurantChoices] = useState([])
+  const [selectedRestaurant, setSelectedRestaurant] = useState(null)
+  const [pendingRestaurantId, setPendingRestaurantId] = useState('')
   const [urls, setUrls] = useState('')
   const [bundle, setBundle] = useState(null)
   const [prompt, setPrompt] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
   const [message, setMessage] = useState(null)
+  const [expired, setExpired] = useState(false)
   const [aiChoice, setAiChoice] = useState('Claude')
   const [aiOther, setAiOther] = useState('')
   const [answer, setAnswer] = useState('')
+  const [pasteSummary, setPasteSummary] = useState(null)
+  const [stateToken, setStateToken] = useState('')
+  const [validUntil, setValidUntil] = useState(null)
   const [report, setReport] = useState(null)
   const [review, setReview] = useState(null)
   const [received, setReceived] = useState(null)
@@ -83,13 +96,17 @@ export default function ManualMenuImportPage() {
       else setSession(data.session)
     })
     const params = new URLSearchParams(window.location.search)
-    if (params.get('restaurant')) setRestaurantId(params.get('restaurant'))
-    if (params.get('name')) setRestaurantName(params.get('name'))
+    const id = params.get('restaurant')
+    const name = params.get('name')
+    if (id && name) setSelectedRestaurant({ id, name })
+    else if (id) setPendingRestaurantId(id)
     if (params.get('url')) setUrls(params.get('url'))
   }, [router])
 
   const token = session && session.access_token
   const aiName = aiChoice === 'Anders' ? aiOther.trim() : aiChoice
+  const restaurantId = selectedRestaurant ? selectedRestaurant.id : ''
+  const restaurantName = selectedRestaurant ? selectedRestaurant.name : ''
 
   const api = useCallback(
     async (path, body, method = 'POST') => {
@@ -106,6 +123,92 @@ export default function ManualMenuImportPage() {
     [token]
   )
 
+  function handleFailure(result) {
+    setError(result.error)
+    // Een verlopen of ongeldig token is geen technische fout: de medewerker
+    // maakt gewoon een nieuwe prompt. De knop daarvoor staat in de melding.
+    if (typeof result.reason === 'string' && result.reason.startsWith('state_')) setExpired(true)
+  }
+
+  function adoptStep(data) {
+    if (data && typeof data.state === 'string') setStateToken(data.state)
+    if (data && data.validUntil) setValidUntil(data.validUntil)
+    setExpired(false)
+  }
+
+  // K3: zoeken op naam in de bestaande statische restaurantlijst. De server
+  // levert alleen id, naam en buurt; de pagina laadt nooit de hele dataset.
+  useEffect(() => {
+    if (!session) return undefined
+    const query = restaurantQuery.trim()
+    if (query.length < 2 || (selectedRestaurant && selectedRestaurant.name === restaurantQuery)) {
+      setRestaurantChoices([])
+      return undefined
+    }
+    let cancelled = false
+    const timer = setTimeout(async () => {
+      const res = await fetch(`${API}/restaurants?q=${encodeURIComponent(query)}`, {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: 'no-store',
+      }).catch(() => null)
+      if (cancelled || !res) return
+      const data = await res.json().catch(() => ({}))
+      if (cancelled) return
+      setRestaurantChoices(res.ok && Array.isArray(data.restaurants) ? data.restaurants : [])
+    }, 200)
+    return () => {
+      cancelled = true
+      clearTimeout(timer)
+    }
+  }, [restaurantQuery, token, session, selectedRestaurant])
+
+  // Een link met alleen een restaurantnummer: de naam komt uit dezelfde lijst,
+  // zodat de medewerker nooit een leeg of zelfbedacht restaurant ziet.
+  useEffect(() => {
+    if (!session || !pendingRestaurantId || selectedRestaurant) return undefined
+    let cancelled = false
+    fetch(`${API}/restaurants?id=${encodeURIComponent(pendingRestaurantId)}`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: 'no-store',
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (cancelled || !data || !data.restaurant) return
+        setSelectedRestaurant(data.restaurant)
+        setRestaurantQuery(data.restaurant.name)
+        setPendingRestaurantId('')
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [session, pendingRestaurantId, selectedRestaurant, token])
+
+  function chooseRestaurant(choice) {
+    setSelectedRestaurant(choice)
+    setRestaurantQuery(choice.name)
+    setRestaurantChoices([])
+    setError(null)
+  }
+
+  function changeRestaurantQuery(value) {
+    setRestaurantQuery(value)
+    if (selectedRestaurant && value !== selectedRestaurant.name) setSelectedRestaurant(null)
+  }
+
+  function acceptPastedText(text) {
+    const value = typeof text === 'string' ? text : ''
+    if (value.trim() === '') return
+    setAnswer(value)
+    setPasteSummary({ chars: value.length, bytes: bytesOf(value) })
+    setReceived(null)
+  }
+
+  function clearPasted() {
+    setAnswer('')
+    setPasteSummary(null)
+  }
+
   async function makePrompt() {
     setBusy(true)
     setError(null)
@@ -115,12 +218,16 @@ export default function ManualMenuImportPage() {
     setReport(null)
     setReview(null)
     setSaved(null)
+    setStateToken('')
+    setValidUntil(null)
+    setExpired(false)
     const list = urls.split('\n').map((line) => line.trim()).filter(Boolean).slice(0, 5)
-    const result = await api('/bundles', { restaurant_id: restaurantId, restaurant_name: restaurantName, urls: list })
-    if (!result.ok) setError(result.error)
+    const result = await api('/bundles', { restaurant_id: restaurantId, urls: list })
+    if (!result.ok) handleFailure(result)
     else {
       setBundle(result.data.bundle)
       setPrompt(result.data.prompt.text)
+      adoptStep(result.data)
       setMessage('Prompt gemaakt. Kopieer hem en plak hem in de AI.')
     }
     setBusy(false)
@@ -140,13 +247,15 @@ export default function ManualMenuImportPage() {
     setBusy(true)
     setError(null)
     setMessage(null)
-    const result = await api('/imports', { bundle_id: bundle.bundleId, bundle_hash: bundle.bundleHash, ai_name: aiName, answer })
-    if (!result.ok) setError(result.error)
+    const result = await api('/imports', { state: stateToken, bundle_hash: bundle.bundleHash, ai_name: aiName, answer })
+    if (!result.ok) handleFailure(result)
     else {
       setReport(result.data.import)
       setReview(result.data.review)
       setReceived(result.data.import.summary)
+      adoptStep(result.data)
       setAnswer('')
+      setPasteSummary(null)
     }
     setBusy(false)
   }
@@ -154,10 +263,11 @@ export default function ManualMenuImportPage() {
   async function sendDecision(decision) {
     setBusy(true)
     setError(null)
-    const result = await api(`/imports/${report.importId}/decisions`, { decision })
-    if (!result.ok) setError(result.error)
+    const result = await api(`/imports/${report.importId}/decisions`, { state: stateToken, decision })
+    if (!result.ok) handleFailure(result)
     else {
       setReview(result.data.review)
+      adoptStep(result.data)
       setReasonFor(null)
       setCorrectFor(null)
     }
@@ -187,22 +297,26 @@ export default function ManualMenuImportPage() {
     setError(null)
     setAskFor(row.id)
     setAskAnswer('')
-    const result = await api(`/imports/${report.importId}/follow-up`, { row_id: row.id })
+    const result = await api(`/imports/${report.importId}/follow-up`, { state: stateToken, row_id: row.id })
     if (!result.ok) {
-      setError(result.error)
+      handleFailure(result)
       setAskFor(null)
-    } else setAskPrompt(result.data.prompt.text)
+    } else {
+      setAskPrompt(result.data.prompt.text)
+      if (result.data.validUntil) setValidUntil(result.data.validUntil)
+    }
     setBusy(false)
   }
 
   async function submitAsk(row) {
     setBusy(true)
     setError(null)
-    const result = await api(`/imports/${report.importId}/follow-up`, { row_id: row.id, answer: askAnswer })
-    if (!result.ok) setError(result.error)
+    const result = await api(`/imports/${report.importId}/follow-up`, { state: stateToken, row_id: row.id, answer: askAnswer })
+    if (!result.ok) handleFailure(result)
     else {
       setReport(result.data.import)
       setReview(result.data.review)
+      adoptStep(result.data)
       setAskFor(null)
       setAskPrompt('')
       setAskAnswer('')
@@ -216,20 +330,24 @@ export default function ManualMenuImportPage() {
     setError(null)
     setAllPrompt('')
     setAllAnswer('')
-    const result = await api(`/imports/${report.importId}/open-points`, {})
-    if (!result.ok) setError(result.error)
-    else setAllPrompt(result.data.prompt.text)
+    const result = await api(`/imports/${report.importId}/open-points`, { state: stateToken })
+    if (!result.ok) handleFailure(result)
+    else {
+      setAllPrompt(result.data.prompt.text)
+      if (result.data.validUntil) setValidUntil(result.data.validUntil)
+    }
     setBusy(false)
   }
 
   async function submitAllOpen() {
     setBusy(true)
     setError(null)
-    const result = await api(`/imports/${report.importId}/open-points`, { answer: allAnswer })
-    if (!result.ok) setError(result.error)
+    const result = await api(`/imports/${report.importId}/open-points`, { state: stateToken, answer: allAnswer })
+    if (!result.ok) handleFailure(result)
     else {
       setReport(result.data.import)
       setReview(result.data.review)
+      adoptStep(result.data)
       setAllPrompt('')
       setAllAnswer('')
       setMessage('De antwoorden zijn per regel gecontroleerd. Jij beslist daarna per regel.')
@@ -240,8 +358,8 @@ export default function ManualMenuImportPage() {
   async function saveConcept() {
     setBusy(true)
     setError(null)
-    const result = await api(`/imports/${report.importId}/save`, {})
-    if (!result.ok) setError(result.error)
+    const result = await api(`/imports/${report.importId}/save`, { state: stateToken })
+    if (!result.ok) handleFailure(result)
     else {
       setSaved(result.data.concept)
       setMessage(
@@ -298,6 +416,16 @@ export default function ManualMenuImportPage() {
         {error ? (
           <div className="di-banner di-banner-danger" role="alert">
             <span>{error}</span>
+            {expired ? (
+              <button
+                type="button"
+                className="di-btn-primary mai-btn"
+                onClick={makePrompt}
+                disabled={busy || !restaurantId || !urls.trim()}
+              >
+                Opnieuw maken
+              </button>
+            ) : null}
           </div>
         ) : null}
         {message ? (
@@ -318,17 +446,58 @@ export default function ManualMenuImportPage() {
             </div>
             <div className="mai-field">
               <label className="bta-label" htmlFor="mai-restaurant">
-                Restaurantnummer
+                Restaurant (zoek op naam)
               </label>
-              <input
-                id="mai-restaurant"
-                className="mai-input"
-                type="text"
-                value={restaurantId}
-                onChange={(event) => setRestaurantId(event.target.value)}
-                autoComplete="off"
-              />
-              <p className="bta-muted">Deze kaart hoort bij dit restaurant en deze vestiging.</p>
+              {selectedRestaurant ? (
+                <div className="mai-chosen">
+                  <span className="mai-chosen-name">
+                    {selectedRestaurant.name}
+                    {selectedRestaurant.buurt ? ` · ${selectedRestaurant.buurt}` : ''}
+                  </span>
+                  <button
+                    type="button"
+                    className="stg-btn-secondary mai-btn"
+                    onClick={() => {
+                      setSelectedRestaurant(null)
+                      setRestaurantQuery('')
+                      setRestaurantChoices([])
+                    }}
+                  >
+                    Wijzig
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <input
+                    id="mai-restaurant"
+                    className="mai-input"
+                    type="search"
+                    value={restaurantQuery}
+                    onChange={(event) => changeRestaurantQuery(event.target.value)}
+                    autoComplete="off"
+                    placeholder="Typ de naam van het restaurant"
+                    aria-describedby="mai-restaurant-help"
+                  />
+                  <p id="mai-restaurant-help" className="bta-muted">
+                    Kies uit de bestaande restaurantlijst. Deze kaart hoort bij dit restaurant en deze vestiging.
+                  </p>
+                  {restaurantChoices.length > 0 ? (
+                    <ul className="mai-choices" aria-label="Gevonden restaurants">
+                      {restaurantChoices.map((choice) => (
+                        <li key={choice.id}>
+                          <button type="button" className="mai-choice" onClick={() => chooseRestaurant(choice)}>
+                            {choice.name}
+                            {choice.buurt ? ` · ${choice.buurt}` : ''}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  {restaurantQuery.trim().length >= 2 && restaurantChoices.length === 0 ? (
+                    <p className="bta-muted">Geen restaurant gevonden met deze naam.</p>
+                  ) : null}
+                </>
+              )}
             </div>
             <div className="mai-field">
               <label className="bta-label" htmlFor="mai-urls">
@@ -341,9 +510,10 @@ export default function ManualMenuImportPage() {
                 onChange={(event) => setUrls(event.target.value)}
                 spellCheck="false"
               />
+              <p className="bta-muted">Gebruik de pagina waar de menukaart staat, niet alleen de homepage.</p>
             </div>
             <div className="mai-actions">
-              <button type="button" className="di-btn-primary" onClick={makePrompt} disabled={busy || !restaurantId.trim() || !urls.trim()}>
+              <button type="button" className="di-btn-primary" onClick={makePrompt} disabled={busy || !restaurantId || !urls.trim()}>
                 Prompt maken
               </button>
               <span className="bta-muted">De app haalt de bronnen veilig op en zet de tekst in de prompt.</span>
@@ -371,6 +541,11 @@ export default function ManualMenuImportPage() {
                   </button>
                   <span className="bta-muted">Plak de prompt in de AI. Voeg een scan zelf toe; de rest gaat mee.</span>
                 </div>
+                {validUntil ? (
+                  <p className="mai-validity">
+                    Geldig tot {clockOf(validUntil)}. Daarna maak je gewoon een nieuwe prompt.
+                  </p>
+                ) : null}
                 <details className="mai-details">
                   <summary>Technische details</summary>
                   <dl className="bta-facts">
@@ -464,16 +639,40 @@ export default function ManualMenuImportPage() {
               <label className="bta-label" htmlFor="mai-answer">
                 Plak hier het volledige antwoord
               </label>
-              <textarea
-                id="mai-answer"
-                className="bta-textarea"
-                value={answer}
-                onChange={(event) => setAnswer(event.target.value)}
-                spellCheck="false"
-                placeholder="Plak het hele antwoord. De app haalt het codeblok er zelf uit."
-              />
-              <p className="bta-muted">
-                {bytesOf(answer)} bytes van 1 MiB · groter dan de grens wordt niet gelezen. Er wordt nooit JSON getoond.
+              {pasteSummary ? (
+                <div className="mai-pasted">
+                  <span role="status">
+                    ✓ Antwoord geplakt ({pasteSummary.chars} tekens)
+                  </span>
+                  <button type="button" className="stg-btn-secondary mai-btn" onClick={clearPasted}>
+                    Wissen
+                  </button>
+                </div>
+              ) : (
+                <textarea
+                  id="mai-answer"
+                  className="bta-textarea"
+                  defaultValue=""
+                  onPaste={(event) => {
+                    const text = event.clipboardData ? event.clipboardData.getData('text') : ''
+                    if (text) {
+                      event.preventDefault()
+                      acceptPastedText(text)
+                    }
+                  }}
+                  onChange={(event) => {
+                    const text = event.target.value
+                    event.target.value = ''
+                    if (text) acceptPastedText(text)
+                  }}
+                  spellCheck="false"
+                  placeholder="Plak het hele antwoord. De app haalt het codeblok er zelf uit."
+                  aria-describedby="mai-answer-help"
+                />
+              )}
+              <p id="mai-answer-help" className="bta-muted">
+                {pasteSummary ? `${pasteSummary.bytes} bytes` : 'Maximaal 1 MiB'} · groter dan de grens wordt niet gelezen. De app
+                toont nooit JSON uit het antwoord.
               </p>
             </div>
             <div className="mai-actions">

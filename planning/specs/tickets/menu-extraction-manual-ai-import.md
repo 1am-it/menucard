@@ -660,10 +660,10 @@ review, geen echte bronacceptatie en geen productieactie.
 
 Bewuste beperkingen van deze ronde, eerlijk gemeld in plaats van opgelost:
 
-- De bundel- en importopslag is **in-memory en begrensd** (50 bundels, 30
-  minuten; 50 imports, 60 minuten). Een herstart geeft `bundle_expired` en
-  vraagt een nieuwe export; er is geen duurzame opslag en dus ook geen
-  herkomstbewijs na een herstart behalve wat in het opgeslagen concept staat.
+- ~~De bundel- en importopslag is in-memory en begrensd (50 bundels, 30
+  minuten; 50 imports, 60 minuten).~~ **Vervallen in de herstelronde van
+  2026-10-22 (review 6350337273):** de stroom is toestandsloos geworden met een
+  ondertekend en versleuteld toestandstoken. Zie "Herstelronde fase 2" onderaan.
 - De prompttekst en de brontekst gaan één keer naar de interne browser; dat is
   de in de spec geaccepteerde blootstelling (T1). Ze worden niet gelogd en niet
   in de browseropslag bewaard, maar de DOM bevat de prompt zolang de pagina
@@ -706,10 +706,10 @@ Wat deze ronde feitelijk doet staat erbij; de beslissing blijft aan de Lead.
    via de bestaande veilige route en legt de tekst alleen in het tijdelijke
    bundel vast (geen database, geen browseropslag). Een expliciet
    opslagbesluit voor herlezen zonder nieuwe fetch is nog niet genomen.
-2. **Levensduur en herbinding van het exportbundel** (T5): het bundel leeft 30
-   minuten in het procesgeheugen en de import hercontroleert de bundelhash;
-   na een herstart of na 30 minuten volgt `bundle_expired`. Of dat genoeg is
-   voor de handmatige proef, beslist de Lead.
+2. **Levensduur en herbinding van het exportbundel** (T5): ~~het bundel leeft 30
+   minuten in het procesgeheugen~~ Het bundel reist sinds de herstelronde in het
+   toestandstoken en is 30 minuten geldig; daarna volgt `state_expired` met
+   [Opnieuw maken]. Of dat genoeg is voor de handmatige proef, beslist de Lead.
 3. **Duurzame herkomstopslag** (T11): de AI-naam, tijd, protocol- en
    bronhashes en de redenen staan additief in
    `captured_content.importProvenance`. Dat is geen nieuwe kolom en geen nieuwe
@@ -724,4 +724,102 @@ Wat deze ronde feitelijk doet staat erbij; de beslissing blijft aan de Lead.
    maakt de prompt in dezelfde pagina, dus het bundel is altijd het zojuist
    gemaakte bundel en de UI toont het.
 
+
+
+## Herstelronde fase 2 — Lead-review 6350337273 (2026-10-22)
+
+De Lead voerde de handmatige import uit in de echte lokale app en vond één
+blokkerende fout: stap 3 ("Weglaten") gaf **404**, omdat de import in een andere
+serverless-instantie niet bestond. Hieronder staat per punt wat er is gebouwd en
+welk bewijs erbij hoort. Alles is **developerbewijs**: geen onafhankelijke
+review, geen browseracceptatie door de Lead en geen productieactie.
+
+### K1 — geen geheugenopslag (blokkerend)
+
+`sharedBundleStore` en `sharedImportStore` (een `Map` op moduleniveau) zijn
+verwijderd. De stroom is nu toestandsloos:
+
+- na elke stap geeft de server één **ondertekend en versleuteld toestandstoken**
+  terug (`src/lib/manualMenuImportState.js`): AES-256-GCM met een willekeurige
+  IV per token, een vast AAD-label en een HKDF-SHA256-sleutel uit het bestaande
+  servergeheim `SUPABASE_SERVICE_ROLE_KEY` met een eigen `info`-label;
+- er is **geen nieuw geheim, geen nieuwe env-variabele, geen migratie en geen
+  nieuwe tabel**; de sleutel verlaat de server nooit;
+- het token bevat de vervaltijd (30 minuten), de gebruikers-ID, het restaurant,
+  de bundelhash en de importhash; de server controleert die waarden bij het
+  openen en weigert een gewijzigd, verlopen, te groot, vreemd of andermans token
+  met een gewone melding (`state_invalid`, `state_expired`, `state_too_large`,
+  `state_other_user`, `state_mismatch`);
+- de grootte is begrensd op 4 MiB token; groter geeft een gewone melding met een
+  nieuwe prompt in plaats van een stille afkapping;
+- de client bewaart het token **alleen in het geheugen van de pagina**, niet in
+  `localStorage`; de server leidt niets af uit een clientclaim;
+- ontbreekt het servergeheim, dan stopt de stap met `state_config_missing` en
+  een concrete fout; er is geen stille doorgang.
+
+De routers `POST /imports`, `POST /imports/<id>/decisions`,
+`POST /imports/<id>/follow-up`, `POST /imports/<id>/open-points` en
+`POST /imports/<id>/save` nemen het token in de body en geven het volgende token
+terug. De import-id in het pad wordt tegen het token gecontroleerd
+(`state_mismatch`), zodat een stap nooit bij een andere import terechtkomt.
+
+### K2 — het plakveld toont geen JSON (eigenaarsbesluit b)
+
+De geplakte tekst gaat direct naar de paginastatus. Het veld toont daarna alleen
+"✓ Antwoord geplakt (N tekens)" met [Wissen]; de inhoud wordt niet gerenderd. Het
+veld heeft geen `value` met de tekst en er is geen JSON-weergave. Na een geslaagde
+controle verdwijnt de samenvatting; het antwoord zelf blijft server-side in het
+toestandstoken.
+
+### K3 — restaurant kiezen
+
+Het vrije "Restaurantnummer" is vervangen door een zoekveld op naam. De keuzes
+komen uit de bestaande statische `data/restaurants.json` via
+`GET /api/internal/v1/manual-menu-import/restaurants` (alleen interne rollen,
+maximaal 10 treffers, alleen id/naam/buurt). De server weigert een onbekend
+nummer met `restaurant_unknown` en neemt de naam uit de lijst over, niet uit de
+client. Een `?restaurant=<id>&name=<naam>`-voorgevulde keuze blijft werken en
+wordt server-side opnieuw gevalideerd.
+
+### K4 — uitleg menupagina
+
+Bij de bron-URL staat: "Gebruik de pagina waar de menukaart staat, niet alleen de
+homepage." Er is geen automatische linkcrawl.
+
+### K5 — geldigheid zichtbaar
+
+Na stap 1 toont de pagina "Geldig tot HH:MM" (uit het token, niet uit een
+clientklok). Is de stap verlopen, dan volgt een gewone melding met
+[Opnieuw maken]; die knop maakt met dezelfde bronnen een nieuwe prompt. Ook
+`follow-up` en `open-points` geven de resterende geldigheid terug.
+
+### K6 — regressies
+
+| Bewijs | Bestand |
+| --- | --- |
+| volledige keten over **aparte handler-instanties** per stap (serverless-simulatie) | `src/lib/manualMenuImportHandlers.test.js` |
+| gewijzigd token, verlopen token, token van een andere gebruiker, te groot token, ontbrekend geheim, ontbrekend token | `src/lib/manualMenuImportHandlers.test.js`, `src/lib/manualMenuImportState.test.js` |
+| plakveld zonder JSON-weergave, "Wissen" en de tekenteller | `ops/browser/run-menu-review-browser-check.js` (browserfixture) |
+| onbekend restaurant, zoeken op naam, GET-route en rolregel | `src/lib/manualMenuImportHandlers.test.js` |
+| AES-GCM/HKDF-eigenschappen: heen en terug, geen leesbare brontekst, andere sleutel, IV per token, TTL | `src/lib/manualMenuImportState.test.js` |
+
+### K7 — voortgang
+
+Per K staat een regel met `name` in `ops/benchmark/output/criteria-progress.json`
+(volgens BE-21 gitignored) onder de ronde van deze review.
+
+### Eerlijk blijvende beperkingen van deze herstelronde
+
+- Het toestandstoken bevat de brontekst die de AI zag. Het gaat alleen over de
+  interne HTTPS-verbinding, staat in het geheugen van de pagina en wordt niet
+  gelogd of in de browseropslag bewaard. Een token van vóór een tussenstap
+  blijft tot de vervaltijd geldig (herhaling van een oude stap is mogelijk); dat
+  is voor een interne handmatige proef geaccepteerd en vraagt geen migratie.
+- De gebruiksteller (`usageLedger`) blijft per instantie in het geheugen. Dat is
+  geen onderdeel van de importstaat: de export is een ruwe, begrensde telling en
+  claimt geen volledigheid. Een duurzame teller vraagt een eigen besluit.
+- Er is nog steeds geen provider, betaalde API, publicatie, merge of
+  productieactie; de bron-SHA-256 blijft de hash van de tekst die de AI zag.
+- De browserfixture bewijst de UI-paden met fictieve antwoorden. De echte proef
+  met de Lead, echte bronnen en de onafhankelijke review blijven open.
 

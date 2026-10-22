@@ -32,6 +32,7 @@ const FIXTURE_API_ROUTES = [
   // answered; the fixed fixture import id keeps every unknown import path
   // refused. The app itself never calls a provider, so no AI traffic exists.
   { id: 'manual-bundles', match: 'exact', path: '/api/internal/v1/manual-menu-import/bundles', methods: ['POST'] },
+  { id: 'manual-restaurants', match: 'exact', path: '/api/internal/v1/manual-menu-import/restaurants', methods: ['GET'] },
   { id: 'manual-imports', match: 'exact', path: '/api/internal/v1/manual-menu-import/imports', methods: ['POST'] },
   { id: 'manual-decisions', match: 'exact', path: '/api/internal/v1/manual-menu-import/imports/fixture-import/decisions', methods: ['POST'] },
   { id: 'manual-follow-up', match: 'exact', path: '/api/internal/v1/manual-menu-import/imports/fixture-import/follow-up', methods: ['POST'] },

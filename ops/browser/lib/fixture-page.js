@@ -97,7 +97,7 @@ function fixtureBootstrap(scenarios, options = {}) {
     function jsonResponse(body, status) {
       return new Response(JSON.stringify(body), { status: status || 200, headers: { 'Content-Type': 'application/json' } });
     }
-    const fixtureState = { manualStep: 0 };
+    const fixtureState = { manualStep: 0, manualState: 0 };
     function fixtureResponse(verdict) {
       if (verdict.routeId === 'auth') return jsonResponse(session);
       if (verdict.routeId === 'me') {
@@ -108,14 +108,43 @@ function fixtureBootstrap(scenarios, options = {}) {
         const scenario = fixtures[fixture];
         const manual = scenario && scenario.manual;
         if (!manual) return jsonResponse({ error: 'Fictief importszenario ontbreekt.' }, 500);
-        if (verdict.routeId === 'manual-bundles') return jsonResponse({ bundle: manual.bundle, prompt: manual.prompt });
+        // K1: elke stap levert een nieuw (fictief) toestandstoken. De browser
+        // geeft het bij de volgende stap terug; de fixture antwoordt alleen op
+        // een token dat hij zelf heeft uitgegeven.
+        const nextToken = () => {
+          fixtureState.manualState += 1;
+          return 'fixture-state-' + fixtureState.manualState;
+        };
+        if (verdict.routeId === 'manual-restaurants') {
+          const url = new URL(verdict.url, 'http://localhost');
+          const id = url.searchParams.get('id');
+          if (id) {
+            const found = manual.restaurants.find((entry) => entry.id === id);
+            return found ? jsonResponse({ restaurant: found }) : jsonResponse({ error: 'Onbekend restaurant.' }, 404);
+          }
+          const query = (url.searchParams.get('q') || '').toLowerCase();
+          return jsonResponse({ restaurants: manual.restaurants.filter((entry) => entry.name.toLowerCase().includes(query)) });
+        }
+        if (verdict.routeId === 'manual-bundles') {
+          return jsonResponse({ bundle: manual.bundle, prompt: manual.prompt, state: nextToken(), validUntil: manual.validUntil });
+        }
         if (verdict.routeId === 'manual-imports') {
-          return jsonResponse({ import: manual.import, review: manual.reviews[0] });
+          return jsonResponse({
+            import: manual.import,
+            review: manual.reviews[0],
+            state: nextToken(),
+            validUntil: manual.validUntil,
+          });
         }
         if (verdict.routeId === 'manual-follow-up') return jsonResponse({ prompt: manual.followUpPrompt });
         if (verdict.routeId === 'manual-decisions') {
           fixtureState.manualStep = Math.min(fixtureState.manualStep + 1, manual.reviews.length - 1);
-          return jsonResponse({ row: null, review: manual.reviews[fixtureState.manualStep] });
+          return jsonResponse({
+            row: null,
+            review: manual.reviews[fixtureState.manualStep],
+            state: nextToken(),
+            validUntil: manual.validUntil,
+          });
         }
         if (verdict.routeId === 'manual-save') return jsonResponse(manual.saved);
       }

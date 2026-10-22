@@ -1161,9 +1161,31 @@ function manualUrl(theme) {
   return `${MANUAL_URL}?${params.toString()}`;
 }
 
+// K3: zonder vooraf gekozen restaurant, zodat zoeken op naam echt gedaan wordt.
+function manualSearchUrl(theme) {
+  const params = new URLSearchParams({
+    fixture: 'manual',
+    url: 'https://fictief-brasserie.invalid/menu',
+    theme,
+  });
+  return `${MANUAL_URL}?${params.toString()}`;
+}
+
 async function manualImportScenario(cdp) {
   await setViewport(cdp, 390, 900);
-  await openRoute(cdp, manualUrl('light'), `document.body.innerText.includes('Menu importeren met AI')`);
+
+  // K3 — restaurant kiezen op naam uit de bestaande lijst.
+  await openRoute(cdp, manualSearchUrl('light'), `document.body.innerText.includes('Menu importeren met AI')`);
+  await setFieldValue(cdp, '#mai-restaurant', 'wolf');
+  const choiceShown = await waitFor(cdp, `document.body.innerText.includes('Restaurant Wolfslaar')`, 15000);
+  check('manual import: restaurant search finds an existing restaurant by name', choiceShown);
+  const chosen = await clickButton(cdp, 'Restaurant Wolfslaar');
+  check('manual import: clicking a search result selects that restaurant', chosen);
+  const chosenText = await bodyText(cdp);
+  check(
+    'manual import: the chosen restaurant replaces the free number field',
+    chosenText.includes('Wijzig') && !chosenText.includes('Restaurantnummer'),
+  );
 
   // Stap 1 — prompt maken.
   await clickButton(cdp, 'Prompt maken');
@@ -1171,19 +1193,38 @@ async function manualImportScenario(cdp) {
   check('manual import: step 1 shows the source line in plain language', step1);
   const step1Text = await bodyText(cdp);
   check('manual import: step 1 offers "Kopieer prompt"', step1Text.includes('Kopieer prompt'));
+  check('manual import: step 1 explains which page to use', step1Text.includes('niet alleen de homepage'));
+  check(
+    'manual import: step 1 shows "Geldig tot" with a clock time',
+    /Geldig tot \d{2}:\d{2}/.test(step1Text),
+    (step1Text.match(/Geldig tot[^\r\n]*/) || ['missing'])[0],
+  );
   const step1Details = await evalJs(cdp, `document.body.textContent.includes('MENU-EXTRACTION.md')`);
   check('manual import: technische details name the pinned instruction', step1Details === true);
 
   // Stap 2 — antwoord plakken; nooit JSON op het scherm.
   await setFieldValue(cdp, '#mai-answer', 'Korte samenvatting.\n```json\n{"menus":[],"coverage":{}}\n```');
+  const pasted = await waitFor(cdp, `document.body.innerText.includes('Antwoord geplakt')`, 15000);
+  check('manual import: pasting shows only a summary line and "Wissen"', pasted);
+  const pasteSnapshot = await evalJs(cdp, `(() => {
+    const field = document.querySelector('#mai-answer');
+    return {
+      fieldPresent: Boolean(field),
+      fieldValue: field ? field.value : null,
+      text: document.body.innerText,
+    };
+  })()`);
+  check('manual import: the paste field no longer shows the pasted content', pasteSnapshot.fieldPresent === false, JSON.stringify(pasteSnapshot.fieldValue));
+  check('manual import: the paste summary counts the characters', /Antwoord geplakt \(\d+ tekens\)/.test(pasteSnapshot.text));
+  check('manual import: the pasted JSON is never rendered', !pasteSnapshot.text.includes('"menus"'));
+
   await clickButton(cdp, 'Controleren');
   const step2 = await waitFor(cdp, `document.body.innerText.includes('Antwoord ontvangen')`, 15000);
   check('manual import: step 2 confirms the received counts', step2);
   const step2Text = await bodyText(cdp);
   // Het plakveld wordt na het controleren leeggemaakt en er verschijnt geen
   // JSON: precies de eigenaarsbeslissing (b).
-  const pasteField = await evalJs(cdp, `(() => { const field = document.querySelector('#mai-answer'); return field ? field.value : null; })()`);
-  check('manual import: the paste field is cleared after checking', pasteField === '', JSON.stringify(pasteField));
+  check('manual import: no pasted JSON remains after checking', !step2Text.includes('"menus"'));
   check('manual import: the received line is the only result shown', step2Text.includes('Antwoord ontvangen') && !step2Text.includes('"validated"'));
   check('manual import: step 2 shows "1 menukaart, 3 gerechten"', step2Text.includes('1 menukaart, 3 gerechten'));
 }
@@ -1376,6 +1417,20 @@ async function manualReviewSteps(cdp) {
     themeBackgrounds['manual-light'] !== themeBackgrounds['manual-dark'],
     `${themeBackgrounds['manual-light']} / ${themeBackgrounds['manual-dark']}`,
   );
+
+  // K2 — "Wissen" geeft het lege plakveld terug (aparte pagina, eenvoudige tekst).
+  await openRoute(cdp, manualUrl('dark'), `document.body.innerText.includes('Prompt maken')`);
+  await clickButton(cdp, 'Prompt maken');
+  await waitFor(cdp, `document.body.innerText.includes('gaat mee in de prompt')`, 15000);
+  await setFieldValue(cdp, '#mai-answer', 'Korte samenvatting zonder codeblok.');
+  const wipeSummary = await waitFor(cdp, `document.body.innerText.includes('Antwoord geplakt')`, 15000);
+  check('manual import: "Wissen" is offered next to the paste summary', wipeSummary);
+  await clickButton(cdp, 'Wissen');
+  const afterWipe = await evalJs(cdp, `(() => ({
+    field: Boolean(document.querySelector('#mai-answer')),
+    summary: document.body.innerText.includes('Antwoord geplakt'),
+  }))()`);
+  check('manual import: after wiping, the empty paste field returns', afterWipe.field === true && afterWipe.summary === false, JSON.stringify(afterWipe));
 }
 
 main();

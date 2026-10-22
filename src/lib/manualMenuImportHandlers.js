@@ -201,7 +201,7 @@ function createManualMenuImportHandlers(deps = {}) {
     return { state: opened.state, expiresAt: opened.expiresAt };
   }
 
-  /**Een stap 3-verzoek hoort bij de import in het token, niet bij de URL alleen. */
+  /** Een stap 3-verzoek hoort bij de import in het token, niet bij de URL alleen. */
   function reportOrReply(state, importId) {
     if (!state.report || typeof state.report !== 'object') {
       return { reply: reply(409, { error: 'Controleer eerst een antwoord.', reason: 'state_step_missing' }) };
