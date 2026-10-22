@@ -480,7 +480,7 @@ export default function ManualMenuImportPage() {
               <>
                 <p className="mai-summary" role="status">
                   {review.summary.items} {review.summary.items === 1 ? 'gerecht' : 'gerechten'} · {review.summary.valid} in orde ·{' '}
-                  {review.summary.needsReview} nalopen
+                  {review.summary.pending} nalopen
                 </p>
                 <p className="bta-muted">
                   Alleen de regels die aandacht vragen staan open. De regels die in orde zijn, zitten ingeklapt. Er is geen

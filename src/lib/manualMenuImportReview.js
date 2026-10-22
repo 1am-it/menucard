@@ -191,6 +191,7 @@ function reviewView({ report, decisions } = {}) {
   const pending = rows.filter((row) => !row.resolved);
   const kept = rows.filter((row) => row.outcome !== 'exclude' && row.outcome !== 'exclude_supplement');
   const excluded = rows.length - kept.length;
+  const handled = rows.filter((row) => row.resolved && row.outcome !== 'exclude' && row.outcome !== 'exclude_supplement');
   const reasons = [...map.values()]
     .filter((decision) => decision.reasonCode)
     .map((decision) => ({
@@ -204,6 +205,9 @@ function reviewView({ report, decisions } = {}) {
     rows,
     summary: {
       ...report.summary,
+      // "in orde" telt wat daadwerkelijk is afgehandeld én automatisch klopte;
+      // "nalopen" is het aantal nog open punten.
+      valid: handled.length,
       pending: pending.length,
       excluded,
       kept: kept.length,

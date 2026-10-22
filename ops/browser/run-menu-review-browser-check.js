@@ -1171,7 +1171,8 @@ async function manualImportScenario(cdp) {
   check('manual import: step 1 shows the source line in plain language', step1);
   const step1Text = await bodyText(cdp);
   check('manual import: step 1 offers "Kopieer prompt"', step1Text.includes('Kopieer prompt'));
-  check('manual import: technische details name the pinned instruction', step1Text.includes('MENU-EXTRACTION.md'));
+  const step1Details = await evalJs(cdp, `document.body.textContent.includes('MENU-EXTRACTION.md')`);
+  check('manual import: technische details name the pinned instruction', step1Details === true);
 
   // Stap 2 — antwoord plakken; nooit JSON op het scherm.
   await setFieldValue(cdp, '#mai-answer', 'Korte samenvatting.\n```json\n{"menus":[],"coverage":{}}\n```');
@@ -1179,12 +1180,13 @@ async function manualImportScenario(cdp) {
   const step2 = await waitFor(cdp, `document.body.innerText.includes('Antwoord ontvangen')`, 15000);
   check('manual import: step 2 confirms the received counts', step2);
   const step2Text = await bodyText(cdp);
-  check(
-    'manual import: step 2 never shows the pasted JSON',
-    !step2Text.includes('"menus"') && !step2Text.includes('"coverage"'),
-    step2Text.slice(0, 120),
-  );
+  // Het plakveld wordt na het controleren leeggemaakt en er verschijnt geen
+  // JSON: precies de eigenaarsbeslissing (b).
+  const pasteField = await evalJs(cdp, `(() => { const field = document.querySelector('#mai-answer'); return field ? field.value : null; })()`);
+  check('manual import: the paste field is cleared after checking', pasteField === '', JSON.stringify(pasteField));
+  check('manual import: the received line is the only result shown', step2Text.includes('Antwoord ontvangen') && !step2Text.includes('"validated"'));
   check('manual import: step 2 shows "1 menukaart, 3 gerechten"', step2Text.includes('1 menukaart, 3 gerechten'));
+}
 
 async function main() {
   const browserPath = findBrowser();
@@ -1216,6 +1218,7 @@ async function main() {
     await imageOnlyScenario(cdp);
     await structureScenario(cdp);
     await manualImportScenario(cdp);
+    await manualReviewSteps(cdp);
     await v2Scenario(cdp);
     await errorScenario(cdp);
     for (const width of [320, 390]) {
@@ -1296,6 +1299,7 @@ async function main() {
 }
 
 
+async function manualReviewSteps(cdp) {
   // Stap 3 — de twee open punten, elk met een eigen handeling.
   const step3 = await waitFor(cdp, `document.body.innerText.includes('3 gerechten · 1 in orde · 2 nalopen')`, 15000);
   check('manual import: step 3 summarises in plain language', step3);
@@ -1309,7 +1313,6 @@ async function main() {
   await clickButton(cdp, 'Kies');
   const afterPrice = await waitFor(cdp, `document.body.innerText.includes('1 nalopen')`, 15000);
   check('manual import: choosing a price resolves that line', afterPrice);
-
   await clickButton(cdp, 'Klopt');
   const reasonPanel = await waitFor(cdp, `document.body.innerText.includes('Waarom staat deze regel er toch?')`, 15000);
   check('manual import: "staat niet in de bron" asks for a reason', reasonPanel);
