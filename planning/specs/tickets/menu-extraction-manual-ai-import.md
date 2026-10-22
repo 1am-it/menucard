@@ -823,9 +823,13 @@ Per K staat een regel met `name` in `ops/benchmark/output/criteria-progress.json
   gelogd of in de browseropslag bewaard. Een token van vóór een tussenstap
   blijft tot de vervaltijd geldig (herhaling van een oude stap is mogelijk); dat
   is voor een interne handmatige proef geaccepteerd en vraagt geen migratie.
-- De gebruiksteller (`usageLedger`) blijft per instantie in het geheugen. Dat is
-  geen onderdeel van de importstaat: de export is een ruwe, begrensde telling en
-  claimt geen volledigheid. Een duurzame teller vraagt een eigen besluit.
+- De gebruiksteller staat sinds Lead-bevinding F6 (review 6352404615) niet meer in
+  het geheugen: de export wordt afgeleid uit opgeslagen concepten met
+  `importProvenance` (eigenaarsbesluit 22-10, schema `manual-ai-import-usage/v2`
+  in docs/api/manual-ai-import-usage.md). Wat niet duurzaam bewaard wordt, staat
+  als "niet bijgehouden" en nooit als 0. Het ops-script
+  `ops/scripts/export-app-ai-usage.js` schrijft hetzelfde document alleen-lezen
+  naar een gitignored bestand voor DevDashboardTower.
 - Er is nog steeds geen provider, betaalde API, publicatie, merge of
   productieactie; de bron-SHA-256 blijft de hash van de tekst die de AI zag.
 - De browserfixture bewijst de UI-paden met fictieve antwoorden. De echte proef

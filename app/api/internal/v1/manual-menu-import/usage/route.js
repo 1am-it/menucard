@@ -1,6 +1,8 @@
 // #59 fase 2 — GET: export van het app-AI-gebruik (alleen metagegevens).
-// Schema en bouw: src/lib/manualMenuImportUsage.js. Gelezen door
-// DevDashboardTower als alleen-lezen bron.
+// Schema en bouw: src/lib/manualMenuImportUsage.js. De tellingen komen uit
+// opgeslagen concepten met importProvenance, dus hetzelfde document als
+// ops/scripts/export-app-ai-usage.js. Gelezen door DevDashboardTower als
+// alleen-lezen bron.
 
 import { NextResponse } from 'next/server'
 import { manualMenuImportHandlers } from '@/src/lib/manualMenuImportRouteDeps'

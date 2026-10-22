@@ -19,6 +19,18 @@ why. The actual workflow files live under `.github/workflows/`
 applies changes), not in this directory — noted here since this is the
 first place anyone looking for "how do we deploy this" would check.
 
+## App-AI usage export for DevDashboardTower (added 2026-10-23)
+
+`node --env-file=.env.local ops/scripts/export-app-ai-usage.js` — read-only,
+local loopback database only. Derives the metadata-only usage document from
+stored concepts with `importProvenance` (schema and bounds:
+`docs/api/manual-ai-import-usage.md`) and writes it atomically to
+`ops/benchmark/output/app-ai-usage.json` (gitignored, BE-21). It refuses a
+non-loopback `SUPABASE_URL`, never writes to the database, and prints no key and
+no menu content. The same document is served by
+`GET /api/internal/v1/manual-menu-import/usage`. A green export is metadata
+evidence only, not proof that a model was used.
+
 ## PDF.js server packaging check (added 2026-09-30)
 
 `node ops/scripts/verify-pdfjs-server-trace.js` — read-only, run after
