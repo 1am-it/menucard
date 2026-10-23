@@ -31,6 +31,18 @@ no menu content. The same document is served by
 `GET /api/internal/v1/manual-menu-import/usage`. A green export is metadata
 evidence only, not proof that a model was used.
 
+## Route B AI probe (added 2026-10-23, #59 / BE-21)
+
+`node ops/scripts/run-menu-extraction-ai-probe.js` — dry-run by default: it
+hash-verifies the eight pinned capture sets, reads their text locally and writes
+an estimated token/cost report to `ops/benchmark/output/ai-probe-report.json`
+(gitignored). It needs no key and makes no network call. `--live` requires
+`ANTHROPIC_API_KEY` and an explicit `--budget-file` inside the gitignored output
+folder; the durable ledger enforces 900 eurocent cumulative, 30 per call, 40
+calls and one at a time before every request. No app route is wired to it —
+`disabledMenuExtractionRuntime` stays in place. See
+`docs/guides/menu-extraction-ai-probe.md`.
+
 ## PDF.js server packaging check (added 2026-09-30)
 
 `node ops/scripts/verify-pdfjs-server-trace.js` — read-only, run after

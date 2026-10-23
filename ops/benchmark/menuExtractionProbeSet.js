@@ -56,6 +56,11 @@ const REFERENCE_FILES = Object.freeze({
 
 const CAPTURE_MAX_BYTES = 15 * 1024 * 1024;
 const CAPTURE_MAX_PAGES = 30;
+const DEFAULT_LEDGER_FILE = 'ops/benchmark/output/ai-probe-budget-ledger.json';
+
+function defaultLedgerFile(root = REPO_ROOT) {
+  return fileIn(root, DEFAULT_LEDGER_FILE);
+}
 
 function sha256Of(bytes) {
   return crypto.createHash('sha256').update(bytes).digest('hex');
@@ -317,6 +322,7 @@ module.exports = {
   CAPTURE_MAX_BYTES,
   CAPTURE_MAX_PAGES,
   CARD_CAPTURES,
+  DEFAULT_LEDGER_FILE,
   LOCAL_ACCEPTANCE_CAPTURES,
   REFERENCE_CAPTURES,
   REFERENCE_FILES,
@@ -325,6 +331,7 @@ module.exports = {
   WOLFSLAAR_CAPTURES,
   attachCaptureTexts,
   captureTextFromBytes,
+  defaultLedgerFile,
   loadProbeSet,
   loadReference,
   normalizeAcceptanceReference,

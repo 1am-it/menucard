@@ -33,9 +33,9 @@ const {
 } = require('../../src/lib/menuExtractionAnthropicCall');
 const { createStructuredExtractionAdapter, runStructuredExtraction } = require('../../src/lib/menuExtractionAdapter');
 const { loadMenuExtractionProtocol, protocolMetadata } = require('../../src/lib/menuExtractionProtocol');
-const { createFileBudgetLedger, defaultLedgerFile } = require('../../src/lib/menuExtractionBudgetLedger');
+const { createFileBudgetLedger } = require('../../src/lib/menuExtractionBudgetLedger');
 const { aggregateControlledReferences, compareControlledReference } = require('../benchmark/referenceComparison');
-const { REPO_ROOT, attachCaptureTexts, loadProbeSet } = require('../benchmark/menuExtractionProbeSet');
+const { REPO_ROOT, attachCaptureTexts, defaultLedgerFile, loadProbeSet } = require('../benchmark/menuExtractionProbeSet');
 const {
   PROBE_BUDGET,
   PROBE_LIMITS,
@@ -178,7 +178,7 @@ async function dryRun(options) {
   writeJsonAtomically(options.out, report);
   printEstimate(report);
   process.stdout.write(`${path.relative(REPO_ROOT, options.out).split(path.sep).join('/')}\n`);
-  const fits = report.totals.callsWithinBudget && report.totals.costWithinBudget && report.totals.inputWithinLimit;
+  const fits = report.totals.callsWithinBudget && report.totals.costWithinBudget && report.totals.inputWithinLimit && report.totals.perCallWithinBudget;
   if (!fits) {
     process.stderr.write('de raming past niet binnen de vaste limieten; een live run wordt geweigerd\n');
     return 2;
@@ -243,7 +243,11 @@ async function runLive(options) {
   if (!options.budgetFileProvided) {
     return { code: 2, message: 'live mode needs an explicit --budget-file=<path> so the spend is durable. No call was made.' };
   }
-  assertOutputPath(options.budgetFile, 'budget file');
+  try {
+    assertOutputPath(options.budgetFile, 'budget file');
+  } catch (err) {
+    return { code: 2, message: `${err.message}. No call was made.` };
+  }
   assertOutputPath(options.out, 'report');
 
   const protocol = loadMenuExtractionProtocol({ root: REPO_ROOT });

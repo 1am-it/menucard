@@ -330,6 +330,7 @@ function classifySdkError(err) {
   if (!err) return CALL_ERROR_CODES.provider_unavailable;
   if (err.name === 'AbortError' || err.code === 'aborted') return CALL_ERROR_CODES.timeout;
   const status = typeof err.status === 'number' ? err.status : null;
+  if (status === 401 || status === 403) return CALL_ERROR_CODES.provider_not_configured;
   if (status === 429) return CALL_ERROR_CODES.rate_limited;
   if (status === 408) return CALL_ERROR_CODES.timeout;
   if (status === 400 || status === 422) return CALL_ERROR_CODES.schema_violation;

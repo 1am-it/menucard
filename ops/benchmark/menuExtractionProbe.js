@@ -104,6 +104,8 @@ function estimateSource(source, options = {}) {
   const chunks = chunkCaptures(source.captures, limits.maxDocuments);
   const promptTokensPerCall = chunks.map((chunk) => promptEstimate(protocol, chunk));
   const maxPromptTokens = promptTokensPerCall.length > 0 ? Math.max(...promptTokensPerCall) : 0;
+  const perCallCeilingCosts = promptTokensPerCall.map((tokens) => estimateCostFromTokens({ inputTokens: tokens, outputTokens: limits.maxOutputTokens }));
+  const maxCallCostEurCents = perCallCeilingCosts.reduce((max, entry) => Math.max(max, entry ? entry.costEurCents : 0), 0);
   const referenceItems = Number.isInteger(options.referenceItems)
     ? options.referenceItems
     : Number.isInteger(source.referenceItems)
@@ -128,6 +130,8 @@ function estimateSource(source, options = {}) {
     promptTokensPerCall,
     maxPromptTokens,
     withinInputLimit: calls.length > 0 && maxPromptTokens <= limits.maxInputTokens,
+    maxCallCostEurCents,
+    withinPerCallBudget: maxCallCostEurCents <= PROBE_BUDGET.perCallLimitEurCents,
     estimatedOutputTokensCeiling: limits.maxOutputTokens,
     estimatedOutputTokensTypical: typicalOutputTokens,
     estimatedCostEurCents: sum(costOf(limits.maxOutputTokens)),
@@ -166,6 +170,7 @@ function estimateProbe(sources, options = {}) {
       maxSourceCostEurCents: Math.max(0, ...rows.map((row) => row.estimatedCostEurCents)),
       callsWithinBudget: plannedCalls <= PROBE_BUDGET.maxCalls,
       costWithinBudget: estimatedCostEurCents <= PROBE_BUDGET.cumulativeLimitEurCents,
+      perCallWithinBudget: rows.every((row) => row.captureStatus !== 'captured' || row.withinPerCallBudget),
       inputWithinLimit: rows.every((row) => row.captureStatus !== 'captured' || row.withinInputLimit),
     },
     assumptions: [

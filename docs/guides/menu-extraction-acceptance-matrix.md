@@ -1135,3 +1135,58 @@ verwerkt. De eerstvolgende veilige stap is
 onafhankelijke review van deze head door de Delivery Lead; daarna kan de Product
 Owner de resterende besluiten nemen. Er is niets gemerged, naar een andere
 branch gepusht, gedeployed of gepubliceerd.
+
+## Ronde 2026-10-23 - route B: Anthropic-call, budgetlog, beslisfunctie en proefharnas (review 6370840673)
+
+**Status: ontwikkelaarsbewijs en fixturebewijs.** Geen betaalde of echte
+API-aanroep, geen sleutel aangemaakt of gebruikt, geen app-route gekoppeld, geen
+migratie, geen wijziging aan referenties, telregels of meetcode, geen merge of
+publicatie. Budget en gegevensverwerking blijven **NEEDS_APPROVAL**.
+
+| Criterium | Stand | Bewijs |
+| --- | --- | --- |
+| K1 Claude-aanroep | **gedaan, zonder netwerk** | `src/lib/menuExtractionAnthropicCall.js`: `@anthropic-ai/sdk` exact `0.133.0` (lockfile, minstens twee weken oud), model `claude-haiku-5-5`, protocol als `system`, tekst- en base64-`document`-blokken, `output_config.format` (`json_schema`) op het bestaande contract, `signal` doorgegeven, geen SDK-retry (`maxRetries: 0`). SDK-vorm gecontroleerd tegen de geïnstalleerde types (`OutputConfig`, `JSONOutputFormat`, `Base64PDFSource`, `StopReason`, `Usage`) en de officiële structured-outputs-documentatie. Zonder `ANTHROPIC_API_KEY` is de adapter uit (`provider_not_configured`). |
+| K2 Kosten uit usage | **gedaan** | Vaste, gedateerde prijstabel (`ANTHROPIC_PRICING`, Anthropic Pricing 2026-10-22): $0,10/$0,50 per miljoen tokens tot 100.000 prompttokens, daarboven $0,50/$2,50; USD 1:1 naar eurocent, naar boven afgerond; cachetokens op het volle prompttarief. Ontbreekt `usage`, dan blijft de kost `null` en meldt de adapter `cost_unknown`. |
+| K3 Duurzame budgetlog | **gedaan** | `src/lib/menuExtractionBudgetLedger.js`: synchroon, atomisch (tijdelijk bestand + fsync + rename), slot per mutatie, 900 cent cumulatief, 30 per call, 40 calls, 1 tegelijk. Een persistente ledger houdt zijn eigen plafonds; een niet-afgerekende reservering blijft belast. |
+| K4 Proefharnas | **gedaan (dry-run)** | `ops/scripts/run-menu-extraction-ai-probe.js` op de acht gepinde captures; hashcontrole per capture; `--live` vereist een sleutel en een expliciet gitignored budgetbestand; meting via de ongewijzigde `compareControlledReference`; twee runs per bron voor stabiliteit. |
+| K5 Alleen waar nodig | **gedaan** | `src/lib/menuExtractionRouteBDecision.js`: route B alleen bij nul items, dekking onder 80% tegen een bekende referentie, `html_arrangements_skipped` of een PDF-layoutflag. Niet gekoppeld aan een route; de app-runtime blijft `disabledMenuExtractionRuntime`. |
+| K6 Regressies | **gedaan** | 12 tests in `src/lib/menuExtractionAnthropicCall.test.js` (geldig antwoord, schemafout, time-out met abort, refusal, `max_tokens`, ontbrekende `usage`, geen sleutel, promptinjectie, documentblok, prijstabellen, SDK-pin) en de bestaande adapterregressies blijven groen; 10 in `src/lib/menuExtractionBudgetLedger.test.js` (per-call- en cumulatief plafond, callplafond, onbekende kost, herstart, corrupt bestand, gewijzigde plafonds, levend en dood slot, schrijffout), 5 in `src/lib/menuExtractionRouteBDecision.test.js`, 6 + 4 + 5 in de proefmodules. Alles met een nagebootste transportlaag: geen netwerk. |
+| K7 Documentatie | **gedaan** | `docs/guides/menu-extraction-ai-probe.md` (werkruimte met $10-limiet en automatisch bijvullen uit, sleutel lokaal, dry-run- en livecommando, grenzen), deze matrix en BE-21. |
+
+### Dry-run op de gepinde captures (2026-10-23)
+
+Bron: `ops/benchmark/output/ai-probe-report.json` (gitignored). Raming met het
+outputplafond van 16.000 tokens per call; prompttokens uit de echte tekst
+(characters / 4) plus protocol en schemaframing. **Geen netwerk, geen sleutel.**
+
+| Bron | Captures | Calls (2 runs) | Prompttokens/call (max) | Raming kosten (cent) |
+| --- | ---: | ---: | ---: | ---: |
+| Zuyd | 6 | 4 | 4.990 | 4 |
+| Andalous | 8 | 4 | 8.890 | 4 |
+| Pellens | 1 | 2 | 4.041 | 2 |
+| Chocolat | 6 | 4 | 5.944 | 4 |
+| Smelt | 1 | 2 | 3.150 | 2 |
+| Blossem | 1 | 2 | 3.702 | 2 |
+| Bardot | 1 | 2 | 3.660 | 2 |
+| Wolfslaar | 4 | 2 | 16.153 | 2 |
+| **Totaal** | **28** | **22** | - | **22** |
+
+Alle acht bronnen zijn hash-geverifieerd en leesbaar; geen bron is geblokkeerd.
+De raming past binnen 40 calls en 900 cent. Zuyd, Andalous en Chocolat hebben
+meer captures dan de documentlimiet van 5 en worden daarom per run in twee calls
+verstuurd; de uitvoer van die calls wordt voor de vergelijking samengevoegd.
+
+### Wat deze ronde niet bewijst
+
+- Geen echte modeluitvoer: gemist/verzonnen/prijs/rubriek/bewijsdekking en
+  werkelijke kosten per bron zijn nog niet gemeten. Die cijfers komen pas uit
+  een goedgekeurde live run.
+- Geen browseracceptatie (geen UI gewijzigd), geen onafhankelijke review en
+  geen productieactivering.
+- Smelt en Blossem hebben referenties zonder citaat per regel; hun
+  bewijsdekking wordt tegen de brontekst gemeten, niet tegen een referentiecijfer.
+- De 50-100-bronnenbenchmark van BE-21 blijft open; dit zijn acht bronnen.
+
+De eerstvolgende veilige stap is onafhankelijke review van deze head door de
+Delivery Lead, daarna het eigenaarsbesluit over budget en gegevensverwerking en
+pas dan een live proef met een door de eigenaar aangemaakte sleutel.

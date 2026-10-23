@@ -266,6 +266,37 @@ dit ticket. Het is geen productieactivering en geen definitieve vendorkeuze.
    branch en PR (#59-contract, bouwvolgorde stap 3), zodat #59 los kan worden
    gemerged.
 
+### Stand van de bouw (2026-10-23, DeepSeek-ronde review 6370840673)
+
+Punten 1, 2, 3 en 5 zijn gebouwd en offline getest. Punt 6 blijft ongewijzigd van
+kracht: geen app-route, geen activering, alleen een ops-script. Punt 4
+(beeldbronnen) is **niet** gebouwd; deze ronde stuurt tekst en blokkeert een PDF
+zonder tekstlaag met `pdf_no_text_layer` in plaats van OCR te suggereren.
+
+| Onderdeel | Pad | Stand |
+| --- | --- | --- |
+| Providercall | `src/lib/menuExtractionAnthropicCall.js` | Gebouwd; SDK exact `0.133.0`, model `claude-haiku-5-5`, protocol als `system`, `output_config.format` op het bestaande schema, `signal`, `maxRetries: 0`. Zonder `ANTHROPIC_API_KEY` uit. |
+| Kosten uit `usage` | idem (`ANTHROPIC_PRICING`) | Gebouwd; vaste prijstabel 2026-10-22, USD 1:1 naar eurocent naar boven afgerond; onbekende kost blijft `null`/`cost_unknown`. |
+| Budgetlog | `src/lib/menuExtractionBudgetLedger.js` | Gebouwd; synchroon, atomisch, met slot; 900 cent cumulatief, 30 per call, 40 calls, 1 tegelijk. |
+| Beslisfunctie | `src/lib/menuExtractionRouteBDecision.js` | Gebouwd; alleen bij nul items, dekking onder 80%, `html_arrangements_skipped` of een PDF-layoutflag. Niet aan een route gekoppeld. |
+| Proefharnas | `ops/scripts/run-menu-extraction-ai-probe.js` | Gebouwd; dry-run is standaard, `--live` vereist sleutel en expliciet budgetbestand, meet met de ongewijzigde `compareControlledReference`, twee runs per bron. |
+| Documentatie | `docs/guides/menu-extraction-ai-probe.md`, #59-matrix | Bijgewerkt met werkruimte ($10, automatisch bijvullen uit), sleutel lokaal, commando's, grenzen en de dry-run-tabel. |
+
+**Dry-run (geen netwerk, geen sleutel, 2026-10-23):** alle acht gepinde
+captures zijn hash-geverifieerd en leesbaar; 22 geplande calls (twee runs per
+bron, grotere sets in twee calls wegens de documentlimiet van 5); 22 eurocent
+plafondraming in totaal, 4 cent voor de duurste bron. Zuyd, Andalous en Chocolat
+hebben meer dan vijf captures en worden daarom per run in twee calls verstuurd.
+
+**Afwijking van de oorspronkelijke proefset hierboven:** de vergelijkingsarm met
+`claude-sonnet-5-5` is volgens het eigenaarsbesluit van 2026-10-23 vervallen en
+het beeldmenu De Beyerd hoort niet bij deze acht gepinde bronnen. Deze ronde
+gebruikt één model en acht bronnen; de 50-100-bronnenbenchmark blijft open.
+
+**Nog niet gedaan:** een betaalde of echte aanroep, het aanmaken of gebruiken
+van een sleutel, het akkoord op budget en gegevensverwerking, de live proef, de
+onafhankelijke review en enige productieactivering.
+
 ### Voorstel: provider, model en ondersteuning
 - **Provider:** Anthropic, Claude API (first-party).
 - **Model:** `claude-haiku-5-5` als proefmodel. Daarnaast één vergelijkingsarm

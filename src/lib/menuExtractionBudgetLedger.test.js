@@ -61,6 +61,10 @@ test('K3: the documented caps are the defaults and a bad cap is refused', () => 
   assert.match(validateLimits({ ...DEFAULT_LEDGER_LIMITS, perCallLimitEurCents: 1000 }).join(' '), /cannot exceed/);
   const { file } = temporaryLedger();
   assert.throws(() => createFileBudgetLedger({ file, limits: { maxConcurrency: 2 } }), /maxConcurrency must be 1/);
+  assert.throws(
+    () => createFileBudgetLedger({}),
+    (err) => err instanceof BudgetLedgerError && err.code === 'budget_ledger_path_required',
+  );
 });
 
 test('K3: reserve and settle are durable, atomic and leave no lock or temporary file behind', () => {

@@ -16,14 +16,14 @@
 // instead of a free budget. An unknown cost settles as the full reservation and
 // increments `unknownCostCalls`; it is never booked as zero.
 //
-// Pure file I/O, no network, no provider, no database. The file lives under
-// ops/benchmark/output/, which .gitignore already excludes.
+// Pure file I/O, no network, no provider, no database. The caller supplies the
+// ledger path, so this module stays free of any tooling or benchmark location;
+// the ops probe decides where its gitignored file lives.
 
 const fs = require('node:fs');
 const path = require('node:path');
 
 const LEDGER_SCHEMA_VERSION = 'menu-extraction-ai-probe-budget/v1';
-const LEDGER_RELATIVE_PATH = 'ops/benchmark/output/ai-probe-budget-ledger.json';
 const STALE_LOCK_MS = 60_000;
 
 const DEFAULT_LEDGER_LIMITS = Object.freeze({
@@ -39,10 +39,6 @@ class BudgetLedgerError extends Error {
     this.name = 'BudgetLedgerError';
     this.code = code;
   }
-}
-
-function defaultLedgerFile(root = process.cwd()) {
-  return path.join(root, LEDGER_RELATIVE_PATH);
 }
 
 function isNonNegativeInteger(value) {
@@ -214,7 +210,8 @@ function releaseLock(lockFile) {
  * from the durable numbers instead of from stale memory.
  */
 function createFileBudgetLedger(options = {}) {
-  const file = options.file || defaultLedgerFile(options.root);
+  const file = typeof options.file === 'string' && options.file.trim() ? path.resolve(options.file) : null;
+  if (!file) throw new BudgetLedgerError('budget_ledger_path_required', 'createFileBudgetLedger needs an explicit file path');
   const limits = { ...DEFAULT_LEDGER_LIMITS, ...(options.limits || {}) };
   const limitProblems = validateLimits(limits);
   if (limitProblems.length > 0) {
@@ -326,13 +323,11 @@ function createFileBudgetLedger(options = {}) {
 module.exports = {
   BudgetLedgerError,
   DEFAULT_LEDGER_LIMITS,
-  LEDGER_RELATIVE_PATH,
   LEDGER_SCHEMA_VERSION,
   STALE_LOCK_MS,
   acquireLock,
   createFileBudgetLedger,
   defaultIsProcessAlive,
-  defaultLedgerFile,
   emptyState,
   readStateFromDisk,
   releaseLock,
