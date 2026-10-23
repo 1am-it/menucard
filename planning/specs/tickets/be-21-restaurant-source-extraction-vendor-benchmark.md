@@ -207,7 +207,14 @@ cijfers ernaast. #59's vijf bronnen sluiten de 50–100-bronnenbenchmark niet af
 ## Voorstel begrensde AI-proef (2026-10-22) — NEEDS_APPROVAL
 
 Opgesteld door de Delivery Lead (Claude Code). Uitvoering door DeepSeek.
-**Status: NEEDS_APPROVAL.** Er wordt niets betaald, geen account aangemaakt en
+**Besluit Product Owner 2026-10-23: provider en model goedgekeurd: Anthropic
+Claude API, `claude-haiku-5-5` ("gebruik claude").** De automatische route (B) mag
+worden gebouwd en getest zonder betaalde aanroepen. **Budget en
+gegevensverwerking blijven NEEDS_APPROVAL**, en zonder die twee akkoorden en
+zonder een door de eigenaar aangemaakte sleutel is er geen betaalde aanroep. De
+vergelijkingsarm met `claude-sonnet-5-5` vervalt tot de eigenaar die apart vraagt.
+
+**Oorspronkelijke status: NEEDS_APPROVAL.** Er wordt niets betaald, geen account aangemaakt en
 geen sleutel gebruikt totdat de Product Owner provider/model, budget en
 gegevensverwerking expliciet goedkeurt. Deze proef levert gemeten cijfers voor
 dit ticket. Het is geen productieactivering en geen definitieve vendorkeuze.
