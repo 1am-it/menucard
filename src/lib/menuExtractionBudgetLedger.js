@@ -69,6 +69,7 @@ function emptyState(limits) {
     spentEurCents: 0,
     reservedEurCents: 0,
     unknownCostCalls: 0,
+    openReservation: null,
     lastCallAt: null,
     lastOutcome: null,
   };
@@ -81,6 +82,15 @@ function validateState(state) {
   for (const problem of validateLimits(state.limits || {})) problems.push(`limits: ${problem}`);
   for (const key of ['calls', 'spentEurCents', 'reservedEurCents', 'unknownCostCalls']) {
     if (!isNonNegativeInteger(state[key])) problems.push(`${key} must be a non-negative integer`);
+  }
+  const open = state.openReservation;
+  if (open !== null) {
+    if (!open || typeof open !== 'object' || Array.isArray(open)) problems.push('openReservation must be null or an object');
+    else {
+      if (!Number.isInteger(open.pid) || open.pid <= 0) problems.push('openReservation.pid must be a positive integer');
+      if (!isNonNegativeInteger(open.amountEurCents) || open.amountEurCents <= 0) problems.push('openReservation.amountEurCents must be a positive integer');
+      if (typeof open.at !== 'string' || open.at.length === 0) problems.push('openReservation.at must be a timestamp');
+    }
   }
   if (state.lastCallAt !== null && typeof state.lastCallAt !== 'string') problems.push('lastCallAt must be null or a string');
   if (state.lastOutcome !== null && typeof state.lastOutcome !== 'string') problems.push('lastOutcome must be null or a string');
@@ -240,7 +250,6 @@ function createFileBudgetLedger(options = {}) {
   } else {
     state = emptyState(limits);
   }
-  let reservation = 0;
 
   function underLock(mutate) {
     const lock = deps.acquireLock(file, deps.isProcessAlive);
@@ -253,6 +262,23 @@ function createFileBudgetLedger(options = {}) {
     }
   }
 
+  /**
+   * One call at a time, across processes. An open reservation from a process
+   * that is gone keeps its money charged (the call may have been paid) and
+   * frees the slot; nothing is silently refunded.
+   */
+  function releaseAbandonedReservation() {
+    const open = state.openReservation;
+    if (!open) return;
+    if (deps.isProcessAlive(open.pid)) return;
+    const amount = Math.min(open.amountEurCents, state.reservedEurCents);
+    state.spentEurCents += amount;
+    state.reservedEurCents = Math.max(0, state.reservedEurCents - amount);
+    state.unknownCostCalls += 1;
+    state.openReservation = null;
+    state.lastOutcome = 'abandoned_reservation_charged';
+  }
+
   return {
     file,
     limits: { ...limits },
@@ -262,24 +288,27 @@ function createFileBudgetLedger(options = {}) {
     reserve(maxCost) {
       if (!Number.isInteger(maxCost) || maxCost < 0 || maxCost > limits.perCallLimitEurCents) return false;
       return underLock(() => {
+        releaseAbandonedReservation();
+        if (state.openReservation) return false;
         if (state.calls + 1 > limits.maxCalls) return false;
         if (state.spentEurCents + state.reservedEurCents + maxCost > limits.cumulativeLimitEurCents) return false;
         state.calls += 1;
         state.reservedEurCents += maxCost;
+        state.openReservation = { pid: process.pid, amountEurCents: maxCost, at: deps.now() };
         state.lastCallAt = deps.now();
         state.lastOutcome = 'reserved';
         deps.writeState(file, state);
-        reservation = maxCost;
         return true;
       });
     },
 
     settle(actual) {
       return underLock(() => {
-        if (reservation <= 0) {
-          throw new BudgetLedgerError('budget_settle_failed', 'there is no open reservation to settle');
+        const open = state.openReservation;
+        if (!open || open.pid !== process.pid) {
+          throw new BudgetLedgerError('budget_settle_failed', 'there is no open reservation for this process');
         }
-        const reserved = Math.min(reservation, state.reservedEurCents);
+        const reserved = Math.min(open.amountEurCents, state.reservedEurCents);
         if (actual === null || actual === undefined) {
           // Unknown is never free: the whole reservation stays spent.
           state.spentEurCents += reserved;
@@ -292,7 +321,7 @@ function createFileBudgetLedger(options = {}) {
           throw new BudgetLedgerError('budget_settle_failed', 'the settled amount must be a non-negative integer or null');
         }
         state.reservedEurCents = Math.max(0, state.reservedEurCents - reserved);
-        reservation = 0;
+        state.openReservation = null;
         deps.writeState(file, state);
         return true;
       });
@@ -310,6 +339,7 @@ function createFileBudgetLedger(options = {}) {
         spentEurCents: state.spentEurCents,
         reservedEurCents: state.reservedEurCents,
         unknownCostCalls: state.unknownCostCalls,
+        openReservation: state.openReservation ? { ...state.openReservation } : null,
         remainingEurCents: remaining,
         exhausted: remaining <= 0,
         callsRemaining: Math.max(0, limits.maxCalls - state.calls),

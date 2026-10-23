@@ -228,11 +228,43 @@ test('K3: a ledger that cannot write a settlement never reports a successful ext
   assert.equal(result.reason, 'budget_settle_failed');
 });
 
+test('K3: only one call holds a reservation at a time, also across two ledger instances', () => {
+  const { file, ledger } = temporaryLedger();
+  assert.equal(ledger.reserve(10), true);
+  assert.equal(ledger.reserve(10), false, 'the same ledger refuses a second open call');
+  const second = createFileBudgetLedger({ file });
+  assert.equal(second.reserve(10), false, 'a second probe instance refuses while a call is open');
+  assert.equal(ledger.snapshot().openReservation.pid, process.pid);
+  assert.equal(ledger.settle(1), true);
+  assert.equal(ledger.snapshot().openReservation, null);
+  assert.equal(second.reserve(10), true);
+  assert.equal(second.settle(10), true);
+});
+
+test('K3: a reservation left by a dead process stays charged and frees the slot', () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'menucard-ledger-'));
+  const file = path.join(directory, 'ledger.json');
+  const abandoned = emptyState(DEFAULT_LEDGER_LIMITS);
+  abandoned.calls = 1;
+  abandoned.reservedEurCents = 30;
+  abandoned.openReservation = { pid: 999_999, amountEurCents: 30, at: '2026-10-23T00:00:00.000Z' };
+  fs.writeFileSync(file, `${JSON.stringify(abandoned, null, 2)}\n`, 'utf8');
+
+  const ledger = createFileBudgetLedger({ file });
+  assert.equal(ledger.reserve(30), true, 'the slot of a dead process is reusable');
+  const snapshot = ledger.snapshot();
+  assert.equal(snapshot.spentEurCents, 30, 'the abandoned call stays charged');
+  assert.equal(snapshot.unknownCostCalls, 1);
+  assert.equal(snapshot.reservedEurCents, 30, 'only the new reservation is still open');
+  assert.equal(snapshot.openReservation.pid, process.pid);
+});
+
 test('K3: the empty state is the documented zero, never a hidden spend', () => {
   const state = emptyState(DEFAULT_LEDGER_LIMITS);
   assert.equal(state.calls, 0);
   assert.equal(state.spentEurCents, 0);
   assert.equal(state.reservedEurCents, 0);
   assert.equal(state.unknownCostCalls, 0);
+  assert.equal(state.openReservation, null);
   assert.equal(state.schemaVersion, 'menu-extraction-ai-probe-budget/v1');
 });
