@@ -7,8 +7,8 @@ zijn machineleesbaar gepind in
 de representatieve set is uitgevoerd. De drie gerepareerde praktijkbronnen zijn
 na hun eenmalige meting naar representatief verplaatst; alleen Gauchos Breda
 blijft holdout. Zie de [acceptatiematrix](menu-extraction-acceptance-matrix.md).
-Protocol: `MENU-EXTRACTION.md` v0.3, SHA-256
-`a352effee402d8ccdbb8260aa21baabcfd2e8f8c160b36a1b21df36a430c2648`.
+Protocol: `MENU-EXTRACTION.md` v0.4, SHA-256
+`ccbc4c03124cb3be8201d24b0a97ed41d962c2415339cf2c295658cca6e310f4`.
 
 ## Representatieve set
 

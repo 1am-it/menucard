@@ -168,8 +168,8 @@ ontbrekende of onversioned instructie geeft een concrete fout.
 
 ## Versiepinning
 
-- Protocol: `MENU-EXTRACTION.md`, concept v0.3, SHA-256
-  `a352effee402d8ccdbb8260aa21baabcfd2e8f8c160b36a1b21df36a430c2648`.
+- Protocol: `MENU-EXTRACTION.md`, concept v0.4, SHA-256
+  `ccbc4c03124cb3be8201d24b0a97ed41d962c2415339cf2c295658cca6e310f4`.
 - Resultaatschema: `menu-extraction-result/v1`.
 - Ticket: https://github.com/1am-it/menucard/issues/59
 - Branch: `feat/menu-extraction-59`

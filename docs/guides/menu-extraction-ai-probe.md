@@ -10,8 +10,12 @@ uitvoerruimte. De ronde van order 6375125413 (Q1-Q5) bewaart het letterlijke
 antwoord van elke aanroep, diagnosticeert een afgekeurd citaat offline en scherpt
 de citatenregel in het protocol aan. De ronde van order 6375740447 (R1-R4) haalt
 het itemaantal bij het model weg: de adapter telt zelf en stelt een te ruime
-`complete`-status neerwaarts bij, zichtbaar per aanroep. Alle rondes zijn offline
-getest.
+`complete`-status neerwaarts bij, zichtbaar per aanroep. De ronde van order
+6376108648 (S1-S5) pakt de drie afkeuroorzaken van de eerste volledige live-run
+aan: een ondubbelzinnige `sourceId:`-regel in de bronkop, een gedocumenteerde
+gelijkstelling van typografische tekens, een ondubbelzinnige prijsvariantregel en
+een diagnose per bron waarom een geaccepteerd item niet matcht. Alle rondes zijn
+offline getest.
 
 [Acceptatiematrix](menu-extraction-acceptance-matrix.md) |
 [Implementatieafspraken](menu-extraction-implementation.md) |
@@ -26,6 +30,7 @@ getest.
 | Budgetlog | `src/lib/menuExtractionBudgetLedger.js` | Synchrone, atomisch geschreven ledger (`reserve`/`settle`) in een gitignored pad. 900 cent cumulatief, 30 cent per call, 40 calls, 1 tegelijk (ook over processen). |
 | Beslisfunctie | `src/lib/menuExtractionRouteBDecision.js` | Route B alleen bij nul items, dekking onder 80% tegen een bekende referentie, `html_arrangements_skipped` of een PDF-layoutprobleem. Niet aan een app-route gekoppeld. |
 | Boekhoudnormalisatie | `src/lib/menuExtractionNormalization.js` | R1/R2 van review 6375740447: de adapter telt de items zelf en stelt `complete` met limitations neerwaarts bij, vóór de ongewijzigde validator. Elke correctie staat als `normalizations`-regel in het rapport en de JSONL. |
+| Mismatchdiagnose | `ops/benchmark/mismatchDiagnosis.js` | S4 van review 6376108648: verklaart per bron waarom een geaccepteerd item niet matcht (rubriekpad met menutitel of extra niveau, prijs, naamvariant, niet in de referentie, niet geëxtraheerd). Diagnose: geen telling of verdict verandert. |
 | Proefharnas | `ops/benchmark/menuExtractionProbe.js`, `ops/benchmark/menuExtractionProbeSet.js`, `ops/scripts/run-menu-extraction-ai-probe.js` | Hash-geverifieerde gepinde captures, dry-run-raming, live meting met de ongewijzigde `compareControlledReference`, twee runs per bron. |
 
 De app-runtime blijft **uit**: `disabledMenuExtractionRuntime` in
@@ -345,8 +350,9 @@ te zwijgen.
 
 ### Q3 - de citatenregel in het protocol
 
-`MENU-EXTRACTION.md` is **v0.3** (SHA-256
-`a352effee402d8ccdbb8260aa21baabcfd2e8f8c160b36a1b21df36a430c2648`). Paragraaf 4
+`MENU-EXTRACTION.md` is bij deze ronde **v0.3** geworden (SHA-256
+`a352effee402d8ccdbb8260aa21baabcfd2e8f8c160b36a1b21df36a430c2648`; de pin
+staat inmiddels op v0.4, zie de S1-S5-ronde hieronder). Paragraaf 4
 zegt nu expliciet dat een citaat een aaneengesloten, letterlijke tekstreeks uit
 een bron is, bij voorkeur alleen de gerechtregel; nooit regels samenvoegen, nooit
 een scheidingsteken toevoegen, en een prijs op een andere regel krijgt een eigen
@@ -411,6 +417,128 @@ provider en geen publicatie of merge. Rapportversie is `1.3.0`. Een
 `complete`-claim met ongebruikte bronnen wordt niet door de adapter bijgesteld;
 die blijft een expliciete validatorafkeuring, zodat de correctie niet breder
 wordt dan de bewezen telfout en de statusregel.
+
+## S1-S5: bron-id, typografische tekens, prijsvarianten en diagnose (Lead-order review 6376108648)
+
+Aanleiding: de eerste volledige live-run van de Lead (2026-10-24 00:3x, 17
+aanroepen van ongeveer 1 cent per stuk, gestopt op het ledgerplafond) gaf drie
+afkeuroorzaken die niets met de menukaart zelf te maken hebben:
+
+- **S1** Smelt en Blossem: alle citaten `unknown_source`, omdat het model
+  `"sourceId":"smelt-01.BRON"` schreef. De oude bronkop was één regel,
+  `BRON smelt-01 | https://… | pdf`, met het label aan de id vast.
+- **S2** Zuyd: afgekeurd op vier citaten waarin alleen het aanhalingsteken
+  verschilde (`‘Catch of the day’` in de bron, `'Catch of the day'` in het
+  antwoord).
+- **S3** Pellens: twee keer afgekeurd op items met `priceVariants` én een
+  `amountMinorUnits`, met een andere `priceStatus` dan `multiple_undecomposed`.
+
+Daarnaast vroeg de Lead (**S4**) om per bron vast te leggen waaróm
+geaccepteerde items niet matchen (Chocolat: 37 items, 0 matches) en (**S5**) om
+regressies zonder netwerk.
+
+### S1 - ondubbelzinnige bron-id
+
+`sourceHeaderText` in `src/lib/menuExtractionAnthropicCall.js` schrijft de id nu
+op een eigen regel, met de rest eronder in plaats van ernaast:
+
+```text
+sourceId: smelt-01
+url: https://voorbeeld.example/menu.pdf
+kind: pdf
+pages: 3
+```
+
+De documenttitel van een PDF-bron is `sourceId: <id>` en niets anders. De
+instructietekst bij de bronnen zegt expliciet dat de id letterlijk en volledig
+wordt overgenomen, met `smelt-01.BRON` en `BRON smelt-01` als foute vormen, en
+`MENU-EXTRACTION.md` paragraaf 4 zegt hetzelfde als vaste regel. Een id die niet
+in de aangeleverde inventaris staat, blijft een validatorafkeuring: de
+normalisatie accepteert niets extra.
+
+### S2 - typografische tekens
+
+`normalizeEvidenceText` in `src/lib/menuExtractionSchema.js` stelt uitsluitend
+deze tekenklassen gelijk (Lead-besluit, bewust en gedocumenteerd):
+
+| Varianten | Gelijk aan |
+| --- | --- |
+| `‘ ’ ‚ ′` | `'` |
+| `“ ” „ ″` | `"` |
+| `– —` | `-` |
+| harde spatie (U+00A0) | gewone spatie |
+
+Daarna blijven de bestaande regels gelden: witruimte (ook een regeleinde) klapt
+samen tot één spatie, trimmen en kleine letters. **Elk ander verschil blijft
+fout**: andere woorden, samengevoegde regels, een toegevoegd scheidingsteken, een
+gewijzigd cijfer of een andere volgorde. De tabel staat als
+`TYPOGRAPHIC_EQUIVALENTS` in de validator en wordt door de validator, de
+citatendiagnose (`quoteDiagnostics`), de bewijsdekking in het rapport
+(`evidenceCoverage`) en de handmatige import gebruikt - één regel, geen tweede
+stille kopie. De rapportdekking gebruikt dezelfde normalisatie, zodat een citaat
+dat de validator goedkeurt nooit als gat in het rapport verschijnt.
+
+### S3 - prijsvarianten
+
+Het protocol (paragraaf 4) en het API-schema zeggen nu dezelfde, enige
+toegestane combinatie bij meerdere gedrukte prijzen:
+
+- `priceVariants` gevuld met elke gedrukte prijs en het label uit de bron;
+- `priceStatus` = `multiple_undecomposed`;
+- `amountMinorUnits` en `currency` = `null`.
+
+Goed en fout staan als voorbeeld in het protocol (`known` met een hoofdprijs
+naast varianten is fout; een bedrag naast varianten is fout). In
+`buildOutputJsonSchema()` dragen `priceStatus`, `amountMinorUnits`, `currency`,
+`priceText` en `priceVariants` nu een korte `description` met die regel - tekst
+alleen, geen extra constraint-keyword. De validator blijft leidend en de adapter
+repareert geen prijzen.
+### S4 - diagnose per bron (waarom matcht een geaccepteerd item niet?)
+
+`ops/benchmark/mismatchDiagnosis.js` verklaart per bron de rijen die de
+ongewijzigde vergelijking al als rubriekfout, prijsfout, gemist of verzonnen
+telt. Het rapport krijgt `sources[].mismatchDiagnosis`
+(`menu-mismatch-diagnosis/v1`) met de klassen `category_path`, `price`,
+`name_variant`, `not_in_reference` en `not_extracted`, een uitsplitsing van het
+padverschil (`menu_title`, `extra_level`, `other`) en de detailrijen. Het is
+**diagnose**: geen match, geen telling en geen verdict verandert, en referenties,
+telregels en meetcode zijn niet aangeraakt.
+
+Uitkomst op de bewaarde antwoorden van de live-run (offline herspeeld met de
+ongewijzigde vergelijking; geen nieuwe aanroep):
+
+| Bron | Status | Items | Match | Rubriek | Verzonnen | Diagnose |
+| --- | --- | --- | --- | --- | --- | --- |
+| Chocolat (run 1, 2 calls) | geaccepteerd | 37 | 0 | 25 | 12 | 25x pad: 11x alleen de menutitel (`LUNCHKAART CHOCOLAT` → `Lunchkaart`), 14x een extra niveau (`Dinerkaart > À la carte > Voorgerechten` naast `DINERKAART CHOCOLAT > VOORGERECHTEN`); 1x naamvariant (`STEAK TARTARE` → `STEAK TARTARE 90 GRAM`); 11x een arrangement buiten de referentie (2/3/4-gangen, Chocolat Gastronomique 4-7 gangen EUR 65-95, lunch-/dinerarrangement EUR 59/89) |
+| Andalous (run 1, 2 calls) | geaccepteerd | 99 | 82 | 3 | 14 | 3x extra rubriekniveau (`Menukaart > Visgerechten` naast `Menukaart > Warme voorgerechten > Visgerechten`); 2x naamvariant met een toevoeging in de naam (`(kindermenu)`, `(1 pers.)`, en `Hoofdgerechten*` in de referentie); 12x een Ramadan-aanbod dat niet in de referentie staat |
+
+De Chocolat-uitkomst is dus **geen** bewijs dat de kaart niet gelezen is: 25 van
+de 26 referentierijen zijn met naam en prijs gevonden, maar onder een ander
+rubriekpad. De telregels blijven zoals ze zijn; dit is de verklaring, niet een
+correctie. Voor Smelt en Blossem zegt deze herspeling niets over de kwaliteit:
+hun antwoorden zijn afgekeurd (S1) en tellen als nul extractie.
+
+### S5 - regressies zonder netwerk
+
+| Eis | Test |
+| --- | --- |
+| S1 bronkop en documenttitel | `src/lib/menuExtractionAnthropicCall.test.js`: "S1: the source header names the exact id on its own line, so it cannot be glued to a label" |
+| S1/S2/S3 in het protocol | `src/lib/menuExtractionProtocol.test.js`: versie 0.4, vaste hash, de drie regels moeten in de tekst staan |
+| S2 gelijkstelling en de grens ervan | `src/lib/menuExtractionSchema.test.js` (curly/straight quotes, dubbele quotes, en/em-dash, prime, harde spatie; samengevoegd, verzonnen en gewijzigd cijfer blijven afgekeurd; de tabel mag alleen de gedocumenteerde tekens bevatten; een onbekende `sourceId` blijft afgekeurd) |
+| S2 route B | `src/lib/menuExtractionAdapter.test.js`: "S2: a typographic quote is the same passage through the whole adapter, and a joined quote stays refused" |
+| S2 handmatige import | `src/lib/manualMenuImport.test.js`: "S2: een typografisch citaat is dezelfde passage in de handmatige import" en "S2: een samengevoegd of verzonnen citaat blijft in de handmatige import afgekeurd" |
+| S2 rapportdekking | `ops/benchmark/menuExtractionProbe.test.js`: de bewijsdekking telt met dezelfde normalisatie |
+| S3 API-hint | `src/lib/menuExtractionAnthropicCall.test.js`: "S3: the API schema states the price-variant rule where the model reads it" |
+| S3 validator blijft leidend | `src/lib/menuExtractionSchema.test.js`: de enige goede combinatie plus de twee live foutvormen van Pellens |
+| S4 diagnose | `ops/benchmark/mismatchDiagnosis.test.js` (menutitel, extra niveau, ander pad, prijs, naamvariant, niet-in-referentie, niet-geextraheerd, geen verschil, en de Chocolat-vorm op de ongewijzigde vergelijking) en `ops/scripts/run-menu-extraction-ai-probe.test.js`: "S4: the report explains per source why an accepted item did not match, without touching a count" |
+
+Wat deze ronde **niet** doet: geen echte of betaalde aanroep, geen sleutel, geen
+wijziging of reset van het ledger, geen koppeling aan de app, geen wijziging aan
+referenties, telregels of meetcode, geen andere provider en geen publicatie of
+merge. Rapportversie is `1.4.0`; de acceptatieset staat op revisie `1.4.0`
+(alleen de protocolpin is naar v0.4 verschoven). Wat deze ronde **niet bewijst**:
+of S1-S3 de live-run nu wél laten slagen - dat moet de volgende live-run van de
+Lead laten zien.
 
 ## Wat de proef meet
 

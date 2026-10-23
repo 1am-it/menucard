@@ -33,8 +33,8 @@ review 6344039571),
 `0f9ea9dd59c36b13b270cb140030466db11d6d8d` (read-only aansluiting) en
 `6fb54cad76dd4f2b7996667777d82c0db5789b04` (volledig-lexeem prijsbewijs).
 Protocol:
-`MENU-EXTRACTION.md` v0.3, SHA-256
-`a352effee402d8ccdbb8260aa21baabcfd2e8f8c160b36a1b21df36a430c2648`.
+`MENU-EXTRACTION.md` v0.4, SHA-256
+`ccbc4c03124cb3be8201d24b0a97ed41d962c2415339cf2c295658cca6e310f4`.
 De runtime blijft zonder provider; alle bronproeven zijn read-only. De v2-laag
 is nu read-only aangesloten op de bestaande interne controle en review; er is
 geen v2-schrijver, provider, DDL of publieke werking.
@@ -635,7 +635,7 @@ stil geschrapt.
 
 | # | Criterium (verkort) | Status | Bewijs / reden |
 | ---: | --- | --- | --- |
-| 1 | Protocol en schema versiegebonden; ontbrekende configuratie stopt concreet | **gehaald** | `MENU-EXTRACTION.md` v0.3 met SHA-256; `menuExtractionProtocol`-regressies blijven groen. Sinds review 6375125413 is de citatenregel in paragraaf 4 letterlijk en aaneengesloten voorgeschreven (Q3); de validator is niet versoepeld |
+| 1 | Protocol en schema versiegebonden; ontbrekende configuratie stopt concreet | **gehaald** | `MENU-EXTRACTION.md` v0.4 met SHA-256; `menuExtractionProtocol`-regressies blijven groen. Sinds review 6375125413 is de citatenregel in paragraaf 4 letterlijk en aaneengesloten voorgeschreven (Q3); sinds review 6376108648 staan de bron-id, de typografische gelijkstelling en de prijsvariantregel er expliciet in (S1-S3). De validator is niet versoepeld buiten de gedocumenteerde tekenklassen |
 | 2 | URL → lezen → extractie → menselijke correctie → conceptopslag met broncontext | **gedeeltelijk** | Bestaande keten en fixture bewijzen de vorm; geen echte Supabase-sessie of conceptopslag in deze ronde |
 | 3 | Smelt: echte PDF-inhoud, 0 items is geen succes, gerechten/prijzen/dekking vergeleken | **gehaald in eerdere ronde** | 37/37 referentierijen op de gepinde PDF; deze ronde meet Smelt niet opnieuw |
 | 4 | Blossem: lunch/diner, rubrieken en items volgens de bron; onzekerheid reviewbaar | **gehaald in eerdere ronde** | 43/43 op de gepinde HTML; deze ronde meet Blossem niet opnieuw |
@@ -1211,10 +1211,37 @@ invulde: `coverage.itemsExtracted` en `complete` met een niet-lege
 | --- | --- | --- |
 | R1 afgeleide telling | **gedaan** | De adapter (`runStructuredExtraction`) telt de items in de uitvoer en zet `coverage.itemsExtracted` vóór de validatie; het veld staat niet meer in `buildOutputJsonSchema()` (schema- en promptmodus). De validatorregel en het backend-contract zijn ongewijzigd. |
 | R2 conservatieve status | **gedaan** | `complete` met niet-lege `limitations` wordt `partial` (of `no_items` bij nul items); alleen neerwaarts. Vastgelegd in `normalizations`. |
-| R3 rapport en JSONL | **gedaan** | `report.calls[].normalizations`, een `normalization`-kop, `totals.normalizationsApplied` en dezelfde regels in de JSONL; de console print elke toepassing. Rapportversie `1.3.0`. |
+| R3 rapport en JSONL | **gedaan** | `report.calls[].normalizations`, een `normalization`-kop, `totals.normalizationsApplied` en dezelfde regels in de JSONL; de console print elke toepassing. Rapportversie `1.3.0` (inmiddels `1.4.0`, zie de ronde hieronder). |
 | R4 regressies zonder netwerk | **gedaan** | `menuExtractionNormalization.test.js` 7/7; R4-tests in `menuExtractionAdapter.test.js` (fout aantal, bijgestelde status, ongeldig citaat blijft afgekeurd); R3-tests in `run-menu-extraction-ai-probe.test.js`; de handmatige import blijft op de directe validator. |
 
 Wat deze ronde niet doet: een `complete`-claim met ongebruikte bronnen wordt niet
 automatisch bijgesteld (dat blijft een expliciete validatorafkeuring), er is geen
 live meting en er is geen onafhankelijke review. De Lead bevestigt het effect met
 een eigen live-aanroep binnen het bestaande budgetbesluit.
+
+## Ronde 2026-10-24 - route B: bron-id, typografische tekens, prijsvarianten en diagnose (review 6376108648)
+
+**Status: ontwikkelaarsbewijs en fixturebewijs.** Geen betaalde of echte
+API-aanroep, geen sleutel, geen wijziging of reset van het ledger, geen
+koppeling aan de app, geen wijziging aan referenties, telregels of meetcode, geen
+andere provider, geen merge en geen publicatie.
+
+Aanleiding: de eerste volledige live-run van de Lead (17 aanroepen, ~1 cent per
+stuk) keurde Smelt en Blossem af op `unknown_source`, Zuyd op vier citaten met
+een ander aanhalingsteken en Pellens op `priceVariants` naast een hoofdprijs.
+Chocolat werd geaccepteerd maar matchte 0 van de 26 referentierijen.
+
+| Criterium | Stand | Bewijs |
+| --- | --- | --- |
+| S1 ondubbelzinnige bron-id | **gedaan** | `sourceHeaderText` schrijft `sourceId: <id>` op een eigen regel, de PDF-documenttitel is die regel alleen, de instructie én `MENU-EXTRACTION.md` paragraaf 4 zeggen dat de id letterlijk wordt overgenomen. Een onbekende id blijft een validatorafkeuring. `menuExtractionAnthropicCall.test.js` (S1), `menuExtractionProtocol.test.js`, `menuExtractionSchema.test.js` (onbekende id). |
+| S2 typografische tekens | **gedaan** | `normalizeEvidenceText` stelt uitsluitend `‘ ’ ‚ ′`=`'`, `“ ” „ ″`=`"`, `– —`=`-` en de harde spatie gelijk (export `TYPOGRAPHIC_EQUIVALENTS`); samengevoegd, verzonnen of gewijzigd blijft afgekeurd. Dezelfde regel voor validator, citatendiagnose, rapportdekking en handmatige import. `menuExtractionSchema.test.js`, `menuExtractionAdapter.test.js`, `manualMenuImport.test.js`, `menuExtractionProbe.test.js`. |
+| S3 prijsvarianten | **gedaan** | Protocolregel met goed/fout voorbeeld en `description`-hints in `buildOutputJsonSchema()`; de validator blijft leidend en de adapter repareert geen prijzen. `menuExtractionProtocol.test.js`, `menuExtractionAnthropicCall.test.js` (S3), `menuExtractionSchema.test.js`. |
+| S4 diagnose Chocolat | **gedaan** | `sources[].mismatchDiagnosis` (`menu-mismatch-diagnosis/v1`) in het rapport en een regel per bron op de console. Op de bewaarde antwoorden: 25x rubriekpad (11x alleen menutitel, 14x extra niveau `À la carte`), 1x naamvariant, 11x arrangement buiten de referentie; de tellingen van de vergelijking zijn ongewijzigd. `mismatchDiagnosis.test.js`, `run-menu-extraction-ai-probe.test.js` (S4). |
+| S5 regressies zonder netwerk | **gedaan** | Bovenstaande tests plus de bestaande suites; `npm test`, `npm run build` en de dry-run op de checkpoint-head. |
+
+Wat deze ronde **niet** bewijst: dat S1-S3 de volgende live-run laten slagen
+(dat moet de Lead met een eigen aanroep binnen het bestaande budgetbesluit
+bevestigen), en dat de referenties compleet zijn - de Chocolat-arrangementen
+staan er niet in en dat is een aparte acceptatievraag, geen telregelwijziging.
+Er is geen onafhankelijke review en geen release.
+

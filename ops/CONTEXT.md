@@ -57,10 +57,14 @@ answer stays diagnosis: it counts as zero extraction. Since review 6375740447
 received and downgrades a claimed `complete` status with limitations to
 `partial`/`no_items` before validation; both the provider schema and the adapter
 no longer trust a model-supplied count, and every correction is recorded per call
-in `report.calls[].normalizations` and in the JSONL. The backend validator and
-the manual-import path are unchanged. No app route is wired to any of it —
-`disabledMenuExtractionRuntime` stays in place. See
-`docs/guides/menu-extraction-ai-probe.md`.
+in `report.calls[].normalizations` and in the JSONL. Since review 6376108648 (S1-S4)
+the source header names the exact `sourceId:` on its own line, the evidence check
+equates only the documented typographic character classes, the price-variant rule
+is stated in the protocol and the provider schema, and every source row carries a
+`mismatchDiagnosis` that explains (diagnosis only) why accepted items did not
+match. The backend validator and the manual-import path keep the same rules. No
+app route is wired to any of it — `disabledMenuExtractionRuntime` stays in place.
+See `docs/guides/menu-extraction-ai-probe.md`.
 
 ## PDF.js server packaging check (added 2026-09-30)
 
