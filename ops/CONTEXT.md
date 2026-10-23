@@ -52,8 +52,14 @@ JSONL line. `node ops/scripts/diagnose-ai-probe-quotes.js` then explains a
 rejected answer offline per citation - the quote, the item, the nearest source
 fragments and a classification - and writes a gitignored
 `ai-probe-quote-diagnosis.json`; it needs no key and makes no call. A rejected
-answer stays diagnosis: it counts as zero extraction. No app route is wired to
-any of it — `disabledMenuExtractionRuntime` stays in place. See
+answer stays diagnosis: it counts as zero extraction. Since review 6375740447
+(R1/R2) the adapter derives `coverage.itemsExtracted` from the items it actually
+received and downgrades a claimed `complete` status with limitations to
+`partial`/`no_items` before validation; both the provider schema and the adapter
+no longer trust a model-supplied count, and every correction is recorded per call
+in `report.calls[].normalizations` and in the JSONL. The backend validator and
+the manual-import path are unchanged. No app route is wired to any of it —
+`disabledMenuExtractionRuntime` stays in place. See
 `docs/guides/menu-extraction-ai-probe.md`.
 
 ## PDF.js server packaging check (added 2026-09-30)

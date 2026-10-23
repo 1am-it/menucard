@@ -8,7 +8,10 @@ API-schema accepteerbaar, de foutdetails compleet en de time-out echt begrensd,
 en de ronde van order 6374528099 (N1-N4) zet het denken uit en geeft de JSON de
 uitvoerruimte. De ronde van order 6375125413 (Q1-Q5) bewaart het letterlijke
 antwoord van elke aanroep, diagnosticeert een afgekeurd citaat offline en scherpt
-de citatenregel in het protocol aan. Alle rondes zijn offline getest.
+de citatenregel in het protocol aan. De ronde van order 6375740447 (R1-R4) haalt
+het itemaantal bij het model weg: de adapter telt zelf en stelt een te ruime
+`complete`-status neerwaarts bij, zichtbaar per aanroep. Alle rondes zijn offline
+getest.
 
 [Acceptatiematrix](menu-extraction-acceptance-matrix.md) |
 [Implementatieafspraken](menu-extraction-implementation.md) |
@@ -22,6 +25,7 @@ de citatenregel in het protocol aan. Alle rondes zijn offline getest.
 | Prijstabel | idem, `ANTHROPIC_PRICING` | Vast en gedateerd: Haiku 5.5 $0,10/$0,50 per miljoen tokens tot 100.000 prompttokens, daarboven $0,50/$2,50 (Anthropic Pricing, 2026-10-22). USD 1:1 naar eurocent, naar boven afgerond. |
 | Budgetlog | `src/lib/menuExtractionBudgetLedger.js` | Synchrone, atomisch geschreven ledger (`reserve`/`settle`) in een gitignored pad. 900 cent cumulatief, 30 cent per call, 40 calls, 1 tegelijk (ook over processen). |
 | Beslisfunctie | `src/lib/menuExtractionRouteBDecision.js` | Route B alleen bij nul items, dekking onder 80% tegen een bekende referentie, `html_arrangements_skipped` of een PDF-layoutprobleem. Niet aan een app-route gekoppeld. |
+| Boekhoudnormalisatie | `src/lib/menuExtractionNormalization.js` | R1/R2 van review 6375740447: de adapter telt de items zelf en stelt `complete` met limitations neerwaarts bij, vóór de ongewijzigde validator. Elke correctie staat als `normalizations`-regel in het rapport en de JSONL. |
 | Proefharnas | `ops/benchmark/menuExtractionProbe.js`, `ops/benchmark/menuExtractionProbeSet.js`, `ops/scripts/run-menu-extraction-ai-probe.js` | Hash-geverifieerde gepinde captures, dry-run-raming, live meting met de ongewijzigde `compareControlledReference`, twee runs per bron. |
 
 De app-runtime blijft **uit**: `disabledMenuExtractionRuntime` in
@@ -384,6 +388,29 @@ Deze ronde bevat **geen** betaalde of echte aanroep, leest de sleutel niet,
 wijzigt het ledger niet, versoepelt de validator niet en koppelt niets aan de
 app. Alles hierboven is ontwikkelaars- en fixturebewijs; de Lead draait de
 diagnose op de bewaarde live-uitvoer zodra die er is.
+
+## R1-R4: afgeleide telling en conservatieve status (Lead-order review 6375740447)
+
+Aanleiding: na Q1-Q5 waren beide live Zuyd-antwoorden inhoudelijk bruikbaar -
+0 ongeldige citaten bij 52 en 23 items - maar afgekeurd op twee velden die het
+model zelf invulde: `coverage.itemsExtracted` klopte niet en `complete` kwam
+voor met een niet-lege `limitations`. Een taalmodel telt onbetrouwbaar; een
+getal dat de code exact kan afleiden hoort niet van het model te komen.
+
+| Eis | Invulling | Bewijs |
+| --- | --- | --- |
+| R1 afgeleide telling | `runStructuredExtraction` laat de ruwe uitvoer eerst door `applyDerivableNormalizations` (`src/lib/menuExtractionNormalization.js`) gaan: `coverage.itemsExtracted` wordt het werkelijke aantal items in `menus[].categories[].items[]`, **vóór** de validatie. Het veld staat niet meer in het provider-schema (`buildOutputJsonSchema()`, schema- én promptmodus), dus het model wordt er niet meer naar gevraagd. De backend-contractdefinitie en de validatorregel blijven ongewijzigd. | `src/lib/menuExtractionNormalization.test.js`, `menuExtractionAdapter.test.js` (R4), `menuExtractionAnthropicCall.test.js` (R1/R2) |
+| R2 conservatieve status | Claimt het model `complete` en geeft het niet-lege `limitations` mee, dan stelt de adapter bij naar de eerstvolgende niet-complete status van het bestaande schema: `partial` (of `no_items` als er geen items zijn). Alleen naar beneden: `partial`, `no_items` en een schone `complete` blijven staan. | idem, plus de probe-regressie hieronder |
+| R3 rapport en JSONL | Elke aanroep draagt `normalizations: [{rule, field, from, to, reason}]` in `report.calls[]` en in de JSONL-regel; het rapport heeft een `normalization`-kop (schemaversie + regels) en `totals.normalizationsApplied`. De console print elke toepassing als regel `genormaliseerd (niet stil): call ...`. De vergelijking met de referentie werkt op de geaccepteerde uitvoer zoals voorheen. | `run-menu-extraction-ai-probe.test.js`: "R3 ... report and the JSONL show the normalizations applied per call" |
+| R4 regressies zonder netwerk | Een fout aantal wordt gecorrigeerd en de uitvoer is geldig; `complete` met limitations wordt bijgestuurd en vastgelegd; een ongeldig citaat blijft afgekeurd (de correctie redt het niet); de handmatige import (`manualMenuImportImport.js` valideert direct) verandert niet en de bestaande tests blijven groen. | `menuExtractionNormalization.test.js` (7 tests), 3 R4-tests in `menuExtractionAdapter.test.js`, 2 R3-tests in de probe-suite |
+
+Wat deze ronde **niet** doet: geen echte of betaalde aanroep, geen sleutel, geen
+wijziging aan het ledger, geen versoepeling van de validator, geen koppeling aan
+de app, geen wijziging aan referenties, telregels of meetcode, geen andere
+provider en geen publicatie of merge. Rapportversie is `1.3.0`. Een
+`complete`-claim met ongebruikte bronnen wordt niet door de adapter bijgesteld;
+die blijft een expliciete validatorafkeuring, zodat de correctie niet breder
+wordt dan de bewezen telfout en de statusregel.
 
 ## Wat de proef meet
 

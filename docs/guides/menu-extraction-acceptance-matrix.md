@@ -1193,3 +1193,28 @@ verstuurd; de uitvoer van die calls wordt voor de vergelijking samengevoegd.
 De eerstvolgende veilige stap is onafhankelijke review van deze head door de
 Delivery Lead, daarna het eigenaarsbesluit over budget en gegevensverwerking en
 pas dan een live proef met een door de eigenaar aangemaakte sleutel.
+
+## Ronde 2026-10-24 - route B: afgeleide telling en conservatieve status (review 6375740447)
+
+**Status: ontwikkelaarsbewijs en fixturebewijs.** Geen betaalde of echte
+API-aanroep, geen sleutel, geen wijziging aan het ledger, geen koppeling aan de
+app, geen wijziging aan referenties, telregels of meetcode, geen andere provider,
+geen merge en geen publicatie. De app-runtime blijft
+`disabledMenuExtractionRuntime`.
+
+Aanleiding: de live Zuyd-antwoorden uit de Q-ronde hadden 0 ongeldige citaten
+(52 en 23 items), maar werden alleen afgekeurd op twee velden die het model zelf
+invulde: `coverage.itemsExtracted` en `complete` met een niet-lege
+`limitations`. Deze ronde haalt die twee boekhoudwaarden bij het model weg.
+
+| Criterium | Stand | Bewijs |
+| --- | --- | --- |
+| R1 afgeleide telling | **gedaan** | De adapter (`runStructuredExtraction`) telt de items in de uitvoer en zet `coverage.itemsExtracted` vóór de validatie; het veld staat niet meer in `buildOutputJsonSchema()` (schema- en promptmodus). De validatorregel en het backend-contract zijn ongewijzigd. |
+| R2 conservatieve status | **gedaan** | `complete` met niet-lege `limitations` wordt `partial` (of `no_items` bij nul items); alleen neerwaarts. Vastgelegd in `normalizations`. |
+| R3 rapport en JSONL | **gedaan** | `report.calls[].normalizations`, een `normalization`-kop, `totals.normalizationsApplied` en dezelfde regels in de JSONL; de console print elke toepassing. Rapportversie `1.3.0`. |
+| R4 regressies zonder netwerk | **gedaan** | `menuExtractionNormalization.test.js` 7/7; R4-tests in `menuExtractionAdapter.test.js` (fout aantal, bijgestelde status, ongeldig citaat blijft afgekeurd); R3-tests in `run-menu-extraction-ai-probe.test.js`; de handmatige import blijft op de directe validator. |
+
+Wat deze ronde niet doet: een `complete`-claim met ongebruikte bronnen wordt niet
+automatisch bijgesteld (dat blijft een expliciete validatorafkeuring), er is geen
+live meting en er is geen onafhankelijke review. De Lead bevestigt het effect met
+een eigen live-aanroep binnen het bestaande budgetbesluit.
