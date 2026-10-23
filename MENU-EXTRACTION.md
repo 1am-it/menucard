@@ -1,7 +1,8 @@
 # MENU-EXTRACTION - Menucard
 
-Status: CONCEPT v0.2 - niet actief in de import.
-Datum: 2026-10-17. Modelonafhankelijke extractie-instructie.
+Status: CONCEPT v0.3 - niet actief in de import.
+Datum: 2026-10-23. Modelonafhankelijke extractie-instructie. v0.3 scherpt
+alleen de citatenregel in paragraaf 4 aan; de overige eisen zijn ongewijzigd.
 
 ## Doel
 
@@ -65,7 +66,26 @@ gegevens voor een concept; een gevonden menulink alleen is geen extractie.
   menu-/rubriekpad, prijstekst, bedrag/valuta, prijsvarianten, supplementen,
   beschikbaarheid en expliciete labels.
 - Onderbouw relevante velden met bron-ID, vindplaats (pagina, sectie, selector
-  of visuele positie) en een korte ondersteunende passage.
+  of visuele positie) en een citaat uit de bron.
+- Een citaat is een **aaneengesloten, letterlijke** tekstreeks uit één bron:
+  neem de kortste reeks over die het item identificeert, bij voorkeur alleen de
+  gerechtregel zoals die in de bron staat, met de tekens en de spelling van de
+  bron.
+  - Voeg nooit regels samen, ook niet als ze in de bron bij elkaar horen.
+  - Voeg nooit een scheidingsteken toe dat niet in de bron staat, zoals ` - `,
+    ` | `, `: ` of een streepje tussen naam en prijs.
+  - Staat de prijs op een andere regel dan de naam, dan bevat het citaat
+    alleen de naamregel. Bewijs de prijs met een eigen, eveneens letterlijke
+    passage, of laat die velden onbewezen. Voeg naam en prijs nooit in één
+    citaat samen.
+  - Goed: bronregel `Soep van de dag` met de prijs `6,50` op de volgende regel
+    -> citaat `Soep van de dag`.
+  - Fout: citaat `Soep van de dag - 6,50` (twee regels samengevoegd en een
+    streepje toegevoegd) en citaat `Soep van de dag 6,50` (naam en prijs tot
+    één reeks gemaakt terwijl de bron ze scheidt).
+  De backendcontrole is letterlijk en streng: één citaat dat niet als
+  aaneengesloten reeks in de opgegeven bron staat, keurt de hele uitvoer af.
+  Een afgekeurde uitvoer telt niet als extractie.
 - Koppel prijzen alleen aan aantoonbaar bijbehorende items. Datums, tijden en
   telefoonnummers zijn geen prijzen. Pas de bestaande Money-regels toe.
 - Onderscheid vanaf-prijs, meerdere prijzen, op aanvraag en onbekend volgens

@@ -92,8 +92,8 @@ voorbeelden. Rapporteer aantoonbare ondersteuning en concrete beperkingen.
 
 ## Uitgevoerd bewijs — 2026-10-17
 
-Branch `feat/menu-extraction-59`; protocol `MENU-EXTRACTION.md` v0.2
-(SHA-256 `15510b4c0b74fee722ac2c51a3f40aa21b03e0161ccffdcb2008f3d27350b762`).
+Branch `feat/menu-extraction-59`; protocol `MENU-EXTRACTION.md` v0.3
+(SHA-256 `a352effee402d8ccdbb8260aa21baabcfd2e8f8c160b36a1b21df36a430c2648`).
 Dit is bewijs van de bouw- en testronde, niet van actuele bronacceptatie.
 
 | Controle | Resultaat |

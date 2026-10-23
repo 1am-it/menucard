@@ -15,7 +15,7 @@ voor reparatie en is daarom verplaatst naar `representative` met
 | --- | --- |
 | Entrypagina | `https://debotanistbreda.nl/`, 126831 bytes, SHA-256 `77c950de…b5b0` |
 | Werkelijk gelezen menubron | `…/De-Botanist-Breda-Menukaart-voorjaar-20-03-2026_compressed.pdf`, 551498 bytes, SHA-256 `50fef0b6…7f85`, contenthash `eb9da86e…3ade7f`, 16 pagina's |
-| Protocol | `MENU-EXTRACTION.md` v0.2, SHA-256 `15510b4c…b762` |
+| Protocol | `MENU-EXTRACTION.md` v0.3, SHA-256 `a352effee4…2648` |
 
 De homepagehash dekt de PDF niet. Daarom staat de PDF als aparte `menuSources`-
 entry in `ops/benchmark/holdout-references.json` en in

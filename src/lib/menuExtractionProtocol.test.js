@@ -20,13 +20,18 @@ function tempRoot(files) {
 
 test('loads the pinned instruction with a stable SHA-256 and no local machine path', () => {
   const protocol = loadMenuExtractionProtocol();
-  assert.equal(protocol.version, '0.2');
+  assert.equal(protocol.version, '0.3');
   assert.equal(protocol.file, 'MENU-EXTRACTION.md');
-  // Pinned LF hash of the committed instruction (MENU-EXTRACTION.md v0.2).
+  // Pinned LF hash of the committed instruction (MENU-EXTRACTION.md v0.3).
   // The same hash is recorded in docs/guides/menu-extraction-acceptance.md and
   // docs/guides/menu-extraction-representative-set.md.
-  assert.equal(protocol.hash, '15510b4c0b74fee722ac2c51a3f40aa21b03e0161ccffdcb2008f3d27350b762');
+  assert.equal(protocol.hash, 'a352effee402d8ccdbb8260aa21baabcfd2e8f8c160b36a1b21df36a430c2648');
   assert.match(protocol.text, /Modelonafhankelijke extractie-instructie/);
+  // Q3 of review 6375125413: the citation rule is part of the shared protocol,
+  // for every model the same. Removing it must fail a test, not only a review.
+  assert.match(protocol.text, /aaneengesloten, letterlijke/);
+  assert.match(protocol.text, /Voeg nooit regels samen/);
+  assert.match(protocol.text, /Voeg nooit een scheidingsteken toe/);
   assert.doesNotMatch(protocol.text, /\r/);
   assert.deepEqual(Object.keys(protocolMetadata(protocol)).sort(), ['instructionFile', 'instructionHash', 'instructionVersion', 'schemaVersion']);
   assert.doesNotMatch(JSON.stringify(protocolMetadata(protocol)), /C:\\\\|Documents/);

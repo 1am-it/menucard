@@ -33,8 +33,8 @@ review 6344039571),
 `0f9ea9dd59c36b13b270cb140030466db11d6d8d` (read-only aansluiting) en
 `6fb54cad76dd4f2b7996667777d82c0db5789b04` (volledig-lexeem prijsbewijs).
 Protocol:
-`MENU-EXTRACTION.md` v0.2, SHA-256
-`15510b4c0b74fee722ac2c51a3f40aa21b03e0161ccffdcb2008f3d27350b762`.
+`MENU-EXTRACTION.md` v0.3, SHA-256
+`a352effee402d8ccdbb8260aa21baabcfd2e8f8c160b36a1b21df36a430c2648`.
 De runtime blijft zonder provider; alle bronproeven zijn read-only. De v2-laag
 is nu read-only aangesloten op de bestaande interne controle en review; er is
 geen v2-schrijver, provider, DDL of publieke werking.
@@ -635,7 +635,7 @@ stil geschrapt.
 
 | # | Criterium (verkort) | Status | Bewijs / reden |
 | ---: | --- | --- | --- |
-| 1 | Protocol en schema versiegebonden; ontbrekende configuratie stopt concreet | **gehaald** | `MENU-EXTRACTION.md` v0.2 met SHA-256; `menuExtractionProtocol`-regressies blijven groen |
+| 1 | Protocol en schema versiegebonden; ontbrekende configuratie stopt concreet | **gehaald** | `MENU-EXTRACTION.md` v0.3 met SHA-256; `menuExtractionProtocol`-regressies blijven groen. Sinds review 6375125413 is de citatenregel in paragraaf 4 letterlijk en aaneengesloten voorgeschreven (Q3); de validator is niet versoepeld |
 | 2 | URL → lezen → extractie → menselijke correctie → conceptopslag met broncontext | **gedeeltelijk** | Bestaande keten en fixture bewijzen de vorm; geen echte Supabase-sessie of conceptopslag in deze ronde |
 | 3 | Smelt: echte PDF-inhoud, 0 items is geen succes, gerechten/prijzen/dekking vergeleken | **gehaald in eerdere ronde** | 37/37 referentierijen op de gepinde PDF; deze ronde meet Smelt niet opnieuw |
 | 4 | Blossem: lunch/diner, rubrieken en items volgens de bron; onzekerheid reviewbaar | **gehaald in eerdere ronde** | 43/43 op de gepinde HTML; deze ronde meet Blossem niet opnieuw |
@@ -706,7 +706,7 @@ naar BE-21**; **open** = nog niet uitgevoerd of niet aantoonbaar.
 
 | # | Criterium | Eindstatus | Bewijs met commit en categorie |
 | --- | --- | --- | --- |
-| 1 | Exact protocol en schema versiegebonden; ontbrekende configuratie stopt concreet | **gehaald** | `menuExtractionProtocol.test.js`, `menuExtractionAdapter.test.js` (14/14 op `b1e4abc`); loader levert v0.2 met vaste hash; ontbrekende provider is een concrete weigering (`provider_not_configured`), nooit een lege “geslaagde” extractie — **T** |
+| 1 | Exact protocol en schema versiegebonden; ontbrekende configuratie stopt concreet | **gehaald** | `menuExtractionProtocol.test.js`, `menuExtractionAdapter.test.js` (14/14 op `b1e4abc`); loader levert v0.2 met vaste hash (inmiddels v0.3, zie de pin bovenaan); ontbrekende provider is een concrete weigering (`provider_not_configured`), nooit een lege “geslaagde” extractie — **T** |
 | 2 | URL → lezen → extractie → menselijke correctie → conceptopslag met traceerbare broncontext | **gehaald, begrensd** | “SMELT-LIKE CHAIN” + de nieuwe K3-ketenregel (`restaurantSourceAnalysis.test.js`, 36/36 op `b1e4abc`); browserfixture 241/241 op `26839eb` (lijst → detail → terug, correctie, geblokkeerde opslag). Echte conceptopslag, bronbevestiging en een authenticated sessie zijn niet uitgevoerd — **T+B** |
 | 3 | Smelt Breda: echte PDF-inhoud; gevonden PDF + 0 items is geen succes | **gehaald, begrensd** | Goedgekeurde read-only bronproef op deze head: PDF 2 pagina's, bytes `4445a101…27f8`, content `24f23cbd…8a845`, 37/37 referentierijen, 0 gemist/extra/prijs/koppeling/duplicaat, boekhouding 37/37; 7 supplementregels en 1 arrangement worden benoemd. Geen item-voor-item menselijke hercontrole — **R+T** |
 | 4 | Blossem: lunch/diner, rubrieken en items volgens de echte bronrelaties; geen vast aantal | **gehaald, begrensd** | Bronproef: bytes `da5c632f…0c38`, 43/43 in 13 secties, 0 verschillen, DINNER/LUNCH gescheiden, 12 secties als onzeker gemarkeerd; 2 arrangement-/wijnarrangement-secties benoemd en niet opgeslagen — **R+T+B** |
@@ -729,7 +729,7 @@ regels in de oude tabel zijn niet herschreven, zodat de rondehistorie klopt.
 
 | # | Criterium | Bewijs op deze kandidaat | Type | Status | Resterend / impact | Volgende eigenaar |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Exact protocol en schema versiegebonden; ontbrekende configuratie stopt concreet | `menuExtractionProtocol.test.js`, `menuExtractionAdapter.test.js`, `acceptanceSet.test.js`; loader geeft v0.2 + vaste LF-hash; ontbrekende/onversioned root en ontbrekende provider geven een concrete weigering | T | **bewezen** | Geen provider geconfigureerd, dus alleen offline bewezen | Developer |
+| 1 | Exact protocol en schema versiegebonden; ontbrekende configuratie stopt concreet | `menuExtractionProtocol.test.js`, `menuExtractionAdapter.test.js`, `acceptanceSet.test.js`; loader geeft v0.2 + vaste LF-hash (inmiddels v0.3, zie de pin bovenaan); ontbrekende/onversioned root en ontbrekende provider geven een concrete weigering | T | **bewezen** | Geen provider geconfigureerd, dus alleen offline bewezen | Developer |
 | 2 | URL → lezen → extractie → menselijke correctie → conceptopslag met traceerbare broncontext | `restaurantSourceAnalysis.test.js` (SMELT-LIKE CHAIN), `menuConcept.test.js`, `batchAnalysisHandlers.test.js`; browserfixture toont resultaat, review, correctie en geblokkeerde conceptopslag | T+B | **bewezen met beperking** | Echte conceptopslag, bronbevestiging en een live sessie zijn niet uitgevoerd; de fixture bewijst geen Supabase-schrijfsessie | Product Owner/ops voor live toegang; developer voor de resterende keten |
 | 3 | Smelt Breda: echte PDF-inhoud getest; gevonden PDF + 0 items is geen succes; gerechten, prijzen en dekking vergeleken | `probe-menu-extraction-sources.js --source=all`: PDF 2 pagina's, bytes `4445a101…27f8`, content `24f23cbd…8a845`; 37/37 referentierijen, 8 secties, 0 gemist/extra/prijs/koppeling/duplicaat, boekhouding 37/37 | R+T | **bewezen met beperking** | 7 supplementregels en 1 arrangementregel worden gemeld, niet opgeslagen; geen item-voor-item menselijke hercontrole in deze ronde; vestiging alleen via URL/bestandsnaam, niet uit de PDF-tekst | Developer voor itemcontrole; Product Owner voor schema-uitbreiding |
 | 4 | Blossem: lunch/diner, rubrieken en items volgen de echte bronrelaties; onzekerheid uitvoerbaar; geen vast aantal | `probe-menu-extraction-sources.js --source=all`: HTML bytes `da5c632f…0c38`; 43/43 in 13 secties, 0 verschillen, boekhouding 43/43; DINNER/LUNCH blijven gescheiden; 12 secties gemarkeerd als onzeker | R+T+B | **bewezen met beperking** | 2 arrangement-/wijnarrangement-secties worden gemeld en niet opgeslagen; de fixture toont groepshandeling zonder accepteer-alles; geen live sessie | Developer voor itemcontrole; Product Owner voor schema-uitbreiding |
