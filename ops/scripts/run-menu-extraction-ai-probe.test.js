@@ -389,6 +389,8 @@ test('L4: an interruption keeps the per-call report and log of the calls already
       ledger,
       out,
       callsFile,
+      // Q1: a test never writes a saved answer into the real evidence folder.
+      rawOutputDirectory: path.join(directory, 'raw'),
       runs: 1,
       limits: PROBE_LIMITS,
       budget: PROBE_BUDGET,
