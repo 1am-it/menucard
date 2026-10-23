@@ -2,8 +2,10 @@
 
 Status: **ontwikkelaarsbewijs. Geen betaalde aanroep, geen sleutel gebruikt, geen
 app-activering en geen onafhankelijke review.** Budget en gegevensverwerking zijn
-door de eigenaar goedgekeurd (2026-10-23); deze ronde (Lead-order 6373183699)
-maakt de live-proef robuust en test dat offline.
+door de eigenaar goedgekeurd (2026-10-23); de ronde van Lead-order 6373183699
+maakte de live-proef robuust, de ronde van order 6373786786 (M1-M4) maakt het
+API-schema accepteerbaar, de foutdetails compleet en de time-out echt begrensd.
+Beide rondes zijn offline getest.
 
 [Acceptatiematrix](menu-extraction-acceptance-matrix.md) |
 [Implementatieafspraken](menu-extraction-implementation.md) |
@@ -95,6 +97,102 @@ gebruikt, geen betaalde aanroep. De Lead draait die na de review.
 
 Zonder stap 1–4 is er geen betaalde aanroep. Deze ontwikkelronde heeft geen
 sleutel aangemaakt of gebruikt en geen account- of providerinstelling gewijzigd.
+
+## M1-M4: schema, foutdetails en de time-out (Lead-order 6373786786)
+
+Aanleiding: de live proef kreeg `400 invalid_request_error "Schema is too complex."`
+op het schema uit `buildOutputJsonSchema()` (3339 bytes) en een eerdere aanroep
+stopte na 60,2 s met `APIConnectionError "Connection error."` zonder één
+stream-event, terwijl de proef 180 s toestaat.
+
+### M1 — het schema voor `output_config`
+
+Toegepaste regels, met bron **Structured outputs**
+(`platform.claude.com/docs/en/build-with-claude/structured-outputs`, opgehaald
+2026-10-23):
+
+| Regel uit de documentatie | Wat hier is gedaan |
+| --- | --- |
+| "Simplify nested structures. Deeply nested objects with optional fields compound the complexity. Flatten structures where possible." | Bijna elk veld is nu **verplicht**. Optionaliteit daalt van 15 naar 4 velden: per item 9 → 3 (`priceVariants`, `supplementOf`, `availability`), per rubriek 2 → 0, per menu 2 → 0, per `rejected`-regel 1 → 1 (`text`). |
+| "Remove unsupported constraints (for example, `minimum`, `maximum`, `minLength`, `maxLength`)"; "Add `additionalProperties: false` to all objects" | Alleen `type`, `properties`, `required`, `additionalProperties`, `items`, `enum`, `anyOf` en `description` komen voor. Geen numerieke, lengte- of patroonkeyword. |
+| "Claude receives a simplified schema, but a helper that validates responses still enforces every constraint in your code." | `validateStructuredOutput` blijft volledig en leidend. Op **waarden** is het API-schema losser (bijv. `amountMinorUnits` en `currency` zijn nullable, de validator eist een bedrag alleen bij `priceStatus: known`); op **aanwezigheid** is het strenger, en dat is veilig omdat de lege waarde (`[]`, `""`, `false`, `null`) altijd beschikbaar en zelf geldig is. |
+| "optional fields compound the complexity" | De vier velden waar de validator *lege waarde noch null* accepteert, blijven optioneel: `priceVariants` (een aanwezige lijst eist `multiple_undecomposed`), `supplementOf`, `availability` en `rejected[].text`. |
+
+Het schema is **3274 bytes** in plaats van 3339: de winst zit in de vorm
+(minder present/afwezig-alternatieven per genest object), niet in de omvang.
+Of de API het nu accepteert, is een **live** check van de Lead; deze ronde doet
+geen aanroep.
+
+Terugvalvariant: `--output-mode=prompt` (standaard `schema`). Die modus stuurt
+**geen** `output_config`, zet hetzelfde schema één keer als data in het
+instructieblok en laat het JSON-contract aan het protocol plus de validator.
+De modus staat in het rapport en in elke JSONL-regel (`outputMode`).
+
+### M2 — foutdetails
+
+Bij een fout bevatten de JSONL-regel en het rapport nu:
+
+- `errorClass` — de SDK-foutklasse (`APIError`, `APIConnectionError`, `APIUserAbortError`, …);
+- `errorType` — het API-fouttype (`invalid_request_error`, …);
+- `errorMessage` — opgeschoonde melding, **maximaal 300 tekens**, witruimte
+  genormaliseerd, `sk-…`/`x-api-key`/`authorization`/`bearer` geredigeerd;
+- `requestId` — het provider-request-id;
+- `errorCause` — de transportcode (`ECONNRESET`, `UND_ERR_SOCKET`, …), zodat een
+  gesloten verbinding te onderscheiden is van een API-fout;
+- `deadlineHit` — `true` als **onze** deadline de aanroep beëindigde.
+
+Er worden nooit headers of een sleutel gelezen of opgeslagen; de bestaande
+veldenweigerlijst van de call log blijft van kracht.
+
+### M3 — welke time-out geldt
+
+Vastgesteld, met bewijs per stap:
+
+1. **De proef** geeft `PROBE_LIMITS.callTimeoutMs = 180000` door aan de adapter
+   (`runBoundedProbe` → `runStructuredExtraction`), die de waarde overneemt in
+   plaats van zijn eigen standaard (gemeten: een limiet van 1200 ms stopte na
+   1203 ms; de `60_000` in `menuExtractionProtocol.js` is alleen de default).
+2. **De adapter** wapent `timer(effective.callTimeoutMs)` — dus 180 s, geen 60 s.
+3. **De client**: `@anthropic-ai/sdk` 0.133.0 heeft `DEFAULT_TIMEOUT = 600000`
+   (10 minuten) en elke request krijgt expliciet `timeout: 180000` mee.
+4. **De SDK-time-out** staat alleen om het wachten op responseheaders
+   (`fetchWithTimeout` → `setTimeout(abort, ms)`), niet om de generatie.
+5. **Onze module** bevat geen 60 s-constante (regressietest).
+
+Conclusie: de 60,2 s-afsluiting kwam **niet** uit de SDK, de client, de
+request-opties of een adapterlimiet — die lagen alle op 180 s of 600 s. Wat
+overblijft is het verbindingspad buiten dit proces (provider-edge/netwerk), dat
+de verbinding sloot terwijl er nog geen responseheader was. Dat is precies
+waarom M1 het schema vereenvoudigt: een schema dat snel compileert, voorkomt dat
+die wachttijd ontstaat.
+
+Herstel in deze ronde: de providercall wapent nu **zelf** een harde deadline op
+`limits.callTimeoutMs` (abort van stream én request, `reason: timeout`,
+`deadlineHit: true`). De ingestelde proeflimiet geldt daarmee aantoonbaar op de
+generatie, niet alleen op het wachten op headers. Bewijs (offline, echte SDK +
+echte lokale socket, geen provider): een SSE-bron die **65 s** wacht met
+responseheaders wordt zonder fout uitgelezen —
+`RESULT ok elapsedMs=65137 menus=0 deadlineHit=false` in
+`ops/benchmark/output/m3-slow-header-fixture.log` (script
+`ops/benchmark/output/m3-slow-header-fixture.cjs`, beide gitignored). Een
+60 s-afsluiting trad daar niet op. De eerste poging faalde op de fixture zelf
+(de SSE-regels misten het `event:`-veld dat de SDK gebruikt); dat is een
+fixturefout, geen time-out.
+
+### M4 — regressies zonder netwerk
+
+- `src/lib/menuExtractionAnthropicCall.test.js`: M1 (alleen gedocumenteerde
+  keywords/types; optionaliteit exact vier velden; een maximaal
+  validator-geldige uitvoer past; de validator blijft leidend), M1-modi
+  (`prompt` zonder `output_config`, hetzelfde schema in de prompt, onbekende
+  modus geweigerd), M2 (400 met klasse/type/melding/request-id,
+  `APIConnectionError` met oorzaakcode, opschonen en 300 tekens), M3 (limiet
+  komt aan als `options.timeout`, de deadline beëindigt een hangende generatie,
+  de SDK-standaard is 600000, geen 60 s-constante).
+- `ops/scripts/run-menu-extraction-ai-probe.test.js`: `--output-mode` parsen en
+  weigeren, modus en foutidentiteit in rapport én JSONL.
+- `ops/benchmark/aiProbeCallLog.test.js`: de nieuwe velden blijven binnen de
+  whitelist; sleutel, header en prompt blijven geweigerd.
 
 ## Wat de proef meet
 

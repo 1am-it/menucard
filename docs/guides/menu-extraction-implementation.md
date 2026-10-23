@@ -103,11 +103,31 @@ en uitvoer, reserveert budget vóór de call en annuleert de provider via
 de routes gebruiken bewust `disabledMenuExtractionRuntime()` totdat provider,
 budget en gegevensvoorwaarden zijn goedgekeurd.
 
+### API-schema versus validator (review 6373786786, #59)
+
+Sinds deze ronde zijn er twee schema's met een verschillende rol:
+
+- `src/lib/menuExtractionSchema.js` (`menu-extraction-output/v1`) is en blijft
+  **leidend**: het controleert elke waarde, elk verband en elk bewijs.
+- `buildOutputJsonSchema()` in `src/lib/menuExtractionAnthropicCall.js` is
+  alleen de *vorm* die het model via `output_config.format` moet aanhouden. Het
+  volgt de gedocumenteerde structured-outputregels (bijna alles verplicht, alleen
+  gedocumenteerde keywords) en is op waarden losser dan de validator, nooit
+  strenger. Een lege waarde (`[]`, `""`, `false`, `null`) is altijd geldig, dus
+  de strengere aanwezigheidsregel blokkeert nooit een eerlijke extractie.
+- `--output-mode=prompt` (alleen in de proef) stuurt géén `output_config` en zet
+  hetzelfde schema in de instructie; de validator beslist in beide modi.
+- De providercall wapent zelf een harde deadline op `limits.callTimeoutMs` en
+  registreert bij een fout `errorClass`, `errorType`, `errorMessage` (max. 300
+  tekens, opgeschoond), `requestId`, `errorCause` en `deadlineHit`.
+
+Zie [de proefgids](menu-extraction-ai-probe.md) voor de citaten, de meting en
+het bewijs.
+
 Houd deze gebeurtenissen afzonderlijk herkenbaar in de gebruikersweergave:
 bron gevonden; inhoud gelezen; gegevens geextraheerd; controle nodig;
 extractie onvolledig/onmogelijk; gevalideerd concept opgeslagen.
 Dit zijn gewenste betekenissen, geen opdracht tot nieuwe database-enums.
-
 Een bronbevestiging mag nooit suggereren dat gerechten zijn overgenomen.
 Bij nul herkende gerechten: toon de werkelijke reden en een bruikbare vervolgstap,
 niet een geslaagde menu-import. Laat handmatige controle het exacte resultaat
