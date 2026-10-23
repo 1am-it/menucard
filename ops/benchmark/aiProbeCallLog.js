@@ -60,11 +60,30 @@ const RECORD_FIELDS = Object.freeze([
   'stopCode',
   'code',
   'detail',
+  // N3 of review 6374528099: how much of the billed output went to reasoning,
+  // and which block types the answer had. Numbers and type names only.
+  'thinkingTokens',
+  'contentBlockTypes',
 ]);
 
 // Field names that would carry a credential or a request header. Refusing them
-// by name makes the boundary explicit instead of relying on review.
-const FORBIDDEN_KEYS = Object.freeze(['key', 'apiKey', 'api_key', 'authorization', 'headers', 'x-api-key', 'body', 'prompt', 'system']);
+// by name makes the boundary explicit instead of relying on review. N3 adds the
+// reasoning text and the response body to that list: only `thinkingTokens` and
+// `contentBlockTypes` may be logged, never the thinking itself.
+const FORBIDDEN_KEYS = Object.freeze([
+  'key',
+  'apiKey',
+  'api_key',
+  'authorization',
+  'headers',
+  'x-api-key',
+  'body',
+  'prompt',
+  'system',
+  'thinking',
+  'thinkingText',
+  'content',
+]);
 
 function pickRecord(record) {
   const picked = {};

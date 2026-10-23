@@ -82,3 +82,14 @@ test('L1: the field whitelist keeps provider metadata and drops everything else'
   const picked = pickRecord({ requestId: 'req_1', httpStatus: 529, unknownField: 1, stopReason: 'refusal' });
   assert.deepEqual(picked, { requestId: 'req_1', httpStatus: 529, stopReason: 'refusal' });
 });
+
+test('N3: the reasoning total and the block types are logged, the reasoning text is refused', () => {
+  const line = toLine({ call: 1, thinkingTokens: 9_776, contentBlockTypes: ['thinking', 'text'] });
+  const record = JSON.parse(line);
+  assert.equal(record.thinkingTokens, 9_776);
+  assert.deepEqual(record.contentBlockTypes, ['thinking', 'text']);
+  // A number and type names are allowed; the reasoning itself never is.
+  assert.throws(() => toLine({ call: 2, thinking: 'raw reasoning text' }), /refuses the field "thinking"/);
+  assert.throws(() => toLine({ call: 3, thinkingText: 'raw reasoning text' }), /refuses the field "thinkingText"/);
+  assert.throws(() => toLine({ call: 4, contentBlockTypes: ['text'], content: '{"menus":[]}' }), /refuses the field "content"/);
+});

@@ -1156,22 +1156,25 @@ publicatie. Budget en gegevensverwerking blijven **NEEDS_APPROVAL**.
 ### Dry-run op de gepinde captures (2026-10-23)
 
 Bron: `ops/benchmark/output/ai-probe-report.json` (gitignored). Raming met het
-outputplafond van 16.000 tokens per call; prompttokens uit de echte tekst
-(characters / 4) plus protocol en schemaframing. **Geen netwerk, geen sleutel.**
+outputplafond van 32.000 tokens per call (N2 van review 6374528099); prompttokens
+uit de echte tekst (characters / 4) plus protocol en schemaframing. **Geen
+netwerk, geen sleutel.**
 
-| Bron | Captures | Calls (2 runs) | Prompttokens/call (max) | Raming kosten (cent) |
+| Bron | Captures | Calls (2 runs) | Prompttokens/call (max) | Raming kosten plafond (cent) |
 | --- | ---: | ---: | ---: | ---: |
-| Zuyd | 6 | 4 | 4.990 | 4 |
-| Andalous | 8 | 4 | 8.890 | 4 |
-| Pellens | 1 | 2 | 4.041 | 2 |
-| Chocolat | 6 | 4 | 5.944 | 4 |
-| Smelt | 1 | 2 | 3.150 | 2 |
-| Blossem | 1 | 2 | 3.702 | 2 |
-| Bardot | 1 | 2 | 3.660 | 2 |
-| Wolfslaar | 4 | 2 | 16.153 | 2 |
-| **Totaal** | **28** | **22** | - | **22** |
+| Zuyd | 6 | 4 | 4.990 | 8 |
+| Andalous | 8 | 4 | 8.890 | 8 |
+| Pellens | 1 | 2 | 4.041 | 4 |
+| Chocolat | 6 | 4 | 5.944 | 8 |
+| Smelt | 1 | 2 | 3.150 | 4 |
+| Blossem | 1 | 2 | 3.702 | 4 |
+| Bardot | 1 | 2 | 3.660 | 4 |
+| Wolfslaar | 4 | 2 | 16.153 | 4 |
+| **Totaal** | **28** | **22** | - | **44** |
 
-Alle acht bronnen zijn hash-geverifieerd en leesbaar; geen bron is geblokkeerd.
+De typische raming blijft 22 cent: die rekent met een realistisch aantal
+uitvoertokens, niet met het plafond. Alle acht bronnen zijn hash-geverifieerd en
+leesbaar; geen bron is geblokkeerd.
 De raming past binnen 40 calls en 900 cent. Zuyd, Andalous en Chocolat hebben
 meer captures dan de documentlimiet van 5 en worden daarom per run in twee calls
 verstuurd; de uitvoer van die calls wordt voor de vergelijking samengevoegd.

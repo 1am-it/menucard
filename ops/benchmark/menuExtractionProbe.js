@@ -10,7 +10,7 @@
 // stop, and `ops/benchmark/referenceComparison.js` stays the one place that
 // counts missed/invented/price/rubric deviations.
 
-const { ANTHROPIC_MODEL, ANTHROPIC_PRICING, buildOutputJsonSchema, estimateCostFromTokens } = require('../../src/lib/menuExtractionAnthropicCall');
+const { ANTHROPIC_MODEL, ANTHROPIC_PRICING, THINKING_CONFIG, buildOutputJsonSchema, estimateCostFromTokens } = require('../../src/lib/menuExtractionAnthropicCall');
 const { actualRows, normalizePath, percent } = require('./referenceComparison');
 
 const PROBE_SOURCE_IDS = Object.freeze(['zuyd', 'andalous', 'pellens', 'chocolat', 'smelt', 'blossem', 'bardot', 'wolfslaar']);
@@ -28,10 +28,35 @@ const PROBE_SOURCE_IDS = Object.freeze(['zuyd', 'andalous', 'pellens', 'chocolat
 // it is a ceiling for one call, not a target.
 const PROBE_CALL_TIMEOUT_MS = 180_000;
 
+// N2 of the Delivery Lead order for #59 / BE-21 (review 6374528099): the output
+// ceiling has to fit the real JSON, not the thinking.
+//
+// Measured on the two live Zuyd calls at 16,000 tokens (5 captures, 12,143 input
+// tokens): `usage.output_tokens_details.thinking_tokens = 9,776`, a `thinking`
+// block, and a `text` block of 12,671 characters holding correct but cut-off
+// menu JSON, `stop_reason: max_tokens`. With thinking disabled (N1) that 9,776
+// is no longer taken from the ceiling, and the JSON itself still needs roughly
+// 20,000 characters (Lead estimate, and 12,671 already arrived incomplete).
+//
+// The arithmetic, deliberately conservative:
+//   - JSON with braces, quotes and prices is closer to 3 characters per token
+//     than to the 4 used for prose, so 20,000 characters ≈ 6,700 tokens; round
+//     up to 8,000 for a larger source;
+//   - 32,000 is four times that estimate, twice the ceiling that was cut off,
+//     and still a quarter of the documented model maximum of 128,000
+//     (ANTHROPIC_MAX_OUTPUT_TOKENS, Claude Haiku 5.5 overview, 2026-10-23);
+//   - cost stays far inside the 30-cent rule per call. Zuyd's measured prompt:
+//     12,143 input + 32,000 output at $0.10/$0.50 per million = $0.0172143
+//     -> 2 eurocent. Even in the >100,000-prompt tier ($0.50/$2.50):
+//     120,000 input + 32,000 output = $0.14 -> 14 eurocent.
+//
+// The chunk size stays at 5 documents: the context window was never the
+// problem (1M tokens), so `maxDocuments` is not touched. References, counting
+// rules and measurement code stay unchanged.
 const PROBE_LIMITS = Object.freeze({
   callTimeoutMs: PROBE_CALL_TIMEOUT_MS,
   maxInputTokens: 50_000,
-  maxOutputTokens: 16_000,
+  maxOutputTokens: 32_000,
   maxDocuments: 5,
   maxPages: 30,
   maxCostEurCents: 30,
@@ -179,6 +204,9 @@ function estimateProbe(sources, options = {}) {
   const blocked = rows.filter((row) => row.captureStatus !== 'captured');
   return {
     model: ANTHROPIC_MODEL,
+    // N1/N3 of review 6374528099: the dry-run report states the thinking setting
+    // that every live call will send, next to the model and the price table.
+    thinking: { ...THINKING_CONFIG },
     pricing: {
       source: ANTHROPIC_PRICING.source,
       retrievedAt: ANTHROPIC_PRICING.retrievedAt,
@@ -205,7 +233,8 @@ function estimateProbe(sources, options = {}) {
     },
     assumptions: [
       'Prompt tokens are estimated from the pinned source text (characters / 4) plus the pinned instruction and schema framing.',
-      'The reported cost uses the documented output ceiling (16,000 tokens) per call; a live run replaces it with the reported usage.',
+      `The reported cost uses the documented output ceiling (${limits.maxOutputTokens.toLocaleString('en-US')} tokens) per call; a live run replaces it with the reported usage.`,
+      "Thinking is disabled for the extraction call (thinking: {type: 'disabled'}), so the ceiling is available to the JSON answer; thinking tokens are still recorded when the provider reports them.",
       'A source with more captures than the document limit is sent in several calls within the same run; its results are compared together.',
       'No network, key or paid call is involved in this estimate.',
     ],

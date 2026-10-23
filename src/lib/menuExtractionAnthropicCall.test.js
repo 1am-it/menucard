@@ -11,12 +11,14 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const {
+  ANTHROPIC_MAX_OUTPUT_TOKENS,
   ANTHROPIC_MODEL,
   ANTHROPIC_PRICING,
   ANTHROPIC_SDK_VERSION,
   DEFAULT_OUTPUT_MODE,
   ERROR_MESSAGE_MAX_CHARS,
   OUTPUT_MODES,
+  THINKING_CONFIG,
   buildAnthropicRequest,
   buildOutputJsonSchema,
   costFromUsage,
@@ -137,6 +139,8 @@ test('K1: the request uses the pinned instruction, the exact model and a structu
   assert.equal(body.model, 'claude-haiku-5-5');
   assert.equal(body.system, protocol.text);
   assert.equal(body.max_tokens, 4000);
+  // N1 of review 6374528099: thinking is off, explicitly.
+  assert.deepEqual(body.thinking, { type: 'disabled' });
   assert.equal(body.output_config.format.type, 'json_schema');
   const jsonSchema = body.output_config.format.schema;
   assert.deepEqual(jsonSchema.required, ['menus', 'rejected', 'coverage']);
@@ -669,6 +673,71 @@ test('M1: the prompt mode sends no output_config but states the same schema in t
     () => buildAnthropicRequest({ protocol: protocol.text, sources, limits, outputMode: 'auto' }),
     /output mode must be one of schema\|prompt/,
   );
+});
+
+test('N1: thinking is disabled in both output modes and the documented model maximum is enforced', () => {
+  assert.deepEqual(THINKING_CONFIG, { type: 'disabled' });
+  assert.equal(ANTHROPIC_MAX_OUTPUT_TOKENS, 128_000);
+  const schemaBody = buildAnthropicRequest({ protocol: protocol.text, sources, limits });
+  const promptBody = buildAnthropicRequest({ protocol: protocol.text, sources, limits, outputMode: 'prompt' });
+  for (const body of [schemaBody, promptBody]) {
+    assert.deepEqual(body.thinking, { type: 'disabled' }, 'the official thinking parameter is sent, not left to the model default');
+    assert.equal(body.max_tokens, 4000, 'max_tokens follows the configured limit');
+  }
+  // The documented model maximum is accepted; one token above it is refused
+  // before a paid call can be attempted.
+  const atMaximum = buildAnthropicRequest({ protocol: protocol.text, sources, limits: { ...limits, maxOutputTokens: ANTHROPIC_MAX_OUTPUT_TOKENS } });
+  assert.equal(atMaximum.max_tokens, ANTHROPIC_MAX_OUTPUT_TOKENS);
+  assert.throws(
+    () => buildAnthropicRequest({ protocol: protocol.text, sources, limits: { ...limits, maxOutputTokens: ANTHROPIC_MAX_OUTPUT_TOKENS + 1 } }),
+    /exceeds the model maximum of 128000/,
+  );
+});
+
+test('N3: a thinking block before the JSON is read, and only the reasoning total and block types are recorded', async () => {
+  const reasoning = 'SECRET-REASONING-TEXT that must never be stored';
+  const response = {
+    ...responseOf(valid),
+    usage: { input_tokens: 12_143, output_tokens: 16_000, output_tokens_details: { thinking_tokens: 9_776 } },
+    content: [
+      { type: 'thinking', thinking: reasoning, signature: 'sig_fixture' },
+      { type: 'text', text: JSON.stringify(valid) },
+    ],
+  };
+  const client = fakeClient(() => response);
+  const budget = budgetOf();
+  const callModule = callFor(client, budget);
+  const result = await run(callModule, budget);
+  assert.equal(result.ok, true, 'the JSON text block is read, not the thinking block');
+  const attempt = callModule.lastCall;
+  assert.equal(attempt.thinkingTokens, 9_776);
+  assert.deepEqual(attempt.contentBlockTypes, ['thinking', 'text']);
+  const serialised = JSON.stringify(attempt);
+  assert.equal(serialised.includes(reasoning), false, 'the reasoning text never enters the record');
+  assert.equal(serialised.includes('sig_fixture'), false, 'the thinking signature never enters the record');
+  // output_tokens is inclusive: the 9,776 reasoning tokens are billed inside it once.
+  assert.equal(attempt.usage.outputTokens, 16_000);
+  assert.equal(attempt.costEurCents, 1);
+});
+
+test('N3: a response cut off at max_tokens still records its reasoning total and block types', async () => {
+  const response = {
+    ...responseOf('{"menus":[', { stop: 'max_tokens' }),
+    usage: { input_tokens: 12_143, output_tokens: 16_000, output_tokens_details: { thinking_tokens: 9_776 } },
+    content: [
+      { type: 'thinking', thinking: 'cut-off reasoning', signature: 'sig_fixture' },
+      { type: 'text', text: '{"menus":[' },
+    ],
+  };
+  const client = fakeClient(() => response);
+  const budget = budgetOf();
+  const callModule = callFor(client, budget);
+  const result = await run(callModule, budget);
+  assert.equal(result.ok, false);
+  assert.equal(result.reason, 'output_truncated');
+  assert.equal(callModule.lastCall.thinkingTokens, 9_776);
+  assert.deepEqual(callModule.lastCall.contentBlockTypes, ['thinking', 'text']);
+  assert.deepEqual(budget.settlements, [1], 'a cut-off is paid work and is still settled');
 });
 
 test('M2: sanitizeErrorMessage caps at 300 characters and removes credentials and headers', () => {

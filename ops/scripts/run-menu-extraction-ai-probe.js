@@ -191,6 +191,7 @@ async function dryRun(options) {
     providerCall: false,
     model: ANTHROPIC_MODEL,
     outputMode: options.outputMode,
+    thinking: estimate.thinking,
     protocol: protocolMetadata(protocol),
     runs: options.runs,
     limits: estimate.limits,
@@ -370,6 +371,9 @@ async function runBoundedProbe({
     sdkVersion: callModule.sdkVersion,
     transport: callModule.transport || null,
     outputMode: callModule.outputMode || DEFAULT_OUTPUT_MODE,
+    // N1 of review 6374528099: the thinking setting the calls were made with.
+    thinking: callModule.thinking || null,
+    thinkingSource: callModule.thinkingSource || null,
     protocol: protocolMetadata(protocol),
     runs,
     limits,
@@ -463,6 +467,11 @@ async function runBoundedProbe({
             errorMessage: attempt ? attempt.errorMessage || null : null,
             errorCause: attempt ? attempt.errorCause || null : null,
             deadlineHit: attempt ? attempt.deadlineHit === true : false,
+            // N3 of review 6374528099: the reasoning total and the block types
+            // travel with the call, in the report and in the JSONL line. The
+            // reasoning text itself is never read and never stored.
+            thinkingTokens: attempt && Number.isInteger(attempt.thinkingTokens) ? attempt.thinkingTokens : null,
+            contentBlockTypes: attempt && Array.isArray(attempt.contentBlockTypes) ? attempt.contentBlockTypes : null,
             outputMode: callModule.outputMode || DEFAULT_OUTPUT_MODE,
             provider: callModule.provider || null,
             model: callModule.model || null,
@@ -528,6 +537,10 @@ async function runBoundedProbe({
     calls,
     actualCostEurCents,
     unknownCostCalls: report.calls.filter((call) => call.costUnknown === true).length,
+    // N3: what the provider reported as reasoning across the run. A call that
+    // did not report it contributes nothing and stays visible as `null` above.
+    thinkingTokens: report.calls.reduce((total, call) => total + (Number.isInteger(call.thinkingTokens) ? call.thinkingTokens : 0), 0),
+    callsWithThinking: report.calls.filter((call) => Number.isInteger(call.thinkingTokens) && call.thinkingTokens > 0).length,
     schemaErrors,
     ledger: safeLedgerSnapshot(ledger),
   };

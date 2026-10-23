@@ -4,8 +4,9 @@ Status: **ontwikkelaarsbewijs. Geen betaalde aanroep, geen sleutel gebruikt, gee
 app-activering en geen onafhankelijke review.** Budget en gegevensverwerking zijn
 door de eigenaar goedgekeurd (2026-10-23); de ronde van Lead-order 6373183699
 maakte de live-proef robuust, de ronde van order 6373786786 (M1-M4) maakt het
-API-schema accepteerbaar, de foutdetails compleet en de time-out echt begrensd.
-Beide rondes zijn offline getest.
+API-schema accepteerbaar, de foutdetails compleet en de time-out echt begrensd,
+en de ronde van order 6374528099 (N1-N4) zet het denken uit en geeft de JSON de
+uitvoerruimte. Alle rondes zijn offline getest.
 
 [Acceptatiematrix](menu-extraction-acceptance-matrix.md) |
 [Implementatieafspraken](menu-extraction-implementation.md) |
@@ -15,7 +16,7 @@ Beide rondes zijn offline getest.
 
 | Onderdeel | Pad | Wat het doet |
 | --- | --- | --- |
-| Providercall | `src/lib/menuExtractionAnthropicCall.js` | Vult de bestaande `call`-interface met de officiële `@anthropic-ai/sdk` (exact `0.133.0`). Model `claude-haiku-5-5`, protocol als `system`, bronnen als tekst- of `document`-blok, uitvoer via `output_config.format` (`json_schema`). Kosten alleen uit `usage`. |
+| Providercall | `src/lib/menuExtractionAnthropicCall.js` | Vult de bestaande `call`-interface met de officiële `@anthropic-ai/sdk` (exact `0.133.0`). Model `claude-haiku-5-5`, `thinking: {type: 'disabled'}`, protocol als `system`, bronnen als tekst- of `document`-blok, uitvoer via `output_config.format` (`json_schema`). Kosten alleen uit `usage`. |
 | Prijstabel | idem, `ANTHROPIC_PRICING` | Vast en gedateerd: Haiku 5.5 $0,10/$0,50 per miljoen tokens tot 100.000 prompttokens, daarboven $0,50/$2,50 (Anthropic Pricing, 2026-10-22). USD 1:1 naar eurocent, naar boven afgerond. |
 | Budgetlog | `src/lib/menuExtractionBudgetLedger.js` | Synchrone, atomisch geschreven ledger (`reserve`/`settle`) in een gitignored pad. 900 cent cumulatief, 30 cent per call, 40 calls, 1 tegelijk (ook over processen). |
 | Beslisfunctie | `src/lib/menuExtractionRouteBDecision.js` | Route B alleen bij nul items, dekking onder 80% tegen een bekende referentie, `html_arrangements_skipped` of een PDF-layoutprobleem. Niet aan een app-route gekoppeld. |
@@ -41,9 +42,16 @@ prompttokens per call, het outputplafond, de geschatte kosten (plafond en
 typisch) en de referentieomvang. Dezelfde acht bronnen worden ook door de
 dry-run gecontroleerd op document-, invoer- en budgetgrenzen.
 
-Uitkomst op deze checkout (2026-10-23): 22 geplande calls, 22 eurocent
-plafondraming in totaal, alle acht bronnen leesbaar. Zie de matrix voor de
-tabel per bron.
+Uitkomst op deze checkout (2026-10-23, na N2): 22 geplande calls, 44 eurocent
+plafondraming in totaal en 22 eurocent typisch, alle acht bronnen leesbaar. Het
+outputplafond is nu 32.000 tokens per call; de plafondraming stijgt daardoor van
+22 naar 44 cent, de typische raming blijft 22 cent. Zie de matrix voor de tabel
+per bron.
+
+De PDF.js-melding `Ensure that the standardFontDataUrl API parameter is
+provided` op de Smelt-PDF is een bestaande waarschuwing uit de ongewijzigde
+PDF-module; de tekstlaag wordt wel uitgelezen (Smelt: 3.150 prompttokens). De
+dry-run eindigt met exitcode 0.
 
 ## Live (pas na goedkeuring van budget en gegevensverwerking)
 
@@ -194,6 +202,81 @@ fixturefout, geen time-out.
   weigeren, modus en foutidentiteit in rapport én JSONL.
 - `ops/benchmark/aiProbeCallLog.test.js`: de nieuwe velden blijven binnen de
   whitelist; sleutel, header en prompt blijven geweigerd.
+
+## N1-N4: denkbudget en uitvoerruimte (Lead-order 6374528099)
+
+Aanleiding: twee live Zuyd-calls (5 captures, 12.143 inputtokens) stopten na
+ongeveer 55 s met `stop_reason: max_tokens` bij een plafond van 16.000
+uitvoertokens. `usage.output_tokens_details.thinking_tokens` was **9.776**; de
+respons bevatte een `thinking`-blok en daarna een `text`-blok van **12.671
+tekens** met correcte maar afgekapte menu-JSON. Het model dacht standaard na en
+dat denken ging van `max_tokens` af. Kosten: 1 cent per aanroep.
+
+### N1 — het denken uitzetten, met de officiële parameter
+
+Het veld is `thinking` op de Messages-request. Bewijs, twee bronnen die op
+elkaar aansluiten:
+
+| Bron | Wat er staat |
+| --- | --- |
+| Geïnstalleerde `@anthropic-ai/sdk` **0.133.0** | `MessageCreateParams.thinking?: ThinkingConfigParam` (`node_modules/@anthropic-ai/sdk/resources/messages/messages.d.ts:5355`); `ThinkingConfigDisabled = { type: 'disabled' }` (:3954-3955); `ThinkingConfigParam = ThinkingConfigEnabled \| ThinkingConfigDisabled \| ThinkingConfigBetweenTools \| ThinkingConfigAdaptive` (:3990). |
+| Anthropic-documentatie, **Claude Haiku 5.5 — What's new**, sectie "Adaptive thinking and effort" (`platform.claude.com/docs/en/models/haiku-5-5/whats-new-haiku-5-5`, opgehaald 2026-10-23) | "Adaptive thinking is on by default. Although you can still turn thinking off with `thinking: {\"type\": \"disabled\"}` at `high` effort or below, the better way to trade response quality against speed and cost is to use the effort parameter." |
+| Anthropic-documentatie, **Claude Haiku 5.5 overview** (zelfde datum) | "Context window: 1M tokens · Max output: 128K tokens"; thinking = "Adaptive"; default effort `medium`. |
+
+De extractie-aanroep stuurt daarom expliciet `thinking: { type: 'disabled' }`
+(`THINKING_CONFIG` in `src/lib/menuExtractionAnthropicCall.js`), in beide
+uitvoermodi. Dat is het minimum dat de documentatie toestaat: het denken staat
+uit in plaats van op een kleiner budget, en `effort` blijft ongemoeid. De
+instelling staat in het rapport (`report.thinking`) en in de metadata van de
+callmodule; de JSONL-regel bevat haar niet.
+
+### N2 — `maxOutputTokens` onderbouwd
+
+| Gegeven | Waarde | Bron |
+| --- | --- | --- |
+| Gemeten uitvoer vóór afkapping | 12.671 tekens JSON, `output_tokens` 16.000, waarvan 9.776 denken | live Zuyd-calls, Lead-diagnose |
+| Nog nodig | ± 20.000 tekens JSON | Lead-schatting |
+| Tokenschatting JSON | 20.000 / 3 ≈ 6.700, naar boven afgerond 8.000 | conservatief: JSON met accolades, quotes en prijzen zit dichter bij 3 dan bij 4 tekens per token |
+| Gekozen plafond | **32.000** = 4 × 8.000, 2 × het oude plafond | `PROBE_LIMITS.maxOutputTokens` |
+| Modelmaximum | **128.000** outputtokens (synchrone Messages API) | Claude Haiku 5.5 overview |
+| Kosten bij het gemeten Zuyd-prompt | 12.143 in + 32.000 uit = $0,0172143 → **2 eurocent** | `ANTHROPIC_PRICING`, `estimateCostFromTokens` |
+| Kosten in het slechtste geval binnen deze proef | 50.000 in (invoerlimiet) + 32.000 uit = $0,021 → **3 eurocent** | idem; ruim onder de 30 cent per call |
+
+`maxDocuments` blijft **5**: het contextvenster (1M tokens) was nooit het
+probleem, dus de chunkgrootte is niet aangepast. Referenties, telregels en
+meetcode zijn ongewijzigd. Een plafond boven 128.000 wordt door
+`buildAnthropicRequest` geweigerd (`input_limit`) in plaats van stil door de
+provider ingekort.
+
+### N3 — denktokens en bloktypen vastleggen
+
+Per call staan nu in de JSONL-regel én in het rapport:
+
+- `thinkingTokens` — `usage.output_tokens_details.thinking_tokens`, of `null`
+  als de provider het niet meldde. `output_tokens` blijft het inclusieve,
+  gefactureerde totaal; de som volgt uit de kostenregel en wordt niet dubbel
+  geteld;
+- `contentBlockTypes` — het type van elk inhoudsblok in volgorde, bijvoorbeeld
+  `["thinking","text"]`. Nooit de tekst, nooit de signature.
+
+Het rapport heeft daarnaast `thinking`, `thinkingSource` en in `totals`
+`thinkingTokens` en `callsWithThinking`. De call log weigert nu expliciet de
+velden `thinking`, `thinkingText` en `content`: de denktekst en de responsbody
+kunnen de schijf niet bereiken, ook niet per ongeluk.
+
+### N4 — regressies zonder netwerk
+
+| Eis | Test |
+| --- | --- |
+| Het request bevat de denkinstelling | `menuExtractionAnthropicCall.test.js`: "N1: thinking is disabled in both output modes …" en de K1-requestassertie |
+| `max_tokens` volgt de nieuwe limiet | idem (4000 uit `limits`, 128.000 op het modelmaximum, 128.001 geweigerd) en `menuExtractionProbe.test.js`: "N2: the output ceiling follows the measured JSON …" |
+| `thinkingTokens` wordt vastgelegd | `menuExtractionAnthropicCall.test.js` (N3, ook bij `max_tokens`), `run-menu-extraction-ai-probe.test.js` (rapport + JSONL), `aiProbeCallLog.test.js` (whitelist en weigering van denktekst) |
+| `thinking`-blok gevolgd door `text`-blok wordt gelezen | `menuExtractionAnthropicCall.test.js`: "N3: a thinking block before the JSON is read …", inclusief bewijs dat de denktekst en signature niet in het record staan |
+
+Deze ronde bevat **geen** betaalde of echte aanroep, leest en gebruikt de sleutel
+niet, wijzigt het ledger niet en koppelt niets aan de app. De 32.000-limiet en
+het uitgezette denken zijn dus **ontwikkelaarsbewijs**: de Lead bevestigt ze met
+een live-aanroep.
 
 ## Wat de proef meet
 

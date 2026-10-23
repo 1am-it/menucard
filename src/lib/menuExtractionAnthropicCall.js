@@ -62,6 +62,44 @@ const DEFAULT_OUTPUT_MODE = 'schema';
 // M2: a provider message is stored, so it is capped and stripped first.
 const ERROR_MESSAGE_MAX_CHARS = 300;
 
+// N1 of the Delivery Lead order for #59 / BE-21 (review 6374528099): the model
+// thinks before it answers, and those tokens come out of `max_tokens`. Claude
+// Haiku 5.5 has adaptive thinking on by default, so the two live Zuyd calls at a
+// 16,000-token ceiling spent 9,776 output tokens on thinking and were then cut
+// off (`stop_reason: max_tokens`) with only part of the JSON in the text block.
+//
+// The official parameter, verified against the installed @anthropic-ai/sdk
+// 0.133.0 types and the Anthropic documentation (both retrieved 2026-10-23):
+//   - `MessageCreateParams.thinking?: ThinkingConfigParam`
+//     (node_modules/@anthropic-ai/sdk/resources/messages/messages.d.ts:5355) with
+//     `ThinkingConfigDisabled = { type: 'disabled' }` (:3954-3955) and
+//     `ThinkingConfigParam = ThinkingConfigEnabled | ThinkingConfigDisabled |
+//     ThinkingConfigBetweenTools | ThinkingConfigAdaptive` (:3990);
+//   - Claude Haiku 5.5, "What's new": "Adaptive thinking is on by default.
+//     Although you can still turn thinking off with
+//     `thinking: {"type": "disabled"}` at `high` effort or below, the better way
+//     to trade response quality against speed and cost is to use the effort
+//     parameter."
+//     (platform.claude.com/docs/en/models/haiku-5-5/whats-new-haiku-5-5)
+// The setting is therefore sent explicitly on every extraction request instead
+// of relying on the model default: the whole ceiling belongs to the JSON answer.
+const THINKING_CONFIG = Object.freeze({ type: 'disabled' });
+const THINKING_SOURCE = Object.freeze({
+  field: 'thinking',
+  value: THINKING_CONFIG.type,
+  model: ANTHROPIC_MODEL,
+  source: "Claude Haiku 5.5 — What's new, 'Adaptive thinking and effort'",
+  url: 'https://platform.claude.com/docs/en/models/haiku-5-5/whats-new-haiku-5-5',
+  retrievedAt: '2026-10-23',
+});
+
+// N2 of the same review: the documented synchronous Messages API maximum for
+// this model. Claude Haiku 5.5 overview, "Context window: 1M tokens · Max
+// output: 128K tokens" (platform.claude.com/docs/en/models/haiku-5-5/overview,
+// retrieved 2026-10-23). A ceiling above it can never be honoured, so the
+// request refuses it here instead of letting the provider trim it silently.
+const ANTHROPIC_MAX_OUTPUT_TOKENS = 128_000;
+
 // Fixed price table, kept in code so a cost can never be invented at runtime.
 // Source: Anthropic Pricing, retrieved 2026-10-22 (claude-haiku-5-5). USD is
 // converted to euro cents conservatively at 1:1 and rounded up; thinking tokens
@@ -145,6 +183,30 @@ function estimateCostFromTokens({ inputTokens, outputTokens } = {}) {
     usdCost: usd,
     tier,
   };
+}
+
+/**
+ * N3 of review 6374528099: the provider's own breakdown of how much of
+ * `output_tokens` went to internal reasoning. `output_tokens` stays the
+ * inclusive, billed total; this is observability only and is `null` when the
+ * provider did not report it. The reasoning text itself is never read.
+ */
+function usageThinkingTokens(usage) {
+  if (!usage || typeof usage !== 'object' || Array.isArray(usage)) return null;
+  const details = usage.output_tokens_details;
+  if (!details || typeof details !== 'object' || Array.isArray(details)) return null;
+  const value = details.thinking_tokens;
+  return Number.isInteger(value) && value >= 0 ? value : null;
+}
+
+/**
+ * The `type` of every content block, in order — `["thinking","text"]` for a
+ * reasoning block followed by the JSON answer. Only the type is kept: the
+ * thinking text, the signature and the JSON body never leave this function.
+ */
+function contentBlockTypes(response) {
+  const blocks = response && Array.isArray(response.content) ? response.content : [];
+  return blocks.map((block) => (block && typeof block.type === 'string' ? block.type : 'unknown'));
 }
 
 /** `{ costEurCents, tokens }`, with `costEurCents: null` when usage is absent. */
@@ -341,6 +403,12 @@ function buildAnthropicRequest({ protocol, sources, limits, outputMode } = {}) {
   if (!maxTokens || maxTokens <= 0) {
     throw new AnthropicCallError(CALL_ERROR_CODES.input_limit, 'limits.maxOutputTokens is required');
   }
+  if (maxTokens > ANTHROPIC_MAX_OUTPUT_TOKENS) {
+    throw new AnthropicCallError(
+      CALL_ERROR_CODES.input_limit,
+      `limits.maxOutputTokens exceeds the model maximum of ${ANTHROPIC_MAX_OUTPUT_TOKENS}`,
+    );
+  }
 
   const content = [
     {
@@ -383,6 +451,9 @@ function buildAnthropicRequest({ protocol, sources, limits, outputMode } = {}) {
   const request = {
     model: ANTHROPIC_MODEL,
     max_tokens: maxTokens,
+    // N1 of review 6374528099: thinking is off, so `max_tokens` is available to
+    // the JSON answer. Sent explicitly; see THINKING_SOURCE for the evidence.
+    thinking: { ...THINKING_CONFIG },
     system: protocol,
     messages: [{ role: 'user', content }],
   };
@@ -497,6 +568,9 @@ function createAnthropicStructuredCall({ env = process.env, client = null, budge
     sdkVersion: ANTHROPIC_SDK_VERSION,
     transport: 'messages.stream',
     outputMode,
+    // N1/N3: what was asked for, and where the reasoning total comes from.
+    thinking: { ...THINKING_CONFIG },
+    thinkingSource: THINKING_SOURCE,
     pricing: ANTHROPIC_PRICING,
     apiKeyEnv: ANTHROPIC_API_KEY_ENV,
   };
@@ -574,6 +648,10 @@ function createAnthropicStructuredCall({ env = process.env, client = null, budge
         // M3: true when OUR deadline ended the call, false when the provider
         // or the connection did. The two must not be confused again.
         deadlineHit: state.deadlineExceeded === true,
+        // N3 of review 6374528099: the reasoning total and the block types are
+        // recorded; the reasoning text and the response body are not.
+        thinkingTokens: Number.isInteger(fields.thinkingTokens) ? fields.thinkingTokens : null,
+        contentBlockTypes: Array.isArray(fields.contentBlockTypes) ? fields.contentBlockTypes.slice() : null,
       };
       return state.lastCall;
     }
@@ -666,7 +744,9 @@ function createAnthropicStructuredCall({ env = process.env, client = null, budge
     }
 
     // The reported usage/cost is recorded even when the output itself failed:
-    // a refusal or a cut-off is paid work, never a free call.
+    // a refusal or a cut-off is paid work, never a free call. N3: the reasoning
+    // total and the block types are recorded for the same reason — a truncated
+    // answer is exactly where the thinking budget has to become visible.
     const recorded = record({
       reason: failure ? failure.code : null,
       stopReason,
@@ -675,6 +755,8 @@ function createAnthropicStructuredCall({ env = process.env, client = null, budge
       costUnknownReason: cost.reason,
       requestId,
       messageId,
+      thinkingTokens: usageThinkingTokens(response && response.usage),
+      contentBlockTypes: contentBlockTypes(response),
     });
     if (failure) throw Object.assign(new AnthropicCallError(failure.code, failure.message), { callRecord: recorded });
     return output;
@@ -706,6 +788,7 @@ function createAnthropicStructuredCall({ env = process.env, client = null, budge
 
 module.exports = {
   ANTHROPIC_API_KEY_ENV,
+  ANTHROPIC_MAX_OUTPUT_TOKENS,
   ANTHROPIC_MODEL,
   ANTHROPIC_PRICING,
   ANTHROPIC_PROVIDER,
@@ -714,16 +797,20 @@ module.exports = {
   DEFAULT_OUTPUT_MODE,
   ERROR_MESSAGE_MAX_CHARS,
   OUTPUT_MODES,
+  THINKING_CONFIG,
+  THINKING_SOURCE,
   AnthropicCallError,
   applyCost,
   buildAnthropicRequest,
   buildOutputJsonSchema,
   classifySdkError,
+  contentBlockTypes,
   costFromUsage,
   createAnthropicStructuredCall,
   describeSdkError,
   estimateCostFromTokens,
   sanitizeErrorMessage,
   selectPriceTier,
+  usageThinkingTokens,
   usageTokens,
 };

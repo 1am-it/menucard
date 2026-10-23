@@ -24,6 +24,7 @@ const {
   titleOnlyCategoryErrors,
   variantCounts,
 } = require('./menuExtractionProbe');
+const { ANTHROPIC_MAX_OUTPUT_TOKENS, estimateCostFromTokens } = require('../../src/lib/menuExtractionAnthropicCall');
 
 function captures(count, textChars = 400) {
   return Array.from({ length: count }, (_, index) => ({
@@ -41,7 +42,7 @@ function source(overrides = {}) {
 test('K4: the probe set is closed, the documented limits and caps are the ones from the order', () => {
   assert.deepEqual(PROBE_SOURCE_IDS, ['zuyd', 'andalous', 'pellens', 'chocolat', 'smelt', 'blossem', 'bardot', 'wolfslaar']);
   assert.equal(PROBE_LIMITS.maxDocuments, 5);
-  assert.equal(PROBE_LIMITS.maxOutputTokens, 16_000);
+  assert.equal(PROBE_LIMITS.maxOutputTokens, 32_000);
   assert.equal(PROBE_LIMITS.maxInputTokens, 50_000);
   assert.equal(PROBE_LIMITS.maxCostEurCents, 30);
   assert.deepEqual(PROBE_BUDGET, {
@@ -75,7 +76,7 @@ test('K4: the estimate is per source, conservative and checks the caps', () => {
   assert.equal(estimate.calls, 4);
   assert.equal(estimate.referenceItems, 36);
   assert.equal(estimate.withinInputLimit, true);
-  assert.equal(estimate.estimatedOutputTokensCeiling, 16_000);
+  assert.equal(estimate.estimatedOutputTokensCeiling, 32_000);
   assert.ok(estimate.estimatedCostEurCents > 0);
   // One call with a 200k-character prompt is above the 50k-token input limit.
   const huge = estimateSource(source({ captures: captures(1, 200_000) }), { protocol: 'x', runs: 1 });
@@ -88,6 +89,38 @@ test('K4: the estimate is per source, conservative and checks the caps', () => {
   assert.equal(probe.totals.costWithinBudget, true);
   assert.equal(probe.totals.capturedSources, 2);
   assert.equal(probe.rows[0].id, 'zuyd');
+  // N1/N3 of review 6374528099: the reported thinking setting is the one the
+  // live call sends, and the estimate states the new ceiling.
+  assert.deepEqual(probe.thinking, { type: 'disabled' });
+  assert.ok(probe.assumptions.some((line) => line.includes('32,000 tokens')));
+  assert.ok(probe.assumptions.some((line) => line.includes("thinking: {type: 'disabled'}")));
+});
+
+test('N2: the output ceiling follows the measured JSON and stays inside the model maximum and the per-call budget', () => {
+  // Zuyd: 5 captures, 12,143 input tokens, 9,776 reasoning tokens and a
+  // 12,671-character JSON text block before the cut-off at 16,000 tokens.
+  assert.equal(PROBE_LIMITS.maxOutputTokens, 32_000);
+  assert.equal(ANTHROPIC_MAX_OUTPUT_TOKENS, 128_000);
+  assert.ok(PROBE_LIMITS.maxOutputTokens <= ANTHROPIC_MAX_OUTPUT_TOKENS, 'never above the documented model maximum');
+  // Four times a conservative 8,000-token estimate for the 20,000 characters
+  // of JSON the source still needs.
+  assert.ok(PROBE_LIMITS.maxOutputTokens >= 4 * 8_000);
+  // The chunk size is unchanged: the 1M context window was never the bottleneck.
+  assert.equal(PROBE_LIMITS.maxDocuments, 5);
+
+  const zuyd = estimateCostFromTokens({ inputTokens: 12_143, outputTokens: PROBE_LIMITS.maxOutputTokens });
+  assert.equal(zuyd.costEurCents, 2);
+  assert.ok(zuyd.costEurCents <= PROBE_BUDGET.perCallLimitEurCents);
+
+  // The largest prompt this probe itself allows (50,000 input tokens) with the
+  // full 32,000-token output: $0.021 -> 3 eurocent, well inside the 30-cent rule.
+  const worstWithinProbe = estimateCostFromTokens({ inputTokens: PROBE_LIMITS.maxInputTokens, outputTokens: PROBE_LIMITS.maxOutputTokens });
+  assert.equal(worstWithinProbe.costEurCents, 3);
+  assert.ok(worstWithinProbe.costEurCents <= PROBE_BUDGET.perCallLimitEurCents);
+
+  const estimate = estimateSource(source(), { protocol: 'instructie', runs: 2 });
+  assert.equal(estimate.estimatedOutputTokensCeiling, PROBE_LIMITS.maxOutputTokens);
+  assert.equal(estimate.withinPerCallBudget, true);
 });
 
 test('K4: evidence coverage, variants and run stability are measured, not asserted', () => {

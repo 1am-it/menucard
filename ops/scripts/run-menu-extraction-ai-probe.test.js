@@ -70,6 +70,8 @@ function fakeCallModule({ ledger, behaviours, outputMode = undefined }) {
     provider: 'fixture',
     model: 'fixture-model',
     transport: 'messages.stream',
+    // N1 of review 6374528099: the same metadata the real call exposes.
+    thinking: { type: 'disabled' },
     ...(outputMode ? { outputMode } : {}),
     pricing: { note: 'fixture price table' },
     get callCount() {
@@ -100,6 +102,10 @@ function fakeCallModule({ ledger, behaviours, outputMode = undefined }) {
           durationMs,
           requestId: behaviour.requestId || 'req_fixture',
           messageId: 'msg_fixture',
+          // N3 of review 6374528099: the provider-reported reasoning total and
+          // the block types, exactly as the real module records them.
+          thinkingTokens: Number.isInteger(behaviour.thinkingTokens) ? behaviour.thinkingTokens : null,
+          contentBlockTypes: Array.isArray(behaviour.contentBlockTypes) ? behaviour.contentBlockTypes : null,
         };
         // The default answer cites the source of this very call, so a later
         // source cannot silently be answered with the first source's evidence.
@@ -128,6 +134,8 @@ function fakeCallModule({ ledger, behaviours, outputMode = undefined }) {
         errorMessage: behaviour.errorMessage || null,
         errorCause: behaviour.errorCause || null,
         deadlineHit: behaviour.deadlineHit === true,
+        thinkingTokens: Number.isInteger(behaviour.thinkingTokens) ? behaviour.thinkingTokens : null,
+        contentBlockTypes: Array.isArray(behaviour.contentBlockTypes) ? behaviour.contentBlockTypes : null,
       };
       throw Object.assign(new Error(behaviour.reason), { code: behaviour.reason });
     },
@@ -319,6 +327,31 @@ test('L4/L2: a streamed answer with usage is priced by the fixed table', async (
   const log = readCallLog(callsFile);
   assert.equal(log.records[0].costEurCents, 2);
   assert.equal(log.records[0].usage.outputTokens, 16_000);
+});
+
+test('N3: the reasoning total and the block types reach the report and the JSONL line, never the reasoning text', async () => {
+  const { report, callsFile } = await probeWith({
+    sources: [sourceOf('bron-een')],
+    behaviours: [
+      {
+        kind: 'output',
+        usage: { input_tokens: 12_143, output_tokens: 16_000, output_tokens_details: { thinking_tokens: 9_776 } },
+        thinkingTokens: 9_776,
+        contentBlockTypes: ['thinking', 'text'],
+      },
+    ],
+  });
+  assert.deepEqual(report.thinking, { type: 'disabled' }, 'the run reports the thinking setting it used');
+  assert.equal(report.limits.maxOutputTokens, 32_000);
+  assert.equal(report.calls[0].thinkingTokens, 9_776);
+  assert.deepEqual(report.calls[0].contentBlockTypes, ['thinking', 'text']);
+  assert.equal(report.totals.thinkingTokens, 9_776);
+  assert.equal(report.totals.callsWithThinking, 1);
+
+  const log = readCallLog(callsFile);
+  assert.equal(log.records[0].thinkingTokens, 9_776);
+  assert.deepEqual(log.records[0].contentBlockTypes, ['thinking', 'text']);
+  assert.equal(Object.prototype.hasOwnProperty.call(log.records[0], 'thinking'), false, 'the setting stays in the report, not in the log line');
 });
 
 test('L4: an interruption keeps the per-call report and log of the calls already made', async () => {
