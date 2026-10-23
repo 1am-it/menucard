@@ -19,6 +19,10 @@ const EXTRACTION_OUTPUT_SCHEMA = {
   allowedTools: [],
 };
 const RECOVERABLE_ERRORS = new Set(['timeout', 'rate_limited', 'provider_unavailable']);
+// A provider can fail in a named, non-recoverable way (a refusal, a max_tokens
+// cut-off, a context overflow, a source without content). Those must reach the
+// caller as their own reason instead of the generic `model_unavailable`.
+const NAMED_PROVIDER_ERRORS = new Set(['provider_refusal', 'output_truncated', 'input_limit', 'source_missing']);
 
 function createStructuredExtractionAdapter({ provider, model, call, cancel } = {}) {
   return {
@@ -39,7 +43,7 @@ function validateStructuredOutput(output, sources) {
 
 function classifyAdapterError(err) {
   if (err && RECOVERABLE_ERRORS.has(err.code)) return { recoverable: true, reason: err.code };
-  if (err && err.code === 'schema_violation') return { recoverable: false, reason: 'schema_violation' };
+  if (err && (err.code === 'schema_violation' || NAMED_PROVIDER_ERRORS.has(err.code))) return { recoverable: false, reason: err.code };
   return { recoverable: false, reason: 'model_unavailable' };
 }
 
@@ -267,6 +271,7 @@ module.exports = {
   PRICE_STATUSES,
   FORBIDDEN_TRUST_KEYS,
   RECOVERABLE_ERRORS,
+  NAMED_PROVIDER_ERRORS,
   EXTRACTION_OUTPUT_SCHEMA,
   createStructuredExtractionAdapter,
   validateStructuredOutput,
