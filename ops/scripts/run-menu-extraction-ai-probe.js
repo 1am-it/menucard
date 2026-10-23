@@ -11,9 +11,21 @@
 //
 // Live: requires the explicit --live flag, --budget-file=<gitignored path> and
 // ANTHROPIC_API_KEY in the environment. The durable ledger enforces the caps
-// before every call; the probe stops immediately on cost_unknown,
-// budget_settle_failed or an exceeded cap, and after more than half of the
-// calls failed on the schema. Two runs per source measure stability.
+// before every call. Two runs per source measure stability.
+//
+// L1-L3 of the Delivery Lead order for #59 / BE-21 (review 6373183699), after a
+// live run spent 13 calls of which 12 reported no usage:
+//   - L1: every call appends one line to a gitignored JSONL file
+//     (ops/benchmark/output/ai-probe-live-calls.jsonl) with source, run, reason,
+//     HTTP status, stop_reason, usage, cost, duration and the provider request
+//     id, and the report is rewritten atomically after every call;
+//   - L2: the provider call streams (src/lib/menuExtractionAnthropicCall.js), so
+//     a long generation is not cut off before it can report its usage; the call
+//     timeout is 180 s;
+//   - L3: the run stops immediately after any call whose cost is unknown,
+//     whatever the technical reason was, and after two consecutive provider
+//     failures or timeouts. The stop reason is stored in the report and in the
+//     JSONL log. A schema error rate above half still stops it as before.
 //
 // Usage:
 //   node ops/scripts/run-menu-extraction-ai-probe.js
@@ -36,6 +48,7 @@ const { loadMenuExtractionProtocol, protocolMetadata } = require('../../src/lib/
 const { createFileBudgetLedger } = require('../../src/lib/menuExtractionBudgetLedger');
 const { aggregateControlledReferences, compareControlledReference } = require('../benchmark/referenceComparison');
 const { REPO_ROOT, attachCaptureTexts, defaultLedgerFile, loadProbeSet } = require('../benchmark/menuExtractionProbeSet');
+const { createCallLog } = require('../benchmark/aiProbeCallLog');
 const {
   PROBE_BUDGET,
   PROBE_LIMITS,
@@ -44,11 +57,14 @@ const {
   chunkCaptures,
   estimateProbe,
   evaluateStop,
+  isProviderFailureReason,
   summarizeSource,
 } = require('../benchmark/menuExtractionProbe');
 
 const OUTPUT_DIRECTORY = path.join(REPO_ROOT, 'ops', 'benchmark', 'output');
 const DEFAULT_OUT = path.join(OUTPUT_DIRECTORY, 'ai-probe-report.json');
+// L1 of review 6373183699: one line per provider call, gitignored, durable.
+const DEFAULT_CALLS_FILE = path.join(OUTPUT_DIRECTORY, 'ai-probe-live-calls.jsonl');
 
 function parseArgs(argv = []) {
   const options = {
@@ -56,6 +72,7 @@ function parseArgs(argv = []) {
     runs: PROBE_RUNS,
     source: 'all',
     out: DEFAULT_OUT,
+    callsFile: DEFAULT_CALLS_FILE,
     budgetFile: defaultLedgerFile(REPO_ROOT),
     budgetFileProvided: false,
     help: false,
@@ -73,6 +90,8 @@ function parseArgs(argv = []) {
       options.source = source;
     } else if (arg.startsWith('--out=')) {
       options.out = path.resolve(REPO_ROOT, arg.slice('--out='.length));
+    } else if (arg.startsWith('--calls-file=')) {
+      options.callsFile = path.resolve(REPO_ROOT, arg.slice('--calls-file='.length));
     } else if (arg.startsWith('--budget-file=')) {
       options.budgetFile = path.resolve(REPO_ROOT, arg.slice('--budget-file='.length));
       options.budgetFileProvided = true;
@@ -249,6 +268,8 @@ async function runLive(options) {
     return { code: 2, message: `${err.message}. No call was made.` };
   }
   assertOutputPath(options.out, 'report');
+  const callsFile = options.callsFile || DEFAULT_CALLS_FILE;
+  assertOutputPath(callsFile, 'call log');
 
   const protocol = loadMenuExtractionProtocol({ root: REPO_ROOT });
   const set = loadProbeSet();
@@ -263,25 +284,68 @@ async function runLive(options) {
   }
   const callModule = createAnthropicStructuredCall({ env: process.env, budget: ledger });
   if (!callModule.enabled) return { code: 2, message: 'the Anthropic call stays provider_not_configured. No call was made.' };
+
+  return runBoundedProbe({
+    selected,
+    protocol,
+    callModule,
+    ledger,
+    out: options.out,
+    callsFile,
+    runs: options.runs,
+    limits: PROBE_LIMITS,
+    budget: PROBE_BUDGET,
+  });
+}
+
+/**
+ * The bounded live loop, with its dependencies injected so every rule can be
+ * tested offline (L4 of review 6373183699): no key, no SDK, no network.
+ *
+ * Per call, in this order: run the extraction, append one JSONL line, rewrite
+ * the report atomically, then decide whether to stop. An interruption therefore
+ * leaves a report and a log that cover every completed call.
+ */
+async function runBoundedProbe({
+  selected,
+  protocol,
+  callModule,
+  ledger,
+  out,
+  callsFile,
+  runs = PROBE_RUNS,
+  limits = PROBE_LIMITS,
+  budget = PROBE_BUDGET,
+  runExtraction = runStructuredExtraction,
+  writeReport = writeJsonAtomically,
+  now = () => new Date().toISOString(),
+} = {}) {
   const adapter = createStructuredExtractionAdapter({
     provider: callModule.provider,
     model: callModule.model,
     call: callModule.call,
     cancel: callModule.cancel,
   });
+  const log = createCallLog({ file: callsFile });
 
   const report = {
-    version: '1.0.0',
+    version: '1.1.0',
     issue: 59,
     mode: 'live',
     provider: callModule.provider,
     model: callModule.model,
     sdkVersion: callModule.sdkVersion,
+    transport: callModule.transport || null,
     protocol: protocolMetadata(protocol),
-    runs: options.runs,
-    limits: PROBE_LIMITS,
-    budget: PROBE_BUDGET,
+    runs,
+    limits,
+    budget,
     pricing: callModule.pricing,
+    logging: {
+      callsFile: path.relative(REPO_ROOT, callsFile).split(path.sep).join('/'),
+      schemaVersion: 'menu-extraction-ai-probe-call/v1',
+      note: 'one line per provider call, appended and flushed right after that call',
+    },
     sources: [],
     calls: [],
     stop: null,
@@ -290,71 +354,130 @@ async function runLive(options) {
 
   let calls = 0;
   let schemaErrors = 0;
+  let consecutiveFailures = 0;
   let stopped = false;
 
-  for (const source of selected) {
-    if (stopped) {
-      report.notRun.push(source.id);
-      continue;
-    }
-    if (source.captureStatus !== 'captured') {
-      report.sources.push(blockedSourceRow(source));
-      continue;
-    }
-    const textById = new Map();
-    const runs = [];
-    for (let run = 1; run <= options.runs && !stopped; run += 1) {
-      const menus = [];
-      for (const chunk of chunkCaptures(source.captures, PROBE_LIMITS.maxDocuments)) {
-        const inventory = chunk.map((capture) => {
-          const entry = { id: capture.id, url: capture.url, kind: capture.kind, pageCount: capture.pageCount, status: 'read', text: capture.text };
-          textById.set(capture.id, entry);
-          return entry;
-        });
-        const result = await runStructuredExtraction({ adapter, protocol, sources: inventory, limits: PROBE_LIMITS, budget: ledger });
-        calls += 1;
-        const record = {
-          sourceId: source.id,
-          run,
-          captureIds: chunk.map((capture) => capture.id),
-          ok: result.ok === true,
-          reason: result.reason || null,
-          costEurCents: result.meta ? result.meta.actualCostEurCents : null,
-          usage: callModule.lastCall ? callModule.lastCall.usage : null,
-          stopReason: callModule.lastCall ? callModule.lastCall.stopReason : null,
-        };
-        if (!result.ok && Array.isArray(result.problems)) record.problems = result.problems.slice(0, 5);
-        report.calls.push(record);
-        if (!result.ok) {
-          if (result.reason === 'schema_violation') schemaErrors += 1;
-          const stop = evaluateStop({ reason: result.reason, calls, schemaErrors });
-          if (stop.stop) {
-            report.stop = { ...stop, sourceId: source.id, run, reason: result.reason };
-            stopped = true;
-          }
-          break;
-        }
-        if (Array.isArray(result.output.menus)) menus.push(...result.output.menus);
+  const checkpoint = () => writeReport(out, report);
+
+  const stopRun = (stop) => {
+    stopped = true;
+    report.stop = stop;
+    log.append({ kind: 'stop', ...stop, call: calls, at: now() });
+    checkpoint();
+  };
+
+  // The report is written once before the first call, so a run that dies early
+  // still leaves the pinned protocol and limits behind instead of nothing.
+  checkpoint();
+
+  try {
+    for (const source of selected) {
+      if (stopped) {
+        report.notRun.push(source.id);
+        continue;
       }
-      runs.push(menus);
+      if (source.captureStatus !== 'captured') {
+        report.sources.push(blockedSourceRow(source));
+        continue;
+      }
+      const textById = new Map();
+      const runResults = [];
+      for (let run = 1; run <= runs && !stopped; run += 1) {
+        const menus = [];
+        const chunks = chunkCaptures(source.captures, limits.maxDocuments);
+        for (let chunkIndex = 0; chunkIndex < chunks.length && !stopped; chunkIndex += 1) {
+          const chunk = chunks[chunkIndex];
+          const inventory = chunk.map((capture) => {
+            const entry = { id: capture.id, url: capture.url, kind: capture.kind, pageCount: capture.pageCount, status: 'read', text: capture.text };
+            textById.set(capture.id, entry);
+            return entry;
+          });
+          const attemptsBefore = Number.isInteger(callModule.callCount) ? callModule.callCount : 0;
+          const startedAt = Date.now();
+          const result = await runExtraction({ adapter, protocol, sources: inventory, limits, budget: ledger });
+          const durationMs = Math.max(0, Date.now() - startedAt);
+          calls += 1;
+
+          // The provider's own record is authoritative for cost: a failure that
+          // never reported `usage` leaves the price unknown, which stops the
+          // run whatever the technical reason was.
+          const attempt = Number.isInteger(callModule.callCount) && callModule.callCount > attemptsBefore ? callModule.lastCall : null;
+          const providerAttempted = Boolean(attempt && attempt.attempt === true);
+          const costUnknown = providerAttempted ? attempt.costEurCents === null : result.costUnknown === true;
+
+          const record = {
+            sourceId: source.id,
+            run,
+            chunkIndex,
+            call: calls,
+            captureIds: chunk.map((capture) => capture.id),
+            ok: result.ok === true,
+            reason: result.reason || null,
+            errorCode: attempt ? attempt.reason || null : null,
+            httpStatus: attempt && Number.isInteger(attempt.httpStatus) ? attempt.httpStatus : null,
+            stopReason: attempt ? attempt.stopReason || null : null,
+            usage: attempt ? attempt.usage || null : null,
+            costEurCents: attempt && Number.isInteger(attempt.costEurCents) ? attempt.costEurCents : null,
+            costUnknown,
+            durationMs: attempt && Number.isInteger(attempt.durationMs) ? attempt.durationMs : durationMs,
+            requestId: attempt ? attempt.requestId || null : null,
+            messageId: attempt ? attempt.messageId || null : null,
+            provider: callModule.provider || null,
+            model: callModule.model || null,
+            transport: callModule.transport || null,
+            protocolHash: protocol.hash,
+            at: now(),
+          };
+          if (result.ok !== true && Array.isArray(result.problems)) record.problems = result.problems.slice(0, 5);
+          report.calls.push(record);
+          log.append(record);
+
+          if (result.ok === true) {
+            consecutiveFailures = 0;
+          } else {
+            if (result.reason === 'schema_violation') schemaErrors += 1;
+            consecutiveFailures = isProviderFailureReason(result.reason) ? consecutiveFailures + 1 : 0;
+          }
+
+          // Interim report: after every call, so an interruption never loses
+          // the calls that already happened.
+          checkpoint();
+
+          if (result.ok !== true) {
+            const decision = evaluateStop({ reason: result.reason, calls, schemaErrors, costUnknown, consecutiveFailures });
+            if (decision.stop) {
+              stopRun({ code: decision.code, sourceId: source.id, run, chunkIndex, reason: result.reason, costUnknown, at: now() });
+            }
+            break;
+          }
+          if (Array.isArray(result.output.menus)) menus.push(...result.output.menus);
+        }
+        runResults.push(menus);
+      }
+      if (runResults.length === 0) {
+        report.sources.push(blockedSourceRow({ ...source, blockedReason: `stopped before the first call: ${report.stop ? report.stop.code : 'unknown'}` }));
+        continue;
+      }
+      const primary = runResults[0];
+      const comparison = compareControlledReference(source.reference, primary, { label: source.label, sourceId: source.id, captureStatus: 'captured' });
+      report.sources.push(
+        summarizeSource({
+          source,
+          reference: source.reference,
+          menus: primary,
+          comparison,
+          sourceById: textById,
+          titles: primary.map((menu) => menu.title),
+          runs: runResults,
+        }),
+      );
+      checkpoint();
     }
-    if (runs.length === 0) {
-      report.sources.push(blockedSourceRow({ ...source, blockedReason: `stopped before the first call: ${report.stop ? report.stop.code : 'unknown'}` }));
-      continue;
-    }
-    const primary = runs[0];
-    const comparison = compareControlledReference(source.reference, primary, { label: source.label, sourceId: source.id, captureStatus: 'captured' });
-    report.sources.push(
-      summarizeSource({
-        source,
-        reference: source.reference,
-        menus: primary,
-        comparison,
-        sourceById: textById,
-        titles: primary.map((menu) => menu.title),
-        runs,
-      }),
-    );
+  } catch (err) {
+    // An internal failure is not a provider result. Record it, keep every call
+    // that was already measured, and fail loudly instead of pretending success.
+    stopRun({ code: 'probe_interrupted', detail: err && err.message ? err.message : String(err), at: now() });
+    throw err;
   }
 
   const actualCostEurCents = report.calls.reduce((total, call) => total + (Number.isInteger(call.costEurCents) ? call.costEurCents : 0), 0);
@@ -362,13 +485,15 @@ async function runLive(options) {
     ...aggregateControlledReferences(report.sources),
     calls,
     actualCostEurCents,
+    unknownCostCalls: report.calls.filter((call) => call.costUnknown === true).length,
     schemaErrors,
     ledger: safeLedgerSnapshot(ledger),
   };
-  writeJsonAtomically(options.out, report);
+  checkpoint();
   printLive(report);
-  process.stdout.write(`${path.relative(REPO_ROOT, options.out).split(path.sep).join('/')}\n`);
-  return { code: 0 };
+  process.stdout.write(`${path.relative(REPO_ROOT, out).split(path.sep).join('/')}\n`);
+  if (report.stop) process.stderr.write(`gestopt na call ${calls}: ${report.stop.code}\n`);
+  return { code: 0, report };
 }
 
 const USAGE = `Gebruik:
@@ -377,7 +502,9 @@ const USAGE = `Gebruik:
 
 Zonder --live is dit een dry-run: alleen een raming uit de gepinde captures,
 geen sleutel en geen netwerk. --live vereist ANTHROPIC_API_KEY in de omgeving en
-een expliciet --budget-file in de gitignored ops/benchmark/output-map.
+een expliciet --budget-file in de gitignored ops/benchmark/output-map. Elke
+aanroep krijgt direct een regel in ops/benchmark/output/ai-probe-live-calls.jsonl
+(override met --calls-file=<pad>); het rapport wordt na elke aanroep bijgewerkt.
 Bronnen: ${PROBE_SOURCE_IDS.join(', ')}.
 `;
 
@@ -429,6 +556,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  DEFAULT_CALLS_FILE,
   DEFAULT_OUT,
   OUTPUT_DIRECTORY,
   assertOutputPath,
@@ -436,6 +564,7 @@ module.exports = {
   main,
   parseArgs,
   printLive,
+  runBoundedProbe,
   runLive,
   selectSources,
   writeJsonAtomically,
