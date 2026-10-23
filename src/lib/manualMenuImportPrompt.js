@@ -27,6 +27,96 @@ const FOLLOW_UP_CONTEXT_CHARS = 8 * 1024;
 const MAX_ROWS_PER_FOLLOW_UP = 10;
 const MAX_QUESTION = 400;
 
+// U3 (Delivery Lead review 6376543234): één klein, volledig ingevuld voorbeeld
+// in de prompt. Fictief, met een letterlijk citaat uit de eigen voorbeeldtekst,
+// één gewone prijs en één regel met twee gedrukte prijzen volgens de
+// prijsvariantregel van v0.4 (S3).
+//
+// Het voorbeeld kan nooit als echte data worden geïmporteerd: het bron-ID
+// `voorbeeld-bron` staat nooit in de broninventaris van de bundel en de citaten
+// staan niet in een echte bron. De validator keurt zo'n regel dus altijd af en
+// een mens moet hem met een reden bevestigen of weglaten.
+const WORKED_EXAMPLE = Object.freeze({
+  sourceId: 'voorbeeld-bron',
+  sourceText: [
+    'FICTIEF VOORBEELD - niet uit deze bron',
+    'Voorgerecht Voorbeeldprijs 12,50',
+    'Voorbeeldwijn glas 4,50 / fles 24,50',
+  ].join('\n'),
+  answer: {
+    menus: [
+      {
+        title: 'Fictief voorbeeld',
+        sourceId: 'voorbeeld-bron',
+        categories: [
+          {
+            name: 'Voorbeeld',
+            items: [
+              {
+                name: 'Voorgerecht Voorbeeldprijs',
+                priceStatus: 'known',
+                amountMinorUnits: 1250,
+                currency: 'EUR',
+                evidence: {
+                  sourceId: 'voorbeeld-bron',
+                  locator: 'Voorbeeld · regel 2',
+                  quote: 'Voorgerecht Voorbeeldprijs 12,50',
+                },
+              },
+              {
+                name: 'Voorbeeldwijn',
+                priceStatus: 'multiple_undecomposed',
+                amountMinorUnits: null,
+                currency: null,
+                priceVariants: [
+                  { label: 'Glas', amountMinorUnits: 450, currency: 'EUR' },
+                  { label: 'Fles', amountMinorUnits: 2450, currency: 'EUR' },
+                ],
+                evidence: {
+                  sourceId: 'voorbeeld-bron',
+                  locator: 'Voorbeeld · regel 3',
+                  quote: 'Voorbeeldwijn glas 4,50 / fles 24,50',
+                },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    coverage: {
+      status: 'complete',
+      sourcesRead: 1,
+      pagesRead: 1,
+      itemsExtracted: 2,
+      unreadSources: [],
+      limitations: [],
+    },
+  },
+});
+
+function workedExampleBlock() {
+  return [
+    '### Ingevuld voorbeeld (fictief, nooit overnemen)',
+    '',
+    'Deze kaart is verzonnen en hoort niet in je antwoord. Ze laat alleen de vorm zien:',
+    'een letterlijk citaat met één prijs, en een tweede regel met twee gedrukte prijzen',
+    'volgens de prijsvariantregel. De fictieve brontekst hieronder is géén bron uit deze',
+    'opdracht.',
+    '',
+    '```text',
+    WORKED_EXAMPLE.sourceText,
+    '```',
+    '',
+    '```json',
+    JSON.stringify(WORKED_EXAMPLE.answer, null, 2),
+    '```',
+    '',
+    `Gebruik \`${WORKED_EXAMPLE.sourceId}\` nooit als sourceId en neem geen enkel woord uit`,
+    'dit voorbeeld over. Elk bewijs verwijst naar een bron uit sectie 5.',
+  ].join('\n');
+}
+
+
 function limitsBlock(bundle) {
   const limits = bundle.limits;
   return [
@@ -124,6 +214,8 @@ function buildImportPrompt(bundle) {
     '```json',
     JSON.stringify(schema.EXTRACTION_OUTPUT_SCHEMA, null, 2),
     '```',
+    '',
+    workedExampleBlock(),
     '',
     '## 5. Bronnen',
     '',
@@ -301,6 +393,7 @@ function buildOpenPointsPrompt({ bundle, rows, question } = {}) {
 module.exports = {
   FOLLOW_UP_CONTEXT_CHARS,
   MAX_ROWS_PER_FOLLOW_UP,
+  WORKED_EXAMPLE,
   buildImportPrompt,
   buildFollowUpPrompt,
   buildOpenPointsPrompt,

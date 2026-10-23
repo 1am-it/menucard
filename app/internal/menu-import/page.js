@@ -88,6 +88,10 @@ export default function ManualMenuImportPage() {
   const [allPrompt, setAllPrompt] = useState('')
   const [allAnswer, setAllAnswer] = useState('')
   const [saved, setSaved] = useState(null)
+  // U1/U2 (review 6376543234): een afgekeurd antwoord levert hooguit vijf
+  // leesbare punten plus één kopieerbare herstelvraag. Alleen deze stap bewaart
+  // dat; er komt geen nieuwe opslag of toestandsvorm bij.
+  const [answerProblems, setAnswerProblems] = useState(null)
 
   useEffect(() => {
     const supabase = getSupabaseBrowser()
@@ -125,6 +129,31 @@ export default function ManualMenuImportPage() {
 
   function handleFailure(result) {
     setError(result.error)
+    // U1/U2: alleen een afgekeurd antwoord met leesbare punten vult het
+    // herstelblok. Ontbreekt die uitleg, dan blijft het bij de gewone melding.
+    const groups = result.data && Array.isArray(result.data.problemSummary) ? result.data.problemSummary : []
+    const question = result.data && typeof result.data.recoveryQuestion === 'string' ? result.data.recoveryQuestion : ''
+    const problems = result.data && Array.isArray(result.data.problems) ? result.data.problems : []
+    const omitted = result.data && Number.isInteger(result.data.problemSummaryOmitted) ? result.data.problemSummaryOmitted : 0
+    // Het inklapbare detail toont dezelfde regels die de validator teruggaf,
+    // inclusief de regelgebonden fouten uit de groepen. Niets technisch komt in
+    // de hoofdtekst.
+    const technical = [
+      ...new Set([
+        ...problems,
+        ...(Array.isArray(groups) ? groups.flatMap((group) => (group && Array.isArray(group.technical) ? group.technical : [])) : []),
+      ]),
+    ].filter((entry) => typeof entry === 'string')
+    setAnswerProblems(
+      groups.length > 0
+        ? {
+            groups: groups.slice(0, 5).filter((group) => group && typeof group.text === 'string'),
+            question,
+            omitted,
+            technical,
+          }
+        : null
+    )
     // Een verlopen of ongeldig token is geen technische fout: de medewerker
     // maakt gewoon een nieuwe prompt. De knop daarvoor staat in de melding.
     if (typeof result.reason === 'string' && result.reason.startsWith('state_')) setExpired(true)
@@ -221,6 +250,7 @@ export default function ManualMenuImportPage() {
     setStateToken('')
     setValidUntil(null)
     setExpired(false)
+    setAnswerProblems(null)
     const list = urls.split('\n').map((line) => line.trim()).filter(Boolean).slice(0, 5)
     const result = await api('/bundles', { restaurant_id: restaurantId, urls: list })
     if (!result.ok) handleFailure(result)
@@ -243,10 +273,24 @@ export default function ManualMenuImportPage() {
     }
   }
 
+  // U2: de herstelvraag is gewone tekst, dus altijd zelf te selecteren. De knop
+  // kopieert precies dezelfde tekst; mislukt dat, dan zegt de melding wat te doen.
+  async function copyRecoveryQuestion() {
+    const question = answerProblems && answerProblems.question
+    if (!question) return
+    try {
+      await navigator.clipboard.writeText(question)
+      setMessage('Herstelvraag gekopieerd. Plak hem in dezelfde AI en vraag om het volledige antwoord opnieuw.')
+    } catch {
+      setMessage('Kopiëren lukte niet automatisch. Selecteer de herstelvraag hierboven en kopieer hem zelf.')
+    }
+  }
+
   async function checkAnswer() {
     setBusy(true)
     setError(null)
     setMessage(null)
+    setAnswerProblems(null)
     const result = await api('/imports', { state: stateToken, bundle_hash: bundle.bundleHash, ai_name: aiName, answer })
     if (!result.ok) handleFailure(result)
     else {
@@ -432,6 +476,57 @@ export default function ManualMenuImportPage() {
           <div className="di-banner di-banner-info" role="status">
             <span>{message}</span>
           </div>
+        ) : null}
+        {/* U1/U2: wat de AI moet herstellen, in gewone taal, met één
+            kopieerbare vervolgvraag. De technische regels staan ingeklapt. */}
+        {answerProblems ? (
+          <section className="mai-panel mai-problems" aria-labelledby="mai-problems-title">
+            <h2 id="mai-problems-title" className="mai-panel-title">
+              Wat de AI moet herstellen
+            </h2>
+            <ol className="mai-problem-list">
+              {answerProblems.groups.map((group, index) => (
+                <li key={`${group.code}-${index}`}>{group.text}</li>
+              ))}
+            </ol>
+            {answerProblems.omitted > 0 ? (
+              <p className="bta-muted">
+                Er zijn nog {answerProblems.omitted} andere soorten problemen; die staan in de technische details.
+              </p>
+            ) : null}
+            {answerProblems.question ? (
+              <>
+                <label className="bta-label" htmlFor="mai-recovery">
+                  Vervolgvraag aan de AI (kopieer en plak in dezelfde AI)
+                </label>
+                <textarea
+                  id="mai-recovery"
+                  className="mai-input mai-recovery"
+                  readOnly
+                  rows={6}
+                  value={answerProblems.question}
+                />
+                <div className="mai-actions">
+                  <button type="button" className="di-btn-primary mai-btn" onClick={copyRecoveryQuestion} disabled={busy}>
+                    Kopieer herstelvraag
+                  </button>
+                  <p className="bta-muted">Plak het nieuwe antwoord daarna opnieuw in stap 2.</p>
+                </div>
+              </>
+            ) : null}
+            {answerProblems.technical.length > 0 ? (
+              <details className="mai-details">
+                <summary>Technische details</summary>
+                <ul className="mai-done-list">
+                  {answerProblems.technical.map((entry, index) => (
+                    <li key={`technical-${index}`}>
+                      <code>{entry}</code>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            ) : null}
+          </section>
         ) : null}
 
         <div className="mai-steps">

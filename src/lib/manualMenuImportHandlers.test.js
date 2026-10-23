@@ -515,3 +515,63 @@ test('K3: een leesfout geeft 503 en nooit een leeg of verzonnen document', async
   assert.equal(thrown.body.usage, undefined);
 });
 
+
+// ── U1/U2 (Delivery Lead review 6376543234) ──────────────────────────────────
+// De route geeft bij een afgekeurd antwoord dezelfde 422, maar met leesbare
+// punten en één kopieerbare herstelvraag. De technische regels blijven bestaan
+// en er wordt niets opgeslagen of van goedkeuring voorzien.
+
+async function rejectedAnswer(handlers, step1, answer) {
+  return handlers.importAnswer(
+    request({ state: step1.state, ai_name: 'Claude', answer: `Korte samenvatting.\n\`\`\`json\n${JSON.stringify(answer)}\n\`\`\`` }),
+  );
+}
+
+test('U1/U2: een 422 geeft leesbare problemen en een herstelvraag', async () => {
+  const h = harness();
+  const step1 = await createBundle(h.next());
+  const bad = output();
+  bad.menus[0].sourceId = 'bron-bestaat-niet';
+  bad.menus[0].categories[0].items[0].approved = true;
+
+  const result = await rejectedAnswer(h.next(), step1, bad);
+  assert.equal(result.status, 422);
+  assert.equal(result.body.reason, 'schema_violation');
+  assert.match(result.body.error, /past niet bij de afspraken/);
+
+  // Het technische detail blijft bestaan en is ongewijzigd Engels.
+  assert.ok(result.body.problems.length > 0);
+  assert.match(result.body.problems.join('\n'), /must reference the source inventory|forbidden trust key/);
+
+  // De hoofdtekst is gewoon Nederlands, zonder paden of codes.
+  assert.ok(Array.isArray(result.body.problemSummary));
+  assert.ok(result.body.problemSummary.length >= 1 && result.body.problemSummary.length <= 5);
+  for (const group of result.body.problemSummary) {
+    assert.match(group.text, /^Bij \d+ |^Op \d+ /, group.text);
+    assert.equal(/menus\[|coverage\.|items\[|_/.test(group.text), false, group.text);
+    assert.equal(typeof group.hint, 'string');
+  }
+  assert.equal(result.body.problemSummaryOmitted >= 0, true);
+  assert.match(result.body.recoveryQuestion, /^Corrigeer alleen deze punten/);
+  assert.match(result.body.recoveryQuestion, /Verander niets anders/);
+
+  // Niets opgeslagen en geen nieuwe stap: dezelfde gesloten keten als voorheen.
+  assert.equal(Object.prototype.hasOwnProperty.call(result.body, 'state'), false);
+  assert.equal(Object.prototype.hasOwnProperty.call(result.body, 'import'), false);
+  assert.equal(h.saved.length, 0);
+});
+
+test('U1: ook een structureel fout antwoord blijft in gewone taal', async () => {
+  const h = harness();
+  const step1 = await createBundle(h.next());
+  const result = await rejectedAnswer(h.next(), step1, { menus: 'geen lijst', coverage: {} });
+
+  assert.equal(result.status, 422);
+  assert.equal(result.body.reason, 'schema_violation');
+  const texts = result.body.problemSummary.map((group) => group.text).join('\n');
+  assert.match(texts, /ontbreekt de lijst met menukaarten/);
+  assert.equal(/menus must be an array/.test(texts), false);
+  assert.match(result.body.recoveryQuestion, /^Corrigeer alleen deze punten/);
+  assert.equal(h.saved.length, 0);
+});
+

@@ -333,7 +333,17 @@ function createManualMenuImportHandlers(deps = {}) {
       now: now(),
     });
     if (!report.ok) {
-      return reply(422, { error: report.message, reason: report.code, problems: report.problems });
+      // U1/U2 (review 6376543234): het scherm krijgt de leesbare punten en de
+      // kopieerbare herstelvraag mee; de technische regels blijven erbij voor
+      // het inklapbare detail. Niets hiervan is een goedkeuring.
+      return reply(422, {
+        error: report.message,
+        reason: report.code,
+        problems: report.problems,
+        problemSummary: Array.isArray(report.problemSummary) ? report.problemSummary : [],
+        problemSummaryOmitted: Number.isInteger(report.problemSummaryOmitted) ? report.problemSummaryOmitted : 0,
+        recoveryQuestion: typeof report.recoveryQuestion === 'string' ? report.recoveryQuestion : null,
+      });
     }
     const next = sealNext(nextState(state, { report, decisions: [], followUps: {}, followUpTotal: 0 }));
     if (next.reply) return next.reply;

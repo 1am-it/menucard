@@ -3133,6 +3133,22 @@ details.bta-side-card > summary:focus-visible { outline: 2px solid var(--border-
 }
 .mai-pasted span { flex: 1 1 200px; min-width: 0; overflow-wrap: anywhere; }
 .mai-validity { margin: 0; font-size: 13px; color: var(--text-secondary); }
+/* U1/U2 (review 6376543234): de leesbare problemen en de herstelvraag. */
+.mai-problems { border-left: 3px solid var(--status-blocked); background: var(--bg-elevated); }
+.mai-problem-list { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 14px; color: var(--text-primary); overflow-wrap: anywhere; }
+.mai-recovery {
+  width: 100%;
+  min-height: 120px;
+  resize: vertical;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+}
 
 @media (min-width: 720px) {
   .mai-steps { gap: 20px; }

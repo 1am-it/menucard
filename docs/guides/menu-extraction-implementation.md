@@ -904,3 +904,50 @@ er een `|`, `/`, `-`, `–`, `—`, `:` of `·` vóór staat; zonder scheidingst
 blijft het een portiegrootte. Regressie: “a portion behind an explicit separator
 stays part of the source name”.
 
+## Leesbaar herstel bij een afgekeurd AI-antwoord (review 6376543234)
+
+Een echt AI-antwoord in de handmatige import gaf `422 schema_violation` en het
+scherm zei alleen "Het antwoord past niet bij de afspraken". De eigenaar kon
+daar niets mee. Sinds deze ronde geldt:
+
+- **U1, gewone taal.** `src/lib/manualMenuImportProblems.js` vertaalt elke
+  regel van de bestaande validator naar hooguit vijf groepen, elk met één
+  Nederlandse zin, het aantal en — als het pad bekend is — het gerecht, de
+  rubriek of de menukaart bij naam. Bijvoorbeeld: "Bij 2 gerechten met meerdere
+  prijzen staat ook één losse hoofdprijs (bijvoorbeeld "Fictief glas wijn")." De
+  hoofdtekst bevat geen JSON-pad en geen technische code; die staan in het
+  inklapbare `Technische details`. Een onbekende validatorregel wordt nooit
+  weggelaten maar valt terug op één algemene, eerlijke zin.
+- **U2, herstelvraag.** `buildRecoveryQuestion` bouwt uit precies dezelfde
+  groepen één kopieerbare vraag: "Corrigeer alleen deze punten en geef daarna
+  het volledige antwoord opnieuw in precies één codeblok: 1. … 2. …". Dezelfde
+  invoer geeft altijd dezelfde vraag (geen tijd, teller of toevallige volgorde).
+- **U3, ingevuld voorbeeld.** `buildImportPrompt` bevat na het uitvoerschema een
+  duidelijk gemarkeerd fictief blok met een fictieve brontekst, één gevuld item
+  met een letterlijk citaat en prijs, en een tweede item met twee gedrukte
+  prijzen volgens de v0.4-prijsvariantregel. Het voorbeeld is zelf geldig
+  volgens exact dezelfde validator, maar nooit importeerbaar: het bron-ID
+  `voorbeeld-bron` staat niet in de broninventaris (menu → fatale afkeuring;
+  losse bewijsregel → `unknown_source` per regel) en een mens moet zo'n regel
+  met een reden bevestigen of weglaten.
+- **U4, ongewijzigde stroom.** Het verzegelde toestandstoken, de duurzame
+  concepten, het usage-ledger en "Weglaten" zijn niet aangeraakt. Er is geen
+  nieuwe opslag: de punten en de vraag leven alleen in de bestaande
+  React-staat van de pagina, binnen dezelfde serverless-veilige keten.
+- De validator wordt niet versoepeld en er is geen nieuwe dependency. De 422 van
+  `POST /api/internal/v1/manual-menu-import/imports` krijgt naast `problems`
+  (technisch, ongewijzigd) de velden `problemSummary`, `problemSummaryOmitted`
+  en `recoveryQuestion`.
+
+Regressies: `src/lib/manualMenuImportProblems.test.js` (8 tests, elke
+validatorregel, groepering, grens van vijf, paden, determinisme),
+`src/lib/manualMenuImport.test.js` (U1/U2 op het rapport, U3 op de prompt en
+"het voorbeeld is niet importeerbaar") en
+`src/lib/manualMenuImportHandlers.test.js` (de 422 van de route).
+Browserbewijs: `ops/browser/run-menu-review-browser-check.js`
+(`manualRejectedScenario`) met de screenshots
+`manual-ai-import-problems-390-dark.png` en
+`manual-ai-import-problems-320-light.png`. Dit blijft fixture- en
+ontwikkelaarsbewijs, geen onafhankelijke review of browseracceptatie.
+
+

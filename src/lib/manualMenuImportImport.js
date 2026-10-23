@@ -22,6 +22,7 @@
 const schema = require('./menuExtractionSchema');
 const { normalizePrice } = require('./menuConcept');
 const { computeBundleHash } = require('./manualMenuImportBundle');
+const { describeImportProblems } = require('./manualMenuImportProblems');
 
 const MAX_ANSWER_BYTES = 1024 * 1024;
 const MAX_AI_NAME = schema.LIMITS.label;
@@ -308,6 +309,12 @@ function emptyReport({ importId, bundle, aiName, code, problems }) {
     code,
     message: humanMessage(code),
     problems: boundedProblems(problems),
+    // U1/U2 (review 6376543234): de leesbare punten en de kopieerbare
+    // herstelvraag staan naast de technische regels. Zonder problemen blijven
+    // ze leeg; ze versoepelen niets en worden nooit een goedkeuring.
+    problemSummary: [],
+    problemSummaryOmitted: 0,
+    recoveryQuestion: null,
     rows: [],
     summary: { menus: 0, items: 0, valid: 0, needsReview: 0, blocked: 0, unsupported: 0, unverifiable: 0 },
     coverage: null,
@@ -337,7 +344,16 @@ function buildImportReport({ importId, bundle, output, aiName, now = new Date() 
     }
   }
   if (fatal.length > 0) {
-    return emptyReport({ importId, bundle, aiName: nameCheck.aiName, code: 'schema_violation', problems: fatal });
+    const report = emptyReport({ importId, bundle, aiName: nameCheck.aiName, code: 'schema_violation', problems: fatal });
+    // U1/U2: dezelfde regels, maar in gewone taal en met één herstelvraag.
+    // `problems` blijft ongewijzigd het technische detail van de blokkade; de
+    // leesbare samenvatting noemt ook de regelgebonden fouten, want ook die
+    // moet de AI herstellen voordat dit antwoord opnieuw kan worden aangeboden.
+    const explained = describeImportProblems(problems, output);
+    report.problemSummary = explained.groups;
+    report.problemSummaryOmitted = explained.omitted;
+    report.recoveryQuestion = explained.recoveryQuestion;
+    return report;
   }
 
   const rows = buildRows(output, bundle, problemCodesByRow);
@@ -380,6 +396,11 @@ function buildImportReport({ importId, bundle, output, aiName, now = new Date() 
     code: null,
     message: null,
     problems: [],
+    // U1/U2: de vorm is ook bij een geslaagde controle hetzelfde; er is dan
+    // niets te herstellen.
+    problemSummary: [],
+    problemSummaryOmitted: 0,
+    recoveryQuestion: null,
     rows,
     menus,
     summary: {

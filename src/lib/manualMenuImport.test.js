@@ -8,6 +8,7 @@ const assert = require('node:assert/strict');
 const path = require('node:path');
 
 const { loadMenuExtractionProtocol } = require('./menuExtractionProtocol');
+const { validateStructuredOutput, quoteIsPresentInSource } = require('./menuExtractionSchema');
 const {
   buildImportBundle,
   bundleMetadata,
@@ -15,7 +16,7 @@ const {
   sourceHashForText,
   MAX_SOURCE_TEXT_CHARS,
 } = require('./manualMenuImportBundle');
-const { buildImportPrompt, buildFollowUpPrompt, buildOpenPointsPrompt } = require('./manualMenuImportPrompt');
+const { buildImportPrompt, buildFollowUpPrompt, buildOpenPointsPrompt, WORKED_EXAMPLE } = require('./manualMenuImportPrompt');
 const { extractCodeBlock, buildImportReport, checkBundleBinding, summaryLine, MAX_ANSWER_BYTES } = require('./manualMenuImportImport');
 const { decideRow, reviewView, buildConceptDraft, applyFollowUp, applyOpenPointsAnswer, menuContextFor, MISSING_REASONS } = require('./manualMenuImportReview');
 
@@ -792,4 +793,131 @@ test('S2: een samengevoegd of verzonnen citaat blijft in de handmatige import af
     assert.equal(reviewView({ report, decisions: new Map() }).canSave, false);
   }
 });
+
+// ── U1/U2/U3 (Delivery Lead review 6376543234) ──────────────────────────────
+// Een afgekeurd antwoord moet begrijpelijk zijn, de herstelvraag moet
+// kopieerbaar zijn en de prompt krijgt één fictief ingevuld voorbeeld dat nooit
+// als echte data kan worden geïmporteerd.
+
+test('U1/U2: een afgekeurd antwoord geeft leesbare punten en een herstelvraag', () => {
+  const answer = fixtureOutput();
+  answer.menus[0].sourceId = 'bron-bestaat-niet';
+  answer.coverage.itemsExtracted = 99;
+  // Ook een regelgebonden citaatfout hoort in de herstelvraag: de AI moet alles
+  // herstellen voordat dit antwoord opnieuw kan worden aangeboden.
+  answer.menus[0].categories[0].items[3].evidence.quote = 'Koffie 9,99';
+  const report = buildReport(answer);
+
+  // De validator blijft de baas: hetzelfde antwoord wordt nog steeds afgekeurd.
+  assert.equal(report.ok, false);
+  assert.equal(report.code, 'schema_violation');
+  assert.ok(report.problems.length > 0);
+  assert.match(report.problems.join('\n'), /must reference the source inventory|forbidden trust key/);
+
+  // De leesbare punten staan ernaast, in gewoon Nederlands, zonder paden.
+  assert.ok(Array.isArray(report.problemSummary));
+  assert.ok(report.problemSummary.length >= 1 && report.problemSummary.length <= 5);
+  for (const group of report.problemSummary) {
+    assert.equal(/menus\[|coverage\.|items\[/.test(group.text), false, group.text);
+    assert.match(group.text, /^Bij \d+ |^Op \d+ /, group.text);
+  }
+  assert.equal(typeof report.recoveryQuestion, 'string');
+  assert.match(report.recoveryQuestion, /^Corrigeer alleen deze punten en geef daarna het volledige antwoord opnieuw/);
+  assert.match(report.recoveryQuestion, /Verander niets anders/);
+  // Een citaatfout bij één gerecht staat er in gewone taal bij, met de naam.
+  const citation = report.problemSummary.find((group) => group.code === 'quote_not_in_source');
+  assert.ok(citation, JSON.stringify(report.problemSummary));
+  assert.match(citation.text, /^Bij 1 gerecht staat het citaat niet letterlijk in de bron/);
+  assert.match(citation.text, /Koffie/);
+  // Niets opgeslagen: een afgekeurd antwoord levert geen regels of concept.
+  assert.deepEqual(report.rows, []);
+  assert.equal(report.summary.items, 0);
+});
+
+test('U1: een leesbaar punt noemt het gerecht als het pad bekend is', () => {
+  const answer = fixtureOutput();
+  answer.menus[0].categories[0].items[0].evidence.quote = 'Staat niet in de bron';
+  const report = buildReport(answer);
+  // Een citaatfout hangt aan één regel en blijft reviewbaar; de leesbare
+  // vertaling is er voor het geval de hele uitvoer wordt afgekeurd.
+  assert.equal(report.ok, true, JSON.stringify(report.problems || report.message));
+  const row = report.rows.find((entry) => entry.code === 'quote_not_in_source');
+  assert.ok(row);
+  assert.equal(row.name, 'Broodplank');
+  assert.equal(report.problemSummary.length, 0);
+  assert.equal(report.recoveryQuestion, null);
+});
+
+test('U3: de prompt bevat een ingevuld fictief voorbeeld met citaat en prijsvarianten', () => {
+  const { text } = buildImportPrompt(buildBundle());
+  assert.match(text, /### Ingevuld voorbeeld \(fictief, nooit overnemen\)/);
+  assert.match(text, /FICTIEF VOORBEELD - niet uit deze bron/);
+  assert.match(text, /"name": "Voorgerecht Voorbeeldprijs"/);
+  assert.match(text, /"amountMinorUnits": 1250/);
+  assert.match(text, /"priceStatus": "multiple_undecomposed"/);
+  assert.match(text, /"label": "Glas"/);
+  assert.match(text, /"label": "Fles"/);
+  assert.match(text, new RegExp(`Gebruik \`${WORKED_EXAMPLE.sourceId}\` nooit als sourceId`));
+
+  // Het voorbeeld is zelf geldig volgens exact dezelfde validator en dezelfde
+  // letterlijke-citaatregel: geen tweede, soepeler norm.
+  const problems = validateStructuredOutput(WORKED_EXAMPLE.answer, [
+    { id: WORKED_EXAMPLE.sourceId, text: WORKED_EXAMPLE.sourceText },
+  ]);
+  assert.deepEqual(problems, []);
+  for (const menu of WORKED_EXAMPLE.answer.menus) {
+    for (const category of menu.categories) {
+      for (const item of category.items) {
+        assert.equal(quoteIsPresentInSource(item.evidence.quote, WORKED_EXAMPLE.sourceText), true, item.name);
+      }
+    }
+  }
+});
+
+test('U3: het voorbeeld kan niet als echte data worden geïmporteerd', () => {
+  // 1. Letterlijk overnemen: het voorbeeld-bron-ID staat niet in de bundel.
+  const copy = {
+    menus: WORKED_EXAMPLE.answer.menus,
+    coverage: {
+      status: 'partial',
+      sourcesRead: 2,
+      pagesRead: 2,
+      itemsExtracted: 2,
+      unreadSources: [{ sourceId: 'source-2', locator: 'scan pagina 1', reason: 'unreadable' }],
+      limitations: ['Scan zonder tekstlaag'],
+    },
+  };
+  const copied = buildReport(copy);
+  assert.equal(copied.ok, false);
+  assert.equal(copied.code, 'schema_violation');
+  assert.match(copied.problems.join('\n'), /must reference the source inventory/);
+  assert.ok(copied.problemSummary.length > 0);
+
+  // 2. Alleen de bewijsregels overnemen: elke regel is een blokkade en niets
+  //    kan zonder een expliciete menselijke beslissing worden opgeslagen.
+  const mixed = {
+    menus: [
+      {
+        ...WORKED_EXAMPLE.answer.menus[0],
+        sourceId: 'source-1',
+        title: 'Lunch',
+      },
+    ],
+    coverage: copy.coverage,
+  };
+  const report = buildReport(mixed);
+  assert.equal(report.ok, true, JSON.stringify(report.problems || report.message));
+  assert.equal(report.rows.length, 2);
+  for (const row of report.rows) {
+    assert.notEqual(row.state, 'valid', row.name);
+    assert.equal(row.evidenceVerified, false, row.name);
+  }
+  assert.equal(report.rows.some((row) => row.code === 'unknown_source'), true);
+  assert.equal(report.summary.valid, 0);
+  const review = reviewView({ report, decisions: new Map() });
+  assert.equal(review.canSave, false);
+  const draft = buildConceptDraft({ report, decisions: new Map(), restaurantId: '23' });
+  assert.equal(draft.ok, false);
+});
+
 
