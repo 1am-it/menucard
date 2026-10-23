@@ -209,10 +209,18 @@ cijfers ernaast. #59's vijf bronnen sluiten de 50–100-bronnenbenchmark niet af
 Opgesteld door de Delivery Lead (Claude Code). Uitvoering door DeepSeek.
 **Besluit Product Owner 2026-10-23: provider en model goedgekeurd: Anthropic
 Claude API, `claude-haiku-5-5` ("gebruik claude").** De automatische route (B) mag
-worden gebouwd en getest zonder betaalde aanroepen. **Budget en
-gegevensverwerking blijven NEEDS_APPROVAL**, en zonder die twee akkoorden en
-zonder een door de eigenaar aangemaakte sleutel is er geen betaalde aanroep. De
-vergelijkingsarm met `claude-sonnet-5-5` vervalt tot de eigenaar die apart vraagt.
+worden gebouwd en getest zonder betaalde aanroepen. De vergelijkingsarm met
+`claude-sonnet-5-5` vervalt tot de eigenaar die apart vraagt.
+
+**Besluit Product Owner 2026-10-23 (vervolg, "akkoord 1 en 2"): budget en
+gegevensverwerking goedgekeurd.**
+1. **Proefbudget: US$ 10, hard**, afgedwongen op drie niveaus:
+   - de eigen Anthropic-werkruimte met een bestedingslimiet van $10, automatisch bijvullen uit en alleen vooraf gekocht tegoed;
+   - de budgetlog van de proef met een cumulatief plafond van 900 eurocent;
+   - per aanroep maximaal 30 eurocent, hooguit 40 aanroepen en 1 tegelijk.
+2. **Gegevensverwerking:** alleen openbare menu-inhoud van toegestane bronnen, geen training op API-gegevens, bewaring maximaal 30 dagen en globale routering. Geen persoonsgegevens en geen productiedata.
+
+**Nog open:** de API-sleutel, die de eigenaar zelf aanmaakt en alleen lokaal en gitignored neerzet. Daarna draait de Lead de live proef (`docs/guides/menu-extraction-ai-probe.md`) op de gepinde captures. Geen productieactivering, geen app-koppeling en geen andere provider of fallback.
 
 **Oorspronkelijke status: NEEDS_APPROVAL.** Er wordt niets betaald, geen account aangemaakt en
 geen sleutel gebruikt totdat de Product Owner provider/model, budget en
