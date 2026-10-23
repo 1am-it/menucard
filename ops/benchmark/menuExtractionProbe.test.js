@@ -7,7 +7,9 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 
 const {
+  MAX_CONSECUTIVE_PROVIDER_FAILURES,
   PROBE_BUDGET,
+  PROBE_CALL_TIMEOUT_MS,
   PROBE_LIMITS,
   PROBE_SOURCE_IDS,
   chunkCaptures,
@@ -16,6 +18,7 @@ const {
   estimateSource,
   evaluateStop,
   evidenceCoverage,
+  isProviderFailureReason,
   planSourceCalls,
   summarizeSource,
   titleOnlyCategoryErrors,
@@ -134,6 +137,38 @@ test('K4: only the documented stop reasons end the probe immediately', () => {
     code: 'schema_error_rate_above_half',
   });
   assert.deepEqual(evaluateStop({ calls: 2, schemaErrors: 1 }), { stop: false, code: null });
+});
+
+test('L3: an unknown cost stops the run, whatever the technical reason was', () => {
+  // The first live run stopped at 13 calls while 12 of them had no usage: a
+  // timeout (or any provider failure) that reported no cost must end the run.
+  for (const reason of ['timeout', 'provider_unavailable', 'rate_limited', 'provider_refusal']) {
+    assert.deepEqual(evaluateStop({ reason, calls: 1, costUnknown: true }), { stop: true, code: 'cost_unknown' });
+  }
+  // A known cost on a failed call is not by itself a stop reason.
+  assert.deepEqual(evaluateStop({ reason: 'schema_violation', calls: 1, schemaErrors: 1, costUnknown: false }), { stop: false, code: null });
+});
+
+test('L3: two consecutive provider failures or timeouts end the run', () => {
+  assert.equal(MAX_CONSECUTIVE_PROVIDER_FAILURES, 2);
+  assert.deepEqual(evaluateStop({ reason: 'timeout', calls: 2, consecutiveFailures: 2 }), { stop: true, code: 'consecutive_provider_failures' });
+  assert.deepEqual(evaluateStop({ reason: 'provider_unavailable', calls: 2, consecutiveFailures: 2, costUnknown: true }), {
+    stop: true,
+    code: 'cost_unknown',
+  });
+  assert.deepEqual(evaluateStop({ reason: 'timeout', calls: 1, consecutiveFailures: 1 }), { stop: false, code: null });
+  // A schema violation has its own rate rule and does not count as a provider failure.
+  assert.equal(isProviderFailureReason('schema_violation'), false);
+  assert.equal(isProviderFailureReason('source_missing'), false);
+  for (const reason of ['timeout', 'provider_unavailable', 'rate_limited', 'provider_refusal', 'output_truncated', 'input_limit']) {
+    assert.equal(isProviderFailureReason(reason), true, `${reason} counts as a provider failure`);
+  }
+});
+
+test('L2: the probe timeout is 180 s and the documented limits stay fixed', () => {
+  assert.equal(PROBE_CALL_TIMEOUT_MS, 180_000);
+  assert.equal(PROBE_LIMITS.callTimeoutMs, 180_000);
+  assert.equal(Object.isFrozen(PROBE_LIMITS), true);
 });
 
 test('K4: a source summary keeps the official counts and the title-only diagnostic separate', () => {

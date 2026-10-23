@@ -16,9 +16,20 @@ const { actualRows, normalizePath, percent } = require('./referenceComparison');
 const PROBE_SOURCE_IDS = Object.freeze(['zuyd', 'andalous', 'pellens', 'chocolat', 'smelt', 'blossem', 'bardot', 'wolfslaar']);
 
 // The probe keeps the documented default limits and only raises the output
-// ceiling, as agreed for the trial (thinking tokens count as output tokens).
+// ceiling and the call timeout, as agreed for the trial (thinking tokens count
+// as output tokens).
+//
+// The timeout is 180 s (L2 of review 6373183699, "bijvoorbeeld 180 s"): a
+// 16K-token generation (measured: 12 of 13 live calls produced no usage at the
+// old 60 s ceiling) streams token by token, and the timer in
+// src/lib/menuExtractionAdapter.js bounds the whole generation, while the SDK's
+// own request timeout only bounds the wait for the response headers. 180 s is
+// three times the old ceiling and still well inside the 10-minute SDK default;
+// it is a ceiling for one call, not a target.
+const PROBE_CALL_TIMEOUT_MS = 180_000;
+
 const PROBE_LIMITS = Object.freeze({
-  callTimeoutMs: 60_000,
+  callTimeoutMs: PROBE_CALL_TIMEOUT_MS,
   maxInputTokens: 50_000,
   maxOutputTokens: 16_000,
   maxDocuments: 5,
@@ -47,6 +58,22 @@ const IMMEDIATE_STOP_REASONS = Object.freeze([
   'budget_ledger_corrupt',
   'budget_ledger_limits_changed',
 ]);
+
+// Reasons that mean the provider answered nothing usable. Two of these in a row
+// end the run (L3): continuing would spend more money on a failing route.
+// `schema_violation` is deliberately absent — it has its own rate rule — and so
+// is `source_missing`, which is our own input problem, not the provider's.
+const PROVIDER_FAILURE_REASONS = Object.freeze([
+  'timeout',
+  'rate_limited',
+  'provider_unavailable',
+  'model_unavailable',
+  'provider_refusal',
+  'output_truncated',
+  'input_limit',
+]);
+
+const MAX_CONSECUTIVE_PROVIDER_FAILURES = 2;
 
 function estimateTokens(text) {
   return Math.ceil((typeof text === 'string' ? text : '').length / 4);
@@ -296,18 +323,40 @@ function summarizeSource({ source, reference, menus, comparison, sourceById, tit
  * The documented stop rules. `calls` counts the calls already made (including
  * the failed one) and `schemaErrors` the schema failures among them.
  */
-function evaluateStop({ reason = null, calls = 0, schemaErrors = 0 } = {}) {
+/**
+ * The documented stop rules (review 6373183699, L3).
+ * `calls` counts the calls already made (including the failed one) and
+ * `schemaErrors` the schema failures among them.
+ *
+ * 1. an immediate-stop reason ends the run at once;
+ * 2. a call whose actual cost is unknown ends the run at once, whatever the
+ *    technical reason was — a paid failure must not silently continue;
+ * 3. two consecutive provider failures/timeouts end the run as well.
+ */
+function evaluateStop({ reason = null, calls = 0, schemaErrors = 0, costUnknown = false, consecutiveFailures = 0 } = {}) {
   if (reason && IMMEDIATE_STOP_REASONS.includes(reason)) return { stop: true, code: reason };
+  if (costUnknown === true) return { stop: true, code: 'cost_unknown' };
+  if (Number.isInteger(consecutiveFailures) && consecutiveFailures >= MAX_CONSECUTIVE_PROVIDER_FAILURES) {
+    return { stop: true, code: 'consecutive_provider_failures' };
+  }
   if (calls >= 2 && schemaErrors > calls / 2) return { stop: true, code: 'schema_error_rate_above_half' };
   return { stop: false, code: null };
 }
 
+/** Whether a reason counts as a provider failure for the consecutive rule. */
+function isProviderFailureReason(reason) {
+  return typeof reason === 'string' && PROVIDER_FAILURE_REASONS.includes(reason);
+}
+
 module.exports = {
   IMMEDIATE_STOP_REASONS,
+  MAX_CONSECUTIVE_PROVIDER_FAILURES,
   PROBE_BUDGET,
+  PROBE_CALL_TIMEOUT_MS,
   PROBE_LIMITS,
   PROBE_RUNS,
   PROBE_SOURCE_IDS,
+  PROVIDER_FAILURE_REASONS,
   chunkCaptures,
   compareRuns,
   estimateProbe,
@@ -315,6 +364,7 @@ module.exports = {
   estimateTokens,
   evaluateStop,
   evidenceCoverage,
+  isProviderFailureReason,
   planSourceCalls,
   promptEstimate,
   summarizeSource,
