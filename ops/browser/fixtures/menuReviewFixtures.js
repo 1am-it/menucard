@@ -723,6 +723,56 @@ function manualImportScenario() {
     now: new Date('2026-10-22T12:05:00.000Z'),
   });
   if (!report.ok) throw new Error(`manual fixture invalid: ${report.code}`);
+  // U1/U2 (review 6376543234): een fictief afgekeurd antwoord met dezelfde
+  // vorm als de echte 422 van de importroute. Gebouwd met de echte validator en
+  // de echte vertaling, zodat de browser precies ziet wat de server stuurt.
+  const rejected = buildImportReport({
+    importId: 'fixture-import-rejected',
+    bundle,
+    output: {
+      menus: [
+        {
+          title: 'Fictief Lunch',
+          sourceId: 'fictief-bron-2',
+          categories: [
+            {
+              name: 'Bites',
+              items: [
+                {
+                  name: 'Fictieve salade',
+                  priceStatus: 'known',
+                  amountMinorUnits: 1250,
+                  currency: 'EUR',
+                  evidence: evidenceFor('Bites · 1', 'Fictieve salade 99,00'),
+                },
+                {
+                  name: 'Fictief glas wijn',
+                  priceStatus: 'known',
+                  amountMinorUnits: 450,
+                  currency: 'EUR',
+                  priceVariants: [{ label: 'Glas', amountMinorUnits: 450, currency: 'EUR' }],
+                  evidence: evidenceFor('Bites · 2', 'Fictief glas wijn 4,50'),
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      coverage: {
+        status: 'complete',
+        sourcesRead: 1,
+        pagesRead: 1,
+        itemsExtracted: 9,
+        unreadSources: [{ sourceId: 'source-1', locator: 'pagina 1', reason: 'unreadable' }],
+        limitations: [],
+      },
+    },
+    aiName: 'Claude',
+    now: new Date('2026-10-22T12:06:00.000Z'),
+  });
+  if (rejected.ok || rejected.code !== 'schema_violation') {
+    throw new Error(`manual rejection fixture invalid: ${rejected.code}`);
+  }
   const wine = report.rows.find((row) => row.code === 'price_variant');
   const coffee = report.rows.find((row) => row.code === 'quote_not_in_source');
   const first = decideRow({ report, decisions: new Map(), decision: { rowId: wine.id, action: 'choose_price', variantIndex: 1 } });
@@ -752,6 +802,19 @@ function manualImportScenario() {
       text: '# Vervolgvraag over één regel\n\nFictief.\n\n```text\nFictieve brontekst.\n```',
       byteLength: 120,
       rowIds: [coffee.id],
+    },
+    // U1/U2: dezelfde velden en dezelfde status als de echte importroute geeft
+    // bij een afgekeurd antwoord.
+    rejection: {
+      status: 422,
+      body: {
+        error: rejected.message,
+        reason: rejected.code,
+        problems: rejected.problems,
+        problemSummary: rejected.problemSummary,
+        problemSummaryOmitted: rejected.problemSummaryOmitted,
+        recoveryQuestion: rejected.recoveryQuestion,
+      },
     },
     saved: {
       concept: { id: 'concept-fictief-import-1', version: 1, unchanged: false },

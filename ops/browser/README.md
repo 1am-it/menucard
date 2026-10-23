@@ -160,6 +160,23 @@ refused by the guard. The app calls no provider in any scenario, so there is no
 AI traffic to intercept. This remains fixture evidence: no real source, no real
 concept write, no independent review.
 
+### Afgekeurd antwoord: leesbare problemen en herstelvraag (review 6376543234)
+
+`?manualFail=schema` on the same page lets only the `POST …/imports` fixture
+answer with the real `422 schema_violation` shape: a fictional answer that the
+actual validator rejects, translated by `src/lib/manualMenuImportProblems.js`
+(built in `fixtures/menuReviewFixtures.js`, not hand-written HTML). The check
+opens the prompt, pastes a fictional answer, presses "Controleren" and asserts
+that the page shows "Wat de AI moet herstellen" with at most five plain Dutch
+sentences (naming the dish, section or menu card), no JSON path in that list, one
+read-only copyable recovery question that starts with "Corrigeer alleen deze
+punten", an inline check that the panel is inside the viewport for the
+screenshot, and a collapsed "Technische details" block that still contains the
+validator lines. It runs at 390 px/dark and 320 px/light without horizontal
+overflow and records `manual-ai-import-problems-390-dark.png` and
+`manual-ai-import-problems-320-light.png` in `output/` and in the evidence file.
+The rejected answer stores nothing: the follow-up steps stay unavailable.
+
 ## Coverage
 
 - exact breadcrumb, source and "handmatig beoordelen" links;

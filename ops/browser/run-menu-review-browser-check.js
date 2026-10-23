@@ -1184,6 +1184,119 @@ function manualExpiredUrl(theme) {
   return `${MANUAL_URL}?${params.toString()}`;
 }
 
+// U1/U2 (review 6376543234): de fixture antwoordt op stap 2 met een afgekeurd
+// antwoord (422) inclusief leesbare punten en de herstelvraag.
+function manualRejectedUrl(theme) {
+  const params = new URLSearchParams({
+    fixture: 'manual',
+    restaurant: fixtures.RESTAURANT.id,
+    name: fixtures.RESTAURANT.name,
+    url: 'https://fictief-brasserie.invalid/menu',
+    manualFail: 'schema',
+    theme,
+  });
+  return `${MANUAL_URL}?${params.toString()}`;
+}
+
+/** Maakt een prompt en controleert een fictief antwoord dat wordt afgekeurd. */
+async function rejectManualAnswer(cdp, theme) {
+  await openRoute(cdp, manualRejectedUrl(theme), `document.body.innerText.includes('Prompt maken')`);
+  await clickButton(cdp, 'Prompt maken');
+  await waitFor(cdp, `document.body.innerText.includes('gaat mee in de prompt')`, 15000);
+  await setFieldValue(cdp, '#mai-answer', 'Korte samenvatting.\n```json\n{"menus":[],"coverage":{}}\n```');
+  await waitFor(cdp, `document.body.innerText.includes('Antwoord geplakt')`, 15000);
+  await clickButton(cdp, 'Controleren');
+  return waitFor(cdp, `document.body.innerText.includes('Wat de AI moet herstellen')`, 15000);
+}
+
+/**
+ * Leest het herstelblok uit de pagina. De hoofdtekst (de lijst) moet gewoon
+ * Nederlands zijn; het technische detail staat ingeklapt in <details>.
+ */
+async function readProblemsPanel(cdp) {
+  return evalJs(cdp, `(() => {
+    const section = document.querySelector('.mai-problems');
+    if (!section) return null;
+    const items = [...section.querySelectorAll('.mai-problem-list li')].map((li) => li.innerText.trim());
+    const field = document.querySelector('#mai-recovery');
+    const details = section.querySelector('details');
+    return {
+      items,
+      question: field ? field.value : null,
+      readOnly: field ? field.readOnly : null,
+      detailsSummary: details ? (details.querySelector('summary') || {}).innerText : null,
+      detailsOpen: details ? details.open : null,
+      detailsText: details ? details.textContent : null,
+      pathsInMain: /menus\\[|coverage\\.|items\\[/.test(items.join(' ')),
+      overflow: document.documentElement.scrollWidth - window.innerWidth,
+    };
+  })()`);
+}
+
+async function manualRejectedScenario(cdp) {
+  await setViewport(cdp, 390, 900);
+  const shown = await rejectManualAnswer(cdp, 'dark');
+  check('manual import rejection: the readable problems are shown', shown);
+  const panel = await readProblemsPanel(cdp);
+  check('manual import rejection: at most five concrete problems', Boolean(panel) && panel.items.length >= 1 && panel.items.length <= 5, panel ? JSON.stringify(panel.items) : 'no panel');
+  check(
+    'manual import rejection: every problem is a plain Dutch sentence',
+    Boolean(panel) && panel.items.every((line) => /^(Bij \d+ |Op \d+ )/.test(line)),
+    panel ? JSON.stringify(panel.items) : 'no panel',
+  );
+  check('manual import rejection: the problems name the dish or the section', Boolean(panel) && panel.items.some((line) => /Fictief glas wijn|Fictieve salade|Fictief Lunch/.test(line)), panel ? JSON.stringify(panel.items) : 'no panel');
+  check('manual import rejection: no JSON path in the main text', Boolean(panel) && panel.pathsInMain === false);
+  check(
+    'manual import rejection: one copyable recovery question',
+    Boolean(panel) && typeof panel.question === 'string' && panel.question.startsWith('Corrigeer alleen deze punten'),
+    panel && panel.question ? panel.question.slice(0, 60) : 'none',
+  );
+  check('manual import rejection: the recovery question is selectable, not editable', Boolean(panel) && panel.readOnly === true);
+  check('manual import rejection: technical detail is collapsed', Boolean(panel) && panel.detailsOpen === false && panel.detailsSummary === 'Technische details');
+  check(
+    'manual import rejection: the technical detail still names the validator lines',
+    Boolean(panel) && typeof panel.detailsText === 'string' && panel.detailsText.includes('menus[0]'),
+  );
+  const banner = await evalJs(cdp, `(() => { const el = document.querySelector('.di-banner-danger'); return el ? el.innerText : null; })()`);
+  check(
+    'manual import rejection: the plain banner stays, without technical codes',
+    typeof banner === 'string' && banner.includes('past niet bij de afspraken') && !banner.includes('menus['),
+    banner,
+  );
+  // Het bewijs moet het herstelblok echt in beeld hebben, niet alleen bestaan.
+  const visible = await evalJs(cdp, `(() => {
+    const el = document.querySelector('.mai-problems');
+    if (!el) return null;
+    el.scrollIntoView({ block: 'start' });
+    const rect = el.getBoundingClientRect();
+    return { top: Math.round(rect.top), height: window.innerHeight };
+  })()`);
+  check(
+    'manual import rejection: the panel is in view for the screenshot',
+    Boolean(visible) && visible.top >= 0 && visible.top < visible.height,
+    visible ? JSON.stringify(visible) : 'none',
+  );
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'manual-ai-import-problems-390-dark.png'));
+  recordClickpath(
+    'manual import rejection',
+    ['Menukaart plakken', 'Controleren', 'Wat de AI moet herstellen', 'Vervolgvraag aan de AI', 'Technische details (ingeklapt)'],
+    Boolean(panel) && panel.items.length <= 5,
+  );
+
+  await setViewport(cdp, 320, 900);
+  const narrowShown = await rejectManualAnswer(cdp, 'light');
+  const narrow = await readProblemsPanel(cdp);
+  check('manual import rejection 320px/light: the problems are shown', narrowShown);
+  check('manual import rejection 320px/light: no horizontal overflow', Boolean(narrow) && narrow.overflow <= 0, narrow ? `overflow=${narrow.overflow}` : 'no panel');
+  check(
+    'manual import rejection 320px/light: every problem stays visible',
+    Boolean(narrow) && narrow.items.length === (panel ? panel.items.length : 0),
+    narrow ? JSON.stringify(narrow.items.length) : 'no panel',
+  );
+  await evalJs(cdp, `(() => { const el = document.querySelector('.mai-problems'); if (el) el.scrollIntoView({ block: 'start' }); return true; })()`);
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'manual-ai-import-problems-320-light.png'));
+}
+
 async function manualImportScenario(cdp) {
   await setViewport(cdp, 390, 900);
 
@@ -1273,6 +1386,9 @@ async function main() {
     await structureScenario(cdp);
     await manualImportScenario(cdp);
     await manualReviewSteps(cdp);
+    // U1/U2: pas na de bestaande stroom, want die gaat verder op de pagina die
+    // stap 2 achterliet. Dit scenario opent zijn eigen afgekeurde antwoord.
+    await manualRejectedScenario(cdp);
     await v2Scenario(cdp);
     await errorScenario(cdp);
     for (const width of [320, 390]) {

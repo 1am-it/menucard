@@ -136,6 +136,11 @@ function fixtureBootstrap(scenarios, options = {}) {
             409,
           );
         }
+        // U1/U2: een fictief afgekeurd antwoord (422) met leesbare punten en de
+        // herstelvraag, zodat het scherm de echte foutweergave kan tonen.
+        if (verdict.routeId === 'manual-imports' && params.get('manualFail') === 'schema') {
+          return jsonResponse(manual.rejection.body, manual.rejection.status);
+        }
         if (verdict.routeId === 'manual-imports') {
           return jsonResponse({
             import: manual.import,
