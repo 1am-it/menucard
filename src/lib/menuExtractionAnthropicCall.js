@@ -50,6 +50,18 @@ const ANTHROPIC_PROVIDER = 'anthropic';
 const ANTHROPIC_MODEL = 'claude-haiku-5-5';
 const ANTHROPIC_SDK_VERSION = '0.133.0';
 
+// M1 of the Delivery Lead order for #59 / BE-21 (review 6373786786): the output
+// contract can be demanded in two ways. `schema` sends it as
+// `output_config.format` (constrained decoding); `prompt` sends no
+// `output_config` at all, states the same schema JSON in the instruction block
+// and leaves the JSON guarantee to the protocol plus the backend validator. The
+// two modes switch on one explicit option (`--output-mode=schema|prompt`), and
+// the validator runs in both.
+const OUTPUT_MODES = Object.freeze(['schema', 'prompt']);
+const DEFAULT_OUTPUT_MODE = 'schema';
+// M2: a provider message is stored, so it is capped and stripped first.
+const ERROR_MESSAGE_MAX_CHARS = 300;
+
 // Fixed price table, kept in code so a cost can never be invented at runtime.
 // Source: Anthropic Pricing, retrieved 2026-10-22 (claude-haiku-5-5). USD is
 // converted to euro cents conservatively at 1:1 and rounded up; thinking tokens
@@ -82,6 +94,7 @@ const CALL_ERROR_CODES = Object.freeze({
   timeout: 'timeout',
   schema_violation: 'schema_violation',
   source_missing: 'source_missing',
+  invalid_output_mode: 'invalid_output_mode',
 });
 
 class AnthropicCallError extends Error {
@@ -144,21 +157,50 @@ function costFromUsage(usage) {
 }
 
 /**
- * The request schema for structured outputs, derived from the existing output
- * contract. Only constructs the documented structured-output support promises
- * are used (type/properties/required/additionalProperties/items/enum/anyOf);
- * no numeric or length constraint is smuggled in here, because the backend
- * validator is the authority for those rules.
+ * The request schema for `output_config.format` (#59 M1, review 6373786786).
+ *
+ * The live 400 `invalid_request_error "Schema is too complex."` came from the
+ * SHAPE of this schema, not from the output contract. The rules applied here
+ * are the official structured-output rules (Structured outputs,
+ * platform.claude.com/docs/en/build-with-claude/structured-outputs, retrieved
+ * 2026-10-23):
+ *
+ *   - "Simplify nested structures. Deeply nested objects with optional fields
+ *     compound the complexity. Flatten structures where possible." Almost every
+ *     property is therefore REQUIRED. The four exceptions are `priceVariants`,
+ *     `supplementOf`, `availability` and `rejected[].text`: the validator treats
+ *     an empty array or string as invalid for those (a present but empty
+ *     `priceVariants` even demands priceStatus `multiple_undecomposed`), so the
+ *     key may only be absent.
+ *   - "Remove unsupported constraints (for example, `minimum`, `maximum`,
+ *     `minLength`, `maxLength`)"; only type/properties/required/
+ *     additionalProperties/items/enum/anyOf/description appear below. No
+ *     numeric, length or pattern keyword is smuggled in: the backend validator
+ *     remains the authority for those rules.
+ *   - "Claude receives a simplified schema, but a helper that validates
+ *     responses still enforces every constraint in your code." On VALUES this
+ *     schema is looser than src/lib/menuExtractionSchema.js, never stricter:
+ *     `amountMinorUnits`/`currency` are nullable because the validator accepts
+ *     null and needs an amount only for priceStatus "known", while every status
+ *     stays an enum so no status can be invented. On PRESENCE it is stricter
+ *     than the validator's "absent or empty" rule, and deliberately so: the
+ *     empty value (`[]`, `""`, `false`, `null`) is always available and is
+ *     itself valid, so no truthful extraction is blocked. The four fields where
+ *     the validator accepts neither empty nor null stay optional.
+ *   - A field whose truthful "none" is an empty value is required exactly
+ *     because that empty value can never force a fabricated dish, variant or
+ *     order.
  */
 function buildOutputJsonSchema() {
+  const nullable = (type, extra = {}) => ({ anyOf: [{ type, ...extra }, { type: 'null' }] });
   const evidence = {
     type: 'object',
     additionalProperties: false,
     required: ['sourceId', 'locator', 'quote'],
     properties: {
       sourceId: { type: 'string', description: 'One of the supplied source ids.' },
-      locator: { type: 'string', description: 'Page, section or printed position in that source.' },
-      quote: { type: 'string', description: 'Short literal passage from the cited source.' },
+      locator: { type: 'string' },
+      quote: { type: 'string' },
     },
   };
   const variant = {
@@ -166,24 +208,21 @@ function buildOutputJsonSchema() {
     additionalProperties: false,
     required: ['label', 'amountMinorUnits', 'currency'],
     properties: {
-      label: {
-        anyOf: [{ type: 'string' }, { type: 'null' }],
-        description: 'The printed portion/variant label, or null when the source prints none.',
-      },
-      amountMinorUnits: { type: 'integer', description: 'Whole euro cents as printed.' },
+      label: nullable('string'),
+      amountMinorUnits: { type: 'integer' },
       currency: { type: 'string', enum: ['EUR'] },
     },
   };
   const item = {
     type: 'object',
     additionalProperties: false,
-    required: ['name', 'priceStatus', 'evidence'],
+    required: ['name', 'description', 'priceStatus', 'amountMinorUnits', 'currency', 'priceText', 'isFrom', 'allergens', 'evidence'],
     properties: {
       name: { type: 'string' },
-      description: { type: 'string' },
+      description: { type: 'string', description: 'Empty string when the source prints none.' },
       priceStatus: { type: 'string', enum: schema.PRICE_STATUSES },
-      amountMinorUnits: { type: 'integer', description: 'Only for priceStatus known.' },
-      currency: { type: 'string', enum: ['EUR'] },
+      amountMinorUnits: nullable('integer'),
+      currency: nullable('string', { enum: ['EUR'] }),
       priceText: { type: 'string' },
       priceVariants: { type: 'array', items: variant },
       isFrom: { type: 'boolean' },
@@ -204,7 +243,7 @@ function buildOutputJsonSchema() {
   const category = {
     type: 'object',
     additionalProperties: false,
-    required: ['name', 'items'],
+    required: ['name', 'path', 'uncertain', 'items'],
     properties: {
       name: { type: 'string' },
       path: { type: 'array', items: { type: 'string' } },
@@ -215,19 +254,19 @@ function buildOutputJsonSchema() {
   const menu = {
     type: 'object',
     additionalProperties: false,
-    required: ['title', 'sourceId', 'categories'],
+    required: ['title', 'sourceId', 'variant', 'order', 'categories'],
     properties: {
       title: { type: 'string' },
       sourceId: { type: 'string', description: 'One of the supplied source ids.' },
-      variant: { anyOf: [{ type: 'string' }, { type: 'null' }] },
-      order: { anyOf: [{ type: 'integer' }, { type: 'null' }] },
+      variant: nullable('string'),
+      order: nullable('integer'),
       categories: { type: 'array', items: category },
     },
   };
   return {
     type: 'object',
     additionalProperties: false,
-    required: ['menus', 'coverage'],
+    required: ['menus', 'rejected', 'coverage'],
     properties: {
       menus: { type: 'array', items: menu },
       rejected: {
@@ -283,11 +322,16 @@ function sourceHeaderText(source) {
 
 /**
  * Builds the Messages request the adapter's `call` sends. Pure, so the ops
- * dry-run can estimate the exact prompt without a network call.
+ * dry-run can estimate the exact prompt without a network call and the tests
+ * can assert both output modes offline.
  */
-function buildAnthropicRequest({ protocol, sources, limits } = {}) {
+function buildAnthropicRequest({ protocol, sources, limits, outputMode } = {}) {
   if (typeof protocol !== 'string' || protocol.trim().length === 0) {
     throw new AnthropicCallError(CALL_ERROR_CODES.provider_not_configured, 'the pinned instruction is required');
+  }
+  const mode = outputMode === undefined || outputMode === null ? DEFAULT_OUTPUT_MODE : outputMode;
+  if (!OUTPUT_MODES.includes(mode)) {
+    throw new AnthropicCallError(CALL_ERROR_CODES.invalid_output_mode, `output mode must be one of ${OUTPUT_MODES.join('|')}`);
   }
   const sourceList = Array.isArray(sources) ? sources : [];
   if (sourceList.length === 0) {
@@ -307,6 +351,17 @@ function buildAnthropicRequest({ protocol, sources, limits } = {}) {
         `evidence.sourceId en rejected/unreadSources: ${sourceList.map((source) => source.id).join(', ')}.`,
     },
   ];
+  if (mode === 'prompt') {
+    // No `output_config`: the schema is stated once, as data, and the protocol
+    // (MENU-EXTRACTION.md §5) already demands JSON only. The validator still
+    // decides whether the answer is usable.
+    content.push({
+      type: 'text',
+      text:
+        'Antwoord uitsluitend met één JSON-object dat exact dit JSON Schema volgt: geen Markdown, ' +
+        `geen codeblok en geen toelichting. JSON Schema: ${JSON.stringify(buildOutputJsonSchema())}`,
+    });
+  }
   for (const source of sourceList) {
     const hasText = typeof source.text === 'string' && source.text.length > 0;
     const hasDocument = typeof source.documentBase64 === 'string' && source.documentBase64.length > 0;
@@ -325,13 +380,16 @@ function buildAnthropicRequest({ protocol, sources, limits } = {}) {
     }
   }
 
-  return {
+  const request = {
     model: ANTHROPIC_MODEL,
     max_tokens: maxTokens,
     system: protocol,
     messages: [{ role: 'user', content }],
-    output_config: { format: { type: 'json_schema', schema: buildOutputJsonSchema() } },
   };
+  if (mode === 'schema') {
+    request.output_config = { format: { type: 'json_schema', schema: buildOutputJsonSchema() } };
+  }
+  return request;
 }
 
 /** The text of the first text block; a JSON output arrives as one text block. */
@@ -361,6 +419,51 @@ function classifySdkError(err) {
   return CALL_ERROR_CODES.provider_unavailable;
 }
 
+/**
+ * M2 (#59, review 6373786786): a provider message may be stored in a durable
+ * report, so it is cleaned before it leaves this module — whitespace collapsed,
+ * anything that looks like a credential or a header redacted, and the length
+ * capped. Headers themselves are never read.
+ */
+function sanitizeErrorMessage(value, max = ERROR_MESSAGE_MAX_CHARS) {
+  if (typeof value !== 'string') return null;
+  let text = value.replace(/\s+/g, ' ').trim();
+  if (text.length === 0) return null;
+  text = text
+    .replace(/\bsk-(?:ant-)?[A-Za-z0-9_-]{6,}/g, '[redacted]')
+    .replace(/\b(x-api-key|api[-_]?key)\b\s*[:=]\s*\S+/gi, '$1 [redacted]')
+    .replace(/\bauthorization\b\s*[:=]\s*(?:bearer\s+)?\S+/gi, 'authorization [redacted]')
+    .replace(/\bbearer\s+[A-Za-z0-9._~+/=-]{6,}/gi, 'bearer [redacted]');
+  return text.length > max ? `${text.slice(0, max - 1)}…` : text;
+}
+
+function shortErrorField(value, max = 80) {
+  if (typeof value !== 'string') return null;
+  const text = value.trim();
+  return text.length === 0 ? null : text.slice(0, max);
+}
+
+/**
+ * The four facts M2 requires, read from the SDK error (never from a request):
+ * the SDK error class, the API error type, a sanitised message and the provider
+ * request id. `errorCause` adds the transport code (for example ECONNRESET or
+ * UND_ERR_SOCKET), which is what makes a closed connection diagnosable.
+ */
+function describeSdkError(err, stream = null) {
+  const body = err && err.error && typeof err.error === 'object' ? err.error : null;
+  const apiError = body && body.error && typeof body.error === 'object' ? body.error : null;
+  const cause = err && err.cause && typeof err.cause === 'object' ? err.cause : null;
+  return {
+    errorClass: shortErrorField(err && err.constructor ? err.constructor.name : err && err.name),
+    errorType: shortErrorField((apiError && apiError.type) || (body && body.type) || (err && err.type)),
+    // The API body message is clearer than the SDK's, which repeats the JSON body.
+    errorMessage: sanitizeErrorMessage((apiError && apiError.message) || (err && err.message)),
+    errorCause: shortErrorField((cause && (cause.code || cause.name)) || (err && err.code)),
+    requestId: shortErrorField((err && (err.requestID || err.request_id)) || (stream && stream.request_id), 200),
+    httpStatus: err && Number.isInteger(err.status) ? err.status : null,
+  };
+}
+
 function loadAnthropicSdk() {
   const loaded = require('@anthropic-ai/sdk');
   const Anthropic = typeof loaded === 'function' ? loaded : loaded.Anthropic || loaded.default;
@@ -382,14 +485,18 @@ function applyCost(budget, costEurCents) {
  * offline regressions only; a request still requires a (fixture) key so the
  * disabled path stays the same in tests and in the app.
  */
-function createAnthropicStructuredCall({ env = process.env, client = null, budget = null, model = ANTHROPIC_MODEL } = {}) {
+function createAnthropicStructuredCall({ env = process.env, client = null, budget = null, model = ANTHROPIC_MODEL, outputMode = DEFAULT_OUTPUT_MODE } = {}) {
+  if (!OUTPUT_MODES.includes(outputMode)) {
+    throw new AnthropicCallError(CALL_ERROR_CODES.invalid_output_mode, `output mode must be one of ${OUTPUT_MODES.join('|')}`);
+  }
   const apiKey = env && typeof env[ANTHROPIC_API_KEY_ENV] === 'string' ? env[ANTHROPIC_API_KEY_ENV].trim() : '';
-  const state = { lastCall: null, client: client || null, controller: null, stream: null, callCount: 0 };
+  const state = { lastCall: null, client: client || null, controller: null, stream: null, callCount: 0, outputMode, deadlineExceeded: false };
   const base = {
     provider: ANTHROPIC_PROVIDER,
     model,
     sdkVersion: ANTHROPIC_SDK_VERSION,
     transport: 'messages.stream',
+    outputMode,
     pricing: ANTHROPIC_PRICING,
     apiKeyEnv: ANTHROPIC_API_KEY_ENV,
   };
@@ -422,26 +529,30 @@ function createAnthropicStructuredCall({ env = process.env, client = null, budge
     // `undefined` is the adapter guard's "not reported yet" state; the record
     // below keeps `null` as the explicit unknown outcome.
     if (budget && typeof budget === 'object') budget.costEurCents = undefined;
-    const body = buildAnthropicRequest(input);
+    const body = buildAnthropicRequest({ ...input, outputMode: state.outputMode });
     const controller = new AbortController();
     state.controller = controller;
+    state.deadlineExceeded = false;
     const signals = [input.signal, controller.signal].filter((signal) => signal && typeof signal.addEventListener === 'function');
     const signal = signals.length > 1 && typeof AbortSignal.any === 'function' ? AbortSignal.any(signals) : signals[0] || undefined;
     const requestOptions = { signal };
-    if (input.limits && Number.isInteger(input.limits.callTimeoutMs) && input.limits.callTimeoutMs > 0) {
+    const callTimeoutMs = input.limits && Number.isInteger(input.limits.callTimeoutMs) && input.limits.callTimeoutMs > 0 ? input.limits.callTimeoutMs : null;
+    if (callTimeoutMs) {
       // Bounds the fetch until the response headers only (see the header note).
-      requestOptions.timeout = input.limits.callTimeoutMs;
+      requestOptions.timeout = callTimeoutMs;
     }
 
     state.callCount += 1;
     state.lastCall = null;
     const startedAt = Date.now();
     let stream = null;
+    let deadlineHandle = null;
 
     function record(fields) {
       state.lastCall = {
         provider: ANTHROPIC_PROVIDER,
         model,
+        outputMode: state.outputMode,
         attempt: true,
         streamed: true,
         ok: !fields.reason,
@@ -454,6 +565,15 @@ function createAnthropicStructuredCall({ env = process.env, client = null, budge
         durationMs: Math.max(0, Date.now() - startedAt),
         requestId: fields.requestId || null,
         messageId: fields.messageId || null,
+        // M2: the error identity, so a 400 or a closed connection is
+        // diagnosable from the report alone.
+        errorClass: fields.errorClass || null,
+        errorType: fields.errorType || null,
+        errorMessage: fields.errorMessage || null,
+        errorCause: fields.errorCause || null,
+        // M3: true when OUR deadline ended the call, false when the provider
+        // or the connection did. The two must not be confused again.
+        deadlineHit: state.deadlineExceeded === true,
       };
       return state.lastCall;
     }
@@ -466,16 +586,50 @@ function createAnthropicStructuredCall({ env = process.env, client = null, budge
       // (and without a catching promise) a mid-stream error becomes an
       // unhandled rejection instead of a rejected `finalMessage()`.
       if (typeof stream.on === 'function') stream.on('error', () => {});
-      response = await stream.finalMessage();
+      // M3 (#59, review 6373786786): the configured probe limit is armed here
+      // as a hard deadline on THIS call. The SDK's own `timeout` option only
+      // wraps the wait for response headers (SDK default 600 s), so without
+      // this timer a limit of 180 s would not be a limit on the generation.
+      const finals = stream.finalMessage();
+      // The race may settle first; the losing promise must never become an
+      // unhandled rejection.
+      finals.catch(() => {});
+      if (callTimeoutMs) {
+        const deadline = new Promise((_, reject) => {
+          deadlineHandle = setTimeout(() => {
+            state.deadlineExceeded = true;
+            if (typeof stream.abort === 'function') {
+              try {
+                stream.abort();
+              } catch {
+                // Best effort: the controller below still aborts the request.
+              }
+            }
+            controller.abort('call_timeout');
+            reject(Object.assign(new Error('timeout'), { code: 'timeout' }));
+          }, callTimeoutMs);
+        });
+        response = await Promise.race([finals, deadline]);
+      } else {
+        response = await finals;
+      }
     } catch (err) {
-      const code = classifySdkError(err);
+      const detail = describeSdkError(err, stream);
+      // A socket error caused by our own deadline is a timeout, never an
+      // unexplained provider failure.
+      const code = state.deadlineExceeded ? CALL_ERROR_CODES.timeout : classifySdkError(err);
       const recorded = record({
         reason: code,
-        httpStatus: err && typeof err.status === 'number' ? err.status : null,
-        requestId: (err && (err.requestID || err.request_id)) || (stream && stream.request_id) || null,
+        httpStatus: detail.httpStatus,
+        requestId: detail.requestId,
+        errorClass: detail.errorClass,
+        errorType: detail.errorType,
+        errorMessage: detail.errorMessage,
+        errorCause: detail.errorCause,
       });
-      throw Object.assign(new AnthropicCallError(code, `anthropic request failed (${code})`), { callRecord: recorded });
+      throw Object.assign(new AnthropicCallError(code, `anthropic request failed (${code})`, detail), { callRecord: recorded });
     } finally {
+      if (deadlineHandle) clearTimeout(deadlineHandle);
       if (state.stream === stream) state.stream = null;
       if (state.controller === controller) state.controller = null;
     }
@@ -557,6 +711,9 @@ module.exports = {
   ANTHROPIC_PROVIDER,
   ANTHROPIC_SDK_VERSION,
   CALL_ERROR_CODES,
+  DEFAULT_OUTPUT_MODE,
+  ERROR_MESSAGE_MAX_CHARS,
+  OUTPUT_MODES,
   AnthropicCallError,
   applyCost,
   buildAnthropicRequest,
@@ -564,7 +721,9 @@ module.exports = {
   classifySdkError,
   costFromUsage,
   createAnthropicStructuredCall,
+  describeSdkError,
   estimateCostFromTokens,
+  sanitizeErrorMessage,
   selectPriceTier,
   usageTokens,
 };

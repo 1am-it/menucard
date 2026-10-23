@@ -27,10 +27,25 @@
 //     failures or timeouts. The stop reason is stored in the report and in the
 //     JSONL log. A schema error rate above half still stops it as before.
 //
+// M1-M3 of the Delivery Lead order for #59 / BE-21 (review 6373786786), after a
+// live call failed with `400 invalid_request_error "Schema is too complex."` and
+// an earlier one with `APIConnectionError` after 60 s without a stream event:
+//   - M1: `--output-mode=schema` (default) sends the simplified schema via
+//     `output_config`; `--output-mode=prompt` sends no `output_config` and puts
+//     the same schema in the instruction block. The validator decides in both.
+//     The mode is stored in the report and in every JSONL line.
+//   - M2: a failed call stores the SDK error class, the API error type, a
+//     sanitised message (max 300 chars) and the provider request id, plus the
+//     transport cause code, in the JSONL line and in the report.
+//   - M3: the configured call limit is a hard deadline on the provider call
+//     itself (`deadlineHit`), so 180 s can no longer be undercut by an SDK or
+//     transport default.
+//
 // Usage:
 //   node ops/scripts/run-menu-extraction-ai-probe.js
 //   node ops/scripts/run-menu-extraction-ai-probe.js --source=zuyd --runs=2
 //   node ops/scripts/run-menu-extraction-ai-probe.js --live --budget-file=ops/benchmark/output/ai-probe-budget-ledger.json
+//   node ops/scripts/run-menu-extraction-ai-probe.js --live --output-mode=prompt --budget-file=...
 //
 // Exit codes: 0 report written, 1 runtime/integrity error, 2 a precondition
 // refused the run (no key, no budget file, over budget, invalid output path).
@@ -41,6 +56,8 @@ const path = require('node:path');
 const {
   ANTHROPIC_API_KEY_ENV,
   ANTHROPIC_MODEL,
+  DEFAULT_OUTPUT_MODE,
+  OUTPUT_MODES,
   createAnthropicStructuredCall,
 } = require('../../src/lib/menuExtractionAnthropicCall');
 const { createStructuredExtractionAdapter, runStructuredExtraction } = require('../../src/lib/menuExtractionAdapter');
@@ -75,12 +92,19 @@ function parseArgs(argv = []) {
     callsFile: DEFAULT_CALLS_FILE,
     budgetFile: defaultLedgerFile(REPO_ROOT),
     budgetFileProvided: false,
+    outputMode: 'schema',
     help: false,
   };
   for (const arg of argv) {
     if (arg === '--live') options.live = true;
     else if (arg === '--help' || arg === '-h') options.help = true;
-    else if (arg.startsWith('--runs=')) {
+    else if (arg.startsWith('--output-mode=')) {
+      // M1 of review 6373786786: the schema is the default; `prompt` is the
+      // documented fallback when the API refuses the schema itself.
+      const mode = arg.slice('--output-mode='.length);
+      if (!OUTPUT_MODES.includes(mode)) throw new Error(`--output-mode must be ${OUTPUT_MODES.join(' or ')}`);
+      options.outputMode = mode;
+    } else if (arg.startsWith('--runs=')) {
       const runs = Number.parseInt(arg.slice('--runs='.length), 10);
       if (!Number.isInteger(runs) || runs < 1 || runs > 2) throw new Error('--runs must be 1 or 2');
       options.runs = runs;
@@ -252,6 +276,14 @@ function printLive(report) {
     `TOTAAL\t${report.totals.capturedSources}/${report.totals.sources}\t${report.totals.referenceItems}\t${report.totals.actualItems}\t${report.totals.matched}\t${report.totals.missing}\t${report.totals.invented}\t${report.totals.priceErrors}\t${report.totals.categoryErrors}\t-\t${report.totals.actualCostEurCents}\t-\n`,
   );
   if (report.stop) process.stdout.write(`gestopt: ${report.stop.code} (${report.stop.sourceId || '-'})\n`);
+  // M2: the failure identity is printed as well, so the operator sees the real
+  // cause instead of only a stop code.
+  const failed = report.calls.filter((call) => call.ok !== true && call.errorClass);
+  if (failed.length > 0) {
+    const last = failed[failed.length - 1];
+    const parts = [last.errorClass, last.errorType, last.errorCause].filter(Boolean).join(' / ');
+    process.stdout.write(`laatste fout: ${parts || 'onbekend'}${last.errorMessage ? ` — ${last.errorMessage}` : ''}\n`);
+  }
   if (report.notRun.length > 0) process.stdout.write(`niet uitgevoerd: ${report.notRun.join(', ')}\n`);
 }
 
@@ -282,7 +314,7 @@ async function runLive(options) {
   } catch (err) {
     return { code: 2, message: `the budget ledger refused the run (${err && err.code ? err.code : 'unknown'}). No call was made.` };
   }
-  const callModule = createAnthropicStructuredCall({ env: process.env, budget: ledger });
+  const callModule = createAnthropicStructuredCall({ env: process.env, budget: ledger, outputMode: options.outputMode });
   if (!callModule.enabled) return { code: 2, message: 'the Anthropic call stays provider_not_configured. No call was made.' };
 
   return runBoundedProbe({
@@ -336,6 +368,7 @@ async function runBoundedProbe({
     model: callModule.model,
     sdkVersion: callModule.sdkVersion,
     transport: callModule.transport || null,
+    outputMode: callModule.outputMode || DEFAULT_OUTPUT_MODE,
     protocol: protocolMetadata(protocol),
     runs,
     limits,
@@ -422,6 +455,14 @@ async function runBoundedProbe({
             durationMs: attempt && Number.isInteger(attempt.durationMs) ? attempt.durationMs : durationMs,
             requestId: attempt ? attempt.requestId || null : null,
             messageId: attempt ? attempt.messageId || null : null,
+            // M2 of review 6373786786: the error identity travels with the call,
+            // so a report explains a 400 or a closed connection without a re-run.
+            errorClass: attempt ? attempt.errorClass || null : null,
+            errorType: attempt ? attempt.errorType || null : null,
+            errorMessage: attempt ? attempt.errorMessage || null : null,
+            errorCause: attempt ? attempt.errorCause || null : null,
+            deadlineHit: attempt ? attempt.deadlineHit === true : false,
+            outputMode: callModule.outputMode || DEFAULT_OUTPUT_MODE,
             provider: callModule.provider || null,
             model: callModule.model || null,
             transport: callModule.transport || null,
@@ -497,14 +538,16 @@ async function runBoundedProbe({
 }
 
 const USAGE = `Gebruik:
-  node ops/scripts/run-menu-extraction-ai-probe.js [--source=all|<id>] [--runs=1|2]
-  node ops/scripts/run-menu-extraction-ai-probe.js --live --budget-file=ops/benchmark/output/ai-probe-budget-ledger.json [--source=...] [--runs=1|2]
+  node ops/scripts/run-menu-extraction-ai-probe.js [--source=all|<id>] [--runs=1|2] [--output-mode=schema|prompt]
+  node ops/scripts/run-menu-extraction-ai-probe.js --live --budget-file=ops/benchmark/output/ai-probe-budget-ledger.json [--source=...] [--runs=1|2] [--output-mode=...]
 
 Zonder --live is dit een dry-run: alleen een raming uit de gepinde captures,
 geen sleutel en geen netwerk. --live vereist ANTHROPIC_API_KEY in de omgeving en
 een expliciet --budget-file in de gitignored ops/benchmark/output-map. Elke
 aanroep krijgt direct een regel in ops/benchmark/output/ai-probe-live-calls.jsonl
 (override met --calls-file=<pad>); het rapport wordt na elke aanroep bijgewerkt.
+--output-mode=schema (standaard) vraagt de uitvoer via output_config; prompt
+stuurt geen output_config mee en zet hetzelfde schema in de instructie.
 Bronnen: ${PROBE_SOURCE_IDS.join(', ')}.
 `;
 

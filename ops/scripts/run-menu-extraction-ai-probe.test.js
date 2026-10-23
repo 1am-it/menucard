@@ -64,12 +64,13 @@ function outputFor(sourceId) {
  * the ledger, from `usage` with the fixed price table) and leaves the same
  * `lastCall` record behind. Nothing here touches a key, an SDK or the network.
  */
-function fakeCallModule({ ledger, behaviours }) {
+function fakeCallModule({ ledger, behaviours, outputMode = undefined }) {
   const state = { callCount: 0, lastCall: null };
   return {
     provider: 'fixture',
     model: 'fixture-model',
     transport: 'messages.stream',
+    ...(outputMode ? { outputMode } : {}),
     pricing: { note: 'fixture price table' },
     get callCount() {
       return state.callCount;
@@ -120,6 +121,13 @@ function fakeCallModule({ ledger, behaviours }) {
         durationMs,
         requestId: behaviour.requestId || `req_fail_${state.callCount}`,
         messageId: null,
+        // M2 of review 6373786786: the fake reports the same identity fields the
+        // provider call records, so the probe plumbing is tested offline.
+        errorClass: behaviour.errorClass || null,
+        errorType: behaviour.errorType || null,
+        errorMessage: behaviour.errorMessage || null,
+        errorCause: behaviour.errorCause || null,
+        deadlineHit: behaviour.deadlineHit === true,
       };
       throw Object.assign(new Error(behaviour.reason), { code: behaviour.reason });
     },
@@ -141,12 +149,12 @@ function fakeLedger() {
   };
 }
 
-async function probeWith({ sources, behaviours, runs = 1, runExtraction = undefined } = {}) {
+async function probeWith({ sources, behaviours, runs = 1, runExtraction = undefined, outputMode = undefined } = {}) {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'menucard-probe-live-'));
   const out = path.join(directory, 'report.json');
   const callsFile = path.join(directory, 'calls.jsonl');
   const ledger = fakeLedger();
-  const callModule = fakeCallModule({ ledger, behaviours });
+  const callModule = fakeCallModule({ ledger, behaviours, outputMode });
   const options = {
     selected: sources,
     protocol,
@@ -178,6 +186,11 @@ test('K4: the default invocation is a dry run with two runs per source', () => {
   assert.throws(() => parseArgs(['--runs=3']), /--runs must be 1 or 2/);
   assert.throws(() => parseArgs(['--source=senang-makan']), /--source must be all or one of/);
   assert.throws(() => parseArgs(['--live=yes']), /unknown argument/);
+  // M1 of review 6373786786: one explicit switch, schema by default.
+  assert.equal(options.outputMode, 'schema');
+  assert.equal(parseArgs(['--output-mode=prompt']).outputMode, 'prompt');
+  assert.equal(parseArgs(['--output-mode=schema']).outputMode, 'schema');
+  assert.throws(() => parseArgs(['--output-mode=auto']), /--output-mode must be schema or prompt/);
 });
 
 test('K4: a report or ledger may only be written inside the gitignored output folder', () => {
@@ -386,4 +399,50 @@ test('K4: the dry run writes a report from the pinned captures without a key or 
   assert.ok(report.totals.estimatedCostEurCents <= 900);
   assert.equal(report.protocol.instructionHash.length, 64);
   assert.match(result.stdout, /TOTAAL/);
+});
+
+test('M1/M2: the output mode and the error identity reach the report and every JSONL line', async () => {
+  const { report, callsFile } = await probeWith({
+    sources: [sourceOf('bron-een')],
+    outputMode: 'prompt',
+    behaviours: [
+      {
+        kind: 'error',
+        reason: 'schema_violation',
+        httpStatus: 400,
+        errorClass: 'APIError',
+        errorType: 'invalid_request_error',
+        errorMessage: 'Schema is too complex.',
+        deadlineHit: false,
+      },
+    ],
+  });
+  // M1: the mode is part of the run and of every call, so a report always says
+  // which of the two requests was sent.
+  assert.equal(report.outputMode, 'prompt');
+  assert.equal(report.calls[0].outputMode, 'prompt');
+  // M2: a 400 is explainable from the report alone.
+  assert.equal(report.calls[0].errorClass, 'APIError');
+  assert.equal(report.calls[0].errorType, 'invalid_request_error');
+  assert.equal(report.calls[0].errorMessage, 'Schema is too complex.');
+  assert.equal(report.calls[0].deadlineHit, false);
+  const log = readCallLog(callsFile);
+  const call = log.records.find((record) => record.kind === undefined);
+  assert.equal(call.outputMode, 'prompt');
+  assert.equal(call.errorClass, 'APIError');
+  assert.equal(call.errorType, 'invalid_request_error');
+  assert.equal(call.errorMessage, 'Schema is too complex.');
+  assert.equal(call.deadlineHit, false);
+});
+
+test('M1: the default run reports the schema mode, so an unset flag is never ambiguous', async () => {
+  const { report } = await probeWith({
+    sources: [sourceOf('bron-een')],
+    behaviours: [{ kind: 'output', usage: { input_tokens: 1000, output_tokens: 500 } }],
+  });
+  assert.equal(report.outputMode, 'schema');
+  assert.equal(report.calls[0].outputMode, 'schema');
+  // M2: a successful call carries no error identity.
+  assert.equal(report.calls[0].errorClass, null);
+  assert.equal(report.calls[0].deadlineHit, false);
 });

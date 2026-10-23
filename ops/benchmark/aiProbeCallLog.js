@@ -47,6 +47,15 @@ const RECORD_FIELDS = Object.freeze([
   'provider',
   'model',
   'transport',
+  // M1-M3 of review 6373786786: the output mode and the error identity are part
+  // of the audit trail. `errorMessage` is sanitised and capped upstream and is
+  // never a source text, prompt or header.
+  'outputMode',
+  'errorClass',
+  'errorType',
+  'errorMessage',
+  'errorCause',
+  'deadlineHit',
   'protocolHash',
   'stopCode',
   'code',
