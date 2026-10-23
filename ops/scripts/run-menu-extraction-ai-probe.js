@@ -92,7 +92,7 @@ function parseArgs(argv = []) {
     callsFile: DEFAULT_CALLS_FILE,
     budgetFile: defaultLedgerFile(REPO_ROOT),
     budgetFileProvided: false,
-    outputMode: 'schema',
+    outputMode: DEFAULT_OUTPUT_MODE,
     help: false,
   };
   for (const arg of argv) {
