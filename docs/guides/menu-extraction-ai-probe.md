@@ -15,7 +15,7 @@ zonder kosten. Budget en gegevensverwerking staan nog op **NEEDS_APPROVAL**.
 | --- | --- | --- |
 | Providercall | `src/lib/menuExtractionAnthropicCall.js` | Vult de bestaande `call`-interface met de officiële `@anthropic-ai/sdk` (exact `0.133.0`). Model `claude-haiku-5-5`, protocol als `system`, bronnen als tekst- of `document`-blok, uitvoer via `output_config.format` (`json_schema`). Kosten alleen uit `usage`. |
 | Prijstabel | idem, `ANTHROPIC_PRICING` | Vast en gedateerd: Haiku 5.5 $0,10/$0,50 per miljoen tokens tot 100.000 prompttokens, daarboven $0,50/$2,50 (Anthropic Pricing, 2026-10-22). USD 1:1 naar eurocent, naar boven afgerond. |
-| Budgetlog | `src/lib/menuExtractionBudgetLedger.js` | Synchrone, atomisch geschreven ledger (`reserve`/`settle`) in een gitignored pad. 900 cent cumulatief, 30 cent per call, 40 calls, 1 tegelijk. |
+| Budgetlog | `src/lib/menuExtractionBudgetLedger.js` | Synchrone, atomisch geschreven ledger (`reserve`/`settle`) in een gitignored pad. 900 cent cumulatief, 30 cent per call, 40 calls, 1 tegelijk (ook over processen). |
 | Beslisfunctie | `src/lib/menuExtractionRouteBDecision.js` | Route B alleen bij nul items, dekking onder 80% tegen een bekende referentie, `html_arrangements_skipped` of een PDF-layoutprobleem. Niet aan een app-route gekoppeld. |
 | Proefharnas | `ops/benchmark/menuExtractionProbe.js`, `ops/benchmark/menuExtractionProbeSet.js`, `ops/scripts/run-menu-extraction-ai-probe.js` | Hash-geverifieerde gepinde captures, dry-run-raming, live meting met de ongewijzigde `compareControlledReference`, twee runs per bron. |
 
@@ -110,6 +110,10 @@ Per bron, met dezelfde referenties en telregels als #59 (ongewijzigde
 - **Menutitel.** Kiest het model een andere titel dan de referentie, dan telt dat
   in de officiële rubriekfout. De extra titel-telling maakt dat zichtbaar zonder
   de telregel te veranderen.
+- **Geen automatische herhaling.** De SDK staat op `maxRetries: 0`; een time-out
+  of 5xx blijft als mislukte call in het rapport staan en de reservering blijft
+  belast. De eerdere proefopzet noemde één retry; die is in deze ronde bewust
+  niet gebouwd.
 - **Geen productiegebruik.** Geen app-route, geen database, geen publicatie,
   geen merge en geen onafhankelijke acceptatie.
 
