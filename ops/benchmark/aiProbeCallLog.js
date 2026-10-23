@@ -14,7 +14,9 @@
 //     `Authorization` header or a raw request body cannot reach the file, even
 //     if a caller passes it in;
 //   - no source text, no prompt and no response body — only identifiers,
-//     provider-reported numbers and error metadata;
+//     provider-reported numbers and error metadata. Q1 of review 6375125413
+//     adds a reference to the saved answer (`rawOutputFile` + hash + length);
+//     the answer text itself stays in its own gitignored file;
 //   - one line is one `writeSync` on an `O_APPEND` handle, followed by fsync.
 //     That keeps an appended line intact; a hard kill can leave a partial
 //     trailing line, which `readCallLog` ignores on purpose.
@@ -64,6 +66,13 @@ const RECORD_FIELDS = Object.freeze([
   // and which block types the answer had. Numbers and type names only.
   'thinkingTokens',
   'contentBlockTypes',
+  // Q1 of review 6375125413: the reference to the saved literal answer. The
+  // answer text itself is never inlined here: the path, its hash and its length
+  // are enough to find and verify the file, and they keep one line readable.
+  'rawOutputFile',
+  'rawOutputSha256',
+  'rawOutputChars',
+  'rawOutputError',
 ]);
 
 // Field names that would carry a credential or a request header. Refusing them

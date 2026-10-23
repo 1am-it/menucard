@@ -104,6 +104,25 @@ function findForbiddenKey(value, depth = 0) {
   return null;
 }
 
+/**
+ * The one normalization the evidence check uses: collapse every whitespace run
+ * (including a newline) to a single space, trim and lower-case. Exported
+ * unchanged so the offline citation diagnosis of the ops tooling can never
+ * disagree with the validator about what "present" means. Nothing here is
+ * loosened: the validator keeps the last word.
+ */
+function normalizeEvidenceText(value) {
+  return typeof value === 'string' ? value.replace(/\s+/g, ' ').trim().toLowerCase() : '';
+}
+
+/** Whether a quote is a literal passage of the cited source, by that rule. */
+function quoteIsPresentInSource(quote, sourceText) {
+  if (typeof quote !== 'string' || typeof sourceText !== 'string') return false;
+  const normalizedQuote = normalizeEvidenceText(quote);
+  if (normalizedQuote.length === 0) return false;
+  return normalizeEvidenceText(sourceText).includes(normalizedQuote);
+}
+
 function validateEvidence(evidence, where, sourceById, problems) {
   if (!isObject(evidence)) {
     problems.push(`${where}.evidence must be an object`);
@@ -117,9 +136,8 @@ function validateEvidence(evidence, where, sourceById, problems) {
   } else {
     const source = sourceById.get(evidence.sourceId);
     const sourceText = source && typeof source.text === 'string' ? source.text : null;
-    if (sourceText) {
-      const normalize = (value) => value.replace(/\s+/g, ' ').trim().toLowerCase();
-      if (!normalize(sourceText).includes(normalize(evidence.quote))) problems.push(`${where}.evidence.quote is not present in the cited source`);
+    if (sourceText && !quoteIsPresentInSource(evidence.quote, sourceText)) {
+      problems.push(`${where}.evidence.quote is not present in the cited source`);
     }
   }
 }
@@ -295,6 +313,8 @@ module.exports = {
   FORBIDDEN_TRUST_KEYS,
   LIMITS,
   findForbiddenKey,
+  normalizeEvidenceText,
+  quoteIsPresentInSource,
   validateStructuredOutput,
 };
 

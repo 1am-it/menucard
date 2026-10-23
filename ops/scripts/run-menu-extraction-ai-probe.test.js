@@ -15,6 +15,8 @@ const { DEFAULT_CALLS_FILE, DEFAULT_OUT, OUTPUT_DIRECTORY, assertOutputPath, par
 const { ANTHROPIC_API_KEY_ENV, costFromUsage } = require('../../src/lib/menuExtractionAnthropicCall');
 const { PROBE_BUDGET, PROBE_LIMITS } = require('../benchmark/menuExtractionProbe');
 const { readCallLog } = require('../benchmark/aiProbeCallLog');
+// Q1 of review 6375125413: the saved answer is verified by its recorded hash.
+const { readRawAnswer } = require('../benchmark/aiProbeRawOutput');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
 const SCRIPT = path.join(__dirname, 'run-menu-extraction-ai-probe.js');
@@ -88,6 +90,7 @@ function fakeCallModule({ ledger, behaviours, outputMode = undefined }) {
       const durationMs = Math.max(0, Date.now() - startedAt);
       if (behaviour.kind === 'output') {
         const cost = costFromUsage(behaviour.usage);
+        const output = behaviour.output || outputFor(input.sources[0].id);
         ledger.costEurCents = cost.costEurCents;
         state.lastCall = {
           attempt: true,
@@ -106,10 +109,13 @@ function fakeCallModule({ ledger, behaviours, outputMode = undefined }) {
           // the block types, exactly as the real module records them.
           thinkingTokens: Number.isInteger(behaviour.thinkingTokens) ? behaviour.thinkingTokens : null,
           contentBlockTypes: Array.isArray(behaviour.contentBlockTypes) ? behaviour.contentBlockTypes : null,
+          // Q1 of review 6375125413: the literal text block of the answer, as the
+          // real module records it.
+          answerText: typeof behaviour.answerText === 'string' ? behaviour.answerText : JSON.stringify(output),
         };
         // The default answer cites the source of this very call, so a later
         // source cannot silently be answered with the first source's evidence.
-        return behaviour.output || outputFor(input.sources[0].id);
+        return output;
       }
       // A failed attempt: `usage` is only known when the provider reported it.
       const cost = behaviour.usage ? costFromUsage(behaviour.usage) : { costEurCents: null, tokens: null };
@@ -136,6 +142,8 @@ function fakeCallModule({ ledger, behaviours, outputMode = undefined }) {
         deadlineHit: behaviour.deadlineHit === true,
         thinkingTokens: Number.isInteger(behaviour.thinkingTokens) ? behaviour.thinkingTokens : null,
         contentBlockTypes: Array.isArray(behaviour.contentBlockTypes) ? behaviour.contentBlockTypes : null,
+        // Q1: a failed answer can still carry text (a cut-off or rejected JSON).
+        answerText: typeof behaviour.answerText === 'string' ? behaviour.answerText : null,
       };
       throw Object.assign(new Error(behaviour.reason), { code: behaviour.reason });
     },
@@ -157,10 +165,12 @@ function fakeLedger() {
   };
 }
 
-async function probeWith({ sources, behaviours, runs = 1, runExtraction = undefined, outputMode = undefined } = {}) {
+async function probeWith({ sources, behaviours, runs = 1, runExtraction = undefined, outputMode = undefined, rawOutputDirectory = undefined } = {}) {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'menucard-probe-live-'));
   const out = path.join(directory, 'report.json');
   const callsFile = path.join(directory, 'calls.jsonl');
+  // Q1: the saved answers of a test stay in its own temp folder.
+  const rawDirectory = rawOutputDirectory || path.join(directory, 'raw');
   const ledger = fakeLedger();
   const callModule = fakeCallModule({ ledger, behaviours, outputMode });
   const options = {
@@ -170,6 +180,7 @@ async function probeWith({ sources, behaviours, runs = 1, runExtraction = undefi
     ledger,
     out,
     callsFile,
+    rawOutputDirectory: rawDirectory,
     runs,
     limits: PROBE_LIMITS,
     budget: PROBE_BUDGET,
@@ -177,7 +188,7 @@ async function probeWith({ sources, behaviours, runs = 1, runExtraction = undefi
   };
   if (runExtraction) options.runExtraction = runExtraction;
   const result = await runBoundedProbe(options);
-  return { directory, out, callsFile, ledger, callModule, result, report: JSON.parse(fs.readFileSync(out, 'utf8')) };
+  return { directory, out, callsFile, rawDirectory, ledger, callModule, result, report: JSON.parse(fs.readFileSync(out, 'utf8')) };
 }
 
 test('K4: the default invocation is a dry run with two runs per source', () => {
@@ -507,3 +518,123 @@ test('M1: the default run reports the schema mode, so an unset flag is never amb
   assert.equal(report.calls[0].errorClass, null);
   assert.equal(report.calls[0].deadlineHit, false);
 });
+
+// ---------------------------------------------------------------------------
+// Q1-Q4 of the Delivery Lead order for #59 / BE-21 (review 6375125413).
+// ---------------------------------------------------------------------------
+
+/** A source whose name and price are on separate lines, like a real menu. */
+function splitLineSource() {
+  return {
+    id: 'bron-twee',
+    label: 'bron-twee',
+    captureStatus: 'captured',
+    blockedReason: null,
+    captures: [{ id: 'bron-twee-01', url: 'https://fictief.example/twee', kind: 'html', pageCount: null, text: 'LUNCH\n\nFictieve soep\n6,50\n' }],
+    reference: { menus: [] },
+    referenceItems: 0,
+  };
+}
+
+/** The live shape: the model joined the name and the price with ` - `. */
+function mergedQuoteOutput(sourceId) {
+  return {
+    menus: [
+      {
+        title: 'Lunch',
+        sourceId,
+        categories: [
+          {
+            name: 'Voor',
+            items: [
+              {
+                name: 'Fictieve soep',
+                priceStatus: 'known',
+                amountMinorUnits: 650,
+                currency: 'EUR',
+                evidence: { sourceId, locator: 'regel 3', quote: 'Fictieve soep - 6,50' },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    rejected: [],
+    coverage: { status: 'complete', sourcesRead: 1, pagesRead: 1, itemsExtracted: 1, unreadSources: [], limitations: [] },
+  };
+}
+
+test('Q1: the literal answer of a call is saved and referenced by the report and the JSONL line', async () => {
+  const answerText = JSON.stringify(outputFor('bron-een'));
+  const { report, callsFile, rawDirectory } = await probeWith({
+    sources: [sourceOf('bron-een')],
+    behaviours: [{ kind: 'output', usage: { input_tokens: 1000, output_tokens: 500 }, answerText }],
+  });
+  const call = report.calls[0];
+  assert.equal(call.ok, true);
+  assert.equal(call.rawOutputChars, answerText.length);
+  assert.match(call.rawOutputSha256, /^[0-9a-f]{64}$/);
+  assert.match(path.basename(call.rawOutputFile), /^bron-een-r1-c0-call1-[0-9a-f]{12}\.json\.txt$/);
+  // The file is the answer itself, resolved from the repository root, and it verifies.
+  const reading = readRawAnswer({ file: call.rawOutputFile, root: REPO_ROOT, expectedHash: call.rawOutputSha256 });
+  assert.equal(reading.text, answerText);
+  // The JSONL line points at it and does not inline the text.
+  const logged = readCallLog(callsFile).records.find((record) => record.call === 1);
+  assert.equal(logged.rawOutputFile, call.rawOutputFile);
+  assert.equal(logged.rawOutputSha256, call.rawOutputSha256);
+  assert.equal(Object.prototype.hasOwnProperty.call(logged, 'answerText'), false);
+  assert.equal(JSON.stringify(logged).includes('Fictieve soep'), false);
+  assert.equal(report.totals.answersSaved, 1);
+  assert.equal(report.rawOutput.schemaVersion, 'menu-extraction-ai-probe-raw/v1');
+});
+
+test('Q4: a rejected answer reports its items and invalid citations and still counts as zero extraction', async () => {
+  // The call receives the capture of the source, so the evidence must cite it.
+  const answerText = JSON.stringify(mergedQuoteOutput('bron-twee-01'));
+  const { report, callsFile, rawDirectory } = await probeWith({
+    sources: [splitLineSource()],
+    behaviours: [{ kind: 'output', usage: { input_tokens: 1000, output_tokens: 500 }, answerText, output: mergedQuoteOutput('bron-twee-01') }],
+  });
+  const call = report.calls[0];
+  // The validator rejects the merged quote; that is unchanged and expected.
+  assert.equal(call.ok, false);
+  assert.equal(call.reason, 'schema_violation');
+  assert.ok(call.problems.some((problem) => /evidence\.quote is not present in the cited source/.test(problem)));
+  // The answer is kept, so the rejection is diagnosable afterwards.
+  const reading = readRawAnswer({ file: call.rawOutputFile, root: REPO_ROOT, expectedHash: call.rawOutputSha256 });
+  assert.equal(reading.text, answerText);
+  assert.equal(readCallLog(callsFile).records.find((record) => record.call === 1).rawOutputFile, call.rawOutputFile);
+  // Q4: measured, not accepted.
+  assert.equal(call.rejected.items, 1);
+  assert.equal(call.rejected.itemsWithInvalidQuote, 1);
+  assert.equal(call.rejected.classes.added_separator, 1);
+  assert.equal(call.rejected.quotes[0].quote, 'Fictieve soep - 6,50');
+  // A rejected answer never counts as an extraction, a match or a menu item.
+  const row = report.sources.find((source) => source.sourceId === 'bron-twee');
+  assert.equal(row.actualItems, 0);
+  assert.equal(row.matched, 0);
+  assert.deepEqual(row.menus, []);
+  assert.equal(report.totals.actualItems, 0);
+  assert.equal(report.totals.matched, 0);
+  assert.equal(report.totals.rejectedOutputs, 1);
+  assert.equal(report.totals.itemsInRejectedOutputs, 1);
+  assert.equal(report.totals.itemsWithInvalidQuote, 1);
+});
+
+test('Q1/Q4: a call without an answer (transport failure) saves no file and reports no item counts', async () => {
+  const { report, rawDirectory } = await probeWith({
+    sources: [sourceOf('bron-een')],
+    behaviours: [{ kind: 'error', reason: 'provider_unavailable', errorClass: 'APIConnectionError' }],
+  });
+  const call = report.calls[0];
+  assert.equal(call.ok, false);
+  assert.equal(call.rawOutputFile, null);
+  assert.equal(call.rawOutputError, null);
+  assert.equal(call.rejected, undefined);
+  assert.equal(fs.existsSync(rawDirectory) ? fs.readdirSync(rawDirectory).length : 0, 0);
+  assert.equal(report.totals.answersSaved, 0);
+  assert.equal(report.totals.rejectedOutputs, 0);
+});
+
+
+

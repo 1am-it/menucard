@@ -42,7 +42,7 @@ test('the acceptance set is versioned and pins the exact protocol and schema ver
   assert.match(manifest.pinnedAt, /^\d{4}-\d{2}-\d{2}$/);
   assert.equal(manifest.issue, 59);
   assert.equal(manifest.protocol.file, 'MENU-EXTRACTION.md');
-  assert.equal(manifest.protocol.version, '0.2');
+  assert.equal(manifest.protocol.version, '0.3');
   assert.match(manifest.protocol.sha256, SHA256);
   const protocol = loadMenuExtractionProtocol({ root: REPO_ROOT });
   assert.equal(protocol.hash, manifest.protocol.sha256, 'runtime hash must match the pinned protocol hash');

@@ -652,6 +652,12 @@ function createAnthropicStructuredCall({ env = process.env, client = null, budge
         // recorded; the reasoning text and the response body are not.
         thinkingTokens: Number.isInteger(fields.thinkingTokens) ? fields.thinkingTokens : null,
         contentBlockTypes: Array.isArray(fields.contentBlockTypes) ? fields.contentBlockTypes.slice() : null,
+        // Q1 of review 6375125413: the literal `text` block of the answer, so a
+        // rejected answer can be inspected offline instead of being lost with
+        // the call. Only the text block is kept: never a `thinking` block, a
+        // signature, a header or a key. It stays in memory here; the probe
+        // writes it to a gitignored file and the call log only references it.
+        answerText: typeof fields.answerText === 'string' && fields.answerText.length > 0 ? fields.answerText : null,
       };
       return state.lastCall;
     }
@@ -729,9 +735,13 @@ function createAnthropicStructuredCall({ env = process.env, client = null, budge
       failure = { code: CALL_ERROR_CODES.provider_unavailable, message: `unexpected stop_reason ${String(stopReason)}` };
     }
 
+    // Q1 of review 6375125413: read the literal answer text once, before any
+    // judgement about it, so it is kept for a cut-off or rejected answer too.
+    const answerText = responseText(response);
+
     let output = null;
     if (!failure) {
-      const text = responseText(response);
+      const text = answerText;
       if (!text) {
         failure = { code: CALL_ERROR_CODES.schema_violation, message: 'the response carries no JSON text block' };
       } else {
@@ -757,6 +767,7 @@ function createAnthropicStructuredCall({ env = process.env, client = null, budge
       messageId,
       thinkingTokens: usageThinkingTokens(response && response.usage),
       contentBlockTypes: contentBlockTypes(response),
+      answerText,
     });
     if (failure) throw Object.assign(new AnthropicCallError(failure.code, failure.message), { callRecord: recorded });
     return output;

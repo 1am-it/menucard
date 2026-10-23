@@ -6,7 +6,9 @@ door de eigenaar goedgekeurd (2026-10-23); de ronde van Lead-order 6373183699
 maakte de live-proef robuust, de ronde van order 6373786786 (M1-M4) maakt het
 API-schema accepteerbaar, de foutdetails compleet en de time-out echt begrensd,
 en de ronde van order 6374528099 (N1-N4) zet het denken uit en geeft de JSON de
-uitvoerruimte. Alle rondes zijn offline getest.
+uitvoerruimte. De ronde van order 6375125413 (Q1-Q5) bewaart het letterlijke
+antwoord van elke aanroep, diagnosticeert een afgekeurd citaat offline en scherpt
+de citatenregel in het protocol aan. Alle rondes zijn offline getest.
 
 [Acceptatiematrix](menu-extraction-acceptance-matrix.md) |
 [Implementatieafspraken](menu-extraction-implementation.md) |
@@ -277,6 +279,111 @@ Deze ronde bevat **geen** betaalde of echte aanroep, leest en gebruikt de sleute
 niet, wijzigt het ledger niet en koppelt niets aan de app. De 32.000-limiet en
 het uitgezette denken zijn dus **ontwikkelaarsbewijs**: de Lead bevestigt ze met
 een live-aanroep.
+
+## Q1-Q4: letterlijke bewijscitaten (Lead-order review 6375125413)
+
+Aanleiding: beide live Zuyd-aanroepen van ronde N1-N4 eindigden met `end_turn` en
+werden daarna door de validator afgekeurd met `schema_violation`. Bijna alle
+meldingen waren `evidence.quote is not present in the cited source`,
+geconcentreerd in `menus[0].categories[3]`, plus een keer
+`currency must be absent/null unless known`. In een eerder ruw antwoord voegde
+het model regels samen tot een citaat met een zelfgekozen scheidingsteken
+(`"Naam - beschrijving - 23,50"`) terwijl de bron die delen op aparte regels
+heeft. De probe bewaarde de ruwe uitvoer niet, dus de exacte gevallen waren niet
+meer te controleren. Deze ronde sluit die twee gaten: het antwoord blijft
+bewaard, en de citatenregel is in het protocol zelf ondubbelzinnig.
+
+### Q1 - de ruwe uitvoer bewaren
+
+| Onderdeel | Invulling |
+| --- | --- |
+| Wat | het letterlijke `text`-blok van het antwoord, per aanroep |
+| Waar | `ops/benchmark/output/ai-probe-raw/` (gitignored), override met `--raw-output-dir=<pad>` |
+| Naam | `<bron>-r<run>-c<chunk>-call<n>-<sha256[0..12]>.json.txt` |
+| Verwijzing | `report.calls[].rawOutputFile`, `rawOutputSha256`, `rawOutputChars` en dezelfde velden in de JSONL-regel |
+| Schrijven | atomair (tijdelijk bestand + rename), idempotent bij gelijke inhoud, weigert een leeg, te groot of onveilig antwoord |
+
+Alleen het `text`-blok wordt bewaard. Een `thinking`-blok, een signature, een
+header, een sleutel en de prompt bereiken de schijf nooit; de denktekst blijft
+buiten het record (N3) en de call log whitelist staat `answerText` niet toe. Een
+antwoord zonder tekst (transportfout) schrijft geen bestand: dat wordt
+`rawOutputFile: null`, geen verzonnen bewijs. Mislukt het schrijven, dan staat de
+fout in `rawOutputError` en blijft het extractieresultaat ongewijzigd - de aanroep
+is al gedaan en al belast.
+
+### Q2 - diagnose per afgekeurd citaat
+
+`ops/benchmark/quoteDiagnostics.js` (pure functies) en
+`ops/scripts/diagnose-ai-probe-quotes.js` (offline CLI) geven per mislukt citaat:
+
+- het citaat en het item (`menus[i].categories[j].items[k]`, menutitel, rubriek);
+- de dichtstbijzijnde bronfragmenten, met capture-id, regelnummer, tekenoffset,
+  een similarity-score en de tekst zelf;
+- een classificatie: `added_separator` (alle delen staan in de bron, ook met
+  spaties ertussen; alleen het scheidingsteken is verzonnen), `merged_lines`
+  (delen bestaan, maar niet als een reeks), `changed_characters` (zelfde woorden,
+  andere tekens zoals `6.50` vs `6,50`), `whitespace_only` (onzichtbare witruimte
+  zoals een zero-width space) of `invented_text` (geen bronpassage). Een citaat
+  dat een bron noemt die niet in de invoer zat, is `unknown_source` en wordt
+  apart geteld, nooit als een van de vijf tekstklassen.
+
+```bash
+node ops/scripts/diagnose-ai-probe-quotes.js
+node ops/scripts/diagnose-ai-probe-quotes.js --source=zuyd
+node ops/scripts/diagnose-ai-probe-quotes.js --raw-file=ops/benchmark/output/ai-probe-raw/<bestand> --source=zuyd
+```
+
+De CLI verifieert elk antwoord tegen de opgeslagen SHA-256 voordat het iets
+beweert, gebruikt alleen de captures die die aanroep werkelijk kreeg, schrijft
+`ops/benchmark/output/ai-probe-quote-diagnosis.json` en doet geen netwerk- of
+modelaanroep. Zonder bewaard antwoord meldt hij `answer_missing` in plaats van
+te zwijgen.
+
+### Q3 - de citatenregel in het protocol
+
+`MENU-EXTRACTION.md` is **v0.3** (SHA-256
+`a352effee402d8ccdbb8260aa21baabcfd2e8f8c160b36a1b21df36a430c2648`). Paragraaf 4
+zegt nu expliciet dat een citaat een aaneengesloten, letterlijke tekstreeks uit
+een bron is, bij voorkeur alleen de gerechtregel; nooit regels samenvoegen, nooit
+een scheidingsteken toevoegen, en een prijs op een andere regel krijgt een eigen
+passage of blijft onbewezen. Goed en fout staan als voorbeeld in het protocol.
+De validator is **niet** versoepeld: `menuExtractionSchema.js` gebruikt dezelfde
+normalisatie als voorheen (witruimte, waaronder een regeleinde, klapt samen tot
+een spatie; tekens en volgorde moeten kloppen). Die normalisatie is als
+`normalizeEvidenceText` en `quoteIsPresentInSource` geeexporteerd, zodat de
+diagnose niet anders kan oordelen dan de validator.
+
+### Q4 - meten ondanks afkeuring
+
+Bij een afgekeurde uitvoer staat in het rapport en in de console:
+
+- `rejected.items` - het aantal items in het afgekeurde antwoord;
+- `rejected.itemsWithInvalidQuote` - items zonder bruikbaar citaat (ontbrekend,
+  onbekende bron of niet in de bron gevonden), met `itemsWithQuoteNotFound`,
+  `itemsWithoutQuote` en `itemsWithUnknownSource` als uitsplitsing;
+- `rejected.classes` - de classificatie per citaat;
+- `totals.rejectedOutputs`, `totals.itemsInRejectedOutputs`,
+  `totals.itemsWithInvalidQuote`, `totals.answersSaved` en
+  `totals.answersNotSaved`.
+
+Een afgekeurde uitvoer telt **niet** als extractie: `actualItems` en `matched`
+blijven 0, het antwoord komt niet in `menus` en dus niet in de vergelijking. Dit
+is diagnose, geen acceptatie.
+
+### Q5 - regressies zonder netwerk
+
+| Eis | Test |
+| --- | --- |
+| Q1 bewaren en verwijzen | `ops/benchmark/aiProbeRawOutput.test.js` (naam, hash, idempotent, weigeringen, integriteit, mislukte rename) en `run-menu-extraction-ai-probe.test.js`: "Q1: the literal answer of a call is saved and referenced ..." |
+| Q1 alleen tekst, nooit denktekst | `src/lib/menuExtractionAnthropicCall.test.js`: "Q1: the call record keeps the literal answer text and never the reasoning text", "Q1: a cut-off answer keeps the partial text", "Q1: a transport failure has no answer text" |
+| Q2 classificatie en dichtstbijzijnde fragmenten | `ops/benchmark/quoteDiagnostics.test.js` (alle vijf klassen plus `unknown_source`, ontbrekend citaat, geen JSON, offsets/regels, fragmentatie) en `ops/scripts/diagnose-ai-probe-quotes.test.js` |
+| Q3 protocolregel | `src/lib/menuExtractionProtocol.test.js` (versie 0.3, vaste hash, de regel moet in de tekst staan) |
+| Q4 meten zonder tellen, validator streng | `run-menu-extraction-ai-probe.test.js`: "Q4: a rejected answer reports its items and invalid citations and still counts as zero extraction"; `menuExtractionAdapter.test.js`: "Q3/Q4: a citation that joins source lines with an added separator is rejected, and stays rejected"; `quoteDiagnostics.test.js`: "Q4: the diagnosis stays with the validator ..." |
+
+Deze ronde bevat **geen** betaalde of echte aanroep, leest de sleutel niet,
+wijzigt het ledger niet, versoepelt de validator niet en koppelt niets aan de
+app. Alles hierboven is ontwikkelaars- en fixturebewijs; de Lead draait de
+diagnose op de bewaarde live-uitvoer zodra die er is.
 
 ## Wat de proef meet
 

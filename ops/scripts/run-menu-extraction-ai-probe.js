@@ -46,6 +46,21 @@
 //   node ops/scripts/run-menu-extraction-ai-probe.js --source=zuyd --runs=2
 //   node ops/scripts/run-menu-extraction-ai-probe.js --live --budget-file=ops/benchmark/output/ai-probe-budget-ledger.json
 //   node ops/scripts/run-menu-extraction-ai-probe.js --live --output-mode=prompt --budget-file=...
+//   node ops/scripts/diagnose-ai-probe-quotes.js   (offline, after a live run)
+//
+// Q1-Q4 of the Delivery Lead order for #59 / BE-21 (review 6375125413), after
+// both live Zuyd answers were rejected with `schema_violation` and the raw
+// answers were gone:
+//   - Q1: the literal JSON answer of every call is written to a gitignored file
+//     under ops/benchmark/output/ai-probe-raw/ (text block only, no reasoning,
+//     no key) and referenced from the report and the JSONL line;
+//   - Q2: ops/benchmark/quoteDiagnostics.js + ops/scripts/diagnose-ai-probe-quotes.js
+//     show per rejected citation the quote, the item, the nearest source
+//     fragments and a classification;
+//   - Q3: MENU-EXTRACTION.md v0.3 states the citation rule literally (validator
+//     unchanged);
+//   - Q4: a rejected answer reports its item and invalid-citation counts, and
+//     still counts as zero extraction.
 //
 // Exit codes: 0 report written, 1 runtime/integrity error, 2 a precondition
 // refused the run (no key, no budget file, over budget, invalid output path).
@@ -66,6 +81,11 @@ const { createFileBudgetLedger } = require('../../src/lib/menuExtractionBudgetLe
 const { aggregateControlledReferences, compareControlledReference } = require('../benchmark/referenceComparison');
 const { REPO_ROOT, attachCaptureTexts, defaultLedgerFile, loadProbeSet } = require('../benchmark/menuExtractionProbeSet');
 const { createCallLog } = require('../benchmark/aiProbeCallLog');
+// Q1-Q4 of the Delivery Lead order for #59 / BE-21 (review 6375125413): the
+// literal answer of every live call is kept in a gitignored file, and a rejected
+// answer is measured and diagnosed offline instead of being discarded.
+const { writeRawAnswer } = require('../benchmark/aiProbeRawOutput');
+const { diagnoseRawText } = require('../benchmark/quoteDiagnostics');
 const {
   PROBE_BUDGET,
   PROBE_LIMITS,
@@ -82,6 +102,9 @@ const OUTPUT_DIRECTORY = path.join(REPO_ROOT, 'ops', 'benchmark', 'output');
 const DEFAULT_OUT = path.join(OUTPUT_DIRECTORY, 'ai-probe-report.json');
 // L1 of review 6373183699: one line per provider call, gitignored, durable.
 const DEFAULT_CALLS_FILE = path.join(OUTPUT_DIRECTORY, 'ai-probe-live-calls.jsonl');
+// Q1 of review 6375125413: the literal JSON answer of every live call, one
+// gitignored file per call, referenced from the report and the JSONL line.
+const DEFAULT_RAW_OUTPUT_DIRECTORY = path.join(OUTPUT_DIRECTORY, 'ai-probe-raw');
 
 function parseArgs(argv = []) {
   const options = {
@@ -90,6 +113,7 @@ function parseArgs(argv = []) {
     source: 'all',
     out: DEFAULT_OUT,
     callsFile: DEFAULT_CALLS_FILE,
+    rawOutputDirectory: DEFAULT_RAW_OUTPUT_DIRECTORY,
     budgetFile: defaultLedgerFile(REPO_ROOT),
     budgetFileProvided: false,
     outputMode: DEFAULT_OUTPUT_MODE,
@@ -116,6 +140,10 @@ function parseArgs(argv = []) {
       options.out = path.resolve(REPO_ROOT, arg.slice('--out='.length));
     } else if (arg.startsWith('--calls-file=')) {
       options.callsFile = path.resolve(REPO_ROOT, arg.slice('--calls-file='.length));
+    } else if (arg.startsWith('--raw-output-dir=')) {
+      // Q1: the saved answers stay in the gitignored output tree by default; the
+      // flag exists so a test or a replay can choose its own folder.
+      options.rawOutputDirectory = path.resolve(REPO_ROOT, arg.slice('--raw-output-dir='.length));
     } else if (arg.startsWith('--budget-file=')) {
       options.budgetFile = path.resolve(REPO_ROOT, arg.slice('--budget-file='.length));
       options.budgetFileProvided = true;
@@ -278,6 +306,22 @@ function printLive(report) {
     `TOTAAL\t${report.totals.capturedSources}/${report.totals.sources}\t${report.totals.referenceItems}\t${report.totals.actualItems}\t${report.totals.matched}\t${report.totals.missing}\t${report.totals.invented}\t${report.totals.priceErrors}\t${report.totals.categoryErrors}\t-\t${report.totals.actualCostEurCents}\t-\n`,
   );
   if (report.stop) process.stdout.write(`gestopt: ${report.stop.code} (${report.stop.sourceId || '-'})\n`);
+  // Q4: a rejected answer is shown with its item and citation counts, labelled
+  // as diagnosis so it is never read as an extraction.
+  for (const call of report.calls.filter((entry) => entry.rejected)) {
+    const rejected = call.rejected;
+    const items = Number.isInteger(rejected.items) ? rejected.items : 'n.v.t.';
+    const invalid = Number.isInteger(rejected.itemsWithInvalidQuote) ? rejected.itemsWithInvalidQuote : 'n.v.t.';
+    const classes = rejected.classes
+      ? Object.entries(rejected.classes)
+          .filter(([, count]) => count > 0)
+          .map(([code, count]) => `${code} ${count}`)
+          .join(', ')
+      : '';
+    process.stdout.write(
+      `afgekeurd, diagnose (telt niet als extractie): call ${call.call} ${call.sourceId} - items ${items}, ongeldig citaat ${invalid}${classes ? ` (${classes})` : ''}${call.rawOutputFile ? `, antwoord ${call.rawOutputFile}` : ''}\n`,
+    );
+  }
   // M2: the failure identity is printed as well, so the operator sees the real
   // cause instead of only a stop code.
   const failed = report.calls.filter((call) => call.ok !== true && call.errorClass);
@@ -304,6 +348,8 @@ async function runLive(options) {
   assertOutputPath(options.out, 'report');
   const callsFile = options.callsFile || DEFAULT_CALLS_FILE;
   assertOutputPath(callsFile, 'call log');
+  const rawOutputDirectory = options.rawOutputDirectory || DEFAULT_RAW_OUTPUT_DIRECTORY;
+  assertOutputPath(rawOutputDirectory, 'raw output directory');
 
   const protocol = loadMenuExtractionProtocol({ root: REPO_ROOT });
   const set = loadProbeSet();
@@ -326,6 +372,7 @@ async function runLive(options) {
     ledger,
     out: options.out,
     callsFile,
+    rawOutputDirectory,
     runs: options.runs,
     limits: PROBE_LIMITS,
     budget: PROBE_BUDGET,
@@ -347,11 +394,16 @@ async function runBoundedProbe({
   ledger,
   out,
   callsFile,
+  rawOutputDirectory = DEFAULT_RAW_OUTPUT_DIRECTORY,
   runs = PROBE_RUNS,
   limits = PROBE_LIMITS,
   budget = PROBE_BUDGET,
   runExtraction = runStructuredExtraction,
   writeReport = writeJsonAtomically,
+  // Q1: injectable so every rule is testable without a provider or a temp path
+  // in the repository.
+  saveAnswer = writeRawAnswer,
+  diagnoseAnswerText = diagnoseRawText,
   now = () => new Date().toISOString(),
 } = {}) {
   const adapter = createStructuredExtractionAdapter({
@@ -363,7 +415,7 @@ async function runBoundedProbe({
   const log = createCallLog({ file: callsFile });
 
   const report = {
-    version: '1.1.0',
+    version: '1.2.0',
     issue: 59,
     mode: 'live',
     provider: callModule.provider,
@@ -383,6 +435,14 @@ async function runBoundedProbe({
       callsFile: path.relative(REPO_ROOT, callsFile).split(path.sep).join('/'),
       schemaVersion: 'menu-extraction-ai-probe-call/v1',
       note: 'one line per provider call, appended and flushed right after that call',
+    },
+    // Q1 of review 6375125413: where the literal answers of this run live. Only
+    // the `text` block of an answer is stored (public menu content), never a key,
+    // a header, a prompt or a reasoning block; the folder is gitignored.
+    rawOutput: {
+      directory: path.relative(REPO_ROOT, rawOutputDirectory).split(path.sep).join('/'),
+      schemaVersion: 'menu-extraction-ai-probe-raw/v1',
+      note: 'one file per provider call with an answer; referenced by rawOutputFile in the call',
     },
     sources: [],
     calls: [],
@@ -443,6 +503,30 @@ async function runBoundedProbe({
           const providerAttempted = Boolean(attempt && attempt.attempt === true);
           const costUnknown = providerAttempted ? attempt.costEurCents === null : result.costUnknown === true;
 
+          // Q1 of review 6375125413: keep the literal answer of this call before
+          // judging it, so a rejected answer stays inspectable. A transport
+          // failure has no answer and writes no file. A failed write is recorded
+          // as a limitation, never as a different extraction outcome: the call
+          // already happened and is already charged.
+          const answerText = attempt && typeof attempt.answerText === 'string' ? attempt.answerText : null;
+          let savedAnswer = null;
+          let rawOutputError = null;
+          if (answerText) {
+            try {
+              savedAnswer = saveAnswer({
+                directory: rawOutputDirectory,
+                root: REPO_ROOT,
+                sourceId: source.id,
+                run,
+                chunkIndex,
+                call: calls,
+                text: answerText,
+              });
+            } catch (err) {
+              rawOutputError = err && err.message ? err.message : 'the raw answer could not be saved';
+            }
+          }
+
           const record = {
             sourceId: source.id,
             run,
@@ -477,9 +561,24 @@ async function runBoundedProbe({
             model: callModule.model || null,
             transport: callModule.transport || null,
             protocolHash: protocol.hash,
+            // Q1: the saved answer is referenced by path and hash, not inlined.
+            rawOutputFile: savedAnswer ? savedAnswer.file : null,
+            rawOutputSha256: savedAnswer ? savedAnswer.sha256 : null,
+            rawOutputChars: savedAnswer ? savedAnswer.chars : null,
+            rawOutputError,
             at: now(),
           };
           if (result.ok !== true && Array.isArray(result.problems)) record.problems = result.problems.slice(0, 5);
+          // Q4 of review 6375125413: a rejected answer is measured, not counted.
+          // The numbers are diagnosis only; the source row stays at 0 extraction
+          // because a rejected answer never reaches `menus`.
+          if (result.ok !== true && answerText) {
+            try {
+              record.rejected = diagnoseAnswerText({ text: answerText, sources: inventory });
+            } catch (err) {
+              record.rejected = { outputParsed: false, parseError: err && err.message ? err.message : 'diagnosis_failed', items: null };
+            }
+          }
           report.calls.push(record);
           log.append(record);
 
@@ -542,6 +641,17 @@ async function runBoundedProbe({
     thinkingTokens: report.calls.reduce((total, call) => total + (Number.isInteger(call.thinkingTokens) ? call.thinkingTokens : 0), 0),
     callsWithThinking: report.calls.filter((call) => Number.isInteger(call.thinkingTokens) && call.thinkingTokens > 0).length,
     schemaErrors,
+    // Q4 of review 6375125413: what the rejected answers contained, so a
+    // rejection rate can be read together with the item and citation numbers.
+    // These counts are diagnosis; they never count as extracted or matched items.
+    rejectedOutputs: report.calls.filter((call) => call.rejected).length,
+    itemsInRejectedOutputs: report.calls.reduce((total, call) => total + (call.rejected && Number.isInteger(call.rejected.items) ? call.rejected.items : 0), 0),
+    itemsWithInvalidQuote: report.calls.reduce(
+      (total, call) => total + (call.rejected && Number.isInteger(call.rejected.itemsWithInvalidQuote) ? call.rejected.itemsWithInvalidQuote : 0),
+      0,
+    ),
+    answersSaved: report.calls.filter((call) => typeof call.rawOutputFile === 'string' && call.rawOutputFile.length > 0).length,
+    answersNotSaved: report.calls.filter((call) => call.rawOutputError).length,
     ledger: safeLedgerSnapshot(ledger),
   };
   checkpoint();
@@ -560,6 +670,9 @@ geen sleutel en geen netwerk. --live vereist ANTHROPIC_API_KEY in de omgeving en
 een expliciet --budget-file in de gitignored ops/benchmark/output-map. Elke
 aanroep krijgt direct een regel in ops/benchmark/output/ai-probe-live-calls.jsonl
 (override met --calls-file=<pad>); het rapport wordt na elke aanroep bijgewerkt.
+Het letterlijke antwoord van elke aanroep wordt bewaard in
+ops/benchmark/output/ai-probe-raw/ (override met --raw-output-dir=<pad>); het
+rapport en de JSONL-regel verwijzen ernaar met pad en SHA-256.
 --output-mode=schema (standaard) vraagt de uitvoer via output_config; prompt
 stuurt geen output_config mee en zet hetzelfde schema in de instructie.
 Bronnen: ${PROBE_SOURCE_IDS.join(', ')}.
@@ -615,6 +728,7 @@ if (require.main === module) {
 module.exports = {
   DEFAULT_CALLS_FILE,
   DEFAULT_OUT,
+  DEFAULT_RAW_OUTPUT_DIRECTORY,
   OUTPUT_DIRECTORY,
   assertOutputPath,
   dryRun,

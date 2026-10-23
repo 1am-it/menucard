@@ -134,6 +134,26 @@ test('REGRESSION: strict schema rejects invalid coverage, unknown nested fields,
   assert.equal(calls.every((n) => n > 0), true);
 });
 
+test('Q3/Q4: a citation that joins source lines with an added separator is rejected, and stays rejected', () => {
+  // Q3 of review 6375125413: the protocol tells every model the same literal
+  // rule. Q4: the validator was not loosened to make a live answer pass.
+  const splitSources = [{ id: 'source-1', url: 'https://fictief.example/menu', kind: 'html', status: 'read', text: 'Lunch\nFictieve soep\n6.50' }];
+  const item = valid.menus[0].categories[0].items[0];
+  const withQuote = (quote) => ({ ...valid, menus: [{ ...valid.menus[0], categories: [{ ...valid.menus[0].categories[0], items: [{ ...item, evidence: { ...item.evidence, quote } }] }] }] });
+  // A newline in the source is whitespace and collapses to a space: that rule is
+  // unchanged, so a plain "name price" quote is still accepted.
+  assert.deepEqual(validateStructuredOutput(withQuote('Fictieve soep 6.50'), splitSources), []);
+  // A separator the source does not contain is not a literal passage.
+  const problems = validateStructuredOutput(withQuote('Fictieve soep - 6.50'), splitSources);
+  assert.equal(problems.filter((problem) => /evidence\.quote is not present in the cited source/.test(problem)).length, 1);
+  // The same quote is rejected through the full extraction path as well.
+  const adapter = createStructuredExtractionAdapter({ call: async () => withQuote('Fictieve soep - 6.50') });
+  return runStructuredExtraction({ adapter, protocol, sources: splitSources, limits, budget: budget() }).then((result) => {
+    assert.equal(result.reason, 'schema_violation');
+    assert.equal(Object.prototype.hasOwnProperty.call(result, 'output'), false);
+  });
+});
+
 test('REGRESSION: limits reject negative/zero configuration before calling the provider', async () => {
   let called = 0;
   const adapter = createStructuredExtractionAdapter({ call: async () => { called += 1; return valid; } });

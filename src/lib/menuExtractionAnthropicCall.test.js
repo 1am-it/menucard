@@ -846,3 +846,65 @@ test('M3: nothing in this module or the SDK imposes 60 s, so a 60 s close is not
   assert.equal(/60_000|60000/.test(adapterSource), false, 'the adapter has no 60 s constant of its own');
 });
 
+// --- Q1 of the Delivery Lead order for #59 / BE-21 (review 6375125413) -------
+//
+// The literal answer has to survive the call, because the previous live run
+// rejected both answers and had nothing left to inspect. Only the `text` block
+// is kept: a `thinking` block, a signature or a header never is.
+
+/** A response with a reasoning block followed by the JSON answer. */
+function responseWithThinking(thinkingText, answerText, options = {}) {
+  return {
+    id: 'msg_fixture',
+    model: ANTHROPIC_MODEL,
+    stop_reason: options.stop || 'end_turn',
+    usage: options.usage || { input_tokens: 20_000, output_tokens: 8_000 },
+    content: [
+      { type: 'thinking', thinking: thinkingText, signature: 'fixture-signature' },
+      { type: 'text', text: answerText },
+    ],
+  };
+}
+
+test('Q1: the call record keeps the literal answer text and never the reasoning text', async () => {
+  const answerText = JSON.stringify(valid);
+  const thinkingText = 'INTERNE OVERWEGING: voeg naam en prijs samen';
+  const client = fakeClient(() => responseWithThinking(thinkingText, answerText));
+  const budget = budgetOf();
+  const callModule = callFor(client, budget);
+  const result = await run(callModule, budget);
+  assert.equal(result.ok, true);
+  // The answer is available to the probe, which saves it to a gitignored file.
+  assert.equal(callModule.lastCall.answerText, answerText);
+  // The reasoning block is never read, never stored and never returned.
+  assert.equal(JSON.stringify(callModule.lastCall).includes(thinkingText), false);
+  assert.equal(JSON.stringify(callModule.lastCall).includes('fixture-signature'), false);
+  assert.deepEqual(callModule.lastCall.contentBlockTypes, ['thinking', 'text']);
+  assert.equal(JSON.stringify(result).includes(thinkingText), false);
+});
+
+test('Q1: a cut-off answer keeps the partial text it did produce', async () => {
+  const client = fakeClient(() => responseWithThinking('denkwerk', '{"menus":[', { stop: 'max_tokens' }));
+  const budget = budgetOf();
+  const callModule = callFor(client, budget);
+  const result = await run(callModule, budget);
+  assert.equal(result.ok, false);
+  assert.equal(result.reason, 'output_truncated');
+  // The partial JSON is exactly what has to be inspectable afterwards.
+  assert.equal(callModule.lastCall.answerText, '{"menus":[');
+  assert.equal(callModule.lastCall.reason, 'output_truncated');
+  assert.equal(callModule.lastCall.stopReason, 'max_tokens');
+});
+
+test('Q1: a transport failure has no answer text, so nothing can be invented', async () => {
+  const connectionError = new APIConnectionError({ cause: Object.assign(new Error('socket hang up'), { code: 'ECONNRESET' }) });
+  const client = fakeClient(() => {
+    throw connectionError;
+  });
+  const budget = budgetOf();
+  const callModule = callFor(client, budget);
+  assert.equal((await run(callModule, budget)).ok, false);
+  assert.equal(callModule.lastCall.answerText, null);
+});
+
+

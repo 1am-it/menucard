@@ -1,13 +1,13 @@
 {
-  "version": "1.2.0",
+  "version": "1.3.0",
   "pinnedAt": "2026-10-18",
-  "revisedAt": "2026-10-18",
+  "revisedAt": "2026-10-23",
   "issue": 59,
-  "note": "Pre-declared #59 acceptance set. It records exact local fixtures and the six explicitly allowed public sources: the two tuned representative sources (Smelt, Blossem), the three repaired practice sources now representative/used_for_tuning (De Botanist, Mr Moos, Colonia Breda), and Gauchos Grill Breda as the only remaining evaluated_once holdout. A holdout has its own explicit state: unused, evaluated_once, or used_for_tuning. It never treats a reachable URL, a found PDF or an item count as proof of a complete menu. BE-21's wider vendor/OCR benchmark is out of scope.",
+  "note": "Pre-declared #59 acceptance set. It records exact local fixtures and the six explicitly allowed public sources: the two tuned representative sources (Smelt, Blossem), the three repaired practice sources now representative/used_for_tuning (De Botanist, Mr Moos, Colonia Breda), and Gauchos Grill Breda as the only remaining evaluated_once holdout. A holdout has its own explicit state: unused, evaluated_once, or used_for_tuning. It never treats a reachable URL, a found PDF or an item count as proof of a complete menu. BE-21's wider vendor/OCR benchmark is out of scope. Revision 1.3.0 only moves the protocol pin to v0.3 (literal, contiguous evidence citation); the entries, references and thresholds are unchanged.",
   "protocol": {
     "file": "MENU-EXTRACTION.md",
-    "version": "0.2",
-    "sha256": "15510b4c0b74fee722ac2c51a3f40aa21b03e0161ccffdcb2008f3d27350b762"
+    "version": "0.3",
+    "sha256": "a352effee402d8ccdbb8260aa21baabcfd2e8f8c160b36a1b21df36a430c2648"
   },
   "schemaVersions": {
     "extractionOutput": "menu-extraction-output/v1",

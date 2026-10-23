@@ -44,8 +44,16 @@ run streams the provider answer (`messages.stream` + `finalMessage()`, 180 s cal
 timeout), appends one line per call to
 `ops/benchmark/output/ai-probe-live-calls.jsonl` (gitignored; no key, no headers,
 no prompt), rewrites the report after every call, and stops at once when a call's
-cost is unknown or after two consecutive provider failures. No app route is wired
-to it — `disabledMenuExtractionRuntime` stays in place. See
+cost is unknown or after two consecutive provider failures. Since review
+6375125413 the run also saves the literal JSON answer of every call (the `text`
+block only: no reasoning, no key, no prompt) to the gitignored
+`ops/benchmark/output/ai-probe-raw/` and references it from the report and the
+JSONL line. `node ops/scripts/diagnose-ai-probe-quotes.js` then explains a
+rejected answer offline per citation - the quote, the item, the nearest source
+fragments and a classification - and writes a gitignored
+`ai-probe-quote-diagnosis.json`; it needs no key and makes no call. A rejected
+answer stays diagnosis: it counts as zero extraction. No app route is wired to
+any of it — `disabledMenuExtractionRuntime` stays in place. See
 `docs/guides/menu-extraction-ai-probe.md`.
 
 ## PDF.js server packaging check (added 2026-09-30)
