@@ -220,7 +220,7 @@ elkaar aansluiten:
 | Bron | Wat er staat |
 | --- | --- |
 | Geïnstalleerde `@anthropic-ai/sdk` **0.133.0** | `MessageCreateParams.thinking?: ThinkingConfigParam` (`node_modules/@anthropic-ai/sdk/resources/messages/messages.d.ts:5355`); `ThinkingConfigDisabled = { type: 'disabled' }` (:3954-3955); `ThinkingConfigParam = ThinkingConfigEnabled \| ThinkingConfigDisabled \| ThinkingConfigBetweenTools \| ThinkingConfigAdaptive` (:3990). |
-| Anthropic-documentatie, **Claude Haiku 5.5 — What's new**, sectie "Adaptive thinking and effort" (`platform.claude.com/docs/en/models/haiku-5-5/whats-new-haiku-5-5`, opgehaald 2026-10-23) | "Adaptive thinking is on by default. Although you can still turn thinking off with `thinking: {\"type\": \"disabled\"}` at `high` effort or below, the better way to trade response quality against speed and cost is to use the effort parameter." |
+| Anthropic-documentatie, **Claude Haiku 5.5 — What's new**, sectie "Adaptive thinking and effort" (`platform.claude.com/docs/en/models/haiku-5-5/whats-new-haiku-5-5`, opgehaald 2026-10-23) | "Adaptive thinking is on by default. Although you can still turn thinking off with `thinking: {"type": "disabled"}` at `high` effort or below, the better way to trade response quality against speed and cost is to use the effort parameter." |
 | Anthropic-documentatie, **Claude Haiku 5.5 overview** (zelfde datum) | "Context window: 1M tokens · Max output: 128K tokens"; thinking = "Adaptive"; default effort `medium`. |
 
 De extractie-aanroep stuurt daarom expliciet `thinking: { type: 'disabled' }`
