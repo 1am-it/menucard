@@ -143,6 +143,24 @@ test('K4: evidence coverage, variants and run stability are measured, not assert
   assert.deepEqual(evidenceCoverage(menus, sourceById), { items: 2, withQuote: 2, verified: 1, ratio: 50 });
   assert.deepEqual(evidenceCoverage([], sourceById), { items: 0, withQuote: 0, verified: 0, ratio: null });
 
+  // S2 of review 6376108648: the report counts coverage with the validator's
+  // own normalization, so a curly quote in the source and a straight quote in
+  // the answer are one verified passage instead of a false gap.
+  const typoMenus = [
+    {
+      title: 'Lunch',
+      categories: [
+        {
+          name: 'Hoofd',
+          path: ['Lunch', 'Hoofd'],
+          items: [{ name: 'Zeebaars', evidence: { sourceId: 'source-01', locator: 'regel 3', quote: "Zeebaars 'Catch of the day' 21,50" } }],
+        },
+      ],
+    },
+  ];
+  const typoSourceById = new Map([['source-01', { id: 'source-01', text: 'Zeebaars ‘Catch of the day’ 21,50' }]]);
+  assert.deepEqual(evidenceCoverage(typoMenus, typoSourceById), { items: 1, withQuote: 1, verified: 1, ratio: 100 });
+
   const reference = {
     menus: [{ categories: [{ path: ['Voor'], items: [{ name: 'Soep', priceVariants: [{ label: 'glas', price: '3.50' }, { label: 'fles', price: '18.00' }] }] }] }],
   };

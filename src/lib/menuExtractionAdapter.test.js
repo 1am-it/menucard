@@ -332,3 +332,41 @@ test('R4: an invalid citation stays rejected even when the count is corrected', 
   assert.equal(result.normalizations.length, 1);
   assert.equal(result.normalizations[0].rule, 'derived_item_count');
 });
+
+test('S2: a typographic quote is the same passage through the whole adapter, and a joined quote stays refused', async () => {
+  const typoSources = [{ id: 'source-1', url: 'https://fictief.example/menu', kind: 'html', status: 'read', text: 'LUNCH\nHoofdgerechten\nGegrilde zeebaars ‘Catch of the day’ 21,50' }];
+  const baseItem = valid.menus[0].categories[0].items[0];
+  const withQuote = (quote) => ({
+    ...valid,
+    menus: [
+      {
+        ...valid.menus[0],
+        categories: [{ ...valid.menus[0].categories[0], items: [{ ...baseItem, name: 'Gegrilde zeebaars', amountMinorUnits: 2150, evidence: { ...baseItem.evidence, quote } }] }],
+      },
+    ],
+  });
+
+  // The live Zuyd case: the answer uses a straight quote where the source
+  // prints a curly one. The validator accepts it, so the adapter does too.
+  const accepted = await runStructuredExtraction({
+    adapter: createStructuredExtractionAdapter({ call: async () => withQuote("Gegrilde zeebaars 'Catch of the day' 21,50") }),
+    protocol,
+    sources: typoSources,
+    limits,
+    budget: budget(),
+  });
+  assert.equal(accepted.ok, true, JSON.stringify(accepted.problems || accepted.reason));
+
+  // The equivalence is only about typographic characters: a separator the
+  // source does not print is still an invented passage.
+  const refused = await runStructuredExtraction({
+    adapter: createStructuredExtractionAdapter({ call: async () => withQuote("Gegrilde zeebaars - 'Catch of the day' - 21,50") }),
+    protocol,
+    sources: typoSources,
+    limits,
+    budget: budget(),
+  });
+  assert.equal(refused.ok, false);
+  assert.equal(refused.reason, 'schema_violation');
+  assert.ok(refused.problems.some((problem) => problem.includes('not present in the cited source')));
+});

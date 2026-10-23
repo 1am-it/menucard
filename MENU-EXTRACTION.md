@@ -1,8 +1,10 @@
 # MENU-EXTRACTION - Menucard
 
-Status: CONCEPT v0.3 - niet actief in de import.
-Datum: 2026-10-23. Modelonafhankelijke extractie-instructie. v0.3 scherpt
-alleen de citatenregel in paragraaf 4 aan; de overige eisen zijn ongewijzigd.
+Status: CONCEPT v0.4 - niet actief in de import.
+Datum: 2026-10-24. Modelonafhankelijke extractie-instructie. v0.4 maakt de
+bron-id en de prijsvarianten ondubbelzinnig en legt vast welke typografische
+tekenvarianten de backend gelijkstelt; de overige eisen zijn ongewijzigd ten
+opzichte van v0.3.
 
 ## Doel
 
@@ -67,6 +69,11 @@ gegevens voor een concept; een gevonden menulink alleen is geen extractie.
   beschikbaarheid en expliciete labels.
 - Onderbouw relevante velden met bron-ID, vindplaats (pagina, sectie, selector
   of visuele positie) en een citaat uit de bron.
+- Neem `sourceId` letterlijk over uit de bronkop: de regel die met `sourceId:`
+  begint, of het `sourceId`-veld van de aangeleverde broninventaris. Neem alleen
+  de id over, zonder toevoeging, vertaling of herhaling: wel `smelt-01`, niet
+  `smelt-01.BRON` en niet `BRON smelt-01`. Een id die niet in de aangeleverde
+  inventaris staat, keurt de hele uitvoer af.
 - Een citaat is een **aaneengesloten, letterlijke** tekstreeks uit één bron:
   neem de kortste reeks over die het item identificeert, bij voorkeur alleen de
   gerechtregel zoals die in de bron staat, met de tekens en de spelling van de
@@ -86,10 +93,24 @@ gegevens voor een concept; een gevonden menulink alleen is geen extractie.
   De backendcontrole is letterlijk en streng: één citaat dat niet als
   aaneengesloten reeks in de opgegeven bron staat, keurt de hele uitvoer af.
   Een afgekeurde uitvoer telt niet als extractie.
+  Bij die controle stelt de backend uitsluitend typografische tekenvarianten
+  gelijk: `‘ ’ ‚ ′` = `'`, `“ ” „ ″` = `"`, `– —` = `-` en de harde spatie =
+  een gewone spatie. Elk ander verschil blijft fout: andere woorden,
+  samengevoegde regels, een toegevoegd scheidingsteken of een gewijzigd cijfer.
 - Koppel prijzen alleen aan aantoonbaar bijbehorende items. Datums, tijden en
   telefoonnummers zijn geen prijzen. Pas de bestaande Money-regels toe.
 - Onderscheid vanaf-prijs, meerdere prijzen, op aanvraag en onbekend volgens
   het schema. Onbekend is niet nul. Vul ontbrekende prijzen niet in.
+- Heeft een item meer dan één gedrukte prijs, dan geldt exact deze combinatie:
+  `priceVariants` gevuld met elke gedrukte prijs en het label uit de bron,
+  `priceStatus` `multiple_undecomposed`, en `amountMinorUnits` én `currency`
+  `null`.
+  - Goed: `{"priceStatus":"multiple_undecomposed","amountMinorUnits":null,"currency":null,"priceVariants":[{"label":"Glas","amountMinorUnits":450,"currency":"EUR"},{"label":"Fles","amountMinorUnits":2400,"currency":"EUR"}]}`.
+  - Fout: `{"priceStatus":"known","amountMinorUnits":450,"priceVariants":[{"label":"Glas","amountMinorUnits":450,"currency":"EUR"}]}`
+    (één variant als hoofdprijs) en
+    `{"priceStatus":"multiple_undecomposed","amountMinorUnits":450,"priceVariants":[...]}`
+    (een bedrag naast de varianten).
+  De backend keurt zo'n combinatie af en de adapter repareert geen prijzen.
 - Allergenen/dieetclaims alleen uit expliciete bronvermelding of duidelijke
   legenda overnemen. Niet afleiden uit ingredienten; geen vermelding is onbekend.
 - Meld conflicten, onleesbare regels en onzekere relaties met bewijs.

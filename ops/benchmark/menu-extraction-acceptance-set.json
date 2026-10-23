@@ -1,13 +1,13 @@
 {
-  "version": "1.3.0",
+  "version": "1.4.0",
   "pinnedAt": "2026-10-18",
-  "revisedAt": "2026-10-23",
+  "revisedAt": "2026-10-24",
   "issue": 59,
-  "note": "Pre-declared #59 acceptance set. It records exact local fixtures and the six explicitly allowed public sources: the two tuned representative sources (Smelt, Blossem), the three repaired practice sources now representative/used_for_tuning (De Botanist, Mr Moos, Colonia Breda), and Gauchos Grill Breda as the only remaining evaluated_once holdout. A holdout has its own explicit state: unused, evaluated_once, or used_for_tuning. It never treats a reachable URL, a found PDF or an item count as proof of a complete menu. BE-21's wider vendor/OCR benchmark is out of scope. Revision 1.3.0 only moves the protocol pin to v0.3 (literal, contiguous evidence citation); the entries, references and thresholds are unchanged.",
+  "note": "Pre-declared #59 acceptance set. It records exact local fixtures and the six explicitly allowed public sources: the two tuned representative sources (Smelt, Blossem), the three repaired practice sources now representative/used_for_tuning (De Botanist, Mr Moos, Colonia Breda), and Gauchos Grill Breda as the only remaining evaluated_once holdout. A holdout has its own explicit state: unused, evaluated_once, or used_for_tuning. It never treats a reachable URL, a found PDF or an item count as proof of a complete menu. BE-21's wider vendor/OCR benchmark is out of scope. Revision 1.3.0 moved the protocol pin to v0.3 (literal, contiguous evidence citation). Revision 1.4.0 only moves the pin to v0.4 (literal sourceId, documented typographic equivalence, unambiguous price variants); the entries, references and thresholds are unchanged.",
   "protocol": {
     "file": "MENU-EXTRACTION.md",
-    "version": "0.3",
-    "sha256": "a352effee402d8ccdbb8260aa21baabcfd2e8f8c160b36a1b21df36a430c2648"
+    "version": "0.4",
+    "sha256": "ccbc4c03124cb3be8201d24b0a97ed41d962c2415339cf2c295658cca6e310f4"
   },
   "schemaVersions": {
     "extractionOutput": "menu-extraction-output/v1",

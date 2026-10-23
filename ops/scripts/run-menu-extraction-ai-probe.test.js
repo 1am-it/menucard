@@ -649,7 +649,7 @@ test('R3 (review 6375740447): the report and the JSONL show the normalizations a
     behaviours: [{ kind: 'output', output: answer, usage: { input_tokens: 20_000, output_tokens: 8_000 } }],
   });
 
-  assert.equal(report.version, '1.3.0');
+  assert.equal(report.version, '1.4.0');
   assert.equal(report.normalization.schemaVersion, 'menu-extraction-normalization/v1');
   const call = report.calls[0];
   assert.equal(call.ok, true);
@@ -671,6 +671,74 @@ test('R3: a call without corrections records an empty normalizations array, neve
   assert.deepEqual(report.calls[0].normalizations, []);
   assert.equal(report.totals.normalizationsApplied, 0);
   assert.deepEqual(readCallLog(callsFile).records[0].normalizations, []);
+});
+
+// ---------------------------------------------------------------------------
+// S4 of the Delivery Lead order for #59 / BE-21 (review 6376108648).
+// ---------------------------------------------------------------------------
+
+/** A source whose reference keeps the menu title as the first rubric segment. */
+function referenceSource(id) {
+  return {
+    ...sourceOf(id),
+    reference: {
+      menus: [
+        {
+          title: 'LUNCHKAART PROEF',
+          categories: [{ path: ['LUNCHKAART PROEF', 'VOOR'], items: [{ name: 'Fictieve soep', price: '6.50' }] }],
+        },
+      ],
+    },
+    referenceItems: 1,
+  };
+}
+
+/** The accepted answer matches name and price but names the menu differently. */
+function renamedMenuOutput(sourceId) {
+  const output = outputFor(sourceId);
+  output.menus[0].title = 'Lunchkaart';
+  output.menus[0].categories[0].name = 'Voor';
+  output.menus[0].categories[0].path = ['Lunchkaart', 'Voor'];
+  return output;
+}
+
+test('S4: the report explains per source why an accepted item did not match, without touching a count', async () => {
+  const { report } = await probeWith({
+    sources: [referenceSource('bron-een')],
+    behaviours: [{ kind: 'output', output: renamedMenuOutput('bron-een-01'), usage: { input_tokens: 20_000, output_tokens: 8_000 } }],
+  });
+  assert.equal(report.version, '1.4.0');
+  assert.equal(report.mismatchDiagnosis.schemaVersion, 'menu-mismatch-diagnosis/v1');
+  const row = report.sources.find((source) => source.sourceId === 'bron-een');
+  // The unchanged counting rule sees one rubric error, not a match.
+  assert.equal(row.matched, 0);
+  assert.equal(row.categoryErrors, 1);
+  assert.equal(report.totals.categoryErrors, 1);
+  assert.equal(report.totals.matched, 0);
+  // The diagnosis names the reason: only the menu title differs.
+  assert.equal(row.mismatchDiagnosis.schemaVersion, 'menu-mismatch-diagnosis/v1');
+  assert.equal(row.mismatchDiagnosis.classes.category_path, 1);
+  assert.equal(row.mismatchDiagnosis.pathReasons.menu_title, 1);
+  assert.equal(row.mismatchDiagnosis.rows[0].pathReason, 'menu_title');
+  assert.deepEqual(row.mismatchDiagnosis.rows[0].expectedPath, ['LUNCHKAART PROEF', 'VOOR']);
+  assert.deepEqual(row.mismatchDiagnosis.rows[0].actualPath, ['Lunchkaart', 'Voor']);
+});
+
+test('S4: a fully matching source reports a diagnosis with zero differences', async () => {
+  const { report } = await probeWith({
+    sources: [
+      {
+        ...sourceOf('bron-een'),
+        reference: { menus: [{ title: 'Lunch', categories: [{ path: ['Lunch', 'Voor'], items: [{ name: 'Fictieve soep', price: '6.50' }] }] }] },
+        referenceItems: 1,
+      },
+    ],
+    behaviours: [{ kind: 'output', usage: { input_tokens: 20_000, output_tokens: 8_000 } }],
+  });
+  const row = report.sources.find((source) => source.sourceId === 'bron-een');
+  assert.equal(row.matched, 1);
+  assert.deepEqual(row.mismatchDiagnosis.rows, []);
+  assert.equal(row.mismatchDiagnosis.classes.category_path, 0);
 });
 
 

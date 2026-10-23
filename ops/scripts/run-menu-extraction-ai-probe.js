@@ -82,6 +82,9 @@ const { createFileBudgetLedger } = require('../../src/lib/menuExtractionBudgetLe
 const { aggregateControlledReferences, compareControlledReference } = require('../benchmark/referenceComparison');
 const { REPO_ROOT, attachCaptureTexts, defaultLedgerFile, loadProbeSet } = require('../benchmark/menuExtractionProbeSet');
 const { createCallLog } = require('../benchmark/aiProbeCallLog');
+// S4 of the Delivery Lead order for #59 / BE-21 (review 6376108648): per source,
+// name the reason an accepted item did not match. Diagnosis only.
+const { DIAGNOSIS_SCHEMA_VERSION: MISMATCH_DIAGNOSIS_SCHEMA_VERSION, mismatchSummary } = require('../benchmark/mismatchDiagnosis');
 // Q1-Q4 of the Delivery Lead order for #59 / BE-21 (review 6375125413): the
 // literal answer of every live call is kept in a gitignored file, and a rejected
 // answer is measured and diagnosed offline instead of being discarded.
@@ -280,6 +283,8 @@ function blockedSourceRow(source) {
     evidence: { items: 0, withQuote: 0, verified: 0, ratio: null },
     variants: null,
     stability: null,
+    // S4 of review 6376108648: a blocked source has nothing to diagnose.
+    mismatchDiagnosis: null,
   };
 }
 
@@ -306,6 +311,14 @@ function printLive(report) {
   process.stdout.write(
     `TOTAAL\t${report.totals.capturedSources}/${report.totals.sources}\t${report.totals.referenceItems}\t${report.totals.actualItems}\t${report.totals.matched}\t${report.totals.missing}\t${report.totals.invented}\t${report.totals.priceErrors}\t${report.totals.categoryErrors}\t-\t${report.totals.actualCostEurCents}\t-\n`,
   );
+  // S4 of review 6376108648: per source, why accepted items did not match. The
+  // counts above stay the unchanged comparison's; this line only explains them.
+  for (const source of report.sources) {
+    const summary = source.mismatchDiagnosis ? mismatchSummary(source.mismatchDiagnosis) : null;
+    if (!summary || summary.text === 'geen verschil') continue;
+    const titles = summary.pathReasons && summary.pathReasons.menu_title > 0 ? ` (menutitel ${summary.pathReasons.menu_title})` : '';
+    process.stdout.write(`diagnose ${source.sourceId}: ${summary.text}${titles}\n`);
+  }
   if (report.stop) process.stdout.write(`gestopt: ${report.stop.code} (${report.stop.sourceId || '-'})\n`);
   // Q4: a rejected answer is shown with its item and citation counts, labelled
   // as diagnosis so it is never read as an extraction.
@@ -424,7 +437,7 @@ async function runBoundedProbe({
   const log = createCallLog({ file: callsFile });
 
   const report = {
-    version: '1.3.0',
+    version: '1.4.0',
     issue: 59,
     mode: 'live',
     provider: callModule.provider,
@@ -460,6 +473,12 @@ async function runBoundedProbe({
       schemaVersion: NORMALIZATION_SCHEMA_VERSION,
       rules: Object.values(NORMALIZATION_RULES),
       note: 'per call in calls[].normalizations and in the JSONL line; applied by the adapter before validation',
+    },
+    // S4 of review 6376108648: what the per-source mismatch diagnosis is. It
+    // explains the unchanged comparison; it never adds a match or a verdict.
+    mismatchDiagnosis: {
+      schemaVersion: MISMATCH_DIAGNOSIS_SCHEMA_VERSION,
+      note: 'per source in sources[].mismatchDiagnosis; diagnosis only, no count, reference or verdict is changed',
     },
     sources: [],
     calls: [],

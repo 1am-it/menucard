@@ -10,8 +10,10 @@
 // stop, and `ops/benchmark/referenceComparison.js` stays the one place that
 // counts missed/invented/price/rubric deviations.
 
-const { ANTHROPIC_MODEL, ANTHROPIC_PRICING, THINKING_CONFIG, buildOutputJsonSchema, estimateCostFromTokens } = require('../../src/lib/menuExtractionAnthropicCall');
+const { ANTHROPIC_MODEL, ANTHROPIC_PRICING, THINKING_CONFIG, buildOutputJsonSchema, estimateCostFromTokens, sourceHeaderText } = require('../../src/lib/menuExtractionAnthropicCall');
+const { normalizeEvidenceText } = require('../../src/lib/menuExtractionSchema');
 const { actualRows, normalizePath, percent } = require('./referenceComparison');
+const { diagnoseMismatches } = require('./mismatchDiagnosis');
 
 const PROBE_SOURCE_IDS = Object.freeze(['zuyd', 'andalous', 'pellens', 'chocolat', 'smelt', 'blossem', 'bardot', 'wolfslaar']);
 
@@ -134,11 +136,14 @@ function planSourceCalls(source, options = {}) {
 }
 
 function promptEstimate(protocol, chunk, options = {}) {
-  // Protocol (system) + one inventory line and one header per source + the
-  // text + the structured-output schema and message framing.
+  // Protocol (system) + the instruction framing + one inventory line and the
+  // real source header per source (S1 of review 6376108648 made that header a
+  // multi-line `sourceId:` block, so its exact length is counted instead of a
+  // fixed guess) + the text + the schema in prompt mode.
   let chars = String(protocol || '').length + 400;
   for (const capture of chunk) {
     chars += 120;
+    chars += sourceHeaderText(capture).length;
     chars += typeof capture.text === 'string' ? capture.text.length : 0;
   }
   // M1 of review 6373786786: `prompt` mode carries the schema JSON in the
@@ -242,17 +247,14 @@ function estimateProbe(sources, options = {}) {
   };
 }
 
-function normalizeForMatch(value) {
-  return String(value || '')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .toLowerCase();
-}
-
 /**
  * Evidence coverage the way the validator defines it: every item quote must be
  * a literal passage of the source it cites. A live result has already passed
  * that validation, so this is a second, independent count for the report.
+ *
+ * S2 of review 6376108648: the count uses the validator's own
+ * `normalizeEvidenceText`, including the documented typographic equivalences,
+ * so the report cannot show a gap for a quote the validator accepts.
  */
 function evidenceCoverage(menus, sourceById) {
   let items = 0;
@@ -263,11 +265,11 @@ function evidenceCoverage(menus, sourceById) {
       for (const item of Array.isArray(category.items) ? category.items : []) {
         items += 1;
         const evidence = item && item.evidence ? item.evidence : {};
-        const quote = normalizeForMatch(evidence.quote);
+        const quote = normalizeEvidenceText(evidence.quote);
         if (!quote) continue;
         withQuote += 1;
         const source = sourceById instanceof Map ? sourceById.get(evidence.sourceId) : null;
-        const text = source && typeof source.text === 'string' ? normalizeForMatch(source.text) : '';
+        const text = source && typeof source.text === 'string' ? normalizeEvidenceText(source.text) : '';
         if (text && text.includes(quote)) verified += 1;
       }
     }
@@ -348,6 +350,9 @@ function summarizeSource({ source, reference, menus, comparison, sourceById, tit
     evidence: evidenceCoverage(menus, sourceById),
     variants: variantCounts(reference, menus),
     stability: runs && runs.length > 1 ? compareRuns(runs[0], runs[1]) : null,
+    // S4 of review 6376108648: why the accepted items did not match, per source.
+    // Diagnosis only: the counts above are the unchanged comparison's.
+    mismatchDiagnosis: diagnoseMismatches(comparison),
   };
 }
 

@@ -709,3 +709,87 @@ test('K5: een onzekere rubriek vraagt per regel een menselijke beslissing', () =
   assert.ok(draft.provenance.rows.length >= report.rows.length - report.summary.valid);
 });
 
+
+// ---------------------------------------------------------------------------
+// S2 of the Delivery Lead order for #59 / BE-21 (review 6376108648): the
+// typographic equivalence is one validator rule, so the manual import behaves
+// exactly like route B. It is not a second, looser path.
+// ---------------------------------------------------------------------------
+
+const TYPO_TEXT = ['LUNCH', 'Hoofdgerechten', 'Gegrilde zeebaars ‘Catch of the day’ 21,50'].join('\n');
+
+function typoBundle() {
+  return buildBundle({
+    sources: [
+      {
+        id: 'source-1',
+        url: 'https://voorbeeld.example/menukaart',
+        kind: 'html',
+        status: 'read',
+        text: TYPO_TEXT,
+        sha256: sourceHashForText(TYPO_TEXT),
+      },
+    ],
+  });
+}
+
+function typoOutput(quote) {
+  return {
+    menus: [
+      {
+        title: 'Lunch',
+        sourceId: 'source-1',
+        categories: [
+          {
+            name: 'Hoofdgerechten',
+            items: [
+              {
+                name: 'Gegrilde zeebaars',
+                priceStatus: 'known',
+                amountMinorUnits: 2150,
+                currency: 'EUR',
+                evidence: { sourceId: 'source-1', locator: 'regel 3', quote },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    coverage: { status: 'complete', sourcesRead: 1, pagesRead: 1, itemsExtracted: 1, unreadSources: [], limitations: [] },
+  };
+}
+
+function typoReport(quote) {
+  return buildImportReport({
+    importId: 'import-typo',
+    bundle: typoBundle(),
+    output: typoOutput(quote),
+    aiName: 'Claude',
+    now: new Date('2026-10-24T08:00:00.000Z'),
+  });
+}
+
+test('S2: een typografisch citaat is dezelfde passage in de handmatige import', () => {
+  const report = typoReport("Gegrilde zeebaars 'Catch of the day' 21,50");
+  assert.equal(report.ok, true, JSON.stringify(report.problems || report.message));
+  const row = report.rows[0];
+  assert.equal(row.state, 'valid');
+  assert.equal(row.code, null);
+  assert.equal(row.evidenceVerified, true);
+  assert.equal(report.summary.valid, 1);
+  assert.equal(report.summary.needsReview, 0);
+});
+
+test('S2: een samengevoegd of verzonnen citaat blijft in de handmatige import afgekeurd', () => {
+  for (const quote of ["Gegrilde zeebaars - 'Catch of the day' 21,50", 'Verse oesters 3 stuks 12,00']) {
+    const report = typoReport(quote);
+    assert.equal(report.ok, true, JSON.stringify(report.problems || report.message));
+    const row = report.rows[0];
+    assert.equal(row.code, 'quote_not_in_source', quote);
+    assert.equal(row.state, 'error');
+    assert.equal(row.evidenceVerified, false);
+    assert.equal(report.summary.needsReview, 1);
+    assert.equal(reviewView({ report, decisions: new Map() }).canSave, false);
+  }
+});
+

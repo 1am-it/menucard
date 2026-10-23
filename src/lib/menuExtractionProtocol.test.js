@@ -20,18 +20,28 @@ function tempRoot(files) {
 
 test('loads the pinned instruction with a stable SHA-256 and no local machine path', () => {
   const protocol = loadMenuExtractionProtocol();
-  assert.equal(protocol.version, '0.3');
+  assert.equal(protocol.version, '0.4');
   assert.equal(protocol.file, 'MENU-EXTRACTION.md');
-  // Pinned LF hash of the committed instruction (MENU-EXTRACTION.md v0.3).
+  // Pinned LF hash of the committed instruction (MENU-EXTRACTION.md v0.4).
   // The same hash is recorded in docs/guides/menu-extraction-acceptance.md and
   // docs/guides/menu-extraction-representative-set.md.
-  assert.equal(protocol.hash, 'a352effee402d8ccdbb8260aa21baabcfd2e8f8c160b36a1b21df36a430c2648');
+  assert.equal(protocol.hash, 'ccbc4c03124cb3be8201d24b0a97ed41d962c2415339cf2c295658cca6e310f4');
   assert.match(protocol.text, /Modelonafhankelijke extractie-instructie/);
   // Q3 of review 6375125413: the citation rule is part of the shared protocol,
   // for every model the same. Removing it must fail a test, not only a review.
   assert.match(protocol.text, /aaneengesloten, letterlijke/);
   assert.match(protocol.text, /Voeg nooit regels samen/);
   assert.match(protocol.text, /Voeg nooit een scheidingsteken toe/);
+  // S1/S2/S3 of review 6376108648: the three round rules are pinned text too.
+  assert.match(protocol.text, /Neem `sourceId` letterlijk over uit de bronkop/);
+  assert.match(protocol.text, /smelt-01\.BRON/);
+  // S2: the equivalence is named as a character-class rule, not a free pass.
+  assert.match(protocol.text, /uitsluitend typografische tekenvarianten/);
+  assert.match(protocol.text, /Elk ander verschil blijft fout/);
+  // S3: the one allowed combination for multiple printed prices, plus a fault
+  // example, so the rule cannot be read as "pick one price".
+  assert.match(protocol.text, /`priceStatus` `multiple_undecomposed`/);
+  assert.match(protocol.text, /De backend keurt zo'n combinatie af en de adapter repareert geen prijzen/);
   assert.doesNotMatch(protocol.text, /\r/);
   assert.deepEqual(Object.keys(protocolMetadata(protocol)).sort(), ['instructionFile', 'instructionHash', 'instructionVersion', 'schemaVersion']);
   assert.doesNotMatch(JSON.stringify(protocolMetadata(protocol)), /C:\\\\|Documents/);

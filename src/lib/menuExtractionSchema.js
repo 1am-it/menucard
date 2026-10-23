@@ -104,15 +104,51 @@ function findForbiddenKey(value, depth = 0) {
   return null;
 }
 
+// S2 of the Delivery Lead order for #59 / BE-21 (review 6376108648): one
+// documented equivalence of typographic character classes, and nothing else.
+//
+// The live Zuyd run of 2026-10-24 was rejected twice on four citations that
+// differed from the source only in the shape of the quotation mark: the source
+// prints `‘Catch of the day’` and the model answered `'Catch of the day'`. A
+// curly quote and a straight quote are the same character to a reader and to a
+// menu, so the equality of those shapes is what is compared. These are
+// character-class variants of one glyph, not a content relaxation:
+//
+//   - typographic single quotes and the prime  -> '
+//   - typographic double quotes and the double prime -> "
+//   - en dash and em dash                      -> -
+//   - the hard (non-breaking) space            -> a normal space
+//
+// Every other difference stays a difference: other words, joined source lines,
+// an added separator, a changed digit or a different order are still rejected.
+// The list is exported so the offline diagnosis and the regressions use exactly
+// this table instead of a second, quieter copy.
+const TYPOGRAPHIC_EQUIVALENTS = Object.freeze([
+  Object.freeze({ characters: '\u2018\u2019\u201A\u2032', replacement: "'" }),
+  Object.freeze({ characters: '\u201C\u201D\u201E\u2033', replacement: '"' }),
+  Object.freeze({ characters: '\u2013\u2014', replacement: '-' }),
+  Object.freeze({ characters: '\u00A0', replacement: ' ' }),
+]);
+
+function equateTypographicCharacters(value) {
+  let text = value;
+  for (const entry of TYPOGRAPHIC_EQUIVALENTS) {
+    for (const character of entry.characters) text = text.split(character).join(entry.replacement);
+  }
+  return text;
+}
+
 /**
- * The one normalization the evidence check uses: collapse every whitespace run
- * (including a newline) to a single space, trim and lower-case. Exported
- * unchanged so the offline citation diagnosis of the ops tooling can never
- * disagree with the validator about what "present" means. Nothing here is
+ * The one normalization the evidence check uses: equate the typographic
+ * character classes above, collapse every whitespace run (including a newline)
+ * to a single space, trim and lower-case. Exported unchanged so the offline
+ * citation diagnosis, the report's own coverage count and the manual import can
+ * never disagree with the validator about what "present" means. Nothing else is
  * loosened: the validator keeps the last word.
  */
 function normalizeEvidenceText(value) {
-  return typeof value === 'string' ? value.replace(/\s+/g, ' ').trim().toLowerCase() : '';
+  if (typeof value !== 'string') return '';
+  return equateTypographicCharacters(value).replace(/\s+/g, ' ').trim().toLowerCase();
 }
 
 /** Whether a quote is a literal passage of the cited source, by that rule. */
@@ -312,6 +348,8 @@ module.exports = {
   ALLERGEN_STATUSES,
   FORBIDDEN_TRUST_KEYS,
   LIMITS,
+  TYPOGRAPHIC_EQUIVALENTS,
+  equateTypographicCharacters,
   findForbiddenKey,
   normalizeEvidenceText,
   quoteIsPresentInSource,

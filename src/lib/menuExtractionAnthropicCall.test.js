@@ -149,7 +149,10 @@ test('K1: the request uses the pinned instruction, the exact model and a structu
   assert.deepEqual(jsonSchema.properties.menus.items.properties.categories.items.required, ['name', 'path', 'uncertain', 'items']);
   assert.equal(jsonSchema.additionalProperties, false);
   assert.equal(Object.prototype.hasOwnProperty.call(body, 'tools'), false);
-  assert.deepEqual(body.messages[0].content[1], { type: 'text', text: 'BRON source-1 | https://fictief.example/menu | html' });
+  assert.deepEqual(body.messages[0].content[1], {
+    type: 'text',
+    text: 'sourceId: source-1\nurl: https://fictief.example/menu\nkind: html',
+  });
   assert.equal(body.messages[0].content[2].text, 'Fictieve soep 6.50');
   assert.ok(options.signal, 'the adapter signal is passed to the SDK request');
   // The fake reports 20k prompt and 8k output tokens: $0.006 -> 1 euro cent.
@@ -188,7 +191,7 @@ test('K1: a PDF with a document payload is sent as a base64 document block, a te
   const body = buildAnthropicRequest({ protocol: protocol.text, sources: [pdfSource], limits });
   assert.deepEqual(body.messages[0].content[2], {
     type: 'document',
-    title: "BRON source-1 | https://fictief.example/menu.pdf | pdf | 2 pagina('s)",
+    title: 'sourceId: source-1',
     source: { type: 'base64', media_type: 'application/pdf', data: 'JVBERi0xLjQ=' },
   });
   // The same module still refuses a source without any content.
@@ -945,6 +948,50 @@ test('Q1: a transport failure has no answer text, so nothing can be invented', a
   const callModule = callFor(client, budget);
   assert.equal((await run(callModule, budget)).ok, false);
   assert.equal(callModule.lastCall.answerText, null);
+});
+
+
+// ---------------------------------------------------------------------------
+// S1 and S3 of the Delivery Lead order for #59 / BE-21 (review 6376108648).
+// ---------------------------------------------------------------------------
+
+test('S1: the source header names the exact id on its own line, so it cannot be glued to a label', () => {
+  const body = buildAnthropicRequest({
+    protocol: protocol.text,
+    sources: [{ id: 'smelt-01', url: 'https://fictief.example/menu.pdf', kind: 'pdf', pageCount: 3, documentBase64: 'JVBERi0xLjQ=' }],
+    limits,
+  });
+  const header = body.messages[0].content[1].text;
+  const lines = header.split('\n');
+  // The live Smelt/Blossem answers wrote "smelt-01.BRON": the old single line
+  // put the label in front of the id. The id is now a value of its own.
+  assert.equal(lines[0], 'sourceId: smelt-01');
+  assert.equal(lines.includes('url: https://fictief.example/menu.pdf'), true);
+  assert.equal(lines.includes('pages: 3'), true);
+  assert.equal(header.includes('BRON'), false);
+  // The instruction block states the literal rule and lists only these ids.
+  const intro = body.messages[0].content[0].text;
+  assert.match(intro, /Neem die id letterlijk en volledig over/);
+  assert.match(intro, /smelt-01\.BRON/);
+  assert.match(intro, /smelt-01/);
+  assert.equal(intro.includes('BRON smelt-01'), true, 'the wrong shape is named as wrong');
+  // The document title is the id alone, never a line that can be re-read.
+  const document = body.messages[0].content[2];
+  assert.equal(document.type, 'document');
+  assert.equal(document.title, 'sourceId: smelt-01');
+});
+
+test('S3: the API schema states the price-variant rule where the model reads it', () => {
+  const category = buildOutputJsonSchema().properties.menus.items.properties.categories.items;
+  const item = category.properties.items.items.properties;
+  assert.match(item.priceStatus.description, /multiple_undecomposed/);
+  assert.match(item.amountMinorUnits.anyOf[0].description, /always null when priceVariants is filled/);
+  assert.match(item.priceVariants.description, /priceStatus is multiple_undecomposed and amountMinorUnits and currency are null/);
+  // The hint is text only: no constraint keyword travels to the API.
+  const keywords = schemaKeywords(buildOutputJsonSchema());
+  for (const forbidden of ['minimum', 'maximum', 'minLength', 'maxLength', 'pattern']) {
+    assert.equal(keywords.some((entry) => entry.key === forbidden), false);
+  }
 });
 
 
