@@ -70,9 +70,24 @@ function fakeClient(handler) {
   return {
     calls,
     messages: {
-      create: async (body, options) => {
+      // L2: the probe streams. `create` exists only to fail the test loudly if
+      // the non-streaming path ever comes back.
+      create: () => {
+        throw new Error('the probe must stream: messages.create is not used');
+      },
+      stream: (body, options) => {
         calls.push({ body, options });
-        return handler(body, options);
+        const final = Promise.resolve().then(() => handler(body, options));
+        const stream = {
+          request_id: 'req_fixture',
+          aborted: false,
+          on: () => stream,
+          abort: () => {
+            stream.aborted = true;
+          },
+          finalMessage: () => final,
+        };
+        return stream;
       },
     },
   };
@@ -238,6 +253,79 @@ test('K6: prompt injection in a source stays data — no tools, no trust fields,
   assert.deepEqual(body.output_config.format.schema, buildOutputJsonSchema());
   assert.equal(body.system, protocol.text);
   assert.match(body.messages[0].content[2].text, /IGNORE ALL PREVIOUS INSTRUCTIONS/);
+});
+
+test('L2: the call streams through messages.stream and books the streamed usage', async () => {
+  const client = fakeClient(() => responseOf(valid, { usage: { input_tokens: 40_000, output_tokens: 16_000 } }));
+  const budget = budgetOf();
+  const callModule = callFor(client, budget);
+  assert.equal(callModule.transport, 'messages.stream');
+  const result = await run(callModule, budget);
+  assert.equal(result.ok, true);
+  // 40k prompt at $0.10/M + 16k output at $0.50/M = $0.012 -> 2 euro cent.
+  assert.equal(result.meta.actualCostEurCents, 2);
+  assert.equal(callModule.callCount, 1);
+  const attempt = callModule.lastCall;
+  assert.equal(attempt.streamed, true);
+  assert.equal(attempt.attempt, true);
+  assert.equal(attempt.ok, true);
+  assert.equal(attempt.requestId, 'req_fixture');
+  assert.equal(attempt.usage.inputTokens, 40_000);
+  assert.equal(attempt.usage.outputTokens, 16_000);
+  assert.ok(Number.isInteger(attempt.durationMs) && attempt.durationMs >= 0);
+});
+
+test('L1: a provider error without usage leaves one attempt record and an unknown cost', async () => {
+  const client = fakeClient(() => {
+    throw Object.assign(new Error('overloaded'), { status: 529, requestID: 'req_error_fixture' });
+  });
+  const budget = budgetOf();
+  const callModule = callFor(client, budget);
+  const result = await run(callModule, budget);
+  assert.equal(result.ok, false);
+  assert.equal(result.reason, 'provider_unavailable');
+  assert.equal(result.costUnknown, true);
+  assert.deepEqual(budget.settlements, [null]);
+  const attempt = callModule.lastCall;
+  assert.equal(attempt.attempt, true);
+  assert.equal(attempt.ok, false);
+  assert.equal(attempt.reason, 'provider_unavailable');
+  assert.equal(attempt.httpStatus, 529);
+  assert.equal(attempt.requestId, 'req_error_fixture');
+  assert.equal(attempt.usage, null);
+  assert.equal(attempt.costEurCents, null);
+  assert.ok(Number.isInteger(attempt.durationMs) && attempt.durationMs >= 0);
+});
+
+test('L1: an aborted stream is a timeout without usage and keeps the cost unknown', async () => {
+  const client = fakeClient(() => {
+    throw Object.assign(new Error('aborted'), { name: 'AbortError' });
+  });
+  const budget = budgetOf();
+  const callModule = callFor(client, budget);
+  const result = await run(callModule, budget);
+  assert.equal(result.reason, 'timeout');
+  assert.equal(result.costUnknown, true);
+  assert.equal(callModule.lastCall.reason, 'timeout');
+  assert.equal(callModule.lastCall.usage, null);
+  assert.equal(callModule.lastCall.costEurCents, null);
+});
+
+test('L1: a previous call\'s known cost is never booked for the next attempt', async () => {
+  let attempt = 0;
+  const client = fakeClient(() => {
+    attempt += 1;
+    if (attempt === 1) return responseOf(valid, { usage: { input_tokens: 20_000, output_tokens: 8_000 } });
+    throw Object.assign(new Error('connection reset'), { status: 500 });
+  });
+  const budget = budgetOf();
+  const callModule = callFor(client, budget);
+  assert.equal((await run(callModule, budget)).meta.actualCostEurCents, 1);
+  const second = await run(callModule, budget);
+  assert.equal(second.ok, false);
+  // The first call cost 1 cent; the failed second call must not inherit it.
+  assert.equal(second.costUnknown, true);
+  assert.deepEqual(budget.settlements, [1, null]);
 });
 
 test('K2: the fixed dated price table is applied by tier and rounds up to euro cents', () => {

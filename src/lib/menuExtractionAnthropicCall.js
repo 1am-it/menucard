@@ -25,6 +25,23 @@
 // types (resources/messages/messages.d.ts: OutputConfig, JSONOutputFormat,
 // Base64PDFSource, StopReason, Usage) and the official structured-outputs
 // documentation (retrieved 2026-10-23).
+//
+// L2 of the Delivery Lead order for #59 / BE-21 (review 6373183699): the call
+// streams. Verified against the installed 0.133.0 types and implementation:
+//   - `messages.stream(body, options?: RequestOptions): MessageStream`
+//     (resources/messages/messages.d.ts:74);
+//   - `MessageStream.finalMessage(): Promise<ParsedMessage<ParsedT>>` and the
+//     `request_id` getter (lib/MessageStream.d.ts:31,110);
+//   - the SDK's `timeout` option is armed around the inner `fetch` only
+//     (client.js `fetchWithTimeout`), so it bounds the wait for the response
+//     headers and cannot cut a streamed generation short.
+// A non-streaming request was the reason a long 16K-token generation was
+// aborted at the socket and reported no `usage` at all.
+//
+// L1: every attempt — including a failed one — leaves one record in
+// `state.lastCall` (`attempt: true`, reason, HTTP status, stop_reason, usage,
+// cost, duration, provider request id). The probe writes that record per call.
+// No key and no header ever enters the record.
 
 const schema = require('./menuExtractionSchema');
 
@@ -328,6 +345,12 @@ function responseText(response) {
 
 function classifySdkError(err) {
   if (!err) return CALL_ERROR_CODES.provider_unavailable;
+  // The SDK's own error classes are not re-exported under a stable `name`, so
+  // the constructor name is the documented-enough identity here: an aborted
+  // request (our signal or the caller's) and the SDK's connection timeout are
+  // both `timeout`, never a generic provider error.
+  const errorClass = err && err.constructor && typeof err.constructor.name === 'string' ? err.constructor.name : '';
+  if (errorClass === 'APIUserAbortError' || errorClass === 'APIConnectionTimeoutError') return CALL_ERROR_CODES.timeout;
   if (err.name === 'AbortError' || err.code === 'aborted') return CALL_ERROR_CODES.timeout;
   const status = typeof err.status === 'number' ? err.status : null;
   if (status === 401 || status === 403) return CALL_ERROR_CODES.provider_not_configured;
@@ -361,11 +384,12 @@ function applyCost(budget, costEurCents) {
  */
 function createAnthropicStructuredCall({ env = process.env, client = null, budget = null, model = ANTHROPIC_MODEL } = {}) {
   const apiKey = env && typeof env[ANTHROPIC_API_KEY_ENV] === 'string' ? env[ANTHROPIC_API_KEY_ENV].trim() : '';
-  const state = { lastCall: null, client: client || null, controller: null };
+  const state = { lastCall: null, client: client || null, controller: null, stream: null, callCount: 0 };
   const base = {
     provider: ANTHROPIC_PROVIDER,
     model,
     sdkVersion: ANTHROPIC_SDK_VERSION,
+    transport: 'messages.stream',
     pricing: ANTHROPIC_PRICING,
     apiKeyEnv: ANTHROPIC_API_KEY_ENV,
   };
@@ -376,6 +400,7 @@ function createAnthropicStructuredCall({ env = process.env, client = null, budge
       reason: CALL_ERROR_CODES.provider_not_configured,
       call: null,
       cancel: null,
+      callCount: 0,
       get lastCall() {
         return state.lastCall;
       },
@@ -393,6 +418,10 @@ function createAnthropicStructuredCall({ env = process.env, client = null, budge
   }
 
   async function call(input = {}) {
+    // The previous attempt's price may never be booked for this attempt.
+    // `undefined` is the adapter guard's "not reported yet" state; the record
+    // below keeps `null` as the explicit unknown outcome.
+    if (budget && typeof budget === 'object') budget.costEurCents = undefined;
     const body = buildAnthropicRequest(input);
     const controller = new AbortController();
     state.controller = controller;
@@ -400,51 +429,101 @@ function createAnthropicStructuredCall({ env = process.env, client = null, budge
     const signal = signals.length > 1 && typeof AbortSignal.any === 'function' ? AbortSignal.any(signals) : signals[0] || undefined;
     const requestOptions = { signal };
     if (input.limits && Number.isInteger(input.limits.callTimeoutMs) && input.limits.callTimeoutMs > 0) {
+      // Bounds the fetch until the response headers only (see the header note).
       requestOptions.timeout = input.limits.callTimeoutMs;
+    }
+
+    state.callCount += 1;
+    state.lastCall = null;
+    const startedAt = Date.now();
+    let stream = null;
+
+    function record(fields) {
+      state.lastCall = {
+        provider: ANTHROPIC_PROVIDER,
+        model,
+        attempt: true,
+        streamed: true,
+        ok: !fields.reason,
+        reason: fields.reason || null,
+        httpStatus: Number.isInteger(fields.httpStatus) ? fields.httpStatus : null,
+        stopReason: fields.stopReason || null,
+        usage: fields.usage || null,
+        costEurCents: Number.isInteger(fields.costEurCents) ? fields.costEurCents : null,
+        costUnknownReason: fields.costUnknownReason || null,
+        durationMs: Math.max(0, Date.now() - startedAt),
+        requestId: fields.requestId || null,
+        messageId: fields.messageId || null,
+      };
+      return state.lastCall;
     }
 
     let response;
     try {
-      response = await getClient().messages.create(body, requestOptions);
+      stream = getClient().messages.stream(body, requestOptions);
+      state.stream = stream;
+      // An error listener is required by the SDK's MessageStream: without one
+      // (and without a catching promise) a mid-stream error becomes an
+      // unhandled rejection instead of a rejected `finalMessage()`.
+      if (typeof stream.on === 'function') stream.on('error', () => {});
+      response = await stream.finalMessage();
     } catch (err) {
       const code = classifySdkError(err);
-      throw new AnthropicCallError(code, `anthropic request failed (${code})`);
+      const recorded = record({
+        reason: code,
+        httpStatus: err && typeof err.status === 'number' ? err.status : null,
+        requestId: (err && (err.requestID || err.request_id)) || (stream && stream.request_id) || null,
+      });
+      throw Object.assign(new AnthropicCallError(code, `anthropic request failed (${code})`), { callRecord: recorded });
     } finally {
+      if (state.stream === stream) state.stream = null;
       if (state.controller === controller) state.controller = null;
     }
 
     const cost = costFromUsage(response && response.usage);
     applyCost(budget, cost.costEurCents);
-    state.lastCall = {
-      model,
-      stopReason: response && typeof response.stop_reason === 'string' ? response.stop_reason : null,
+    const stopReason = response && typeof response.stop_reason === 'string' ? response.stop_reason : null;
+    const requestId = (stream && stream.request_id) || null;
+    const messageId = response && typeof response.id === 'string' ? response.id : null;
+
+    let failure = null;
+    if (stopReason === 'refusal') {
+      failure = { code: CALL_ERROR_CODES.provider_refusal, message: 'the provider refused this request' };
+    } else if (stopReason === 'max_tokens') {
+      failure = { code: CALL_ERROR_CODES.output_truncated, message: 'the response was cut off by max_tokens' };
+    } else if (stopReason === 'model_context_window_exceeded') {
+      failure = { code: CALL_ERROR_CODES.input_limit, message: 'the request exceeded the context window' };
+    } else if (stopReason !== 'end_turn' && stopReason !== 'stop_sequence') {
+      failure = { code: CALL_ERROR_CODES.provider_unavailable, message: `unexpected stop_reason ${String(stopReason)}` };
+    }
+
+    let output = null;
+    if (!failure) {
+      const text = responseText(response);
+      if (!text) {
+        failure = { code: CALL_ERROR_CODES.schema_violation, message: 'the response carries no JSON text block' };
+      } else {
+        try {
+          output = JSON.parse(text);
+        } catch {
+          failure = { code: CALL_ERROR_CODES.schema_violation, message: 'the response text is not JSON' };
+        }
+      }
+    }
+
+    // The reported usage/cost is recorded even when the output itself failed:
+    // a refusal or a cut-off is paid work, never a free call.
+    const recorded = record({
+      reason: failure ? failure.code : null,
+      stopReason,
       usage: cost.tokens,
       costEurCents: cost.costEurCents,
       costUnknownReason: cost.reason,
-      messageId: response && typeof response.id === 'string' ? response.id : null,
-    };
-
-    const stopReason = state.lastCall.stopReason;
-    if (stopReason === 'refusal') {
-      throw new AnthropicCallError(CALL_ERROR_CODES.provider_refusal, 'the provider refused this request');
-    }
-    if (stopReason === 'max_tokens') {
-      throw new AnthropicCallError(CALL_ERROR_CODES.output_truncated, 'the response was cut off by max_tokens');
-    }
-    if (stopReason === 'model_context_window_exceeded') {
-      throw new AnthropicCallError(CALL_ERROR_CODES.input_limit, 'the request exceeded the context window');
-    }
-    if (stopReason !== 'end_turn' && stopReason !== 'stop_sequence') {
-      throw new AnthropicCallError(CALL_ERROR_CODES.provider_unavailable, `unexpected stop_reason ${String(stopReason)}`);
-    }
-
-    const text = responseText(response);
-    if (!text) throw new AnthropicCallError(CALL_ERROR_CODES.schema_violation, 'the response carries no JSON text block');
-    try {
-      return JSON.parse(text);
-    } catch {
-      throw new AnthropicCallError(CALL_ERROR_CODES.schema_violation, 'the response text is not JSON');
-    }
+      requestId,
+      messageId,
+    });
+    if (failure) throw Object.assign(new AnthropicCallError(failure.code, failure.message), { callRecord: recorded });
+    return output;
   }
 
   return {
@@ -453,7 +532,17 @@ function createAnthropicStructuredCall({ env = process.env, client = null, budge
     reason: null,
     call,
     cancel: (reason = 'cancelled') => {
+      if (state.stream && typeof state.stream.abort === 'function') {
+        try {
+          state.stream.abort();
+        } catch {
+          // Best effort: the controller below still aborts the request.
+        }
+      }
       if (state.controller) state.controller.abort(reason);
+    },
+    get callCount() {
+      return state.callCount;
     },
     get lastCall() {
       return state.lastCall;

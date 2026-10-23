@@ -112,7 +112,12 @@ function reserveBudget(budget, maxCost) {
   return { ok: true, maxCost, reservation };
 }
 
-/** The provider's reported actual cost, or null when it is unknown. */
+/**
+ * The provider's reported actual cost for THIS attempt, or null when it is
+ * unknown. The provider owns `budget.costEurCents` and must clear it at the
+ * start of every attempt (src/lib/menuExtractionAnthropicCall.js does); the
+ * adapter never writes it, so a read-only budget object stays usable.
+ */
 function knownCost(budget) {
   return budget && Number.isInteger(budget.costEurCents) && budget.costEurCents >= 0 ? budget.costEurCents : null;
 }
@@ -140,10 +145,16 @@ function settleBudget(budget, amount) {
 }
 
 function failedCall(reason, budget, extra = {}) {
-  const booked = settleBudget(budget, knownCost(budget));
+  const cost = knownCost(budget);
+  const booked = settleBudget(budget, cost);
   return {
     ok: false,
     reason,
+    // L1/L3 of review 6373183699: a call that produced no usable output and
+    // reported no usage leaves its price unknown. That is a stop signal of its
+    // own, whatever the technical reason was (timeout, provider error, abort).
+    // Without it the probe kept spending while every call stayed unaccountable.
+    costUnknown: cost === null,
     budgetAccounting: booked.mode,
     ...(booked.ok ? {} : { budgetFailed: true }),
     ...extra,
