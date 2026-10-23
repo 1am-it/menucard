@@ -348,12 +348,16 @@ function buildOutputJsonSchema() {
       coverage: {
         type: 'object',
         additionalProperties: false,
-        required: ['status', 'sourcesRead', 'pagesRead', 'itemsExtracted', 'unreadSources', 'limitations'],
+        // R1 of review 6375740447: `itemsExtracted` is deliberately absent. The
+        // backend counts the items it received (src/lib/menuExtractionNormalization.js)
+        // before the validator runs; a language model must not supply a number
+        // the code can derive exactly. The backend contract keeps the field and
+        // the validator keeps enforcing it, unchanged.
+        required: ['status', 'sourcesRead', 'pagesRead', 'unreadSources', 'limitations'],
         properties: {
           status: { type: 'string', enum: schema.COVERAGE_STATUSES },
           sourcesRead: { type: 'integer' },
           pagesRead: { type: 'integer' },
-          itemsExtracted: { type: 'integer' },
           unreadSources: {
             type: 'array',
             items: {

@@ -29,6 +29,7 @@ const {
   usageTokens,
 } = require('./menuExtractionAnthropicCall');
 const { createStructuredExtractionAdapter, runStructuredExtraction } = require('./menuExtractionAdapter');
+const { applyDerivableNormalizations } = require('./menuExtractionNormalization');
 const { validateStructuredOutput } = require('./menuExtractionSchema');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
@@ -154,6 +155,30 @@ test('K1: the request uses the pinned instruction, the exact model and a structu
   // The fake reports 20k prompt and 8k output tokens: $0.006 -> 1 euro cent.
   assert.deepEqual(budget.settlements, [1]);
   assert.equal(result.meta.actualCostEurCents, 1);
+});
+
+test('R1/R2 (review 6375740447): the provider is not asked to count, and the adapter derives and downgrades', async () => {
+  // The API schema leaves `itemsExtracted` out in both output modes: the code
+  // counts the items it received instead of trusting the model.
+  const coverageSchema = buildOutputJsonSchema().properties.coverage;
+  assert.deepEqual(coverageSchema.required, ['status', 'sourcesRead', 'pagesRead', 'unreadSources', 'limitations']);
+  assert.equal(Object.prototype.hasOwnProperty.call(coverageSchema.properties, 'itemsExtracted'), false);
+  const promptBody = buildAnthropicRequest({ protocol: protocol.text, sources, limits, outputMode: 'prompt' });
+  const instruction = promptBody.messages[0].content[1].text;
+  assert.ok(instruction.includes(JSON.stringify(buildOutputJsonSchema())), 'prompt mode states the same schema');
+  assert.equal(instruction.includes('"itemsExtracted"'), false);
+
+  // The adapter repairs the two bookkeeping values the model got wrong, and the
+  // unchanged validator accepts the result.
+  const answer = JSON.parse(JSON.stringify(valid));
+  answer.coverage.itemsExtracted = 99;
+  answer.coverage.limitations = ['onderaan afgesneden'];
+  const budget = budgetOf();
+  const result = await run(callFor(fakeClient(() => responseOf(answer)), budget), budget);
+  assert.equal(result.ok, true);
+  assert.equal(result.output.coverage.itemsExtracted, 1);
+  assert.equal(result.output.coverage.status, 'partial');
+  assert.deepEqual(result.normalizations.map((entry) => entry.rule).sort(), ['complete_with_limitations', 'derived_item_count']);
 });
 
 test('K1: a PDF with a document payload is sent as a base64 document block, a text PDF as text', async () => {
@@ -608,10 +633,15 @@ test('M1: optionality is limited to the four documented fields, so the grammar c
 });
 
 test('M1: the schema never blocks a validator-valid extraction', () => {
-  // The validator accepts the maximal output ...
+  // The validator accepts the maximal output ... (with its own itemsExtracted,
+  // because the backend contract still requires that field)
   assert.deepEqual(validateStructuredOutput(richValid, richSources), []);
   // ... and the API schema must not reject anything the validator accepted.
-  assert.deepEqual(schemaRejections(richValid, buildOutputJsonSchema()), []);
+  // R1 of review 6375740447: the provider schema no longer carries
+  // `itemsExtracted`; the adapter derives it before validation.
+  const providerRich = JSON.parse(JSON.stringify(richValid));
+  delete providerRich.coverage.itemsExtracted;
+  assert.deepEqual(schemaRejections(providerRich, buildOutputJsonSchema()), []);
   // A minimal extraction that omits the empty fields is completed with the
   // truthful empty values the protocol already describes; the completed output
   // is still validator-valid AND conforms to the API schema. So the stricter
@@ -627,8 +657,14 @@ test('M1: the schema never blocks a validator-valid extraction', () => {
   item.priceText = '6.50';
   item.isFrom = false;
   item.allergens = { status: 'unknown', values: [] };
+  delete completed.coverage.itemsExtracted;
   assert.deepEqual(schemaRejections(completed, buildOutputJsonSchema()), []);
-  assert.deepEqual(validateStructuredOutput(completed, sources), []);
+  // The real chain: what the provider may send is completed by the adapter and
+  // then accepted by the unchanged validator.
+  const derived = applyDerivableNormalizations(completed);
+  assert.deepEqual(validateStructuredOutput(derived.output, sources), []);
+  assert.equal(derived.output.coverage.itemsExtracted, 1);
+  assert.equal(derived.normalizations.length, 1);
 });
 
 test('M1: the looser API schema does not replace the validator', () => {
@@ -636,8 +672,12 @@ test('M1: the looser API schema does not replace the validator', () => {
   // validator may reject that, so the two must not drift into each other.
   const loose = JSON.parse(JSON.stringify(richValid));
   loose.menus[0].categories[0].items[0].priceStatus = 'unknown';
-  assert.deepEqual(schemaRejections(loose, buildOutputJsonSchema()), []);
-  assert.ok(validateStructuredOutput(loose, richSources).length > 0, 'the validator still rejects it');
+  // The provider answer carries no itemsExtracted (R1); the adapter adds it.
+  const providerLoose = JSON.parse(JSON.stringify(loose));
+  delete providerLoose.coverage.itemsExtracted;
+  assert.deepEqual(schemaRejections(providerLoose, buildOutputJsonSchema()), []);
+  const normalized = applyDerivableNormalizations(providerLoose).output;
+  assert.ok(validateStructuredOutput(normalized, richSources).length > 0, 'the validator still rejects it');
 });
 
 

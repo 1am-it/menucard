@@ -73,6 +73,9 @@ const RECORD_FIELDS = Object.freeze([
   'rawOutputSha256',
   'rawOutputChars',
   'rawOutputError',
+  // R3 of review 6375740447: the adapter's own bookkeeping corrections, as rule
+  // names, field names and counts/statuses. No source text, no answer text.
+  'normalizations',
 ]);
 
 // Field names that would carry a credential or a request header. Refusing them

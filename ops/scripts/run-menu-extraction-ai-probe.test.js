@@ -638,5 +638,40 @@ test('Q1/Q4: a call without an answer (transport failure) saves no file and repo
   assert.equal(report.totals.rejectedOutputs, 0);
 });
 
+test('R3 (review 6375740447): the report and the JSONL show the normalizations applied per call', async () => {
+  // The model claims 99 items and `complete` with a limitation; the adapter
+  // derives the real count and downgrades the status before validation.
+  const answer = outputFor('bron-een-01');
+  answer.coverage.itemsExtracted = 99;
+  answer.coverage.limitations = ['onderaan afgesneden'];
+  const { report, callsFile } = await probeWith({
+    sources: [sourceOf('bron-een')],
+    behaviours: [{ kind: 'output', output: answer, usage: { input_tokens: 20_000, output_tokens: 8_000 } }],
+  });
+
+  assert.equal(report.version, '1.3.0');
+  assert.equal(report.normalization.schemaVersion, 'menu-extraction-normalization/v1');
+  const call = report.calls[0];
+  assert.equal(call.ok, true);
+  assert.deepEqual(call.normalizations.map((entry) => entry.rule).sort(), ['complete_with_limitations', 'derived_item_count']);
+  assert.equal(call.normalizations.find((entry) => entry.field === 'coverage.itemsExtracted').to, 1);
+  assert.equal(report.totals.normalizationsApplied, 2);
+
+  // The same entries are in the durable call log, not only in the report.
+  const log = readCallLog(callsFile);
+  assert.deepEqual(log.records[0].normalizations, call.normalizations);
+  assert.equal(log.records[0].ok, true);
+});
+
+test('R3: a call without corrections records an empty normalizations array, never a missing field', async () => {
+  const { report, callsFile } = await probeWith({
+    sources: [sourceOf('bron-een')],
+    behaviours: [{ kind: 'output', usage: { input_tokens: 20_000, output_tokens: 8_000 } }],
+  });
+  assert.deepEqual(report.calls[0].normalizations, []);
+  assert.equal(report.totals.normalizationsApplied, 0);
+  assert.deepEqual(readCallLog(callsFile).records[0].normalizations, []);
+});
+
 
 

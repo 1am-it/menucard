@@ -285,3 +285,50 @@ test('REGRESSION (review P1): an asynchronous budget guard is refused explicitly
   assert.equal(unbooked.reason, 'budget_settle_failed');
   assert.equal(unbooked.output, undefined);
 });
+
+// R4 of the Delivery Lead order for #59 / BE-21 (review 6375740447): the two
+// bookkeeping corrections happen in the adapter, before validation, and are
+// always reported. The validator itself is untouched.
+test('R4: a wrong itemsExtracted is corrected by the adapter before validation', async () => {
+  const answer = { ...valid, coverage: { ...valid.coverage, itemsExtracted: 99 } };
+  const adapter = createStructuredExtractionAdapter({ provider: 'fake', model: 'fixture', call: async () => answer });
+  const result = await runStructuredExtraction({ adapter, protocol, sources, limits, budget: budget() });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.output.coverage.itemsExtracted, 1);
+  assert.deepEqual(result.normalizations.map((entry) => entry.rule), ['derived_item_count']);
+  assert.equal(result.normalizations[0].from, 99);
+  assert.equal(result.normalizations[0].to, 1);
+  // The provider answer itself is not rewritten: only the validated copy changes.
+  assert.equal(answer.coverage.itemsExtracted, 99);
+});
+
+test('R4: complete with limitations is downgraded and recorded, never silently', async () => {
+  const answer = { ...valid, coverage: { ...valid.coverage, status: 'complete', itemsExtracted: 42, limitations: ['onderaan afgesneden'] } };
+  const adapter = createStructuredExtractionAdapter({ call: async () => answer });
+  const result = await runStructuredExtraction({ adapter, protocol, sources, limits, budget: budget() });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.output.coverage.status, 'partial');
+  assert.equal(result.output.coverage.itemsExtracted, 1);
+  assert.deepEqual(result.normalizations.map((entry) => entry.field).sort(), ['coverage.itemsExtracted', 'coverage.status']);
+  const downgrade = result.normalizations.find((entry) => entry.field === 'coverage.status');
+  assert.equal(downgrade.from, 'complete');
+  assert.equal(downgrade.to, 'partial');
+});
+
+test('R4: an invalid citation stays rejected even when the count is corrected', async () => {
+  const broken = JSON.parse(JSON.stringify(valid));
+  broken.coverage.itemsExtracted = 99;
+  broken.menus[0].categories[0].items[0].evidence.quote = 'Fictieve soep - 6.50';
+  const adapter = createStructuredExtractionAdapter({ call: async () => broken });
+  const result = await runStructuredExtraction({ adapter, protocol, sources, limits, budget: budget() });
+
+  assert.equal(result.ok, false);
+  assert.equal(result.reason, 'schema_violation');
+  assert.ok(result.problems.some((problem) => problem.includes('not present in the cited source')));
+  // A derived count never rescues a bad quote: the correction is reported, the
+  // rejection stands.
+  assert.equal(result.normalizations.length, 1);
+  assert.equal(result.normalizations[0].rule, 'derived_item_count');
+});

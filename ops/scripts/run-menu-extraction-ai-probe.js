@@ -76,6 +76,7 @@ const {
   createAnthropicStructuredCall,
 } = require('../../src/lib/menuExtractionAnthropicCall');
 const { createStructuredExtractionAdapter, runStructuredExtraction } = require('../../src/lib/menuExtractionAdapter');
+const { NORMALIZATION_RULES, NORMALIZATION_SCHEMA_VERSION } = require('../../src/lib/menuExtractionNormalization');
 const { loadMenuExtractionProtocol, protocolMetadata } = require('../../src/lib/menuExtractionProtocol');
 const { createFileBudgetLedger } = require('../../src/lib/menuExtractionBudgetLedger');
 const { aggregateControlledReferences, compareControlledReference } = require('../benchmark/referenceComparison');
@@ -322,6 +323,14 @@ function printLive(report) {
       `afgekeurd, diagnose (telt niet als extractie): call ${call.call} ${call.sourceId} - items ${items}, ongeldig citaat ${invalid}${classes ? ` (${classes})` : ''}${call.rawOutputFile ? `, antwoord ${call.rawOutputFile}` : ''}\n`,
     );
   }
+  // R3 of review 6375740447: every applied correction is printed, so a derived
+  // count or a downgraded status can never look like the model's own claim.
+  for (const call of report.calls.filter((entry) => Array.isArray(entry.normalizations) && entry.normalizations.length > 0)) {
+    const applied = call.normalizations
+      .map((entry) => `${entry.field}: ${entry.from === null || entry.from === undefined ? 'null' : entry.from} -> ${entry.to} (${entry.rule})`)
+      .join(', ');
+    process.stdout.write(`genormaliseerd (niet stil): call ${call.call} ${call.sourceId} - ${applied}\n`);
+  }
   // M2: the failure identity is printed as well, so the operator sees the real
   // cause instead of only a stop code.
   const failed = report.calls.filter((call) => call.ok !== true && call.errorClass);
@@ -415,7 +424,7 @@ async function runBoundedProbe({
   const log = createCallLog({ file: callsFile });
 
   const report = {
-    version: '1.2.0',
+    version: '1.3.0',
     issue: 59,
     mode: 'live',
     provider: callModule.provider,
@@ -443,6 +452,14 @@ async function runBoundedProbe({
       directory: path.relative(REPO_ROOT, rawOutputDirectory).split(path.sep).join('/'),
       schemaVersion: 'menu-extraction-ai-probe-raw/v1',
       note: 'one file per provider call with an answer; referenced by rawOutputFile in the call',
+    },
+    // R3 of review 6375740447: what the adapter corrected before validation is
+    // shown per call, in the report and in the JSONL line. The validator itself
+    // is unchanged; nothing is corrected silently.
+    normalization: {
+      schemaVersion: NORMALIZATION_SCHEMA_VERSION,
+      rules: Object.values(NORMALIZATION_RULES),
+      note: 'per call in calls[].normalizations and in the JSONL line; applied by the adapter before validation',
     },
     sources: [],
     calls: [],
@@ -566,6 +583,10 @@ async function runBoundedProbe({
             rawOutputSha256: savedAnswer ? savedAnswer.sha256 : null,
             rawOutputChars: savedAnswer ? savedAnswer.chars : null,
             rawOutputError,
+            // R3 of review 6375740447: the adapter's corrections travel with the
+            // call. Also for a rejected answer: a fixed count never rescues an
+            // invalid citation, and that stays visible in `problems`.
+            normalizations: Array.isArray(result.normalizations) ? result.normalizations : [],
             at: now(),
           };
           if (result.ok !== true && Array.isArray(result.problems)) record.problems = result.problems.slice(0, 5);
@@ -641,6 +662,13 @@ async function runBoundedProbe({
     thinkingTokens: report.calls.reduce((total, call) => total + (Number.isInteger(call.thinkingTokens) ? call.thinkingTokens : 0), 0),
     callsWithThinking: report.calls.filter((call) => Number.isInteger(call.thinkingTokens) && call.thinkingTokens > 0).length,
     schemaErrors,
+    // R3 of review 6375740447: how often the adapter had to correct the model's
+    // bookkeeping. A corrected count is not an extraction error; it is visible
+    // here and per call so it can never pass as the model's own number.
+    normalizationsApplied: report.calls.reduce(
+      (total, call) => total + (Array.isArray(call.normalizations) ? call.normalizations.length : 0),
+      0,
+    ),
     // Q4 of review 6375125413: what the rejected answers contained, so a
     // rejection rate can be read together with the item and citation numbers.
     // These counts are diagnosis; they never count as extracted or matched items.

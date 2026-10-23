@@ -10,6 +10,7 @@
 // It does not turn an invalid/partial result into a successful empty menu.
 
 const { DEFAULT_EXTRACTION_LIMITS } = require('./menuExtractionProtocol');
+const { applyDerivableNormalizations } = require('./menuExtractionNormalization');
 const schema = require('./menuExtractionSchema');
 
 const PRICE_STATUSES = schema.PRICE_STATUSES;
@@ -201,7 +202,7 @@ async function runStructuredExtraction({ adapter, protocol, sources, limits, bud
     });
   });
   try {
-    const output = await Promise.race([
+    const rawOutput = await Promise.race([
       adapter.extract({
         protocol: protocol.text,
         protocolHash: protocol.hash,
@@ -213,33 +214,39 @@ async function runStructuredExtraction({ adapter, protocol, sources, limits, bud
       }),
       timeout,
     ]);
+    // R1/R2 of review 6375740447: the adapter — not the validator — derives the
+    // two bookkeeping values it can know exactly, before any check runs. The
+    // raw answer is kept by the provider module; this only shapes the copy that
+    // is validated and measured.
+    const { output, normalizations } = applyDerivableNormalizations(rawOutput);
     if (estimateTokens(output) > effective.maxOutputTokens) {
-      return failedCall('output_limit', budget);
+      return failedCall('output_limit', budget, { normalizations });
     }
     if (output && output.coverage && Number.isInteger(output.coverage.pagesRead) && output.coverage.pagesRead > effective.maxPages) {
-      return failedCall('page_limit', budget);
+      return failedCall('page_limit', budget, { normalizations });
     }
     const problems = validateStructuredOutput(output, sourceList);
     if (problems.length > 0) {
-      return failedCall('schema_violation', budget, { problems });
+      return failedCall('schema_violation', budget, { problems, normalizations });
     }
     // Unknown actual cost must never be treated as zero spend: the reservation
     // stays charged, so the same budget cannot fund a second call.
     if (!Number.isInteger(budget.costEurCents) || budget.costEurCents < 0) {
-      return failedCall('cost_unknown', budget);
+      return failedCall('cost_unknown', budget, { normalizations });
     }
     const actualCost = budget.costEurCents;
     if (actualCost > effective.maxCostEurCents) {
-      return failedCall('budget_exceeded', budget);
+      return failedCall('budget_exceeded', budget, { normalizations });
     }
     const booked = settleBudget(budget, actualCost);
     if (!booked.ok) {
       // A valid result whose cost could not be booked is not a success.
-      return { ok: false, reason: booked.mode === 'async_guard_unsupported' ? 'async_budget_guard_unsupported' : 'budget_settle_failed', budgetAccounting: booked.mode, meta: { actualCostEurCents: actualCost } };
+      return { ok: false, reason: booked.mode === 'async_guard_unsupported' ? 'async_budget_guard_unsupported' : 'budget_settle_failed', budgetAccounting: booked.mode, meta: { actualCostEurCents: actualCost }, normalizations };
     }
     return {
       ok: true,
       output,
+      normalizations,
       meta: {
         adapterVersion: adapter.version,
         provider: adapter.provider,
