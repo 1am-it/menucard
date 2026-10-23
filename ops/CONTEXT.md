@@ -39,8 +39,13 @@ an estimated token/cost report to `ops/benchmark/output/ai-probe-report.json`
 (gitignored). It needs no key and makes no network call. `--live` requires
 `ANTHROPIC_API_KEY` and an explicit `--budget-file` inside the gitignored output
 folder; the durable ledger enforces 900 eurocent cumulative, 30 per call, 40
-calls and one at a time before every request. No app route is wired to it —
-`disabledMenuExtractionRuntime` stays in place. See
+calls and one at a time before every request. Since review 6373183699 the live
+run streams the provider answer (`messages.stream` + `finalMessage()`, 180 s call
+timeout), appends one line per call to
+`ops/benchmark/output/ai-probe-live-calls.jsonl` (gitignored; no key, no headers,
+no prompt), rewrites the report after every call, and stops at once when a call's
+cost is unknown or after two consecutive provider failures. No app route is wired
+to it — `disabledMenuExtractionRuntime` stays in place. See
 `docs/guides/menu-extraction-ai-probe.md`.
 
 ## PDF.js server packaging check (added 2026-09-30)

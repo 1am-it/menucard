@@ -1,9 +1,9 @@
 # Route B — begrensde AI-proef (#59 / BE-21)
 
 Status: **ontwikkelaarsbewijs. Geen betaalde aanroep, geen sleutel gebruikt, geen
-app-activering en geen onafhankelijke review.** Deze ronde (Lead-order
-6370840673, eigenaarsbesluit 2026-10-23) bouwt en test de automatische AI-route
-zonder kosten. Budget en gegevensverwerking staan nog op **NEEDS_APPROVAL**.
+app-activering en geen onafhankelijke review.** Budget en gegevensverwerking zijn
+door de eigenaar goedgekeurd (2026-10-23); deze ronde (Lead-order 6373183699)
+maakt de live-proef robuust en test dat offline.
 
 [Acceptatiematrix](menu-extraction-acceptance-matrix.md) |
 [Implementatieafspraken](menu-extraction-implementation.md) |
@@ -64,6 +64,21 @@ Vereist en afgedwongen:
 - Exitcodes: `0` rapport geschreven, `1` runtime-/integriteitsfout, `2` een
   voorwaarde weigerde de run (geen sleutel, geen budgetbestand, buiten budget,
   ongeldig pad).
+
+## Robuustheid van de live-run (ronde 2026-10-23, review 6373183699)
+
+De eerste live-run deed 13 calls, waarvan 12 zonder `usage`; er stond niets per
+call op schijf en de run stopte niet. Dat is in deze ronde gerepareerd.
+
+| Eis | Wat er nu gebeurt | Bewijs |
+| --- | --- | --- |
+| L1 logging per aanroep | Na **elke** call één regel in `ops/benchmark/output/ai-probe-live-calls.jsonl` (gitignored, `--calls-file=` om te overschrijven). Velden: bron, run, chunk, callnummer, `reason`/foutcode, HTTP-status, `stop_reason`, `usage`, kosten, duur in ms, provider-request-id. Eén `O_APPEND`-write + fsync per regel; geen sleutel, geen headers, geen prompt. Het rapport wordt na elke call atomisch herschreven, dus een onderbreking verliest alleen de call die nog liep. | `ops/benchmark/aiProbeCallLog.js`, `aiProbeCallLog.test.js`, L4-tests in `ops/scripts/run-menu-extraction-ai-probe.test.js` |
+| L2 lange antwoorden | De providercall gebruikt `messages.stream(...)` + `finalMessage()` (SDK 0.133.0; `lib/MessageStream.d.ts`), niet meer `messages.create`. De SDK-timeout begrenst alleen de fetch tot de responseheaders; de adaptertimer begrenst de hele generatie. Die timer staat nu op **180 s** (`PROBE_CALL_TIMEOUT_MS`), drie keer de oude 60 s en ruim binnen de SDK-default van 10 minuten. | `src/lib/menuExtractionAnthropicCall.js`, `L2`-tests |
+| L3 stoppen | Stop direct als de kosten van een call onbekend zijn (time-out, providerfout, afbreken), en na twee opeenvolgende providerfouten/time-outs. De stopreden staat in `report.stop` en als `kind: "stop"`-regel in de JSONL. De schemafoutregel blijft ongewijzigd. | `evaluateStop` in `ops/benchmark/menuExtractionProbe.js`, L3/L4-tests |
+| L5 ledger | `ai-probe-budget-ledger.json` is niet gewijzigd of gereset. De proef loopt verder binnen de resterende ruimte; onbekende kosten blijven de reservering belasten. | ongewijzigd bestand |
+
+De live-run zelf is **niet** door de developer gedraaid: geen sleutel gelezen of
+gebruikt, geen betaalde aanroep. De Lead draait die na de review.
 
 ## Werkruimte en sleutel (voor de eigenaar, nog niet uitgevoerd)
 
@@ -127,6 +142,15 @@ Per bron, met dezelfde referenties en telregels als #59 (ongewijzigde
   `ops/benchmark/menuExtractionProbe.test.js`,
   `ops/benchmark/menuExtractionProbeSet.test.js`,
   `ops/scripts/run-menu-extraction-ai-probe.test.js`.
+- L1–L5-regressies van deze ronde: `ops/benchmark/aiProbeCallLog.test.js`
+  (logregel, weigeren van sleutel/header, partiële regel), de L1/L2-tests in
+  `src/lib/menuExtractionAnthropicCall.test.js` (streamen, mislukte aanroep met
+  en zonder `usage`, kosten nooit overnemen van de vorige call), de L3-tests in
+  `ops/benchmark/menuExtractionProbe.test.js` (onbekende kosten, twee
+  opeenvolgende providerfouten, time-out 180 s) en de L4-tests in
+  `ops/scripts/run-menu-extraction-ai-probe.test.js` (time-out → stop,
+  providerfout zonder usage → stop, één JSONL-regel per call, tussentijds
+  rapport na een onderbreking, gestreamde usage → juiste kosten).
 - De dry-run is op de acht gepinde captures gedraaid; de tabel staat in de
   matrix en in `ops/benchmark/output/ai-probe-report.json` (gitignored).
 - Dit is **ontwikkelaarsbewijs en fixturebewijs**: geen betaalde aanroep, geen
