@@ -435,6 +435,34 @@ test('M1/M2: the output mode and the error identity reach the report and every J
   assert.equal(call.deadlineHit, false);
 });
 
+test('M1: prompt mode estimates the schema tokens and reports the mode (dry run, no key)', () => {
+  const calls = path.join(REPO_ROOT, 'ops', 'benchmark', 'output', 'reference-captures', 'zuyd');
+  if (!fs.existsSync(calls)) return; // the pinned captures are not in this checkout
+  const out = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'menucard-probe-dry-')), 'report.json');
+  const run = (mode) => {
+    const result = spawnSync(process.execPath, [SCRIPT, `--source=zuyd`, `--out=${out}`, `--output-mode=${mode}`], {
+      cwd: REPO_ROOT,
+      encoding: 'utf8',
+      timeout: 120000,
+      env: { ...process.env, [ANTHROPIC_API_KEY_ENV]: '' },
+    });
+    assert.equal(result.status, 0, result.stderr);
+    return JSON.parse(fs.readFileSync(out, 'utf8'));
+  };
+  const schemaRun = run('schema');
+  const promptRun = run('prompt');
+  assert.equal(schemaRun.outputMode, 'schema');
+  assert.equal(promptRun.outputMode, 'prompt');
+  // The prompt carries the schema as text, so its prompt estimate must be
+  // larger; the output ceiling and the call plan stay identical.
+  assert.ok(
+    promptRun.rows[0].promptTokensPerCall[0] > schemaRun.rows[0].promptTokensPerCall[0],
+    'prompt mode must estimate the schema tokens it actually sends',
+  );
+  assert.deepEqual(promptRun.rows[0].promptTokensPerCall.length, schemaRun.rows[0].promptTokensPerCall.length);
+  assert.equal(promptRun.network, false);
+});
+
 test('M1: the default run reports the schema mode, so an unset flag is never ambiguous', async () => {
   const { report } = await probeWith({
     sources: [sourceOf('bron-een')],

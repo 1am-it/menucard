@@ -126,7 +126,8 @@ geen aanroep.
 Terugvalvariant: `--output-mode=prompt` (standaard `schema`). Die modus stuurt
 **geen** `output_config`, zet hetzelfde schema één keer als data in het
 instructieblok en laat het JSON-contract aan het protocol plus de validator.
-De modus staat in het rapport en in elke JSONL-regel (`outputMode`).
+De modus staat in het rapport en in elke JSONL-regel (`outputMode`); de dry-run
+telt in `prompt`-modus de schematekst mee in de promptraming.
 
 ### M2 — foutdetails
 
@@ -251,5 +252,10 @@ Per bron, met dezelfde referenties en telregels als #59 (ongewijzigde
   rapport na een onderbreking, gestreamde usage → juiste kosten).
 - De dry-run is op de acht gepinde captures gedraaid; de tabel staat in de
   matrix en in `ops/benchmark/output/ai-probe-report.json` (gitignored).
+- M1-M4-regressies van deze ronde staan in `src/lib/menuExtractionAnthropicCall.test.js`,
+  `ops/scripts/run-menu-extraction-ai-probe.test.js` en
+  `ops/benchmark/aiProbeCallLog.test.js` (lijst hierboven). De M3-fixture met de
+  echte SDK op een lokale socket staat bewust **niet** in de suite: 65 s per
+  run, gitignored script, resultaat in `ops/benchmark/output/m3-slow-header-fixture.log`.
 - Dit is **ontwikkelaarsbewijs en fixturebewijs**: geen betaalde aanroep, geen
   echte modeluitvoer, geen browseracceptatie en geen onafhankelijke review.

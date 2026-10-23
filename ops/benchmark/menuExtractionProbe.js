@@ -10,7 +10,7 @@
 // stop, and `ops/benchmark/referenceComparison.js` stays the one place that
 // counts missed/invented/price/rubric deviations.
 
-const { ANTHROPIC_MODEL, ANTHROPIC_PRICING, estimateCostFromTokens } = require('../../src/lib/menuExtractionAnthropicCall');
+const { ANTHROPIC_MODEL, ANTHROPIC_PRICING, buildOutputJsonSchema, estimateCostFromTokens } = require('../../src/lib/menuExtractionAnthropicCall');
 const { actualRows, normalizePath, percent } = require('./referenceComparison');
 
 const PROBE_SOURCE_IDS = Object.freeze(['zuyd', 'andalous', 'pellens', 'chocolat', 'smelt', 'blossem', 'bardot', 'wolfslaar']);
@@ -108,7 +108,7 @@ function planSourceCalls(source, options = {}) {
   return calls;
 }
 
-function promptEstimate(protocol, chunk) {
+function promptEstimate(protocol, chunk, options = {}) {
   // Protocol (system) + one inventory line and one header per source + the
   // text + the structured-output schema and message framing.
   let chars = String(protocol || '').length + 400;
@@ -116,6 +116,9 @@ function promptEstimate(protocol, chunk) {
     chars += 120;
     chars += typeof capture.text === 'string' ? capture.text.length : 0;
   }
+  // M1 of review 6373786786: `prompt` mode carries the schema JSON in the
+  // instruction instead of `output_config`, so the estimate must count it.
+  if (options.outputMode === 'prompt') chars += JSON.stringify(buildOutputJsonSchema()).length;
   return Math.ceil(chars / 4);
 }
 
@@ -129,7 +132,7 @@ function estimateSource(source, options = {}) {
   const limits = { ...PROBE_LIMITS, ...(options.limits || {}) };
   const calls = planSourceCalls(source, options);
   const chunks = chunkCaptures(source.captures, limits.maxDocuments);
-  const promptTokensPerCall = chunks.map((chunk) => promptEstimate(protocol, chunk));
+  const promptTokensPerCall = chunks.map((chunk) => promptEstimate(protocol, chunk, options));
   const maxPromptTokens = promptTokensPerCall.length > 0 ? Math.max(...promptTokensPerCall) : 0;
   const perCallCeilingCosts = promptTokensPerCall.map((tokens) => estimateCostFromTokens({ inputTokens: tokens, outputTokens: limits.maxOutputTokens }));
   const maxCallCostEurCents = perCallCeilingCosts.reduce((max, entry) => Math.max(max, entry ? entry.costEurCents : 0), 0);

@@ -182,7 +182,7 @@ async function dryRun(options) {
   const selected = selectSources(set.sources, options.source);
   await attachCaptureTexts(selected, { root: REPO_ROOT });
   const protocol = loadMenuExtractionProtocol({ root: REPO_ROOT });
-  const estimate = estimateProbe(selected, { protocol: protocol.text, runs: options.runs, limits: PROBE_LIMITS });
+  const estimate = estimateProbe(selected, { protocol: protocol.text, runs: options.runs, limits: PROBE_LIMITS, outputMode: options.outputMode });
   const report = {
     version: '1.0.0',
     issue: 59,
@@ -190,6 +190,7 @@ async function dryRun(options) {
     network: false,
     providerCall: false,
     model: ANTHROPIC_MODEL,
+    outputMode: options.outputMode,
     protocol: protocolMetadata(protocol),
     runs: options.runs,
     limits: estimate.limits,
