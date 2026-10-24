@@ -153,6 +153,12 @@ export default function ManualMenuImportPage() {
   const aiNotConfigured = Boolean(aiStatusError || (aiStatus && !aiStatus.enabled))
   const manualVisible = !aiConfigured || manualOpen
   const reviewVisible = !aiConfigured || manualOpen || reviewOpen
+  // BB3 (Lead review 6384867373): the step numbers follow the steps the human
+  // actually sees. With AI the visible order is Bron kiezen (1), the AI card (2)
+  // and Nalopen en opslaan (3); the manual route, when it is opened, takes 2 and
+  // 3 and the review becomes 4. Without AI the old numbering is unchanged.
+  const aiStep = manualVisible ? null : 2
+  const reviewStep = aiConfigured && !manualVisible ? 3 : aiConfigured ? 4 : 3
 
   const api = useCallback(
     async (path, body, method = 'POST') => {
@@ -594,6 +600,33 @@ export default function ManualMenuImportPage() {
     setManualOpen((open) => !open)
   }
 
+  // W1/W3/W4: does the server offer AI, and what did this month already cost?
+  // BB3 (Lead review 6384867373): the same read refreshes the month line after
+  // every reading, so a call of one cent shows up at once instead of leaving
+  // "€ 0,00 van € 10,00" on screen. It lives above `readWithAi`, because that
+  // callback depends on it.
+  const loadAiStatus = useCallback(async () => {
+    if (!token) return null
+    try {
+      const res = await fetch(AI_API, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' })
+      const data = res.ok ? await res.json() : null
+      if (!data) {
+        setAiStatusError(true)
+        return null
+      }
+      setAiStatus(data)
+      setAiStatusError(false)
+      return data
+    } catch {
+      setAiStatusError(true)
+      return null
+    }
+  }, [token])
+
+  useEffect(() => {
+    loadAiStatus()
+  }, [loadAiStatus])
+
   /**
    * W2/W5: one click on "Lees met AI". The route only accepts an existing
    * capture (the sealed bundle of step 1) or an existing analysis job — a URL is
@@ -640,9 +673,12 @@ export default function ManualMenuImportPage() {
         if (!res.ok) {
           setAiPhase('error')
           setAiError(data.error || 'De AI-lezing lukte niet.')
+          // BB3: a refused call can still have cost money, so the month line is
+          // taken from the answer and then confirmed by the server.
           if (data.monthly) {
             setAiStatus((current) => (current ? { ...current, monthly: data.monthly } : current))
           }
+          await loadAiStatus()
           return
         }
         setAiResult(data)
@@ -651,6 +687,13 @@ export default function ManualMenuImportPage() {
         setReceived(data.import.summary)
         adoptStep(data)
         setAiPhase('done')
+        // BB3 (Lead review 6384867373): a reading of one cent must be visible in
+        // "AI deze maand" at once. The answer already carries the new total; the
+        // server read right after it confirms the durable state.
+        if (data.monthly) {
+          setAiStatus((current) => (current ? { ...current, monthly: data.monthly } : current))
+        }
+        await loadAiStatus()
         // Y2: the result is reported by the AI card itself. A second page-level
         // banner would duplicate it above the source card, so it is not set.
       } catch {
@@ -660,27 +703,8 @@ export default function ManualMenuImportPage() {
         setBusy(false)
       }
     },
-    [api, restaurantId, token, urls]
+    [api, loadAiStatus, restaurantId, token, urls]
   )
-
-  // W1/W3/W4: does the server offer AI, and what did this month already cost?
-  useEffect(() => {
-    if (!token) return undefined
-    let cancelled = false
-    fetch(AI_API, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (cancelled) return
-        if (!data) setAiStatusError(true)
-        else setAiStatus(data)
-      })
-      .catch(() => {
-        if (!cancelled) setAiStatusError(true)
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [token])
 
   // From the batch screen: the analysis job is the allowed source, so the
   // reading starts once for that job after the click that brought us here.
@@ -912,6 +936,7 @@ export default function ManualMenuImportPage() {
                 result={aiResult}
                 error={aiError}
                 busy={busy}
+                step={aiStep}
                 canRead={Boolean(restaurantId) || Boolean(aiJobId)}
                 hint="Kies eerst een restaurant en een bron-URL."
                 manualOpen={manualOpen}
@@ -1119,7 +1144,7 @@ export default function ManualMenuImportPage() {
             <section className="bta-card" aria-labelledby="mai-s3">
               <div className="mai-step-head">
                 <span className="step-num" aria-hidden="true">
-                  {aiConfigured ? 4 : 3}
+                  {reviewStep}
                 </span>
                 <h2 id="mai-s3" className="mai-step-title">
                   Nalopen en opslaan

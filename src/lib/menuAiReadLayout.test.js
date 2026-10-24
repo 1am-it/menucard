@@ -43,11 +43,27 @@ test('Y2: the manual steps are a disclosure and the review opens after Nalopen',
 test('Y2: without AI the old manual flow stays and the quiet message is shown', () => {
   assert.match(PAGE, /const aiNotConfigured =/);
   assert.match(PAGE, /AI is niet ingesteld\./);
-  // With AI the manual steps are 2/3/4; without AI they stay 1/2/3.
+  // With AI the manual steps are 2 and 3; without AI they stay 1 and 2.
   assert.match(PAGE, /\{aiConfigured \? 2 : 1\}/);
   assert.match(PAGE, /\{aiConfigured \? 3 : 2\}/);
-  assert.match(PAGE, /\{aiConfigured \? 4 : 3\}/);
+  // BB3 (review 6384867373): the review number follows the visible order, so
+  // "Nalopen en opslaan" is 3 while only the AI route is visible and 4 when the
+  // manual route is open. Without AI it stays 3.
+  assert.match(PAGE, /const reviewStep = aiConfigured && !manualVisible \? 3 : aiConfigured \? 4 : 3/);
+  assert.match(PAGE, /\{reviewStep\}/);
 });
+
+test('BB3: de stappen worden genummerd in de volgorde die de mens ziet', () => {
+  // De AI-kaart is een genummerde stap zolang de handmatige route dicht is.
+  assert.match(PAGE, /const aiStep = manualVisible \? null : 2/);
+  assert.match(PAGE, /step=\{aiStep\}/);
+  // En de kaart toont dat nummer in dezelfde kop als de andere stappen.
+  assert.match(BLOCK, /step = null,/);
+  assert.match(BLOCK, /<div className="mai-step-head">/);
+  assert.match(BLOCK, /\{step === null \? null : \(/);
+  assert.match(BLOCK, /<span className="step-num" aria-hidden="true">/);
+});
+
 
 test('Y2: the batch place is a standalone section with the same title and manual link', () => {
   assert.match(BATCH, /<section className="bta-ai-help"/);

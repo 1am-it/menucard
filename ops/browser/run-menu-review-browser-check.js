@@ -1541,6 +1541,11 @@ async function readAiLayout(cdp) {
         ),
         sourceInputOutsideBlock: Boolean(sourceInput && block && !block.contains(sourceInput)),
         steps: { one: Boolean(stepOne), two: Boolean(stepTwo), three: Boolean(stepThree) },
+        // BB3 (review 6384867373): de nummers van de zichtbare stappen, in de
+        // volgorde waarin ze op het scherm staan.
+        stepNumbers: Array.from(document.querySelectorAll('.step-num'))
+          .filter((el) => el.getClientRects().length > 0)
+          .map((el) => (el.innerText || '').trim()),
         overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
       };
     })()`,
@@ -1592,6 +1597,13 @@ async function aiReadScenario(cdp, theme) {
       block.steps.three === false,
     block ? JSON.stringify({ steps: block.steps, expanded: block.manualExpanded }) : 'no block',
   );
+  // BB3 (Lead review 6384867373): de zichtbare stappen zijn Bron kiezen (1) en
+  // de AI-kaart (2), zonder gat en zonder sprong.
+  check(
+    'ai read: the visible steps are numbered in their own order',
+    Boolean(block) && block.stepNumbers.join(',') === '1,2',
+    block ? JSON.stringify(block.stepNumbers) : 'no block',
+  );
   check('ai read: no horizontal overflow at 390 px', Boolean(block) && block.overflow <= 0, block ? `overflow=${block.overflow}` : 'no block');
   const firstCard = await evalJs(cdp, `(() => {
     window.scrollTo(0, 0);
@@ -1625,6 +1637,11 @@ async function aiReadScenario(cdp, theme) {
     'ai read: the expanded manual steps still keep the source outside step 1',
     opened.sourceInputOutsideBlock === true && openedText.includes('Prompt maken') && openedText.includes('Antwoord plakken'),
   );
+  check(
+    'ai read: with the manual route open the steps are numbered in their own order',
+    opened.stepNumbers.join(',') === '1,2,3,4',
+    JSON.stringify(opened.stepNumbers),
+  );
   await evalJs(cdp, `(() => { const el = document.getElementById('mai-manual'); if (el) el.scrollIntoView({ block: 'start', behavior: 'instant' }); return true; })()`);
   screenshotFiles.push(await screenshot(cdp, OUT_DIR, `ai-read-manual-390-${theme}.png`));
 
@@ -1654,6 +1671,19 @@ async function aiReadScenario(cdp, theme) {
       doneLayout.steps.two === false &&
       doneLayout.steps.three === false,
     JSON.stringify({ buttons: doneLayout.buttons, steps: doneLayout.steps }),
+  );
+  // BB3 (Lead review 6384867373): de maandregel volgt de echte uitgave meteen.
+  // De fictieve lezing kost 4 cent; de statusroute telt hem daarna mee.
+  const monthAfterRead = await bodyText(cdp);
+  check(
+    'ai read: this month\'s spend is refreshed right after the reading',
+    /AI deze maand € 0,16 van € 10,00/.test(monthAfterRead),
+    (monthAfterRead.match(/AI deze maand[^\n]*/) || ['missing'])[0],
+  );
+  check(
+    'ai read: after the reading the visible steps stay 1 and 2',
+    doneLayout.stepNumbers.join(',') === '1,2',
+    JSON.stringify(doneLayout.stepNumbers),
   );
   await evalJs(cdp, `(() => { const el = document.querySelector('.mai-ai'); if (el) el.scrollIntoView({ block: 'start', behavior: 'instant' }); return true; })()`);
   screenshotFiles.push(await screenshot(cdp, OUT_DIR, `ai-read-done-390-${theme}.png`));
@@ -1688,6 +1718,24 @@ async function aiReadScenario(cdp, theme) {
   );
   await evalJs(cdp, `(() => { const el = document.getElementById('mai-s3'); if (el) el.scrollIntoView({ block: 'start', behavior: 'instant' }); return true; })()`);
   screenshotFiles.push(await screenshot(cdp, OUT_DIR, `ai-read-review-390-${theme}.png`));
+  // BB3: met de handmatige route open én de review zichtbaar lopen de nummers
+  // door tot 4, in de volgorde van het scherm.
+  const reviewLayout = await readAiLayout(cdp);
+  check(
+    'ai read: the review is step 3 while only the AI route is visible',
+    reviewLayout.stepNumbers.join(',') === '1,2,3',
+    JSON.stringify(reviewLayout.stepNumbers),
+  );
+  await clickButton(cdp, 'Liever zelf invoeren of plakken');
+  await waitFor(cdp, `Boolean(document.getElementById('mai-s1') && document.getElementById('mai-s2'))`, 10000);
+  const fourSteps = await readAiLayout(cdp);
+  check(
+    'ai read: with both routes open the steps run 1, 2, 3, 4 without a gap',
+    fourSteps.stepNumbers.join(',') === '1,2,3,4',
+    JSON.stringify(fourSteps.stepNumbers),
+  );
+  await clickButton(cdp, 'Liever zelf invoeren of plakken');
+  await waitFor(cdp, `!document.getElementById('mai-s1')`, 10000);
   recordClickpath(
     `ai read (${theme})`,
     [
@@ -2004,6 +2052,8 @@ async function readMap(cdp) {
           glyph: (el.querySelector('.mai-map-swatch') || {}).innerText || '',
           top: Math.round(el.getBoundingClientRect().top),
           height: Math.round(el.getBoundingClientRect().height),
+          left: Math.round(el.getBoundingClientRect().left),
+          right: Math.round(el.getBoundingClientRect().right),
         })) : [],
         legendRowHeight: root && root.querySelector('.mai-map-chips') ? Math.round(root.querySelector('.mai-map-chips').getBoundingClientRect().height) : 0,
         explain: root && root.querySelector('.mai-map-legend-more')
@@ -2082,6 +2132,19 @@ async function manualCardScenario(cdp, theme, width = 390) {
       map.chips.every((entry) => entry.height > 0) &&
       (width > 320 ? new Set(map.chips.map((entry) => entry.top)).size === 1 && map.legendRowHeight <= 26 : map.legendRowHeight <= 50),
     JSON.stringify({ chips: map.chips, row: map.legendRowHeight }),
+  );
+  // BB3 (Lead review 6384867373): de chips plakten aan elkaar. Elke volgende
+  // chip begint nu minstens 6 px na het einde van de vorige (op een eigen regel
+  // geldt de rijafstand, die de wrapper al meet).
+  const chipGaps = map.chips.slice(1).map((entry, index) => {
+    const previous = map.chips[index];
+    return entry.top === previous.top ? entry.left - previous.right : null;
+  });
+  check(
+    `kaart ${width}px/${theme}: de legenda-chips hebben ruimte tussen zich`,
+    chipGaps.filter((gap) => gap !== null).length >= (width > 320 ? 3 : 1) &&
+      chipGaps.filter((gap) => gap !== null).every((gap) => gap >= 6),
+    JSON.stringify({ gaps: chipGaps, chips: map.chips.map((entry) => [entry.label, entry.left, entry.right]) }),
   );
   check(
     `kaart ${width}px/${theme}: de lange uitleg zit dicht achter "Uitleg"`,

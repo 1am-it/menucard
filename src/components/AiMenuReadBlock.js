@@ -37,6 +37,7 @@ export default function AiMenuReadBlock({
   onRead,
   onReview,
   title = 'Laat AI de kaart lezen',
+  step = null,
 }) {
   const monthly = status && status.monthly ? status.monthly : null
   const enabled = Boolean(status && status.enabled)
@@ -46,9 +47,19 @@ export default function AiMenuReadBlock({
 
   return (
     <section className="bta-card mai-ai-card mai-ai" aria-labelledby="mai-ai-title">
-      <h2 id="mai-ai-title" className="mai-step-title">
-        {title}
-      </h2>
+      {/* BB3 (Lead review 6384867373): the card is a numbered step whenever the
+          manual route is collapsed, so "Nalopen en opslaan" is never step 4
+          while only step 1 and this card are visible. */}
+      <div className="mai-step-head">
+        {step === null ? null : (
+          <span className="step-num" aria-hidden="true">
+            {step}
+          </span>
+        )}
+        <h2 id="mai-ai-title" className="mai-step-title">
+          {title}
+        </h2>
+      </div>
 
       {statusError ? (
         <p className="mai-why" role="status">

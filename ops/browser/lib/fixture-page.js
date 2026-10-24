@@ -97,7 +97,7 @@ function fixtureBootstrap(scenarios, options = {}) {
     function jsonResponse(body, status) {
       return new Response(JSON.stringify(body), { status: status || 200, headers: { 'Content-Type': 'application/json' } });
     }
-    const fixtureState = { manualStep: 0, manualState: 0 };
+    const fixtureState = { manualStep: 0, manualState: 0, aiRead: false };
     // #59 variant 5: which fictional API routes the screen actually called, so
     // the browser check can prove that a card page is only fetched on request.
     const calls = (window.__FIXTURE_CALLS__ = window.__FIXTURE_CALLS__ || []);
@@ -205,14 +205,21 @@ function fixtureBootstrap(scenarios, options = {}) {
         if (!ai) return jsonResponse({ error: 'Fictief AI-szenario ontbreekt.' }, 500);
         if (verdict.routeId === 'menu-ai-status') {
           // ?aiState=off shows the same block without a key or flag (W3).
-          return jsonResponse(params.get('aiState') === 'off' ? ai.statusOff : ai.status, 200);
+          if (params.get('aiState') === 'off') return jsonResponse(ai.statusOff, 200);
+          // BB3 (review 6384867373): after a fictional reading the month line
+          // must show the new total, exactly like the real route that counts the
+          // durable concepts. The state lives in this page load only.
+          return jsonResponse(fixtureState.aiRead && ai.statusAfterRead ? ai.statusAfterRead : ai.status, 200);
         }
         if (verdict.routeId === 'menu-ai-read') {
           // Y3 (review 6381657192): aiState=slow holds the fictional answer
           // briefly, so the real "AI bezig" state is observable and can be
           // screenshotted. Still fixture only: no provider is contacted.
           const answer = () => {
-            if (ai.read.body) return jsonResponse(ai.read.body, ai.read.status);
+            if (ai.read.body) {
+              fixtureState.aiRead = true;
+              return jsonResponse(ai.read.body, ai.read.status);
+            }
             return jsonResponse({ error: 'De AI is nu niet bereikbaar. Ga verder met de handmatige import.', reason: 'provider_unavailable' }, 422);
           };
           if (params.get('aiState') === 'slow') {

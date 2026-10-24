@@ -3131,7 +3131,12 @@ details.bta-side-card > summary:focus-visible { outline: 2px solid var(--border-
 /* AA2 (Lead review 6383853638): de legenda is één regel met vier kleine
    chips; de lange uitleg zit achter "Uitleg". Vorm en kleur blijven samen de
    drager: elk chip heeft zijn eigen teken en zijn eigen rand- of stippelstijl,
-   en de schermlezer leest de volledige woorden. */
+   en de schermlezer leest de volledige woorden.
+   BB3 (Lead review 6384867373): de chips plakten aan elkaar ("Overgenomen"
+   direct tegen het volgende teken). Ze krijgen nu ruimte tussen en binnen de
+   chips (6 px tussen, 3 px binnen de chip); de letters zijn één tiende kleiner,
+   zodat de vier chips op 390 px op één regel blijven (zie de browsercheck die
+   de tussenruimte meet). */
 .mai-map-legend { display: grid; gap: 4px; min-width: 0; }
 .mai-map-chips {
   list-style: none;
@@ -3140,13 +3145,13 @@ details.bta-side-card > summary:focus-visible { outline: 2px solid var(--border-
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 2px;
-  font-size: 10.5px;
+  gap: 6px 6px;
+  font-size: 10px;
   color: var(--text-secondary);
   min-width: 0;
 }
-.mai-map-chip { display: inline-flex; align-items: center; gap: 2px; min-width: 0; }
-.mai-map-chip-label { font-size: 10.5px; color: var(--text-primary); white-space: nowrap; }
+.mai-map-chip { display: inline-flex; align-items: center; gap: 3px; min-width: 0; }
+.mai-map-chip-label { font-size: 10px; color: var(--text-primary); white-space: nowrap; }
 .mai-map-chip .mai-map-swatch { width: 10px; height: 10px; font-size: 7px; }
 .mai-map-legend-more { min-width: 0; }
 .mai-map-legend-summary {

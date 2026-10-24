@@ -1,9 +1,9 @@
 {
   "fixtureOnly": true,
   "passed": true,
-  "head": "2dd40d0611298dfc0a1035a3a52c2d706620d16a",
-  "worktreeDirty": false,
-  "generatedAt": "2026-10-24T13:11:28.364Z",
+  "head": "edf058d8abd1027f616d9877481b3bdc1fdf70d7",
+  "worktreeDirty": true,
+  "generatedAt": "2026-10-24T14:07:33.787Z",
   "command": "npm run test:browser:menu-review",
   "environment": {
     "node": "v22.22.3",
@@ -616,7 +616,7 @@
     {
       "name": "manual import: step 1 shows \"Geldig tot\" with a clock time",
       "passed": true,
-      "detail": "Geldig tot 15:36. Daarna maak je gewoon een nieuwe prompt."
+      "detail": "Geldig tot 16:34. Daarna maak je gewoon een nieuwe prompt."
     },
     {
       "name": "manual import: technische details name the pinned instruction",
@@ -1191,7 +1191,12 @@
     {
       "name": "kaart 390px/light: de legenda is één regel met vier kleine chips in volgorde",
       "passed": true,
-      "detail": "{\"chips\":[{\"label\":\"Overgenomen\",\"glyph\":\"✓\",\"top\":2065,\"height\":14},{\"label\":\"Niet overgenomen\",\"glyph\":\"○\",\"top\":2065,\"height\":14},{\"label\":\"Prijs wijkt af\",\"glyph\":\"▲\",\"top\":2065,\"height\":14},{\"label\":\"Geen gerecht\",\"glyph\":\"–\",\"top\":2065,\"height\":14}],\"row\":14}"
+      "detail": "{\"chips\":[{\"label\":\"Overgenomen\",\"glyph\":\"✓\",\"top\":2065,\"height\":14,\"left\":29,\"right\":105},{\"label\":\"Niet overgenomen\",\"glyph\":\"○\",\"top\":2065,\"height\":14,\"left\":111,\"right\":207},{\"label\":\"Prijs wijkt af\",\"glyph\":\"▲\",\"top\":2065,\"height\":14,\"left\":213,\"right\":278},{\"label\":\"Geen gerecht\",\"glyph\":\"–\",\"top\":2065,\"height\":14,\"left\":284,\"right\":356}],\"row\":14}"
+    },
+    {
+      "name": "kaart 390px/light: de legenda-chips hebben ruimte tussen zich",
+      "passed": true,
+      "detail": "{\"gaps\":[6,6,6],\"chips\":[[\"Overgenomen\",29,105],[\"Niet overgenomen\",111,207],[\"Prijs wijkt af\",213,278],[\"Geen gerecht\",284,356]]}"
     },
     {
       "name": "kaart 390px/light: de lange uitleg zit dicht achter \"Uitleg\"",
@@ -1351,7 +1356,12 @@
     {
       "name": "kaart 390px/dark: de legenda is één regel met vier kleine chips in volgorde",
       "passed": true,
-      "detail": "{\"chips\":[{\"label\":\"Overgenomen\",\"glyph\":\"✓\",\"top\":2065,\"height\":14},{\"label\":\"Niet overgenomen\",\"glyph\":\"○\",\"top\":2065,\"height\":14},{\"label\":\"Prijs wijkt af\",\"glyph\":\"▲\",\"top\":2065,\"height\":14},{\"label\":\"Geen gerecht\",\"glyph\":\"–\",\"top\":2065,\"height\":14}],\"row\":14}"
+      "detail": "{\"chips\":[{\"label\":\"Overgenomen\",\"glyph\":\"✓\",\"top\":2065,\"height\":14,\"left\":29,\"right\":105},{\"label\":\"Niet overgenomen\",\"glyph\":\"○\",\"top\":2065,\"height\":14,\"left\":111,\"right\":207},{\"label\":\"Prijs wijkt af\",\"glyph\":\"▲\",\"top\":2065,\"height\":14,\"left\":213,\"right\":278},{\"label\":\"Geen gerecht\",\"glyph\":\"–\",\"top\":2065,\"height\":14,\"left\":284,\"right\":356}],\"row\":14}"
+    },
+    {
+      "name": "kaart 390px/dark: de legenda-chips hebben ruimte tussen zich",
+      "passed": true,
+      "detail": "{\"gaps\":[6,6,6],\"chips\":[[\"Overgenomen\",29,105],[\"Niet overgenomen\",111,207],[\"Prijs wijkt af\",213,278],[\"Geen gerecht\",284,356]]}"
     },
     {
       "name": "kaart 390px/dark: de lange uitleg zit dicht achter \"Uitleg\"",
@@ -1511,7 +1521,12 @@
     {
       "name": "kaart 320px/light: de legenda is één regel met vier kleine chips in volgorde",
       "passed": true,
-      "detail": "{\"chips\":[{\"label\":\"Overgenomen\",\"glyph\":\"✓\",\"top\":2258,\"height\":14},{\"label\":\"Niet overgenomen\",\"glyph\":\"○\",\"top\":2258,\"height\":14},{\"label\":\"Prijs wijkt af\",\"glyph\":\"▲\",\"top\":2258,\"height\":14},{\"label\":\"Geen gerecht\",\"glyph\":\"–\",\"top\":2274,\"height\":14}],\"row\":30}"
+      "detail": "{\"chips\":[{\"label\":\"Overgenomen\",\"glyph\":\"✓\",\"top\":2258,\"height\":14,\"left\":29,\"right\":105},{\"label\":\"Niet overgenomen\",\"glyph\":\"○\",\"top\":2258,\"height\":14,\"left\":111,\"right\":207},{\"label\":\"Prijs wijkt af\",\"glyph\":\"▲\",\"top\":2258,\"height\":14,\"left\":213,\"right\":278},{\"label\":\"Geen gerecht\",\"glyph\":\"–\",\"top\":2278,\"height\":14,\"left\":29,\"right\":101}],\"row\":34}"
+    },
+    {
+      "name": "kaart 320px/light: de legenda-chips hebben ruimte tussen zich",
+      "passed": true,
+      "detail": "{\"gaps\":[6,6,null],\"chips\":[[\"Overgenomen\",29,105],[\"Niet overgenomen\",111,207],[\"Prijs wijkt af\",213,278],[\"Geen gerecht\",29,101]]}"
     },
     {
       "name": "kaart 320px/light: de lange uitleg zit dicht achter \"Uitleg\"",
@@ -1699,6 +1714,11 @@
       "detail": "{\"steps\":{\"one\":false,\"two\":false,\"three\":false},\"expanded\":\"false\"}"
     },
     {
+      "name": "ai read: the visible steps are numbered in their own order",
+      "passed": true,
+      "detail": "[\"1\",\"2\"]"
+    },
+    {
       "name": "ai read: no horizontal overflow at 390 px",
       "passed": true,
       "detail": "overflow=0"
@@ -1717,6 +1737,11 @@
       "name": "ai read: the expanded manual steps still keep the source outside step 1",
       "passed": true,
       "detail": null
+    },
+    {
+      "name": "ai read: with the manual route open the steps are numbered in their own order",
+      "passed": true,
+      "detail": "[\"1\",\"2\",\"3\",\"4\"]"
     },
     {
       "name": "ai read: the manual route collapses again without losing the reading",
@@ -1744,6 +1769,16 @@
       "detail": "{\"buttons\":[\"Nalopen\",\"Liever zelf invoeren of plakken\"],\"steps\":{\"one\":false,\"two\":false,\"three\":false}}"
     },
     {
+      "name": "ai read: this month's spend is refreshed right after the reading",
+      "passed": true,
+      "detail": "AI deze maand € 0,16 van € 10,00"
+    },
+    {
+      "name": "ai read: after the reading the visible steps stay 1 and 2",
+      "passed": true,
+      "detail": "[\"1\",\"2\"]"
+    },
+    {
       "name": "ai read: the review carries the label Gelezen door AI",
       "passed": true,
       "detail": "Gelezen door AI"
@@ -1757,6 +1792,16 @@
       "name": "ai read: a named price list stays in orde instead of asking for a price",
       "passed": true,
       "detail": "Fictief glas wijn · Glas 4,50 / Fles 24,00Bekijk op kaart"
+    },
+    {
+      "name": "ai read: the review is step 3 while only the AI route is visible",
+      "passed": true,
+      "detail": "[\"1\",\"2\",\"3\"]"
+    },
+    {
+      "name": "ai read: with both routes open the steps run 1, 2, 3, 4 without a gap",
+      "passed": true,
+      "detail": "[\"1\",\"2\",\"3\",\"4\"]"
     },
     {
       "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual-ai&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&theme=light&aiState=off)",
@@ -1819,6 +1864,11 @@
       "detail": "{\"steps\":{\"one\":false,\"two\":false,\"three\":false},\"expanded\":\"false\"}"
     },
     {
+      "name": "ai read: the visible steps are numbered in their own order",
+      "passed": true,
+      "detail": "[\"1\",\"2\"]"
+    },
+    {
       "name": "ai read: no horizontal overflow at 390 px",
       "passed": true,
       "detail": "overflow=0"
@@ -1837,6 +1887,11 @@
       "name": "ai read: the expanded manual steps still keep the source outside step 1",
       "passed": true,
       "detail": null
+    },
+    {
+      "name": "ai read: with the manual route open the steps are numbered in their own order",
+      "passed": true,
+      "detail": "[\"1\",\"2\",\"3\",\"4\"]"
     },
     {
       "name": "ai read: the manual route collapses again without losing the reading",
@@ -1864,6 +1919,16 @@
       "detail": "{\"buttons\":[\"Nalopen\",\"Liever zelf invoeren of plakken\"],\"steps\":{\"one\":false,\"two\":false,\"three\":false}}"
     },
     {
+      "name": "ai read: this month's spend is refreshed right after the reading",
+      "passed": true,
+      "detail": "AI deze maand € 0,16 van € 10,00"
+    },
+    {
+      "name": "ai read: after the reading the visible steps stay 1 and 2",
+      "passed": true,
+      "detail": "[\"1\",\"2\"]"
+    },
+    {
       "name": "ai read: the review carries the label Gelezen door AI",
       "passed": true,
       "detail": "Gelezen door AI"
@@ -1877,6 +1942,16 @@
       "name": "ai read: a named price list stays in orde instead of asking for a price",
       "passed": true,
       "detail": "Fictief glas wijn · Glas 4,50 / Fles 24,00Bekijk op kaart"
+    },
+    {
+      "name": "ai read: the review is step 3 while only the AI route is visible",
+      "passed": true,
+      "detail": "[\"1\",\"2\",\"3\"]"
+    },
+    {
+      "name": "ai read: with both routes open the steps run 1, 2, 3, 4 without a gap",
+      "passed": true,
+      "detail": "[\"1\",\"2\",\"3\",\"4\"]"
     },
     {
       "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual-ai&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&theme=dark&aiState=off)",
@@ -2936,7 +3011,7 @@
     {
       "name": "network guard: CDP blocks external subresource and frame navigation",
       "passed": true,
-      "detail": "[{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/pixel.png\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-24T13:11:27.430Z\",\"resourceType\":\"Image\"},{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/frame\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-24T13:11:27.431Z\",\"resourceType\":\"Document\"}]"
+      "detail": "[{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/frame\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-24T14:07:32.903Z\",\"resourceType\":\"Document\"},{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/pixel.png\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-24T14:07:32.921Z\",\"resourceType\":\"Image\"}]"
     },
     {
       "name": "network guard: no unexpected CDP traffic during app scenarios",
@@ -3166,7 +3241,7 @@
     },
     {
       "file": "menu-review-readonly-1024-dark.png",
-      "sha256": "ef6aea2575fe146c7480bb01208db508e8d77705e3498fe7f85cbbc5b2a888f7",
+      "sha256": "e16dec8a02fb581593e98e726f4b2fe7749efca1fa80a13346ad71caf05586ad",
       "width": 1024,
       "height": 900
     },
@@ -3178,19 +3253,19 @@
     },
     {
       "file": "menu-review-partial-390-dark.png",
-      "sha256": "03d5f5c9bdfab7f95565c102513e3dcc50610bf0c741e9277e616c8d2b79d6f6",
+      "sha256": "9222ed21f2fce5807945f79b8133c369664f485ae4e653725850e1989f024b65",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-image-only-390-light.png",
-      "sha256": "9da64c25bde165ea2c160fb2ef4b08be38c953885e1deea7f9270da9d35565af",
+      "sha256": "6d93ca5d813a7f4ef25e25e84c3abf71d5900d0ed099bf96ffbfc0ad364296e7",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-image-only-320-dark.png",
-      "sha256": "6ef3907523e36faade4d87fb613336d62cc82150b226e35e8feb0f42d795c5cf",
+      "sha256": "65a28aa9d4e8f2d6ed39e54a7cc42a8b3fb518dfb8ef20470c3af8c3ea9ffdb9",
       "width": 320,
       "height": 900
     },
@@ -3208,31 +3283,31 @@
     },
     {
       "file": "menu-review-structure-1024-light.png",
-      "sha256": "b4425d538838f17a65cb12ca3b66fcbf83bebf4072a98eb4c4bf1d523da2428b",
+      "sha256": "f466eb2538257668d562bd5ae76e722464e1f78602562cea5616f12ff0c41f89",
       "width": 1024,
       "height": 900
     },
     {
       "file": "menu-review-structure-keyboard-390-light.png",
-      "sha256": "95a70e686ac87b1128cf00786d7218b46c7df4ab75ab9dc20ae690d3ee329bd3",
+      "sha256": "30da7dadba5789ade45d56b3df65f96a3eddc7f56a4c33db63601493ab08fc90",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-structure-390-light.png",
-      "sha256": "69ee79fc122f71eb3e992ef25886f077ada7d0dcdf065a121310ba521d083185",
+      "sha256": "3c68a15f19468d381adbe0b58ed2a6d34f664b4d6756ed53f4326a6b157a2773",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-structure-390-dark.png",
-      "sha256": "34f968537614863236b8c6ed05f3d1c3e37af8fbccabd90996e7c97c35665132",
+      "sha256": "dea38f18296a655080d00396f6133267f98a9be5b2e38c373c21b16e47e29fb9",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-structure-readonly-1024-dark.png",
-      "sha256": "a842ea5e779e5a718ec370a03f06596dd9972ce89676a7765cf62b2d1eee4e3a",
+      "sha256": "664abd95730e9e7ed975b8d2737341e99a70f1f595e6a0b81ee8987fa047cd25",
       "width": 1024,
       "height": 900
     },
@@ -3304,13 +3379,13 @@
     },
     {
       "file": "ai-map-legend-uitleg-390-light.png",
-      "sha256": "af63c7dc4e1ade1b4bb3c0e5c9cfb0fc98df1a168ed4dfacc9a50ff40b07ac28",
+      "sha256": "318e570e20f6b7ea97be4e4d434fabb829c40798500315e4019374d4a164de14",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-map-390-light.png",
-      "sha256": "7e795c57100f640732aadd435ac9d7ac83c27f17e168184fa501471b2a6ad9d4",
+      "sha256": "5b4ae5901a8c457524b1d1fae0f5cd2b61d2027fc66d9a2ff3f4dd4105e5ae6f",
       "width": 390,
       "height": 900
     },
@@ -3328,25 +3403,25 @@
     },
     {
       "file": "ai-map-pdf-390-light.png",
-      "sha256": "17aa85be2ce0eecdc56e68bb574b012cbaaff0c9dc5c217329b36e41e0d3204a",
+      "sha256": "22e679ccdf5ea7d25ad795b9b1077823f403995c5342bc1228dc8660b586e3e5",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-map-from-list-390-light.png",
-      "sha256": "bad2df956e7175b2490d9afeb8ab762c54ffa4e2df556a66c894adbb631cf105",
+      "sha256": "c2b3dba53c7532d036e4a8783af90148d7febbd8037420f6ca08cca885b1e094",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-map-legend-uitleg-390-dark.png",
-      "sha256": "44bbc30f1aff973ba7fef54310fa2f8a5cf2bce9fc3c67aa1986a2a909a461b9",
+      "sha256": "4c9169eb53e27b507ce41c5cfbd76e3379d1cecb303a68e193e5da7e7b92cfe4",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-map-390-dark.png",
-      "sha256": "597e01d373cadc46f844c6f96a33a9cbcc1f1378e0b88ad8a575adf8053b2382",
+      "sha256": "9f7356af0a4bd8d49b71ca8542b1bda232ad26b73e9cb344c6a7d64decf617b8",
       "width": 390,
       "height": 900
     },
@@ -3364,85 +3439,85 @@
     },
     {
       "file": "ai-map-pdf-390-dark.png",
-      "sha256": "f394dddd59de45b4fbd42e2561062c644f3253b0d682c88637141df4688a54dd",
+      "sha256": "e75cb4d9c2433a00b669bcc5eb17b35c104a85ecadc71e7fa68d7ed0468161c6",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-map-from-list-390-dark.png",
-      "sha256": "5276074b3e537f8a14c53d872b575133fb2d010db74de7f1fbacc6e365996ffe",
+      "sha256": "5a79b8a8853869948cdfcf9082c414efec8dd9f53c751f37a80dc36f33804355",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-map-legend-uitleg-320-light.png",
-      "sha256": "506214db52e54e42527e9704401dda2cbf4c0c0d3dec01cc5348d126ec9f7394",
+      "sha256": "884814ec4c49688b29b2efff60c8457807aa75fcacb096808f9a550ffd70a26e",
       "width": 320,
       "height": 900
     },
     {
       "file": "ai-map-320-light.png",
-      "sha256": "80390692981a05f8ddae2fdce822f5c3780b28304dfe5eb7b2e941691b274327",
+      "sha256": "70184e199fef4bbc78226ae5095e150024cf61952a9999b2e3ed11358f991c7e",
       "width": 320,
       "height": 900
     },
     {
       "file": "ai-map-red-panel-320-light.png",
-      "sha256": "04fbba868b593c5c8bef41f8ec5f20eb270af7f46c002e984ee47d9aedcdcb7c",
+      "sha256": "d0846241afc6aa19dfe1d93b84d8ae46cb6172760c7442fecdce12fe231d9e1a",
       "width": 320,
       "height": 900
     },
     {
       "file": "ai-map-orange-panel-320-light.png",
-      "sha256": "94cb34e05589a13b3d31b25015c94f2917fabf6e804eaee5ea6871fe2a68fb9a",
+      "sha256": "6e507ce28f6030fda1cb27fc60da811305e1a435ade6165a73e3a4f28bfad99e",
       "width": 320,
       "height": 900
     },
     {
       "file": "ai-map-pdf-320-light.png",
-      "sha256": "a82792d787a7dae9c76369a3399379cf243d15a33ab34a5b8ea7b8fcf7b1c020",
+      "sha256": "a3771d3f05cd36c6cc3a1ce4ace78d56d576fbe69db4bb8ee11fd134ed85ae3f",
       "width": 320,
       "height": 900
     },
     {
       "file": "ai-map-from-list-320-light.png",
-      "sha256": "1854bb72f66a4c328aab66c0305b72ca86f7f6fe8f4397fb22e1d9bee7b6e8b8",
+      "sha256": "7f83119840a4c59baaa5a216d83460aeed412948724967594409b77fe5abefbd",
       "width": 320,
       "height": 900
     },
     {
       "file": "ai-map-keyboard-390-light.png",
-      "sha256": "6cf887aa50d4bdeda97b13b0e6cc0dd8aac593ec5f7f30e67f16c9e6e28c47ed",
+      "sha256": "890770673116f76bdebd1db9702186d4b582e59399c3d8182deb5fb410be2556",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-read-block-390-light.png",
-      "sha256": "d52ff8af9810c3c897ee136661179bee236f447b4c8d17225a01a4f6878778dc",
+      "sha256": "2906ad00283f1795a4ce032fa7b7cc246b00ea05363f4c6da5be2b1a03b59533",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-read-manual-390-light.png",
-      "sha256": "ef523c657cf0e1aaf0c23c3117cf51dd0bd328a69c467a3709b8b6ce47dc8318",
+      "sha256": "7bc302fb1f92ca58e3956f7d0abf6713ced097a5397c48c3672d85bf8115fbaf",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-read-busy-390-light.png",
-      "sha256": "d84b3803e08ab173b58a52272f2dd037e8d7a70fffea9c5326807a7e17eee7f9",
+      "sha256": "5fffb9bdf20dd48f32a8aa1aee945a871d36f30d5f964f52dfee3101bff4ab33",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-read-done-390-light.png",
-      "sha256": "f5b53f8a7ddf4842ca4e94de9b5043c6bd2145a2419fb03a5396a5dba4e87b97",
+      "sha256": "d1ac06e01a7b347fcdeb6217bdc189eb01ad4609c868e6845593f1e169e5ee5b",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-read-review-390-light.png",
-      "sha256": "0e41deb1e4ba1ad2f1c6badf6854a79b08fdf6be322876a1224b23ff06acd28a",
+      "sha256": "89ebaf17531d010301d0578f5f0e316739e86725dfd9831d60746c64c4f30a6d",
       "width": 390,
       "height": 900
     },
@@ -3454,7 +3529,7 @@
     },
     {
       "file": "ai-read-block-390-dark.png",
-      "sha256": "5b582eda481f27a1fd9d4e93e1a1d5a09951d482f87a5237822f505c933b4d6b",
+      "sha256": "90c9736c52c5130e781714e8e1085b33afd2fde133ab79a02ff050ba2ec1a4b3",
       "width": 390,
       "height": 900
     },
@@ -3466,19 +3541,19 @@
     },
     {
       "file": "ai-read-busy-390-dark.png",
-      "sha256": "0cd362d9e99126a48c0d22220edcbe9dd4c3b1ca1f79786ef4528630932daeb0",
+      "sha256": "e20ee634618a7fea67cd1bb38e6879d36dde7eac4c617059737db9224106cd1b",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-read-done-390-dark.png",
-      "sha256": "967f4aa3ab1bcc83d76f6c202ddab128cb3b152fe4380ff5548daebac81d9470",
+      "sha256": "a272363e2b0783e61fb13711353abe88aee5267b9f8c1ea8e6d882b94742d040",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-read-review-390-dark.png",
-      "sha256": "b6f08c76bb9533d4a90f58a54e7b17e21f0cdeeb98ac92222393b5e4136317c8",
+      "sha256": "809e8a2809cff2053460156a0984c2cc42ce67978664a56a42f607e832e946d5",
       "width": 390,
       "height": 900
     },
@@ -3490,19 +3565,19 @@
     },
     {
       "file": "ai-read-batch-390-light.png",
-      "sha256": "31b811f9fa83aafdbb59345fea11be555dda5dab825fa54b88d05045c1231694",
+      "sha256": "de301cc5dfc61774df93595ecdecc343e19ac32f5e391d28ec6d2dacd60367ec",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-read-batch-390-dark.png",
-      "sha256": "6f10d5217c747c2cc2ff5ae1d8b3f1cf5bece28fb4b0c45947028259d05e836b",
+      "sha256": "f43fa69d567c35075ddae84fd5eb7bf0be55d350a8e4bf1252c04dad8ab85606",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-v2-1024-light.png",
-      "sha256": "9caf379bec710f8aa4d3b9abd80479321689cb207c4b0e4ceaf3ca961f25dfe4",
+      "sha256": "2346d6043bc95c303cc523584ef5d8ecef52b90c4475732c3b145bfadba86028",
       "width": 1024,
       "height": 900
     },
@@ -3520,37 +3595,37 @@
     },
     {
       "file": "menu-review-320-light.png",
-      "sha256": "5a9ab5a11d4a1a552ff4ca29906872bb06356ae38c85693e9f1deb447e128cbc",
+      "sha256": "9c0f705bf2ae6cbcc5686650e415396a92736ddceb7e99261493a0f33810f0a4",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-320-dark.png",
-      "sha256": "b8517bd94734e346cb6adcd071431a5f6d3e33d85e88b085ab08fb1f7f7b8400",
+      "sha256": "86270dcef1edf2e2fa106704131c2767c270b96df94f667d0c932060b15f6c74",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-390-light.png",
-      "sha256": "8795eaf97143d25368fc3a787feadfe56a3de66f616159d3867d261f435ecff5",
+      "sha256": "1b90a88d82d4cec43fa26132955be4187dc97ad2b7aefac902e7810e60c210b0",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-390-dark.png",
-      "sha256": "728856a4598913f4cf96ba20fa84eb5a1cdb76eef7e0d843a1f6ec7c3e56fc4d",
+      "sha256": "6593f5ec161d7a1701e8a4cc812c32eb0db10856e3b7365514695260756ce6b8",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-1024-dark.png",
-      "sha256": "8dae4b8edd423138be3028d4b6b88c29ff2684be397d1c980cc5ab703ce85aac",
+      "sha256": "a1e810474c4ad73397f79737521498e2712db2ddae308b9d761f136872a2408a",
       "width": 1024,
       "height": 900
     },
     {
       "file": "menu-review-keyboard-390-light.png",
-      "sha256": "7fdf1c9c7840881322f8ecb472b6271c39d5d9d00831a2df9efc7625c1093a4a",
+      "sha256": "7283227b359a86e980aed7a6e4fbb420cacb4361e161584de2424f2865a9109e",
       "width": 390,
       "height": 900
     },
@@ -3562,7 +3637,7 @@
     },
     {
       "file": "concept-detail-v1-1024-clickpath.png",
-      "sha256": "7ad8d2309a4549984cc472febe828a6855efa8b25e0a08f71450da81d9f2b108",
+      "sha256": "7d2459db0263666dbb7df04d43a4445e58de7126f0f530f5257bfa9122511bfa",
       "width": 1024,
       "height": 900
     },
@@ -3592,7 +3667,7 @@
     },
     {
       "file": "concept-detail-invalid-1024-light.png",
-      "sha256": "03be8dc2156bdc7de41a6f1e4a92479671d5a7350c2946fe0adb61594325bae7",
+      "sha256": "3aa77eb1cb981404ba3acf222c86a4044f99e8aa133eeab2da484c589c69dc66",
       "width": 1024,
       "height": 900
     },
@@ -3610,7 +3685,7 @@
     },
     {
       "file": "concept-list-error-390-light.png",
-      "sha256": "c27e117bf249cd74544cea5e95503d51c5d839de73487116e80c83490038c6a4",
+      "sha256": "3a74f151a5d778f1a00b3e21c40b4f11637f795d9ab4b5a96867260337691d17",
       "width": 390,
       "height": 900
     },
@@ -3683,21 +3758,21 @@
         "phase": "negative-probe",
         "kind": "cdp_fetch",
         "method": "GET",
-        "url": "https://unapproved.invalid/pixel.png",
+        "url": "https://unapproved.invalid/frame",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-24T13:11:27.430Z",
-        "resourceType": "Image"
+        "at": "2026-10-24T14:07:32.903Z",
+        "resourceType": "Document"
       },
       {
         "phase": "negative-probe",
         "kind": "cdp_fetch",
         "method": "GET",
-        "url": "https://unapproved.invalid/frame",
+        "url": "https://unapproved.invalid/pixel.png",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-24T13:11:27.431Z",
-        "resourceType": "Document"
+        "at": "2026-10-24T14:07:32.921Z",
+        "resourceType": "Image"
       }
     ],
     "pageViolations": [
@@ -3708,7 +3783,7 @@
         "url": "https://unapproved.invalid/api/anything",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-24T13:11:27.406Z"
+        "at": "2026-10-24T14:07:32.877Z"
       },
       {
         "phase": "negative-probe",
@@ -3717,7 +3792,7 @@
         "url": "http://unapproved.invalid/api/anything",
         "reason": "external_origin",
         "protocolRelative": true,
-        "at": "2026-10-24T13:11:27.406Z"
+        "at": "2026-10-24T14:07:32.878Z"
       },
       {
         "phase": "negative-probe",
@@ -3726,7 +3801,7 @@
         "url": "http://localhost:3137/api/internal/v1/menu-concepts",
         "reason": "method_not_allowed",
         "protocolRelative": false,
-        "at": "2026-10-24T13:11:27.407Z"
+        "at": "2026-10-24T14:07:32.878Z"
       },
       {
         "phase": "negative-probe",
@@ -3735,7 +3810,7 @@
         "url": "http://localhost:3137/api/internal/v1/unrelated-write",
         "reason": "unknown_api_route",
         "protocolRelative": false,
-        "at": "2026-10-24T13:11:27.407Z"
+        "at": "2026-10-24T14:07:32.878Z"
       },
       {
         "phase": "negative-probe",
@@ -3744,7 +3819,7 @@
         "url": "http://localhost:3137/api/internal/v1/menu-concepts",
         "reason": "method_not_allowed",
         "protocolRelative": false,
-        "at": "2026-10-24T13:11:27.407Z"
+        "at": "2026-10-24T14:07:32.878Z"
       },
       {
         "phase": "negative-probe",
@@ -3753,7 +3828,7 @@
         "url": "ws://unapproved.invalid/socket",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-24T13:11:27.407Z"
+        "at": "2026-10-24T14:07:32.879Z"
       }
     ]
   },

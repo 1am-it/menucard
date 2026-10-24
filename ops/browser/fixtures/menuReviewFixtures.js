@@ -707,6 +707,11 @@ function manualImportScenario({ variantsNamed = false } = {}) {
     now: new Date('2026-10-22T12:00:00.000Z'),
   });
   const evidenceFor = (locator, quote) => ({ sourceId: 'source-1', locator, quote });
+  // BB1 (Lead review 6384867373): elk item van een echt opgeslagen AI-antwoord
+  // draagt het verplichte `allergens`-object (status unknown, lege lijst) en
+  // `isFrom: false`. De fixture gebruikt daarom exact die vorm; een lege of
+  // onbekende lijst mag een regel niet afkeuren.
+  const realAnswerShape = { isFrom: false, allergens: { status: 'unknown', values: [] } };
   const output = {
     menus: [
       {
@@ -716,7 +721,7 @@ function manualImportScenario({ variantsNamed = false } = {}) {
           {
             name: 'Bites',
             items: [
-              { name: 'Fictieve salade', priceStatus: 'known', amountMinorUnits: 1250, currency: 'EUR', evidence: evidenceFor('Bites · 1', 'Fictieve salade 12,50') },
+              { name: 'Fictieve salade', priceStatus: 'known', amountMinorUnits: 1250, currency: 'EUR', ...realAnswerShape, evidence: evidenceFor('Bites · 1', 'Fictieve salade 12,50') },
               {
                 name: 'Fictief glas wijn',
                 priceStatus: 'multiple_undecomposed',
@@ -732,6 +737,7 @@ function manualImportScenario({ variantsNamed = false } = {}) {
                       { label: null, amountMinorUnits: 450, currency: 'EUR' },
                       { label: null, amountMinorUnits: 2400, currency: 'EUR' },
                     ],
+                ...realAnswerShape,
                 evidence: evidenceFor('Bites · 2', 'Fictief glas wijn 4,50'),
               },
               {
@@ -739,6 +745,7 @@ function manualImportScenario({ variantsNamed = false } = {}) {
                 priceStatus: 'known',
                 amountMinorUnits: 280,
                 currency: 'EUR',
+                ...realAnswerShape,
                 evidence: evidenceFor('Bites · 9', 'Fictieve koffie 2,80'),
               },
             ],
@@ -870,6 +877,19 @@ function manualImportScenario({ variantsNamed = false } = {}) {
       perCallMaxEurCents: 30,
       monthly: { spentEurCents: null, limitEurCents: 1000, remainingEurCents: null, unknownConcepts: 0 },
       budget: { allowed: false, reason: 'budget_unavailable' },
+    },
+    // BB3 (Lead review 6384867373): na een lezing van 4 cent staat de maandregel
+    // meteen op het nieuwe totaal. De statusroute antwoordt dit zodra de fictieve
+    // lezing is geweest, net als de echte route die het duurzame concept telt.
+    statusAfterRead: {
+      enabled: true,
+      reason: null,
+      message: null,
+      label: 'Gelezen door AI',
+      aiName,
+      perCallMaxEurCents: 30,
+      monthly: { spentEurCents: 16, limitEurCents: 1000, remainingEurCents: 984, unknownConcepts: 0 },
+      budget: { allowed: true, reason: null },
     },
     read: {
       status: 200,
