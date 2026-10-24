@@ -1,9 +1,9 @@
 {
   "fixtureOnly": true,
   "passed": true,
-  "head": "0f30f89738caf7ba6b0a0fdbb51fc2f7b816bd76",
+  "head": "c84d63d77362789ca62634660c8871882aae6d66",
   "worktreeDirty": false,
-  "generatedAt": "2026-10-24T10:01:21.705Z",
+  "generatedAt": "2026-10-24T11:07:44.601Z",
   "command": "npm run test:browser:menu-review",
   "environment": {
     "node": "v22.22.3",
@@ -35,6 +35,7 @@
     "manual",
     "manual-ai",
     "manual-coverage",
+    "manual-map",
     "concepts",
     "concepts-empty",
     "concepts-error",
@@ -615,7 +616,7 @@
     {
       "name": "manual import: step 1 shows \"Geldig tot\" with a clock time",
       "passed": true,
-      "detail": "Geldig tot 12:27. Daarna maak je gewoon een nieuwe prompt."
+      "detail": "Geldig tot 13:33. Daarna maak je gewoon een nieuwe prompt."
     },
     {
       "name": "manual import: technische details name the pinned instruction",
@@ -1153,6 +1154,476 @@
       "detail": "overflow=0"
     },
     {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual-map&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fdiner&aiState=off&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-import?fixture=manual-map&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fdiner&aiState=off&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "kaart 390px/light: de review opent met de schakelaar Lijst | Kaart",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "kaart 390px/light: de kaart is niet geladen en er is geen pagina opgevraagd",
+      "passed": true,
+      "detail": "{\"present\":false,\"calls\":0,\"toggles\":[{\"text\":\"Lijst\",\"pressed\":\"true\"},{\"text\":\"Kaart\",\"pressed\":\"false\"}]}"
+    },
+    {
+      "name": "kaart 390px/light: Lijst staat aan en de kaart nog niet",
+      "passed": true,
+      "detail": "[{\"text\":\"Lijst\",\"pressed\":\"true\"},{\"text\":\"Kaart\",\"pressed\":\"false\"}]"
+    },
+    {
+      "name": "kaart 390px/light: de kaart toont de regels van de bron",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "kaart 390px/light: precies één kaartpagina is opgevraagd",
+      "passed": true,
+      "detail": "calls=1"
+    },
+    {
+      "name": "kaart 390px/light: de legenda noemt de vier markeringen in gewone taal",
+      "passed": true,
+      "detail": "[{\"label\":\"Overgenomen\",\"detail\":\"Groen met een doorgetrokken rand: dit gerecht staat in het concept met dezelfde prijs.\",\"swatch\":\"●\"},{\"label\":\"Niet overgenomen\",\"detail\":\"Oranje met een gestippelde rand: deze regel met een prijs staat niet in het concept.\",\"swatch\":\"◌\"},{\"label\":\"Prijs wijkt af\",\"detail\":\"Rood met een dubbele rand: de prijs in het concept verschilt van de prijs op de kaart.\",\"swatch\":\"▲\"},{\"label\":\"Geen gerecht\",\"detail\":\"Grijs: deze regel is afgewezen of eerder als geen gerecht beoordeeld.\",\"swatch\":\"–\"}]"
+    },
+    {
+      "name": "kaart 390px/light: de bronnen staan in volgorde met hun weergave",
+      "passed": true,
+      "detail": "[\"source-1 · Website · 1 niet overgenomen\",\"source-2 · PDF · 2 pagina's · 1 niet overgenomen\",\"source-3 · Afbeelding zonder tekst · 0 niet overgenomen\"]"
+    },
+    {
+      "name": "kaart 390px/light: de melding zegt dat dit de opgehaalde tekst van de website is",
+      "passed": true,
+      "detail": "Opgehaalde tekst van de website"
+    },
+    {
+      "name": "kaart 390px/light: rood, groen, oranje en grijs staan elk op hun eigen regel",
+      "passed": true,
+      "detail": "[[\"FICTIEF DINER\",null],[\"Voorgerechten\",null],[\"Fictieve carpaccio\",\"price_mismatch\"],[\"11,00\",\"price_mismatch\"],[\"Fictieve steak 24,50\",\"covered\"],[\"Fictieve bitterballen 7,50\",\"uncovered\"],[\"Fictieve friet 3,50\",\"not_dish\"]]"
+    },
+    {
+      "name": "kaart 390px/light: regels zonder prijs blijven ongemarkeerd",
+      "passed": true,
+      "detail": "[\"FICTIEF DINER\",\"Voorgerechten\"]"
+    },
+    {
+      "name": "kaart 390px/light: de prijs op een eigen regel hoort bij de naam erboven (één markering)",
+      "passed": true,
+      "detail": "[{\"text\":\"FICTIEF DINER\",\"tone\":null,\"marker\":false},{\"text\":\"Voorgerechten\",\"tone\":null,\"marker\":false},{\"text\":\"Fictieve carpaccio\",\"tone\":\"price_mismatch\",\"marker\":true},{\"text\":\"11,00\",\"tone\":\"price_mismatch\",\"marker\":false},{\"text\":\"Fictieve steak 24,50\",\"tone\":\"covered\",\"marker\":true},{\"text\":\"Fictieve bitterballen 7,50\",\"tone\":\"uncovered\",\"marker\":true},{\"text\":\"Fictieve friet 3,50\",\"tone\":\"not_dish\",\"marker\":true}]"
+    },
+    {
+      "name": "kaart 390px/light: elke markering heeft een eigen tekst voor de schermlezer",
+      "passed": true,
+      "detail": "[\"Fictieve carpaccio: prijs wijkt af, kaart 11,00 en concept € 12,50\",\"Fictieve steak: overgenomen, concept € 24,50\",\"Fictieve bitterballen: niet overgenomen, kaart 7,50\",\"Fictieve friet: geen gerecht, eerder beoordeeld\"]"
+    },
+    {
+      "name": "kaart 390px/light: geen afbeelding of iframe in de kaart",
+      "passed": true,
+      "detail": "images=0"
+    },
+    {
+      "name": "kaart 390px/light: geen horizontale overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "kaart 390px/light: een tik op rood opent het paneel",
+      "passed": true,
+      "detail": "[\"price_mismatch\"]"
+    },
+    {
+      "name": "kaart 390px/light: het rode paneel noemt kaart- en conceptprijs en biedt overnemen of wijzigen",
+      "passed": true,
+      "detail": "[\"Prijs wijkt af\\n\\nKaart 11,00 · concept € 12,50\\n\\nNeem 11,00 over\\nWijzig\\n\\nregels 3–4\",[\"Neem 11,00 over\",\"Wijzig\"]]"
+    },
+    {
+      "name": "kaart 390px/light: Neem de prijs over komt duurzaam terug in het paneel",
+      "passed": true,
+      "detail": "[\"Prijs wijkt af\\n\\nKaart 11,00 · concept € 12,50\\n\\n€ 11,00 overgenomen uit de kaart. Bij opslaan krijgt dit gerecht die prijs.\\n\\nregels 3–4\"]"
+    },
+    {
+      "name": "kaart 390px/light: de melding zegt dat opslaan een aparte stap blijft",
+      "passed": true,
+      "detail": "no message"
+    },
+    {
+      "name": "kaart 390px/light: het oranje paneel biedt Toevoegen en Geen gerecht",
+      "passed": true,
+      "detail": "[\"Toevoegen\",\"Geen gerecht\"]"
+    },
+    {
+      "name": "kaart 390px/light: Geen gerecht maakt de regel grijs en laat hem staan",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "kaart 390px/light: een tik op groen toont het gerecht",
+      "passed": true,
+      "detail": "Overgenomen\n\nFictieve steak · concept € 24,50\n\nregel 5"
+    },
+    {
+      "name": "kaart 390px/light: een PDF toont de tekst met een eerlijke melding over de pagina-afbeelding",
+      "passed": true,
+      "detail": "De echte PDF-pagina kan niet worden getoond: de import bewaart de PDF-bytes niet en haalt de bron niet opnieuw op. Je ziet de opgehaalde tekst met dezelfde regelnummers."
+    },
+    {
+      "name": "kaart 390px/light: pagina 1 van de PDF komt uit een eigen verzoek",
+      "passed": true,
+      "detail": "{\"page\":\"Pagina 1 van 2\",\"calls\":4}"
+    },
+    {
+      "name": "kaart 390px/light: pagina 2 wordt pas op verzoek geladen",
+      "passed": true,
+      "detail": "{\"calls\":5,\"lines\":[\"Hoofdgerechten\",\"Fictieve salade\",\"9,00\"]}"
+    },
+    {
+      "name": "kaart 390px/light: een scan zonder tekst zegt eerlijk dat vergelijken nog niet kan",
+      "passed": true,
+      "detail": "{\"notice\":\"Deze kaart is een afbeelding; vergelijken kan nog niet.\",\"lines\":0}"
+    },
+    {
+      "name": "kaart 390px/light: Lijst brengt de nalopen-lijst terug",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "kaart 390px/light: Bekijk op kaart opent de kaart, scrolt naar de regel en markeert hem",
+      "passed": true,
+      "detail": "{\"text\":\"Fictieve soep 6,50\",\"inView\":true,\"source\":[\"source-2 · PDF · 2 pagina's · 1 niet overgenomen\"]}"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual-map&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fdiner&aiState=off&theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-import?fixture=manual-map&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fdiner&aiState=off&theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "kaart 390px/dark: de review opent met de schakelaar Lijst | Kaart",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "kaart 390px/dark: de kaart is niet geladen en er is geen pagina opgevraagd",
+      "passed": true,
+      "detail": "{\"present\":false,\"calls\":0,\"toggles\":[{\"text\":\"Lijst\",\"pressed\":\"true\"},{\"text\":\"Kaart\",\"pressed\":\"false\"}]}"
+    },
+    {
+      "name": "kaart 390px/dark: Lijst staat aan en de kaart nog niet",
+      "passed": true,
+      "detail": "[{\"text\":\"Lijst\",\"pressed\":\"true\"},{\"text\":\"Kaart\",\"pressed\":\"false\"}]"
+    },
+    {
+      "name": "kaart 390px/dark: de kaart toont de regels van de bron",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "kaart 390px/dark: precies één kaartpagina is opgevraagd",
+      "passed": true,
+      "detail": "calls=1"
+    },
+    {
+      "name": "kaart 390px/dark: de legenda noemt de vier markeringen in gewone taal",
+      "passed": true,
+      "detail": "[{\"label\":\"Overgenomen\",\"detail\":\"Groen met een doorgetrokken rand: dit gerecht staat in het concept met dezelfde prijs.\",\"swatch\":\"●\"},{\"label\":\"Niet overgenomen\",\"detail\":\"Oranje met een gestippelde rand: deze regel met een prijs staat niet in het concept.\",\"swatch\":\"◌\"},{\"label\":\"Prijs wijkt af\",\"detail\":\"Rood met een dubbele rand: de prijs in het concept verschilt van de prijs op de kaart.\",\"swatch\":\"▲\"},{\"label\":\"Geen gerecht\",\"detail\":\"Grijs: deze regel is afgewezen of eerder als geen gerecht beoordeeld.\",\"swatch\":\"–\"}]"
+    },
+    {
+      "name": "kaart 390px/dark: de bronnen staan in volgorde met hun weergave",
+      "passed": true,
+      "detail": "[\"source-1 · Website · 1 niet overgenomen\",\"source-2 · PDF · 2 pagina's · 1 niet overgenomen\",\"source-3 · Afbeelding zonder tekst · 0 niet overgenomen\"]"
+    },
+    {
+      "name": "kaart 390px/dark: de melding zegt dat dit de opgehaalde tekst van de website is",
+      "passed": true,
+      "detail": "Opgehaalde tekst van de website"
+    },
+    {
+      "name": "kaart 390px/dark: rood, groen, oranje en grijs staan elk op hun eigen regel",
+      "passed": true,
+      "detail": "[[\"FICTIEF DINER\",null],[\"Voorgerechten\",null],[\"Fictieve carpaccio\",\"price_mismatch\"],[\"11,00\",\"price_mismatch\"],[\"Fictieve steak 24,50\",\"covered\"],[\"Fictieve bitterballen 7,50\",\"uncovered\"],[\"Fictieve friet 3,50\",\"not_dish\"]]"
+    },
+    {
+      "name": "kaart 390px/dark: regels zonder prijs blijven ongemarkeerd",
+      "passed": true,
+      "detail": "[\"FICTIEF DINER\",\"Voorgerechten\"]"
+    },
+    {
+      "name": "kaart 390px/dark: de prijs op een eigen regel hoort bij de naam erboven (één markering)",
+      "passed": true,
+      "detail": "[{\"text\":\"FICTIEF DINER\",\"tone\":null,\"marker\":false},{\"text\":\"Voorgerechten\",\"tone\":null,\"marker\":false},{\"text\":\"Fictieve carpaccio\",\"tone\":\"price_mismatch\",\"marker\":true},{\"text\":\"11,00\",\"tone\":\"price_mismatch\",\"marker\":false},{\"text\":\"Fictieve steak 24,50\",\"tone\":\"covered\",\"marker\":true},{\"text\":\"Fictieve bitterballen 7,50\",\"tone\":\"uncovered\",\"marker\":true},{\"text\":\"Fictieve friet 3,50\",\"tone\":\"not_dish\",\"marker\":true}]"
+    },
+    {
+      "name": "kaart 390px/dark: elke markering heeft een eigen tekst voor de schermlezer",
+      "passed": true,
+      "detail": "[\"Fictieve carpaccio: prijs wijkt af, kaart 11,00 en concept € 12,50\",\"Fictieve steak: overgenomen, concept € 24,50\",\"Fictieve bitterballen: niet overgenomen, kaart 7,50\",\"Fictieve friet: geen gerecht, eerder beoordeeld\"]"
+    },
+    {
+      "name": "kaart 390px/dark: geen afbeelding of iframe in de kaart",
+      "passed": true,
+      "detail": "images=0"
+    },
+    {
+      "name": "kaart 390px/dark: geen horizontale overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "kaart 390px/dark: een tik op rood opent het paneel",
+      "passed": true,
+      "detail": "[\"price_mismatch\"]"
+    },
+    {
+      "name": "kaart 390px/dark: het rode paneel noemt kaart- en conceptprijs en biedt overnemen of wijzigen",
+      "passed": true,
+      "detail": "[\"Prijs wijkt af\\n\\nKaart 11,00 · concept € 12,50\\n\\nNeem 11,00 over\\nWijzig\\n\\nregels 3–4\",[\"Neem 11,00 over\",\"Wijzig\"]]"
+    },
+    {
+      "name": "kaart 390px/dark: Neem de prijs over komt duurzaam terug in het paneel",
+      "passed": true,
+      "detail": "[\"Prijs wijkt af\\n\\nKaart 11,00 · concept € 12,50\\n\\n€ 11,00 overgenomen uit de kaart. Bij opslaan krijgt dit gerecht die prijs.\\n\\nregels 3–4\"]"
+    },
+    {
+      "name": "kaart 390px/dark: de melding zegt dat opslaan een aparte stap blijft",
+      "passed": true,
+      "detail": "no message"
+    },
+    {
+      "name": "kaart 390px/dark: het oranje paneel biedt Toevoegen en Geen gerecht",
+      "passed": true,
+      "detail": "[\"Toevoegen\",\"Geen gerecht\"]"
+    },
+    {
+      "name": "kaart 390px/dark: Geen gerecht maakt de regel grijs en laat hem staan",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "kaart 390px/dark: een tik op groen toont het gerecht",
+      "passed": true,
+      "detail": "Overgenomen\n\nFictieve steak · concept € 24,50\n\nregel 5"
+    },
+    {
+      "name": "kaart 390px/dark: een PDF toont de tekst met een eerlijke melding over de pagina-afbeelding",
+      "passed": true,
+      "detail": "De echte PDF-pagina kan niet worden getoond: de import bewaart de PDF-bytes niet en haalt de bron niet opnieuw op. Je ziet de opgehaalde tekst met dezelfde regelnummers."
+    },
+    {
+      "name": "kaart 390px/dark: pagina 1 van de PDF komt uit een eigen verzoek",
+      "passed": true,
+      "detail": "{\"page\":\"Pagina 1 van 2\",\"calls\":4}"
+    },
+    {
+      "name": "kaart 390px/dark: pagina 2 wordt pas op verzoek geladen",
+      "passed": true,
+      "detail": "{\"calls\":5,\"lines\":[\"Hoofdgerechten\",\"Fictieve salade\",\"9,00\"]}"
+    },
+    {
+      "name": "kaart 390px/dark: een scan zonder tekst zegt eerlijk dat vergelijken nog niet kan",
+      "passed": true,
+      "detail": "{\"notice\":\"Deze kaart is een afbeelding; vergelijken kan nog niet.\",\"lines\":0}"
+    },
+    {
+      "name": "kaart 390px/dark: Lijst brengt de nalopen-lijst terug",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "kaart 390px/dark: Bekijk op kaart opent de kaart, scrolt naar de regel en markeert hem",
+      "passed": true,
+      "detail": "{\"text\":\"Fictieve soep 6,50\",\"inView\":true,\"source\":[\"source-2 · PDF · 2 pagina's · 1 niet overgenomen\"]}"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual-map&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fdiner&aiState=off&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-import?fixture=manual-map&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fdiner&aiState=off&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "kaart 320px/light: de review opent met de schakelaar Lijst | Kaart",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "kaart 320px/light: de kaart is niet geladen en er is geen pagina opgevraagd",
+      "passed": true,
+      "detail": "{\"present\":false,\"calls\":0,\"toggles\":[{\"text\":\"Lijst\",\"pressed\":\"true\"},{\"text\":\"Kaart\",\"pressed\":\"false\"}]}"
+    },
+    {
+      "name": "kaart 320px/light: Lijst staat aan en de kaart nog niet",
+      "passed": true,
+      "detail": "[{\"text\":\"Lijst\",\"pressed\":\"true\"},{\"text\":\"Kaart\",\"pressed\":\"false\"}]"
+    },
+    {
+      "name": "kaart 320px/light: de kaart toont de regels van de bron",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "kaart 320px/light: precies één kaartpagina is opgevraagd",
+      "passed": true,
+      "detail": "calls=1"
+    },
+    {
+      "name": "kaart 320px/light: de legenda noemt de vier markeringen in gewone taal",
+      "passed": true,
+      "detail": "[{\"label\":\"Overgenomen\",\"detail\":\"Groen met een doorgetrokken rand: dit gerecht staat in het concept met dezelfde prijs.\",\"swatch\":\"●\"},{\"label\":\"Niet overgenomen\",\"detail\":\"Oranje met een gestippelde rand: deze regel met een prijs staat niet in het concept.\",\"swatch\":\"◌\"},{\"label\":\"Prijs wijkt af\",\"detail\":\"Rood met een dubbele rand: de prijs in het concept verschilt van de prijs op de kaart.\",\"swatch\":\"▲\"},{\"label\":\"Geen gerecht\",\"detail\":\"Grijs: deze regel is afgewezen of eerder als geen gerecht beoordeeld.\",\"swatch\":\"–\"}]"
+    },
+    {
+      "name": "kaart 320px/light: de bronnen staan in volgorde met hun weergave",
+      "passed": true,
+      "detail": "[\"source-1 · Website · 1 niet overgenomen\",\"source-2 · PDF · 2 pagina's · 1 niet overgenomen\",\"source-3 · Afbeelding zonder tekst · 0 niet overgenomen\"]"
+    },
+    {
+      "name": "kaart 320px/light: de melding zegt dat dit de opgehaalde tekst van de website is",
+      "passed": true,
+      "detail": "Opgehaalde tekst van de website"
+    },
+    {
+      "name": "kaart 320px/light: rood, groen, oranje en grijs staan elk op hun eigen regel",
+      "passed": true,
+      "detail": "[[\"FICTIEF DINER\",null],[\"Voorgerechten\",null],[\"Fictieve carpaccio\",\"price_mismatch\"],[\"11,00\",\"price_mismatch\"],[\"Fictieve steak 24,50\",\"covered\"],[\"Fictieve bitterballen 7,50\",\"uncovered\"],[\"Fictieve friet 3,50\",\"not_dish\"]]"
+    },
+    {
+      "name": "kaart 320px/light: regels zonder prijs blijven ongemarkeerd",
+      "passed": true,
+      "detail": "[\"FICTIEF DINER\",\"Voorgerechten\"]"
+    },
+    {
+      "name": "kaart 320px/light: de prijs op een eigen regel hoort bij de naam erboven (één markering)",
+      "passed": true,
+      "detail": "[{\"text\":\"FICTIEF DINER\",\"tone\":null,\"marker\":false},{\"text\":\"Voorgerechten\",\"tone\":null,\"marker\":false},{\"text\":\"Fictieve carpaccio\",\"tone\":\"price_mismatch\",\"marker\":true},{\"text\":\"11,00\",\"tone\":\"price_mismatch\",\"marker\":false},{\"text\":\"Fictieve steak 24,50\",\"tone\":\"covered\",\"marker\":true},{\"text\":\"Fictieve bitterballen 7,50\",\"tone\":\"uncovered\",\"marker\":true},{\"text\":\"Fictieve friet 3,50\",\"tone\":\"not_dish\",\"marker\":true}]"
+    },
+    {
+      "name": "kaart 320px/light: elke markering heeft een eigen tekst voor de schermlezer",
+      "passed": true,
+      "detail": "[\"Fictieve carpaccio: prijs wijkt af, kaart 11,00 en concept € 12,50\",\"Fictieve steak: overgenomen, concept € 24,50\",\"Fictieve bitterballen: niet overgenomen, kaart 7,50\",\"Fictieve friet: geen gerecht, eerder beoordeeld\"]"
+    },
+    {
+      "name": "kaart 320px/light: geen afbeelding of iframe in de kaart",
+      "passed": true,
+      "detail": "images=0"
+    },
+    {
+      "name": "kaart 320px/light: geen horizontale overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "kaart 320px/light: een tik op rood opent het paneel",
+      "passed": true,
+      "detail": "[\"price_mismatch\"]"
+    },
+    {
+      "name": "kaart 320px/light: het rode paneel noemt kaart- en conceptprijs en biedt overnemen of wijzigen",
+      "passed": true,
+      "detail": "[\"Prijs wijkt af\\n\\nKaart 11,00 · concept € 12,50\\n\\nNeem 11,00 over\\nWijzig\\n\\nregels 3–4\",[\"Neem 11,00 over\",\"Wijzig\"]]"
+    },
+    {
+      "name": "kaart 320px/light: Neem de prijs over komt duurzaam terug in het paneel",
+      "passed": true,
+      "detail": "[\"Prijs wijkt af\\n\\nKaart 11,00 · concept € 12,50\\n\\n€ 11,00 overgenomen uit de kaart. Bij opslaan krijgt dit gerecht die prijs.\\n\\nregels 3–4\"]"
+    },
+    {
+      "name": "kaart 320px/light: de melding zegt dat opslaan een aparte stap blijft",
+      "passed": true,
+      "detail": "no message"
+    },
+    {
+      "name": "kaart 320px/light: het oranje paneel biedt Toevoegen en Geen gerecht",
+      "passed": true,
+      "detail": "[\"Toevoegen\",\"Geen gerecht\"]"
+    },
+    {
+      "name": "kaart 320px/light: Geen gerecht maakt de regel grijs en laat hem staan",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "kaart 320px/light: een tik op groen toont het gerecht",
+      "passed": true,
+      "detail": "Overgenomen\n\nFictieve steak · concept € 24,50\n\nregel 5"
+    },
+    {
+      "name": "kaart 320px/light: een PDF toont de tekst met een eerlijke melding over de pagina-afbeelding",
+      "passed": true,
+      "detail": "De echte PDF-pagina kan niet worden getoond: de import bewaart de PDF-bytes niet en haalt de bron niet opnieuw op. Je ziet de opgehaalde tekst met dezelfde regelnummers."
+    },
+    {
+      "name": "kaart 320px/light: pagina 1 van de PDF komt uit een eigen verzoek",
+      "passed": true,
+      "detail": "{\"page\":\"Pagina 1 van 2\",\"calls\":4}"
+    },
+    {
+      "name": "kaart 320px/light: pagina 2 wordt pas op verzoek geladen",
+      "passed": true,
+      "detail": "{\"calls\":5,\"lines\":[\"Hoofdgerechten\",\"Fictieve salade\",\"9,00\"]}"
+    },
+    {
+      "name": "kaart 320px/light: een scan zonder tekst zegt eerlijk dat vergelijken nog niet kan",
+      "passed": true,
+      "detail": "{\"notice\":\"Deze kaart is een afbeelding; vergelijken kan nog niet.\",\"lines\":0}"
+    },
+    {
+      "name": "kaart 320px/light: Lijst brengt de nalopen-lijst terug",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "kaart 320px/light: Bekijk op kaart opent de kaart, scrolt naar de regel en markeert hem",
+      "passed": true,
+      "detail": "{\"text\":\"Fictieve soep 6,50\",\"inView\":true,\"source\":[\"source-2 · PDF · 2 pagina's · 1 niet overgenomen\"]}"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual-map&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fdiner&aiState=off&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-import?fixture=manual-map&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fdiner&aiState=off&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "kaart toetsenbord: de review opent met de schakelaar",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "kaart toetsenbord: Tab bereikt de knop Kaart",
+      "passed": true,
+      "detail": "[{\"tag\":\"SUMMARY\",\"type\":null,\"id\":\"\",\"text\":\"Technische details\"},{\"tag\":\"SELECT\",\"type\":null,\"id\":\"mai-ai\",\"text\":\"ChatGPT\\nClaude\\nGemini\\nCopilot\\nAnders\"},{\"tag\":\"TEXTAREA\",\"type\":null,\"id\":\"mai-answer\",\"text\":\"\"},{\"tag\":\"BUTTON\",\"type\":\"button\",\"id\":\"\",\"text\":\"Lijst\"},{\"tag\":\"BUTTON\",\"type\":\"button\",\"id\":\"\",\"text\":\"Kaart\"}]"
+    },
+    {
+      "name": "kaart toetsenbord: Enter opent de kaart",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "kaart toetsenbord: een markering is met de tab/ focus bereikbaar en heeft een naam",
+      "passed": true,
+      "detail": "Fictieve carpaccio: prijs wijkt af, kaart 11,00 en concept € 12,50"
+    },
+    {
+      "name": "kaart toetsenbord: Enter op de markering opent het paneel onder de regel",
+      "passed": true,
+      "detail": null
+    },
+    {
       "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual-ai&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&theme=light&aiState=slow)",
       "passed": true,
       "detail": "ok"
@@ -1240,7 +1711,7 @@
     {
       "name": "ai read: a named price list stays in orde instead of asking for a price",
       "passed": true,
-      "detail": "Fictief glas wijn · Glas 4,50 / Fles 24,00"
+      "detail": "Fictief glas wijn · Glas 4,50 / Fles 24,00Bekijk op kaart"
     },
     {
       "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual-ai&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&theme=light&aiState=off)",
@@ -1360,7 +1831,7 @@
     {
       "name": "ai read: a named price list stays in orde instead of asking for a price",
       "passed": true,
-      "detail": "Fictief glas wijn · Glas 4,50 / Fles 24,00"
+      "detail": "Fictief glas wijn · Glas 4,50 / Fles 24,00Bekijk op kaart"
     },
     {
       "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual-ai&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&theme=dark&aiState=off)",
@@ -2420,7 +2891,7 @@
     {
       "name": "network guard: CDP blocks external subresource and frame navigation",
       "passed": true,
-      "detail": "[{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/pixel.png\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-24T10:01:20.399Z\",\"resourceType\":\"Image\"},{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/frame\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-24T10:01:20.399Z\",\"resourceType\":\"Document\"}]"
+      "detail": "[{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/frame\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-24T11:07:43.604Z\",\"resourceType\":\"Document\"},{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/pixel.png\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-24T11:07:43.616Z\",\"resourceType\":\"Image\"}]"
     },
     {
       "name": "network guard: no unexpected CDP traffic during app scenarios",
@@ -2644,13 +3115,13 @@
   "screenshots": [
     {
       "file": "menu-review-desktop-light.png",
-      "sha256": "ab481991886d697111f245f9a3bb9dc058b719bf2f0ee88f4d67cf2905324639",
+      "sha256": "c55c42c512f383fafdfb5ec3fbc05825961095303c5bc8a4cefc363e8e2eb4c7",
       "width": 1024,
       "height": 900
     },
     {
       "file": "menu-review-readonly-1024-dark.png",
-      "sha256": "b976ae0cde4a2778c724bc04e5a2b17e4aab4dbb775796acbea5b46f28870f2c",
+      "sha256": "ef6aea2575fe146c7480bb01208db508e8d77705e3498fe7f85cbbc5b2a888f7",
       "width": 1024,
       "height": 900
     },
@@ -2662,19 +3133,19 @@
     },
     {
       "file": "menu-review-partial-390-dark.png",
-      "sha256": "e20d27a156f7ab16dc723b5990248eeda94fa1c640998eae236e34b496c3e9a4",
+      "sha256": "8a742b6fe50ed5971e47ec08604b54b35a0ef4e32361c4c6793c97311be88623",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-image-only-390-light.png",
-      "sha256": "047537e5164f01990150882f9aee27d81ae5f87a64de0d900d953a45f4d04920",
+      "sha256": "2a980a609076a8ee423bcb84dbc7e938228a6651b62b0b30659e7366f9a19b0c",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-image-only-320-dark.png",
-      "sha256": "624904c2c3a8d598182fa9b3d9b5000288a376707333da52cbb8c938a8f069a0",
+      "sha256": "b424c9cfd0687798fa4c8206b0947d6aad120de5d996bfc2e20f3de7910d61fa",
       "width": 320,
       "height": 900
     },
@@ -2692,31 +3163,31 @@
     },
     {
       "file": "menu-review-structure-1024-light.png",
-      "sha256": "6a2ca9d4b49f102a304a3558ab4db4885b48df1454d0c58fcfcc1b14933ee4e9",
+      "sha256": "d804bbe989ec1824ed69264f4becfbeaf7cb0f11dc860b6a2bd1b803c77c9871",
       "width": 1024,
       "height": 900
     },
     {
       "file": "menu-review-structure-keyboard-390-light.png",
-      "sha256": "65760c8af26f6bb5556adfc37fb3b820dfe4b0fa2bf90654ee407e784120d94e",
+      "sha256": "d451e65c126d817df093e33f9a6ebf936dfd4dccb6d7fd947486d21d8f41a90b",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-structure-390-light.png",
-      "sha256": "dc5fa9f11a02faef3ecf419f6dfa5cd3095e3861f214d7b121eaa7071b57feda",
+      "sha256": "ce7d0da516a916a3b913f3ab33bea6012502ede44269bb72b35fbc91bf174b16",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-structure-390-dark.png",
-      "sha256": "50898483e75ccb3277fc06e28beec6cc5eaec93ad86650e8bb42aec7b39ab414",
+      "sha256": "1dfbc4d21a6942a69f3d7a17ab77805ce79890d1d5f455721353cc27f142cb49",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-structure-readonly-1024-dark.png",
-      "sha256": "b5929caf9b2d662c296f05f9b8feafeb960e9853a5430e3f4c232a1f94794ac2",
+      "sha256": "bed4607bef341123392318e86074651747147e2e188fd280f419c2ad9e614383",
       "width": 1024,
       "height": 900
     },
@@ -2752,43 +3223,139 @@
     },
     {
       "file": "manual-ai-import-normalized-390-dark.png",
-      "sha256": "4fceff5976db79200bb588a6f6c8531c3a597aa81df9a1ec6817a783538d280a",
+      "sha256": "36c95b60a49abbf48782852571a0bd6ebe6a856cd5f4959365ce3bc6615b984a",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-uncovered-390-dark.png",
-      "sha256": "15b5da6747c3a6521f8d711e6db50052f81b9a8c39ee5e33f2b64042d39bd947",
+      "sha256": "278b3e164d27d87d34cdcf0fd4f0535d5319a016316a640dd23b1a178d0f3e79",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-uncovered-after-add-390-dark.png",
-      "sha256": "40e4d9ad1fb6ec9ade4db0230f38e4868e11de471221d4a08741cb5633cc6faf",
+      "sha256": "4de3f8657c219f7984f2d2976460a5af3ef71a5e86574bce18aac0cf18164c45",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-uncovered-empty-390-dark.png",
-      "sha256": "bba163e1f06f2a9de918bff45c12d0f3a42fda2f46b2a4aed09dfe60761a3a8d",
+      "sha256": "3460cf137a3ec999efc1a128a7565d6a00a593179967c6ee084d9974679b051e",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-uncovered-390-light.png",
-      "sha256": "220d0bc68d38bf1d6b90b8c77ac54ef4154aa964ff3990f78faa4a29403fb062",
+      "sha256": "a383229765e058862f97c3c8cbb05e05924468600143a130215042700fe05b76",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-uncovered-320-light.png",
-      "sha256": "2706454f55fdfe40a20576561456f1a1f519cdef0388115e710dfb33f43981de",
+      "sha256": "5001312ba089ec884fa5fc2212c7bae4ff37ce9964e103281ad7b61b671fc938",
       "width": 320,
       "height": 900
     },
     {
+      "file": "ai-map-390-light.png",
+      "sha256": "6f8d301d4682711b0fa9d5f82b5f3f2bba05b8f4170272fe80aa4d69d5d7a118",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-map-red-panel-390-light.png",
+      "sha256": "9f7625ca55c30372e0d24f8ff1f43ee7e44ad8fe8335c079e8a06cd5e2840f07",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-map-orange-panel-390-light.png",
+      "sha256": "d03a40757028d736ae9401f65376b8aa16343b3f8ce42600fd38b381d6dd89dc",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-map-pdf-390-light.png",
+      "sha256": "cf95f478ce5c606a27a6ba9ccfb06103529ee2dbe105f6cd529a9ccc598026d1",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-map-from-list-390-light.png",
+      "sha256": "37dcf61e092c27ecb3c70d68d4a05e814c3c9bef00be38d70de9464dc0d8c53c",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-map-390-dark.png",
+      "sha256": "04c75de6d503f6b48b9254ca3a31007e14018de2e44c0e0be775ce0ec4fcbbed",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-map-red-panel-390-dark.png",
+      "sha256": "a9be78f63a40a6e88d8f25d11256adcef151d39124ff7d3012984340d83a10f8",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-map-orange-panel-390-dark.png",
+      "sha256": "a28933f18afce4f79189694830aa0407df9d3da984755b30077df68479c30f21",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-map-pdf-390-dark.png",
+      "sha256": "1319b9bc81486367886c6165a0f3e38dcaca0108679bb749681c665721a76ff4",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-map-from-list-390-dark.png",
+      "sha256": "bda81f4659d3d298c70bdf665746b45981016a073af96d0eb599b9d4138262a5",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-map-320-light.png",
+      "sha256": "da2a58d33b2df1d6efe02ed3518d34e40de0de2f89ef8a723f1755301a6c466d",
+      "width": 320,
+      "height": 900
+    },
+    {
+      "file": "ai-map-red-panel-320-light.png",
+      "sha256": "dfb36480a8651e5f22d5c4e5710c084c7cbceeeec1bb2b969415d309e671c386",
+      "width": 320,
+      "height": 900
+    },
+    {
+      "file": "ai-map-orange-panel-320-light.png",
+      "sha256": "757bc925ed0e878c851716214e3ef42875419dce1a189a4a0f1029eeba1cce58",
+      "width": 320,
+      "height": 900
+    },
+    {
+      "file": "ai-map-pdf-320-light.png",
+      "sha256": "d2c193a0ce4bd29e3432d92050e0c55a0618b4c1c02ccf773413f78b4d5bff8c",
+      "width": 320,
+      "height": 900
+    },
+    {
+      "file": "ai-map-from-list-320-light.png",
+      "sha256": "52138402cbca59e8783df0e610207ab938df1aa18adc27cc1535e8aa83fd2a1b",
+      "width": 320,
+      "height": 900
+    },
+    {
+      "file": "ai-map-keyboard-390-light.png",
+      "sha256": "2299bbfda7cecd612d4d822c9553a2930c888dcd510b64378af0ade31b72df68",
+      "width": 390,
+      "height": 900
+    },
+    {
       "file": "ai-read-block-390-light.png",
-      "sha256": "b742dd5aba06470a64f6e04af654cd5a886514678fc8ad36995e2ee1845c7661",
+      "sha256": "d52ff8af9810c3c897ee136661179bee236f447b4c8d17225a01a4f6878778dc",
       "width": 390,
       "height": 900
     },
@@ -2812,7 +3379,7 @@
     },
     {
       "file": "ai-read-review-390-light.png",
-      "sha256": "9c32f20512d1a6d775c523a331d807d4315444ca5997ca858c82df3f84c6d7a6",
+      "sha256": "0e41deb1e4ba1ad2f1c6badf6854a79b08fdf6be322876a1224b23ff06acd28a",
       "width": 390,
       "height": 900
     },
@@ -2824,7 +3391,7 @@
     },
     {
       "file": "ai-read-block-390-dark.png",
-      "sha256": "6760eba1a15d2d90520e3090e9dc4251cf09b5b76d36278f2ada079cb30397d0",
+      "sha256": "dafbe71f69def8a6d87b22cd678b29d1df2e208c89079da3deb98c5e38c80650",
       "width": 390,
       "height": 900
     },
@@ -2848,7 +3415,7 @@
     },
     {
       "file": "ai-read-review-390-dark.png",
-      "sha256": "dd2fd8144bd5633ffa0267e28d1c363dde7532333daafb687fd6e7df13b75bf3",
+      "sha256": "b6f08c76bb9533d4a90f58a54e7b17e21f0cdeeb98ac92222393b5e4136317c8",
       "width": 390,
       "height": 900
     },
@@ -2860,13 +3427,13 @@
     },
     {
       "file": "ai-read-batch-390-light.png",
-      "sha256": "0e5642f3e9e66a030e528f6b060869b46f4d1f5763677b986496792e05b4c051",
+      "sha256": "79d53a48aebbf45805058ff23c385f1e5db48f78df232d04acfcfeb7c67794a6",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-read-batch-390-dark.png",
-      "sha256": "bdd0e937a2645749d50405a5d2669e817c81b80517bb6eaccb15e3b0e7d30794",
+      "sha256": "dc0106c71152eb48fc71b316cb140ac9f4e6932f3d63335fb65b60c19e514ba1",
       "width": 390,
       "height": 900
     },
@@ -2890,37 +3457,37 @@
     },
     {
       "file": "menu-review-320-light.png",
-      "sha256": "d23fad5a21b64159128db450e9e44f588add7d657bc2d68ced76b5ddb3a15a83",
+      "sha256": "5bed0ce87f6c69167cf8da66a8de697127559b29a16d7a99b7f1d6750ef2188c",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-320-dark.png",
-      "sha256": "838f48cfc1e266fe656c16bdb0e80bc2796e2d703ad6c2443aaa0c5004ec5bdc",
+      "sha256": "6ced771a1fe0081788609a2f63c2b9577b5e0d60d8dcc98a51df7fd0b2b38144",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-390-light.png",
-      "sha256": "c13d78cabdfd170f0f6777440f141ce32f928a02f1a59f3ff47105242e75d408",
+      "sha256": "76723e41f099ef3a30bc1eb7cbe28be2852e60177b763035b555c8e5ed0e3b37",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-390-dark.png",
-      "sha256": "65c4083423e5ad3e5b65a0b8987518a014345e01f33fcb8319665f08121a4f90",
+      "sha256": "4fd74cf3f5897b725ee5a6e42e66dbdacefa90600fa4dc2c7b3d6209bc8e98be",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-1024-dark.png",
-      "sha256": "4fb1eb6c59fd2d32a39e8225a1070e1f08c63b2346e0f704105c09aa8bebf5e2",
+      "sha256": "152b43601da93121f7c25e5aa825c05e8809e887b62a4b3b2d267854cc18a32e",
       "width": 1024,
       "height": 900
     },
     {
       "file": "menu-review-keyboard-390-light.png",
-      "sha256": "713ebd3fe121a6077b5b4628c6e40152f194044c395f9021d3f63c9674e72657",
+      "sha256": "be5923d89f154130717a5db341e4e4d1e3ad139619456f9d21d8efcdb19d4d85",
       "width": 390,
       "height": 900
     },
@@ -2992,13 +3559,13 @@
     },
     {
       "file": "concept-detail-error-390-light.png",
-      "sha256": "0b1e4d9603ce996c85a0ccd2d1f2d812e4412ee712afb4210a5ca5291e481bcc",
+      "sha256": "bd11c8e8c843cb8c0bfd1fef33d66c2ef684939c6a3554f5b781355746f32acd",
       "width": 390,
       "height": 900
     },
     {
       "file": "concept-detail-missing-390-light.png",
-      "sha256": "f1b67706b9443df52bb12ff5ce393de6741451222f0792d8b1742e4707a0743d",
+      "sha256": "38372402dc60308bc22b008512017d628304c78fcdb39a0d7a2379778c1ec91b",
       "width": 390,
       "height": 900
     },
@@ -3053,21 +3620,21 @@
         "phase": "negative-probe",
         "kind": "cdp_fetch",
         "method": "GET",
-        "url": "https://unapproved.invalid/pixel.png",
+        "url": "https://unapproved.invalid/frame",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-24T10:01:20.399Z",
-        "resourceType": "Image"
+        "at": "2026-10-24T11:07:43.604Z",
+        "resourceType": "Document"
       },
       {
         "phase": "negative-probe",
         "kind": "cdp_fetch",
         "method": "GET",
-        "url": "https://unapproved.invalid/frame",
+        "url": "https://unapproved.invalid/pixel.png",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-24T10:01:20.399Z",
-        "resourceType": "Document"
+        "at": "2026-10-24T11:07:43.616Z",
+        "resourceType": "Image"
       }
     ],
     "pageViolations": [
@@ -3078,7 +3645,7 @@
         "url": "https://unapproved.invalid/api/anything",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-24T10:01:20.381Z"
+        "at": "2026-10-24T11:07:43.575Z"
       },
       {
         "phase": "negative-probe",
@@ -3087,7 +3654,7 @@
         "url": "http://unapproved.invalid/api/anything",
         "reason": "external_origin",
         "protocolRelative": true,
-        "at": "2026-10-24T10:01:20.381Z"
+        "at": "2026-10-24T11:07:43.575Z"
       },
       {
         "phase": "negative-probe",
@@ -3096,7 +3663,7 @@
         "url": "http://localhost:3137/api/internal/v1/menu-concepts",
         "reason": "method_not_allowed",
         "protocolRelative": false,
-        "at": "2026-10-24T10:01:20.381Z"
+        "at": "2026-10-24T11:07:43.575Z"
       },
       {
         "phase": "negative-probe",
@@ -3105,7 +3672,7 @@
         "url": "http://localhost:3137/api/internal/v1/unrelated-write",
         "reason": "unknown_api_route",
         "protocolRelative": false,
-        "at": "2026-10-24T10:01:20.381Z"
+        "at": "2026-10-24T11:07:43.575Z"
       },
       {
         "phase": "negative-probe",
@@ -3114,7 +3681,7 @@
         "url": "http://localhost:3137/api/internal/v1/menu-concepts",
         "reason": "method_not_allowed",
         "protocolRelative": false,
-        "at": "2026-10-24T10:01:20.382Z"
+        "at": "2026-10-24T11:07:43.576Z"
       },
       {
         "phase": "negative-probe",
@@ -3123,7 +3690,7 @@
         "url": "ws://unapproved.invalid/socket",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-24T10:01:20.382Z"
+        "at": "2026-10-24T11:07:43.576Z"
       }
     ]
   },
