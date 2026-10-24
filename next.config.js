@@ -8,6 +8,8 @@ const nextConfig = {
   outputFileTracingIncludes: {
     '/api/internal/v1/restaurant-analysis-jobs/**': ['./MENU-EXTRACTION.md'],
     '/api/internal/v1/batch-analysis/**': ['./MENU-EXTRACTION.md'],
+    // #59 / BE-21 "Lees met AI": route B reads the same pinned instruction.
+    '/api/internal/v1/menu-ai-import/**': ['./MENU-EXTRACTION.md'],
   },
 }
 module.exports = nextConfig

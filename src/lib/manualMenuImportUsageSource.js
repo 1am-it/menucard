@@ -14,6 +14,7 @@
 // nooit een stilzwijgend afgekapt totaal.
 
 const { MAX_SOURCE_ROWS, PROVENANCE_KIND } = require('./manualMenuImportUsage');
+const { AI_READ_PROVENANCE_KIND } = require('./menuAiImport');
 
 const CONCEPT_TABLE = 'menu_snapshot_proposals';
 const CONCEPT_COLUMNS = 'id, created_at, captured_content';
@@ -38,4 +39,23 @@ async function readDurableUsageRows(supabase, { limit = MAX_SOURCE_ROWS } = {}) 
   return { ok: true, rows, limit: effectiveLimit, bounded: rows.length >= effectiveLimit };
 }
 
-module.exports = { CONCEPT_TABLE, CONCEPT_COLUMNS, PROVENANCE_KIND_PATH, readDurableUsageRows };
+/**
+ * Leest de conceptrijen van een AI-lezing ("Gelezen door AI"), oud naar nieuw.
+ * Alleen `select`: geen insert, update, delete of migratie. Dezelfde bron als
+ * het gebruiksdocument, zodat het maandbudget uit duurzame concepten volgt.
+ */
+async function readDurableAiReadRows(supabase, { since = null, limit = MAX_SOURCE_ROWS } = {}) {
+  if (!supabase || typeof supabase.from !== 'function') return { ok: false, code: 'no_client' };
+  const effectiveLimit = Number.isInteger(limit) && limit > 0 ? limit : MAX_SOURCE_ROWS;
+  let query = supabase
+    .from(CONCEPT_TABLE)
+    .select(CONCEPT_COLUMNS)
+    .eq(PROVENANCE_KIND_PATH, AI_READ_PROVENANCE_KIND);
+  if (typeof since === 'string' && since !== '') query = query.gte('created_at', since);
+  const { data, error } = await query.order('created_at', { ascending: true }).limit(effectiveLimit);
+  if (error) return { ok: false, code: 'read_failed' };
+  const rows = Array.isArray(data) ? data : [];
+  return { ok: true, rows, limit: effectiveLimit, bounded: rows.length >= effectiveLimit };
+}
+
+module.exports = { CONCEPT_TABLE, CONCEPT_COLUMNS, PROVENANCE_KIND_PATH, readDurableUsageRows, readDurableAiReadRows };

@@ -593,17 +593,21 @@ function buildMenuConcept({ menus, liveLines, edits }) {
     if (l.duplicateAccepted) item.duplicateAccepted = true;
     // W6: the price model stays lossless. A known single price is stored
     // exactly as before (no extra key, so existing content hashes and the
-    // public projection do not change); a per-unit price and an accepted
+    // public projection do not change); a per-unit price list and an accepted
     // unknown price are stored explicitly instead of being flattened.
-    if (!l.price && l.namedVariants) {
+    if (!l.price && Array.isArray(l.priceVariants) && l.priceVariants.length > 0) {
       item.priceStatus = 'multiple_undecomposed';
       item.priceVariants = l.priceVariants.map((variant) => ({
-        label: variant.label.trim(),
+        label: typeof variant.label === 'string' && variant.label.trim() !== '' ? variant.label.trim() : null,
         price: normalizePrice(variant.price),
       }));
     } else if (!l.price && l.priceUnknownAccepted) {
       item.priceStatus = l.priceStatus === 'on_request' ? 'on_request' : 'unknown';
       item.priceUnknownAccepted = true;
+    } else if (!l.price && (l.priceStatus === 'unknown' || l.priceStatus === 'on_request')) {
+      // Not accepted yet (for example the draft a "Lees met AI" run writes
+      // before review): the state is stored, but it stays an open blocker.
+      item.priceStatus = l.priceStatus;
     }
     if (l.evidence && typeof l.evidence === 'object') item.evidence = l.evidence;
     add(l.categoryPath, item, { sourcePath: l.categoryEdited ? null : l.sourcePath, uncertain: l.categoryUncertain && !l.categoryEdited });
