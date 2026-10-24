@@ -229,6 +229,26 @@ Screenshots in `output/` en in het evidencebestand: `ai-read-block`,
 Dit blijft fixture- en ontwikkelaarsbewijs, geen onafhankelijke review of echte
 browseracceptatie.
 
+### Variant 1: niet-overgenomen bronregels (order 6382189724)
+
+`fixture=manual-coverage` antwoordt met een fictieve dinerkaart waarin twee
+regels een prijs printen die geen gerecht dekt, en met de reviewstanden na
+"Toevoegen" en na "Geen gerecht". `manualUncoveredScenario` controleert:
+
+- het oranje blok staat boven de nalopen-lijst, met kop, citaat,
+  "Pagina <bron> · regel N · onder <rubriek>", de twee knoppen en
+  "Gratis: geen extra AI-aanroep nodig";
+- de kleuren komen uit de aandachtrol (`--status-old`) van het actieve thema;
+- "Toevoegen" verdwijnt met de regel en het nieuwe gerecht staat in nalopen als
+  "rubriek controleren"; "Geen gerecht" laat het blok met de laatste regel
+  verdwijnen;
+- 390 px licht/donker en 320 px licht, geen horizontale overflow, en de
+  toetsenbordroute (focus + Enter).
+
+Screenshots: `ai-uncovered-390-dark.png`, `ai-uncovered-after-add-390-dark.png`,
+`ai-uncovered-empty-390-dark.png`, `ai-uncovered-390-light.png` en
+`ai-uncovered-320-light.png`.
+
 ## Coverage
 
 - exact breadcrumb, source and "handmatig beoordelen" links;

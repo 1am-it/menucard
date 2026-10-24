@@ -1219,7 +1219,10 @@ hem met AES-256-GCM en geeft hem bij elke stap terug. De vergelijking draait
 daarom altijd server-side en de browser krijgt alleen de regel die het blok
 toont, nooit de hele capture. Er is geen migratie, geen nieuwe kolom en geen
 state in het geheugen. Een concept waarvan de tekst niet meer beschikbaar is
-(verlopen token, bron zonder tekst) toont de eerlijke melding hierboven.
+(verlopen token, bron zonder tekst) toont de eerlijke melding hierboven. Het blok
+hoort bij het nalopen-scherm van de import (stap 3); het bestaande
+conceptbeoordelingsscherm (`/internal/menu-concepts/[id]`) heeft geen capture en
+toont daarom geen vergelijking: daar wordt niets beweerd over dekking.
 
 ### Toevoegen en Geen gerecht (X3)
 
