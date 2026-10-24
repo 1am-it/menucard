@@ -235,10 +235,10 @@ function isArrangementLike(menu, category, item) {
 
 /**
  * BB1 (Lead review 6384867373): het echte antwoord dat de app zelf opsloeg
- * (`ops/benchmark/output/ai-probe-raw/*`) draagt bij elk gerecht
- * `allergens: { status: "unknown", values: [] }`, want het schema (M1) maakt
- * dat veld verplicht. Een onbekende lijst met nul waarden is geen opgave: de
- * bron zegt niets over allergenen. Alleen een expliciet vermelde lijst is een
+ * (de bewaarde antwoorden van de live proef, zie ops/CONTEXT.md) draagt bij elk
+ * gerecht `allergens: { status: "unknown", values: [] }`, want het schema (M1)
+ * maakt dat veld verplicht. Een onbekende lijst met nul waarden is geen opgave:
+ * de bron zegt niets over allergenen. Alleen een expliciet vermelde lijst is een
  * relatie en houdt de bestaande regel "niet op te slaan".
  */
 function hasStatedAllergens(allergens) {
