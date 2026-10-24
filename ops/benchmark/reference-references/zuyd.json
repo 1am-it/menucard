@@ -1,0 +1,112 @@
+{
+  "version": "1.1.0",
+  "sourceId": "zuyd",
+  "label": "Restaurant Zuyd",
+  "entryUrl": "https://www.restaurantzuyd.nl",
+  "captureStatus": "captured",
+  "correction": "Herstel na Lead-review 6319894232 (R3): de wijnarrangement- en ½-glasprijzen van de verrassingsmenu's zijn als arrangementprijzen toegevoegd. Uitsluitend opgesteld uit de vastgezette bytes; de telregels zijn ongewijzigd.",
+  "note": "Authored from the pinned capture text of the lunch and diner pages. Arrangement components without their own price are not dishes. Every item carries a section path, a locator and a quote from the captured source.",
+  "menus": [
+    {
+      "title": "Lunch",
+      "sourceUrl": "https://www.restaurantzuyd.nl/lunch",
+      "captureKey": "ops/benchmark/output/reference-captures/zuyd/02-lunch-389470158b72.html",
+      "categories": [
+        {
+          "path": ["Lunch", "BITES - voor bij het aperitief"],
+          "items": [
+            {"name": "Oesterproeverij", "price": "23.50", "locator": "Lunch › BITES - voor bij het aperitief › regel 1", "quote": "Oesterproeverij - 6 stuks naturel oesters │ Balinese vinaigrette - 23,50"},
+            {"name": "Jamon Iberico Bellota", "price": "19.50", "locator": "Lunch › BITES - voor bij het aperitief › regel 2", "quote": "Jamon Iberico Bellota - de exclusieve Spaanse ham │ 75 gram - 19,50"},
+            {"name": "Brioche met paling", "price": "9.50", "locator": "Lunch › BITES - voor bij het aperitief › regel 3", "quote": "Brioche met paling - 9,50"},
+            {"name": "Crumpet met huisgerookte zalm", "price": "9.50", "locator": "Lunch › BITES - voor bij het aperitief › regel 4", "quote": "Crumpet met huisgerookte zalm - 9,50"},
+            {"name": "Toast met Mangalica, sriracha en sesam", "price": "8.50", "locator": "Lunch › BITES - voor bij het aperitief › regel 5", "quote": "Toast met Mangalica, sriracha en sesam - 8,50"},
+            {"name": "Duivels eitje met kimchi", "price": "8.50", "locator": "Lunch › BITES - voor bij het aperitief › regel 6", "quote": "Duivels eitje met kimchi - 8,50"},
+            {"name": "Zuurdesembrood", "price": "5.50", "locator": "Lunch › BITES - voor bij het aperitief › regel 7", "quote": "Zuurdesembrood - 2 soorten boter - 5,50"}
+          ]
+        },
+        {
+          "path": ["Lunch", "SANDWICHES"],
+          "items": [
+            {"name": "Sandwich Zuyd", "price": "19.50", "locator": "Lunch › SANDWICHES › regel 1", "quote": "Sandwich Zuyd krentenbrood │ dungesneden ossenhaas │ eendenlever │ rucola │ truffel │ kaas 19,50"},
+            {"name": "Lobster roll", "price": "25.00", "locator": "Lunch › SANDWICHES › regel 2", "quote": "Lobster roll brioche │ kreeft │ frisse salade │ kreeftensoep 25"}
+          ]
+        },
+        {
+          "path": ["Lunch", "A LA CARTE"],
+          "items": [
+            {"name": "Steak tartaar", "price": "27.50", "locator": "Lunch › A LA CARTE › regel 1", "quote": "Steak tartaar steak tartaar van Holsteiner rund │ runderham │ bitterbal van zwezerik │ prei │ truffelpecorino 27,50"},
+            {"name": "Kreeft", "price": "29.50", "locator": "Lunch › A LA CARTE › regel 2", "quote": "Kreeft - lauwwarm gegaarde kreeftenstaart │ salade van kreeft │ bospeen │ tandoori 29,50"},
+            {"name": "Coquille", "price": "29.00", "locator": "Lunch › A LA CARTE › regel 3", "quote": "Coquille - gebakken coquille │ tartaar van coquille │ knolselderij │ kalamansi │ hazelnoot │ witte soja 29"},
+            {"name": "‘Catch of the day’", "price": "26.00", "locator": "Lunch › A LA CARTE › regel 4", "quote": "‘Catch of the day’ - warm of koud gerecht 26"},
+            {"name": "Zeetongfilet", "price": "39.00", "locator": "Lunch › A LA CARTE › regel 5", "quote": "Zeetongfilet - gebakken zeetongfilet │ Hollandse garnaal │ saffraan │ pompoen │ bouillabaisse 39"},
+            {"name": "Ossenhaas", "price": "35.00", "locator": "Lunch › A LA CARTE › regel 6", "quote": "Ossenhaas rosé gebraden ossenhaas │ runderstoverij │ 'triple fried' pont-neuf │ paprika │ jus Stroganoff 35 - supplement eendenlever 9"},
+            {"name": "Eendenlever", "price": "28.00", "locator": "Lunch › A LA CARTE › regel 7", "quote": "Eendenlever gebakken lever │ macaron │ crème van lever │ peer │ steranijs 28"},
+            {"name": "Kaasgerecht ‘3 x Epoisses’", "price": "17.00", "locator": "Lunch › A LA CARTE › regel 8", "quote": "Kaasgerecht ‘3 x Epoisses’ - 17 - in plaats van dessert, supplement 8,50"},
+            {"name": "Kaasassortiment", "priceVariants": [{"label": "vier stuks", "price": "13.00"}, {"label": "zes stuks", "price": "19.50"}], "locator": "Lunch › A LA CARTE › regel 9", "quote": "Kaasassortiment selectie van kazen │ Zuydvruchtencompote │ brood vier stuks 13 - zes stuks 19,50 - in plaats van dessert, supplement 8,50"},
+            {"name": "Dessert", "price": "16.50", "locator": "Lunch › A LA CARTE › regel 10", "quote": "Dessert - laat u verrassen… 16,50"}
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Diner",
+      "sourceUrl": "https://www.restaurantzuyd.nl/diner",
+      "captureKey": "ops/benchmark/output/reference-captures/zuyd/03-diner-128cae10ca14.html",
+      "categories": [
+        {
+          "path": ["Diner", "BITES - voor bij het aperitief"],
+          "items": [
+            {"name": "Oesterproeverij", "price": "23.50", "locator": "Diner › BITES - voor bij het aperitief › regel 1", "quote": "Oesterproeverij - 6 stuks naturel oesters │ Balinese vinaigrette - 23,50"},
+            {"name": "Oesterproeverij Deluxe", "price": "29.50", "locator": "Diner › BITES - voor bij het aperitief › regel 2", "quote": "Oesterproeverij Deluxe - 6 stuks opgemaakte oesters - 29,50"},
+            {"name": "Jamon Iberico Bellota", "price": "19.50", "locator": "Diner › BITES - voor bij het aperitief › regel 3", "quote": "Jamon Iberico Bellota - de exclusieve Spaanse ham │ 75 gram - 19,50"},
+            {"name": "Brioche met paling", "price": "9.50", "locator": "Diner › BITES - voor bij het aperitief › regel 4", "quote": "Brioche met paling - 9,50"},
+            {"name": "Crumpet met huisgerookte zalm", "price": "9.50", "locator": "Diner › BITES - voor bij het aperitief › regel 5", "quote": "Crumpet met huisgerookte zalm - 9,50"},
+            {"name": "Toast met Mangalica, sriracha en sesam", "price": "8.50", "locator": "Diner › BITES - voor bij het aperitief › regel 6", "quote": "Toast met Mangalica, sriracha en sesam - 8,50"},
+            {"name": "Duivels eitje met kimchi", "price": "8.50", "locator": "Diner › BITES - voor bij het aperitief › regel 7", "quote": "Duivels eitje met kimchi - 8,50"}
+          ]
+        },
+        {
+          "path": ["Diner", "A LA CARTE"],
+          "items": [
+            {"name": "Steak tartaar", "price": "27.50", "locator": "Diner › A LA CARTE › regel 1", "quote": "Steak tartaar steak tartaar van Holsteiner rund │ runderham │ bitterbal van zwezerik │ prei │ truffelpecorino 27,50"},
+            {"name": "Kreeft", "price": "29.50", "locator": "Diner › A LA CARTE › regel 2", "quote": "Kreeft - lauwwarm gegaarde kreeftenstaart │ salade van kreeft │ bospeen │ tandoori 29,50"},
+            {"name": "Coquille", "price": "29.00", "locator": "Diner › A LA CARTE › regel 3", "quote": "Coquille - gebakken coquille │ tartaar van coquille │ knolselderij │ kalamansi │ hazelnoot │ witte soja 29"},
+            {"name": "‘Catch of the day’", "price": "26.00", "locator": "Diner › A LA CARTE › regel 4", "quote": "‘Catch of the day’ - warm of koud gerecht 26"},
+            {"name": "Zeetongfilet", "price": "39.00", "locator": "Diner › A LA CARTE › regel 5", "quote": "Zeetongfilet - gebakken zeetongfilet │ Hollandse garnaal │ saffraan │ pompoen │ bouillabaisse 39"},
+            {"name": "Ossenhaas", "price": "35.00", "locator": "Diner › A LA CARTE › regel 6", "quote": "Ossenhaas rosé gebraden ossenhaas │ runderstoverij │ 'triple fried' pont-neuf │ paprika │ jus Stroganoff 35 - supplement eendenlever 9"},
+            {"name": "Eendenlever", "price": "28.00", "locator": "Diner › A LA CARTE › regel 7", "quote": "Eendenlever gebakken lever │ macaron │ crème van lever │ peer │ steranijs 28"},
+            {"name": "Kaasgerecht ‘3 x Epoisses’", "price": "17.00", "locator": "Diner › A LA CARTE › regel 8", "quote": "Kaasgerecht ‘3 x Epoisses’ - 17 - in plaats van dessert, supplement 8,50"},
+            {"name": "Kaasassortiment", "priceVariants": [{"label": "vier stuks", "price": "13.00"}, {"label": "zes stuks", "price": "19.50"}], "locator": "Diner › A LA CARTE › regel 9", "quote": "Kaasassortiment selectie van kazen │ Zuydvruchtencompote │ brood vier stuks 13 - zes stuks 19,50 - in plaats van dessert, supplement 8,50"},
+            {"name": "Dessert", "price": "16.50", "locator": "Diner › A LA CARTE › regel 10", "quote": "Dessert - laat u verrassen… 16,50"}
+          ]
+        }
+      ]
+    }
+  ],
+  "arrangements": [
+    {"name": "LUNCHMENU'S", "path": ["Lunch", "LUNCHMENU'S"], "captureKey": "ops/benchmark/output/reference-captures/zuyd/02-lunch-389470158b72.html", "prices": [{"label": "2-gangen menu", "price": "50.00"}, {"label": "3-gangen menu", "price": "60.00"}, {"label": "4-gangen menu", "price": "70.00"}, {"label": "5-gangen menu", "price": "80.00"}], "quote": "LUNCHMENU'S 2-gangen menu inclusief koffie of thee met friandises 50 3-gangen menu met tussengerecht of dessert 60 4-gangen menu met tussengerecht + dessert 70 5-gangen menu met 2 tussengerechten + dessert 80", "note": "Keuzemenu per aantal gangen; de gangen zijn geen losse gerechten."},
+    {"name": "VERRASSINGSMENU'S", "path": ["Diner", "VERRASSINGSMENU'S"], "captureKey": "ops/benchmark/output/reference-captures/zuyd/03-diner-128cae10ca14.html", "prices": [{"label": "4*-gangen menu", "price": "75.00"}, {"label": "4*-gangen menu · wijnarrangement", "price": "32.00"}, {"label": "4*-gangen menu · ½ glas wijnarrangement", "price": "22.00"}, {"label": "5-gangen menu", "price": "85.00"}, {"label": "5-gangen menu · wijnarrangement", "price": "40.00"}, {"label": "5-gangen menu · ½ glas wijnarrangement", "price": "27.50"}, {"label": "6-gangen menu", "price": "95.00"}, {"label": "6-gangen menu · wijnarrangement", "price": "48.00"}, {"label": "6-gangen menu · ½ glas wijnarrangement", "price": "33.00"}, {"label": "7-gangen menu", "price": "105.00"}, {"label": "7-gangen menu · wijnarrangement", "price": "56.00"}, {"label": "7-gangen menu · ½ glas wijnarrangement", "price": "38.50"}], "quote": "VERRASSINGSMENU'S 4*-gangen menu 75 wijnarr. 32 ½ glas wijnarr. 22 5-gangen menu 85 wijnarr. 40 ½ glas wijnarr. 27,50 6-gangen menu 95 wijnarr. 48 ½ glas wijnarr. 33 7-gangen menu 105 wijnarr. 56 ½ glas wijnarr. 38,50", "note": "Verrassingsmenu per aantal gangen, met per menuprijs ook het wijnarrangement en het halve glas wijnarrangement dat de bron in dezelfde rij noemt. Dat zijn arrangementprijzen, geen gerechten; de gangen hebben geen eigen prijs."},
+    {"name": "Kerstmenu 2026", "path": ["Kerstmenu"], "captureKey": "ops/benchmark/output/reference-captures/zuyd/04-kerstmenu-2bfaf63e7814.html", "prices": [{"label": "5-gangen kerstmenu", "price": "110.00"}, {"label": "6*-gangen kerstmenu", "price": "120.00"}], "quote": "5-gangen kerstmenu € 110,- p.p. 6*-gangen kerstmenu € 120,- p.p.", "note": "Seizoensarrangement. De gangen (zeebaars & krab, coquille, tarbot & paling, hert & knolselderij, kaas, dessert) hebben geen eigen prijs en zijn geen losse gerechten."},
+    {"name": "Kerstmenu Zuyd voor Thuys 2026", "path": ["Zuyd voor Thuys"], "captureKey": "ops/benchmark/output/reference-captures/zuyd/05-zuydvoorthuys-644810dfc971.html", "prices": [{"label": "5-gangen Kerst-Thuysmenu", "price": "90.00"}], "quote": "5-gangen Kerst-Thuysmenu € 90,- p.p.", "note": "Afhaalarrangement. De componenten hebben geen eigen prijs."}
+  ],
+  "supplements": [
+    {"name": "supplement eendenlever", "price": "9.00", "captureKey": "ops/benchmark/output/reference-captures/zuyd/02-lunch-389470158b72.html", "quote": "35 - supplement eendenlever 9", "note": "Toevoeging bij Ossenhaas, geen zelfstandig gerecht."},
+    {"name": "supplement 3 x Epoisses", "price": "8.50", "captureKey": "ops/benchmark/output/reference-captures/zuyd/02-lunch-389470158b72.html", "quote": "in plaats van dessert, supplement 8,50", "note": "Toevoeging bij het kaasgerecht."},
+    {"name": "supplement kaasassortiment", "price": "8.50", "captureKey": "ops/benchmark/output/reference-captures/zuyd/02-lunch-389470158b72.html", "quote": "in plaats van dessert, supplement 8,50", "note": "Toevoeging bij het kaasassortiment."},
+    {"name": "Zuurdesembol met smeersels", "price": "5.50", "captureKey": "ops/benchmark/output/reference-captures/zuyd/05-zuydvoorthuys-644810dfc971.html", "quote": "A. Zuurdesembol met smeersels € 5,50", "note": "Optionele toevoeging bij het afhaalarrangement."},
+    {"name": "Oesterproeverij (6 st.)", "price": "23.50", "captureKey": "ops/benchmark/output/reference-captures/zuyd/05-zuydvoorthuys-644810dfc971.html", "quote": "B. Oesterproeverij (6 st.) – met Balinese vinaigrette en een oestermes € 23,50", "note": "Optionele toevoeging bij het afhaalarrangement."},
+    {"name": "Jamon Iberico Belotta", "price": "19.50", "captureKey": "ops/benchmark/output/reference-captures/zuyd/05-zuydvoorthuys-644810dfc971.html", "quote": "C. Jamon Iberico Belotta – 75 gram € 19,50", "note": "Optionele toevoeging bij het afhaalarrangement."},
+    {"name": "Kaasassortiment (6 st.)", "price": "19.50", "captureKey": "ops/benchmark/output/reference-captures/zuyd/05-zuydvoorthuys-644810dfc971.html", "quote": "D. Kaasassortiment (6 st.) – Zuydvruchtencompote € 19,50", "note": "Optionele toevoeging bij het afhaalarrangement."},
+    {"name": "Friandises", "price": "9.50", "captureKey": "ops/benchmark/output/reference-captures/zuyd/05-zuydvoorthuys-644810dfc971.html", "quote": "E. Friandises – 3 stuks per portie € 9,50", "note": "Optionele toevoeging bij het afhaalarrangement."}
+  ],
+  "ambiguous": [
+    {"item": "Kerstmenu 2026 / Zuyd voor Thuys", "reason": "De arrangementgerechten hebben geen eigen losse prijs. Ze zijn daarom geen referentiegerecht; een extractie die ze als gerecht opvoert, telt als verzonnen gerecht.", "captureKey": "ops/benchmark/output/reference-captures/zuyd/04-kerstmenu-2bfaf63e7814.html"},
+    {"item": "Dessert", "reason": "De bron noemt alleen 'Dessert - laat u verrassen…' met een vaste prijs; er is geen afzonderlijke dessernaam.", "captureKey": "ops/benchmark/output/reference-captures/zuyd/02-lunch-389470158b72.html"}
+  ],
+  "limitations": [
+    "Lunch en diner zijn twee afzonderlijke menuvarianten; beide zijn als eigen menu opgenomen.",
+    "De kerstmenu- en afhaalpagina's zijn arrangementen; hun gangen hebben geen eigen prijs en zijn geen losse referentiegerechten.",
+    "De vastgezette menupagina's bevatten geen allergenenlegenda per gerecht; allergenen blijven onbekend, niet allergeenvrij.",
+    "Deze referentie is uit de vastgezette brontekst opgesteld en niet uit de parseruitvoer."
+  ]
+}

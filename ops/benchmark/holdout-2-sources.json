@@ -1,0 +1,594 @@
+{
+  "version": "1.0.0",
+  "pinnedAt": "2026-10-21",
+  "pinnedBy": "Delivery Lead (Claude Code)",
+  "issue": 59,
+  "authorization": {
+    "decision": "Product Owner, 2026-10-21: akkoord op optie 1 (vier bestaande kaarten plus een ongeziene set van maximaal 20 restaurants uit data/restaurants.json).",
+    "reference": "GitHub #59 issuecomment-6315226470",
+    "scope": "Public read-only probes of exactly these entry URLs and their relevant public menu links, within the existing safe fetch/source bounds. No login, CAPTCHA bypass, paid service, other location, arbitrary crawl, publication or app-side AI.",
+    "appProviderActivation": false
+  },
+  "selection": {
+    "rule": "All restaurants in data/restaurants.json with an http(s) website, excluding sources already used or tuned for #59 (Smelt, Blossem, De Botanist, Gauchos, Mr Moos, Colonia) and the four existing-card sources (Wolfslaar, Bardot, Zuyd, T-Huis); ordered by sha256(seed + \"|\" + restaurantId); at most 20.",
+    "seed": "github:1am-it/menucard#issuecomment-6315226470",
+    "eligible": 19,
+    "selected": 19,
+    "note": "Selected before any fetch or inspection of these sites."
+  },
+  "rules": "Same states as menu-extraction-acceptance-set.json holdout: unused -> evaluated_once (exactly one first evaluation per pinned source version, by the Delivery Lead) -> a source used for tuning leaves the holdout. The developer must not fetch, inspect or tune on these sources.",
+  "sources": [
+    {
+      "id": "H2-01",
+      "restaurantId": "5",
+      "label": "Restaurant Chocolat",
+      "url": "https://www.restaurant-chocolat.nl",
+      "allowedHosts": [
+        "restaurant-chocolat.nl",
+        "www.restaurant-chocolat.nl"
+      ],
+      "selectionRank": "0c9c67d8cd723a2920a26b74e31dd654dcf88c232041ea3c05cd54fb6d2e5632",
+      "evaluationState": "used_for_tuning",
+      "evaluationCount": 1,
+      "usedForTuning": true,
+      "firstEvaluatedAt": "2026-10-21",
+      "firstEvaluation": {
+        "path": "ops/benchmark/holdout-2-evaluation.json",
+        "sha256": "45098d76dff9afae4c87df20e207a4fe53686d308517ab2433a6d9a462b11918",
+        "evaluatedAt": "2026-10-21T12:43:03.155Z",
+        "manifestBytesSha256": "151c34c0a383438a1227d71b1751f947b64a94e2397e69e00b4cbc89f283c2c8",
+        "selectionDigest": "dffb74245bf02e87a833c969c351c4ab8955befe3303b9a954728bbf8b925c5a",
+        "sourceBytesSha256": "070974a5ac1922c4bf0c4372614556d4ea4624e711e9d4d8eb5b2f71f30d52c8",
+        "captureStatus": "captured"
+      },
+      "tuningDecision": {
+        "reference": "GitHub #59 review 6316295818: holdout-2 is na de enige eerste evaluatie als representatief (used_for_tuning) vastgelegd.",
+        "decidedAt": "2026-10-21",
+        "note": "This source is representative from now on; it is no longer an unseen holdout."
+      }
+    },
+    {
+      "id": "H2-02",
+      "restaurantId": "12",
+      "label": "Pellens",
+      "url": "https://pellens.nl",
+      "allowedHosts": [
+        "pellens.nl",
+        "www.pellens.nl"
+      ],
+      "selectionRank": "105e3ab1f829ff8ee754bbb0c367ee8a5ce7abc52d7917fd3cde343b092cc2bd",
+      "evaluationState": "used_for_tuning",
+      "evaluationCount": 1,
+      "usedForTuning": true,
+      "firstEvaluatedAt": "2026-10-21",
+      "firstEvaluation": {
+        "path": "ops/benchmark/holdout-2-evaluation.json",
+        "sha256": "45098d76dff9afae4c87df20e207a4fe53686d308517ab2433a6d9a462b11918",
+        "evaluatedAt": "2026-10-21T12:43:03.155Z",
+        "manifestBytesSha256": "151c34c0a383438a1227d71b1751f947b64a94e2397e69e00b4cbc89f283c2c8",
+        "selectionDigest": "dffb74245bf02e87a833c969c351c4ab8955befe3303b9a954728bbf8b925c5a",
+        "sourceBytesSha256": "66f57e2672894a1bf76bea5d52acdf6749000140d99fd12ff20fa5207b5e2d7a",
+        "captureStatus": "captured"
+      },
+      "tuningDecision": {
+        "reference": "GitHub #59 review 6316295818: holdout-2 is na de enige eerste evaluatie als representatief (used_for_tuning) vastgelegd.",
+        "decidedAt": "2026-10-21",
+        "note": "This source is representative from now on; it is no longer an unseen holdout."
+      }
+    },
+    {
+      "id": "H2-03",
+      "restaurantId": "25",
+      "label": "Dolce e Salato",
+      "url": "https://dolceesalato.nl",
+      "allowedHosts": [
+        "dolceesalato.nl",
+        "www.dolceesalato.nl"
+      ],
+      "selectionRank": "3c5b773f85f91aadacc8c16c217db2c2305a88413d5de55f89094f01c935daa9",
+      "evaluationState": "used_for_tuning",
+      "evaluationCount": 1,
+      "usedForTuning": true,
+      "firstEvaluatedAt": "2026-10-21",
+      "firstEvaluation": {
+        "path": "ops/benchmark/holdout-2-evaluation.json",
+        "sha256": "45098d76dff9afae4c87df20e207a4fe53686d308517ab2433a6d9a462b11918",
+        "evaluatedAt": "2026-10-21T12:43:03.155Z",
+        "manifestBytesSha256": "151c34c0a383438a1227d71b1751f947b64a94e2397e69e00b4cbc89f283c2c8",
+        "selectionDigest": "dffb74245bf02e87a833c969c351c4ab8955befe3303b9a954728bbf8b925c5a",
+        "sourceBytesSha256": "378dc3db722adc2483c5fc7584fb22c21bceea06f2a4153d07570272072a1837",
+        "captureStatus": "captured"
+      },
+      "tuningDecision": {
+        "reference": "GitHub #59 review 6316295818: holdout-2 is na de enige eerste evaluatie als representatief (used_for_tuning) vastgelegd.",
+        "decidedAt": "2026-10-21",
+        "note": "This source is representative from now on; it is no longer an unseen holdout."
+      }
+    },
+    {
+      "id": "H2-04",
+      "restaurantId": "24",
+      "label": "Trattoria Perron",
+      "url": "https://www.trattoriaperron.nl",
+      "allowedHosts": [
+        "trattoriaperron.nl",
+        "www.trattoriaperron.nl"
+      ],
+      "selectionRank": "6231e4fe35c2ccd801130188c7fb2035d56c24109c58f3935ea4b6758c5a25a0",
+      "evaluationState": "used_for_tuning",
+      "evaluationCount": 1,
+      "usedForTuning": true,
+      "firstEvaluatedAt": "2026-10-21",
+      "firstEvaluation": {
+        "path": "ops/benchmark/holdout-2-evaluation.json",
+        "sha256": "45098d76dff9afae4c87df20e207a4fe53686d308517ab2433a6d9a462b11918",
+        "evaluatedAt": "2026-10-21T12:43:03.155Z",
+        "manifestBytesSha256": "151c34c0a383438a1227d71b1751f947b64a94e2397e69e00b4cbc89f283c2c8",
+        "selectionDigest": "dffb74245bf02e87a833c969c351c4ab8955befe3303b9a954728bbf8b925c5a",
+        "sourceBytesSha256": "dd2aa70beedf56edf9d3b9e3b9f126db6a311d7fe557cebba5eeeb573a4e1773",
+        "captureStatus": "captured"
+      },
+      "tuningDecision": {
+        "reference": "GitHub #59 review 6316295818: holdout-2 is na de enige eerste evaluatie als representatief (used_for_tuning) vastgelegd.",
+        "decidedAt": "2026-10-21",
+        "note": "This source is representative from now on; it is no longer an unseen holdout."
+      }
+    },
+    {
+      "id": "H2-05",
+      "restaurantId": "21",
+      "label": "Senang Makan",
+      "url": "https://www.senangmakan.nl",
+      "allowedHosts": [
+        "senangmakan.nl",
+        "www.senangmakan.nl"
+      ],
+      "selectionRank": "652bc52046fd19b93cad339b03dfe9e42866061702f49f02b6b8fe8ecba867f6",
+      "evaluationState": "used_for_tuning",
+      "evaluationCount": 1,
+      "usedForTuning": true,
+      "firstEvaluatedAt": "2026-10-21",
+      "firstEvaluation": {
+        "path": "ops/benchmark/holdout-2-evaluation.json",
+        "sha256": "45098d76dff9afae4c87df20e207a4fe53686d308517ab2433a6d9a462b11918",
+        "evaluatedAt": "2026-10-21T12:43:03.155Z",
+        "manifestBytesSha256": "151c34c0a383438a1227d71b1751f947b64a94e2397e69e00b4cbc89f283c2c8",
+        "selectionDigest": "dffb74245bf02e87a833c969c351c4ab8955befe3303b9a954728bbf8b925c5a",
+        "sourceBytesSha256": "aa8a5dbd18214db4da51d110aba7601036b79f39a95d265ec42746d83d8b5d64",
+        "captureStatus": "captured"
+      },
+      "tuningDecision": {
+        "reference": "GitHub #59 review 6316295818: holdout-2 is na de enige eerste evaluatie als representatief (used_for_tuning) vastgelegd.",
+        "decidedAt": "2026-10-21",
+        "note": "This source is representative from now on; it is no longer an unseen holdout."
+      }
+    },
+    {
+      "id": "H2-06",
+      "restaurantId": "17",
+      "label": "Restaurant Zenza",
+      "url": "https://www.restaurantzenza.nl",
+      "allowedHosts": [
+        "restaurantzenza.nl",
+        "www.restaurantzenza.nl"
+      ],
+      "selectionRank": "6e59f37e331a418fbdf06627dbbca0cf70308f3fe7bd89be3394b78c060de1ed",
+      "evaluationState": "used_for_tuning",
+      "evaluationCount": 1,
+      "usedForTuning": true,
+      "firstEvaluatedAt": "2026-10-21",
+      "firstEvaluation": {
+        "path": "ops/benchmark/holdout-2-evaluation.json",
+        "sha256": "45098d76dff9afae4c87df20e207a4fe53686d308517ab2433a6d9a462b11918",
+        "evaluatedAt": "2026-10-21T12:43:03.155Z",
+        "manifestBytesSha256": "151c34c0a383438a1227d71b1751f947b64a94e2397e69e00b4cbc89f283c2c8",
+        "selectionDigest": "dffb74245bf02e87a833c969c351c4ab8955befe3303b9a954728bbf8b925c5a",
+        "sourceBytesSha256": "dcd192649e2b2209ad1f0332c9489a0f6cc7ad6736679c4fdbf5d5ac17b112bb",
+        "captureStatus": "captured"
+      },
+      "tuningDecision": {
+        "reference": "GitHub #59 review 6316295818: holdout-2 is na de enige eerste evaluatie als representatief (used_for_tuning) vastgelegd.",
+        "decidedAt": "2026-10-21",
+        "note": "This source is representative from now on; it is no longer an unseen holdout."
+      }
+    },
+    {
+      "id": "H2-07",
+      "restaurantId": "10",
+      "label": "Salon de Provence",
+      "url": "https://www.salondeprovence.nl",
+      "allowedHosts": [
+        "salondeprovence.nl",
+        "www.salondeprovence.nl"
+      ],
+      "selectionRank": "730a06824446c37ce92cedf94a92f430ea7164959e46fc67c78a1845284f9e7f",
+      "evaluationState": "used_for_tuning",
+      "evaluationCount": 1,
+      "usedForTuning": true,
+      "firstEvaluatedAt": "2026-10-21",
+      "firstEvaluation": {
+        "path": "ops/benchmark/holdout-2-evaluation.json",
+        "sha256": "45098d76dff9afae4c87df20e207a4fe53686d308517ab2433a6d9a462b11918",
+        "evaluatedAt": "2026-10-21T12:43:03.155Z",
+        "manifestBytesSha256": "151c34c0a383438a1227d71b1751f947b64a94e2397e69e00b4cbc89f283c2c8",
+        "selectionDigest": "dffb74245bf02e87a833c969c351c4ab8955befe3303b9a954728bbf8b925c5a",
+        "sourceBytesSha256": "ce02f460c79e3e83720b85c41e9e0dbcf4013990222270af680418c07c3a960f",
+        "captureStatus": "captured"
+      },
+      "tuningDecision": {
+        "reference": "GitHub #59 review 6316295818: holdout-2 is na de enige eerste evaluatie als representatief (used_for_tuning) vastgelegd.",
+        "decidedAt": "2026-10-21",
+        "note": "This source is representative from now on; it is no longer an unseen holdout."
+      }
+    },
+    {
+      "id": "H2-08",
+      "restaurantId": "8",
+      "label": "Al Dente Ristorante",
+      "url": "https://www.aldentebreda.nl",
+      "allowedHosts": [
+        "aldentebreda.nl",
+        "www.aldentebreda.nl"
+      ],
+      "selectionRank": "7ea9b657e14f4fb723fbf0763c152365184c5f083994a2a2a650cde0b67c84d5",
+      "evaluationState": "used_for_tuning",
+      "evaluationCount": 1,
+      "usedForTuning": true,
+      "firstEvaluatedAt": "2026-10-21",
+      "firstEvaluation": {
+        "path": "ops/benchmark/holdout-2-evaluation.json",
+        "sha256": "45098d76dff9afae4c87df20e207a4fe53686d308517ab2433a6d9a462b11918",
+        "evaluatedAt": "2026-10-21T12:43:03.155Z",
+        "manifestBytesSha256": "151c34c0a383438a1227d71b1751f947b64a94e2397e69e00b4cbc89f283c2c8",
+        "selectionDigest": "dffb74245bf02e87a833c969c351c4ab8955befe3303b9a954728bbf8b925c5a",
+        "sourceBytesSha256": "9b4041b72f50046a3715bb246d4d3a641b38c6ecd822c7e9a59db44e65ff9a09",
+        "captureStatus": "captured"
+      },
+      "tuningDecision": {
+        "reference": "GitHub #59 review 6316295818: holdout-2 is na de enige eerste evaluatie als representatief (used_for_tuning) vastgelegd.",
+        "decidedAt": "2026-10-21",
+        "note": "This source is representative from now on; it is no longer an unseen holdout."
+      }
+    },
+    {
+      "id": "H2-09",
+      "restaurantId": "14",
+      "label": "The Chai Affairs",
+      "url": "https://www.thechaiaffairs.nl",
+      "allowedHosts": [
+        "thechaiaffairs.nl",
+        "www.thechaiaffairs.nl"
+      ],
+      "selectionRank": "902d898420c37d8a49459a46a8662508984364f0772354a39a2508bd2ba6086e",
+      "evaluationState": "used_for_tuning",
+      "evaluationCount": 1,
+      "usedForTuning": true,
+      "firstEvaluatedAt": "2026-10-21",
+      "firstEvaluation": {
+        "path": "ops/benchmark/holdout-2-evaluation.json",
+        "sha256": "45098d76dff9afae4c87df20e207a4fe53686d308517ab2433a6d9a462b11918",
+        "evaluatedAt": "2026-10-21T12:43:03.155Z",
+        "manifestBytesSha256": "151c34c0a383438a1227d71b1751f947b64a94e2397e69e00b4cbc89f283c2c8",
+        "selectionDigest": "dffb74245bf02e87a833c969c351c4ab8955befe3303b9a954728bbf8b925c5a",
+        "sourceBytesSha256": "ecb4b277f11ef4ddb837883fafb0b7a6473b090d622a1a6ea1b53eb90459589a",
+        "captureStatus": "captured"
+      },
+      "tuningDecision": {
+        "reference": "GitHub #59 review 6316295818: holdout-2 is na de enige eerste evaluatie als representatief (used_for_tuning) vastgelegd.",
+        "decidedAt": "2026-10-21",
+        "note": "This source is representative from now on; it is no longer an unseen holdout."
+      }
+    },
+    {
+      "id": "H2-10",
+      "restaurantId": "15",
+      "label": "Andalous",
+      "url": "https://www.andalous-breda.nl",
+      "allowedHosts": [
+        "andalous-breda.nl",
+        "www.andalous-breda.nl"
+      ],
+      "selectionRank": "9089be1220b0a30b65d2e19bf304f1e42d9e46e87711f4e2b10b19aa90fdf33a",
+      "evaluationState": "used_for_tuning",
+      "evaluationCount": 1,
+      "usedForTuning": true,
+      "firstEvaluatedAt": "2026-10-21",
+      "firstEvaluation": {
+        "path": "ops/benchmark/holdout-2-evaluation.json",
+        "sha256": "45098d76dff9afae4c87df20e207a4fe53686d308517ab2433a6d9a462b11918",
+        "evaluatedAt": "2026-10-21T12:43:03.155Z",
+        "manifestBytesSha256": "151c34c0a383438a1227d71b1751f947b64a94e2397e69e00b4cbc89f283c2c8",
+        "selectionDigest": "dffb74245bf02e87a833c969c351c4ab8955befe3303b9a954728bbf8b925c5a",
+        "sourceBytesSha256": "05e08dad114775dea7ee9f8a38aac4389728136f9a58b34a938259457829f086",
+        "captureStatus": "captured"
+      },
+      "tuningDecision": {
+        "reference": "GitHub #59 review 6316295818: holdout-2 is na de enige eerste evaluatie als representatief (used_for_tuning) vastgelegd.",
+        "decidedAt": "2026-10-21",
+        "note": "This source is representative from now on; it is no longer an unseen holdout."
+      }
+    },
+    {
+      "id": "H2-11",
+      "restaurantId": "11",
+      "label": "De Beyerd",
+      "url": "https://www.beyerd.nl",
+      "allowedHosts": [
+        "beyerd.nl",
+        "www.beyerd.nl"
+      ],
+      "selectionRank": "9c156c085101b69004afcb5609aa713d4451c1f886734bf2073e05e8e8f273c5",
+      "evaluationState": "used_for_tuning",
+      "evaluationCount": 1,
+      "usedForTuning": true,
+      "firstEvaluatedAt": "2026-10-21",
+      "firstEvaluation": {
+        "path": "ops/benchmark/holdout-2-evaluation.json",
+        "sha256": "45098d76dff9afae4c87df20e207a4fe53686d308517ab2433a6d9a462b11918",
+        "evaluatedAt": "2026-10-21T12:43:03.155Z",
+        "manifestBytesSha256": "151c34c0a383438a1227d71b1751f947b64a94e2397e69e00b4cbc89f283c2c8",
+        "selectionDigest": "dffb74245bf02e87a833c969c351c4ab8955befe3303b9a954728bbf8b925c5a",
+        "sourceBytesSha256": "2a736399d86dfbe6277ea2f001502e7df131ebeb74644d414cca465f8eee09cb",
+        "captureStatus": "captured"
+      },
+      "tuningDecision": {
+        "reference": "GitHub #59 review 6316295818: holdout-2 is na de enige eerste evaluatie als representatief (used_for_tuning) vastgelegd.",
+        "decidedAt": "2026-10-21",
+        "note": "This source is representative from now on; it is no longer an unseen holdout."
+      }
+    },
+    {
+      "id": "H2-12",
+      "restaurantId": "7",
+      "label": "Restaurant Ruitersbosch",
+      "url": "https://www.restaurantruitersbosch.nl",
+      "allowedHosts": [
+        "restaurantruitersbosch.nl",
+        "www.restaurantruitersbosch.nl"
+      ],
+      "selectionRank": "a24c6d2dfd15183c82b95b44770bd98346519cc618062a0242f4ac7742354ef5",
+      "evaluationState": "used_for_tuning",
+      "evaluationCount": 1,
+      "usedForTuning": true,
+      "firstEvaluatedAt": "2026-10-21",
+      "firstEvaluation": {
+        "path": "ops/benchmark/holdout-2-evaluation.json",
+        "sha256": "45098d76dff9afae4c87df20e207a4fe53686d308517ab2433a6d9a462b11918",
+        "evaluatedAt": "2026-10-21T12:43:03.155Z",
+        "manifestBytesSha256": "151c34c0a383438a1227d71b1751f947b64a94e2397e69e00b4cbc89f283c2c8",
+        "selectionDigest": "dffb74245bf02e87a833c969c351c4ab8955befe3303b9a954728bbf8b925c5a",
+        "sourceBytesSha256": null,
+        "captureStatus": "failed"
+      },
+      "tuningDecision": {
+        "reference": "GitHub #59 review 6316295818: holdout-2 is na de enige eerste evaluatie als representatief (used_for_tuning) vastgelegd.",
+        "decidedAt": "2026-10-21",
+        "note": "This source is representative from now on; it is no longer an unseen holdout."
+      }
+    },
+    {
+      "id": "H2-13",
+      "restaurantId": "22",
+      "label": "Makanan",
+      "url": "https://www.makananbreda.nl",
+      "allowedHosts": [
+        "makananbreda.nl",
+        "www.makananbreda.nl"
+      ],
+      "selectionRank": "af861a5fe2632d543a60d38966a3b5043cb9ccce0f2eef83badc01e2e53fc76c",
+      "evaluationState": "used_for_tuning",
+      "evaluationCount": 1,
+      "usedForTuning": true,
+      "firstEvaluatedAt": "2026-10-21",
+      "firstEvaluation": {
+        "path": "ops/benchmark/holdout-2-evaluation.json",
+        "sha256": "45098d76dff9afae4c87df20e207a4fe53686d308517ab2433a6d9a462b11918",
+        "evaluatedAt": "2026-10-21T12:43:03.155Z",
+        "manifestBytesSha256": "151c34c0a383438a1227d71b1751f947b64a94e2397e69e00b4cbc89f283c2c8",
+        "selectionDigest": "dffb74245bf02e87a833c969c351c4ab8955befe3303b9a954728bbf8b925c5a",
+        "sourceBytesSha256": null,
+        "captureStatus": "failed"
+      },
+      "tuningDecision": {
+        "reference": "GitHub #59 review 6316295818: holdout-2 is na de enige eerste evaluatie als representatief (used_for_tuning) vastgelegd.",
+        "decidedAt": "2026-10-21",
+        "note": "This source is representative from now on; it is no longer an unseen holdout."
+      }
+    },
+    {
+      "id": "H2-14",
+      "restaurantId": "20",
+      "label": "Klein Java",
+      "url": "https://www.klein-java.nl",
+      "allowedHosts": [
+        "klein-java.nl",
+        "www.klein-java.nl"
+      ],
+      "selectionRank": "b45a00ce97657066fce60620d57d2b827f5acf79fb4585a8f7707e25bdb7c989",
+      "evaluationState": "used_for_tuning",
+      "evaluationCount": 1,
+      "usedForTuning": true,
+      "firstEvaluatedAt": "2026-10-21",
+      "firstEvaluation": {
+        "path": "ops/benchmark/holdout-2-evaluation.json",
+        "sha256": "45098d76dff9afae4c87df20e207a4fe53686d308517ab2433a6d9a462b11918",
+        "evaluatedAt": "2026-10-21T12:43:03.155Z",
+        "manifestBytesSha256": "151c34c0a383438a1227d71b1751f947b64a94e2397e69e00b4cbc89f283c2c8",
+        "selectionDigest": "dffb74245bf02e87a833c969c351c4ab8955befe3303b9a954728bbf8b925c5a",
+        "sourceBytesSha256": "076214e3a560b97e250863eb083d41ad6827684c1d8337e921bcbda44a636c2e",
+        "captureStatus": "captured"
+      },
+      "tuningDecision": {
+        "reference": "GitHub #59 review 6316295818: holdout-2 is na de enige eerste evaluatie als representatief (used_for_tuning) vastgelegd.",
+        "decidedAt": "2026-10-21",
+        "note": "This source is representative from now on; it is no longer an unseen holdout."
+      }
+    },
+    {
+      "id": "H2-15",
+      "restaurantId": "13",
+      "label": "Gantau Village",
+      "url": "https://www.gantauvillage.nl",
+      "allowedHosts": [
+        "gantauvillage.nl",
+        "www.gantauvillage.nl"
+      ],
+      "selectionRank": "b5804b2e963a2468376c6678ad899c58aea5017440c33b4bed24811a01adf631",
+      "evaluationState": "used_for_tuning",
+      "evaluationCount": 1,
+      "usedForTuning": true,
+      "firstEvaluatedAt": "2026-10-21",
+      "firstEvaluation": {
+        "path": "ops/benchmark/holdout-2-evaluation.json",
+        "sha256": "45098d76dff9afae4c87df20e207a4fe53686d308517ab2433a6d9a462b11918",
+        "evaluatedAt": "2026-10-21T12:43:03.155Z",
+        "manifestBytesSha256": "151c34c0a383438a1227d71b1751f947b64a94e2397e69e00b4cbc89f283c2c8",
+        "selectionDigest": "dffb74245bf02e87a833c969c351c4ab8955befe3303b9a954728bbf8b925c5a",
+        "sourceBytesSha256": null,
+        "captureStatus": "failed"
+      },
+      "tuningDecision": {
+        "reference": "GitHub #59 review 6316295818: holdout-2 is na de enige eerste evaluatie als representatief (used_for_tuning) vastgelegd.",
+        "decidedAt": "2026-10-21",
+        "note": "This source is representative from now on; it is no longer an unseen holdout."
+      }
+    },
+    {
+      "id": "H2-16",
+      "restaurantId": "3",
+      "label": "Con Fuego",
+      "url": "https://www.restaurantconfuego.com",
+      "allowedHosts": [
+        "restaurantconfuego.com",
+        "www.restaurantconfuego.com"
+      ],
+      "selectionRank": "b96a1163213e94e73f3e597b8f005d191631e81d3f33a3a70516f80d784cba2d",
+      "evaluationState": "used_for_tuning",
+      "evaluationCount": 1,
+      "usedForTuning": true,
+      "firstEvaluatedAt": "2026-10-21",
+      "firstEvaluation": {
+        "path": "ops/benchmark/holdout-2-evaluation.json",
+        "sha256": "45098d76dff9afae4c87df20e207a4fe53686d308517ab2433a6d9a462b11918",
+        "evaluatedAt": "2026-10-21T12:43:03.155Z",
+        "manifestBytesSha256": "151c34c0a383438a1227d71b1751f947b64a94e2397e69e00b4cbc89f283c2c8",
+        "selectionDigest": "dffb74245bf02e87a833c969c351c4ab8955befe3303b9a954728bbf8b925c5a",
+        "sourceBytesSha256": "a980e64d62453cbdc884072c57153744375037ad2087d6f2ca00c71f8f59fb80",
+        "captureStatus": "captured"
+      },
+      "tuningDecision": {
+        "reference": "GitHub #59 review 6316295818: holdout-2 is na de enige eerste evaluatie als representatief (used_for_tuning) vastgelegd.",
+        "decidedAt": "2026-10-21",
+        "note": "This source is representative from now on; it is no longer an unseen holdout."
+      }
+    },
+    {
+      "id": "H2-17",
+      "restaurantId": "18",
+      "label": "Masala",
+      "url": "https://www.masalabreda.nl",
+      "allowedHosts": [
+        "masalabreda.nl",
+        "www.masalabreda.nl"
+      ],
+      "selectionRank": "c33e3defb4437221f1d516c03837fb4245e9f9932f5c2c60e04626c92d78ed2d",
+      "evaluationState": "used_for_tuning",
+      "evaluationCount": 1,
+      "usedForTuning": true,
+      "firstEvaluatedAt": "2026-10-21",
+      "firstEvaluation": {
+        "path": "ops/benchmark/holdout-2-evaluation.json",
+        "sha256": "45098d76dff9afae4c87df20e207a4fe53686d308517ab2433a6d9a462b11918",
+        "evaluatedAt": "2026-10-21T12:43:03.155Z",
+        "manifestBytesSha256": "151c34c0a383438a1227d71b1751f947b64a94e2397e69e00b4cbc89f283c2c8",
+        "selectionDigest": "dffb74245bf02e87a833c969c351c4ab8955befe3303b9a954728bbf8b925c5a",
+        "sourceBytesSha256": null,
+        "captureStatus": "failed"
+      },
+      "tuningDecision": {
+        "reference": "GitHub #59 review 6316295818: holdout-2 is na de enige eerste evaluatie als representatief (used_for_tuning) vastgelegd.",
+        "decidedAt": "2026-10-21",
+        "note": "This source is representative from now on; it is no longer an unseen holdout."
+      }
+    },
+    {
+      "id": "H2-18",
+      "restaurantId": "4",
+      "label": "Restaurant Uijttewaal",
+      "url": "https://www.restaurantuijttewaal.nl",
+      "allowedHosts": [
+        "restaurantuijttewaal.nl",
+        "www.restaurantuijttewaal.nl"
+      ],
+      "selectionRank": "f4d65ec21bfaf09e8267b8467037b88b55673ca64697085a140a0cf019926f25",
+      "evaluationState": "used_for_tuning",
+      "evaluationCount": 1,
+      "usedForTuning": true,
+      "firstEvaluatedAt": "2026-10-21",
+      "firstEvaluation": {
+        "path": "ops/benchmark/holdout-2-evaluation.json",
+        "sha256": "45098d76dff9afae4c87df20e207a4fe53686d308517ab2433a6d9a462b11918",
+        "evaluatedAt": "2026-10-21T12:43:03.155Z",
+        "manifestBytesSha256": "151c34c0a383438a1227d71b1751f947b64a94e2397e69e00b4cbc89f283c2c8",
+        "selectionDigest": "dffb74245bf02e87a833c969c351c4ab8955befe3303b9a954728bbf8b925c5a",
+        "sourceBytesSha256": "5b9eac97da192645cf2c0994f40a8e2c10295a3f2c1ac622634fda4988255682",
+        "captureStatus": "captured"
+      },
+      "tuningDecision": {
+        "reference": "GitHub #59 review 6316295818: holdout-2 is na de enige eerste evaluatie als representatief (used_for_tuning) vastgelegd.",
+        "decidedAt": "2026-10-21",
+        "note": "This source is representative from now on; it is no longer an unseen holdout."
+      }
+    },
+    {
+      "id": "H2-19",
+      "restaurantId": "9",
+      "label": "Beers & Barrels",
+      "url": "https://www.beersbarrels.nl/en/locations/breda/",
+      "allowedHosts": [
+        "beersbarrels.nl",
+        "www.beersbarrels.nl"
+      ],
+      "selectionRank": "f9cc1d104d71d9adc293688047e452697ee2aa79750aa7e3e6df813ee2bfba5a",
+      "evaluationState": "used_for_tuning",
+      "evaluationCount": 1,
+      "usedForTuning": true,
+      "firstEvaluatedAt": "2026-10-21",
+      "firstEvaluation": {
+        "path": "ops/benchmark/holdout-2-evaluation.json",
+        "sha256": "45098d76dff9afae4c87df20e207a4fe53686d308517ab2433a6d9a462b11918",
+        "evaluatedAt": "2026-10-21T12:43:03.155Z",
+        "manifestBytesSha256": "151c34c0a383438a1227d71b1751f947b64a94e2397e69e00b4cbc89f283c2c8",
+        "selectionDigest": "dffb74245bf02e87a833c969c351c4ab8955befe3303b9a954728bbf8b925c5a",
+        "sourceBytesSha256": "1a112904f2860beee2d77563a7ae3ce99c6ca5cf6f6dff321bf3407f8826b097",
+        "captureStatus": "captured"
+      },
+      "tuningDecision": {
+        "reference": "GitHub #59 review 6316295818: holdout-2 is na de enige eerste evaluatie als representatief (used_for_tuning) vastgelegd.",
+        "decidedAt": "2026-10-21",
+        "note": "This source is representative from now on; it is no longer an unseen holdout."
+      }
+    }
+  ],
+  "evaluation": {
+    "path": "ops/benchmark/holdout-2-evaluation.json",
+    "sha256": "45098d76dff9afae4c87df20e207a4fe53686d308517ab2433a6d9a462b11918",
+    "evaluatedAt": "2026-10-21T12:43:03.155Z",
+    "manifestBytesSha256": "151c34c0a383438a1227d71b1751f947b64a94e2397e69e00b4cbc89f283c2c8"
+  },
+  "lifecycle": {
+    "state": "used_for_tuning",
+    "decidedAt": "2026-10-21",
+    "reference": "GitHub #59 review 6316295818: holdout-2 is na de enige eerste evaluatie als representatief (used_for_tuning) vastgelegd.",
+    "note": "Representative measurement only. A new unseen set needs a separately pinned holdout."
+  },
+  "representative": {
+    "reference": "GitHub #59 review 6316295818: holdout-2 is na de enige eerste evaluatie als representatief (used_for_tuning) vastgelegd.",
+    "decidedAt": "2026-10-21",
+    "evaluation": {
+      "path": "ops/benchmark/holdout-2-evaluation.json",
+      "sha256": "45098d76dff9afae4c87df20e207a4fe53686d308517ab2433a6d9a462b11918"
+    },
+    "selectionDigest": "dffb74245bf02e87a833c969c351c4ab8955befe3303b9a954728bbf8b925c5a"
+  }
+}

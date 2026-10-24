@@ -5,6 +5,12 @@
 // menu modules import nothing but each other and the existing benchmark
 // foundation — no network client, provider SDK, browser tool, child process,
 // or environment variable.
+//
+// Route B exception (owner decision 2026-10-23, #59 / BE-21 review
+// 6370840673): exactly one provider SDK is allowed, in exactly one module —
+// `src/lib/menuExtractionAnthropicCall.js` — with an exact version. Every other
+// provider, browser or network dependency stays forbidden, and the guard below
+// proves the SDK is not imported anywhere else.
 
 const test = require('node:test')
 const assert = require('node:assert/strict')
@@ -108,8 +114,40 @@ test('the ops/benchmark shims only re-export their promoted src/lib module', () 
   }
 })
 
-test('package.json gained no provider, browser or network dependency for this track', () => {
+test('package.json gained only the one approved provider dependency, pinned exactly', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'package.json'), 'utf8'))
   const deps = Object.keys({ ...pkg.dependencies, ...pkg.devDependencies })
-  for (const dep of deps) assert.ok(!/anthropic|openai|playwright|puppeteer|browserless|tesseract|cheerio|jsdom|parse5|htmlparser2/i.test(dep), dep)
+  const PROVIDER = '@anthropic-ai/sdk'
+  for (const dep of deps) {
+    if (dep === PROVIDER) continue
+    assert.ok(!/anthropic|openai|playwright|puppeteer|browserless|tesseract|cheerio|jsdom|parse5|htmlparser2/i.test(dep), dep)
+  }
+  assert.ok(deps.includes(PROVIDER), 'the approved route B dependency is present')
+  assert.match(pkg.dependencies[PROVIDER], /^\d+\.\d+\.\d+$/, 'the provider version is exact, never a range')
+  assert.equal(Object.prototype.hasOwnProperty.call(pkg.devDependencies || {}, PROVIDER), false)
+})
+
+test('the provider SDK is imported by exactly one module; every other file stays provider-free', () => {
+  const PROVIDER = '@anthropic-ai/sdk'
+  const allowed = path.join('src', 'lib', 'menuExtractionAnthropicCall.js')
+  const offenders = []
+  for (const dir of ['src', 'app', 'components', 'lib', 'pages', 'ops']) {
+    for (const file of sourceFiles(path.join(REPO_ROOT, dir))) {
+      const relative = path.relative(REPO_ROOT, file)
+      if (relative === allowed) continue
+      // A test that asserts the pin is not a runtime import; only production
+      // code (and the ops tooling) is checked here.
+      if (/\.test\.js$/.test(relative)) continue
+      const source = fs.readFileSync(file, 'utf8')
+      if (importSpecifiers(source).includes(PROVIDER)) offenders.push(relative)
+    }
+  }
+  assert.deepEqual(offenders, [])
+  const providerSource = fs.readFileSync(path.join(REPO_ROOT, allowed), 'utf8')
+  assert.equal(importSpecifiers(providerSource).filter((specifier) => specifier === PROVIDER).length, 1)
+  // One environment variable, read once; no key literal and no logging.
+  assert.equal((providerSource.match(/process\.env/g) || []).length, 1)
+  assert.match(providerSource, /ANTHROPIC_API_KEY/)
+  assert.equal(/sk-ant-/.test(providerSource), false, 'no key literal')
+  assert.equal(/console\.(log|info|warn|error)/.test(providerSource), false, 'the provider module logs nothing')
 })

@@ -72,17 +72,21 @@
 
 const { extractMenusFromHtml } = require('./menuJsonLdExtraction')
 const { normalizeMenuHierarchy } = require('./menuHierarchy')
-const { findSameHostMenuCandidates } = require('./sameHostDiscovery')
+const { findSameHostMenuCandidates, findSameHostSubPageLinks, collectAnchors, sameHostPageKey, MAX_CANDIDATES } = require('./sameHostDiscovery')
 const { extractRestaurantFieldsWithEvidence } = require('./restaurantFieldEvidence')
 const { ALLOWED_FIELD_NAMES, deriveFieldConfidence, isFieldReviewReady } = require('./fieldConfidence')
 const { computeFieldEvidenceHash } = require('./fieldEvidenceHash')
 const { checkFieldContextStatus } = require('./fieldContextConflict')
 const { extractDigitalPdfLines, extractDigitalPdfTextWithFallback, PdfExtractionError } = require('./pdfTextExtraction')
-const { structurePdfLinesIntoMenu } = require('./pdfMenuStructuring')
+const { structurePdfLinesIntoMenu, compactPdfLayoutText } = require('./pdfMenuStructuring')
 const { rollUpPdfAdapterErrorReason } = require('./restaurantSourceAnalysisJobs')
 const { composeEvidenceBasedDescription } = require('./restaurantConceptDescription')
 const { runClaudeStructuringAdapter } = require('./claudeStructuringAdapter')
-const { extractHtmlMenuStructure } = require('./htmlMenuStructure')
+const { extractHtmlMenuStructure, spamSignals } = require('./htmlMenuStructure')
+const { pdfContextToMenuContext } = require('./pdfMenuContext')
+const { buildExtractionResult, countMenuItems } = require('./menuExtractionResult')
+const { assessDeterministicMenuQuality, applyQualityReview, aiReplacementGate } = require('./menuExtractionQuality')
+const { applyItemEvidenceGate } = require('./menuItemEvidence')
 
 /**
  * BE-25 fase 2: a menu context from the visible HTML of a discovered menu
@@ -93,17 +97,96 @@ const { extractHtmlMenuStructure } = require('./htmlMenuStructure')
  * Returns `{ menu, itemCount }` or `null`. Never throws into the analysis.
  */
 /**
+ * A site's own link label for a menu page can name that card ("Menukaart
+ * diner", "Lunchkaart"); a label that only says "menu"/"menukaart"/"kaart"
+ * adds nothing and must not become a title. Matched as a whole label.
+ */
+const GENERIC_MENU_LABEL =
+  /^(?:(?:de|het|ons|onze|the|our|la|le)\s+)?(?:menus?|menu'?s|menukaart|menu ?kaart|menukaarten|kaart|spijskaart|drankenkaart|wijnkaart|menucard|menu ?card|carte|card|menu of the day)$/i
+const MAX_MENU_TITLE_LENGTH = 60
+const GENERIC_MENU_WORDS = new Set(['menu', 'menus', 'menukaart', 'kaart', 'card', 'carte', 'menucard', 'spijskaart', 'drankenkaart', 'wijnkaart'])
+
+/**
+ * The name a site itself uses for one menu page, taken from its own links to
+ * that page ("Menukaart diner"). A label only counts when it shares a word with
+ * the page's own address that is not a generic menu word, so a call-to-action
+ * ("Ontdek ons menu") never becomes a card name. Purely from the source's own
+ * link text: nothing is invented and no route level is added.
+ */
+function menuTitleFromLinkLabels(labels, sourceUrl) {
+  const slugWords = new Set(
+    String(sourceUrl || '')
+      .toLowerCase()
+      .split(/[^a-z0-9]+/)
+      .filter((word) => word.length >= 3),
+  )
+  const candidates = [...(labels instanceof Set ? labels : new Set(Array.isArray(labels) ? labels : []))]
+    .map((label) => String(label || '').replace(/\s+/g, ' ').trim())
+    .filter((label) => label.length > 0 && label.length <= MAX_MENU_TITLE_LENGTH)
+    .filter((label) => (label.match(/\p{L}/gu) || []).length >= 3)
+    .filter((label) => !GENERIC_MENU_LABEL.test(label))
+    .map((label) => ({
+      label,
+      score: label
+        .toLowerCase()
+        .split(/[^\p{L}\p{N}]+/u)
+        .filter((word) => word.length >= 3 && slugWords.has(word) && !GENERIC_MENU_WORDS.has(word)).length,
+    }))
+    .filter((entry) => entry.score > 0)
+    .sort((a, b) => b.score - a.score || a.label.length - b.label.length || a.label.localeCompare(b.label))
+  return candidates.length > 0 ? candidates[0].label : null
+}
+
+/**
+ * Fills the menu title of a discovered HTML menu that printed no shared card
+ * heading of its own, using the site's own link label for that exact page.
+ * Never overwrites a title the page itself prints, and never renames a section.
+ */
+function applyLinkLabelMenuTitles(menuContexts, labelsByPageKey) {
+  let filled = 0
+  for (const menu of Array.isArray(menuContexts) ? menuContexts : []) {
+    if (!menu || menu.extractionMethod !== 'html') continue
+    if (typeof menu.title === 'string' && menu.title.trim()) continue
+    const labels = labelsByPageKey instanceof Map ? labelsByPageKey.get(sameHostPageKey(menu.sourceUrl)) : null
+    const title = menuTitleFromLinkLabels(labels, menu.sourceUrl)
+    if (!title) continue
+    menu.title = title
+    menu.titleSource = 'link_label'
+    filled += 1
+  }
+  return filled
+}
+
+/**
  * The HTML structure adapter's sections as one menu context. The heading
  * route is kept losslessly (src/lib/menuHierarchy.js): a shared title, a
  * path of any depth per section, the original source route, the source
  * position and locator, and an uncertainty flag — never one flattened name.
  */
-function menuFromHtmlStructure(html, usedSlugs) {
+function menuFromHtmlStructure(html, usedSlugs, report = null) {
   let result
   try {
     result = extractHtmlMenuStructure(html)
   } catch {
     return null
+  }
+  // The refusal reason/limits are reviewable information too: a page that was
+  // read but refused as non-menu content must not look like an empty page.
+  if (report && typeof report === 'object') {
+    report.status = (result && result.status) || 'unparsed'
+    report.reason = (result && result.reason) || null
+    report.injectedBlocksSkipped = (result && result.stats && result.stats.injectedBlocksSkipped) || 0
+    report.contentSuspicion = (result && result.stats && result.stats.contentSuspicion) || null
+    // Price variants (sizes, course counts, glass/bottle) and other multi-price
+    // lines are never flattened to one amount. They are counted so the review
+    // can see exactly what the deterministic context did not store.
+    report.priceVariantLines =
+      ((result && result.stats && result.stats.priceVariantLines) || 0) + ((result && result.stats && result.stats.priceVariantItems) || 0)
+    // A hidden alternative view of the same card that was counted once, and
+    // hidden content kept because it has no visible counterpart. Both are
+    // reviewable facts, never a silent omission (#59 review 6334231310, K3).
+    report.hiddenViewsMerged = (result && result.stats && result.stats.hiddenViewsMerged) || 0
+    report.hiddenUniqueItems = (result && result.stats && result.stats.hiddenUniqueItems) || 0
   }
   if (!result || result.status !== 'parsed') return null
   const kept = result.sections
@@ -111,8 +194,34 @@ function menuFromHtmlStructure(html, usedSlugs) {
       section,
       position,
       items: section.items
-        .filter((item) => item.priceStatus === 'known' && Number.isInteger(item.amountMinorUnits))
-        .map((item) => ({ name: item.name, desc: item.description || null, price: (item.amountMinorUnits / 100).toFixed(2) })),
+        .filter(
+          (item) =>
+            (item.priceStatus === 'known' && Number.isInteger(item.amountMinorUnits)) ||
+            item.priceStatus === 'multiple_undecomposed',
+        )
+        .map((item) => {
+          // A dish with several printed amounts keeps every amount as a named
+          // variant; it is never flattened to one price and never dropped
+          // (criterium 5/8, review 6351417692 K2).
+          const mapped =
+            item.priceStatus === 'multiple_undecomposed'
+              ? { name: item.name, desc: item.description || null, price: null, priceStatus: 'multiple_undecomposed' }
+              : { name: item.name, desc: item.description || null, price: (item.amountMinorUnits / 100).toFixed(2) }
+          if (item.priceStatus === 'multiple_undecomposed') {
+            if (typeof item.priceText === 'string' && item.priceText.trim()) mapped.priceText = item.priceText
+            if (Array.isArray(item.priceVariants)) {
+              mapped.priceVariants = item.priceVariants
+                .filter((variant) => variant && typeof variant.price === 'string')
+                .slice(0, 10)
+                .map((variant) => ({ label: typeof variant.label === 'string' && variant.label.trim() ? variant.label : null, price: variant.price }))
+            }
+          }
+          // Keep the extractor's own locator/pattern/quote with the item: the
+          // review and receipt must be able to point at the exact source line,
+          // not only at the section (#59 Delivery Lead review 6315269210).
+          if (item.evidence && typeof item.evidence === 'object') mapped.evidence = { ...item.evidence }
+          return mapped
+        }),
     }))
     .filter((entry) => entry.items.length > 0)
   const itemCount = kept.reduce((n, entry) => n + entry.items.length, 0)
@@ -126,7 +235,184 @@ function menuFromHtmlStructure(html, usedSlugs) {
   })
   let contextSlug = 'menukaart'
   for (let i = 0; usedSlugs.has(contextSlug); i += 1) contextSlug = `menukaart${String.fromCharCode(97 + (i % 26))}`
-  return { menu: { name: 'Menukaart', contextSlug, title: hierarchy.title, structure: hierarchy.structure, categories }, itemCount }
+  const excludedSections = (Array.isArray(result.excludedSections) ? result.excludedSections : [])
+    .filter((entry) => entry && Array.isArray(entry.path) && entry.path.length > 0)
+    .slice(0, 20)
+    .map((entry) => ({
+      path: entry.path.map((label) => String(label || '').slice(0, 60)),
+      unpricedLines: entry.unpricedLines,
+      // The reason decides the wording: an arrangement with course prices is a
+      // different fact from a section without any readable price (K4).
+      ...(entry.reason === 'service_unit' ? { reason: 'service_unit' } : {}),
+    }))
+  const priceVariantLines = (report && typeof report === 'object' && Number.isInteger(report.priceVariantLines) ? report.priceVariantLines : 0)
+  const hiddenViewsMerged = (report && typeof report === 'object' && Number.isInteger(report.hiddenViewsMerged) ? report.hiddenViewsMerged : 0)
+  const hiddenUniqueItems = (report && typeof report === 'object' && Number.isInteger(report.hiddenUniqueItems) ? report.hiddenUniqueItems : 0)
+  return {
+    menu: {
+      name: 'Menukaart',
+      contextSlug,
+      title: hierarchy.title,
+      structure: hierarchy.structure,
+      categories,
+    },
+    itemCount,
+    excludedSections,
+    priceVariantLines,
+    hiddenViewsMerged,
+    hiddenUniqueItems,
+  }
+}
+
+/**
+ * Honest limitations for recognised headings whose content could not be
+ * stored as dishes (typically an arrangement or choice menu whose prices do
+ * not belong to one dish). Never a guessed item, never silence.
+ */
+function htmlMenuExclusionLimitations(url, found) {
+  const limitations = ((found && found.excludedSections) || []).map((entry) => {
+    const route = entry.path.join(' › ')
+    const lines = entry.unpricedLines
+    // A course/portion price of an arrangement is a different fact from a
+    // section without any readable price: report the real reason (K4).
+    if (entry.reason === 'service_unit') {
+      return `Menukaart ${url}: sectie "${route}" is niet als gerechten opgenomen; ${lines} regel(s) horen bij een arrangement of keuzemenu (prijs per gang of portie) en zijn geen losse gerechten.`
+    }
+    return `Menukaart ${url}: sectie "${route}" is niet als gerechten opgenomen; ${lines} regel(s) zonder herkenbare losse prijs (mogelijk arrangement of keuzemenu).`
+  })
+  // A dish with several prices (sizes, course counts, glass/bottle) keeps every
+  // printed amount as its own variant with the label the source prints; none of
+  // them becomes "the" price. The count stays visible so a review knows which
+  // dishes need a variant check.
+  const variants = found && Number.isInteger(found.priceVariantLines) ? found.priceVariantLines : 0
+  if (variants > 0) {
+    limitations.push(
+      `Menukaart ${url}: ${variants} gerecht(en) met meerdere prijzen (prijsvarianten zoals aantal stuks, gewicht, glas/fles of een basis- en een uitgebreide prijs) zijn als prijsvarianten opgeslagen met het bedrag en het label dat de bron print; geen enkel bedrag is tot één prijs teruggebracht.`,
+    )
+  }
+  // A page may print the same card twice; the hidden copy is counted once when
+  // the visible side provably carries the same priced dishes, and hidden
+  // content without a visible counterpart is kept and reported (K3).
+  const merged = found && Number.isInteger(found.hiddenViewsMerged) ? found.hiddenViewsMerged : 0
+  if (merged > 0) {
+    limitations.push(`Menukaart ${url}: een verborgen tweede weergave van dezelfde kaart is één keer geteld; ${merged} gerecht(en) zijn niet dubbel opgenomen.`)
+  }
+  const hiddenUnique = found && Number.isInteger(found.hiddenUniqueItems) ? found.hiddenUniqueItems : 0
+  if (hiddenUnique > 0) {
+    limitations.push(`Menukaart ${url}: ${hiddenUnique} gerecht(en) staan alleen in een verborgen weergave zonder zichtbare tegenhanger; ze zijn toch opgenomen en vragen controle.`)
+  }
+  return limitations
+}
+
+/** JSON-LD menus from one page, refused as non-menu content when their own
+ * names/sections carry clear spam/injection signals (#59 review
+ * 6316295818). A hijacked page can also inject a schema.org Menu. */
+function jsonLdMenusForPage(menus, url, limitations) {
+  const signals = new Set()
+  for (const menu of Array.isArray(menus) ? menus : []) {
+    for (const category of (menu && Array.isArray(menu.categories) && menu.categories) || []) {
+      for (const signal of spamSignals(category && category.name)) signals.add(signal)
+      for (const item of (category && Array.isArray(category.items) && category.items) || []) {
+        for (const signal of spamSignals(`${(item && item.name) || ''} ${(item && item.desc) || ''}`)) signals.add(signal)
+      }
+    }
+  }
+  if (signals.size < 2) return menus
+  limitations.push(
+    `Inhoud van ${url} is niet als menukaart gebruikt (content_not_menu_suspected): spam-/injectiesignalen (${[...signals].slice(0, 3).join(', ')}).`,
+  )
+  return []
+}
+
+/** Honest limitations for a page the recognizer refused as non-menu content
+ * or where hidden injected text was skipped. Never a guessed menu. */
+function htmlMenuRefusalLimitations(url, report) {
+  if (!report || typeof report !== 'object') return []
+  const limitations = []
+  if (report.reason === 'content_not_menu_suspected') {
+    const signals = report.contentSuspicion && Array.isArray(report.contentSuspicion.signals) ? report.contentSuspicion.signals.slice(0, 3).join(', ') : null
+    limitations.push(
+      `Inhoud van ${url} is niet als menukaart gebruikt (content_not_menu_suspected)${signals ? `: spam-/injectiesignalen (${signals})` : ': duidelijke spam-/injectiesignalen'}.`,
+    )
+  }
+  if (Number.isInteger(report.injectedBlocksSkipped) && report.injectedBlocksSkipped > 0) {
+    limitations.push(`Verborgen geïnjecteerde inhoud op ${url} is niet gelezen (${report.injectedBlocksSkipped} blok(ken) met spam-/injectiesignalen).`)
+  }
+  return limitations
+}
+
+const MENU_IMAGE_URL_PATTERN = /\.(?:jpe?g|png|webp)(?:[?#]|$)/i
+const MENU_MEDIA_HINT = /(?:menu|menukaart|kaart|lunch|diner|dinner|gerechten|spijskaart|food)/i
+const PDF_URL_PATTERN = /\.pdf(?:[?#]|$)/i
+// Narrow: a restaurant saying it is closed for good, never an opening-hours
+// line such as "op zondag gesloten".
+const SOURCE_CLOSURE_PATTERN = /\b(?:deuren\s+(?:definitief\s+)?gesloten|definitief\s+gesloten|permanently\s+closed|heeft\s+[^.]{0,80}deuren\s+gesloten)\b/i
+
+function plainTextOfHtml(html) {
+  return String(html || '')
+    .replace(/<script\b[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style\b[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+/** True when the page itself says the restaurant has closed for good. */
+function sourceClosureSignal(html) {
+  return SOURCE_CLOSURE_PATTERN.test(plainTextOfHtml(html).slice(0, 20000))
+}
+
+/**
+ * What this deterministic, non-AI route cannot read from one already-fetched
+ * page: a menu published only as an image (no OCR configured) or only as a
+ * PDF on another host (outside the approved source scope). Reported per
+ * source, never guessed and never fetched around the boundary.
+ */
+function menuMediaLimitations(html, pageUrl) {
+  const limitations = []
+  let base
+  try {
+    base = new URL(pageUrl)
+  } catch (err) {
+    return limitations
+  }
+  const pageHost = base.hostname.replace(/^www\./i, '').toLowerCase()
+  const images = []
+  for (const match of String(html || '').matchAll(/<img\b[^>]*>/gi)) {
+    const tag = match[0]
+    const src = (tag.match(/(?:src|data-src)\s*=\s*["']([^"']+)["']/i) || [])[1]
+    if (!src || !MENU_IMAGE_URL_PATTERN.test(src)) continue
+    const alt = (tag.match(/alt\s*=\s*["']([^"']*)["']/i) || [])[1] || ''
+    if (!MENU_MEDIA_HINT.test(src) && !MENU_MEDIA_HINT.test(alt)) continue
+    images.push(src)
+  }
+  if (images.length > 0) {
+    limitations.push(
+      `Menukaart lijkt alleen als afbeelding beschikbaar op ${pageUrl} (${images.length} afbeelding(en), o.a. ${String(images[0]).slice(0, 120)}); beeldanalyse/OCR is niet geconfigureerd.`,
+    )
+  }
+  const externalPdfHosts = []
+  for (const anchor of collectAnchors(html, pageUrl)) {
+    if (!PDF_URL_PATTERN.test(anchor.url.pathname)) continue
+    const host = anchor.url.hostname.replace(/^www\./i, '').toLowerCase()
+    if (host !== pageHost && !externalPdfHosts.includes(anchor.url.origin)) externalPdfHosts.push(anchor.url.origin)
+  }
+  if (externalPdfHosts.length > 0) {
+    limitations.push(
+      `Menukaart lijkt alleen als PDF op een andere host beschikbaar (${externalPdfHosts.slice(0, 3).join(', ')}); die is niet opgehaald binnen het bronbereik.`,
+    )
+  }
+  return limitations
+}
+
+/** Records the count (never the content) on the source entry so the quality
+ * gate can treat it as a product gap for exactly that source. */
+function noteHtmlExclusions(sourceInventory, sourceId, found) {
+  const entry = (Array.isArray(sourceInventory) ? sourceInventory : []).find((source) => source && source.id === sourceId)
+  if (!entry) return
+  const count = ((found && found.excludedSections) || []).length
+  if (count > 0) entry.excludedSections = (Number.isInteger(entry.excludedSections) ? entry.excludedSections : 0) + count
 }
 
 /** A plain-language note for a recognised HTML menu. */
@@ -135,6 +421,12 @@ function htmlMenuNote(url, found) {
   return found.menu.structure === 'uncertain'
     ? `${base} De rubriekindeling is onzeker: controleer de bronroute.`
     : `${base} Controleer rubrieken en prijzen.`
+}
+
+/** A plain-language note for a recognized PDF menu, with page coverage. */
+function pdfMenuNote(url, found, pageCount) {
+  const pages = Number.isInteger(pageCount) ? ` (${pageCount} ${pageCount === 1 ? 'pagina' : "pagina's"})` : ''
+  return `Menukaart herkend uit de PDF van ${url}${pages}: ${found.itemCount} gerechten met prijs in ${found.menu.categories.length} rubrieken. Controleer pagina's, rubrieken en prijzen.`
 }
 
 /** A safe, derived signal for a discovered PDF's own review metadata —
@@ -169,10 +461,13 @@ function countWords(text) {
  * omitted, when nothing reliable was found, or when the fallback path
  * ran and has no position data to structure at all).
  */
-async function buildUnknownMenuContext(pdfBytes, sourceUrl) {
+async function readPdfMenuSource(pdfBytes, sourceUrl, sourceId) {
   const result = await extractDigitalPdfTextWithFallback(pdfBytes)
 
   let recognizedSections = []
+  let layout = null
+  let extractionText = result.text
+  let extractionTextTruncated = false
   if (!result.usedFallback) {
     // Structuring is a bonus layered on top of an already-succeeded,
     // structure-aware text extraction — never lets a structuring-
@@ -184,21 +479,302 @@ async function buildUnknownMenuContext(pdfBytes, sourceUrl) {
     // validation/budgets to the exact same bytes.
     try {
       const { pages } = await extractDigitalPdfLines(pdfBytes)
-      recognizedSections = structurePdfLinesIntoMenu(pages).categories
+      const structured = structurePdfLinesIntoMenu(pages)
+      recognizedSections = structured.categories
+      layout = structured.layout
+      // The same lines, page- and column-aware, are the only PDF content a
+      // future model adapter receives. They are bounded and kept out of the
+      // context object, the receipt and every log.
+      const compact = compactPdfLayoutText(pages)
+      extractionText = compact.text
+      extractionTextTruncated = compact.truncated
     } catch {
       recognizedSections = []
+      layout = null
+      extractionText = result.text
     }
   }
 
   return {
-    sourceUrl,
-    extractionMethod: 'pdf_text',
-    pageCount: result.pageCount,
-    wordCount: countWords(result.text),
-    contentHash: computeFieldEvidenceHash(result.text),
-    usedFallback: result.usedFallback,
-    recognizedSections,
+    context: {
+      sourceUrl,
+      ...(typeof sourceId === 'string' && sourceId ? { sourceId } : {}),
+      extractionMethod: 'pdf_text',
+      pageCount: result.pageCount,
+      wordCount: countWords(result.text),
+      contentHash: computeFieldEvidenceHash(result.text),
+      usedFallback: result.usedFallback,
+      recognizedSections,
+      // Counts only — never source text. Persisted with the job so review can
+      // tell "nothing found" apart from "content deliberately not turned into
+      // an ordinary dish" (supplements, prose prices, unknown headings).
+      ...(layout ? { layout: { ...layout, duplicateLayerOffsets: [...layout.duplicateLayerOffsets] } } : {}),
+    },
+    extractionText,
+    extractionTextTruncated,
   }
+}
+
+/**
+ * The one, single place a discovered PDF (a same-host candidate here,
+ * or the entry URL itself in
+ * `app/api/internal/v1/restaurant-analysis-jobs/route.js`'s own PDF-entry
+ * branch) is turned into an `unknownMenuContexts` entry — shared so both
+ * call sites apply the exact same extraction-with-fallback and menu-
+ * structuring logic, never two subtly different copies.
+ *
+ * Rejects with the underlying `PdfExtractionError` exactly like the
+ * plain `extractDigitalPdfText` used to — every caller's existing
+ * catch/note-and-continue handling stays unchanged. On success, always
+ * returns the same shape as before (`sourceUrl`/`extractionMethod`/
+ * `pageCount`/`wordCount`/`contentHash`) plus additive fields:
+ * `usedFallback` (honest signal that the byte-scanning fallback, not
+ * the structure-aware primary parser, produced this text — see
+ * `src/lib/pdfTextExtraction.js`'s own `extractDigitalPdfTextWithFallback`),
+ * `recognizedSections` (this fix's own new deterministic menu
+ * recognition — see `src/lib/pdfMenuStructuring.js` — always `[]`, never
+ * omitted, when nothing reliable was found, or when the fallback path
+ * ran and has no position data to structure at all) and `layout`
+ * (bounded counts of content that was read but not stored as an ordinary
+ * dish). `readPdfMenuSource` additionally returns the bounded extraction
+ * text, which is NEVER put on this context.
+ */
+async function buildUnknownMenuContext(pdfBytes, sourceUrl, sourceId) {
+  const { context } = await readPdfMenuSource(pdfBytes, sourceUrl, sourceId)
+  return context
+}
+
+
+/**
+ * Plain-language, bounded limitations for PDF content that was read but
+ * deliberately not turned into ordinary dishes. Shared by the discovered-PDF
+ * and direct-PDF paths so both report the same facts. Counts only, never
+ * source text.
+ */
+function pdfLayoutLimitations(sourceUrl, layout = {}) {
+  const limitations = []
+  if (Number.isInteger(layout.duplicateLayerItems) && layout.duplicateLayerItems > 0) {
+    limitations.push(`PDF ${sourceUrl}: een tweede, overlappende tekstlaag is genegeerd (${layout.duplicateLayerItems} dubbele tekstregels).`)
+  }
+  if (Number.isInteger(layout.supplementLines) && layout.supplementLines > 0) {
+    const supplementSections = Array.isArray(layout.supplementSections) ? layout.supplementSections : []
+    const where = supplementSections
+      .filter((section) => section && typeof section.heading === 'string' && section.heading.trim())
+      .map((section) => {
+        const pages = Array.isArray(section.pages) && section.pages.length > 0 ? ` p. ${section.pages.join(', ')}` : ''
+        const lines = Number.isInteger(section.lines) ? `, ${section.lines} regel(s)` : ''
+        return `${section.heading}${pages}${lines}`
+      })
+      .join('; ')
+    limitations.push(
+      `PDF ${sourceUrl}: ${layout.supplementLines} supplementregel(s)${where ? ` in ${where}` : ''} zijn niet als gerecht opgenomen; het concept ondersteunt supplementen nog niet.`,
+    )
+  }
+  if (Number.isInteger(layout.arrangementLines) && layout.arrangementLines > 0) {
+    limitations.push(`PDF ${sourceUrl}: ${layout.arrangementLines} arrangement-/keuzeregel(s) zijn niet als gerecht opgenomen; het concept ondersteunt arrangementen nog niet.`)
+  }
+  if (Number.isInteger(layout.ambiguousPriceLines) && layout.ambiguousPriceLines > 0) {
+    limitations.push(`PDF ${sourceUrl}: ${layout.ambiguousPriceLines} regel(s) met een prijs- of hoeveelheidsgetal dat niet eenduidig aan een gerecht is te koppelen, zijn niet als gerecht overgenomen.`)
+  }
+  if (Number.isInteger(layout.unlinkedPriceLines) && layout.unlinkedPriceLines > 0) {
+    limitations.push(`PDF ${sourceUrl}: ${layout.unlinkedPriceLines} prijsregel(s) konden zonder aantoonbare lokale naam-/prijskoppeling niet als gerecht worden opgenomen.`)
+  }
+  if (Number.isInteger(layout.unrecognizedHeadingLines) && layout.unrecognizedHeadingLines > 0) {
+    limitations.push(`PDF ${sourceUrl}: ${layout.unrecognizedHeadingLines} mogelijke rubriekkop(pen) zijn niet herkend en dus niet als rubriek opgeslagen.`)
+  }
+  if (
+    (Number.isInteger(layout.inheritedSectionColumns) && layout.inheritedSectionColumns > 0) ||
+    (Number.isInteger(layout.inheritedSubheadingColumns) && layout.inheritedSubheadingColumns > 0)
+  ) {
+    limitations.push(
+      `PDF ${sourceUrl}: ${layout.inheritedSectionColumns || 0} kolom(men) zonder eigen rubriekkop en ${layout.inheritedSubheadingColumns || 0} merk-/subrubriek(en) zijn als onzekere rubricering overgenomen; controleer de rubriekkoppeling.`,
+    )
+  }
+  if (Number.isInteger(layout.portionLines) && layout.portionLines > 0) {
+    limitations.push(
+      `PDF ${sourceUrl}: ${layout.portionLines} portie-/hoeveelheidsregel(s) zijn niet als los gerecht opgenomen; het concept ondersteunt porties nog niet.`,
+    )
+  }
+  return limitations
+}
+
+/**
+ * Shared provider-neutral extraction step used by both the HTML and the
+ * direct-PDF analysis paths. It runs BEFORE any model call:
+ *   1. assess the deterministic result (quality/coverage gates);
+ *   2. mark exactly the flagged categories "Controle nodig";
+ *   3. refuse a model call for a source that needs constructs the concept
+ *      cannot store (supplements/arrangements) while still allowing repair of
+ *      another source in the same analysis — such output would be discarded;
+ *   4. skip the call entirely when the deterministic result is sufficient;
+ *   5. otherwise use the validated model result only as an explicit,
+ *      source- and version-scoped REPLACEMENT of a flagged deterministic menu,
+ *      never as a silent merge and never as an approval.
+ * Mutates `menuContexts`/`notes`/`limitations` in place and returns
+ * `{ aiExtraction, assessment }`.
+ */
+async function applyProviderNeutralExtraction({
+  menuContexts,
+  unknownMenuContexts,
+  sourceInventory,
+  sourceTexts,
+  notes,
+  limitations,
+  restaurantCandidateFields,
+  structuredExtraction,
+}) {
+  const menus = Array.isArray(menuContexts) ? menuContexts : []
+  const assessment = assessDeterministicMenuQuality({ menus, unknownMenuContexts, sourceInventory })
+  const marked = applyQualityReview(menus, assessment)
+  if (assessment.flags.length > 0) {
+    limitations.push(
+      `Kwaliteitscontrole op de deterministische extractie vraagt aandacht (${assessment.codes.join(', ')}); het resultaat is niet als volledig beoordeeld.`,
+    )
+    if (marked > 0) notes.push(`${marked} rubriek(en) zijn als "Controle nodig" gemarkeerd op basis van de kwaliteitscontrole.`)
+  }
+
+  if (typeof structuredExtraction !== 'function') return { aiExtraction: null, assessment }
+
+  // Product gaps are per source: a supplement/arrangement in one source must
+  // not silence a recoverable defect in another source. Blocked sources keep
+  // their deterministic result, stay "Controle nodig" and keep their own
+  // provenance; they are never sent to the provider (output would be rejected)
+  // and their model output, if any, is never used.
+  const blockedSourceIds = new Set(assessment.blockedSourceIds || [])
+  const blockedStatus = (assessment.sourceStatus || []).filter((entry) => entry.blockedByProductGap)
+  for (const entry of blockedStatus) {
+    const label = entry.sourceId ? `bron ${entry.sourceId}` : 'een bron zonder bron-ID'
+    const url = entry.sourceUrl ? ` (${entry.sourceUrl})` : ''
+    limitations.push(
+      `Geen model-extractie uitgevoerd voor ${label}${url}: de bron bevat supplementen of relaties die het concept nog niet kan opslaan (${entry.flagCodes.join(', ')}). Het deterministische resultaat blijft ongewijzigd, als "Controle nodig" gemarkeerd en niet als volledig beoordeeld.`,
+    )
+  }
+
+  if (menus.length > 0 && assessment.sufficient) {
+    notes.push('Model-extractie overgeslagen: de deterministische extractie voldeed aan de kwaliteitscontrole.')
+    return { aiExtraction: { enabled: true, ok: null, skipped: true, reason: 'deterministic_result_sufficient', quality: assessment.codes }, assessment }
+  }
+
+  const eligibleFlagged = (assessment.sourceStatus || []).filter((entry) => entry.requiresAiExtraction)
+  const unscopedBlocked = assessment.unscopedBlockedByProductGap === true
+  const nothingRecoverable =
+    unscopedBlocked ||
+    (menus.length > 0 && eligibleFlagged.length === 0) ||
+    (menus.length === 0 && blockedSourceIds.size > 0 && eligibleFlagged.length === 0 && (assessment.sourceStatus || []).length > 0 && (assessment.sourceStatus || []).every((entry) => entry.blockedByProductGap))
+  if (nothingRecoverable) {
+    return {
+      aiExtraction: {
+        enabled: false,
+        ok: null,
+        skipped: true,
+        reason: 'unsupported_product_gap',
+        quality: assessment.codes,
+        blockedSources: blockedStatus.map((entry) => ({ sourceId: entry.sourceId, sourceUrl: entry.sourceUrl, codes: entry.flagCodes })),
+      },
+      assessment,
+    }
+  }
+
+  const aiSources = (Array.isArray(sourceInventory) ? sourceInventory : [])
+    .filter((source) => !(source && blockedSourceIds.has(source.id)))
+    .map((source) => ({
+      ...source,
+      ...(sourceTexts && sourceTexts.has(source.id) ? { text: sourceTexts.get(source.id) } : {}),
+    }))
+  let aiExtraction
+  try {
+    aiExtraction = await structuredExtraction({ sources: aiSources, restaurantFields: restaurantCandidateFields })
+  } catch {
+    aiExtraction = { enabled: true, ok: false, reason: 'adapter_failed' }
+  }
+  if (!aiExtraction || aiExtraction.enabled !== true) return { aiExtraction, assessment }
+  aiExtraction = {
+    ...aiExtraction,
+    quality: assessment.codes,
+    ...(blockedStatus.length > 0
+      ? { blockedSources: blockedStatus.map((entry) => ({ sourceId: entry.sourceId, sourceUrl: entry.sourceUrl, codes: entry.flagCodes })) }
+      : {}),
+  }
+
+  if (!aiExtraction.ok || !Array.isArray(aiExtraction.menus) || aiExtraction.menus.length === 0) {
+    limitations.push(`Model-extractie niet gebruikt (${aiExtraction.reason || 'onbekende reden'}).`)
+    return { aiExtraction, assessment }
+  }
+
+  if (menus.length === 0) {
+    const accepted = aiExtraction.menus.filter((menu) => !(menu && blockedSourceIds.has(menu.sourceId)))
+    const rejectedBlocked = aiExtraction.menus.length - accepted.length
+    if (rejectedBlocked > 0) {
+      limitations.push(`${rejectedBlocked} modelmenu('s) voor een bron met een productgat zijn niet gebruikt.`)
+    }
+    if (accepted.length === 0) {
+      return { aiExtraction, assessment }
+    }
+    menus.push(...accepted)
+    notes.push('Aanvullende structurering via de geconfigureerde adapter toegevoegd; menselijke controle blijft nodig.')
+    return { aiExtraction, assessment }
+  }
+
+  // Source-scoped replacement only. A deterministic menu that was not flagged
+  // for this source is kept; a model menu for an unflagged source is not added.
+  const deterministicBySource = new Map()
+  for (const menu of menus) {
+    if (!menu || typeof menu.sourceId !== 'string') continue
+    deterministicBySource.set(menu.sourceId, (deterministicBySource.get(menu.sourceId) || 0) + countMenuItems([menu]))
+  }
+  const flagged = new Set(assessment.flaggedSourceIds)
+  const replaceableBySource = new Map()
+  const rejected = []
+  for (const aiMenu of aiExtraction.menus) {
+    const sourceId = aiMenu && typeof aiMenu.sourceId === 'string' ? aiMenu.sourceId : null
+    if (sourceId && blockedSourceIds.has(sourceId)) {
+      rejected.push({ sourceId, reason: 'source_blocked_by_product_gap' })
+      continue
+    }
+    if (!sourceId || !flagged.has(sourceId)) {
+      rejected.push({ sourceId, reason: 'source_not_flagged' })
+      continue
+    }
+    const gate = aiReplacementGate({ aiMenu, deterministicItemCount: deterministicBySource.get(sourceId) || 0, sourceId })
+    if (!gate.ok) {
+      rejected.push({ sourceId, reason: gate.reason })
+      continue
+    }
+    if (!replaceableBySource.has(sourceId)) replaceableBySource.set(sourceId, [])
+    replaceableBySource.get(sourceId).push({ aiMenu, gate })
+  }
+
+  if (replaceableBySource.size === 0) {
+    limitations.push('Modelresultaat niet gebruikt: geen onderbouwde verbetering voor de gemarkeerde bron(nen).')
+    if (rejected.length > 0) limitations.push(`Modelresultaat niet samengevoegd (${[...new Set(rejected.map((row) => row.reason))].join(', ')}).`)
+    return { aiExtraction, assessment }
+  }
+
+  const replacedSummary = []
+  for (const [sourceId, entries] of replaceableBySource) {
+    const existingCount = deterministicBySource.get(sourceId) || 0
+    for (let i = menus.length - 1; i >= 0; i -= 1) {
+      if (menus[i] && menus[i].sourceId === sourceId) menus.splice(i, 1)
+    }
+    for (const { aiMenu, gate } of entries) {
+      const categories = (Array.isArray(aiMenu.categories) ? aiMenu.categories : []).map((category) => ({ ...category, uncertain: true }))
+      menus.push({
+        ...aiMenu,
+        extractionMethod: 'ai_structured',
+        replacesDeterministic: { sourceId, itemCount: existingCount, qualityFlags: assessment.codes },
+        categories,
+      })
+      replacedSummary.push(`${sourceId}: ${existingCount} → ${gate.itemCount} gerechten`)
+    }
+  }
+  limitations.push(
+    `Model-extractie verving de deterministische uitkomst voor ${replacedSummary.join('; ')} op basis van de kwaliteitscontrole (${assessment.codes.join(', ')}). Het vervangen resultaat is als "Controle nodig" gemarkeerd en niet automatisch goedgekeurd.`,
+  )
+  notes.push('De modeluitkomst is bron- en versiegebonden vervangen; open het resultaat met broncontext en controleer de gemarkeerde rubrieken.')
+  if (rejected.length > 0) {
+    limitations.push(`Niet gebruikt modelresultaat voor andere bron(nen): ${[...new Set(rejected.map((row) => row.reason))].join(', ')}.`)
+  }
+  return { aiExtraction, assessment }
 }
 
 /**
@@ -216,24 +792,52 @@ async function buildUnknownMenuContext(pdfBytes, sourceUrl) {
  * only reads `name`/`contextSlug`/`categories` from each entry, so those
  * additions are inert to the existing, unchanged receipt/promotion path.
  */
-async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCandidate }) {
+async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCandidate, structuredExtraction }) {
   const menuContexts = []
   const unknownMenuContexts = []
   const notes = []
+  const sourceInventory = []
+  const sourceTexts = new Map()
+  const limitations = []
+  let sourceNumber = 0
+
+  function addSource(entry) {
+    sourceNumber += 1
+    const source = { id: `source-${sourceNumber}`, ...entry }
+    sourceInventory.push(source)
+    return source.id
+  }
+
+  // The entry page is a real source even when it yields no menu: the reviewer
+  // must be able to see that it was read (or blocked/failed), not infer it
+  // from free-text notes.
+  const homepageSourceId = addSource({
+    url: homepageUrl,
+    kind: 'html',
+    status: 'read',
+    contentHash: computeFieldEvidenceHash(homepageHtml),
+  })
+  sourceTexts.set(homepageSourceId, homepageHtml)
 
   // 1. Homepage menu structure — BE-18's own extractor, unchanged.
-  for (const menu of extractMenusFromHtml(homepageHtml)) {
-    menuContexts.push({ ...menu, extractionMethod: 'json_ld', sourceUrl: homepageUrl })
+  for (const menu of jsonLdMenusForPage(extractMenusFromHtml(homepageHtml), homepageUrl, limitations)) {
+    menuContexts.push({ ...menu, extractionMethod: 'json_ld', sourceUrl: homepageUrl, sourceId: homepageSourceId })
   }
   // 1b. No JSON-LD menu on the entry page itself: read its already-fetched
   // HTML with the same strict recognizer as a discovered menu page (BE-25),
   // so a menu page entered directly gets the same path. No extra fetch.
   if (menuContexts.length === 0) {
-    const entryHtmlMenu = menuFromHtmlStructure(homepageHtml, new Set())
+    const entryReport = {}
+    const entryHtmlMenu = menuFromHtmlStructure(homepageHtml, new Set(), entryReport)
     if (entryHtmlMenu) {
-      menuContexts.push({ ...entryHtmlMenu.menu, extractionMethod: 'html', sourceUrl: homepageUrl })
+      menuContexts.push({ ...entryHtmlMenu.menu, extractionMethod: 'html', sourceUrl: homepageUrl, sourceId: homepageSourceId })
       notes.push(htmlMenuNote(homepageUrl, entryHtmlMenu))
+      limitations.push(...htmlMenuExclusionLimitations(homepageUrl, entryHtmlMenu))
+      noteHtmlExclusions(sourceInventory, homepageSourceId, entryHtmlMenu)
     }
+    // Reports a refused page (content_not_menu_suspected) and any skipped
+    // injected block, also when the visible menu itself was readable.
+    limitations.push(...htmlMenuRefusalLimitations(homepageUrl, entryReport))
   }
 
   // 2. Homepage field evidence — first source wins per field for the
@@ -261,12 +865,44 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
     recordFieldSighting(fieldName, homepageFieldEvidence[fieldName], homepageUrl)
   }
 
-  // 3. Bounded same-host discovery — at most sameHostDiscovery.js's own
-  // MAX_CANDIDATES links, each fetched at most once, never a second hop
-  // from any of them (this loop never itself calls findSameHostMenuCandidates
-  // again on a candidate's own body).
-  const candidates = findSameHostMenuCandidates(homepageHtml, homepageUrl)
-  for (const candidate of candidates) {
+  // 3. Bounded same-host discovery. MAX_CANDIDATES is the budget for the
+  // whole analysis: at most five candidate fetches beyond the already-fetched
+  // entry page. A discovered page that holds no menu but links to several
+  // same-host menu variants (a "menu hub" such as /menukaart -> /lunch,
+  // /diner, /dranken) may contribute its own links, but only one level deeper
+  // and only while that same budget lasts. Never a second-level hub
+  // expansion, never a cross-host link, never a re-fetch of the entry page.
+  const candidateQueue = findSameHostMenuCandidates(homepageHtml, homepageUrl).map((candidate) => ({ ...candidate, depth: 1 }))
+  const queuedCandidates = new Set(candidateQueue.map((candidate) => candidate.url))
+  // Every link label the site itself uses for a page, keyed by page. A menu
+  // page that prints no shared card heading keeps its own printed structure and
+  // takes its name from this label ("Menukaart diner"), never from a guess.
+  const linkLabelsByPageKey = new Map()
+  const recordLinkLabel = (url, label) => {
+    const text = typeof label === 'string' ? label.replace(/\s+/g, ' ').trim() : ''
+    if (!url || !text) return
+    const key = sameHostPageKey(url)
+    if (!linkLabelsByPageKey.has(key)) linkLabelsByPageKey.set(key, new Set())
+    if (linkLabelsByPageKey.get(key).size < 6) linkLabelsByPageKey.get(key).add(text)
+  }
+  for (const candidate of candidateQueue) recordLinkLabel(candidate.url, candidate.matchedOn)
+  // The entry page's own labels for its same-host pages are evidence too.
+  for (const anchor of collectAnchors(homepageHtml, homepageUrl)) {
+    recordLinkLabel(`${anchor.url.origin}${anchor.url.pathname}`, anchor.visibleText)
+  }
+  const visitedCandidates = new Set()
+  // Every page that was actually read (including redirect targets), so a
+  // second link to the same page never produces a duplicate menu.
+  const readPageKeys = new Set([sameHostPageKey(homepageUrl)])
+  let candidateFetches = 0
+
+  while (candidateQueue.length > 0 && candidateFetches < MAX_CANDIDATES) {
+    const candidate = candidateQueue.shift()
+    if (visitedCandidates.has(candidate.url)) continue
+    if (readPageKeys.has(sameHostPageKey(candidate.url))) continue
+    visitedCandidates.add(candidate.url)
+    candidateFetches += 1
+
     let fetched
     try {
       fetched = await fetchCandidate(candidate.url)
@@ -275,72 +911,212 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
     }
 
     if (!fetched || fetched.status === 'blocked') {
+      addSource({ url: candidate.url, kind: 'other', status: 'blocked', limitation: 'Niet opgehaald: robots.txt of onveilige bron.' })
+      limitations.push(`Niet opgehaald: ${candidate.url} (robots.txt of onveilige bron).`)
       notes.push(`Kon ${candidate.url} niet automatisch raadplegen (robots.txt of een onveilige bron).`)
       continue
     }
     if (fetched.status === 'error') {
+      addSource({ url: candidate.url, kind: 'other', status: 'failed', limitation: 'Ophalen mislukt.' })
+      limitations.push(`Niet gelezen: ${candidate.url} (ophalen mislukt).`)
       notes.push(`Ophalen van ${candidate.url} is mislukt.`)
       continue
     }
 
     if (fetched.status === 'html') {
+      const sourceUrl = fetched.finalUrl || candidate.url
+      const sourceKey = sameHostPageKey(sourceUrl)
+      // A redirect can land on a page this analysis already read under
+      // another URL (a link to `/ramadan` and to `/ramadan-menu/`). Never
+      // record or extract the same page twice.
+      if (readPageKeys.has(sourceKey)) {
+        limitations.push(`Doorgestuurd naar een al gelezen pagina; niet nogmaals verwerkt: ${candidate.url} → ${sourceUrl}.`)
+        continue
+      }
+      readPageKeys.add(sourceKey)
+      const sourceId = addSource({
+        url: sourceUrl,
+        kind: 'html',
+        status: 'read',
+        contentHash: computeFieldEvidenceHash(fetched.body),
+      })
+      sourceTexts.set(sourceId, fetched.body)
+      // The site's own labels for its other same-host pages. A menu page that
+      // prints no shared heading of its own takes its name from this label
+      // ("Menukaart diner"), never from a guess (K2, review 6351417692).
+      for (const anchor of collectAnchors(fetched.body, sourceUrl)) {
+        recordLinkLabel(`${anchor.url.origin}${anchor.url.pathname}`, anchor.visibleText)
+      }
       const existingSlugs = new Set(menuContexts.map((m) => m.contextSlug))
-      const candidateMenus = extractMenusFromHtml(fetched.body)
+      const candidateMenus = jsonLdMenusForPage(extractMenusFromHtml(fetched.body), sourceUrl, limitations)
       for (const menu of candidateMenus) {
         if (existingSlugs.has(menu.contextSlug)) continue
-        menuContexts.push({ ...menu, extractionMethod: 'html', sourceUrl: fetched.finalUrl || candidate.url })
+        menuContexts.push({ ...menu, extractionMethod: 'html', sourceUrl, sourceId })
         existingSlugs.add(menu.contextSlug)
       }
       // No JSON-LD menu on a page a menu link pointed to: read its visible
       // HTML with the deterministic BE-22 structure recognizer (BE-25 fase
       // 2) — only priced dishes in recognised structures, never a guess.
-      const htmlMenu = candidateMenus.length === 0 ? menuFromHtmlStructure(fetched.body, existingSlugs) : null
+      const htmlMenuReport = {}
+      const htmlMenu = candidateMenus.length === 0 ? menuFromHtmlStructure(fetched.body, existingSlugs, htmlMenuReport) : null
+      limitations.push(...htmlMenuRefusalLimitations(sourceUrl, htmlMenuReport))
       if (htmlMenu) {
-        menuContexts.push({ ...htmlMenu.menu, extractionMethod: 'html', sourceUrl: fetched.finalUrl || candidate.url })
+        menuContexts.push({ ...htmlMenu.menu, extractionMethod: 'html', sourceUrl, sourceId })
         existingSlugs.add(htmlMenu.menu.contextSlug)
-        notes.push(htmlMenuNote(fetched.finalUrl || candidate.url, htmlMenu))
+        notes.push(htmlMenuNote(sourceUrl, htmlMenu))
+        limitations.push(...htmlMenuExclusionLimitations(sourceUrl, htmlMenu))
+        noteHtmlExclusions(sourceInventory, sourceId, htmlMenu)
       } else if (candidateMenus.length === 0) {
         // The page was read, but holds no menu this pipeline can read
         // automatically. Name the page for the human reviewer — never a
         // claim that no menu exists, never a guessed menu.
+        limitations.push(`Gelezen zonder automatisch herkende menukaart: ${sourceUrl}.`)
         notes.push(
-          `Mogelijke menupagina gelezen: ${fetched.finalUrl || candidate.url} (link "${String(candidate.matchedOn || '').slice(0, 60)}"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.`
+          `Mogelijke menupagina gelezen: ${sourceUrl} (link "${String(candidate.matchedOn || '').slice(0, 60)}"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.`
         )
+        // Name what this deterministic, non-AI route cannot read: an image
+        // menu, a PDF on another host, or a source that reports its own
+        // closure. Never a guessed menu, never an OCR call.
+        limitations.push(...menuMediaLimitations(fetched.body, sourceUrl))
+        if (sourceClosureSignal(fetched.body)) {
+          limitations.push(`De bron ${sourceUrl} meldt dat het restaurant gesloten is; er is geen menukaart meer opgehaald.`)
+        } else {
+          // A menu overview page (for example /menukaart with tiles for lunch,
+          // diner and drinks) is not itself a menu. Its own same-host menu
+          // links — and, for a CMS category hub, its own labelled child pages
+          // — are relevant follow-up pages, only one level below this page and
+          // only from the shared MAX_CANDIDATES budget.
+          if (candidate.depth === 1) {
+            const keywordLinks = findSameHostMenuCandidates(fetched.body, sourceUrl)
+            const subPageLinks = findSameHostSubPageLinks(fetched.body, sourceUrl)
+            const seenHub = new Set([...visitedCandidates, ...queuedCandidates])
+            const seenHubKeys = new Set([...readPageKeys, ...[...seenHub].map((url) => sameHostPageKey(url))])
+            const hubLinks = []
+            for (const link of [...keywordLinks, ...subPageLinks]) {
+              if (!link || !link.url || seenHub.has(link.url)) continue
+              const key = sameHostPageKey(link.url)
+              if (seenHubKeys.has(key)) continue
+              seenHub.add(link.url)
+              seenHubKeys.add(key)
+              hubLinks.push(link)
+            }
+            // A single same-host PDF menu link is unambiguous enough to follow;
+            // a single HTML link is not (it may be any page).
+            const singlePdf = hubLinks.length === 1 && /\.pdf(?:[?#]|$)/i.test(hubLinks[0].url)
+            if (hubLinks.length >= 2 || singlePdf) {
+              const remaining = MAX_CANDIDATES - candidateFetches
+              for (const link of hubLinks.slice(0, remaining)) {
+                candidateQueue.push({ ...link, depth: candidate.depth + 1 })
+                queuedCandidates.add(link.url)
+              }
+              if (remaining > 0) {
+                notes.push(
+                  `Menukaartpagina ${sourceUrl} is een tussenpagina; ${Math.min(hubLinks.length, remaining)} relevante menulink(s) binnen dezelfde site zijn gevolgd.`
+                )
+              }
+            }
+          }
+        }
       }
       const candidateFieldEvidence = extractRestaurantFieldsWithEvidence(fetched.body)
       for (const fieldName of ALLOWED_FIELD_NAMES) {
-        recordFieldSighting(fieldName, candidateFieldEvidence[fieldName], fetched.finalUrl || candidate.url)
+        recordFieldSighting(fieldName, candidateFieldEvidence[fieldName], sourceUrl)
       }
       continue
     }
 
     if (fetched.status === 'pdf') {
+      const sourceUrl = fetched.finalUrl || candidate.url
+      readPageKeys.add(sameHostPageKey(sourceUrl))
+      const sourceId = addSource({ url: sourceUrl, kind: 'pdf', status: 'read' })
+      const source = sourceInventory[sourceInventory.length - 1]
       try {
         // A digital PDF's plain text is never itself a confidently-named,
-        // structured menu context without AI structuring (disabled today
-        // — see runClaudeStructuringAdapter below) — surfaced instead as
-        // an explicit, reviewer-facing "unknown menu context," per the
-        // ticket's own acceptance criterion for a section the system
-        // found but could not confidently categorize. `recognizedSections`
-        // (see buildUnknownMenuContext's own doc comment) is this fix's
-        // own additive, deterministic layer on top of that: real,
-        // reviewable (name, price) candidates when the PDF's own layout
-        // allows them to be found — never a raw text excerpt (an earlier
-        // version of this module kept a bounded raw preview, which an
-        // independent review correctly flagged: unlike every structured
-        // restaurant field elsewhere in this pipeline, a PDF's own
-        // header/footer could incidentally include something outside the
-        // fixed field allowlist).
-        unknownMenuContexts.push(await buildUnknownMenuContext(fetched.bytes, fetched.finalUrl || candidate.url))
+        // structured menu context without AI structuring (disabled today —
+        // see runClaudeStructuringAdapter below). `recognizedSections` is the
+        // deterministic, reviewable layer: real (name, price) candidates when
+        // the PDF's own layout allows them to be found, never a raw excerpt.
+        // The same sections are ALSO promoted to the canonical menu-context
+        // shape, so receipt, summary, detail and concept cannot disagree about
+        // whether this PDF yielded dishes (the Smelt failure mode).
+        const { context: pdfContext, extractionText, extractionTextTruncated } = await readPdfMenuSource(fetched.bytes, sourceUrl, sourceId)
+        unknownMenuContexts.push(pdfContext)
+        // The bounded, page/column-aware text is what a future model adapter
+        // reads. It stays in memory only: never on the context, the receipt
+        // or a log line.
+        if (extractionText) sourceTexts.set(sourceId, extractionText)
+        Object.assign(source, {
+          pageCount: pdfContext.pageCount,
+          wordCount: pdfContext.wordCount,
+          contentHash: pdfContext.contentHash,
+        })
+        if (pdfContext.usedFallback) {
+          limitations.push(`PDF ${sourceUrl} is alleen via de tekstfallback gelezen; paginastructuur ontbreekt.`)
+        }
+        if (extractionTextTruncated) {
+          limitations.push(`PDF ${sourceUrl} is voor modellezing afgekapt op de veilige tekstlimiet.`)
+        }
+        limitations.push(...pdfLayoutLimitations(sourceUrl, pdfContext.layout || {}))
+        const converted = pdfContextToMenuContext(pdfContext, new Set(menuContexts.map((m) => m.contextSlug)), {
+          sourceId,
+          titleFallback: pdfContext.layout && pdfContext.layout.documentTitle,
+        })
+        if (converted) {
+          menuContexts.push({ ...converted.menu, sourceUrl, sourceId })
+          source.itemCount = converted.itemCount
+          notes.push(pdfMenuNote(sourceUrl, converted, pdfContext.pageCount))
+        } else {
+          limitations.push(`PDF ${sourceUrl} bevat geen betrouwbaar herkenbare gerechten met prijs.`)
+          notes.push(`PDF op ${sourceUrl} is gelezen, maar bevat geen betrouwbaar herkenbare gerechten met prijs.`)
+        }
       } catch (err) {
         // Any failure here — a properly-typed PdfExtractionError, or, as
         // defense in depth, any other unexpected error — is reported as a
         // plain-language note and never re-thrown: one bad candidate PDF
         // must never crash the rest of this analysis.
         const reason = err instanceof PdfExtractionError ? rollUpPdfAdapterErrorReason(err.reason) : 'pdf_extraction_failed'
+        Object.assign(source, { status: 'failed', limitation: `PDF niet leesbaar (${reason}).` })
+        limitations.push(`PDF ${sourceUrl} kon niet worden gelezen (${reason}).`)
         notes.push(`PDF op ${candidate.url} kon niet worden gelezen (${reason}).`)
       }
       continue
+    }
+  }
+
+  // 3a. A discovered menu page that printed no shared card heading of its own
+  // keeps its own section paths and takes its name from the site's own link
+  // label for that page. No route level is added, renamed or flattened.
+  const titlesFromLinks = applyLinkLabelMenuTitles(menuContexts, linkLabelsByPageKey)
+  if (titlesFromLinks > 0) {
+    notes.push(
+      `${titlesFromLinks} menutitel(s) zijn overgenomen uit de linklabels van de site zelf; de pagina's drukken geen eigen kaarttitel en de rubriekpaden zijn ongewijzigd.`,
+    )
+  }
+
+  // 3b. Nothing recognisable anywhere: say so once, per source, and name the
+  // media form this route cannot read (image menu / external PDF) or a
+  // source-reported closure. A read page is never presented as "no menu".
+  if (menuContexts.length === 0 && unknownMenuContexts.length === 0) {
+    limitations.push(`Geen menukaart gevonden op ${homepageUrl} of in de gevolgde menulinks.`)
+    limitations.push(...menuMediaLimitations(homepageHtml, homepageUrl))
+    if (sourceClosureSignal(homepageHtml)) {
+      limitations.push(`De bron ${homepageUrl} meldt dat het restaurant gesloten is; er is geen menukaart meer opgehaald.`)
+    }
+  }
+
+  // 3b. Every accepted item must carry its own locator + supporting passage
+  // (#59 Delivery Lead review 6316295818). The gate refuses what a path lost
+  // and names it, so no consumer can show a "dish" that cannot be pointed at
+  // in the source. This runs before the quality gate and any model call.
+  const evidenceGate = applyItemEvidenceGate(menuContexts)
+  if (evidenceGate.droppedCount > 0) {
+    const perSource = new Map()
+    for (const dropped of evidenceGate.dropped) {
+      const key = dropped.sourceUrl || dropped.sourceId || 'onbekende bron'
+      perSource.set(key, (perSource.get(key) || 0) + 1)
+    }
+    for (const [source, count] of perSource) {
+      limitations.push(`${count} item(s) zonder bronbewijs (locator + ondersteunende passage) zijn niet als gerecht opgenomen: ${source}.`)
     }
   }
 
@@ -401,13 +1177,48 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
   const claudeResult = await runClaudeStructuringAdapter({ homepageHtml, unknownMenuContexts })
   if (!claudeResult.enabled) {
     notes.push('AI-structurering is niet beschikbaar — resultaten zijn beperkt tot deterministische extractie.')
+    limitations.push('AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.')
   }
 
-  return { restaurantCandidateFields, fieldEvidence, menuContexts, unknownMenuContexts, description, notes }
+  // 7. Optional provider-neutral hook. It is absent/disabled by default; a
+  // caller may inject a configured, budget-guarded runtime after the provider
+  // and data-processing decisions. Quality/coverage gates decide whether a
+  // model call is useful at all; a validated result may only replace a
+  // flagged deterministic menu of the SAME source, never merge into it.
+  const { aiExtraction } = await applyProviderNeutralExtraction({
+    menuContexts,
+    unknownMenuContexts,
+    sourceInventory,
+    sourceTexts,
+    notes,
+    limitations,
+    restaurantCandidateFields,
+    structuredExtraction,
+  })
+
+  const extractionResult = buildExtractionResult({
+    sourceInventory,
+    menus: menuContexts,
+    unknownMenuContexts,
+    limitations,
+    notes,
+  })
+  if (aiExtraction && aiExtraction.enabled) {
+    extractionResult.ai = {
+      ok: aiExtraction.ok === true,
+      reason: aiExtraction.reason || null,
+      meta: aiExtraction.meta || null,
+    }
+  }
+
+  return { restaurantCandidateFields, fieldEvidence, menuContexts, unknownMenuContexts, description, notes, sourceInventory, limitations, extractionResult, aiExtraction }
 }
 
 module.exports = {
   countWords,
+  readPdfMenuSource,
   buildUnknownMenuContext,
+  pdfLayoutLimitations,
+  applyProviderNeutralExtraction,
   runRestaurantSourceAnalysis,
 }

@@ -46,6 +46,9 @@ the full notes; nothing listed here was removed.
 | `be-25-batch-analysis-desktop-v2.png` | Future internal `Batchanalyse` under `Werkvoorraad / Bronnen beoordelen`, desktop 1280px, light and dark | `be-25-batch-source-analysis-from-triage.md` | **Leading** visual reference for BE-25 fase 2 (final, fictional `.example` data); the ticket and design reference win. No background worker is implied. |
 | `be-25-batch-analysis-mobile-v2.png` | Same, mobile 390px and 320px, light and dark | `be-25-batch-source-analysis-from-triage.md` | **Leading**, together with the desktop v2 file. |
 | `be-25-batch-analysis-handoff-v2.pdf` | BE-25 handoff: tokens, status role per state, accessibility, per-width rules, design decisions | `be-25-batch-source-analysis-from-triage.md` | Accompanies the two v2 PNGs; recorded PDF exception (`design-reference.md`, "Mockups"). Not a build authorization. |
+| `manual-ai-import-v3.html` | Internal manual AI import v3 (#59 phase 2): the approved three-step flow plus (a) a readable summary before one code block, (b) a paste field that never shows JSON, (c) forgiving code-block extraction with a plain message, (d) a required short reason at "staat niet in de bron"; light and dark, 320/390 px | `planning/specs/tickets/menu-extraction-manual-ai-import.md` (context: issue #59 / PR #60) | **Leading and approved** by the owner on 2026-10-22 (review 6348147293). Replaces v2. Static reference with fictional `.example` data; the spec text wins. |
+| `manual-ai-import-v2.html` | Internal manual AI import v2 (#59 phase 1): one column, three plain-language steps (make the prompt, paste the answer, check and save), per-line "Vraag AI" follow-up prompts, technical details collapsed; light and dark, 320/390 px | `planning/specs/tickets/menu-extraction-manual-ai-import.md` (context: issue #59 / PR #60) | **Vervangen door v3**; kept for history only, not a reference. |
+| `manual-ai-import-v1.html` | Internal manual AI import (#59 phase 1): export the prompt, import the AI JSON with its control result, human review before saving; light and dark, 320/390 px | `planning/specs/tickets/menu-extraction-manual-ai-import.md` (context: issue #59 / PR #60) | **Vervangen door v2, daarna v3**; kept for history only, not a reference. |
 | `be-25-batch-analysis-desktop-v1.png` | Future internal batch source analysis, desktop 1280px, light | `be-25-batch-source-analysis-from-triage.md` | **Superseded by v2**; kept for history only, not a reference. |
 | `be-25-batch-analysis-mobile-v1.png` | Future internal batch source analysis, mobile 390px, light | `be-25-batch-source-analysis-from-triage.md` | **Superseded by v2**; kept for history only, not a reference. |
 | `share-1-dish-sharing-handoff-v1.pdf` | "Deel gerecht" on `/menu/[id]`: share sheet, popover, dish-link context line and mismatch status; desktop and mobile, light and dark | `share-1-dish-sharing-v1.md` | Conceptual implementation reference for the future SHARE-1 build; not a product decision or build authorization on its own (see "Public sharing" below). |
@@ -87,6 +90,22 @@ routes and identifiers unchanged). It keeps the same boundary as v1: no
 background worker, no automatic publication, no implementation before
 `0016`. Its product decisions are recorded in the BE-25 ticket ("Design
 v2 decisions"), which wins.
+
+**Handmatige AI-import (addition, 2026-10-22; v2 the same day, v3 approved).**
+`manual-ai-import-v3.html` is the leading and owner-approved visual reference
+for the hand-built AI import trial in #59
+(`planning/specs/tickets/menu-extraction-manual-ai-import.md`). It keeps the
+three-step, single-column flow of v2 and adds the owner's four decisions of
+2026-10-22 (review 6348147293): the prompt asks first for a short readable
+summary and then for one code block; the paste field never shows JSON and only
+confirms "✓ Antwoord ontvangen: N menukaarten, M gerechten"; pasting is
+forgiving because the app extracts the code block itself and otherwise says
+"Kopieer alleen het codeblok" instead of a technical parse error; and at "staat
+niet in de bron" a short reason is required and stored with the provenance.
+It uses only fictional `.example` data, Kleurtaal v2 tokens and a
+Licht/Donker switch (`#licht` / `#donker` deep links). The spec text and the
+ticket contracts win over the mockup. `manual-ai-import-v2.html` and
+`manual-ai-import-v1.html` are kept for history only.
 
 Not yet in this directory: a PLATFORM-12 coverage dashboard v2 has no
 committed ticket or mockup in the repository yet. When it lands, add it

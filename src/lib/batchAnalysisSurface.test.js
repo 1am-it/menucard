@@ -62,6 +62,19 @@ test('page: never fetches anything but its own internal API; no AI, OCR or exter
   assert.doesNotMatch(PAGE, /openai|anthropic|tesseract|from ['"][^'"]*(ocr|claude)[^'"]*['"]/i);
 });
 
+test('page: an image/scan-only menu keeps its reason and opens the existing Bronnen beoordelen route', () => {
+  assert.match(PAGE, /review_source/);
+  assert.match(PAGE, /\/internal\/source-triage\?restaurant=/);
+  assert.match(PAGE, /reason=image_only/);
+  assert.match(PAGE, /item\.key === 'image_only'/);
+});
+
+test('page: an already confirmed source is reported as such and never as a new confirmation', () => {
+  assert.match(PAGE, /r\.reason === 'already_confirmed'/);
+  assert.match(PAGE, /Deze bron was al bevestigd\. Er is niets dubbel opgeslagen\./);
+  assert.match(PAGE, /r\.reason === 'proposal_rejected'/);
+});
+
 test('styles: Kleurtaal v2 tokens only, 44px targets and no horizontal overflow on mobile, reduced motion respected', () => {
   assert.ok(BTA_CSS.length > 0);
   assert.doesNotMatch(BTA_CSS, /#[0-9a-fA-F]{3,8}\b|rgba?\(/);
@@ -90,7 +103,19 @@ test('routes: internal-only handlers, process route bounded in time, nothing els
   assert.match(PAGE, /onRerun\(item\.url, action\)/);
   const deps = read('src/lib/batchAnalysisRouteDeps.js');
   assert.match(deps, /authenticate: authenticateInternalRequest/);
-  assert.match(deps, /analyze: analyzeSourceUrl/);
+  assert.match(deps, /analyze: \(url\) => analyzeSourceUrl\(url, \{ structuredExtraction \}\)/);
+  assert.match(deps, /disabledMenuExtractionRuntime/);
+});
+
+test('menu review: manual review reopens the exact batch result, and shared uncertainty has a scoped group action', () => {
+  assert.match(PAGE, /batch=\$\{encodeURIComponent\(batchId\)\}&item=\$\{item\.position\}/);
+  assert.match(PAGE, /id=\{`bta-result-\$\{item\.position\}`\}/);
+  assert.match(PAGE, /if \(focusItem !== item\.position\) return[\s\S]*resultRef\.current/);
+  const review = read('app/internal/source-triage/batch/MenuReview.js');
+  assert.match(review, /Gedeelde onzekerheid/);
+  assert.match(review, /Rubriek klopt zo/);
+  assert.match(review, /lost geen ontbrekende prijzen of andere blokkades op/);
+  assert.match(review, /coverage\.status === 'candidate_without_items'/);
 });
 
 test('menu review: control view links to the original menu safely; concept is internal and saved only through its own route', () => {

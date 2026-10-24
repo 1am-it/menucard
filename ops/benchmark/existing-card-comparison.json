@@ -1,0 +1,5629 @@
+{
+  "version": "1.0.0",
+  "issue": 59,
+  "generatedAt": "2026-10-21T13:31:26.829Z",
+  "note": "Read-only live comparison of the four existing #59 cards. Developer evidence, not independent review or browser acceptance. Historical data/menus.json rows are dated observations; missing/extra/price differences are reported per historical menu key and never hidden by an equal count.",
+  "dataExport": {
+    "file": "data/menus.json",
+    "role": "dated historical observation"
+  },
+  "manifest": {
+    "path": "ops/benchmark/existing-card-sources.json",
+    "bytesSha256": "98df21f988cd237e85b2b121d906ee2735ac4f88a2e6650007c67dd737067042"
+  },
+  "references": {
+    "path": "ops/benchmark/existing-card-references.json",
+    "capturedAt": "2026-10-21T12:13:00.735Z"
+  },
+  "authorization": {
+    "decision": "Product Owner 2026-10-21, option 1 (four existing cards plus an unseen set), reference GitHub #59 issuecomment-6315226470; Delivery Lead order review 6315269210.",
+    "reference": "GitHub #59 review 6315269210",
+    "scope": "Public read-only comparison of exactly these four existing-card sources and the menu sub-pages/PDFs that the historical data/menus.json export itself names. No login, CAPTCHA bypass, other restaurant, arbitrary crawl, publication, production write or app-side AI.",
+    "appProviderActivation": false
+  },
+  "summary": [
+    {
+      "id": "wolfslaar",
+      "label": "Restaurant Wolfslaar",
+      "captureStatus": "failed",
+      "sourceVersionMatches": null,
+      "liveItemCount": 0,
+      "liveCategoryCount": 0,
+      "historicalItemCount": 25,
+      "historicalKeys": [
+        "1-lunch",
+        "1-diner"
+      ],
+      "totals": {
+        "historicalItems": 25,
+        "strictMissing": 25,
+        "strictExtra": 0,
+        "strictPriceMismatches": 0,
+        "strictCategoryMismatches": 0,
+        "namePriceMissing": 25,
+        "namePriceExtra": 0,
+        "namePriceMismatches": 0
+      },
+      "probeErrors": [
+        {
+          "url": "https://www.restaurantwolfslaar.com",
+          "error": "request-error"
+        },
+        {
+          "url": "https://www.restaurantwolfslaar.com/nl/menu-lunch",
+          "error": "request-error"
+        },
+        {
+          "url": "https://www.restaurantwolfslaar.com/nl/menu-diner",
+          "error": "request-error"
+        }
+      ],
+      "limitations": 0
+    },
+    {
+      "id": "bardot",
+      "label": "Brasserie Bardot",
+      "captureStatus": "captured",
+      "sourceVersionMatches": null,
+      "liveItemCount": 0,
+      "liveCategoryCount": 0,
+      "historicalItemCount": 111,
+      "historicalKeys": [
+        "6-diner",
+        "6-lunch",
+        "6-borrel",
+        "6-specialiteiten"
+      ],
+      "totals": {
+        "historicalItems": 111,
+        "strictMissing": 111,
+        "strictExtra": 0,
+        "strictPriceMismatches": 0,
+        "strictCategoryMismatches": 0,
+        "namePriceMissing": 111,
+        "namePriceExtra": 0,
+        "namePriceMismatches": 0
+      },
+      "probeErrors": [
+        {
+          "url": "https://www.brasseriebardot.nl",
+          "error": "bad-status"
+        },
+        {
+          "url": "https://www.brasseriebardot.nl/brasserie-bardot/",
+          "error": "bad-status"
+        },
+        {
+          "url": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf",
+          "error": "bad-status"
+        }
+      ],
+      "limitations": 0
+    },
+    {
+      "id": "zuyd",
+      "label": "Restaurant Zuyd",
+      "captureStatus": "captured",
+      "sourceVersionMatches": false,
+      "liveItemCount": 25,
+      "liveCategoryCount": 4,
+      "historicalItemCount": 42,
+      "historicalKeys": [
+        "19-lunch",
+        "19-diner"
+      ],
+      "totals": {
+        "historicalItems": 42,
+        "strictMissing": 33,
+        "strictExtra": 16,
+        "strictPriceMismatches": 0,
+        "strictCategoryMismatches": 9,
+        "namePriceMissing": 29,
+        "namePriceExtra": 12,
+        "namePriceMismatches": 4
+      },
+      "probeErrors": [],
+      "limitations": 2
+    },
+    {
+      "id": "thuis",
+      "label": "T-Huis",
+      "captureStatus": "failed",
+      "sourceVersionMatches": null,
+      "liveItemCount": 0,
+      "liveCategoryCount": 0,
+      "historicalItemCount": 189,
+      "historicalKeys": [
+        "23-lunch",
+        "23-diner",
+        "23-borrel"
+      ],
+      "totals": {
+        "historicalItems": 189,
+        "strictMissing": 189,
+        "strictExtra": 0,
+        "strictPriceMismatches": 0,
+        "strictCategoryMismatches": 0,
+        "namePriceMissing": 189,
+        "namePriceExtra": 0,
+        "namePriceMismatches": 0
+      },
+      "probeErrors": [
+        {
+          "url": "https://t-huis.online",
+          "error": "too-many-redirects"
+        },
+        {
+          "url": "https://t-huis.online/menu/",
+          "error": "too-many-redirects"
+        }
+      ],
+      "limitations": 0
+    }
+  ],
+  "sources": {
+    "wolfslaar": {
+      "id": "wolfslaar",
+      "label": "Restaurant Wolfslaar",
+      "restaurantId": "1",
+      "entryUrl": "https://www.restaurantwolfslaar.com",
+      "captureStatus": "failed",
+      "sourceVersionMatches": null,
+      "probes": [
+        {
+          "url": "https://www.restaurantwolfslaar.com",
+          "pinnedBytesSha256": null,
+          "pinnedCaptureStatus": "failed",
+          "ok": false,
+          "error": "request-error",
+          "httpStatus": null
+        },
+        {
+          "url": "https://www.restaurantwolfslaar.com/nl/menu-lunch",
+          "pinnedBytesSha256": null,
+          "pinnedCaptureStatus": "failed",
+          "ok": false,
+          "error": "request-error",
+          "httpStatus": null
+        },
+        {
+          "url": "https://www.restaurantwolfslaar.com/nl/menu-diner",
+          "pinnedBytesSha256": null,
+          "pinnedCaptureStatus": "failed",
+          "ok": false,
+          "error": "request-error",
+          "httpStatus": null
+        }
+      ],
+      "live": {
+        "menuCount": 0,
+        "itemCount": 0,
+        "categoryCount": 0,
+        "priceStatus": {},
+        "knownWithoutAmount": 0,
+        "evidence": {
+          "itemCount": 0,
+          "withSourceId": 0,
+          "withLocator": 0,
+          "withSupport": 0,
+          "sourceIdPercent": null,
+          "locatorPercent": null,
+          "supportPercent": null,
+          "missingSourceId": [],
+          "missingLocator": [],
+          "missingSupport": []
+        },
+        "menus": []
+      },
+      "historical": {
+        "keys": [
+          "1-lunch",
+          "1-diner"
+        ],
+        "itemCount": 25,
+        "note": "data/menus.json is a dated observation (see each scoped date), not live truth and not ground truth for this source version.",
+        "cards": [
+          {
+            "key": "1-lunch",
+            "name": "Restaurant Wolfslaar",
+            "subtitle": "Lunchkaart",
+            "scraped": "2026-03-25",
+            "historicalSourceUrl": "https://www.restaurantwolfslaar.com/nl/menu-lunch",
+            "historicalItemCount": 3,
+            "liveMatch": "none",
+            "liveMenuCount": 0,
+            "strictComparison": {
+              "label": "1-lunch Lunchkaart",
+              "expectedItems": 3,
+              "actualItems": 0,
+              "matched": 0,
+              "missing": [
+                {
+                  "name": "Business Lunch",
+                  "price": "72.50",
+                  "path": [
+                    "Lunchmenu's"
+                  ]
+                },
+                {
+                  "name": "Lunchmenu 3 Gangen",
+                  "price": "85.00",
+                  "path": [
+                    "Lunchmenu's"
+                  ]
+                },
+                {
+                  "name": "Lunchmenu 4 Gangen",
+                  "price": "95.00",
+                  "path": [
+                    "Lunchmenu's"
+                  ]
+                }
+              ],
+              "extra": [],
+              "priceMismatches": [],
+              "categoryMismatches": [],
+              "duplicates": [],
+              "accounting": {
+                "expected": {
+                  "total": 3,
+                  "matched": 0,
+                  "missing": 3,
+                  "priceMismatch": 0,
+                  "categoryMismatch": 0,
+                  "accounted": 3,
+                  "balanced": true
+                },
+                "actual": {
+                  "total": 0,
+                  "matched": 0,
+                  "extra": 0,
+                  "priceMismatch": 0,
+                  "categoryMismatch": 0,
+                  "accounted": 0,
+                  "balanced": true
+                }
+              }
+            },
+            "namePriceComparison": {
+              "referenceItems": 3,
+              "actualItems": 0,
+              "matched": 0,
+              "missing": [
+                {
+                  "name": "Business Lunch",
+                  "price": "72.50"
+                },
+                {
+                  "name": "Lunchmenu 3 Gangen",
+                  "price": "85.00"
+                },
+                {
+                  "name": "Lunchmenu 4 Gangen",
+                  "price": "95.00"
+                }
+              ],
+              "extra": [],
+              "priceMismatches": [],
+              "balanced": true
+            }
+          },
+          {
+            "key": "1-diner",
+            "name": "Restaurant Wolfslaar",
+            "subtitle": "Dinerkaart",
+            "scraped": "2026-03-25",
+            "historicalSourceUrl": "https://www.restaurantwolfslaar.com/nl/menu-diner",
+            "historicalItemCount": 22,
+            "liveMatch": "none",
+            "liveMenuCount": 0,
+            "strictComparison": {
+              "label": "1-diner Dinerkaart",
+              "expectedItems": 22,
+              "actualItems": 0,
+              "matched": 0,
+              "missing": [
+                {
+                  "name": "Signature Menu",
+                  "price": "130.00",
+                  "path": [
+                    "Signature Menu — Maarten Camps (5 gangen)"
+                  ]
+                },
+                {
+                  "name": "Uitbreiding: Langoustine",
+                  "price": "+€20",
+                  "path": [
+                    "Signature Menu — Maarten Camps (5 gangen)"
+                  ]
+                },
+                {
+                  "name": "Blonde d'Aquitaine Beef",
+                  "price": "26.00",
+                  "path": [
+                    "Voorgerechten"
+                  ]
+                },
+                {
+                  "name": "Pieterman & Royal Belgian Caviar",
+                  "price": "32.00",
+                  "path": [
+                    "Voorgerechten"
+                  ]
+                },
+                {
+                  "name": "Noordzeekrab",
+                  "price": "38.00",
+                  "path": [
+                    "Voorgerechten"
+                  ]
+                },
+                {
+                  "name": "Vichyssoise & Coquille",
+                  "price": "28.00",
+                  "path": [
+                    "Voorgerechten"
+                  ]
+                },
+                {
+                  "name": "Kalfswang",
+                  "price": "36.00",
+                  "path": [
+                    "Voorgerechten"
+                  ]
+                },
+                {
+                  "name": "Royal Belgian Platinum Caviar 30g",
+                  "price": "65.00",
+                  "path": [
+                    "Voorgerechten"
+                  ]
+                },
+                {
+                  "name": "Royal Belgian Platinum Caviar 50g",
+                  "price": "98.00",
+                  "path": [
+                    "Voorgerechten"
+                  ]
+                },
+                {
+                  "name": "Tarbot",
+                  "price": "65.00",
+                  "path": [
+                    "Hoofdgerechten"
+                  ]
+                },
+                {
+                  "name": "Skrei",
+                  "price": "41.00",
+                  "path": [
+                    "Hoofdgerechten"
+                  ]
+                },
+                {
+                  "name": "Dover Sole Meunière",
+                  "price": "69.00",
+                  "path": [
+                    "Hoofdgerechten"
+                  ]
+                },
+                {
+                  "name": "Tournedos",
+                  "price": "52.00",
+                  "path": [
+                    "Hoofdgerechten"
+                  ]
+                },
+                {
+                  "name": "Ree",
+                  "price": "58.00",
+                  "path": [
+                    "Hoofdgerechten"
+                  ]
+                },
+                {
+                  "name": "Beter Leven Kalf",
+                  "price": "54.00",
+                  "path": [
+                    "Hoofdgerechten"
+                  ]
+                },
+                {
+                  "name": "Madeleines",
+                  "price": "10.00",
+                  "path": [
+                    "Desserts"
+                  ]
+                },
+                {
+                  "name": "Nougatine",
+                  "price": "18.00",
+                  "path": [
+                    "Desserts"
+                  ]
+                },
+                {
+                  "name": "Lemon Curd & Heelkruid",
+                  "price": "18.00",
+                  "path": [
+                    "Desserts"
+                  ]
+                },
+                {
+                  "name": "Bloedsinaasappel",
+                  "price": "18.00",
+                  "path": [
+                    "Desserts"
+                  ]
+                },
+                {
+                  "name": "Doyenné du Comice Peer",
+                  "price": "18.00",
+                  "path": [
+                    "Desserts"
+                  ]
+                },
+                {
+                  "name": "Kaaswagen",
+                  "price": "25.00",
+                  "path": [
+                    "Desserts"
+                  ]
+                },
+                {
+                  "name": "Wijnkaart",
+                  "price": "",
+                  "path": [
+                    "Wijnarrangementen"
+                  ]
+                }
+              ],
+              "extra": [],
+              "priceMismatches": [],
+              "categoryMismatches": [],
+              "duplicates": [],
+              "accounting": {
+                "expected": {
+                  "total": 22,
+                  "matched": 0,
+                  "missing": 22,
+                  "priceMismatch": 0,
+                  "categoryMismatch": 0,
+                  "accounted": 22,
+                  "balanced": true
+                },
+                "actual": {
+                  "total": 0,
+                  "matched": 0,
+                  "extra": 0,
+                  "priceMismatch": 0,
+                  "categoryMismatch": 0,
+                  "accounted": 0,
+                  "balanced": true
+                }
+              }
+            },
+            "namePriceComparison": {
+              "referenceItems": 22,
+              "actualItems": 0,
+              "matched": 0,
+              "missing": [
+                {
+                  "name": "Signature Menu",
+                  "price": "130.00"
+                },
+                {
+                  "name": "Uitbreiding: Langoustine",
+                  "price": "+€20"
+                },
+                {
+                  "name": "Blonde d'Aquitaine Beef",
+                  "price": "26.00"
+                },
+                {
+                  "name": "Pieterman & Royal Belgian Caviar",
+                  "price": "32.00"
+                },
+                {
+                  "name": "Noordzeekrab",
+                  "price": "38.00"
+                },
+                {
+                  "name": "Vichyssoise & Coquille",
+                  "price": "28.00"
+                },
+                {
+                  "name": "Kalfswang",
+                  "price": "36.00"
+                },
+                {
+                  "name": "Royal Belgian Platinum Caviar 30g",
+                  "price": "65.00"
+                },
+                {
+                  "name": "Royal Belgian Platinum Caviar 50g",
+                  "price": "98.00"
+                },
+                {
+                  "name": "Tarbot",
+                  "price": "65.00"
+                },
+                {
+                  "name": "Skrei",
+                  "price": "41.00"
+                },
+                {
+                  "name": "Dover Sole Meunière",
+                  "price": "69.00"
+                },
+                {
+                  "name": "Tournedos",
+                  "price": "52.00"
+                },
+                {
+                  "name": "Ree",
+                  "price": "58.00"
+                },
+                {
+                  "name": "Beter Leven Kalf",
+                  "price": "54.00"
+                },
+                {
+                  "name": "Madeleines",
+                  "price": "10.00"
+                },
+                {
+                  "name": "Nougatine",
+                  "price": "18.00"
+                },
+                {
+                  "name": "Lemon Curd & Heelkruid",
+                  "price": "18.00"
+                },
+                {
+                  "name": "Bloedsinaasappel",
+                  "price": "18.00"
+                },
+                {
+                  "name": "Doyenné du Comice Peer",
+                  "price": "18.00"
+                },
+                {
+                  "name": "Kaaswagen",
+                  "price": "25.00"
+                },
+                {
+                  "name": "Wijnkaart",
+                  "price": ""
+                }
+              ],
+              "extra": [],
+              "priceMismatches": [],
+              "balanced": true
+            }
+          }
+        ],
+        "totals": {
+          "historicalItems": 25,
+          "strictMissing": 25,
+          "strictExtra": 0,
+          "strictPriceMismatches": 0,
+          "strictCategoryMismatches": 0,
+          "namePriceMissing": 25,
+          "namePriceExtra": 0,
+          "namePriceMismatches": 0
+        }
+      },
+      "limitations": [],
+      "errors": [
+        {
+          "url": "https://www.restaurantwolfslaar.com",
+          "error": "request-error"
+        },
+        {
+          "url": "https://www.restaurantwolfslaar.com/nl/menu-lunch",
+          "error": "request-error"
+        },
+        {
+          "url": "https://www.restaurantwolfslaar.com/nl/menu-diner",
+          "error": "request-error"
+        }
+      ],
+      "result": "No live menu items were extracted; 3 probe(s) failed. The source is recorded as a limitation, not as a successful menu."
+    },
+    "bardot": {
+      "id": "bardot",
+      "label": "Brasserie Bardot",
+      "restaurantId": "6",
+      "entryUrl": "https://www.brasseriebardot.nl",
+      "captureStatus": "captured",
+      "sourceVersionMatches": null,
+      "probes": [
+        {
+          "url": "https://www.brasseriebardot.nl",
+          "pinnedBytesSha256": "fc058ebee25a78da9929bb924f555ab4930eff1b26dd99db9190cdd3160de7f7",
+          "pinnedCaptureStatus": "captured",
+          "ok": false,
+          "error": "bad-status",
+          "httpStatus": 503
+        },
+        {
+          "url": "https://www.brasseriebardot.nl/brasserie-bardot/",
+          "pinnedBytesSha256": "43139ae295484fa2a8e30d0c4bffb215c2a6a9b4fa0188161920bf8d3193e82a",
+          "pinnedCaptureStatus": "captured",
+          "ok": false,
+          "error": "bad-status",
+          "httpStatus": 503
+        },
+        {
+          "url": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf",
+          "pinnedBytesSha256": "487ba29f4bf8dbeca9de161d5e2a3839ed9cbd0eb6c77ce76ffbd62a6f2a7597",
+          "pinnedCaptureStatus": "captured",
+          "ok": false,
+          "error": "bad-status",
+          "httpStatus": 503
+        }
+      ],
+      "live": {
+        "menuCount": 0,
+        "itemCount": 0,
+        "categoryCount": 0,
+        "priceStatus": {},
+        "knownWithoutAmount": 0,
+        "evidence": {
+          "itemCount": 0,
+          "withSourceId": 0,
+          "withLocator": 0,
+          "withSupport": 0,
+          "sourceIdPercent": null,
+          "locatorPercent": null,
+          "supportPercent": null,
+          "missingSourceId": [],
+          "missingLocator": [],
+          "missingSupport": []
+        },
+        "menus": []
+      },
+      "historical": {
+        "keys": [
+          "6-diner",
+          "6-lunch",
+          "6-borrel",
+          "6-specialiteiten"
+        ],
+        "itemCount": 111,
+        "note": "data/menus.json is a dated observation (see each scoped date), not live truth and not ground truth for this source version.",
+        "cards": [
+          {
+            "key": "6-diner",
+            "name": "Brasserie Bardot",
+            "subtitle": "Dinerkaart",
+            "scraped": "2026-03-25",
+            "historicalSourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf",
+            "historicalItemCount": 29,
+            "liveMatch": "none",
+            "liveMenuCount": 0,
+            "strictComparison": {
+              "label": "6-diner Dinerkaart",
+              "expectedItems": 29,
+              "actualItems": 0,
+              "matched": 0,
+              "missing": [
+                {
+                  "name": "Poussin",
+                  "price": "20.95",
+                  "path": [
+                    "Specialiteiten van Bardot"
+                  ]
+                },
+                {
+                  "name": "Kreeft (pasta)",
+                  "price": "",
+                  "path": [
+                    "Specialiteiten van Bardot"
+                  ]
+                },
+                {
+                  "name": "Chateaubriand (450 gr., om te delen)",
+                  "price": "74.95",
+                  "path": [
+                    "Specialiteiten van Bardot"
+                  ]
+                },
+                {
+                  "name": "Klassieke steak tartaar (90 gr.)",
+                  "price": "15.95",
+                  "path": [
+                    "Voorgerechten"
+                  ]
+                },
+                {
+                  "name": "Klassieke steak tartaar (150 gr.)",
+                  "price": "27.95",
+                  "path": [
+                    "Voorgerechten"
+                  ]
+                },
+                {
+                  "name": "Bisque de homard",
+                  "price": "13.95",
+                  "path": [
+                    "Voorgerechten"
+                  ]
+                },
+                {
+                  "name": "Garnalenkroketten (2 st.)",
+                  "price": "21.95",
+                  "path": [
+                    "Voorgerechten"
+                  ]
+                },
+                {
+                  "name": "Escargots",
+                  "price": "12.95",
+                  "path": [
+                    "Voorgerechten"
+                  ]
+                },
+                {
+                  "name": "Stracciatella",
+                  "price": "16.95",
+                  "path": [
+                    "Voorgerechten"
+                  ]
+                },
+                {
+                  "name": "Gravad lax",
+                  "price": "17.95",
+                  "path": [
+                    "Voorgerechten"
+                  ]
+                },
+                {
+                  "name": "Boudin Noir",
+                  "price": "18.95",
+                  "path": [
+                    "Voorgerechten"
+                  ]
+                },
+                {
+                  "name": "Canard à l'orange",
+                  "price": "24.95",
+                  "path": [
+                    "Hoofdgerechten"
+                  ]
+                },
+                {
+                  "name": "Runderentrecôte (220 gr.)",
+                  "price": "37.95",
+                  "path": [
+                    "Hoofdgerechten"
+                  ]
+                },
+                {
+                  "name": "Tournedos (170 gr.)",
+                  "price": "37.95",
+                  "path": [
+                    "Hoofdgerechten"
+                  ]
+                },
+                {
+                  "name": "Hele dorade van de grill",
+                  "price": "",
+                  "path": [
+                    "Hoofdgerechten"
+                  ]
+                },
+                {
+                  "name": "Kreeft (500/600 gr.)",
+                  "price": "",
+                  "path": [
+                    "Hoofdgerechten"
+                  ]
+                },
+                {
+                  "name": "Zeetong à la meunière",
+                  "price": "",
+                  "path": [
+                    "Hoofdgerechten"
+                  ]
+                },
+                {
+                  "name": "Gnocchi",
+                  "price": "22.95",
+                  "path": [
+                    "Hoofdgerechten"
+                  ]
+                },
+                {
+                  "name": "Desem stokbrood",
+                  "price": "5.95",
+                  "path": [
+                    "Bijgerechten"
+                  ]
+                },
+                {
+                  "name": "Verse frites",
+                  "price": "4.75",
+                  "path": [
+                    "Bijgerechten"
+                  ]
+                },
+                {
+                  "name": "Verse frites (truffel)",
+                  "price": "5.75",
+                  "path": [
+                    "Bijgerechten"
+                  ]
+                },
+                {
+                  "name": "Frisse botersalade",
+                  "price": "5.50",
+                  "path": [
+                    "Bijgerechten"
+                  ]
+                },
+                {
+                  "name": "Seizoensgroenten",
+                  "price": "6.75",
+                  "path": [
+                    "Bijgerechten"
+                  ]
+                },
+                {
+                  "name": "Crème brûlée",
+                  "price": "9.95",
+                  "path": [
+                    "Dessert"
+                  ]
+                },
+                {
+                  "name": "Mousse au chocolat",
+                  "price": "12.95",
+                  "path": [
+                    "Dessert"
+                  ]
+                },
+                {
+                  "name": "Plateau de fromage (3)",
+                  "price": "10.95",
+                  "path": [
+                    "Dessert"
+                  ]
+                },
+                {
+                  "name": "Plateau de fromage (5)",
+                  "price": "15.95",
+                  "path": [
+                    "Dessert"
+                  ]
+                },
+                {
+                  "name": "Café complet",
+                  "price": "13.95",
+                  "path": [
+                    "Dessert"
+                  ]
+                },
+                {
+                  "name": "Chocolade truffels (2)",
+                  "price": "3.75",
+                  "path": [
+                    "Dessert"
+                  ]
+                }
+              ],
+              "extra": [],
+              "priceMismatches": [],
+              "categoryMismatches": [],
+              "duplicates": [],
+              "accounting": {
+                "expected": {
+                  "total": 29,
+                  "matched": 0,
+                  "missing": 29,
+                  "priceMismatch": 0,
+                  "categoryMismatch": 0,
+                  "accounted": 29,
+                  "balanced": true
+                },
+                "actual": {
+                  "total": 0,
+                  "matched": 0,
+                  "extra": 0,
+                  "priceMismatch": 0,
+                  "categoryMismatch": 0,
+                  "accounted": 0,
+                  "balanced": true
+                }
+              }
+            },
+            "namePriceComparison": {
+              "referenceItems": 29,
+              "actualItems": 0,
+              "matched": 0,
+              "missing": [
+                {
+                  "name": "Poussin",
+                  "price": "20.95"
+                },
+                {
+                  "name": "Kreeft (pasta)",
+                  "price": ""
+                },
+                {
+                  "name": "Chateaubriand (450 gr., om te delen)",
+                  "price": "74.95"
+                },
+                {
+                  "name": "Klassieke steak tartaar (90 gr.)",
+                  "price": "15.95"
+                },
+                {
+                  "name": "Klassieke steak tartaar (150 gr.)",
+                  "price": "27.95"
+                },
+                {
+                  "name": "Bisque de homard",
+                  "price": "13.95"
+                },
+                {
+                  "name": "Garnalenkroketten (2 st.)",
+                  "price": "21.95"
+                },
+                {
+                  "name": "Escargots",
+                  "price": "12.95"
+                },
+                {
+                  "name": "Stracciatella",
+                  "price": "16.95"
+                },
+                {
+                  "name": "Gravad lax",
+                  "price": "17.95"
+                },
+                {
+                  "name": "Boudin Noir",
+                  "price": "18.95"
+                },
+                {
+                  "name": "Canard à l'orange",
+                  "price": "24.95"
+                },
+                {
+                  "name": "Runderentrecôte (220 gr.)",
+                  "price": "37.95"
+                },
+                {
+                  "name": "Tournedos (170 gr.)",
+                  "price": "37.95"
+                },
+                {
+                  "name": "Hele dorade van de grill",
+                  "price": ""
+                },
+                {
+                  "name": "Kreeft (500/600 gr.)",
+                  "price": ""
+                },
+                {
+                  "name": "Zeetong à la meunière",
+                  "price": ""
+                },
+                {
+                  "name": "Gnocchi",
+                  "price": "22.95"
+                },
+                {
+                  "name": "Desem stokbrood",
+                  "price": "5.95"
+                },
+                {
+                  "name": "Verse frites",
+                  "price": "4.75"
+                },
+                {
+                  "name": "Verse frites (truffel)",
+                  "price": "5.75"
+                },
+                {
+                  "name": "Frisse botersalade",
+                  "price": "5.50"
+                },
+                {
+                  "name": "Seizoensgroenten",
+                  "price": "6.75"
+                },
+                {
+                  "name": "Crème brûlée",
+                  "price": "9.95"
+                },
+                {
+                  "name": "Mousse au chocolat",
+                  "price": "12.95"
+                },
+                {
+                  "name": "Plateau de fromage (3)",
+                  "price": "10.95"
+                },
+                {
+                  "name": "Plateau de fromage (5)",
+                  "price": "15.95"
+                },
+                {
+                  "name": "Café complet",
+                  "price": "13.95"
+                },
+                {
+                  "name": "Chocolade truffels (2)",
+                  "price": "3.75"
+                }
+              ],
+              "extra": [],
+              "priceMismatches": [],
+              "balanced": true
+            }
+          },
+          {
+            "key": "6-lunch",
+            "name": "Brasserie Bardot",
+            "subtitle": "Lunchkaart",
+            "scraped": "2026-03-24",
+            "historicalSourceUrl": "https://www.brasseriebardot.nl/brasserie-bardot/",
+            "historicalItemCount": 36,
+            "liveMatch": "none",
+            "liveMenuCount": 0,
+            "strictComparison": {
+              "label": "6-lunch Lunchkaart",
+              "expectedItems": 36,
+              "actualItems": 0,
+              "matched": 0,
+              "missing": [
+                {
+                  "name": "Croissant met jam en boter",
+                  "price": "4.75",
+                  "path": [
+                    "Croissant & Gebak"
+                  ]
+                },
+                {
+                  "name": "Pain au chocolat",
+                  "price": "4.75",
+                  "path": [
+                    "Croissant & Gebak"
+                  ]
+                },
+                {
+                  "name": "Appelkruimeltaart (Holkamp)",
+                  "price": "5.75",
+                  "path": [
+                    "Croissant & Gebak"
+                  ]
+                },
+                {
+                  "name": "Cheesecake (Holtkamp)",
+                  "price": "5.75",
+                  "path": [
+                    "Croissant & Gebak"
+                  ]
+                },
+                {
+                  "name": "Hazelnoot karameltaart (Holtkamp)",
+                  "price": "5.75",
+                  "path": [
+                    "Croissant & Gebak"
+                  ]
+                },
+                {
+                  "name": "Verse slagroom",
+                  "price": "0.75",
+                  "path": [
+                    "Croissant & Gebak"
+                  ]
+                },
+                {
+                  "name": "Menu du Midi",
+                  "price": "38.50",
+                  "path": [
+                    "Wisselend Lunchmenu"
+                  ]
+                },
+                {
+                  "name": "Croque Madame",
+                  "price": "10.95",
+                  "path": [
+                    "Lunchgerechten (12:00–15:00)"
+                  ]
+                },
+                {
+                  "name": "Club Classic",
+                  "price": "16.95",
+                  "path": [
+                    "Lunchgerechten (12:00–15:00)"
+                  ]
+                },
+                {
+                  "name": "Club Coppa di Parma",
+                  "price": "16.95",
+                  "path": [
+                    "Lunchgerechten (12:00–15:00)"
+                  ]
+                },
+                {
+                  "name": "Steak tartaar (90 gr.)",
+                  "price": "15.95",
+                  "path": [
+                    "Lunchgerechten (12:00–15:00)"
+                  ]
+                },
+                {
+                  "name": "Steak tartaar (150 gr.)",
+                  "price": "24.95",
+                  "path": [
+                    "Lunchgerechten (12:00–15:00)"
+                  ]
+                },
+                {
+                  "name": "Vol au vent",
+                  "price": "16.95",
+                  "path": [
+                    "Lunchgerechten (12:00–15:00)"
+                  ]
+                },
+                {
+                  "name": "Runderentrecôte (220 gr.)",
+                  "price": "37.95",
+                  "path": [
+                    "Lunchgerechten (12:00–15:00)"
+                  ]
+                },
+                {
+                  "name": "Bisque de homard",
+                  "price": "13.95",
+                  "path": [
+                    "Lunchgerechten (12:00–15:00)"
+                  ]
+                },
+                {
+                  "name": "Vistrio",
+                  "price": "17.95",
+                  "path": [
+                    "Lunchgerechten (12:00–15:00)"
+                  ]
+                },
+                {
+                  "name": "Omelette zalm met truffel",
+                  "price": "16.95",
+                  "path": [
+                    "Lunchgerechten (12:00–15:00)"
+                  ]
+                },
+                {
+                  "name": "Garnalenkroketten (2 st.)",
+                  "price": "21.95",
+                  "path": [
+                    "Lunchgerechten (12:00–15:00)"
+                  ]
+                },
+                {
+                  "name": "Stracciatella",
+                  "price": "16.95",
+                  "path": [
+                    "Lunchgerechten (12:00–15:00)"
+                  ]
+                },
+                {
+                  "name": "Tartelette roquefort",
+                  "price": "17.95",
+                  "path": [
+                    "Lunchgerechten (12:00–15:00)"
+                  ]
+                },
+                {
+                  "name": "Caesar salade",
+                  "price": "16.95",
+                  "path": [
+                    "Lunchgerechten (12:00–15:00)"
+                  ]
+                },
+                {
+                  "name": "Kreeft (500/600 gr.)",
+                  "price": "",
+                  "path": [
+                    "Lunchgerechten (12:00–15:00)"
+                  ]
+                },
+                {
+                  "name": "Zeetong à la meunière",
+                  "price": "",
+                  "path": [
+                    "Lunchgerechten (12:00–15:00)"
+                  ]
+                },
+                {
+                  "name": "Gnocchi",
+                  "price": "22.95",
+                  "path": [
+                    "Lunchgerechten (12:00–15:00)"
+                  ]
+                },
+                {
+                  "name": "Desem stokbrood",
+                  "price": "5.95",
+                  "path": [
+                    "Bijgerechten"
+                  ]
+                },
+                {
+                  "name": "Verse frites",
+                  "price": "4.75",
+                  "path": [
+                    "Bijgerechten"
+                  ]
+                },
+                {
+                  "name": "Verse frites (truffel)",
+                  "price": "5.75",
+                  "path": [
+                    "Bijgerechten"
+                  ]
+                },
+                {
+                  "name": "Frisse botersalade",
+                  "price": "5.75",
+                  "path": [
+                    "Bijgerechten"
+                  ]
+                },
+                {
+                  "name": "Seizoensgroenten",
+                  "price": "6.75",
+                  "path": [
+                    "Bijgerechten"
+                  ]
+                },
+                {
+                  "name": "Café complet",
+                  "price": "13.95",
+                  "path": [
+                    "Dessert"
+                  ]
+                },
+                {
+                  "name": "Crème brûlée",
+                  "price": "9.95",
+                  "path": [
+                    "Dessert"
+                  ]
+                },
+                {
+                  "name": "Plateau de fromage (3)",
+                  "price": "10.95",
+                  "path": [
+                    "Dessert"
+                  ]
+                },
+                {
+                  "name": "Plateau de fromage (5)",
+                  "price": "15.95",
+                  "path": [
+                    "Dessert"
+                  ]
+                },
+                {
+                  "name": "Chocolade truffels (2)",
+                  "price": "3.75",
+                  "path": [
+                    "Dessert"
+                  ]
+                },
+                {
+                  "name": "Café Spécial",
+                  "price": "9.95",
+                  "path": [
+                    "Dessert"
+                  ]
+                },
+                {
+                  "name": "Espresso Martini",
+                  "price": "11.95",
+                  "path": [
+                    "Dessert"
+                  ]
+                }
+              ],
+              "extra": [],
+              "priceMismatches": [],
+              "categoryMismatches": [],
+              "duplicates": [],
+              "accounting": {
+                "expected": {
+                  "total": 36,
+                  "matched": 0,
+                  "missing": 36,
+                  "priceMismatch": 0,
+                  "categoryMismatch": 0,
+                  "accounted": 36,
+                  "balanced": true
+                },
+                "actual": {
+                  "total": 0,
+                  "matched": 0,
+                  "extra": 0,
+                  "priceMismatch": 0,
+                  "categoryMismatch": 0,
+                  "accounted": 0,
+                  "balanced": true
+                }
+              }
+            },
+            "namePriceComparison": {
+              "referenceItems": 36,
+              "actualItems": 0,
+              "matched": 0,
+              "missing": [
+                {
+                  "name": "Croissant met jam en boter",
+                  "price": "4.75"
+                },
+                {
+                  "name": "Pain au chocolat",
+                  "price": "4.75"
+                },
+                {
+                  "name": "Appelkruimeltaart (Holkamp)",
+                  "price": "5.75"
+                },
+                {
+                  "name": "Cheesecake (Holtkamp)",
+                  "price": "5.75"
+                },
+                {
+                  "name": "Hazelnoot karameltaart (Holtkamp)",
+                  "price": "5.75"
+                },
+                {
+                  "name": "Verse slagroom",
+                  "price": "0.75"
+                },
+                {
+                  "name": "Menu du Midi",
+                  "price": "38.50"
+                },
+                {
+                  "name": "Croque Madame",
+                  "price": "10.95"
+                },
+                {
+                  "name": "Club Classic",
+                  "price": "16.95"
+                },
+                {
+                  "name": "Club Coppa di Parma",
+                  "price": "16.95"
+                },
+                {
+                  "name": "Steak tartaar (90 gr.)",
+                  "price": "15.95"
+                },
+                {
+                  "name": "Steak tartaar (150 gr.)",
+                  "price": "24.95"
+                },
+                {
+                  "name": "Vol au vent",
+                  "price": "16.95"
+                },
+                {
+                  "name": "Runderentrecôte (220 gr.)",
+                  "price": "37.95"
+                },
+                {
+                  "name": "Bisque de homard",
+                  "price": "13.95"
+                },
+                {
+                  "name": "Vistrio",
+                  "price": "17.95"
+                },
+                {
+                  "name": "Omelette zalm met truffel",
+                  "price": "16.95"
+                },
+                {
+                  "name": "Garnalenkroketten (2 st.)",
+                  "price": "21.95"
+                },
+                {
+                  "name": "Stracciatella",
+                  "price": "16.95"
+                },
+                {
+                  "name": "Tartelette roquefort",
+                  "price": "17.95"
+                },
+                {
+                  "name": "Caesar salade",
+                  "price": "16.95"
+                },
+                {
+                  "name": "Kreeft (500/600 gr.)",
+                  "price": ""
+                },
+                {
+                  "name": "Zeetong à la meunière",
+                  "price": ""
+                },
+                {
+                  "name": "Gnocchi",
+                  "price": "22.95"
+                },
+                {
+                  "name": "Desem stokbrood",
+                  "price": "5.95"
+                },
+                {
+                  "name": "Verse frites",
+                  "price": "4.75"
+                },
+                {
+                  "name": "Verse frites (truffel)",
+                  "price": "5.75"
+                },
+                {
+                  "name": "Frisse botersalade",
+                  "price": "5.75"
+                },
+                {
+                  "name": "Seizoensgroenten",
+                  "price": "6.75"
+                },
+                {
+                  "name": "Café complet",
+                  "price": "13.95"
+                },
+                {
+                  "name": "Crème brûlée",
+                  "price": "9.95"
+                },
+                {
+                  "name": "Plateau de fromage (3)",
+                  "price": "10.95"
+                },
+                {
+                  "name": "Plateau de fromage (5)",
+                  "price": "15.95"
+                },
+                {
+                  "name": "Chocolade truffels (2)",
+                  "price": "3.75"
+                },
+                {
+                  "name": "Café Spécial",
+                  "price": "9.95"
+                },
+                {
+                  "name": "Espresso Martini",
+                  "price": "11.95"
+                }
+              ],
+              "extra": [],
+              "priceMismatches": [],
+              "balanced": true
+            }
+          },
+          {
+            "key": "6-borrel",
+            "name": "Brasserie Bardot",
+            "subtitle": "Borrelkaart",
+            "scraped": "2026-03-25",
+            "historicalSourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf",
+            "historicalItemCount": 43,
+            "liveMatch": "none",
+            "liveMenuCount": 0,
+            "strictComparison": {
+              "label": "6-borrel Borrelkaart",
+              "expectedItems": 43,
+              "actualItems": 0,
+              "matched": 0,
+              "missing": [
+                {
+                  "name": "Oesters naturel",
+                  "price": "4.00",
+                  "path": [
+                    "Klassieke Borrelhappen"
+                  ]
+                },
+                {
+                  "name": "Pata Negra (70 gr.)",
+                  "price": "21.95",
+                  "path": [
+                    "Klassieke Borrelhappen"
+                  ]
+                },
+                {
+                  "name": "Paté en croûte",
+                  "price": "16.95",
+                  "path": [
+                    "Klassieke Borrelhappen"
+                  ]
+                },
+                {
+                  "name": "Charcuterie",
+                  "price": "16.95",
+                  "path": [
+                    "Klassieke Borrelhappen"
+                  ]
+                },
+                {
+                  "name": "Paling (2 st.)",
+                  "price": "13.95",
+                  "path": [
+                    "Klassieke Borrelhappen"
+                  ]
+                },
+                {
+                  "name": "Kaviaar Osietra 10 gr.",
+                  "price": "35.00",
+                  "path": [
+                    "Klassieke Borrelhappen"
+                  ]
+                },
+                {
+                  "name": "Koffie",
+                  "price": "3.20",
+                  "path": [
+                    "Dranken — Koffie & Thee"
+                  ]
+                },
+                {
+                  "name": "Espresso",
+                  "price": "3.20",
+                  "path": [
+                    "Dranken — Koffie & Thee"
+                  ]
+                },
+                {
+                  "name": "Dubbele espresso",
+                  "price": "4.50",
+                  "path": [
+                    "Dranken — Koffie & Thee"
+                  ]
+                },
+                {
+                  "name": "Espresso Macchiato",
+                  "price": "3.65",
+                  "path": [
+                    "Dranken — Koffie & Thee"
+                  ]
+                },
+                {
+                  "name": "Cappuccino",
+                  "price": "3.75",
+                  "path": [
+                    "Dranken — Koffie & Thee"
+                  ]
+                },
+                {
+                  "name": "Flat White",
+                  "price": "4.75",
+                  "path": [
+                    "Dranken — Koffie & Thee"
+                  ]
+                },
+                {
+                  "name": "Latte Macchiato",
+                  "price": "4.20",
+                  "path": [
+                    "Dranken — Koffie & Thee"
+                  ]
+                },
+                {
+                  "name": "Warme Chocomel",
+                  "price": "3.50",
+                  "path": [
+                    "Dranken — Koffie & Thee"
+                  ]
+                },
+                {
+                  "name": "Thee",
+                  "price": "3.00",
+                  "path": [
+                    "Dranken — Koffie & Thee"
+                  ]
+                },
+                {
+                  "name": "Verse Muntthee",
+                  "price": "4.00",
+                  "path": [
+                    "Dranken — Koffie & Thee"
+                  ]
+                },
+                {
+                  "name": "Verse Gemberthee",
+                  "price": "4.00",
+                  "path": [
+                    "Dranken — Koffie & Thee"
+                  ]
+                },
+                {
+                  "name": "Mimosa",
+                  "price": "7.75",
+                  "path": [
+                    "Dranken — Cocktails & Mix"
+                  ]
+                },
+                {
+                  "name": "Aperol Spritz",
+                  "price": "9.75",
+                  "path": [
+                    "Dranken — Cocktails & Mix"
+                  ]
+                },
+                {
+                  "name": "Limoncello Spritz",
+                  "price": "9.75",
+                  "path": [
+                    "Dranken — Cocktails & Mix"
+                  ]
+                },
+                {
+                  "name": "Espresso Martini",
+                  "price": "11.75",
+                  "path": [
+                    "Dranken — Cocktails & Mix"
+                  ]
+                },
+                {
+                  "name": "Pornstar Martini",
+                  "price": "11.75",
+                  "path": [
+                    "Dranken — Cocktails & Mix"
+                  ]
+                },
+                {
+                  "name": "Moscow Mule",
+                  "price": "9.75",
+                  "path": [
+                    "Dranken — Cocktails & Mix"
+                  ]
+                },
+                {
+                  "name": "Amaretto Sour",
+                  "price": "10.75",
+                  "path": [
+                    "Dranken — Cocktails & Mix"
+                  ]
+                },
+                {
+                  "name": "Whisky Sour",
+                  "price": "11.75",
+                  "path": [
+                    "Dranken — Cocktails & Mix"
+                  ]
+                },
+                {
+                  "name": "Negroni",
+                  "price": "9.75",
+                  "path": [
+                    "Dranken — Cocktails & Mix"
+                  ]
+                },
+                {
+                  "name": "Hendrick's G&T",
+                  "price": "11.75",
+                  "path": [
+                    "Dranken — Cocktails & Mix"
+                  ]
+                },
+                {
+                  "name": "Copperhead G&T",
+                  "price": "12.75",
+                  "path": [
+                    "Dranken — Cocktails & Mix"
+                  ]
+                },
+                {
+                  "name": "Hertog Jan (tap)",
+                  "price": "v.a.€4.00",
+                  "path": [
+                    "Dranken — Bier"
+                  ]
+                },
+                {
+                  "name": "Hertog Jan Weizener",
+                  "price": "5.25",
+                  "path": [
+                    "Dranken — Bier"
+                  ]
+                },
+                {
+                  "name": "Stella Artois",
+                  "price": "4.30",
+                  "path": [
+                    "Dranken — Bier"
+                  ]
+                },
+                {
+                  "name": "Leffe Blond",
+                  "price": "5.75",
+                  "path": [
+                    "Dranken — Bier"
+                  ]
+                },
+                {
+                  "name": "Leffe Bruin",
+                  "price": "5.25",
+                  "path": [
+                    "Dranken — Bier"
+                  ]
+                },
+                {
+                  "name": "Vedett Extra White",
+                  "price": "5.75",
+                  "path": [
+                    "Dranken — Bier"
+                  ]
+                },
+                {
+                  "name": "Hertog Jan Tripel",
+                  "price": "6.00",
+                  "path": [
+                    "Dranken — Bier"
+                  ]
+                },
+                {
+                  "name": "Tripel Karmeliet",
+                  "price": "6.00",
+                  "path": [
+                    "Dranken — Bier"
+                  ]
+                },
+                {
+                  "name": "Juice Punch NEIPA",
+                  "price": "6.50",
+                  "path": [
+                    "Dranken — Bier"
+                  ]
+                },
+                {
+                  "name": "Duvel",
+                  "price": "6.50",
+                  "path": [
+                    "Dranken — Bier"
+                  ]
+                },
+                {
+                  "name": "Hoegaarden Radler",
+                  "price": "5.00",
+                  "path": [
+                    "Dranken — Bier"
+                  ]
+                },
+                {
+                  "name": "Liefmans Fruitesse",
+                  "price": "5.50",
+                  "path": [
+                    "Dranken — Bier"
+                  ]
+                },
+                {
+                  "name": "Hoegaarden Radler 0.0%",
+                  "price": "4.25",
+                  "path": [
+                    "Dranken — Bier"
+                  ]
+                },
+                {
+                  "name": "Leffe Blond 0.0%",
+                  "price": "5.25",
+                  "path": [
+                    "Dranken — Bier"
+                  ]
+                },
+                {
+                  "name": "Hertog Jan 0.0%",
+                  "price": "3.85",
+                  "path": [
+                    "Dranken — Bier"
+                  ]
+                }
+              ],
+              "extra": [],
+              "priceMismatches": [],
+              "categoryMismatches": [],
+              "duplicates": [],
+              "accounting": {
+                "expected": {
+                  "total": 43,
+                  "matched": 0,
+                  "missing": 43,
+                  "priceMismatch": 0,
+                  "categoryMismatch": 0,
+                  "accounted": 43,
+                  "balanced": true
+                },
+                "actual": {
+                  "total": 0,
+                  "matched": 0,
+                  "extra": 0,
+                  "priceMismatch": 0,
+                  "categoryMismatch": 0,
+                  "accounted": 0,
+                  "balanced": true
+                }
+              }
+            },
+            "namePriceComparison": {
+              "referenceItems": 43,
+              "actualItems": 0,
+              "matched": 0,
+              "missing": [
+                {
+                  "name": "Oesters naturel",
+                  "price": "4.00"
+                },
+                {
+                  "name": "Pata Negra (70 gr.)",
+                  "price": "21.95"
+                },
+                {
+                  "name": "Paté en croûte",
+                  "price": "16.95"
+                },
+                {
+                  "name": "Charcuterie",
+                  "price": "16.95"
+                },
+                {
+                  "name": "Paling (2 st.)",
+                  "price": "13.95"
+                },
+                {
+                  "name": "Kaviaar Osietra 10 gr.",
+                  "price": "35.00"
+                },
+                {
+                  "name": "Koffie",
+                  "price": "3.20"
+                },
+                {
+                  "name": "Espresso",
+                  "price": "3.20"
+                },
+                {
+                  "name": "Dubbele espresso",
+                  "price": "4.50"
+                },
+                {
+                  "name": "Espresso Macchiato",
+                  "price": "3.65"
+                },
+                {
+                  "name": "Cappuccino",
+                  "price": "3.75"
+                },
+                {
+                  "name": "Flat White",
+                  "price": "4.75"
+                },
+                {
+                  "name": "Latte Macchiato",
+                  "price": "4.20"
+                },
+                {
+                  "name": "Warme Chocomel",
+                  "price": "3.50"
+                },
+                {
+                  "name": "Thee",
+                  "price": "3.00"
+                },
+                {
+                  "name": "Verse Muntthee",
+                  "price": "4.00"
+                },
+                {
+                  "name": "Verse Gemberthee",
+                  "price": "4.00"
+                },
+                {
+                  "name": "Mimosa",
+                  "price": "7.75"
+                },
+                {
+                  "name": "Aperol Spritz",
+                  "price": "9.75"
+                },
+                {
+                  "name": "Limoncello Spritz",
+                  "price": "9.75"
+                },
+                {
+                  "name": "Espresso Martini",
+                  "price": "11.75"
+                },
+                {
+                  "name": "Pornstar Martini",
+                  "price": "11.75"
+                },
+                {
+                  "name": "Moscow Mule",
+                  "price": "9.75"
+                },
+                {
+                  "name": "Amaretto Sour",
+                  "price": "10.75"
+                },
+                {
+                  "name": "Whisky Sour",
+                  "price": "11.75"
+                },
+                {
+                  "name": "Negroni",
+                  "price": "9.75"
+                },
+                {
+                  "name": "Hendrick's G&T",
+                  "price": "11.75"
+                },
+                {
+                  "name": "Copperhead G&T",
+                  "price": "12.75"
+                },
+                {
+                  "name": "Hertog Jan (tap)",
+                  "price": "v.a.€4.00"
+                },
+                {
+                  "name": "Hertog Jan Weizener",
+                  "price": "5.25"
+                },
+                {
+                  "name": "Stella Artois",
+                  "price": "4.30"
+                },
+                {
+                  "name": "Leffe Blond",
+                  "price": "5.75"
+                },
+                {
+                  "name": "Leffe Bruin",
+                  "price": "5.25"
+                },
+                {
+                  "name": "Vedett Extra White",
+                  "price": "5.75"
+                },
+                {
+                  "name": "Hertog Jan Tripel",
+                  "price": "6.00"
+                },
+                {
+                  "name": "Tripel Karmeliet",
+                  "price": "6.00"
+                },
+                {
+                  "name": "Juice Punch NEIPA",
+                  "price": "6.50"
+                },
+                {
+                  "name": "Duvel",
+                  "price": "6.50"
+                },
+                {
+                  "name": "Hoegaarden Radler",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Liefmans Fruitesse",
+                  "price": "5.50"
+                },
+                {
+                  "name": "Hoegaarden Radler 0.0%",
+                  "price": "4.25"
+                },
+                {
+                  "name": "Leffe Blond 0.0%",
+                  "price": "5.25"
+                },
+                {
+                  "name": "Hertog Jan 0.0%",
+                  "price": "3.85"
+                }
+              ],
+              "extra": [],
+              "priceMismatches": [],
+              "balanced": true
+            }
+          },
+          {
+            "key": "6-specialiteiten",
+            "name": "Brasserie Bardot",
+            "subtitle": "Specialiteiten",
+            "scraped": "2026-03-25",
+            "historicalSourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf",
+            "historicalItemCount": 3,
+            "liveMatch": "none",
+            "liveMenuCount": 0,
+            "strictComparison": {
+              "label": "6-specialiteiten Specialiteiten",
+              "expectedItems": 3,
+              "actualItems": 0,
+              "matched": 0,
+              "missing": [
+                {
+                  "name": "Poussin",
+                  "price": "20.95",
+                  "path": [
+                    "Specialiteiten van Bardot"
+                  ]
+                },
+                {
+                  "name": "Kreeft (pasta)",
+                  "price": "",
+                  "path": [
+                    "Specialiteiten van Bardot"
+                  ]
+                },
+                {
+                  "name": "Chateaubriand (450 gr., om te delen)",
+                  "price": "74.95",
+                  "path": [
+                    "Specialiteiten van Bardot"
+                  ]
+                }
+              ],
+              "extra": [],
+              "priceMismatches": [],
+              "categoryMismatches": [],
+              "duplicates": [],
+              "accounting": {
+                "expected": {
+                  "total": 3,
+                  "matched": 0,
+                  "missing": 3,
+                  "priceMismatch": 0,
+                  "categoryMismatch": 0,
+                  "accounted": 3,
+                  "balanced": true
+                },
+                "actual": {
+                  "total": 0,
+                  "matched": 0,
+                  "extra": 0,
+                  "priceMismatch": 0,
+                  "categoryMismatch": 0,
+                  "accounted": 0,
+                  "balanced": true
+                }
+              }
+            },
+            "namePriceComparison": {
+              "referenceItems": 3,
+              "actualItems": 0,
+              "matched": 0,
+              "missing": [
+                {
+                  "name": "Poussin",
+                  "price": "20.95"
+                },
+                {
+                  "name": "Kreeft (pasta)",
+                  "price": ""
+                },
+                {
+                  "name": "Chateaubriand (450 gr., om te delen)",
+                  "price": "74.95"
+                }
+              ],
+              "extra": [],
+              "priceMismatches": [],
+              "balanced": true
+            }
+          }
+        ],
+        "totals": {
+          "historicalItems": 111,
+          "strictMissing": 111,
+          "strictExtra": 0,
+          "strictPriceMismatches": 0,
+          "strictCategoryMismatches": 0,
+          "namePriceMissing": 111,
+          "namePriceExtra": 0,
+          "namePriceMismatches": 0
+        }
+      },
+      "limitations": [],
+      "errors": [
+        {
+          "url": "https://www.brasseriebardot.nl",
+          "error": "bad-status"
+        },
+        {
+          "url": "https://www.brasseriebardot.nl/brasserie-bardot/",
+          "error": "bad-status"
+        },
+        {
+          "url": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf",
+          "error": "bad-status"
+        }
+      ],
+      "result": "No live menu items were extracted; 3 probe(s) failed. The source is recorded as a limitation, not as a successful menu."
+    },
+    "zuyd": {
+      "id": "zuyd",
+      "label": "Restaurant Zuyd",
+      "restaurantId": "19",
+      "entryUrl": "https://www.restaurantzuyd.nl",
+      "captureStatus": "captured",
+      "sourceVersionMatches": false,
+      "probes": [
+        {
+          "url": "https://www.restaurantzuyd.nl",
+          "pinnedBytesSha256": "427eb7d66f02239f6b02dcc86a50dc82c8db59c071a8abe5ec5ba3f22bf3197e",
+          "pinnedCaptureStatus": "captured",
+          "ok": true,
+          "finalUrl": "https://www.restaurantzuyd.nl/",
+          "contentType": "text/html",
+          "bytes": 6231,
+          "bytesSha256": "68eef94152aafab2c206831a62c2cf8923f8819dd5917c84394ef54cff136417",
+          "sourceVersionMatches": false,
+          "limitations": [
+            "Gelezen zonder automatisch herkende menukaart: https://www.restaurantzuyd.nl/kerstmenu.",
+            "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+          ],
+          "notes": [
+            "Menukaart herkend uit de HTML van https://www.restaurantzuyd.nl/lunch: 13 gerechten met prijs in 2 rubrieken. Controleer rubrieken en prijzen.",
+            "Menukaart herkend uit de HTML van https://www.restaurantzuyd.nl/diner: 12 gerechten met prijs in 2 rubrieken. Controleer rubrieken en prijzen.",
+            "Mogelijke menupagina gelezen: https://www.restaurantzuyd.nl/kerstmenu (link \"Kerstmenu\"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.",
+            "AI-structurering is niet beschikbaar — resultaten zijn beperkt tot deterministische extractie."
+          ],
+          "sourceInventory": [
+            {
+              "url": "https://www.restaurantzuyd.nl/",
+              "kind": "html",
+              "status": "read",
+              "itemCount": null,
+              "pageCount": null,
+              "wordCount": null,
+              "contentHash": "e683d168bbb5bda937ebc0a630c0a6394caa3999201dd091355c2a4b09533498",
+              "excludedSections": null
+            },
+            {
+              "url": "https://www.restaurantzuyd.nl/lunch",
+              "kind": "html",
+              "status": "read",
+              "itemCount": null,
+              "pageCount": null,
+              "wordCount": null,
+              "contentHash": "5b5d974b61ef8e50dcb25389db728e98b09e99b184915703db680049bb661050",
+              "excludedSections": null
+            },
+            {
+              "url": "https://www.restaurantzuyd.nl/diner",
+              "kind": "html",
+              "status": "read",
+              "itemCount": null,
+              "pageCount": null,
+              "wordCount": null,
+              "contentHash": "a3e17b04dba7bfbe9178e595d8f2175cf223e78523a5328f5100a19625700128",
+              "excludedSections": null
+            },
+            {
+              "url": "https://www.restaurantzuyd.nl/kerstmenu",
+              "kind": "html",
+              "status": "read",
+              "itemCount": null,
+              "pageCount": null,
+              "wordCount": null,
+              "contentHash": "2bfaf63e7814766e57eb3e71619dd8f9eba73b4960c73b96295808430a48b789",
+              "excludedSections": null
+            }
+          ]
+        },
+        {
+          "url": "https://www.restaurantzuyd.nl/lunch",
+          "pinnedBytesSha256": "94aaa5716cc325e0c86a342d7f8a7dd679bc2a326962a86fd7a349eb15594063",
+          "pinnedCaptureStatus": "captured",
+          "ok": true,
+          "finalUrl": "https://www.restaurantzuyd.nl/lunch",
+          "contentType": "text/html",
+          "bytes": 9885,
+          "bytesSha256": "1f8674a89969b99298824bbd603d298d58f91a7c39f79fcaa1eb9578f2da476a",
+          "sourceVersionMatches": false,
+          "limitations": [
+            "Gelezen zonder automatisch herkende menukaart: https://www.restaurantzuyd.nl/kerstmenu.",
+            "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+          ],
+          "notes": [
+            "Menukaart herkend uit de HTML van https://www.restaurantzuyd.nl/lunch: 13 gerechten met prijs in 2 rubrieken. Controleer rubrieken en prijzen.",
+            "Menukaart herkend uit de HTML van https://www.restaurantzuyd.nl/diner: 12 gerechten met prijs in 2 rubrieken. Controleer rubrieken en prijzen.",
+            "Mogelijke menupagina gelezen: https://www.restaurantzuyd.nl/kerstmenu (link \"Kerstmenu\"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.",
+            "AI-structurering is niet beschikbaar — resultaten zijn beperkt tot deterministische extractie."
+          ],
+          "sourceInventory": [
+            {
+              "url": "https://www.restaurantzuyd.nl/lunch",
+              "kind": "html",
+              "status": "read",
+              "itemCount": null,
+              "pageCount": null,
+              "wordCount": null,
+              "contentHash": "f2b4cb7186081186097e0651d911691e3b56ea0ba46584628606a521d79bc059",
+              "excludedSections": null
+            },
+            {
+              "url": "https://www.restaurantzuyd.nl/diner",
+              "kind": "html",
+              "status": "read",
+              "itemCount": null,
+              "pageCount": null,
+              "wordCount": null,
+              "contentHash": "5178a136104754bb92705e01531e4f4b9d65325d44faa3d493ea46d1830e6c8c",
+              "excludedSections": null
+            },
+            {
+              "url": "https://www.restaurantzuyd.nl/kerstmenu",
+              "kind": "html",
+              "status": "read",
+              "itemCount": null,
+              "pageCount": null,
+              "wordCount": null,
+              "contentHash": "2bfaf63e7814766e57eb3e71619dd8f9eba73b4960c73b96295808430a48b789",
+              "excludedSections": null
+            }
+          ]
+        },
+        {
+          "url": "https://www.restaurantzuyd.nl/diner",
+          "pinnedBytesSha256": "5738eab5602736d81b9f59141378d23c6819fe99b7e25487cf8557d3f460a4d7",
+          "pinnedCaptureStatus": "captured",
+          "ok": true,
+          "finalUrl": "https://www.restaurantzuyd.nl/diner",
+          "contentType": "text/html",
+          "bytes": 9832,
+          "bytesSha256": "e3db8113ab9769df2a620919b4f40fca8629d2fbc477a2580cefc537290c7ccf",
+          "sourceVersionMatches": false,
+          "limitations": [
+            "Gelezen zonder automatisch herkende menukaart: https://www.restaurantzuyd.nl/kerstmenu.",
+            "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+          ],
+          "notes": [
+            "Menukaart herkend uit de HTML van https://www.restaurantzuyd.nl/diner: 12 gerechten met prijs in 2 rubrieken. Controleer rubrieken en prijzen.",
+            "Menukaart herkend uit de HTML van https://www.restaurantzuyd.nl/lunch: 13 gerechten met prijs in 2 rubrieken. Controleer rubrieken en prijzen.",
+            "Mogelijke menupagina gelezen: https://www.restaurantzuyd.nl/kerstmenu (link \"Kerstmenu\"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.",
+            "AI-structurering is niet beschikbaar — resultaten zijn beperkt tot deterministische extractie."
+          ],
+          "sourceInventory": [
+            {
+              "url": "https://www.restaurantzuyd.nl/diner",
+              "kind": "html",
+              "status": "read",
+              "itemCount": null,
+              "pageCount": null,
+              "wordCount": null,
+              "contentHash": "1de7e43ee9cce1ba50563d1c125d1ddcca3f776f12640f3b0a9ce5e75c1baf3c",
+              "excludedSections": null
+            },
+            {
+              "url": "https://www.restaurantzuyd.nl/lunch",
+              "kind": "html",
+              "status": "read",
+              "itemCount": null,
+              "pageCount": null,
+              "wordCount": null,
+              "contentHash": "3b672672c8960e4327dbb14f27c158391e0280f1b02d0adb605b17c6be42d691",
+              "excludedSections": null
+            },
+            {
+              "url": "https://www.restaurantzuyd.nl/kerstmenu",
+              "kind": "html",
+              "status": "read",
+              "itemCount": null,
+              "pageCount": null,
+              "wordCount": null,
+              "contentHash": "2bfaf63e7814766e57eb3e71619dd8f9eba73b4960c73b96295808430a48b789",
+              "excludedSections": null
+            }
+          ]
+        }
+      ],
+      "live": {
+        "menuCount": 2,
+        "itemCount": 25,
+        "categoryCount": 4,
+        "priceStatus": {
+          "known": 25
+        },
+        "knownWithoutAmount": 0,
+        "evidence": {
+          "itemCount": 25,
+          "withSourceId": 25,
+          "withLocator": 25,
+          "withSupport": 25,
+          "sourceIdPercent": 100,
+          "locatorPercent": 100,
+          "supportPercent": 100,
+          "missingSourceId": [],
+          "missingLocator": [],
+          "missingSupport": []
+        },
+        "menus": [
+          {
+            "title": "Lunch",
+            "sourceUrl": "https://www.restaurantzuyd.nl/lunch",
+            "contextSlug": "menukaart",
+            "extractionMethod": "html",
+            "categories": [
+              {
+                "path": [
+                  "BITES - voor bij het aperitief"
+                ],
+                "name": "BITES - voor bij het aperitief",
+                "itemCount": 7,
+                "uncertain": false
+              },
+              {
+                "path": [
+                  "A LA CARTE"
+                ],
+                "name": "A LA CARTE",
+                "itemCount": 6,
+                "uncertain": false
+              }
+            ],
+            "items": [
+              {
+                "name": "Oesterproeverij",
+                "price": "23.50",
+                "priceStatus": null,
+                "locator": "html>body>div>p[1]"
+              },
+              {
+                "name": "Jamon Iberico Bellota",
+                "price": "19.50",
+                "priceStatus": null,
+                "locator": "html>body>div>p[1]"
+              },
+              {
+                "name": "Brioche met paling",
+                "price": "9.50",
+                "priceStatus": null,
+                "locator": "html>body>div>p[1]"
+              },
+              {
+                "name": "Crumpet met huisgerookte zalm",
+                "price": "9.50",
+                "priceStatus": null,
+                "locator": "html>body>div>p[1]"
+              },
+              {
+                "name": "Toast met Mangalica, sriracha en sesam",
+                "price": "8.50",
+                "priceStatus": null,
+                "locator": "html>body>div>p[1]"
+              },
+              {
+                "name": "Duivels eitje met kimchi",
+                "price": "8.50",
+                "priceStatus": null,
+                "locator": "html>body>div>p[1]"
+              },
+              {
+                "name": "Zuurdesembrood",
+                "price": "5.50",
+                "priceStatus": null,
+                "locator": "html>body>div>p[1]"
+              },
+              {
+                "name": "Steak tartaar",
+                "price": "27.50",
+                "priceStatus": null,
+                "locator": "html>body>div>p[5]"
+              },
+              {
+                "name": "Kreeft",
+                "price": "29.50",
+                "priceStatus": null,
+                "locator": "html>body>div>p[5]"
+              },
+              {
+                "name": "Coquille",
+                "price": "29.00",
+                "priceStatus": null,
+                "locator": "html>body>div>p[5]"
+              },
+              {
+                "name": "‘Catch of the day’",
+                "price": "26.00",
+                "priceStatus": null,
+                "locator": "html>body>div>p[5]"
+              },
+              {
+                "name": "Zeetongfilet",
+                "price": "28.00",
+                "priceStatus": null,
+                "locator": "html>body>div>p[5]"
+              },
+              {
+                "name": "Dessert",
+                "price": "16.50",
+                "priceStatus": null,
+                "locator": "html>body>div>p[5]"
+              }
+            ]
+          },
+          {
+            "title": "Diner",
+            "sourceUrl": "https://www.restaurantzuyd.nl/diner",
+            "contextSlug": "menukaarta",
+            "extractionMethod": "html",
+            "categories": [
+              {
+                "path": [
+                  "BITES - voor bij het aperitief"
+                ],
+                "name": "BITES - voor bij het aperitief",
+                "itemCount": 6,
+                "uncertain": false
+              },
+              {
+                "path": [
+                  "A LA CARTE"
+                ],
+                "name": "A LA CARTE",
+                "itemCount": 6,
+                "uncertain": false
+              }
+            ],
+            "items": [
+              {
+                "name": "Oesterproeverij",
+                "price": "23.50",
+                "priceStatus": null,
+                "locator": "html>body>div>p[1]"
+              },
+              {
+                "name": "Jamon Iberico Bellota",
+                "price": "19.50",
+                "priceStatus": null,
+                "locator": "html>body>div>p[1]"
+              },
+              {
+                "name": "Brioche met paling",
+                "price": "9.50",
+                "priceStatus": null,
+                "locator": "html>body>div>p[1]"
+              },
+              {
+                "name": "Crumpet met huisgerookte zalm",
+                "price": "9.50",
+                "priceStatus": null,
+                "locator": "html>body>div>p[1]"
+              },
+              {
+                "name": "Toast met Mangalica, sriracha en sesam",
+                "price": "8.50",
+                "priceStatus": null,
+                "locator": "html>body>div>p[1]"
+              },
+              {
+                "name": "Duivels eitje met kimchi",
+                "price": "8.50",
+                "priceStatus": null,
+                "locator": "html>body>div>p[1]"
+              },
+              {
+                "name": "Steak tartaar",
+                "price": "27.50",
+                "priceStatus": null,
+                "locator": "html>body>div>p[3]"
+              },
+              {
+                "name": "Kreeft",
+                "price": "29.50",
+                "priceStatus": null,
+                "locator": "html>body>div>p[3]"
+              },
+              {
+                "name": "Coquille",
+                "price": "29.00",
+                "priceStatus": null,
+                "locator": "html>body>div>p[3]"
+              },
+              {
+                "name": "‘Catch of the day’",
+                "price": "26.00",
+                "priceStatus": null,
+                "locator": "html>body>div>p[3]"
+              },
+              {
+                "name": "Zeetongfilet",
+                "price": "28.00",
+                "priceStatus": null,
+                "locator": "html>body>div>p[3]"
+              },
+              {
+                "name": "Dessert",
+                "price": "16.50",
+                "priceStatus": null,
+                "locator": "html>body>div>p[3]"
+              }
+            ]
+          }
+        ]
+      },
+      "historical": {
+        "keys": [
+          "19-lunch",
+          "19-diner"
+        ],
+        "itemCount": 42,
+        "note": "data/menus.json is a dated observation (see each scoped date), not live truth and not ground truth for this source version.",
+        "cards": [
+          {
+            "key": "19-lunch",
+            "name": "Restaurant Zuyd",
+            "subtitle": "Lunchkaart",
+            "scraped": "2026-03-28",
+            "historicalSourceUrl": "https://www.restaurantzuyd.nl/lunch",
+            "historicalItemCount": 22,
+            "liveMatch": "source_url",
+            "liveMenuCount": 1,
+            "strictComparison": {
+              "label": "19-lunch Lunchkaart",
+              "expectedItems": 22,
+              "actualItems": 13,
+              "matched": 0,
+              "missing": [
+                {
+                  "name": "Brioche met paling",
+                  "price": "8.50",
+                  "path": [
+                    "Bites"
+                  ]
+                },
+                {
+                  "name": "Crumpet met huis gerookte zalm",
+                  "price": "8.50",
+                  "path": [
+                    "Bites"
+                  ]
+                },
+                {
+                  "name": "2-gangen menu",
+                  "price": "45.00",
+                  "path": [
+                    "Lunchmenu's"
+                  ]
+                },
+                {
+                  "name": "3-gangen menu",
+                  "price": "55.00",
+                  "path": [
+                    "Lunchmenu's"
+                  ]
+                },
+                {
+                  "name": "4-gangen menu",
+                  "price": "65.00",
+                  "path": [
+                    "Lunchmenu's"
+                  ]
+                },
+                {
+                  "name": "5-gangen menu",
+                  "price": "75.00",
+                  "path": [
+                    "Lunchmenu's"
+                  ]
+                },
+                {
+                  "name": "Sandwich Zuyd",
+                  "price": "19.50",
+                  "path": [
+                    "Sandwiches"
+                  ]
+                },
+                {
+                  "name": "Lobster roll",
+                  "price": "25.00",
+                  "path": [
+                    "Sandwiches"
+                  ]
+                },
+                {
+                  "name": "Steak tartaar",
+                  "price": "26.00",
+                  "path": [
+                    "À la carte"
+                  ]
+                },
+                {
+                  "name": "Kreeft (½)",
+                  "price": "29.00",
+                  "path": [
+                    "À la carte"
+                  ]
+                },
+                {
+                  "name": "Catch of the day",
+                  "price": "",
+                  "path": [
+                    "À la carte"
+                  ]
+                },
+                {
+                  "name": "Zeebaars",
+                  "price": "29.00",
+                  "path": [
+                    "À la carte"
+                  ]
+                },
+                {
+                  "name": "Zwezerik",
+                  "price": "29.00",
+                  "path": [
+                    "À la carte"
+                  ]
+                },
+                {
+                  "name": "Ossenhaas",
+                  "price": "32.50",
+                  "path": [
+                    "À la carte"
+                  ]
+                },
+                {
+                  "name": "Eendenlever",
+                  "price": "27.00",
+                  "path": [
+                    "À la carte"
+                  ]
+                },
+                {
+                  "name": "Kaasassortiment",
+                  "price": "€12.00/€18,00",
+                  "path": [
+                    "À la carte"
+                  ]
+                },
+                {
+                  "name": "Kaasgerecht",
+                  "price": "17.00",
+                  "path": [
+                    "À la carte"
+                  ]
+                }
+              ],
+              "extra": [
+                {
+                  "name": "Brioche met paling",
+                  "price": "9.50",
+                  "path": [
+                    "BITES - voor bij het aperitief"
+                  ]
+                },
+                {
+                  "name": "Crumpet met huisgerookte zalm",
+                  "price": "9.50",
+                  "path": [
+                    "BITES - voor bij het aperitief"
+                  ]
+                },
+                {
+                  "name": "Duivels eitje met kimchi",
+                  "price": "8.50",
+                  "path": [
+                    "BITES - voor bij het aperitief"
+                  ]
+                },
+                {
+                  "name": "Steak tartaar",
+                  "price": "27.50",
+                  "path": [
+                    "A LA CARTE"
+                  ]
+                },
+                {
+                  "name": "Kreeft",
+                  "price": "29.50",
+                  "path": [
+                    "A LA CARTE"
+                  ]
+                },
+                {
+                  "name": "Coquille",
+                  "price": "29.00",
+                  "path": [
+                    "A LA CARTE"
+                  ]
+                },
+                {
+                  "name": "‘Catch of the day’",
+                  "price": "26.00",
+                  "path": [
+                    "A LA CARTE"
+                  ]
+                },
+                {
+                  "name": "Zeetongfilet",
+                  "price": "28.00",
+                  "path": [
+                    "A LA CARTE"
+                  ]
+                }
+              ],
+              "priceMismatches": [],
+              "categoryMismatches": [
+                {
+                  "name": "Oesterproeverij",
+                  "price": "23.50",
+                  "expectedPath": [
+                    "Bites"
+                  ],
+                  "actualPath": [
+                    "BITES - voor bij het aperitief"
+                  ]
+                },
+                {
+                  "name": "Jamon Iberico Bellota",
+                  "price": "19.50",
+                  "expectedPath": [
+                    "Bites"
+                  ],
+                  "actualPath": [
+                    "BITES - voor bij het aperitief"
+                  ]
+                },
+                {
+                  "name": "Toast met Mangalica, sriracha en sesam",
+                  "price": "8.50",
+                  "expectedPath": [
+                    "Bites"
+                  ],
+                  "actualPath": [
+                    "BITES - voor bij het aperitief"
+                  ]
+                },
+                {
+                  "name": "Zuurdesembrood",
+                  "price": "5.50",
+                  "expectedPath": [
+                    "Bites"
+                  ],
+                  "actualPath": [
+                    "BITES - voor bij het aperitief"
+                  ]
+                },
+                {
+                  "name": "Dessert",
+                  "price": "16.50",
+                  "expectedPath": [
+                    "À la carte"
+                  ],
+                  "actualPath": [
+                    "A LA CARTE"
+                  ]
+                }
+              ],
+              "duplicates": [],
+              "accounting": {
+                "expected": {
+                  "total": 22,
+                  "matched": 0,
+                  "missing": 17,
+                  "priceMismatch": 0,
+                  "categoryMismatch": 5,
+                  "accounted": 22,
+                  "balanced": true
+                },
+                "actual": {
+                  "total": 13,
+                  "matched": 0,
+                  "extra": 8,
+                  "priceMismatch": 0,
+                  "categoryMismatch": 5,
+                  "accounted": 13,
+                  "balanced": true
+                }
+              }
+            },
+            "namePriceComparison": {
+              "referenceItems": 22,
+              "actualItems": 13,
+              "matched": 5,
+              "missing": [
+                {
+                  "name": "Crumpet met huis gerookte zalm",
+                  "price": "8.50"
+                },
+                {
+                  "name": "2-gangen menu",
+                  "price": "45.00"
+                },
+                {
+                  "name": "3-gangen menu",
+                  "price": "55.00"
+                },
+                {
+                  "name": "4-gangen menu",
+                  "price": "65.00"
+                },
+                {
+                  "name": "5-gangen menu",
+                  "price": "75.00"
+                },
+                {
+                  "name": "Sandwich Zuyd",
+                  "price": "19.50"
+                },
+                {
+                  "name": "Lobster roll",
+                  "price": "25.00"
+                },
+                {
+                  "name": "Kreeft (½)",
+                  "price": "29.00"
+                },
+                {
+                  "name": "Catch of the day",
+                  "price": ""
+                },
+                {
+                  "name": "Zeebaars",
+                  "price": "29.00"
+                },
+                {
+                  "name": "Zwezerik",
+                  "price": "29.00"
+                },
+                {
+                  "name": "Ossenhaas",
+                  "price": "32.50"
+                },
+                {
+                  "name": "Eendenlever",
+                  "price": "27.00"
+                },
+                {
+                  "name": "Kaasassortiment",
+                  "price": "€12.00/€18,00"
+                },
+                {
+                  "name": "Kaasgerecht",
+                  "price": "17.00"
+                }
+              ],
+              "extra": [
+                {
+                  "name": "Crumpet met huisgerookte zalm",
+                  "price": "9.50"
+                },
+                {
+                  "name": "Duivels eitje met kimchi",
+                  "price": "8.50"
+                },
+                {
+                  "name": "Kreeft",
+                  "price": "29.50"
+                },
+                {
+                  "name": "Coquille",
+                  "price": "29.00"
+                },
+                {
+                  "name": "‘Catch of the day’",
+                  "price": "26.00"
+                },
+                {
+                  "name": "Zeetongfilet",
+                  "price": "28.00"
+                }
+              ],
+              "priceMismatches": [
+                {
+                  "name": "Brioche met paling",
+                  "expectedPrice": "8.50",
+                  "actualPrice": "9.50"
+                },
+                {
+                  "name": "Steak tartaar",
+                  "expectedPrice": "26.00",
+                  "actualPrice": "27.50"
+                }
+              ],
+              "balanced": true
+            }
+          },
+          {
+            "key": "19-diner",
+            "name": "Restaurant Zuyd",
+            "subtitle": "Dinerkaart",
+            "scraped": "2026-03-28",
+            "historicalSourceUrl": "https://www.restaurantzuyd.nl/diner",
+            "historicalItemCount": 20,
+            "liveMatch": "source_url",
+            "liveMenuCount": 1,
+            "strictComparison": {
+              "label": "19-diner Dinerkaart",
+              "expectedItems": 20,
+              "actualItems": 12,
+              "matched": 0,
+              "missing": [
+                {
+                  "name": "Oesterproeverij Deluxe",
+                  "price": "29.50",
+                  "path": [
+                    "Bites"
+                  ]
+                },
+                {
+                  "name": "Brioche met paling",
+                  "price": "8.50",
+                  "path": [
+                    "Bites"
+                  ]
+                },
+                {
+                  "name": "Crumpet met huis gerookte zalm",
+                  "price": "8.50",
+                  "path": [
+                    "Bites"
+                  ]
+                },
+                {
+                  "name": "4-gangen surprise",
+                  "price": "70.00",
+                  "path": [
+                    "Surprise / Proeverij"
+                  ]
+                },
+                {
+                  "name": "5-gangen surprise",
+                  "price": "80.00",
+                  "path": [
+                    "Surprise / Proeverij"
+                  ]
+                },
+                {
+                  "name": "6-gangen surprise",
+                  "price": "90.00",
+                  "path": [
+                    "Surprise / Proeverij"
+                  ]
+                },
+                {
+                  "name": "7-gangen surprise",
+                  "price": "100.00",
+                  "path": [
+                    "Surprise / Proeverij"
+                  ]
+                },
+                {
+                  "name": "Steak tartaar",
+                  "price": "26.00",
+                  "path": [
+                    "À la carte"
+                  ]
+                },
+                {
+                  "name": "Kreeft (½)",
+                  "price": "29.00",
+                  "path": [
+                    "À la carte"
+                  ]
+                },
+                {
+                  "name": "Catch of the day",
+                  "price": "27.00",
+                  "path": [
+                    "À la carte"
+                  ]
+                },
+                {
+                  "name": "Zeebaars",
+                  "price": "29.00",
+                  "path": [
+                    "À la carte"
+                  ]
+                },
+                {
+                  "name": "Zwezerik",
+                  "price": "29.00",
+                  "path": [
+                    "À la carte"
+                  ]
+                },
+                {
+                  "name": "Ossenhaas",
+                  "price": "32.50",
+                  "path": [
+                    "À la carte"
+                  ]
+                },
+                {
+                  "name": "Eendenlever",
+                  "price": "27.00",
+                  "path": [
+                    "À la carte"
+                  ]
+                },
+                {
+                  "name": "Kaasassortiment",
+                  "price": "€12.00/€18,00",
+                  "path": [
+                    "À la carte"
+                  ]
+                },
+                {
+                  "name": "Kaasgerecht",
+                  "price": "17.00",
+                  "path": [
+                    "À la carte"
+                  ]
+                }
+              ],
+              "extra": [
+                {
+                  "name": "Brioche met paling",
+                  "price": "9.50",
+                  "path": [
+                    "BITES - voor bij het aperitief"
+                  ]
+                },
+                {
+                  "name": "Crumpet met huisgerookte zalm",
+                  "price": "9.50",
+                  "path": [
+                    "BITES - voor bij het aperitief"
+                  ]
+                },
+                {
+                  "name": "Duivels eitje met kimchi",
+                  "price": "8.50",
+                  "path": [
+                    "BITES - voor bij het aperitief"
+                  ]
+                },
+                {
+                  "name": "Steak tartaar",
+                  "price": "27.50",
+                  "path": [
+                    "A LA CARTE"
+                  ]
+                },
+                {
+                  "name": "Kreeft",
+                  "price": "29.50",
+                  "path": [
+                    "A LA CARTE"
+                  ]
+                },
+                {
+                  "name": "Coquille",
+                  "price": "29.00",
+                  "path": [
+                    "A LA CARTE"
+                  ]
+                },
+                {
+                  "name": "‘Catch of the day’",
+                  "price": "26.00",
+                  "path": [
+                    "A LA CARTE"
+                  ]
+                },
+                {
+                  "name": "Zeetongfilet",
+                  "price": "28.00",
+                  "path": [
+                    "A LA CARTE"
+                  ]
+                }
+              ],
+              "priceMismatches": [],
+              "categoryMismatches": [
+                {
+                  "name": "Oesterproeverij",
+                  "price": "23.50",
+                  "expectedPath": [
+                    "Bites"
+                  ],
+                  "actualPath": [
+                    "BITES - voor bij het aperitief"
+                  ]
+                },
+                {
+                  "name": "Jamon Iberico Bellota",
+                  "price": "19.50",
+                  "expectedPath": [
+                    "Bites"
+                  ],
+                  "actualPath": [
+                    "BITES - voor bij het aperitief"
+                  ]
+                },
+                {
+                  "name": "Toast met Mangalica, sriracha en sesam",
+                  "price": "8.50",
+                  "expectedPath": [
+                    "Bites"
+                  ],
+                  "actualPath": [
+                    "BITES - voor bij het aperitief"
+                  ]
+                },
+                {
+                  "name": "Dessert",
+                  "price": "16.50",
+                  "expectedPath": [
+                    "À la carte"
+                  ],
+                  "actualPath": [
+                    "A LA CARTE"
+                  ]
+                }
+              ],
+              "duplicates": [],
+              "accounting": {
+                "expected": {
+                  "total": 20,
+                  "matched": 0,
+                  "missing": 16,
+                  "priceMismatch": 0,
+                  "categoryMismatch": 4,
+                  "accounted": 20,
+                  "balanced": true
+                },
+                "actual": {
+                  "total": 12,
+                  "matched": 0,
+                  "extra": 8,
+                  "priceMismatch": 0,
+                  "categoryMismatch": 4,
+                  "accounted": 12,
+                  "balanced": true
+                }
+              }
+            },
+            "namePriceComparison": {
+              "referenceItems": 20,
+              "actualItems": 12,
+              "matched": 4,
+              "missing": [
+                {
+                  "name": "Oesterproeverij Deluxe",
+                  "price": "29.50"
+                },
+                {
+                  "name": "Crumpet met huis gerookte zalm",
+                  "price": "8.50"
+                },
+                {
+                  "name": "4-gangen surprise",
+                  "price": "70.00"
+                },
+                {
+                  "name": "5-gangen surprise",
+                  "price": "80.00"
+                },
+                {
+                  "name": "6-gangen surprise",
+                  "price": "90.00"
+                },
+                {
+                  "name": "7-gangen surprise",
+                  "price": "100.00"
+                },
+                {
+                  "name": "Kreeft (½)",
+                  "price": "29.00"
+                },
+                {
+                  "name": "Catch of the day",
+                  "price": "27.00"
+                },
+                {
+                  "name": "Zeebaars",
+                  "price": "29.00"
+                },
+                {
+                  "name": "Zwezerik",
+                  "price": "29.00"
+                },
+                {
+                  "name": "Ossenhaas",
+                  "price": "32.50"
+                },
+                {
+                  "name": "Eendenlever",
+                  "price": "27.00"
+                },
+                {
+                  "name": "Kaasassortiment",
+                  "price": "€12.00/€18,00"
+                },
+                {
+                  "name": "Kaasgerecht",
+                  "price": "17.00"
+                }
+              ],
+              "extra": [
+                {
+                  "name": "Crumpet met huisgerookte zalm",
+                  "price": "9.50"
+                },
+                {
+                  "name": "Duivels eitje met kimchi",
+                  "price": "8.50"
+                },
+                {
+                  "name": "Kreeft",
+                  "price": "29.50"
+                },
+                {
+                  "name": "Coquille",
+                  "price": "29.00"
+                },
+                {
+                  "name": "‘Catch of the day’",
+                  "price": "26.00"
+                },
+                {
+                  "name": "Zeetongfilet",
+                  "price": "28.00"
+                }
+              ],
+              "priceMismatches": [
+                {
+                  "name": "Brioche met paling",
+                  "expectedPrice": "8.50",
+                  "actualPrice": "9.50"
+                },
+                {
+                  "name": "Steak tartaar",
+                  "expectedPrice": "26.00",
+                  "actualPrice": "27.50"
+                }
+              ],
+              "balanced": true
+            }
+          }
+        ],
+        "totals": {
+          "historicalItems": 42,
+          "strictMissing": 33,
+          "strictExtra": 16,
+          "strictPriceMismatches": 0,
+          "strictCategoryMismatches": 9,
+          "namePriceMissing": 29,
+          "namePriceExtra": 12,
+          "namePriceMismatches": 4
+        }
+      },
+      "limitations": [
+        "Gelezen zonder automatisch herkende menukaart: https://www.restaurantzuyd.nl/kerstmenu.",
+        "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+      ],
+      "errors": [],
+      "result": "25 live items in 4 sections across 2 menu context(s); 0 probe(s) failed. This is a read-only comparison, not an acceptance claim."
+    },
+    "thuis": {
+      "id": "thuis",
+      "label": "T-Huis",
+      "restaurantId": "23",
+      "entryUrl": "https://t-huis.online",
+      "captureStatus": "failed",
+      "sourceVersionMatches": null,
+      "probes": [
+        {
+          "url": "https://t-huis.online",
+          "pinnedBytesSha256": null,
+          "pinnedCaptureStatus": "failed",
+          "ok": false,
+          "error": "too-many-redirects",
+          "httpStatus": 301
+        },
+        {
+          "url": "https://t-huis.online/menu/",
+          "pinnedBytesSha256": null,
+          "pinnedCaptureStatus": "failed",
+          "ok": false,
+          "error": "too-many-redirects",
+          "httpStatus": 301
+        }
+      ],
+      "live": {
+        "menuCount": 0,
+        "itemCount": 0,
+        "categoryCount": 0,
+        "priceStatus": {},
+        "knownWithoutAmount": 0,
+        "evidence": {
+          "itemCount": 0,
+          "withSourceId": 0,
+          "withLocator": 0,
+          "withSupport": 0,
+          "sourceIdPercent": null,
+          "locatorPercent": null,
+          "supportPercent": null,
+          "missingSourceId": [],
+          "missingLocator": [],
+          "missingSupport": []
+        },
+        "menus": []
+      },
+      "historical": {
+        "keys": [
+          "23-lunch",
+          "23-diner",
+          "23-borrel"
+        ],
+        "itemCount": 189,
+        "note": "data/menus.json is a dated observation (see each scoped date), not live truth and not ground truth for this source version.",
+        "cards": [
+          {
+            "key": "23-lunch",
+            "name": "T-Huis",
+            "subtitle": "Lunchkaart",
+            "scraped": "2026-03-28",
+            "historicalSourceUrl": "https://t-huis.online/menu/",
+            "historicalItemCount": 25,
+            "liveMatch": "none",
+            "liveMenuCount": 0,
+            "strictComparison": {
+              "label": "23-lunch Lunchkaart",
+              "expectedItems": 25,
+              "actualItems": 0,
+              "matched": 0,
+              "missing": [
+                {
+                  "name": "Middle Eastern Pancakes",
+                  "price": "14.75",
+                  "path": [
+                    "Breakfast & Lunch"
+                  ]
+                },
+                {
+                  "name": "Shakshuka",
+                  "price": "13.75",
+                  "path": [
+                    "Breakfast & Lunch"
+                  ]
+                },
+                {
+                  "name": "Avocado Toast",
+                  "price": "14.75",
+                  "path": [
+                    "Breakfast & Lunch"
+                  ]
+                },
+                {
+                  "name": "Quattro Formaggi Tosti",
+                  "price": "14.75",
+                  "path": [
+                    "Breakfast & Lunch"
+                  ]
+                },
+                {
+                  "name": "Burrata & Peach",
+                  "price": "14.75",
+                  "path": [
+                    "Breakfast & Lunch"
+                  ]
+                },
+                {
+                  "name": "Iberian Melt",
+                  "price": "15.75",
+                  "path": [
+                    "Breakfast & Lunch"
+                  ]
+                },
+                {
+                  "name": "Veggie Romesco Sandwich",
+                  "price": "15.75",
+                  "path": [
+                    "Breakfast & Lunch"
+                  ]
+                },
+                {
+                  "name": "Mortadella Burrata",
+                  "price": "14.75",
+                  "path": [
+                    "Breakfast & Lunch"
+                  ]
+                },
+                {
+                  "name": "White Bean & Veggie Sandwich",
+                  "price": "14.75",
+                  "path": [
+                    "Breakfast & Lunch"
+                  ]
+                },
+                {
+                  "name": "Greek Chicken Sandwich",
+                  "price": "15.25",
+                  "path": [
+                    "Breakfast & Lunch"
+                  ]
+                },
+                {
+                  "name": "Steak à la T-Huis",
+                  "price": "23.75",
+                  "path": [
+                    "Breakfast & Lunch"
+                  ]
+                },
+                {
+                  "name": "Tournedos à la T-Huis",
+                  "price": "32.75",
+                  "path": [
+                    "Breakfast & Lunch"
+                  ]
+                },
+                {
+                  "name": "TFC Burger",
+                  "price": "15.75",
+                  "path": [
+                    "Breakfast & Lunch"
+                  ]
+                },
+                {
+                  "name": "Bisque",
+                  "price": "14.75",
+                  "path": [
+                    "Breakfast & Lunch"
+                  ]
+                },
+                {
+                  "name": "Salade Geitenkaas",
+                  "price": "20.75",
+                  "path": [
+                    "Salades"
+                  ]
+                },
+                {
+                  "name": "Japanse Tonijn Salade",
+                  "price": "22.75",
+                  "path": [
+                    "Salades"
+                  ]
+                },
+                {
+                  "name": "Caesar Salade",
+                  "price": "21.75",
+                  "path": [
+                    "Salades"
+                  ]
+                },
+                {
+                  "name": "Appeltaart",
+                  "price": "4.75",
+                  "path": [
+                    "Sweets"
+                  ]
+                },
+                {
+                  "name": "Red Velvet Cake",
+                  "price": "6.75",
+                  "path": [
+                    "Sweets"
+                  ]
+                },
+                {
+                  "name": "Taart van het Moment",
+                  "price": "opaanvraag",
+                  "path": [
+                    "Sweets"
+                  ]
+                },
+                {
+                  "name": "Kids Pancakes",
+                  "price": "8.00",
+                  "path": [
+                    "Kids Menu"
+                  ]
+                },
+                {
+                  "name": "Kids Burger",
+                  "price": "9.75",
+                  "path": [
+                    "Kids Menu"
+                  ]
+                },
+                {
+                  "name": "Biefstukje met Friet",
+                  "price": "13.75",
+                  "path": [
+                    "Kids Menu"
+                  ]
+                },
+                {
+                  "name": "Kids Tosti",
+                  "price": "6.00",
+                  "path": [
+                    "Kids Menu"
+                  ]
+                },
+                {
+                  "name": "Frietjes & Snacks",
+                  "price": "8.75",
+                  "path": [
+                    "Kids Menu"
+                  ]
+                }
+              ],
+              "extra": [],
+              "priceMismatches": [],
+              "categoryMismatches": [],
+              "duplicates": [],
+              "accounting": {
+                "expected": {
+                  "total": 25,
+                  "matched": 0,
+                  "missing": 25,
+                  "priceMismatch": 0,
+                  "categoryMismatch": 0,
+                  "accounted": 25,
+                  "balanced": true
+                },
+                "actual": {
+                  "total": 0,
+                  "matched": 0,
+                  "extra": 0,
+                  "priceMismatch": 0,
+                  "categoryMismatch": 0,
+                  "accounted": 0,
+                  "balanced": true
+                }
+              }
+            },
+            "namePriceComparison": {
+              "referenceItems": 25,
+              "actualItems": 0,
+              "matched": 0,
+              "missing": [
+                {
+                  "name": "Middle Eastern Pancakes",
+                  "price": "14.75"
+                },
+                {
+                  "name": "Shakshuka",
+                  "price": "13.75"
+                },
+                {
+                  "name": "Avocado Toast",
+                  "price": "14.75"
+                },
+                {
+                  "name": "Quattro Formaggi Tosti",
+                  "price": "14.75"
+                },
+                {
+                  "name": "Burrata & Peach",
+                  "price": "14.75"
+                },
+                {
+                  "name": "Iberian Melt",
+                  "price": "15.75"
+                },
+                {
+                  "name": "Veggie Romesco Sandwich",
+                  "price": "15.75"
+                },
+                {
+                  "name": "Mortadella Burrata",
+                  "price": "14.75"
+                },
+                {
+                  "name": "White Bean & Veggie Sandwich",
+                  "price": "14.75"
+                },
+                {
+                  "name": "Greek Chicken Sandwich",
+                  "price": "15.25"
+                },
+                {
+                  "name": "Steak à la T-Huis",
+                  "price": "23.75"
+                },
+                {
+                  "name": "Tournedos à la T-Huis",
+                  "price": "32.75"
+                },
+                {
+                  "name": "TFC Burger",
+                  "price": "15.75"
+                },
+                {
+                  "name": "Bisque",
+                  "price": "14.75"
+                },
+                {
+                  "name": "Salade Geitenkaas",
+                  "price": "20.75"
+                },
+                {
+                  "name": "Japanse Tonijn Salade",
+                  "price": "22.75"
+                },
+                {
+                  "name": "Caesar Salade",
+                  "price": "21.75"
+                },
+                {
+                  "name": "Appeltaart",
+                  "price": "4.75"
+                },
+                {
+                  "name": "Red Velvet Cake",
+                  "price": "6.75"
+                },
+                {
+                  "name": "Taart van het Moment",
+                  "price": "opaanvraag"
+                },
+                {
+                  "name": "Kids Pancakes",
+                  "price": "8.00"
+                },
+                {
+                  "name": "Kids Burger",
+                  "price": "9.75"
+                },
+                {
+                  "name": "Biefstukje met Friet",
+                  "price": "13.75"
+                },
+                {
+                  "name": "Kids Tosti",
+                  "price": "6.00"
+                },
+                {
+                  "name": "Frietjes & Snacks",
+                  "price": "8.75"
+                }
+              ],
+              "extra": [],
+              "priceMismatches": [],
+              "balanced": true
+            }
+          },
+          {
+            "key": "23-diner",
+            "name": "T-Huis",
+            "subtitle": "Dinerkaart",
+            "scraped": "2026-03-28",
+            "historicalSourceUrl": "https://t-huis.online/menu/",
+            "historicalItemCount": 26,
+            "liveMatch": "none",
+            "liveMenuCount": 0,
+            "strictComparison": {
+              "label": "23-diner Dinerkaart",
+              "expectedItems": 26,
+              "actualItems": 0,
+              "matched": 0,
+              "missing": [
+                {
+                  "name": "Steak Tartaar",
+                  "price": "15.75",
+                  "path": [
+                    "Voorgerechten"
+                  ]
+                },
+                {
+                  "name": "Tonijn Tataki",
+                  "price": "15.75",
+                  "path": [
+                    "Voorgerechten"
+                  ]
+                },
+                {
+                  "name": "Burrata & Perzik",
+                  "price": "13.75",
+                  "path": [
+                    "Voorgerechten"
+                  ]
+                },
+                {
+                  "name": "Pata Negra",
+                  "price": "14.75",
+                  "path": [
+                    "Voorgerechten"
+                  ]
+                },
+                {
+                  "name": "Romesco & Veg",
+                  "price": "13.75",
+                  "path": [
+                    "Voorgerechten"
+                  ]
+                },
+                {
+                  "name": "Greek Delight",
+                  "price": "12.75",
+                  "path": [
+                    "Voorgerechten"
+                  ]
+                },
+                {
+                  "name": "Bisque",
+                  "price": "14.75",
+                  "path": [
+                    "Voorgerechten"
+                  ]
+                },
+                {
+                  "name": "Steak à la T-Huis",
+                  "price": "25.75",
+                  "path": [
+                    "Hoofdgerechten"
+                  ]
+                },
+                {
+                  "name": "Tournedos à la T-Huis",
+                  "price": "34.75",
+                  "path": [
+                    "Hoofdgerechten"
+                  ]
+                },
+                {
+                  "name": "Sliptongetjes",
+                  "price": "26.75",
+                  "path": [
+                    "Hoofdgerechten"
+                  ]
+                },
+                {
+                  "name": "Portugese Marisco Seafood Stew",
+                  "price": "25.75",
+                  "path": [
+                    "Hoofdgerechten"
+                  ]
+                },
+                {
+                  "name": "Pulpo del Sol",
+                  "price": "25.75",
+                  "path": [
+                    "Hoofdgerechten"
+                  ]
+                },
+                {
+                  "name": "Roasted Pointed Cabbage",
+                  "price": "24.75",
+                  "path": [
+                    "Hoofdgerechten"
+                  ]
+                },
+                {
+                  "name": "TFC Burger",
+                  "price": "19.75",
+                  "path": [
+                    "Hoofdgerechten"
+                  ]
+                },
+                {
+                  "name": "Salade Geitenkaas",
+                  "price": "20.75",
+                  "path": [
+                    "Signature Salads"
+                  ]
+                },
+                {
+                  "name": "Japanse Tonijn Salade",
+                  "price": "22.75",
+                  "path": [
+                    "Signature Salads"
+                  ]
+                },
+                {
+                  "name": "Caesar Salade",
+                  "price": "21.75",
+                  "path": [
+                    "Signature Salads"
+                  ]
+                },
+                {
+                  "name": "Summer Peach",
+                  "price": "8.75",
+                  "path": [
+                    "Desserts"
+                  ]
+                },
+                {
+                  "name": "Chocolade Moelleux",
+                  "price": "9.75",
+                  "path": [
+                    "Desserts"
+                  ]
+                },
+                {
+                  "name": "T-Huis Tiramisu",
+                  "price": "9.75",
+                  "path": [
+                    "Desserts"
+                  ]
+                },
+                {
+                  "name": "Kaasplankje",
+                  "price": "13.75",
+                  "path": [
+                    "Desserts"
+                  ]
+                },
+                {
+                  "name": "Pancakes",
+                  "price": "8.00",
+                  "path": [
+                    "Kids Menu"
+                  ]
+                },
+                {
+                  "name": "Kids Burger",
+                  "price": "9.75",
+                  "path": [
+                    "Kids Menu"
+                  ]
+                },
+                {
+                  "name": "Biefstukje met Friet",
+                  "price": "13.25",
+                  "path": [
+                    "Kids Menu"
+                  ]
+                },
+                {
+                  "name": "Kids Sliptong",
+                  "price": "13.25",
+                  "path": [
+                    "Kids Menu"
+                  ]
+                },
+                {
+                  "name": "Frietjes & Snacks",
+                  "price": "8.75",
+                  "path": [
+                    "Kids Menu"
+                  ]
+                }
+              ],
+              "extra": [],
+              "priceMismatches": [],
+              "categoryMismatches": [],
+              "duplicates": [],
+              "accounting": {
+                "expected": {
+                  "total": 26,
+                  "matched": 0,
+                  "missing": 26,
+                  "priceMismatch": 0,
+                  "categoryMismatch": 0,
+                  "accounted": 26,
+                  "balanced": true
+                },
+                "actual": {
+                  "total": 0,
+                  "matched": 0,
+                  "extra": 0,
+                  "priceMismatch": 0,
+                  "categoryMismatch": 0,
+                  "accounted": 0,
+                  "balanced": true
+                }
+              }
+            },
+            "namePriceComparison": {
+              "referenceItems": 26,
+              "actualItems": 0,
+              "matched": 0,
+              "missing": [
+                {
+                  "name": "Steak Tartaar",
+                  "price": "15.75"
+                },
+                {
+                  "name": "Tonijn Tataki",
+                  "price": "15.75"
+                },
+                {
+                  "name": "Burrata & Perzik",
+                  "price": "13.75"
+                },
+                {
+                  "name": "Pata Negra",
+                  "price": "14.75"
+                },
+                {
+                  "name": "Romesco & Veg",
+                  "price": "13.75"
+                },
+                {
+                  "name": "Greek Delight",
+                  "price": "12.75"
+                },
+                {
+                  "name": "Bisque",
+                  "price": "14.75"
+                },
+                {
+                  "name": "Steak à la T-Huis",
+                  "price": "25.75"
+                },
+                {
+                  "name": "Tournedos à la T-Huis",
+                  "price": "34.75"
+                },
+                {
+                  "name": "Sliptongetjes",
+                  "price": "26.75"
+                },
+                {
+                  "name": "Portugese Marisco Seafood Stew",
+                  "price": "25.75"
+                },
+                {
+                  "name": "Pulpo del Sol",
+                  "price": "25.75"
+                },
+                {
+                  "name": "Roasted Pointed Cabbage",
+                  "price": "24.75"
+                },
+                {
+                  "name": "TFC Burger",
+                  "price": "19.75"
+                },
+                {
+                  "name": "Salade Geitenkaas",
+                  "price": "20.75"
+                },
+                {
+                  "name": "Japanse Tonijn Salade",
+                  "price": "22.75"
+                },
+                {
+                  "name": "Caesar Salade",
+                  "price": "21.75"
+                },
+                {
+                  "name": "Summer Peach",
+                  "price": "8.75"
+                },
+                {
+                  "name": "Chocolade Moelleux",
+                  "price": "9.75"
+                },
+                {
+                  "name": "T-Huis Tiramisu",
+                  "price": "9.75"
+                },
+                {
+                  "name": "Kaasplankje",
+                  "price": "13.75"
+                },
+                {
+                  "name": "Pancakes",
+                  "price": "8.00"
+                },
+                {
+                  "name": "Kids Burger",
+                  "price": "9.75"
+                },
+                {
+                  "name": "Biefstukje met Friet",
+                  "price": "13.25"
+                },
+                {
+                  "name": "Kids Sliptong",
+                  "price": "13.25"
+                },
+                {
+                  "name": "Frietjes & Snacks",
+                  "price": "8.75"
+                }
+              ],
+              "extra": [],
+              "priceMismatches": [],
+              "balanced": true
+            }
+          },
+          {
+            "key": "23-borrel",
+            "name": "T-Huis",
+            "subtitle": "Borrelkaart",
+            "scraped": "2026-03-28",
+            "historicalSourceUrl": "https://t-huis.online/menu/",
+            "historicalItemCount": 138,
+            "liveMatch": "none",
+            "liveMenuCount": 0,
+            "strictComparison": {
+              "label": "23-borrel Borrelkaart",
+              "expectedItems": 138,
+              "actualItems": 0,
+              "matched": 0,
+              "missing": [
+                {
+                  "name": "Camembert",
+                  "price": "9.75",
+                  "path": [
+                    "Signature Snacks"
+                  ]
+                },
+                {
+                  "name": "Pata Negra",
+                  "price": "14.75",
+                  "path": [
+                    "Signature Snacks"
+                  ]
+                },
+                {
+                  "name": "Charcuterie van het Moment",
+                  "price": "13.75",
+                  "path": [
+                    "Signature Snacks"
+                  ]
+                },
+                {
+                  "name": "Tonijn Tataki",
+                  "price": "15.75",
+                  "path": [
+                    "Signature Snacks"
+                  ]
+                },
+                {
+                  "name": "Kaasplankje",
+                  "price": "11.75",
+                  "path": [
+                    "Signature Snacks"
+                  ]
+                },
+                {
+                  "name": "Nacho's",
+                  "price": "15.75",
+                  "path": [
+                    "Signature Snacks"
+                  ]
+                },
+                {
+                  "name": "Brood & Boter",
+                  "price": "6.75",
+                  "path": [
+                    "Signature Snacks"
+                  ]
+                },
+                {
+                  "name": "Noten & Olijven",
+                  "price": "6.75",
+                  "path": [
+                    "Signature Snacks"
+                  ]
+                },
+                {
+                  "name": "Chorizo Kroketjes",
+                  "price": "9.00",
+                  "path": [
+                    "Fried Delight"
+                  ]
+                },
+                {
+                  "name": "Kaastengels",
+                  "price": "9.50",
+                  "path": [
+                    "Fried Delight"
+                  ]
+                },
+                {
+                  "name": "Gyoza's",
+                  "price": "9.75",
+                  "path": [
+                    "Fried Delight"
+                  ]
+                },
+                {
+                  "name": "Chicken Bites",
+                  "price": "9.50",
+                  "path": [
+                    "Fried Delight"
+                  ]
+                },
+                {
+                  "name": "Bitterballen",
+                  "price": "8.50",
+                  "path": [
+                    "Fried Delight"
+                  ]
+                },
+                {
+                  "name": "Frikandelletjes",
+                  "price": "8.50",
+                  "path": [
+                    "Fried Delight"
+                  ]
+                },
+                {
+                  "name": "La Roche - La Chevallière",
+                  "price": "€6.00/€35,00",
+                  "path": [
+                    "Wijnen — Wit"
+                  ]
+                },
+                {
+                  "name": "Agustinos - Gran Terroir White",
+                  "price": "€7.00/€39,00",
+                  "path": [
+                    "Wijnen — Wit"
+                  ]
+                },
+                {
+                  "name": "Joseph Cattin - Duo Gris & Blanc",
+                  "price": "42.00",
+                  "path": [
+                    "Wijnen — Wit"
+                  ]
+                },
+                {
+                  "name": "Morgadio",
+                  "price": "45.00",
+                  "path": [
+                    "Wijnen — Wit"
+                  ]
+                },
+                {
+                  "name": "Höpler - Seeblick",
+                  "price": "€5.50/€32,00",
+                  "path": [
+                    "Wijnen — Wit"
+                  ]
+                },
+                {
+                  "name": "Baigorri - Blanco Fermentado en Barrica DOC",
+                  "price": "49.00",
+                  "path": [
+                    "Wijnen — Wit"
+                  ]
+                },
+                {
+                  "name": "Maison Champy Pernand-Vergelesses 1er Cru",
+                  "price": "98.00",
+                  "path": [
+                    "Wijnen — Wit"
+                  ]
+                },
+                {
+                  "name": "Gérard Bertrand",
+                  "price": "39.00",
+                  "path": [
+                    "Wijnen — Wit"
+                  ]
+                },
+                {
+                  "name": "Vallformosa - Blue Fin Cava Brut Reserva",
+                  "price": "€5.00/€38,00",
+                  "path": [
+                    "Wijnen — Mousserend"
+                  ]
+                },
+                {
+                  "name": "Bouvet Ladubay - Crémant de Loire",
+                  "price": "€8.50/€45,00",
+                  "path": [
+                    "Wijnen — Mousserend"
+                  ]
+                },
+                {
+                  "name": "Gérard Bertrand - Papillon Pétillant Naturel",
+                  "price": "38.00",
+                  "path": [
+                    "Wijnen — Mousserend"
+                  ]
+                },
+                {
+                  "name": "Bouché - Père et Fils Cuvée Réservée Brut",
+                  "price": "€75.00/€51,00(37.5cl)",
+                  "path": [
+                    "Wijnen — Mousserend"
+                  ]
+                },
+                {
+                  "name": "Joseph Cattin Orange",
+                  "price": "42.00",
+                  "path": [
+                    "Wijnen — Oranje"
+                  ]
+                },
+                {
+                  "name": "El Esteco - Don David Malbec Reserva",
+                  "price": "€7.00/€37,00",
+                  "path": [
+                    "Wijnen — Rood"
+                  ]
+                },
+                {
+                  "name": "Pasqua - Desire Lush & Zin",
+                  "price": "€6.50/€35,00",
+                  "path": [
+                    "Wijnen — Rood"
+                  ]
+                },
+                {
+                  "name": "Castillo de Monjardin Reserva",
+                  "price": "43.00",
+                  "path": [
+                    "Wijnen — Rood"
+                  ]
+                },
+                {
+                  "name": "Baigorri - Reserva",
+                  "price": "55.00",
+                  "path": [
+                    "Wijnen — Rood"
+                  ]
+                },
+                {
+                  "name": "Pasqua - Black Label Valpolicella Superiore Ripasso DOC",
+                  "price": "45.00",
+                  "path": [
+                    "Wijnen — Rood"
+                  ]
+                },
+                {
+                  "name": "Bassermann Jordan - Spätburgunder",
+                  "price": "47.00",
+                  "path": [
+                    "Wijnen — Rood"
+                  ]
+                },
+                {
+                  "name": "Höpler - Seeblick",
+                  "price": "€5.50/€32,00",
+                  "path": [
+                    "Wijnen — Rood"
+                  ]
+                },
+                {
+                  "name": "Cérvoles - Colors Negre",
+                  "price": "42.00",
+                  "path": [
+                    "Wijnen — Rood"
+                  ]
+                },
+                {
+                  "name": "Coppo - La Morra",
+                  "price": "35.00",
+                  "path": [
+                    "Wijnen — Rood"
+                  ]
+                },
+                {
+                  "name": "Rolland Galareta - Priorat Clos d'en Ferran",
+                  "price": "73.00",
+                  "path": [
+                    "Wijnen — Rood"
+                  ]
+                },
+                {
+                  "name": "La Campagne",
+                  "price": "€5.50/€29,00",
+                  "path": [
+                    "Wijnen — Rosé"
+                  ]
+                },
+                {
+                  "name": "Höpler - Seeblick",
+                  "price": "€5.50/€32,00",
+                  "path": [
+                    "Wijnen — Rosé"
+                  ]
+                },
+                {
+                  "name": "Pasqua - Y by Il Minuto Rosé",
+                  "price": "48.00",
+                  "path": [
+                    "Wijnen — Rosé"
+                  ]
+                },
+                {
+                  "name": "Château Gassier - Esprit Gassier Bio",
+                  "price": "39.00",
+                  "path": [
+                    "Wijnen — Rosé"
+                  ]
+                },
+                {
+                  "name": "Santa Alicia - Agustinos Late Harvest",
+                  "price": "8.00",
+                  "path": [
+                    "Wijnen — Dessert"
+                  ]
+                },
+                {
+                  "name": "Gérard Bertrand - Rivesaltes Ambré",
+                  "price": "7.50",
+                  "path": [
+                    "Wijnen — Dessert"
+                  ]
+                },
+                {
+                  "name": "Kopke Port",
+                  "price": "7.00",
+                  "path": [
+                    "Wijnen — Dessert"
+                  ]
+                },
+                {
+                  "name": "Bombay G&T",
+                  "price": "9.00",
+                  "path": [
+                    "Cocktails"
+                  ]
+                },
+                {
+                  "name": "Bulldog G&T",
+                  "price": "11.00",
+                  "path": [
+                    "Cocktails"
+                  ]
+                },
+                {
+                  "name": "Pink Flamingo",
+                  "price": "10.00",
+                  "path": [
+                    "Cocktails"
+                  ]
+                },
+                {
+                  "name": "Tequila Sunrise",
+                  "price": "10.00",
+                  "path": [
+                    "Cocktails"
+                  ]
+                },
+                {
+                  "name": "Paloma",
+                  "price": "11.00",
+                  "path": [
+                    "Cocktails"
+                  ]
+                },
+                {
+                  "name": "Moscow Mule",
+                  "price": "9.00",
+                  "path": [
+                    "Cocktails"
+                  ]
+                },
+                {
+                  "name": "Bloody Miro",
+                  "price": "9.00",
+                  "path": [
+                    "Cocktails"
+                  ]
+                },
+                {
+                  "name": "Dark & Stormy",
+                  "price": "10.00",
+                  "path": [
+                    "Cocktails"
+                  ]
+                },
+                {
+                  "name": "Negroni",
+                  "price": "9.00",
+                  "path": [
+                    "Cocktails"
+                  ]
+                },
+                {
+                  "name": "Mimosa",
+                  "price": "7.00",
+                  "path": [
+                    "Cocktails"
+                  ]
+                },
+                {
+                  "name": "Lyre's Pink London Spirit & Tonic",
+                  "price": "9.00",
+                  "path": [
+                    "Cocktails"
+                  ]
+                },
+                {
+                  "name": "Aperol Spritz",
+                  "price": "9.00",
+                  "path": [
+                    "Spritzers"
+                  ]
+                },
+                {
+                  "name": "Luxardo Limoncello Spritz",
+                  "price": "9.00",
+                  "path": [
+                    "Spritzers"
+                  ]
+                },
+                {
+                  "name": "Campari Spritz",
+                  "price": "9.00",
+                  "path": [
+                    "Spritzers"
+                  ]
+                },
+                {
+                  "name": "Kan Rode Sangria",
+                  "price": "26.00",
+                  "path": [
+                    "Spritzers"
+                  ]
+                },
+                {
+                  "name": "Brand Pilsener 25cl · 5.6%",
+                  "price": "3.00",
+                  "path": [
+                    "Bieren — Van de Tap"
+                  ]
+                },
+                {
+                  "name": "Brand Pilsener 50cl · 5.8%",
+                  "price": "6.00",
+                  "path": [
+                    "Bieren — Van de Tap"
+                  ]
+                },
+                {
+                  "name": "Texels Skiller Wit 30cl · 5.6%",
+                  "price": "5.00",
+                  "path": [
+                    "Bieren — Van de Tap"
+                  ]
+                },
+                {
+                  "name": "Frontaal Juice Punch NEIPA 25cl · 5.8%",
+                  "price": "6.00",
+                  "path": [
+                    "Bieren — Van de Tap"
+                  ]
+                },
+                {
+                  "name": "Lagunitas IPA 30cl · 6.2%",
+                  "price": "5.00",
+                  "path": [
+                    "Bieren — Van de Tap"
+                  ]
+                },
+                {
+                  "name": "Affligem Blond 30cl · 6.8%",
+                  "price": "5.00",
+                  "path": [
+                    "Bieren — Van de Tap"
+                  ]
+                },
+                {
+                  "name": "Paulaner Weizen 30cl · 5.3%",
+                  "price": "5.00",
+                  "path": [
+                    "Bieren — Van de Tap"
+                  ]
+                },
+                {
+                  "name": "Paulaner Weizen 50cl · 5.5%",
+                  "price": "8.00",
+                  "path": [
+                    "Bieren — Van de Tap"
+                  ]
+                },
+                {
+                  "name": "Eeuwige Jeugd Lieflibel · 8.7%",
+                  "price": "6.25",
+                  "path": [
+                    "Bieren — Flesjes & Blikjes"
+                  ]
+                },
+                {
+                  "name": "Texels Zeebries",
+                  "price": "5.00",
+                  "path": [
+                    "Bieren — Flesjes & Blikjes"
+                  ]
+                },
+                {
+                  "name": "Big Belly Loudon · 6.8%",
+                  "price": "5.00",
+                  "path": [
+                    "Bieren — Flesjes & Blikjes"
+                  ]
+                },
+                {
+                  "name": "Oedipus Mannenliefde · 6.0%",
+                  "price": "5.00",
+                  "path": [
+                    "Bieren — Flesjes & Blikjes"
+                  ]
+                },
+                {
+                  "name": "Brugse Zot · 6.0%",
+                  "price": "5.00",
+                  "path": [
+                    "Bieren — Flesjes & Blikjes"
+                  ]
+                },
+                {
+                  "name": "Duvel · 8.5%",
+                  "price": "5.00",
+                  "path": [
+                    "Bieren — Flesjes & Blikjes"
+                  ]
+                },
+                {
+                  "name": "Oedipus Thai · 8.0%",
+                  "price": "5.00",
+                  "path": [
+                    "Bieren — Flesjes & Blikjes"
+                  ]
+                },
+                {
+                  "name": "Affligem Tripel · 9.0%",
+                  "price": "5.00",
+                  "path": [
+                    "Bieren — Flesjes & Blikjes"
+                  ]
+                },
+                {
+                  "name": "IJwit · 4.5%",
+                  "price": "6.00",
+                  "path": [
+                    "Bieren — Flesjes & Blikjes"
+                  ]
+                },
+                {
+                  "name": "Blanche de Bruges · 5.0%",
+                  "price": "5.00",
+                  "path": [
+                    "Bieren — Flesjes & Blikjes"
+                  ]
+                },
+                {
+                  "name": "Belgisch Wit · 4.8%",
+                  "price": "5.00",
+                  "path": [
+                    "Bieren — Flesjes & Blikjes"
+                  ]
+                },
+                {
+                  "name": "Frontaal White Simmie · 5.2%",
+                  "price": "5.00",
+                  "path": [
+                    "Bieren — Flesjes & Blikjes"
+                  ]
+                },
+                {
+                  "name": "Texels Skuumkoppe · 6.0%",
+                  "price": "5.00",
+                  "path": [
+                    "Bieren — Flesjes & Blikjes"
+                  ]
+                },
+                {
+                  "name": "Eeuwige Jeugd Dutteloak · 7.7%",
+                  "price": "5.00",
+                  "path": [
+                    "Bieren — Flesjes & Blikjes"
+                  ]
+                },
+                {
+                  "name": "Texels Overzee · 6.0%",
+                  "price": "5.00",
+                  "path": [
+                    "Bieren — Flesjes & Blikjes"
+                  ]
+                },
+                {
+                  "name": "Oedipus Gaia · 7.0%",
+                  "price": "5.00",
+                  "path": [
+                    "Bieren — Flesjes & Blikjes"
+                  ]
+                },
+                {
+                  "name": "Eeuwige Jeugd Globjanus · 5.2%",
+                  "price": "5.00",
+                  "path": [
+                    "Bieren — Flesjes & Blikjes"
+                  ]
+                },
+                {
+                  "name": "Big Belly Cabron · 5.6%",
+                  "price": "5.00",
+                  "path": [
+                    "Bieren — Flesjes & Blikjes"
+                  ]
+                },
+                {
+                  "name": "Bolleke De Koninck · 5.2%",
+                  "price": "5.00",
+                  "path": [
+                    "Bieren — Flesjes & Blikjes"
+                  ]
+                },
+                {
+                  "name": "Affligem Dubbel · 6.0%",
+                  "price": "5.00",
+                  "path": [
+                    "Bieren — Flesjes & Blikjes"
+                  ]
+                },
+                {
+                  "name": "Brugse Zot Dubbel · 7.5%",
+                  "price": "6.00",
+                  "path": [
+                    "Bieren — Flesjes & Blikjes"
+                  ]
+                },
+                {
+                  "name": "Desperados · 5.9%",
+                  "price": "5.00",
+                  "path": [
+                    "Bieren — Flesjes & Blikjes"
+                  ]
+                },
+                {
+                  "name": "Liefmans Fruitesse · 3.8%",
+                  "price": "5.00",
+                  "path": [
+                    "Bieren — Flesjes & Blikjes"
+                  ]
+                },
+                {
+                  "name": "Amstel Radler · 2.0%",
+                  "price": "4.00",
+                  "path": [
+                    "Bieren — Flesjes & Blikjes"
+                  ]
+                },
+                {
+                  "name": "Heineken 0.0%",
+                  "price": "3.00",
+                  "path": [
+                    "Bieren — Flesjes & Blikjes"
+                  ]
+                },
+                {
+                  "name": "Brand Weizen 0.0%",
+                  "price": "4.00",
+                  "path": [
+                    "Bieren — Flesjes & Blikjes"
+                  ]
+                },
+                {
+                  "name": "Affligem Blond 0.0%",
+                  "price": "4.00",
+                  "path": [
+                    "Bieren — Flesjes & Blikjes"
+                  ]
+                },
+                {
+                  "name": "Brand IPA 0.0%",
+                  "price": "4.00",
+                  "path": [
+                    "Bieren — Flesjes & Blikjes"
+                  ]
+                },
+                {
+                  "name": "Amstel Rosé 0.0%",
+                  "price": "4.00",
+                  "path": [
+                    "Bieren — Flesjes & Blikjes"
+                  ]
+                },
+                {
+                  "name": "Koffie | Espresso",
+                  "price": "3.00",
+                  "path": [
+                    "Koffie & Thee"
+                  ]
+                },
+                {
+                  "name": "Dubbele Espresso",
+                  "price": "3.50",
+                  "path": [
+                    "Koffie & Thee"
+                  ]
+                },
+                {
+                  "name": "Cappuccino | Koffie Verkeerd",
+                  "price": "4.00",
+                  "path": [
+                    "Koffie & Thee"
+                  ]
+                },
+                {
+                  "name": "Espresso Macchiato | Cortado",
+                  "price": "3.00",
+                  "path": [
+                    "Koffie & Thee"
+                  ]
+                },
+                {
+                  "name": "Latte Macchiato",
+                  "price": "4.00",
+                  "path": [
+                    "Koffie & Thee"
+                  ]
+                },
+                {
+                  "name": "Flat White",
+                  "price": "4.00",
+                  "path": [
+                    "Koffie & Thee"
+                  ]
+                },
+                {
+                  "name": "Chai Latte",
+                  "price": "4.00",
+                  "path": [
+                    "Koffie & Thee"
+                  ]
+                },
+                {
+                  "name": "Dirty Chai Latte",
+                  "price": "5.00",
+                  "path": [
+                    "Koffie & Thee"
+                  ]
+                },
+                {
+                  "name": "Diverse smaken thee",
+                  "price": "3.00",
+                  "path": [
+                    "Koffie & Thee"
+                  ]
+                },
+                {
+                  "name": "Verse thee",
+                  "price": "3.00",
+                  "path": [
+                    "Koffie & Thee"
+                  ]
+                },
+                {
+                  "name": "Warme Chocolademelk",
+                  "price": "3.50",
+                  "path": [
+                    "Koffie & Thee"
+                  ]
+                },
+                {
+                  "name": "IJskoffie",
+                  "price": "4.00",
+                  "path": [
+                    "Koffie & Thee"
+                  ]
+                },
+                {
+                  "name": "Koffie Deluxe",
+                  "price": "8.00",
+                  "path": [
+                    "Koffie & Thee"
+                  ]
+                },
+                {
+                  "name": "Amaretto | Licor 43 | Baileys",
+                  "price": "8.00",
+                  "path": [
+                    "Koffie & Thee"
+                  ]
+                },
+                {
+                  "name": "IJskoffie Deluxe",
+                  "price": "8.00",
+                  "path": [
+                    "Koffie & Thee"
+                  ]
+                },
+                {
+                  "name": "Warme Chocolademelk Deluxe",
+                  "price": "8.00",
+                  "path": [
+                    "Koffie & Thee"
+                  ]
+                },
+                {
+                  "name": "'t Heerdje",
+                  "price": "8.00",
+                  "path": [
+                    "Koffie & Thee"
+                  ]
+                },
+                {
+                  "name": "Pinkyrose Straight Lemon",
+                  "price": "4.00",
+                  "path": [
+                    "Fresh Lemonades & Frisdranken"
+                  ]
+                },
+                {
+                  "name": "Pinkyrose Spiced Lemon & Rose",
+                  "price": "4.00",
+                  "path": [
+                    "Fresh Lemonades & Frisdranken"
+                  ]
+                },
+                {
+                  "name": "Pinkyrose Ginger & Orange",
+                  "price": "4.00",
+                  "path": [
+                    "Fresh Lemonades & Frisdranken"
+                  ]
+                },
+                {
+                  "name": "Pinkyrose Chili Grapefruit",
+                  "price": "4.00",
+                  "path": [
+                    "Fresh Lemonades & Frisdranken"
+                  ]
+                },
+                {
+                  "name": "Chaudfontaine",
+                  "price": "3.00",
+                  "path": [
+                    "Fresh Lemonades & Frisdranken"
+                  ]
+                },
+                {
+                  "name": "Coca Cola Regular | Zero",
+                  "price": "3.00",
+                  "path": [
+                    "Fresh Lemonades & Frisdranken"
+                  ]
+                },
+                {
+                  "name": "Lipton Ice Tea",
+                  "price": "3.00",
+                  "path": [
+                    "Fresh Lemonades & Frisdranken"
+                  ]
+                },
+                {
+                  "name": "Fanta Orange | Cassis",
+                  "price": "3.00",
+                  "path": [
+                    "Fresh Lemonades & Frisdranken"
+                  ]
+                },
+                {
+                  "name": "Royal Bites",
+                  "price": "3.00",
+                  "path": [
+                    "Fresh Lemonades & Frisdranken"
+                  ]
+                },
+                {
+                  "name": "Red Bull Regular",
+                  "price": "4.00",
+                  "path": [
+                    "Fresh Lemonades & Frisdranken"
+                  ]
+                },
+                {
+                  "name": "Jus d'Orange",
+                  "price": "4.00",
+                  "path": [
+                    "Fresh Lemonades & Frisdranken"
+                  ]
+                },
+                {
+                  "name": "Johnnie Walker Red Label",
+                  "price": "5.00",
+                  "path": [
+                    "Gedistilleerd"
+                  ]
+                },
+                {
+                  "name": "Jack Daniels",
+                  "price": "5.00",
+                  "path": [
+                    "Gedistilleerd"
+                  ]
+                },
+                {
+                  "name": "Jameson",
+                  "price": "5.00",
+                  "path": [
+                    "Gedistilleerd"
+                  ]
+                },
+                {
+                  "name": "The Glenlivet 12 Years",
+                  "price": "7.00",
+                  "path": [
+                    "Gedistilleerd"
+                  ]
+                },
+                {
+                  "name": "Courvoisier VS",
+                  "price": "6.00",
+                  "path": [
+                    "Gedistilleerd"
+                  ]
+                },
+                {
+                  "name": "Ketel 1",
+                  "price": "5.00",
+                  "path": [
+                    "Gedistilleerd"
+                  ]
+                },
+                {
+                  "name": "Luxardo Limoncello",
+                  "price": "5.00",
+                  "path": [
+                    "Gedistilleerd"
+                  ]
+                },
+                {
+                  "name": "Luxardo Sambuca",
+                  "price": "5.00",
+                  "path": [
+                    "Gedistilleerd"
+                  ]
+                },
+                {
+                  "name": "Pernod",
+                  "price": "5.00",
+                  "path": [
+                    "Gedistilleerd"
+                  ]
+                },
+                {
+                  "name": "Licor 43",
+                  "price": "5.00",
+                  "path": [
+                    "Likeuren"
+                  ]
+                },
+                {
+                  "name": "Baileys",
+                  "price": "5.00",
+                  "path": [
+                    "Likeuren"
+                  ]
+                },
+                {
+                  "name": "Tia Maria",
+                  "price": "5.00",
+                  "path": [
+                    "Likeuren"
+                  ]
+                },
+                {
+                  "name": "Grand Marnier",
+                  "price": "6.00",
+                  "path": [
+                    "Likeuren"
+                  ]
+                },
+                {
+                  "name": "Disaronno Amaretto",
+                  "price": "6.00",
+                  "path": [
+                    "Likeuren"
+                  ]
+                }
+              ],
+              "extra": [],
+              "priceMismatches": [],
+              "categoryMismatches": [],
+              "duplicates": [],
+              "accounting": {
+                "expected": {
+                  "total": 138,
+                  "matched": 0,
+                  "missing": 138,
+                  "priceMismatch": 0,
+                  "categoryMismatch": 0,
+                  "accounted": 138,
+                  "balanced": true
+                },
+                "actual": {
+                  "total": 0,
+                  "matched": 0,
+                  "extra": 0,
+                  "priceMismatch": 0,
+                  "categoryMismatch": 0,
+                  "accounted": 0,
+                  "balanced": true
+                }
+              }
+            },
+            "namePriceComparison": {
+              "referenceItems": 138,
+              "actualItems": 0,
+              "matched": 0,
+              "missing": [
+                {
+                  "name": "Camembert",
+                  "price": "9.75"
+                },
+                {
+                  "name": "Pata Negra",
+                  "price": "14.75"
+                },
+                {
+                  "name": "Charcuterie van het Moment",
+                  "price": "13.75"
+                },
+                {
+                  "name": "Tonijn Tataki",
+                  "price": "15.75"
+                },
+                {
+                  "name": "Kaasplankje",
+                  "price": "11.75"
+                },
+                {
+                  "name": "Nacho's",
+                  "price": "15.75"
+                },
+                {
+                  "name": "Brood & Boter",
+                  "price": "6.75"
+                },
+                {
+                  "name": "Noten & Olijven",
+                  "price": "6.75"
+                },
+                {
+                  "name": "Chorizo Kroketjes",
+                  "price": "9.00"
+                },
+                {
+                  "name": "Kaastengels",
+                  "price": "9.50"
+                },
+                {
+                  "name": "Gyoza's",
+                  "price": "9.75"
+                },
+                {
+                  "name": "Chicken Bites",
+                  "price": "9.50"
+                },
+                {
+                  "name": "Bitterballen",
+                  "price": "8.50"
+                },
+                {
+                  "name": "Frikandelletjes",
+                  "price": "8.50"
+                },
+                {
+                  "name": "La Roche - La Chevallière",
+                  "price": "€6.00/€35,00"
+                },
+                {
+                  "name": "Agustinos - Gran Terroir White",
+                  "price": "€7.00/€39,00"
+                },
+                {
+                  "name": "Joseph Cattin - Duo Gris & Blanc",
+                  "price": "42.00"
+                },
+                {
+                  "name": "Morgadio",
+                  "price": "45.00"
+                },
+                {
+                  "name": "Höpler - Seeblick",
+                  "price": "€5.50/€32,00"
+                },
+                {
+                  "name": "Baigorri - Blanco Fermentado en Barrica DOC",
+                  "price": "49.00"
+                },
+                {
+                  "name": "Maison Champy Pernand-Vergelesses 1er Cru",
+                  "price": "98.00"
+                },
+                {
+                  "name": "Gérard Bertrand",
+                  "price": "39.00"
+                },
+                {
+                  "name": "Vallformosa - Blue Fin Cava Brut Reserva",
+                  "price": "€5.00/€38,00"
+                },
+                {
+                  "name": "Bouvet Ladubay - Crémant de Loire",
+                  "price": "€8.50/€45,00"
+                },
+                {
+                  "name": "Gérard Bertrand - Papillon Pétillant Naturel",
+                  "price": "38.00"
+                },
+                {
+                  "name": "Bouché - Père et Fils Cuvée Réservée Brut",
+                  "price": "€75.00/€51,00(37.5cl)"
+                },
+                {
+                  "name": "Joseph Cattin Orange",
+                  "price": "42.00"
+                },
+                {
+                  "name": "El Esteco - Don David Malbec Reserva",
+                  "price": "€7.00/€37,00"
+                },
+                {
+                  "name": "Pasqua - Desire Lush & Zin",
+                  "price": "€6.50/€35,00"
+                },
+                {
+                  "name": "Castillo de Monjardin Reserva",
+                  "price": "43.00"
+                },
+                {
+                  "name": "Baigorri - Reserva",
+                  "price": "55.00"
+                },
+                {
+                  "name": "Pasqua - Black Label Valpolicella Superiore Ripasso DOC",
+                  "price": "45.00"
+                },
+                {
+                  "name": "Bassermann Jordan - Spätburgunder",
+                  "price": "47.00"
+                },
+                {
+                  "name": "Höpler - Seeblick",
+                  "price": "€5.50/€32,00"
+                },
+                {
+                  "name": "Cérvoles - Colors Negre",
+                  "price": "42.00"
+                },
+                {
+                  "name": "Coppo - La Morra",
+                  "price": "35.00"
+                },
+                {
+                  "name": "Rolland Galareta - Priorat Clos d'en Ferran",
+                  "price": "73.00"
+                },
+                {
+                  "name": "La Campagne",
+                  "price": "€5.50/€29,00"
+                },
+                {
+                  "name": "Höpler - Seeblick",
+                  "price": "€5.50/€32,00"
+                },
+                {
+                  "name": "Pasqua - Y by Il Minuto Rosé",
+                  "price": "48.00"
+                },
+                {
+                  "name": "Château Gassier - Esprit Gassier Bio",
+                  "price": "39.00"
+                },
+                {
+                  "name": "Santa Alicia - Agustinos Late Harvest",
+                  "price": "8.00"
+                },
+                {
+                  "name": "Gérard Bertrand - Rivesaltes Ambré",
+                  "price": "7.50"
+                },
+                {
+                  "name": "Kopke Port",
+                  "price": "7.00"
+                },
+                {
+                  "name": "Bombay G&T",
+                  "price": "9.00"
+                },
+                {
+                  "name": "Bulldog G&T",
+                  "price": "11.00"
+                },
+                {
+                  "name": "Pink Flamingo",
+                  "price": "10.00"
+                },
+                {
+                  "name": "Tequila Sunrise",
+                  "price": "10.00"
+                },
+                {
+                  "name": "Paloma",
+                  "price": "11.00"
+                },
+                {
+                  "name": "Moscow Mule",
+                  "price": "9.00"
+                },
+                {
+                  "name": "Bloody Miro",
+                  "price": "9.00"
+                },
+                {
+                  "name": "Dark & Stormy",
+                  "price": "10.00"
+                },
+                {
+                  "name": "Negroni",
+                  "price": "9.00"
+                },
+                {
+                  "name": "Mimosa",
+                  "price": "7.00"
+                },
+                {
+                  "name": "Lyre's Pink London Spirit & Tonic",
+                  "price": "9.00"
+                },
+                {
+                  "name": "Aperol Spritz",
+                  "price": "9.00"
+                },
+                {
+                  "name": "Luxardo Limoncello Spritz",
+                  "price": "9.00"
+                },
+                {
+                  "name": "Campari Spritz",
+                  "price": "9.00"
+                },
+                {
+                  "name": "Kan Rode Sangria",
+                  "price": "26.00"
+                },
+                {
+                  "name": "Brand Pilsener 25cl · 5.6%",
+                  "price": "3.00"
+                },
+                {
+                  "name": "Brand Pilsener 50cl · 5.8%",
+                  "price": "6.00"
+                },
+                {
+                  "name": "Texels Skiller Wit 30cl · 5.6%",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Frontaal Juice Punch NEIPA 25cl · 5.8%",
+                  "price": "6.00"
+                },
+                {
+                  "name": "Lagunitas IPA 30cl · 6.2%",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Affligem Blond 30cl · 6.8%",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Paulaner Weizen 30cl · 5.3%",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Paulaner Weizen 50cl · 5.5%",
+                  "price": "8.00"
+                },
+                {
+                  "name": "Eeuwige Jeugd Lieflibel · 8.7%",
+                  "price": "6.25"
+                },
+                {
+                  "name": "Texels Zeebries",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Big Belly Loudon · 6.8%",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Oedipus Mannenliefde · 6.0%",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Brugse Zot · 6.0%",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Duvel · 8.5%",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Oedipus Thai · 8.0%",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Affligem Tripel · 9.0%",
+                  "price": "5.00"
+                },
+                {
+                  "name": "IJwit · 4.5%",
+                  "price": "6.00"
+                },
+                {
+                  "name": "Blanche de Bruges · 5.0%",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Belgisch Wit · 4.8%",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Frontaal White Simmie · 5.2%",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Texels Skuumkoppe · 6.0%",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Eeuwige Jeugd Dutteloak · 7.7%",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Texels Overzee · 6.0%",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Oedipus Gaia · 7.0%",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Eeuwige Jeugd Globjanus · 5.2%",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Big Belly Cabron · 5.6%",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Bolleke De Koninck · 5.2%",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Affligem Dubbel · 6.0%",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Brugse Zot Dubbel · 7.5%",
+                  "price": "6.00"
+                },
+                {
+                  "name": "Desperados · 5.9%",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Liefmans Fruitesse · 3.8%",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Amstel Radler · 2.0%",
+                  "price": "4.00"
+                },
+                {
+                  "name": "Heineken 0.0%",
+                  "price": "3.00"
+                },
+                {
+                  "name": "Brand Weizen 0.0%",
+                  "price": "4.00"
+                },
+                {
+                  "name": "Affligem Blond 0.0%",
+                  "price": "4.00"
+                },
+                {
+                  "name": "Brand IPA 0.0%",
+                  "price": "4.00"
+                },
+                {
+                  "name": "Amstel Rosé 0.0%",
+                  "price": "4.00"
+                },
+                {
+                  "name": "Koffie | Espresso",
+                  "price": "3.00"
+                },
+                {
+                  "name": "Dubbele Espresso",
+                  "price": "3.50"
+                },
+                {
+                  "name": "Cappuccino | Koffie Verkeerd",
+                  "price": "4.00"
+                },
+                {
+                  "name": "Espresso Macchiato | Cortado",
+                  "price": "3.00"
+                },
+                {
+                  "name": "Latte Macchiato",
+                  "price": "4.00"
+                },
+                {
+                  "name": "Flat White",
+                  "price": "4.00"
+                },
+                {
+                  "name": "Chai Latte",
+                  "price": "4.00"
+                },
+                {
+                  "name": "Dirty Chai Latte",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Diverse smaken thee",
+                  "price": "3.00"
+                },
+                {
+                  "name": "Verse thee",
+                  "price": "3.00"
+                },
+                {
+                  "name": "Warme Chocolademelk",
+                  "price": "3.50"
+                },
+                {
+                  "name": "IJskoffie",
+                  "price": "4.00"
+                },
+                {
+                  "name": "Koffie Deluxe",
+                  "price": "8.00"
+                },
+                {
+                  "name": "Amaretto | Licor 43 | Baileys",
+                  "price": "8.00"
+                },
+                {
+                  "name": "IJskoffie Deluxe",
+                  "price": "8.00"
+                },
+                {
+                  "name": "Warme Chocolademelk Deluxe",
+                  "price": "8.00"
+                },
+                {
+                  "name": "'t Heerdje",
+                  "price": "8.00"
+                },
+                {
+                  "name": "Pinkyrose Straight Lemon",
+                  "price": "4.00"
+                },
+                {
+                  "name": "Pinkyrose Spiced Lemon & Rose",
+                  "price": "4.00"
+                },
+                {
+                  "name": "Pinkyrose Ginger & Orange",
+                  "price": "4.00"
+                },
+                {
+                  "name": "Pinkyrose Chili Grapefruit",
+                  "price": "4.00"
+                },
+                {
+                  "name": "Chaudfontaine",
+                  "price": "3.00"
+                },
+                {
+                  "name": "Coca Cola Regular | Zero",
+                  "price": "3.00"
+                },
+                {
+                  "name": "Lipton Ice Tea",
+                  "price": "3.00"
+                },
+                {
+                  "name": "Fanta Orange | Cassis",
+                  "price": "3.00"
+                },
+                {
+                  "name": "Royal Bites",
+                  "price": "3.00"
+                },
+                {
+                  "name": "Red Bull Regular",
+                  "price": "4.00"
+                },
+                {
+                  "name": "Jus d'Orange",
+                  "price": "4.00"
+                },
+                {
+                  "name": "Johnnie Walker Red Label",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Jack Daniels",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Jameson",
+                  "price": "5.00"
+                },
+                {
+                  "name": "The Glenlivet 12 Years",
+                  "price": "7.00"
+                },
+                {
+                  "name": "Courvoisier VS",
+                  "price": "6.00"
+                },
+                {
+                  "name": "Ketel 1",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Luxardo Limoncello",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Luxardo Sambuca",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Pernod",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Licor 43",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Baileys",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Tia Maria",
+                  "price": "5.00"
+                },
+                {
+                  "name": "Grand Marnier",
+                  "price": "6.00"
+                },
+                {
+                  "name": "Disaronno Amaretto",
+                  "price": "6.00"
+                }
+              ],
+              "extra": [],
+              "priceMismatches": [],
+              "balanced": true
+            }
+          }
+        ],
+        "totals": {
+          "historicalItems": 189,
+          "strictMissing": 189,
+          "strictExtra": 0,
+          "strictPriceMismatches": 0,
+          "strictCategoryMismatches": 0,
+          "namePriceMissing": 189,
+          "namePriceExtra": 0,
+          "namePriceMismatches": 0
+        }
+      },
+      "limitations": [],
+      "errors": [
+        {
+          "url": "https://t-huis.online",
+          "error": "too-many-redirects"
+        },
+        {
+          "url": "https://t-huis.online/menu/",
+          "error": "too-many-redirects"
+        }
+      ],
+      "result": "No live menu items were extracted; 2 probe(s) failed. The source is recorded as a limitation, not as a successful menu."
+    }
+  }
+}

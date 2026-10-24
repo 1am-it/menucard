@@ -1,0 +1,45 @@
+{
+  "version": "1.0.0",
+  "pinnedAt": "2026-10-18",
+  "authorization": {
+    "decision": "Product Owner, 2026-10-18: 'Ja, deze vier bronnen testen'.",
+    "reference": "GitHub #59, explicit instruction 6248411416",
+    "scope": "Public read-only practice probes of exactly these four entry URLs and their relevant public menu links, within the existing safe fetch/source bounds. No login, CAPTCHA bypass, paid service, other location, arbitrary crawl or publication.",
+    "appProviderActivation": false,
+    "note": "This permission is a source-probe permission. It does not activate an app-side AI provider, budget or retention arrangement."
+  },
+  "sources": [
+    {
+      "id": "debotanist",
+      "label": "De Botanist Breda",
+      "url": "https://debotanistbreda.nl/",
+      "class": "text_pdf",
+      "allowedHosts": ["debotanistbreda.nl", "www.debotanistbreda.nl"],
+      "shapeHypothesis": "Landing page with a linked digital PDF menu. To be confirmed by the captured source, not by a parser count."
+    },
+    {
+      "id": "gauchosgrill",
+      "label": "Gauchos Grill Breda",
+      "url": "https://www.gauchosgrill.nl/breda",
+      "class": "language_branch",
+      "allowedHosts": ["gauchosgrill.nl", "www.gauchosgrill.nl"],
+      "shapeHypothesis": "Chain/location page; the location must not be assigned to another branch."
+    },
+    {
+      "id": "mrmoos",
+      "label": "Mr Moos Breda",
+      "url": "https://mrmoos.nl/",
+      "class": "html",
+      "allowedHosts": ["mrmoos.nl", "www.mrmoos.nl"],
+      "shapeHypothesis": "Known JavaScript-dependent candidate; a no-JS read may honestly find nothing."
+    },
+    {
+      "id": "colonie",
+      "label": "Colonia Breda",
+      "url": "https://breda.colonie.nl/",
+      "class": "html",
+      "allowedHosts": ["breda.colonie.nl", "www.breda.colonie.nl"],
+      "shapeHypothesis": "Location page; relevant public menu links are followed only within the existing bounds."
+    }
+  ]
+}

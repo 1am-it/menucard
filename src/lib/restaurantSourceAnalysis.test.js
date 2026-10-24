@@ -4,7 +4,10 @@ const test = require('node:test')
 const assert = require('node:assert/strict')
 const fs = require('node:fs')
 
-const { runRestaurantSourceAnalysis } = require('./restaurantSourceAnalysis')
+const { runRestaurantSourceAnalysis, applyProviderNeutralExtraction, pdfLayoutLimitations, readPdfMenuSource } = require('./restaurantSourceAnalysis')
+const { assessDeterministicMenuQuality } = require('./menuExtractionQuality')
+const { buildCandidateSummary } = require('./urlIntakes')
+const { buildMenuConcept } = require('./menuConcept')
 
 // Reused verbatim from src/lib/pdfTextExtraction.test.js's own,
 // empirically-verified fixtures — a genuinely valid single-page PDF with
@@ -163,6 +166,23 @@ test('runRestaurantSourceAnalysis: an HTML candidate contributes a new menu cont
   assert.equal(result.fieldEvidence.phone.sourceUrl, 'https://bobbisbar.nl/menukaart')
 })
 
+test('runRestaurantSourceAnalysis: an HTML menu item keeps its own locator, pattern and quote for review', async () => {
+  const homepage = '<html><body><a href="/menukaart">Menukaart</a></body></html>'
+  const candidateHtml = '<h2>Fictieve kaart</h2><ul><li>Fictieve soep 4,50</li><li>Fictieve salade 5,50</li><li>Fictief brood 3,00</li></ul>'
+  const result = await runRestaurantSourceAnalysis({
+    homepageHtml: homepage,
+    homepageUrl: 'https://bobbisbar.nl/',
+    fetchCandidate: async () => ({ status: 'html', body: candidateHtml, finalUrl: 'https://bobbisbar.nl/menukaart' }),
+  })
+  const menu = result.menuContexts.find((entry) => entry.extractionMethod === 'html')
+  assert.ok(menu, 'the structured HTML menu is a real menu context')
+  const item = menu.categories.flatMap((category) => category.items).find((entry) => entry.name === 'Fictieve soep')
+  assert.ok(item)
+  assert.match(item.evidence.locator, /^ul>li\[1\]$/)
+  assert.equal(typeof item.evidence.pattern, 'string')
+  assert.match(item.evidence.quote, /Fictieve soep/)
+})
+
 test('runRestaurantSourceAnalysis: the homepage field always wins over a same-host candidate for the same field — never overridden', async () => {
   const homepageWithPhone = jsonLdScript({ '@type': 'Restaurant', name: 'Mr. Moos', telephone: '076 0000000' }) +
     '<a href="/menukaart">Menukaart</a>'
@@ -223,6 +243,57 @@ test('runRestaurantSourceAnalysis: a same-host PDF candidate with real menu cont
   )
   assert.equal(unknown.recognizedSections[0].items[0].confidence, 'middel')
 })
+
+test('SMELT-LIKE CHAIN: recognized PDF sections become receipt menus, one concept and a saveable reviewed result — never "PDF found, zero dishes"', async () => {
+  const content = [
+    'BT /F1 12 Tf',
+    textAt(20, 100, '// FICTIEVE FONDUE'),
+    textAt(20, 80, 'Fictieve kaasfondue'),
+    textAt(120, 80, '24.50'),
+    'ET',
+  ].join('\n');
+  const result = await runRestaurantSourceAnalysis({
+    homepageHtml: homepageWithFullRestaurantAndOneMenu(),
+    homepageUrl: 'https://debotanistbreda.nl/',
+    fetchCandidate: async () => ({ status: 'pdf', bytes: buildTestPdf({ contentStream: content }), finalUrl: 'https://debotanistbreda.nl/menukaart.pdf' }),
+  });
+  const pdfMenu = result.menuContexts.find((menu) => menu.extractionMethod === 'pdf_text');
+  assert.ok(pdfMenu);
+  const summary = buildCandidateSummary({ restaurantCandidateFields: result.restaurantCandidateFields, menus: [pdfMenu] });
+  assert.equal(summary.menus[0].sourceUrl, 'https://debotanistbreda.nl/menukaart.pdf');
+  assert.equal(summary.menus[0].sourceId, pdfMenu.sourceId);
+  assert.equal(summary.menus[0].categories[0].items[0].price, '24.50');
+  assert.match(summary.menus[0].categories[0].items[0].evidence.locator, /^pdf:/);
+  const concept = buildMenuConcept({ menus: summary.menus, liveLines: [], edits: {} });
+  assert.equal(concept.canSave, true);
+  assert.equal(concept.content.categories[0].items[0].name, 'Fictieve kaasfondue');
+  assert.equal(result.extractionResult.coverage.itemCount >= 1, true);
+});
+
+test('REGRESSION: an ambiguous PDF price reaches concept as one explicit blocker, not a fake "/" dish', async () => {
+  const content = [
+    'BT /F1 12 Tf',
+    textAt(20, 100, '// DRANKEN'),
+    textAt(20, 80, 'Chardonnay 6.50 / 25.00'),
+    'ET',
+  ].join('\n');
+  const result = await runRestaurantSourceAnalysis({
+    homepageHtml: homepageWithFullRestaurantAndOneMenu(),
+    homepageUrl: 'https://debotanistbreda.nl/',
+    fetchCandidate: async () => ({ status: 'pdf', bytes: buildTestPdf({ contentStream: content }), finalUrl: 'https://debotanistbreda.nl/kaart.pdf' }),
+  });
+  const pdfMenu = result.menuContexts.find((menu) => menu.extractionMethod === 'pdf_text');
+  assert.ok(pdfMenu);
+  assert.equal(pdfMenu.categories[0].items.length, 1);
+  assert.equal(pdfMenu.categories[0].items[0].name, 'Chardonnay');
+  assert.equal(pdfMenu.categories[0].items[0].price, null);
+  const summary = buildCandidateSummary({ restaurantCandidateFields: {}, menus: [pdfMenu] });
+  const concept = buildMenuConcept({ menus: summary.menus, liveLines: [], edits: {} });
+  assert.equal(concept.canSave, false);
+  assert.deepEqual(concept.blockers.map((b) => b.status), ['multiple_prices']);
+  assert.equal(concept.content.categories[0].items[0].name, 'Chardonnay');
+  assert.equal(concept.content.categories[0].items[0].price, null);
+});
 
 test('runRestaurantSourceAnalysis: a same-host PDF candidate with no recognizable menu content still succeeds, with recognizedSections: [] — never fabricated', async () => {
   const result = await runRestaurantSourceAnalysis({
@@ -304,10 +375,17 @@ test('DE BOTANIST REGRESSION CASE — this fix\'s own named production finding, 
   // itself never throws and returns its normal shape.
   assert.ok(result.restaurantCandidateFields)
 
-  // "nul menu's werden gevonden" — no json_ld/html menu on the homepage
-  // or any HTML candidate (there is none here; the only candidate is
-  // the PDF itself).
-  assert.equal(result.menuContexts.length, 0)
+  // No json_ld/html menu exists, but the recognized PDF sections are now
+  // promoted to the SAME canonical menu context the receipt and concept use.
+  // This is the Smelt regression: "PDF found" and "zero dishes" must not be
+  // two separate observations.
+  assert.equal(result.menuContexts.length, 1)
+  assert.equal(result.menuContexts[0].extractionMethod, 'pdf_text')
+  assert.equal(result.menuContexts[0].sourceId, result.unknownMenuContexts[0].sourceId)
+  assert.equal(result.menuContexts[0].categories[0].items.length, 2)
+  assert.equal(result.extractionResult.status, 'items_extracted')
+  assert.equal(result.extractionResult.coverage.itemCount, 2)
+  assert.equal(result.extractionResult.coverage.complete, false)
 
   // "de ontdekte PDF gaf pdf_extraction_failed" — reproduced as NOT
   // reproducing today: the PDF is processed successfully, never
@@ -512,4 +590,536 @@ test('structural safety net: never performs its own network fetch — every I/O 
 test('structural safety net: no OCR, screenshot, image-rendering, or browser-automation dependency', () => {
   const source = fs.readFileSync(require.resolve('./restaurantSourceAnalysis.js'), 'utf8')
   assert.doesNotMatch(source, /tesseract|puppeteer|playwright|browserless|canvas|screenshot/i)
+})
+
+// ─── Provider-neutral quality gate and source-scoped replacement (#59 review) ─
+
+const aiItem = (name, sourceId = 'source-1') => ({
+  name,
+  desc: null,
+  price: '5.00',
+  priceStatus: 'known',
+  evidence: { sourceId, locator: 'line:1', quote: name, sourceUrl: 'https://fixture.example/menu.pdf' },
+})
+const aiMenu = (sourceId = 'source-1') => ({
+  name: 'Kaart',
+  contextSlug: 'ai-1',
+  title: 'Kaart',
+  structure: 'normalized',
+  sourceId,
+  sourceUrl: 'https://fixture.example/menu.pdf',
+  extractionMethod: 'ai_structured',
+  categories: [{ name: 'Voor', items: [aiItem('Fictieve soep', sourceId), aiItem('Fictief brood', sourceId)] }],
+})
+const deterministicMenu = () => ({
+  sourceId: 'source-1',
+  sourceUrl: 'https://fixture.example/menu.pdf',
+  contextSlug: 'pdf-1',
+  extractionMethod: 'pdf_text',
+  categories: [{ name: 'Voor', items: [{ name: 'Fictieve soep', price: '5.00', priceStatus: 'known' }, { name: 'Fictief brood', price: '4.00', priceStatus: 'known' }] }],
+})
+
+test('REGRESSION (review P1): no model call is made when the deterministic result is sufficient', async () => {
+  let called = 0
+  const notes = []
+  const limitations = []
+  const result = await applyProviderNeutralExtraction({
+    menuContexts: [deterministicMenu()],
+    unknownMenuContexts: [],
+    sourceInventory: [{ id: 'source-1', url: 'https://fixture.example/menu.pdf', kind: 'pdf', status: 'read', itemCount: 2 }],
+    sourceTexts: new Map(),
+    notes,
+    limitations,
+    restaurantCandidateFields: {},
+    structuredExtraction: async () => { called += 1; return { enabled: true, ok: true, menus: [aiMenu()] } },
+  })
+  assert.equal(called, 0)
+  assert.equal(result.aiExtraction.skipped, true)
+  assert.equal(result.aiExtraction.reason, 'deterministic_result_sufficient')
+  assert.equal(result.assessment.sufficient, true)
+})
+
+test('REGRESSION (review P1): a supplement source is reported and refused, never paid for and thrown away', async () => {
+  let called = 0
+  const limitations = []
+  const result = await applyProviderNeutralExtraction({
+    menuContexts: [deterministicMenu()],
+    unknownMenuContexts: [{ sourceId: 'source-1', sourceUrl: 'https://fixture.example/menu.pdf', layout: { supplementLines: 2 } }],
+    sourceInventory: [{ id: 'source-1', url: 'https://fixture.example/menu.pdf', kind: 'pdf', status: 'read', itemCount: 2 }],
+    sourceTexts: new Map(),
+    notes: [],
+    limitations,
+    restaurantCandidateFields: {},
+    structuredExtraction: async () => { called += 1; return { enabled: true, ok: true, menus: [aiMenu()] } },
+  })
+  assert.equal(called, 0)
+  assert.equal(result.aiExtraction.reason, 'unsupported_product_gap')
+  assert.equal(result.assessment.blockedByProductGap, true)
+  assert.ok(limitations.some((line) => line.includes('Geen model-extractie uitgevoerd')))
+})
+
+
+
+test('REGRESSION (review 6246984520): a product gap in source-1 does not block or overwrite the recoverable source-2', async () => {
+  const blockedMenu = {
+    sourceId: 'source-1',
+    sourceUrl: 'https://fixture.example/borrel.pdf',
+    contextSlug: 'borrel',
+    extractionMethod: 'pdf_text',
+    categories: [{ name: 'Borrel', items: [{ name: 'Fictief brood', price: '4.00', priceStatus: 'known' }] }],
+  }
+  const recoverableMenu = {
+    sourceId: 'source-2',
+    sourceUrl: 'https://fixture.example/lunch.pdf',
+    contextSlug: 'lunch',
+    extractionMethod: 'html',
+    categories: [{ name: 'Lunch', items: [{ name: 'Fictieve soep', price: '5.00', priceStatus: 'known' }, { name: 'Fictieve soep', price: '5.00', priceStatus: 'known' }] }],
+  }
+  const menus = [blockedMenu, recoverableMenu]
+  const limitations = []
+  let called = 0
+  let receivedSources = null
+  const result = await applyProviderNeutralExtraction({
+    menuContexts: menus,
+    unknownMenuContexts: [{ sourceId: 'source-1', sourceUrl: blockedMenu.sourceUrl, layout: { supplementLines: 2 } }],
+    sourceInventory: [
+      { id: 'source-1', url: blockedMenu.sourceUrl, kind: 'pdf', status: 'read', itemCount: 1 },
+      { id: 'source-2', url: recoverableMenu.sourceUrl, kind: 'html', status: 'read', itemCount: 2 },
+    ],
+    sourceTexts: new Map([['source-2', 'Fictieve soep 5.00']]),
+    notes: [],
+    limitations,
+    restaurantCandidateFields: {},
+    structuredExtraction: async (input) => {
+      called += 1
+      receivedSources = input.sources.map((source) => source.id)
+      return {
+        enabled: true,
+        ok: true,
+        menus: [
+          {
+            name: 'Lunch',
+            title: 'Lunch',
+            contextSlug: 'ai-1',
+            structure: 'normalized',
+            sourceId: 'source-2',
+            variant: null,
+            order: 0,
+            categories: [{
+              name: 'Lunch',
+              items: [
+                { name: 'Fictieve soep', description: null, priceStatus: 'known', amountMinorUnits: 500, currency: 'EUR', evidence: { sourceId: 'source-2', locator: 'line:1', quote: 'Fictieve soep' } },
+                { name: 'Fictief brood', description: null, priceStatus: 'known', amountMinorUnits: 400, currency: 'EUR', evidence: { sourceId: 'source-2', locator: 'line:2', quote: 'Fictief brood' } },
+              ],
+            }],
+          },
+          {
+            name: 'Borrel',
+            title: 'Borrel',
+            contextSlug: 'ai-2',
+            structure: 'normalized',
+            sourceId: 'source-1',
+            variant: null,
+            order: 0,
+            categories: [{
+              name: 'Borrel',
+              items: [{ name: 'Fictief brood', description: null, priceStatus: 'known', amountMinorUnits: 400, currency: 'EUR', evidence: { sourceId: 'source-1', locator: 'line:1', quote: 'Fictief brood' } }],
+            }],
+          },
+        ],
+      }
+    },
+  })
+
+  // The model is asked once, for the recoverable source only.
+  assert.equal(called, 1)
+  assert.deepEqual(receivedSources, ['source-2'])
+  assert.equal(result.assessment.blockedByProductGap, true)
+  assert.deepEqual(result.assessment.blockedSourceIds, ['source-1'])
+  assert.deepEqual(result.assessment.aiEligibleSourceIds, ['source-2'])
+  assert.deepEqual(result.aiExtraction.blockedSources.map((entry) => entry.sourceId), ['source-1'])
+
+  // The blocked source keeps its own deterministic result and provenance.
+  const kept = menus.find((menu) => menu.sourceId === 'source-1')
+  assert.equal(kept.extractionMethod, 'pdf_text')
+  assert.equal(kept.categories[0].uncertain, true)
+  // The recoverable source is replaced, explicitly marked for review.
+  const replaced = menus.find((menu) => menu.sourceId === 'source-2')
+  assert.equal(replaced.extractionMethod, 'ai_structured')
+  assert.equal(replaced.replacesDeterministic.sourceId, 'source-2')
+  assert.equal(replaced.categories.every((category) => category.uncertain === true), true)
+  // A model menu for the blocked source is refused, with an explicit reason.
+  assert.ok(limitations.some((line) => line.includes('bron source-1') && line.includes('supplementen')))
+  assert.ok(limitations.some((line) => line.includes('source_blocked_by_product_gap')))
+  assert.equal(menus.filter((menu) => menu.sourceId === 'source-1').length, 1)
+})
+
+
+test('REGRESSION (review P1): a validated model menu replaces only the flagged source, explicitly marked for review', async () => {
+  const deterministic = deterministicMenu()
+  deterministic.categories[0].items = [{ name: 'Fictieve soep', price: '5.00', priceStatus: 'known' }, { name: 'Fictieve soep', price: '5.00', priceStatus: 'known' }] // duplicate → flag
+  const menus = [deterministic]
+  const limitations = []
+  let called = 0
+  const result = await applyProviderNeutralExtraction({
+    menuContexts: menus,
+    unknownMenuContexts: [],
+    sourceInventory: [{ id: 'source-1', url: 'https://fixture.example/menu.pdf', kind: 'pdf', status: 'read', itemCount: 3 }],
+    sourceTexts: new Map(),
+    notes: [],
+    limitations,
+    restaurantCandidateFields: {},
+    structuredExtraction: async () => {
+      called += 1
+      return { enabled: true, ok: true, menus: [aiMenu(), aiMenu('source-9')], meta: { provider: 'fake' } }
+    },
+  })
+  assert.equal(called, 1)
+  assert.equal(menus.length, 1)
+  assert.equal(menus[0].extractionMethod, 'ai_structured')
+  assert.equal(menus[0].sourceId, 'source-1')
+  assert.equal(menus[0].replacesDeterministic.sourceId, 'source-1')
+  assert.equal(menus[0].replacesDeterministic.itemCount, 2)
+  assert.equal(menus[0].categories.every((category) => category.uncertain === true), true)
+  assert.ok(result.assessment.codes.includes('duplicate_item_within_category'))
+  assert.ok(limitations.some((line) => line.includes('Model-extractie verving de deterministische uitkomst')))
+  assert.ok(limitations.some((line) => line.includes('source_not_flagged')))
+})
+
+test('REGRESSION (review P1): a model menu with insufficient coverage never replaces the deterministic one', async () => {
+  const deterministic = deterministicMenu()
+  for (let i = 0; i < 10; i += 1) deterministic.categories[0].items.push({ name: `Fictief gerecht ${i}`, price: '5.00', priceStatus: 'known' })
+  // One duplicate is enough to flag the menu, so the model IS asked; its
+  // materially smaller answer must still not replace the deterministic result.
+  deterministic.categories[0].items.push({ name: 'Fictieve soep', price: '5.00', priceStatus: 'known' })
+  const menus = [deterministic]
+  const limitations = []
+  await applyProviderNeutralExtraction({
+    menuContexts: menus,
+    unknownMenuContexts: [],
+    sourceInventory: [{ id: 'source-1', url: 'https://fixture.example/menu.pdf', kind: 'pdf', status: 'read', itemCount: 12 }],
+    sourceTexts: new Map(),
+    notes: [],
+    limitations,
+    restaurantCandidateFields: {},
+    structuredExtraction: async () => ({ enabled: true, ok: true, menus: [aiMenu()] }),
+  })
+  assert.equal(menus.length, 1)
+  assert.equal(menus[0].extractionMethod, 'pdf_text')
+  assert.ok(limitations.some((line) => line.includes('coverage_below_deterministic')))
+})
+
+test('REGRESSION (review P1): the bounded PDF text reaches the adapter, while context/receipt never carry it', async () => {
+  const menuContent = [
+    'BT /F1 12 Tf',
+    textAt(20, 100, '// FICTIEVE DRANKEN'),
+    textAt(20, 80, 'Fictieve Koffie'),
+    textAt(90, 80, '3.5'),
+    textAt(20, 60, 'Fictieve Koffie'),
+    textAt(90, 60, '3.5'),
+    'ET',
+  ].join('\n')
+  let received
+  const result = await runRestaurantSourceAnalysis({
+    homepageHtml: '<html><body><a href="/menukaart">Download Menukaart</a></body></html>',
+    homepageUrl: 'https://fictieve-botanist.invalid/',
+    fetchCandidate: async () => ({ status: 'pdf', bytes: buildTestPdf({ contentStream: menuContent }), finalUrl: 'https://fictieve-botanist.invalid/menukaart' }),
+    structuredExtraction: async (input) => {
+      received = input
+      return { enabled: true, ok: false, reason: 'provider_unavailable' }
+    },
+  })
+  const pdfSource = received.sources.find((source) => source.id === result.unknownMenuContexts[0].sourceId)
+  assert.match(pdfSource.text, /Pagina 1/)
+  assert.match(pdfSource.text, /Fictieve Koffie 3\.5/)
+  assert.equal(Object.prototype.hasOwnProperty.call(result.unknownMenuContexts[0], 'text'), false)
+  assert.doesNotMatch(JSON.stringify(result.unknownMenuContexts), /Pagina 1/)
+  assert.doesNotMatch(JSON.stringify(result.extractionResult), /Pagina 1/)
+  assert.doesNotMatch(JSON.stringify(result.extractionResult), /Fictieve Koffie/)
+  assert.equal(result.menuContexts.length, 1)
+  assert.equal(result.aiExtraction.reason, 'provider_unavailable')
+})
+
+test('REGRESSION (review 6249303096 P1): an unlinked PDF price line is reported as a limitation instead of disappearing', () => {
+  const limitations = pdfLayoutLimitations('https://fixture.example/menu.pdf', { unlinkedPriceLines: 2 })
+  assert.equal(limitations.length, 1)
+  assert.match(limitations[0], /2 prijsregel\(s\)/)
+  assert.match(limitations[0], /naam-\/prijskoppeling/)
+  assert.deepEqual(pdfLayoutLimitations('https://fixture.example/menu.pdf', { unlinkedPriceLines: 0 }), [])
+})
+
+test('REGRESSION (review 6250261342): an inherited section and a skipped portion are named limitations, not silent success', () => {
+  const inherited = pdfLayoutLimitations('https://fixture.example/menu.pdf', {
+    inheritedSectionColumns: 1,
+    inheritedSubheadingColumns: 1,
+  })
+  assert.equal(inherited.length, 1)
+  assert.match(inherited[0], /1 kolom\(men\)/)
+  assert.match(inherited[0], /onzekere rubricering/)
+
+  const portions = pdfLayoutLimitations('https://fixture.example/menu.pdf', { portionLines: 2 })
+  assert.equal(portions.length, 1)
+  assert.match(portions[0], /2 portie-/)
+  assert.match(portions[0], /porties nog niet/)
+})
+
+test('REGRESSION (review 6249657793 P1 + 6249915021 P1): an unresolvable numeric ambiguity survives parser → quality gate → limitation identically for integer, decimal and comma notation and never becomes a sufficient/review-ready menu', async () => {
+  const outcomes = []
+  for (const [second, third] of [['6', '25'], ['6.5', '25.0'], ['6,50', '25,00']]) {
+    const content = [
+      'BT /F1 12 Tf',
+      textAt(20, 100, '// FICTIEVE DRANKEN'),
+      // A proven pair (split name/price) and a proven merged pair stay items.
+      textAt(20, 80, 'Fictieve Koffie'),
+      textAt(90, 80, '3.5'),
+      textAt(160, 80, 'Fictief Broodje 4.5'),
+      // The same geometry with two amounts and no separator: the layout does
+      // not prove whether the first number belongs to the name or is a second
+      // (glass) amount. The amount's writing style must not change that.
+      textAt(20, 60, 'Fictieve Wijn'),
+      textAt(90, 60, second),
+      textAt(150, 60, third),
+      'ET',
+    ].join('\n')
+
+    const { context } = await readPdfMenuSource(
+      buildTestPdf({ contentStream: content }),
+      'https://fixture.example/menu.pdf',
+      'source-1',
+    )
+    assert.equal(context.layout.ambiguousPriceLines, 1, `${second}/${third}`)
+    const names = context.recognizedSections.flatMap((category) => category.items.map((item) => item.name))
+    assert.deepEqual(names, ['Fictieve Koffie', 'Fictief Broodje'], `${second}/${third}`)
+    // Never a claimed first amount and never a silent "Fictieve Wijn 6" item.
+    assert.equal(context.recognizedSections.some((category) => category.items.some((item) => item.name.includes('Wijn'))), false, `${second}/${third}`)
+    assert.equal(context.recognizedSections.some((category) => category.items.some((item) => [second, third].includes(item.price))), false, `${second}/${third}`)
+
+    const menu = {
+      sourceId: 'source-1',
+      sourceUrl: 'https://fixture.example/menu.pdf',
+      categories: context.recognizedSections,
+    }
+    const assessment = assessDeterministicMenuQuality({ menus: [menu], unknownMenuContexts: [context] })
+    assert.equal(assessment.sufficient, false, `${second}/${third}`)
+    assert.equal(assessment.blockedByProductGap, false, `${second}/${third}`)
+    assert.ok(assessment.codes.includes('pdf_ambiguous_price_lines'), `${second}/${third}`)
+    assert.deepEqual(assessment.flaggedSourceIds, ['source-1'], `${second}/${third}`)
+
+    const limitations = pdfLayoutLimitations(menu.sourceUrl, context.layout)
+    assert.ok(limitations.some((line) => /niet eenduidig/.test(line) && /niet als gerecht/.test(line)), `${second}/${third}`)
+
+    outcomes.push(JSON.stringify({ names, layout: context.layout, flags: assessment.codes, limitations }))
+  }
+  // Names, layout counters, flag codes and limitation text are identical for
+  // the integer, decimal and comma runs: the safety outcome never depends on
+  // the amount's notation.
+  assert.equal(new Set(outcomes).size, 1)
+})
+
+test('REGRESSION (review 6252891629 P1): a supplement section survives parser → analysis → quality gate as an explicit product gap, never as ordinary dishes or a paid call', async () => {
+  const content = [
+    'BT /F1 12 Tf',
+    textAt(20, 200, '// SUPPLEMENTEN'),
+    textAt(20, 180, 'Havermelk'),
+    textAt(120, 180, '0.5'),
+    textAt(20, 160, 'Honing'),
+    textAt(120, 160, '0.6'),
+    textAt(20, 120, '// DESSERTS'),
+    textAt(20, 100, 'Fictieve Taart'),
+    textAt(120, 100, '6.0'),
+    'ET',
+  ].join('\n')
+  const { context } = await readPdfMenuSource(
+    buildTestPdf({ contentStream: content }),
+    'https://fixture.example/menu.pdf',
+    'source-1',
+  )
+
+  // Parser: the two supplement rows are not dishes; the real section after
+  // them still is.
+  assert.deepEqual(context.recognizedSections.map((category) => category.name), ['DESSERTS'])
+  assert.deepEqual(context.recognizedSections[0].items.map((item) => [item.name, item.price]), [['Fictieve Taart', '6.0']])
+  assert.deepEqual(context.layout.supplementSections, [{ heading: 'SUPPLEMENTEN', pages: [1], lines: 2 }])
+  assert.equal(context.layout.supplementLines, 2)
+
+  // Quality gate: an explicit product gap, not a repairable menu.
+  const menu = { sourceId: 'source-1', sourceUrl: 'https://fixture.example/menu.pdf', categories: context.recognizedSections }
+  const assessment = assessDeterministicMenuQuality({ menus: [menu], unknownMenuContexts: [context] })
+  assert.equal(assessment.sufficient, false)
+  assert.equal(assessment.blockedByProductGap, true)
+  assert.equal(assessment.requiresAiExtraction, false)
+  assert.deepEqual(assessment.blockedSourceIds, ['source-1'])
+  assert.ok(assessment.codes.includes('pdf_supplements_skipped'))
+  const flag = assessment.flags.find((entry) => entry.code === 'pdf_supplements_skipped')
+  assert.match(flag.detail, /SUPPLEMENTEN/)
+  assert.match(flag.detail, /p\. 1/)
+
+  // The same fact is a plain-language limitation with its source provenance.
+  const limitations = pdfLayoutLimitations(menu.sourceUrl, context.layout)
+  const supplementLimitation = limitations.find((line) => line.includes('supplementregel'))
+  assert.ok(supplementLimitation)
+  assert.match(supplementLimitation, /SUPPLEMENTEN/)
+  assert.match(supplementLimitation, /p\. 1/)
+
+  // No provider call is made for a source blocked by this product gap.
+  let providerCalls = 0
+  const result = await applyProviderNeutralExtraction({
+    menuContexts: [menu],
+    unknownMenuContexts: [context],
+    sourceInventory: [{ id: 'source-1', url: menu.sourceUrl, kind: 'pdf', status: 'read' }],
+    notes: [],
+    limitations: [],
+    restaurantCandidateFields: {},
+    structuredExtraction: async () => {
+      providerCalls += 1
+      return { enabled: true, ok: true, menus: [] }
+    },
+  })
+  assert.equal(providerCalls, 0)
+  assert.equal(result.aiExtraction.skipped, true)
+  assert.equal(result.aiExtraction.reason, 'unsupported_product_gap')
+})
+
+// ── Lead-review 6344039571 (finish round): criterion 10 and 11 ──
+
+test('K2 (criterion 10, wrong establishment): a same-host page carrying another branch address never lends that address to this branch, and the menu read there keeps its own source URL', async () => {
+  const homepageWithBredaAddress = jsonLdScript({
+    '@type': 'Restaurant',
+    name: 'Fictieve Keten Breda',
+    address: { streetAddress: 'Tolbrugstraat 19', postalCode: '4811 WN', addressLocality: 'Breda' },
+  }) + '<a href="/menukaart">Menukaart</a>'
+  // A chain-wide template prints the head office of another branch next to
+  // this branch's own menu. The address is a genuine conflict and the menu
+  // keeps the page it was actually read from, so a reviewer can see both.
+  const otherBranchPage = `<address>Hoofdkantoor 1, 1011 AB Amsterdam</address>
+    <h2>Fictieve lunchkaart</h2><ul><li>Fictieve soep 4,50</li><li>Fictieve salade 5,50</li><li>Fictief brood 3,00</li></ul>`
+
+  const result = await runRestaurantSourceAnalysis({
+    homepageHtml: homepageWithBredaAddress,
+    homepageUrl: 'https://fictieve-keten.invalid/',
+    fetchCandidate: async () => ({ status: 'html', body: otherBranchPage, finalUrl: 'https://fictieve-keten.invalid/menukaart' }),
+  })
+
+  // The other branch's address is never accepted as this branch's address.
+  assert.equal(result.fieldEvidence.address.contextStatus, 'conflict')
+  assert.equal(result.fieldEvidence.address.confidence, 'laag')
+  assert.equal(result.fieldEvidence.address.reviewReady, false)
+  assert.doesNotMatch(JSON.stringify(result.restaurantCandidateFields.address), /Amsterdam/)
+  assert.doesNotMatch(result.description, /Amsterdam/)
+
+  // The menu itself is not detached from its own page: the source URL stays
+  // the open review context, and only that page's own dishes are read.
+  const menu = result.menuContexts.find((entry) => entry.extractionMethod === 'html')
+  assert.ok(menu, 'the page menu is a real menu context')
+  assert.equal(menu.sourceUrl, 'https://fictieve-keten.invalid/menukaart')
+  const names = menu.categories.flatMap((category) => category.items.map((item) => item.name))
+  assert.deepEqual(names, ['Fictieve soep', 'Fictieve salade', 'Fictief brood'])
+})
+
+test('K2 (criterion 5, missing card title): a menu page without its own card heading takes the name the site itself links it with, and keeps its section paths', async () => {
+  const homepage = `<nav>
+      <a href="/menu-diner">Menukaart diner</a>
+      <a href="/menu-lunch">Menukaart lunch</a>
+    </nav>`
+  const dinerPage = `<h2>Voorgerechten</h2><ul><li>Fictieve soep 7,50</li><li>Fictieve salade 8,50</li></ul>
+    <h2>Hoofdgerechten</h2><ul><li>Fictief gerecht 18,50</li></ul>`
+  const lunchPage = dinerPage.replace('Fictief gerecht', 'Fictief lunchgerecht')
+
+  const result = await runRestaurantSourceAnalysis({
+    homepageHtml: homepage,
+    homepageUrl: 'https://fictieve-kaart.invalid/',
+    fetchCandidate: async (url) => ({
+      status: 'html',
+      body: url.includes('lunch') ? lunchPage : dinerPage,
+      finalUrl: url,
+    }),
+  })
+
+  const menus = result.menuContexts.filter((menu) => menu.extractionMethod === 'html')
+  const diner = menus.find((menu) => menu.sourceUrl.endsWith('/menu-diner'))
+  const lunch = menus.find((menu) => menu.sourceUrl.endsWith('/menu-lunch'))
+  assert.ok(diner && lunch, 'both menu pages are real menu contexts')
+  // The site's own label for that exact page becomes the menu title …
+  assert.equal(diner.title, 'Menukaart diner')
+  assert.equal(lunch.title, 'Menukaart lunch')
+  // … and the printed section paths are not renamed, extended or flattened.
+  assert.deepEqual(diner.categories.map((category) => category.path), [['Voorgerechten'], ['Hoofdgerechten']])
+  assert.deepEqual(
+    diner.categories.flatMap((category) => category.items.map((item) => item.name)),
+    ['Fictieve soep', 'Fictieve salade', 'Fictief gerecht'],
+  )
+})
+
+test('K2 (criterion 5, missing card title): a call-to-action link never becomes a card title', async () => {
+  const homepage = '<a href="/onze-kaart">Ontdek ons menu</a>'
+  const menuPage = `<h2>Voorgerechten</h2><ul><li>Fictieve soep 7,50</li><li>Fictieve salade 8,50</li><li>Fictief gerecht 18,50</li></ul>`
+
+  const result = await runRestaurantSourceAnalysis({
+    homepageHtml: homepage,
+    homepageUrl: 'https://fictieve-cta.invalid/',
+    fetchCandidate: async (url) => ({ status: 'html', body: menuPage, finalUrl: url }),
+  })
+
+  const menu = result.menuContexts.find((entry) => entry.extractionMethod === 'html')
+  assert.ok(menu, 'the menu page is a real menu context')
+  // No name of its own is proven for this page, so no title is invented.
+  assert.equal(menu.title, null)
+  assert.deepEqual(menu.categories.map((category) => category.path), [['Voorgerechten']])
+})
+
+test('K3 (criterion 11): a supplement gap and a two-price row stay named through analysis → receipt summary → concept — never a guessed price and never a silent drop', async () => {
+  const content = [
+    'BT /F1 12 Tf',
+    textAt(20, 200, '// SUPPLEMENTEN'),
+    textAt(20, 180, 'Fictieve Havermelk'),
+    textAt(120, 180, '0.5'),
+    textAt(20, 140, '// DRANKEN'),
+    textAt(20, 120, 'Fictieve Wijn 6.50 / 25.00'),
+    textAt(20, 100, 'Fictieve Thee'),
+    textAt(120, 100, '2.5'),
+    'ET',
+  ].join('\n')
+  const result = await runRestaurantSourceAnalysis({
+    homepageHtml: homepageWithFullRestaurantAndOneMenu(),
+    homepageUrl: 'https://debotanistbreda.nl/',
+    fetchCandidate: async () => ({ status: 'pdf', bytes: buildTestPdf({ contentStream: content }), finalUrl: 'https://debotanistbreda.nl/menukaart.pdf' }),
+  })
+  const pdfMenu = result.menuContexts.find((menu) => menu.extractionMethod === 'pdf_text')
+  assert.ok(pdfMenu)
+
+  // Extraction: the supplement row is not a dish; the two-price row keeps its
+  // name and both amounts verbatim (priceText), never flattened to one amount;
+  // both facts are named for the reviewer.
+  const extracted = pdfMenu.categories.flatMap((category) => category.items)
+  assert.deepEqual(extracted.map((item) => item.name), ['Fictieve Wijn', 'Fictieve Thee'])
+  assert.equal(extracted[0].price, null)
+  assert.equal(extracted[0].priceText, '6.50 / 25.00')
+  assert.equal(extracted[1].price, '2.5')
+  assert.ok(result.limitations.some((line) => /supplementregel/.test(line) && /SUPPLEMENTEN/.test(line)), 'the supplement rows are named')
+  assert.ok(result.limitations.some((line) => /unresolved_price/.test(line)), 'the unresolved price is named')
+
+  // Receipt summary: exactly the same validated result, nothing re-extracted
+  // and both amounts preserved verbatim as price variants.
+  const summary = buildCandidateSummary({ restaurantCandidateFields: result.restaurantCandidateFields, menus: [pdfMenu] })
+  assert.equal(summary.menus[0].sourceId, pdfMenu.sourceId)
+  assert.equal(summary.menus[0].sourceUrl, 'https://debotanistbreda.nl/menukaart.pdf')
+  assert.deepEqual(
+    summary.menus[0].categories.flatMap((category) => category.items.map((item) => [item.name, item.price])),
+    [['Fictieve Wijn', null], ['Fictieve Thee', '2.5']],
+  )
+  const carriedVariant = summary.menus[0].categories[0].items[0]
+  assert.equal(carriedVariant.priceStatus, 'multiple_undecomposed')
+  assert.deepEqual(carriedVariant.priceVariants.map((variant) => variant.price), ['6.50', '25.00'])
+
+  // Concept: the unresolved price and the uncertain rubric are explicit
+  // blockers; no amount is guessed and no dish disappears.
+  const concept = buildMenuConcept({ menus: summary.menus, liveLines: [], edits: {} })
+  assert.equal(concept.canSave, false)
+  assert.deepEqual(concept.blockers.map((blocker) => [blocker.name, blocker.status]), [
+    ['Fictieve Wijn', 'multiple_prices'],
+    ['Fictieve Thee', 'unclear_category'],
+  ])
+  const conceptItems = concept.content.categories.flatMap((category) => category.items)
+  // The concept normalises a price notation ("2.5" → "2.50") but never invents one.
+  assert.deepEqual(conceptItems.map((item) => [item.name, item.price]), [['Fictieve Wijn', null], ['Fictieve Thee', '2.50']])
 })

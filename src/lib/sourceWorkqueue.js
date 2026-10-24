@@ -30,6 +30,8 @@
 
 'use strict';
 
+const { readReceiptProjection } = require('./menuProductIntegrationV2');
+
 const SOURCE_STATUSES = ['reachable', 'unreachable', 'access_limited', 'identity_changed'];
 const MENU_STATUSES = ['ready_for_review', 'structure_not_recognized', 'no_menu_found', 'not_assessed'];
 
@@ -175,9 +177,17 @@ function observeJob(job, receipt) {
   if (!job || typeof job !== 'object') return { kind: 'unusable' };
   if (job.status === 'succeeded') {
     if (!receipt) return { kind: 'unusable' }; // a succeeded job always has a receipt; without it, no claim
-    const recognized = countSummaryMenuItems(receipt.menus) + countRecognizedPdfItems(job.unknown_menu_contexts);
+    const product = readReceiptProjection(receipt);
+    const productBlocked = product.kind !== 'v1';
+    // A v2 receipt's legacy `menus` projection loses the version. Count the
+    // validated v2 items only, and treat any present envelope as a menu
+    // candidate so zero items is never reported as "no menu found".
+    const recognized = (productBlocked
+      ? (product.view ? product.view.counts.items : 0)
+      : countSummaryMenuItems(receipt.menus)) + countRecognizedPdfItems(job.unknown_menu_contexts);
     if (recognized > 0) return { kind: 'classified', source: 'reachable', menu: 'ready_for_review' };
     const candidateFound =
+      productBlocked ||
       (Array.isArray(job.unknown_menu_contexts) && job.unknown_menu_contexts.length > 0) ||
       (Array.isArray(receipt.menus) && receipt.menus.length > 0);
     if (candidateFound) return { kind: 'classified', source: 'reachable', menu: 'structure_not_recognized' };

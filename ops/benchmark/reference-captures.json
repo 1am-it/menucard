@@ -1,0 +1,475 @@
+{
+  "version": "1.0.0",
+  "pinnedAt": "2026-10-21",
+  "capturedAt": "2026-10-21T14:25:30.538Z",
+  "captureStatus": "blocked",
+  "deterministicReplay": true,
+  "manifest": {
+    "path": "ops/benchmark/reference-capture-sources.json",
+    "bytesSha256": "487802a6f23f1b2a6909cf72d90a7a01f74296b2ded5034bea3c0941c5a92fa7",
+    "sourceCount": 5
+  },
+  "authorization": {
+    "decision": "Product Owner issuecomment-6318192386 (1a, 2a, 3a); Delivery Lead review 6318225879",
+    "reference": "GitHub #59 developeropdracht: gecontroleerde referenties, afbeeldingsmenu-route en criteria",
+    "scope": "Public read-only capture of the five named entry URLs and their relevant same-host menu pages or PDFs through the existing safe fetch, with robots and redirect checks. No login, CAPTCHA bypass, paid service, other location, arbitrary crawl, production action or publication.",
+    "appProviderActivation": false,
+    "note": "This is a source-capture permission. It does not activate an app-side AI provider, OCR, budget or retention arrangement."
+  },
+  "note": "Capture-only metadata for the five #59 controlled reference sources. The response bytes stay local and gitignored; only URL, content-type, time, size and SHA-256 are committed. The measurement replays the current extraction on exactly these bytes and never refetches them.",
+  "sources": {
+    "zuyd": {
+      "label": "Restaurant Zuyd",
+      "class": "html_menu_pages",
+      "entryUrl": "https://www.restaurantzuyd.nl",
+      "allowedHosts": [
+        "restaurantzuyd.nl",
+        "www.restaurantzuyd.nl"
+      ],
+      "captureStatus": "captured",
+      "captures": [
+        {
+          "order": 1,
+          "requestedUrl": "https://www.restaurantzuyd.nl",
+          "finalUrl": "https://www.restaurantzuyd.nl/",
+          "contentType": "text/html",
+          "kind": "html",
+          "bytes": 6235,
+          "bytesSha256": "f4f685da725f353d1a2f69243b168d66a98e1310aae8a6e11bdfcac087f7624f",
+          "capturedAt": "2026-10-21T14:25:13.420Z",
+          "captureStatus": "captured",
+          "httpStatus": null,
+          "error": null,
+          "localPath": "ops/benchmark/output/reference-captures/zuyd/01-home-f4f685da725f.html",
+          "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here.",
+          "redirects": []
+        },
+        {
+          "order": 2,
+          "requestedUrl": "https://www.restaurantzuyd.nl/lunch",
+          "finalUrl": "https://www.restaurantzuyd.nl/lunch",
+          "contentType": "text/html",
+          "kind": "html",
+          "bytes": 9877,
+          "bytesSha256": "389470158b72f9809c9b35d3212bf0ea44fde9b4c1bcbdc877538dee80394338",
+          "capturedAt": "2026-10-21T14:25:13.538Z",
+          "captureStatus": "captured",
+          "httpStatus": null,
+          "error": null,
+          "localPath": "ops/benchmark/output/reference-captures/zuyd/02-lunch-389470158b72.html",
+          "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here.",
+          "redirects": []
+        },
+        {
+          "order": 3,
+          "requestedUrl": "https://www.restaurantzuyd.nl/diner",
+          "finalUrl": "https://www.restaurantzuyd.nl/diner",
+          "contentType": "text/html",
+          "kind": "html",
+          "bytes": 9832,
+          "bytesSha256": "128cae10ca14ab9cc2e8b92f2a1b7736c6a787fa02ab32e43f929ccf94723a04",
+          "capturedAt": "2026-10-21T14:25:13.592Z",
+          "captureStatus": "captured",
+          "httpStatus": null,
+          "error": null,
+          "localPath": "ops/benchmark/output/reference-captures/zuyd/03-diner-128cae10ca14.html",
+          "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here.",
+          "redirects": []
+        },
+        {
+          "order": 4,
+          "requestedUrl": "https://www.restaurantzuyd.nl/kerstmenu",
+          "finalUrl": "https://www.restaurantzuyd.nl/kerstmenu",
+          "contentType": "text/html",
+          "kind": "html",
+          "bytes": 7759,
+          "bytesSha256": "2bfaf63e7814766e57eb3e71619dd8f9eba73b4960c73b96295808430a48b789",
+          "capturedAt": "2026-10-21T14:25:13.651Z",
+          "captureStatus": "captured",
+          "httpStatus": null,
+          "error": null,
+          "localPath": "ops/benchmark/output/reference-captures/zuyd/04-kerstmenu-2bfaf63e7814.html",
+          "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here.",
+          "redirects": []
+        },
+        {
+          "order": 5,
+          "requestedUrl": "https://www.restaurantzuyd.nl/zuydvoorthuys",
+          "finalUrl": "https://www.restaurantzuyd.nl/zuydvoorthuys",
+          "contentType": "text/html",
+          "kind": "html",
+          "bytes": 10326,
+          "bytesSha256": "644810dfc971a0dfe958e59335d9f9f8f9aa80018eb2da875d28aa1dac4818f9",
+          "capturedAt": "2026-10-21T14:25:13.700Z",
+          "captureStatus": "captured",
+          "httpStatus": null,
+          "error": null,
+          "localPath": "ops/benchmark/output/reference-captures/zuyd/05-zuydvoorthuys-644810dfc971.html",
+          "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here.",
+          "redirects": []
+        },
+        {
+          "order": 6,
+          "requestedUrl": "https://www.restaurantzuyd.nl/nieuws",
+          "finalUrl": "https://www.restaurantzuyd.nl/nieuws",
+          "contentType": "text/html",
+          "kind": "html",
+          "bytes": 6863,
+          "bytesSha256": "c9c130c079b7ba52b28f9535b599c787fb527ad9c2be0485dc0acf7791f05a1c",
+          "capturedAt": "2026-10-21T14:25:13.795Z",
+          "captureStatus": "captured",
+          "httpStatus": null,
+          "error": null,
+          "localPath": "ops/benchmark/output/reference-captures/zuyd/06-nieuws-c9c130c079b7.html",
+          "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here.",
+          "redirects": []
+        }
+      ]
+    },
+    "andalous": {
+      "label": "Andalous Restaurant Breda",
+      "class": "html_menu_page",
+      "entryUrl": "https://www.andalous-breda.nl",
+      "allowedHosts": [
+        "andalous-breda.nl",
+        "www.andalous-breda.nl"
+      ],
+      "captureStatus": "captured",
+      "captures": [
+        {
+          "order": 1,
+          "requestedUrl": "https://www.andalous-breda.nl",
+          "finalUrl": "https://www.andalous-breda.nl/",
+          "contentType": "text/html",
+          "kind": "html",
+          "bytes": 88853,
+          "bytesSha256": "8c2fb5e31c5f417504ca46ba162acdfced9d443f4958827c92bcdcb34d31ee89",
+          "capturedAt": "2026-10-21T14:25:13.909Z",
+          "captureStatus": "captured",
+          "httpStatus": null,
+          "error": null,
+          "localPath": "ops/benchmark/output/reference-captures/andalous/01-home-8c2fb5e31c5f.html",
+          "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here.",
+          "redirects": []
+        },
+        {
+          "order": 2,
+          "requestedUrl": "https://www.andalous-breda.nl/menukaart/",
+          "finalUrl": "https://www.andalous-breda.nl/menukaart/",
+          "contentType": "text/html",
+          "kind": "html",
+          "bytes": 89785,
+          "bytesSha256": "93b11284b922471712df5b389abbccf489da582016d2d5860768667c775677c9",
+          "capturedAt": "2026-10-21T14:25:16.163Z",
+          "captureStatus": "captured",
+          "httpStatus": null,
+          "error": null,
+          "localPath": "ops/benchmark/output/reference-captures/andalous/02-menukaart-93b11284b922.html",
+          "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here.",
+          "redirects": []
+        },
+        {
+          "order": 3,
+          "requestedUrl": "https://www.andalous-breda.nl/ramadan-menu/",
+          "finalUrl": "https://www.andalous-breda.nl/ramadan-menu/",
+          "contentType": "text/html",
+          "kind": "html",
+          "bytes": 52907,
+          "bytesSha256": "69b1011c07776a2ef481fb18027ccab05990d512c8fa01d5b55b837af1eac0a6",
+          "capturedAt": "2026-10-21T14:25:16.905Z",
+          "captureStatus": "captured",
+          "httpStatus": null,
+          "error": null,
+          "localPath": "ops/benchmark/output/reference-captures/andalous/03-ramadan-menu-69b1011c0777.html",
+          "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here.",
+          "redirects": []
+        },
+        {
+          "order": 4,
+          "requestedUrl": "https://www.andalous-breda.nl/ramadan",
+          "finalUrl": "https://www.andalous-breda.nl/ramadan-menu/",
+          "contentType": "text/html",
+          "kind": "html",
+          "bytes": 52907,
+          "bytesSha256": "1faa547bd4b385ac1afbfc5df566a24cb26ccae6aeb540849125a41e2fc8d03a",
+          "capturedAt": "2026-10-21T14:25:17.645Z",
+          "captureStatus": "captured",
+          "httpStatus": null,
+          "error": null,
+          "localPath": "ops/benchmark/output/reference-captures/andalous/04-ramadan-menu-1faa547bd4b3.html",
+          "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here.",
+          "redirects": [
+            {
+              "from": "https://www.andalous-breda.nl/ramadan",
+              "to": "https://www.andalous-breda.nl/ramadan-menu/",
+              "status": 301
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "requestedUrl": "https://www.andalous-breda.nl/thuisbezorgd",
+          "finalUrl": "https://www.andalous-breda.nl/thuisbezorgd/",
+          "contentType": "text/html",
+          "kind": "html",
+          "bytes": 53276,
+          "bytesSha256": "a22fb64af8d979088627ac87ade176576ae7cc1fa7ae85a577ae61629ecf73ed",
+          "capturedAt": "2026-10-21T14:25:18.836Z",
+          "captureStatus": "captured",
+          "httpStatus": null,
+          "error": null,
+          "localPath": "ops/benchmark/output/reference-captures/andalous/05-thuisbezorgd-a22fb64af8d9.html",
+          "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here.",
+          "redirects": [
+            {
+              "from": "https://www.andalous-breda.nl/thuisbezorgd",
+              "to": "https://www.andalous-breda.nl/thuisbezorgd/",
+              "status": 301
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "requestedUrl": "https://www.andalous-breda.nl/werken",
+          "finalUrl": "https://www.andalous-breda.nl/werken/",
+          "contentType": "text/html",
+          "kind": "html",
+          "bytes": 67036,
+          "bytesSha256": "a469bf6ab62bf149235f271c75dba2ab1486da52ca70d659e9c0240db805381f",
+          "capturedAt": "2026-10-21T14:25:20.066Z",
+          "captureStatus": "captured",
+          "httpStatus": null,
+          "error": null,
+          "localPath": "ops/benchmark/output/reference-captures/andalous/06-werken-a469bf6ab62b.html",
+          "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here.",
+          "redirects": [
+            {
+              "from": "https://www.andalous-breda.nl/werken",
+              "to": "https://www.andalous-breda.nl/werken/",
+              "status": 301
+            }
+          ]
+        },
+        {
+          "order": 7,
+          "requestedUrl": "https://andalous-breda.nl/wp-content/uploads/2026/02/Ramadan-menu-kaart-Essaouira-_20240316_170004_0000.pdf_compressed-1.pdf",
+          "finalUrl": "https://andalous-breda.nl/wp-content/uploads/2026/02/Ramadan-menu-kaart-Essaouira-_20240316_170004_0000.pdf_compressed-1.pdf",
+          "contentType": "application/pdf",
+          "kind": "pdf",
+          "bytes": 384596,
+          "bytesSha256": "9a32541b2a5a8b95a1a2ed4e9619a31c86130d7b87731b7e3e88a7f9689a55ac",
+          "capturedAt": "2026-10-21T14:25:21.474Z",
+          "captureStatus": "captured",
+          "httpStatus": null,
+          "error": null,
+          "localPath": "ops/benchmark/output/reference-captures/andalous/07-ramadan-menu-kaart-essaouira-20240316-170004-0000-pdf-compressed-1-pdf-9a32541b2a5a.pdf",
+          "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here.",
+          "redirects": []
+        },
+        {
+          "order": 8,
+          "requestedUrl": "https://www.andalous-breda.nl/fr/ramadan-menu/",
+          "finalUrl": "https://www.andalous-breda.nl/fr/ramadan-menu/",
+          "contentType": "text/html",
+          "kind": "html",
+          "bytes": 56413,
+          "bytesSha256": "521e389ce669ad7d9982c2f606e81071e4af24cd1392e93080b2e4ecd8474735",
+          "capturedAt": "2026-10-21T14:25:21.830Z",
+          "captureStatus": "captured",
+          "httpStatus": null,
+          "error": null,
+          "localPath": "ops/benchmark/output/reference-captures/andalous/08-ramadan-menu-521e389ce669.html",
+          "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here.",
+          "redirects": []
+        }
+      ]
+    },
+    "pellens": {
+      "label": "Restaurant Pellens",
+      "class": "html_tabs",
+      "entryUrl": "https://pellens.nl",
+      "allowedHosts": [
+        "pellens.nl",
+        "www.pellens.nl"
+      ],
+      "captureStatus": "captured",
+      "captures": [
+        {
+          "order": 1,
+          "requestedUrl": "https://pellens.nl",
+          "finalUrl": "https://pellens.nl/",
+          "contentType": "text/html",
+          "kind": "html",
+          "bytes": 117199,
+          "bytesSha256": "66f57e2672894a1bf76bea5d52acdf6749000140d99fd12ff20fa5207b5e2d7a",
+          "capturedAt": "2026-10-21T14:25:23.915Z",
+          "captureStatus": "captured",
+          "httpStatus": null,
+          "error": null,
+          "localPath": "ops/benchmark/output/reference-captures/pellens/01-home-66f57e267289.html",
+          "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here.",
+          "redirects": []
+        }
+      ]
+    },
+    "chocolat": {
+      "label": "Restaurant Chocolat",
+      "class": "html_menu_pages",
+      "entryUrl": "https://www.restaurant-chocolat.nl",
+      "allowedHosts": [
+        "restaurant-chocolat.nl",
+        "www.restaurant-chocolat.nl"
+      ],
+      "captureStatus": "captured",
+      "captures": [
+        {
+          "order": 1,
+          "requestedUrl": "https://www.restaurant-chocolat.nl",
+          "finalUrl": "https://www.restaurant-chocolat.nl/",
+          "contentType": "text/html",
+          "kind": "html",
+          "bytes": 221980,
+          "bytesSha256": "186958b4753f5a350203363f846fcd663097e2da6ed44fb089755e4eaeb91ce8",
+          "capturedAt": "2026-10-21T14:25:24.524Z",
+          "captureStatus": "captured",
+          "httpStatus": null,
+          "error": null,
+          "localPath": "ops/benchmark/output/reference-captures/chocolat/01-home-186958b4753f.html",
+          "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here.",
+          "redirects": []
+        },
+        {
+          "order": 2,
+          "requestedUrl": "https://www.restaurant-chocolat.nl/menu/",
+          "finalUrl": "https://www.restaurant-chocolat.nl/menu/",
+          "contentType": "text/html",
+          "kind": "html",
+          "bytes": 154178,
+          "bytesSha256": "0754bdd2f6ca8d143b68d6d1ce5ddae6f44b3d69cfbbb173d9e96add00cab73c",
+          "capturedAt": "2026-10-21T14:25:25.418Z",
+          "captureStatus": "captured",
+          "httpStatus": null,
+          "error": null,
+          "localPath": "ops/benchmark/output/reference-captures/chocolat/02-menu-0754bdd2f6ca.html",
+          "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here.",
+          "redirects": []
+        },
+        {
+          "order": 3,
+          "requestedUrl": "https://www.restaurant-chocolat.nl/lunch",
+          "finalUrl": "https://www.restaurant-chocolat.nl/lunch/",
+          "contentType": "text/html",
+          "kind": "html",
+          "bytes": 159440,
+          "bytesSha256": "4ac64c425f1c630cdc0b83bfb10af3a4c193a321be6a99b24d708782be928f74",
+          "capturedAt": "2026-10-21T14:25:26.013Z",
+          "captureStatus": "captured",
+          "httpStatus": null,
+          "error": null,
+          "localPath": "ops/benchmark/output/reference-captures/chocolat/03-lunch-4ac64c425f1c.html",
+          "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here.",
+          "redirects": [
+            {
+              "from": "https://www.restaurant-chocolat.nl/lunch",
+              "to": "https://www.restaurant-chocolat.nl/lunch/",
+              "status": 301
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "requestedUrl": "https://www.restaurant-chocolat.nl/diner",
+          "finalUrl": "https://www.restaurant-chocolat.nl/diner/",
+          "contentType": "text/html",
+          "kind": "html",
+          "bytes": 159176,
+          "bytesSha256": "7122b5d1c92bba8122d3d6db42c2191d228b6873bd0071a86ec462ba6c5335ac",
+          "capturedAt": "2026-10-21T14:25:27.015Z",
+          "captureStatus": "captured",
+          "httpStatus": null,
+          "error": null,
+          "localPath": "ops/benchmark/output/reference-captures/chocolat/04-diner-7122b5d1c92b.html",
+          "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here.",
+          "redirects": [
+            {
+              "from": "https://www.restaurant-chocolat.nl/diner",
+              "to": "https://www.restaurant-chocolat.nl/diner/",
+              "status": 301
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "requestedUrl": "https://www.restaurant-chocolat.nl/cadeaubon",
+          "finalUrl": "https://www.restaurant-chocolat.nl/cadeaubon/",
+          "contentType": "text/html",
+          "kind": "html",
+          "bytes": 170522,
+          "bytesSha256": "3acbf4874eeda7b77dfd50f7e6f4ff3b6bfc9a387354107804eeace213f3a7e1",
+          "capturedAt": "2026-10-21T14:25:28.038Z",
+          "captureStatus": "captured",
+          "httpStatus": null,
+          "error": null,
+          "localPath": "ops/benchmark/output/reference-captures/chocolat/05-cadeaubon-3acbf4874eed.html",
+          "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here.",
+          "redirects": [
+            {
+              "from": "https://www.restaurant-chocolat.nl/cadeaubon",
+              "to": "https://www.restaurant-chocolat.nl/cadeaubon/",
+              "status": 301
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "requestedUrl": "https://www.restaurant-chocolat.nl/arrangementen",
+          "finalUrl": "https://www.restaurant-chocolat.nl/arrangementen/",
+          "contentType": "text/html",
+          "kind": "html",
+          "bytes": 167937,
+          "bytesSha256": "a35ee43d2d681cb983d2f006412873b646b78310a6c1ed3cd0587d067d8c699d",
+          "capturedAt": "2026-10-21T14:25:28.998Z",
+          "captureStatus": "captured",
+          "httpStatus": null,
+          "error": null,
+          "localPath": "ops/benchmark/output/reference-captures/chocolat/06-arrangementen-a35ee43d2d68.html",
+          "note": "Only this source version is pinned. No parser outcome, item count or category count is recorded here.",
+          "redirects": [
+            {
+              "from": "https://www.restaurant-chocolat.nl/arrangementen",
+              "to": "https://www.restaurant-chocolat.nl/arrangementen/",
+              "status": 301
+            }
+          ]
+        }
+      ]
+    },
+    "senang-makan": {
+      "label": "Senang Makan",
+      "class": "html_and_pdf",
+      "entryUrl": "https://www.senangmakan.nl",
+      "allowedHosts": [
+        "senangmakan.nl",
+        "www.senangmakan.nl"
+      ],
+      "captureStatus": "blocked",
+      "captures": [
+        {
+          "order": 1,
+          "requestedUrl": "https://www.senangmakan.nl",
+          "finalUrl": null,
+          "contentType": null,
+          "kind": "unsupported",
+          "bytes": 0,
+          "bytesSha256": null,
+          "capturedAt": "2026-10-21T14:25:30.404Z",
+          "captureStatus": "blocked",
+          "httpStatus": 503,
+          "error": "robots.txt van deze site was niet bereikbaar (HTTP 503) — de pagina is niet opgehaald.",
+          "localPath": null,
+          "note": "The safe route refused this URL before reading it. No alternative URL, other location or bypass was substituted."
+        }
+      ]
+    }
+  }
+}

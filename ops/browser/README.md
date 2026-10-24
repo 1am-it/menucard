@@ -1,0 +1,324 @@
+# Isolated browser fixture — #59 menu import/review
+
+This directory holds the reproducible **fixture-only** browser check for the
+existing batch import and menu-review UI, and for the existing concept list and
+detail pages. It is not live integration, staging, authenticated or production
+acceptance.
+
+## What it does
+
+`run-menu-review-browser-check.js` starts the real Next.js app on a local port
+with fictional `NEXT_PUBLIC_SUPABASE_*` values, launches a locally installed
+Edge/Chrome through the Chrome DevTools Protocol, installs a fictional
+in-page session and same-origin API responses, and drives the real
+`/internal/source-triage/batch`, `/internal/menu-concepts` and
+`/internal/menu-concepts/[id]` routes with the real
+`BatchAnalysisView`, `MenuReview`, `ConceptList` and `ConceptReview`
+components. No HTML is rebuilt in the harness.
+
+The fictional data is generated through the product's own helpers
+(`summarizeRecognisedMenu`, `buildMenuConcept`, `buildExtractionResult`,
+`readConceptProduct`, `buildProductReviewView`, `storedConceptInput`) in
+`fixtures/menuReviewFixtures.js`. Every URL is on `.invalid`. No production
+identity, credential, database or write is used, and the check never confirms a
+source, saves a concept, records a decision, exports, publishes or calls a
+provider.
+
+## Concept list and detail coverage
+
+Four fictional lineages exercise the existing pages:
+
+- a valid v1 concept with no blockers (approve/reject remain usable);
+- a stored `menu-extraction-product/v2` envelope, read-only, with separate
+  glass/bottle prices, an unresolved supplement, unknown allergens, provenance
+  quotes and coverage limitations;
+- an unknown/invalid versioned-looking row that must not become v1;
+- an exact `menus: []` v2 envelope, visibly empty and blocked.
+
+The check performs real list → exact detail → back clicks, asserts that each
+selected id and restaurant name match, and covers empty list, load error,
+missing access (403), detail error and a 404. It also covers keyboard focus and
+Enter activation, light/dark tokens and 320/390/1024 px.
+`clickpaths` in the evidence records the concrete click inventory.
+
+Only these fictional concept reads are mocked:
+
+- `GET /api/internal/v1/menu-concepts` (list);
+- `GET /api/internal/v1/menu-concepts/<id>` (detail, exactly one segment).
+
+Every concept write (`POST` list/detail, `versions`, `decision`, `export`) and
+every unknown or nested API route is refused by the guard before a handler or
+native fetch is reached. A forced approve click and forced script POSTs are
+recorded as deliberate negative probes. That proves the network guard only:
+`src/lib/menuConceptReviewHandlers.test.js` remains the authority for
+server-side refusal. The UI block is not presented as proof that a server
+would refuse.
+
+## Isolation is fail-closed
+
+`lib/network-policy.js` is the single policy for two layers:
+
+- the in-page guard for `fetch`, `XMLHttpRequest`, `WebSocket`, `EventSource`
+  and `sendBeacon`;
+- the CDP `Fetch` interception in the harness, which also covers subresources
+  and frame/document navigation.
+
+Only explicit local app resources and the explicit fictional fixture API
+routes are allowed. Unknown external URLs, protocol-relative external URLs,
+unknown API routes and non-GET app requests are refused with
+`fixture_network_blocked: <reason>` and recorded in
+`window.__FIXTURE_NETWORK_VIOLATIONS__`. Chromium additionally runs with
+`--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE localhost` as defense in depth.
+
+The check deliberately attempts an external fetch, a protocol-relative external
+URL, an unknown local API write and an external WebSocket, plus an external
+image/iframe that only the CDP layer can stop. Those deliberate attempts are
+recorded in the evidence as `network.deliberateViolations`; any unexpected
+app-phase request fails the run. Negative unit regressions run the real
+bootstrap in a Node VM with a native-fetch spy and no network:
+`lib/fixture-page.test.js` and `lib/network-policy.test.js`.
+
+## Loopback and CDP boundary
+
+The harness starts and stops its own `next dev` process on
+`http://localhost:3137` (override with `BROWSER_FIXTURE_PORT`) and its own local
+Edge/Chrome process with a temporary profile, controlled over CDP. It only
+exercises those two processes; no remote host is contacted. The evidence names
+this boundary under `environment.loopback` and marks the run `fixtureOnly`.
+
+## Run
+
+```bash
+npm run test:browser:menu-review
+```
+
+Requirements: Node 22, the repository's installed dependencies, and an
+installed Edge or Chrome. Override the browser with `BROWSER_PATH`; override the
+app port with `BROWSER_FIXTURE_PORT` (default 3137).
+
+Generated artifacts (gitignored):
+
+- `output/next-dev.log` — local dev-server log;
+- `output/*.png` — screenshots at 320/390/1024 px, light/dark and the
+  empty/partial/error/concept states;
+- `evidence/menu-review-browser-evidence.json` — machine-readable result with
+  every check, clickpath, each screenshot's SHA-256 and dimensions, the mocked
+  reads and the deliberate refusals.
+
+The evidence file is committed; screenshots stay local. A reviewer can rerun
+the command to reproduce the same fixture evidence.
+
+Screenshots whose name ends in `-clickpath.png` follow a real link and therefore
+use the fixture's default dark theme: a real click drops the query string.
+Explicit light/dark evidence comes from the direct-URL scenarios, including
+`concept-detail-v2-1024-light.png`, `concept-detail-v2-1024-dark.png`,
+`concept-detail-v2-390-light.png`, `concept-detail-v2-390-dark.png` and
+`concept-detail-v2-320-light.png`.
+
+## Uncertain section structure (#59 review 6307703713)
+
+`fixture=structure` drives a result whose section structure the extractor marks
+uncertain. The check opens "Menukaart controleren", asserts that each uncertain
+section shows its path, source route and locator, keeps one section and corrects
+the other with a real typed path, and only then finds an enabled "Bevestig bron"
+that opens the existing confirmation panel with "gehandhaafd"/"gecorrigeerd".
+The final write is deliberately not sent: the fixture guard refuses non-GET app
+requests, so this is UI evidence, not a saved confirmation. The same scenario
+runs at 390 px in light and dark, by keyboard (Tab + Space) and read-only for a
+colleague. `fixture=structure-readonly` proves the colleague never gets an
+enabled decision or a confirmation button.
+
+## Handmatige AI-import (#59 fase 2, review 6348147293)
+
+`fixture=manual` drives the new internal page `/internal/menu-import` in its
+three steps. Step 1 makes the prompt from a fictional source and shows the
+source line in plain language plus the collapsed technical details. Step 2
+pastes a fictional answer, and the check asserts that the paste field is
+cleared after checking and that the page shows only
+"✓ Antwoord ontvangen: 1 menukaart, 3 gerechten" — never the pasted JSON.
+Step 3 resolves the two open points the way a human must: choose a price for
+the line with two prices, then confirm the line that is not in the source with a
+required reason, after which "Concept opslaan" becomes enabled and reports the
+existing concept-route result with "niets gepubliceerd". The same page is
+checked by keyboard (Tab + Enter makes the prompt) and at 320/390 px in light
+and dark.
+
+Only these fictional writes are mocked, all with the fixed import id
+`fixture-import`:
+
+- `POST /api/internal/v1/manual-menu-import/bundles`;
+- `POST /api/internal/v1/manual-menu-import/imports`;
+- `POST /api/internal/v1/manual-menu-import/imports/fixture-import/decisions`;
+- `POST /api/internal/v1/manual-menu-import/imports/fixture-import/follow-up`;
+- `POST /api/internal/v1/manual-menu-import/imports/fixture-import/save`.
+
+The fixture data is built with the product modules themselves
+(`buildImportBundle`, `buildImportReport`, `decideRow`, `reviewView`,
+`buildConceptDraft`), so the browser sees the real shapes. Every other import
+path — another id, another method, the real `/usage` read — stays unknown and is
+refused by the guard. The app calls no provider in any scenario, so there is no
+AI traffic to intercept. This remains fixture evidence: no real source, no real
+concept write, no independent review.
+
+### Afgekeurd antwoord: leesbare problemen en herstelvraag (review 6376543234)
+
+`?manualFail=schema` on the same page lets only the `POST …/imports` fixture
+answer with the real `422 schema_violation` shape: a fictional answer that the
+actual validator rejects, translated by `src/lib/manualMenuImportProblems.js`
+(built in `fixtures/menuReviewFixtures.js`, not hand-written HTML). The check
+opens the prompt, pastes a fictional answer, presses "Controleren" and asserts
+that the page shows "Wat de AI moet herstellen" with at most five plain Dutch
+sentences (naming the dish, section or menu card), no JSON path in that list, one
+read-only copyable recovery question that starts with "Corrigeer alleen deze
+punten", an inline check that the panel is inside the viewport for the
+screenshot, and a collapsed "Technische details" block that still contains the
+validator lines. It runs at 390 px/dark and 320 px/light without horizontal
+overflow and records `manual-ai-import-problems-390-dark.png` and
+`manual-ai-import-problems-320-light.png` in `output/` and in the evidence file.
+The rejected answer stores nothing: the follow-up steps stay unavailable.
+
+### Afgeleide telling en status: de melding op het reviewscherm (review 6377050602)
+
+`?manualNormalize=1` op dezelfde pagina laat alleen de `POST …/imports`-fixture
+antwoorden met hetzelfde fictieve antwoord, maar met een foute telling (`9`) en
+een `complete`-status met een limitation. Dat antwoord wordt met de echte
+`buildImportReport` gebouwd, dus de browser ziet dezelfde afleiding en dezelfde
+melding als de server zou sturen. De check opent de prompt, plakt een fictief
+antwoord, drukt "Controleren" en controleert dat:
+
+- stap 2 "1 menukaart, 3 gerechten" toont (de afgeleide telling, niet de claim
+  van 9);
+- het blok "Door het systeem bijgesteld" (`role="status"`) twee zinnen in gewone
+  taal toont: "Aantal gerechten door het systeem geteld: 3 (de AI zei 9)." en
+  "Status bijgesteld naar gedeeltelijk, omdat de AI zelf een beperking noemde.";
+- er geen JSON op het scherm staat en er geen accepteer-alles-knop is;
+- de melding in beeld staat voor de screenshot en er geen horizontale overflow
+  is op 390 px/dark en 320 px/light.
+
+De screenshot `manual-ai-import-normalized-390-dark.png` staat in `output/` en
+in het evidencebestand. Ook dit blijft fixturebewijs: geen provider, geen echte
+bron, geen conceptopslag.
+
+## "Lees met AI" als hoofdroute en de batchplek (review 6381657192)
+
+`fixture=manual-ai` levert de fictieve status (sleutel + vlag aan), het
+maandbedrag en één fictief leesantwoord. `?aiState=off` antwoordt als "niet
+ingesteld"; `?aiState=slow` houdt het fictieve antwoord 2,5 s vast, zodat de
+"AI bezig"-stand echt in beeld komt voordat het resultaat er is. Geen provider,
+geen sleutel en geen echte kaart. De bestaande handmatige scenario's gebruiken
+`aiState=off`, zodat zij de ongewijzigde handmatige flow blijven bewijzen.
+
+Per thema (licht en donker, 390 px) controleert de check:
+
+- het AI-blok is een zelfstandige kaart na "Bron kiezen" en zit niet in stap 1;
+- de handmatige stappen zijn ingeklapt achter "Liever zelf invoeren of plakken"
+  (`aria-expanded`/`aria-controls`), klappen open als je die kiest en weer dicht
+  bij een tweede klik;
+- na "Concept klaar" staat alleen het resultaat met "Nalopen"; stap 1, 2 en het
+  reviewblok blijven weg tot die klik;
+- zonder AI staat rustig "AI is niet ingesteld." en is de oude handmatige flow
+  direct zichtbaar met de nummers 1, 2 en 3;
+- de batchplek (`fixture=partial`) toont hetzelfde blok als mockupscherm 1 in
+  het mislukte resultaat, met de knop naar de bestaande analyse-opdracht en de
+  handmatige link;
+- de AI-knop is met Tab en Enter te bedienen.
+
+Screenshots in `output/` en in het evidencebestand: `ai-read-block`,
+`ai-read-manual`, `ai-read-busy`, `ai-read-done`, `ai-read-review`,
+`ai-read-off` en `ai-read-batch`, elk als `-390-light.png` en `-390-dark.png`.
+Dit blijft fixture- en ontwikkelaarsbewijs, geen onafhankelijke review of echte
+browseracceptatie.
+
+### Variant 1: niet-overgenomen bronregels (order 6382189724)
+
+`fixture=manual-coverage` antwoordt met een fictieve dinerkaart waarin twee
+regels een prijs printen die geen gerecht dekt, en met de reviewstanden na
+"Toevoegen" en na "Geen gerecht". `manualUncoveredScenario` controleert:
+
+- het oranje blok staat boven de nalopen-lijst, met kop, citaat,
+  "Pagina <bron> · regel N · onder <rubriek>", de twee knoppen en
+  "Gratis: geen extra AI-aanroep nodig";
+- de kleuren komen uit de aandachtrol (`--status-old`) van het actieve thema;
+- "Toevoegen" verdwijnt met de regel en het nieuwe gerecht staat in nalopen als
+  "rubriek controleren"; "Geen gerecht" laat het blok met de laatste regel
+  verdwijnen;
+- 390 px licht/donker en 320 px licht, geen horizontale overflow, en de
+  toetsenbordroute (focus + Enter).
+
+Screenshots: `ai-uncovered-390-dark.png`, `ai-uncovered-after-add-390-dark.png`,
+`ai-uncovered-empty-390-dark.png`, `ai-uncovered-390-light.png` en
+`ai-uncovered-320-light.png`.
+
+### Variant 5: de kaart met markeringen (order 6382953597)
+
+`fixture=manual-map` antwoordt met een fictieve bron waarin een prijs op een eigen
+regel staat (naamregel + "11,00"), met een afwijkende prijs (rood), een
+overgenomen regel (groen), een niet-overgenomen regel (oranje), een afgewezen
+regel (grijs), een PDF met twee pagina's en een scan zonder tekstlaag. De review
+en de kaartpagina's zijn met de echte productmodules gebouwd
+(`reviewView`, `decideSourcePriceLine`, `decideUncoveredLine`, `sourceCardView`).
+
+De fixture beantwoordt één extra, fictief leespad:
+`POST /api/internal/v1/manual-menu-import/imports/fixture-import/source-map`. Elk
+ander pad, een andere bron of een andere pagina wordt geweigerd. Elke fictieve
+route die de pagina werkelijk aanroept staat in `window.__FIXTURE_CALLS__`, zodat
+de check kan bewijzen dat een kaartpagina pas bij openen of bladeren wordt
+opgevraagd.
+
+`manualCardScenario` controleert:
+
+- de review opent met de schakelaar **Lijst | Kaart** en zonder kaartverzoek;
+- de kaart toont de legenda met vier markeringen (elk met vorm én tekst), de drie
+  bronnen in volgorde en de regels van de bron; regels zonder prijs blijven
+  ongemarkeerd; het paar heeft één markering;
+- een tik op rood opent "Kaart 11,00 · concept € 12,50" met "Neem 11,00 over" en
+  "Wijzig"; overnemen komt duurzaam terug in het paneel;
+- een tik op oranje biedt "Toevoegen" en "Geen gerecht"; "Geen gerecht" maakt de
+  regel grijs en laat hem staan; groen toont het gerecht;
+- de PDF-pagina's komen per stuk binnen (pagina 2 pas na "Volgende") met de
+  eerlijke melding over de ontbrekende pagina-afbeelding; de scan zonder tekst
+  toont geen regels;
+- "Bekijk op kaart" in de lijst opent de kaart, scrolt naar de regel en markeert
+  hem;
+- 390 px licht/donker, 320 px licht, geen horizontale overflow, en de
+  toetsenbordroute (Tab naar "Kaart", Enter, focus op een markering, Enter opent
+  het paneel).
+
+Screenshots: `ai-map-390-light.png`, `ai-map-390-dark.png`, `ai-map-320-light.png`,
+`ai-map-red-panel-*.png`, `ai-map-orange-panel-*.png`, `ai-map-pdf-*.png`,
+`ai-map-from-list-*.png` en `ai-map-keyboard-390-light.png`.
+
+## Coverage
+
+- exact breadcrumb, source and "handmatig beoordelen" links;
+- the starter view and a read-only colleague view (no save or confirmation);
+- section paths, item counts, prices, a missing price and multiple
+  undecomposed prices;
+- duplicate, price and missing-price blockers kept separate;
+- shared uncertainty grouped per section, with no accept-all action;
+- a disabled "Concept opslaan" while blockers remain;
+- empty, partial (source found, zero items) and load-error states;
+- an image/scan-only menu with the explicit non-supported status, the reason, no
+  confirmation, and a working click into Bronnen beoordelen with the restaurant
+  preselected and the reason still visible;
+- concept list: four lineages, exact row hrefs, valid v1 next to blocked rows;
+- concept detail: v1 usable, v2 read-only with glass/bottle/supplement/
+  unknown allergens/provenance/coverage, invalid and exact `menus: []` blocked;
+- concept states: empty list, load error, missing access, detail error and 404;
+- concept keyboard reachability and Enter navigation; light/dark and 320/390 px
+  without horizontal overflow;
+- keyboard reachability and Enter activation of the batch review controls;
+- light/dark tokens and 320/390 px without horizontal overflow;
+- fail-closed network isolation: external fetch, protocol-relative URL, concept
+  write, unknown local API write, XHR, WebSocket, image/iframe subresource and
+  frame navigation are blocked and recorded; the explicit fixture API still
+  answers.
+
+## Limits
+
+This is fixture evidence. It does not prove a live Supabase session, a real
+source import, a real concept save or decision, a browser rendering of an
+actual restaurant site, or production behaviour. The product extraction
+runtime remains disabled. The fictional session/API is intercepted in the page;
+it never falls through to a real API or an external host. A green browser run
+is not independent review and not authenticated acceptance.

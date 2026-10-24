@@ -230,7 +230,7 @@ test('correction: a new immutable version with maker, analysis result and base v
   const edits = {
     // Rename and price the tartaar, keep both salads deliberately ("Klopt zo"),
     // exclude the uncertain cheese board, keep the disappeared mousse.
-    lines: { '0.0.1': { accept: true }, '0.0.2': { price: '15,50', name: 'Fictief tartaar van de chef' }, '0.1.0': { accept: true }, '0.1.1': { exclude: true } },
+    lines: { '0.0.1': { acceptDuplicate: true }, '0.0.2': { price: '15,50', name: 'Fictief tartaar van de chef' }, '0.1.0': { acceptCategory: true, acceptDuplicate: true }, '0.1.1': { exclude: true } },
     removed: { 'fictieve mousse': 'keep' },
   };
   const res = await handlersFor(supabase).saveVersion(request({ expected_version: 1, edits }), '1');
@@ -244,13 +244,15 @@ test('correction: a new immutable version with maker, analysis result and base v
   assert.equal(write.row.based_on_snapshot_id, 1);
   assert.equal(write.row.source_url, MENU_URL);
   assert.equal(write.row.content_hash, hash(write.row.captured_content));
-  const items = write.row.captured_content.categories.flatMap((c) => c.items.map((i) => [c.name, i.name, i.price, i.from || null, Boolean(i.accepted), Boolean(i.kept)]));
+  const items = write.row.captured_content.categories.flatMap((c) =>
+    c.items.map((i) => [c.name, i.name, i.price, i.from || null, Boolean(i.categoryAccepted), Boolean(i.duplicateAccepted), Boolean(i.kept)])
+  );
   assert.deepEqual(items, [
-    ['Koud', 'Fictieve soep', '8.50', '0.0.0', false, false], // price change 7,50 → 8,50: visible, not blocking
-    ['Koud', 'Fictieve salade', '12.50', '0.0.1', true, false],
-    ['Koud', 'Fictief tartaar van de chef', '15.50', '0.0.2', false, false], // keeps its reference to the original line
-    ['Koud', 'Fictieve mousse', '8.00', null, false, true], // kept from the current menu
-    ['Overig', 'Fictieve salade', '13.00', '0.1.0', true, false],
+    ['Koud', 'Fictieve soep', '8.50', '0.0.0', false, false, false], // price change 7,50 → 8,50: visible, not blocking
+    ['Koud', 'Fictieve salade', '12.50', '0.0.1', false, true, false],
+    ['Koud', 'Fictief tartaar van de chef', '15.50', '0.0.2', false, false, false], // keeps its reference to the original line
+    ['Koud', 'Fictieve mousse', '8.00', null, false, false, true], // kept from the current menu
+    ['Overig', 'Fictieve salade', '13.00', '0.1.0', true, true, false],
   ]);
   assert.equal(rpcs(supabase).length, 0);
 });

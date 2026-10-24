@@ -16,6 +16,9 @@
 const { canonicalizeSourceUrl } = require('./urlIntakes');
 const { hostOf, observeJob } = require('./sourceWorkqueue');
 const { summarizeRecognisedMenu } = require('./menuConcept');
+const { uncertainSections } = require('./menuStructureReview');
+const { menusFromUnknownContexts } = require('./pdfMenuContext');
+const { readReceiptProjection, summarizeProductMenu } = require('./menuProductIntegrationV2');
 
 const MAX_BATCH_URLS = 10;
 const DAILY_URL_LIMIT = 25;
@@ -38,6 +41,7 @@ const STATUSES = {
   menu_found: { label: 'Menukaart gevonden · controle nodig', role: 'file', icon: 'file' },
   needs_review: { label: 'Controle nodig', role: 'old', icon: 'warning' },
   no_menu: { label: 'Geen bruikbare menukaart gevonden', role: 'neutral', icon: 'minus' },
+  image_only: { label: 'Menu alleen als afbeelding: niet ondersteund', role: 'blocked', icon: 'warning' },
   recent: { label: 'Recent geanalyseerd', role: 'neutral', icon: 'recent' },
   robots: { label: 'Robots geblokkeerd', role: 'blocked', icon: 'lock' },
   invalid: { label: 'Ongeldige URL', role: 'blocked', icon: 'cross' },
@@ -49,14 +53,54 @@ const STATUSES = {
 
 const ACTION_LABELS = {
   confirm: 'Bevestig bron',
+  review_structure: 'Rubriekindeling controleren',
   review_manually: 'Beoordeel handmatig',
   adjust_url: 'URL aanpassen',
   retry: 'Opnieuw proberen',
   reanalyze: 'Opnieuw analyseren',
+  review_source: 'Bronnen beoordelen',
   onboarding: 'Naar Onboarding Restaurant',
 };
 
-const TERMINAL_KEYS = new Set(['menu_found', 'needs_review', 'no_menu', 'recent', 'robots', 'invalid', 'error', 'confirmed', 'duplicate', 'not_queued']);
+const TERMINAL_KEYS = new Set(['menu_found', 'needs_review', 'no_menu', 'image_only', 'recent', 'robots', 'invalid', 'error', 'confirmed', 'duplicate', 'not_queued']);
+
+// #59 / BE-21 "Lees met AI" (Lead review 6380804419, W1): the statuses in which
+// the deterministic read produced no usable menu. Only there — and only for an
+// existing analysis job — is the AI reading offered as a help, never as a
+// replacement of the automatic path.
+const AI_READ_OFFER_STATUSES = new Set(['no_menu', 'error', 'image_only']);
+
+function offersAiRead(item) {
+  return Boolean(item && AI_READ_OFFER_STATUSES.has(item.key) && typeof item.jobId === 'string' && item.jobId !== '');
+}
+
+// The exact status copy for a menu that exists only as an image or scan. It
+// never claims a successful extraction and always names the working human
+// follow-up route (Bronnen beoordelen) plus the option to try another URL.
+const IMAGE_ONLY_TEXT =
+  'De menukaart is alleen als afbeelding of scan beschikbaar. Deze import leest geen beeld en gebruikt geen OCR, dus er is niets als gerecht opgeslagen. Beoordeel de bron of kies een tekst- of pdf-bron.';
+const IMAGE_ONLY_TEXT_PDF =
+  'De PDF bevat geen leesbare tekstlaag; het menu lijkt alleen als afbeelding of scan beschikbaar. Deze import leest geen beeld en gebruikt geen OCR, dus er is niets als gerecht opgeslagen. Beoordeel de bron of kies een tekst- of pdf-bron.';
+
+function imageOnlyText(reason) {
+  return reason === 'pdf_no_text_layer' ? IMAGE_ONLY_TEXT_PDF : IMAGE_ONLY_TEXT;
+}
+
+/** True only on a concrete image/scan signal; never inferred from "no menu". */
+function imageOnlyReason(job, recognisedMenu) {
+  if (!job || typeof job !== 'object') return null;
+  if (job.status === 'failed' && job.error_reason === 'pdf_no_text_layer') return 'pdf_no_text_layer';
+  if (job.status !== 'succeeded') return null;
+  if (recognisedMenu && Number.isInteger(recognisedMenu.itemCount) && recognisedMenu.itemCount > 0) return null;
+  const limitations = Array.isArray(job.limitations) ? job.limitations.filter((line) => typeof line === 'string') : [];
+  if (limitations.some((line) => /alleen als afbeelding|beeldanalyse\/OCR is niet geconfigureerd/i.test(line))) {
+    return 'image_only_menu';
+  }
+  if (limitations.some((line) => /pdf_no_text_layer|geen (?:leesbare )?tekstlaag|no text layer/i.test(line))) {
+    return 'pdf_no_text_layer';
+  }
+  return null;
+}
 
 /** The non-empty, trimmed lines of a pasted list, in order. */
 function splitLines(text) {
@@ -127,6 +171,21 @@ function restaurantFor(receipt, restaurants) {
 }
 
 /**
+ * The conservative own-source checks, shared by the one-click rule and the
+ * explicit human structure review: a known location on the restaurant's own
+ * host that is not simply the already-known source. Returns
+ * { ok: true, foundUrl } or { ok: false, reason }.
+ */
+function ownSourceOf({ job, restaurant }) {
+  const urls = Array.isArray(job && job.menu_source_urls) ? job.menu_source_urls.filter((u) => typeof u === 'string') : [];
+  if (urls.length === 0) return { ok: false, reason: 'menu_source_unknown' };
+  const restaurantHost = hostOf(restaurant && restaurant.website);
+  if (!restaurantHost || urls.some((u) => hostOf(u) !== restaurantHost)) return { ok: false, reason: 'other_host' };
+  if (sameAddress(urls[0], restaurant.website)) return { ok: false, reason: 'already_known_source' };
+  return { ok: true, foundUrl: urls[0] };
+}
+
+/**
  * The conservative v1 high-certainty rule for a succeeded job. Returns
  * { high: true, foundUrl } or { high: false, reason }.
  */
@@ -136,12 +195,36 @@ function certaintyOf({ job, receipt, restaurant }) {
   if (observation.kind !== 'classified' || observation.menu !== 'ready_for_review') return { high: false, reason: 'no_recognised_menu' };
   // An uncertain section structure is never confirmed with one click (menuHierarchy.js).
   if (receipt && Array.isArray(receipt.menus) && receipt.menus.some((m) => m && m.structure === 'uncertain')) return { high: false, reason: 'structure_uncertain' };
-  const urls = Array.isArray(job && job.menu_source_urls) ? job.menu_source_urls.filter((u) => typeof u === 'string') : [];
-  if (urls.length === 0) return { high: false, reason: 'menu_source_unknown' };
-  const restaurantHost = hostOf(restaurant.website);
-  if (!restaurantHost || urls.some((u) => hostOf(u) !== restaurantHost)) return { high: false, reason: 'other_host' };
-  if (sameAddress(urls[0], restaurant.website)) return { high: false, reason: 'already_known_source' };
-  return { high: true, foundUrl: urls[0] };
+  const own = ownSourceOf({ job, restaurant });
+  if (!own.ok) return { high: false, reason: own.reason };
+  return { high: true, foundUrl: own.foundUrl };
+}
+
+/**
+ * The separate, explicitly human route for an uncertain structure. It only
+ * relaxes the structure rule: the restaurant, the recognised menu and the
+ * own-source location must already pass, exactly as for one-click
+ * confirmation. Returns { ok: true, foundUrl, receiptHash, sections } or
+ * { ok: false, reason }. Never a certainty claim.
+ */
+function structureReviewFor({ job, receipt, restaurant }) {
+  if (!restaurant) return { ok: false, reason: 'unknown_restaurant' };
+  const observation = observeJob(job, receipt);
+  if (observation.kind !== 'classified' || observation.menu !== 'ready_for_review') return { ok: false, reason: 'no_recognised_menu' };
+  const menus = receipt && Array.isArray(receipt.menus) ? receipt.menus : [];
+  if (!menus.some((m) => m && m.structure === 'uncertain')) return { ok: false, reason: 'structure_normalized' };
+  const sections = uncertainSections(menus);
+  // An inconsistent receipt (uncertain without any flagged section) cannot be
+  // reviewed per section; it stays a manual result instead of a shortcut.
+  if (sections.length === 0) return { ok: false, reason: 'structure_sections_unknown' };
+  const own = ownSourceOf({ job, restaurant });
+  if (!own.ok) return { ok: false, reason: own.reason };
+  return {
+    ok: true,
+    foundUrl: own.foundUrl,
+    receiptHash: receipt && typeof receipt.analysis_result_hash === 'string' ? receipt.analysis_result_hash : null,
+    sections,
+  };
 }
 
 /** Same host (existing normalisation) and same path. */
@@ -156,10 +239,16 @@ function sameAddress(a, b) {
 
 const NOT_HIGH_TEXT = {
   structure_uncertain: 'Er is een menukaart gevonden, maar de rubriekindeling is onzeker. Een medewerker controleert de bronroute.',
+  structure_sections_unknown: 'Er is een menukaart gevonden met een onzekere indeling, maar de onzekere rubrieken zijn niet per rubriek vastgelegd. Een medewerker beoordeelt hem handmatig.',
+  structure_normalized: 'Er is een menukaart gevonden. Een medewerker beoordeelt hem handmatig.',
   menu_source_unknown: 'Er is een menukaart gevonden, maar de vindplaats is niet vastgelegd. Een medewerker beoordeelt hem handmatig.',
   other_host: 'De gevonden menukaart staat niet op de eigen website van dit restaurant. Een medewerker beoordeelt hem handmatig.',
   already_known_source: 'De menukaart staat op de al bekende bron. Een medewerker beoordeelt hem handmatig.',
 };
+
+// Shown for a result that only a human structure review can move forward.
+const STRUCTURE_TEXT =
+  'Er is een menukaart gevonden, maar de rubriekindeling is onzeker. Controleer elke onzekere rubriek hieronder en handhaaf of corrigeer hem; pas daarna kun je de bron bevestigen.';
 
 /** The accepted BE-24 proposal that confirms this result, if any. */
 function confirmationFor({ job, restaurant, foundUrl, proposals }) {
@@ -191,13 +280,41 @@ function view(key, extra) {
  *   duplicateOf: 1-based position of the first equal line (duplicate)
  *   formatTime(iso) → display time
  */
-function deriveItemView({ item, job, receipt, restaurants, proposals, duplicateOf, now, formatTime }) {
+function deriveItemView({ item, job, receipt, restaurants, proposals, duplicateOf, now, formatTime, recordedReviews, structureStoreAvailable }) {
   const fmt = typeof formatTime === 'function' ? formatTime : (v) => v;
   // Reviewer-facing analysis notes (redirects, pages read), never claims.
   const notes = job && Array.isArray(job.notes) ? job.notes.filter((n) => typeof n === 'string').slice(0, 10) : [];
-  // The recognised dishes (the receipt's bounded summary) for the control view.
-  const recognisedMenu = job && job.status === 'succeeded' && receipt && Array.isArray(receipt.menus) && receipt.menus.length > 0 ? summarizeRecognisedMenu(receipt.menus) : null;
-  const base = { position: item.item_position, url: item.canonical_source_url || null, jobId: item.job_id || item.reused_job_id || null, restaurant: null, foundUrl: null, high: false, notes, menu: recognisedMenu && recognisedMenu.itemCount > 0 ? recognisedMenu : null };
+  // The recognised dishes for the control view. The receipt is authoritative;
+  // for an older/job-only PDF result, its recognized sections are converted to
+  // the same menu shape instead of showing "Geen herkende gerechten" beside a
+  // "Menukaart gevonden" badge (the Smelt mismatch).
+  const fallbackMenus = job && job.status === 'succeeded' ? menusFromUnknownContexts(job.unknown_menu_contexts) : [];
+  const receiptProduct = readReceiptProjection(receipt);
+  const productBlocked = receiptProduct.kind !== 'v1';
+  const reviewMenus = !productBlocked && receipt && Array.isArray(receipt.menus) && receipt.menus.length > 0 ? receipt.menus : (productBlocked ? [] : fallbackMenus);
+  const recognisedMenu = productBlocked
+    ? summarizeProductMenu(receiptProduct.view)
+    : job && job.status === 'succeeded' && reviewMenus.length > 0 ? summarizeRecognisedMenu(reviewMenus) : null;
+  const extraction = job && job.extraction_result && typeof job.extraction_result === 'object' ? job.extraction_result : null;
+  const base = {
+    position: item.item_position,
+    url: item.canonical_source_url || null,
+    jobId: item.job_id || item.reused_job_id || null,
+    restaurant: null,
+    foundUrl: null,
+    high: false,
+    notes,
+    menu: recognisedMenu && recognisedMenu.itemCount > 0 ? recognisedMenu : null,
+    // A versioned envelope is shown through the same bounded, sanitized view
+    // as the review page; its legacy `menus` projection is never displayed.
+    product: productBlocked ? receiptProduct.view : null,
+    productBlocked,
+    productReason: productBlocked ? receiptProduct.reason : null,
+    productSchemaVersion: productBlocked ? receiptProduct.schemaVersion || null : null,
+    coverage: extraction && extraction.coverage ? extraction.coverage : null,
+    limitations: job && Array.isArray(job.limitations) ? job.limitations.filter((n) => typeof n === 'string').slice(0, 10) : [],
+    attentionGroups: extraction && Array.isArray(extraction.attentionGroups) ? extraction.attentionGroups : [],
+  };
 
   if (item.outcome === 'invalid') {
     return view('invalid', { ...base, text: 'Geen geldig webadres; pas de regel aan.', actions: ['adjust_url'] });
@@ -243,6 +360,15 @@ function deriveItemView({ item, job, receipt, restaurants, proposals, duplicateO
   if (job.status === 'running') return view('running', { ...withRestaurant });
 
   if (job.status === 'failed') {
+    const imageOnly = imageOnlyReason(job, recognisedMenu);
+    if (imageOnly) {
+      return view('image_only', {
+        ...withRestaurant,
+        text: imageOnlyText(imageOnly),
+        actions: ['review_source', 'adjust_url'],
+        reason: imageOnly,
+      });
+    }
     if (job.error_reason === 'robots_disallowed') {
       return view('robots', {
         ...withRestaurant,
@@ -272,6 +398,19 @@ function deriveItemView({ item, job, receipt, restaurants, proposals, duplicateO
   const observation = observeJob(job, receipt);
   const menu = observation.kind === 'classified' ? observation.menu : 'not_assessed';
 
+  // A source whose only menu is an image/scan gets its own explicit status. It
+  // must never fall through to "no usable menu" (which reads as a verdict about
+  // the restaurant) or to "menu found" (which reads as success).
+  const imageOnly = imageOnlyReason(job, recognisedMenu);
+  if (imageOnly) {
+    return view('image_only', {
+      ...withRestaurant,
+      text: imageOnlyText(imageOnly),
+      actions: ['review_source', 'adjust_url'],
+      reason: imageOnly,
+    });
+  }
+
   if (menu === 'not_assessed') {
     return view('no_menu', {
       ...withRestaurant,
@@ -294,12 +433,59 @@ function deriveItemView({ item, job, receipt, restaurants, proposals, duplicateO
   if (menu === 'structure_not_recognized') {
     return view('needs_review', {
       ...withRestaurant,
-      text: 'Er is een menukaart-kandidaat gevonden, maar de opbouw is niet herkend. Een medewerker beoordeelt hem handmatig in Bronnen beoordelen.',
+      text: 'Er is een menukaart-kandidaat gevonden, maar er zijn geen gerechten met een betrouwbare prijs herkend. Open dit exacte resultaat voor handmatige controle; dit is geen geslaagde extractie.',
       actions: ['review_manually'],
     });
   }
 
   const certainty = certaintyOf({ job, receipt, restaurant });
+  // An uncertain section structure is never "confirmed with one click"
+  // (certaintyOf stays conservative). The separate, explicitly human route is
+  // offered only when every other own-source rule already passes, and only
+  // once a human handled each uncertain section.
+  if (certainty.reason === 'structure_uncertain') {
+    const structure = structureReviewFor({ job, receipt, restaurant });
+    if (structure.ok) {
+      const treated = Array.isArray(recordedReviews) ? recordedReviews : [];
+      const handled = new Set(treated.map((review) => review.key));
+      const complete = structure.sections.length > 0 && structure.sections.every((section) => handled.has(section.key));
+      const structureReview = {
+        eligible: true,
+        foundUrl: structure.foundUrl,
+        receiptHash: structure.receiptHash,
+        storeAvailable: structureStoreAvailable !== false,
+        required: structure.sections,
+        treated,
+        handledCount: structure.sections.filter((section) => handled.has(section.key)).length,
+      };
+      const confirmed = confirmationFor({ job, restaurant, foundUrl: structure.foundUrl, proposals });
+      if (confirmed) {
+        return view('confirmed', {
+          ...withRestaurant,
+          foundUrl: structure.foundUrl,
+          confirmedAt: confirmed.decided_at,
+          text: COPY.confirmedText(fmt(confirmed.decided_at)),
+          structureReview,
+        });
+      }
+      return view('needs_review', {
+        ...withRestaurant,
+        foundUrl: structure.foundUrl,
+        text: STRUCTURE_TEXT,
+        actions: complete ? ['confirm'] : ['review_structure'],
+        structureReview,
+      });
+    }
+    // The human route is not available for this result (for example because
+    // the menu sits on another host or the receipt has no flagged section):
+    // never show a control the server would refuse.
+    return view('needs_review', {
+      ...withRestaurant,
+      text: NOT_HIGH_TEXT[structure.reason] || NOT_HIGH_TEXT.structure_uncertain,
+      actions: ['review_manually'],
+      structureReview: { eligible: false },
+    });
+  }
   if (!certainty.high) {
     return view('needs_review', { ...withRestaurant, text: NOT_HIGH_TEXT[certainty.reason] || NOT_HIGH_TEXT.menu_source_unknown, actions: ['review_manually'] });
   }
@@ -352,6 +538,8 @@ module.exports = {
   MAX_BATCH_URLS,
   DAILY_URL_LIMIT,
   MAX_ATTEMPTS,
+  AI_READ_OFFER_STATUSES,
+  offersAiRead,
   COPY,
   STATUSES,
   ACTION_LABELS,
@@ -360,7 +548,11 @@ module.exports = {
   precheckLines,
   menuSourceUrls,
   certaintyOf,
+  ownSourceOf,
+  structureReviewFor,
   deriveItemView,
+  imageOnlyReason,
+  IMAGE_ONLY_TEXT,
   summarizeItems,
   amsterdamDayStart,
 };

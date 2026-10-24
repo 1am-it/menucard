@@ -1,0 +1,409 @@
+{
+  "version": "1.0.0",
+  "sourceId": "wolfslaar",
+  "label": "Restaurant Wolfslaar",
+  "entryUrl": "https://www.restaurantwolfslaar.com",
+  "captureStatus": "captured",
+  "captureKey": "ops/benchmark/output/card-captures/wolfslaar/02-html-22d60179c67b.html",
+  "pinnedCapture": {
+    "path": "ops/benchmark/card-reference-captures.wolfslaar.json",
+    "bytesSha256": "0705abddd1344f8728c0f936ced9f1e43cf8ec765206e0f6c9c293c74c236ed7"
+  },
+  "method": "Authored from the bytes pinned by the one read-only capture of review 6349832755 K1 (entry page, menukaart lunch, menukaart diner and the menu-1 overview page). Every row carries the printed name, the printed amount(s), the section path of its own page, a locator with the printed line and a literal quote from that page's pinned text. The pages print whole euros without a decimal part; the quote keeps the printed form and only the comparable price field is written as 00 cents. Nothing here comes from the extractor.",
+  "note": "Controlled reference for the criterion-5 comparison of the 2026-10 Wolfslaar menu pages. Both pages print the full à la carte next to the Signature Menu, so each page is its own menu in this reference. The historical data/menus.json counts (3 lunch rows, 22 diner rows) are dated observations from another source version, never truth.",
+  "menus": [
+    {
+      "title": "Menukaart lunch",
+      "sourceUrl": "https://www.restaurantwolfslaar.com/nl/menu-lunch",
+      "captureKey": "ops/benchmark/output/card-captures/wolfslaar/02-html-22d60179c67b.html",
+      "categories": [
+        {
+          "path": [
+            "Menukaart lunch",
+            "Voorgerechten"
+          ],
+          "items": [
+            {
+              "name": "Witte Heilbot",
+              "price": "32.00",
+              "locator": "Menukaart lunch › Voorgerechten › regel 1",
+              "quote": "Witte Heilbot 32 zeeuwse mossel | sjalot | escabeche"
+            },
+            {
+              "name": "Zeebaars",
+              "price": "34.00",
+              "locator": "Menukaart lunch › Voorgerechten › regel 2",
+              "quote": "Zeebaars 34 geschroeid | oester | shiitake | kombucha"
+            },
+            {
+              "name": "Noordzeekrab",
+              "price": "38.00",
+              "locator": "Menukaart lunch › Voorgerechten › regel 3",
+              "quote": "Noordzeekrab 38 als cocktail geserveerd | struikselderij | granny Smith | piment d’espelette"
+            },
+            {
+              "name": "Tartaar",
+              "price": "26.00",
+              "locator": "Menukaart lunch › Voorgerechten › regel 4",
+              "quote": "Tartaar 26 blonde d’aquitaine rund | kapperappel | radijs | witte aceto balsamico"
+            },
+            {
+              "name": "Limburgs Kloostervarken",
+              "price": "26.00",
+              "locator": "Menukaart lunch › Voorgerechten › regel 5",
+              "quote": "Limburgs Kloostervarken 26 bospeen | paksoy | xo | yuzu"
+            },
+            {
+              "name": "Royal Belgian Platinum Caviar",
+              "priceVariants": [
+                {
+                  "label": "30 gram",
+                  "price": "65.00"
+                },
+                {
+                  "label": "50 gram",
+                  "price": "98.00"
+                }
+              ],
+              "locator": "Menukaart lunch › Voorgerechten › regel 6",
+              "quote": "Royal Belgian Platinum Caviar blini’s | bieslook | crème fraîche 30 gram 65 | 50 gram 98"
+            }
+          ]
+        },
+        {
+          "path": [
+            "Menukaart lunch",
+            "Hoofdgerechten"
+          ],
+          "items": [
+            {
+              "name": "Tarbot",
+              "price": "62.00",
+              "locator": "Menukaart lunch › Hoofdgerechten › regel 1",
+              "quote": "Tarbot 62 gebakken in boerenboter | artisjok | polenta | bouillabaisse"
+            },
+            {
+              "name": "Zeetong",
+              "price": "69.00",
+              "locator": "Menukaart lunch › Hoofdgerechten › regel 2",
+              "quote": "Zeetong 69 à la meuniere | spinazie | pont neuf"
+            },
+            {
+              "name": "Mechelse Koekoek",
+              "priceVariants": [
+                {
+                  "label": "menu",
+                  "price": "44.00"
+                },
+                {
+                  "label": "inclusief gebakken ganzenlever",
+                  "price": "54.00"
+                }
+              ],
+              "locator": "Menukaart lunch › Hoofdgerechten › regel 3",
+              "quote": "Mechelse Koekoek 44 zacht gegaard | stoof van dijen | witlof | geweckte wintertruffel inclusief gebakken ganzenlever 54"
+            },
+            {
+              "name": "Tournedos",
+              "price": "52.00",
+              "locator": "Menukaart lunch › Hoofdgerechten › regel 4",
+              "quote": "Tournedos 52 blonde d’acquitaine rund | seizoensgroenten | sjalot jus"
+            },
+            {
+              "name": "Grain-fed Entrecote",
+              "price": "52.00",
+              "locator": "Menukaart lunch › Hoofdgerechten › regel 5",
+              "quote": "Grain-fed Entrecote 52 gegrild op de konro grill | knolselderij | boleet | zwarte boon"
+            }
+          ]
+        },
+        {
+          "path": [
+            "Menukaart lunch",
+            "Nagerechten"
+          ],
+          "items": [
+            {
+              "name": "Madeleines",
+              "price": "10.00",
+              "locator": "Menukaart lunch › Nagerechten › regel 1",
+              "quote": "Madeleines 10 twee warme madeleines | crème surprise"
+            },
+            {
+              "name": "Conference Peer",
+              "price": "18.00",
+              "locator": "Menukaart lunch › Nagerechten › regel 2",
+              "quote": "Conference Peer 18 pecannoot | kardemom | karamel | vanille"
+            },
+            {
+              "name": "Passie Curd",
+              "price": "18.00",
+              "locator": "Menukaart lunch › Nagerechten › regel 3",
+              "quote": "Passie Curd 18 mango | passievrucht | meringue | sorbet"
+            },
+            {
+              "name": "Kaaswagen",
+              "price": "25.00",
+              "locator": "Menukaart lunch › Nagerechten › regel 4",
+              "quote": "Kaaswagen 25 kazen uit het seizoen | notenbrood | bijpassende garnituren"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Menukaart diner",
+      "sourceUrl": "https://www.restaurantwolfslaar.com/nl/menu-diner",
+      "captureKey": "ops/benchmark/output/card-captures/wolfslaar/03-html-bc35f9ca7a5c.html",
+      "categories": [
+        {
+          "path": [
+            "Menukaart diner",
+            "Voorgerechten"
+          ],
+          "items": [
+            {
+              "name": "Witte Heilbot",
+              "price": "32.00",
+              "locator": "Menukaart diner › Voorgerechten › regel 1",
+              "quote": "Witte Heilbot 32 zeeuwse mossel | sjalot | escabeche"
+            },
+            {
+              "name": "Zeebaars",
+              "price": "34.00",
+              "locator": "Menukaart diner › Voorgerechten › regel 2",
+              "quote": "Zeebaars 34 geschroeid | oester | shiitake | kombucha"
+            },
+            {
+              "name": "Noordzeekrab",
+              "price": "38.00",
+              "locator": "Menukaart diner › Voorgerechten › regel 3",
+              "quote": "Noordzeekrab 38 als cocktail geserveerd | struikselderij | granny Smith | piment d’espelette"
+            },
+            {
+              "name": "Tartaar",
+              "price": "26.00",
+              "locator": "Menukaart diner › Voorgerechten › regel 4",
+              "quote": "Tartaar 26 blonde d’aquitaine rund | kapperappel | radijs | witte aceto balsamico"
+            },
+            {
+              "name": "Limburgs Kloostervarken",
+              "price": "26.00",
+              "locator": "Menukaart diner › Voorgerechten › regel 5",
+              "quote": "Limburgs Kloostervarken 26 bospeen | paksoy | xo | yuzu"
+            },
+            {
+              "name": "Royal Belgian Platinum Caviar",
+              "priceVariants": [
+                {
+                  "label": "30 gram",
+                  "price": "65.00"
+                },
+                {
+                  "label": "50 gram",
+                  "price": "98.00"
+                }
+              ],
+              "locator": "Menukaart diner › Voorgerechten › regel 6",
+              "quote": "Royal Belgian Platinum Caviar blini’s | bieslook | crème fraîche 30 gram 65 | 50 gram 98"
+            }
+          ]
+        },
+        {
+          "path": [
+            "Menukaart diner",
+            "Hoofdgerechten"
+          ],
+          "items": [
+            {
+              "name": "Tarbot",
+              "price": "62.00",
+              "locator": "Menukaart diner › Hoofdgerechten › regel 1",
+              "quote": "Tarbot 62 gebakken in boerenboter | artisjok | polenta | bouillabaisse"
+            },
+            {
+              "name": "Zeetong",
+              "price": "69.00",
+              "locator": "Menukaart diner › Hoofdgerechten › regel 2",
+              "quote": "Zeetong 69 à la meuniere | spinazie | pont neuf"
+            },
+            {
+              "name": "Mechelse Koekoek",
+              "priceVariants": [
+                {
+                  "label": "menu",
+                  "price": "44.00"
+                },
+                {
+                  "label": "inclusief gebakken ganzenlever",
+                  "price": "54.00"
+                }
+              ],
+              "locator": "Menukaart diner › Hoofdgerechten › regel 3",
+              "quote": "Mechelse Koekoek 44 zacht gegaard | stoof van dijen | witlof | geweckte wintertruffel inclusief gebakken ganzenlever 54"
+            },
+            {
+              "name": "Tournedos",
+              "price": "52.00",
+              "locator": "Menukaart diner › Hoofdgerechten › regel 4",
+              "quote": "Tournedos 52 blonde d’acquitaine rund | seizoensgroenten | sjalot jus"
+            },
+            {
+              "name": "Grain-fed Entrecote",
+              "price": "52.00",
+              "locator": "Menukaart diner › Hoofdgerechten › regel 5",
+              "quote": "Grain-fed Entrecote 52 gegrild op de konro grill | knolselderij | boleet | zwarte boon"
+            }
+          ]
+        },
+        {
+          "path": [
+            "Menukaart diner",
+            "Nagerechten"
+          ],
+          "items": [
+            {
+              "name": "Madeleines",
+              "price": "10.00",
+              "locator": "Menukaart diner › Nagerechten › regel 1",
+              "quote": "Madeleines 10 twee warme madeleines | crème surprise"
+            },
+            {
+              "name": "Conference Peer",
+              "price": "18.00",
+              "locator": "Menukaart diner › Nagerechten › regel 2",
+              "quote": "C onference Peer 18 pecannoot | kardemom | karamel | vanille",
+              "note": "De bron splitst de naam over twee tekstknopen (C onference); de quote houdt die splitsing, de naam is het gedrukte gerecht."
+            },
+            {
+              "name": "Passie Curd",
+              "price": "18.00",
+              "locator": "Menukaart diner › Nagerechten › regel 3",
+              "quote": "Passie Curd 18 mango | passievrucht | meringue | sorbet"
+            },
+            {
+              "name": "Kaaswagen",
+              "price": "25.00",
+              "locator": "Menukaart diner › Nagerechten › regel 4",
+              "quote": "Kaaswagen 25 kazen uit het seizoen | notenbrood | bijpassende garnituren"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "arrangements": [
+    {
+      "name": "Signature Menu Maarten Camps",
+      "path": [
+        "Menukaart lunch"
+      ],
+      "captureKey": "ops/benchmark/output/card-captures/wolfslaar/02-html-22d60179c67b.html",
+      "prices": [
+        {
+          "label": "vijf gangen",
+          "price": "130.00"
+        },
+        {
+          "label": "zes gangen",
+          "price": "150.00"
+        }
+      ],
+      "quote": "Vijf-gangen 130 | Zes-gangen 150",
+      "note": "Vastgesteld arrangement. De gangen (Witte Heilbot, Zeebaars, Coquille, Tarbot, Grain-fed Entrecote, Conference Peer) hebben geen eigen prijs en zijn geen losse gerechten."
+    },
+    {
+      "name": "Business Lunch",
+      "path": [
+        "Menukaart lunch"
+      ],
+      "captureKey": "ops/benchmark/output/card-captures/wolfslaar/02-html-22d60179c67b.html",
+      "prices": [
+        {
+          "label": "twee gangen",
+          "price": "70.00"
+        }
+      ],
+      "quote": "Business Lunch - binnen één uur geserveerd 70 twee gangen van de chef voor gasten met beperkte tijd",
+      "note": "Luncharrangement met twee gangen van de chef."
+    },
+    {
+      "name": "Lunchmenu 3 gangen",
+      "path": [
+        "Menukaart lunch"
+      ],
+      "captureKey": "ops/benchmark/output/card-captures/wolfslaar/02-html-22d60179c67b.html",
+      "prices": [
+        {
+          "label": "drie gangen",
+          "price": "85.00"
+        }
+      ],
+      "quote": "Lunchmenu 3 gangen 85 drie gangen: voorgerecht, hoofdgerecht en dessert, keuze van de chef",
+      "note": "Luncharrangement; de gangen zijn een keuze van de chef en hebben geen eigen prijs."
+    },
+    {
+      "name": "Lunchmenu 4 gangen",
+      "path": [
+        "Menukaart lunch"
+      ],
+      "captureKey": "ops/benchmark/output/card-captures/wolfslaar/02-html-22d60179c67b.html",
+      "prices": [
+        {
+          "label": "vier gangen",
+          "price": "95.00"
+        }
+      ],
+      "quote": "Lunchmenu 4 gangen de volledige middagervaring van Wolfslaar 95 vier gangen: voorgerecht, tussengerecht, hoofdgerecht en dessert, keuze van de chef",
+      "note": "Luncharrangement; de gangen zijn een keuze van de chef en hebben geen eigen prijs."
+    }
+  ],
+  "supplements": [
+    {
+      "name": "3 kazen",
+      "price": "15.00",
+      "captureKey": "ops/benchmark/output/card-captures/wolfslaar/02-html-22d60179c67b.html",
+      "quote": "3 kazen 15 | 5 kazen 20",
+      "note": "Uitbreiding van het menu met kazen; geen zelfstandig gerecht."
+    },
+    {
+      "name": "5 kazen",
+      "price": "20.00",
+      "captureKey": "ops/benchmark/output/card-captures/wolfslaar/02-html-22d60179c67b.html",
+      "quote": "3 kazen 15 | 5 kazen 20",
+      "note": "Uitbreiding van het menu met kazen; geen zelfstandig gerecht."
+    },
+    {
+      "name": "kaasselectie i.p.v. dessert",
+      "price": "15.00",
+      "captureKey": "ops/benchmark/output/card-captures/wolfslaar/02-html-22d60179c67b.html",
+      "quote": "kaasselectie i.p.v dessert - 15",
+      "note": "Vervanging van het dessert door kaas; geen zelfstandig gerecht."
+    }
+  ],
+  "ambiguous": [
+    {
+      "item": "Signature Menu Maarten Camps (gangen)",
+      "reason": "De bron noemt de gangen zonder eigen prijs; alleen het arrangement heeft een prijs. Een extractie die een gang als los gerecht met een arrangementprijs opvoert, is een prijsfout, geen match.",
+      "captureKey": "ops/benchmark/output/card-captures/wolfslaar/02-html-22d60179c67b.html"
+    },
+    {
+      "item": "https://www.restaurantwolfslaar.com/menu-1",
+      "reason": "Deze pagina is een overzichtspagina die naar de à la carte-, lunch- en dinerkaart linkt. Ze drukt zelf geen gerecht of prijs en levert daarom geen referentieregel.",
+      "captureKey": "ops/benchmark/output/card-captures/wolfslaar/04-html-19abbe4aa63a.html"
+    },
+    {
+      "item": "Wijnkaart",
+      "reason": "De pagina noemt alleen de indeling van de wijnkaart (Sparkling en Zoet, Wit en Rosé, Rood) zonder wijn of prijs. De wijnkaart is niet op deze pagina's gepubliceerd en levert geen referentieregel.",
+      "captureKey": "ops/benchmark/output/card-captures/wolfslaar/02-html-22d60179c67b.html"
+    }
+  ],
+  "limitations": [
+    "De lunch- en dinerpagina drukken dezelfde à la carte; elke pagina is in deze referentie een eigen menu, zodat structuurverlies per pagina zichtbaar blijft.",
+    "Prijzen staan als hele euro's zonder decimalen of valutateken. De quote houdt de gedrukte vorm; alleen het vergelijkbare prijsveld is als 00 cent geschreven.",
+    "De lunchpagina bevat daarnaast het Lunchmenu; de dinerpagina niet.",
+    "De pagina's noemen geen allergenen per gerecht; er staat alleen een algemene mededeling over allergieën en diëten. Allergenen blijven onbekend, niet allergeenvrij.",
+    "De vastgezette pagina's bevatten geen menutitel; dat is een structuurbevinding in de meting en is hier niet weggepoetst.",
+    "Deze referentie is uit de vastgezette brontekst opgesteld en niet uit de parseruitvoer."
+  ]
+}

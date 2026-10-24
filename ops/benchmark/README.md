@@ -10,6 +10,34 @@ has a manifest, adapter contract, scorer, and report shape to plug into,
 rather than starting from nothing. Nothing here fetches a real restaurant
 URL, contacts a vendor, or spends any money.
 
+`source-references.json` in this directory is a separate, #59-specific artefact:
+a controlled capture of two real public sources (Smelt Breda PDF, Blossem Breda
+HTML) with byte and content hashes, used only by
+`ops/scripts/probe-menu-extraction-sources.js`. That probe fetches exactly those
+two URLs read-only through `safeOutboundFetch` and the real analysis chain, and
+fails on any hash or item difference. It is not part of the BE-21 benchmark, is
+deliberately not wired into `npm test` (it needs network access), and never
+writes, confirms or publishes anything.
+
+`holdout-sources.json` and `holdout-references.json` are the #59 holdout pins for
+the four Product Owner-approved public sources (De Botanist, Gauchos Grill Breda,
+Mr Moos, Colonia Breda). The reference is capture-only: it pins the source
+version and the honest read outcome, never a parser result or item count.
+`ops/scripts/capture-menu-extraction-holdout-references.js` creates it once, and
+`ops/scripts/probe-menu-extraction-holdout.js` records exactly one first
+evaluation in `holdout-evaluation.json` (tracked, create-only). Both are not
+npm scripts. A tuned source must move to the representative set with a new,
+unused holdout; a second evaluation on the same pin is refused.
+
+After the 2026-10-18 repair round, De Botanist, Mr Moos and Colonia are
+representative/used-for-tuning; only Gauchos Breda remains an
+`evaluated_once` holdout. `holdout-references.json` also pins the actual later
+menu sources (the Botanist PDF and the Mr Moos/Colonia menu pages) because the
+entry-page hash does not cover them. `botanist-reference.json` is a controlled
+partial layout reference for the Botanist PDF; its misses/extras and unsupported
+wine/cocktail blocks are documented in
+`docs/guides/menu-extraction-botanist-reference.md`.
+
 ## What actually exists here
 
 - `manifest.js` / `manifest.json` — a case manifest with three honestly
@@ -230,3 +258,86 @@ node --test ops/benchmark/*.test.js
 
 Both are fully offline and safe to run repeatedly — no network call, no
 secret, no external state.
+
+## #59 controlled reference captures (review 6318225879)
+
+This is a separate, capture-first track next to the BE-21 foundation. Five
+public sources are pinned once through the existing safe fetch (robots and
+redirect checks), the response bytes stay local and gitignored under
+`ops/benchmark/output/reference-captures/`, and only URL, content-type, time,
+size and SHA-256 are committed in `ops/benchmark/reference-captures.json`.
+References are authored from that pinned text, never from parser output.
+
+```
+node ops/scripts/capture-menu-extraction-reference-sources.js
+node ops/scripts/measure-menu-extraction-references.js
+```
+
+The capture command is create-only: a second run is refused so a source version
+cannot be silently replaced. The measurement command replays the current
+pipeline on exactly the pinned bytes (offline fetcher, no network), verifies
+every capture hash and every reference quote, and writes
+`reference-measurement.json` / `.md`. It reports missed, invented, price and
+rubric errors separately, with precision and recall. A blocked source (Senang
+Makan returned HTTP 503 to the safe route) stays visible and is never counted as
+an empty or successful menu. The five sources are a controlled set to steer on,
+not an unseen holdout; the broader benchmark and a new holdout remain BE-21.
+
+A reference may only be corrected from the same pinned bytes (Lead review
+6319894232 repaired the Pellens diner panel, one Andalous dish and the Zuyd
+wine-arrangement prices that way). Such a repair re-runs the measurement and
+reports the new table next to the old one, even when the outcome gets worse;
+the counting rules and the measurement code stay unchanged.
+
+## #59 criterion 5 — existing cards, four cards, one measurement (orders 6347355753, 6349832755)
+
+A separate capture-first track for the four existing cards. The 2025-11 Bardot
+dinerkaart PDF is the only pinned Bardot document that still matches its
+captured SHA-256, so it is the only one that carries a reference. Wolfslaar and
+T-Huis were pinned for the first time by the second order (both earlier captures
+had failed); T-Huis carries no reference because its pinned menu page publishes
+the five cards as SVG images only.
+
+```
+node ops/scripts/verify-menu-extraction-card-reference-bytes.js   # once, create-only
+node ops/scripts/capture-menu-extraction-card-source-bytes.js --source wolfslaar   # once, create-only
+node ops/scripts/capture-menu-extraction-card-source-bytes.js --source thuis       # once, create-only
+node ops/scripts/measure-menu-extraction-card-reference.js        # offline, repeatable
+node ops/scripts/probe-menu-extraction-blocked-cards.js           # once, create-only
+```
+
+- `card-reference-captures.json` — the one verification attempt: which pinned
+  card URL still has the pinned bytes and which one changed (a source change,
+  recorded without bytes).
+- `card-reference-captures.wolfslaar.json` / `.thuis.json` — the one capture per
+  source: the pinned entry URL, the menu URLs the historical export names, the
+  pinned probe URLs and (Wolfslaar only) the one same-host menu link the entry
+  page itself named. Only hash, size, content type, role and time are committed;
+  the bytes stay in the gitignored `ops/benchmark/output/card-captures/`.
+  `cardSourceCaptures.js` refuses any other URL, a second entry seed, a
+  `not-a-menu` page without a reason and a `blocked` page that stores bytes.
+- `reference-references/bardot.json` — the controlled Bardot reference: name,
+  price variants, rubric path, locator, literal quote and, per amount, a price
+  proof (page, column, baseline) that `cardReferenceIntegrity.js` resolves back
+  to the pinned row. Supplements, arrangements and doubt cases are separate
+  lists; a `Dagprijs` dish without an amount is a doubt case, never a guessed
+  price.
+- `reference-references/wolfslaar.json` — the Wolfslaar reference from the pinned
+  HTML only: 30 dishes over two menu pages, 4 arrangements, 3 supplements and 3
+  doubt cases, each with a literal quote from the pinned page.
+- `reference-references/thuis.json` — no dish row: the pinned menu page names
+  five tab panels that each hold one SVG card. Recorded as blocked with its
+  reason, never as an empty menu.
+- `card-reference-measurement.json` / `.md` — the current extraction on those
+  pinned bytes, with Bardot, Zuyd, Wolfslaar and T-Huis reported separately and
+  never merged into one success figure. T-Huis stays a blocked row. Deterministic:
+  no network and no wall-clock time.
+- `existing-card-probe-attempts.json` — one honest re-attempt for the two cards
+  that were blocked before (Wolfslaar, T-Huis). A readable page is recorded as
+  reachable, never as a read or extracted menu.
+
+The capture route reuses the existing safe fetch (SSRF guards, redirect, timeout
+and byte limits) but does **not** perform a `robots.txt` check; the earlier probe
+and Bardot documentation suggested it did. The new documentation does not repeat
+that claim.
+

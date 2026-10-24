@@ -1,0 +1,91 @@
+{
+  "version": "1.0.0",
+  "sourceId": "chocolat",
+  "label": "Restaurant Chocolat",
+  "entryUrl": "https://www.restaurant-chocolat.nl",
+  "captureStatus": "captured",
+  "note": "Authored from the pinned lunch and diner captures. The lunch and diner cards stay separate menus; the group-arrangement page is not a dish menu.",
+  "menus": [
+    {
+      "title": "LUNCHKAART CHOCOLAT",
+      "sourceUrl": "https://www.restaurant-chocolat.nl/lunch/",
+      "captureKey": "ops/benchmark/output/reference-captures/chocolat/03-lunch-4ac64c425f1c.html",
+      "categories": [
+        {
+          "path": ["LUNCHKAART CHOCOLAT", "LUNCHGERECHTEN"],
+          "items": [
+            {"name": "STEAK TARTARE", "price": "17.00", "locator": "LUNCHKAART CHOCOLAT › LUNCHGERECHTEN › regel 1", "quote": "STEAK TARTARE 90 GRAM €17 Gerookte Ei-dooier · Kappertjes · Zoetzuur (supp. 130 gr. €8)"},
+            {"name": "ROGVLEUGEL & STOOF", "price": "24.00", "locator": "LUNCHKAART CHOCOLAT › LUNCHGERECHTEN › regel 2", "quote": "ROGVLEUGEL & STOOF €24 Gebakken · Truffel · Bruine Boter"},
+            {"name": "1/2 KREEFT THERMIDOR", "price": "28.00", "locator": "LUNCHKAART CHOCOLAT › LUNCHGERECHTEN › regel 3", "quote": "1/2 KREEFT THERMIDOR €28 Gegratineerd · Dragon · Parmezaanse Kaas"},
+            {"name": "LINGUINE BOUILLABAISSE", "price": "21.00", "locator": "LUNCHKAART CHOCOLAT › LUNCHGERECHTEN › regel 4", "quote": "LINGUINE BOUILLABAISSE €21 Scampi · Venkel · Rouille · Brioche"},
+            {"name": "GARNALEN KROKETTEN", "price": "19.00", "locator": "LUNCHKAART CHOCOLAT › LUNCHGERECHTEN › regel 5", "quote": "GARNALEN KROKETTEN €19 Gebakken Scampi · Limoen Mayonaise (friet of toast)"},
+            {"name": "SANDWICH CHOCOLAT", "price": "18.00", "locator": "LUNCHKAART CHOCOLAT › LUNCHGERECHTEN › regel 6", "quote": "SANDWICH CHOCOLAT €18 Steak Tartare · Pata Negra · Truffel Roerei (supp. ganzenlever €4)"},
+            {"name": "BULGOGI", "price": "17.00", "locator": "LUNCHKAART CHOCOLAT › LUNCHGERECHTEN › regel 7", "quote": "BULGOGI €17 Diamanthaas · Kimchi · Gefrituurde Bloemkool · Chili Flakes"},
+            {"name": "SALADE BOTANIQUE", "price": "17.00", "locator": "LUNCHKAART CHOCOLAT › LUNCHGERECHTEN › regel 8", "quote": "SALADE BOTANIQUE €17 Groene Asperges · Suikersla · Avocado · Groene Kruiden · Komkommer"},
+            {"name": "CHOCOLAT FAVORITES", "price": "18.00", "locator": "LUNCHKAART CHOCOLAT › LUNCHGERECHTEN › regel 9", "quote": "CHOCOLAT FAVORITES €18 Mini Hamburger · Brioche Steak Tartare · Toast Krab"},
+            {"name": "ZALM", "price": "18.00", "locator": "LUNCHKAART CHOCOLAT › LUNCHGERECHTEN › regel 10", "quote": "ZALM €18 Ras el Hanout · Granaatappel · Basilicum"},
+            {"name": "STEAK CHOCOLAT", "price": "32.00", "locator": "LUNCHKAART CHOCOLAT › LUNCHGERECHTEN › regel 11", "quote": "STEAK CHOCOLAT €32 Paddenstoelen · Truffel · Verse Friet"},
+            {"name": "SALADE STRACCIATELLA", "price": "17.00", "locator": "LUNCHKAART CHOCOLAT › LUNCHGERECHTEN › regel 12", "quote": "SALADE STRACCIATELLA €17 Biet · Granaatappel · Suikersla · Zuurdesem"}
+          ]
+        }
+      ]
+    },
+    {
+      "title": "DINERKAART CHOCOLAT",
+      "sourceUrl": "https://www.restaurant-chocolat.nl/diner/",
+      "captureKey": "ops/benchmark/output/reference-captures/chocolat/04-diner-7122b5d1c92b.html",
+      "categories": [
+        {
+          "path": ["DINERKAART CHOCOLAT", "VOORGERECHTEN"],
+          "items": [
+            {"name": "NOORDZEE KRAB", "price": "25.00", "locator": "DINERKAART CHOCOLAT › VOORGERECHTEN › regel 1", "quote": "NOORDZEE KRAB 25 Jamaicaanse Peper · Coulis van Krab · Haringkuit · Sorbet van Wasabi"},
+            {"name": "WATERMELOEN (V)", "price": "22.00", "locator": "DINERKAART CHOCOLAT › VOORGERECHTEN › regel 2", "quote": "WATERMELOEN (V) 22 Gepekeld & Gedroogd · Tartaar · Nori · Waterkers · Jalapeño"},
+            {"name": "KINGFISH", "price": "28.00", "locator": "DINERKAART CHOCOLAT › VOORGERECHTEN › regel 3", "quote": "KINGFISH 28 Crème van Bokking · Hangop · Passievrucht · Nashipeer"},
+            {"name": "ZWEZERIK", "price": "28.00", "locator": "DINERKAART CHOCOLAT › VOORGERECHTEN › regel 4", "quote": "ZWEZERIK 28 Suikerbrood · Kropsla · Truffel · Belperknolle"},
+            {"name": "STEAK TARTARE", "price": "26.00", "locator": "DINERKAART CHOCOLAT › VOORGERECHTEN › regel 5", "quote": "STEAK TARTARE 26 Wagyu A5 · Sukiyaki · Bosui · Appelciderazijn"}
+          ]
+        },
+        {
+          "path": ["DINERKAART CHOCOLAT", "HOOFDGERECHTEN"],
+          "items": [
+            {"name": "RUNDERHAAS", "price": "38.00", "locator": "DINERKAART CHOCOLAT › HOOFDGERECHTEN › regel 1", "quote": "RUNDERHAAS 38 Truffelstoof · Cantharel · Doperwt · Jus met Bonenkruid"},
+            {"name": "ROGVLEUGEL", "price": "32.00", "locator": "DINERKAART CHOCOLAT › HOOFDGERECHTEN › regel 2", "quote": "ROGVLEUGEL 32 Venkel · Gepofte Paprika · Courgette · Beurre Blanc met Sriracha"},
+            {"name": "KNOLSELDERIJ (V)", "price": "29.00", "locator": "DINERKAART CHOCOLAT › HOOFDGERECHTEN › regel 3", "quote": "KNOLSELDERIJ (V) 29 Crispy Chili Boter · Prei Hollandaise · Polenta · Spinazie"},
+            {"name": "RUNDERBAVETTE", "price": "37.00", "locator": "DINERKAART CHOCOLAT › HOOFDGERECHTEN › regel 4", "quote": "RUNDERBAVETTE 37 Kroket van Wang · Vadouvan · Snijboon · Oude Kaas"},
+            {"name": "IBERICO PRESA", "price": "39.00", "locator": "DINERKAART CHOCOLAT › HOOFDGERECHTEN › regel 5", "quote": "IBERICO PRESA 39 Zoete Aardappel · Zwarte Knoflook · Shiitake"}
+          ]
+        },
+        {
+          "path": ["DINERKAART CHOCOLAT", "NAGERECHTEN"],
+          "items": [
+            {"name": "SURPRISE", "price": "18.00", "locator": "DINERKAART CHOCOLAT › NAGERECHTEN › regel 1", "quote": "SURPRISE 18 Wisselend dessert van onze Patissier"},
+            {"name": "CHOCOLAT & CHOCOLAT PUUR", "price": "19.00", "locator": "DINERKAART CHOCOLAT › NAGERECHTEN › regel 2", "quote": "CHOCOLAT & CHOCOLAT PUUR 19 Bereidingen van pure Chocolat"},
+            {"name": "CHOCOLAT & CHOCOLAT WIT", "price": "19.00", "locator": "DINERKAART CHOCOLAT › NAGERECHTEN › regel 3", "quote": "CHOCOLAT & CHOCOLAT WIT 19 Bereidingen witte Chocolat"},
+            {"name": "KAAS ASSORTIMENT", "price": "22.00", "locator": "DINERKAART CHOCOLAT › NAGERECHTEN › regel 4", "quote": "KAAS ASSORTIMENT 22 4 Soorten · Wortel Gember Compôte · Kletzenbrood"}
+          ]
+        }
+      ]
+    }
+  ],
+  "arrangements": [
+    {"name": "LUNCHMENU", "path": ["LUNCHKAART CHOCOLAT", "LUNCHMENU"], "captureKey": "ops/benchmark/output/reference-captures/chocolat/03-lunch-4ac64c425f1c.html", "prices": [{"label": "2 gangen", "price": "38.00"}, {"label": "3 gangen", "price": "48.00"}, {"label": "4 gangen", "price": "58.00"}], "quote": "2 GANGEN € 38 Wijnarrangement € 16 3 GANGEN € 48 Wijnarrangement € 24 4 GANGEN € 58 Wijnarrangement € 32", "note": "Lunchmenu per aantal gangen; het wijnarrangement is een aparte arrangementprijs."},
+    {"name": "CHOCOLAT GASTRONOMIQUE", "path": ["DINERKAART CHOCOLAT", "CHOCOLAT GASTRONOMIQUE"], "captureKey": "ops/benchmark/output/reference-captures/chocolat/04-diner-7122b5d1c92b.html", "prices": [{"label": "4 gangen", "price": "65.00"}, {"label": "5 gangen", "price": "75.00"}, {"label": "6 gangen", "price": "85.00"}, {"label": "7 gangen", "price": "95.00"}], "quote": "4 GANGEN € 65 Wijnarrangement € 32 5 GANGEN € 75 Wijnarrangement € 40 6 GANGEN € 85 Wijnarrangement € 48 7 GANGEN € 95 Wijnarrangement € 56", "note": "Gangenarrangement; de gangen zijn geen losse gerechten. Wijnarrangementen zijn aparte arrangementprijzen."},
+    {"name": "ALL THE WAY CHOCOLAT", "path": ["DINERKAART CHOCOLAT", "ALL THE WAY CHOCOLAT"], "captureKey": "ops/benchmark/output/reference-captures/chocolat/04-diner-7122b5d1c92b.html", "prices": [{"label": "All the Way Chocolat", "price": "125.00"}], "quote": "ALL THE WAY CHOCOLAT · Vijf verrassende gerechten · Wijnarrangement · Tafelwater (plat of lichtbruisend) · Koffie met huisgemaakte friandises € 125", "note": "Vast arrangement; de vijf gerechten hebben geen eigen prijs."},
+    {"name": "LUNCH ARRANGEMENT (gezelschappen)", "path": ["Gezelschappen", "LUNCH ARRANGEMENT"], "captureKey": "ops/benchmark/output/reference-captures/chocolat/06-arrangementen-a35ee43d2d68.html", "prices": [{"label": "2 gangen", "price": "59.00"}], "quote": "LUNCH ARRANGEMENT 2 GANGEN Amuses en brood 2-gangen lunchmenu 2 drankjes naar keuze: (huiswijn, bier en frisdranken) Tafelwater (plat of bruisend) Koffie/thee met huisgemaakte friandises € 59 p.p.", "note": "Arrangement voor gezelschappen vanaf 8 personen; geen losse gerechten."},
+    {"name": "DINER ARRANGEMENT (gezelschappen)", "path": ["Gezelschappen", "DINER ARRANGEMENT"], "captureKey": "ops/benchmark/output/reference-captures/chocolat/06-arrangementen-a35ee43d2d68.html", "prices": [{"label": "4 gangen", "price": "89.00"}], "quote": "DINER ARRANGEMENT 4 GANGEN Amuses en brood 4-gangen gastromenu 2 drankjes naar keuze: (huiswijn, bier en frisdranken) Tafelwater (plat of bruisend) Koffie/thee met huisgemaakte friandises € 89 p.p.", "note": "Arrangement voor gezelschappen vanaf 8 personen; geen losse gerechten."}
+  ],
+  "supplements": [
+    {"name": "STEAK TARTARE 130 gr.", "price": "8.00", "captureKey": "ops/benchmark/output/reference-captures/chocolat/03-lunch-4ac64c425f1c.html", "quote": "supp. 130 gr. €8", "note": "Grotere portie als supplement bij STEAK TARTARE; geen zelfstandig gerecht."},
+    {"name": "ganzenlever", "price": "4.00", "captureKey": "ops/benchmark/output/reference-captures/chocolat/03-lunch-4ac64c425f1c.html", "quote": "supp. ganzenlever €4", "note": "Toevoeging bij SANDWICH CHOCOLAT; geen zelfstandig gerecht."}
+  ],
+  "ambiguous": [
+    {"item": "STEAK TARTARE", "reason": "De bron noemt de portie in de naam ('90 GRAM'). De referentienaam is het gerecht; de 130-gramsoptie is een supplement van €8 en telt niet als tweede gerecht.", "captureKey": "ops/benchmark/output/reference-captures/chocolat/03-lunch-4ac64c425f1c.html"},
+    {"item": "SURPRISE", "reason": "Wisselend dessert met vaste prijs; er is geen afzonderlijke dessernaam.", "captureKey": "ops/benchmark/output/reference-captures/chocolat/04-diner-7122b5d1c92b.html"}
+  ],
+  "limitations": [
+    "De /menu-pagina toont alleen tegels naar de lunch- en dinerkaart en is geen menukaart.",
+    "De pagina /arrangementen bevat arrangementprijzen voor gezelschappen en geen losse gerechten.",
+    "De allergeninformatie is een algemene mededeling; allergenen per gerecht blijven onbekend.",
+    "Deze referentie is uit de vastgezette brontekst opgesteld en niet uit de parseruitvoer."
+  ]
+}

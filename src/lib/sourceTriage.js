@@ -99,6 +99,67 @@ const NEXT_STEP_LABELS = {
 const NOTE_MAX = 280;
 const URL_MAX = 2048;
 
+// ── Batch follow-up: a menu that exists only as an image or scan ───────────
+//
+// #59 Lead review 6319894232 (R4/R5). A batch result with that verdict links
+// here as `/internal/source-triage?restaurant=<id>&reason=image_only`. The
+// reason must be visible in the detail of that restaurant — not only in a page
+// banner — together with the next step that actually fits it. It stays page
+// context: it never becomes a stored source status, a menu verdict, or a
+// proposal that already exists.
+//
+// No new stored reason value and no schema change: the existing `other` reason
+// carries a fixed, visible explanation as its required note.
+const FOLLOW_UP_REASONS = ['image_only'];
+
+const FOLLOW_UPS = {
+  image_only: {
+    id: 'image_only',
+    title: 'Aandachtspunt uit de batchanalyse',
+    reason: 'Menu alleen als afbeelding of scan: niet ondersteund',
+    detail:
+      'De menukaart is alleen als afbeelding of scan beschikbaar. Deze import leest geen beeld en gebruikt geen OCR, dus er is niets als gerecht opgeslagen.',
+    nextStep: 'Kies een andere tekst- of pdf-bron of markeer deze bron als onbruikbaar.',
+    suggestion: {
+      kind: 'mark_unusable',
+      unusableReason: 'other',
+      note: 'Menu alleen als afbeelding of scan; niet met OCR te lezen.',
+      explain:
+        'Voorgeselecteerd omdat de batchanalyse dit menu als afbeelding of scan meldde. De toelichting hieronder is verplicht en al ingevuld.',
+    },
+  },
+};
+
+/**
+ * The follow-up context in the address bar, as text only:
+ * `{ id, restaurantId, followUp }` or null. An unknown, malformed or duplicate
+ * value is ignored — it is never turned into a status or a proposal.
+ */
+function readFollowUp(search) {
+  let params;
+  try {
+    params = new URLSearchParams(typeof search === 'string' ? search : '');
+  } catch {
+    return null;
+  }
+  const reason = params.get('reason');
+  if (!FOLLOW_UP_REASONS.includes(reason)) return null;
+  const rawId = params.get('restaurant');
+  const restaurantId = typeof rawId === 'string' && /^[A-Za-z0-9_-]{1,64}$/.test(rawId) ? rawId : null;
+  return { id: reason, restaurantId, followUp: FOLLOW_UPS[reason] };
+}
+
+/**
+ * The follow-up that belongs to exactly this entry. Only a link that names the
+ * same restaurant attaches to the detail; a link without a restaurant, with
+ * another restaurant or with an unknown id stays a page-level note and is
+ * never shown at the wrong restaurant.
+ */
+function followUpForEntry(context, entry) {
+  if (!context || !context.followUp || !context.restaurantId) return null;
+  return String((entry && entry.restaurant_id) || '') === context.restaurantId ? context.followUp : null;
+}
+
 // Special-use and internal top-level labels (RFC 2606/6761/6762 and common
 // private use). A source on one of these can never be a public restaurant
 // website.
@@ -525,6 +586,10 @@ module.exports = {
   EVENT_LABELS,
   NEXT_STEPS,
   NEXT_STEP_LABELS,
+  FOLLOW_UP_REASONS,
+  FOLLOW_UPS,
+  readFollowUp,
+  followUpForEntry,
   NOTE_MAX,
   URL_MAX,
   BLOCKED_TLDS,

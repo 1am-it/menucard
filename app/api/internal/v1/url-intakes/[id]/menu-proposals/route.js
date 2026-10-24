@@ -76,7 +76,15 @@ export async function POST(request, { params }) {
       continue
     }
 
-    const capturedContent = { categories: menu.categories || [] }
+    const categories = menu && Array.isArray(menu.categories) ? menu.categories : []
+    // A stored v1 projection with zero categories is not a successful menu.
+    // It is refused here before it can become an empty snapshot, and a
+    // v2-shaped value can never lose its version into `categories`.
+    if (categories.length === 0) {
+      results.push({ context_slug: slug, ok: false, error: 'Deze menucontext bevat geen bruikbare rubrieken.' })
+      continue
+    }
+    const capturedContent = { categories }
     const validation = validateSnapshotProposalInput({
       restaurantId: intake.matched_restaurant_id,
       menuContext: `${intake.matched_restaurant_id}-${slug}`,

@@ -11,9 +11,12 @@
     "start": "next start",
     "test": "node --test \"src/**/*.test.js\" \"app/**/*.test.js\" \"ops/**/*.test.js\"",
     "test:menu-structure": "node --test ops/benchmark/structureCorpus.test.js",
-    "benchmark:menu-structure": "node ops/benchmark/runStructureCorpus.js"
+    "test:browser:menu-review": "node ops/browser/run-menu-review-browser-check.js",
+    "benchmark:menu-structure": "node ops/benchmark/runStructureCorpus.js",
+    "worker:analysis": "node ops/scripts/process-analysis-jobs.js"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "0.133.0",
     "@supabase/supabase-js": "^2.112.4",
     "next": "^15.1.0",
     "pdfjs-dist": "6.3.289",

@@ -28,8 +28,12 @@ const {
   summarizeItems,
   amsterdamDayStart,
 } = require('./batchAnalysis');
-const { liveMenuLines, buildMenuConcept, sanitizeEdits } = require('./menuConcept');
+const { liveMenuLines, buildMenuConcept, sanitizeEdits, mergeEdits } = require('./menuConcept');
 const { createConceptVersion } = require('./menuConceptStore');
+const { menusFromUnknownContexts } = require('./pdfMenuContext');
+const { readReceiptProjection, productActionRefusal } = require('./menuProductIntegrationV2');
+const { validateStructureReviews, structureEdits, recordedSections, reviewKey } = require('./menuStructureReview');
+const { confirmationProposalId } = require('./sourceConfirmation');
 
 // One internal menu concept per restaurant: BE-17 snapshot proposals in
 // the context "<restaurantId>-menukaart", versioned.
@@ -41,9 +45,12 @@ const LOAD_ERROR = 'De batchanalyse kon niet worden geladen.';
 const RECENT_BATCH_LIMIT = 10;
 const BATCH_COLUMNS = 'id, actor_user_id, created_at, last_activity_at, closed_at, close_reason, item_count';
 const JOB_COLUMNS =
-  'id, status, error_reason, attempt_count, next_attempt_at, lease_expires_at, expired_at, finished_at, created_at, updated_at, result_receipt_id, unknown_menu_contexts:field_evidence->unknown_menu_contexts, menu_source_urls:field_evidence->menu_source_urls, notes:field_evidence->notes';
-const RECEIPT_COLUMNS = 'id, restaurant_match_type, matched_restaurant_id, created_at, menus:candidate_summary->menus';
+  'id, status, error_reason, attempt_count, next_attempt_at, lease_expires_at, expired_at, finished_at, created_at, updated_at, result_receipt_id, unknown_menu_contexts:field_evidence->unknown_menu_contexts, menu_source_urls:field_evidence->menu_source_urls, notes:field_evidence->notes, source_inventory:field_evidence->source_inventory, limitations:field_evidence->limitations, extraction_result:field_evidence->extraction_result, protocol:field_evidence->protocol';
+const RECEIPT_COLUMNS =
+  'id, restaurant_match_type, matched_restaurant_id, created_at, canonical_source_url, actor_user_id, analysis_result_hash, menus:candidate_summary->menus, product:candidate_summary->menuExtractionV2';
+const STRUCTURE_COLUMNS = 'id, receipt_id, job_id, path_key, original_path, source_path, locator, decision, corrected_path, actor_user_id, created_at';
 const CONFIRM_NOTE = 'Bevestigd vanuit Batchanalyse na menselijke controle.';
+const STRUCTURE_NOTE = 'Bevestigd vanuit Batchanalyse na expliciete menselijke controle van elke onzekere rubriek.';
 
 // Display time for result texts ("Bevestigd om 13:20"), in the market's time zone.
 const CLOCK = new Intl.DateTimeFormat('nl-NL', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Amsterdam' });
@@ -129,6 +136,8 @@ function createBatchAnalysisHandlers(deps) {
 
     const jobById = new Map(jobs.map((j) => [j.id, j]));
     const receiptById = new Map(receipts.map((r) => [r.id, r]));
+    // The human structure decisions already recorded for these receipts (0020).
+    const structureReviews = await loadStructureReviews(supabase, receiptIds);
     const firstPosition = new Map();
     const views = (items || []).map((item) => {
       if (item.canonical_source_url && item.outcome !== 'duplicate' && !firstPosition.has(item.canonical_source_url)) {
@@ -145,6 +154,8 @@ function createBatchAnalysisHandlers(deps) {
         duplicateOf: item.outcome === 'duplicate' ? firstPosition.get(item.canonical_source_url) : undefined,
         now: now(),
         formatTime: formatClock,
+        recordedReviews: receipt ? structureReviews.byReceipt.get(receipt.id) || [] : [],
+        structureStoreAvailable: structureReviews.available,
       });
     });
 
@@ -168,11 +179,32 @@ function createBatchAnalysisHandlers(deps) {
       const job = jobById.get(item.job_id || item.reused_job_id) || null;
       const receipt = job && job.result_receipt_id ? receiptById.get(job.result_receipt_id) || null : null;
       const latest = concepts.find((c) => c.restaurant_id === view.restaurant.id) || null;
+      const receiptMenus = (receipt && Array.isArray(receipt.menus) && receipt.menus) || [];
+      // A v2 receipt is authoritative over the legacy `menus` projection. Its
+      // validated view is sent; the old projection is not used for a concept.
+      const receiptProduct = readReceiptProjection(receipt);
+      const productBlocked = receiptProduct.kind !== 'v1';
+      // Receipt is authoritative; a job-only PDF result (older records or a
+      // job whose receipt predates PDF promotion) is converted through the
+      // same canonical helper, never through a second interpretation.
+      const fallbackMenus = menusFromUnknownContexts(job && job.unknown_menu_contexts);
+      const menus = productBlocked ? [] : (receiptMenus.length > 0 ? receiptMenus : fallbackMenus);
+      // A human structure decision is an edit on the concept: keeping the
+      // section accepts it explicitly, correcting it replaces its path. The
+      // client gets the same base edits the server applies on save, so the
+      // preview and the saved version cannot drift apart.
+      const structure = receipt ? structureReviews.byReceipt.get(receipt.id) || [] : [];
       view.concept = {
         receiptId: receipt ? receipt.id : null,
-        menus: (receipt && Array.isArray(receipt.menus) && receipt.menus) || [],
+        menus,
+        product: productBlocked ? receiptProduct.view : null,
+        productBlocked,
+        productReason: productBlocked ? receiptProduct.reason : null,
+        productSchemaVersion: productBlocked ? receiptProduct.schemaVersion || null : null,
         liveLines: liveMenuLines(liveMenus, view.restaurant.id),
         latest: latest ? { version: latest.version, created_at: latest.created_at } : null,
+        structureEdits: structureEdits(menus, structure).lines,
+        structureReview: { treated: structure },
       };
     });
 
@@ -328,21 +360,28 @@ function createBatchAnalysisHandlers(deps) {
         description: outcome.analysis.description,
         notes: outcome.analysis.notes,
         menu_source_urls: menuSourceUrls(outcome.analysis),
+        source_inventory: outcome.analysis.sourceInventory || [],
+        limitations: outcome.analysis.limitations || [],
+        extraction_result: outcome.analysis.extractionResult || null,
+        protocol: outcome.analysis.protocol || null,
       },
     });
     return { ok: !error, code: error && error.code };
   }
 
-  /** POST /[id]/process — claim and analyse exactly one job of this batch. */
-  async function processNext(request, batchId) {
-    const { auth, denied } = await authorize(request);
-    if (denied) return denied;
+  /**
+   * Claim and process exactly one job. Shared by the browser route (after
+   * authorization) and the explicit server-side worker (service credentials).
+   * The claim/lease RPC remains the only concurrency guard, so a page and a
+   * worker can never analyse the same job twice.
+   */
+  async function processClaimedJob(batchId, actorUserId) {
     if (!isUuid(batchId)) return reply(404, { error: 'Batch niet gevonden.' });
     const supabase = getSupabase();
 
     const { data: claimRows, error: claimError } = await supabase.rpc('claim_next_source_analysis_job', {
       p_batch_id: batchId,
-      p_actor_user_id: auth.userId,
+      p_actor_user_id: actorUserId,
     });
     if (claimError) {
       if (claimError.code === 'P0044') return reply(403, { error: 'Alleen wie de batch startte, kan hem verwerken.', reason: 'not_starter' });
@@ -381,7 +420,7 @@ function createBatchAnalysisHandlers(deps) {
 
     const { error: failError } = await supabase.rpc('fail_source_analysis_job', {
       p_job_id: job.id,
-      p_actor_user_id: auth.userId,
+      p_actor_user_id: actorUserId,
       p_error_reason: (outcome && outcome.errorReason) || 'internal_error',
     });
     if (failError) {
@@ -391,8 +430,122 @@ function createBatchAnalysisHandlers(deps) {
     return reply(200, { outcome: 'claimed', job: { id: job.id, status: 'attempted' } });
   }
 
-  /** POST /[id]/confirm — "Bevestig bron" for one or more high-certainty
-   * results: per result an accepted BE-24 proposal, nothing else. */
+  /** POST /[id]/process — authenticated browser route. */
+  async function processNext(request, batchId) {
+    const { auth, denied } = await authorize(request);
+    if (denied) return denied;
+    return processClaimedJob(batchId, auth.userId);
+  }
+
+  /**
+   * Service-worker entry point. Deliberately not wired to a route or schedule;
+   * only a caller holding the service-role credentials can reach it. It still
+   * passes the batch's real actor to the RPC, so the database's own ownership
+   * guard remains in force.
+   */
+  async function processForWorker(batchId, actorUserId) {
+    return processClaimedJob(batchId, actorUserId);
+  }
+
+  /**
+   * Re-reads the stored analysis result of one job for the confirmation. The
+   * human structure review is re-validated against this receipt — never
+   * against what the browser claims about it.
+   */
+  async function readStoredResult(supabase, jobId, batchId, actorUserId) {
+    const { data: job, error } = await supabase
+      .from('restaurant_source_analysis_jobs')
+      .select('id, status, result_receipt_id, batch_id, actor_user_id')
+      .eq('id', jobId)
+      .maybeSingle();
+    if (error || !job || !job.result_receipt_id) return null;
+    if (job.batch_id !== batchId || job.actor_user_id !== actorUserId) return null;
+    const { data: receipt, error: receiptError } = await supabase
+      .from('url_intake_analysis_receipts')
+      .select(`${RECEIPT_COLUMNS}, candidate_summary`)
+      .eq('id', job.result_receipt_id)
+      .maybeSingle();
+    if (receiptError || !receipt || receipt.actor_user_id !== actorUserId) return null;
+    // Integrity self-check: the stored binding must still produce the stored
+    // hash (0013). A drifted or rewritten receipt is never a basis for a
+    // human review decision.
+    if (typeof computeHash === 'function') {
+      let recomputed;
+      try {
+        recomputed = computeHash({
+          actorUserId: receipt.actor_user_id,
+          canonicalSourceUrl: receipt.canonical_source_url,
+          restaurantMatchType: receipt.restaurant_match_type,
+          matchedRestaurantId: receipt.matched_restaurant_id,
+          candidateSummary: receipt.candidate_summary,
+        });
+      } catch {
+        recomputed = null;
+      }
+      if (!recomputed || recomputed !== receipt.analysis_result_hash) return { ok: false, reason: 'receipt_binding_mismatch' };
+    }
+    return { job, receipt, menus: Array.isArray(receipt.menus) ? receipt.menus : [] };
+  }
+
+  /**
+   * Records the human decisions for one receipt as an append-only audit trail
+   * (who, when, which path, old → new). Existing rows are never changed: a
+   * contradicting retry is refused, an identical retry is a no-op.
+   */
+  async function recordStructureReviews(supabase, { batch, market, job, receipt, actorUserId, sections }) {
+    const { data: existing, error } = await supabase.from('menu_structure_reviews').select(STRUCTURE_COLUMNS).eq('receipt_id', receipt.id);
+    if (error) return { ok: false, reason: 'structure_store_unavailable' };
+    const stored = new Map((existing || []).map((row) => [row.path_key, row]));
+    const rows = [];
+    for (const section of sections) {
+      const key = reviewKey(section.path);
+      const corrected = section.action === 'correct' ? JSON.stringify(section.correctedPath) : null;
+      const row = stored.get(key);
+      if (row) {
+        if (row.decision !== section.action || (row.corrected_path || null) !== corrected) return { ok: false, reason: 'structure_already_reviewed' };
+        continue;
+      }
+      rows.push({
+        market_id: market,
+        batch_id: batch.id,
+        job_id: job.id,
+        receipt_id: receipt.id,
+        actor_user_id: actorUserId,
+        path_key: key,
+        original_path: JSON.stringify(section.path),
+        source_path: Array.isArray(section.sourcePath) ? JSON.stringify(section.sourcePath) : null,
+        locator: section.locator || null,
+        decision: section.action,
+        corrected_path: corrected,
+      });
+    }
+    if (rows.length === 0) return { ok: true };
+    const { error: insertError } = await supabase.from('menu_structure_reviews').insert(rows);
+    if (insertError) return { ok: false, reason: insertError.code === '23505' ? 'structure_conflict' : 'structure_save_failed' };
+    return { ok: true };
+  }
+
+  /**
+   * Explains a P0030 from 0015 for this confirmation without writing anything.
+   * The proposal id is derived from this exact result (src/lib/sourceConfirmation.js),
+   * so the row it collides with is this result's own confirmation: accepted
+   * means it is already confirmed, rejected means a human decided it in
+   * Bronnen, open means the decision is still in flight. Any other conflict is
+   * the existing one-open-proposal-per-restaurant rule.
+   */
+  async function confirmationConflictReason(supabase, proposalId) {
+    const { data: row, error } = await supabase.from('source_triage_proposals').select('id, status').eq('id', proposalId).maybeSingle();
+    if (error || !row) return 'open_proposal_exists';
+    if (row.status === 'accepted') return 'already_confirmed';
+    if (row.status === 'rejected') return 'proposal_rejected';
+    return 'open_proposal_exists';
+  }
+
+  /** POST /[id]/confirm — "Bevestig bron" for one or more results. A result
+   * is eligible through the one-click rule, or through the separate human
+   * structure route: every uncertain section of the stored receipt was
+   * explicitly handled, which the server re-checks before anything is
+   * written. Per result one accepted BE-24 proposal; nothing else. */
   async function confirmSources(request, batchId) {
     const { auth, denied } = await authorize(request);
     if (denied) return denied;
@@ -402,6 +555,15 @@ function createBatchAnalysisHandlers(deps) {
     if (!jobIds || jobIds.length < 1 || jobIds.length > MAX_BATCH_URLS || !jobIds.every(isUuid) || new Set(jobIds).size !== jobIds.length) {
       return reply(400, { error: 'Ongeldig verzoek.' });
     }
+    const rawReviews = parsed.body && parsed.body.structure_reviews !== undefined ? parsed.body.structure_reviews : [];
+    if (!Array.isArray(rawReviews) || rawReviews.length > MAX_BATCH_URLS) return reply(400, { error: 'Ongeldig verzoek.' });
+    const structureByJob = new Map();
+    for (const entry of rawReviews) {
+      if (!entry || typeof entry !== 'object' || !isUuid(entry.job_id) || structureByJob.has(entry.job_id)) return reply(400, { error: 'Ongeldig verzoek.' });
+      structureByJob.set(entry.job_id, entry);
+    }
+    // A structure review can only belong to a job in this same request.
+    if ([...structureByJob.keys()].some((jobId) => !jobIds.includes(jobId))) return reply(400, { error: 'Ongeldig verzoek.' });
 
     const supabase = getSupabase();
     const market = await marketId(supabase);
@@ -418,15 +580,60 @@ function createBatchAnalysisHandlers(deps) {
     const results = [];
     for (const jobId of jobIds) {
       const item = detail.items.find((v) => v.jobId === jobId);
-      // The same checks for one and for many: only a high-certainty,
-      // unconfirmed result of this batch can be confirmed.
-      if (!item || !item.high || !item.foundUrl || !item.restaurant || !item.actions.includes('confirm')) {
+      // A stored accepted proposal for this exact result is final. No route —
+      // one click or the human structure route — may confirm it again: that
+      // would add a second accepted proposal and a second event to the audit
+      // trail. An identical retry is refused with an explicit reason and
+      // writes nothing.
+      if (item && item.key === 'confirmed') {
+        results.push({ job_id: jobId, ok: false, reason: 'already_confirmed' });
+        continue;
+      }
+      // One-click: only a high-certainty, unconfirmed result of this batch.
+      const oneClick = Boolean(item && item.high && item.foundUrl && item.restaurant && item.actions.includes('confirm'));
+      // Human structure route: offered only for an exactly eligible result.
+      const humanStructure = Boolean(
+        !oneClick && item && item.foundUrl && item.restaurant && item.structureReview && item.structureReview.eligible === true
+      );
+      if (!oneClick && !humanStructure) {
         results.push({ job_id: jobId, ok: false, reason: 'not_eligible' });
         continue;
       }
+      let foundUrl = item.foundUrl;
+      let note = CONFIRM_NOTE;
+      if (humanStructure) {
+        const storedResult = await readStoredResult(supabase, jobId, batchId, auth.userId);
+        if (!storedResult || storedResult.ok === false) {
+          results.push({ job_id: jobId, ok: false, reason: (storedResult && storedResult.reason) || 'receipt_unavailable' });
+          continue;
+        }
+        const review = validateStructureReviews({
+          menus: storedResult.menus,
+          receiptHash: storedResult.receipt.analysis_result_hash,
+          submitted: structureByJob.get(jobId),
+        });
+        if (!review.ok) {
+          results.push({ job_id: jobId, ok: false, reason: review.code, missing: review.missing || null, unknown: review.unknown || null });
+          continue;
+        }
+        const recorded = await recordStructureReviews(supabase, {
+          batch,
+          market,
+          job: storedResult.job,
+          receipt: storedResult.receipt,
+          actorUserId: auth.userId,
+          sections: review.sections,
+        });
+        if (!recorded.ok) {
+          results.push({ job_id: jobId, ok: false, reason: recorded.reason });
+          continue;
+        }
+        foundUrl = item.structureReview.foundUrl;
+        note = STRUCTURE_NOTE;
+      }
       const restaurant = restaurants[item.restaurant.id];
       const validation = validateProposalInput(
-        { restaurant_id: item.restaurant.id, kind: 'add_candidate', proposed_url: item.foundUrl, note: CONFIRM_NOTE },
+        { restaurant_id: item.restaurant.id, kind: 'add_candidate', proposed_url: foundUrl, note },
         restaurant
       );
       if (!validation.ok) {
@@ -434,8 +641,13 @@ function createBatchAnalysisHandlers(deps) {
         continue;
       }
       const v = validation.value;
+      // The proposal id is the idempotency guard: it is derived from this
+      // stored result, so the primary key of 0015 refuses a second proposal
+      // for the same confirmation even when two requests race. No schema
+      // change and no relaxation of the existing constraints.
+      const proposalId = confirmationProposalId({ jobId, restaurantId: v.restaurant_id, url: v.proposed_url });
       const { data: proposal, error: createError } = await supabase.rpc('create_source_triage_proposal', {
-        p_proposal_id: generateId(),
+        p_proposal_id: proposalId,
         p_market_id: market,
         p_restaurant_id: v.restaurant_id,
         p_kind: v.kind,
@@ -446,7 +658,11 @@ function createBatchAnalysisHandlers(deps) {
         p_actor_user_id: auth.userId,
       });
       if (createError) {
-        results.push({ job_id: jobId, ok: false, reason: createError.code === 'P0030' ? 'open_proposal_exists' : 'save_failed' });
+        if (createError.code === 'P0030') {
+          results.push({ job_id: jobId, ok: false, reason: await confirmationConflictReason(supabase, proposalId) });
+          continue;
+        }
+        results.push({ job_id: jobId, ok: false, reason: 'save_failed' });
         continue;
       }
       const { error: decideError } = await supabase.rpc('decide_source_triage_proposal', {
@@ -460,6 +676,27 @@ function createBatchAnalysisHandlers(deps) {
       results.push(decideError ? { job_id: jobId, ok: false, reason: 'left_open' } : { job_id: jobId, ok: true });
     }
     return reply(200, { results, confirmed: results.filter((r) => r.ok).length });
+  }
+
+  /**
+   * The recorded human structure decisions of these receipts, keyed by receipt.
+   * `available: false` means the additive 0020 table is not present yet or the
+   * read failed: the overview keeps working, the human route refuses with a
+   * concrete error instead of pretending a section was handled.
+   */
+  async function loadStructureReviews(supabase, receiptIds) {
+    if (!Array.isArray(receiptIds) || receiptIds.length === 0) return { byReceipt: new Map(), available: true };
+    const { data, error } = await supabase.from('menu_structure_reviews').select(STRUCTURE_COLUMNS).in('receipt_id', receiptIds);
+    if (error) return { byReceipt: new Map(), available: false };
+    const byReceipt = new Map();
+    for (const row of data || []) {
+      const [section] = recordedSections([row]);
+      if (!section) continue;
+      const list = byReceipt.get(row.receipt_id) || [];
+      list.push(section);
+      byReceipt.set(row.receipt_id, list);
+    }
+    return { byReceipt, available: true };
   }
 
   /** POST /reanalyze — "Opnieuw analyseren": one URL, after an explicit
@@ -524,7 +761,25 @@ function createBatchAnalysisHandlers(deps) {
     if (!item || item.key !== 'confirmed' || !item.restaurant || !item.concept || !item.foundUrl) {
       return reply(409, { error: 'Een concept kan pas na een bevestigde bron van een bekend restaurant.', reason: 'not_confirmed' });
     }
-    const concept = buildMenuConcept({ menus: item.concept.menus, liveLines: item.concept.liveLines, edits });
+    if (item.concept.productBlocked) {
+      return productActionRefusal('save', {
+        reason: item.concept.productReason || 'product_v2_read_only',
+        schemaVersion: item.concept.productSchemaVersion || null,
+        problems: [],
+      });
+    }
+    // Every uncertain section was handled by a human before this source was
+    // confirmed; that decision is part of the concept. If its trail cannot be
+    // read, the concept is refused rather than saved without it.
+    if (item.structureReview && item.structureReview.eligible && item.structureReview.storeAvailable === false) {
+      return reply(409, { error: 'De opgeslagen rubriekcontrole is niet beschikbaar; het concept is niet opgeslagen.', reason: 'structure_store_unavailable' });
+    }
+    const structure = item.concept.structureEdits && typeof item.concept.structureEdits === 'object' ? item.concept.structureEdits : {};
+    const concept = buildMenuConcept({
+      menus: item.concept.menus,
+      liveLines: item.concept.liveLines,
+      edits: mergeEdits({ lines: structure, removed: null }, edits),
+    });
     if (!concept.canSave) {
       return reply(409, { error: 'Los eerst de blokkades op.', reason: 'blockers', blockers: concept.blockers });
     }
@@ -547,7 +802,7 @@ function createBatchAnalysisHandlers(deps) {
     return reply(result.status, result.body);
   }
 
-  return { getOverview, createBatch, processNext, confirmSources, reanalyze, saveConcept };
+  return { getOverview, createBatch, processNext, processForWorker, confirmSources, reanalyze, saveConcept };
 }
 
 module.exports = { createBatchAnalysisHandlers, RECENT_BATCH_LIMIT };

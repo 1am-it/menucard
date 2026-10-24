@@ -1,0 +1,511 @@
+{
+  "capturedAt": "2026-10-18",
+  "note": "Controlled capture of the public source, read-only; not ground truth for a later version.",
+  "sources": {
+    "smelt": {
+      "label": "Smelt Breda",
+      "url": "https://restaurantsmelt.nl/wp-content/uploads/2026/05/smelt_menu_breda_nederlands.pdf",
+      "kind": "pdf",
+      "bytesSha256": "4445a101f200de7d72e3d7d8f2053f0b69798796f15ebd3f92173cbdad6c27f8",
+      "contentHash": "24f23cbd80a3e37d097b88e4e28165ad1235ba7babfbef7beb87fcdfaae8a845",
+      "pageCount": 2,
+      "categories": [
+        {
+          "path": [
+            "KAASFONDUE"
+          ],
+          "items": [
+            {
+              "name": "Hollands",
+              "price": "27"
+            },
+            {
+              "name": "Zwitsers",
+              "price": "29.5"
+            },
+            {
+              "name": "Truffel",
+              "price": "28"
+            },
+            {
+              "name": "Italiaans",
+              "price": "29.5"
+            },
+            {
+              "name": "Frans",
+              "price": "29.5"
+            },
+            {
+              "name": "Bossche Bierfondue",
+              "price": "27"
+            },
+            {
+              "name": "Spaans",
+              "price": "27"
+            }
+          ]
+        },
+        {
+          "path": [
+            "DINER",
+            "Vooraf"
+          ],
+          "items": [
+            {
+              "name": "Lucques olijven",
+              "price": "8"
+            },
+            {
+              "name": "Burrata",
+              "price": "13"
+            },
+            {
+              "name": "Tapenade van geroosterde artisjokken",
+              "price": "13"
+            },
+            {
+              "name": "Gazpacho met gerookte forel",
+              "price": "10"
+            },
+            {
+              "name": "Rillette van gerookte makreel",
+              "price": "12"
+            }
+          ]
+        },
+        {
+          "path": [
+            "DINER",
+            "Hoofd"
+          ],
+          "items": [
+            {
+              "name": "Ravioli (V)",
+              "price": "20"
+            },
+            {
+              "name": "Smelt's Cheese Burger",
+              "price": "18"
+            },
+            {
+              "name": "Burrata salade (V)",
+              "price": "18"
+            }
+          ]
+        },
+        {
+          "path": [
+            "DINER",
+            "Desserts"
+          ],
+          "items": [
+            {
+              "name": "Creme brulee",
+              "price": "9"
+            },
+            {
+              "name": "Huisgemaakte cheesecake",
+              "price": "9"
+            },
+            {
+              "name": "Hemelse Modder",
+              "price": "9"
+            },
+            {
+              "name": "Sgroppino",
+              "price": "9"
+            }
+          ]
+        },
+        {
+          "path": [
+            "BORREL"
+          ],
+          "items": [
+            {
+              "name": "Oude boeren kaas",
+              "price": "8"
+            },
+            {
+              "name": "Brood",
+              "price": "6"
+            },
+            {
+              "name": "Rillette van gerookte makreel",
+              "price": "12"
+            },
+            {
+              "name": "Lucques olijven",
+              "price": "8"
+            },
+            {
+              "name": "Burrata",
+              "price": "13"
+            },
+            {
+              "name": "Tapenade van geroosterd artisjokkenhart",
+              "price": "13"
+            },
+            {
+              "name": "Charcuterieplank",
+              "price": "14"
+            },
+            {
+              "name": "Bresaola",
+              "price": "15"
+            },
+            {
+              "name": "Smelt's kaaskroketjes (per stuk)",
+              "price": "2"
+            },
+            {
+              "name": "Bitterballen (per stuk)",
+              "price": "1.5"
+            }
+          ]
+        },
+        {
+          "path": [
+            "LUNCH",
+            "Eieren"
+          ],
+          "items": [
+            {
+              "name": "Omelette du fromage (V)",
+              "price": "11"
+            }
+          ]
+        },
+        {
+          "path": [
+            "LUNCH",
+            "Broodjes"
+          ],
+          "items": [
+            {
+              "name": "Groninger mozzarella (V)",
+              "price": "12"
+            },
+            {
+              "name": "Kaaskroketten (V)",
+              "price": "12"
+            },
+            {
+              "name": "Bresaola",
+              "price": "13"
+            },
+            {
+              "name": "Rillette van gerookte makreel",
+              "price": "12"
+            }
+          ]
+        },
+        {
+          "path": [
+            "LUNCH",
+            "Overig"
+          ],
+          "items": [
+            {
+              "name": "Smelt's kaas tosti (V)",
+              "price": "8"
+            },
+            {
+              "name": "Ravioli (V)",
+              "price": "20"
+            },
+            {
+              "name": "Smelt's Cheese Burger",
+              "price": "18"
+            }
+          ]
+        }
+      ]
+    },
+    "blossem": {
+      "label": "Blossem Breda",
+      "url": "https://restaurantblossem.nl/nl/restaurant",
+      "kind": "html",
+      "bytesSha256": "da5c632f85fda1a7c4df827db011ccdd46c5a160dbb6f6adc04ace35d5ed0c38",
+      "contentHash": "da5c632f85fda1a7c4df827db011ccdd46c5a160dbb6f6adc04ace35d5ed0c38",
+      "pageCount": null,
+      "categories": [
+        {
+          "path": [
+            "BITES"
+          ],
+          "items": [
+            {
+              "name": "Gemarineerde olijven",
+              "price": "4.50"
+            },
+            {
+              "name": "Nibbit",
+              "price": "3.00"
+            },
+            {
+              "name": "Gerookte amandelen",
+              "price": "4.00"
+            },
+            {
+              "name": "Sesam kroepoek met dip van vadouvan",
+              "price": "5.50"
+            },
+            {
+              "name": "Brioche gerookte paling en crème van knoflook | 4 stuks",
+              "price": "9.00"
+            },
+            {
+              "name": "Blini met zalm, crème fraîche en cavi-art",
+              "price": "9.00"
+            },
+            {
+              "name": "Abdij kaas uit de oven met honingglaze en walnoten",
+              "price": "12.00"
+            },
+            {
+              "name": "Pata negra | 80 gram",
+              "price": "17.00"
+            },
+            {
+              "name": "Bonbon van ganzenlever, witte chocolade en truffelkaviaar | 4 stuks",
+              "price": "12.00"
+            },
+            {
+              "name": "Krokante bloemkool met bbq-kruiden en geklopte feta",
+              "price": "7.50"
+            }
+          ]
+        },
+        {
+          "path": [
+            "BITES",
+            "BITTERBAL"
+          ],
+          "items": [
+            {
+              "name": "Rundvleesbitterbal",
+              "price": "1.85"
+            },
+            {
+              "name": "Oude kaas bitterbal",
+              "price": "1.85"
+            },
+            {
+              "name": "Kreeftbitterbal",
+              "price": "1.85"
+            }
+          ]
+        },
+        {
+          "path": [
+            "BITES",
+            "BROOD"
+          ],
+          "items": [
+            {
+              "name": "Huisgemaakt focaccia met seizoensboter, Blossem-olijfolie en maldon",
+              "price": "8.00"
+            },
+            {
+              "name": "Huisgemaakt focaccia met seizoensboter, Blossem-olijfolie en maldon X Funkybread",
+              "price": "8.00"
+            }
+          ]
+        },
+        {
+          "path": [
+            "DINNER",
+            "VOOR"
+          ],
+          "items": [
+            {
+              "name": "Gamba, rabarber, komkommer, nori",
+              "price": "19.50"
+            },
+            {
+              "name": "Steak tartaar, parmezaan, piccalilly, basilicum",
+              "price": "19.50"
+            },
+            {
+              "name": "Venkel, feta, kaffir, couscous, hazelnoot",
+              "price": "18.00"
+            }
+          ]
+        },
+        {
+          "path": [
+            "DINNER",
+            "TUSSEN"
+          ],
+          "items": [
+            {
+              "name": "Rode mul, tomaat, jalapeño, bleekselderij, basilicum",
+              "price": "21.00"
+            },
+            {
+              "name": "Hoender, paling, cevenne ui, gele curry, cashew",
+              "price": "21.00"
+            },
+            {
+              "name": "Bloemkool, snijboon, ras el hanout, prei",
+              "price": "19.50"
+            }
+          ]
+        },
+        {
+          "path": [
+            "DINNER",
+            "HOOFD"
+          ],
+          "items": [
+            {
+              "name": "Wilde zeebaars, coquille, saffraan, courgette, limoenblad",
+              "price": "31.00"
+            },
+            {
+              "name": "Runder rib-eye, zoete peper, béarnaise, truffelaardappel, jus",
+              "price": "35.00"
+            },
+            {
+              "name": "Purpura aubergine, eekhoorntjesbrood, gegrilde groenten, muntpesto",
+              "price": "27.00"
+            }
+          ]
+        },
+        {
+          "path": [
+            "DINNER",
+            "BIJGERECHTEN"
+          ],
+          "items": [
+            {
+              "name": "Friet met mayonaise",
+              "price": "6.50"
+            },
+            {
+              "name": "Seasonal salad",
+              "price": "8.50"
+            }
+          ]
+        },
+        {
+          "path": [
+            "DINNER",
+            "DESSERT"
+          ],
+          "items": [
+            {
+              "name": "Limoen mousse, witte chocolade, matcha, mango, amandelcake",
+              "price": "13.50"
+            },
+            {
+              "name": "Marshmallow, groene appel, pure chocolade, karamel, citrus",
+              "price": "13.50"
+            },
+            {
+              "name": "Selectie van kazen",
+              "price": "16.00"
+            }
+          ]
+        },
+        {
+          "path": [
+            "LUNCH",
+            "KOUD"
+          ],
+          "items": [
+            {
+              "name": "Gamba, rabarber, komkommer, nori",
+              "price": "19.50"
+            },
+            {
+              "name": "Steak tartaar, parmezaan, piccalilly, basilicum",
+              "price": "19.50"
+            },
+            {
+              "name": "Venkel, feta, kaffir, couscous, hazelnoot",
+              "price": "18.00"
+            }
+          ]
+        },
+        {
+          "path": [
+            "LUNCH",
+            "WARM"
+          ],
+          "items": [
+            {
+              "name": "Rode mul, tomaat, jalapeño, bleekselderij, basilicum",
+              "price": "21.00"
+            },
+            {
+              "name": "Hoender, paling, cevenne ui, gele curry, cashew",
+              "price": "21.00"
+            },
+            {
+              "name": "Bloemkool, snijboon, ras el hanout, prei",
+              "price": "19.50"
+            }
+          ]
+        },
+        {
+          "path": [
+            "LUNCH",
+            "BIJGERECHTEN"
+          ],
+          "items": [
+            {
+              "name": "Friet met mayonaise",
+              "price": "6.50"
+            },
+            {
+              "name": "Seasonal salad",
+              "price": "8.50"
+            }
+          ]
+        },
+        {
+          "path": [
+            "LUNCH",
+            "BROOD"
+          ],
+          "items": [
+            {
+              "name": "Steak tartaar Blossem style",
+              "price": "17.00"
+            },
+            {
+              "name": "Koudgerookte zalm, citroenmayonaise, kappertjes",
+              "price": "16.00"
+            },
+            {
+              "name": "Burrata, zongerijpte tomaat, artisjok",
+              "price": "14.50"
+            }
+          ]
+        },
+        {
+          "path": [
+            "LUNCH",
+            "DESSERT"
+          ],
+          "items": [
+            {
+              "name": "Limoen mousse, witte chocolade, matcha, mango, amandelcake",
+              "price": "13.50"
+            },
+            {
+              "name": "Marshmallow, groene appel, pure chocolade, karamel, citrus",
+              "price": "13.50"
+            },
+            {
+              "name": "Selectie van kazen",
+              "price": "16.00"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

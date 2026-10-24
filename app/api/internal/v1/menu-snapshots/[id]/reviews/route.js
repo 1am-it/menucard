@@ -20,7 +20,9 @@ import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/src/lib/supabaseAdmin'
 import { authenticateInternalRequest } from '@/src/lib/internalAuth'
 import { isInternalOnly } from '@/src/lib/importInbox'
-import { validateSnapshotReviewInput, snapshotReviewValidationMessage } from '@/src/lib/menuSnapshotProposals'
+import { createMenuSnapshotReviewHandlers } from '@/src/lib/menuSnapshotReviewHandlers'
+
+export const dynamic = 'force-dynamic'
 
 // Same one-line definition as
 // app/api/internal/v1/moderation/pending/route.js and
@@ -53,52 +55,13 @@ export async function GET(request, { params }) {
   return NextResponse.json({ reviews })
 }
 
+const handlers = createMenuSnapshotReviewHandlers({
+  authenticate: authenticateInternalRequest,
+  getSupabase: getSupabaseAdmin,
+})
+
 export async function POST(request, { params }) {
-  const auth = await authenticateInternalRequest(request)
-  if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status })
-
-  if (!isEditor(auth.roles)) {
-    return NextResponse.json({ error: 'Only editor staff can record a snapshot review decision' }, { status: 403 })
-  }
-
   const { id } = await params
-
-  let body
-  try {
-    body = await request.json()
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
-  }
-
-  const validation = validateSnapshotReviewInput({
-    decision: body && body.decision,
-    reason: body && body.reason,
-    note: body && body.note,
-  })
-  if (!validation.valid) {
-    return NextResponse.json({ error: snapshotReviewValidationMessage(validation.reason) }, { status: 400 })
-  }
-
-  const supabase = getSupabaseAdmin()
-  const { data, error } = await supabase
-    .from('menu_snapshot_reviews')
-    .insert({
-      snapshot_id: id,
-      reviewer_id: auth.userId,
-      decision: validation.decision,
-      reason: validation.reason,
-      note: validation.note,
-    })
-    .select('id, snapshot_id, reviewer_id, decided_at, decision, reason, note')
-    .single()
-
-  if (error) {
-    const notFound = error.code === '23503'
-    return NextResponse.json(
-      { error: notFound ? 'Snapshot not found' : 'Recording the review failed' },
-      { status: notFound ? 404 : 500 }
-    )
-  }
-
-  return NextResponse.json({ review: data }, { status: 201 })
+  const { status, body } = await handlers.record(request, id)
+  return NextResponse.json(body, { status })
 }

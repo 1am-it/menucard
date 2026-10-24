@@ -83,6 +83,11 @@ test('0015 RPCs: fixed search_path, service_role execute only, typed errors, an 
   for (const c of ['P0030', 'P0031', 'P0032', 'P0033']) assert.match(code, new RegExp(`errcode = '${c}'`), c);
   const create = code.slice(code.indexOf('create or replace function create_source_triage_proposal'), code.indexOf('create or replace function decide_source_triage_proposal'));
   assert.match(create, /insert into source_triage_proposal_events \(proposal_id, event, actor_user_id, note\)\s+values \(v_result\.id, 'proposed'/);
+  // BE-25 confirmation idempotency (review 6309694854): the handler derives the
+  // proposal id from the stored result, so a simultaneous second confirmation
+  // collides on the primary key. That collision must surface as P0030 (not a
+  // raw 23505), otherwise the handler cannot report already_confirmed.
+  assert.match(create, /exception\s+when unique_violation then[\s\S]{0,400}errcode = 'P0030'/);
   const decide = code.slice(code.indexOf('create or replace function decide_source_triage_proposal'));
   assert.match(decide, /where id = p_proposal_id and status = 'open'/);
   assert.match(decide, /insert into source_triage_proposal_events \(proposal_id, event, actor_user_id, note\)\s+values \(v_result\.id, p_decision/);

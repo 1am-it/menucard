@@ -26,6 +26,7 @@ import { authenticateInternalRequest } from '@/src/lib/internalAuth'
 import { isInternalOnly } from '@/src/lib/importInbox'
 import { canonicalizeSourceUrl } from '@/src/lib/urlIntakes'
 import { computeAnalysisResultHash } from '@/src/lib/urlIntakeReceiptHash'
+import { readReceiptProduct, productActionRefusal } from '@/src/lib/menuProductIntegrationV2'
 import { generateUuidV7 } from '@/src/lib/uuidv7'
 
 export async function POST(request) {
@@ -62,6 +63,15 @@ export async function POST(request) {
   if (receiptError) return NextResponse.json({ error: 'Query failed' }, { status: 500 })
   if (!receiptRow) {
     return NextResponse.json({ error: 'Deze analyse is niet meer geldig. Lees de URL opnieuw uit.' }, { status: 409 })
+  }
+
+  // The existing RPC projects only `candidate_summary->menus`. Until that
+  // projection is version-aware, redeeming a v2 receipt would silently store
+  // an older (or empty) v1 projection, so it is refused before the RPC.
+  const product = readReceiptProduct(receiptRow.candidate_summary)
+  if (product.kind !== 'v1') {
+    const refusal = productActionRefusal('confirm', product)
+    return NextResponse.json(refusal.body, { status: refusal.status })
   }
 
   const expectedHash = computeAnalysisResultHash({

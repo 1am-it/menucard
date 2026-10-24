@@ -292,13 +292,26 @@ async function extractDigitalPdfText(pdfBytes, options = {}) {
  * to merge two genuinely different rows. */
 function groupItemsIntoLines(items, yToleranceUnits = 2) {
   const bucketed = new Map()
+  let sequence = 0
   for (const item of items) {
     if (!item || typeof item.str !== 'string') continue
     const x = item.transform[4]
     const y = item.transform[5]
     const bucketKey = Math.round(y / yToleranceUnits) * yToleranceUnits
     if (!bucketed.has(bucketKey)) bucketed.set(bucketKey, [])
-    bucketed.get(bucketKey).push({ str: item.str, x, y })
+    // `seq` is the item's own position in the PDF content stream. It is
+    // additive and used only for one honest layout decision downstream:
+    // when a document draws the exact same text twice, a later identical,
+    // overlapping copy is treated as an overlay (see
+    // src/lib/pdfMenuStructuring.js's own duplicate-layer detection).
+    // `width` is pdfjs's own advance width for the printed run. Downstream
+    // layout code uses it only to measure the real printed end of a run, so
+    // a long dish name that reaches across a page-column boundary is not
+    // mistaken for a short name in the left column with an unrelated amount
+    // in the right column. Omitted when pdfjs gives no usable number.
+    const width = typeof item.width === 'number' && Number.isFinite(item.width) && item.width > 0 ? item.width : null
+    bucketed.get(bucketKey).push({ str: item.str, x, y, seq: sequence, ...(width !== null ? { width } : {}) })
+    sequence += 1
   }
   const sortedYs = [...bucketed.keys()].sort((a, b) => b - a) // top of page first
   return sortedYs.map((y) => ({

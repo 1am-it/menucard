@@ -2738,6 +2738,7 @@ mark.search-highlight {
 .stg-badge { white-space: normal; }
 .stg-section { border-top: 1px solid var(--border); padding-top: 12px; display: grid; gap: 10px; justify-items: start; }
 .stg-section > * { max-width: 100%; }
+.stg-followup .stg-facts { width: 100%; }
 .stg-section-title { margin: 0; font-size: 16px; font-weight: 700; color: var(--text-primary); }
 .stg-form { display: grid; gap: 10px; width: 100%; }
 .stg-fieldset { border: 0; margin: 0; padding: 0; min-width: 0; display: grid; gap: 6px; }
@@ -2967,3 +2968,420 @@ details.bta-side-card > summary:focus-visible { outline: 2px solid var(--border-
 .bta-structure { list-style: none; margin: 0; padding: 0 12px 10px; display: grid; gap: 6px; }
 .bta-structure li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; padding-top: 6px; border-top: 1px solid var(--border); font-size: 14px; }
 .bta-structure .bta-source-route { padding: 0; flex-basis: 100%; }
+
+/* Human structure review of an uncertain section structure (#59 review
+   6307703713): one row per uncertain section, with its source route and
+   locator. Kept in the existing neutral/uncertain colour language, never an
+   error colour, and it must fit 320 px without horizontal scrolling. */
+.bta-structure-review { display: grid; gap: 8px; padding: 12px; border: 1px solid var(--border); border-left: 3px solid var(--status-neutral); border-radius: var(--radius-md); background: var(--bg-card); min-width: 0; }
+.bta-structure-count { margin: 0; font-size: 13px; font-weight: 700; color: var(--text-primary); }
+.bta-structure-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; min-width: 0; }
+.bta-structure-row { display: grid; gap: 4px; padding: 10px 0 0; border-top: 1px solid var(--border); min-width: 0; }
+.bta-structure-row:first-child { padding-top: 0; border-top: 0; }
+.bta-structure-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; min-width: 0; }
+.bta-structure-choices { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 13px; color: var(--text-primary); }
+.bta-structure-choices label { display: inline-flex; align-items: center; gap: 6px; min-height: 24px; }
+.bta-structure-edit { display: grid; gap: 4px; grid-template-columns: minmax(0, 1fr); font-size: 13px; color: var(--text-primary); }
+.bta-structure-edit label { font-weight: 700; }
+.bta-structure-edit .stg-input { width: 100%; min-width: 0; }
+.bta-structure-review .bta-muted { overflow-wrap: anywhere; }
+
+/* ── #59 fase 2: handmatige AI-import (drie stappen) ─────────────────────────
+   Kleurtaal v2-tokens only; licht/donker via de bestaande tokens. Status is
+   altijd icoon of tekst plus kleur (.status-badge). Mobile-first: één kolom,
+   geen horizontale overflow op 320 en 390 px. */
+
+.mai-steps { display: grid; gap: 16px; min-width: 0; }
+.mai-step-head { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.mai-step-title { margin: 0; font-size: 18px; font-weight: 800; color: var(--text-primary); }
+.mai-field { display: grid; gap: 6px; min-width: 0; }
+.mai-input,
+.mai-select {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-md);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 14px;
+}
+.mai-input:focus-visible,
+.mai-select:focus-visible,
+.mai-btn:focus-visible,
+.mai-details > summary:focus-visible,
+.mai-prompt:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+.mai-urls { min-height: 96px; }
+.mai-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; min-width: 0; }
+.mai-actions .bta-muted { flex: 1 1 220px; min-width: 0; }
+.mai-source-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; min-width: 0; }
+.mai-source {
+  display: grid;
+  gap: 2px 10px;
+  grid-template-columns: 20px minmax(0, 1fr);
+  align-items: baseline;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--status-positive);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  font-size: 13px;
+  min-width: 0;
+}
+.mai-source--ask { border-left-color: var(--status-old); }
+.mai-source-mark { grid-row: 1 / span 3; font-weight: 800; color: var(--status-positive); }
+.mai-source--ask .mai-source-mark { color: var(--status-old); }
+.mai-source-name { font-weight: 700; color: var(--text-primary); overflow-wrap: anywhere; }
+.mai-source-line { color: var(--text-secondary); }
+.mai-source-url {
+  color: var(--text-secondary);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.mai-details { border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-elevated); padding: 8px 12px; min-width: 0; }
+.mai-details > summary { cursor: pointer; font-size: 13px; font-weight: 700; color: var(--text-primary); min-height: 24px; }
+.mai-details[open] > summary { margin-bottom: 8px; }
+.mai-prompt {
+  margin: 0;
+  max-height: 320px;
+  overflow: auto;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.mai-received { margin: 0; padding: 10px 12px; border-radius: var(--radius-md); background: var(--status-positive-bg); color: var(--status-positive); font-weight: 700; font-size: 14px; }
+.mai-summary { margin: 0; font-size: 16px; font-weight: 800; color: var(--text-primary); }
+/* V2 (review 6377050602): een korte, gewone melding over wat het systeem zelf
+   heeft bijgesteld. Neutraal van toon: geen goedkeuring en geen blokkade. */
+.mai-notices { display: grid; gap: 4px; padding: 10px 12px; border: 1px solid var(--border); border-left: 3px solid var(--accent-border); border-radius: var(--radius-md); background: var(--bg-elevated); min-width: 0; }
+.mai-notices-title { margin: 0; font-size: 13px; font-weight: 800; color: var(--text-primary); }
+.mai-notice-list { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 13px; color: var(--text-secondary); overflow-wrap: anywhere; }
+/* Variant 1 (Lead order 6382189724): source lines with a price that no dish in
+   the concept covers. Orange (the attention role, --status-old; --warning is
+   retired), above the nalopen list, and free: no AI call. */
+.mai-uncovered {
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--status-old);
+  border-radius: var(--radius-md);
+  background: var(--status-old-bg);
+  min-width: 0;
+}
+.mai-uncovered-title { margin: 0; font-size: 14px; font-weight: 800; color: var(--text-primary); overflow-wrap: anywhere; }
+.mai-uncovered-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; min-width: 0; }
+.mai-uncovered-row {
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  min-width: 0;
+}
+.mai-uncovered-free { margin: 0; font-size: 12px; color: var(--text-secondary); }
+.mai-uncovered-unavailable { margin: 0; font-size: 13px; color: var(--text-secondary); overflow-wrap: anywhere; }
+
+/* #59 variant 5 (Lead order 6382953597): Lijst | Kaart en de kaart met
+   markeringen. Kleur is nooit de enige drager: elke markering heeft een eigen
+   vorm, een rand- of stippelstijl en een aria-label met dezelfde woorden. */
+.mai-view-toggle {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 0;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+}
+.mai-view-btn {
+  min-height: 40px;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+}
+.mai-view-btn--active {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-weight: 800;
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+.mai-view-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mai-map { display: grid; gap: 10px; min-width: 0; }
+.mai-map-head { display: grid; gap: 4px; min-width: 0; }
+.mai-map-title { margin: 0; font-size: 15px; font-weight: 800; color: var(--text-primary); overflow-wrap: anywhere; }
+/* AA2 (Lead review 6383853638): de legenda is één regel met vier kleine
+   chips; de lange uitleg zit achter "Uitleg". Vorm en kleur blijven samen de
+   drager: elk chip heeft zijn eigen teken en zijn eigen rand- of stippelstijl,
+   en de schermlezer leest de volledige woorden.
+   BB3 (Lead review 6384867373): de chips plakten aan elkaar ("Overgenomen"
+   direct tegen het volgende teken). Ze krijgen nu ruimte tussen en binnen de
+   chips (6 px tussen, 3 px binnen de chip); de letters zijn één tiende kleiner,
+   zodat de vier chips op 390 px op één regel blijven (zie de browsercheck die
+   de tussenruimte meet). */
+.mai-map-legend { display: grid; gap: 4px; min-width: 0; }
+.mai-map-chips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 6px;
+  font-size: 10px;
+  color: var(--text-secondary);
+  min-width: 0;
+}
+.mai-map-chip { display: inline-flex; align-items: center; gap: 3px; min-width: 0; }
+.mai-map-chip-label { font-size: 10px; color: var(--text-primary); white-space: nowrap; }
+.mai-map-chip .mai-map-swatch { width: 10px; height: 10px; font-size: 7px; }
+.mai-map-legend-more { min-width: 0; }
+.mai-map-legend-summary {
+  cursor: pointer;
+  width: fit-content;
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.mai-map-legend-summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mai-map-legend-list { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 6px; min-width: 0; }
+.mai-map-legend-item {
+  display: grid;
+  grid-template-columns: 20px auto 1fr;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+.mai-map-swatch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  font-size: 11px;
+  line-height: 1;
+}
+.mai-map-swatch--covered { color: var(--status-positive); border-color: var(--status-positive-border); }
+.mai-map-swatch--uncovered { color: var(--status-old); border-style: dashed; border-color: var(--status-old-border); }
+.mai-map-swatch--price_mismatch { color: var(--status-blocked); border-style: double; border-width: 3px; border-color: var(--status-blocked-border); }
+.mai-map-swatch--not_dish { color: var(--status-neutral); border-color: var(--status-neutral-border); }
+.mai-map-legend-label { font-size: 13px; font-weight: 800; color: var(--text-primary); }
+.mai-map-legend-detail { font-size: 12px; color: var(--text-secondary); overflow-wrap: anywhere; }
+.mai-map-sources { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
+.mai-map-source { max-width: 100%; text-align: left; overflow-wrap: anywhere; }
+.mai-map-source--active { border-color: var(--accent); color: var(--text-primary); font-weight: 800; }
+.mai-map-card {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  min-width: 0;
+}
+.mai-map-notice { margin: 0; font-size: 12px; color: var(--text-secondary); overflow-wrap: anywhere; }
+.mai-map-card-head { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; justify-content: space-between; min-width: 0; }
+.mai-map-card-source { font-size: 13px; font-weight: 800; color: var(--text-primary); overflow-wrap: anywhere; }
+.mai-map-counts { font-size: 12px; color: var(--text-secondary); }
+.mai-map-pages { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.mai-map-lines {
+  list-style: none;
+  margin: 0;
+  padding: 8px 0;
+  display: grid;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  min-width: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+}
+.mai-map-line {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  align-items: start;
+  gap: 6px;
+  padding: 3px 8px 3px 4px;
+  border-left: 3px solid transparent;
+  min-width: 0;
+}
+.mai-map-line--covered { border-left-color: var(--status-positive); }
+.mai-map-line--uncovered { border-left-style: dashed; border-left-color: var(--status-old); }
+.mai-map-line--price_mismatch { border-left-style: double; border-left-width: 4px; border-left-color: var(--status-blocked); }
+.mai-map-line--not_dish { border-left-color: var(--status-neutral); color: var(--text-secondary); }
+.mai-map-line--focus { background: var(--accent-surface); }
+.mai-map-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  cursor: pointer;
+}
+.mai-map-mark:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mai-map-mark--covered { border-color: var(--status-positive-border); }
+.mai-map-mark--uncovered { border-style: dashed; border-color: var(--status-old-border); }
+.mai-map-mark--price_mismatch { border-style: double; border-width: 3px; border-color: var(--status-blocked-border); }
+.mai-map-mark--not_dish { border-color: var(--status-neutral-border); }
+.mai-map-dot { font-size: 12px; line-height: 1; }
+.mai-map-dot--covered { color: var(--status-positive); }
+.mai-map-dot--uncovered { color: var(--status-old); }
+.mai-map-dot--price_mismatch { color: var(--status-blocked); }
+.mai-map-dot--not_dish { color: var(--status-neutral); }
+.mai-map-mark-space { width: 24px; }
+.mai-map-text { white-space: pre-wrap; overflow-wrap: anywhere; min-width: 0; color: var(--text-primary); }
+.mai-map-panel {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 6px;
+  margin: 2px 0 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  font-size: 13px;
+  min-width: 0;
+}
+.mai-map-panel--uncovered { border-left-color: var(--status-old); }
+.mai-map-panel--price_mismatch { border-left-color: var(--status-blocked); }
+.mai-map-panel--covered { border-left-color: var(--status-positive); }
+.mai-map-panel--not_dish { border-left-color: var(--status-neutral); }
+.mai-map-panel-title { margin: 0; font-size: 13px; font-weight: 800; color: var(--text-primary); }
+.mai-map-panel-line { margin: 0; color: var(--text-primary); overflow-wrap: anywhere; }
+.mai-map-panel-price { margin: 0; font-weight: 800; color: var(--text-primary); }
+.mai-map-panel-done { margin: 0; color: var(--status-positive); overflow-wrap: anywhere; }
+.mai-review-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; min-width: 0; }
+.mai-review-row {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--status-old);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  min-width: 0;
+}
+.mai-review-row--blocked { border-left-color: var(--status-blocked); }
+.mai-review-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px; min-width: 0; }
+.mai-review-name { font-weight: 700; color: var(--text-primary); overflow-wrap: anywhere; }
+.mai-review-price { font-weight: 600; color: var(--text-secondary); }
+.mai-why { margin: 0; font-size: 13px; color: var(--text-secondary); overflow-wrap: anywhere; }
+.mai-quote { margin: 0; padding-left: 10px; border-left: 2px solid var(--border-strong); font-size: 13px; color: var(--text-secondary); overflow-wrap: anywhere; }
+.mai-row-actions { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
+.mai-row-actions .mai-select { flex: 1 1 200px; }
+.mai-btn { min-height: 40px; padding: 8px 14px; font-size: 14px; }
+.mai-panel { display: grid; gap: 8px; padding: 10px 12px; border: 1px solid var(--accent-border); border-radius: var(--radius-md); background: var(--bg-card); min-width: 0; }
+.mai-panel-title { margin: 0; font-size: 14px; font-weight: 800; color: var(--text-primary); }
+.mai-done-list { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 13px; color: var(--text-secondary); }
+.mai-chosen {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  min-width: 0;
+}
+.mai-chosen-name { flex: 1 1 200px; min-width: 0; font-weight: 700; color: var(--text-primary); overflow-wrap: anywhere; }
+.mai-choices { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; min-width: 0; }
+.mai-choice {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.mai-choice:hover { border-color: var(--border-hover); }
+.mai-choice:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+.mai-pasted {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--status-positive);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 700;
+  min-width: 0;
+}
+.mai-pasted span { flex: 1 1 200px; min-width: 0; overflow-wrap: anywhere; }
+.mai-validity { margin: 0; font-size: 13px; color: var(--text-secondary); }
+/* U1/U2 (review 6376543234): de leesbare problemen en de herstelvraag. */
+.mai-problems { border-left: 3px solid var(--status-blocked); background: var(--bg-elevated); }
+.mai-problem-list { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 14px; color: var(--text-primary); overflow-wrap: anywhere; }
+.mai-recovery {
+  width: 100%;
+  min-height: 120px;
+  resize: vertical;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+@media (min-width: 720px) {
+  .mai-steps { gap: 20px; }
+  .mai-review-row { padding: 14px 16px; }
+}
+
+
+/* #59 / BE-21 "Lees met AI" (Lead review 6380804419, W1/W5/W6).
+   The block sits next to the manual steps and inside a failed batch result.
+   Only existing tokens and patterns; no new colour or layout system. */
+.mai-ai { border-color: var(--border-strong); }
+.mai-ai-done { display: grid; gap: 8px; justify-items: start; }
+/* Y2: standalone AI card plus a keyboard-reachable manual disclosure. */
+.mai-ai-card { border-color: var(--border-strong); }
+.mai-manual { padding-top: 4px; }
+.mai-linkbtn { display: inline; padding: 0; border: 0; background: none; font: inherit; cursor: pointer; text-align: left; }
+.mai-origin { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.mai-link { color: var(--text-primary); font-weight: 700; text-decoration: underline; }
+.mai-link:focus-visible { outline: 2px solid var(--accent-border); outline-offset: 2px; }
+.bta-ai-help { display: grid; gap: 8px; padding: 10px 12px; border: 1px solid var(--border-strong); border-radius: var(--radius-md); background: var(--bg-elevated); min-width: 0; }
+.bta-ai-title { margin: 0; font-size: 14px; font-weight: 800; color: var(--text-primary); }
+.bta-ai-link { color: var(--text-primary); font-weight: 700; text-decoration: underline; }
+.bta-ai-help .bta-actions { flex-wrap: wrap; }

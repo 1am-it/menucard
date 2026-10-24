@@ -65,6 +65,19 @@ test('the pages talk only to their own internal API; the source opens in a new t
   }
 });
 
+test('concept detail: the overview and the structure card use one section count, per full path', () => {
+  const view = read('app/internal/menu-concepts/MenuConceptsView.js');
+  // P3 of review 6309694854: the overview counted distinct last labels, so
+  // two equally named sections under different parents merged.
+  assert.match(view, /import \{[^}]*\bconceptSectionCount\b[^}]*\} from '@\/src\/lib\/menuConcept'/);
+  assert.match(view, /const sectionCount = conceptSectionCount\(concept\)/);
+  assert.doesNotMatch(view, /new Set\(concept\.lines/);
+  // The structure card shows the same built concept, never the stored copy.
+  assert.match(view, /<ConceptStructure captured=\{concept\.content\} \/>/);
+  // The card itself counts the categories it lists, not their names.
+  assert.match(read('app/internal/source-triage/batch/MenuReview.js'), /plural\(categories\.length, 'rubriek', 'rubrieken'\)/);
+});
+
 test('BE-27 export: the route only delegates; the GitHub client cannot merge, delete or move a branch, and its token stays on the server', () => {
   const route = code('app/api/internal/v1/menu-concepts/[id]/export/route.js');
   assert.deepEqual([...route.matchAll(/export async function (\w+)/g)].map((m) => m[1]), ['POST']);

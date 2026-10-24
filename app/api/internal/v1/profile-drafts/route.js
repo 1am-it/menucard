@@ -56,6 +56,7 @@ import {
 import { generateUuidV7 } from '@/src/lib/uuidv7'
 import { canonicalizeSourceUrl } from '@/src/lib/urlIntakes'
 import { computeAnalysisResultHash } from '@/src/lib/urlIntakeReceiptHash'
+import { readReceiptProduct, productActionRefusal } from '@/src/lib/menuProductIntegrationV2'
 
 const DRAFT_OVERVIEW_COLUMNS =
   'id, source_candidate_id, status, promoted_at, discarded_at, discard_note, possible_duplicate_of_draft_id, restarted_from_draft_id'
@@ -300,6 +301,15 @@ async function handleUrlIntakePromotion(request, auth, body, receiptId) {
   if (receiptError) return NextResponse.json({ error: 'Query failed' }, { status: 500 })
   if (!receiptRow) {
     return NextResponse.json({ error: 'Deze analyse is niet meer geldig. Lees de URL opnieuw uit.' }, { status: 409 })
+  }
+
+  // The existing RPC projects only the old v1 candidate projection. A v2
+  // receipt would therefore become an older/empty v1 projection, so it is
+  // refused before the redemption and the draft RPC.
+  const product = readReceiptProduct(receiptRow.candidate_summary)
+  if (product.kind !== 'v1') {
+    const refusal = productActionRefusal('confirm', product)
+    return NextResponse.json(refusal.body, { status: refusal.status })
   }
 
   const expectedHash = computeAnalysisResultHash({
