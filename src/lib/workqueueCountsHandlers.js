@@ -15,7 +15,7 @@
 
 const { isInternalOnly } = require('./importInbox');
 const { isEditorRole, resolveVisibleModules } = require('./internalNav');
-const { countSnapshotConceptsAwaitingReview, countNewInboxCandidates, sumAvailableCounts } = require('./workqueueCounts');
+const { countSnapshotConceptsAwaitingReview, countCandidatesWithoutReview, sumAvailableCounts } = require('./workqueueCounts');
 
 const CONCEPT_LIMIT = 300;
 const INBOX_RECORD_LIMIT = 2000;
@@ -64,13 +64,18 @@ function createWorkqueueCountsHandlers(deps) {
       .order('retrieved_at', { ascending: false })
       .limit(INBOX_RECORD_LIMIT);
     if (records.error) return null;
+    const rows = Array.isArray(records.data) ? records.data : [];
+    // Nothing to triage: no second query at all.
+    if (rows.length === 0) return 0;
+    // Only candidate ids: a candidate is still `new` exactly when no review row
+    // exists for it (the stored status set never contains `new`), so the status
+    // and timestamp of up to 4000 reviews are not transferred on each navigation.
     const reviews = await supabase
       .from('import_candidate_reviews')
-      .select('id, candidate_id, decided_at, status')
-      .order('decided_at', { ascending: false })
+      .select('candidate_id')
       .limit(INBOX_REVIEW_LIMIT);
     if (reviews.error) return null;
-    return countNewInboxCandidates(records.data || [], reviews.data || []);
+    return countCandidatesWithoutReview(rows, reviews.data || []);
   }
 
   async function loadModerationCount(supabase) {

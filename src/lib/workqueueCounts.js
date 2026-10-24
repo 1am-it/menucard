@@ -64,6 +64,23 @@ function countNewInboxCandidates(recordRows, reviewRows) {
   return count;
 }
 
+/** The cheapest equivalent for the count route, which only selects
+ * `candidate_id` from the review table: a candidate is still `new` exactly when
+ * no review row exists for it at all (the stored status set never contains
+ * `new`). Counting the distinct reviewed candidate ids avoids transferring every
+ * review's status and timestamp on each navigation. */
+function countCandidatesWithoutReview(recordRows, reviewRows) {
+  const reviewed = new Set();
+  for (const row of Array.isArray(reviewRows) ? reviewRows : []) {
+    if (row && row.candidate_id !== undefined && row.candidate_id !== null) reviewed.add(row.candidate_id);
+  }
+  let count = 0;
+  for (const record of Array.isArray(recordRows) ? recordRows : []) {
+    if (record && record.id && !reviewed.has(record.id)) count += 1;
+  }
+  return count;
+}
+
 /** Adds counts for one combined workspace (the moderation page), `null` as
  * soon as one part is unavailable — a partial sum would understate the work. */
 function sumAvailableCounts(values) {
@@ -82,5 +99,6 @@ module.exports = {
   latestSnapshotPerLineage,
   countSnapshotConceptsAwaitingReview,
   countNewInboxCandidates,
+  countCandidatesWithoutReview,
   sumAvailableCounts,
 };

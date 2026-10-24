@@ -15,6 +15,7 @@ const {
   latestSnapshotPerLineage,
   countSnapshotConceptsAwaitingReview,
   countNewInboxCandidates,
+  countCandidatesWithoutReview,
   sumAvailableCounts,
 } = require('./workqueueCounts');
 const { createWorkqueueCountsHandlers } = require('./workqueueCountsHandlers');
@@ -293,4 +294,33 @@ test('structural safety net: GET /api/internal/v1/workqueue-counts reuses authen
   assert.doesNotMatch(source, /export async function (POST|PUT|PATCH|DELETE)/);
   assert.doesNotMatch(source, /\.from\(['"]/, 'the route must not query a table itself — the tested handler does that');
   assert.match(source, /export const dynamic = 'force-dynamic'/);
+});
+
+// --- The cheaper count-route variant: reviewed candidate ids only ---
+
+test('countCandidatesWithoutReview: a candidate counts once and only when no review row exists at all', () => {
+  const records = [{ id: 'c-1' }, { id: 'c-2' }, { id: 'c-3' }];
+  const reviews = [{ candidate_id: 'c-1' }, { candidate_id: 'c-1' }, { candidate_id: 'c-3' }];
+  assert.equal(countCandidatesWithoutReview(records, reviews), 1);
+  assert.equal(countCandidatesWithoutReview([{ id: 'c-1' }], []), 1);
+  assert.equal(countCandidatesWithoutReview(records, [{ candidate_id: 'c-unknown' }]), 3);
+  assert.equal(countCandidatesWithoutReview([], []), 0);
+  assert.equal(countCandidatesWithoutReview(null, null), 0);
+});
+
+test('handler: an empty inbox is a real 0 and triggers no review query at all', async () => {
+  const { handlers, fake } = handlerFor([{ role: 'internal' }], {
+    menu_snapshot_proposals: { rows: [] },
+    source_triage_proposals: { count: 0 },
+    import_extraction_records: { rows: [] },
+  });
+  const result = await handlers.getCounts({});
+  assert.equal(result.body.counts['import-inbox'], 0);
+  assert.ok(!fake.calls.includes('import_candidate_reviews'), 'no review query for an empty inbox');
+});
+
+test('handler: the inbox count only selects reviewed candidate ids, never every review row', () => {
+  const source = fs.readFileSync(path.join(__dirname, 'workqueueCountsHandlers.js'), 'utf8');
+  assert.match(source, /\.from\('import_candidate_reviews'\)\s*\.select\('candidate_id'\)/);
+  assert.doesNotMatch(source, /\.from\('import_candidate_reviews'\)\s*\.select\('id, candidate_id/);
 });
