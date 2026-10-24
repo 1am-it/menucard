@@ -3069,6 +3069,31 @@ details.bta-side-card > summary:focus-visible { outline: 2px solid var(--border-
 .mai-notices { display: grid; gap: 4px; padding: 10px 12px; border: 1px solid var(--border); border-left: 3px solid var(--accent-border); border-radius: var(--radius-md); background: var(--bg-elevated); min-width: 0; }
 .mai-notices-title { margin: 0; font-size: 13px; font-weight: 800; color: var(--text-primary); }
 .mai-notice-list { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 13px; color: var(--text-secondary); overflow-wrap: anywhere; }
+/* Variant 1 (Lead order 6382189724): source lines with a price that no dish in
+   the concept covers. Orange, above the nalopen list, and free: no AI call. */
+.mai-uncovered {
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--warning-border);
+  border-left: 3px solid var(--warning);
+  border-radius: var(--radius-md);
+  background: var(--warning-bg);
+  min-width: 0;
+}
+.mai-uncovered-title { margin: 0; font-size: 14px; font-weight: 800; color: var(--text-primary); overflow-wrap: anywhere; }
+.mai-uncovered-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; min-width: 0; }
+.mai-uncovered-row {
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--warning-border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  min-width: 0;
+}
+.mai-uncovered-free { margin: 0; font-size: 12px; color: var(--text-secondary); }
+.mai-uncovered-unavailable { margin: 0; font-size: 13px; color: var(--text-secondary); overflow-wrap: anywhere; }
 .mai-review-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; min-width: 0; }
 .mai-review-row {
   display: grid;

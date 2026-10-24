@@ -1766,6 +1766,192 @@ async function aiReadKeyboardScenario(cdp) {
 }
 
 
+// ── Variant 1 (Delivery Lead order 6382189724): niet-overgenomen regels ──────
+// De fixture antwoordt met een fictieve dinerkaart waarin twee regels een prijs
+// printen die geen gerecht dekt, en met de twee vervolgstanden (na Toevoegen en
+// na Geen gerecht). Geen model, geen sleutel, geen netwerk.
+
+function manualCoverageUrl(theme) {
+  const params = new URLSearchParams({
+    fixture: 'manual-coverage',
+    restaurant: fixtures.RESTAURANT.id,
+    name: fixtures.RESTAURANT.name,
+    url: 'https://fictief-brasserie.invalid/diner',
+    aiState: 'off',
+    theme,
+  });
+  return `${MANUAL_URL}?${params.toString()}`;
+}
+
+/** Maakt de prompt, plakt het fictieve antwoord en opent de review. */
+async function openCoverageReview(cdp, theme) {
+  await openRoute(cdp, manualCoverageUrl(theme), `document.body.innerText.includes('Prompt maken')`);
+  await clickButton(cdp, 'Prompt maken');
+  await waitFor(cdp, `document.body.innerText.includes('gaat mee in de prompt')`, 15000);
+  await setFieldValue(cdp, '#mai-answer', 'Korte samenvatting.\n```json\n{"menus":[],"coverage":{}}\n```');
+  await waitFor(cdp, `document.body.innerText.includes('Antwoord geplakt')`, 15000);
+  await clickButton(cdp, 'Controleren');
+  return waitFor(
+    cdp,
+    `document.body.innerText.includes('staan niet in het concept') || document.body.innerText.includes('staat niet in het concept')`,
+    15000,
+  );
+}
+
+async function readUncovered(cdp) {
+  return evalJs(
+    cdp,
+    `(() => {
+      const block = document.querySelector('.mai-uncovered');
+      const list = document.querySelector('.mai-review-list');
+      if (block) block.scrollIntoView({ block: 'start', behavior: 'instant' });
+      const rect = block ? block.getBoundingClientRect() : null;
+      const styles = block ? getComputedStyle(block) : null;
+      const root = getComputedStyle(document.documentElement);
+      const probe = document.createElement('div');
+      probe.style.color = 'var(--warning)';
+      probe.style.backgroundColor = 'var(--warning-bg)';
+      document.body.appendChild(probe);
+      const probeStyle = getComputedStyle(probe);
+      const warningRgb = probeStyle.color;
+      const warningBackgroundRgb = probeStyle.backgroundColor;
+      probe.remove();
+      const rows = block ? Array.from(block.querySelectorAll('.mai-uncovered-row')) : [];
+      return {
+        present: Boolean(block),
+        title: block && block.querySelector('.mai-uncovered-title') ? block.querySelector('.mai-uncovered-title').innerText.trim() : null,
+        lines: rows.map((row) => ({
+          quote: row.querySelector('.mai-quote') ? row.querySelector('.mai-quote').innerText.trim() : null,
+          meta: Array.from(row.querySelectorAll('.mai-why')).map((el) => el.innerText.trim()).join(' | '),
+          buttons: Array.from(row.querySelectorAll('button')).map((el) => el.innerText.trim()),
+          accessible: Array.from(row.querySelectorAll('button')).map((el) => el.getAttribute('aria-label')),
+          focusable: Array.from(row.querySelectorAll('button')).every((el) => el.tabIndex >= 0 && !el.disabled),
+        })),
+        free: block && block.querySelector('.mai-uncovered-free') ? block.querySelector('.mai-uncovered-free').innerText.trim() : null,
+        aboveList: Boolean(block && list && (block.compareDocumentPosition(list) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0),
+        background: styles ? styles.backgroundColor : null,
+        warningBackground: root.getPropertyValue('--warning-bg').trim(),
+        borderLeft: styles ? styles.borderLeftColor : null,
+        warning: warningRgb,
+        warningBackgroundToken: root.getPropertyValue('--warning-bg').trim(),
+        warningBackgroundRgb,
+        overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        top: rect ? Math.round(rect.top) : null,
+        height: window.innerHeight,
+        focused: document.activeElement ? document.activeElement.getAttribute('aria-label') : null,
+        text: document.body.innerText,
+      };
+    })()`,
+  );
+}
+
+async function manualUncoveredScenario(cdp) {
+  // 390 px, donker: the block with two lines, above nalopen.
+  await setViewport(cdp, 390, 900);
+  const shown = await openCoverageReview(cdp, 'dark');
+  check('uncovered lines: the review opens with the comparison', shown);
+  const block = await readUncovered(cdp);
+  check(
+    'uncovered lines: the block is shown above the nalopen list',
+    Boolean(block) && block.present && block.aboveList,
+    JSON.stringify({ present: block && block.present, aboveList: block && block.aboveList }),
+  );
+  check(
+    'uncovered lines: the heading counts the lines in plain language',
+    Boolean(block) && block.title === '2 regels met een prijs staan niet in het concept',
+    block ? block.title : 'no block',
+  );
+  check(
+    'uncovered lines: each line shows its quote, page and section, with two buttons',
+    Boolean(block) &&
+      block.lines.length === 2 &&
+      block.lines[0].quote === '“Fictieve carpaccio 11,00”' &&
+      block.lines[0].meta === 'Pagina source-1 · website · regel 4 · onder Voorgerechten' &&
+      block.lines[0].buttons.join('|') === 'Toevoegen|Geen gerecht' &&
+      block.lines[1].quote === '“Fictieve steak 24,50”',
+    block ? JSON.stringify(block.lines) : 'no block',
+  );
+  check(
+    'uncovered lines: the free note is visible',
+    Boolean(block) && block.free === 'Gratis: geen extra AI-aanroep nodig',
+    block ? block.free : 'no block',
+  );
+  check(
+    'uncovered lines: the block uses the orange warning tokens of this theme',
+    Boolean(block) && block.borderLeft === block.warning && block.background === block.warningBackgroundRgb,
+    block ? JSON.stringify({ borderLeft: block.borderLeft, warning: block.warning, background: block.background, warningBackgroundRgb: block.warningBackgroundRgb }) : 'no block',
+  );
+  check('uncovered lines: no horizontal overflow at 390 px', Boolean(block) && block.overflow <= 0, block ? `overflow=${block.overflow}` : 'no block');
+  check(
+    'uncovered lines: the block is in view for the screenshot',
+    Boolean(block) && block.top !== null && block.top >= 0 && block.top < block.height,
+    block ? JSON.stringify({ top: block.top, height: block.height }) : 'no block',
+  );
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'ai-uncovered-390-dark.png'));
+  recordClickpath(
+    'manual import: uncovered source lines',
+    ['Menu importeren met AI', 'Prompt maken', 'Controleren', 'Toevoegen', 'Geen gerecht'],
+    Boolean(block) && block.lines.length === 2,
+  );
+
+  // Keyboard: focus the first Toevoegen button and press Enter. The line
+  // disappears and the new dish appears in nalopen with a section to check.
+  const focused = await evalJs(cdp, `(() => {
+    const button = document.querySelector('.mai-uncovered-row button');
+    if (!button) return null;
+    button.focus();
+    return document.activeElement === button ? button.getAttribute('aria-label') : null;
+  })()`);
+  check('uncovered lines: the Toevoegen button takes focus', focused === 'Toevoegen: Fictieve carpaccio 11,00', focused);
+  await pressKey(cdp, 'Enter', 'Enter', 13, '\r');
+  const afterAdd = await waitFor(cdp, `document.querySelectorAll('.mai-uncovered-row').length === 1`, 15000);
+  check('uncovered lines: Toevoegen removes the line after the server answer', afterAdd);
+  const added = await readUncovered(cdp);
+  check(
+    'uncovered lines: the remaining uncovered line is the other one',
+    Boolean(added) && added.lines.length === 1 && added.lines[0].quote === '“Fictieve steak 24,50”',
+    added ? JSON.stringify(added.lines) : 'no block',
+  );
+  check(
+    'uncovered lines: the added dish is in nalopen with a section to check',
+    Boolean(added) && added.text.includes('Fictieve carpaccio') && added.text.includes('rubriek controleren'),
+    added ? (added.text.match(/Fictieve carpaccio[^\n]*/) || ['missing'])[0] : 'no block',
+  );
+  check('uncovered lines: no horizontal overflow after adding', Boolean(added) && added.overflow <= 0, added ? `overflow=${added.overflow}` : 'no block');
+  await evalJs(cdp, `(() => { const el = document.querySelector('.mai-uncovered'); if (el) el.scrollIntoView({ block: 'start', behavior: 'instant' }); return true; })()`);
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'ai-uncovered-after-add-390-dark.png'));
+
+  // "Geen gerecht" on the last line: the block disappears with its last line.
+  await clickButton(cdp, 'Geen gerecht');
+  const gone = await waitFor(cdp, `!document.querySelector('.mai-uncovered')`, 15000);
+  check('uncovered lines: the block disappears when no line is left', gone);
+  const empty = await readUncovered(cdp);
+  check('uncovered lines: nothing is invented after the last choice', empty.present === false, JSON.stringify(empty.lines));
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'ai-uncovered-empty-390-dark.png'));
+
+  // 390 px light and 320 px light: the same block within the viewport.
+  for (const [width, theme] of [[390, 'light'], [320, 'light']]) {
+    await setViewport(cdp, width, 900);
+    const opened = await openCoverageReview(cdp, theme);
+    const narrow = await readUncovered(cdp);
+    check(`uncovered lines ${width}px/${theme}: the block is shown`, Boolean(opened) && Boolean(narrow) && narrow.present);
+    check(
+      `uncovered lines ${width}px/${theme}: both lines and both buttons stay visible`,
+      Boolean(narrow) && narrow.lines.length === 2 && narrow.lines.every((line) => line.buttons.length === 2 && line.focusable),
+      narrow ? JSON.stringify(narrow.lines.map((line) => line.buttons)) : 'no block',
+    );
+    check(
+      `uncovered lines ${width}px/${theme}: the buttons are named for screen readers`,
+      Boolean(narrow) && narrow.lines.every((line) => line.accessible.every((label) => typeof label === 'string' && label.length > 0)),
+      narrow ? JSON.stringify(narrow.lines.map((line) => line.accessible)) : 'no block',
+    );
+    check(`uncovered lines ${width}px/${theme}: no horizontal overflow`, Boolean(narrow) && narrow.overflow <= 0, narrow ? `overflow=${narrow.overflow}` : 'no block');
+    await evalJs(cdp, `(() => { const el = document.querySelector('.mai-uncovered'); if (el) el.scrollIntoView({ block: 'start', behavior: 'instant' }); return true; })()`);
+    screenshotFiles.push(await screenshot(cdp, OUT_DIR, `ai-uncovered-${width}-${theme}.png`));
+  }
+}
+
+
 async function main() {
   const browserPath = findBrowser();
   if (!browserPath) {
@@ -1802,6 +1988,9 @@ async function main() {
     await manualRejectedScenario(cdp);
     // V1/V2 (review 6377050602): de afgeleide telling en status met de melding.
     await manualNormalizedScenario(cdp);
+    // Variant 1 (order 6382189724): niet-overgenomen bronregels, met de
+    // toetsenbordroute en de standen na Toevoegen en Geen gerecht.
+    await manualUncoveredScenario(cdp);
     // #59 / BE-21 (review 6380804419): "Lees met AI" op het bestaande scherm.
     for (const theme of ['light', 'dark']) await aiReadScenario(cdp, theme);
     for (const theme of ['light', 'dark']) await aiReadBatchScenario(cdp, theme);

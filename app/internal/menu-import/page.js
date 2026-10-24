@@ -352,6 +352,30 @@ export default function ManualMenuImportPage() {
     setBusy(false)
   }
 
+  /**
+   * Variant 1 (Lead order 6382189724): one choice on one source line that no
+   * dish covers. The server compares again from its own capture; the screen
+   * sends only the line id and the choice.
+   */
+  async function sendUncovered(line, action) {
+    setBusy(true)
+    setError(null)
+    setMessage(null)
+    const result = await api(`/imports/${report.importId}/decisions`, { state: stateToken, decision: { action, lineId: line.id } })
+    if (!result.ok) handleFailure(result)
+    else {
+      if (result.data.import) setReport(result.data.import)
+      setReview(result.data.review)
+      adoptStep(result.data)
+      setMessage(
+        action === 'add_uncovered'
+          ? 'De regel staat nu als gerecht in het concept. Stel naam en rubriek bij waar nodig; opslaan blijft een aparte stap.'
+          : 'Deze regel telt als geen gerecht. De keuze blijft bij het concept bewaard.'
+      )
+    }
+    setBusy(false)
+  }
+
   function openReason(row) {
     setReasonFor(row.id)
     setReasonCode('niet_in_bron')
@@ -1030,6 +1054,58 @@ export default function ManualMenuImportPage() {
                         ))}
                       </ul>
                     </div>
+                  ) : null}
+                  {/* Variant 1 (Lead order 6382189724): the deterministic,
+                      free comparison with the original menu. It sits above the
+                      nalopen list, never below it. */}
+                  {review.uncovered ? (
+                    review.uncovered.available === false ? (
+                      <p className="mai-uncovered-unavailable" role="status">
+                        {review.uncovered.message}
+                      </p>
+                    ) : review.uncovered.total > 0 ? (
+                      <section className="mai-uncovered" aria-labelledby="mai-uncovered-title">
+                        <p id="mai-uncovered-title" className="mai-uncovered-title">
+                          {review.uncovered.total}{' '}
+                          {review.uncovered.total === 1
+                            ? 'regel met een prijs staat niet in het concept'
+                            : 'regels met een prijs staan niet in het concept'}
+                        </p>
+                        <ul className="mai-uncovered-list">
+                          {review.uncovered.lines.map((line) => (
+                            <li key={line.id} className="mai-uncovered-row">
+                              <p className="mai-quote">“{line.text}”</p>
+                              <p className="mai-why">
+                                Pagina {line.sourceLabel} · {line.locator}
+                                {line.section ? ` · onder ${line.section}` : ' · rubriek onbekend'}
+                              </p>
+                              <div className="mai-row-actions">
+                                <button
+                                  type="button"
+                                  className="di-btn-primary mai-btn"
+                                  disabled={busy}
+                                  aria-label={`Toevoegen: ${line.text}`}
+                                  onClick={() => sendUncovered(line, 'add_uncovered')}
+                                >
+                                  Toevoegen
+                                </button>
+                                <button
+                                  type="button"
+                                  className="stg-btn-secondary mai-btn"
+                                  disabled={busy}
+                                  aria-label={`Geen gerecht: ${line.text}`}
+                                  onClick={() => sendUncovered(line, 'uncovered_not_dish')}
+                                >
+                                  Geen gerecht
+                                </button>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                        {review.uncovered.omitted > 0 ? <p className="mai-why">{review.uncovered.omittedLabel}</p> : null}
+                        <p className="mai-uncovered-free">Gratis: geen extra AI-aanroep nodig</p>
+                      </section>
+                    ) : null
                   ) : null}
                   <p className="bta-muted">
                     Alleen de regels die aandacht vragen staan open. De regels die in orde zijn, zitten ingeklapt. Er is geen

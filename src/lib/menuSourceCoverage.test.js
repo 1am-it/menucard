@@ -16,6 +16,7 @@ const {
   compareCaptureWithConcept,
   itemFromPricedLine,
 } = require('./menuSourceCoverage');
+const { quoteIsPresentInSource } = require('./menuExtractionSchema');
 
 const SOURCE_TEXT = [
   'LUNCH',
@@ -158,6 +159,28 @@ test('X1: rubriekkoppen en namen zijn herkenbaar zonder een nieuwe prijsfamilie'
   assert.equal(looksLikeSectionHeading('Broodplank 8,50'), false);
   assert.equal(nameFromLine('Broodplank 8,50', [{ index: 11, length: 4 }]), 'Broodplank');
   assert.equal(nameFromLine('Broodplank ........ 8,50', [{ index: 20, length: 4 }]), 'Broodplank');
+});
+
+test('X1: een platgeslagen bronregel levert per geprinte prijs een regel met de cel ervoor als naam', () => {
+  const text =
+    'Formule du Jour     2 gangen voor- en hoofdgerecht of hoofdgerecht en dessert   €45,00    3 gangen voor-, hoofdgerecht en dessert   €55,00      ' +
+    'Brioches    Entrecôte zwarte knoflook   €21,50    Jamón Ibérico  €19,50 ' +
+    'x'.repeat(400);
+  const result = compareCaptureWithConcept({ sources: [source(text)], menus: menuWith([]) });
+  assert.equal(result.available, true);
+  assert.deepEqual(
+    result.lines.map((line) => [line.id, line.name, line.priceText]),
+    [
+      ['source-1:1:1', '2 gangen voor- en hoofdgerecht of hoofdgerecht en dessert', '€45,00'],
+      ['source-1:1:2', '3 gangen voor-, hoofdgerecht en dessert', '€55,00'],
+      ['source-1:1:3', 'Entrecôte zwarte knoflook', '€21,50'],
+      ['source-1:1:4', 'Jamón Ibérico', '€19,50'],
+    ],
+  );
+  assert.equal(result.lines[0].locator, 'regel 1, deel 1');
+  // The citation of a fragment is present under the validator's normalization.
+  assert.equal(quoteIsPresentInSource(result.lines[2].text, text), true);
+  assert.deepEqual(result.lines.map((line) => line.section), ['Formule du Jour', 'Formule du Jour', 'Brioches', 'Brioches']);
 });
 
 test('X3: Toevoegen maakt een item met de regel zelf als citaat; twee prijzen blijven twee prijzen', () => {

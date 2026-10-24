@@ -654,6 +654,14 @@ module.exports = {
         return manualImportScenario({ variantsNamed: true });
       },
     },
+    // Variant 1 (Lead order 6382189724): a fictional diner card with two lines
+    // that no dish covers, plus the review after "Toevoegen" and after
+    // "Geen gerecht".
+    'manual-coverage': {
+      get manual() {
+        return manualCoverageScenario();
+      },
+    },
     ...conceptScenarios,
   },
   expected: {
@@ -674,7 +682,7 @@ const { loadMenuExtractionProtocol } = require('../../../src/lib/menuExtractionP
 const { buildImportBundle, bundleMetadata, sourceHashForText } = require('../../../src/lib/manualMenuImportBundle');
 const { buildImportPrompt } = require('../../../src/lib/manualMenuImportPrompt');
 const { buildImportReport, publicImportReport } = require('../../../src/lib/manualMenuImportImport');
-const { decideRow, reviewView, buildConceptDraft } = require('../../../src/lib/manualMenuImportReview');
+const { decideRow, decideUncoveredLine, reviewView, buildConceptDraft } = require('../../../src/lib/manualMenuImportReview');
 
 function manualImportScenario({ variantsNamed = false } = {}) {
   const protocol = loadMenuExtractionProtocol({ root: path.resolve(__dirname, '..', '..', '..') });
@@ -873,7 +881,7 @@ function manualImportScenario({ variantsNamed = false } = {}) {
         cost: { eurCents: 4, known: true, maxEurCents: 30 },
         monthly: { spentEurCents: 16, limitEurCents: 1000, remainingEurCents: 984, unknownConcepts: 0 },
         import: { ...publicImportReport(report), aiName },
-        review: reviewView({ report, decisions: new Map() }),
+        review: reviewView({ report, decisions: new Map(), capture: bundle.sources }),
         summary: { items: report.summary.items, valid: report.summary.valid, needsReview: report.summary.needsReview },
         concept: { id: 'concept-fictief-ai-1', version: 1, unchanged: false },
         state: 'fixture-ai-state',
@@ -894,15 +902,15 @@ function manualImportScenario({ variantsNamed = false } = {}) {
       { id: '1', name: 'Restaurant Wolfslaar', buurt: 'Wolfslaar' },
     ],
     reviews: [
-      reviewView({ report, decisions: new Map() }),
-      reviewView({ report, decisions: first.decisions }),
-      reviewView({ report, decisions: second.decisions }),
+      reviewView({ report, decisions: new Map(), capture: bundle.sources }),
+      reviewView({ report, decisions: first.decisions, capture: bundle.sources }),
+      reviewView({ report, decisions: second.decisions, capture: bundle.sources }),
     ],
     // V2: hetzelfde antwoord mét de afgeleide telling en status. Eén review,
     // want dit scenario beoordeelt alleen de melding, niet de beslisstappen.
     normalized: {
       import: publicImportReport(normalized),
-      review: reviewView({ report: normalized, decisions: new Map() }),
+      review: reviewView({ report: normalized, decisions: new Map(), capture: bundle.sources }),
     },
     followUpPrompt: {
       text: '# Vervolgvraag over één regel\n\nFictief.\n\n```text\nFictieve brontekst.\n```',
@@ -926,6 +934,105 @@ function manualImportScenario({ variantsNamed = false } = {}) {
       concept: { id: 'concept-fictief-import-1', version: 1, unchanged: false },
       provenance: draft.ok ? draft.provenance : null,
     },
+  };
+}
+
+// ── Variant 1 (Lead order 6382189724): niet-overgenomen bronregels ─────────
+// Dezelfde fictieve stroom, maar met een bron waarin twee regels een prijs
+// printen die geen enkel gerecht dekt. De drie reviewstanden hieronder zijn met
+// de echte productmodules gebouwd: eerst twee open regels, daarna één na
+// "Toevoegen" (met het nieuwe gerecht in nalopen), daarna nul na "Geen
+// gerecht". Geen netwerk, geen model, geen sleutel.
+function manualCoverageScenario() {
+  const base = manualImportScenario();
+  const protocol = loadMenuExtractionProtocol({ root: path.resolve(__dirname, '..', '..', '..') });
+  const text = [
+    'FICTIEF DINER',
+    'Voorgerechten',
+    'Fictieve soep 6,50',
+    'Fictieve carpaccio 11,00',
+    'Hoofdgerechten',
+    'Fictieve steak 24,50',
+  ].join('\n');
+  const bundle = buildImportBundle({
+    bundleId: 'AI-FICTIEF-DEKKING',
+    actorUserId: 'fixture-user',
+    restaurantId: RESTAURANT.id,
+    restaurantName: RESTAURANT.name,
+    fetchedAt: '2026-10-24T12:00:00.000Z',
+    sources: [{ id: 'source-1', url: 'https://fictief-brasserie.invalid/diner', kind: 'html', status: 'read', text }],
+    protocol,
+    now: new Date('2026-10-24T12:00:00.000Z'),
+  });
+  const output = {
+    menus: [
+      {
+        title: 'Fictief Diner',
+        sourceId: 'source-1',
+        categories: [
+          {
+            name: 'Voorgerechten',
+            items: [
+              {
+                name: 'Fictieve soep',
+                priceStatus: 'known',
+                amountMinorUnits: 650,
+                currency: 'EUR',
+                evidence: { sourceId: 'source-1', locator: 'regel 3', quote: 'Fictieve soep 6,50' },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    coverage: { status: 'complete', sourcesRead: 1, pagesRead: 1, itemsExtracted: 1, unreadSources: [], limitations: [] },
+  };
+  const report = buildImportReport({
+    // Same fictional import id as the manual scenario: the harness only allows
+    // these exact fictional paths.
+    importId: 'fixture-import',
+    bundle,
+    output,
+    aiName: 'Claude',
+    now: new Date('2026-10-24T12:05:00.000Z'),
+  });
+  if (!report.ok) throw new Error(`coverage fixture invalid: ${report.code}`);
+  const capture = bundle.sources;
+  const initial = reviewView({ report, decisions: new Map(), capture });
+  if (initial.uncovered.total !== 2) {
+    throw new Error(`coverage fixture expects two uncovered lines, got ${initial.uncovered.total}`);
+  }
+  const addedLine = initial.uncovered.lines[0];
+  const dismissedLine = initial.uncovered.lines[1];
+  const added = decideUncoveredLine({
+    report,
+    decisions: new Map(),
+    bundle,
+    decision: { action: 'add_uncovered', lineId: addedLine.id },
+  });
+  if (!added.ok) throw new Error(`coverage fixture cannot add: ${added.code}`);
+  const addedView = reviewView({ report: added.report, decisions: added.decisions, capture });
+  if (addedView.uncovered.total !== 1) {
+    throw new Error(`coverage fixture expects one uncovered line after adding, got ${addedView.uncovered.total}`);
+  }
+  const dismissed = decideUncoveredLine({
+    report: added.report,
+    decisions: added.decisions,
+    bundle,
+    decision: { action: 'uncovered_not_dish', lineId: dismissedLine.id },
+  });
+  if (!dismissed.ok) throw new Error(`coverage fixture cannot dismiss: ${dismissed.code}`);
+  const done = reviewView({ report: added.report, decisions: dismissed.decisions, capture });
+  if (done.uncovered.total !== 0) {
+    throw new Error(`coverage fixture expects no uncovered lines at the end, got ${done.uncovered.total}`);
+  }
+  return {
+    ...base,
+    bundle: bundleMetadata(bundle),
+    prompt: buildImportPrompt(bundle),
+    import: publicImportReport(report),
+    reviews: [initial, addedView, done],
+    coverage: { addedLine, dismissedLine, addedRowName: addedView.rows.find((row) => row.name === 'Fictieve carpaccio') ? 'Fictieve carpaccio' : null },
   };
 }
 

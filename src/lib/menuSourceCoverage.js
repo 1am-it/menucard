@@ -84,39 +84,109 @@ function nameFromLine(line, prices) {
  * The priced lines of one source, in printing order, each with its nearest
  * preceding heading and its own line number. A source without text yields
  * nothing; that is never the same as "no uncovered lines".
+ *
+ * A capture whose block structure was flattened into one very long line (the
+ * benchmark's visible-text reader, or a page without line breaks) is split on
+ * the printed cells: the text right before a price is that price's name. That
+ * is the same "name before its price" rule the extraction already uses, not a
+ * second price parser, and every citation stays a literal part of the source.
  */
 function pricedLinesOfSource(source) {
   const text = source && typeof source.text === 'string' ? source.text : '';
   if (!source || source.hasText === false || text.trim() === '') return [];
   const records = [];
+  const sourceId = bounded(source.id, 80) || 'bron';
   let section = null;
   const rawLines = text.split(/\r\n|\r|\n/);
   rawLines.forEach((raw, index) => {
-    const line = bounded(raw, MAX_LINE_CHARS);
-    if (line === '') return;
-    if (looksLikeSectionHeading(line)) {
-      section = line.slice(0, MAX_SECTION_CHARS);
+    const lineNumber = index + 1;
+    const trimmed = typeof raw === 'string' ? raw.trim() : '';
+    if (trimmed === '') return;
+    // A short line is normalized like every other evidence text; a long,
+    // flattened line keeps its printed cell gaps for the segmentation below.
+    const line = trimmed.length <= MAX_LINE_CHARS ? trimmed.replace(/\s+/g, ' ') : trimmed;
+    if (line.length <= MAX_LINE_CHARS) {
+      if (looksLikeSectionHeading(line)) {
+        section = line.slice(0, MAX_SECTION_CHARS);
+        return;
+      }
+      const prices = findPrices(line);
+      if (prices.length === 0) return;
+      const name = nameFromLine(line, prices);
+      if (!name) return;
+      records.push({
+        sourceId,
+        sourceUrl: bounded(source.url, 500) || null,
+        sourceKind: typeof source.kind === 'string' ? source.kind : null,
+        lineNumber,
+        segment: 0,
+        // The line itself stays the citation, exactly as the source prints it.
+        text: line,
+        name,
+        priceText: prices.map((price) => price.raw).join(' / '),
+        amountMinorUnits: prices[0].amountMinorUnits,
+        amountsMinorUnits: prices.map((price) => price.amountMinorUnits),
+        section: section ? section : null,
+      });
       return;
     }
-    const prices = findPrices(line);
-    if (prices.length === 0) return;
-    const name = nameFromLine(line, prices);
-    if (!name) return;
-    records.push({
-      sourceId: bounded(source.id, 80) || 'bron',
-      sourceUrl: bounded(source.url, 500) || null,
-      sourceKind: typeof source.kind === 'string' ? source.kind : null,
-      lineNumber: index + 1,
-      // The line itself stays the citation, exactly as the source prints it.
-      text: line,
-      name,
-      priceText: prices.map((price) => price.raw).join(' / '),
-      amountMinorUnits: prices[0].amountMinorUnits,
-      amountsMinorUnits: prices.map((price) => price.amountMinorUnits),
-      section: section ? section : null,
-    });
+    for (const fragment of fragmentsOfFlattenedLine(raw, { section })) {
+      if (fragment.section) section = fragment.section;
+      records.push({
+        sourceId,
+        sourceUrl: bounded(source.url, 500) || null,
+        sourceKind: typeof source.kind === 'string' ? source.kind : null,
+        lineNumber,
+        segment: fragment.segment,
+        text: fragment.text,
+        name: fragment.name,
+        priceText: fragment.priceText,
+        amountMinorUnits: fragment.amountMinorUnits,
+        amountsMinorUnits: [fragment.amountMinorUnits],
+        section: fragment.section || section || null,
+      });
+    }
   });
   return records;
+}
+
+/** The printed cells of a flattened line, split on runs of two or more spaces. */
+function cellsOfFlattenedLine(text) {
+  return String(text || '')
+    .split(/\s{2,}/)
+    .map((cell) => cell.replace(/\s+/g, ' ').trim())
+    .filter((cell) => cell !== '');
+}
+
+/**
+ * One record per printed price of a flattened line: the cell right before the
+ * price is its name, an earlier heading-like cell is the section. The text is
+ * the name plus the printed price, so the citation stays in the source.
+ */
+function fragmentsOfFlattenedLine(line, { section = null } = {}) {
+  const fragments = [];
+  const prices = findPrices(line);
+  let previousEnd = 0;
+  let currentSection = section;
+  prices.forEach((price, index) => {
+    const cells = cellsOfFlattenedLine(line.slice(previousEnd, price.index));
+    previousEnd = price.index + price.length;
+    if (cells.length === 0) return;
+    const name = cells[cells.length - 1];
+    const headings = cells.slice(0, -1).filter((cell) => looksLikeSectionHeading(cell));
+    if (headings.length > 0) currentSection = headings[headings.length - 1].slice(0, MAX_SECTION_CHARS);
+    if (lettersOf(name) < 2) return;
+    const boundedName = name.slice(0, MAX_NAME_CHARS);
+    fragments.push({
+      segment: index + 1,
+      name: boundedName,
+      text: `${boundedName} ${price.raw}`.replace(/\s+/g, ' ').trim().slice(0, MAX_LINE_CHARS),
+      priceText: price.raw,
+      amountMinorUnits: price.amountMinorUnits,
+      section: currentSection,
+    });
+  });
+  return fragments;
 }
 
 /** Every quote and rejected passage the concept already carries, normalized. */
@@ -216,11 +286,12 @@ function compareCaptureWithConcept({ sources, menus, rejected, accounted, limit 
       if (accountedByHuman) continue;
       total += 1;
       if (lines.length < cap) {
+        const segment = Number.isInteger(record.segment) ? record.segment : 0;
         lines.push({
           ...record,
-          id: `${record.sourceId}:${record.lineNumber}`,
+          id: segment > 0 ? `${record.sourceId}:${record.lineNumber}:${segment}` : `${record.sourceId}:${record.lineNumber}`,
           sourceLabel: `${record.sourceId} · ${record.sourceKind === 'pdf' ? 'PDF' : record.sourceKind === 'html' ? 'website' : 'bron'}`,
-          locator: `regel ${record.lineNumber}`,
+          locator: segment > 0 ? `regel ${record.lineNumber}, deel ${segment}` : `regel ${record.lineNumber}`,
         });
       }
     }
@@ -253,7 +324,11 @@ function itemFromPricedLine(line) {
   if (!name) {
     return { ok: false, code: 'line_without_name', message: 'Deze regel bevat geen herkenbare gerechtnaam.' };
   }
-  const evidence = { sourceId: line.sourceId, locator: `regel ${line.lineNumber}`, quote: line.text };
+  const evidence = {
+    sourceId: line.sourceId,
+    locator: Number.isInteger(line.segment) && line.segment > 0 ? `regel ${line.lineNumber}, deel ${line.segment}` : `regel ${line.lineNumber}`,
+    quote: line.text,
+  };
   if (prices.length === 1) {
     return {
       ok: true,
