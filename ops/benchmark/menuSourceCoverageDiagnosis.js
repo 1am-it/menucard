@@ -75,7 +75,12 @@ function answerConcept(answers) {
  */
 function diagnoseSource({ sourceId, label, captureStatus, blockedReason, captures, answers, problems, limit = 20 } = {}) {
   const usable = (Array.isArray(captures) ? captures : []).filter((capture) => typeof capture.text === 'string' && capture.text.trim() !== '');
-  const pricedLines = usable.reduce((sum, capture) => sum + pricedLinesOfSource(capture).length, 0);
+  const records = usable.flatMap((capture) => pricedLinesOfSource(capture));
+  const pricedLines = records.length;
+  // Z1 (Lead order 6382953597): how many of those priced lines are a name line
+  // plus the price on its own line, and how many print a price without a name.
+  const pairedLines = records.filter((record) => record.paired === true).length;
+  const looseLines = records.filter((record) => record.loose === true).length;
   const concept = answerConcept(answers);
   const comparison = compareCaptureWithConcept({
     sources: usable,
@@ -90,6 +95,8 @@ function diagnoseSource({ sourceId, label, captureStatus, blockedReason, capture
     blockedReason: blockedReason || null,
     capturesRead: usable.length,
     pricedLines,
+    pairedLines,
+    looseLines,
     // An honest distinction: a capture whose text holds no price token cannot
     // say anything about missing dishes. That is not a green result.
     note: comparison.available && pricedLines === 0 ? 'de capture bevat geen prijsregels; niets te vergelijken' : null,

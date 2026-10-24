@@ -28,6 +28,9 @@ const MAX_LINES = 100;
 const MAX_LINE_CHARS = 300;
 const MAX_NAME_CHARS = 200;
 const MAX_SECTION_CHARS = 120;
+// Z1 (Lead order 6382953597): a line that prints only a price may belong to the
+// nearest preceding printed line, but never further back than this.
+const PAIR_LOOKBACK_LINES = 2;
 const UNAVAILABLE_MESSAGE = 'Vergelijking niet beschikbaar voor dit concept';
 
 function bounded(value, max) {
@@ -81,6 +84,121 @@ function nameFromLine(line, prices) {
 }
 
 /**
+ * The printed lines of one source with their page and their global line number.
+ * Deterministic and free: the same text always gives the same numbers, so a
+ * decision on line 7 stays line 7 on the next step.
+ *
+ * PDF text may keep a form feed between pages; that character ends the current
+ * line and starts the next page. Without a form feed the whole captured text is
+ * one page, exactly as the importer read that one URL.
+ */
+function sourceTextLines(source) {
+  const text = source && typeof source.text === 'string' ? source.text : '';
+  if (!source || source.hasText === false || text.trim() === '') return { lines: [], pageCount: 0 };
+  const lines = [];
+  let page = 1;
+  let lineNumber = 0;
+  let buffer = '';
+  // True right after a line break or at the start of the text, so a page break
+  // that sits on that boundary never adds an empty line number.
+  let atLineStart = true;
+  const flush = () => {
+    lineNumber += 1;
+    const raw = buffer.trim();
+    if (raw !== '') {
+      lines.push({
+        number: lineNumber,
+        page,
+        raw,
+        // A short line is normalized like every other evidence text; a long,
+        // flattened line keeps its printed cell gaps for the segmentation below.
+        text: raw.length <= MAX_LINE_CHARS ? raw.replace(/\s+/g, ' ') : raw,
+      });
+    }
+    buffer = '';
+    atLineStart = true;
+  };
+  for (const segment of text.split(/(\r\n|\r|\n|\f)/)) {
+    if (segment === '\r\n' || segment === '\r' || segment === '\n') {
+      flush();
+      continue;
+    }
+    if (segment === '\f') {
+      // A page break: the line before it belongs to this page, the next one to
+      // the following page.
+      if (atLineStart) page += 1;
+      else {
+        flush();
+        page += 1;
+      }
+      continue;
+    }
+    buffer += segment;
+    // An empty segment is the empty line between two separators; it never
+    // starts a page on its own.
+    if (segment !== '') atLineStart = false;
+  }
+  flush();
+  return { lines, pageCount: page };
+}
+
+/** A printed line that holds nothing but a price: "24,50", "€ 12,50", "8,-". */
+function isPriceOnlyLine(text, prices) {
+  if (!Array.isArray(prices) || prices.length === 0) return false;
+  let rest = '';
+  let cursor = 0;
+  for (const price of prices) {
+    rest += text.slice(cursor, price.index);
+    cursor = price.index + price.length;
+  }
+  rest += text.slice(cursor);
+  if (lettersOf(rest) >= 2) return false;
+  // A quantity or a multiplier ("2 x 6,50") is not a price on its own line.
+  return !/\d/.test(rest.replace(/[.,]/g, ''));
+}
+
+/**
+ * The line a price-only line belongs to, from the printed lines right above it.
+ *
+ * Only the nearest preceding line is a candidate, and only when it prints text
+ * without a price. A heading or another priced line in between ends the search:
+ * a guessed coupling is never allowed, the price line then stays loose and is
+ * shown as such. A decorative line ("—") is skipped; an already used name line
+ * is not reused.
+ */
+function partnerForPriceLine(recent) {
+  const candidates = (Array.isArray(recent) ? recent : []).slice(-PAIR_LOOKBACK_LINES).reverse();
+  for (const entry of candidates) {
+    if (!entry) continue;
+    if (entry.kind === 'heading' || entry.kind === 'priced') return null;
+    if (entry.kind !== 'text' || !entry.line) continue;
+    if (entry.used) return null;
+    if (findPrices(entry.line.text).length > 0) return null;
+    if (lettersOf(entry.line.text) < 2) continue;
+    return entry;
+  }
+  return null;
+}
+
+/** A priced record: the shape both the nalopen block and the map read. */
+function pricedRecord(base, record) {
+  return {
+    ...base,
+    nameLineNumber: record.nameLineNumber === undefined ? null : record.nameLineNumber,
+    segment: record.segment || 0,
+    page: record.page || base.page || 1,
+    paired: record.paired === true,
+    loose: record.loose === true,
+    text: record.text,
+    name: record.name === undefined ? null : record.name,
+    priceText: record.priceText,
+    amountMinorUnits: record.amountMinorUnits,
+    amountsMinorUnits: record.amountsMinorUnits,
+    section: record.section || null,
+  };
+}
+
+/**
  * The priced lines of one source, in printing order, each with its nearest
  * preceding heading and its own line number. A source without text yields
  * nothing; that is never the same as "no uncovered lines".
@@ -90,62 +208,102 @@ function nameFromLine(line, prices) {
  * the printed cells: the text right before a price is that price's name. That
  * is the same "name before its price" rule the extraction already uses, not a
  * second price parser, and every citation stays a literal part of the source.
+ *
+ * Z1: when a line prints nothing but a price, the nearest preceding text line
+ * within the same section names it, and the two lines count as one priced line.
+ * A price line without such a partner (or with more than one price) stays a
+ * loose price line: it is reported, never silently dropped and never coupled to
+ * a name the source does not place there.
  */
 function pricedLinesOfSource(source) {
   const text = source && typeof source.text === 'string' ? source.text : '';
   if (!source || source.hasText === false || text.trim() === '') return [];
-  const records = [];
   const sourceId = bounded(source.id, 80) || 'bron';
+  const base = {
+    sourceId,
+    sourceUrl: bounded(source.url, 500) || null,
+    sourceKind: typeof source.kind === 'string' ? source.kind : null,
+  };
+  const records = [];
+  // The last two printed lines, so a price on its own line can see the name
+  // that precedes it without looking any further.
+  let recent = [];
   let section = null;
-  const rawLines = text.split(/\r\n|\r|\n/);
-  rawLines.forEach((raw, index) => {
-    const lineNumber = index + 1;
-    const trimmed = typeof raw === 'string' ? raw.trim() : '';
-    if (trimmed === '') return;
-    // A short line is normalized like every other evidence text; a long,
-    // flattened line keeps its printed cell gaps for the segmentation below.
-    const line = trimmed.length <= MAX_LINE_CHARS ? trimmed.replace(/\s+/g, ' ') : trimmed;
-    if (line.length <= MAX_LINE_CHARS) {
-      if (looksLikeSectionHeading(line)) {
-        section = line.slice(0, MAX_SECTION_CHARS);
-        return;
+  const lines = sourceTextLines(source).lines;
+  const priceInfo = lines.map((line) => {
+    const prices = findPrices(line.text);
+    return { prices, priceOnly: isPriceOnlyLine(line.text, prices) };
+  });
+  lines.forEach((line, index) => {
+    const lineBase = { ...base, lineNumber: line.number, page: line.page };
+    if (line.text.length > MAX_LINE_CHARS) {
+      for (const fragment of fragmentsOfFlattenedLine(line.raw, { section })) {
+        if (fragment.section) section = fragment.section;
+        records.push(
+          pricedRecord(lineBase, {
+            segment: fragment.segment,
+            text: fragment.text,
+            name: fragment.name,
+            priceText: fragment.priceText,
+            amountMinorUnits: fragment.amountMinorUnits,
+            amountsMinorUnits: [fragment.amountMinorUnits],
+            section: fragment.section || section || null,
+          }),
+        );
       }
-      const prices = findPrices(line);
-      if (prices.length === 0) return;
-      const name = nameFromLine(line, prices);
-      if (!name) return;
-      records.push({
-        sourceId,
-        sourceUrl: bounded(source.url, 500) || null,
-        sourceKind: typeof source.kind === 'string' ? source.kind : null,
-        lineNumber,
-        segment: 0,
-        // The line itself stays the citation, exactly as the source prints it.
-        text: line,
-        name,
-        priceText: prices.map((price) => price.raw).join(' / '),
-        amountMinorUnits: prices[0].amountMinorUnits,
-        amountsMinorUnits: prices.map((price) => price.amountMinorUnits),
-        section: section ? section : null,
-      });
+      recent = [{ kind: 'priced' }];
       return;
     }
-    for (const fragment of fragmentsOfFlattenedLine(raw, { section })) {
-      if (fragment.section) section = fragment.section;
-      records.push({
-        sourceId,
-        sourceUrl: bounded(source.url, 500) || null,
-        sourceKind: typeof source.kind === 'string' ? source.kind : null,
-        lineNumber,
-        segment: fragment.segment,
-        text: fragment.text,
-        name: fragment.name,
-        priceText: fragment.priceText,
-        amountMinorUnits: fragment.amountMinorUnits,
-        amountsMinorUnits: [fragment.amountMinorUnits],
-        section: fragment.section || section || null,
-      });
+    const prices = priceInfo[index].prices;
+    // A heading introduces a list, so it is a heading only when the next
+    // printed line is not the price that belongs to it. "Fictieve carpaccio"
+    // directly above "11,00" is that dish's name, not a section.
+    const nextLine = index + 1 < lines.length ? priceInfo[index + 1] : null;
+    const followedByPrice = Boolean(nextLine && nextLine.priceOnly && nextLine.prices.length === 1);
+    if (looksLikeSectionHeading(line.text) && !followedByPrice) {
+      section = line.text.slice(0, MAX_SECTION_CHARS);
+      recent = [{ kind: 'heading' }];
+      return;
     }
+    if (prices.length === 0) {
+      recent = [...recent, { kind: 'text', line }].slice(-PAIR_LOOKBACK_LINES);
+      return;
+    }
+    const priceOnly = priceInfo[index].priceOnly;
+    const partner = priceOnly ? partnerForPriceLine(recent) : null;
+    if (partner && prices.length === 1) {
+      partner.used = true;
+      records.push(
+        pricedRecord(lineBase, {
+          nameLineNumber: partner.line.number,
+          paired: true,
+          // Both printed lines stay the citation: the name and its price as the
+          // card prints them, nothing invented in between.
+          text: `${partner.line.text} ${prices[0].raw}`.replace(/\s+/g, ' ').trim(),
+          name: partner.line.text.slice(0, MAX_NAME_CHARS),
+          priceText: prices[0].raw,
+          amountMinorUnits: prices[0].amountMinorUnits,
+          amountsMinorUnits: prices.map((price) => price.amountMinorUnits),
+          section,
+        }),
+      );
+    } else {
+      const name = priceOnly ? null : nameFromLine(line.text, prices);
+      records.push(
+        pricedRecord(lineBase, {
+          // A line that prints a price but no name stays visible as a loose
+          // price line instead of disappearing.
+          loose: !name,
+          text: line.text,
+          name,
+          priceText: prices.map((price) => price.raw).join(' / '),
+          amountMinorUnits: prices[0].amountMinorUnits,
+          amountsMinorUnits: prices.map((price) => price.amountMinorUnits),
+          section,
+        }),
+      );
+    }
+    recent = [...recent, { kind: 'priced' }].slice(-PAIR_LOOKBACK_LINES);
   });
   return records;
 }
@@ -189,24 +347,47 @@ function fragmentsOfFlattenedLine(line, { section = null } = {}) {
   return fragments;
 }
 
-/** Every quote and rejected passage the concept already carries, normalized. */
+/**
+ * Every quote and rejected passage the concept already carries, normalized,
+ * with the dish it belongs to. The row id is the same `${menu}.${category}.${item}`
+ * the review already uses, so a mark on the card can hand the human straight to
+ * the existing row actions.
+ */
 function conceptEvidence(menus, rejected) {
   const quotes = [];
-  for (const menu of Array.isArray(menus) ? menus : []) {
-    for (const category of Array.isArray(menu && menu.categories) ? menu.categories : []) {
-      for (const item of Array.isArray(category && category.items) ? category.items : []) {
-        const quote = item && item.evidence && typeof item.evidence.quote === 'string' ? item.evidence.quote : '';
+  (Array.isArray(menus) ? menus : []).forEach((menu, m) => {
+    const categories = Array.isArray(menu && menu.categories) ? menu.categories : [];
+    categories.forEach((category, c) => {
+      const items = Array.isArray(category && category.items) ? category.items : [];
+      items.forEach((item, i) => {
+        const evidence = item && item.evidence && typeof item.evidence === 'object' ? item.evidence : null;
+        const quote = evidence && typeof evidence.quote === 'string' ? evidence.quote : '';
         const normalized = normalizeEvidenceText(quote);
-        if (normalized !== '') quotes.push({ sourceId: (item.evidence.sourceId || null), normalized });
-      }
-    }
-  }
+        if (normalized === '') return;
+        const variants = Array.isArray(item.priceVariants)
+          ? item.priceVariants.map((variant) => (variant && Number.isInteger(variant.amountMinorUnits) ? variant.amountMinorUnits : null)).filter((amount) => amount !== null)
+          : [];
+        quotes.push({
+          kind: 'dish',
+          sourceId: evidence.sourceId || null,
+          normalized,
+          rowId: `${m}.${c}.${i}`,
+          name: typeof item.name === 'string' ? item.name : null,
+          // A dish without a price is not a different price; the review already
+          // asks for it separately.
+          amounts: variants.length > 0 ? variants : Number.isInteger(item.amountMinorUnits) ? [item.amountMinorUnits] : [],
+          priced: variants.length > 0 || Number.isInteger(item.amountMinorUnits),
+        });
+      });
+    });
+  });
   for (const entry of Array.isArray(rejected) ? rejected : []) {
     const normalized = normalizeEvidenceText(entry && typeof entry.text === 'string' ? entry.text : '');
-    if (normalized !== '') quotes.push({ sourceId: entry && entry.sourceId ? entry.sourceId : null, normalized });
+    if (normalized !== '') quotes.push({ kind: 'rejected', sourceId: entry && entry.sourceId ? entry.sourceId : null, normalized });
   }
   return quotes;
 }
+
 
 /** "Geen gerecht" decisions this human already made, as normalized passages. */
 function accountedPassages(accounted) {
@@ -241,6 +422,92 @@ function unavailable(reason) {
 }
 
 /**
+ * Every priced line of every usable source with its meaning for this concept:
+ *
+ *   covered        a dish quote overlaps the line and its price is the same;
+ *   price_mismatch a dish quote overlaps the line but the concept prints another
+ *                  price for that dish (the red mark, Z2);
+ *   uncovered      no dish covers this line (the orange mark);
+ *   not_dish       a rejected passage or an earlier human "Geen gerecht".
+ *
+ * Pure and deterministic. It never approves, never rejects and never invents a
+ * price, a name or a coupling.
+ */
+function analyseCapture({ sources, menus, rejected, accounted } = {}) {
+  const usable = (Array.isArray(sources) ? sources : []).filter(
+    (source) => source && typeof source.text === 'string' && source.text.trim() !== '' && source.hasText !== false,
+  );
+  if (usable.length === 0) return { available: false, version: COMPARISON_VERSION, reason: 'capture_unavailable', sources: [] };
+  const evidence = conceptEvidence(menus, rejected);
+  const humanAccounted = accountedPassages(accounted);
+  const analysed = usable.map((source) => {
+    const sourceId = bounded(source.id, 80) || 'bron';
+    const records = pricedLinesOfSource(source).map((record) => {
+      const normalized = normalizeEvidenceText(record.text);
+      // A quote without a sourceId still counts for every source: the validator
+      // only accepts a quote that is present in the cited source.
+      const covering = normalized === ''
+        ? []
+        : evidence.filter((entry) => (entry.sourceId === null || entry.sourceId === sourceId) && overlaps(normalized, [entry]));
+      const dish = covering.find((entry) => entry.kind === 'dish') || null;
+      // A human decision never comes back: same source and line number, or the
+      // same printed line when the store only kept the text.
+      const accountedByHuman = !dish && normalized !== '' && humanAccounted.some(
+        (entry) =>
+          (entry.sourceId === null || entry.sourceId === sourceId) &&
+          (entry.lineNumber === null || entry.lineNumber === record.lineNumber) &&
+          overlaps(normalized, [entry]),
+      );
+      let tone = 'uncovered';
+      if (dish) {
+        const samePrice = !dish.priced || record.amountsMinorUnits.some((amount) => dish.amounts.includes(amount));
+        tone = samePrice ? 'covered' : 'price_mismatch';
+      } else if (covering.length > 0 || accountedByHuman) {
+        tone = 'not_dish';
+      }
+      return {
+        ...record,
+        tone,
+        dish: dish
+          ? { rowId: dish.rowId, name: dish.name, amounts: dish.amounts, priced: dish.priced }
+          : null,
+        accounted: Boolean(accountedByHuman),
+      };
+    });
+    return {
+      id: sourceId,
+      url: bounded(source.url, 500) || null,
+      kind: typeof source.kind === 'string' ? source.kind : null,
+      label: bounded(source.label || source.title, 120) || null,
+      pageCount: sourceTextLines(source).pageCount,
+      records,
+    };
+  });
+  return { available: true, version: COMPARISON_VERSION, reason: null, sources: analysed };
+}
+
+/** The uncovered line as the review and the map show it, with a stable id. */
+function publicLine(record) {
+  const segment = Number.isInteger(record.segment) ? record.segment : 0;
+  const id = segment > 0 ? `${record.sourceId}:${record.lineNumber}:${segment}` : `${record.sourceId}:${record.lineNumber}`;
+  return {
+    ...record,
+    id,
+    sourceLabel: `${record.sourceId} · ${record.sourceKind === 'pdf' ? 'PDF' : record.sourceKind === 'html' ? 'website' : 'bron'}`,
+    locator: locatorOf(record),
+  };
+}
+
+/** "regel 7", "regel 7, deel 2" or, for a pair, "regels 6–7". */
+function locatorOf(record) {
+  const segment = Number.isInteger(record.segment) ? record.segment : 0;
+  if (Number.isInteger(record.nameLineNumber) && record.nameLineNumber !== record.lineNumber) {
+    return `regels ${record.nameLineNumber}–${record.lineNumber}`;
+  }
+  return segment > 0 ? `regel ${record.lineNumber}, deel ${segment}` : `regel ${record.lineNumber}`;
+}
+
+/**
  * The comparison itself.
  *
  *   sources   — the capture text per source ({ id, url, kind, text, hasText });
@@ -253,50 +520,18 @@ function unavailable(reason) {
  * uncovered lines.
  */
 function compareCaptureWithConcept({ sources, menus, rejected, accounted, limit } = {}) {
-  const usable = (Array.isArray(sources) ? sources : []).filter(
-    (source) => source && typeof source.text === 'string' && source.text.trim() !== '' && source.hasText !== false,
-  );
-  if (usable.length === 0) return unavailable('capture_unavailable');
-
-  const evidence = conceptEvidence(menus, rejected);
-  const humanAccounted = accountedPassages(accounted);
+  const analysis = analyseCapture({ sources, menus, rejected, accounted });
+  if (!analysis.available) return unavailable(analysis.reason);
   const cap = Number.isInteger(limit) && limit > 0 ? Math.min(limit, MAX_LINES) : MAX_LINES;
-
   const lines = [];
   let total = 0;
-  for (const source of usable) {
-    const sourceId = bounded(source.id, 80) || 'bron';
-    for (const record of pricedLinesOfSource(source)) {
-      const normalized = normalizeEvidenceText(record.text);
-      if (normalized === '') continue;
-      // A quote without a sourceId still counts for every source: the
-      // validator only accepts a quote that is present in the cited source.
-      const coveredByDish = evidence.some(
-        (entry) => (entry.sourceId === null || entry.sourceId === record.sourceId) && overlaps(normalized, [entry]),
-      );
-      if (coveredByDish) continue;
-      // A human decision never comes back: same source and line number, or
-      // the same printed line when the store only kept the text.
-      const accountedByHuman = humanAccounted.some(
-        (entry) =>
-          (entry.sourceId === null || entry.sourceId === record.sourceId) &&
-          (entry.lineNumber === null || entry.lineNumber === record.lineNumber) &&
-          overlaps(normalized, [entry]),
-      );
-      if (accountedByHuman) continue;
+  for (const source of analysis.sources) {
+    for (const record of source.records) {
+      if (record.tone !== 'uncovered') continue;
       total += 1;
-      if (lines.length < cap) {
-        const segment = Number.isInteger(record.segment) ? record.segment : 0;
-        lines.push({
-          ...record,
-          id: segment > 0 ? `${record.sourceId}:${record.lineNumber}:${segment}` : `${record.sourceId}:${record.lineNumber}`,
-          sourceLabel: `${record.sourceId} · ${record.sourceKind === 'pdf' ? 'PDF' : record.sourceKind === 'html' ? 'website' : 'bron'}`,
-          locator: segment > 0 ? `regel ${record.lineNumber}, deel ${segment}` : `regel ${record.lineNumber}`,
-        });
-      }
+      if (lines.length < cap) lines.push(publicLine(record));
     }
   }
-
   const omitted = total - lines.length;
   return {
     available: true,
@@ -320,19 +555,22 @@ function itemFromPricedLine(line) {
   if (prices.length === 0) {
     return { ok: false, code: 'line_without_price', message: 'Deze regel heeft geen herkenbare prijs.' };
   }
-  const name = nameFromLine(line.text, prices);
+  // A pair carries the printed name of its own line; a loose price line has
+  // none, and no name is ever invented for it.
+  const name = typeof line.name === 'string' && line.name.trim() !== '' ? line.name.trim().slice(0, MAX_NAME_CHARS) : nameFromLine(line.text, prices);
   if (!name) {
     return { ok: false, code: 'line_without_name', message: 'Deze regel bevat geen herkenbare gerechtnaam.' };
   }
   const evidence = {
     sourceId: line.sourceId,
-    locator: Number.isInteger(line.segment) && line.segment > 0 ? `regel ${line.lineNumber}, deel ${line.segment}` : `regel ${line.lineNumber}`,
+    locator: locatorOf(line),
     quote: line.text,
   };
   if (prices.length === 1) {
     return {
       ok: true,
       name,
+      locator: evidence.locator,
       item: { name, priceStatus: 'known', amountMinorUnits: prices[0].amountMinorUnits, currency: 'EUR', evidence },
     };
   }
@@ -341,6 +579,7 @@ function itemFromPricedLine(line) {
   return {
     ok: true,
     name,
+    locator: evidence.locator,
     item: {
       name,
       priceStatus: 'multiple_undecomposed',
@@ -353,10 +592,17 @@ function itemFromPricedLine(line) {
 module.exports = {
   COMPARISON_VERSION,
   MAX_LINES,
+  PAIR_LOOKBACK_LINES,
   UNAVAILABLE_MESSAGE,
+  analyseCapture,
+  isPriceOnlyLine,
+  locatorOf,
   looksLikeSectionHeading,
   nameFromLine,
+  partnerForPriceLine,
   pricedLinesOfSource,
+  publicLine,
+  sourceTextLines,
   compareCaptureWithConcept,
   itemFromPricedLine,
 };

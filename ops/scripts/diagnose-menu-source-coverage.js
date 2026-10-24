@@ -92,7 +92,8 @@ async function main() {
     const outcome =
       comparison.available === false
         ? `not comparable (${comparison.reason || 'unknown'})`
-        : `${comparison.uncoveredLines} uncovered of ${row.pricedLines} priced lines`;
+        : `${comparison.uncoveredLines} uncovered of ${row.pricedLines} priced lines` +
+          ` (${row.pairedLines} name+price pairs, ${row.looseLines} loose price lines)`;
     process.stdout.write(
       `- ${row.sourceId}: ${outcome}; ${row.acceptedItems} accepted items, ${row.answerFiles.length} answers` +
         `${row.unreadableAnswers.length > 0 ? `, ${row.unreadableAnswers.length} unreadable` : ''}` +

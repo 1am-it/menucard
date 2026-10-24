@@ -91,6 +91,19 @@ test('X5: een bron zonder prijsregels is geen groen resultaat', () => {
   assert.equal(row.note, 'de capture bevat geen prijsregels; niets te vergelijken');
 });
 
+test('Z1: de diagnose telt paren en losse prijsregels apart', () => {
+  const capture = {
+    id: 'bron-01',
+    kind: 'html',
+    text: ['LUNCH', 'Bites', 'Fictieve carpaccio', '11,00', 'Steak 24,50', '..', '8,50'].join('\n'),
+  };
+  const row = diagnoseSource({ sourceId: 'bron', captures: [capture], answers: [] });
+  assert.equal(row.pricedLines, 3);
+  assert.equal(row.pairedLines, 1);
+  assert.equal(row.looseLines, 1);
+  assert.equal(row.comparison.uncoveredLines, 3);
+});
+
 test('X5: zonder brontekst blijft de diagnose eerlijk leeg', () => {
   const row = diagnoseSource({ sourceId: 'bron', captures: [], answers: [], captureStatus: 'blocked', blockedReason: 'missing local capture x' });
   assert.equal(row.comparison.available, false);

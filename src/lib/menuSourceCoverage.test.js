@@ -10,9 +10,11 @@ const assert = require('node:assert/strict');
 const {
   MAX_LINES,
   UNAVAILABLE_MESSAGE,
+  analyseCapture,
   looksLikeSectionHeading,
   nameFromLine,
   pricedLinesOfSource,
+  sourceTextLines,
   compareCaptureWithConcept,
   itemFromPricedLine,
 } = require('./menuSourceCoverage');
@@ -181,6 +183,176 @@ test('X1: een platgeslagen bronregel levert per geprinte prijs een regel met de 
   // The citation of a fragment is present under the validator's normalization.
   assert.equal(quoteIsPresentInSource(result.lines[2].text, text), true);
   assert.deepEqual(result.lines.map((line) => line.section), ['Formule du Jour', 'Formule du Jour', 'Brioches', 'Brioches']);
+});
+
+test('Z1: een prijs op een eigen regel hoort bij de naamregel erboven en telt als één regel', () => {
+  const text = ['DINER', 'Voorgerechten', 'Fictieve carpaccio', '11,00', 'Fictieve steak 24,50'].join('\n');
+  const records = pricedLinesOfSource(source(text));
+  assert.equal(records.length, 2);
+  const pair = records[0];
+  assert.equal(pair.paired, true);
+  assert.equal(pair.lineNumber, 4);
+  assert.equal(pair.nameLineNumber, 3);
+  assert.equal(pair.name, 'Fictieve carpaccio');
+  assert.equal(pair.text, 'Fictieve carpaccio 11,00');
+  assert.equal(pair.priceText, '11,00');
+  assert.equal(pair.amountMinorUnits, 1100);
+  assert.equal(pair.section, 'Voorgerechten');
+  // The pair is covered by a citation of the name line or of the price line.
+  const byName = compareCaptureWithConcept({
+    sources: [source(text)],
+    menus: menuWith([item('Fictieve carpaccio', 'Fictieve carpaccio'), item('Fictieve steak', 'Fictieve steak 24,50')]),
+  });
+  assert.equal(byName.total, 0, JSON.stringify(byName.lines));
+  const byPrice = compareCaptureWithConcept({
+    sources: [source(text)],
+    menus: menuWith([item('Fictieve carpaccio', 'Voorgerechten\nFictieve carpaccio\n11,00'), item('Fictieve steak', 'Fictieve steak 24,50')]),
+  });
+  assert.equal(byPrice.total, 0, JSON.stringify(byPrice.lines));
+  // Without a dish the pair is one uncovered line of its own section.
+  const uncovered = compareCaptureWithConcept({ sources: [source(text)], menus: menuWith([]) });
+  assert.deepEqual(
+    uncovered.lines.map((line) => [line.id, line.text, line.locator, line.section]),
+    [
+      ['source-1:4', 'Fictieve carpaccio 11,00', 'regels 3–4', 'Voorgerechten'],
+      ['source-1:5', 'Fictieve steak 24,50', 'regel 5', 'Voorgerechten'],
+    ],
+  );
+});
+
+test('Z1: een prijsregel verder dan twee regels terug wordt niet gekoppeld', () => {
+  const text = ['Diner', 'Fictieve carpaccio', '—', '—', '—', '11,00'].join('\n');
+  const records = pricedLinesOfSource(source(text));
+  assert.equal(records.length, 1);
+  assert.equal(records[0].paired, false);
+  assert.equal(records[0].loose, true);
+  assert.equal(records[0].name, null);
+  assert.equal(records[0].text, '11,00');
+  assert.equal(records[0].lineNumber, 6);
+});
+
+test('Z1: een rubriekkop tussen naam en prijs verbreekt de koppeling', () => {
+  const text = ['Diner', 'Fictieve carpaccio', 'Hoofdgerechten', '—', '11,00'].join('\n');
+  const records = pricedLinesOfSource(source(text));
+  assert.equal(records.length, 1);
+  assert.equal(records[0].paired, false);
+  assert.equal(records[0].loose, true);
+  assert.equal(records[0].section, 'Hoofdgerechten');
+  // The name line above belongs to the previous section and is never reused.
+  const result = compareCaptureWithConcept({ sources: [source(text)], menus: menuWith([item('Fictieve carpaccio', 'Fictieve carpaccio')]) });
+  assert.deepEqual(result.lines.map((line) => line.text), ['11,00']);
+});
+
+test('Z1: een kop direct boven een prijs is de naam van die prijs, niet de rubriek', () => {
+  const text = ['DINER', 'Hoofdgerechten', 'Fictieve steak', '24,50', 'Fictieve carpaccio', '11,00'].join('\n');
+  const records = pricedLinesOfSource(source(text));
+  assert.deepEqual(
+    records.map((record) => [record.text, record.paired, record.section]),
+    [
+      ['Fictieve steak 24,50', true, 'Hoofdgerechten'],
+      ['Fictieve carpaccio 11,00', true, 'Hoofdgerechten'],
+    ],
+  );
+});
+
+test('Z1: onduidelijk blijft los — geen tweede prijs gekoppeld, geen hergebruikte naam', () => {
+  const text = ['Diner', 'Fictieve carpaccio', '11,00', '12,00', 'Steak van de grill.', '—', '24,50'].join('\n');
+  const records = pricedLinesOfSource(source(text));
+  assert.deepEqual(
+    records.map((record) => [record.lineNumber, record.paired, record.loose, record.text]),
+    [
+      [3, true, false, 'Fictieve carpaccio 11,00'],
+      // The name above is already used: this price stays loose.
+      [4, false, true, '12,00'],
+      // The decorative "—" is skipped, so the name two lines back is used.
+      [7, true, false, 'Steak van de grill. 24,50'],
+    ],
+  );
+  const twoPrices = pricedLinesOfSource(source(['Diner', 'Fictieve carpaccio', '11,00 12,00'].join('\n')));
+  assert.equal(twoPrices.length, 1);
+  assert.equal(twoPrices[0].paired, false);
+  assert.equal(twoPrices[0].loose, true);
+});
+
+test('Z1: een form feed is een paginagrens en verandert de regelnummers niet', () => {
+  const text = ['Diner', 'Fictieve carpaccio', '11,00', 'Hoofdgerechten', 'Fictieve steak', '24,50'].join('\n');
+  const paged = text.replace('Hoofdgerechten', '\fHoofdgerechten');
+  const lines = sourceTextLines(source(paged));
+  assert.equal(lines.pageCount, 2);
+  assert.deepEqual(
+    lines.lines.map((line) => [line.number, line.page]),
+    [
+      [1, 1],
+      [2, 1],
+      [3, 1],
+      [4, 2],
+      [5, 2],
+      [6, 2],
+    ],
+  );
+  const records = pricedLinesOfSource(source(paged));
+  assert.deepEqual(
+    records.map((record) => [record.text, record.page]),
+    [
+      ['Fictieve carpaccio 11,00', 1],
+      ['Fictieve steak 24,50', 2],
+    ],
+  );
+});
+
+test('Z2: de kaart onderscheidt overgenomen, afwijkende prijs, niet overgenomen en geen gerecht', () => {
+  const text = ['Diner', 'Voorgerechten', 'Soep 6,50', 'Carpaccio 11,00', 'Steak 24,50', 'Friet 3,50'].join('\n');
+  const menus = menuWith([
+    item('Soep', 'Soep 6,50'),
+    // Covered, but the concept prints another price: red.
+    { name: 'Carpaccio', priceStatus: 'known', amountMinorUnits: 1250, currency: 'EUR', evidence: { sourceId: 'source-1', locator: 'regel 4', quote: 'Carpaccio 11,00' } },
+    // Covered, two printed prices, one of them the dish price: green.
+    {
+      name: 'Steak',
+      priceStatus: 'multiple_undecomposed',
+      priceVariants: [
+        { label: 'Glas', amountMinorUnits: 2450, currency: 'EUR' },
+        { label: 'Fles', amountMinorUnits: 4800, currency: 'EUR' },
+      ],
+      evidence: { sourceId: 'source-1', locator: 'regel 5', quote: 'Steak 24,50' },
+    },
+  ]);
+  const analysis = analyseCapture({ sources: [source(text)], menus, rejected: [{ sourceId: 'source-1', text: 'Friet 3,50', reason: 'not_a_dish' }] });
+  assert.deepEqual(
+    analysis.sources[0].records.map((record) => [record.text, record.tone, record.dish ? record.dish.rowId : null]),
+    [
+      ['Soep 6,50', 'covered', '0.0.0'],
+      ['Carpaccio 11,00', 'price_mismatch', '0.0.1'],
+      ['Steak 24,50', 'covered', '0.0.2'],
+      ['Friet 3,50', 'not_dish', null],
+    ],
+  );
+  // An earlier human "Geen gerecht" is accounted, never asked again.
+  const accounted = analyseCapture({ sources: [source(text)], menus: [], accounted: [{ sourceId: 'source-1', lineNumber: 6, text: 'Friet 3,50' }] });
+  assert.equal(accounted.sources[0].records.find((record) => record.text === 'Friet 3,50').tone, 'not_dish');
+  // A dish without a price is taken over; it is not a different price.
+  const unpriced = analyseCapture({
+    sources: [source(text)],
+    menus: menuWith([{ name: 'Soep', priceStatus: 'unknown', evidence: { sourceId: 'source-1', locator: 'regel 3', quote: 'Soep 6,50' } }]),
+  });
+  assert.equal(unpriced.sources[0].records[0].tone, 'covered');
+});
+
+test('Z1/X3: Toevoegen op een paar citeert beide geprinte regels', () => {
+  const text = ['Diner', 'Fictieve carpaccio', '11,00'].join('\n');
+  const pair = compareCaptureWithConcept({ sources: [source(text)], menus: menuWith([]) }).lines[0];
+  const built = itemFromPricedLine(pair);
+  assert.equal(built.ok, true);
+  assert.equal(built.item.name, 'Fictieve carpaccio');
+  assert.equal(built.item.amountMinorUnits, 1100);
+  assert.equal(built.item.evidence.locator, 'regels 2–3');
+  assert.equal(built.item.evidence.quote, 'Fictieve carpaccio 11,00');
+  assert.equal(quoteIsPresentInSource(built.item.evidence.quote, text), true);
+  // A loose price line has no name: adding it is refused, never invented.
+  const loose = compareCaptureWithConcept({ sources: [source('11,00')], menus: menuWith([]) }).lines[0];
+  assert.equal(loose.loose, true);
+  assert.equal(itemFromPricedLine(loose).ok, false);
+  assert.equal(itemFromPricedLine(loose).code, 'line_without_name');
 });
 
 test('X3: Toevoegen maakt een item met de regel zelf als citaat; twee prijzen blijven twee prijzen', () => {
