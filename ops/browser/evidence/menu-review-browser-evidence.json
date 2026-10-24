@@ -1,9 +1,9 @@
 {
   "fixtureOnly": true,
   "passed": true,
-  "head": "4a6f6bfcc3fd190ff9167f50e4830b62bf37e131",
+  "head": "10811700d1c814011cf50e0562dc7f8141d77e7a",
   "worktreeDirty": false,
-  "generatedAt": "2026-10-23T23:40:55.148Z",
+  "generatedAt": "2026-10-24T00:44:23.026Z",
   "command": "npm run test:browser:menu-review",
   "environment": {
     "node": "v22.22.3",
@@ -613,7 +613,7 @@
     {
       "name": "manual import: step 1 shows \"Geldig tot\" with a clock time",
       "passed": true,
-      "detail": "Geldig tot 02:08. Daarna maak je gewoon een nieuwe prompt."
+      "detail": "Geldig tot 03:10. Daarna maak je gewoon een nieuwe prompt."
     },
     {
       "name": "manual import: technische details name the pinned instruction",
@@ -853,17 +853,17 @@
     {
       "name": "manual import rejection: at most five concrete problems",
       "passed": true,
-      "detail": "[\"Bij 2 gerechten met meerdere prijzen staat ook één losse hoofdprijs (bijvoorbeeld “Fictief glas wijn”).\",\"Bij 1 gerecht staat het citaat niet letterlijk in de bron (bijvoorbeeld ‘Fictieve salade 99,00’ bij “Fictieve salade”).\",\"Bij 1 menukaart staat een bron die niet in de opdracht voorkomt (bijvoorbeeld “Fictief Lunch”).\",\"Op 1 plek in het antwoord klopt de dekking niet met de rest van de inhoud.\",\"Op 1 plek in het antwoord kloppen de aantallen in de dekking niet met de inhoud.\"]"
+      "detail": "[\"Bij 2 gerechten met meerdere prijzen staat ook één losse hoofdprijs (bijvoorbeeld “Fictief glas wijn”).\",\"Bij 1 gerecht staat het citaat niet letterlijk in de bron (bijvoorbeeld ‘Fictieve salade 99,00’ bij “Fictieve salade”).\",\"Bij 1 menukaart staat een bron die niet in de opdracht voorkomt (bijvoorbeeld “Fictief Lunch”).\",\"Op 1 plek in het antwoord klopt de dekking niet met de rest van de inhoud.\"]"
     },
     {
       "name": "manual import rejection: every problem is a plain Dutch sentence",
       "passed": true,
-      "detail": "[\"Bij 2 gerechten met meerdere prijzen staat ook één losse hoofdprijs (bijvoorbeeld “Fictief glas wijn”).\",\"Bij 1 gerecht staat het citaat niet letterlijk in de bron (bijvoorbeeld ‘Fictieve salade 99,00’ bij “Fictieve salade”).\",\"Bij 1 menukaart staat een bron die niet in de opdracht voorkomt (bijvoorbeeld “Fictief Lunch”).\",\"Op 1 plek in het antwoord klopt de dekking niet met de rest van de inhoud.\",\"Op 1 plek in het antwoord kloppen de aantallen in de dekking niet met de inhoud.\"]"
+      "detail": "[\"Bij 2 gerechten met meerdere prijzen staat ook één losse hoofdprijs (bijvoorbeeld “Fictief glas wijn”).\",\"Bij 1 gerecht staat het citaat niet letterlijk in de bron (bijvoorbeeld ‘Fictieve salade 99,00’ bij “Fictieve salade”).\",\"Bij 1 menukaart staat een bron die niet in de opdracht voorkomt (bijvoorbeeld “Fictief Lunch”).\",\"Op 1 plek in het antwoord klopt de dekking niet met de rest van de inhoud.\"]"
     },
     {
       "name": "manual import rejection: the problems name the dish or the section",
       "passed": true,
-      "detail": "[\"Bij 2 gerechten met meerdere prijzen staat ook één losse hoofdprijs (bijvoorbeeld “Fictief glas wijn”).\",\"Bij 1 gerecht staat het citaat niet letterlijk in de bron (bijvoorbeeld ‘Fictieve salade 99,00’ bij “Fictieve salade”).\",\"Bij 1 menukaart staat een bron die niet in de opdracht voorkomt (bijvoorbeeld “Fictief Lunch”).\",\"Op 1 plek in het antwoord klopt de dekking niet met de rest van de inhoud.\",\"Op 1 plek in het antwoord kloppen de aantallen in de dekking niet met de inhoud.\"]"
+      "detail": "[\"Bij 2 gerechten met meerdere prijzen staat ook één losse hoofdprijs (bijvoorbeeld “Fictief glas wijn”).\",\"Bij 1 gerecht staat het citaat niet letterlijk in de bron (bijvoorbeeld ‘Fictieve salade 99,00’ bij “Fictieve salade”).\",\"Bij 1 menukaart staat een bron die niet in de opdracht voorkomt (bijvoorbeeld “Fictief Lunch”).\",\"Op 1 plek in het antwoord klopt de dekking niet met de rest van de inhoud.\"]"
     },
     {
       "name": "manual import rejection: no JSON path in the main text",
@@ -923,7 +923,87 @@
     {
       "name": "manual import rejection 320px/light: every problem stays visible",
       "passed": true,
-      "detail": "5"
+      "detail": "4"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&manualNormalize=1&theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-import?fixture=manual&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&manualNormalize=1&theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "manual import normalization: the answer is accepted after the derived count",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import normalization: the notice is rendered in plain language",
+      "passed": true,
+      "detail": "status"
+    },
+    {
+      "name": "manual import normalization: the heading names what the system adjusted",
+      "passed": true,
+      "detail": "Door het systeem bijgesteld"
+    },
+    {
+      "name": "manual import normalization: the derived item count is visible with the AI claim",
+      "passed": true,
+      "detail": "[\"Aantal gerechten door het systeem geteld: 3 (de AI zei 9).\",\"Status bijgesteld naar gedeeltelijk, omdat de AI zelf een beperking noemde.\"]"
+    },
+    {
+      "name": "manual import normalization: the adjusted status is visible",
+      "passed": true,
+      "detail": "[\"Aantal gerechten door het systeem geteld: 3 (de AI zei 9).\",\"Status bijgesteld naar gedeeltelijk, omdat de AI zelf een beperking noemde.\"]"
+    },
+    {
+      "name": "manual import normalization: step 2 shows the derived count, not the claimed 9",
+      "passed": true,
+      "detail": "Antwoord ontvangen: 1 menukaart, 3 gerechten"
+    },
+    {
+      "name": "manual import normalization: no JSON and no accept-all control is shown",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "manual import normalization: no horizontal overflow at 390 px",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "manual import normalization: the notice is in view for the screenshot",
+      "passed": true,
+      "detail": "{\"scrolledIn\":true,\"placed\":{\"top\":296,\"height\":900}}"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&manualNormalize=1&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-import?fixture=manual&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&manualNormalize=1&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "manual import normalization 320px/light: the notice is shown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import normalization 320px/light: both lines stay visible",
+      "passed": true,
+      "detail": "[\"Aantal gerechten door het systeem geteld: 3 (de AI zei 9).\",\"Status bijgesteld naar gedeeltelijk, omdat de AI zelf een beperking noemde.\"]"
+    },
+    {
+      "name": "manual import normalization 320px/light: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
     },
     {
       "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=v2&batch=batch-fictief-0001&theme=light)",
@@ -1888,7 +1968,7 @@
     {
       "name": "network guard: CDP blocks external subresource and frame navigation",
       "passed": true,
-      "detail": "[{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/pixel.png\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-23T23:40:54.125Z\",\"resourceType\":\"Image\"},{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/frame\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-23T23:40:54.126Z\",\"resourceType\":\"Document\"}]"
+      "detail": "[{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/pixel.png\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-24T00:44:22.030Z\",\"resourceType\":\"Image\"},{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/frame\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-24T00:44:22.030Z\",\"resourceType\":\"Document\"}]"
     },
     {
       "name": "network guard: no unexpected CDP traffic during app scenarios",
@@ -1974,6 +2054,17 @@
       "detail": null
     },
     {
+      "name": "manual import normalization",
+      "steps": [
+        "Menu importeren met AI",
+        "Prompt maken",
+        "Controleren",
+        "Door het systeem bijgesteld"
+      ],
+      "passed": true,
+      "detail": null
+    },
+    {
       "name": "concept list -> exact detail -> back",
       "steps": [
         {
@@ -2053,13 +2144,13 @@
   "screenshots": [
     {
       "file": "menu-review-desktop-light.png",
-      "sha256": "528e83eb451f3f48d56626e7c4e0dfcfaf967668e70b99493394841dbadc9109",
+      "sha256": "8e7a5f8d969a61d1133c4a3f3f78a6a1dbd2d033f4d2f99dcefe290aabd5b1eb",
       "width": 1024,
       "height": 900
     },
     {
       "file": "menu-review-readonly-1024-dark.png",
-      "sha256": "7ddadf074656547ec16b9b0cdf7d16d5f467db490eb5f90e149e582686b9d7bd",
+      "sha256": "d7fb4dcdbf2a5a4b9a1f0edf565aaa7702f9de77b67114ebdb5e91152c70563d",
       "width": 1024,
       "height": 900
     },
@@ -2071,61 +2162,61 @@
     },
     {
       "file": "menu-review-partial-390-dark.png",
-      "sha256": "eb2d731250bad8535483c890a7bf26729ad0cbff0d3768946068290e4d3d69f7",
+      "sha256": "8192c21d56273fd8a3d9120df1f9c7056d581ba7d4c8f1b4a72c77aa38d21e0c",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-image-only-390-light.png",
-      "sha256": "957ef9beebff53762674527604c22cac90835476b2c5252c20ad5a333093b70a",
+      "sha256": "fab7f5c44b65a9ee102264294f2ab036df368af42b1a432ea53b27932fc224ea",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-image-only-320-dark.png",
-      "sha256": "35a985a647e1c40f77ee300533c8aef96375d103c2468bab74a2513f112a399d",
+      "sha256": "4bab202571e55dddd13759b29fc0dd2a922b5f69fb29e4132f8e3f028e146aa0",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-image-only-follow-up-320-dark.png",
-      "sha256": "2f2df54b38f5c49ea081e51b5eb01d9ec81e8993c6d6537032878a206fabe96e",
+      "sha256": "bd5e170483aa27f0afe7979beac15d7a69c3d694d9c068bdf6eae70d3c3edc47",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-image-only-follow-up-reason-320-dark.png",
-      "sha256": "dd423c45a344d12814977449d25cf8ee0ce9e1125c618432c6639dcc65616660",
+      "sha256": "5608a017be234ac8864e843b2c4fe57065364b5c86d46b124787f1b91f6532e8",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-structure-1024-light.png",
-      "sha256": "3402dd16a78f9f01605212c9fe5877251efd39b59715d02ca14baed81b10ec87",
+      "sha256": "942e1815ef208bf3f1950822473f46367fc0e466779aa4e4f3fd33948c05b1b3",
       "width": 1024,
       "height": 900
     },
     {
       "file": "menu-review-structure-keyboard-390-light.png",
-      "sha256": "78213a36cbae22c5d16410ff50b70102317da9840615f20907d16ddefdeac793",
+      "sha256": "c657559921eec22f6fcd4edde9e2d5bd593dce654644acfcdfe956f9d3d76316",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-structure-390-light.png",
-      "sha256": "106d69d49c127269c9ff4af0589440b9558a47c33a9e52df2a3596d5d798a89c",
+      "sha256": "dc5fa9f11a02faef3ecf419f6dfa5cd3095e3861f214d7b121eaa7071b57feda",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-structure-390-dark.png",
-      "sha256": "5b550e5197e24ae2808c77312cbfdda07b50edd5ffc02b1a39bccf57744239a5",
+      "sha256": "47d13364da76158c71742139aa385b3c64de607b65fe0c21d27f96ac5c5c92de",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-structure-readonly-1024-dark.png",
-      "sha256": "a93f06195780526decc05aecf69742880e0813c7581c9dd8b502206e4611367d",
+      "sha256": "88d95e94d9b08cf0f1c481ca3c9ae9b054214f41928ee3ff81c33ef72f9a762f",
       "width": 1024,
       "height": 900
     },
@@ -2149,14 +2240,20 @@
     },
     {
       "file": "manual-ai-import-problems-390-dark.png",
-      "sha256": "f34d488c52ef38298f2dcc06820a6ad8d409e8e088015b079742187da7cd4833",
+      "sha256": "396f6e9bd8d7b809f3788ebb49cb41672dfd1bba9bdba75ebfb5d8ccd4790ff5",
       "width": 390,
       "height": 900
     },
     {
       "file": "manual-ai-import-problems-320-light.png",
-      "sha256": "863748517c3b520be4d114918fe03ec80740a2070be5a02ade8c8e64861efaae",
+      "sha256": "eacba9d6d6045258a2613460f0838c1b2e9104cd3005bc65a954d6ddf25648b3",
       "width": 320,
+      "height": 900
+    },
+    {
+      "file": "manual-ai-import-normalized-390-dark.png",
+      "sha256": "87fced6de9aa64820584de5942d9d9fcff38f8395600ae486db4ef32a98ed9ab",
+      "width": 390,
       "height": 900
     },
     {
@@ -2167,7 +2264,7 @@
     },
     {
       "file": "menu-review-v2-390-dark.png",
-      "sha256": "b00c9e5362cddb1384e8fdf7d026ee2fdcd8d4ab8ce026462c75ea6675ca8592",
+      "sha256": "a29a59dbfe24761807f309b80e91280926b50d863ab120c301d760e40b6d97f7",
       "width": 390,
       "height": 900
     },
@@ -2179,37 +2276,37 @@
     },
     {
       "file": "menu-review-320-light.png",
-      "sha256": "4a878ca283f8f1e37d0f3299eb924ddd3ad582946042b184681686224b1bb706",
+      "sha256": "b4e6cd97eccee2e711202924811f4d2979bde84b3fed7664591520dd28449077",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-320-dark.png",
-      "sha256": "3eee553004e727916f77aa1041c00c29924a9161b45b3352571881bda3bc1cea",
+      "sha256": "4b73a07b7df5ea3850a017db8a54d108db6d023cf025c52d9f1617366ca779f0",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-390-light.png",
-      "sha256": "5ed477738847bdb4395173de7b7fe80f4a5be62c3327260d8a60ed3792b34f4f",
+      "sha256": "f5a1bc255f76933db47a2c1366e6528bff6e7f876048344a4e066854cf248aed",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-390-dark.png",
-      "sha256": "e58f332aa198c801c79938ccbacc1138d8ead095ea3e11b315eaec7b9f1f2a3e",
+      "sha256": "3c988706ec0338e4cb8d46259f3de04931dfe26ccad0f9d409ec169533608466",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-1024-dark.png",
-      "sha256": "4a295c6e34468865ba048062fe6e9efcf755109bb90978ed70e3f91ebc221250",
+      "sha256": "409f0add119383a35cccbccd80312ea5646fe0d3df7b30222c132f347d3a8e8b",
       "width": 1024,
       "height": 900
     },
     {
       "file": "menu-review-keyboard-390-light.png",
-      "sha256": "b74dceee1d20ef6ba75699b667b7ceac9abde207bdc7c3a5f655d69c2f237e80",
+      "sha256": "f660415a1e17016862cb34aa16bdb11c23f827b91d1df8eaacf5e50244858ae5",
       "width": 390,
       "height": 900
     },
@@ -2233,7 +2330,7 @@
     },
     {
       "file": "concept-detail-invalid-1024-clickpath.png",
-      "sha256": "47cbcf2fbcad810a15ac1e14105f51ab75dcc5ba7978134aa8bbcdba313017dd",
+      "sha256": "2641357a168ba7383e8c9ca1394a0c0494c899b89129a663312fdb73ebdddd28",
       "width": 1024,
       "height": 900
     },
@@ -2251,7 +2348,7 @@
     },
     {
       "file": "concept-detail-invalid-1024-light.png",
-      "sha256": "03be8dc2156bdc7de41a6f1e4a92479671d5a7350c2946fe0adb61594325bae7",
+      "sha256": "3aa77eb1cb981404ba3acf222c86a4044f99e8aa133eeab2da484c589c69dc66",
       "width": 1024,
       "height": 900
     },
@@ -2281,13 +2378,13 @@
     },
     {
       "file": "concept-detail-error-390-light.png",
-      "sha256": "bd11c8e8c843cb8c0bfd1fef33d66c2ef684939c6a3554f5b781355746f32acd",
+      "sha256": "61f16266f7af71b73690a5a0048263e1570d31f8707b96f7a1bbb110ea06cb83",
       "width": 390,
       "height": 900
     },
     {
       "file": "concept-detail-missing-390-light.png",
-      "sha256": "f1b67706b9443df52bb12ff5ce393de6741451222f0792d8b1742e4707a0743d",
+      "sha256": "7851abe8baa89704865461f12fc2d57bd6e6f2dc8492294ff71a4b60b0ddcb14",
       "width": 390,
       "height": 900
     },
@@ -2345,7 +2442,7 @@
         "url": "https://unapproved.invalid/pixel.png",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-23T23:40:54.125Z",
+        "at": "2026-10-24T00:44:22.030Z",
         "resourceType": "Image"
       },
       {
@@ -2355,7 +2452,7 @@
         "url": "https://unapproved.invalid/frame",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-23T23:40:54.126Z",
+        "at": "2026-10-24T00:44:22.030Z",
         "resourceType": "Document"
       }
     ],
@@ -2367,7 +2464,7 @@
         "url": "https://unapproved.invalid/api/anything",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-23T23:40:54.102Z"
+        "at": "2026-10-24T00:44:22.009Z"
       },
       {
         "phase": "negative-probe",
@@ -2376,7 +2473,7 @@
         "url": "http://unapproved.invalid/api/anything",
         "reason": "external_origin",
         "protocolRelative": true,
-        "at": "2026-10-23T23:40:54.103Z"
+        "at": "2026-10-24T00:44:22.010Z"
       },
       {
         "phase": "negative-probe",
@@ -2385,7 +2482,7 @@
         "url": "http://localhost:3137/api/internal/v1/menu-concepts",
         "reason": "method_not_allowed",
         "protocolRelative": false,
-        "at": "2026-10-23T23:40:54.103Z"
+        "at": "2026-10-24T00:44:22.010Z"
       },
       {
         "phase": "negative-probe",
@@ -2394,7 +2491,7 @@
         "url": "http://localhost:3137/api/internal/v1/unrelated-write",
         "reason": "unknown_api_route",
         "protocolRelative": false,
-        "at": "2026-10-23T23:40:54.103Z"
+        "at": "2026-10-24T00:44:22.010Z"
       },
       {
         "phase": "negative-probe",
@@ -2403,7 +2500,7 @@
         "url": "http://localhost:3137/api/internal/v1/menu-concepts",
         "reason": "method_not_allowed",
         "protocolRelative": false,
-        "at": "2026-10-23T23:40:54.103Z"
+        "at": "2026-10-24T00:44:22.010Z"
       },
       {
         "phase": "negative-probe",
@@ -2412,7 +2509,7 @@
         "url": "ws://unapproved.invalid/socket",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-23T23:40:54.104Z"
+        "at": "2026-10-24T00:44:22.010Z"
       }
     ]
   },
