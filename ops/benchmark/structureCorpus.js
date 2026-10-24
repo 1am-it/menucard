@@ -256,18 +256,29 @@ const STRUCTURE_CASES = [
   },
   {
     id: 'STRUCT-012',
-    name: 'Dubbele prijzen en prijsrange: niet als gewoon gerecht',
+    name: 'Dubbele prijzen en prijsrange: als prijsvarianten bewaard, nooit één bedrag',
     status: 'classified',
     layers: ['html_parser', 'source_analysis'],
     input: {
       page: page(`<h2>Lunch</h2>${list(['Fictieve soep', '7,50'], ['Fictieve salade', '13,50'], ['Fictief broodje', '8,50'])}
-        <h2>Diner</h2><p><strong>Fictieve stoof</strong> rund 22,50<br><strong>Fictieve pizza</strong> klein of groot 12 / 16<br><strong>Fictieve wijn</strong> glas 5,50 fles 27,50<br><strong>Fictieve vis</strong> kabeljauw 24</p>`),
+        <h2>Diner</h2><p><strong>Fictieve stoof</strong> rund 22,50<br><strong>Fictieve duokaart</strong> soep 6,50 salade 7,50<br><strong>Fictieve pizza</strong> klein of groot 12 / 16<br><strong>Fictieve wijn</strong> glas 5,50 fles 27,50<br><strong>Fictieve vis</strong> kabeljauw 24</p>`),
     },
     expected: {
       recognized: true,
-      menus: [{ title: null, structure: 'normalized', sections: [[['Lunch'], 3, false], [['Diner'], 2, false]] }],
+      menus: [{ title: null, structure: 'normalized', sections: [[['Lunch'], 3, false], [['Diner'], 4, true]] }],
+      // Two printed amounts on one dish row are that dish's price variants
+      // (#59 Lead review 6351417692 K2): every amount is kept with the label
+      // the source prints, none becomes "the" price and none is dropped.
+      // #59 Lead review 6380804419 (W6): a price list the source names itself
+      // ("glas 5,50 fles 27,50") is a complete price, so the row is no longer
+      // "twee prijzen"; it stays a review target because its rubric is
+      // uncertain. An unnamed multiple price ("12 / 16") still asks for one
+      // choice.
       parserRejected: ['ambiguous_structure'],
-      mustNot: { dishRecognised: ['Fictieve pizza', 'Fictieve wijn'] },
+      lineStatuses: [
+        ['', 'Fictieve pizza', 'multiple_prices'],
+        ['', 'Fictieve wijn', 'unclear_category'],
+      ],
     },
   },
   {

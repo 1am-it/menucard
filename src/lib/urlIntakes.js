@@ -118,6 +118,18 @@ function hierarchyFields(category) {
   return out;
 }
 
+/** Short source evidence only — never raw source text. */
+function boundedEvidence(evidence) {
+  if (!evidence || typeof evidence !== 'object') return null;
+  const out = {};
+  if (typeof evidence.locator === 'string' && evidence.locator.trim()) out.locator = evidence.locator.trim().slice(0, 160);
+  if (typeof evidence.sourceId === 'string' && evidence.sourceId.trim()) out.sourceId = evidence.sourceId.trim().slice(0, 80);
+  if (typeof evidence.sourceUrl === 'string' && evidence.sourceUrl.trim()) out.sourceUrl = evidence.sourceUrl.trim().slice(0, 2048);
+  if (typeof evidence.quote === 'string' && evidence.quote.trim()) out.quote = evidence.quote.trim().slice(0, 500);
+  if (typeof evidence.contentHash === 'string' && evidence.contentHash.trim()) out.contentHash = evidence.contentHash.trim().slice(0, 128);
+  return Object.keys(out).length > 0 ? out : null;
+}
+
 function buildMenuCandidateSummary(menus) {
   if (!Array.isArray(menus)) return [];
   return menus.map((menu) => ({
@@ -125,16 +137,41 @@ function buildMenuCandidateSummary(menus) {
     contextSlug: menu && menu.contextSlug,
     ...(menu && typeof menu.title === 'string' ? { title: menu.title.slice(0, 160) } : {}),
     ...(menu && (menu.structure === 'normalized' || menu.structure === 'uncertain') ? { structure: menu.structure } : {}),
+    // Additive provenance, bounded and optional: existing receipts keep their
+    // exact shape, while PDF/HTML review can point back to the source.
+    ...(menu && typeof menu.sourceId === 'string' ? { sourceId: menu.sourceId.slice(0, 80) } : {}),
+    ...(menu && typeof menu.sourceUrl === 'string' ? { sourceUrl: menu.sourceUrl.slice(0, 2048) } : {}),
+    ...(menu && typeof menu.extractionMethod === 'string' ? { extractionMethod: menu.extractionMethod.slice(0, 40) } : {}),
+    // Explicit menu variant/order from a validated extraction survive into the
+    // receipt instead of disappearing at this mapping step.
+    ...(menu && typeof menu.variant === 'string' && menu.variant.trim() ? { variant: menu.variant.trim().slice(0, 160) } : {}),
+    ...(menu && Number.isInteger(menu.order) && menu.order >= 0 ? { order: menu.order } : {}),
     categories: Array.isArray(menu && menu.categories)
       ? menu.categories.map((category) => ({
           name: (category && category.name) || null,
           ...hierarchyFields(category),
           items: Array.isArray(category && category.items)
-            ? category.items.map((item) => ({
-                name: (item && item.name) || null,
-                desc: (item && item.desc) || null,
-                price: (item && item.price) || null,
-              }))
+            ? category.items.map((item) => {
+                const summary = {
+                  name: (item && item.name) || null,
+                  desc: (item && item.desc) || null,
+                  price: (item && item.price) || null,
+                };
+                const evidence = boundedEvidence(item && item.evidence);
+                if (evidence) summary.evidence = evidence;
+                if (item && ['multiple_undecomposed', 'on_request', 'unknown'].includes(item.priceStatus)) summary.priceStatus = item.priceStatus;
+                if (item && typeof item.priceText === 'string' && item.priceText.trim()) summary.priceText = item.priceText.trim().slice(0, 160);
+                if (item && Array.isArray(item.priceVariants)) {
+                  summary.priceVariants = item.priceVariants
+                    .filter((variant) => variant && typeof variant.price === 'string')
+                    .slice(0, 10)
+                    .map((variant) => ({
+                      label: typeof variant.label === 'string' ? variant.label.slice(0, 80) : null,
+                      price: variant.price.slice(0, 40),
+                    }));
+                }
+                return summary;
+              })
             : [],
         }))
       : [],

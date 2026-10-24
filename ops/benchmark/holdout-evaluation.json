@@ -1,0 +1,995 @@
+{
+  "version": "1.0.0",
+  "issue": 59,
+  "evaluatedAt": "2026-10-18T09:58:50.201Z",
+  "protocol": {
+    "file": "MENU-EXTRACTION.md",
+    "version": "0.2",
+    "sha256": "15510b4c0b74fee722ac2c51a3f40aa21b03e0161ccffdcb2008f3d27350b762"
+  },
+  "authorization": {
+    "decision": "Product Owner, 2026-10-18: 'Ja, deze vier bronnen testen'.",
+    "reference": "GitHub #59, explicit instruction 6248411416",
+    "scope": "Public read-only practice probes of exactly these four entry URLs and their relevant public menu links, within the existing safe fetch/source bounds. No login, CAPTCHA bypass, paid service, other location, arbitrary crawl or publication.",
+    "appProviderActivation": false,
+    "note": "This permission is a source-probe permission. It does not activate an app-side AI provider, budget or retention arrangement."
+  },
+  "noTuning": true,
+  "prePinReconnaissance": "Before the capture pin was written, two unrecorded read-only connectivity/analysis calls on De Botanist were made while checking the runner. They were not used for tuning, are not treated as the recorded evaluation, and no parser or rule was changed. The pinned first recorded evaluation is the one in this file.",
+  "scopeNote": "The approved Gauchos Breda entry returned HTTP 404. One additional unparsed read-only request to the chain homepage was used only to confirm that the host itself was reachable; it was not stored, parsed or treated as a source, and no other branch, location or menu page was followed.",
+  "note": "First recorded evaluation against the pinned holdout source versions. No parser or rule was changed from these outcomes; a later tuning use must move the source to representative and pin a new holdout.",
+  "results": {
+    "HOLD-REAL-01": {
+      "id": "HOLD-REAL-01",
+      "referenceId": "debotanist",
+      "class": "text_pdf",
+      "url": "https://debotanistbreda.nl/",
+      "pinnedBytesSha256": "77c950de558afa1d43cd48320fc0776069a643f25fe6b8d8ce83f08ee41eb5b0",
+      "captureStatus": "captured",
+      "evaluatedAt": "2026-10-18T09:58:44.489Z",
+      "status": "executed_with_limitation",
+      "completed": true,
+      "bytesSha256": "77c950de558afa1d43cd48320fc0776069a643f25fe6b8d8ce83f08ee41eb5b0",
+      "sourceVersionMatches": true,
+      "finalUrl": "https://debotanistbreda.nl/",
+      "itemCount": 151,
+      "categoryCount": 59,
+      "menuCount": 1,
+      "menus": [
+        {
+          "title": null,
+          "sourceId": "source-2",
+          "categoryCount": 59,
+          "itemCount": 151,
+          "categories": [
+            {
+              "name": "WARME DRANKEN",
+              "path": [
+                "WARME DRANKEN"
+              ],
+              "sourcePath": [
+                "WARME DRANKEN"
+              ],
+              "uncertain": true,
+              "itemCount": 2
+            },
+            {
+              "name": "Cappuccino",
+              "path": [
+                "WARME DRANKEN",
+                "Cappuccino"
+              ],
+              "sourcePath": [
+                "WARME DRANKEN",
+                "Cappuccino"
+              ],
+              "uncertain": true,
+              "itemCount": 1
+            },
+            {
+              "name": "Latte Macchiato",
+              "path": [
+                "WARME DRANKEN",
+                "Latte Macchiato"
+              ],
+              "sourcePath": [
+                "WARME DRANKEN",
+                "Latte Macchiato"
+              ],
+              "uncertain": true,
+              "itemCount": 5
+            },
+            {
+              "name": "Verse gemberthee",
+              "path": [
+                "WARME DRANKEN",
+                "Verse gemberthee"
+              ],
+              "sourcePath": [
+                "WARME DRANKEN",
+                "Verse gemberthee"
+              ],
+              "uncertain": true,
+              "itemCount": 1
+            },
+            {
+              "name": "SUPPLEMENTEN",
+              "path": [
+                "SUPPLEMENTEN"
+              ],
+              "sourcePath": [
+                "SUPPLEMENTEN"
+              ],
+              "uncertain": true,
+              "itemCount": 4
+            },
+            {
+              "name": "Karamelsiroop",
+              "path": [
+                "SUPPLEMENTEN",
+                "Karamelsiroop"
+              ],
+              "sourcePath": [
+                "SUPPLEMENTEN",
+                "Karamelsiroop"
+              ],
+              "uncertain": true,
+              "itemCount": 1
+            },
+            {
+              "name": "Witte chocoladesiroop",
+              "path": [
+                "SUPPLEMENTEN",
+                "Witte chocoladesiroop"
+              ],
+              "sourcePath": [
+                "SUPPLEMENTEN",
+                "Witte chocoladesiroop"
+              ],
+              "uncertain": true,
+              "itemCount": 1
+            },
+            {
+              "name": "Honing",
+              "path": [
+                "SUPPLEMENTEN",
+                "Honing"
+              ],
+              "sourcePath": [
+                "SUPPLEMENTEN",
+                "Honing"
+              ],
+              "uncertain": true,
+              "itemCount": 1
+            },
+            {
+              "name": "LEKKERS VOOR BIJ DE KOFFIE",
+              "path": [
+                "LEKKERS VOOR BIJ DE KOFFIE"
+              ],
+              "sourcePath": [
+                "LEKKERS VOOR BIJ DE KOFFIE"
+              ],
+              "uncertain": true,
+              "itemCount": 1
+            },
+            {
+              "name": "Holtkamp Patisserie",
+              "path": [
+                "LEKKERS VOOR BIJ DE KOFFIE",
+                "Holtkamp Patisserie"
+              ],
+              "sourcePath": [
+                "LEKKERS VOOR BIJ DE KOFFIE",
+                "Holtkamp Patisserie"
+              ],
+              "uncertain": true,
+              "itemCount": 3
+            },
+            {
+              "name": "PREMIUM FRISDRANKEN",
+              "path": [
+                "PREMIUM FRISDRANKEN"
+              ],
+              "sourcePath": [
+                "PREMIUM FRISDRANKEN"
+              ],
+              "uncertain": false,
+              "itemCount": 2
+            },
+            {
+              "name": "fritz",
+              "path": [
+                "fritz"
+              ],
+              "sourcePath": [
+                "fritz"
+              ],
+              "uncertain": false,
+              "itemCount": 3
+            },
+            {
+              "name": "BIER VAN DE TAP",
+              "path": [
+                "BIER VAN DE TAP"
+              ],
+              "sourcePath": [
+                "BIER VAN DE TAP"
+              ],
+              "uncertain": false,
+              "itemCount": 6
+            },
+            {
+              "name": "BROUWERIJ FRONTAAL",
+              "path": [
+                "BROUWERIJ FRONTAAL"
+              ],
+              "sourcePath": [
+                "BROUWERIJ FRONTAAL"
+              ],
+              "uncertain": true,
+              "itemCount": 1
+            },
+            {
+              "name": "England IPA",
+              "path": [
+                "BROUWERIJ FRONTAAL",
+                "England IPA"
+              ],
+              "sourcePath": [
+                "BROUWERIJ FRONTAAL",
+                "England IPA"
+              ],
+              "uncertain": true,
+              "itemCount": 1
+            },
+            {
+              "name": "Witte Simmie",
+              "path": [
+                "KRACHTIG EN BLOND",
+                "Witte Simmie"
+              ],
+              "sourcePath": [
+                "KRACHTIG EN BLOND",
+                "Witte Simmie"
+              ],
+              "uncertain": true,
+              "itemCount": 1
+            },
+            {
+              "name": "Affligem Tripel",
+              "path": [
+                "KRACHTIG EN BLOND",
+                "Affligem Tripel"
+              ],
+              "sourcePath": [
+                "KRACHTIG EN BLOND",
+                "Affligem Tripel"
+              ],
+              "uncertain": true,
+              "itemCount": 3
+            },
+            {
+              "name": "Affligem Blond",
+              "path": [
+                "KRACHTIG EN BLOND",
+                "Affligem Blond"
+              ],
+              "sourcePath": [
+                "KRACHTIG EN BLOND",
+                "Affligem Blond"
+              ],
+              "uncertain": true,
+              "itemCount": 1
+            },
+            {
+              "name": "Texels Skuumkoppe",
+              "path": [
+                "KRACHTIG EN BLOND",
+                "Texels Skuumkoppe"
+              ],
+              "sourcePath": [
+                "KRACHTIG EN BLOND",
+                "Texels Skuumkoppe"
+              ],
+              "uncertain": true,
+              "itemCount": 1
+            },
+            {
+              "name": "KOREMAN´S",
+              "path": [
+                "KOREMAN´S"
+              ],
+              "sourcePath": [
+                "KOREMAN´S"
+              ],
+              "uncertain": false,
+              "itemCount": 4
+            },
+            {
+              "name": "ONZE SIGNATURES",
+              "path": [
+                "ONZE SIGNATURES"
+              ],
+              "sourcePath": [
+                "ONZE SIGNATURES"
+              ],
+              "uncertain": true,
+              "itemCount": 2
+            },
+            {
+              "name": "Tempranillo, limoensap,",
+              "path": [
+                "ONZE SIGNATURES",
+                "Tempranillo, limoensap,"
+              ],
+              "sourcePath": [
+                "ONZE SIGNATURES",
+                "Tempranillo, limoensap,"
+              ],
+              "uncertain": true,
+              "itemCount": 2
+            },
+            {
+              "name": "Brandy, abrikozenpuree,",
+              "path": [
+                "ONZE SIGNATURES",
+                "Brandy, abrikozenpuree,"
+              ],
+              "sourcePath": [
+                "ONZE SIGNATURES",
+                "Brandy, abrikozenpuree,"
+              ],
+              "uncertain": true,
+              "itemCount": 5
+            },
+            {
+              "name": "Prosecco Foam",
+              "path": [
+                "ONZE SIGNATURES",
+                "Prosecco Foam"
+              ],
+              "sourcePath": [
+                "ONZE SIGNATURES",
+                "Prosecco Foam"
+              ],
+              "uncertain": true,
+              "itemCount": 7
+            },
+            {
+              "name": "GIN & TONIC",
+              "path": [
+                "GIN & TONIC"
+              ],
+              "sourcePath": [
+                "GIN & TONIC"
+              ],
+              "uncertain": true,
+              "itemCount": 7
+            },
+            {
+              "name": "HARD SELTZER",
+              "path": [
+                "HARD SELTZER"
+              ],
+              "sourcePath": [
+                "HARD SELTZER"
+              ],
+              "uncertain": true,
+              "itemCount": 1
+            },
+            {
+              "name": "Nolet’s Silver",
+              "path": [
+                "HARD SELTZER",
+                "Nolet’s Silver"
+              ],
+              "sourcePath": [
+                "HARD SELTZER",
+                "Nolet’s Silver"
+              ],
+              "uncertain": true,
+              "itemCount": 3
+            },
+            {
+              "name": "Tonic",
+              "path": [
+                "HARD SELTZER",
+                "Tonic"
+              ],
+              "sourcePath": [
+                "HARD SELTZER",
+                "Tonic"
+              ],
+              "uncertain": true,
+              "itemCount": 1
+            },
+            {
+              "name": "Watermelon Tonic",
+              "path": [
+                "HARD SELTZER",
+                "Watermelon Tonic"
+              ],
+              "sourcePath": [
+                "HARD SELTZER",
+                "Watermelon Tonic"
+              ],
+              "uncertain": true,
+              "itemCount": 6
+            },
+            {
+              "name": "Monin Rose",
+              "path": [
+                "HARD SELTZER",
+                "Monin Rose"
+              ],
+              "sourcePath": [
+                "HARD SELTZER",
+                "Monin Rose"
+              ],
+              "uncertain": true,
+              "itemCount": 5
+            },
+            {
+              "name": "PUBLIC FAVORITE!",
+              "path": [
+                "PUBLIC FAVORITE!"
+              ],
+              "sourcePath": [
+                "PUBLIC FAVORITE!"
+              ],
+              "uncertain": false,
+              "itemCount": 1
+            },
+            {
+              "name": "ROSÉ WIJNEN",
+              "path": [
+                "ROSÉ WIJNEN"
+              ],
+              "sourcePath": [
+                "ROSÉ WIJNEN"
+              ],
+              "uncertain": true,
+              "itemCount": 2
+            },
+            {
+              "name": "Chardonnay",
+              "path": [
+                "ROSÉ WIJNEN",
+                "Chardonnay"
+              ],
+              "sourcePath": [
+                "ROSÉ WIJNEN",
+                "Chardonnay"
+              ],
+              "uncertain": true,
+              "itemCount": 1
+            },
+            {
+              "name": "Sauvignon",
+              "path": [
+                "ROSÉ WIJNEN",
+                "Sauvignon"
+              ],
+              "sourcePath": [
+                "ROSÉ WIJNEN",
+                "Sauvignon"
+              ],
+              "uncertain": true,
+              "itemCount": 1
+            },
+            {
+              "name": "Grenache Blanc",
+              "path": [
+                "ROSÉ WIJNEN",
+                "Grenache Blanc"
+              ],
+              "sourcePath": [
+                "ROSÉ WIJNEN",
+                "Grenache Blanc"
+              ],
+              "uncertain": true,
+              "itemCount": 1
+            },
+            {
+              "name": "Frankrijk, Languedoc",
+              "path": [
+                "ROSÉ WIJNEN",
+                "Frankrijk, Languedoc"
+              ],
+              "sourcePath": [
+                "ROSÉ WIJNEN",
+                "Frankrijk, Languedoc"
+              ],
+              "uncertain": true,
+              "itemCount": 1
+            },
+            {
+              "name": "Sauvignon Blanc",
+              "path": [
+                "ROSÉ WIJNEN",
+                "Sauvignon Blanc"
+              ],
+              "sourcePath": [
+                "ROSÉ WIJNEN",
+                "Sauvignon Blanc"
+              ],
+              "uncertain": true,
+              "itemCount": 2
+            },
+            {
+              "name": "Clairette",
+              "path": [
+                "ROSÉ WIJNEN",
+                "Clairette"
+              ],
+              "sourcePath": [
+                "ROSÉ WIJNEN",
+                "Clairette"
+              ],
+              "uncertain": true,
+              "itemCount": 1
+            },
+            {
+              "name": "Zuid-Afrika, Stellenbosch",
+              "path": [
+                "ROSÉ WIJNEN",
+                "Zuid-Afrika, Stellenbosch"
+              ],
+              "sourcePath": [
+                "ROSÉ WIJNEN",
+                "Zuid-Afrika, Stellenbosch"
+              ],
+              "uncertain": true,
+              "itemCount": 1
+            },
+            {
+              "name": "RODE WIJNEN",
+              "path": [
+                "RODE WIJNEN"
+              ],
+              "sourcePath": [
+                "RODE WIJNEN"
+              ],
+              "uncertain": true,
+              "itemCount": 1
+            },
+            {
+              "name": "Tempranillo",
+              "path": [
+                "RODE WIJNEN",
+                "Tempranillo"
+              ],
+              "sourcePath": [
+                "RODE WIJNEN",
+                "Tempranillo"
+              ],
+              "uncertain": true,
+              "itemCount": 1
+            },
+            {
+              "name": "Primitivo",
+              "path": [
+                "RODE WIJNEN",
+                "Primitivo"
+              ],
+              "sourcePath": [
+                "RODE WIJNEN",
+                "Primitivo"
+              ],
+              "uncertain": true,
+              "itemCount": 1
+            },
+            {
+              "name": "Malbec Reserve",
+              "path": [
+                "RODE WIJNEN",
+                "Malbec Reserve"
+              ],
+              "sourcePath": [
+                "RODE WIJNEN",
+                "Malbec Reserve"
+              ],
+              "uncertain": true,
+              "itemCount": 1
+            },
+            {
+              "name": "Grenache, Syrah",
+              "path": [
+                "RODE WIJNEN",
+                "Grenache, Syrah"
+              ],
+              "sourcePath": [
+                "RODE WIJNEN",
+                "Grenache, Syrah"
+              ],
+              "uncertain": true,
+              "itemCount": 1
+            },
+            {
+              "name": "BIJZONDERE WIJNEN",
+              "path": [
+                "BIJZONDERE WIJNEN"
+              ],
+              "sourcePath": [
+                "BIJZONDERE WIJNEN"
+              ],
+              "uncertain": false,
+              "itemCount": 2
+            },
+            {
+              "name": "CHAMPAGNE",
+              "path": [
+                "CHAMPAGNE"
+              ],
+              "sourcePath": [
+                "CHAMPAGNE"
+              ],
+              "uncertain": false,
+              "itemCount": 1
+            },
+            {
+              "name": "LUNCH",
+              "path": [
+                "LUNCH"
+              ],
+              "sourcePath": [
+                "LUNCH"
+              ],
+              "uncertain": false,
+              "itemCount": 2
+            },
+            {
+              "name": "SOEPEN EN SALADES",
+              "path": [
+                "SOEPEN EN SALADES"
+              ],
+              "sourcePath": [
+                "SOEPEN EN SALADES"
+              ],
+              "uncertain": true,
+              "itemCount": 1
+            },
+            {
+              "name": "Doperwtensoepje",
+              "path": [
+                "SOEPEN EN SALADES",
+                "Doperwtensoepje"
+              ],
+              "sourcePath": [
+                "SOEPEN EN SALADES",
+                "Doperwtensoepje"
+              ],
+              "uncertain": true,
+              "itemCount": 1
+            },
+            {
+              "name": "SNACKS",
+              "path": [
+                "SNACKS"
+              ],
+              "sourcePath": [
+                "SNACKS"
+              ],
+              "uncertain": true,
+              "itemCount": 8
+            },
+            {
+              "name": "BORRELPLANKEN EN MEER 11:30 - 22:00",
+              "path": [
+                "BORRELPLANKEN EN MEER 11:30 - 22:00"
+              ],
+              "sourcePath": [
+                "BORRELPLANKEN EN MEER 11:30 - 22:00"
+              ],
+              "uncertain": true,
+              "itemCount": 6
+            },
+            {
+              "name": "STARTERS",
+              "path": [
+                "STARTERS"
+              ],
+              "sourcePath": [
+                "STARTERS"
+              ],
+              "uncertain": true,
+              "itemCount": 9
+            },
+            {
+              "name": "MEDITERRAANS",
+              "path": [
+                "MEDITERRAANS"
+              ],
+              "sourcePath": [
+                "MEDITERRAANS"
+              ],
+              "uncertain": false,
+              "itemCount": 3
+            },
+            {
+              "name": "(MIDDEN) - OOSTERS",
+              "path": [
+                "(MIDDEN) - OOSTERS"
+              ],
+              "sourcePath": [
+                "(MIDDEN) - OOSTERS"
+              ],
+              "uncertain": true,
+              "itemCount": 5
+            },
+            {
+              "name": "Risoni Nord",
+              "path": [
+                "(MIDDEN) - OOSTERS",
+                "Risoni Nord"
+              ],
+              "sourcePath": [
+                "(MIDDEN) - OOSTERS",
+                "Risoni Nord"
+              ],
+              "uncertain": true,
+              "itemCount": 1
+            },
+            {
+              "name": "OESTERS",
+              "path": [
+                "OESTERS"
+              ],
+              "sourcePath": [
+                "OESTERS"
+              ],
+              "uncertain": true,
+              "itemCount": 2
+            },
+            {
+              "name": "Mexicaanse frietjes",
+              "path": [
+                "OESTERS",
+                "Mexicaanse frietjes"
+              ],
+              "sourcePath": [
+                "OESTERS",
+                "Mexicaanse frietjes"
+              ],
+              "uncertain": true,
+              "itemCount": 4
+            },
+            {
+              "name": "Hollands frietje",
+              "path": [
+                "OESTERS",
+                "Hollands frietje"
+              ],
+              "sourcePath": [
+                "OESTERS",
+                "Hollands frietje"
+              ],
+              "uncertain": true,
+              "itemCount": 1
+            },
+            {
+              "name": "DESSERTS 17:00 - 21:00",
+              "path": [
+                "DESSERTS 17:00 - 21:00"
+              ],
+              "sourcePath": [
+                "DESSERTS 17:00 - 21:00"
+              ],
+              "uncertain": false,
+              "itemCount": 7
+            }
+          ]
+        }
+      ],
+      "sourceInventory": [
+        {
+          "url": "https://debotanistbreda.nl/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "77c950de558afa1d43cd48320fc0776069a643f25fe6b8d8ce83f08ee41eb5b0"
+        },
+        {
+          "url": "https://debotanistbreda.nl/wp-content/uploads/2022/11/De-Botanist-Breda-Menukaart-voorjaar-20-03-2026_compressed.pdf",
+          "kind": "pdf",
+          "status": "read",
+          "pageCount": 16,
+          "wordCount": 2718,
+          "itemCount": 151,
+          "contentHash": "eb9da86e950463b90f09634f05236ec44925968120923506337678e56e3ade7f"
+        }
+      ],
+      "coverage": {
+        "status": "items_extracted",
+        "sourceCount": 2,
+        "readCount": 2,
+        "blockedCount": 0,
+        "failedCount": 0,
+        "candidateCount": 2,
+        "menuCount": 1,
+        "itemCount": 151,
+        "complete": false,
+        "reviewRequired": true
+      },
+      "attentionGroupCount": 49,
+      "limitations": [
+        "PDF https://debotanistbreda.nl/wp-content/uploads/2022/11/De-Botanist-Breda-Menukaart-voorjaar-20-03-2026_compressed.pdf: een tweede, overlappende tekstlaag is genegeerd (41 dubbele tekstregels).",
+        "PDF https://debotanistbreda.nl/wp-content/uploads/2022/11/De-Botanist-Breda-Menukaart-voorjaar-20-03-2026_compressed.pdf: 38 regel(s) met een prijs midden in de regel zijn niet als gerecht overgenomen.",
+        "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd.",
+        "Kwaliteitscontrole op de deterministische extractie vraagt aandacht (duplicate_item_across_categories, duplicate_item_within_category, pdf_ambiguous_price_lines); het resultaat is niet als volledig beoordeeld."
+      ],
+      "notes": [
+        "Menukaart herkend uit de PDF van https://debotanistbreda.nl/wp-content/uploads/2022/11/De-Botanist-Breda-Menukaart-voorjaar-20-03-2026_compressed.pdf (16 pagina's): 151 gerechten met prijs in 59 rubrieken. Controleer pagina's, rubrieken en prijzen.",
+        "AI-structurering is niet beschikbaar — resultaten zijn beperkt tot deterministische extractie.",
+        "4 rubriek(en) zijn als \"Controle nodig\" gemarkeerd op basis van de kwaliteitscontrole."
+      ],
+      "result": "151 items in 59 sections across 1 menu context(s). This is a first holdout observation, not a complete-menu or accuracy claim.",
+      "elapsedMs": 3056
+    },
+    "HOLD-REAL-02": {
+      "id": "HOLD-REAL-02",
+      "referenceId": "gauchosgrill",
+      "class": "language_branch",
+      "url": "https://www.gauchosgrill.nl/breda",
+      "pinnedBytesSha256": null,
+      "captureStatus": "blocked",
+      "evaluatedAt": "2026-10-18T09:58:47.545Z",
+      "status": "blocked",
+      "completed": true,
+      "result": "The approved entry URL did not yield a readable public source (bad-status 404). No alternative URL or other location was substituted.",
+      "elapsedMs": 0,
+      "limitations": [
+        "The approved entry URL did not yield a readable public source. No alternative URL, other location or crawl was substituted."
+      ]
+    },
+    "HOLD-REAL-03": {
+      "id": "HOLD-REAL-03",
+      "referenceId": "mrmoos",
+      "class": "html",
+      "url": "https://mrmoos.nl/",
+      "pinnedBytesSha256": "20c0d9fa646719c78810e636f3abb3f59948e52972891b2d77a4d16d7fa39580",
+      "captureStatus": "captured",
+      "evaluatedAt": "2026-10-18T09:58:47.545Z",
+      "status": "executed_with_limitation",
+      "completed": true,
+      "bytesSha256": "20c0d9fa646719c78810e636f3abb3f59948e52972891b2d77a4d16d7fa39580",
+      "sourceVersionMatches": true,
+      "finalUrl": "https://mrmoos.nl/",
+      "itemCount": 0,
+      "categoryCount": 0,
+      "menuCount": 0,
+      "menus": [],
+      "sourceInventory": [
+        {
+          "url": "https://mrmoos.nl/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "20c0d9fa646719c78810e636f3abb3f59948e52972891b2d77a4d16d7fa39580"
+        },
+        {
+          "url": "https://mrmoos.nl/menukaart",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "1f1c09800eef8cfa6094cfadd6014449cdeb776cb6e82f09c978edebc5433775"
+        }
+      ],
+      "coverage": {
+        "status": "no_content_found",
+        "sourceCount": 2,
+        "readCount": 2,
+        "blockedCount": 0,
+        "failedCount": 0,
+        "candidateCount": 0,
+        "menuCount": 0,
+        "itemCount": 0,
+        "complete": false,
+        "reviewRequired": true
+      },
+      "attentionGroupCount": 0,
+      "limitations": [
+        "Gelezen zonder automatisch herkende menukaart: https://mrmoos.nl/menukaart.",
+        "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+      ],
+      "notes": [
+        "Mogelijke menupagina gelezen: https://mrmoos.nl/menukaart (link \"Menukaart\"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.",
+        "AI-structurering is niet beschikbaar — resultaten zijn beperkt tot deterministische extractie."
+      ],
+      "result": "No items were extracted. The source is recorded as an honest limitation, not as a successful menu.",
+      "elapsedMs": 143
+    },
+    "HOLD-REAL-04": {
+      "id": "HOLD-REAL-04",
+      "referenceId": "colonie",
+      "class": "html",
+      "url": "https://breda.colonie.nl/",
+      "pinnedBytesSha256": "29ed55827a4141647531e473f55410358962e63f5179c7e7a73e715d070ccbdf",
+      "captureStatus": "captured",
+      "evaluatedAt": "2026-10-18T09:58:47.688Z",
+      "status": "executed_with_limitation",
+      "completed": true,
+      "bytesSha256": "29ed55827a4141647531e473f55410358962e63f5179c7e7a73e715d070ccbdf",
+      "sourceVersionMatches": true,
+      "finalUrl": "https://breda.colonie.nl/",
+      "itemCount": 0,
+      "categoryCount": 0,
+      "menuCount": 0,
+      "menus": [],
+      "sourceInventory": [
+        {
+          "url": "https://breda.colonie.nl/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "29ed55827a4141647531e473f55410358962e63f5179c7e7a73e715d070ccbdf"
+        },
+        {
+          "url": "https://breda.colonie.nl/menukaart/lunch-diner-dranken/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "09c4935bf9360a38316fb4496caad78eb2f99ee9e750cd6e8848b8ca01942333"
+        },
+        {
+          "url": "https://breda.colonie.nl/over-ons/cadeaukaart/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "96dabad3a42813d15ead57c5bbbcb31aa7068f69c648ed7c69ac28dc3b51394d"
+        },
+        {
+          "url": "https://breda.colonie.nl/nieuwe-zomer-kaart/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "5b33532fcca41eeb0198f809b74f7314409f9f333bf05cbff9472d966cf4006f"
+        },
+        {
+          "url": "https://breda.colonie.nl/nieuwekaart/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "80fa1ff06fa0e5f158371732da8272ba1394f0074016275673a443936b4ccf0b"
+        },
+        {
+          "url": "https://breda.colonie.nl/kerstmenu2025/",
+          "kind": "html",
+          "status": "read",
+          "pageCount": null,
+          "wordCount": null,
+          "itemCount": null,
+          "contentHash": "bf969d86077ae56849ecf40232f1c55f51218035fe86b0a50c42f4d00ba4482e"
+        }
+      ],
+      "coverage": {
+        "status": "no_content_found",
+        "sourceCount": 6,
+        "readCount": 6,
+        "blockedCount": 0,
+        "failedCount": 0,
+        "candidateCount": 0,
+        "menuCount": 0,
+        "itemCount": 0,
+        "complete": false,
+        "reviewRequired": true
+      },
+      "attentionGroupCount": 0,
+      "limitations": [
+        "Gelezen zonder automatisch herkende menukaart: https://breda.colonie.nl/menukaart/lunch-diner-dranken/.",
+        "Gelezen zonder automatisch herkende menukaart: https://breda.colonie.nl/over-ons/cadeaukaart/.",
+        "Gelezen zonder automatisch herkende menukaart: https://breda.colonie.nl/nieuwe-zomer-kaart/.",
+        "Gelezen zonder automatisch herkende menukaart: https://breda.colonie.nl/nieuwekaart/.",
+        "Gelezen zonder automatisch herkende menukaart: https://breda.colonie.nl/kerstmenu2025/.",
+        "AI-structurering is niet geconfigureerd; alleen deterministische extractie is uitgevoerd."
+      ],
+      "notes": [
+        "Mogelijke menupagina gelezen: https://breda.colonie.nl/menukaart/lunch-diner-dranken/ (link \"Menu\"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.",
+        "Mogelijke menupagina gelezen: https://breda.colonie.nl/over-ons/cadeaukaart/ (link \"Cadeaukaart\"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.",
+        "Mogelijke menupagina gelezen: https://breda.colonie.nl/nieuwe-zomer-kaart/ (link \"/nieuwe-zomer-kaart/\"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.",
+        "Mogelijke menupagina gelezen: https://breda.colonie.nl/nieuwekaart/ (link \"/nieuwekaart/\"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.",
+        "Mogelijke menupagina gelezen: https://breda.colonie.nl/kerstmenu2025/ (link \"/kerstmenu2025/\"). Hier is geen automatisch leesbare menukaart herkend; bekijk deze pagina handmatig.",
+        "AI-structurering is niet beschikbaar — resultaten zijn beperkt tot deterministische extractie."
+      ],
+      "result": "No items were extracted. The source is recorded as an honest limitation, not as a successful menu.",
+      "elapsedMs": 2513
+    }
+  }
+}

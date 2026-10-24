@@ -171,3 +171,41 @@ test('buildCandidateSummary: never includes raw HTML, a full JSON-LD document, o
   assert.ok(!serialized.includes('<div>'));
   assert.ok(!serialized.toLowerCase().includes('pdf'));
 });
+
+test('REGRESSION (review P2): menu variant/order and item evidence survive into the receipt summary', () => {
+  const summary = buildMenuCandidateSummary([
+    {
+      name: 'Lunch',
+      contextSlug: 'ai-1',
+      variant: 'Lunchkaart',
+      order: 2,
+      sourceId: 'source-1',
+      categories: [
+        {
+          name: 'Voor',
+          items: [
+            {
+              name: 'Fictieve soep',
+              price: '6.50',
+              evidence: { sourceId: 'source-1', sourceUrl: 'https://fixture.example/menu.pdf', locator: 'page:1', quote: 'Fictieve soep 6.50' },
+            },
+          ],
+        },
+      ],
+    },
+  ]);
+  assert.equal(summary[0].variant, 'Lunchkaart');
+  assert.equal(summary[0].order, 2);
+  assert.deepEqual(summary[0].categories[0].items[0].evidence, {
+    sourceId: 'source-1',
+    sourceUrl: 'https://fixture.example/menu.pdf',
+    locator: 'page:1',
+    quote: 'Fictieve soep 6.50',
+  });
+});
+
+test('buildMenuCandidateSummary: an absent variant/order is omitted, never an empty placeholder', () => {
+  const summary = buildMenuCandidateSummary([{ name: 'Kaart', contextSlug: 'kaart', categories: [] }]);
+  assert.equal('variant' in summary[0], false);
+  assert.equal('order' in summary[0], false);
+});

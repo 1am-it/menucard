@@ -1,0 +1,93 @@
+{
+  "version": "1.0.0",
+  "pinnedAt": "2026-10-21",
+  "pinnedBy": "DeepSeek developer, local #59 runner",
+  "issue": 59,
+  "authorization": {
+    "decision": "Product Owner 2026-10-21, option 1 (four existing cards plus an unseen set), reference GitHub #59 issuecomment-6315226470; Delivery Lead order review 6315269210.",
+    "reference": "GitHub #59 review 6315269210",
+    "scope": "Public read-only comparison of exactly these four existing-card sources and the menu sub-pages/PDFs that the historical data/menus.json export itself names. No login, CAPTCHA bypass, other restaurant, arbitrary crawl, publication, production write or app-side AI.",
+    "appProviderActivation": false
+  },
+  "rules": "The historical data/menus.json export is a dated observation, never live truth. A capture only pins bytes, hash and time. Repairs found from this comparison may tune these four sources; they never turn the four into a holdout.",
+  "sources": [
+    {
+      "id": "wolfslaar",
+      "label": "Restaurant Wolfslaar",
+      "restaurantId": "1",
+      "entryUrl": "https://www.restaurantwolfslaar.com",
+      "allowedHosts": [
+        "restaurantwolfslaar.com",
+        "www.restaurantwolfslaar.com"
+      ],
+      "menuKeys": [
+        "1-lunch",
+        "1-diner"
+      ],
+      "probeUrls": [
+        "https://www.restaurantwolfslaar.com",
+        "https://www.restaurantwolfslaar.com/nl/menu-lunch",
+        "https://www.restaurantwolfslaar.com/nl/menu-diner"
+      ]
+    },
+    {
+      "id": "bardot",
+      "label": "Brasserie Bardot",
+      "restaurantId": "6",
+      "entryUrl": "https://www.brasseriebardot.nl",
+      "allowedHosts": [
+        "brasseriebardot.nl",
+        "www.brasseriebardot.nl"
+      ],
+      "menuKeys": [
+        "6-diner",
+        "6-lunch",
+        "6-borrel",
+        "6-specialiteiten"
+      ],
+      "probeUrls": [
+        "https://www.brasseriebardot.nl",
+        "https://www.brasseriebardot.nl/brasserie-bardot/",
+        "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf"
+      ]
+    },
+    {
+      "id": "zuyd",
+      "label": "Restaurant Zuyd",
+      "restaurantId": "19",
+      "entryUrl": "https://www.restaurantzuyd.nl",
+      "allowedHosts": [
+        "restaurantzuyd.nl",
+        "www.restaurantzuyd.nl"
+      ],
+      "menuKeys": [
+        "19-lunch",
+        "19-diner"
+      ],
+      "probeUrls": [
+        "https://www.restaurantzuyd.nl",
+        "https://www.restaurantzuyd.nl/lunch",
+        "https://www.restaurantzuyd.nl/diner"
+      ]
+    },
+    {
+      "id": "thuis",
+      "label": "T-Huis",
+      "restaurantId": "23",
+      "entryUrl": "https://t-huis.online",
+      "allowedHosts": [
+        "t-huis.online",
+        "www.t-huis.online"
+      ],
+      "menuKeys": [
+        "23-lunch",
+        "23-diner",
+        "23-borrel"
+      ],
+      "probeUrls": [
+        "https://t-huis.online",
+        "https://t-huis.online/menu/"
+      ]
+    }
+  ]
+}

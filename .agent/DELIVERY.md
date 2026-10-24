@@ -25,6 +25,28 @@ between agents; they are not a claim of direct model-to-model communication.
 | AI Product Designer | Mockup or prototype that expresses the approved direction | Final product choice or implementation release |
 | AI Implementation Engineer | Design and code inside the contract, tests, PR evidence | Changes outside the contract or irreversible actions |
 
+Assigned executors and autonomy: see `AI-WORKING-AGREEMENT.md` (owner decision
+2026-10-24) and `.agent/assignments.md`. In short: Claude Code is the AI
+Delivery Lead and may make simple changes itself; DeepSeek via the local Cline
+runner does regular development through bounded orders in the format of
+`.agent/templates/developer-order.md`; Codex has no default role.
+
+## Evidence Categories
+
+Every claim in a checkpoint, review or handoff names its category:
+
+| Category | Meaning |
+| --- | --- |
+| Developer evidence | The developer's own tests, builds and screenshots |
+| Independent check | Repeated or assessed by the Delivery Lead |
+| Fixture evidence | Simulated, intercepted or fictional data/services |
+| Real practical acceptance | The real app with real auth/DB/services and the real user flow |
+
+One category never substitutes for another. Fixture or developer evidence is
+not reported as real acceptance. "Busy"/BUILDING needs fresh execution
+evidence; an old running record is not progress. DONE only when the agreed
+acceptance in the contract is demonstrably met.
+
 ## Lifecycle
 
 ### 1. Shape

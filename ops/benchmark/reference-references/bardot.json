@@ -1,0 +1,310 @@
+{
+  "version": "1.0.0",
+  "sourceId": "bardot",
+  "label": "Brasserie Bardot",
+  "entryUrl": "https://www.brasseriebardot.nl",
+  "captureStatus": "captured",
+  "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
+  "pinnedCapture": {
+    "path": "ops/benchmark/card-reference-captures.json",
+    "bytesSha256": "487ba29f4bf8dbeca9de161d5e2a3839ed9cbd0eb6c77ce76ffbd62a6f2a7597",
+    "pageCount": 4
+  },
+  "method": "Authored from the pinned PDF bytes whose SHA-256 equals the hash in ops/benchmark/existing-card-references.json (2025-11 dinerkaart, 4 pages). The text layer prints the name and the amount on one baseline but as separate text items, so every row carries a literal quote for the name (a contiguous passage in the pinned page text), a locator with page, column and baseline, and a price proof (page, column, baseline) that the measurement resolves back to the pinned row. No parser outcome was used to author this reference. A wine is named by the designation on its own printed line; a producer printed on the following line is recorded as producer, never merged into the name.",
+  "note": "Controlled reference for the criterion-5 existing-card comparison of the 2025-11 Bardot dinerkaart. The two pinned HTML pages of the same capture returned different bytes at verification time, so no reference covers them: only the hash-verified PDF is used. Historical data/menus.json counts (29 lunch/diner rows) are dated observations, not truth.",
+  "menus": [
+    {
+      "title": "Dinerkaart",
+      "sourceUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf",
+      "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
+      "categories": [
+        {
+          "path": ["Dinerkaart", "KLASSIEKE BORRELHAPPEN"],
+          "items": [
+            {"name": "Oesters: Naturel", "priceVariants": [{"label": "per stuk", "price": "4.00"}], "locator": "Dinerkaart › KLASSIEKE BORRELHAPPEN › pagina 2, kolom links, y=742 (bedrag op y=744)", "quote": "Naturel met sjalottenvinaigrette en citroen", "priceProofs": [{"page": 2, "column": "left", "y": 744}]},
+            {"name": "Pata Negra (70 gr.)", "price": "21.95", "locator": "Dinerkaart › KLASSIEKE BORRELHAPPEN › pagina 2, kolom links, y=644", "quote": "Pata Negra (70 gr.), Spaanse Ibericoham", "priceProofs": [{"page": 2, "column": "left", "y": 644}]},
+            {"name": "Paté en croute", "price": "16.95", "locator": "Dinerkaart › KLASSIEKE BORRELHAPPEN › pagina 2, kolom links, y=610 (bedrag op y=612)", "quote": "Paté en croute, gefrituurde kappertjes, uienconfit", "priceProofs": [{"page": 2, "column": "left", "y": 612}]},
+            {"name": "Charcuterie", "price": "16.95", "locator": "Dinerkaart › KLASSIEKE BORRELHAPPEN › pagina 2, kolom links, y=578", "quote": "Charcuterie, diverse vleeswaren", "priceProofs": [{"page": 2, "column": "left", "y": 578}]},
+            {"name": "Paling", "priceVariants": [{"label": "per 2 stuks", "price": "13.95"}], "locator": "Dinerkaart › KLASSIEKE BORRELHAPPEN › pagina 2, kolom links, y=534", "quote": "Paling, brioche, rode biet, Per 2 stuks crème fraîche en roze peper", "priceProofs": [{"page": 2, "column": "left", "y": 534}]},
+            {"name": "Kaviaar 'Osietra'", "priceVariants": [{"label": "10 gram", "price": "35.00"}], "locator": "Dinerkaart › KLASSIEKE BORRELHAPPEN › pagina 2, kolom links, y=490", "quote": "Kaviaar 'Osietra', 10 gram", "priceProofs": [{"page": 2, "column": "left", "y": 490}]}
+          ]
+        },
+        {
+          "path": ["Dinerkaart", "VOORGERECHTEN"],
+          "items": [
+            {"name": "Bisque de homard", "price": "13.95", "locator": "Dinerkaart › VOORGERECHTEN › pagina 2, kolom links, y=374", "quote": "Bisque de homard, rivierkreeft, saffraanrouille", "priceProofs": [{"page": 2, "column": "left", "y": 374}]},
+            {"name": "Garnalenkroketten", "priceVariants": [{"label": "2 stuks", "price": "21.95"}], "locator": "Dinerkaart › VOORGERECHTEN › pagina 2, kolom links, y=340 (bedrag op y=342)", "quote": "Garnalenkroketten (2 st.) met citroenmayonaise", "priceProofs": [{"page": 2, "column": "left", "y": 342}]},
+            {"name": "Escargots", "price": "12.95", "locator": "Dinerkaart › VOORGERECHTEN › pagina 2, kolom links, y=308", "quote": "Escargots, persillade, knoflooksabayon, croutons", "priceProofs": [{"page": 2, "column": "left", "y": 308}]},
+            {"name": "Stracciatella", "price": "16.95", "locator": "Dinerkaart › VOORGERECHTEN › pagina 2, kolom links, y=274 (bedrag op y=276)", "quote": "Stracciatella, tomaat, pruim, amandel en basilicum", "priceProofs": [{"page": 2, "column": "left", "y": 276}]},
+            {"name": "Klassieke steak tartaar (90 gram)", "price": "15.95", "locator": "Dinerkaart › VOORGERECHTEN › pagina 2, kolom links, y=230 (bedrag op y=232)", "quote": "Klassieke steak tartaar (90 gram)", "priceProofs": [{"page": 2, "column": "left", "y": 232}]},
+            {"name": "Gravad lax", "price": "17.95", "locator": "Dinerkaart › VOORGERECHTEN › pagina 2, kolom links, y=186 (bedrag op y=188)", "quote": "Gravad lax, toast, aardappel, dragonmayonaise, venkel, citroen", "priceProofs": [{"page": 2, "column": "left", "y": 188}]},
+            {"name": "Boudin Noir", "price": "18.95", "locator": "Dinerkaart › VOORGERECHTEN › pagina 2, kolom links, y=132", "quote": "Boudin Noir, gebakken bloedworst, brioche, appel, Calvados, gebakken eendenlever", "priceProofs": [{"page": 2, "column": "left", "y": 132}]}
+          ]
+        },
+        {
+          "path": ["Dinerkaart", "HOOFDGERECHTEN", "SPECIALITEITEN VAN BARDOT"],
+          "items": [
+            {"name": "Poussin", "price": "20.95", "locator": "Dinerkaart › HOOFDGERECHTEN › SPECIALITEITEN VAN BARDOT › pagina 2, kolom rechts, y=674", "quote": "Poussin, krielkippetje van onze huisrotisserie met citroen, tijm en appelcompote", "priceProofs": [{"page": 2, "column": "right", "y": 674}]},
+            {"name": "Chateaubriand (om te delen 450 gr.)", "price": "74.95", "locator": "Dinerkaart › HOOFDGERECHTEN › SPECIALITEITEN VAN BARDOT › pagina 2, kolom rechts, y=564", "quote": "Chateaubriand (om te delen 450 gr.), het beste stuk van de ossenhaas met Persillade boter of Béarnaise of Blauwe kaas of Groene pepersaus", "priceProofs": [{"page": 2, "column": "right", "y": 564}]}
+          ]
+        },
+        {
+          "path": ["Dinerkaart", "HOOFDGERECHTEN"],
+          "items": [
+            {"name": "Klassieke steak tartaar (150 gram)", "price": "24.95", "locator": "Dinerkaart › HOOFDGERECHTEN › pagina 2, kolom rechts, y=418", "quote": "Klassieke steak tartaar (150 gram)", "priceProofs": [{"page": 2, "column": "right", "y": 418}]},
+            {"name": "Canard à l'orange", "price": "27.95", "locator": "Dinerkaart › HOOFDGERECHTEN › pagina 2, kolom rechts, y=364", "quote": "Canard à l'orange, knolselderij gratin, rode bietencrème, gele biet, Amsterdamse ui, sinaasappel gevogelte saus.", "priceProofs": [{"page": 2, "column": "right", "y": 364}]},
+            {"name": "Runderentrecote (220 gr.)", "price": "37.95", "locator": "Dinerkaart › HOOFDGERECHTEN › pagina 2, kolom rechts, y=298", "quote": "Runderentrecote (220 gr.), met beurre de Paris", "priceProofs": [{"page": 2, "column": "right", "y": 298}]},
+            {"name": "Tournedos (170 gr.)", "price": "37.95", "locator": "Dinerkaart › HOOFDGERECHTEN › pagina 2, kolom rechts, y=242", "quote": "Tournedos (170 gr.), spinazie, champignons, truffeljus", "priceProofs": [{"page": 2, "column": "right", "y": 242}]},
+            {"name": "Hele dorade van de grill", "price": "26.95", "locator": "Dinerkaart › HOOFDGERECHTEN › pagina 2, kolom rechts, y=176", "quote": "Hele dorade van de grill , kruidenolie van salie,", "priceProofs": [{"page": 2, "column": "right", "y": 176}]},
+            {"name": "Gnocchi", "price": "22.95", "locator": "Dinerkaart › HOOFDGERECHTEN › pagina 2, kolom rechts, y=88", "quote": "Gnocchi, saffraan, venkel, parmezaan", "priceProofs": [{"page": 2, "column": "right", "y": 88}]}
+          ]
+        },
+        {
+          "path": ["Dinerkaart", "ExTRA BIjGERECHTEN"],
+          "items": [
+            {"name": "Desem stokbrood met seizoensroomboter en olijfolie", "price": "5.95", "locator": "Dinerkaart › ExTRA BIjGERECHTEN › pagina 3, kolom links, y=774 (bedrag op y=776)", "quote": "Desem stokbrood met seizoensroomboter en olijfolie", "priceProofs": [{"page": 3, "column": "left", "y": 776}]},
+            {"name": "Verse frites met Belgische mayonaise", "price": "4.75", "locator": "Dinerkaart › ExTRA BIjGERECHTEN › pagina 3, kolom links, y=762 (bedrag op y=764)", "quote": "Verse frites met Belgische mayonaise", "priceProofs": [{"page": 3, "column": "left", "y": 764}]},
+            {"name": "Verse frites met truffelmayonaise en parmezaan", "price": "5.75", "locator": "Dinerkaart › ExTRA BIjGERECHTEN › pagina 3, kolom links, y=752 (bedrag op y=754)", "quote": "Verse frites met truffelmayonaise en parmezaan", "priceProofs": [{"page": 3, "column": "left", "y": 754}]},
+            {"name": "Frisse botersalade", "price": "5.50", "locator": "Dinerkaart › ExTRA BIjGERECHTEN › pagina 3, kolom links, y=740 (bedrag op y=742)", "quote": "Frisse botersalade", "priceProofs": [{"page": 3, "column": "left", "y": 742}]},
+            {"name": "Seizoensgroenten", "price": "6.75", "locator": "Dinerkaart › ExTRA BIjGERECHTEN › pagina 3, kolom links, y=730 (bedrag op y=732)", "quote": "Seizoensgroenten", "priceProofs": [{"page": 3, "column": "left", "y": 732}]}
+          ]
+        },
+        {
+          "path": ["Dinerkaart", "VOOR ONZE KLEINE GASTEN"],
+          "items": [
+            {"name": "Kipfilet of witvis", "price": "15.95", "locator": "Dinerkaart › VOOR ONZE KLEINE GASTEN › pagina 3, kolom links, y=696 (bedrag op y=698)", "quote": "Kipfilet of witvis, frites, salade", "priceProofs": [{"page": 3, "column": "left", "y": 698}]}
+          ]
+        },
+        {
+          "path": ["Dinerkaart", "DESSERT"],
+          "items": [
+            {"name": "Crème brûlée", "price": "9.95", "locator": "Dinerkaart › DESSERT › pagina 3, kolom links, y=488", "quote": "Crème brûlée", "priceProofs": [{"page": 3, "column": "left", "y": 488}]},
+            {"name": "Mousse au chocolat", "price": "12.95", "locator": "Dinerkaart › DESSERT › pagina 3, kolom links, y=434", "quote": "Mousse au chocolat, gezouten pecan, karamel", "priceProofs": [{"page": 3, "column": "left", "y": 434}]},
+            {"name": "Plateau de fromage", "priceVariants": [{"label": "3 stuks", "price": "10.95"}, {"label": "5 stuks", "price": "15.95"}], "locator": "Dinerkaart › DESSERT › pagina 3, kolom links, y=400 (3 stuks) en y=390 (5 stuks)", "quote": "Plateau de fromage, kweeperengelei, rozijnenbrood", "priceProofs": [{"page": 3, "column": "left", "y": 400}, {"page": 3, "column": "left", "y": 390}]},
+            {"name": "Café complet", "price": "13.95", "locator": "Dinerkaart › DESSERT › pagina 3, kolom links, y=356", "quote": "Café complet, zoete lekkernijen met koffie of thee naar keuze", "priceProofs": [{"page": 3, "column": "left", "y": 356}]},
+            {"name": "Chocolade truffels", "priceVariants": [{"label": "2 stuks", "price": "3.75"}], "locator": "Dinerkaart › DESSERT › pagina 3, kolom links, y=324", "quote": "Chocolade truffels (2 stuks)", "priceProofs": [{"page": 3, "column": "left", "y": 324}]}
+          ]
+        },
+        {
+          "path": ["Dinerkaart", "WIJNEN & PORT"],
+          "items": [
+            {"name": "Banyuls Traditionnel Aphrodis", "price": "6.25", "locator": "Dinerkaart › WIJNEN & PORT › pagina 3, kolom rechts, y=808", "quote": "Banyuls Traditionnel Aphrodis", "priceProofs": [{"page": 3, "column": "right", "y": 808}]},
+            {"name": "Muscat de Beaumes de Venise", "price": "6.25", "locator": "Dinerkaart › WIJNEN & PORT › pagina 3, kolom rechts, y=798", "quote": "Muscat de Beaumes de Venise", "priceProofs": [{"page": 3, "column": "right", "y": 798}]},
+            {"name": "Sauternes, Le Terre du Lys d'Or", "price": "7.25", "locator": "Dinerkaart › WIJNEN & PORT › pagina 3, kolom rechts, y=786", "quote": "Sauternes, Le Terre du Lys d'Or", "priceProofs": [{"page": 3, "column": "right", "y": 786}]},
+            {"name": "Pedro Ximénez, Mil Pesetas, Jerez", "price": "6.75", "locator": "Dinerkaart › WIJNEN & PORT › pagina 3, kolom rechts, y=776", "quote": "Pedro Ximénez, Mil Pesetas, Jerez", "priceProofs": [{"page": 3, "column": "right", "y": 776}]},
+            {"name": "Martha's Porto 10 yrs.", "price": "6.75", "locator": "Dinerkaart › WIJNEN & PORT › pagina 3, kolom rechts, y=764", "quote": "Martha's Porto 10 yrs.", "priceProofs": [{"page": 3, "column": "right", "y": 764}]}
+          ]
+        },
+        {
+          "path": ["Dinerkaart", "APERATIEF"],
+          "items": [
+            {"name": "Pernod / Ricard / Martini Bianco / Martini Rosso / Campari", "price": "5.00", "locator": "Dinerkaart › APERATIEF › pagina 3, kolom rechts, y=732", "quote": "Pernod / Ricard / Martini Bianco / Martini Rosso / Campari", "priceProofs": [{"page": 3, "column": "right", "y": 732}]},
+            {"name": "Rode Port Ruby / Witte port", "price": "5.00", "locator": "Dinerkaart › APERATIEF › pagina 3, kolom rechts, y=710", "quote": "Rode Port Ruby / Witte port", "priceProofs": [{"page": 3, "column": "right", "y": 710}]},
+            {"name": "Martha's Porto 10 yrs.", "price": "6.75", "locator": "Dinerkaart › APERATIEF › pagina 3, kolom rechts, y=698", "quote": "Martha's Porto 10 yrs.", "priceProofs": [{"page": 3, "column": "right", "y": 698}]},
+            {"name": "Crodino (alcoholvrij)", "price": "5.00", "locator": "Dinerkaart › APERATIEF › pagina 3, kolom rechts, y=688", "quote": "Crodino (alcoholvrij)", "priceProofs": [{"page": 3, "column": "right", "y": 688}]}
+          ]
+        },
+        {
+          "path": ["Dinerkaart", "DIGESTIVES"],
+          "items": [
+            {"name": "Café Spécial", "price": "9.95", "locator": "Dinerkaart › DIGESTIVES › pagina 3, kolom rechts, y=654", "quote": "Café Spécial: French, Irish, Italian, Spanish, Bardot", "priceProofs": [{"page": 3, "column": "right", "y": 654}]},
+            {"name": "Likeuren en Grappa", "priceVariants": [{"label": "vanaf", "price": "6.25"}], "locator": "Dinerkaart › DIGESTIVES › pagina 3, kolom rechts, y=632", "quote": "Likeuren en Grappa", "priceProofs": [{"page": 3, "column": "right", "y": 632}]},
+            {"name": "Limoncello Primo", "price": "5.75", "locator": "Dinerkaart › DIGESTIVES › pagina 3, kolom rechts, y=622", "quote": "Limoncello Primo", "priceProofs": [{"page": 3, "column": "right", "y": 622}]},
+            {"name": "Espresso Martini", "price": "11.75", "locator": "Dinerkaart › DIGESTIVES › pagina 3, kolom rechts, y=610", "quote": "Espresso Martini", "priceProofs": [{"page": 3, "column": "right", "y": 610}]}
+          ]
+        },
+        {
+          "path": ["Dinerkaart", "MIX / COCKTAILS / GIN & TONIC"],
+          "items": [
+            {"name": "Mimosa", "price": "8.25", "locator": "Dinerkaart › MIX / COCKTAILS / GIN & TONIC › pagina 3, kolom rechts, y=578", "quote": "Mimosa", "priceProofs": [{"page": 3, "column": "right", "y": 578}]},
+            {"name": "Aperol Spritz", "price": "9.25", "locator": "Dinerkaart › MIX / COCKTAILS / GIN & TONIC › pagina 3, kolom rechts, y=566", "quote": "Aperol Spritz", "priceProofs": [{"page": 3, "column": "right", "y": 566}]},
+            {"name": "Limoncello Spritz", "price": "9.25", "locator": "Dinerkaart › MIX / COCKTAILS / GIN & TONIC › pagina 3, kolom rechts, y=556", "quote": "Limoncello Spritz", "priceProofs": [{"page": 3, "column": "right", "y": 556}]},
+            {"name": "Espresso Martini", "price": "11.75", "locator": "Dinerkaart › MIX / COCKTAILS / GIN & TONIC › pagina 3, kolom rechts, y=544", "quote": "Espresso Martini", "priceProofs": [{"page": 3, "column": "right", "y": 544}]},
+            {"name": "Pornstar Martini", "price": "11.75", "locator": "Dinerkaart › MIX / COCKTAILS / GIN & TONIC › pagina 3, kolom rechts, y=534", "quote": "Pornstar Martini", "priceProofs": [{"page": 3, "column": "right", "y": 534}]},
+            {"name": "Moscow mule", "price": "9.75", "locator": "Dinerkaart › MIX / COCKTAILS / GIN & TONIC › pagina 3, kolom rechts, y=522", "quote": "Moscow mule", "priceProofs": [{"page": 3, "column": "right", "y": 522}]},
+            {"name": "Amaretto Sour", "price": "10.75", "locator": "Dinerkaart › MIX / COCKTAILS / GIN & TONIC › pagina 3, kolom rechts, y=512", "quote": "Amaretto Sour", "priceProofs": [{"page": 3, "column": "right", "y": 512}]},
+            {"name": "Whisky Sour", "price": "11.75", "locator": "Dinerkaart › MIX / COCKTAILS / GIN & TONIC › pagina 3, kolom rechts, y=500", "quote": "Whisky Sour", "priceProofs": [{"page": 3, "column": "right", "y": 500}]},
+            {"name": "Negroni", "price": "9.75", "locator": "Dinerkaart › MIX / COCKTAILS / GIN & TONIC › pagina 3, kolom rechts, y=490", "quote": "Negroni", "priceProofs": [{"page": 3, "column": "right", "y": 490}]},
+            {"name": "Hendrick's gin – Fever Tree", "price": "11.75", "locator": "Dinerkaart › MIX / COCKTAILS / GIN & TONIC › pagina 3, kolom rechts, y=478", "quote": "Hendrick's gin – Fever Tree", "priceProofs": [{"page": 3, "column": "right", "y": 478}]},
+            {"name": "Copperhead gin – Fever Tree", "price": "13.25", "locator": "Dinerkaart › MIX / COCKTAILS / GIN & TONIC › pagina 3, kolom rechts, y=468", "quote": "Copperhead gin – Fever Tree", "priceProofs": [{"page": 3, "column": "right", "y": 468}]}
+          ]
+        },
+        {
+          "path": ["Dinerkaart", "MOCKTAILS"],
+          "items": [
+            {"name": "Copperhead gin 0.0% – Fever Tree", "price": "8.75", "locator": "Dinerkaart › MOCKTAILS › pagina 3, kolom rechts, y=434", "quote": "Copperhead gin 0.0% – Fever Tree", "priceProofs": [{"page": 3, "column": "right", "y": 434}]},
+            {"name": "Spiced Mule 0.0%", "price": "6.95", "locator": "Dinerkaart › MOCKTAILS › pagina 3, kolom rechts, y=424", "quote": "Spiced Mule 0.0%", "priceProofs": [{"page": 3, "column": "right", "y": 424}]},
+            {"name": "Pornstar Martini 0.0%", "price": "10.75", "locator": "Dinerkaart › MOCKTAILS › pagina 3, kolom rechts, y=412", "quote": "Pornstar Martini 0.0%", "priceProofs": [{"page": 3, "column": "right", "y": 412}]}
+          ]
+        },
+        {
+          "path": ["Dinerkaart", "COGNAC & CALVADOS"],
+          "items": [
+            {"name": "Courvoisier VS", "price": "9.00", "locator": "Dinerkaart › COGNAC & CALVADOS › pagina 3, kolom rechts, y=380", "quote": "Courvoisier VS", "priceProofs": [{"page": 3, "column": "right", "y": 380}]},
+            {"name": "Martell VS", "price": "10.75", "locator": "Dinerkaart › COGNAC & CALVADOS › pagina 3, kolom rechts, y=368", "quote": "Martell VS", "priceProofs": [{"page": 3, "column": "right", "y": 368}]},
+            {"name": "Rémy Martin VSOP", "price": "11.75", "locator": "Dinerkaart › COGNAC & CALVADOS › pagina 3, kolom rechts, y=358", "quote": "Rémy Martin VSOP", "priceProofs": [{"page": 3, "column": "right", "y": 358}]},
+            {"name": "Armagnac VSOP", "price": "8.75", "locator": "Dinerkaart › COGNAC & CALVADOS › pagina 3, kolom rechts, y=346", "quote": "Armagnac VSOP", "priceProofs": [{"page": 3, "column": "right", "y": 346}]},
+            {"name": "Calvados Père Magloire VSOP", "price": "9.00", "locator": "Dinerkaart › COGNAC & CALVADOS › pagina 3, kolom rechts, y=336", "quote": "Calvados Père Magloire VSOP", "priceProofs": [{"page": 3, "column": "right", "y": 336}]}
+          ]
+        },
+        {
+          "path": ["Dinerkaart", "WHISKY"],
+          "items": [
+            {"name": "Jameson", "price": "6.25", "locator": "Dinerkaart › WHISKY › pagina 3, kolom rechts, y=302", "quote": "Jameson", "priceProofs": [{"page": 3, "column": "right", "y": 302}]},
+            {"name": "Jack Daniel's", "price": "6.25", "locator": "Dinerkaart › WHISKY › pagina 3, kolom rechts, y=292", "quote": "Jack Daniel's", "priceProofs": [{"page": 3, "column": "right", "y": 292}]},
+            {"name": "Glenfiddich 12 yrs.", "price": "8.00", "locator": "Dinerkaart › WHISKY › pagina 3, kolom rechts, y=280", "quote": "Glenfiddich 12 yrs.", "priceProofs": [{"page": 3, "column": "right", "y": 280}]},
+            {"name": "Chivas Regal 12 yrs.", "price": "7.75", "locator": "Dinerkaart › WHISKY › pagina 3, kolom rechts, y=270", "quote": "Chivas Regal 12 yrs.", "priceProofs": [{"page": 3, "column": "right", "y": 270}]},
+            {"name": "Oban 14 yrs.", "price": "10.75", "locator": "Dinerkaart › WHISKY › pagina 3, kolom rechts, y=258", "quote": "Oban 14 yrs.", "priceProofs": [{"page": 3, "column": "right", "y": 258}]}
+          ]
+        },
+        {
+          "path": ["Dinerkaart", "WIJNKAART", "WITTE WIJNEN", "Frankrijk"],
+          "items": [
+            {"name": "Pays d'Oc Chardonnay, Croix d'Or", "priceVariants": [{"label": "per glas", "price": "5.50"}, {"label": "per fles", "price": "30.25"}], "locator": "Dinerkaart › WIJNKAART › WITTE WIJNEN › Frankrijk › pagina 4, kolom links, y=726", "quote": "Pays d'Oc Chardonnay, Croix d'Or", "priceProofs": [{"page": 4, "column": "left", "y": 726}, {"page": 4, "column": "left", "y": 726}]},
+            {"name": "Languedoc Viognier", "producer": "Domaine Castelnau", "priceVariants": [{"label": "per glas", "price": "5.75"}, {"label": "per fles", "price": "31.50"}], "locator": "Dinerkaart › WIJNKAART › WITTE WIJNEN › Frankrijk › pagina 4, kolom links, y=696", "quote": "Languedoc Viognier, Domaine Castelnau", "priceProofs": [{"page": 4, "column": "left", "y": 696}, {"page": 4, "column": "left", "y": 696}]},
+            {"name": "Languedoc-Roussillon Chardonnay", "producer": "Les Bertholets", "priceVariants": [{"label": "per glas", "price": "6.00"}, {"label": "per fles", "price": "33.00"}], "locator": "Dinerkaart › WIJNKAART › WITTE WIJNEN › Frankrijk › pagina 4, kolom links, y=666", "quote": "Languedoc-Roussillon Chardonnay, Les Bertholets", "priceProofs": [{"page": 4, "column": "left", "y": 666}, {"page": 4, "column": "left", "y": 666}]},
+            {"name": "Loire Sauvignon Blanc Touraine", "producer": "Domaine de la Renaudie", "priceVariants": [{"label": "per glas", "price": "6.75"}, {"label": "per fles", "price": "37.25"}], "locator": "Dinerkaart › WIJNKAART › WITTE WIJNEN › Frankrijk › pagina 4, kolom links, y=636", "quote": "Loire Sauvignon Blanc Touraine, Domaine de la Renaudie", "priceProofs": [{"page": 4, "column": "left", "y": 636}, {"page": 4, "column": "left", "y": 636}]},
+            {"name": "Loire Sauvignon Blanc, Menetou-Salon", "producer": "Domaine Champault, appellatie Sancerre en Menetou-Salon", "priceVariants": [{"label": "per glas", "price": "8.00"}, {"label": "per fles", "price": "44.00"}], "locator": "Dinerkaart › WIJNKAART › WITTE WIJNEN › Frankrijk › pagina 4, kolom links, y=606", "quote": "Loire Sauvignon Blanc, Menetou-Salon Domaine Champault, appellatie Sancerre en Menetou-Salon", "priceProofs": [{"page": 4, "column": "left", "y": 606}, {"page": 4, "column": "left", "y": 606}]},
+            {"name": "Bourgogne Chardonnay Chablis", "producer": "Domaine Marcel et Blanche Fèvre-Fèvre", "priceVariants": [{"label": "per glas", "price": "8.75"}, {"label": "per fles", "price": "48.00"}], "locator": "Dinerkaart › WIJNKAART › WITTE WIJNEN › Frankrijk › pagina 4, kolom links, y=566", "quote": "Bourgogne Chardonnay Chablis, Domaine Marcel et Blanche Fèvre-Fèvre", "priceProofs": [{"page": 4, "column": "left", "y": 566}, {"page": 4, "column": "left", "y": 566}]},
+            {"name": "Bourgogne Chardonnay Pouilly Fuissé", "producer": "Domaine Rey 'En Carmentrant'", "priceVariants": [{"label": "per glas", "price": "8.75"}, {"label": "per fles", "price": "48.00"}], "locator": "Dinerkaart › WIJNKAART › WITTE WIJNEN › Frankrijk › pagina 4, kolom links, y=526", "quote": "Bourgogne Chardonnay Pouilly Fuissé Domaine Rey “En Carmentrant”", "priceProofs": [{"page": 4, "column": "left", "y": 526}, {"page": 4, "column": "left", "y": 526}]},
+            {"name": "Bourgogne Chardonnay Saint Aubin", "producer": "Domaine du Château Philippe le Hardi", "priceVariants": [{"label": "per fles", "price": "89.00"}], "locator": "Dinerkaart › WIJNKAART › WITTE WIJNEN › Frankrijk › pagina 4, kolom links, y=496 (alleen flesprijs)", "quote": "Bourgogne Chardonnay Saint Aubin Domaine du Château Philippe le Hardi", "priceProofs": [{"page": 4, "column": "left", "y": 496}]},
+            {"name": "Bourgogne Chardonnay Meursault", "producer": "Seguin Manuel Les Clos", "priceVariants": [{"label": "per fles", "price": "105.00"}], "locator": "Dinerkaart › WIJNKAART › WITTE WIJNEN › Frankrijk › pagina 4, kolom links, y=466 (alleen flesprijs)", "quote": "Bourgogne Chardonnay Meursault, Seguin Manuel Les Clos", "priceProofs": [{"page": 4, "column": "left", "y": 466}]},
+            {"name": "Viognier Condrieu Noordelijk Rhônegebied", "producer": "Christophe Semaska Lys d'Or 2021", "priceVariants": [{"label": "per fles", "price": "89.00"}], "locator": "Dinerkaart › WIJNKAART › WITTE WIJNEN › Frankrijk › pagina 4, kolom links, y=436 (alleen flesprijs)", "quote": "Viognier Condrieu Noordelijk Rhônegebied Christophe Semaska Lys d'Or 2021", "priceProofs": [{"page": 4, "column": "left", "y": 436}]}
+          ]
+        },
+        {
+          "path": ["Dinerkaart", "WIJNKAART", "WITTE WIJNEN", "Duitsland"],
+          "items": [
+            {"name": "Pfalz, Dr. Burkin-Wolf Riesling", "priceVariants": [{"label": "per glas", "price": "8.25"}, {"label": "per fles", "price": "45.00"}], "locator": "Dinerkaart › WIJNKAART › WITTE WIJNEN › Duitsland › pagina 4, kolom links, y=396", "quote": "Pfalz, Dr. Burkin-Wolf Riesling", "priceProofs": [{"page": 4, "column": "left", "y": 396}, {"page": 4, "column": "left", "y": 396}]}
+          ]
+        },
+        {
+          "path": ["Dinerkaart", "WIJNKAART", "WITTE WIJNEN", "Oostenrijk"],
+          "items": [
+            {"name": "Grüner Veltliner, Weingut Gruber", "producer": "Röschitz (biologisch)", "priceVariants": [{"label": "per glas", "price": "6.75"}, {"label": "per fles", "price": "37.00"}], "locator": "Dinerkaart › WIJNKAART › WITTE WIJNEN › Oostenrijk › pagina 4, kolom links, y=366", "quote": "Grüner Veltliner, Weingut Gruber Röschitz (biologisch)", "priceProofs": [{"page": 4, "column": "left", "y": 366}, {"page": 4, "column": "left", "y": 366}]}
+          ]
+        },
+        {
+          "path": ["Dinerkaart", "WIJNKAART", "WITTE WIJNEN", "Italië"],
+          "items": [
+            {"name": "Pinot Grigio della Venezie, Zenato", "priceVariants": [{"label": "per glas", "price": "5.75"}, {"label": "per fles", "price": "31.75"}], "locator": "Dinerkaart › WIJNKAART › WITTE WIJNEN › Italië › pagina 4, kolom links, y=326", "quote": "Pinot Grigio della Venezie, Zenato", "priceProofs": [{"page": 4, "column": "left", "y": 326}, {"page": 4, "column": "left", "y": 326}]}
+          ]
+        },
+        {
+          "path": ["Dinerkaart", "WIJNKAART", "WITTE WIJNEN", "Spanje"],
+          "items": [
+            {"name": "Verdejo, Dama del Lago, Rueda", "priceVariants": [{"label": "per glas", "price": "5.75"}, {"label": "per fles", "price": "31.75"}], "locator": "Dinerkaart › WIJNKAART › WITTE WIJNEN › Spanje › pagina 4, kolom links, y=296", "quote": "Verdejo, Dama del Lago, Rueda", "priceProofs": [{"page": 4, "column": "left", "y": 296}, {"page": 4, "column": "left", "y": 296}]}
+          ]
+        },
+        {
+          "path": ["Dinerkaart", "WIJNKAART", "WITTE WIJNEN", "Nieuw Zeeland"],
+          "items": [
+            {"name": "Sauvignon Blanc Marlborough", "producer": "Misty Cove Estate", "priceVariants": [{"label": "per glas", "price": "6.75"}, {"label": "per fles", "price": "37.00"}], "locator": "Dinerkaart › WIJNKAART › WITTE WIJNEN › Nieuw Zeeland › pagina 4, kolom links, y=266", "quote": "Sauvignon Blanc Marlborough, Misty Cove Estate", "priceProofs": [{"page": 4, "column": "left", "y": 266}, {"page": 4, "column": "left", "y": 266}]}
+          ]
+        },
+        {
+          "path": ["Dinerkaart", "WIJNKAART", "WITTE WIJNEN", "Zuid Afrika"],
+          "items": [
+            {"name": "Boschendal 1685", "producer": "100% Chenin Blanc, Franschhoek", "priceVariants": [{"label": "per glas", "price": "7.25"}, {"label": "per fles", "price": "39.75"}], "locator": "Dinerkaart › WIJNKAART › WITTE WIJNEN › Zuid Afrika › pagina 4, kolom links, y=226", "quote": "Boschendal 1685 100% Chenin Blanc, Franschhoek", "priceProofs": [{"page": 4, "column": "left", "y": 226}, {"page": 4, "column": "left", "y": 226}]}
+          ]
+        },
+        {
+          "path": ["Dinerkaart", "WIJNKAART", "WITTE WIJNEN", "USA"],
+          "items": [
+            {"name": "100% Bogle Chardonnay", "producer": "Clarksburg Californië", "priceVariants": [{"label": "per glas", "price": "8.50"}, {"label": "per fles", "price": "46.75"}], "locator": "Dinerkaart › WIJNKAART › WITTE WIJNEN › USA › pagina 4, kolom links, y=186", "quote": "100% Bogle Chardonnay, Clarksburg Californië", "priceProofs": [{"page": 4, "column": "left", "y": 186}, {"page": 4, "column": "left", "y": 186}]}
+          ]
+        },
+        {
+          "path": ["Dinerkaart", "WIJNKAART", "RODE WIJNEN", "Frankrijk"],
+          "items": [
+            {"name": "Pays d'Oc Merlot, Croix d'Or", "priceVariants": [{"label": "per glas", "price": "5.50"}, {"label": "per fles", "price": "30.25"}], "locator": "Dinerkaart › WIJNKAART › RODE WIJNEN › Frankrijk › pagina 4, kolom links, y=118 (bedragen op y=116)", "quote": "Pays d'Oc Merlot, Croix d'Or", "priceProofs": [{"page": 4, "column": "left", "y": 116}, {"page": 4, "column": "left", "y": 116}]},
+            {"name": "Languedoc Pinot Noir Réserve", "producer": "Château Paul Mas", "priceVariants": [{"label": "per glas", "price": "6.50"}, {"label": "per fles", "price": "35.75"}], "locator": "Dinerkaart › WIJNKAART › RODE WIJNEN › Frankrijk › pagina 4, kolom links, y=98 (bedragen op y=94)", "quote": "Languedoc Pinot Noir Réserve, Château Paul Mas", "priceProofs": [{"page": 4, "column": "left", "y": 94}, {"page": 4, "column": "left", "y": 94}]},
+            {"name": "Côtes du Rhône, Paul Jaboulet", "producer": "Aîné Parallèle 45, Grenache, Syrah", "priceVariants": [{"label": "per glas", "price": "7.25"}, {"label": "per fles", "price": "39.75"}], "locator": "Dinerkaart › WIJNKAART › RODE WIJNEN › Frankrijk › pagina 4, kolom links, y=68", "quote": "Côtes du Rhône, Paul Jaboulet Aîné Parallèle 45, Grenache, Syrah", "priceProofs": [{"page": 4, "column": "left", "y": 68}, {"page": 4, "column": "left", "y": 68}]},
+            {"name": "Bordeaux Saint-Émilion Grand Cru", "producer": "Château La Fleur Cravignac", "priceVariants": [{"label": "per glas", "price": "8.50"}, {"label": "per fles", "price": "46.75"}], "locator": "Dinerkaart › WIJNKAART › RODE WIJNEN › Frankrijk › pagina 4, kolom rechts, y=798", "quote": "Bordeaux Saint-Émilion Grand Cru Château La Fleur Cravignac", "priceProofs": [{"page": 4, "column": "right", "y": 798}, {"page": 4, "column": "right", "y": 798}]},
+            {"name": "Bordeaux Lalande de Pomerol", "producer": "Château La Pensée", "priceVariants": [{"label": "per glas", "price": "8.75"}, {"label": "per fles", "price": "48.00"}], "locator": "Dinerkaart › WIJNKAART › RODE WIJNEN › Frankrijk › pagina 4, kolom rechts, y=748", "quote": "Bordeaux Lalande de Pomerol, Château La Pensée, Merlot 80%, Cabernet Sauvignon, Cabernet Franc", "priceProofs": [{"page": 4, "column": "right", "y": 748}, {"page": 4, "column": "right", "y": 748}]},
+            {"name": "Bordeaux Margaux, Château de Clairefont", "priceVariants": [{"label": "per fles", "price": "79.00"}], "locator": "Dinerkaart › WIJNKAART › RODE WIJNEN › Frankrijk › pagina 4, kolom rechts, y=698 (alleen flesprijs)", "quote": "Bordeaux Margaux, Château de Clairefont", "priceProofs": [{"page": 4, "column": "right", "y": 698}]}
+          ]
+        },
+        {
+          "path": ["Dinerkaart", "WIJNKAART", "RODE WIJNEN", "Italië"],
+          "items": [
+            {"name": "Primitivo Quota 29, Menhir Salento, Puglia", "priceVariants": [{"label": "per glas", "price": "7.50"}, {"label": "per fles", "price": "41.75"}], "locator": "Dinerkaart › WIJNKAART › RODE WIJNEN › Italië › pagina 4, kolom rechts, y=658", "quote": "Primitivo Quota 29, Menhir Salento, Puglia", "priceProofs": [{"page": 4, "column": "right", "y": 658}, {"page": 4, "column": "right", "y": 658}]},
+            {"name": "Zenato Ripassa della Valpolicella", "producer": "Ripasso Superiore, Veneto", "priceVariants": [{"label": "per glas", "price": "8.75"}, {"label": "per fles", "price": "48.00"}], "locator": "Dinerkaart › WIJNKAART › RODE WIJNEN › Italië › pagina 4, kolom rechts, y=628", "quote": "Zenato Ripassa della Valpolicella, Ripasso Superiore, Veneto", "priceProofs": [{"page": 4, "column": "right", "y": 628}, {"page": 4, "column": "right", "y": 628}]},
+            {"name": "Piemonte 100% Nebbiolo Serre dei Roveri Barolo Riserva", "priceVariants": [{"label": "per glas", "price": "12.75"}, {"label": "per fles", "price": "69.50"}], "locator": "Dinerkaart › WIJNKAART › RODE WIJNEN › Italië › pagina 4, kolom rechts, y=588", "quote": "Piemonte 100% Nebbiolo Serre dei Roveri Barolo Riserva", "priceProofs": [{"page": 4, "column": "right", "y": 588}, {"page": 4, "column": "right", "y": 588}]}
+          ]
+        },
+        {
+          "path": ["Dinerkaart", "WIJNKAART", "RODE WIJNEN", "Spanje"],
+          "items": [
+            {"name": "Rioja Coto de Imaz Reserva, 100% Tempranillo", "priceVariants": [{"label": "per glas", "price": "7.50"}, {"label": "per fles", "price": "41.75"}], "locator": "Dinerkaart › WIJNKAART › RODE WIJNEN › Spanje › pagina 4, kolom rechts, y=548", "quote": "Rioja Coto de Imaz Reserva, 100% Tempranillo", "priceProofs": [{"page": 4, "column": "right", "y": 548}, {"page": 4, "column": "right", "y": 548}]}
+          ]
+        },
+        {
+          "path": ["Dinerkaart", "WIJNKAART", "RODE WIJNEN", "Argentinië"],
+          "items": [
+            {"name": "La Consulta 100% Malbec, Catena", "priceVariants": [{"label": "per glas", "price": "7.75"}, {"label": "per fles", "price": "42.50"}], "locator": "Dinerkaart › WIJNKAART › RODE WIJNEN › Argentinië › pagina 4, kolom rechts, y=508", "quote": "La Consulta 100% Malbec, Catena", "priceProofs": [{"page": 4, "column": "right", "y": 508}, {"page": 4, "column": "right", "y": 508}]}
+          ]
+        },
+        {
+          "path": ["Dinerkaart", "WIJNKAART", "RODE WIJNEN", "USA"],
+          "items": [
+            {"name": "Cali Shark California Red", "producer": "100% Cabernet Sauvignon.", "priceVariants": [{"label": "per glas", "price": "7.50"}, {"label": "per fles", "price": "41.75"}], "locator": "Dinerkaart › WIJNKAART › RODE WIJNEN › USA › pagina 4, kolom rechts, y=478", "quote": "Cali Shark California Red", "priceProofs": [{"page": 4, "column": "right", "y": 478}, {"page": 4, "column": "right", "y": 478}]}
+          ]
+        },
+        {
+          "path": ["Dinerkaart", "WIJNKAART", "ROSÉ WIJNEN"],
+          "items": [
+            {"name": "Languedoc Syrah Rosé, Luc Pirlet", "priceVariants": [{"label": "per glas", "price": "5.50"}, {"label": "per fles", "price": "30.25"}], "locator": "Dinerkaart › WIJNKAART › ROSÉ WIJNEN › pagina 4, kolom rechts, y=418", "quote": "Languedoc Syrah Rosé, Luc Pirlet", "priceProofs": [{"page": 4, "column": "right", "y": 418}, {"page": 4, "column": "right", "y": 418}]},
+            {"name": "Côtes d'Azur Rosé CHIC, Grenache, Cinsault, Château du Rouët", "priceVariants": [{"label": "per glas", "price": "6.50"}, {"label": "per fles", "price": "35.75"}], "locator": "Dinerkaart › WIJNKAART › ROSÉ WIJNEN › pagina 4, kolom rechts, y=398", "quote": "Côtes d'Azur Rosé CHIC, Grenache, Cinsault, Château du Rouët", "priceProofs": [{"page": 4, "column": "right", "y": 398}, {"page": 4, "column": "right", "y": 398}]},
+            {"name": "Languedoc-Roussillion, Gavinel Gris", "producer": "Rosé, Cinsault, Grenache Noir, Mourvèdre", "priceVariants": [{"label": "per fles", "price": "41.25"}], "locator": "Dinerkaart › WIJNKAART › ROSÉ WIJNEN › pagina 4, kolom rechts, y=368 (alleen flesprijs)", "quote": "Languedoc-Roussillion, Gavinel Gris", "priceProofs": [{"page": 4, "column": "right", "y": 368}]},
+            {"name": "Ultimate Provence Rosé, 100% Grenache", "priceVariants": [{"label": "per fles", "price": "42.50"}], "locator": "Dinerkaart › WIJNKAART › ROSÉ WIJNEN › pagina 4, kolom rechts, y=338 (alleen flesprijs)", "quote": "Ultimate Provence Rosé, 100% Grenache", "priceProofs": [{"page": 4, "column": "right", "y": 338}]},
+            {"name": "Magnum Ultimate Provence Rosé 1,5 ltr.", "priceVariants": [{"label": "per fles", "price": "75.00"}], "locator": "Dinerkaart › WIJNKAART › ROSÉ WIJNEN › pagina 4, kolom rechts, y=328 (alleen flesprijs)", "quote": "Magnum Ultimate Provence Rosé 1,5 ltr.", "priceProofs": [{"page": 4, "column": "right", "y": 328}]},
+            {"name": "Miraval Rosé Côtes de Provence", "producer": "Cinsault 40%, Grenache 40%, Syrah 10%", "priceVariants": [{"label": "per fles", "price": "49.00"}], "locator": "Dinerkaart › WIJNKAART › ROSÉ WIJNEN › pagina 4, kolom rechts, y=308 (alleen flesprijs)", "quote": "Miraval Rosé Côtes de Provence", "priceProofs": [{"page": 4, "column": "right", "y": 308}]},
+            {"name": "Magnum Miraval 1,5 ltr.", "priceVariants": [{"label": "per fles", "price": "89.00"}], "locator": "Dinerkaart › WIJNKAART › ROSÉ WIJNEN › pagina 4, kolom rechts, y=286 (alleen flesprijs)", "quote": "Magnum Miraval 1,5 ltr.", "priceProofs": [{"page": 4, "column": "right", "y": 286}]}
+          ]
+        },
+        {
+          "path": ["Dinerkaart", "WIJNKAART", "MOUSSERENDE WIJNEN"],
+          "items": [
+            {"name": "Crémant de Bourgogne", "producer": "Cave de Viré Brut", "priceVariants": [{"label": "per glas", "price": "7.75"}, {"label": "per fles", "price": "45.75"}], "locator": "Dinerkaart › WIJNKAART › MOUSSERENDE WIJNEN › pagina 4, kolom rechts, y=234", "quote": "Crémant de Bourgogne Cave de Viré Brut", "priceProofs": [{"page": 4, "column": "right", "y": 234}, {"page": 4, "column": "right", "y": 234}]},
+            {"name": "Champagne Charles LaFITTE, ODF", "producer": "Blanc Brut", "priceVariants": [{"label": "per fles", "price": "79.75"}], "locator": "Dinerkaart › WIJNKAART › MOUSSERENDE WIJNEN › pagina 4, kolom rechts, y=178 (alleen flesprijs)", "quote": "Champagne Charles LaFITTE, ODF", "priceProofs": [{"page": 4, "column": "right", "y": 178}]},
+            {"name": "Champagne Charles LaFITTE, ODF Rosé", "priceVariants": [{"label": "per fles", "price": "89.75"}], "locator": "Dinerkaart › WIJNKAART › MOUSSERENDE WIJNEN › pagina 4, kolom rechts, y=150 (alleen flesprijs)", "quote": "Champagne Charles LaFITTE, ODF Rosé", "priceProofs": [{"page": 4, "column": "right", "y": 150}]},
+            {"name": "Champagne Vranken", "producer": "cuvée Diamant Brut", "priceVariants": [{"label": "0,375 ltr.", "price": "55.00"}, {"label": "0.750 ltr.", "price": "95.00"}, {"label": "1,5 ltr", "price": "185.00"}], "locator": "Dinerkaart › WIJNKAART › MOUSSERENDE WIJNEN › pagina 4, kolom rechts, y=132 (0,375 ltr.), y=122 (0.750 ltr.) en y=112 (1,5 ltr)", "quote": "Champagne Vranken cuvée Diamant Brut", "priceProofs": [{"page": 4, "column": "right", "y": 132}, {"page": 4, "column": "right", "y": 122}, {"page": 4, "column": "right", "y": 112}]},
+            {"name": "Champagne Louis Roederer Brut", "priceVariants": [{"label": "per fles", "price": "99.00"}], "locator": "Dinerkaart › WIJNKAART › MOUSSERENDE WIJNEN › pagina 4, kolom rechts, y=94 (alleen flesprijs)", "quote": "Champagne Louis Roederer Brut", "priceProofs": [{"page": 4, "column": "right", "y": 94}]},
+            {"name": "Champagne Ruinart Brut Blanc de Blancs", "priceVariants": [{"label": "per fles", "price": "165.00"}], "locator": "Dinerkaart › WIJNKAART › MOUSSERENDE WIJNEN › pagina 4, kolom rechts, y=76 (alleen flesprijs)", "quote": "Champagne Ruinart Brut Blanc de Blancs", "priceProofs": [{"page": 4, "column": "right", "y": 76}]},
+            {"name": "Pizzolato organic 0.0% 0,20 ltr.", "price": "7.95", "locator": "Dinerkaart › WIJNKAART › MOUSSERENDE WIJNEN › pagina 4, kolom rechts, y=56 (bedrag op y=58)", "quote": "Pizzolato organic 0.0% 0,20 ltr.", "priceProofs": [{"page": 4, "column": "right", "y": 58}]}
+          ]
+        }
+      ]
+    }
+  ],
+  "supplements": [
+    {"name": "Extra topping", "price": "0.95", "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf", "quote": "Extra topping: Gin Tonic schuim & Sinaasappel", "priceProofs": [{"page": 2, "column": "left", "y": 722}], "note": "Toevoeging bij de oesters. De bron print drie toppingregels (Gin Tonic schuim & Sinaasappel, Asian Style, Rockefeller met daslook) bij één bedrag; zie ambiguous."},
+    {"name": "blini's en zure room", "price": "5.00", "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf", "quote": "Supplement: blini's en zure room", "priceProofs": [{"page": 2, "column": "left", "y": 480}], "note": "Toevoeging bij de kaviaar, geen zelfstandig gerecht."},
+    {"name": "eendenlever", "price": "6.75", "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf", "quote": "Supplement: eendenlever", "priceProofs": [{"page": 2, "column": "left", "y": 220}], "note": "Toevoeging bij de klassieke steak tartaar (90 gram) in de voorgerechten."},
+    {"name": "eendenlever", "price": "6.75", "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf", "quote": "Klassieke steak tartaar (150 gram) Supplement: eendenlever", "priceProofs": [{"page": 2, "column": "right", "y": 408}], "note": "Toevoeging bij de klassieke steak tartaar (150 gram) in de hoofdgerechten."},
+    {"name": "gebakken eendenlever", "price": "8.50", "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf", "quote": "Supplement: gebakken eendenlever", "priceProofs": [{"page": 2, "column": "right", "y": 220}], "note": "Toevoeging bij de tournedos."},
+    {"name": "Pata Negra (25 gr.)", "price": "9.50", "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf", "quote": "Supplement: Pata Negra (25 gr.)", "priceProofs": [{"page": 2, "column": "right", "y": 78}], "note": "Toevoeging bij de gnocchi."},
+    {"name": "bol vanille-ijs", "price": "2.50", "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf", "quote": "Supplement: bol vanille-ijs", "priceProofs": [{"page": 3, "column": "left", "y": 478}], "note": "Toevoeging bij de crème brûlée."}
+  ],
+  "arrangements": [],
+  "ambiguous": [
+    {"kind": "dish_without_amount", "item": "Kreeft (500/600 gr.)", "path": ["Dinerkaart", "VOORGERECHTEN"], "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf", "quote": "Kreeft (500/600 gr.), 1/2 of 1/1 gekookt of gegrild, citroenmayonaise of dragon boter", "reason": "De bron noemt bij dit gerecht uitsluitend 'Dagprijs' en geen bedrag. Volgens telregel 1 is een regel zonder prijs wel een gerecht, maar de bestaande referentiecontrole eist een bedrag per item; daarom staat het hier met de letterlijke regel en telt het niet mee in precisie/recall. Een extractie die dit gerecht leeg oplevert, verschijnt daardoor als verzonnen rij."},
+    {"kind": "dish_without_amount", "item": "Kreeft, pasta aglio e olio", "path": ["Dinerkaart", "HOOFDGERECHTEN", "SPECIALITEITEN VAN BARDOT"], "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf", "quote": "Kreeft, pasta aglio e olio, 1/2 of 1/1 antiboise, parmezaan", "reason": "Ook hier noemt de bron alleen 'Dagprijs'. Zelfde behandeling als de kreeft bij de voorgerechten: wel een bronregel, geen bedrag, dus niet in de teller."},
+    {"kind": "oyster_toppings", "item": "Asian Style / Rockefeller met daslook", "path": ["Dinerkaart", "KLASSIEKE BORRELHAPPEN"], "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf", "quote": "Asian Style Rockefeller met daslook", "reason": "De bron print onder 'Extra topping' drie regels en één bedrag (0,95). Niet vast te stellen of 'Asian Style' en 'Rockefeller met daslook' bereidingen van de oester tegen het oesterbedrag zijn of toppings tegen 0,95. Niet als gerecht opgenomen en het bedrag is niet aan een van beide regels toegekend."},
+    {"kind": "amount_not_on_own_row", "item": "Royal de Jarras, Brut Rosé", "path": ["Dinerkaart", "WIJNKAART", "MOUSSERENDE WIJNEN"], "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf", "quote": "Royal de Jarras, Brut Rosé", "reason": "Deze regel heeft geen eigen bedrag; het dichtstbijzijnde bedrag staat op de regel met 'French sparkling wine' 7,75 / 45,75, die ook als omschrijving van de crémant kan horen. Geen prijs toegekend."},
+    {"kind": "description_line", "item": "French sparkling wine", "path": ["Dinerkaart", "WIJNKAART", "MOUSSERENDE WIJNEN"], "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf", "quote": "French sparkling wine", "reason": "Omschrijvingsregel bij de crémant, geen zelfstandig benoemd gerecht."},
+    {"kind": "subsection_boundary", "item": "HOOFDGERECHTEN versus SPECIALITEITEN VAN BARDOT", "path": ["Dinerkaart", "HOOFDGERECHTEN"], "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf", "quote": "HOOFDGEREC HTEN", "reason": "De rechterkolom van pagina 2 print 'HOOFDGERECHTEN' en daaronder 'SPECIALITEITEN VAN BARDOT', met de eerste gerechten onder die tweede kop. De referentie leest Poussin en Chateaubriand als subsectie en de rest als HOOFDGERECHTEN. Een vlakke lezing (alles HOOFDGERECHTEN) is ook verdedigbaar; die levert rubriekfouten op en is hier bewust gedocumenteerd in plaats van als enige waarheid opgelegd."},
+    {"kind": "magnum_as_own_row", "item": "Magnum Ultimate Provence Rosé / Magnum Miraval", "path": ["Dinerkaart", "WIJNKAART", "ROSÉ WIJNEN"], "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf", "quote": "Magnum Ultimate Provence Rosé 1,5 ltr.", "reason": "De twee magnumregels zijn apart benoemd en apart geprijsd, dus als eigen regel geteld. Ze als flesvariant van dezelfde wijn lezen kan ook; de meting telt ze in dat geval als gemist/verzonnen en dat is hier vastgelegd."},
+    {"kind": "source_duplicate_rows", "item": "Espresso Martini / Martha's Porto 10 yrs.", "path": ["Dinerkaart"], "captureKey": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf", "quote": "Espresso Martini", "reason": "De bron print 'Espresso Martini' bij de digestieven en bij de cocktails, en 'Martha's Porto 10 yrs.' bij de wijnen/port en bij de aperitieven. Volgens telregel 1 is dat één gerecht per rubriekpad, dus twee referentie-items; een extra kopie in hetzelfde pad zou een verzonnen rij zijn."}
+  ],
+  "limitations": [
+    "Alleen de dinerkaart-PDF (2025-11) is vastgezet en gebruikt. De twee HTML-pagina's uit dezelfde capture gaven bij verificatie andere bytes dan de gepinde hash en leveren daarom geen referentie.",
+    "Pagina 1 is de omslag; pagina 4 is de wijnkaart. De dranken tellen mee omdat telregel 1 dranken in de vastgezette menubron meetelt.",
+    "De sectie 'NAAST DE KAART / SERVEREN WIJ WISSELEND / SEIZOENSGERECHTEN' print geen gerecht en geen bedrag; er is niets geteld en dit is geen lege menukaart.",
+    "De allergenenvermelding is algemeen ('Niet alle ingrediënten worden vermeld'). Allergenen per gerecht blijven onbekend, niet allergeenvrij.",
+    "Wijnnamen staan over twee of drie regels; de naam is de aanduidingsregel en de producent of herkomst staat als producer, nooit samengevoegd.",
+    "'v.a. 6,25' bij Likeuren en Grappa is als prijsvariant met label 'vanaf' vastgelegd; de bron noemt geen ander bedrag.",
+    "Deze referentie is uit de vastgezette PDF-tekst en de paginageometrie opgesteld, niet uit de parseruitvoer."
+  ]
+}

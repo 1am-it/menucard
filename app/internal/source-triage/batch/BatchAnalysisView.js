@@ -8,8 +8,53 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import StatusIcon from '@/src/components/StatusIcon'
-import { MenuControl, MenuConcept } from './MenuReview'
-import { MAX_BATCH_URLS, DAILY_URL_LIMIT, COPY, ACTION_LABELS, precheckLines, splitLines } from '@/src/lib/batchAnalysis'
+import { MenuControl, MenuConcept, StructureReview, plural } from './MenuReview'
+import { MAX_BATCH_URLS, DAILY_URL_LIMIT, COPY, ACTION_LABELS, precheckLines, splitLines, offersAiRead } from '@/src/lib/batchAnalysis'
+import { formatPath } from '@/src/lib/menuHierarchy'
+import { parsePathText, reviewKey } from '@/src/lib/menuStructureReview'
+
+/** The local per-section state starts from the already recorded decisions. */
+function seedStructure(review) {
+  const seed = {}
+  if (!review || !Array.isArray(review.required)) return seed
+  const treated = new Map(((Array.isArray(review.treated) && review.treated) || []).map((entry) => [entry.key, entry]))
+  for (const section of review.required) {
+    const decision = treated.get(section.key)
+    if (!decision) continue
+    seed[section.key] = decision.action === 'correct'
+      ? { action: 'correct', text: formatPath(decision.correctedPath) }
+      : { action: 'keep', text: formatPath(section.path) }
+  }
+  return seed
+}
+
+/**
+ * The exact payload the server re-checks: every uncertain section of the
+ * stored receipt, the receipt hash, and only "keep" or a real correction.
+ * Incomplete input never produces a confirmable payload.
+ */
+function structurePayload(item, review, value) {
+  const sections = []
+  let complete = true
+  for (const section of review.required) {
+    const choice = value[section.key]
+    if (!choice || (choice.action !== 'keep' && choice.action !== 'correct')) {
+      complete = false
+      continue
+    }
+    if (choice.action === 'keep') {
+      sections.push({ path: section.path, action: 'keep' })
+      continue
+    }
+    const corrected = parsePathText(choice.text || '')
+    if (!corrected || reviewKey(corrected) === section.key) {
+      complete = false
+      continue
+    }
+    sections.push({ path: section.path, action: 'correct', corrected_path: corrected })
+  }
+  return { complete, payload: { job_id: item.jobId, receipt_hash: review.receiptHash || null, sections } }
+}
 
 function timeOf(value) {
   const d = new Date(value)
@@ -49,7 +94,10 @@ function Explainer() {
     <ul className="bta-explainer">
       <li>Maximaal {MAX_BATCH_URLS} URL&apos;s per batch, handmatig ingevoerd.</li>
       <li>De analyse loopt alleen zolang jij deze pagina open hebt. Sluiten pauzeert; terugkomen hervat.</li>
-      <li>Geen AI, geen OCR, geen automatische wijziging van restaurantgegevens.</li>
+      <li>
+        Geen OCR en geen automatische wijziging van restaurantgegevens. Lukt lezen niet, dan is er de AI-hulp met eigen
+        controle.
+      </li>
       <li>
         Zeker resultaat: bevestig de bron hier. Twijfel, robots.txt of geen bruikbare menukaart: beoordeel handmatig in
         Bronnen beoordelen.
@@ -210,21 +258,67 @@ function InputCard({ text, setText, daily, ownOpenBatchId, onStart, busy, error,
   )
 }
 
-function ResultCard({ item, isStarter, batchOpen, ownOpenBatchId, confirming, setConfirming, onConfirm, onRerun, onAdjust, onSaveConcept, busy }) {
-  const [details, setDetails] = useState(false)
+function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBatchId, confirming, setConfirming, onConfirm, onRerun, onAdjust, onSaveConcept, busy }) {
+  const [details, setDetails] = useState(focusItem === item.position || item.key === 'image_only')
   const confirmRef = useRef(null)
+  const resultRef = useRef(null)
   const restaurantName = item.restaurant && item.restaurant.name
   const knownText = item.restaurant ? `Bekend restaurant · ${restaurantName}` : item.key === 'menu_found' || item.key === 'needs_review' ? 'Onbekend restaurant' : null
   const open = Boolean(item.jobId) && confirming === item.jobId
+
+  // Human structure review (#59 review 6307703713). Only an exactly eligible
+  // result offers it; the server re-validates the same paths on confirm.
+  const structureReview = item.structureReview && item.structureReview.eligible === true ? item.structureReview : null
+  const [structure, setStructure] = useState(() => seedStructure(structureReview))
+  const structureState = structureReview ? structurePayload(item, structureReview, structure) : null
+  const structureReady = Boolean(
+    structureReview && structureState.complete && structureReview.receiptHash && structureReview.storeAvailable !== false
+  )
+  const structureRef = useRef(null)
+
+  function changeStructure(key, patch) {
+    setStructure((prev) => ({ ...prev, [key]: { ...(prev[key] || {}), ...patch } }))
+  }
 
   useEffect(() => {
     if (open && confirmRef.current) confirmRef.current.focus()
   }, [open])
 
+  useEffect(() => {
+    if (focusItem !== item.position) return
+    setDetails(true)
+    if (resultRef.current) resultRef.current.scrollIntoView({ block: 'start' })
+  }, [focusItem, item.position])
+
   const canAct = isStarter
   const rerunBlocked = Boolean(ownOpenBatchId) || batchOpen
   const actions = canAct ? item.actions : []
-  const reviewHref = item.restaurant ? '/internal/source-triage' : `/internal/onboarding-restaurant${item.url ? `?url=${encodeURIComponent(item.url)}` : ''}`
+  // A known restaurant's manual result belongs to this exact batch item. The
+  // old unfiltered source-triage list lost the restaurant, source and page;
+  // this link reopens the same result with its source context intact.
+  const reviewHref = item.restaurant && batchId
+    ? `/internal/source-triage/batch?batch=${encodeURIComponent(batchId)}&item=${item.position}`
+    : `/internal/onboarding-restaurant${item.url ? `?url=${encodeURIComponent(item.url)}` : ''}`
+  // The image/scan route deliberately leaves the batch: the existing Bronnen
+  // beoordelen page lets a human propose another text/PDF source or mark this
+  // one unusable. The reason travels with the link so it stays visible.
+  const reviewSourceHref = item.restaurant
+    ? `/internal/source-triage?restaurant=${encodeURIComponent(item.restaurant.id)}&reason=image_only`
+    : '/internal/source-triage?reason=image_only'
+
+  // W1 of Lead review 6380804419: on a failed or empty automatic read, the
+  // existing job is the allowed source of an AI reading. The link opens the
+  // manual import page, which owns the progress, the budget and the review; the
+  // manual alternative stays one click away.
+  const aiReadAvailable = offersAiRead(item)
+  const aiReadHref = aiReadAvailable
+    ? `/internal/menu-import?job=${encodeURIComponent(item.jobId)}${
+        item.restaurant ? `&restaurant=${encodeURIComponent(item.restaurant.id)}&name=${encodeURIComponent(item.restaurant.name || '')}` : ''
+      }${item.url ? `&url=${encodeURIComponent(item.url)}` : ''}`
+    : null
+  const manualImportHref = `/internal/menu-import${
+    item.restaurant ? `?restaurant=${encodeURIComponent(item.restaurant.id)}&name=${encodeURIComponent(item.restaurant.name || '')}` : ''
+  }`
 
   function actionButton(action, primary) {
     const cls = primary ? 'di-btn-primary bta-btn' : 'stg-btn-secondary bta-btn'
@@ -235,10 +329,35 @@ function ResultCard({ item, isStarter, batchOpen, ownOpenBatchId, confirming, se
         </button>
       )
     }
+    if (action === 'review_structure') {
+      return (
+        <button
+          key={action}
+          type="button"
+          className={cls}
+          disabled={busy}
+          onClick={() => {
+            setDetails(true)
+            window.requestAnimationFrame(() => {
+              if (structureRef.current) structureRef.current.scrollIntoView({ block: 'start' })
+            })
+          }}
+        >
+          {ACTION_LABELS.review_structure}
+        </button>
+      )
+    }
     if (action === 'review_manually') {
       return (
         <a key={action} className={cls} href={reviewHref}>
           {ACTION_LABELS.review_manually}
+        </a>
+      )
+    }
+    if (action === 'review_source') {
+      return (
+        <a key={action} className={cls} href={reviewSourceHref}>
+          {ACTION_LABELS.review_source}
         </a>
       )
     }
@@ -267,7 +386,7 @@ function ResultCard({ item, isStarter, batchOpen, ownOpenBatchId, confirming, se
   }
 
   return (
-    <li className={`bta-result${open ? ' bta-result--confirming' : ''}`}>
+    <li ref={resultRef} id={`bta-result-${item.position}`} className={`bta-result${open ? ' bta-result--confirming' : ''}`}>
       <div className="bta-result-head">
         <div className="bta-result-id">
           <span className="bta-url bta-url--strong">{item.url || `Regel ${item.position}`}</span>
@@ -287,9 +406,30 @@ function ResultCard({ item, isStarter, batchOpen, ownOpenBatchId, confirming, se
         </dl>
       )}
 
+      {details && structureReview && (
+        <div ref={structureRef}>
+          <StructureReview
+            idPrefix={`bta-${item.position}-${item.jobId || 'geen'}`}
+            review={structureReview}
+            value={structure}
+            readOnly={!isStarter}
+            onChange={changeStructure}
+          />
+        </div>
+      )}
+
       {details && <MenuControl item={item} />}
 
       {item.concept && <MenuConcept item={item} readOnly={!isStarter} busy={busy} onSave={onSaveConcept} />}
+
+      {!open && details && structureReview && structureReady && canAct && item.key === 'needs_review' && !item.actions.includes('confirm') && (
+        <div className="bta-actions">
+          <button type="button" className="di-btn-primary bta-btn" disabled={busy} onClick={() => setConfirming(item.jobId)}>
+            {ACTION_LABELS.confirm}
+          </button>
+          <p className="bta-muted">Alle {structureReview.required.length} onzekere rubrieken zijn behandeld. Bevestig daarna de bron; er wordt niets gepubliceerd.</p>
+        </div>
+      )}
 
       {open && (
         <div className="bta-confirm" role="group" aria-labelledby={`bta-confirm-${item.jobId}`}>
@@ -300,8 +440,22 @@ function ResultCard({ item, isStarter, batchOpen, ownOpenBatchId, confirming, se
             Je bevestigt na eigen controle dat deze menukaart de bron van {restaurantName} is. Er wordt niets
             gepubliceerd.
           </p>
+          {structureReview && structureState && (
+            <p className="bta-muted">
+              {plural(structureState.payload.sections.length, 'onzekere rubriek', 'onzekere rubrieken')} behandeld:{' '}
+              {structureState.payload.sections.filter((section) => section.action === 'keep').length} gehandhaafd,{' '}
+              {structureState.payload.sections.filter((section) => section.action === 'correct').length} gecorrigeerd. Deze
+              keuzes worden als edits in het concept opgenomen.
+            </p>
+          )}
           <div className="bta-actions">
-            <button ref={confirmRef} type="button" className="di-btn-primary bta-btn" disabled={busy} onClick={() => onConfirm([item.jobId])}>
+            <button
+              ref={confirmRef}
+              type="button"
+              className="di-btn-primary bta-btn"
+              disabled={busy || (structureReview && !structureReady)}
+              onClick={() => onConfirm([item.jobId], structureReview && structureState ? [structureState.payload] : undefined)}
+            >
               {ACTION_LABELS.confirm}
             </button>
             <button type="button" className="stg-btn-secondary bta-btn" onClick={() => setConfirming(null)}>
@@ -311,10 +465,33 @@ function ResultCard({ item, isStarter, batchOpen, ownOpenBatchId, confirming, se
         </div>
       )}
 
+      {canAct && aiReadHref && (
+        <section className="bta-ai-help" aria-labelledby={`bta-ai-${item.position}`}>
+          <h3 id={`bta-ai-${item.position}`} className="bta-ai-title">
+            Laat AI de kaart lezen
+          </h3>
+          <p className="bta-muted">
+            Lukt automatisch lezen niet, dan leest de AI dezelfde bron. Je leest het resultaat daarna zelf na; er wordt
+            niets gepubliceerd.
+          </p>
+          <div className="bta-actions">
+            <a className="di-btn-primary bta-btn" href={aiReadHref}>
+              Lees met AI
+            </a>
+            <span className="bta-muted">Kost ongeveer 1 cent · duurt ± 1 minuut</span>
+          </div>
+          <p className="bta-muted">
+            <a className="bta-ai-link" href={manualImportHref}>
+              Liever zelf invoeren of plakken
+            </a>
+          </p>
+        </section>
+      )}
+
       {!open && (
         <div className="bta-actions">
           {actions.map((a, i) => actionButton(a, i === 0))}
-          {(item.menu || item.foundUrl || item.restaurant || item.notes.length > 0) && (
+          {(item.menu || item.foundUrl || item.restaurant || item.notes.length > 0 || item.limitations.length > 0 || item.key === 'image_only') && (
             <button type="button" className="stg-btn-secondary bta-btn" aria-expanded={details} onClick={() => setDetails((d) => !d)}>
               {item.menu ? (details ? 'Controle sluiten' : 'Menukaart controleren') : 'Details bekijken'}
             </button>
@@ -328,7 +505,7 @@ function ResultCard({ item, isStarter, batchOpen, ownOpenBatchId, confirming, se
   )
 }
 
-function BatchDetail({ detail, ownOpenBatchId, busy, confirming, setConfirming, onConfirm, onRerun, onAdjust, onSaveConcept, onNew, notice }) {
+function BatchDetail({ detail, focusItem, ownOpenBatchId, busy, confirming, setConfirming, onConfirm, onRerun, onAdjust, onSaveConcept, onNew, notice }) {
   const { batch, items, summary } = detail
   const isStarter = batch.is_starter
   const batchOpen = !batch.closed_at
@@ -482,6 +659,8 @@ function BatchDetail({ detail, ownOpenBatchId, busy, confirming, setConfirming, 
           <ResultCard
             key={`${item.position}-${item.jobId || 'none'}`}
             item={item}
+            batchId={batch.id}
+            focusItem={focusItem}
             isStarter={isStarter}
             batchOpen={batchOpen}
             ownOpenBatchId={ownOpenBatchId}
@@ -500,7 +679,7 @@ function BatchDetail({ detail, ownOpenBatchId, busy, confirming, setConfirming, 
 }
 
 /** Everything below the internal navigation. */
-export default function BatchAnalysisView({ data, loadError, message, viewing, ownOpenBatchId, busy, confirming, setConfirming, onConfirm, onRerun, onAdjust, onSaveConcept, onNew, notice, text, setText, onStart, actionError, onShowOpen, onSelect }) {
+export default function BatchAnalysisView({ data, loadError, message, viewing, focusItem, ownOpenBatchId, busy, confirming, setConfirming, onConfirm, onRerun, onAdjust, onSaveConcept, onNew, notice, text, setText, onStart, actionError, onShowOpen, onSelect }) {
   return (
     <>
       <nav aria-label="Kruimelpad" className="bta-breadcrumb">
@@ -554,6 +733,7 @@ export default function BatchAnalysisView({ data, loadError, message, viewing, o
           {data && viewing && (
             <BatchDetail
               detail={viewing}
+              focusItem={focusItem}
               ownOpenBatchId={ownOpenBatchId}
               busy={busy}
               confirming={confirming}

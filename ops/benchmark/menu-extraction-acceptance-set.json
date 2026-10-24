@@ -1,0 +1,632 @@
+{
+  "version": "1.4.0",
+  "pinnedAt": "2026-10-18",
+  "revisedAt": "2026-10-24",
+  "issue": 59,
+  "note": "Pre-declared #59 acceptance set. It records exact local fixtures and the six explicitly allowed public sources: the two tuned representative sources (Smelt, Blossem), the three repaired practice sources now representative/used_for_tuning (De Botanist, Mr Moos, Colonia Breda), and Gauchos Grill Breda as the only remaining evaluated_once holdout. A holdout has its own explicit state: unused, evaluated_once, or used_for_tuning. It never treats a reachable URL, a found PDF or an item count as proof of a complete menu. BE-21's wider vendor/OCR benchmark is out of scope. Revision 1.3.0 moved the protocol pin to v0.3 (literal, contiguous evidence citation). Revision 1.4.0 only moves the pin to v0.4 (literal sourceId, documented typographic equivalence, unambiguous price variants); the entries, references and thresholds are unchanged.",
+  "protocol": {
+    "file": "MENU-EXTRACTION.md",
+    "version": "0.4",
+    "sha256": "ccbc4c03124cb3be8201d24b0a97ed41d962c2415339cf2c295658cca6e310f4"
+  },
+  "schemaVersions": {
+    "extractionOutput": "menu-extraction-output/v1",
+    "extractionResult": 1,
+    "productMapping": "existing receipt + concept contract; a lossless extension is design-only in planning/architecture/menu-extraction-product-schema-v2.md"
+  },
+  "requiredClasses": {
+    "html": "Static HTML headings, lists and repeated dish blocks.",
+    "accordion_tabs": "Tab/accordion panels whose DOM relation decides the menu variant and section.",
+    "tables": "Table rows and definition lists, including a price without a name.",
+    "text_pdf": "Digital text PDF, columns, baselines, multiple pages and price variants.",
+    "scan_unreadable": "Scan/image-only, encrypted or otherwise unreadable PDF; the product must report the limit, not OCR it.",
+    "language_branch": "Non-Dutch menu labels and a chain/location menu that must not be assigned to another branch.",
+    "arrangement": "Arrangement, choice menu, supplement or per-person price, kept out of ordinary dishes.",
+    "price_variant": "Glass/bottle, from-price or multiple undecomposed prices; never silently choose one.",
+    "historical_cards": "Existing Wolfslaar, Bardot, Zuyd and T-Huis snapshots as a shape regression, never current truth.",
+    "safety_and_errors": "Timeout, provider failure, invalid output, budget/page limits, reimport, concurrency, prompt injection, wrong branch and unsafe redirect.",
+    "contract_mapping": "One validated result reaching receipt, review, concept and export without silent flattening.",
+    "review_surface": "Shared uncertainty is reviewable per group; no accept-all action; duplicate and price blockers stay separate.",
+    "browser_fixture": "Existing import/review UI in an isolated local browser fixture; explicitly not live integration."
+  },
+  "releaseThresholds": {
+    "inventedDishes": 0,
+    "inventedPrices": 0,
+    "evidenceCoveragePercent": 100,
+    "unexplainedCoverageItems": 0,
+    "structureLossAccepted": 0,
+    "priceErrorsAccepted": 0,
+    "manualCorrectionTime": "unknown; not measured in this round and never reported as zero",
+    "costPerSourceEurCents": "unknown; no provider was called and unknown cost is never reported as 0"
+  },
+  "representative": [
+    {
+      "id": "REP-HTML-001",
+      "class": "html",
+      "provenance": "synthetic_fixture",
+      "sourceRef": "ops/benchmark/structureCorpus.js",
+      "sourceVersion": "STRUCTURE_CORPUS_VERSION 1.0.0; STRUCT-001, STRUCT-002, STRUCT-004, STRUCT-005, STRUCT-021, STRUCT-022",
+      "expected": [
+        "Headings, lists, formatted dish blocks, definition data and line_break_list rows keep their own section route.",
+        "A price is linked to its own dish; a price without a name is not a dish.",
+        "normalized and uncertain structures both remain representable."
+      ],
+      "tests": [
+        "npm run test:menu-structure",
+        "npm test"
+      ],
+      "status": "executed",
+      "result": "6/6 corpus gate tests pass; 22 classified cases pass and STRUCT-018 remains the single documented unclassified case.",
+      "usedForTuning": true,
+      "limitations": [
+        "Synthetic fixture only; it does not prove every real HTML site."
+      ]
+    },
+    {
+      "id": "REP-ACCORDION-001",
+      "class": "accordion_tabs",
+      "provenance": "synthetic_fixture",
+      "sourceRef": "src/lib/htmlMenuVariants.test.js",
+      "sourceVersion": "hand-written .invalid panel fixture",
+      "expected": [
+        "Panel labels become menu variants, not decoration.",
+        "A cookie button without a controlled panel is never a menu heading.",
+        "Alternative menu prices are reported as excluded content, never flattened into a dish."
+      ],
+      "tests": [
+        "node --test src/lib/htmlMenuVariants.test.js"
+      ],
+      "status": "executed",
+      "result": "3/3 tests pass in the full suite.",
+      "usedForTuning": true,
+      "limitations": [
+        "A panel without a DOM relation stays uncertain on a real site; no rendered observation is available here."
+      ]
+    },
+    {
+      "id": "REP-ACCORDION-002",
+      "class": "accordion_tabs",
+      "provenance": "real_source",
+      "referenceId": "blossem",
+      "sourceRef": "ops/benchmark/source-references.json#blossem",
+      "sourceVersion": "HTML 40615 bytes; bytesSha256 da5c632f...0c38; contentHash pinned in source-references.json",
+      "expected": [
+        "DINNER and LUNCH stay separate variants; VOOR/TUSSEN/HOOFD/BIJGERECHTEN/DESSERT and KOUD/WARM/BROOD keep their own paths.",
+        "Every reference row is explained exactly once; arrangement sections are excluded and reported.",
+        "An uncertain relation has a reviewable group; no fixed item or section count is a pass condition."
+      ],
+      "tests": [
+        "node ops/scripts/probe-menu-extraction-sources.js --source=blossem"
+      ],
+      "status": "executed_with_limitation",
+      "result": "Probe exit 0; 43/43 reference items matched in 13 sections; 0 missing, 0 extra, 0 price, 0 link, 0 duplicate; balanced accounting.",
+      "usedForTuning": true,
+      "limitations": [
+        "BLOSSEM MENU and WIJNARRANGEMENT are reported as excluded alternative-price sections and cannot yet be stored losslessly.",
+        "The reference is a controlled capture of this source version, not a truth claim for a later version.",
+        "No independent human item-by-item review has been performed."
+      ]
+    },
+    {
+      "id": "REP-TABLE-001",
+      "class": "tables",
+      "provenance": "synthetic_fixture",
+      "sourceRef": "ops/benchmark/structureCorpus.js#STRUCT-019,STRUCT-020",
+      "sourceVersion": "STRUCTURE_CORPUS_VERSION 1.0.0",
+      "expected": [
+        "Table rows and dt/dd pairs keep name and price together.",
+        "A row with a price but no name is rejected, not invented into a dish."
+      ],
+      "tests": [
+        "npm run test:menu-structure"
+      ],
+      "status": "executed",
+      "result": "Both classified cases pass in the 6/6 corpus gate.",
+      "usedForTuning": true,
+      "limitations": [
+        "Only the shapes in the corpus are pinned; arbitrary table layouts are not claimed."
+      ]
+    },
+    {
+      "id": "REP-PDF-001",
+      "class": "text_pdf",
+      "provenance": "real_source",
+      "referenceId": "smelt",
+      "sourceRef": "ops/benchmark/source-references.json#smelt",
+      "sourceVersion": "PDF 550738 bytes; bytesSha256 4445a101...27f8; contentHash 24f23cbd...8a845; 2 pages",
+      "expected": [
+        "The actual PDF text layer is read; a found PDF with zero dishes never succeeds.",
+        "Every reference row is matched once with its own section and price; columns and baselines do not merge dishes.",
+        "Supplement and arrangement lines are reported as limitations and never become ordinary dishes."
+      ],
+      "tests": [
+        "node ops/scripts/probe-menu-extraction-sources.js --source=smelt"
+      ],
+      "status": "executed_with_limitation",
+      "result": "Probe exit 0; 37/37 reference items matched in 8 sections (KAASFONDUE, DINER > Vooraf/Hoofd/Desserts, BORREL, LUNCH > Eieren/Broodjes/Overig); 0 missing, 0 extra, 0 price, 0 link, 0 duplicate.",
+      "usedForTuning": true,
+      "limitations": [
+        "7 supplement lines and 1 arrangement line are not stored; 1 price-like line inside a description is reported.",
+        "88 duplicate overlay text lines are ignored by the rule; the source version is pinned by byte and content hash.",
+        "No independent human item-by-item review has been performed."
+      ]
+    },
+    {
+      "id": "REP-PDF-002",
+      "class": "text_pdf",
+      "provenance": "synthetic_fixture",
+      "sourceRef": "src/lib/pdfMenuStructuring.test.js",
+      "sourceVersion": "hand-built digital PDF line fixtures in the test file",
+      "expected": [
+        "Rows are reconstructed by Y-position; a right-hand dish never lands under a left heading when a row is empty.",
+        "A second identical overlapping text layer is ignored, while a legitimate repeated list is kept.",
+        "A supplement line is skipped and counted; a number in a description is not a price."
+      ],
+      "tests": [
+        "node --test src/lib/pdfMenuStructuring.test.js"
+      ],
+      "status": "executed",
+      "result": "63 PDF structuring tests pass in the full suite.",
+      "usedForTuning": true,
+      "limitations": [
+        "Synthetic positions cannot reproduce every real PDF generator."
+      ]
+    },
+    {
+      "id": "REP-SCAN-001",
+      "class": "scan_unreadable",
+      "provenance": "synthetic_fixture",
+      "sourceRef": "ops/benchmark/manifest.json#fixture-scanned-pdf-no-text-layer,fixture-digital-pdf-encrypted",
+      "sourceVersion": "local_be20_fixture entries; structurally valid PDFs in src/lib/pdfTextExtraction.test.js",
+      "expected": [
+        "An image-only PDF ends as pdf_no_text_layer, never as an empty successful menu.",
+        "An encrypted PDF ends as pdf_encrypted; neither case attempts OCR or the raw-stream fallback.",
+        "The limitation is visible to review; no OCR vendor is activated."
+      ],
+      "tests": [
+        "node --test src/lib/pdfTextExtraction.test.js"
+      ],
+      "status": "executed_with_limitation",
+      "result": "Closed error vocabulary and both fixtures pass; no OCR/rendering dependency is imported.",
+      "usedForTuning": true,
+      "limitations": [
+        "Scanned menus are not extracted at all today; this is an explicit unsupported class, not a silent partial success."
+      ]
+    },
+    {
+      "id": "REP-LANG-001",
+      "class": "language_branch",
+      "provenance": "synthetic_fixture",
+      "sourceRef": "ops/benchmark/manifest.json#fixture-multilingual-menu-keyword",
+      "sourceVersion": "synthetic-html-multilingual-menu-keyword (hand-written .invalid page)",
+      "expected": [
+        "A German menu link (Speisekarte) is discovered once and followed once.",
+        "The menu label stays as found; no Dutch section name is invented."
+      ],
+      "tests": [
+        "node --test ops/benchmark/adapters.test.js ops/benchmark/manifest.test.js"
+      ],
+      "status": "executed",
+      "result": "The fixture is pinned and its expected menu context is asserted by the BE-21 foundation tests.",
+      "usedForTuning": true,
+      "limitations": [
+        "One non-Dutch keyword is not full multilingual coverage."
+      ]
+    },
+    {
+      "id": "REP-BRANCH-001",
+      "class": "language_branch",
+      "provenance": "synthetic_fixture",
+      "sourceRef": "ops/benchmark/manifest.json#fixture-chain-location-conflict",
+      "sourceVersion": "synthetic chain fixture with a different head-office postcode",
+      "expected": [
+        "A chain location page keeps its own address; a conflicting head-office address is reported, not overwritten.",
+        "The field is capped at low confidence and marked for manual review."
+      ],
+      "tests": [
+        "node --test src/lib/restaurantSourceAnalysis.test.js"
+      ],
+      "status": "executed",
+      "result": "The contextStatus conflict regression passes; the location value is retained.",
+      "usedForTuning": true,
+      "limitations": [
+        "Synthetic chain page; it does not prove every shared-domain restaurant site."
+      ]
+    },
+    {
+      "id": "REP-BRANCH-002",
+      "class": "language_branch",
+      "provenance": "real_source",
+      "referenceId": "smelt",
+      "sourceRef": "ops/benchmark/source-references.json#smelt",
+      "sourceVersion": "Breda-specific PDF under the shared restaurantsmelt.nl domain; bytesSha256 4445a101...27f8; contentHash 24f23cbd...8a845",
+      "expected": [
+        "The Breda menu is read from the Breda page/PDF, not assumed from the chain homepage.",
+        "The homepage having no menu link is not reported as an empty menu."
+      ],
+      "tests": [
+        "node ops/scripts/probe-menu-extraction-sources.js --source=smelt"
+      ],
+      "status": "executed_with_limitation",
+      "result": "The Breda PDF is read read-only; the homepage-only observation is recorded as no extraction evidence.",
+      "usedForTuning": true,
+      "limitations": [
+        "Only Breda is probed; other Smelt locations are not part of #59."
+      ]
+    },
+    {
+      "id": "REP-ARRANGEMENT-001",
+      "class": "arrangement",
+      "provenance": "synthetic_fixture",
+      "sourceRef": "ops/benchmark/structureCorpus.js#STRUCT-013",
+      "sourceVersion": "STRUCTURE_CORPUS_VERSION 1.0.0",
+      "expected": [
+        "A supplement, time, date, arrangement and per-person price are rejected as ordinary dishes.",
+        "The exclusion reason is recorded; nothing is silently turned into a priced dish."
+      ],
+      "tests": [
+        "npm run test:menu-structure"
+      ],
+      "status": "executed",
+      "result": "STRUCT-013 passes with the expected rejection reasons.",
+      "usedForTuning": true,
+      "limitations": [
+        "The product concept still cannot store the excluded arrangement itself; only its absence is reported."
+      ]
+    },
+    {
+      "id": "REP-ARRANGEMENT-002",
+      "class": "arrangement",
+      "provenance": "real_source",
+      "referenceId": "blossem",
+      "sourceRef": "ops/benchmark/source-references.json#blossem; source-references.json#smelt",
+      "sourceVersion": "Blossem HTML bytesSha256 da5c632f...0c38 and Smelt PDF bytesSha256 4445a101...27f8; content hashes pinned in source-references.json",
+      "expected": [
+        "BLOSSEM MENU, WIJNARRANGEMENT and the Smelt arrangement line are reported as excluded, not stored as dishes.",
+        "The quality gate marks the source incomplete and does not present a partial menu as complete."
+      ],
+      "tests": [
+        "node ops/scripts/probe-menu-extraction-sources.js --source=all",
+        "node --test src/lib/menuExtractionQuality.test.js"
+      ],
+      "status": "executed_with_limitation",
+      "result": "Both probes exit 0 with zero item/price/link differences and explicit excluded-arrangement limitations.",
+      "usedForTuning": true,
+      "limitations": [
+        "Arrangement, choice-group and supplement storage is a product-schema gap; a versioned design exists but is not implemented or migrated."
+      ]
+    },
+    {
+      "id": "REP-PRICE-001",
+      "class": "price_variant",
+      "provenance": "synthetic_fixture",
+      "sourceRef": "ops/benchmark/structureCorpus.js#STRUCT-012; src/lib/pdfMenuStructuring.test.js Chardonnay regression",
+      "sourceVersion": "STRUCTURE_CORPUS_VERSION 1.0.0; hand-built PDF line fixture",
+      "expected": [
+        "Two prices or a price range are not an ordinary single-price dish.",
+        "Chardonnay 6.50 / 25.00 becomes one item with priceStatus multiple_undecomposed and priceText, never a second item named /."
+      ],
+      "tests": [
+        "npm run test:menu-structure",
+        "node --test src/lib/pdfMenuStructuring.test.js"
+      ],
+      "status": "executed",
+      "result": "STRUCT-012 passes and the PDF regression passes with the concept blocker multiple_prices.",
+      "usedForTuning": true,
+      "limitations": [
+        "The concept stores at most one price; a multi-price line is blocked for human correction."
+      ]
+    },
+    {
+      "id": "REP-PRICE-002",
+      "class": "price_variant",
+      "provenance": "real_source",
+      "referenceId": "smelt",
+      "sourceRef": "ops/benchmark/source-references.json#smelt; source-references.json#blossem",
+      "sourceVersion": "Smelt PDF bytesSha256 4445a101...27f8 and Blossem HTML bytesSha256 da5c632f...0c38; content hashes pinned in source-references.json",
+      "expected": [
+        "No supplement becomes a main price and no lowest price is chosen silently.",
+        "Alternative menu prices are excluded and reported rather than attached to a dish."
+      ],
+      "tests": [
+        "node ops/scripts/probe-menu-extraction-sources.js --source=all"
+      ],
+      "status": "executed_with_limitation",
+      "result": "Probes report 0 price errors on the pinned references; alternative-price sections are listed as exclusions.",
+      "usedForTuning": true,
+      "limitations": [
+        "Lossless glass/bottle/from-price storage is not implemented; those constructs are blocked or excluded."
+      ]
+    },
+    {
+      "id": "REP-HISTORICAL-001",
+      "class": "historical_cards",
+      "provenance": "historical_dataset",
+      "sourceRef": "data/menus.json",
+      "sourceVersion": "11 menu entries; latest scraped 2026-03-28; canonical LF sha256 46c84c0fad3c0bef02173cedfa4e5e3d699d2acacd0a8b9ff9ec4afe90e49766",
+      "truthClaim": false,
+      "expected": [
+        "Wolfslaar, Bardot, Zuyd and T-Huis snapshots map to live menu lines one-for-one with category path, order and normalised price preserved.",
+        "Missing or unparseable prices become null, never 0.00; no dish is invented or silently dropped.",
+        "The historical counts are reported as a shape regression, never as current menu truth."
+      ],
+      "tests": [
+        "node --test src/lib/historicalMenus.test.js"
+      ],
+      "status": "executed_with_limitation",
+      "result": "Shape regression passes for all four restaurants; the source snapshot and its dates are pinned.",
+      "usedForTuning": true,
+      "limitations": [
+        "The four live websites were not re-fetched or compared in this round; current truth remains unverified."
+      ]
+    },
+    {
+      "id": "REP-SAFETY-001",
+      "class": "safety_and_errors",
+      "provenance": "synthetic_fixture",
+      "sourceRef": "src/lib/menuExtractionAdapter.test.js; src/lib/safeOutboundFetch.test.js; src/lib/restaurantSourceAnalysis.test.js; src/lib/menuConcept.test.js; src/lib/menuSourceComparison.test.js",
+      "sourceVersion": "offline fake provider and .invalid HTTP fixtures",
+      "expected": [
+        "Timeout, provider exception, invalid output, missing budget, input/output/page limits and async guards all refuse before or after a call with a concrete reason.",
+        "Reimport is idempotent, concurrent claims cannot double-process, and source text cannot inject instructions or trust fields.",
+        "A wrong branch or unsafe redirect is rejected by the existing safe-fetch/host rules."
+      ],
+      "tests": [
+        "node --test src/lib/menuExtractionAdapter.test.js src/lib/safeOutboundFetch.test.js src/lib/restaurantSourceAnalysis.test.js",
+        "node --test src/lib/menuConcept.test.js src/lib/menuSourceComparison.test.js"
+      ],
+      "status": "executed",
+      "result": "The targeted suites pass offline; no real provider or network call is involved.",
+      "usedForTuning": true,
+      "limitations": [
+        "Provider failure is simulated, not observed; no real provider is configured or approved."
+      ]
+    },
+    {
+      "id": "REP-CONTRACT-001",
+      "class": "contract_mapping",
+      "provenance": "synthetic_fixture",
+      "sourceRef": "src/lib/menuExtractionRuntime.test.js; src/lib/menuExtractionMapping.test.js; src/lib/restaurantSourceAnalysis.test.js; src/lib/menuConcept.test.js; src/lib/menuConceptExport.test.js; ops/benchmark/structureCorpus.js#STRUCT-017",
+      "sourceVersion": "menu-extraction-result/v1 and existing receipt/concept/export contracts",
+      "expected": [
+        "Summary, detail, review and concept all read the same validated extraction result.",
+        "Variant, order, source id, quote and uncertainty survive mapping; unsupported fields are blocked/reported, not flattened.",
+        "Concept preview and export use the same generated menu entry; no automatic publication."
+      ],
+      "tests": [
+        "node --test src/lib/menuExtractionRuntime.test.js src/lib/menuExtractionMapping.test.js src/lib/menuConceptExport.test.js",
+        "npm run test:menu-structure"
+      ],
+      "status": "executed_with_limitation",
+      "result": "All mapped fields and the STRUCT-017 concept/export equality pass; unsupported variants/supplements/allergens are reported.",
+      "usedForTuning": true,
+      "limitations": [
+        "The receipt/concept contract has one price per line; the lossless v2 design is not implemented."
+      ]
+    },
+    {
+      "id": "REP-REVIEW-001",
+      "class": "review_surface",
+      "provenance": "synthetic_fixture",
+      "sourceRef": "src/lib/menuConcept.test.js; src/lib/batchAnalysisHandlers.test.js; src/lib/menuExtractionQuality.test.js",
+      "sourceVersion": "fictional receipt/live-menu fixtures",
+      "expected": [
+        "Only the uncertain group is accepted by its own action; duplicate and missing-price blockers remain.",
+        "A legacy accept cannot settle a duplicate, and the server re-checks every blocker.",
+        "Attention groups are per variant + section, never one flattened global list."
+      ],
+      "tests": [
+        "node --test src/lib/menuConcept.test.js src/lib/batchAnalysisHandlers.test.js src/lib/menuExtractionQuality.test.js"
+      ],
+      "status": "executed",
+      "result": "The group/duplicate/price separation regressions pass in the full suite.",
+      "usedForTuning": true,
+      "limitations": [
+        "Component-level logic only until the isolated browser fixture below is executed."
+      ]
+    },
+    {
+      "id": "REP-BROWSER-001",
+      "class": "browser_fixture",
+      "provenance": "synthetic_fixture",
+      "sourceRef": "ops/browser/fixtures/menuReviewFixtures.js; ops/browser/run-menu-review-browser-check.js",
+      "sourceVersion": "fictional .invalid restaurant and batch fixture; no production credentials or data",
+      "expected": [
+        "Exact links, section labels, prices, duplicate/price blockers and grouped uncertainty are visible in the existing import/review UI.",
+        "Empty, partial and error states are reachable and honest.",
+        "Keyboard navigation, light/dark and 320/390 px have no horizontal overflow and keep the same content."
+      ],
+      "tests": [
+        "npm run test:browser:menu-review"
+      ],
+      "status": "executed",
+      "evidence": "ops/browser/evidence/menu-review-browser-evidence.json",
+      "result": "99/99 fixture checks pass on Edge 155.0.4283.45 at 1024/390/320 px in light and dark (evidence head 5a7f99ac0f822f6471c948ae017641d4d1925b19, worktreeDirty false, generated 2026-10-19T16:49:19Z): exact links, section paths, prices, duplicate/price/missing-price blockers, grouped uncertainty, disabled save, read-only colleague boundaries, empty/partial/error, keyboard Enter activation, zero horizontal overflow and fail-closed network isolation (external fetch, protocol-relative URL, unknown API write, XHR, WebSocket, CDP subresource/frame navigation). 11 screenshots hashed.",
+      "usedForTuning": false,
+      "limitations": [
+        "Fixture evidence only; it is not live integration, staging or production acceptance.",
+        "Reaching the review control from the top of the page took 43 Tab stops; no focus trap was found.",
+        "The read-only scenario uses the same fictional API data with no actions; it is not a live colleague session.",
+        "The fictional session/API is intercepted in the page; no production Supabase project or credential is used."
+      ]
+    },
+    {
+      "id": "REP-DEBOTANIST-REAL",
+      "class": "text_pdf",
+      "provenance": "real_source",
+      "usedForTuning": true,
+      "referenceId": "debotanist",
+      "sourceRef": "ops/benchmark/holdout-references.json#debotanist",
+      "sourceVersion": "Entry HTML 126831 bytes, bytesSha256 77c950de...b5b0; actual linked PDF 551498 bytes, bytesSha256 50fef0b6...7f85, contentHash eb9da86e...3ade7f, 16 pages. The homepage hash alone does not cover the PDF.",
+      "expected": [
+        "The actual linked 16-page PDF text layer is read; the PDF source hash and content hash are pinned separately from the entry page.",
+        "Items, prices and section paths are compared with a controlled reference taken from the PDF layout, not with the parser output.",
+        "A quality-limited PDF result stays reviewable and is never presented as a complete or accurate menu."
+      ],
+      "tests": [
+        "node ops/benchmark/output/run-analysis.js botanist=https://debotanistbreda.nl/ (local diagnostic)",
+        "npm test"
+      ],
+      "status": "executed_with_limitation",
+      "result": "Baseline reference: the original one-time holdout evaluation (ops/benchmark/holdout-evaluation.json, HOLD-REAL-01) recorded 151 items in 59 sections and is preserved unchanged. This source is now representative/used_for_tuning. After the parser repairs it yields 196 priced items in 55 sections; the controlled layout reference has 141 rows with 95 matched, 46 missing, 5 extra, 0 price differences and 96 unlinked parser items. Those misses/extras are recorded in docs/guides/menu-extraction-botanist-reference.md. This is not an accuracy or completeness claim.",
+      "limitations": [
+        "The PDF has a magazine layout with multi-line wine/cocktail blocks and glass/bottle price variants; the current schema cannot store those variants losslessly.",
+        "A full independent item-by-item human acceptance of every wine/cocktail block has not been established.",
+        "The result is quality-limited and must be reviewed; 196 items is not evidence of correctness."
+      ],
+      "evaluationCount": 1,
+      "firstEvaluatedAt": "2026-10-18"
+    },
+    {
+      "id": "REP-MRMOOS-REAL",
+      "class": "html",
+      "provenance": "real_source",
+      "usedForTuning": true,
+      "referenceId": "mrmoos",
+      "sourceRef": "ops/benchmark/holdout-references.json#mrmoos",
+      "sourceVersion": "Entry HTML 53287 bytes, bytesSha256 20c0d9fa...9580; /menukaart HTML 51115 bytes.",
+      "expected": [
+        "A menu overview page that is only a hub is followed one bounded level to its same-host menu variants.",
+        "The shared candidate budget is never exceeded and no second hub level or cross-host page is fetched.",
+        "A blocked child (robots/rate limit) is reported as a limitation, not filled in."
+      ],
+      "tests": [
+        "node ops/benchmark/output/run-analysis.js mrmoos=https://mrmoos.nl/ (local diagnostic)",
+        "node --test src/lib/menuHubDiscoveryRegression.test.js"
+      ],
+      "status": "executed_with_limitation",
+      "result": "Baseline reference: the original one-time holdout evaluation recorded 0 items and is preserved unchanged. After bounded hub discovery and the class-based price repair, the read produced 247 priced items in 3 menus (dranken 160, lunch 34, diner 53). /groepsmenu was blocked by the live robots/rate gate in that run and is reported, not filled in. This source is now representative/used_for_tuning.",
+      "limitations": [
+        "The live run was one observation, not a repeatable acceptance benchmark.",
+        "/groepsmenu (arrangement/choice menu) was blocked in the measured run and is not included.",
+        "No independent human item-by-item comparison has been performed."
+      ],
+      "evaluationCount": 1,
+      "firstEvaluatedAt": "2026-10-18"
+    },
+    {
+      "id": "REP-COLONIE-REAL",
+      "class": "html",
+      "provenance": "real_source",
+      "usedForTuning": true,
+      "referenceId": "colonie",
+      "sourceRef": "ops/benchmark/holdout-references.json#colonie",
+      "sourceVersion": "Entry HTML 232884 bytes, bytesSha256 29ed5582...cbdf; /menukaart/lunch-diner-dranken/ HTML 234894 bytes.",
+      "expected": [
+        "A repeated card with a dedicated class-based name and price element is read as one item, including whole-euro and one-decimal prices.",
+        "The gift-card page is not treated as a menu candidate.",
+        "Sections whose price semantics the schema cannot store are reported as excluded, not flattened."
+      ],
+      "tests": [
+        "node ops/benchmark/output/run-analysis.js colonie=https://breda.colonie.nl/ (local diagnostic)",
+        "node --test src/lib/htmlMenuPriceElement.test.js"
+      ],
+      "status": "executed_with_limitation",
+      "result": "Baseline reference: the original one-time holdout evaluation recorded 0 items and is preserved unchanged. After the class-based price repair and gift-card exclusion, /menukaart/lunch-diner-dranken/ yields 84 priced items in 16 sections. Wine, brunch and high-tea blocks whose glass/bottle or arrangement price cannot be stored are reported as excluded. This source is now representative/used_for_tuning.",
+      "limitations": [
+        "Wine glass/bottle variants and arrangement prices are not stored losslessly; those sections are reported as excluded.",
+        "No independent human item-by-item comparison has been performed.",
+        "One live run is not a general claim that other Colonia pages or sites work."
+      ],
+      "evaluationCount": 1,
+      "firstEvaluatedAt": "2026-10-18"
+    }
+  ],
+  "holdout": {
+    "pinnedAt": "2026-10-18",
+    "rule": "A holdout has exactly three explicit states. `unused` is not fetched and carries no result. `evaluated_once` records exactly one independent first evaluation; it is still not a tuning source and may not be executed a second time on the same pinned source version. `used_for_tuning` is no longer a holdout: it must move to the representative set and a new unused holdout must be pinned. Smelt and Blossem were already used for tuning and are representative, never holdout.",
+    "evaluationStates": {
+      "unused": "Pinned but not fetched/evaluated. status is blocked or not_available; evaluationCount 0; no result.",
+      "evaluated_once": "One recorded first evaluation against the pinned source version. status may be executed, executed_with_limitation, blocked, unsupported or not_available; evaluationCount 1; result and firstEvaluatedAt are required; usedForTuning stays false.",
+      "used_for_tuning": "No longer a holdout. Forbidden in the holdout list: move the entry to representative and pin a new, unused holdout."
+    },
+    "entries": [
+      {
+        "id": "HOLD-REAL-02",
+        "class": "language_branch",
+        "provenance": "real_source",
+        "sourceRef": "ops/benchmark/holdout-references.json#gauchosgrill",
+        "referenceId": "gauchosgrill",
+        "url": "https://www.gauchosgrill.nl/breda",
+        "fetched": true,
+        "status": "blocked",
+        "evaluationState": "evaluated_once",
+        "evaluationCount": 1,
+        "firstEvaluatedAt": "2026-10-18",
+        "usedForTuning": false,
+        "result": "First pinned evaluation: the approved Breda entry URL returned HTTP 404. No menu was read. No alternative URL, other branch or crawl was substituted.",
+        "reason": "Product Owner-approved public holdout. Recorded once with the real non-200 outcome; not used for tuning.",
+        "limitations": [
+          "Chain/location source; the approved Breda URL is not readable (404).",
+          "The chain homepage was not substituted; that would exceed the approved source."
+        ]
+      }
+    ],
+    "classCoverage": {
+      "html": {
+        "entryIds": [],
+        "status": "not_available"
+      },
+      "accordion_tabs": {
+        "entryIds": [],
+        "status": "not_available"
+      },
+      "tables": {
+        "entryIds": [],
+        "status": "not_available"
+      },
+      "text_pdf": {
+        "entryIds": [],
+        "status": "not_available"
+      },
+      "scan_unreadable": {
+        "entryIds": [],
+        "status": "not_available"
+      },
+      "language_branch": {
+        "entryIds": [
+          "HOLD-REAL-02"
+        ],
+        "status": "evaluated_once"
+      },
+      "arrangement": {
+        "entryIds": [],
+        "status": "not_available"
+      },
+      "price_variant": {
+        "entryIds": [],
+        "status": "not_available"
+      },
+      "historical_cards": {
+        "entryIds": [],
+        "status": "not_available"
+      },
+      "safety_and_errors": {
+        "entryIds": [],
+        "status": "not_available"
+      },
+      "contract_mapping": {
+        "entryIds": [],
+        "status": "not_available"
+      },
+      "review_surface": {
+        "entryIds": [],
+        "status": "not_available"
+      },
+      "browser_fixture": {
+        "entryIds": [],
+        "status": "not_available"
+      }
+    },
+    "classCoverageReason": "De Botanist, Mr Moos and Colonia were evaluated once and then used for the repairs in this round. They are now representative/used_for_tuning, not holdouts. Gauchos Breda remains the only evaluated_once holdout, with the original HTTP 404 outcome unchanged. No new unused external holdout is pinned in this round; that still needs its own source/access decision."
+  },
+  "notIncluded": [
+    "BE-21's 50-100-source vendor/OCR benchmark; #59 does not close it.",
+    "OCR, image rendering or a browser vendor in the product extraction runtime.",
+    "Real provider activation, cost measurement and DPA/EU retention (Product Owner decision).",
+    "An independent human item-by-item comparison of the two real sources.",
+    "A real concept save, source confirmation, export, merge or publication.",
+    "Live staging/production browser acceptance; the browser entry is fixture evidence only.",
+    "Any claim that every restaurant website works."
+  ]
+}

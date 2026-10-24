@@ -28,6 +28,7 @@ const { isInternalOnly } = require('./importInbox');
 const { liveMenuLines, buildMenuConcept, storedConceptInput } = require('./menuConcept');
 const { loadLineage, wasRejectedBefore } = require('./menuConceptStore');
 const { menuKeyFor, restaurantMenuEntries, buildMenuEntry, applyExport, serialize, exportScopeViolations } = require('./menuExport');
+const { readConceptProduct, readReceiptProjection, productActionRefusal } = require('./menuProductIntegrationV2');
 
 const PENDING_TIMEOUT_MS = 10 * 60 * 1000;
 const EXPORT_COLUMNS = 'id, snapshot_id, restaurant_id, content_hash, export_hash, status, branch, commit_sha, pr_number, pr_url, error_reason, created_by, created_at, updated_at';
@@ -46,6 +47,8 @@ function reply(status, body) {
  */
 function exportMenuEntry({ snapshot, menus }) {
   const rid = snapshot.restaurant_id;
+  const product = readConceptProduct(snapshot.captured_content);
+  if (product.kind !== 'v1') return { concept: null, entry: null, blocked: product };
   const stored = storedConceptInput(snapshot.captured_content);
   const concept = buildMenuConcept({ menus: stored.menus, liveLines: liveMenuLines(menus, rid), edits: stored.edits });
   if (!concept.canSave) return { concept, entry: null };
@@ -114,6 +117,18 @@ async function exportForSnapshot(supabase, github, snapshotId, now) {
   return { export: exportView(await refreshExport(supabase, github, rows[0] || null, now)) };
 }
 
+/**
+ * The latest stored export of a version without any refresh: no GitHub call,
+ * no status update and no claim. Used when the card itself is blocked (v2,
+ * unknown or invalid content), so displaying stored metadata can never cause a
+ * side effect.
+ */
+async function storedExportForSnapshot(supabase, snapshotId) {
+  const { rows, error } = await activeExports(supabase, { snapshotId });
+  if (error) return { error };
+  return { export: exportView(rows[0] || null) };
+}
+
 function createMenuConceptExportHandler({ authenticate, getSupabase, restaurants, liveMenus, computeMenuHash, github, sourceStatus, now = () => new Date() }) {
   async function authorize(request) {
     const auth = await authenticate(request);
@@ -144,6 +159,22 @@ function createMenuConceptExportHandler({ authenticate, getSupabase, restaurants
       .maybeSingle();
     if (error) return reply(500, { error: 'De review-PR kon niet worden gemaakt.' });
     if (!snapshot) return reply(404, { error: 'Menuconcept niet gevonden.' });
+    const product = readConceptProduct(snapshot.captured_content);
+    if (product.kind !== 'v1') return productActionRefusal('export', product);
+    let receiptUrl = null;
+    if (snapshot.origin_receipt_id) {
+      const { data: receipt, error: receiptError } = await supabase
+        .from('url_intake_analysis_receipts')
+        .select('id, canonical_source_url, menus:candidate_summary->menus, product:candidate_summary->menuExtractionV2')
+        .eq('id', snapshot.origin_receipt_id)
+        .maybeSingle();
+      if (receiptError) return reply(500, { error: 'De review-PR kon niet worden gemaakt.' });
+      const originProduct = receipt ? readReceiptProjection(receipt) : null;
+      if (originProduct && originProduct.kind !== 'v1') {
+        return productActionRefusal('export', { ...originProduct, reason: 'receipt_product_v2_authoritative' });
+      }
+      receiptUrl = receipt ? receipt.canonical_source_url : null;
+    }
     const rid = snapshot.restaurant_id;
     if (!restaurants || !restaurants[rid]) return reply(409, { error: 'Dit restaurant staat niet in de statische restaurantdata.', reason: 'unknown_restaurant' });
 
@@ -164,11 +195,6 @@ function createMenuConceptExportHandler({ authenticate, getSupabase, restaurants
     if (!concept.canSave) return reply(409, { error: 'Dit concept heeft blokkades; een gedeeltelijke menukaart wordt nooit geëxporteerd.', reason: 'blockers', blockers: concept.blockers });
     if (wasRejectedBefore(lineage.versions, snapshot.captured_content, computeMenuHash, snapshot.id)) {
       return reply(409, { error: 'Deze menukaart is eerder afgewezen.', reason: 'previously_rejected' });
-    }
-    let receiptUrl = null;
-    if (snapshot.origin_receipt_id) {
-      const { data: receipt } = await supabase.from('url_intake_analysis_receipts').select('id, canonical_source_url').eq('id', snapshot.origin_receipt_id).maybeSingle();
-      receiptUrl = receipt ? receipt.canonical_source_url : null;
     }
     const source = await sourceStatus(supabase, { restaurantId: rid, sourceUrl: snapshot.source_url, receiptUrl });
     if (source.error) return reply(500, { error: 'De review-PR kon niet worden gemaakt.' });
@@ -302,4 +328,4 @@ function createMenuConceptExportHandler({ authenticate, getSupabase, restaurants
   return { exportToReviewPr };
 }
 
-module.exports = { createMenuConceptExportHandler, exportForSnapshot, exportMenuEntry, exportView, marker, NOT_PUBLISHED };
+module.exports = { createMenuConceptExportHandler, exportForSnapshot, storedExportForSnapshot, exportMenuEntry, exportView, marker, NOT_PUBLISHED };

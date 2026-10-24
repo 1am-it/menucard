@@ -33,11 +33,12 @@ function fakeSupabase({ tables = {}, rpc = {} } = {}) {
         },
         insert(row) {
           calls.push({ insert: table, row });
-          const stored = { id: (tables[table] || []).length + 100, ...row };
-          (tables[table] = tables[table] || []).push(stored);
+          const rows = Array.isArray(row) ? row : [row];
+          const stored = rows.map((entry) => ({ id: (tables[table] || []).length + 100, ...entry }));
+          (tables[table] = tables[table] || []).push(...stored);
           const result = { error: null };
           return {
-            select: () => ({ maybeSingle: () => Promise.resolve({ data: { id: stored.id }, error: null }) }),
+            select: () => ({ maybeSingle: () => Promise.resolve({ data: { id: stored[0] ? stored[0].id : null }, error: null }) }),
             then: (resolve, reject) => Promise.resolve(result).then(resolve, reject),
           };
         },
@@ -179,6 +180,17 @@ test('process: a non-starter is refused by the claim (P0044) and nothing is anal
   assert.equal(analysed, false);
 });
 
+test('service worker entry uses the same claim path without a browser request', async () => {
+  const supabase = fakeSupabase({
+    rpc: { claim_next_source_analysis_job: () => ({ data: [{ claimed_job_id: null, claim_outcome: 'done' }], error: null }) },
+  });
+  const { handlers } = makeHandlers({ supabase });
+  const res = await handlers.processForWorker(BATCH, STARTER);
+  assert.equal(res.status, 200);
+  assert.equal(res.body.outcome, 'done');
+  assert.equal(supabase.calls.filter((c) => c.rpc === 'claim_next_source_analysis_job').length, 1);
+});
+
 test('process: waiting/busy/done are passed through without analysing', async () => {
   for (const outcome of ['waiting', 'busy', 'done']) {
     let analysed = false;
@@ -257,22 +269,56 @@ test('process: a failed analysis is recorded through fail_source_analysis_job wi
   assert.equal(failArgs.p_error_reason, 'internal_error');
 });
 
-function confirmFixture({ actor = STARTER, menuUrl = 'https://www.bistro-fictief-voorbeeld.nl/menukaart' } = {}) {
+// A stateful stand-in for the 0015 RPCs when a test needs the real effects:
+// the proposal row, its primary key (the confirmation idempotency guard) and
+// the accepted/rejected events. `ledger.rows` is the live proposals array.
+function ledgerRpc(tables, ledger) {
+  if (!Array.isArray(ledger.events)) ledger.events = [];
+  ledger.rows = tables.source_triage_proposals;
+  return {
+    create_source_triage_proposal: (a) => {
+      // 0015 maps any unique_violation to P0030, including the primary key.
+      if (tables.source_triage_proposals.some((p) => p.id === a.p_proposal_id)) return { data: null, error: { code: 'P0030' } };
+      const row = { id: a.p_proposal_id, restaurant_id: a.p_restaurant_id, proposed_url: a.p_proposed_url, status: 'open', decided_at: null, note: a.p_note };
+      tables.source_triage_proposals.push(row);
+      ledger.events.push({ event: 'proposed', proposal_id: a.p_proposal_id });
+      return { data: row, error: null };
+    },
+    decide_source_triage_proposal: (a) => {
+      const row = tables.source_triage_proposals.find((p) => p.id === a.p_proposal_id && p.status === 'open');
+      if (!row) return { data: null, error: { code: 'P0031' } };
+      row.status = a.p_decision;
+      row.decided_at = '2026-10-10T11:05:30Z';
+      ledger.events.push({ event: a.p_decision, proposal_id: a.p_proposal_id });
+      return { data: row, error: null };
+    },
+  };
+}
+
+function confirmFixture({
+  actor = STARTER,
+  menuUrl = 'https://www.bistro-fictief-voorbeeld.nl/menukaart',
+  proposal = null,
+  ledger = null,
+} = {}) {
+  const tables = {
+    markets: [{ id: 'm1', slug: 'breda' }],
+    url_intake_batches: [{ id: BATCH, market_id: 'm1', actor_user_id: actor, created_at: '2026-10-10T11:00:00Z', closed_at: '2026-10-10T11:10:00Z', close_reason: 'completed', item_count: 1 }],
+    url_intake_batch_items: [{ batch_id: BATCH, item_position: 1, canonical_source_url: 'https://www.bistro-fictief-voorbeeld.nl/', outcome: 'queued', job_id: JOB, reused_job_id: null }],
+    restaurant_source_analysis_jobs: [
+      { id: JOB, status: 'succeeded', attempt_count: 1, finished_at: '2026-10-10T11:05:00Z', result_receipt_id: 'r1', unknown_menu_contexts: [], menu_source_urls: [menuUrl], actor_user_id: actor, batch_id: BATCH, created_at: '2026-10-10T11:00:00Z' },
+    ],
+    url_intake_analysis_receipts: [{ id: 'r1', restaurant_match_type: 'exact', matched_restaurant_id: 'bistro', menus: [{ categories: [{ items: [{ name: 'Soep' }] }] }] }],
+    source_triage_proposals: proposal ? [proposal] : [],
+  };
   return fakeSupabase({
-    tables: {
-      markets: [{ id: 'm1', slug: 'breda' }],
-      url_intake_batches: [{ id: BATCH, market_id: 'm1', actor_user_id: actor, created_at: '2026-10-10T11:00:00Z', closed_at: '2026-10-10T11:10:00Z', close_reason: 'completed', item_count: 1 }],
-      url_intake_batch_items: [{ batch_id: BATCH, item_position: 1, canonical_source_url: 'https://www.bistro-fictief-voorbeeld.nl/', outcome: 'queued', job_id: JOB, reused_job_id: null }],
-      restaurant_source_analysis_jobs: [
-        { id: JOB, status: 'succeeded', attempt_count: 1, finished_at: '2026-10-10T11:05:00Z', result_receipt_id: 'r1', unknown_menu_contexts: [], menu_source_urls: [menuUrl], actor_user_id: actor, batch_id: BATCH, created_at: '2026-10-10T11:00:00Z' },
-      ],
-      url_intake_analysis_receipts: [{ id: 'r1', restaurant_match_type: 'exact', matched_restaurant_id: 'bistro', menus: [{ categories: [{ items: [{ name: 'Soep' }] }] }] }],
-      source_triage_proposals: [],
-    },
-    rpc: {
-      create_source_triage_proposal: (a) => ({ data: { id: a.p_proposal_id, status: 'open' }, error: null }),
-      decide_source_triage_proposal: () => ({ data: { status: 'accepted' }, error: null }),
-    },
+    tables,
+    rpc: ledger
+      ? ledgerRpc(tables, ledger)
+      : {
+          create_source_triage_proposal: (a) => ({ data: { id: a.p_proposal_id, status: 'open' }, error: null }),
+          decide_source_triage_proposal: () => ({ data: { status: 'accepted' }, error: null }),
+        },
   });
 }
 
@@ -364,7 +410,7 @@ test('after a re-analysis the URL is a fresh queued job, not "Recent geanalyseer
 const FOUND = 'https://www.bistro-fictief-voorbeeld.nl/menukaart';
 const CONCEPT_MENUS = [{ categories: [{ name: 'Koud', items: [{ name: 'Fictieve soep', price: '7.50' }, { name: 'Fictieve salade', price: '12.50' }, { name: 'Fictief tartaar', price: null }] }] }];
 
-function conceptFixture({ actor = STARTER, existing = [], menus = CONCEPT_MENUS } = {}) {
+function conceptFixture({ actor = STARTER, existing = [], menus = CONCEPT_MENUS, receiptProduct = null } = {}) {
   // A confirmed source (accepted BE-24 proposal for the found URL) with a recognised menu.
   return fakeSupabase({
     tables: {
@@ -372,7 +418,7 @@ function conceptFixture({ actor = STARTER, existing = [], menus = CONCEPT_MENUS 
       url_intake_batches: [{ id: BATCH, market_id: 'm1', actor_user_id: actor, created_at: '2026-10-10T11:00:00Z', closed_at: '2026-10-10T11:10:00Z', close_reason: 'completed', item_count: 1 }],
       url_intake_batch_items: [{ batch_id: BATCH, item_position: 1, canonical_source_url: 'https://www.bistro-fictief-voorbeeld.nl/', outcome: 'queued', job_id: JOB, reused_job_id: null }],
       restaurant_source_analysis_jobs: [{ id: JOB, status: 'succeeded', attempt_count: 1, finished_at: '2026-10-10T11:05:00Z', result_receipt_id: 'r1', unknown_menu_contexts: [], menu_source_urls: [FOUND], actor_user_id: actor, batch_id: BATCH, created_at: '2026-10-10T11:00:00Z' }],
-      url_intake_analysis_receipts: [{ id: 'r1', restaurant_match_type: 'exact', matched_restaurant_id: 'bistro', menus }],
+      url_intake_analysis_receipts: [{ id: 'r1', restaurant_match_type: 'exact', matched_restaurant_id: 'bistro', menus, product: receiptProduct }],
       source_triage_proposals: [{ id: 'p1', restaurant_id: 'bistro', proposed_url: FOUND, status: 'accepted', decided_at: '2026-10-10T11:20:00Z' }],
       menu_snapshot_proposals: existing,
     },
@@ -424,6 +470,24 @@ test('concept: once resolved, it is saved as an internal BE-17 proposal (next ve
   assert.equal(supabase.calls.filter((c) => c.rpc).length, 0);
 });
 
+test('REGRESSION: server-side concept save keeps duplicate blockers after group category acceptance', async () => {
+  const menus = [
+    {
+      categories: [
+        { name: 'Warm', uncertain: true, items: [{ name: 'Fictieve soep', price: '6.50' }, { name: 'Fictieve soep', price: '6.50' }] },
+      ],
+    },
+  ];
+  const supabase = conceptFixture({ menus });
+  const res = await makeHandlers({ supabase, liveMenus: {} }).handlers.saveConcept(
+    request({ job_id: JOB, edits: { lines: { '0.0.0': { acceptCategory: true }, '0.0.1': { acceptCategory: true } } } }),
+    BATCH
+  );
+  assert.equal(res.status, 409);
+  assert.deepEqual(res.body.blockers.map((b) => b.status), ['duplicate', 'duplicate']);
+  assert.equal(supabase.calls.filter((c) => c.insert).length, 0);
+});
+
 test('concept: the server re-checks every blocker itself and ignores what the browser claims; a price change does not block', async () => {
   const menus = [
     {
@@ -469,3 +533,491 @@ test('concept: only the starter, only for a confirmed known source', async () =>
   assert.equal(notConfirmed.body.reason, 'not_confirmed');
   assert.equal((await makeHandlers({ supabase: conceptFixture() }).handlers.saveConcept(request({ job_id: 'nope' }), BATCH)).status, 400);
 });
+
+function v2ProductFixture() {
+  return {
+    schemaVersion: 'menu-extraction-product/v2',
+    menus: [{
+      id: 'menu-1',
+      title: 'Fictief Diner',
+      sourceId: 'src-1',
+      variant: { id: 'variant-1', label: 'Diner', sourceLabel: 'DINNER', locale: null, location: null, order: 1 },
+      categories: [{
+        id: 'cat-1',
+        name: 'Koud',
+        path: ['Diner', 'Koud'],
+        sourcePath: ['DINNER', 'KOUD'],
+        kind: 'section',
+        choice: null,
+        uncertain: false,
+        items: [{
+          id: 'item-1',
+          kind: 'dish',
+          name: 'Fictieve soep',
+          description: null,
+          price: { status: 'known', amountMinorUnits: 750, currency: 'EUR', text: null, isFrom: false, evidence: { sourceId: 'src-1', locator: 'regel 1', quote: 'Fictieve soep 7,50' } },
+          priceVariants: [],
+          primaryPriceRef: null,
+          supplementOf: null,
+          choiceGroupRef: null,
+          allergens: { status: 'unknown', codes: [], sourceText: null, sourceTextStatus: 'unknown' },
+          dietaryLabels: [],
+          availability: null,
+          evidence: { sourceId: 'src-1', locator: 'regel 1', quote: 'Fictieve soep 7,50' },
+          origins: { name: 'extracted', description: 'unknown', price: 'extracted', allergens: 'unknown', supplementOf: 'unknown', availability: 'unknown', kind: 'unknown' },
+        }],
+      }],
+    }],
+    rejected: [],
+    coverage: { status: 'partial', sourcesRead: 1, pagesRead: 1, itemsExtracted: 1, unreadSources: [], limitations: ['Fictieve beperking.'] },
+  };
+}
+
+test('overview: a v2 receipt shows the versioned view and never the older v1 menus projection', async () => {
+  const supabase = conceptFixture({ menus: [{ categories: [{ name: 'Verouderd', items: [{ name: 'Oude projectie', price: '1.00' }] }] }], receiptProduct: v2ProductFixture() });
+  const res = await makeHandlers({ supabase, liveMenus: LIVE_BISTRO }).handlers.getOverview(request(), BATCH);
+  const item = res.body.detail.items[0];
+  assert.equal(item.productBlocked, true);
+  assert.equal(item.product.schemaVersion, 'menu-extraction-product/v2');
+  assert.equal(item.product.counts.items, 1);
+  assert.equal(item.menu.itemCount, 1);
+  assert.equal(item.menu.supplementCount, 0);
+  assert.deepEqual(item.concept.menus, []);
+  assert.equal(item.concept.productBlocked, true);
+  assert.equal(item.concept.product.schemaVersion, 'menu-extraction-product/v2');
+});
+
+test('concept: a v2 receipt is refused before any version, hash or insert', async () => {
+  const supabase = conceptFixture({ receiptProduct: v2ProductFixture() });
+  const res = await makeHandlers({ supabase, liveMenus: LIVE_BISTRO }).handlers.saveConcept(request({ job_id: JOB, edits: {} }), BATCH);
+  assert.equal(res.status, 409);
+  assert.equal(res.body.reason, 'product_v2_read_only');
+  assert.deepEqual(res.body.blockedActions, ['save', 'confirm', 'export', 'publish']);
+  assert.equal(supabase.calls.filter((c) => c.insert).length, 0);
+  assert.equal(supabase.calls.filter((c) => c.rpc).length, 0);
+});
+
+// ─── #59 review 6307703713: human structure review of an uncertain result ──
+//
+// A real source whose section structure is uncertain (Blossem/Smelt shape) can
+// only move forward after a human handled every uncertain section. The server
+// re-checks the submitted set against the stored receipt and never trusts a
+// client claim.
+
+const STRUCTURE_HASH = 'a'.repeat(64);
+const STRUCTURE_MENUS = [
+  {
+    title: 'Fictief Diner',
+    structure: 'uncertain',
+    categories: [
+      { name: 'Voor', path: ['Voor'], sourcePath: ['DINNER', 'VOOR'], locator: 'paneel Diner, regel 1', uncertain: true, items: [{ name: 'Fictieve burrata', price: '13.00' }] },
+      { name: 'Hoofd', path: ['Hoofd'], sourcePath: ['DINNER', 'HOOFD'], items: [{ name: 'Fictieve zeebaars', price: '24.00' }] },
+    ],
+  },
+  {
+    title: 'Fictief Lunch',
+    structure: 'uncertain',
+    categories: [
+      { name: 'Koud', path: ['Koud'], sourcePath: ['LUNCH', 'KOUD'], locator: 'paneel Lunch, regel 1', uncertain: true, items: [{ name: 'Fictieve salade', price: '12.50' }] },
+      { name: 'Warm', path: ['Warm'], sourcePath: ['LUNCH', 'WARM'], items: [{ name: 'Fictieve pasta', price: '14.50' }] },
+    ],
+  },
+];
+const VOOR_PATH = ['Fictief Diner', 'Voor'];
+const KOUD_PATH = ['Fictief Lunch', 'Koud'];
+
+function structureFixture({ menus = STRUCTURE_MENUS, reviews = [], proposal = null, receiptHash = STRUCTURE_HASH, storedReviewError = null, existing = [], ledger = null } = {}) {
+  const tables = {
+    markets: [{ id: 'm1', slug: 'breda' }],
+    url_intake_batches: [{ id: BATCH, market_id: 'm1', actor_user_id: STARTER, created_at: '2026-10-10T11:00:00Z', closed_at: '2026-10-10T11:10:00Z', close_reason: 'completed', item_count: 1 }],
+    url_intake_batch_items: [{ batch_id: BATCH, item_position: 1, canonical_source_url: 'https://www.bistro-fictief-voorbeeld.nl/', outcome: 'queued', job_id: JOB, reused_job_id: null }],
+    restaurant_source_analysis_jobs: [
+      { id: JOB, status: 'succeeded', attempt_count: 1, finished_at: '2026-10-10T11:05:00Z', result_receipt_id: 'r1', unknown_menu_contexts: [], menu_source_urls: [FOUND], actor_user_id: STARTER, batch_id: BATCH, created_at: '2026-10-10T11:00:00Z' },
+    ],
+    url_intake_analysis_receipts: [
+      {
+        id: 'r1',
+        restaurant_match_type: 'exact',
+        matched_restaurant_id: 'bistro',
+        canonical_source_url: 'https://www.bistro-fictief-voorbeeld.nl/',
+        actor_user_id: STARTER,
+        analysis_result_hash: receiptHash,
+        candidate_summary: { menus },
+        menus,
+      },
+    ],
+    source_triage_proposals: proposal ? [proposal] : [],
+    menu_snapshot_proposals: existing,
+    menu_structure_reviews: reviews,
+  };
+  const supabase = fakeSupabase({
+    tables,
+    rpc: ledger
+      ? ledgerRpc(tables, ledger)
+      : {
+          create_source_triage_proposal: (a) => ({ data: { id: a.p_proposal_id, status: 'open' }, error: null }),
+          decide_source_triage_proposal: () => ({ data: { status: 'accepted' }, error: null }),
+        },
+  });
+  if (storedReviewError) {
+    const base = supabase.from;
+    supabase.from = (table) => {
+      const builder = base(table);
+      if (table !== 'menu_structure_reviews') return builder;
+      const wrapped = Object.create(builder);
+      wrapped.select = () => ({
+        in: () => Promise.resolve({ data: null, error: { code: '42P01' } }),
+        eq: () => Promise.resolve({ data: null, error: { code: '42P01' } }),
+      });
+      return wrapped;
+    };
+  }
+  return supabase;
+}
+
+const structureReview = (sections) => ({ job_id: JOB, receipt_hash: STRUCTURE_HASH, sections });
+const KEEP_VOOR = { path: VOOR_PATH, action: 'keep' };
+const KEEP_KOUD = { path: KOUD_PATH, action: 'keep' };
+const CORRECT_KOUD = { path: KOUD_PATH, action: 'correct', corrected_path: ['Fictief Lunch', 'Salades'] };
+
+test('structure review: no confirmation while any uncertain section is untreated — and nothing is written', async () => {
+  const supabase = structureFixture();
+  const partial = await makeHandlers({ supabase, liveMenus: {} }).handlers.confirmSources(
+    request({ job_ids: [JOB], structure_reviews: [structureReview([KEEP_VOOR])] }),
+    BATCH
+  );
+  assert.equal(partial.status, 200);
+  assert.deepEqual(partial.body.results, [
+    { job_id: JOB, ok: false, reason: 'structure_unreviewed', missing: ['Fictief Lunch › Koud'], unknown: null },
+  ]);
+  assert.equal(supabase.calls.filter((c) => c.insert).length, 0);
+  assert.equal(supabase.calls.filter((c) => c.rpc).length, 0);
+
+  // The one-click request without any structure review is refused as well.
+  const none = await makeHandlers({ supabase, liveMenus: {} }).handlers.confirmSources(request({ job_ids: [JOB] }), BATCH);
+  assert.deepEqual(none.body.results, [{ job_id: JOB, ok: false, reason: 'structure_required', missing: null, unknown: null }]);
+  assert.equal(supabase.calls.filter((c) => c.insert).length, 0);
+  assert.equal(supabase.calls.filter((c) => c.rpc).length, 0);
+});
+
+test('structure review: an unknown, duplicated or non-correcting payload is refused without any write', async () => {
+  const cases = [
+    [[KEEP_VOOR, KEEP_KOUD, { path: ['Fictief Diner', 'Hoofd'], action: 'keep' }], 'structure_unknown_section'],
+    [[KEEP_VOOR, KEEP_KOUD, KEEP_KOUD], 'structure_invalid'],
+    [[KEEP_VOOR, { path: KOUD_PATH, action: 'correct', corrected_path: KOUD_PATH }], 'structure_invalid'],
+    [[KEEP_VOOR, { path: KOUD_PATH, action: 'correct' }], 'structure_invalid'],
+    [[KEEP_VOOR, { path: KOUD_PATH, action: 'approve' }], 'structure_invalid'],
+  ];
+  for (const [sections, reason] of cases) {
+    const supabase = structureFixture();
+    const res = await makeHandlers({ supabase, liveMenus: {} }).handlers.confirmSources(
+      request({ job_ids: [JOB], structure_reviews: [structureReview(sections)] }),
+      BATCH
+    );
+    assert.equal(res.status, 200, reason);
+    assert.equal(res.body.results[0].reason, reason, JSON.stringify(sections));
+    assert.equal(supabase.calls.filter((c) => c.insert).length, 0, reason);
+    assert.equal(supabase.calls.filter((c) => c.rpc).length, 0, reason);
+  }
+});
+
+test('structure review: a wrong or drifted receipt hash is refused before any row or proposal', async () => {
+  const wrongHash = structureFixture();
+  const mismatch = await makeHandlers({ supabase: wrongHash, liveMenus: {} }).handlers.confirmSources(
+    request({ job_ids: [JOB], structure_reviews: [{ ...structureReview([KEEP_VOOR, KEEP_KOUD]), receipt_hash: 'b'.repeat(64) }] }),
+    BATCH
+  );
+  assert.equal(mismatch.body.results[0].reason, 'receipt_mismatch');
+  assert.equal(wrongHash.calls.filter((c) => c.insert).length, 0);
+
+  // The stored binding must still produce the stored hash (computeHash is
+  // injected; here it returns a different value than the stored receipt).
+  const drifted = structureFixture({ receiptHash: 'c'.repeat(64) });
+  const binding = await makeHandlers({ supabase: drifted, liveMenus: {} }).handlers.confirmSources(
+    request({ job_ids: [JOB], structure_reviews: [{ ...structureReview([KEEP_VOOR, KEEP_KOUD]), receipt_hash: 'c'.repeat(64) }] }),
+    BATCH
+  );
+  assert.equal(binding.body.results[0].reason, 'receipt_binding_mismatch');
+  assert.equal(drifted.calls.filter((c) => c.insert).length, 0);
+  assert.equal(drifted.calls.filter((c) => c.rpc).length, 0);
+});
+
+
+test('structure review: only the starter and only a real internal account may confirm', async () => {
+  const colleague = structureFixture();
+  const refused = await makeHandlers({ userId: COLLEAGUE, supabase: colleague, liveMenus: {} }).handlers.confirmSources(
+    request({ job_ids: [JOB], structure_reviews: [structureReview([KEEP_VOOR, KEEP_KOUD])] }),
+    BATCH
+  );
+  assert.equal(refused.status, 403);
+  assert.equal(refused.body.reason, 'not_starter');
+  assert.equal(colleague.calls.filter((c) => c.insert).length, 0);
+  assert.equal(colleague.calls.filter((c) => c.rpc).length, 0);
+
+  for (const roles of [[{ role: 'editor' }], [{ role: 'owner', restaurant_id: 'bistro' }], []]) {
+    let dbCalls = 0;
+    const handlers = createBatchAnalysisHandlers({
+      authenticate: async () => ({ ok: true, userId: STARTER, roles }),
+      getSupabase: () => {
+        dbCalls += 1;
+        return structureFixture();
+      },
+      restaurants: RESTAURANTS,
+      generateId: () => 'x',
+      analyze: async () => ({ ok: false }),
+      computeHash: () => STRUCTURE_HASH,
+    });
+    const res = await handlers.confirmSources(request({ job_ids: [JOB], structure_reviews: [structureReview([KEEP_VOOR, KEEP_KOUD])] }), BATCH);
+    assert.equal(res.status, 403, JSON.stringify(roles));
+    assert.equal(dbCalls, 0, JSON.stringify(roles));
+  }
+});
+
+test('structure review: a complete human set is recorded with who/when/old→new and confirms the source', async () => {
+  const supabase = structureFixture();
+  const res = await makeHandlers({ supabase, liveMenus: {} }).handlers.confirmSources(
+    request({ job_ids: [JOB], structure_reviews: [structureReview([KEEP_VOOR, CORRECT_KOUD])] }),
+    BATCH
+  );
+  assert.equal(res.status, 200);
+  assert.deepEqual(res.body.results, [{ job_id: JOB, ok: true }]);
+  assert.equal(res.body.confirmed, 1);
+
+  const reviewInsert = supabase.calls.find((c) => c.insert === 'menu_structure_reviews');
+  assert.ok(reviewInsert, 'the human decisions are stored');
+  assert.equal(reviewInsert.row.length, 2);
+  const [kept, corrected] = reviewInsert.row;
+  assert.equal(kept.decision, 'keep');
+  assert.equal(kept.actor_user_id, STARTER);
+  assert.equal(kept.receipt_id, 'r1');
+  assert.equal(kept.job_id, JOB);
+  assert.equal(kept.batch_id, BATCH);
+  assert.deepEqual(JSON.parse(kept.original_path), VOOR_PATH);
+  assert.equal(kept.source_path, JSON.stringify(['DINNER', 'VOOR']));
+  assert.equal(kept.locator, 'paneel Diner, regel 1');
+  assert.equal(kept.corrected_path, null);
+  assert.equal(corrected.decision, 'correct');
+  assert.deepEqual(JSON.parse(corrected.corrected_path), ['Fictief Lunch', 'Salades']);
+
+  const create = supabase.calls.find((c) => c.rpc === 'create_source_triage_proposal').args;
+  assert.equal(create.p_kind, 'add_candidate');
+  assert.equal(create.p_proposed_url, FOUND);
+  assert.match(create.p_note, /expliciete menselijke controle/);
+  assert.equal(supabase.calls.find((c) => c.rpc === 'decide_source_triage_proposal').args.p_decision, 'accepted');
+});
+
+test('structure review: a retry with the same decisions is idempotent, a contradicting retry is refused', async () => {
+  const stored = [
+    { id: 1, receipt_id: 'r1', path_key: JSON.stringify(VOOR_PATH), original_path: JSON.stringify(VOOR_PATH), source_path: JSON.stringify(['DINNER', 'VOOR']), locator: 'paneel Diner, regel 1', decision: 'keep', corrected_path: null, actor_user_id: STARTER, created_at: '2026-10-10T11:20:00Z' },
+    { id: 2, receipt_id: 'r1', path_key: JSON.stringify(KOUD_PATH), original_path: JSON.stringify(KOUD_PATH), source_path: JSON.stringify(['LUNCH', 'KOUD']), locator: 'paneel Lunch, regel 1', decision: 'correct', corrected_path: JSON.stringify(['Fictief Lunch', 'Salades']), actor_user_id: STARTER, created_at: '2026-10-10T11:20:00Z' },
+  ];
+  const same = structureFixture({ reviews: stored });
+  const retry = await makeHandlers({ supabase: same, liveMenus: {} }).handlers.confirmSources(
+    request({ job_ids: [JOB], structure_reviews: [structureReview([KEEP_VOOR, CORRECT_KOUD])] }),
+    BATCH
+  );
+  assert.deepEqual(retry.body.results, [{ job_id: JOB, ok: true }]);
+  assert.equal(same.calls.filter((c) => c.insert === 'menu_structure_reviews').length, 0);
+
+  const changed = structureFixture({ reviews: stored });
+  const contradiction = await makeHandlers({ supabase: changed, liveMenus: {} }).handlers.confirmSources(
+    request({ job_ids: [JOB], structure_reviews: [structureReview([KEEP_VOOR, KEEP_KOUD])] }),
+    BATCH
+  );
+  assert.equal(contradiction.body.results[0].reason, 'structure_already_reviewed');
+  assert.equal(changed.calls.filter((c) => c.insert).length, 0);
+  assert.equal(changed.calls.filter((c) => c.rpc).length, 0);
+});
+
+test('confirm: an already confirmed result is never confirmed again by the human structure route', async () => {
+  // The Lead's reproduction: a second POST with the same complete, valid
+  // structure_reviews for a result that already has its accepted proposal.
+  const supabase = confirmedStructureFixture();
+  const res = await makeHandlers({ supabase, liveMenus: {} }).handlers.confirmSources(
+    request({ job_ids: [JOB], structure_reviews: [structureReview([KEEP_VOOR, CORRECT_KOUD])] }),
+    BATCH
+  );
+  assert.equal(res.status, 200);
+  assert.deepEqual(res.body.results, [{ job_id: JOB, ok: false, reason: 'already_confirmed' }]);
+  assert.equal(res.body.confirmed, 0);
+  // Nothing at all is written: no proposal, no event, no audit review.
+  assert.equal(supabase.calls.filter((c) => c.insert).length, 0);
+  assert.equal(supabase.calls.filter((c) => c.rpc).length, 0);
+});
+
+test('confirm: an already confirmed result is never confirmed again by the one-click route', async () => {
+  const supabase = confirmFixture({ proposal: { id: 'p1', restaurant_id: 'bistro', proposed_url: FOUND, status: 'accepted', decided_at: '2026-10-10T11:20:00Z' } });
+  const res = await makeHandlers({ supabase }).handlers.confirmSources(request({ job_ids: [JOB] }), BATCH);
+  assert.deepEqual(res.body.results, [{ job_id: JOB, ok: false, reason: 'already_confirmed' }]);
+  assert.equal(res.body.confirmed, 0);
+  assert.equal(supabase.calls.filter((c) => c.insert).length, 0);
+  assert.equal(supabase.calls.filter((c) => c.rpc).length, 0);
+});
+
+test('confirm: two confirmations of one result leave exactly one accepted proposal, whatever the route', async () => {
+  // A real first confirmation through the human structure route, then the
+  // same request again on the same stored state.
+  const ledger = { events: [] };
+  const supabase = structureFixture({ ledger });
+  const handlers = makeHandlers({ supabase, liveMenus: {} }).handlers;
+  const body = { job_ids: [JOB], structure_reviews: [structureReview([KEEP_VOOR, CORRECT_KOUD])] };
+
+  const first = await handlers.confirmSources(request(body), BATCH);
+  assert.deepEqual(first.body.results, [{ job_id: JOB, ok: true }]);
+  assert.equal(ledger.rows.filter((p) => p.status === 'accepted').length, 1);
+
+  const second = await handlers.confirmSources(request(body), BATCH);
+  assert.deepEqual(second.body.results, [{ job_id: JOB, ok: false, reason: 'already_confirmed' }]);
+  assert.equal(second.body.confirmed, 0);
+  assert.equal(ledger.rows.filter((p) => p.status === 'accepted').length, 1, 'never a second accepted proposal');
+  assert.deepEqual(ledger.events.map((e) => e.event), ['proposed', 'accepted']);
+  // The audit trail is written once; the retry adds no review row.
+  assert.equal(supabase.calls.filter((c) => c.insert === 'menu_structure_reviews').length, 1);
+  assert.equal(ledger.rows.length, 1);
+});
+
+test('confirm: a simultaneous double request still yields exactly one accepted proposal', async () => {
+  // Both requests pass the "not yet confirmed" check before either writes.
+  // The derived proposal id is the primary key of 0015, so the second create
+  // collides (P0030) instead of adding a second accepted proposal.
+  const ledger = { events: [] };
+  const supabase = confirmFixture({ ledger });
+  const handlers = makeHandlers({ supabase }).handlers;
+  const [a, b] = await Promise.all([
+    handlers.confirmSources(request({ job_ids: [JOB] }), BATCH),
+    handlers.confirmSources(request({ job_ids: [JOB] }), BATCH),
+  ]);
+  const responses = [a, b];
+  assert.equal(responses.filter((r) => r.body.confirmed === 1).length, 1);
+  const loser = responses.find((r) => r.body.confirmed === 0);
+  assert.equal(loser.body.results[0].ok, false);
+  assert.ok(['open_proposal_exists', 'already_confirmed'].includes(loser.body.results[0].reason), loser.body.results[0].reason);
+  assert.equal(ledger.rows.length, 1, 'one proposal row');
+  assert.equal(ledger.rows.filter((p) => p.status === 'accepted').length, 1, 'one accepted proposal');
+  assert.deepEqual(ledger.events.map((e) => e.event), ['proposed', 'accepted'], 'one proposed and one accepted event');
+});
+
+test('confirm: a rejected proposal is reported as such, not as an open one or a second confirmation', async () => {
+  const ledger = { events: [] };
+  const supabase = confirmFixture({ ledger });
+  // The acceptance itself fails: 0015 leaves the proposal open for Bronnen.
+  const baseRpc = supabase.rpc;
+  supabase.rpc = (name, args) =>
+    name === 'decide_source_triage_proposal' ? Promise.resolve({ data: null, error: { code: 'P0031' } }) : baseRpc(name, args);
+  const handlers = makeHandlers({ supabase }).handlers;
+  const left = await handlers.confirmSources(request({ job_ids: [JOB] }), BATCH);
+  assert.deepEqual(left.body.results, [{ job_id: JOB, ok: false, reason: 'left_open' }]);
+  assert.equal(ledger.rows[0].status, 'open');
+
+  // A human rejects that proposal in Bronnen beoordelen; the result is not confirmed.
+  ledger.rows[0].status = 'rejected';
+  const retry = await handlers.confirmSources(request({ job_ids: [JOB] }), BATCH);
+  assert.deepEqual(retry.body.results, [{ job_id: JOB, ok: false, reason: 'proposal_rejected' }]);
+  assert.equal(ledger.rows.length, 1);
+  assert.deepEqual(ledger.events.map((e) => e.event), ['proposed']);
+});
+
+test('structure review: an unavailable store is an honest refusal, never a silent confirmation', async () => {
+  const supabase = structureFixture({ storedReviewError: true });
+  const res = await makeHandlers({ supabase, liveMenus: {} }).handlers.confirmSources(
+    request({ job_ids: [JOB], structure_reviews: [structureReview([KEEP_VOOR, KEEP_KOUD])] }),
+    BATCH
+  );
+  assert.equal(res.body.results[0].reason, 'structure_store_unavailable');
+  assert.equal(supabase.calls.filter((c) => c.rpc).length, 0);
+});
+
+
+const ACCEPTED_PROPOSAL = { id: 'p1', restaurant_id: 'bistro', proposed_url: FOUND, status: 'accepted', decided_at: '2026-10-10T11:20:00Z' };
+const STORED_REVIEWS = [
+  { id: 1, receipt_id: 'r1', path_key: JSON.stringify(VOOR_PATH), original_path: JSON.stringify(VOOR_PATH), source_path: JSON.stringify(['DINNER', 'VOOR']), locator: 'paneel Diner, regel 1', decision: 'keep', corrected_path: null, actor_user_id: STARTER, created_at: '2026-10-10T11:20:00Z' },
+  { id: 2, receipt_id: 'r1', path_key: JSON.stringify(KOUD_PATH), original_path: JSON.stringify(KOUD_PATH), source_path: JSON.stringify(['LUNCH', 'KOUD']), locator: 'paneel Lunch, regel 1', decision: 'correct', corrected_path: JSON.stringify(['Fictief Lunch', 'Salades']), actor_user_id: STARTER, created_at: '2026-10-10T11:20:00Z' },
+];
+const confirmedStructureFixture = (extra = {}) => structureFixture({ proposal: ACCEPTED_PROPOSAL, reviews: STORED_REVIEWS, ...extra });
+
+test('concept after a structure review: the human corrections are the edits, and the preview base is the same', async () => {
+  const supabase = confirmedStructureFixture();
+  const overview = await makeHandlers({ supabase, liveMenus: {} }).handlers.getOverview(request(), BATCH);
+  const item = overview.body.detail.items[0];
+  assert.equal(item.key, 'confirmed');
+  assert.equal(item.high, false);
+  assert.deepEqual(item.concept.structureEdits, { '0.0.0': { acceptCategory: true }, '1.0.0': { path: ['Fictief Lunch', 'Salades'] } });
+  assert.deepEqual(item.concept.structureReview.treated.map((r) => [r.key, r.action]), [[JSON.stringify(VOOR_PATH), 'keep'], [JSON.stringify(KOUD_PATH), 'correct']]);
+
+  const res = await makeHandlers({ supabase, liveMenus: {} }).handlers.saveConcept(request({ job_id: JOB, edits: {} }), BATCH);
+  assert.equal(res.status, 201);
+  const row = supabase.calls.find((c) => c.insert === 'menu_snapshot_proposals').row;
+  assert.equal(row.created_by, STARTER);
+  assert.equal(row.origin_receipt_id, 'r1');
+  const categories = row.captured_content.categories.map((c) => ({ name: c.name, path: c.path || null, sourcePath: c.sourcePath || null, items: c.items.map((i) => ({ name: i.name, categoryAccepted: i.categoryAccepted || false })) }));
+  assert.deepEqual(categories, [
+    { name: 'Voor', path: ['Fictief Diner', 'Voor'], sourcePath: ['DINNER', 'VOOR'], items: [{ name: 'Fictieve burrata', categoryAccepted: true }] },
+    { name: 'Hoofd', path: ['Fictief Diner', 'Hoofd'], sourcePath: ['DINNER', 'HOOFD'], items: [{ name: 'Fictieve zeebaars', categoryAccepted: false }] },
+    { name: 'Salades', path: ['Fictief Lunch', 'Salades'], sourcePath: null, items: [{ name: 'Fictieve salade', categoryAccepted: false }] },
+    { name: 'Warm', path: ['Fictief Lunch', 'Warm'], sourcePath: ['LUNCH', 'WARM'], items: [{ name: 'Fictieve pasta', categoryAccepted: false }] },
+  ]);
+});
+
+test('concept after a structure review: the same decisions give a stable hash and never a second version', async () => {
+  const first = confirmedStructureFixture();
+  await makeHandlers({ supabase: first, liveMenus: {} }).handlers.saveConcept(request({ job_id: JOB, edits: {} }), BATCH);
+  const hash = first.calls.find((c) => c.insert === 'menu_snapshot_proposals').row.content_hash;
+  assert.match(hash, /^[0-9a-f]{64}$/);
+  // The same lineage already holds that exact content.
+  const second = confirmedStructureFixture({ existing: [{ id: 1, restaurant_id: 'bistro', menu_context: 'bistro-menukaart', version: 1, content_hash: hash }] });
+  const res = await makeHandlers({ supabase: second, liveMenus: {} }).handlers.saveConcept(request({ job_id: JOB, edits: {} }), BATCH);
+  assert.equal(res.status, 200);
+  assert.equal(res.body.concept.unchanged, true);
+  assert.equal(res.body.concept.version, 1);
+  assert.equal(second.calls.filter((c) => c.insert === 'menu_snapshot_proposals').length, 0);
+});
+
+test('concept after a structure review: a missing price stays a blocker; a human price edit still applies on top', async () => {
+  const menus = JSON.parse(JSON.stringify(STRUCTURE_MENUS));
+  menus[0].categories[0].items.push({ name: 'Fictieve soep', price: null });
+  const supabase = confirmedStructureFixture({ menus });
+  const blocked = await makeHandlers({ supabase, liveMenus: {} }).handlers.saveConcept(request({ job_id: JOB, edits: {} }), BATCH);
+  assert.equal(blocked.status, 409);
+  assert.deepEqual(blocked.body.blockers.map((b) => b.status), ['missing_price']);
+  assert.equal(supabase.calls.filter((c) => c.insert === 'menu_snapshot_proposals').length, 0);
+
+  const fixed = await makeHandlers({ supabase, liveMenus: {} }).handlers.saveConcept(
+    request({ job_id: JOB, edits: { lines: { '0.0.1': { price: '9,50' } } } }),
+    BATCH
+  );
+  assert.equal(fixed.status, 201);
+  const row = supabase.calls.find((c) => c.insert === 'menu_snapshot_proposals').row;
+  const voor = row.captured_content.categories.find((c) => c.name === 'Voor');
+  assert.deepEqual(voor.items.map((i) => `${i.name} ${i.price}`), ['Fictieve burrata 13.00', 'Fictieve soep 9.50']);
+  // The corrected section from the review is still there.
+  assert.ok(row.captured_content.categories.some((c) => c.name === 'Salades' && c.path.join('›') === 'Fictief Lunch›Salades'));
+});
+
+test('concept after a structure review: an unreadable review trail refuses the concept instead of saving without it', async () => {
+  const supabase = confirmedStructureFixture({ storedReviewError: true });
+  const res = await makeHandlers({ supabase, liveMenus: {} }).handlers.saveConcept(request({ job_id: JOB, edits: {} }), BATCH);
+  assert.equal(res.status, 409);
+  assert.equal(res.body.reason, 'structure_store_unavailable');
+  assert.equal(supabase.calls.filter((c) => c.insert === 'menu_snapshot_proposals').length, 0);
+});
+
+// Regression (d) of the order: a certain (normalized) receipt keeps the
+// unchanged one-click confirmation. A client-sent structure_reviews list never
+// activates the human route and never writes an audit row for it.
+test('certain outcome (regression d): a normalized receipt confirms one-click and ignores a sent structure list', async () => {
+  const supabase = confirmFixture();
+  const res = await makeHandlers({ supabase, liveMenus: {} }).handlers.confirmSources(
+    request({
+      job_ids: [JOB],
+      structure_reviews: [{ job_id: JOB, receipt_hash: 'a'.repeat(64), sections: [{ path: ['Fictief'], action: 'keep' }] }],
+    }),
+    BATCH
+  );
+  assert.equal(res.status, 200);
+  assert.deepEqual(res.body.results, [{ job_id: JOB, ok: true }]);
+  const create = supabase.calls.find((c) => c.rpc === 'create_source_triage_proposal').args;
+  assert.equal(create.p_note, 'Bevestigd vanuit Batchanalyse na menselijke controle.');
+  assert.equal(supabase.calls.filter((c) => c.insert === 'menu_structure_reviews').length, 0);
+});
+
+

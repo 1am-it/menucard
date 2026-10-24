@@ -1,0 +1,1133 @@
+{
+  "referenceVersion": "3.0.0-proposed",
+  "referenceMode": "controlled_layout_capture",
+  "source": {
+    "menuUrl": "https://debotanistbreda.nl/wp-content/uploads/2022/11/De-Botanist-Breda-Menukaart-voorjaar-20-03-2026_compressed.pdf",
+    "menuBytesSha256": "50fef0b6e8d14fbc151273c492f27c0fe70ab1ff909fdc445750cc7bb32a7f85",
+    "menuContentHash": "eb9da86e950463b90f09634f05236ec44925968120923506337678e56e3ade7f",
+    "pageCount": 16
+  },
+  "measurement": {
+    "command": "node ops/benchmark/runBotanistComparison.js",
+    "reference": "botanist-reference.proposed-v3.json",
+    "deterministicOnly": true,
+    "providerCalled": false,
+    "networkUsed": false
+  },
+  "referenceItems": 139,
+  "parserItems": 215,
+  "sections": {
+    "WARME DRANKEN": {
+      "expected": 10,
+      "actual": 10,
+      "matched": 10,
+      "missing": [],
+      "extra": [],
+      "priceMismatch": 0,
+      "limited": 0
+    },
+    "SUPPLEMENTEN": {
+      "expected": 6,
+      "actual": 0,
+      "matched": 0,
+      "missing": [],
+      "extra": [],
+      "priceMismatch": 0,
+      "limited": 0,
+      "productGap": 6
+    },
+    "LEKKERS VOOR BIJ DE KOFFIE": {
+      "expected": 4,
+      "actual": 4,
+      "matched": 4,
+      "missing": [],
+      "extra": [],
+      "priceMismatch": 0,
+      "limited": 0
+    },
+    "FRISDRANK": {
+      "expected": 14,
+      "actual": 14,
+      "matched": 14,
+      "missing": [],
+      "extra": [],
+      "priceMismatch": 0,
+      "limited": 0
+    },
+    "PREMIUM FRISDRANKEN": {
+      "expected": 10,
+      "actual": 10,
+      "matched": 9,
+      "missing": [
+        {
+          "name": "Del Sol Pineapple Hibiscus Soda",
+          "price": "5.5"
+        }
+      ],
+      "extra": [
+        {
+          "name": "Del Sol Pineapple",
+          "price": "5.5",
+          "path": [
+            "PREMIUM FRISDRANKEN"
+          ]
+        }
+      ],
+      "priceMismatch": 0,
+      "limited": 0
+    },
+    "fritz": {
+      "expected": 5,
+      "actual": 5,
+      "matched": 5,
+      "missing": [],
+      "extra": [],
+      "priceMismatch": 0,
+      "limited": 0
+    },
+    "SOOF LEMONADES": {
+      "expected": 5,
+      "actual": 0,
+      "matched": 0,
+      "missing": [
+        {
+          "name": "Blueberry & Lavender Lemonade",
+          "price": "4.8",
+          "support": "unsupported_readability"
+        },
+        {
+          "name": "Rose & Cardamom Lemonade",
+          "price": "4.8",
+          "support": "unsupported_readability"
+        },
+        {
+          "name": "Carrot & Ginger Lemonade",
+          "price": "4.8",
+          "support": "unsupported_readability"
+        },
+        {
+          "name": "Lemongrass & Pear Lemonade",
+          "price": "4.8",
+          "support": "unsupported_readability"
+        },
+        {
+          "name": "Ice Tea Lemonade",
+          "price": "4.8",
+          "support": "unsupported_readability"
+        }
+      ],
+      "extra": [],
+      "priceMismatch": 0,
+      "limited": 5
+    },
+    "BIER VAN DE TAP": {
+      "expected": 7,
+      "actual": 7,
+      "matched": 7,
+      "missing": [],
+      "extra": [],
+      "priceMismatch": 0,
+      "limited": 0
+    },
+    "RIJK EN DONKER": {
+      "expected": 2,
+      "actual": 2,
+      "matched": 2,
+      "missing": [],
+      "extra": [],
+      "priceMismatch": 0,
+      "limited": 0
+    },
+    "FRIS EN FRUITIG": {
+      "expected": 4,
+      "actual": 4,
+      "matched": 4,
+      "missing": [],
+      "extra": [],
+      "priceMismatch": 0,
+      "limited": 0
+    },
+    "BROUWERIJ FRONTAAL": {
+      "expected": 5,
+      "actual": 5,
+      "matched": 5,
+      "missing": [],
+      "extra": [],
+      "priceMismatch": 0,
+      "limited": 0
+    },
+    "NON ALCOHOLISCH": {
+      "expected": 6,
+      "actual": 6,
+      "matched": 6,
+      "missing": [],
+      "extra": [],
+      "priceMismatch": 0,
+      "limited": 0
+    },
+    "KOREMAN'S": {
+      "expected": 4,
+      "actual": 4,
+      "matched": 4,
+      "missing": [],
+      "extra": [],
+      "priceMismatch": 0,
+      "limited": 0
+    },
+    "SNACKS": {
+      "expected": 6,
+      "actual": 6,
+      "matched": 6,
+      "missing": [],
+      "extra": [],
+      "priceMismatch": 0,
+      "limited": 0
+    },
+    "STARTERS": {
+      "expected": 10,
+      "actual": 10,
+      "matched": 10,
+      "missing": [],
+      "extra": [],
+      "priceMismatch": 0,
+      "limited": 0
+    },
+    "SIDE DISHES": {
+      "expected": 7,
+      "actual": 7,
+      "matched": 7,
+      "missing": [],
+      "extra": [],
+      "priceMismatch": 0,
+      "limited": 0
+    },
+    "OESTERS": {
+      "expected": 3,
+      "actual": 3,
+      "matched": 3,
+      "missing": [],
+      "extra": [],
+      "priceMismatch": 0,
+      "limited": 0
+    },
+    "DESSERTS 17:00 - 21:00": {
+      "expected": 8,
+      "actual": 8,
+      "matched": 8,
+      "missing": [],
+      "extra": [],
+      "priceMismatch": 0,
+      "limited": 0
+    },
+    "MEDITERRAANS": {
+      "expected": 3,
+      "actual": 3,
+      "matched": 3,
+      "missing": [],
+      "extra": [],
+      "priceMismatch": 0,
+      "limited": 0
+    },
+    "(MIDDEN) - OOSTERS": {
+      "expected": 3,
+      "actual": 3,
+      "matched": 3,
+      "missing": [],
+      "extra": [],
+      "priceMismatch": 0,
+      "limited": 0
+    },
+    "LATIJNS-AMERIKAANS": {
+      "expected": 6,
+      "actual": 6,
+      "matched": 6,
+      "missing": [],
+      "extra": [],
+      "priceMismatch": 0,
+      "limited": 0
+    },
+    "LUNCH": {
+      "expected": 11,
+      "actual": 11,
+      "matched": 11,
+      "missing": [],
+      "extra": [],
+      "priceMismatch": 0,
+      "limited": 0
+    }
+  },
+  "totals": {
+    "matched": 127,
+    "missing": 6,
+    "extra": 1,
+    "priceMismatch": 0
+  },
+  "layout": {
+    "duplicateLayerItems": 0,
+    "duplicateLayerOffsets": [],
+    "ambiguousPriceLines": 18,
+    "unlinkedPriceLines": 2,
+    "supplementLines": 18,
+    "arrangementLines": 0,
+    "unrecognizedHeadingLines": 0,
+    "inheritedSectionColumns": 4,
+    "inheritedSubheadingColumns": 1,
+    "nameContinuationLines": 13,
+    "portionLines": 2,
+    "bridgedPricePairs": 7,
+    "supplementSections": [
+      {
+        "heading": "SUPPLEMENTEN",
+        "pages": [
+          2
+        ],
+        "lines": 6
+      }
+    ]
+  },
+  "unmapped": [
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Blueberry & Lavender Lemonade",
+      "price": "4.8"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Rose & Cardamom Lemonade",
+      "price": "4.8"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Carrot & Ginger Lemonade",
+      "price": "4.8"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Lemongrass & Pear Lemonade",
+      "price": "4.8"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Ice Tea Lemonade",
+      "price": "4.8"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Oester naturel",
+      "price": "4.0"
+    },
+    {
+      "path": [
+        "Menukaart"
+      ],
+      "name": "Oester oosters",
+      "price": "4.5"
+    },
+    {
+      "path": [
+        "KRACHTIG EN BLOND"
+      ],
+      "name": "Pornstar Martini Blond",
+      "price": "6.0"
+    },
+    {
+      "path": [
+        "KRACHTIG EN BLOND"
+      ],
+      "name": "Texels Springtij Blond",
+      "price": "6.0"
+    },
+    {
+      "path": [
+        "KRACHTIG EN BLOND"
+      ],
+      "name": "Texels Tuunwal Tripel",
+      "price": "6.0"
+    },
+    {
+      "path": [
+        "KRACHTIG EN BLOND"
+      ],
+      "name": "Oedipus Thai Thai Tripel",
+      "price": "6.5"
+    },
+    {
+      "path": [
+        "KRACHTIG EN BLOND"
+      ],
+      "name": "Affligem Tripel",
+      "price": "5.9"
+    },
+    {
+      "path": [
+        "ONZE SIGNATURES"
+      ],
+      "name": "St. Germain, Kersenlikeur, karaf",
+      "price": "24.0"
+    },
+    {
+      "path": [
+        "ONZE SIGNATURES"
+      ],
+      "name": "Pick me",
+      "price": "11.0"
+    },
+    {
+      "path": [
+        "ONZE SIGNATURES"
+      ],
+      "name": "Rum Forrest Rum",
+      "price": "13.0"
+    },
+    {
+      "path": [
+        "ONZE SIGNATURES",
+        "Tempranillo, limoensap,"
+      ],
+      "name": "Sunset Mojito",
+      "price": "10.5"
+    },
+    {
+      "path": [
+        "ONZE SIGNATURES",
+        "Brandy, abrikozenpuree,"
+      ],
+      "name": "Ook beschikbaar in",
+      "price": "8.0"
+    },
+    {
+      "path": [
+        "ONZE SIGNATURES",
+        "Brandy, abrikozenpuree,"
+      ],
+      "name": "Ruby Bliss",
+      "price": "12.0"
+    },
+    {
+      "path": [
+        "ONZE SIGNATURES",
+        "Brandy, abrikozenpuree,"
+      ],
+      "name": "Smooth Operator",
+      "price": "11.5"
+    },
+    {
+      "path": [
+        "ONZE SIGNATURES",
+        "Prosecco Foam"
+      ],
+      "name": "One More",
+      "price": "13.5"
+    },
+    {
+      "path": [
+        "ONZE SIGNATURES",
+        "Prosecco Foam"
+      ],
+      "name": "Botanist Martini",
+      "price": "11.0"
+    },
+    {
+      "path": [
+        "KLASSIEKERS MET EEN TWIST"
+      ],
+      "name": "Pornstar Martini",
+      "price": "11.5"
+    },
+    {
+      "path": [
+        "KLASSIEKERS MET EEN TWIST"
+      ],
+      "name": "Espresso Martini",
+      "price": "11.5"
+    },
+    {
+      "path": [
+        "KLASSIEKERS MET EEN TWIST"
+      ],
+      "name": "Amaretto Sour",
+      "price": "11.0"
+    },
+    {
+      "path": [
+        "KLASSIEKERS MET EEN TWIST"
+      ],
+      "name": "Pornstar Martini Boom 6 st.",
+      "price": "65.0"
+    },
+    {
+      "path": [
+        "KLASSIEKERS MET EEN TWIST"
+      ],
+      "name": "Pornstar Martini Boom 12 st.",
+      "price": "120.0"
+    },
+    {
+      "path": [
+        "GIN & TONIC"
+      ],
+      "name": "Bombay Sapphire",
+      "price": "6.0"
+    },
+    {
+      "path": [
+        "GIN & TONIC"
+      ],
+      "name": "Double Dutch Indian Tonic",
+      "price": "4.6"
+    },
+    {
+      "path": [
+        "GIN & TONIC"
+      ],
+      "name": "Drumchanbo Gunpowder",
+      "price": "6.5"
+    },
+    {
+      "path": [
+        "GIN & TONIC"
+      ],
+      "name": "Royal Club ginger ale",
+      "price": "3.8"
+    },
+    {
+      "path": [
+        "GIN & TONIC"
+      ],
+      "name": "Nolet’s Silver",
+      "price": "8.5"
+    },
+    {
+      "path": [
+        "GIN & TONIC"
+      ],
+      "name": "Double Dutch Elderflower",
+      "price": "4.6"
+    },
+    {
+      "path": [
+        "GIN & TONIC"
+      ],
+      "name": "Hendrick’s",
+      "price": "8.0"
+    },
+    {
+      "path": [
+        "GIN & TONIC"
+      ],
+      "name": "Double Dutch Cucumber & Watermelon Tonic",
+      "price": "4.6"
+    },
+    {
+      "path": [
+        "GIN & TONIC"
+      ],
+      "name": "Botanist Pink Gin",
+      "price": "7.5"
+    },
+    {
+      "path": [
+        "GIN & TONIC"
+      ],
+      "name": "Something & Nothing Hibiscus & Rose Soda",
+      "price": "4.6"
+    },
+    {
+      "path": [
+        "GIN & TONIC"
+      ],
+      "name": "Double Dutch Indian Tonic",
+      "price": "4.6"
+    },
+    {
+      "path": [
+        "GIN & TONIC"
+      ],
+      "name": "The Botanist",
+      "price": "8.0"
+    },
+    {
+      "path": [
+        "GIN & TONIC"
+      ],
+      "name": "Double Dutch Indian Tonic",
+      "price": "4.6"
+    },
+    {
+      "path": [
+        "GIN & TONIC"
+      ],
+      "name": "Gin Mare",
+      "price": "9.0"
+    },
+    {
+      "path": [
+        "GIN & TONIC"
+      ],
+      "name": "Double Dutch Ginger Beer",
+      "price": "4.6"
+    },
+    {
+      "path": [
+        "GIN & TONIC"
+      ],
+      "name": "Bobby’s Schiedam Dry",
+      "price": "7.5"
+    },
+    {
+      "path": [
+        "GIN & TONIC"
+      ],
+      "name": "Double Dutch Cranberry & Ginger Tonic",
+      "price": "4.6"
+    },
+    {
+      "path": [
+        "SPRITZERS"
+      ],
+      "name": "Aperol Spritz",
+      "price": "9.0"
+    },
+    {
+      "path": [
+        "SPRITZERS"
+      ],
+      "name": "Limoncello Spritz",
+      "price": "9.0"
+    },
+    {
+      "path": [
+        "SPRITZERS"
+      ],
+      "name": "St. Germain Spritz",
+      "price": "9.5"
+    },
+    {
+      "path": [
+        "SPRITZERS"
+      ],
+      "name": "Watermelon Spritz",
+      "price": "9.5"
+    },
+    {
+      "path": [
+        "HARD SELTZER"
+      ],
+      "name": "Stëltz Mango",
+      "price": "5.0"
+    },
+    {
+      "path": [
+        "HARD SELTZER"
+      ],
+      "name": "Stëltz Iced Tea Peach",
+      "price": "5.0"
+    },
+    {
+      "path": [
+        "HARD SELTZER"
+      ],
+      "name": "Stëltz Iced Tea Lemon",
+      "price": "5.0"
+    },
+    {
+      "path": [
+        "MOCKTAILS"
+      ],
+      "name": "Ceremonial Matcha 0.0",
+      "price": "5.5"
+    },
+    {
+      "path": [
+        "MOCKTAILS"
+      ],
+      "name": "Tropic Like it’s Hot 0.0",
+      "price": "8.0"
+    },
+    {
+      "path": [
+        "MOCKTAILS"
+      ],
+      "name": "0.0 Regrets",
+      "price": "7.5"
+    },
+    {
+      "path": [
+        "MOCKTAILS",
+        "Monin Rose"
+      ],
+      "name": "Tanqueray 0.0 Gin",
+      "price": "10.0"
+    },
+    {
+      "path": [
+        "WITTE WIJNEN"
+      ],
+      "name": "Spanje, Cuenca",
+      "price": "30.5"
+    },
+    {
+      "path": [
+        "WITTE WIJNEN"
+      ],
+      "name": "Frankrijk, Pays d’Oc",
+      "price": "32.0"
+    },
+    {
+      "path": [
+        "WITTE WIJNEN"
+      ],
+      "name": "Provence, Frankrijk",
+      "price": "35.0"
+    },
+    {
+      "path": [
+        "WITTE WIJNEN",
+        "Grenache Blanc"
+      ],
+      "name": "Duitsland, Rheinhessen",
+      "price": "36.0"
+    },
+    {
+      "path": [
+        "WITTE WIJNEN",
+        "Sauvignon Blanc"
+      ],
+      "name": "Frankrijk, Côtes de Gascogne",
+      "price": "37.5"
+    },
+    {
+      "path": [
+        "WITTE WIJNEN",
+        "Sauvignon Blanc"
+      ],
+      "name": "Torres Celeste Verdejo",
+      "price": "36.0"
+    },
+    {
+      "path": [
+        "WITTE WIJNEN",
+        "Sauvignon Blanc"
+      ],
+      "name": "Gérard Bertrand Art de Vivre",
+      "price": "38.0"
+    },
+    {
+      "path": [
+        "WITTE WIJNEN",
+        "Clairette"
+      ],
+      "name": "Ken Forrester",
+      "price": "40.0"
+    },
+    {
+      "path": [
+        "WITTE WIJNEN",
+        "Clairette"
+      ],
+      "name": "Baigorri Rioja Blanco",
+      "price": "40.0"
+    },
+    {
+      "path": [
+        "ROSÉ WIJNEN"
+      ],
+      "name": "Spanje, Cuenca",
+      "price": "30.5"
+    },
+    {
+      "path": [
+        "ROSÉ WIJNEN"
+      ],
+      "name": "Provence, Frankrijk",
+      "price": "35.0"
+    },
+    {
+      "path": [
+        "ROSÉ WIJNEN"
+      ],
+      "name": "Gérard Bertrand Art de",
+      "price": "38.0"
+    },
+    {
+      "path": [
+        "RODE WIJNEN"
+      ],
+      "name": "Spanje, Castilla-La Mancha",
+      "price": "30.5"
+    },
+    {
+      "path": [
+        "RODE WIJNEN"
+      ],
+      "name": "Italië, Puglia",
+      "price": "34.5"
+    },
+    {
+      "path": [
+        "RODE WIJNEN"
+      ],
+      "name": "Crianza",
+      "price": "35.0"
+    },
+    {
+      "path": [
+        "RODE WIJNEN"
+      ],
+      "name": "Argentinië, Mendoza",
+      "price": "35.5"
+    },
+    {
+      "path": [
+        "RODE WIJNEN"
+      ],
+      "name": "Gérard Bertrand Art de Vivre",
+      "price": "38.0"
+    },
+    {
+      "path": [
+        "RODE WIJNEN",
+        "Grenache, Syrah"
+      ],
+      "name": "Bottega Valpolicella Ripasso",
+      "price": "40.0"
+    },
+    {
+      "path": [
+        "BIJZONDERE WIJNEN"
+      ],
+      "name": "Joseph Cattin",
+      "price": "34.5"
+    },
+    {
+      "path": [
+        "BIJZONDERE WIJNEN"
+      ],
+      "name": "Luis Felipe Edwards",
+      "price": "34.5"
+    },
+    {
+      "path": [
+        "BUBBELS"
+      ],
+      "name": "Italie, Veneto",
+      "price": "32.5"
+    },
+    {
+      "path": [
+        "BUBBELS"
+      ],
+      "name": "Spanje, Penedès",
+      "price": "30.0"
+    },
+    {
+      "path": [
+        "CHAMPAGNE"
+      ],
+      "name": "Moët & Chandon Brut",
+      "price": "74.5"
+    },
+    {
+      "path": [
+        "SOEPEN EN SALADES"
+      ],
+      "name": "Doperwtensoepje",
+      "price": "9.5"
+    },
+    {
+      "path": [
+        "SOEPEN EN SALADES"
+      ],
+      "name": "Bisque van Langoustine",
+      "price": "12.5"
+    },
+    {
+      "path": [
+        "SOEPEN EN SALADES"
+      ],
+      "name": "Salade Primavera",
+      "price": "17.5"
+    },
+    {
+      "path": [
+        "SOEPEN EN SALADES"
+      ],
+      "name": "Salade Il Magnifico",
+      "price": "16.5"
+    },
+    {
+      "path": [
+        "BORRELPLANKEN EN MEER 11:30 - 22:00"
+      ],
+      "name": "Crispy Coconut Gyoza",
+      "price": "12.5"
+    },
+    {
+      "path": [
+        "PETITE CROQUETTES"
+      ],
+      "name": "Rendang Croquettes 6st.",
+      "price": "8.5"
+    },
+    {
+      "path": [
+        "PETITE CROQUETTES"
+      ],
+      "name": "Gamba Croquettes 6st.",
+      "price": "8.5"
+    },
+    {
+      "path": [
+        "PETITE CROQUETTES"
+      ],
+      "name": "Chorizo Croquettes 6st.",
+      "price": "8.5"
+    },
+    {
+      "path": [
+        "PETITE CROQUETTES"
+      ],
+      "name": "Truffel Croquettes 6st.",
+      "price": "9.5"
+    },
+    {
+      "path": [
+        "PETITE CROQUETTES"
+      ],
+      "name": "Croquettes mix 8st.",
+      "price": "11.5"
+    }
+  ],
+  "categoryUnknown": {
+    "explanation": "Parser rows whose name and amount match a reference row, but whose own category is absent/unmapped. Never added to matched or coverage.",
+    "count": 8,
+    "rows": [
+      {
+        "name": "Blueberry & Lavender Lemonade",
+        "price": "4.8",
+        "parserPath": [
+          "Menukaart"
+        ],
+        "parserSourcePath": [],
+        "parserCategoryStatus": "unheaded_fallback",
+        "categoryUncertain": true,
+        "referenceSections": [
+          "SOOF LEMONADES"
+        ]
+      },
+      {
+        "name": "Rose & Cardamom Lemonade",
+        "price": "4.8",
+        "parserPath": [
+          "Menukaart"
+        ],
+        "parserSourcePath": [],
+        "parserCategoryStatus": "unheaded_fallback",
+        "categoryUncertain": true,
+        "referenceSections": [
+          "SOOF LEMONADES"
+        ]
+      },
+      {
+        "name": "Carrot & Ginger Lemonade",
+        "price": "4.8",
+        "parserPath": [
+          "Menukaart"
+        ],
+        "parserSourcePath": [],
+        "parserCategoryStatus": "unheaded_fallback",
+        "categoryUncertain": true,
+        "referenceSections": [
+          "SOOF LEMONADES"
+        ]
+      },
+      {
+        "name": "Lemongrass & Pear Lemonade",
+        "price": "4.8",
+        "parserPath": [
+          "Menukaart"
+        ],
+        "parserSourcePath": [],
+        "parserCategoryStatus": "unheaded_fallback",
+        "categoryUncertain": true,
+        "referenceSections": [
+          "SOOF LEMONADES"
+        ]
+      },
+      {
+        "name": "Ice Tea Lemonade",
+        "price": "4.8",
+        "parserPath": [
+          "Menukaart"
+        ],
+        "parserSourcePath": [],
+        "parserCategoryStatus": "unheaded_fallback",
+        "categoryUncertain": true,
+        "referenceSections": [
+          "SOOF LEMONADES"
+        ]
+      },
+      {
+        "name": "Oester naturel",
+        "price": "4.0",
+        "parserPath": [
+          "Menukaart"
+        ],
+        "parserSourcePath": [],
+        "parserCategoryStatus": "unheaded_fallback",
+        "categoryUncertain": true,
+        "referenceSections": [
+          "OESTERS"
+        ]
+      },
+      {
+        "name": "Oester oosters",
+        "price": "4.5",
+        "parserPath": [
+          "Menukaart"
+        ],
+        "parserSourcePath": [],
+        "parserCategoryStatus": "unheaded_fallback",
+        "categoryUncertain": true,
+        "referenceSections": [
+          "OESTERS"
+        ]
+      },
+      {
+        "name": "Crispy Coconut Gyoza",
+        "price": "12.5",
+        "parserPath": [
+          "BORRELPLANKEN EN MEER 11:30 - 22:00"
+        ],
+        "parserSourcePath": [
+          "BORRELPLANKEN EN MEER 11:30 - 22:00"
+        ],
+        "parserCategoryStatus": "other_section",
+        "categoryUncertain": true,
+        "referenceSections": [
+          "STARTERS"
+        ]
+      }
+    ]
+  },
+  "coverage": {
+    "referenceItems": 139,
+    "matched": 127,
+    "missing": 6,
+    "productGap": 6,
+    "extra": 1,
+    "priceMismatch": 0,
+    "matchedRatio": 0.9137,
+    "limitedRows": 5
+  },
+  "supportedSubset": {
+    "label": "rows_with_unsupported_readability_or_product_fields_excluded",
+    "referenceItems": 128,
+    "matched": 127,
+    "missing": 1,
+    "extra": 1,
+    "priceMismatch": 0,
+    "matchedRatio": 0.9922,
+    "excludedRows": [
+      {
+        "section": "SOOF LEMONADES",
+        "name": "Blueberry & Lavender Lemonade",
+        "price": "4.8",
+        "support": "unsupported_readability",
+        "reason": "No printed text heading covers this lower page block. The five rows are readable names with amounts in a different grid (names x≈184.4, amounts x≈369.0) next to the Soof logo/prose context. The label \"SOOF LEMONADES\" is a reference label, not source text; the rows stay in the denominator and are counted as missing."
+      },
+      {
+        "section": "SOOF LEMONADES",
+        "name": "Rose & Cardamom Lemonade",
+        "price": "4.8",
+        "support": "unsupported_readability",
+        "reason": "No printed text heading covers this lower page block. The five rows are readable names with amounts in a different grid (names x≈184.4, amounts x≈369.0) next to the Soof logo/prose context. The label \"SOOF LEMONADES\" is a reference label, not source text; the rows stay in the denominator and are counted as missing."
+      },
+      {
+        "section": "SOOF LEMONADES",
+        "name": "Carrot & Ginger Lemonade",
+        "price": "4.8",
+        "support": "unsupported_readability",
+        "reason": "No printed text heading covers this lower page block. The five rows are readable names with amounts in a different grid (names x≈184.4, amounts x≈369.0) next to the Soof logo/prose context. The label \"SOOF LEMONADES\" is a reference label, not source text; the rows stay in the denominator and are counted as missing."
+      },
+      {
+        "section": "SOOF LEMONADES",
+        "name": "Lemongrass & Pear Lemonade",
+        "price": "4.8",
+        "support": "unsupported_readability",
+        "reason": "No printed text heading covers this lower page block. The five rows are readable names with amounts in a different grid (names x≈184.4, amounts x≈369.0) next to the Soof logo/prose context. The label \"SOOF LEMONADES\" is a reference label, not source text; the rows stay in the denominator and are counted as missing."
+      },
+      {
+        "section": "SOOF LEMONADES",
+        "name": "Ice Tea Lemonade",
+        "price": "4.8",
+        "support": "unsupported_readability",
+        "reason": "No printed text heading covers this lower page block. The five rows are readable names with amounts in a different grid (names x≈184.4, amounts x≈369.0) next to the Soof logo/prose context. The label \"SOOF LEMONADES\" is a reference label, not source text; the rows stay in the denominator and are counted as missing."
+      },
+      {
+        "section": "SUPPLEMENTEN",
+        "name": "Havermelk",
+        "price": "0.5",
+        "support": "unsupported_product_field",
+        "reason": "Explicit supplement section: the rows are readable, but the product concept cannot store supplement relations. They must never flow through as ordinary dishes with a main price."
+      },
+      {
+        "section": "SUPPLEMENTEN",
+        "name": "Hazelnootsiroop",
+        "price": "0.6",
+        "support": "unsupported_product_field",
+        "reason": "Explicit supplement section: the rows are readable, but the product concept cannot store supplement relations. They must never flow through as ordinary dishes with a main price."
+      },
+      {
+        "section": "SUPPLEMENTEN",
+        "name": "Karamelsiroop",
+        "price": "0.6",
+        "support": "unsupported_product_field",
+        "reason": "Explicit supplement section: the rows are readable, but the product concept cannot store supplement relations. They must never flow through as ordinary dishes with a main price."
+      },
+      {
+        "section": "SUPPLEMENTEN",
+        "name": "Witte chocoladesiroop",
+        "price": "0.6",
+        "support": "unsupported_product_field",
+        "reason": "Explicit supplement section: the rows are readable, but the product concept cannot store supplement relations. They must never flow through as ordinary dishes with a main price."
+      },
+      {
+        "section": "SUPPLEMENTEN",
+        "name": "Honing",
+        "price": "0.6",
+        "support": "unsupported_product_field",
+        "reason": "Explicit supplement section: the rows are readable, but the product concept cannot store supplement relations. They must never flow through as ordinary dishes with a main price."
+      },
+      {
+        "section": "SUPPLEMENTEN",
+        "name": "Slagroom",
+        "price": "0.6",
+        "support": "unsupported_product_field",
+        "reason": "Explicit supplement section: the rows are readable, but the product concept cannot store supplement relations. They must never flow through as ordinary dishes with a main price."
+      }
+    ]
+  },
+  "accounting": {
+    "referenceItems": 139,
+    "matched": 127,
+    "missing": 6,
+    "productGap": 6,
+    "extra": 1,
+    "explainedRows": 140,
+    "expectedRows": 140,
+    "balanced": true
+  }
+}

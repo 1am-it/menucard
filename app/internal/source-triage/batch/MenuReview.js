@@ -17,8 +17,9 @@
 
 import { useMemo, useState } from 'react'
 import StatusIcon from '@/src/components/StatusIcon'
-import { STATUS, buildMenuConcept, displayPrice, removalKey } from '@/src/lib/menuConcept'
-import { formatPath } from '@/src/lib/menuHierarchy'
+import { STATUS, buildMenuConcept, displayPrice, mergeEdits, removalKey } from '@/src/lib/menuConcept'
+import { formatPath, pathKey } from '@/src/lib/menuHierarchy'
+import { parsePathText, reviewKey } from '@/src/lib/menuStructureReview'
 
 /**
  * The proposed section structure next to its original source route, for
@@ -60,9 +61,219 @@ export function plural(n, one, many) {
   return `${n} ${n === 1 ? one : many}`
 }
 
+const PRODUCT_KIND_LABELS = {
+  dish: 'Gerecht',
+  choice: 'Keuze',
+  supplement: 'Supplement',
+  arrangement: 'Arrangement',
+  beverage: 'Drank',
+  unknown: 'Soort onbekend',
+  section: 'Rubriek',
+  choice_group: 'Keuzegroep',
+};
+
+const PRODUCT_PRICE_LABELS = {
+  multiple_undecomposed: 'Meerdere prijzen',
+  on_request: 'Prijs op aanvraag',
+  unknown: 'Prijs onbekend',
+};
+
+function productPriceText(price) {
+  if (!price) return 'Prijs onbekend';
+  if (price.status === 'known' || price.status === 'from') {
+    const amount = price.display || (price.text ? price.text : null);
+    if (amount) return price.isFrom ? `Vanaf ${amount}` : amount;
+    return 'Prijs onbekend';
+  }
+  if (price.text) return price.text;
+  return PRODUCT_PRICE_LABELS[price.status] || 'Prijs onbekend';
+}
+
+/**
+ * Read-only, version-faithful rendering of a validated menu-extraction v2
+ * view: variants, nested sections, multiple/glass/bottle prices, supplements,
+ * explicit or unknown allergens, and source evidence. Source text is rendered
+ * as plain React text, never as HTML or an instruction.
+ */
+export function ProductReview({ product }) {
+  if (!product) return null;
+  const coverage = product.coverage || {};
+  return (
+    <div className="bta-product" aria-label="Menukaart v2, alleen-lezen">
+      <div className="di-banner di-banner-neutral" role="status">
+        <span className="di-banner-icon">
+          <StatusIcon name="warning" />
+        </span>
+        <span>
+          <strong>Alleen-lezen.</strong> {product.blockers.map((blocker) => blocker.label).join(' ')}
+        </span>
+      </div>
+      <ul className="bta-chips" aria-label="Aantallen in deze kaart">
+        <li className="bta-chip">{plural(product.counts.items, 'item', 'items')}</li>
+        <li className="bta-chip">{plural(product.counts.categories, 'rubriek', 'rubrieken')}</li>
+        {product.counts.priceVariants > 0 && <li className="bta-chip">{plural(product.counts.priceVariants, 'prijsvariant', 'prijsvarianten')}</li>}
+        {product.counts.supplements > 0 && <li className="bta-chip">{plural(product.counts.supplements, 'supplement', 'supplementen')}</li>}
+      </ul>
+
+      {product.notes.length > 0 && (
+        <ul className="bta-notes" aria-label="Aandachtspunten in deze kaart">
+          {product.notes.map((note) => (
+            <li key={`${note.code}-${note.label}`}>
+              {note.name ? <strong>{note.name}</strong> : null}
+              {note.name ? ' · ' : null}
+              {note.label}
+            </li>
+          ))}
+        </ul>
+      )}
+      {product.menus.map((menu) => (
+        <section key={menu.id} className="bta-product-menu" aria-label={menu.title || 'Menukaart'}>
+          <h3 className="bta-concept-title">{menu.title || 'Naamloze menukaart'}</h3>
+          {(menu.variant.label || menu.variant.sourceLabel) && (
+            <p className="bta-muted">
+              Variant: {menu.variant.label || 'onbekend'}
+              {menu.variant.sourceLabel && menu.variant.sourceLabel !== menu.variant.label ? ` · bronlabel: ${menu.variant.sourceLabel}` : ''}
+              {menu.variant.locale ? ` · taal: ${menu.variant.locale}` : ''}
+              {menu.variant.location ? ` · vestiging: ${menu.variant.location}` : ''}
+            </p>
+          )}
+          {menu.categories.map((category) => (
+            <details key={category.id} className="bta-category">
+              <summary>
+                <span className="bta-category-name">{category.name || 'Zonder rubriek'}</span>
+                <span className="bta-muted"> · {plural(category.items.length, 'item', 'items')}</span>
+                {category.kind !== 'section' && (
+                  <span className="status-badge status-badge--neutral bta-badge bta-inline-badge">
+                    <span>{PRODUCT_KIND_LABELS[category.kind] || category.kind}</span>
+                  </span>
+                )}
+                {category.uncertain && (
+                  <span className="status-badge status-badge--neutral bta-badge bta-inline-badge">
+                    <StatusIcon name="warning" />
+                    <span>Rubriekindeling onzeker</span>
+                  </span>
+                )}
+              </summary>
+              {category.path.length > 1 && <p className="bta-source-route">Pad: {formatPath(category.path)}</p>}
+              {category.sourcePath.length > 0 && <p className="bta-source-route">Bronroute: {formatPath(category.sourcePath)}</p>}
+              {category.choice && (
+                <p className="bta-muted">
+                  Keuzegroep{category.choice.count !== null ? ` · ${category.choice.count} keuzes` : ''}
+                  {category.choice.min !== null || category.choice.max !== null ? ` (min ${category.choice.min ?? '?'}, max ${category.choice.max ?? '?'})` : ''}
+                </p>
+              )}
+              <ul className="bta-dishes">
+                {category.items.map((item) => (
+                  <li key={item.id} className="bta-product-item">
+                    <div>
+                      <span className="bta-dish">{item.name || 'Naam ontbreekt'}</span>{' '}
+                      <span className="bta-muted">· {PRODUCT_KIND_LABELS[item.kind] || item.kind}</span>
+                    </div>
+                    {item.description && <p className="bta-muted">{item.description}</p>}
+                    <span className={item.price.status === 'known' || item.price.status === 'from' ? 'bta-price' : 'bta-price bta-price--missing'}>
+                      {productPriceText(item.price)}
+                    </span>
+                    {item.priceVariants.length > 0 && (
+                      <ul className="bta-notes" aria-label={`Prijsvarianten van ${item.name || 'dit item'}`}>
+                        {item.priceVariants.map((variant) => (
+                          <li key={variant.id}>
+                            {variant.label || PRODUCT_KIND_LABELS[variant.kind] || 'Variant'}: {variant.display || variant.text || 'onbekend'}
+                            {variant.isSupplement ? ' · supplement' : ''}
+                            {variant.perPerson ? ' · per persoon' : ''}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {item.supplementOf && (
+                      <p className="bta-muted">
+                        {item.supplementOf.status === 'resolved'
+                          ? `Supplement bij item ${item.supplementOf.itemId}.`
+                          : `Supplement${item.supplementOf.label ? `: ${item.supplementOf.label}` : ''}; doel niet vastgelegd (context ${item.supplementOf.context.menuId || '?'} / ${item.supplementOf.context.categoryId || '?'}). ${item.supplementOf.limitation || ''}`}
+                      </p>
+                    )}
+                    <p className="bta-muted">
+                      {item.allergens.status === 'explicit'
+                        ? `Allergenen: ${item.allergens.codes.join(', ') || 'geen code vermeld'}`
+                        : 'Allergenen onbekend (geen bronvermelding)'}
+                      {item.dietaryLabels.length > 0 ? ` · ${item.dietaryLabels.join(', ')}` : ''}
+                    </p>
+                    {item.evidence && (
+                      <details className="bta-evidence">
+                        <summary>Bronbewijs</summary>
+                        <p className="bta-muted">
+                          {item.evidence.sourceId || 'bron onbekend'} · {item.evidence.locator || 'vindplaats onbekend'}
+                        </p>
+                        {item.evidence.quote && <p className="bta-quote">{item.evidence.quote}</p>}
+                      </details>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </details>
+          ))}
+        </section>
+      ))}
+
+      <details className="bta-category">
+        <summary>
+          <span className="bta-category-name">Dekking</span>
+          <span className="bta-muted"> · {coverage.status || 'onbekend'} · {plural(coverage.itemsExtracted || 0, 'item', 'items')}</span>
+        </summary>
+        <p className="bta-muted">
+          {plural(coverage.sourcesRead || 0, 'bron gelezen', 'bronnen gelezen')} · {plural(coverage.pagesRead || 0, 'pagina', "pagina's")}
+        </p>
+        {coverage.unreadSources.length > 0 && (
+          <ul className="bta-notes" aria-label="Niet-gelezen bronnen">
+            {coverage.unreadSources.map((source, index) => (
+              <li key={`${source.sourceId}-${source.locator}-${index}`}>
+                {source.sourceId || 'bron onbekend'} · {source.locator || 'vindplaats onbekend'} · {source.reason || 'reden onbekend'}
+              </li>
+            ))}
+          </ul>
+        )}
+        {coverage.limitations.length > 0 && (
+          <ul className="bta-notes" aria-label="Beperkingen">
+            {coverage.limitations.map((limitation) => (
+              <li key={limitation}>{limitation}</li>
+            ))}
+          </ul>
+        )}
+      </details>
+
+      {product.rejected.length > 0 && (
+        <details className="bta-category">
+          <summary>
+            <span className="bta-category-name">Niet opgenomen regels</span>
+            <span className="bta-muted"> · {product.rejected.length}</span>
+          </summary>
+          <ul className="bta-notes">
+            {product.rejected.map((row, index) => (
+              <li key={`${row.sourceId}-${row.locator}-${index}`}>
+                {row.text || 'Geen tekst'} · {row.reason} · {row.sourceId || 'bron onbekend'} / {row.locator || 'vindplaats onbekend'}
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+
+    </div>
+  );
+}
+
+function coverageText(coverage) {
+  if (!coverage) return null
+  if (coverage.status === 'candidate_without_items') {
+    return 'Bron gevonden, maar er zijn geen gerechten met een betrouwbare prijs herkend. Dit is geen geslaagde extractie.'
+  }
+  if (coverage.status === 'no_content_found') return 'Geen bruikbare menukaart gevonden.'
+  const sources = plural(coverage.readCount || 0, 'bron gelezen', 'bronnen gelezen')
+  return `${plural(coverage.itemCount || 0, 'gerecht', 'gerechten')} uit ${sources}; controle nodig.`
+}
+
 export function MenuControl({ item }) {
   const menu = item.menu
   const href = item.foundUrl || item.url
+  const coverage = coverageText(item.coverage)
   return (
     <section className="bta-control" aria-label="Menukaartcontrole">
       <div className="bta-control-head">
@@ -76,6 +287,46 @@ export function MenuControl({ item }) {
           </a>
         )}
       </div>
+
+      {coverage && <p className="bta-muted">{coverage}</p>}
+
+      {item.productBlocked && !item.product && (
+        <div className="di-banner di-banner-neutral" role="status">
+          <span className="di-banner-icon">
+            <StatusIcon name="warning" />
+          </span>
+          <span>
+            <strong>Alleen-lezen.</strong> Deze analyse bevat een versiegebonden kaart die niet als v1 kan worden gelezen
+            {item.productReason ? ` (${item.productReason}).` : '.'} Opslaan, bevestigen en exporteren zijn geblokkeerd.
+          </span>
+        </div>
+      )}
+
+      {item.product && <ProductReview product={item.product} />}
+
+      {item.attentionGroups && item.attentionGroups.length > 0 && (
+        <div className="bta-attention" role="group" aria-label="Gedeelde onzekerheid">
+          <p className="bta-attention-title">
+            <StatusIcon name="warning" /> {plural(item.attentionGroups.length, 'gedeelde onzekerheid', 'gedeelde onzekerheden')}
+          </p>
+          <ul>
+            {item.attentionGroups.map((group) => (
+              <li key={group.id}>
+                <span className="bta-dish">{group.label}</span>{' '}
+                <span className="bta-muted">· {plural(group.itemCount, 'gerecht', 'gerechten')} · rubriekindeling onzeker</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {item.limitations && item.limitations.length > 0 && (
+        <ul className="bta-notes" aria-label="Beperkingen van deze extractie">
+          {item.limitations.map((limitation) => (
+            <li key={limitation}>{limitation}</li>
+          ))}
+        </ul>
+      )}
 
       {menu && menu.attention.length > 0 && (
         <div className="bta-attention" role="group" aria-label="Aandachtspunten">
@@ -112,7 +363,9 @@ export function MenuControl({ item }) {
               {category.items.map((dish) => (
                 <li key={dish.id}>
                   <span className="bta-dish">{dish.name}</span>
-                  <span className={dish.price ? 'bta-price' : 'bta-price bta-price--missing'}>{dish.price || 'geen prijs'}</span>
+                  <span className={dish.price ? 'bta-price' : 'bta-price bta-price--missing'}>
+                    {dish.price || (dish.priceText ? `${dish.priceText} · meerdere prijzen` : 'geen prijs')}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -128,6 +381,135 @@ export function MenuControl({ item }) {
       )}
     </section>
   )
+}
+
+/**
+ * The explicit human control of an uncertain section structure (#59 review
+ * 6307703713). Every uncertain section of THIS source version is shown with
+ * its source route and locator; a reviewer keeps it or corrects its whole
+ * path. Only a complete set can be confirmed — the server re-checks the same
+ * paths against the stored receipt. No "accept everything" action.
+ */
+export function StructureReview({ idPrefix, review, value, readOnly, onChange }) {
+  const required = (review && Array.isArray(review.required) && review.required) || []
+  if (required.length === 0) return null
+  const titleId = `${idPrefix}-structure-title`
+  const decisions = (review && Array.isArray(review.treated) && review.treated) || []
+  const handled = required.filter((section) => {
+    const choice = value[section.key]
+    if (!choice) return false
+    if (choice.action === 'keep') return true
+    if (choice.action !== 'correct') return false
+    const corrected = parsePathText(choice.text || '')
+    return Boolean(corrected && reviewKey(corrected) !== section.key)
+  })
+  return (
+    <div className="bta-structure-review" role="group" aria-labelledby={titleId}>
+      <p id={titleId} className="bta-attention-title">
+        <StatusIcon name="warning" /> Rubriekindeling controleren
+      </p>
+      <p className="bta-muted">
+        {plural(required.length, 'onzekere rubriek', 'onzekere rubrieken')} in deze bronversie. Handhaaf of corrigeer elke
+        rubriek met het bronpad en de vindplaats erbij. Daarna kun je de bron bevestigen.
+      </p>
+      <p className="bta-structure-count" role="status">
+        {handled.length} van {required.length} behandeld
+      </p>
+      {review.storeAvailable === false && (
+        <div className="di-banner di-banner-neutral" role="status">
+          <span className="di-banner-icon">
+            <StatusIcon name="warning" />
+          </span>
+          <span>
+            <strong>Controle niet beschikbaar.</strong> De opgeslagen rubriekcontrole kan niet worden gelezen. Er kan nu
+            niets worden bevestigd; probeer het later opnieuw.
+          </span>
+        </div>
+      )}
+      <ol className="bta-structure-list">
+        {required.map((section, index) => {
+          const choice = value[section.key] || {}
+          const corrected = choice.action === 'correct'
+          const correctedPath = corrected ? parsePathText(choice.text || '') : null
+          const invalid = corrected && (!correctedPath || reviewKey(correctedPath) === section.key)
+          const fieldId = `${idPrefix}-structure-${index}`
+          const treated = decisions.find((decision) => decision.key === section.key) || null
+          return (
+            <li key={section.key} className="bta-structure-row">
+              <div className="bta-structure-head">
+                <span className="bta-dish">{section.label}</span>
+                <span className="bta-muted">
+                  {plural(section.itemCount || 0, 'gerecht', 'gerechten')}
+                  {section.locator ? ` · vindplaats: ${section.locator}` : ''}
+                </span>
+              </div>
+              <p className="bta-source-route">Bronroute: {section.sourceRoute || 'niet vastgelegd'}</p>
+              {treated && (
+                <p className="bta-muted">
+                  Al behandeld{treated.reviewedAt ? ` op ${reviewedText(treated.reviewedAt)}` : ''}:{' '}
+                  {treated.action === 'correct' ? `gecorrigeerd naar ${formatPath(treated.correctedPath)}` : 'gehandhaafd'}.
+                </p>
+              )}
+              <div className="bta-structure-choices" role="radiogroup" aria-label={`Beslissing voor ${section.label}`}>
+                <label>
+                  <input
+                    type="radio"
+                    name={`${fieldId}-decision`}
+                    checked={choice.action === 'keep'}
+                    disabled={readOnly || review.storeAvailable === false}
+                    onChange={() => onChange(section.key, { action: 'keep', text: formatPath(section.path) })}
+                  />{' '}
+                  Rubriek klopt zo
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name={`${fieldId}-decision`}
+                    checked={corrected}
+                    disabled={readOnly || review.storeAvailable === false}
+                    onChange={() =>
+                      onChange(section.key, { action: 'correct', text: choice.action === 'correct' ? choice.text : formatPath(section.path) })
+                    }
+                  />{' '}
+                  Rubriek corrigeren
+                </label>
+              </div>
+              {corrected && (
+                <div className="bta-structure-edit">
+                  <label htmlFor={`${fieldId}-path`}>Gecorrigeerde rubriek en pad</label>
+                  <input
+                    id={`${fieldId}-path`}
+                    className="stg-input"
+                    value={choice.text || ''}
+                    disabled={readOnly || review.storeAvailable === false}
+                    placeholder="bijv. Diner › Voorgerechten"
+                    aria-describedby={`${fieldId}-hint`}
+                    aria-invalid={invalid ? 'true' : undefined}
+                    onChange={(event) => onChange(section.key, { action: 'correct', text: event.target.value })}
+                  />
+                  <p id={`${fieldId}-hint`} className="bta-muted">
+                    {invalid
+                      ? 'Vul een ander pad in dan het onzekere bronpad; gebruik › tussen niveaus.'
+                      : 'Gebruik › tussen niveaus, bijvoorbeeld Diner › Voorgerechten.'}
+                  </p>
+                </div>
+              )}
+            </li>
+          )
+        })}
+      </ol>
+      <p className="bta-muted">
+        Deze controle geldt alleen voor deze bronversie. Ontbrekende prijzen en andere blokkades los je daarna in het
+        concept op. Er wordt niets gepubliceerd.
+      </p>
+    </div>
+  )
+}
+
+function reviewedText(value) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return 'onbekend moment'
+  return date.toLocaleString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 }
 
 function DishValue({ value, empty }) {
@@ -148,7 +530,8 @@ function DishValue({ value, empty }) {
  */
 export function LineEditor({ idPrefix, line, edit, setEdit, categories, readOnly, compare }) {
   const id = `${idPrefix}-${line.id}`
-  const canAccept = line.status === 'duplicate' || line.status === 'unclear_category' || line.accepted === true
+  const canAcceptCategory = line.categoryNeedsAcceptance === true || line.categoryAccepted === true
+  const canAcceptDuplicate = line.duplicateNeedsAcceptance === true || line.duplicateAccepted === true
   const status = STATUS[line.status]
   const resolved = !status.attention
   return (
@@ -177,7 +560,7 @@ export function LineEditor({ idPrefix, line, edit, setEdit, categories, readOnly
         </div>
       ) : (
         <p className="bta-muted">
-          {line.category || 'Zonder rubriek'} · {displayPrice(line.price) || 'geen prijs'}
+          {line.category || 'Zonder rubriek'} · {displayPrice(line.price) || (line.priceText ? `${line.priceText} (meerdere prijzen)` : 'geen prijs')}
           {line.status === 'price_changed' && line.livePrice ? ` (nu live ${displayPrice(line.livePrice)})` : ''}
         </p>
       )}
@@ -205,9 +588,14 @@ export function LineEditor({ idPrefix, line, edit, setEdit, categories, readOnly
             <label>
               <input type="checkbox" checked={line.excluded === true} onChange={(e) => setEdit({ exclude: e.target.checked })} /> Uitsluiten
             </label>
-            {canAccept && (
+            {canAcceptCategory && (
               <label>
-                <input type="checkbox" checked={line.accepted === true} onChange={(e) => setEdit({ accept: e.target.checked })} /> Klopt zo
+                <input type="checkbox" checked={line.categoryAccepted === true} onChange={(e) => setEdit({ acceptCategory: e.target.checked })} /> Rubriek klopt zo
+              </label>
+            )}
+            {canAcceptDuplicate && (
+              <label>
+                <input type="checkbox" checked={line.duplicateAccepted === true} onChange={(e) => setEdit({ acceptDuplicate: e.target.checked })} /> Duplicaat klopt zo
               </label>
             )}
           </div>
@@ -333,6 +721,31 @@ export function useConceptEdits() {
   return { edits, touched, setLineEdit, decideRemoved, reset, dirty }
 }
 
+/** The human structure decisions that were part of the confirmed source version. */
+function StructureTrail({ review }) {
+  const treated = (review && Array.isArray(review.treated) && review.treated) || []
+  if (treated.length === 0) return null
+  return (
+    <details className="bta-category">
+      <summary>
+        <span className="bta-category-name">Rubriekcontrole</span>
+        <span className="bta-muted"> · {plural(treated.length, 'rubriek', 'rubrieken')} behandeld</span>
+      </summary>
+      <ul className="bta-notes">
+        {treated.map((decision) => (
+          <li key={decision.key}>
+            {formatPath(decision.path)} → {decision.action === 'correct' ? formatPath(decision.correctedPath) : 'gehandhaafd'}
+            {decision.reviewedAt ? ` · ${reviewedText(decision.reviewedAt)}` : ''}
+          </li>
+        ))}
+      </ul>
+      <p className="bta-muted">
+        Deze keuzes horen bij de bevestigde bronversie en zitten als edits in dit concept. Er is niets gepubliceerd.
+      </p>
+    </details>
+  )
+}
+
 /** Splits a concept into the editor list, the safe lines and the excluded lines. */
 export function conceptParts(concept, touched) {
   const inEditor = (l) => l.status !== 'excluded' && (STATUS[l.status].attention || touched.has(l.id))
@@ -370,9 +783,91 @@ export function BlockerBanner({ concept }) {
   )
 }
 
+/**
+ * A shared uncertainty is one decision about the shown section, not an
+ * "accept everything" switch. Price/duplicate/removed blockers stay untouched.
+ */
+function UncertainGroups({ lines, readOnly, onAcceptGroup }) {
+  const groups = []
+  const byPath = new Map()
+  for (const line of lines) {
+    // Only the category blocker is settled here. A duplicate or missing price
+    // on the same line keeps its own blocker and needs its own decision.
+    if (!line.categoryUncertain || line.categoryEdited || line.status !== 'unclear_category') continue
+    const key = pathKey(line.categoryPath || [line.category])
+    let group = byPath.get(key)
+    if (!group) {
+      group = { key, path: line.categoryPath || [line.category], lines: [] }
+      byPath.set(key, group)
+      groups.push(group)
+    }
+    group.lines.push(line)
+  }
+  if (groups.length === 0) return null
+  return (
+    <div className="bta-attention" role="group" aria-label="Gedeelde rubriekonzekerheid">
+      <p className="bta-attention-title">
+        <StatusIcon name="warning" /> {plural(groups.length, 'gedeelde rubriekonzekerheid', 'gedeelde rubriekonzekerheden')}
+      </p>
+      <ul>
+        {groups.map((group) => (
+          <li key={group.key}>
+            <span className="bta-dish">{formatPath(group.path)}</span>{' '}
+            <span className="bta-muted">· {plural(group.lines.length, 'gerecht', 'gerechten')}</span>
+            {!readOnly && (
+              <button type="button" className="stg-btn-secondary bta-btn" onClick={() => onAcceptGroup(group.lines)}>
+                Rubriek klopt zo
+              </button>
+            )}
+          </li>
+        ))}
+      </ul>
+      <p className="bta-muted">Deze keuze geldt alleen voor de getoonde rubriek en lost geen ontbrekende prijzen of andere blokkades op.</p>
+    </div>
+  )
+}
+
 export function MenuConcept({ item, readOnly, busy, onSave }) {
   const { edits, touched, setLineEdit, decideRemoved } = useConceptEdits()
-  const concept = useMemo(() => buildMenuConcept({ menus: item.concept.menus, liveLines: item.concept.liveLines, edits }), [item.concept, edits])
+  const productBlocked = item.concept.productBlocked === true
+  // The confirmed source's human structure decisions are the base edits; the
+  // reviewer's own line corrections apply on top. The server recomputes the
+  // same base on save, so preview and version stay identical.
+  const structureEdits = item.concept.structureEdits && typeof item.concept.structureEdits === 'object' ? item.concept.structureEdits : null
+  const concept = useMemo(
+    () =>
+      productBlocked
+        ? null
+        : buildMenuConcept({
+            menus: item.concept.menus,
+            liveLines: item.concept.liveLines,
+            edits: structureEdits ? mergeEdits({ lines: structureEdits, removed: null }, edits) : edits,
+          }),
+    [item.concept, edits, productBlocked, structureEdits]
+  )
+  if (productBlocked) {
+    return (
+      <section className="bta-concept" aria-labelledby={`bta-concept-${item.jobId}`}>
+        <h3 id={`bta-concept-${item.jobId}`} className="bta-concept-title">
+          Menuconcept · intern
+        </h3>
+        <div className="di-banner di-banner-neutral" role="status">
+          <span className="di-banner-icon">
+            <StatusIcon name="warning" />
+          </span>
+          <span>
+            <strong>Alleen-lezen.</strong> Deze kaart is versiegebonden (v2) en kan in deze ronde niet als v1-concept worden
+            opgeslagen, goedgekeurd of geëxporteerd.
+          </span>
+        </div>
+        <p className="bta-muted">
+          De volledige, versiegetrouwe kaart staat bij <strong>Menukaart controleren</strong> hierboven
+          {item.concept.product ? ` (${item.concept.product.counts.items} items, ${item.concept.product.counts.priceVariants} prijsvarianten).` : '.'}
+          {!item.concept.product && item.concept.productReason ? ` Reden: ${item.concept.productReason}.` : ''}
+        </p>
+      </section>
+    )
+  }
   const { editorLines, safe, excluded, categories } = conceptParts(concept, touched)
   const latest = item.concept.latest
 
@@ -387,7 +882,15 @@ export function MenuConcept({ item, readOnly, busy, onSave }) {
       </p>
 
       <ConceptChips safe={safe} concept={concept} excluded={excluded} />
+      <StructureTrail review={item.concept.structureReview} />
       <BlockerBanner concept={concept} />
+      <UncertainGroups
+        lines={concept.lines}
+        readOnly={readOnly}
+        onAcceptGroup={(lines) => {
+          for (const line of lines) setLineEdit(line.id, { acceptCategory: true })
+        }}
+      />
 
       {editorLines.length > 0 && (
         <ul className="bta-concept-lines" aria-label="Aandachtspunten en blokkades">

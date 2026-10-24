@@ -6,3 +6,4 @@
 # BE-21 — a benchmark run's own generated output, never a committed
 # artifact; see ops/benchmark/run.js.
 ops/benchmark/output/
+ops/browser/output/

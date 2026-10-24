@@ -1,0 +1,190 @@
+{
+  "version": "1.1.0",
+  "sourceId": "andalous",
+  "label": "Andalous Restaurant Breda",
+  "entryUrl": "https://www.andalous-breda.nl",
+  "captureStatus": "captured",
+  "correction": "Herstel na Lead-review 6319894232 (R2): 'Loaded Fries Scampi' (€17,00) is toegevoegd. Uitsluitend opgesteld uit de vastgezette bytes; de telregels zijn ongewijzigd.",
+  "note": "Authored from the pinned menukaart capture and the pinned Ramadan PDF. Section paths follow the flat headings the source actually shows. Supplements, arrangement prices and arrangement components are kept out of the dish reference.",
+  "menus": [
+    {
+      "title": "Menukaart",
+      "sourceUrl": "https://www.andalous-breda.nl/menukaart/",
+      "captureKey": "ops/benchmark/output/reference-captures/andalous/02-menukaart-93b11284b922.html",
+      "categories": [
+        {
+          "path": ["Menukaart", "Koude voorgerechten"],
+          "items": [
+            {"name": "Stokbroodje kruidenboter", "price": "6.00", "locator": "Menukaart › Koude voorgerechten › regel 1", "quote": "Stokbroodje kruidenboter, €6,00 V Warm brood met huisgemaakte kruidenboter"},
+            {"name": "Salata Maghreb", "price": "8.00", "locator": "Menukaart › Koude voorgerechten › regel 2", "quote": "Salata Maghreb, €8,00 V Een frisse Marokkaanse salade"},
+            {"name": "Salata Arabia", "price": "9.00", "locator": "Menukaart › Koude voorgerechten › regel 3", "quote": "Salata Arabia, €9,00 V Een zoete salade met diverse groentes, feta en stukjes dadels met huisgemaakte dressing"},
+            {"name": "Insalata Greca", "price": "8.00", "locator": "Menukaart › Koude voorgerechten › regel 4", "quote": "Insalata Greca, €8,00 V Een Griekse salade met diverse groentes, feta en een huisgemaakte dressing"},
+            {"name": "Hawaii Crispy Chicken salade", "price": "8.00", "locator": "Menukaart › Koude voorgerechten › regel 5", "quote": "Hawaii Crispy Chicken salade, €8,00 Een salade met diverse groentes, krokante kip, ananas en een huisgemaakte dressing"}
+          ]
+        },
+        {
+          "path": ["Menukaart", "Warme voorgerechten"],
+          "items": [
+            {"name": "Harira", "price": "7.00", "locator": "Menukaart › Warme voorgerechten › regel 1", "quote": "Harira, €7,00 Huisgemaakte Marokkaanse soep met kalfsvlees geserveerd met dadels, citroen en brood"},
+            {"name": "Mercimec Corbasi", "price": "7.00", "locator": "Menukaart › Warme voorgerechten › regel 2", "quote": "Mercimec Corbasi, €7,00 Huisgemaakte Turkse linzensoep geserveerd met citroen en brood"},
+            {"name": "Oosterse BBQ-wings (nieuw recept)", "price": "9.00", "locator": "Menukaart › Warme voorgerechten › regel 3", "quote": "Oosterse BBQ-wings (nieuw recept), €9,00 In de oven bereide kippenvleugels gemarineerd in een huisgemaakte BBQ marinade"},
+            {"name": "Kip loempia’s", "price": "8.00", "locator": "Menukaart › Warme voorgerechten › regel 4", "quote": "Kip loempia’s, €8,00 Oosterse loempiarollen gevuld met gekruide kip en groente (2 st)"},
+            {"name": "Chicken Chunks", "price": "7.00", "locator": "Menukaart › Warme voorgerechten › regel 5", "quote": "Chicken Chunks, €7,00 Gefrituurde stukjes kipfilet in een krokant jasje"},
+            {"name": "Sweet Dynamite Chicken", "price": "8.50", "locator": "Menukaart › Warme voorgerechten › regel 6", "quote": "Sweet Dynamite Chicken, €8,50 Knapperige kipstukjes perfect goudbruin gebakken, overgoten met een romige, licht pittige dynamite saus."},
+            {"name": "Sharing is Caring (2 pers.)", "price": "33.50", "locator": "Menukaart › Warme voorgerechten › regel 7", "quote": "Sharing is Caring (2 pers.), €33,50 Plateau van huisgemaakte kiploempia’s, pil pil, garnalenkroketten, chicken chunks geserveerd met chilisaus en een verrassing van het huis"}
+          ]
+        },
+        {
+          "path": ["Menukaart", "Visgerechten"],
+          "items": [
+            {"name": "Gamba croquettes", "price": "9.50", "locator": "Menukaart › Visgerechten › regel 1", "quote": "Gamba croquettes, €9,50 Verfijnde croquettes gevuld met ragouts en gerold in kruim van geroosterd brood, geserveerd met een huisgemaakte saus"},
+            {"name": "Pil Pil", "price": "11.00", "locator": "Menukaart › Visgerechten › regel 2", "quote": "Pil Pil, €11,00 Gamba’s op Spaanse manier bereid in knoflook en peper"},
+            {"name": "Pil Pil a la Andalous", "price": "12.00", "locator": "Menukaart › Visgerechten › regel 3", "quote": "Pil Pil a la Andalous, €12,00 Gamba’s in een huisgemaakte saus met knoflook, tomaat, citroen en verse kruiden"}
+          ]
+        },
+        {
+          "path": ["Menukaart", "Hoofdgerechten*"],
+          "items": [
+            {"name": "Filet De Pollo A La Parrilla", "price": "18.00", "locator": "Menukaart › Hoofdgerechten* › regel 1", "quote": "Filet De Pollo A La Parrilla, €18,00 Gegrilde gemarineerde kipfiletlapjes met gegrilde groentes en champignonsaus"},
+            {"name": "Kip Saté", "price": "18.00", "locator": "Menukaart › Hoofdgerechten* › regel 2", "quote": "Kip Saté, €18,00 Gegrilde gemarineerde kipspiezen met gegrilde groentes en saté saus"},
+            {"name": "Tenderloin South America", "price": "30.50", "locator": "Menukaart › Hoofdgerechten* › regel 3", "quote": "Tenderloin South America, €30,50 Gras gevoerde ossenhaas van de lavagrill met gegrilde groentes en champignonsaus of peperroomsaus"},
+            {"name": "Kalfs Spareribs", "price": "27.50", "locator": "Menukaart › Hoofdgerechten* › regel 4", "quote": "Kalfs Spareribs, €27,50 Malse kalfs spareribs overgoten met barbecue saus (zowel zoet als pikant mogelijk)"},
+            {"name": "Lamsrack New Zealand", "price": "28.50", "locator": "Menukaart › Hoofdgerechten* › regel 5", "quote": "Lamsrack New Zealand, €28,50 Malse lamskoteletten uit Nieuw-Zeeland op de lavagrill met gegrilde groentes en champignonsaus"},
+            {"name": "Ribeye South America", "price": "24.50", "locator": "Menukaart › Hoofdgerechten* › regel 6", "quote": "Ribeye South America, €24,50 Malse ribeye gegrild op de lavagrill met groentes en champignonsaus of peperroomsaus"},
+            {"name": "Mixed Grill Andalous", "priceVariants": [{"label": "1 pers.", "price": "27.50"}, {"label": "2 pers.", "price": "48.50"}], "locator": "Menukaart › Hoofdgerechten* › regel 7", "quote": "Mixed Grill Andalous, €27,50 (1 pers.) / €48,50 (2 pers.) Mix van Ribeye South America, Lams-Rack, Marokkaanse kefta, kipfilet geserveerd met champignonsaus"},
+            {"name": "Loaded Fries Chicken", "price": "16.00", "locator": "Menukaart › Hoofdgerechten* › regel 8", "quote": "Loaded Fries Chicken, €16,00 Gekruide friet met gemarineerde stukjes kip overgoten met kaassaus en diverse groentes"},
+            {"name": "Loaded Fries Chicken Saté", "price": "18.00", "locator": "Menukaart › Hoofdgerechten* › regel 9", "quote": "Loaded Fries Chicken Saté, €18,00 Gekruide friet met gemarineerde stukjes kip overgoten met kaassaus, diverse groentes en satésaus"},
+            {"name": "Liefie Chicken", "price": "17.00", "locator": "Menukaart › Hoofdgerechten* › regel 10", "quote": "Liefie Chicken, €17,00 Rijstgerecht met stukjes kip en diverse groentes in een zoete en licht pikante saus"},
+            {"name": "Mac & Shrimp", "price": "15.00", "locator": "Menukaart › Hoofdgerechten* › regel 11", "quote": "Mac & Shrimp, €15,00 Romige macaroni met kaassaus en sappige scampi’s afgewerkt met verse kruiden"},
+            {"name": "Mac & Chick", "price": "13.00", "locator": "Menukaart › Hoofdgerechten* › regel 12", "quote": "Mac & Chick, €13,00 Romige macaroni met kaassaus en malse kipfilet afgewerkt met verse kruiden"},
+            {"name": "Tajine Al Hoceima", "price": "19.00", "locator": "Menukaart › Hoofdgerechten* › regel 13", "quote": "Tajine Al Hoceima, €19,00 Malse kip in rijke tajinesaus, geserveerd met friet, olijven, gekookte ei, gekarameliseerde ui en rozijnen en brood"},
+            {"name": "Tajine Marrakesh", "price": "21.00", "locator": "Menukaart › Hoofdgerechten* › regel 14", "quote": "Tajine Marrakesh, €21,00 Zacht gegaard lamsvlees in aromatische tajinesaus, geserveerd met friet, zoete abrikozen en pruimen en brood"},
+            {"name": "Moroccan rice Al hoceima", "price": "19.00", "locator": "Menukaart › Hoofdgerechten* › regel 15", "quote": "Moroccan rice Al hoceima, €19,00 Marokkaans rijstgerecht met malse kip overgoten met heerlijke tajinesaus"},
+            {"name": "Moroccan rice Marrakech", "price": "21.00", "locator": "Menukaart › Hoofdgerechten* › regel 16", "quote": "Moroccan rice Marrakech, €21,00 Marokkaans rijstgerecht met lamsvlees overgoten met heerlijke tajinesaus"},
+            {"name": "Couscous Al Hoceima", "price": "19.00", "locator": "Menukaart › Hoofdgerechten* › regel 17", "quote": "Couscous Al Hoceima, €19,00 Gemalen Marokkaanse couscous met kip, diverse groentes en gekarameliseerde rozijnen en ui, overgoten met tajinesaus"},
+            {"name": "Couscous Marrakesh", "price": "21.00", "locator": "Menukaart › Hoofdgerechten* › regel 18", "quote": "Couscous Marrakesh, €21,00 Gemalen Marokkaanse couscous met lamsvlees, diverse groentes en abrikozen en pruimen"},
+            {"name": "Loaded Fries Scampi", "price": "17.00", "locator": "Menukaart › Hoofdgerechten* › Visgerechten › regel 1", "quote": "Loaded Fries Scampi, €17,00 Gekruide friet met gemarineerde scampi garnalen overgoten met kaassaus en diverse groentes"}
+          ]
+        },
+        {
+          "path": ["Menukaart", "Pasta's"],
+          "items": [
+            {"name": "Pasta zalm", "price": "16.00", "locator": "Menukaart › Pasta's › regel 1", "quote": "Pasta zalm, €16,00 Pasta met zalm, spinazie en diverse groente in een romige witte saus"},
+            {"name": "Pasta funghi", "price": "11.00", "locator": "Menukaart › Pasta's › regel 2", "quote": "Pasta funghi , €11,00 V Heerlijke romige vegetarische pasta met champignons en uitjes"},
+            {"name": "Pasta bolognese", "price": "13.00", "locator": "Menukaart › Pasta's › regel 3", "quote": "Pasta bolognese, €13,00 Klassieke pasta met gekruid rundergehakt in tomatensaus met basilicum"},
+            {"name": "Pasta pollo Pesto", "price": "13.00", "locator": "Menukaart › Pasta's › regel 4", "quote": "Pasta pollo Pesto, €13,00 Pasta met stukjes kip en groenten in een romige pesto saus"},
+            {"name": "Pasta al Scampi", "price": "16.00", "locator": "Menukaart › Pasta's › regel 5", "quote": "Pasta al Scampi, €16,00 Pasta met garnalen en groenten in een romige saus"},
+            {"name": "Pasta Veggie Pesto", "price": "11.00", "locator": "Menukaart › Pasta's › regel 6", "quote": "Pasta Veggie Pesto, 11,00 V Pasta met diverse groenten in een romige pestosaus"}
+          ]
+        },
+        {
+          "path": ["Menukaart", "Moroccan Sandwich"],
+          "items": [
+            {"name": "Chicken", "price": "10.00", "locator": "Menukaart › Moroccan Sandwich › regel 1", "quote": "Chicken, €10,00 Marokkaanse traditionele sandwich oftewel bokadio met stukjes kipfilet, diverse groentes, friet in het broodje en een huisgemaakte saus"},
+            {"name": "Hot Chicken", "price": "10.00", "locator": "Menukaart › Moroccan Sandwich › regel 2", "quote": "Hot Chicken, €10,00 Marokkaanse traditionele sandwich oftewel bokadio met stukjes hete kipfilet, diverse groentes, friet in het broodje en een huisgemaakte saus"},
+            {"name": "Grilled Kefta", "price": "10.00", "locator": "Menukaart › Moroccan Sandwich › regel 3", "quote": "Grilled Kefta, €10,00 Marokkaanse sandwich oftewel bokadio met gegrilde kefta (rundergehakt), diverse groentes, friet in het broodje en een huisgemaakte saus"},
+            {"name": "Crunchy", "price": "10.00", "locator": "Menukaart › Moroccan Sandwich › regel 4", "quote": "Crunchy, €10,00 Marokkaanse sandwich oftewel bokadio met stukjes crispy chicken, diverse groentes, friet in het broodje en een huisgemaakte saus"}
+          ]
+        },
+        {
+          "path": ["Menukaart", "Burgers"],
+          "items": [
+            {"name": "Kipburger Hot&Spicey", "price": "8.00", "locator": "Menukaart › Burgers › regel 1", "quote": "Kipburger Hot&Spicey, €8,00 Licht pikante kipburger op een speciaal hamburgerbroodje met cheddar, sla, tomaat en garnering van het huis"},
+            {"name": "Grillburger Andalous", "price": "8.00", "locator": "Menukaart › Burgers › regel 2", "quote": "Grillburger Andalous, €8,0 0 Gegrilde rundergehaktburger op een speciaal hamburgerbroodje met cheddar, mayonaise, ketchup, sla en tomaat"},
+            {"name": "Smokey Melt Burger", "price": "11.50", "locator": "Menukaart › Burgers › regel 3", "quote": "Smokey Melt Burger, € 11,50 Zacht burgerbroodje met gegrild kalfsgehakt en verse salade gedoopt in een romige huisgemaakte kaassaus. Geserveerd met friet en saus naar keuze"},
+            {"name": "Spicy Chicken Melt Burger", "price": "11.50", "locator": "Menukaart › Burgers › regel 4", "quote": "Spicy Chicken Melt Burger, € 11,50 Zacht burgerbroodje crispy chicken en verse salade gedoopt in een romige huisgemaakte kaassaus. Geserveerd met friet en saus naar keuze"}
+          ]
+        },
+        {
+          "path": ["Menukaart", "Bijgerechten"],
+          "items": [
+            {"name": "Friet", "price": "4.50", "locator": "Menukaart › Bijgerechten › regel 1", "quote": "Friet, €4,50"},
+            {"name": "Aardappelpuree", "price": "5.00", "locator": "Menukaart › Bijgerechten › regel 2", "quote": "Aardappelpuree, €5,00"},
+            {"name": "Gegrilde groenten", "price": "4.00", "locator": "Menukaart › Bijgerechten › regel 3", "quote": "Gegrilde groenten, €4,00"},
+            {"name": "Turkse rijst", "price": "3.50", "locator": "Menukaart › Bijgerechten › regel 4", "quote": "Turkse rijst, €3,50"},
+            {"name": "Baguette", "price": "2.50", "locator": "Menukaart › Bijgerechten › regel 5", "quote": "Baguette, €2,50"},
+            {"name": "Champignonsaus", "price": "3.50", "locator": "Menukaart › Bijgerechten › regel 6", "quote": "Champignonsaus, €3,50"},
+            {"name": "Saté saus", "price": "3.50", "locator": "Menukaart › Bijgerechten › regel 7", "quote": "Saté saus, €3,50"}
+          ]
+        },
+        {
+          "path": ["Menukaart", "Kindermenu"],
+          "items": [
+            {"name": "Spaghetti Bolognese", "price": "13.00", "locator": "Menukaart › Kindermenu › regel 1", "quote": "Spaghetti Bolognese, €13,00 Klassieke pasta met gekruid rundergehakt in tomatensaus met basilicum"},
+            {"name": "Chicken Chunks", "price": "11.00", "locator": "Menukaart › Kindermenu › regel 2", "quote": "Chicken Chunks, €11,00 Gefrituurde stukjes kipfilet in een krokant jasje geserveerd met friet"},
+            {"name": "Grillburger Andalous", "price": "11.50", "locator": "Menukaart › Kindermenu › regel 3", "quote": "Grillburger Andalous, €11 ,50 Gegrilde rundergehakt in een speciaal hamburgerbrood met cheddar, mayonaise, ketchup, sla en tomaat geserveerd met friet."}
+          ]
+        },
+        {
+          "path": ["Menukaart", "Nagerechten"],
+          "items": [
+            {"name": "Viral Fruits", "price": "11.50", "locator": "Menukaart › Nagerechten › regel 1", "quote": "Viral Fruits, €11,50 Luxe fruitdessert met een knapperige buitenkant en een zachte, frisse binnenkant Keuze uit: Mango, Pistache, Vanille, Snickers, Passionfruit of Framboos"},
+            {"name": "Twix Cheesecake", "price": "7.50", "locator": "Menukaart › Nagerechten › regel 2", "quote": "Twix Cheesecake, €7,50 Huisgemaakte Twix cheesecake met een topping van karamelsaus en Twix stukjes"}
+          ]
+        },
+        {
+          "path": ["Menukaart", "Mocktails"],
+          "items": [
+            {"name": "Mojito Classic", "price": "7.50", "locator": "Menukaart › Mocktails › regel 1", "quote": "Mojito Classic, €7,50"},
+            {"name": "Mojito Strawberry", "price": "7.50", "locator": "Menukaart › Mocktails › regel 2", "quote": "Mojito Strawberry, €7,50"}
+          ]
+        },
+        {
+          "path": ["Menukaart", "Warme Dranken"],
+          "items": [
+            {"name": "Munt thee", "price": "3.00", "locator": "Menukaart › Warme Dranken › regel 1", "quote": "Munt thee, €3,00"},
+            {"name": "Thee", "price": "3.00", "locator": "Menukaart › Warme Dranken › regel 2", "quote": "Thee, €3,00"},
+            {"name": "Koffie", "price": "3.00", "locator": "Menukaart › Warme Dranken › regel 3", "quote": "Koffie, €3,00"},
+            {"name": "Koffie verkeerd", "price": "3.00", "locator": "Menukaart › Warme Dranken › regel 4", "quote": "Koffie verkeerd, €3,00"},
+            {"name": "Cappuccino", "price": "3.00", "locator": "Menukaart › Warme Dranken › regel 5", "quote": "Cappuccino, €3,00"},
+            {"name": "Espresso", "price": "3.00", "locator": "Menukaart › Warme Dranken › regel 6", "quote": "Espresso, €3,00"},
+            {"name": "Theepot Munt Groot", "price": "8.50", "locator": "Menukaart › Warme Dranken › regel 7", "quote": "Theepot Munt Groot, €8,50"}
+          ]
+        },
+        {
+          "path": ["Menukaart", "Koude dranken"],
+          "items": [
+            {"name": "Coca Cola", "price": "3.25", "locator": "Menukaart › Koude dranken › regel 1", "quote": "Coca Cola, €3,25"},
+            {"name": "Coca Cola Zero", "price": "3.25", "locator": "Menukaart › Koude dranken › regel 2", "quote": "Coca Cola Zero, €3,25"},
+            {"name": "Fanta", "price": "3.25", "locator": "Menukaart › Koude dranken › regel 3", "quote": "Fanta, €3,25"},
+            {"name": "Fanta Cassis", "price": "3.25", "locator": "Menukaart › Koude dranken › regel 4", "quote": "Fanta Cassis, €3,25"},
+            {"name": "Ice Tea", "price": "3.25", "locator": "Menukaart › Koude dranken › regel 5", "quote": "Ice Tea, €3,25"},
+            {"name": "Ice Tea Green", "price": "3.25", "locator": "Menukaart › Koude dranken › regel 6", "quote": "Ice Tea Green, €3,25"},
+            {"name": "AA Drink", "price": "3.25", "locator": "Menukaart › Koude dranken › regel 7", "quote": "AA Drink, €3,25"},
+            {"name": "Ginger Ale", "price": "3.25", "locator": "Menukaart › Koude dranken › regel 8", "quote": "Ginger Ale, €3,25"},
+            {"name": "Red Bull", "price": "4.50", "locator": "Menukaart › Koude dranken › regel 9", "quote": "Red Bull, €4,50"},
+            {"name": "Bitter lemon", "price": "3.25", "locator": "Menukaart › Koude dranken › regel 10", "quote": "Bitter lemon, €3,25"},
+            {"name": "Spa Blauw", "price": "3.25", "locator": "Menukaart › Koude dranken › regel 11", "quote": "Spa Blauw, €3,25"},
+            {"name": "Spa Rood", "price": "3.25", "locator": "Menukaart › Koude dranken › regel 12", "quote": "Spa Rood, €3,25"},
+            {"name": "Appelsap", "price": "3.25", "locator": "Menukaart › Koude dranken › regel 13", "quote": "Appelsap, €3,25"},
+            {"name": "Poms", "price": "3.25", "locator": "Menukaart › Koude dranken › regel 14", "quote": "Poms, €3,25"},
+            {"name": "Hawaii", "price": "3.25", "locator": "Menukaart › Koude dranken › regel 15", "quote": "Hawaii, €3,25"},
+            {"name": "Chocomel", "price": "3.25", "locator": "Menukaart › Koude dranken › regel 16", "quote": "Chocomel, €3,25"},
+            {"name": "Fristi", "price": "3.25", "locator": "Menukaart › Koude dranken › regel 17", "quote": "Fristi, €3,25"},
+            {"name": "Tonic", "price": "3.25", "locator": "Menukaart › Koude dranken › regel 18", "quote": "Tonic, €3,25"}
+          ]
+        }
+      ]
+    }
+  ],
+  "arrangements": [
+    {"name": "Warming up Iftar 2026", "path": ["Ramadan", "Warming up Iftar 2026"], "captureKey": "ops/benchmark/output/reference-captures/andalous/07-ramadan-menu-kaart-essaouira-20240316-170004-0000-pdf-compressed-1-pdf-9a32541b2a5a.pdf", "prices": [{"label": "Warming up Iftar 2026", "price": "39.50"}], "quote": "Warming up Iftar 2026 € 39,50", "note": "Seizoensarrangement; de genoemde gangen (harira, kiploempia, garnalenkroket, chicken chunks, mix grill, muntthee) hebben geen eigen prijs en zijn geen losse gerechten."},
+    {"name": "Dubai Warming Up Iftar 2026", "path": ["Ramadan", "Dubai Warming Up Iftar 2026"], "captureKey": "ops/benchmark/output/reference-captures/andalous/07-ramadan-menu-kaart-essaouira-20240316-170004-0000-pdf-compressed-1-pdf-9a32541b2a5a.pdf", "prices": [{"label": "Dubai Warming Up Iftar 2026", "price": "35.50"}], "quote": "Dubai Warming Up Iftar 2026 €35,50", "note": "Seizoensarrangement; de genoemde gangen hebben geen eigen prijs en zijn geen losse gerechten."}
+  ],
+  "supplements": [
+    {"name": "Geraspte kaas", "price": "2.00", "captureKey": "ops/benchmark/output/reference-captures/andalous/02-menukaart-93b11284b922.html", "quote": "Geraspte kaas, €2,00 meerprijs", "note": "Meerprijs bij de pasta, geen zelfstandig gerecht."}
+  ],
+  "ambiguous": [
+    {"item": "Grillburger Andalous (Burgers)", "reason": "De bron splitst het bedrag als '€8,0 0'; gelezen als €8,00. De kinderversie staat apart in het Kindermenu met €11,50.", "captureKey": "ops/benchmark/output/reference-captures/andalous/02-menukaart-93b11284b922.html"},
+    {"item": "Pasta Veggie Pesto", "reason": "De bron noemt het bedrag zonder euroteken ('11,00 V'); gelezen als €11,00.", "captureKey": "ops/benchmark/output/reference-captures/andalous/02-menukaart-93b11284b922.html"},
+    {"item": "Ramadan-PDF", "reason": "De PDF noemt arrangementprijzen en gangen zonder eigen prijs. Er is daarom geen gerechtelijke referentie per gang; een extractie die een arrangementprijs als gerecht opvoert, telt als verzonnen gerecht.", "captureKey": "ops/benchmark/output/reference-captures/andalous/07-ramadan-menu-kaart-essaouira-20240316-170004-0000-pdf-compressed-1-pdf-9a32541b2a5a.pdf"},
+    {"item": "Herhaalde h4 'Visgerechten'", "reason": "De pagina toont twee keer een h4 'Visgerechten': een keer direct na de warme voorgerechten (Gamba croquettes, Pil Pil, Pil Pil a la Andalous) en een keer binnen Hoofdgerechten* (Loaded Fries Scampi). De eerste is als eigen categorie opgenomen, de tweede als laatste regel van Hoofdgerechten* met de subrubriek in de locator. Beide zijn uit de vastgezette bytes gelezen.", "captureKey": "ops/benchmark/output/reference-captures/andalous/02-menukaart-93b11284b922.html"}
+  ],
+  "limitations": [
+    "De Ramadan-PDF is een seizoensarrangement; de gangen hebben geen eigen prijs en zijn geen losse referentiegerechten.",
+    "De Frans-talige ramadanpagina en de pagina's /thuisbezorgd en /werken zijn gelezen maar bevatten geen menukaart met losse gerechten; ze zijn geen referentiebron.",
+    "De pagina /ramadan is naar /ramadan-menu/ doorgestuurd en telt als één pagina (telregel 5).",
+    "De bron bevat alleen een algemene allergenenmededeling, geen allergenenlegenda per gerecht; allergenen blijven onbekend.",
+    "Deze referentie is uit de vastgezette brontekst en PDF-tekst opgesteld en niet uit de parseruitvoer."
+  ]
+}

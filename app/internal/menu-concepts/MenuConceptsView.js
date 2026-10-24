@@ -11,7 +11,7 @@
 import { useMemo, useRef, useState } from 'react'
 import StatusIcon from '@/src/components/StatusIcon'
 import { StaticMenu, menuTitle } from '@/src/components/MenuBody'
-import { buildMenuConcept, storedConceptInput, mergeEdits } from '@/src/lib/menuConcept'
+import { buildMenuConcept, storedConceptInput, mergeEdits, conceptSectionCount } from '@/src/lib/menuConcept'
 import {
   plural,
   LineEditor,
@@ -23,6 +23,7 @@ import {
   ConceptStructure,
   useConceptEdits,
   conceptParts,
+  ProductReview,
 } from '../source-triage/batch/MenuReview'
 
 const STATUS_VIEW = {
@@ -88,6 +89,11 @@ function ConceptItem({ item }) {
         <li className="bta-chip">{plural(item.dishCount, 'gerecht', 'gerechten')}</li>
         <li className="bta-chip">{plural(item.attentionCount, 'aandachtspunt', 'aandachtspunten')}</li>
         {item.blockerCount > 0 && <li className="bta-chip">{plural(item.blockerCount, 'blokkade', 'blokkades')}</li>}
+        {item.readOnly && (
+          <li className="bta-chip">
+            {item.schemaVersion === 'menu-extraction-product/v2' ? 'v2' : 'onbekende versie'} · alleen-lezen
+          </li>
+        )}
       </ul>
     </li>
   )
@@ -394,11 +400,99 @@ function PublicationCard({ concept, exportInfo, githubConfigured, canExport, exp
   )
 }
 
+/** A versioned v2 concept: version-faithful display, every write action blocked. */
+function ProductConceptReview({ data, crumbs, loadError, message }) {
+  const c = data.concept
+  const blocked = c.blocked || {}
+  const product = data.product
+  return (
+    <>
+      {crumbs}
+      <div className="bta-header">
+        <div className="bta-title-row">
+          <h1 className="di-title">Beoordeel menuconcept</h1>
+          <span className="bta-tag">Alleen intern</span>
+        </div>
+        <p className="bta-muted">Versiegebonden kaart. Alleen lezen: opslaan, goedkeuren en exporteren zijn in deze ronde geblokkeerd.</p>
+      </div>
+      <Messages loadError={loadError} message={message} />
+      <div className="di-banner di-banner-neutral" role="status">
+        <span className="di-banner-icon">
+          <StatusIcon name="warning" />
+        </span>
+        <span>
+          <strong>Alleen-lezen.</strong> {blocked.message || 'Deze kaart kan niet als v1-concept worden verwerkt.'}{' '}
+          {blocked.reason ? `Reden: ${blocked.reason}.` : ''}
+        </span>
+      </div>
+      {blocked.problems && blocked.problems.length > 0 && (
+        <ul className="bta-notes" aria-label="Validatieproblemen">
+          {blocked.problems.map((problem) => (
+            <li key={problem}>{problem}</li>
+          ))}
+        </ul>
+      )}
+
+      <ul className="mcr-stats" aria-label="Concept in cijfers">
+        <li>
+          <strong>{product ? product.counts.items : 0}</strong> items
+        </li>
+        <li>
+          <strong>{product ? product.counts.categories : 0}</strong> rubrieken
+        </li>
+        <li>
+          <StatusIcon name="file" /> conceptversie {c.version}
+        </li>
+        <li>
+          <StatusIcon name="warning" /> {blocked.blockedActions && blocked.blockedActions.length > 0 ? blocked.blockedActions.join(', ') : 'schrijven geblokkeerd'}
+        </li>
+      </ul>
+
+      {product ? (
+        <ProductReview product={product} />
+      ) : (
+        <p className="bta-muted">De inhoud kon niet als v2 worden gelezen. De onbewerkte rij blijft bewaard; er wordt niets omgezet.</p>
+      )}
+
+      <section className="bta-concept" aria-labelledby="mcr-source-v2">
+        <h2 id="mcr-source-v2" className="bta-concept-title">
+          Bron
+        </h2>
+        <p className="bta-url">{c.sourceUrl}</p>
+        <p className="bta-muted">
+          De brontekst en hash zijn niet als controleerbare broncontext geregistreerd. Een structureel geldige kaart is daarom niet
+          bronbevestigd.
+        </p>
+        <div className="bta-actions">
+          <a className="stg-btn-secondary bta-btn" href={c.sourceUrl} target="_blank" rel="noopener noreferrer">
+            Open originele menukaart
+            <span className="bta-sr-only"> (opent in een nieuw tabblad)</span>
+          </a>
+        </div>
+      </section>
+
+      <section className="bta-concept" aria-labelledby="mcr-history-v2">
+        <h2 id="mcr-history-v2" className="bta-concept-title">
+          Versiegeschiedenis
+        </h2>
+        <History history={data.history} currentId={c.id} />
+      </section>
+
+      <p>
+        <a className="stg-link" href="/internal/menu-concepts">
+          Terug naar Menuconcepten beoordelen
+        </a>
+      </p>
+    </>
+  )
+}
+
 export function ConceptReview({ data, loadError, message, busy, onSaveVersion, onDecide, onExport }) {
   const { edits, touched, setLineEdit, decideRemoved, reset, dirty } = useConceptEdits()
   const [rejecting, setRejecting] = useState(false)
   const [tab, setTab] = useState(() => (data && data.concept.status === 'approved' && data.preview && data.preview.concept ? 'preview' : 'changes'))
-  const stored = useMemo(() => (data ? storedConceptInput(data.concept.captured) : null), [data])
+  const blockedContent = Boolean(data && (data.product || data.concept.blocked))
+  const stored = useMemo(() => (data && !blockedContent ? storedConceptInput(data.concept.captured) : null), [data, blockedContent])
   const concept = useMemo(
     () => (stored ? buildMenuConcept({ menus: stored.menus, liveLines: data.liveLines, edits: mergeEdits(stored.edits, edits) }) : null),
     [stored, data, edits]
@@ -438,10 +532,17 @@ export function ConceptReview({ data, loadError, message, busy, onSaveVersion, o
     )
   }
 
+  if (blockedContent) {
+    return <ProductConceptReview data={data} crumbs={crumbs} loadError={loadError} message={message} />
+  }
+
   const c = data.concept
   const readOnly = !c.isLatest
   const { editorLines, safe, excluded, categories } = conceptParts(concept, touched)
-  const sectionCount = new Set(concept.lines.filter((l) => l.status !== 'excluded').map((l) => l.category)).size
+  // One rule for the whole concept: sections per full path, exactly as the
+  // concept stores them. Counting by the last label merged "Lunch › Dessert"
+  // with "Diner › Dessert" and disagreed with the structure card.
+  const sectionCount = conceptSectionCount(concept)
   const dishCount = concept.lines.filter((l) => l.status !== 'excluded').length
   const sourceOk = data.source.confirmed && !data.source.blocked
   const approveBlockers = []
@@ -510,7 +611,9 @@ export function ConceptReview({ data, loadError, message, busy, onSaveVersion, o
             </h2>
             <ConceptChips safe={safe} concept={concept} excluded={excluded} />
             <BlockerBanner concept={concept} />
-            <ConceptStructure captured={c.captured} />
+            {/* The same built concept as the counters, so the section count can
+                never disagree with the overview. */}
+            <ConceptStructure captured={concept.content} />
             {editorLines.length > 0 && (
               <ul className="bta-concept-lines" aria-label="Aandachtspunten en blokkades">
                 {editorLines.map((line) => (

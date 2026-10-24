@@ -1,0 +1,50 @@
+{
+  "version": "1.0.0",
+  "sourceId": "thuis",
+  "label": "T-Huis",
+  "entryUrl": "https://t-huis.online",
+  "captureStatus": "blocked",
+  "blockedReason": "De vastgezette menupagina levert geen tekst: de vijf kaarten (Food, Lunch, Wijn, Drank, Dessert) staan als SVG-afbeelding in de tabpanelen. Zonder beeldanalyse/OCR is er geen gerecht, prijs of rubriek uit de vastgezette bytes te bewijzen. Daarom is er geen referentie en wordt T-Huis niet als lege of geslaagde extractie geteld.",
+  "pinnedCapture": {
+    "path": "ops/benchmark/card-reference-captures.thuis.json",
+    "bytesSha256": "49ad24e90eb83b79a5fa29e8d85c8d760c81dfe12b78fe8a81185448f69e866f"
+  },
+  "method": "The entry page and the menu page were pinned once by review 6349832755 K1. The pinned menu page names five tab panels, each holding one SVG card image. This reference records that fact and no dish: a reference row needs a literal text quote, and the pinned HTML has none for any dish, price or section. Nothing was read from an image, an OCR engine or the extractor.",
+  "note": "T-Huis is recorded as not measurable from text, not as an empty menu. The historical data/menus.json counts (25 lunch, 26 diner, 138 borrel rows) are dated observations from another source version and cannot stand in for the pinned bytes.",
+  "menus": [],
+  "arrangements": [],
+  "supplements": [],
+  "ambiguous": [
+    {
+      "item": "Food",
+      "reason": "Tabpaneel met alleen een SVG-afbeelding (THS-Diner_Herfst-2026.2_DIGI.svg, 595x1612). Geen tekst in de vastgezette HTML; niet leesbaar zonder beeldanalyse.",
+      "captureKey": "ops/benchmark/output/card-captures/thuis/02-html-c48082618f25.html"
+    },
+    {
+      "item": "Lunch",
+      "reason": "Tabpaneel met alleen een SVG-afbeelding (THS-Lunch_Herfst-2026.2_DIGI.svg, 595x1612). Geen tekst in de vastgezette HTML; niet leesbaar zonder beeldanalyse.",
+      "captureKey": "ops/benchmark/output/card-captures/thuis/02-html-c48082618f25.html"
+    },
+    {
+      "item": "Wijn",
+      "reason": "Tabpaneel met alleen een SVG-afbeelding (THS-Wijnkaart-2026_DIGI.svg, 595x1354). Geen tekst in de vastgezette HTML; niet leesbaar zonder beeldanalyse.",
+      "captureKey": "ops/benchmark/output/card-captures/thuis/02-html-c48082618f25.html"
+    },
+    {
+      "item": "Drank",
+      "reason": "Tabpaneel met alleen een SVG-afbeelding (THS-Drankkaart-2026_DIGI.svg, 595x2277). Geen tekst in de vastgezette HTML; niet leesbaar zonder beeldanalyse.",
+      "captureKey": "ops/benchmark/output/card-captures/thuis/02-html-c48082618f25.html"
+    },
+    {
+      "item": "Dessert",
+      "reason": "Tabpaneel met alleen een SVG-afbeelding (THS-Dessert_Herfst-2026.2_DIGI.svg, 595x836). Geen tekst in de vastgezette HTML; niet leesbaar zonder beeldanalyse.",
+      "captureKey": "ops/benchmark/output/card-captures/thuis/02-html-c48082618f25.html"
+    }
+  ],
+  "limitations": [
+    "De menukaart is alleen als afbeelding gepubliceerd; dit is een eerlijke, niet-ondersteunde klasse en geen lege kaart.",
+    "OCR en beeldanalyse zijn niet geconfigureerd en zijn in deze opdracht niet toegestaan; de SVG's zijn daarom niet opgehaald of gelezen.",
+    "De entrypagina noemt zelf geen menu-inhoud en geen menulinks; de menupagina is de URL die de historische export noemt.",
+    "De vastgezette HTML bevat geen allergeneninformatie per gerecht; allergenen blijven onbekend, niet allergeenvrij."
+  ]
+}

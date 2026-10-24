@@ -1,0 +1,17 @@
+{
+  "version": "1.0.0",
+  "sourceId": "senang-makan",
+  "label": "Senang Makan",
+  "entryUrl": "https://www.senangmakan.nl",
+  "captureStatus": "blocked",
+  "blockedReason": "De bestaande veilige route kon de publieke bron niet lezen: robots.txt gaf HTTP 503, waardoor de pagina niet is opgehaald. Er is geen alternatieve URL, andere vestiging of omzeiling gebruikt.",
+  "menus": [],
+  "arrangements": [],
+  "supplements": [],
+  "ambiguous": [],
+  "limitations": [
+    "Geen vastgezette bytes en dus geen referentie: de bron was op het moment van vastleggen niet leesbaar via de bestaande veilige route (HTTP 503 op robots.txt).",
+    "Dit is een bronbeperking, geen lege menukaart en geen succesvolle extractie.",
+    "De afhaal-PDF is niet vastgelegd omdat de website zelf niet leesbaar was; de PDF-URL is niet geraden."
+  ]
+}

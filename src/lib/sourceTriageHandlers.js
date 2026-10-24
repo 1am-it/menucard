@@ -19,7 +19,7 @@ const { validateProposalInput, validateDecisionInput, buildTriageView, isUuid } 
 const JOB_LIMIT = 2000;
 const JOB_COLUMNS =
   'id, canonical_source_url, status, error_reason, result_receipt_id, created_at, updated_at, unknown_menu_contexts:field_evidence->unknown_menu_contexts';
-const RECEIPT_COLUMNS = 'id, restaurant_match_type, matched_restaurant_id, menus:candidate_summary->menus';
+const RECEIPT_COLUMNS = 'id, restaurant_match_type, matched_restaurant_id, menus:candidate_summary->menus, product:candidate_summary->menuExtractionV2';
 
 const PROPOSAL_LIMIT = 1000;
 const PROPOSAL_COLUMNS =

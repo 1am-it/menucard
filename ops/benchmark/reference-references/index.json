@@ -1,0 +1,18 @@
+{
+  "version": "1.0.0",
+  "pinnedAt": "2026-10-21",
+  "issue": 59,
+  "captureMetadata": "ops/benchmark/reference-captures.json",
+  "countingRules": {
+    "path": "docs/guides/menu-extraction-reference-counting-rules.md",
+    "sha256": "0f09b74fdd9f33ecd58af4e3df8ab3c711ee70d32030bc4296f3af78adc2f09c"
+  },
+  "note": "One controlled reference per pinned source. Each item carries a section path, a locator and a quote from the captured bytes. Arrangements and supplements are kept separately. Senang Makan is recorded as blocked, not as an empty menu.",
+  "sources": [
+    { "id": "zuyd", "file": "ops/benchmark/reference-references/zuyd.json" },
+    { "id": "andalous", "file": "ops/benchmark/reference-references/andalous.json" },
+    { "id": "pellens", "file": "ops/benchmark/reference-references/pellens.json" },
+    { "id": "chocolat", "file": "ops/benchmark/reference-references/chocolat.json" },
+    { "id": "senang-makan", "file": "ops/benchmark/reference-references/senang-makan.json" }
+  ]
+}

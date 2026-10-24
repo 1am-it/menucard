@@ -76,6 +76,54 @@ test('doubt, robots.txt and no usable menu → "Beoordeel handmatig"; "Robots ge
   assert.ok(!none.actions.includes('retry'));
 });
 
+test('an image-or-scan-only menu gets an explicit non-supported status and a working human route', () => {
+  const failedPdf = derive({
+    job: job({ status: 'failed', error_reason: 'pdf_no_text_layer', result_receipt_id: null }),
+    receipt: null,
+  });
+  assert.equal(failedPdf.key, 'image_only');
+  assert.equal(failedPdf.label, 'Menu alleen als afbeelding: niet ondersteund');
+  assert.equal(failedPdf.role, 'blocked');
+  assert.equal(failedPdf.high, false);
+  assert.equal(failedPdf.terminal, true);
+  assert.deepEqual(failedPdf.actions, ['review_source', 'adjust_url']);
+  assert.equal(failedPdf.reason, 'pdf_no_text_layer');
+  assert.match(failedPdf.text, /geen leesbare tekstlaag/);
+  assert.match(failedPdf.text, /geen OCR/);
+  assert.equal(ACTION_LABELS.review_source, 'Bronnen beoordelen');
+
+  const imagePage = derive({
+    job: job({
+      limitations: ['Menukaart lijkt alleen als afbeelding beschikbaar op https://bistro-voorbeeld.example/menu (2 afbeelding(en)); beeldanalyse/OCR is niet geconfigureerd.'],
+    }),
+    receipt: receipt({ menus: [] }),
+  });
+  assert.equal(imagePage.key, 'image_only');
+  assert.equal(imagePage.reason, 'image_only_menu');
+  assert.deepEqual(imagePage.actions, ['review_source', 'adjust_url']);
+  assert.ok(!imagePage.actions.includes('confirm'));
+
+  // A scan PDF inside a site analysis is named as a text-layer limitation.
+  const scanPdf = derive({
+    job: job({ limitations: ['PDF https://bistro-voorbeeld.example/menu.pdf kon niet worden gelezen (pdf_no_text_layer).'] }),
+    receipt: receipt({ menus: [] }),
+  });
+  assert.equal(scanPdf.key, 'image_only');
+  assert.equal(scanPdf.reason, 'pdf_no_text_layer');
+
+  // Never inferred from a real menu or a different failure.
+  const realMenu = derive({
+    job: job({ limitations: ['Menukaart lijkt alleen als afbeelding beschikbaar; beeldanalyse/OCR is niet geconfigureerd.'] }),
+  });
+  assert.notEqual(realMenu.key, 'image_only');
+  const corrupt = derive({ job: job({ status: 'failed', error_reason: 'pdf_corrupt', result_receipt_id: null }), receipt: null });
+  assert.notEqual(corrupt.key, 'image_only');
+
+  const summary = summarizeItems([failedPdf, imagePage, corrupt]);
+  assert.equal(summary.done, 3);
+  assert.equal(summary.byAction.review_source, 2);
+});
+
 test('"Opnieuw proberen" only for a technical failure or an expired job; an invalid URL gets "URL aanpassen"', () => {
   const failed = derive({ job: job({ status: 'failed', error_reason: 'fetch_failed', attempt_count: 5, result_receipt_id: null }), receipt: null });
   assert.equal(failed.label, 'Fout');
@@ -163,6 +211,27 @@ test('menu source URLs: only menus with recognised items, canonical, deduplicate
   assert.deepEqual(urls, ['https://a.example/menu', 'https://a.example/kaart.pdf']);
 });
 
+test('a job-only PDF result shows the same recognized dishes as the receipt path — never "0 dishes" beside "menu found"', () => {
+  const pdfJob = job({
+    unknown_menu_contexts: [
+      {
+        sourceUrl: 'https://bistro-voorbeeld.example/menukaart.pdf',
+        sourceId: 'source-2',
+        recognizedSections: [{ name: 'Fondue', items: [{ name: 'Fictieve fondue', price: '24.50', contentHash: 'h' }] }],
+      },
+    ],
+    extraction_result: {
+      coverage: { status: 'items_extracted', itemCount: 1, readCount: 2, complete: false, reviewRequired: true },
+      attentionGroups: [],
+    },
+  });
+  const v = derive({ job: pdfJob, receipt: receipt({ menus: [] }) });
+  assert.equal(v.high, true);
+  assert.equal(v.menu.itemCount, 1);
+  assert.equal(v.menu.categories[0].items[0].name, 'Fictieve fondue');
+  assert.equal(v.coverage.itemCount, 1);
+});
+
 test('daily limit day starts at midnight Europe/Amsterdam, summer and winter time', () => {
   assert.equal(amsterdamDayStart('2026-10-10T11:00:00Z'), '2026-10-09T22:00:00.000Z');
   assert.equal(amsterdamDayStart('2026-01-15T23:30:00Z'), '2026-01-15T23:00:00.000Z');
@@ -173,4 +242,112 @@ test('fixed copy is verbatim and never says the screen may be closed', () => {
   assert.equal(COPY.keepOpen, 'Houd dit scherm open. Sluit je het, dan pauzeert de analyse en gaat hij verder zodra je terugkomt.');
   assert.equal(COPY.nothingPublished, 'Niets wordt automatisch gepubliceerd.');
   assert.doesNotMatch(JSON.stringify(COPY), /gerust verlaten|mag (je )?sluiten/i);
+});
+
+// #59 (review 6307703713) — an uncertain section structure stays "Controle
+// nodig" and is never high certainty; it gets a separate, explicitly human
+// per-section route that only relaxes the structure rule.
+const { uncertainSections } = require('./menuStructureReview');
+
+const STRUCTURE_MENUS = [
+  {
+    title: 'Fictief Diner',
+    structure: 'uncertain',
+    categories: [
+      { name: 'Voor', path: ['Voor'], sourcePath: ['DINNER', 'VOOR'], locator: 'paneel Diner, regel 1', uncertain: true, items: [{ name: 'Fictieve burrata', price: '13.00' }] },
+      { name: 'Hoofd', path: ['Hoofd'], sourcePath: ['DINNER', 'HOOFD'], items: [{ name: 'Fictieve zeebaars', price: '24.00' }] },
+    ],
+  },
+  {
+    title: 'Fictief Lunch',
+    structure: 'uncertain',
+    categories: [
+      { name: 'Koud', path: ['Koud'], sourcePath: ['LUNCH', 'KOUD'], locator: 'paneel Lunch, regel 1', uncertain: true, items: [{ name: 'Fictieve salade', price: '12.50' }] },
+      { name: 'Warm', path: ['Warm'], sourcePath: ['LUNCH', 'WARM'], items: [{ name: 'Fictieve pasta', price: '14.50' }] },
+    ],
+  },
+];
+const structureReceipt = (extra) => receipt({ analysis_result_hash: 'a'.repeat(64), menus: STRUCTURE_MENUS, ...extra });
+const STRUCTURE_SECTIONS = uncertainSections(STRUCTURE_MENUS);
+
+test('uncertain structure: never high certainty, but a per-section human route is offered', () => {
+  const v = derive({ receipt: structureReceipt() });
+  assert.equal(v.key, 'needs_review');
+  assert.equal(v.high, false);
+  assert.equal(v.label, 'Controle nodig');
+  assert.deepEqual(v.actions, ['review_structure']);
+  assert.equal(v.structureReview.eligible, true);
+  assert.equal(v.structureReview.receiptHash, 'a'.repeat(64));
+  assert.deepEqual(v.structureReview.required.map((s) => s.label), ['Fictief Diner › Voor', 'Fictief Lunch › Koud']);
+  assert.deepEqual(v.structureReview.treated, []);
+  assert.equal(v.structureReview.handledCount, 0);
+  assert.match(v.text, /Controleer elke onzekere rubriek/);
+  assert.equal(ACTION_LABELS.review_structure, 'Rubriekindeling controleren');
+});
+
+test('uncertain structure: confirmation only after every section was explicitly recorded', () => {
+  const half = derive({
+    receipt: structureReceipt(),
+    recordedReviews: [{ key: STRUCTURE_SECTIONS[0].key, path: STRUCTURE_SECTIONS[0].path, action: 'keep', correctedPath: null }],
+  });
+  assert.deepEqual(half.actions, ['review_structure']);
+  assert.equal(half.structureReview.handledCount, 1);
+
+  const complete = derive({
+    receipt: structureReceipt(),
+    recordedReviews: STRUCTURE_SECTIONS.map((section) => ({ key: section.key, path: section.path, action: 'keep', correctedPath: null })),
+  });
+  assert.deepEqual(complete.actions, ['confirm']);
+  assert.equal(complete.structureReview.handledCount, 2);
+  assert.equal(complete.high, false);
+});
+
+test('uncertain structure: the human route never widens the own-source rule', () => {
+  const v = derive({ receipt: structureReceipt(), job: job({ menu_source_urls: ['https://other.example/menu'] }) });
+  assert.equal(v.key, 'needs_review');
+  assert.equal(v.structureReview.eligible, false);
+  assert.deepEqual(v.actions, ['review_manually']);
+  assert.match(v.text, /eigen website/);
+  // No receipt menus at all: nothing to review per section.
+  const noMenus = derive({ receipt: receipt({ analysis_result_hash: 'a'.repeat(64), menus: [] }) });
+  assert.notEqual(noMenus.key, 'confirmed');
+  assert.ok(!noMenus.structureReview || noMenus.structureReview.eligible !== true);
+  assert.ok(!noMenus.actions.includes('confirm'));
+});
+
+test('uncertain structure: a confirmed proposal is shown as confirmed, never as high certainty', () => {
+  const v = derive({
+    receipt: structureReceipt(),
+    proposals: [
+      { restaurant_id: 'bistro', proposed_url: 'https://bistro-voorbeeld.example/menukaart.pdf', status: 'accepted', decided_at: '2026-10-10T11:30:00Z' },
+    ],
+  });
+  assert.equal(v.key, 'confirmed');
+  assert.equal(v.label, 'Bron bevestigd');
+  assert.equal(v.high, false);
+  assert.equal(v.structureReview.eligible, true);
+});
+
+// Regression (d) of the order: a certain (normalized) structure must behave
+// exactly as before — the one-click rule stays high and no structure review is
+// offered or required.
+test('certain outcome (regression d): a normalized structure keeps the unchanged one-click rule', () => {
+  const v = derive({ receipt: receipt({ analysis_result_hash: 'b'.repeat(64) }) });
+  assert.equal(v.key, 'menu_found');
+  assert.equal(v.high, true);
+  assert.deepEqual(v.actions, ['confirm']);
+  assert.equal(v.foundUrl, 'https://bistro-voorbeeld.example/menukaart.pdf');
+  // No human section route is attached to a certain result.
+  assert.equal(v.structureReview, undefined);
+  // And an uncertain-looking receipt without flagged sections is never
+  // silently treated as normalized: it falls back to the manual review.
+  const inconsistent = derive({
+    receipt: receipt({
+      analysis_result_hash: 'b'.repeat(64),
+      menus: [{ structure: 'uncertain', categories: [{ name: 'Koud', path: ['Koud'], items: [{ name: 'Soep', price: '6.00' }] }] }],
+    }),
+  });
+  assert.equal(inconsistent.high, false);
+  assert.equal(inconsistent.structureReview.eligible, false);
+  assert.deepEqual(inconsistent.actions, ['review_manually']);
 });

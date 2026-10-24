@@ -1,0 +1,67 @@
+{
+  "version": "1.0.0",
+  "issue": 59,
+  "sourceId": "bardot",
+  "label": "Brasserie Bardot",
+  "verifiedAt": "2026-10-22T17:52:10.467Z",
+  "oneShot": true,
+  "captureStatus": "partially-verified",
+  "verifiedCaptures": 1,
+  "sourceChangedCaptures": 2,
+  "partialReason": "2 pinned HTML page(s) return different bytes than the pinned capture; only the hash-verified PDF is used as a reference source",
+  "verification": "One read-only attempt per pinned card URL through the existing safe fetch (robots and redirect checks). Bytes are kept only when the recomputed SHA-256 equals the hash in ops/benchmark/existing-card-references.json; a different hash is recorded as a source change without bytes.",
+  "authorization": {
+    "decision": "Product Owner 2026-10-21, option 1 (four existing cards plus an unseen set), reference GitHub #59 issuecomment-6315226470; Delivery Lead order review 6315269210.",
+    "reference": "GitHub #59 review 6315269210",
+    "scope": "Public read-only comparison of exactly these four existing-card sources and the menu sub-pages/PDFs that the historical data/menus.json export itself names. No login, CAPTCHA bypass, other restaurant, arbitrary crawl, publication, production write or app-side AI.",
+    "appProviderActivation": false
+  },
+  "pinnedCardCapture": {
+    "path": "ops/benchmark/existing-card-references.json",
+    "bytesSha256": "dcb0e92b9cbefc7b56e5c934c722850078d3340c805498dd0e23bebbe2705bc4"
+  },
+  "captures": [
+    {
+      "requestedUrl": "https://www.brasseriebardot.nl",
+      "finalUrl": "https://brasseriebardot.nl/",
+      "contentType": "text/html",
+      "kind": "html",
+      "status": "source-changed",
+      "observedBytes": 93233,
+      "observedBytesSha256": "9c6422963d28e57d700527fb31e91f2c46ecb0efa82265762445fb069fcf1d2b",
+      "pinnedBytes": 93309,
+      "pinnedBytesSha256": "fc058ebee25a78da9929bb924f555ab4930eff1b26dd99db9190cdd3160de7f7",
+      "verifiedAt": "2026-10-22T17:52:10.467Z",
+      "error": "source-changed",
+      "note": "The source now returns different bytes than the pinned card capture. That is a source change, not a correction, so no reference is authored from it."
+    },
+    {
+      "requestedUrl": "https://www.brasseriebardot.nl/brasserie-bardot/",
+      "finalUrl": "https://brasseriebardot.nl/brasserie-bardot/",
+      "contentType": "text/html",
+      "kind": "html",
+      "status": "source-changed",
+      "observedBytes": 135407,
+      "observedBytesSha256": "45e96b351f930a921f84ec1f930fe75bb92cde353ca2f30a574a6632e1d07c7a",
+      "pinnedBytes": 135411,
+      "pinnedBytesSha256": "43139ae295484fa2a8e30d0c4bffb215c2a6a9b4fa0188161920bf8d3193e82a",
+      "verifiedAt": "2026-10-22T17:52:10.467Z",
+      "error": "source-changed",
+      "note": "The source now returns different bytes than the pinned card capture. That is a source change, not a correction, so no reference is authored from it."
+    },
+    {
+      "requestedUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf",
+      "finalUrl": "https://brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf",
+      "contentType": "application/pdf",
+      "kind": "pdf",
+      "status": "verified",
+      "bytes": 1833458,
+      "bytesSha256": "487ba29f4bf8dbeca9de161d5e2a3839ed9cbd0eb6c77ce76ffbd62a6f2a7597",
+      "pinnedBytes": 1833458,
+      "pinnedBytesSha256": "487ba29f4bf8dbeca9de161d5e2a3839ed9cbd0eb6c77ce76ffbd62a6f2a7597",
+      "verifiedAt": "2026-10-22T17:52:10.467Z",
+      "localPath": "ops/benchmark/output/card-captures/bardot/03-pdf-487ba29f4bf8.pdf",
+      "note": "Bytes are identical to the pinned card capture; only this hash-verified version may carry a reference."
+    }
+  ]
+}

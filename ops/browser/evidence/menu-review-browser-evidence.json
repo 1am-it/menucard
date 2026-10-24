@@ -1,0 +1,3871 @@
+{
+  "fixtureOnly": true,
+  "passed": true,
+  "head": "436b96495971534ac3c8e1d1e7dac3d96e6c5560",
+  "worktreeDirty": false,
+  "generatedAt": "2026-10-24T14:16:11.134Z",
+  "command": "npm run test:browser:menu-review",
+  "environment": {
+    "node": "v22.22.3",
+    "platform": "win32",
+    "browser": "Edg/155.0.4283.45",
+    "viewportHeights": [
+      900
+    ],
+    "fixtureOnly": true,
+    "loopback": {
+      "app": "http://localhost:3137",
+      "server": "the local next-dev process started and stopped by this harness",
+      "browser": "the local Edge/Chrome process started and stopped by this harness over CDP",
+      "scope": "only these own processes are exercised; no remote host"
+    },
+    "networkGuard": "in-page fetch/XHR/WebSocket/EventSource/beacon + CDP Fetch + DNS lockdown"
+  },
+  "fixtures": [
+    "review",
+    "readonly",
+    "structure",
+    "structure-readonly",
+    "empty",
+    "partial",
+    "image_only",
+    "triage",
+    "v2",
+    "error",
+    "manual",
+    "manual-ai",
+    "manual-coverage",
+    "manual-map",
+    "concepts",
+    "concepts-empty",
+    "concepts-error",
+    "concepts-no-access"
+  ],
+  "conceptFixtures": {
+    "v1": "concept-v1-0001",
+    "v2": "concept-v2-0002",
+    "invalid": "concept-invalid-0003",
+    "empty": "concept-empty-0004"
+  },
+  "checks": [
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "review: result card and exact source URL are visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review: control is collapsed before the click path",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review: \"Menukaart controleren\" is a real button",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review: click opens the recognised menu",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review: item and section counts come from the fixture",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review: original section paths are shown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review: prices are shown per dish",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review: multiple undecomposed prices stay explicit",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review: a missing price is not zero",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review: duplicate, price and missing-price attention are visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review: shared uncertainty is grouped per section",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review: concept is internal and blocked, not savable",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review: save is disabled while blockers remain",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "review: group action is per section and not accept-all",
+      "passed": true,
+      "detail": "groupButtons=2"
+    },
+    {
+      "name": "review: coverage and limitations are visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review: breadcrumb link is exact",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "review: original menu link is exact and safe",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review: \"handmatig beoordelen\" opens the same batch item",
+      "passed": true,
+      "detail": "/internal/source-triage/batch?batch=batch-fictief-0001&item=1"
+    },
+    {
+      "name": "review: light theme is active",
+      "passed": true,
+      "detail": "light/#fcfaf4"
+    },
+    {
+      "name": "review: address bar keeps the batch context",
+      "passed": true,
+      "detail": "http://localhost:3137/internal/source-triage/batch?fixture=review&theme=light&batch=batch-fictief-0001"
+    },
+    {
+      "name": "review: no horizontal overflow at 1024 px",
+      "passed": true,
+      "detail": "overflow=-6"
+    },
+    {
+      "name": "review: \"Controle sluiten\" closes the same panel",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=readonly&batch=batch-fictief-0001&item=1&theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=readonly&batch=batch-fictief-0001&item=1&theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "readonly: colleague view is explicitly read-only",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "readonly: no save or group-accept control is offered",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "readonly: no source confirmation is offered",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "readonly: the same concept and blockers are readable",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "readonly: no horizontal overflow at 1024 px",
+      "passed": true,
+      "detail": "overflow=-6"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=empty&theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=empty&theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "empty: the real URL input is present and labelled",
+      "passed": true,
+      "detail": "Restaurant-URL's, één per regel"
+    },
+    {
+      "name": "empty: the empty recent-batches state is honest",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "empty: no fabricated result is shown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "empty: dark theme is active",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=partial&batch=batch-fictief-0001&item=1&theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=partial&batch=batch-fictief-0001&item=1&theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "partial: a found source with zero items is not a success",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "partial: the limitation is visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "partial: no concept is offered for an empty result",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "partial: no horizontal overflow at 390 px",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=image_only&batch=batch-fictief-0001&item=1&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=image_only&batch=batch-fictief-0001&item=1&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "image-only: the explicit non-supported status is shown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "image-only: no successful extraction is claimed",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "image-only: the reason stays visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "image-only: no confirm action is offered",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "image-only: the human route is linked with restaurant and reason",
+      "passed": true,
+      "detail": "/internal/source-triage?restaurant=9001&reason=image_only"
+    },
+    {
+      "name": "image-only: no horizontal overflow at 390 px",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "image-only: light theme is active",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=image_only&batch=batch-fictief-0001&item=1&theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=image_only&batch=batch-fictief-0001&item=1&theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "image-only: the status and reason also hold at 320 px/dark",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "image-only: no horizontal overflow at 320 px",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "image-only: dark theme is active at 320 px",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "image-only follow-up: the existing Bronnen beoordelen page opens",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "image-only follow-up: the restaurant is preselected",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "image-only follow-up: the detail names the real reason",
+      "passed": true,
+      "detail": "Aandachtspunt uit de batchanalyse\nReden\nMenu alleen als afbeelding of scan: niet ondersteund\nWat dit betekent\nDe menukaart is alleen als afbeelding of scan beschikbaar. Deze import leest geen beeld en gebruikt geen OCR, dus er is niets als gerecht opgeslagen."
+    },
+    {
+      "name": "image-only follow-up: the detail names the fitting next step",
+      "passed": true,
+      "detail": "Fictief Brasserie Noord\n\nCentrum\n\nBronstatus\nBron: Bereikbaar\nMenukaart: Niet beoordeeld\nWaarom aandacht\nMenukaart: Niet beoordeeld\nBekende bron-URL\nhttps://fictief-brasserie.example.com/\n(opent in ee"
+    },
+    {
+      "name": "image-only follow-up: the reason is not only a page banner",
+      "passed": true,
+      "detail": "followup=Aandachtspunt uit de batchanalyse\nReden\nMenu alleen als afbeelding of scan: niet banner="
+    },
+    {
+      "name": "image-only follow-up: the generic onboarding route stays visible as secondary context",
+      "passed": true,
+      "detail": "Fictief Brasserie Noord\n\nCentrum\n\nBronstatus\nBron: Bereikbaar\nMenukaart: Niet beoordeeld\nWaarom aandacht\nMenukaart: Niet beoordeeld\nBekende bron-URL\nhttps://fictief-brasserie.example.com/\n(opent in ee"
+    },
+    {
+      "name": "image-only follow-up: no menu status or confirmation is claimed",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "image-only follow-up: the context is kept in the address bar",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "image-only follow-up: no proposal or publication happened",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "image-only follow-up: an unusable proposal can be prepared",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "image-only follow-up: a fitting reason is preselected",
+      "passed": true,
+      "detail": "other"
+    },
+    {
+      "name": "image-only follow-up: the fixed explanation is visible and filled in",
+      "passed": true,
+      "detail": "Menu alleen als afbeelding of scan; niet met OCR te lezen. | Voorgeselecteerd omdat de batchanalyse dit menu als afbeelding of scan meldde. De toelichting hieronder is verplicht en al ingevuld."
+    },
+    {
+      "name": "image-only follow-up: the preselected reason is described to assistive tech",
+      "passed": true,
+      "detail": "stg-new-9001-reason-help"
+    },
+    {
+      "name": "image-only follow-up: the note stays required",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "image-only follow-up: choosing the reason saves nothing by itself",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=structure&batch=batch-fictief-0001&item=1&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=structure&batch=batch-fictief-0001&item=1&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "structure: the existing \"Menukaart controleren\" path shows the section control",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "structure: each uncertain section carries its path, source route and locator",
+      "passed": true,
+      "detail": "[\"Fictief Lunch › Koud\\n1 gerecht · vindplaats: paneel Lunch, regel 1\\n\\nBronroute: LUNCH › KOUD\\n\\nRubriek klopt zo\\nRubriek corrigeren\",\"Fictief Diner › Voor\\n1 gerecht · vindplaats: paneel Diner, regel 1\\n\\nBronroute: DINNER › VOOR\\n\\nRubriek klopt zo\\nRubriek corrigeren\"]"
+    },
+    {
+      "name": "structure: nothing is treated before the human acts",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "structure: the progress counter starts at 0 van 2",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "structure: no one-click confirmation is offered before handling",
+      "passed": true,
+      "detail": "[\"Licht\",\"Donker\",\"Sign out\",\"Nieuwe batch\",\"Rubriekindeling controleren\",\"Controle sluiten\",\"18 okt 11:00\\n1 URL · klaar voor controle\"]"
+    },
+    {
+      "name": "structure: no accept-all action exists",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "structure: light theme is active",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "structure: no horizontal overflow at 1024 px",
+      "passed": true,
+      "detail": "overflow=-6"
+    },
+    {
+      "name": "structure: handling one section is not enough",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "structure: correcting a section opens a labelled path field",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "structure: all sections treated only after a real corrected path",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "structure: the confirm control appears only now and is enabled",
+      "passed": true,
+      "detail": "{\"text\":\"Bevestig bron\",\"disabled\":false}"
+    },
+    {
+      "name": "structure: the confirmation shows the handled decisions before writing",
+      "passed": true,
+      "detail": "onze\nmenukaarten\nDekkingsoverzicht\nOnboarding Restaurant\nLicht\nDonker\nSign out\nWerkvoorraad\n/\nBronnen beoordelen\n/\nBatchanalyse\nBatchanalyse\nAlleen intern\n\nAnalyseer maximaal 10 restaurant-URL's tegelijk. Elk resultaat blijft een voorstel voor menselijke controle.\n\nNiets wordt automatisch gepublicee"
+    },
+    {
+      "name": "structure: no write request leaves the browser in the fixture",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=structure&batch=batch-fictief-0001&item=1&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=structure&batch=batch-fictief-0001&item=1&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "structure keyboard: Tab reaches a section decision and Space selects it",
+      "passed": true,
+      "detail": "tabs=1"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=structure&batch=batch-fictief-0001&item=1&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=structure&batch=batch-fictief-0001&item=1&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "structure light: the requested theme is active",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "structure light: no horizontal overflow at 390 px",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "structure light: the correction field stays inside the viewport",
+      "passed": true,
+      "detail": "width=272"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=structure&batch=batch-fictief-0001&item=1&theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=structure&batch=batch-fictief-0001&item=1&theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "structure dark: the requested theme is active",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "structure dark: no horizontal overflow at 390 px",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "structure dark: the correction field stays inside the viewport",
+      "passed": true,
+      "detail": "width=272"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=structure-readonly&batch=batch-fictief-0001&item=1&theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=structure-readonly&batch=batch-fictief-0001&item=1&theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "structure readonly: the same sections stay readable",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "structure readonly: the decisions are disabled and no confirmation is offered",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&aiState=off&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-import?fixture=manual&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&aiState=off&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "manual import: restaurant search finds an existing restaurant by name",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import: clicking a search result selects that restaurant",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import: the chosen restaurant replaces the free number field",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import: step 1 shows the source line in plain language",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import: step 1 offers \"Kopieer prompt\"",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import: step 1 explains which page to use",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import: step 1 shows \"Geldig tot\" with a clock time",
+      "passed": true,
+      "detail": "Geldig tot 16:42. Daarna maak je gewoon een nieuwe prompt."
+    },
+    {
+      "name": "manual import: technische details name the pinned instruction",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import: pasting shows only a summary line and \"Wissen\"",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import: the paste field no longer shows the pasted content",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "manual import: the paste summary counts the characters",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import: the pasted JSON is never rendered",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import: step 2 confirms the received counts",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import: no pasted JSON remains after checking",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import: the received line is the only result shown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import: step 2 shows \"1 menukaart, 3 gerechten\"",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import: step 3 summarises in plain language",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import: saving is disabled while points are open",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import: choosing a price resolves that line",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import: \"staat niet in de bron\" asks for a reason",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import: the reason cannot be saved empty",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import: after the reason every point is handled",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import: saving is enabled only after all human steps",
+      "passed": true,
+      "detail": "{\"disabled\":false}"
+    },
+    {
+      "name": "manual import: the existing concept route result is shown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import: the confirmation keeps publishing a separate step",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&aiState=off&theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-import?fixture=manual&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&aiState=off&theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "manual import keyboard: \"Prompt maken\" is reachable with Tab",
+      "passed": true,
+      "detail": "[{\"tag\":\"BUTTON\",\"text\":\"Donker\",\"href\":null,\"expanded\":null},{\"tag\":\"BUTTON\",\"text\":\"Sign out\",\"href\":null,\"expanded\":null},{\"tag\":\"BUTTON\",\"text\":\"Wijzig\",\"href\":null,\"expanded\":null},{\"tag\":\"TEXTAREA\",\"text\":\"\",\"href\":null,\"expanded\":null},{\"tag\":\"BUTTON\",\"text\":\"Prompt maken\",\"href\":null,\"expanded\":null}]"
+    },
+    {
+      "name": "manual import keyboard: Enter makes the prompt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&aiState=off&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-import?fixture=manual&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&aiState=off&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "manual import 320px/light: requested theme is active",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "manual import 320px/light: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "manual import 320px/light: all three steps are present",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import 320px/light: the plain-language intro is shown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&aiState=off&theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-import?fixture=manual&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&aiState=off&theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "manual import 390px/dark: requested theme is active",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "manual import 390px/dark: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "manual import 390px/dark: all three steps are present",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import 390px/dark: the plain-language intro is shown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import light and dark resolve to different background tokens",
+      "passed": true,
+      "detail": "#fcfaf4 / #0a0a0a"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&aiState=off&theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-import?fixture=manual&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&aiState=off&theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "manual import: \"Wissen\" is offered next to the paste summary",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import: after wiping, the empty paste field returns",
+      "passed": true,
+      "detail": "{\"field\":true,\"summary\":false}"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&manualFail=expired&aiState=off&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-import?fixture=manual&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&manualFail=expired&aiState=off&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "manual import: an expired step is a plain message, not a technical error",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import: an expired step offers \"Opnieuw maken\"",
+      "passed": true,
+      "detail": "{\"disabled\":false}"
+    },
+    {
+      "name": "manual import: \"Opnieuw maken\" creates a new prompt from the same sources",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&manualFail=schema&aiState=off&theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-import?fixture=manual&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&manualFail=schema&aiState=off&theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "manual import rejection: the readable problems are shown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import rejection: at most five concrete problems",
+      "passed": true,
+      "detail": "[\"Bij 2 gerechten met meerdere prijzen staat ook één losse hoofdprijs (bijvoorbeeld “Fictief glas wijn”).\",\"Bij 1 gerecht staat het citaat niet letterlijk in de bron (bijvoorbeeld ‘Fictieve salade 99,00’ bij “Fictieve salade”).\",\"Bij 1 menukaart staat een bron die niet in de opdracht voorkomt (bijvoorbeeld “Fictief Lunch”).\",\"Op 1 plek in het antwoord klopt de dekking niet met de rest van de inhoud.\"]"
+    },
+    {
+      "name": "manual import rejection: every problem is a plain Dutch sentence",
+      "passed": true,
+      "detail": "[\"Bij 2 gerechten met meerdere prijzen staat ook één losse hoofdprijs (bijvoorbeeld “Fictief glas wijn”).\",\"Bij 1 gerecht staat het citaat niet letterlijk in de bron (bijvoorbeeld ‘Fictieve salade 99,00’ bij “Fictieve salade”).\",\"Bij 1 menukaart staat een bron die niet in de opdracht voorkomt (bijvoorbeeld “Fictief Lunch”).\",\"Op 1 plek in het antwoord klopt de dekking niet met de rest van de inhoud.\"]"
+    },
+    {
+      "name": "manual import rejection: the problems name the dish or the section",
+      "passed": true,
+      "detail": "[\"Bij 2 gerechten met meerdere prijzen staat ook één losse hoofdprijs (bijvoorbeeld “Fictief glas wijn”).\",\"Bij 1 gerecht staat het citaat niet letterlijk in de bron (bijvoorbeeld ‘Fictieve salade 99,00’ bij “Fictieve salade”).\",\"Bij 1 menukaart staat een bron die niet in de opdracht voorkomt (bijvoorbeeld “Fictief Lunch”).\",\"Op 1 plek in het antwoord klopt de dekking niet met de rest van de inhoud.\"]"
+    },
+    {
+      "name": "manual import rejection: no JSON path in the main text",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import rejection: one copyable recovery question",
+      "passed": true,
+      "detail": "Corrigeer alleen deze punten en geef daarna het volledige an"
+    },
+    {
+      "name": "manual import rejection: the recovery question is selectable, not editable",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import rejection: technical detail is collapsed",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import rejection: the technical detail still names the validator lines",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import rejection: the plain banner stays, without technical codes",
+      "passed": true,
+      "detail": "Het antwoord past niet bij de afspraken. Vraag de AI om alleen het codeblok opnieuw te geven."
+    },
+    {
+      "name": "manual import rejection: the panel is in view for the screenshot",
+      "passed": true,
+      "detail": "{\"top\":0,\"height\":900}"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&manualFail=schema&aiState=off&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-import?fixture=manual&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&manualFail=schema&aiState=off&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "manual import rejection 320px/light: the problems are shown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import rejection 320px/light: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "manual import rejection 320px/light: every problem stays visible",
+      "passed": true,
+      "detail": "4"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&manualNormalize=1&aiState=off&theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-import?fixture=manual&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&manualNormalize=1&aiState=off&theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "manual import normalization: the answer is accepted after the derived count",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import normalization: the notice is rendered in plain language",
+      "passed": true,
+      "detail": "status"
+    },
+    {
+      "name": "manual import normalization: the heading names what the system adjusted",
+      "passed": true,
+      "detail": "Door het systeem bijgesteld"
+    },
+    {
+      "name": "manual import normalization: the derived item count is visible with the AI claim",
+      "passed": true,
+      "detail": "[\"Aantal gerechten door het systeem geteld: 3 (de AI zei 9).\",\"Status bijgesteld naar gedeeltelijk, omdat de AI zelf een beperking noemde.\"]"
+    },
+    {
+      "name": "manual import normalization: the adjusted status is visible",
+      "passed": true,
+      "detail": "[\"Aantal gerechten door het systeem geteld: 3 (de AI zei 9).\",\"Status bijgesteld naar gedeeltelijk, omdat de AI zelf een beperking noemde.\"]"
+    },
+    {
+      "name": "manual import normalization: step 2 shows the derived count, not the claimed 9",
+      "passed": true,
+      "detail": "Antwoord ontvangen: 1 menukaart, 3 gerechten"
+    },
+    {
+      "name": "manual import normalization: no JSON and no accept-all control is shown",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "manual import normalization: no horizontal overflow at 390 px",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "manual import normalization: the notice is in view for the screenshot",
+      "passed": true,
+      "detail": "{\"placed\":{\"top\":0,\"height\":900}}"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&manualNormalize=1&aiState=off&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-import?fixture=manual&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&manualNormalize=1&aiState=off&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "manual import normalization 320px/light: the notice is shown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import normalization 320px/light: both lines stay visible",
+      "passed": true,
+      "detail": "[\"Aantal gerechten door het systeem geteld: 3 (de AI zei 9).\",\"Status bijgesteld naar gedeeltelijk, omdat de AI zelf een beperking noemde.\"]"
+    },
+    {
+      "name": "manual import normalization 320px/light: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual-coverage&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fdiner&aiState=off&theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-import?fixture=manual-coverage&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fdiner&aiState=off&theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "uncovered lines: the review opens with the comparison",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "uncovered lines: the block is shown above the nalopen list",
+      "passed": true,
+      "detail": "{\"present\":true,\"aboveList\":true}"
+    },
+    {
+      "name": "uncovered lines: the heading counts the lines in plain language",
+      "passed": true,
+      "detail": "2 regels met een prijs staan niet in het concept"
+    },
+    {
+      "name": "uncovered lines: each line shows its quote, page and section, with two buttons",
+      "passed": true,
+      "detail": "[{\"quote\":\"“Fictieve carpaccio 11,00”\",\"meta\":\"Pagina source-1 · website · regel 4 · onder Voorgerechten\",\"buttons\":[\"Toevoegen\",\"Geen gerecht\"],\"accessible\":[\"Toevoegen: Fictieve carpaccio 11,00\",\"Geen gerecht: Fictieve carpaccio 11,00\"],\"focusable\":true},{\"quote\":\"“Fictieve steak 24,50”\",\"meta\":\"Pagina source-1 · website · regel 6 · onder Hoofdgerechten\",\"buttons\":[\"Toevoegen\",\"Geen gerecht\"],\"accessible\":[\"Toevoegen: Fictieve steak 24,50\",\"Geen gerecht: Fictieve steak 24,50\"],\"focusable\":true}]"
+    },
+    {
+      "name": "uncovered lines: the free note is visible",
+      "passed": true,
+      "detail": "Gratis: geen extra AI-aanroep nodig"
+    },
+    {
+      "name": "uncovered lines: the block uses the orange attention tokens of this theme",
+      "passed": true,
+      "detail": "{\"borderLeft\":\"rgb(255, 158, 107)\",\"attentionRgb\":\"rgb(255, 158, 107)\",\"background\":\"rgba(255, 158, 107, 0.1)\",\"attentionBackgroundRgb\":\"rgba(255, 158, 107, 0.1)\"}"
+    },
+    {
+      "name": "uncovered lines: no horizontal overflow at 390 px",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "uncovered lines: the block is in view for the screenshot",
+      "passed": true,
+      "detail": "{\"top\":55,\"height\":900}"
+    },
+    {
+      "name": "uncovered lines: the Toevoegen button takes focus",
+      "passed": true,
+      "detail": "Toevoegen: Fictieve carpaccio 11,00"
+    },
+    {
+      "name": "uncovered lines: Toevoegen removes the line after the server answer",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "uncovered lines: the remaining uncovered line is the other one",
+      "passed": true,
+      "detail": "[{\"quote\":\"“Fictieve steak 24,50”\",\"meta\":\"Pagina source-1 · website · regel 6 · onder Hoofdgerechten\",\"buttons\":[\"Toevoegen\",\"Geen gerecht\"],\"accessible\":[\"Toevoegen: Fictieve steak 24,50\",\"Geen gerecht: Fictieve steak 24,50\"],\"focusable\":true}]"
+    },
+    {
+      "name": "uncovered lines: the added dish is in nalopen with a section to check",
+      "passed": true,
+      "detail": "Fictieve carpaccio € 11,00"
+    },
+    {
+      "name": "uncovered lines: no horizontal overflow after adding",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "uncovered lines: the block disappears when no line is left",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "uncovered lines: nothing is invented after the last choice",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual-coverage&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fdiner&aiState=off&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-import?fixture=manual-coverage&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fdiner&aiState=off&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "uncovered lines 390px/light: the block is shown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "uncovered lines 390px/light: both lines and both buttons stay visible",
+      "passed": true,
+      "detail": "[[\"Toevoegen\",\"Geen gerecht\"],[\"Toevoegen\",\"Geen gerecht\"]]"
+    },
+    {
+      "name": "uncovered lines 390px/light: the buttons are named for screen readers",
+      "passed": true,
+      "detail": "[[\"Toevoegen: Fictieve carpaccio 11,00\",\"Geen gerecht: Fictieve carpaccio 11,00\"],[\"Toevoegen: Fictieve steak 24,50\",\"Geen gerecht: Fictieve steak 24,50\"]]"
+    },
+    {
+      "name": "uncovered lines 390px/light: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual-coverage&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fdiner&aiState=off&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-import?fixture=manual-coverage&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fdiner&aiState=off&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "uncovered lines 320px/light: the block is shown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "uncovered lines 320px/light: both lines and both buttons stay visible",
+      "passed": true,
+      "detail": "[[\"Toevoegen\",\"Geen gerecht\"],[\"Toevoegen\",\"Geen gerecht\"]]"
+    },
+    {
+      "name": "uncovered lines 320px/light: the buttons are named for screen readers",
+      "passed": true,
+      "detail": "[[\"Toevoegen: Fictieve carpaccio 11,00\",\"Geen gerecht: Fictieve carpaccio 11,00\"],[\"Toevoegen: Fictieve steak 24,50\",\"Geen gerecht: Fictieve steak 24,50\"]]"
+    },
+    {
+      "name": "uncovered lines 320px/light: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual-map&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fdiner&aiState=off&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-import?fixture=manual-map&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fdiner&aiState=off&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "kaart 390px/light: de review opent met de schakelaar Lijst | Kaart",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "kaart 390px/light: de kaart is niet geladen en er is geen pagina opgevraagd",
+      "passed": true,
+      "detail": "{\"present\":false,\"calls\":0,\"toggles\":[{\"text\":\"Lijst\",\"pressed\":\"true\"},{\"text\":\"Kaart\",\"pressed\":\"false\"}]}"
+    },
+    {
+      "name": "kaart 390px/light: Lijst staat aan en de kaart nog niet",
+      "passed": true,
+      "detail": "[{\"text\":\"Lijst\",\"pressed\":\"true\"},{\"text\":\"Kaart\",\"pressed\":\"false\"}]"
+    },
+    {
+      "name": "kaart 390px/light: de kaart toont de regels van de bron",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "kaart 390px/light: precies één kaartpagina is opgevraagd",
+      "passed": true,
+      "detail": "calls=1"
+    },
+    {
+      "name": "kaart 390px/light: de legenda is één regel met vier kleine chips in volgorde",
+      "passed": true,
+      "detail": "{\"chips\":[{\"label\":\"Overgenomen\",\"glyph\":\"✓\",\"top\":2065,\"height\":14,\"left\":29,\"right\":105},{\"label\":\"Niet overgenomen\",\"glyph\":\"○\",\"top\":2065,\"height\":14,\"left\":111,\"right\":207},{\"label\":\"Prijs wijkt af\",\"glyph\":\"▲\",\"top\":2065,\"height\":14,\"left\":213,\"right\":278},{\"label\":\"Geen gerecht\",\"glyph\":\"–\",\"top\":2065,\"height\":14,\"left\":284,\"right\":356}],\"row\":14}"
+    },
+    {
+      "name": "kaart 390px/light: de legenda-chips hebben ruimte tussen zich",
+      "passed": true,
+      "detail": "{\"gaps\":[6,6,6],\"chips\":[[\"Overgenomen\",29,105],[\"Niet overgenomen\",111,207],[\"Prijs wijkt af\",213,278],[\"Geen gerecht\",284,356]]}"
+    },
+    {
+      "name": "kaart 390px/light: de lange uitleg zit dicht achter \"Uitleg\"",
+      "passed": true,
+      "detail": "{\"tag\":\"DETAILS\",\"open\":false,\"summary\":\"Uitleg\"}"
+    },
+    {
+      "name": "kaart 390px/light: \"Uitleg\" opent de vier regels met de vorm én de volledige tekst",
+      "passed": true,
+      "detail": "[{\"label\":\"Overgenomen\",\"detail\":\"Groen met een doorgetrokken rand: dit gerecht staat in het concept met dezelfde prijs.\",\"swatch\":\"✓\"},{\"label\":\"Niet overgenomen\",\"detail\":\"Oranje met een gestippelde rand: deze regel met een prijs staat niet in het concept.\",\"swatch\":\"○\"},{\"label\":\"Prijs wijkt af\",\"detail\":\"Rood met een dubbele rand: de prijs in het concept verschilt van de prijs op de kaart.\",\"swatch\":\"▲\"},{\"label\":\"Geen gerecht\",\"detail\":\"Grijs: deze regel is afgewezen of eerder als geen gerecht beoordeeld.\",\"swatch\":\"–\"}]"
+    },
+    {
+      "name": "kaart 390px/light: een prijs zonder centen en zonder € staat als prijs op de kaart (AA1)",
+      "passed": true,
+      "detail": "[{\"text\":\"Fictieve zeebaars 34 geschroeid | venkel\",\"tone\":\"uncovered\",\"marker\":true},{\"text\":\"Fictieve bisque 12 van rivierkreeft\",\"tone\":\"uncovered\",\"marker\":true}]"
+    },
+    {
+      "name": "kaart 390px/light: de bronnen staan in volgorde met hun weergave",
+      "passed": true,
+      "detail": "[\"source-1 · Website · 3 niet overgenomen\",\"source-2 · PDF · 2 pagina's · 1 niet overgenomen\",\"source-3 · Afbeelding zonder tekst · 0 niet overgenomen\"]"
+    },
+    {
+      "name": "kaart 390px/light: de melding zegt dat dit de opgehaalde tekst van de website is",
+      "passed": true,
+      "detail": "Opgehaalde tekst van de website"
+    },
+    {
+      "name": "kaart 390px/light: rood, groen, oranje en grijs staan elk op hun eigen regel",
+      "passed": true,
+      "detail": "[[\"FICTIEF DINER\",null],[\"Voorgerechten\",null],[\"Fictieve carpaccio\",\"price_mismatch\"],[\"11,00\",\"price_mismatch\"],[\"Fictieve steak 24,50\",\"covered\"],[\"Fictieve bitterballen 7,50\",\"uncovered\"],[\"Fictieve friet 3,50\",\"not_dish\"],[\"Fictieve zeebaars 34 geschroeid | venkel\",\"uncovered\"],[\"Fictieve bisque 12 van rivierkreeft\",\"uncovered\"]]"
+    },
+    {
+      "name": "kaart 390px/light: regels zonder prijs blijven ongemarkeerd",
+      "passed": true,
+      "detail": "[\"FICTIEF DINER\",\"Voorgerechten\"]"
+    },
+    {
+      "name": "kaart 390px/light: de prijs op een eigen regel hoort bij de naam erboven (één markering)",
+      "passed": true,
+      "detail": "[{\"text\":\"FICTIEF DINER\",\"tone\":null,\"marker\":false},{\"text\":\"Voorgerechten\",\"tone\":null,\"marker\":false},{\"text\":\"Fictieve carpaccio\",\"tone\":\"price_mismatch\",\"marker\":true},{\"text\":\"11,00\",\"tone\":\"price_mismatch\",\"marker\":false},{\"text\":\"Fictieve steak 24,50\",\"tone\":\"covered\",\"marker\":true},{\"text\":\"Fictieve bitterballen 7,50\",\"tone\":\"uncovered\",\"marker\":true},{\"text\":\"Fictieve friet 3,50\",\"tone\":\"not_dish\",\"marker\":true},{\"text\":\"Fictieve zeebaars 34 geschroeid | venkel\",\"tone\":\"uncovered\",\"marker\":true},{\"text\":\"Fictieve bisque 12 van rivierkreeft\",\"tone\":\"uncovered\",\"marker\":true}]"
+    },
+    {
+      "name": "kaart 390px/light: elke markering heeft een eigen tekst voor de schermlezer",
+      "passed": true,
+      "detail": "[\"Fictieve carpaccio: prijs wijkt af, kaart 11,00 en concept € 12,50\",\"Fictieve steak: overgenomen, concept € 24,50\",\"Fictieve bitterballen: niet overgenomen, kaart 7,50\",\"Fictieve friet: geen gerecht, eerder beoordeeld\",\"Fictieve zeebaars: niet overgenomen, kaart 34\",\"Fictieve bisque: niet overgenomen, kaart 12\"]"
+    },
+    {
+      "name": "kaart 390px/light: geen afbeelding of iframe in de kaart",
+      "passed": true,
+      "detail": "images=0"
+    },
+    {
+      "name": "kaart 390px/light: geen horizontale overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "kaart 390px/light: een tik op rood opent het paneel",
+      "passed": true,
+      "detail": "[\"price_mismatch\"]"
+    },
+    {
+      "name": "kaart 390px/light: het rode paneel noemt kaart- en conceptprijs en biedt overnemen of wijzigen",
+      "passed": true,
+      "detail": "[\"Prijs wijkt af\\n\\nKaart 11,00 · concept € 12,50\\n\\nNeem 11,00 over\\nWijzig\\n\\nregels 3–4\",[\"Neem 11,00 over\",\"Wijzig\"]]"
+    },
+    {
+      "name": "kaart 390px/light: Neem de prijs over komt duurzaam terug in het paneel",
+      "passed": true,
+      "detail": "[\"Prijs wijkt af\\n\\nKaart 11,00 · concept € 12,50\\n\\n€ 11,00 overgenomen uit de kaart. Bij opslaan krijgt dit gerecht die prijs.\\n\\nregels 3–4\"]"
+    },
+    {
+      "name": "kaart 390px/light: de melding zegt dat opslaan een aparte stap blijft",
+      "passed": true,
+      "detail": "no message"
+    },
+    {
+      "name": "kaart 390px/light: het oranje paneel biedt Toevoegen en Geen gerecht",
+      "passed": true,
+      "detail": "[\"Toevoegen\",\"Geen gerecht\"]"
+    },
+    {
+      "name": "kaart 390px/light: Geen gerecht maakt die regel grijs en laat hem staan",
+      "passed": true,
+      "detail": "{\"line\":\"Fictieve bitterballen 7,50\",\"dismissed\":true}"
+    },
+    {
+      "name": "kaart 390px/light: een tik op groen toont het gerecht",
+      "passed": true,
+      "detail": "Overgenomen\n\nFictieve steak · concept € 24,50\n\nregel 5"
+    },
+    {
+      "name": "kaart 390px/light: een PDF toont de tekst met een eerlijke melding over de pagina-afbeelding",
+      "passed": true,
+      "detail": "De echte PDF-pagina kan niet worden getoond: de import bewaart de PDF-bytes niet en haalt de bron niet opnieuw op. Je ziet de opgehaalde tekst met dezelfde regelnummers."
+    },
+    {
+      "name": "kaart 390px/light: pagina 1 van de PDF komt uit een eigen verzoek",
+      "passed": true,
+      "detail": "{\"page\":\"Pagina 1 van 2\",\"calls\":4}"
+    },
+    {
+      "name": "kaart 390px/light: pagina 2 wordt pas op verzoek geladen",
+      "passed": true,
+      "detail": "{\"calls\":5,\"lines\":[\"Hoofdgerechten\",\"Fictieve salade\",\"9,00\"]}"
+    },
+    {
+      "name": "kaart 390px/light: een scan zonder tekst zegt eerlijk dat vergelijken nog niet kan",
+      "passed": true,
+      "detail": "{\"notice\":\"Deze kaart is een afbeelding; vergelijken kan nog niet.\",\"lines\":0}"
+    },
+    {
+      "name": "kaart 390px/light: Lijst brengt de nalopen-lijst terug",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "kaart 390px/light: Bekijk op kaart opent de kaart, scrolt naar de regel en markeert hem",
+      "passed": true,
+      "detail": "{\"text\":\"Fictieve soep 6,50\",\"inView\":true,\"source\":[\"source-2 · PDF · 2 pagina's · 1 niet overgenomen\"]}"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual-map&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fdiner&aiState=off&theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-import?fixture=manual-map&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fdiner&aiState=off&theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "kaart 390px/dark: de review opent met de schakelaar Lijst | Kaart",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "kaart 390px/dark: de kaart is niet geladen en er is geen pagina opgevraagd",
+      "passed": true,
+      "detail": "{\"present\":false,\"calls\":0,\"toggles\":[{\"text\":\"Lijst\",\"pressed\":\"true\"},{\"text\":\"Kaart\",\"pressed\":\"false\"}]}"
+    },
+    {
+      "name": "kaart 390px/dark: Lijst staat aan en de kaart nog niet",
+      "passed": true,
+      "detail": "[{\"text\":\"Lijst\",\"pressed\":\"true\"},{\"text\":\"Kaart\",\"pressed\":\"false\"}]"
+    },
+    {
+      "name": "kaart 390px/dark: de kaart toont de regels van de bron",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "kaart 390px/dark: precies één kaartpagina is opgevraagd",
+      "passed": true,
+      "detail": "calls=1"
+    },
+    {
+      "name": "kaart 390px/dark: de legenda is één regel met vier kleine chips in volgorde",
+      "passed": true,
+      "detail": "{\"chips\":[{\"label\":\"Overgenomen\",\"glyph\":\"✓\",\"top\":2065,\"height\":14,\"left\":29,\"right\":105},{\"label\":\"Niet overgenomen\",\"glyph\":\"○\",\"top\":2065,\"height\":14,\"left\":111,\"right\":207},{\"label\":\"Prijs wijkt af\",\"glyph\":\"▲\",\"top\":2065,\"height\":14,\"left\":213,\"right\":278},{\"label\":\"Geen gerecht\",\"glyph\":\"–\",\"top\":2065,\"height\":14,\"left\":284,\"right\":356}],\"row\":14}"
+    },
+    {
+      "name": "kaart 390px/dark: de legenda-chips hebben ruimte tussen zich",
+      "passed": true,
+      "detail": "{\"gaps\":[6,6,6],\"chips\":[[\"Overgenomen\",29,105],[\"Niet overgenomen\",111,207],[\"Prijs wijkt af\",213,278],[\"Geen gerecht\",284,356]]}"
+    },
+    {
+      "name": "kaart 390px/dark: de lange uitleg zit dicht achter \"Uitleg\"",
+      "passed": true,
+      "detail": "{\"tag\":\"DETAILS\",\"open\":false,\"summary\":\"Uitleg\"}"
+    },
+    {
+      "name": "kaart 390px/dark: \"Uitleg\" opent de vier regels met de vorm én de volledige tekst",
+      "passed": true,
+      "detail": "[{\"label\":\"Overgenomen\",\"detail\":\"Groen met een doorgetrokken rand: dit gerecht staat in het concept met dezelfde prijs.\",\"swatch\":\"✓\"},{\"label\":\"Niet overgenomen\",\"detail\":\"Oranje met een gestippelde rand: deze regel met een prijs staat niet in het concept.\",\"swatch\":\"○\"},{\"label\":\"Prijs wijkt af\",\"detail\":\"Rood met een dubbele rand: de prijs in het concept verschilt van de prijs op de kaart.\",\"swatch\":\"▲\"},{\"label\":\"Geen gerecht\",\"detail\":\"Grijs: deze regel is afgewezen of eerder als geen gerecht beoordeeld.\",\"swatch\":\"–\"}]"
+    },
+    {
+      "name": "kaart 390px/dark: een prijs zonder centen en zonder € staat als prijs op de kaart (AA1)",
+      "passed": true,
+      "detail": "[{\"text\":\"Fictieve zeebaars 34 geschroeid | venkel\",\"tone\":\"uncovered\",\"marker\":true},{\"text\":\"Fictieve bisque 12 van rivierkreeft\",\"tone\":\"uncovered\",\"marker\":true}]"
+    },
+    {
+      "name": "kaart 390px/dark: de bronnen staan in volgorde met hun weergave",
+      "passed": true,
+      "detail": "[\"source-1 · Website · 3 niet overgenomen\",\"source-2 · PDF · 2 pagina's · 1 niet overgenomen\",\"source-3 · Afbeelding zonder tekst · 0 niet overgenomen\"]"
+    },
+    {
+      "name": "kaart 390px/dark: de melding zegt dat dit de opgehaalde tekst van de website is",
+      "passed": true,
+      "detail": "Opgehaalde tekst van de website"
+    },
+    {
+      "name": "kaart 390px/dark: rood, groen, oranje en grijs staan elk op hun eigen regel",
+      "passed": true,
+      "detail": "[[\"FICTIEF DINER\",null],[\"Voorgerechten\",null],[\"Fictieve carpaccio\",\"price_mismatch\"],[\"11,00\",\"price_mismatch\"],[\"Fictieve steak 24,50\",\"covered\"],[\"Fictieve bitterballen 7,50\",\"uncovered\"],[\"Fictieve friet 3,50\",\"not_dish\"],[\"Fictieve zeebaars 34 geschroeid | venkel\",\"uncovered\"],[\"Fictieve bisque 12 van rivierkreeft\",\"uncovered\"]]"
+    },
+    {
+      "name": "kaart 390px/dark: regels zonder prijs blijven ongemarkeerd",
+      "passed": true,
+      "detail": "[\"FICTIEF DINER\",\"Voorgerechten\"]"
+    },
+    {
+      "name": "kaart 390px/dark: de prijs op een eigen regel hoort bij de naam erboven (één markering)",
+      "passed": true,
+      "detail": "[{\"text\":\"FICTIEF DINER\",\"tone\":null,\"marker\":false},{\"text\":\"Voorgerechten\",\"tone\":null,\"marker\":false},{\"text\":\"Fictieve carpaccio\",\"tone\":\"price_mismatch\",\"marker\":true},{\"text\":\"11,00\",\"tone\":\"price_mismatch\",\"marker\":false},{\"text\":\"Fictieve steak 24,50\",\"tone\":\"covered\",\"marker\":true},{\"text\":\"Fictieve bitterballen 7,50\",\"tone\":\"uncovered\",\"marker\":true},{\"text\":\"Fictieve friet 3,50\",\"tone\":\"not_dish\",\"marker\":true},{\"text\":\"Fictieve zeebaars 34 geschroeid | venkel\",\"tone\":\"uncovered\",\"marker\":true},{\"text\":\"Fictieve bisque 12 van rivierkreeft\",\"tone\":\"uncovered\",\"marker\":true}]"
+    },
+    {
+      "name": "kaart 390px/dark: elke markering heeft een eigen tekst voor de schermlezer",
+      "passed": true,
+      "detail": "[\"Fictieve carpaccio: prijs wijkt af, kaart 11,00 en concept € 12,50\",\"Fictieve steak: overgenomen, concept € 24,50\",\"Fictieve bitterballen: niet overgenomen, kaart 7,50\",\"Fictieve friet: geen gerecht, eerder beoordeeld\",\"Fictieve zeebaars: niet overgenomen, kaart 34\",\"Fictieve bisque: niet overgenomen, kaart 12\"]"
+    },
+    {
+      "name": "kaart 390px/dark: geen afbeelding of iframe in de kaart",
+      "passed": true,
+      "detail": "images=0"
+    },
+    {
+      "name": "kaart 390px/dark: geen horizontale overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "kaart 390px/dark: een tik op rood opent het paneel",
+      "passed": true,
+      "detail": "[\"price_mismatch\"]"
+    },
+    {
+      "name": "kaart 390px/dark: het rode paneel noemt kaart- en conceptprijs en biedt overnemen of wijzigen",
+      "passed": true,
+      "detail": "[\"Prijs wijkt af\\n\\nKaart 11,00 · concept € 12,50\\n\\nNeem 11,00 over\\nWijzig\\n\\nregels 3–4\",[\"Neem 11,00 over\",\"Wijzig\"]]"
+    },
+    {
+      "name": "kaart 390px/dark: Neem de prijs over komt duurzaam terug in het paneel",
+      "passed": true,
+      "detail": "[\"Prijs wijkt af\\n\\nKaart 11,00 · concept € 12,50\\n\\n€ 11,00 overgenomen uit de kaart. Bij opslaan krijgt dit gerecht die prijs.\\n\\nregels 3–4\"]"
+    },
+    {
+      "name": "kaart 390px/dark: de melding zegt dat opslaan een aparte stap blijft",
+      "passed": true,
+      "detail": "no message"
+    },
+    {
+      "name": "kaart 390px/dark: het oranje paneel biedt Toevoegen en Geen gerecht",
+      "passed": true,
+      "detail": "[\"Toevoegen\",\"Geen gerecht\"]"
+    },
+    {
+      "name": "kaart 390px/dark: Geen gerecht maakt die regel grijs en laat hem staan",
+      "passed": true,
+      "detail": "{\"line\":\"Fictieve bitterballen 7,50\",\"dismissed\":true}"
+    },
+    {
+      "name": "kaart 390px/dark: een tik op groen toont het gerecht",
+      "passed": true,
+      "detail": "Overgenomen\n\nFictieve steak · concept € 24,50\n\nregel 5"
+    },
+    {
+      "name": "kaart 390px/dark: een PDF toont de tekst met een eerlijke melding over de pagina-afbeelding",
+      "passed": true,
+      "detail": "De echte PDF-pagina kan niet worden getoond: de import bewaart de PDF-bytes niet en haalt de bron niet opnieuw op. Je ziet de opgehaalde tekst met dezelfde regelnummers."
+    },
+    {
+      "name": "kaart 390px/dark: pagina 1 van de PDF komt uit een eigen verzoek",
+      "passed": true,
+      "detail": "{\"page\":\"Pagina 1 van 2\",\"calls\":4}"
+    },
+    {
+      "name": "kaart 390px/dark: pagina 2 wordt pas op verzoek geladen",
+      "passed": true,
+      "detail": "{\"calls\":5,\"lines\":[\"Hoofdgerechten\",\"Fictieve salade\",\"9,00\"]}"
+    },
+    {
+      "name": "kaart 390px/dark: een scan zonder tekst zegt eerlijk dat vergelijken nog niet kan",
+      "passed": true,
+      "detail": "{\"notice\":\"Deze kaart is een afbeelding; vergelijken kan nog niet.\",\"lines\":0}"
+    },
+    {
+      "name": "kaart 390px/dark: Lijst brengt de nalopen-lijst terug",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "kaart 390px/dark: Bekijk op kaart opent de kaart, scrolt naar de regel en markeert hem",
+      "passed": true,
+      "detail": "{\"text\":\"Fictieve soep 6,50\",\"inView\":true,\"source\":[\"source-2 · PDF · 2 pagina's · 1 niet overgenomen\"]}"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual-map&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fdiner&aiState=off&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-import?fixture=manual-map&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fdiner&aiState=off&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "kaart 320px/light: de review opent met de schakelaar Lijst | Kaart",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "kaart 320px/light: de kaart is niet geladen en er is geen pagina opgevraagd",
+      "passed": true,
+      "detail": "{\"present\":false,\"calls\":0,\"toggles\":[{\"text\":\"Lijst\",\"pressed\":\"true\"},{\"text\":\"Kaart\",\"pressed\":\"false\"}]}"
+    },
+    {
+      "name": "kaart 320px/light: Lijst staat aan en de kaart nog niet",
+      "passed": true,
+      "detail": "[{\"text\":\"Lijst\",\"pressed\":\"true\"},{\"text\":\"Kaart\",\"pressed\":\"false\"}]"
+    },
+    {
+      "name": "kaart 320px/light: de kaart toont de regels van de bron",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "kaart 320px/light: precies één kaartpagina is opgevraagd",
+      "passed": true,
+      "detail": "calls=1"
+    },
+    {
+      "name": "kaart 320px/light: de legenda is één regel met vier kleine chips in volgorde",
+      "passed": true,
+      "detail": "{\"chips\":[{\"label\":\"Overgenomen\",\"glyph\":\"✓\",\"top\":2258,\"height\":14,\"left\":29,\"right\":105},{\"label\":\"Niet overgenomen\",\"glyph\":\"○\",\"top\":2258,\"height\":14,\"left\":111,\"right\":207},{\"label\":\"Prijs wijkt af\",\"glyph\":\"▲\",\"top\":2258,\"height\":14,\"left\":213,\"right\":278},{\"label\":\"Geen gerecht\",\"glyph\":\"–\",\"top\":2278,\"height\":14,\"left\":29,\"right\":101}],\"row\":34}"
+    },
+    {
+      "name": "kaart 320px/light: de legenda-chips hebben ruimte tussen zich",
+      "passed": true,
+      "detail": "{\"gaps\":[6,6,null],\"chips\":[[\"Overgenomen\",29,105],[\"Niet overgenomen\",111,207],[\"Prijs wijkt af\",213,278],[\"Geen gerecht\",29,101]]}"
+    },
+    {
+      "name": "kaart 320px/light: de lange uitleg zit dicht achter \"Uitleg\"",
+      "passed": true,
+      "detail": "{\"tag\":\"DETAILS\",\"open\":false,\"summary\":\"Uitleg\"}"
+    },
+    {
+      "name": "kaart 320px/light: \"Uitleg\" opent de vier regels met de vorm én de volledige tekst",
+      "passed": true,
+      "detail": "[{\"label\":\"Overgenomen\",\"detail\":\"Groen met een doorgetrokken rand: dit gerecht staat in het concept met dezelfde prijs.\",\"swatch\":\"✓\"},{\"label\":\"Niet overgenomen\",\"detail\":\"Oranje met een gestippelde rand: deze regel met een prijs staat niet in het concept.\",\"swatch\":\"○\"},{\"label\":\"Prijs wijkt af\",\"detail\":\"Rood met een dubbele rand: de prijs in het concept verschilt van de prijs op de kaart.\",\"swatch\":\"▲\"},{\"label\":\"Geen gerecht\",\"detail\":\"Grijs: deze regel is afgewezen of eerder als geen gerecht beoordeeld.\",\"swatch\":\"–\"}]"
+    },
+    {
+      "name": "kaart 320px/light: een prijs zonder centen en zonder € staat als prijs op de kaart (AA1)",
+      "passed": true,
+      "detail": "[{\"text\":\"Fictieve zeebaars 34 geschroeid | venkel\",\"tone\":\"uncovered\",\"marker\":true},{\"text\":\"Fictieve bisque 12 van rivierkreeft\",\"tone\":\"uncovered\",\"marker\":true}]"
+    },
+    {
+      "name": "kaart 320px/light: de bronnen staan in volgorde met hun weergave",
+      "passed": true,
+      "detail": "[\"source-1 · Website · 3 niet overgenomen\",\"source-2 · PDF · 2 pagina's · 1 niet overgenomen\",\"source-3 · Afbeelding zonder tekst · 0 niet overgenomen\"]"
+    },
+    {
+      "name": "kaart 320px/light: de melding zegt dat dit de opgehaalde tekst van de website is",
+      "passed": true,
+      "detail": "Opgehaalde tekst van de website"
+    },
+    {
+      "name": "kaart 320px/light: rood, groen, oranje en grijs staan elk op hun eigen regel",
+      "passed": true,
+      "detail": "[[\"FICTIEF DINER\",null],[\"Voorgerechten\",null],[\"Fictieve carpaccio\",\"price_mismatch\"],[\"11,00\",\"price_mismatch\"],[\"Fictieve steak 24,50\",\"covered\"],[\"Fictieve bitterballen 7,50\",\"uncovered\"],[\"Fictieve friet 3,50\",\"not_dish\"],[\"Fictieve zeebaars 34 geschroeid | venkel\",\"uncovered\"],[\"Fictieve bisque 12 van rivierkreeft\",\"uncovered\"]]"
+    },
+    {
+      "name": "kaart 320px/light: regels zonder prijs blijven ongemarkeerd",
+      "passed": true,
+      "detail": "[\"FICTIEF DINER\",\"Voorgerechten\"]"
+    },
+    {
+      "name": "kaart 320px/light: de prijs op een eigen regel hoort bij de naam erboven (één markering)",
+      "passed": true,
+      "detail": "[{\"text\":\"FICTIEF DINER\",\"tone\":null,\"marker\":false},{\"text\":\"Voorgerechten\",\"tone\":null,\"marker\":false},{\"text\":\"Fictieve carpaccio\",\"tone\":\"price_mismatch\",\"marker\":true},{\"text\":\"11,00\",\"tone\":\"price_mismatch\",\"marker\":false},{\"text\":\"Fictieve steak 24,50\",\"tone\":\"covered\",\"marker\":true},{\"text\":\"Fictieve bitterballen 7,50\",\"tone\":\"uncovered\",\"marker\":true},{\"text\":\"Fictieve friet 3,50\",\"tone\":\"not_dish\",\"marker\":true},{\"text\":\"Fictieve zeebaars 34 geschroeid | venkel\",\"tone\":\"uncovered\",\"marker\":true},{\"text\":\"Fictieve bisque 12 van rivierkreeft\",\"tone\":\"uncovered\",\"marker\":true}]"
+    },
+    {
+      "name": "kaart 320px/light: elke markering heeft een eigen tekst voor de schermlezer",
+      "passed": true,
+      "detail": "[\"Fictieve carpaccio: prijs wijkt af, kaart 11,00 en concept € 12,50\",\"Fictieve steak: overgenomen, concept € 24,50\",\"Fictieve bitterballen: niet overgenomen, kaart 7,50\",\"Fictieve friet: geen gerecht, eerder beoordeeld\",\"Fictieve zeebaars: niet overgenomen, kaart 34\",\"Fictieve bisque: niet overgenomen, kaart 12\"]"
+    },
+    {
+      "name": "kaart 320px/light: geen afbeelding of iframe in de kaart",
+      "passed": true,
+      "detail": "images=0"
+    },
+    {
+      "name": "kaart 320px/light: geen horizontale overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "kaart 320px/light: een tik op rood opent het paneel",
+      "passed": true,
+      "detail": "[\"price_mismatch\"]"
+    },
+    {
+      "name": "kaart 320px/light: het rode paneel noemt kaart- en conceptprijs en biedt overnemen of wijzigen",
+      "passed": true,
+      "detail": "[\"Prijs wijkt af\\n\\nKaart 11,00 · concept € 12,50\\n\\nNeem 11,00 over\\nWijzig\\n\\nregels 3–4\",[\"Neem 11,00 over\",\"Wijzig\"]]"
+    },
+    {
+      "name": "kaart 320px/light: Neem de prijs over komt duurzaam terug in het paneel",
+      "passed": true,
+      "detail": "[\"Prijs wijkt af\\n\\nKaart 11,00 · concept € 12,50\\n\\n€ 11,00 overgenomen uit de kaart. Bij opslaan krijgt dit gerecht die prijs.\\n\\nregels 3–4\"]"
+    },
+    {
+      "name": "kaart 320px/light: de melding zegt dat opslaan een aparte stap blijft",
+      "passed": true,
+      "detail": "no message"
+    },
+    {
+      "name": "kaart 320px/light: het oranje paneel biedt Toevoegen en Geen gerecht",
+      "passed": true,
+      "detail": "[\"Toevoegen\",\"Geen gerecht\"]"
+    },
+    {
+      "name": "kaart 320px/light: Geen gerecht maakt die regel grijs en laat hem staan",
+      "passed": true,
+      "detail": "{\"line\":\"Fictieve bitterballen 7,50\",\"dismissed\":true}"
+    },
+    {
+      "name": "kaart 320px/light: een tik op groen toont het gerecht",
+      "passed": true,
+      "detail": "Overgenomen\n\nFictieve steak · concept € 24,50\n\nregel 5"
+    },
+    {
+      "name": "kaart 320px/light: een PDF toont de tekst met een eerlijke melding over de pagina-afbeelding",
+      "passed": true,
+      "detail": "De echte PDF-pagina kan niet worden getoond: de import bewaart de PDF-bytes niet en haalt de bron niet opnieuw op. Je ziet de opgehaalde tekst met dezelfde regelnummers."
+    },
+    {
+      "name": "kaart 320px/light: pagina 1 van de PDF komt uit een eigen verzoek",
+      "passed": true,
+      "detail": "{\"page\":\"Pagina 1 van 2\",\"calls\":4}"
+    },
+    {
+      "name": "kaart 320px/light: pagina 2 wordt pas op verzoek geladen",
+      "passed": true,
+      "detail": "{\"calls\":5,\"lines\":[\"Hoofdgerechten\",\"Fictieve salade\",\"9,00\"]}"
+    },
+    {
+      "name": "kaart 320px/light: een scan zonder tekst zegt eerlijk dat vergelijken nog niet kan",
+      "passed": true,
+      "detail": "{\"notice\":\"Deze kaart is een afbeelding; vergelijken kan nog niet.\",\"lines\":0}"
+    },
+    {
+      "name": "kaart 320px/light: Lijst brengt de nalopen-lijst terug",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "kaart 320px/light: Bekijk op kaart opent de kaart, scrolt naar de regel en markeert hem",
+      "passed": true,
+      "detail": "{\"text\":\"Fictieve soep 6,50\",\"inView\":true,\"source\":[\"source-2 · PDF · 2 pagina's · 1 niet overgenomen\"]}"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual-map&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fdiner&aiState=off&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-import?fixture=manual-map&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fdiner&aiState=off&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "kaart toetsenbord: de review opent met de schakelaar",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "kaart toetsenbord: Tab bereikt de knop Kaart",
+      "passed": true,
+      "detail": "[{\"tag\":\"SUMMARY\",\"type\":null,\"id\":\"\",\"text\":\"Technische details\"},{\"tag\":\"SELECT\",\"type\":null,\"id\":\"mai-ai\",\"text\":\"ChatGPT\\nClaude\\nGemini\\nCopilot\\nAnders\"},{\"tag\":\"TEXTAREA\",\"type\":null,\"id\":\"mai-answer\",\"text\":\"\"},{\"tag\":\"BUTTON\",\"type\":\"button\",\"id\":\"\",\"text\":\"Lijst\"},{\"tag\":\"BUTTON\",\"type\":\"button\",\"id\":\"\",\"text\":\"Kaart\"}]"
+    },
+    {
+      "name": "kaart toetsenbord: Enter opent de kaart",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "kaart toetsenbord: een markering is met de tab/ focus bereikbaar en heeft een naam",
+      "passed": true,
+      "detail": "Fictieve carpaccio: prijs wijkt af, kaart 11,00 en concept € 12,50"
+    },
+    {
+      "name": "kaart toetsenbord: Enter op de markering opent het paneel onder de regel",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual-ai&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&theme=light&aiState=slow)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-import?fixture=manual-ai&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&theme=light&aiState=slow)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "ai read: the block is a standalone card after the source choice",
+      "passed": true,
+      "detail": "{\"insideStepOne\":false,\"sourceCardBeforeBlock\":true}"
+    },
+    {
+      "name": "ai read: title, button and cost line are the agreed text",
+      "passed": true,
+      "detail": "{\"title\":\"Laat AI de kaart lezen\",\"buttons\":[\"Lees met AI\",\"Liever zelf invoeren of plakken\"]}"
+    },
+    {
+      "name": "ai read: this month's spend is shown against the ceiling",
+      "passed": true,
+      "detail": "AI deze maand € 0,12 van € 10,00"
+    },
+    {
+      "name": "ai read: the manual steps are collapsed behind one link",
+      "passed": true,
+      "detail": "{\"steps\":{\"one\":false,\"two\":false,\"three\":false},\"expanded\":\"false\"}"
+    },
+    {
+      "name": "ai read: the visible steps are numbered in their own order",
+      "passed": true,
+      "detail": "[\"1\",\"2\"]"
+    },
+    {
+      "name": "ai read: no horizontal overflow at 390 px",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "ai read: the AI card is visible as its own card in the first screen",
+      "passed": true,
+      "detail": "{\"top\":586,\"visible\":true}"
+    },
+    {
+      "name": "ai read: the manual route expands when it is chosen",
+      "passed": true,
+      "detail": "{\"steps\":{\"one\":true,\"two\":true,\"three\":true},\"expanded\":\"true\"}"
+    },
+    {
+      "name": "ai read: the expanded manual steps still keep the source outside step 1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "ai read: with the manual route open the steps are numbered in their own order",
+      "passed": true,
+      "detail": "[\"1\",\"2\",\"3\",\"4\"]"
+    },
+    {
+      "name": "ai read: the manual route collapses again without losing the reading",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "ai read: the reading shows its progress",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "ai read: the reading reports its own result",
+      "passed": true,
+      "detail": "Concept klaar: 3 gerechten · 2 in orde, 1 nalopen"
+    },
+    {
+      "name": "ai read: the cost of this call is shown",
+      "passed": true,
+      "detail": "Kosten: € 0,04 · Gelezen door AI"
+    },
+    {
+      "name": "ai read: after Concept klaar only the result with Nalopen remains and the manual steps stay collapsed",
+      "passed": true,
+      "detail": "{\"buttons\":[\"Nalopen\",\"Liever zelf invoeren of plakken\"],\"steps\":{\"one\":false,\"two\":false,\"three\":false}}"
+    },
+    {
+      "name": "ai read: this month's spend is refreshed right after the reading",
+      "passed": true,
+      "detail": "AI deze maand € 0,16 van € 10,00"
+    },
+    {
+      "name": "ai read: after the reading the visible steps stay 1 and 2",
+      "passed": true,
+      "detail": "[\"1\",\"2\"]"
+    },
+    {
+      "name": "ai read: the review carries the label Gelezen door AI",
+      "passed": true,
+      "detail": "Gelezen door AI"
+    },
+    {
+      "name": "ai read: the review shows rows and the explicit save step",
+      "passed": true,
+      "detail": "Opslaan als concept"
+    },
+    {
+      "name": "ai read: a named price list stays in orde instead of asking for a price",
+      "passed": true,
+      "detail": "Fictief glas wijn · Glas 4,50 / Fles 24,00Bekijk op kaart"
+    },
+    {
+      "name": "ai read: the review is step 3 while only the AI route is visible",
+      "passed": true,
+      "detail": "[\"1\",\"2\",\"3\"]"
+    },
+    {
+      "name": "ai read: with both routes open the steps run 1, 2, 3, 4 without a gap",
+      "passed": true,
+      "detail": "[\"1\",\"2\",\"3\",\"4\"]"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual-ai&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&theme=light&aiState=off)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-import?fixture=manual-ai&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&theme=light&aiState=off)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "ai read: without a key or flag the block says AI is niet ingesteld",
+      "passed": true,
+      "detail": "AI is niet ingesteld."
+    },
+    {
+      "name": "ai read: without a key or flag there is no AI card or button",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "ai read: without AI the manual flow stays unchanged and directly visible",
+      "passed": true,
+      "detail": "{\"one\":true,\"two\":true,\"three\":true}"
+    },
+    {
+      "name": "ai read: the quiet message is visible without AI",
+      "passed": true,
+      "detail": "{\"top\":317,\"visible\":true}"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual-ai&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&theme=dark&aiState=slow)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-import?fixture=manual-ai&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&theme=dark&aiState=slow)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "ai read: the block is a standalone card after the source choice",
+      "passed": true,
+      "detail": "{\"insideStepOne\":false,\"sourceCardBeforeBlock\":true}"
+    },
+    {
+      "name": "ai read: title, button and cost line are the agreed text",
+      "passed": true,
+      "detail": "{\"title\":\"Laat AI de kaart lezen\",\"buttons\":[\"Lees met AI\",\"Liever zelf invoeren of plakken\"]}"
+    },
+    {
+      "name": "ai read: this month's spend is shown against the ceiling",
+      "passed": true,
+      "detail": "AI deze maand € 0,12 van € 10,00"
+    },
+    {
+      "name": "ai read: the manual steps are collapsed behind one link",
+      "passed": true,
+      "detail": "{\"steps\":{\"one\":false,\"two\":false,\"three\":false},\"expanded\":\"false\"}"
+    },
+    {
+      "name": "ai read: the visible steps are numbered in their own order",
+      "passed": true,
+      "detail": "[\"1\",\"2\"]"
+    },
+    {
+      "name": "ai read: no horizontal overflow at 390 px",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "ai read: the AI card is visible as its own card in the first screen",
+      "passed": true,
+      "detail": "{\"top\":586,\"visible\":true}"
+    },
+    {
+      "name": "ai read: the manual route expands when it is chosen",
+      "passed": true,
+      "detail": "{\"steps\":{\"one\":true,\"two\":true,\"three\":true},\"expanded\":\"true\"}"
+    },
+    {
+      "name": "ai read: the expanded manual steps still keep the source outside step 1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "ai read: with the manual route open the steps are numbered in their own order",
+      "passed": true,
+      "detail": "[\"1\",\"2\",\"3\",\"4\"]"
+    },
+    {
+      "name": "ai read: the manual route collapses again without losing the reading",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "ai read: the reading shows its progress",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "ai read: the reading reports its own result",
+      "passed": true,
+      "detail": "Concept klaar: 3 gerechten · 2 in orde, 1 nalopen"
+    },
+    {
+      "name": "ai read: the cost of this call is shown",
+      "passed": true,
+      "detail": "Kosten: € 0,04 · Gelezen door AI"
+    },
+    {
+      "name": "ai read: after Concept klaar only the result with Nalopen remains and the manual steps stay collapsed",
+      "passed": true,
+      "detail": "{\"buttons\":[\"Nalopen\",\"Liever zelf invoeren of plakken\"],\"steps\":{\"one\":false,\"two\":false,\"three\":false}}"
+    },
+    {
+      "name": "ai read: this month's spend is refreshed right after the reading",
+      "passed": true,
+      "detail": "AI deze maand € 0,16 van € 10,00"
+    },
+    {
+      "name": "ai read: after the reading the visible steps stay 1 and 2",
+      "passed": true,
+      "detail": "[\"1\",\"2\"]"
+    },
+    {
+      "name": "ai read: the review carries the label Gelezen door AI",
+      "passed": true,
+      "detail": "Gelezen door AI"
+    },
+    {
+      "name": "ai read: the review shows rows and the explicit save step",
+      "passed": true,
+      "detail": "Opslaan als concept"
+    },
+    {
+      "name": "ai read: a named price list stays in orde instead of asking for a price",
+      "passed": true,
+      "detail": "Fictief glas wijn · Glas 4,50 / Fles 24,00Bekijk op kaart"
+    },
+    {
+      "name": "ai read: the review is step 3 while only the AI route is visible",
+      "passed": true,
+      "detail": "[\"1\",\"2\",\"3\"]"
+    },
+    {
+      "name": "ai read: with both routes open the steps run 1, 2, 3, 4 without a gap",
+      "passed": true,
+      "detail": "[\"1\",\"2\",\"3\",\"4\"]"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual-ai&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&theme=dark&aiState=off)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-import?fixture=manual-ai&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&theme=dark&aiState=off)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "ai read: without a key or flag the block says AI is niet ingesteld",
+      "passed": true,
+      "detail": "AI is niet ingesteld."
+    },
+    {
+      "name": "ai read: without a key or flag there is no AI card or button",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "ai read: without AI the manual flow stays unchanged and directly visible",
+      "passed": true,
+      "detail": "{\"one\":true,\"two\":true,\"three\":true}"
+    },
+    {
+      "name": "ai read: the quiet message is visible without AI",
+      "passed": true,
+      "detail": "{\"top\":317,\"visible\":true}"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=partial&batch=batch-fictief-0001&item=1&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=partial&batch=batch-fictief-0001&item=1&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "ai read batch: the failed result offers the AI card of mockup screen 1",
+      "passed": true,
+      "detail": "{\"present\":true,\"title\":\"Laat AI de kaart lezen\",\"buttonHref\":\"/internal/menu-import?job=job-fictief-1&restaurant=9001&name=Fictief%20Brasserie%20Noord&url=https%3A%2F%2Ffictief-restaurant.invalid%2F\",\"manualHref\":\"/internal/menu-import?restaurant=9001&name=Fictief%20Brasserie%20Noord\",\"text\":\"Laat "
+    },
+    {
+      "name": "ai read batch: the card opens the existing job and keeps the manual route",
+      "passed": true,
+      "detail": "{\"buttonHref\":\"/internal/menu-import?job=job-fictief-1&restaurant=9001&name=Fictief%20Brasserie%20Noord&url=https%3A%2F%2Ffictief-restaurant.invalid%2F\",\"manualHref\":\"/internal/menu-import?restaurant=9001&name=Fictief%20Brasserie%20Noord\"}"
+    },
+    {
+      "name": "ai read batch: no horizontal overflow at 390 px",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=partial&batch=batch-fictief-0001&item=1&theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=partial&batch=batch-fictief-0001&item=1&theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "ai read batch: the failed result offers the AI card of mockup screen 1",
+      "passed": true,
+      "detail": "{\"present\":true,\"title\":\"Laat AI de kaart lezen\",\"buttonHref\":\"/internal/menu-import?job=job-fictief-1&restaurant=9001&name=Fictief%20Brasserie%20Noord&url=https%3A%2F%2Ffictief-restaurant.invalid%2F\",\"manualHref\":\"/internal/menu-import?restaurant=9001&name=Fictief%20Brasserie%20Noord\",\"text\":\"Laat "
+    },
+    {
+      "name": "ai read batch: the card opens the existing job and keeps the manual route",
+      "passed": true,
+      "detail": "{\"buttonHref\":\"/internal/menu-import?job=job-fictief-1&restaurant=9001&name=Fictief%20Brasserie%20Noord&url=https%3A%2F%2Ffictief-restaurant.invalid%2F\",\"manualHref\":\"/internal/menu-import?restaurant=9001&name=Fictief%20Brasserie%20Noord\"}"
+    },
+    {
+      "name": "ai read batch: no horizontal overflow at 390 px",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual-ai&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-import?fixture=manual-ai&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "ai read: the button works with the keyboard",
+      "passed": true,
+      "detail": "{\"focused\":{\"info\":{\"tag\":\"BUTTON\",\"text\":\"Lees met AI\",\"href\":null,\"expanded\":null},\"tabs\":10,\"seen\":[{\"tag\":\"A\",\"text\":\"onze\\nmenukaarten\",\"href\":\"/internal\",\"expanded\":null},{\"tag\":\"A\",\"text\":\"Dekkingsoverzicht\",\"href\":\"/internal/coverage\",\"expanded\":null},{\"tag\":\"A\",\"text\":\"Onboarding Restaurant\",\"href\":\"/internal/onboarding-restaurant\",\"expanded\":null},{\"tag\":\"SUMMARY\",\"text\":\"\",\"href\":null,\"expanded\":null},{\"tag\":\"BUTTON\",\"text\":\"Licht\",\"href\":null,\"expanded\":null},{\"tag\":\"BUTTON\",\"text\":\"Donker\",\"href\":null,\"expanded\":null},{\"tag\":\"BUTTON\",\"text\":\"Sign out\",\"href\":null,\"expanded\":null},{\"tag\":\"BUTTON\",\"text\":\"Wijzig\",\"href\":null,\"expanded\":null},{\"tag\":\"TEXTAREA\",\"text\":\"\",\"href\":null,\"expanded\":null},{\"tag\":\"BUTTON\",\"text\":\"Lees met AI\",\"href\":null,\"expanded\":null}]},\"keyboardDone\":true}"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=v2&batch=batch-fictief-0001&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=v2&batch=batch-fictief-0001&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "v2 1024px/light: the real review control is present",
+      "passed": true,
+      "detail": "true/false"
+    },
+    {
+      "name": "v2 1024px/light: \"Menukaart controleren\" is a real button",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "v2 1024px/light: the versioned menu becomes readable",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "v2 1024px/light: glass and bottle prices stay separate",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "v2 1024px/light: no invented primary price is shown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "v2 1024px/light: supplement relation and limitation stay visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "v2 1024px/light: unknown allergens stay unknown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "v2 1024px/light: structural validity is not source verification",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "v2 1024px/light: coverage limitation is visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "v2 1024px/light: v2 is read-only, without a save or approve action",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "v2 1024px/light: requested theme is active",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "v2 1024px/light: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=-6"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=v2&batch=batch-fictief-0001&theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=v2&batch=batch-fictief-0001&theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "v2 390px/dark: the real review control is present",
+      "passed": true,
+      "detail": "true/false"
+    },
+    {
+      "name": "v2 390px/dark: \"Menukaart controleren\" is a real button",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "v2 390px/dark: the versioned menu becomes readable",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "v2 390px/dark: glass and bottle prices stay separate",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "v2 390px/dark: no invented primary price is shown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "v2 390px/dark: supplement relation and limitation stay visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "v2 390px/dark: unknown allergens stay unknown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "v2 390px/dark: structural validity is not source verification",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "v2 390px/dark: coverage limitation is visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "v2 390px/dark: v2 is read-only, without a save or approve action",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "v2 390px/dark: requested theme is active",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "v2 390px/dark: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=error&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=error&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "error: the load error is shown in the alert region",
+      "passed": true,
+      "detail": "De batchanalyse kon niet worden geladen."
+    },
+    {
+      "name": "error: no stale result is shown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "error: light theme is active",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "error: no horizontal overflow at 390 px",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=light&item=1)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=light&item=1)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "responsive 320px/light: requested theme is active",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "responsive 320px/light: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "responsive 320px/light: navigation and save control stay visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "responsive 320px/light: the menu content is unchanged",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=dark&item=1)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=dark&item=1)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "responsive 320px/dark: requested theme is active",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "responsive 320px/dark: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "responsive 320px/dark: navigation and save control stay visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "responsive 320px/dark: the menu content is unchanged",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=light&item=1)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=light&item=1)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "responsive 390px/light: requested theme is active",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "responsive 390px/light: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "responsive 390px/light: navigation and save control stay visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "responsive 390px/light: the menu content is unchanged",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=dark&item=1)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=dark&item=1)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "responsive 390px/dark: requested theme is active",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "responsive 390px/dark: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "responsive 390px/dark: navigation and save control stay visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "responsive 390px/dark: the menu content is unchanged",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=dark&item=1)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=dark&item=1)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "responsive 1024px/dark: requested theme is active",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "responsive 1024px/dark: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=-6"
+    },
+    {
+      "name": "responsive 1024px/dark: navigation and save control stay visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "responsive 1024px/dark: the menu content is unchanged",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "light and dark resolve to different background tokens",
+      "passed": true,
+      "detail": "#fcfaf4 / #0a0a0a"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "keyboard: the review control is reachable with Tab",
+      "passed": true,
+      "detail": "[{\"tag\":\"INPUT\",\"text\":\"\",\"href\":null,\"expanded\":null},{\"tag\":\"SUMMARY\",\"text\":\"2 gerechten zonder aandachtspunt · 2 nieuw, 0 ongewijzigd\",\"href\":null,\"expanded\":null},{\"tag\":\"BUTTON\",\"text\":\"Concept opslaan\",\"href\":null,\"expanded\":null},{\"tag\":\"A\",\"text\":\"Beoordeel handmatig\",\"href\":\"/internal/source-triage/batch?batch=batch-fictief-0001&item=1\",\"expanded\":null},{\"tag\":\"BUTTON\",\"text\":\"Menukaart controleren\",\"href\":null,\"expanded\":\"false\"}]"
+    },
+    {
+      "name": "keyboard: Tab moves focus through the page",
+      "passed": true,
+      "detail": "tabs=43"
+    },
+    {
+      "name": "keyboard: Enter opens the review panel",
+      "passed": true,
+      "detail": "opened=true expanded=true"
+    },
+    {
+      "name": "keyboard: a section summary opens with Enter",
+      "passed": true,
+      "detail": "focused=true open=true"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts?theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts?theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept list: all four fictional rows are shown",
+      "passed": true,
+      "detail": "onze\nmenukaarten\nDekkingsoverzicht\nOnboarding Restaurant\nLicht\nDonker\nSign out\nWerkvoorraad\n/\nMenuconcepten beoordelen\nMenuconcepten beoordelen\nAlleen intern\n\nControleer menuconcepten uit Batchanalyse. Je ziet alleen de aandachtspunten; veilige gerechten zijn samengevat.\n\nGoedkeuren blijft intern: e"
+    },
+    {
+      "name": "concept list: a valid v1 row is usable next to blocked rows",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept list: the v2 row is marked v2 and read-only",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept list: the unknown version row is marked read-only",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept list: every row links to its own exact concept id",
+      "passed": true,
+      "detail": "[{\"text\":\"\",\"href\":\"/internal/menu-concepts\"},{\"text\":\"Fictief Concept Lunch\",\"href\":\"/internal/menu-concepts/concept-v1-0001\"},{\"text\":\"Fictief Concept Diner\",\"href\":\"/internal/menu-concepts/concept-v2-0002\"},{\"text\":\"Fictief Concept Onbekend\",\"href\":\"/internal/menu-concepts/concept-invalid-0003\"},{\"text\":\"Fictief Concept Leeg\",\"href\":\"/internal/menu-concepts/concept-empty-0004\"}]"
+    },
+    {
+      "name": "concept list: light theme and no horizontal overflow",
+      "passed": true,
+      "detail": "light/-6"
+    },
+    {
+      "name": "concept click: valid v1 row opens its own detail id",
+      "passed": true,
+      "detail": "/internal/menu-concepts/concept-v1-0001/true"
+    },
+    {
+      "name": "concept v1: still usable - approve and reject are present and enabled",
+      "passed": true,
+      "detail": "approve=true/null reject=true"
+    },
+    {
+      "name": "concept v1: no blockers and the exact source URL is kept",
+      "passed": true,
+      "detail": "https://fictief-brasserie.invalid/menu"
+    },
+    {
+      "name": "concept v1: the selected id did not jump to another row",
+      "passed": true,
+      "detail": "/internal/menu-concepts/concept-v1-0001"
+    },
+    {
+      "name": "concept v1: the Bron tab keeps the exact source reference",
+      "passed": true,
+      "detail": "true/true"
+    },
+    {
+      "name": "concept v1: the public preview still renders the stored dishes",
+      "passed": true,
+      "detail": "true/true"
+    },
+    {
+      "name": "concept click: back returns to the real list",
+      "passed": true,
+      "detail": "/internal/menu-concepts/true"
+    },
+    {
+      "name": "concept click: the v2 row opens the v2 detail id",
+      "passed": true,
+      "detail": "/internal/menu-concepts/concept-v2-0002/true"
+    },
+    {
+      "name": "concept v2: the raw stored v2 envelope is never shown as v1",
+      "passed": true,
+      "detail": "/internal/menu-concepts/concept-v2-0002/Licht|Donker|Sign out"
+    },
+    {
+      "name": "concept click: v2 back returns to the real list",
+      "passed": true,
+      "detail": "/internal/menu-concepts/true"
+    },
+    {
+      "name": "concept click: the unknown row opens its own detail id",
+      "passed": true,
+      "detail": "/internal/menu-concepts/concept-invalid-0003/true"
+    },
+    {
+      "name": "concept invalid: visibly blocked, never flattened to v1",
+      "passed": true,
+      "detail": "/internal/menu-concepts/concept-invalid-0003"
+    },
+    {
+      "name": "concept click: the exact menus:[] row opens its own detail id",
+      "passed": true,
+      "detail": "/internal/menu-concepts/concept-empty-0004/true"
+    },
+    {
+      "name": "concept empty: an exact empty v2 menu stays visibly blocked",
+      "passed": true,
+      "detail": "/internal/menu-concepts/concept-empty-0004"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts/concept-v2-0002?theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts/concept-v2-0002?theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept v2 read-only: glass and bottle prices stay separate",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept v2 read-only: no invented primary price is shown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept v2 read-only: supplement relation stays explicit",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept v2 read-only: unknown allergens stay unknown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept v2 read-only: provenance and its quote are visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept v2 read-only: coverage and its limitation are visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept v2 read-only: counts keep both items, the variant and the supplement",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept v2 read-only: save, approve, reject and export are absent",
+      "passed": true,
+      "detail": "Licht|Donker|Sign out"
+    },
+    {
+      "name": "concept v2 read-only: the blocked actions are named, not hidden",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept v2 read-only: the exact source link is kept",
+      "passed": true,
+      "detail": "[{\"text\":\"Open originele menukaart\\n(opent in een nieuw tabblad)\",\"href\":\"https://fictief-brasserie.invalid/menu\"}]"
+    },
+    {
+      "name": "concept v2 read-only: light theme and no horizontal overflow",
+      "passed": true,
+      "detail": "light/-6"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts/concept-invalid-0003?theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts/concept-invalid-0003?theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept invalid: the unknown version is named with its concrete problem",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept invalid: the raw row stays preserved and nothing is converted",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept invalid: no save, approve, reject or export action exists",
+      "passed": true,
+      "detail": "Licht|Donker|Sign out"
+    },
+    {
+      "name": "concept invalid: the selected id did not jump to another row",
+      "passed": true,
+      "detail": "Fictief Concept Onbekend"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts/concept-empty-0004?theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts/concept-empty-0004?theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept empty: an exact empty v2 menu is not a success",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept empty: it never becomes a usable v1 concept",
+      "passed": true,
+      "detail": "Licht|Donker|Sign out"
+    },
+    {
+      "name": "concept empty: the selected id did not jump to another row",
+      "passed": true,
+      "detail": "Fictief Concept Leeg"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts?fixture=concepts-empty&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts?fixture=concepts-empty&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept list empty: the honest empty state is shown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept list empty: light theme and no horizontal overflow",
+      "passed": true,
+      "detail": "light/0"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts?fixture=concepts-error&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts?fixture=concepts-error&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept list error: the load error is in the alert region",
+      "passed": true,
+      "detail": "De menuconcepten konden niet worden geladen."
+    },
+    {
+      "name": "concept list error: no stale or fabricated row is shown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept list error: no horizontal overflow at 390 px",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts?fixture=concepts-no-access&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts?fixture=concepts-no-access&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept list no-access: the server refusal is shown, not an empty success",
+      "passed": true,
+      "detail": "Alleen interne medewerkers kunnen menuconcepten beoordelen."
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts/concept-v1-0001?fixture=concepts-error&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts/concept-v1-0001?fixture=concepts-error&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept detail error: the load error is shown and no stale detail remains",
+      "passed": true,
+      "detail": "Het menuconcept kon niet worden geladen."
+    },
+    {
+      "name": "concept detail error: a real back link stays available",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts/concept-missing-9999?theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts/concept-missing-9999?theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept detail missing id: a 404 is reported, not an empty concept",
+      "passed": true,
+      "detail": "Menuconcept niet gevonden."
+    },
+    {
+      "name": "concept detail missing id: a real back link stays available",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts/concept-v1-0001?theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts/concept-v1-0001?theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept forced write: the real approve click shows the refusal and stays on the page",
+      "passed": true,
+      "detail": "true/true//internal/menu-concepts/concept-v1-0001"
+    },
+    {
+      "name": "concept forced write: no internal approval is claimed",
+      "passed": true,
+      "detail": "Het besluit kon niet worden vastgelegd."
+    },
+    {
+      "name": "concept forced write: the decision POST is blocked before a handler",
+      "passed": true,
+      "detail": "[{\"method\":\"POST\",\"url\":\"http://localhost:3137/api/internal/v1/menu-concepts/concept-v1-0001/decision\",\"reason\":\"unknown_api_route\",\"phase\":\"negative-probe\"}]"
+    },
+    {
+      "name": "concept forced write: decision, versions and export POSTs are all refused",
+      "passed": true,
+      "detail": "{\"decision\":\"fixture_network_blocked: unknown_api_route (POST http://localhost:3137/api/internal/v1/menu-concepts/concept-v2-0002/decision)\",\"versions\":\"fixture_network_blocked: unknown_api_route (POST http://localhost:3137/api/internal/v1/menu-concepts/concept-v2-0002/versions)\",\"export\":\"fixture_network_blocked: unknown_api_route (POST http://localhost:3137/api/internal/v1/menu-concepts/concept-v2-0002/export)\",\"listWrite\":\"fixture_network_blocked: method_not_allowed (POST http://localhost:3137/api/internal/v1/menu-concepts)\",\"detailWrite\":\"fixture_network_blocked: method_not_allowed (POST http://localhost:3137/api/internal/v1/menu-concepts/concept-v2-0002)\",\"provider\":\"fixture_network_blocked: external_origin (GET https://unapproved.invalid/provider)\",\"violations\":7}"
+    },
+    {
+      "name": "concept forced write: the concept list and detail POSTs are refused",
+      "passed": true,
+      "detail": "fixture_network_blocked: method_not_allowed (POST http://localhost:3137/api/internal/v1/menu-concepts) / fixture_network_blocked: method_not_allowed (POST http://localhost:3137/api/internal/v1/menu-concepts/concept-v2-0002)"
+    },
+    {
+      "name": "concept forced write: an external provider POST is refused too",
+      "passed": true,
+      "detail": "fixture_network_blocked: external_origin (GET https://unapproved.invalid/provider)"
+    },
+    {
+      "name": "concept forced write: every attempt is recorded as a deliberate violation",
+      "passed": true,
+      "detail": "0->7, phase=7"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts/concept-v2-0002?theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts/concept-v2-0002?theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept responsive 320px/light: requested theme is active",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "concept responsive 320px/light: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "concept responsive 320px/light: the v2 content and read-only banner stay visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts/concept-v2-0002?theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts/concept-v2-0002?theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept responsive 390px/light: requested theme is active",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "concept responsive 390px/light: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "concept responsive 390px/light: the v2 content and read-only banner stay visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts/concept-v2-0002?theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts/concept-v2-0002?theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept responsive 390px/dark: requested theme is active",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "concept responsive 390px/dark: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "concept responsive 390px/dark: the v2 content and read-only banner stay visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts/concept-v2-0002?theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts/concept-v2-0002?theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept responsive 1024px/dark: requested theme is active",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "concept responsive 1024px/dark: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=-6"
+    },
+    {
+      "name": "concept responsive 1024px/dark: the v2 content and read-only banner stay visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts?theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts?theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept list responsive 320px/light: requested theme is active",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "concept list responsive 320px/light: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "concept list responsive 320px/light: all rows remain readable",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts?theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts?theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept list responsive 390px/dark: requested theme is active",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "concept list responsive 390px/dark: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "concept list responsive 390px/dark: all rows remain readable",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept light and dark resolve to different background tokens",
+      "passed": true,
+      "detail": "#fcfaf4 / #0a0a0a"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts?theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts?theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "concept keyboard: the v2 row is reachable with Tab",
+      "passed": true,
+      "detail": "[{\"tag\":\"BUTTON\",\"text\":\"Donker\",\"href\":null,\"expanded\":null},{\"tag\":\"BUTTON\",\"text\":\"Sign out\",\"href\":null,\"expanded\":null},{\"tag\":\"A\",\"text\":\"Fictief Concept Lunch\",\"href\":\"/internal/menu-concepts/concept-v1-0001\",\"expanded\":null},{\"tag\":\"A\",\"text\":\"Fictief Concept Diner\",\"href\":\"/internal/menu-concepts/concept-v2-0002\",\"expanded\":null}]"
+    },
+    {
+      "name": "concept keyboard: Tab moves focus through the list",
+      "passed": true,
+      "detail": "tabs=9"
+    },
+    {
+      "name": "concept keyboard: Enter opens the correct detail page",
+      "passed": true,
+      "detail": "/internal/menu-concepts/concept-v2-0002"
+    },
+    {
+      "name": "concept keyboard: the return link is reachable with Tab",
+      "passed": true,
+      "detail": "[{\"tag\":\"SUMMARY\",\"text\":\"Hoofd · 2 items\",\"href\":null,\"expanded\":null},{\"tag\":\"SUMMARY\",\"text\":\"Dekking · partial · 2 items\",\"href\":null,\"expanded\":null},{\"tag\":\"A\",\"text\":\"Open originele menukaart\\n(opent in een nieuw tabblad)\",\"href\":\"https://fictief-brasserie.invalid/menu\",\"expanded\":null},{\"tag\":\"A\",\"text\":\"Terug naar Menuconcepten beoordelen\",\"href\":\"/internal/menu-concepts\",\"expanded\":null}]"
+    },
+    {
+      "name": "concept keyboard: Enter returns to the list",
+      "passed": true,
+      "detail": "/internal/menu-concepts"
+    },
+    {
+      "name": "network guard: external fetch is blocked before native fetch",
+      "passed": true,
+      "detail": "fixture_network_blocked: external_origin (GET https://unapproved.invalid/api/anything)"
+    },
+    {
+      "name": "network guard: protocol-relative external URL is blocked",
+      "passed": true,
+      "detail": "fixture_network_blocked: external_origin (GET http://unapproved.invalid/api/anything)"
+    },
+    {
+      "name": "network guard: unknown local API write is blocked",
+      "passed": true,
+      "detail": "fixture_network_blocked: unknown_api_route (POST http://localhost:3137/api/internal/v1/unrelated-write)"
+    },
+    {
+      "name": "network guard: the explicit concept write is still refused",
+      "passed": true,
+      "detail": "fixture_network_blocked: method_not_allowed (POST http://localhost:3137/api/internal/v1/menu-concepts)"
+    },
+    {
+      "name": "network guard: explicit fixture API still answers",
+      "passed": true,
+      "detail": "200"
+    },
+    {
+      "name": "network guard: XHR to the concept write is blocked",
+      "passed": true,
+      "detail": "xhr-error"
+    },
+    {
+      "name": "network guard: external WebSocket is blocked",
+      "passed": true,
+      "detail": "fixture_network_blocked: external_origin (GET ws://unapproved.invalid/socket)"
+    },
+    {
+      "name": "network guard: page-level violations are recorded",
+      "passed": true,
+      "detail": "violations=6"
+    },
+    {
+      "name": "network guard: CDP blocks external subresource and frame navigation",
+      "passed": true,
+      "detail": "[{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/frame\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-24T14:16:10.166Z\",\"resourceType\":\"Document\"},{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/pixel.png\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-24T14:16:10.171Z\",\"resourceType\":\"Image\"}]"
+    },
+    {
+      "name": "network guard: no unexpected CDP traffic during app scenarios",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "network guard: page recorded only deliberate blocked attempts",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "no uncaught browser exception",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "no fixture bootstrap error at the end",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "every page used the fictional fixture",
+      "passed": true,
+      "detail": null
+    }
+  ],
+  "clickpaths": [
+    {
+      "name": "image-only result -> Bronnen beoordelen",
+      "steps": [
+        {
+          "action": "open batch result",
+          "reached": true
+        },
+        {
+          "action": "click Bronnen beoordelen",
+          "href": "/internal/source-triage?restaurant=9001&reason=image_only",
+          "reached": true,
+          "arrived": true
+        },
+        {
+          "action": "source detail rendered",
+          "reached": true
+        }
+      ],
+      "passed": true,
+      "detail": "[{\"action\":\"open batch result\",\"reached\":true},{\"action\":\"click Bronnen beoordelen\",\"href\":\"/internal/source-triage?restaurant=9001&reason=image_only\",\"reached\":true,\"arrived\":true},{\"action\":\"source detail rendered\",\"reached\":true}]"
+    },
+    {
+      "name": "batch result -> Menukaart controleren -> keep/correct each uncertain section -> Bevestig bron (panel only)",
+      "steps": [
+        {
+          "step": "uncertain result opens the section control",
+          "arrived": true
+        },
+        {
+          "step": "keep the first uncertain section",
+          "arrived": true
+        },
+        {
+          "step": "correct the second uncertain section with a path",
+          "arrived": true
+        },
+        {
+          "step": "all sections treated",
+          "arrived": true
+        },
+        {
+          "step": "confirmation panel shows the handled decisions",
+          "arrived": true
+        }
+      ],
+      "passed": true,
+      "detail": "{\"required\":[\"Fictief Lunch › Koud\",\"Fictief Diner › Voor\"]}"
+    },
+    {
+      "name": "manual import rejection",
+      "steps": [
+        "Menukaart plakken",
+        "Controleren",
+        "Wat de AI moet herstellen",
+        "Vervolgvraag aan de AI",
+        "Technische details (ingeklapt)"
+      ],
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import normalization",
+      "steps": [
+        "Menu importeren met AI",
+        "Prompt maken",
+        "Controleren",
+        "Door het systeem bijgesteld"
+      ],
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manual import: uncovered source lines",
+      "steps": [
+        "Menu importeren met AI",
+        "Prompt maken",
+        "Controleren",
+        "Toevoegen",
+        "Geen gerecht"
+      ],
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "ai read (light)",
+      "steps": [
+        "Laat AI de kaart lezen",
+        "Liever zelf invoeren of plakken",
+        "Prompt maken",
+        "Antwoord plakken",
+        "Liever zelf invoeren of plakken",
+        "Lees met AI",
+        "Concept klaar",
+        "Nalopen",
+        "Gelezen door AI"
+      ],
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "ai read (dark)",
+      "steps": [
+        "Laat AI de kaart lezen",
+        "Liever zelf invoeren of plakken",
+        "Prompt maken",
+        "Antwoord plakken",
+        "Liever zelf invoeren of plakken",
+        "Lees met AI",
+        "Concept klaar",
+        "Nalopen",
+        "Gelezen door AI"
+      ],
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "concept list -> exact detail -> back",
+      "steps": [
+        {
+          "action": "click list row",
+          "target": "Fictief Concept Lunch",
+          "href": "/internal/menu-concepts/concept-v1-0001",
+          "pathname": "/internal/menu-concepts/concept-v1-0001",
+          "arrived": true
+        },
+        {
+          "action": "click breadcrumb back",
+          "href": "/internal/menu-concepts",
+          "pathname": "/internal/menu-concepts",
+          "arrived": true
+        },
+        {
+          "action": "click list row",
+          "target": "Fictief Concept Diner",
+          "href": "/internal/menu-concepts/concept-v2-0002",
+          "pathname": "/internal/menu-concepts/concept-v2-0002",
+          "arrived": true
+        },
+        {
+          "action": "click bottom back link",
+          "href": "/internal/menu-concepts",
+          "pathname": "/internal/menu-concepts",
+          "arrived": true
+        },
+        {
+          "action": "click list row",
+          "target": "Fictief Concept Onbekend",
+          "href": "/internal/menu-concepts/concept-invalid-0003",
+          "pathname": "/internal/menu-concepts/concept-invalid-0003",
+          "arrived": true
+        },
+        {
+          "action": "click list row",
+          "target": "Fictief Concept Leeg",
+          "href": "/internal/menu-concepts/concept-empty-0004",
+          "pathname": "/internal/menu-concepts/concept-empty-0004",
+          "arrived": true
+        }
+      ],
+      "passed": true,
+      "detail": "[{\"action\":\"click list row\",\"target\":\"Fictief Concept Lunch\",\"href\":\"/internal/menu-concepts/concept-v1-0001\",\"pathname\":\"/internal/menu-concepts/concept-v1-0001\",\"arrived\":true},{\"action\":\"click breadcrumb back\",\"href\":\"/internal/menu-concepts\",\"pathname\":\"/internal/menu-concepts\",\"arrived\":true},{\"action\":\"click list row\",\"target\":\"Fictief Concept Diner\",\"href\":\"/internal/menu-concepts/concept-v2-0002\",\"pathname\":\"/internal/menu-concepts/concept-v2-0002\",\"arrived\":true},{\"action\":\"click bottom back link\",\"href\":\"/internal/menu-concepts\",\"pathname\":\"/internal/menu-concepts\",\"arrived\":true},{\"action\":\"click list row\",\"target\":\"Fictief Concept Onbekend\",\"href\":\"/internal/menu-concepts/concept-invalid-0003\",\"pathname\":\"/internal/menu-concepts/concept-invalid-0003\",\"arrived\":true},{\"action\":\"click list row\",\"target\":\"Fictief Concept Leeg\",\"href\":\"/internal/menu-concepts/concept-empty-0004\",\"pathname\":\"/internal/menu-concepts/concept-empty-0004\",\"arrived\":true}]"
+    },
+    {
+      "name": "concept keyboard list -> detail -> list",
+      "steps": [
+        {
+          "action": "Tab to list row",
+          "target": "Fictief Concept Diner",
+          "reached": true,
+          "tabs": 9
+        },
+        {
+          "action": "Enter on list row",
+          "pathname": "/internal/menu-concepts/concept-v2-0002",
+          "arrived": true
+        },
+        {
+          "action": "Tab to return link",
+          "target": "Terug naar Menuconcepten beoordelen",
+          "reached": true,
+          "tabs": 12
+        },
+        {
+          "action": "Enter on return link",
+          "pathname": "/internal/menu-concepts",
+          "arrived": true
+        }
+      ],
+      "passed": true,
+      "detail": "[{\"action\":\"Tab to list row\",\"target\":\"Fictief Concept Diner\",\"reached\":true,\"tabs\":9},{\"action\":\"Enter on list row\",\"pathname\":\"/internal/menu-concepts/concept-v2-0002\",\"arrived\":true},{\"action\":\"Tab to return link\",\"target\":\"Terug naar Menuconcepten beoordelen\",\"reached\":true,\"tabs\":12},{\"action\":\"Enter on return link\",\"pathname\":\"/internal/menu-concepts\",\"arrived\":true}]"
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "menu-review-desktop-light.png",
+      "sha256": "ab481991886d697111f245f9a3bb9dc058b719bf2f0ee88f4d67cf2905324639",
+      "width": 1024,
+      "height": 900
+    },
+    {
+      "file": "menu-review-readonly-1024-dark.png",
+      "sha256": "dd06695ab77ac28daeecd4488ca24ccec8ce69756fe1f11f8ecd029a56fa3a49",
+      "width": 1024,
+      "height": 900
+    },
+    {
+      "file": "menu-review-empty-dark.png",
+      "sha256": "85e2a7ad6ccdd9c5600362be4c7bb5b4b73e56cc835af04793e31bb8dc58257a",
+      "width": 1024,
+      "height": 900
+    },
+    {
+      "file": "menu-review-partial-390-dark.png",
+      "sha256": "570c82ce951974c6a3a938fdbb16c6e91e18e801db17b7ef95ecc06c52e4ee77",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "menu-review-image-only-390-light.png",
+      "sha256": "22e5cfb58a9e4d1caca4bd58521213f0a8459ddf52c2011f5598fd5e14f13c38",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "menu-review-image-only-320-dark.png",
+      "sha256": "fd35636bdbca7989fb82ee29da04572bae6f03ddc2c2b03dc6667a711f802757",
+      "width": 320,
+      "height": 900
+    },
+    {
+      "file": "menu-review-image-only-follow-up-320-dark.png",
+      "sha256": "d29dcfc0ee1c78535013b7b29743efae244c6630b47bbe56989c10dedde4807a",
+      "width": 320,
+      "height": 900
+    },
+    {
+      "file": "menu-review-image-only-follow-up-reason-320-dark.png",
+      "sha256": "dd423c45a344d12814977449d25cf8ee0ce9e1125c618432c6639dcc65616660",
+      "width": 320,
+      "height": 900
+    },
+    {
+      "file": "menu-review-structure-1024-light.png",
+      "sha256": "f9bd9c92d0cf0310ebcc34fe20618dfef07578d12a84ce8dc731af25deaba1cb",
+      "width": 1024,
+      "height": 900
+    },
+    {
+      "file": "menu-review-structure-keyboard-390-light.png",
+      "sha256": "c657559921eec22f6fcd4edde9e2d5bd593dce654644acfcdfe956f9d3d76316",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "menu-review-structure-390-light.png",
+      "sha256": "7f40fa48561024b4d4d47c1fee900518e27189b64a8536e2ecb139698f65e00f",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "menu-review-structure-390-dark.png",
+      "sha256": "34f968537614863236b8c6ed05f3d1c3e37af8fbccabd90996e7c97c35665132",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "menu-review-structure-readonly-1024-dark.png",
+      "sha256": "b5929caf9b2d662c296f05f9b8feafeb960e9853a5430e3f4c232a1f94794ac2",
+      "width": 1024,
+      "height": 900
+    },
+    {
+      "file": "manual-ai-import-390-light.png",
+      "sha256": "61ef27934d0b9eaae1f35e3794fcc35d42eccc729c31f8584b4bfff0cc7456e8",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "manual-ai-import-320-light.png",
+      "sha256": "23af23f829859429daae5557b8c6f242f4c787ef19466364f1fb5cfd9b1d8ff2",
+      "width": 320,
+      "height": 900
+    },
+    {
+      "file": "manual-ai-import-390-dark.png",
+      "sha256": "39b2634529fc7848e29b1190cacdf65f238314dd03db654f23623c8ed529f820",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "manual-ai-import-problems-390-dark.png",
+      "sha256": "146c05143b707fd370a165104cc26013612793e43d9983c91619cef607f15439",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "manual-ai-import-problems-320-light.png",
+      "sha256": "7ba99292fabcdad06ef376e158d7a87f5014052a8ad46275c4e1e812372f456e",
+      "width": 320,
+      "height": 900
+    },
+    {
+      "file": "manual-ai-import-normalized-390-dark.png",
+      "sha256": "36c95b60a49abbf48782852571a0bd6ebe6a856cd5f4959365ce3bc6615b984a",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-uncovered-390-dark.png",
+      "sha256": "278b3e164d27d87d34cdcf0fd4f0535d5319a016316a640dd23b1a178d0f3e79",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-uncovered-after-add-390-dark.png",
+      "sha256": "4de3f8657c219f7984f2d2976460a5af3ef71a5e86574bce18aac0cf18164c45",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-uncovered-empty-390-dark.png",
+      "sha256": "3460cf137a3ec999efc1a128a7565d6a00a593179967c6ee084d9974679b051e",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-uncovered-390-light.png",
+      "sha256": "a383229765e058862f97c3c8cbb05e05924468600143a130215042700fe05b76",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-uncovered-320-light.png",
+      "sha256": "5001312ba089ec884fa5fc2212c7bae4ff37ce9964e103281ad7b61b671fc938",
+      "width": 320,
+      "height": 900
+    },
+    {
+      "file": "ai-map-legend-uitleg-390-light.png",
+      "sha256": "318e570e20f6b7ea97be4e4d434fabb829c40798500315e4019374d4a164de14",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-map-390-light.png",
+      "sha256": "5b4ae5901a8c457524b1d1fae0f5cd2b61d2027fc66d9a2ff3f4dd4105e5ae6f",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-map-red-panel-390-light.png",
+      "sha256": "0d19eda1a5c94566758babf4e1091cf29de66648e10be877853af3a0d9b76f84",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-map-orange-panel-390-light.png",
+      "sha256": "9e1b3c47016968cd295880196dca5922f915c64abe111c3af794f51bfd1e751b",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-map-pdf-390-light.png",
+      "sha256": "22e679ccdf5ea7d25ad795b9b1077823f403995c5342bc1228dc8660b586e3e5",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-map-from-list-390-light.png",
+      "sha256": "c2b3dba53c7532d036e4a8783af90148d7febbd8037420f6ca08cca885b1e094",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-map-legend-uitleg-390-dark.png",
+      "sha256": "4c9169eb53e27b507ce41c5cfbd76e3379d1cecb303a68e193e5da7e7b92cfe4",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-map-390-dark.png",
+      "sha256": "9f7356af0a4bd8d49b71ca8542b1bda232ad26b73e9cb344c6a7d64decf617b8",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-map-red-panel-390-dark.png",
+      "sha256": "5532e951741ddee7009b192d46641b1fcad24177b17d861482a0d6f7d5f0f567",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-map-orange-panel-390-dark.png",
+      "sha256": "4aeb8e754e7d7cd3e5dc68e1b0b955abc74d3653aead70e2f89caadbfeac2058",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-map-pdf-390-dark.png",
+      "sha256": "e75cb4d9c2433a00b669bcc5eb17b35c104a85ecadc71e7fa68d7ed0468161c6",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-map-from-list-390-dark.png",
+      "sha256": "5a79b8a8853869948cdfcf9082c414efec8dd9f53c751f37a80dc36f33804355",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-map-legend-uitleg-320-light.png",
+      "sha256": "884814ec4c49688b29b2efff60c8457807aa75fcacb096808f9a550ffd70a26e",
+      "width": 320,
+      "height": 900
+    },
+    {
+      "file": "ai-map-320-light.png",
+      "sha256": "70184e199fef4bbc78226ae5095e150024cf61952a9999b2e3ed11358f991c7e",
+      "width": 320,
+      "height": 900
+    },
+    {
+      "file": "ai-map-red-panel-320-light.png",
+      "sha256": "d0846241afc6aa19dfe1d93b84d8ae46cb6172760c7442fecdce12fe231d9e1a",
+      "width": 320,
+      "height": 900
+    },
+    {
+      "file": "ai-map-orange-panel-320-light.png",
+      "sha256": "6e507ce28f6030fda1cb27fc60da811305e1a435ade6165a73e3a4f28bfad99e",
+      "width": 320,
+      "height": 900
+    },
+    {
+      "file": "ai-map-pdf-320-light.png",
+      "sha256": "a3771d3f05cd36c6cc3a1ce4ace78d56d576fbe69db4bb8ee11fd134ed85ae3f",
+      "width": 320,
+      "height": 900
+    },
+    {
+      "file": "ai-map-from-list-320-light.png",
+      "sha256": "7f83119840a4c59baaa5a216d83460aeed412948724967594409b77fe5abefbd",
+      "width": 320,
+      "height": 900
+    },
+    {
+      "file": "ai-map-keyboard-390-light.png",
+      "sha256": "8ee6fcac06ec1ff8dc60053361b4903ef94be69ae5947ad1ef5b9c29c1c7b908",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-read-block-390-light.png",
+      "sha256": "2906ad00283f1795a4ce032fa7b7cc246b00ea05363f4c6da5be2b1a03b59533",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-read-manual-390-light.png",
+      "sha256": "7bc302fb1f92ca58e3956f7d0abf6713ced097a5397c48c3672d85bf8115fbaf",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-read-busy-390-light.png",
+      "sha256": "5fffb9bdf20dd48f32a8aa1aee945a871d36f30d5f964f52dfee3101bff4ab33",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-read-done-390-light.png",
+      "sha256": "d1ac06e01a7b347fcdeb6217bdc189eb01ad4609c868e6845593f1e169e5ee5b",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-read-review-390-light.png",
+      "sha256": "10121b822755c42ee1757d28953198bab948cde59090c4cf07b47686cf0e5190",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-read-off-390-light.png",
+      "sha256": "9dd0c832353ffa5370a0b36948a06abc27bd1df3f6c4d0c70be1e4a81a461101",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-read-block-390-dark.png",
+      "sha256": "5afd8ca9e87a2f5a623b54f4a2912510a8644ce9fb3b3bc72675c464859bddb3",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-read-manual-390-dark.png",
+      "sha256": "c23207ee5f0e9f0e99899c074e884dead6572e15d3a27818ff97ad76f7148b0d",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-read-busy-390-dark.png",
+      "sha256": "e20ee634618a7fea67cd1bb38e6879d36dde7eac4c617059737db9224106cd1b",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-read-done-390-dark.png",
+      "sha256": "a272363e2b0783e61fb13711353abe88aee5267b9f8c1ea8e6d882b94742d040",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-read-review-390-dark.png",
+      "sha256": "a2e4c06deb9da54cd07e5fa543f92340e50317bda245d90b23aec45922203c25",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-read-off-390-dark.png",
+      "sha256": "39b2634529fc7848e29b1190cacdf65f238314dd03db654f23623c8ed529f820",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-read-batch-390-light.png",
+      "sha256": "0e5642f3e9e66a030e528f6b060869b46f4d1f5763677b986496792e05b4c051",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-read-batch-390-dark.png",
+      "sha256": "475a5fcc4314d1f8f240c99fca4bc0698e62290638d1386052e179588554da65",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "menu-review-v2-1024-light.png",
+      "sha256": "2346d6043bc95c303cc523584ef5d8ecef52b90c4475732c3b145bfadba86028",
+      "width": 1024,
+      "height": 900
+    },
+    {
+      "file": "menu-review-v2-390-dark.png",
+      "sha256": "a29a59dbfe24761807f309b80e91280926b50d863ab120c301d760e40b6d97f7",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "menu-review-error-390-light.png",
+      "sha256": "add59e15bc14021b6aad56bb27468634ed88198774788ba2011d42b98ba9c1fe",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "menu-review-320-light.png",
+      "sha256": "79239894b8cd28d0d059df4301e55fd038da0b0e0c05779e75d715ad60ba385e",
+      "width": 320,
+      "height": 900
+    },
+    {
+      "file": "menu-review-320-dark.png",
+      "sha256": "667a0760daca7df096729c9e6af41c85f998843613b8b9b442c696b922f224db",
+      "width": 320,
+      "height": 900
+    },
+    {
+      "file": "menu-review-390-light.png",
+      "sha256": "3832141f6a6e8285212593722660a36b08b1fa6f00aa1069a84957abe7643c6c",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "menu-review-390-dark.png",
+      "sha256": "7ae8450edfcf2a4fc5617687d3e7e449e70ee19a1880646880ca61049ad0ddc5",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "menu-review-1024-dark.png",
+      "sha256": "6ef14b308d15d8e3ac2d0526d2d45ccb395f3384fc94cc3150a3a39f82b064f7",
+      "width": 1024,
+      "height": 900
+    },
+    {
+      "file": "menu-review-keyboard-390-light.png",
+      "sha256": "801599e2739ec973e1b09bb61ceab9277562c3afeea538d3513fb6466db4ae9c",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "concept-list-1024-light.png",
+      "sha256": "b09dc9300fe1d3c8baf125cf56f5f3184ca2966c8acbdbbbaabe375e7dfdd69a",
+      "width": 1024,
+      "height": 900
+    },
+    {
+      "file": "concept-detail-v1-1024-clickpath.png",
+      "sha256": "7d2459db0263666dbb7df04d43a4445e58de7126f0f530f5257bfa9122511bfa",
+      "width": 1024,
+      "height": 900
+    },
+    {
+      "file": "concept-detail-v2-1024-clickpath.png",
+      "sha256": "fc73b1c97b1b25bb9ba989e21754f1c24e3a5ec2dd1f60fc41d28b8dded5bc71",
+      "width": 1024,
+      "height": 900
+    },
+    {
+      "file": "concept-detail-invalid-1024-clickpath.png",
+      "sha256": "2641357a168ba7383e8c9ca1394a0c0494c899b89129a663312fdb73ebdddd28",
+      "width": 1024,
+      "height": 900
+    },
+    {
+      "file": "concept-detail-empty-1024-clickpath.png",
+      "sha256": "2dadce3024d0cd0a80580959ec5b88f306b9f807896751f491d34ef5315ec6fc",
+      "width": 1024,
+      "height": 900
+    },
+    {
+      "file": "concept-detail-v2-readonly-1024-light.png",
+      "sha256": "3e0ce2139e72488aead90e9f04b55f61fd6a79a5f9504c8c896e97c0c14cb943",
+      "width": 1024,
+      "height": 900
+    },
+    {
+      "file": "concept-detail-invalid-1024-light.png",
+      "sha256": "3aa77eb1cb981404ba3acf222c86a4044f99e8aa133eeab2da484c589c69dc66",
+      "width": 1024,
+      "height": 900
+    },
+    {
+      "file": "concept-detail-empty-1024-dark.png",
+      "sha256": "2dadce3024d0cd0a80580959ec5b88f306b9f807896751f491d34ef5315ec6fc",
+      "width": 1024,
+      "height": 900
+    },
+    {
+      "file": "concept-list-empty-390-light.png",
+      "sha256": "81f2ec71b8735a0b99b44d2a008563e125459a0d68729fd9f3c98696a611b231",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "concept-list-error-390-light.png",
+      "sha256": "c27e117bf249cd74544cea5e95503d51c5d839de73487116e80c83490038c6a4",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "concept-list-no-access-390-light.png",
+      "sha256": "6996a7ace3bfa31f80820af8d0e1883b11a0110c081f6d80ccc64c4629946cd5",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "concept-detail-error-390-light.png",
+      "sha256": "61f16266f7af71b73690a5a0048263e1570d31f8707b96f7a1bbb110ea06cb83",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "concept-detail-missing-390-light.png",
+      "sha256": "38372402dc60308bc22b008512017d628304c78fcdb39a0d7a2379778c1ec91b",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "concept-detail-v2-320-light.png",
+      "sha256": "b70f78fa2e1379899a7866ad80cc5cb5791baab8937ff499587d6f00b332eae5",
+      "width": 320,
+      "height": 900
+    },
+    {
+      "file": "concept-detail-v2-390-light.png",
+      "sha256": "309bdf2e28b90f7380665a6925f47d4b2f84e8b26fc70cbdacd7a4679fa8801e",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "concept-detail-v2-390-dark.png",
+      "sha256": "df9f62d8519bd1944b5808ab78a182a99f0d87b842ffe1e56c0314d4dcfb68e1",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "concept-detail-v2-1024-dark.png",
+      "sha256": "fc73b1c97b1b25bb9ba989e21754f1c24e3a5ec2dd1f60fc41d28b8dded5bc71",
+      "width": 1024,
+      "height": 900
+    },
+    {
+      "file": "concept-list-320-light.png",
+      "sha256": "025999d65c49893f9906f8a394560340fc5ba7ce8943ddf4ebbc6da85f3f9e44",
+      "width": 320,
+      "height": 900
+    },
+    {
+      "file": "concept-list-390-dark.png",
+      "sha256": "d5f2f3ce3e56d192e7fbe1939a243d789a32ae2a48503920873151ba97638660",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "concept-keyboard-390-clickpath.png",
+      "sha256": "8e12f3419dafcfe88f580ccf3871af80560ac2be405eb44c9e6380101b8bb706",
+      "width": 390,
+      "height": 900
+    }
+  ],
+  "network": {
+    "guard": "in-page fetch/XHR/WebSocket/EventSource/beacon + CDP Fetch + DNS lockdown",
+    "appViolations": [],
+    "deliberateViolations": [
+      {
+        "phase": "negative-probe",
+        "kind": "cdp_fetch",
+        "method": "GET",
+        "url": "https://unapproved.invalid/frame",
+        "reason": "external_origin",
+        "protocolRelative": false,
+        "at": "2026-10-24T14:16:10.166Z",
+        "resourceType": "Document"
+      },
+      {
+        "phase": "negative-probe",
+        "kind": "cdp_fetch",
+        "method": "GET",
+        "url": "https://unapproved.invalid/pixel.png",
+        "reason": "external_origin",
+        "protocolRelative": false,
+        "at": "2026-10-24T14:16:10.171Z",
+        "resourceType": "Image"
+      }
+    ],
+    "pageViolations": [
+      {
+        "phase": "negative-probe",
+        "kind": "fetch",
+        "method": "GET",
+        "url": "https://unapproved.invalid/api/anything",
+        "reason": "external_origin",
+        "protocolRelative": false,
+        "at": "2026-10-24T14:16:10.142Z"
+      },
+      {
+        "phase": "negative-probe",
+        "kind": "fetch",
+        "method": "GET",
+        "url": "http://unapproved.invalid/api/anything",
+        "reason": "external_origin",
+        "protocolRelative": true,
+        "at": "2026-10-24T14:16:10.142Z"
+      },
+      {
+        "phase": "negative-probe",
+        "kind": "fetch",
+        "method": "POST",
+        "url": "http://localhost:3137/api/internal/v1/menu-concepts",
+        "reason": "method_not_allowed",
+        "protocolRelative": false,
+        "at": "2026-10-24T14:16:10.142Z"
+      },
+      {
+        "phase": "negative-probe",
+        "kind": "fetch",
+        "method": "POST",
+        "url": "http://localhost:3137/api/internal/v1/unrelated-write",
+        "reason": "unknown_api_route",
+        "protocolRelative": false,
+        "at": "2026-10-24T14:16:10.142Z"
+      },
+      {
+        "phase": "negative-probe",
+        "kind": "xhr",
+        "method": "POST",
+        "url": "http://localhost:3137/api/internal/v1/menu-concepts",
+        "reason": "method_not_allowed",
+        "protocolRelative": false,
+        "at": "2026-10-24T14:16:10.143Z"
+      },
+      {
+        "phase": "negative-probe",
+        "kind": "websocket",
+        "method": "GET",
+        "url": "ws://unapproved.invalid/socket",
+        "reason": "external_origin",
+        "protocolRelative": false,
+        "at": "2026-10-24T14:16:10.143Z"
+      }
+    ]
+  },
+  "forcedWrites": {
+    "uiClick": {
+      "clicked": true,
+      "failed": true,
+      "pathname": "/internal/menu-concepts/concept-v1-0001",
+      "approveStillPresent": true,
+      "violations": [
+        {
+          "method": "POST",
+          "url": "http://localhost:3137/api/internal/v1/menu-concepts/concept-v1-0001/decision",
+          "reason": "unknown_api_route",
+          "phase": "negative-probe"
+        }
+      ]
+    },
+    "scripted": {
+      "decision": "fixture_network_blocked: unknown_api_route (POST http://localhost:3137/api/internal/v1/menu-concepts/concept-v2-0002/decision)",
+      "versions": "fixture_network_blocked: unknown_api_route (POST http://localhost:3137/api/internal/v1/menu-concepts/concept-v2-0002/versions)",
+      "export": "fixture_network_blocked: unknown_api_route (POST http://localhost:3137/api/internal/v1/menu-concepts/concept-v2-0002/export)",
+      "listWrite": "fixture_network_blocked: method_not_allowed (POST http://localhost:3137/api/internal/v1/menu-concepts)",
+      "detailWrite": "fixture_network_blocked: method_not_allowed (POST http://localhost:3137/api/internal/v1/menu-concepts/concept-v2-0002)",
+      "provider": "fixture_network_blocked: external_origin (GET https://unapproved.invalid/provider)",
+      "violations": 7
+    },
+    "note": "Only the in-page fixture guard is proven here. It received no handler and made no real network call; src/lib/menuConceptReviewHandlers.test.js remains the authority for server-side refusal."
+  },
+  "error": null,
+  "limitations": [
+    "Fixture evidence against the real UI components; it is not live integration, staging, production or authenticated acceptance.",
+    "The session and API responses are fictional and same-origin; no production Supabase project, credential or data is used.",
+    "Only two fictional concept reads are mocked: GET /api/internal/v1/menu-concepts and GET /api/internal/v1/menu-concepts/<id>. Every concept POST (versions, decision, export) and every unknown API route is refused at the network layer.",
+    "Forced write probes prove the in-page guard, not the server. src/lib/menuConceptReviewHandlers.test.js remains the authority for server-side refusal.",
+    "Unknown external URLs, protocol-relative external URLs and unknown API/write routes are fail-closed. The negative probe deliberately attempts them and proves they never reach the destination.",
+    "The harness only exercises the local loopback next-dev process it starts and the local Edge/Chrome instance it starts over CDP; no remote host, real auth provider, database, GitHub or AI provider is contacted.",
+    "No source confirmation, concept save, decision, export, provider call or workflow activation is performed."
+  ]
+}

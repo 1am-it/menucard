@@ -15,7 +15,8 @@
 'use strict';
 
 const { categoryPath, pathKey, formatPath } = require('./menuHierarchy');
-const { menuScopeOf } = require('./menuGroups');
+const { cleanLabels, menuScopeOf } = require('./menuGroups');
+const { assertLegacyConceptContent } = require('./menuProductGuardsV2');
 
 const UNCLEAR_CATEGORY_NAMES = new Set(['', 'menu', 'menukaart', 'kaart', 'categorie', 'overig', 'overige', 'diversen']);
 const MAX_CATEGORY_NAME = 60;
@@ -25,6 +26,7 @@ const STATUS = {
   unchanged: { label: 'Ongewijzigd', blocker: false, attention: false },
   new: { label: 'Nieuw', blocker: false, attention: false },
   price_changed: { label: 'Prijs gewijzigd', blocker: false, attention: true },
+  multiple_prices: { label: 'Meerdere prijzen', blocker: true, attention: true },
   missing_price: { label: 'Prijs ontbreekt', blocker: true, attention: true },
   unclear_category: { label: 'Rubriek onduidelijk', blocker: true, attention: true },
   duplicate: { label: 'Dubbel gerecht', blocker: true, attention: true },
@@ -104,16 +106,62 @@ function recognisedLines(menus) {
           name: item.name.trim().slice(0, MAX_NAME),
           desc: typeof item.desc === 'string' && item.desc.trim() ? item.desc.trim() : null,
           price: normalizePrice(item.price),
+          priceStatus: ['multiple_undecomposed', 'on_request', 'unknown'].includes(item.priceStatus)
+            ? item.priceStatus
+            : item.price ? 'known' : 'unknown',
+          ...(typeof item.priceText === 'string' && item.priceText.trim() ? { priceText: item.priceText.trim().slice(0, 160) } : {}),
+          ...(Array.isArray(item.priceVariants)
+            ? {
+                priceVariants: item.priceVariants
+                  .filter((variant) => variant && typeof variant.price === 'string')
+                  .slice(0, 10)
+                  .map((variant) => ({ label: typeof variant.label === 'string' ? variant.label : null, price: variant.price })),
+              }
+            : {}),
+          // W6 (Lead review 6380804419): "Prijs onbekend" is a human decision on
+          // this line, not a missing value. It travels with the line so the
+          // concept stores `priceStatus: unknown` instead of a made-up amount.
+          ...(item.priceUnknownAccepted === true ? { priceUnknownAccepted: true } : {}),
+          ...(item.evidence && typeof item.evidence === 'object' ? { evidence: item.evidence } : {}),
           category: path[path.length - 1],
           categoryPath: path,
           menuScope: menuScopeOf(path),
           sourcePath: labelsOf(category && category.sourcePath),
+          ...(typeof category.locator === 'string' && category.locator.trim() ? { locator: category.locator.trim().slice(0, 160) } : {}),
           categoryUncertain: Boolean(category && category.uncertain === true),
         });
       });
     });
   });
   return lines;
+}
+
+/**
+ * Section metadata of recognised menus, in source order and with exactly the
+ * same path rule as `recognisedLines` — the one source for "which sections
+ * does this result contain, where do they come from, and which are
+ * uncertain". Used by the human structure review (src/lib/menuStructureReview.js)
+ * so the server re-checks the same paths the reviewer saw.
+ */
+function menuSections(menus) {
+  const list = Array.isArray(menus) ? menus : [];
+  const several = list.filter((m) => m && Array.isArray(m.categories) && m.categories.length > 0).length > 1;
+  const sections = [];
+  list.forEach((menu, m) => {
+    const title = several ? menuTitleOf(menu) : null;
+    ((menu && Array.isArray(menu.categories) && menu.categories) || []).forEach((category, c) => {
+      const path = title ? [title, ...categoryPath(category)] : categoryPath(category);
+      sections.push({
+        id: `${m}.${c}`,
+        path,
+        sourcePath: labelsOf(category && category.sourcePath),
+        ...(typeof category.locator === 'string' && category.locator.trim() ? { locator: category.locator.trim().slice(0, 160) } : {}),
+        uncertain: Boolean(category && category.uncertain === true),
+        itemCount: ((category && Array.isArray(category.items) && category.items) || []).filter((item) => item && typeof item.name === 'string' && item.name.trim()).length,
+      });
+    });
+  });
+  return sections;
 }
 
 /** Summary for the control view: sections (with their path and source route) with dishes and prices. */
@@ -136,13 +184,20 @@ function summarizeRecognisedMenu(menus) {
       byPath.set(key, category);
       categories.push(category);
     }
-    category.items.push({ id: line.id, name: line.name, price: displayPrice(line.price) });
+    category.items.push({
+      id: line.id,
+      name: line.name,
+      price: displayPrice(line.price),
+      ...(line.priceText ? { priceText: line.priceText } : {}),
+      ...(line.priceStatus === 'multiple_undecomposed' ? { priceStatus: 'multiple_undecomposed' } : {}),
+    });
   }
   const names = new Map();
   for (const line of lines) names.set(dishKey(line), (names.get(dishKey(line)) || 0) + 1);
   const attention = [];
   for (const line of lines) {
-    if (!line.price) attention.push({ id: line.id, name: line.name, reason: 'Prijs ontbreekt' });
+    if (!line.price && line.priceStatus === 'multiple_undecomposed') attention.push({ id: line.id, name: line.name, reason: 'Meerdere prijzen' });
+    else if (!line.price) attention.push({ id: line.id, name: line.name, reason: 'Prijs ontbreekt' });
     else if (names.get(dishKey(line)) > 1) attention.push({ id: line.id, name: line.name, reason: 'Komt meer dan eens voor' });
     else if (isUnclearCategory(line.category)) attention.push({ id: line.id, name: line.name, reason: 'Rubriek onduidelijk' });
     else if (line.categoryUncertain) attention.push({ id: line.id, name: line.name, reason: 'Rubriekindeling onzeker' });
@@ -215,8 +270,13 @@ const MAX_EDIT_TEXT = 200;
 /**
  * Edits as sent by a browser, reduced to what the concept understands. Never
  * trusted beyond that: the concept and its blockers are always recomputed.
- *   lines:   { [lineId]: { exclude?, accept?, name?, price?, category? } }
- *            (exclude/accept may be false to undo a stored choice)
+ *   lines:   { [lineId]: { exclude?, acceptCategory?, acceptDuplicate?, name?,
+ *              price?, category?, path? } }
+ *            (all booleans may be false to undo a stored choice). `accept` is
+ *            accepted only as a legacy alias for `acceptCategory`; it can
+ *            never settle a duplicate. `path` is the whole corrected section
+ *            path (used by the human structure review); `category` stays the
+ *            single-label correction.
  *   removed: 'keep' | 'remove' (every disappeared dish) or
  *            { [normalizeName(dish)]: 'keep' | 'remove' }
  */
@@ -234,8 +294,17 @@ function sanitizeEdits(raw) {
   for (const [id, e] of Object.entries(lines).slice(0, MAX_EDITED_LINES)) {
     if (!/^\d+\.\d+\.\d+$/.test(id) || !e || typeof e !== 'object') continue;
     const clean = {};
-    for (const key of ['exclude', 'accept']) if (typeof e[key] === 'boolean') clean[key] = e[key];
+    for (const key of ['exclude', 'acceptCategory', 'acceptDuplicate']) if (typeof e[key] === 'boolean') clean[key] = e[key];
+    // Legacy browser payload: an old `accept` may only settle the category
+    // uncertainty. It is never interpreted as duplicate acceptance.
+    if (typeof e.accept === 'boolean' && clean.acceptCategory === undefined) clean.acceptCategory = e.accept;
     for (const key of ['name', 'price', 'category']) if (typeof e[key] === 'string' && e[key].length <= MAX_EDIT_TEXT) clean[key] = e[key];
+    // A whole corrected section path (human structure review): labels only,
+    // bounded, never trusted beyond the concept's own limits.
+    if (Array.isArray(e.path)) {
+      const path = cleanLabels(e.path.filter((label) => typeof label === 'string' && label.length <= MAX_EDIT_TEXT));
+      if (path.length > 0) clean.path = path;
+    }
     out.lines[id] = clean;
   }
   return out;
@@ -244,7 +313,17 @@ function sanitizeEdits(raw) {
 /** A reviewer's edits on top of a stored version's own choices. */
 function mergeEdits(base, delta) {
   const lines = { ...((base && base.lines) || {}) };
-  for (const [id, e] of Object.entries((delta && delta.lines) || {})) lines[id] = { ...(lines[id] || {}), ...e };
+  for (const [id, e] of Object.entries((delta && delta.lines) || {})) {
+    if (!e || typeof e !== 'object') continue;
+    if (Object.prototype.hasOwnProperty.call(e, 'accept')) {
+      // A legacy undo (`accept:false`) must override a stored category
+      // acceptance, and can never touch a duplicate acceptance.
+      const { accept, ...rest } = e;
+      lines[id] = { ...(lines[id] || {}), ...rest, acceptCategory: accept };
+    } else {
+      lines[id] = { ...(lines[id] || {}), ...e };
+    }
+  }
   const baseRemoved = base && base.removed;
   const deltaRemoved = delta && delta.removed;
   let removed = baseRemoved || null;
@@ -261,6 +340,9 @@ function mergeEdits(base, delta) {
  * with it — dishes accepted as they are and decisions on disappeared dishes.
  */
 function storedConceptInput(captured) {
+  // A versioned product envelope is not v1 concept content. Refuse here so no
+  // caller can flatten it by accident; routes show the concrete refusal.
+  assertLegacyConceptContent(captured);
   const source = captured && Array.isArray(captured.categories) ? captured.categories : [];
   const lines = {};
   const categories = source.map((category, c) => ({
@@ -269,11 +351,23 @@ function storedConceptInput(captured) {
     ...(category && Array.isArray(category.sourcePath) ? { sourcePath: category.sourcePath } : {}),
     ...(category && category.uncertain === true ? { uncertain: true } : {}),
     items: ((category && Array.isArray(category.items) && category.items) || []).map((item, i) => {
-      if (item && item.accepted === true) lines[`0.${c}.${i}`] = { accept: true };
+      const lineId = `0.${c}.${i}`;
+      if (item && item.categoryAccepted === true) lines[lineId] = { ...(lines[lineId] || {}), acceptCategory: true };
+      if (item && item.duplicateAccepted === true) lines[lineId] = { ...(lines[lineId] || {}), acceptDuplicate: true };
+      // A saved version before the split stored one ambiguous `accepted`.
+      // Reinterpret it conservatively as category-only; a duplicate must be
+      // reviewed again rather than silently inheriting approval.
+      if (item && item.accepted === true && item.categoryAccepted === undefined && item.duplicateAccepted === undefined) {
+        lines[lineId] = { ...(lines[lineId] || {}), acceptCategory: true };
+      }
       return {
         name: item && item.name,
         desc: item && item.desc,
         price: item && item.price,
+        ...(item && typeof item.priceStatus === 'string' ? { priceStatus: item.priceStatus } : {}),
+        ...(item && Array.isArray(item.priceVariants) ? { priceVariants: item.priceVariants } : {}),
+        ...(item && item.priceUnknownAccepted === true ? { priceUnknownAccepted: true } : {}),
+        ...(item && item.evidence && typeof item.evidence === 'object' ? { evidence: item.evidence } : {}),
         from: item && typeof item.from === 'string' ? item.from : null,
         kept: Boolean(item && item.kept === true),
       };
@@ -361,21 +455,34 @@ function buildMenuConcept({ menus, liveLines, edits }) {
     const name = typeof e.name === 'string' && e.name.trim() ? e.name.trim().slice(0, MAX_NAME) : line.name;
     const editedPrice = e.price !== undefined && e.price !== null && e.price !== '' ? normalizePrice(String(e.price)) : undefined;
     const price = editedPrice !== undefined ? editedPrice : line.price;
-    const categoryEdited = typeof e.category === 'string' && e.category.trim() !== '';
-    const category = categoryEdited ? e.category.trim().slice(0, MAX_CATEGORY_NAME) : line.category;
+    // An explicit correction chooses a price on purpose; an untouched
+    // multiple-price extraction stays a blocker.
+    const priceStatus = editedPrice !== undefined ? (editedPrice ? 'known' : 'unknown') : line.priceStatus;
+    const categoryEdited = (Array.isArray(e.path) && cleanLabels(e.path).length > 0) || (typeof e.category === 'string' && e.category.trim() !== '');
     const linePath = line.categoryPath || [line.category];
+    const categoryPath = Array.isArray(e.path) && cleanLabels(e.path).length > 0
+      ? cleanLabels(e.path)
+      : categoryEdited
+        ? [...linePath.slice(0, -1), e.category.trim().slice(0, MAX_CATEGORY_NAME)]
+        : linePath;
+    const category = categoryPath[categoryPath.length - 1];
     return {
       ...line,
       original: { name: line.name, price: line.price, category: line.category },
       name,
       price,
+      priceStatus,
       category,
       categoryEdited,
-      categoryPath: categoryEdited ? [...linePath.slice(0, -1), category] : linePath,
-      menuScope: menuScopeOf(categoryEdited ? [...linePath.slice(0, -1), category] : linePath),
+      categoryPath,
+      menuScope: menuScopeOf(categoryPath),
       excluded: e.exclude === true,
-      accepted: e.accept === true,
-      edited: Boolean(e.name || e.price || e.category),
+      // Direct callers (and older stored versions) may still carry the
+      // ambiguous `accept`; it means category-only. Duplicate acceptance can
+      // only arrive through `acceptDuplicate`.
+      categoryAccepted: e.acceptCategory === true ? true : e.acceptCategory === false ? false : e.accept === true,
+      duplicateAccepted: e.acceptDuplicate === true,
+      edited: Boolean(e.name || e.price || e.category || (Array.isArray(e.path) && e.path.length > 0)),
     };
   });
 
@@ -388,18 +495,45 @@ function buildMenuConcept({ menus, liveLines, edits }) {
   for (const l of lines) {
     const liveMatch = matchLive(l, liveByName);
     // An uncertain source structure counts as an unclear section until a
-    // human names the section or accepts it ("Klopt zo").
+    // human names the section or accepts the category. This is a different
+    // decision from accepting a duplicate dish.
     const unclear = isUnclearCategory(l.category) || (l.categoryUncertain && !l.categoryEdited);
-    const needsAcceptance = unclear || nameCount.get(dishKey(l)) > 1;
+    const duplicate = nameCount.get(dishKey(l)) > 1;
+    const hasPrice = Boolean(l.price);
+    // W6 (Lead review 6380804419): a price that the source itself names per
+    // unit ("glas 5,00 / karaf 18,50", "klein / groot") is a complete price of
+    // the menu, not an unresolved choice. Every variant carries its own label
+    // and amount, so it is stored as `priceVariants` and never flattened to a
+    // single amount. An unnamed multiple price stays a blocker.
+    const namedVariants =
+      Array.isArray(l.priceVariants) &&
+      l.priceVariants.length > 0 &&
+      l.priceVariants.every(
+        (variant) =>
+          variant &&
+          typeof variant.label === 'string' &&
+          variant.label.trim() !== '' &&
+          normalizePrice(variant.price) !== null,
+      );
+    // "Prijs onbekend" is an explicit human choice: the dish stays, with an
+    // unknown price and never € 0,00.
+    const priceUnknownAccepted = l.priceUnknownAccepted === true;
+    l.namedVariants = namedVariants;
+    l.priceUnknownAccepted = priceUnknownAccepted;
+    // Keep the flags on the line so the UI and the stored version can show
+    // exactly which decision was made, even after the blocker is cleared.
+    l.categoryNeedsAcceptance = unclear && hasPrice && !l.excluded;
+    l.duplicateNeedsAcceptance = duplicate && hasPrice && !l.excluded;
+    l.categoryAccepted = l.categoryAccepted && l.categoryNeedsAcceptance;
+    l.duplicateAccepted = l.duplicateAccepted && l.duplicateNeedsAcceptance;
     if (l.excluded) l.status = 'excluded';
-    else if (!l.price) l.status = 'missing_price';
-    else if (unclear && !l.accepted) l.status = 'unclear_category';
-    else if (nameCount.get(dishKey(l)) > 1 && !l.accepted) l.status = 'duplicate';
+    else if (!hasPrice && !namedVariants && l.priceStatus === 'multiple_undecomposed') l.status = 'multiple_prices';
+    else if (!hasPrice && !namedVariants && !priceUnknownAccepted) l.status = 'missing_price';
+    else if (unclear && !l.categoryAccepted) l.status = 'unclear_category';
+    else if (duplicate && !l.duplicateAccepted) l.status = 'duplicate';
     else if (liveMatch && liveMatch.price && liveMatch.price !== l.price) l.status = 'price_changed';
     else if (liveMatch) l.status = 'unchanged';
     else l.status = 'new';
-    // An acceptance is only kept where it settles something.
-    l.accepted = l.accepted && !l.excluded && Boolean(l.price) && needsAcceptance;
     l.livePrice = liveMatch ? liveMatch.price : null;
     l.live = liveMatch ? { name: liveMatch.name, desc: liveMatch.desc || null, price: liveMatch.price, category: liveMatch.category } : null;
   }
@@ -455,7 +589,27 @@ function buildMenuConcept({ menus, liveLines, edits }) {
     const item = { name: l.name, desc: l.desc, price: l.price };
     if (l.from) item.from = l.from;
     if (l.kept) item.kept = true;
-    if (l.accepted) item.accepted = true;
+    if (l.categoryAccepted) item.categoryAccepted = true;
+    if (l.duplicateAccepted) item.duplicateAccepted = true;
+    // W6: the price model stays lossless. A known single price is stored
+    // exactly as before (no extra key, so existing content hashes and the
+    // public projection do not change); a per-unit price list and an accepted
+    // unknown price are stored explicitly instead of being flattened.
+    if (!l.price && Array.isArray(l.priceVariants) && l.priceVariants.length > 0) {
+      item.priceStatus = 'multiple_undecomposed';
+      item.priceVariants = l.priceVariants.map((variant) => ({
+        label: typeof variant.label === 'string' && variant.label.trim() !== '' ? variant.label.trim() : null,
+        price: normalizePrice(variant.price),
+      }));
+    } else if (!l.price && l.priceUnknownAccepted) {
+      item.priceStatus = l.priceStatus === 'on_request' ? 'on_request' : 'unknown';
+      item.priceUnknownAccepted = true;
+    } else if (!l.price && (l.priceStatus === 'unknown' || l.priceStatus === 'on_request')) {
+      // Not accepted yet (for example the draft a "Lees met AI" run writes
+      // before review): the state is stored, but it stays an open blocker.
+      item.priceStatus = l.priceStatus;
+    }
+    if (l.evidence && typeof l.evidence === 'object') item.evidence = l.evidence;
     add(l.categoryPath, item, { sourcePath: l.categoryEdited ? null : l.sourcePath, uncertain: l.categoryUncertain && !l.categoryEdited });
   }
   // A kept dish returns to its own variant when the concept has variants.
@@ -494,6 +648,17 @@ function buildMenuConcept({ menus, liveLines, edits }) {
   };
 }
 
+/**
+ * The number of sections of one built concept, counted per full path exactly
+ * as the concept itself stores them (`content.categories`). Never by the last
+ * label only: "Lunch › Dessert" and "Diner › Dessert" are two sections. Every
+ * place that shows a section count uses this one rule, so the overview and
+ * the structure card of the same concept can never disagree.
+ */
+function conceptSectionCount(concept) {
+  return concept && concept.content && Array.isArray(concept.content.categories) ? concept.content.categories.length : 0;
+}
+
 module.exports = {
   STATUS,
   normalizeName,
@@ -501,9 +666,11 @@ module.exports = {
   displayPrice,
   isUnclearCategory,
   recognisedLines,
+  menuSections,
   summarizeRecognisedMenu,
   liveMenuLines,
   buildMenuConcept,
+  conceptSectionCount,
   removalKey,
   liveEntryLabel,
   sanitizeEdits,

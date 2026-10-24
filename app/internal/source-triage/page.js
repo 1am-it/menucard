@@ -36,6 +36,8 @@ import {
   NOTE_MAX,
   TRIAGE_FILTERS,
   TRIAGE_FILTER_LABELS,
+  readFollowUp,
+  followUpForEntry,
   validateProposedUrl,
   validateProposalForm,
   validateDecisionForm,
@@ -212,13 +214,15 @@ function DecisionForm({ proposal, busy, onDecide }) {
   )
 }
 
-function ProposalForm({ entry, busy, onCreate }) {
+function ProposalForm({ entry, busy, onCreate, suggestion }) {
   const kinds = PROPOSAL_KINDS.filter((k) => k === 'add_candidate' || entry.known_url)
   const [kind, setKind] = useState(kinds[0])
   const [url, setUrl] = useState('')
   const [reason, setReason] = useState('')
   const [note, setNote] = useState('')
   const [error, setError] = useState(null) // { field: 'url' | 'reason' | 'note', message }
+  const [suggested, setSuggested] = useState(false)
+  const suggestionApplied = useRef(false)
   const urlRef = useRef(null)
   const reasonRef = useRef(null)
   const noteRef = useRef(null)
@@ -227,6 +231,19 @@ function ProposalForm({ entry, busy, onCreate }) {
   const needsUrl = kind === 'add_candidate' || kind === 'replace_source'
   const noteRequired = !needsUrl && reason === 'other'
   const preview = needsUrl && url.trim() ? validateProposedUrl(url) : null
+
+  // #59 review 6319894232 (R5): a fitting reason exists. On the human follow-up
+  // of an image/scan menu, choosing "markeren als onbruikbaar" preselects the
+  // existing `other` reason and fills in its fixed, required explanation — once,
+  // and never over text the human already typed. No stored value is added.
+  useEffect(() => {
+    if (!suggestion || suggestionApplied.current) return
+    if (kind !== suggestion.kind) return
+    suggestionApplied.current = true
+    setSuggested(true)
+    setReason(suggestion.unusableReason)
+    setNote((current) => (current.trim() ? current : suggestion.note))
+  }, [kind, suggestion])
 
   // Only the control the error is about is marked invalid and described.
   const invalid = (field) => (error && error.field === field ? 'true' : undefined)
@@ -328,7 +345,7 @@ function ProposalForm({ entry, busy, onCreate }) {
               clearError('reason', 'note')
             }}
             aria-invalid={invalid('reason')}
-            aria-describedby={describedBy('reason')}
+            aria-describedby={describedBy('reason', suggested && suggestion ? `${base}-reason-help` : null)}
           >
             <option value="">Kies een reden</option>
             {UNUSABLE_REASONS.map((r) => (
@@ -337,6 +354,11 @@ function ProposalForm({ entry, busy, onCreate }) {
               </option>
             ))}
           </select>
+          {suggested && suggestion && (
+            <p id={`${base}-reason-help`} className="stg-hint stg-followup-suggestion">
+              {suggestion.explain}
+            </p>
+          )}
         </div>
       )}
 
@@ -379,7 +401,7 @@ function ProposalForm({ entry, busy, onCreate }) {
   )
 }
 
-function Detail({ entry, proposalsAvailable, busy, onCreate, onDecide, headingRef }) {
+function Detail({ entry, proposalsAvailable, busy, onCreate, onDecide, headingRef, followUp }) {
   const open = entry.proposals.find((p) => p.status === 'open') || null
   const history = entry.proposals.filter((p) => p.status !== 'open')
   const checked = formatDateTime(entry.checked_at)
@@ -421,7 +443,12 @@ function Detail({ entry, proposalsAvailable, busy, onCreate, onDecide, headingRe
         <div>
           <dt>Vervolgstap</dt>
           <dd>
-            {entry.next_step === 'check_via_onboarding' ? (
+            {followUp ? (
+              <>
+                {followUp.nextStep}
+                <p className="stg-hint">Algemene route: {NEXT_STEP_LABELS[entry.next_step]}</p>
+              </>
+            ) : entry.next_step === 'check_via_onboarding' ? (
               <a href="/internal/onboarding-restaurant" className="stg-link">
                 {NEXT_STEP_LABELS[entry.next_step]}
               </a>
@@ -431,6 +458,24 @@ function Detail({ entry, proposalsAvailable, busy, onCreate, onDecide, headingRe
           </dd>
         </div>
       </dl>
+
+      {followUp && (
+        <section className="stg-section stg-followup" aria-labelledby="stg-followup-title">
+          <h3 id="stg-followup-title" className="stg-section-title">
+            {followUp.title}
+          </h3>
+          <dl className="stg-facts">
+            <div>
+              <dt>Reden</dt>
+              <dd>{followUp.reason}</dd>
+            </div>
+            <div>
+              <dt>Wat dit betekent</dt>
+              <dd>{followUp.detail}</dd>
+            </div>
+          </dl>
+        </section>
+      )}
 
       {!proposalsAvailable ? (
         <p className="stg-muted">Voorstellen kunnen nu niet worden geladen of opgeslagen.</p>
@@ -448,7 +493,7 @@ function Detail({ entry, proposalsAvailable, busy, onCreate, onDecide, headingRe
           <h3 id="stg-new-title" className="stg-section-title">
             Voorstel doen
           </h3>
-          <ProposalForm key={entry.restaurant_id} entry={entry} busy={busy} onCreate={onCreate} />
+          <ProposalForm key={entry.restaurant_id} entry={entry} busy={busy} onCreate={onCreate} suggestion={followUp ? followUp.suggestion : null} />
         </section>
       )}
 
@@ -560,12 +605,36 @@ export default function SourceTriagePage() {
     if (session) load(session.access_token)
   }, [session, load])
 
+  // A batch result whose menu exists only as an image/scan links here with its
+  // reason. The reason is read as text from the address bar (#59 review
+  // 6319894232, R4/R5); it stays page context and is never a stored status.
+  const [search, setSearch] = useState('')
+  useEffect(() => {
+    setSearch(window.location.search)
+  }, [])
+
   const entries = useMemo(() => (data && data.restaurants) || [], [data])
   const proposalsAvailable = Boolean(data && data.proposals_available)
   const counts = useMemo(() => countTriage(entries, { proposalsAvailable }), [entries, proposalsAvailable])
   const activeFilter = effectiveFilter(filter, proposalsAvailable)
   const visible = useMemo(() => filterTriage(entries, { filter: activeFilter, query }), [entries, activeFilter, query])
   const selected = entries.find((e) => e.restaurant_id === selectedId) || null
+
+  // The follow-up belongs to exactly the restaurant the batch link named; the
+  // detail shows it there. Any other case keeps it as a page-level note, so the
+  // reason is never attached to the wrong restaurant.
+  const followUpContext = useMemo(() => readFollowUp(search), [search])
+  const detailFollowUp = useMemo(() => followUpForEntry(followUpContext, selected), [followUpContext, selected])
+  const bannerFollowUp = followUpContext && !detailFollowUp ? followUpContext.followUp : null
+
+  // A batch follow-up link may name the restaurant explicitly. Only an entry
+  // that is actually in the loaded list is selected; an unknown id changes
+  // nothing and is never invented into the list.
+  useEffect(() => {
+    if (selectedId) return
+    const requested = new URLSearchParams(window.location.search).get('restaurant')
+    if (requested && entries.some((entry) => entry.restaurant_id === requested)) setSelectedId(requested)
+  }, [entries, selectedId])
 
   useEffect(() => {
     if (focusDetail.current && headingRef.current) {
@@ -653,6 +722,12 @@ export default function SourceTriagePage() {
             start geen controle.
           </p>
         </div>
+
+        {bannerFollowUp && (
+          <div className="di-banner di-banner-neutral" role="note">
+            <strong>Vervolg van de batchanalyse:</strong> {bannerFollowUp.reason}. {bannerFollowUp.nextStep}
+          </div>
+        )}
 
         <div role="alert" aria-atomic="true">
           {error && <div className="di-banner di-banner-danger">{error}</div>}
@@ -756,6 +831,7 @@ export default function SourceTriagePage() {
                     onCreate={createProposal}
                     onDecide={decideProposal}
                     headingRef={headingRef}
+                    followUp={detailFollowUp}
                   />
                 ) : (
                   <p className="stg-empty">Kies een restaurant om de bron te bekijken of een voorstel te doen.</p>

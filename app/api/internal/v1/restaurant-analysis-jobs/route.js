@@ -43,10 +43,13 @@ import { matchRestaurantByHostname, buildRestaurantChoiceList } from '@/src/lib/
 import { canonicalizeSourceUrl, buildCandidateSummary, computeReceiptExpiry } from '@/src/lib/urlIntakes'
 import { computeAnalysisResultHash } from '@/src/lib/urlIntakeReceiptHash'
 import { analyzeSourceUrl } from '@/src/lib/sourceAnalysisPipeline'
+import { disabledMenuExtractionRuntime } from '@/src/lib/menuExtractionRuntime'
 import { isValidJobStatus, isValidJobErrorReason, canTransitionJobStatus } from '@/src/lib/restaurantSourceAnalysisJobs'
 import { generateUuidV7 } from '@/src/lib/uuidv7'
 import { getSupabaseAdmin } from '@/src/lib/supabaseAdmin'
 import restaurantsData from '@/data/restaurants.json'
+
+const structuredExtraction = disabledMenuExtractionRuntime()
 
 // The robots.txt gate, the entry fetch (safeOutboundFetch, re-validated
 // same-site redirects), BE-20's same-host discovery and digital-PDF
@@ -270,7 +273,7 @@ export async function POST(request) {
   // a closed, generic failure — the job always reaches a durable terminal
   // status and the client never sees a raw internal error.
   try {
-    const outcome = await analyzeSourceUrl(sourceUrl.href)
+    const outcome = await analyzeSourceUrl(sourceUrl.href, { structuredExtraction })
     if (!outcome.ok) {
       return respondFailed(jobId, ['running'], outcome.errorReason, outcome.message, outcome.httpStatus)
     }
@@ -312,6 +315,10 @@ export async function POST(request) {
       unknown_menu_contexts: analysis.unknownMenuContexts,
       description: analysis.description,
       notes: analysis.notes,
+      source_inventory: analysis.sourceInventory || [],
+      limitations: analysis.limitations || [],
+      extraction_result: analysis.extractionResult || null,
+      protocol: analysis.protocol || null,
     }
     const succeededConfirmed = await updateJobSucceeded(jobId, ['running'], { receiptId: receipt.id, fieldEvidencePayload })
     if (!succeededConfirmed) {
@@ -338,6 +345,10 @@ export async function POST(request) {
       unknown_menu_contexts: analysis.unknownMenuContexts,
       description: analysis.description,
       notes: analysis.notes,
+      source_inventory: analysis.sourceInventory || [],
+      limitations: analysis.limitations || [],
+      extraction_result: analysis.extractionResult || null,
+      protocol: analysis.protocol || null,
       warning: needsExplicitChoice
         ? 'De bron van deze pagina komt niet automatisch overeen met één bekend restaurant — kies handmatig het juiste restaurant.'
         : null,

@@ -2,12 +2,13 @@
 
 // Batchanalyse (BE-25 fase 2) — under Werkvoorraad / Bronnen beoordelen.
 // A staff member pastes at most 10 restaurant URLs and chooses "Analyse
-// starten" once. Processing is page-bound: only the starter's open page
-// asks the server to analyse the next URL, one at a time (no worker, no
-// schedule); closing the page pauses the batch. Colleagues can view a
-// batch read-only and never see who started it. Every result stays a
-// reviewable result: "Bevestig bron" records an accepted BE-24 proposal
-// after a short human confirmation, nothing is published. The visible
+// starten" once. The starter's open page can drive the next URL, one at a
+// time; the same claim/lease handler also has an explicit service-worker
+// entry (no cron is installed). Closing the page merely pauses this browser
+// loop; a service worker may resume the same jobs without double processing.
+// Colleagues can view a batch read-only and never see who started it. Every
+// result stays a reviewable result: "Bevestig bron" records an accepted BE-24
+// proposal after a short human confirmation, nothing is published. The visible
 // states live in ./BatchAnalysisView.js.
 // Contract: planning/specs/tickets/be-25-batch-source-analysis-from-triage.md;
 // visual reference: docs/mockups/be-25-batch-analysis-*-v2.png (text wins).
@@ -31,6 +32,7 @@ export default function BatchAnalysisPage() {
   const [data, setData] = useState(null)
   const [loadError, setLoadError] = useState(null)
   const [selectedId, setSelectedId] = useState(null)
+  const [focusItem, setFocusItem] = useState(null)
   const [showInput, setShowInput] = useState(false)
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
@@ -46,8 +48,11 @@ export default function BatchAnalysisPage() {
       if (!sessionData.session) router.replace('/internal/login')
       else setSession(sessionData.session)
     })
-    const fromUrl = new URLSearchParams(window.location.search).get('batch')
+    const params = new URLSearchParams(window.location.search)
+    const fromUrl = params.get('batch')
+    const item = Number(params.get('item'))
     if (fromUrl) setSelectedId(fromUrl)
+    if (Number.isInteger(item) && item > 0) setFocusItem(item)
   }, [router])
 
   const token = session && session.access_token
@@ -168,7 +173,7 @@ export default function BatchAnalysisPage() {
     }
   }
 
-  async function confirm(jobIds) {
+  async function confirm(jobIds, structureReviews) {
     if (!viewing) return
     setBusy(true)
     setMessage(null)
@@ -176,7 +181,9 @@ export default function BatchAnalysisPage() {
       const res = await fetch(`${API}/${viewing.batch.id}/confirm`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ job_ids: jobIds }),
+        body: JSON.stringify(
+          structureReviews && structureReviews.length > 0 ? { job_ids: jobIds, structure_reviews: structureReviews } : { job_ids: jobIds }
+        ),
       })
       const body = await res.json().catch(() => ({}))
       if (!res.ok) {
@@ -184,13 +191,41 @@ export default function BatchAnalysisPage() {
       } else {
         const failed = (body.results || []).filter((r) => !r.ok)
         const openExists = failed.some((r) => r.reason === 'open_proposal_exists' || r.reason === 'left_open')
+        // An already confirmed result can never be confirmed twice: the server
+        // refuses it and writes nothing. Say so instead of asking for a repair.
+        const allAlready = body.confirmed === 0 && failed.length > 0 && failed.every((r) => r.reason === 'already_confirmed')
+        const rejected = failed.some((r) => r.reason === 'proposal_rejected')
+        // The server re-checks the human structure review against the stored
+        // receipt; a stale or incomplete review is reported concretely.
+        const structureIssue = failed.find((r) =>
+          [
+            'structure_unreviewed',
+            'structure_unknown_section',
+            'structure_invalid',
+            'structure_required',
+            'structure_sections_unknown',
+            'structure_already_reviewed',
+            'structure_conflict',
+            'structure_save_failed',
+            'structure_store_unavailable',
+            'receipt_mismatch',
+            'receipt_unavailable',
+            'receipt_binding_mismatch',
+          ].includes(r.reason)
+        )
+        const detail = structureIssue
+          ? ' De rubriekcontrole is niet opgeslagen; controleer elke onzekere rubriek opnieuw.'
+          : rejected
+            ? ' Dit resultaat is in Bronnen beoordeeld en afgewezen; start zo nodig een nieuwe analyse.'
+            : openExists
+              ? ' Voor een restaurant staat al een open voorstel; beoordeel dat in Bronnen beoordelen.'
+              : ''
         setMessage(
           failed.length === 0
             ? { tone: 'success', text: `${body.confirmed} ${body.confirmed === 1 ? 'bron' : 'bronnen'} bevestigd. Er is niets gepubliceerd.` }
-            : {
-                tone: 'notice',
-                text: `${body.confirmed} bevestigd, ${failed.length} niet.${openExists ? ' Voor een restaurant staat al een open voorstel; beoordeel dat in Bronnen beoordelen.' : ''}`,
-              }
+            : allAlready
+              ? { tone: 'notice', text: 'Deze bron was al bevestigd. Er is niets dubbel opgeslagen.' }
+              : { tone: 'notice', text: `${body.confirmed} bevestigd, ${failed.length} niet.${detail}` }
         )
       }
       setConfirming(null)
@@ -250,6 +285,7 @@ export default function BatchAnalysisPage() {
     setShowInput(false)
     setMessage(null)
     setConfirming(null)
+    setFocusItem(null)
     setSelectedId(id)
   }
 
@@ -270,6 +306,7 @@ export default function BatchAnalysisPage() {
           loadError={loadError}
           message={message}
           viewing={viewing}
+          focusItem={focusItem}
           ownOpenBatchId={ownOpenBatchId}
           busy={busy}
           confirming={confirming}

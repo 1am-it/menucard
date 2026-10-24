@@ -1,0 +1,128 @@
+{
+  "version": "1.0.0",
+  "issue": 59,
+  "sourceId": "wolfslaar",
+  "label": "Restaurant Wolfslaar",
+  "entryUrl": "https://www.restaurantwolfslaar.com",
+  "allowedHosts": [
+    "restaurantwolfslaar.com",
+    "www.restaurantwolfslaar.com"
+  ],
+  "capturedAt": "2026-10-22T19:53:31.516Z",
+  "oneShot": true,
+  "captureStatus": "captured",
+  "method": "One read-only attempt per URL through the existing safe fetch (SSRF guards, redirect limit, timeout and byte cap). Bytes are stored under the gitignored ops/benchmark/output/card-captures/; only SHA-256, size, content type, role and time are committed here. A readable page without menu content is recorded as not-a-menu, an unreadable page as blocked. The decimalAmountCount per capture only counts amounts printed with a decimal part; a whole-euro menu (Wolfslaar) therefore reports 0 and the reference, not this counter, proves its prices.",
+  "authorization": {
+    "decision": "Product Owner 2026-10-21, option 1 (four existing cards plus an unseen set), reference GitHub #59 issuecomment-6315226470; Delivery Lead order review 6315269210.",
+    "reference": "GitHub #59 review 6315269210",
+    "scope": "Public read-only comparison of exactly these four existing-card sources and the menu sub-pages/PDFs that the historical data/menus.json export itself names. No login, CAPTCHA bypass, other restaurant, arbitrary crawl, publication, production write or app-side AI.",
+    "appProviderActivation": false
+  },
+  "previousCardCapture": {
+    "path": "ops/benchmark/existing-card-references.json",
+    "bytesSha256": "dcb0e92b9cbefc7b56e5c934c722850078d3340c805498dd0e23bebbe2705bc4",
+    "previousCaptureStatus": "failed",
+    "note": "The 2026-10-21 capture of this source failed. Review 6349832755 K1 is the one honest read-only re-attempt; these bytes are pinned for the first time."
+  },
+  "historicalUrls": [
+    "https://www.restaurantwolfslaar.com/nl/menu-lunch",
+    "https://www.restaurantwolfslaar.com/nl/menu-diner"
+  ],
+  "seeds": [
+    {
+      "url": "https://www.restaurantwolfslaar.com",
+      "origin": "entry"
+    },
+    {
+      "url": "https://www.restaurantwolfslaar.com/nl/menu-lunch",
+      "origin": "historical"
+    },
+    {
+      "url": "https://www.restaurantwolfslaar.com/nl/menu-diner",
+      "origin": "historical"
+    }
+  ],
+  "captures": [
+    {
+      "requestedUrl": "https://www.restaurantwolfslaar.com",
+      "finalUrl": "https://www.restaurantwolfslaar.com/",
+      "contentType": "text/html",
+      "kind": "html",
+      "role": "entry",
+      "discovery": null,
+      "discoveredFrom": null,
+      "bytes": 105453,
+      "bytesSha256": "14abdb9e684e34358ce02e2aa82683e5ddf70a694cd9060f6ebc1bb051ca8dfc",
+      "capturedAt": "2026-10-22T19:53:31.518Z",
+      "localPath": "ops/benchmark/output/card-captures/wolfslaar/01-html-14abdb9e684e.html",
+      "status": "captured",
+      "reason": null,
+      "error": null,
+      "note": null,
+      "seedOrigin": "entry",
+      "decimalAmountCount": 0
+    },
+    {
+      "requestedUrl": "https://www.restaurantwolfslaar.com/nl/menu-lunch",
+      "finalUrl": "https://www.restaurantwolfslaar.com/nl/menu-lunch",
+      "contentType": "text/html",
+      "kind": "html",
+      "role": "menu",
+      "discovery": null,
+      "discoveredFrom": null,
+      "bytes": 70597,
+      "bytesSha256": "22d60179c67bda0d332fb948e758b2513a233848a5875945a6932f1548c0df19",
+      "capturedAt": "2026-10-22T19:53:31.827Z",
+      "localPath": "ops/benchmark/output/card-captures/wolfslaar/02-html-22d60179c67b.html",
+      "status": "captured",
+      "reason": null,
+      "error": null,
+      "note": null,
+      "seedOrigin": "historical",
+      "decimalAmountCount": 0
+    },
+    {
+      "requestedUrl": "https://www.restaurantwolfslaar.com/nl/menu-diner",
+      "finalUrl": "https://www.restaurantwolfslaar.com/nl/menu-diner",
+      "contentType": "text/html",
+      "kind": "html",
+      "role": "menu",
+      "discovery": null,
+      "discoveredFrom": null,
+      "bytes": 69108,
+      "bytesSha256": "bc35f9ca7a5c9692e476f4356c035099c36c8b1dfc98280c7bc9e8343ee5edc8",
+      "capturedAt": "2026-10-22T19:53:31.951Z",
+      "localPath": "ops/benchmark/output/card-captures/wolfslaar/03-html-bc35f9ca7a5c.html",
+      "status": "captured",
+      "reason": null,
+      "error": null,
+      "note": null,
+      "seedOrigin": "historical",
+      "decimalAmountCount": 0
+    },
+    {
+      "requestedUrl": "https://www.restaurantwolfslaar.com/menu-1",
+      "finalUrl": "https://www.restaurantwolfslaar.com/menu-1",
+      "contentType": "text/html",
+      "kind": "html",
+      "role": "menu",
+      "discovery": "same-host-menu-link",
+      "discoveredFrom": "https://www.restaurantwolfslaar.com",
+      "bytes": 66272,
+      "bytesSha256": "19abbe4aa63a0d1bab541d8285abe0ff51eb54477b8c706e8548d31db41be9f4",
+      "capturedAt": "2026-10-22T19:53:32.072Z",
+      "localPath": "ops/benchmark/output/card-captures/wolfslaar/04-html-19abbe4aa63a.html",
+      "status": "captured",
+      "reason": null,
+      "error": null,
+      "note": null,
+      "seedOrigin": "page-link",
+      "decimalAmountCount": 0
+    }
+  ],
+  "limitations": [
+    "One read-only attempt per URL through the existing safe fetch; robots.txt is not consulted by this benchmark capture route, exactly like the accepted Bardot capture.",
+    "Only the pinned entry URL, the menu URLs the historical export names, the pinned probe URLs and the same-host menu links the entry page itself names (one hop). No crawl, no alternative URL, no other location.",
+    "A readable page that is not a menu is recorded as not-a-menu; an unreadable page as blocked. Neither is ever counted as a menu."
+  ]
+}
