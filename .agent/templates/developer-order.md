@@ -2,13 +2,12 @@
 
 Every Delivery Lead order to the #59 developer uses this structure, posted as
 one PR review comment plus one runner order on the issue (runner protocol in
-`.agent/START.md`). The Lead implements nothing itself; this order is the full
-handoff.
+`.agent/START.md`). This order is the full handoff for the round.
 
 ```text
-ROLES: Lead = Claude Code (order, review, acceptance). Developer = DeepSeek via
-the local runner (all product code, tests and repairs). The Lead does not take
-over implementation.
+ROLES: Lead = Claude Code (order, review, acceptance, releases). Developer =
+DeepSeek via the local runner (the code, tests and repairs of this order). The
+Lead does not write in this working copy while the round is active.
 BASE: <full, freshly verified HEAD>
 CONTRACT: <issue/spec + Product Owner decision link>
 

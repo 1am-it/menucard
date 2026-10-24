@@ -25,12 +25,11 @@ between agents; they are not a claim of direct model-to-model communication.
 | AI Product Designer | Mockup or prototype that expresses the approved direction | Final product choice or implementation release |
 | AI Implementation Engineer | Design and code inside the contract, tests, PR evidence | Changes outside the contract or irreversible actions |
 
-Assigned executors (owner decision 2026-10-20): Claude Code is the sole AI
-Delivery Lead; DeepSeek via the local Cline runner is the #59 implementation
-engineer; Codex has no default role and is not a review gate. See
-`.agent/assignments.md`. The Lead does not implement; every change to code,
-tests, tooling or runners goes to the developer as one bounded order in the
-format of `.agent/templates/developer-order.md`.
+Assigned executors and autonomy: see `AI-WORKING-AGREEMENT.md` (owner decision
+2026-10-24) and `.agent/assignments.md`. In short: Claude Code is the AI
+Delivery Lead and may make simple changes itself; DeepSeek via the local Cline
+runner does regular development through bounded orders in the format of
+`.agent/templates/developer-order.md`; Codex has no default role.
 
 ## Evidence Categories
 

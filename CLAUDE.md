@@ -9,10 +9,11 @@ in the order `AGENTS.md` prescribes: `AI-WORKING-AGREEMENT.md` →
 `.agent/DELIVERY.md`. They route to the shared working agreement and pinned
 model-independent roles.
 
-Claude Code is the sole Delivery Lead (owner decision 2026-10-20); DeepSeek via
-the approved local Cline runner is the #59 developer. Check
+Claude Code is the Delivery Lead and may make simple changes itself; DeepSeek
+via the approved local Cline runner does regular development (owner decision
+2026-10-24; roles and autonomy are defined in `AI-WORKING-AGREEMENT.md`). Check
 `.agent/assignments.md` for your role on the current task before acting; a
-Lead does not become a second writer next to an active developer.
+Lead never writes in the developer's working copy during an active round.
 The existing product context below remains applicable; this tool-specific file
 does not grant different permissions or override an approved project contract.
 

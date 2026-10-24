@@ -12,9 +12,13 @@ selects the package and supplement. Do not infer a package from an AI brand.
 Human Product Owner & Release Approver: repository owner/user.
 AI Delivery Lead: Claude Code for Menucard #59 / PR #60 and the read-only #53
 follow-up, by explicit owner handover on 2026-10-20 (PR #60 comment
-6297254612). Codex is not an additional review gate.
+6297254612). Codex is not an additional review gate. Since 2026-10-24 the Lead
+also owns releases and may make simple changes itself; roles and autonomy are
+defined in `AI-WORKING-AGREEMENT.md`.
 AI Implementation Engineer: DeepSeek via the existing local Cline runner for
-#59 (owner-approved existing prepaid; this does not approve app-side AI).
+#59, for regular development (owner-approved existing prepaid; this runner
+approval does not by itself approve app-side AI, which has its own owner
+decisions in BE-21).
 Claude Code remains the implementation engineer for the separate #53 / PR #56
 assignment. Verify the actual runner status before assuming an active session.
 AI Product Designer: a specifically assigned designer using approved project
@@ -22,7 +26,7 @@ references; Claude Design may be the tool, not an autonomous release approver.
 
 | Task | Delivery Lead | Developer | Current owner / status |
 | --- | --- | --- | --- |
-| #59 / PR #60 menu extraction | Claude Code | DeepSeek, local Cline runner (`menucard-local-runner`) | Claude Code: real local acceptance run by the Lead; runner stopped and new rounds disabled since 2026-10-20 |
+| #59 / PR #60 menu extraction | Claude Code | DeepSeek, local Cline runner (`menucard-local-runner`) | Claude Code: content complete and accepted locally (BE-21, 2026-10-24); release in progress (migration-only PR #61 for 0020, then PR #60); runner active, waiting for orders |
 | #53 / PR #56 compact intake flow | Claude Code (read-only follow-up) | Claude Code (separate branch) | Open/draft; real browser acceptance outstanding |
 
 The table records the owner at the time of the last edit; the live GitHub

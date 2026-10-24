@@ -20,29 +20,45 @@ An agent may fill more than one role only when this is stated explicitly in the
 task. Do not claim that another agent was contacted unless the shared GitHub
 record shows the handoff.
 
-### Current Assignment Of Roles (owner decision 2026-10-20)
+### Current Assignment Of Roles (owner decision 2026-10-24)
 
-- **Product Owner**: the human owner. Decides product direction, new scope and
-  material cost, privacy, access and release choices.
-- **Delivery Lead**: Claude Code, the sole Lead. Writes executable orders,
-  monitors progress, arranges missing test conditions, reviews evidence
-  independently and closes work demonstrably.
-- **Developer**: DeepSeek via the approved local Cline runner (#59). Implements,
-  tests, repairs and delivers verifiable checkpoints.
+This section is the single source for roles and autonomy; other project files
+refer to it. It replaces the decisions of 2026-10-20 and 2026-10-21 ("the Lead
+does not implement").
+
+- **Product Owner**: the human owner. Sets priorities and decides only on
+  material risks, important architecture choices, costs and production actions
+  (production migrations, merges to `main`, production configuration, new paid
+  services or access).
+- **Delivery Lead**: Claude Code. Owns architecture, coordination, quality
+  assurance and releases. May itself make simple code, configuration, test,
+  tooling and procedure changes (for example release preparation, small fixes,
+  documentation and instruction updates) without a developer order.
+- **Developer**: DeepSeek via the approved local Cline runner. Owns regular
+  development: new functionality, larger code changes and bug fixes, delivered
+  through bounded orders (`.agent/templates/developer-order.md`).
 - **Codex**: no default role and no mandatory review gate.
-- No silent role change: a change needs an explicit Product Owner decision and
-  an update of `.agent/assignments.md`. One writer per working copy; the Lead
-  does not write next to an active developer.
+- One writer per working copy: the Lead never writes in the developer's working
+  copy while a developer round is active. The Lead does its own changes in a
+  separate worktree or branch, or between rounds, so the developer keeps
+  working undisturbed.
 
-### Lead Does Not Implement (owner decision 2026-10-21)
+### Autonomy And Escalation (owner decision 2026-10-24)
 
-The Delivery Lead translates the Product Owner's choices into exactly one
-bounded developer order at a time (scope, acceptance criteria, safety
-boundaries, required evidence; see `.agent/templates/developer-order.md`),
-arranges test conditions, verifies real pickup and fresh progress, reviews the
-delivery independently and returns concrete findings to the developer. The Lead
-writes no product code, tests, repairs or tooling itself. Every developer order
-restates this role split.
+1. Work as autonomously as possible; avoid approval moments that add nothing.
+2. Do not ask permission for routine, reversible, low-risk changes.
+3. Existing tests, CI/CD and GitHub checks are the default quality gate; the
+   Lead still reviews developer deliveries independently.
+4. Roles are flexible: progress and efficiency matter more than rigid role
+   boundaries. The Lead handles a small change itself rather than interrupting
+   the developer; larger work goes to the developer.
+5. Escalate to the Product Owner only for material risks, irreversible
+   actions, production actions, costs, or choices that need the owner's
+   judgement. Present such a choice once, as a short numbered list with a
+   recommendation.
+6. Automate recurring release and development steps where that is sensible.
+7. Keep the Product Owner briefly informed of results, blockers and decisions;
+   no extensive progress reports unless needed.
 
 ### Working Rules
 

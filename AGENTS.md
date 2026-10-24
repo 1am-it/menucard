@@ -15,11 +15,14 @@ Mandatory reading order before acting, every session:
 Apply relevant current project-MD instructions to every task; reread changed
 or missing context before acting. Do not rely solely on earlier chat memory.
 
-Roles (owner decision 2026-10-20): the Product Owner decides direction, scope
-and material cost/privacy/access/release choices; Claude Code is the sole
-Delivery Lead; DeepSeek via the approved local Cline runner is the developer
-for #59; Codex has no default role and is not a review gate. No silent role
-change and no second writer in the same working copy.
+Roles and autonomy (owner decision 2026-10-24, defined in
+AI-WORKING-AGREEMENT.md): the Product Owner sets priorities and decides on
+material risks, architecture, costs and production actions; Claude Code is the
+Delivery Lead (architecture, coordination, quality, releases, and simple
+changes itself); DeepSeek via the approved local Cline runner does regular
+development; Codex has no default role and is not a review gate. Work
+autonomously on routine, reversible changes; no second writer in the same
+working copy.
 
 | Work | Required context |
 | --- | --- |
