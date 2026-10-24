@@ -1308,12 +1308,47 @@ Een paar telt als **één** "regel met een prijs". Het citaat is de naamregel pl
 de prijsregel ("Fictieve carpaccio 11,00"), wat onder de bestaande normalisatie
 een letterlijk deel van de bron is; de locator is "regels 3–4". Een citaat dat
 alleen de naamregel of alleen de prijsregel dekt, dekt het paar. Er is geen
-tweede prijsfamilie: dezelfde `findPrices` uit `src/lib/htmlMenuStructure.js`,
-die losse hele euro's zonder € of decimalen bewust niet als prijs ziet.
+tweede prijsfamilie: dezelfde prijslezer uit `src/lib/htmlMenuStructure.js`.
 
 `sourceTextLines` geeft elke geprinte regel een pagina (een form feed in
 PDF-tekst is een paginagrens) en een globaal regelnummer, zodat een keuze op
 regel 7 ook na een paginawissel regel 7 blijft.
+
+### AA1 — hele getallen als prijs, voorzichtig (review 6383853638)
+
+Sommige kaarten printen een prijs als **geheel getal zonder centen en zonder
+valutateken**: `Zeebaars 34    geschroeid | oester` en `Vijf-gangen 130`.
+`findPrices` blijft daar bewust blind voor — referenties, telregels en
+meetcode veranderen dus niet. Dezelfde parser is uitgebreid met
+`findWholeEuroPrices` / `findPrintedPrices` in dezelfde prijssectie van
+`src/lib/htmlMenuStructure.js`, met dezelfde eenheids-, tijd- en
+datumwoordenschat. `findPrintedPrices` = de bestaande geldbedragen plus de
+bevestigde hele euro's, nooit dubbel.
+
+Een geheel getal is alleen een prijs als **alle** voorwaarden gelden:
+
+| Voorwaarde | Regel in de code |
+| --- | --- |
+| vorm | 1–3 cijfers, geen voorloopnul, optioneel `,-`; decimalen, `€` en `%` blijven bij `findPrices` |
+| geprinte celgrens | ten minste twee spaties, een tab, een kolomscheider (`\|` `·` `•`) of het eind van de geprinte regel, aan minstens één kant |
+| naam | minstens twee letters vóór het bedrag (in dezelfde cel of de cel ervoor) |
+| geen eenheid of telwoord direct erna | `gram`, `g`, `cl`, `ml`, `st`, `stuks`, `personen`, `pers`, `gangen`, `x`, `%`, `uur`, `h`, `min`, `kazen`, `glazen`, `flessen`, … |
+| geen jaartal, tijd, datum, telefoon of nummering | vier cijfers vallen al af; `18:30`, `16h00`, `22h45`, `076 201 49 75`, `op nummer 1`, `Wolfslaardreef 100` |
+| dezelfde rubriek op ≥ 2 geprinte regels | `confirmWholeEuros`: per rubriek en pagina tellen de **geprinte rijen**; een samengevouwen captureregel met meerdere cellen telt als meerdere rijen, want de capture heeft de kolommen van de kaart samengevoegd |
+
+Een geweigerd bedrag houdt zijn **eigen reden** (`wholeEuroAmountTokens`):
+`unit`, `counting_word`, `leading_zero`, `glued`, `time`, `date`, `phone`,
+`no_boundary`, `no_name`. De offline diagnose
+(`node ops/scripts/diagnose-menu-source-coverage.js`) rapporteert die redenen en
+somt elke geaccepteerde regel op, zodat een **valse treffer** zichtbaar is in
+plaats van verstopt in een totaal.
+
+Bekende grens: de gepinde Smelt-PDF vat alle cellen samen tot enkele regels met
+**één** spatie ertussen (`Hollands 27 Petit Doruvael, …`). Zonder geprinte
+celgrens is een heel getal daar niet te onderscheiden van een gewoon getal; die
+regels blijven dus ongemoeid en Smelt houdt nul prijsregels. Dat is een eerlijke
+beperking, geen groen resultaat: de kolomreconstructie van zo'n PDF vraagt een
+eigen besluit (BE-21).
 
 ### Z2 — de kaartindex bij de review
 
@@ -1323,6 +1358,13 @@ regel, gerecht, kaartprijs, conceptprijs). **Geen brontekst** in dit deel: de
 review blijft dus zonder capture, precies zoals variant 1 eist. De legenda komt
 van de server en noemt elke kleur in gewone taal, zodat kleur nooit de enige
 drager is.
+
+AA2 (review 6383853638): `MenuSourceMap` toont die legenda als **één regel met
+vier kleine chips** (✓ overgenomen · ○ niet overgenomen · ▲ prijs wijkt af · –
+geen gerecht) en zet de lange uitleg per kleur achter een native
+`<details>` met de naam "Uitleg". Elk chip houdt zijn eigen teken en zijn eigen
+rand- of stippelstijl, en de schermlezer leest de volledige woorden; openen kan
+met het toetsenbord.
 
 ### Z3 — de kaartpagina, lui geladen
 
@@ -1350,7 +1392,7 @@ een eigenaar-besluit over byte-opslag.
 ### Z4 — tikken = actie
 
 Een markering is een `button` met `aria-expanded`, een `aria-label` met dezelfde
-woorden als de legenda, een eigen vorm (● ◌ ▲ –) en een rand- of stippelstijl.
+woorden als de legenda, een eigen vorm (✓ ○ ▲ –) en een rand- of stippelstijl.
 Daaronder opent het paneel:
 
 | Kleur | Paneel | Actie |

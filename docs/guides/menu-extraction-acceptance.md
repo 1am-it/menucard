@@ -947,9 +947,64 @@ Wat dit eerlijk laat zien:
   haalt de bron bij het bekijken niet opnieuw op. Dat is een eigenaar-besluit over
   byte-opslag, geen technische slordigheid.
 - Hele-euro-prijzen zonder € of decimalen (Wolfslaar, Smelt) blijven buiten de
-  vergelijking; zie de diagnose hierboven.
+  vergelijking; zie de diagnose hierboven en AA1 hieronder (Wolfslaar is inmiddels
+  wel gelezen, Smelt niet).
 - Een losse prijsregel kan alleen "Geen gerecht" worden; er is geen
   samenvoegactie met een gerecht elders op de kaart.
 - Geen echte provideraanroep, geen productieconcept en geen onafhankelijke
   review in deze ronde.
+
+## AA1/AA2: hele getallen als prijs en een compacte legenda (review 6383853638)
+
+Basis `40e18ff`. Ook dit is **ontwikkelaars- en fixturebewijs**: geen
+AI-aanroep, geen sleutel, geen migratie, geen nieuwe dependency, geen
+PDF-byteopslag, geen wijziging aan referenties, telregels of meetcode, en geen
+publicatie of merge.
+
+| Criterium | Bewijs |
+| --- | --- |
+| AA1 hele getallen als prijs | `ops/benchmark/htmlMenuStructure.test.js`: "Zeebaars 34    geschroeid \| oester", "Witte Heilbot 32    zeeuwse mossel", "Vijf-gangen 130", "3 kazen 15 \| 5 kazen 20", tab-cel, "9,-"; geweigerd: "75 gram", "6 stuks", "2 personen", "5 gangen", "10%", "12 x", "2025", "18:30", "16h00 - 22h45", "076 201 49 75", "Wolfslaardreef 100 4834 SP Breda", "op nummer 1", losse "12", en de Smelt-vorm "Hollands 27 Petit Doruvael" (enkelvoudige spatie). `findPrices` zelf blijft ongewijzigd. `src/lib/menuSourceCoverage.test.js`: twee hele-getalregels in dezelfde rubriek tellen, één los getal in zijn eigen rubriek telt niet, een samengevouwen rij met drie cellen is één prijskolom, en "Toevoegen" gebruikt de prijs van de server |
+| AA2 compacte legenda | `src/lib/menuSourceMapSurface.test.js`: één chipregel met de vier tekens (✓ ○ ▲ –), de volledige woorden per chip, een native `<details>` met "Uitleg" en de lange tekst per kleur, plus de CSS voor één regel en de focusstijl. Browser: de chips staan op 390 px op één regel (één `top`), "Uitleg" is dicht bij openen en opent met het toetsenbord, daarna staan de vier volledige teksten er |
+| AA3 bewijs | unit-tests hierboven, de diagnose vóór en na (hieronder), de kaartscreenshots 390 px licht/donker en 320 px, `npm test` en `npm run build` |
+
+### Diagnose vóór en na AA1 (gepinde captures, live-run 2)
+
+`node ops/scripts/diagnose-menu-source-coverage.js`, offline. Rapport gitignored
+in `ops/benchmark/output/ai-probe-coverage-diagnosis.json` (vóór:
+`...aa1-before.json`, na: `...aa1-after.txt`). "Hele euro" = de nieuwe lezing.
+
+| Bron | Vóór (niet gedekt / prijsregels) | Na (niet gedekt / prijsregels) | Hele euro geaccepteerd | Rubriek weigerde | Verdacht |
+| --- | --- | --- | --- | --- | --- |
+| zuyd | 9 / 31 | 15 / 41 | 10 | 10 | 0 |
+| andalous | 2 / 91 | 2 / 91 | 0 | 7 | 0 |
+| pellens | 16 / 72 | 16 / 72 | 0 | 1 | 0 |
+| chocolat | 0 / 30 | 0 / 30 | 0 | 0 | 0 |
+| smelt | 0 / 0 | 0 / 0 | 0 | 0 | 0 |
+| blossem | 0 / 2 | 0 / 8 | 6 | 0 | 0 |
+| bardot | 15 / 16 | 15 / 16 | 0 | 0 | 0 |
+| wolfslaar | 0 / 0 | 28 / 29 | 29 | 0 | 0 |
+
+Eerlijk over de treffers:
+
+- **Wolfslaar** levert de echte vormen van de review: "Witte Heilbot 32",
+  "Zeebaars 34", "Noordzeekrab 38", "Tarbot 62", "Zeetong 69", "Mechelse Koekoek
+  44", "Vijf-gangen 130", "3 kazen 15". De namen komen uit de geprinte cel vóór
+  de prijs, dus niet de omschrijving erachter.
+- **Zuyd** en **Blossem** leveren arrangementen en wijntips ("wijnarr 32",
+  "3 gangen 57", "4 gangen 66"). Dat zijn echte prijzen maar **geen gerechten**:
+  ze verschijnen als "niet overgenomen" en een medewerker kan ze met "Geen
+  gerecht" afvinken. Dat is de bedoelde route, geen stilzwijgende goedkeuring.
+- Eén treffer is een **valse naam**: "inclusief gebakken ganzenlever 54" op de
+  Wolfslaar-hoofdgerechten. De prijs klopt, de naam is een vervolgzin. Ook die
+  kan alleen "Geen gerecht" worden; de app verzint geen betere naam.
+- Uitgesloten met een eigen reden (en dus niet stil): "op nummer 1" uit een
+  vacaturetekst (`counting_word`), "16h00 - 22h45" (`unit`/`glued`), "076 201 49
+  75" (`leading_zero`/`no_boundary`/`no_name`), "75 gram" en "6 stuks" (`unit`).
+  Die twee klassen zijn pas na de eerste meting toegevoegd; zonder die twee
+  correcties gaf Andalous 8 valse prijsregels.
+- **Smelt blijft 0**: de gepinde PDF vat alle cellen samen tot regels met één
+  spatie ("Hollands 27 Petit Doruvael"), dus er is geen geprinte celgrens en het
+  getal is niet van een gewoon getal te onderscheiden. Dat is een gemelde
+  beperking, geen groen resultaat.
+
 
