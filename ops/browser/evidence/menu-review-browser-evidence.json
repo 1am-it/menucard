@@ -1,9 +1,9 @@
 {
   "fixtureOnly": true,
   "passed": true,
-  "head": "17bda73d9e3dd4cae5b757d6bc635d493bf5deac",
-  "worktreeDirty": true,
-  "generatedAt": "2026-10-24T12:41:18.468Z",
+  "head": "c4ea5dce650eb6dafd92d47739f0ae64069d6868",
+  "worktreeDirty": false,
+  "generatedAt": "2026-10-24T12:46:02.844Z",
   "command": "npm run test:browser:menu-review",
   "environment": {
     "node": "v22.22.3",
@@ -616,7 +616,7 @@
     {
       "name": "manual import: step 1 shows \"Geldig tot\" with a clock time",
       "passed": true,
-      "detail": "Geldig tot 15:07. Daarna maak je gewoon een nieuwe prompt."
+      "detail": "Geldig tot 15:12. Daarna maak je gewoon een nieuwe prompt."
     },
     {
       "name": "manual import: technische details name the pinned instruction",
@@ -2936,7 +2936,7 @@
     {
       "name": "network guard: CDP blocks external subresource and frame navigation",
       "passed": true,
-      "detail": "[{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/pixel.png\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-24T12:41:17.482Z\",\"resourceType\":\"Image\"},{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/frame\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-24T12:41:17.489Z\",\"resourceType\":\"Document\"}]"
+      "detail": "[{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/pixel.png\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-24T12:46:01.876Z\",\"resourceType\":\"Image\"},{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/frame\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-24T12:46:01.876Z\",\"resourceType\":\"Document\"}]"
     },
     {
       "name": "network guard: no unexpected CDP traffic during app scenarios",
@@ -3166,7 +3166,7 @@
     },
     {
       "file": "menu-review-readonly-1024-dark.png",
-      "sha256": "fa826d9c2444b7353cf68a8c3104ebe7c55cd5ead4753293f50be7b241cf83d6",
+      "sha256": "6088c98c789064cdca63259783c5efcb078e5cd569d00f6697a7708d5290d31b",
       "width": 1024,
       "height": 900
     },
@@ -3178,19 +3178,19 @@
     },
     {
       "file": "menu-review-partial-390-dark.png",
-      "sha256": "8ba12036c7eee528eb6705d38a9753fedbaa89cedc5d7858d6848e4720030c50",
+      "sha256": "aa7f3ab57f4f1df7f24a29d0da0522f7a665be4ab2e044ac1848f6e76fd919a9",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-image-only-390-light.png",
-      "sha256": "744f41499f3387fefaf7114a4256f76ac76bafefd1861991a5633a7c3bb68424",
+      "sha256": "489c0a58c5ef1f24caed93ac20c79b9d8f58fe004432362f4f93f3b9a1d0ae98",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-image-only-320-dark.png",
-      "sha256": "2365d6051366a95cf3bbc2493814b1dadaa062882ce936d8d3ccf39bd4132193",
+      "sha256": "e7f8db0789f56bcb2b9560a999c6f00bfd32e55a3c4c88712e82d974e3387d98",
       "width": 320,
       "height": 900
     },
@@ -3208,7 +3208,7 @@
     },
     {
       "file": "menu-review-structure-1024-light.png",
-      "sha256": "d21be4d81eae3d9f7cde400c03a8ed3b4128f9873fad0c6c7bd8e838541bbd49",
+      "sha256": "d342dfd5f655f49b39df426fe013818959fce81d3dfde520706833cca53bf71d",
       "width": 1024,
       "height": 900
     },
@@ -3220,19 +3220,19 @@
     },
     {
       "file": "menu-review-structure-390-light.png",
-      "sha256": "69ee79fc122f71eb3e992ef25886f077ada7d0dcdf065a121310ba521d083185",
+      "sha256": "40b8815fe2877c132dfb5be6c0e175b537e810bb3495b26d50bc89bcecd95252",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-structure-390-dark.png",
-      "sha256": "1dfbc4d21a6942a69f3d7a17ab77805ce79890d1d5f455721353cc27f142cb49",
+      "sha256": "875bef0b3f4219a6e7265499f60332a6f1bfb89e41b70c184da53ac4865477c1",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-structure-readonly-1024-dark.png",
-      "sha256": "00944f106855c92b31d240aad61c62cac2cfed4fe38e69a160f0c319ab322206",
+      "sha256": "64f3a2a4838c1d27a15605245add1d51ed5a19a020f5de7a1f89f6e64d6fa27b",
       "width": 1024,
       "height": 900
     },
@@ -3412,7 +3412,7 @@
     },
     {
       "file": "ai-map-keyboard-390-light.png",
-      "sha256": "e38d7aa2dcbb5c688eb4852bc924237d73de24faca4713cc6ade06ce178ce329",
+      "sha256": "9edce345596e8234035150dc370d9ad014395f611f420a572182fdb10dc19303",
       "width": 390,
       "height": 900
     },
@@ -3442,7 +3442,7 @@
     },
     {
       "file": "ai-read-review-390-light.png",
-      "sha256": "c066794d7a605c8fca0ce482eaeebc8420aa57e63229d1c8634ac2e74e901cd3",
+      "sha256": "0e41deb1e4ba1ad2f1c6badf6854a79b08fdf6be322876a1224b23ff06acd28a",
       "width": 390,
       "height": 900
     },
@@ -3454,13 +3454,13 @@
     },
     {
       "file": "ai-read-block-390-dark.png",
-      "sha256": "5b582eda481f27a1fd9d4e93e1a1d5a09951d482f87a5237822f505c933b4d6b",
+      "sha256": "6760eba1a15d2d90520e3090e9dc4251cf09b5b76d36278f2ada079cb30397d0",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-read-manual-390-dark.png",
-      "sha256": "55001d8a2fc3584ba78df7ec031ab3d435a1e5c9b7c25524a5e34e2c500a1da4",
+      "sha256": "c23207ee5f0e9f0e99899c074e884dead6572e15d3a27818ff97ad76f7148b0d",
       "width": 390,
       "height": 900
     },
@@ -3478,7 +3478,7 @@
     },
     {
       "file": "ai-read-review-390-dark.png",
-      "sha256": "2255a376609ca6622f270f986b7727ddc562324429dad57b30c2a8d6a8b3531d",
+      "sha256": "b6f08c76bb9533d4a90f58a54e7b17e21f0cdeeb98ac92222393b5e4136317c8",
       "width": 390,
       "height": 900
     },
@@ -3490,13 +3490,13 @@
     },
     {
       "file": "ai-read-batch-390-light.png",
-      "sha256": "ae56bdb6752bcf4957f82265f42d7952c8cb86c9dc50e6c20ac4b30907209193",
+      "sha256": "0e5642f3e9e66a030e528f6b060869b46f4d1f5763677b986496792e05b4c051",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-read-batch-390-dark.png",
-      "sha256": "d8d9f484434276259bfbeb43b23b6497e15c51725c7dc10ea61849dfd5b133ad",
+      "sha256": "c054578dae55a99c0e59caab3eaaeec986928da21257c2acb248946b6eefbcb4",
       "width": 390,
       "height": 900
     },
@@ -3520,37 +3520,37 @@
     },
     {
       "file": "menu-review-320-light.png",
-      "sha256": "bc714be00037be17655b61b6a7a5637f1597fd5d8711bd1ed32301423adf7fe9",
+      "sha256": "10353eba7623aef6e7e68c7c901f340e2c0b9d645e78518a118d98cfb16256a3",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-320-dark.png",
-      "sha256": "4bc3aa27b622de05cc793f7991dbfee5e1413d2d2fe0df36cf16632d152d039a",
+      "sha256": "a8d3d56ea9ee37dfeb959614debbea97ad7e96323cab0da3883c6fffea34b7ba",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-390-light.png",
-      "sha256": "3ffa0042bbfa2cb9a4af8a7d756738b4f023feb62b939114949aa13b025487ce",
+      "sha256": "f631c7bbc7838ac16fbe614915d5bb95b43f92a8d7abe5cb0873dc1589fddf15",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-390-dark.png",
-      "sha256": "40520f9e8ef6c8f789aa53f11293f701b3406d6b53f399606eabee06829b7d82",
+      "sha256": "d1055e7a2a901bf23648034dca6fa49102b0db61f8e2dad470fd7eae2c8a327c",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-1024-dark.png",
-      "sha256": "c1cf6d0490e4d92c55e0091c9bcd01dbaada92db8ce7e8b356c58dcf3a6ead1c",
+      "sha256": "1e7fda780a0ec49b6e16bf344bd50130c63c277596550358bea6037db8bc87c1",
       "width": 1024,
       "height": 900
     },
     {
       "file": "menu-review-keyboard-390-light.png",
-      "sha256": "05a3ad23767e96a51d21f0702e79ec78c5e98d82edc083cc895176db06cfaf28",
+      "sha256": "36859ca2d4d7212810daa277af992d6465c810174e8d5aee8b904c3dfd6773eb",
       "width": 390,
       "height": 900
     },
@@ -3604,7 +3604,7 @@
     },
     {
       "file": "concept-list-empty-390-light.png",
-      "sha256": "81f2ec71b8735a0b99b44d2a008563e125459a0d68729fd9f3c98696a611b231",
+      "sha256": "2c1eacc66df22c5646b0db7a19e9b5460f79a92cb73b06fca70e501681bac80b",
       "width": 390,
       "height": 900
     },
@@ -3686,7 +3686,7 @@
         "url": "https://unapproved.invalid/pixel.png",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-24T12:41:17.482Z",
+        "at": "2026-10-24T12:46:01.876Z",
         "resourceType": "Image"
       },
       {
@@ -3696,7 +3696,7 @@
         "url": "https://unapproved.invalid/frame",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-24T12:41:17.489Z",
+        "at": "2026-10-24T12:46:01.876Z",
         "resourceType": "Document"
       }
     ],
@@ -3708,7 +3708,7 @@
         "url": "https://unapproved.invalid/api/anything",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-24T12:41:17.456Z"
+        "at": "2026-10-24T12:46:01.850Z"
       },
       {
         "phase": "negative-probe",
@@ -3717,7 +3717,7 @@
         "url": "http://unapproved.invalid/api/anything",
         "reason": "external_origin",
         "protocolRelative": true,
-        "at": "2026-10-24T12:41:17.456Z"
+        "at": "2026-10-24T12:46:01.850Z"
       },
       {
         "phase": "negative-probe",
@@ -3726,7 +3726,7 @@
         "url": "http://localhost:3137/api/internal/v1/menu-concepts",
         "reason": "method_not_allowed",
         "protocolRelative": false,
-        "at": "2026-10-24T12:41:17.456Z"
+        "at": "2026-10-24T12:46:01.850Z"
       },
       {
         "phase": "negative-probe",
@@ -3735,7 +3735,7 @@
         "url": "http://localhost:3137/api/internal/v1/unrelated-write",
         "reason": "unknown_api_route",
         "protocolRelative": false,
-        "at": "2026-10-24T12:41:17.456Z"
+        "at": "2026-10-24T12:46:01.850Z"
       },
       {
         "phase": "negative-probe",
@@ -3744,7 +3744,7 @@
         "url": "http://localhost:3137/api/internal/v1/menu-concepts",
         "reason": "method_not_allowed",
         "protocolRelative": false,
-        "at": "2026-10-24T12:41:17.457Z"
+        "at": "2026-10-24T12:46:01.851Z"
       },
       {
         "phase": "negative-probe",
@@ -3753,7 +3753,7 @@
         "url": "ws://unapproved.invalid/socket",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-24T12:41:17.457Z"
+        "at": "2026-10-24T12:46:01.851Z"
       }
     ]
   },
