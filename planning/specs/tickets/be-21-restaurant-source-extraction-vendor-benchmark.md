@@ -225,6 +225,14 @@ gegevensverwerking goedgekeurd.**
 **Besluit Product Owner 2026-10-24 ("akkoord 1"): tweede aanroepteller voor de herhaalde live-proef.**
 De eerste live-reeks (2026-10-23/24) bereikte het plafond van 40 aanroepen. Die reeks bevat de diagnoseaanroepen; de werkelijke kosten waren ongeveer 1 eurocent per aanroep, terwijl het ledger aanroepen met onbekende kosten conservatief op 30 eurocent boekt. Dat ledger is ongewijzigd bewaard als `ops/benchmark/output/ai-probe-budget-ledger.run1.json`. Er komt één nieuwe teller met dezelfde grenzen: 40 aanroepen, 30 eurocent per aanroep, 1 tegelijk en cumulatief 900 eurocent. Het harde plafond blijft de $10-limiet van de Anthropic-werkruimte; er komt geen nieuw tegoed bij en automatisch bijvullen blijft uit.
 
+**Besluit Product Owner 2026-10-24 ("akkoord mockup", "ok akkoord"): route B als hulpmiddel in de app.**
+Uitkomst van live-run 2: 22 aanroepen, 23 eurocent. Gevonden: 265 van 407 gerechten; zonder Bardot 265 van 295 (90 %). Er waren 2 prijsfouten, het bewijs was 100 % geverifieerd en de tweede run was instabiel.
+1. Lukt deterministisch lezen niet, dan kan de beheerder op "Lees met AI" klikken. Claude maakt dan een **concept** dat door het bestaande nalopen-scherm gaat. Er is nooit automatische publicatie.
+2. Visuele referentie: de mockup "Automatisch menu uitlezen met AI" (3 schermen; https://claude.ai/artifact/Na8DHfPQfFHC3MACJg5J6y, versie 5), met twee aanpassingen:
+   - benoemde prijsvarianten (bijvoorbeeld glas/karaf) zijn direct geldig en hoeven niet nagelopen te worden;
+   - de keuze bij een ontbrekende prijs heet "Prijs onbekend".
+3. Maandbudget voor de app: US$ 10, zichtbaar als "AI deze maand". Productie krijgt een aparte API-sleutel. Die wordt pas bij de vrijgave aangemaakt en in Vercel gezet; zonder sleutel blijft de functie uit.
+
 **Oorspronkelijke status: NEEDS_APPROVAL.** Er wordt niets betaald, geen account aangemaakt en
 geen sleutel gebruikt totdat de Product Owner provider/model, budget en
 gegevensverwerking expliciet goedkeurt. Deze proef levert gemeten cijfers voor
