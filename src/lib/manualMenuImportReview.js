@@ -23,6 +23,7 @@ const { extractCodeBlock, buildImportReport } = require('./manualMenuImportImpor
 const schema = require('./menuExtractionSchema');
 const { describeNormalizations } = require('./menuExtractionNormalization');
 const { PROVENANCE_KIND } = require('./manualMenuImportBundle');
+const { compareCaptureWithConcept, itemFromPricedLine } = require('./menuSourceCoverage');
 
 const MAX_NOTE = 300;
 const MAX_REASONS = 200;
@@ -185,6 +186,109 @@ function decideRow({ report, decisions, decision } = {}) {
   return { ok: true, decisions: next, row: rowForView(row, next.get(row.id)) };
 }
 
+// Variant 1 (Lead order 6382189724): the two choices per uncovered line.
+const UNCOVERED_ACTIONS = ['add_uncovered', 'uncovered_not_dish'];
+
+function uncoveredLineKey(line) {
+  return `uncovered:${line.id}`;
+}
+
+function uncoveredDecisionEntry(line, action, extra) {
+  return {
+    rowId: uncoveredLineKey(line),
+    action,
+    line: {
+      sourceId: line.sourceId,
+      lineNumber: line.lineNumber,
+      text: line.text,
+      section: line.section || null,
+    },
+    ...(extra || {}),
+    at: new Date().toISOString(),
+  };
+}
+
+/**
+ * X3: one human choice on one uncovered line. The server recomputes the
+ * comparison from the capture it read itself, so a client can never inject a
+ * line, a name or a price. Adding goes through the same validator as every
+ * other dish: the new row appears in the review with its section marked
+ * uncertain, so the human confirms or corrects name and section there.
+ */
+function decideUncoveredLine({ report, decisions, bundle, decision } = {}) {
+  if (!report || !Array.isArray(report.rows)) {
+    return { ok: false, code: 'unknown_import', message: 'Deze import hoort niet bij deze sessie.' };
+  }
+  const action = decision && typeof decision.action === 'string' ? decision.action : '';
+  if (!UNCOVERED_ACTIONS.includes(action)) {
+    return { ok: false, code: 'decision_invalid', message: 'Kies Toevoegen of Geen gerecht.' };
+  }
+  // No "accept all": exactly one line per decision, also here.
+  if (decision.acceptAll === true || decision.rows !== undefined) {
+    return { ok: false, code: 'accept_all_forbidden', message: 'Er is geen "alles accepteren". Beoordeel elke regel apart.' };
+  }
+  const lineId = decision && typeof decision.lineId === 'string' ? decision.lineId.trim() : '';
+  if (lineId === '' || lineId.length > 160) {
+    return { ok: false, code: 'unknown_line', message: 'Deze regel staat niet meer open. Laad de review opnieuw.' };
+  }
+  const map = decisions instanceof Map ? decisions : new Map();
+  const view = uncoveredView({ report, decisions: map, capture: bundle ? bundle.sources : null });
+  if (!view.available) {
+    return { ok: false, code: 'capture_unavailable', message: view.message };
+  }
+  const line = view.lines.find((entry) => entry.id === lineId);
+  if (!line) {
+    return { ok: false, code: 'unknown_line', message: 'Deze regel staat niet meer open. Laad de review opnieuw.' };
+  }
+  const next = new Map(map);
+  if (action === 'uncovered_not_dish') {
+    next.set(uncoveredLineKey(line), uncoveredDecisionEntry(line, action));
+    return { ok: true, decisions: next, report: null, row: null, line };
+  }
+  const added = addLineAsItem({ report, bundle, line });
+  if (!added.ok) return added;
+  next.set(uncoveredLineKey(line), uncoveredDecisionEntry(line, action, { addedRowId: added.rowId }));
+  return { ok: true, decisions: next, report: added.report, row: added.row, line };
+}
+
+/**
+ * The "Toevoegen" item, through the existing validator. The new category is
+ * always marked uncertain: the section label is the nearest printed heading,
+ * a guess the human must confirm or correct with the existing "Wijzig" step.
+ */
+function addLineAsItem({ report, bundle, line } = {}) {
+  const built = itemFromPricedLine(line);
+  if (!built.ok) return built;
+  const menus = cloneMenus(report.validated.menus);
+  if (menus.length === 0) {
+    return { ok: false, code: 'no_menu', message: 'Dit concept heeft nog geen menukaart om deze regel aan toe te voegen.' };
+  }
+  const found = menus.findIndex((menu) => menu && menu.sourceId === line.sourceId);
+  const menuIndex = found >= 0 ? found : 0;
+  const target = menus[menuIndex];
+  const section = typeof line.section === 'string' && line.section.trim() ? line.section.trim().slice(0, schema.LIMITS.category) : null;
+  const categories = Array.isArray(target.categories) ? target.categories : [];
+  target.categories = [...categories, { name: section || 'Overig', uncertain: true, items: [built.item] }];
+  const next = buildImportReport({
+    importId: report.importId,
+    bundle,
+    output: {
+      menus,
+      coverage: report.validated.coverage,
+      ...(Array.isArray(report.validated.rejected) && report.validated.rejected.length > 0 ? { rejected: report.validated.rejected } : {}),
+    },
+    aiName: report.aiName,
+    now: new Date(report.importedAt),
+    // V2: an earlier derivation stays visible after this step too.
+    carriedNormalizations: report.normalizations,
+  });
+  if (!next.ok) return { ok: false, code: next.code, message: next.message };
+  const rowId = `${menuIndex}.${target.categories.length - 1}.0`;
+  const row = next.rows.find((entry) => entry.id === rowId) || null;
+  return { ok: true, report: next, row, rowId };
+}
+
+
 /**
  * Het schermbeeld: per regel de toestand plus de menselijke beslissing. Een
  * bevestigd supplement is zichtbaar "als toeslag weggelaten" â€” nooit stil
@@ -207,7 +311,7 @@ function decisionOutcome(row, decision) {
   return 'keep_confirmed';
 }
 
-function reviewView({ report, decisions } = {}) {
+function reviewView({ report, decisions, capture } = {}) {
   if (!report || !Array.isArray(report.rows)) return null;
   const map = decisions instanceof Map ? decisions : new Map();
   const rows = report.rows.map((row) => rowForView(row, map.get(row.id)));
@@ -250,7 +354,39 @@ function reviewView({ report, decisions } = {}) {
         : pending.length > 0
           ? `Kan pas als alle ${report.summary.needsReview} punten zijn nagelopen. Nog ${pending.length} open.`
           : null,
+    // Variant 1 (Lead order 6382189724): the free, deterministic comparison
+    // between the captured source and this concept. Always computed here on the
+    // server from the capture that came out of the sealed token; the screen
+    // never compares anything itself and never receives the source text.
+    uncovered: uncoveredView({ report, decisions: map, capture }),
   };
+}
+
+/** The "Geen gerecht" lines a human already accounted, for the comparison. */
+function accountedLines(decisions) {
+  const map = decisions instanceof Map ? decisions : new Map();
+  return [...map.values()]
+    .filter((decision) => decision && decision.line && decision.action === 'uncovered_not_dish')
+    .map((decision) => ({
+      sourceId: decision.line.sourceId,
+      lineNumber: Number.isInteger(decision.line.lineNumber) ? decision.line.lineNumber : null,
+      text: decision.line.text,
+    }));
+}
+
+/**
+ * The block of variant 1. `capture` is the source text per source as the
+ * server read it; without it the screen says the comparison is unavailable
+ * for this concept instead of pretending there is nothing to compare.
+ */
+function uncoveredView({ report, decisions, capture } = {}) {
+  const validated = report && report.validated ? report.validated : {};
+  return compareCaptureWithConcept({
+    sources: Array.isArray(capture) ? capture : null,
+    menus: Array.isArray(validated.menus) ? validated.menus : [],
+    rejected: Array.isArray(validated.rejected) ? validated.rejected : [],
+    accounted: accountedLines(decisions),
+  });
 }
 
 /** De herkomst die met het concept wordt bewaard (K5). */
@@ -300,6 +436,20 @@ function buildImportProvenance({ report, decisions } = {}) {
     // conceptmetadata). Het is de herkomst van de telling en de bijgestelde
     // status, geen goedkeuring en geen vervanging van het bronbewijs.
     normalizations: (report && Array.isArray(report.normalizations) ? report.normalizations : []).slice(0, 5),
+    // Variant 1: wat een mens met een niet-overgenomen bronregel deed, blijft
+    // in de conceptmetadata staan. Daardoor komt de regel na herladen niet
+    // terug en is de keuze achteraf te controleren.
+    uncovered: [...map.values()]
+      .filter((decision) => decision && decision.line && typeof decision.line.text === 'string')
+      .slice(0, MAX_REASONS)
+      .map((decision) => ({
+        sourceId: decision.line.sourceId || null,
+        lineNumber: Number.isInteger(decision.line.lineNumber) ? decision.line.lineNumber : null,
+        text: decision.line.text,
+        section: decision.line.section || null,
+        action: decision.action,
+        addedRowId: decision.addedRowId || null,
+      })),
   };
 }
 
@@ -613,9 +763,12 @@ module.exports = {
   MAX_FOLLOW_UPS_PER_ROW,
   ACTIONS,
   MISSING_REASONS,
+  UNCOVERED_ACTIONS,
   ManualImportReviewError,
   validateDecision,
   decideRow,
+  decideUncoveredLine,
+  uncoveredView,
   reviewView,
   rowForView,
   buildImportProvenance,

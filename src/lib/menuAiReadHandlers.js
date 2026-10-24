@@ -449,7 +449,7 @@ function createMenuAiReadHandlers({
       cost,
       monthly: publicMonthly(spendAfter),
       import: publicImportReport(result),
-      review: reviewView({ report: result, decisions: new Map() }),
+      review: reviewView({ report: result, decisions: new Map(), capture: source.bundle.sources }),
       summary: {
         items: result.summary.items,
         valid: result.summary.valid,

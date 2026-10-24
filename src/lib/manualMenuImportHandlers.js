@@ -31,11 +31,13 @@ const { buildImportPrompt, buildFollowUpPrompt, buildOpenPointsPrompt } = requir
 const { extractCodeBlock, buildImportReport, checkBundleBinding, publicImportReport } = require('./manualMenuImportImport');
 const {
   decideRow,
+  decideUncoveredLine,
   reviewView,
   buildConceptDraft,
   applyFollowUp,
   applyOpenPointsAnswer,
   MAX_FOLLOW_UPS_PER_IMPORT,
+  UNCOVERED_ACTIONS,
 } = require('./manualMenuImportReview');
 const { buildUsageExport } = require('./manualMenuImportUsage');
 const { aiOriginOverrides } = require('./menuAiImport');
@@ -350,7 +352,7 @@ function createManualMenuImportHandlers(deps = {}) {
     if (next.reply) return next.reply;
     return reply(201, {
       import: publicImportReport(report),
-      review: reviewView({ report, decisions: new Map() }),
+      review: reviewView({ report, decisions: new Map(), capture: state.bundle.sources }),
       state: next.state,
       validUntil: next.validUntil,
     });
@@ -368,13 +370,25 @@ function createManualMenuImportHandlers(deps = {}) {
     const step = reportOrReply(opened.state, importId || parsed.body.import_id);
     if (step.reply) return step.reply;
     const state = opened.state;
-    const result = decideRow({ report: step.report, decisions: decisionsFromState(state), decision: parsed.body.decision });
+    const decisions = decisionsFromState(state);
+    const decision = parsed.body.decision;
+    // Variant 1 (Lead order 6382189724): the two choices on a source line that
+    // no dish covers. They are handled here, next to the existing row
+    // decisions, and travel in the same sealed state.
+    const onUncoveredLine = Boolean(decision && typeof decision === 'object' && UNCOVERED_ACTIONS.includes(decision.action));
+    const result = onUncoveredLine
+      ? decideUncoveredLine({ report: step.report, decisions, bundle: state.bundle, decision })
+      : decideRow({ report: step.report, decisions, decision });
     if (!result.ok) return reply(422, { error: result.message, reason: result.code });
-    const next = sealNext(nextState(state, { decisions: [...result.decisions.values()] }));
+    const reportNext = result.report || step.report;
+    const next = sealNext(nextState(state, { decisions: [...result.decisions.values()], report: reportNext }));
     if (next.reply) return next.reply;
     return reply(200, {
       row: result.row,
-      review: reviewView({ report: step.report, decisions: result.decisions }),
+      // An added line changes the concept itself, so the screen gets the same
+      // public report shape as every other step.
+      ...(result.report ? { import: publicImportReport(result.report) } : {}),
+      review: reviewView({ report: reportNext, decisions: result.decisions, capture: state.bundle.sources }),
       state: next.state,
       validUntil: next.validUntil,
     });
@@ -442,7 +456,7 @@ function createManualMenuImportHandlers(deps = {}) {
     return reply(200, {
       row: result.row,
       import: publicImportReport(result.report),
-      review: reviewView({ report: result.report, decisions: decisionsFromState(state) }),
+      review: reviewView({ report: result.report, decisions: decisionsFromState(state), capture: state.bundle.sources }),
       state: next.state,
       validUntil: next.validUntil,
     });
@@ -487,7 +501,7 @@ function createManualMenuImportHandlers(deps = {}) {
       if (next.reply) return next.reply;
       return reply(200, {
         import: publicImportReport(result.report),
-        review: reviewView({ report: result.report, decisions }),
+        review: reviewView({ report: result.report, decisions, capture: state.bundle.sources }),
         state: next.state,
         validUntil: next.validUntil,
       });
