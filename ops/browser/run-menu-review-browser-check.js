@@ -300,6 +300,14 @@ async function imageOnlyScenario(cdp) {
   const clicked = await clickLink(cdp, 'Bronnen beoordelen');
   const arrived = await waitForPath(cdp, '/internal/source-triage', 'Bronnen beoordelen', 30000);
   steps.push({ action: 'click Bronnen beoordelen', href: clicked, reached: Boolean(clicked), arrived });
+  // The follow-up context is rendered from the triage fetch; wait for the
+  // detail card itself instead of reading an empty card right after the route.
+  const detailReady = await waitFor(
+    cdp,
+    `Boolean(document.querySelector('.stg-detail-card') && document.querySelector('.stg-detail-title') && document.querySelector('.stg-detail-title').innerText.trim())`,
+    20000,
+  );
+  steps.push({ action: 'source detail rendered', reached: Boolean(detailReady) });
   const triage = await evalJs(cdp, `(() => {
     const detail = document.querySelector('.stg-detail-card');
     const block = document.querySelector('.stg-followup');
