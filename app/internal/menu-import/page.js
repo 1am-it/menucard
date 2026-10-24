@@ -1315,6 +1315,9 @@ export default function ManualMenuImportPage() {
                       : review.saveBlockReason ||
                         'Alle punten zijn nagelopen. Opslaan maakt een intern concept. Publiceren blijft een aparte stap.'}
                   </p>
+                  {/* W6: the separate publish step is always named, also while
+                      points are still open. */}
+                  <p className="mai-why">Publiceren blijft een aparte stap.</p>
                 </div>
               </>
             )}

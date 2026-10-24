@@ -1485,6 +1485,155 @@ async function manualImportScenario(cdp) {
   check('manual import: step 2 shows "1 menukaart, 3 gerechten"', step2Text.includes('1 menukaart, 3 gerechten'));
 }
 
+// ── #59 / BE-21 "Lees met AI" (Lead review 6380804419, W1/W5/W6/W8) ──────────
+// Fictieve API-antwoorden: het blok, het resultaat en het bestaande
+// nalopen-scherm met het label "Gelezen door AI". Geen provider, geen sleutel
+// en geen echte kaart.
+
+/** Leest het AI-blok zoals de browser het toont. */
+async function readAiBlock(cdp) {
+  return evalJs(
+    cdp,
+    `(() => {
+      const block = document.querySelector('.mai-ai');
+      if (!block) return null;
+      block.scrollIntoView({ block: 'start' });
+      const buttons = Array.from(block.querySelectorAll('button')).map((el) => el.innerText.trim());
+      const links = Array.from(block.querySelectorAll('a')).map((el) => ({ text: el.innerText.trim(), href: el.getAttribute('href') }));
+      const heading = document.querySelector('#mai-s1');
+      const stepOne = heading && typeof heading.closest === 'function' ? heading.closest('section') : null;
+      return {
+        title: block.querySelector('.mai-panel-title') ? block.querySelector('.mai-panel-title').innerText.trim() : null,
+        text: block.innerText,
+        buttons,
+        links,
+        insideStepOne: Boolean(stepOne && stepOne.contains(block)),
+        overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      };
+    })()`,
+  );
+}
+
+/** Dezelfde pagina, maar met het fictieve AI-antwoord en een bron waarvan de
+ *  prijslijst zelf is benoemd (W6: die regels staan meteen in orde). */
+function aiUrl(theme, extra = {}) {
+  const params = new URLSearchParams({
+    fixture: 'manual-ai',
+    restaurant: fixtures.RESTAURANT.id,
+    name: fixtures.RESTAURANT.name,
+    url: 'https://fictief-brasserie.invalid/menu',
+    theme,
+    ...extra,
+  });
+  return `${MANUAL_URL}?${params.toString()}`;
+}
+
+async function aiReadScenario(cdp) {
+  await setViewport(cdp, 390, 900);
+  await openRoute(cdp, aiUrl('light'), `document.body.innerText.includes('Laat AI de kaart lezen')`);
+  const block = await readAiBlock(cdp);
+  check('ai read: the block is on the place where a source could not be read', Boolean(block) && block.insideStepOne, block ? String(block.insideStepOne) : 'no block');
+  check(
+    'ai read: title, button and cost line are the agreed text',
+    Boolean(block) && block.title === 'Laat AI de kaart lezen' && block.buttons.includes('Lees met AI') && block.text.includes('Kost ongeveer 1 cent · duurt ± 1 minuut'),
+    block ? JSON.stringify({ title: block.title, buttons: block.buttons }) : 'no block',
+  );
+  check(
+    "ai read: this month's spend is shown against the ceiling",
+    Boolean(block) && block.text.includes('AI deze maand € 0,12 van € 10,00'),
+    block ? (block.text.match(/AI deze maand[^\n]*/) || ['missing'])[0] : 'no block',
+  );
+  check(
+    'ai read: the manual alternative is one link away',
+    Boolean(block) && block.links.some((link) => link.text === 'Liever zelf invoeren of plakken' && typeof link.href === 'string'),
+    block ? JSON.stringify(block.links) : 'no block',
+  );
+  check('ai read: no horizontal overflow at 390 px', Boolean(block) && block.overflow <= 0, block ? `overflow=${block.overflow}` : 'no block');
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'ai-read-block-390-light.png'));
+
+  // Scherm 2: de aanroep en het resultaat.
+  await clickButton(cdp, 'Lees met AI');
+  const done = await waitFor(cdp, `document.body.innerText.includes('Concept klaar')`, 20000);
+  const doneText = await bodyText(cdp);
+  check('ai read: the reading reports its own result', Boolean(done) && /Concept klaar: 3 gerechten/.test(doneText), (doneText.match(/Concept klaar[^\n]*/) || ['missing'])[0]);
+  check('ai read: the cost of this call is shown', /Kosten: € 0,04/.test(doneText), (doneText.match(/Kosten[^\n]*/) || ['missing'])[0]);
+  check(
+    'ai read: the Nalopen button opens the existing review',
+    (await evalJs(cdp, `[...document.querySelectorAll('button')].some((el) => el.innerText.trim() === 'Nalopen')`)) === true,
+  );
+  await evalJs(cdp, `(() => { const el = document.querySelector('.mai-ai'); if (el) el.scrollIntoView({ block: 'start' }); return true; })()`);
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'ai-read-done-390-light.png'));
+
+  // Scherm 3: het bestaande nalopen-scherm met het label.
+  await clickButton(cdp, 'Nalopen');
+  const reviewed = await waitFor(cdp, `document.body.innerText.includes('Gelezen door AI')`, 10000);
+  const reviewText = await bodyText(cdp);
+  check('ai read: the review carries the label Gelezen door AI', Boolean(reviewed), (reviewText.match(/Gelezen door AI[^\n]*/) || ['missing'])[0]);
+  check(
+    'ai read: the review shows rows and the explicit save step',
+    reviewText.includes('in orde') && reviewText.includes('Opslaan als concept') && reviewText.includes('Publiceren blijft een aparte stap'),
+    (reviewText.match(/Opslaan als concept[^\n]*/) || ['missing'])[0],
+  );
+  check(
+    'ai read: a named price list stays in orde instead of asking for a price',
+    // A named price list belongs to the rows that are already fine, so the
+    // check opens that collapsed list first. "Kies een prijs" must not appear.
+    (await evalJs(
+      cdp,
+      `(() => {
+        const summary = [...document.querySelectorAll('details.mai-details > summary')].find((el) => el.innerText.includes('in orde of afgehandeld'));
+        if (!summary) return false;
+        summary.click();
+        return true;
+      })()`,
+    )) === true &&
+      !reviewText.includes('Kies een prijs') &&
+      (await bodyText(cdp)).includes('Fictief glas wijn') &&
+      (await bodyText(cdp)).includes('Glas 4,50 / Fles 24,00'),
+    (await bodyText(cdp)).match(/Fictief glas wijn[^\n]*/)?.[0] || 'missing',
+  );
+  await evalJs(cdp, `(() => { const el = document.getElementById('mai-s3'); if (el) el.scrollIntoView({ block: 'start' }); return true; })()`);
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'ai-read-review-390-light.png'));
+  recordClickpath(
+    'ai read (light)',
+    ['Menu importeren met AI', 'Laat AI de kaart lezen', 'Lees met AI', 'Concept klaar', 'Nalopen', 'Gelezen door AI'],
+    Boolean(done && reviewed),
+  );
+}
+
+
+/** W3 en donker: hetzelfde blok zonder sleutel/vlag, en de drie schermen in donker. */
+async function aiReadOffAndDarkScenario(cdp) {
+  await setViewport(cdp, 390, 900);
+  await openRoute(cdp, aiUrl('dark', { aiState: 'off' }), `document.body.innerText.includes('Laat AI de kaart lezen')`);
+  const off = await readAiBlock(cdp);
+  check('ai read: without a key or flag the block says AI is niet ingesteld', Boolean(off) && off.text.includes('AI is niet ingesteld'), off ? 'ok' : 'no block');
+  check('ai read: without a key or flag there is no button', Boolean(off) && !off.buttons.includes('Lees met AI'), off ? JSON.stringify(off.buttons) : 'no block');
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'ai-read-not-configured-390-dark.png'));
+
+  await openRoute(cdp, aiUrl('dark'), `document.body.innerText.includes('Laat AI de kaart lezen')`);
+  const dark = await readAiBlock(cdp);
+  check('ai read: the block is visible in dark mode', Boolean(dark) && dark.text.includes('Lees met AI'), dark ? 'ok' : 'no block');
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'ai-read-block-390-dark.png'));
+  await clickButton(cdp, 'Lees met AI');
+  const darkDone = await waitFor(cdp, `document.body.innerText.includes('Concept klaar')`, 20000);
+  check('ai read: the result is visible in dark mode', Boolean(darkDone));
+  await evalJs(cdp, `(() => { const el = document.querySelector('.mai-ai'); if (el) el.scrollIntoView({ block: 'start' }); return true; })()`);
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'ai-read-done-390-dark.png'));
+  await clickButton(cdp, 'Nalopen');
+  const darkReview = await waitFor(cdp, `document.body.innerText.includes('Gelezen door AI')`, 10000);
+  check('ai read: the review label is visible in dark mode', Boolean(darkReview));
+  await evalJs(cdp, `(() => { const el = document.getElementById('mai-s3'); if (el) el.scrollIntoView({ block: 'start' }); return true; })()`);
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'ai-read-review-390-dark.png'));
+
+  // Toetsenbord: dezelfde knop is met Tab en Enter te bedienen.
+  await openRoute(cdp, aiUrl('light'), `document.body.innerText.includes('Laat AI de kaart lezen')`);
+  const focused = await tabUntil(cdp, 'Lees met AI');
+  await pressKey(cdp, 'Enter', 'Enter', 13, '\r');
+  const keyboardDone = await waitFor(cdp, `document.body.innerText.includes('Concept klaar')`, 20000);
+  check('ai read: the button works with the keyboard', Boolean(focused) && Boolean(keyboardDone), JSON.stringify({ focused, keyboardDone }));
+}
+
 async function main() {
   const browserPath = findBrowser();
   if (!browserPath) {
@@ -1521,6 +1670,9 @@ async function main() {
     await manualRejectedScenario(cdp);
     // V1/V2 (review 6377050602): de afgeleide telling en status met de melding.
     await manualNormalizedScenario(cdp);
+    // #59 / BE-21 (review 6380804419): "Lees met AI" op het bestaande scherm.
+    await aiReadScenario(cdp);
+    await aiReadOffAndDarkScenario(cdp);
     await v2Scenario(cdp);
     await errorScenario(cdp);
     for (const width of [320, 390]) {
@@ -1606,7 +1758,7 @@ async function manualReviewSteps(cdp) {
   const step3 = await waitFor(cdp, `document.body.innerText.includes('3 gerechten · 1 in orde · 2 nalopen')`, 15000);
   check('manual import: step 3 summarises in plain language', step3);
   const saveBefore = await evalJs(cdp, `(() => {
-    const button = [...document.querySelectorAll('button')].find((b) => b.innerText.includes('Concept opslaan'));
+    const button = [...document.querySelectorAll('button')].find((b) => b.innerText.includes('Opslaan als concept'));
     return button ? button.disabled : null;
   })()`);
   check('manual import: saving is disabled while points are open', saveBefore === true);
@@ -1629,15 +1781,16 @@ async function manualReviewSteps(cdp) {
   check('manual import: after the reason every point is handled', afterReason);
 
   const saveEnabled = await evalJs(cdp, `(() => {
-    const button = [...document.querySelectorAll('button')].find((b) => b.innerText.includes('Concept opslaan'));
+    const button = [...document.querySelectorAll('button')].find((b) => b.innerText.includes('Opslaan als concept'));
     return button ? { disabled: button.disabled } : null;
   })()`);
   check('manual import: saving is enabled only after all human steps', Boolean(saveEnabled) && saveEnabled.disabled === false, JSON.stringify(saveEnabled));
-  await clickButton(cdp, 'Concept opslaan');
+  await clickButton(cdp, 'Opslaan als concept');
   const saved = await waitFor(cdp, `document.body.innerText.includes('Concept opgeslagen als versie 1')`, 15000);
   check('manual import: the existing concept route result is shown', saved);
   const savedText = await bodyText(cdp);
-  check('manual import: the confirmation says nothing was published', savedText.includes('niets gepubliceerd'));
+  // W6 (review 6380804419): the save message names the separate publish step.
+  check('manual import: the confirmation keeps publishing a separate step', savedText.includes('Publiceren blijft een aparte stap'));
   screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'manual-ai-import-390-light.png'));
 
   // Toetsenbord: stap 1 is met Tab en Enter te bereiken en te activeren.

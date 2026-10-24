@@ -991,3 +991,88 @@ ongewijzigd). Browserbewijs:
 `ops/browser/run-menu-review-browser-check.js` (`manualNormalizedScenario`) met
 `manual-ai-import-normalized-390-dark.png`. Dit blijft fixture- en
 ontwikkelaarsbewijs, geen onafhankelijke review of browseracceptatie.
+
+## "Lees met AI" als hulpmiddel in de app (review 6380804419, W1-W8)
+
+Eigenaarsbesluit 2026-10-24: route B is een hulpmiddel in de app. Lukt
+deterministisch lezen voor een bron niet, dan klikt de beheerder op **Lees met
+AI**. De server roept het bestaande route-B-pad aan; het resultaat gaat door het
+bestaande nalopen-scherm met het label **Gelezen door AI**. Er is nooit
+automatische publicatie en er is geen nieuwe navigatie.
+
+### Route en grenzen
+
+`app/api/internal/v1/menu-ai-import/route.js` (`maxDuration = 60`, dezelfde
+waarde als de bestaande batch-analysis-process-route; de call zelf stopt op 50 s
+via `AI_LIMITS`, zodat validatie en conceptopslag binnen de functie vallen).
+Er is geen achtergrondproces en geen in-memory state tussen requests.
+
+- `GET` meldt of de knop mag (`ANTHROPIC_API_KEY` **en**
+  `MENU_AI_FALLBACK_ENABLED=true`), wat dit kalendermaand al kostte en of het
+  budget nog een aanroep toestaat. Zonder sleutel of vlag: `ai_not_configured`
+  en in de app rustig "AI is niet ingesteld" zonder knop. De sleutel komt nooit
+  in de client, een log of een concept.
+- `POST` accepteert uitsluitend twee server-verifieerbare bronnen: het
+  verzegelde toestandstoken van stap 1 van de handmatige import (een capture die
+  deze server zelf las en verzegelde) of het id van een bestaande
+  analyse-opdracht (`restaurant_source_analysis_jobs`), waarvan de URL in de
+  database wordt opgezocht. Een URL uit het verzoek wordt nooit gebruikt.
+- Het restaurant komt uit de bestaande statische lijst of uit de analyse; het
+  is nooit vrije tekst.
+- De aanroep gebruikt `menuExtractionAnthropicCall.js` (streaming, thinking uit,
+  schema, kosten uit `usage`), `runStructuredExtraction`,
+  `validateStructuredOutput` en `menuExtractionNormalization`. Niets daarvan is
+  gedupliceerd.
+- Geen automatische retry: een fout is een leesbare melding met de route naar de
+  handmatige import, dus nooit dubbele kosten.
+
+### Budget (W4)
+
+Het maandverbruik komt uit de duurzame conceptmetadata van eerdere AI-lezingen
+(`captured_content.importProvenance.cost`), zonder nieuwe tabel of migratie.
+Vóór elke aanroep geldt: verbruik + 30 eurocent (het maximum per aanroep) mag
+niet boven 1000 komen; anders `429 budget_exhausted`. Onbekende kosten tellen
+als het maximum per aanroep en nooit als nul. Eén lezing heeft één `readId`,
+zodat een later opgeslagen correctie dezelfde lezing niet dubbel telt. De harde
+grens blijft de bestedingslimiet van de Anthropic-werkruimte.
+
+### Opslag en herkomst
+
+De route schrijft één durable concept via de bestaande conceptroute, met
+`importProvenance.kind = 'ai_gelezen'`, label "Gelezen door AI", provider,
+model, `readId`, protocol-/schemaversie en de gemeten kosten. Het resultaat
+reist in het bestaande toestandstoken naar het bestaande nalopen-scherm
+(`/internal/menu-import`, stap 3), dat hetzelfde label houdt en de kosten van
+die lezing meeneemt. Opslaan blijft een expliciete stap met de melding
+"Publiceren blijft een aparte stap".
+
+### Prijzen (W6)
+
+Benoemt de bron elke prijs zelf ("glas 5,00 / karaf 18,50"), dan staan die
+varianten direct als `priceVariants` opgeslagen en telt de regel als "in orde";
+alleen een onbenoemde meervoudige prijs vraagt nog "Kies een prijs". Een
+ontbrekende prijs heet **Prijs onbekend**: het gerecht blijft met
+`priceStatus` onbekend (of `on_request`) en nooit met 0 euro. Dezelfde regels
+gelden voor de handmatige import.
+
+### Gebruik (W7)
+
+`manual-ai-import-usage/v3`: de export telt naast de handmatige import ook de
+AI-lezingen, met provider, model en kosten per provider/model, en markeert
+onbekende kosten als onbekend. De lezer haalt beide herkomsten op met twee
+gewone select-query's; DevDashboardTower leest hetzelfde document.
+
+### Bewijs
+
+Unit/route-tests met een nagebootste transportlaag:
+`src/lib/menuAiReadHandlers.test.js` (geldig antwoord, schemafout, time-out, nul
+gerechten, budget vol, onbekende kosten, geen sleutel of vlag, ongeldige bron,
+gewijzigd token, verkeerde rol), `src/lib/menuPriceVariants.test.js` (benoemd en
+onbenoemd, Prijs onbekend, nooit nul euro, round-trip),
+`src/lib/manualMenuImportHandlers.test.js` (AI-herkomst bij opslaan) en
+`src/lib/manualMenuImportUsage.test.js` (v3). Browserbewijs:
+`ops/browser/run-menu-review-browser-check.js` (`aiReadScenario`,
+`aiReadOffAndDarkScenario`) met `ai-read-*.png` op 390 px, licht en donker.
+Dit blijft fixture- en ontwikkelaarsbewijs, geen onafhankelijke review of
+browseracceptatie; de Lead test de echte aanroep daarna zelf.
+

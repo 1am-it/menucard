@@ -172,6 +172,22 @@ function fixtureBootstrap(scenarios, options = {}) {
         }
         if (verdict.routeId === 'manual-save') return jsonResponse(manual.saved);
       }
+      // #59 / BE-21 "Lees met AI" (Lead review 6380804419): only the two
+      // fictional AI routes below are answered; the app itself never reaches a
+      // provider, so no AI traffic exists in this check.
+      if (typeof verdict.routeId === 'string' && verdict.routeId.indexOf('menu-ai-') === 0) {
+        const scenario = fixtures[fixture];
+        const ai = scenario && (scenario.ai || (scenario.manual && scenario.manual.ai));
+        if (!ai) return jsonResponse({ error: 'Fictief AI-szenario ontbreekt.' }, 500);
+        if (verdict.routeId === 'menu-ai-status') {
+          // ?aiState=off shows the same block without a key or flag (W3).
+          return jsonResponse(params.get('aiState') === 'off' ? ai.statusOff : ai.status, 200);
+        }
+        if (verdict.routeId === 'menu-ai-read') {
+          if (ai.read.body) return jsonResponse(ai.read.body, ai.read.status);
+          return jsonResponse({ error: 'De AI is nu niet bereikbaar. Ga verder met de handmatige import.', reason: 'provider_unavailable' }, 422);
+        }
+      }
       if (verdict.routeId === 'batch-analysis') {
         if (fixture === 'error') {
           return jsonResponse({ error: 'De batchanalyse kon niet worden geladen.' }, 500);

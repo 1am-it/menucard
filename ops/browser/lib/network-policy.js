@@ -37,6 +37,11 @@ const FIXTURE_API_ROUTES = [
   { id: 'manual-decisions', match: 'exact', path: '/api/internal/v1/manual-menu-import/imports/fixture-import/decisions', methods: ['POST'] },
   { id: 'manual-follow-up', match: 'exact', path: '/api/internal/v1/manual-menu-import/imports/fixture-import/follow-up', methods: ['POST'] },
   { id: 'manual-save', match: 'exact', path: '/api/internal/v1/manual-menu-import/imports/fixture-import/save', methods: ['POST'] },
+  // #59 / BE-21 "Lees met AI" (Lead review 6380804419). GET decides whether the
+  // block may offer the button and what this month cost; POST is the one
+  // reading. Both are fictional; no provider is contacted.
+  { id: 'menu-ai-status', match: 'exact', path: '/api/internal/v1/menu-ai-import', methods: ['GET'] },
+  { id: 'menu-ai-read', match: 'exact', path: '/api/internal/v1/menu-ai-import', methods: ['POST'] },
   { id: 'me', match: 'exact', path: '/api/internal/v1/me', methods: ['GET'] },
   { id: 'auth', match: 'prefix', path: '/auth/v1/', methods: ['GET', 'POST'] },
 ];
@@ -95,12 +100,15 @@ function classifyRequest(input, options) {
     return pathname === '/api' || pathname.indexOf('/api/') === 0 || pathname.indexOf('/auth/') === 0;
   }
 
-  function matchingRoute(pathname) {
+  function matchingRoute(pathname, method) {
     // Exact routes win over prefix routes so the explicit process write is not
     // swallowed by its GET-only parent route. A `detail` route accepts exactly
     // one segment below its path (e.g. `/menu-concepts/<id>`), so a nested
     // `/versions` or `/decision` GET is not silently promoted to a read.
+    // Two routes may share one path with different methods (the AI reading is
+    // POST where its status is GET), so the method decides which one matches.
     const ordered = fixtureRoutes.slice().sort((a, b) => (a.match === 'exact' ? 0 : 1) - (b.match === 'exact' ? 0 : 1));
+    let samePathWithoutMethod = null;
     for (const route of ordered) {
       const exact = pathname === route.path;
       const rest = pathname.indexOf(route.path) === 0 ? pathname.slice(route.path.length) : null;
@@ -108,11 +116,12 @@ function classifyRequest(input, options) {
       const prefix = route.path.charAt(route.path.length - 1) === '/'
         ? pathname.indexOf(route.path) === 0
         : (pathname === route.path || pathname.indexOf(route.path + '/') === 0);
-      if (route.match === 'exact' && exact) return route;
-      if (route.match === 'detail' && detail) return route;
-      if (route.match === 'prefix' && prefix) return route;
+      const matches = (route.match === 'exact' && exact) || (route.match === 'detail' && detail) || (route.match === 'prefix' && prefix);
+      if (!matches) continue;
+      if (!route.methods || route.methods.indexOf(method) !== -1) return route;
+      if (!samePathWithoutMethod) samePathWithoutMethod = route;
     }
-    return null;
+    return samePathWithoutMethod;
   }
 
   if (url.protocol === 'ws:' || url.protocol === 'wss:') {
@@ -155,7 +164,7 @@ function classifyRequest(input, options) {
   }
 
   if (isFixtureApiPath(url.pathname)) {
-    const route = matchingRoute(url.pathname);
+    const route = matchingRoute(url.pathname, method);
     if (!route) {
       result.reason = 'unknown_api_route';
       return result;

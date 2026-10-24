@@ -1,9 +1,9 @@
 {
   "fixtureOnly": true,
   "passed": true,
-  "head": "10811700d1c814011cf50e0562dc7f8141d77e7a",
-  "worktreeDirty": false,
-  "generatedAt": "2026-10-24T00:44:23.026Z",
+  "head": "d30049c8b0ad5c1775f170735e229fe19997b905",
+  "worktreeDirty": true,
+  "generatedAt": "2026-10-24T07:35:52.044Z",
   "command": "npm run test:browser:menu-review",
   "environment": {
     "node": "v22.22.3",
@@ -33,6 +33,7 @@
     "v2",
     "error",
     "manual",
+    "manual-ai",
     "concepts",
     "concepts-empty",
     "concepts-error",
@@ -613,7 +614,7 @@
     {
       "name": "manual import: step 1 shows \"Geldig tot\" with a clock time",
       "passed": true,
-      "detail": "Geldig tot 03:10. Daarna maak je gewoon een nieuwe prompt."
+      "detail": "Geldig tot 10:00. Daarna maak je gewoon een nieuwe prompt."
     },
     {
       "name": "manual import: technische details name the pinned instruction",
@@ -701,7 +702,7 @@
       "detail": null
     },
     {
-      "name": "manual import: the confirmation says nothing was published",
+      "name": "manual import: the confirmation keeps publishing a separate step",
       "passed": true,
       "detail": null
     },
@@ -978,7 +979,7 @@
     {
       "name": "manual import normalization: the notice is in view for the screenshot",
       "passed": true,
-      "detail": "{\"scrolledIn\":true,\"placed\":{\"top\":296,\"height\":900}}"
+      "detail": "{\"scrolledIn\":true,\"placed\":{\"top\":210,\"height\":900}}"
     },
     {
       "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&manualNormalize=1&theme=light)",
@@ -1004,6 +1005,131 @@
       "name": "manual import normalization 320px/light: no horizontal overflow",
       "passed": true,
       "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual-ai&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-import?fixture=manual-ai&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "ai read: the block is on the place where a source could not be read",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "ai read: title, button and cost line are the agreed text",
+      "passed": true,
+      "detail": "{\"title\":\"Laat AI de kaart lezen\",\"buttons\":[\"Lees met AI\"]}"
+    },
+    {
+      "name": "ai read: this month's spend is shown against the ceiling",
+      "passed": true,
+      "detail": "AI deze maand € 0,12 van € 10,00"
+    },
+    {
+      "name": "ai read: the manual alternative is one link away",
+      "passed": true,
+      "detail": "[{\"text\":\"Liever zelf invoeren of plakken\",\"href\":\"#mai-s1\"}]"
+    },
+    {
+      "name": "ai read: no horizontal overflow at 390 px",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "ai read: the reading reports its own result",
+      "passed": true,
+      "detail": "Concept klaar: 3 gerechten · 2 in orde, 1 nalopen."
+    },
+    {
+      "name": "ai read: the cost of this call is shown",
+      "passed": true,
+      "detail": "Kosten: € 0,04 · Gelezen door AI"
+    },
+    {
+      "name": "ai read: the Nalopen button opens the existing review",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "ai read: the review carries the label Gelezen door AI",
+      "passed": true,
+      "detail": "Gelezen door AI"
+    },
+    {
+      "name": "ai read: the review shows rows and the explicit save step",
+      "passed": true,
+      "detail": "Opslaan als concept"
+    },
+    {
+      "name": "ai read: a named price list stays in orde instead of asking for a price",
+      "passed": true,
+      "detail": "Fictief glas wijn · Glas 4,50 / Fles 24,00"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual-ai&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&theme=dark&aiState=off)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-import?fixture=manual-ai&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&theme=dark&aiState=off)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "ai read: without a key or flag the block says AI is niet ingesteld",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "ai read: without a key or flag there is no button",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual-ai&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-import?fixture=manual-ai&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "ai read: the block is visible in dark mode",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "ai read: the result is visible in dark mode",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "ai read: the review label is visible in dark mode",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-import?fixture=manual-ai&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-import?fixture=manual-ai&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenu&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "ai read: the button works with the keyboard",
+      "passed": true,
+      "detail": "{\"focused\":{\"info\":{\"tag\":\"BUTTON\",\"text\":\"Lees met AI\",\"href\":null,\"expanded\":null},\"tabs\":11,\"seen\":[{\"tag\":\"A\",\"text\":\"onze\\nmenukaarten\",\"href\":\"/internal\",\"expanded\":null},{\"tag\":\"A\",\"text\":\"Dekkingsoverzicht\",\"href\":\"/internal/coverage\",\"expanded\":null},{\"tag\":\"A\",\"text\":\"Onboarding Restaurant\",\"href\":\"/internal/onboarding-restaurant\",\"expanded\":null},{\"tag\":\"SUMMARY\",\"text\":\"\",\"href\":null,\"expanded\":null},{\"tag\":\"BUTTON\",\"text\":\"Licht\",\"href\":null,\"expanded\":null},{\"tag\":\"BUTTON\",\"text\":\"Donker\",\"href\":null,\"expanded\":null},{\"tag\":\"BUTTON\",\"text\":\"Sign out\",\"href\":null,\"expanded\":null},{\"tag\":\"BUTTON\",\"text\":\"Wijzig\",\"href\":null,\"expanded\":null},{\"tag\":\"TEXTAREA\",\"text\":\"\",\"href\":null,\"expanded\":null},{\"tag\":\"BUTTON\",\"text\":\"Prompt maken\",\"href\":null,\"expanded\":null},{\"tag\":\"BUTTON\",\"text\":\"Lees met AI\",\"href\":null,\"expanded\":null}]},\"keyboardDone\":true}"
     },
     {
       "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=v2&batch=batch-fictief-0001&theme=light)",
@@ -1968,7 +2094,7 @@
     {
       "name": "network guard: CDP blocks external subresource and frame navigation",
       "passed": true,
-      "detail": "[{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/pixel.png\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-24T00:44:22.030Z\",\"resourceType\":\"Image\"},{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/frame\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-24T00:44:22.030Z\",\"resourceType\":\"Document\"}]"
+      "detail": "[{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/frame\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-24T07:35:50.861Z\",\"resourceType\":\"Document\"},{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/pixel.png\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-24T07:35:50.863Z\",\"resourceType\":\"Image\"}]"
     },
     {
       "name": "network guard: no unexpected CDP traffic during app scenarios",
@@ -2065,6 +2191,19 @@
       "detail": null
     },
     {
+      "name": "ai read (light)",
+      "steps": [
+        "Menu importeren met AI",
+        "Laat AI de kaart lezen",
+        "Lees met AI",
+        "Concept klaar",
+        "Nalopen",
+        "Gelezen door AI"
+      ],
+      "passed": true,
+      "detail": null
+    },
+    {
       "name": "concept list -> exact detail -> back",
       "steps": [
         {
@@ -2150,7 +2289,7 @@
     },
     {
       "file": "menu-review-readonly-1024-dark.png",
-      "sha256": "d7fb4dcdbf2a5a4b9a1f0edf565aaa7702f9de77b67114ebdb5e91152c70563d",
+      "sha256": "df890541ad1f54d265c821e3a51e60b81879503a763bdcf4d0790b1d6337f5ce",
       "width": 1024,
       "height": 900
     },
@@ -2162,19 +2301,19 @@
     },
     {
       "file": "menu-review-partial-390-dark.png",
-      "sha256": "8192c21d56273fd8a3d9120df1f9c7056d581ba7d4c8f1b4a72c77aa38d21e0c",
+      "sha256": "8a742b6fe50ed5971e47ec08604b54b35a0ef4e32361c4c6793c97311be88623",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-image-only-390-light.png",
-      "sha256": "fab7f5c44b65a9ee102264294f2ab036df368af42b1a432ea53b27932fc224ea",
+      "sha256": "3af3fbeb2c26a20c46a6dfd984124358ce2abc04873e19a27d965cb71032ee81",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-image-only-320-dark.png",
-      "sha256": "4bab202571e55dddd13759b29fc0dd2a922b5f69fb29e4132f8e3f028e146aa0",
+      "sha256": "ee02cff1291dc1282b569ebd6e7db4b9a94b3f084db5255272a3b7c3c8040443",
       "width": 320,
       "height": 900
     },
@@ -2192,49 +2331,49 @@
     },
     {
       "file": "menu-review-structure-1024-light.png",
-      "sha256": "942e1815ef208bf3f1950822473f46367fc0e466779aa4e4f3fd33948c05b1b3",
+      "sha256": "98302123535f9a3994a3eaeb0093b3086e76ddf819190f405677b34c49c0f400",
       "width": 1024,
       "height": 900
     },
     {
       "file": "menu-review-structure-keyboard-390-light.png",
-      "sha256": "c657559921eec22f6fcd4edde9e2d5bd593dce654644acfcdfe956f9d3d76316",
+      "sha256": "2bd3f028750da3bcf2f0e8b0c226e7ce95ab73b0695f539dad3c7ea9806bdb2d",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-structure-390-light.png",
-      "sha256": "dc5fa9f11a02faef3ecf419f6dfa5cd3095e3861f214d7b121eaa7071b57feda",
+      "sha256": "568d85d3db48cec82decab5ed953b0577939feb0b16121cbe7891f8d940f8852",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-structure-390-dark.png",
-      "sha256": "47d13364da76158c71742139aa385b3c64de607b65fe0c21d27f96ac5c5c92de",
+      "sha256": "595e72f9b3677bbbdcdab3d8fbc2db5b1f7a969c74b72f0d65b83188300dfeb4",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-structure-readonly-1024-dark.png",
-      "sha256": "88d95e94d9b08cf0f1c481ca3c9ae9b054214f41928ee3ff81c33ef72f9a762f",
+      "sha256": "2ed793670aa70007b062196e193339401cdc68043b881f7273e8dc54799bd318",
       "width": 1024,
       "height": 900
     },
     {
       "file": "manual-ai-import-390-light.png",
-      "sha256": "412f57805a89799ae1940de417f40233d54285f0fa25be115313233ad325dd50",
+      "sha256": "64fa869336334740c77f156b2a71f05bda573b8224f3fe1918dae8f8ebd471ce",
       "width": 390,
       "height": 900
     },
     {
       "file": "manual-ai-import-320-light.png",
-      "sha256": "1532399c27526cea979e93db90eca80be2d9aa16f97c0c0a9ae6489b6584b5a4",
+      "sha256": "761aaf575ae7b0a39a79452eada5b467b6c594c8d0900401d1fe369a7c57740e",
       "width": 320,
       "height": 900
     },
     {
       "file": "manual-ai-import-390-dark.png",
-      "sha256": "2c8e8c7bdecf97ccfebf6218088077f4a49b526a2f8556962c877b04689787ba",
+      "sha256": "d228d17fe2e896f3e43c77ddb9663e7d071cc979a5230eb20335414695385924",
       "width": 390,
       "height": 900
     },
@@ -2246,13 +2385,55 @@
     },
     {
       "file": "manual-ai-import-problems-320-light.png",
-      "sha256": "eacba9d6d6045258a2613460f0838c1b2e9104cd3005bc65a954d6ddf25648b3",
+      "sha256": "6b38c594fe5db408de4c6ea0c9d4e944a6f75f58899014acd0f7129c953751e9",
       "width": 320,
       "height": 900
     },
     {
       "file": "manual-ai-import-normalized-390-dark.png",
-      "sha256": "87fced6de9aa64820584de5942d9d9fcff38f8395600ae486db4ef32a98ed9ab",
+      "sha256": "6a8162e18f2fb36a3ace8e12d944468f57e1d912b181b68b2873885b24e9a919",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-read-block-390-light.png",
+      "sha256": "d44ac88c7efee9c79bcd7deb2945acd4fc2c4ae6d38fbe30a5e041075d305d63",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-read-done-390-light.png",
+      "sha256": "ac7a21f37527936801be70898d051daf4e959eaeb83e685c8a040c3ccfbc09ea",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-read-review-390-light.png",
+      "sha256": "0a3b47599e9a564aea599fb25772503a53d7ddde59676816a7c41c5c57b55019",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-read-not-configured-390-dark.png",
+      "sha256": "22673a498f36651d10673efd789f52e5e4912f779dd518b54f99fa2e03f43c18",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-read-block-390-dark.png",
+      "sha256": "9660ed4499dec99464835677301c74602a98f45f9a3e3938cdc96444444e28f5",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-read-done-390-dark.png",
+      "sha256": "7deb2f4ca0af4b8fd0c922bf0e9763bc2992c85109a910e2ebe5bc4d6c458581",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "ai-read-review-390-dark.png",
+      "sha256": "3c28a1527739bd532c0b3b0fd841d0f645827e81e9e3f9ea9ef8aaaf20289155",
       "width": 390,
       "height": 900
     },
@@ -2276,37 +2457,37 @@
     },
     {
       "file": "menu-review-320-light.png",
-      "sha256": "b4e6cd97eccee2e711202924811f4d2979bde84b3fed7664591520dd28449077",
+      "sha256": "e8d64ce61fa8091ff5c52c7ff2989fc5ffab11acc3e145d29e6ff81de86bb122",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-320-dark.png",
-      "sha256": "4b73a07b7df5ea3850a017db8a54d108db6d023cf025c52d9f1617366ca779f0",
+      "sha256": "50cc4ff28f68b0a0cb6f4aaa6d8cda1ba8a13d13d01c69b4bf452948c5107e86",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-390-light.png",
-      "sha256": "f5a1bc255f76933db47a2c1366e6528bff6e7f876048344a4e066854cf248aed",
+      "sha256": "0f472a9b84b650d8506e75734789e8bd6ea8ce8cb844c47cb92c0b9b779f8d53",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-390-dark.png",
-      "sha256": "3c988706ec0338e4cb8d46259f3de04931dfe26ccad0f9d409ec169533608466",
+      "sha256": "65c4083423e5ad3e5b65a0b8987518a014345e01f33fcb8319665f08121a4f90",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-1024-dark.png",
-      "sha256": "409f0add119383a35cccbccd80312ea5646fe0d3df7b30222c132f347d3a8e8b",
+      "sha256": "473cdf96700cfba5566abdb69c4e3a57b8bdc3fc804cd47e2cdbffddf2dc661f",
       "width": 1024,
       "height": 900
     },
     {
       "file": "menu-review-keyboard-390-light.png",
-      "sha256": "f660415a1e17016862cb34aa16bdb11c23f827b91d1df8eaacf5e50244858ae5",
+      "sha256": "05ea6613ee59bc44b1bd19762809e7963ef8fe057a861571107e93d2b2e94241",
       "width": 390,
       "height": 900
     },
@@ -2318,7 +2499,7 @@
     },
     {
       "file": "concept-detail-v1-1024-clickpath.png",
-      "sha256": "7d2459db0263666dbb7df04d43a4445e58de7126f0f530f5257bfa9122511bfa",
+      "sha256": "7ad8d2309a4549984cc472febe828a6855efa8b25e0a08f71450da81d9f2b108",
       "width": 1024,
       "height": 900
     },
@@ -2330,7 +2511,7 @@
     },
     {
       "file": "concept-detail-invalid-1024-clickpath.png",
-      "sha256": "2641357a168ba7383e8c9ca1394a0c0494c899b89129a663312fdb73ebdddd28",
+      "sha256": "47cbcf2fbcad810a15ac1e14105f51ab75dcc5ba7978134aa8bbcdba313017dd",
       "width": 1024,
       "height": 900
     },
@@ -2348,7 +2529,7 @@
     },
     {
       "file": "concept-detail-invalid-1024-light.png",
-      "sha256": "3aa77eb1cb981404ba3acf222c86a4044f99e8aa133eeab2da484c589c69dc66",
+      "sha256": "03be8dc2156bdc7de41a6f1e4a92479671d5a7350c2946fe0adb61594325bae7",
       "width": 1024,
       "height": 900
     },
@@ -2360,13 +2541,13 @@
     },
     {
       "file": "concept-list-empty-390-light.png",
-      "sha256": "81f2ec71b8735a0b99b44d2a008563e125459a0d68729fd9f3c98696a611b231",
+      "sha256": "2c1eacc66df22c5646b0db7a19e9b5460f79a92cb73b06fca70e501681bac80b",
       "width": 390,
       "height": 900
     },
     {
       "file": "concept-list-error-390-light.png",
-      "sha256": "c27e117bf249cd74544cea5e95503d51c5d839de73487116e80c83490038c6a4",
+      "sha256": "5ed3c1fcc8844de00323424a8345f0ee7ed47cccebc6fb0838216bd9c671131c",
       "width": 390,
       "height": 900
     },
@@ -2384,7 +2565,7 @@
     },
     {
       "file": "concept-detail-missing-390-light.png",
-      "sha256": "7851abe8baa89704865461f12fc2d57bd6e6f2dc8492294ff71a4b60b0ddcb14",
+      "sha256": "38372402dc60308bc22b008512017d628304c78fcdb39a0d7a2379778c1ec91b",
       "width": 390,
       "height": 900
     },
@@ -2439,21 +2620,21 @@
         "phase": "negative-probe",
         "kind": "cdp_fetch",
         "method": "GET",
-        "url": "https://unapproved.invalid/pixel.png",
+        "url": "https://unapproved.invalid/frame",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-24T00:44:22.030Z",
-        "resourceType": "Image"
+        "at": "2026-10-24T07:35:50.861Z",
+        "resourceType": "Document"
       },
       {
         "phase": "negative-probe",
         "kind": "cdp_fetch",
         "method": "GET",
-        "url": "https://unapproved.invalid/frame",
+        "url": "https://unapproved.invalid/pixel.png",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-24T00:44:22.030Z",
-        "resourceType": "Document"
+        "at": "2026-10-24T07:35:50.863Z",
+        "resourceType": "Image"
       }
     ],
     "pageViolations": [
@@ -2464,7 +2645,7 @@
         "url": "https://unapproved.invalid/api/anything",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-24T00:44:22.009Z"
+        "at": "2026-10-24T07:35:50.827Z"
       },
       {
         "phase": "negative-probe",
@@ -2473,7 +2654,7 @@
         "url": "http://unapproved.invalid/api/anything",
         "reason": "external_origin",
         "protocolRelative": true,
-        "at": "2026-10-24T00:44:22.010Z"
+        "at": "2026-10-24T07:35:50.827Z"
       },
       {
         "phase": "negative-probe",
@@ -2482,7 +2663,7 @@
         "url": "http://localhost:3137/api/internal/v1/menu-concepts",
         "reason": "method_not_allowed",
         "protocolRelative": false,
-        "at": "2026-10-24T00:44:22.010Z"
+        "at": "2026-10-24T07:35:50.827Z"
       },
       {
         "phase": "negative-probe",
@@ -2491,7 +2672,7 @@
         "url": "http://localhost:3137/api/internal/v1/unrelated-write",
         "reason": "unknown_api_route",
         "protocolRelative": false,
-        "at": "2026-10-24T00:44:22.010Z"
+        "at": "2026-10-24T07:35:50.828Z"
       },
       {
         "phase": "negative-probe",
@@ -2500,7 +2681,7 @@
         "url": "http://localhost:3137/api/internal/v1/menu-concepts",
         "reason": "method_not_allowed",
         "protocolRelative": false,
-        "at": "2026-10-24T00:44:22.010Z"
+        "at": "2026-10-24T07:35:50.828Z"
       },
       {
         "phase": "negative-probe",
@@ -2509,7 +2690,7 @@
         "url": "ws://unapproved.invalid/socket",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-24T00:44:22.010Z"
+        "at": "2026-10-24T07:35:50.828Z"
       }
     ]
   },

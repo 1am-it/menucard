@@ -646,6 +646,14 @@ module.exports = {
         return manualImportScenario();
       },
     },
+    // #59 / BE-21 "Lees met AI" (Lead review 6380804419): the same fictional
+    // reading, but with the price list the source names itself, so the review
+    // shows those prices in orde instead of asking for a choice.
+    'manual-ai': {
+      get manual() {
+        return manualImportScenario({ variantsNamed: true });
+      },
+    },
     ...conceptScenarios,
   },
   expected: {
@@ -668,7 +676,7 @@ const { buildImportPrompt } = require('../../../src/lib/manualMenuImportPrompt')
 const { buildImportReport, publicImportReport } = require('../../../src/lib/manualMenuImportImport');
 const { decideRow, reviewView, buildConceptDraft } = require('../../../src/lib/manualMenuImportReview');
 
-function manualImportScenario() {
+function manualImportScenario({ variantsNamed = false } = {}) {
   const protocol = loadMenuExtractionProtocol({ root: path.resolve(__dirname, '..', '..', '..') });
   const text = ['FICTIEF LUNCH', 'Bites', 'Fictieve salade 12,50', 'Fictief glas wijn 4,50', 'Fictief fles wijn 24,00'].join('\n');
   const bundle = buildImportBundle({
@@ -695,10 +703,18 @@ function manualImportScenario() {
               {
                 name: 'Fictief glas wijn',
                 priceStatus: 'multiple_undecomposed',
-                priceVariants: [
-                  { label: 'Glas', amountMinorUnits: 450, currency: 'EUR' },
-                  { label: 'Fles', amountMinorUnits: 2400, currency: 'EUR' },
-                ],
+                // W6: unnamed by default (an open "Kies een prijs" row for the
+                // manual review); the AI reading uses the named variant case,
+                // where the source names every price and the row is in orde.
+                priceVariants: variantsNamed
+                  ? [
+                      { label: 'Glas', amountMinorUnits: 450, currency: 'EUR' },
+                      { label: 'Fles', amountMinorUnits: 2400, currency: 'EUR' },
+                    ]
+                  : [
+                      { label: null, amountMinorUnits: 450, currency: 'EUR' },
+                      { label: null, amountMinorUnits: 2400, currency: 'EUR' },
+                    ],
                 evidence: evidenceFor('Bites · 2', 'Fictief glas wijn 4,50'),
               },
               {
@@ -773,9 +789,14 @@ function manualImportScenario() {
   if (rejected.ok || rejected.code !== 'schema_violation') {
     throw new Error(`manual rejection fixture invalid: ${rejected.code}`);
   }
-  const wine = report.rows.find((row) => row.code === 'price_variant');
+  const wine = report.rows.find((row) => row.name === 'Fictief glas wijn');
   const coffee = report.rows.find((row) => row.code === 'quote_not_in_source');
-  const first = decideRow({ report, decisions: new Map(), decision: { rowId: wine.id, action: 'choose_price', variantIndex: 1 } });
+  // W6: with a named price list the wine row is already in orde, so only an
+  // unnamed multiple price needs the explicit choose step.
+  const first =
+    wine && wine.code === 'price_variant'
+      ? decideRow({ report, decisions: new Map(), decision: { rowId: wine.id, action: 'choose_price', variantIndex: 1 } })
+      : { decisions: new Map() };
   const second = decideRow({
     report,
     decisions: first.decisions,
@@ -806,7 +827,62 @@ function manualImportScenario() {
   if (normalized.normalizations.length !== 2) {
     throw new Error(`manual normalized fixture recorded ${normalized.normalizations.length} normalizations`);
   }
+  // #59 / BE-21 "Lees met AI" (Lead review 6380804419): the fictional answer of
+  // the one AI route, built with the real import/review shapes so the browser
+  // shows exactly what the server sends. No provider is contacted.
+  const aiName = 'Claude (Haiku 5.5)';
+  const ai = {
+    status: {
+      enabled: true,
+      reason: null,
+      message: null,
+      label: 'Gelezen door AI',
+      aiName,
+      perCallMaxEurCents: 30,
+      monthly: { spentEurCents: 12, limitEurCents: 1000, remainingEurCents: 988, unknownConcepts: 0 },
+      budget: { allowed: true, reason: null },
+    },
+    // W3: the same block without a key or flag, so the calm "AI is niet
+    // ingesteld" without a button is observable.
+    statusOff: {
+      enabled: false,
+      reason: 'ai_not_configured',
+      message: 'AI is niet ingesteld.',
+      label: 'Gelezen door AI',
+      aiName,
+      perCallMaxEurCents: 30,
+      monthly: { spentEurCents: null, limitEurCents: 1000, remainingEurCents: null, unknownConcepts: 0 },
+      budget: { allowed: false, reason: 'budget_unavailable' },
+    },
+    read: {
+      status: 200,
+      body: {
+        origin: { kind: 'ai_gelezen', label: 'Gelezen door AI', aiName },
+        ai: {
+          provider: 'anthropic',
+          model: 'claude-haiku-5-5',
+          readAt: '2026-10-24T12:00:00.000Z',
+          label: 'Gelezen door AI',
+          protocolVersion: report.technical.protocolVersion,
+          protocolHash: report.technical.protocolHash,
+          schemaVersion: report.technical.schemaVersion,
+          bundleHash: report.bundleHash,
+          requestId: 'req_fictief',
+          durationMs: 42000,
+        },
+        cost: { eurCents: 4, known: true, maxEurCents: 30 },
+        monthly: { spentEurCents: 16, limitEurCents: 1000, remainingEurCents: 984, unknownConcepts: 0 },
+        import: { ...publicImportReport(report), aiName },
+        review: reviewView({ report, decisions: new Map() }),
+        summary: { items: report.summary.items, valid: report.summary.valid, needsReview: report.summary.needsReview },
+        concept: { id: 'concept-fictief-ai-1', version: 1, unchanged: false },
+        state: 'fixture-ai-state',
+        validUntil: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+      },
+    },
+  };
   return {
+    ai,
     bundle: bundleMetadata(bundle),
     prompt: buildImportPrompt(bundle),
     import: publicImportReport(report),
