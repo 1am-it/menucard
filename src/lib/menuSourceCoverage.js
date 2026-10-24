@@ -21,7 +21,7 @@
 // invents a price or a name.
 
 const { normalizeEvidenceText } = require('./menuExtractionSchema');
-const { findPrices } = require('./htmlMenuStructure');
+const { findPrices, findPrintedPrices } = require('./htmlMenuStructure');
 
 const COMPARISON_VERSION = 'menu-source-coverage/v1';
 const MAX_LINES = 100;
@@ -62,6 +62,20 @@ function looksLikeSectionHeading(line) {
   // A price list, an e-mail address or a URL is never a heading.
   if (/[@/\\]/.test(text)) return false;
   return true;
+}
+
+/**
+ * AA1: the printed cell right before a whole-euro price, used as the name.
+ * `cellsOfFlattenedLine` is the same cell rule the long rows already use, so
+ * there is no second way to read a printed column. Returns null when the cell
+ * holds no usable name, and the caller falls back to the line rule.
+ */
+function nameFromPrintedCell(line, price) {
+  const from = Math.max(0, price.index - MAX_NAME_CHARS - 40);
+  const cells = cellsOfFlattenedLine(String(line || '').slice(from, price.index));
+  const cell = cells.length > 0 ? cells[cells.length - 1] : '';
+  if (lettersOf(cell) < 2) return null;
+  return cell.slice(0, MAX_NAME_CHARS);
 }
 
 /** The name a printed line prints, with every money token taken out. */
@@ -173,7 +187,7 @@ function partnerForPriceLine(recent) {
     if (entry.kind === 'heading' || entry.kind === 'priced') return null;
     if (entry.kind !== 'text' || !entry.line) continue;
     if (entry.used) return null;
-    if (findPrices(entry.line.text).length > 0) return null;
+    if (findPrintedPrices(entry.line.raw).length > 0) return null;
     if (lettersOf(entry.line.text) < 2) continue;
     return entry;
   }
@@ -189,6 +203,9 @@ function pricedRecord(base, record) {
     page: record.page || base.page || 1,
     paired: record.paired === true,
     loose: record.loose === true,
+    // AA1 (Lead review 6383853638): the price was a printed whole euro, so the
+    // record still has to be confirmed by a second such line in its section.
+    wholeEuro: record.wholeEuro === true,
     text: record.text,
     name: record.name === undefined ? null : record.name,
     priceText: record.priceText,
@@ -196,6 +213,44 @@ function pricedRecord(base, record) {
     amountsMinorUnits: record.amountsMinorUnits,
     section: record.section || null,
   };
+}
+
+/** The group a whole euro has to repeat in: its section on its own page. */
+function wholeEuroGroupKey(record) {
+  return `${record.section || ''}#${record.page || 1}`;
+}
+
+/**
+ * Where this price is printed. A normal line is one printed row; a flattened
+ * capture line holds several printed rows of the card (one dish cell plus its
+ * price cell each), and those rows are already separate records with their own
+ * `segment`. Counting them as one row would hide a whole price column that the
+ * capture collapsed into a single line.
+ */
+function printedRowOf(record) {
+  const segment = Number.isInteger(record.segment) ? record.segment : 0;
+  const line = Number.isInteger(record.nameLineNumber) ? record.nameLineNumber : record.lineNumber;
+  return segment > 0 ? `${line}:${segment}` : `${line}`;
+}
+
+/**
+ * AA1 (Lead review 6383853638): a whole euro counts only when the same section
+ * prints it on at least two printed rows. A single bare integer is also a house
+ * number, a weight or a guess, so it stays a plain number and disappears from
+ * the comparison.
+ */
+function confirmWholeEuros(records) {
+  const rows = new Map();
+  for (const record of records) {
+    if (!record.wholeEuro) continue;
+    const key = wholeEuroGroupKey(record);
+    if (!rows.has(key)) rows.set(key, new Set());
+    rows.get(key).add(printedRowOf(record));
+  }
+  return records.filter((record) => {
+    if (!record.wholeEuro) return true;
+    return (rows.get(wholeEuroGroupKey(record)) || new Set()).size >= 2;
+  });
 }
 
 /**
@@ -215,7 +270,7 @@ function pricedRecord(base, record) {
  * loose price line: it is reported, never silently dropped and never coupled to
  * a name the source does not place there.
  */
-function pricedLinesOfSource(source) {
+function pricedLinesOfSource(source, { requireSectionConfirmation = true } = {}) {
   const text = source && typeof source.text === 'string' ? source.text : '';
   if (!source || source.hasText === false || text.trim() === '') return [];
   const sourceId = bounded(source.id, 80) || 'bron';
@@ -231,8 +286,12 @@ function pricedLinesOfSource(source) {
   let section = null;
   const lines = sourceTextLines(source).lines;
   const priceInfo = lines.map((line) => {
-    const prices = findPrices(line.text);
-    return { prices, priceOnly: isPriceOnlyLine(line.text, prices) };
+    // AA1: the same money parser, extended with a confirmed whole euro. The
+    // PRICES are read from the printed line, never from the whitespace-collapsed
+    // copy: the runs of spaces between the columns are exactly what proves a
+    // whole euro ("Zeebaars 34    geschroeid").
+    const prices = findPrintedPrices(line.raw);
+    return { prices, priceOnly: isPriceOnlyLine(line.raw, prices) };
   });
   lines.forEach((line, index) => {
     const lineBase = { ...base, lineNumber: line.number, page: line.page };
@@ -248,6 +307,7 @@ function pricedLinesOfSource(source) {
             amountMinorUnits: fragment.amountMinorUnits,
             amountsMinorUnits: [fragment.amountMinorUnits],
             section: fragment.section || section || null,
+            wholeEuro: fragment.wholeEuro === true,
           }),
         );
       }
@@ -285,10 +345,15 @@ function pricedLinesOfSource(source) {
           amountMinorUnits: prices[0].amountMinorUnits,
           amountsMinorUnits: prices.map((price) => price.amountMinorUnits),
           section,
+          wholeEuro: prices.every((price) => price.wholeEuro === true),
         }),
       );
     } else {
-      const name = priceOnly ? null : nameFromLine(line.text, prices);
+      // AA1: a whole euro proves where the printed cell ends, so the cell right
+      // before it is the name — the description that follows the price is not
+      // part of it. A normal money token keeps the existing name rule.
+      const cellName = prices.length === 1 && prices[0].wholeEuro === true ? nameFromPrintedCell(line.raw, prices[0]) : null;
+      const name = priceOnly ? null : cellName || nameFromLine(line.raw, prices);
       records.push(
         pricedRecord(lineBase, {
           // A line that prints a price but no name stays visible as a loose
@@ -300,12 +365,14 @@ function pricedLinesOfSource(source) {
           amountMinorUnits: prices[0].amountMinorUnits,
           amountsMinorUnits: prices.map((price) => price.amountMinorUnits),
           section,
+          wholeEuro: prices.every((price) => price.wholeEuro === true),
         }),
       );
     }
     recent = [...recent, { kind: 'priced' }].slice(-PAIR_LOOKBACK_LINES);
   });
-  return records;
+  // AA1: a whole euro still needs a second printed line in its own section.
+  return requireSectionConfirmation === false ? records : confirmWholeEuros(records);
 }
 
 /** The printed cells of a flattened line, split on runs of two or more spaces. */
@@ -320,10 +387,15 @@ function cellsOfFlattenedLine(text) {
  * One record per printed price of a flattened line: the cell right before the
  * price is its name, an earlier heading-like cell is the section. The text is
  * the name plus the printed price, so the citation stays in the source.
+ *
+ * AA1 (Lead review 6383853638): the same money parser, extended with a whole
+ * euro. A flattened card prints its columns as runs of spaces, so the cell
+ * right before "34" in "Zeebaars 34    geschroeid" is the name and the run
+ * behind it is the printed boundary the whole-euro rule asks for.
  */
 function fragmentsOfFlattenedLine(line, { section = null } = {}) {
   const fragments = [];
-  const prices = findPrices(line);
+  const prices = findPrintedPrices(line);
   let previousEnd = 0;
   let currentSection = section;
   prices.forEach((price, index) => {
@@ -342,6 +414,7 @@ function fragmentsOfFlattenedLine(line, { section = null } = {}) {
       priceText: price.raw,
       amountMinorUnits: price.amountMinorUnits,
       section: currentSection,
+      wholeEuro: price.wholeEuro === true,
     });
   });
   return fragments;
@@ -551,13 +624,19 @@ function itemFromPricedLine(line) {
   if (!line || typeof line.text !== 'string' || typeof line.sourceId !== 'string') {
     return { ok: false, code: 'unknown_line', message: 'Deze regel staat niet meer open. Laad de review opnieuw.' };
   }
-  const prices = findPrices(line.text);
-  if (prices.length === 0) {
+  // The server's own reading of this line wins: a whole euro can never be
+  // recovered from the whitespace-collapsed display text, and re-parsing what
+  // the screen shows would silently refuse a price the server already proved.
+  const parsed = findPrintedPrices(line.text);
+  const recorded = Array.isArray(line.amountsMinorUnits) && line.amountsMinorUnits.length > 0 && line.amountsMinorUnits.every(Number.isInteger)
+    ? line.amountsMinorUnits
+    : parsed.map((price) => price.amountMinorUnits);
+  if (recorded.length === 0) {
     return { ok: false, code: 'line_without_price', message: 'Deze regel heeft geen herkenbare prijs.' };
   }
   // A pair carries the printed name of its own line; a loose price line has
   // none, and no name is ever invented for it.
-  const name = typeof line.name === 'string' && line.name.trim() !== '' ? line.name.trim().slice(0, MAX_NAME_CHARS) : nameFromLine(line.text, prices);
+  const name = typeof line.name === 'string' && line.name.trim() !== '' ? line.name.trim().slice(0, MAX_NAME_CHARS) : nameFromLine(line.text, parsed);
   if (!name) {
     return { ok: false, code: 'line_without_name', message: 'Deze regel bevat geen herkenbare gerechtnaam.' };
   }
@@ -566,12 +645,12 @@ function itemFromPricedLine(line) {
     locator: locatorOf(line),
     quote: line.text,
   };
-  if (prices.length === 1) {
+  if (recorded.length === 1) {
     return {
       ok: true,
       name,
       locator: evidence.locator,
-      item: { name, priceStatus: 'known', amountMinorUnits: prices[0].amountMinorUnits, currency: 'EUR', evidence },
+      item: { name, priceStatus: 'known', amountMinorUnits: recorded[0], currency: 'EUR', evidence },
     };
   }
   // Two printed prices stay two printed prices: the human chooses one in the
@@ -583,7 +662,7 @@ function itemFromPricedLine(line) {
     item: {
       name,
       priceStatus: 'multiple_undecomposed',
-      priceVariants: prices.map((price) => ({ label: null, amountMinorUnits: price.amountMinorUnits, currency: 'EUR' })),
+      priceVariants: recorded.map((amount) => ({ label: null, amountMinorUnits: amount, currency: 'EUR' })),
       evidence,
     },
   };

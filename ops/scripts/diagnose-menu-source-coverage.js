@@ -103,6 +103,16 @@ async function main() {
     for (const example of (comparison.examples || []).slice(0, 3)) {
       process.stdout.write(`    · ${example.text}${example.section ? ` (onder ${example.section})` : ''}\n`);
     }
+    // AA1: the whole-euro rule counts, its refusals and the records a reviewer
+    // has to judge for a false hit.
+    const whole = row.wholeEuro || {};
+    process.stdout.write(
+      `    whole euro: ${whole.accepted || 0} accepted, ${whole.sectionRefused || 0} refused by the section rule,` +
+        ` refusals ${JSON.stringify(whole.refused || {})}, ${(whole.suspicious || []).length} suspicious\n`,
+    );
+    for (const example of (whole.acceptedExamples || []).slice(0, 4)) {
+      process.stdout.write(`    + ${example.name} = ${example.priceText}${example.section ? ` (onder ${example.section})` : ''}\n`);
+    }
   }
   process.stdout.write(`report: ${path.relative(REPO_ROOT, OUTPUT_FILE).split(path.sep).join('/')}\n`);
   return 0;

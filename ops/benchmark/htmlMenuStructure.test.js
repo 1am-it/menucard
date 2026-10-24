@@ -17,6 +17,9 @@ const {
   isDateText,
   displayName,
   findPrices,
+  findWholeEuroPrices,
+  findPrintedPrices,
+  wholeEuroAmountTokens,
   extractHtmlMenuStructure,
   createHtmlStructureAdapter,
 } = require('./htmlMenuStructure')
@@ -556,4 +559,73 @@ test('N5: a standalone dish price followed only by a bulleted legend stays an it
   assert.equal(dessert.item.amountMinorUnits, 1650)
   assert.match(dessert.item.description, /laat u fictief verrassen/)
   assert.equal(/legende/.test(dessert.item.description || ''), false, 'the legend is not part of the dish description')
+})
+
+// ─── AA1: whole euros as a printed price (Lead review 6383853638) ───────────
+//
+// The shapes are the real ones the pinned captures print, used as fictional
+// fixtures: Wolfslaar's "Zeebaars 34" and "Vijf-gangen 130", plus the traps a
+// bare integer brings (grams, pieces, years, clock times, phones, addresses).
+
+test('AA1: a whole euro after a printed cell boundary is a price', () => {
+  assert.deepEqual(findWholeEuroPrices('Witte Heilbot 32    zeeuwse mossel | sjalot | escabeche').map((p) => p.amountMinorUnits), [3200])
+  assert.deepEqual(findWholeEuroPrices('Zeebaars 34    geschroeid | oester | shiitake | kombucha').map((p) => p.amountMinorUnits), [3400])
+  assert.deepEqual(findWholeEuroPrices('Vijf-gangen 130').map((p) => p.amountMinorUnits), [13000])
+  assert.deepEqual(findWholeEuroPrices('3 kazen 15 | 5 kazen 20').map((p) => p.amountMinorUnits), [1500, 2000])
+  assert.deepEqual(findWholeEuroPrices('Fictief gerecht\t18').map((p) => p.amountMinorUnits), [1800])
+  assert.deepEqual(findWholeEuroPrices('Fictief gerecht 9,-').map((p) => p.amountMinorUnits), [900])
+})
+
+test('AA1: findPrices itself never gains a bare integer, so references and measurement stay unchanged', () => {
+  assert.deepEqual(findPrices('Zeebaars 34    geschroeid | oester'), [])
+  assert.deepEqual(findPrices('Vijf-gangen 130'), [])
+  assert.deepEqual(findPrices('Fictief bier 0,75 L 4,50').map((p) => p.amountMinorUnits), [450])
+})
+
+test('AA1: findPrintedPrices keeps the money parser and adds the whole euros exactly once', () => {
+  assert.deepEqual(findPrintedPrices('Zeebaars 34    geschroeid | oester').map((p) => p.amountMinorUnits), [3400])
+  assert.deepEqual(findPrintedPrices('Fictief bier 0,75 L 4,50').map((p) => p.amountMinorUnits), [450])
+  // "€ 12" and "12,-" are already money tokens: never counted twice.
+  assert.deepEqual(findPrintedPrices('€ 12').map((p) => p.amountMinorUnits), [1200])
+  assert.deepEqual(findPrintedPrices('Fictief gerecht 12,-').map((p) => p.amountMinorUnits), [1200])
+  assert.deepEqual(findPrintedPrices('Fictieve pizza 9,50 M 12,50 L').map((p) => p.amountMinorUnits), [950, 1250])
+  assert.equal(findPrintedPrices('Zeebaars 34    geschroeid')[0].wholeEuro, true)
+})
+
+test('AA1: a unit, a counting word or a percentage directly after the amount is never a price', () => {
+  assert.deepEqual(findWholeEuroPrices('75 gram'), [])
+  assert.deepEqual(findWholeEuroPrices('6 stuks'), [])
+  assert.deepEqual(findWholeEuroPrices('2 personen    bij het raam'), [])
+  assert.deepEqual(findWholeEuroPrices('Voorgerechten 5 gangen    keuze'), [])
+  assert.deepEqual(findWholeEuroPrices('10%'), [])
+  assert.deepEqual(findWholeEuroPrices('12 x'), [])
+  assert.deepEqual(findWholeEuroPrices('Fictief bier 33 cl'), [])
+})
+
+test('AA1: a year, a clock time, a phone number or a house number is never a price', () => {
+  assert.deepEqual(findWholeEuroPrices('2025'), [])
+  assert.deepEqual(findWholeEuroPrices('18:30'), [])
+  assert.deepEqual(findWholeEuroPrices('16h00 - 22h45'), [])
+  assert.deepEqual(findWholeEuroPrices('076 201 49 75'), [])
+  assert.deepEqual(findWholeEuroPrices('Wolfslaardreef 100 4834 SP Breda'), [])
+  assert.deepEqual(findWholeEuroPrices('Kerstvakantie Zondag 27 december 2026'), [])
+})
+
+test('AA1: a loose "12" without a printed pattern is not a price, and a numbering word is not a name', () => {
+  assert.deepEqual(findWholeEuroPrices('12'), [])
+  assert.deepEqual(findWholeEuroPrices(' 12 '), [])
+  assert.deepEqual(findWholeEuroPrices('op nummer 1'), [])
+  // The single-space PDF row of the Smelt capture: no printed cell boundary.
+  assert.deepEqual(findWholeEuroPrices('Hollands 27 Petit Doruvael, Tynjetaler, Bunker Blosse'), [])
+})
+
+test('AA1: every refusal carries its own reason, so the diagnosis can report it', () => {
+  const reasons = (text) => wholeEuroAmountTokens(text).map((token) => `${token.raw}:${token.reason}`)
+  assert.deepEqual(reasons('75 gram'), ['75:unit'])
+  assert.deepEqual(reasons('op nummer 1'), ['1:counting_word'])
+  assert.deepEqual(reasons('12'), ['12:no_name'])
+  assert.deepEqual(reasons('Hollands 27 Petit Doruvael'), ['27:no_boundary'])
+  assert.deepEqual(reasons('16h00 - 22h45'), ['16:unit', '00:leading_zero', '22:unit', '45:glued'])
+  assert.deepEqual(reasons('076 201 49 75'), ['076:leading_zero', '201:no_boundary', '49:no_boundary', '75:no_name'])
+  assert.deepEqual(wholeEuroAmountTokens('Zeebaars 34    geschroeid').map((token) => token.reason), [null])
 })

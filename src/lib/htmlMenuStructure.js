@@ -808,6 +808,124 @@ function isDateText(text) {
   return MONTH_DATE_PATTERN.test(text) || ON_DATE_PATTERN.test(text) || (EVENT_CONTEXT_PATTERN.test(text) && DOT_DATE_PATTERN.test(text))
 }
 
+// ─── Whole euros as a printed price (AA1, Lead review 6383853638) ──────────
+//
+// Some cards print a price as a whole number of euros, without cents and
+// without a currency sign: "Zeebaars 34    geschroeid | oester", "Vijf-gangen
+// 130". That is the same money parser, not a second family: the same digit
+// shape, the same quantity/unit vocabulary and the same time/date vocabulary
+// are reused here. Only the printed context is stricter, because a bare
+// integer is also a weight, a year, a house number or a phone group.
+//
+// A bare integer is a price only when every one of these holds:
+//   1. shape: 1–3 digits, no leading zero, optional ",-"; a decimal, a euro
+//      sign or a percentage stays with `findPrices`;
+//   2. it sits on a printed cell boundary — two or more spaces, a tab, a
+//      printed column separator (| · •) or the end of the printed segment — on
+//      at least one side;
+//   3. at least two letters print before it inside that same cell (a name);
+//   4. no unit or counting word directly follows it ("75 gram", "6 stuks",
+//      "5 gangen", "12 x", "10%");
+//   5. it is not a year, a clock time, a date or a phone group.
+// The caller still confirms the section: one bare integer on its own is never
+// enough (see `pricedLinesOfSource` in src/lib/menuSourceCoverage.js).
+// Anything doubtful stays a plain number — a false price is worse than a
+// missed one.
+
+/** A unit, a counting word, a time or a year directly after the amount. */
+const COUNTING_WORD_AFTER = /^\s?(?:%|(?:gram|grams|gr|g|kg|kilo|cl|ml|dl|l|ltr|liter|liters|litre|litres|mg|oz|lb|st|stk|stuks|personen|persoon|pers|pp|gangen|gang|x|×|uur|u|h|hr|min|minuut|minuten|jaar|maanden|mnd|weken|dagen|keer|kazen|glazen|glas|flessen|fles|gerechten|borden|kopjes|bolletjes|sneetjes|plakjes)(?!\p{L}))/iu
+
+/** A word that numbers something rather than naming a dish: "op nummer 1". */
+const NUMBERING_WORD_BEFORE = /\b(?:nummer|nr|nrs|punt|stap|etage|verdieping|keuze|optie|plek|plaats|tafel|kamer|pagina)\s*[.:]?\s*$/i
+
+const WHOLE_EURO_PATTERN = /(?<![\d.,€])(\d{1,3})(?:\s*,\s*[-–])?(?![\d.,:]*\d)(?!\s*%)/g
+
+/** True when the text before `index` ends on a printed cell boundary. */
+function boundaryBefore(text, index) {
+  if (index === 0) return true
+  if (text[index - 1] === '\t') return true
+  let i = index - 1
+  while (i >= 0 && text[i] === ' ') i -= 1
+  if (index - 1 - i >= 2) return true
+  return i >= 0 && (text[i] === '|' || text[i] === '·' || text[i] === '•')
+}
+
+/** True when the text from `end` starts with a printed cell boundary. */
+function boundaryAfter(text, end) {
+  if (end >= text.length) return true
+  const next = text.slice(end, end + 4)
+  if (next[0] === '\t') return true
+  if (next.startsWith('  ')) return true
+  return /^\s*[|·•]/.test(next)
+}
+
+/**
+ * At least two letters print before the amount: its name, in its own cell or in
+ * the printed cell just before it (a tab- or column-separated card). Bounded
+ * look-back, trailing separators dropped.
+ */
+function printedNameBefore(text, index) {
+  const from = Math.max(0, index - 240)
+  return isPlausibleItemName(text.slice(from, index).replace(/[\s|·•]+$/, ''))
+}
+
+/**
+ * Every bare whole-euro amount in `text` with the verdict of the line rule.
+ * Exported for the offline diagnosis, so a refused amount is reported with its
+ * own reason instead of disappearing silently.
+ */
+function wholeEuroAmountTokens(text) {
+  const source = String(text || '')
+  const tokens = []
+  for (const m of source.matchAll(WHOLE_EURO_PATTERN)) {
+    const raw = m[0].trim()
+    const index = m.index
+    const length = m[0].length
+    const digits = m[1]
+    const token = { raw, index, length, amountMinorUnits: Number(digits) * 100, hasEuroSign: false, reason: null }
+    const after = source.slice(index + length, index + length + 12)
+    const around = source.slice(Math.max(0, index - 16), index + length + 8)
+    if (/^0/.test(digits)) token.reason = 'leading_zero'
+    else if (index > 0 && /[\p{L}\p{N}]/u.test(source[index - 1])) token.reason = 'glued'
+    else if (COUNTING_WORD_AFTER.test(after)) token.reason = 'unit'
+    else if (NUMBERING_WORD_BEFORE.test(source.slice(Math.max(0, index - 24), index))) token.reason = 'counting_word'
+    else if (MONTH_DATE_PATTERN.test(around) || ON_DATE_PATTERN.test(around)) token.reason = 'date'
+    else if (isClockText(source.slice(Math.max(0, index - 12), index + length + 2)) || /[:.]\d{2}/.test(source.slice(index + length, index + length + 4))) token.reason = 'time'
+    else if (/\b(?:tel|telefoon|mobiel|gsm|fax)\b/i.test(source.slice(Math.max(0, index - 24), index))) token.reason = 'phone'
+    else if (!boundaryBefore(source, index) && !boundaryAfter(source, index + length)) token.reason = 'no_boundary'
+    else if (!printedNameBefore(source, index)) token.reason = 'no_name'
+    tokens.push(token)
+  }
+  return tokens
+}
+
+/** The bare whole-euro amounts of `text` that pass the whole line rule. */
+function findWholeEuroPrices(text) {
+  return wholeEuroAmountTokens(text)
+    .filter((token) => token.reason === null)
+    .map(({ raw, index, length, amountMinorUnits, hasEuroSign }) => ({ raw, index, length, amountMinorUnits, hasEuroSign }))
+}
+
+/**
+ * Every printed price of one printed segment: the money parser above plus the
+ * confirmed whole euros, in printed order. A whole euro that would overlap or
+ * follow a money token is already that token and is skipped, so an amount is
+ * never counted twice.
+ */
+function findPrintedPrices(text) {
+  const source = String(text || '')
+  const money = findPrices(source)
+  const taken = money.map((price) => [price.index, price.index + price.length])
+  const whole = findWholeEuroPrices(source)
+    .filter((price) => {
+      const end = price.index + price.length
+      if (taken.some(([start, stop]) => price.index < stop && start < end)) return false
+      return !/€\s*$/.test(source.slice(0, price.index))
+    })
+    .map((price) => ({ ...price, wholeEuro: true }))
+  return [...money, ...whole].sort((a, b) => a.index - b.index)
+}
+
 const ON_REQUEST_PATTERN = /\b(op aanvraag|dagprijs|marktprijs|market price|price on request|p\.o\.a\.?)\b/i
 const MODIFIER_PATTERN = /^\s*(\+|extra\b|supplement|toevoeging|add\b|met extra\b)/i
 const PER_TABLE_PATTERN = /\bper\s+(tafel|table|tafelgroep)\b|\bp\.\s?t\.(?=\s|$)/i
@@ -2694,6 +2812,9 @@ module.exports = {
   createBudget,
   parseHtml,
   findPrices,
+  findWholeEuroPrices,
+  findPrintedPrices,
+  wholeEuroAmountTokens,
   isClockText,
   isDateText,
   displayName,

@@ -369,3 +369,56 @@ test('X3: Toevoegen maakt een item met de regel zelf als citaat; twee prijzen bl
   assert.equal(itemFromPricedLine({ text: 'Geen prijs hier', sourceId: 'source-1', lineNumber: 1 }).ok, false);
 });
 
+
+// ─── AA1: whole euros in the comparison (Lead review 6383853638) ────────────
+
+test('AA1: twee hele-getalprijzen in dezelfde rubriek tellen als prijsregels', () => {
+  const text = ['FICTIEF DINER', 'Voorgerechten', 'Fictieve zeebaars 34    geschroeid | venkel', 'Fictieve bisque 12    van rivierkreeft'].join('\n');
+  const result = compareCaptureWithConcept({ sources: [source(text)], menus: menuWith([]) });
+  assert.equal(result.available, true);
+  assert.equal(result.total, 2);
+  assert.deepEqual(result.lines.map((line) => [line.name, line.amountMinorUnits]), [
+    ['Fictieve zeebaars', 3400],
+    ['Fictieve bisque', 1200],
+  ]);
+  assert.equal(result.lines[0].priceText, '34');
+  assert.equal(result.lines[0].section, 'Voorgerechten');
+});
+
+test('AA1: één los heel getal in zijn eigen rubriek blijft een gewoon getal', () => {
+  const text = ['Fictief', 'Wijnkaart', 'Fictieve huiswijn 24'].join('\n');
+  const records = pricedLinesOfSource(source(text));
+  assert.deepEqual(records, []);
+  const result = compareCaptureWithConcept({ sources: [source(text)], menus: menuWith([]) });
+  assert.equal(result.total, 0);
+});
+
+test('AA1: een samengevouwen rij met meerdere hele-getalprijzen is één prijskolom', () => {
+  // De vorm van de gepinde Wolfslaar-capture: één lange regel met de cellen van
+  // de kaart, elk met naam en hele-getalprijs (de capture vouwt de kolommen).
+  const row = [
+    'Fictieve heilbot 32    gebakken in boerenboter | zeewier | sjalot | escabeche | venkel | citroenolie | dille',
+    'Fictieve zeebaars 34    geschroeid | oester | shiitake | kombucha | dashi | lente-ui | sesam | koriander',
+    'Fictieve krab 38   als cocktail geserveerd | struikselderij | granny Smith | piment d espelette | mierikswortel',
+  ].join('     ');
+  assert.ok(row.length > 300, 'de regel moet de samengevouwen vorm hebben');
+  const text = ['FICTIEF DINER', 'Voorgerechten', row].join('\n');
+  const records = pricedLinesOfSource(source(text)).filter((record) => record.wholeEuro);
+  assert.deepEqual(records.map((record) => [record.name, record.amountMinorUnits]), [
+    ['Fictieve heilbot', 3200],
+    ['Fictieve zeebaars', 3400],
+    ['Fictieve krab', 3800],
+  ]);
+});
+
+test('AA1: Toevoegen op een hele-getalprijs gebruikt de geprinte prijs', () => {
+  const text = ['FICTIEF DINER', 'Voorgerechten', 'Fictieve zeebaars 34    geschroeid | venkel', 'Fictieve bisque 12    van rivierkreeft'].join('\n');
+  const lines = compareCaptureWithConcept({ sources: [source(text)], menus: menuWith([]) }).lines;
+  const built = itemFromPricedLine(lines[0]);
+  assert.equal(built.ok, true);
+  assert.equal(built.item.name, 'Fictieve zeebaars');
+  assert.equal(built.item.priceStatus, 'known');
+  assert.equal(built.item.amountMinorUnits, 3400);
+  assert.equal(quoteIsPresentInSource(built.item.evidence.quote, text), true);
+});
+

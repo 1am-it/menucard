@@ -1061,6 +1061,10 @@ function manualMapScenario() {
     'Fictieve steak 24,50',
     'Fictieve bitterballen 7,50',
     'Fictieve friet 3,50',
+    // AA1 (Lead review 6383853638): een prijs zonder centen en zonder €, in de
+    // vorm die de echte kaarten printen ("Zeebaars 34    geschroeid | …").
+    'Fictieve zeebaars 34    geschroeid | venkel',
+    'Fictieve bisque 12    van rivierkreeft',
   ].join('\n');
   const lunchText = ['FICTIEF LUNCH', 'Fictieve soep 6,50', 'Hoofdgerechten', 'Fictieve salade', '9,00']
     .join('\n')
