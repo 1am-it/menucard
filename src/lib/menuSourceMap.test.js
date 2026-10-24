@@ -87,6 +87,21 @@ test('Z2: een bron zonder tekst levert geen markeringen en geen groen resultaat'
   assert.deepEqual(map.marks, []);
 });
 
+test('Z3: een scan zonder tekst staat als bron in de kaart met een eerlijke melding', () => {
+  const sources = [source(), source({ id: 'source-2', kind: 'pdf', hasText: false, text: '' })];
+  const map = buildSourceMap({ sources, menus: menus([STEAK]) });
+  assert.equal(map.available, true);
+  assert.equal(map.sources.length, 2);
+  assert.equal(map.sources[1].id, 'source-2');
+  assert.equal(map.sources[1].view.mode, 'image');
+  assert.equal(map.sources[1].view.notice, IMAGE_NOTICE);
+  assert.equal(map.sources[1].counts.total, 0);
+  // The card of that source says it cannot be compared yet, and draws nothing.
+  const card = buildSourceCard({ sources, menus: [], sourceId: 'source-2' });
+  assert.equal(card.source.view.notice, IMAGE_NOTICE);
+  assert.deepEqual(card.page.lines, []);
+});
+
 test('Z3: de kaart toont de echte regels van één pagina met de markering op de juiste regel', () => {
   const card = buildSourceCard({ sources: [source()], menus: menus([STEAK]), sourceId: 'source-1', page: 1 });
   assert.equal(card.available, true);

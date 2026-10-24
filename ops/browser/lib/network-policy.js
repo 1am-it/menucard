@@ -37,6 +37,9 @@ const FIXTURE_API_ROUTES = [
   { id: 'manual-decisions', match: 'exact', path: '/api/internal/v1/manual-menu-import/imports/fixture-import/decisions', methods: ['POST'] },
   { id: 'manual-follow-up', match: 'exact', path: '/api/internal/v1/manual-menu-import/imports/fixture-import/follow-up', methods: ['POST'] },
   { id: 'manual-save', match: 'exact', path: '/api/internal/v1/manual-menu-import/imports/fixture-import/save', methods: ['POST'] },
+  // #59 variant 5 (Lead order 6382953597): one printed page of one source with
+  // its markings, read-only from the fixture's sealed state.
+  { id: 'manual-source-map', match: 'exact', path: '/api/internal/v1/manual-menu-import/imports/fixture-import/source-map', methods: ['POST'] },
   // #59 / BE-21 "Lees met AI" (Lead review 6380804419). GET decides whether the
   // block may offer the button and what this month cost; POST is the one
   // reading. Both are fictional; no provider is contacted.

@@ -662,6 +662,15 @@ module.exports = {
         return manualCoverageScenario();
       },
     },
+    // Variant 5 (Lead order 6382953597): dezelfde fictieve stroom met een bron
+    // waarin een prijs op een eigen regel staat, een afwijkende prijs (rood), een
+    // overgenomen regel (groen), een niet-overgenomen regel (oranje), een
+    // afgewezen regel (grijs), een PDF met twee pagina's en een scan zonder tekst.
+    'manual-map': {
+      get manual() {
+        return manualMapScenario();
+      },
+    },
     ...conceptScenarios,
   },
   expected: {
@@ -682,7 +691,7 @@ const { loadMenuExtractionProtocol } = require('../../../src/lib/menuExtractionP
 const { buildImportBundle, bundleMetadata, sourceHashForText } = require('../../../src/lib/manualMenuImportBundle');
 const { buildImportPrompt } = require('../../../src/lib/manualMenuImportPrompt');
 const { buildImportReport, publicImportReport } = require('../../../src/lib/manualMenuImportImport');
-const { decideRow, decideUncoveredLine, reviewView, buildConceptDraft } = require('../../../src/lib/manualMenuImportReview');
+const { decideRow, decideUncoveredLine, decideSourcePriceLine, reviewView, sourceCardView, buildConceptDraft } = require('../../../src/lib/manualMenuImportReview');
 
 function manualImportScenario({ variantsNamed = false } = {}) {
   const protocol = loadMenuExtractionProtocol({ root: path.resolve(__dirname, '..', '..', '..') });
@@ -1035,4 +1044,159 @@ function manualCoverageScenario() {
     coverage: { addedLine, dismissedLine, addedRowName: addedView.rows.find((row) => row.name === 'Fictieve carpaccio') ? 'Fictieve carpaccio' : null },
   };
 }
+
+// ── Variant 5 (Lead order 6382953597): de kaart met markeringen ─────────────
+// Gebouwd met de echte productmodules: dezelfde reviews, markeringen en
+// kaartpagina's die de server zou sturen. Fictieve bronnen, geen netwerk, geen
+// model. De kaartpagina's staan per bron en pagina klaar; de browsercheck vraagt
+// ze pas op als de medewerker de kaart opent.
+function manualMapScenario() {
+  const base = manualImportScenario();
+  const protocol = loadMenuExtractionProtocol({ root: path.resolve(__dirname, '..', '..', '..') });
+  const dinerText = [
+    'FICTIEF DINER',
+    'Voorgerechten',
+    'Fictieve carpaccio',
+    '11,00',
+    'Fictieve steak 24,50',
+    'Fictieve bitterballen 7,50',
+    'Fictieve friet 3,50',
+  ].join('\n');
+  const lunchText = ['FICTIEF LUNCH', 'Fictieve soep 6,50', 'Hoofdgerechten', 'Fictieve salade', '9,00']
+    .join('\n')
+    .replace('Hoofdgerechten', '\fHoofdgerechten');
+  const bundle = buildImportBundle({
+    bundleId: 'AI-FICTIEF-KAART',
+    actorUserId: 'fixture-user',
+    restaurantId: RESTAURANT.id,
+    restaurantName: RESTAURANT.name,
+    fetchedAt: '2026-10-24T13:00:00.000Z',
+    sources: [
+      { id: 'source-1', url: 'https://fictief-brasserie.invalid/diner', kind: 'html', status: 'read', text: dinerText },
+      { id: 'source-2', url: 'https://fictief-brasserie.invalid/lunch.pdf', kind: 'pdf', status: 'read', text: lunchText },
+      // Een scan zonder tekstlaag: eerlijk geen tekst en geen vergelijking.
+      {
+        id: 'source-3',
+        url: 'https://fictief-brasserie.invalid/scan.pdf',
+        kind: 'pdf',
+        status: 'read',
+        text: '',
+        // De app hasht de bytes van de scan; hier een vaste fictieve hash.
+        sha256: sourceHashForText('fictieve-scan-zonder-tekstlaag'),
+      },
+    ],
+    protocol,
+    now: new Date('2026-10-24T13:00:00.000Z'),
+  });
+  const output = {
+    menus: [
+      {
+        title: 'Fictief Diner',
+        sourceId: 'source-1',
+        categories: [
+          {
+            name: 'Voorgerechten',
+            items: [
+              // De kaart print € 11,00, het concept zegt € 12,50: rood.
+              {
+                name: 'Fictieve carpaccio',
+                priceStatus: 'known',
+                amountMinorUnits: 1250,
+                currency: 'EUR',
+                evidence: { sourceId: 'source-1', locator: 'regels 3–4', quote: 'Fictieve carpaccio 11,00' },
+              },
+              // Dezelfde prijs: groen.
+              {
+                name: 'Fictieve steak',
+                priceStatus: 'known',
+                amountMinorUnits: 2450,
+                currency: 'EUR',
+                evidence: { sourceId: 'source-1', locator: 'regel 5', quote: 'Fictieve steak 24,50' },
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Fictief Lunch',
+        sourceId: 'source-2',
+        categories: [
+          {
+            name: 'Lunch',
+            items: [
+              // Wel overgenomen, maar zonder prijs: een open nalopen-regel.
+              {
+                name: 'Fictieve soep',
+                priceStatus: 'unknown',
+                evidence: { sourceId: 'source-2', locator: 'pagina 1, regel 2', quote: 'Fictieve soep 6,50' },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    rejected: [{ sourceId: 'source-1', locator: 'regel 7', reason: 'not_menu', text: 'Fictieve friet 3,50' }],
+    coverage: {
+      status: 'partial',
+      sourcesRead: 2,
+      pagesRead: 3,
+      itemsExtracted: 3,
+      unreadSources: [{ sourceId: 'source-3', locator: 'pagina 1', reason: 'unreadable' }],
+      limitations: ['Fictief: één PDF is een scan zonder tekstlaag.'],
+    },
+  };
+  const report = buildImportReport({
+    importId: 'fixture-import',
+    bundle,
+    output,
+    aiName: 'Claude',
+    now: new Date('2026-10-24T13:05:00.000Z'),
+  });
+  if (!report.ok) throw new Error(`map fixture invalid: ${report.code}`);
+  const capture = bundle.sources;
+  const initial = reviewView({ report, decisions: new Map(), capture });
+  const redMark = (initial.sourceMap.marks || []).find((mark) => mark.tone === 'price_mismatch');
+  const orangeMark = (initial.sourceMap.marks || []).find(
+    (mark) => mark.tone === 'uncovered' && mark.sourceId === 'source-1' && mark.canAdd,
+  );
+  if (!redMark || !orangeMark) throw new Error('map fixture expects a red and an orange mark');
+  const taken = decideSourcePriceLine({
+    report,
+    decisions: new Map(),
+    bundle,
+    decision: { action: 'take_source_price', lineId: redMark.id, rowId: redMark.rowId },
+  });
+  if (!taken.ok) throw new Error(`map fixture cannot take the price: ${taken.code}`);
+  const afterTake = reviewView({ report, decisions: taken.decisions, capture });
+  const dismissed = decideUncoveredLine({
+    report,
+    decisions: taken.decisions,
+    bundle,
+    decision: { action: 'uncovered_not_dish', lineId: orangeMark.id },
+  });
+  if (!dismissed.ok) throw new Error(`map fixture cannot dismiss: ${dismissed.code}`);
+  const afterBoth = reviewView({ report, decisions: dismissed.decisions, capture });
+  const cardsFor = (decisions) => ({
+    'source-1:1': sourceCardView({ report, decisions, capture, sourceId: 'source-1', page: 1 }),
+    'source-2:1': sourceCardView({ report, decisions, capture, sourceId: 'source-2', page: 1 }),
+    'source-2:2': sourceCardView({ report, decisions, capture, sourceId: 'source-2', page: 2 }),
+    'source-3:1': sourceCardView({ report, decisions, capture, sourceId: 'source-3', page: 1 }),
+  });
+  return {
+    ...base,
+    bundle: bundleMetadata(bundle),
+    prompt: buildImportPrompt(bundle),
+    import: publicImportReport(report),
+    // Dezelfde volgorde als de beslissingen in de browsercheck: eerst de prijs
+    // overnemen, daarna de losse regel als geen gerecht.
+    reviews: [initial, afterTake, afterBoth],
+    cardSteps: [cardsFor(new Map()), cardsFor(taken.decisions), cardsFor(dismissed.decisions)],
+    map: {
+      redMark,
+      orangeMark,
+      counts: initial.sourceMap.sources.map((source) => ({ id: source.id, counts: source.counts, view: source.view })),
+    },
+  };
+}
+
 

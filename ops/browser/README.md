@@ -249,6 +249,45 @@ Screenshots: `ai-uncovered-390-dark.png`, `ai-uncovered-after-add-390-dark.png`,
 `ai-uncovered-empty-390-dark.png`, `ai-uncovered-390-light.png` en
 `ai-uncovered-320-light.png`.
 
+### Variant 5: de kaart met markeringen (order 6382953597)
+
+`fixture=manual-map` antwoordt met een fictieve bron waarin een prijs op een eigen
+regel staat (naamregel + "11,00"), met een afwijkende prijs (rood), een
+overgenomen regel (groen), een niet-overgenomen regel (oranje), een afgewezen
+regel (grijs), een PDF met twee pagina's en een scan zonder tekstlaag. De review
+en de kaartpagina's zijn met de echte productmodules gebouwd
+(`reviewView`, `decideSourcePriceLine`, `decideUncoveredLine`, `sourceCardView`).
+
+De fixture beantwoordt één extra, fictief leespad:
+`POST /api/internal/v1/manual-menu-import/imports/fixture-import/source-map`. Elk
+ander pad, een andere bron of een andere pagina wordt geweigerd. Elke fictieve
+route die de pagina werkelijk aanroept staat in `window.__FIXTURE_CALLS__`, zodat
+de check kan bewijzen dat een kaartpagina pas bij openen of bladeren wordt
+opgevraagd.
+
+`manualCardScenario` controleert:
+
+- de review opent met de schakelaar **Lijst | Kaart** en zonder kaartverzoek;
+- de kaart toont de legenda met vier markeringen (elk met vorm én tekst), de drie
+  bronnen in volgorde en de regels van de bron; regels zonder prijs blijven
+  ongemarkeerd; het paar heeft één markering;
+- een tik op rood opent "Kaart 11,00 · concept € 12,50" met "Neem 11,00 over" en
+  "Wijzig"; overnemen komt duurzaam terug in het paneel;
+- een tik op oranje biedt "Toevoegen" en "Geen gerecht"; "Geen gerecht" maakt de
+  regel grijs en laat hem staan; groen toont het gerecht;
+- de PDF-pagina's komen per stuk binnen (pagina 2 pas na "Volgende") met de
+  eerlijke melding over de ontbrekende pagina-afbeelding; de scan zonder tekst
+  toont geen regels;
+- "Bekijk op kaart" in de lijst opent de kaart, scrolt naar de regel en markeert
+  hem;
+- 390 px licht/donker, 320 px licht, geen horizontale overflow, en de
+  toetsenbordroute (Tab naar "Kaart", Enter, focus op een markering, Enter opent
+  het paneel).
+
+Screenshots: `ai-map-390-light.png`, `ai-map-390-dark.png`, `ai-map-320-light.png`,
+`ai-map-red-panel-*.png`, `ai-map-orange-panel-*.png`, `ai-map-pdf-*.png`,
+`ai-map-from-list-*.png` en `ai-map-keyboard-390-light.png`.
+
 ## Coverage
 
 - exact breadcrumb, source and "handmatig beoordelen" links;

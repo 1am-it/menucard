@@ -98,7 +98,11 @@ function fixtureBootstrap(scenarios, options = {}) {
       return new Response(JSON.stringify(body), { status: status || 200, headers: { 'Content-Type': 'application/json' } });
     }
     const fixtureState = { manualStep: 0, manualState: 0 };
+    // #59 variant 5: which fictional API routes the screen actually called, so
+    // the browser check can prove that a card page is only fetched on request.
+    const calls = (window.__FIXTURE_CALLS__ = window.__FIXTURE_CALLS__ || []);
     function fixtureResponse(verdict) {
+      if (calls.length < 200) calls.push({ routeId: verdict.routeId || null, at: new Date().toISOString() });
       if (verdict.routeId === 'auth') return jsonResponse(session);
       if (verdict.routeId === 'me') {
         return jsonResponse({ roles: [{ role: 'internal', restaurant_id: null }, { role: 'editor', restaurant_id: null }] });
@@ -171,6 +175,26 @@ function fixtureBootstrap(scenarios, options = {}) {
           });
         }
         if (verdict.routeId === 'manual-save') return jsonResponse(manual.saved);
+        // #59 variant 5 (Lead order 6382953597): one printed page of one source.
+        // Only a source and a page that the fixture itself prepared are answered;
+        // anything else is refused, so the check never invents a page.
+        if (verdict.routeId === 'manual-source-map') {
+          let body = {};
+          try {
+            body = JSON.parse(verdict.body || '{}');
+          } catch (ignored) {
+            return jsonResponse({ error: 'Ongeldig verzoek.', reason: 'body_invalid' }, 400);
+          }
+          const key = String(body.source_id || '') + ':' + String(body.page || 1);
+          // De kaartstap loopt mee met de beslisstap: na een keuze antwoordt de
+          // fixture met dezelfde stand die de review al toont.
+          const steps = Array.isArray(manual.cardSteps) ? manual.cardSteps : [manual.cards || {}];
+          const step = steps[Math.min(fixtureState.manualStep, steps.length - 1)] || {};
+          const card = step[key];
+          return card
+            ? jsonResponse({ card, validUntil: manual.validUntil })
+            : jsonResponse({ error: 'Deze pagina bestaat niet op deze kaart.', reason: 'page_out_of_range' }, 422);
+        }
       }
       // #59 / BE-21 "Lees met AI" (Lead review 6380804419): only the two
       // fictional AI routes below are answered; the app itself never reaches a
@@ -238,7 +262,12 @@ function fixtureBootstrap(scenarios, options = {}) {
         recordViolation('fetch', raw, method, verdict);
         throw new Error(describeBlocked(verdict));
       }
-      if (verdict.kind === 'fixture_api') return fixtureResponse(verdict);
+      if (verdict.kind === 'fixture_api') {
+        // The request body travels with the verdict so a fictional read route can
+        // answer for exactly the source and page the screen asked for.
+        verdict.body = typeof (init && init.body) === 'string' ? init.body : null;
+        return fixtureResponse(verdict);
+      }
       if (!nativeFetch) {
         recordViolation('fetch_no_native', raw, method, { reason: 'native_fetch_unavailable', url: String(raw) });
         throw new Error('fixture_network_blocked: native_fetch_unavailable');

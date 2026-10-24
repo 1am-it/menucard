@@ -1957,6 +1957,318 @@ async function manualUncoveredScenario(cdp) {
   }
 }
 
+// ── Variant 5 (Lead order 6382953597): Lijst | Kaart, de kaart met markeringen
+// en de acties in het paneel. Fixture en ontwikkelaarsbewijs: geen echt
+// restaurant, geen model, geen sleutel en geen opslag.
+
+function manualMapUrl(theme) {
+  const params = new URLSearchParams({
+    fixture: 'manual-map',
+    restaurant: fixtures.RESTAURANT.id,
+    name: fixtures.RESTAURANT.name,
+    url: 'https://fictief-brasserie.invalid/diner',
+    aiState: 'off',
+    theme,
+  });
+  return `${MANUAL_URL}?${params.toString()}`;
+}
+
+/** Maakt de prompt, plakt het fictieve antwoord en wacht op de schakelaar. */
+async function openMapReview(cdp, theme) {
+  await openRoute(cdp, manualMapUrl(theme), `document.body.innerText.includes('Prompt maken')`);
+  await clickButton(cdp, 'Prompt maken');
+  await waitFor(cdp, `document.body.innerText.includes('gaat mee in de prompt')`, 15000);
+  await setFieldValue(cdp, '#mai-answer', 'Korte samenvatting.\n```json\n{"menus":[],"coverage":{}}\n```');
+  await waitFor(cdp, `document.body.innerText.includes('Antwoord geplakt')`, 15000);
+  await clickButton(cdp, 'Controleren');
+  return waitFor(cdp, `Boolean(document.querySelector('.mai-view-toggle'))`, 15000);
+}
+
+/** De zichtbare kaartstand, inclusief welke fictieve routes al zijn aangeroepen. */
+async function readMap(cdp) {
+  return evalJs(
+    cdp,
+    `(() => {
+      const root = document.querySelector('.mai-map');
+      const lines = root ? Array.from(root.querySelectorAll('.mai-map-line')) : [];
+      const marks = root ? Array.from(root.querySelectorAll('.mai-map-mark')) : [];
+      return {
+        present: Boolean(root),
+        legend: root ? Array.from(root.querySelectorAll('.mai-map-legend-item')).map((el) => ({
+          label: (el.querySelector('.mai-map-legend-label') || {}).innerText || '',
+          detail: (el.querySelector('.mai-map-legend-detail') || {}).innerText || '',
+          swatch: (el.querySelector('.mai-map-swatch') || {}).innerText || '',
+        })) : [],
+        sources: root ? Array.from(root.querySelectorAll('.mai-map-source')).map((el) => ({ text: (el.innerText || '').trim(), pressed: el.getAttribute('aria-pressed') })) : [],
+        notice: root && root.querySelector('.mai-map-notice') ? root.querySelector('.mai-map-notice').innerText.trim() : null,
+        counts: root && root.querySelector('.mai-map-counts') ? root.querySelector('.mai-map-counts').innerText.trim() : null,
+        page: root && root.querySelector('.mai-map-pages') ? root.querySelector('.mai-map-pages .mai-why').innerText.trim() : null,
+        marks: marks.map((el) => ({ aria: el.getAttribute('aria-label'), expanded: el.getAttribute('aria-expanded'), tone: (el.className.match(/mai-map-mark--([a-z_]+)/) || [])[1] || null })),
+        lines: lines.map((el) => ({
+          text: el.querySelector('.mai-map-text') ? el.querySelector('.mai-map-text').innerText.trim() : '',
+          tone: (el.className.match(/mai-map-line--([a-z_]+)/) || [])[1] || null,
+          marker: Boolean(el.querySelector('.mai-map-mark')),
+        })),
+        panels: root ? Array.from(root.querySelectorAll('.mai-map-panel')).map((el) => ({
+          tone: (el.className.match(/mai-map-panel--([a-z_]+)/) || [])[1] || null,
+          text: el.innerText.trim(),
+          buttons: Array.from(el.querySelectorAll('button')).map((b) => b.innerText.trim()),
+          named: Array.from(el.querySelectorAll('button')).every((b) => Boolean(b.getAttribute('aria-label'))),
+          aria: el.getAttribute('aria-label'),
+        })) : [],
+        toggles: Array.from(document.querySelectorAll('.mai-view-btn')).map((el) => ({ text: el.innerText.trim(), pressed: el.getAttribute('aria-pressed') })),
+        images: root ? root.querySelectorAll('img, canvas, iframe').length : 0,
+        cardCalls: (window.__FIXTURE_CALLS__ || []).filter((entry) => entry.routeId === 'manual-source-map').length,
+        overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      };
+    })()`,
+  );
+}
+
+/** Klikt de markering van een bepaalde kleur (de knop zelf, geen tekstmatch). */
+async function clickMark(cdp, tone) {
+  return evalJs(
+    cdp,
+    `(() => {
+      const el = document.querySelector('.mai-map-mark--${tone}');
+      if (!el) return false;
+      el.click();
+      return true;
+    })()`,
+  );
+}
+
+async function manualCardScenario(cdp, theme, width = 390) {
+  await setViewport(cdp, width, 900);
+  const opened = await openMapReview(cdp, theme);
+  check(`kaart ${width}px/${theme}: de review opent met de schakelaar Lijst | Kaart`, opened);
+  const before = await readMap(cdp);
+  check(
+    `kaart ${width}px/${theme}: de kaart is niet geladen en er is geen pagina opgevraagd`,
+    before.present === false && before.cardCalls === 0 && before.toggles.length === 2,
+    JSON.stringify({ present: before.present, calls: before.cardCalls, toggles: before.toggles }),
+  );
+  check(
+    `kaart ${width}px/${theme}: Lijst staat aan en de kaart nog niet`,
+    Boolean(before.toggles[0]) && before.toggles[0].pressed === 'true' && before.toggles[1].pressed === 'false',
+    JSON.stringify(before.toggles),
+  );
+
+  // De kaart opent en laadt pas dan één pagina.
+  await clickButton(cdp, 'Kaart');
+  const shown = await waitFor(cdp, `Boolean(document.querySelector('.mai-map-lines'))`, 15000);
+  check(`kaart ${width}px/${theme}: de kaart toont de regels van de bron`, shown);
+  const map = await readMap(cdp);
+  check(`kaart ${width}px/${theme}: precies één kaartpagina is opgevraagd`, map.cardCalls === 1, `calls=${map.cardCalls}`);
+  check(
+    `kaart ${width}px/${theme}: de legenda noemt de vier markeringen in gewone taal`,
+    map.legend.length === 4 &&
+      map.legend.map((entry) => entry.label).join('|') === 'Overgenomen|Niet overgenomen|Prijs wijkt af|Geen gerecht' &&
+      map.legend.every((entry) => entry.swatch.length > 0 && entry.detail.length > 10),
+    JSON.stringify(map.legend),
+  );
+  check(
+    `kaart ${width}px/${theme}: de bronnen staan in volgorde met hun weergave`,
+    map.sources.length === 3 &&
+      map.sources[0].text.includes('Website') &&
+      map.sources[1].text.includes('PDF') &&
+      map.sources[2].text.includes('Afbeelding zonder tekst'),
+    JSON.stringify(map.sources.map((entry) => entry.text)),
+  );
+  check(
+    `kaart ${width}px/${theme}: de melding zegt dat dit de opgehaalde tekst van de website is`,
+    map.notice === 'Opgehaalde tekst van de website',
+    String(map.notice),
+  );
+  check(
+    `kaart ${width}px/${theme}: rood, groen, oranje en grijs staan elk op hun eigen regel`,
+    ['price_mismatch', 'covered', 'uncovered', 'not_dish'].every((tone) => map.lines.some((line) => line.tone === tone)),
+    JSON.stringify(map.lines.map((line) => [line.text, line.tone])),
+  );
+  check(
+    `kaart ${width}px/${theme}: regels zonder prijs blijven ongemarkeerd`,
+    map.lines
+      .filter((line) => line.text === 'FICTIEF DINER' || line.text === 'Voorgerechten')
+      .every((line) => line.tone === null && line.marker === false),
+    JSON.stringify(map.lines.filter((line) => line.tone === null).map((line) => line.text)),
+  );
+  check(
+    `kaart ${width}px/${theme}: de prijs op een eigen regel hoort bij de naam erboven (één markering)`,
+    map.marks.some((mark) => /Fictieve carpaccio: prijs wijkt af/.test(mark.aria || '')) &&
+      map.lines.some((line) => line.text === '11,00' && line.marker === false && line.tone === 'price_mismatch'),
+    JSON.stringify(map.lines),
+  );
+  check(
+    `kaart ${width}px/${theme}: elke markering heeft een eigen tekst voor de schermlezer`,
+    map.marks.length >= 4 && map.marks.every((mark) => typeof mark.aria === 'string' && mark.aria.length > 12),
+    JSON.stringify(map.marks.map((mark) => mark.aria)),
+  );
+  check(`kaart ${width}px/${theme}: geen afbeelding of iframe in de kaart`, map.images === 0, `images=${map.images}`);
+  check(`kaart ${width}px/${theme}: geen horizontale overflow`, map.overflow <= 0, `overflow=${map.overflow}`);
+  await evalJs(cdp, `(() => { const el = document.querySelector('.mai-map'); if (el) el.scrollIntoView({ block: 'start', behavior: 'instant' }); return true; })()`);
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, `ai-map-${width}-${theme}.png`));
+
+  // Rood: het paneel noemt beide prijzen en neemt de kaartprijs over.
+  await clickMark(cdp, 'price_mismatch');
+  const redOpen = await waitFor(cdp, `Boolean(document.querySelector('.mai-map-panel--price_mismatch'))`, 10000);
+  const red = await readMap(cdp);
+  const redPanel = red.panels.find((panel) => panel.tone === 'price_mismatch');
+  check(
+    `kaart ${width}px/${theme}: een tik op rood opent het paneel`,
+    redOpen && Boolean(redPanel),
+    JSON.stringify(red.panels.map((panel) => panel.tone)),
+  );
+  check(
+    `kaart ${width}px/${theme}: het rode paneel noemt kaart- en conceptprijs en biedt overnemen of wijzigen`,
+    Boolean(redPanel) &&
+      /Kaart 11,00/.test(redPanel.text) &&
+      /concept € 12,50/.test(redPanel.text) &&
+      redPanel.buttons.join('|') === 'Neem 11,00 over|Wijzig' &&
+      redPanel.named,
+    redPanel ? JSON.stringify([redPanel.text, redPanel.buttons]) : 'no panel',
+  );
+  await evalJs(cdp, `(() => { const el = document.querySelector('.mai-map-panel--price_mismatch'); if (el) el.scrollIntoView({ block: 'center', behavior: 'instant' }); return true; })()`);
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, `ai-map-red-panel-${width}-${theme}.png`));
+  await clickButton(cdp, 'Neem 11,00 over');
+  const taken = await waitFor(cdp, `document.body.innerText.includes('overgenomen uit de kaart')`, 15000);
+  const afterTake = await readMap(cdp);
+  check(
+    `kaart ${width}px/${theme}: Neem de prijs over komt duurzaam terug in het paneel`,
+    taken && afterTake.panels.some((panel) => /€ 11,00 overgenomen uit de kaart/.test(panel.text)),
+    JSON.stringify(afterTake.panels.map((panel) => panel.text)),
+  );
+  const takeMessage = await evalJs(cdp, `document.body.innerText.includes('opslaan blijft een aparte stap')`);
+  check(`kaart ${width}px/${theme}: de melding zegt dat opslaan een aparte stap blijft`, takeMessage, 'no message');
+
+  // Oranje: Toevoegen of Geen gerecht, via hetzelfde durable pad.
+  await clickMark(cdp, 'uncovered');
+  const orangeOpen = await waitFor(cdp, `Boolean(document.querySelector('.mai-map-panel--uncovered'))`, 10000);
+  const orange = await readMap(cdp);
+  const orangePanel = orange.panels.find((panel) => panel.tone === 'uncovered');
+  check(
+    `kaart ${width}px/${theme}: het oranje paneel biedt Toevoegen en Geen gerecht`,
+    orangeOpen && Boolean(orangePanel) && orangePanel.buttons.join('|') === 'Toevoegen|Geen gerecht' && orangePanel.named,
+    orangePanel ? JSON.stringify(orangePanel.buttons) : 'no panel',
+  );
+  await evalJs(cdp, `(() => { const el = document.querySelector('.mai-map-panel--uncovered'); if (el) el.scrollIntoView({ block: 'center', behavior: 'instant' }); return true; })()`);
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, `ai-map-orange-panel-${width}-${theme}.png`));
+  await clickButton(cdp, 'Geen gerecht');
+  const dismissed = await waitFor(
+    cdp,
+    `Boolean(document.querySelector('.mai-map-mark--not_dish')) && !document.querySelector('.mai-map-mark--uncovered')`,
+    15000,
+  );
+  check(`kaart ${width}px/${theme}: Geen gerecht maakt de regel grijs en laat hem staan`, dismissed);
+
+  // Groen: het bijbehorende gerecht.
+  await clickMark(cdp, 'covered');
+  const greenOpen = await waitFor(cdp, `Boolean(document.querySelector('.mai-map-panel--covered'))`, 10000);
+  const green = await readMap(cdp);
+  const greenPanel = green.panels.find((panel) => panel.tone === 'covered');
+  check(
+    `kaart ${width}px/${theme}: een tik op groen toont het gerecht`,
+    greenOpen && Boolean(greenPanel) && /Fictieve steak/.test(greenPanel.text) && greenPanel.buttons.length === 0,
+    greenPanel ? greenPanel.text : 'no panel',
+  );
+
+  // PDF: eigen tekstweergave met eerlijke melding en pagina's op verzoek.
+  await evalJs(cdp, `(() => { const el = [...document.querySelectorAll('.mai-map-source')].find((b) => b.innerText.includes('source-2')); if (el) el.click(); return true; })()`);
+  const pdfShown = await waitFor(cdp, `document.body.innerText.includes('De echte PDF-pagina kan niet worden getoond')`, 15000);
+  const pdf = await readMap(cdp);
+  check(
+    `kaart ${width}px/${theme}: een PDF toont de tekst met een eerlijke melding over de pagina-afbeelding`,
+    pdfShown && typeof pdf.notice === 'string' && pdf.notice.includes('de import bewaart de PDF-bytes niet'),
+    String(pdf.notice),
+  );
+  check(
+    `kaart ${width}px/${theme}: pagina 1 van de PDF komt uit een eigen verzoek`,
+    pdf.page === 'Pagina 1 van 2' && pdf.cardCalls >= 3,
+    JSON.stringify({ page: pdf.page, calls: pdf.cardCalls }),
+  );
+  const callsBeforePageTwo = pdf.cardCalls;
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, `ai-map-pdf-${width}-${theme}.png`));
+  await clickButton(cdp, 'Volgende');
+  const pageTwo = await waitFor(cdp, `document.body.innerText.includes('Pagina 2 van 2')`, 15000);
+  const second = await readMap(cdp);
+  check(
+    `kaart ${width}px/${theme}: pagina 2 wordt pas op verzoek geladen`,
+    pageTwo && second.cardCalls === callsBeforePageTwo + 1 && second.lines.some((line) => line.text === 'Fictieve salade'),
+    JSON.stringify({ calls: second.cardCalls, lines: second.lines.map((line) => line.text) }),
+  );
+
+  // Scan zonder tekst: geen verzonnen pagina.
+  await evalJs(cdp, `(() => { const el = [...document.querySelectorAll('.mai-map-source')].find((b) => b.innerText.includes('source-3')); if (el) el.click(); return true; })()`);
+  const imageShown = await waitFor(cdp, `document.body.innerText.includes('Deze kaart is een afbeelding; vergelijken kan nog niet.')`, 15000);
+  const image = await readMap(cdp);
+  check(
+    `kaart ${width}px/${theme}: een scan zonder tekst zegt eerlijk dat vergelijken nog niet kan`,
+    imageShown && image.lines.length === 0,
+    JSON.stringify({ notice: image.notice, lines: image.lines.length }),
+  );
+
+  // Terug naar de lijst: "Bekijk op kaart" opent dezelfde regel in de kaart.
+  await clickButton(cdp, 'Lijst');
+  const backToList = await waitFor(cdp, `Boolean(document.querySelector('.mai-review-list'))`, 10000);
+  const back = await readMap(cdp);
+  check(`kaart ${width}px/${theme}: Lijst brengt de nalopen-lijst terug`, backToList && back.present === false);
+  const openedFromList = await evalJs(
+    cdp,
+    `(() => {
+      const button = [...document.querySelectorAll('button')].find((el) => (el.innerText || '').trim() === 'Bekijk op kaart');
+      if (!button) return false;
+      button.click();
+      return true;
+    })()`,
+  );
+  const jumped = await waitFor(cdp, `Boolean(document.querySelector('.mai-map-line--focus'))`, 15000);
+  const focused = await evalJs(
+    cdp,
+    `(() => {
+      const line = document.querySelector('.mai-map-line--focus');
+      const box = line ? line.getBoundingClientRect() : null;
+      return {
+        text: line && line.querySelector('.mai-map-text') ? line.querySelector('.mai-map-text').innerText.trim() : null,
+        inView: Boolean(box) && box.top >= -8 && box.top <= window.innerHeight,
+        source: [...document.querySelectorAll('.mai-map-source')]
+          .filter((el) => el.getAttribute('aria-pressed') === 'true')
+          .map((el) => el.innerText.trim()),
+      };
+    })()`,
+  );
+  check(
+    `kaart ${width}px/${theme}: Bekijk op kaart opent de kaart, scrolt naar de regel en markeert hem`,
+    openedFromList && jumped && Boolean(focused.text) && focused.inView,
+    JSON.stringify(focused),
+  );
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, `ai-map-from-list-${width}-${theme}.png`));
+}
+
+/** Toetsenbord: de schakelaar en een markering zijn met Tab en Enter te bedienen. */
+async function manualCardKeyboardScenario(cdp) {
+  await setViewport(cdp, 390, 900);
+  const opened = await openMapReview(cdp, 'light');
+  check('kaart toetsenbord: de review opent met de schakelaar', opened);
+  const reached = await tabUntilInput(cdp, (info) => info.tag === 'BUTTON' && info.text === 'Kaart', 60);
+  check('kaart toetsenbord: Tab bereikt de knop Kaart', Boolean(reached.info), JSON.stringify(reached.seen.slice(-5)));
+  await pressKey(cdp, 'Enter', 'Enter', 13, '\r');
+  const shown = await waitFor(cdp, `Boolean(document.querySelector('.mai-map-lines'))`, 15000);
+  check('kaart toetsenbord: Enter opent de kaart', shown);
+  // Focus de eerste markering en open hem met Enter: dezelfde actie als een tik.
+  const focused = await evalJs(
+    cdp,
+    `(() => {
+      const el = document.querySelector('.mai-map-mark');
+      if (!el) return null;
+      el.focus();
+      return document.activeElement === el ? el.getAttribute('aria-label') : null;
+    })()`,
+  );
+  check('kaart toetsenbord: een markering is met de tab/ focus bereikbaar en heeft een naam', Boolean(focused) && focused.length > 12, String(focused));
+  await pressKey(cdp, 'Enter', 'Enter', 13, '\r');
+  const panel = await waitFor(cdp, `Boolean(document.querySelector('.mai-map-panel'))`, 10000);
+  check('kaart toetsenbord: Enter op de markering opent het paneel onder de regel', panel);
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'ai-map-keyboard-390-light.png'));
+}
 
 async function main() {
   const browserPath = findBrowser();
@@ -1997,6 +2309,11 @@ async function main() {
     // Variant 1 (order 6382189724): niet-overgenomen bronregels, met de
     // toetsenbordroute en de standen na Toevoegen en Geen gerecht.
     await manualUncoveredScenario(cdp);
+    // Variant 5 (order 6382953597): de schakelaar Lijst | Kaart, de markeringen,
+    // de panelen en de luie kaartpagina. 390 px licht/donker, 320 px en toetsenbord.
+    for (const theme of ['light', 'dark']) await manualCardScenario(cdp, theme);
+    await manualCardScenario(cdp, 'light', 320);
+    await manualCardKeyboardScenario(cdp);
     // #59 / BE-21 (review 6380804419): "Lees met AI" op het bestaande scherm.
     for (const theme of ['light', 'dark']) await aiReadScenario(cdp, theme);
     for (const theme of ['light', 'dark']) await aiReadBatchScenario(cdp, theme);

@@ -871,3 +871,85 @@ geen referentie, telregel of meetcode en doet geen provideraanroep.
 - De rubriek van een toegevoegd gerecht is een systeemgok uit de dichtstbijzijnde
   kop en staat daarom altijd als "rubriek controleren" in nalopen.
 
+## Variant 5: originele kaart met markeringen (order 6382953597)
+
+Ook deze ronde is **ontwikkelaars- en fixturebewijs**. Er is geen provider, geen
+sleutel, geen productieconcept, geen migratie en geen onafhankelijke review
+gebruikt.
+
+| Criterium | Bewijs |
+| --- | --- |
+| Z1 prijs op een eigen regel | `src/lib/menuSourceCoverage.test.js`: een paar (naamregel + prijsregel), gedekt via de naamregel en via de prijsregel, een prijs verder dan twee regels terug, een rubriekkop ertussen, een kop direct boven een prijs (naam, geen rubriek), onduidelijk (tweede prijs, gebruikte naam, twee prijzen op één regel), een form feed als paginagrens, en "Toevoegen" op een paar met `regels 3–4` als locator. `ops/benchmark/menuSourceCoverageDiagnosis.test.js`: paren en losse prijsregels worden apart geteld |
+| Z2 kaartweergave | `src/lib/menuSourceMap.test.js` (index met vier kleuren, tellingen per bron, geen brontekst in de index) en `src/lib/menuSourceMapSurface.test.js` (schakelaar Lijst \| Kaart, legenda en markeringen uit de server, aria-labels en eigen vormen) |
+| Z3 PDF als echte pagina | `src/lib/menuSourceMap.test.js`: de keuze tussen website-, PDF- en afbeeldingsweergave met de letterlijke meldingen; pagina 2 van een PDF wordt apart opgevraagd; een afbeelding zonder tekst toont geen verzonnen pagina. `src/lib/menuSourceCoverageHandlers.test.js`: één pagina per verzoek uit het verzegelde token, met weigeringen voor een onbekende bron, een verkeerde pagina en een ontbrekend token |
+| Z4 tikken = actie | `src/lib/menuSourceCoverageHandlers.test.js`: "Neem € x over" haalt het bedrag uit de server, weigert een andere regel of rij, blijft in een nieuwe instantie staan, komt in `importProvenance.priceFromSource` en in het opgeslagen concept; een andere regel zonder afwijking en een onbenoemde dubbele prijs worden geweigerd. `src/lib/menuSourceMapSurface.test.js`: de paneelknoppen en de durable route |
+| Z5 regressies en bewijs | `npm test`, `npm run build`, de brownerun hieronder en de diagnose vóór/na Z1 |
+
+### Diagnose vóór en na Z1 (gepinde captures, live-run 2)
+
+`node ops/scripts/diagnose-menu-source-coverage.js`, offline, geen sleutel en
+geen aanroep. Het rapport staat gitignored in
+`ops/benchmark/output/ai-probe-coverage-diagnosis.json` (vóór: `...before-z1.json`).
+
+| Bron | Vóór (niet gedekt / prijsregels) | Na (niet gedekt / prijsregels) | Paren / los |
+| --- | --- | --- | --- |
+| zuyd | 9 / 31 | 9 / 31 | 0 / 0 |
+| andalous | 2 / 91 | 2 / 91 | 0 / 0 |
+| pellens | 16 / 72 | 16 / 72 | 0 / 0 |
+| chocolat | 0 / 28 | 0 / 30 | 2 / 0 |
+| smelt | 0 / 0 | 0 / 0 | 0 / 0 |
+| blossem | 0 / 2 | 0 / 2 | 0 / 0 |
+| bardot | 15 / 16 | 15 / 16 | 0 / 0 |
+| wolfslaar | 0 / 0 | 0 / 0 | 0 / 0 |
+
+Wat dit eerlijk laat zien:
+
+- Chocolat levert twee **paren** op (naamregel + "€ 125" op een eigen regel); die
+  waren eerst onzichtbaar omdat een prijsregel zonder naam werd overgeslagen.
+- Wolfslaar en Smelt blijven op nul. Dat komt **niet** door de regelindeling maar
+  door het prijsformaat: beide kaarten printen hele euro's zonder € of decimalen
+  ("Witte Heilbot 32", "Hollands 27", "29.5"). De bestaande prijsparser ziet zo'n
+  los getal bewust niet als prijs (het zou hoeveelheden en jaartallen raken). Een
+  tweede prijsfamilie is in deze opdracht niet toegestaan; dit vraagt een eigen
+  besluit over hele-euro-prijzen, niet een stille uitbreiding hier.
+- Blossem, Bardot, Zuyd, Pellens en Andalous hebben geen prijs op een eigen
+  regel: hun prijzen staan in dezelfde (soms platgeslagen) regel als de naam.
+- Dit is diagnose, geen acceptatiecijfer: de referenties, telregels en meetcode
+  zijn niet gewijzigd.
+
+### Browserbewijs (fixture)
+
+`npm run test:browser:menu-review` met `manualCardScenario` op `fixture=manual-map`:
+
+- de review opent met de schakelaar Lijst | Kaart en **zonder** kaartverzoek;
+- de kaart toont de legenda met vier markeringen, de drie bronnen (website, PDF
+  met twee pagina's, scan zonder tekst) en de regels van de bron;
+- rood, groen, oranje en grijs staan elk op hun eigen regel; regels zonder prijs
+  blijven ongemarkeerd; het paar (naamregel + "11,00") heeft één markering;
+- een tik op rood opent "Kaart 11,00 · concept € 12,50" met "Neem 11,00 over" en
+  "Wijzig"; overnemen komt duurzaam terug in het paneel;
+- een tik op oranje biedt "Toevoegen" en "Geen gerecht"; "Geen gerecht" maakt de
+  regel grijs en laat hem staan; een tik op groen toont het gerecht;
+- de PDF-pagina's worden per stuk opgevraagd (pagina 1 bij openen, pagina 2 pas
+  na "Volgende"), de scan zonder tekst toont geen regels;
+- "Bekijk op kaart" in de lijst opent de kaart, scrolt naar de regel en markeert
+  hem;
+- 390 px licht en donker, 320 px licht, en de toetsenbordroute (Tab naar "Kaart",
+  Enter, focus op een markering, Enter opent het paneel), zonder horizontale
+  overflow;
+- screenshots: `ai-map-{390-light,390-dark,320-light}.png`,
+  `ai-map-red-panel-*`, `ai-map-orange-panel-*`, `ai-map-pdf-*`,
+  `ai-map-from-list-*` en `ai-map-keyboard-390-light.png`.
+
+### Resterende gaten (variant 5)
+
+- De echte PDF-pagina wordt niet getoond: de import bewaart de PDF-bytes niet en
+  haalt de bron bij het bekijken niet opnieuw op. Dat is een eigenaar-besluit over
+  byte-opslag, geen technische slordigheid.
+- Hele-euro-prijzen zonder € of decimalen (Wolfslaar, Smelt) blijven buiten de
+  vergelijking; zie de diagnose hierboven.
+- Een losse prijsregel kan alleen "Geen gerecht" worden; er is geen
+  samenvoegactie met een gerecht elders op de kaart.
+- Geen echte provideraanroep, geen productieconcept en geen onafhankelijke
+  review in deze ronde.
+

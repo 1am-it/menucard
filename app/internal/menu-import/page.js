@@ -16,6 +16,7 @@ import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import InternalNav from '@/src/components/InternalNav'
 import AiMenuReadBlock from '@/src/components/AiMenuReadBlock'
+import MenuSourceMap from '@/src/components/MenuSourceMap'
 
 const API = '/api/internal/v1/manual-menu-import'
 const AI_API = '/api/internal/v1/menu-ai-import'
@@ -112,6 +113,17 @@ export default function ManualMenuImportPage() {
   // after the explicit "Nalopen" click (or after a manual check).
   const [manualOpen, setManualOpen] = useState(false)
   const [reviewOpen, setReviewOpen] = useState(false)
+  // Variant 5 (Lead order 6382953597): the review opens as the list and shows
+  // the original card with markings on request. One page of one source is
+  // fetched only when the human looks at it.
+  const [viewMode, setViewMode] = useState('list')
+  const [mapCard, setMapCard] = useState(null)
+  const [mapLoading, setMapLoading] = useState(false)
+  const [mapError, setMapError] = useState(null)
+  const [mapSource, setMapSource] = useState('')
+  const [mapPage, setMapPage] = useState(1)
+  const [openMark, setOpenMark] = useState('')
+  const [focusMark, setFocusMark] = useState('')
   const autoStarted = useRef(false)
 
   useEffect(() => {
@@ -372,9 +384,98 @@ export default function ManualMenuImportPage() {
           ? 'De regel staat nu als gerecht in het concept. Stel naam en rubriek bij waar nodig; opslaan blijft een aparte stap.'
           : 'Deze regel telt als geen gerecht. De keuze blijft bij het concept bewaard.'
       )
+      if (viewMode === 'map') loadCard(mapSource, mapPage)
     }
     setBusy(false)
   }
+
+  /**
+   * Variant 5 (Lead order 6382953597): one page of one source, on request. The
+   * server compares again from its own capture; the screen only shows the page.
+   */
+  async function loadCard(sourceId, page) {
+    if (!report || !stateToken || !sourceId) return
+    setMapLoading(true)
+    setMapError(null)
+    const result = await api(`/imports/${report.importId}/source-map`, { state: stateToken, source_id: sourceId, page })
+    if (!result.ok) {
+      setMapCard(null)
+      setMapError(result.error || 'De kaartpagina kon niet worden geladen.')
+    } else {
+      setMapCard(result.data.card)
+      setMapSource(sourceId)
+      setMapPage(result.data.card.page.number)
+    }
+    setMapLoading(false)
+  }
+
+  function showMap(sourceId, page, markId) {
+    const map = review && review.sourceMap
+    if (!map || map.available !== true) return
+    const fallback = map.sources[0] ? map.sources[0].id : ''
+    const nextSource = sourceId || mapSource || fallback
+    const nextPage = Number.isInteger(page) && page > 0 ? page : 1
+    setViewMode('map')
+    setMapSource(nextSource)
+    setMapPage(nextPage)
+    setOpenMark(markId || '')
+    setFocusMark(markId || '')
+    if (!mapCard || mapCard.source.id !== nextSource || mapCard.page.number !== nextPage) {
+      loadCard(nextSource, nextPage)
+    }
+  }
+
+  /** "Bekijk op kaart" bij een gerecht: dezelfde regel, gemarkeerd en in beeld. */
+  function openMarkOnMap(row) {
+    const map = review && review.sourceMap
+    if (!map || map.available !== true) return
+    const mark = (map.marks || []).find((entry) => entry.rowId === row.id)
+    if (!mark) return
+    showMap(mark.sourceId, mark.page, mark.id)
+  }
+
+  /** Z4: "Neem € x over" — de server leest de prijs zelf uit de kaart. */
+  async function sendTakePrice(mark) {
+    setBusy(true)
+    setError(null)
+    setMessage(null)
+    const result = await api(`/imports/${report.importId}/decisions`, {
+      state: stateToken,
+      decision: { action: 'take_source_price', lineId: mark.id, rowId: mark.rowId },
+    })
+    if (!result.ok) handleFailure(result)
+    else {
+      setReview(result.data.review)
+      adoptStep(result.data)
+      setMessage(
+        `De prijs van de kaart (${mark.priceText}) staat nu bij dit gerecht. Bij opslaan krijgt het concept die prijs; opslaan blijft een aparte stap.`,
+      )
+      if (viewMode === 'map') loadCard(mapSource, mapPage)
+    }
+    setBusy(false)
+  }
+
+  /** Z4: "Wijzig" opent het bestaande correctieformulier in de lijst. */
+  function correctFromMap(mark) {
+    const row = review && Array.isArray(review.rows) ? review.rows.find((entry) => entry.id === mark.rowId) : null
+    if (!row) return
+    setViewMode('list')
+    setOpenMark('')
+    openCorrection(row)
+    if (typeof window !== 'undefined') {
+      window.setTimeout(() => {
+        const element = document.getElementById(`mai-row-${row.id}`)
+        if (element && typeof element.scrollIntoView === 'function') element.scrollIntoView({ block: 'center', behavior: 'instant' })
+      }, 0)
+    }
+  }
+
+  // Na "Bekijk op kaart" of een paginawissel: de gemarkeerde regel in beeld.
+  useEffect(() => {
+    if (!mapCard || !focusMark) return
+    const element = document.querySelector(`[data-mark-id="${focusMark}"]`)
+    if (element && typeof element.scrollIntoView === 'function') element.scrollIntoView({ block: 'center', behavior: 'instant' })
+  }, [mapCard, focusMark])
 
   function openReason(row) {
     setReasonFor(row.id)
@@ -1055,6 +1156,55 @@ export default function ManualMenuImportPage() {
                       </ul>
                     </div>
                   ) : null}
+                  {/* Variant 5 (Lead order 6382953597): Lijst | Kaart. De kaart
+                      toont de bron met markeringen; de lijst blijft de vaste
+                      nalopen-weergave. Kleur is nooit de enige drager. */}
+                  {review.sourceMap && review.sourceMap.available ? (
+                    <div className="mai-view-toggle" role="group" aria-label="Weergave van de controle">
+                      <button
+                        type="button"
+                        className={`mai-view-btn${viewMode === 'list' ? ' mai-view-btn--active' : ''}`}
+                        aria-pressed={viewMode === 'list'}
+                        onClick={() => {
+                          setViewMode('list')
+                          setOpenMark('')
+                          setFocusMark('')
+                        }}
+                      >
+                        Lijst
+                      </button>
+                      <button
+                        type="button"
+                        className={`mai-view-btn${viewMode === 'map' ? ' mai-view-btn--active' : ''}`}
+                        aria-pressed={viewMode === 'map'}
+                        onClick={() => showMap()}
+                      >
+                        Kaart
+                      </button>
+                    </div>
+                  ) : null}
+                  {viewMode === 'map' && review.sourceMap && review.sourceMap.available ? (
+                    <MenuSourceMap
+                      map={review.sourceMap}
+                      card={mapCard}
+                      cardError={mapError}
+                      loading={mapLoading}
+                      sourceId={mapSource || (review.sourceMap.sources[0] ? review.sourceMap.sources[0].id : '')}
+                      page={mapPage}
+                      openMarkId={openMark}
+                      focusMarkId={focusMark}
+                      busy={busy}
+                      onSelectSource={(id) => showMap(id, 1, '')}
+                      onPage={(page) => showMap(mapSource, page, '')}
+                      onOpenMark={(id) => setOpenMark(openMark === id ? '' : id)}
+                      onAdd={(mark) => sendUncovered({ id: mark.id }, 'add_uncovered')}
+                      onNotDish={(mark) => sendUncovered({ id: mark.id }, 'uncovered_not_dish')}
+                      onTakePrice={sendTakePrice}
+                      onCorrect={correctFromMap}
+                    />
+                  ) : null}
+                  {viewMode === 'list' ? (
+                    <>
                   {/* Variant 1 (Lead order 6382189724): the deterministic,
                       free comparison with the original menu. It sits above the
                       nalopen list, never below it. */}
@@ -1154,8 +1304,17 @@ export default function ManualMenuImportPage() {
                       // W6: a row without any price gets "Prijs onbekend" as its
                       // explicit choice; "Klopt" would silently keep it unpriced.
                       const priceMissing = row.code === 'price_unknown' || row.code === 'price_on_request'
+                      // Variant 5: the same dish on the card with its marking.
+                      const rowMark =
+                        review.sourceMap && review.sourceMap.available
+                          ? (review.sourceMap.marks || []).find((mark) => mark.rowId === row.id) || null
+                          : null
                       return (
-                        <li key={row.id} className={`mai-review-row ${row.state === 'error' ? 'mai-review-row--blocked' : ''}`}>
+                        <li
+                          key={row.id}
+                          id={`mai-row-${row.id}`}
+                          className={`mai-review-row ${row.state === 'error' ? 'mai-review-row--blocked' : ''}`}
+                        >
                           <div className="mai-review-head">
                             <span className="mai-review-name">
                               {row.name} <span className="mai-review-price">{row.priceText}</span>
@@ -1169,7 +1328,19 @@ export default function ManualMenuImportPage() {
                             {row.locator ? ` · ${row.locator}` : ''}
                           </p>
                           {row.quote ? <p className="mai-quote">“{row.quote}”</p> : null}
-
+                          {rowMark ? (
+                            <div className="mai-row-actions">
+                              <button
+                                type="button"
+                                className="stg-btn-secondary mai-btn"
+                                disabled={busy}
+                                aria-label={`Bekijk ${row.name || 'dit gerecht'} op de kaart`}
+                                onClick={() => openMarkOnMap(row)}
+                              >
+                                Bekijk op kaart
+                              </button>
+                            </div>
+                          ) : null}
 
                           {row.code === 'price_variant' ? (
                             <div className="mai-row-actions">
@@ -1392,16 +1563,36 @@ export default function ManualMenuImportPage() {
                       {doneRows.length} {doneRows.length === 1 ? 'regel' : 'regels'} in orde of afgehandeld (bekijk)
                     </summary>
                     <ul className="mai-done-list">
-                      {doneRows.map((row) => (
-                        <li key={row.id}>
-                          {row.name} · <b>{row.priceText}</b>
-                          {row.outcome === 'keep_corrected' ? ' · gecorrigeerd' : ''}
-                          {row.outcome === 'keep_confirmed' ? ' · bevestigd' : ''}
-                        </li>
-                      ))}
+                      {doneRows.map((row) => {
+                        // Variant 5: ook een regel die in orde is, is op de kaart
+                        // terug te vinden.
+                        const doneMark =
+                          review.sourceMap && review.sourceMap.available
+                            ? (review.sourceMap.marks || []).find((mark) => mark.rowId === row.id) || null
+                            : null
+                        return (
+                          <li key={row.id}>
+                            {row.name} · <b>{row.priceText}</b>
+                            {row.outcome === 'keep_corrected' ? ' · gecorrigeerd' : ''}
+                            {row.outcome === 'keep_confirmed' ? ' · bevestigd' : ''}
+                            {doneMark ? (
+                              <button
+                                type="button"
+                                className="stg-btn-secondary mai-btn"
+                                aria-label={`Bekijk ${row.name || 'dit gerecht'} op de kaart`}
+                                onClick={() => openMarkOnMap(row)}
+                              >
+                                Bekijk op kaart
+                              </button>
+                            ) : null}
+                          </li>
+                        )
+                      })}
                     </ul>
                     <p className="bta-muted">Deze regels hoef je niet meer na te lopen. Ze zijn wel gecontroleerd.</p>
                   </details>
+                    </>
+                  ) : null}
 
 
                   <details className="mai-details">

@@ -1277,3 +1277,109 @@ fixturebewijs**, geen onafhankelijke review, geen browseracceptatie en geen
 productiegebruik. Niet getest: een echte provider, een echte PDF-rendering op de
 kaart (variant 5) en productiegedrag.
 
+## Variant 5: de originele kaart met markeringen (order 6382953597)
+
+Variant 5 vergelijkt het concept met de **originele kaart** en toont die kaart met
+markeringen: groen (overgenomen), oranje gestippeld (niet overgenomen), rood
+(prijs wijkt af) en grijs (geen gerecht). Dezelfde motor uit variant 1 doet het
+werk; er is geen tweede vergelijking, geen model, geen provider, geen migratie en
+geen nieuwe opslag.
+
+### Z1 — een prijs op een eigen regel
+
+`src/lib/menuSourceCoverage.js` koppelt een regel die **alleen** een prijs print
+aan de dichtstbijzijnde voorgaande regel met tekst:
+
+- binnen dezelfde rubriek: een rubriekkop of een andere prijsregel tussen beide
+  regels beëindigt het zoeken;
+- hooguit twee geprinte regels terug (een decoratieve regel zoals "—" telt niet
+  mee en wordt overgeslagen);
+- de naamregel wordt maar één keer gebruikt;
+- een kop-achtige regel die **direct** door een prijs wordt gevolgd is de naam
+  van die prijs, geen rubriek (anders zou "Fictieve carpaccio" boven "11,00"
+  als kop gelden en nooit koppelen);
+- onduidelijk blijft los: een prijsregel zonder partner, met meer dan één prijs
+  of met een al gebruikte naam blijft een **losse prijsregel**. Die wordt
+  gerapporteerd en nooit stilletjes weggegooid of aan een verzonnen naam
+  gekoppeld. Zo'n losse regel kan alleen "Geen gerecht" krijgen: de app verzint
+  geen gerechtnaam.
+
+Een paar telt als **één** "regel met een prijs". Het citaat is de naamregel plus
+de prijsregel ("Fictieve carpaccio 11,00"), wat onder de bestaande normalisatie
+een letterlijk deel van de bron is; de locator is "regels 3–4". Een citaat dat
+alleen de naamregel of alleen de prijsregel dekt, dekt het paar. Er is geen
+tweede prijsfamilie: dezelfde `findPrices` uit `src/lib/htmlMenuStructure.js`,
+die losse hele euro's zonder € of decimalen bewust niet als prijs ziet.
+
+`sourceTextLines` geeft elke geprinte regel een pagina (een form feed in
+PDF-tekst is een paginagrens) en een globaal regelnummer, zodat een keuze op
+regel 7 ook na een paginawissel regel 7 blijft.
+
+### Z2 — de kaartindex bij de review
+
+`src/lib/menuSourceMap.js` bouwt met dezelfde analyse (`analyseCapture`) een
+compacte index: per bron de weergave, de tellingen en de markeringen (id, kleur,
+regel, gerecht, kaartprijs, conceptprijs). **Geen brontekst** in dit deel: de
+review blijft dus zonder capture, precies zoals variant 1 eist. De legenda komt
+van de server en noemt elke kleur in gewone taal, zodat kleur nooit de enige
+drager is.
+
+### Z3 — de kaartpagina, lui geladen
+
+`POST /api/internal/v1/manual-menu-import/imports/{id}/source-map` met
+`{ state, source_id, page }` geeft **één** pagina van **één** bron uit de capture
+in het verzegelde toestandstoken. De pagina wordt pas opgevraagd als de
+medewerker de kaart opent of verder bladert; bij de eerste weergave gebeurt er
+niets. Per pagina is de kaart begrensd (400 regels, 300 tekens per regel) met een
+eerlijke "en nog N regels op deze pagina".
+
+`chooseCardView` beslist hoe een bron getoond wordt:
+
+| Bron | Weergave | Melding |
+| --- | --- | --- |
+| website met tekst | de opgehaalde tekst als kaart | "Opgehaalde tekst van de website" |
+| PDF met tekstlaag | de opgehaalde tekst, pagina's uit de tekst | "De echte PDF-pagina kan niet worden getoond: de import bewaart de PDF-bytes niet en haalt de bron niet opnieuw op. Je ziet de opgehaalde tekst met dezelfde regelnummers." |
+| afbeelding/scan zonder tekst | geen regels | "Deze kaart is een afbeelding; vergelijken kan nog niet." |
+
+De echte PDF-pagina zou de PDF-bytes nodig hebben. De import bewaart alleen de
+tekst die hij las (geen byte-opslag, geen migratie, geen nieuwe dependency) en
+haalt de bron bij het bekijken niet opnieuw op; de tekstweergave met die
+beperking is daarom de eerlijke uitkomst. De pagina-afbeelding komt er pas met
+een eigenaar-besluit over byte-opslag.
+
+### Z4 — tikken = actie
+
+Een markering is een `button` met `aria-expanded`, een `aria-label` met dezelfde
+woorden als de legenda, een eigen vorm (● ◌ ▲ –) en een rand- of stippelstijl.
+Daaronder opent het paneel:
+
+| Kleur | Paneel | Actie |
+| --- | --- | --- |
+| oranje | naam, "Losse prijsregel" bij een regel zonder naam | "Toevoegen" (alleen met een naam) of "Geen gerecht", via hetzelfde durable pad als variant 1 |
+| rood | "Kaart € x · concept € y" | "Neem € x over" of "Wijzig" |
+| groen | het gerecht met de conceptprijs | geen actie |
+| grijs | "telt als geen gerecht" | geen actie |
+
+"Neem € x over" (`take_source_price`) laat de **server** het bedrag uit zijn eigen
+lezing van de kaart halen; de browser stuurt alleen regel-id en rij-id. Het
+resultaat is een gewone correctie (`correct`) met de naam van de rij en de prijs
+van de kaart, dus opslaan gebruikt exact de bestaande route. De prijsregel zelf
+blijft als bewijs bij het concept (`importProvenance.priceFromSource`, met
+bron, regelnummers, tekst, het overgenomen bedrag en het eerdere bedrag); het
+citaat van het gerecht wordt nooit herschreven. Bij twee onbenoemde prijzen
+weigert de actie met "kies zelf een prijs": de kaart wijst daar geen van beide
+aan.
+
+"Wijzig" opent het bestaande correctieformulier in de lijst. "Bekijk op kaart"
+bij een gerecht in de lijst opent de kaart, laadt de juiste bron en pagina,
+scrolt naar die regel en markeert hem.
+
+### Beperkingen (variant 5)
+
+- Geen AI-aanroep, geen sleutel, geen migratie, geen nieuwe dependency en geen
+  afbeelding bij de eerste weergave.
+- De PDF-pagina zelf wordt niet gerenderd (zie Z3); er is geen OCR.
+- Een losse prijsregel levert geen gerecht op: alleen "Geen gerecht".
+- De kaart toont per pagina; een bron met veel pagina's vraagt per pagina een
+  verzoek.
+

@@ -3095,6 +3095,163 @@ details.bta-side-card > summary:focus-visible { outline: 2px solid var(--border-
 }
 .mai-uncovered-free { margin: 0; font-size: 12px; color: var(--text-secondary); }
 .mai-uncovered-unavailable { margin: 0; font-size: 13px; color: var(--text-secondary); overflow-wrap: anywhere; }
+
+/* #59 variant 5 (Lead order 6382953597): Lijst | Kaart en de kaart met
+   markeringen. Kleur is nooit de enige drager: elke markering heeft een eigen
+   vorm, een rand- of stippelstijl en een aria-label met dezelfde woorden. */
+.mai-view-toggle {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 0;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+}
+.mai-view-btn {
+  min-height: 40px;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+}
+.mai-view-btn--active {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-weight: 800;
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+.mai-view-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mai-map { display: grid; gap: 10px; min-width: 0; }
+.mai-map-head { display: grid; gap: 4px; min-width: 0; }
+.mai-map-title { margin: 0; font-size: 15px; font-weight: 800; color: var(--text-primary); overflow-wrap: anywhere; }
+.mai-map-legend {
+  list-style: none;
+  margin: 0;
+  padding: 10px 12px;
+  display: grid;
+  gap: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  min-width: 0;
+}
+.mai-map-legend-item {
+  display: grid;
+  grid-template-columns: 24px auto 1fr;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+.mai-map-swatch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  font-size: 11px;
+  line-height: 1;
+}
+.mai-map-swatch--covered { color: var(--status-positive); border-color: var(--status-positive-border); }
+.mai-map-swatch--uncovered { color: var(--status-old); border-style: dashed; border-color: var(--status-old-border); }
+.mai-map-swatch--price_mismatch { color: var(--status-blocked); border-style: double; border-width: 3px; border-color: var(--status-blocked-border); }
+.mai-map-swatch--not_dish { color: var(--status-neutral); border-color: var(--status-neutral-border); }
+.mai-map-legend-label { font-size: 13px; font-weight: 800; color: var(--text-primary); }
+.mai-map-legend-detail { font-size: 12px; color: var(--text-secondary); overflow-wrap: anywhere; }
+.mai-map-sources { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
+.mai-map-source { max-width: 100%; text-align: left; overflow-wrap: anywhere; }
+.mai-map-source--active { border-color: var(--accent); color: var(--text-primary); font-weight: 800; }
+.mai-map-card {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  min-width: 0;
+}
+.mai-map-notice { margin: 0; font-size: 12px; color: var(--text-secondary); overflow-wrap: anywhere; }
+.mai-map-card-head { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; justify-content: space-between; min-width: 0; }
+.mai-map-card-source { font-size: 13px; font-weight: 800; color: var(--text-primary); overflow-wrap: anywhere; }
+.mai-map-counts { font-size: 12px; color: var(--text-secondary); }
+.mai-map-pages { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.mai-map-lines {
+  list-style: none;
+  margin: 0;
+  padding: 8px 0;
+  display: grid;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  min-width: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+}
+.mai-map-line {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  align-items: start;
+  gap: 6px;
+  padding: 3px 8px 3px 4px;
+  border-left: 3px solid transparent;
+  min-width: 0;
+}
+.mai-map-line--covered { border-left-color: var(--status-positive); }
+.mai-map-line--uncovered { border-left-style: dashed; border-left-color: var(--status-old); }
+.mai-map-line--price_mismatch { border-left-style: double; border-left-width: 4px; border-left-color: var(--status-blocked); }
+.mai-map-line--not_dish { border-left-color: var(--status-neutral); color: var(--text-secondary); }
+.mai-map-line--focus { background: var(--accent-surface); }
+.mai-map-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  cursor: pointer;
+}
+.mai-map-mark:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mai-map-mark--covered { border-color: var(--status-positive-border); }
+.mai-map-mark--uncovered { border-style: dashed; border-color: var(--status-old-border); }
+.mai-map-mark--price_mismatch { border-style: double; border-width: 3px; border-color: var(--status-blocked-border); }
+.mai-map-mark--not_dish { border-color: var(--status-neutral-border); }
+.mai-map-dot { font-size: 12px; line-height: 1; }
+.mai-map-dot--covered { color: var(--status-positive); }
+.mai-map-dot--uncovered { color: var(--status-old); }
+.mai-map-dot--price_mismatch { color: var(--status-blocked); }
+.mai-map-dot--not_dish { color: var(--status-neutral); }
+.mai-map-mark-space { width: 24px; }
+.mai-map-text { white-space: pre-wrap; overflow-wrap: anywhere; min-width: 0; color: var(--text-primary); }
+.mai-map-panel {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 6px;
+  margin: 2px 0 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  font-size: 13px;
+  min-width: 0;
+}
+.mai-map-panel--uncovered { border-left-color: var(--status-old); }
+.mai-map-panel--price_mismatch { border-left-color: var(--status-blocked); }
+.mai-map-panel--covered { border-left-color: var(--status-positive); }
+.mai-map-panel--not_dish { border-left-color: var(--status-neutral); }
+.mai-map-panel-title { margin: 0; font-size: 13px; font-weight: 800; color: var(--text-primary); }
+.mai-map-panel-line { margin: 0; color: var(--text-primary); overflow-wrap: anywhere; }
+.mai-map-panel-price { margin: 0; font-weight: 800; color: var(--text-primary); }
+.mai-map-panel-done { margin: 0; color: var(--status-positive); overflow-wrap: anywhere; }
 .mai-review-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; min-width: 0; }
 .mai-review-row {
   display: grid;

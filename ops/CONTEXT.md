@@ -81,6 +81,27 @@ key, no network, no provider call, and it changes no reference, counting rule or
 measurement code. The engine itself is `src/lib/menuSourceCoverage.js` and reuses
 the extraction's own price parser and the validator's normalization.
 
+## Variant 5 card with markings (added 2026-10-24, #59 / BE-21, order 6382953597)
+
+`node ops/scripts/diagnose-menu-source-coverage.js` now also reports, per source,
+how many priced lines are a **name + price pair** (a price alone on its line,
+paired with the nearest preceding text line) and how many are a **loose price
+line** (no partner, never coupled to an invented name). The counts and the
+before/after numbers of the pinned captures are recorded in
+`docs/guides/menu-extraction-acceptance.md`; the diagnosis still reads only local
+files and changes no reference, counting rule or measurement code.
+
+The review gained a Lijst | Kaart switch. The printed page of one source is read
+lazily through
+`POST /api/internal/v1/manual-menu-import/imports/{id}/source-map` with
+`{ state, source_id, page }`: the capture comes out of the existing sealed state
+token, one page per request, bounded per page. No new table, column, migration,
+provider call or dependency; a PDF page image is not rendered because the import
+keeps no PDF bytes (the card says so and shows the text with the same line
+numbers). The red mark's "Neem € x over" action takes the amount from the
+server's own reading and stores the source line in
+`importProvenance.priceFromSource`.
+
 ## PDF.js server packaging check (added 2026-09-30)
 
 `node ops/scripts/verify-pdfjs-server-trace.js` — read-only, run after
