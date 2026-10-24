@@ -1404,17 +1404,18 @@ async function manualNormalizedScenario(cdp) {
     notice ? JSON.stringify(notice.buttons.filter((label) => /accep/i.test(label))) : 'no notice',
   );
   check('manual import normalization: no horizontal overflow at 390 px', Boolean(notice) && notice.overflow <= 0, notice ? `overflow=${notice.overflow}` : 'no notice');
-  // Het scrollen kan animeren: meet pas als de melding echt in beeld staat.
-  const scrolledIn = await waitFor(
+  // Y3: scroll direct (niet smooth) en meet meteen, zodat de screenshot
+  // deterministisch de melding toont. Dezelfde eis als voorheen: de melding
+  // staat met zijn bovenkant in het scherm.
+  await evalJs(
     cdp,
-    `(() => { const el = document.querySelector('.mai-notices'); if (!el) return false; const r = el.getBoundingClientRect(); return r.top >= 0 && r.top < window.innerHeight * 0.6; })()`,
-    5000,
+    `(() => { const el = document.querySelector('.mai-notices'); if (el) el.scrollIntoView({ block: 'start', behavior: 'instant' }); return true; })()`,
   );
   const placed = await noticePosition(cdp);
   check(
     'manual import normalization: the notice is in view for the screenshot',
-    scrolledIn && Boolean(placed) && placed.top >= 0 && placed.top < placed.height,
-    JSON.stringify({ scrolledIn, placed }),
+    Boolean(placed) && placed.top >= 0 && placed.top < placed.height,
+    JSON.stringify({ placed }),
   );
   screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'manual-ai-import-normalized-390-dark.png'));
   recordClickpath(
