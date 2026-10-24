@@ -74,6 +74,25 @@ test('Z4: het paneel biedt per kleur precies de toegestane acties', () => {
   assert.match(PAGE, /Bekijk op kaart/);
 });
 
+test('AA2: de legenda is één regel chips met een uitklapbare uitleg', () => {
+  // Eén regel met vier kleine chips, in de volgorde van de mockup.
+  assert.match(MAP, /className="mai-map-chips"/);
+  assert.match(MAP, /className={`mai-map-chip mai-map-chip--\$\{entry\.tone\}`}/);
+  assert.match(MAP, /className="mai-map-chip-label">\{entry\.label\}/);
+  // Vorm naast kleur: elk chip houdt zijn eigen teken.
+  assert.match(MAP, /covered: '✓'/);
+  assert.match(MAP, /uncovered: '○'/);
+  assert.match(MAP, /price_mismatch: '▲'/);
+  assert.match(MAP, /not_dish: '–'/);
+  // De lange teksten staan achter een native details met de naam "Uitleg".
+  assert.match(MAP, /<details className="mai-map-legend-more">/);
+  assert.match(MAP, /<summary className="mai-map-legend-summary">Uitleg<\/summary>/);
+  assert.match(MAP, /className="mai-map-legend-detail">\{entry\.detail\}/);
+  assert.match(CSS, /\.mai-map-chips \{[^}]*display: flex/s);
+  assert.match(CSS, /\.mai-map-chip-label \{[^}]*white-space: nowrap/s);
+  assert.match(CSS, /\.mai-map-legend-summary:focus-visible \{ outline: 2px solid var\(--accent\)/);
+});
+
 test('Z2/Z4: de kleuren volgen de bestaande statusrollen, met rand of stippel als tweede drager', () => {
   for (const rule of ['.mai-map-swatch--covered', '.mai-map-swatch--uncovered', '.mai-map-swatch--price_mismatch', '.mai-map-swatch--not_dish']) {
     assert.ok(CSS.includes(rule), rule);

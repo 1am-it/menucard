@@ -6,10 +6,15 @@
 //
 // Kleur is nooit de enige drager: elke markering heeft een eigen vorm, een rand-
 // of stippelstijl en een aria-label met dezelfde woorden als de legenda.
+//
+// AA2 (Lead review 6383853638): de legenda is één regel met vier kleine chips;
+// de lange uitleg per kleur zit achter "Uitleg" (een native details, dus met
+// het toetsenbord te openen). De chips houden de volledige woorden, zodat de
+// schermlezertekst gelijk blijft aan de mockup.
 
 const GLYPH = {
-  covered: '●',
-  uncovered: '◌',
+  covered: '✓',
+  uncovered: '○',
   price_mismatch: '▲',
   not_dish: '–',
 }
@@ -49,17 +54,32 @@ export default function MenuSourceMap({
         </p>
       </div>
 
-      <ul className="mai-map-legend" aria-label="Legenda">
-        {map.legend.map((entry) => (
-          <li key={entry.tone} className={`mai-map-legend-item mai-map-legend-item--${entry.tone}`}>
-            <span className={`mai-map-swatch mai-map-swatch--${entry.tone}`} aria-hidden="true">
-              {GLYPH[entry.tone]}
-            </span>
-            <span className="mai-map-legend-label">{entry.label}</span>
-            <span className="mai-map-legend-detail">{entry.detail}</span>
-          </li>
-        ))}
-      </ul>
+      <div className="mai-map-legend" role="group" aria-label="Legenda">
+        <ul className="mai-map-chips">
+          {map.legend.map((entry) => (
+            <li key={entry.tone} className={`mai-map-chip mai-map-chip--${entry.tone}`}>
+              <span className={`mai-map-swatch mai-map-swatch--${entry.tone}`} aria-hidden="true">
+                {GLYPH[entry.tone]}
+              </span>
+              <span className="mai-map-chip-label">{entry.label}</span>
+            </li>
+          ))}
+        </ul>
+        <details className="mai-map-legend-more">
+          <summary className="mai-map-legend-summary">Uitleg</summary>
+          <ul className="mai-map-legend-list">
+            {map.legend.map((entry) => (
+              <li key={entry.tone} className={`mai-map-legend-item mai-map-legend-item--${entry.tone}`}>
+                <span className={`mai-map-swatch mai-map-swatch--${entry.tone}`} aria-hidden="true">
+                  {GLYPH[entry.tone]}
+                </span>
+                <span className="mai-map-legend-label">{entry.label}</span>
+                <span className="mai-map-legend-detail">{entry.detail}</span>
+              </li>
+            ))}
+          </ul>
+        </details>
+      </div>
 
       <div className="mai-map-sources" role="group" aria-label="Bronnen in deze kaart">
         {map.sources.map((entry) => (

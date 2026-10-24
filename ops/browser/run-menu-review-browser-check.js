@@ -1999,6 +1999,20 @@ async function readMap(cdp) {
           detail: (el.querySelector('.mai-map-legend-detail') || {}).innerText || '',
           swatch: (el.querySelector('.mai-map-swatch') || {}).innerText || '',
         })) : [],
+        chips: root ? Array.from(root.querySelectorAll('.mai-map-chip')).map((el) => ({
+          label: (el.querySelector('.mai-map-chip-label') || {}).innerText || '',
+          glyph: (el.querySelector('.mai-map-swatch') || {}).innerText || '',
+          top: Math.round(el.getBoundingClientRect().top),
+          height: Math.round(el.getBoundingClientRect().height),
+        })) : [],
+        legendRowHeight: root && root.querySelector('.mai-map-chips') ? Math.round(root.querySelector('.mai-map-chips').getBoundingClientRect().height) : 0,
+        explain: root && root.querySelector('.mai-map-legend-more')
+          ? {
+              tag: root.querySelector('.mai-map-legend-more').tagName,
+              open: root.querySelector('.mai-map-legend-more').open,
+              summary: (root.querySelector('.mai-map-legend-summary') || {}).innerText || '',
+            }
+          : null,
         sources: root ? Array.from(root.querySelectorAll('.mai-map-source')).map((el) => ({ text: (el.innerText || '').trim(), pressed: el.getAttribute('aria-pressed') })) : [],
         notice: root && root.querySelector('.mai-map-notice') ? root.querySelector('.mai-map-notice').innerText.trim() : null,
         counts: root && root.querySelector('.mai-map-counts') ? root.querySelector('.mai-map-counts').innerText.trim() : null,
@@ -2061,11 +2075,38 @@ async function manualCardScenario(cdp, theme, width = 390) {
   const map = await readMap(cdp);
   check(`kaart ${width}px/${theme}: precies één kaartpagina is opgevraagd`, map.cardCalls === 1, `calls=${map.cardCalls}`);
   check(
-    `kaart ${width}px/${theme}: de legenda noemt de vier markeringen in gewone taal`,
-    map.legend.length === 4 &&
-      map.legend.map((entry) => entry.label).join('|') === 'Overgenomen|Niet overgenomen|Prijs wijkt af|Geen gerecht' &&
-      map.legend.every((entry) => entry.swatch.length > 0 && entry.detail.length > 10),
-    JSON.stringify(map.legend),
+    `kaart ${width}px/${theme}: de legenda is één regel met vier kleine chips in volgorde`,
+    map.chips.length === 4 &&
+      map.chips.map((entry) => entry.label).join('|') === 'Overgenomen|Niet overgenomen|Prijs wijkt af|Geen gerecht' &&
+      map.chips.map((entry) => entry.glyph).join('') === '✓○▲–' &&
+      map.chips.every((entry) => entry.height > 0) &&
+      (width > 320 ? new Set(map.chips.map((entry) => entry.top)).size === 1 && map.legendRowHeight <= 26 : map.legendRowHeight <= 50),
+    JSON.stringify({ chips: map.chips, row: map.legendRowHeight }),
+  );
+  check(
+    `kaart ${width}px/${theme}: de lange uitleg zit dicht achter "Uitleg"`,
+    Boolean(map.explain) && map.explain.tag === 'DETAILS' && map.explain.open === false && map.explain.summary === 'Uitleg',
+    JSON.stringify(map.explain),
+  );
+  await evalJs(cdp, `(() => { const el = document.querySelector('.mai-map-legend-summary'); if (el) el.click(); return true; })()`);
+  const explainOpened = await waitFor(cdp, `Boolean(document.querySelector('.mai-map-legend-more[open]'))`, 5000);
+  const explained = await readMap(cdp);
+  check(
+    `kaart ${width}px/${theme}: "Uitleg" opent de vier regels met de vorm én de volledige tekst`,
+    explainOpened &&
+      explained.legend.length === 4 &&
+      explained.legend.map((entry) => entry.label).join('|') === 'Overgenomen|Niet overgenomen|Prijs wijkt af|Geen gerecht' &&
+      explained.legend.every((entry) => entry.swatch.length > 0 && entry.detail.length > 10),
+    JSON.stringify(explained.legend),
+  );
+  await evalJs(cdp, `(() => { const el = document.querySelector('.mai-map-legend'); if (el) el.scrollIntoView({ block: 'start', behavior: 'instant' }); return true; })()`);
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, `ai-map-legend-uitleg-${width}-${theme}.png`));
+  await evalJs(cdp, `(() => { const el = document.querySelector('.mai-map-legend-more'); if (el) el.open = false; return true; })()`);
+  check(
+    `kaart ${width}px/${theme}: een prijs zonder centen en zonder € staat als prijs op de kaart (AA1)`,
+    map.lines.some((line) => /^Fictieve zeebaars 34/.test(line.text) && line.tone === 'uncovered' && line.marker === true) &&
+      map.marks.some((mark) => /Fictieve zeebaars: niet overgenomen, kaart 34/.test(mark.aria || '')),
+    JSON.stringify(map.lines.filter((line) => /zeebaars|bisque/i.test(line.text))),
   );
   check(
     `kaart ${width}px/${theme}: de bronnen staan in volgorde met hun weergave`,
@@ -2152,13 +2193,27 @@ async function manualCardScenario(cdp, theme, width = 390) {
   );
   await evalJs(cdp, `(() => { const el = document.querySelector('.mai-map-panel--uncovered'); if (el) el.scrollIntoView({ block: 'center', behavior: 'instant' }); return true; })()`);
   screenshotFiles.push(await screenshot(cdp, OUT_DIR, `ai-map-orange-panel-${width}-${theme}.png`));
+  // De eerste oranje regel (die de markering draagt) wordt grijs; de andere
+  // oranje regels van de fictieve kaart blijven staan, want elke regel heeft
+  // zijn eigen beslissing.
+  const orangeLine = (orange.lines.find((line) => line.tone === 'uncovered' && line.marker) || {}).text || null;
   await clickButton(cdp, 'Geen gerecht');
   const dismissed = await waitFor(
     cdp,
-    `Boolean(document.querySelector('.mai-map-mark--not_dish')) && !document.querySelector('.mai-map-mark--uncovered')`,
+    `(() => {
+      const rows = Array.from(document.querySelectorAll('.mai-map-line')).map((el) => ({
+        text: (el.querySelector('.mai-map-text') || {}).innerText || '',
+        tone: (el.className.match(/mai-map-line--([a-z_]+)/) || [])[1] || null,
+      }));
+      return rows.some((row) => row.tone === 'not_dish') && !rows.some((row) => row.text === ${JSON.stringify(orangeLine)} && row.tone === 'uncovered');
+    })()`,
     15000,
   );
-  check(`kaart ${width}px/${theme}: Geen gerecht maakt de regel grijs en laat hem staan`, dismissed);
+  check(
+    `kaart ${width}px/${theme}: Geen gerecht maakt die regel grijs en laat hem staan`,
+    dismissed && Boolean(orangeLine),
+    JSON.stringify({ line: orangeLine, dismissed }),
+  );
 
   // Groen: het bijbehorende gerecht.
   await clickMark(cdp, 'covered');
