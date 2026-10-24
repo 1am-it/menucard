@@ -199,6 +199,36 @@ De screenshot `manual-ai-import-normalized-390-dark.png` staat in `output/` en
 in het evidencebestand. Ook dit blijft fixturebewijs: geen provider, geen echte
 bron, geen conceptopslag.
 
+## "Lees met AI" als hoofdroute en de batchplek (review 6381657192)
+
+`fixture=manual-ai` levert de fictieve status (sleutel + vlag aan), het
+maandbedrag en één fictief leesantwoord. `?aiState=off` antwoordt als "niet
+ingesteld"; `?aiState=slow` houdt het fictieve antwoord 2,5 s vast, zodat de
+"AI bezig"-stand echt in beeld komt voordat het resultaat er is. Geen provider,
+geen sleutel en geen echte kaart. De bestaande handmatige scenario's gebruiken
+`aiState=off`, zodat zij de ongewijzigde handmatige flow blijven bewijzen.
+
+Per thema (licht en donker, 390 px) controleert de check:
+
+- het AI-blok is een zelfstandige kaart na "Bron kiezen" en zit niet in stap 1;
+- de handmatige stappen zijn ingeklapt achter "Liever zelf invoeren of plakken"
+  (`aria-expanded`/`aria-controls`), klappen open als je die kiest en weer dicht
+  bij een tweede klik;
+- na "Concept klaar" staat alleen het resultaat met "Nalopen"; stap 1, 2 en het
+  reviewblok blijven weg tot die klik;
+- zonder AI staat rustig "AI is niet ingesteld." en is de oude handmatige flow
+  direct zichtbaar met de nummers 1, 2 en 3;
+- de batchplek (`fixture=partial`) toont hetzelfde blok als mockupscherm 1 in
+  het mislukte resultaat, met de knop naar de bestaande analyse-opdracht en de
+  handmatige link;
+- de AI-knop is met Tab en Enter te bedienen.
+
+Screenshots in `output/` en in het evidencebestand: `ai-read-block`,
+`ai-read-manual`, `ai-read-busy`, `ai-read-done`, `ai-read-review`,
+`ai-read-off` en `ai-read-batch`, elk als `-390-light.png` en `-390-dark.png`.
+Dit blijft fixture- en ontwikkelaarsbewijs, geen onafhankelijke review of echte
+browseracceptatie.
+
 ## Coverage
 
 - exact breadcrumb, source and "handmatig beoordelen" links;
