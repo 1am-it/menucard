@@ -1099,6 +1099,31 @@ sha256). Dit blijft **fixture- en ontwikkelaarsbewijs**, geen onafhankelijke
 review of browseracceptatie.
 
 
+### Bewijs en beperkingen (Y3, review 6381657192)
+
+Ontwikkelaarsbewijs op head `8de0a0a` (schone werkmap; de documentatiecommit
+volgt daarna):
+
+- `npm test`: 2661/2661;
+- `npm run test:menu-structure`: 6/6;
+- `npm run build`: `Compiled successfully`, route-overzicht zonder fouten;
+- `npm run test:browser:menu-review`: 451/451 fixturecontroles,
+  `worktreeDirty: false`, head `8de0a0a…`, 14 AI-screenshots (390 px, licht en
+  donker) in `ops/browser/output/` met bestand, formaat en sha256 in
+  `ops/browser/evidence/menu-review-browser-evidence.json`. De screenshots zijn
+  `ai-read-block`, `ai-read-manual`, `ai-read-busy`, `ai-read-done`,
+  `ai-read-review`, `ai-read-off` en `ai-read-batch`, elk met `-390-light.png`
+  en `-390-dark.png`.
+
+De bestaande handmatige browserscenario's draaien met `aiState=off` (de route
+zonder AI) en blijven ongewijzigd groen; de AI-route heeft eigen scenario's.
+Dit is **fixture- en ontwikkelaarsbewijs**, geen onafhankelijke review en geen
+echte browseracceptatie. Niet getest: een echte provider, het Vercel-plan of
+-dashboard en productiegedrag; de 300 s is gebaseerd op de gedocumenteerde
+Hobby/Pro-limieten en de projectconfiguratie zonder credentials.
+
+### Budget (W4)
+
 Het maandverbruik komt uit de duurzame conceptmetadata van eerdere AI-lezingen
 (`captured_content.importProvenance.cost`), zonder nieuwe tabel of migratie.
 Vóór elke aanroep geldt: verbruik + 30 eurocent (het maximum per aanroep) mag
@@ -1143,7 +1168,8 @@ onbenoemd, Prijs onbekend, nooit nul euro, round-trip),
 `src/lib/manualMenuImportHandlers.test.js` (AI-herkomst bij opslaan) en
 `src/lib/manualMenuImportUsage.test.js` (v3). Browserbewijs:
 `ops/browser/run-menu-review-browser-check.js` (`aiReadScenario`,
-`aiReadOffAndDarkScenario`) met `ai-read-*.png` op 390 px, licht en donker.
+`aiReadBatchScenario`, `aiReadKeyboardScenario`); de screenshots en de
+beperkingen staan in "Bewijs en beperkingen (Y3, review 6381657192)" hierboven.
 Dit blijft fixture- en ontwikkelaarsbewijs, geen onafhankelijke review of
 browseracceptatie; de Lead test de echte aanroep daarna zelf.
 
