@@ -1,0 +1,678 @@
+{
+  "category": "fixture evidence (fictional session and fictional API answers; not real acceptance)",
+  "issue": "#62",
+  "generatedAt": "2026-10-24T20:30:42.572Z",
+  "port": 3138,
+  "head": "473d01c160cf0d9d63746c89a92dc569aa17bda9",
+  "fixtureCounts": {
+    "menu-concepts": 7,
+    "source-triage": 2,
+    "import-inbox": 1,
+    "moderation": 1
+  },
+  "expectedTotal": 11,
+  "mockupComparison": "not machine-verifiable here: the approved mockup is an external Claude artifact; the screenshots are saved for the Lead/human visual comparison",
+  "fixtureNote": "the nav counts are one fixed fictional API answer; every fixture page keeps its own fictional list, so a row number is not derived from that page here. The real agreement (same definitions as the pages) is unit-tested in src/lib/workqueueCounts.test.js.",
+  "checks": [
+    {
+      "name": "fixture bootstrap without error (http://localhost:3138/internal/toevoegen?theme=light&fixture=review)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "warm-up: the counts route answered and the bar renders the total",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3138/internal/toevoegen?theme=light&fixture=review)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "desktop: the bar shows the real total",
+      "passed": true,
+      "detail": "expected (11)"
+    },
+    {
+      "name": "desktop: the bar shows Dekking, Werkvoorraad (N), the add entry, Licht/Donker and Sign out",
+      "passed": true,
+      "detail": "onze | menukaarten | Dekking | Werkvoorraad | (11) | + | Restaurant of menu toevoegen | Licht | Donker | Sign out"
+    },
+    {
+      "name": "desktop: Onboarding Restaurant and Beheer are no longer bar items",
+      "passed": true,
+      "detail": "onze | menukaarten | Dekking | Werkvoorraad | (11) | + | Restaurant of menu toevoegen | Licht | Donker | Sign out"
+    },
+    {
+      "name": "desktop: the menu starts closed",
+      "passed": true,
+      "detail": "{\"expanded\":\"false\",\"panel\":false}"
+    },
+    {
+      "name": "desktop: the add entry is at least 44 px high",
+      "passed": true,
+      "detail": "height=44"
+    },
+    {
+      "name": "desktop: the requested light theme is active",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "Werkvoorraad: the trigger is a real button that opens the menu",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Werkvoorraad: the panel opens",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "desktop: open work is sorted by the real numbers, Menuconcepten first, Beoordelen included for the editor role",
+      "passed": true,
+      "detail": "[[\"Menuconcepten beoordelen\",\"7\"],[\"Bronnen beoordelen\",\"2\"],[\"Nieuwe aanleveringen\",\"1\"],[\"Beoordelen\",\"1\"]]"
+    },
+    {
+      "name": "desktop: below the separating line are Stadsoverzicht and Restaurantgegevens (concept), without a number",
+      "passed": true,
+      "detail": "[{\"label\":\"Stadsoverzicht\",\"count\":null,\"href\":\"/internal/source-workqueue\"},{\"label\":\"Restaurantgegevens (concept)\",\"count\":null,\"href\":\"/internal/profile-drafts\"}]"
+    },
+    {
+      "name": "desktop: every row keeps its existing route",
+      "passed": true,
+      "detail": "/internal/menu-concepts,/internal/source-triage,/internal/import-inbox,/internal/moderation,/internal/source-workqueue,/internal/profile-drafts"
+    },
+    {
+      "name": "desktop: the panel has the \"Open werk\" heading",
+      "passed": true,
+      "detail": "OPEN WERK |  | Menuconcepten beoordelen | Concepten controleren en intern goedkeuren | 7 | Bronnen beoordelen | Bronvoorstellen vastleggen en beoordelen | 2 | Nieuwe aanleveringen | Nieuwe bronnen | 1 | Beoordelen | Menu's, profielen en eigenaarsclaims | 1 | Stadsoverzicht | Bron en menukaart per restaurant | Restaurantgegevens (concept) | Klaarzetten"
+    },
+    {
+      "name": "desktop: Escape closes the menu",
+      "passed": true,
+      "detail": "{\"className\":\"internal-nav-workqueue-trigger\",\"expanded\":\"false\"}"
+    },
+    {
+      "name": "desktop: focus returns to the Werkvoorraad button",
+      "passed": true,
+      "detail": "internal-nav-workqueue-trigger"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3138/internal/toevoegen?theme=dark&fixture=review)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "Werkvoorraad: the trigger is a real button that opens the menu",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Werkvoorraad: the panel opens",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "desktop: the requested dark theme is active",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "desktop: light and dark resolve to different background tokens",
+      "passed": true,
+      "detail": "#fcfaf4 / #0a0a0a"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3138/internal/toevoegen?theme=light&fixture=review)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "390px/light: the short label with the real total is visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "390px/light: Dekking, Werk (N) and the + entry stay in the bar",
+      "passed": true,
+      "detail": "Dekking | Werk | (11) | +"
+    },
+    {
+      "name": "390px/light: the long Werkvoorraad label lives only in the menu",
+      "passed": true,
+      "detail": "false"
+    },
+    {
+      "name": "390px/light: the Werk button and the + entry are at least 44 px",
+      "passed": true,
+      "detail": "{\"triggerH\":44,\"triggerW\":106.875,\"addH\":44,\"addW\":44}"
+    },
+    {
+      "name": "390px/light: Licht/Donker and Sign out are not in the bar itself",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "390px/light: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "390px/light: the requested theme is active",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "Werkvoorraad: the trigger is a real button that opens the menu",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Werkvoorraad: the panel opens",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "390px/light: the menu shows the same rows, numbers and separating line",
+      "passed": true,
+      "detail": "[{\"label\":\"Menuconcepten beoordelen\",\"count\":\"7\",\"href\":\"/internal/menu-concepts\"},{\"label\":\"Bronnen beoordelen\",\"count\":\"2\",\"href\":\"/internal/source-triage\"},{\"label\":\"Nieuwe aanleveringen\",\"count\":\"1\",\"href\":\"/internal/import-inbox\"},{\"label\":\"Beoordelen\",\"count\":\"1\",\"href\":\"/internal/moderation\"},{\"label\":\"Stadsoverzicht\",\"count\":null,\"href\":\"/internal/source-workqueue\"},{\"label\":\"Restaurantgegevens (concept)\",\"count\":null,\"href\":\"/internal/profile-drafts\"}]"
+    },
+    {
+      "name": "390px/light: Licht/Donker and Sign out are at the bottom of the menu",
+      "passed": true,
+      "detail": "OPEN WERK |  | Menuconcepten beoordelen | Concepten controleren en intern goedkeuren | 7 | Bronnen beoordelen | Bronvoorstellen vastleggen en beoordelen | 2 | Nieuwe aanleveringen | Nieuwe bronnen | 1 | Beoordelen | Menu's, profielen en eigenaarsclaims | 1 | Stadsoverzicht | Bron en menukaart per restaurant | Restaurantgegevens (concept) | Klaarzetten | Licht | Donker | Sign out"
+    },
+    {
+      "name": "390px/light: every menu row is at least 44 px",
+      "passed": true,
+      "detail": "height=49"
+    },
+    {
+      "name": "390px/light: the open menu does not overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3138/internal/toevoegen?theme=light&fixture=review)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "320px/light: the short label with the real total is visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "320px/light: Dekking, Werk (N) and the + entry stay in the bar",
+      "passed": true,
+      "detail": "Dekking | Werk | (11) | +"
+    },
+    {
+      "name": "320px/light: the long Werkvoorraad label lives only in the menu",
+      "passed": true,
+      "detail": "false"
+    },
+    {
+      "name": "320px/light: the Werk button and the + entry are at least 44 px",
+      "passed": true,
+      "detail": "{\"triggerH\":44,\"triggerW\":100.875,\"addH\":44,\"addW\":44}"
+    },
+    {
+      "name": "320px/light: Licht/Donker and Sign out are not in the bar itself",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "320px/light: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "320px/light: the requested theme is active",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "Werkvoorraad: the trigger is a real button that opens the menu",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Werkvoorraad: the panel opens",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "320px/light: the menu shows the same rows, numbers and separating line",
+      "passed": true,
+      "detail": "[{\"label\":\"Menuconcepten beoordelen\",\"count\":\"7\",\"href\":\"/internal/menu-concepts\"},{\"label\":\"Bronnen beoordelen\",\"count\":\"2\",\"href\":\"/internal/source-triage\"},{\"label\":\"Nieuwe aanleveringen\",\"count\":\"1\",\"href\":\"/internal/import-inbox\"},{\"label\":\"Beoordelen\",\"count\":\"1\",\"href\":\"/internal/moderation\"},{\"label\":\"Stadsoverzicht\",\"count\":null,\"href\":\"/internal/source-workqueue\"},{\"label\":\"Restaurantgegevens (concept)\",\"count\":null,\"href\":\"/internal/profile-drafts\"}]"
+    },
+    {
+      "name": "320px/light: Licht/Donker and Sign out are at the bottom of the menu",
+      "passed": true,
+      "detail": "OPEN WERK |  | Menuconcepten beoordelen | Concepten controleren en intern goedkeuren | 7 | Bronnen beoordelen | Bronvoorstellen vastleggen en beoordelen | 2 | Nieuwe aanleveringen | Nieuwe bronnen | 1 | Beoordelen | Menu's, profielen en eigenaarsclaims | 1 | Stadsoverzicht | Bron en menukaart per restaurant | Restaurantgegevens (concept) | Klaarzetten | Licht | Donker | Sign out"
+    },
+    {
+      "name": "320px/light: every menu row is at least 44 px",
+      "passed": true,
+      "detail": "height=64"
+    },
+    {
+      "name": "320px/light: the open menu does not overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3138/internal/toevoegen?theme=dark&fixture=review)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "390px/dark: the short label with the real total is visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "390px/dark: Dekking, Werk (N) and the + entry stay in the bar",
+      "passed": true,
+      "detail": "Dekking | Werk | (11) | +"
+    },
+    {
+      "name": "390px/dark: the long Werkvoorraad label lives only in the menu",
+      "passed": true,
+      "detail": "false"
+    },
+    {
+      "name": "390px/dark: the Werk button and the + entry are at least 44 px",
+      "passed": true,
+      "detail": "{\"triggerH\":44,\"triggerW\":106.875,\"addH\":44,\"addW\":44}"
+    },
+    {
+      "name": "390px/dark: Licht/Donker and Sign out are not in the bar itself",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "390px/dark: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "390px/dark: the requested theme is active",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "Werkvoorraad: the trigger is a real button that opens the menu",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Werkvoorraad: the panel opens",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "390px/dark: the menu shows the same rows, numbers and separating line",
+      "passed": true,
+      "detail": "[{\"label\":\"Menuconcepten beoordelen\",\"count\":\"7\",\"href\":\"/internal/menu-concepts\"},{\"label\":\"Bronnen beoordelen\",\"count\":\"2\",\"href\":\"/internal/source-triage\"},{\"label\":\"Nieuwe aanleveringen\",\"count\":\"1\",\"href\":\"/internal/import-inbox\"},{\"label\":\"Beoordelen\",\"count\":\"1\",\"href\":\"/internal/moderation\"},{\"label\":\"Stadsoverzicht\",\"count\":null,\"href\":\"/internal/source-workqueue\"},{\"label\":\"Restaurantgegevens (concept)\",\"count\":null,\"href\":\"/internal/profile-drafts\"}]"
+    },
+    {
+      "name": "390px/dark: Licht/Donker and Sign out are at the bottom of the menu",
+      "passed": true,
+      "detail": "OPEN WERK |  | Menuconcepten beoordelen | Concepten controleren en intern goedkeuren | 7 | Bronnen beoordelen | Bronvoorstellen vastleggen en beoordelen | 2 | Nieuwe aanleveringen | Nieuwe bronnen | 1 | Beoordelen | Menu's, profielen en eigenaarsclaims | 1 | Stadsoverzicht | Bron en menukaart per restaurant | Restaurantgegevens (concept) | Klaarzetten | Licht | Donker | Sign out"
+    },
+    {
+      "name": "390px/dark: every menu row is at least 44 px",
+      "passed": true,
+      "detail": "height=49"
+    },
+    {
+      "name": "390px/dark: the open menu does not overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3138/internal/toevoegen?theme=dark&fixture=review)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "320px/dark: the short label with the real total is visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "320px/dark: Dekking, Werk (N) and the + entry stay in the bar",
+      "passed": true,
+      "detail": "Dekking | Werk | (11) | +"
+    },
+    {
+      "name": "320px/dark: the long Werkvoorraad label lives only in the menu",
+      "passed": true,
+      "detail": "false"
+    },
+    {
+      "name": "320px/dark: the Werk button and the + entry are at least 44 px",
+      "passed": true,
+      "detail": "{\"triggerH\":44,\"triggerW\":100.875,\"addH\":44,\"addW\":44}"
+    },
+    {
+      "name": "320px/dark: Licht/Donker and Sign out are not in the bar itself",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "320px/dark: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "320px/dark: the requested theme is active",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "Werkvoorraad: the trigger is a real button that opens the menu",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Werkvoorraad: the panel opens",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "320px/dark: the menu shows the same rows, numbers and separating line",
+      "passed": true,
+      "detail": "[{\"label\":\"Menuconcepten beoordelen\",\"count\":\"7\",\"href\":\"/internal/menu-concepts\"},{\"label\":\"Bronnen beoordelen\",\"count\":\"2\",\"href\":\"/internal/source-triage\"},{\"label\":\"Nieuwe aanleveringen\",\"count\":\"1\",\"href\":\"/internal/import-inbox\"},{\"label\":\"Beoordelen\",\"count\":\"1\",\"href\":\"/internal/moderation\"},{\"label\":\"Stadsoverzicht\",\"count\":null,\"href\":\"/internal/source-workqueue\"},{\"label\":\"Restaurantgegevens (concept)\",\"count\":null,\"href\":\"/internal/profile-drafts\"}]"
+    },
+    {
+      "name": "320px/dark: Licht/Donker and Sign out are at the bottom of the menu",
+      "passed": true,
+      "detail": "OPEN WERK |  | Menuconcepten beoordelen | Concepten controleren en intern goedkeuren | 7 | Bronnen beoordelen | Bronvoorstellen vastleggen en beoordelen | 2 | Nieuwe aanleveringen | Nieuwe bronnen | 1 | Beoordelen | Menu's, profielen en eigenaarsclaims | 1 | Stadsoverzicht | Bron en menukaart per restaurant | Restaurantgegevens (concept) | Klaarzetten | Licht | Donker | Sign out"
+    },
+    {
+      "name": "320px/dark: every menu row is at least 44 px",
+      "passed": true,
+      "detail": "height=64"
+    },
+    {
+      "name": "320px/dark: the open menu does not overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3138/internal/toevoegen?theme=light&fixture=review&countsState=error)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "counts failed: the bar shows no total at all",
+      "passed": true,
+      "detail": "Dekking | Werk | +"
+    },
+    {
+      "name": "Werkvoorraad: the trigger is a real button that opens the menu",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Werkvoorraad: the panel opens",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "counts failed: no row shows a number, and certainly not a fake 0",
+      "passed": true,
+      "detail": "[{\"label\":\"Menuconcepten beoordelen\",\"count\":null,\"href\":\"/internal/menu-concepts\"},{\"label\":\"Bronnen beoordelen\",\"count\":null,\"href\":\"/internal/source-triage\"},{\"label\":\"Nieuwe aanleveringen\",\"count\":null,\"href\":\"/internal/import-inbox\"},{\"label\":\"Beoordelen\",\"count\":null,\"href\":\"/internal/moderation\"},{\"label\":\"Stadsoverzicht\",\"count\":null,\"href\":\"/internal/source-workqueue\"},{\"label\":\"Restaurantgegevens (concept)\",\"count\":null,\"href\":\"/internal/profile-drafts\"}]"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3138/internal/toevoegen?theme=light&fixture=review&countsState=partial)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "Werkvoorraad: the trigger is a real button that opens the menu",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Werkvoorraad: the panel opens",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "counts partial: the known numbers stay, the missing one shows no number (sorted last), and there is no total",
+      "passed": true,
+      "detail": "[[\"Menuconcepten beoordelen\",\"7\"],[\"Bronnen beoordelen\",\"2\"],[\"Beoordelen\",\"1\"],[\"Nieuwe aanleveringen\",null]]"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3138/internal?theme=light&fixture=review)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "landing: /internal sends the visitor to the section with the most open work",
+      "passed": true,
+      "detail": "/internal/menu-concepts"
+    },
+    {
+      "name": "landing: that destination page mounts the shared bar",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3138/internal/toevoegen?theme=light&fixture=review)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "keyboard: the Werkvoorraad button is reachable with Tab",
+      "passed": true,
+      "detail": "[{\"tag\":\"A\",\"text\":\"\",\"href\":\"/internal\",\"expanded\":null},{\"tag\":\"A\",\"text\":\"Dekking\",\"href\":\"/internal/coverage\",\"expanded\":null},{\"tag\":\"BUTTON\",\"text\":\"Werk\\n(11)\",\"href\":null,\"expanded\":\"false\"}]"
+    },
+    {
+      "name": "keyboard: focus is on the Werkvoorraad button",
+      "passed": true,
+      "detail": "internal-nav-workqueue-trigger"
+    },
+    {
+      "name": "keyboard: Enter opens the menu",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "keyboard: Escape closes it and focus is back on the button",
+      "passed": true,
+      "detail": "internal-nav-workqueue-trigger"
+    },
+    {
+      "name": "network guard: the page recorded no blocked app traffic",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "network guard: the CDP layer recorded no blocked app traffic",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "no uncaught browser exception",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "no fixture bootstrap error at the end",
+      "passed": true,
+      "detail": "ok"
+    }
+  ],
+  "clickpaths": [
+    {
+      "name": "menu open, Escape, focus back",
+      "steps": [
+        "click Werkvoorraad",
+        "Escape"
+      ],
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "login/logo landing rule through /internal",
+      "steps": [
+        "open /internal",
+        "rule picks menu-concepts (7 open)"
+      ],
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "keyboard only: Tab, Enter, Escape",
+      "steps": [
+        "Tab to Werk",
+        "Enter opens",
+        "Escape closes"
+      ],
+      "passed": true,
+      "detail": null
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "nav62-desktop-1280-light-bar.png",
+      "sha256": "6741affb9dd781f7cb6db844b91feee554b3f43b0f989abbf5a37d0ae8db71ca",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "light",
+      "menu": "closed"
+    },
+    {
+      "file": "nav62-desktop-1280-light-menu.png",
+      "sha256": "0f42a956620d809c6b8fa1128fd68bb8d15de88168c3a8a2a5a13bc4980921f4",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "light",
+      "menu": "open"
+    },
+    {
+      "file": "nav62-desktop-1280-dark-menu.png",
+      "sha256": "a997684486215ddd9ed0d1d30e2c357f77fa16d0007b85ed577b3c4478481c90",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "dark",
+      "menu": "open"
+    },
+    {
+      "file": "nav62-390-light-bar.png",
+      "sha256": "5b2ebdb3839267be5a13028cb0926b1b733f6925834437f68b249fd3fc35580a",
+      "width": 390,
+      "height": 780,
+      "viewport": "390x780",
+      "theme": "light",
+      "menu": "closed"
+    },
+    {
+      "file": "nav62-390-light-menu.png",
+      "sha256": "dc9fafce8503c947ad24cbaed7e948fcc42e668dd4ad236c47ff1f7067889136",
+      "width": 390,
+      "height": 780,
+      "viewport": "390x780",
+      "theme": "light",
+      "menu": "open"
+    },
+    {
+      "file": "nav62-320-light-bar.png",
+      "sha256": "cd7b7baadb755bdbf7d5def4654a180c937b89d7f5bff8056b2c530764331bb7",
+      "width": 320,
+      "height": 780,
+      "viewport": "320x780",
+      "theme": "light",
+      "menu": "closed"
+    },
+    {
+      "file": "nav62-320-light-menu.png",
+      "sha256": "92935a86e0f15d10486e1620560f9964be34239e65337377dfaaf65cac977425",
+      "width": 320,
+      "height": 780,
+      "viewport": "320x780",
+      "theme": "light",
+      "menu": "open"
+    },
+    {
+      "file": "nav62-390-dark-bar.png",
+      "sha256": "04bbb443b1f808d30b79f9b80cb3d2dd2c1d6f4bf6855eacb08c625036b6fccf",
+      "width": 390,
+      "height": 780,
+      "viewport": "390x780",
+      "theme": "dark",
+      "menu": "closed"
+    },
+    {
+      "file": "nav62-390-dark-menu.png",
+      "sha256": "de48b016c2a6186d4bcb71aa2c240cbc4d9668693ceb3f874e7ef863bc1d5e47",
+      "width": 390,
+      "height": 780,
+      "viewport": "390x780",
+      "theme": "dark",
+      "menu": "open"
+    },
+    {
+      "file": "nav62-320-dark-bar.png",
+      "sha256": "42498238975e89cbe25d3a74a578bf8364de2c0355f407e43706b7c53bc5425a",
+      "width": 320,
+      "height": 780,
+      "viewport": "320x780",
+      "theme": "dark",
+      "menu": "closed"
+    },
+    {
+      "file": "nav62-320-dark-menu.png",
+      "sha256": "8f17874babbb167f9632edd35869ef085657f7d42bb7e7f6706dfe5fcaf03777",
+      "width": 320,
+      "height": 780,
+      "viewport": "320x780",
+      "theme": "dark",
+      "menu": "open"
+    },
+    {
+      "file": "nav62-390-light-counts-missing.png",
+      "sha256": "6b2dd70bf99b7a5ebdd356dd0eb5f5f72eaffe7683c9ac0ed9e9acf523c2b45d",
+      "width": 390,
+      "height": 780,
+      "viewport": "390x780",
+      "theme": "light",
+      "menu": "open",
+      "counts": "failed"
+    },
+    {
+      "file": "nav62-desktop-1280-light-counts-partial.png",
+      "sha256": "1bff833baa383810bf552221427ea71152b1459c213a68174479dbf4213aba0b",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "light",
+      "menu": "open",
+      "counts": "partial"
+    },
+    {
+      "file": "nav62-landing-menu-concepts-1280-light.png",
+      "sha256": "24daa386b4b9392fb3ac6d6b2f005b3b77400ccb8c0bffac35bd9dd4abab212a",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "light",
+      "menu": "closed"
+    }
+  ],
+  "network": {
+    "appViolations": [],
+    "pageViolations": []
+  },
+  "passed": true
+}

@@ -314,6 +314,42 @@ Screenshots: `ai-map-390-light.png`, `ai-map-390-dark.png`, `ai-map-320-light.pn
   frame navigation are blocked and recorded; the explicit fixture API still
   answers.
 
+## #62 — the internal navigation and the one entry (fixture evidence)
+
+`run-internal-nav-browser-check.js` uses the same harness and isolation as the #59
+check, with fictional numbers (`NAV62_COUNTS` in `lib/fixture-page.js`). It drives
+the real `InternalNav`, the real `/internal/toevoegen` page and the real `/internal`
+redirect:
+
+- the bar shows Dekking, Werkvoorraad (N), "+ Restaurant of menu toevoegen",
+  Licht/Donker and Sign out, and never "Onboarding Restaurant" or "Beheer";
+- the menu is closed by default, opens with a click or Enter, lists the open work
+  in the contract order and by the real numbers (Menuconcepten 7, Bronnen 2,
+  Nieuwe aanleveringen 1, Beoordelen 1), then a separating line, then
+  Stadsoverzicht and Restaurantgegevens (concept) without a number;
+- Escape closes it and returns focus to the button; the focus order is proven;
+- 390 and 320 px, light and dark: logo, Dekking, Werk (N) and a "+" button of at
+  least 44 px, no horizontal overflow, and Licht/Donker + Sign out at the bottom
+  of the menu;
+- `/internal` lands on the section with the most open work;
+- `?countsState=error` and `?countsState=partial` prove that a failed or partial
+  count shows no number at all, never a fake 0, and no total.
+
+Screenshots: `nav62-desktop-1280-{light,dark}-*.png`,
+`nav62-{390,320}-{light,dark}-{bar,menu}.png`,
+`nav62-390-light-counts-missing.png`,
+`nav62-desktop-1280-light-counts-partial.png` and
+`nav62-landing-menu-concepts-1280-light.png`. Evidence:
+`evidence/internal-nav-browser-evidence.json`.
+
+The approved mockup is an external Claude artifact; this check cannot fetch it.
+The screenshots are the material for the Lead's/human visual comparison against
+the four mockup screens. The nav counts are one fixed fictional API answer and
+each fixture page keeps its own fictional list, so a number is not derived from
+that page here; the real agreement with the pages' own definitions is unit-tested
+in `src/lib/workqueueCounts.test.js`. This is fixture evidence, never real
+acceptance.
+
 ## Limits
 
 This is fixture evidence. It does not prove a live Supabase session, a real

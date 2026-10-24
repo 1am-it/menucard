@@ -18,6 +18,17 @@
 
 const { FIXTURE_API_ROUTES, classifyRequest } = require('./network-policy');
 
+// #62: the fictional numbers the navigation shell asks for. Kept here (not in a
+// scenario) because every internal page now mounts the shell and needs a
+// deterministic answer. `menu-concepts` is deliberately the largest so the
+// landing rule has one unambiguous winner; the values are fixture data only.
+const NAV62_COUNTS = Object.freeze({
+  'menu-concepts': 7,
+  'source-triage': 2,
+  'import-inbox': 1,
+  moderation: 1,
+});
+
 function fixtureBootstrap(scenarios, options = {}) {
   const config = {
     appOrigins: options.appOrigins,
@@ -98,6 +109,7 @@ function fixtureBootstrap(scenarios, options = {}) {
       return new Response(JSON.stringify(body), { status: status || 200, headers: { 'Content-Type': 'application/json' } });
     }
     const fixtureState = { manualStep: 0, manualState: 0, aiRead: false };
+    const navCounts = ${JSON.stringify(NAV62_COUNTS)};
     // #59 variant 5: which fictional API routes the screen actually called, so
     // the browser check can prove that a card page is only fetched on request.
     const calls = (window.__FIXTURE_CALLS__ = window.__FIXTURE_CALLS__ || []);
@@ -106,6 +118,15 @@ function fixtureBootstrap(scenarios, options = {}) {
       if (verdict.routeId === 'auth') return jsonResponse(session);
       if (verdict.routeId === 'me') {
         return jsonResponse({ roles: [{ role: 'internal', restaurant_id: null }, { role: 'editor', restaurant_id: null }] });
+      }
+      if (verdict.routeId === 'workqueue-counts') {
+        if (params.get('countsState') === 'error') {
+          return jsonResponse({ error: 'De werkvoorraad kon niet worden geteld.' }, 503);
+        }
+        if (params.get('countsState') === 'partial') {
+          return jsonResponse({ counts: Object.assign({}, navCounts, { 'import-inbox': null }) });
+        }
+        return jsonResponse({ counts: navCounts });
       }
       if (verdict.routeId === 'batch-analysis-process') return jsonResponse({ outcome: 'done' });
       if (typeof verdict.routeId === 'string' && verdict.routeId.indexOf('manual-') === 0) {
@@ -361,4 +382,4 @@ function fixtureBootstrap(scenarios, options = {}) {
 })();`;
 }
 
-module.exports = { fixtureBootstrap };
+module.exports = { NAV62_COUNTS, fixtureBootstrap };
