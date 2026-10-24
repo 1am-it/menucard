@@ -21,6 +21,7 @@ const { normalizePrice, buildMenuConcept } = require('./menuConcept');
 const { mapStructuredOutputToMenuContexts } = require('./menuExtractionMapping');
 const { extractCodeBlock, buildImportReport } = require('./manualMenuImportImport');
 const schema = require('./menuExtractionSchema');
+const { describeNormalizations } = require('./menuExtractionNormalization');
 const { PROVENANCE_KIND } = require('./manualMenuImportBundle');
 
 const MAX_NOTE = 300;
@@ -214,6 +215,12 @@ function reviewView({ report, decisions } = {}) {
     },
     pending: pending.map((row) => row.id),
     reasons,
+    // V2 (review 6377050602): wat het systeem zelf heeft bijgesteld, in gewone
+    // taal. Alleen de afgeleide telling en status; geen modelclaim en geen
+    // goedkeuring. Dezelfde lijst reist mee in het toestandstoken. De bewoording
+    // komt uit src/lib/menuExtractionNormalization.js, zodat route B en de
+    // handmatige import niet uit elkaar kunnen lopen.
+    notices: describeNormalizations(report.normalizations),
     canSave: pending.length === 0 && kept.length > 0,
     saveBlockReason:
       kept.length === 0
@@ -267,6 +274,10 @@ function buildImportProvenance({ report, decisions } = {}) {
     })),
     reasons,
     rows,
+    // V2: een toegepaste afleiding blijft bij het concept staan (duurzame
+    // conceptmetadata). Het is de herkomst van de telling en de bijgestelde
+    // status, geen goedkeuring en geen vervanging van het bronbewijs.
+    normalizations: (report && Array.isArray(report.normalizations) ? report.normalizations : []).slice(0, 5),
   };
 }
 
@@ -483,6 +494,8 @@ function applyFollowUp({ report, bundle, rowId, answer, followUpCount = 0 } = {}
     },
     aiName: report.aiName,
     now: new Date(report.importedAt),
+    // V2: de eerdere afleiding blijft ook na een vervolgvraag zichtbaar.
+    carriedNormalizations: report.normalizations,
   });
   if (!next.ok) return next;
   return { ok: true, report: next, row: next.rows.find((entry) => entry.id === rowId) || null };
@@ -551,6 +564,8 @@ function applyOpenPointsAnswer({ report, bundle, answer, maxRows = MAX_FOLLOW_UP
     },
     aiName: report.aiName,
     now: new Date(report.importedAt),
+    // V2: ook één antwoord voor alle open punten laat de eerdere afleiding staan.
+    carriedNormalizations: report.normalizations,
   });
   if (!next.ok) return next;
   return { ok: true, report: next, rowIds: replacements.map((entry) => entry.row.id) };

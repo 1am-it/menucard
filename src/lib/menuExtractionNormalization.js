@@ -18,10 +18,12 @@
 //
 // The validator in src/lib/menuExtractionSchema.js is deliberately NOT changed
 // and is NOT bypassed: it still rejects a wrong count or a `complete` claim
-// with limitations in every other input, such as the manual import, a fixture
-// or a replayed answer. Every applied correction is returned as a
-// `normalizations` entry so the probe report and JSONL can show it instead of
-// hiding it.
+// with limitations in every input it is given, such as a fixture or a replayed
+// answer. Every caller that wants the derivation — the adapter (route B) and,
+// since review 6377050602, the manual import — applies this same function
+// BEFORE that validator. Every applied correction is returned as a
+// `normalizations` entry so the probe report, the JSONL and the manual-import
+// review can show it instead of hiding it.
 //
 // Pure: the input is never mutated.
 
@@ -30,6 +32,23 @@ const NORMALIZATION_SCHEMA_VERSION = 'menu-extraction-normalization/v1';
 const NORMALIZATION_RULES = Object.freeze({
   derivedItemCount: 'derived_item_count',
   completeWithLimitations: 'complete_with_limitations',
+});
+
+// V2 of the Delivery Lead order for review 6377050602: a correction that was
+// applied must be readable as a normal Dutch sentence, and the wording lives
+// next to the rules so route B and the manual import cannot drift apart. These
+// functions only describe an entry that `applyDerivableNormalizations` already
+// produced; they never derive, accept or approve anything themselves.
+
+const NORMALIZATION_NOTICES = Object.freeze({
+  [NORMALIZATION_RULES.derivedItemCount]: (entry) =>
+    Number.isInteger(entry.from) && entry.from !== entry.to
+      ? `Aantal gerechten door het systeem geteld: ${entry.to} (de AI zei ${entry.from}).`
+      : `Aantal gerechten door het systeem geteld: ${entry.to}.`,
+  [NORMALIZATION_RULES.completeWithLimitations]: (entry) =>
+    entry.to === 'no_items'
+      ? 'Status bijgesteld naar geen gerechten, omdat de AI zelf een beperking noemde.'
+      : 'Status bijgesteld naar gedeeltelijk, omdat de AI zelf een beperking noemde.',
 });
 
 function isObject(value) {
@@ -95,9 +114,44 @@ function applyDerivableNormalizations(output) {
   return { output: { ...output, coverage: { ...coverage, ...changes } }, normalizations };
 }
 
+/**
+ * One plain-language sentence for one applied normalization, or `null` for an
+ * entry this module did not derive. An unknown entry is never silently
+ * described as something else.
+ *
+ * @param {unknown} entry
+ * @returns {string|null}
+ */
+function describeNormalization(entry) {
+  if (!isObject(entry) || typeof entry.rule !== 'string') return null;
+  const describe = NORMALIZATION_NOTICES[entry.rule];
+  return typeof describe === 'function' ? describe(entry) : null;
+}
+
+/**
+ * The notices for a bounded list of entries, in order and without duplicates.
+ *
+ * @param {unknown} entries
+ * @returns {string[]}
+ */
+function describeNormalizations(entries) {
+  const seen = new Set();
+  const notices = [];
+  for (const entry of Array.isArray(entries) ? entries : []) {
+    const notice = describeNormalization(entry);
+    if (!notice || seen.has(notice)) continue;
+    seen.add(notice);
+    notices.push(notice);
+  }
+  return notices;
+}
+
 module.exports = {
   NORMALIZATION_RULES,
   NORMALIZATION_SCHEMA_VERSION,
+  NORMALIZATION_NOTICES,
   applyDerivableNormalizations,
   countExtractedItems,
+  describeNormalization,
+  describeNormalizations,
 };

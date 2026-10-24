@@ -23,6 +23,7 @@ const schema = require('./menuExtractionSchema');
 const { normalizePrice } = require('./menuConcept');
 const { computeBundleHash } = require('./manualMenuImportBundle');
 const { describeImportProblems } = require('./manualMenuImportProblems');
+const { applyDerivableNormalizations, describeNormalization } = require('./menuExtractionNormalization');
 
 const MAX_ANSWER_BYTES = 1024 * 1024;
 const MAX_AI_NAME = schema.LIMITS.label;
@@ -83,6 +84,41 @@ function humanMessage(code) {
 
 function boundedProblems(problems) {
   return (Array.isArray(problems) ? problems : []).slice(0, MAX_PROBLEMS).map((text) => String(text).slice(0, 240));
+}
+
+// ── V1/V2 (Delivery Lead review 6377050602) ─────────────────────────────────
+// Het taalmodel telt onbetrouwbaar. `coverage.itemsExtracted` en een
+// `complete`-status met limitations zijn uit het antwoord zelf af te leiden, dus
+// past de handmatige import exact dezelfde functie toe als route B
+// (src/lib/menuExtractionNormalization.js) — geen tweede implementatie. Dat
+// gebeurt vóór `validateStructuredOutput`, zodat de validator ongewijzigd blijft
+// en een foute telling alleen via deze bewezen afleiding wordt geaccepteerd.
+//
+// Een toegepaste correctie verdwijnt niet: elk item krijgt een `notice` in
+// gewone taal, gaat mee in het toestandstoken, komt op het reviewscherm en
+// wordt bij het concept bewaard (`importProvenance.normalizations`).
+
+function withNotice(entry) {
+  const notice = describeNormalization(entry);
+  return notice ? { ...entry, notice } : { ...entry };
+}
+
+/**
+ * De aangevraagde en al eerder toegepaste correcties, zonder dubbelen. Een
+ * vervolgvraag bouwt het rapport opnieuw op; de eerdere melding moet dan
+ * zichtbaar blijven in plaats van stil te verdwijnen.
+ */
+function mergeNormalizations(carried, applied) {
+  const merged = [];
+  const seen = new Set();
+  for (const entry of [...(Array.isArray(carried) ? carried : []), ...(Array.isArray(applied) ? applied : [])]) {
+    if (!entry || typeof entry !== 'object' || typeof entry.rule !== 'string') continue;
+    const key = `${entry.rule}\u0000${typeof entry.field === 'string' ? entry.field : ''}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    merged.push(withNotice(entry));
+  }
+  return merged;
 }
 
 /** Het AI-naamveld is zelfgerapporteerd en onbewezen; leeg is geen import. */
@@ -299,7 +335,7 @@ function buildRows(output, bundle, problemCodesByRow) {
   return rows;
 }
 
-function emptyReport({ importId, bundle, aiName, code, problems }) {
+function emptyReport({ importId, bundle, aiName, code, problems, normalizations }) {
   return {
     ok: false,
     importId,
@@ -315,6 +351,9 @@ function emptyReport({ importId, bundle, aiName, code, problems }) {
     problemSummary: [],
     problemSummaryOmitted: 0,
     recoveryQuestion: null,
+    // V2: een toegepaste afleiding blijft ook bij een afgekeurd antwoord in het
+    // spoor staan; er is dan geen reviewscherm en dus geen melding.
+    normalizations: Array.isArray(normalizations) ? normalizations : [],
     rows: [],
     summary: { menus: 0, items: 0, valid: 0, needsReview: 0, blocked: 0, unsupported: 0, unverifiable: 0 },
     coverage: null,
@@ -324,13 +363,23 @@ function emptyReport({ importId, bundle, aiName, code, problems }) {
 /**
  * Bouwt het gevalideerde importresultaat. `output` is al uit de codeblok-
  * extractie gekomen; hier wordt hij opnieuw als onbetrouwbare data behandeld.
+ *
+ * `carriedNormalizations` zijn de correcties die al bij een eerdere stap van
+ * dezelfde import zijn toegepast (bijvoorbeeld vóór een vervolgvraag). Ze
+ * worden niet opnieuw afgeleid maar blijven zichtbaar.
  */
-function buildImportReport({ importId, bundle, output, aiName, now = new Date() } = {}) {
+function buildImportReport({ importId, bundle, output, aiName, now = new Date(), carriedNormalizations } = {}) {
   const nameCheck = validateAiName(aiName);
   if (!nameCheck.ok) return emptyReport({ importId, bundle, aiName, code: nameCheck.code });
   if (!bundle) return emptyReport({ importId, bundle, aiName: nameCheck.aiName, code: 'unknown_bundle' });
 
-  const problems = schema.validateStructuredOutput(output, validatorSources(bundle));
+  // V1: dezelfde afleiding als route B, vóór de ongewijzigde validator. Het
+  // antwoord wordt niet gemuteerd; de validator ziet de afgeleide waarden.
+  const normalized = applyDerivableNormalizations(output);
+  const answer = normalized.output;
+  const normalizations = mergeNormalizations(carriedNormalizations, normalized.normalizations);
+
+  const problems = schema.validateStructuredOutput(answer, validatorSources(bundle));
   const problemCodesByRow = new Map();
   const fatal = [];
   for (const problem of problems) {
@@ -344,26 +393,34 @@ function buildImportReport({ importId, bundle, output, aiName, now = new Date() 
     }
   }
   if (fatal.length > 0) {
-    const report = emptyReport({ importId, bundle, aiName: nameCheck.aiName, code: 'schema_violation', problems: fatal });
+    const report = emptyReport({
+      importId,
+      bundle,
+      aiName: nameCheck.aiName,
+      code: 'schema_violation',
+      problems: fatal,
+      normalizations,
+    });
     // U1/U2: dezelfde regels, maar in gewone taal en met één herstelvraag.
     // `problems` blijft ongewijzigd het technische detail van de blokkade; de
     // leesbare samenvatting noemt ook de regelgebonden fouten, want ook die
     // moet de AI herstellen voordat dit antwoord opnieuw kan worden aangeboden.
-    const explained = describeImportProblems(problems, output);
+    const explained = describeImportProblems(problems, answer);
     report.problemSummary = explained.groups;
     report.problemSummaryOmitted = explained.omitted;
     report.recoveryQuestion = explained.recoveryQuestion;
     return report;
   }
 
-  const rows = buildRows(output, bundle, problemCodesByRow);
+  const rows = buildRows(answer, bundle, problemCodesByRow);
   if (rows.length === 0) {
     return emptyReport({
       importId,
       bundle,
       aiName: nameCheck.aiName,
       code: 'no_items',
-      problems: output && output.coverage && output.coverage.status === 'no_items' ? ['coverage.no_items'] : [],
+      problems: answer && answer.coverage && answer.coverage.status === 'no_items' ? ['coverage.no_items'] : [],
+      normalizations,
     });
   }
 
@@ -374,7 +431,7 @@ function buildImportReport({ importId, bundle, output, aiName, now = new Date() 
     },
     { valid: 0, error: 0, unverifiable: 0, unsupported: 0 },
   );
-  const menus = (Array.isArray(output.menus) ? output.menus : []).map((menu, index) => ({
+  const menus = (Array.isArray(answer.menus) ? answer.menus : []).map((menu, index) => ({
     index,
     title: typeof menu.title === 'string' ? menu.title : null,
     variant: typeof menu.variant === 'string' ? menu.variant : null,
@@ -401,6 +458,9 @@ function buildImportReport({ importId, bundle, output, aiName, now = new Date() 
     problemSummary: [],
     problemSummaryOmitted: 0,
     recoveryQuestion: null,
+    // V2: wat het systeem zelf heeft bijgesteld, technisch én in gewone taal.
+    // Nooit een goedkeuring en nooit een modelclaim.
+    normalizations,
     rows,
     menus,
     summary: {
@@ -412,8 +472,8 @@ function buildImportReport({ importId, bundle, output, aiName, now = new Date() 
       unsupported: counts.unsupported,
       unverifiable: counts.unverifiable,
     },
-    coverage: output.coverage || null,
-    rejected: Array.isArray(output.rejected) ? output.rejected : [],
+    coverage: answer.coverage || null,
+    rejected: Array.isArray(answer.rejected) ? answer.rejected : [],
     technical: {
       protocolVersion: bundle.protocol.version,
       protocolHash: bundle.protocol.hash,
@@ -425,9 +485,10 @@ function buildImportReport({ importId, bundle, output, aiName, now = new Date() 
       fetchedAt: bundle.fetchedAt,
     },
     // De gevalideerde uitvoer blijft server-side; de opslagstap hergebruikt
-    // exact dit object en bouwt niets opnieuw uit clientinvoer.
-    validated: { menus: output.menus, coverage: output.coverage, rejected: Array.isArray(output.rejected) ? output.rejected : [] },
-    output,
+    // exact dit object en bouwt niets opnieuw uit clientinvoer. Het is de
+    // genormaliseerde uitvoer: dezelfde waarden die de validator heeft gezien.
+    validated: { menus: answer.menus, coverage: answer.coverage, rejected: Array.isArray(answer.rejected) ? answer.rejected : [] },
+    output: answer,
   };
 }
 
@@ -483,6 +544,7 @@ module.exports = {
   validateAiName,
   extractCodeBlock,
   buildImportReport,
+  mergeNormalizations,
   checkBundleBinding,
   publicImportReport,
   summaryLine,

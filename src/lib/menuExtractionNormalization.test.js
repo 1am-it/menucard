@@ -1,8 +1,9 @@
 'use strict';
 
 // R1/R2 of the Delivery Lead order for #59 / BE-21 (review 6375740447):
-// regressions for the adapter-side bookkeeping normalizations. Everything here
-// is offline and pure; no key, no network, no paid call.
+// regressions for the adapter-side bookkeeping normalizations. V1/V2 (review
+// 6377050602) reuse the same module in the manual import. Everything here is
+// offline and pure; no key, no network, no paid call.
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -11,6 +12,8 @@ const {
   NORMALIZATION_SCHEMA_VERSION,
   applyDerivableNormalizations,
   countExtractedItems,
+  describeNormalization,
+  describeNormalizations,
 } = require('./menuExtractionNormalization');
 const { validateStructuredOutput } = require('./menuExtractionSchema');
 
@@ -133,9 +136,11 @@ test('R1: a malformed answer is left to the validator, never counted as a valid 
   assert.ok(validateStructuredOutput({ menus: [] }, sources).length > 0);
 });
 
-test('R4: the manual import keeps the unchanged validator — no adapter normalization applies there', () => {
-  // The same wrong answers the adapter repairs are still refused on the direct
-  // validation path used by the manual import (src/lib/manualMenuImportImport.js).
+test('R4/V1: the validator rules stay unchanged — only the shared derivation satisfies them', () => {
+  // These are the unchanged validator rules themselves (src/lib/menuExtractionSchema.js).
+  // The V1 order (Delivery Lead review 6377050602) makes the manual import apply
+  // this same module before validation instead of loosening the rules, so the
+  // assertions below still hold on every direct validation path.
   const wrongCount = answerOf({ itemsExtracted: 99 });
   assert.ok(validateStructuredOutput(wrongCount, sources).includes('coverage.itemsExtracted must equal the number of extracted items'));
 
@@ -144,4 +149,41 @@ test('R4: the manual import keeps the unchanged validator — no adapter normali
 
   // Applying the adapter normalization is the only place the correction exists.
   assert.equal(NORMALIZATION_SCHEMA_VERSION, 'menu-extraction-normalization/v1');
+});
+
+// V2 (review 6377050602): a correction that was applied must be readable as one
+// plain Dutch sentence. The wording lives here so route B and the manual import
+// cannot drift apart.
+test('V2: every derived correction has one plain-language notice, and nothing else does', () => {
+  const answer = answerOf({ itemsExtracted: 99, status: 'complete', limitations: ['onderaan afgesneden'] });
+  const { normalizations } = applyDerivableNormalizations(answer);
+
+  assert.deepEqual(describeNormalizations(normalizations), [
+    'Aantal gerechten door het systeem geteld: 3 (de AI zei 99).',
+    'Status bijgesteld naar gedeeltelijk, omdat de AI zelf een beperking noemde.',
+  ]);
+  // The same correction twice is still one line: a notice never repeats.
+  assert.equal(describeNormalizations([normalizations[0], normalizations[0]]).length, 1);
+
+  // A missing count is described without inventing a model claim.
+  const missing = answerOf({});
+  delete missing.coverage.itemsExtracted;
+  assert.equal(
+    describeNormalization(applyDerivableNormalizations(missing).normalizations[0]),
+    'Aantal gerechten door het systeem geteld: 3.',
+  );
+
+  // Zero items with a limitation says so in the same plain language.
+  const empty = {
+    menus: [],
+    rejected: [],
+    coverage: { status: 'complete', sourcesRead: 1, pagesRead: 1, itemsExtracted: 0, unreadSources: [], limitations: ['alleen afbeeldingen'] },
+  };
+  const statusEntry = applyDerivableNormalizations(empty).normalizations.find((entry) => entry.field === 'coverage.status');
+  assert.equal(describeNormalization(statusEntry), 'Status bijgesteld naar geen gerechten, omdat de AI zelf een beperking noemde.');
+
+  // An unknown entry is never described as something else.
+  assert.equal(describeNormalization({ rule: 'iets_anders', field: 'coverage.status' }), null);
+  assert.equal(describeNormalization(null), null);
+  assert.deepEqual(describeNormalizations('geen lijst'), []);
 });

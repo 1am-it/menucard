@@ -921,3 +921,183 @@ test('U3: het voorbeeld kan niet als echte data worden geïmporteerd', () => {
 });
 
 
+// ── V1/V2/V3 (Delivery Lead review 6377050602) ──────────────────────────────
+// Het taalmodel telt onbetrouwbaar. De handmatige import past vóór de
+// ongewijzigde validator dezelfde afleiding toe als route B
+// (src/lib/menuExtractionNormalization.js) en maakt die correctie zichtbaar op
+// het reviewscherm en in het concept. Geen tweede implementatie, geen
+// versoepelde validator, geen goedkeuring.
+
+test('V1: een foute telling wordt afgeleid en geaccepteerd, met een melding in gewone taal', () => {
+  const answer = fixtureOutput();
+  answer.coverage.itemsExtracted = 42;
+  const report = buildReport(answer);
+
+  // De validator zou dit antwoord zonder de afleiding afkeuren; dat blijft zo.
+  const sources = [
+    { id: 'source-1', text: HTML_TEXT },
+    { id: 'source-2', text: '' },
+  ];
+  assert.ok(
+    validateStructuredOutput(answer, sources).includes('coverage.itemsExtracted must equal the number of extracted items'),
+    'de validatorregel zelf is niet versoepeld',
+  );
+
+  assert.equal(report.ok, true, JSON.stringify(report.problems || report.message));
+  assert.equal(report.summary.items, 6);
+  assert.equal(report.coverage.itemsExtracted, 6, 'de telling komt uit het antwoord zelf');
+  assert.equal(report.normalizations.length, 1);
+  const entry = report.normalizations[0];
+  assert.equal(entry.rule, 'derived_item_count');
+  assert.equal(entry.field, 'coverage.itemsExtracted');
+  assert.equal(entry.from, 42);
+  assert.equal(entry.to, 6);
+  assert.equal(entry.notice, 'Aantal gerechten door het systeem geteld: 6 (de AI zei 42).');
+  // Het antwoord van de AI is niet gemuteerd.
+  assert.equal(answer.coverage.itemsExtracted, 42);
+  // Geen goedkeuring: dezelfde regels blijven per stuk te beoordelen.
+  const review = reviewView({ report, decisions: new Map() });
+  assert.ok(review.notices.includes(entry.notice));
+  assert.equal(review.canSave, false);
+});
+
+test('V1/V2: complete met limitations wordt alleen naar beneden bijgesteld en zichtbaar', () => {
+  const answer = fixtureOutput();
+  answer.coverage = {
+    status: 'complete',
+    sourcesRead: 2,
+    pagesRead: 2,
+    itemsExtracted: 6,
+    unreadSources: [],
+    limitations: ['Scan zonder tekstlaag'],
+  };
+  const report = buildReport(answer);
+
+  assert.equal(report.ok, true, JSON.stringify(report.problems || report.message));
+  assert.equal(report.coverage.status, 'partial', 'complete met limitations kan niet blijven staan');
+  assert.deepEqual(report.coverage.limitations, ['Scan zonder tekstlaag'], 'de beperking zelf blijft staan');
+  const entry = report.normalizations.find((item) => item.field === 'coverage.status');
+  assert.equal(entry.rule, 'complete_with_limitations');
+  assert.equal(entry.from, 'complete');
+  assert.equal(entry.to, 'partial');
+  assert.equal(entry.notice, 'Status bijgesteld naar gedeeltelijk, omdat de AI zelf een beperking noemde.');
+
+  const review = reviewView({ report, decisions: new Map() });
+  assert.ok(review.notices.includes('Status bijgesteld naar gedeeltelijk, omdat de AI zelf een beperking noemde.'));
+
+  // Een eerlijke partial wordt nooit herschreven en levert geen melding op.
+  const honest = fixtureOutput();
+  const honestReport = buildReport(honest);
+  assert.equal(honestReport.ok, true, JSON.stringify(honestReport.problems || honestReport.message));
+  assert.equal(honestReport.coverage.status, 'partial');
+  assert.deepEqual(honestReport.normalizations, []);
+  assert.deepEqual(reviewView({ report: honestReport, decisions: new Map() }).notices, []);
+});
+
+test('V2: de toegepaste afleiding wordt bij het concept bewaard', () => {
+  const answer = fixtureOutput();
+  answer.coverage.itemsExtracted = 42;
+  // Een tweede melding erbij: ook de statuscorrectie moet bewaard blijven.
+  answer.coverage.status = 'complete';
+  answer.coverage.unreadSources = [];
+  const withStatus = buildReport(answer);
+  assert.equal(withStatus.ok, true, JSON.stringify(withStatus.problems || withStatus.message));
+  assert.equal(withStatus.normalizations.length, 2, JSON.stringify(withStatus.normalizations));
+
+  const decisions = fullyReviewed(withStatus);
+  const draft = buildConceptDraft({ report: withStatus, decisions, restaurantId: '23' });
+  assert.equal(draft.ok, true, JSON.stringify(draft.blockers || draft.message));
+  const stored = draft.content.importProvenance.normalizations;
+  assert.equal(stored.length, 2, JSON.stringify(stored));
+  assert.deepEqual(stored.map((entry) => entry.rule).sort(), ['complete_with_limitations', 'derived_item_count']);
+  for (const entry of stored) assert.equal(typeof entry.notice, 'string');
+  // De herkomst blijft handwerk van een mens met een zelfgerapporteerde AI.
+  assert.equal(draft.content.importProvenance.kind, 'handmatige_ai_import');
+  assert.equal(draft.content.importProvenance.aiNameSelfReported, true);
+});
+
+test('V2: een vervolgvraag laat de melding staan in plaats van stil te verdwijnen', () => {
+  const answer = fixtureOutput();
+  answer.coverage.itemsExtracted = 42;
+  const report = buildReport(answer);
+  const row = report.rows.find((entry) => entry.name === 'Koffie');
+  assert.ok(row, 'de Koffie-regel staat open');
+  const followUpOutput = {
+    menus: [
+      {
+        title: 'Lunch',
+        sourceId: 'source-1',
+        categories: [
+          {
+            name: 'Bites',
+            items: [
+              item('Koffie', {
+                priceStatus: 'on_request',
+                amountMinorUnits: undefined,
+                currency: undefined,
+                evidence: { sourceId: 'source-1', locator: 'Bites · regel 1', quote: 'Broodplank 8,50' },
+              }),
+            ],
+          },
+        ],
+      },
+    ],
+    coverage: { status: 'partial', sourcesRead: 1, pagesRead: 1, itemsExtracted: 1, unreadSources: [], limitations: ['Vervolgvraag over één regel'] },
+  };
+  const result = applyFollowUp({
+    report,
+    bundle: buildBundle(),
+    rowId: row.id,
+    answer: 'Korte samenvatting.\n```json\n' + JSON.stringify(followUpOutput) + '\n```',
+  });
+  assert.equal(result.ok, true, JSON.stringify(result.message || result.problems || []));
+  assert.deepEqual(
+    result.report.normalizations.map((entry) => entry.rule),
+    ['derived_item_count'],
+    'de eerdere afleiding blijft staan',
+  );
+  assert.equal(reviewView({ report: result.report, decisions: new Map() }).notices.length, 1);
+});
+
+test('V3: een ongeldig citaat blijft afgekeurd en verschijnt als leesbaar probleem', () => {
+  const answer = fixtureOutput();
+  answer.coverage.itemsExtracted = 42;
+  answer.menus[0].sourceId = 'bron-bestaat-niet';
+  const report = buildReport(answer);
+
+  // De telling is afgeleid, maar dat maakt het antwoord niet geldig.
+  assert.equal(report.ok, false);
+  assert.equal(report.code, 'schema_violation');
+  assert.match(report.problems.join('\n'), /must reference the source inventory/);
+  assert.ok(report.problemSummary.length >= 1 && report.problemSummary.length <= 5);
+  for (const group of report.problemSummary) {
+    assert.equal(/menus\[|coverage\.|items\[/.test(group.text), false, group.text);
+  }
+  assert.equal(typeof report.recoveryQuestion, 'string');
+  // De afleiding staat ook in het spoor van het afgekeurde antwoord.
+  assert.equal(report.normalizations.length, 1);
+
+  // Een losse citaatfout blijft een regelblokkade met de naam van het gerecht.
+  const quoteAnswer = fixtureOutput();
+  quoteAnswer.coverage.itemsExtracted = 42;
+  quoteAnswer.menus[0].categories[0].items[3].evidence.quote = 'Koffie 9,99';
+  const quoteReport = buildReport(quoteAnswer);
+  assert.equal(quoteReport.ok, true, JSON.stringify(quoteReport.problems || quoteReport.message));
+  const blocked = quoteReport.rows.find((entry) => entry.code === 'quote_not_in_source');
+  assert.ok(blocked);
+  assert.equal(blocked.state, 'error');
+  assert.equal(reviewView({ report: quoteReport, decisions: new Map() }).canSave, false);
+});
+
+test('V1: een antwoord zonder coverage blijft een eerlijke afkeuring', () => {
+  // De afleiding verzint geen dekking: zonder coverage-object verandert er
+  // niets en blijft de validator de baas.
+  const answer = fixtureOutput();
+  delete answer.coverage;
+  const report = buildReport(answer);
+  assert.equal(report.ok, false);
+  assert.equal(report.code, 'schema_violation');
+  assert.deepEqual(report.normalizations, []);
+  assert.ok(report.problemSummary.length > 0);
+});
+

@@ -575,3 +575,77 @@ test('U1: ook een structureel fout antwoord blijft in gewone taal', async () => 
   assert.equal(h.saved.length, 0);
 });
 
+// ── V1/V2/V3 (Delivery Lead review 6377050602) ──────────────────────────────
+// De afgeleide telling en de bijgestelde status moeten door de bestaande,
+// toestandsloze keten heen zichtbaar blijven: in een nieuwe handlerinstantie,
+// na "Weglaten", bij het concept en zonder het usage-ledger te raken.
+
+test('V1/V2/V3: de afleiding reist mee in het toestandstoken, blijft zichtbaar en komt bij het concept', async () => {
+  const h = harness();
+  const step1 = await createBundle(h.next());
+
+  // De AI telt fout (9) en noemt zichzelf volledig terwijl er een beperking is.
+  const claimed = output();
+  claimed.coverage = {
+    status: 'complete',
+    sourcesRead: 1,
+    pagesRead: 1,
+    itemsExtracted: 9,
+    unreadSources: [],
+    limitations: ['Alleen de lunchkaart gelezen'],
+  };
+  const checked = await h.next().importAnswer(
+    request({ state: step1.state, ai_name: 'Claude', answer: '```json\n' + JSON.stringify(claimed) + '\n```' }),
+  );
+  assert.equal(checked.status, 201, JSON.stringify(checked.body));
+  assert.equal(checked.body.import.summary.items, 3, 'de telling komt uit het antwoord zelf');
+  assert.equal(checked.body.import.coverage.status, 'partial', 'alleen naar beneden bijgesteld');
+  assert.deepEqual(
+    checked.body.import.normalizations.map((entry) => entry.rule).sort(),
+    ['complete_with_limitations', 'derived_item_count'],
+  );
+  assert.equal(checked.body.review.notices.length, 2);
+  assert.ok(checked.body.review.notices.includes('Aantal gerechten door het systeem geteld: 3 (de AI zei 9).'));
+  // Niets goedgekeurd: de open regels staan er nog.
+  assert.equal(checked.body.review.canSave, false);
+
+  const importId = checked.body.import.importId;
+  const supplement = checked.body.import.rows.find((row) => row.code === 'supplement_as_main_price');
+  const missing = checked.body.import.rows.find((row) => row.code === 'quote_not_in_source');
+  assert.ok(supplement && missing);
+
+  // Een nieuwe instantie opent alleen het token; de melding blijft staan.
+  const afterSupplement = await h.next().decide(
+    request({ state: checked.body.state, decision: { rowId: supplement.id, action: 'confirm' } }),
+    importId,
+  );
+  assert.equal(afterSupplement.status, 200, JSON.stringify(afterSupplement.body));
+  assert.equal(afterSupplement.body.review.notices.length, 2);
+
+  // "Weglaten" werkt ongewijzigd en laat de melding niet verdwijnen.
+  const afterDrop = await h.next().decide(
+    request({ state: afterSupplement.body.state, decision: { rowId: missing.id, action: 'drop' } }),
+    importId,
+  );
+  assert.equal(afterDrop.status, 200, JSON.stringify(afterDrop.body));
+  assert.equal(afterDrop.body.review.canSave, true);
+  assert.equal(afterDrop.body.review.notices.length, 2);
+
+  // Opslaan via de bestaande conceptroute: de afleiding staat in de duurzame
+  // conceptmetadata, niet in een nieuwe opslag of in het geheugen.
+  const savedResult = await h.next().save(request({ state: afterDrop.body.state }), importId);
+  assert.equal(savedResult.status, 201, JSON.stringify(savedResult.body));
+  assert.equal(h.saved.length, 1);
+  const stored = h.saved[0].content.importProvenance.normalizations;
+  assert.deepEqual(stored.map((entry) => entry.rule).sort(), ['complete_with_limitations', 'derived_item_count']);
+  assert.equal(h.saved[0].content.importProvenance.kind, 'handmatige_ai_import');
+
+  // Het usage-ledger blijft afgeleid uit de opgeslagen concepten en bevat geen
+  // gerechtnamen.
+  const usage = await h.next().usage(request({}));
+  assert.equal(usage.status, 200);
+  assert.deepEqual(validateUsageExport(usage.body.usage), []);
+  assert.equal(usage.body.usage.totals.conceptSaved, 1);
+  assert.equal(JSON.stringify(usage.body.usage).includes('Broodplank'), false);
+});
+
