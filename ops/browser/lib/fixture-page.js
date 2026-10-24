@@ -141,6 +141,17 @@ function fixtureBootstrap(scenarios, options = {}) {
         if (verdict.routeId === 'manual-imports' && params.get('manualFail') === 'schema') {
           return jsonResponse(manual.rejection.body, manual.rejection.status);
         }
+        // V1/V2 (review 6377050602): hetzelfde antwoord, maar met de door het
+        // systeem afgeleide telling en status. Alleen met ?manualNormalize=1,
+        // dus nooit stil: het bestaande scenario antwoordt ongewijzigd.
+        if (verdict.routeId === 'manual-imports' && params.get('manualNormalize') === '1') {
+          return jsonResponse({
+            import: manual.normalized.import,
+            review: manual.normalized.review,
+            state: nextToken(),
+            validUntil: manual.validUntil,
+          });
+        }
         if (verdict.routeId === 'manual-imports') {
           return jsonResponse({
             import: manual.import,

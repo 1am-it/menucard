@@ -1297,6 +1297,136 @@ async function manualRejectedScenario(cdp) {
   screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'manual-ai-import-problems-320-light.png'));
 }
 
+// V1/V2 (review 6377050602): de fixture antwoordt op stap 2 met een antwoord
+// waarvan de telling en de status door het systeem zijn afgeleid. De melding
+// moet zichtbaar zijn; niets wordt stil aangepast.
+function manualNormalizedUrl(theme) {
+  const params = new URLSearchParams({
+    fixture: 'manual',
+    restaurant: fixtures.RESTAURANT.id,
+    name: fixtures.RESTAURANT.name,
+    url: 'https://fictief-brasserie.invalid/menu',
+    manualNormalize: '1',
+    theme,
+  });
+  return `${MANUAL_URL}?${params.toString()}`;
+}
+
+/** Maakt een prompt en controleert een fictief antwoord met een afgeleide telling. */
+async function normalizeManualAnswer(cdp, theme) {
+  await openRoute(cdp, manualNormalizedUrl(theme), `document.body.innerText.includes('Prompt maken')`);
+  await clickButton(cdp, 'Prompt maken');
+  await waitFor(cdp, `document.body.innerText.includes('gaat mee in de prompt')`, 15000);
+  await setFieldValue(cdp, '#mai-answer', 'Korte samenvatting.\n```json\n{"menus":[],"coverage":{}}\n```');
+  await waitFor(cdp, `document.body.innerText.includes('Antwoord geplakt')`, 15000);
+  await clickButton(cdp, 'Controleren');
+  return waitFor(cdp, `document.body.innerText.includes('Antwoord ontvangen')`, 15000);
+}
+
+/** Leest de melding als de browser hem toont: tekst, zichtbaarheid en overflow. */
+async function readNormalizationNotice(cdp) {
+  return evalJs(
+    cdp,
+    `(() => {
+      const panel = document.querySelector('.mai-notices');
+      if (!panel) return null;
+      panel.scrollIntoView({ block: 'start' });
+      const rect = panel.getBoundingClientRect();
+      return {
+        role: panel.getAttribute('role'),
+        title: panel.querySelector('.mai-notices-title') ? panel.querySelector('.mai-notices-title').innerText : null,
+        items: Array.from(panel.querySelectorAll('.mai-notice-list li')).map((el) => el.innerText),
+        text: document.body.innerText,
+        buttons: Array.from(document.querySelectorAll('button')).map((el) => el.innerText),
+        top: Math.round(rect.top),
+        height: window.innerHeight,
+        overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      };
+    })()`,
+  );
+}
+
+/** De verse positie van de melding, nadat het scrollen klaar is. */
+async function noticePosition(cdp) {
+  return evalJs(
+    cdp,
+    `(() => {
+      const panel = document.querySelector('.mai-notices');
+      if (!panel) return null;
+      const rect = panel.getBoundingClientRect();
+      return { top: Math.round(rect.top), height: window.innerHeight };
+    })()`,
+  );
+}
+
+async function manualNormalizedScenario(cdp) {
+  await setViewport(cdp, 390, 900);
+  const shown = await normalizeManualAnswer(cdp, 'dark');
+  check('manual import normalization: the answer is accepted after the derived count', shown);
+  const notice = await readNormalizationNotice(cdp);
+  check('manual import normalization: the notice is rendered in plain language', Boolean(notice) && notice.role === 'status', notice ? notice.role : 'no notice');
+  check(
+    'manual import normalization: the heading names what the system adjusted',
+    Boolean(notice) && notice.title === 'Door het systeem bijgesteld',
+    notice ? notice.title : 'no notice',
+  );
+  check(
+    'manual import normalization: the derived item count is visible with the AI claim',
+    Boolean(notice) && notice.items.includes('Aantal gerechten door het systeem geteld: 3 (de AI zei 9).'),
+    notice ? JSON.stringify(notice.items) : 'no notice',
+  );
+  check(
+    'manual import normalization: the adjusted status is visible',
+    Boolean(notice) && notice.items.includes('Status bijgesteld naar gedeeltelijk, omdat de AI zelf een beperking noemde.'),
+    notice ? JSON.stringify(notice.items) : 'no notice',
+  );
+  // De telling op stap 2 komt uit het antwoord zelf, niet uit de modelclaim.
+  check(
+    'manual import normalization: step 2 shows the derived count, not the claimed 9',
+    Boolean(notice) && notice.text.includes('Antwoord ontvangen: 1 menukaart, 3 gerechten') && !notice.text.includes('9 gerechten'),
+    notice ? (notice.text.match(/Antwoord ontvangen[^\r\n]*/) || ['missing'])[0] : 'no notice',
+  );
+  // Niets goedgekeurd: geen accepteer-alles-knop en geen JSON op het scherm.
+  check(
+    'manual import normalization: no JSON and no accept-all control is shown',
+    Boolean(notice) &&
+      !notice.text.includes('"menus"') &&
+      !notice.buttons.some((label) => /alles accepteren|accepteer alles|alles goedkeuren/i.test(label)),
+    notice ? JSON.stringify(notice.buttons.filter((label) => /accep/i.test(label))) : 'no notice',
+  );
+  check('manual import normalization: no horizontal overflow at 390 px', Boolean(notice) && notice.overflow <= 0, notice ? `overflow=${notice.overflow}` : 'no notice');
+  // Het scrollen kan animeren: meet pas als de melding echt in beeld staat.
+  const scrolledIn = await waitFor(
+    cdp,
+    `(() => { const el = document.querySelector('.mai-notices'); if (!el) return false; const r = el.getBoundingClientRect(); return r.top >= 0 && r.top < window.innerHeight * 0.6; })()`,
+    5000,
+  );
+  const placed = await noticePosition(cdp);
+  check(
+    'manual import normalization: the notice is in view for the screenshot',
+    scrolledIn && Boolean(placed) && placed.top >= 0 && placed.top < placed.height,
+    JSON.stringify({ scrolledIn, placed }),
+  );
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'manual-ai-import-normalized-390-dark.png'));
+  recordClickpath(
+    'manual import normalization',
+    ['Menu importeren met AI', 'Prompt maken', 'Controleren', 'Door het systeem bijgesteld'],
+    Boolean(notice) && notice.items.length === 2,
+  );
+
+  // 320 px/licht: dezelfde melding, zonder horizontale overflow.
+  await setViewport(cdp, 320, 900);
+  const narrowShown = await normalizeManualAnswer(cdp, 'light');
+  const narrow = await readNormalizationNotice(cdp);
+  check('manual import normalization 320px/light: the notice is shown', Boolean(narrowShown) && Boolean(narrow));
+  check(
+    'manual import normalization 320px/light: both lines stay visible',
+    Boolean(narrow) && narrow.items.length === 2,
+    narrow ? JSON.stringify(narrow.items) : 'no notice',
+  );
+  check('manual import normalization 320px/light: no horizontal overflow', Boolean(narrow) && narrow.overflow <= 0, narrow ? `overflow=${narrow.overflow}` : 'no notice');
+}
+
 async function manualImportScenario(cdp) {
   await setViewport(cdp, 390, 900);
 
@@ -1389,6 +1519,8 @@ async function main() {
     // U1/U2: pas na de bestaande stroom, want die gaat verder op de pagina die
     // stap 2 achterliet. Dit scenario opent zijn eigen afgekeurde antwoord.
     await manualRejectedScenario(cdp);
+    // V1/V2 (review 6377050602): de afgeleide telling en status met de melding.
+    await manualNormalizedScenario(cdp);
     await v2Scenario(cdp);
     await errorScenario(cdp);
     for (const width of [320, 390]) {

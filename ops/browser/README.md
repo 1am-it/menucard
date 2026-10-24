@@ -177,6 +177,28 @@ overflow and records `manual-ai-import-problems-390-dark.png` and
 `manual-ai-import-problems-320-light.png` in `output/` and in the evidence file.
 The rejected answer stores nothing: the follow-up steps stay unavailable.
 
+### Afgeleide telling en status: de melding op het reviewscherm (review 6377050602)
+
+`?manualNormalize=1` op dezelfde pagina laat alleen de `POST …/imports`-fixture
+antwoorden met hetzelfde fictieve antwoord, maar met een foute telling (`9`) en
+een `complete`-status met een limitation. Dat antwoord wordt met de echte
+`buildImportReport` gebouwd, dus de browser ziet dezelfde afleiding en dezelfde
+melding als de server zou sturen. De check opent de prompt, plakt een fictief
+antwoord, drukt "Controleren" en controleert dat:
+
+- stap 2 "1 menukaart, 3 gerechten" toont (de afgeleide telling, niet de claim
+  van 9);
+- het blok "Door het systeem bijgesteld" (`role="status"`) twee zinnen in gewone
+  taal toont: "Aantal gerechten door het systeem geteld: 3 (de AI zei 9)." en
+  "Status bijgesteld naar gedeeltelijk, omdat de AI zelf een beperking noemde.";
+- er geen JSON op het scherm staat en er geen accepteer-alles-knop is;
+- de melding in beeld staat voor de screenshot en er geen horizontale overflow
+  is op 390 px/dark en 320 px/light.
+
+De screenshot `manual-ai-import-normalized-390-dark.png` staat in `output/` en
+in het evidencebestand. Ook dit blijft fixturebewijs: geen provider, geen echte
+bron, geen conceptopslag.
+
 ## Coverage
 
 - exact breadcrumb, source and "handmatig beoordelen" links;

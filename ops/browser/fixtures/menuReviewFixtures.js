@@ -782,6 +782,30 @@ function manualImportScenario() {
     decision: { rowId: coffee.id, action: 'confirm', reasonCode: 'niet_in_bron', note: 'Fictief op de papieren kaart gezien.' },
   });
   const draft = buildConceptDraft({ report, decisions: second.decisions, restaurantId: RESTAURANT.id });
+  // V1/V2 (review 6377050602): hetzelfde fictieve antwoord met een foute telling
+  // en een complete-status met limitations. De echte importroute leidt die af
+  // vóór de ongewijzigde validator; deze fixture gebruikt dezelfde functies,
+  // zodat de browser precies de echte melding ziet.
+  const claimed = {
+    ...output,
+    coverage: {
+      ...output.coverage,
+      status: 'complete',
+      itemsExtracted: 9,
+      limitations: ['Fictief: alleen de lunchkaart gelezen'],
+    },
+  };
+  const normalized = buildImportReport({
+    importId: 'fixture-import-normalized',
+    bundle,
+    output: claimed,
+    aiName: 'Claude',
+    now: new Date('2026-10-22T12:06:00.000Z'),
+  });
+  if (!normalized.ok) throw new Error(`manual normalized fixture invalid: ${normalized.code}`);
+  if (normalized.normalizations.length !== 2) {
+    throw new Error(`manual normalized fixture recorded ${normalized.normalizations.length} normalizations`);
+  }
   return {
     bundle: bundleMetadata(bundle),
     prompt: buildImportPrompt(bundle),
@@ -798,6 +822,12 @@ function manualImportScenario() {
       reviewView({ report, decisions: first.decisions }),
       reviewView({ report, decisions: second.decisions }),
     ],
+    // V2: hetzelfde antwoord mét de afgeleide telling en status. Eén review,
+    // want dit scenario beoordeelt alleen de melding, niet de beslisstappen.
+    normalized: {
+      import: publicImportReport(normalized),
+      review: reviewView({ report: normalized, decisions: new Map() }),
+    },
     followUpPrompt: {
       text: '# Vervolgvraag over één regel\n\nFictief.\n\n```text\nFictieve brontekst.\n```',
       byteLength: 120,

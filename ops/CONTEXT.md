@@ -62,8 +62,11 @@ the source header names the exact `sourceId:` on its own line, the evidence chec
 equates only the documented typographic character classes, the price-variant rule
 is stated in the protocol and the provider schema, and every source row carries a
 `mismatchDiagnosis` that explains (diagnosis only) why accepted items did not
-match. The backend validator and the manual-import path keep the same rules. No
-app route is wired to any of it — `disabledMenuExtractionRuntime` stays in place.
+match. The backend validator keeps the same rules; since review 6377050602 the
+manual import applies this same derivation before validation and shows the
+result as a plain-language notice, kept in `importProvenance.normalizations`.
+No app route is wired to any of it — `disabledMenuExtractionRuntime` stays in
+place.
 See `docs/guides/menu-extraction-ai-probe.md`.
 
 ## PDF.js server packaging check (added 2026-09-30)

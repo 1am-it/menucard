@@ -950,4 +950,44 @@ Browserbewijs: `ops/browser/run-menu-review-browser-check.js`
 `manual-ai-import-problems-320-light.png`. Dit blijft fixture- en
 ontwikkelaarsbewijs, geen onafhankelijke review of browseracceptatie.
 
+## Afgeleide telling en status in de handmatige import (review 6377050602)
 
+In het afgekeurde-antwoords Scherm gingen twee van de vijf punten over
+boekhoudvelden die een taalmodel onbetrouwbaar invult: `coverage.itemsExtracted`
+en een `complete`-status met limitations. Route B leidt die al deterministisch af
+(R1/R2, `src/lib/menuExtractionNormalization.js`). De handmatige import doet dat
+nu met exact dezelfde functie, vóór de validator:
+
+- **V1, hergebruik.** `buildImportReport` in
+  `src/lib/manualMenuImportImport.js` roept `applyDerivableNormalizations` aan
+  vóór `validateStructuredOutput`. `itemsExtracted` wordt het aantal items dat
+  werkelijk in `menus[].categories[].items[]` staat; `complete` met limitations
+  gaat alleen naar beneden (`partial`, of `no_items` zonder items). Er is geen
+  tweede implementatie en de validator in `src/lib/menuExtractionSchema.js` is
+  niet gewijzigd: dezelfde regel keurt nog steeds elk antwoord af dat zonder
+  deze afleiding binnenkomt.
+- **V2, zichtbaar en bewaard.** Elke toegepaste correctie krijgt een `notice` in
+  gewone taal ("Aantal gerechten door het systeem geteld: 3 (de AI zei 9)." /
+  "Status bijgesteld naar gedeeltelijk, omdat de AI zelf een beperking noemde.").
+  `reviewView` geeft die als `notices` aan het reviewscherm (`.mai-notices`,
+  `role="status"`), de lijst reist mee in het bestaande toestandstoken — ook na
+  een vervolgvraag of één antwoord over alle open punten — en
+  `buildImportProvenance` bewaart haar als
+  `content.importProvenance.normalizations` bij het concept. Er is geen nieuwe
+  opslag en geen nieuwe in-memory state.
+- **V3, ongewijzigde keten.** Het statetoken, "Weglaten", de duurzame
+  concepten en het usage-ledger werken onveranderd. Een ongeldig citaat blijft
+  een regelblokkade `quote_not_in_source` en verschijnt als leesbaar probleem;
+  een fataal probleem (onbekende bron, ontbrekende coverage) blijft een 422 met
+  `problemSummary` en `recoveryQuestion`. Een afleiding is nooit een
+  goedkeuring: `reviewReady`, bronbevestiging en publicatie blijven menselijk.
+
+Regressies: `src/lib/manualMenuImport.test.js` (V1, V1/V2, V2 bij het concept,
+V2 na een vervolgvraag, V3 citaat en coverage-loos antwoord),
+`src/lib/manualMenuImportHandlers.test.js` (de hele keten over nieuwe
+handlerinstanties, inclusief "Weglaten", opslaan en usage-ledger) en
+`src/lib/menuExtractionNormalization.test.js` (de validatorregels zelf blijven
+ongewijzigd). Browserbewijs:
+`ops/browser/run-menu-review-browser-check.js` (`manualNormalizedScenario`) met
+`manual-ai-import-normalized-390-dark.png`. Dit blijft fixture- en
+ontwikkelaarsbewijs, geen onafhankelijke review of browseracceptatie.
