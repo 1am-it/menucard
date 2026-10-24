@@ -30,13 +30,16 @@ const MAX_AI_NAME = schema.LIMITS.label;
 const MAX_PROBLEMS = 20;
 const MAX_QUESTION = 400;
 
-const ROW_STATES = ['valid', 'error', 'unverifiable', 'unsupported'];
+const ROW_STATES = ['valid', 'error', 'unverifiable', 'unsupported', 'review'];
 
 const STATE_LABELS = {
   valid: 'in orde',
   error: 'staat niet in de bron',
   unverifiable: 'uit scan, controleer',
   unsupported: 'niet op te slaan',
+  // W6: no price in the source, so the human chooses "Prijs onbekend" or
+  // supplies one. The dish is never stored with a made-up amount.
+  review: 'prijs onbekend',
 };
 
 const ROW_CODES = {
@@ -47,6 +50,8 @@ const ROW_CODES = {
   scan_unverified: { state: 'unverifiable', label: 'uit scan, controleer', askAi: true },
   category_uncertain: { state: 'unverifiable', label: 'rubriek controleren', askAi: true },
   price_variant: { state: 'unsupported', label: 'twee prijzen', askAi: false },
+  price_unknown: { state: 'review', label: 'prijs onbekend', askAi: false },
+  price_on_request: { state: 'review', label: 'prijs op aanvraag', askAi: false },
   supplement_as_main_price: { state: 'unsupported', label: 'is een toeslag', askAi: true },
   from_price: { state: 'unsupported', label: 'niet op te slaan', askAi: true },
   allergens: { state: 'unsupported', label: 'niet op te slaan', askAi: true },
@@ -211,6 +216,13 @@ function priceTextOf(item) {
   if (item.priceStatus === 'known' && Number.isInteger(item.amountMinorUnits)) {
     return `€ ${(item.amountMinorUnits / 100).toFixed(2).replace('.', ',')}`;
   }
+  // A source-named price list ("glas 5,00 / karaf 18,50") is shown exactly as
+  // the source states it instead of "meerdere prijzen".
+  if (isNamedVariantList(item.priceVariants)) {
+    return item.priceVariants
+      .map((variant) => `${variant.label.trim()} ${(variant.amountMinorUnits / 100).toFixed(2).replace('.', ',')}`)
+      .join(' / ');
+  }
   if (item.priceStatus === 'multiple_undecomposed') return 'meerdere prijzen';
   if (item.priceStatus === 'on_request') return 'op aanvraag';
   return 'prijs onbekend';
@@ -235,16 +247,39 @@ function rowProblemKey(problem) {
   return match ? `${match[1]}.${match[2]}.${match[3]}` : null;
 }
 
+function isNamedVariantList(variants) {
+  return (
+    Array.isArray(variants) &&
+    variants.length > 0 &&
+    variants.every(
+      (variant) =>
+        variant &&
+        typeof variant.label === 'string' &&
+        variant.label.trim() !== '' &&
+        Number.isInteger(variant.amountMinorUnits) &&
+        variant.amountMinorUnits >= 0,
+    )
+  );
+}
+
 /**
  * Per regel één toestand. Nooit afvlakken: een variant wordt geen enkele
  * prijs, een supplement wordt geen hoofdprijs en een arrangement wordt geen
  * gewoon gerecht. De mens kiest of laat weg; de app beslist niet.
+ *
+ * W6 (Lead review 6380804419): een bron die elke prijs zelf benoemt
+ * ("glas 5,00 / karaf 18,50") is een volledige prijs, dus die regel staat
+ * meteen in orde en wordt als `priceVariants` bewaard. Alleen een
+ * onbenoemde meervoudige prijs vraagt nog een keuze. Een ontbrekende prijs
+ * wordt "Prijs onbekend": het gerecht blijft, nooit € 0,00.
  */
 function classifyRow({ item, menu, category, source, rowProblemCodes }) {
   const reasons = [];
   const relations = [];
+  const variants = Array.isArray(item.priceVariants) ? item.priceVariants : [];
+  const namedVariants = isNamedVariantList(variants);
   if (item.supplementOf) relations.push('supplement_as_main_price');
-  if (Array.isArray(item.priceVariants) && item.priceVariants.length > 0) relations.push('price_variant');
+  if (variants.length > 0 && !namedVariants) relations.push('price_variant');
   if (item.isFrom === true) relations.push('from_price');
   if (item.allergens) relations.push('allergens');
   if (item.availability) relations.push('availability');
@@ -252,13 +287,22 @@ function classifyRow({ item, menu, category, source, rowProblemCodes }) {
 
   const priceOutOfRange =
     item.priceStatus === 'known' && Number.isInteger(item.amountMinorUnits) && normalizePrice(item.amountMinorUnits / 100) === null;
+  // An item without a known price and without named variants: the source
+  // either states a request price or nothing at all. Never guessed.
+  const missingPrice =
+    item.priceStatus !== 'known' && !namedVariants && !(Number.isInteger(item.amountMinorUnits) && item.amountMinorUnits > 0);
 
   let code = null;
   if (relations.includes('supplement_as_main_price')) code = 'supplement_as_main_price';
   else if (relations.includes('price_variant')) code = 'price_variant';
   else if (relations.length > 0) code = relations[0];
   else if (priceOutOfRange) code = 'price_out_of_concept_range';
+  // A row whose own evidence failed stays an evidence error: that is the more
+  // serious problem. For every other row a missing price is its own open point,
+  // also above "uit scan, controleer" — otherwise such a row would look
+  // confirmed and then be refused by the concept at save time.
   else if (rowProblemCodes.length > 0) code = rowProblemCodes[0];
+  else if (missingPrice) code = item.priceStatus === 'on_request' ? 'price_on_request' : 'price_unknown';
   else if (category && category.uncertain === true) code = 'category_uncertain';
   else if (source && !source.hasText) code = 'scan_unverified';
 
@@ -273,6 +317,7 @@ function classifyRow({ item, menu, category, source, rowProblemCodes }) {
     state,
     label: code ? ROW_CODES[code].label : STATE_LABELS.valid,
     askAi: code ? Boolean(ROW_CODES[code].askAi) : false,
+    namedPriceVariants: namedVariants,
   };
 }
 
@@ -326,6 +371,9 @@ function buildRows(output, bundle, problemCodesByRow) {
           reasons: classified.reasons,
           relations: classified.relations,
           askAi: classified.askAi,
+          // W6: a named price list is complete; only an unnamed multiple price
+          // is an open "Kies een prijs" point.
+          namedPriceVariants: classified.namedPriceVariants,
           // Bewijs uit een bron zonder tekst is nooit automatisch bevestigd.
           evidenceVerified: Boolean(source && source.hasText && !(problemCodesByRow.get(id) || []).includes('quote_not_in_source')),
         });
@@ -541,6 +589,7 @@ module.exports = {
   STATE_LABELS,
   ROW_CODES,
   humanMessage,
+  isNamedVariantList,
   validateAiName,
   extractCodeBlock,
   buildImportReport,

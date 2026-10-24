@@ -91,9 +91,11 @@ function fixtureOutput() {
                 priceStatus: 'multiple_undecomposed',
                 amountMinorUnits: undefined,
                 currency: undefined,
+                // W6: unnamed multiple prices stay an open "Kies een prijs"
+                // point; the named case is covered by its own regression.
                 priceVariants: [
-                  { label: 'Glas', amountMinorUnits: 450, currency: 'EUR' },
-                  { label: 'Fles', amountMinorUnits: 2400, currency: 'EUR' },
+                  { label: null, amountMinorUnits: 450, currency: 'EUR' },
+                  { label: null, amountMinorUnits: 2400, currency: 'EUR' },
                 ],
                 evidence: { sourceId: 'source-1', locator: 'Bites · regel 2', quote: 'Glas huiswijn 4,50' },
               }),
@@ -151,6 +153,7 @@ function fullyReviewed(report, initial = new Map()) {
     if (row.state === 'valid' || decisions.has(row.id)) continue;
     let decision;
     if (row.code === 'price_variant') decision = { rowId: row.id, action: 'choose_price', variantIndex: 0 };
+    else if (row.code === 'price_unknown' || row.code === 'price_on_request') decision = { rowId: row.id, action: 'price_unknown' };
     else if (row.code === 'supplement_as_main_price') decision = { rowId: row.id, action: 'confirm' };
     else if (row.code === 'quote_not_in_source') {
       decision = { rowId: row.id, action: 'confirm', reasonCode: 'niet_in_bron', note: 'Handmatig in de bron gezien op de papieren kaart.' };
@@ -521,7 +524,10 @@ test('K6: een geldig vervolgantwoord vervangt alleen het voorstel voor die regel
   assert.equal(result.ok, true, JSON.stringify(result.message || result.problems || []));
   const changed = result.report.rows.find((entry) => entry.id === row.id);
   assert.equal(changed.priceStatus, 'on_request');
-  assert.equal(changed.state, 'valid');
+  // W6: "op aanvraag" is a price the source does not state as an amount, so it
+  // is an explicit open point ("Prijs op aanvraag") instead of silently valid.
+  assert.equal(changed.state, 'review');
+  assert.equal(changed.code, 'price_on_request');
   for (const before of report.rows.filter((entry) => entry.id !== row.id)) {
     const after = result.report.rows.find((entry) => entry.id === before.id);
     assert.deepEqual({ ...after, id: undefined }, { ...before, id: undefined });
@@ -625,8 +631,12 @@ test('K6: één antwoord voor alle open punten vervangt alleen die regels', () =
   const daily = result.report.rows.find((entry) => entry.name === 'Dagschotel');
   // Een regel uit een scan blijft ook na een AI-antwoord "uit scan, controleer":
   // zonder brontekst is bewijs nooit automatisch te controleren.
-  assert.equal(daily.state, 'unverifiable');
-  assert.equal(coffee.state, 'valid');
+  assert.equal(daily.evidenceVerified, false);
+  assert.equal(daily.state, 'review');
+  assert.equal(daily.code, 'price_on_request');
+  // W6: an answer without an amount is still an open price point.
+  assert.equal(coffee.state, 'review');
+  assert.equal(coffee.code, 'price_on_request');
   // De wijn met twee prijzen staat niet in deze vraag en blijft open.
   const wine = result.report.rows.find((entry) => entry.name === 'Glas huiswijn');
   assert.equal(wine.state, 'unsupported');

@@ -48,6 +48,9 @@ function stateBadge(row) {
   if (row.state === 'valid') return { tone: 'positive', label: 'in orde' }
   if (row.state === 'error') return { tone: 'blocked', label: 'staat niet in de bron' }
   if (row.state === 'unverifiable') return { tone: 'old', label: row.label || 'uit scan, controleer' }
+  // W6: no price in the source. The human decides; the dish is never stored
+  // with a made-up amount.
+  if (row.state === 'review') return { tone: 'old', label: row.label || 'prijs onbekend' }
   if (row.code === 'price_variant') return { tone: 'old', label: 'twee prijzen' }
   if (row.code === 'supplement_as_main_price') return { tone: 'old', label: 'is een toeslag' }
   return { tone: 'old', label: 'niet op te slaan' }
@@ -408,8 +411,8 @@ export default function ManualMenuImportPage() {
       setSaved(result.data.concept)
       setMessage(
         result.data.concept && result.data.concept.unchanged
-          ? `Het concept is ongewijzigd (versie ${result.data.concept.version}). Er is niets gepubliceerd.`
-          : `Concept opgeslagen als versie ${result.data.concept && result.data.concept.version}. Het wacht op interne controle; er is niets gepubliceerd.`
+          ? `Het concept is ongewijzigd (versie ${result.data.concept.version}). Publiceren blijft een aparte stap.`
+          : `Concept opgeslagen als versie ${result.data.concept && result.data.concept.version}. Het wacht op interne controle. Publiceren blijft een aparte stap.`
       )
     }
     setBusy(false)
@@ -861,6 +864,9 @@ export default function ManualMenuImportPage() {
                   {openRows.map((row) => {
                     const badge = stateBadge(row)
                     const variants = Array.isArray(row.priceVariants) ? row.priceVariants : []
+                    // W6: a row without any price gets "Prijs onbekend" as its
+                    // explicit choice; "Klopt" would silently keep it unpriced.
+                    const priceMissing = row.code === 'price_unknown' || row.code === 'price_on_request'
                     return (
                       <li key={row.id} className={`mai-review-row ${row.state === 'error' ? 'mai-review-row--blocked' : ''}`}>
                         <div className="mai-review-head">
@@ -918,14 +924,25 @@ export default function ManualMenuImportPage() {
                         ) : (
                           <>
                             <div className="mai-row-actions">
-                              <button
-                                type="button"
-                                className="di-btn-primary mai-btn"
-                                disabled={busy}
-                                onClick={() => (row.state === 'error' ? openReason(row) : sendDecision({ rowId: row.id, action: 'confirm' }))}
-                              >
-                                Klopt
-                              </button>
+                              {priceMissing ? (
+                                <button
+                                  type="button"
+                                  className="di-btn-primary mai-btn"
+                                  disabled={busy}
+                                  onClick={() => sendDecision({ rowId: row.id, action: 'price_unknown' })}
+                                >
+                                  Prijs onbekend
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  className="di-btn-primary mai-btn"
+                                  disabled={busy}
+                                  onClick={() => (row.state === 'error' ? openReason(row) : sendDecision({ rowId: row.id, action: 'confirm' }))}
+                                >
+                                  Klopt
+                                </button>
+                              )}
                               <button type="button" className="stg-btn-secondary mai-btn" disabled={busy} onClick={() => openCorrection(row)}>
                                 Wijzig
                               </button>
@@ -1145,12 +1162,13 @@ export default function ManualMenuImportPage() {
                     aria-describedby="mai-save-reason"
                     onClick={saveConcept}
                   >
-                    Concept opslaan
+                    Opslaan als concept
                   </button>
                   <p id="mai-save-reason" className="mai-why">
                     {saved
-                      ? 'Opgeslagen als intern concept. Er is niets gepubliceerd.'
-                      : review.saveBlockReason || 'Alle punten zijn nagelopen. Opslaan maakt een intern concept; niets wordt gepubliceerd.'}
+                      ? 'Opgeslagen als intern concept. Publiceren blijft een aparte stap.'
+                      : review.saveBlockReason ||
+                        'Alle punten zijn nagelopen. Opslaan maakt een intern concept. Publiceren blijft een aparte stap.'}
                   </p>
                 </div>
               </>

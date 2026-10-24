@@ -118,6 +118,10 @@ function recognisedLines(menus) {
                   .map((variant) => ({ label: typeof variant.label === 'string' ? variant.label : null, price: variant.price })),
               }
             : {}),
+          // W6 (Lead review 6380804419): "Prijs onbekend" is a human decision on
+          // this line, not a missing value. It travels with the line so the
+          // concept stores `priceStatus: unknown` instead of a made-up amount.
+          ...(item.priceUnknownAccepted === true ? { priceUnknownAccepted: true } : {}),
           ...(item.evidence && typeof item.evidence === 'object' ? { evidence: item.evidence } : {}),
           category: path[path.length - 1],
           categoryPath: path,
@@ -360,6 +364,9 @@ function storedConceptInput(captured) {
         name: item && item.name,
         desc: item && item.desc,
         price: item && item.price,
+        ...(item && typeof item.priceStatus === 'string' ? { priceStatus: item.priceStatus } : {}),
+        ...(item && Array.isArray(item.priceVariants) ? { priceVariants: item.priceVariants } : {}),
+        ...(item && item.priceUnknownAccepted === true ? { priceUnknownAccepted: true } : {}),
         ...(item && item.evidence && typeof item.evidence === 'object' ? { evidence: item.evidence } : {}),
         from: item && typeof item.from === 'string' ? item.from : null,
         kept: Boolean(item && item.kept === true),
@@ -493,6 +500,26 @@ function buildMenuConcept({ menus, liveLines, edits }) {
     const unclear = isUnclearCategory(l.category) || (l.categoryUncertain && !l.categoryEdited);
     const duplicate = nameCount.get(dishKey(l)) > 1;
     const hasPrice = Boolean(l.price);
+    // W6 (Lead review 6380804419): a price that the source itself names per
+    // unit ("glas 5,00 / karaf 18,50", "klein / groot") is a complete price of
+    // the menu, not an unresolved choice. Every variant carries its own label
+    // and amount, so it is stored as `priceVariants` and never flattened to a
+    // single amount. An unnamed multiple price stays a blocker.
+    const namedVariants =
+      Array.isArray(l.priceVariants) &&
+      l.priceVariants.length > 0 &&
+      l.priceVariants.every(
+        (variant) =>
+          variant &&
+          typeof variant.label === 'string' &&
+          variant.label.trim() !== '' &&
+          normalizePrice(variant.price) !== null,
+      );
+    // "Prijs onbekend" is an explicit human choice: the dish stays, with an
+    // unknown price and never € 0,00.
+    const priceUnknownAccepted = l.priceUnknownAccepted === true;
+    l.namedVariants = namedVariants;
+    l.priceUnknownAccepted = priceUnknownAccepted;
     // Keep the flags on the line so the UI and the stored version can show
     // exactly which decision was made, even after the blocker is cleared.
     l.categoryNeedsAcceptance = unclear && hasPrice && !l.excluded;
@@ -500,8 +527,8 @@ function buildMenuConcept({ menus, liveLines, edits }) {
     l.categoryAccepted = l.categoryAccepted && l.categoryNeedsAcceptance;
     l.duplicateAccepted = l.duplicateAccepted && l.duplicateNeedsAcceptance;
     if (l.excluded) l.status = 'excluded';
-    else if (!hasPrice && l.priceStatus === 'multiple_undecomposed') l.status = 'multiple_prices';
-    else if (!hasPrice) l.status = 'missing_price';
+    else if (!hasPrice && !namedVariants && l.priceStatus === 'multiple_undecomposed') l.status = 'multiple_prices';
+    else if (!hasPrice && !namedVariants && !priceUnknownAccepted) l.status = 'missing_price';
     else if (unclear && !l.categoryAccepted) l.status = 'unclear_category';
     else if (duplicate && !l.duplicateAccepted) l.status = 'duplicate';
     else if (liveMatch && liveMatch.price && liveMatch.price !== l.price) l.status = 'price_changed';
@@ -564,6 +591,20 @@ function buildMenuConcept({ menus, liveLines, edits }) {
     if (l.kept) item.kept = true;
     if (l.categoryAccepted) item.categoryAccepted = true;
     if (l.duplicateAccepted) item.duplicateAccepted = true;
+    // W6: the price model stays lossless. A known single price is stored
+    // exactly as before (no extra key, so existing content hashes and the
+    // public projection do not change); a per-unit price and an accepted
+    // unknown price are stored explicitly instead of being flattened.
+    if (!l.price && l.namedVariants) {
+      item.priceStatus = 'multiple_undecomposed';
+      item.priceVariants = l.priceVariants.map((variant) => ({
+        label: variant.label.trim(),
+        price: normalizePrice(variant.price),
+      }));
+    } else if (!l.price && l.priceUnknownAccepted) {
+      item.priceStatus = l.priceStatus === 'on_request' ? 'on_request' : 'unknown';
+      item.priceUnknownAccepted = true;
+    }
     if (l.evidence && typeof l.evidence === 'object') item.evidence = l.evidence;
     add(l.categoryPath, item, { sourcePath: l.categoryEdited ? null : l.sourcePath, uncertain: l.categoryUncertain && !l.categoryEdited });
   }

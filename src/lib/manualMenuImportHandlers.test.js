@@ -451,7 +451,10 @@ test('K6: de vervolgprompt gaat over één regel en het antwoord vervangt alleen
   );
   assert.equal(answered.status, 200, JSON.stringify(answered.body));
   const after = answered.body.import.rows.find((entry) => entry.id === row.id);
-  assert.equal(after.state, 'valid');
+  // W6: the follow-up fixed the evidence, but a price without an amount stays
+  // an explicit "Prijs op aanvraag" point instead of silently valid.
+  assert.equal(after.code, 'price_on_request');
+  assert.equal(after.state, 'review');
   const repeated = await h
     .next()
     .followUp(request({ state: answered.body.state, row_id: row.id }), step2.import.importId);

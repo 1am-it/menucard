@@ -30,6 +30,19 @@ function mapItem(item, sourceUrl, menuSourceId) {
       quote: bounded(item && item.evidence && item.evidence.quote, 500),
     },
   };
+  // W6 of the Lead review: a source that names each price ("glas 5,00 /
+  // karaf 18,50") keeps those variants instead of losing them on the way to
+  // the concept. Only a variant with its own amount is carried.
+  const variants = Array.isArray(item && item.priceVariants)
+    ? item.priceVariants
+        .filter((variant) => variant && Number.isInteger(variant.amountMinorUnits) && variant.amountMinorUnits >= 0)
+        .slice(0, 10)
+        .map((variant) => ({ label: bounded(variant.label, 80), price: (variant.amountMinorUnits / 100).toFixed(2) }))
+    : [];
+  if (variants.length > 0) out.priceVariants = variants;
+  // W6: an accepted "Prijs onbekend" decision travels to the concept as an
+  // explicit state, so the concept stores it instead of a blocker.
+  if (item && item.priceUnknownAccepted === true) out.priceUnknownAccepted = true;
   if (sourceUrl) out.evidence.sourceUrl = sourceUrl;
   if (item && typeof item.priceText === 'string') out.priceText = bounded(item.priceText, 160);
   return out;

@@ -29,7 +29,11 @@ const MAX_REASONS = 200;
 const MAX_FOLLOW_UPS_PER_IMPORT = 20;
 const MAX_FOLLOW_UPS_PER_ROW = 1;
 
-const ACTIONS = ['confirm', 'correct', 'drop', 'choose_price'];
+const ACTIONS = ['confirm', 'correct', 'drop', 'choose_price', 'price_unknown'];
+
+// W6 (Lead review 6380804419): a row whose price the source does not state.
+// The human either supplies a price, marks it unknown, or drops the row.
+const PRICE_UNKNOWN_CODES = new Set(['price_unknown', 'price_on_request']);
 
 // Vaste redenen bij "staat niet in de bron"; een korte toelichting is
 // verplicht en wordt met de herkomst bewaard.
@@ -85,6 +89,18 @@ function validateDecision({ row, decision } = {}) {
   if (row.code === 'price_variant' && action !== 'choose_price' && action !== 'drop') {
     return { ok: false, code: 'price_choice_required', message: 'Kies een prijs of laat de regel weg.' };
   }
+  // W6: "Prijs onbekend" only exists for a row without a price. The dish stays
+  // with an unknown price — never € 0,00 and never a guessed amount.
+  if (action === 'price_unknown' && !PRICE_UNKNOWN_CODES.has(row.code)) {
+    return { ok: false, code: 'decision_invalid', message: 'Kies "Prijs onbekend" alleen bij een regel zonder prijs.' };
+  }
+  if (PRICE_UNKNOWN_CODES.has(row.code) && action !== 'price_unknown' && action !== 'drop' && action !== 'correct') {
+    return {
+      ok: false,
+      code: 'price_choice_required',
+      message: 'Vul een prijs in, kies "Prijs onbekend" of laat de regel weg.',
+    };
+  }
   if (action === 'choose_price') {
     const variants = Array.isArray(row.priceVariants) ? row.priceVariants : [];
     const index = decision.variantIndex;
@@ -114,6 +130,11 @@ function validateDecision({ row, decision } = {}) {
       }
     }
     const description = typeof corrected.description === 'string' ? corrected.description.trim().slice(0, schema.LIMITS.description) : null;
+    // W6: correcting a row without a price means supplying that price; leaving
+    // it empty would silently keep an unpriced dish.
+    if (PRICE_UNKNOWN_CODES.has(row.code) && !price) {
+      return { ok: false, code: 'correction_incomplete', message: 'Vul een prijs in, of kies "Prijs onbekend".' };
+    }
     const path = corrected.path === undefined ? undefined : normalizePath(corrected.path);
     if (corrected.path !== undefined && path === null) {
       return { ok: false, code: 'correction_incomplete', message: 'Kies een geldige rubriek.' };
@@ -177,6 +198,7 @@ function rowForView(row, decision) {
 function decisionOutcome(row, decision) {
   if (!decision) return row.state === 'valid' ? 'keep' : null;
   if (decision.action === 'drop') return 'exclude';
+  if (decision.action === 'price_unknown') return 'keep_price_unknown';
   if (decision.action === 'choose_price') return 'keep_with_price';
   if (decision.action === 'correct') return 'keep_corrected';
   // "Klopt" op een toeslag: de AI had gelijk dat dit een toeslag is. Het
@@ -335,6 +357,19 @@ function repairMenus({ report, decisions } = {}) {
           const next = { ...item, priceStatus: 'known', amountMinorUnits: variant ? variant.amountMinorUnits : item.amountMinorUnits, currency: 'EUR' };
           delete next.priceVariants;
           delete next.supplementOf;
+          pushItem(rebuilt, byPath, basePath, next, sourceCategory);
+          return;
+        }
+        // W6: "Prijs onbekend". The dish stays with an unknown price (or, when
+        // the source said so, "op aanvraag"); no amount is invented.
+        if (decision.action === 'price_unknown') {
+          const next = {
+            ...item,
+            priceStatus: item.priceStatus === 'on_request' ? 'on_request' : 'unknown',
+            priceUnknownAccepted: true,
+          };
+          delete next.amountMinorUnits;
+          delete next.priceVariants;
           pushItem(rebuilt, byPath, basePath, next, sourceCategory);
           return;
         }
