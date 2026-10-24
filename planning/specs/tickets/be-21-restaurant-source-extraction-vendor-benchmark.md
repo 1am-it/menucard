@@ -222,6 +222,9 @@ gegevensverwerking goedgekeurd.**
 
 **Nog open:** de API-sleutel, die de eigenaar zelf aanmaakt en alleen lokaal en gitignored neerzet. Daarna draait de Lead de live proef (`docs/guides/menu-extraction-ai-probe.md`) op de gepinde captures. Geen productieactivering, geen app-koppeling en geen andere provider of fallback.
 
+**Besluit Product Owner 2026-10-24 ("akkoord 1"): tweede aanroepteller voor de herhaalde live-proef.**
+De eerste live-reeks (2026-10-23/24) bereikte het plafond van 40 aanroepen. Die reeks bevat de diagnoseaanroepen; de werkelijke kosten waren ongeveer 1 eurocent per aanroep, terwijl het ledger aanroepen met onbekende kosten conservatief op 30 eurocent boekt. Dat ledger is ongewijzigd bewaard als `ops/benchmark/output/ai-probe-budget-ledger.run1.json`. Er komt één nieuwe teller met dezelfde grenzen: 40 aanroepen, 30 eurocent per aanroep, 1 tegelijk en cumulatief 900 eurocent. Het harde plafond blijft de $10-limiet van de Anthropic-werkruimte; er komt geen nieuw tegoed bij en automatisch bijvullen blijft uit.
+
 **Oorspronkelijke status: NEEDS_APPROVAL.** Er wordt niets betaald, geen account aangemaakt en
 geen sleutel gebruikt totdat de Product Owner provider/model, budget en
 gegevensverwerking expliciet goedkeurt. Deze proef levert gemeten cijfers voor
