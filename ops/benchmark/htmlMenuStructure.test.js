@@ -625,7 +625,18 @@ test('AA1: every refusal carries its own reason, so the diagnosis can report it'
   assert.deepEqual(reasons('op nummer 1'), ['1:counting_word'])
   assert.deepEqual(reasons('12'), ['12:no_name'])
   assert.deepEqual(reasons('Hollands 27 Petit Doruvael'), ['27:no_boundary'])
-  assert.deepEqual(reasons('16h00 - 22h45'), ['16:unit', '00:leading_zero', '22:unit', '45:glued'])
+  assert.deepEqual(reasons('16h00 - 22h45'), ['16:glued', '00:leading_zero', '22:glued', '45:glued'])
+  // Een gegaatje van een PDF: "1 e tussengerecht" is een gangnummer, geen prijs.
+  assert.deepEqual(reasons('bombe van zeebaars - pompoen      1 e  tussengerecht'), ['1:ordinal'])
+  assert.deepEqual(reasons('1e tussengerecht'), ['1:glued'])
   assert.deepEqual(reasons('076 201 49 75'), ['076:leading_zero', '201:no_boundary', '49:no_boundary', '75:no_name'])
   assert.deepEqual(wholeEuroAmountTokens('Zeebaars 34    geschroeid').map((token) => token.reason), [null])
 })
+
+test('AA1: een gangnummer of een vastgeplakt woord is geen prijs', () => {
+  assert.deepEqual(findWholeEuroPrices('bombe van zeebaars en krab - pompoen - radijs - mandarijn           1 e  tussengerecht'), [])
+  assert.deepEqual(findWholeEuroPrices('2 e  tussengerecht'), [])
+  assert.deepEqual(findWholeEuroPrices('34x'), [])
+  assert.deepEqual(findWholeEuroPrices('Fictief 5st'), [])
+})
+

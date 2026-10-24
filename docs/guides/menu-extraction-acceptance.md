@@ -977,34 +977,47 @@ in `ops/benchmark/output/ai-probe-coverage-diagnosis.json` (vóór:
 | --- | --- | --- | --- | --- | --- |
 | zuyd | 9 / 31 | 15 / 41 | 10 | 10 | 0 |
 | andalous | 2 / 91 | 2 / 91 | 0 | 7 | 0 |
-| pellens | 16 / 72 | 16 / 72 | 0 | 1 | 0 |
-| chocolat | 0 / 30 | 0 / 30 | 0 | 0 | 0 |
+| pellens | 16 / 72 | 16 / 72 | 0 | 3 | 0 |
+| chocolat | 0 / 30 | 0 / 40 | 10 | 2 | 0 |
 | smelt | 0 / 0 | 0 / 0 | 0 | 0 | 0 |
-| blossem | 0 / 2 | 0 / 8 | 6 | 0 | 0 |
+| blossem | 0 / 2 | 0 / 8 | 6 | 1 | 0 |
 | bardot | 15 / 16 | 15 / 16 | 0 | 0 | 0 |
-| wolfslaar | 0 / 0 | 28 / 29 | 29 | 0 | 0 |
+| wolfslaar | 0 / 0 | 32 / 33 | 30 | 6 | 0 |
 
 Eerlijk over de treffers:
 
 - **Wolfslaar** levert de echte vormen van de review: "Witte Heilbot 32",
   "Zeebaars 34", "Noordzeekrab 38", "Tarbot 62", "Zeetong 69", "Mechelse Koekoek
-  44", "Vijf-gangen 130", "3 kazen 15". De namen komen uit de geprinte cel vóór
-  de prijs, dus niet de omschrijving erachter.
-- **Zuyd** en **Blossem** leveren arrangementen en wijntips ("wijnarr 32",
-  "3 gangen 57", "4 gangen 66"). Dat zijn echte prijzen maar **geen gerechten**:
-  ze verschijnen als "niet overgenomen" en een medewerker kan ze met "Geen
-  gerecht" afvinken. Dat is de bedoelde route, geen stilzwijgende goedkeuring.
-- Eén treffer is een **valse naam**: "inclusief gebakken ganzenlever 54" op de
-  Wolfslaar-hoofdgerechten. De prijs klopt, de naam is een vervolgzin. Ook die
-  kan alleen "Geen gerecht" worden; de app verzint geen betere naam.
+  44", "Vijf-gangen 130" en "Zes-gangen 150". De namen komen uit de geprinte cel
+  vóór de prijs, dus niet de omschrijving erachter.
+- **Chocolat** levert tien echte gerechtprijzen die de oude lezer miste:
+  "NOORDZEE KRAB 25", "WATERMELOEN (V) 22", "KINGFISH 28", "STEAK TARTARE 26",
+  "RUNDERHAAS 38", "ROGVLEUGEL 32", "KNOLSELDERIJ (V) 29", "RUNDERBAVETTE 37",
+  "IBERICO PRESA 39", "ZWEZERIK 28". Die kaart print hele euro's in een eigen
+  cel, dus hier is de winst het grootst na Wolfslaar.
+- **Zuyd** en **Blossem** leveren arrangementen en wijntips ("wijnarr. 32",
+  "3 gangen 57", "4 gangen 66", "5 gangen 76"). Dat zijn echte prijzen maar
+  **geen gerechten**: ze verschijnen als "niet overgenomen" en een medewerker kan
+  ze met "Geen gerecht" afvinken. Dat is de bedoelde route, geen stilzwijgende
+  goedkeuring.
+- Drie treffers hebben een **verkeerde naam** (wel een echte prijs): "Royal
+  Belgian Platinum Caviar 30 gram 65" en "50 gram 98" (de naam is de portie, het
+  gerecht staat in de rubriek), "inclusief gebakken ganzenlever 54" (een
+  vervolgzin) en de kaasregel "… 3 kazen | 5 kazen … 15 / 20". Ze kunnen alleen
+  "Geen gerecht" worden of met de hand gecorrigeerd; de app verzint geen betere
+  naam.
 - Uitgesloten met een eigen reden (en dus niet stil): "op nummer 1" uit een
-  vacaturetekst (`counting_word`), "16h00 - 22h45" (`unit`/`glued`), "076 201 49
-  75" (`leading_zero`/`no_boundary`/`no_name`), "75 gram" en "6 stuks" (`unit`).
-  Die twee klassen zijn pas na de eerste meting toegevoegd; zonder die twee
-  correcties gaf Andalous 8 valse prijsregels.
+  vacaturetekst (`counting_word`), "16h00 - 22h45" (`glued`), "1 e
+  tussengerecht" uit een gangenlijst (`ordinal`), "076 201 49 75"
+  (`leading_zero`/`no_boundary`/`no_name`), "75 gram", "6 stuks" en "3 kazen"
+  (`unit`). Die klassen zijn na de eerste meting toegevoegd: zonder de
+  `counting_word`- en `glued`-correctie gaf Andalous 8 valse prijsregels en
+  zonder de `ordinal`-correctie gaf Zuyd twee valse prijzen (€ 1 en € 2 voor
+  "1 e tussengerecht" en "2 e tussengerecht").
 - **Smelt blijft 0**: de gepinde PDF vat alle cellen samen tot regels met één
   spatie ("Hollands 27 Petit Doruvael"), dus er is geen geprinte celgrens en het
   getal is niet van een gewoon getal te onderscheiden. Dat is een gemelde
   beperking, geen groen resultaat.
+
 
 

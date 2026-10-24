@@ -1333,12 +1333,12 @@ Een geheel getal is alleen een prijs als **alle** voorwaarden gelden:
 | geprinte celgrens | ten minste twee spaties, een tab, een kolomscheider (`\|` `·` `•`) of het eind van de geprinte regel, aan minstens één kant |
 | naam | minstens twee letters vóór het bedrag (in dezelfde cel of de cel ervoor) |
 | geen eenheid of telwoord direct erna | `gram`, `g`, `cl`, `ml`, `st`, `stuks`, `personen`, `pers`, `gangen`, `x`, `%`, `uur`, `h`, `min`, `kazen`, `glazen`, `flessen`, … |
-| geen jaartal, tijd, datum, telefoon of nummering | vier cijfers vallen al af; `18:30`, `16h00`, `22h45`, `076 201 49 75`, `op nummer 1`, `Wolfslaardreef 100` |
+| geen jaartal, tijd, datum, telefoon, nummering of ordinaal | vier cijfers vallen al af; `18:30`, `16h00`, `22h45`, `076 201 49 75`, `op nummer 1`, `Wolfslaardreef 100`, en een aan het bedrag vastgeplakt woord of een gangnummer (`1e`, `1 e tussengerecht`, `34x`) |
 | dezelfde rubriek op ≥ 2 geprinte regels | `confirmWholeEuros`: per rubriek en pagina tellen de **geprinte rijen**; een samengevouwen captureregel met meerdere cellen telt als meerdere rijen, want de capture heeft de kolommen van de kaart samengevoegd |
 
 Een geweigerd bedrag houdt zijn **eigen reden** (`wholeEuroAmountTokens`):
-`unit`, `counting_word`, `leading_zero`, `glued`, `time`, `date`, `phone`,
-`no_boundary`, `no_name`. De offline diagnose
+`unit`, `counting_word`, `ordinal`, `leading_zero`, `glued`, `time`, `date`,
+`phone`, `no_boundary`, `no_name`. De offline diagnose
 (`node ops/scripts/diagnose-menu-source-coverage.js`) rapporteert die redenen en
 somt elke geaccepteerde regel op, zodat een **valse treffer** zichtbaar is in
 plaats van verstopt in een totaal.

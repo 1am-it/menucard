@@ -840,6 +840,9 @@ const NUMBERING_WORD_BEFORE = /\b(?:nummer|nr|nrs|punt|stap|etage|verdieping|keu
 
 const WHOLE_EURO_PATTERN = /(?<![\d.,€])(\d{1,3})(?:\s*,\s*[-–])?(?![\d.,:]*\d)(?!\s*%)/g
 
+/** A course ordinal as a PDF prints it: "1e", "2 e" ("1e tussengerecht"). */
+const ORDINAL_MARKER_AFTER = /^\s?e(?![a-zé])/i
+
 /** True when the text before `index` ends on a printed cell boundary. */
 function boundaryBefore(text, index) {
   if (index === 0) return true
@@ -887,6 +890,9 @@ function wholeEuroAmountTokens(text) {
     const around = source.slice(Math.max(0, index - 16), index + length + 8)
     if (/^0/.test(digits)) token.reason = 'leading_zero'
     else if (index > 0 && /[\p{L}\p{N}]/u.test(source[index - 1])) token.reason = 'glued'
+    // A price is never glued to a word ("34x", "1e tussengerecht").
+    else if (/^\p{L}/u.test(after)) token.reason = 'glued'
+    else if (ORDINAL_MARKER_AFTER.test(after)) token.reason = 'ordinal'
     else if (COUNTING_WORD_AFTER.test(after)) token.reason = 'unit'
     else if (NUMBERING_WORD_BEFORE.test(source.slice(Math.max(0, index - 24), index))) token.reason = 'counting_word'
     else if (MONTH_DATE_PATTERN.test(around) || ON_DATE_PATTERN.test(around)) token.reason = 'date'
