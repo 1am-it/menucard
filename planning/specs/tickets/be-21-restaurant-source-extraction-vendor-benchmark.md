@@ -233,6 +233,12 @@ Uitkomst van live-run 2: 22 aanroepen, 23 eurocent. Gevonden: 265 van 407 gerech
    - de keuze bij een ontbrekende prijs heet "Prijs onbekend".
 3. Maandbudget voor de app: US$ 10, zichtbaar als "AI deze maand". Productie krijgt een aparte API-sleutel. Die wordt pas bij de vrijgave aangemaakt en in Vercel gezet; zonder sleutel blijft de functie uit.
 
+**Besluit Product Owner 2026-10-24 ("1 en 5 !"): concept vergelijken met de originele kaart.**
+Visuele referentie: de mockup "Automatisch menu uitlezen met AI", versie 11, met de schermen "Variant 1 · Niet overgenomen" en "Variant 5 · Originele kaart met markeringen".
+1. **Variant 1** komt eerst. Een deterministische en gratis vergelijking toont de regels met een prijs uit de bron die bij geen enkel gerecht in het concept horen, als lijst met de keuzes "Toevoegen" en "Geen gerecht".
+2. **Variant 5** volgt daarna. In het nalopen-scherm wissel je tussen Lijst en Kaart. De kaartweergave toont de originele kaart met markeringen: groen voor overgenomen, oranje voor niet overgenomen en rood voor afwijkend. Bij een PDF is dat de echte pagina, bij een website de opgehaalde tekst. "Bekijk op kaart" opent die weergave op de juiste regel.
+3. Variant 2 vervalt. Variant 3 (wijzigingen bij opnieuw lezen) en variant 4 (tweede AI als controleur) zijn niet besloten.
+
 **Oorspronkelijke status: NEEDS_APPROVAL.** Er wordt niets betaald, geen account aangemaakt en
 geen sleutel gebruikt totdat de Product Owner provider/model, budget en
 gegevensverwerking expliciet goedkeurt. Deze proef levert gemeten cijfers voor
