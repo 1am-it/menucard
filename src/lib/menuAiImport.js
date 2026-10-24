@@ -49,14 +49,16 @@ const AI_MONTH_LIMIT_EUR_CENTS = 1000;
 const MAX_SOURCES = DEFAULT_EXTRACTION_LIMITS.maxDocuments;
 const MAX_IMPORT_ITEMS = 1000;
 
-// W2: one bounded synchronous call, no retry of its own. The route's own
-// maxDuration (60 s, the value the existing batch-analysis process route uses)
-// has to cover the call plus validation and the concept write, so the call
-// itself stops earlier and the failure is a readable message.
+// W2 + Y1: one bounded synchronous call, no retry of its own. The route's own
+// maxDuration (300 s, verified against Vercel's duration documentation in
+// docs/guides/menu-extraction-implementation.md) has to cover the call plus
+// validation and the concept write. The measured worst case was 46.8 s, so the
+// call stops at 120 s and the job deadline at 150 s: roughly 2.5x the measured
+// maximum and still 150 s of the function left for validation and the write.
 const AI_LIMITS = Object.freeze({
   ...DEFAULT_EXTRACTION_LIMITS,
-  callTimeoutMs: 50_000,
-  jobDeadlineMs: 55_000,
+  callTimeoutMs: 120_000,
+  jobDeadlineMs: 150_000,
   maxRetries: 0,
   maxCostEurCents: AI_MAX_COST_EUR_CENTS,
   maxConcurrency: 1,

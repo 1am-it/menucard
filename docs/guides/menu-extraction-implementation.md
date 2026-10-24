@@ -1002,10 +1002,39 @@ automatische publicatie en er is geen nieuwe navigatie.
 
 ### Route en grenzen
 
-`app/api/internal/v1/menu-ai-import/route.js` (`maxDuration = 60`, dezelfde
-waarde als de bestaande batch-analysis-process-route; de call zelf stopt op 50 s
-via `AI_LIMITS`, zodat validatie en conceptopslag binnen de functie vallen).
-Er is geen achtergrondproces en geen in-memory state tussen requests.
+### Tijdslimiet en functiegrens (Y1, review 6381657192)
+
+De eerste versie nam de 60 s van de batchroute over. Dat is te krap: in live-run 2
+(één document per aanroep) duurde andalous 46,8 s, zuyd 41,5 s en smelt 38,8 s.
+Een iets grotere kaart werd daardoor na betaling afgebroken.
+
+De officiële Vercel-documentatie is op 2026-10-24 gecontroleerd:
+
+- "Configuring Maximum Duration for Vercel Functions"
+  (<https://vercel.com/docs/functions/configuring-functions/duration>): een
+  Next.js-routehandler zet de grens met `export const maxDuration`. De
+  gedocumenteerde duurlimieten met Fluid compute zijn Hobby 300 s default en
+  300 s maximum, Pro en Enterprise 300 s default en 800 s maximum (1800 s in
+  beta).
+- "Fluid compute" (<https://vercel.com/docs/fluid-compute>): "As of April 23,
+  2025, fluid compute is enabled by default for new projects." De defaults per
+  plan zijn 300 s; Hobby max 300 s, Pro/Enterprise max 800 s.
+
+Projectconfiguratie, voor zover zonder credentials zichtbaar: er is geen
+`vercel.json` en `next.config.js` zet geen `fluid`, `maxDuration` of plan. Het
+project gebruikt de standaard Node.js-runtime van Next.js 15 (route zonder
+`runtime`-export). Het project is na 23 april 2025 gestart (eerste commit
+2026-08-29), dus de gedocumenteerde Fluid-standaard geldt. Het plan zelf is
+zonder dashboard/credentials niet zichtbaar; 300 s valt binnen zowel de
+Hobby- als de Pro-maximum, dus er is geen planwijziging nodig. Zou Fluid op een
+ouder project expliciet uit staan, dan geldt de oude Hobby-grens van 60 s; dat is
+hier niet aantoonbaar en is als beperking vermeld, niet stil aangenomen.
+
+Daarom: `maxDuration = 300`, `callTimeoutMs = 120_000` (ongeveer 2,5× de gemeten
+46,8 s) en `jobDeadlineMs = 150_000`. De resterende 150 s van de functie is voor
+validatie en de bestaande conceptopslag. Geen retry, geen achtergrondproces en
+geen plan- of Vercel-instelling gewijzigd. Regressie:
+`src/lib/menuAiTimeLimits.test.js` leest de echte route, `AI_LIMITS` en deze gids.
 
 - `GET` meldt of de knop mag (`ANTHROPIC_API_KEY` **en**
   `MENU_AI_FALLBACK_ENABLED=true`), wat dit kalendermaand al kostte en of het
