@@ -1077,9 +1077,10 @@ Eerlijk over de treffers:
 - `npm run build`: geslaagd (gecompileerd in 30,1 s, 42/42 statische pagina's);
   `node ops/scripts/verify-pdfjs-server-trace.js`: OK (192 server scripts,
   geen gebundelde PDF.js-runtime).
-- Browsercheck: **598/598** op een **dirty worktree** met head `edf058d8` (de
-  screenshot- en evidence-stand horen bij deze ronde; de Lead beoordeelt
-  onafhankelijk). Nul mislukte checks.
+- Browsercheck: **598/598** op een **schone werkmap** met head `436b964` (regels
+  hierboven: 598 checks, waaronder de stap-, maand- en chipchecks in licht en
+  donker en op 320/390 px). De Lead beoordeelt onafhankelijk; dit is
+  fixturebewijs, geen browseracceptatie door de Lead.
 - Resterende gaten: een decimale prijs midden in een regel of achter een
   prijsbereik blijft bewust ongelezen; Bardot/Smelt houden hun
   `no_boundary`-beperking; de legenda is 10 px in plaats van 10,5 px om op 390 px
