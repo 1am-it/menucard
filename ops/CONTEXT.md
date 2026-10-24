@@ -112,6 +112,18 @@ instead of hidden. `pricedLinesOfSource(source, { requireSectionConfirmation:
 false })` exists for that reporting only; the review always uses the confirmed
 list.
 
+### Stored-answer fixture for the review (added 2026-10-24, #59 BB1/BB4)
+
+`ops/benchmark/aiAnswerRealShape.js` is the committed counterpart of the raw
+answers under `ops/benchmark/output/ai-probe-raw/` (gitignored). It copies that
+shape with fictional values — including the mandatory
+`allergens: { status: "unknown", values: [] }` and `isFrom: false` on every item
+— so a regression or a route test can replay a real answer instead of a
+hand-made minimal object. `aiAnswerRealShape.test.js` validates the fixture
+against the unchanged schema; `menuAiReadEndToEnd.test.js` runs it through the
+real route chain with a mocked transport (no key, no SDK, no network, no
+database) and asserts that rows end up "in orde".
+
 ### One-decimal prices with a decimal point (added 2026-10-24, #59 BB2)
 
 `src/lib/htmlMenuStructure.js` adds `findDecimalPointPrices` /

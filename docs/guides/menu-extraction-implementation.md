@@ -1425,3 +1425,92 @@ scrolt naar die regel en markeert hem.
 - De kaart toont per pagina; een bron met veel pagina's vraagt per pagina een
   verzoek.
 
+
+## BB1-BB4: herstel na de echte praktijktest van "Lees met AI" (review 6384867373)
+
+Basis `bab93bb`. Deze ronde repareert alleen wat de praktijktest van de Lead op
+de echte lokale app aantoonde; het contract en de grenzen van #59 blijven gelijk.
+Geen echte of betaalde aanroep, geen sleutel, geen migratie, geen nieuwe
+dependency, geen versoepeling van de validator, geen wijziging aan referenties,
+telregels of meetcode, en geen publicatie of merge.
+
+### BB1 — een onbekende allergenenlijst is geen opgave
+
+Het echte antwoord dat de app zelf opsloeg, draagt bij **elk** gerecht
+`allergens: { status: "unknown", values: [] }`, omdat het schema (M1) dat veld
+verplicht. `src/lib/manualMenuImportImport.js` telde elk waarheidsachtig
+`allergens`-object als "allergenen opgegeven", waardoor alle 52 Blossem-gerechten
+op "niet op te slaan" stonden.
+
+De regel is nu:
+
+| Veld | Wel een relatie (bestaande regel) | Geen relatie |
+| --- | --- | --- |
+| `allergens` | `status: "explicit"` met minstens één waarde, of een gevulde `values`-lijst | `status: "unknown"`, `values: []`, `null`, `undefined`, lege tekst |
+| `availability` | een niet-lege tekst | ontbrekend, `""`, `"   "` |
+| `supplementOf` | een niet-lege tekst | ontbrekend, `""`, `"   "` |
+| `isFrom` | `true` | `false`, ontbrekend |
+| `priceVariants` | minstens één variant, onbenoemd | een lege lijst, of een door de bron benoemde lijst |
+
+Alle andere regels (prijs, bewijs, rubriek, arrangement) blijven ongewijzigd. De
+validator is niet aangeraakt: een lege `availability` of `supplementOf` wordt
+daar nog steeds als schemavout geweigerd; de nieuwe helper is de tweede,
+verdedigende laag voor een antwoord dat er toch doorheen komt.
+
+Nieuwe fixture: `ops/benchmark/aiAnswerRealShape.js`. Dat is een kopie met
+fictieve waarden in **exact** de vorm van de bewaarde antwoorden onder
+`ops/benchmark/output/ai-probe-raw/` (`description: ""`, `priceText`, `isFrom`,
+`allergens`, `evidence`), inclusief één regel met echte allergenen en één met een
+echte beschikbaarheid. `ops/benchmark/aiAnswerRealShape.test.js` bewijst dat de
+fixture de ongewijzigde validator passeert, dat de drie onbekende regels "in
+orde" zijn en dat de twee echte vermeldingen de bestaande regel volgen.
+
+### BB2 — een prijs met een decimale punt
+
+Blossem print `4.5`, `3.0` en `4.0`; `findPrices` leest alleen twee decimalen,
+waardoor 52 gelezen gerechten bij "4 regels met een prijs" stonden. In dezelfde
+prijssectie van `src/lib/htmlMenuStructure.js` staat nu een derde familie:
+
+- 1-3 cijfers, een punt en één of twee decimalen (`4.5`, `16.0`);
+- het bedrag staat aan het **eind** van een geprinte regel of cel (regeleinde,
+  twee of meer spaties, een tab of `| · •`);
+- minstens twee letters ervoor (een naam), en geen eenheid of telwoord erna;
+- geweigerd met een eigen reden: versie (`versie 4.5`), tijd (`om 12.5`),
+  prijsbereik (`12.5 - 22.5`), `p.p.`/`per persoon`, leidende nul (`0.5 l`),
+  vastgeplakt (`1.85st`), ordinaal, datum, telefoon, geen celgrens, geen naam;
+- een bedrag met twee decimalen blijft van `findPrices` en wordt nooit dubbel
+  geteld (`findPrintedPrices` dedupliceert op overlap).
+
+`findPrices`, de referenties, de telregels en de meetcode zijn niet gewijzigd.
+`src/lib/menuSourceCoverage.js` leest de prijzen uit `findPrintedPrices` (dat was
+al zo) en ziet een regel met een prijs nooit meer als rubriekkop, zodat
+"Friet met mayonaise  6.5" op een korte regel geen kop wordt.
+
+### BB3 — stapnummering, maandbedrag en legenda
+
+- **Stapnummering**: de nummers volgen de zichtbare volgorde. Met AI én de
+  handmatige route dicht zijn dat Bron kiezen (1), de AI-kaart (2) en Nalopen en
+  opslaan (3); met de handmatige route open worden dat 1, 2, 3 en 4. Zonder AI
+  blijft de oude nummering (1, 1, 2, 3) staan. `AiMenuReadBlock` kreeg daarvoor
+  een `step`-prop en dezelfde `mai-step-head` als de andere stappen.
+- **Maandbedrag**: `app/internal/menu-import/page.js` leest de status na **elke**
+  lezing opnieuw (`loadAiStatus`), en neemt het nieuwe totaal uit het
+  antwoord zelf alvast over. Een lezing van één cent is dus meteen zichtbaar; ook
+  een geweigerde aanroep die wel geld kost wordt daarna opnieuw gelezen.
+- **Legenda**: de vier chips hadden 2 px tussenruimte en plakten aan elkaar. Ze
+  hebben nu 8 px tussen en 3 px binnen de chip (met 6 px rijafstand bij
+  terugvouwen), en de letters zijn 10 px in plaats van 10,5 px, zodat de vier
+  chips op 390 px op één regel blijven.
+
+### BB4 — end-to-end zonder netwerk
+
+`ops/benchmark/menuAiReadEndToEnd.test.js` laat de nagebootste transportlaag het
+opgeslagen antwoord teruggeven en loopt de echte keten door:
+`menuAiReadHandlers` → `menuAiImport` → de adapter → de ongewijzigde validator →
+`buildImportReport` → `reviewView` → het concept. Assertie: 6 gelezen gerechten,
+**4 in orde** (was 0 met dezelfde vorm vóór BB1), 2 regels met een echte
+allergenen-/beschikbaarheidsvermelding als "niet op te slaan", één modelaanroep,
+1 cent, en een ongeldig citaat blijft een weigering zonder concept. De test staat
+in `ops/benchmark/` omdat productcode nooit `ops/benchmark/` importeert
+(`menuIsolation.test.js`); de richting ops → src is toegestaan.
+

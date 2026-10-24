@@ -1021,3 +1021,68 @@ Eerlijk over de treffers:
 
 
 
+
+## BB1-BB4: herstel na de praktijktest van "Lees met AI" (review 6384867373)
+
+Basis `bab93bb`. De Lead voerde de echte lokale app uit (echte sleutel, lokale
+Supabase, INTERNAL, bron `https://restaurantblossem.nl/nl/restaurant`, twee
+aanroepen van ±29 s en € 0,01 per aanroep) en vond vijf punten. Deze ronde
+herstelt die punten. Ook dit is **ontwikkelaars- en fixturebewijs**: geen echte
+of betaalde aanroep in deze ronde, geen sleutel, geen migratie, geen nieuwe
+dependency, geen versoepeling van de validator, geen wijziging aan referenties,
+telregels of meetcode, en geen publicatie of merge.
+
+| Criterium | Bewijs |
+| --- | --- |
+| BB1 onbekende allergenen | `ops/benchmark/aiAnswerRealShape.js` is de vorm van een echt opgeslagen antwoord (met `allergens: {status:"unknown",values:[]}` en `isFrom:false` per item). `ops/benchmark/aiAnswerRealShape.test.js` (5 tests): de fixture passeert de ongewijzigde validator, drie regels met een onbekende lijst/ontbrekende beschikbaarheid zijn "in orde", een expliciete allergenenlijst en een expliciete beschikbaarheid blijven "niet op te slaan", en lege standaardwaarden (`""`, `"   "`, `null`) zijn nooit een relatie |
+| BB2 decimale punt | `ops/benchmark/htmlMenuStructure.test.js` (5 BB2-tests): "Gemarineerde olijven  4.5", "Nibbit  3.0", "Friet met mayonaise  6.5", "Selectie van kazen  16.0", tab-cel, "€ 4.5"; geweigerd: "versie 4.5", "om 12.5", "12.5 - 22.5", "42.0 p.p.", "35.0 per persoon", "0.5 l", "4.5 kg", "1.85st", "slechts 1.5 kilometer", een bedrag midden in de regel en "4.5" zonder naam. `findPrices` blijft ongewijzigd (referenties en meting). `src/lib/menuSourceCoverage.test.js` (3 BB2-tests): de Blossem-vorm (één samengevouwen rij) levert zeven prijsregels met de cel ervoor als naam, een korte regel telt, proza niet, en "Toevoegen" gebruikt de geprinte prijs |
+| BB3 stapnummering, maandbedrag, legenda | Browsercheck: de zichtbare stappen zijn `["1","2"]` vóór het nalopen, `["1","2","3"]` met alleen de AI-route, `["1","2","3","4"]` met de handmatige route open (geen gat, geen sprong); de maandregel staat direct na de lezing op "AI deze maand € 0,16 van € 10,00" (was € 0,12); de vier legenda-chips houden 6 px tussenruimte (gemeten `[6,6,6]`) en blijven op 390 px op één regel (was 2 px en plakkerig). Screenshots: `ai-read-done-390-{light,dark}.png` (stap 2 + nieuwe maandregel), `ai-read-review-390-{light,dark}.png` (stap 3), `ai-map-390-{light,dark}.png` en `ai-map-legend-uitleg-390-{light,dark}.png` |
+| BB4 end-to-end zonder netwerk | `ops/benchmark/menuAiReadEndToEnd.test.js`: een nagebootste transportlaag geeft het opgeslagen antwoord terug door `menuAiReadHandlers` → `menuAiImport` → adapter → validator → `buildImportReport` → `reviewView` → concept. Assertie: 6 items, **4 in orde** (> 0), 2 regels met een echte allergenen-/beschikbaarheidsvermelding, één aanroep, 1 cent; een ongeldig citaat blijft een weigering zonder concept. `npm test` en `npm run build` hieronder |
+
+### Diagnose vóór en na BB2 (gepinde captures, live-run 2)
+
+`node ops/scripts/diagnose-menu-source-coverage.js`, offline, geen sleutel en
+geen aanroep. Rapport gitignored in `ops/benchmark/output/` (vóór:
+`ai-probe-coverage-diagnosis.bb2-before.json`, na:
+`ai-probe-coverage-diagnosis.json`, tekst: `bb2-diagnosis-before.txt` en
+`bb2-diagnosis-after.txt`).
+
+| Bron | Vóór prijsregels | Na prijsregels | Decimale prijzen | Weigeringen van die familie |
+| --- | --- | --- | --- | --- |
+| zuyd | 41 | 41 | 0 | – |
+| andalous | 91 | 91 | 0 | – |
+| pellens | 72 | 72 | 0 | `unit: 5` |
+| chocolat | 40 | 40 | 0 | – |
+| smelt | 0 | 0 | 0 | `unit: 2`, `no_boundary: 7` |
+| blossem | 8 | **45** | **37** | `glued: 3`, `unit: 2` |
+| bardot | 16 | 16 | 0 | `no_boundary: 149`, `leading_zero: 1` |
+| wolfslaar | 33 | 33 | 0 | – |
+
+Eerlijk over de treffers:
+
+- De 37 Blossem-prijzen zijn stuk voor stuk echte gerechten met hun eigen prijs
+  ("Gemarineerde olijven 4.5", "Wilde zeebaars 31.0", "Friet met mayonaise 6.5");
+  de naam is de geprinte cel vóór de prijs. De diagnose meldt 0 verdachte
+  records.
+- De vijf weigeringen zijn de arrangementen met "p.p." ("Tafeltje vol
+  lunchgerechten 42.0 p.p.", "2-gangen lunch 35.0 p.p.") en de vastgeplakte
+  "1.85st"-bitterballen. Die staan dus **niet** als gerechtprijs op de kaart.
+- De andere zeven bronnen houden hun aantal en hun weigeringen: de nieuwe familie
+  verandert daar niets. Bardot blijft een eerlijke beperking: de capture is daar
+  één regel met enkele spaties, dus er is geen geprinte celgrens.
+
+### Bewijs en resterende gaten (BB1-BB4)
+
+- `npm test`: **2744/2744** (was 2728/2728 op `bab93bb`; +16 regressies).
+- `npm run build`: geslaagd (gecompileerd in 30,1 s, 42/42 statische pagina's);
+  `node ops/scripts/verify-pdfjs-server-trace.js`: OK (192 server scripts,
+  geen gebundelde PDF.js-runtime).
+- Browsercheck: **598/598** op een **dirty worktree** met head `edf058d8` (de
+  screenshot- en evidence-stand horen bij deze ronde; de Lead beoordeelt
+  onafhankelijk). Nul mislukte checks.
+- Resterende gaten: een decimale prijs midden in een regel of achter een
+  prijsbereik blijft bewust ongelezen; Bardot/Smelt houden hun
+  `no_boundary`-beperking; de legenda is 10 px in plaats van 10,5 px om op 390 px
+  op één regel te blijven; app-side AI-activering, een echte provideraanroep,
+  browseracceptatie door de Lead en de onafhankelijke review blijven open.
+
