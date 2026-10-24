@@ -233,6 +233,33 @@ function isArrangementLike(menu, category, item) {
   return labels.some((label) => typeof label === 'string' && ARRANGEMENT_SIGNAL.test(label));
 }
 
+/**
+ * BB1 (Lead review 6384867373): het echte antwoord dat de app zelf opsloeg
+ * (`ops/benchmark/output/ai-probe-raw/*`) draagt bij elk gerecht
+ * `allergens: { status: "unknown", values: [] }`, want het schema (M1) maakt
+ * dat veld verplicht. Een onbekende lijst met nul waarden is geen opgave: de
+ * bron zegt niets over allergenen. Alleen een expliciet vermelde lijst is een
+ * relatie en houdt de bestaande regel "niet op te slaan".
+ */
+function hasStatedAllergens(allergens) {
+  if (typeof allergens === 'string') return allergens.trim() !== '';
+  if (!allergens || typeof allergens !== 'object' || Array.isArray(allergens)) return false;
+  if (allergens.status === 'unknown') return false;
+  if (allergens.status === 'explicit') return true;
+  // Onbekende of ontbrekende status: alleen een gevulde lijst telt als opgave.
+  const values = Array.isArray(allergens.values) ? allergens.values : Array.isArray(allergens.codes) ? allergens.codes : [];
+  return values.some((value) => typeof value === 'string' && value.trim() !== '');
+}
+
+/**
+ * BB1: een lege of ontbrekende tekst is geen opgave. Dat geldt voor
+ * `availability` en `supplementOf`: een standaardwaarde zoals "" of "   " mag
+ * nooit een relatie of een afkeuring opleveren.
+ */
+function hasStatedText(value) {
+  return typeof value === 'string' && value.trim() !== '';
+}
+
 
 /** Schemafouten die aan één regel hangen en dus per regel reviewbaar zijn. */
 function rowCodeForProblem(problem) {
@@ -278,11 +305,11 @@ function classifyRow({ item, menu, category, source, rowProblemCodes }) {
   const relations = [];
   const variants = Array.isArray(item.priceVariants) ? item.priceVariants : [];
   const namedVariants = isNamedVariantList(variants);
-  if (item.supplementOf) relations.push('supplement_as_main_price');
+  if (hasStatedText(item.supplementOf)) relations.push('supplement_as_main_price');
   if (variants.length > 0 && !namedVariants) relations.push('price_variant');
   if (item.isFrom === true) relations.push('from_price');
-  if (item.allergens) relations.push('allergens');
-  if (item.availability) relations.push('availability');
+  if (hasStatedAllergens(item.allergens)) relations.push('allergens');
+  if (hasStatedText(item.availability)) relations.push('availability');
   if (isArrangementLike(menu, category, item)) relations.push('arrangement_like');
 
   const priceOutOfRange =
@@ -590,6 +617,8 @@ module.exports = {
   ROW_CODES,
   humanMessage,
   isNamedVariantList,
+  hasStatedAllergens,
+  hasStatedText,
   validateAiName,
   extractCodeBlock,
   buildImportReport,
