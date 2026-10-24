@@ -1151,11 +1151,16 @@ async function setFieldValue(cdp, selector, value) {
 }
 
 function manualUrl(theme) {
+  // De bestaande handmatige stroom is de route zonder AI. Met aiState=off
+  // antwoordt de fictieve status als "niet ingesteld", zodat deze scenario's
+  // exact de ongewijzigde handmatige flow blijven bewijzen (Y2, review
+  // 6381657192). De AI-route heeft eigen scenario's.
   const params = new URLSearchParams({
     fixture: 'manual',
     restaurant: fixtures.RESTAURANT.id,
     name: fixtures.RESTAURANT.name,
     url: 'https://fictief-brasserie.invalid/menu',
+    aiState: 'off',
     theme,
   });
   return `${MANUAL_URL}?${params.toString()}`;
@@ -1166,6 +1171,7 @@ function manualSearchUrl(theme) {
   const params = new URLSearchParams({
     fixture: 'manual',
     url: 'https://fictief-brasserie.invalid/menu',
+    aiState: 'off',
     theme,
   });
   return `${MANUAL_URL}?${params.toString()}`;
@@ -1179,6 +1185,7 @@ function manualExpiredUrl(theme) {
     name: fixtures.RESTAURANT.name,
     url: 'https://fictief-brasserie.invalid/menu',
     manualFail: 'expired',
+    aiState: 'off',
     theme,
   });
   return `${MANUAL_URL}?${params.toString()}`;
@@ -1193,6 +1200,7 @@ function manualRejectedUrl(theme) {
     name: fixtures.RESTAURANT.name,
     url: 'https://fictief-brasserie.invalid/menu',
     manualFail: 'schema',
+    aiState: 'off',
     theme,
   });
   return `${MANUAL_URL}?${params.toString()}`;
@@ -1307,6 +1315,7 @@ function manualNormalizedUrl(theme) {
     name: fixtures.RESTAURANT.name,
     url: 'https://fictief-brasserie.invalid/menu',
     manualNormalize: '1',
+    aiState: 'off',
     theme,
   });
   return `${MANUAL_URL}?${params.toString()}`;
@@ -1575,6 +1584,17 @@ async function aiReadScenario(cdp, theme) {
     block ? JSON.stringify({ steps: block.steps, expanded: block.manualExpanded }) : 'no block',
   );
   check('ai read: no horizontal overflow at 390 px', Boolean(block) && block.overflow <= 0, block ? `overflow=${block.overflow}` : 'no block');
+  const firstCard = await evalJs(cdp, `(() => {
+    window.scrollTo(0, 0);
+    const block = document.querySelector('.mai-ai');
+    const rect = block ? block.getBoundingClientRect() : null;
+    return rect ? { top: Math.round(rect.top), visible: rect.top < window.innerHeight && rect.bottom > 0 } : null;
+  })()`);
+  check(
+    'ai read: the AI card is visible as its own card in the first screen',
+    Boolean(firstCard && firstCard.visible),
+    JSON.stringify(firstCard),
+  );
   screenshotFiles.push(await screenshot(cdp, OUT_DIR, `ai-read-block-390-${theme}.png`));
 
   // De handmatige route opent pas als de mens die kiest.
@@ -1686,7 +1706,13 @@ async function aiReadScenario(cdp, theme) {
     offLayout.steps.one && offLayout.steps.two && offLayout.steps.three && offText.includes('Prompt maken') && offText.includes('Antwoord plakken'),
     JSON.stringify(offLayout.steps),
   );
-  await evalJs(cdp, `(() => { const el = document.getElementById('mai-s1'); if (el) el.scrollIntoView({ block: 'start' }); return true; })()`);
+  const offTop = await evalJs(cdp, `(() => {
+    window.scrollTo(0, 0);
+    const message = [...document.querySelectorAll('p')].find((el) => el.innerText.trim() === 'AI is niet ingesteld.');
+    const rect = message ? message.getBoundingClientRect() : null;
+    return rect ? { top: Math.round(rect.top), visible: rect.top >= 0 && rect.top < window.innerHeight } : null;
+  })()`);
+  check('ai read: the quiet message is visible without AI', Boolean(offTop && offTop.visible), JSON.stringify(offTop));
   screenshotFiles.push(await screenshot(cdp, OUT_DIR, `ai-read-off-390-${theme}.png`));
 }
 
