@@ -239,6 +239,20 @@ Visuele referentie: de mockup "Automatisch menu uitlezen met AI", versie 11, met
 2. **Variant 5** volgt daarna. In het nalopen-scherm wissel je tussen Lijst en Kaart. De kaartweergave toont de originele kaart met markeringen: groen voor overgenomen, oranje voor niet overgenomen en rood voor afwijkend. Bij een PDF is dat de echte pagina, bij een website de opgehaalde tekst. "Bekijk op kaart" opent die weergave op de juiste regel.
 3. Variant 2 vervalt. Variant 3 (wijzigingen bij opnieuw lezen) en variant 4 (tweede AI als controleur) zijn niet besloten.
 
+**Lead-acceptatie 2026-10-24: "Lees met AI" en de kaartvergelijking (variant 1 en 5), lokaal getest in de praktijk.**
+- Categorie: echte praktijk, lokaal. Gebruikt zijn de echte app (`next dev`, head 7001661), de lokale Supabase op loopback, de echte Anthropic-sleutel met `MENU_AI_FALLBACK_ENABLED=true`, en een sessie als INTERNAL. Bron: Restaurant Blossem.
+- Run 1 (head bab93bb): 52 gerechten, maar alle 52 "niet op te slaan" door een leeg allergenenobject. Dat is hersteld in BB1 (81b6650).
+- Run 2 en 3 (head 7001661): 52 gerechten, 40 en 45 "in orde", 12 en 7 "nalopen". De nalooppunten zijn terecht: stukprijzen, arrangementen en "p.p."-prijzen. De duur was 31-34 s en de kosten 1 eurocent per lezing; "AI deze maand" werkt mee.
+- Kaartweergave: 43 prijsregels, alle 43 overgenomen, 0 gemist.
+- Totale kosten van de praktijktest: 4 aanroepen, ongeveer 4 eurocent.
+- Bekende grenzen:
+  - de uitkomst verschilt per run (40 of 45 in orde);
+  - een website wordt getoond als opgehaalde tekst, inclusief cookieteksten;
+  - een PDF wordt getoond als tekst, omdat de bytes niet worden bewaard;
+  - een kaart die alleen uit een afbeelding bestaat, wordt niet gelezen;
+  - Bardot blijft open.
+- Niet getest: productie of Vercel. Daarvoor zijn een aparte sleutel, migratie 0020 en de merge nodig; dat zijn eigenaarsacties.
+
 **Oorspronkelijke status: NEEDS_APPROVAL.** Er wordt niets betaald, geen account aangemaakt en
 geen sleutel gebruikt totdat de Product Owner provider/model, budget en
 gegevensverwerking expliciet goedkeurt. Deze proef levert gemeten cijfers voor
