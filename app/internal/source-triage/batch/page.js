@@ -53,6 +53,14 @@ export default function BatchAnalysisPage() {
     const item = Number(params.get('item'))
     if (fromUrl) setSelectedId(fromUrl)
     if (Number.isInteger(item) && item > 0) setFocusItem(item)
+    // #62: "Restaurant of menu toevoegen" hands its URL(s) over to this same
+    // screen. Only the existing input is prefilled — starting still needs the
+    // same explicit click, with this page's own validation and daily limit.
+    const prefill = params.get('urls')
+    if (prefill) {
+      setText(prefill)
+      setShowInput(true)
+    }
   }, [router])
 
   const token = session && session.access_token

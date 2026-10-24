@@ -127,7 +127,7 @@ test('Wordmark: links carry an explicit accessible name that starts with the vis
   assert.match(src, /WORDMARK_HOME_LABEL = 'Onze Menukaarten, naar de startpagina'/);
   assert.match(src, /<Link href=\{href\} className="wordmark" aria-label=\{label\}>/);
   const nav = read('src/components/InternalNav.js');
-  assert.match(nav, /className="internal-nav-home"\s+aria-label="Onze Menukaarten, naar het interne overzicht"/);
+  assert.match(nav, /className="internal-nav-home"\s+aria-label="Onze Menukaarten, naar het meeste open werk of Dekking"/);
 });
 
 // ── Tokens ──────────────────────────────────────────────────────────────

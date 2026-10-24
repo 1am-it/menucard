@@ -5,15 +5,17 @@
 // never queries data directly; that always goes through
 // /api/internal/v1/... with the resulting session's access_token.
 //
-// **PLATFORM-11 (Phase 2): post-sign-in destination is now always
-// `/internal`**, never a specific module — every account, regardless of
-// role, lands on the role-aware home page, which resolves its own
-// `staff_roles` and shows only what they unlock. See that ticket's
-// "Design decision — login destination and role-based access."
+// #62 (contract criterion 3): after signing in the visitor goes to the
+// section with the most real open work, and to Dekking when there is none.
+// resolveLandingAfterSignIn applies the one tested rule
+// (src/lib/internalNav.js) through the same read-only endpoints the shell
+// uses. An account without a usable role, or a failed lookup, keeps the
+// existing /internal status page instead of an invented destination.
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
+import { resolveLandingAfterSignIn } from '@/src/lib/internalLandingClient'
 
 export default function InternalLoginPage() {
   const router = useRouter()
@@ -28,12 +30,14 @@ export default function InternalLoginPage() {
     setLoading(true)
     try {
       const supabase = getSupabaseBrowser()
-      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password })
       if (signInError) {
         setError(signInError.message)
         return
       }
-      router.push('/internal')
+      const href = await resolveLandingAfterSignIn(data && data.session && data.session.access_token)
+      // No visible module (or a failed lookup): the existing status page.
+      router.replace(href || '/internal')
     } catch (err) {
       setError(err.message)
     } finally {

@@ -1,11 +1,16 @@
 'use strict';
 
-// PLATFORM-11 — role-aware internal navigation (Phase 1/2: /internal home
-// + shared nav shell + decided login redirect). Unit tests for the pure
-// decision logic in src/lib/internalNav.js, plus structural safety-net
-// tests (fs.readFileSync + regex, this project's existing convention —
-// see src/lib/importInbox.test.js/src/lib/restaurantProfileDrafts.test.js)
-// for the new/modified files this ticket's Phase 1/2 touches.
+// #62 — the internal navigation model (labels, placements, real counts, the one
+// landing rule, roles) plus structural safety nets for the files this issue
+// touches. Unit tests for the pure logic in src/lib/internalNav.js first; the
+// structural tests use this project's existing fs.readFileSync + regex
+// convention (see src/lib/importInbox.test.js).
+//
+// Every expectation here comes from the approved contract and the Lead's review:
+// the top bar shows Dekking, Werkvoorraad (N) and "+ Restaurant of menu
+// toevoegen"; the menu shows the counted open work first, a separating line, then
+// Stadsoverzicht and Restaurantgegevens (concept); /internal, the login and the
+// logo use one landing rule; a missing count never becomes a number.
 
 const fs = require('fs');
 const path = require('path');
@@ -16,17 +21,26 @@ const {
   isEditorRole,
   isOwnerRole,
   hasAnyKnownRole,
+  COVERAGE_HREF,
+  ADD_ENTRY_HREF,
   INTERNAL_MODULES,
   resolveVisibleModules,
   groupModulesByPlacement,
+  resolveCount,
+  sortOpenWork,
+  resolveOpenWorkTotal,
+  resolveLandingHref,
 } = require('./internalNav');
 
 const REPO_ROOT = path.join(__dirname, '..', '..');
 const INTERNAL_HOME_PAGE_PATH = path.join(REPO_ROOT, 'app/internal/page.js');
 const LOGIN_PAGE_PATH = path.join(REPO_ROOT, 'app/internal/login/page.js');
 const ME_ROUTE_PATH = path.join(REPO_ROOT, 'app/api/internal/v1/me/route.js');
+const COUNT_ROUTE_PATH = path.join(REPO_ROOT, 'app/api/internal/v1/workqueue-counts/route.js');
 const NAV_COMPONENT_PATH = path.join(REPO_ROOT, 'src/components/InternalNav.js');
 const GLOBALS_CSS_PATH = path.join(REPO_ROOT, 'app/globals.css');
+const ADD_PAGE_PATH = path.join(REPO_ROOT, 'app/internal/toevoegen/page.js');
+const BATCH_PAGE_PATH = path.join(REPO_ROOT, 'app/internal/source-triage/batch/page.js');
 const COVERAGE_PAGE_PATH = path.join(REPO_ROOT, 'app/internal/coverage/page.js');
 const IMPORT_INBOX_PAGE_PATH = path.join(REPO_ROOT, 'app/internal/import-inbox/page.js');
 const PROFILE_DRAFTS_PAGE_PATH = path.join(REPO_ROOT, 'app/internal/profile-drafts/page.js');
@@ -40,13 +54,10 @@ test('isEditorRole: true only when the editor role is present', () => {
   assert.equal(isEditorRole([{ role: 'internal' }, { role: 'editor' }]), true);
 });
 
-test('isEditorRole: false for internal-only, owner-only, or no roles at all', () => {
+test('isEditorRole: false for internal-only, owner-only, or no roles at all, and never throws on malformed input', () => {
   assert.equal(isEditorRole([{ role: 'internal' }]), false);
   assert.equal(isEditorRole([{ role: 'owner', restaurant_id: '6' }]), false);
   assert.equal(isEditorRole([]), false);
-});
-
-test('isEditorRole: never throws on malformed input', () => {
   assert.equal(isEditorRole(null), false);
   assert.equal(isEditorRole(undefined), false);
   assert.equal(isEditorRole('not-an-array'), false);
@@ -60,6 +71,113 @@ test('isOwnerRole: true only when the owner role is present', () => {
   assert.equal(isOwnerRole(null), false);
 });
 
+// ─── The navigation model: labels, routes, placements, roles ───────────
+
+test('the top bar has exactly one primary item: "Dekking" (was Dekkingsoverzicht), on its unchanged route', () => {
+  const primary = INTERNAL_MODULES.filter((m) => m.placement === 'primary');
+  assert.deepEqual(primary.map((m) => m.id), ['coverage']);
+  assert.equal(primary[0].label, 'Dekking');
+  assert.equal(primary[0].href, '/internal/coverage');
+  assert.equal(COVERAGE_HREF, '/internal/coverage');
+});
+
+test('"Onboarding Restaurant" and the old "Beheer" tile page are no longer navigation items at all', () => {
+  const ids = INTERNAL_MODULES.map((m) => m.id);
+  assert.ok(!ids.includes('onboarding-restaurant'), 'the contract removes it as a top-bar item; it is reached through the add screen');
+  assert.ok(!ids.includes('manage'), 'the /internal tile page ceases to be a destination');
+  assert.ok(!INTERNAL_MODULES.some((m) => m.href === '/internal'), 'no nav item links to the tile page');
+});
+
+test('open work has the contract order and the contract labels, each with its real count key and unchanged route', () => {
+  const openWork = INTERNAL_MODULES.filter((m) => m.placement === 'open-work');
+  assert.deepEqual(
+    openWork.map((m) => [m.id, m.label, m.href, m.countKey]),
+    [
+      ['menu-concepts', 'Menuconcepten beoordelen', '/internal/menu-concepts', 'menu-concepts'],
+      ['source-triage', 'Bronnen beoordelen', '/internal/source-triage', 'source-triage'],
+      ['import-inbox', 'Nieuwe aanleveringen', '/internal/import-inbox', 'import-inbox'],
+      ['moderation', 'Beoordelen', '/internal/moderation', 'moderation'],
+    ],
+  );
+});
+
+test('below the separating line: Stadsoverzicht (was Bronwerkvoorraad) and Restaurantgegevens (concept) (was Profielconcepten), routes and ids unchanged, never counted', () => {
+  const secondary = INTERNAL_MODULES.filter((m) => m.placement === 'secondary');
+  assert.deepEqual(
+    secondary.map((m) => [m.id, m.label, m.href]),
+    [
+      ['source-workqueue', 'Stadsoverzicht', '/internal/source-workqueue'],
+      ['profile-drafts', 'Restaurantgegevens (concept)', '/internal/profile-drafts'],
+    ],
+  );
+  for (const module of secondary) assert.ok(!('countKey' in module), `${module.id} must never show a count`);
+});
+
+test('every module keeps an existing internal route, a non-empty label, a recognized role and a recognized placement', () => {
+  for (const m of INTERNAL_MODULES) {
+    assert.match(m.href, /^\/internal(\/|$)/);
+    assert.ok(m.label.length > 0);
+    assert.ok(['internal', 'editor'].includes(m.requiredRole));
+    assert.ok(['primary', 'open-work', 'secondary'].includes(m.placement), `${m.id} must have a recognized placement`);
+  }
+});
+
+test('every open-work entry carries a subtitle for the menu; a module without a recognized placement is never shown', () => {
+  for (const m of INTERNAL_MODULES.filter((module) => module.placement === 'open-work')) {
+    assert.ok(typeof m.subtitle === 'string' && m.subtitle.length > 0, `${m.id} must have a subtitle`);
+  }
+  const { primary, openWork, secondary } = groupModulesByPlacement([
+    { id: 'no-placement', href: '/internal/x', requiredRole: 'internal' },
+    { id: 'other', href: '/internal/y', requiredRole: 'internal', placement: 'somewhere' },
+  ]);
+  assert.deepEqual([primary, openWork, secondary], [[], [], []]);
+});
+
+test('resolveVisibleModules: an internal-only account sees Dekking, the three internal open-work sections and the two secondary ones — not Beoordelen', () => {
+  const ids = resolveVisibleModules([{ role: 'internal' }]).map((m) => m.id).sort();
+  assert.deepEqual(ids, ['coverage', 'import-inbox', 'menu-concepts', 'profile-drafts', 'source-triage', 'source-workqueue']);
+});
+
+test('resolveVisibleModules: an editor-only account sees exactly Beoordelen (moderation)', () => {
+  assert.deepEqual(resolveVisibleModules([{ role: 'editor' }]).map((m) => m.id), ['moderation']);
+});
+
+test('resolveVisibleModules: an owner-only account and a role-less account see zero modules — no invented destination', () => {
+  assert.deepEqual(resolveVisibleModules([{ role: 'owner', restaurant_id: '6' }]), []);
+  assert.deepEqual(resolveVisibleModules([]), []);
+  assert.deepEqual(resolveVisibleModules(null), []);
+});
+
+test('resolveVisibleModules: a multi-role (internal + editor) account sees the full union, not one role\'s subset', () => {
+  const ids = resolveVisibleModules([{ role: 'internal' }, { role: 'editor' }]).map((m) => m.id).sort();
+  assert.deepEqual(ids, ['coverage', 'import-inbox', 'menu-concepts', 'moderation', 'profile-drafts', 'source-triage', 'source-workqueue']);
+});
+
+test('onboarding-menu stays out of the shared nav for every role (route and deep links untouched)', () => {
+  for (const roles of [[{ role: 'internal' }], [{ role: 'editor' }], [{ role: 'internal' }, { role: 'editor' }]]) {
+    assert.ok(!resolveVisibleModules(roles).some((m) => m.id === 'onboarding-menu'));
+  }
+  assert.ok(!INTERNAL_MODULES.some((m) => m.id === 'onboarding-menu'));
+});
+
+// ─── groupModulesByPlacement ──────────────────────────────────────────
+
+test('groupModulesByPlacement: splits the role-filtered list into primary, open work and secondary, keeping contract order', () => {
+  const modules = resolveVisibleModules([{ role: 'internal' }, { role: 'editor' }]);
+  const { primary, openWork, secondary } = groupModulesByPlacement(modules);
+  assert.deepEqual(primary.map((m) => m.id), ['coverage']);
+  assert.deepEqual(openWork.map((m) => m.id), ['menu-concepts', 'source-triage', 'import-inbox', 'moderation']);
+  assert.deepEqual(secondary.map((m) => m.id), ['source-workqueue', 'profile-drafts']);
+});
+
+test('groupModulesByPlacement: never throws and returns empty groups for non-array input', () => {
+  assert.deepEqual(groupModulesByPlacement(null), { primary: [], openWork: [], secondary: [] });
+  assert.deepEqual(groupModulesByPlacement(undefined), { primary: [], openWork: [], secondary: [] });
+  assert.deepEqual(groupModulesByPlacement([]), { primary: [], openWork: [], secondary: [] });
+});
+
+
+
 test('hasAnyKnownRole: true for any of internal/editor/owner, false for zero rows or unrecognized values', () => {
   assert.equal(hasAnyKnownRole([{ role: 'internal' }]), true);
   assert.equal(hasAnyKnownRole([{ role: 'editor' }]), true);
@@ -67,365 +185,364 @@ test('hasAnyKnownRole: true for any of internal/editor/owner, false for zero row
   assert.equal(hasAnyKnownRole([]), false);
   assert.equal(hasAnyKnownRole(null), false);
   assert.equal(hasAnyKnownRole(undefined), false);
-  // Defensive case: the `staff_roles.role` check constraint should already
-  // prevent this, but the nav must still treat it as "no usable role,"
-  // never throw or silently unlock a module.
   assert.equal(hasAnyKnownRole([{ role: 'something-else' }]), false);
 });
+// --- Real counts: sorting, missing numbers, the bar total ---
 
-// ─── resolveVisibleModules — the route/role matrix, enforced in code ───
-
-test('resolveVisibleModules: an internal-only account sees exactly Dekkingsoverzicht, Onboarding Restaurant, Beheer, Nieuwe aanleveringen, Bronwerkvoorraad, Bronnen beoordelen, and Profielconcepten — not Beoordelen (editor-only)', () => {
-  const modules = resolveVisibleModules([{ role: 'internal' }]);
-  const ids = modules.map((m) => m.id);
-  assert.deepEqual(ids.sort(), ['coverage', 'import-inbox', 'manage', 'menu-concepts', 'onboarding-restaurant', 'profile-drafts', 'source-triage', 'source-workqueue']);
+test('resolveCount: only a non-negative integer is a number; everything else is not computable', () => {
+  assert.equal(resolveCount({ a: 0 }, 'a'), 0);
+  assert.equal(resolveCount({ a: 12 }, 'a'), 12);
+  assert.equal(resolveCount({ a: null }, 'a'), null);
+  assert.equal(resolveCount({ a: '5' }, 'a'), null);
+  assert.equal(resolveCount({ a: 1.5 }, 'a'), null);
+  assert.equal(resolveCount({ a: -1 }, 'a'), null);
+  assert.equal(resolveCount({}, 'a'), null);
+  assert.equal(resolveCount(null, 'a'), null);
+  assert.equal(resolveCount({ a: 1 }, ''), null);
 });
 
-test('resolveVisibleModules: an editor-only account sees exactly Beoordelen (moderation) — not any internal-only module', () => {
-  const modules = resolveVisibleModules([{ role: 'editor' }]);
-  assert.deepEqual(modules.map((m) => m.id), ['moderation']);
+test('sortOpenWork: descending by the real count, equal counts keep the contract order', () => {
+  const openWork = INTERNAL_MODULES.filter((m) => m.placement === 'open-work');
+  const rows = sortOpenWork(openWork, { 'menu-concepts': 1, 'source-triage': 9, 'import-inbox': 4, moderation: 9 });
+  assert.deepEqual(rows.map((row) => [row.module.id, row.count]), [
+    ['source-triage', 9],
+    ['moderation', 9],
+    ['import-inbox', 4],
+    ['menu-concepts', 1],
+  ]);
 });
 
-test('resolveVisibleModules: an owner-only account sees zero modules — no invented destination', () => {
-  assert.deepEqual(resolveVisibleModules([{ role: 'owner', restaurant_id: '6' }]), []);
+test('sortOpenWork: modules without a computable count go last, in contract order, without a number', () => {
+  const openWork = INTERNAL_MODULES.filter((m) => m.placement === 'open-work');
+  const rows = sortOpenWork(openWork, { 'source-triage': 3, 'menu-concepts': null });
+  assert.deepEqual(rows.map((row) => [row.module.id, row.count]), [
+    ['source-triage', 3],
+    ['menu-concepts', null],
+    ['import-inbox', null],
+    ['moderation', null],
+  ]);
+  const allUnknown = sortOpenWork(openWork, null);
+  assert.deepEqual(allUnknown.map((row) => row.module.id), openWork.map((m) => m.id));
+  assert.ok(allUnknown.every((row) => row.count === null));
 });
 
-test('resolveVisibleModules: an account with no roles at all sees zero modules', () => {
-  assert.deepEqual(resolveVisibleModules([]), []);
-  assert.deepEqual(resolveVisibleModules(null), []);
+test('sortOpenWork: never mutates the input list or the module objects', () => {
+  const openWork = INTERNAL_MODULES.filter((m) => m.placement === 'open-work');
+  const before = openWork.map((m) => m.id);
+  sortOpenWork(openWork, { 'menu-concepts': 99 });
+  assert.deepEqual(openWork.map((m) => m.id), before);
+  assert.ok(!('count' in openWork[0]));
 });
 
-test('resolveVisibleModules: a multi-role (internal + editor) account sees the full union, not just one role\'s subset', () => {
-  const modules = resolveVisibleModules([{ role: 'internal' }, { role: 'editor' }]);
-  const ids = modules.map((m) => m.id).sort();
-  assert.deepEqual(ids, ['coverage', 'import-inbox', 'manage', 'menu-concepts', 'moderation', 'onboarding-restaurant', 'profile-drafts', 'source-triage', 'source-workqueue']);
+test('resolveOpenWorkTotal: the bar total adds every visible number, a real 0 included', () => {
+  const openWork = INTERNAL_MODULES.filter((m) => m.placement === 'open-work');
+  const rows = sortOpenWork(openWork, { 'menu-concepts': 0, 'source-triage': 2, 'import-inbox': 3, moderation: 5 });
+  assert.equal(resolveOpenWorkTotal(rows), 10);
+  assert.equal(resolveOpenWorkTotal(sortOpenWork(openWork, { 'menu-concepts': 0, 'source-triage': 0, 'import-inbox': 0, moderation: 0 })), 0);
 });
 
-test('resolveVisibleModules: every entry links to an existing internal route with a non-empty label and a recognized required role', () => {
-  for (const m of INTERNAL_MODULES) {
-    assert.match(m.href, /^\/internal(\/|$)/);
-    assert.ok(m.label.length > 0);
-    assert.ok(['internal', 'editor'].includes(m.requiredRole));
-    assert.ok(['primary', 'workqueue'].includes(m.placement), `${m.id} must have a recognized placement`);
-  }
+test('resolveOpenWorkTotal: one missing number means no total at all, never an understated number', () => {
+  const openWork = INTERNAL_MODULES.filter((m) => m.placement === 'open-work');
+  const rows = sortOpenWork(openWork, { 'menu-concepts': 2, 'source-triage': 3, 'import-inbox': null, moderation: 5 });
+  assert.equal(resolveOpenWorkTotal(rows), null);
+  assert.equal(resolveOpenWorkTotal([]), null);
+  assert.equal(resolveOpenWorkTotal(null), null);
 });
 
-test('resolveVisibleModules: onboarding-menu is no longer a nav module at all — reachable only from within the Onboarding Restaurant page\'s own content, not the shared nav, for any role', () => {
-  const internalIds = resolveVisibleModules([{ role: 'internal' }]).map((m) => m.id);
-  const editorIds = resolveVisibleModules([{ role: 'editor' }]).map((m) => m.id);
-  assert.ok(!internalIds.includes('onboarding-menu'));
-  assert.ok(!editorIds.includes('onboarding-menu'));
-  assert.ok(!INTERNAL_MODULES.some((m) => m.id === 'onboarding-menu'));
+test('resolveLandingHref: the visible open-work section with the most real open work wins', () => {
+  const roles = [{ role: 'internal' }];
+  assert.equal(resolveLandingHref(roles, { 'menu-concepts': 2, 'source-triage': 8, 'import-inbox': 1 }), '/internal/source-triage');
+  assert.equal(resolveLandingHref(roles, { 'menu-concepts': 9, 'source-triage': 8, 'import-inbox': 1 }), '/internal/menu-concepts');
+  assert.equal(resolveLandingHref(roles, { 'menu-concepts': 1, 'source-triage': 2, 'import-inbox': 7 }), '/internal/import-inbox');
 });
 
-// ─── groupModulesByPlacement — the primary/Werkvoorraad split ──────────
-
-test('groupModulesByPlacement: splits Dekkingsoverzicht and Onboarding Restaurant into primary, everything else into workqueue', () => {
-  const modules = resolveVisibleModules([{ role: 'internal' }, { role: 'editor' }]);
-  const { primary, workqueue } = groupModulesByPlacement(modules);
-  assert.deepEqual(primary.map((m) => m.id), ['coverage', 'onboarding-restaurant']);
-  assert.deepEqual(workqueue.map((m) => m.id), ['manage', 'import-inbox', 'source-workqueue', 'source-triage', 'menu-concepts', 'profile-drafts', 'moderation']);
+test('resolveLandingHref: a tie follows the contract order (Menuconcepten, Bronnen, Nieuwe aanleveringen, Beoordelen)', () => {
+  const both = [{ role: 'internal' }, { role: 'editor' }];
+  assert.equal(resolveLandingHref(both, { 'menu-concepts': 5, 'source-triage': 5, 'import-inbox': 5, moderation: 5 }), '/internal/menu-concepts');
+  assert.equal(resolveLandingHref(both, { 'menu-concepts': 0, 'source-triage': 5, 'import-inbox': 5, moderation: 5 }), '/internal/source-triage');
+  assert.equal(resolveLandingHref(both, { 'menu-concepts': 0, 'source-triage': 0, 'import-inbox': 5, moderation: 5 }), '/internal/import-inbox');
+  assert.equal(resolveLandingHref(both, { 'menu-concepts': 0, 'source-triage': 0, 'import-inbox': 0, moderation: 4 }), '/internal/moderation');
 });
 
-test('groupModulesByPlacement: an internal-only account never sees Beoordelen in the workqueue group — role boundaries hold through the grouping step too', () => {
-  const modules = resolveVisibleModules([{ role: 'internal' }]);
-  const { workqueue } = groupModulesByPlacement(modules);
-  assert.ok(!workqueue.some((m) => m.id === 'moderation'), 'an internal-only account must never see the editor-only Beoordelen entry');
-});
-
-test('groupModulesByPlacement: both groups are empty for a role with no visible modules — never a default/fallback placement', () => {
-  assert.deepEqual(groupModulesByPlacement([]), { primary: [], workqueue: [] });
-});
-
-test('groupModulesByPlacement: never throws and returns empty groups for non-array input', () => {
-  assert.deepEqual(groupModulesByPlacement(null), { primary: [], workqueue: [] });
-  assert.deepEqual(groupModulesByPlacement(undefined), { primary: [], workqueue: [] });
-});
-
-test('groupModulesByPlacement: every workqueue module carries a non-empty subtitle for the Werkvoorraad panel', () => {
-  const { workqueue } = groupModulesByPlacement(INTERNAL_MODULES);
-  for (const m of workqueue) {
-    assert.ok(typeof m.subtitle === 'string' && m.subtitle.length > 0, `${m.id} must have a subtitle`);
-  }
-});
-
-// ─── Structural safety net: /internal home page ────────────────────────
-
-test('structural safety net: /internal exists and gates on a signed-in session only, matching every other internal page\'s pattern', () => {
-  const source = fs.readFileSync(INTERNAL_HOME_PAGE_PATH, 'utf8');
-  assert.match(source, /getSupabaseBrowser\(\)\.auth\.getSession\(\)/, 'must use the same session-check pattern as every other internal page');
-  assert.match(source, /router\.replace\(['"]\/internal\/login['"]\)/, 'an unauthenticated visitor must be redirected to /internal/login');
-  assert.doesNotMatch(source, /isInternalOnly|isEditorRole/, 'the page itself must not gate on a specific role — /internal is session-gated only, per PLATFORM-11\'s decided matrix row');
-});
-
-test('structural safety net: /internal resolves roles via the shared, read-only /api/internal/v1/me endpoint — no direct Supabase staff_roles query from the browser', () => {
-  const source = fs.readFileSync(INTERNAL_HOME_PAGE_PATH, 'utf8');
-  assert.match(source, /\/api\/internal\/v1\/me/);
-  assert.doesNotMatch(source, /\.from\(['"]/, 'must never query a Supabase table directly from the browser');
-});
-
-test('structural safety net: /internal passes its own already-resolved roles into InternalNav — never a second, independent fetch racing the page\'s own one', () => {
-  const source = fs.readFileSync(INTERNAL_HOME_PAGE_PATH, 'utf8');
-  assert.match(
-    source,
-    /<InternalNav\s+accessToken=\{session\.access_token\}\s+roles=\{roles\}\s*\/>/,
-    'expected <InternalNav accessToken={session.access_token} roles={roles} /> — passing the page\'s own resolved roles down'
+test('resolveLandingHref: zero open work lands on Dekking', () => {
+  assert.equal(
+    resolveLandingHref([{ role: 'internal' }], { 'menu-concepts': 0, 'source-triage': 0, 'import-inbox': 0 }),
+    COVERAGE_HREF,
   );
 });
 
-test('structural safety net: /internal shows an explicit "no internal access" status with sign out as its only action when no usable role is present', () => {
-  const source = fs.readFileSync(INTERNAL_HOME_PAGE_PATH, 'utf8');
-  assert.match(source, /hasAnyKnownRole/, 'must use the shared, tested role classifier — never a separately re-implemented check');
-  assert.match(source, /no internal access/i);
-  assert.match(source, /signOut/);
+test('resolveLandingHref: a missing count never invents a winner, it falls back to Dekking', () => {
+  assert.equal(resolveLandingHref([{ role: 'internal' }], { 'menu-concepts': 5 }), COVERAGE_HREF);
+  assert.equal(resolveLandingHref([{ role: 'internal' }], null), COVERAGE_HREF);
+  assert.equal(resolveLandingHref([{ role: 'internal' }], undefined), COVERAGE_HREF);
 });
 
-test('structural safety net: /internal renders InternalNav only when the no-access status is not shown, so a role-less account never sees the nav\'s own "Internal" link or sign out alongside the status box\'s one action', () => {
-  const source = fs.readFileSync(INTERNAL_HOME_PAGE_PATH, 'utf8');
-  assert.match(
-    source,
-    /\{!showNoAccessStatus && <InternalNav\s+accessToken=\{session\.access_token\}\s+roles=\{roles\}\s*\/>\}/,
-    'InternalNav must be conditionally gated on !showNoAccessStatus, not rendered unconditionally'
-  );
-  assert.match(source, /showNoAccessStatus = noAccess && !error/);
+test('resolveLandingHref: roles decide which sections may win, so an internal account never lands on the editor-only queue', () => {
+  const counts = { 'menu-concepts': 0, 'source-triage': 0, 'import-inbox': 0, moderation: 99 };
+  assert.equal(resolveLandingHref([{ role: 'internal' }], counts), COVERAGE_HREF);
+  assert.equal(resolveLandingHref([{ role: 'editor' }], counts), '/internal/moderation');
+  assert.equal(resolveLandingHref([{ role: 'editor' }], { moderation: 0 }), COVERAGE_HREF);
 });
 
-test('structural safety net: /internal never invents an owner destination — the owner section is worded as not-yet-available, not a link', () => {
-  const source = fs.readFileSync(INTERNAL_HOME_PAGE_PATH, 'utf8');
-  assert.match(source, /isOwnerRole/);
-  const ownerBlockMatch = source.match(/\{showOwnerSection && \([\s\S]*?\n {10}\)\}/);
-  assert.ok(ownerBlockMatch, 'expected to find the conditionally-rendered owner section block');
-  assert.doesNotMatch(ownerBlockMatch[0], /<a\s/, 'the owner section must never render as a clickable link to an invented page');
-  assert.match(ownerBlockMatch[0], /not.*yet|nothing.*yet/i, 'must plainly say there is nothing to open yet, never imply a real destination');
+test('resolveLandingHref: an account with no visible module gets null, so the caller keeps its existing status', () => {
+  assert.equal(resolveLandingHref([], {}), null);
+  assert.equal(resolveLandingHref([{ role: 'owner', restaurant_id: '9001' }], { 'menu-concepts': 3 }), null);
+  assert.equal(resolveLandingHref(null, { 'menu-concepts': 3 }), null);
 });
 
-// ─── Structural safety net: decided login redirect ─────────────────────
-
-test('structural safety net: /internal/login redirects every successful sign-in to /internal — never hardcoded to /internal/moderation', () => {
-  const source = fs.readFileSync(LOGIN_PAGE_PATH, 'utf8');
-  assert.match(source, /router\.push\(['"]\/internal['"]\)/, 'must redirect to /internal, per PLATFORM-11\'s decided design (Design decision #1)');
-  assert.doesNotMatch(source, /router\.push\(['"]\/internal\/moderation['"]\)/, 'the old hardcoded, role-blind redirect must be fully gone');
+test('the add entry route is a real, known path and never a second Beheer page', () => {
+  assert.equal(ADD_ENTRY_HREF, '/internal/toevoegen');
+  assert.match(ADD_ENTRY_HREF, /^\/internal\/[a-z-]+$/);
 });
 
-// ─── Structural safety net: /api/internal/v1/me ────────────────────────
+// --- Structural safety net: the nav component ---
 
-test('structural safety net: GET /api/internal/v1/me reuses authenticateInternalRequest exactly — no second, parallel way to resolve staff_roles', () => {
-  const source = fs.readFileSync(ME_ROUTE_PATH, 'utf8');
-  assert.match(source, /import \{ authenticateInternalRequest \} from ['"]@\/src\/lib\/internalAuth['"]/);
-  assert.match(source, /authenticateInternalRequest\(request\)/);
-  assert.doesNotMatch(source, /\.from\(['"]staff_roles['"]\)/, 'must never issue its own staff_roles query — that stays exclusively inside authenticateInternalRequest');
-});
-
-test('structural safety net: GET /api/internal/v1/me turns a zero-role account\'s 403 into a normal 200 with an empty roles array — a valid session with no staff_roles row is not an API error for navigation purposes', () => {
-  const source = fs.readFileSync(ME_ROUTE_PATH, 'utf8');
-  assert.match(source, /auth\.status === 403/);
-  assert.match(source, /roles:\s*\[\]/);
-});
-
-test('structural safety net: GET /api/internal/v1/me never writes and never mutates any table', () => {
-  const source = fs.readFileSync(ME_ROUTE_PATH, 'utf8');
-  assert.doesNotMatch(source, /\.insert\(|\.update\(|\.delete\(|\.upsert\(/);
-  assert.doesNotMatch(source, /export async function (POST|PUT|PATCH|DELETE)/, 'must expose GET only');
-});
-
-// ─── Structural safety net: shared nav component ───────────────────────
-
-test('structural safety net: InternalNav is keyboard/screen-reader reachable and reuses resolveVisibleModules — never a separately re-implemented module list', () => {
+test('structural safety net: InternalNav is keyboard and screen-reader reachable and reuses the shared model', () => {
   const source = fs.readFileSync(NAV_COMPONENT_PATH, 'utf8');
-  assert.match(source, /aria-label=["'][^"']*[Nn]avigation/);
-  assert.match(source, /resolveVisibleModules/);
+  assert.match(source, /aria-label="Interne navigatie"/);
+  for (const fn of ['resolveVisibleModules', 'groupModulesByPlacement', 'sortOpenWork', 'resolveOpenWorkTotal']) {
+    assert.match(source, new RegExp(fn));
+  }
   assert.doesNotMatch(source, /\.from\(['"]/, 'must never query Supabase data directly from the browser');
 });
 
-test('structural safety net: InternalNav marks the active route with aria-current, and offers sign out', () => {
+test('structural safety net: Werkvoorraad is a real button with aria-expanded and aria-controls, never a hover-only or CSS-only menu', () => {
   const source = fs.readFileSync(NAV_COMPONENT_PATH, 'utf8');
-  assert.match(source, /aria-current/);
-  assert.match(source, /signOut|sign out/i);
+  assert.match(source, /<button[\s\S]{0,400}className="internal-nav-workqueue-trigger"/);
+  assert.match(source, /aria-expanded=\{open\}/);
+  assert.match(source, /aria-controls=\{PANEL_ID\}/);
+  assert.match(source, /const PANEL_ID = 'internal-nav-workqueue-panel'/);
+  assert.match(source, /\{open && \(/);
+  assert.doesNotMatch(source, /<details|<summary/);
+  const css = fs.readFileSync(GLOBALS_CSS_PATH, 'utf8');
+  assert.doesNotMatch(css, /\.internal-nav-workqueue[^{]*:hover[^{]*\{[^}]*(display|opacity|visibility)/);
 });
 
-test('structural safety net: InternalNav accepts an optional roles prop and skips its own fetch when the caller already resolved roles', () => {
+test('structural safety net: Escape closes the panel and returns focus to the trigger; a click outside closes it', () => {
   const source = fs.readFileSync(NAV_COMPONENT_PATH, 'utf8');
-  assert.match(source, /roles:\s*rolesProp/, 'must destructure an optional roles prop');
-  assert.match(source, /if \(rolesProp !== undefined\) return/, 'must skip its own fetch when the caller already provided roles');
+  assert.match(source, /if \(event\.key !== 'Escape'\) return/);
+  assert.match(source, /setOpen\(false\)/);
+  assert.match(source, /triggerRef\.current\.focus\(\)/);
+  assert.match(source, /wrapperRef\.current\.contains\(event\.target\)/);
 });
 
-// ─── Structural safety net: the Werkvoorraad disclosure (BE-20) ────────
-
-test('structural safety net: Werkvoorraad reuses groupModulesByPlacement and renders both the top-level primary links and the grouped items — never a second, separately re-implemented module list', () => {
+test('structural safety net: a route change closes the panel, so a navigation from inside it never leaves it stuck open', () => {
   const source = fs.readFileSync(NAV_COMPONENT_PATH, 'utf8');
-  assert.match(source, /groupModulesByPlacement/);
-  assert.match(source, /primary\.map/);
-  assert.match(source, /workqueue\.map/);
-});
-
-test('structural safety net: Werkvoorraad is a native <details>/<summary> disclosure — real keyboard/click toggling for free, never a hover-only or purely CSS-driven menu', () => {
-  const source = fs.readFileSync(NAV_COMPONENT_PATH, 'utf8');
-  assert.match(source, /<details[^>]*className="internal-nav-workqueue"/);
-  assert.match(source, /<summary[^>]*className="internal-nav-workqueue-trigger"/);
-  assert.doesNotMatch(source, /:hover\s*\{[^}]*display/, 'must never rely on a CSS :hover rule to open the menu');
-  const cssSource = fs.readFileSync(GLOBALS_CSS_PATH, 'utf8');
-  const workqueueCss = cssSource.slice(cssSource.indexOf('.internal-nav-workqueue'));
-  assert.doesNotMatch(workqueueCss.slice(0, 3000), /:hover[^{]*\{[^}]*(display|opacity|visibility)/, 'the Werkvoorraad panel must never open on hover alone');
-});
-
-test('structural safety net: Werkvoorraad closes on Escape and restores focus to its own trigger — never leaves focus stranded on a hidden panel', () => {
-  const source = fs.readFileSync(NAV_COMPONENT_PATH, 'utf8');
-  const fnStart = source.indexOf('function handleKeyDown')
-  const fnBody = source.slice(fnStart, source.indexOf('\n    }', fnStart))
-  assert.match(fnBody, /event\.key !== 'Escape'/)
-  assert.match(fnBody, /details\.open = false/)
-  assert.match(fnBody, /summary\.focus\(\)/)
-});
-
-test('structural safety net: Werkvoorraad closes on an outside click — checks containment before closing, never closes on a click inside its own panel', () => {
-  const source = fs.readFileSync(NAV_COMPONENT_PATH, 'utf8');
-  const fnStart = source.indexOf('function handleClickOutside')
-  const fnBody = source.slice(fnStart, source.indexOf('\n    }', fnStart))
-  assert.match(fnBody, /!details\.contains\(event\.target\)/)
-});
-
-test('structural safety net: Werkvoorraad closes on every route change, so a client-side navigation from inside the panel never leaves it stuck open', () => {
-  const source = fs.readFileSync(NAV_COMPONENT_PATH, 'utf8');
-  assert.match(source, /workqueueRef\.current\.open = false/);
   assert.match(source, /\}, \[pathname\]\)/);
 });
 
-test('structural safety net: every workqueue item marks the active route with aria-current, matching the existing primary-link pattern exactly', () => {
+test('structural safety net: the menu items are real links with aria-current, without a fake menu role fighting normal link behaviour', () => {
   const source = fs.readFileSync(NAV_COMPONENT_PATH, 'utf8');
-  // BE-25: a subpage (Bronnen beoordelen / Batchanalyse) keeps its parent
-  // item current; primary links and workqueue items share one helper.
-  assert.match(source, /className="internal-nav-workqueue-item"[\s\S]{0,120}aria-current=\{isCurrent\(pathname, m\.href\) \? 'page' : undefined\}/);
-  assert.match(source, /className="internal-nav-link"[\s\S]{0,60}aria-current=\{isCurrent\(pathname, m\.href\) \? 'page' : undefined\}/);
-  assert.match(source, /return pathname === href \|\| \(typeof pathname === 'string' && pathname\.startsWith\(`\$\{href\}\/`\)\)/);
+  assert.match(source, /className="internal-nav-workqueue-item"[\s\S]{0,240}aria-current=\{isCurrent\(pathname, (module|m)\.href\) \? 'page' : undefined\}/);
+  assert.match(source, /className="internal-nav-link"[\s\S]{0,140}aria-current=\{isCurrent\(pathname, m\.href\) \? 'page' : undefined\}/);
+  assert.match(source, /className="internal-nav-add"[\s\S]{0,240}aria-current=\{isCurrent\(pathname, '\/internal\/toevoegen'\) \? 'page' : undefined\}/);
+  assert.doesNotMatch(source, /role="menu"/);
 });
 
-test('structural safety net: no photo, illustration, or new image asset — the wordmark and workqueue icons are inline SVG only', () => {
+test('structural safety net: no count means no number, and the total uses the shared rule', () => {
+  const source = fs.readFileSync(NAV_COMPONENT_PATH, 'utf8');
+  assert.match(source, /\{total !== null && <span className="internal-nav-workqueue-total">\(\{total\}\)<\/span>\}/);
+  assert.match(source, /\{count !== null && \(/);
+  assert.match(source, /className="internal-nav-workqueue-item-count"/);
+});
+
+test('structural safety net: the counts are one request per shell load to the dedicated read route, never a per-open request and never a write', () => {
+  const source = fs.readFileSync(NAV_COMPONENT_PATH, 'utf8');
+  assert.match(source, /const COUNT_API = '\/api\/internal\/v1\/workqueue-counts'/);
+  assert.equal((source.match(/fetch\(COUNT_API/g) || []).length, 1);
+  assert.match(source, /\}, \[accessToken, openWorkCount\]\)/);
+  assert.doesNotMatch(source, /method: 'POST'|method: 'PUT'|method: 'PATCH'|method: 'DELETE'/);
+});
+
+test('structural safety net: the bar carries Dekking, Werkvoorraad, the add entry, Licht/Donker and Sign out; the menu adds them at the bottom', () => {
+  const source = fs.readFileSync(NAV_COMPONENT_PATH, 'utf8');
+  assert.match(source, /<span className="internal-nav-workqueue-title-full">Werkvoorraad<\/span>/);
+  assert.match(source, /<span className="internal-nav-workqueue-title-short">Werk<\/span>/);
+  assert.match(source, /internal-nav-add-text">Restaurant of menu toevoegen/);
+  assert.match(source, /aria-label="Restaurant of menu toevoegen"/);
+  assert.match(source, /className="internal-nav-actions"[\s\S]{0,220}<ThemeToggle \/>/);
+  assert.match(source, /className="internal-nav-workqueue-actions"[\s\S]{0,220}<ThemeToggle \/>/);
+  assert.equal((source.match(/<ThemeToggle \/>/g) || []).length, 2, 'one bar copy and one menu copy, never a second theme implementation');
+  assert.equal((source.match(/onClick=\{signOut\}/g) || []).length, 2);
+  assert.match(source, /\{narrow && \(/, 'the menu copy exists only on a telephone');
+  assert.match(source, /\{!narrow && \(/, 'the bar copy exists only on a wide screen');
+});
+
+test('structural safety net (criterion 5): the trigger, every menu row, the add entry and Sign out have a real 44 px touch target', () => {
+  const css = fs.readFileSync(GLOBALS_CSS_PATH, 'utf8');
+  const rule = (selector) => {
+    const start = css.indexOf(selector + ' {');
+    assert.ok(start >= 0, 'missing CSS rule ' + selector);
+    const end = css.indexOf('}', start);
+    return css.slice(start, end + 1);
+  };
+  assert.match(rule('.internal-nav-workqueue-trigger'), /min-height: 44px/);
+  assert.match(rule('.internal-nav-workqueue-item'), /min-height: 44px/);
+  assert.match(rule('.internal-nav-add'), /min-height: 44px/);
+  assert.match(rule('.internal-nav-signout'), /min-height: 44px/);
+});
+
+test('structural safety net (criterion 5): at 640 px and below the bar keeps Dekking, Werk (N) and a + button, and the menu gets Licht/Donker + Sign out at the bottom', () => {
+  const css = fs.readFileSync(GLOBALS_CSS_PATH, 'utf8');
+  const start = css.lastIndexOf('@media (max-width: 640px)');
+  assert.ok(start >= 0, 'expected the 640 px telephone breakpoint (covers 390 and 320)');
+  const block = css.slice(start, css.indexOf('\n}', start) + 2);
+  assert.match(block, /\.internal-nav-workqueue-title-full \{ display: none; \}/);
+  assert.match(block, /\.internal-nav-workqueue-title-short \{ display: inline; \}/);
+  assert.match(block, /\.internal-nav-add-text \{ display: none; \}/);
+  assert.match(block, /\.internal-nav-actions \{ display: none; \}/);
+  assert.match(block, /\.internal-nav-workqueue-actions \{ display: flex; \}/);
+  assert.match(block, /\.internal-nav-workqueue-panel \{[\s\S]*left: 10px;[\s\S]*right: 10px;/);
+  assert.match(css, /\.internal-nav-workqueue-actions \{\r?\n  display: none;/);
+});
+
+test('structural safety net: every new interactive element gets a real, visible keyboard-focus style', () => {
+  const css = fs.readFileSync(GLOBALS_CSS_PATH, 'utf8');
+  for (const selector of [
+    'internal-nav-workqueue-trigger:focus-visible',
+    'internal-nav-workqueue-item:focus-visible',
+    'internal-nav-add:focus-visible',
+    'internal-nav-signout:focus-visible',
+  ]) {
+    assert.match(css, new RegExp(selector + '[^{]*\\{[^}]*outline: 2px solid var\\(--border-focus\\)'));
+  }
+});
+
+test('structural safety net: no photo, illustration or new image asset, only inline SVG', () => {
   const source = fs.readFileSync(NAV_COMPONENT_PATH, 'utf8');
   assert.doesNotMatch(source, /<img\b|next\/image|\.jpg|\.png|\.webp/i);
   assert.match(source, /<svg/);
 });
 
-test('structural safety net: every new interactive element gets a real, visible keyboard-focus style, not only a browser default', () => {
-  const cssSource = fs.readFileSync(GLOBALS_CSS_PATH, 'utf8');
-  assert.match(cssSource, /internal-nav-workqueue-trigger:focus-visible/);
-  assert.match(cssSource, /internal-nav-workqueue-item:focus-visible/);
-});
-
-test('structural safety net: the Werkvoorraad panel never causes page-level horizontal overflow on a narrow viewport — constrained width plus a static, full-width fallback below 420px', () => {
-  const cssSource = fs.readFileSync(GLOBALS_CSS_PATH, 'utf8');
-  assert.match(cssSource, /max-width:\s*min\(320px,\s*calc\(100vw - 32px\)\)/);
-  const narrowBlocks = cssSource.match(/@media \(max-width: 420px\) \{[\s\S]*?\n\}/g) || [];
-  const workqueueNarrowBlock = narrowBlocks.find((block) => block.includes('.internal-nav-workqueue-panel'));
-  assert.ok(workqueueNarrowBlock, 'expected a max-width: 420px media query block covering .internal-nav-workqueue-panel');
-  assert.match(workqueueNarrowBlock, /\.internal-nav-workqueue-panel\s*\{[^}]*position:\s*static/);
-});
-
-// ─── Structural safety net: existing pages adopt the shared nav shell,
-// their own content/logic otherwise untouched ───────────────────────────
-
-test('structural safety net: every existing internal page adopts the shared InternalNav shell without losing its own preserved content markers', () => {
-  const cases = [
-    // PLATFORM-12 Phase 1 (2026-10-04): the page title is now the calmer
-    // "Coverage Dashboard" (city moved into the subtitle) — still the same
-    // page, still the same BreakdownTable component.
-    { file: COVERAGE_PAGE_PATH, mustStillContain: [/<h1[^>]*>Coverage Dashboard<\/h1>/, /\{data\.city\}/, /BreakdownTable/] },
-    { file: IMPORT_INBOX_PAGE_PATH, mustStillContain: [/di-topbar/, /Dashboard imported Restaurant Data/] },
-    { file: PROFILE_DRAFTS_PAGE_PATH, mustStillContain: [/di-topbar/, /Restaurant Profile Drafts/] },
-    { file: MODERATION_PAGE_PATH, mustStillContain: [/Moderation queue/, /Owner claims/] },
-  ];
-  for (const { file, mustStillContain } of cases) {
-    const source = fs.readFileSync(file, 'utf8');
-    assert.match(source, /import InternalNav from ['"]@\/src\/components\/InternalNav['"]/, `${file} must import the shared nav component`);
-    assert.match(source, /<InternalNav\s+accessToken=\{session\.access_token\}\s*\/>/, `${file} must render <InternalNav accessToken={session.access_token} />`);
-    for (const pattern of mustStillContain) {
-      assert.match(source, pattern, `${file} must still contain its own preserved content: ${pattern}`);
-    }
-  }
-});
-
-test('structural safety net: Moderation, Import Inbox, and Restaurant Profile Drafts no longer carry their own separate sign-out action — InternalNav\'s is the one and only sign-out control on each page', () => {
-  for (const file of [MODERATION_PAGE_PATH, IMPORT_INBOX_PAGE_PATH, PROFILE_DRAFTS_PAGE_PATH]) {
-    const source = fs.readFileSync(file, 'utf8');
-    assert.doesNotMatch(source, /function signOut/, `${file} must not define its own local signOut function`);
-    assert.doesNotMatch(source, /di-signout/, `${file} must not render its own separate "Sign out" button`);
-    assert.match(source, /import InternalNav from ['"]@\/src\/components\/InternalNav['"]/, `${file} must still render InternalNav, which is now the sole sign-out control`);
-  }
-});
-
-test('structural safety net: adopting the nav shell changes no existing route\'s own API calls, data, or actions', () => {
-  // The four pages keep calling exactly the same data endpoints they
-  // always did — the nav shell is additive chrome, not a rewrite.
-  assert.match(fs.readFileSync(COVERAGE_PAGE_PATH, 'utf8'), /\/api\/internal\/v1\/coverage/);
-  assert.match(fs.readFileSync(IMPORT_INBOX_PAGE_PATH, 'utf8'), /\/api\/internal\/v1\/import-inbox\/candidates/);
-  assert.match(fs.readFileSync(PROFILE_DRAFTS_PAGE_PATH, 'utf8'), /\/api\/internal\/v1\/profile-drafts/);
-  const moderationSource = fs.readFileSync(MODERATION_PAGE_PATH, 'utf8');
-  assert.match(moderationSource, /\/api\/internal\/v1\/moderation\/pending/);
-  assert.match(moderationSource, /\/api\/internal\/v1\/claims\/pending/);
-});
-
-test('structural safety net: app/internal/layout.js keeps its existing noindex metadata unchanged — PLATFORM-11 mounts the nav per-page, not via the layout', () => {
-  const source = fs.readFileSync(LAYOUT_PATH, 'utf8');
-  assert.match(source, /robots:\s*\{\s*index:\s*false,\s*follow:\s*false\s*\}/);
-});
-
-// ─── Structural safety net: the shared theme toggle in the internal shell ──
-
-const ROOT_LAYOUT_PATH = path.join(REPO_ROOT, 'app/layout.js');
-const THEME_TOGGLE_PATH = path.join(REPO_ROOT, 'src/components/ThemeToggle.js');
-
-test('structural safety net: InternalNav renders the one shared ThemeToggle — no internal copy and no internal theme logic', () => {
+test('structural safety net: InternalNav renders the one shared ThemeToggle and keeps its own theme logic out', () => {
   const source = fs.readFileSync(NAV_COMPONENT_PATH, 'utf8');
   assert.match(source, /import ThemeToggle from '@\/src\/components\/ThemeToggle'/);
-  assert.match(source, /<div className="internal-nav-theme">\s*<ThemeToggle \/>\s*<\/div>/);
-  // The nav itself never touches the theme: no data-theme, storage key or media query.
   const code = source.replace(/^\s*\/\/.*$/gm, '');
   assert.doesNotMatch(code, /data-theme|bredaeats_theme|prefers-color-scheme|localStorage/);
-});
-
-test('structural safety net: the theme toggle sits right before Sign out and keeps Sign out on the right', () => {
-  const source = fs.readFileSync(NAV_COMPONENT_PATH, 'utf8');
-  assert.ok(source.indexOf('<ThemeToggle />') < source.indexOf('onClick={signOut}'), 'toggle before Sign out');
   const css = fs.readFileSync(GLOBALS_CSS_PATH, 'utf8');
-  assert.match(css, /\.internal-nav-theme \{ margin-left: auto; display: flex; \}/);
-  assert.match(css, /\.internal-nav-theme \+ \.internal-nav-signout \{ margin-left: 0; \}/);
-  assert.match(css, /\.internal-nav-theme \.theme-btn:focus-visible \{ outline: 2px solid var\(--border-focus\)/);
-  // Contrast of the inactive option inside the internal nav (measured below 4.5:1 with --text-muted).
-  assert.match(css, /\.internal-nav-theme \.theme-btn \{ color: var\(--text-secondary\); \}/);
-  // Active option uses the soft accent treatment (.theme-btn.active), so its text uses --accent.
-  assert.match(css, /\.internal-nav-theme \.theme-btn\.active \{ color: var\(--accent\); \}/);
+  assert.match(css, /\.internal-nav-actions \.theme-btn,\r?\n\.internal-nav-workqueue-actions \.theme-btn \{ color: var\(--text-secondary\); \}/);
+  assert.match(css, /\.internal-nav-actions \.theme-btn\.active,\r?\n\.internal-nav-workqueue-actions \.theme-btn\.active \{ color: var\(--accent\); \}/);
 });
 
-test('structural safety net: the theme contract stays as decided — explicit Licht/Donker choice, dark when nothing is stored, no OS-preference following', () => {
-  const layout = fs.readFileSync(ROOT_LAYOUT_PATH, 'utf8');
-  // No stored choice resolves to dark (decision 006); only the one-time
-  // migration of a legacy stored 'system' value reads the OS preference (BE-09).
+test('structural safety net: the theme contract itself stays as decided (explicit Licht/Donker, dark when nothing is stored)', () => {
+  const layout = fs.readFileSync(path.join(REPO_ROOT, 'app/layout.js'), 'utf8');
   assert.match(layout, /else\{document\.documentElement\.setAttribute\('data-theme','dark'\);localStorage\.setItem\('bredaeats_theme','dark'\);\}/);
-  assert.equal((layout.match(/prefers-color-scheme/g) || []).length, 1, 'only the legacy "system" migration reads the OS preference');
-  assert.match(layout, /else if\(t==='system'\)\{var r=\(window\.matchMedia&&window\.matchMedia\('\(prefers-color-scheme: light\)'\)\.matches\)/);
-  const toggle = fs.readFileSync(THEME_TOGGLE_PATH, 'utf8');
+  assert.equal((layout.match(/prefers-color-scheme/g) || []).length, 1);
+  const toggle = fs.readFileSync(path.join(REPO_ROOT, 'src/components/ThemeToggle.js'), 'utf8');
   assert.match(toggle, /\{ value: 'light', label: 'Licht' \}/);
   assert.match(toggle, /\{ value: 'dark', label: 'Donker' \}/);
   assert.doesNotMatch(toggle, /value: 'system'/);
 });
 
-// ─── BE-24 Brontriage ──────────────────────────────────────────────────
+// --- Structural safety net: /internal redirects by the one rule ---
 
-test('BE-24/BE-25: Bronnen beoordelen (formerly shown as Brontriage) is one internal-only Werkvoorraad entry right after Bronwerkvoorraad, without a count', () => {
-  const entry = INTERNAL_MODULES.find((m) => m.id === 'source-triage');
-  assert.deepEqual(entry, { id: 'source-triage', label: 'Bronnen beoordelen', href: '/internal/source-triage', requiredRole: 'internal', placement: 'workqueue', subtitle: 'Bronvoorstellen vastleggen en beoordelen' });
-  const ids = INTERNAL_MODULES.map((m) => m.id);
-  assert.equal(ids.indexOf('source-triage'), ids.indexOf('source-workqueue') + 1);
-  assert.equal(ids.filter((id) => id === 'source-triage').length, 1);
-  assert.ok(!('count' in entry) && !('badge' in entry));
-  assert.ok(!resolveVisibleModules([{ role: 'editor' }]).some((m) => m.id === 'source-triage'));
-  assert.ok(!resolveVisibleModules([{ role: 'owner', restaurant_id: '1' }]).some((m) => m.id === 'source-triage'));
+test('structural safety net: /internal is no longer a tile page, it resolves roles and counts and replaces the route', () => {
+  const source = fs.readFileSync(INTERNAL_HOME_PAGE_PATH, 'utf8');
+  assert.match(source, /resolveLandingHref\(roles, counts\)/);
+  assert.match(source, /router\.replace\(href\)/);
+  assert.match(source, /\/api\/internal\/v1\/workqueue-counts/);
+  assert.doesNotMatch(source, /modules\.map|gridTemplateColumns/, 'the module tile grid must be gone');
+  assert.doesNotMatch(source, /<InternalNav/, 'the redirect page never flashes the bar');
 });
 
-test('BE-17 Menuconcepten beoordelen: one internal-only Werkvoorraad entry directly after Bronnen beoordelen, without a count', () => {
-  const ids = INTERNAL_MODULES.map((m) => m.id);
-  const entry = INTERNAL_MODULES.find((m) => m.id === 'menu-concepts');
-  assert.deepEqual(entry, { id: 'menu-concepts', label: 'Menuconcepten beoordelen', href: '/internal/menu-concepts', requiredRole: 'internal', placement: 'workqueue', subtitle: 'Concepten controleren en intern goedkeuren' });
-  assert.equal(ids.indexOf('menu-concepts'), ids.indexOf('source-triage') + 1);
-  assert.ok(!resolveVisibleModules([{ role: 'editor' }]).some((m) => m.id === 'menu-concepts'));
-  assert.ok(!resolveVisibleModules([{ role: 'owner', restaurant_id: '1' }]).some((m) => m.id === 'menu-concepts'));
+test('structural safety net: /internal keeps the unchanged session gate and never queries a table directly', () => {
+  const source = fs.readFileSync(INTERNAL_HOME_PAGE_PATH, 'utf8');
+  assert.match(source, /getSupabaseBrowser\(\)/);
+  assert.match(source, /\.auth\.getSession\(\)/);
+  assert.match(source, /router\.replace\('\/internal\/login'\)/);
+  assert.match(source, /\/api\/internal\/v1\/me/);
+  assert.doesNotMatch(source, /\.from\(['"]/);
+});
+
+test('structural safety net: /internal keeps the existing no-access status and owner note, and invents no owner destination', () => {
+  const source = fs.readFileSync(INTERNAL_HOME_PAGE_PATH, 'utf8');
+  assert.match(source, /hasAnyKnownRole/);
+  assert.match(source, /isOwnerRole/);
+  assert.match(source, /No internal access for this account\./);
+  assert.match(source, /Nothing to open yet/);
+  assert.match(source, /signOut/);
+  assert.doesNotMatch(source, /<a\s/, 'no clickable invented owner or module destination on the status page');
+});
+
+// --- Structural safety net: login uses the same landing rule ---
+
+test('structural safety net: a successful sign-in uses resolveLandingAfterSignIn and never a hardcoded module or tile page', () => {
+  const source = fs.readFileSync(LOGIN_PAGE_PATH, 'utf8');
+  assert.match(source, /import \{ resolveLandingAfterSignIn \} from '@\/src\/lib\/internalLandingClient'/);
+  assert.match(source, /const href = await resolveLandingAfterSignIn\(/);
+  assert.match(source, /router\.replace\(href \|\| '\/internal'\)/);
+  assert.doesNotMatch(source, /router\.push\('\/internal\/moderation'\)/);
+  assert.doesNotMatch(source, /router\.push\('\/internal'\)/);
+});
+
+// --- Structural safety net: the one add entry ---
+
+test('structural safety net: the add page is one form with the existing restaurant search and URL input, under the shared nav', () => {
+  const source = fs.readFileSync(ADD_PAGE_PATH, 'utf8');
+  assert.match(source, /import InternalNav from '@\/src\/components\/InternalNav'/);
+  assert.match(source, /<InternalNav accessToken=\{session\.access_token\} \/>/);
+  assert.match(source, /\/api\/internal\/v1\/manual-menu-import\/restaurants/);
+  assert.match(source, /decideAddEntry\(\{ restaurant: selectedRestaurant, urls \}\)/);
+  assert.match(source, /manualImportHref\(selectedRestaurant\)/);
+  assert.match(source, /Restaurant of menu toevoegen/);
+  assert.match(source, /Liever zelf invoeren of plakken/);
+  assert.match(source, /getSupabaseBrowser\(\)/);
+  assert.match(source, /\.auth\.getSession\(\)/);
+  assert.doesNotMatch(source, /\.from\(['"]/, 'the page never queries Supabase directly');
+});
+
+test('structural safety net: the add page reuses the existing analysis and onboarding routes and starts nothing else', () => {
+  const source = fs.readFileSync(ADD_PAGE_PATH, 'utf8');
+  assert.match(source, /const BATCH_API = '\/api\/internal\/v1\/batch-analysis'/);
+  assert.match(source, /method: 'POST'/);
+  assert.match(source, /router\.push\(decision\.href\)/);
+  assert.match(source, /router\.push\(`\/internal\/source-triage\/batch\?batch=/);
+  assert.match(source, /setFallbackHref\(decision\.href\)/);
+  assert.doesNotMatch(source, /menu-ai-import/);
+});
+
+test('structural safety net: the batch page accepts the prefill without starting anything by itself', () => {
+  const source = fs.readFileSync(BATCH_PAGE_PATH, 'utf8');
+  assert.match(source, /const prefill = params\.get\('urls'\)/);
+  assert.match(source, /setText\(prefill\)/);
+  assert.match(source, /setShowInput\(true\)/);
+});
+
+// --- Structural safety net: the read-only routes and the other pages ---
+
+test('structural safety net: GET /api/internal/v1/me still reuses authenticateInternalRequest exactly', () => {
+  const source = fs.readFileSync(ME_ROUTE_PATH, 'utf8');
+  assert.match(source, /import \{ authenticateInternalRequest \} from '@\/src\/lib\/internalAuth'/);
+  assert.match(source, /authenticateInternalRequest\(request\)/);
+  assert.doesNotMatch(source, /\.from\(['"]staff_roles['"]\)/);
+  assert.match(source, /auth\.status === 403/);
+  assert.match(source, /roles:\s*\[\]/);
+  assert.doesNotMatch(source, /export async function (POST|PUT|PATCH|DELETE)/);
+});
+
+test('structural safety net: the counts route exists next to the roles route, authenticated and read-only', () => {
+  assert.equal(fs.existsSync(COUNT_ROUTE_PATH), true);
+  const source = fs.readFileSync(COUNT_ROUTE_PATH, 'utf8');
+  assert.match(source, /authenticate: authenticateInternalRequest/);
+  assert.doesNotMatch(source, /export async function (POST|PUT|PATCH|DELETE)/);
+});
+
+test('structural safety net: the existing internal pages still mount the shared nav and keep their own data calls and content', () => {
+  const cases = [
+    { file: COVERAGE_PAGE_PATH, mustStillContain: [/\/api\/internal\/v1\/coverage/, /Coverage Dashboard/] },
+    { file: IMPORT_INBOX_PAGE_PATH, mustStillContain: [/\/api\/internal\/v1\/import-inbox\/candidates/, /di-topbar/] },
+    { file: PROFILE_DRAFTS_PAGE_PATH, mustStillContain: [/\/api\/internal\/v1\/profile-drafts/, /Restaurant Profile Drafts/] },
+    { file: MODERATION_PAGE_PATH, mustStillContain: [/\/api\/internal\/v1\/moderation\/pending/, /\/api\/internal\/v1\/claims\/pending/] },
+  ];
+  for (const item of cases) {
+    const source = fs.readFileSync(item.file, 'utf8');
+    assert.match(source, /import InternalNav from ['"]@\/src\/components\/InternalNav['"]/);
+    assert.match(source, /<InternalNav\s+accessToken=\{session\.access_token\}\s*\/>/);
+    for (const pattern of item.mustStillContain) assert.match(source, pattern, item.file + ' must keep ' + pattern);
+  }
+});
+
+test('structural safety net: app/internal/layout.js keeps its existing noindex metadata unchanged', () => {
+  const source = fs.readFileSync(LAYOUT_PATH, 'utf8');
+  assert.match(source, /robots:\s*\{\s*index:\s*false,\s*follow:\s*false\s*\}/);
 });

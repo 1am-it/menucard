@@ -1,18 +1,35 @@
-// PLATFORM-11 — pure decision logic behind the role-aware internal
-// navigation shell (Phase 1/2: /internal home + shared nav). Deliberately
-// CommonJS, same reasoning as importInbox.js/activationFlow.js: directly
-// testable via this project's existing `node --test` tooling, no new
-// dependency, interoperates fine with the ESM 'use client' pages/
-// components that import it.
+// #62 — pure decision logic behind the internal navigation shell and the
+// single "Restaurant of menu toevoegen" entry. Deliberately CommonJS, same
+// reasoning as importInbox.js/activationFlow.js: directly testable via this
+// project's existing `node --test` tooling, no new dependency, interoperates
+// fine with the ESM 'use client' pages/components that import it.
 //
-// This module never touches Supabase, the DOM, or React — it only
-// classifies an already-resolved `roles` array (the same shape
-// `authenticateInternalRequest` returns: `{ role, restaurant_id }[]`) into
-// what the navigation should show. It never grants access itself — every
-// existing route keeps its own unchanged server-side
-// `authenticateInternalRequest`/`isInternalOnly`/`isEditor` gate; this is
-// a discoverability layer only, per PLATFORM-11's own "Technical
-// constraints."
+// This module never touches Supabase, the DOM, React, the network or a clock.
+// It classifies an already-resolved `roles` array (the same shape
+// `authenticateInternalRequest` returns: `{ role, restaurant_id }[]`) and an
+// already-resolved `counts` object into what the navigation should show. It
+// never grants access itself — every existing route keeps its own unchanged
+// server-side authenticateInternalRequest/isInternalOnly/isEditor gate; this is
+// a discoverability layer only.
+//
+// #62 (issue contract, criteria 1-3): the top bar shows only "Dekking",
+// "Werkvoorraad (N)" and "+ Restaurant of menu toevoegen". "Onboarding
+// Restaurant" is no longer a top-bar item, and the old "Beheer" tile page
+// (/internal) is no longer a destination: onboarding is reached through the add
+// screen, and /internal redirects by the same landing rule as the login page and
+// the logo (resolveLandingHref below). Every remaining route and id is
+// unchanged; only the visible labels changed (Stadsoverzicht, Restaurantgegevens
+// (concept)).
+//
+// `placement` is the only structural concept this module adds:
+//  - 'primary'   — always inline in the top bar (Dekking);
+//  - 'open-work' — the counted "Open werk" section of the Werkvoorraad menu,
+//                  sorted by real counts (sortOpenWork below);
+//  - 'secondary' — below the separating line in that menu, never counted.
+// A module with an unrecognized/missing placement appears in no group at all —
+// it fails closed to "not shown", never an assumed default, so a future module
+// added without an explicit placement is visibly absent in testing rather than
+// silently misplaced.
 
 'use strict';
 
@@ -21,10 +38,8 @@ const { isInternalOnly } = require('./importInbox');
 // Mirrors the identical, independently-defined `isEditor` in
 // app/api/internal/v1/moderation/pending/route.js and
 // app/api/internal/v1/claims/pending/route.js exactly (`roles.some((r) =>
-// r.role === 'editor')`) — not a "third, subtly different copy," the same
-// one-line definition kept deliberately in sync. PLATFORM-11's own ticket
-// ("Open questions") explicitly leaves consolidating all three into one
-// shared export as later, orthogonal cleanup, not required here.
+// r.role === 'editor')`) — the same one-line definition kept deliberately in
+// sync, not a third, subtly different copy.
 function isEditorRole(roles) {
   return Array.isArray(roles) && roles.some((r) => r && r.role === 'editor');
 }
@@ -34,128 +49,131 @@ function isOwnerRole(roles) {
 }
 
 // The three `staff_roles.role` values the column's own `check` constraint
-// allows (supabase/migrations/0001_field_provenance.sql). Used only to
-// tell "a real but currently destination-less role" (`owner`) apart from
-// "no usable role at all" — never to grant anything.
+// allows (supabase/migrations/0001_field_provenance.sql). Used only to tell
+// "a real but currently destination-less role" (`owner`) apart from "no usable
+// role at all" — never to grant anything.
 const KNOWN_ROLE_VALUES = ['internal', 'editor', 'owner'];
 
 function hasAnyKnownRole(roles) {
   return Array.isArray(roles) && roles.some((r) => r && KNOWN_ROLE_VALUES.includes(r.role));
 }
 
-// BE-20 — simplified navigation structure, replacing the earlier flat
-// list. Implements be-20-general-restaurant-source-extraction.md's own
-// "Visual contract" ("Main navigation shows only Dekkingsoverzicht and
-// Onboarding Restaurant... Nieuwe aanleveringen, Profielconcepten, and
-// Beoordelen stay reachable through a compact, accessible Werkvoorraad
-// control") plus the current, explicit user direction that additionally
-// groups a `manage` ("Beheer") entry alongside those three under the same
-// Werkvoorraad control — the earlier, not-yet-simplified nav (still shown
-// in docs/mockups/onboarding-restaurant-workflow-v1.png's own top bar,
-// itself superseded for navigation structure by
-// docs/mockups/internal-navigation-workqueue-v1.png) listed `Beheer` as
-// its own separate top-level link; this build keeps it reachable, just
-// relocated into Werkvoorraad rather than dropped.
-//
-// `placement` is the only new concept this module adds:
-//  - `'primary'` — always inline in the top bar (Dekkingsoverzicht,
-//    Onboarding Restaurant).
-//  - `'workqueue'` — grouped under the compact Werkvoorraad control
-//    (Beheer, Nieuwe aanleveringen, Profielconcepten, Beoordelen).
-// `onboarding-menu` deliberately has NO nav placement at all (and so is
-// no longer listed in INTERNAL_MODULES below) — per the current,
-// explicit direction it "blijft bereikbaar vanuit de bredere Onboarding
-// Restaurant-context, maar is geen los prominent hoofdmenu-item meer":
-// it is linked directly from app/internal/onboarding-restaurant/page.js's
-// own content instead, never through this shared nav mechanism. Its
-// route, page, and every existing deep link to it are completely
-// unchanged — removing it from this list only removes it from the shared
-// nav rendering, never the route itself.
-//
-// **`id: 'manage'` ("Beheer") is this build's own explicit design
-// choice, not literally named as a destination anywhere in the approved
-// mockups or ticket text** — the current, explicit instruction names
-// "Beheer" as one of the four items Werkvoorraad groups, but neither
-// approved mockup shows what it should link to (the workqueue mockup's
-// own dropdown shows only three rows; the older, superseded-for-navigation
-// mockup shows "Beheer" as a bare top-level label with no visible
-// destination of its own either). Mapped here to `/internal` itself
-// (the existing, unchanged PLATFORM-11 role-aware overview that already
-// lists every accessible module as a card) — the closest existing,
-// already-built destination that matches "Beheer"'s own general-
-// management meaning, reusing an existing route rather than inventing a
-// new one. Flagged explicitly in this round's own report for
-// confirmation or correction.
+const COVERAGE_HREF = '/internal/coverage';
+const ADD_ENTRY_HREF = '/internal/toevoegen';
+
+// The single source for the Werkvoorraad menu. Order inside each placement is
+// the contract's own fixed order (issue #62, criteria 1-2): that order is both
+// the tie-break for equal counts and the order used when a count is unknown.
 const INTERNAL_MODULES = [
-  { id: 'coverage', label: 'Dekkingsoverzicht', href: '/internal/coverage', requiredRole: 'internal', placement: 'primary' },
-  { id: 'onboarding-restaurant', label: 'Onboarding Restaurant', href: '/internal/onboarding-restaurant', requiredRole: 'internal', placement: 'primary' },
-  { id: 'manage', label: 'Beheer', href: '/internal', requiredRole: 'internal', placement: 'workqueue', subtitle: 'Alle modules' },
-  { id: 'import-inbox', label: 'Nieuwe aanleveringen', href: '/internal/import-inbox', requiredRole: 'internal', placement: 'workqueue', subtitle: 'Nieuwe bronnen' },
-  // Bronwerkvoorraad — read-only overview of every known restaurant source
-  // (Bron and Menukaart as two separate statuses), built only from existing
-  // BE-20 analysis jobs/receipts; see
-  // planning/specs/tickets/be-23-internal-source-workqueue.md. No badge
-  // count is shown in the nav (BE-20 "Visual contract": only real, computed
-  // counts — the page itself shows them).
-  { id: 'source-workqueue', label: 'Bronwerkvoorraad', href: '/internal/source-workqueue', requiredRole: 'internal', placement: 'workqueue', subtitle: 'Bron en menukaart per restaurant' },
-  // Bronnen beoordelen (visible name since BE-25 fase 2; route and id
-  // unchanged) — proposal-only source triage (BE-24,
-  // planning/specs/tickets/be-24-internal-source-triage.md): record and
-  // accept/reject source proposals; nothing is fetched or published.
-  // Internal-only, directly after Bronwerkvoorraad: the BE-24 v1 product
-  // decision. No badge count.
-  { id: 'source-triage', label: 'Bronnen beoordelen', href: '/internal/source-triage', requiredRole: 'internal', placement: 'workqueue', subtitle: 'Bronvoorstellen vastleggen en beoordelen' },
-  // BE-17 Menuconcepten beoordelen v1 — review the internal menu concepts
-  // saved from Batchanalyse: correct as a new version, approve internally or
-  // reject. Internal-only, directly after Bronnen beoordelen; nothing is
-  // published. No badge count.
-  { id: 'menu-concepts', label: 'Menuconcepten beoordelen', href: '/internal/menu-concepts', requiredRole: 'internal', placement: 'workqueue', subtitle: 'Concepten controleren en intern goedkeuren' },
-  { id: 'profile-drafts', label: 'Profielconcepten', href: '/internal/profile-drafts', requiredRole: 'internal', placement: 'workqueue', subtitle: 'Klaarzetten' },
-  // BE-17/PLATFORM-06's existing `editor`-only Moderation module — route,
-  // authorization, and data model completely unchanged. Per BE-20's own
-  // "Visual contract": "gets no own top-level nav item and folds
-  // functionally into the same Werkvoorraad → Beoordelen entry" — the
-  // subtitle below is that same section's own suggested description,
-  // verbatim.
-  { id: 'moderation', label: 'Beoordelen', href: '/internal/moderation', requiredRole: 'editor', placement: 'workqueue', subtitle: "Menu's, profielen en eigenaarsclaims" },
+  { id: 'coverage', label: 'Dekking', href: COVERAGE_HREF, requiredRole: 'internal', placement: 'primary' },
+  { id: 'menu-concepts', label: 'Menuconcepten beoordelen', href: '/internal/menu-concepts', requiredRole: 'internal', placement: 'open-work', countKey: 'menu-concepts', subtitle: 'Concepten controleren en intern goedkeuren' },
+  { id: 'source-triage', label: 'Bronnen beoordelen', href: '/internal/source-triage', requiredRole: 'internal', placement: 'open-work', countKey: 'source-triage', subtitle: 'Bronvoorstellen vastleggen en beoordelen' },
+  { id: 'import-inbox', label: 'Nieuwe aanleveringen', href: '/internal/import-inbox', requiredRole: 'internal', placement: 'open-work', countKey: 'import-inbox', subtitle: 'Nieuwe bronnen' },
+  { id: 'moderation', label: 'Beoordelen', href: '/internal/moderation', requiredRole: 'editor', placement: 'open-work', countKey: 'moderation', subtitle: "Menu's, profielen en eigenaarsclaims" },
+  { id: 'source-workqueue', label: 'Stadsoverzicht', href: '/internal/source-workqueue', requiredRole: 'internal', placement: 'secondary', subtitle: 'Bron en menukaart per restaurant' },
+  { id: 'profile-drafts', label: 'Restaurantgegevens (concept)', href: '/internal/profile-drafts', requiredRole: 'internal', placement: 'secondary', subtitle: 'Klaarzetten' },
 ];
+
 
 /** The union of every section each of the roles individually unlocks — an
  * `internal`+`editor` account gets both sets, never just one (mirrors
  * src/lib/internalAuth.js's getAccessForRestaurant's own "strongest
- * applicable role" reasoning, generalized from one restaurant's write
- * access to "which nav items render"). Unchanged in shape/behavior from
- * before BE-20 — still a flat, role-filtered list; `placement` is only
- * ever read by `groupModulesByPlacement` below, a separate, later step,
- * so any existing caller that only needs "which modules can this account
- * see" keeps working exactly as it always did. */
+ * applicable role" reasoning, generalized from one restaurant's write access
+ * to "which nav items render"). Unchanged in shape/behavior from before #62 —
+ * still a flat, role-filtered list; `placement` is only ever read by
+ * `groupModulesByPlacement` below. */
 function resolveVisibleModules(roles) {
   const hasInternal = isInternalOnly(roles);
   const hasEditor = isEditorRole(roles);
   return INTERNAL_MODULES.filter((m) => (m.requiredRole === 'internal' ? hasInternal : hasEditor));
 }
 
-/** Splits an already role-filtered module list (`resolveVisibleModules`'s
- * own output — this function never resolves roles itself) into
- * `{ primary, workqueue }` by each module's own `placement` field, both
- * arrays keeping `INTERNAL_MODULES`'s own original relative order. A
- * module with an unrecognized/missing `placement` appears in neither
- * array — fails closed to "not shown," never an assumed default
- * placement, so a future module added without an explicit `placement`
- * is visibly absent from testing rather than silently misplaced. */
+/** Splits an already role-filtered module list (`resolveVisibleModules`'s own
+ * output — this function never resolves roles itself) into
+ * `{ primary, openWork, secondary }` by each module's own `placement` field.
+ * Every array keeps `INTERNAL_MODULES`'s own relative order. */
 function groupModulesByPlacement(modules) {
   const list = Array.isArray(modules) ? modules : [];
   return {
     primary: list.filter((m) => m && m.placement === 'primary'),
-    workqueue: list.filter((m) => m && m.placement === 'workqueue'),
+    openWork: list.filter((m) => m && m.placement === 'open-work'),
+    secondary: list.filter((m) => m && m.placement === 'secondary'),
   };
+}
+
+/** A real, computed count or `null`. Anything that is not a non-negative
+ * integer (missing key, failed request, a string, a float) is "not
+ * computable" — the UI then shows no number at all, never a fabricated 0. */
+function resolveCount(counts, key) {
+  if (!counts || typeof counts !== 'object' || !key) return null;
+  const value = counts[key];
+  return Number.isInteger(value) && value >= 0 ? value : null;
+}
+
+/** "Open werk": real counts first, descending; equal counts keep the
+ * contract's fixed order; entries whose count is not available go last, still
+ * in that fixed order, and are rendered without a number. Never mutates the
+ * input array or the module objects. */
+function sortOpenWork(modules, counts) {
+  const list = Array.isArray(modules) ? modules : [];
+  return list
+    .map((module, index) => ({ module, count: resolveCount(counts, module && module.countKey), index }))
+    .sort((a, b) => {
+      if (a.count === null && b.count === null) return a.index - b.index;
+      if (a.count === null) return 1;
+      if (b.count === null) return -1;
+      return b.count - a.count || a.index - b.index;
+    });
+}
+
+/** The total in "Werkvoorraad (N)". Only a total over *every* visible
+ * open-work section counts: when one of them could not be computed the total
+ * would understate the real work, so it is `null` and the bar shows no number
+ * (issue #62: "Als een aantal niet te berekenen is, staat er geen nep-getal").
+ * A real 0 is a number and is shown as such. */
+function resolveOpenWorkTotal(rows) {
+  const list = Array.isArray(rows) ? rows : [];
+  if (list.length === 0) return null;
+  let total = 0;
+  for (const row of list) {
+    const count = resolveCount({ value: row && row.count }, 'value');
+    if (count === null) return null;
+    total += count;
+  }
+  return total;
+}
+
+/** Criterion 3 — the one landing rule, used by the login page, by /internal
+ * and (through /internal) by the logo:
+ *  - the visible open-work section with the most real open work wins;
+ *  - equal counts keep the contract's fixed order (Menuconcepten, Bronnen,
+ *    Nieuwe aanleveringen, Beoordelen);
+ *  - zero open work (or every count a real 0) lands on Dekking;
+ *  - when a visible count is not available the rule never guesses a winner
+ *    from partial data: it falls back to Dekking;
+ *  - an account without any visible module gets `null` — the caller keeps its
+ *    existing "no internal access" status instead of redirecting into a route
+ *    that would deny it. */
+function resolveLandingHref(roles, counts) {
+  const { openWork } = groupModulesByPlacement(resolveVisibleModules(roles));
+  if (openWork.length === 0) return null;
+  const rows = sortOpenWork(openWork, counts);
+  if (rows.some((row) => row.count === null)) return COVERAGE_HREF;
+  const best = rows[0];
+  return best && best.count > 0 ? best.module.href : COVERAGE_HREF;
 }
 
 module.exports = {
   isEditorRole,
   isOwnerRole,
   hasAnyKnownRole,
+  COVERAGE_HREF,
+  ADD_ENTRY_HREF,
   INTERNAL_MODULES,
   resolveVisibleModules,
   groupModulesByPlacement,
+  resolveCount,
+  sortOpenWork,
+  resolveOpenWorkTotal,
+  resolveLandingHref,
 };
