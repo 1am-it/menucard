@@ -3064,6 +3064,11 @@ details.bta-side-card > summary:focus-visible { outline: 2px solid var(--border-
 }
 .mai-received { margin: 0; padding: 10px 12px; border-radius: var(--radius-md); background: var(--status-positive-bg); color: var(--status-positive); font-weight: 700; font-size: 14px; }
 .mai-summary { margin: 0; font-size: 16px; font-weight: 800; color: var(--text-primary); }
+/* V2 (review 6377050602): een korte, gewone melding over wat het systeem zelf
+   heeft bijgesteld. Neutraal van toon: geen goedkeuring en geen blokkade. */
+.mai-notices { display: grid; gap: 4px; padding: 10px 12px; border: 1px solid var(--border); border-left: 3px solid var(--accent-border); border-radius: var(--radius-md); background: var(--bg-elevated); min-width: 0; }
+.mai-notices-title { margin: 0; font-size: 13px; font-weight: 800; color: var(--text-primary); }
+.mai-notice-list { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 13px; color: var(--text-secondary); overflow-wrap: anywhere; }
 .mai-review-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; min-width: 0; }
 .mai-review-row {
   display: grid;

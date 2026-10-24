@@ -804,6 +804,19 @@ export default function ManualMenuImportPage() {
                   {review.summary.items} {review.summary.items === 1 ? 'gerecht' : 'gerechten'} · {review.summary.valid} in orde ·{' '}
                   {review.summary.pending} nalopen
                 </p>
+                {/* V2 (review 6377050602): wat het systeem zelf heeft bijgesteld.
+                    Een telling of status die uit het antwoord zelf volgt, in
+                    gewone taal. Niets wordt stil aangepast. */}
+                {Array.isArray(review.notices) && review.notices.length > 0 ? (
+                  <div className="mai-notices" role="status">
+                    <p className="mai-notices-title">Door het systeem bijgesteld</p>
+                    <ul className="mai-notice-list">
+                      {review.notices.map((notice) => (
+                        <li key={notice}>{notice}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
                 <p className="bta-muted">
                   Alleen de regels die aandacht vragen staan open. De regels die in orde zijn, zitten ingeklapt. Er is geen
                   &quot;alles accepteren&quot;.
