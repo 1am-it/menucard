@@ -197,24 +197,34 @@ function buildSourceMap({ sources, menus, rejected, accounted, limit, priceChoic
       omittedLabel: null,
     };
   }
-  const textById = new Map((Array.isArray(sources) ? sources : []).map((source) => [source && source.id, source || {}]));
+  const analysedById = new Map(analysis.sources.map((source) => [source.id, source]));
   const marks = [];
   let total = 0;
   const sourcesOut = [];
-  for (const source of analysis.sources) {
-    const raw = textById.get(source.id) || {};
-    const view = chooseCardView({
-      kind: source.kind,
-      hasText: typeof raw.text === 'string' && raw.text.trim() !== '',
-      pageCount: source.pageCount,
-    });
+  // Every source of the import is listed, also one without any text: an image or
+  // a scan is an honest "not comparable yet" card, never silently missing.
+  const listed = Array.isArray(sources) && sources.length > 0 ? sources : analysis.sources;
+  for (const raw of listed) {
+    const source = analysedById.get(raw && raw.id) || null;
+    if (!source) {
+      sourcesOut.push({
+        id: raw && raw.id ? raw.id : 'bron',
+        label: null,
+        url: (raw && typeof raw.url === 'string' ? raw.url : null) || null,
+        kind: raw && typeof raw.kind === 'string' ? raw.kind : null,
+        pageCount: 0,
+        view: chooseCardView({ kind: raw && raw.kind, hasText: false }),
+        counts: countsOf([]),
+      });
+      continue;
+    }
     sourcesOut.push({
       id: source.id,
       label: source.label,
       url: source.url,
       kind: source.kind,
       pageCount: source.pageCount,
-      view,
+      view: chooseCardView({ kind: source.kind, hasText: true, pageCount: source.pageCount }),
       counts: countsOf(source.records),
     });
     for (const record of source.records) {
