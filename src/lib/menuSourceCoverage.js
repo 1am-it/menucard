@@ -6,8 +6,9 @@
 //
 // Deterministic and free: no model, no network, no database, no new storage.
 // It reuses exactly two existing rules and never adds a second family:
-//   - `findPrices` from src/lib/htmlMenuStructure.js is the extraction's own
-//     money parser (quantity units such as "0,75 L" included);
+//   - `findPrintedPrices` from src/lib/htmlMenuStructure.js is the extraction's
+//     own money parser plus the two printed additions (a whole euro and a
+//     one-decimal point amount); the parser family is never duplicated here;
 //   - `normalizeEvidenceText` / `quoteIsPresentInSource` from
 //     src/lib/menuExtractionSchema.js are the validator's one normalization,
 //     so "covered" here can never disagree with the validator about what
@@ -21,7 +22,7 @@
 // invents a price or a name.
 
 const { normalizeEvidenceText } = require('./menuExtractionSchema');
-const { findPrices, findPrintedPrices } = require('./htmlMenuStructure');
+const { findPrintedPrices } = require('./htmlMenuStructure');
 
 const COMPARISON_VERSION = 'menu-source-coverage/v1';
 const MAX_LINES = 100;
@@ -52,7 +53,10 @@ function looksLikeSectionHeading(line) {
   const text = bounded(line, MAX_SECTION_CHARS + 40);
   if (text.length < 2 || text.length > 80) return false;
   if (lettersOf(text) < 2) return false;
-  if (findPrices(text).length > 0) return false;
+  // BB2 (review 6384867373): any printed price is evidence of a dish row, not
+  // of a heading. The printed reading includes the whole euro and the
+  // one-decimal point amount, so "Friet met mayonaise  6.5" is never a heading.
+  if (findPrintedPrices(text).length > 0) return false;
   if (/[.,;:!?]$/.test(text)) return false;
   // A line that starts with a lower-case letter is prose, not a heading.
   if (/^\p{Ll}/u.test(text)) return false;
@@ -206,6 +210,9 @@ function pricedRecord(base, record) {
     // AA1 (Lead review 6383853638): the price was a printed whole euro, so the
     // record still has to be confirmed by a second such line in its section.
     wholeEuro: record.wholeEuro === true,
+    // BB2 (Lead review 6384867373): the price was a one/two-decimal point
+    // amount ("4.5"), read by the same printed line rule.
+    decimalPoint: record.decimalPoint === true,
     text: record.text,
     name: record.name === undefined ? null : record.name,
     priceText: record.priceText,
@@ -308,6 +315,7 @@ function pricedLinesOfSource(source, { requireSectionConfirmation = true } = {})
             amountsMinorUnits: [fragment.amountMinorUnits],
             section: fragment.section || section || null,
             wholeEuro: fragment.wholeEuro === true,
+            decimalPoint: fragment.decimalPoint === true,
           }),
         );
       }
@@ -346,6 +354,7 @@ function pricedLinesOfSource(source, { requireSectionConfirmation = true } = {})
           amountsMinorUnits: prices.map((price) => price.amountMinorUnits),
           section,
           wholeEuro: prices.every((price) => price.wholeEuro === true),
+          decimalPoint: prices.every((price) => price.decimalPoint === true),
         }),
       );
     } else {
@@ -366,6 +375,7 @@ function pricedLinesOfSource(source, { requireSectionConfirmation = true } = {})
           amountsMinorUnits: prices.map((price) => price.amountMinorUnits),
           section,
           wholeEuro: prices.every((price) => price.wholeEuro === true),
+          decimalPoint: prices.every((price) => price.decimalPoint === true),
         }),
       );
     }
@@ -415,6 +425,7 @@ function fragmentsOfFlattenedLine(line, { section = null } = {}) {
       amountMinorUnits: price.amountMinorUnits,
       section: currentSection,
       wholeEuro: price.wholeEuro === true,
+      decimalPoint: price.decimalPoint === true,
     });
   });
   return fragments;

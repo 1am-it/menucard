@@ -113,6 +113,15 @@ async function main() {
     for (const example of (whole.acceptedExamples || []).slice(0, 4)) {
       process.stdout.write(`    + ${example.name} = ${example.priceText}${example.section ? ` (onder ${example.section})` : ''}\n`);
     }
+    // BB2: the decimal-point family ("4.5"), with its own refusals.
+    const point = row.decimalPoint || {};
+    process.stdout.write(
+      `    decimal point: ${point.accepted || 0} accepted, refusals ${JSON.stringify(point.refused || {})},` +
+        ` ${(point.suspicious || []).length} suspicious\n`,
+    );
+    for (const example of (point.acceptedExamples || []).slice(0, 4)) {
+      process.stdout.write(`    · ${example.name} = ${example.priceText}${example.section ? ` (onder ${example.section})` : ''}\n`);
+    }
   }
   process.stdout.write(`report: ${path.relative(REPO_ROOT, OUTPUT_FILE).split(path.sep).join('/')}\n`);
   return 0;

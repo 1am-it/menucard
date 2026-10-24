@@ -112,6 +112,31 @@ instead of hidden. `pricedLinesOfSource(source, { requireSectionConfirmation:
 false })` exists for that reporting only; the review always uses the confirmed
 list.
 
+### One-decimal prices with a decimal point (added 2026-10-24, #59 BB2)
+
+`src/lib/htmlMenuStructure.js` adds `findDecimalPointPrices` /
+`decimalPointAmountTokens` in the same price section, next to the whole euro:
+Blossem prints `4.5`, `3.0` and `4.0`, and `findPrices` only reads two decimals,
+so 52 read dishes stood next to "4 regels met een prijs". The family uses the
+same printed line rule as the whole euro — 1–3 digits, a printed cell boundary,
+a name before it, not before a unit/counting word, not a date/phone — plus three
+refusals of its own: a version (`versie 4.5`), a time (`om 12.5`) and a
+per-person unit (`42.0 p.p.`). A two-decimal point amount stays with the money
+parser and is never counted twice; the amount must sit at the END of the printed
+row or cell. `findPrices`, the references, the counting rules and the measurement
+stay unchanged.
+
+`src/lib/menuSourceCoverage.js` reads the prices from `findPrintedPrices` only,
+so the card and the diagnosis share exactly this reading, and a line that prints
+a price is never mistaken for a section heading. The diagnosis prints
+`decimal point: N accepted, refusals {...}` per source, with the accepted records
+and every refusal reason (`version`, `time`, `price_range`, `unit`,
+`leading_zero`, `glued`, `ordinal`, `counting_word`, `date`, `phone`,
+`no_boundary`, `no_name`). On the pinned run-2 captures only Blossem changes:
+8 → 45 priced lines (37 decimal-point prices, 0 suspicious); the other seven
+sources keep their numbers and their refusals.
+
+
 
 The review gained a Lijst | Kaart switch. The printed page of one source is read
 lazily through

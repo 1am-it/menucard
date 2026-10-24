@@ -20,6 +20,8 @@ const {
   findWholeEuroPrices,
   findPrintedPrices,
   wholeEuroAmountTokens,
+  findDecimalPointPrices,
+  decimalPointAmountTokens,
   extractHtmlMenuStructure,
   createHtmlStructureAdapter,
 } = require('./htmlMenuStructure')
@@ -639,4 +641,61 @@ test('AA1: een gangnummer of een vastgeplakt woord is geen prijs', () => {
   assert.deepEqual(findWholeEuroPrices('34x'), [])
   assert.deepEqual(findWholeEuroPrices('Fictief 5st'), [])
 })
+
+// ─── BB2: a decimal point with one decimal (Lead review 6384867373) ─────────
+//
+// The shapes are the real ones the pinned Blossem capture prints ("4.5", "3.0",
+// "4.0"), used as fictional fixtures, plus the traps a decimal point brings
+// (versions, times, per-person units, quantities and decimals in prose).
+
+test('BB2: a one-decimal price at the end of a printed cell is a price', () => {
+  assert.deepEqual(findDecimalPointPrices('Gemarineerde olijven  4.5   Nibbit  3.0').map((p) => p.amountMinorUnits), [450, 300])
+  assert.deepEqual(findDecimalPointPrices('Friet met mayonaise  6.5').map((p) => p.amountMinorUnits), [650])
+  assert.deepEqual(findDecimalPointPrices('Selectie van kazen  16.0').map((p) => p.amountMinorUnits), [1600])
+  assert.deepEqual(findDecimalPointPrices('Fictief gerecht\t7.5').map((p) => p.amountMinorUnits), [750])
+  assert.deepEqual(findDecimalPointPrices('Fictief gerecht € 4.5').map((p) => p.amountMinorUnits), [450])
+  // A two-decimal point amount stays with the money parser, never doubled.
+  assert.deepEqual(findPrintedPrices('Fictieve steak  22.95').map((p) => p.amountMinorUnits), [2295])
+  assert.deepEqual(findPrintedPrices('Gemarineerde olijven  4.5').map((p) => p.amountMinorUnits), [450])
+  assert.equal(findPrintedPrices('Gemarineerde olijven  4.5')[0].decimalPoint, true)
+})
+
+test('BB2: findPrices itself never gains a one-decimal amount, so references and measurement stay unchanged', () => {
+  assert.deepEqual(findPrices('Gemarineerde olijven  4.5').map((p) => p.amountMinorUnits), [])
+  assert.deepEqual(findPrices('Fictieve steak  22.95').map((p) => p.amountMinorUnits), [2295])
+})
+
+test('BB2: a version, a time, a per-person unit and a quantity are never a price', () => {
+  assert.deepEqual(findDecimalPointPrices('Kaart versie 4.5'), [])
+  assert.deepEqual(findDecimalPointPrices('Openingstijden 12.5 - 22.5'), [])
+  assert.deepEqual(findDecimalPointPrices('geopend om 12.5'), [])
+  assert.deepEqual(findDecimalPointPrices('Tafeltje vol lunchgerechten  42.0 p.p.'), [])
+  assert.deepEqual(findDecimalPointPrices('Fictief menu  35.0 per persoon'), [])
+  assert.deepEqual(findDecimalPointPrices('0.5 l'), [])
+  assert.deepEqual(findDecimalPointPrices('Fictief gerecht  4.5 kg'), [])
+  assert.deepEqual(findDecimalPointPrices('Rundvleesbitterbal  1.85st'), [])
+})
+
+test('BB2: a decimal point in running text, a leading zero or a missing name is not a price', () => {
+  assert.deepEqual(findDecimalPointPrices('Hollands 27 Petit Doruvael'), [])
+  assert.deepEqual(findDecimalPointPrices('4.5'), [])
+  // "slechts 1.5 kilometer van het centrum" has no printed cell boundary.
+  assert.deepEqual(findDecimalPointPrices('slechts 1.5 kilometer van het centrum'), [])
+  // A one-decimal amount in the middle of a line is not at the end of the row.
+  assert.deepEqual(findDecimalPointPrices('Fictief gerecht 4.5 met friet'), [])
+})
+
+test('BB2: every refusal carries its own reason, so the diagnosis can report it', () => {
+  const reasons = (text) => decimalPointAmountTokens(text).map((token) => `${token.raw}:${token.reason}`)
+  assert.deepEqual(reasons('Gemarineerde olijven  4.5'), ['4.5:null'])
+  assert.deepEqual(reasons('Kaart versie 4.5'), ['4.5:version'])
+  assert.deepEqual(reasons('geopend om 12.5'), ['12.5:time'])
+  assert.deepEqual(reasons('Openingstijden 12.5 - 22.5'), ['12.5:time', '22.5:price_range'])
+  assert.deepEqual(reasons('Tafeltje vol lunchgerechten  42.0 p.p.'), ['42.0:unit'])
+  assert.deepEqual(reasons('0.5 l'), ['0.5:leading_zero'])
+  assert.deepEqual(reasons('Rundvleesbitterbal  1.85st'), ['1.85:glued'])
+  assert.deepEqual(reasons('slechts 1.5 kilometer'), ['1.5:no_boundary'])
+  assert.deepEqual(reasons('4.5'), ['4.5:no_name'])
+})
+
 

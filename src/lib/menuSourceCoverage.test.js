@@ -422,3 +422,57 @@ test('AA1: Toevoegen op een hele-getalprijs gebruikt de geprinte prijs', () => {
   assert.equal(quoteIsPresentInSource(built.item.evidence.quote, text), true);
 });
 
+// ─── BB2: prices with a decimal point (Lead review 6384867373) ─────────────
+//
+// De vorm van de gepinde Blossem-capture: één lange regel met de cellen van de
+// kaart, elk met een prijs als "4.5" of "6.5". Die prijzen waren onzichtbaar
+// voor de kaart, zodat 52 gelezen gerechten bij "4 regels met een prijs" stonden.
+
+test('BB2: een prijs met een decimale punt telt als prijsregel, ook in een samengevouwen rij', () => {
+  const row = [
+    'BITES   Fictieve olijven  4.5   Fictief brood  3.0   Fictief bittergarnituur  9.0   Fictieve soep  6.5',
+    'WIJN   Fictieve huiswijn  4.0   Fictieve rode wijn met een lange omschrijving  5.5   Fictieve rosé  4.5',
+    'DESSERT   Fictieve limoen mousse met witte chocolade, matcha, mango en amandelcake  13.5   Fictieve kazen  16.0',
+  ].join('     ');
+  assert.ok(row.length > 300, 'de regel moet de samengevouwen vorm hebben');
+  const text = ['FICTIEF DINER', 'Bites en wijn', row].join('\n');
+  const records = pricedLinesOfSource(source(text)).filter((record) => record.decimalPoint);
+  assert.deepEqual(records.map((record) => [record.name, record.amountMinorUnits]), [
+    ['Fictieve olijven', 450],
+    ['Fictief brood', 300],
+    ['Fictief bittergarnituur', 900],
+    ['Fictieve soep', 650],
+    ['Fictieve huiswijn', 400],
+    ['Fictieve rode wijn met een lange omschrijving', 550],
+    ['Fictieve rosé', 450],
+    ['Fictieve limoen mousse met witte chocolade, matcha, mango en amandelcake', 1350],
+    ['Fictieve kazen', 1600],
+  ]);
+  assert.equal(records[0].priceText, '4.5');
+});
+
+test('BB2: een decimale prijs op een korte regel telt, een gewone tekstregel niet', () => {
+  const text = ['FICTIEF DINER', 'Bites', 'Friet met mayonaise  6.5', 'Seasonal salad  8.5'].join('\n');
+  const result = compareCaptureWithConcept({ sources: [source(text)], menus: menuWith([]) });
+  assert.equal(result.available, true);
+  assert.deepEqual(result.lines.map((line) => [line.name, line.amountMinorUnits]), [
+    ['Friet met mayonaise', 650],
+    ['Seasonal salad', 850],
+  ]);
+  // "slechts 1.5 kilometer" is tekst, geen prijs.
+  const prose = ['FICTIEF DINER', 'Route', 'Slechts 1.5 kilometer van het centrum'].join('\n');
+  assert.deepEqual(pricedLinesOfSource(source(prose)).filter((record) => record.decimalPoint), []);
+});
+
+test('BB2: Toevoegen op een decimale prijs gebruikt de geprinte prijs en citeert de regel', () => {
+  const text = ['FICTIEF DINER', 'Bites', 'Friet met mayonaise  6.5', 'Seasonal salad  8.5'].join('\n');
+  const lines = compareCaptureWithConcept({ sources: [source(text)], menus: menuWith([]) }).lines;
+  const built = itemFromPricedLine(lines[0]);
+  assert.equal(built.ok, true);
+  assert.equal(built.item.name, 'Friet met mayonaise');
+  assert.equal(built.item.priceStatus, 'known');
+  assert.equal(built.item.amountMinorUnits, 650);
+  assert.equal(quoteIsPresentInSource(built.item.evidence.quote, text), true);
+});
+
+

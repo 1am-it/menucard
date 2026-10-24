@@ -912,24 +912,102 @@ function findWholeEuroPrices(text) {
     .map(({ raw, index, length, amountMinorUnits, hasEuroSign }) => ({ raw, index, length, amountMinorUnits, hasEuroSign }))
 }
 
+// ─── One-decimal prices with a decimal point (BB2, review 6384867373) ───────
+//
+// Some cards print a price with a decimal POINT and one decimal: Blossem prints
+// "4.5", "3.0" and "4.0". `findPrices` reads two decimals, so those lines never
+// reached the review card ("4 regels met een prijs" bij 52 gerechten). This is
+// the third family in the same price section, not a second parser:
+//
+//   - the same 1-3 digits and the same unit/counting/time/date/phone reasons as
+//     the whole euro above (the shape itself carries the decimals, so ",-" does
+//     not apply here);
+//   - the amount must sit at the END of a printed row or cell (end of the
+//     segment, two or more spaces, a tab or a column separator), because that
+//     is where a card prints its price;
+//   - a version ("versie 4.5"), a time ("om 12.5") and a per-person unit
+//     ("42.0 p.p.") are refused with their own reason;
+//   - two decimals are the money parser's job, so such a token is never counted
+//     twice (see `findPrintedPrices`).
+// `findPrices`, the references and the measurement stay unchanged: only the
+// printed reading of the review card and its diagnosis see this family.
+const VERSION_WORD_BEFORE = /\b(?:versie|version|editie|edition|vers|build|release)\s*[.:]?\s*$/i
+const TIME_WORD_BEFORE = /\b(?:om|tussen|geopend|gesloten|open|sluit|sluiting|aanvang|openingstijden)\s+(?:ca\.?\s*)?$/i
+const PRICE_RANGE_BEFORE = /(?:-|–|tot|t\/m)\s*$/i
+/** A per-person unit: "42.0 p.p.", "35.0 per persoon" — an arrangement, no dish price. */
+const PER_PERSON_UNIT_AFTER = /^\s*(?:p\.?\s?p\.?|per\s+(?:persoon|person|personen))(?!\p{L})/iu
+const DECIMAL_POINT_PATTERN = /(€\s*)?(?<![\d.,])(\d{1,3})\.(\d{1,2})(?![\d.,]*\d)(?!\s*%)/g
+
+/**
+ * Every one/two-decimal point amount in `text` with the verdict of the printed
+ * line rule. Exported for the offline diagnosis, so a refused amount is
+ * reported with its own reason instead of disappearing silently.
+ */
+function decimalPointAmountTokens(text) {
+  const source = String(text || '')
+  const tokens = []
+  for (const m of source.matchAll(DECIMAL_POINT_PATTERN)) {
+    const hasEuroSign = typeof m[1] === 'string' && m[1].includes('€')
+    const raw = m[0].trim()
+    const index = m.index
+    const length = m[0].length
+    const digits = m[2]
+    const fraction = m[3]
+    const end = index + length
+    const after = source.slice(end, end + 12)
+    const before = source.slice(Math.max(0, index - 24), index)
+    const cents = fraction.length === 1 ? Number(fraction) * 10 : Number(fraction)
+    const token = { raw, index, length, amountMinorUnits: Number(digits) * 100 + cents, hasEuroSign, decimalPoint: true, reason: null }
+    if (/^0/.test(digits)) token.reason = 'leading_zero'
+    else if (index > 0 && /[\p{L}\p{N}]/u.test(source[index - 1])) token.reason = 'glued'
+    // A price is never glued to a word ("1.85st", "7.5x").
+    else if (/^\p{L}/u.test(after)) token.reason = 'glued'
+    else if (ORDINAL_MARKER_AFTER.test(after)) token.reason = 'ordinal'
+    else if (COUNTING_WORD_AFTER.test(after)) token.reason = 'unit'
+    else if (PER_PERSON_UNIT_AFTER.test(after)) token.reason = 'unit'
+    else if (NUMBERING_WORD_BEFORE.test(before)) token.reason = 'counting_word'
+    else if (VERSION_WORD_BEFORE.test(before)) token.reason = 'version'
+    else if (TIME_WORD_BEFORE.test(before)) token.reason = 'time'
+    // The second amount of "4.5 - 6.0" is a range, never one dish price.
+    else if (PRICE_RANGE_BEFORE.test(source.slice(Math.max(0, index - 12), index))) token.reason = 'price_range'
+    else if (isDateText(source.slice(Math.max(0, index - 16), end + 8))) token.reason = 'date'
+    else if (/\b(?:tel|telefoon|mobiel|gsm|fax)\b/i.test(before)) token.reason = 'phone'
+    // A one-decimal amount is money only at the end of the printed row/cell.
+    else if (!boundaryAfter(source, end)) token.reason = 'no_boundary'
+    else if (!printedNameBefore(source, index)) token.reason = 'no_name'
+    tokens.push(token)
+  }
+  return tokens
+}
+
+/** The decimal-point amounts of `text` that pass the printed line rule. */
+function findDecimalPointPrices(text) {
+  return decimalPointAmountTokens(text)
+    .filter((token) => token.reason === null)
+    .map(({ raw, index, length, amountMinorUnits, hasEuroSign }) => ({ raw, index, length, amountMinorUnits, hasEuroSign, decimalPoint: true }))
+}
+
 /**
  * Every printed price of one printed segment: the money parser above plus the
- * confirmed whole euros, in printed order. A whole euro that would overlap or
- * follow a money token is already that token and is skipped, so an amount is
- * never counted twice.
+ * confirmed whole euros and the one-decimal point amounts, in printed order. An
+ * amount the money parser already read is never counted twice, so "22.95" stays
+ * one money token and "4.5" is added exactly once.
  */
 function findPrintedPrices(text) {
   const source = String(text || '')
   const money = findPrices(source)
   const taken = money.map((price) => [price.index, price.index + price.length])
+  const notTaken = (price) => {
+    const end = price.index + price.length
+    if (taken.some(([start, stop]) => price.index < stop && start < end)) return false
+    return !/€\s*$/.test(source.slice(0, price.index))
+  }
   const whole = findWholeEuroPrices(source)
-    .filter((price) => {
-      const end = price.index + price.length
-      if (taken.some(([start, stop]) => price.index < stop && start < end)) return false
-      return !/€\s*$/.test(source.slice(0, price.index))
-    })
+    .filter(notTaken)
     .map((price) => ({ ...price, wholeEuro: true }))
-  return [...money, ...whole].sort((a, b) => a.index - b.index)
+  // BB2: the decimal-point family, only where the money parser read nothing.
+  const decimalPoint = findDecimalPointPrices(source).filter(notTaken)
+  return [...money, ...whole, ...decimalPoint].sort((a, b) => a.index - b.index)
 }
 
 const ON_REQUEST_PATTERN = /\b(op aanvraag|dagprijs|marktprijs|market price|price on request|p\.o\.a\.?)\b/i
@@ -2821,6 +2899,8 @@ module.exports = {
   findWholeEuroPrices,
   findPrintedPrices,
   wholeEuroAmountTokens,
+  findDecimalPointPrices,
+  decimalPointAmountTokens,
   isClockText,
   isDateText,
   displayName,

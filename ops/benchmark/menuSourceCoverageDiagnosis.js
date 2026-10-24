@@ -12,7 +12,7 @@
 // No file, network or database access here: the ops script loads the bytes.
 
 const { compareCaptureWithConcept, pricedLinesOfSource, sourceTextLines } = require('../../src/lib/menuSourceCoverage');
-const { wholeEuroAmountTokens } = require('../../src/lib/htmlMenuStructure');
+const { wholeEuroAmountTokens, decimalPointAmountTokens } = require('../../src/lib/htmlMenuStructure');
 
 const DIAGNOSIS_VERSION = 'menu-source-coverage-diagnosis/v1';
 const RAW_FILE_PATTERN = /^([a-z0-9][a-z0-9._-]*)-r(\d+)-c(\d+)-call(\d+)-([0-9a-f]{12})\.json\.txt$/i;
@@ -119,6 +119,54 @@ function wholeEuroReport(captures) {
   };
 }
 
+/**
+ * BB2 (Lead review 6384867373): what the decimal-point rule did on this source.
+ *
+ * Blossem prints "4.5", "3.0" and "4.0"; `findPrices` reads two decimals, so
+ * those lines were invisible to the card. The accepted records and every
+ * refusal reason are listed, exactly like the whole-euro report above, so a
+ * reviewer judges a false hit instead of trusting a count.
+ */
+function decimalPointReport(captures) {
+  const byReason = {};
+  const refusedExamples = [];
+  const accepted = [];
+  for (const capture of Array.isArray(captures) ? captures : []) {
+    for (const line of sourceTextLines(capture).lines) {
+      for (const token of decimalPointAmountTokens(line.raw)) {
+        if (token.reason === null) continue;
+        byReason[token.reason] = (byReason[token.reason] || 0) + 1;
+        if (refusedExamples.length < 8) {
+          refusedExamples.push({
+            token: token.raw,
+            reason: token.reason,
+            context: line.raw.slice(Math.max(0, token.index - 50), token.index + token.length + 30).replace(/\s+/g, ' ').trim(),
+          });
+        }
+      }
+    }
+    for (const record of pricedLinesOfSource(capture).filter((entry) => entry.decimalPoint === true)) {
+      if (accepted.length < 40) {
+        accepted.push({
+          line: record.lineNumber,
+          section: record.section,
+          name: record.name,
+          priceText: record.priceText,
+          text: record.text,
+          suspicious: SUSPICIOUS_PRICE_LINE.test(record.text) || SUSPICIOUS_PRICE_LINE.test(record.name || ''),
+        });
+      }
+    }
+  }
+  return {
+    accepted: accepted.length,
+    acceptedExamples: accepted,
+    refused: byReason,
+    refusedExamples,
+    suspicious: accepted.filter((entry) => entry.suspicious),
+  };
+}
+
 /** Every menu and every rejected passage of the answers, in file order. */
 function answerConcept(answers) {
   const menus = [];
@@ -181,6 +229,8 @@ function diagnoseSource({ sourceId, label, captureStatus, blockedReason, capture
     // AA1: the whole-euro rule, with every accepted record and every refusal
     // reason, so a false hit is reported instead of hidden in a total.
     wholeEuro: wholeEuroReport(usable),
+    // BB2: the same reporting for the decimal-point prices ("4.5").
+    decimalPoint: decimalPointReport(usable),
     answerFiles: (Array.isArray(answers) ? answers : []).map((answer) => answer.file),
     unreadableAnswers: Array.isArray(problems) ? problems : [],
   };
@@ -194,4 +244,5 @@ module.exports = {
   answerConcept,
   diagnoseSource,
   wholeEuroReport,
+  decimalPointReport,
 };
