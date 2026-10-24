@@ -1055,7 +1055,49 @@ geen plan- of Vercel-instelling gewijzigd. Regressie:
 - Geen automatische retry: een fout is een leesbare melding met de route naar de
   handmatige import, dus nooit dubbele kosten.
 
-### Budget (W4)
+### Indeling volgens de goedgekeurde mockup (Y2, review 6381657192)
+
+De eerste versie zette het AI-blok genest in stap 1 en liet na "Concept klaar"
+de handmatige stappen eronder staan. Dat wijkt af van de goedgekeurde mockup
+(versie 11, schermen 1-3), waarin AI de hoofdroute is en de handmatige import
+een secundaire link.
+
+Daarom is `/internal/menu-import` als volgt ingedeeld:
+
+- Na de bronkeuze staat eerst de zelfstandige kaart **"Bron kiezen"**
+  (`#mai-bron`) met restaurant en URL's, daarna de zelfstandige kaart
+  **"Laat AI de kaart lezen"** (`src/components/AiMenuReadBlock.js`,
+  `.mai-ai-card`). Het AI-blok zit niet meer in stap 1 en gebruikt dezelfde
+  bronvelden.
+- De handmatige stappen (prompt maken, kopiëren, plakken) zitten ingeklapt
+  achter de knop **"Liever zelf invoeren of plakken"** met
+  `aria-expanded`/`aria-controls`. Die knop opent stap 1 en 2 ter plaatse; nog
+  een klik klapt ze weer in. Met AI actief zijn de nummers 2 (prompt maken),
+  3 (antwoord plakken) en 4 (nalopen en opslaan); zonder AI blijven het de
+  vertrouwde 1, 2 en 3.
+- Na **"Concept klaar"** toont de kaart alleen het resultaat met **"Nalopen"**;
+  de handmatige stappen en het reviewblok blijven ingeklapt tot die klik. Het
+  reviewblok verschijnt pas daarna (`reviewOpen`) of na een expliciete
+  handmatige controle.
+- Zonder sleutel of vlag (`ai_not_configured`) is er geen AI-kaart en geen
+  AI-knop: de bestaande handmatige flow staat direct zichtbaar en er staat
+  rustig **"AI is niet ingesteld."** boven.
+- Op de batchplek (`BatchAnalysisView`) is het AI-blok een zelfstandige
+  `section` in het mislukte resultaat met dezelfde titel, uitleg, knop en
+  handmatige link (mockupscherm 1). De uitleg "Geen AI" is vervangen door een
+  eerlijke regel over de AI-hulp.
+
+Bewijs: `ops/browser/run-menu-review-browser-check.js` (`aiReadScenario`,
+`aiReadBatchScenario`, `aiReadKeyboardScenario`) controleert de zelfstandige
+kaart, de ingeklapte en uitgeklapte handmatige route, het resultaat met
+"Nalopen", de stand zonder AI en de batchplek. Screenshots op 390 px, licht en
+donker: `ai-read-block`, `ai-read-manual`, `ai-read-busy`, `ai-read-done`,
+`ai-read-review`, `ai-read-off` en `ai-read-batch`, elk met `-390-light.png` en
+`-390-dark.png`, vastgelegd in
+`ops/browser/evidence/menu-review-browser-evidence.json` (bestand, formaat en
+sha256). Dit blijft **fixture- en ontwikkelaarsbewijs**, geen onafhankelijke
+review of browseracceptatie.
+
 
 Het maandverbruik komt uit de duurzame conceptmetadata van eerdere AI-lezingen
 (`captured_content.importProvenance.cost`), zonder nieuwe tabel of migratie.

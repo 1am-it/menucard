@@ -1,12 +1,17 @@
 'use client'
 
 // #59 / BE-21 "Lees met AI" — the one block that offers the AI reading
-// (Lead review 6380804419, W1/W3/W4/W5).
+// (Lead review 6380804419, W1/W3/W4/W5; layout Y2 of review 6381657192).
 //
-// It is shown where a source or menu could not be read automatically and on the
-// manual import page. It never decides anything itself: the server reports
-// whether AI is configured (W3) and what this month already cost (W4); this
-// block only shows that and passes one click through.
+// It is a standalone card and the primary route on /internal/menu-import: it is
+// shown after the source choice, never nested inside the manual "Prompt maken"
+// step. The manual steps stay collapsed behind one link, so the AI reading stays
+// the main path and the old three-step flow stays available unchanged when AI is
+// not configured.
+//
+// It never decides anything itself: the server reports whether AI is configured
+// (W3) and what this month already cost (W4); this block only shows that and
+// passes one click through.
 //
 // States: loading (no status yet), not configured ("AI is niet ingesteld", no
 // button), ready, reading (progress), done ("Concept klaar: N gerechten · X in
@@ -27,7 +32,8 @@ export default function AiMenuReadBlock({
   busy = false,
   canRead = true,
   hint = null,
-  manualHref = null,
+  manualOpen = false,
+  onManual = null,
   onRead,
   onReview,
   title = 'Laat AI de kaart lezen',
@@ -39,10 +45,10 @@ export default function AiMenuReadBlock({
   const failed = phase === 'error'
 
   return (
-    <section className="mai-panel mai-ai" aria-labelledby="mai-ai-title">
-      <h3 id="mai-ai-title" className="mai-panel-title">
+    <section className="bta-card mai-ai-card mai-ai" aria-labelledby="mai-ai-title">
+      <h2 id="mai-ai-title" className="mai-step-title">
         {title}
-      </h3>
+      </h2>
 
       {statusError ? (
         <p className="mai-why" role="status">
@@ -135,11 +141,20 @@ export default function AiMenuReadBlock({
         </>
       ) : null}
 
-      {manualHref ? (
+      {onManual ? (
         <p className="mai-why">
-          <a className="mai-link" href={manualHref}>
+          {/* Y2: the manual steps are collapsed behind this link. It stays
+              visible after a finished reading, so the expansion state is the
+              only thing that changes. */}
+          <button
+            type="button"
+            className="mai-link mai-linkbtn"
+            aria-expanded={manualOpen}
+            aria-controls="mai-manual"
+            onClick={onManual}
+          >
             Liever zelf invoeren of plakken
-          </a>
+          </button>
         </p>
       ) : null}
     </section>

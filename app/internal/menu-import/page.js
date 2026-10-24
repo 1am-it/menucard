@@ -106,6 +106,12 @@ export default function ManualMenuImportPage() {
   const [aiResult, setAiResult] = useState(null)
   const [aiError, setAiError] = useState(null)
   const [aiJobId, setAiJobId] = useState('')
+  // Y2 (Lead review 6381657192): with AI configured the reading is the primary
+  // route and the manual three-step import is collapsed behind one link. A
+  // finished reading keeps those steps collapsed; the review card only opens
+  // after the explicit "Nalopen" click (or after a manual check).
+  const [manualOpen, setManualOpen] = useState(false)
+  const [reviewOpen, setReviewOpen] = useState(false)
   const autoStarted = useRef(false)
 
   useEffect(() => {
@@ -128,6 +134,13 @@ export default function ManualMenuImportPage() {
   const aiName = aiChoice === 'Anders' ? aiOther.trim() : aiChoice
   const restaurantId = selectedRestaurant ? selectedRestaurant.id : ''
   const restaurantName = selectedRestaurant ? selectedRestaurant.name : ''
+  // While the server status is still loading the manual flow stays visible; it
+  // only collapses once the server confirms that AI is available. Without a key
+  // or flag the manual flow is exactly the old one and stays directly visible.
+  const aiConfigured = Boolean(aiStatus && aiStatus.enabled)
+  const aiNotConfigured = Boolean(aiStatusError || (aiStatus && !aiStatus.enabled))
+  const manualVisible = !aiConfigured || manualOpen
+  const reviewVisible = !aiConfigured || manualOpen || reviewOpen
 
   const api = useCallback(
     async (path, body, method = 'POST') => {
@@ -317,6 +330,10 @@ export default function ManualMenuImportPage() {
       adoptStep(result.data)
       setAnswer('')
       setPasteSummary(null)
+      // A finished manual check opens the review card, as before. With AI this
+      // is the explicit manual route; a normal AI reading opens it only through
+      // "Nalopen" (Y2).
+      setReviewOpen(true)
     }
     setBusy(false)
   }
@@ -432,11 +449,21 @@ export default function ManualMenuImportPage() {
     setBusy(false)
   }
 
-  // W5: the "Nalopen" button of the AI reading opens the existing review step.
+  // W5 + Y2: the "Nalopen" button of the AI reading opens the existing review
+  // step. The card is mounted first, then scrolled to on the next frame.
   function focusReview() {
-    const target = typeof document !== 'undefined' ? document.getElementById('mai-s3') : null
-    if (target && typeof target.scrollIntoView === 'function') target.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    if (target && typeof target.focus === 'function') target.focus()
+    setReviewOpen(true)
+    if (typeof window === 'undefined') return
+    window.requestAnimationFrame(() => {
+      const target = document.getElementById('mai-s3')
+      if (target && typeof target.scrollIntoView === 'function') target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      if (target && typeof target.focus === 'function') target.focus()
+    })
+  }
+
+  // Y2: "Liever zelf invoeren of plakken" expands the old manual steps in place.
+  function toggleManual() {
+    setManualOpen((open) => !open)
   }
 
   /**
@@ -451,6 +478,7 @@ export default function ManualMenuImportPage() {
       setError(null)
       setMessage(null)
       setAiPhase('reading')
+      setReviewOpen(false)
       try {
         let payload
         if (jobId) {
@@ -547,6 +575,82 @@ export default function ManualMenuImportPage() {
     [review]
   )
 
+  // Y2: the source choice belongs to both routes. With AI it is its own card
+  // before the reading; without AI these fields stay inside step 1 exactly as
+  // before, so the old manual flow is unchanged.
+  const sourceFields = (
+    <>
+      <div className="mai-field">
+        <label className="bta-label" htmlFor="mai-restaurant">
+          Restaurant (zoek op naam)
+        </label>
+        {selectedRestaurant ? (
+          <div className="mai-chosen">
+            <span className="mai-chosen-name">
+              {selectedRestaurant.name}
+              {selectedRestaurant.buurt ? ` · ${selectedRestaurant.buurt}` : ''}
+            </span>
+            <button
+              type="button"
+              className="stg-btn-secondary mai-btn"
+              onClick={() => {
+                setSelectedRestaurant(null)
+                setRestaurantQuery('')
+                setRestaurantChoices([])
+              }}
+            >
+              Wijzig
+            </button>
+          </div>
+        ) : (
+          <>
+            <input
+              id="mai-restaurant"
+              className="mai-input"
+              type="search"
+              value={restaurantQuery}
+              onChange={(event) => changeRestaurantQuery(event.target.value)}
+              autoComplete="off"
+              placeholder="Typ de naam van het restaurant"
+              aria-describedby="mai-restaurant-help"
+            />
+            <p id="mai-restaurant-help" className="bta-muted">
+              Kies uit de bestaande restaurantlijst. Deze kaart hoort bij dit restaurant en deze vestiging.
+            </p>
+            {restaurantChoices.length > 0 ? (
+              <ul className="mai-choices" aria-label="Gevonden restaurants">
+                {restaurantChoices.map((choice) => (
+                  <li key={choice.id}>
+                    <button type="button" className="mai-choice" onClick={() => chooseRestaurant(choice)}>
+                      {choice.name}
+                      {choice.buurt ? ` · ${choice.buurt}` : ''}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+            {restaurantQuery.trim().length >= 2 && restaurantChoices.length === 0 ? (
+              <p className="bta-muted">Geen restaurant gevonden met deze naam.</p>
+            ) : null}
+          </>
+        )}
+      </div>
+      <div className="mai-field">
+        <label className="bta-label" htmlFor="mai-urls">
+          Bron-URL&apos;s (één per regel, maximaal 5)
+        </label>
+        <textarea
+          id="mai-urls"
+          className="bta-textarea mai-urls"
+          value={urls}
+          onChange={(event) => setUrls(event.target.value)}
+          spellCheck="false"
+        />
+        <p className="bta-muted">Gebruik de pagina waar de menukaart staat, niet alleen de homepage.</p>
+      </div>
+    </>
+  )
+
 
   if (session === undefined) {
     return (
@@ -576,6 +680,14 @@ export default function ManualMenuImportPage() {
             {restaurantName || 'Restaurant'} · drie stappen · het antwoord van de AI is een voorstel, geen bewijs
           </p>
         </div>
+
+        {/* Y2: without a key or flag the page keeps the old manual flow and
+            says so quietly, without a card or a disabled button. */}
+        {aiNotConfigured ? (
+          <p className="mai-why" role="status">
+            AI is niet ingesteld.
+          </p>
+        ) : null}
 
         {error ? (
           <div className="di-banner di-banner-danger" role="alert">
@@ -650,446 +762,367 @@ export default function ManualMenuImportPage() {
         ) : null}
 
         <div className="mai-steps">
-          <section className="bta-card" aria-labelledby="mai-s1">
-            <div className="mai-step-head">
-              <span className="step-num" aria-hidden="true">
-                1
-              </span>
-              <h2 id="mai-s1" className="mai-step-title">
-                Prompt maken
-              </h2>
-            </div>
-            <div className="mai-field">
-              <label className="bta-label" htmlFor="mai-restaurant">
-                Restaurant (zoek op naam)
-              </label>
-              {selectedRestaurant ? (
-                <div className="mai-chosen">
-                  <span className="mai-chosen-name">
-                    {selectedRestaurant.name}
-                    {selectedRestaurant.buurt ? ` · ${selectedRestaurant.buurt}` : ''}
+          {aiConfigured ? (
+            <>
+              <section className="bta-card" aria-labelledby="mai-bron">
+                <div className="mai-step-head">
+                  <span className="step-num" aria-hidden="true">
+                    1
                   </span>
-                  <button
-                    type="button"
-                    className="stg-btn-secondary mai-btn"
-                    onClick={() => {
-                      setSelectedRestaurant(null)
-                      setRestaurantQuery('')
-                      setRestaurantChoices([])
-                    }}
-                  >
-                    Wijzig
-                  </button>
+                  <h2 id="mai-bron" className="mai-step-title">
+                    Bron kiezen
+                  </h2>
                 </div>
+                {sourceFields}
+              </section>
+
+              {/* Y2: the AI reading is a standalone card right after the
+                  source choice, never inside the manual "Prompt maken" step. */}
+              <AiMenuReadBlock
+                status={aiStatus}
+                statusError={aiStatusError}
+                phase={aiPhase}
+                result={aiResult}
+                error={aiError}
+                busy={busy}
+                canRead={Boolean(restaurantId) || Boolean(aiJobId)}
+                hint="Kies eerst een restaurant en een bron-URL."
+                manualOpen={manualOpen}
+                onManual={toggleManual}
+                onRead={() => readWithAi({ jobId: aiJobId })}
+                onReview={focusReview}
+              />
+            </>
+          ) : null}
+
+          {manualVisible ? (
+            <div id="mai-manual" className="mai-steps mai-manual">
+                <section className="bta-card" aria-labelledby="mai-s1">
+                  <div className="mai-step-head">
+                    <span className="step-num" aria-hidden="true">
+                      {aiConfigured ? 2 : 1}
+                    </span>
+                    <h2 id="mai-s1" className="mai-step-title">
+                      Prompt maken
+                    </h2>
+                  </div>
+                  {aiConfigured ? null : sourceFields}
+
+              <div className="mai-actions">
+                <button type="button" className="di-btn-primary" onClick={makePrompt} disabled={busy || !restaurantId || !urls.trim()}>
+                  Prompt maken
+                </button>
+                <span className="bta-muted">De app haalt de bronnen veilig op en zet de tekst in de prompt.</span>
+              </div>
+
+              {bundle ? (
+                <>
+                  <ul className="mai-source-list" aria-label="Bronnen in deze prompt">
+                    {bundle.sources.map((source) => (
+                      <li key={source.id} className={`mai-source ${source.hasText ? 'mai-source--ok' : 'mai-source--ask'}`}>
+                        <span className="mai-source-mark" aria-hidden="true">
+                          {source.hasText ? '✓' : '!'}
+                        </span>
+                        <span className="mai-source-name">
+                          {source.id} · {source.kind === 'pdf' ? 'PDF' : source.kind === 'html' ? 'website' : 'bron'}
+                        </span>
+                        <span className="mai-source-line">{sourceLine(source)}</span>
+                        <span className="mai-source-url">{source.url}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mai-actions">
+                    <button type="button" className="di-btn-primary" onClick={copyPrompt}>
+                      Kopieer prompt
+                    </button>
+                    <span className="bta-muted">Plak de prompt in de AI. Voeg een scan zelf toe; de rest gaat mee.</span>
+                  </div>
+                  {validUntil ? (
+                    <p className="mai-validity">
+                      Geldig tot {clockOf(validUntil)}. Daarna maak je gewoon een nieuwe prompt.
+                    </p>
+                  ) : null}
+                  <details className="mai-details">
+                    <summary>Technische details</summary>
+                    <dl className="bta-facts">
+                      <div>
+                        <dt>Instructie</dt>
+                        <dd>
+                          {bundle.protocol.file} · v{bundle.protocol.version} · {bundle.protocol.hash.slice(0, 12)}…
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>Schemaversie</dt>
+                        <dd>
+                          {bundle.protocol.schemaVersion} · {bundle.schemaVersion}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>Exportbundel</dt>
+                        <dd>
+                          {bundle.bundleId} · {bundle.bundleHash.slice(0, 12)}…
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>Geldig tot</dt>
+                        <dd>{new Date(bundle.expiresAt).toLocaleString('nl-NL')}</dd>
+                      </div>
+                    </dl>
+                    <details className="mai-details">
+                      <summary>Bekijk de prompt</summary>
+                      <pre className="mai-prompt" tabIndex="0">
+                        {prompt}
+                      </pre>
+                    </details>
+                    <p className="bta-muted">De prompt wordt niet gelogd en niet in de browseropslag bewaard.</p>
+                  </details>
+                </>
+              ) : null}
+            </section>
+
+
+            <section className="bta-card" aria-labelledby="mai-s2">
+              <div className="mai-step-head">
+                <span className="step-num" aria-hidden="true">
+                  {aiConfigured ? 3 : 2}
+                </span>
+                <h2 id="mai-s2" className="mai-step-title">
+                  Antwoord plakken
+                </h2>
+              </div>
+              <div className="mai-field">
+                <label className="bta-label" htmlFor="mai-ai">
+                  Welke AI gebruikte je?
+                </label>
+                <select
+                  id="mai-ai"
+                  className="mai-select"
+                  value={aiChoice}
+                  onChange={(event) => setAiChoice(event.target.value)}
+                  aria-describedby="mai-ai-help"
+                >
+                  {AI_CHOICES.map((choice) => (
+                    <option key={choice} value={choice}>
+                      {choice}
+                    </option>
+                  ))}
+                  <option value="Anders">Anders</option>
+                </select>
+                {aiChoice === 'Anders' ? (
+                  <input
+                    className="mai-input"
+                    type="text"
+                    value={aiOther}
+                    maxLength={80}
+                    placeholder="Vul de naam zelf in"
+                    onChange={(event) => setAiOther(event.target.value)}
+                    aria-label="Naam van de AI"
+                  />
+                ) : null}
+                <p id="mai-ai-help" className="bta-muted">
+                  Zelf ingevuld. De app kan niet zien welke AI je gebruikte; daarom staat er later &quot;zelfgerapporteerd&quot;.
+                </p>
+              </div>
+
+              {received ? (
+                <p className="mai-received" role="status">
+                  ✓ Antwoord ontvangen: {received.menus} {received.menus === 1 ? 'menukaart' : 'menukaarten'}, {received.items}{' '}
+                  {received.items === 1 ? 'gerecht' : 'gerechten'}
+                </p>
+              ) : null}
+
+              <div className="mai-field">
+                <label className="bta-label" htmlFor="mai-answer">
+                  Plak hier het volledige antwoord
+                </label>
+                {pasteSummary ? (
+                  <div className="mai-pasted">
+                    <span role="status">
+                      ✓ Antwoord geplakt ({pasteSummary.chars} tekens)
+                    </span>
+                    <button type="button" className="stg-btn-secondary mai-btn" onClick={clearPasted}>
+                      Wissen
+                    </button>
+                  </div>
+                ) : (
+                  <textarea
+                    id="mai-answer"
+                    className="bta-textarea"
+                    defaultValue=""
+                    onPaste={(event) => {
+                      const text = event.clipboardData ? event.clipboardData.getData('text') : ''
+                      if (text) {
+                        event.preventDefault()
+                        acceptPastedText(text)
+                      }
+                    }}
+                    onChange={(event) => {
+                      const text = event.target.value
+                      event.target.value = ''
+                      if (text) acceptPastedText(text)
+                    }}
+                    spellCheck="false"
+                    placeholder="Plak het hele antwoord. De app haalt het codeblok er zelf uit."
+                    aria-describedby="mai-answer-help"
+                  />
+                )}
+                <p id="mai-answer-help" className="bta-muted">
+                  {pasteSummary ? `${pasteSummary.bytes} bytes` : 'Maximaal 1 MiB'} · groter dan de grens wordt niet gelezen. De app
+                  toont nooit JSON uit het antwoord.
+                </p>
+              </div>
+              <div className="mai-actions">
+                <button
+                  type="button"
+                  className="di-btn-primary"
+                  onClick={checkAnswer}
+                  disabled={busy || !bundle || !answer.trim() || !aiName}
+                >
+                  Controleren
+                </button>
+                <span className="bta-muted">
+                  Lukt het codeblok niet, dan zegt de app gewoon: kopieer alleen het codeblok. Je krijgt nooit een technische parsefout.
+                </span>
+              </div>
+            </section>
+            </div>
+          ) : null}
+
+          {reviewVisible ? (
+            <section className="bta-card" aria-labelledby="mai-s3">
+              <div className="mai-step-head">
+                <span className="step-num" aria-hidden="true">
+                  {aiConfigured ? 4 : 3}
+                </span>
+                <h2 id="mai-s3" className="mai-step-title">
+                  Nalopen en opslaan
+                </h2>
+              </div>
+
+              {!review ? (
+                <p className="bta-muted">Controleer eerst een antwoord. Daarna staan hier alleen de regels die aandacht vragen.</p>
               ) : (
                 <>
-                  <input
-                    id="mai-restaurant"
-                    className="mai-input"
-                    type="search"
-                    value={restaurantQuery}
-                    onChange={(event) => changeRestaurantQuery(event.target.value)}
-                    autoComplete="off"
-                    placeholder="Typ de naam van het restaurant"
-                    aria-describedby="mai-restaurant-help"
-                  />
-                  <p id="mai-restaurant-help" className="bta-muted">
-                    Kies uit de bestaande restaurantlijst. Deze kaart hoort bij dit restaurant en deze vestiging.
+                  <p className="mai-summary" role="status">
+                    {review.summary.items} {review.summary.items === 1 ? 'gerecht' : 'gerechten'} · {review.summary.valid} in orde ·{' '}
+                    {review.summary.pending} nalopen
                   </p>
-                  {restaurantChoices.length > 0 ? (
-                    <ul className="mai-choices" aria-label="Gevonden restaurants">
-                      {restaurantChoices.map((choice) => (
-                        <li key={choice.id}>
-                          <button type="button" className="mai-choice" onClick={() => chooseRestaurant(choice)}>
-                            {choice.name}
-                            {choice.buurt ? ` · ${choice.buurt}` : ''}
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : null}
-                  {restaurantQuery.trim().length >= 2 && restaurantChoices.length === 0 ? (
-                    <p className="bta-muted">Geen restaurant gevonden met deze naam.</p>
-                  ) : null}
-                </>
-              )}
-            </div>
-            <div className="mai-field">
-              <label className="bta-label" htmlFor="mai-urls">
-                Bron-URL&apos;s (één per regel, maximaal 5)
-              </label>
-              <textarea
-                id="mai-urls"
-                className="bta-textarea mai-urls"
-                value={urls}
-                onChange={(event) => setUrls(event.target.value)}
-                spellCheck="false"
-              />
-              <p className="bta-muted">Gebruik de pagina waar de menukaart staat, niet alleen de homepage.</p>
-            </div>
-            <div className="mai-actions">
-              <button type="button" className="di-btn-primary" onClick={makePrompt} disabled={busy || !restaurantId || !urls.trim()}>
-                Prompt maken
-              </button>
-              <span className="bta-muted">De app haalt de bronnen veilig op en zet de tekst in de prompt.</span>
-            </div>
-
-            {/* W1: the AI reading sits next to the manual steps, at the place
-                where a source could not be read automatically. */}
-            <AiMenuReadBlock
-              status={aiStatus}
-              statusError={aiStatusError}
-              phase={aiPhase}
-              result={aiResult}
-              error={aiError}
-              busy={busy}
-              canRead={Boolean(restaurantId) || Boolean(aiJobId)}
-              hint="Kies eerst een restaurant en een bron-URL."
-              manualHref={aiJobId ? undefined : '#mai-s1'}
-              onRead={() => readWithAi({ jobId: aiJobId })}
-              onReview={focusReview}
-            />
-
-            {bundle ? (
-              <>
-                <ul className="mai-source-list" aria-label="Bronnen in deze prompt">
-                  {bundle.sources.map((source) => (
-                    <li key={source.id} className={`mai-source ${source.hasText ? 'mai-source--ok' : 'mai-source--ask'}`}>
-                      <span className="mai-source-mark" aria-hidden="true">
-                        {source.hasText ? '✓' : '!'}
+                  {/* W6: which reading produced this review, with its own cost. */}
+                  {aiResult ? (
+                    <p className="mai-origin" role="status">
+                      <span className="bta-tag">Gelezen door AI</span>
+                      <span className="bta-muted">
+                        {aiResult.ai && aiResult.ai.label ? aiResult.ai.label : 'AI-lezing'}
+                        {aiResult.cost && aiResult.cost.known
+                          ? ` · kosten € ${(aiResult.cost.eurCents / 100).toFixed(2).replace('.', ',')}`
+                          : ' · kosten niet gemeten'}
                       </span>
-                      <span className="mai-source-name">
-                        {source.id} · {source.kind === 'pdf' ? 'PDF' : source.kind === 'html' ? 'website' : 'bron'}
-                      </span>
-                      <span className="mai-source-line">{sourceLine(source)}</span>
-                      <span className="mai-source-url">{source.url}</span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="mai-actions">
-                  <button type="button" className="di-btn-primary" onClick={copyPrompt}>
-                    Kopieer prompt
-                  </button>
-                  <span className="bta-muted">Plak de prompt in de AI. Voeg een scan zelf toe; de rest gaat mee.</span>
-                </div>
-                {validUntil ? (
-                  <p className="mai-validity">
-                    Geldig tot {clockOf(validUntil)}. Daarna maak je gewoon een nieuwe prompt.
+                    </p>
+                  ) : null}
+                  {/* V2 (review 6377050602): wat het systeem zelf heeft bijgesteld.
+                      Een telling of status die uit het antwoord zelf volgt, in
+                      gewone taal. Niets wordt stil aangepast. */}
+                  {Array.isArray(review.notices) && review.notices.length > 0 ? (
+                    <div className="mai-notices" role="status">
+                      <p className="mai-notices-title">Door het systeem bijgesteld</p>
+                      <ul className="mai-notice-list">
+                        {review.notices.map((notice) => (
+                          <li key={notice}>{notice}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                  <p className="bta-muted">
+                    Alleen de regels die aandacht vragen staan open. De regels die in orde zijn, zitten ingeklapt. Er is geen
+                    &quot;alles accepteren&quot;.
                   </p>
-                ) : null}
-                <details className="mai-details">
-                  <summary>Technische details</summary>
-                  <dl className="bta-facts">
-                    <div>
-                      <dt>Instructie</dt>
-                      <dd>
-                        {bundle.protocol.file} · v{bundle.protocol.version} · {bundle.protocol.hash.slice(0, 12)}…
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>Schemaversie</dt>
-                      <dd>
-                        {bundle.protocol.schemaVersion} · {bundle.schemaVersion}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>Exportbundel</dt>
-                      <dd>
-                        {bundle.bundleId} · {bundle.bundleHash.slice(0, 12)}…
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>Geldig tot</dt>
-                      <dd>{new Date(bundle.expiresAt).toLocaleString('nl-NL')}</dd>
-                    </div>
-                  </dl>
-                  <details className="mai-details">
-                    <summary>Bekijk de prompt</summary>
-                    <pre className="mai-prompt" tabIndex="0">
-                      {prompt}
-                    </pre>
-                  </details>
-                  <p className="bta-muted">De prompt wordt niet gelogd en niet in de browseropslag bewaard.</p>
-                </details>
-              </>
-            ) : null}
-          </section>
 
-
-          <section className="bta-card" aria-labelledby="mai-s2">
-            <div className="mai-step-head">
-              <span className="step-num" aria-hidden="true">
-                2
-              </span>
-              <h2 id="mai-s2" className="mai-step-title">
-                Antwoord plakken
-              </h2>
-            </div>
-            <div className="mai-field">
-              <label className="bta-label" htmlFor="mai-ai">
-                Welke AI gebruikte je?
-              </label>
-              <select
-                id="mai-ai"
-                className="mai-select"
-                value={aiChoice}
-                onChange={(event) => setAiChoice(event.target.value)}
-                aria-describedby="mai-ai-help"
-              >
-                {AI_CHOICES.map((choice) => (
-                  <option key={choice} value={choice}>
-                    {choice}
-                  </option>
-                ))}
-                <option value="Anders">Anders</option>
-              </select>
-              {aiChoice === 'Anders' ? (
-                <input
-                  className="mai-input"
-                  type="text"
-                  value={aiOther}
-                  maxLength={80}
-                  placeholder="Vul de naam zelf in"
-                  onChange={(event) => setAiOther(event.target.value)}
-                  aria-label="Naam van de AI"
-                />
-              ) : null}
-              <p id="mai-ai-help" className="bta-muted">
-                Zelf ingevuld. De app kan niet zien welke AI je gebruikte; daarom staat er later &quot;zelfgerapporteerd&quot;.
-              </p>
-            </div>
-
-            {received ? (
-              <p className="mai-received" role="status">
-                ✓ Antwoord ontvangen: {received.menus} {received.menus === 1 ? 'menukaart' : 'menukaarten'}, {received.items}{' '}
-                {received.items === 1 ? 'gerecht' : 'gerechten'}
-              </p>
-            ) : null}
-
-            <div className="mai-field">
-              <label className="bta-label" htmlFor="mai-answer">
-                Plak hier het volledige antwoord
-              </label>
-              {pasteSummary ? (
-                <div className="mai-pasted">
-                  <span role="status">
-                    ✓ Antwoord geplakt ({pasteSummary.chars} tekens)
-                  </span>
-                  <button type="button" className="stg-btn-secondary mai-btn" onClick={clearPasted}>
-                    Wissen
-                  </button>
-                </div>
-              ) : (
-                <textarea
-                  id="mai-answer"
-                  className="bta-textarea"
-                  defaultValue=""
-                  onPaste={(event) => {
-                    const text = event.clipboardData ? event.clipboardData.getData('text') : ''
-                    if (text) {
-                      event.preventDefault()
-                      acceptPastedText(text)
-                    }
-                  }}
-                  onChange={(event) => {
-                    const text = event.target.value
-                    event.target.value = ''
-                    if (text) acceptPastedText(text)
-                  }}
-                  spellCheck="false"
-                  placeholder="Plak het hele antwoord. De app haalt het codeblok er zelf uit."
-                  aria-describedby="mai-answer-help"
-                />
-              )}
-              <p id="mai-answer-help" className="bta-muted">
-                {pasteSummary ? `${pasteSummary.bytes} bytes` : 'Maximaal 1 MiB'} · groter dan de grens wordt niet gelezen. De app
-                toont nooit JSON uit het antwoord.
-              </p>
-            </div>
-            <div className="mai-actions">
-              <button
-                type="button"
-                className="di-btn-primary"
-                onClick={checkAnswer}
-                disabled={busy || !bundle || !answer.trim() || !aiName}
-              >
-                Controleren
-              </button>
-              <span className="bta-muted">
-                Lukt het codeblok niet, dan zegt de app gewoon: kopieer alleen het codeblok. Je krijgt nooit een technische parsefout.
-              </span>
-            </div>
-          </section>
-
-
-          <section className="bta-card" aria-labelledby="mai-s3">
-            <div className="mai-step-head">
-              <span className="step-num" aria-hidden="true">
-                3
-              </span>
-              <h2 id="mai-s3" className="mai-step-title">
-                Nalopen en opslaan
-              </h2>
-            </div>
-
-            {!review ? (
-              <p className="bta-muted">Controleer eerst een antwoord. Daarna staan hier alleen de regels die aandacht vragen.</p>
-            ) : (
-              <>
-                <p className="mai-summary" role="status">
-                  {review.summary.items} {review.summary.items === 1 ? 'gerecht' : 'gerechten'} · {review.summary.valid} in orde ·{' '}
-                  {review.summary.pending} nalopen
-                </p>
-                {/* W6: which reading produced this review, with its own cost. */}
-                {aiResult ? (
-                  <p className="mai-origin" role="status">
-                    <span className="bta-tag">Gelezen door AI</span>
+                  <div className="mai-actions">
+                    <button type="button" className="stg-btn-secondary mai-btn" disabled={busy || openRows.filter((row) => row.askAi).length === 0} onClick={askAllOpen}>
+                      Vraag AI over alle open punten
+                    </button>
                     <span className="bta-muted">
-                      {aiResult.ai && aiResult.ai.label ? aiResult.ai.label : 'AI-lezing'}
-                      {aiResult.cost && aiResult.cost.known
-                        ? ` · kosten € ${(aiResult.cost.eurCents / 100).toFixed(2).replace('.', ',')}`
-                        : ' · kosten niet gemeten'}
+                      Eén vraag over de punten waar de AI iets kan toevoegen. Elk antwoord wordt apart gecontroleerd; er is geen
+                      &quot;alles overnemen&quot;.
                     </span>
-                  </p>
-                ) : null}
-                {/* V2 (review 6377050602): wat het systeem zelf heeft bijgesteld.
-                    Een telling of status die uit het antwoord zelf volgt, in
-                    gewone taal. Niets wordt stil aangepast. */}
-                {Array.isArray(review.notices) && review.notices.length > 0 ? (
-                  <div className="mai-notices" role="status">
-                    <p className="mai-notices-title">Door het systeem bijgesteld</p>
-                    <ul className="mai-notice-list">
-                      {review.notices.map((notice) => (
-                        <li key={notice}>{notice}</li>
-                      ))}
-                    </ul>
                   </div>
-                ) : null}
-                <p className="bta-muted">
-                  Alleen de regels die aandacht vragen staan open. De regels die in orde zijn, zitten ingeklapt. Er is geen
-                  &quot;alles accepteren&quot;.
-                </p>
 
-                <div className="mai-actions">
-                  <button type="button" className="stg-btn-secondary mai-btn" disabled={busy || openRows.filter((row) => row.askAi).length === 0} onClick={askAllOpen}>
-                    Vraag AI over alle open punten
-                  </button>
-                  <span className="bta-muted">
-                    Eén vraag over de punten waar de AI iets kan toevoegen. Elk antwoord wordt apart gecontroleerd; er is geen
-                    &quot;alles overnemen&quot;.
-                  </span>
-                </div>
-
-                {allPrompt ? (
-                  <div className="mai-panel">
-                    <p className="mai-panel-title">Vraag AI over alle open punten</p>
-                    <pre className="mai-prompt" tabIndex="0">
-                      {allPrompt}
-                    </pre>
-                    <textarea
-                      className="bta-textarea"
-                      value={allAnswer}
-                      onChange={(event) => setAllAnswer(event.target.value)}
-                      placeholder="Plak hier het antwoord over deze regels"
-                      aria-label="Antwoord over alle open punten"
-                    />
-                    <div className="mai-row-actions">
-                      <button type="button" className="di-btn-primary mai-btn" disabled={busy || !allAnswer.trim()} onClick={submitAllOpen}>
-                        Controleren
-                      </button>
-                      <button type="button" className="stg-btn-secondary mai-btn" onClick={() => setAllPrompt('')}>
-                        Annuleer
-                      </button>
+                  {allPrompt ? (
+                    <div className="mai-panel">
+                      <p className="mai-panel-title">Vraag AI over alle open punten</p>
+                      <pre className="mai-prompt" tabIndex="0">
+                        {allPrompt}
+                      </pre>
+                      <textarea
+                        className="bta-textarea"
+                        value={allAnswer}
+                        onChange={(event) => setAllAnswer(event.target.value)}
+                        placeholder="Plak hier het antwoord over deze regels"
+                        aria-label="Antwoord over alle open punten"
+                      />
+                      <div className="mai-row-actions">
+                        <button type="button" className="di-btn-primary mai-btn" disabled={busy || !allAnswer.trim()} onClick={submitAllOpen}>
+                          Controleren
+                        </button>
+                        <button type="button" className="stg-btn-secondary mai-btn" onClick={() => setAllPrompt('')}>
+                          Annuleer
+                        </button>
+                      </div>
+                      <p className="mai-why">Maximaal 10 regels per vraag. Een antwoord dat een andere regel raakt, wordt geweigerd.</p>
                     </div>
-                    <p className="mai-why">Maximaal 10 regels per vraag. Een antwoord dat een andere regel raakt, wordt geweigerd.</p>
-                  </div>
-                ) : null}
+                  ) : null}
 
-                <ul className="mai-review-list">
-                  {openRows.map((row) => {
-                    const badge = stateBadge(row)
-                    const variants = Array.isArray(row.priceVariants) ? row.priceVariants : []
-                    // W6: a row without any price gets "Prijs onbekend" as its
-                    // explicit choice; "Klopt" would silently keep it unpriced.
-                    const priceMissing = row.code === 'price_unknown' || row.code === 'price_on_request'
-                    return (
-                      <li key={row.id} className={`mai-review-row ${row.state === 'error' ? 'mai-review-row--blocked' : ''}`}>
-                        <div className="mai-review-head">
-                          <span className="mai-review-name">
-                            {row.name} <span className="mai-review-price">{row.priceText}</span>
-                          </span>
-                          <span className={`status-badge status-badge--${badge.tone}`}>
-                            <span>{badge.label}</span>
-                          </span>
-                        </div>
-                        <p className="mai-why">
-                          {row.pathLabel}
-                          {row.locator ? ` · ${row.locator}` : ''}
-                        </p>
-                        {row.quote ? <p className="mai-quote">“{row.quote}”</p> : null}
-
-
-                        {row.code === 'price_variant' ? (
-                          <div className="mai-row-actions">
-                            <select
-                              className="mai-select"
-                              aria-label={`Kies de prijs voor ${row.name}`}
-                              value={variantChoice[row.id] === undefined ? '' : String(variantChoice[row.id])}
-                              onChange={(event) => setVariantChoice({ ...variantChoice, [row.id]: event.target.value })}
-                            >
-                              <option value="">Kies een prijs</option>
-                              {variants.map((variant, index) => (
-                                <option key={`${row.id}-${index}`} value={String(index)}>
-                                  {variant.label || `Prijs ${index + 1}`}
-                                  {Number.isInteger(variant.amountMinorUnits)
-                                    ? ` € ${(variant.amountMinorUnits / 100).toFixed(2).replace('.', ',')}`
-                                    : ''}
-                                </option>
-                              ))}
-                            </select>
-                            <button
-                              type="button"
-                              className="di-btn-primary mai-btn"
-                              disabled={busy || variantChoice[row.id] === undefined || variantChoice[row.id] === ''}
-                              onClick={() =>
-                                sendDecision({ rowId: row.id, action: 'choose_price', variantIndex: Number(variantChoice[row.id]) })
-                              }
-                            >
-                              Kies
-                            </button>
-                            <button
-                              type="button"
-                              className="stg-btn-secondary mai-btn"
-                              disabled={busy}
-                              onClick={() => sendDecision({ rowId: row.id, action: 'drop' })}
-                            >
-                              Weglaten
-                            </button>
+                  <ul className="mai-review-list">
+                    {openRows.map((row) => {
+                      const badge = stateBadge(row)
+                      const variants = Array.isArray(row.priceVariants) ? row.priceVariants : []
+                      // W6: a row without any price gets "Prijs onbekend" as its
+                      // explicit choice; "Klopt" would silently keep it unpriced.
+                      const priceMissing = row.code === 'price_unknown' || row.code === 'price_on_request'
+                      return (
+                        <li key={row.id} className={`mai-review-row ${row.state === 'error' ? 'mai-review-row--blocked' : ''}`}>
+                          <div className="mai-review-head">
+                            <span className="mai-review-name">
+                              {row.name} <span className="mai-review-price">{row.priceText}</span>
+                            </span>
+                            <span className={`status-badge status-badge--${badge.tone}`}>
+                              <span>{badge.label}</span>
+                            </span>
                           </div>
-                        ) : (
-                          <>
+                          <p className="mai-why">
+                            {row.pathLabel}
+                            {row.locator ? ` · ${row.locator}` : ''}
+                          </p>
+                          {row.quote ? <p className="mai-quote">“{row.quote}”</p> : null}
+
+
+                          {row.code === 'price_variant' ? (
                             <div className="mai-row-actions">
-                              {priceMissing ? (
-                                <button
-                                  type="button"
-                                  className="di-btn-primary mai-btn"
-                                  disabled={busy}
-                                  onClick={() => sendDecision({ rowId: row.id, action: 'price_unknown' })}
-                                >
-                                  Prijs onbekend
-                                </button>
-                              ) : (
-                                <button
-                                  type="button"
-                                  className="di-btn-primary mai-btn"
-                                  disabled={busy}
-                                  onClick={() => (row.state === 'error' ? openReason(row) : sendDecision({ rowId: row.id, action: 'confirm' }))}
-                                >
-                                  Klopt
-                                </button>
-                              )}
-                              <button type="button" className="stg-btn-secondary mai-btn" disabled={busy} onClick={() => openCorrection(row)}>
-                                Wijzig
+                              <select
+                                className="mai-select"
+                                aria-label={`Kies de prijs voor ${row.name}`}
+                                value={variantChoice[row.id] === undefined ? '' : String(variantChoice[row.id])}
+                                onChange={(event) => setVariantChoice({ ...variantChoice, [row.id]: event.target.value })}
+                              >
+                                <option value="">Kies een prijs</option>
+                                {variants.map((variant, index) => (
+                                  <option key={`${row.id}-${index}`} value={String(index)}>
+                                    {variant.label || `Prijs ${index + 1}`}
+                                    {Number.isInteger(variant.amountMinorUnits)
+                                      ? ` € ${(variant.amountMinorUnits / 100).toFixed(2).replace('.', ',')}`
+                                      : ''}
+                                  </option>
+                                ))}
+                              </select>
+                              <button
+                                type="button"
+                                className="di-btn-primary mai-btn"
+                                disabled={busy || variantChoice[row.id] === undefined || variantChoice[row.id] === ''}
+                                onClick={() =>
+                                  sendDecision({ rowId: row.id, action: 'choose_price', variantIndex: Number(variantChoice[row.id]) })
+                                }
+                              >
+                                Kies
                               </button>
                               <button
                                 type="button"
@@ -1099,229 +1132,264 @@ export default function ManualMenuImportPage() {
                               >
                                 Weglaten
                               </button>
-                              {row.askAi ? (
+                            </div>
+                          ) : (
+                            <>
+                              <div className="mai-row-actions">
+                                {priceMissing ? (
+                                  <button
+                                    type="button"
+                                    className="di-btn-primary mai-btn"
+                                    disabled={busy}
+                                    onClick={() => sendDecision({ rowId: row.id, action: 'price_unknown' })}
+                                  >
+                                    Prijs onbekend
+                                  </button>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    className="di-btn-primary mai-btn"
+                                    disabled={busy}
+                                    onClick={() => (row.state === 'error' ? openReason(row) : sendDecision({ rowId: row.id, action: 'confirm' }))}
+                                  >
+                                    Klopt
+                                  </button>
+                                )}
+                                <button type="button" className="stg-btn-secondary mai-btn" disabled={busy} onClick={() => openCorrection(row)}>
+                                  Wijzig
+                                </button>
                                 <button
                                   type="button"
                                   className="stg-btn-secondary mai-btn"
                                   disabled={busy}
-                                  onClick={() => askAi(row)}
-                                  aria-expanded={askFor === row.id}
+                                  onClick={() => sendDecision({ rowId: row.id, action: 'drop' })}
                                 >
-                                  Vraag AI
+                                  Weglaten
                                 </button>
-                              ) : null}
-                            </div>
-                            <p className="mai-why">
-                              {row.askAi
-                                ? 'Het antwoord van Vraag AI wordt opnieuw gecontroleerd en vervangt alleen deze regel. Jij beslist daarna.'
-                                : 'Hier is geen Vraag AI: de keuze is aan jou.'}
-                            </p>
-                          </>
-                        )}
+                                {row.askAi ? (
+                                  <button
+                                    type="button"
+                                    className="stg-btn-secondary mai-btn"
+                                    disabled={busy}
+                                    onClick={() => askAi(row)}
+                                    aria-expanded={askFor === row.id}
+                                  >
+                                    Vraag AI
+                                  </button>
+                                ) : null}
+                              </div>
+                              <p className="mai-why">
+                                {row.askAi
+                                  ? 'Het antwoord van Vraag AI wordt opnieuw gecontroleerd en vervangt alleen deze regel. Jij beslist daarna.'
+                                  : 'Hier is geen Vraag AI: de keuze is aan jou.'}
+                              </p>
+                            </>
+                          )}
 
 
-                        {reasonFor === row.id ? (
-                          <div className="mai-panel">
-                            <p className="mai-panel-title">Waarom staat deze regel er toch?</p>
-                            <select
-                              className="mai-select"
-                              value={reasonCode}
-                              onChange={(event) => setReasonCode(event.target.value)}
-                              aria-label="Reden"
-                            >
-                              {MISSING_REASONS.map(([value, label]) => (
-                                <option key={value} value={value}>
-                                  {label}
-                                </option>
-                              ))}
-                            </select>
-                            <input
-                              className="mai-input"
-                              type="text"
-                              maxLength={300}
-                              value={reasonNote}
-                              onChange={(event) => setReasonNote(event.target.value)}
-                              placeholder="Korte toelichting (verplicht)"
-                              aria-label="Korte toelichting"
-                            />
-                            <div className="mai-row-actions">
-                              <button
-                                type="button"
-                                className="di-btn-primary mai-btn"
-                                disabled={busy || !reasonNote.trim()}
-                                onClick={() => sendDecision({ rowId: row.id, action: 'confirm', reasonCode, note: reasonNote })}
+                          {reasonFor === row.id ? (
+                            <div className="mai-panel">
+                              <p className="mai-panel-title">Waarom staat deze regel er toch?</p>
+                              <select
+                                className="mai-select"
+                                value={reasonCode}
+                                onChange={(event) => setReasonCode(event.target.value)}
+                                aria-label="Reden"
                               >
-                                Reden opslaan
-                              </button>
-                              <button type="button" className="stg-btn-secondary mai-btn" onClick={() => setReasonFor(null)}>
-                                Annuleer
-                              </button>
+                                {MISSING_REASONS.map(([value, label]) => (
+                                  <option key={value} value={value}>
+                                    {label}
+                                  </option>
+                                ))}
+                              </select>
+                              <input
+                                className="mai-input"
+                                type="text"
+                                maxLength={300}
+                                value={reasonNote}
+                                onChange={(event) => setReasonNote(event.target.value)}
+                                placeholder="Korte toelichting (verplicht)"
+                                aria-label="Korte toelichting"
+                              />
+                              <div className="mai-row-actions">
+                                <button
+                                  type="button"
+                                  className="di-btn-primary mai-btn"
+                                  disabled={busy || !reasonNote.trim()}
+                                  onClick={() => sendDecision({ rowId: row.id, action: 'confirm', reasonCode, note: reasonNote })}
+                                >
+                                  Reden opslaan
+                                </button>
+                                <button type="button" className="stg-btn-secondary mai-btn" onClick={() => setReasonFor(null)}>
+                                  Annuleer
+                                </button>
+                              </div>
+                              <p className="mai-why">De reden wordt met de herkomst bewaard.</p>
                             </div>
-                            <p className="mai-why">De reden wordt met de herkomst bewaard.</p>
-                          </div>
-                        ) : null}
+                          ) : null}
 
-                        {correctFor === row.id ? (
-                          <div className="mai-panel">
-                            <p className="mai-panel-title">Wijzig deze regel</p>
-                            <input
-                              className="mai-input"
-                              type="text"
-                              value={correction.name}
-                              maxLength={200}
-                              onChange={(event) => setCorrection({ ...correction, name: event.target.value })}
-                              placeholder="Naam"
-                              aria-label="Naam"
-                            />
-                            <input
-                              className="mai-input"
-                              type="text"
-                              value={correction.price}
-                              onChange={(event) => setCorrection({ ...correction, price: event.target.value })}
-                              placeholder="Prijs, bijvoorbeeld 12,50"
-                              aria-label="Prijs"
-                            />
-                            <input
-                              className="mai-input"
-                              type="text"
-                              value={correction.description}
-                              maxLength={1000}
-                              onChange={(event) => setCorrection({ ...correction, description: event.target.value })}
-                              placeholder="Omschrijving"
-                              aria-label="Omschrijving"
-                            />
-                            <input
-                              className="mai-input"
-                              type="text"
-                              value={correction.path}
-                              onChange={(event) => setCorrection({ ...correction, path: event.target.value })}
-                              placeholder="Rubriekpad, bijvoorbeeld Lunch › Bites"
-                              aria-label="Rubriekpad"
-                            />
-                            <div className="mai-row-actions">
-                              <button type="button" className="di-btn-primary mai-btn" disabled={busy} onClick={() => submitCorrection(row)}>
-                                Correctie opslaan
-                              </button>
-                              <button type="button" className="stg-btn-secondary mai-btn" onClick={() => setCorrectFor(null)}>
-                                Annuleer
-                              </button>
+                          {correctFor === row.id ? (
+                            <div className="mai-panel">
+                              <p className="mai-panel-title">Wijzig deze regel</p>
+                              <input
+                                className="mai-input"
+                                type="text"
+                                value={correction.name}
+                                maxLength={200}
+                                onChange={(event) => setCorrection({ ...correction, name: event.target.value })}
+                                placeholder="Naam"
+                                aria-label="Naam"
+                              />
+                              <input
+                                className="mai-input"
+                                type="text"
+                                value={correction.price}
+                                onChange={(event) => setCorrection({ ...correction, price: event.target.value })}
+                                placeholder="Prijs, bijvoorbeeld 12,50"
+                                aria-label="Prijs"
+                              />
+                              <input
+                                className="mai-input"
+                                type="text"
+                                value={correction.description}
+                                maxLength={1000}
+                                onChange={(event) => setCorrection({ ...correction, description: event.target.value })}
+                                placeholder="Omschrijving"
+                                aria-label="Omschrijving"
+                              />
+                              <input
+                                className="mai-input"
+                                type="text"
+                                value={correction.path}
+                                onChange={(event) => setCorrection({ ...correction, path: event.target.value })}
+                                placeholder="Rubriekpad, bijvoorbeeld Lunch › Bites"
+                                aria-label="Rubriekpad"
+                              />
+                              <div className="mai-row-actions">
+                                <button type="button" className="di-btn-primary mai-btn" disabled={busy} onClick={() => submitCorrection(row)}>
+                                  Correctie opslaan
+                                </button>
+                                <button type="button" className="stg-btn-secondary mai-btn" onClick={() => setCorrectFor(null)}>
+                                  Annuleer
+                                </button>
+                              </div>
                             </div>
-                          </div>
-                        ) : null}
+                          ) : null}
 
 
-                        {askFor === row.id ? (
-                          <div className="mai-panel">
-                            <p className="mai-panel-title">Vraag AI over deze regel</p>
-                            <p className="bta-muted">Eén korte vraag over alleen deze regel, met dezelfde bron erbij.</p>
-                            <pre className="mai-prompt" tabIndex="0">
-                              {askPrompt}
-                            </pre>
-                            <textarea
-                              className="bta-textarea"
-                              value={askAnswer}
-                              onChange={(event) => setAskAnswer(event.target.value)}
-                              placeholder="Plak hier het antwoord over deze regel"
-                              aria-label="Antwoord over deze regel"
-                            />
-                            <div className="mai-row-actions">
-                              <button
-                                type="button"
-                                className="di-btn-primary mai-btn"
-                                disabled={busy || !askAnswer.trim()}
-                                onClick={() => submitAsk(row)}
-                              >
-                                Controleren
-                              </button>
-                              <button type="button" className="stg-btn-secondary mai-btn" onClick={() => setAskFor(null)}>
-                                Annuleer
-                              </button>
+                          {askFor === row.id ? (
+                            <div className="mai-panel">
+                              <p className="mai-panel-title">Vraag AI over deze regel</p>
+                              <p className="bta-muted">Eén korte vraag over alleen deze regel, met dezelfde bron erbij.</p>
+                              <pre className="mai-prompt" tabIndex="0">
+                                {askPrompt}
+                              </pre>
+                              <textarea
+                                className="bta-textarea"
+                                value={askAnswer}
+                                onChange={(event) => setAskAnswer(event.target.value)}
+                                placeholder="Plak hier het antwoord over deze regel"
+                                aria-label="Antwoord over deze regel"
+                              />
+                              <div className="mai-row-actions">
+                                <button
+                                  type="button"
+                                  className="di-btn-primary mai-btn"
+                                  disabled={busy || !askAnswer.trim()}
+                                  onClick={() => submitAsk(row)}
+                                >
+                                  Controleren
+                                </button>
+                                <button type="button" className="stg-btn-secondary mai-btn" onClick={() => setAskFor(null)}>
+                                  Annuleer
+                                </button>
+                              </div>
+                              <p className="mai-why">Maximaal 1 vervolgvraag per regel.</p>
                             </div>
-                            <p className="mai-why">Maximaal 1 vervolgvraag per regel.</p>
-                          </div>
-                        ) : null}
-                      </li>
-                    )
-                  })}
-                </ul>
-
-                <details className="mai-details">
-                  <summary>
-                    {doneRows.length} {doneRows.length === 1 ? 'regel' : 'regels'} in orde of afgehandeld (bekijk)
-                  </summary>
-                  <ul className="mai-done-list">
-                    {doneRows.map((row) => (
-                      <li key={row.id}>
-                        {row.name} · <b>{row.priceText}</b>
-                        {row.outcome === 'keep_corrected' ? ' · gecorrigeerd' : ''}
-                        {row.outcome === 'keep_confirmed' ? ' · bevestigd' : ''}
-                      </li>
-                    ))}
+                          ) : null}
+                        </li>
+                      )
+                    })}
                   </ul>
-                  <p className="bta-muted">Deze regels hoef je niet meer na te lopen. Ze zijn wel gecontroleerd.</p>
-                </details>
+
+                  <details className="mai-details">
+                    <summary>
+                      {doneRows.length} {doneRows.length === 1 ? 'regel' : 'regels'} in orde of afgehandeld (bekijk)
+                    </summary>
+                    <ul className="mai-done-list">
+                      {doneRows.map((row) => (
+                        <li key={row.id}>
+                          {row.name} · <b>{row.priceText}</b>
+                          {row.outcome === 'keep_corrected' ? ' · gecorrigeerd' : ''}
+                          {row.outcome === 'keep_confirmed' ? ' · bevestigd' : ''}
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="bta-muted">Deze regels hoef je niet meer na te lopen. Ze zijn wel gecontroleerd.</p>
+                  </details>
 
 
-                <details className="mai-details">
-                  <summary>Technische details</summary>
-                  <dl className="bta-facts">
-                    <div>
-                      <dt>Instructie</dt>
-                      <dd>
-                        {report.technical.protocolVersion} · {report.technical.protocolHash.slice(0, 12)}…
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>Schemaversies</dt>
-                      <dd>
-                        {report.technical.instructionSchemaVersion} · {report.technical.schemaVersion}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>Exportbundel</dt>
-                      <dd>{report.bundleHash.slice(0, 16)}…</dd>
-                    </div>
-                    <div>
-                      <dt>Bronnen</dt>
-                      <dd>{report.technical.sources.map((source) => `${source.id} · ${source.sha256.slice(0, 8)}…`).join(' · ')}</dd>
-                    </div>
-                    <div>
-                      <dt>AI-naam</dt>
-                      <dd>{report.aiName} · zelfgerapporteerd en onbewezen</dd>
-                    </div>
-                    <div>
-                      <dt>Geïmporteerd</dt>
-                      <dd>{new Date(report.importedAt).toLocaleString('nl-NL')}</dd>
-                    </div>
-                  </dl>
-                  <p className="bta-muted">
-                    Deze gegevens worden vastgelegd en gecontroleerd. Je hoeft ze niet te lezen om verder te kunnen.
-                  </p>
-                </details>
+                  <details className="mai-details">
+                    <summary>Technische details</summary>
+                    <dl className="bta-facts">
+                      <div>
+                        <dt>Instructie</dt>
+                        <dd>
+                          {report.technical.protocolVersion} · {report.technical.protocolHash.slice(0, 12)}…
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>Schemaversies</dt>
+                        <dd>
+                          {report.technical.instructionSchemaVersion} · {report.technical.schemaVersion}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>Exportbundel</dt>
+                        <dd>{report.bundleHash.slice(0, 16)}…</dd>
+                      </div>
+                      <div>
+                        <dt>Bronnen</dt>
+                        <dd>{report.technical.sources.map((source) => `${source.id} · ${source.sha256.slice(0, 8)}…`).join(' · ')}</dd>
+                      </div>
+                      <div>
+                        <dt>AI-naam</dt>
+                        <dd>{report.aiName} · zelfgerapporteerd en onbewezen</dd>
+                      </div>
+                      <div>
+                        <dt>Geïmporteerd</dt>
+                        <dd>{new Date(report.importedAt).toLocaleString('nl-NL')}</dd>
+                      </div>
+                    </dl>
+                    <p className="bta-muted">
+                      Deze gegevens worden vastgelegd en gecontroleerd. Je hoeft ze niet te lezen om verder te kunnen.
+                    </p>
+                  </details>
 
-                <div className="mai-actions">
-                  <button
-                    type="button"
-                    className="di-btn-primary"
-                    disabled={busy || !review.canSave || Boolean(saved)}
-                    aria-describedby="mai-save-reason"
-                    onClick={saveConcept}
-                  >
-                    Opslaan als concept
-                  </button>
-                  <p id="mai-save-reason" className="mai-why">
-                    {saved
-                      ? 'Opgeslagen als intern concept. Publiceren blijft een aparte stap.'
-                      : review.saveBlockReason ||
-                        'Alle punten zijn nagelopen. Opslaan maakt een intern concept. Publiceren blijft een aparte stap.'}
-                  </p>
-                  {/* W6: the separate publish step is always named, also while
-                      points are still open. */}
-                  <p className="mai-why">Publiceren blijft een aparte stap.</p>
-                </div>
-              </>
-            )}
-          </section>
+                  <div className="mai-actions">
+                    <button
+                      type="button"
+                      className="di-btn-primary"
+                      disabled={busy || !review.canSave || Boolean(saved)}
+                      aria-describedby="mai-save-reason"
+                      onClick={saveConcept}
+                    >
+                      Opslaan als concept
+                    </button>
+                    <p id="mai-save-reason" className="mai-why">
+                      {saved
+                        ? 'Opgeslagen als intern concept. Publiceren blijft een aparte stap.'
+                        : review.saveBlockReason ||
+                          'Alle punten zijn nagelopen. Opslaan maakt een intern concept. Publiceren blijft een aparte stap.'}
+                    </p>
+                    {/* W6: the separate publish step is always named, also while
+                        points are still open. */}
+                    <p className="mai-why">Publiceren blijft een aparte stap.</p>
+                  </div>
+                </>
+              )}
+            </section>
+          ) : null}
         </div>
       </main>
     </div>

@@ -94,7 +94,10 @@ function Explainer() {
     <ul className="bta-explainer">
       <li>Maximaal {MAX_BATCH_URLS} URL&apos;s per batch, handmatig ingevoerd.</li>
       <li>De analyse loopt alleen zolang jij deze pagina open hebt. Sluiten pauzeert; terugkomen hervat.</li>
-      <li>Geen AI, geen OCR, geen automatische wijziging van restaurantgegevens.</li>
+      <li>
+        Geen OCR en geen automatische wijziging van restaurantgegevens. Lukt lezen niet, dan is er de AI-hulp met eigen
+        controle.
+      </li>
       <li>
         Zeker resultaat: bevestig de bron hier. Twijfel, robots.txt of geen bruikbare menukaart: beoordeel handmatig in
         Bronnen beoordelen.
@@ -463,10 +466,10 @@ function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBat
       )}
 
       {canAct && aiReadHref && (
-        <div className="bta-ai-help" role="group" aria-labelledby={`bta-ai-${item.position}`}>
-          <p id={`bta-ai-${item.position}`} className="bta-ai-title">
+        <section className="bta-ai-help" aria-labelledby={`bta-ai-${item.position}`}>
+          <h3 id={`bta-ai-${item.position}`} className="bta-ai-title">
             Laat AI de kaart lezen
-          </p>
+          </h3>
           <p className="bta-muted">
             Lukt automatisch lezen niet, dan leest de AI dezelfde bron. Je leest het resultaat daarna zelf na; er wordt
             niets gepubliceerd.
@@ -482,7 +485,7 @@ function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBat
               Liever zelf invoeren of plakken
             </a>
           </p>
-        </div>
+        </section>
       )}
 
       {!open && (

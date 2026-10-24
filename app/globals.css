@@ -3166,6 +3166,10 @@ details.bta-side-card > summary:focus-visible { outline: 2px solid var(--border-
    Only existing tokens and patterns; no new colour or layout system. */
 .mai-ai { border-color: var(--border-strong); }
 .mai-ai-done { display: grid; gap: 8px; justify-items: start; }
+/* Y2: standalone AI card plus a keyboard-reachable manual disclosure. */
+.mai-ai-card { border-color: var(--border-strong); }
+.mai-manual { padding-top: 4px; }
+.mai-linkbtn { display: inline; padding: 0; border: 0; background: none; font: inherit; cursor: pointer; text-align: left; }
 .mai-origin { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .mai-link { color: var(--text-primary); font-weight: 700; text-decoration: underline; }
 .mai-link:focus-visible { outline: 2px solid var(--accent-border); outline-offset: 2px; }

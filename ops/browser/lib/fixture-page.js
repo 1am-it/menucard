@@ -184,8 +184,17 @@ function fixtureBootstrap(scenarios, options = {}) {
           return jsonResponse(params.get('aiState') === 'off' ? ai.statusOff : ai.status, 200);
         }
         if (verdict.routeId === 'menu-ai-read') {
-          if (ai.read.body) return jsonResponse(ai.read.body, ai.read.status);
-          return jsonResponse({ error: 'De AI is nu niet bereikbaar. Ga verder met de handmatige import.', reason: 'provider_unavailable' }, 422);
+          // Y3 (review 6381657192): aiState=slow holds the fictional answer
+          // briefly, so the real "AI bezig" state is observable and can be
+          // screenshotted. Still fixture only: no provider is contacted.
+          const answer = () => {
+            if (ai.read.body) return jsonResponse(ai.read.body, ai.read.status);
+            return jsonResponse({ error: 'De AI is nu niet bereikbaar. Ga verder met de handmatige import.', reason: 'provider_unavailable' }, 422);
+          };
+          if (params.get('aiState') === 'slow') {
+            return new Promise((resolve) => setTimeout(() => resolve(answer()), 2500));
+          }
+          return answer();
         }
       }
       if (verdict.routeId === 'batch-analysis') {
