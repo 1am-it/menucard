@@ -38,13 +38,15 @@ test('Z2: de legenda en de markeringen komen uit de server, niet uit het scherm'
 });
 
 test('Z3: pagina\'s komen lui binnen en er staat geen afbeelding in de kaart', () => {
-  assert.match(PAGE, /async function loadCard\(sourceId, page\)/);
+  assert.match(PAGE, /async function loadCard\(sourceId, page, token = stateToken\)/);
   assert.match(PAGE, /`\/imports\/\$\{report\.importId\}\/source-map`/);
   assert.match(PAGE, /source_id: sourceId, page/);
-  // Alleen bij openen of bladeren, nooit bij de eerste weergave.
+  // Alleen bij openen of bladeren, nooit bij de eerste weergave. En na een
+  // beslissing leest de kaart opnieuw met het token van die stap.
   const loader = PAGE.slice(PAGE.indexOf('async function loadCard'), PAGE.indexOf('function showMap'));
   assert.equal(loader.includes('AI_API'), false, 'no AI call when a page is read');
   assert.equal(loader.includes('fetch('), false, 'the loader uses the existing api() helper only');
+  assert.equal((PAGE.match(/loadCard\(mapSource, mapPage, result\.data\.state\)/g) || []).length, 2, 'both decisions reload with the new token');
   assert.equal(/<img|<canvas|<iframe|<object/.test(MAP), false, 'the card is text, never an image');
   assert.match(MAP, /card\.source\.view\.notice/);
 });

@@ -384,7 +384,8 @@ export default function ManualMenuImportPage() {
           ? 'De regel staat nu als gerecht in het concept. Stel naam en rubriek bij waar nodig; opslaan blijft een aparte stap.'
           : 'Deze regel telt als geen gerecht. De keuze blijft bij het concept bewaard.'
       )
-      if (viewMode === 'map') loadCard(mapSource, mapPage)
+      // De kaart opnieuw lezen met het nieuwe token: hetzelfde beeld als de server.
+      if (viewMode === 'map') loadCard(mapSource, mapPage, result.data.state)
     }
     setBusy(false)
   }
@@ -393,11 +394,11 @@ export default function ManualMenuImportPage() {
    * Variant 5 (Lead order 6382953597): one page of one source, on request. The
    * server compares again from its own capture; the screen only shows the page.
    */
-  async function loadCard(sourceId, page) {
-    if (!report || !stateToken || !sourceId) return
+  async function loadCard(sourceId, page, token = stateToken) {
+    if (!report || !token || !sourceId) return
     setMapLoading(true)
     setMapError(null)
-    const result = await api(`/imports/${report.importId}/source-map`, { state: stateToken, source_id: sourceId, page })
+    const result = await api(`/imports/${report.importId}/source-map`, { state: token, source_id: sourceId, page })
     if (!result.ok) {
       setMapCard(null)
       setMapError(result.error || 'De kaartpagina kon niet worden geladen.')
@@ -450,7 +451,9 @@ export default function ManualMenuImportPage() {
       setMessage(
         `De prijs van de kaart (${mark.priceText}) staat nu bij dit gerecht. Bij opslaan krijgt het concept die prijs; opslaan blijft een aparte stap.`,
       )
-      if (viewMode === 'map') loadCard(mapSource, mapPage)
+      // De kaart opnieuw lezen met het nieuwe token, zodat het paneel de
+      // overgenomen prijs toont en niet de stand van vóór de beslissing.
+      if (viewMode === 'map') loadCard(mapSource, mapPage, result.data.state)
     }
     setBusy(false)
   }
