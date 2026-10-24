@@ -340,7 +340,7 @@ async function imageOnlyScenario(cdp) {
   check('image-only follow-up: no proposal or publication happened', triage.text.includes('Leg een voorstel vast') && !triage.text.includes('Bron bevestigd'));
   await evalJs(cdp, `(() => {
     const block = document.querySelector('.stg-followup');
-    if (block) block.scrollIntoView({ block: 'center' });
+    if (block) block.scrollIntoView({ block: 'center', behavior: 'instant' });
     return true;
   })()`);
   await new Promise((resolve) => setTimeout(resolve, 200));
@@ -381,7 +381,7 @@ async function imageOnlyScenario(cdp) {
   );
   await evalJs(cdp, `(() => {
     const select = document.querySelector('select[id$="-reason"]');
-    if (select) select.scrollIntoView({ block: 'center' });
+    if (select) select.scrollIntoView({ block: 'center', behavior: 'instant' });
     return true;
   })()`);
   await new Promise((resolve) => setTimeout(resolve, 200));
@@ -1275,7 +1275,7 @@ async function manualRejectedScenario(cdp) {
   const visible = await evalJs(cdp, `(() => {
     const el = document.querySelector('.mai-problems');
     if (!el) return null;
-    el.scrollIntoView({ block: 'start' });
+    el.scrollIntoView({ block: 'start', behavior: 'instant' });
     const rect = el.getBoundingClientRect();
     return { top: Math.round(rect.top), height: window.innerHeight };
   })()`);
@@ -1301,7 +1301,7 @@ async function manualRejectedScenario(cdp) {
     Boolean(narrow) && narrow.items.length === (panel ? panel.items.length : 0),
     narrow ? JSON.stringify(narrow.items.length) : 'no panel',
   );
-  await evalJs(cdp, `(() => { const el = document.querySelector('.mai-problems'); if (el) el.scrollIntoView({ block: 'start' }); return true; })()`);
+  await evalJs(cdp, `(() => { const el = document.querySelector('.mai-problems'); if (el) el.scrollIntoView({ block: 'start', behavior: 'instant' }); return true; })()`);
   screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'manual-ai-import-problems-320-light.png'));
 }
 
@@ -1339,7 +1339,7 @@ async function readNormalizationNotice(cdp) {
     `(() => {
       const panel = document.querySelector('.mai-notices');
       if (!panel) return null;
-      panel.scrollIntoView({ block: 'start' });
+      panel.scrollIntoView({ block: 'start', behavior: 'instant' });
       const rect = panel.getBoundingClientRect();
       return {
         role: panel.getAttribute('role'),
@@ -1511,7 +1511,7 @@ async function readAiLayout(cdp) {
       const stepThree = document.getElementById('mai-s3');
       const sourceCard = document.getElementById('mai-bron');
       const sourceInput = document.getElementById('mai-urls');
-      if (block) block.scrollIntoView({ block: 'start' });
+      if (block) block.scrollIntoView({ block: 'start', behavior: 'instant' });
       const buttons = Array.from(block ? block.querySelectorAll('button') : []).map((el) => el.innerText.trim());
       const links = Array.from(block ? block.querySelectorAll('a') : []).map((el) => ({ text: el.innerText.trim(), href: el.getAttribute('href') }));
       const manual = block
@@ -1595,7 +1595,7 @@ async function aiReadScenario(cdp, theme) {
     Boolean(firstCard && firstCard.visible),
     JSON.stringify(firstCard),
   );
-  await evalJs(cdp, `(() => { const el = document.querySelector('.mai-ai'); if (el) el.scrollIntoView({ block: 'center' }); return true; })()`);
+  await evalJs(cdp, `(() => { const el = document.querySelector('.mai-ai'); if (el) el.scrollIntoView({ block: 'center', behavior: 'instant' }); return true; })()`);
   screenshotFiles.push(await screenshot(cdp, OUT_DIR, `ai-read-block-390-${theme}.png`));
 
   // De handmatige route opent pas als de mens die kiest.
@@ -1616,7 +1616,7 @@ async function aiReadScenario(cdp, theme) {
     'ai read: the expanded manual steps still keep the source outside step 1',
     opened.sourceInputOutsideBlock === true && openedText.includes('Prompt maken') && openedText.includes('Antwoord plakken'),
   );
-  await evalJs(cdp, `(() => { const el = document.getElementById('mai-manual'); if (el) el.scrollIntoView({ block: 'start' }); return true; })()`);
+  await evalJs(cdp, `(() => { const el = document.getElementById('mai-manual'); if (el) el.scrollIntoView({ block: 'start', behavior: 'instant' }); return true; })()`);
   screenshotFiles.push(await screenshot(cdp, OUT_DIR, `ai-read-manual-390-${theme}.png`));
 
   await clickButton(cdp, 'Liever zelf invoeren of plakken');
@@ -1628,7 +1628,7 @@ async function aiReadScenario(cdp, theme) {
   await clickButton(cdp, 'Lees met AI');
   const busy = await waitFor(cdp, `document.body.innerText.includes('De AI leest de kaart')`, 10000);
   check('ai read: the reading shows its progress', Boolean(busy));
-  await evalJs(cdp, `(() => { const el = document.querySelector('.mai-ai'); if (el) el.scrollIntoView({ block: 'start' }); return true; })()`);
+  await evalJs(cdp, `(() => { const el = document.querySelector('.mai-ai'); if (el) el.scrollIntoView({ block: 'start', behavior: 'instant' }); return true; })()`);
   screenshotFiles.push(await screenshot(cdp, OUT_DIR, `ai-read-busy-390-${theme}.png`));
 
   // Scherm 2b: het resultaat, met de handmatige stappen nog steeds ingeklapt.
@@ -1646,7 +1646,7 @@ async function aiReadScenario(cdp, theme) {
       doneLayout.steps.three === false,
     JSON.stringify({ buttons: doneLayout.buttons, steps: doneLayout.steps }),
   );
-  await evalJs(cdp, `(() => { const el = document.querySelector('.mai-ai'); if (el) el.scrollIntoView({ block: 'start' }); return true; })()`);
+  await evalJs(cdp, `(() => { const el = document.querySelector('.mai-ai'); if (el) el.scrollIntoView({ block: 'start', behavior: 'instant' }); return true; })()`);
   screenshotFiles.push(await screenshot(cdp, OUT_DIR, `ai-read-done-390-${theme}.png`));
 
   // Scherm 3: het bestaande nalopen-scherm met het label.
@@ -1677,7 +1677,7 @@ async function aiReadScenario(cdp, theme) {
       (await bodyText(cdp)).includes('Glas 4,50 / Fles 24,00'),
     (await bodyText(cdp)).match(/Fictief glas wijn[^\n]*/)?.[0] || 'missing',
   );
-  await evalJs(cdp, `(() => { const el = document.getElementById('mai-s3'); if (el) el.scrollIntoView({ block: 'start' }); return true; })()`);
+  await evalJs(cdp, `(() => { const el = document.getElementById('mai-s3'); if (el) el.scrollIntoView({ block: 'start', behavior: 'instant' }); return true; })()`);
   screenshotFiles.push(await screenshot(cdp, OUT_DIR, `ai-read-review-390-${theme}.png`));
   recordClickpath(
     `ai read (${theme})`,
@@ -1727,7 +1727,7 @@ async function aiReadBatchScenario(cdp, theme) {
   );
   const snapshot = await evalJs(cdp, `(() => {
     const block = document.querySelector('.bta-ai-help');
-    if (block) block.scrollIntoView({ block: 'start' });
+    if (block) block.scrollIntoView({ block: 'start', behavior: 'instant' });
     const button = block ? [...block.querySelectorAll('a')].find((el) => el.innerText.trim() === 'Lees met AI') : null;
     const link = block ? [...block.querySelectorAll('a')].find((el) => el.innerText.trim() === 'Liever zelf invoeren of plakken') : null;
     return {
