@@ -32,12 +32,15 @@ const { extractCodeBlock, buildImportReport, checkBundleBinding, publicImportRep
 const {
   decideRow,
   decideUncoveredLine,
+  decideSourcePriceLine,
   reviewView,
+  sourceCardView,
   buildConceptDraft,
   applyFollowUp,
   applyOpenPointsAnswer,
   MAX_FOLLOW_UPS_PER_IMPORT,
   UNCOVERED_ACTIONS,
+  SOURCE_PRICE_ACTION,
 } = require('./manualMenuImportReview');
 const { buildUsageExport } = require('./manualMenuImportUsage');
 const { aiOriginOverrides } = require('./menuAiImport');
@@ -376,9 +379,14 @@ function createManualMenuImportHandlers(deps = {}) {
     // no dish covers. They are handled here, next to the existing row
     // decisions, and travel in the same sealed state.
     const onUncoveredLine = Boolean(decision && typeof decision === 'object' && UNCOVERED_ACTIONS.includes(decision.action));
-    const result = onUncoveredLine
-      ? decideUncoveredLine({ report: step.report, decisions, bundle: state.bundle, decision })
-      : decideRow({ report: step.report, decisions, decision });
+    // Z4 (Lead order 6382953597): the red mark's "Neem € x over". The amount
+    // comes from the server's own comparison, the row from the same review.
+    const onSourcePrice = Boolean(decision && typeof decision === 'object' && decision.action === SOURCE_PRICE_ACTION);
+    const result = onSourcePrice
+      ? decideSourcePriceLine({ report: step.report, decisions, bundle: state.bundle, decision })
+      : onUncoveredLine
+        ? decideUncoveredLine({ report: step.report, decisions, bundle: state.bundle, decision })
+        : decideRow({ report: step.report, decisions, decision });
     if (!result.ok) return reply(422, { error: result.message, reason: result.code });
     const reportNext = result.report || step.report;
     const next = sealNext(nextState(state, { decisions: [...result.decisions.values()], report: reportNext }));
@@ -565,6 +573,41 @@ function createManualMenuImportHandlers(deps = {}) {
   }
 
   /**
+   * POST — Z3 (Lead order 6382953597): one printed page of one source, with its
+   * markings. Read-only: the capture comes from the sealed state of the previous
+   * step, one page per request, so the browser never loads every page at once.
+   */
+  async function sourceCard(request, importId) {
+    const { auth, denied } = await authorize(request);
+    if (denied) return denied;
+    const parsed = await readJson(request);
+    if (!parsed.ok) return reply(400, { error: 'Ongeldig verzoek.' });
+    const opened = openState(parsed.body, auth);
+    if (opened.reply) return opened.reply;
+    const step = reportOrReply(opened.state, importId || parsed.body.import_id);
+    if (step.reply) return step.reply;
+    const state = opened.state;
+    const sourceId = typeof parsed.body.source_id === 'string' ? parsed.body.source_id.trim() : '';
+    const sources = state.bundle && Array.isArray(state.bundle.sources) ? state.bundle.sources : [];
+    if (!sources.some((source) => source && source.id === sourceId)) {
+      return reply(404, { error: 'Deze bron hoort niet bij deze import.', reason: 'unknown_source' });
+    }
+    const page = parsed.body.page === undefined ? 1 : Number(parsed.body.page);
+    if (!Number.isInteger(page) || page < 1) {
+      return reply(422, { error: 'Kies een paginanummer vanaf 1.', reason: 'page_invalid' });
+    }
+    const card = sourceCardView({
+      report: step.report,
+      decisions: decisionsFromState(state),
+      capture: sources,
+      sourceId,
+      page,
+    });
+    if (!card.available) return reply(422, { error: card.message, reason: card.reason, card });
+    return reply(200, { card, validUntil: opened.expiresAt });
+  }
+
+  /**
    * GET — K3: het gebruiksdocument komt uit dezelfde duurzame bron als het
    * ops-exportscript (opgeslagen concepten met importProvenance). Ontbreekt de
    * leesroute of de configuratie, dan is dat een concrete fout en nooit een
@@ -591,7 +634,7 @@ function createManualMenuImportHandlers(deps = {}) {
     });
   }
 
-  return { createBundle, importAnswer, decide, followUp, openPointsPrompt, save, usage, listRestaurants };
+  return { createBundle, importAnswer, decide, followUp, openPointsPrompt, save, sourceCard, usage, listRestaurants };
 }
 
 module.exports = { createManualMenuImportHandlers, searchRestaurantChoices };

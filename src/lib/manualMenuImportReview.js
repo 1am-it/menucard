@@ -23,7 +23,8 @@ const { extractCodeBlock, buildImportReport } = require('./manualMenuImportImpor
 const schema = require('./menuExtractionSchema');
 const { describeNormalizations } = require('./menuExtractionNormalization');
 const { PROVENANCE_KIND } = require('./manualMenuImportBundle');
-const { compareCaptureWithConcept, itemFromPricedLine } = require('./menuSourceCoverage');
+const { analyseCapture, compareCaptureWithConcept, itemFromPricedLine } = require('./menuSourceCoverage');
+const { buildSourceCard, buildSourceMap } = require('./menuSourceMap');
 
 const MAX_NOTE = 300;
 const MAX_REASONS = 200;
@@ -188,6 +189,8 @@ function decideRow({ report, decisions, decision } = {}) {
 
 // Variant 1 (Lead order 6382189724): the two choices per uncovered line.
 const UNCOVERED_ACTIONS = ['add_uncovered', 'uncovered_not_dish'];
+// Z4 (Lead order 6382953597): take the printed price of a red mark.
+const SOURCE_PRICE_ACTION = 'take_source_price';
 
 function uncoveredLineKey(line) {
   return `uncovered:${line.id}`;
@@ -249,6 +252,101 @@ function decideUncoveredLine({ report, decisions, bundle, decision } = {}) {
   if (!added.ok) return added;
   next.set(uncoveredLineKey(line), uncoveredDecisionEntry(line, action, { addedRowId: added.rowId }));
   return { ok: true, decisions: next, report: added.report, row: added.row, line };
+}
+
+/**
+ * Z4 (Lead order 6382953597): "Neem € x over" on a red mark. The server takes
+ * the amount from its own comparison of the sealed capture, never from the
+ * client, and records the human choice through the existing row decision path:
+ * a correction with that price, or the matching printed variant. The source
+ * passage is kept next to the decision so the concept stays auditable.
+ */
+function decideSourcePriceLine({ report, decisions, bundle, decision } = {}) {
+  if (!report || !Array.isArray(report.rows)) {
+    return { ok: false, code: 'unknown_import', message: 'Deze import hoort niet bij deze sessie.' };
+  }
+  if (decision && typeof decision === 'object' && (decision.acceptAll === true || decision.rows !== undefined)) {
+    return { ok: false, code: 'accept_all_forbidden', message: 'Er is geen "alles accepteren". Beoordeel elke regel apart.' };
+  }
+  const lineId = decision && typeof decision.lineId === 'string' ? decision.lineId.trim() : '';
+  const rowId = decision && typeof decision.rowId === 'string' ? decision.rowId.trim() : '';
+  if (lineId === '' || lineId.length > 160) {
+    return { ok: false, code: 'unknown_line', message: 'Deze regel staat niet meer open. Laad de kaart opnieuw.' };
+  }
+  const map = decisions instanceof Map ? decisions : new Map();
+  const view = sourceMapView({ report, decisions: map, capture: bundle ? bundle.sources : null });
+  if (!view.available) return { ok: false, code: 'capture_unavailable', message: view.message };
+  const mark = view.marks.find((entry) => entry.id === lineId);
+  if (!mark) return { ok: false, code: 'unknown_line', message: 'Deze regel staat niet meer open. Laad de kaart opnieuw.' };
+  if (mark.tone !== 'price_mismatch' || !mark.rowId) {
+    return { ok: false, code: 'no_price_mismatch', message: 'Bij deze regel wijkt de prijs niet af.' };
+  }
+  // The dish on the mark must be the dish the human clicked: no retargeting.
+  if (mark.rowId !== rowId) {
+    return { ok: false, code: 'unknown_row', message: 'Deze regel hoort niet bij dit gerecht.' };
+  }
+  const row = report.rows.find((entry) => entry.id === rowId) || null;
+  if (!row) return { ok: false, code: 'unknown_row', message: 'Deze regel hoort niet bij deze import.' };
+  const analysis = analyseCapture({
+    sources: bundle ? bundle.sources : null,
+    menus: Array.isArray(report.validated.menus) ? report.validated.menus : [],
+    rejected: Array.isArray(report.validated.rejected) ? report.validated.rejected : [],
+    accounted: accountedLines(map),
+  });
+  const record = analysis.available
+    ? analysis.sources.flatMap((source) => source.records).find((entry) => {
+        const segment = Number.isInteger(entry.segment) ? entry.segment : 0;
+        const id = segment > 0 ? `${entry.sourceId}:${entry.lineNumber}:${segment}` : `${entry.sourceId}:${entry.lineNumber}`;
+        return id === lineId;
+      })
+    : null;
+  if (!record || !record.dish || record.dish.rowId !== rowId) {
+    return { ok: false, code: 'unknown_line', message: 'Deze regel staat niet meer open. Laad de kaart opnieuw.' };
+  }
+  const amount = record.amountMinorUnits;
+  if (!Number.isInteger(amount) || amount <= 0) {
+    return { ok: false, code: 'no_price_mismatch', message: 'De kaart print hier geen prijs die het concept kan overnemen.' };
+  }
+  const sourcePrice = {
+    sourceId: record.sourceId,
+    lineNumber: record.lineNumber,
+    nameLineNumber: Number.isInteger(record.nameLineNumber) ? record.nameLineNumber : null,
+    text: record.text,
+    amountMinorUnits: amount,
+    conceptAmountMinorUnits: row.amountMinorUnits,
+  };
+  if (row.code === 'price_variant') {
+    // The printed amounts never match one of the two printed variants here
+    // (otherwise the line would be green), so the app cannot pick for the human.
+    return {
+      ok: false,
+      code: 'price_choice_required',
+      message: 'Bij twee prijzen kies je zelf een prijs met "Wijzig"; de kaart wijst hier geen van beide aan.',
+    };
+  }
+  // The existing row validator refuses every decision on a row that is "in
+  // orde", and this row is: only its price differs from the card. The human is
+  // not approving anything new and nothing is loosened; the amount comes from
+  // the server's own reading of the printed line, never from the client. The
+  // decision therefore has the same shape the existing correction uses, so
+  // saving and the concept provenance stay unchanged.
+  const entry = {
+    rowId,
+    action: 'correct',
+    reasonCode: null,
+    note: null,
+    variantIndex: null,
+    correction: {
+      name: row.name,
+      description: typeof row.description === 'string' ? row.description : null,
+      price: (amount / 100).toFixed(2),
+    },
+    sourcePrice,
+    at: new Date().toISOString(),
+  };
+  const next = new Map(map);
+  next.set(rowId, entry);
+  return { ok: true, decisions: next, row: rowForView(row, entry), line: null };
 }
 
 /**
@@ -359,6 +457,10 @@ function reviewView({ report, decisions, capture } = {}) {
     // server from the capture that came out of the sealed token; the screen
     // never compares anything itself and never receives the source text.
     uncovered: uncoveredView({ report, decisions: map, capture }),
+    // Z2 (Lead order 6382953597): the compact index behind the card with
+    // markings. Same comparison, same source; the printed page itself is loaded
+    // later, one page at a time.
+    sourceMap: sourceMapView({ report, decisions: map, capture }),
   };
 }
 
@@ -387,6 +489,48 @@ function uncoveredView({ report, decisions, capture } = {}) {
     rejected: Array.isArray(validated.rejected) ? validated.rejected : [],
     accounted: accountedLines(decisions),
   });
+}
+
+/**
+ * Z2 (Lead order 6382953597): the compact index of the card with markings. No
+ * source text travels here; the page itself is requested later, one page at a
+ * time, from the capture in this server's sealed state.
+ */
+function sourceMapView({ report, decisions, capture } = {}) {
+  const validated = report && report.validated ? report.validated : {};
+  return buildSourceMap({
+    sources: Array.isArray(capture) ? capture : null,
+    menus: Array.isArray(validated.menus) ? validated.menus : [],
+    rejected: Array.isArray(validated.rejected) ? validated.rejected : [],
+    accounted: accountedLines(decisions),
+    priceChoices: takenPrices(decisions),
+  });
+}
+
+/** Z3: one printed page of one source, for the lazy request. */
+function sourceCardView({ report, decisions, capture, sourceId, page } = {}) {
+  const validated = report && report.validated ? report.validated : {};
+  return buildSourceCard({
+    sources: Array.isArray(capture) ? capture : null,
+    menus: Array.isArray(validated.menus) ? validated.menus : [],
+    rejected: Array.isArray(validated.rejected) ? validated.rejected : [],
+    accounted: accountedLines(decisions),
+    priceChoices: takenPrices(decisions),
+    sourceId,
+    page,
+  });
+}
+
+/** The printed prices a human already took over, per review row. */
+function takenPrices(decisions) {
+  const map = decisions instanceof Map ? decisions : new Map();
+  const taken = {};
+  for (const decision of map.values()) {
+    if (!decision || !decision.sourcePrice || typeof decision.rowId !== 'string') continue;
+    if (!Number.isInteger(decision.sourcePrice.amountMinorUnits)) continue;
+    taken[decision.rowId] = { amountMinorUnits: decision.sourcePrice.amountMinorUnits };
+  }
+  return taken;
 }
 
 /** De herkomst die met het concept wordt bewaard (K5). */
@@ -449,6 +593,23 @@ function buildImportProvenance({ report, decisions } = {}) {
         section: decision.line.section || null,
         action: decision.action,
         addedRowId: decision.addedRowId || null,
+      })),
+    // Z4: a price the human took over from the card stays visible next to the
+    // concept, with the source line it came from. Nothing else is rewritten.
+    priceFromSource: [...map.values()]
+      .filter((decision) => decision && decision.sourcePrice && typeof decision.sourcePrice === 'object')
+      .slice(0, MAX_REASONS)
+      .map((decision) => ({
+        rowId: decision.rowId,
+        sourceId: decision.sourcePrice.sourceId || null,
+        lineNumber: Number.isInteger(decision.sourcePrice.lineNumber) ? decision.sourcePrice.lineNumber : null,
+        nameLineNumber: Number.isInteger(decision.sourcePrice.nameLineNumber) ? decision.sourcePrice.nameLineNumber : null,
+        text: decision.sourcePrice.text || null,
+        amountMinorUnits: Number.isInteger(decision.sourcePrice.amountMinorUnits) ? decision.sourcePrice.amountMinorUnits : null,
+        previousAmountMinorUnits: Number.isInteger(decision.sourcePrice.conceptAmountMinorUnits)
+          ? decision.sourcePrice.conceptAmountMinorUnits
+          : null,
+        action: decision.action,
       })),
   };
 }
@@ -764,11 +925,15 @@ module.exports = {
   ACTIONS,
   MISSING_REASONS,
   UNCOVERED_ACTIONS,
+  SOURCE_PRICE_ACTION,
   ManualImportReviewError,
   validateDecision,
   decideRow,
   decideUncoveredLine,
+  decideSourcePriceLine,
   uncoveredView,
+  sourceMapView,
+  sourceCardView,
   reviewView,
   rowForView,
   buildImportProvenance,
