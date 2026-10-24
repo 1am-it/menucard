@@ -123,15 +123,25 @@ function conceptCost(row) {
 /**
  * The spend of one month, derived only from durable concept rows. `rows` is the
  * bounded list read from the concept table; `created_at` decides the month.
+ * A reading's cost is counted once per `readId`, so a corrected version of the
+ * same reading does not spend the budget twice. A row without a measured cost
+ * counts as the full per-call maximum, never as zero.
  */
 function monthlySpendFromRows(rows, { now = new Date() } = {}) {
   const start = monthStartIso(now);
   let spentEurCents = 0;
   let concepts = 0;
   let unknownConcepts = 0;
+  const countedReads = new Set();
   for (const row of Array.isArray(rows) ? rows : []) {
     if (!row || typeof row.created_at !== 'string' || row.created_at < start) continue;
     concepts += 1;
+    const provenance = row.captured_content && row.captured_content.importProvenance;
+    const readKey = provenance && typeof provenance.readId === 'string' && provenance.readId !== ''
+      ? provenance.readId
+      : `row:${row.id === undefined || row.id === null ? concepts : row.id}`;
+    if (countedReads.has(readKey)) continue;
+    countedReads.add(readKey);
     const cost = conceptCost(row);
     if (!cost.known) unknownConcepts += 1;
     spentEurCents += cost.eurCents;
@@ -139,6 +149,7 @@ function monthlySpendFromRows(rows, { now = new Date() } = {}) {
   return {
     spentEurCents,
     concepts,
+    reads: countedReads.size,
     unknownConcepts,
     limitEurCents: AI_MONTH_LIMIT_EUR_CENTS,
     remainingEurCents: Math.max(0, AI_MONTH_LIMIT_EUR_CENTS - spentEurCents),
@@ -170,6 +181,35 @@ function publicMonthly(spend) {
   };
 }
 
+/**
+ * The fixed provenance fields of one AI reading, taken only from the sealed
+ * origin of a step or from the call itself. Returns null for anything that is
+ * not this app's own AI reading, so a client can never claim that origin.
+ */
+function aiOriginOverrides(origin) {
+  if (!origin || typeof origin !== 'object' || Array.isArray(origin)) return null;
+  if (origin.kind !== AI_READ_PROVENANCE_KIND) return null;
+  const cost = origin.cost && typeof origin.cost === 'object' && !Array.isArray(origin.cost) ? origin.cost : null;
+  return {
+    kind: AI_READ_PROVENANCE_KIND,
+    label: AI_READ_LABEL,
+    aiName: typeof origin.aiName === 'string' && origin.aiName.trim() !== '' ? origin.aiName.trim().slice(0, 80) : AI_READ_AI_NAME,
+    aiNameSelfReported: false,
+    provider: typeof origin.provider === 'string' ? origin.provider.trim().slice(0, 40) : null,
+    model: typeof origin.model === 'string' ? origin.model.trim().slice(0, 60) : null,
+    // One reading has one id: the ledger counts its cost once, also when the
+    // human later saves a corrected version of the same reading.
+    readId: typeof origin.readId === 'string' && origin.readId.trim() !== '' ? origin.readId.trim().slice(0, 80) : null,
+    readAt: typeof origin.readAt === 'string' ? origin.readAt.slice(0, 40) : null,
+    providerRequestId: typeof origin.requestId === 'string' ? origin.requestId.slice(0, 80) : null,
+    cost: {
+      eurCents: cost && Number.isInteger(cost.eurCents) ? cost.eurCents : null,
+      known: Boolean(cost && cost.known === true && Number.isInteger(cost.eurCents)),
+      source: 'usage',
+    },
+  };
+}
+
 module.exports = {
   AI_API_KEY_ENV,
   AI_FEATURE_FLAG,
@@ -185,6 +225,7 @@ module.exports = {
   MAX_SOURCES,
   MESSAGES,
   aiConfiguration,
+  aiOriginOverrides,
   budgetDecision,
   conceptCost,
   messageFor,

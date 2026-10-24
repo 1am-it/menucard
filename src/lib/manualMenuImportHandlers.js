@@ -38,6 +38,7 @@ const {
   MAX_FOLLOW_UPS_PER_IMPORT,
 } = require('./manualMenuImportReview');
 const { buildUsageExport } = require('./manualMenuImportUsage');
+const { aiOriginOverrides } = require('./menuAiImport');
 const { ManualImportStateError, stateMessage } = require('./manualMenuImportState');
 
 const FORBIDDEN = 'Alleen interne medewerkers kunnen een menu importeren.';
@@ -523,21 +524,29 @@ function createManualMenuImportHandlers(deps = {}) {
       return reply(409, { error: draft.message, reason: draft.code, blockers: draft.blockers || [], pending: draft.pending || [] });
     }
     const firstSource = (step.report.technical.sources || [])[0] || null;
+    // W6/W7 (Lead review 6380804419): a reading the app made itself keeps its
+    // own label, provider, model, read id and measured cost, also after the
+    // human corrected rows. Nothing else about the origin is taken from input.
+    const origin = aiOriginOverrides(state.origin);
+    const provenance = origin ? { ...draft.provenance, ...origin } : draft.provenance;
+    const content = origin
+      ? { ...draft.content, importProvenance: { ...draft.content.importProvenance, ...origin } }
+      : draft.content;
     const result = await saveConcept({
       actorUserId: auth.userId,
       restaurantId: state.restaurantId,
       menuContext: typeof parsed.body.menu_context === 'string' && parsed.body.menu_context.trim() ? parsed.body.menu_context.trim() : draft.menuContext,
       sourceUrl: firstSource ? firstSource.url : null,
-      sourceType: 'manual',
+      sourceType: origin ? 'own_website' : 'manual',
       qualityScore: 'medium',
-      content: draft.content,
+      content,
       originallyFetchedAt: state.bundle.fetchedAt,
       expectedVersion: Number.isInteger(parsed.body.expected_version) ? parsed.body.expected_version : undefined,
     });
     return reply(result.status, {
       ...result.body,
-      provenance: draft.provenance,
-      concept: result.body && result.body.concept ? { ...result.body.concept, menuContext: draft.menuContext, provenance: draft.provenance } : result.body && result.body.concept,
+      provenance,
+      concept: result.body && result.body.concept ? { ...result.body.concept, menuContext: draft.menuContext, provenance } : result.body && result.body.concept,
     });
   }
 

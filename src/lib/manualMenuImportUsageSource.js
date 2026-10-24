@@ -25,18 +25,35 @@ const PROVENANCE_KIND_PATH = 'captured_content->importProvenance->>kind';
  * `supabase` is een bestaande client; dit module maakt er zelf geen en kent geen
  * netwerk buiten die client.
  */
-async function readDurableUsageRows(supabase, { limit = MAX_SOURCE_ROWS } = {}) {
-  if (!supabase || typeof supabase.from !== 'function') return { ok: false, code: 'no_client' };
-  const effectiveLimit = Number.isInteger(limit) && limit > 0 ? limit : MAX_SOURCE_ROWS;
+async function readRowsOfKind(supabase, kind, limit) {
   const { data, error } = await supabase
     .from(CONCEPT_TABLE)
     .select(CONCEPT_COLUMNS)
-    .eq(PROVENANCE_KIND_PATH, PROVENANCE_KIND)
+    .eq(PROVENANCE_KIND_PATH, kind)
     .order('created_at', { ascending: true })
-    .limit(effectiveLimit);
+    .limit(limit);
   if (error) return { ok: false, code: 'read_failed' };
   const rows = Array.isArray(data) ? data : [];
-  return { ok: true, rows, limit: effectiveLimit, bounded: rows.length >= effectiveLimit };
+  return { ok: true, rows, bounded: rows.length >= limit };
+}
+
+/**
+ * W7: beide soorten AI-herkomst in één document — de handmatige import en de
+ * lezing door de app zelf ("Gelezen door AI"). Twee gewone select-query's op
+ * dezelfde kolom (geen `in` op een JSON-pad), daarna samengevoegd op tijd.
+ * Elke rij wordt bij het bouwen van het document nog eens op zijn `kind`
+ * gecontroleerd, zodat een andere herkomst nooit meetelt.
+ */
+async function readDurableUsageRows(supabase, { limit = MAX_SOURCE_ROWS } = {}) {
+  if (!supabase || typeof supabase.from !== 'function') return { ok: false, code: 'no_client' };
+  const effectiveLimit = Number.isInteger(limit) && limit > 0 ? limit : MAX_SOURCE_ROWS;
+  const manual = await readRowsOfKind(supabase, PROVENANCE_KIND, effectiveLimit);
+  if (!manual.ok) return manual;
+  const remaining = Math.max(0, effectiveLimit - manual.rows.length);
+  const aiRead = remaining > 0 ? await readRowsOfKind(supabase, AI_READ_PROVENANCE_KIND, remaining) : { ok: true, rows: [], bounded: false };
+  if (!aiRead.ok) return aiRead;
+  const rows = [...manual.rows, ...aiRead.rows].sort((a, b) => String(a && a.created_at).localeCompare(String(b && b.created_at)));
+  return { ok: true, rows, limit: effectiveLimit, bounded: manual.bounded || aiRead.bounded };
 }
 
 /**

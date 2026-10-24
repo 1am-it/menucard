@@ -25,12 +25,17 @@
 // DevDashboardTower leest dit document als alleen-lezen bron; dit module schrijft
 // niets en kent geen netwerk.
 
-const USAGE_SCHEMA_VERSION = 'manual-ai-import-usage/v2';
+const USAGE_SCHEMA_VERSION = 'manual-ai-import-usage/v3';
 const APPLICATION = 'handmatige-ai-import';
 const APPLICATION_LABEL = 'menu-extractie';
 const NOT_MEASURED_LABEL = 'via abonnement, niet gemeten';
 const NOT_TRACKED_LABEL = 'niet bijgehouden';
 const PROVENANCE_KIND = 'handmatige_ai_import';
+// W7 of the Delivery Lead order (review 6380804419): a concept the app read
+// itself ("Gelezen door AI") is counted in the same ledger and the same export,
+// with its provider, model and measured cost.
+const AI_READ_KIND = 'ai_gelezen';
+const PROVENANCE_KINDS = Object.freeze([PROVENANCE_KIND, AI_READ_KIND]);
 const MAX_AI_NAMES = 20;
 const MAX_AI_NAME = 80;
 const MAX_ROUTES = 8;
@@ -103,6 +108,7 @@ const DURABLE_SOURCE = {
   table: 'menu_snapshot_proposals',
   jsonField: 'captured_content.importProvenance',
   provenanceKind: PROVENANCE_KIND,
+  provenanceKinds: [...PROVENANCE_KINDS],
   note: 'Tellingen komen uit opgeslagen conceptversies met importProvenance; niets wordt in het geheugen bijgehouden.',
 };
 
@@ -111,6 +117,7 @@ const SELF_REPORTED_NOTE = 'De AI-naam is zelfgerapporteerd en onbewezen.';
 const NOT_TRACKED_NOTE = 'Stappen zonder duurzame opslag staan als "niet bijgehouden" en nooit als 0.';
 const UNATTRIBUTED_NOTE = 'Concepten zonder AI-naam in de herkomst.';
 const AI_OMITTED_NOTE = `Meer dan ${MAX_AI_NAMES} AI-namen: de rest is niet per naam uitgesplitst.`;
+const AI_READ_NOTE = 'Alleen AI-concepten die de app zelf las, met provider, model en gemeten kosten; onbekende kosten staan er als onbekend.';
 
 function isCount(value) {
   return Number.isInteger(value) && value >= 0;
@@ -145,8 +152,21 @@ function provenanceOf(row) {
   if (!content || typeof content !== 'object' || Array.isArray(content)) return null;
   const provenance = content.importProvenance;
   if (!provenance || typeof provenance !== 'object' || Array.isArray(provenance)) return null;
-  if (provenance.kind !== PROVENANCE_KIND) return null;
+  if (!PROVENANCE_KINDS.includes(provenance.kind)) return null;
   return provenance;
+}
+
+/**
+ * W7: the cost of one AI-read concept, from its own durable metadata. A
+ * measured cost is an integer number of eurocents; everything else stays
+ * unknown (never 0).
+ */
+function aiReadCost(provenance) {
+  const cost = provenance && provenance.cost;
+  if (cost && Number.isInteger(cost.eurCents) && cost.eurCents >= 0 && cost.known !== false) {
+    return { known: true, eurCents: cost.eurCents };
+  }
+  return { known: false, eurCents: null };
 }
 
 /** Hoeveel regels een mens corrigeerde, wegliet of bevestigde (duurzaam bewaard). */
@@ -182,6 +202,8 @@ function buildUsageExport({ rows, limit = MAX_SOURCE_ROWS, bounded, generatedAt 
   const list = Array.isArray(rows) ? rows : [];
   const seen = new Set();
   const perAi = new Map();
+  const perModel = new Map();
+  const nameKinds = new Map();
   let used = 0;
   let ignored = 0;
   let unattributed = 0;
@@ -192,6 +214,12 @@ function buildUsageExport({ rows, limit = MAX_SOURCE_ROWS, bounded, generatedAt 
   let timestampsMissing = 0;
   let from = null;
   let to = null;
+  // W7: AI reads ("Gelezen door AI") are counted in the same document, with
+  // their own provider, model and measured cost. An unknown cost stays
+  // unknown and is counted, never booked as 0.
+  let aiReadConcepts = 0;
+  let aiReadCostEurCents = 0;
+  let aiReadUnknownCosts = 0;
 
   for (const row of list) {
     const provenance = provenanceOf(row);
@@ -214,6 +242,24 @@ function buildUsageExport({ rows, limit = MAX_SOURCE_ROWS, bounded, generatedAt 
       unattributed += 1;
     } else {
       perAi.set(name, (perAi.get(name) || 0) + 1);
+      nameKinds.set(name, provenance.kind);
+    }
+    if (provenance.kind === AI_READ_KIND) {
+      aiReadConcepts += 1;
+      const provider = boundedText(provenance.provider, 40);
+      const model = boundedText(provenance.model, 60);
+      const key = `${provider || 'onbekend'}\u0000${model || 'onbekend'}`;
+      const entry = perModel.get(key) || { provider, model, concepts: 0, costEurCents: 0, unknownCosts: 0 };
+      entry.concepts += 1;
+      const cost = aiReadCost(provenance);
+      if (cost.known) {
+        entry.costEurCents += cost.eurCents;
+        aiReadCostEurCents += cost.eurCents;
+      } else {
+        entry.unknownCosts += 1;
+        aiReadUnknownCosts += 1;
+      }
+      perModel.set(key, entry);
     }
     const decisions = rowDecisionCounts(provenance);
     correctedRows += decisions.corrected;
@@ -235,9 +281,40 @@ function buildUsageExport({ rows, limit = MAX_SOURCE_ROWS, bounded, generatedAt 
   const dropped = ranked.slice(MAX_AI_NAMES);
   const ai = kept.map(([aiName, concepts]) => ({
     aiName,
-    selfReported: true,
+    // A name a person typed is self-reported; the name of a call this app made
+    // itself is not.
+    selfReported: nameKinds.get(aiName) !== AI_READ_KIND,
     counts: { concept_saved: concepts },
   }));
+  // W7: per provider/model what it read and what it cost (or did not measure).
+  const providers = [...perModel.entries()]
+    .map(([, entry]) => ({
+      provider: entry.provider,
+      model: entry.model,
+      concepts: entry.concepts,
+      cost: entry.unknownCosts > 0 && entry.costEurCents === 0
+        ? { status: 'not_measured', label: NOT_MEASURED_LABEL, unknownConcepts: entry.unknownCosts }
+        : {
+            status: 'measured',
+            amountEurCents: entry.costEurCents,
+            currency: 'EUR',
+            unknownConcepts: entry.unknownCosts,
+          },
+    }))
+    .sort((a, b) => b.concepts - a.concepts || String(a.provider).localeCompare(String(b.provider), 'nl'));
+  const aiRead = {
+    concepts: aiReadConcepts,
+    cost: aiReadConcepts === 0 || (aiReadCostEurCents === 0 && aiReadUnknownCosts > 0)
+      ? { status: 'not_measured', label: NOT_MEASURED_LABEL, unknownConcepts: aiReadUnknownCosts }
+      : {
+          status: 'measured',
+          amountEurCents: aiReadCostEurCents,
+          currency: 'EUR',
+          unknownConcepts: aiReadUnknownCosts,
+        },
+    providers,
+    note: AI_READ_NOTE,
+  };
   const aiOmitted = {
     names: dropped.length,
     concepts: dropped.reduce((sum, [, concepts]) => sum + concepts, 0),
@@ -278,6 +355,7 @@ function buildUsageExport({ rows, limit = MAX_SOURCE_ROWS, bounded, generatedAt 
     costs: costBlock(cost),
     routes,
     ai,
+    aiRead,
     aiOmitted,
     unattributed: { concepts: unattributed, note: UNATTRIBUTED_NOTE },
     reviewOutcomes: {
@@ -307,6 +385,7 @@ const ALLOWED_FIELDS = [
   'costs',
   'routes',
   'ai',
+  'aiRead',
   'aiOmitted',
   'unattributed',
   'reviewOutcomes',
@@ -343,6 +422,9 @@ function validateUsageExport(doc) {
     if (source.table !== DURABLE_SOURCE.table) problems.push('source.table is not the durable concept table');
     if (source.jsonField !== DURABLE_SOURCE.jsonField) problems.push('source.jsonField is not the provenance field');
     if (source.provenanceKind !== PROVENANCE_KIND) problems.push('source.provenanceKind is not supported');
+    if (!Array.isArray(source.provenanceKinds) || source.provenanceKinds.join(',') !== PROVENANCE_KINDS.join(',')) {
+      problems.push('source.provenanceKinds must list both supported kinds');
+    }
     for (const key of ['rowsRead', 'rowsUsed', 'rowsIgnored']) if (!isCount(source[key])) problems.push(`source.${key} must be a non-negative integer`);
     if (!isCount(source.limit) || source.limit === 0) problems.push('source.limit must be a positive integer');
     if (isCount(source.limit) && source.limit > MAX_SOURCE_ROWS) problems.push('source.limit is above the fixed maximum');
@@ -410,11 +492,54 @@ function validateUsageExport(doc) {
       } else {
         names.add(entry.aiName);
       }
-      if (!entry || entry.selfReported !== true) problems.push('ai name must be marked self-reported');
+      if (!entry || typeof entry.selfReported !== 'boolean') problems.push('ai entry must state whether the name is self-reported');
       const counts = entry && entry.counts && typeof entry.counts === 'object' ? entry.counts : null;
       const keys = counts ? Object.keys(counts).sort().join(',') : '';
       if (!counts || keys !== 'concept_saved') problems.push('ai counts must carry exactly concept_saved');
       if (!isCount(counts && counts.concept_saved)) problems.push('ai counts are invalid');
+    }
+  }
+
+  const aiRead = doc.aiRead;
+  if (!aiRead || typeof aiRead !== 'object' || Array.isArray(aiRead)) {
+    problems.push('aiRead is required');
+  } else {
+    if (!isCount(aiRead.concepts)) problems.push('aiRead.concepts must be a non-negative integer');
+    if (boundedText(aiRead.note) === null) problems.push('aiRead.note is required');
+    const cost = aiRead.cost;
+    if (!cost || typeof cost !== 'object' || Array.isArray(cost)) {
+      problems.push('aiRead.cost is required');
+    } else {
+      if (!['measured', 'not_measured'].includes(cost.status)) problems.push('aiRead.cost.status is invalid');
+      if (!isCount(cost.unknownConcepts)) problems.push('aiRead.cost.unknownConcepts must be a non-negative integer');
+      if (cost.status === 'measured') {
+        if (!(Number.isInteger(cost.amountEurCents) && cost.amountEurCents >= 0)) problems.push('measured aiRead cost needs eurocents');
+        if (cost.currency !== 'EUR') problems.push('measured aiRead cost must be in EUR');
+      } else if (cost.label !== NOT_MEASURED_LABEL) {
+        problems.push('unmeasured aiRead cost needs the fixed label');
+      }
+    }
+    const providers = Array.isArray(aiRead.providers) ? aiRead.providers : null;
+    if (!providers) {
+      problems.push('aiRead.providers must be an array');
+    } else {
+      if (providers.length > MAX_AI_NAMES) problems.push('aiRead.providers is too long');
+      for (const entry of providers) {
+        if (!entry || typeof entry !== 'object') {
+          problems.push('aiRead provider entry is invalid');
+          continue;
+        }
+        if (entry.provider !== null && boundedText(entry.provider, 40) === null) problems.push('aiRead provider name is invalid');
+        if (entry.model !== null && boundedText(entry.model, 60) === null) problems.push('aiRead model name is invalid');
+        if (!isCount(entry.concepts)) problems.push('aiRead provider concepts must be a non-negative integer');
+        const entryCost = entry.cost && typeof entry.cost === 'object' ? entry.cost : null;
+        if (!entryCost) problems.push('aiRead provider cost is required');
+        else if (!['measured', 'not_measured'].includes(entryCost.status)) problems.push('aiRead provider cost status is invalid');
+        else if (!isCount(entryCost.unknownConcepts)) problems.push('aiRead provider unknownConcepts must be a non-negative integer');
+      }
+      if (isCount(aiRead.concepts) && providers.reduce((sum, entry) => sum + (entry && isCount(entry.concepts) ? entry.concepts : 0), 0) !== aiRead.concepts) {
+        problems.push('aiRead provider concepts must add up');
+      }
     }
   }
 
@@ -523,6 +648,8 @@ module.exports = {
   NOT_MEASURED_LABEL,
   NOT_TRACKED_LABEL,
   PROVENANCE_KIND,
+  AI_READ_KIND,
+  PROVENANCE_KINDS,
   PERIOD_BASIS,
   DURABLE_SOURCE,
   ROUTES,

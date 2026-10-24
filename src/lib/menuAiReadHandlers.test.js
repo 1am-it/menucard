@@ -14,7 +14,7 @@ const assert = require('node:assert/strict');
 const path = require('node:path');
 
 const { createMenuAiReadHandlers } = require('./menuAiReadHandlers');
-const { AI_MAX_COST_EUR_CENTS, AI_MONTH_LIMIT_EUR_CENTS, AI_READ_PROVENANCE_KIND } = require('./menuAiImport');
+const { AI_MAX_COST_EUR_CENTS, AI_MONTH_LIMIT_EUR_CENTS, AI_READ_PROVENANCE_KIND, monthlySpendFromRows } = require('./menuAiImport');
 const { loadMenuExtractionProtocol } = require('./menuExtractionProtocol');
 const { buildImportBundle, sourceHashForText } = require('./manualMenuImportBundle');
 const { createManualImportStateCipher } = require('./manualMenuImportState');
@@ -404,3 +404,35 @@ test('W2: een gewijzigd toestandstoken is geen bron', async () => {
   assert.equal(client.calls.length, 0);
 });
 
+
+test('W6/W7: het toestandstoken van een AI-lezing draagt het vaste AI-label', async () => {
+  const client = fakeClient(() => responseOf(validAnswer()));
+  const h = harness({ client });
+  const result = await h.handlers.read(requestOf({ state: tokenOf() }));
+  assert.equal(result.status, 200);
+  const opened = h.sealed.cipher.open(result.body.state);
+  assert.equal(opened.ok, true);
+  assert.equal(opened.state.origin.kind, AI_READ_PROVENANCE_KIND);
+  assert.equal(opened.state.origin.label, 'Gelezen door AI');
+  assert.equal(opened.state.origin.provider, 'anthropic');
+  assert.equal(opened.state.origin.model, 'claude-haiku-5-5');
+  assert.equal(opened.state.origin.readId, 'import-ai-1');
+  assert.equal(opened.state.origin.cost.known, true);
+  assert.match(opened.state.origin.readId, /import-ai-1/);
+  // The report in the sealed step is the validated result the review uses.
+  assert.ok(Array.isArray(opened.state.report.rows));
+  assert.equal(opened.state.report.rows.length, 2);
+});
+
+test('W4: een gecorrigeerde versie van dezelfde lezing telt niet dubbel', () => {
+  const provenanceBase = { importProvenance: { kind: 'ai_gelezen', readId: 'read-1', cost: { eurCents: 7, known: true } } };
+  const rows = [
+    { id: 'a', created_at: '2026-10-05T10:00:00.000Z', captured_content: provenanceBase },
+    { id: 'b', created_at: '2026-10-05T10:05:00.000Z', captured_content: provenanceBase },
+    { id: 'c', created_at: '2026-10-05T11:00:00.000Z', captured_content: { importProvenance: { kind: 'ai_gelezen', readId: 'read-2', cost: { eurCents: 5, known: true } } } },
+  ];
+  const spend = monthlySpendFromRows(rows, { now: new Date('2026-10-24T12:00:00.000Z') });
+  assert.equal(spend.concepts, 3);
+  assert.equal(spend.reads, 2);
+  assert.equal(spend.spentEurCents, 12);
+});

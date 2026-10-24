@@ -109,6 +109,16 @@ function assertStateShape(state) {
   if (state.followUps !== undefined && state.followUps !== null) {
     if (typeof state.followUps !== 'object' || Array.isArray(state.followUps)) throw new ManualImportStateError('state_invalid');
   }
+  // W6/W7 of Lead review 6380804419: an AI reading ("Gelezen door AI") keeps
+  // its origin in the sealed step, so the existing review and save routes can
+  // store the same label, provider, model and cost after human correction.
+  // Only the fixed fields below are carried; nothing else is trusted.
+  if (state.origin !== undefined && state.origin !== null) {
+    const origin = state.origin;
+    if (typeof origin !== 'object' || Array.isArray(origin)) throw new ManualImportStateError('state_invalid');
+    if (origin.kind !== 'ai_gelezen') throw new ManualImportStateError('state_invalid');
+    if (!isNonEmptyString(origin.readId)) throw new ManualImportStateError('state_invalid');
+  }
 }
 
 /**
@@ -187,6 +197,8 @@ function createManualImportStateCipher({
         decisions: Array.isArray(state.decisions) ? state.decisions : [],
         followUps: state.followUps && typeof state.followUps === 'object' ? state.followUps : {},
         followUpTotal: Number.isInteger(state.followUpTotal) ? state.followUpTotal : 0,
+        // Fixed-shape origin of an AI reading; absent for the manual import.
+        origin: state.origin && typeof state.origin === 'object' ? state.origin : null,
       },
     };
     const token = encryptState(key(), JSON.stringify(envelope));

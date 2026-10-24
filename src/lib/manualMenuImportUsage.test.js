@@ -239,10 +239,10 @@ test('K4: het schema weigert een 0, een oude versie en vreemde velden', () => {
   const inflated = { ...base(), totals: { ...base().totals, conceptSaved: 99 } };
   assert.ok(validateUsageExport(inflated).includes('totals.conceptSaved must equal the route sum'));
 
-  // Een AI-naam zonder de zelfgerapporteerd-markering is niet toegestaan.
+  // Een AI-naam zonder de zelfgerapporteerd-markering (geen boolean) is niet toegestaan.
   const notSelfReported = base();
-  notSelfReported.ai[0].selfReported = false;
-  assert.ok(validateUsageExport(notSelfReported).includes('ai name must be marked self-reported'));
+  delete notSelfReported.ai[0].selfReported;
+  assert.ok(validateUsageExport(notSelfReported).includes('ai entry must state whether the name is self-reported'));
 
   // Kosten van 0 zijn geen meting.
   const zeroCost = { ...base(), costs: { status: 'measured', amount: 0, currency: 'EUR' } };
@@ -273,3 +273,40 @@ test('K4: het document draagt geen prompts, sleutels of persoonsgegevens', () =>
   assert.equal(doc.contents, 'alleen metagegevens');
   assert.equal(doc.selfReportedNote.includes('zelfgerapporteerd'), true);
 });
+
+test('W7: AI-concepten van de app tellen mee met provider, model en kosten', () => {
+  const manual = { id: 'c1', created_at: '2026-10-22T10:00:00.000Z', captured_content: { importProvenance: provenance({ aiName: 'Claude' }) } };
+  const aiRead = (id, eurCents, known) => ({
+    id,
+    created_at: '2026-10-23T10:00:00.000Z',
+    captured_content: {
+      importProvenance: {
+        kind: 'ai_gelezen',
+        label: 'Gelezen door AI',
+        aiName: 'Claude (Haiku 5.5)',
+        aiNameSelfReported: false,
+        provider: 'anthropic',
+        model: 'claude-haiku-5-5',
+        importedAt: '2026-10-23T10:00:00.000Z',
+        cost: { eurCents, known },
+        rows: [],
+      },
+    },
+  });
+  const doc = buildUsageExport({ rows: [manual, aiRead('c2', 3, true), aiRead('c3', 4, true), aiRead('c4', 2, false)], generatedAt: GENERATED_AT });
+  assert.deepEqual(validateUsageExport(doc), []);
+  assert.equal(doc.schemaVersion, 'manual-ai-import-usage/v3');
+  assert.deepEqual(doc.source.provenanceKinds, ['handmatige_ai_import', 'ai_gelezen']);
+  assert.equal(doc.aiRead.concepts, 3);
+  assert.equal(doc.aiRead.cost.status, 'measured');
+  assert.equal(doc.aiRead.cost.amountEurCents, 7);
+  assert.equal(doc.aiRead.cost.currency, 'EUR');
+  assert.equal(doc.aiRead.cost.unknownConcepts, 1);
+  assert.deepEqual(doc.aiRead.providers, [
+    { provider: 'anthropic', model: 'claude-haiku-5-5', concepts: 3, cost: { status: 'measured', amountEurCents: 7, currency: 'EUR', unknownConcepts: 1 } },
+  ]);
+  const names = doc.ai.map((entry) => [entry.aiName, entry.selfReported]);
+  assert.deepEqual(names, [['Claude (Haiku 5.5)', false], ['Claude', true]]);
+  assert.equal(doc.totals.conceptSaved, 4);
+});
+

@@ -57,11 +57,13 @@ function fakeClient({ rows = [], error = null } = {}) {
   };
 }
 
-test('K3: de leesroute leest alleen en filtert op de AI-herkomst', async () => {
+test('K3/W7: de leesroute leest alleen en filtert op beide AI-herkomsten', async () => {
   const client = fakeClient({ rows: [{ id: 3, created_at: '2026-10-22T21:10:02.873Z', captured_content: {} }] });
   const result = await readDurableUsageRows(client);
   assert.equal(result.ok, true);
-  assert.equal(result.rows.length, 1);
+  // The manual kind first, then the remaining room for AI reads; both rows are
+  // returned and de-duplicated by the document itself.
+  assert.equal(result.rows.length, 2);
   assert.equal(result.limit, 5000);
   assert.equal(result.bounded, false);
   assert.deepEqual(client.calls, [
@@ -70,6 +72,11 @@ test('K3: de leesroute leest alleen en filtert op de AI-herkomst', async () => {
     ['eq', PROVENANCE_KIND_PATH, 'handmatige_ai_import'],
     ['order', 'created_at', { ascending: true }],
     ['limit', 5000],
+    ['from', CONCEPT_TABLE],
+    ['select', CONCEPT_COLUMNS],
+    ['eq', PROVENANCE_KIND_PATH, 'ai_gelezen'],
+    ['order', 'created_at', { ascending: true }],
+    ['limit', 4999],
   ]);
   assert.equal(client.calls.some(([name]) => ['insert', 'update', 'delete'].includes(name)), false);
 });
@@ -79,8 +86,10 @@ test('K4: een leesactie die de grens raakt is zichtbaar begrensd', async () => {
   const result = await readDurableUsageRows(client, { limit: 2 });
   assert.equal(result.ok, true);
   assert.equal(result.limit, 2);
+  // The manual query already fills the bound, so no room is left for AI reads.
   assert.equal(result.bounded, true);
-  const wider = await readDurableUsageRows(fakeClient({ rows: [{ id: 1 }] }), { limit: 2 });
+  assert.deepEqual(client.calls.filter(([name]) => name === 'eq').map(([, , value]) => value), ['handmatige_ai_import']);
+  const wider = await readDurableUsageRows(fakeClient({ rows: [{ id: 1 }] }), { limit: 3 });
   assert.equal(wider.bounded, false);
 });
 

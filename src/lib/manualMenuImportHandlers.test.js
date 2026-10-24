@@ -652,3 +652,55 @@ test('V1/V2/V3: de afleiding reist mee in het toestandstoken, blijft zichtbaar e
   assert.equal(JSON.stringify(usage.body.usage).includes('Broodplank'), false);
 });
 
+
+test('W6/W7: een AI-lezing houdt zijn label, provider, model en kosten bij opslaan', async () => {
+  const h = harness();
+  const step1 = await createBundle(h.next());
+  const step2 = await importAnswer(h.next(), step1);
+  const supplement = step2.import.rows.find((row) => row.code === 'supplement_as_main_price');
+  const missing = step2.import.rows.find((row) => row.code === 'quote_not_in_source');
+  const afterSupplement = await h.next().decide(request({ state: step2.state, decision: { rowId: supplement.id, action: 'confirm' } }), step2.import.importId);
+  assert.equal(afterSupplement.status, 200);
+  const afterMissing = await h.next().decide(
+    request({
+      state: afterSupplement.body.state,
+      decision: { rowId: missing.id, action: 'confirm', reasonCode: 'niet_in_bron', note: 'Op de papieren kaart gezien.' },
+    }),
+    step2.import.importId,
+  );
+  assert.equal(afterMissing.status, 200);
+  assert.equal(afterMissing.body.review.canSave, true);
+
+  // The sealed step of an AI reading carries the fixed origin; the save route
+  // takes the label, provider, model, read id and cost from there.
+  const cipher = createManualImportStateCipher({ secret: TEST_SECRET, now: () => NOW });
+  const opened = cipher.open(afterMissing.body.state);
+  assert.equal(opened.ok, true);
+  const resealed = cipher.seal({
+    ...opened.state,
+    origin: {
+      kind: 'ai_gelezen',
+      label: 'Gelezen door AI',
+      aiName: 'Claude (Haiku 5.5)',
+      provider: 'anthropic',
+      model: 'claude-haiku-5-5',
+      readId: 'read-1',
+      readAt: '2026-10-22T11:59:00.000Z',
+      cost: { eurCents: 4, known: true },
+    },
+  });
+  const saved = await h.next().save(request({ state: resealed.token }), step2.import.importId);
+  assert.equal(saved.status, 201, JSON.stringify(saved.body));
+  assert.equal(h.saved[0].sourceType, 'own_website');
+  const provenance = h.saved[0].content.importProvenance;
+  assert.equal(provenance.kind, 'ai_gelezen');
+  assert.equal(provenance.label, 'Gelezen door AI');
+  assert.equal(provenance.aiName, 'Claude (Haiku 5.5)');
+  assert.equal(provenance.aiNameSelfReported, false);
+  assert.equal(provenance.provider, 'anthropic');
+  assert.equal(provenance.model, 'claude-haiku-5-5');
+  assert.equal(provenance.readId, 'read-1');
+  assert.deepEqual(provenance.cost, { eurCents: 4, known: true, source: 'usage' });
+  // The human decisions stay part of the same durable provenance.
+  assert.equal(provenance.reasons.length, 1);
+});

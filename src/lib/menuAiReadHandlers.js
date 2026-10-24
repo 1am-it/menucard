@@ -31,6 +31,7 @@ const {
   AI_READ_PROVENANCE_KIND,
   MAX_SOURCES,
   aiConfiguration,
+  aiOriginOverrides,
   budgetDecision,
   messageFor,
   monthlySpendFromRows,
@@ -231,20 +232,13 @@ function createMenuAiReadHandlers({
     const contexts = mapStructuredOutputToMenuContexts({ menus: result.validated.menus }, ai.sources);
     const concept = buildMenuConcept({ menus: contexts, liveLines: [], edits: {} });
     const provenance = {
-      kind: AI_READ_PROVENANCE_KIND,
-      label: AI_READ_LABEL,
-      aiName: AI_READ_AI_NAME,
-      // The app made this call itself, so the name is not self-reported.
-      aiNameSelfReported: false,
-      provider: ai.provider,
-      model: ai.model,
-      readAt: ai.readAt,
+      // Fixed AI-read fields, taken only from this app's own call.
+      ...aiOriginOverrides(ai.origin),
+      // Report-derived facts; never a model claim.
       protocolVersion: ai.protocolVersion,
       protocolHash: ai.protocolHash,
       schemaVersion: ai.schemaVersion,
       bundleHash: ai.bundleHash,
-      providerRequestId: ai.requestId || null,
-      cost: ai.cost,
       // Explicitly not reviewed: this version is the reading, not a decision.
       reviewed: false,
       items: result.summary.items,
@@ -379,6 +373,19 @@ function createMenuAiReadHandlers({
       cost,
       sources: result.technical.sources,
       restaurantId: source.restaurantId,
+      // The origin that travels in the sealed step and into every version of
+      // this reading: label, provider, model, cost and one read id.
+      origin: {
+        kind: AI_READ_PROVENANCE_KIND,
+        label: AI_READ_LABEL,
+        aiName: AI_READ_AI_NAME,
+        provider: callModule.provider || AI_PROVIDER,
+        model: callModule.model || AI_MODEL,
+        readId: importId,
+        readAt: at.toISOString(),
+        requestId: (callModule.lastCall && callModule.lastCall.requestId) || null,
+        cost: { eurCents: cost.known ? cost.eurCents : null, known: cost.known },
+      },
     };
     const draft = buildAiReadConcept(result, ai);
 
@@ -418,6 +425,9 @@ function createMenuAiReadHandlers({
           decisions: [],
           followUps: {},
           followUpTotal: 0,
+          // The existing review and save routes take the label, provider,
+          // model, read id and measured cost from here — never from input.
+          origin: ai.origin,
         })
       : null;
 
