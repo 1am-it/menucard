@@ -523,9 +523,8 @@ export default function ManualMenuImportPage() {
         setReceived(data.import.summary)
         adoptStep(data)
         setAiPhase('done')
-        setMessage(
-          `Concept klaar: ${data.summary.items} ${data.summary.items === 1 ? 'gerecht' : 'gerechten'} · ${data.summary.valid} in orde, ${data.summary.needsReview} nalopen.`
-        )
+        // Y2: the result is reported by the AI card itself. A second page-level
+        // banner would duplicate it above the source card, so it is not set.
       } catch {
         setAiPhase('error')
         setAiError('De AI-lezing lukte niet. Ga verder met de handmatige import.')

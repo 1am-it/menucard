@@ -1595,6 +1595,7 @@ async function aiReadScenario(cdp, theme) {
     Boolean(firstCard && firstCard.visible),
     JSON.stringify(firstCard),
   );
+  await evalJs(cdp, `(() => { const el = document.querySelector('.mai-ai'); if (el) el.scrollIntoView({ block: 'center' }); return true; })()`);
   screenshotFiles.push(await screenshot(cdp, OUT_DIR, `ai-read-block-390-${theme}.png`));
 
   // De handmatige route opent pas als de mens die kiest.
