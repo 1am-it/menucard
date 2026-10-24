@@ -69,6 +69,18 @@ No app route is wired to any of it — `disabledMenuExtractionRuntime` stays in
 place.
 See `docs/guides/menu-extraction-ai-probe.md`.
 
+## Variant 1 coverage diagnosis (added 2026-10-24, #59 / BE-21)
+
+`node ops/scripts/diagnose-menu-source-coverage.js` — offline diagnosis of the
+comparison engine behind the review block "N regels met een prijs staan niet in
+het concept". It reads the hash-verified pinned captures plus the literal AI
+answers of a live run under `ops/benchmark/output/ai-probe-raw/` (gitignored),
+counts per source how many priced source lines no accepted dish covers, and
+writes `ops/benchmark/output/ai-probe-coverage-diagnosis.json` (gitignored). No
+key, no network, no provider call, and it changes no reference, counting rule or
+measurement code. The engine itself is `src/lib/menuSourceCoverage.js` and reuses
+the extraction's own price parser and the validator's normalization.
+
 ## PDF.js server packaging check (added 2026-09-30)
 
 `node ops/scripts/verify-pdfjs-server-trace.js` — read-only, run after

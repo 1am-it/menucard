@@ -90,6 +90,9 @@ function diagnoseSource({ sourceId, label, captureStatus, blockedReason, capture
     blockedReason: blockedReason || null,
     capturesRead: usable.length,
     pricedLines,
+    // An honest distinction: a capture whose text holds no price token cannot
+    // say anything about missing dishes. That is not a green result.
+    note: comparison.available && pricedLines === 0 ? 'de capture bevat geen prijsregels; niets te vergelijken' : null,
     acceptedItems: concept.menus.reduce(
       (sum, menu) => sum + (Array.isArray(menu.categories) ? menu.categories.reduce((n, category) => n + (Array.isArray(category.items) ? category.items.length : 0), 0) : 0),
       0,

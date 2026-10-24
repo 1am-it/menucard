@@ -1173,3 +1173,104 @@ beperkingen staan in "Bewijs en beperkingen (Y3, review 6381657192)" hierboven.
 Dit blijft fixture- en ontwikkelaarsbewijs, geen onafhankelijke review of
 browseracceptatie; de Lead test de echte aanroep daarna zelf.
 
+
+## Variant 1: het concept vergelijken met de originele kaart (order 6382189724)
+
+Eigenaarsbesluit 2026-10-24 ("1 en 5 !"): eerst een **deterministische en
+gratis** vergelijking, daarna variant 5 (originele kaart met markeringen). Deze
+ronde bouwt uitsluitend variant 1. Er is geen AI-aanroep, geen sleutel, geen
+migratie, geen nieuwe tabel en geen nieuw workflowmechanisme.
+
+### De vergelijkingsmotor (`src/lib/menuSourceCoverage.js`)
+
+- **Invoer:** de capture-tekst per bron en de gerechten van het concept met hun
+  citaten; daarnaast de afgekeurde passages en de regels die een mens al
+  "Geen gerecht" gaf.
+- **Prijsherkenning:** `findPrices` uit `src/lib/htmlMenuStructure.js`, dus
+  dezelfde parser als de extractie (hoeveelheden als "0,75 L" blijven
+  hoeveelheden). Er is geen tweede regex-familie.
+- **Dekking:** een regel is gedekt als een citaat hem overlapt, in beide
+  richtingen, met `normalizeEvidenceText`/`quoteIsPresentInSource` uit
+  `src/lib/menuExtractionSchema.js`. Een citaat dat alleen de naam noemt dekt de
+  regel dus ook.
+- **Verantwoord:** een `rejected` passage, een arrangement (het citaat dekt de
+  regel) en een regel met "Geen gerecht" verschijnen niet opnieuw. Een
+  weggehaalde regel ("Weglaten") vraagt de mens ook niet opnieuw iets: het
+  citaat van die rij dekt de regel nog steeds.
+- **Uitvoer per regel:** bron-id, regelnummer (en bij een platgeslagen regel het
+  deel), de tekst zoals de bron hem print, de prijs, de dichtstbijzijnde
+  rubriekkop en een stabiel `id` (`bron:regel` of `bron:regel:deel`).
+- **Begrenzing:** maximaal 100 regels met een eerlijke `en nog N`; de telling
+  zelf is niet afgekapt.
+- **Eerlijk bij ontbreken:** is er voor dit concept geen brontekst, dan meldt de
+  motor `available: false` met de tekst "Vergelijking niet beschikbaar voor dit
+  concept". Nul regels betekent dus nooit "niets gevonden" zonder bewijs.
+- **Platgeslagen regels:** een capture zonder regeleinden (bijvoorbeeld de
+  zichtbare tekst van een pagina die als één regel binnenkomt) wordt op de
+  geprinte cellen gesplitst: de cel direct vóór een prijs is de naam, een
+  eerdere kop-achtige cel de rubriek. Elk citaat blijft een letterlijk deel van
+  de bron (op witruimte genormaliseerd, precies zoals de validator toetst).
+
+### Waar de brontekst staat (X2)
+
+De capture-tekst van een concept staat in het **verzegelde toestandstoken** van
+de bestaande stroom (handmatige import en AI-lezing): de server las hem, zegelde
+hem met AES-256-GCM en geeft hem bij elke stap terug. De vergelijking draait
+daarom altijd server-side en de browser krijgt alleen de regel die het blok
+toont, nooit de hele capture. Er is geen migratie, geen nieuwe kolom en geen
+state in het geheugen. Een concept waarvan de tekst niet meer beschikbaar is
+(verlopen token, bron zonder tekst) toont de eerlijke melding hierboven.
+
+### Toevoegen en Geen gerecht (X3)
+
+- **Toevoegen** bouwt uit de regel zelf (nooit uit clienttekst) een gerecht met
+  naam en prijs, met de regel als citaat, en laat het door dezelfde validator
+  (`buildImportReport`) gaan. Het nieuwe gerecht komt in een eigen rubriek met
+  `uncertain: true`, zodat het in nalopen staat als "rubriek controleren" en de
+  mens naam en rubriek met de bestaande "Wijzig"-stap bijstelt. Twee geprinte
+  prijzen blijven twee prijzen (`multiple_undecomposed` + `priceVariants`); de
+  app kiest er nooit zelf één.
+- **Geen gerecht** legt de regel vast als verantwoord: de keuze reist mee in
+  hetzelfde verzegelde token (dus ook in een nieuwe serverinstantie) en komt bij
+  opslaan in de duurzame conceptmetadata (`importProvenance.uncovered`, met
+  bron, regelnummer, tekst, rubriek en de keuze). Na herladen van de stap komt
+  de regel niet terug.
+- De bestaande "Weglaten"- en "Klopt"-flows zijn ongewijzigd. Er is geen
+  accepteer-alles: één regel per beslissing, ook hier.
+
+### Weergave (X4)
+
+Het oranje blok (`--status-old`/`--status-old-bg`, de aandachtrol; `--warning`
+is uitgefaseerd) staat **boven** de nalopen-lijst,
+met per regel het citaat, "Pagina <bron> · regel N · onder <rubriek>" en de twee
+knoppen, en onderaan "Gratis: geen extra AI-aanroep nodig". Bij nul regels
+verdwijnt het blok; de begrenzing toont "en nog N". De knoppen hebben een
+`aria-label` met de regel erna, zodat de toetsenbordroute eenduidig is.
+
+### Diagnose op de gepinde captures en live-run 2 (X5)
+
+`node ops/scripts/diagnose-menu-source-coverage.js` leest alleen lokale
+bestanden: de gevalideerde gepinde captures en de bewaarde antwoorden van de
+live-proef (`ops/benchmark/output/ai-probe-raw/`, gitignored). Het schrijft een
+gitignored rapport (`ops/benchmark/output/ai-probe-coverage-diagnosis.json`) en
+wijzigt geen referentie, telregel of meetcode. Het is diagnose, geen
+acceptatiecijfer.
+
+### Bewijs en beperkingen
+
+Unit-tests: `src/lib/menuSourceCoverage.test.js` (gedekt/ongedekt,
+typografische tekens, regel zonder prijs, rejected/arrangement, begrenzing,
+bron zonder tekst, rubriekkoppen, platgeslagen regel, Toevoegen-item) en
+`src/lib/menuUncoveredLayout.test.js` (plaats boven nalopen, teksten,
+toegankelijke namen, geen AI-aanroep in de handler).
+Route-/handlertests: `src/lib/menuSourceCoverageHandlers.test.js` (vergelijking
+uit het token, bron zonder tekst, "Geen gerecht" durable in een nieuwe instantie
+en in de conceptmetadata, "Toevoegen" door de validator en in het concept,
+onbekende regel en accepteer-alles geweigerd). Browserbewijs:
+`ops/browser/run-menu-review-browser-check.js` (`manualUncoveredScenario`) met
+screenshots op 390 px licht/donker en 320 px licht, de toetsenbordactie en de
+standen na Toevoegen en Geen gerecht. Dit is **ontwikkelaars- en
+fixturebewijs**, geen onafhankelijke review, geen browseracceptatie en geen
+productiegebruik. Niet getest: een echte provider, een echte PDF-rendering op de
+kaart (variant 5) en productiegedrag.
+

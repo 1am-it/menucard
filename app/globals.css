@@ -3070,15 +3070,16 @@ details.bta-side-card > summary:focus-visible { outline: 2px solid var(--border-
 .mai-notices-title { margin: 0; font-size: 13px; font-weight: 800; color: var(--text-primary); }
 .mai-notice-list { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 13px; color: var(--text-secondary); overflow-wrap: anywhere; }
 /* Variant 1 (Lead order 6382189724): source lines with a price that no dish in
-   the concept covers. Orange, above the nalopen list, and free: no AI call. */
+   the concept covers. Orange (the attention role, --status-old; --warning is
+   retired), above the nalopen list, and free: no AI call. */
 .mai-uncovered {
   display: grid;
   gap: 8px;
   padding: 12px 14px;
-  border: 1px solid var(--warning-border);
-  border-left: 3px solid var(--warning);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--status-old);
   border-radius: var(--radius-md);
-  background: var(--warning-bg);
+  background: var(--status-old-bg);
   min-width: 0;
 }
 .mai-uncovered-title { margin: 0; font-size: 14px; font-weight: 800; color: var(--text-primary); overflow-wrap: anywhere; }
@@ -3087,7 +3088,7 @@ details.bta-side-card > summary:focus-visible { outline: 2px solid var(--border-
   display: grid;
   gap: 6px;
   padding: 10px 12px;
-  border: 1px solid var(--warning-border);
+  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--bg-elevated);
   min-width: 0;

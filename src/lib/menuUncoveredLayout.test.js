@@ -54,7 +54,9 @@ test('X4: de keuze gaat naar de bestaande beslisroute, zonder AI-aanroep', () =>
   const handler = PAGE.slice(PAGE.indexOf('async function sendUncovered'), PAGE.indexOf('function openReason'));
   assert.equal(handler.includes('AI_API'), false, 'no AI call in the uncovered handler');
   assert.equal(handler.includes('fetch('), false, 'the handler uses the existing api() helper only');
-  assert.equal(CSS.includes('.mai-uncovered {'), true);
-  assert.match(CSS, /\.mai-uncovered \{[\s\S]*?background: var\(--warning-bg\)/);
+  assert.ok(CSS.includes('.mai-uncovered {'), true);
+  assert.match(CSS, /\.mai-uncovered \{[\s\S]*?background: var\(--status-old-bg\)/);
   assert.match(CSS, /\.mai-uncovered-row \{/);
+  // The retired --warning alias stays out of the UI (colourLanguage guard).
+  assert.equal(/var\(--warning/.test(CSS.slice(CSS.indexOf('.mai-uncovered {'), CSS.indexOf('.mai-uncovered-unavailable') + 60)), false);
 });

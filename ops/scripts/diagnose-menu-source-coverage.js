@@ -96,6 +96,7 @@ async function main() {
     process.stdout.write(
       `- ${row.sourceId}: ${outcome}; ${row.acceptedItems} accepted items, ${row.answerFiles.length} answers` +
         `${row.unreadableAnswers.length > 0 ? `, ${row.unreadableAnswers.length} unreadable` : ''}` +
+        `${row.note ? `; ${row.note}` : ''}` +
         `${row.blockedReason ? `; blocked: ${row.blockedReason}` : ''}\n`,
     );
     for (const example of (comparison.examples || []).slice(0, 3)) {

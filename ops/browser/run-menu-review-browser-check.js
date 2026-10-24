@@ -1809,12 +1809,12 @@ async function readUncovered(cdp) {
       const styles = block ? getComputedStyle(block) : null;
       const root = getComputedStyle(document.documentElement);
       const probe = document.createElement('div');
-      probe.style.color = 'var(--warning)';
-      probe.style.backgroundColor = 'var(--warning-bg)';
+      probe.style.color = 'var(--status-old)';
+      probe.style.backgroundColor = 'var(--status-old-bg)';
       document.body.appendChild(probe);
       const probeStyle = getComputedStyle(probe);
-      const warningRgb = probeStyle.color;
-      const warningBackgroundRgb = probeStyle.backgroundColor;
+      const attentionRgb = probeStyle.color;
+      const attentionBackgroundRgb = probeStyle.backgroundColor;
       probe.remove();
       const rows = block ? Array.from(block.querySelectorAll('.mai-uncovered-row')) : [];
       return {
@@ -1830,11 +1830,9 @@ async function readUncovered(cdp) {
         free: block && block.querySelector('.mai-uncovered-free') ? block.querySelector('.mai-uncovered-free').innerText.trim() : null,
         aboveList: Boolean(block && list && (block.compareDocumentPosition(list) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0),
         background: styles ? styles.backgroundColor : null,
-        warningBackground: root.getPropertyValue('--warning-bg').trim(),
         borderLeft: styles ? styles.borderLeftColor : null,
-        warning: warningRgb,
-        warningBackgroundToken: root.getPropertyValue('--warning-bg').trim(),
-        warningBackgroundRgb,
+        attentionRgb,
+        attentionBackgroundRgb,
         overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
         top: rect ? Math.round(rect.top) : null,
         height: window.innerHeight,
@@ -1877,9 +1875,9 @@ async function manualUncoveredScenario(cdp) {
     block ? block.free : 'no block',
   );
   check(
-    'uncovered lines: the block uses the orange warning tokens of this theme',
-    Boolean(block) && block.borderLeft === block.warning && block.background === block.warningBackgroundRgb,
-    block ? JSON.stringify({ borderLeft: block.borderLeft, warning: block.warning, background: block.background, warningBackgroundRgb: block.warningBackgroundRgb }) : 'no block',
+    'uncovered lines: the block uses the orange attention tokens of this theme',
+    Boolean(block) && block.borderLeft === block.attentionRgb && block.background === block.attentionBackgroundRgb,
+    block ? JSON.stringify({ borderLeft: block.borderLeft, attentionRgb: block.attentionRgb, background: block.background, attentionBackgroundRgb: block.attentionBackgroundRgb }) : 'no block',
   );
   check('uncovered lines: no horizontal overflow at 390 px', Boolean(block) && block.overflow <= 0, block ? `overflow=${block.overflow}` : 'no block');
   check(

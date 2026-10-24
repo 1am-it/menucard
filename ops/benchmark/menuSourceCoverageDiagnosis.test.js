@@ -80,6 +80,17 @@ test('X5: per bron telt de diagnose gedekte en niet-overgenomen regels', () => {
   assert.equal(row.comparison.examples[0].section, 'Bites');
 });
 
+test('X5: een bron zonder prijsregels is geen groen resultaat', () => {
+  const row = diagnoseSource({
+    sourceId: 'bron',
+    captures: [{ id: 'bron-01', kind: 'html', text: ['LUNCH', 'Soep van de dag', 'Steak'].join('\n') }],
+    answers: [],
+  });
+  assert.equal(row.pricedLines, 0);
+  assert.equal(row.comparison.uncoveredLines, 0);
+  assert.equal(row.note, 'de capture bevat geen prijsregels; niets te vergelijken');
+});
+
 test('X5: zonder brontekst blijft de diagnose eerlijk leeg', () => {
   const row = diagnoseSource({ sourceId: 'bron', captures: [], answers: [], captureStatus: 'blocked', blockedReason: 'missing local capture x' });
   assert.equal(row.comparison.available, false);

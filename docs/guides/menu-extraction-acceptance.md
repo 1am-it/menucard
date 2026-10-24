@@ -841,3 +841,33 @@ is niet opgehoogd door de referentie passend te maken.
   nieuwe holdout, 50-100-bronnenbenchmark of #56-compatibiliteit in deze ronde.
 - Onafhankelijke herreview door de Delivery Lead staat open. Deze sectie is
   ontwikkelaarsbewijs, geen productacceptatie of release.
+
+## Variant 1: niet-overgenomen bronregels (order 6382189724)
+
+Acceptatie van variant 1 is **ontwikkelaars- en fixturebewijs**. Er is geen
+echte provider, geen productieconcept en geen browseracceptatie door de Lead
+gebruikt.
+
+| Criterium | Bewijs |
+| --- | --- |
+| X1 vergelijkingsmotor | `src/lib/menuSourceCoverage.test.js`: gedekte en ongedekte regel, citaat dat de regel deels of ruimer dekt, typografische tekens, regel zonder prijs, hoeveelheid "0,75 L", `rejected` en arrangement, "Geen gerecht", begrenzing op 100 met "en nog N", rubriekkoppen, platgeslagen regel met cel-vóór-prijs, Toevoegen-item met één en met twee prijzen |
+| X2 brontekst | `src/lib/menuSourceCoverageHandlers.test.js`: de vergelijking komt uit de capture in het verzegelde token; zonder tekst `available: false` met "Vergelijking niet beschikbaar voor dit concept" en nul regels; geen migratie, geen geheugenstate |
+| X3 Toevoegen / Geen gerecht | dezelfde handlertests: "Geen gerecht" blijft weg in een nieuwe handlerinstantie en staat in `importProvenance.uncovered`; "Toevoegen" gaat door de validator, staat als "rubriek controleren" in nalopen, wordt met "Wijzig" bijgesteld en staat met prijs en citaat in het concept; een onbekende regel en een accepteer-alles-payload worden geweigerd; clienttekst telt nooit |
+| X4 weergave | `src/lib/menuUncoveredLayout.test.js` (plaats boven nalopen, teksten, aria-labels, geen AI-aanroep) en `ops/browser/run-menu-review-browser-check.js` (`manualUncoveredScenario`): 390 px licht/donker, 320 px licht, toetsenbordactie, standen na Toevoegen en Geen gerecht, screenshots `ai-uncovered-*` |
+| X5 regressies en diagnose | `npm test`, `npm run build`, de brownerun en `node ops/scripts/diagnose-menu-source-coverage.js` met het gitignored rapport `ops/benchmark/output/ai-probe-coverage-diagnosis.json` |
+
+De diagnose is **diagnose, geen acceptatiecijfer**: zij telt per gepinde bron
+hoeveel prijsregels geen geaccepteerd gerecht dekken, met voorbeelden. Ze wijzigt
+geen referentie, telregel of meetcode en doet geen provideraanroep.
+
+### Resterende gaten (variant 1)
+
+- Geen echte provideraanroep, geen productieconcept en geen onafhankelijke
+  review in deze ronde.
+- Een bron zonder tekstlaag (scan-PDF) blijft eerlijk "niet beschikbaar"; er is
+  geen OCR bijgebouwd.
+- Variant 5 (originele kaart met markeringen) is niet gebouwd; variant 2 vervalt
+  en variant 3/4 zijn niet besloten.
+- De rubriek van een toegevoegd gerecht is een systeemgok uit de dichtstbijzijnde
+  kop en staat daarom altijd als "rubriek controleren" in nalopen.
+
