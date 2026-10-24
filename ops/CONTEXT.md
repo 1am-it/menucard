@@ -91,6 +91,28 @@ before/after numbers of the pinned captures are recorded in
 `docs/guides/menu-extraction-acceptance.md`; the diagnosis still reads only local
 files and changes no reference, counting rule or measurement code.
 
+### Whole euros as a printed price (added 2026-10-24, #59 AA1)
+
+`src/lib/htmlMenuStructure.js` keeps `findPrices` unchanged for the references
+and the measurement, and adds `findWholeEuroPrices` / `findPrintedPrices` /
+`wholeEuroAmountTokens` in the same price section: a bare 1-3 digit amount
+(optionally `,-`) counts only on a printed cell boundary (2+ spaces, tab, a
+column separator or the end of the printed segment), with 2+ letters before it,
+not before a unit or counting word, not a year/time/date/phone/numbering/ordinal,
+and not glued to a word. `src/lib/menuSourceCoverage.js` reads the prices from the
+printed line (`line.raw`, never the whitespace-collapsed copy) and confirms a
+whole euro only when the same section prints it on at least two printed rows
+(`confirmWholeEuros`), counting a flattened capture row per cell (`segment`).
+
+The diagnosis now prints, per source, `whole euro: N accepted, M refused by the
+section rule, refusals {...}` plus the accepted records, and every refusal keeps
+its own reason (`unit`, `counting_word`, `ordinal`, `leading_zero`, `glued`,
+`time`, `date`, `phone`, `no_boundary`, `no_name`) so a false hit can be reported
+instead of hidden. `pricedLinesOfSource(source, { requireSectionConfirmation:
+false })` exists for that reporting only; the review always uses the confirmed
+list.
+
+
 The review gained a Lijst | Kaart switch. The printed page of one source is read
 lazily through
 `POST /api/internal/v1/manual-menu-import/imports/{id}/source-map` with
