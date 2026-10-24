@@ -64,6 +64,16 @@ const ACTION_LABELS = {
 
 const TERMINAL_KEYS = new Set(['menu_found', 'needs_review', 'no_menu', 'image_only', 'recent', 'robots', 'invalid', 'error', 'confirmed', 'duplicate', 'not_queued']);
 
+// #59 / BE-21 "Lees met AI" (Lead review 6380804419, W1): the statuses in which
+// the deterministic read produced no usable menu. Only there — and only for an
+// existing analysis job — is the AI reading offered as a help, never as a
+// replacement of the automatic path.
+const AI_READ_OFFER_STATUSES = new Set(['no_menu', 'error', 'image_only']);
+
+function offersAiRead(item) {
+  return Boolean(item && AI_READ_OFFER_STATUSES.has(item.key) && typeof item.jobId === 'string' && item.jobId !== '');
+}
+
 // The exact status copy for a menu that exists only as an image or scan. It
 // never claims a successful extraction and always names the working human
 // follow-up route (Bronnen beoordelen) plus the option to try another URL.
@@ -528,6 +538,8 @@ module.exports = {
   MAX_BATCH_URLS,
   DAILY_URL_LIMIT,
   MAX_ATTEMPTS,
+  AI_READ_OFFER_STATUSES,
+  offersAiRead,
   COPY,
   STATUSES,
   ACTION_LABELS,

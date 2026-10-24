@@ -11,12 +11,14 @@
 // en het antwoord worden niet in de browseropslag bewaard en er wordt nooit
 // JSON uit het antwoord getoond.
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import InternalNav from '@/src/components/InternalNav'
+import AiMenuReadBlock from '@/src/components/AiMenuReadBlock'
 
 const API = '/api/internal/v1/manual-menu-import'
+const AI_API = '/api/internal/v1/menu-ai-import'
 const AI_CHOICES = ['ChatGPT', 'Claude', 'Gemini', 'Copilot']
 const MISSING_REASONS = [
   ['niet_in_bron', 'Niet in de bron gevonden'],
@@ -95,6 +97,16 @@ export default function ManualMenuImportPage() {
   // leesbare punten plus één kopieerbare herstelvraag. Alleen deze stap bewaart
   // dat; er komt geen nieuwe opslag of toestandsvorm bij.
   const [answerProblems, setAnswerProblems] = useState(null)
+  // W1/W5 (Lead review 6380804419): "Lees met AI" is an extra way in on this
+  // page. The server decides whether AI is configured and what this month
+  // already cost; the page only shows it and passes one click through.
+  const [aiStatus, setAiStatus] = useState(null)
+  const [aiStatusError, setAiStatusError] = useState(false)
+  const [aiPhase, setAiPhase] = useState('idle')
+  const [aiResult, setAiResult] = useState(null)
+  const [aiError, setAiError] = useState(null)
+  const [aiJobId, setAiJobId] = useState('')
+  const autoStarted = useRef(false)
 
   useEffect(() => {
     const supabase = getSupabaseBrowser()
@@ -108,6 +120,8 @@ export default function ManualMenuImportPage() {
     if (id && name) setSelectedRestaurant({ id, name })
     else if (id) setPendingRestaurantId(id)
     if (params.get('url')) setUrls(params.get('url'))
+    // W1: a failing analysis job opens this page as the allowed source.
+    if (params.get('job')) setAiJobId(params.get('job'))
   }, [router])
 
   const token = session && session.access_token
@@ -418,6 +432,109 @@ export default function ManualMenuImportPage() {
     setBusy(false)
   }
 
+  // W5: the "Nalopen" button of the AI reading opens the existing review step.
+  function focusReview() {
+    const target = typeof document !== 'undefined' ? document.getElementById('mai-s3') : null
+    if (target && typeof target.scrollIntoView === 'function') target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    if (target && typeof target.focus === 'function') target.focus()
+  }
+
+  /**
+   * W2/W5: one click on "Lees met AI". The route only accepts an existing
+   * capture (the sealed bundle of step 1) or an existing analysis job — a URL is
+   * never sent. There is no automatic retry, so a failure never costs twice.
+   */
+  const readWithAi = useCallback(
+    async ({ jobId = '' } = {}) => {
+      setBusy(true)
+      setAiError(null)
+      setError(null)
+      setMessage(null)
+      setAiPhase('reading')
+      try {
+        let payload
+        if (jobId) {
+          payload = { job_id: jobId, ...(restaurantId ? { restaurant_id: restaurantId } : {}) }
+        } else {
+          const list = urls.split('\n').map((line) => line.trim()).filter(Boolean).slice(0, 5)
+          if (!restaurantId || list.length === 0) {
+            setAiPhase('idle')
+            setAiError('Kies eerst een restaurant en een bron-URL.')
+            return
+          }
+          const created = await api('/bundles', { restaurant_id: restaurantId, urls: list })
+          if (!created.ok) {
+            handleFailure(created)
+            setAiPhase('error')
+            setAiError(created.error)
+            return
+          }
+          setBundle(created.data.bundle)
+          setPrompt(created.data.prompt.text)
+          adoptStep(created.data)
+          payload = { state: created.data.state }
+        }
+        const res = await fetch(AI_API, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          cache: 'no-store',
+        })
+        const data = await res.json().catch(() => ({}))
+        if (!res.ok) {
+          setAiPhase('error')
+          setAiError(data.error || 'De AI-lezing lukte niet.')
+          if (data.monthly) {
+            setAiStatus((current) => (current ? { ...current, monthly: data.monthly } : current))
+          }
+          return
+        }
+        setAiResult(data)
+        setReport(data.import)
+        setReview(data.review)
+        setReceived(data.import.summary)
+        adoptStep(data)
+        setAiPhase('done')
+        setMessage(
+          `Concept klaar: ${data.summary.items} ${data.summary.items === 1 ? 'gerecht' : 'gerechten'} · ${data.summary.valid} in orde, ${data.summary.needsReview} nalopen.`
+        )
+      } catch {
+        setAiPhase('error')
+        setAiError('De AI-lezing lukte niet. Ga verder met de handmatige import.')
+      } finally {
+        setBusy(false)
+      }
+    },
+    [api, restaurantId, token, urls]
+  )
+
+  // W1/W3/W4: does the server offer AI, and what did this month already cost?
+  useEffect(() => {
+    if (!token) return undefined
+    let cancelled = false
+    fetch(AI_API, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (cancelled) return
+        if (!data) setAiStatusError(true)
+        else setAiStatus(data)
+      })
+      .catch(() => {
+        if (!cancelled) setAiStatusError(true)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [token])
+
+  // From the batch screen: the analysis job is the allowed source, so the
+  // reading starts once for that job after the click that brought us here.
+  useEffect(() => {
+    if (!token || !aiJobId || autoStarted.current) return
+    autoStarted.current = true
+    readWithAi({ jobId: aiJobId })
+  }, [token, aiJobId, readWithAi])
+
   const openRows = useMemo(
     () => (review && Array.isArray(review.rows) ? review.rows.filter((row) => !row.resolved) : []),
     [review]
@@ -617,6 +734,22 @@ export default function ManualMenuImportPage() {
               <span className="bta-muted">De app haalt de bronnen veilig op en zet de tekst in de prompt.</span>
             </div>
 
+            {/* W1: the AI reading sits next to the manual steps, at the place
+                where a source could not be read automatically. */}
+            <AiMenuReadBlock
+              status={aiStatus}
+              statusError={aiStatusError}
+              phase={aiPhase}
+              result={aiResult}
+              error={aiError}
+              busy={busy}
+              canRead={Boolean(restaurantId) || Boolean(aiJobId)}
+              hint="Kies eerst een restaurant en een bron-URL."
+              manualHref={aiJobId ? undefined : '#mai-s1'}
+              onRead={() => readWithAi({ jobId: aiJobId })}
+              onReview={focusReview}
+            />
+
             {bundle ? (
               <>
                 <ul className="mai-source-list" aria-label="Bronnen in deze prompt">
@@ -807,6 +940,18 @@ export default function ManualMenuImportPage() {
                   {review.summary.items} {review.summary.items === 1 ? 'gerecht' : 'gerechten'} · {review.summary.valid} in orde ·{' '}
                   {review.summary.pending} nalopen
                 </p>
+                {/* W6: which reading produced this review, with its own cost. */}
+                {aiResult ? (
+                  <p className="mai-origin" role="status">
+                    <span className="bta-tag">Gelezen door AI</span>
+                    <span className="bta-muted">
+                      {aiResult.ai && aiResult.ai.label ? aiResult.ai.label : 'AI-lezing'}
+                      {aiResult.cost && aiResult.cost.known
+                        ? ` · kosten € ${(aiResult.cost.eurCents / 100).toFixed(2).replace('.', ',')}`
+                        : ' · kosten niet gemeten'}
+                    </span>
+                  </p>
+                ) : null}
                 {/* V2 (review 6377050602): wat het systeem zelf heeft bijgesteld.
                     Een telling of status die uit het antwoord zelf volgt, in
                     gewone taal. Niets wordt stil aangepast. */}

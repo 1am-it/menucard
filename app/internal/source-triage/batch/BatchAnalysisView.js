@@ -9,7 +9,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import StatusIcon from '@/src/components/StatusIcon'
 import { MenuControl, MenuConcept, StructureReview, plural } from './MenuReview'
-import { MAX_BATCH_URLS, DAILY_URL_LIMIT, COPY, ACTION_LABELS, precheckLines, splitLines } from '@/src/lib/batchAnalysis'
+import { MAX_BATCH_URLS, DAILY_URL_LIMIT, COPY, ACTION_LABELS, precheckLines, splitLines, offersAiRead } from '@/src/lib/batchAnalysis'
 import { formatPath } from '@/src/lib/menuHierarchy'
 import { parsePathText, reviewKey } from '@/src/lib/menuStructureReview'
 
@@ -303,6 +303,20 @@ function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBat
     ? `/internal/source-triage?restaurant=${encodeURIComponent(item.restaurant.id)}&reason=image_only`
     : '/internal/source-triage?reason=image_only'
 
+  // W1 of Lead review 6380804419: on a failed or empty automatic read, the
+  // existing job is the allowed source of an AI reading. The link opens the
+  // manual import page, which owns the progress, the budget and the review; the
+  // manual alternative stays one click away.
+  const aiReadAvailable = offersAiRead(item)
+  const aiReadHref = aiReadAvailable
+    ? `/internal/menu-import?job=${encodeURIComponent(item.jobId)}${
+        item.restaurant ? `&restaurant=${encodeURIComponent(item.restaurant.id)}&name=${encodeURIComponent(item.restaurant.name || '')}` : ''
+      }${item.url ? `&url=${encodeURIComponent(item.url)}` : ''}`
+    : null
+  const manualImportHref = `/internal/menu-import${
+    item.restaurant ? `?restaurant=${encodeURIComponent(item.restaurant.id)}&name=${encodeURIComponent(item.restaurant.name || '')}` : ''
+  }`
+
   function actionButton(action, primary) {
     const cls = primary ? 'di-btn-primary bta-btn' : 'stg-btn-secondary bta-btn'
     if (action === 'confirm') {
@@ -445,6 +459,29 @@ function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBat
               Annuleren
             </button>
           </div>
+        </div>
+      )}
+
+      {canAct && aiReadHref && (
+        <div className="bta-ai-help" role="group" aria-labelledby={`bta-ai-${item.position}`}>
+          <p id={`bta-ai-${item.position}`} className="bta-ai-title">
+            Laat AI de kaart lezen
+          </p>
+          <p className="bta-muted">
+            Lukt automatisch lezen niet, dan leest de AI dezelfde bron. Je leest het resultaat daarna zelf na; er wordt
+            niets gepubliceerd.
+          </p>
+          <div className="bta-actions">
+            <a className="di-btn-primary bta-btn" href={aiReadHref}>
+              Lees met AI
+            </a>
+            <span className="bta-muted">Kost ongeveer 1 cent · duurt ± 1 minuut</span>
+          </div>
+          <p className="bta-muted">
+            <a className="bta-ai-link" href={manualImportHref}>
+              Liever zelf invoeren of plakken
+            </a>
+          </p>
         </div>
       )}
 

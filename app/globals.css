@@ -3160,3 +3160,16 @@ details.bta-side-card > summary:focus-visible { outline: 2px solid var(--border-
   .mai-review-row { padding: 14px 16px; }
 }
 
+
+/* #59 / BE-21 "Lees met AI" (Lead review 6380804419, W1/W5/W6).
+   The block sits next to the manual steps and inside a failed batch result.
+   Only existing tokens and patterns; no new colour or layout system. */
+.mai-ai { border-color: var(--border-strong); }
+.mai-ai-done { display: grid; gap: 8px; justify-items: start; }
+.mai-origin { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.mai-link { color: var(--text-primary); font-weight: 700; text-decoration: underline; }
+.mai-link:focus-visible { outline: 2px solid var(--accent-border); outline-offset: 2px; }
+.bta-ai-help { display: grid; gap: 8px; padding: 10px 12px; border: 1px solid var(--border-strong); border-radius: var(--radius-md); background: var(--bg-elevated); min-width: 0; }
+.bta-ai-title { margin: 0; font-size: 14px; font-weight: 800; color: var(--text-primary); }
+.bta-ai-link { color: var(--text-primary); font-weight: 700; text-decoration: underline; }
+.bta-ai-help .bta-actions { flex-wrap: wrap; }
