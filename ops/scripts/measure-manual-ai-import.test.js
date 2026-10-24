@@ -77,7 +77,9 @@ test('K9: de meting telt gemist, verzonnen, varianten, rubrieken en bewijsdekkin
   assert.equal(measurement.counts.items, 4);
   assert.equal(measurement.counts.variants, 1);
   assert.equal(measurement.counts.sections, 1);
-  assert.equal(measurement.counts.unsupported, 1);
+  // W6 (Lead review 6380804419): the only variant row in this fixture names
+  // its price, so it is no longer "niet op te slaan".
+  assert.equal(measurement.counts.unsupported, 0);
   assert.equal(measurement.comparison.expectedItems, 3);
   assert.equal(measurement.comparison.actualItems, 4);
   assert.equal(measurement.comparison.matched, 2);

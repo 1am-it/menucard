@@ -268,13 +268,16 @@ const STRUCTURE_CASES = [
       menus: [{ title: null, structure: 'normalized', sections: [[['Lunch'], 3, false], [['Diner'], 4, true]] }],
       // Two printed amounts on one dish row are that dish's price variants
       // (#59 Lead review 6351417692 K2): every amount is kept with the label
-      // the source prints, none becomes "the" price and none is dropped. A
-      // variant dish stays a review target, so its rubric is marked. A row
-      // with two name+price pairs stays refused, never merged into one dish.
+      // the source prints, none becomes "the" price and none is dropped.
+      // #59 Lead review 6380804419 (W6): a price list the source names itself
+      // ("glas 5,50 fles 27,50") is a complete price, so the row is no longer
+      // "twee prijzen"; it stays a review target because its rubric is
+      // uncertain. An unnamed multiple price ("12 / 16") still asks for one
+      // choice.
       parserRejected: ['ambiguous_structure'],
       lineStatuses: [
         ['', 'Fictieve pizza', 'multiple_prices'],
-        ['', 'Fictieve wijn', 'multiple_prices'],
+        ['', 'Fictieve wijn', 'unclear_category'],
       ],
     },
   },
