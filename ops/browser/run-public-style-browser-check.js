@@ -395,6 +395,23 @@ async function searchCardScenario(cdp) {
   await shot(cdp, 'search-results-light-390-detail.png');
 }
 
+async function nvwaLayoutScenario(cdp) {
+  await applyTheme(cdp, 'light');
+  await setViewport(cdp, 320, 820);
+  await open(cdp, `${APP}/nvwa/6`, `document.querySelector('.nvwa-score-value') !== null`);
+  const score = await evalJs(cdp, `(() => {
+    const value = document.querySelector('.nvwa-score-value').getBoundingClientRect();
+    const copy = document.querySelector('.nvwa-score-copy').getBoundingClientRect();
+    return {
+      valueRight: Math.round(value.right),
+      copyLeft: Math.round(copy.left),
+      valueWidth: Math.round(value.width),
+      copyWidth: Math.round(copy.width),
+    };
+  })()`);
+  check('nvwa 320px: the compliance score and its explanation do not overlap', score.valueRight <= score.copyLeft, JSON.stringify(score));
+}
+
 async function alleRestaurantsContrastScenario(cdp) {
   const perTheme = {};
   for (const theme of ['light', 'dark']) {
@@ -451,7 +468,7 @@ async function alleRestaurantsScenario(cdp) {
   check('alle restaurants: the whole card is one link, with no nested link or button', initial.allLinks && !initial.nestedActions, JSON.stringify({ allLinks: initial.allLinks, nestedActions: initial.nestedActions }));
   check('alle restaurants: "Met menukaart eerst" is the default sort', initial.sortValue === 'menu-first' && /Met menukaart eerst/.test(initial.sortText || ''), JSON.stringify({ value: initial.sortValue, text: initial.sortText }));
   check('alle restaurants: the first chip is "📋 Met menukaart" and cuisine chips carry emoji', /Met menukaart/.test(initial.chips[0] || '') && initial.chips.length > 1 && initial.chips.some((chip) => /[🍝🥩🥘🍜🥡🍺🥂🍛🧆🥨🍴🥢🍽️]/.test(chip)), JSON.stringify(initial.chips.slice(0, 8)));
-  check('alle restaurants: cards with a menu show the existing labels and one real CTA', initial.ctas.length === 4 && initial.ctas.every((text) => /^📋 Bekijk /.test(text)), JSON.stringify(initial.ctas));
+  check('alle restaurants: cards with a menu show the existing labels and one real CTA', initial.ctas.length === 4 && initial.ctas.every((text) => /^📋\s+Bekijk /.test(text)), JSON.stringify(initial.ctas));
   check('alle restaurants: cards without a menu never show the big CTA', initial.noMenuCtas === 0 && initial.noMenuLabels.every((text) => text === 'Nog geen menukaart'), JSON.stringify({ noMenuCtas: initial.noMenuCtas, labels: initial.noMenuLabels.length }));
   check('alle restaurants: cards without a menu still offer "Bekijk restaurant →"', initial.restaurantLinks.length === 21 && initial.restaurantLinks.every((text) => text.startsWith('Bekijk restaurant')), JSON.stringify(initial.restaurantLinks.slice(0, 2)));
   const uneven = initial.rows.filter((heights) => heights.length > 1 && Math.max(...heights) - Math.min(...heights) > 1);
@@ -605,6 +622,7 @@ async function main() {
       await pageScenario(cdp, { name: 'nvwa', url: `${APP}/nvwa/6`, ready: `document.querySelector('.nvwa-title') !== null`, widths: [1280, 390, 320] });
       await searchCardScenario(cdp);
       await alleRestaurantsScenario(cdp);
+      await nvwaLayoutScenario(cdp);
       await tapTargetScenario(cdp);
       await keyboardScenario(cdp);
 

@@ -55,7 +55,7 @@ function ComplianceScore({ items }) {
   const pct = Math.round((known / items.length) * 100)
   const tone = pct === 100 ? COMPLIANCE_TONE.neutral : pct >= 50 ? COMPLIANCE_TONE.partial : COMPLIANCE_TONE.none
   return (
-    <div style={{
+    <div className="nvwa-score" style={{
       display: 'flex',
       alignItems: 'center',
       gap: 12,
@@ -65,13 +65,13 @@ function ComplianceScore({ items }) {
       borderRadius: 10,
       marginBottom: 20,
     }}>
-      <div style={{
+      <div className="nvwa-score-value" style={{
         fontSize: 28, fontWeight: 800, color: tone.color,
-        fontVariantNumeric: 'tabular-nums', minWidth: 52,
+        fontVariantNumeric: 'tabular-nums', minWidth: 64, flexShrink: 0,
       }}>
         {pct}%
       </div>
-      <div>
+      <div className="nvwa-score-copy" style={{ minWidth: 0 }}>
         <div style={{ fontSize: 13, fontWeight: 700, color: tone.color }}>
           {pct === 100 ? 'Elke gerechtregel heeft een waarde voor allergenen' : pct >= 50 ? 'Allergeneninformatie gedeeltelijk vastgelegd' : 'Allergeneninformatie grotendeels nog niet vastgelegd'}
         </div>

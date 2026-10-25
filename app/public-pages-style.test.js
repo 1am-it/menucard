@@ -41,6 +41,8 @@ test('NVWA-pagina: ronde chips met aria-pressed, dezelfde header en de telefoonm
   const source = read('app/nvwa/[id]/NvwaView.js');
   assert.match(source, /className=\{`filter-chip \$\{!filterMeal \? 'active' : ''\}`\}/);
   assert.match(source, /aria-pressed=\{filterAllergen === a\.id\}/);
+  assert.match(source, /className="nvwa-score-value"/);
+  assert.match(source, /minWidth: 64, flexShrink: 0/, 'the score value must not shrink under its own text at 320 px');
   assert.match(source, /import MobileTabBar from '@\/src\/components\/MobileTabBar'/);
   assert.match(source, /<MobileTabBar \/>/);
 });

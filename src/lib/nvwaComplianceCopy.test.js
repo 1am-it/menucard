@@ -141,12 +141,15 @@ test('NvwaView: every row is stated to have a value, but an empty value never co
 test('NvwaView: the print mechanism itself is untouched (window.print(), no new dependency)', () => {
   const source = readNvwaViewSource();
   assert.match(source, /const handlePrint = \(\) => window\.print\(\)/);
-  // Only the four pre-existing imports remain — no PDF/email library added.
+  // BE-28b (#68) added the shared, in-repo MobileTabBar to this public page;
+  // all five imports are still local/Next/React — no PDF/email library added.
   const importLines = source.split('\n').filter((line) => line.trim().startsWith('import '));
   // 3 pre-existing imports + the shared, in-repo Wordmark component (Onze
-  // Menukaarten header) — still no external dependency.
-  assert.equal(importLines.length, 4);
+  // Menukaarten header) + the shared MobileTabBar — still no external
+  // dependency.
+  assert.equal(importLines.length, 5);
   assert.ok(importLines.some((line) => line.includes('@/src/components/Wordmark')));
+  assert.ok(importLines.some((line) => line.includes('@/src/components/MobileTabBar')));
   assert.ok(importLines.some((line) => line.includes("'react'")));
   assert.ok(importLines.some((line) => line.includes("next/link")));
   assert.ok(importLines.some((line) => line.includes('ThemeToggle')));

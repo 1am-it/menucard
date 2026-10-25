@@ -1,24 +1,24 @@
 {
-  "generatedAt": "2026-10-25T12:15:47.792Z",
+  "generatedAt": "2026-10-25T16:02:08.394Z",
   "label": "after",
   "kind": "developer evidence â€” local production build, no production data or credentials",
-  "app": "http://localhost:3144",
+  "app": "http://localhost:3150",
   "transfer": [
     {
       "label": "after",
       "page": "/",
       "theme": "dark",
       "viewport": "1280x900",
-      "totalBytes": 152292,
-      "totalKb": 148.7,
-      "documentBytes": 4438,
+      "totalBytes": 154724,
+      "totalKb": 151.1,
+      "documentBytes": 4435,
       "resourceCount": 13,
       "byType": {
-        "Document": 4438,
-        "Script": 122334,
-        "Stylesheet": 20058,
+        "Document": 4435,
+        "Script": 123502,
+        "Stylesheet": 21324,
         "Other": 662,
-        "Fetch": 4800
+        "Fetch": 4801
       },
       "biggest": [
         {
@@ -32,34 +32,93 @@
           "bytes": 46499
         },
         {
-          "url": "/_next/static/css/5bb2e7b10435351b.css",
+          "url": "/_next/static/css/0dea0c07b8a2c479.css",
           "type": "Stylesheet",
-          "bytes": 20058
+          "bytes": 21324
         },
         {
-          "url": "/_next/static/chunks/app/search/page-59759771418db1e8.js",
+          "url": "/_next/static/chunks/app/search/page-f0750e93f2b73c80.js",
           "type": "Script",
-          "bytes": 7191
+          "bytes": 7100
+        },
+        {
+          "url": "/_next/static/chunks/app/alle-restaurants/page-5980e1cefbc3c656.js",
+          "type": "Script",
+          "bytes": 4726
         },
         {
           "url": "/",
           "type": "Document",
-          "bytes": 4438
+          "bytes": 4435
         },
         {
-          "url": "/_next/static/chunks/2619-3c9e02e22d10480a.js",
+          "url": "/_next/static/chunks/176-b1374ab33d855c73.js",
           "type": "Script",
-          "bytes": 3784
+          "bytes": 3861
         },
         {
-          "url": "/_next/static/chunks/app/page-f1ec4978bee18630.js",
+          "url": "/_next/static/chunks/app/page-e2712038ba0f796f.js",
           "type": "Script",
-          "bytes": 3525
+          "bytes": 3448
+        }
+      ]
+    },
+    {
+      "label": "after",
+      "page": "/alle-restaurants",
+      "theme": "dark",
+      "viewport": "1280x900",
+      "totalBytes": 155792,
+      "totalKb": 152.1,
+      "documentBytes": 3078,
+      "resourceCount": 15,
+      "byType": {
+        "Document": 3078,
+        "Stylesheet": 21324,
+        "Script": 123502,
+        "Other": 662,
+        "Fetch": 7226
+      },
+      "biggest": [
+        {
+          "url": "/_next/static/chunks/4bd1b696-f785427dddbba9fb.js",
+          "type": "Script",
+          "bytes": 54796
         },
         {
-          "url": "/_next/static/chunks/app/alle-restaurants/page-55c1db9135832f1d.js",
+          "url": "/_next/static/chunks/1255-5fe68596fe147850.js",
           "type": "Script",
-          "bytes": 3467
+          "bytes": 46499
+        },
+        {
+          "url": "/_next/static/css/0dea0c07b8a2c479.css",
+          "type": "Stylesheet",
+          "bytes": 21324
+        },
+        {
+          "url": "/_next/static/chunks/app/search/page-f0750e93f2b73c80.js",
+          "type": "Script",
+          "bytes": 7100
+        },
+        {
+          "url": "/_next/static/chunks/app/alle-restaurants/page-5980e1cefbc3c656.js",
+          "type": "Script",
+          "bytes": 4726
+        },
+        {
+          "url": "/_next/static/chunks/176-b1374ab33d855c73.js",
+          "type": "Script",
+          "bytes": 3861
+        },
+        {
+          "url": "/_next/static/chunks/app/page-e2712038ba0f796f.js",
+          "type": "Script",
+          "bytes": 3448
+        },
+        {
+          "url": "/alle-restaurants",
+          "type": "Document",
+          "bytes": 3078
         }
       ]
     }
@@ -160,10 +219,94 @@
           "ratio": 3.56
         }
       ]
+    },
+    "alleRestaurants": {
+      "light": {
+        "theme": "light",
+        "results": [
+          {
+            "label": "card name",
+            "fg": "#1A1410",
+            "bg": "#FFFFFF",
+            "ratio": 18.24
+          },
+          {
+            "label": "card kind",
+            "fg": "#5C5650",
+            "bg": "#FFFFFF",
+            "ratio": 7.24
+          },
+          {
+            "label": "card address",
+            "fg": "#5C5650",
+            "bg": "#FFFFFF",
+            "ratio": 7.24
+          },
+          {
+            "label": "card CTA",
+            "fg": "#1F1600",
+            "bg": "#F6C057",
+            "ratio": 10.74
+          },
+          {
+            "label": "chip",
+            "fg": "#1A1410",
+            "bg": "#FFFFFF",
+            "ratio": 18.24
+          },
+          {
+            "label": "count",
+            "fg": "#5C5650",
+            "bg": "#FFFFFF",
+            "ratio": 7.24
+          }
+        ]
+      },
+      "dark": {
+        "theme": "dark",
+        "results": [
+          {
+            "label": "card name",
+            "fg": "#F2F3F4",
+            "bg": "#2A2F35",
+            "ratio": 12.14
+          },
+          {
+            "label": "card kind",
+            "fg": "#B6BCC3",
+            "bg": "#2A2F35",
+            "ratio": 7.05
+          },
+          {
+            "label": "card address",
+            "fg": "#B6BCC3",
+            "bg": "#2A2F35",
+            "ratio": 7.05
+          },
+          {
+            "label": "card CTA",
+            "fg": "#1F2328",
+            "bg": "#F2F3F4",
+            "ratio": 14.22
+          },
+          {
+            "label": "chip",
+            "fg": "#F2F3F4",
+            "bg": "#353A41",
+            "ratio": 10.31
+          },
+          {
+            "label": "count",
+            "fg": "#B6BCC3",
+            "bg": "#1F2328",
+            "ratio": 8.25
+          }
+        ]
+      }
     }
   },
   "checks": {
-    "total": 148,
+    "total": 275,
     "failed": 0,
     "entries": [
       {
@@ -235,6 +378,66 @@
         "name": "contrast dark: search field border >= 3:1",
         "passed": true,
         "detail": "3.56:1 (#7C848D on #2A2F35)"
+      },
+      {
+        "name": "contrast alle-restaurants light: card name >= 4.5:1",
+        "passed": true,
+        "detail": "18.24:1 (#1A1410 on #FFFFFF)"
+      },
+      {
+        "name": "contrast alle-restaurants light: card kind >= 4.5:1",
+        "passed": true,
+        "detail": "7.24:1 (#5C5650 on #FFFFFF)"
+      },
+      {
+        "name": "contrast alle-restaurants light: card address >= 4.5:1",
+        "passed": true,
+        "detail": "7.24:1 (#5C5650 on #FFFFFF)"
+      },
+      {
+        "name": "contrast alle-restaurants light: card CTA >= 4.5:1",
+        "passed": true,
+        "detail": "10.74:1 (#1F1600 on #F6C057)"
+      },
+      {
+        "name": "contrast alle-restaurants light: chip >= 4.5:1",
+        "passed": true,
+        "detail": "18.24:1 (#1A1410 on #FFFFFF)"
+      },
+      {
+        "name": "contrast alle-restaurants light: count >= 4.5:1",
+        "passed": true,
+        "detail": "7.24:1 (#5C5650 on #FFFFFF)"
+      },
+      {
+        "name": "contrast alle-restaurants dark: card name >= 4.5:1",
+        "passed": true,
+        "detail": "12.14:1 (#F2F3F4 on #2A2F35)"
+      },
+      {
+        "name": "contrast alle-restaurants dark: card kind >= 4.5:1",
+        "passed": true,
+        "detail": "7.05:1 (#B6BCC3 on #2A2F35)"
+      },
+      {
+        "name": "contrast alle-restaurants dark: card address >= 4.5:1",
+        "passed": true,
+        "detail": "7.05:1 (#B6BCC3 on #2A2F35)"
+      },
+      {
+        "name": "contrast alle-restaurants dark: card CTA >= 4.5:1",
+        "passed": true,
+        "detail": "14.22:1 (#1F2328 on #F2F3F4)"
+      },
+      {
+        "name": "contrast alle-restaurants dark: chip >= 4.5:1",
+        "passed": true,
+        "detail": "10.31:1 (#F2F3F4 on #353A41)"
+      },
+      {
+        "name": "contrast alle-restaurants dark: count >= 4.5:1",
+        "passed": true,
+        "detail": "8.25:1 (#B6BCC3 on #1F2328)"
       },
       {
         "name": "home light 1280px: theme applied",
@@ -579,116 +782,344 @@
         "detail": "0 img elements"
       },
       {
-        "name": "restaurant light 1280px: theme applied",
+        "name": "restaurants light 1280px: theme applied",
         "passed": true,
         "detail": "light, body rgb(255, 255, 255)"
       },
       {
-        "name": "restaurant light 1280px: no horizontal overflow",
+        "name": "restaurants light 1280px: no horizontal overflow",
         "passed": true,
         "detail": "scrollWidth 1274 vs innerWidth 1280"
       },
       {
-        "name": "restaurant light 1280px: tab bar hidden",
+        "name": "restaurants light 1280px: tab bar hidden",
         "passed": true
       },
       {
-        "name": "restaurant light 1280px: no photography",
+        "name": "restaurants light 1280px: no photography",
         "passed": true,
         "detail": "0 img elements"
       },
       {
-        "name": "restaurant light 390px: theme applied",
+        "name": "restaurants light 390px: theme applied",
         "passed": true,
         "detail": "light, body rgb(255, 255, 255)"
       },
       {
-        "name": "restaurant light 390px: no horizontal overflow",
+        "name": "restaurants light 390px: no horizontal overflow",
         "passed": true,
         "detail": "scrollWidth 390 vs innerWidth 390"
       },
       {
-        "name": "restaurant light 390px: tab bar visible",
+        "name": "restaurants light 390px: tab bar visible",
         "passed": true
       },
       {
-        "name": "restaurant light 390px: no photography",
+        "name": "restaurants light 390px: no photography",
         "passed": true,
         "detail": "0 img elements"
       },
       {
-        "name": "restaurant light 320px: theme applied",
+        "name": "restaurants light 320px: theme applied",
         "passed": true,
         "detail": "light, body rgb(255, 255, 255)"
       },
       {
-        "name": "restaurant light 320px: no horizontal overflow",
+        "name": "restaurants light 320px: no horizontal overflow",
         "passed": true,
         "detail": "scrollWidth 320 vs innerWidth 320"
       },
       {
-        "name": "restaurant light 320px: tab bar visible",
+        "name": "restaurants light 320px: tab bar visible",
         "passed": true
       },
       {
-        "name": "restaurant light 320px: no photography",
+        "name": "restaurants light 320px: no photography",
         "passed": true,
         "detail": "0 img elements"
       },
       {
-        "name": "restaurant dark 1280px: theme applied",
+        "name": "restaurants dark 1280px: theme applied",
         "passed": true,
         "detail": "dark, body rgb(31, 35, 40)"
       },
       {
-        "name": "restaurant dark 1280px: no horizontal overflow",
+        "name": "restaurants dark 1280px: no horizontal overflow",
         "passed": true,
         "detail": "scrollWidth 1274 vs innerWidth 1280"
       },
       {
-        "name": "restaurant dark 1280px: tab bar hidden",
+        "name": "restaurants dark 1280px: tab bar hidden",
         "passed": true
       },
       {
-        "name": "restaurant dark 1280px: no photography",
+        "name": "restaurants dark 1280px: no photography",
         "passed": true,
         "detail": "0 img elements"
       },
       {
-        "name": "restaurant dark 390px: theme applied",
+        "name": "restaurants dark 390px: theme applied",
         "passed": true,
         "detail": "dark, body rgb(31, 35, 40)"
       },
       {
-        "name": "restaurant dark 390px: no horizontal overflow",
+        "name": "restaurants dark 390px: no horizontal overflow",
         "passed": true,
         "detail": "scrollWidth 390 vs innerWidth 390"
       },
       {
-        "name": "restaurant dark 390px: tab bar visible",
+        "name": "restaurants dark 390px: tab bar visible",
         "passed": true
       },
       {
-        "name": "restaurant dark 390px: no photography",
+        "name": "restaurants dark 390px: no photography",
         "passed": true,
         "detail": "0 img elements"
       },
       {
-        "name": "restaurant dark 320px: theme applied",
+        "name": "restaurants dark 320px: theme applied",
         "passed": true,
         "detail": "dark, body rgb(31, 35, 40)"
       },
       {
-        "name": "restaurant dark 320px: no horizontal overflow",
+        "name": "restaurants dark 320px: no horizontal overflow",
         "passed": true,
         "detail": "scrollWidth 320 vs innerWidth 320"
       },
       {
-        "name": "restaurant dark 320px: tab bar visible",
+        "name": "restaurants dark 320px: tab bar visible",
         "passed": true
       },
       {
-        "name": "restaurant dark 320px: no photography",
+        "name": "restaurants dark 320px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "restaurant-with-menu light 1280px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "restaurant-with-menu light 1280px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 1274 vs innerWidth 1280"
+      },
+      {
+        "name": "restaurant-with-menu light 1280px: tab bar hidden",
+        "passed": true
+      },
+      {
+        "name": "restaurant-with-menu light 1280px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "restaurant-with-menu light 390px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "restaurant-with-menu light 390px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 390 vs innerWidth 390"
+      },
+      {
+        "name": "restaurant-with-menu light 390px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "restaurant-with-menu light 390px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "restaurant-with-menu light 320px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "restaurant-with-menu light 320px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 320 vs innerWidth 320"
+      },
+      {
+        "name": "restaurant-with-menu light 320px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "restaurant-with-menu light 320px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "restaurant-with-menu dark 1280px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "restaurant-with-menu dark 1280px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 1274 vs innerWidth 1280"
+      },
+      {
+        "name": "restaurant-with-menu dark 1280px: tab bar hidden",
+        "passed": true
+      },
+      {
+        "name": "restaurant-with-menu dark 1280px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "restaurant-with-menu dark 390px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "restaurant-with-menu dark 390px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 390 vs innerWidth 390"
+      },
+      {
+        "name": "restaurant-with-menu dark 390px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "restaurant-with-menu dark 390px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "restaurant-with-menu dark 320px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "restaurant-with-menu dark 320px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 320 vs innerWidth 320"
+      },
+      {
+        "name": "restaurant-with-menu dark 320px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "restaurant-with-menu dark 320px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "restaurant-without-menu light 1280px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "restaurant-without-menu light 1280px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 1274 vs innerWidth 1280"
+      },
+      {
+        "name": "restaurant-without-menu light 1280px: tab bar hidden",
+        "passed": true
+      },
+      {
+        "name": "restaurant-without-menu light 1280px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "restaurant-without-menu light 390px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "restaurant-without-menu light 390px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 390 vs innerWidth 390"
+      },
+      {
+        "name": "restaurant-without-menu light 390px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "restaurant-without-menu light 390px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "restaurant-without-menu light 320px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "restaurant-without-menu light 320px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 320 vs innerWidth 320"
+      },
+      {
+        "name": "restaurant-without-menu light 320px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "restaurant-without-menu light 320px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "restaurant-without-menu dark 1280px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "restaurant-without-menu dark 1280px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 1274 vs innerWidth 1280"
+      },
+      {
+        "name": "restaurant-without-menu dark 1280px: tab bar hidden",
+        "passed": true
+      },
+      {
+        "name": "restaurant-without-menu dark 1280px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "restaurant-without-menu dark 390px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "restaurant-without-menu dark 390px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 390 vs innerWidth 390"
+      },
+      {
+        "name": "restaurant-without-menu dark 390px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "restaurant-without-menu dark 390px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "restaurant-without-menu dark 320px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "restaurant-without-menu dark 320px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 320 vs innerWidth 320"
+      },
+      {
+        "name": "restaurant-without-menu dark 320px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "restaurant-without-menu dark 320px: no photography",
         "passed": true,
         "detail": "0 img elements"
       },
@@ -807,6 +1238,234 @@
         "detail": "0 img elements"
       },
       {
+        "name": "claim light 1280px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "claim light 1280px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 1280 vs innerWidth 1280"
+      },
+      {
+        "name": "claim light 1280px: tab bar hidden",
+        "passed": true
+      },
+      {
+        "name": "claim light 1280px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "claim light 390px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "claim light 390px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 390 vs innerWidth 390"
+      },
+      {
+        "name": "claim light 390px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "claim light 390px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "claim light 320px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "claim light 320px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 320 vs innerWidth 320"
+      },
+      {
+        "name": "claim light 320px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "claim light 320px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "claim dark 1280px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "claim dark 1280px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 1280 vs innerWidth 1280"
+      },
+      {
+        "name": "claim dark 1280px: tab bar hidden",
+        "passed": true
+      },
+      {
+        "name": "claim dark 1280px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "claim dark 390px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "claim dark 390px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 390 vs innerWidth 390"
+      },
+      {
+        "name": "claim dark 390px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "claim dark 390px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "claim dark 320px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "claim dark 320px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 320 vs innerWidth 320"
+      },
+      {
+        "name": "claim dark 320px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "claim dark 320px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "nvwa light 1280px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "nvwa light 1280px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 1274 vs innerWidth 1280"
+      },
+      {
+        "name": "nvwa light 1280px: tab bar hidden",
+        "passed": true
+      },
+      {
+        "name": "nvwa light 1280px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "nvwa light 390px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "nvwa light 390px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 390 vs innerWidth 390"
+      },
+      {
+        "name": "nvwa light 390px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "nvwa light 390px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "nvwa light 320px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "nvwa light 320px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 320 vs innerWidth 320"
+      },
+      {
+        "name": "nvwa light 320px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "nvwa light 320px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "nvwa dark 1280px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "nvwa dark 1280px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 1274 vs innerWidth 1280"
+      },
+      {
+        "name": "nvwa dark 1280px: tab bar hidden",
+        "passed": true
+      },
+      {
+        "name": "nvwa dark 1280px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "nvwa dark 390px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "nvwa dark 390px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 390 vs innerWidth 390"
+      },
+      {
+        "name": "nvwa dark 390px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "nvwa dark 390px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "nvwa dark 320px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "nvwa dark 320px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 320 vs innerWidth 320"
+      },
+      {
+        "name": "nvwa dark 320px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "nvwa dark 320px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
         "name": "search results: a result card shows the dish name and its real price",
         "passed": true,
         "detail": "{\"nameRight\":230,\"priceLeft\":240,\"priceText\":\"op aanvraag\",\"nameText\":\"Kreeft (pasta)\"}"
@@ -825,6 +1484,101 @@
         "name": "search results: active header nav contrast >= 4.5:1",
         "passed": true,
         "detail": "18.24:1 (#1A1410 on #FFFFFF)"
+      },
+      {
+        "name": "alle restaurants: every known restaurant is shown from the real API",
+        "passed": true,
+        "detail": "25 cards"
+      },
+      {
+        "name": "alle restaurants: the count line is computed from the real data",
+        "passed": true,
+        "detail": "25 restaurants · 4 met menukaart"
+      },
+      {
+        "name": "alle restaurants: the whole card is one link, with no nested link or button",
+        "passed": true,
+        "detail": "{\"allLinks\":true,\"nestedActions\":false}"
+      },
+      {
+        "name": "alle restaurants: \"Met menukaart eerst\" is the default sort",
+        "passed": true,
+        "detail": "{\"value\":\"menu-first\",\"text\":\"📋 Met menukaart eerst\"}"
+      },
+      {
+        "name": "alle restaurants: the first chip is \"📋 Met menukaart\" and cuisine chips carry emoji",
+        "passed": true,
+        "detail": "[\"📋\\nMet menukaart\",\"🥂\\nFrans\",\"🍜\\nIndonesisch\",\"🍝\\nItaliaans\",\"🍺\\nBiercafé\",\"🥩\\nGrill\",\"🍛\\nIndiaas\",\"🍴\\nModern Europees\"]"
+      },
+      {
+        "name": "alle restaurants: cards with a menu show the existing labels and one real CTA",
+        "passed": true,
+        "detail": "[\"📋\\nBekijk 4 menukaarten\",\"📋\\nBekijk 2 menukaarten\",\"📋\\nBekijk 2 menukaarten\",\"📋\\nBekijk 3 menukaarten\"]"
+      },
+      {
+        "name": "alle restaurants: cards without a menu never show the big CTA",
+        "passed": true,
+        "detail": "{\"noMenuCtas\":0,\"labels\":21}"
+      },
+      {
+        "name": "alle restaurants: cards without a menu still offer \"Bekijk restaurant →\"",
+        "passed": true,
+        "detail": "[\"Bekijk restaurant →\",\"Bekijk restaurant →\"]"
+      },
+      {
+        "name": "alle restaurants: cards in the same row are equally high",
+        "passed": true,
+        "detail": "[[224,224,224],[196,196,196],[196,196,196],[196,196,196],[196,196,196],[196,196,196],[196,196,196],[196,196,196],[196]]"
+      },
+      {
+        "name": "alle restaurants: A–Z really sorts alphabetically",
+        "passed": true,
+        "detail": "{\"first\":\"Al Dente Ristorante\",\"url\":\"?sort=az\",\"countText\":\"25 restaurants · 4 met menukaart\"}"
+      },
+      {
+        "name": "alle restaurants: the chosen sort lives in the URL",
+        "passed": true,
+        "detail": "?sort=az"
+      },
+      {
+        "name": "alle restaurants: \"Met menukaart eerst\" puts a card with a menu first",
+        "passed": true,
+        "detail": "{\"first\":\"Brasserie Bardot\",\"hasCta\":true,\"url\":\"\"}"
+      },
+      {
+        "name": "alle restaurants: the default sort removes the sort parameter again",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "name": "alle restaurants: the \"Met menukaart\" chip filters to the four real menu cards",
+        "passed": true,
+        "detail": "{\"cards\":4,\"ctas\":4,\"countText\":\"4 van 25 restaurants · 4 met menukaart\"}"
+      },
+      {
+        "name": "alle restaurants: a cuisine chip filters on the real cuisine labels",
+        "passed": true,
+        "detail": "{\"cards\":[\"Al Dente Ristorante\",\"Dolce e Salato\",\"Trattoria Perron\"],\"kinds\":[\"Italiaans · Klassiek · €€\",\"Italiaans · Pizza & Pasta · €€\",\"Italiaans · Bij het Station · €€\"],\"countText\":\"3 van 25 restaurants · 0 met menukaart\"}"
+      },
+      {
+        "name": "alle restaurants: the filtered count is honest about the total",
+        "passed": true,
+        "detail": "3 van 25 restaurants · 0 met menukaart"
+      },
+      {
+        "name": "alle restaurants 390px: the menu-less card is one compact line with an arrow",
+        "passed": true,
+        "detail": "{\"arrow\":\"block\",\"inline\":\"inline\",\"link\":\"none\",\"address\":\"📍 Nieuwe Ginnekenstraat 20, 4811 NR Breda\"}"
+      },
+      {
+        "name": "alle restaurants 390px: the address is still shown",
+        "passed": true,
+        "detail": "📍 Nieuwe Ginnekenstraat 20, 4811 NR Breda"
+      },
+      {
+        "name": "nvwa 320px: the compliance score and its explanation do not overlap",
+        "passed": true,
+        "detail": "{\"valueRight\":105,\"copyLeft\":117,\"valueWidth\":72,\"copyWidth\":170}"
       },
       {
         "name": "320px: tab bar target \"🔍\nZoeken\" >= 44px",
@@ -965,126 +1719,294 @@
     },
     {
       "file": "ops/browser/output/be-28/alle-restaurants-light-1280.png",
-      "bytes": 166944,
+      "bytes": 250267,
       "width": 1274,
-      "height": 1958,
+      "height": 2380,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/alle-restaurants-light-390.png",
-      "bytes": 43593,
+      "bytes": 56763,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/alle-restaurants-light-320.png",
-      "bytes": 42449,
+      "bytes": 54345,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/alle-restaurants-dark-1280.png",
-      "bytes": 158787,
+      "bytes": 244688,
       "width": 1274,
-      "height": 1958,
+      "height": 2380,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/alle-restaurants-dark-390.png",
-      "bytes": 43147,
+      "bytes": 58069,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/alle-restaurants-dark-320.png",
-      "bytes": 41970,
+      "bytes": 55287,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
-      "file": "ops/browser/output/be-28/restaurant-light-1280.png",
-      "bytes": 138496,
+      "file": "ops/browser/output/be-28/restaurants-light-1280.png",
+      "bytes": 511448,
       "width": 1274,
-      "height": 1590,
+      "height": 4000,
       "viewport": "1280x900"
     },
     {
-      "file": "ops/browser/output/be-28/restaurant-light-390.png",
-      "bytes": 43383,
+      "file": "ops/browser/output/be-28/restaurants-light-390.png",
+      "bytes": 48350,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
-      "file": "ops/browser/output/be-28/restaurant-light-320.png",
-      "bytes": 38210,
+      "file": "ops/browser/output/be-28/restaurants-light-320.png",
+      "bytes": 42895,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
-      "file": "ops/browser/output/be-28/restaurant-dark-1280.png",
-      "bytes": 134138,
+      "file": "ops/browser/output/be-28/restaurants-dark-1280.png",
+      "bytes": 508113,
       "width": 1274,
-      "height": 1590,
+      "height": 4000,
       "viewport": "1280x900"
     },
     {
-      "file": "ops/browser/output/be-28/restaurant-dark-390.png",
-      "bytes": 44465,
+      "file": "ops/browser/output/be-28/restaurants-dark-390.png",
+      "bytes": 52670,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
-      "file": "ops/browser/output/be-28/restaurant-dark-320.png",
-      "bytes": 39139,
+      "file": "ops/browser/output/be-28/restaurants-dark-320.png",
+      "bytes": 47424,
+      "width": 320,
+      "height": 820,
+      "viewport": "320x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/restaurant-with-menu-light-1280.png",
+      "bytes": 141114,
+      "width": 1274,
+      "height": 1591,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "ops/browser/output/be-28/restaurant-with-menu-light-390.png",
+      "bytes": 43644,
+      "width": 390,
+      "height": 820,
+      "viewport": "390x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/restaurant-with-menu-light-320.png",
+      "bytes": 38056,
+      "width": 320,
+      "height": 820,
+      "viewport": "320x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/restaurant-with-menu-dark-1280.png",
+      "bytes": 136151,
+      "width": 1274,
+      "height": 1591,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "ops/browser/output/be-28/restaurant-with-menu-dark-390.png",
+      "bytes": 44546,
+      "width": 390,
+      "height": 820,
+      "viewport": "390x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/restaurant-with-menu-dark-320.png",
+      "bytes": 38678,
+      "width": 320,
+      "height": 820,
+      "viewport": "320x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/restaurant-without-menu-light-1280.png",
+      "bytes": 79480,
+      "width": 1274,
+      "height": 1331,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "ops/browser/output/be-28/restaurant-without-menu-light-390.png",
+      "bytes": 40288,
+      "width": 390,
+      "height": 820,
+      "viewport": "390x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/restaurant-without-menu-light-320.png",
+      "bytes": 39720,
+      "width": 320,
+      "height": 820,
+      "viewport": "320x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/restaurant-without-menu-dark-1280.png",
+      "bytes": 77415,
+      "width": 1274,
+      "height": 1331,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "ops/browser/output/be-28/restaurant-without-menu-dark-390.png",
+      "bytes": 41193,
+      "width": 390,
+      "height": 820,
+      "viewport": "390x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/restaurant-without-menu-dark-320.png",
+      "bytes": 40153,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/menu-light-1280.png",
-      "bytes": 273500,
+      "bytes": 271385,
       "width": 1274,
-      "height": 2599,
+      "height": 2598,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/menu-light-390.png",
-      "bytes": 48483,
+      "bytes": 47614,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/menu-light-320.png",
-      "bytes": 50050,
+      "bytes": 49292,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/menu-dark-1280.png",
-      "bytes": 256288,
+      "bytes": 257450,
       "width": 1274,
-      "height": 2599,
+      "height": 2598,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/menu-dark-390.png",
-      "bytes": 50040,
+      "bytes": 50276,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/menu-dark-320.png",
-      "bytes": 52075,
+      "bytes": 52573,
+      "width": 320,
+      "height": 820,
+      "viewport": "320x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/claim-light-1280.png",
+      "bytes": 28489,
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "ops/browser/output/be-28/claim-light-390.png",
+      "bytes": 25969,
+      "width": 390,
+      "height": 820,
+      "viewport": "390x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/claim-light-320.png",
+      "bytes": 25457,
+      "width": 320,
+      "height": 820,
+      "viewport": "320x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/claim-dark-1280.png",
+      "bytes": 27690,
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "ops/browser/output/be-28/claim-dark-390.png",
+      "bytes": 26328,
+      "width": 390,
+      "height": 820,
+      "viewport": "390x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/claim-dark-320.png",
+      "bytes": 25862,
+      "width": 320,
+      "height": 820,
+      "viewport": "320x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/nvwa-light-1280.png",
+      "bytes": 293056,
+      "width": 1274,
+      "height": 4000,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "ops/browser/output/be-28/nvwa-light-390.png",
+      "bytes": 47052,
+      "width": 390,
+      "height": 820,
+      "viewport": "390x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/nvwa-light-320.png",
+      "bytes": 42911,
+      "width": 320,
+      "height": 820,
+      "viewport": "320x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/nvwa-dark-1280.png",
+      "bytes": 300002,
+      "width": 1274,
+      "height": 4000,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "ops/browser/output/be-28/nvwa-dark-390.png",
+      "bytes": 49683,
+      "width": 390,
+      "height": 820,
+      "viewport": "390x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/nvwa-dark-320.png",
+      "bytes": 45222,
       "width": 320,
       "height": 820,
       "viewport": "320x820"

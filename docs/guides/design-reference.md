@@ -494,6 +494,53 @@ layout and colours; they only inherit the token values.
    `ops/browser/output/be-28/` (the output folder is generated, not
    committed).
 
+### Vervolg BE-28b (#68) — Alle restaurants en de overige publieke pagina's
+
+Owner decision 2026-10-25 ("ja heel goed ga met alles akkoord"), canvas
+version 17, source HTML in `docs/mockups/be-28-fresh-style-v1/`
+(`alle-restaurants-*.html`). Implemented on `feat/fresh-style-68`:
+
+- `/alle-restaurants` has one whole-card link per restaurant (no nested link
+  or button), an emoji tile from the small tested `src/lib/cuisineStyle.js`
+  mapping (unknown cuisine → 🍽️), the cuisine · price line, 📍 address,
+  equal-height round cards, the existing menu labels with emoji and exactly
+  one "📋 Bekijk N menukaarten" CTA when a menu exists. Without a menu there
+  is no big button: only "Nog geen menukaart" and "Bekijk restaurant →"
+  (a compact line with an arrow at ≤720 px).
+- The filter row reuses the existing chip style and real data:
+  "📋 Met menukaart" plus cuisine chips derived from the loaded restaurants.
+  Sorting is "📋 Met menukaart eerst" by default (alphabetical within that)
+  and A–Z as the alternative; the choice lives in the URL (`?sort=az`). The
+  count line ("25 restaurants · 4 met menukaart") is computed from the real
+  API data, not hardcoded.
+- `/restaurants`, `/restaurant/[id]`, `/menu/[id]`, `/claim/[id]` and
+  `/nvwa/[id]` use the same tokens, round cards, pills and emoji labels;
+  menu actions remain leading and reservations secondary. Routes and
+  behaviour are unchanged. On the phone the shared floating tab bar is now
+  also on `/claim` and `/nvwa`. The NVWA compliance score no longer overlaps
+  its explanation at 320 px.
+- Transport-only: `GET /api/restaurants` now gzips the same JSON when the
+  client accepts it (5,874 → 1,389 bytes for the 25-restaurant response).
+  No field, route or data change; this keeps the full-list transfer under
+  the previous size.
+
+Measured with `ops/browser/run-public-style-browser-check.js` on a local
+production build (developer evidence, 2026-10-25), cold cache, dark, 1280 px:
+
+- `/alle-restaurants`: **154.5 KB before** → **152.1 KB after**;
+- live contrast, light: card name 18.24:1, kind/address 7.24:1, CTA
+  10.74:1, chip 18.24:1, count 7.24:1;
+- live contrast, dark: card name 12.14:1, kind/address 7.05:1, CTA 14.22:1,
+  chip 10.31:1, count 8.25:1;
+- 275 checks passed, 0 failed, 59 screenshots: `/alle-restaurants`,
+  `/restaurants`, `/restaurant/[id]` with and without a menu, `/menu/[id]`,
+  `/claim/[id]` and `/nvwa/[id]` at 1280/390/320 px in light and dark, plus
+  the existing home/search/internal coverage. No horizontal overflow and the
+  tab bar only at ≤720 px on every measured page.
+
+This remains developer evidence on a local build; it is not production or
+independent acceptance.
+
 ## Internal navigation hierarchy
 
 Sources:

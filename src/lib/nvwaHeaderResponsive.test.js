@@ -82,12 +82,14 @@ test('globals.css: the allergen matrix\'s own horizontal-scroll container is unt
   assert.match(css, /\.allergen-table-wrap\s*\{\s*overflow-x:\s*auto;?\s*\}/);
 });
 
-test('NvwaView: no new dependency, route, or unrelated markup change — only the one div\'s className changed', () => {
+test('NvwaView: no new dependency or route — BE-28b only adds the in-repo MobileTabBar and classes', () => {
   const source = readNvwaViewSource();
   const importLines = source.split('\n').filter((line) => line.trim().startsWith('import '));
   // 3 pre-existing imports + the shared, in-repo Wordmark component (Onze
-  // Menukaarten header) — still no external dependency.
-  assert.equal(importLines.length, 4);
+  // Menukaarten header) + the shared MobileTabBar — still no external
+  // dependency.
+  assert.equal(importLines.length, 5);
   assert.ok(importLines.some((line) => line.includes('@/src/components/Wordmark')));
+  assert.ok(importLines.some((line) => line.includes('@/src/components/MobileTabBar')));
   assert.match(source, /const handlePrint = \(\) => window\.print\(\)/);
 });
