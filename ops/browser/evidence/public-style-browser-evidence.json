@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-25T11:58:36.865Z",
+  "generatedAt": "2026-10-25T12:15:47.792Z",
   "label": "after",
   "kind": "developer evidence â€” local production build, no production data or credentials",
   "app": "http://localhost:3144",
@@ -9,16 +9,16 @@
       "page": "/",
       "theme": "dark",
       "viewport": "1280x900",
-      "totalBytes": 152279,
+      "totalBytes": 152292,
       "totalKb": 148.7,
-      "documentBytes": 4431,
+      "documentBytes": 4438,
       "resourceCount": 13,
       "byType": {
-        "Document": 4431,
+        "Document": 4438,
         "Script": 122334,
         "Stylesheet": 20058,
         "Other": 662,
-        "Fetch": 4794
+        "Fetch": 4800
       },
       "biggest": [
         {
@@ -44,7 +44,7 @@
         {
           "url": "/",
           "type": "Document",
-          "bytes": 4431
+          "bytes": 4438
         },
         {
           "url": "/_next/static/chunks/2619-3c9e02e22d10480a.js",
