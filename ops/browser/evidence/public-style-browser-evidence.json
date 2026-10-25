@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-25T17:54:36.561Z",
+  "generatedAt": "2026-10-25T18:05:19.101Z",
   "label": "after",
   "kind": "developer evidence â€” local production build, no production data or credentials",
   "app": "http://localhost:3144",
@@ -9,15 +9,16 @@
       "page": "/",
       "theme": "dark",
       "viewport": "1280x900",
-      "totalBytes": 165371,
-      "totalKb": 161.5,
+      "totalBytes": 166034,
+      "totalKb": 162.1,
       "documentBytes": 8081,
-      "resourceCount": 15,
+      "resourceCount": 16,
       "byType": {
         "Document": 8081,
-        "Stylesheet": 21508,
         "Script": 128474,
-        "Fetch": 7308
+        "Stylesheet": 21508,
+        "Fetch": 7309,
+        "Other": 662
       },
       "biggest": [
         {
@@ -67,15 +68,15 @@
       "page": "/alle-restaurants",
       "theme": "dark",
       "viewport": "1280x900",
-      "totalBytes": 163848,
+      "totalBytes": 163849,
       "totalKb": 160,
       "documentBytes": 3079,
       "resourceCount": 14,
       "byType": {
         "Document": 3079,
-        "Script": 128474,
         "Stylesheet": 21508,
-        "Fetch": 10125,
+        "Script": 128474,
+        "Fetch": 10126,
         "Other": 662
       },
       "biggest": [
@@ -1961,7 +1962,7 @@
     },
     {
       "file": "ops/browser/output/be-28/home-light-390.png",
-      "bytes": 54545,
+      "bytes": 56973,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
@@ -2290,7 +2291,7 @@
     },
     {
       "file": "ops/browser/output/be-28/search-results-light-390-detail.png",
-      "bytes": 53318,
+      "bytes": 53013,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
@@ -2409,7 +2410,7 @@
     },
     {
       "file": "ops/browser/output/be-28/be29-home-diner-dark-390.png",
-      "bytes": 85211,
+      "bytes": 85212,
       "width": 390,
       "height": 1547,
       "viewport": "390x820"
@@ -2437,7 +2438,7 @@
     },
     {
       "file": "ops/browser/output/be-28/be29-menu-marked-light-1280.png",
-      "bytes": 222919,
+      "bytes": 221617,
       "width": 1274,
       "height": 2412,
       "viewport": "1280x900"
