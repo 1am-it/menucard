@@ -1,0 +1,75 @@
+{
+  "generatedAt": "2026-10-25T11:49:12.629Z",
+  "label": "before",
+  "kind": "developer evidence â€” local production build, no production data or credentials",
+  "app": "http://localhost:3145",
+  "transfer": [
+    {
+      "label": "before",
+      "page": "/",
+      "theme": "dark",
+      "viewport": "1280x900",
+      "totalBytes": 194580,
+      "totalKb": 190,
+      "documentBytes": 4449,
+      "resourceCount": 16,
+      "byType": {
+        "Document": 4449,
+        "Script": 164608,
+        "Stylesheet": 17659,
+        "Other": 662,
+        "Fetch": 7202
+      },
+      "biggest": [
+        {
+          "url": "/_next/static/chunks/50291a53-e663f037a3178541.js",
+          "type": "Script",
+          "bytes": 54797
+        },
+        {
+          "url": "/_next/static/chunks/9325-32f272fae0591586.js",
+          "type": "Script",
+          "bytes": 46493
+        },
+        {
+          "url": "/_next/static/chunks/app/restaurants/page-0e3d047fe3e4d32f.js",
+          "type": "Script",
+          "bytes": 40194
+        },
+        {
+          "url": "/_next/static/css/80136d197b52ac1a.css",
+          "type": "Stylesheet",
+          "bytes": 17659
+        },
+        {
+          "url": "/_next/static/chunks/app/search/page-bfa1b8639bf9f930.js",
+          "type": "Script",
+          "bytes": 6927
+        },
+        {
+          "url": "/",
+          "type": "Document",
+          "bytes": 4449
+        },
+        {
+          "url": "/_next/static/chunks/6719-a42e7b84d3e349e1.js",
+          "type": "Script",
+          "bytes": 3765
+        },
+        {
+          "url": "/_next/static/chunks/app/alle-restaurants/page-c06ebf76b7079fc6.js",
+          "type": "Script",
+          "bytes": 3298
+        }
+      ]
+    }
+  ],
+  "contrast": null,
+  "checks": {
+    "total": 0,
+    "failed": 0,
+    "entries": []
+  },
+  "screenshots": [],
+  "result": "passed"
+}

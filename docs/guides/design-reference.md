@@ -470,8 +470,29 @@ layout and colours; they only inherit the token values.
    control borders and focus rings ≥ 3:1. Card *container* edges follow the
    approved mockup (soft in light, `#3A4048` in dark) and are never the only
    affordance: the card's own text, hover state and focus ring carry the
-   interaction. The initial transfer of `/` was measured before and after
-   with the browser check in `ops/browser/` (see the ticket for the numbers).
+   interaction. Interactive fields (the home and search bars) use
+   `--input-border`, which does meet 3:1 in both themes.
+
+   Measured in the browser (`ops/browser/run-public-style-browser-check.js`,
+   developer evidence on a local production build, 2026-10-25):
+
+   - initial transfer of `/`, dark, 1280 px, cold cache: **190 KB before**
+     (base `a517052`) → **148.7 KB after** — under the 250 KB target and
+     41 KB smaller than before;
+   - live contrast, light: body 18.24:1, secondary 7.24:1, price label
+     18.24:1, primary button 10.74:1, chip 18.24:1, tab bar 18.24:1, search
+     field border 3.56:1;
+   - live contrast, dark: body 14.22:1, secondary 7.05:1, price label
+     6.95:1, primary button 14.22:1, chip 10.31:1, tab bar 10.31:1, search
+     field border 3.56:1;
+   - no horizontal overflow at 1280/390/320 px on any public page, the tab
+     bar only appears at ≤720 px, tap targets ≥ 44 px, keyboard Tab from the
+     search field reaches the Zoeken button.
+
+   The full result and the 35 screenshots are in
+   `ops/browser/evidence/public-style-browser-evidence.json` and
+   `ops/browser/output/be-28/` (the output folder is generated, not
+   committed).
 
 ## Internal navigation hierarchy
 

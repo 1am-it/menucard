@@ -3605,7 +3605,9 @@ header, .site-header { height: auto; min-height: var(--header-h); }
   padding: 5px 5px 5px 18px;
   border-radius: var(--radius-pill);
   background: var(--card-surface);
-  border: 1px solid var(--card-border-color);
+  /* Een veld is een bediening: deze rand haalt in beide thema's >= 3:1
+     (--input-border), anders dan de zachte kaartrand van de mockup. */
+  border: 1px solid var(--input-border);
   box-shadow: var(--panel-shadow);
 }
 .home-search-label { position: absolute; left: -9999px; }
@@ -3812,7 +3814,7 @@ header, .site-header { height: auto; min-height: var(--header-h); }
   padding: 4px 4px 4px 14px;
   border-radius: var(--radius-pill);
   background: var(--card-surface);
-  border: 1px solid var(--card-border-color);
+  border: 1px solid var(--input-border);
   box-shadow: var(--card-shadow);
 }
 .search-field .search-icon { position: static; font-size: 18px; }
@@ -3861,6 +3863,13 @@ header, .site-header { height: auto; min-height: var(--header-h); }
   border-color: transparent;
 }
 .day-btn { min-width: 44px; justify-content: center; }
+/* BE-28: ook de maaltijdkeuze en de categorienavigatie op de menukaart zijn
+   "actieve chips" — in donker dus wit, net als de filterchips. */
+.meal-btn.active, .cat-nav-item.active, .mf-btn.active {
+  background: var(--chip-active-bg);
+  color: var(--chip-active-text);
+  border-color: transparent;
+}
 .filters-panel {
   border-radius: var(--radius-card);
   background: var(--card-surface);

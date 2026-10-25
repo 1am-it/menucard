@@ -35,3 +35,38 @@ De publieke site ziet er fris en eigen uit, in licht en antraciet, met emoji's, 
 - foto's van restaurants of gerechten.
 
 **Rollen:** Lead = Claude Code (contract, review, acceptatie, release). Developer = DeepSeek via de lokale runner.
+
+## Bewijs (developer, 2026-10-25)
+
+Developer-evidence: lokale, geïsoleerde productiebuild. Geen productie, geen
+echte Supabase-credentials, geen merge of publicatie. Onafhankelijke review en
+browseracceptatie door de Lead staan nog open.
+
+| Onderdeel | Resultaat |
+|---|---|
+| Branch / commits | `feat/fresh-style-65`: tokens → home → pagina's → documentatie → browsercheck (zie `git log`) |
+| `npm test` | 2819 tests, 2818 pass, 1 fail: `src/lib/menuAiTimeLimits.test.js` "Y1: no vercel.json was introduced". Die faalt ook op de base `a517052` (het bestand `vercel.json` is daar al getrackt); niet aangeraakt door #65 |
+| `npm run build` | groen (43/43 statische pagina's) |
+| Initiële overdracht `/` (dark, 1280 px, koude cache) | **190 KB vóór** (base `a517052`) → **148,7 KB ná** (document 4,4 KB, 13 requests). Doel < 250 KB en niet groter dan nu: gehaald |
+| Contrast licht (live gemeten) | body 18,24:1 · secundair 7,24:1 · prijslabel 18,24:1 · hoofdknop 10,74:1 · chip 18,24:1 · menubalk 18,24:1 · veldrand 3,56:1 |
+| Contrast donker (live gemeten) | body 14,22:1 · secundair 7,05:1 · prijslabel 6,95:1 · hoofdknop 14,22:1 · chip 10,31:1 · menubalk 10,31:1 · veldrand 3,56:1 |
+| Browsercheck | `ops/browser/run-public-style-browser-check.js`: 148 checks, 0 failures, 35 screenshots (home, zoeken met resultaten, alle restaurants, restaurantpagina, menukaart op 1280/390/320 px in licht en donker; plus `/internal/login` en `/internal/coverage`) |
+| Bewijsbestanden | `ops/browser/evidence/public-style-browser-evidence.json`, `ops/browser/evidence/public-style-transfer-before.json`; screenshots in `ops/browser/output/be-28/` (gegenereerd, niet gecommit) |
+| "Vanavond op de kaart" | Gebouwd met alleen echte dinergerechten en echte prijzen uit de bestaande zoeklogica/data (`src/lib/publicTonight.js`); zonder eerlijke selectie vervalt de sectie. Geen nieuwe route, data of migratie |
+| Zoekresultaten met prijs rechts | De bestaande `group=restaurant`-respons krijgt per voorbeeldgerecht de al bestaande publieke prijsvelden mee (`docs/api/dish-result-shape.md`); ranking en route ongewijzigd |
+
+**Bekende gaten (eerlijk gemeld):**
+
+- `/internal/coverage` kon lokaal niet inhoudelijk worden gecontroleerd: zonder
+  Supabase-credentials toont die pagina een client-side fout. De screenshots
+  laten dat zien. `/internal/login` is wél in licht en donker vastgelegd als
+  bewijs dat de nieuwe tokens interne pagina's leesbaar houden; de echte
+  coverage-dashboardcheck hoort bij de Lead/acceptatie.
+- De app-side AI-activatie is niet aangeraakt (die vereist een eigen
+  eigenaarsbesluit, BE-21); deze ronde gebruikt alleen de bestaande prepaid
+  developer-runner.
+- Card- en chipvlakken volgen de goedgekeurde mockup (zachte randen in licht,
+  `#3A4048` in donker). Interactieve velden gebruiken `--input-border` (≥ 3:1);
+  kaart- en chipvlakken zijn nooit de enige affordance (tekst, hover en
+  focusring dragen de interactie). Zie `docs/guides/design-reference.md`.
+
