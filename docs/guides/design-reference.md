@@ -778,3 +778,25 @@ these restaurants "nieuw", do not route them into
 - If a mockup and a ticket disagree, the ticket's "Deviations from the
   mockup" section (or its equivalent) wins. If two mockups disagree, the
   index says which one leads.
+
+## BE-29 — slimme "Vanavond op de kaart", seizoen en daghap (implemented 2026-10-25, #70)
+
+Owner decision 2026-10-25 ("akkoord ik volg al jouw adviezen"): the BE-28
+style stays the visual reference; no new page or design gate. The labels
+follow the existing emoji-plus-text pattern (`<Emoji/>` decorative, the text
+carries the meaning):
+
+- "✨ Nieuw op de kaart" — a menu updated in the last 30 days;
+- "🌿 Seizoen" — only when the menu itself says so (Wildkaart,
+  Seizoenskaart or the section "Seizoen"), never from a dish name;
+- "📅 Daghap" — only when the source says Daghap/Dagschotel/Dagspecial/
+  Vandaag or carries the `Dagspecial` label, always followed by
+  "volgens de kaart van [brondatum]";
+- "🌱 Vegetarisch" — the existing neutral diet label;
+- "🟢 Nu open" — unchanged, browser clock only.
+
+The home season tiles reuse the existing `.home-tile` pattern and link to the
+existing `/search?q=` route; a tile only appears when that search really has
+results. The moment section keeps the BE-28 card, one dish per restaurant, and
+disappears below three dishes. The measured colours still come from the
+existing tokens; the BE-29 block adds no hard-coded colour.

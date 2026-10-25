@@ -7,6 +7,8 @@
 
 import Emoji from '@/src/components/Emoji'
 import { groupHeadingsBefore } from '@/src/lib/menuGroups'
+import { dailyDishInfo } from '@/src/lib/dailyDish'
+import { honestPriceLabel } from '@/src/lib/menuPrice'
 
 export const TAG_LABELS = {
   aanbevolen:  'Aanbevolen',
@@ -94,9 +96,18 @@ export function itemMatchesAllergens(item, excludeIds) {
 
 // ─── MenuItem Component ────────────────────────────────────────────────────────
 
-export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTarget = false, showPulse = false, highlightQuery = null, innerRef }) {
+export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTarget = false, showPulse = false, highlightQuery = null, innerRef, domId = null, category = null, menuTitle = null, sourceDate = null }) {
   const { safe, unknown } = itemMatchesAllergens(item, excludeAllergens)
   const hasAllergenFilter = excludeAllergens.length > 0
+  // BE-29 (#70) — een daghap alleen als de bron het zelf zegt en de kaart
+  // een leesbare brondatum heeft. Het label komt altijd met die datum; een
+  // verlopen daghap blijft zo gewoon op de menukaart staan.
+  const dailyInfo = dailyDishInfo(item, { category, menuTitle, sourceDate })
+  const visibleTags = (item.tags || []).filter((tag) => !(dailyInfo && tag === 'dagspecial'))
+  // BE-29 (#70) — dezelfde eerlijke prijs als op de home: een expliciete
+  // bron-eenheid ("per stuk", "per kilo", "voor 2 personen") blijft zichtbaar;
+  // zonder echte prijs blijft "op aanvraag" staan.
+  const priceLabel = honestPriceLabel(item) || item.price || 'op aanvraag'
   // BE-12 — the resolved dish's own substring mark comes from `fromQuery`,
   // never the shared `?q=` filter state, and only for this one item; it
   // stays for as long as this item is the resolved target (the life of
@@ -107,13 +118,14 @@ export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTa
   return (
     <div
       ref={innerRef}
+      id={domId || undefined}
       tabIndex={isResolvedTarget ? -1 : undefined}
       className={`menu-card ${hasAllergenFilter && unknown ? 'mc-unknown' : ''} ${hasAllergenFilter && !safe ? 'mc-unsafe' : ''} ${showPulse ? 'menu-card-highlighted' : ''}`}
     >
       <div className="card-top">
         <div className="td-name">{highlight(item.name, displayQuery)}</div>
         <div className={`td-price ${!item.price ? 'no-price' : ''}`}>
-          {item.price || 'op aanvraag'}
+          {priceLabel}
         </div>
       </div>
 
@@ -159,9 +171,18 @@ export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTa
         </div>
       )}
 
-      {item.tags?.length > 0 && (
+      {dailyInfo && (
+        <div className="item-tags item-daily">
+          <span className="item-tag tag-daghap">
+            <Emoji glyph="📅" /> Daghap
+          </span>
+          <span className="item-daily-date">{dailyInfo.dateLine}</span>
+        </div>
+      )}
+
+      {visibleTags.length > 0 && (
         <div className="item-tags">
-          {item.tags.map(t => (
+          {visibleTags.map(t => (
             <span key={t} className={`item-tag tag-${t}`}>
               {/* BE-28 — het blad is nu het systeem-emoji (aria-hidden) in
                   plaats van een SVG; de tekst ernaast draagt de betekenis. */}
@@ -193,7 +214,7 @@ export function MenuSection({ id, sectionRef, name, count, children }) {
 }
 
 /** A whole menu entry exactly as the public page shows it, without filters (Publicatievoorbeeld). */
-export function StaticMenu({ categories, idPrefix }) {
+export function StaticMenu({ categories, idPrefix, sourceDate = null }) {
   const list = categories || []
   return (
     <>
@@ -202,7 +223,7 @@ export function StaticMenu({ categories, idPrefix }) {
           <MenuGroupHeadings categories={list} index={i} />
           <MenuSection id={`${idPrefix}-cat-${i}`} name={cat.name}>
             {(cat.items || []).map((item, j) => (
-              <MenuItem key={j} item={item} />
+              <MenuItem key={j} item={item} category={cat.name} sourceDate={sourceDate} />
             ))}
           </MenuSection>
         </div>

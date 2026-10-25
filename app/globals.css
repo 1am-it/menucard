@@ -2657,8 +2657,8 @@ mark.search-highlight {
 /* ── BE-11 Fase 1 — light restaurant browse card ──────────────────────────
    Deliberately new, "lrc-" ("light restaurant card") namespaced classes —
    never reuses or redefines the existing rc-prefixed / .restaurant-card
-   rules above, which app/restaurants/page.js's heavier card still depends
-   on.
+   rules above. Those legacy rules stay because shared classes still use
+   them; the old /restaurants page itself is now a redirect.
    Reuses the existing .restaurant-grid container class (layout-only, no
    card-specific styling) and design tokens from :root. See
    docs/mockups/be-11-menu-discovery-v1.html for the directional
@@ -4117,10 +4117,10 @@ header, .site-header { height: auto; min-height: var(--header-h); }
 .ar-arrow { display: none; flex: none; color: var(--accent); font-size: 18px; font-weight: 800; }
 
 /* ── BE-28b (#68): dezelfde stijl op de overige publieke pagina's ──
-   /restaurants, /restaurant/[id], /menu/[id], /claim/[id] en /nvwa/[id]
-   gebruiken dezelfde tokens, ronde kaarten en pillen. Geen route, geen
-   gedrag en geen nieuwe stijl-familie; alleen de bestaande klassen krijgen
-   de BE-28-vorm. */
+   /restaurant/[id], /menu/[id], /claim/[id] en /nvwa/[id] gebruiken
+   dezelfde tokens, ronde kaarten en pillen. Geen route, geen gedrag en geen
+   nieuwe stijl-familie; alleen de bestaande klassen krijgen de BE-28-vorm.
+   (/restaurants is sinds BE-29 een redirect; gedeelde klassen blijven.) */
 .back-btn {
   display: inline-flex;
   align-items: center;
@@ -4132,7 +4132,9 @@ header, .site-header { height: auto; min-height: var(--header-h); }
 }
 .back-btn:hover { border-color: var(--border-hover); color: var(--text-primary); }
 
-/* /restaurants — de bestaande opbouw, nu in de frisse vorm. */
+/* Legacy /restaurants-opbouw: de route is sinds BE-29 een permanente
+   redirect, maar deze gedeelde hero-/kaartklassen blijven voor de andere
+   publieke pagina's. */
 .hero-section {
   max-width: var(--max-w);
   margin: 24px auto 0;
@@ -4297,6 +4299,62 @@ header, .site-header { height: auto; min-height: var(--header-h); }
 .filter-chip--small { min-height: 30px; padding: 0 10px; font-size: 11px; }
 .filter-chip.active { background: var(--chip-active-bg); border-color: transparent; color: var(--chip-active-text); font-weight: 700; }
 .filter-chip:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+
+/* ── BE-29 (#70): slimme Vanavond-sectie, seizoenstegels en labels ──
+   Alleen bestaande tokens: geen nieuwe kleur, geen afbeelding en geen font.
+   De labels volgen het BE-28/`item-tag`-patroon (emoji via <Emoji/>, tekst
+   ernaast draagt de betekenis). */
+.tonight-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  align-items: center;
+  margin-top: 2px;
+}
+.tonight-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-soft);
+  color: var(--text-secondary);
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+.tonight-tag--new { background: var(--tag-info-bg); color: var(--tag-info); }
+.tonight-tag--season { background: transparent; box-shadow: inset 0 0 0 1px var(--input-border); }
+.tonight-tag--veg { background: transparent; box-shadow: inset 0 0 0 1px var(--input-border); }
+.tonight-tag--daily { background: var(--tag-featured-bg); color: var(--tag-featured); max-width: 100%; overflow-wrap: anywhere; }
+.tonight-tags .open-label { margin-left: 2px; }
+.home-tile[data-season] { justify-content: flex-start; }
+
+/* Menukaart: hetzelfde labelpatroon voor de daghap met brondatum en het
+   seizoenslabel van de kaart zelf. */
+.item-daily { align-items: center; }
+.item-daily-date {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  align-self: center;
+  overflow-wrap: anywhere;
+}
+.tag-daghap { background: var(--tag-featured-bg); color: var(--tag-featured); }
+.menu-season-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--input-border);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
 
 /* ── Telefoon: zwevende menubalk onderin (390 en 320 px) ── */
 .mobile-tabbar {

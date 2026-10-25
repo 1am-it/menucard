@@ -5,7 +5,7 @@
 // 'use client' views.
 //
 // Same rule as the existing isCurrentlyOpen()/getOpenStatus() helpers in
-// app/restaurants/page.js, src/services/dishSearch.js and
+// app/restaurants/page.js (now a redirect), src/services/dishSearch.js and
 // src/services/restaurantIndex.js — the browser's local time, today's
 // "HH:MM-HH:MM" entry, open from the opening minute up to (not including)
 // the closing minute, no overnight windows. No new time-zone or planning
@@ -19,6 +19,32 @@ const DAY_KEYS = ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za'];
 function toMinutes(str) {
   const [h, m] = String(str).split(':').map(Number);
   return h * 60 + (m || 0);
+}
+
+/**
+ * BE-29 (#70) — één leesfunctie voor "HH:MM-HH:MM", zonder overnight-venster.
+ * @returns {{open:number,close:number}|null}
+ */
+function parseOpeningRange(hours) {
+  if (typeof hours !== 'string') return null;
+  const [opens, closes] = hours.split('-').map((part) => part.trim());
+  if (!/^\d{1,2}:\d{2}$/.test(opens || '') || !/^\d{1,2}:\d{2}$/.test(closes || '')) return null;
+  const range = { open: toMinutes(opens), close: toMinutes(closes) };
+  if (range.close <= range.open) return null;
+  return range;
+}
+
+/**
+ * BE-29 (#70) — overlapt de openingstijd van deze weekdag een venster van de
+ * dag (in minuten na middernacht)? Dezelfde leesregel als `todayOpening`,
+ * maar zonder "nu": de momentkeuze op de home moet per dag vast en cachebaar
+ * zijn.
+ */
+function isOpenDuring(openingHours, dayKey, fromMinutes, toMinutesOfDay) {
+  if (!openingHours || typeof openingHours !== 'object') return false;
+  const range = parseOpeningRange(openingHours[dayKey]);
+  if (!range) return false;
+  return range.open < toMinutesOfDay && range.close > fromMinutes;
 }
 
 /**
@@ -72,4 +98,4 @@ function openingBadge(opening, openingHours, todayKey) {
   }
 }
 
-module.exports = { DAY_KEYS, todayOpening, openingBadge };
+module.exports = { DAY_KEYS, todayOpening, openingBadge, parseOpeningRange, isOpenDuring };

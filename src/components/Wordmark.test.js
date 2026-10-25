@@ -100,7 +100,6 @@ const PUBLIC_HEADERS = [
   'app/HomeView.js',
   'app/search/page.js',
   'app/alle-restaurants/page.js',
-  'app/restaurants/page.js',
   'app/menu/[id]/MenuView.js',
   'app/restaurant/[id]/RestaurantDetailView.js',
   'app/nvwa/[id]/NvwaView.js',
@@ -279,7 +278,7 @@ test('restaurant detail hero no longer paints a restaurant-colour gradient', () 
 test('homepage (BE-28): the mockup headline replaces the old marker span; emoji are decorative only', () => {
   const src = read('app/HomeView.js');
   const page = read('app/page.js');
-  assert.match(page, /<HomeView tonight=/);
+  assert.match(page, /<HomeView candidates=/);
   assert.match(src, /Waar heb je vanavond zin in\?/);
   assert.match(src, /import Emoji from '@\/src\/components\/Emoji'/);
   assert.doesNotMatch(src, /var\(--green\)/);

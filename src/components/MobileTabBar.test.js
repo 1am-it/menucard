@@ -46,7 +46,6 @@ test('every public page mounts the bar and reserves room for it on the phone', (
     'app/HomeView.js',
     'app/search/page.js',
     'app/alle-restaurants/page.js',
-    'app/restaurants/page.js',
     'app/restaurant/[id]/RestaurantDetailView.js',
     'app/menu/[id]/MenuView.js',
   ]) {

@@ -1,24 +1,24 @@
 {
-  "generatedAt": "2026-10-25T16:02:08.394Z",
+  "generatedAt": "2026-10-25T18:05:19.101Z",
   "label": "after",
   "kind": "developer evidence â€” local production build, no production data or credentials",
-  "app": "http://localhost:3150",
+  "app": "http://localhost:3144",
   "transfer": [
     {
       "label": "after",
       "page": "/",
       "theme": "dark",
       "viewport": "1280x900",
-      "totalBytes": 154724,
-      "totalKb": 151.1,
-      "documentBytes": 4435,
-      "resourceCount": 13,
+      "totalBytes": 166034,
+      "totalKb": 162.1,
+      "documentBytes": 8081,
+      "resourceCount": 16,
       "byType": {
-        "Document": 4435,
-        "Script": 123502,
-        "Stylesheet": 21324,
-        "Other": 662,
-        "Fetch": 4801
+        "Document": 8081,
+        "Script": 128474,
+        "Stylesheet": 21508,
+        "Fetch": 7309,
+        "Other": 662
       },
       "biggest": [
         {
@@ -32,9 +32,19 @@
           "bytes": 46499
         },
         {
-          "url": "/_next/static/css/0dea0c07b8a2c479.css",
+          "url": "/_next/static/css/75659ac43a6cad5c.css",
           "type": "Stylesheet",
-          "bytes": 21324
+          "bytes": 21508
+        },
+        {
+          "url": "/_next/static/chunks/app/page-b86284c428f5dedc.js",
+          "type": "Script",
+          "bytes": 8420
+        },
+        {
+          "url": "/",
+          "type": "Document",
+          "bytes": 8081
         },
         {
           "url": "/_next/static/chunks/app/search/page-f0750e93f2b73c80.js",
@@ -47,19 +57,9 @@
           "bytes": 4726
         },
         {
-          "url": "/",
-          "type": "Document",
-          "bytes": 4435
-        },
-        {
           "url": "/_next/static/chunks/176-b1374ab33d855c73.js",
           "type": "Script",
           "bytes": 3861
-        },
-        {
-          "url": "/_next/static/chunks/app/page-e2712038ba0f796f.js",
-          "type": "Script",
-          "bytes": 3448
         }
       ]
     },
@@ -68,16 +68,16 @@
       "page": "/alle-restaurants",
       "theme": "dark",
       "viewport": "1280x900",
-      "totalBytes": 155792,
-      "totalKb": 152.1,
-      "documentBytes": 3078,
-      "resourceCount": 15,
+      "totalBytes": 163849,
+      "totalKb": 160,
+      "documentBytes": 3079,
+      "resourceCount": 14,
       "byType": {
-        "Document": 3078,
-        "Stylesheet": 21324,
-        "Script": 123502,
-        "Other": 662,
-        "Fetch": 7226
+        "Document": 3079,
+        "Stylesheet": 21508,
+        "Script": 128474,
+        "Fetch": 10126,
+        "Other": 662
       },
       "biggest": [
         {
@@ -91,14 +91,24 @@
           "bytes": 46499
         },
         {
-          "url": "/_next/static/css/0dea0c07b8a2c479.css",
+          "url": "/_next/static/css/75659ac43a6cad5c.css",
           "type": "Stylesheet",
-          "bytes": 21324
+          "bytes": 21508
+        },
+        {
+          "url": "/_next/static/chunks/app/page-b86284c428f5dedc.js",
+          "type": "Script",
+          "bytes": 8420
         },
         {
           "url": "/_next/static/chunks/app/search/page-f0750e93f2b73c80.js",
           "type": "Script",
           "bytes": 7100
+        },
+        {
+          "url": "/?_rsc=1tikd",
+          "type": "Fetch",
+          "bytes": 5966
         },
         {
           "url": "/_next/static/chunks/app/alle-restaurants/page-5980e1cefbc3c656.js",
@@ -109,16 +119,6 @@
           "url": "/_next/static/chunks/176-b1374ab33d855c73.js",
           "type": "Script",
           "bytes": 3861
-        },
-        {
-          "url": "/_next/static/chunks/app/page-e2712038ba0f796f.js",
-          "type": "Script",
-          "bytes": 3448
-        },
-        {
-          "url": "/alle-restaurants",
-          "type": "Document",
-          "bytes": 3078
         }
       ]
     }
@@ -306,7 +306,7 @@
     }
   },
   "checks": {
-    "total": 275,
+    "total": 342,
     "failed": 0,
     "entries": [
       {
@@ -778,120 +778,6 @@
       },
       {
         "name": "alle-restaurants dark 320px: no photography",
-        "passed": true,
-        "detail": "0 img elements"
-      },
-      {
-        "name": "restaurants light 1280px: theme applied",
-        "passed": true,
-        "detail": "light, body rgb(255, 255, 255)"
-      },
-      {
-        "name": "restaurants light 1280px: no horizontal overflow",
-        "passed": true,
-        "detail": "scrollWidth 1274 vs innerWidth 1280"
-      },
-      {
-        "name": "restaurants light 1280px: tab bar hidden",
-        "passed": true
-      },
-      {
-        "name": "restaurants light 1280px: no photography",
-        "passed": true,
-        "detail": "0 img elements"
-      },
-      {
-        "name": "restaurants light 390px: theme applied",
-        "passed": true,
-        "detail": "light, body rgb(255, 255, 255)"
-      },
-      {
-        "name": "restaurants light 390px: no horizontal overflow",
-        "passed": true,
-        "detail": "scrollWidth 390 vs innerWidth 390"
-      },
-      {
-        "name": "restaurants light 390px: tab bar visible",
-        "passed": true
-      },
-      {
-        "name": "restaurants light 390px: no photography",
-        "passed": true,
-        "detail": "0 img elements"
-      },
-      {
-        "name": "restaurants light 320px: theme applied",
-        "passed": true,
-        "detail": "light, body rgb(255, 255, 255)"
-      },
-      {
-        "name": "restaurants light 320px: no horizontal overflow",
-        "passed": true,
-        "detail": "scrollWidth 320 vs innerWidth 320"
-      },
-      {
-        "name": "restaurants light 320px: tab bar visible",
-        "passed": true
-      },
-      {
-        "name": "restaurants light 320px: no photography",
-        "passed": true,
-        "detail": "0 img elements"
-      },
-      {
-        "name": "restaurants dark 1280px: theme applied",
-        "passed": true,
-        "detail": "dark, body rgb(31, 35, 40)"
-      },
-      {
-        "name": "restaurants dark 1280px: no horizontal overflow",
-        "passed": true,
-        "detail": "scrollWidth 1274 vs innerWidth 1280"
-      },
-      {
-        "name": "restaurants dark 1280px: tab bar hidden",
-        "passed": true
-      },
-      {
-        "name": "restaurants dark 1280px: no photography",
-        "passed": true,
-        "detail": "0 img elements"
-      },
-      {
-        "name": "restaurants dark 390px: theme applied",
-        "passed": true,
-        "detail": "dark, body rgb(31, 35, 40)"
-      },
-      {
-        "name": "restaurants dark 390px: no horizontal overflow",
-        "passed": true,
-        "detail": "scrollWidth 390 vs innerWidth 390"
-      },
-      {
-        "name": "restaurants dark 390px: tab bar visible",
-        "passed": true
-      },
-      {
-        "name": "restaurants dark 390px: no photography",
-        "passed": true,
-        "detail": "0 img elements"
-      },
-      {
-        "name": "restaurants dark 320px: theme applied",
-        "passed": true,
-        "detail": "dark, body rgb(31, 35, 40)"
-      },
-      {
-        "name": "restaurants dark 320px: no horizontal overflow",
-        "passed": true,
-        "detail": "scrollWidth 320 vs innerWidth 320"
-      },
-      {
-        "name": "restaurants dark 320px: tab bar visible",
-        "passed": true
-      },
-      {
-        "name": "restaurants dark 320px: no photography",
         "passed": true,
         "detail": "0 img elements"
       },
@@ -1581,6 +1467,440 @@
         "detail": "{\"valueRight\":105,\"copyLeft\":117,\"valueWidth\":72,\"copyWidth\":170}"
       },
       {
+        "name": "be29-home-lunch light 1280px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "be29-home-lunch light 1280px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 1274 vs innerWidth 1280"
+      },
+      {
+        "name": "be29-home-lunch light 1280px: tab bar hidden",
+        "passed": true
+      },
+      {
+        "name": "be29-home-lunch light 1280px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "be29-home-lunch light 390px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "be29-home-lunch light 390px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 390 vs innerWidth 390"
+      },
+      {
+        "name": "be29-home-lunch light 390px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "be29-home-lunch light 390px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "be29-home-lunch light 320px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "be29-home-lunch light 320px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 320 vs innerWidth 320"
+      },
+      {
+        "name": "be29-home-lunch light 320px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "be29-home-lunch light 320px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "be29-home-lunch dark 1280px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "be29-home-lunch dark 1280px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 1274 vs innerWidth 1280"
+      },
+      {
+        "name": "be29-home-lunch dark 1280px: tab bar hidden",
+        "passed": true
+      },
+      {
+        "name": "be29-home-lunch dark 1280px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "be29-home-lunch dark 390px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "be29-home-lunch dark 390px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 390 vs innerWidth 390"
+      },
+      {
+        "name": "be29-home-lunch dark 390px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "be29-home-lunch dark 390px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "be29-home-lunch dark 320px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "be29-home-lunch dark 320px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 320 vs innerWidth 320"
+      },
+      {
+        "name": "be29-home-lunch dark 320px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "be29-home-lunch dark 320px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "BE-29 lunch: de sectie staat er met de juiste titel",
+        "passed": true,
+        "detail": "{\"meal\":\"lunch\",\"title\":\"Nu op de lunchkaart 🔥\",\"cards\":3}"
+      },
+      {
+        "name": "BE-29 lunch: precies drie echte gerechten met prijs",
+        "passed": true,
+        "detail": "[\"€14,75\",\"€23,50\",\"€37,95\"]"
+      },
+      {
+        "name": "BE-29 lunch: hooguit één gerecht per restaurant",
+        "passed": true,
+        "detail": "[\"T-Huis\",\"Restaurant Zuyd\",\"Brasserie Bardot\"]"
+      },
+      {
+        "name": "BE-29 lunch: de klik opent de menukaart op het gerecht",
+        "passed": true,
+        "detail": "[\"/menu/23-lunch?dish=23-lunch-0-4&name=Burrata+%26+Peach&cat=Breakfast+%26+Lunch#gerecht-23-lunch-0-4\",\"/menu/19-lunch?dish=19-lunch-0-0&name=Oesterproeverij&cat=Bites#gerecht-19-lunch-0-0\",\"/menu/6-lunch?dish=6-lunch-2-6&name=Runderentrec%C3%B4te+%28220+gr.%29&cat=Lunchgerechten+%2812%3A00%E2%80%9315%3A00%29#gerecht-6-lunch-2-6\"]"
+      },
+      {
+        "name": "BE-29 lunch: seizoenstegels alleen met echte zoekresultaten (mosselen, wild, pompoen in oktober)",
+        "passed": true,
+        "detail": "[\"mosselen\",\"wild\",\"pompoen\"]"
+      },
+      {
+        "name": "be29-home-borrel light 1280px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "be29-home-borrel light 1280px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 1274 vs innerWidth 1280"
+      },
+      {
+        "name": "be29-home-borrel light 1280px: tab bar hidden",
+        "passed": true
+      },
+      {
+        "name": "be29-home-borrel light 1280px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "be29-home-borrel light 390px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "be29-home-borrel light 390px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 390 vs innerWidth 390"
+      },
+      {
+        "name": "be29-home-borrel light 390px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "be29-home-borrel light 390px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "be29-home-borrel light 320px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "be29-home-borrel light 320px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 320 vs innerWidth 320"
+      },
+      {
+        "name": "be29-home-borrel light 320px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "be29-home-borrel light 320px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "be29-home-borrel dark 1280px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "be29-home-borrel dark 1280px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 1274 vs innerWidth 1280"
+      },
+      {
+        "name": "be29-home-borrel dark 1280px: tab bar hidden",
+        "passed": true
+      },
+      {
+        "name": "be29-home-borrel dark 1280px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "be29-home-borrel dark 390px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "be29-home-borrel dark 390px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 390 vs innerWidth 390"
+      },
+      {
+        "name": "be29-home-borrel dark 390px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "be29-home-borrel dark 390px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "be29-home-borrel dark 320px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "be29-home-borrel dark 320px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 320 vs innerWidth 320"
+      },
+      {
+        "name": "be29-home-borrel dark 320px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "be29-home-borrel dark 320px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "BE-29 borrel: de sectie blijft weg bij minder dan drie gerechten",
+        "passed": true,
+        "detail": "{\"meal\":null,\"title\":null,\"cards\":0}"
+      },
+      {
+        "name": "BE-29 borrel: seizoenstegels alleen met echte zoekresultaten (mosselen, wild, pompoen in oktober)",
+        "passed": true,
+        "detail": "[\"mosselen\",\"wild\",\"pompoen\"]"
+      },
+      {
+        "name": "be29-home-diner light 1280px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "be29-home-diner light 1280px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 1274 vs innerWidth 1280"
+      },
+      {
+        "name": "be29-home-diner light 1280px: tab bar hidden",
+        "passed": true
+      },
+      {
+        "name": "be29-home-diner light 1280px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "be29-home-diner light 390px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "be29-home-diner light 390px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 390 vs innerWidth 390"
+      },
+      {
+        "name": "be29-home-diner light 390px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "be29-home-diner light 390px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "be29-home-diner light 320px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "be29-home-diner light 320px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 320 vs innerWidth 320"
+      },
+      {
+        "name": "be29-home-diner light 320px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "be29-home-diner light 320px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "be29-home-diner dark 1280px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "be29-home-diner dark 1280px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 1274 vs innerWidth 1280"
+      },
+      {
+        "name": "be29-home-diner dark 1280px: tab bar hidden",
+        "passed": true
+      },
+      {
+        "name": "be29-home-diner dark 1280px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "be29-home-diner dark 390px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "be29-home-diner dark 390px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 390 vs innerWidth 390"
+      },
+      {
+        "name": "be29-home-diner dark 390px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "be29-home-diner dark 390px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "be29-home-diner dark 320px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "be29-home-diner dark 320px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 320 vs innerWidth 320"
+      },
+      {
+        "name": "be29-home-diner dark 320px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "be29-home-diner dark 320px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "BE-29 diner: de sectie staat er met de juiste titel",
+        "passed": true,
+        "detail": "{\"meal\":\"diner\",\"title\":\"Vanavond op de kaart 🔥\",\"cards\":3}"
+      },
+      {
+        "name": "BE-29 diner: precies drie echte gerechten met prijs",
+        "passed": true,
+        "detail": "[\"€13,75\",\"€19,50\",\"€58\"]"
+      },
+      {
+        "name": "BE-29 diner: hooguit één gerecht per restaurant",
+        "passed": true,
+        "detail": "[\"T-Huis\",\"Restaurant Zuyd\",\"Restaurant Wolfslaar\"]"
+      },
+      {
+        "name": "BE-29 diner: de klik opent de menukaart op het gerecht",
+        "passed": true,
+        "detail": "[\"/menu/23-diner?dish=23-diner-0-4&name=Romesco+%26+Veg&cat=Voorgerechten#gerecht-23-diner-0-4\",\"/menu/19-diner?dish=19-diner-0-2&name=Jamon+Iberico+Bellota&cat=Bites#gerecht-19-diner-0-2\",\"/menu/1-diner?dish=1-diner-2-4&name=Ree&cat=Hoofdgerechten#gerecht-1-diner-2-4\"]"
+      },
+      {
+        "name": "BE-29 diner: seizoenstegels alleen met echte zoekresultaten (mosselen, wild, pompoen in oktober)",
+        "passed": true,
+        "detail": "[\"mosselen\",\"wild\",\"pompoen\"]"
+      },
+      {
+        "name": "BE-29: geen \"Nu open\" in de server-HTML van de home",
+        "passed": true
+      },
+      {
+        "name": "BE-29: geen daghap in de server-HTML van de home",
+        "passed": true
+      },
+      {
+        "name": "BE-29: geen moment-sectie in de server-HTML van de home",
+        "passed": true
+      },
+      {
+        "name": "BE-29: de menukaart opent op hetzelfde gerecht en markeert het",
+        "passed": true,
+        "detail": "{\"marked\":{\"id\":\"gerecht-23-diner-0-4\",\"hash\":\"#gerecht-23-diner-0-4\",\"name\":\"Romesco & Veg\"},\"expected\":\"Romesco & Veg\"}"
+      },
+      {
+        "name": "BE-29: /restaurants geeft een permanente 308",
+        "passed": true,
+        "detail": "308 /alle-restaurants"
+      },
+      {
+        "name": "BE-29: de 308 wijst naar /alle-restaurants",
+        "passed": true,
+        "detail": "/alle-restaurants"
+      },
+      {
+        "name": "BE-29: de 308 behoudt de zoekterm q=bardot",
+        "passed": true,
+        "detail": "308 /alle-restaurants?q=bardot"
+      },
+      {
         "name": "320px: tab bar target \"🔍\nZoeken\" >= 44px",
         "passed": true,
         "detail": "139x48"
@@ -1635,14 +1955,14 @@
   "screenshots": [
     {
       "file": "ops/browser/output/be-28/home-light-1280.png",
-      "bytes": 94629,
+      "bytes": 85865,
       "width": 1274,
-      "height": 1000,
+      "height": 904,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/home-light-390.png",
-      "bytes": 55795,
+      "bytes": 56973,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
@@ -1656,14 +1976,14 @@
     },
     {
       "file": "ops/browser/output/be-28/home-dark-1280.png",
-      "bytes": 85672,
+      "bytes": 77500,
       "width": 1274,
-      "height": 1000,
+      "height": 904,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/home-dark-390.png",
-      "bytes": 50135,
+      "bytes": 48212,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
@@ -1760,48 +2080,6 @@
       "viewport": "320x820"
     },
     {
-      "file": "ops/browser/output/be-28/restaurants-light-1280.png",
-      "bytes": 511448,
-      "width": 1274,
-      "height": 4000,
-      "viewport": "1280x900"
-    },
-    {
-      "file": "ops/browser/output/be-28/restaurants-light-390.png",
-      "bytes": 48350,
-      "width": 390,
-      "height": 820,
-      "viewport": "390x820"
-    },
-    {
-      "file": "ops/browser/output/be-28/restaurants-light-320.png",
-      "bytes": 42895,
-      "width": 320,
-      "height": 820,
-      "viewport": "320x820"
-    },
-    {
-      "file": "ops/browser/output/be-28/restaurants-dark-1280.png",
-      "bytes": 508113,
-      "width": 1274,
-      "height": 4000,
-      "viewport": "1280x900"
-    },
-    {
-      "file": "ops/browser/output/be-28/restaurants-dark-390.png",
-      "bytes": 52670,
-      "width": 390,
-      "height": 820,
-      "viewport": "390x820"
-    },
-    {
-      "file": "ops/browser/output/be-28/restaurants-dark-320.png",
-      "bytes": 47424,
-      "width": 320,
-      "height": 820,
-      "viewport": "320x820"
-    },
-    {
       "file": "ops/browser/output/be-28/restaurant-with-menu-light-1280.png",
       "bytes": 141114,
       "width": 1274,
@@ -1887,9 +2165,9 @@
     },
     {
       "file": "ops/browser/output/be-28/menu-light-1280.png",
-      "bytes": 271385,
+      "bytes": 281313,
       "width": 1274,
-      "height": 2598,
+      "height": 2613,
       "viewport": "1280x900"
     },
     {
@@ -1908,9 +2186,9 @@
     },
     {
       "file": "ops/browser/output/be-28/menu-dark-1280.png",
-      "bytes": 257450,
+      "bytes": 267461,
       "width": 1274,
-      "height": 2598,
+      "height": 2613,
       "viewport": "1280x900"
     },
     {
@@ -1971,9 +2249,9 @@
     },
     {
       "file": "ops/browser/output/be-28/nvwa-light-1280.png",
-      "bytes": 293056,
+      "bytes": 342325,
       "width": 1274,
-      "height": 4000,
+      "height": 5000,
       "viewport": "1280x900"
     },
     {
@@ -1992,9 +2270,9 @@
     },
     {
       "file": "ops/browser/output/be-28/nvwa-dark-1280.png",
-      "bytes": 300002,
+      "bytes": 350513,
       "width": 1274,
-      "height": 4000,
+      "height": 5000,
       "viewport": "1280x900"
     },
     {
@@ -2017,6 +2295,153 @@
       "width": 390,
       "height": 820,
       "viewport": "390x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/be29-home-lunch-light-1280.png",
+      "bytes": 117109,
+      "width": 1274,
+      "height": 1304,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "ops/browser/output/be-28/be29-home-lunch-light-390.png",
+      "bytes": 95251,
+      "width": 390,
+      "height": 1567,
+      "viewport": "390x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/be29-home-lunch-light-320.png",
+      "bytes": 99585,
+      "width": 320,
+      "height": 1977,
+      "viewport": "320x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/be29-home-lunch-dark-1280.png",
+      "bytes": 106022,
+      "width": 1274,
+      "height": 1304,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "ops/browser/output/be-28/be29-home-lunch-dark-390.png",
+      "bytes": 86054,
+      "width": 390,
+      "height": 1567,
+      "viewport": "390x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/be29-home-lunch-dark-320.png",
+      "bytes": 89804,
+      "width": 320,
+      "height": 1977,
+      "viewport": "320x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/be29-home-borrel-light-1280.png",
+      "bytes": 85865,
+      "width": 1274,
+      "height": 904,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "ops/browser/output/be-28/be29-home-borrel-light-390.png",
+      "bytes": 68083,
+      "width": 390,
+      "height": 1128,
+      "viewport": "390x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/be29-home-borrel-light-320.png",
+      "bytes": 73963,
+      "width": 320,
+      "height": 1539,
+      "viewport": "320x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/be29-home-borrel-dark-1280.png",
+      "bytes": 77500,
+      "width": 1274,
+      "height": 904,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "ops/browser/output/be-28/be29-home-borrel-dark-390.png",
+      "bytes": 61345,
+      "width": 390,
+      "height": 1128,
+      "viewport": "390x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/be29-home-borrel-dark-320.png",
+      "bytes": 66462,
+      "width": 320,
+      "height": 1539,
+      "viewport": "320x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/be29-home-diner-light-1280.png",
+      "bytes": 117096,
+      "width": 1274,
+      "height": 1304,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "ops/browser/output/be-28/be29-home-diner-light-390.png",
+      "bytes": 94457,
+      "width": 390,
+      "height": 1547,
+      "viewport": "390x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/be29-home-diner-light-320.png",
+      "bytes": 99278,
+      "width": 320,
+      "height": 2003,
+      "viewport": "320x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/be29-home-diner-dark-1280.png",
+      "bytes": 105941,
+      "width": 1274,
+      "height": 1304,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "ops/browser/output/be-28/be29-home-diner-dark-390.png",
+      "bytes": 85212,
+      "width": 390,
+      "height": 1547,
+      "viewport": "390x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/be29-home-diner-dark-320.png",
+      "bytes": 89374,
+      "width": 320,
+      "height": 2003,
+      "viewport": "320x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/be29-menu-marked-light-390.png",
+      "bytes": 260185,
+      "width": 390,
+      "height": 4940,
+      "viewport": "390x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/be29-menu-marked-dark-390.png",
+      "bytes": 260206,
+      "width": 390,
+      "height": 4940,
+      "viewport": "390x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/be29-menu-marked-light-1280.png",
+      "bytes": 221617,
+      "width": 1274,
+      "height": 2412,
+      "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/internal-coverage-light-1280.png",

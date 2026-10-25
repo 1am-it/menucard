@@ -13,12 +13,11 @@ const { test } = require('node:test');
 const ROOT = path.join(__dirname, '..');
 const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
 
-test('/restaurants: dezelfde emoji, menukaart-leidend en reserveren secundair', () => {
+test('/restaurants: uitgefaseerd met een permanente 308 naar /alle-restaurants', () => {
   const source = read('app/restaurants/page.js');
-  assert.match(source, /import \{ cuisineEmoji \} from '@\/src\/lib\/cuisineStyle'/);
-  assert.match(source, /<div className="rc-name"><Emoji glyph=\{cuisineEmoji\(restaurant\.cuisine\)\} \/> \{restaurant\.name\}<\/div>/);
-  assert.match(source, /<Emoji glyph="📋" \/> Bekijk menu →/);
-  assert.match(source, /hasMenu \? 'rc-reserve-btn--secondary' : ''/, 'the reservation action stays secondary when a menu exists');
+  assert.match(source, /import \{ permanentRedirect \} from 'next\/navigation'/);
+  assert.match(source, /permanentRedirect\(query \? `\/alle-restaurants\?q=\$\{encodeURIComponent\(query\)\}` : '\/alle-restaurants'\)/);
+  assert.doesNotMatch(source, /cuisineEmoji|restaurant-card|rc-reserve-btn/, 'the old page body is gone; shared components stay shared');
 });
 
 test('restaurantpagina: "Bekijk menukaart" blijft leidend met emoji, reserveren blijft secundair', () => {

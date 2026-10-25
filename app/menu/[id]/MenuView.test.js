@@ -215,3 +215,48 @@ test('BE-16: keyboard focus is moved independently of, and before, the highlight
   const effectMatch = source.match(/node\.scrollIntoView\([^)]*\)\s*node\.focus\(\)\s*setShowPulse\(true\)[\s\S]*?const timer = setTimeout/);
   assert.ok(effectMatch, 'expected node.focus() to run unconditionally before the highlight timer is created, with no dependency between them');
 });
+
+// ─── BE-29 (#70) — anker, daghap met brondatum en het seizoenslabel ────────
+
+test('BE-29: every menu card carries the same dish anchor the home deeplink uses', () => {
+  const source = readComponentSource();
+  assert.match(source, /const domId = originalItemIndex >= 0 \? `gerecht-\$\{id\}-\$\{origIdx\}-\$\{originalItemIndex\}` : undefined/);
+  assert.match(source, /domId=\{domId\}/);
+  assert.match(source, /id=\{domId \|\| undefined\}/);
+});
+
+test('BE-29: the original category/item index comes from the unfiltered menu, so a filter never moves the anchor', () => {
+  const source = readComponentSource();
+  assert.match(source, /const originalItemIndex = r\.categories\[origIdx\] \? r\.categories\[origIdx\]\.items\.indexOf\(item\) : -1/);
+  assert.match(source, /domId=\{domId\}[\s\S]*?category=\{cat\.name\}[\s\S]*?menuTitle=\{subtitle\}[\s\S]*?sourceDate=\{r\.scraped\}/);
+});
+
+test('BE-29: a daghap on the menu is labelled with the source date, also when it has expired', () => {
+  const source = readComponentSource();
+  assert.match(source, /import \{ dailyDishInfo \} from '@\/src\/lib\/dailyDish'/);
+  assert.match(source, /const dailyInfo = dailyDishInfo\(item, \{ category, menuTitle, sourceDate \}\)/);
+  assert.match(source, /\{dailyInfo && \(/);
+  assert.match(source, /<span className="item-tag tag-daghap">\s*<Emoji glyph="📅" \/> Daghap\s*<\/span>/);
+  assert.match(source, /<span className="item-daily-date">\{dailyInfo\.dateLine\}<\/span>/);
+  assert.doesNotMatch(source, /dailyDishStatus|isDailyFromToday/, 'the public menu never hides an expired daghap');
+});
+
+test('BE-29: the Dagspecial tag is not duplicated next to the honest Daghap label', () => {
+  const source = readComponentSource();
+  assert.match(source, /const visibleTags = \(item\.tags \|\| \[\]\)\.filter\(\(tag\) => !\(dailyInfo && tag === 'dagspecial'\)\)/);
+});
+
+test('BE-29: the menu card shows the same honest price as the home (unit/2-person qualifier included)', () => {
+  const source = readComponentSource();
+  assert.match(source, /import \{ honestPriceLabel \} from '@\/src\/lib\/menuPrice'/);
+  assert.match(source, /const priceLabel = honestPriceLabel\(item\) \|\| item\.price \|\| 'op aanvraag'/);
+  assert.match(source, /<div className=\{`td-price \$\{!item\.price \? 'no-price' : ''\}`\}>\s*\{priceLabel\}\s*<\/div>/);
+});
+
+test('BE-29: "Seizoen" appears on the menu only when the menu itself says so', () => {
+  const source = readComponentSource();
+  assert.match(source, /import \{ seasonLabelForMenu \} from '@\/src\/lib\/seasonCalendar'/);
+  assert.match(source, /const menuSeason = seasonLabelForMenu\(r\)/);
+  assert.match(source, /\{menuSeason && \(/);
+  assert.match(source, /<span className="menu-season-label">\s*<Emoji glyph=\{menuSeason\.emoji\} \/> \{menuSeason\.label\}\s*<\/span>/);
+});

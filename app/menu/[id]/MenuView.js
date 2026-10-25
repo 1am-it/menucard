@@ -12,6 +12,7 @@ import ExternalLinkIcon from '@/src/components/ExternalLinkIcon'
 import StatusIcon from '@/src/components/StatusIcon'
 import useClientNow from '@/src/components/useClientNow'
 import { todayOpening, openingBadge } from '@/src/lib/openingStatus'
+import { seasonLabelForMenu } from '@/src/lib/seasonCalendar'
 import { EU14, MEAL_CONFIG, menuTitle, itemMatchesAllergens, MenuItem, MenuSection, MenuGroupHeadings } from '@/src/components/MenuBody'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -113,6 +114,10 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
   const baseId    = id.split('-')[0]
   const mealType  = id.split('-').slice(1).join('-')
   const subtitle  = menuTitle(id, r)
+  // BE-29 (#70) — het label "Seizoen" alleen als deze kaart het zelf zegt
+  // (Wildkaart, Seizoenskaart of de rubriek "Seizoen"), nooit op basis van
+  // een woord in een gerechtnaam.
+  const menuSeason = seasonLabelForMenu(r)
   const primaryReservation = getReservationActions(restaurant)[0]
 
   // BE-12 — resolve the dish deep-link (if any) against this route's own,
@@ -278,6 +283,13 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
           <div>
             <div className="hero-eyebrow">{r.name || restaurant.name}</div>
             <h1 className="hero-title">{subtitle}</h1>
+            {menuSeason && (
+              <div>
+                <span className="menu-season-label">
+                  <Emoji glyph={menuSeason.emoji} /> {menuSeason.label}
+                </span>
+              </div>
+            )}
 
             {/* Meal type switch */}
             {availableMeals.length > 1 && (
@@ -517,6 +529,13 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
                     // regardless of whatever the current filter happens to
                     // be showing (filteredCategories never clones items).
                     const isResolvedTarget = item === resolvedTargetItem
+                    // BE-29 — het anker van het gerecht is exact hetzelfde id
+                    // als de dish-deeplink gebruikt (`<menukey>-<cat>-<item>`),
+                    // zodat de home direct op dit gerecht kan landen. De
+                    // originele index wordt uit de ongefilterde categorie
+                    // gehaald; een actief filter verandert die niet.
+                    const originalItemIndex = r.categories[origIdx] ? r.categories[origIdx].items.indexOf(item) : -1
+                    const domId = originalItemIndex >= 0 ? `gerecht-${id}-${origIdx}-${originalItemIndex}` : undefined
                     return (
                       <MenuItem
                         key={j}
@@ -527,6 +546,10 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
                         showPulse={isResolvedTarget && showPulse}
                         highlightQuery={fromQueryParam}
                         innerRef={isResolvedTarget ? highlightedItemRef : undefined}
+                        domId={domId}
+                        category={cat.name}
+                        menuTitle={subtitle}
+                        sourceDate={r.scraped}
                       />
                     )
                   })}
