@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<title>Alle restaurants desktop</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 1280px; height: 1180px; box-sizing: border-box; overflow: hidden; background: {{t.bg}}; color: {{t.text}}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif">
+  <header style="display: flex; align-items: center; gap: 20px; padding: 14px 46px; border-bottom: 1px solid {{t.line}}">
+    <a href="#" aria-label="Onze Menukaarten, naar de startpagina" style="display: flex; align-items: center; gap: 8px; text-decoration: none; color: {{t.text}}">
+      <span aria-hidden="true" style="width: 32px; height: 32px; border-radius: 10px; background: #F2C35B; color: #1F1600; font-weight: 800; font-size: 14px; display: flex; align-items: center; justify-content: center">om</span>
+      <span style="display: flex; flex-direction: column; line-height: 0.95; font-size: 17px"><span style="font-weight: 500; color: {{t.muted}}">onze</span><span style="font-weight: 800">menukaarten</span></span>
+    </a>
+    <span style="font-size: 14px; color: {{t.muted}}">Menukaarten in Breda</span>
+    <div style="flex: 1"></div>
+    <nav aria-label="Hoofdmenu" style="display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: {{t.soft}}; font-size: 15px">
+      <a href="#" style="min-height: 40px; display: flex; align-items: center; padding: 0 16px; border-radius: 999px; color: {{t.muted}}; text-decoration: none">🔍 Zoeken</a>
+      <a href="#" aria-current="page" style="min-height: 40px; display: flex; align-items: center; padding: 0 16px; border-radius: 999px; background: {{t.btn}}; color: {{t.btnText}}; font-weight: 700; text-decoration: none">🍽️ Alle restaurants</a>
+    </nav>
+  </header>
+
+  <main style="padding: 28px 46px">
+    <div style="display: flex; align-items: flex-end; gap: 24px; flex-wrap: wrap">
+      <div style="flex: 1">
+        <h1 style="margin: 0; font-size: 30px; font-weight: 800; letter-spacing: -0.03em">Alle restaurants 🍽️</h1>
+        <p style="margin: 6px 0 0; font-size: 15px; color: {{t.muted}}">Elk bekend restaurant in Breda, ook als we de menukaart nog niet hebben.</p>
+      </div>
+      <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: {{t.muted}}">Sorteren
+        <select style="min-height: 40px; border-radius: 999px; padding: 0 14px; border: 1px solid {{t.field}}; background: {{t.card}}; color: {{t.text}}; font: inherit; font-weight: 600"><option>📋 Met menukaart eerst</option><option>A–Z</option></select>
+      </label>
+    </div>
+
+    <div style="margin-top: 18px; display: flex; align-items: center; gap: 8px; max-width: 520px; padding: 4px 4px 4px 18px; border-radius: 999px; border: 1px solid {{t.field}}; background: {{t.card}}">
+      <span aria-hidden="true">🔍</span>
+      <label for="ar-q" style="position: absolute; left: -9999px">Zoek op naam of buurt</label>
+      <input id="ar-q" placeholder="Zoek op naam of buurt" style="flex: 1; min-height: 44px; border: 0; background: transparent; font: inherit; font-size: 16px; color: {{t.text}}">
+    </div>
+
+    <div style="margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; font-size: 14px">
+      <a href="#" style="min-height: 38px; display: flex; align-items: center; padding: 0 14px; border-radius: 999px; background: {{t.btn}}; color: {{t.btnText}}; font-weight: 700; text-decoration: none">📋 Met menukaart</a>
+      <sc-for list="{{chips}}" as="c" hint-placeholder-count="7">
+        <a href="#" style="min-height: 38px; display: flex; align-items: center; padding: 0 14px; border-radius: 999px; background: {{t.soft}}; color: {{t.text}}; font-weight: 600; text-decoration: none">{{c}}</a>
+      </sc-for>
+    </div>
+
+    <p style="margin: 20px 0 12px; font-size: 14px; font-weight: 600; color: {{t.muted}}">25 restaurants · 2 met menukaart</p>
+
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px">
+      <sc-for list="{{restaurants}}" as="r" hint-placeholder-count="9">
+        <a href="#" style="display: flex; flex-direction: column; gap: 10px; padding: 18px; border-radius: 20px; background: {{t.card}}; border: 1px solid {{t.line}}; box-shadow: {{t.shadow}}; color: {{t.text}}; text-decoration: none; min-height: 196px; box-sizing: border-box">
+          <span style="display: flex; align-items: flex-start; gap: 12px">
+            <span aria-hidden="true" style="width: 46px; height: 46px; flex: none; border-radius: 14px; background: {{t.tile}}; display: flex; align-items: center; justify-content: center; font-size: 24px">{{r.emoji}}</span>
+            <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+              <span style="font-size: 17px; font-weight: 800">{{r.name}}</span>
+              <span style="font-size: 13px; color: {{t.muted}}">{{r.kind}}</span>
+            </span>
+            <sc-if value="{{r.noMenu}}" hint-placeholder-val="{{false}}">
+              <span style="flex: none; padding: 4px 10px; border-radius: 999px; background: {{t.soft}}; color: {{t.muted}}; font-size: 12px; font-weight: 700">Nog geen menukaart</span>
+            </sc-if>
+          </span>
+          <span style="font-size: 13px; color: {{t.muted}}">📍 {{r.address}}</span>
+          <sc-if value="{{r.hasMenu}}" hint-placeholder-val="{{false}}">
+            <span style="display: flex; flex-wrap: wrap; gap: 6px; font-size: 12px; font-weight: 700">
+              <sc-for list="{{r.menus}}" as="m" hint-placeholder-count="3">
+                <span style="padding: 4px 9px; border-radius: 999px; background: {{t.soft}}">{{m}}</span>
+              </sc-for>
+            </span>
+            <span style="flex: 1"></span>
+            <span style="align-self: flex-start; padding: 10px 16px; border-radius: 999px; background: {{t.btn}}; color: {{t.btnText}}; font-weight: 800; font-size: 14px">📋 {{r.cta}}</span>
+          </sc-if>
+          <sc-if value="{{r.noMenu}}" hint-placeholder-val="{{true}}">
+            <span style="flex: 1"></span>
+            <span style="font-size: 14px; font-weight: 700; color: {{t.link}}">Bekijk restaurant →</span>
+          </sc-if>
+        </a>
+      </sc-for>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":true},"$preview":{"width":1280,"height":1180}}'>
+class Component extends DCLogic {
+renderVals() {
+const dark = this.props.dark ?? true;
+const t = dark
+? { bg: '#1F2328', card: '#2A2F35', soft: '#353A41', tile: '#353A41', line: '#3A4048', field: '#4A515A', text: '#F2F3F4', muted: '#B6BCC3', btn: '#F2F3F4', btnText: '#1F2328', link: '#F2C35B', shadow: 'none' }
+: { bg: '#FFFFFF', card: '#FFFFFF', soft: '#F3F1EC', tile: '#FFF6E2', line: '#EEEAE2', field: '#8E877B', text: '#1A1410', muted: '#5C5650', btn: '#F6C057', btnText: '#1F1600', link: '#7A4E00', shadow: '0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.05)' };
+const r = (emoji, name, kind, address, menus, cta) => ({ emoji, name, kind, address, menus: menus || [], hasMenu: !!menus, noMenu: !menus, cta });
+return {
+t,
+chips: ['🍝 Italiaans', '🥩 Grill', '🥘 Mediterraans', '🍜 Indonesisch', '🥡 Chinees', '🍺 Biercafé', '🥂 Frans'],
+restaurants: [
+r('🥂', 'Brasserie Bardot', 'Franse brasserie · Wijnbar · €€', 'Van Coothplein 12, 4811 NE Breda', ['🥪 Lunch', '🍝 Diner', '🍻 Borrel', '⭐ Specialiteiten'], 'Bekijk 4 menukaarten'),
+r('🍽️', 'Restaurant Wolfslaar', 'Modern Europees · €€€', '[adres]', ['🍝 Diner'], 'Bekijk menukaart'),
+r('🍝', 'Al Dente Ristorante', 'Italiaans · Klassiek · €€', 'Nieuwe Ginnekenstraat 20, 4811 NR Breda'),
+r('🥘', 'Andalous', 'Mediterraans · Noord-Afrikaans · €€', 'Boschstraat 53, 4811 GK Breda'),
+r('🍺', 'Beers & Barrels', 'Biercafé · Amerikaans · Burgers · €', 'Ceresstraat 15 A1, 4811 CA Breda'),
+r('🥩', 'Con Fuego', 'Grill · Steakhouse · €€€', 'Grote Markt 24, 4811 XR Breda'),
+r('🍺', 'De Beyerd', 'Biercafé · Nederlands · €', 'Boschstraat 26, 4811 GH Breda'),
+r('🍕', 'Dolce e Salato', 'Italiaans · Pizza & Pasta · €€', 'Akkerstraat 9, 4811 JL Breda'),
+r('🥡', 'Gantau Village', 'Chinees · Kantonees · €', 'Boschstraat 19, 4811 GG Breda')
+]
+};
+}
+}
+</script>
+</body>
+</html>
