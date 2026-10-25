@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import ThemeToggle from '@/src/components/ThemeToggle'
@@ -9,18 +9,25 @@ import Wordmark from '@/src/components/Wordmark'
 import Emoji from '@/src/components/Emoji'
 import useClientNow from '@/src/components/useClientNow'
 import { todayOpening } from '@/src/lib/openingStatus'
+import { selectTonight } from '@/src/lib/publicTonight'
+import { seasonTiles } from '@/src/lib/seasonCalendar'
+import { zonedParts } from '@/src/lib/localTime'
 
 // BE-28 — de frisse, emoji-rijke home (#65, owner decision 2026-10-25).
+// BE-29 (#70) — de browser kiest "Vanavond op de kaart" nu zelf uit een
+// compacte kandidatenlijst (props), met de browserklok en de kalender van
+// Europe/Amsterdam. De server rendert de sectie, de seizoenstegels en alle
+// labels daarom bewust niet: geen "Nu open" en geen daghap in de server-HTML.
 // Referentie: docs/mockups/be-28-fresh-style-v1/home-licht.html en
 // home-antraciet.html (canvas v14). Opbouw: zoekpaneel met "📍 Breda · echte
 // menukaarten", emoji-titel, ronde zoekbalk en maaltijdchips; de tegelrij
-// "Populair in Breda"; "Vanavond op de kaart" met alleen echte gerechten en
-// prijzen uit de bestaande data (props, server-side geselecteerd in
-// src/lib/publicTonight.js); en de regel "⚡ / 💶 / 📵".
+// "Populair in Breda"; de seizoenstegels (alleen als de bestaande zoekopdracht
+// nu resultaten heeft); "Vanavond op de kaart" met alleen echte gerechten en
+// prijzen; en de regel "⚡ / 💶 / 📵".
 //
-// Geen nieuwe zoeklogica: elke chip en tegel linkt naar de bestaande
-// /search-parameters (meal/cuisine) en de zoekbalk naar /search?q=.
-// "🟢 Nu open" komt alleen uit de bestaande openingslogica
+// Geen nieuwe zoeklogica: elke chip, tegel en seizoenstegel linkt naar de
+// bestaande /search-parameters (meal/cuisine/q) en de zoekbalk naar
+// /search?q=. "🟢 Nu open" komt alleen uit de bestaande openingslogica
 // (src/lib/openingStatus.js) met de browserklok — nooit uit een aanname.
 // De emoji's zijn decoratief (aria-hidden via <Emoji/>).
 
@@ -48,12 +55,51 @@ const PROMISES = [
   { glyph: '📵', text: "Geen foto’s, wel info" },
 ]
 
-export default function HomeView({ tonight = [] }) {
+export default function HomeView({ candidates = [] }) {
   const router = useRouter()
   const [query, setQuery] = useState('')
   // Browserklok, net als op de restaurant- en menukaartpagina. Vóór de
-  // eerste meting is `now` null: dan is er geen "Nu open"-label.
+  // eerste meting is `now` null: dan is er geen "Nu open", geen daghap, geen
+  // momentselectie en nog geen seizoenstegel.
   const now = useClientNow()
+  const month = now ? zonedParts(now).month : null
+
+  // BE-29 — de pure selectie draait in de browser. De server gaf alleen de
+  // compacte kandidatenlijst mee, dus de keuze hangt nooit van de
+  // serverklok of van een oude ISR-render af.
+  const selection = useMemo(
+    () => (now ? selectTonight({ candidates, now }) : null),
+    [candidates, now]
+  )
+  const tonight = selection && !selection.hidden ? selection.dishes : []
+
+  // BE-29 — een seizoenstegel is een bestaande zoekopdracht. Alleen een
+  // tegel met echte resultaten verschijnt; de controle gebeurt in de browser
+  // via de bestaande /api/search-route.
+  const [seasonResult, setSeasonResult] = useState({ month: null, tiles: [] })
+  useEffect(() => {
+    if (month === null) return undefined
+    let cancelled = false
+    const tiles = seasonTiles(month)
+    Promise.all(
+      tiles.map(async (tile) => {
+        try {
+          const response = await fetch(`/api/search?q=${encodeURIComponent(tile.query)}&limit=1`)
+          if (!response.ok) return null
+          const data = await response.json()
+          return data && data.total > 0 ? tile : null
+        } catch {
+          return null
+        }
+      })
+    ).then((found) => {
+      if (!cancelled) setSeasonResult({ month, tiles: found.filter(Boolean) })
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [month])
+  const visibleSeasonTiles = seasonResult.month === month ? seasonResult.tiles : []
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -125,35 +171,87 @@ export default function HomeView({ tonight = [] }) {
         </section>
 
 
-        {/* Alleen renderen als er echte gerechten met een echte prijs zijn
-            (src/lib/publicTonight.js). Nooit een verzonnen gerecht of prijs,
-            en geen lege sectie als de data het niet toelaat. */}
+        {/* BE-29 — seizoenstegels verschijnen pas als de browser de maand
+            kent én de bestaande zoekopdracht echte resultaten heeft. */}
+        {visibleSeasonTiles.length > 0 && (
+          <section className="home-section" aria-labelledby="seizoen-title">
+            <h2 className="home-section-title" id="seizoen-title">
+              Nu in het seizoen <Emoji glyph="🌿" />
+            </h2>
+            <div className="home-tile-grid">
+              {visibleSeasonTiles.map((tile) => (
+                <Link
+                  key={tile.id}
+                  href={tile.href}
+                  className="home-tile"
+                  data-season={tile.id}
+                >
+                  <Emoji glyph={tile.emoji} className="home-tile-emoji" />
+                  <span>{tile.label}</span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Alleen renderen als de browser (met zijn eigen klok) drie echte
+            gerechten met een echte prijs vindt (src/lib/publicTonight.js).
+            Nooit een verzonnen gerecht of prijs, en geen lege sectie als de
+            data het niet toelaat. */}
         {tonight.length > 0 && (
-          <section className="home-section" aria-labelledby="vanavond-title">
+          <section
+            className="home-section tonight-section"
+            aria-labelledby="vanavond-title"
+            data-meal={selection.mealType}
+          >
             <div className="home-section-head">
               <h2 className="home-section-title" id="vanavond-title">
-                Vanavond op de kaart <Emoji glyph="🔥" />
+                {selection.title} <Emoji glyph="🔥" />
               </h2>
-              <Link href="/search?meal=diner" className="home-all-link">Alles →</Link>
+              <Link href={`/search?meal=${selection.mealType}`} className="home-all-link">Alles →</Link>
             </div>
             <ul className="tonight-list">
               {tonight.map((dish) => {
                 const isOpen = !!now && !!dish.openingHours && todayOpening(dish.openingHours, now).state === 'open'
                 return (
                   <li key={dish.dishId}>
-                    <Link href={dish.menuLink} className="tonight-card">
+                    <Link href={dish.href} className="tonight-card" data-dish={dish.dishId}>
                       <Emoji glyph={dish.emoji} className="tonight-emoji" />
                       <span className="tonight-main">
                         <span className="tonight-name">{dish.name}</span>
                         <span className="tonight-meta">
                           <span>{dish.restaurantName}</span>
-                          {isOpen && (
-                            <span className="open-label">
-                              <Emoji glyph="🟢" />
-                              Nu open
-                            </span>
-                          )}
                         </span>
+                        {(dish.newOnMenu || dish.seasonal || dish.vegetarian || dish.daily || isOpen) && (
+                          <span className="tonight-tags">
+                            {dish.newOnMenu && (
+                              <span className="tonight-tag tonight-tag--new">
+                                <Emoji glyph="✨" /> Nieuw op de kaart
+                              </span>
+                            )}
+                            {dish.seasonal && (
+                              <span className="tonight-tag tonight-tag--season">
+                                <Emoji glyph="🌿" /> Seizoen
+                              </span>
+                            )}
+                            {dish.vegetarian && (
+                              <span className="tonight-tag tonight-tag--veg">
+                                <Emoji glyph="🌱" /> Vegetarisch
+                              </span>
+                            )}
+                            {dish.daily && (
+                              <span className="tonight-tag tonight-tag--daily">
+                                <Emoji glyph="📅" /> Daghap · {dish.daily.dateLine}
+                              </span>
+                            )}
+                            {isOpen && (
+                              <span className="open-label">
+                                <Emoji glyph="🟢" />
+                                Nu open
+                              </span>
+                            )}
+                          </span>
+                        )}
                       </span>
                       <span className="tonight-price">{dish.priceDisplay}</span>
                     </Link>

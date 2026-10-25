@@ -128,8 +128,7 @@ test('BE-29: de seizoenskaart en de daghap komen alleen uit wat de kaart zelf ze
   const seasonal = buildTonightCandidates(fixtureData(categories, { subtitle: 'Wildkaart', scraped: '2026-10-23' }));
   assert.equal(seasonal.every((candidate) => candidate.seasonal === true), true, 'een Wildkaart is een seizoenskaart');
   const daily = seasonal.find((candidate) => candidate.name === 'Dagschotel');
-  assert.equal(daily.daily.label, 'Daghap');
-  assert.equal(daily.daily.dateLine, 'volgens de kaart van 23 oktober 2026');
+  assert.deepEqual(daily.daily, { sourceDate: '2026-10-23' }, 'alleen de datum gaat mee, geen label in de serverdata');
 
   const ordinary = buildTonightCandidates(fixtureData(categories, { subtitle: 'Dinerkaart', scraped: '2026-10-23' }));
   assert.equal(ordinary.every((candidate) => candidate.seasonal === false), true, 'een gewone dinerkaart is geen seizoenskaart');

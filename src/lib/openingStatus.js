@@ -5,7 +5,7 @@
 // 'use client' views.
 //
 // Same rule as the existing isCurrentlyOpen()/getOpenStatus() helpers in
-// app/restaurants/page.js, src/services/dishSearch.js and
+// app/restaurants/page.js (now a redirect), src/services/dishSearch.js and
 // src/services/restaurantIndex.js — the browser's local time, today's
 // "HH:MM-HH:MM" entry, open from the opening minute up to (not including)
 // the closing minute, no overnight windows. No new time-zone or planning

@@ -12,10 +12,16 @@ readability of an internal screen:
   1280 px) — the before/after measurements of #65 and #68 criterion 6; the
   optional `--root <checkout>` measures another checkout (for example the base
   commit) with exactly the same script;
-- screenshots of home, search with results, all restaurants, `/restaurants`,
-  one restaurant with and one without a menu, one menu, `/claim` and `/nvwa`
-  at 1280/390/320 px, light and dark, plus `/internal/login` and
-  `/internal/coverage` in both themes;
+- screenshots of home, search with results, all restaurants, one restaurant with
+  and without a menu, one menu, `/claim` and `/nvwa` at 1280/390/320 px, light
+  and dark, plus `/internal/login` and `/internal/coverage` in both themes;
+  `/restaurants` is no longer screenshotted: the check asserts its permanent
+  308 to `/alle-restaurants` (with `q`) instead;
+- the BE-29 (#70) evidence: home screenshots at a fixed browser clock on three
+  moments of the day (lunch, borrel, diner) at 1280/390/320 px in light and
+  dark, the real season tiles (only with search results), the selected dishes
+  and labels, the marked dish anchor on the menu, and the check that the
+  server HTML contains no "Nu open" or daghap;
 - live contrast of the new token pairs (including the `/alle-restaurants`
   cards, CTA, chips and count), no horizontal overflow, the phone tab bar only
   at ≤720 px, tap targets ≥ 44 px and the keyboard path from the search field
@@ -379,6 +385,28 @@ each fixture page keeps its own fictional list, so a number is not derived from
 that page here; the real agreement with the pages' own definitions is unit-tested
 in `src/lib/workqueueCounts.test.js`. This is fixture evidence, never real
 acceptance.
+
+## BE-29 (#70) — Vanavond, seizoen, daghap and `/restaurants`
+
+The same public-style script also drives the BE-29 evidence with a fixed
+browser clock (`2026-10-23`, a Friday):
+
+- home at 12:30, 17:00 and 20:00 Europe/Amsterdam, at 1280/390/320 px in light
+  and dark: the lunch and diner sections show three real dishes with a price,
+  one per restaurant; the borrel moment honestly hides the section because the
+  real data has fewer than three borrel restaurants;
+- the October season tiles (mosselen, wild, pompoen) only when the existing
+  search has results; no tile is invented;
+- the menu opened from a home card, with the same dish marked through the
+  `#gerecht-<id>` anchor;
+- `/restaurants` answers 308 to `/alle-restaurants`, and `?q=bardot` is kept.
+
+The fixed clock is a test instrument only (`Date` override before navigation);
+the product code itself always uses the browser clock and
+`Europe/Amsterdam`. Screenshots are `be29-home-*` and `be29-menu-marked-*` in
+`ops/browser/output/be-28/`. This remains developer evidence, not production
+or independent acceptance.
+
 
 ## Limits
 

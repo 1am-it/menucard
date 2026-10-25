@@ -333,7 +333,7 @@ test('Bronwerkvoorraad: BE-23 statuses map to the Kleurtaal v2 roles', () => {
 });
 
 test('open indicators show an icon plus text, never a coloured dot alone', () => {
-  for (const f of ['app/menu/[id]/MenuView.js', 'app/restaurant/[id]/RestaurantDetailView.js', 'app/restaurants/page.js']) {
+  for (const f of ['app/menu/[id]/MenuView.js', 'app/restaurant/[id]/RestaurantDetailView.js']) {
     const src = read(f);
     assert.match(src, /import \{ todayOpening, openingBadge \} from '@\/src\/lib\/openingStatus'/, f);
     assert.match(src, /<span className=\{\`status-badge status-badge--\$\{(todayBadge|openBadge)\.role\}\`\}[^>]*>\s*(?:\{(todayBadge|openBadge)\.role === 'positive' && <Emoji glyph="🟢" \/>\}\s*)?<StatusIcon name=\{(todayBadge|openBadge)\.icon\}[^>]*\/>\s*\{(todayBadge|openBadge)\.text\}/, f);
@@ -365,9 +365,8 @@ test('"Nu open" is the only wording: "Open nu" appears in no rendered UI', () =>
   }
 });
 
-test('the approved "🟢 Nu open" filter tags on /search and /restaurants are kept as they are', () => {
+test('the approved "🟢 Nu open" filter tag on /search is kept as it is', () => {
   assert.match(read('app/search/page.js'), /label: '🟢 Nu open'/);
-  assert.match(read('app/restaurants/page.js'), /label: '🟢 Nu open'/);
 });
 
 test('status icons are decorative inline SVG (aria-hidden, currentColor), no asset', () => {

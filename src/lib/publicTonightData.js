@@ -84,7 +84,10 @@ function buildTonightCandidates({ menus = menusData, restaurants = restaurantsDa
           vegetarian: tags.includes('vegetarisch') || tags.includes('vegan'),
           seasonal: Boolean(seasonalMenu),
           sourceDate,
-          daily,
+          // Alleen de datum gaat mee: het label "Daghap" en de datumregel
+          // worden pas in de browser opgebouwd, zodat er geen daghap in de
+          // server-HTML staat.
+          daily: daily ? { sourceDate: daily.sourceDate } : null,
           emoji: dishEmoji(item.name, category.name),
           menuLink: `/menu/${menuKey}`,
           openingHours: restaurant.openingHours || null,

@@ -21,7 +21,7 @@ test('one shared menu body: the public page and the preview both render dishes t
   assert.match(PUBLIC, /import \{[^}]*\bMenuItem\b[^}]*\bMenuSection\b[^}]*\} from '@\/src\/components\/MenuBody'/);
   assert.doesNotMatch(PUBLIC, /^function MenuItem|className="menu-card/m, 'the public page no longer has its own dish markup');
   assert.match(VIEW, /import \{ StaticMenu, menuTitle \} from '@\/src\/components\/MenuBody'/);
-  assert.match(BODY, /export function StaticMenu[\s\S]*<MenuSection[\s\S]*<MenuItem key=\{j\} item=\{item\} \/>/);
+  assert.match(BODY, /export function StaticMenu[\s\S]*<MenuSection[\s\S]*<MenuItem key=\{j\} item=\{item\}[^>]*\/>/);
   assert.doesNotMatch(VIEW, /className="menu-card|className="td-price/, 'the preview renders no dish markup of its own');
 });
 

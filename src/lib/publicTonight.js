@@ -19,6 +19,7 @@
 
 const { zonedParts, DEFAULT_TIME_ZONE } = require('./localTime');
 const { cuisineFamily } = require('./cuisineStyle');
+const { dutchDateLabel } = require('./dailyDish');
 
 const MAX_DISHES = 3;
 
@@ -224,6 +225,7 @@ function preferInSameBucket(selected, ranked, predicate) {
   // ander gerecht van dezelfde kaart vervangen mag, een extra restaurant niet.
   const choices = ranked.filter((entry) => predicate(entry) && !selected.includes(entry));
   for (const candidate of choices) {
+    const sameBucket = [];
     for (let index = 0; index < selected.length; index += 1) {
       const current = selected[index];
       if (predicate(current)) continue;
@@ -232,10 +234,16 @@ function preferInSameBucket(selected, ranked, predicate) {
         (picked, position) => position !== index && picked.restaurantId === candidate.restaurantId
       );
       if (usedElsewhere) continue;
-      const next = [...selected];
-      next[index] = candidate;
-      return next;
+      sameBucket.push(index);
     }
+    // Behoud een al gekozen seizoensgerecht als de vegetarische voorkeur ook
+    // in een andere plek van dezelfde prijsklasse kan landen.
+    const safeIndex = sameBucket.find((index) => !selected[index].seasonal);
+    const index = safeIndex !== undefined ? safeIndex : sameBucket[0];
+    if (index === undefined) continue;
+    const next = [...selected];
+    next[index] = candidate;
+    return next;
   }
   return selected;
 }
@@ -331,25 +339,31 @@ function selectTonight({ candidates = [], now = new Date(), timeZone = DEFAULT_T
 
   const dishes = [...finalSelection]
     .sort((a, b) => a.priceValue - b.priceValue || a.name.localeCompare(b.name, 'nl'))
-    .map((candidate) => ({
-      dishId: candidate.dishId,
-      name: candidate.name,
-      restaurantId: candidate.restaurantId,
-      restaurantName: candidate.restaurantName,
-      cuisine: candidate.cuisine,
-      category: candidate.category,
-      mealType: candidate.mealType,
-      priceDisplay: candidate.priceDisplay,
-      priceValue: candidate.priceValue,
-      emoji: candidate.emoji || dishEmoji(candidate.name, candidate.category),
-      menuLink: candidate.menuLink,
-      href: buildDishHref(candidate),
-      vegetarian: !!candidate.vegetarian,
-      seasonal: !!candidate.seasonal,
-      newOnMenu: !!candidate.newOnMenu,
-      daily: candidate.daily || null,
-      openingHours: candidate.openingHours || null,
-    }));
+    .map((candidate) => {
+      const dailyDate = candidate.daily && candidate.daily.sourceDate;
+      const dateLabel = dailyDate ? dutchDateLabel(dailyDate) : null;
+      return {
+        dishId: candidate.dishId,
+        name: candidate.name,
+        restaurantId: candidate.restaurantId,
+        restaurantName: candidate.restaurantName,
+        cuisine: candidate.cuisine,
+        category: candidate.category,
+        mealType: candidate.mealType,
+        priceDisplay: candidate.priceDisplay,
+        priceValue: candidate.priceValue,
+        emoji: candidate.emoji || dishEmoji(candidate.name, candidate.category),
+        menuLink: candidate.menuLink,
+        href: buildDishHref(candidate),
+        vegetarian: !!candidate.vegetarian,
+        seasonal: !!candidate.seasonal,
+        newOnMenu: !!candidate.newOnMenu,
+        daily: dailyDate
+          ? { label: 'Daghap', emoji: '📅', sourceDate: dailyDate, dateLabel, dateLine: `volgens de kaart van ${dateLabel}` }
+          : null,
+        openingHours: candidate.openingHours || null,
+      };
+    });
 
   return {
     mealType,

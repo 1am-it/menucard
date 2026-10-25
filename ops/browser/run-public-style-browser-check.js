@@ -234,6 +234,39 @@ async function applyTheme(cdp, theme) {
   await evalJs(cdp, `localStorage.setItem('bredaeats_theme', '${theme}')`);
 }
 
+// BE-29 (#70) — de drie momenten van de dag met een vaste browserklok. De
+// productiecode rekent zelf in Europe/Amsterdam; deze override laat de echte
+// clientselectie op een vast moment draaien zonder de systeemklok te wijzigen.
+const BE29_MOMENTS = [
+  { id: 'lunch', iso: '2026-10-23T10:30:00Z', meal: 'lunch', title: 'Nu op de lunchkaart', expectSection: true },
+  { id: 'borrel', iso: '2026-10-23T15:00:00Z', meal: 'borrel', title: 'Borrel', expectSection: false },
+  { id: 'diner', iso: '2026-10-23T18:00:00Z', meal: 'diner', title: 'Vanavond op de kaart', expectSection: true },
+];
+
+let clockScriptId = null;
+async function setFixedClock(cdp, iso) {
+  if (clockScriptId) {
+    await cdp.send('Page.removeScriptToEvaluateOnNewDocument', { identifier: clockScriptId });
+    clockScriptId = null;
+  }
+  if (!iso) return;
+  const fixed = new Date(iso).getTime();
+  const result = await cdp.send('Page.addScriptToEvaluateOnNewDocument', {
+    source: `(() => {
+      const RealDate = Date;
+      const fixed = ${fixed};
+      class FixedDate extends RealDate {
+        constructor(...args) { if (args.length === 0) super(fixed); else super(...args); }
+        static now() { return fixed; }
+      }
+      FixedDate.parse = RealDate.parse;
+      FixedDate.UTC = RealDate.UTC;
+      window.Date = FixedDate;
+    })();`,
+  });
+  clockScriptId = result.identifier;
+}
+
 async function open(cdp, url, readyExpression) {
   await navigate(cdp, url, readyExpression);
 }
@@ -584,6 +617,131 @@ async function keyboardScenario(cdp) {
 }
 
 
+// ── BE-29 (#70): drie momenten, seizoenstegels, anker en de 308 ───────────
+async function be29Scenario(cdp) {
+  const homeState = {};
+
+  for (const moment of BE29_MOMENTS) {
+    await setFixedClock(cdp, moment.iso);
+    await pageScenario(cdp, {
+      name: `be29-home-${moment.id}`,
+      url: `${APP}/`,
+      ready:
+        `document.readyState === 'complete' && document.querySelector('.home-hero') !== null && document.querySelectorAll('[data-season]').length === 3` +
+        (moment.expectSection ? ` && document.querySelector('.tonight-section') !== null` : ''),
+      widths: [1280, 390, 320],
+    });
+
+    await applyTheme(cdp, 'light');
+    await setViewport(cdp, 1280, 900);
+    await open(cdp, `${APP}/`, `document.readyState === 'complete' && document.querySelector('.home-hero') !== null`);
+    await new Promise((resolve) => setTimeout(resolve, 1200));
+    const state = await evalJs(cdp, `(() => {
+      const section = document.querySelector('.tonight-section');
+      return {
+        meal: section ? section.getAttribute('data-meal') : null,
+        title: section ? section.querySelector('.home-section-title').textContent.trim() : null,
+        cards: [...document.querySelectorAll('.tonight-card')].map((link) => ({
+          name: link.querySelector('.tonight-name') ? link.querySelector('.tonight-name').textContent.trim() : null,
+          restaurant: link.querySelector('.tonight-meta') ? link.querySelector('.tonight-meta').textContent.trim() : null,
+          price: link.querySelector('.tonight-price') ? link.querySelector('.tonight-price').textContent.trim() : null,
+          href: link.getAttribute('href'),
+          labels: [...link.querySelectorAll('.tonight-tag, .open-label')].map((label) => label.textContent.trim()),
+        })),
+        seasons: [...document.querySelectorAll('[data-season]')].map((tile) => tile.getAttribute('data-season')),
+      };
+    })()`);
+    homeState[moment.id] = state;
+
+    check(
+      `BE-29 ${moment.id}: de sectie ${moment.expectSection ? 'staat er met de juiste titel' : 'blijft weg bij minder dan drie gerechten'}`,
+      moment.expectSection
+        ? Boolean(state.meal) && state.title.includes(moment.title) && state.meal === moment.meal
+        : state.meal === null && state.cards.length === 0,
+      JSON.stringify({ meal: state.meal, title: state.title, cards: state.cards.length })
+    );
+
+    if (moment.expectSection) {
+      check(`BE-29 ${moment.id}: precies drie echte gerechten met prijs`, state.cards.length === 3 && state.cards.every((card) => card.price && !/op aanvraag/i.test(card.price)), JSON.stringify(state.cards.map((card) => card.price)));
+      check(
+        `BE-29 ${moment.id}: hooguit één gerecht per restaurant`,
+        new Set(state.cards.map((card) => card.restaurant)).size === state.cards.length,
+        JSON.stringify(state.cards.map((card) => card.restaurant))
+      );
+      check(
+        `BE-29 ${moment.id}: de klik opent de menukaart op het gerecht`,
+        state.cards.every((card) => /\/menu\/[^?]+\?dish=.*#gerecht-/.test(card.href || '')),
+        JSON.stringify(state.cards.map((card) => card.href))
+      );
+    }
+
+    check(
+      `BE-29 ${moment.id}: seizoenstegels alleen met echte zoekresultaten (mosselen, wild, pompoen in oktober)`,
+      state.seasons.length === 3 && ['mosselen', 'wild', 'pompoen'].every((id) => state.seasons.includes(id)),
+      JSON.stringify(state.seasons)
+    );
+  }
+
+  // De server-HTML mag geen moment-, open- of daghapinhoud bevatten: die
+  // bepaalt de browser na het laden.
+  const html = await (await fetch(`${APP}/`)).text();
+  check('BE-29: geen "Nu open" in de server-HTML van de home', !html.includes('Nu open'));
+  check('BE-29: geen daghap in de server-HTML van de home', !html.includes('Daghap') && !html.includes('Dagschotel'));
+  check('BE-29: geen moment-sectie in de server-HTML van de home', !html.includes('tonight-section') && !html.includes('seizoen-title'));
+
+  // Een tik op een gerecht landt op de menukaart, gemarkeerd.
+  const dinerCard = homeState.diner.cards[0];
+  if (!dinerCard || !dinerCard.href) {
+    check('BE-29: er is een dinergerecht om naar de menukaart te volgen', false, 'no diner card');
+    return;
+  }
+  await applyTheme(cdp, 'light');
+  await setViewport(cdp, 390, 820);
+  await open(cdp, `${APP}${dinerCard.href}`, `document.querySelector('.menu-card-highlighted') !== null`);
+  await new Promise((resolve) => setTimeout(resolve, 400));
+  const marked = await evalJs(cdp, `(() => {
+    const el = document.querySelector('.menu-card-highlighted');
+    return {
+      id: el ? el.id : null,
+      hash: decodeURIComponent(location.hash),
+      name: el && el.querySelector('.td-name') ? el.querySelector('.td-name').textContent.trim() : null,
+    };
+  })()`);
+  await shot(cdp, 'be29-menu-marked-light-390.png');
+  check(
+    'BE-29: de menukaart opent op hetzelfde gerecht en markeert het',
+    Boolean(marked.id) && marked.hash === `#${marked.id}` && marked.name === dinerCard.name,
+    JSON.stringify({ marked, expected: dinerCard.name })
+  );
+
+  await applyTheme(cdp, 'dark');
+  await setViewport(cdp, 390, 820);
+  await open(cdp, `${APP}${dinerCard.href}`, `document.querySelector('.menu-card-highlighted') !== null`);
+  await new Promise((resolve) => setTimeout(resolve, 400));
+  await shot(cdp, 'be29-menu-marked-dark-390.png');
+  await applyTheme(cdp, 'light');
+  await setViewport(cdp, 1280, 900);
+  await open(cdp, `${APP}${dinerCard.href}`, `document.querySelector('.menu-card-highlighted') !== null`);
+  await new Promise((resolve) => setTimeout(resolve, 400));
+  await shot(cdp, 'be29-menu-marked-light-1280.png');
+
+  // /restaurants is uitgefaseerd: permanente 308 naar /alle-restaurants,
+  // met behoud van een bestaande zoekterm.
+  const redirect = await fetch(`${APP}/restaurants`, { redirect: 'manual' });
+  check('BE-29: /restaurants geeft een permanente 308', redirect.status === 308, `${redirect.status} ${redirect.headers.get('location') || ''}`);
+  check(
+    'BE-29: de 308 wijst naar /alle-restaurants',
+    (redirect.headers.get('location') || '').endsWith('/alle-restaurants'),
+    redirect.headers.get('location') || 'geen location'
+  );
+  const withQuery = await fetch(`${APP}/restaurants?q=bardot`, { redirect: 'manual' });
+  const location = withQuery.headers.get('location') || '';
+  check('BE-29: de 308 behoudt de zoekterm q=bardot', withQuery.status === 308 && /\/alle-restaurants\?q=bardot$/.test(location), `${withQuery.status} ${location}`);
+
+  await setFixedClock(cdp, null);
+}
+
+
 async function main() {
   const browserPath = findBrowser();
   if (!browserPath) throw new Error('browser_unavailable: set BROWSER_PATH to an installed Edge/Chrome');
@@ -597,6 +755,8 @@ async function main() {
     server = await startProductionServer();
     browser = await startBrowser(browserPath);
     cdp = new CdpClient(browser.target.webSocketDebuggerUrl);
+
+
     await cdp.ready;
     await cdp.send('Page.enable');
     await cdp.send('Runtime.enable');
@@ -614,7 +774,6 @@ async function main() {
       await pageScenario(cdp, { name: 'home', url: `${APP}/`, ready: `document.querySelector('.home-hero') !== null`, widths: [1280, 390, 320] });
       await pageScenario(cdp, { name: 'search-results', url: `${APP}/search?q=pasta`, ready: `document.querySelectorAll('.dish-result-card-row').length > 0`, widths: [1280, 390, 320] });
       await pageScenario(cdp, { name: 'alle-restaurants', url: `${APP}/alle-restaurants`, ready: `document.querySelector('.ar-card') !== null`, widths: [1280, 390, 320] });
-      await pageScenario(cdp, { name: 'restaurants', url: `${APP}/restaurants`, ready: `document.querySelector('.restaurant-card') !== null`, widths: [1280, 390, 320] });
       await pageScenario(cdp, { name: 'restaurant-with-menu', url: `${APP}/restaurant/6`, ready: `document.querySelector('.detail-name') !== null`, widths: [1280, 390, 320] });
       await pageScenario(cdp, { name: 'restaurant-without-menu', url: `${APP}/restaurant/2`, ready: `document.querySelector('.detail-name') !== null`, widths: [1280, 390, 320] });
       await pageScenario(cdp, { name: 'menu', url: `${APP}/menu/6-diner`, ready: `document.querySelector('.td-price') !== null`, widths: [1280, 390, 320] });
@@ -623,6 +782,7 @@ async function main() {
       await searchCardScenario(cdp);
       await alleRestaurantsScenario(cdp);
       await nvwaLayoutScenario(cdp);
+      await be29Scenario(cdp);
       await tapTargetScenario(cdp);
       await keyboardScenario(cdp);
 

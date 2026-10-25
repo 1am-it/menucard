@@ -230,7 +230,9 @@ test('BE-29: een verlopen daghap staat niet meer in Vanavond, een daghap van van
   const extra = candidate({ restaurantId: '4' });
   const selection = selectTonight({ candidates: [expired, today, plain, extra], now: new Date(DINER) });
   assert.equal(selection.dishes.some((dish) => dish.restaurantId === '1'), false);
-  assert.equal(selection.dishes.some((dish) => dish.restaurantId === '2'), true);
+  const todayDish = selection.dishes.find((dish) => dish.restaurantId === '2');
+  assert.equal(todayDish.daily.label, 'Daghap');
+  assert.equal(todayDish.daily.dateLine, 'volgens de kaart van 23 oktober 2026');
 });
 
 test('BE-29: een recent bijgewerkte kaart krijgt het label Nieuw op de kaart', () => {
