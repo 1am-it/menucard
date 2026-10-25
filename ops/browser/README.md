@@ -1,6 +1,6 @@
 # Isolated browser fixture — #59 menu import/review
 
-## BE-28 public style check (#65)
+## BE-28 public style check (#65) and BE-28b (#68)
 
 `run-public-style-browser-check.js` (also `npm run test:browser:public-style`)
 is the browser check for the fresh public style. Unlike the fixture checks
@@ -8,14 +8,22 @@ above it drives the **real production build** (`next start`) with placeholder
 Supabase values, because it only measures public pages plus the token
 readability of an internal screen:
 
-- the initial transfer of `/` (cold cache, dark, 1280 px) — the before/after
-  measurement of #65 criterion 6;
-- screenshots of home, search with results, all restaurants, one restaurant
-  and one menu at 1280/390/320 px, light and dark, plus `/internal/login`
-  and `/internal/coverage` in both themes;
-- live contrast of the new token pairs, no horizontal overflow, the phone tab
-  bar only at ≤720 px, tap targets ≥ 44 px and the keyboard path from the
-  search field to the Zoeken button.
+- the initial transfer of `/` and of `/alle-restaurants` (cold cache, dark,
+  1280 px) — the before/after measurements of #65 and #68 criterion 6; the
+  optional `--root <checkout>` measures another checkout (for example the base
+  commit) with exactly the same script;
+- screenshots of home, search with results, all restaurants, `/restaurants`,
+  one restaurant with and one without a menu, one menu, `/claim` and `/nvwa`
+  at 1280/390/320 px, light and dark, plus `/internal/login` and
+  `/internal/coverage` in both themes;
+- live contrast of the new token pairs (including the `/alle-restaurants`
+  cards, CTA, chips and count), no horizontal overflow, the phone tab bar only
+  at ≤720 px, tap targets ≥ 44 px and the keyboard path from the search field
+  to the Zoeken button;
+- the BE-28b card rules: one whole-card link with no nested action, equal card
+  heights, real menu/cuisine chips, the default "Met menukaart eerst" sort
+  (`?sort=az` as the alternative), the real `25 restaurants · 4 met menukaart`
+  count and the compact menu-less phone row with an arrow.
 
 Build first (`npm run build`), then run it. The evidence lands in
 `ops/browser/evidence/public-style-browser-evidence.json`; screenshots go to

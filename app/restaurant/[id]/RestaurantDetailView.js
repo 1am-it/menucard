@@ -167,7 +167,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
             <div className="dip-cta">
               {menuLinks.length > 0 && (
                 <Link href={`/menu/${menuLinks[0].id}`} className="dip-btn-primary">
-                  Bekijk menukaart
+                  <Emoji glyph="📋" /> Bekijk menukaart
                 </Link>
               )}
               {primaryReservation && (

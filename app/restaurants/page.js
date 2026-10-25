@@ -8,6 +8,7 @@ import restaurantsData from '@/data/restaurants.json'
 import menusData from '@/data/menus.json'
 import Wordmark from '@/src/components/Wordmark'
 import Emoji from '@/src/components/Emoji'
+import { cuisineEmoji } from '@/src/lib/cuisineStyle'
 import StatusIcon from '@/src/components/StatusIcon'
 import useClientNow from '@/src/components/useClientNow'
 import { todayOpening, openingBadge } from '@/src/lib/openingStatus'
@@ -409,7 +410,7 @@ function RestaurantCard({ restaurant, id, lang, selectedMeal, selectedDay, ingre
             </span>
           </div>
         </div>
-        <div className="rc-name">{restaurant.name}</div>
+        <div className="rc-name"><Emoji glyph={cuisineEmoji(restaurant.cuisine)} /> {restaurant.name}</div>
         <div className="rc-cuisine">{restaurant.cuisineLabel || restaurant.cuisine}</div>
       </div>
 
@@ -479,7 +480,7 @@ function RestaurantCard({ restaurant, id, lang, selectedMeal, selectedDay, ingre
                 className="rc-menu-go-btn rc-menu-go-btn--primary"
                 onClick={() => { saveScrollNow(); trackLead(id, restaurant.name, 'menu') }}
               >
-                Bekijk menu →
+                <Emoji glyph="📋" /> Bekijk menu →
               </Link>
             </div>
           ) : allLinks.length === 1 ? (
@@ -493,7 +494,7 @@ function RestaurantCard({ restaurant, id, lang, selectedMeal, selectedDay, ingre
           ) : (
             <Link href={`/restaurant/${id}`} className="rc-menu-btn rc-menu-btn--outline"
               onClick={() => { saveScrollNow(); trackLead(id, restaurant.name, 'menu') }}>
-              {t.viewMenu}
+              <Emoji glyph="📋" /> {t.viewMenu}
             </Link>
           )}
         </div>
@@ -791,7 +792,7 @@ export default function RestaurantsPage() {
       {/* ── Hero / Value prop ── */}
       <section className="hero-section">
         <div className="hero-content">
-          <h1 className="hero-title">{t.headline}</h1>
+          <h1 className="hero-title">{t.headline} <Emoji glyph="🍽️" /></h1>
           <p className="hero-sub">{t.sub}</p>
           <div className="hero-steps">
             <div className="hero-step"><span className="step-num">1</span>{t.step1}</div>

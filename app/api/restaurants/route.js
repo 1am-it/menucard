@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { searchRestaurants } from '@/src/services/restaurantIndex'
+import { encodeJson } from '@/src/lib/httpCompression'
 
 function parseIntOr(value, fallback) {
   const n = parseInt(value, 10)
@@ -27,9 +28,16 @@ export async function GET(request) {
 
   const result = searchRestaurants({ q, cursor, limit })
 
-  return NextResponse.json(result, {
-    headers: {
-      'Cache-Control': 'public, max-age=60, stale-while-revalidate=300',
-    },
-  })
+  // BE-28b (#68) — dezelfde JSON, nu transport-gecomprimeerd wanneer de client
+  // gzip accepteert. Geen wijziging aan velden, route of data; alleen minder
+  // bytes voor de bestaande volledige lijst op /alle-restaurants.
+  const { body, encoding } = encodeJson(result, request.headers.get('accept-encoding'))
+  const headers = {
+    'Cache-Control': 'public, max-age=60, stale-while-revalidate=300',
+    'Content-Type': 'application/json',
+    Vary: 'Accept-Encoding',
+  }
+  if (encoding) headers['Content-Encoding'] = encoding
+
+  return new NextResponse(body, { headers })
 }

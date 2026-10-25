@@ -1,65 +1,124 @@
 {
-  "generatedAt": "2026-10-25T11:49:12.629Z",
+  "generatedAt": "2026-10-25T15:47:18.738Z",
   "label": "before",
   "kind": "developer evidence â€” local production build, no production data or credentials",
-  "app": "http://localhost:3145",
+  "app": "http://localhost:3146",
   "transfer": [
     {
       "label": "before",
       "page": "/",
       "theme": "dark",
       "viewport": "1280x900",
-      "totalBytes": 194580,
-      "totalKb": 190,
-      "documentBytes": 4449,
-      "resourceCount": 16,
+      "totalBytes": 152286,
+      "totalKb": 148.7,
+      "documentBytes": 4433,
+      "resourceCount": 13,
       "byType": {
-        "Document": 4449,
-        "Script": 164608,
-        "Stylesheet": 17659,
+        "Document": 4433,
+        "Script": 122334,
+        "Stylesheet": 20058,
         "Other": 662,
-        "Fetch": 7202
+        "Fetch": 4799
       },
       "biggest": [
         {
-          "url": "/_next/static/chunks/50291a53-e663f037a3178541.js",
+          "url": "/_next/static/chunks/4bd1b696-f785427dddbba9fb.js",
           "type": "Script",
-          "bytes": 54797
+          "bytes": 54796
         },
         {
-          "url": "/_next/static/chunks/9325-32f272fae0591586.js",
+          "url": "/_next/static/chunks/1255-5fe68596fe147850.js",
           "type": "Script",
-          "bytes": 46493
+          "bytes": 46499
         },
         {
-          "url": "/_next/static/chunks/app/restaurants/page-0e3d047fe3e4d32f.js",
-          "type": "Script",
-          "bytes": 40194
-        },
-        {
-          "url": "/_next/static/css/80136d197b52ac1a.css",
+          "url": "/_next/static/css/5bb2e7b10435351b.css",
           "type": "Stylesheet",
-          "bytes": 17659
+          "bytes": 20058
         },
         {
-          "url": "/_next/static/chunks/app/search/page-bfa1b8639bf9f930.js",
+          "url": "/_next/static/chunks/app/search/page-59759771418db1e8.js",
           "type": "Script",
-          "bytes": 6927
+          "bytes": 7191
         },
         {
           "url": "/",
           "type": "Document",
-          "bytes": 4449
+          "bytes": 4433
         },
         {
-          "url": "/_next/static/chunks/6719-a42e7b84d3e349e1.js",
+          "url": "/_next/static/chunks/2619-3c9e02e22d10480a.js",
           "type": "Script",
-          "bytes": 3765
+          "bytes": 3784
         },
         {
-          "url": "/_next/static/chunks/app/alle-restaurants/page-c06ebf76b7079fc6.js",
+          "url": "/_next/static/chunks/app/page-f1ec4978bee18630.js",
           "type": "Script",
-          "bytes": 3298
+          "bytes": 3525
+        },
+        {
+          "url": "/_next/static/chunks/app/alle-restaurants/page-55c1db9135832f1d.js",
+          "type": "Script",
+          "bytes": 3467
+        }
+      ]
+    },
+    {
+      "label": "before",
+      "page": "/alle-restaurants",
+      "theme": "dark",
+      "viewport": "1280x900",
+      "totalBytes": 158166,
+      "totalKb": 154.5,
+      "documentBytes": 3076,
+      "resourceCount": 18,
+      "byType": {
+        "Document": 3076,
+        "Script": 122334,
+        "Stylesheet": 20058,
+        "Fetch": 12036,
+        "Other": 662
+      },
+      "biggest": [
+        {
+          "url": "/_next/static/chunks/4bd1b696-f785427dddbba9fb.js",
+          "type": "Script",
+          "bytes": 54796
+        },
+        {
+          "url": "/_next/static/chunks/1255-5fe68596fe147850.js",
+          "type": "Script",
+          "bytes": 46499
+        },
+        {
+          "url": "/_next/static/css/5bb2e7b10435351b.css",
+          "type": "Stylesheet",
+          "bytes": 20058
+        },
+        {
+          "url": "/_next/static/chunks/app/search/page-59759771418db1e8.js",
+          "type": "Script",
+          "bytes": 7191
+        },
+        {
+          "url": "/api/restaurants?",
+          "type": "Fetch",
+          "bytes": 5001
+        },
+        {
+          "url": "/_next/static/chunks/2619-3c9e02e22d10480a.js",
+          "type": "Script",
+          "bytes": 3784
+        },
+        {
+          "url": "/_next/static/chunks/app/page-f1ec4978bee18630.js",
+          "type": "Script",
+          "bytes": 3525
+        },
+        {
+          "url": "/_next/static/chunks/app/alle-restaurants/page-55c1db9135832f1d.js",
+          "type": "Script",
+          "bytes": 3467
         }
       ]
     }
