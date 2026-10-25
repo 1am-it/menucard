@@ -45,6 +45,10 @@ const FIXTURE_API_ROUTES = [
   // reading. Both are fictional; no provider is contacted.
   { id: 'menu-ai-status', match: 'exact', path: '/api/internal/v1/menu-ai-import', methods: ['GET'] },
   { id: 'menu-ai-read', match: 'exact', path: '/api/internal/v1/menu-ai-import', methods: ['POST'] },
+  // #62: the real counts of the navigation shell. ?countsState=partial answers
+  // with one unavailable number and ?countsState=error refuses the whole call,
+  // so the check can prove that no number (and certainly not 0) is invented.
+  { id: 'workqueue-counts', match: 'exact', path: '/api/internal/v1/workqueue-counts', methods: ['GET'] },
   { id: 'me', match: 'exact', path: '/api/internal/v1/me', methods: ['GET'] },
   { id: 'auth', match: 'prefix', path: '/auth/v1/', methods: ['GET', 'POST'] },
 ];

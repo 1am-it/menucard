@@ -12,6 +12,7 @@
     "test": "node --test \"src/**/*.test.js\" \"app/**/*.test.js\" \"ops/**/*.test.js\"",
     "test:menu-structure": "node --test ops/benchmark/structureCorpus.test.js",
     "test:browser:menu-review": "node ops/browser/run-menu-review-browser-check.js",
+    "test:browser:internal-nav": "node ops/browser/run-internal-nav-browser-check.js",
     "benchmark:menu-structure": "node ops/benchmark/runStructureCorpus.js",
     "worker:analysis": "node ops/scripts/process-analysis-jobs.js"
   },

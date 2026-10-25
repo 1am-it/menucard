@@ -2337,6 +2337,7 @@ mark.search-highlight {
    collapse mechanism and no new dependency. Same shared token system as
    the rest of this file — no colors hardcoded here either. */
 .internal-nav {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -2377,86 +2378,113 @@ mark.search-highlight {
   padding: 6px 4px;
 }
 .internal-nav-signout {
-  margin-left: auto;
   font-size: 13px;
   background: none;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 6px 12px;
+  min-height: 44px;
   cursor: pointer;
   color: var(--text-secondary);
 }
 .internal-nav-signout:hover { border-color: var(--border-hover); color: var(--text-primary); }
-/* The shared Licht/Donker toggle (src/components/ThemeToggle.js) sits next
-   to Sign out on the right; the wrapper takes over Sign out's auto margin
-   so both stay together. Focus ring scoped to the internal nav only — the
-   public header's .theme-btn styling is unchanged. */
-.internal-nav-theme { margin-left: auto; display: flex; }
-.internal-nav-theme + .internal-nav-signout { margin-left: 0; }
-.internal-nav-theme .theme-btn:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
-/* The shared .theme-btn now uses --text-secondary for the inactive option
-   everywhere (Kleurtaal v2); these internal-nav rules are kept as an
-   explicit, scoped guarantee and match the global values. */
-.internal-nav-theme .theme-btn { color: var(--text-secondary); }
-.internal-nav-theme .theme-btn.active { color: var(--accent); }
+/* #62 — Licht/Donker and Sign out live together on the right of the bar; the
+   same two controls are rendered once more at the bottom of the Werkvoorraad
+   menu for the telephone layout (only one copy is ever displayed, so a screen
+   reader and the tab order never see a duplicate). Focus rings stay scoped to
+   the internal nav — the public header's .theme-btn styling is unchanged. */
+.internal-nav-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.internal-nav-actions .theme-btn:focus-visible,
+.internal-nav-workqueue-actions .theme-btn:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+/* The shared .theme-btn uses --text-secondary for the inactive option
+   everywhere (Kleurtaal v2); these internal-nav rules are kept as an explicit,
+   scoped guarantee and match the global values. */
+.internal-nav-actions .theme-btn,
+.internal-nav-workqueue-actions .theme-btn { color: var(--text-secondary); }
+.internal-nav-actions .theme-btn.active,
+.internal-nav-workqueue-actions .theme-btn.active { color: var(--accent); }
 
-/* BE-20 — the compact "Werkvoorraad" disclosure grouping Beheer/Nieuwe
-   aanleveringen/Profielconcepten/Beoordelen. A native <details>/<summary>
-   element (see src/components/InternalNav.js's own header comment for
-   why) — this project's existing `.di-accordion-trigger` focus-visible
-   rule is the only prior site-wide precedent for a real keyboard-focus
-   ring; the rules below extend that same idea to every new interactive
-   element here via the already-defined-but-previously-unused
-   `--border-focus` token, rather than inventing a new color. */
-.internal-nav-workqueue { position: relative; }
-.internal-nav-workqueue-trigger {
-  display: flex;
+/* #62 — "+ Restaurant of menu toevoegen". One real link, at least 44 px high,
+   using the existing accent fill tokens; on a telephone only the "+" stays
+   visible while the accessible name remains the full label. */
+.internal-nav-add {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  gap: 6px;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 12px;
+  border-radius: var(--radius-pill);
+  background: var(--accent-fill);
+  color: var(--on-accent-fill);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.internal-nav-add:hover { filter: brightness(1.06); }
+.internal-nav-add-plus { font-size: 16px; line-height: 1; }
+.internal-nav-add[aria-current="page"] { box-shadow: inset 0 0 0 2px var(--on-accent-fill); }
+
+/* #62 / BE-20 — the "Werkvoorraad" disclosure: a real button (aria-expanded)
+   with a panel underneath. The rules extend this project's existing
+   `.di-accordion-trigger` focus-visible precedent to every new interactive
+   element via the already-defined `--border-focus` token, rather than
+   inventing a new color. */
+
+.internal-nav-workqueue { position: relative; }
+.internal-nav-workqueue-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 12px;
   border-radius: var(--radius-pill);
   border: 1px solid var(--border);
   background: var(--bg-card);
   color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  list-style: none; /* hide the native disclosure triangle */
 }
-.internal-nav-workqueue-trigger::-webkit-details-marker { display: none; }
 .internal-nav-workqueue-trigger svg { width: 16px; height: 16px; }
 .internal-nav-workqueue-trigger:hover { color: var(--text-primary); border-color: var(--border-hover); }
-.internal-nav-workqueue[open] > .internal-nav-workqueue-trigger {
+.internal-nav-workqueue-trigger[aria-expanded="true"] {
   background: var(--accent-faint);
   color: var(--accent);
   border-color: var(--accent-border);
 }
+.internal-nav-workqueue-title { display: inline-flex; align-items: baseline; gap: 5px; }
+.internal-nav-workqueue-title-short { display: none; }
+.internal-nav-workqueue-total { font-variant-numeric: tabular-nums; color: var(--accent); }
 .internal-nav-workqueue-panel {
   position: absolute;
   top: calc(100% + 6px);
-  right: 0;
+  left: 0;
   z-index: 20;
-  min-width: 240px;
-  max-width: min(320px, calc(100vw - 32px));
+  width: min(340px, calc(100vw - 28px));
+  max-height: min(70vh, 560px);
+  overflow-y: auto;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   padding: 6px;
-  display: grid;
-  gap: 2px;
 }
 .internal-nav-workqueue-heading {
+  margin: 6px 8px 4px;
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--text-secondary);
-  padding: 6px 8px 4px;
 }
+.internal-nav-workqueue-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
 .internal-nav-workqueue-item {
   display: flex;
   align-items: flex-start;
   gap: 10px;
+  min-height: 44px;
   padding: 8px;
   border-radius: var(--radius-md);
   text-decoration: none;
@@ -2470,24 +2498,75 @@ mark.search-highlight {
 .internal-nav-workqueue-item-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .internal-nav-workqueue-item-label { font-size: 13px; font-weight: 600; }
 .internal-nav-workqueue-item-subtitle { font-size: 11px; color: var(--text-secondary); }
+/* The real, computed number: the contract's own "geen nep-getal" rule means
+   this element only exists when the count resolved. */
+.internal-nav-workqueue-item-count {
+  margin-left: auto;
+  min-width: 24px;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+.internal-nav-workqueue-separator { border: 0; border-top: 1px solid var(--border); margin: 6px 4px; }
+/* Telephone only: Licht/Donker and Sign out at the bottom of the same menu.
+   On a wider screen this block is display: none, so the bar's own copy is the
+   only one a screen reader or the tab order can reach. */
+.internal-nav-workqueue-actions {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 8px 4px 2px;
+  border-top: 1px solid var(--border);
+}
 
 .internal-nav-home:focus-visible,
 .internal-nav-link:focus-visible,
 .internal-nav-signout:focus-visible,
+.internal-nav-add:focus-visible,
 .internal-nav-workqueue-trigger:focus-visible,
 .internal-nav-workqueue-item:focus-visible {
   outline: 2px solid var(--border-focus);
   outline-offset: 2px;
 }
 
-@media (max-width: 420px) {
-  .internal-nav-signout { margin-left: 0; }
+/* #62 criterion 5 — 640 px (and therefore both 390 and 320 px): the bar keeps
+   the logo, Dekking, "Werk (N)" and a "+" button of at least 44 px; the menu
+   opens full width under the bar with the same rows, the same numbers and
+   Licht/Donker + Sign out at the bottom. */
+@media (max-width: 640px) {
+  .internal-nav { padding: 8px 10px; gap: 6px 8px; }
+  /* The mark alone is the logo on a telephone (the link keeps its full
+     accessible name), so logo, Dekking, Werk (N) and + stay on one row. */
+  .internal-nav-home { padding: 4px 6px; }
+  .internal-nav-home .wordmark-text { display: none; }
+  .internal-nav-workqueue { position: static; }
+  .internal-nav-workqueue-title-full { display: none; }
+  .internal-nav-workqueue-title-short { display: inline; }
   .internal-nav-workqueue-panel {
-    position: static;
-    margin-top: 8px;
-    max-width: 100%;
-    width: 100%;
+    left: 10px;
+    right: 10px;
+    top: 100%;
+    width: auto;
+    max-height: min(70vh, 520px);
   }
+  .internal-nav-add { padding: 0 12px; }
+  .internal-nav-add-text { display: none; }
+  .internal-nav-actions { display: none; }
+  .internal-nav-workqueue-actions { display: flex; }
+}
+
+/* 320 px: keep logo, Dekking, Werk (N) and + on one row. */
+@media (max-width: 360px) {
+  .internal-nav { gap: 4px 6px; padding: 8px; }
+  .internal-nav-home { padding: 2px 4px; }
+  .internal-nav-link { padding: 6px 8px; }
+  .internal-nav-workqueue-trigger { padding: 0 10px; }
+  .internal-nav-workqueue-title { gap: 3px; }
+  .internal-nav-add { padding: 0 10px; }
 }
 
 /* ── BE-11 Fase 1 — light restaurant browse card ──────────────────────────

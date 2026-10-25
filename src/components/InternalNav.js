@@ -1,44 +1,72 @@
 'use client'
 
-// PLATFORM-11 (Phase 2/3), restructured for BE-20 — shared, role-aware
-// internal navigation shell. Mounted individually on /internal and every
-// existing authenticated internal page (never via app/internal/layout.js,
-// which stays a Server Component wrapping /internal/login and the
-// pre-session activation pages too, where no nav should render). Resolves
-// the caller's roles via the existing, unchanged, read-only
-// GET /api/internal/v1/me. This component only decides what to *show*; it
-// grants no access. Every existing route keeps enforcing its own
-// unchanged server-side authorization regardless of what renders here.
+// #62 — shared, role-aware internal navigation shell. Mounted individually on
+// every existing authenticated internal page (never via app/internal/layout.js,
+// which stays a Server Component wrapping /internal/login and the pre-session
+// activation pages too, where no nav should render). Resolves the caller's roles
+// via the existing, unchanged, read-only GET /api/internal/v1/me and the real
+// workqueue numbers via GET /api/internal/v1/workqueue-counts. This component
+// only decides what to *show*; it grants no access. Every existing route keeps
+// enforcing its own unchanged server-side authorization.
 //
-// Accepts the same optional `roles` prop as before: a caller that already
-// resolved its own roles passes them straight through so the page's roles
-// and the nav's roles are never two independent fetches racing each
-// other; every other page omits the prop and this component fetches its
-// own, exactly as before.
+// Issue #62's structure (contract criteria 1, 2 and 5):
+//  - inline: the logo (always the landing rule, through /internal), "Dekking",
+//    "Werkvoorraad (N)", "+ Restaurant of menu toevoegen", Licht/Donker and
+//    Sign out;
+//  - the Werkvoorraad menu is a real button with aria-expanded (never a
+//    hover-only or CSS-only menu), followed by a panel with the counted
+//    "Open werk" rows sorted by real numbers, one separating line, then
+//    Stadsoverzicht and Restaurantgegevens (concept), and on a telephone the
+//    same Licht/Donker and Sign out at the bottom;
+//  - on a narrow screen the bar keeps the logo, Dekking, "Werk (N)" and a "+"
+//    button of at least 44 px; the full labels live in the menu.
 //
-// BE-20's own restructuring: `Dekkingsoverzicht`/`Onboarding Restaurant`
-// stay inline; `Beheer`/`Nieuwe aanleveringen`/`Profielconcepten`/
-// `Beoordelen` move into a compact `Werkvoorraad` disclosure — a native
-// `<details>/<summary>` element, not a custom-built menu widget: this
-// gives click/Enter/Space toggling and basic focus handling for free,
-// with no new dependency, matching this project's own existing
-// `.di-accordion` precedent (app/globals.css). Escape-to-close and
-// click-outside-to-close are the only behavior this file adds on top of
-// the native element. Never hover-only — opening/closing is always an
-// explicit click or key press.
+// Keyboard and screen reader: the trigger is a native button (Enter/Space
+// toggle), Escape closes the panel and returns focus to that button, a click
+// outside closes it, and every item is a normal link with aria-current on the
+// current route. The two action blocks (bar vs. menu bottom) are the same two
+// controls rendered once per breakpoint; the inactive copy is `display: none`,
+// so it is never in the accessibility tree and never a duplicate tab stop.
+//
+// Counts are one request per shell load. If it fails, no number is shown at all
+// — never a fabricated 0 — while the menu itself keeps working.
 
 import { useEffect, useRef, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
-import { resolveVisibleModules, groupModulesByPlacement, isOwnerRole, hasAnyKnownRole } from '@/src/lib/internalNav'
+import {
+  resolveVisibleModules,
+  groupModulesByPlacement,
+  sortOpenWork,
+  resolveOpenWorkTotal,
+  isOwnerRole,
+  hasAnyKnownRole,
+} from '@/src/lib/internalNav'
 // The same shared Licht/Donker toggle every public header already uses
-// (theme-design-tokens.md: "the same component reused in every page's
-// header"; decision 006 + BE-09: an explicit per-browser choice stored as
-// `bredaeats_theme`, dark when nothing is stored, no OS-preference
-// following). Mounted once here so every internal page gets it — no
-// internal-only theme logic.
+// (theme-design-tokens.md; decision 006 + BE-09: an explicit per-browser choice
+// stored as `bredaeats_theme`, dark when nothing is stored, no OS-preference
+// following). Mounted here so every internal page gets it — no internal-only
+// theme logic.
 import ThemeToggle from '@/src/components/ThemeToggle'
 import { WordmarkInline } from '@/src/components/Wordmark'
+
+const COUNT_API = '/api/internal/v1/workqueue-counts'
+const PANEL_ID = 'internal-nav-workqueue-panel'
+
+// The current destination: the page itself or one of its subpages (e.g.
+// Bronnen beoordelen / Batchanalyse), so orientation stays on the parent item
+// (decision 014).
+function isCurrent(pathname, href) {
+  return pathname === href || (typeof pathname === 'string' && pathname.startsWith(`${href}/`))
+}
+
+function IconChevron() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  )
+}
 
 function IconWorkqueue() {
   return (
@@ -50,57 +78,84 @@ function IconWorkqueue() {
   )
 }
 
-/** One icon per workqueue module id — a fixed, closed lookup, never a
- * default/fallback glyph, so a module added later without a matching
- * entry here fails visibly (no icon rendered) rather than showing a
- * misleading placeholder. */
+// One icon per workqueue module id — a fixed, closed lookup, never a
+// default/fallback glyph, so a module added later without a matching entry here
+// fails visibly (no icon rendered) rather than showing a misleading placeholder.
+const iconProps = {
+  viewBox: '0 0 24 24',
+  fill: 'none',
+  stroke: 'currentColor',
+  strokeWidth: 2,
+  strokeLinecap: 'round',
+  strokeLinejoin: 'round',
+  'aria-hidden': 'true',
+  focusable: 'false',
+}
+
 const WORKQUEUE_ICONS = {
-  manage: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
-      <rect x="3" y="3" width="7" height="7" rx="1" />
-      <rect x="14" y="3" width="7" height="7" rx="1" />
-      <rect x="3" y="14" width="7" height="7" rx="1" />
-      <rect x="14" y="14" width="7" height="7" rx="1" />
+  'menu-concepts': (
+    <svg {...iconProps}>
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <path d="M14 2v6h6" />
+      <path d="m9 15 2 2 4-4" />
+    </svg>
+  ),
+  'source-triage': (
+    <svg {...iconProps}>
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
     </svg>
   ),
   'import-inbox': (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+    <svg {...iconProps}>
       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
       <path d="M14 2v6h6" />
     </svg>
   ),
+  moderation: (
+    <svg {...iconProps}>
+      <circle cx="12" cy="12" r="10" />
+      <path d="m9 12 2 2 4-4" />
+    </svg>
+  ),
   'source-workqueue': (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+    <svg {...iconProps}>
       <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
       <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
     </svg>
   ),
   'profile-drafts': (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+    <svg {...iconProps}>
       <path d="M12 20h9" />
       <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
     </svg>
   ),
-  moderation: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
-      <circle cx="12" cy="12" r="10" />
-      <path d="m9 12 2 2 4-4" />
-    </svg>
-  ),
-}
+};
 
-// The current destination: the page itself or one of its subpages (e.g.
-// Bronnen beoordelen / Batchanalyse), so orientation stays on the parent
-// item (decision 014).
-function isCurrent(pathname, href) {
-  return pathname === href || (typeof pathname === 'string' && pathname.startsWith(`${href}/`))
-}
 
 export default function InternalNav({ accessToken, roles: rolesProp }) {
   const pathname = usePathname()
   const router = useRouter()
   const [rolesState, setRolesState] = useState(undefined) // undefined = loading, [] once resolved (possibly empty)
-  const workqueueRef = useRef(null)
+  const [counts, setCounts] = useState(undefined) // undefined = loading, null = failed, object = resolved
+  const [open, setOpen] = useState(false)
+  const triggerRef = useRef(null)
+  const wrapperRef = useRef(null)
+
+  // Which copy of Licht/Donker + Sign out is mounted: the bar's on a wide
+  // screen, the menu's at the bottom on a telephone. Exactly one exists at a
+  // time, so two independent toggles can never disagree after a resize and a
+  // screen reader or the tab order never meets a duplicate. The 640 px CSS rule
+  // only keeps the first paint stable; this listener is not theme logic.
+  const [narrow, setNarrow] = useState(false)
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return undefined
+    const query = window.matchMedia('(max-width: 640px)')
+    const update = () => setNarrow(query.matches)
+    update()
+    query.addEventListener('change', update)
+    return () => query.removeEventListener('change', update)
+  }, [])
 
   useEffect(() => {
     if (rolesProp !== undefined) return // the caller already resolved roles — never fetch a second time
@@ -124,38 +179,62 @@ export default function InternalNav({ accessToken, roles: rolesProp }) {
   }, [accessToken, rolesProp])
 
   const roles = rolesProp !== undefined ? rolesProp : rolesState
+  const modules = roles === undefined ? [] : resolveVisibleModules(roles)
+  const { primary, openWork, secondary } = groupModulesByPlacement(modules)
+  const openWorkRows = sortOpenWork(openWork, counts || null)
+  const total = resolveOpenWorkTotal(openWorkRows)
+  const showOwnerNote = roles !== undefined && isOwnerRole(roles)
+  const noAccess = roles !== undefined && !hasAnyKnownRole(roles)
 
-  // Close the Werkvoorraad panel on Escape (native <details> has no
-  // built-in Escape handling) and on a click outside it — both restore
-  // focus to the trigger itself, never leaving it stranded, per
-  // 014-navigation-and-orientation-standard.md's own item 7. Native
-  // click/Enter/Space toggling on <summary> needs no code here at all.
+  // One request per shell load, only for an account that actually has open
+  // work sections to count. A failure is kept as `null`, never turned into 0.
+  const openWorkCount = openWork.length
   useEffect(() => {
+    if (!accessToken || openWorkCount === 0) return undefined
+    let cancelled = false
+    async function loadCounts() {
+      try {
+        const res = await fetch(COUNT_API, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+          cache: 'no-store',
+        })
+        const data = await res.json().catch(() => ({}))
+        if (cancelled) return
+        setCounts(res.ok && data && data.counts && typeof data.counts === 'object' ? data.counts : null)
+      } catch {
+        if (!cancelled) setCounts(null)
+      }
+    }
+    loadCounts()
+    return () => {
+      cancelled = true
+    }
+  }, [accessToken, openWorkCount])
+
+  // Escape closes the panel and returns focus to its trigger; a click outside
+  // closes it without moving focus. Both listeners only exist while open.
+  useEffect(() => {
+    if (!open) return undefined
     function handleKeyDown(event) {
       if (event.key !== 'Escape') return
-      const details = workqueueRef.current
-      if (!details || !details.open) return
-      details.open = false
-      const summary = details.querySelector('summary')
-      if (summary) summary.focus()
+      setOpen(false)
+      if (triggerRef.current) triggerRef.current.focus()
     }
     function handleClickOutside(event) {
-      const details = workqueueRef.current
-      if (!details || !details.open) return
-      if (!details.contains(event.target)) details.open = false
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) setOpen(false)
     }
     document.addEventListener('keydown', handleKeyDown)
-    document.addEventListener('click', handleClickOutside)
+    document.addEventListener('mousedown', handleClickOutside)
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
-      document.removeEventListener('click', handleClickOutside)
+      document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [])
+  }, [open])
 
-  // A client-side navigation from inside the panel should not leave it
-  // stuck open on the next page.
+  // A client-side navigation from inside the panel should not leave it stuck
+  // open on the next page.
   useEffect(() => {
-    if (workqueueRef.current) workqueueRef.current.open = false
+    setOpen(false)
   }, [pathname])
 
   async function signOut() {
@@ -164,18 +243,12 @@ export default function InternalNav({ accessToken, roles: rolesProp }) {
     router.replace('/internal/login')
   }
 
-  const modules = roles === undefined ? [] : resolveVisibleModules(roles)
-  const { primary, workqueue } = groupModulesByPlacement(modules)
-  const showOwnerNote = roles !== undefined && isOwnerRole(roles)
-  const noAccess = roles !== undefined && !hasAnyKnownRole(roles)
-
   return (
-    <nav aria-label="Internal navigation" className="internal-nav">
+    <nav aria-label="Interne navigatie" className="internal-nav" ref={wrapperRef}>
       <a
         href="/internal"
         className="internal-nav-home"
-        aria-label="Onze Menukaarten, naar het interne overzicht"
-        aria-current={pathname === '/internal' ? 'page' : undefined}
+        aria-label="Onze Menukaarten, naar het meeste open werk of Dekking"
       >
         <WordmarkInline />
       </a>
@@ -191,40 +264,113 @@ export default function InternalNav({ accessToken, roles: rolesProp }) {
         </a>
       ))}
 
-      {workqueue.length > 0 && (
-        <details ref={workqueueRef} className="internal-nav-workqueue">
-          <summary className="internal-nav-workqueue-trigger" aria-label="Werkvoorraad">
-            <IconWorkqueue />
-          </summary>
-          <div className="internal-nav-workqueue-panel" role="menu">
-            <div className="internal-nav-workqueue-heading">Werkvoorraad</div>
-            {workqueue.map((m) => (
-              <a
-                key={m.id}
-                href={m.href}
-                role="menuitem"
-                className="internal-nav-workqueue-item"
-                aria-current={isCurrent(pathname, m.href) ? 'page' : undefined}
-              >
-                <span className="internal-nav-workqueue-item-icon">{WORKQUEUE_ICONS[m.id]}</span>
-                <span className="internal-nav-workqueue-item-text">
-                  <span className="internal-nav-workqueue-item-label">{m.label}</span>
-                  {m.subtitle && <span className="internal-nav-workqueue-item-subtitle">{m.subtitle}</span>}
-                </span>
-              </a>
-            ))}
-          </div>
-        </details>
+      {openWork.length > 0 && (
+        <div className="internal-nav-workqueue">
+          <button
+            ref={triggerRef}
+            type="button"
+            className="internal-nav-workqueue-trigger"
+            aria-expanded={open}
+            aria-controls={PANEL_ID}
+            onClick={() => setOpen((value) => !value)}
+          >
+            <span className="internal-nav-workqueue-title">
+              <span className="internal-nav-workqueue-title-full">Werkvoorraad</span>
+              <span className="internal-nav-workqueue-title-short">Werk</span>
+              {total !== null && <span className="internal-nav-workqueue-total">({total})</span>}
+            </span>
+            <IconChevron />
+          </button>
+
+          {open && (
+            <div className="internal-nav-workqueue-panel" id={PANEL_ID}>
+              <p className="internal-nav-workqueue-heading" id="internal-nav-open-work">
+                Open werk
+              </p>
+              <ul className="internal-nav-workqueue-list" aria-labelledby="internal-nav-open-work">
+                {openWorkRows.map(({ module, count }) => (
+                  <li key={module.id}>
+                    <a
+                      href={module.href}
+                      className="internal-nav-workqueue-item"
+                      aria-current={isCurrent(pathname, module.href) ? 'page' : undefined}
+                    >
+                      <span className="internal-nav-workqueue-item-icon">{WORKQUEUE_ICONS[module.id]}</span>
+                      <span className="internal-nav-workqueue-item-text">
+                        <span className="internal-nav-workqueue-item-label">{module.label}</span>
+                        {module.subtitle && <span className="internal-nav-workqueue-item-subtitle">{module.subtitle}</span>}
+                      </span>
+                      {count !== null && (
+                        <span className="internal-nav-workqueue-item-count" aria-label={`${count} open`}>
+                          {count}
+                        </span>
+                      )}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+
+              {secondary.length > 0 && (
+                <>
+                  <hr className="internal-nav-workqueue-separator" />
+                  <ul className="internal-nav-workqueue-list" aria-label="Stad en restaurantgegevens">
+                    {secondary.map((m) => (
+                      <li key={m.id}>
+                        <a
+                          href={m.href}
+                          className="internal-nav-workqueue-item"
+                          aria-current={isCurrent(pathname, m.href) ? 'page' : undefined}
+                        >
+                          <span className="internal-nav-workqueue-item-icon">{WORKQUEUE_ICONS[m.id]}</span>
+                          <span className="internal-nav-workqueue-item-text">
+                            <span className="internal-nav-workqueue-item-label">{m.label}</span>
+                            {m.subtitle && <span className="internal-nav-workqueue-item-subtitle">{m.subtitle}</span>}
+                          </span>
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+
+              <div className="internal-nav-workqueue-actions">
+                {narrow && (
+                  <>
+                    <ThemeToggle />
+                    <button type="button" onClick={signOut} className="internal-nav-signout">
+                      Sign out
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
       )}
+
+      <a
+        href="/internal/toevoegen"
+        className="internal-nav-add"
+        aria-label="Restaurant of menu toevoegen"
+        aria-current={isCurrent(pathname, '/internal/toevoegen') ? 'page' : undefined}
+      >
+        <span className="internal-nav-add-plus" aria-hidden="true">
+          +
+        </span>
+        <span className="internal-nav-add-text">Restaurant of menu toevoegen</span>
+      </a>
 
       {showOwnerNote && <span className="internal-nav-note">Owner tools — not available yet</span>}
       {noAccess && <span className="internal-nav-note">No internal access for this account</span>}
-      <div className="internal-nav-theme">
-        <ThemeToggle />
-      </div>
-      <button type="button" onClick={signOut} className="internal-nav-signout">
-        Sign out
-      </button>
+
+      {!narrow && (
+        <div className="internal-nav-actions">
+          <ThemeToggle />
+          <button type="button" onClick={signOut} className="internal-nav-signout">
+            Sign out
+          </button>
+        </div>
+      )}
     </nav>
   )
 }

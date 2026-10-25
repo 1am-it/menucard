@@ -1,51 +1,33 @@
 'use client'
 
-// PLATFORM-11 (Phase 2) — the single, role-aware /internal home page every
-// successful internal sign-in now lands on (see app/internal/login/page.js
-// and planning/specs/tickets/platform-11-role-aware-internal-navigation-home.md's
-// "Design decision — login destination and role-based access").
+// #62 — /internal is no longer a tile page ("De tegelpagina 'Beheer' vervalt als
+// bestemming", contract criterion 3). It now sends every signed-in visitor on by
+// the one tested landing rule (resolveLandingHref): the visible open-work
+// section with the most real open work wins, equal counts keep the contract's
+// fixed order, and zero open work lands on Dekking. The login page uses the same
+// rule, and the logo reaches it through this route, so there is exactly one
+// definition.
 //
-// Session-gated only — reaching this page requires nothing beyond a
-// signed-in session, exactly like every other internal page (same
-// getSupabaseBrowser().auth.getSession() check, same redirect to
-// /internal/login otherwise). It never itself decides which
-// `staff_roles` a visitor needs; it resolves the session's actual roles
-// via the new, minimal, read-only GET /api/internal/v1/me (a thin
-// reshaping of authenticateInternalRequest, the same check every other
-// internal route already uses) and shows only the module links those
-// roles already unlock — the union of every role's sections for a
-// multi-role account. An account with no usable role (zero staff_roles
-// rows, or defensively only unrecognized values) sees an explicit "no
-// internal access" status with sign out as its only action — never an
-// automatic redirect into any module. `owner` never gets an invented
-// destination while no owner-gated internal page exists.
+// Roles and access are unchanged: this page decides nothing itself and grants
+// nothing. An account without a usable role keeps the same explicit "no internal
+// access" status with sign out as its only action, and an owner-only account
+// keeps the existing "nothing to open yet" note instead of being redirected into
+// a route that would deny it. Every module route still enforces its own
+// unchanged server-side authorization.
 //
-// This page grants no access itself — every existing module route keeps
-// enforcing its own unchanged server-side role check regardless of what
-// renders here.
+// Only the existing, read-only GET /api/internal/v1/me and
+// GET /api/internal/v1/workqueue-counts are called. A failed counts call never
+// produces an invented destination: the pure rule falls back to Dekking.
 
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
-import InternalNav from '@/src/components/InternalNav'
-import { resolveVisibleModules, isOwnerRole, hasAnyKnownRole } from '@/src/lib/internalNav'
-
-function IconArrowRight() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M5 12h14M13 6l6 6-6 6" />
-    </svg>
-  )
-}
-
-function IconLock() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="5" y="11" width="14" height="10" rx="2" />
-      <path d="M8 11V7a4 4 0 0 1 8 0v4" />
-    </svg>
-  )
-}
+import {
+  resolveVisibleModules,
+  resolveLandingHref,
+  isOwnerRole,
+  hasAnyKnownRole,
+} from '@/src/lib/internalNav'
 
 const SHELL_STYLE = {
   maxWidth: 960,
@@ -60,42 +42,71 @@ const SHELL_STYLE = {
 export default function InternalHomePage() {
   const router = useRouter()
   const [session, setSession] = useState(undefined) // undefined = loading, null = no session
-  const [roles, setRoles] = useState(undefined) // undefined = loading, [] once resolved (possibly empty)
+  const [status, setStatus] = useState('loading') // loading | redirecting | no-access | owner
   const [error, setError] = useState(null)
 
   useEffect(() => {
     const supabase = getSupabaseBrowser()
     supabase.auth.getSession().then(({ data }) => {
-      if (!data.session) {
-        router.replace('/internal/login')
-      } else {
-        setSession(data.session)
-      }
+      if (!data.session) router.replace('/internal/login')
+      else setSession(data.session)
     })
   }, [router])
 
-  const loadRoles = useCallback(async (token) => {
-    setError(null)
-    try {
-      const res = await fetch('/api/internal/v1/me', {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.error || 'Failed to resolve your internal access')
-        setRoles([])
-        return
-      }
-      setRoles(data.roles || [])
-    } catch {
-      setError('Failed to resolve your internal access')
-      setRoles([])
-    }
-  }, [])
-
   useEffect(() => {
-    if (session) loadRoles(session.access_token)
-  }, [session, loadRoles])
+    if (!session) return undefined
+    let cancelled = false
+    const token = session.access_token
+
+    async function resolve() {
+      setError(null)
+      try {
+        const meRes = await fetch('/api/internal/v1/me', {
+          headers: { Authorization: `Bearer ${token}` },
+          cache: 'no-store',
+        })
+        const me = await meRes.json().catch(() => ({}))
+        if (cancelled) return
+        if (!meRes.ok) {
+          setError(me.error || 'Failed to resolve your internal access')
+          return
+        }
+        const roles = Array.isArray(me.roles) ? me.roles : []
+        if (resolveVisibleModules(roles).length === 0) {
+          setStatus(hasAnyKnownRole(roles) && isOwnerRole(roles) ? 'owner' : 'no-access')
+          return
+        }
+
+        let counts = null
+        try {
+          const countsRes = await fetch('/api/internal/v1/workqueue-counts', {
+            headers: { Authorization: `Bearer ${token}` },
+            cache: 'no-store',
+          })
+          const body = await countsRes.json().catch(() => ({}))
+          if (countsRes.ok && body && body.counts && typeof body.counts === 'object') counts = body.counts
+        } catch {
+          counts = null
+        }
+        if (cancelled) return
+
+        const href = resolveLandingHref(roles, counts)
+        if (!href) {
+          setStatus(hasAnyKnownRole(roles) ? 'owner' : 'no-access')
+          return
+        }
+        setStatus('redirecting')
+        router.replace(href)
+      } catch {
+        if (!cancelled) setError('Failed to resolve your internal access')
+      }
+    }
+
+    resolve()
+    return () => {
+      cancelled = true
+    }
+  }, [session, router])
 
   async function signOut() {
     const supabase = getSupabaseBrowser()
@@ -103,37 +114,41 @@ export default function InternalHomePage() {
     router.replace('/internal/login')
   }
 
-  if (session === undefined || roles === undefined) {
-    return <main style={{ ...SHELL_STYLE, color: 'var(--text-secondary)' }}>Loading…</main>
+
+  const signOutButton = (
+    <button
+      type="button"
+      onClick={signOut}
+      style={{
+        padding: '8px 14px',
+        borderRadius: 'var(--radius-md)',
+        border: '1px solid var(--border)',
+        background: 'transparent',
+        color: 'var(--text-primary)',
+        cursor: 'pointer',
+        fontSize: 13,
+      }}
+    >
+      Sign out
+    </button>
+  )
+
+  if (session === undefined || status === 'loading' || status === 'redirecting') {
+    return (
+      <main className="cov-dashboard" style={{ ...SHELL_STYLE, color: 'var(--text-secondary)' }} role="status">
+        Laden…
+      </main>
+    )
   }
 
-  const modules = resolveVisibleModules(roles)
-  const showOwnerSection = isOwnerRole(roles)
-  const noAccess = !hasAnyKnownRole(roles)
-  // No modules and no nav destinations exist for this account, so the
-  // status box below is the page's only navigation-adjacent content —
-  // it carries the page's one sign-out action itself, and the shared nav
-  // (which would otherwise duplicate it) is not rendered alongside it.
-  const showNoAccessStatus = noAccess && !error
-  const roleLabels = [...new Set(roles.map((r) => r.role))]
-  const email = session?.user?.email || null
-
-  return (
-    <main style={SHELL_STYLE}>
-      {!showNoAccessStatus && <InternalNav accessToken={session.access_token} roles={roles} />}
-
-      <div style={{ paddingTop: 28, marginBottom: 24 }}>
-        <h1 style={{ fontSize: 28, margin: '0 0 4px' }}>Beheer</h1>
-        <p style={{ color: 'var(--text-secondary)', fontSize: 13, margin: 0 }}>
-          {email ? `Signed in as ${email}` : 'Signed in'}
-          {roleLabels.length > 0 ? ` · roles: ${roleLabels.join(', ')}` : ''}
-        </p>
-      </div>
-
-      {error && (
+  if (error) {
+    return (
+      <main className="cov-dashboard" style={SHELL_STYLE}>
         <div
+          role="alert"
           style={{
-            padding: 14,
+            marginTop: 20,
+            padding: 18,
             borderRadius: 'var(--radius-lg)',
             border: '1px solid var(--danger-border)',
             background: 'var(--danger-bg)',
@@ -144,100 +159,51 @@ export default function InternalHomePage() {
         >
           {error}
         </div>
-      )}
+        {signOutButton}
+      </main>
+    )
+  }
 
-      {showNoAccessStatus && (
+  if (status === 'owner') {
+    return (
+      <main className="cov-dashboard" style={SHELL_STYLE}>
         <div
-          role="status"
           style={{
-            padding: 20,
+            marginTop: 20,
+            padding: 18,
             borderRadius: 'var(--radius-lg)',
-            border: '1px solid var(--border)',
-            background: 'var(--bg-card)',
+            border: '1px dashed var(--border)',
+            background: 'var(--bg-elevated)',
+            color: 'var(--text-secondary)',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-            <span style={{ width: 18, height: 18, display: 'flex', flexShrink: 0, color: 'var(--text-secondary)', marginTop: 1 }}>
-              <IconLock />
-            </span>
-            <div>
-              <strong style={{ color: 'var(--text-primary)' }}>No internal access for this account.</strong>
-              <p style={{ marginTop: 8, marginBottom: 16, fontSize: 14, color: 'var(--text-secondary)' }}>
-                Your account has no internal role assigned. If you believe this is a mistake, contact an
-                administrator — there is nothing else to do from here.
-              </p>
-              <button
-                type="button"
-                onClick={signOut}
-                style={{
-                  padding: '8px 14px',
-                  borderRadius: 'var(--radius-md)',
-                  border: '1px solid var(--border)',
-                  background: 'transparent',
-                  color: 'var(--text-primary)',
-                  cursor: 'pointer',
-                  fontSize: 13,
-                }}
-              >
-                Sign out
-              </button>
-            </div>
-          </div>
+          <div style={{ fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>Owner tools</div>
+          <p style={{ margin: 0, fontSize: 13 }}>Nothing to open yet — no owner-facing internal page exists.</p>
         </div>
-      )}
+        <div style={{ marginTop: 16 }}>{signOutButton}</div>
+      </main>
+    )
+  }
 
-      {!noAccess && (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-            gap: 14,
-          }}
-        >
-          {modules.map((m) => (
-            <a
-              key={m.id}
-              href={m.href}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 10,
-                padding: 18,
-                borderRadius: 'var(--radius-lg)',
-                border: '1px solid var(--border)',
-                background: 'var(--bg-card)',
-                color: 'var(--text-primary)',
-                textDecoration: 'none',
-                fontWeight: 600,
-                fontSize: 15,
-              }}
-            >
-              {m.label}
-              <span style={{ width: 16, height: 16, display: 'flex', flexShrink: 0, color: 'var(--text-secondary)' }}>
-                <IconArrowRight />
-              </span>
-            </a>
-          ))}
-
-          {showOwnerSection && (
-            <div
-              style={{
-                padding: 18,
-                borderRadius: 'var(--radius-lg)',
-                border: '1px dashed var(--border)',
-                background: 'var(--bg-elevated)',
-                color: 'var(--text-secondary)',
-              }}
-            >
-              <div style={{ fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>Owner tools</div>
-              <p style={{ margin: 0, fontSize: 13 }}>
-                Nothing to open yet — no owner-facing internal page exists.
-              </p>
-            </div>
-          )}
-        </div>
-      )}
+  return (
+    <main className="cov-dashboard" style={SHELL_STYLE}>
+      <div
+        role="status"
+        style={{
+          marginTop: 20,
+          padding: 20,
+          borderRadius: 'var(--radius-lg)',
+          border: '1px solid var(--border)',
+          background: 'var(--bg-card)',
+        }}
+      >
+        <strong style={{ color: 'var(--text-primary)' }}>No internal access for this account.</strong>
+        <p style={{ marginTop: 8, marginBottom: 16, fontSize: 14, color: 'var(--text-secondary)' }}>
+          Your account has no internal role assigned. If you believe this is a mistake, contact an administrator —
+          there is nothing else to do from here.
+        </p>
+        {signOutButton}
+      </div>
     </main>
   )
 }
