@@ -90,14 +90,14 @@ test('Wordmark CSS (E2): tile is the primary-button pair, "onze" quiet, "menukaa
   assert.doesNotMatch(s, /\.logo span \{/, 'the old split-colour .logo span rule must be gone');
 });
 
-test('tokens (E2): dark --wordmark is the primary text colour, light stays #1A1410', () => {
+test('tokens (E2): dark --wordmark is the primary text colour (antraciet #F2F3F4), light stays #1A1410', () => {
   const { dark, lightAttr } = blocks();
-  assert.equal(tokenIn(dark, 'wordmark'), '#FFFFFF');
+  assert.equal(tokenIn(dark, 'wordmark'), '#F2F3F4');
   assert.equal(tokenIn(lightAttr, 'wordmark'), '#1A1410');
 });
 
 const PUBLIC_HEADERS = [
-  'app/page.js',
+  'app/HomeView.js',
   'app/search/page.js',
   'app/alle-restaurants/page.js',
   'app/restaurants/page.js',
@@ -215,14 +215,18 @@ test('status colours stay semantic: open/ok use --status-positive, brand control
   assert.match(s, /\.swq-badge--positive \{ color: var\(--status-positive\);/);
   assert.doesNotMatch(s, /\.tag-vegan[^{]*\{[^}]*--status-positive/, 'dietary labels are neutral, not a success status');
   assert.match(s, /\.hero-search-btn \{[^}]*background: var\(--accent-fill\);[^}]*color: var\(--on-accent-fill\);/);
-  assert.match(s, /\.primary-nav-link\[aria-current="page"\] \{ background: var\(--accent-surface\); color: var\(--accent\);/);
+  // BE-28 (#65): the shared public nav's active tab is the approved
+  // white-on-antraciet pill in dark and white on the soft nav in light, so
+  // its own token pair replaces the earlier soft-accent rule.
+  assert.match(s, /\.primary-nav-link\[aria-current="page"\] \{ background: var\(--nav-active-bg\); color: var\(--nav-active-text\);/);
 });
 
 // Handoff "Oker licht": okergeel als vol vlak alleen voor primaire knop,
 // markeerstreep en actieve tab-onderstreping. Selectietoestanden zijn zacht.
+// BE-28: de publieke header-nav heeft een eigen, goedgekeurd tokenpaar
+// (--nav-active-*), zie de aparte test hieronder.
 const SELECTED_STATE_RULES = [
   '.theme-btn.active',
-  '.primary-nav-link[aria-current="page"]',
   '.meal-btn.active',
   '.lang-btn.active',
   '.mode-btn.active',
@@ -241,6 +245,17 @@ for (const selector of SELECTED_STATE_RULES) {
     assert.doesNotMatch(m[1], /--accent-fill/);
   });
 }
+
+test('BE-28: the public header nav active tab uses the approved white token pair in dark and never the oker fill', () => {
+  const { dark, lightAttr } = blocks();
+  assert.equal(tokenIn(dark, 'nav-active-bg'), '#F2F3F4');
+  assert.equal(tokenIn(dark, 'nav-active-text'), '#1F2328');
+  assert.equal(tokenIn(lightAttr, 'nav-active-bg'), '#FFFFFF');
+  assert.equal(tokenIn(lightAttr, 'nav-active-text'), '#1A1410');
+  const m = css().match(/\.primary-nav-link\[aria-current="page"\] \{([^}]*)\}/);
+  assert.ok(m);
+  assert.doesNotMatch(m[1], /--accent-fill/);
+});
 
 test('legacy reservation button (/restaurants) is outlined, not a filled primary action', () => {
   const m = css().match(/\n\.rc-reserve-btn \{([^}]*)\}/);
@@ -261,11 +276,18 @@ test('restaurant detail hero no longer paints a restaurant-colour gradient', () 
   assert.doesNotMatch(src, /linear-gradient/);
 });
 
-test('homepage: the keyword uses the marker class (no inline green) and meal shortcuts carry no emoji', () => {
-  const src = read('app/page.js');
-  assert.match(src, /<span className="hero-title-mark">eten<\/span>/);
+test('homepage (BE-28): the mockup headline replaces the old marker span; emoji are decorative only', () => {
+  const src = read('app/HomeView.js');
+  const page = read('app/page.js');
+  assert.match(page, /<HomeView tonight=/);
+  assert.match(src, /Waar heb je vanavond zin in\?/);
+  assert.match(src, /import Emoji from '@\/src\/components\/Emoji'/);
   assert.doesNotMatch(src, /var\(--green\)/);
-  assert.doesNotMatch(src, /[\u{1F300}-\u{1FAFF}]/u, 'no emoji in the homepage source');
+  const withoutGlyphSlots = src
+    .replace(/^\s*\/\/.*$/gm, '')
+    .replace(/glyph="[^"]*"/g, '')
+    .replace(/glyph: '[^']*'/g, '');
+  assert.doesNotMatch(withoutGlyphSlots, /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u, 'no bare emoji in the homepage source');
 });
 
 test('reservation button on the menu page is an outlined, visibly external action', () => {

@@ -75,17 +75,23 @@ test('renders real <Link> elements, not <button> or a <div> with a click handler
   assert.doesNotMatch(source, /onClick/);
 });
 
-test('carries no emoji, icon library import, or new dependency', () => {
+test('BE-28: emoji are decorative system characters via the shared <Emoji/>, never an icon library or new dependency', () => {
   const source = readSource();
-  // Broad emoji/pictograph ranges, same check convention used elsewhere in
-  // this project's structural tests for "no icon" navigation requirements.
+  assert.match(source, /import Emoji from '@\/src\/components\/Emoji'/);
   const emojiPattern = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u;
-  assert.doesNotMatch(source, emojiPattern, 'no emoji allowed anywhere in this component');
-  assert.doesNotMatch(source, /react-icons|lucide|heroicons|<svg/i, 'no icon library or inline SVG — text-only per the ticket');
+  // Every emoji is passed to <Emoji glyph="…" />, which renders aria-hidden
+  // (src/components/Emoji.js), so no bare emoji may remain in the markup.
+  const withoutGlyphSlots = source.replace(/glyph="[^"]*"/g, '').replace(/glyph: '[^']*'/g, '');
+  assert.doesNotMatch(withoutGlyphSlots, emojiPattern, 'no bare emoji outside <Emoji glyph="…"/>');
+  assert.doesNotMatch(source, /react-icons|lucide|heroicons|<svg/i, 'no icon library or inline SVG — emoji are plain characters');
   const importLines = source.match(/^import .+$/gm) || [];
   assert.deepEqual(
     importLines.map((l) => l.trim()),
-    ["import Link from 'next/link'", "import { usePathname } from 'next/navigation'"],
-    'no import beyond Link and usePathname — no new dependency'
+    [
+      "import Link from 'next/link'",
+      "import { usePathname } from 'next/navigation'",
+      "import Emoji from '@/src/components/Emoji'",
+    ],
+    'no import beyond Link, usePathname and the shared Emoji — no new dependency'
   );
 });

@@ -1,6 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import Emoji from '@/src/components/Emoji'
 
 // BE-11 — permanent, text-only primary navigation: the two coequal public
 // entry points, `Zoeken` (dish/ingredient/restaurant/buurt/street/address
@@ -30,9 +31,14 @@ import { usePathname } from 'next/navigation'
 // labels only, per the ticket's explicit "Neither carries an icon"
 // decision.
 
+// BE-28 (#65) — dezelfde twee bestemmingen, nu met een decoratief
+// systeem-emoji uit <Emoji/> (aria-hidden). De labels blijven exact
+// "Zoeken" / "Alle restaurants"; het emoji draagt geen betekenis en er is
+// nog steeds geen icoonbibliotheek, afbeelding of nieuwe dependency.
+
 const DESTINATIONS = [
-  { href: '/search', label: 'Zoeken' },
-  { href: '/alle-restaurants', label: 'Alle restaurants' },
+  { href: '/search', label: 'Zoeken', glyph: '🔍' },
+  { href: '/alle-restaurants', label: 'Alle restaurants', glyph: '🍽️' },
 ]
 
 export default function PrimaryNav() {
@@ -47,6 +53,7 @@ export default function PrimaryNav() {
           className="primary-nav-link"
           aria-current={pathname === destination.href ? 'page' : undefined}
         >
+          <Emoji glyph={destination.glyph} />
           {destination.label}
         </Link>
       ))}

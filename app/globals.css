@@ -34,35 +34,66 @@
   --on-accent-fill:        #1F1600;
   --accent-faint:          rgba(242, 195, 91, 0.08);
   --accent-border:         rgba(242, 195, 91, 0.28);
-  --accent-surface:        #2A2109;
-  --accent-surface-strong: #3A2D0C;
+  --accent-surface:        #353A41;
+  --accent-surface-strong: #3A4048;
   --accent-glow:           rgba(242, 195, 91, 0.35);
-  --wordmark:              #FFFFFF;
+  --wordmark:              #F2F3F4;
   --wordmark-icon:         #F2C35B;
   --nav-indicator:         #F2C35B;
   --mark-bg:               #3A2D0C;
   --mark-text:             #F2C35B;
 
+  /* Publieke oppervlakken (BE-28, owner decision 2026-10-25).
+     Donker = antraciet #1F2328 met witte knoppen. De primaire knop, de
+     actieve chip en het actieve menutabblad zijn wit (#F2F3F4 op #1F2328,
+     "Telefoon · knop wit"); prijzen zijn een label met okergele tekst; het
+     logo-tegeltje blijft oker (--accent-fill). Zie
+     docs/guides/design-reference.md "BE-28 — frisse publieke stijl". */
+  --surface-soft:          #353A41;
+  --surface-warm:          #24292F;
+  --card-surface:          var(--bg-card);
+  --card-border-color:     #3A4048;
+  --card-shadow:           none;
+  --panel-shadow:          none;
+  --button-primary-bg:     #F2F3F4;
+  --button-primary-text:   #1F2328;
+  --button-primary-hover:  #FFFFFF;
+  --chip-bg:               #353A41;
+  --chip-text:             #F2F3F4;
+  --chip-active-bg:        #F2F3F4;
+  --chip-active-text:      #1F2328;
+  --price-bg:              #353A41;
+  --price-text:            #F2C35B;
+  --tabbar-bg:             #353A41;
+  --tabbar-text:           #F2F3F4;
+  --tabbar-active-bg:      #F2F3F4;
+  --tabbar-active-text:    #1F2328;
+  --nav-active-bg:         #F2F3F4;
+  --nav-active-text:       #1F2328;
+  --nav-active-shadow:     none;
+
   /* Semantische statusrollen — alleen voor status, altijd icoon + tekst.
      Donker: statuskleur als tekst en 1px rand, vlak = statuskleur op 10%.
-     Minimum gemeten over kaart, verhoogd vlak en zacht accentvlak
-     (src/lib/colourLanguage.test.js). Welke staat welke rol krijgt:
+     BE-28 (#65): op de antraciet ondergrond (#2A2F35 kaart, #353A41 zacht
+     vlak) zijn de kleuren iets opgehelderd zodat tekst op het 10%-vlak
+     overal AA (≥ 4,5:1) haalt; de gemeten minima staan in
+     src/lib/colourLanguage.test.js. Welke staat welke rol krijgt:
      src/lib/statusRoles.js; --status-action is gereserveerd. */
-  --status-blocked:         #FF6B6B;
-  --status-blocked-bg:      rgba(255, 107, 107, 0.10);
-  --status-blocked-border:  #FF6B6B;
-  --status-neutral:         #AAAAAA;
-  --status-neutral-bg:      rgba(170, 170, 170, 0.10);
-  --status-neutral-border:  #AAAAAA;
-  --status-file:            #64B4FF;
-  --status-file-bg:         rgba(100, 180, 255, 0.10);
-  --status-file-border:     #64B4FF;
-  --status-old:             #FF9E6B;
-  --status-old-bg:          rgba(255, 158, 107, 0.10);
-  --status-old-border:      #FF9E6B;
-  --status-positive:        #06C167;
-  --status-positive-bg:     rgba(6, 193, 103, 0.10);
-  --status-positive-border: #06C167;
+  --status-blocked:         #FFA3A3;
+  --status-blocked-bg:      rgba(255, 163, 163, 0.10);
+  --status-blocked-border:  #FFA3A3;
+  --status-neutral:         #C9CED4;
+  --status-neutral-bg:      rgba(201, 206, 212, 0.10);
+  --status-neutral-border:  #C9CED4;
+  --status-file:            #A5D4FF;
+  --status-file-bg:         rgba(165, 212, 255, 0.10);
+  --status-file-border:     #A5D4FF;
+  --status-old:             #FFB48C;
+  --status-old-bg:          rgba(255, 180, 140, 0.10);
+  --status-old-border:      #FFB48C;
+  --status-positive:        #4CE096;
+  --status-positive-bg:     rgba(76, 224, 150, 0.10);
+  --status-positive-border: #4CE096;
   --status-action:          #FFD27A;
   --status-action-bg:       rgba(255, 210, 122, 0.10);
   --status-action-border:   #FFD27A;
@@ -75,28 +106,28 @@
   --green-faint:  var(--status-positive-bg);
   --green-border: var(--status-positive-border);
 
-  /* Surfaces */
-  --bg:              #0a0a0a;
-  --bg-card:         #111111;
-  --bg-elevated:     #181818;
-  --bg-input:        #111111;
-  --bg-hover:        #222222;
-  --bg-hover-accent: #1a170d;
-  --bg-panel:        #0f0f1a;
+  /* Surfaces — antraciet (BE-28): #1F2328 ondergrond, #2A2F35 kaarten. */
+  --bg:              #1F2328;
+  --bg-card:         #2A2F35;
+  --bg-elevated:     #353A41;
+  --bg-input:        #1F2328;
+  --bg-hover:        #353A41;
+  --bg-hover-accent: #3A3F35;
+  --bg-panel:        #2A2F35;
 
   /* Borders */
-  --border:        #1f1f1f;
-  --border-hover:  #333333;
-  --border-strong: #3a3a3a;
-  --input-border:  #6b7280;
+  --border:        #3A4048;
+  --border-hover:  #4A515A;
+  --border-strong: #4A515A;
+  --input-border:  #7C848D;
   --border-focus:  var(--accent);
 
   /* Text. Leesbare tekst (body, labels, hulptekst, status) gebruikt alleen
      --text-primary of --text-secondary. --text-muted, --text-dim en
      --text-faint halen geen AA op elk vlak: alleen voor niet-tekstuele
      decoratie (Kleurtaal v2). */
-  --text-primary:   #ffffff;
-  --text-secondary: #aaaaaa;
+  --text-primary:   #F2F3F4;
+  --text-secondary: #B6BCC3;
   --text-muted:     #666666;
   --text-dim:       #555555;
   --text-faint:     #444444;
@@ -116,7 +147,7 @@
      --status-old (aandacht). Alleen de randen zijn eigen waarden. */
   --danger:               var(--status-blocked);
   --danger-bg:            var(--status-blocked-bg);
-  --danger-border:        rgba(255, 107, 107, 0.20);
+  --danger-border:        rgba(255, 163, 163, 0.20);
   --danger-glow:          rgba(255, 107, 107, 0.6);
   --warning:              var(--status-old);
   --warning-bg:           var(--status-old-bg);
@@ -135,8 +166,8 @@
   --wine:              #a87c4a;
 
   /* Gradients & sticky surfaces */
-  --header-bg: rgba(10, 10, 10, 0.95);
-  --sticky-bg: rgba(10, 10, 10, 0.97);
+  --header-bg: rgba(31, 35, 40, 0.94);
+  --sticky-bg: rgba(31, 35, 40, 0.97);
 
   /* Shadows (tint-only tokens so component-specific shadows can reuse them) */
   --shadow-tint-sm: rgba(0, 0, 0, 0.3);
@@ -147,8 +178,8 @@
   --shadow-lg: 0 8px 32px var(--shadow-tint-lg);
 
   /* Scrollbar / selection / table */
-  --scrollbar-thumb:       #2a2a2a;
-  --scrollbar-thumb-hover: #3a3a3a;
+  --scrollbar-thumb:       #3A4048;
+  --scrollbar-thumb-hover: #4A515A;
   --selection-bg:          rgba(242, 195, 91, 0.30);
   --stripe-alt:            rgba(255, 255, 255, 0.02);
   --row-hover:             rgba(242, 195, 91, 0.04);
@@ -159,6 +190,10 @@
   --radius-lg:    14px;
   --radius-xl:    18px;
   --radius-pill:  100px;
+  /* BE-28 — ronde publieke kaarten en panelen (mockup: kaarten 20px,
+     hero/zoekpaneel 28px). Theme-independent, zoals de andere radii. */
+  --radius-card:  20px;
+  --radius-panel: 28px;
 
   --header-h:     60px;
   --max-w:        1200px;
@@ -185,6 +220,31 @@
     --mark-bg:               #F6C057;
     --mark-text:             inherit;
 
+    /* Publieke oppervlakken (BE-28): wit, zachte vlakken, okergele
+       hoofdknop; kaarten met zachte schaduw in plaats van een rand. */
+    --surface-soft:          #F3F1EC;
+    --surface-warm:          #FFF6E2;
+    --card-surface:          #FFFFFF;
+    --card-border-color:     #EEEAE2;
+    --card-shadow:           0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.05);
+    --panel-shadow:          0 2px 4px rgba(0, 0, 0, 0.03), 0 12px 32px rgba(122, 78, 0, 0.10);
+    --button-primary-bg:     #F6C057;
+    --button-primary-text:   #1F1600;
+    --button-primary-hover:  #E8B648;
+    --chip-bg:               #FFFFFF;
+    --chip-text:             #1A1410;
+    --chip-active-bg:        #1A1410;
+    --chip-active-text:      #FFFFFF;
+    --price-bg:              #1A1410;
+    --price-text:            #FFFFFF;
+    --tabbar-bg:             #1A1410;
+    --tabbar-text:           #FFFFFF;
+    --tabbar-active-bg:      #F6C057;
+    --tabbar-active-text:    #1F1600;
+    --nav-active-bg:         #FFFFFF;
+    --nav-active-text:       #1A1410;
+    --nav-active-shadow:     0 1px 3px rgba(0, 0, 0, 0.12);
+
     /* Statusrollen licht: pil zonder rand, effen vlak; alleen rood, oker
        en grijs (geen blauw of groen). */
     --status-blocked:         #8A1C12;
@@ -207,16 +267,16 @@
     --status-action-border:   transparent;
     --status-radius:          var(--radius-pill);
 
-    --bg:              #FCFAF4;
-    --bg-card:         #FFFDF9;
-    --bg-elevated:     #F5F3EE;
-    --bg-input:        #FFFDF9;
-    --bg-hover:        #eef0f2;
-    --bg-hover-accent: #FDF8EA;
-    --bg-panel:        #faf8ff;
+    --bg:              #FFFFFF;
+    --bg-card:         #FFFFFF;
+    --bg-elevated:     #F6F4EF;
+    --bg-input:        #FFFFFF;
+    --bg-hover:        #F3F1EC;
+    --bg-hover-accent: #FFF6E2;
+    --bg-panel:        #F8F6F1;
 
-    --border:        #EFE8D8;
-    --border-hover:  #c7cbd1;
+    --border:        #EEEAE2;
+    --border-hover:  #D7D2C8;
     --border-strong: #b3b8c0;
     --input-border:  #8E877B;
 
@@ -249,8 +309,8 @@
 
     --wine:              #7a5a35;
 
-    --header-bg: rgba(252, 250, 244, 0.92);
-    --sticky-bg: rgba(252, 250, 244, 0.94);
+    --header-bg: rgba(255, 255, 255, 0.92);
+    --sticky-bg: rgba(255, 255, 255, 0.94);
 
     --shadow-tint-sm: rgba(0, 0, 0, 0.08);
     --shadow-tint-md: rgba(0, 0, 0, 0.10);
@@ -283,6 +343,31 @@
   --mark-bg:               #F6C057;
   --mark-text:             inherit;
 
+  /* Publieke oppervlakken (BE-28): wit, zachte vlakken, okergele
+     hoofdknop; kaarten met zachte schaduw in plaats van een rand. */
+  --surface-soft:          #F3F1EC;
+  --surface-warm:          #FFF6E2;
+  --card-surface:          #FFFFFF;
+  --card-border-color:     #EEEAE2;
+  --card-shadow:           0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.05);
+  --panel-shadow:          0 2px 4px rgba(0, 0, 0, 0.03), 0 12px 32px rgba(122, 78, 0, 0.10);
+  --button-primary-bg:     #F6C057;
+  --button-primary-text:   #1F1600;
+  --button-primary-hover:  #E8B648;
+  --chip-bg:               #FFFFFF;
+  --chip-text:             #1A1410;
+  --chip-active-bg:        #1A1410;
+  --chip-active-text:      #FFFFFF;
+  --price-bg:              #1A1410;
+  --price-text:            #FFFFFF;
+  --tabbar-bg:             #1A1410;
+  --tabbar-text:           #FFFFFF;
+  --tabbar-active-bg:      #F6C057;
+  --tabbar-active-text:    #1F1600;
+  --nav-active-bg:         #FFFFFF;
+  --nav-active-text:       #1A1410;
+  --nav-active-shadow:     0 1px 3px rgba(0, 0, 0, 0.12);
+
   /* Statusrollen licht: pil zonder rand, effen vlak; alleen rood, oker
      en grijs (geen blauw of groen). */
   --status-blocked:         #8A1C12;
@@ -305,16 +390,16 @@
   --status-action-border:   transparent;
   --status-radius:          var(--radius-pill);
 
-  --bg:              #FCFAF4;
-  --bg-card:         #FFFDF9;
-  --bg-elevated:     #F5F3EE;
-  --bg-input:        #FFFDF9;
-  --bg-hover:        #eef0f2;
-  --bg-hover-accent: #FDF8EA;
-  --bg-panel:        #faf8ff;
+  --bg:              #FFFFFF;
+  --bg-card:         #FFFFFF;
+  --bg-elevated:     #F6F4EF;
+  --bg-input:        #FFFFFF;
+  --bg-hover:        #F3F1EC;
+  --bg-hover-accent: #FFF6E2;
+  --bg-panel:        #F8F6F1;
 
-  --border:        #EFE8D8;
-  --border-hover:  #c7cbd1;
+  --border:        #EEEAE2;
+  --border-hover:  #D7D2C8;
   --border-strong: #b3b8c0;
   --input-border:  #8E877B;
 
@@ -347,8 +432,8 @@
 
   --wine:              #7a5a35;
 
-  --header-bg: rgba(252, 250, 244, 0.92);
-  --sticky-bg: rgba(252, 250, 244, 0.94);
+  --header-bg: rgba(255, 255, 255, 0.92);
+  --sticky-bg: rgba(255, 255, 255, 0.94);
 
   --shadow-tint-sm: rgba(0, 0, 0, 0.08);
   --shadow-tint-md: rgba(0, 0, 0, 0.10);
@@ -413,10 +498,10 @@ img { display: block; max-width: 100%; }
    only — this is not a card-style change anywhere else.
    ───────────────────────────────────────────────────────────────────────────── */
 
-.primary-nav { display: flex; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 8px; padding: 2px; gap: 2px; }
-.primary-nav-link { padding: 4px 10px; color: var(--text-secondary); font-size: 12px; font-weight: 600; text-decoration: none; border-radius: 6px; transition: all 0.15s; white-space: nowrap; }
-.primary-nav-link:hover { color: var(--text-primary); }
-.primary-nav-link[aria-current="page"] { background: var(--accent-surface); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.primary-nav { display: flex; background: var(--surface-soft); border: 0; border-radius: var(--radius-pill); padding: 4px; gap: 4px; }
+.primary-nav-link { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 14px; color: var(--text-secondary); font-size: 14px; font-weight: 600; text-decoration: none; border-radius: var(--radius-pill); transition: all 0.15s; white-space: nowrap; }
+.primary-nav-link:hover { color: var(--text-primary); background: var(--bg-hover); }
+.primary-nav-link[aria-current="page"] { background: var(--nav-active-bg); color: var(--nav-active-text); font-weight: 700; box-shadow: var(--nav-active-shadow); }
 .primary-nav-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -3464,3 +3549,528 @@ details.bta-side-card > summary:focus-visible { outline: 2px solid var(--border-
 .bta-ai-title { margin: 0; font-size: 14px; font-weight: 800; color: var(--text-primary); }
 .bta-ai-link { color: var(--text-primary); font-weight: 700; text-decoration: underline; }
 .bta-ai-help .bta-actions { flex-wrap: wrap; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   BE-28 — frisse publieke stijl (#65, owner decision 2026-10-25)
+   Referentie: docs/mockups/be-28-fresh-style-v1/ (canvas v14), zie
+   docs/guides/design-reference.md "BE-28 — frisse publieke stijl".
+   Alleen de publieke oppervlakken: home, zoeken, alle restaurants,
+   restaurants, restaurant- en menukaartpagina, de gedeelde header en het
+   woordmerk. Interne pagina's houden hun eigen opmaak en kleuren automatisch
+   mee via de tokens hierboven. Geen gradient, geen afbeelding, geen font en
+   geen nieuwe dependency; alles via tokens.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Decoratief systeem-emoji (src/components/Emoji.js). Altijd aria-hidden:
+   de betekenis staat in de tekst ernaast. */
+.emoji { font-style: normal; line-height: 1; }
+.item-tag-icon-size { font-size: 12px; }
+
+/* ── Gedeelde header ── */
+header, .site-header { height: auto; min-height: var(--header-h); }
+.header-inner { padding: 10px 24px; gap: 12px 20px; flex-wrap: wrap; }
+.header-right { gap: 8px 12px; flex-wrap: wrap; justify-content: flex-end; }
+.wordmark-mark { width: 32px; height: 32px; }
+@media (max-width: 720px) {
+  .header-inner { padding: 10px 16px; }
+  .wordmark-mark { width: 30px; height: 30px; }
+}
+
+/* ── Home: zoekpaneel ── */
+.home-hero {
+  max-width: var(--max-w);
+  margin: 24px auto 0;
+  padding: clamp(24px, 4vw, 48px);
+  border-radius: var(--radius-panel);
+  background: var(--surface-warm);
+  border: 1px solid var(--card-border-color);
+  box-shadow: var(--panel-shadow);
+}
+.home-eyebrow { margin: 0 0 10px; font-size: 15px; font-weight: 700; color: var(--accent); }
+.home-title {
+  margin: 0;
+  font-size: clamp(30px, 4.6vw, 56px);
+  line-height: 1.03;
+  letter-spacing: -0.035em;
+  font-weight: 800;
+  color: var(--text-primary);
+  max-width: 16ch;
+}
+.home-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+  max-width: 680px;
+  padding: 5px 5px 5px 18px;
+  border-radius: var(--radius-pill);
+  background: var(--card-surface);
+  border: 1px solid var(--card-border-color);
+  box-shadow: var(--panel-shadow);
+}
+.home-search-label { position: absolute; left: -9999px; }
+.home-search-input {
+  flex: 1;
+  min-width: 0;
+  min-height: 48px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 17px;
+  color: var(--text-primary);
+}
+.home-search-input:focus { outline: none; }
+.home-search:focus-within { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+.home-search-btn {
+  min-height: 48px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--button-primary-bg);
+  color: var(--button-primary-text);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.home-search-btn:hover { background: var(--button-primary-hover); }
+
+/* ── Chips (maaltijd, keuken, filters) ── */
+.home-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.chip, .home-chip, .meal-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--chip-bg);
+  color: var(--chip-text);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.chip:hover, .home-chip:hover, .meal-chip:hover { background: var(--bg-hover); }
+.chip[aria-pressed="true"], .meal-chip.active {
+  background: var(--chip-active-bg);
+  color: var(--chip-active-text);
+  font-weight: 700;
+}
+/* ── Home: tegels en "Vanavond op de kaart" ── */
+.home-section { max-width: var(--max-w); margin: 40px auto 0; padding: 0 24px; }
+.home-section-title {
+  margin: 0 0 14px;
+  font-size: clamp(19px, 2.4vw, 24px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+.home-tile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+.home-tile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 64px;
+  padding: 14px 16px;
+  border-radius: var(--radius-card);
+  background: var(--card-surface);
+  border: 1px solid var(--card-border-color);
+  box-shadow: var(--card-shadow);
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.home-tile:hover { border-color: var(--border-hover); background: var(--bg-hover-accent); }
+.home-tile-emoji { font-size: 22px; }
+.home-tile-note { display: block; font-size: 12.5px; font-weight: 500; color: var(--text-secondary); }
+
+.tonight-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.tonight-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 68px;
+  padding: 14px;
+  border-radius: var(--radius-card);
+  background: var(--card-surface);
+  border: 1px solid var(--card-border-color);
+  box-shadow: var(--card-shadow);
+  color: var(--text-primary);
+  text-decoration: none;
+}
+.tonight-card:hover { border-color: var(--border-hover); }
+.tonight-emoji {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: var(--surface-warm);
+  font-size: 22px;
+}
+.tonight-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.tonight-name { font-size: 16px; font-weight: 700; line-height: 1.25; }
+.tonight-meta { font-size: 13px; color: var(--text-secondary); display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; }
+.tonight-price {
+  flex: none;
+  padding: 6px 11px;
+  border-radius: var(--radius-pill);
+  background: var(--price-bg);
+  color: var(--price-text);
+  font-size: 14px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.home-promise {
+  max-width: var(--max-w);
+  margin: 40px auto 0;
+  padding: 0 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.home-browse { max-width: var(--max-w); margin: 24px auto 0; padding: 0 24px; }
+.home-section-head { display: flex; align-items: baseline; gap: 12px; margin: 0 0 14px; }
+.home-section-head .home-section-title { margin: 0; flex: 1; min-width: 0; }
+.home-all-link { font-size: 14px; font-weight: 700; color: var(--accent); text-decoration: none; white-space: nowrap; }
+.home-all-link:hover { color: var(--accent-dim); text-decoration: underline; }
+.home-all-link:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+
+/* ── Labels: prijs, nu open, vegetarisch ── */
+.price-label {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 11px;
+  border-radius: var(--radius-pill);
+  background: var(--price-bg);
+  color: var(--price-text);
+  font-size: 14px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.price-label--soft { background: var(--surface-soft); color: var(--text-secondary); font-weight: 700; }
+.open-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--status-positive-bg);
+  color: var(--status-positive);
+  font-size: 13px;
+  font-weight: 700;
+}
+/* ── Ronde kaarten (licht: zachte schaduw; donker: rand) ── */
+.menu-card, .lrc-card, .restaurant-card, .menu-overview-card, .rc-card, .dish-group-card {
+  background: var(--card-surface);
+  border: 1px solid var(--card-border-color);
+  border-radius: var(--radius-card);
+  box-shadow: var(--card-shadow);
+}
+.menu-card:hover, .lrc-card:hover, .restaurant-card:hover, .menu-overview-card:hover, .rc-card:hover {
+  border-color: var(--border-hover);
+}
+.lrc-primary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--button-primary-bg);
+  color: var(--button-primary-text);
+  font-size: 13.5px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.lrc-primary-btn:hover { background: var(--button-primary-hover); color: var(--button-primary-text); }
+
+/* ── Zoeken: zoekbalk, resultaten als kaarten met de prijs rechts ── */
+.results-section { border-top: 0; padding: 20px 24px 96px; }
+.results-header { margin-bottom: 12px; }
+.results-count { font-size: 14px; font-weight: 600; text-transform: none; letter-spacing: 0; }
+.search-page-hero { padding: 16px 24px 0; }
+.search-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 620px;
+  padding: 4px 4px 4px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--card-surface);
+  border: 1px solid var(--card-border-color);
+  box-shadow: var(--card-shadow);
+}
+.search-field .search-icon { position: static; font-size: 18px; }
+.search-field .search-input {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: 17px;
+}
+.search-field .search-input:focus { outline: none; }
+.search-field:focus-within { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+.search-clear {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--surface-soft);
+  color: var(--text-secondary);
+  font-size: 15px;
+}
+.meal-selector { display: flex; flex-wrap: wrap; gap: 6px; }
+.home-meal-btn, .now-open-btn, .filters-toggle-btn, .day-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--chip-bg);
+  color: var(--chip-text);
+  font-size: 14px;
+  font-weight: 600;
+}
+.home-meal-btn:hover, .now-open-btn:hover, .filters-toggle-btn:hover, .day-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+.home-meal-btn.active, .now-open-btn.active, .filters-toggle-btn.active, .day-btn.active {
+  background: var(--chip-active-bg);
+  color: var(--chip-active-text);
+  border-color: transparent;
+}
+.day-btn { min-width: 44px; justify-content: center; }
+.filters-panel {
+  border-radius: var(--radius-card);
+  background: var(--card-surface);
+  border: 1px solid var(--card-border-color);
+  box-shadow: var(--card-shadow);
+  padding: 16px;
+}
+.filter-tag, .active-filters-bar .filter-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--surface-soft);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Zoekresultaten: één kaart per gerecht, prijs rechts (ook op 320 px). */
+.dish-result-cards { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 8px; }
+.dish-result-card-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 10px 12px;
+  border-radius: var(--radius-card);
+  background: var(--card-surface);
+  border: 1px solid var(--card-border-color);
+  box-shadow: var(--card-shadow);
+}
+.dish-result-card-row .dish-result-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.dish-result-card-row .dish-group-example-link {
+  color: var(--text-primary);
+  font-size: 15.5px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.dish-result-card-row .dish-group-example-link:hover { text-decoration: underline; }
+.dish-result-card-row .dish-result-match-hint { font-size: 12px; }
+.dish-result-emoji {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: var(--surface-warm);
+  font-size: 20px;
+}
+.dish-group-examples { margin: 0 0 8px; }
+.dish-group-more { display: block; padding-top: 4px; font-size: 13px; }
+.list-search-field { max-width: 460px; margin: 0 0 16px; }
+.dish-group-restaurant-name { font-size: 17px; font-weight: 800; }
+.dish-group-menu-title { font-size: 14px; font-weight: 700; }
+
+.diet-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-soft);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* ── Detailpagina's: restaurant en menukaart ── */
+.detail-hero { padding: 24px; }
+.detail-hero-inner {
+  background: var(--card-surface);
+  border: 1px solid var(--card-border-color);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--card-shadow);
+  padding: clamp(20px, 3vw, 32px);
+}
+.detail-name { font-size: clamp(26px, 3.6vw, 40px); font-weight: 800; letter-spacing: -0.02em; }
+.detail-tag, .detail-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-soft);
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  font-weight: 700;
+}
+.detail-menu-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--button-primary-bg);
+  color: var(--button-primary-text);
+  font-size: 14px;
+  font-weight: 800;
+  text-decoration: none;
+}
+.detail-menu-btn:hover { background: var(--button-primary-hover); color: var(--button-primary-text); }
+.detail-menu-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--card-border-color);
+  border-radius: var(--radius-pill);
+  background: var(--card-surface);
+  color: var(--text-primary);
+  font-size: 13.5px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.detail-menu-btn-outline:hover { border-color: var(--border-hover); color: var(--text-primary); }
+
+.hero { padding: 24px; border-bottom: 0; background: transparent; }
+.hero-inner { gap: 20px; }
+.hero-eyebrow { font-size: 13px; letter-spacing: 0.2px; text-transform: none; color: var(--accent); }
+.hero-title { letter-spacing: -0.025em; }
+.restaurant-panel {
+  background: var(--card-surface);
+  border: 1px solid var(--card-border-color);
+  border-radius: var(--radius-card);
+  box-shadow: var(--card-shadow);
+}
+.menu-filter-bar { background: transparent; border-bottom: 0; }
+.mf-search, .mf-btn, .mf-price-slider { border-radius: var(--radius-pill); }
+.menu-filter-inner { gap: 8px; flex-wrap: wrap; }
+.cat-block { margin-bottom: 28px; }
+.cat-title { font-size: clamp(19px, 2.4vw, 24px); font-weight: 800; letter-spacing: -0.02em; }
+.menu-card .card-top { align-items: flex-start; gap: 12px; }
+.td-name { font-size: 16px; font-weight: 700; }
+.td-price {
+  flex: none;
+  padding: 5px 11px;
+  border-radius: var(--radius-pill);
+  background: var(--price-bg);
+  color: var(--price-text);
+  font-size: 14px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.td-price.no-price {
+  background: var(--surface-soft);
+  color: var(--text-secondary);
+  font-style: normal;
+  font-weight: 700;
+}
+
+/* ── Telefoon: zwevende menubalk onderin (390 en 320 px) ── */
+.mobile-tabbar {
+  display: none;
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 120;
+  gap: 6px;
+  padding: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--tabbar-bg);
+  box-shadow: 0 10px 30px var(--shadow-tint-lg);
+}
+.mobile-tab-link {
+  flex: 1;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: var(--radius-pill);
+  color: var(--tabbar-text);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.mobile-tab-link[aria-current="page"] {
+  background: var(--tabbar-active-bg);
+  color: var(--tabbar-active-text);
+  font-weight: 800;
+}
+.mobile-tab-link:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+
+@media (max-width: 720px) {
+  .mobile-tabbar { display: flex; }
+  .page-with-tabbar { padding-bottom: 88px; }
+  .header-right .primary-nav { display: none; }
+  .home-hero { margin: 16px 0 0; border-radius: var(--radius-card); }
+  .home-section, .home-promise, .home-browse { padding: 0 16px; }
+  .home-tile-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  .results-section { padding: 16px 16px 96px; }
+  .search-page-hero { padding: 12px 16px 0; }
+  .detail-hero, .hero { padding: 16px; }
+}
+@media (max-width: 380px) {
+  .tonight-price, .price-label, .td-price { font-size: 13px; padding: 4px 9px; }
+  .tonight-emoji, .dish-result-emoji { width: 36px; height: 36px; font-size: 18px; }
+  .mobile-tab-link { font-size: 14px; }
+}
+
+
+
+

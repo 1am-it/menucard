@@ -62,9 +62,9 @@ function blocks() {
 // ── Globale tokens ────────────────────────────────────────────────────────
 
 const LIGHT = {
-  bg: '#FCFAF4',
-  'bg-card': '#FFFDF9',
-  'bg-elevated': '#F5F3EE',
+  bg: '#FFFFFF',
+  'bg-card': '#FFFFFF',
+  'bg-elevated': '#F6F4EF',
   'text-primary': '#1A1410',
   'text-secondary': '#5C5650',
   'input-border': '#8E877B',
@@ -72,22 +72,60 @@ const LIGHT = {
   'accent-fill': '#F6C057',
   'on-accent-fill': '#1F1600',
   'accent-surface': '#FEF1D5',
-  border: '#EFE8D8',
+  border: '#EEEAE2',
   wordmark: '#1A1410',
   'wordmark-icon': '#B28110',
   'nav-indicator': '#D8BC7A',
+  // BE-28 (#65) — publieke oppervlakken, in beide lichtblokken gelijk.
+  'surface-soft': '#F3F1EC',
+  'surface-warm': '#FFF6E2',
+  'card-surface': '#FFFFFF',
+  'card-border-color': '#EEEAE2',
+  'button-primary-bg': '#F6C057',
+  'button-primary-text': '#1F1600',
+  'chip-bg': '#FFFFFF',
+  'chip-text': '#1A1410',
+  'chip-active-bg': '#1A1410',
+  'chip-active-text': '#FFFFFF',
+  'price-bg': '#1A1410',
+  'price-text': '#FFFFFF',
+  'tabbar-bg': '#1A1410',
+  'tabbar-text': '#FFFFFF',
+  'tabbar-active-bg': '#F6C057',
+  'tabbar-active-text': '#1F1600',
+  'nav-active-bg': '#FFFFFF',
+  'nav-active-text': '#1A1410',
 };
 const DARK = {
-  bg: '#0a0a0a',
-  'bg-card': '#111111',
-  'bg-elevated': '#181818',
-  'text-primary': '#ffffff',
-  'text-secondary': '#aaaaaa',
-  'input-border': '#6b7280',
+  bg: '#1F2328',
+  'bg-card': '#2A2F35',
+  'bg-elevated': '#353A41',
+  'text-primary': '#F2F3F4',
+  'text-secondary': '#B6BCC3',
+  'input-border': '#7C848D',
   accent: '#F2C35B',
   'accent-fill': '#F2C35B',
   'on-accent-fill': '#1F1600',
-  'accent-surface': '#2A2109',
+  'accent-surface': '#353A41',
+  // BE-28 (#65) — antraciet met witte knoppen.
+  'surface-soft': '#353A41',
+  'surface-warm': '#24292F',
+  'card-surface': 'var(--bg-card)',
+  'card-border-color': '#3A4048',
+  'button-primary-bg': '#F2F3F4',
+  'button-primary-text': '#1F2328',
+  'chip-bg': '#353A41',
+  'chip-text': '#F2F3F4',
+  'chip-active-bg': '#F2F3F4',
+  'chip-active-text': '#1F2328',
+  'price-bg': '#353A41',
+  'price-text': '#F2C35B',
+  'tabbar-bg': '#353A41',
+  'tabbar-text': '#F2F3F4',
+  'tabbar-active-bg': '#F2F3F4',
+  'tabbar-active-text': '#1F2328',
+  'nav-active-bg': '#F2F3F4',
+  'nav-active-text': '#1F2328',
 };
 
 test('global tokens: light matches Kleurtaal v2 in both light blocks (kept in sync)', () => {
@@ -118,11 +156,13 @@ test('theme contract unchanged: dark stays the runtime default, explicit Licht/D
 // ── Statusrollen ──────────────────────────────────────────────────────────
 
 const ROLES = {
-  blocked: { light: ['#8A1C12', '#FCE0DA'], dark: '#FF6B6B' },
-  neutral: { light: ['#2A2E36', '#EFEFEF'], dark: '#AAAAAA' },
-  file: { light: ['#5A3A0A', '#FEF0D3'], dark: '#64B4FF' },
-  old: { light: ['#5A3A0A', '#FEF0D3'], dark: '#FF9E6B' },
-  positive: { light: ['#2A2E36', '#EFEFEF'], dark: '#06C167' },
+  // BE-28 (#65) — de donkere statuskleuren zijn op de antraciet vlakken
+  // opgehelderd; de gemeten minima hieronder horen daarbij.
+  blocked: { light: ['#8A1C12', '#FCE0DA'], dark: '#FFA3A3' },
+  neutral: { light: ['#2A2E36', '#EFEFEF'], dark: '#C9CED4' },
+  file: { light: ['#5A3A0A', '#FEF0D3'], dark: '#A5D4FF' },
+  old: { light: ['#5A3A0A', '#FEF0D3'], dark: '#FFB48C' },
+  positive: { light: ['#2A2E36', '#EFEFEF'], dark: '#4CE096' },
   action: { light: ['#5A3A0A', '#FEF1D5'], dark: '#FFD27A' },
 };
 
@@ -161,7 +201,10 @@ test('contrast: light status text on its own fill meets the measured minima', ()
 test('contrast: dark status text on its 10% fill, over card, elevated surface and soft accent', () => {
   const { dark } = blocks();
   const surfaces = ['bg-card', 'bg-elevated', 'accent-surface'].map((n) => tokenIn(dark, n));
-  const min = { blocked: 4.96, neutral: 5.71, file: 6.05, old: 6.43, positive: 5.77, action: 8.70 };
+  // BE-28 (#65): measured minima on the antraciet surfaces (#2A2F35 card,
+  // #353A41 elevated/accent-surface) after the status colours were lifted
+  // for AA on the lighter background.
+  const min = { blocked: 4.93, neutral: 5.41, file: 5.86, old: 5.39, positive: 5.47, action: 6.34 };
   for (const role of Object.keys(ROLES)) {
     const fg = rgb(tokenIn(dark, `status-${role}`));
     const lowest = Math.min(...surfaces.map((s) => contrastRgb(fg, over(tokenIn(dark, `status-${role}-bg`), s))));
@@ -170,21 +213,23 @@ test('contrast: dark status text on its 10% fill, over card, elevated surface an
   }
 });
 
-test('contrast: "Actie nodig" in dark is at least 8,70:1 (documented minimum)', () => {
+test('contrast: "Actie nodig" in dark is at least 6,34:1 (documented minimum, BE-28 antraciet)', () => {
   const { dark } = blocks();
   const fg = rgb(tokenIn(dark, 'status-action'));
-  // #29241C op kaart, #2F2B22 op verhoogd vlak (ontwerpbron); zacht accentvlak is het minimum.
-  assert.deepEqual(over(tokenIn(dark, 'status-action-bg'), tokenIn(dark, 'bg-card')), rgb('#29241C'));
-  assert.deepEqual(over(tokenIn(dark, 'status-action-bg'), tokenIn(dark, 'bg-elevated')), rgb('#2F2B22'));
+  // BE-28 (#65): the 10% fill over the antraciet surfaces; the soft accent
+  // surface (#353A41) is the lowest of the three.
+  assert.deepEqual(over(tokenIn(dark, 'status-action-bg'), tokenIn(dark, 'bg-card')), rgb('#3F3F3C'));
+  assert.deepEqual(over(tokenIn(dark, 'status-action-bg'), tokenIn(dark, 'bg-elevated')), rgb('#494947'));
   const onSoft = contrastRgb(fg, over(tokenIn(dark, 'status-action-bg'), tokenIn(dark, 'accent-surface')));
-  assert.equal(round2(onSoft), 8.7);
+  assert.equal(round2(onSoft), 6.34);
 });
 
 // ── Leesbare tekst en controls ────────────────────────────────────────────
 
-test('contrast: --text-secondary meets AA on every surface it sits on (light >= 6.46, dark >= 6.85)', () => {
+test('contrast: --text-secondary meets AA on every surface it sits on (light >= 6.46, dark >= 5.99)', () => {
   const { dark, lightAttr } = blocks();
-  for (const [b, min] of [[lightAttr, 6.46], [dark, 6.85]]) {
+  // BE-28 (#65): measured on the antraciet surfaces (#353A41 is the lowest).
+  for (const [b, min] of [[lightAttr, 6.46], [dark, 5.99]]) {
     for (const s of ['bg', 'bg-card', 'bg-elevated', 'accent-surface']) {
       const r = contrast(tokenIn(b, 'text-secondary'), tokenIn(b, s));
       assert.ok(round2(r) >= min, `--text-secondary on --${s}: ${r.toFixed(2)}:1`);
@@ -251,14 +296,17 @@ test('information is not success: the import-inbox info banner uses the soft acc
   assert.match(css(), /\.di-banner-info \{ background: var\(--accent-surface\); border: 1px solid var\(--accent\); color: var\(--text-primary\); \}/);
 });
 
-test('dietary labels are neutral outlined tags with a leaf icon, not a success status', () => {
+test('dietary labels are neutral outlined tags with a leaf emoji, not a success status', () => {
   const s = css();
   const m = s.match(/\.tag-vegetarisch,\n\.tag-vegan\s*\{([^}]*)\}/);
   assert.ok(m);
   assert.match(m[1], /color: var\(--text-secondary\)/);
   assert.doesNotMatch(m[1], /status|green/);
   // The public menu body, shared with the internal Publicatievoorbeeld.
-  assert.match(read('src/components/MenuBody.js'), /NEUTRAL_DIET_TAG_KEYS\.has\(t\) && <StatusIcon name="leaf"/);
+  // BE-28 (#65): the leaf is now the system emoji via <Emoji/> (decorative,
+  // aria-hidden); the label text next to it carries the meaning.
+  assert.match(read('src/components/MenuBody.js'), /NEUTRAL_DIET_TAG_KEYS\.has\(t\) && <Emoji glyph="🌱"/);
+  assert.match(read('src/components/MenuBody.js'), /import Emoji from '@\/src\/components\/Emoji'/);
 });
 
 test('coverage dashboard: header tint is neutral and the headline number is primary text', () => {
@@ -288,7 +336,7 @@ test('open indicators show an icon plus text, never a coloured dot alone', () =>
   for (const f of ['app/menu/[id]/MenuView.js', 'app/restaurant/[id]/RestaurantDetailView.js', 'app/restaurants/page.js']) {
     const src = read(f);
     assert.match(src, /import \{ todayOpening, openingBadge \} from '@\/src\/lib\/openingStatus'/, f);
-    assert.match(src, /<span className=\{`status-badge status-badge--\$\{(todayBadge|openBadge)\.role\}`\}[^>]*>\s*<StatusIcon name=\{(todayBadge|openBadge)\.icon\}[^>]*\/>\s*\{(todayBadge|openBadge)\.text\}/, f);
+    assert.match(src, /<span className=\{\`status-badge status-badge--\$\{(todayBadge|openBadge)\.role\}\`\}[^>]*>\s*(?:\{(todayBadge|openBadge)\.role === 'positive' && <Emoji glyph="🟢" \/>\}\s*)?<StatusIcon name=\{(todayBadge|openBadge)\.icon\}[^>]*\/>\s*\{(todayBadge|openBadge)\.text\}/, f);
     assert.doesNotMatch(src, /status-badge--positive/, `${f}: positive only via openingBadge (open at this moment)`);
     assert.doesNotMatch(src, /`Open · \$\{/, `${f}: no "Open · hours" from opening hours alone`);
     assert.doesNotMatch(src, /borderRadius: '50%'[^}]*var\(--/, `${f}: no colour-only dot`);
@@ -355,6 +403,11 @@ const TEXT_COLOUR_TOKENS = new Set([
   'danger',
   'tag-featured', 'tag-info', 'tag-halal', 'tag-gluten', 'allergy', 'allergy-strong', 'wine',
   'bg-card', // only as text on a full --accent fill (.swq-count), never as readable text on a surface
+  // BE-28 (#65) — de publieke oppervlakken hebben hun eigen, gemeten paren:
+  // knop, chip, prijslabel, menubalk en actieve headernav. Elk paar haalt AA
+  // (zie de BE-28-contrasttest in src/lib/publicStyle.test.js).
+  'button-primary-text', 'chip-text', 'chip-active-text', 'price-text',
+  'tabbar-text', 'tabbar-active-text', 'nav-active-text',
 ]);
 
 test('every text colour custom property is a reviewed token (CSS and inline styles)', () => {
@@ -494,9 +547,9 @@ test('moderation: only a domain match is positive; mismatch and existing owner s
   assert.doesNotMatch(src, /status-badge--old/);
 });
 
-test('dark: only approved refinements — the error border keeps its former 20% alpha', () => {
+test('dark: only approved refinements — the error border keeps its 20% alpha', () => {
   const { dark } = blocks();
-  assert.equal(tokenIn(dark, 'danger-border'), 'rgba(255, 107, 107, 0.20)');
+  assert.equal(tokenIn(dark, 'danger-border'), 'rgba(255, 163, 163, 0.20)');
 });
 
 test('dead open-dot and dish-result-status CSS is gone and nothing references it', () => {
