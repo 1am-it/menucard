@@ -17,6 +17,7 @@ const { canonicalizeSourceUrl } = require('./urlIntakes');
 const { hostOf, observeJob } = require('./sourceWorkqueue');
 const { summarizeRecognisedMenu } = require('./menuConcept');
 const { uncertainSections } = require('./menuStructureReview');
+const { storedAdviceView } = require('./menuStructureAdvice');
 const { menusFromUnknownContexts } = require('./pdfMenuContext');
 const { readReceiptProjection, summarizeProductMenu } = require('./menuProductIntegrationV2');
 
@@ -280,7 +281,7 @@ function view(key, extra) {
  *   duplicateOf: 1-based position of the first equal line (duplicate)
  *   formatTime(iso) → display time
  */
-function deriveItemView({ item, job, receipt, restaurants, proposals, duplicateOf, now, formatTime, recordedReviews, structureStoreAvailable }) {
+function deriveItemView({ item, job, receipt, restaurants, proposals, duplicateOf, now, formatTime, recordedReviews, structureStoreAvailable, storedAdvice }) {
   const fmt = typeof formatTime === 'function' ? formatTime : (v) => v;
   // Reviewer-facing analysis notes (redirects, pages read), never claims.
   const notes = job && Array.isArray(job.notes) ? job.notes.filter((n) => typeof n === 'string').slice(0, 10) : [];
@@ -457,6 +458,8 @@ function deriveItemView({ item, job, receipt, restaurants, proposals, duplicateO
         required: structure.sections,
         treated,
         handledCount: structure.sections.filter((section) => handled.has(section.key)).length,
+        // BE-30: het opgeslagen AI-advies hoort bij precies deze bronversie.
+        advice: storedAdviceView(storedAdvice, structure.receiptHash),
       };
       const confirmed = confirmationFor({ job, restaurant, foundUrl: structure.foundUrl, proposals });
       if (confirmed) {

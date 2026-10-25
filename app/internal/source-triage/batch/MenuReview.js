@@ -392,11 +392,16 @@ export function MenuControl({ item }) {
  * still asks one explicit confirmation. Only a complete set can be confirmed —
  * the server re-checks the same paths against the stored receipt.
  */
-export function StructureReview({ idPrefix, review, value, readOnly, onChange, onAcceptAll, bulkLabel }) {
+export function StructureReview({ idPrefix, review, value, readOnly, onChange, onAcceptAll, bulkLabel, advice }) {
   const required = (review && Array.isArray(review.required) && review.required) || []
   if (required.length === 0) return null
   const titleId = `${idPrefix}-structure-title`
   const decisions = (review && Array.isArray(review.treated) && review.treated) || []
+  const adviceByKey = new Map(
+    (Array.isArray(advice) ? advice : [])
+      .filter((entry) => entry && typeof entry.key === 'string')
+      .map((entry) => [entry.key, entry]),
+  )
   const handled = required.filter((section) => {
     const choice = value[section.key]
     if (!choice) return false
@@ -451,6 +456,7 @@ export function StructureReview({ idPrefix, review, value, readOnly, onChange, o
           const treated = decisions.find((decision) => decision.key === section.key) || null
           const items = Array.isArray(section.items) ? section.items : []
           const sourceLink = section.sourceLink && typeof section.sourceLink.url === 'string' ? section.sourceLink : null
+          const adviceEntry = adviceByKey.get(section.key) || null
           return (
             <li key={section.key} className="bta-structure-row">
               <details className="bta-structure-section">
@@ -470,6 +476,18 @@ export function StructureReview({ idPrefix, review, value, readOnly, onChange, o
                   )}
                 </summary>
                 <p className="bta-structure-reason">Twijfel: {section.reason || 'de indeling van dit kopje is niet zeker.'}</p>
+                {adviceEntry && (
+                  <div className="bta-advice">
+                    <p className="bta-advice-title">
+                      <span className="status-badge status-badge--neutral bta-badge bta-inline-badge">
+                        <span>AI-advies</span>
+                      </span>{' '}
+                      {adviceEntry.label || (adviceEntry.decision === 'correct' ? 'Corrigeer de rubriek' : 'Klopt zo')}
+                      <span className="bta-advice-confidence"> · zekerheid {adviceEntry.confidence || 'midden'}</span>
+                    </p>
+                    <p className="bta-advice-quote">Citaat uit de bron: “{adviceEntry.quote}”</p>
+                  </div>
+                )}
                 <p className="bta-source-route">
                   {sourceLink ? (
                     <a className="bta-structure-link" href={sourceLink.url} target="_blank" rel="noopener noreferrer">

@@ -58,7 +58,11 @@ test('page: accessible states — progressbar with text, one polite live region,
 
 test('page: never fetches anything but its own internal API; no AI, OCR or external source', () => {
   const fetches = [...PAGE.matchAll(/fetch\(([^,)]+)/g)].map((m) => m[1].trim());
-  for (const target of fetches) assert.match(target, /^`?\$?\{?API|^API|^`\$\{API\}|^reanalyze \? `\$\{API\}\/reanalyze` : API$/, target);
+  // BE-30 (#72): the advice block uses the existing internal AI-status route
+  // (AI_API) and its own internal advice route; no provider is called here.
+  for (const target of fetches) {
+    assert.match(target, /^`?\$?\{?API|^API|^`\$\{API\}|^reanalyze \? `\$\{API\}\/reanalyze` : API$|^`?\$\{?AI_API/, target);
+  }
   assert.doesNotMatch(PAGE, /openai|anthropic|tesseract|from ['"][^'"]*(ocr|claude)[^'"]*['"]/i);
 });
 
@@ -136,7 +140,41 @@ test('menu review: control view links to the original menu safely; concept is in
 // BE-30 (#72): the reviewer sees the dishes, the reason and the page of the
 // source per uncertain section, and one bulk action that still asks for the
 // human confirmation. Free: no AI, no extra fetch, nothing published.
+test('BE-30 (#72): the AI advice is a suggestion with its quote, one bulk action and one honest fallback', () => {
+  const review = read('app/internal/source-triage/batch/MenuReview.js');
+  const route = read('app/api/internal/v1/batch-analysis/[id]/structure-advice/route.js');
+  const deps = read('src/lib/menuStructureAdviceRouteDeps.js');
+  // Per section: the advice, its confidence and a literal quote.
+  assert.match(review, /AI-advies/);
+  assert.match(review, /zekerheid \{adviceEntry\.confidence/);
+  assert.match(review, /Citaat uit de bron: “\{adviceEntry\.quote\}”/);
+  // The advice is preselected; the human confirms through the existing route.
+  assert.match(PAGE, /setStructure\(applyAdviceChoices\(structureReview\.required, next\.sections\)\)/);
+  assert.match(PAGE, /Neem alle adviezen over/);
+  assert.match(PAGE, /\$\{API\}\/\$\{viewing\.batch\.id\}\/structure-advice/);
+  // Unavailable AI (off, budget, error) is an honest note; the screen works on.
+  assert.match(PAGE, /Je kunt de rubrieken hieronder zelf beoordelen/);
+  assert.match(PAGE, /AI_API/);
+  // The route is POST-only, internal and reuses the existing provider call.
+  assert.match(route, /export async function POST\(request\)/);
+  assert.doesNotMatch(route, /export async function (GET|PUT|PATCH|DELETE)/);
+  assert.match(deps, /authenticate: authenticateInternalRequest/);
+  assert.match(deps, /createAnthropicStructuredCall/);
+  assert.match(deps, /buildAdviceRequest/);
+  assert.match(deps, /readAllAiUsageRows/);
+  // No new AI permission: the same key, flag and monthly counter.
+  assert.match(deps, /env: process\.env/);
+  assert.doesNotMatch(deps, /ANTHROPIC_API_KEY\s*[:=]\s*['"]/);
+  // The advice never confirms, publishes or writes a human decision itself:
+  // the handler has no database at all, only injected readers and a saver.
+  const handlers = read('src/lib/menuStructureAdviceHandlers.js');
+  assert.doesNotMatch(handlers, /\.from\(|\.insert\(|create_source_triage_proposal|decide_source_triage_proposal/);
+  assert.match(handlers, /saveAdvice/);
+});
+
+
 test('BE-30 (#72): structure review shows the dishes, the reason, the source page and one bulk confirmation', () => {
+
   const review = read('app/internal/source-triage/batch/MenuReview.js');
   assert.match(review, /<details className="bta-structure-section">/);
   assert.match(review, /bta-structure-dishes/);

@@ -15,10 +15,16 @@
 
 const { MAX_SOURCE_ROWS, PROVENANCE_KIND } = require('./manualMenuImportUsage');
 const { AI_READ_PROVENANCE_KIND } = require('./menuAiImport');
+const { adviceCostRow, ADVICE_KIND } = require('./menuStructureAdvice');
 
 const CONCEPT_TABLE = 'menu_snapshot_proposals';
 const CONCEPT_COLUMNS = 'id, created_at, captured_content';
 const PROVENANCE_KIND_PATH = 'captured_content->importProvenance->>kind';
+// BE-30 (#72): een AI-advies woont in de bestaande jobrij; dezelfde teller leest
+// hem daar, zodat het maandbudget één geheel blijft.
+const JOB_TABLE = 'restaurant_source_analysis_jobs';
+const ADVICE_COLUMNS = 'id, structure_advice:field_evidence->structureAdvice';
+const ADVICE_KIND_PATH = 'field_evidence->structureAdvice->>kind';
 
 /**
  * Leest de conceptrijen met een handmatige AI-importherkomst, oud naar nieuw.
@@ -75,4 +81,44 @@ async function readDurableAiReadRows(supabase, { since = null, limit = MAX_SOURC
   return { ok: true, rows, limit: effectiveLimit, bounded: rows.length >= effectiveLimit };
 }
 
-module.exports = { CONCEPT_TABLE, CONCEPT_COLUMNS, PROVENANCE_KIND_PATH, readDurableUsageRows, readDurableAiReadRows };
+/**
+ * BE-30 (#72): de duurzame advieskosten, als dezelfde vorm als een AI-leesrij,
+ * zodat `monthlySpendFromRows` ze zonder uitzondering meetelt in het ene
+ * maandbudget. Alleen `select`: geen insert, update of delete.
+ */
+async function readDurableStructureAdviceRows(supabase, { limit = MAX_SOURCE_ROWS } = {}) {
+  if (!supabase || typeof supabase.from !== 'function') return { ok: false, code: 'no_client' };
+  const effectiveLimit = Number.isInteger(limit) && limit > 0 ? limit : MAX_SOURCE_ROWS;
+  const { data, error } = await supabase
+    .from(JOB_TABLE)
+    .select(ADVICE_COLUMNS)
+    .eq(ADVICE_KIND_PATH, ADVICE_KIND)
+    .order('id', { ascending: true })
+    .limit(effectiveLimit);
+  if (error) return { ok: false, code: 'read_failed' };
+  const rows = [];
+  for (const row of Array.isArray(data) ? data : []) {
+    const costRow = adviceCostRow(row && row.structure_advice);
+    if (costRow) rows.push(costRow);
+  }
+  return { ok: true, rows, limit: effectiveLimit, bounded: Array.isArray(data) && data.length >= effectiveLimit };
+}
+
+/**
+ * Beide duurzame AI-kostenbronnen in één lijst: de AI-lezingen (conceptrijen) en
+ * de AI-adviezen (jobrijen). Eén teller, één plafond van 1000 cent per maand.
+ */
+async function readAllAiUsageRows(supabase, options = {}) {
+  const concept = await readDurableAiReadRows(supabase, options);
+  if (!concept.ok) return concept;
+  const advice = await readDurableStructureAdviceRows(supabase, options);
+  if (!advice.ok) return advice;
+  return {
+    ok: true,
+    rows: [...concept.rows, ...advice.rows],
+    limit: concept.limit,
+    bounded: Boolean(concept.bounded || advice.bounded),
+  };
+}
+
+module.exports = { CONCEPT_TABLE, CONCEPT_COLUMNS, PROVENANCE_KIND_PATH, readDurableUsageRows, readDurableAiReadRows, readDurableStructureAdviceRows, readAllAiUsageRows };

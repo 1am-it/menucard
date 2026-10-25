@@ -3164,6 +3164,12 @@ details.bta-side-card > summary:focus-visible { outline: 2px solid var(--border-
 .bta-structure-dishes .bta-dish { min-width: 0; overflow-wrap: anywhere; }
 .bta-structure-bulk { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; min-width: 0; }
 .bta-structure-bulk .bta-muted { flex: 1 1 220px; margin: 0; font-size: 13px; }
+/* BE-30 (#72): het AI-advies is een suggestie met een letterlijk citaat; het
+   gebruikt de neutrale statusrol, nooit een goedkeurings- of foutkleur. */
+.bta-advice { display: grid; gap: 2px; margin: 4px 0; padding: 8px 10px; border: 1px solid var(--status-neutral-border); border-left: 3px solid var(--status-neutral); border-radius: var(--radius-sm); background: var(--status-neutral-bg); min-width: 0; }
+.bta-advice-title { margin: 0; font-size: 13px; font-weight: 700; color: var(--text-primary); overflow-wrap: anywhere; }
+.bta-advice-confidence { font-weight: 500; color: var(--text-secondary); }
+.bta-advice-quote { margin: 0; font-size: 13px; color: var(--text-secondary); overflow-wrap: anywhere; }
 
 /* ── #59 fase 2: handmatige AI-import (drie stappen) ─────────────────────────
    Kleurtaal v2-tokens only; licht/donker via de bestaande tokens. Status is
