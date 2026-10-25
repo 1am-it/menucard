@@ -31,6 +31,27 @@ what a result contains, not what order results come back in.
 | `openStatus`         | `'open' \| 'closed' \| null` | Derivable from `restaurant.openingHours`; `null` only if opening hours are entirely missing for a restaurant (not currently the case for any of the 25). |
 | `menuLink`           | string                   | Route to the full menu, e.g. `/menu/{restaurantId}-{mealType}`. |
 
+### Grouped mode (`group=restaurant`): example dish objects
+
+Every menu subgroup in `restaurantGroups[].menus[]` carries up to three
+`examples`. Each example is a small, public dish object — not the full shape
+above, and never an internal field:
+
+| Field | Type | Meaning |
+|---|---|---|
+| `dishId` | string | Same id as the ungrouped result; used to build the exact BE-12 deep link. |
+| `name` | string | Dish name. |
+| `category` | string | Category name, used only to disambiguate same-named dishes. |
+| `weakMatch` | boolean | `true` only when the query matched an internal, non-public field; the UI then shows the honest "Gevonden in aanvullende menudetails" hint. |
+| `priceDisplay` | string | **BE-28 (#65):** the dish's own real price, exactly as the ungrouped shape returns it, so the public result card can show the price on the right. Never computed or invented here. |
+| `priceOnRequest` | boolean | **BE-28 (#65):** the same flag as above; `true` means "op aanvraag" and never a price. |
+| `priceIsFrom` | boolean | **BE-28 (#65):** render as "vanaf" when true. |
+
+`priceValue` and every other internal field stay out of the example object
+(`src/services/dishSearch.test.js` pins the exact key set). This is an
+additive change to the existing response; no route, dataset or ranking
+changed.
+
 ## Known limitations carried over from BE-02a
 
 - **`allergens` ambiguity is not resolved.** 233 of 367 items (63%) have

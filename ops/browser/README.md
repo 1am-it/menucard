@@ -1,5 +1,27 @@
 # Isolated browser fixture — #59 menu import/review
 
+## BE-28 public style check (#65)
+
+`run-public-style-browser-check.js` (also `npm run test:browser:public-style`)
+is the browser check for the fresh public style. Unlike the fixture checks
+above it drives the **real production build** (`next start`) with placeholder
+Supabase values, because it only measures public pages plus the token
+readability of an internal screen:
+
+- the initial transfer of `/` (cold cache, dark, 1280 px) — the before/after
+  measurement of #65 criterion 6;
+- screenshots of home, search with results, all restaurants, one restaurant
+  and one menu at 1280/390/320 px, light and dark, plus `/internal/login`
+  and `/internal/coverage` in both themes;
+- live contrast of the new token pairs, no horizontal overflow, the phone tab
+  bar only at ≤720 px, tap targets ≥ 44 px and the keyboard path from the
+  search field to the Zoeken button.
+
+Build first (`npm run build`), then run it. The evidence lands in
+`ops/browser/evidence/public-style-browser-evidence.json`; screenshots go to
+the git-ignored `ops/browser/output/be-28/`. It is developer evidence on a
+local machine, not production or independent acceptance.
+
 This directory holds the reproducible **fixture-only** browser check for the
 existing batch import and menu-review UI, and for the existing concept list and
 detail pages. It is not live integration, staging, authenticated or production

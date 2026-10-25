@@ -1,0 +1,1129 @@
+{
+  "generatedAt": "2026-10-25T12:15:47.792Z",
+  "label": "after",
+  "kind": "developer evidence â€” local production build, no production data or credentials",
+  "app": "http://localhost:3144",
+  "transfer": [
+    {
+      "label": "after",
+      "page": "/",
+      "theme": "dark",
+      "viewport": "1280x900",
+      "totalBytes": 152292,
+      "totalKb": 148.7,
+      "documentBytes": 4438,
+      "resourceCount": 13,
+      "byType": {
+        "Document": 4438,
+        "Script": 122334,
+        "Stylesheet": 20058,
+        "Other": 662,
+        "Fetch": 4800
+      },
+      "biggest": [
+        {
+          "url": "/_next/static/chunks/4bd1b696-f785427dddbba9fb.js",
+          "type": "Script",
+          "bytes": 54796
+        },
+        {
+          "url": "/_next/static/chunks/1255-5fe68596fe147850.js",
+          "type": "Script",
+          "bytes": 46499
+        },
+        {
+          "url": "/_next/static/css/5bb2e7b10435351b.css",
+          "type": "Stylesheet",
+          "bytes": 20058
+        },
+        {
+          "url": "/_next/static/chunks/app/search/page-59759771418db1e8.js",
+          "type": "Script",
+          "bytes": 7191
+        },
+        {
+          "url": "/",
+          "type": "Document",
+          "bytes": 4438
+        },
+        {
+          "url": "/_next/static/chunks/2619-3c9e02e22d10480a.js",
+          "type": "Script",
+          "bytes": 3784
+        },
+        {
+          "url": "/_next/static/chunks/app/page-f1ec4978bee18630.js",
+          "type": "Script",
+          "bytes": 3525
+        },
+        {
+          "url": "/_next/static/chunks/app/alle-restaurants/page-55c1db9135832f1d.js",
+          "type": "Script",
+          "bytes": 3467
+        }
+      ]
+    }
+  ],
+  "contrast": {
+    "light": {
+      "theme": "light",
+      "bodyBackground": "rgb(255, 255, 255)",
+      "results": [
+        {
+          "label": "body text",
+          "fg": "#1A1410",
+          "bg": "#FFFFFF",
+          "ratio": 18.24
+        },
+        {
+          "label": "secondary text",
+          "fg": "#5C5650",
+          "bg": "#FFFFFF",
+          "ratio": 7.24
+        },
+        {
+          "label": "price label",
+          "fg": "#FFFFFF",
+          "bg": "#1A1410",
+          "ratio": 18.24
+        },
+        {
+          "label": "primary button",
+          "fg": "#1F1600",
+          "bg": "#F6C057",
+          "ratio": 10.74
+        },
+        {
+          "label": "chip",
+          "fg": "#1A1410",
+          "bg": "#FFFFFF",
+          "ratio": 18.24
+        },
+        {
+          "label": "tab bar link",
+          "fg": "#FFFFFF",
+          "bg": "#1A1410",
+          "ratio": 18.24
+        },
+        {
+          "label": "search field border",
+          "fg": "#8E877B",
+          "bg": "#FFFFFF",
+          "ratio": 3.56
+        }
+      ]
+    },
+    "dark": {
+      "theme": "dark",
+      "bodyBackground": "rgb(31, 35, 40)",
+      "results": [
+        {
+          "label": "body text",
+          "fg": "#F2F3F4",
+          "bg": "#1F2328",
+          "ratio": 14.22
+        },
+        {
+          "label": "secondary text",
+          "fg": "#B6BCC3",
+          "bg": "#2A2F35",
+          "ratio": 7.05
+        },
+        {
+          "label": "price label",
+          "fg": "#F2C35B",
+          "bg": "#353A41",
+          "ratio": 6.95
+        },
+        {
+          "label": "primary button",
+          "fg": "#1F2328",
+          "bg": "#F2F3F4",
+          "ratio": 14.22
+        },
+        {
+          "label": "chip",
+          "fg": "#F2F3F4",
+          "bg": "#353A41",
+          "ratio": 10.31
+        },
+        {
+          "label": "tab bar link",
+          "fg": "#F2F3F4",
+          "bg": "#353A41",
+          "ratio": 10.31
+        },
+        {
+          "label": "search field border",
+          "fg": "#7C848D",
+          "bg": "#2A2F35",
+          "ratio": 3.56
+        }
+      ]
+    }
+  },
+  "checks": {
+    "total": 148,
+    "failed": 0,
+    "entries": [
+      {
+        "name": "contrast light: body text >= 4.5:1",
+        "passed": true,
+        "detail": "18.24:1 (#1A1410 on #FFFFFF)"
+      },
+      {
+        "name": "contrast light: secondary text >= 4.5:1",
+        "passed": true,
+        "detail": "7.24:1 (#5C5650 on #FFFFFF)"
+      },
+      {
+        "name": "contrast light: price label >= 4.5:1",
+        "passed": true,
+        "detail": "18.24:1 (#FFFFFF on #1A1410)"
+      },
+      {
+        "name": "contrast light: primary button >= 4.5:1",
+        "passed": true,
+        "detail": "10.74:1 (#1F1600 on #F6C057)"
+      },
+      {
+        "name": "contrast light: chip >= 4.5:1",
+        "passed": true,
+        "detail": "18.24:1 (#1A1410 on #FFFFFF)"
+      },
+      {
+        "name": "contrast light: tab bar link >= 4.5:1",
+        "passed": true,
+        "detail": "18.24:1 (#FFFFFF on #1A1410)"
+      },
+      {
+        "name": "contrast light: search field border >= 3:1",
+        "passed": true,
+        "detail": "3.56:1 (#8E877B on #FFFFFF)"
+      },
+      {
+        "name": "contrast dark: body text >= 4.5:1",
+        "passed": true,
+        "detail": "14.22:1 (#F2F3F4 on #1F2328)"
+      },
+      {
+        "name": "contrast dark: secondary text >= 4.5:1",
+        "passed": true,
+        "detail": "7.05:1 (#B6BCC3 on #2A2F35)"
+      },
+      {
+        "name": "contrast dark: price label >= 4.5:1",
+        "passed": true,
+        "detail": "6.95:1 (#F2C35B on #353A41)"
+      },
+      {
+        "name": "contrast dark: primary button >= 4.5:1",
+        "passed": true,
+        "detail": "14.22:1 (#1F2328 on #F2F3F4)"
+      },
+      {
+        "name": "contrast dark: chip >= 4.5:1",
+        "passed": true,
+        "detail": "10.31:1 (#F2F3F4 on #353A41)"
+      },
+      {
+        "name": "contrast dark: tab bar link >= 4.5:1",
+        "passed": true,
+        "detail": "10.31:1 (#F2F3F4 on #353A41)"
+      },
+      {
+        "name": "contrast dark: search field border >= 3:1",
+        "passed": true,
+        "detail": "3.56:1 (#7C848D on #2A2F35)"
+      },
+      {
+        "name": "home light 1280px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "home light 1280px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 1274 vs innerWidth 1280"
+      },
+      {
+        "name": "home light 1280px: tab bar hidden",
+        "passed": true
+      },
+      {
+        "name": "home light 1280px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "home light 390px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "home light 390px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 390 vs innerWidth 390"
+      },
+      {
+        "name": "home light 390px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "home light 390px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "home light 320px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "home light 320px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 320 vs innerWidth 320"
+      },
+      {
+        "name": "home light 320px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "home light 320px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "home dark 1280px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "home dark 1280px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 1274 vs innerWidth 1280"
+      },
+      {
+        "name": "home dark 1280px: tab bar hidden",
+        "passed": true
+      },
+      {
+        "name": "home dark 1280px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "home dark 390px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "home dark 390px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 390 vs innerWidth 390"
+      },
+      {
+        "name": "home dark 390px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "home dark 390px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "home dark 320px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "home dark 320px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 320 vs innerWidth 320"
+      },
+      {
+        "name": "home dark 320px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "home dark 320px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "search-results light 1280px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "search-results light 1280px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 1280 vs innerWidth 1280"
+      },
+      {
+        "name": "search-results light 1280px: tab bar hidden",
+        "passed": true
+      },
+      {
+        "name": "search-results light 1280px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "search-results light 390px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "search-results light 390px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 390 vs innerWidth 390"
+      },
+      {
+        "name": "search-results light 390px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "search-results light 390px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "search-results light 320px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "search-results light 320px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 320 vs innerWidth 320"
+      },
+      {
+        "name": "search-results light 320px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "search-results light 320px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "search-results dark 1280px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "search-results dark 1280px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 1280 vs innerWidth 1280"
+      },
+      {
+        "name": "search-results dark 1280px: tab bar hidden",
+        "passed": true
+      },
+      {
+        "name": "search-results dark 1280px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "search-results dark 390px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "search-results dark 390px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 390 vs innerWidth 390"
+      },
+      {
+        "name": "search-results dark 390px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "search-results dark 390px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "search-results dark 320px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "search-results dark 320px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 320 vs innerWidth 320"
+      },
+      {
+        "name": "search-results dark 320px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "search-results dark 320px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "alle-restaurants light 1280px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "alle-restaurants light 1280px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 1274 vs innerWidth 1280"
+      },
+      {
+        "name": "alle-restaurants light 1280px: tab bar hidden",
+        "passed": true
+      },
+      {
+        "name": "alle-restaurants light 1280px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "alle-restaurants light 390px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "alle-restaurants light 390px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 390 vs innerWidth 390"
+      },
+      {
+        "name": "alle-restaurants light 390px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "alle-restaurants light 390px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "alle-restaurants light 320px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "alle-restaurants light 320px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 320 vs innerWidth 320"
+      },
+      {
+        "name": "alle-restaurants light 320px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "alle-restaurants light 320px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "alle-restaurants dark 1280px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "alle-restaurants dark 1280px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 1274 vs innerWidth 1280"
+      },
+      {
+        "name": "alle-restaurants dark 1280px: tab bar hidden",
+        "passed": true
+      },
+      {
+        "name": "alle-restaurants dark 1280px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "alle-restaurants dark 390px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "alle-restaurants dark 390px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 390 vs innerWidth 390"
+      },
+      {
+        "name": "alle-restaurants dark 390px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "alle-restaurants dark 390px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "alle-restaurants dark 320px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "alle-restaurants dark 320px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 320 vs innerWidth 320"
+      },
+      {
+        "name": "alle-restaurants dark 320px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "alle-restaurants dark 320px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "restaurant light 1280px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "restaurant light 1280px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 1274 vs innerWidth 1280"
+      },
+      {
+        "name": "restaurant light 1280px: tab bar hidden",
+        "passed": true
+      },
+      {
+        "name": "restaurant light 1280px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "restaurant light 390px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "restaurant light 390px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 390 vs innerWidth 390"
+      },
+      {
+        "name": "restaurant light 390px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "restaurant light 390px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "restaurant light 320px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "restaurant light 320px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 320 vs innerWidth 320"
+      },
+      {
+        "name": "restaurant light 320px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "restaurant light 320px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "restaurant dark 1280px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "restaurant dark 1280px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 1274 vs innerWidth 1280"
+      },
+      {
+        "name": "restaurant dark 1280px: tab bar hidden",
+        "passed": true
+      },
+      {
+        "name": "restaurant dark 1280px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "restaurant dark 390px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "restaurant dark 390px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 390 vs innerWidth 390"
+      },
+      {
+        "name": "restaurant dark 390px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "restaurant dark 390px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "restaurant dark 320px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "restaurant dark 320px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 320 vs innerWidth 320"
+      },
+      {
+        "name": "restaurant dark 320px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "restaurant dark 320px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "menu light 1280px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "menu light 1280px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 1274 vs innerWidth 1280"
+      },
+      {
+        "name": "menu light 1280px: tab bar hidden",
+        "passed": true
+      },
+      {
+        "name": "menu light 1280px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "menu light 390px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "menu light 390px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 390 vs innerWidth 390"
+      },
+      {
+        "name": "menu light 390px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "menu light 390px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "menu light 320px: theme applied",
+        "passed": true,
+        "detail": "light, body rgb(255, 255, 255)"
+      },
+      {
+        "name": "menu light 320px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 320 vs innerWidth 320"
+      },
+      {
+        "name": "menu light 320px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "menu light 320px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "menu dark 1280px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "menu dark 1280px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 1274 vs innerWidth 1280"
+      },
+      {
+        "name": "menu dark 1280px: tab bar hidden",
+        "passed": true
+      },
+      {
+        "name": "menu dark 1280px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "menu dark 390px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "menu dark 390px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 390 vs innerWidth 390"
+      },
+      {
+        "name": "menu dark 390px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "menu dark 390px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "menu dark 320px: theme applied",
+        "passed": true,
+        "detail": "dark, body rgb(31, 35, 40)"
+      },
+      {
+        "name": "menu dark 320px: no horizontal overflow",
+        "passed": true,
+        "detail": "scrollWidth 320 vs innerWidth 320"
+      },
+      {
+        "name": "menu dark 320px: tab bar visible",
+        "passed": true
+      },
+      {
+        "name": "menu dark 320px: no photography",
+        "passed": true,
+        "detail": "0 img elements"
+      },
+      {
+        "name": "search results: a result card shows the dish name and its real price",
+        "passed": true,
+        "detail": "{\"nameRight\":230,\"priceLeft\":240,\"priceText\":\"op aanvraag\",\"nameText\":\"Kreeft (pasta)\"}"
+      },
+      {
+        "name": "search results: the price sits to the right of the dish name",
+        "passed": true,
+        "detail": "240 >= 230"
+      },
+      {
+        "name": "search results: active phone tab contrast >= 4.5:1",
+        "passed": true,
+        "detail": "10.74:1 (#1F1600 on #F6C057)"
+      },
+      {
+        "name": "search results: active header nav contrast >= 4.5:1",
+        "passed": true,
+        "detail": "18.24:1 (#1A1410 on #FFFFFF)"
+      },
+      {
+        "name": "320px: tab bar target \"🔍\nZoeken\" >= 44px",
+        "passed": true,
+        "detail": "139x48"
+      },
+      {
+        "name": "320px: tab bar target \"🍽️\nRestaurants\" >= 44px",
+        "passed": true,
+        "detail": "139x48"
+      },
+      {
+        "name": "320px: chip target \"🥪\nLunch\" >= 44px",
+        "passed": true,
+        "detail": "91x40"
+      },
+      {
+        "name": "320px: chip target \"🍝\nDiner\" >= 44px",
+        "passed": true,
+        "detail": "88x40"
+      },
+      {
+        "name": "320px: chip target \"🍻\nBorrel\" >= 44px",
+        "passed": true,
+        "detail": "91x40"
+      },
+      {
+        "name": "keyboard: Tab from the search field lands on the Zoeken button",
+        "passed": true,
+        "detail": "{\"tag\":\"BUTTON\",\"text\":\"Zoeken\",\"outline\":\"1px\"}"
+      },
+      {
+        "name": "internal/coverage light: captured without production credentials",
+        "passed": true,
+        "detail": "{\"path\":\"/internal/coverage\",\"text\":\"Application error: a client-side exception has occurred while loading localhost (see the browser console for more information).\",\"theme\":null}"
+      },
+      {
+        "name": "internal/coverage dark: captured without production credentials",
+        "passed": true,
+        "detail": "{\"path\":\"/internal/coverage\",\"text\":\"Application error: a client-side exception has occurred while loading localhost (see the browser console for more information).\",\"theme\":null}"
+      },
+      {
+        "name": "internal/login light: renders with the new tokens",
+        "passed": true,
+        "detail": "{\"path\":\"/internal/login\",\"theme\":\"light\",\"bodyBackground\":\"rgb(255, 255, 255)\",\"textColor\":\"rgb(26, 20, 16)\",\"heading\":\"Internal sign-in\"}"
+      },
+      {
+        "name": "internal/login dark: renders with the new tokens",
+        "passed": true,
+        "detail": "{\"path\":\"/internal/login\",\"theme\":\"dark\",\"bodyBackground\":\"rgb(31, 35, 40)\",\"textColor\":\"rgb(242, 243, 244)\",\"heading\":\"Internal sign-in\"}"
+      }
+    ]
+  },
+  "screenshots": [
+    {
+      "file": "ops/browser/output/be-28/home-light-1280.png",
+      "bytes": 94629,
+      "width": 1274,
+      "height": 1000,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "ops/browser/output/be-28/home-light-390.png",
+      "bytes": 55795,
+      "width": 390,
+      "height": 820,
+      "viewport": "390x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/home-light-320.png",
+      "bytes": 45528,
+      "width": 320,
+      "height": 820,
+      "viewport": "320x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/home-dark-1280.png",
+      "bytes": 85672,
+      "width": 1274,
+      "height": 1000,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "ops/browser/output/be-28/home-dark-390.png",
+      "bytes": 50135,
+      "width": 390,
+      "height": 820,
+      "viewport": "390x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/home-dark-320.png",
+      "bytes": 40842,
+      "width": 320,
+      "height": 820,
+      "viewport": "320x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/search-results-light-1280.png",
+      "bytes": 62112,
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "ops/browser/output/be-28/search-results-light-390.png",
+      "bytes": 53013,
+      "width": 390,
+      "height": 820,
+      "viewport": "390x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/search-results-light-320.png",
+      "bytes": 46135,
+      "width": 320,
+      "height": 820,
+      "viewport": "320x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/search-results-dark-1280.png",
+      "bytes": 59166,
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "ops/browser/output/be-28/search-results-dark-390.png",
+      "bytes": 53950,
+      "width": 390,
+      "height": 820,
+      "viewport": "390x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/search-results-dark-320.png",
+      "bytes": 47071,
+      "width": 320,
+      "height": 820,
+      "viewport": "320x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/alle-restaurants-light-1280.png",
+      "bytes": 166944,
+      "width": 1274,
+      "height": 1958,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "ops/browser/output/be-28/alle-restaurants-light-390.png",
+      "bytes": 43593,
+      "width": 390,
+      "height": 820,
+      "viewport": "390x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/alle-restaurants-light-320.png",
+      "bytes": 42449,
+      "width": 320,
+      "height": 820,
+      "viewport": "320x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/alle-restaurants-dark-1280.png",
+      "bytes": 158787,
+      "width": 1274,
+      "height": 1958,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "ops/browser/output/be-28/alle-restaurants-dark-390.png",
+      "bytes": 43147,
+      "width": 390,
+      "height": 820,
+      "viewport": "390x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/alle-restaurants-dark-320.png",
+      "bytes": 41970,
+      "width": 320,
+      "height": 820,
+      "viewport": "320x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/restaurant-light-1280.png",
+      "bytes": 138496,
+      "width": 1274,
+      "height": 1590,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "ops/browser/output/be-28/restaurant-light-390.png",
+      "bytes": 43383,
+      "width": 390,
+      "height": 820,
+      "viewport": "390x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/restaurant-light-320.png",
+      "bytes": 38210,
+      "width": 320,
+      "height": 820,
+      "viewport": "320x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/restaurant-dark-1280.png",
+      "bytes": 134138,
+      "width": 1274,
+      "height": 1590,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "ops/browser/output/be-28/restaurant-dark-390.png",
+      "bytes": 44465,
+      "width": 390,
+      "height": 820,
+      "viewport": "390x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/restaurant-dark-320.png",
+      "bytes": 39139,
+      "width": 320,
+      "height": 820,
+      "viewport": "320x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/menu-light-1280.png",
+      "bytes": 273500,
+      "width": 1274,
+      "height": 2599,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "ops/browser/output/be-28/menu-light-390.png",
+      "bytes": 48483,
+      "width": 390,
+      "height": 820,
+      "viewport": "390x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/menu-light-320.png",
+      "bytes": 50050,
+      "width": 320,
+      "height": 820,
+      "viewport": "320x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/menu-dark-1280.png",
+      "bytes": 256288,
+      "width": 1274,
+      "height": 2599,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "ops/browser/output/be-28/menu-dark-390.png",
+      "bytes": 50040,
+      "width": 390,
+      "height": 820,
+      "viewport": "390x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/menu-dark-320.png",
+      "bytes": 52075,
+      "width": 320,
+      "height": 820,
+      "viewport": "320x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/search-results-light-390-detail.png",
+      "bytes": 53013,
+      "width": 390,
+      "height": 820,
+      "viewport": "390x820"
+    },
+    {
+      "file": "ops/browser/output/be-28/internal-coverage-light-1280.png",
+      "bytes": 9370,
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "ops/browser/output/be-28/internal-coverage-dark-1280.png",
+      "bytes": 9370,
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "ops/browser/output/be-28/internal-login-light-1280.png",
+      "bytes": 10412,
+      "width": 1274,
+      "height": 980,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "ops/browser/output/be-28/internal-login-dark-1280.png",
+      "bytes": 10740,
+      "width": 1274,
+      "height": 980,
+      "viewport": "1280x900"
+    }
+  ],
+  "result": "passed"
+}

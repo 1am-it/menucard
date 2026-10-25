@@ -408,6 +408,92 @@ Open points (not decided by Kleurtaal v2):
   shades of margin). Serif typography, KPI tiles and the deviating nav
   labels in that mockup were not adopted.
 
+## BE-28 — frisse publieke stijl (implemented 2026-10-25, #65)
+
+Owner decisions (2026-10-25, recorded in
+`planning/specs/tickets/be-28-fresh-public-style.md`):
+
+- "negeer even de md files eenmalig op dit vlak: geef het een modernere look
+  o.a. toevoegen van emoji's … het moet technisch allemaal zo licht en snel
+  mogelijk laden";
+- dark theme: antraciet instead of black (not black with bright oker,
+  because of the NAC association);
+- buttons in the dark theme: **white** (variant 4);
+- emoji everywhere, desktop and phone (choice 1);
+- "Akkoord om dit te bouwen … zoals aangeleverd in de mockups".
+
+Approved visual reference: Claude Design canvas "Onze Menukaarten – eigen
+gezicht v2", version 14 (https://claude.ai/artifact/8VLxwWFHkffexpyLPyF5DD).
+The source HTML is committed in `docs/mockups/be-28-fresh-style-v1/`; its
+README names which boards lead. The canvas' top rows (quiet version,
+Espresso, Inkt) and the other button variants were **not** chosen.
+
+This decision supersedes exactly these Kleurtaal v2 rules for the **public**
+surfaces (home, search, alle restaurants, restaurants, restaurant page, menu
+page, the shared header and the wordmark). Internal screens keep their own
+layout and colours; they only inherit the token values.
+
+1. **Palette / surfaces.** Light: white page and card surfaces, soft warm
+   tints (`#F6F4EF`, `#F3F1EC`, warm panel `#FFF6E2`), oker primary button.
+   Dark: antraciet `#1F2328` page, `#2A2F35` cards, `#3A4048` borders, text
+   `#F2F3F4` / `#B6BCC3`. All values live in `app/globals.css` as tokens
+   (`--surface-soft`, `--surface-warm`, `--card-*`, `--button-primary-*`,
+   `--chip-*`, `--price-*`, `--tabbar-*`, `--nav-active-*`); components never
+   hard-code a colour. Dark stays the runtime default on a first visit
+   (theme contract unchanged).
+2. **Buttons and selected states.** Light: oker `--button-primary-bg`
+   (`#F6C057`, text `#1F1600`). Dark: white (`#F2F3F4`, text `#1F2328`) for
+   the primary button, the active chip and the active tab/menu item. Prices
+   are a label: dark `#353A41` fill with oker text; light `#1A1410` fill with
+   white text. The logo tile stays oker in both themes.
+3. **Green.** Green remains a *status* colour only (`--status-positive`, for
+   example "🟢 Nu open" when the existing opening logic says the restaurant
+   is open right now). It is never a brand or interaction colour. On the
+   antraciet surfaces the dark status colours were lifted so status text on
+   its own 10% fill keeps AA; the measured minima are pinned in
+   `src/lib/colourLanguage.test.js`.
+4. **Emoji.** Emoji are ordinary system characters: no emoji font, no image,
+   no library. Every decorative emoji is rendered through
+   `src/components/Emoji.js`, which is always `aria-hidden`; the meaning
+   lives in the text next to it. Earlier "no emoji" rules (for example in
+   `be-11-*` and the old homepage tests) are superseded for these public
+   surfaces by this decision. The one exception kept is the approved
+   "🟢 Nu open" filter chip wording on `/search` and `/restaurants`.
+5. **Card shape.** Cards are round (`--radius-card` 20 px, panels
+   `--radius-panel` 28 px). Light: white card, 1px `#EEEAE2` edge and a soft
+   shadow. Dark: `#2A2F35` card with a `#3A4048` edge and no shadow. The
+   search bar and chips are pills. On the phone (≤720 px) a floating tab bar
+   sits at the bottom with the two existing destinations (🔍 Zoeken,
+   🍽️ Restaurants); tap targets are at least 44 px (the bar's own links 48 px).
+6. **Measurement.** Contrast is measured in both themes and pinned in
+   `src/lib/publicStyle.test.js`: every public text token pair ≥ 4.5:1,
+   control borders and focus rings ≥ 3:1. Card *container* edges follow the
+   approved mockup (soft in light, `#3A4048` in dark) and are never the only
+   affordance: the card's own text, hover state and focus ring carry the
+   interaction. Interactive fields (the home and search bars) use
+   `--input-border`, which does meet 3:1 in both themes.
+
+   Measured in the browser (`ops/browser/run-public-style-browser-check.js`,
+   developer evidence on a local production build, 2026-10-25):
+
+   - initial transfer of `/`, dark, 1280 px, cold cache: **190 KB before**
+     (base `a517052`) → **148.7 KB after** — under the 250 KB target and
+     41 KB smaller than before;
+   - live contrast, light: body 18.24:1, secondary 7.24:1, price label
+     18.24:1, primary button 10.74:1, chip 18.24:1, tab bar 18.24:1, search
+     field border 3.56:1;
+   - live contrast, dark: body 14.22:1, secondary 7.05:1, price label
+     6.95:1, primary button 14.22:1, chip 10.31:1, tab bar 10.31:1, search
+     field border 3.56:1;
+   - no horizontal overflow at 1280/390/320 px on any public page, the tab
+     bar only appears at ≤720 px, tap targets ≥ 44 px, keyboard Tab from the
+     search field reaches the Zoeken button.
+
+   The full result and the 35 screenshots are in
+   `ops/browser/evidence/public-style-browser-evidence.json` and
+   `ops/browser/output/be-28/` (the output folder is generated, not
+   committed).
+
 ## Internal navigation hierarchy
 
 Sources:

@@ -410,6 +410,13 @@ function searchDishes({
         name: dish.name,
         category: dish.category,
         weakMatch: isWeakMatch(dish, needle),
+        // BE-28 (#65) — the shown example carries its own real price so the
+        // public result card can put it on the right. Same fields the
+        // ungrouped response already returns for every dish; no new data,
+        // no new field semantics.
+        priceDisplay: dish.priceDisplay,
+        priceOnRequest: dish.priceOnRequest,
+        priceIsFrom: dish.priceIsFrom,
       })
     }
   }

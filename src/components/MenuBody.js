@@ -5,7 +5,7 @@
 // chrome, no URL parameters, no filters, no reservation actions — those stay
 // in MenuView. Classes and markup are the public menu's own (app/globals.css).
 
-import StatusIcon from '@/src/components/StatusIcon'
+import Emoji from '@/src/components/Emoji'
 import { groupHeadingsBefore } from '@/src/lib/menuGroups'
 
 export const TAG_LABELS = {
@@ -163,7 +163,9 @@ export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTa
         <div className="item-tags">
           {item.tags.map(t => (
             <span key={t} className={`item-tag tag-${t}`}>
-              {NEUTRAL_DIET_TAG_KEYS.has(t) && <StatusIcon name="leaf" size={11} className="item-tag-icon" />}
+              {/* BE-28 — het blad is nu het systeem-emoji (aria-hidden) in
+                  plaats van een SVG; de tekst ernaast draagt de betekenis. */}
+              {NEUTRAL_DIET_TAG_KEYS.has(t) && <Emoji glyph="🌱" className="item-tag-icon-size" />}
               {TAG_LABELS[t] || t}
             </span>
           ))}
