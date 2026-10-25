@@ -20,6 +20,8 @@
 const { zonedParts, DEFAULT_TIME_ZONE } = require('./localTime');
 const { cuisineFamily } = require('./cuisineStyle');
 const { dutchDateLabel } = require('./dailyDish');
+const { isOpenDuring } = require('./openingStatus');
+const { honestPriceLabel } = require('./menuPrice');
 
 const MAX_DISHES = 3;
 
@@ -112,57 +114,19 @@ function isMainDishCategory(categoryName) {
   return true;
 }
 
-// ─── Eerlijke prijs ─────────────────────────────────────────────────────────
-
-/**
- * De prijs zoals de bron hem noemt, met een bron-qualifier ("voor 2
- * personen", "per kilo", …) erbij als die in een eigen veld staat. Staat de
- * qualifier al in de prijsstring, dan blijft die ongewijzigd. Zonder echte
- * prijs is er geen label: "op aanvraag" telt niet.
- */
-function honestPriceLabel(item) {
-  if (!item || typeof item !== 'object') return null;
-  if (!item.price || item.priceOnRequest || item.priceValue == null) return null;
-  let label = String(item.price).trim();
-  if (!label) return null;
-  for (const note of [item.priceNote, item.priceUnit, item.priceQualifier]) {
-    if (typeof note !== 'string' || !note.trim()) continue;
-    const clean = note.trim();
-    if (!label.toLowerCase().includes(clean.toLowerCase())) label += ` · ${clean}`;
-  }
-  if (item.priceIsFrom && !/^vanaf\b/i.test(label)) label = `vanaf ${label}`;
-  return label;
-}
-
 // ─── Openingstijden ─────────────────────────────────────────────────────────
-
-function toMinutes(value) {
-  const [hours, minutes] = String(value).split(':').map(Number);
-  return hours * 60 + (minutes || 0);
-}
-
-function parseOpeningRange(hours) {
-  if (typeof hours !== 'string') return null;
-  const [open, close] = hours.split('-').map((part) => part.trim());
-  if (!/^\d{1,2}:\d{2}$/.test(open || '') || !/^\d{1,2}:\d{2}$/.test(close || '')) return null;
-  const range = { open: toMinutes(open), close: toMinutes(close) };
-  // Zelfde conventie als src/lib/openingStatus.js: geen overnight-vensters.
-  if (range.close <= range.open) return null;
-  return range;
-}
 
 /**
  * Is het restaurant op deze weekdag open in het deel van de dag van dit
  * menutype? Een overlap is genoeg: een dinerkaart bij een zaak die om 17:00
- * opent telt mee, ook al is het nu 12:00.
+ * opent telt mee, ook al is het nu 12:00. De leesregel komt uit
+ * src/lib/openingStatus.js (dezelfde als "Nu open"), niet uit een tweede
+ * interpretatie hier.
  */
 function isOpenForMoment(openingHours, dayKey, mealType) {
-  if (!openingHours || typeof openingHours !== 'object') return false;
   const window = MEAL_OPEN_WINDOWS[mealType];
   if (!window) return false;
-  const range = parseOpeningRange(openingHours[dayKey]);
-  if (!range) return false;
-  return range.open < window.to && range.close > window.from;
+  return isOpenDuring(openingHours, dayKey, window.from, window.to);
 }
 
 // ─── Dagkeuze ───────────────────────────────────────────────────────────────
@@ -386,7 +350,6 @@ module.exports = {
   mealTitle,
   isMainDishCategory,
   honestPriceLabel,
-  parseOpeningRange,
   isOpenForMoment,
   isNewlyUpdated,
   buildDishHref,

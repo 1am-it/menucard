@@ -98,3 +98,27 @@ test('only an open-now state is positive, over a whole day in 15-minute steps', 
     if (b.role !== 'positive') assert.doesNotMatch(b.text, NO_OPEN_WORD, `${min} min`);
   }
 });
+
+// ─── BE-29 (#70) — hetzelfde leesregel voor een dagvenster ────────────────
+
+const { parseOpeningRange, isOpenDuring } = require('./openingStatus');
+
+test('BE-29: parseOpeningRange leest HH:MM-HH:MM en weigert de rest', () => {
+  assert.deepEqual(parseOpeningRange('12:00-23:00'), { open: 720, close: 1380 });
+  assert.deepEqual(parseOpeningRange('9:30 - 17:15'), { open: 570, close: 1035 });
+  assert.equal(parseOpeningRange('op afspraak'), null);
+  assert.equal(parseOpeningRange('18:00-02:00'), null, 'geen overnight-venster');
+  assert.equal(parseOpeningRange('12:00'), null);
+  assert.equal(parseOpeningRange(null), null);
+});
+
+test('BE-29: isOpenDuring toetst overlap met het etensvenster, niet "nu"', () => {
+  assert.equal(isOpenDuring(HOURS, 'wo', 11 * 60, 15 * 60), true);
+  assert.equal(isOpenDuring(HOURS, 'wo', 16 * 60, 18 * 60), true);
+  assert.equal(isOpenDuring(HOURS, 'wo', 17 * 60, 23 * 60), true);
+  assert.equal(isOpenDuring({ wo: '18:00-22:00' }, 'wo', 11 * 60, 15 * 60), false);
+  assert.equal(isOpenDuring({ wo: '18:00-22:00' }, 'wo', 16 * 60, 18 * 60), false);
+  assert.equal(isOpenDuring({ wo: '18:00-22:00' }, 'wo', 17 * 60, 23 * 60), true);
+  assert.equal(isOpenDuring({ do: '12:00-23:00' }, 'wo', 11 * 60, 15 * 60), false);
+  assert.equal(isOpenDuring(null, 'wo', 11 * 60, 15 * 60), false);
+});

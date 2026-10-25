@@ -208,18 +208,20 @@ async function setViewport(cdp, width, height) {
   await cdp.send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: width < 600 });
 }
 
-async function shot(cdp, name) {
+async function shot(cdp, name, { fullPage = false } = {}) {
   // Desktop: the whole page. Phone: exactly one viewport, because a fixed
   // tab bar is painted at its viewport position in a beyond-viewport shot and
-  // would look like a layout bug in the evidence.
+  // would look like a layout bug in the evidence. BE-29's own evidence asks
+  // for the whole page at every width, so it passes `fullPage: true`.
   const metrics = await cdp.send('Page.getLayoutMetrics');
   const content = metrics.cssContentSize || metrics.contentSize;
   const width = Math.min(viewport.width, Math.ceil(content.width));
-  const height = viewport.width < 720 ? viewport.height : Math.min(4000, Math.ceil(content.height));
+  const wholePage = fullPage || viewport.width >= 720;
+  const height = wholePage ? Math.min(5000, Math.ceil(content.height)) : viewport.height;
   const result = await cdp.send('Page.captureScreenshot', {
     format: 'png',
     fromSurface: true,
-    captureBeyondViewport: viewport.width >= 720,
+    captureBeyondViewport: wholePage,
     clip: { x: 0, y: 0, width, height, scale: 1 },
   });
   const buffer = Buffer.from(result.data, 'base64');
@@ -340,12 +342,17 @@ async function measureAlleRestaurantsTransfer(cdp, meter) {
 
 // â”€â”€ scenario's â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function contrastScenario(cdp) {
+  // BE-29 — de home toont "Vanavond op de kaart" alleen als er drie echte
+  // gerechten voor dit moment zijn. Meet de contrastparen daarom op het vaste
+  // dinermoment (2026-10-23, 20:00 Amsterdam), niet op de toevallige
+  // systeemklok van de ontwikkelmachine.
+  await setFixedClock(cdp, '2026-10-23T18:00:00Z');
   const perTheme = {};
   for (const theme of ['light', 'dark']) {
     await applyTheme(cdp, theme);
     await setViewport(cdp, 390, 820);
     await open(cdp, `${APP}/`, `document.readyState === 'complete' && document.querySelector('.home-hero') !== null`);
-    await new Promise((resolve) => setTimeout(resolve, 600));
+    await new Promise((resolve) => setTimeout(resolve, 900));
     const measured = await evalJs(cdp, CONTRAST_JS);
     perTheme[theme] = measured;
     for (const entry of measured.results) {
@@ -358,10 +365,11 @@ async function contrastScenario(cdp) {
       check(`contrast ${theme}: ${entry.label} >= ${minimum}:1`, entry.ratio >= minimum, `${entry.ratio}:1 (${entry.fg} on ${entry.bg})`);
     }
   }
+  await setFixedClock(cdp, null);
   return perTheme;
 }
 
-async function pageScenario(cdp, { name, url, ready, widths }) {
+async function pageScenario(cdp, { name, url, ready, widths, fullPage = false }) {
   for (const theme of ['light', 'dark']) {
     await applyTheme(cdp, theme);
     for (const width of widths) {
@@ -379,7 +387,7 @@ async function pageScenario(cdp, { name, url, ready, widths }) {
           return bar ? getComputedStyle(bar).display !== 'none' : null;
         })(),
       }))()`);
-      await shot(cdp, `${name}-${theme}-${width}.png`);
+      await shot(cdp, `${name}-${theme}-${width}.png`, { fullPage });
 
       check(`${name} ${theme} ${width}px: theme applied`, state.htmlTheme === theme, `${state.htmlTheme}, body ${state.bodyBackground}`);
       check(`${name} ${theme} ${width}px: no horizontal overflow`, state.scrollWidth <= state.innerWidth + 1, `scrollWidth ${state.scrollWidth} vs innerWidth ${state.innerWidth}`);
@@ -630,6 +638,7 @@ async function be29Scenario(cdp) {
         `document.readyState === 'complete' && document.querySelector('.home-hero') !== null && document.querySelectorAll('[data-season]').length === 3` +
         (moment.expectSection ? ` && document.querySelector('.tonight-section') !== null` : ''),
       widths: [1280, 390, 320],
+      fullPage: true,
     });
 
     await applyTheme(cdp, 'light');
@@ -707,7 +716,7 @@ async function be29Scenario(cdp) {
       name: el && el.querySelector('.td-name') ? el.querySelector('.td-name').textContent.trim() : null,
     };
   })()`);
-  await shot(cdp, 'be29-menu-marked-light-390.png');
+  await shot(cdp, 'be29-menu-marked-light-390.png', { fullPage: true });
   check(
     'BE-29: de menukaart opent op hetzelfde gerecht en markeert het',
     Boolean(marked.id) && marked.hash === `#${marked.id}` && marked.name === dinerCard.name,
@@ -718,12 +727,12 @@ async function be29Scenario(cdp) {
   await setViewport(cdp, 390, 820);
   await open(cdp, `${APP}${dinerCard.href}`, `document.querySelector('.menu-card-highlighted') !== null`);
   await new Promise((resolve) => setTimeout(resolve, 400));
-  await shot(cdp, 'be29-menu-marked-dark-390.png');
+  await shot(cdp, 'be29-menu-marked-dark-390.png', { fullPage: true });
   await applyTheme(cdp, 'light');
   await setViewport(cdp, 1280, 900);
   await open(cdp, `${APP}${dinerCard.href}`, `document.querySelector('.menu-card-highlighted') !== null`);
   await new Promise((resolve) => setTimeout(resolve, 400));
-  await shot(cdp, 'be29-menu-marked-light-1280.png');
+  await shot(cdp, 'be29-menu-marked-light-1280.png', { fullPage: true });
 
   // /restaurants is uitgefaseerd: permanente 308 naar /alle-restaurants,
   // met behoud van een bestaande zoekterm.

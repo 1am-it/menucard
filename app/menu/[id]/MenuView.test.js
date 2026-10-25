@@ -246,6 +246,13 @@ test('BE-29: the Dagspecial tag is not duplicated next to the honest Daghap labe
   assert.match(source, /const visibleTags = \(item\.tags \|\| \[\]\)\.filter\(\(tag\) => !\(dailyInfo && tag === 'dagspecial'\)\)/);
 });
 
+test('BE-29: the menu card shows the same honest price as the home (unit/2-person qualifier included)', () => {
+  const source = readComponentSource();
+  assert.match(source, /import \{ honestPriceLabel \} from '@\/src\/lib\/menuPrice'/);
+  assert.match(source, /const priceLabel = honestPriceLabel\(item\) \|\| item\.price \|\| 'op aanvraag'/);
+  assert.match(source, /<div className=\{`td-price \$\{!item\.price \? 'no-price' : ''\}`\}>\s*\{priceLabel\}\s*<\/div>/);
+});
+
 test('BE-29: "Seizoen" appears on the menu only when the menu itself says so', () => {
   const source = readComponentSource();
   assert.match(source, /import \{ seasonLabelForMenu \} from '@\/src\/lib\/seasonCalendar'/);

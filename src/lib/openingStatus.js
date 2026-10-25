@@ -22,6 +22,32 @@ function toMinutes(str) {
 }
 
 /**
+ * BE-29 (#70) — één leesfunctie voor "HH:MM-HH:MM", zonder overnight-venster.
+ * @returns {{open:number,close:number}|null}
+ */
+function parseOpeningRange(hours) {
+  if (typeof hours !== 'string') return null;
+  const [opens, closes] = hours.split('-').map((part) => part.trim());
+  if (!/^\d{1,2}:\d{2}$/.test(opens || '') || !/^\d{1,2}:\d{2}$/.test(closes || '')) return null;
+  const range = { open: toMinutes(opens), close: toMinutes(closes) };
+  if (range.close <= range.open) return null;
+  return range;
+}
+
+/**
+ * BE-29 (#70) — overlapt de openingstijd van deze weekdag een venster van de
+ * dag (in minuten na middernacht)? Dezelfde leesregel als `todayOpening`,
+ * maar zonder "nu": de momentkeuze op de home moet per dag vast en cachebaar
+ * zijn.
+ */
+function isOpenDuring(openingHours, dayKey, fromMinutes, toMinutesOfDay) {
+  if (!openingHours || typeof openingHours !== 'object') return false;
+  const range = parseOpeningRange(openingHours[dayKey]);
+  if (!range) return false;
+  return range.open < toMinutesOfDay && range.close > fromMinutes;
+}
+
+/**
  * @param {Record<string,string>|undefined|null} openingHours  e.g. { wo: '12:00-23:00' }
  * @param {Date} now
  * @returns {{ state: 'open'|'later'|'closed-now'|'closed-today'|'unknown', hours: string|null, opens: string|null, closes: string|null }}
@@ -72,4 +98,4 @@ function openingBadge(opening, openingHours, todayKey) {
   }
 }
 
-module.exports = { DAY_KEYS, todayOpening, openingBadge };
+module.exports = { DAY_KEYS, todayOpening, openingBadge, parseOpeningRange, isOpenDuring };

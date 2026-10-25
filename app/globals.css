@@ -4324,7 +4324,7 @@ header, .site-header { height: auto; min-height: var(--header-h); }
 .tonight-tag--new { background: var(--tag-info-bg); color: var(--tag-info); }
 .tonight-tag--season { background: transparent; box-shadow: inset 0 0 0 1px var(--input-border); }
 .tonight-tag--veg { background: transparent; box-shadow: inset 0 0 0 1px var(--input-border); }
-.tonight-tag--daily { background: var(--tag-featured-bg); color: var(--tag-featured); }
+.tonight-tag--daily { background: var(--tag-featured-bg); color: var(--tag-featured); max-width: 100%; overflow-wrap: anywhere; }
 .tonight-tags .open-label { margin-left: 2px; }
 .home-tile[data-season] { justify-content: flex-start; }
 
@@ -4336,6 +4336,7 @@ header, .site-header { height: auto; min-height: var(--header-h); }
   font-weight: 600;
   color: var(--text-secondary);
   align-self: center;
+  overflow-wrap: anywhere;
 }
 .tag-daghap { background: var(--tag-featured-bg); color: var(--tag-featured); }
 .menu-season-label {

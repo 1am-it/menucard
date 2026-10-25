@@ -8,6 +8,7 @@
 import Emoji from '@/src/components/Emoji'
 import { groupHeadingsBefore } from '@/src/lib/menuGroups'
 import { dailyDishInfo } from '@/src/lib/dailyDish'
+import { honestPriceLabel } from '@/src/lib/menuPrice'
 
 export const TAG_LABELS = {
   aanbevolen:  'Aanbevolen',
@@ -103,6 +104,10 @@ export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTa
   // verlopen daghap blijft zo gewoon op de menukaart staan.
   const dailyInfo = dailyDishInfo(item, { category, menuTitle, sourceDate })
   const visibleTags = (item.tags || []).filter((tag) => !(dailyInfo && tag === 'dagspecial'))
+  // BE-29 (#70) — dezelfde eerlijke prijs als op de home: een expliciete
+  // bron-eenheid ("per stuk", "per kilo", "voor 2 personen") blijft zichtbaar;
+  // zonder echte prijs blijft "op aanvraag" staan.
+  const priceLabel = honestPriceLabel(item) || item.price || 'op aanvraag'
   // BE-12 — the resolved dish's own substring mark comes from `fromQuery`,
   // never the shared `?q=` filter state, and only for this one item; it
   // stays for as long as this item is the resolved target (the life of
@@ -120,7 +125,7 @@ export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTa
       <div className="card-top">
         <div className="td-name">{highlight(item.name, displayQuery)}</div>
         <div className={`td-price ${!item.price ? 'no-price' : ''}`}>
-          {item.price || 'op aanvraag'}
+          {priceLabel}
         </div>
       </div>
 

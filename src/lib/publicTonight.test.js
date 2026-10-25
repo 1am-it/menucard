@@ -107,6 +107,27 @@ test('BE-29: de eerlijke prijs laat een bron-qualifier staan en verzint er geen'
     '€ 27,50 · voor 2 personen'
   );
   assert.equal(honestPriceLabel({ price: '€ 12,50 per kilo', priceValue: 12.5 }), '€ 12,50 per kilo');
+  assert.equal(
+    honestPriceLabel({ price: '€ 27,50', priceValue: 27.5, desc: 'Mix van vis, voor 2 personen' }),
+    '€ 27,50 · voor 2 personen'
+  );
+  assert.equal(
+    honestPriceLabel({ price: '€ 12,50', priceValue: 12.5, desc: 'Gewicht per kilo bij aankoop' }),
+    '€ 12,50 · per kilo'
+  );
+  assert.equal(
+    honestPriceLabel({ price: '€ 4,00', priceValue: 4, desc: 'Met sjalottenvinaigrette (per stuk)' }),
+    '€ 4,00 · per stuk'
+  );
+  assert.equal(
+    honestPriceLabel({ price: '€ 20,95', priceValue: 20.95, desc: 'Krielkippetje met appelcompote' }),
+    '€ 20,95',
+    'een dubbele p in een gewoon woord is geen prijs per persoon'
+  );
+  assert.equal(
+    honestPriceLabel({ price: '€ 42,00', priceValue: 42, desc: 'Driegangenmenu 42,0 p.p.' }),
+    '€ 42,00 · p.p.'
+  );
   assert.equal(honestPriceLabel({ price: '€ 9,50', priceValue: 9.5, priceIsFrom: true }), 'vanaf € 9,50');
   assert.equal(honestPriceLabel({ price: 'op aanvraag', priceValue: null, priceOnRequest: true }), null);
   assert.equal(honestPriceLabel({ price: '', priceValue: 12 }), null);
