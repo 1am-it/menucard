@@ -55,7 +55,13 @@ test('Y1: the measured 46.8 s worst case has at least 2x margin and validation s
 test('Y1: no plan, Fluid or maxDuration override was added to the project configuration', () => {
   // The documented 300 s is the Hobby maximum with Fluid compute, so the route
   // value alone is enough and no project setting had to change.
-  assert.equal(fs.existsSync(VERCEL_CONFIG_PATH), false, 'no vercel.json was introduced');
+  // vercel.json may exist for the daily Supabase keep-alive cron (PR #64), but it
+  // must not carry a plan, Fluid or function-duration override.
+  if (fs.existsSync(VERCEL_CONFIG_PATH)) {
+    const vercelConfig = JSON.parse(fs.readFileSync(VERCEL_CONFIG_PATH, 'utf8'));
+    assert.deepEqual(Object.keys(vercelConfig), ['crons'], 'vercel.json only holds crons');
+    assert.doesNotMatch(JSON.stringify(vercelConfig), /maxDuration|fluid|functions/i);
+  }
   const nextConfig = fs.readFileSync(NEXT_CONFIG_PATH, 'utf8');
   assert.doesNotMatch(nextConfig, /maxDuration|fluid/i);
 });
