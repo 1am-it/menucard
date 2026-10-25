@@ -3,9 +3,11 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import ThemeToggle from '@/src/components/ThemeToggle'
+import MobileTabBar from '@/src/components/MobileTabBar'
 import { getReservationActions, getReservationNote, isExternalReservation, isValidPhone, isValidUrl } from '@/src/utils/reservation'
 import { resolveDishTarget } from '@/src/lib/dishDeepLink'
 import Wordmark from '@/src/components/Wordmark'
+import Emoji from '@/src/components/Emoji'
 import ExternalLinkIcon from '@/src/components/ExternalLinkIcon'
 import StatusIcon from '@/src/components/StatusIcon'
 import useClientNow from '@/src/components/useClientNow'
@@ -316,6 +318,7 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
               {restaurant.openingHours && (
                 <div className="rp-line">
                   <span className={`status-badge status-badge--${todayBadge.role}`}>
+                    {todayBadge.role === 'positive' && <Emoji glyph="🟢" />}
                     <StatusIcon name={todayBadge.icon} size={13} />
                     {todayBadge.text}
                   </span>
@@ -487,7 +490,7 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
       </div>
 
       {/* ── Menu items ── */}
-      <main className="page-main">
+      <main className="page-main page-with-tabbar">
         {filteredCategories.length === 0 ? (
           <div className="empty-state">
             <div style={{ fontSize: 36, marginBottom: 12 }}>🔍</div>
@@ -544,6 +547,8 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
           </Link>
         </div>
       </main>
+
+      <MobileTabBar />
     </>
   )
 }

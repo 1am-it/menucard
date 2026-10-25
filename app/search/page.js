@@ -4,8 +4,10 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import ThemeToggle from '@/src/components/ThemeToggle'
 import PrimaryNav from '@/src/components/PrimaryNav'
+import MobileTabBar from '@/src/components/MobileTabBar'
 import RestaurantBrowseCard from '@/src/components/RestaurantBrowseCard'
 import Wordmark from '@/src/components/Wordmark'
+import Emoji from '@/src/components/Emoji'
 import StatusIcon from '@/src/components/StatusIcon'
 
 // BE-03 — dish-first search results.
@@ -50,11 +52,15 @@ const MENU_TITLE_LABELS = {
 // already duplicate small constants during this migration.
 
 const MEAL_OPTIONS = [
-  { value: 'lunch', label: '🥗 Lunch' },
-  { value: 'diner', label: '🍽 Diner' },
-  { value: 'borrel', label: '🍸 Borrel' },
-  { value: 'specialiteiten', label: '⭐ Specialiteiten' },
+  { value: 'lunch', label: 'Lunch', glyph: '🥪' },
+  { value: 'diner', label: 'Diner', glyph: '🍝' },
+  { value: 'borrel', label: 'Borrel', glyph: '🍻' },
+  { value: 'specialiteiten', label: 'Specialiteiten', glyph: '⭐' },
 ]
+
+// BE-28 — decoratief teken per menusoort. Alleen als teken in de opmaak
+// (<Emoji/> zet aria-hidden); het label ernaast draagt de betekenis.
+const MEAL_GLYPHS = { lunch: '🥪', diner: '🍝', borrel: '🍻', specialiteiten: '⭐' }
 
 const DAYS = ['ma', 'di', 'wo', 'do', 'vr', 'za', 'zo']
 const DAY_LABELS = { ma: 'Ma', di: 'Di', wo: 'Wo', do: 'Do', vr: 'Vr', za: 'Za', zo: 'Zo' }
@@ -519,30 +525,39 @@ function SearchPageInner() {
                     {menu.count} {menu.count === 1 ? 'gerecht' : 'gerechten'}
                   </h4>
                   {menu.examples.length > 0 && (
-                    <p className="dish-group-examples">
-                      {menu.examples.map((example, i) => {
+                    <ul className="dish-result-cards">
+                      {menu.examples.map((example) => {
                         const collision = hasExampleNameCollision(example, menu.examples)
                         const label = collision ? `${example.name} (${example.category})` : example.name
                         return (
-                          <span key={example.dishId}>
-                            {i > 0 && ' · '}
-                            <Link href={buildExampleDishHref(example, menu, filters.q)} className="dish-group-example-link">
-                              {label}
-                            </Link>
-                            {/* BE-12 §1.2/BE-13, restored for BE-16 — a
-                                neutral, honest hint, only for an example
-                                that matched purely via an internal,
-                                non-public field (never the raw sup/wine
-                                text itself — see dishSearch.js's
-                                isWeakMatch()). A normal, visibly-matching
-                                example gets no hint at all. */}
-                            {example.weakMatch && <span className="dish-result-match-hint"> · Gevonden in aanvullende menudetails</span>}
-                          </span>
+                          <li key={example.dishId} className="dish-result-card-row">
+                            {/* BE-28 — decoratief maaltijdteken; het label
+                                en de prijs dragen de inhoud. */}
+                            <Emoji glyph={MEAL_GLYPHS[menu.mealType] || '🍽️'} className="dish-result-emoji" />
+                            <span className="dish-result-main">
+                              <Link href={buildExampleDishHref(example, menu, filters.q)} className="dish-group-example-link">
+                                {label}
+                              </Link>
+                              {/* BE-12 §1.2/BE-13, restored for BE-16 — a
+                                  neutral, honest hint, only for an example
+                                  that matched purely via an internal,
+                                  non-public field (never the raw sup/wine
+                                  text itself — see dishSearch.js's
+                                  isWeakMatch()). A normal, visibly-matching
+                                  example gets no hint at all. */}
+                              {example.weakMatch && <span className="dish-result-match-hint">Gevonden in aanvullende menudetails</span>}
+                            </span>
+                            {/* BE-28 — de echte prijs van dít gerecht,
+                                rechts in de kaart (ook op 320 px). */}
+                            {example.priceOnRequest
+                              ? <span className="price-label price-label--soft">op aanvraag</span>
+                              : example.priceDisplay && <span className="price-label">{example.priceDisplay}</span>}
+                          </li>
                         )
                       })}
-                      {remaining > 0 && <span className="dish-group-more"> +{remaining} meer</span>}
-                    </p>
+                    </ul>
                   )}
+                  {remaining > 0 && <span className="dish-group-more"> +{remaining} meer</span>}
                   <Link href={buildGroupMenuHref(menu, filters.q)} className="detail-menu-btn-outline dish-group-link">
                     Bekijk alle {menu.count} op de kaart →
                   </Link>
@@ -638,7 +653,7 @@ function SearchPageInner() {
 
       <section className="search-page-hero">
         <form className="search-field search-page-field" onSubmit={handleSubmit}>
-          <span className="search-icon">🔍</span>
+          <span className="search-icon"><Emoji glyph="🔍" /></span>
           <input
             type="text"
             className="search-input flagship"
@@ -660,6 +675,7 @@ function SearchPageInner() {
               className={`home-meal-btn ${filters.meal === m.value ? 'active' : ''}`}
               onClick={() => setFilter('meal', filters.meal === m.value ? '' : m.value)}
             >
+              <Emoji glyph={m.glyph} />
               {m.label}
             </button>
           ))}
@@ -803,6 +819,8 @@ function SearchPageInner() {
           </>
         )}
       </main>
+
+      <MobileTabBar />
     </>
   )
 }

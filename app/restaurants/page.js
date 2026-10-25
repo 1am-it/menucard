@@ -2,10 +2,12 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import ThemeToggle from '@/src/components/ThemeToggle'
+import MobileTabBar from '@/src/components/MobileTabBar'
 import { getReservationActions, isValidPhone } from '@/src/utils/reservation'
 import restaurantsData from '@/data/restaurants.json'
 import menusData from '@/data/menus.json'
 import Wordmark from '@/src/components/Wordmark'
+import Emoji from '@/src/components/Emoji'
 import StatusIcon from '@/src/components/StatusIcon'
 import useClientNow from '@/src/components/useClientNow'
 import { todayOpening, openingBadge } from '@/src/lib/openingStatus'
@@ -401,6 +403,7 @@ function RestaurantCard({ restaurant, id, lang, selectedMeal, selectedDay, ingre
           {restaurant.badge && <span className="rc-badge">{restaurant.badge}</span>}
           <div className="rc-open-pill">
             <span className={`status-badge status-badge--${openBadge.role}`} style={{ fontSize: 11 }}>
+              {openBadge.role === 'positive' && <Emoji glyph="🟢" />}
               <StatusIcon name={openBadge.icon} size={12} />
               {openBadge.text}
             </span>
@@ -1032,7 +1035,7 @@ export default function RestaurantsPage() {
       </section>
 
       {/* ── Results ── */}
-      <main className="results-section" ref={resultsRef}>
+      <main className="results-section page-with-tabbar" ref={resultsRef}>
         <div className="results-header">
           <span className="results-count">
             {mode === 'restaurants'
@@ -1096,6 +1099,7 @@ export default function RestaurantsPage() {
         )}
       </main>
 
+      <MobileTabBar />
     </>
   )
 }

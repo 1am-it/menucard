@@ -2,8 +2,10 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import ThemeToggle from '@/src/components/ThemeToggle'
+import MobileTabBar from '@/src/components/MobileTabBar'
 import { getReservationActions, getReservationNote, isExternalReservation, isValidPhone, isValidUrl } from '@/src/utils/reservation'
 import Wordmark from '@/src/components/Wordmark'
+import Emoji from '@/src/components/Emoji'
 import ExternalLinkIcon from '@/src/components/ExternalLinkIcon'
 import StatusIcon from '@/src/components/StatusIcon'
 import useClientNow from '@/src/components/useClientNow'
@@ -103,6 +105,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
               <div className="dip-section-title">Vandaag</div>
               <div style={{ marginBottom: 4 }}>
                 <span className={`status-badge status-badge--${todayBadge.role}`} style={{ fontSize: 13 }}>
+                  {todayBadge.role === 'positive' && <Emoji glyph="🟢" />}
                   <StatusIcon name={todayBadge.icon} size={14} />
                   {todayBadge.text}
                 </span>
@@ -195,7 +198,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
       </div>
 
       {/* ── Menu preview ── */}
-      <main className="page-main">
+      <main className="page-main page-with-tabbar">
         {menuPreview ? (
           <section>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
@@ -289,6 +292,8 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
           </Link>
         </div>
       </main>
+
+      <MobileTabBar />
     </>
   )
 }

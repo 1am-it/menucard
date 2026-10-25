@@ -4,8 +4,10 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import ThemeToggle from '@/src/components/ThemeToggle'
 import PrimaryNav from '@/src/components/PrimaryNav'
+import MobileTabBar from '@/src/components/MobileTabBar'
 import RestaurantBrowseCard from '@/src/components/RestaurantBrowseCard'
 import Wordmark from '@/src/components/Wordmark'
+import Emoji from '@/src/components/Emoji'
 
 // BE-11 Fase 1 — first real, server-first "Alle restaurants" browse
 // vertical slice. Deliberately a new, additive route (not `/restaurants`,
@@ -116,13 +118,16 @@ function AlleRestaurantsPageInner() {
         </div>
       </header>
 
-      <main className="results-section">
-        <h1 style={{ fontSize: 20, fontWeight: 800, margin: '0 0 4px' }}>Alle restaurants</h1>
+      <main className="results-section page-with-tabbar">
+        <h1 style={{ fontSize: 20, fontWeight: 800, margin: '0 0 4px' }}>
+          Alle restaurants <Emoji glyph="🍽️" />
+        </h1>
         <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '0 0 16px' }}>
           Elk bekend restaurant in Breda — ook restaurants die nog geen menukaart hebben.
         </p>
 
-        <form onSubmit={handleSubmit} style={{ marginBottom: 16, maxWidth: 420 }}>
+        <form onSubmit={handleSubmit} className="search-field list-search-field">
+          <Emoji glyph="🔍" />
           <input
             type="text"
             className="search-input"
@@ -175,6 +180,8 @@ function AlleRestaurantsPageInner() {
           </>
         )}
       </main>
+
+      <MobileTabBar />
     </>
   )
 }

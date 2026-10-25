@@ -250,7 +250,7 @@ test('BE-16: no duplication or loss — every restaurant group appears exactly o
   assert.equal(res.results.length, 0, 'no dish is ever left as an individual, non-grouped result');
 });
 
-test('BE-16: menu subgroups carry public example dish objects (dishId/name/category/weakMatch), sufficient to build an exact BE-12 link, in the same relevance order and capped at 3 the ungrouped path already returns', () => {
+test('BE-16: menu subgroups carry public example dish objects (dishId/name/category/weakMatch plus BE-28\'s own price fields), sufficient to build an exact BE-12 link, in the same relevance order and capped at 3 the ungrouped path already returns', () => {
   const ungrouped = searchDishes({ q: 'friet' });
   const grouped = searchDishes({ q: 'friet', group: 'restaurant' });
   const dinerDishes = ungrouped.results.filter((d) => d.mealType === 'diner');
@@ -259,13 +259,24 @@ test('BE-16: menu subgroups carry public example dish objects (dishId/name/categ
   assert.equal(dinerMenu.examples.length, 3, 'capped at the example limit even though 8 dishes match');
   assert.deepEqual(
     dinerMenu.examples,
-    dinerDishes.slice(0, 3).map((d) => ({ dishId: d.dishId, name: d.name, category: d.category, weakMatch: false })),
-    'the first three examples must be the same three dishes, with the same dishId/name/category BE-12 needs, in the same relevance order the ungrouped path already returns; none of these visibly-named "friet" matches is a weak match'
+    dinerDishes.slice(0, 3).map((d) => ({
+      dishId: d.dishId,
+      name: d.name,
+      category: d.category,
+      weakMatch: false,
+      // BE-28 (#65) — the shown example's own real price, so the public
+      // result card can show it on the right. Same public fields as the
+      // ungrouped response; still no internal field.
+      priceDisplay: d.priceDisplay,
+      priceOnRequest: d.priceOnRequest,
+      priceIsFrom: d.priceIsFrom,
+    })),
+    'the first three examples must be the same three dishes, with the same dishId/name/category BE-12 needs and the same real price BE-28 shows, in the same relevance order the ungrouped path already returns; none of these visibly-named "friet" matches is a weak match'
   );
   assert.equal(dinerMenu.menuLink, '/menu/23-diner');
   for (const example of dinerMenu.examples) {
-    const allowedKeys = ['dishId', 'name', 'category', 'weakMatch'];
-    assert.deepEqual(Object.keys(example).sort(), allowedKeys.sort(), 'examples must never leak internal/extra dish fields beyond dishId/name/category/weakMatch');
+    const allowedKeys = ['dishId', 'name', 'category', 'weakMatch', 'priceDisplay', 'priceOnRequest', 'priceIsFrom'];
+    assert.deepEqual(Object.keys(example).sort(), allowedKeys.sort(), 'examples must never leak internal/extra dish fields beyond the public id/name/category/weakMatch/price fields');
     assert.equal(Object.prototype.hasOwnProperty.call(example, 'priceValue'), false);
   }
 });

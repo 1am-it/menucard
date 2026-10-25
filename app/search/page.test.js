@@ -334,7 +334,7 @@ test('BE-13/BE-16: an example that only matched via an internal field shows the 
   const source = readPageSource();
   assert.match(
     source,
-    /\{example\.weakMatch && <span className="dish-result-match-hint"> · Gevonden in aanvullende menudetails<\/span>\}/,
+    /\{example\.weakMatch && <span className="dish-result-match-hint">Gevonden in aanvullende menudetails<\/span>\}/,
     'expected the exact, existing honest hint text, shown only for a weakMatch example'
   );
 });
