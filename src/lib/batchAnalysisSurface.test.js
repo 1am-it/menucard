@@ -183,7 +183,7 @@ test('BE-30 (#72): structure review shows the dishes, the reason, the source pag
   assert.match(review, /target="_blank" rel="noopener noreferrer"/);
   assert.match(review, /Alles klopt zo/);
   assert.match(review, /sourceLink\.text/);
-  assert.match(review, /Zet alle \{required\.length\} rubrieken op/);
+  assert.match(review, /Neem de adviezen over waar ze er zijn/);
   // The bulk action only fills choices; the human still confirms, and the
   // server still re-checks every path (no automatic approval anywhere).
   assert.match(PAGE, /keepAllChoices\(structureReview\.required\)/);

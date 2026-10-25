@@ -441,8 +441,9 @@ export function StructureReview({ idPrefix, review, value, readOnly, onChange, o
             {bulkLabel || 'Alles klopt zo'}
           </button>
           <p className="bta-muted">
-            Zet alle {required.length} rubrieken op “klopt zo”. Je bevestigt daarna zelf de bron; niets wordt automatisch
-            vastgelegd.
+            {adviceByKey.size > 0
+              ? `Neem de adviezen over waar ze er zijn; de overige ${required.length - adviceByKey.size} rubrieken blijven op “klopt zo”. Je bevestigt daarna zelf de bron; niets wordt automatisch vastgelegd.`
+              : `Zet alle ${required.length} rubrieken op “klopt zo”. Je bevestigt daarna zelf de bron; niets wordt automatisch vastgelegd.`}
           </p>
         </div>
       )}
@@ -475,6 +476,7 @@ export function StructureReview({ idPrefix, review, value, readOnly, onChange, o
                     </span>
                   )}
                 </summary>
+                <div className="bta-structure-body">
                 <p className="bta-structure-reason">Twijfel: {section.reason || 'de indeling van dit kopje is niet zeker.'}</p>
                 {adviceEntry && (
                   <div className="bta-advice">
@@ -563,6 +565,7 @@ export function StructureReview({ idPrefix, review, value, readOnly, onChange, o
                   </p>
                 </div>
               )}
+              </div>
               </details>
             </li>
           )

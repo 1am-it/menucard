@@ -3150,8 +3150,11 @@ details.bta-side-card > summary:focus-visible { outline: 2px solid var(--border-
 .bta-structure-edit .stg-input { width: 100%; min-width: 0; }
 .bta-structure-review .bta-muted { overflow-wrap: anywhere; }
 /* BE-30 (#72): per section its dishes, the reason for the doubt and a direct
-   source link, plus one bulk action that only fills the same choices. */
+   source link, plus one bulk action that only fills the same choices.
+   The body wrapper deliberately sets no `display`: a closed <details> must stay
+   closed, and an author `display` rule on a direct child would un-hide it. */
 .bta-structure-section { display: grid; gap: 4px; min-width: 0; }
+.bta-structure-body { padding-top: 4px; min-width: 0; }
 .bta-structure-section > summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; min-height: 44px; padding: 6px 0; cursor: pointer; min-width: 0; }
 .bta-structure-section > summary::marker { color: var(--text-secondary); }
 .bta-structure-section:focus-within { outline: 2px solid var(--accent-fill); outline-offset: 2px; border-radius: var(--radius-sm); }
