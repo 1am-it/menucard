@@ -11,7 +11,7 @@ import StatusIcon from '@/src/components/StatusIcon'
 import { MenuControl, MenuConcept, StructureReview, plural } from './MenuReview'
 import { MAX_BATCH_URLS, DAILY_URL_LIMIT, COPY, ACTION_LABELS, precheckLines, splitLines, offersAiRead } from '@/src/lib/batchAnalysis'
 import { formatPath } from '@/src/lib/menuHierarchy'
-import { parsePathText, reviewKey } from '@/src/lib/menuStructureReview'
+import { parsePathText, reviewKey, keepAllChoices } from '@/src/lib/menuStructureReview'
 
 /** The local per-section state starts from the already recorded decisions. */
 function seedStructure(review) {
@@ -280,6 +280,15 @@ function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBat
     setStructure((prev) => ({ ...prev, [key]: { ...(prev[key] || {}), ...patch } }))
   }
 
+  // BE-30 (criterium 4): "Alles klopt zo" fills exactly the same choices a
+  // reviewer makes by hand and then opens the one explicit confirmation step.
+  // The server still re-checks every path; nothing is stored without that click.
+  function acceptAllStructure() {
+    if (!structureReview) return
+    setStructure(keepAllChoices(structureReview.required))
+    setConfirming(item.jobId)
+  }
+
   useEffect(() => {
     if (open && confirmRef.current) confirmRef.current.focus()
   }, [open])
@@ -414,6 +423,7 @@ function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBat
             value={structure}
             readOnly={!isStarter}
             onChange={changeStructure}
+            onAcceptAll={acceptAllStructure}
           />
         </div>
       )}
@@ -436,6 +446,12 @@ function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBat
           <p id={`bta-confirm-${item.jobId}`} className="bta-confirm-title">
             Bron bevestigen voor {restaurantName}?
           </p>
+          {structureReview && (
+            <p className="bta-confirm-count" role="status">
+              {plural(structureReview.required.length, 'rubriek', 'rubrieken')} bevestigen? Je bevestigt de
+              rubriekindeling van deze bronversie en daarna de bron zelf.
+            </p>
+          )}
           <p className="bta-muted">
             Je bevestigt na eigen controle dat deze menukaart de bron van {restaurantName} is. Er wordt niets
             gepubliceerd.

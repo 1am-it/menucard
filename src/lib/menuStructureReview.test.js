@@ -15,7 +15,13 @@ const {
   parsePathText,
   reviewKey,
   boundedLocator,
+  keepAllChoices,
+  sourceLinkOf,
+  pdfPageOf,
+  safeSourceUrl,
+  uncertaintyReason,
   MAX_LOCATOR,
+  MAX_SECTION_ITEMS,
 } = require('./menuStructureReview');
 const { buildMenuConcept, recognisedLines } = require('./menuConcept');
 
@@ -274,4 +280,119 @@ test('parsePathText: reviewer input becomes bounded labels, or null', () => {
   assert.equal(parsePathText('› ›'), null);
   assert.equal(parsePathText('x'.repeat(121)), null);
   assert.equal(parsePathText('a›b›c›d›e›f›g'), null);
+});
+
+// ── BE-30 (#72): the reviewer sees the dishes, the reason and the page --------
+
+test('BE-30 criterion 1: every uncertain section carries its dishes with the price from the source', () => {
+  const menus = [
+    {
+      title: 'Fictief Diner',
+      structure: 'uncertain',
+      sourceUrl: 'https://voorbeeld.example/menukaart.pdf',
+      categories: [
+        {
+          name: 'Voor',
+          path: ['Voor'],
+          sourcePath: ['DINNER', 'VOOR'],
+          locator: 'pdf:3',
+          uncertain: true,
+          items: [
+            { name: 'Fictieve burrata', price: '13.00' },
+            { name: 'Fictieve soep', price: null, priceText: '8,00 / 12,00' },
+            { name: '   ' },
+            null,
+            { name: 'Fictieve carpaccio', price: '12.50' },
+          ],
+        },
+      ],
+    },
+  ];
+  const [section] = uncertainSections(menus);
+  assert.deepEqual(section.items.map((item) => [item.name, item.price, item.priceText]), [
+    ['Fictieve burrata', '13.00', null],
+    ['Fictieve soep', null, '8,00 / 12,00'],
+    ['Fictieve carpaccio', '12.50', null],
+  ]);
+  // The ids stay stable per section, so React keys and tests do not shift.
+  assert.deepEqual(section.items.map((item) => item.id), ['0.0.0', '0.0.1', '0.0.2']);
+  assert.equal(section.itemCount, 3);
+  assert.equal(section.reason, 'Kopje anders gelezen dan in de bron ("DINNER › VOOR").');
+  assert.deepEqual(section.sourceLink, {
+    url: 'https://voorbeeld.example/menukaart.pdf#page=3',
+    page: 3,
+    text: 'Bekijk pagina 3',
+  });
+});
+
+test('BE-30 criterion 1: a section list is bounded exactly like the menu control', () => {
+  const items = Array.from({ length: MAX_SECTION_ITEMS + 5 }, (_, i) => ({ name: `Fictief gerecht ${i + 1}`, price: '9.50' }));
+  const [section] = uncertainSections([
+    { title: 'Fictief', structure: 'uncertain', categories: [{ name: 'X', path: ['X'], uncertain: true, items }] },
+  ]);
+  assert.equal(section.items.length, MAX_SECTION_ITEMS);
+  assert.equal(section.itemCount, MAX_SECTION_ITEMS + 5);
+});
+
+test('BE-30 criterion 2: "Bekijk pagina N" only for a pdf locator, the plain source URL for a website', () => {
+  assert.equal(pdfPageOf('pdf:12:item:2'), 12);
+  assert.equal(pdfPageOf('pdf:7'), 7);
+  assert.equal(pdfPageOf('paneel Diner, regel 1'), null);
+  assert.equal(pdfPageOf('pdf:0'), null);
+  assert.equal(pdfPageOf(42), null);
+
+  const url = 'https://voorbeeld.example/menukaart.pdf';
+  assert.deepEqual(sourceLinkOf({ sourceUrl: url, locator: 'pdf:2' }), { url: `${url}#page=2`, page: 2, text: 'Bekijk pagina 2' });
+  assert.deepEqual(sourceLinkOf({ sourceUrl: 'https://voorbeeld.example/menu', locator: 'paneel Diner, regel 1' }), {
+    url: 'https://voorbeeld.example/menu',
+    page: null,
+    text: 'Bekijk bron',
+  });
+  // An existing fragment is replaced, never appended twice.
+  assert.equal(sourceLinkOf({ sourceUrl: `${url}#page=9`, locator: 'pdf:4' }).url, `${url}#page=4`);
+  // No usable address: no link at all, never an invented one.
+  assert.equal(sourceLinkOf({ sourceUrl: 'javascript:alert(1)', locator: 'pdf:2' }), null);
+  assert.equal(sourceLinkOf({ sourceUrl: 'niet-een-url', locator: 'pdf:2' }), null);
+  assert.equal(sourceLinkOf({}), null);
+  assert.equal(safeSourceUrl('ftp://voorbeeld.example/menu'), null);
+});
+
+test('BE-30 criterion 2: the reason is plain Dutch and only what the analysis knows', () => {
+  assert.equal(
+    uncertaintyReason({ sourcePath: null, path: ['Koud'], locator: 'paneel Lunch, regel 1' }),
+    'Kopje niet herkend in de bron.',
+  );
+  assert.equal(
+    uncertaintyReason({ sourcePath: ['DINNER', 'VOOR'], path: ['Voor'], locator: 'pdf:1' }),
+    'Kopje anders gelezen dan in de bron ("DINNER › VOOR").',
+  );
+  assert.equal(
+    uncertaintyReason({ sourcePath: ['Voor'], path: ['Voor'], locator: 'pdf:1' }),
+    'De indeling van dit kopje is niet zeker.',
+  );
+  assert.equal(
+    uncertaintyReason({ sourcePath: null, path: ['Koud'], locator: null }),
+    'Kopje niet herkend in de bron; vindplaats niet vastgelegd.',
+  );
+});
+
+test('BE-30 criterion 4: "Alles klopt zo" fills the same keep choices a human would, and nothing else', () => {
+  const reviews = uncertainSections(MENUS);
+  const choices = keepAllChoices(reviews);
+  assert.equal(Object.keys(choices).length, reviews.length);
+  for (const section of reviews) {
+    assert.deepEqual(choices[section.key], { action: 'keep', text: section.label });
+  }
+  // The bulk choices are exactly the payload the server accepts.
+  const validated = validateStructureReviews({
+    menus: MENUS,
+    receiptHash: HASH,
+    submitted: {
+      receipt_hash: HASH,
+      sections: Object.entries(choices).map(([, choice]) => ({ path: choice.text.split(' › '), action: choice.action })),
+    },
+  });
+  assert.equal(validated.ok, true, JSON.stringify(validated));
+  assert.deepEqual(keepAllChoices(null), {});
+  assert.deepEqual(keepAllChoices([{ key: 'x' }]), {});
 });

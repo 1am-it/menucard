@@ -3149,6 +3149,21 @@ details.bta-side-card > summary:focus-visible { outline: 2px solid var(--border-
 .bta-structure-edit label { font-weight: 700; }
 .bta-structure-edit .stg-input { width: 100%; min-width: 0; }
 .bta-structure-review .bta-muted { overflow-wrap: anywhere; }
+/* BE-30 (#72): per section its dishes, the reason for the doubt and a direct
+   source link, plus one bulk action that only fills the same choices. */
+.bta-structure-section { display: grid; gap: 4px; min-width: 0; }
+.bta-structure-section > summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; min-height: 44px; padding: 6px 0; cursor: pointer; min-width: 0; }
+.bta-structure-section > summary::marker { color: var(--text-secondary); }
+.bta-structure-section:focus-within { outline: 2px solid var(--accent-fill); outline-offset: 2px; border-radius: var(--radius-sm); }
+.bta-structure-reason { margin: 0; font-size: 13px; color: var(--text-primary); overflow-wrap: anywhere; }
+.bta-structure-link { color: var(--accent); font-weight: 700; text-decoration: underline; overflow-wrap: anywhere; }
+.bta-structure-link:hover { color: var(--accent-dim); }
+.bta-structure-dishes { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; min-width: 0; }
+.bta-structure-dishes li { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; padding: 3px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+.bta-structure-dishes li:last-child { border-bottom: 0; }
+.bta-structure-dishes .bta-dish { min-width: 0; overflow-wrap: anywhere; }
+.bta-structure-bulk { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; min-width: 0; }
+.bta-structure-bulk .bta-muted { flex: 1 1 220px; margin: 0; font-size: 13px; }
 
 /* ── #59 fase 2: handmatige AI-import (drie stappen) ─────────────────────────
    Kleurtaal v2-tokens only; licht/donker via de bestaande tokens. Status is

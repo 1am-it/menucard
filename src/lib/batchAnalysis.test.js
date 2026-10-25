@@ -315,6 +315,52 @@ test('uncertain structure: the human route never widens the own-source rule', ()
   assert.ok(!noMenus.actions.includes('confirm'));
 });
 
+// BE-30 (#72): the reviewer gets the dishes, the reason and the page of the
+// source from the same stored receipt — no AI, no extra request.
+test('BE-30: the structure review carries the section dishes and a direct page link', () => {
+  const receiptMenus = [
+    {
+      title: 'Fictief Diner',
+      structure: 'uncertain',
+      sourceUrl: 'https://bistro-voorbeeld.example/menukaart.pdf',
+      categories: [
+        {
+          name: 'Voor',
+          path: ['Voor'],
+          sourcePath: ['DINNER', 'VOOR'],
+          locator: 'pdf:3:item:1',
+          uncertain: true,
+          items: [{ name: 'Fictieve burrata', price: '13.00' }],
+        },
+      ],
+    },
+  ];
+  const v = derive({ receipt: receipt({ analysis_result_hash: 'a'.repeat(64), menus: receiptMenus }) });
+  const [section] = v.structureReview.required;
+  assert.equal(section.label, 'Voor');
+  assert.deepEqual(section.items.map((dish) => [dish.name, dish.price]), [['Fictieve burrata', '13.00']]);
+  assert.deepEqual(section.sourceLink, {
+    url: 'https://bistro-voorbeeld.example/menukaart.pdf#page=3',
+    page: 3,
+    text: 'Bekijk pagina 3',
+  });
+  assert.match(section.reason, /^Kopje anders gelezen dan in de bron/);
+  // The client payload the server re-checks is unchanged: path and action only.
+  assert.deepEqual(Object.keys(section).sort(), [
+    'id',
+    'itemCount',
+    'items',
+    'key',
+    'label',
+    'locator',
+    'path',
+    'reason',
+    'sourceLink',
+    'sourcePath',
+    'sourceRoute',
+  ]);
+});
+
 test('uncertain structure: a confirmed proposal is shown as confirmed, never as high certainty', () => {
   const v = derive({
     receipt: structureReceipt(),

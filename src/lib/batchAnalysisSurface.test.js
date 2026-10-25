@@ -132,3 +132,27 @@ test('menu review: control view links to the original menu safely; concept is in
   assert.doesNotMatch(route, /export async function (GET|PUT|PATCH|DELETE)/);
   assert.match(PAGE, /\$\{API\}\/\$\{viewing\.batch\.id\}\/concept/);
 });
+
+// BE-30 (#72): the reviewer sees the dishes, the reason and the page of the
+// source per uncertain section, and one bulk action that still asks for the
+// human confirmation. Free: no AI, no extra fetch, nothing published.
+test('BE-30 (#72): structure review shows the dishes, the reason, the source page and one bulk confirmation', () => {
+  const review = read('app/internal/source-triage/batch/MenuReview.js');
+  assert.match(review, /<details className="bta-structure-section">/);
+  assert.match(review, /bta-structure-dishes/);
+  assert.match(review, /Twijfel: \{section\.reason/);
+  assert.match(review, /section\.sourceLink/);
+  assert.match(review, /target="_blank" rel="noopener noreferrer"/);
+  assert.match(review, /Alles klopt zo/);
+  assert.match(review, /sourceLink\.text/);
+  assert.match(review, /Zet alle \{required\.length\} rubrieken op/);
+  // The bulk action only fills choices; the human still confirms, and the
+  // server still re-checks every path (no automatic approval anywhere).
+  assert.match(PAGE, /keepAllChoices\(structureReview\.required\)/);
+  assert.match(PAGE, /setConfirming\(item\.jobId\)/);
+  assert.match(PAGE, /plural\(structureReview\.required\.length, 'rubriek', 'rubrieken'\)\} bevestigen\?/);
+  assert.doesNotMatch(review, /fetch\(/);
+  assert.match(BTA_CSS, /\.bta-structure-dishes/);
+  assert.match(BTA_CSS, /\.bta-structure-bulk/);
+  assert.match(BTA_CSS, /\.bta-structure-link/);
+});
