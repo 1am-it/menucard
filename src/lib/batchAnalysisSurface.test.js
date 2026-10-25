@@ -194,3 +194,8 @@ test('BE-30 (#72): structure review shows the dishes, the reason, the source pag
   assert.match(BTA_CSS, /\.bta-structure-bulk/);
   assert.match(BTA_CSS, /\.bta-structure-link/);
 });
+test('BE-30: rubric review shows source prices in Dutch notation', () => {
+  const source = fs.readFileSync(path.join(__dirname, '..', '..', 'app', 'internal', 'source-triage', 'batch', 'MenuReview.js'), 'utf8');
+  assert.match(source, /export function dutchPrice/);
+  assert.equal((source.match(/dutchPrice\(dish\.price\)/g) || []).length, 2);
+});

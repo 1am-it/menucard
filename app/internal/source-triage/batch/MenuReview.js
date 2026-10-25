@@ -78,6 +78,13 @@ const PRODUCT_PRICE_LABELS = {
   unknown: 'Prijs onbekend',
 };
 
+// Prices read from a source arrive as "13.00"; staff see Dutch notation ("13,00").
+export function dutchPrice(value) {
+  if (value === null || value === undefined || value === '') return value
+  const text = String(value)
+  return /^\d+\.\d{1,2}$/.test(text) ? text.replace('.', ',') : text
+}
+
 function productPriceText(price) {
   if (!price) return 'Prijs onbekend';
   if (price.status === 'known' || price.status === 'from') {
@@ -364,7 +371,7 @@ export function MenuControl({ item }) {
                 <li key={dish.id}>
                   <span className="bta-dish">{dish.name}</span>
                   <span className={dish.price ? 'bta-price' : 'bta-price bta-price--missing'}>
-                    {dish.price || (dish.priceText ? `${dish.priceText} · meerdere prijzen` : 'geen prijs')}
+                    {dutchPrice(dish.price) || (dish.priceText ? `${dish.priceText} · meerdere prijzen` : 'geen prijs')}
                   </span>
                 </li>
               ))}
@@ -507,7 +514,7 @@ export function StructureReview({ idPrefix, review, value, readOnly, onChange, o
                       <li key={dish.id}>
                         <span className="bta-dish">{dish.name}</span>
                         <span className={dish.price ? 'bta-price' : 'bta-price bta-price--missing'}>
-                          {dish.price || (dish.priceText ? `${dish.priceText} · meerdere prijzen` : 'geen prijs')}
+                          {dutchPrice(dish.price) || (dish.priceText ? `${dish.priceText} · meerdere prijzen` : 'geen prijs')}
                         </span>
                       </li>
                     ))}
