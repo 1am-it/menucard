@@ -2657,8 +2657,8 @@ mark.search-highlight {
 /* ── BE-11 Fase 1 — light restaurant browse card ──────────────────────────
    Deliberately new, "lrc-" ("light restaurant card") namespaced classes —
    never reuses or redefines the existing rc-prefixed / .restaurant-card
-   rules above, which app/restaurants/page.js's heavier card still depends
-   on.
+   rules above. Those legacy rules stay because shared classes still use
+   them; the old /restaurants page itself is now a redirect.
    Reuses the existing .restaurant-grid container class (layout-only, no
    card-specific styling) and design tokens from :root. See
    docs/mockups/be-11-menu-discovery-v1.html for the directional
@@ -4117,10 +4117,10 @@ header, .site-header { height: auto; min-height: var(--header-h); }
 .ar-arrow { display: none; flex: none; color: var(--accent); font-size: 18px; font-weight: 800; }
 
 /* ── BE-28b (#68): dezelfde stijl op de overige publieke pagina's ──
-   /restaurants, /restaurant/[id], /menu/[id], /claim/[id] en /nvwa/[id]
-   gebruiken dezelfde tokens, ronde kaarten en pillen. Geen route, geen
-   gedrag en geen nieuwe stijl-familie; alleen de bestaande klassen krijgen
-   de BE-28-vorm. */
+   /restaurant/[id], /menu/[id], /claim/[id] en /nvwa/[id] gebruiken
+   dezelfde tokens, ronde kaarten en pillen. Geen route, geen gedrag en geen
+   nieuwe stijl-familie; alleen de bestaande klassen krijgen de BE-28-vorm.
+   (/restaurants is sinds BE-29 een redirect; gedeelde klassen blijven.) */
 .back-btn {
   display: inline-flex;
   align-items: center;
@@ -4132,7 +4132,9 @@ header, .site-header { height: auto; min-height: var(--header-h); }
 }
 .back-btn:hover { border-color: var(--border-hover); color: var(--text-primary); }
 
-/* /restaurants — de bestaande opbouw, nu in de frisse vorm. */
+/* Legacy /restaurants-opbouw: de route is sinds BE-29 een permanente
+   redirect, maar deze gedeelde hero-/kaartklassen blijven voor de andere
+   publieke pagina's. */
 .hero-section {
   max-width: var(--max-w);
   margin: 24px auto 0;
