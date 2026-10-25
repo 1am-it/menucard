@@ -3,6 +3,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import ThemeToggle from '@/src/components/ThemeToggle'
 import Wordmark from '@/src/components/Wordmark'
+import MobileTabBar from '@/src/components/MobileTabBar'
 
 // EU Verordening 1169/2011 — 14 verplichte allergenen
 const EU14 = [
@@ -159,27 +160,21 @@ export default function NvwaView({ id, restaurant, allItems }) {
 
           {/* Meal type filter */}
           {mealTypes.length > 1 && (
-            <div style={{ display: 'flex', gap: 6 }}>
+            <div className="nvwa-filter-row">
               <button
-                onClick={() => setFilterMeal('')}
-                style={{
-                  padding: '5px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600,
-                  border: `1px solid ${!filterMeal ? 'var(--accent)' : 'var(--input-border)'}`,
-                  background: !filterMeal ? 'var(--accent-faint)' : 'var(--bg-input)',
-                  color: !filterMeal ? 'var(--accent)' : 'var(--text-secondary)', cursor: 'pointer',
-                }}>
+                type="button"
+                aria-pressed={!filterMeal}
+                className={`filter-chip ${!filterMeal ? 'active' : ''}`}
+                onClick={() => setFilterMeal('')}>
                 Alle kaarten
               </button>
               {mealTypes.map(m => (
                 <button
                   key={m}
-                  onClick={() => setFilterMeal(m)}
-                  style={{
-                    padding: '5px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600,
-                    border: `1px solid ${filterMeal === m ? 'var(--accent)' : 'var(--input-border)'}`,
-                    background: filterMeal === m ? 'var(--accent-faint)' : 'var(--bg-input)',
-                    color: filterMeal === m ? 'var(--accent)' : 'var(--text-secondary)', cursor: 'pointer',
-                  }}>
+                  type="button"
+                  aria-pressed={filterMeal === m}
+                  className={`filter-chip ${filterMeal === m ? 'active' : ''}`}
+                  onClick={() => setFilterMeal(m)}>
                   {m.charAt(0).toUpperCase() + m.slice(1)}
                 </button>
               ))}
@@ -187,28 +182,22 @@ export default function NvwaView({ id, restaurant, allItems }) {
           )}
 
           {/* Allergen filter */}
-          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+          <div className="nvwa-filter-row">
             <button
-              onClick={() => setFilterAllergen(null)}
-              style={{
-                padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 600,
-                border: `1px solid ${filterAllergen === null ? 'var(--accent)' : 'var(--input-border)'}`,
-                background: filterAllergen === null ? 'var(--accent-faint)' : 'var(--bg-input)',
-                color: filterAllergen === null ? 'var(--accent)' : 'var(--text-secondary)', cursor: 'pointer',
-              }}>
+              type="button"
+              aria-pressed={filterAllergen === null}
+              className={`filter-chip filter-chip--small ${filterAllergen === null ? 'active' : ''}`}
+              onClick={() => setFilterAllergen(null)}>
               Alle allergenen
             </button>
             {EU14.map(a => (
               <button
                 key={a.id}
-                onClick={() => setFilterAllergen(filterAllergen === a.id ? null : a.id)}
+                type="button"
                 title={a.name}
-                style={{
-                  padding: '4px 8px', borderRadius: 6, fontSize: 11,
-                  border: `1px solid ${filterAllergen === a.id ? 'var(--accent)' : 'var(--input-border)'}`,
-                  background: filterAllergen === a.id ? 'var(--accent-faint)' : 'var(--bg-input)',
-                  color: filterAllergen === a.id ? 'var(--accent)' : 'var(--text-secondary)', cursor: 'pointer',
-                }}>
+                aria-pressed={filterAllergen === a.id}
+                className={`filter-chip filter-chip--small ${filterAllergen === a.id ? 'active' : ''}`}
+                onClick={() => setFilterAllergen(filterAllergen === a.id ? null : a.id)}>
                 {a.icon} {a.short}
               </button>
             ))}
@@ -355,6 +344,7 @@ export default function NvwaView({ id, restaurant, allItems }) {
           </p>
         </div>
       </div>
+      <MobileTabBar />
     </>
   )
 }
