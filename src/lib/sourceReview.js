@@ -233,8 +233,13 @@ function rowForBatchItem(item, { batchId, returnTo, now, aiReady } = {}) {
     // a real source. Otherwise the row says "Handmatig toevoegen" — never a
     // "Lees met AI" that can only read text.
     if (key === 'image_only') {
-      if (base.jobId && aiReady === true) return row('no_menu', STEPS.ai_read_image);
-      return row('blocked', STEPS.manual);
+      // Without a job there is no source at all: a blocked row with the manual
+      // route. With a job the row keeps the same outcome (a menu exists only as
+      // an image) and differs only in its one next step: the AI reading when it
+      // can read an image, the manual import when it cannot.
+      if (!base.jobId) return row('blocked', STEPS.manual);
+      if (aiReady === true) return row('no_menu', STEPS.ai_read_image);
+      return row('no_menu', STEPS.manual);
     }
     // An AI reading needs the existing analysis job; without one, the honest
     // fallback is the manual import, never a button that cannot work.

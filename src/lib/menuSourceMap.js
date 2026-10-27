@@ -90,7 +90,7 @@ function chooseCardView({ kind, hasText = true, pageCount = 1, images } = {}) {
   if (imageList.length > 0) {
     return {
       mode: 'images',
-      label: imageList.length === 1 ? 'Afbeelding · 1 menu-afbeelding' : `Afbeeldingen · ${imageList.length} menu-afbeeldingen`,
+      label: imageList.length === 1 ? 'Menukaart · 1 afbeelding' : `Menukaart · ${imageList.length} afbeeldingen`,
       notice: IMAGE_MENU_NOTICE,
       pageRenderable: true,
       reason: 'image_menu',

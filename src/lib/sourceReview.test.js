@@ -350,10 +350,11 @@ test('BE-33: an image/scan row offers "Lees met AI (afbeelding)" only when AI ca
   assert.equal(ready.step.label, '📷 Lees met AI (afbeelding)');
   // It is still the existing menu-import route of the same job.
   assert.match(stepHref(ready, { batchId: 'batch-1' }), /^\/internal\/menu-import\?job=job-7/);
-  // AI off, budget exhausted, a failed status request or no status yet: manual.
+  // AI off, budget exhausted, a failed status request or no status yet: manual,
+  // with the same outcome as the AI step (the menu exists only as an image).
   for (const aiReady of [false, null, undefined]) {
     const manual = rowForBatchItem(item, { batchId: 'batch-1', aiReady });
-    assert.equal(manual.state, 'blocked', `aiReady=${String(aiReady)} → state`);
+    assert.equal(manual.state, 'no_menu', `aiReady=${String(aiReady)} → state`);
     assert.equal(manual.step.key, 'manual', `aiReady=${String(aiReady)} → step`);
     assert.equal(manual.step.label, '✍️ Handmatig toevoegen');
     assert.match(stepHref(manual, { batchId: 'batch-1' }), /^\/internal\/menu-import\?restaurant=r-1/);

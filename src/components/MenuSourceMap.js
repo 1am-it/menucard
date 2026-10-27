@@ -91,7 +91,9 @@ export default function MenuSourceMap({
             aria-pressed={entry.id === sourceId}
             onClick={() => onSelectSource(entry.id)}
           >
-            {entry.id} · {entry.view.label} · {entry.counts.uncovered} niet overgenomen
+            {entry.view.mode === 'images' || entry.view.mode === 'pdf_scan'
+              ? `${entry.id} · ${entry.view.label}`
+              : `${entry.id} · ${entry.view.label} · ${entry.counts.uncovered} niet overgenomen`}
           </button>
         ))}
       </div>
@@ -116,7 +118,8 @@ export default function MenuSourceMap({
             <span className="mai-map-counts">
               {card.source.view.mode === 'images' || card.source.view.mode === 'pdf_scan' ? (
                 <>
-                  {Array.isArray(card.dishes) ? card.dishes.length : 0} gerechten gelezen · Controle nodig
+                  {Array.isArray(card.dishes) ? card.dishes.length : 0}{' '}
+                  {(Array.isArray(card.dishes) ? card.dishes.length : 0) === 1 ? 'gerecht' : 'gerechten'} gelezen · Controle nodig
                 </>
               ) : (
                 <>
@@ -133,19 +136,19 @@ export default function MenuSourceMap({
                 className="stg-btn-secondary mai-btn"
                 disabled={busy || number <= 1}
                 onClick={() => onPage(number - 1)}
-                aria-label={`Vorige pagina, pagina ${Math.max(1, number - 1)} van ${total}`}
+                aria-label={`Vorige ${card.source.view.mode === 'images' ? 'afbeelding' : 'pagina'}, ${Math.max(1, number - 1)} van ${total}`}
               >
                 Vorige
               </button>
               <span className="mai-why">
-                Pagina {number} van {total}
+                {card.source.view.mode === 'images' ? 'Afbeelding' : 'Pagina'} {number} van {total}
               </span>
               <button
                 type="button"
                 className="stg-btn-secondary mai-btn"
                 disabled={busy || number >= total}
                 onClick={() => onPage(number + 1)}
-                aria-label={`Volgende pagina, pagina ${Math.min(total, number + 1)} van ${total}`}
+                aria-label={`Volgende ${card.source.view.mode === 'images' ? 'afbeelding' : 'pagina'}, ${Math.min(total, number + 1)} van ${total}`}
               >
                 Volgende
               </button>

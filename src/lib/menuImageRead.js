@@ -32,7 +32,6 @@ const IMAGE_MEDIA_TYPES = Object.freeze({
   png: 'image/png',
   webp: 'image/webp',
 });
-const IMAGE_EXTENSION = /\.(jpe?g|png|webp)(?:[?#]|$)/i;
 // The words that make a file or an alt text a menu image. Deliberately the same
 // vocabulary the deterministic analysis already uses for this signal.
 const MENU_HINT = /(?:menu|menukaart|kaart|lunch|diner|dinner|spijskaart|gerechten|food|drinks|dranken)/i;
