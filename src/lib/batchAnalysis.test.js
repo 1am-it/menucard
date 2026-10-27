@@ -76,20 +76,23 @@ test('doubt, robots.txt and no usable menu → "Beoordeel handmatig"; "Robots ge
   assert.ok(!none.actions.includes('retry'));
 });
 
-test('an image-or-scan-only menu gets an explicit non-supported status and a working human route', () => {
+test('an image-or-scan-only menu gets an honest status and a working human route', () => {
   const failedPdf = derive({
     job: job({ status: 'failed', error_reason: 'pdf_no_text_layer', result_receipt_id: null }),
     receipt: null,
   });
   assert.equal(failedPdf.key, 'image_only');
-  assert.equal(failedPdf.label, 'Menu alleen als afbeelding: niet ondersteund');
+  assert.equal(failedPdf.label, 'Menu alleen als afbeelding · lees met AI of met de hand');
   assert.equal(failedPdf.role, 'blocked');
   assert.equal(failedPdf.high, false);
   assert.equal(failedPdf.terminal, true);
   assert.deepEqual(failedPdf.actions, ['review_source', 'adjust_url']);
   assert.equal(failedPdf.reason, 'pdf_no_text_layer');
   assert.match(failedPdf.text, /geen leesbare tekstlaag/);
-  assert.match(failedPdf.text, /geen OCR/);
+  // BE-33 (#79, criterion 1): the old copy claimed the app cannot read an image
+  // at all. It can now, so that sentence may never come back.
+  assert.match(failedPdf.text, /Lees de PDF met AI/);
+  assert.doesNotMatch(failedPdf.text, /leest geen beeld|geen OCR/);
   assert.equal(ACTION_LABELS.review_source, 'Bronnen beoordelen');
 
   const imagePage = derive({
@@ -100,6 +103,8 @@ test('an image-or-scan-only menu gets an explicit non-supported status and a wor
   });
   assert.equal(imagePage.key, 'image_only');
   assert.equal(imagePage.reason, 'image_only_menu');
+  assert.match(imagePage.text, /Lees de afbeelding met AI/);
+  assert.doesNotMatch(imagePage.text, /leest geen beeld|geen OCR/);
   assert.deepEqual(imagePage.actions, ['review_source', 'adjust_url']);
   assert.ok(!imagePage.actions.includes('confirm'));
 

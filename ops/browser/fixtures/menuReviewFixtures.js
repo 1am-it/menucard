@@ -507,12 +507,12 @@ const partialItem = item({
 // and the two human routes (Bronnen beoordelen / URL aanpassen).
 const imageOnlyItem = item({
   key: 'image_only',
-  label: 'Menu alleen als afbeelding: niet ondersteund',
+  label: 'Menu alleen als afbeelding · lees met AI of met de hand',
   role: 'blocked',
   icon: 'warning',
   terminal: true,
   actions: ['review_source', 'adjust_url'],
-  text: 'De menukaart is alleen als afbeelding of scan beschikbaar. Deze import leest geen beeld en gebruikt geen OCR, dus er is niets als gerecht opgeslagen. Beoordeel de bron of kies een tekst- of pdf-bron.',
+  text: 'De menukaart is alleen als afbeelding beschikbaar. Automatisch is er niets als gerecht opgeslagen. Lees de afbeelding met AI of voeg de gerechten handmatig toe.',
   reason: 'image_only_menu',
   menu: null,
   concept: null,

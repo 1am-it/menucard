@@ -22,7 +22,7 @@ import InternalNav from '@/src/components/InternalNav'
 import SourceResultRow from '@/src/components/SourceResultRow'
 import useBatchProcessing from '@/src/components/useBatchProcessing'
 import { decideAddEntry, manualImportHref, MAX_BATCH_URLS } from '@/src/lib/internalAddEntry'
-import { rowForBatchItem, stepHref, CHECK_COPY } from '@/src/lib/sourceReview'
+import { rowForBatchItem, stepHref, aiReadReady, CHECK_COPY } from '@/src/lib/sourceReview'
 import { discoveryRow, originLabel } from '@/src/lib/sourceDiscovery'
 import { OSM_ATTRIBUTION } from '@/src/lib/osmSource'
 
@@ -31,6 +31,8 @@ const BATCH_API = '/api/internal/v1/batch-analysis'
 // BE-32 (#75, criterion 2): the same engine as "Vind bronnen", for one restaurant.
 const DISCOVERY_API = '/api/internal/v1/source-discovery'
 const TRIAGE_API = '/api/internal/v1/source-triage'
+// BE-33 (#79): the existing AI status; it decides the image/scan row step only.
+const AI_API = '/api/internal/v1/menu-ai-import'
 
 function newBatchId() {
   return typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : null
@@ -56,6 +58,8 @@ export default function AddEntryPage() {
   const [discoveryBusy, setDiscoveryBusy] = useState(false)
   const [discoveryNotice, setDiscoveryNotice] = useState(null)
   const [prefill, setPrefill] = useState(null)
+  // BE-33 (#79): AI availability for the image/scan row; null means "manual".
+  const [aiStatus, setAiStatus] = useState(null)
   const debounce = useRef(null)
 
   useEffect(() => {
@@ -80,6 +84,24 @@ export default function AddEntryPage() {
   }, [router])
 
   const token = session && session.access_token
+
+  // BE-33 (#79, criterion 1): the image/scan row may only offer the AI reading
+  // when the same status endpoint says AI is on and the budget allows it.
+  useEffect(() => {
+    if (!token) return
+    let live = true
+    fetch(AI_API, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((body) => {
+        if (live) setAiStatus(body || null)
+      })
+      .catch(() => {
+        if (live) setAiStatus(null)
+      })
+    return () => {
+      live = false
+    }
+  }, [token])
 
   // The rows of one batch, read through the existing GET. Used after a start and
   // by the ?batch= deeplink (also the way back from "Menukopjes controleren").
@@ -535,7 +557,7 @@ export default function AddEntryPage() {
             </p>
             <ol className="srr-list" aria-label="Resultaat van deze toevoeging">
               {activeBatch.items.map((item) => {
-                const row = rowForBatchItem(item, { batchId: activeBatch.batch.id, now: new Date() })
+                const row = rowForBatchItem(item, { batchId: activeBatch.batch.id, now: new Date(), aiReady: aiReadReady(aiStatus) })
                 const returnTo = `/internal/toevoegen?batch=${encodeURIComponent(activeBatch.batch.id)}`
                 return (
                   <SourceResultRow

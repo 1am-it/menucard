@@ -264,7 +264,7 @@ async function imageOnlyScenario(cdp) {
   await openRoute(
     cdp,
     `${BATCH_URL}?fixture=image_only&${BATCH_QUERY}&item=1&theme=light`,
-    `document.body.innerText.includes('Menu alleen als afbeelding: niet ondersteund')`,
+    `document.body.innerText.includes('Menu alleen als afbeelding · lees met AI of met de hand')`,
   );
   const snapshot = await evalJs(cdp, `(() => {
     const text = document.body.innerText;
@@ -278,7 +278,7 @@ async function imageOnlyScenario(cdp) {
       theme: document.documentElement.getAttribute('data-theme'),
     };
   })()`);
-  check('image-only: the explicit non-supported status is shown', snapshot.text.includes('Menu alleen als afbeelding: niet ondersteund'));
+  check('image-only: the honest image/scan status is shown', snapshot.text.includes('Menu alleen als afbeelding · lees met AI of met de hand'));
   check('image-only: no successful extraction is claimed', !snapshot.text.includes('Menukaart gevonden') && !snapshot.text.includes('Bron bevestigd'));
   check('image-only: the reason stays visible', snapshot.text.includes('beeldanalyse/OCR is niet geconfigureerd'));
   check('image-only: no confirm action is offered', !snapshot.hasConfirm);
@@ -295,14 +295,14 @@ async function imageOnlyScenario(cdp) {
   await openRoute(
     cdp,
     `${BATCH_URL}?fixture=image_only&${BATCH_QUERY}&item=1&theme=dark`,
-    `document.body.innerText.includes('Menu alleen als afbeelding: niet ondersteund')`,
+    `document.body.innerText.includes('Menu alleen als afbeelding · lees met AI of met de hand')`,
   );
   const small = await evalJs(cdp, `(() => ({
     text: document.body.innerText,
     theme: document.documentElement.getAttribute('data-theme'),
     overflow: document.documentElement.scrollWidth - window.innerWidth,
   }))()`);
-  check('image-only: the status and reason also hold at 320 px/dark', small.text.includes('Menu alleen als afbeelding: niet ondersteund') && small.text.includes('beeldanalyse/OCR is niet geconfigureerd'));
+  check('image-only: the status and reason also hold at 320 px/dark', small.text.includes('Menu alleen als afbeelding · lees met AI of met de hand') && small.text.includes('beeldanalyse/OCR is niet geconfigureerd'));
   check('image-only: no horizontal overflow at 320 px', small.overflow <= 0, `overflow=${small.overflow}`);
   check('image-only: dark theme is active at 320 px', small.theme === 'dark');
   screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'menu-review-image-only-320-dark.png'));
@@ -336,12 +336,12 @@ async function imageOnlyScenario(cdp) {
   check('image-only follow-up: the restaurant is preselected', triage.detailTitle.includes('Fictief Brasserie Noord'));
   check(
     'image-only follow-up: the detail names the real reason',
-    triage.detailText.includes('Menu alleen als afbeelding of scan: niet ondersteund'),
+    triage.detailText.includes('Menu alleen als afbeelding of scan: lees het met AI of met de hand'),
     triage.followupText,
   );
   check(
     'image-only follow-up: the detail names the fitting next step',
-    triage.detailText.includes('Kies een andere tekst- of pdf-bron of markeer deze bron als onbruikbaar'),
+    triage.detailText.includes('Lees de afbeelding met AI, kies een andere tekst- of pdf-bron of markeer deze bron als onbruikbaar'),
     triage.detailText.slice(0, 200),
   );
   check(

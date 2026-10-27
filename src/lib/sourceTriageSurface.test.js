@@ -91,8 +91,9 @@ test('the same result row component renders the batch rows here and elsewhere', 
 });
 
 test('the new task definition is shown: one task per restaurant, the age and one recheck button', () => {
-  // The chips and the list keep the same one task per restaurant.
-  assert.match(code, /selectTasks\(\{ entries, batchDetails: details, returnTo: BRONNEN_HREF, now: new Date\(\) \}\)/);
+  // The chips and the list keep the same one task per restaurant. BE-33 (#79)
+  // adds only the AI availability flag of the image/scan row step.
+  assert.match(code, /selectTasks\(\{ entries, batchDetails: details, returnTo: BRONNEN_HREF, now: new Date\(\), aiReady \}\)/);
   assert.match(code, /import useBatchProcessing from '@\/src\/components\/useBatchProcessing'/);
   assert.match(code, /batchId: recheckBatchId/);
   // The age of a result stays visible; nothing expires automatically.

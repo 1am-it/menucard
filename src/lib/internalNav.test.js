@@ -501,7 +501,12 @@ test('structural safety net: the add page reuses the existing analysis and onboa
   assert.match(source, /await loadBatch\(body\.batch\.id\)/);
   assert.match(source, /SourceResultRow/);
   assert.match(source, /setFallbackHref\(decision\.href\)/);
-  assert.doesNotMatch(source, /menu-ai-import/);
+  // BE-33 (#79): the page only *reads* the existing AI status, because the
+  // image/scan row may offer "Lees met AI (afbeelding)" only when AI can read
+  // it. It never calls the AI reading route and starts nothing by itself.
+  assert.match(source, /const AI_API = '\/api\/internal\/v1\/menu-ai-import'/);
+  assert.doesNotMatch(source, /method:\s*'POST'[\s\S]{0,200}AI_API/);
+  assert.doesNotMatch(source, /fetch\(AI_API,\s*\{[^}]*method/);
 });
 
 test('structural safety net: the batch page accepts the prefill without starting anything by itself', () => {
