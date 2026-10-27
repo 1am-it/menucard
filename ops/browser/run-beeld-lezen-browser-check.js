@@ -9,6 +9,9 @@
 // What it shows, at 1280 and 390 px in light and dark:
 //   1. the result row of an image-only menu: "📷 Lees met AI (afbeelding)" when
 //      the AI is on and the budget allows it, "✍️ Handmatig toevoegen" when not;
+//      BE-35 (#84, criterion 3): the row also says why — "AI staat uit
+//      (instelling ontbreekt)." — and that row is saved once as
+//      be35-rij-1280-light-ai-uit.png for that review;
 //   2. the Kaart view of the same menu: the image beside the dishes, each dish
 //      with "Controle nodig" and "gelezen van afbeelding N", and "Nalopen in de
 //      lijst" back to that row.
@@ -204,6 +207,14 @@ async function rowScenario(cdp, width, theme, aiState) {
       row.action === '✍️ Handmatig toevoegen',
       JSON.stringify({ action: row.action, labels: row.aiLabels }),
     );
+    // BE-35 (#84, criterion 3): the row says in plain words why it offers the
+    // manual route instead of the AI one — the same reason the menu-import page
+    // shows for this answer of the existing status endpoint.
+    check(
+      `rij (${width}/${theme}/${aiState}): de rij zegt waarom de AI niet beschikbaar is`,
+      flatText(row.rowText).includes('AI staat uit (instelling ontbreekt).'),
+      flatText(row.rowText).slice(0, 240),
+    );
     check(
       `rij (${width}/${theme}/${aiState}): die stap opent de bestaande handmatige import`,
       typeof row.href === 'string' && row.href.startsWith('/internal/menu-import?restaurant=9010') && !row.href.includes('image=1'),
@@ -243,6 +254,21 @@ async function rowScenario(cdp, width, theme, aiState) {
   }
   await focusOn(cdp, '.cov-check-table');
   await shot(cdp, `be33-rij-${width}-${theme}-${aiState}.png`, { scenario: 'row', aiState });
+  // BE-35 (#84): the one screenshot the review asks for — a row with the reason,
+  // at 1280 px in light. Its own evidence folder, like every earlier ticket, so
+  // the BE-33 set stays exactly what that ticket proved.
+  if (width === 1280 && theme === 'light' && aiState === 'off') {
+    const be35Dir = path.join(__dirname, 'evidence', 'be-35');
+    fs.mkdirSync(be35Dir, { recursive: true });
+    const file = await screenshot(cdp, be35Dir, 'be35-rij-1280-light-ai-uit.png');
+    shots.push({
+      ...file,
+      viewport: `${viewport.width}x${viewport.height}`,
+      scenario: 'row-with-reason',
+      aiState,
+      dir: 'ops/browser/evidence/be-35',
+    });
+  }
 }
 
 

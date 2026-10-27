@@ -22,6 +22,7 @@ const {
   rowForBatchItem,
   stepHref,
   aiReadReady,
+  aiUnavailableText,
   safeReturnHref,
   menukopjesBackHref,
   rowNeedsAction,
@@ -30,6 +31,8 @@ const {
   filterTasks,
   effectiveTaskFilter,
   coverageRows,
+  confirmedCheckUrl,
+  recheckUrlFor,
   checkSelection,
   canStartCheck,
   countSourceReviewTasks,
@@ -617,6 +620,258 @@ test('addresses: a 308 sends both old addresses to /internal/bronnen', async () 
   assert.equal(fs.existsSync(path.join(REPO_ROOT, 'app/internal/source-triage/page.js')), false);
 });
 
-// __SOURCE_REVIEW_TEST_APPEND__
+// ── BE-35 (#84): the confirmed link leads the check, and the row says why ─────
+//
+// The practical test of 2026-10-27 (Al Dente): the menu link on the restaurant's
+// own domain was confirmed, "Controleer" analysed the homepage instead, and the
+// outcome was "Geen menukaart gevonden". Fictional addresses below; the shape is
+// the real one.
+function confirmedAlDente() {
+  return entry({
+    restaurant_id: 'aldente',
+    name: 'Fictief Al Dente',
+    domain: 'fictief-aldente.invalid',
+    known_url: 'https://fictief-aldente.invalid/',
+    not_in_queue_reason: 'never_checked',
+    proposals: [
+      {
+        id: 'p-be35',
+        kind: 'add_candidate',
+        status: 'accepted',
+        proposed_url: 'https://fictief-aldente.invalid/menukaart-restaurant-2/',
+        proposed_at: '2026-10-27T09:00:00.000Z',
+        decided_at: '2026-10-27T09:05:00.000Z',
+        note:
+          'Herkomst: eigen website · website: https://fictief-aldente.invalid · menulink: https://fictief-aldente.invalid/menukaart-restaurant-2/',
+      },
+    ],
+  });
+}
+
+test('BE-35: "Controleer" uses the menu link of the confirmed proposal, not the homepage', () => {
+  const rows = coverageRows([confirmedAlDente()]);
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].url, 'https://fictief-aldente.invalid/menukaart-restaurant-2/');
+  // The provenance of BE-32 travels with it: this is an own-website menu link.
+  assert.equal(rows[0].checkUrlSource, 'proposal_menu');
+  assert.equal(rows[0].checkUrlOrigin, 'same_host');
+  assert.equal(rows[0].canCheck, true);
+  assert.deepEqual(rows[0].step, STEPS.check_proposal);
+  // "Controleer N geselecteerde" submits exactly that link.
+  assert.deepEqual(checkSelection(rows, new Set(['aldente'])).urls, [
+    'https://fictief-aldente.invalid/menukaart-restaurant-2/',
+  ]);
+  // The rule itself, without the screen around it.
+  assert.deepEqual(confirmedCheckUrl(confirmedAlDente()), {
+    url: 'https://fictief-aldente.invalid/menukaart-restaurant-2/',
+    from: 'proposal_menu',
+    origin: 'same_host',
+    website: 'https://fictief-aldente.invalid',
+    proposalId: 'p-be35',
+  });
+});
+
+test('BE-35: without a menu link the confirmed website is the check URL', () => {
+  const rows = coverageRows([
+    entry({
+      restaurant_id: 'twee',
+      name: 'Twee',
+      known_url: 'https://oud.invalid/',
+      not_in_queue_reason: 'never_checked',
+      proposals: [
+        {
+          id: 'p-website',
+          kind: 'replace_source',
+          status: 'accepted',
+          proposed_url: 'https://nieuw.invalid/',
+          proposed_at: '2026-10-27T09:00:00.000Z',
+          decided_at: '2026-10-27T09:05:00.000Z',
+          note: 'Herkomst: OpenStreetMap (© OpenStreetMap-bijdragers) · website: https://nieuw.invalid/',
+        },
+      ],
+    }),
+  ]);
+  assert.equal(rows[0].url, 'https://nieuw.invalid/');
+  assert.equal(rows[0].checkUrlSource, 'proposal');
+});
+
+test('BE-35: without a confirmed proposal the known website stays the check URL', () => {
+  const rows = coverageRows([
+    entry({ restaurant_id: 'drie', name: 'Drie', known_url: 'https://drie.invalid/', not_in_queue_reason: 'never_checked' }),
+  ]);
+  assert.equal(rows[0].url, 'https://drie.invalid/');
+  assert.equal(rows[0].checkUrlSource, 'website');
+  assert.deepEqual(rows[0].step, STEPS.check);
+
+  // An open proposal is still the next step: nothing is checked before the
+  // human confirms it (BE-32's own rule stays intact).
+  const open = coverageRows([
+    entry({
+      restaurant_id: 'vier',
+      name: 'Vier',
+      known_url: 'https://vier.invalid/',
+      not_in_queue_reason: 'never_checked',
+      proposals: [
+        {
+          id: 'p-open',
+          kind: 'add_candidate',
+          status: 'open',
+          proposed_url: 'https://vier.invalid/menu',
+          proposed_at: '2026-10-27T09:00:00.000Z',
+          note: 'Herkomst: eigen website · website: https://vier.invalid · menulink: https://vier.invalid/menu',
+        },
+      ],
+    }),
+  ]);
+  assert.equal(open[0].url, 'https://vier.invalid/menu');
+  assert.deepEqual(open[0].step, STEPS.confirm_proposal);
+});
+
+test('BE-35: the last confirmed proposal wins, also when the rows arrive unsorted', () => {
+  const rows = coverageRows([
+    entry({
+      restaurant_id: 'vijf',
+      name: 'Vijf',
+      known_url: 'https://vijf.invalid/',
+      not_in_queue_reason: 'never_checked',
+      proposals: [
+        {
+          id: 'p-old',
+          kind: 'add_candidate',
+          status: 'accepted',
+          proposed_url: 'https://vijf.invalid/oude-kaart',
+          proposed_at: '2026-10-01T08:00:00.000Z',
+          decided_at: '2026-10-01T08:30:00.000Z',
+          note: 'Herkomst: eigen website · website: https://vijf.invalid · menulink: https://vijf.invalid/oude-kaart',
+        },
+        {
+          id: 'p-new',
+          kind: 'add_candidate',
+          status: 'accepted',
+          proposed_url: 'https://vijf.invalid/nieuwe-kaart',
+          proposed_at: '2026-10-27T08:00:00.000Z',
+          decided_at: '2026-10-27T09:30:00.000Z',
+          note: 'Herkomst: eigen website · website: https://vijf.invalid · menulink: https://vijf.invalid/nieuwe-kaart',
+        },
+      ],
+    }),
+  ]);
+  assert.equal(rows[0].url, 'https://vijf.invalid/nieuwe-kaart');
+});
+
+test('BE-35: "Opnieuw controleren" uses the same rule', () => {
+  const row = { url: 'https://fictief-aldente.invalid/', foundUrl: 'https://fictief-aldente.invalid/' };
+  assert.equal(recheckUrlFor(row, confirmedAlDente()), 'https://fictief-aldente.invalid/menukaart-restaurant-2/');
+  // Nothing confirmed: the result that is looked at again decides.
+  assert.equal(recheckUrlFor(row, entry({ known_url: null })), 'https://fictief-aldente.invalid/');
+  // No entry and no row URL: nothing to check, and nothing invented.
+  assert.equal(recheckUrlFor({ url: null, foundUrl: null }, null), null);
+  assert.equal(recheckUrlFor(null, null), null);
+});
+
+test('BE-35: the image-only row says why the AI route is not offered', () => {
+  const imageOnly = batchItem({
+    key: 'image_only',
+    url: 'https://fictief-aldente.invalid/menukaart-restaurant-2/',
+    foundUrl: null,
+    actions: [],
+    jobId: 'job-image',
+  });
+  const off = { enabled: false, reason: 'ai_not_configured', message: 'AI is niet ingesteld.' };
+  const manual = rowForBatchItem(imageOnly, { aiReady: false, aiStatus: off });
+  assert.deepEqual(manual.step, STEPS.manual);
+  assert.equal(manual.aiReason, 'AI staat uit (instelling ontbreekt).');
+
+  // The three "AI off" answers of the same status endpoint say the same thing,
+  // in the words the menu-import page uses for that reason.
+  for (const reason of ['ai_not_configured', 'ai_flagged_off', 'ai_key_missing']) {
+    assert.equal(
+      aiUnavailableText({ enabled: false, reason, message: 'AI is niet ingesteld.' }),
+      'AI staat uit (instelling ontbreekt).',
+      reason,
+    );
+  }
+  // The two budget answers of that endpoint.
+  assert.equal(
+    aiUnavailableText({ enabled: true, budget: { allowed: false, reason: 'budget_exhausted' } }),
+    'Het budget van deze maand is op.',
+  );
+  assert.equal(
+    aiUnavailableText({ enabled: true, budget: { allowed: false, reason: 'budget_unavailable' } }),
+    'Het budget kon niet worden gelezen.',
+  );
+  // An unknown answer never becomes a claim.
+  assert.equal(aiUnavailableText({ enabled: false }), 'AI staat uit.');
+  assert.equal(aiUnavailableText(null), null);
+
+  // Available: the AI step, without a reason line.
+  const ready = rowForBatchItem(imageOnly, {
+    aiReady: true,
+    aiStatus: { enabled: true, budget: { allowed: true, reason: null } },
+  });
+  assert.deepEqual(ready.step, STEPS.ai_read_image);
+  assert.equal(ready.aiReason, null);
+
+  // The Dekking row carries the reason next to the manual step, on the confirmed
+  // menu link.
+  const rows = coverageRows([confirmedAlDente()], {
+    batchDetails: [
+      batchDetail([
+        batchItem({
+          key: 'image_only',
+          jobId: 'job-image',
+          restaurant: { id: 'aldente', name: 'Fictief Al Dente', known: true },
+          url: 'https://fictief-aldente.invalid/menukaart-restaurant-2/',
+          foundUrl: null,
+          actions: [],
+          resultAt: '2026-10-27T09:10:00.000Z',
+        }),
+      ]),
+    ],
+    aiReady: false,
+    aiStatus: off,
+  });
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].url, 'https://fictief-aldente.invalid/menukaart-restaurant-2/');
+  assert.deepEqual(rows[0].step, STEPS.manual);
+  assert.equal(rows[0].aiReason, 'AI staat uit (instelling ontbreekt).');
+
+  // A text reading never depends on the AI status.
+  const text = rowForBatchItem(batchItem({ key: 'no_menu' }), { aiReady: false, aiStatus: off });
+  assert.deepEqual(text.step, STEPS.ai_read);
+  assert.equal(text.aiReason, null);
+});
+
+test('BE-35: every screen that starts a check uses that one rule', () => {
+  // The row shows the reason under the manual step.
+  const rowComponent = fs.readFileSync(path.join(REPO_ROOT, 'src/components/SourceResultRow.js'), 'utf8');
+  assert.match(rowComponent, /row\.aiReason \? <span className="srr-why">/);
+  assert.match(rowComponent, /srr-step--stack/);
+
+  // Dekking: the same rule for the row, the selection and the AI reason.
+  const coverage = fs.readFileSync(path.join(REPO_ROOT, 'app/internal/coverage/CoverageCheckSection.js'), 'utf8');
+  assert.match(
+    coverage,
+    /coverageRows\(entries \|\| \[\], \{ batchDetails: details, now: new Date\(\), aiReady: aiReadReady\(aiStatus\), aiStatus \}\)/,
+  );
+  assert.match(coverage, /start\(\[row\.url\]\)/);
+  assert.match(coverage, /start\(selection\.urls\)/);
+  assert.match(coverage, /row\.aiReason/);
+
+  // Bronnen beoordelen: "Opnieuw controleren" goes through the same function.
+  const bronnen = fs.readFileSync(path.join(REPO_ROOT, 'app/internal/bronnen/page.js'), 'utf8');
+  assert.match(bronnen, /entryById\(entries, row\.restaurant\.id\)/);
+  assert.match(bronnen, /recheckUrlFor\(row, entry\)/);
+  assert.match(bronnen, /aiReady, aiStatus \}\)/);
+
+  // Toevoegen: the confirmed link fills the empty field and is used again on
+  // "Opnieuw controleren"; the image-only row shows the reason here too.
+  const toevoegen = fs.readFileSync(path.join(REPO_ROOT, 'app/internal/toevoegen/page.js'), 'utf8');
+  assert.match(toevoegen, /confirmedCheckUrl\(checkEntry\.entry\)/);
+  assert.match(toevoegen, /recheckUrlFor\(row, entry\)/);
+  assert.match(toevoegen, /aiReady: aiReadReady\(aiStatus\), aiStatus \}\)/);
+  assert.match(toevoegen, /Bevestigde link:/);
+});
+
 
 

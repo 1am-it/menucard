@@ -15,7 +15,7 @@
 // screens: this page submits the same payload the batch page submits and shows
 // the server's own error message instead of starting anything else.
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import InternalNav from '@/src/components/InternalNav'
@@ -23,7 +23,8 @@ import SourceResultRow from '@/src/components/SourceResultRow'
 import useBatchProcessing from '@/src/components/useBatchProcessing'
 import useAiReading from '@/src/components/useAiReading'
 import { decideAddEntry, manualImportHref, MAX_BATCH_URLS } from '@/src/lib/internalAddEntry'
-import { rowForBatchItem, stepHref, aiReadReady, CHECK_COPY } from '@/src/lib/sourceReview'
+import { decideRestaurantPick, restaurantChoiceLabel } from '@/src/lib/restaurantPick'
+import { rowForBatchItem, stepHref, aiReadReady, confirmedCheckUrl, recheckUrlFor, CHECK_URL_SOURCE_LABELS, CHECK_COPY } from '@/src/lib/sourceReview'
 import { discoveryRow, originLabel, costLine } from '@/src/lib/sourceDiscovery'
 import { OSM_ATTRIBUTION } from '@/src/lib/osmSource'
 import { ROW_SEARCHING, discoveryFailure } from '@/src/lib/discoveryProgress'
@@ -50,6 +51,11 @@ export default function AddEntryPage() {
   const [session, setSession] = useState(undefined)
   const [restaurantQuery, setRestaurantQuery] = useState('')
   const [restaurantChoices, setRestaurantChoices] = useState([])
+  // BE-35 (#84, criterion 4): a list of choices belongs to one typed query; a
+  // stale list may never decide for a newer name.
+  const [choicesQuery, setChoicesQuery] = useState('')
+  // The clear question when several restaurants match, or nothing.
+  const [restaurantNotice, setRestaurantNotice] = useState(null)
   const [selectedRestaurant, setSelectedRestaurant] = useState(null)
   const [urls, setUrls] = useState('')
   const [error, setError] = useState(null)
@@ -120,6 +126,49 @@ export default function AddEntryPage() {
     }
   }, [token])
 
+  // BE-35 (#84, criterion 1): here too the confirmed link leads the check. The
+  // existing triage GET already knows the confirmed proposal of a restaurant
+  // (with the provenance BE-32 wrote), so nothing new is asked or written.
+  const [checkEntry, setCheckEntry] = useState(null)
+  useEffect(() => {
+    if (!token || !selectedRestaurant) {
+      setCheckEntry(null)
+      return undefined
+    }
+    let live = true
+    const restaurantId = String(selectedRestaurant.id)
+    fetch(TRIAGE_API, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((body) => {
+        if (!live) return
+        const list = body && Array.isArray(body.restaurants) ? body.restaurants : []
+        const found = list.find((item) => item && String(item.restaurant_id) === restaurantId) || null
+        setCheckEntry(found ? { restaurantId, entry: found } : null)
+      })
+      .catch(() => {
+        if (live) setCheckEntry(null)
+      })
+    return () => {
+      live = false
+    }
+  }, [token, selectedRestaurant])
+  // Only the entry of the restaurant that is chosen right now may decide the
+  // link: a slower answer for a previous choice is ignored.
+  const confirmedCheck = useMemo(
+    () =>
+      checkEntry && selectedRestaurant && checkEntry.restaurantId === String(selectedRestaurant.id)
+        ? confirmedCheckUrl(checkEntry.entry)
+        : null,
+    [checkEntry, selectedRestaurant],
+  )
+
+  // The confirmed link fills an empty URL field; text the human typed is never
+  // overwritten. The field stays theirs to change.
+  useEffect(() => {
+    if (!confirmedCheck || !confirmedCheck.url) return
+    setUrls((prev) => (prev.trim() === '' ? confirmedCheck.url : prev))
+  }, [confirmedCheck])
+
   // The rows of one batch, read through the existing GET. Used after a start and
   // by the ?batch= deeplink (also the way back from "Menukopjes controleren").
   const loadBatch = useCallback(
@@ -179,8 +228,12 @@ export default function AddEntryPage() {
   // "Opnieuw controleren" (BE-31 review #6439131777) is the same existing
   // analysis for exactly this URL: same route, same body, same limits, and it
   // runs only while this page is open (useBatchProcessing below).
+  // BE-35 (#84, criterion 2): the same rule as "Controleer" — the confirmed link
+  // of this restaurant comes before the URL the row was checked on.
   async function recheck(row) {
-    const url = row && (row.url || row.foundUrl)
+    const entry =
+      checkEntry && row && row.restaurant && String(row.restaurant.id) === checkEntry.restaurantId ? checkEntry.entry : null
+    const url = recheckUrlFor(row, entry)
     const batchId = newBatchId()
     if (!url || !batchId) return
     setBusy(true)
@@ -323,11 +376,13 @@ export default function AddEntryPage() {
     if (!token) return undefined
     if (selectedRestaurant && selectedRestaurant.name === restaurantQuery) {
       setRestaurantChoices([])
+      setChoicesQuery('')
       return undefined
     }
     const query = restaurantQuery.trim()
     if (query.length < 2) {
       setRestaurantChoices([])
+      setChoicesQuery('')
       return undefined
     }
     let cancelled = false
@@ -342,6 +397,7 @@ export default function AddEntryPage() {
         const data = await res.json().catch(() => ({}))
         if (cancelled) return
         setRestaurantChoices(res.ok && Array.isArray(data.restaurants) ? data.restaurants : [])
+        setChoicesQuery(query)
       } catch {
         if (!cancelled) setRestaurantChoices([])
       }
@@ -356,6 +412,8 @@ export default function AddEntryPage() {
     setSelectedRestaurant(choice)
     setRestaurantQuery(choice.name)
     setRestaurantChoices([])
+    setChoicesQuery('')
+    setRestaurantNotice(null)
     setError(null)
   }
 
@@ -365,14 +423,69 @@ export default function AddEntryPage() {
     // A proposal belongs to the name it was searched for.
     setNameSearch({ busy: false, proposal: null, message: null, cost: null, monthly: null })
     if (selectedRestaurant && value !== selectedRestaurant.name) setSelectedRestaurant(null)
+    setRestaurantNotice(null)
   }
+
+  // BE-35 (#84, criterion 4): the typed name chooses the restaurant by itself
+  // when it is unambiguous — one match, or one exact name among several. The
+  // same pure rule as the manual import page; several matches ask a clear
+  // question and start nothing. It runs when the field is left, on Enter and on
+  // the primary button ("Doorgaan"), so all three agree.
+  const searchRestaurants = useCallback(
+    async (query) => {
+      if (!token) return []
+      try {
+        const res = await fetch(`${RESTAURANTS_API}?q=${encodeURIComponent(query)}`, {
+          headers: { Authorization: `Bearer ${token}` },
+          cache: 'no-store',
+        })
+        if (!res.ok) return []
+        const data = await res.json().catch(() => ({}))
+        return data && Array.isArray(data.restaurants) ? data.restaurants : []
+      } catch {
+        return []
+      }
+    },
+    [token]
+  )
+
+  const resolveRestaurantChoice = useCallback(async () => {
+    if (selectedRestaurant) return { status: 'chosen', choice: selectedRestaurant, message: null }
+    const query = restaurantQuery.trim()
+    if (query.length < 2) {
+      setRestaurantNotice(null)
+      return { status: 'idle', choice: null, message: null }
+    }
+    let choices = choicesQuery === query ? restaurantChoices : []
+    if (choicesQuery !== query) {
+      choices = await searchRestaurants(query)
+      setRestaurantChoices(choices)
+      setChoicesQuery(query)
+    }
+    const pick = decideRestaurantPick({ query, choices })
+    if (pick.status === 'chosen') {
+      chooseRestaurant(pick.choice)
+      return pick
+    }
+    setRestaurantNotice(pick.status === 'multiple' ? pick.message : null)
+    return pick
+  }, [choicesQuery, restaurantChoices, restaurantQuery, searchRestaurants, selectedRestaurant])
 
   const start = useCallback(
     async (event) => {
       event.preventDefault()
       setError(null)
       setFallbackHref(null)
-      const decision = decideAddEntry({ restaurant: selectedRestaurant, urls })
+      // BE-35 (#84, criterion 4): a typed, unambiguous name is the restaurant.
+      // Several matches stop here with the clear question; nothing is created.
+      const pick = await resolveRestaurantChoice()
+      if (pick.status === 'multiple') {
+        setRestaurantNotice(pick.message)
+        setError(pick.message)
+        return
+      }
+      const restaurant = pick.choice || selectedRestaurant
+      const decision = decideAddEntry({ restaurant, urls })
       if (!decision.ok) {
         setError(decision.error)
         return
@@ -411,7 +524,7 @@ export default function AddEntryPage() {
         setBusy(false)
       }
     },
-    [loadBatch, router, selectedRestaurant, token, urls],
+    [loadBatch, resolveRestaurantChoice, router, selectedRestaurant, token, urls],
   )
 
   if (session === undefined) {
@@ -450,10 +563,7 @@ export default function AddEntryPage() {
             </label>
             {selectedRestaurant ? (
               <div className="mai-chosen">
-                <span className="mai-chosen-name">
-                  {selectedRestaurant.name}
-                  {selectedRestaurant.buurt ? ` · ${selectedRestaurant.buurt}` : ''}
-                </span>
+                <span className="mai-chosen-name">{restaurantChoiceLabel(selectedRestaurant)}</span>
                 <button
                   type="button"
                   className="stg-btn-secondary mai-btn"
@@ -461,6 +571,8 @@ export default function AddEntryPage() {
                     setSelectedRestaurant(null)
                     setRestaurantQuery('')
                     setRestaurantChoices([])
+                    setChoicesQuery('')
+                    setRestaurantNotice(null)
                     setError(null)
                   }}
                 >
@@ -475,6 +587,15 @@ export default function AddEntryPage() {
                   type="search"
                   value={restaurantQuery}
                   onChange={(event) => changeRestaurantQuery(event.target.value)}
+                  onBlur={() => {
+                    resolveRestaurantChoice()
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      event.preventDefault()
+                      resolveRestaurantChoice()
+                    }
+                  }}
                   autoComplete="off"
                   placeholder="Typ de naam van het restaurant"
                   aria-describedby="add-restaurant-help"
@@ -494,7 +615,12 @@ export default function AddEntryPage() {
                     ))}
                   </ul>
                 ) : null}
-                {restaurantQuery.trim().length >= 2 && restaurantChoices.length === 0 ? (
+                {restaurantNotice ? (
+                  <p className="bta-muted" role="status">
+                    {restaurantNotice}
+                  </p>
+                ) : null}
+                {restaurantQuery.trim().length >= 2 && restaurantChoices.length === 0 && !restaurantNotice ? (
                   <p className="bta-muted">Geen restaurant gevonden met deze naam. Laat het veld leeg voor een nieuw restaurant.</p>
                 ) : null}
                 {/* BE-34 (#81, criterion 2): a name that is not in our list can be
@@ -593,6 +719,14 @@ export default function AddEntryPage() {
               Eén URL is genoeg. Meerdere URL&apos;s gaan naar de bestaande batchanalyse. Gebruik de pagina waar de
               menukaart staat, niet alleen de homepage.
             </p>
+            {/* BE-35 (#84, criterion 1): a confirmed link is what "Controleer"
+                uses here too, and the screen says so before the click. */}
+            {confirmedCheck && confirmedCheck.url ? (
+              <p className="bta-muted cov-check-why">
+                Bevestigde link: {confirmedCheck.url} ({CHECK_URL_SOURCE_LABELS[confirmedCheck.from] || 'bevestigd'}) ·
+                die gebruikt &quot;Controleer&quot;.
+              </p>
+            ) : null}
           </div>
 
           {/* BE-32 (#75, criterion 2): the mockup's "Geen link bij de hand?" box. */}
@@ -713,7 +847,7 @@ export default function AddEntryPage() {
             </p>
             <ol className="srr-list" aria-label="Resultaat van deze toevoeging">
               {activeBatch.items.map((item) => {
-                const row = rowForBatchItem(item, { batchId: activeBatch.batch.id, now: new Date(), aiReady: aiReadReady(aiStatus) })
+                const row = rowForBatchItem(item, { batchId: activeBatch.batch.id, now: new Date(), aiReady: aiReadReady(aiStatus), aiStatus })
                 const returnTo = `/internal/toevoegen?batch=${encodeURIComponent(activeBatch.batch.id)}`
                 return (
                   <SourceResultRow

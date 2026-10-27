@@ -19,9 +19,41 @@ Live contract en status: GitHub issue #79.
    - **wat de AI krijgt:**
      - een pdf zonder tekstlaag gaat als document naar het bestaande model;
      - menu-afbeeldingen (jpg/png/webp) gaan als afbeelding, en alleen van dezelfde website als de bron;
+     - **beeld vóór tekst (bijgewerkt in #84, ronde 2):** heeft een pagina
+       menu-afbeeldingen en bevat de leesbare tekst geen menu (minder dan drie
+       regels met een prijs), dan gaat de pagina als beeldbron naar de AI —
+       ook als er navigatie-, footer- of openingstijdentekst staat. Een echte
+       tekstmenu blijft een tekstbron;
+     - **paginacontext (bijgewerkt in #84, ronde 2):** noemt de pagina-URL of de
+       `<title>` zelf het menu (`menu-classico`, `menukaart-restaurant-2`), dan
+       zijn afbeeldingen van dezelfde website kandidaat, ook zonder menuwoord in
+       de bestandsnaam. `NOT_MENU` (logo, icoon, favicon, te kleine afbeelding)
+       blijft gelden, en WordPress-varianten (`-300x212`, `-768x…`) tellen als
+       één afbeelding met voorkeur voor het origineel;
+     - **site-opmaak is geen menukaart (bijgewerkt in #84, ronde 3):** een
+       afbeelding die in dezelfde lezing op meer dan één pagina staat (een
+       kop- of site-afbeelding) valt af, net als de WordPress-header- en
+       site-icoonvorm (`cropped-` in de bestandsnaam) en een beeld met een
+       opgegeven breedte én hoogte waarvan de langste zijde kleiner is dan
+       600 px. Alleen een ontbrekende maat is nooit een reden om af te vallen;
+     - **elke ingang leest beeld (bijgewerkt in #84, ronde 3):** de rij in
+       Dekking (`job_id`) én de pagina "Menu importeren" (`state`) lezen
+       dezelfde beeldbronnen. De verzegelde bundel bewaart alleen metadata, dus
+       de beeldbron-URL's worden server-side opnieuw gelezen — altijd uit de
+       door de server verzegelde staat, nooit uit het verzoek. Tekstbronnen en
+       beeldbronnen gaan samen naar hetzelfde model;
    - **zelfde basis:** dezelfde client, hetzelfde model, dezelfde enable-vlag, hetzelfde schema en dezelfde validator;
    - **grenzen:**
-     - maximaal 6 afbeeldingen of 10 pagina's per lezing;
+     - maximaal 10 afbeeldingen of 10 pagina's per lezing (bijgewerkt in #84,
+       ronde 2; was 6);
+     - de tien afbeeldingen gelden over de hele lezing, in volgorde van bron en
+       pagina (bijgewerkt in #84, ronde 3). Een lezing met minstens één
+       bruikbare afbeelding wordt nooit geweigerd; zij zegt het echte aantal:
+       "Deze lezing heeft N menu-afbeeldingen; de eerste 10 zijn gelezen." en
+       de kostenschatting volgt het gelezen aantal. Nooit 0;
+     - een pagina die buiten die tien valt wordt geen lege beeldbron in de
+       bundel: zij valt uit de lezing, zodat de bundel, de dekking van het
+       antwoord en wat het model ziet dezelfde bronnen noemen;
      - een vaste maximale bestandsgrootte;
      - de budgetcontrole gebeurt vooraf;
      - de kosten worden zichtbaar.

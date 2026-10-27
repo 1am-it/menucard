@@ -93,7 +93,7 @@ export default function SourceResultRow({ row, href, onConfirm, onRecheck, onAiR
           ) : null}
         </span>
       </div>
-      <div className="srr-step">
+      <div className={`srr-step${row.aiReason ? ' srr-step--stack' : ''}`}>
         {confirmable ? (
           <button type="button" className="di-btn-primary srr-action" disabled={busy} onClick={() => onConfirm(row)}>
             {step.label}
@@ -118,6 +118,9 @@ export default function SourceResultRow({ row, href, onConfirm, onRecheck, onAiR
         ) : (
           <span className="srr-none">{row.handled ? CHECK_COPY.handled : 'Geen actie nodig'}</span>
         )}
+        {/* BE-35 (#84, criterion 3): the manual step says why it is not the AI
+            route — AI off, the month budget spent, or the budget unreadable. */}
+        {row.aiReason ? <span className="srr-why">{row.aiReason}</span> : null}
       </div>
     </li>
   )

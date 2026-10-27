@@ -18,6 +18,7 @@ import InternalNav from '@/src/components/InternalNav'
 import AiMenuReadBlock from '@/src/components/AiMenuReadBlock'
 import MenuSourceMap from '@/src/components/MenuSourceMap'
 import { aiHandoffKeyFromSearch, takeAiRead } from '@/src/lib/aiReadFlow'
+import { decideRestaurantPick, restaurantChoiceLabel } from '@/src/lib/restaurantPick'
 
 const API = '/api/internal/v1/manual-menu-import'
 const AI_API = '/api/internal/v1/menu-ai-import'
@@ -65,6 +66,11 @@ export default function ManualMenuImportPage() {
   const [session, setSession] = useState(undefined)
   const [restaurantQuery, setRestaurantQuery] = useState('')
   const [restaurantChoices, setRestaurantChoices] = useState([])
+  // BE-35 (#84, criterion 4): the choices belong to one typed query; a list of
+  // an older query may never decide for a newer name.
+  const [choicesQuery, setChoicesQuery] = useState('')
+  // The clear question when several restaurants match, or nothing.
+  const [restaurantNotice, setRestaurantNotice] = useState(null)
   const [selectedRestaurant, setSelectedRestaurant] = useState(null)
   const [pendingRestaurantId, setPendingRestaurantId] = useState('')
   const [urls, setUrls] = useState('')
@@ -244,6 +250,7 @@ export default function ManualMenuImportPage() {
     const query = restaurantQuery.trim()
     if (query.length < 2 || (selectedRestaurant && selectedRestaurant.name === restaurantQuery)) {
       setRestaurantChoices([])
+      setChoicesQuery('')
       return undefined
     }
     let cancelled = false
@@ -256,6 +263,7 @@ export default function ManualMenuImportPage() {
       const data = await res.json().catch(() => ({}))
       if (cancelled) return
       setRestaurantChoices(res.ok && Array.isArray(data.restaurants) ? data.restaurants : [])
+      setChoicesQuery(query)
     }, 200)
     return () => {
       cancelled = true
@@ -289,13 +297,61 @@ export default function ManualMenuImportPage() {
     setSelectedRestaurant(choice)
     setRestaurantQuery(choice.name)
     setRestaurantChoices([])
+    setChoicesQuery('')
+    setRestaurantNotice(null)
     setError(null)
   }
 
   function changeRestaurantQuery(value) {
     setRestaurantQuery(value)
     if (selectedRestaurant && value !== selectedRestaurant.name) setSelectedRestaurant(null)
+    setRestaurantNotice(null)
   }
+
+  // BE-35 (#84, criterion 4): the typed name chooses the restaurant by itself
+  // when it is unambiguous — one match, or one exact name among several. The
+  // decision is one pure, tested rule (src/lib/restaurantPick.js); several
+  // matches give a clear question and never a guess. This runs when the field
+  // is left, on Enter and on the primary button, so all three agree.
+  const searchRestaurants = useCallback(
+    async (query) => {
+      if (!token) return []
+      try {
+        const res = await fetch(`${API}/restaurants?q=${encodeURIComponent(query)}`, {
+          headers: { Authorization: `Bearer ${token}` },
+          cache: 'no-store',
+        })
+        if (!res.ok) return []
+        const data = await res.json().catch(() => ({}))
+        return data && Array.isArray(data.restaurants) ? data.restaurants : []
+      } catch {
+        return []
+      }
+    },
+    [token]
+  )
+
+  const resolveRestaurantChoice = useCallback(async () => {
+    if (selectedRestaurant) return { status: 'chosen', choice: selectedRestaurant, message: null }
+    const query = restaurantQuery.trim()
+    if (query.length < 2) {
+      setRestaurantNotice(null)
+      return { status: 'idle', choice: null, message: null }
+    }
+    let choices = choicesQuery === query ? restaurantChoices : []
+    if (choicesQuery !== query) {
+      choices = await searchRestaurants(query)
+      setRestaurantChoices(choices)
+      setChoicesQuery(query)
+    }
+    const pick = decideRestaurantPick({ query, choices })
+    if (pick.status === 'chosen') {
+      chooseRestaurant(pick.choice)
+      return pick
+    }
+    setRestaurantNotice(pick.status === 'multiple' ? pick.message : null)
+    return pick
+  }, [choicesQuery, restaurantChoices, restaurantQuery, searchRestaurants, selectedRestaurant])
 
   function acceptPastedText(text) {
     const value = typeof text === 'string' ? text : ''
@@ -324,7 +380,17 @@ export default function ManualMenuImportPage() {
     setExpired(false)
     setAnswerProblems(null)
     const list = urls.split('\n').map((line) => line.trim()).filter(Boolean).slice(0, 5)
-    const result = await api('/bundles', { restaurant_id: restaurantId, urls: list })
+    // BE-35 (#84, criterion 4): the primary button uses the same rule as the
+    // field: a typed, unambiguous name is chosen here; several matches ask a
+    // question and nothing is sent.
+    const pick = await resolveRestaurantChoice()
+    if (pick.status === 'multiple') {
+      setBusy(false)
+      setMessage(pick.message)
+      return
+    }
+    const chosenId = pick.choice ? String(pick.choice.id) : restaurantId
+    const result = await api('/bundles', { restaurant_id: chosenId, urls: list })
     if (!result.ok) handleFailure(result)
     else {
       setBundle(result.data.bundle)
@@ -737,12 +803,22 @@ export default function ManualMenuImportPage() {
           payload = { job_id: jobId, ...(restaurantId ? { restaurant_id: restaurantId } : {}) }
         } else {
           const list = urls.split('\n').map((line) => line.trim()).filter(Boolean).slice(0, 5)
-          if (!restaurantId || list.length === 0) {
+          // BE-35 (#84, criterion 4): the same rule as the field and the manual
+          // button. Several matches ask a question instead of reading for the
+          // wrong restaurant.
+          const pick = await resolveRestaurantChoice()
+          if (pick.status === 'multiple') {
+            setAiPhase('idle')
+            setAiError(pick.message)
+            return
+          }
+          const chosenId = pick.choice ? String(pick.choice.id) : restaurantId
+          if (!chosenId || list.length === 0) {
             setAiPhase('idle')
             setAiError('Kies eerst een restaurant en een bron-URL.')
             return
           }
-          const created = await api('/bundles', { restaurant_id: restaurantId, urls: list })
+          const created = await api('/bundles', { restaurant_id: chosenId, urls: list })
           if (!created.ok) {
             handleFailure(created)
             setAiPhase('error')
@@ -794,7 +870,7 @@ export default function ManualMenuImportPage() {
         setBusy(false)
       }
     },
-    [api, loadAiStatus, restaurantId, token, urls]
+    [api, loadAiStatus, resolveRestaurantChoice, restaurantId, token, urls]
   )
 
   // From the batch screen: the analysis job is the allowed source, so the
@@ -828,10 +904,7 @@ export default function ManualMenuImportPage() {
         </label>
         {selectedRestaurant ? (
           <div className="mai-chosen">
-            <span className="mai-chosen-name">
-              {selectedRestaurant.name}
-              {selectedRestaurant.buurt ? ` · ${selectedRestaurant.buurt}` : ''}
-            </span>
+            <span className="mai-chosen-name">{restaurantChoiceLabel(selectedRestaurant)}</span>
             <button
               type="button"
               className="stg-btn-secondary mai-btn"
@@ -839,6 +912,8 @@ export default function ManualMenuImportPage() {
                 setSelectedRestaurant(null)
                 setRestaurantQuery('')
                 setRestaurantChoices([])
+                setChoicesQuery('')
+                setRestaurantNotice(null)
               }}
             >
               Wijzig
@@ -852,6 +927,15 @@ export default function ManualMenuImportPage() {
               type="search"
               value={restaurantQuery}
               onChange={(event) => changeRestaurantQuery(event.target.value)}
+              onBlur={() => {
+                resolveRestaurantChoice()
+              }}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault()
+                  resolveRestaurantChoice()
+                }
+              }}
               autoComplete="off"
               placeholder="Typ de naam van het restaurant"
               aria-describedby="mai-restaurant-help"
@@ -871,7 +955,12 @@ export default function ManualMenuImportPage() {
                 ))}
               </ul>
             ) : null}
-            {restaurantQuery.trim().length >= 2 && restaurantChoices.length === 0 ? (
+            {restaurantNotice ? (
+              <p className="bta-muted" role="status">
+                {restaurantNotice}
+              </p>
+            ) : null}
+            {restaurantQuery.trim().length >= 2 && restaurantChoices.length === 0 && !restaurantNotice ? (
               <p className="bta-muted">Geen restaurant gevonden met deze naam.</p>
             ) : null}
           </>
@@ -939,7 +1028,7 @@ export default function ManualMenuImportPage() {
                 type="button"
                 className="di-btn-primary mai-btn"
                 onClick={makePrompt}
-                disabled={busy || !restaurantId || !urls.trim()}
+                disabled={busy || (!restaurantId && restaurantQuery.trim().length < 2) || !urls.trim()}
               >
                 Opnieuw maken
               </button>
@@ -1028,7 +1117,7 @@ export default function ManualMenuImportPage() {
                 error={aiError}
                 busy={busy}
                 step={aiStep}
-                canRead={Boolean(restaurantId) || Boolean(aiJobId)}
+                canRead={Boolean(restaurantId) || Boolean(aiJobId) || restaurantQuery.trim().length >= 2}
                 hint="Kies eerst een restaurant en een bron-URL."
                 manualOpen={manualOpen}
                 onManual={toggleManual}
@@ -1052,7 +1141,7 @@ export default function ManualMenuImportPage() {
                   {aiConfigured ? null : sourceFields}
 
               <div className="mai-actions">
-                <button type="button" className="di-btn-primary" onClick={makePrompt} disabled={busy || !restaurantId || !urls.trim()}>
+                <button type="button" className="di-btn-primary" onClick={makePrompt} disabled={busy || (!restaurantId && restaurantQuery.trim().length < 2) || !urls.trim()}>
                   Prompt maken
                 </button>
                 <span className="bta-muted">De app haalt de bronnen veilig op en zet de tekst in de prompt.</span>

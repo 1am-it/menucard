@@ -28,7 +28,7 @@ import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import InternalNav from '@/src/components/InternalNav'
 import useBatchProcessing from '@/src/components/useBatchProcessing'
 import BronnenView from './BronnenView'
-import { BRONNEN_HREF, CHECK_COPY, selectTasks, countTasks, filterTasks, effectiveTaskFilter, aiReadReady } from '@/src/lib/sourceReview'
+import { BRONNEN_HREF, CHECK_COPY, selectTasks, countTasks, filterTasks, effectiveTaskFilter, aiReadReady, entryById, recheckUrlFor } from '@/src/lib/sourceReview'
 import { readFollowUp, followUpForEntry } from '@/src/lib/sourceTriage'
 
 const TRIAGE_API = '/api/internal/v1/source-triage'
@@ -183,8 +183,8 @@ export default function BronnenPage() {
   const aiReady = aiReadReady(aiStatus)
   // The age of a result is calculated once per load, with the browser's clock.
   const tasks = useMemo(
-    () => selectTasks({ entries, batchDetails: details, returnTo: BRONNEN_HREF, now: new Date(), aiReady }),
-    [entries, details, aiReady],
+    () => selectTasks({ entries, batchDetails: details, returnTo: BRONNEN_HREF, now: new Date(), aiReady, aiStatus }),
+    [entries, details, aiReady, aiStatus],
   )
   const counts = useMemo(() => countTasks(tasks), [tasks])
   const activeFilter = effectiveTaskFilter(filter)
@@ -272,8 +272,11 @@ export default function BronnenPage() {
   // The existing batch analysis for exactly this URL: same POST, same limits
   // (10 per batch, 25 per day) and the same rule that it only runs while this
   // page is open. Nothing is published and nothing expires by itself.
+  // BE-35 (#84, criterion 2): "Opnieuw controleren" uses the same rule as
+  // "Controleer" — the confirmed menu link comes before the website.
   async function recheck(row) {
-    const url = row && (row.url || row.foundUrl)
+    const entry = row && row.restaurant && row.restaurant.id ? entryById(entries, row.restaurant.id) : null
+    const url = recheckUrlFor(row, entry)
     if (!url) return
     const batchId = newBatchId()
     if (!batchId) {

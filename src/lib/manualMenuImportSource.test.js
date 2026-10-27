@@ -9,6 +9,8 @@ const assert = require('node:assert/strict');
 
 const { htmlToPlainText, pdfPageCount, readManualImportSource, readManualImportSources, MAX_SOURCES } = require('./manualMenuImportSource');
 const { sourceHashForText } = require('./manualMenuImportBundle');
+const { alDenteMenuPage, classicoPage, textMenuPage, wordpressVariantsPage, menuImagePage, ORIGIN, UPLOAD, SITE_HEADER_IMAGE } = require('./__fixtures__/menuImagePages');
+const { collectMenuImages, imageReadNotice, planImageRead } = require('./menuImageRead');
 
 test('K2: HTML wordt platte, gecodeerde tekst zonder scripts of opmaak', () => {
   const text = htmlToPlainText(
@@ -149,23 +151,114 @@ test('BE-33: een pagina met alleen menu-afbeeldingen levert die afbeeldingen, ni
   assert.equal(requested.some((url) => url.includes('ander.example')), false);
 });
 
-test('BE-33: meer dan zes menu-afbeeldingen worden niet opgehaald en de bron zegt waarom', async () => {
-  const html = Array.from({ length: 8 }, (_, index) => `<img src="/kaart-${index + 1}.jpg" alt="Menukaart ${index + 1}">`).join('');
+test('BE-35: meer dan tien menu-afbeeldingen leest de eerste tien en zegt het echte aantal', async () => {
+  const page = alDenteMenuPage({ count: 12 });
   const requested = [];
   const source = await readManualImportSource({
     id: 'source-1',
-    url: 'https://voorbeeld.example/menu',
+    url: page.pageUrl,
     fetchImpl: async (url) => {
       requested.push(url);
-      return { finalUrl: url, contentType: 'text/html', bytes: Buffer.from(html) };
+      if (url === page.pageUrl) return { finalUrl: url, contentType: 'text/html', bytes: Buffer.from(page.html) };
+      return { finalUrl: url, contentType: 'image/jpeg', bytes: PNG_BYTES };
     },
   });
   assert.equal(source.kind, 'image');
-  assert.deepEqual(source.images, []);
-  assert.equal(source.imageCandidates, 7, 'the overflow is counted, not silently cut');
-  assert.match(source.limitation, /maximaal 6/);
-  // Only the page itself was fetched: nothing above the limit goes out.
+  assert.equal(source.status, 'read');
+  assert.equal(source.images.length, 10, 'exactly the first ten are read, never zero');
+  assert.equal(source.imageCandidates, 12);
+  assert.deepEqual(source.images.map((image) => image.number), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+  assert.deepEqual(source.images.map((image) => image.url), page.imageUrls.slice(0, 10));
+  assert.match(source.limitation, /Deze pagina heeft 12 menu-afbeeldingen; de eerste 10 zijn gelezen\./);
+  // The page plus the first ten images; the eleventh and twelfth never leave.
+  assert.equal(requested.length, 11);
+  assert.equal(requested.includes(page.imageUrls[10]), false);
+  assert.equal(requested.includes(page.imageUrls[11]), false);
+});
+
+/** A fake fetch for one fixture page: the page itself as HTML, images as PNG. */
+function fetchForPage(page) {
+  const requested = [];
+  const fetchImpl = async (url) => {
+    requested.push(url);
+    if (url === page.pageUrl) {
+      return { finalUrl: url, contentType: 'text/html', bytes: Buffer.from(page.html, 'utf8') };
+    }
+    return { finalUrl: url, contentType: 'image/jpeg', bytes: PNG_BYTES };
+  };
+  return { requested, fetchImpl };
+}
+
+test('BE-35: de echte Al Dente-vorm (navigatie, footer, openingstijden) wordt een beeldbron', async () => {
+  const page = alDenteMenuPage();
+  assert.equal(page.imageUrls.length, 7);
+  const { requested, fetchImpl } = fetchForPage(page);
+  const source = await readManualImportSource({ id: 'source-1', url: page.pageUrl, fetchImpl });
+
+  // The page text exists (navigation, footer, opening hours) but holds no menu,
+  // so the menu images of this page are the source — before the text.
+  const text = htmlToPlainText(page.html);
+  assert.match(text, /Openingstijden/);
+  assert.match(text, /Instagram/);
+  assert.equal(source.kind, 'image');
+  assert.equal(source.hasText, false);
+  assert.equal(source.text, '');
+  assert.equal(source.imageRead, true);
+  assert.equal(source.images.length, 7);
+  assert.equal(source.imageCandidates, 7);
+  assert.deepEqual(source.images.map((image) => image.url), page.imageUrls);
+  assert.deepEqual(source.images.map((image) => image.number), [1, 2, 3, 4, 5, 6, 7]);
+  // Nothing is cut: seven images fit inside the limit of ten.
+  assert.equal(source.limitation.includes('eerste 10'), false);
+  assert.match(source.limitation, /toont de menukaart als afbeelding/);
+  assert.equal(requested.length, 8, 'the page and its seven images, nothing else');
+
+  // The plan the AI route uses sees an image reading with the real count.
+  const plan = planImageRead({ sources: [source] });
+  assert.equal(plan.ok, true);
+  assert.equal(plan.mode, 'image');
+  assert.equal(plan.imageCount, 7);
+  assert.match(plan.estimate.label, /7 afbeeldingen/);
+});
+
+test('BE-35: een menu-classico-pagina met twee afbeeldingen zonder menuwoord wordt een beeldbron', async () => {
+  const page = classicoPage();
+  const { fetchImpl } = fetchForPage(page);
+  const source = await readManualImportSource({ id: 'source-1', url: page.pageUrl, fetchImpl });
+  assert.equal(source.kind, 'image');
+  assert.equal(source.images.length, 2);
+  assert.deepEqual(source.images.map((image) => image.url), page.imageUrls);
+  assert.equal(source.images[0].url.endsWith('/Classico0826a.jpg'), true);
+  assert.equal(source.images[1].url.endsWith('/Classico0826b.jpg'), true);
+  const plan = planImageRead({ sources: [source] });
+  assert.equal(plan.ok, true);
+  assert.equal(plan.mode, 'image');
+  assert.equal(plan.imageCount, 2);
+});
+
+test('BE-35: een pagina met een echt tekstmenu blijft een tekstbron', async () => {
+  const page = textMenuPage();
+  const { requested, fetchImpl } = fetchForPage(page);
+  const source = await readManualImportSource({ id: 'source-1', url: page.pageUrl, fetchImpl });
+  assert.equal(source.kind, 'html');
+  assert.equal(source.hasText, true);
+  assert.match(source.text, /Bruschetta pomodoro 8,50/);
+  assert.match(source.text, /Pasta carbonara € 14,50/);
+  assert.equal(source.sha256, sourceHashForText(source.text));
+  // The image on that page is not read: text is free and exactly checkable.
   assert.equal(requested.length, 1);
+  assert.equal(planImageRead({ sources: [source] }).mode, 'text');
+});
+
+test('BE-35: WordPress-varianten van hetzelfde bestand leveren één afbeelding, bij voorkeur het origineel', async () => {
+  const page = wordpressVariantsPage();
+  const { fetchImpl } = fetchForPage(page);
+  const source = await readManualImportSource({ id: 'source-1', url: page.pageUrl, fetchImpl });
+  assert.equal(source.kind, 'image');
+  assert.deepEqual(source.images.map((image) => image.url), [
+    `${ORIGIN}${UPLOAD}/Menukaart0826a.jpg`,
+    `${ORIGIN}${UPLOAD}/Menukaart0826b-300x212.jpg`,
+  ]);
 });
 
 test('BE-33: het aantal paginas van een PDF wordt begrensd gelezen', async () => {
@@ -186,3 +279,108 @@ test('BE-33: het aantal paginas van een PDF wordt begrensd gelezen', async () =>
   assert.equal(source.imageRead, true);
   assert.equal(typeof source.documentBase64, 'string');
 });
+
+test('BE-35 ronde 3: over alle bronnen samen zijn de eerste tien menu-afbeeldingen leidend', async () => {
+  // The two live Al Dente pages: 7 and 2 menu images, with the same header
+  // image on both. Nine menu images fit, so nothing is cut and nothing is refused.
+  const menuPage = alDenteMenuPage();
+  const classic = classicoPage();
+  const requested = [];
+  const fetchImpl = async (url) => {
+    requested.push(url);
+    if (url === menuPage.pageUrl) return { finalUrl: url, contentType: 'text/html', bytes: Buffer.from(menuPage.html, 'utf8') };
+    if (url === classic.pageUrl) return { finalUrl: url, contentType: 'text/html', bytes: Buffer.from(classic.html, 'utf8') };
+    return { finalUrl: url, contentType: 'image/jpeg', bytes: PNG_BYTES };
+  };
+  const sources = await readManualImportSources({ urls: [menuPage.pageUrl, classic.pageUrl], fetchImpl });
+  assert.equal(sources.length, 2);
+  assert.deepEqual(sources.map((source) => source.id), ['source-1', 'source-2']);
+  assert.equal(sources[0].images.length, 7);
+  assert.equal(sources[1].images.length, 2);
+  const plan = planImageRead({ sources });
+  assert.equal(plan.ok, true);
+  assert.equal(plan.mode, 'image');
+  assert.equal(plan.imageCount, 9);
+  assert.equal(plan.availableImageCount, 9);
+  assert.equal(plan.limitation, null);
+  // The site header is never fetched: it is no menu image.
+  assert.equal(requested.includes(SITE_HEADER_IMAGE), false);
+  assert.equal(requested.length, 11, 'two pages and nine menu images, nothing else');
+
+  // Twelve and three candidates: the reading is cut over the sources together,
+  // in source order. The second page falls outside the ten and is no source of
+  // this reading; the picked page carries the real total of the whole reading.
+  const big = alDenteMenuPage({ count: 12 });
+  const overflowRequested = [];
+  const overflow = await readManualImportSources({
+    urls: [big.pageUrl, classic.pageUrl],
+    fetchImpl: async (url) => {
+      overflowRequested.push(url);
+      if (url === big.pageUrl) return { finalUrl: url, contentType: 'text/html', bytes: Buffer.from(big.html, 'utf8') };
+      if (url === classic.pageUrl) return { finalUrl: url, contentType: 'text/html', bytes: Buffer.from(classic.html, 'utf8') };
+      return { finalUrl: url, contentType: 'image/jpeg', bytes: PNG_BYTES };
+    },
+  });
+  assert.equal(overflow.length, 1, 'a page outside the ten is not an empty image source');
+  assert.equal(overflow[0].id, 'source-1');
+  assert.equal(overflow[0].images.length, 10, 'the first ten of the reading, in source order');
+  assert.deepEqual(overflow[0].images.map((image) => image.url), big.imageUrls.slice(0, 10));
+  assert.equal(overflow[0].imageCandidates, 12);
+  assert.equal(overflow[0].readingImageCandidates, 14);
+  assert.match(overflow[0].limitation, /Deze lezing heeft 14 menu-afbeeldingen; de eerste 10 zijn gelezen\./);
+  assert.equal(overflowRequested.includes(SITE_HEADER_IMAGE), false);
+  assert.equal(overflowRequested.length, 12, 'two pages and ten menu images, nothing else');
+  // Never refused: the plan reads what fits, names the real total and estimates
+  // that read number.
+  const overflowPlan = planImageRead({ sources: overflow });
+  assert.equal(overflowPlan.ok, true);
+  assert.equal(overflowPlan.imageCount, 10);
+  assert.equal(overflowPlan.availableImageCount, 14);
+  assert.equal(overflowPlan.limitation, 'Deze lezing heeft 14 menu-afbeeldingen; de eerste 10 zijn gelezen.');
+  assert.match(overflowPlan.estimate.label, /10 afbeeldingen/);
+  assert.deepEqual(overflowPlan.sources.map((entry) => [entry.id, entry.imageCount]), [['source-1', 10]]);
+  // Nothing is refused and nothing is dropped silently: the notice says it.
+  assert.match(imageReadNotice(overflowPlan), /Deze lezing heeft 14 menu-afbeeldingen; de eerste 10 zijn gelezen\./);
+});
+
+test('BE-35 ronde 3: een afbeelding op meer dan één pagina is site-opmaak, geen menukaart', async () => {
+  // A non-cropped banner that both pages share: without the reading rule it
+  // would be a candidate on a menu page (the page itself names the menu).
+  const banner = `${ORIGIN}/wp-content/uploads/2022/03/kop-2022.png`;
+  const first = menuImagePage({
+    path: '/menukaart/',
+    title: 'Menukaart - Al Dente Voorbeeld',
+    heading: 'Menukaart',
+    intro: 'Onze kaart wisselt met de seizoenen.',
+    files: ['Menukaart0826a.jpg', 'Menukaart0826b.jpg'],
+  });
+  const second = menuImagePage({
+    path: '/dinerkaart/',
+    title: 'Dinerkaart - Al Dente Voorbeeld',
+    heading: 'Dinerkaart',
+    intro: 'Onze dinerkaart.',
+    files: ['Diner0826a.jpg'],
+  });
+  const withBanner = (page) => ({ ...page, html: page.html.replace('<main>', `<main>\n<img src="${banner}" alt="" width="1920" height="300">`) });
+  const pages = [withBanner(first), withBanner(second)];
+  const requested = [];
+  const sources = await readManualImportSources({
+    urls: pages.map((page) => page.pageUrl),
+    fetchImpl: async (url) => {
+      requested.push(url);
+      const page = pages.find((entry) => entry.pageUrl === url);
+      if (page) return { finalUrl: url, contentType: 'text/html', bytes: Buffer.from(page.html, 'utf8') };
+      return { finalUrl: url, contentType: 'image/png', bytes: PNG_BYTES };
+    },
+  });
+  assert.equal(requested.includes(banner), false, 'the shared site image is never fetched');
+  assert.deepEqual(sources[0].images.map((image) => image.url), first.imageUrls);
+  assert.deepEqual(sources[1].images.map((image) => image.url), second.imageUrls);
+  // The page-wide hint alone would have made the banner a candidate; the
+  // reading rule is what removes it.
+  const html = withBanner(first).html;
+  assert.equal(collectMenuImages({ html, pageUrl: first.pageUrl }).some((entry) => entry.url === banner), true);
+  assert.equal(sources[0].imageCandidates, 2);
+  assert.equal(sources[1].imageCandidates, 1);
+});
+

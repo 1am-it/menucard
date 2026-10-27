@@ -142,6 +142,41 @@ function createMenuAiReadHandlers({
   }
 
   /**
+   * BE-35 ronde 3 (#84): the sources that really go to the model, in the order
+   * of the plan. An image source carries exactly the number of images the plan
+   * reads (a page whose images were all cut is not sent with none), a text
+   * source goes by its own text and a scan as its document. The bytes exist only
+   * inside this request; the sealed bundle keeps metadata.
+   */
+  function modelSources(plan, byId) {
+    const entries = plan && Array.isArray(plan.sources) ? plan.sources : [];
+    const out = [];
+    for (const entry of entries) {
+      const source = byId.get(entry.id);
+      if (!source) continue;
+      const images = entry.mode === 'image' && Array.isArray(source.images)
+        ? source.images.slice(0, Number.isInteger(entry.imageCount) ? entry.imageCount : source.images.length)
+        : [];
+      out.push({
+        id: source.id,
+        url: source.url,
+        kind: source.kind,
+        text: entry.mode === 'text' && typeof source.text === 'string' ? source.text : null,
+        images: images.map((image) => ({
+          number: image.number,
+          url: image.url,
+          mediaType: image.mediaType,
+          data: image.data,
+        })),
+        documentBase64: entry.mode === 'document' && typeof source.documentBase64 === 'string' ? source.documentBase64 : null,
+        pageCount: Number.isInteger(source.pageCount) ? source.pageCount : null,
+        imageRead: entry.mode !== 'text',
+      });
+    }
+    return out;
+  }
+
+  /**
    * W2: the only two accepted handles. `state` is a capture this server sealed
    * itself; `job_id` is resolved from the database. A URL in the body is never
    * used: no code path reads one.
@@ -157,13 +192,65 @@ function createMenuAiReadHandlers({
       if (!state || state.userId !== auth.userId) return { ok: false, status: 403, reason: 'forbidden' };
       const bundle = state.bundle;
       if (!bundle || !Array.isArray(bundle.sources)) return { ok: false, status: 409, reason: 'source_unknown' };
-      const readable = bundle.sources.filter((source) => source && source.hasText === true && typeof source.text === 'string' && source.text.trim() !== '');
-      if (readable.length === 0) return { ok: false, status: 422, reason: 'source_empty' };
+      const sealedText = (source) => Boolean(source) && source.hasText === true && typeof source.text === 'string' && source.text.trim() !== '';
+      const textSources = bundle.sources.filter(sealedText);
+      // BE-35 ronde 3 (#84): the sealed bundle keeps metadata only, so the menu
+      // images of an image source are read again here, server-side, exactly as
+      // the `job_id` branch does. The URLs come from the sealed state and never
+      // from the request (W2); a source that already carries sealed text keeps
+      // its text, which is free and exactly checkable.
+      const imageSources = bundle.sources.filter((source) => (
+        Boolean(source)
+        && source.imageRead === true
+        && !sealedText(source)
+        && typeof source.url === 'string'
+        && source.url.trim() !== ''
+      ));
+      if (textSources.length === 0 && imageSources.length === 0) return { ok: false, status: 422, reason: 'source_empty' };
+      let fetched = [];
+      if (imageSources.length > 0) {
+        if (typeof readSources !== 'function') return { ok: false, status: 503, reason: 'source_unknown' };
+        let read;
+        try {
+          read = await readSources({ urls: imageSources.map((source) => source.url), now: stamp() });
+        } catch {
+          read = null;
+        }
+        const sealedById = new Map(imageSources.map((source) => [source.url, source]));
+        fetched = (Array.isArray(read) ? read : [])
+          .filter((source) => (
+            source
+            && (source.status === 'read' || source.status === undefined)
+            && typeof source.sha256 === 'string'
+            && typeof source.url === 'string'
+            && sealedById.has(source.url)
+          ))
+          // The sealed id stays the id of the source, so the existing bundle
+          // binding and the validator keep naming the same source.
+          .map((source) => ({ ...source, id: sealedById.get(source.url).id }));
+        if (fetched.length === 0) {
+          return {
+            ok: false,
+            status: 422,
+            reason: 'source_empty',
+            message: 'De beeldbronnen van deze import konden niet opnieuw worden gelezen. Ga verder met de handmatige import.',
+          };
+        }
+      }
+      const byId = new Map();
+      for (const source of textSources) {
+        byId.set(source.id, { id: source.id, url: source.url, kind: source.kind, text: source.text, hasText: true });
+      }
+      for (const source of fetched) byId.set(source.id, source);
+      const combined = bundle.sources.map((source) => byId.get(source.id)).filter(Boolean);
+      const plan = planImageRead({ sources: combined });
+      if (!plan.ok) return { ok: false, status: 422, reason: plan.reason, message: plan.message, plan };
       return {
         ok: true,
         restaurantId: state.restaurantId,
         bundle,
-        sources: readable.map((source) => ({ id: source.id, url: source.url, kind: source.kind, text: source.text })),
+        plan,
+        sources: modelSources(plan, byId),
       };
     }
 
@@ -199,7 +286,7 @@ function createMenuAiReadHandlers({
       const read = await readSources({ urls, now: stamp() });
       // BE-33 (#79, criterion 2): a menu that only exists as an image or as a
       // scan is planned here, before any budget is spent. The plan enforces the
-      // 6-image / 10-page limits and the fixed file size; a refusal names the
+      // 10-image / 10-page limits and the fixed file size; a refusal names the
       // reason instead of sending something unbounded to the model.
       const fetched = (Array.isArray(read) ? read : []).filter(
         (source) => source && (source.status === 'read' || source.status === undefined) && typeof source.sha256 === 'string',
@@ -207,6 +294,11 @@ function createMenuAiReadHandlers({
       if (fetched.length === 0) return { ok: false, status: 422, reason: 'source_empty' };
       const plan = planImageRead({ sources: fetched });
       if (!plan.ok) return { ok: false, status: 422, reason: plan.reason, message: plan.message, plan };
+      // BE-35 ronde 3 (#84): the bundle holds exactly the sources the model gets,
+      // so the validator's coverage rule and the reading name the same sources. A
+      // page whose images were all cut or failed is no source of this reading.
+      const byId = new Map(fetched.map((source) => [source.id, source]));
+      const sent = plan.sources.map((entry) => byId.get(entry.id)).filter(Boolean);
       const built = buildImportBundle({
         bundleId: `AI-${generateId ? generateId() : 'job'}`,
         actorUserId: auth.userId,
@@ -214,7 +306,7 @@ function createMenuAiReadHandlers({
         restaurantName: job.restaurantName || null,
         fetchedAt: stamp().toISOString(),
         protocol,
-        sources: fetched,
+        sources: sent,
         now: stamp(),
       });
       return {
@@ -222,26 +314,10 @@ function createMenuAiReadHandlers({
         restaurantId,
         bundle: built,
         plan,
-        // The model receives the same validated inventory: text, or the images
-        // of this website, or the PDF as a document. The bytes stay in this
-        // request only; the sealed bundle keeps metadata only.
-        sources: fetched.map((source) => ({
-          id: source.id,
-          url: source.url,
-          kind: source.kind,
-          text: source.hasText === true && typeof source.text === 'string' ? source.text : null,
-          images: Array.isArray(source.images)
-            ? source.images.map((image) => ({
-                number: image.number,
-                url: image.url,
-                mediaType: image.mediaType,
-                data: image.data,
-              }))
-            : [],
-          documentBase64: typeof source.documentBase64 === 'string' ? source.documentBase64 : null,
-          pageCount: Number.isInteger(source.pageCount) ? source.pageCount : null,
-          imageRead: source.imageRead === true,
-        })),
+        // The model receives exactly what the plan reads: text, the images of
+        // this website, or the PDF as a document. The bytes stay in this request
+        // only; the sealed bundle keeps metadata only.
+        sources: modelSources(plan, byId),
       };
     }
 
