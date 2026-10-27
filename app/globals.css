@@ -4857,11 +4857,13 @@ a.srr-paste-link { min-height: 44px; display: inline-flex; align-items: center; 
 /* Het woordmerk in de kop en de interne huislink zijn zelf een tikvlak. */
 a.wordmark { min-height: 44px; }
 a.internal-nav-home { min-width: 44px; min-height: 44px; }
-/* Een selectievakje van 20 px is te klein om te raken. De zichtbare box blijft
-   klein; het klikbare vlak eromheen wordt 44 px. De `input`-prefix is nodig:
-   de bestaande `input[type=checkbox]`-regel zet de padding anders terug. */
-input.cov-check-select,
-input.brn-pick { width: 24px; height: 24px; padding: 10px; box-sizing: content-box; }
+/* Een native selectievakje van 20 px negeert padding en blijft dus 20 px.
+   Het label eromheen is het tikvlak van 44 px; de box zelf houdt zijn maat. */
+.cov-check-hit,
+.brn-pick-hit { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; }
+.brn-pick-hit { margin-top: 6px; }
+.brn-pick-hit .brn-pick { margin-top: 0; }
+.brn-pick-spacer { width: 44px; }
 .cov-new,
 .cov-new > * { min-width: 0; }
 

@@ -249,13 +249,15 @@ export default function BronnenView({
                   {tasks.map((task) => (
                     <li key={task.id} className="brn-task-row">
                       {task.kind === 'batch' ? (
-                        <input
-                          type="checkbox"
-                          className="brn-pick"
-                          checked={Boolean(picked && picked.has(task.id))}
-                          onChange={() => onTogglePick(task.id)}
-                          aria-label={`Selecteer ${task.name} voor opruimen`}
-                        />
+                        <label className="brn-pick-hit">
+                          <input
+                            type="checkbox"
+                            className="brn-pick"
+                            checked={Boolean(picked && picked.has(task.id))}
+                            onChange={() => onTogglePick(task.id)}
+                            aria-label={`Selecteer ${task.name} voor opruimen`}
+                          />
+                        </label>
                       ) : (
                         <span className="brn-pick-spacer" aria-hidden="true" />
                       )}

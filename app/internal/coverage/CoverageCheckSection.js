@@ -488,14 +488,18 @@ export default function CoverageCheckSection({ token, onUncheckedCount }) {
             {visibleRows.map((row) => (
               <tr key={row.restaurantId}>
                 <td>
-                  <input
-                    type="checkbox"
-                    className="cov-check-select"
-                    checked={selected.has(row.restaurantId)}
-                    disabled={!row.canCheck}
-                    onChange={() => toggle(row.restaurantId)}
-                    aria-label={`Selecteer ${row.name}`}
-                  />
+                  {/* BE-37 (#89): een native selectievakje negeert padding; het
+                      label eromheen is het tikvlak van 44 px. */}
+                  <label className="cov-check-hit">
+                    <input
+                      type="checkbox"
+                      className="cov-check-select"
+                      checked={selected.has(row.restaurantId)}
+                      disabled={!row.canCheck}
+                      onChange={() => toggle(row.restaurantId)}
+                      aria-label={`Selecteer ${row.name}`}
+                    />
+                  </label>
                 </td>
                 <td>
                   <div className="cov-check-name">{row.name}</div>
