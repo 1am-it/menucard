@@ -27,6 +27,9 @@ const MAX_LABEL = 120;
 const MAX_PATH_TEXT = 1024;
 // Same display bound the concept uses for a section's locator (menuConcept).
 const MAX_LOCATOR = 160;
+// BE-30: a section's dish list stays bounded, exactly like the menu control.
+const MAX_SECTION_ITEMS = 60;
+const MAX_PRICE_TEXT = 60;
 
 /** A section locator as the review shows and 0020 stores it: trimmed, bounded. */
 function boundedLocator(value) {
@@ -69,24 +72,122 @@ function storedPath(value) {
   }
 }
 
+/** The menu and category a `menuSections` id ("1.0") points at. */
+function sectionSource(menus, id) {
+  const [m, c] = String(id === undefined || id === null ? '' : id)
+    .split('.')
+    .map((part) => Number(part));
+  const menu = Array.isArray(menus) && Number.isInteger(m) ? menus[m] : null;
+  const category = menu && Array.isArray(menu.categories) && Number.isInteger(c) ? menu.categories[c] : null;
+  return { menu: menu && typeof menu === 'object' ? menu : null, category: category && typeof category === 'object' ? category : null };
+}
+
+/**
+ * BE-30 (criterium 1): the dishes of one uncertain section with their price,
+ * bounded exactly like the review shows them. Free: this is what the analysis
+ * already read, no AI and no extra request.
+ */
+function sectionItems(category, id) {
+  const list = Array.isArray(category && category.items) ? category.items : [];
+  const out = [];
+  for (const item of list) {
+    if (!item || typeof item.name !== 'string' || item.name.trim() === '') continue;
+    const price = typeof item.price === 'string' && item.price.trim() !== '' ? item.price.trim().slice(0, MAX_PRICE_TEXT) : null;
+    const priceText = typeof item.priceText === 'string' && item.priceText.trim() !== '' ? item.priceText.trim().slice(0, MAX_PRICE_TEXT) : null;
+    out.push({ id: `${id}.${out.length}`, name: item.name.trim().slice(0, MAX_LABEL), price, priceText });
+    if (out.length >= MAX_SECTION_ITEMS) break;
+  }
+  return out;
+}
+
+/** "pdf:12:item:2" or "pdf:12" → 12; anything else → null. */
+function pdfPageOf(locator) {
+  if (typeof locator !== 'string') return null;
+  const match = /^\s*pdf:(\d{1,4})(?::|\s*$)/i.exec(locator);
+  if (!match) return null;
+  const page = Number(match[1]);
+  return Number.isInteger(page) && page > 0 ? page : null;
+}
+
+/** Only a real http(s) address may ever become a link. */
+function safeSourceUrl(value) {
+  if (typeof value !== 'string' || value.trim() === '') return null;
+  try {
+    const url = new URL(value.trim());
+    if (url.protocol !== 'https:' && url.protocol !== 'http:') return null;
+    url.hash = '';
+    return url.toString();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * BE-30 (criterium 2): "Bekijk pagina N" for a pdf source (`#page=N`, only when
+ * the locator names a page) and the plain source URL for a website. A source
+ * without a usable address gets no link at all.
+ */
+function sourceLinkOf({ sourceUrl, locator } = {}) {
+  const url = safeSourceUrl(sourceUrl);
+  if (!url) return null;
+  const page = pdfPageOf(locator);
+  if (!page) return { url, page: null, text: 'Bekijk bron' };
+  return { url: `${url}#page=${page}`, page, text: `Bekijk pagina ${page}` };
+}
+
+/**
+ * BE-30 (criterium 2): why this section is uncertain, in plain Dutch, from what
+ * the analysis itself knows — never an invented cause.
+ */
+function uncertaintyReason({ sourcePath, path, locator } = {}) {
+  const source = Array.isArray(sourcePath) ? sourcePath.filter((label) => typeof label === 'string' && label.trim() !== '') : [];
+  const parts = [];
+  if (source.length === 0) parts.push('kopje niet herkend in de bron');
+  else if (reviewKey(source) !== reviewKey(Array.isArray(path) ? path : [])) parts.push(`kopje anders gelezen dan in de bron ("${formatPath(source)}")`);
+  else parts.push('de indeling van dit kopje is niet zeker');
+  if (!boundedLocator(locator)) parts.push('vindplaats niet vastgelegd');
+  return `${parts.join('; ')}.`.replace(/^./, (first) => first.toUpperCase());
+}
+
 /**
  * The sections a human must handle before an uncertain result may be
- * confirmed, exactly as the review page shows them (same path, source route
- * and locator).
+ * confirmed, exactly as the review page shows them (same path, source route,
+ * locator and dishes).
  */
 function uncertainSections(menus) {
   return menuSections(menus)
     .filter((section) => section.uncertain)
-    .map((section) => ({
-      id: section.id,
-      key: reviewKey(section.path),
-      path: section.path,
-      label: formatPath(section.path),
-      sourcePath: Array.isArray(section.sourcePath) ? section.sourcePath : null,
-      sourceRoute: Array.isArray(section.sourcePath) ? formatPath(section.sourcePath) : null,
-      locator: boundedLocator(section.locator),
-      itemCount: section.itemCount,
-    }));
+    .map((section) => {
+      const { menu, category } = sectionSource(menus, section.id);
+      const locator = boundedLocator(section.locator);
+      return {
+        id: section.id,
+        key: reviewKey(section.path),
+        path: section.path,
+        label: formatPath(section.path),
+        sourcePath: Array.isArray(section.sourcePath) ? section.sourcePath : null,
+        sourceRoute: Array.isArray(section.sourcePath) ? formatPath(section.sourcePath) : null,
+        locator,
+        itemCount: section.itemCount,
+        reason: uncertaintyReason({ sourcePath: section.sourcePath, path: section.path, locator }),
+        items: sectionItems(category, section.id),
+        sourceLink: sourceLinkOf({ sourceUrl: menu && menu.sourceUrl, locator }),
+      };
+    });
+}
+
+/**
+ * BE-30 (criterium 4): "Alles klopt zo" as the same per-section choices a
+ * reviewer makes by hand — one keep decision per uncertain section, nothing
+ * more. The server still re-checks every path and the human still confirms.
+ */
+function keepAllChoices(sections) {
+  const out = {};
+  for (const section of Array.isArray(sections) ? sections : []) {
+    if (!section || typeof section.key !== 'string' || !Array.isArray(section.path)) continue;
+    out[section.key] = { action: 'keep', text: formatPath(section.path) };
+  }
+  return out;
 }
 
 /** True when any menu of this receipt is structurally uncertain. */
@@ -191,14 +292,22 @@ module.exports = {
   MAX_PATH_LABELS,
   MAX_LABEL,
   MAX_LOCATOR,
+  MAX_SECTION_ITEMS,
+  MAX_PRICE_TEXT,
   normalizePath,
   parsePathText,
   reviewKey,
   storedPath,
   boundedLocator,
+  pdfPageOf,
+  safeSourceUrl,
+  sourceLinkOf,
+  uncertaintyReason,
+  sectionItems,
   uncertainSections,
   structureUncertain,
   validateStructureReviews,
   structureEdits,
   recordedSections,
+  keepAllChoices,
 };

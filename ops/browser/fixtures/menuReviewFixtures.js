@@ -8,6 +8,13 @@
 
 const { summarizeRecognisedMenu, buildMenuConcept, storedConceptInput, recognisedLines } = require('../../../src/lib/menuConcept');
 const { uncertainSections } = require('../../../src/lib/menuStructureReview');
+const {
+  adviceRecord,
+  sourceFragments,
+  storedAdviceView,
+  validateAdvice,
+} = require('../../../src/lib/menuStructureAdvice');
+
 const { buildTriageView } = require('../../../src/lib/sourceTriage');
 const { buildExtractionResult } = require('../../../src/lib/menuExtractionResult');
 const {
@@ -305,7 +312,184 @@ const structureReadOnlyDetail = (() => {
   return detail;
 })();
 
+// ── BE-30 (#72): diezelfde controle met gerechten, bronpagina en AI-advies ───
+//
+// Het fictieve voorbeeld uit de opdracht: acht onzekere rubrieken (zoals de
+// praktijktest bij Smelt), een pdf-bron met paginanummers en een opgeslagen
+// advies voor zes van de acht rubrieken. Het advies komt door dezelfde
+// keuring als in de app (validateAdvice met de bewijscontrole), dus de fixture
+// kan geen vorm tonen die het product niet produceert.
+const STRUCTURE8_RECEIPT_HASH = 'c'.repeat(64);
+const STRUCTURE8_SOURCE = 'https://fictief-smelt.invalid/menukaart.pdf';
+const structure8Menus = [
+  {
+    title: 'Smelt (fictief)',
+    structure: 'uncertain',
+    sourceUrl: STRUCTURE8_SOURCE,
+    categories: [
+      {
+        name: 'Voorgerechten',
+        path: ['Voorgerechten'],
+        sourcePath: ['SMELT', 'VOORGERECHTEN'],
+        locator: 'pdf:3',
+        uncertain: true,
+        items: [
+          { name: 'Fictieve burrata', price: '13.00', evidence: evidence('pdf:3:item:1', 'Fictieve burrata 13,00') },
+          { name: 'Fictieve soep van de dag', price: '8.50', evidence: evidence('pdf:3:item:2', 'Fictieve soep van de dag 8,50') },
+        ],
+      },
+      {
+        name: 'Hoofdgerechten',
+        path: ['Hoofdgerechten'],
+        sourcePath: ['SMELT', 'HOOFDGERECHTEN'],
+        locator: 'pdf:4',
+        uncertain: true,
+        items: [
+          { name: 'Fictieve zeebaars', price: '24.00', evidence: evidence('pdf:4:item:1', 'Fictieve zeebaars 24,00') },
+          { name: 'Fictieve risotto', price: '19.50', evidence: evidence('pdf:4:item:2', 'Fictieve risotto 19,50') },
+        ],
+      },
+      {
+        name: 'Desserts',
+        path: ['Desserts'],
+        sourcePath: ['SMELT', 'NAGERECHTEN'],
+        locator: 'pdf:5',
+        uncertain: true,
+        items: [
+          { name: 'Fictieve panna cotta', price: '7.50', evidence: evidence('pdf:5:item:1', 'Fictieve panna cotta 7,50') },
+          { name: 'Fictief kaasbord', price: '11.00', evidence: evidence('pdf:5:item:2', 'Fictief kaasbord 11,00') },
+        ],
+      },
+      {
+        name: 'Dranken',
+        path: ['Dranken'],
+        sourcePath: ['SMELT', 'DRANKEN'],
+        locator: 'pdf:8',
+        uncertain: true,
+        items: [
+          { name: 'Fictieve huiswijn', price: '5.00', evidence: evidence('pdf:8:item:1', 'Fictieve huiswijn 5,00') },
+          { name: 'Fictief mineraalwater', price: '3.50', evidence: evidence('pdf:8:item:2', 'Fictief mineraalwater 3,50') },
+        ],
+      },
+    ],
+  },
+  {
+    title: 'Smelt lunch (fictief)',
+    structure: 'uncertain',
+    sourceUrl: STRUCTURE8_SOURCE,
+    categories: [
+      {
+        name: 'Lunchgerechten',
+        path: ['Lunchgerechten'],
+        sourcePath: ['LUNCH', 'LUNCHGERECHTEN'],
+        locator: 'pdf:11',
+        uncertain: true,
+        items: [
+          { name: 'Fictief broodje kaas', price: '8.00', evidence: evidence('pdf:11:item:1', 'Fictief broodje kaas 8,00') },
+          { name: 'Fictieve tosti', price: '6.50', evidence: evidence('pdf:11:item:2', 'Fictieve tosti 6,50') },
+        ],
+      },
+      {
+        name: 'Salades',
+        path: ['Salades'],
+        sourcePath: ['LUNCH', 'SALADES'],
+        locator: 'pdf:12',
+        uncertain: true,
+        items: [{ name: 'Fictieve salade niçoise', price: '14.00', evidence: evidence('pdf:12:item:1', 'Fictieve salade niçoise 14,00') }],
+      },
+      {
+        name: 'Soepen',
+        path: ['Soepen'],
+        sourcePath: ['LUNCH', 'SOEPEN'],
+        locator: 'pdf:13',
+        uncertain: true,
+        items: [{ name: 'Fictieve tomatensoep', price: '7.00', evidence: evidence('pdf:13:item:1', 'Fictieve tomatensoep 7,00') }],
+      },
+      {
+        name: 'Bijgerechten',
+        path: ['Bijgerechten'],
+        sourcePath: ['LUNCH', 'BIJGERECHTEN'],
+        locator: 'pdf:14',
+        uncertain: true,
+        items: [{ name: 'Fictieve friet', price: '4.00', evidence: evidence('pdf:14:item:1', 'Fictieve friet 4,00') }],
+      },
+    ],
+  },
+];
+const structure8Sections = uncertainSections(structure8Menus);
+
+const structure8Advice = (() => {
+  const fragments = sourceFragments(structure8Menus);
+  // Each advice quotes the first dish line of its own section, exactly as the
+  // receipt stored it; a quote that is not literal is rejected.
+  const quotes = new Map();
+  structure8Menus.forEach((menu, m) => {
+    menu.categories.forEach((category, c) => quotes.set(`${m}.${c}`, category.items[0].evidence.quote));
+  });
+  const output = {
+    sections: structure8Sections.slice(0, 6).map((section, index) => ({
+      rubriekId: section.id,
+      decision: index % 4 === 2 ? 'correct' : 'keep',
+      correctedPath: index % 4 === 2 ? [section.path[0], 'Gecorrigeerde rubriek'] : null,
+      confidence: index % 2 === 0 ? 'hoog' : 'midden',
+      quote: quotes.get(section.id),
+    })),
+  };
+  const { advices, rejected } = validateAdvice({ sections: structure8Sections, fragments, output });
+  const record = adviceRecord({
+    jobId: 'job-fictief-72',
+    receiptId: 'receipt-fictief-72',
+    receiptHash: STRUCTURE8_RECEIPT_HASH,
+    advices,
+    rejected,
+    ai: {
+      label: 'Gelezen door AI',
+      aiName: 'Claude (Haiku 5.5)',
+      provider: 'anthropic',
+      model: 'claude-haiku-5-5',
+      requestId: 'req-fictief-72',
+    },
+    cost: { eurCents: 3, known: true },
+    now: new Date('2026-10-25T10:00:00Z'),
+    readId: 'advice-fictief-72',
+    outcome: 'advised',
+  });
+  return { record, view: storedAdviceView(record, STRUCTURE8_RECEIPT_HASH) };
+})();
+
+const structure8Review = (advice) => ({
+  eligible: true,
+  foundUrl: STRUCTURE8_SOURCE,
+  receiptHash: STRUCTURE8_RECEIPT_HASH,
+  storeAvailable: true,
+  required: structure8Sections,
+  treated: [],
+  handledCount: 0,
+  advice: advice || null,
+});
+const structure8Item = item({
+  key: 'needs_review',
+  label: 'Controle nodig',
+  role: 'old',
+  icon: 'warning',
+  high: false,
+  actions: ['review_structure'],
+  text: 'Er is een menukaart gevonden, maar de rubriekindeling is onzeker. Controleer elke onzekere rubriek hieronder en handhaaf of corrigeer hem; pas daarna kun je de bron bevestigen.',
+  menu: summarizeRecognisedMenu(structure8Menus),
+  concept: null,
+  foundUrl: STRUCTURE8_SOURCE,
+  notes: ['Fictief: acht onzekere rubrieken, zoals in de praktijktest.'],
+  structureReview: structure8Review(null),
+});
+const structure8AdviceItem = item({
+  ...structure8Item,
+  structureReview: structure8Review(structure8Advice.view),
+});
+const structure8Detail = detailWith([structure8Item]);
+const structure8AdviceDetail = detailWith([structure8AdviceItem]);
+
 const partialItem = item({
+
   key: 'no_menu',
   label: 'Geen bruikbare menukaart',
   role: 'neutral',
@@ -622,6 +806,8 @@ module.exports = {
   reviewDetail,
   structureItem,
   structureSections,
+  structure8Sections,
+  structure8Advice,
   imageOnlyItem,
   triagePayload,
   v2Product,
@@ -633,6 +819,10 @@ module.exports = {
     readonly: overview(readOnlyDetail()),
     structure: overview(structureDetail),
     'structure-readonly': overview(structureReadOnlyDetail),
+    // BE-30 (#72): acht onzekere rubrieken met gerechten, bronpagina en
+    // (in de tweede variant) een opgeslagen AI-advies.
+    structure8: overview(structure8Detail),
+    'structure8-advice': overview(structure8AdviceDetail),
     empty: overview(null),
     partial: overview(detailWith([partialItem])),
     image_only: { batch: overview(detailWith([imageOnlyItem])), triage: triagePayload },

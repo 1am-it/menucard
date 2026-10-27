@@ -597,9 +597,12 @@ function applyCost(budget, costEurCents) {
  * offline regressions only; a request still requires a (fixture) key so the
  * disabled path stays the same in tests and in the app.
  */
-function createAnthropicStructuredCall({ env = process.env, client = null, budget = null, model = ANTHROPIC_MODEL, outputMode = DEFAULT_OUTPUT_MODE } = {}) {
+function createAnthropicStructuredCall({ env = process.env, client = null, budget = null, model = ANTHROPIC_MODEL, outputMode = DEFAULT_OUTPUT_MODE, buildRequest = buildAnthropicRequest } = {}) {
   if (!OUTPUT_MODES.includes(outputMode)) {
     throw new AnthropicCallError(CALL_ERROR_CODES.invalid_output_mode, `output mode must be one of ${OUTPUT_MODES.join('|')}`);
+  }
+  if (typeof buildRequest !== 'function') {
+    throw new AnthropicCallError(CALL_ERROR_CODES.input_limit, 'buildRequest must be a function');
   }
   const apiKey = env && typeof env[ANTHROPIC_API_KEY_ENV] === 'string' ? env[ANTHROPIC_API_KEY_ENV].trim() : '';
   const state = { lastCall: null, client: client || null, controller: null, stream: null, callCount: 0, outputMode, deadlineExceeded: false };
@@ -644,7 +647,7 @@ function createAnthropicStructuredCall({ env = process.env, client = null, budge
     // `undefined` is the adapter guard's "not reported yet" state; the record
     // below keeps `null` as the explicit unknown outcome.
     if (budget && typeof budget === 'object') budget.costEurCents = undefined;
-    const body = buildAnthropicRequest({ ...input, outputMode: state.outputMode });
+    const body = buildRequest({ ...input, outputMode: state.outputMode });
     const controller = new AbortController();
     state.controller = controller;
     state.deadlineExceeded = false;

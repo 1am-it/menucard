@@ -78,6 +78,13 @@ const PRODUCT_PRICE_LABELS = {
   unknown: 'Prijs onbekend',
 };
 
+// Prices read from a source arrive as "13.00"; staff see Dutch notation ("13,00").
+export function dutchPrice(value) {
+  if (value === null || value === undefined || value === '') return value
+  const text = String(value)
+  return /^\d+\.\d{1,2}$/.test(text) ? text.replace('.', ',') : text
+}
+
 function productPriceText(price) {
   if (!price) return 'Prijs onbekend';
   if (price.status === 'known' || price.status === 'from') {
@@ -364,7 +371,7 @@ export function MenuControl({ item }) {
                 <li key={dish.id}>
                   <span className="bta-dish">{dish.name}</span>
                   <span className={dish.price ? 'bta-price' : 'bta-price bta-price--missing'}>
-                    {dish.price || (dish.priceText ? `${dish.priceText} · meerdere prijzen` : 'geen prijs')}
+                    {dutchPrice(dish.price) || (dish.priceText ? `${dish.priceText} · meerdere prijzen` : 'geen prijs')}
                   </span>
                 </li>
               ))}
@@ -385,16 +392,23 @@ export function MenuControl({ item }) {
 
 /**
  * The explicit human control of an uncertain section structure (#59 review
- * 6307703713). Every uncertain section of THIS source version is shown with
- * its source route and locator; a reviewer keeps it or corrects its whole
- * path. Only a complete set can be confirmed — the server re-checks the same
- * paths against the stored receipt. No "accept everything" action.
+ * 6307703713, BE-30 #72). Every uncertain section of THIS source version is
+ * shown with its dishes and prices, why it is uncertain, its source route and a
+ * direct link to that page of the source; a reviewer keeps it or corrects its
+ * whole path. "Alles klopt zo" fills exactly the same per-section choices and
+ * still asks one explicit confirmation. Only a complete set can be confirmed —
+ * the server re-checks the same paths against the stored receipt.
  */
-export function StructureReview({ idPrefix, review, value, readOnly, onChange }) {
+export function StructureReview({ idPrefix, review, value, readOnly, onChange, onAcceptAll, bulkLabel, advice }) {
   const required = (review && Array.isArray(review.required) && review.required) || []
   if (required.length === 0) return null
   const titleId = `${idPrefix}-structure-title`
   const decisions = (review && Array.isArray(review.treated) && review.treated) || []
+  const adviceByKey = new Map(
+    (Array.isArray(advice) ? advice : [])
+      .filter((entry) => entry && typeof entry.key === 'string')
+      .map((entry) => [entry.key, entry]),
+  )
   const handled = required.filter((section) => {
     const choice = value[section.key]
     if (!choice) return false
@@ -403,14 +417,16 @@ export function StructureReview({ idPrefix, review, value, readOnly, onChange })
     const corrected = parsePathText(choice.text || '')
     return Boolean(corrected && reviewKey(corrected) !== section.key)
   })
+  const editable = !readOnly && review.storeAvailable !== false
   return (
     <div className="bta-structure-review" role="group" aria-labelledby={titleId}>
       <p id={titleId} className="bta-attention-title">
         <StatusIcon name="warning" /> Rubriekindeling controleren
       </p>
       <p className="bta-muted">
-        {plural(required.length, 'onzekere rubriek', 'onzekere rubrieken')} in deze bronversie. Handhaaf of corrigeer elke
-        rubriek met het bronpad en de vindplaats erbij. Daarna kun je de bron bevestigen.
+        {plural(required.length, 'onzekere rubriek', 'onzekere rubrieken')} in deze bronversie. Klap een rubriek open: je
+        ziet de gerechten met hun prijs, waarom de indeling onzeker is en de plek in de bron. Handhaaf of corrigeer elke
+        rubriek; daarna kun je de bron bevestigen.
       </p>
       <p className="bta-structure-count" role="status">
         {handled.length} van {required.length} behandeld
@@ -426,6 +442,18 @@ export function StructureReview({ idPrefix, review, value, readOnly, onChange })
           </span>
         </div>
       )}
+      {editable && (
+        <div className="bta-structure-bulk">
+          <button type="button" className="stg-btn-secondary bta-btn" onClick={() => onAcceptAll && onAcceptAll()}>
+            {bulkLabel || 'Alles klopt zo'}
+          </button>
+          <p className="bta-muted">
+            {adviceByKey.size > 0
+              ? `Neem de adviezen over waar ze er zijn; de overige ${required.length - adviceByKey.size} rubrieken blijven op “klopt zo”. Je bevestigt daarna zelf de bron; niets wordt automatisch vastgelegd.`
+              : `Zet alle ${required.length} rubrieken op “klopt zo”. Je bevestigt daarna zelf de bron; niets wordt automatisch vastgelegd.`}
+          </p>
+        </div>
+      )}
       <ol className="bta-structure-list">
         {required.map((section, index) => {
           const choice = value[section.key] || {}
@@ -434,29 +462,79 @@ export function StructureReview({ idPrefix, review, value, readOnly, onChange })
           const invalid = corrected && (!correctedPath || reviewKey(correctedPath) === section.key)
           const fieldId = `${idPrefix}-structure-${index}`
           const treated = decisions.find((decision) => decision.key === section.key) || null
+          const items = Array.isArray(section.items) ? section.items : []
+          const sourceLink = section.sourceLink && typeof section.sourceLink.url === 'string' ? section.sourceLink : null
+          const adviceEntry = adviceByKey.get(section.key) || null
           return (
             <li key={section.key} className="bta-structure-row">
-              <div className="bta-structure-head">
-                <span className="bta-dish">{section.label}</span>
-                <span className="bta-muted">
-                  {plural(section.itemCount || 0, 'gerecht', 'gerechten')}
-                  {section.locator ? ` · vindplaats: ${section.locator}` : ''}
-                </span>
-              </div>
-              <p className="bta-source-route">Bronroute: {section.sourceRoute || 'niet vastgelegd'}</p>
-              {treated && (
-                <p className="bta-muted">
-                  Al behandeld{treated.reviewedAt ? ` op ${reviewedText(treated.reviewedAt)}` : ''}:{' '}
-                  {treated.action === 'correct' ? `gecorrigeerd naar ${formatPath(treated.correctedPath)}` : 'gehandhaafd'}.
+              <details className="bta-structure-section">
+                <summary className="bta-structure-head">
+                  <span className="bta-dish">{section.label}</span>
+                  <span className="bta-muted">{plural(section.itemCount || items.length, 'gerecht', 'gerechten')}</span>
+                  {choice.action === 'keep' && (
+                    <span className="status-badge status-badge--positive bta-badge bta-inline-badge">
+                      <StatusIcon name="check" />
+                      <span>Klopt zo</span>
+                    </span>
+                  )}
+                  {corrected && (
+                    <span className="status-badge status-badge--neutral bta-badge bta-inline-badge">
+                      <span>Gecorrigeerd</span>
+                    </span>
+                  )}
+                </summary>
+                <div className="bta-structure-body">
+                <p className="bta-structure-reason">Twijfel: {section.reason || 'de indeling van dit kopje is niet zeker.'}</p>
+                {adviceEntry && (
+                  <div className="bta-advice">
+                    <p className="bta-advice-title">
+                      <span className="status-badge status-badge--neutral bta-badge bta-inline-badge">
+                        <span>AI-advies</span>
+                      </span>{' '}
+                      {adviceEntry.label || (adviceEntry.decision === 'correct' ? 'Corrigeer de rubriek' : 'Klopt zo')}
+                      <span className="bta-advice-confidence"> · zekerheid {adviceEntry.confidence || 'midden'}</span>
+                    </p>
+                    <p className="bta-advice-quote">Citaat uit de bron: “{adviceEntry.quote}”</p>
+                  </div>
+                )}
+                <p className="bta-source-route">
+                  {sourceLink ? (
+                    <a className="bta-structure-link" href={sourceLink.url} target="_blank" rel="noopener noreferrer">
+                      {sourceLink.text}
+                    </a>
+                  ) : (
+                    'Geen directe bronlink bekend'
+                  )}
+                  {section.locator ? <span className="bta-muted"> · vindplaats: {section.locator}</span> : null}
                 </p>
-              )}
+                <p className="bta-source-route">Bronroute: {section.sourceRoute || 'niet vastgelegd'}</p>
+                {items.length > 0 ? (
+                  <ul className="bta-structure-dishes" aria-label={`Gerechten in ${section.label}`}>
+                    {items.map((dish) => (
+                      <li key={dish.id}>
+                        <span className="bta-dish">{dish.name}</span>
+                        <span className={dish.price ? 'bta-price' : 'bta-price bta-price--missing'}>
+                          {dutchPrice(dish.price) || (dish.priceText ? `${dish.priceText} · meerdere prijzen` : 'geen prijs')}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="bta-muted">Geen gerechten met een naam in deze rubriek gelezen.</p>
+                )}
+                {treated && (
+                  <p className="bta-muted">
+                    Al behandeld{treated.reviewedAt ? ` op ${reviewedText(treated.reviewedAt)}` : ''}:{' '}
+                    {treated.action === 'correct' ? `gecorrigeerd naar ${formatPath(treated.correctedPath)}` : 'gehandhaafd'}.
+                  </p>
+                )}
               <div className="bta-structure-choices" role="radiogroup" aria-label={`Beslissing voor ${section.label}`}>
                 <label>
                   <input
                     type="radio"
                     name={`${fieldId}-decision`}
                     checked={choice.action === 'keep'}
-                    disabled={readOnly || review.storeAvailable === false}
+                    disabled={!editable}
                     onChange={() => onChange(section.key, { action: 'keep', text: formatPath(section.path) })}
                   />{' '}
                   Rubriek klopt zo
@@ -466,7 +544,7 @@ export function StructureReview({ idPrefix, review, value, readOnly, onChange })
                     type="radio"
                     name={`${fieldId}-decision`}
                     checked={corrected}
-                    disabled={readOnly || review.storeAvailable === false}
+                    disabled={!editable}
                     onChange={() =>
                       onChange(section.key, { action: 'correct', text: choice.action === 'correct' ? choice.text : formatPath(section.path) })
                     }
@@ -481,7 +559,7 @@ export function StructureReview({ idPrefix, review, value, readOnly, onChange })
                     id={`${fieldId}-path`}
                     className="stg-input"
                     value={choice.text || ''}
-                    disabled={readOnly || review.storeAvailable === false}
+                    disabled={!editable}
                     placeholder="bijv. Diner › Voorgerechten"
                     aria-describedby={`${fieldId}-hint`}
                     aria-invalid={invalid ? 'true' : undefined}
@@ -494,6 +572,8 @@ export function StructureReview({ idPrefix, review, value, readOnly, onChange })
                   </p>
                 </div>
               )}
+              </div>
+              </details>
             </li>
           )
         })}

@@ -21,6 +21,9 @@ import BatchAnalysisView from './BatchAnalysisView'
 
 const LOAD_ERROR = 'De batchanalyse kon niet worden geladen.'
 const API = '/api/internal/v1/batch-analysis'
+// BE-30 (#72): de bestaande AI-status van "Lees met AI" (zelfde vlag, sleutel en
+// maandteller); alleen-lezen, bepaalt of het adviesblok zijn knop toont.
+const AI_API = '/api/internal/v1/menu-ai-import'
 
 function newBatchId() {
   return typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : null
@@ -40,6 +43,7 @@ export default function BatchAnalysisPage() {
   const [message, setMessage] = useState(null)
   const [confirming, setConfirming] = useState(null)
   const [notice, setNotice] = useState('')
+  const [aiStatus, setAiStatus] = useState(null)
   const loopToken = useRef(0)
 
   useEffect(() => {
@@ -90,6 +94,22 @@ export default function BatchAnalysisPage() {
   useEffect(() => {
     if (token) load(selectedId)
   }, [token, selectedId, load])
+
+  useEffect(() => {
+    if (!token) return undefined
+    let alive = true
+    fetch(`${AI_API}`, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' })
+      .then((res) => res.json().catch(() => ({})))
+      .then((body) => {
+        if (alive) setAiStatus(body && typeof body === 'object' ? body : null)
+      })
+      .catch(() => {
+        if (alive) setAiStatus(null)
+      })
+    return () => {
+      alive = false
+    }
+  }, [token])
 
   const detail = data && data.detail
   const ownOpenBatchId = data && data.own_open_batch_id
@@ -250,6 +270,29 @@ export default function BatchAnalysisPage() {
     await startBatch([url], { reanalyze: action === 'reanalyze' })
   }
 
+  // BE-30 (#72): één AI-advies voor alle onzekere rubrieken van deze bronversie.
+  // Het is een suggestie met een letterlijk citaat; de mens bevestigt daarna via
+  // de bestaande bevestigingsroute. Niets wordt automatisch vastgelegd.
+  async function requestAdvice(jobId) {
+    if (!viewing || !jobId) return { ok: false, body: null }
+    setBusy(true)
+    try {
+      const res = await fetch(`${API}/${viewing.batch.id}/structure-advice`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ job_id: jobId }),
+      })
+      const body = await res.json().catch(() => ({}))
+      if (!res.ok) return { ok: false, body }
+      setAiStatus((prev) => (prev && body.monthly ? { ...prev, monthly: body.monthly } : prev))
+      return { ok: true, body }
+    } catch {
+      return { ok: false, body: { error: 'Het AI-advies lukte niet. Je kunt de rubrieken zelf beoordelen.' } }
+    } finally {
+      setBusy(false)
+    }
+  }
+
   // "Concept opslaan": an internal menu concept (BE-17 proposal) for a
   // confirmed source. The server re-checks every blocker; nothing is public.
   async function saveConcept(jobId, edits) {
@@ -323,6 +366,8 @@ export default function BatchAnalysisPage() {
           onRerun={rerun}
           onAdjust={adjust}
           onSaveConcept={saveConcept}
+          onAdvice={requestAdvice}
+          aiStatus={aiStatus}
           onNew={() => {
             setShowInput(true)
             setMessage(null)

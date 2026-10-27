@@ -53,6 +53,15 @@ function check(name, passed, detail) {
   checks.push({ name, passed: Boolean(passed), detail: detail === undefined ? null : String(detail) });
 }
 
+/** #RGB/#RRGGBB with a light luminance: the light theme is active. */
+function isLightBackground(value) {
+  const hex = String(value || '').trim().replace('#', '');
+  const full = hex.length === 3 ? hex.split('').map((c) => c + c).join('') : hex;
+  if (!/^[0-9a-f]{6}$/i.test(full)) return false;
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16) / 255);
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.8;
+}
+
 function recordClickpath(name, steps, passed, detail) {
   clickpaths.push({ name, steps, passed: Boolean(passed), detail: detail === undefined ? null : String(detail) });
 }
@@ -190,7 +199,9 @@ async function reviewScenario(cdp) {
   check('review: breadcrumb link is exact', Boolean(breadcrumb), breadcrumb && breadcrumb.text);
   check('review: original menu link is exact and safe', original && original.target === '_blank' && original.rel.includes('noopener') && original.rel.includes('noreferrer'));
   check('review: "handmatig beoordelen" opens the same batch item', Boolean(review), review && review.href);
-  check('review: light theme is active', snapshot.theme === 'light' && snapshot.bg === '#fcfaf4', `${snapshot.theme}/${snapshot.bg}`);
+  // The light `--bg` token is #FFFFFF since BE-28 ("frisse publieke stijl");
+  // this check only needs to prove the light theme is active, not one exact hex.
+  check('review: light theme is active', snapshot.theme === 'light' && isLightBackground(snapshot.bg), `${snapshot.theme}/${snapshot.bg}`);
   check('review: address bar keeps the batch context', snapshot.url.includes(`batch=${fixtures.BATCH_ID}`), snapshot.url);
   check('review: no horizontal overflow at 1024 px', snapshot.overflow <= 0, `overflow=${snapshot.overflow}`);
 
@@ -437,15 +448,21 @@ async function structureScenario(cdp) {
     };
   })()`);
   check('structure: the existing "Menukaart controleren" path shows the section control', initial.text.includes('Rubriekindeling controleren'));
+  // BE-30 (#72): the route, locator, dishes and page link live in the opened
+  // section; the collapsed summary keeps only the label and the count.
+  const expandedRows = await evalJs(cdp, `(() => {
+    for (const details of document.querySelectorAll('.bta-structure-section')) details.open = true;
+    return [...document.querySelectorAll('.bta-structure-row')].map((row) => (row.innerText || '').trim());
+  })()`);
   check(
     'structure: each uncertain section carries its path, source route and locator',
-    initial.rows.length === 2 &&
-      initial.rows[0].includes(fixtures.structureSections[0].label) &&
-      initial.rows[0].includes(fixtures.structureSections[0].sourceRoute) &&
-      initial.rows[0].includes(fixtures.structureSections[0].locator) &&
-      initial.rows[1].includes(fixtures.structureSections[1].label) &&
-      initial.rows[1].includes(fixtures.structureSections[1].locator),
-    JSON.stringify(initial.rows),
+    expandedRows.length === 2 &&
+      expandedRows[0].includes(fixtures.structureSections[0].label) &&
+      expandedRows[0].includes(fixtures.structureSections[0].sourceRoute) &&
+      expandedRows[0].includes(fixtures.structureSections[0].locator) &&
+      expandedRows[1].includes(fixtures.structureSections[1].label) &&
+      expandedRows[1].includes(fixtures.structureSections[1].locator),
+    JSON.stringify(expandedRows),
   );
   check('structure: nothing is treated before the human acts', initial.radios.length === 4 && initial.radios.every((r) => !r.checked));
   check('structure: the progress counter starts at 0 van 2', initial.text.includes('0 van 2 behandeld'));
@@ -454,7 +471,7 @@ async function structureScenario(cdp) {
     !initial.buttons.some((b) => b.text.includes('Bevestig bron')),
     JSON.stringify(initial.buttons.map((b) => b.text)),
   );
-  check('structure: no accept-all action exists', !/alles accepteren|accepteer alles|alles goedkeuren/i.test(initial.text));
+  check('structure: the bulk action only fills choices, it never approves', initial.text.includes('Alles klopt zo') && !/automatisch bevestigd|alles accepteren/i.test(initial.text));
   check('structure: light theme is active', initial.theme === 'light');
   check('structure: no horizontal overflow at 1024 px', initial.overflow <= 0, `overflow=${initial.overflow}`);
 
@@ -521,18 +538,32 @@ async function structureScenario(cdp) {
   );
   screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'menu-review-structure-1024-light.png'));
 
-  // Keyboard: a fresh page at 390 px, Tab to the first decision radio, Space selects it.
+  // Keyboard: a fresh page at 390 px. A section body is collapsed by default, so
+  // the keyboard route is: Tab to the section summary, Enter opens it, then Tab
+  // to the decision radio and Space selects it.
   await setViewport(cdp, 390, 900);
   await openRoute(cdp, url('light'), `document.body.innerText.includes('Rubriekindeling controleren')`);
-  const reach = await tabUntilInput(cdp, (info) => info.tag === 'INPUT' && info.type === 'radio');
+  const summaryReach = await tabUntilInput(cdp, (info) => info.tag === 'SUMMARY');
   let keyboardOk = false;
-  if (reach.info) {
-    await pressKey(cdp, ' ', 'Space', 32, ' ');
-    const selected = await waitFor(cdp, `document.body.innerText.includes('1 van 2 behandeld')`, 10000);
-    const checked = await evalJs(cdp, `Boolean(document.querySelector('.bta-structure-choices input[type="radio"]:checked'))`);
-    keyboardOk = selected && checked;
+  let radioReach = null;
+  if (summaryReach.info) {
+    await pressKey(cdp, 'Enter', 'Enter', 13, '\r');
+    const openedSummary = await waitFor(cdp, `Boolean(document.querySelector('.bta-structure-section[open]'))`, 5000);
+    if (openedSummary) {
+      radioReach = await tabUntilInput(cdp, (info) => info.tag === 'INPUT' && info.type === 'radio');
+      if (radioReach.info) {
+        await pressKey(cdp, ' ', 'Space', 32, ' ');
+        const selected = await waitFor(cdp, `document.body.innerText.includes('1 van 2 behandeld')`, 10000);
+        const checked = await evalJs(cdp, `Boolean(document.querySelector('.bta-structure-choices input[type="radio"]:checked'))`);
+        keyboardOk = selected && checked;
+      }
+    }
   }
-  check('structure keyboard: Tab reaches a section decision and Space selects it', keyboardOk, reach.info ? `tabs=${reach.tabs}` : JSON.stringify(reach.seen.slice(-6)));
+  check(
+    'structure keyboard: Enter opens a section and Space selects its decision',
+    keyboardOk,
+    summaryReach.info ? `tabs=${summaryReach.tabs} radioTabs=${radioReach ? radioReach.tabs : 'none'}` : JSON.stringify(summaryReach.seen.slice(-6)),
+  );
   screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'menu-review-structure-keyboard-390-light.png'));
 
   // Responsive: 390 px in both themes, with the correction field open.
@@ -575,6 +606,123 @@ async function structureScenario(cdp) {
   check('structure readonly: the decisions are disabled and no confirmation is offered', readonly.disabledRadios && !readonly.buttons.some((text) => text.includes('Bevestig')));
   screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'menu-review-structure-readonly-1024-dark.png'));
 }
+// BE-30 (#72): the same section control with its dishes, the reason, the page
+// link, the stored AI advice and the bulk confirmation — 1280 and 390 px, light
+// and dark. FIXTURE evidence only; no provider, credential or write is used.
+async function be30Scenario(cdp) {
+  const url = (fixture, theme) => `${BATCH_URL}?fixture=${fixture}&${BATCH_QUERY}&item=1&theme=${theme}`;
+  const sections = fixtures.structure8Sections;
+  for (const [width, theme] of [[1280, 'light'], [1280, 'dark'], [390, 'light'], [390, 'dark']]) {
+    await setViewport(cdp, width, 900);
+
+    // 1. Without AI advice: collapsed, then opened.
+    await openRoute(cdp, url('structure8', theme), `document.body.innerText.includes('Rubriekindeling controleren')`);
+    const collapsed = await evalJs(cdp, `(() => {
+      const section = document.querySelector('.bta-structure-section');
+      const body = section ? section.querySelector('.bta-structure-body') : null;
+      const dishes = body ? body.querySelector('.bta-structure-dishes') : null;
+      return {
+        text: document.body.innerText,
+        sections: document.querySelectorAll('.bta-structure-section').length,
+        open: [...document.querySelectorAll('.bta-structure-section')].filter((d) => d.open).length,
+        bodyRendered: body ? body.getClientRects().length > 0 : null,
+        bodyPresent: Boolean(body),
+        bodyText: body ? (body.innerText || '').trim() : null,
+        dishRendered: dishes ? dishes.getClientRects().length > 0 : null,
+        bulk: ([...document.querySelectorAll('.bta-structure-bulk button')][0] || {}).innerText || '',
+        overflow: document.documentElement.scrollWidth - window.innerWidth,
+      };
+    })()`);
+    check(`be30 ${width}-${theme}: eight uncertain sections, all collapsed`, collapsed.sections === 8 && collapsed.open === 0, `${collapsed.sections}/${collapsed.open}`);
+    check(
+      `be30 ${width}-${theme}: a section body only appears when the reviewer opens it`,
+      collapsed.open === 0 && collapsed.bodyPresent === true,
+      JSON.stringify({ open: collapsed.open, body: collapsed.bodyPresent }),
+    );
+    check(`be30 ${width}-${theme}: the bulk action is "Alles klopt zo" without advice`, collapsed.bulk.trim() === 'Alles klopt zo', collapsed.bulk);
+    check(`be30 ${width}-${theme}: no horizontal overflow (collapsed)`, collapsed.overflow <= 0, `overflow=${collapsed.overflow}`);
+    screenshotFiles.push(await screenshot(cdp, OUT_DIR, `be-30-structure-collapsed-${width}-${theme}.png`));
+
+    await evalJs(cdp, `(() => { document.querySelectorAll('.bta-structure-section').forEach((d) => { d.open = true; }); return true; })()`);
+    const expanded = await evalJs(cdp, `(() => {
+      const row = document.querySelectorAll('.bta-structure-row')[0];
+      const link = row ? row.querySelector('.bta-structure-link') : null;
+      return {
+        text: document.body.innerText,
+        linkText: link ? link.innerText.trim() : null,
+        linkHref: link ? link.getAttribute('href') : null,
+        dishes: row ? row.querySelectorAll('.bta-structure-dishes li').length : 0,
+        overflow: document.documentElement.scrollWidth - window.innerWidth,
+      };
+    })()`);
+    check(
+      `be30 ${width}-${theme}: an opened section shows its dishes with prices`,
+      expanded.dishes === 2 && expanded.text.includes('Fictieve burrata') && expanded.text.includes('13.00'),
+      JSON.stringify({ dishes: expanded.dishes }),
+    );
+    check(`be30 ${width}-${theme}: the doubt is explained in plain language`, expanded.text.includes(sections[0].reason), expanded.text.slice(0, 200));
+    check(
+      `be30 ${width}-${theme}: the pdf page link opens that page of the source`,
+      expanded.linkHref === sections[0].sourceLink.url && expanded.linkText === sections[0].sourceLink.text,
+      JSON.stringify({ href: expanded.linkHref, text: expanded.linkText }),
+    );
+    check(`be30 ${width}-${theme}: no horizontal overflow (expanded)`, expanded.overflow <= 0, `overflow=${expanded.overflow}`);
+    screenshotFiles.push(await screenshot(cdp, OUT_DIR, `be-30-structure-expanded-${width}-${theme}.png`));
+    // 2. With the stored advice: preselected, each with confidence and quote.
+    await openRoute(cdp, url('structure8-advice', theme), `document.body.innerText.includes('Rubriekindeling controleren')`);
+    const advised = await evalJs(cdp, `(() => ({
+      checked: document.querySelectorAll('.bta-structure-choices input[type="radio"]:checked').length,
+      quotes: document.querySelectorAll('.bta-advice-quote').length,
+      confidence: [...document.querySelectorAll('.bta-advice-confidence')].map((el) => (el.textContent || '').trim()),
+      bulk: ([...document.querySelectorAll('.bta-structure-bulk button')][0] || {}).innerText || '',
+      overflow: document.documentElement.scrollWidth - window.innerWidth,
+    }))()`);
+    check(`be30 ${width}-${theme}: six advices are preselected, the other two are not`, advised.checked === 6, `checked=${advised.checked}`);
+    check(`be30 ${width}-${theme}: every advice shows its own literal quote`, advised.quotes === 6, `quotes=${advised.quotes}`);
+    check(
+      `be30 ${width}-${theme}: every advice shows its confidence`,
+      advised.confidence.length === 6 && advised.confidence.every((text) => /zekerheid (hoog|midden)/.test(text)),
+      JSON.stringify(advised.confidence.slice(0, 2)),
+    );
+    check(`be30 ${width}-${theme}: the bulk action becomes "Neem alle adviezen over"`, advised.bulk.trim() === 'Neem alle adviezen over', advised.bulk);
+    check(`be30 ${width}-${theme}: no horizontal overflow with advice`, advised.overflow <= 0, `overflow=${advised.overflow}`);
+    screenshotFiles.push(await screenshot(cdp, OUT_DIR, `be-30-structure-advice-${width}-${theme}.png`));
+
+    await evalJs(cdp, `(() => { document.querySelectorAll('.bta-structure-section').forEach((d) => { d.open = true; }); return true; })()`);
+    screenshotFiles.push(await screenshot(cdp, OUT_DIR, `be-30-structure-advice-expanded-${width}-${theme}.png`));
+
+    // 3. One bulk confirmation that names the number of sections.
+    const clicked = await clickButton(cdp, 'Neem alle adviezen over');
+    const confirmReady = await waitFor(cdp, `document.body.innerText.includes('8 rubrieken bevestigen?')`, 10000);
+    const confirmState = await evalJs(cdp, `(() => ({
+      text: document.body.innerText,
+      buttons: [...document.querySelectorAll('.bta-confirm button')].map((b) => ({ text: (b.innerText || '').trim(), disabled: b.disabled })),
+      overflow: document.documentElement.scrollWidth - window.innerWidth,
+    }))()`);
+    const confirmButton = confirmState.buttons.find((button) => button.text === 'Bevestig bron');
+    check(`be30 ${width}-${theme}: the bulk action asks one confirmation with the count`, clicked === true && confirmReady === true);
+    check(`be30 ${width}-${theme}: the confirmation is explicit and not automatic`, Boolean(confirmButton) && confirmButton.disabled === false, JSON.stringify(confirmState.buttons));
+    check(`be30 ${width}-${theme}: no horizontal overflow in the confirmation`, confirmState.overflow <= 0, `overflow=${confirmState.overflow}`);
+    screenshotFiles.push(await screenshot(cdp, OUT_DIR, `be-30-structure-confirm-${width}-${theme}.png`));
+
+    const violations = await evalJs(cdp, `(window.__FIXTURE_NETWORK_VIOLATIONS__ || []).filter((entry) => entry.phase === 'app')`);
+    check(`be30 ${width}-${theme}: nothing leaves the browser and no advice call is made`, violations.length === 0, JSON.stringify(violations.slice(0, 3)));
+    recordClickpath(
+      `BE-30 ${width}-${theme}: rubriek openen -> gerechten en bronpagina -> AI-advies voorgeselecteerd -> alles overnemen -> bevestigingsstap`,
+      [
+        { step: 'eight uncertain sections, collapsed', arrived: collapsed.sections === 8 },
+        { step: 'dishes, reason and pdf page link in the opened section', arrived: expanded.dishes === 2 && expanded.linkHref === sections[0].sourceLink.url },
+        { step: 'advices preselected with quote and confidence', arrived: advised.checked === 6 && advised.quotes === 6 },
+        { step: 'one confirmation that names 8 rubrieken', arrived: Boolean(confirmReady) },
+      ],
+      Boolean(confirmReady),
+      JSON.stringify({ sections: sections.map((section) => section.label) }),
+    );
+  }
+}
+
+
+
 
 async function v2Scenario(cdp) {
   for (const [width, theme] of [[1024, 'light'], [390, 'dark']]) {
@@ -2417,6 +2565,7 @@ async function main() {
     await partialScenario(cdp);
     await imageOnlyScenario(cdp);
     await structureScenario(cdp);
+ await be30Scenario(cdp);
     await manualImportScenario(cdp);
     await manualReviewSteps(cdp);
     // U1/U2: pas na de bestaande stroom, want die gaat verder op de pagina die

@@ -19,7 +19,7 @@ import { computeCanonicalContentHash } from '@/src/lib/menuSnapshotHash'
 import { createConceptVersion } from '@/src/lib/menuConceptStore'
 import { getSupabaseAdmin } from '@/src/lib/supabaseAdmin'
 import { readManualImportSources } from '@/src/lib/manualMenuImportSource'
-import { readDurableAiReadRows } from '@/src/lib/manualMenuImportUsageSource'
+import { readAllAiUsageRows } from '@/src/lib/manualMenuImportUsageSource'
 import { createManualImportStateCipher } from '@/src/lib/manualMenuImportState'
 import { createAnthropicStructuredCall } from '@/src/lib/menuExtractionAnthropicCall'
 import { createMenuAiReadHandlers } from '@/src/lib/menuAiReadHandlers'
@@ -97,7 +97,9 @@ function restaurantExists(id) {
 export const menuAiReadHandlers = createMenuAiReadHandlers({
   authenticate: authenticateInternalRequest,
   env: () => process.env,
-  readUsageRows: () => readDurableAiReadRows(getSupabaseAdmin()),
+  // BE-30 (#72): dezelfde maandteller voor elke AI-uitgave — de AI-lezingen en
+  // de AI-adviezen samen, tegen hetzelfde plafond van 1000 cent.
+  readUsageRows: () => readAllAiUsageRows(getSupabaseAdmin()),
   readSources: ({ urls, now }) => readManualImportSources({ urls, fetchImpl: fetchOne, robotsCheck, now }),
   resolveJob: (request) => resolveJob(request, { restaurantId: null }),
   restaurantExists,

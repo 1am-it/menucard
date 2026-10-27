@@ -11,18 +11,30 @@ import StatusIcon from '@/src/components/StatusIcon'
 import { MenuControl, MenuConcept, StructureReview, plural } from './MenuReview'
 import { MAX_BATCH_URLS, DAILY_URL_LIMIT, COPY, ACTION_LABELS, precheckLines, splitLines, offersAiRead } from '@/src/lib/batchAnalysis'
 import { formatPath } from '@/src/lib/menuHierarchy'
-import { parsePathText, reviewKey } from '@/src/lib/menuStructureReview'
+import { parsePathText, reviewKey, keepAllChoices } from '@/src/lib/menuStructureReview'
+import { applyAdviceChoices } from '@/src/lib/menuStructureAdvice'
 
-/** The local per-section state starts from the already recorded decisions. */
+/** The local per-section state starts from the recorded decisions, otherwise
+ * from a stored AI advice (a suggestion the reviewer still confirms). */
 function seedStructure(review) {
   const seed = {}
   if (!review || !Array.isArray(review.required)) return seed
   const treated = new Map(((Array.isArray(review.treated) && review.treated) || []).map((entry) => [entry.key, entry]))
+  const advised = new Map(
+    ((review.advice && Array.isArray(review.advice.sections) && review.advice.sections) || []).map((entry) => [entry.key, entry]),
+  )
   for (const section of review.required) {
     const decision = treated.get(section.key)
-    if (!decision) continue
-    seed[section.key] = decision.action === 'correct'
-      ? { action: 'correct', text: formatPath(decision.correctedPath) }
+    if (decision) {
+      seed[section.key] = decision.action === 'correct'
+        ? { action: 'correct', text: formatPath(decision.correctedPath) }
+        : { action: 'keep', text: formatPath(section.path) }
+      continue
+    }
+    const advice = advised.get(section.key)
+    if (!advice) continue
+    seed[section.key] = advice.decision === 'correct' && Array.isArray(advice.correctedPath)
+      ? { action: 'correct', text: formatPath(advice.correctedPath) }
       : { action: 'keep', text: formatPath(section.path) }
   }
   return seed
@@ -258,7 +270,7 @@ function InputCard({ text, setText, daily, ownOpenBatchId, onStart, busy, error,
   )
 }
 
-function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBatchId, confirming, setConfirming, onConfirm, onRerun, onAdjust, onSaveConcept, busy }) {
+function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBatchId, confirming, setConfirming, onConfirm, onRerun, onAdjust, onSaveConcept, busy, aiStatus, onAdvice }) {
   const [details, setDetails] = useState(focusItem === item.position || item.key === 'image_only')
   const confirmRef = useRef(null)
   const resultRef = useRef(null)
@@ -276,8 +288,66 @@ function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBat
   )
   const structureRef = useRef(null)
 
+  // BE-30 (#72): the AI advice is a suggestion, never a decision. It is always
+  // preselected, always carries its literal quote, and only a human confirms.
+  const [advice, setAdvice] = useState(() => (structureReview && structureReview.advice) || null)
+  const [adviceNote, setAdviceNote] = useState(null)
+  const adviceSections = advice && Array.isArray(advice.sections) ? advice.sections : null
+  const aiEnabled = Boolean(aiStatus && aiStatus.enabled === true && aiStatus.budget && aiStatus.budget.allowed === true)
+  const aiUnavailable = aiStatus
+    ? aiStatus.enabled !== true
+      ? aiStatus.message || 'AI-advies is nu niet beschikbaar.'
+      : aiStatus.budget && aiStatus.budget.allowed !== true
+        ? aiStatus.budget.reason === 'budget_exhausted'
+          ? 'Het AI-budget van deze maand is op.'
+          : 'Het AI-budget is nu niet te controleren.'
+        : null
+    : null
+
   function changeStructure(key, patch) {
     setStructure((prev) => ({ ...prev, [key]: { ...(prev[key] || {}), ...patch } }))
+  }
+
+  // BE-30 (criterium 4): "Alles klopt zo" fills exactly the same choices a
+  // reviewer makes by hand and then opens the one explicit confirmation step.
+  // The server still re-checks every path; nothing is stored without that click.
+  function acceptAllStructure() {
+    if (!structureReview) return
+    if (adviceSections && adviceSections.length > 0) {
+      // "Neem alle adviezen over": apply every advice, keep the rest as the
+      // reviewer would with "Alles klopt zo". Rubrieken zonder advies staan er
+      // expliciet bij in de hint; de bevestiging noemt het aantal.
+      const advised = applyAdviceChoices(structureReview.required, adviceSections)
+      const rest = keepAllChoices(structureReview.required.filter((section) => !advised[section.key]))
+      setStructure({ ...rest, ...advised })
+    } else {
+      setStructure(keepAllChoices(structureReview.required))
+    }
+    setConfirming(item.jobId)
+  }
+
+  // BE-30 (criterium 3): one advice call for all uncertain sections of this
+  // source version. The server validates the quote and stores the advice as
+  // `ai_suggested`; the reviewer's confirmation stays a separate human action.
+  async function requestAdvice() {
+    if (!structureReview || typeof onAdvice !== 'function') return
+    setAdviceNote(null)
+    const result = await onAdvice(item.jobId)
+    const body = result && result.ok ? result.body : null
+    const next = body && body.advice ? body.advice : null
+    if (!result || result.ok !== true || !next) {
+      setAdviceNote({
+        tone: 'notice',
+        text: (result && result.body && result.body.error) || 'Het AI-advies lukte niet. Je kunt de rubrieken zelf beoordelen.',
+      })
+      return
+    }
+    setAdvice(next)
+    setStructure(applyAdviceChoices(structureReview.required, next.sections))
+    setAdviceNote({
+      tone: 'notice',
+      text: `AI-advies over ${next.sections.length} van ${structureReview.required.length} rubrieken. Controleer het citaat en bevestig zelf.`,
+    })
   }
 
   useEffect(() => {
@@ -408,12 +478,49 @@ function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBat
 
       {details && structureReview && (
         <div ref={structureRef}>
+          {isStarter && (
+            <section className="bta-ai-help" aria-labelledby={`bta-advice-${item.jobId}`}>
+              <h3 id={`bta-advice-${item.jobId}`} className="bta-ai-title">
+                {adviceSections ? 'AI-advies bij deze rubrieken' : 'AI-advies vragen'}
+              </h3>
+              {adviceSections ? (
+                <p className="bta-muted">
+                  Eén suggestie voor alle onzekere rubrieken samen, met een letterlijk citaat als bewijs. De AI beslist
+                  niets; jij bevestigt hieronder zelf.
+                </p>
+              ) : aiEnabled ? (
+                <p className="bta-muted">
+                  Eén aanroep voor alle {structureReview.required.length} onzekere rubrieken samen. Het advies is een
+                  suggestie met een letterlijk citaat; jij bevestigt.
+                </p>
+              ) : (
+                <p className="bta-muted">
+                  {aiUnavailable || 'AI-advies is nu niet beschikbaar.'} Je kunt de rubrieken hieronder zelf beoordelen.
+                </p>
+              )}
+              {aiEnabled && !adviceSections && (
+                <div className="bta-actions">
+                  <button type="button" className="stg-btn-secondary bta-btn" onClick={requestAdvice} disabled={busy || !item.jobId}>
+                    {busy ? 'AI denkt mee…' : 'Vraag AI-advies'}
+                  </button>
+                </div>
+              )}
+              {adviceNote && (
+                <p className="bta-muted" role="status">
+                  {adviceNote.text}
+                </p>
+              )}
+            </section>
+          )}
           <StructureReview
             idPrefix={`bta-${item.position}-${item.jobId || 'geen'}`}
             review={structureReview}
             value={structure}
             readOnly={!isStarter}
             onChange={changeStructure}
+            onAcceptAll={acceptAllStructure}
+            advice={adviceSections}
+            bulkLabel={adviceSections && adviceSections.length > 0 ? 'Neem alle adviezen over' : undefined}
           />
         </div>
       )}
@@ -436,6 +543,12 @@ function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBat
           <p id={`bta-confirm-${item.jobId}`} className="bta-confirm-title">
             Bron bevestigen voor {restaurantName}?
           </p>
+          {structureReview && (
+            <p className="bta-confirm-count" role="status">
+              {plural(structureReview.required.length, 'rubriek', 'rubrieken')} bevestigen? Je bevestigt de
+              rubriekindeling van deze bronversie en daarna de bron zelf.
+            </p>
+          )}
           <p className="bta-muted">
             Je bevestigt na eigen controle dat deze menukaart de bron van {restaurantName} is. Er wordt niets
             gepubliceerd.
@@ -505,7 +618,7 @@ function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBat
   )
 }
 
-function BatchDetail({ detail, focusItem, ownOpenBatchId, busy, confirming, setConfirming, onConfirm, onRerun, onAdjust, onSaveConcept, onNew, notice }) {
+function BatchDetail({ detail, focusItem, ownOpenBatchId, busy, confirming, setConfirming, onConfirm, onRerun, onAdjust, onSaveConcept, onNew, notice, aiStatus, onAdvice }) {
   const { batch, items, summary } = detail
   const isStarter = batch.is_starter
   const batchOpen = !batch.closed_at
@@ -671,6 +784,8 @@ function BatchDetail({ detail, focusItem, ownOpenBatchId, busy, confirming, setC
             onAdjust={onAdjust}
             onSaveConcept={onSaveConcept}
             busy={busy}
+            aiStatus={aiStatus}
+            onAdvice={onAdvice}
           />
         ))}
       </ol>
@@ -679,7 +794,7 @@ function BatchDetail({ detail, focusItem, ownOpenBatchId, busy, confirming, setC
 }
 
 /** Everything below the internal navigation. */
-export default function BatchAnalysisView({ data, loadError, message, viewing, focusItem, ownOpenBatchId, busy, confirming, setConfirming, onConfirm, onRerun, onAdjust, onSaveConcept, onNew, notice, text, setText, onStart, actionError, onShowOpen, onSelect }) {
+export default function BatchAnalysisView({ data, loadError, message, viewing, focusItem, ownOpenBatchId, busy, confirming, setConfirming, onConfirm, onRerun, onAdjust, onSaveConcept, onNew, notice, text, setText, onStart, actionError, onShowOpen, onSelect, aiStatus, onAdvice }) {
   return (
     <>
       <nav aria-label="Kruimelpad" className="bta-breadcrumb">
@@ -744,6 +859,8 @@ export default function BatchAnalysisView({ data, loadError, message, viewing, f
               onSaveConcept={onSaveConcept}
               onNew={onNew}
               notice={notice}
+              aiStatus={aiStatus}
+              onAdvice={onAdvice}
             />
           )}
           {data && !viewing && (

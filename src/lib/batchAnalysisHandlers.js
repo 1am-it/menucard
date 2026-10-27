@@ -45,7 +45,7 @@ const LOAD_ERROR = 'De batchanalyse kon niet worden geladen.';
 const RECENT_BATCH_LIMIT = 10;
 const BATCH_COLUMNS = 'id, actor_user_id, created_at, last_activity_at, closed_at, close_reason, item_count';
 const JOB_COLUMNS =
-  'id, status, error_reason, attempt_count, next_attempt_at, lease_expires_at, expired_at, finished_at, created_at, updated_at, result_receipt_id, unknown_menu_contexts:field_evidence->unknown_menu_contexts, menu_source_urls:field_evidence->menu_source_urls, notes:field_evidence->notes, source_inventory:field_evidence->source_inventory, limitations:field_evidence->limitations, extraction_result:field_evidence->extraction_result, protocol:field_evidence->protocol';
+  'id, status, error_reason, attempt_count, next_attempt_at, lease_expires_at, expired_at, finished_at, created_at, updated_at, result_receipt_id, unknown_menu_contexts:field_evidence->unknown_menu_contexts, menu_source_urls:field_evidence->menu_source_urls, notes:field_evidence->notes, source_inventory:field_evidence->source_inventory, limitations:field_evidence->limitations, extraction_result:field_evidence->extraction_result, protocol:field_evidence->protocol, structure_advice:field_evidence->structureAdvice';
 const RECEIPT_COLUMNS =
   'id, restaurant_match_type, matched_restaurant_id, created_at, canonical_source_url, actor_user_id, analysis_result_hash, menus:candidate_summary->menus, product:candidate_summary->menuExtractionV2';
 const STRUCTURE_COLUMNS = 'id, receipt_id, job_id, path_key, original_path, source_path, locator, decision, corrected_path, actor_user_id, created_at';
@@ -156,6 +156,9 @@ function createBatchAnalysisHandlers(deps) {
         formatTime: formatClock,
         recordedReviews: receipt ? structureReviews.byReceipt.get(receipt.id) || [] : [],
         structureStoreAvailable: structureReviews.available,
+        // BE-30 (#72): het eerder opgeslagen AI-advies bij deze bronversie, zodat
+        // de voorgeselecteerde suggestie ook na herladen zichtbaar blijft.
+        storedAdvice: job && job.structure_advice ? job.structure_advice : null,
       });
     });
 
