@@ -463,6 +463,90 @@ test('Bronnen beoordelen: cleanup names a selection, or explicitly "Alle N oprui
   assert.doesNotMatch(view, /opruimen geldt dan voor alle/i);
 });
 
+// BE-32 (#75): "✨ Vind bronnen" proposes through the existing BE-24 proposal.
+// The row shows the proposal with its provenance and asks the human to confirm
+// it; only after that confirmation does the existing check become the step.
+test('Dekking: an open source proposal is the next step, "Bevestig voorstel"', () => {
+  const rows = coverageRows([
+    entry({
+      not_in_queue_reason: 'never_checked',
+      known_url: null,
+      proposals: [
+        {
+          id: 'p-1',
+          kind: 'add_candidate',
+          status: 'open',
+          proposed_url: 'https://een.nl/menukaart',
+          proposed_at: '2026-10-27T09:00:00.000Z',
+          note: 'Herkomst: OpenStreetMap (© OpenStreetMap-bijdragers) · website: https://een.nl · menulink: https://een.nl/menukaart',
+        },
+      ],
+    }),
+  ]);
+  assert.equal(rows.length, 1);
+  const row = rows[0];
+  assert.equal(row.proposal.id, 'p-1');
+  assert.equal(row.proposal.origin, 'osm');
+  assert.equal(row.proposal.website, 'https://een.nl');
+  assert.equal(row.proposal.menu, 'https://een.nl/menukaart');
+  assert.equal(row.url, 'https://een.nl/menukaart', 'the proposed link is what the row shows and checks');
+  assert.equal(row.canCheck, true);
+  assert.deepEqual(row.step, { key: 'confirm_proposal', label: '✅ Bevestig voorstel' });
+});
+
+test('Dekking: after the proposal is confirmed, the row offers the existing check', () => {
+  const rows = coverageRows([
+    entry({
+      not_in_queue_reason: 'never_checked',
+      known_url: null,
+      proposals: [
+        {
+          id: 'p-1',
+          kind: 'add_candidate',
+          status: 'accepted',
+          proposed_url: 'https://een.nl/menukaart',
+          proposed_at: '2026-10-27T09:00:00.000Z',
+          note: 'Herkomst: OpenStreetMap (© OpenStreetMap-bijdragers) · website: https://een.nl',
+        },
+      ],
+    }),
+  ]);
+  assert.equal(rows[0].url, 'https://een.nl/menukaart');
+  assert.equal(rows[0].proposal.confirmed, true);
+  assert.deepEqual(rows[0].step, { key: 'check', label: '🔎 Controleer' });
+});
+
+test('Dekking: a rejected or unusable proposal never becomes a source', () => {
+  const rejected = coverageRows([
+    entry({
+      not_in_queue_reason: 'never_checked',
+      known_url: null,
+      proposals: [{ id: 'p-1', kind: 'add_candidate', status: 'rejected', proposed_url: 'https://fout.example/menu', proposed_at: '2026-10-27T09:00:00.000Z' }],
+    }),
+  ]);
+  assert.equal(rejected[0].proposal, null);
+  assert.equal(rejected[0].url, null);
+  assert.equal(rejected[0].canCheck, false);
+
+  const unusable = coverageRows([
+    entry({
+      not_in_queue_reason: 'never_checked',
+      known_url: null,
+      proposals: [
+        {
+          id: 'p-2',
+          kind: 'mark_unusable',
+          status: 'open',
+          proposed_url: null,
+          proposed_at: '2026-10-27T09:00:00.000Z',
+          note: 'Negeren in Nieuw gevonden: Bakkerij Voorbeeld — geen restaurant voor ons.',
+        },
+      ],
+    }),
+  ]);
+  assert.equal(unusable[0].proposal, null);
+});
+
 test('copy: the empty state and the phone list use the agreed words', () => {
   assert.equal(CHECK_COPY.noWork, '✅ Geen open bronwerk');
   assert.equal(CHECK_COPY.pickTask, 'Kies een taak links');

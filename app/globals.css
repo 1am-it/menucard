@@ -4585,6 +4585,32 @@ header, .site-header { height: auto; min-height: var(--header-h); }
   border: 1px solid var(--border);
   background: var(--status-neutral-bg);
 }
+/* BE-32 (#75): the result line of "✨ Vind bronnen" — summary, cost and the
+   honest notices, directly under the button that started it. */
+/* BE-32 (#75): "Geen link bij de hand?" — the same engine as Dekking, for one
+   restaurant. A calm highlighted box, never a primary action. */
+.mai-discovery {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  background: var(--status-old-bg);
+  border: 1px solid var(--status-old-border);
+}
+/* BE-32 (#75): "Nieuw gevonden" and the prefilled add link. */
+.cov-new { margin-top: 20px; display: grid; gap: 10px; }
+.cov-new-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.cov-discovery {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+}
+.cov-discovery-summary { margin: 0; font-size: 13px; font-weight: 700; color: var(--text-primary); }
 .cov-check { display: grid; gap: 10px; }
 .cov-check-head { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 .cov-check-title { margin: 0; font-weight: 800; }

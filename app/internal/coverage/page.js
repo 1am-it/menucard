@@ -50,6 +50,7 @@ import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import InternalNav from '@/src/components/InternalNav'
 import CoverageCheckSection from './CoverageCheckSection'
+import NewFoundSection from './NewFoundSection'
 import { PRIORITY_DEFAULT_VISIBLE, sortByMenuDataGap, visiblePriorityRows, metricState } from '@/src/lib/coveragePriority'
 
 function IconLock() {
@@ -353,6 +354,7 @@ export default function CoverageDashboardPage() {
           reason texts, selection and the existing batch analysis as its check. */}
       <div style={{ marginBottom: 20 }}>
         <CoverageCheckSection token={session.access_token} onUncheckedCount={setUncheckedCount} />
+        <NewFoundSection token={session.access_token} />
       </div>
 
       {/* Details: dezelfde cijfers als voorheen, zonder de dubbele

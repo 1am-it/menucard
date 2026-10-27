@@ -312,8 +312,10 @@ test('dietary labels are neutral outlined tags with a leaf emoji, not a success 
 test('coverage dashboard: header tint is neutral and the headline number is primary text', () => {
   const src = read('app/internal/coverage/page.js');
   assert.doesNotMatch(src, /--green/);
-  assert.match(src, /lineHeight: 1\.05, color: 'var\(--text-primary\)'/);
-  assert.match(src, /complete: \{ label: 'Complete', color: 'var\(--status-positive\)' \}/);
+  // BE-32 (#75): the headline number is now the first tile, in the BE-28 style;
+  // the colour rule is unchanged: primary text, never a status colour.
+  assert.match(css(), /\.cov-tile-value \{[^}]*color: var\(--text-primary\)/);
+  assert.match(src, /complete: \{ label: 'Compleet', color: 'var\(--status-positive\)' \}/);
 });
 
 // ── Status is nooit alleen kleur ──────────────────────────────────────────

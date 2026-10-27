@@ -1,0 +1,108 @@
+   ▲ Next.js 15.5.15
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 34.4s
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/45) ...
+   Generating static pages (11/45) 
+   Generating static pages (22/45) 
+   Generating static pages (33/45) 
+ ✓ Generating static pages (45/45)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                                                Size  First Load JS  Revalidate  Expire
+┌ ○ /                                                                      8 kB         114 kB          5m      1y
+├ ○ /_not-found                                                           998 B         103 kB
+├ ○ /alle-restaurants                                                   4.32 kB         110 kB
+├ ƒ /api/claims                                                           278 B         102 kB
+├ ƒ /api/claims/mine                                                      278 B         102 kB
+├ ƒ /api/health/db                                                        278 B         102 kB
+├ ƒ /api/internal/v1/batch-analysis                                       278 B         102 kB
+├ ƒ /api/internal/v1/batch-analysis/[id]/concept                          278 B         102 kB
+├ ƒ /api/internal/v1/batch-analysis/[id]/confirm                          278 B         102 kB
+├ ƒ /api/internal/v1/batch-analysis/[id]/process                          278 B         102 kB
+├ ƒ /api/internal/v1/batch-analysis/[id]/structure-advice                 278 B         102 kB
+├ ƒ /api/internal/v1/batch-analysis/handled                               278 B         102 kB
+├ ƒ /api/internal/v1/batch-analysis/reanalyze                             278 B         102 kB
+├ ƒ /api/internal/v1/claims/[id]/approve                                  278 B         102 kB
+├ ƒ /api/internal/v1/claims/[id]/reject                                   278 B         102 kB
+├ ƒ /api/internal/v1/claims/pending                                       278 B         102 kB
+├ ƒ /api/internal/v1/coverage                                             278 B         102 kB
+├ ƒ /api/internal/v1/import-inbox/candidates                              278 B         102 kB
+├ ƒ /api/internal/v1/import-inbox/candidates/[id]/enrichments             278 B         102 kB
+├ ƒ /api/internal/v1/import-inbox/candidates/[id]/reviews                 278 B         102 kB
+├ ƒ /api/internal/v1/import-inbox/candidates/[id]/suggest-from-website    278 B         102 kB
+├ ƒ /api/internal/v1/import-inbox/runs                                    278 B         102 kB
+├ ƒ /api/internal/v1/manual-menu-import/bundles                           278 B         102 kB
+├ ƒ /api/internal/v1/manual-menu-import/imports                           278 B         102 kB
+├ ƒ /api/internal/v1/manual-menu-import/imports/[id]/decisions            278 B         102 kB
+├ ƒ /api/internal/v1/manual-menu-import/imports/[id]/follow-up            278 B         102 kB
+├ ƒ /api/internal/v1/manual-menu-import/imports/[id]/open-points          278 B         102 kB
+├ ƒ /api/internal/v1/manual-menu-import/imports/[id]/save                 278 B         102 kB
+├ ƒ /api/internal/v1/manual-menu-import/imports/[id]/source-map           278 B         102 kB
+├ ƒ /api/internal/v1/manual-menu-import/restaurants                       278 B         102 kB
+├ ƒ /api/internal/v1/manual-menu-import/usage                             278 B         102 kB
+├ ƒ /api/internal/v1/me                                                   278 B         102 kB
+├ ƒ /api/internal/v1/menu-ai-import                                       278 B         102 kB
+├ ƒ /api/internal/v1/menu-concepts                                        278 B         102 kB
+├ ƒ /api/internal/v1/menu-concepts/[id]                                   278 B         102 kB
+├ ƒ /api/internal/v1/menu-concepts/[id]/decision                          278 B         102 kB
+├ ƒ /api/internal/v1/menu-concepts/[id]/export                            278 B         102 kB
+├ ƒ /api/internal/v1/menu-concepts/[id]/versions                          278 B         102 kB
+├ ƒ /api/internal/v1/menu-snapshots                                       278 B         102 kB
+├ ƒ /api/internal/v1/menu-snapshots/[id]/reviews                          278 B         102 kB
+├ ƒ /api/internal/v1/moderation/[id]/approve                              278 B         102 kB
+├ ƒ /api/internal/v1/moderation/[id]/reject                               278 B         102 kB
+├ ƒ /api/internal/v1/moderation/pending                                   278 B         102 kB
+├ ƒ /api/internal/v1/onboarding-menu/read-url                             278 B         102 kB
+├ ƒ /api/internal/v1/profile-drafts                                       278 B         102 kB
+├ ƒ /api/internal/v1/profile-drafts/[id]/discard                          278 B         102 kB
+├ ƒ /api/internal/v1/provenance                                           278 B         102 kB
+├ ƒ /api/internal/v1/restaurant-analysis-jobs                             278 B         102 kB
+├ ƒ /api/internal/v1/restaurant-analysis-jobs/[id]                        278 B         102 kB
+├ ƒ /api/internal/v1/source-discovery                                     278 B         102 kB
+├ ƒ /api/internal/v1/source-discovery/ignore                              278 B         102 kB
+├ ƒ /api/internal/v1/source-triage                                        278 B         102 kB
+├ ƒ /api/internal/v1/source-triage/proposals                              278 B         102 kB
+├ ƒ /api/internal/v1/source-triage/proposals/[id]/decision                278 B         102 kB
+├ ƒ /api/internal/v1/source-workqueue                                     278 B         102 kB
+├ ƒ /api/internal/v1/url-intakes                                          278 B         102 kB
+├ ƒ /api/internal/v1/url-intakes/[id]/menu-proposals                      278 B         102 kB
+├ ƒ /api/internal/v1/workqueue-counts                                     278 B         102 kB
+├ ƒ /api/restaurants                                                      278 B         102 kB
+├ ƒ /api/search                                                           278 B         102 kB
+├ ƒ /claim/[restaurantId]                                               2.97 kB         172 kB
+├ ○ /icon.svg                                                               0 B            0 B
+├ ○ /internal                                                           1.57 kB         173 kB
+├ ○ /internal/activate                                                  1.77 kB         167 kB
+├ ○ /internal/bronnen                                                   14.2 kB         233 kB
+├ ○ /internal/bronnen/batch                                             9.51 kB         236 kB
+├ ○ /internal/coverage                                                  9.24 kB         228 kB
+├ ○ /internal/import-inbox                                                11 kB         188 kB
+├ ○ /internal/login                                                     1.31 kB         172 kB
+├ ○ /internal/menu-concepts                                               712 B         204 kB
+├ ƒ /internal/menu-concepts/[id]                                        1.51 kB         204 kB
+├ ○ /internal/menu-import                                               12.4 kB         190 kB
+├ ○ /internal/moderation                                                3.66 kB         181 kB
+├ ○ /internal/onboarding-menu                                           6.92 kB         184 kB
+├ ○ /internal/onboarding-restaurant                                     5.32 kB         183 kB
+├ ○ /internal/profile-drafts                                            2.58 kB         180 kB
+├ ○ /internal/set-password                                              2.99 kB         169 kB
+├ ○ /internal/source-workqueue                                          5.26 kB         195 kB
+├ ○ /internal/toevoegen                                                 5.71 kB         225 kB
+├ ƒ /menu/[id]                                                          4.81 kB         117 kB
+├ ƒ /nvwa/[id]                                                          4.42 kB         110 kB
+├ ƒ /restaurant/[id]                                                    2.45 kB         111 kB
+├ ƒ /restaurants                                                          278 B         102 kB
+└ ○ /search                                                             6.69 kB         112 kB
++ First Load JS shared by all                                            102 kB
+  ├ chunks/1255-5fe68596fe147850.js                                       46 kB
+  ├ chunks/4bd1b696-f785427dddbba9fb.js                                 54.2 kB
+  └ other shared chunks (total)                                            2 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

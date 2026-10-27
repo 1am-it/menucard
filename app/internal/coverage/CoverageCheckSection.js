@@ -25,9 +25,12 @@ import {
   MAX_BATCH_URLS,
   DAILY_URL_LIMIT,
 } from '@/src/lib/sourceReview'
+import { costLine, originLabel } from '@/src/lib/sourceDiscovery'
 
 const TRIAGE_API = '/api/internal/v1/source-triage'
 const BATCH_API = '/api/internal/v1/batch-analysis'
+// BE-32 (#75): the same engine as "Zoek de bron voor mij".
+const DISCOVERY_API = '/api/internal/v1/source-discovery'
 // The same bound the batch overview itself uses for its recent batches.
 const BATCH_DETAIL_LIMIT = 10
 
@@ -44,6 +47,10 @@ export default function CoverageCheckSection({ token, onUncheckedCount }) {
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState(null)
   const [loadError, setLoadError] = useState(null)
+  // BE-32 (#75): the result of "✨ Vind bronnen" — the summary, the honest
+  // notices and the AI cost of this run.
+  const [discovery, setDiscovery] = useState(null)
+  const [discoveryBusy, setDiscoveryBusy] = useState(false)
 
   const load = useCallback(async () => {
     if (!token) return
@@ -177,6 +184,71 @@ export default function CoverageCheckSection({ token, onUncheckedCount }) {
     return <p className="brn-hint">Nog niet gecontroleerd wordt geladen…</p>
   }
 
+  // BE-32 (#75, criterion 1/4): "✨ Vind bronnen" runs the engine for the
+  // selection or for every row, then reloads so the proposals appear as rows.
+  async function findSources(ids) {
+    if (!token || !Array.isArray(ids) || ids.length === 0) return
+    setDiscoveryBusy(true)
+    setMessage(null)
+    setDiscovery(null)
+    try {
+      const res = await fetch(DISCOVERY_API, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ restaurant_ids: ids.slice(0, MAX_BATCH_URLS) }),
+      })
+      const body = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setMessage({ tone: 'error', text: body.error || 'De zoekactie kon niet worden uitgevoerd.' })
+        return
+      }
+      setDiscovery({
+        summary: body.summary || null,
+        messages: Array.isArray(body.messages) ? body.messages : [],
+        cost: body.cost || null,
+        monthly: body.monthly || null,
+        attribution: body.attribution || null,
+      })
+      await load()
+    } catch {
+      setMessage({ tone: 'error', text: 'De zoekactie kon niet worden uitgevoerd.' })
+    } finally {
+      setDiscoveryBusy(false)
+    }
+  }
+
+  // A proposal is confirmed by the human, through the existing BE-24 decision
+  // route. Nothing is published; the row then offers the existing check.
+  async function confirmProposal(row) {
+    if (!token || !row || !row.proposal || !row.proposal.id) return
+    setBusy(true)
+    setMessage(null)
+    try {
+      const res = await fetch(`${TRIAGE_API}/proposals/${encodeURIComponent(row.proposal.id)}/decision`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ decision: 'accepted' }),
+      })
+      const body = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setMessage({ tone: 'error', text: body.error || 'Het voorstel kon niet worden bevestigd.' })
+        return
+      }
+      setMessage({
+        tone: 'success',
+        text: 'Voorstel bevestigd. Er is niets automatisch gepubliceerd: controleer nu de bron.',
+      })
+      await load()
+    } catch {
+      setMessage({ tone: 'error', text: 'Het voorstel kon niet worden bevestigd.' })
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const discoveryIds = selected.size > 0 ? [...selected] : rows.map((row) => row.restaurantId)
+  const discoveryLabel = `✨ Vind bronnen (${discoveryIds.length})`
+
   return (
     <section className="cov-check" aria-labelledby="cov-check-title">
       <div className="cov-check-head">
@@ -184,6 +256,16 @@ export default function CoverageCheckSection({ token, onUncheckedCount }) {
           Nog niet gecontroleerd ({rows.length})
         </h2>
         <div style={{ flex: 1 }} />
+        {/* BE-32 (#75, criterion 1): the same engine as "Zoek de bron voor mij",
+            for the selected rows — or for every row when none is selected. */}
+        <button
+          type="button"
+          className="stg-btn-secondary cov-check-action"
+          disabled={busy || discoveryBusy || rows.length === 0}
+          onClick={() => findSources(discoveryIds)}
+        >
+          {discoveryBusy ? '✨ Bezig…' : discoveryLabel}
+        </button>
         <button
           type="button"
           className="di-btn-primary cov-check-action"
@@ -208,6 +290,20 @@ export default function CoverageCheckSection({ token, onUncheckedCount }) {
       {message ? (
         <div className={message.tone === 'error' ? 'di-banner di-banner-danger' : 'di-banner di-banner-info'} role="status">
           {message.text}
+        </div>
+      ) : null}
+      {discovery ? (
+        <div className="cov-discovery" role="status">
+          {discovery.summary ? <p className="cov-discovery-summary">{discovery.summary}</p> : null}
+          <p className="cov-check-meta">
+            {costLine({ costEurCents: discovery.cost ? discovery.cost.eurCents : null, monthly: discovery.monthly })}
+          </p>
+          {discovery.messages.map((text) => (
+            <p key={text} className="cov-check-meta">
+              {text}
+            </p>
+          ))}
+          {discovery.attribution ? <p className="cov-check-meta">Kaartgegevens: {discovery.attribution}.</p> : null}
         </div>
       ) : null}
 
@@ -242,7 +338,17 @@ export default function CoverageCheckSection({ token, onUncheckedCount }) {
                   {row.wijk ? <div className="cov-check-meta">{row.wijk}</div> : null}
                 </td>
                 <td>
-                  <div className="cov-check-meta">{row.url || 'Geen website bekend'}</div>
+                  <div className="cov-check-meta">
+                    {row.proposal
+                      ? row.proposal.menu || row.proposal.website || row.url
+                      : row.url || 'Geen website bekend'}
+                  </div>
+                  {row.proposal ? (
+                    <div className="cov-check-meta">
+                      {originLabel(row.proposal.origin, { quote: row.proposal.quote, source: row.proposal.source }) ||
+                        'Voorstel'}
+                    </div>
+                  ) : null}
                 </td>
                 <td>
                   <div className="cov-check-meta">{row.reasonLabel}</div>
@@ -255,7 +361,16 @@ export default function CoverageCheckSection({ token, onUncheckedCount }) {
                   ) : null}
                 </td>
                 <td>
-                  {row.deadEnd ? (
+                  {row.step && row.step.key === 'confirm_proposal' ? (
+                    <button
+                      type="button"
+                      className="di-btn-primary cov-check-action"
+                      disabled={busy}
+                      onClick={() => confirmProposal(row)}
+                    >
+                      {row.step.label}
+                    </button>
+                  ) : row.deadEnd ? (
                     // The one fitting step of this dead end: "Handmatig
                     // toevoegen" or "Lees met AI", the existing routes.
                     <a
