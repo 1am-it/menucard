@@ -19,6 +19,7 @@ import {
   canStartCheck,
   rowForBatchItem,
   stepHref,
+  aiReadReady,
   CHECK_COPY,
   COVERAGE_HREF,
   MANUAL_IMPORT_HREF,
@@ -31,6 +32,8 @@ const TRIAGE_API = '/api/internal/v1/source-triage'
 const BATCH_API = '/api/internal/v1/batch-analysis'
 // BE-32 (#75): the same engine as "Zoek de bron voor mij".
 const DISCOVERY_API = '/api/internal/v1/source-discovery'
+// BE-33 (#79): the existing AI status; it decides the image/scan row step only.
+const AI_API = '/api/internal/v1/menu-ai-import'
 // The same bound the batch overview itself uses for its recent batches.
 const BATCH_DETAIL_LIMIT = 10
 
@@ -51,12 +54,20 @@ export default function CoverageCheckSection({ token, onUncheckedCount }) {
   // notices and the AI cost of this run.
   const [discovery, setDiscovery] = useState(null)
   const [discoveryBusy, setDiscoveryBusy] = useState(false)
+  // BE-33 (#79): AI availability for the image/scan row; null means "use the
+  // manual route".
+  const [aiStatus, setAiStatus] = useState(null)
 
   const load = useCallback(async () => {
     if (!token) return
     const auth = { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' }
     try {
-      const [triageRes, overviewRes] = await Promise.all([fetch(TRIAGE_API, auth), fetch(BATCH_API, auth)])
+      const [triageRes, overviewRes, aiRes] = await Promise.all([
+        fetch(TRIAGE_API, auth),
+        fetch(BATCH_API, auth),
+        fetch(AI_API, auth).catch(() => null),
+      ])
+      setAiStatus(aiRes && aiRes.ok ? await aiRes.json().catch(() => null) : null)
       const triageBody = await triageRes.json().catch(() => ({}))
       const overviewBody = await overviewRes.json().catch(() => ({}))
       if (!triageRes.ok || !Array.isArray(triageBody.restaurants)) {
@@ -94,8 +105,8 @@ export default function CoverageCheckSection({ token, onUncheckedCount }) {
   }, [load])
 
   const rows = useMemo(
-    () => coverageRows(entries || [], { batchDetails: details, now: new Date() }),
-    [entries, details],
+    () => coverageRows(entries || [], { batchDetails: details, now: new Date(), aiReady: aiReadReady(aiStatus) }),
+    [entries, details, aiStatus],
   )
   // Criterium 6: de tegel "nog niet gecontroleerd" toont dezelfde telling als
   // deze lijst — geen tweede schatting, en niets zolang de lijst niet geladen is.
@@ -408,7 +419,7 @@ export default function CoverageCheckSection({ token, onUncheckedCount }) {
           <h3 className="cov-check-title">{activeBatch.batch.closed_at ? 'Resultaat van de controle' : CHECK_COPY.running}</h3>
           <ol className="srr-list" aria-label="Resultaat van de controle">
             {activeBatch.items.map((item) => {
-              const row = rowForBatchItem(item, { batchId: activeBatch.batch.id, now: new Date() })
+              const row = rowForBatchItem(item, { batchId: activeBatch.batch.id, now: new Date(), aiReady: aiReadReady(aiStatus) })
               return (
                 <SourceResultRow
                   key={`${item.position}-${item.jobId || item.key}`}

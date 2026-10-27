@@ -42,7 +42,7 @@ const STATUSES = {
   menu_found: { label: 'Menukaart gevonden · controle nodig', role: 'file', icon: 'file' },
   needs_review: { label: 'Controle nodig', role: 'old', icon: 'warning' },
   no_menu: { label: 'Geen bruikbare menukaart gevonden', role: 'neutral', icon: 'minus' },
-  image_only: { label: 'Menu alleen als afbeelding: niet ondersteund', role: 'blocked', icon: 'warning' },
+  image_only: { label: 'Menu alleen als afbeelding · lees met AI of met de hand', role: 'blocked', icon: 'warning' },
   recent: { label: 'Recent geanalyseerd', role: 'neutral', icon: 'recent' },
   robots: { label: 'Robots geblokkeerd', role: 'blocked', icon: 'lock' },
   invalid: { label: 'Ongeldige URL', role: 'blocked', icon: 'cross' },
@@ -75,13 +75,15 @@ function offersAiRead(item) {
   return Boolean(item && AI_READ_OFFER_STATUSES.has(item.key) && typeof item.jobId === 'string' && item.jobId !== '');
 }
 
-// The exact status copy for a menu that exists only as an image or scan. It
-// never claims a successful extraction and always names the working human
-// follow-up route (Bronnen beoordelen) plus the option to try another URL.
+// The exact status copy for a menu that exists only as an image or scan.
+// BE-33 (#79) changed the second sentence: the app now *does* read an image
+// with AI ("Lees met AI (afbeelding)") or as a PDF document, so the old "deze
+// import leest geen beeld" would be false. It still claims nothing more than
+// the truth: the automatic read stored no dishes.
 const IMAGE_ONLY_TEXT =
-  'De menukaart is alleen als afbeelding of scan beschikbaar. Deze import leest geen beeld en gebruikt geen OCR, dus er is niets als gerecht opgeslagen. Beoordeel de bron of kies een tekst- of pdf-bron.';
+  'De menukaart is alleen als afbeelding beschikbaar. Automatisch is er niets als gerecht opgeslagen. Lees de afbeelding met AI of voeg de gerechten handmatig toe.';
 const IMAGE_ONLY_TEXT_PDF =
-  'De PDF bevat geen leesbare tekstlaag; het menu lijkt alleen als afbeelding of scan beschikbaar. Deze import leest geen beeld en gebruikt geen OCR, dus er is niets als gerecht opgeslagen. Beoordeel de bron of kies een tekst- of pdf-bron.';
+  'De PDF heeft geen leesbare tekstlaag; het menu lijkt alleen als afbeelding of scan beschikbaar. Automatisch is er niets als gerecht opgeslagen. Lees de PDF met AI of voeg de gerechten handmatig toe.';
 
 function imageOnlyText(reason) {
   return reason === 'pdf_no_text_layer' ? IMAGE_ONLY_TEXT_PDF : IMAGE_ONLY_TEXT;

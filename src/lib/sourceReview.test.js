@@ -21,6 +21,7 @@ const {
   MAX_BATCH_URLS,
   rowForBatchItem,
   stepHref,
+  aiReadReady,
   safeReturnHref,
   menukopjesBackHref,
   rowNeedsAction,
@@ -316,7 +317,6 @@ test('row states: each batch status gets exactly one next step', () => {
     ['needs_review', { structureReview: { eligible: true }, actions: ['review_structure'] }, 'doubt', 'menukopjes'],
     ['needs_review', { structureReview: { eligible: false }, actions: ['review_manually'] }, 'blocked', 'manual'],
     ['no_menu', { actions: ['review_manually'], jobId: 'job-1' }, 'no_menu', 'ai_read'],
-    ['image_only', { actions: ['review_source'], jobId: 'job-1' }, 'no_menu', 'ai_read'],
     ['error', { actions: ['retry'], jobId: 'job-1' }, 'no_menu', 'ai_read'],
     ['robots', { actions: ['review_manually'], jobId: 'job-1' }, 'blocked', 'manual'],
     ['invalid', { actions: ['adjust_url'] }, 'blocked', 'manual'],
@@ -339,6 +339,41 @@ test('row states: a no_menu result without a job is manual, never a dead AI butt
   assert.equal(row.state, 'blocked');
   assert.equal(row.step.key, 'manual');
   assert.equal(stepHref(row, { batchId: 'batch-1' }), '/internal/menu-import?restaurant=r-1&name=Restaurant+Een');
+});
+
+test('BE-33: an image/scan row offers "Lees met AI (afbeelding)" only when AI can read it', () => {
+  const item = batchItem({ key: 'image_only', actions: ['review_source'], jobId: 'job-7' });
+  // AI on and budget available: the image reading, with its own words.
+  const ready = rowForBatchItem(item, { batchId: 'batch-1', aiReady: true });
+  assert.equal(ready.state, 'no_menu');
+  assert.equal(ready.step.key, 'ai_read');
+  assert.equal(ready.step.label, '📷 Lees met AI (afbeelding)');
+  // It is still the existing menu-import route of the same job.
+  assert.match(stepHref(ready, { batchId: 'batch-1' }), /^\/internal\/menu-import\?job=job-7/);
+  // AI off, budget exhausted, a failed status request or no status yet: manual,
+  // with the same outcome as the AI step (the menu exists only as an image).
+  for (const aiReady of [false, null, undefined]) {
+    const manual = rowForBatchItem(item, { batchId: 'batch-1', aiReady });
+    assert.equal(manual.state, 'no_menu', `aiReady=${String(aiReady)} → state`);
+    assert.equal(manual.step.key, 'manual', `aiReady=${String(aiReady)} → step`);
+    assert.equal(manual.step.label, '✍️ Handmatig toevoegen');
+    assert.match(stepHref(manual, { batchId: 'batch-1' }), /^\/internal\/menu-import\?restaurant=r-1/);
+  }
+  // Without a job there is no source for any reading, so never an AI step.
+  const noJob = rowForBatchItem(batchItem({ key: 'image_only', jobId: null }), { aiReady: true });
+  assert.equal(noJob.state, 'blocked');
+  assert.equal(noJob.step.key, 'manual');
+  // A text reading keeps its own words: the image label never leaks into it.
+  const text = rowForBatchItem(batchItem({ key: 'no_menu', jobId: 'job-7' }), { aiReady: false });
+  assert.equal(text.step.label, '📖 Lees met AI');
+});
+
+test('BE-33: aiReadReady follows exactly the existing status endpoint', () => {
+  assert.equal(aiReadReady(null), false);
+  assert.equal(aiReadReady({ enabled: true }), true);
+  assert.equal(aiReadReady({ enabled: false }), false);
+  assert.equal(aiReadReady({ enabled: true, budget: { allowed: true } }), true);
+  assert.equal(aiReadReady({ enabled: true, budget: { allowed: false, reason: 'budget_exhausted' } }), false);
 });
 
 test('row hrefs: menukopjes opens the BE-30 screen of the same batch and item', () => {

@@ -459,6 +459,72 @@ const discoveryNew = {
   sourceUrl: 'https://www.openstreetmap.org',
 };
 
+// BE-33 (#79): één restaurant waarvan de nieuwste controle zegt dat de kaart
+// alleen als afbeelding bestaat. Dezelfde rijstap als in de app: met AI aan en
+// budget "📷 Lees met AI (afbeelding)", zonder AI "✍️ Handmatig toevoegen".
+const BEELD = { id: '9010', name: 'Fictief Al Dente', known: true };
+const beeldBatchId = 'batch-bronnen-beeld';
+const beeldItem = item({
+  position: 1,
+  key: 'image_only',
+  jobId: 'job-bronnen-beeld',
+  restaurant: BEELD,
+  url: 'https://fictief-aldente.invalid/menukaart',
+  foundUrl: null,
+  high: false,
+  actions: ['review_source', 'adjust_url'],
+  resultAt: '2026-10-27T09:00:00.000Z',
+  text: 'De menukaart is alleen als afbeelding beschikbaar. Automatisch is er niets als gerecht opgeslagen. Lees de afbeelding met AI of voeg de gerechten handmatig toe.',
+});
+const beeldDetail = detailOf(beeldBatchId, '2026-10-27T09:00:00.000Z', [beeldItem]);
+const beeldTriage = {
+  city: 'Breda',
+  proposals_available: true,
+  orphan_proposals: 0,
+  unattributed_checks: 0,
+  totals: { restaurants: 1 },
+  restaurants: [
+    entry({
+      restaurant_id: BEELD.id,
+      name: BEELD.name,
+      domain: 'fictief-aldente.invalid',
+      known_url: 'https://fictief-aldente.invalid',
+      attention: 'Menu alleen als afbeelding',
+      next_step: 'replace_or_mark',
+      checked_at: '2026-10-27T09:00:00.000Z',
+    }),
+  ],
+};
+const beeldOverview = {
+  daily: { used: 1, limit: 25 },
+  own_open_batch_id: null,
+  recent_batches: [
+    { id: beeldBatchId, created_at: '2026-10-27T09:00:00.000Z', closed_at: '2026-10-27T09:00:00.000Z', close_reason: 'completed', item_count: 1, is_own: true },
+  ],
+};
+// The two answers of the existing status endpoint: AI on with budget, and AI off.
+const aiStatusOn = {
+  enabled: true,
+  reason: null,
+  message: null,
+  label: 'Gelezen door AI',
+  aiName: 'Claude (Haiku 5.5)',
+  perCallMaxEurCents: 30,
+  monthly: { spentEurCents: 12, limitEurCents: 1000, remainingEurCents: 988, unknownConcepts: 0 },
+  budget: { allowed: true, reason: null },
+};
+const aiStatusOff = {
+  enabled: false,
+  reason: 'ai_flagged_off',
+  message: 'AI is niet ingesteld.',
+  label: 'Gelezen door AI',
+  aiName: 'Claude (Haiku 5.5)',
+  perCallMaxEurCents: 30,
+  monthly: { spentEurCents: 12, limitEurCents: 1000, remainingEurCents: 988, unknownConcepts: 0 },
+  budget: { allowed: false, reason: 'ai_flagged_off' },
+};
+const aiBudgetOut = { ...aiStatusOn, budget: { allowed: false, reason: 'budget_exhausted' } };
+
 const SCENARIOS = {
   bronnen: { triage, batchOverview, batchDetail, batchDetails, coverage },
   vindBronnen: {
@@ -488,6 +554,16 @@ const SCENARIOS = {
   // "Restaurant of menu toevoegen": the same rows, but the fictional batch is
   // already finished so the read-only fixture never calls the process route.
   bronnenToevoegen: { triage, batchOverview, batchDetail: batchDetailClosed, batchDetails: { [BATCH_ID]: batchDetailClosed }, coverage },
+  // BE-33 (#79): het beeld-scenario, met de echte AI-statusvorm. `?aiState=off`
+  // antwoordt met dezelfde stand als een app zonder sleutel/vlag.
+  beeldLezen: {
+    triage: beeldTriage,
+    batchOverview: beeldOverview,
+    batchDetail: beeldDetail,
+    batchDetails: { [beeldBatchId]: beeldDetail },
+    coverage,
+    ai: { status: aiStatusOn, statusOff: aiStatusOff, budgetOut: aiBudgetOut },
+  },
 };
 
 module.exports = {

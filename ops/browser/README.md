@@ -455,6 +455,35 @@ number is computed from the same task definition is unit-tested in
 `src/lib/sourceReviewCount.test.js`.
 
 
+## BE-33 (#79) — menukaarten die alleen als afbeelding of scan bestaan
+
+`run-beeld-lezen-browser-check.js` (also `npm run test:browser:beeld-lezen`)
+uses the same harness and fictional fixtures. It drives the real
+`/internal/coverage` and `/internal/menu-import` routes with the real
+`CoverageCheckSection`, `SourceResultRow`, `MenuSourceMap` and review
+components at 1280 and 390 px in light and dark:
+
+- the result row of a menu that only exists as an image: "📷 Lees met AI
+  (afbeelding)" when the existing AI status says the AI is on and the budget
+  allows a call, "✍️ Handmatig toevoegen" when it does not (`?aiState=off`),
+  with the existing job link, the image flag and the honest reason text;
+- the Kaart view of that same menu: the image itself (a fictional, generated
+  menu PNG as a data URL, so the check stays offline) beside the dishes the AI
+  read from it, each with "Controle nodig" and "gelezen van afbeelding N", the
+  second image of the same menu, and "Nalopen in de lijst" back to that row.
+
+A menu that only exists as an image is a dead end, not a ready decision: the
+owner decision of 2026-10-27 keeps such a restaurant in Dekking
+("Nog niet gecontroleerd") with its own fitting next step in the row, which is
+what the first screenshots show.
+
+The evidence lands in
+`ops/browser/evidence/beeld-lezen-browser-evidence.json`; screenshots go to
+`ops/browser/evidence/be-33/`. It is fixture evidence on a local machine: no
+model, key, provider or real restaurant is involved, and a green run is not
+independent review or production acceptance.
+
+
 ## Limits
 
 This is fixture evidence. It does not prove a live Supabase session, a real

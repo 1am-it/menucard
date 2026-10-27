@@ -96,6 +96,10 @@ const STEPS = {
   confirm: { key: 'confirm', label: '✅ Bevestig bron' },
   menukopjes: { key: 'menukopjes', label: '⚠️ Menukopjes controleren' },
   ai_read: { key: 'ai_read', label: '📖 Lees met AI' },
+  // BE-33 (#79, criterion 1): a menu that only exists as an image or scan gets
+  // its own honest next step. It is the same route (and the same step key), so
+  // only the words change: "Lees met AI" text can never be offered for an image.
+  ai_read_image: { key: 'ai_read', label: '📷 Lees met AI (afbeelding)' },
   manual: { key: 'manual', label: '✍️ Handmatig toevoegen' },
   wait: { key: 'wait', label: '⏳ Even wachten' },
   check: { key: 'check', label: '🔎 Controleer bron' },
@@ -153,12 +157,28 @@ function ageLabel(resultAt, now) {
 }
 
 /**
+ * BE-33 (#79, criterion 1): may a row claim that "Lees met AI" can read an
+ * image? Only when the same existing status endpoint says AI is on *and* the
+ * month budget allows a call. Anything unknown — no status yet, a failed
+ * request, AI off, budget exhausted — is `false`, so the row falls back to the
+ * manual route instead of a button that cannot work.
+ */
+function aiReadReady(status) {
+  if (!status || status.enabled !== true) return false;
+  if (status.budget && status.budget.allowed === false) return false;
+  return true;
+}
+
+/**
  * One batch result (BE-25 `deriveItemView` output) → one row:
  * { key, position, url, jobId, restaurant, foundUrl, detail, actions,
  *   resultAt, age, handled, state, emoji, label, step }.
  * Exactly one `step`; `null` only for a finished, closed or work-free row.
+ *
+ * `aiReady` is the answer of the existing AI status endpoint (`aiReadReady`);
+ * it decides only the image/scan row, never a text reading.
  */
-function rowForBatchItem(item, { batchId, returnTo, now } = {}) {
+function rowForBatchItem(item, { batchId, returnTo, now, aiReady } = {}) {
   const key = item && typeof item.key === 'string' ? item.key : null;
   const resultAt = (item && item.resultAt) || null;
   const base = {
@@ -208,6 +228,19 @@ function rowForBatchItem(item, { batchId, returnTo, now } = {}) {
     return canConfirm ? row('certain', STEPS.confirm) : row('blocked', STEPS.manual);
   }
   if (AI_READ_KEYS.has(key)) {
+    // BE-33 (#79, criterion 1): an image/scan menu gets its own step, and only
+    // when the AI can actually read an image (AI on + budget) *and* the job is
+    // a real source. Otherwise the row says "Handmatig toevoegen" — never a
+    // "Lees met AI" that can only read text.
+    if (key === 'image_only') {
+      // Without a job there is no source at all: a blocked row with the manual
+      // route. With a job the row keeps the same outcome (a menu exists only as
+      // an image) and differs only in its one next step: the AI reading when it
+      // can read an image, the manual import when it cannot.
+      if (!base.jobId) return row('blocked', STEPS.manual);
+      if (aiReady === true) return row('no_menu', STEPS.ai_read_image);
+      return row('no_menu', STEPS.manual);
+    }
     // An AI reading needs the existing analysis job; without one, the honest
     // fallback is the manual import, never a button that cannot work.
     if (base.jobId) return row('no_menu', STEPS.ai_read);
@@ -239,6 +272,9 @@ function stepHref(row, { batchId, returnTo } = {}) {
       if (restaurant.name) params.set('name', String(restaurant.name));
     }
     if (row.url) params.set('url', String(row.url));
+    // BE-33 (#79): the image/scan step is the one that may read images, so the
+    // screen may ask for the estimate of that reading before the click.
+    if (row.step.label === STEPS.ai_read_image.label) params.set('image', '1');
     return `${MANUAL_IMPORT_HREF}?${params.toString()}`;
   }
   if (row.step.key === 'manual') {
@@ -354,14 +390,14 @@ function newestFirst(a, b) {
  *   detailById: Map<batchId, detail>
  * }
  */
-function groupBatchResults(batchDetails, { returnTo, now } = {}) {
+function groupBatchResults(batchDetails, { returnTo, now, aiReady } = {}) {
   const groups = new Map();
   for (const detail of Array.isArray(batchDetails) ? batchDetails : []) {
     if (!detail || !detail.batch || !detail.batch.id) continue;
     const batch = detail.batch;
     const items = Array.isArray(detail.items) ? detail.items : [];
     for (const item of items) {
-      const row = rowForBatchItem(item, { batchId: batch.id, returnTo, now });
+      const row = rowForBatchItem(item, { batchId: batch.id, returnTo, now, aiReady });
       const restaurant = row.restaurant;
       if (!restaurant || !restaurant.id) continue;
       const id = String(restaurant.id);
@@ -493,9 +529,9 @@ function entryById(entries, restaurantId) {
  *    newest result decides (task or not); its triage attention signal never
  *    adds a second task for the same restaurant.
  */
-function selectTasks({ entries, batchDetails, returnTo, now } = {}) {
+function selectTasks({ entries, batchDetails, returnTo, now, aiReady } = {}) {
   const entryList = Array.isArray(entries) ? entries : [];
-  const groups = groupBatchResults(batchDetails, { returnTo, now });
+  const groups = groupBatchResults(batchDetails, { returnTo, now, aiReady });
   const groupById = new Map(groups.map((group) => [group.restaurantId, group]));
   const tasks = [];
   for (const group of groups) {
@@ -555,8 +591,8 @@ function effectiveTaskFilter(filter) {
  *  - a row without a website cannot be checked and says so instead of offering
  *    a dead button.
  */
-function coverageRows(entries, { batchDetails, now } = {}) {
-  const groups = groupBatchResults(batchDetails, { now });
+function coverageRows(entries, { batchDetails, now, aiReady } = {}) {
+  const groups = groupBatchResults(batchDetails, { now, aiReady });
   const groupById = new Map(groups.map((group) => [group.restaurantId, group]));
   const rows = [];
   const seen = new Set();
@@ -750,6 +786,7 @@ module.exports = {
   MAX_BATCH_URLS,
   DAILY_URL_LIMIT,
   ageLabel,
+  aiReadReady,
   rowForBatchItem,
   stepHref,
   safeReturnHref,

@@ -382,12 +382,22 @@ function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBat
   // existing job is the allowed source of an AI reading. The link opens the
   // manual import page, which owns the progress, the budget and the review; the
   // manual alternative stays one click away.
-  const aiReadAvailable = offersAiRead(item)
+  //
+  // BE-33 (#79, criterion 1): an image/scan menu may only offer the AI reading
+  // when the AI is actually available (same flag and budget as the block); with
+  // AI off there is no "Lees met AI" that could read nothing, only the manual
+  // route.
+  const imageOnly = item.key === 'image_only'
+  const aiReadAvailable = offersAiRead(item) && (!imageOnly || aiEnabled)
   const aiReadHref = aiReadAvailable
     ? `/internal/menu-import?job=${encodeURIComponent(item.jobId)}${
         item.restaurant ? `&restaurant=${encodeURIComponent(item.restaurant.id)}&name=${encodeURIComponent(item.restaurant.name || '')}` : ''
-      }${item.url ? `&url=${encodeURIComponent(item.url)}` : ''}`
+      }${item.url ? `&url=${encodeURIComponent(item.url)}` : ''}${imageOnly ? '&image=1' : ''}`
     : null
+  const aiReadLabel = imageOnly ? '📷 Lees met AI (afbeelding)' : 'Lees met AI'
+  const aiReadHint = imageOnly
+    ? 'Kost ongeveer 1 cent per afbeelding of pagina · duurt ± 1 minuut'
+    : 'Kost ongeveer 1 cent · duurt ± 1 minuut'
   const manualImportHref = `/internal/menu-import${
     item.restaurant ? `?restaurant=${encodeURIComponent(item.restaurant.id)}&name=${encodeURIComponent(item.restaurant.name || '')}` : ''
   }`
@@ -591,9 +601,9 @@ function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBat
           </p>
           <div className="bta-actions">
             <a className="di-btn-primary bta-btn" href={aiReadHref}>
-              Lees met AI
+              {aiReadLabel}
             </a>
-            <span className="bta-muted">Kost ongeveer 1 cent · duurt ± 1 minuut</span>
+            <span className="bta-muted">{aiReadHint}</span>
           </div>
           <p className="bta-muted">
             <a className="bta-ai-link" href={manualImportHref}>
@@ -601,6 +611,16 @@ function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBat
             </a>
           </p>
         </section>
+      )}
+
+      {canAct && imageOnly && !aiEnabled && (
+        <p className="bta-muted" role="status">
+          AI is nu niet beschikbaar, dus een afbeelding kan nu niet gelezen worden.{' '}
+          <a className="bta-ai-link" href={manualImportHref}>
+            Voeg de gerechten handmatig toe
+          </a>{' '}
+          of kies een andere bron.
+        </p>
       )}
 
       {!open && (

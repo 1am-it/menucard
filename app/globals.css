@@ -3392,6 +3392,53 @@ details.bta-side-card > summary:focus-visible { outline: 2px solid var(--border-
 .mai-map-card-head { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; justify-content: space-between; min-width: 0; }
 .mai-map-card-source { font-size: 13px; font-weight: 800; color: var(--text-primary); overflow-wrap: anywhere; }
 .mai-map-counts { font-size: 12px; color: var(--text-secondary); }
+/* BE-33 (#79, criterion 3): de afbeelding of pagina naast de gelezen gerechten.
+   Op een telefoon staan ze onder elkaar; de afbeelding blijft binnen de breedte. */
+.mai-map-imagegrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  min-width: 0;
+}
+@media (max-width: 719px) {
+  .mai-map-imagegrid { grid-template-columns: minmax(0, 1fr); }
+}
+.mai-map-figure { display: grid; gap: 4px; margin: 0; min-width: 0; }
+.mai-map-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 70vh;
+  object-fit: contain;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+}
+.mai-map-image--missing {
+  display: grid;
+  place-items: center;
+  min-height: 120px;
+  padding: 12px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+.mai-map-dishelist { display: grid; gap: 6px; min-width: 0; }
+.mai-map-dishelist-title { margin: 0; font-size: 13px; font-weight: 800; color: var(--text-primary); }
+.mai-map-dishes { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; min-width: 0; }
+.mai-map-dish {
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  min-width: 0;
+}
+.mai-map-dish-name { font-size: 13px; color: var(--text-primary); overflow-wrap: anywhere; }
+.mai-provenance { margin: 0; font-size: 12px; color: var(--text-secondary); overflow-wrap: anywhere; }
+.mai-image-notice { display: block; }
 .mai-map-pages { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .mai-map-lines {
   list-style: none;

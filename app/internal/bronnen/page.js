@@ -28,11 +28,15 @@ import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import InternalNav from '@/src/components/InternalNav'
 import useBatchProcessing from '@/src/components/useBatchProcessing'
 import BronnenView from './BronnenView'
-import { BRONNEN_HREF, CHECK_COPY, selectTasks, countTasks, filterTasks, effectiveTaskFilter } from '@/src/lib/sourceReview'
+import { BRONNEN_HREF, CHECK_COPY, selectTasks, countTasks, filterTasks, effectiveTaskFilter, aiReadReady } from '@/src/lib/sourceReview'
 import { readFollowUp, followUpForEntry } from '@/src/lib/sourceTriage'
 
 const TRIAGE_API = '/api/internal/v1/source-triage'
 const BATCH_API = '/api/internal/v1/batch-analysis'
+// BE-33 (#79, criterion 1): the existing AI status (same flag, key and month
+// counter as "Lees met AI"). It only decides whether an image/scan row may
+// offer the AI reading; a failed request keeps that row on the manual route.
+const AI_API = '/api/internal/v1/menu-ai-import'
 // The same bound the batch overview itself uses for its recent batches.
 const BATCH_DETAIL_LIMIT = 10
 const LOAD_ERROR = 'Bronnen beoordelen kon niet worden geladen.'
@@ -60,6 +64,9 @@ export default function BronnenPage() {
   // "Opnieuw controleren" runs the existing batch analysis while this page is
   // open, exactly like the batch screen.
   const [recheckBatchId, setRecheckBatchId] = useState(null)
+  // BE-33 (#79): AI availability for the image/scan row step; null until the
+  // status request answers, and null stays "not available" (manual route).
+  const [aiStatus, setAiStatus] = useState(null)
   const headingRef = useRef(null)
   const focusDetail = useRef(false)
   const feedbackRef = useRef(null)
@@ -83,10 +90,19 @@ export default function BronnenPage() {
       }
       try {
         const auth = { headers: { Authorization: `Bearer ${accessToken}` }, cache: 'no-store' }
-        const [triageRes, overviewRes] = await Promise.all([
+        const [triageRes, overviewRes, aiRes] = await Promise.all([
           fetch(TRIAGE_API, auth).catch(() => null),
           fetch(BATCH_API, auth).catch(() => null),
+          fetch(AI_API, auth).catch(() => null),
         ])
+        // AI is only offered for an image/scan when the same status endpoint
+        // says it is on and the budget allows a call (BE-33 #79).
+        if (aiRes && aiRes.ok) {
+          const aiBody = await aiRes.json().catch(() => null)
+          setAiStatus(aiBody)
+        } else {
+          setAiStatus(null)
+        }
         if (!triageRes || !overviewRes) {
           if (!refresh) setError(LOAD_ERROR)
           return false
@@ -164,10 +180,11 @@ export default function BronnenPage() {
   })
 
   const entries = useMemo(() => (triage && triage.restaurants) || [], [triage])
+  const aiReady = aiReadReady(aiStatus)
   // The age of a result is calculated once per load, with the browser's clock.
   const tasks = useMemo(
-    () => selectTasks({ entries, batchDetails: details, returnTo: BRONNEN_HREF, now: new Date() }),
-    [entries, details],
+    () => selectTasks({ entries, batchDetails: details, returnTo: BRONNEN_HREF, now: new Date(), aiReady }),
+    [entries, details, aiReady],
   )
   const counts = useMemo(() => countTasks(tasks), [tasks])
   const activeFilter = effectiveTaskFilter(filter)

@@ -116,16 +116,16 @@ const FOLLOW_UPS = {
   image_only: {
     id: 'image_only',
     title: 'Aandachtspunt uit de batchanalyse',
-    reason: 'Menu alleen als afbeelding of scan: niet ondersteund',
+    reason: 'Menu alleen als afbeelding of scan: lees het met AI of met de hand',
     detail:
-      'De menukaart is alleen als afbeelding of scan beschikbaar. Deze import leest geen beeld en gebruikt geen OCR, dus er is niets als gerecht opgeslagen.',
-    nextStep: 'Kies een andere tekst- of pdf-bron of markeer deze bron als onbruikbaar.',
+      'De menukaart is alleen als afbeelding of scan beschikbaar. Automatisch is er niets als gerecht opgeslagen. Lees de afbeelding of scan met AI, voeg de gerechten handmatig toe of kies een andere tekst- of pdf-bron.',
+    nextStep: 'Lees de afbeelding met AI, kies een andere tekst- of pdf-bron of markeer deze bron als onbruikbaar.',
     suggestion: {
       kind: 'mark_unusable',
       unusableReason: 'other',
-      note: 'Menu alleen als afbeelding of scan; niet met OCR te lezen.',
+      note: 'Menu alleen als afbeelding of scan; niet automatisch te lezen zonder AI.',
       explain:
-        'Voorgeselecteerd omdat de batchanalyse dit menu als afbeelding of scan meldde. De toelichting hieronder is verplicht en al ingevuld.',
+        'Voorgeselecteerd omdat de batchanalyse dit menu als afbeelding of scan meldde. Lees het eerst met AI of kies een andere bron; de toelichting hieronder is verplicht en al ingevuld.',
     },
   },
 };

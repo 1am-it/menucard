@@ -48,8 +48,10 @@ test('Z3: een website toont de opgehaalde tekst, een PDF de tekst met een eerlij
   assert.equal(pdf.reason, 'pdf_bytes_not_kept');
   assert.match(pdf.label, /3 pagina/);
   const image = chooseCardView({ kind: 'pdf', hasText: false });
-  assert.equal(image.mode, 'image');
-  assert.equal(image.notice, IMAGE_NOTICE);
+  // BE-33 (#79): a scan PDF is its own card with the page origin, not a silent
+  // "image without text" anymore.
+  assert.equal(image.mode, 'pdf_scan');
+  assert.match(image.notice, /Controle nodig/);
   // An unknown kind is still honest: text of the source, no page image.
   assert.equal(chooseCardView({ kind: 'other', hasText: true }).mode, 'source_text');
 });
@@ -93,12 +95,12 @@ test('Z3: een scan zonder tekst staat als bron in de kaart met een eerlijke meld
   assert.equal(map.available, true);
   assert.equal(map.sources.length, 2);
   assert.equal(map.sources[1].id, 'source-2');
-  assert.equal(map.sources[1].view.mode, 'image');
-  assert.equal(map.sources[1].view.notice, IMAGE_NOTICE);
+  assert.equal(map.sources[1].view.mode, 'pdf_scan');
+  assert.match(map.sources[1].view.notice, /Controle nodig/);
   assert.equal(map.sources[1].counts.total, 0);
   // The card of that source says it cannot be compared yet, and draws nothing.
   const card = buildSourceCard({ sources, menus: [], sourceId: 'source-2' });
-  assert.equal(card.source.view.notice, IMAGE_NOTICE);
+  assert.match(card.source.view.notice, /Controle nodig/);
   assert.deepEqual(card.page.lines, []);
 });
 
@@ -159,8 +161,8 @@ test('Z3: pagina 2 van een PDF-tekst wordt apart opgevraagd en de melding blijft
 
 test('Z3: een afbeelding zonder tekst toont geen verzonnen pagina', () => {
   const card = buildSourceCard({ sources: [source({ kind: 'pdf', hasText: false, text: '' })], menus: [], sourceId: 'source-1' });
-  assert.equal(card.source.view.mode, 'image');
-  assert.equal(card.source.view.notice, IMAGE_NOTICE);
+  assert.equal(card.source.view.mode, 'pdf_scan');
+  assert.match(card.source.view.notice, /Controle nodig/);
   assert.deepEqual(card.page.lines, []);
 });
 
@@ -174,3 +176,87 @@ test('Z2/Z4: elke markering heeft tekst voor een schermlezer, niet alleen kleur'
   );
   assert.equal(describeMark({ tone: 'not_dish', name: 'Friet' }), 'Friet: geen gerecht, eerder beoordeeld');
 });
+// BE-33 (#79, criterion 3): a menu read from images shows the image beside the
+// dishes that came from it, and every dish keeps "Controle nodig".
+const IMAGE_PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8AAAwAB/AL+2wAAAABJRU5ErkJggg==';
+
+function imageSource(extra = {}) {
+  return {
+    id: 'source-1',
+    url: 'https://fictief-brasserie.invalid/menukaart',
+    kind: 'image',
+    hasText: false,
+    text: null,
+    imageRead: true,
+    images: [
+      { number: 1, url: 'https://fictief-brasserie.invalid/kaart-1.jpg', alt: 'Menukaart 1', mediaType: 'image/jpeg' },
+      { number: 2, url: 'https://fictief-brasserie.invalid/kaart-2.jpg', alt: 'Menukaart 2', mediaType: 'image/jpeg' },
+    ],
+    ...extra,
+  };
+}
+
+function imageItem(name, locator, amount) {
+  return {
+    name,
+    priceStatus: 'known',
+    amountMinorUnits: amount,
+    currency: 'EUR',
+    priceText: `${amount / 100},00`,
+    evidence: { sourceId: 'source-1', locator, quote: name },
+  };
+}
+
+test('BE-33: een kaart van afbeeldingen is beschikbaar zonder tekst en toont de afbeelding naast de gerechten', () => {
+  const menusWithImages = menus([imageItem('Fictieve steak', 'afbeelding 1', 2450), imageItem('Fictieve soep', 'afbeelding 2', 650)]);
+  const map = buildSourceMap({ sources: [imageSource()], menus: menusWithImages });
+  assert.equal(map.available, true, 'an image menu has its own card instead of "not comparable"');
+  assert.deepEqual(map.sources.map((entry) => entry.view.mode), ['images']);
+  assert.match(map.sources[0].view.notice, /Controle nodig/);
+  assert.equal(map.sources[0].imageCount, 2);
+  assert.deepEqual(map.marks, [], 'no text comparison is invented');
+
+  const first = buildSourceCard({ sources: [imageSource()], menus: menusWithImages, sourceId: 'source-1', page: 1 });
+  assert.equal(first.available, true);
+  assert.equal(first.source.view.mode, 'images');
+  assert.deepEqual(first.images.map((image) => image.url), ['https://fictief-brasserie.invalid/kaart-1.jpg']);
+  assert.deepEqual(first.dishes.map((dish) => [dish.name, dish.provenance, dish.label]), [
+    ['Fictieve steak', 'gelezen van afbeelding 1', 'Controle nodig'],
+  ]);
+  assert.equal(first.dishes[0].needsCheck, true);
+  assert.deepEqual(first.page, { number: 1, total: 2, lines: [] });
+
+  const second = buildSourceCard({ sources: [imageSource()], menus: menusWithImages, sourceId: 'source-1', page: 2 });
+  assert.deepEqual(second.images.map((image) => image.url), ['https://fictief-brasserie.invalid/kaart-2.jpg']);
+  assert.deepEqual(second.dishes.map((dish) => dish.provenance), ['gelezen van afbeelding 2']);
+  // A page outside the images is refused, never drawn empty.
+  const outOfRange = buildSourceCard({ sources: [imageSource()], menus: menusWithImages, sourceId: 'source-1', page: 3 });
+  assert.equal(outOfRange.available, false);
+  assert.equal(outOfRange.reason, 'page_out_of_range');
+});
+
+test('BE-33: een scan-PDF toont de paginanummer-herkomst naast de gerechten', () => {
+  const scan = {
+    id: 'source-1',
+    url: 'https://fictief-brasserie.invalid/menukaart.pdf',
+    kind: 'pdf',
+    hasText: false,
+    text: null,
+    imageRead: true,
+    pageCount: 3,
+    images: [],
+  };
+  const scanMenus = menus([imageItem('Fictieve steak', 'pagina 2', 2450)]);
+  const map = buildSourceMap({ sources: [scan], menus: scanMenus });
+  assert.equal(map.available, true);
+  assert.equal(map.sources[0].view.mode, 'pdf_scan');
+  const card = buildSourceCard({ sources: [scan], menus: scanMenus, sourceId: 'source-1', page: 2 });
+  assert.equal(card.available, true);
+  assert.deepEqual(card.images, []);
+  assert.equal(card.page.total, 3);
+  assert.deepEqual(card.dishes.map((dish) => dish.provenance), ['gelezen van pagina 2']);
+  // The same dish is not claimed on another page.
+  const other = buildSourceCard({ sources: [scan], menus: scanMenus, sourceId: 'source-1', page: 1 });
+  assert.deepEqual(other.dishes, []);
+});
+

@@ -18,10 +18,12 @@
 const { createHash } = require('node:crypto');
 const { decodeEntities } = require('./htmlMenuStructure');
 const { sourceHashForText } = require('./manualMenuImportBundle');
+const { MAX_IMAGE_BYTES, MAX_MENU_IMAGES, collectMenuImages, mediaTypeForUrl } = require('./menuImageRead');
 
 const MAX_SOURCE_BYTES = 15 * 1024 * 1024;
 const MAX_TEXT_CHARS = 120_000;
 const MAX_SOURCES = 5;
+const MAX_DOCUMENT_BYTES = 10 * 1024 * 1024;
 
 function decodeEntitiesSafely(text) {
   try {
@@ -54,10 +56,79 @@ function failureSource({ id, url, kind, status, limitation }) {
 }
 
 /**
+ * BE-33 (#79, criterion 2): the number of pages of a PDF, as far as it can be
+ * seen without a new dependency. A compressed page tree can hide it; then the
+ * answer is `null` and the reading is refused instead of sending an unbounded
+ * document. `readPdfPages` (the existing PDF route) may supply the real count.
+ */
+function pdfPageCount(bytes) {
+  if (!bytes || typeof bytes.length !== 'number' || bytes.length === 0) return null;
+  const text = bytes.toString('latin1');
+  const pages = text.match(/\/Type\s*\/Page(?![s\w])/g);
+  if (pages && pages.length > 0) return pages.length;
+  const counts = [...text.matchAll(/\/Count\s+(\d+)/g)]
+    .map((match) => Number(match[1]))
+    .filter((value) => Number.isInteger(value) && value > 0);
+  return counts.length > 0 ? Math.max(...counts) : null;
+}
+
+/**
+ * Fetches the menu images of one page through the same safe route (robots, the
+ * same site, a fixed size). A failed image is skipped with a limitation and is
+ * never replaced by a guess. No more than the fixed maximum is fetched.
+ */
+async function readMenuImages({ images, fetchImpl, robotsCheck, maxImageBytes = MAX_IMAGE_BYTES } = {}) {
+  const list = Array.isArray(images) ? images : [];
+  const read = [];
+  const limitations = [];
+  for (const image of list.slice(0, MAX_MENU_IMAGES)) {
+    if (typeof robotsCheck === 'function') {
+      const gate = await robotsCheck(image.url);
+      if (gate && gate.shouldFetchPage === false) {
+        limitations.push(`robots.txt staat het ophalen van afbeelding ${image.number} niet toe.`);
+        continue;
+      }
+    }
+    let response;
+    try {
+      response = await fetchImpl(image.url, { encoding: 'buffer', maxBytes: maxImageBytes });
+    } catch {
+      limitations.push(`Afbeelding ${image.number} kon niet worden opgehaald.`);
+      continue;
+    }
+    const bytes = response && response.bytes;
+    if (!bytes || typeof bytes.length !== 'number' || bytes.length === 0) {
+      limitations.push(`Afbeelding ${image.number} is leeg.`);
+      continue;
+    }
+    if (bytes.length > maxImageBytes) {
+      limitations.push(`Afbeelding ${image.number} is groter dan de vaste limiet en wordt niet verstuurd.`);
+      continue;
+    }
+    const mediaType = mediaTypeForUrl(image.url);
+    if (!mediaType) {
+      limitations.push(`Afbeelding ${image.number} heeft geen ondersteund formaat.`);
+      continue;
+    }
+    read.push({ ...image, mediaType, data: bytes.toString('base64'), bytes: bytes.length });
+  }
+  return { images: read, limitations };
+}
+
+/**
  * Leest één bron. `fetchImpl` is altijd de veilige fetch van de bestaande
  * route; deze module kent zelf geen netwerk.
  */
-async function readManualImportSource({ id, url, fetchImpl, robotsCheck, now = new Date(), maxBytes = MAX_SOURCE_BYTES } = {}) {
+async function readManualImportSource({
+  id,
+  url,
+  fetchImpl,
+  robotsCheck,
+  now = new Date(),
+  maxBytes = MAX_SOURCE_BYTES,
+  maxDocumentBytes = MAX_DOCUMENT_BYTES,
+  readPdfPages = null,
+} = {}) {
   if (typeof fetchImpl !== 'function') throw new Error('fetchImpl_required');
   const fetchedAt = now instanceof Date ? now.toISOString() : new Date(now).toISOString();
   if (typeof robotsCheck === 'function') {
@@ -81,12 +152,17 @@ async function readManualImportSource({ id, url, fetchImpl, robotsCheck, now = n
   const finalUrl = response && response.finalUrl ? response.finalUrl : url;
   const contentType = response && response.contentType ? response.contentType : '';
   if (contentType === 'application/pdf') {
-    // Een PDF-tekstlaag lezen is het werk van de bestaande PDF-route; zonder
-    // die stap is een PDF een scan: expliciet geen tekst, geen verzonnen menu.
+    // BE-33 (#79): a PDF without a text layer is a scan. It goes to the same
+    // model as a document, within the fixed size; the page count is measured
+    // here only to enforce the 10-page limit, never to invent text.
     const bytes = response && response.bytes;
     const sha256 = bytes && typeof bytes.length === 'number' && bytes.length > 0
       ? createHash('sha256').update(bytes).digest('hex')
       : sourceHashForText(String(bytes ? bytes.toString('base64') : ''));
+    const pageCount = bytes && typeof bytes.length === 'number' && bytes.length <= maxDocumentBytes
+      ? pdfPageCount(bytes) || (typeof readPdfPages === 'function' ? await readPdfPages(bytes) : null)
+      : null;
+    const tooLarge = Boolean(bytes && typeof bytes.length === 'number' && bytes.length > maxDocumentBytes);
     return {
       id,
       url: finalUrl,
@@ -94,9 +170,14 @@ async function readManualImportSource({ id, url, fetchImpl, robotsCheck, now = n
       status: 'read',
       text: '',
       hasText: false,
+      imageRead: true,
       sha256,
+      pageCount,
+      documentBase64: bytes && typeof bytes.length === 'number' && bytes.length > 0 && !tooLarge ? bytes.toString('base64') : null,
       fetchedAt,
-      limitation: 'PDF opgehaald zonder tekstlaagcontrole; voeg het bestand zelf toe aan de AI.',
+      limitation: tooLarge
+        ? 'De PDF is groter dan de vaste limiet en gaat niet als document naar de AI.'
+        : 'De PDF gaat als document naar de AI; de pagina’s worden niet als tekst gelezen.',
     };
   }
   if (contentType !== 'text/html' && contentType !== 'application/xhtml+xml') {
@@ -105,6 +186,31 @@ async function readManualImportSource({ id, url, fetchImpl, robotsCheck, now = n
   const html = response.bytes ? response.bytes.toString('utf8') : String(response.body || '');
   const text = htmlToPlainText(html);
   if (text === '') {
+    // BE-33 (#79, criterion 2): a page without text may carry its menu as
+    // images. Only images of the same website that are recognisable as a menu
+    // are fetched, never more than the fixed maximum, and each through the same
+    // safe route. Nothing is guessed when that fails.
+    const candidates = collectMenuImages({ html, pageUrl: finalUrl, limit: MAX_MENU_IMAGES + 1 });
+    if (candidates.length > 0) {
+      const overflow = candidates.length > MAX_MENU_IMAGES;
+      const { images, limitations } = overflow
+        ? { images: [], limitations: [`Deze pagina heeft meer dan ${MAX_MENU_IMAGES} menu-afbeeldingen; maximaal ${MAX_MENU_IMAGES} per lezing.`] }
+        : await readMenuImages({ images: candidates, fetchImpl, robotsCheck });
+      return {
+        id,
+        url: finalUrl,
+        kind: 'image',
+        status: 'read',
+        text: '',
+        hasText: false,
+        imageRead: true,
+        sha256: createHash('sha256').update(candidates.map((candidate) => candidate.url).join('\n')).digest('hex'),
+        images,
+        imageCandidates: candidates.length,
+        fetchedAt,
+        limitation: limitations.length > 0 ? limitations.join(' ') : 'Deze pagina toont de menukaart als afbeelding; de AI leest de afbeeldingen.',
+      };
+    }
     return {
       ...failureSource({ id, url: finalUrl, kind: 'html', status: 'read', limitation: 'De pagina bevat geen leesbare tekst.' }),
       fetchedAt,
@@ -124,7 +230,15 @@ async function readManualImportSource({ id, url, fetchImpl, robotsCheck, now = n
 }
 
 /** Leest een begrensde set URL's, met een vaste sourceId per bron. */
-async function readManualImportSources({ urls, fetchImpl, robotsCheck, now = new Date(), maxBytes = MAX_SOURCE_BYTES } = {}) {
+async function readManualImportSources({
+  urls,
+  fetchImpl,
+  robotsCheck,
+  now = new Date(),
+  maxBytes = MAX_SOURCE_BYTES,
+  maxDocumentBytes = MAX_DOCUMENT_BYTES,
+  readPdfPages = null,
+} = {}) {
   const list = (Array.isArray(urls) ? urls : []).filter((url) => typeof url === 'string' && url.trim());
   if (list.length === 0) return [];
   return Promise.all(
@@ -136,6 +250,8 @@ async function readManualImportSources({ urls, fetchImpl, robotsCheck, now = new
         robotsCheck,
         now,
         maxBytes,
+        maxDocumentBytes,
+        readPdfPages,
       }),
     ),
   );
@@ -145,7 +261,10 @@ module.exports = {
   MAX_SOURCE_BYTES,
   MAX_TEXT_CHARS,
   MAX_SOURCES,
+  MAX_DOCUMENT_BYTES,
   htmlToPlainText,
+  pdfPageCount,
+  readMenuImages,
   readManualImportSource,
   readManualImportSources,
 };

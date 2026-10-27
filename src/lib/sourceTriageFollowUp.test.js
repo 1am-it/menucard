@@ -33,8 +33,8 @@ test('the batch link of an image/scan menu is read as page context, never as a s
   const context = readFollowUp(SEARCH);
   assert.equal(context.id, 'image_only');
   assert.equal(context.restaurantId, '9001');
-  assert.equal(context.followUp.reason, 'Menu alleen als afbeelding of scan: niet ondersteund');
-  assert.match(context.followUp.detail, /geen OCR/);
+  assert.equal(context.followUp.reason, 'Menu alleen als afbeelding of scan: lees het met AI of met de hand');
+  assert.match(context.followUp.detail, /Lees de afbeelding of scan met AI/);
   assert.match(context.followUp.nextStep, /tekst- of pdf-bron/);
   // Nothing here claims a menu verdict, a confirmation or a publication.
   assert.doesNotMatch(JSON.stringify(context.followUp), /bevestigd|gepubliceerd|geslaagd/i);
