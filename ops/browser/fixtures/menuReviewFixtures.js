@@ -861,6 +861,14 @@ module.exports = {
         return manualMapScenario();
       },
     },
+    // BE-33 (#79): dezelfde stroom met een menukaart die alleen als afbeelding
+    // bestaat. Elk gerecht is daar "Controle nodig" en draagt de afbeelding waar
+    // het van gelezen is; de kaart toont die afbeelding naast de lijst.
+    'manual-image': {
+      get manual() {
+        return manualImageScenario();
+      },
+    },
     ...conceptScenarios,
   },
   expected: {
@@ -877,6 +885,7 @@ module.exports = {
 // die de server stuurt. Fictieve bron, fictief antwoord, geen netwerk.
 
 const path = require('node:path');
+const fs = require('node:fs');
 const { loadMenuExtractionProtocol } = require('../../../src/lib/menuExtractionProtocol');
 const { buildImportBundle, bundleMetadata, sourceHashForText } = require('../../../src/lib/manualMenuImportBundle');
 const { buildImportPrompt } = require('../../../src/lib/manualMenuImportPrompt');
@@ -1410,6 +1419,105 @@ function manualMapScenario() {
       orangeMark,
       counts: initial.sourceMap.sources.map((source) => ({ id: source.id, counts: source.counts, view: source.view })),
     },
+  };
+}
+
+// ── BE-33 (#79): een menukaart die alleen als afbeelding bestaat ─────────────
+// Dezelfde echte productmodules als hierboven, met een afbeeldingsbron: elk
+// gerecht draagt de herkomst "gelezen van afbeelding N" en het label "Controle
+// nodig". De afbeelding is een kleine, fictieve menukaart-PNG als data-URL
+// (ops/browser/fixtures/assets/menukaart-fictief.png), zodat de browsercontrole
+// offline blijft: geen netwerk, geen echt restaurant.
+const FIXTURE_PNG =
+  'data:image/png;base64,' + fs.readFileSync(path.join(__dirname, 'assets', 'menukaart-fictief.png')).toString('base64');
+
+function manualImageScenario() {
+  const base = manualImportScenario();
+  const protocol = loadMenuExtractionProtocol({ root: path.resolve(__dirname, '..', '..', '..') });
+  const bundle = buildImportBundle({
+    bundleId: 'AI-FICTIEF-BEELD',
+    actorUserId: 'fixture-user',
+    restaurantId: RESTAURANT.id,
+    restaurantName: RESTAURANT.name,
+    fetchedAt: '2026-10-27T12:00:00.000Z',
+    sources: [
+      {
+        id: 'source-1',
+        url: 'https://fictief-brasserie.invalid/menukaart',
+        kind: 'image',
+        status: 'read',
+        text: '',
+        hasText: false,
+        imageRead: true,
+        sha256: sourceHashForText('fictieve-menu-afbeeldingen'),
+        images: [
+          { number: 1, url: FIXTURE_PNG, alt: 'Fictieve menukaart 1', mediaType: 'image/png' },
+          { number: 2, url: FIXTURE_PNG, alt: 'Fictieve menukaart 2', mediaType: 'image/png' },
+        ],
+      },
+    ],
+    protocol,
+    now: new Date('2026-10-27T12:00:00.000Z'),
+  });
+  const output = {
+    menus: [
+      {
+        title: 'Fictieve Kaart',
+        sourceId: 'source-1',
+        categories: [
+          {
+            name: 'Klassiekers',
+            items: [
+              {
+                name: 'Fictieve steak',
+                priceStatus: 'known',
+                amountMinorUnits: 2450,
+                currency: 'EUR',
+                priceText: '24,50',
+                evidence: { sourceId: 'source-1', locator: 'afbeelding 1', quote: 'Fictieve steak 24,50' },
+              },
+              {
+                name: 'Fictieve soep',
+                priceStatus: 'known',
+                amountMinorUnits: 650,
+                currency: 'EUR',
+                priceText: '6,50',
+                evidence: { sourceId: 'source-1', locator: 'afbeelding 2', quote: 'Fictieve soep 6,50' },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    rejected: [],
+    coverage: { status: 'complete', sourcesRead: 1, pagesRead: 2, itemsExtracted: 2, unreadSources: [], limitations: [] },
+  };
+  const report = buildImportReport({
+    importId: 'fixture-import',
+    bundle,
+    output,
+    aiName: 'Claude',
+    now: new Date('2026-10-27T12:05:00.000Z'),
+  });
+  if (!report.ok) throw new Error(`image fixture invalid: ${report.code}`);
+  const capture = bundle.sources;
+  const initial = reviewView({ report, decisions: new Map(), capture });
+  if (!initial.sourceMap || initial.sourceMap.available !== true) throw new Error('image fixture expects an available card');
+  if (initial.rows.some((row) => row.label !== 'Controle nodig' || !row.provenance)) {
+    throw new Error('image fixture expects "Controle nodig" with its origin on every row');
+  }
+  return {
+    ...base,
+    bundle: bundleMetadata(bundle),
+    prompt: buildImportPrompt(bundle),
+    import: publicImportReport(report),
+    reviews: [initial, initial, initial],
+    cardSteps: [
+      {
+        'source-1:1': sourceCardView({ report, decisions: new Map(), capture, sourceId: 'source-1', page: 1 }),
+        'source-1:2': sourceCardView({ report, decisions: new Map(), capture, sourceId: 'source-1', page: 2 }),
+      },
+    ],
   };
 }
 
