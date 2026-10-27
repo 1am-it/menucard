@@ -146,7 +146,15 @@ export default function AddEntryPage() {
       live = false
     }
   }, [token, selectedRestaurant])
-  const confirmedCheck = useMemo(() => (checkEntry ? confirmedCheckUrl(checkEntry.entry) : null), [checkEntry])
+  // Only the entry of the restaurant that is chosen right now may decide the
+  // link: a slower answer for a previous choice is ignored.
+  const confirmedCheck = useMemo(
+    () =>
+      checkEntry && selectedRestaurant && checkEntry.restaurantId === String(selectedRestaurant.id)
+        ? confirmedCheckUrl(checkEntry.entry)
+        : null,
+    [checkEntry, selectedRestaurant],
+  )
 
   // The confirmed link fills an empty URL field; text the human typed is never
   // overwritten. The field stays theirs to change.
