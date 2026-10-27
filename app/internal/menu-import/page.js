@@ -17,6 +17,7 @@ import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import InternalNav from '@/src/components/InternalNav'
 import AiMenuReadBlock from '@/src/components/AiMenuReadBlock'
 import MenuSourceMap from '@/src/components/MenuSourceMap'
+import { aiHandoffKeyFromSearch, takeAiRead } from '@/src/lib/aiReadFlow'
 
 const API = '/api/internal/v1/manual-menu-import'
 const AI_API = '/api/internal/v1/menu-ai-import'
@@ -107,6 +108,10 @@ export default function ManualMenuImportPage() {
   const [aiResult, setAiResult] = useState(null)
   const [aiError, setAiError] = useState(null)
   const [aiJobId, setAiJobId] = useState('')
+  // BE-34 (#81, criterion 3): one confirmation for "Alles nagelopen" on the
+  // dishes of an image reading. It names the exact number; nothing is decided
+  // before that click.
+  const [bulkConfirm, setBulkConfirm] = useState(false)
   // Y2 (Lead review 6381657192): with AI configured the reading is the primary
   // route and the manual three-step import is collapsed behind one link. A
   // finished reading keeps those steps collapsed; the review card only opens
@@ -133,6 +138,25 @@ export default function ManualMenuImportPage() {
       else setSession(data.session)
     })
     const params = new URLSearchParams(window.location.search)
+    // BE-34 (#81, criterion 1): "Bekijk en controleer" in a result row hands one
+    // finished reading to this screen. It is the same sealed state token, report
+    // and review this page already works with; it is read once and removed, so a
+    // reload shows the same screen as closing and reopening it. Nothing is read
+    // again and no second AI call is made.
+    const handoffKey = aiHandoffKeyFromSearch(window.location.search)
+    if (handoffKey) {
+      const handoff = takeAiRead(window.sessionStorage, handoffKey)
+      if (handoff) {
+        setAiResult(handoff)
+        setReport(handoff.import || null)
+        setReview(handoff.review || null)
+        setReceived(handoff.import && handoff.import.summary ? handoff.import.summary : null)
+        setStateToken(handoff.state)
+        setValidUntil(handoff.validUntil || null)
+        setAiPhase('done')
+        setReviewOpen(true)
+      }
+    }
     const id = params.get('restaurant')
     const name = params.get('name')
     if (id && name) setSelectedRestaurant({ id, name })
@@ -352,6 +376,57 @@ export default function ManualMenuImportPage() {
       // is the explicit manual route; a normal AI reading opens it only through
       // "Nalopen" (Y2).
       setReviewOpen(true)
+    }
+    setBusy(false)
+  }
+
+  /**
+   * BE-34 (#81, criterion 3): "Alles nagelopen" for the dishes of an image
+   * reading. The number that was shown goes to the server; the server decides
+   * with its own count and records one human decision per dish. There is no
+   * "alles accepteren": rows with their own point (a price variant, an evidence
+   * error) keep their own step.
+   */
+  async function sendBulkReview() {
+    const offer = review && review.bulkReview ? review.bulkReview : null
+    if (!offer || !offer.available) return
+    setBusy(true)
+    setError(null)
+    setMessage(null)
+    const result = await api(`/imports/${report.importId}/decisions`, {
+      state: stateToken,
+      decision: { action: 'confirm_all_unverifiable', count: offer.count },
+    })
+    if (!result.ok) handleFailure(result)
+    else {
+      setReview(result.data.review)
+      adoptStep(result.data)
+      setBulkConfirm(false)
+      setMessage(
+        `${offer.count} ${offer.count === 1 ? 'gerecht' : 'gerechten'} nagelopen. Dat staat per gerecht vast; aanpassen kan nog via "Wijzig". Opslaan blijft een aparte stap.`,
+      )
+    }
+    setBusy(false)
+  }
+
+  /**
+   * "Wijzig" on one of those dishes: the human reopens that single row, so the
+   * existing correction form decides it. Nothing else changes.
+   */
+  async function reopenRow(row) {
+    setBusy(true)
+    setError(null)
+    setMessage(null)
+    const result = await api(`/imports/${report.importId}/decisions`, {
+      state: stateToken,
+      decision: { action: 'reopen', rowId: row.id },
+    })
+    if (!result.ok) handleFailure(result)
+    else {
+      setReview(result.data.review)
+      adoptStep(result.data)
+      openCorrection(row)
+      setMessage('Deze regel staat weer open. Pas aan of bevestig opnieuw; opslaan blijft een aparte stap.')
     }
     setBusy(false)
   }
@@ -1307,6 +1382,50 @@ export default function ManualMenuImportPage() {
                     &quot;alles accepteren&quot;.
                   </p>
 
+                  {/* BE-34 (#81, criterion 3): the dishes of an image reading can
+                      be closed with one explicit confirmation that names the
+                      number. Each dish keeps its own decision; rows with their
+                      own point keep their own step. */}
+                  {review.bulkReview && review.bulkReview.available ? (
+                    <div className="mai-actions mai-bulk">
+                      {!bulkConfirm ? (
+                        <>
+                          <button
+                            type="button"
+                            className="stg-btn-secondary mai-btn"
+                            disabled={busy}
+                            onClick={() => setBulkConfirm(true)}
+                          >
+                            {review.bulkReview.buttonLabel}
+                          </button>
+                          <span className="bta-muted">{review.bulkReview.hint}</span>
+                        </>
+                      ) : (
+                        <div className="di-banner di-banner-neutral" role="group" aria-label="Alles nagelopen bevestigen">
+                          <p className="mai-why">{review.bulkReview.confirmLabel}</p>
+                          <div className="mai-row-actions">
+                            <button
+                              type="button"
+                              className="di-btn-primary mai-btn"
+                              disabled={busy}
+                              onClick={sendBulkReview}
+                            >
+                              {review.bulkReview.confirmAction}
+                            </button>
+                            <button
+                              type="button"
+                              className="stg-btn-secondary mai-btn"
+                              disabled={busy}
+                              onClick={() => setBulkConfirm(false)}
+                            >
+                              Annuleer
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : null}
+
                   <div className="mai-actions">
                     <button type="button" className="stg-btn-secondary mai-btn" disabled={busy || openRows.filter((row) => row.askAi).length === 0} onClick={askAllOpen}>
                       Vraag AI over alle open punten
@@ -1623,7 +1742,22 @@ export default function ManualMenuImportPage() {
                             {row.name} · <b>{row.priceText}</b>
                             {row.outcome === 'keep_corrected' ? ' · gecorrigeerd' : ''}
                             {row.outcome === 'keep_confirmed' ? ' · bevestigd' : ''}
+                            {row.outcome === 'keep_bulk_reviewed' ? ' · nagelopen' : ''}
                             {row.provenance ? ` · ${row.provenance}` : ''}
+                            {row.outcome === 'keep_bulk_reviewed' ? (
+                              // BE-34 (#81): adjusting one dish stays possible
+                              // after "Alles nagelopen": reopening this row is a
+                              // human action of its own.
+                              <button
+                                type="button"
+                                className="stg-btn-secondary mai-btn"
+                                disabled={busy}
+                                aria-label={`Wijzig ${row.name || 'dit gerecht'}`}
+                                onClick={() => reopenRow(row)}
+                              >
+                                Wijzig
+                              </button>
+                            ) : null}
                             {doneMark ? (
                               <button
                                 type="button"

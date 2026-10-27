@@ -21,6 +21,7 @@ import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import InternalNav from '@/src/components/InternalNav'
 import SourceResultRow from '@/src/components/SourceResultRow'
 import useBatchProcessing from '@/src/components/useBatchProcessing'
+import useAiReading from '@/src/components/useAiReading'
 import { decideAddEntry, manualImportHref, MAX_BATCH_URLS } from '@/src/lib/internalAddEntry'
 import { rowForBatchItem, stepHref, aiReadReady, CHECK_COPY } from '@/src/lib/sourceReview'
 import { discoveryRow, originLabel } from '@/src/lib/sourceDiscovery'
@@ -84,6 +85,10 @@ export default function AddEntryPage() {
   }, [router])
 
   const token = session && session.access_token
+  // BE-34 (#81): one click on "Lees met AI" in a result row starts the existing
+  // server-side reading there; the row shows progress, outcome and, on failure,
+  // "Handmatig toevoegen" as the next step.
+  const aiRead = useAiReading({ token })
 
   // BE-33 (#79, criterion 1): the image/scan row may only offer the AI reading
   // when the same status endpoint says AI is on and the budget allows it.
@@ -567,6 +572,9 @@ export default function AddEntryPage() {
                     href={stepHref(row, { batchId: activeBatch.batch.id, returnTo })}
                     onConfirm={confirmRow}
                     onRecheck={recheck}
+                    onAiRead={aiRead.read}
+                    onOpenAiRead={aiRead.open}
+                    aiRead={aiRead.stateFor(row)}
                     busy={busy}
                   />
                 )

@@ -12,7 +12,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import SourceResultRow from '@/src/components/SourceResultRow'
+import AiReadAction from '@/src/components/AiReadAction'
 import useBatchProcessing from '@/src/components/useBatchProcessing'
+import useAiReading from '@/src/components/useAiReading'
 import {
   coverageRows,
   checkSelection,
@@ -57,6 +59,10 @@ export default function CoverageCheckSection({ token, onUncheckedCount }) {
   // BE-33 (#79): AI availability for the image/scan row; null means "use the
   // manual route".
   const [aiStatus, setAiStatus] = useState(null)
+  // BE-34 (#81): one click on "Lees met AI" starts the existing reading here and
+  // the row shows its progress and outcome; the manual import is only the small
+  // link "Liever zelf plakken".
+  const aiRead = useAiReading({ token })
 
   const load = useCallback(async () => {
     if (!token) return
@@ -383,13 +389,26 @@ export default function CoverageCheckSection({ token, onUncheckedCount }) {
                     </button>
                   ) : row.deadEnd ? (
                     // The one fitting step of this dead end: "Handmatig
-                    // toevoegen" or "Lees met AI", the existing routes.
-                    <a
-                      className="stg-btn-secondary cov-check-action"
-                      href={stepHref(row, { batchId: row.batchId, returnTo: COVERAGE_HREF }) || MANUAL_IMPORT_HREF}
-                    >
-                      {row.step.label}
-                    </a>
+                    // toevoegen" or, since BE-34 (#81), the one-click AI reading
+                    // in this row itself. The manual import stays the small link
+                    // inside that action, never the first destination.
+                    row.step && row.step.key === 'ai_read' ? (
+                      <AiReadAction
+                        row={row}
+                        state={aiRead.stateFor(row)}
+                        onRead={aiRead.read}
+                        onOpen={aiRead.open}
+                        disabled={busy}
+                        label={row.step.label}
+                      />
+                    ) : (
+                      <a
+                        className="stg-btn-secondary cov-check-action"
+                        href={stepHref(row, { batchId: row.batchId, returnTo: COVERAGE_HREF }) || MANUAL_IMPORT_HREF}
+                      >
+                        {row.step.label}
+                      </a>
+                    )
                   ) : row.canCheck ? (
                     <button
                       type="button"
@@ -427,6 +446,9 @@ export default function CoverageCheckSection({ token, onUncheckedCount }) {
                   position={item.position}
                   href={stepHref(row, { batchId: activeBatch.batch.id, returnTo: COVERAGE_HREF })}
                   onRecheck={(target) => start([target.url])}
+                  onAiRead={aiRead.read}
+                  onOpenAiRead={aiRead.open}
+                  aiRead={aiRead.stateFor(row)}
                   busy={busy}
                 />
               )
