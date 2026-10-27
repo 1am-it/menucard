@@ -190,7 +190,8 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
             {/* PLATFORM-07 — small, unobtrusive claim link, not a CTA */}
             <Link
               href={`/claim/${id}`}
-              style={{ display: 'inline-block', marginTop: 12, fontSize: 13, color: 'var(--text-secondary)' }}
+              className="dip-claim"
+              style={{ marginTop: 12, fontSize: 13, color: 'var(--text-secondary)' }}
             >
               Is dit jouw restaurant? Claim dit restaurant →
             </Link>
@@ -280,7 +281,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
               Wettelijk verplichte allergenenmatrix · EU Verordening 1169/2011
             </div>
           </div>
-          <Link href={`/nvwa/${id}`} style={{
+          <Link href={`/nvwa/${id}`} className="dip-nvwa-btn" style={{
             padding: '9px 18px',
             background: 'var(--accent-fill)',
             color: 'var(--on-accent-fill)',

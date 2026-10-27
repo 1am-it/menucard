@@ -30,6 +30,24 @@ test('BE-37 contrast: control borders use the input-border token, not the decora
   }
 });
 
+test('BE-37 contrast: the dark wine line uses a gold that meets 4.5:1 on the dark card', () => {
+  const source = css();
+  // De donkere kaart is #2A2F35; #a87c4a haalde daar 3,63:1. In de donkere
+  // root staat nu dezelfde goudfamilie als de nav-indicator (#d8bc7a, 7,3:1).
+  assert.match(source, /--wine:\s+#d8bc7a;/);
+  assert.doesNotMatch(source, /--wine:\s+#a87c4a;/);
+  for (const light of source.matchAll(/--wine:\s+(#[0-9a-fA-F]{6});/g)) {
+    assert.notEqual(light[1].toLowerCase(), '#a87c4a');
+  }
+});
+
+test('BE-37 contrast: the Bronnen task row and chips use the 3:1 control border in both themes', () => {
+  const source = css();
+  assert.match(source, /\.brn-task \{[^}]*border: 1px solid var\(--input-border\)/);
+  assert.match(source, /\.brn-chip \{[^}]*border: 1px solid var\(--input-border\)/);
+  assert.match(source, /\.brn-chip\[aria-pressed="true"\] \{[^}]*border-color: var\(--on-accent-fill\)/);
+});
+
 // ── criterium 3: toetsenbord, focus en schermlezer ────────────────────────
 test('BE-37 focus: every interactive element has the shared focus ring', () => {
   const source = css();
@@ -101,6 +119,14 @@ test('BE-37 phone: the measured controls have a 44px tap target and the checkbox
   }
   assert.match(source, /\.cov-check-select,\s*\n\.brn-pick \{ width: 24px; height: 24px; padding: 10px; box-sizing: content-box; \}/);
   assert.match(source, /\.search-clear,\s*\n\.mf-clear \{ width: 44px; height: 44px;/);
+  assert.match(
+    source,
+    /\.brn-breadcrumb a\.stg-link,\s*\n\.dip-row a,\s*\n\.rp-line a,\s*\n\.rp-source a \{ min-height: 44px; display: inline-flex; align-items: center; \}/,
+  );
+  assert.match(source, /\.dip-claim,\s*\n\.dip-nvwa-btn \{ display: inline-flex; align-items: center; min-height: 44px; \}/);
+  const detail = read('app/restaurant/[id]/RestaurantDetailView.js');
+  assert.match(detail, /className="dip-claim"/);
+  assert.match(detail, /className="dip-nvwa-btn"/);
 });
 
 test('BE-37 phone: Dekking keeps its two action buttons inside the screen at 320px', () => {

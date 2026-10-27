@@ -163,7 +163,9 @@
   --allergy-toggle-bg:  #1f1a30;
 
   /* Misc */
-  --wine:              #a87c4a;
+  /* BE-37 (#89): was #a87c4a; dat haalde op de donkere kaart (#2A2F35) maar
+     3,63:1. Dezelfde goudfamilie als de bestaande nav-indicator, nu 7,3:1. */
+  --wine:              #d8bc7a;
 
   /* Gradients & sticky surfaces */
   --header-bg: rgba(31, 35, 40, 0.94);
@@ -4519,14 +4521,14 @@ header, .site-header { height: auto; min-height: var(--header-h); }
 .brn-subtitle { font-size: 14px; color: var(--text-secondary); }
 .brn-hint { margin: 0; font-size: 13px; color: var(--text-secondary); }
 .brn-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
-.brn-chip { min-height: 40px; padding: 8px 14px; border-radius: var(--radius-pill); border: 1px solid var(--border); background: var(--surface-soft); color: var(--text-primary); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
-.brn-chip[aria-pressed="true"] { background: var(--accent-fill); border-color: var(--accent); color: var(--on-accent-fill); }
+.brn-chip { min-height: 40px; padding: 8px 14px; border-radius: var(--radius-pill); border: 1px solid var(--input-border); background: var(--surface-soft); color: var(--text-primary); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+.brn-chip[aria-pressed="true"] { background: var(--accent-fill); border-color: var(--on-accent-fill); color: var(--on-accent-fill); }
 .brn-chip:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
 .brn-layout { display: flex; gap: 20px; align-items: stretch; margin-top: 16px; }
 .brn-list { width: 470px; flex: none; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 .brn-count { margin: 0; font-size: 13px; color: var(--text-secondary); }
 .brn-tasks { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-.brn-task { width: 100%; min-height: 44px; display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: var(--radius-lg); border: 1px solid var(--border); background: var(--bg-card); color: var(--text-primary); font: inherit; text-align: left; cursor: pointer; }
+.brn-task { width: 100%; min-height: 44px; display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: var(--radius-lg); border: 1px solid var(--input-border); background: var(--bg-card); color: var(--text-primary); font: inherit; text-align: left; cursor: pointer; }
 .brn-task:hover { border-color: var(--input-border); }
 .brn-task[aria-current="true"] { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
 .brn-task:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
@@ -4840,7 +4842,19 @@ textarea:focus-visible,
    mag de tekst doorlopen; zo blijft de kolom binnen het scherm. */
 .cov-check,
 .cov-check-head { min-width: 0; }
+/* 8b. Dekking op 320 px: de twee actieknoppen op één regel (zie 8). */
 @media (max-width: 720px) {
   .cov-check-head > .cov-check-action { flex: 1 1 100%; white-space: normal; justify-content: center; text-align: center; }
 }
+
+/* 9. Tikvlakken van de losse tekstlinks en de twee kleine links op de
+   restaurantpagina: dezelfde 44 px-eis, zonder de tekst groter te maken. Een
+   link midden in een zin houdt zijn gewone regel (WCAG 2.5.5-uitzondering);
+   deze vier staan elk op hun eigen regel. */
+.brn-breadcrumb a.stg-link,
+.dip-row a,
+.rp-line a,
+.rp-source a { min-height: 44px; display: inline-flex; align-items: center; }
+.dip-claim,
+.dip-nvwa-btn { display: inline-flex; align-items: center; min-height: 44px; }
 

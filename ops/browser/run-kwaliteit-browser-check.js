@@ -286,7 +286,12 @@ const LAYOUT_JS = `(() => {
     if (!visible(el)) continue;
     const rect = el.getBoundingClientRect();
     if (rect.right <= clientWidth + 1) continue;
-    wide.push({ selector: selectorOf(el), right: Math.round(rect.right), width: Math.round(rect.width) });
+    wide.push({
+      selector: selectorOf(el),
+      parent: el.parentElement ? selectorOf(el.parentElement) : null,
+      right: Math.round(rect.right),
+      width: Math.round(rect.width),
+    });
   }
   const tap = [];
   const INTERACTIVE = 'a[href], button, input:not([type="hidden"]), select, textarea, summary, [tabindex]:not([tabindex="-1"])';
