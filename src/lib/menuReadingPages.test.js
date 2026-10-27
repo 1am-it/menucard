@@ -57,6 +57,10 @@ test('BE-36: een lezing wordt per afbeelding en per pagina genummerd, met eigen 
   assert.equal(unitSource(units[3])[0].text.startsWith('Soep'), true);
   assert.equal(unitLimits(units[1]).maxOutputTokens, PAGE_MAX_OUTPUT_TOKENS);
   assert.equal(unitLimits(units[1]).maxPages, 1);
+  // A text source keeps the ceiling it always had: a long text menu is one page
+  // and must not be narrowed to an image page's budget.
+  assert.equal(unitLimits(units[3], { maxOutputTokens: 10_000, maxPages: 10 }).maxOutputTokens, 10_000);
+  assert.equal(unitLimits(units[3], { maxOutputTokens: 10_000, maxPages: 10 }).maxPages, 10);
 });
 
 test('BE-36: een scan blijft een document en krijgt ruimte per pagina', () => {

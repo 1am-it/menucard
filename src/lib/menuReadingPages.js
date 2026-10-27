@@ -192,9 +192,17 @@ function unitSource(unit) {
  */
 function unitLimits(unit, base = {}) {
   const pages = unit && unit.kind === 'document' && Number.isInteger(unit.pageCount) && unit.pageCount > 0 ? unit.pageCount : 1;
+  // One page of images gets room for one page; a scan gets room per page. A text
+  // source keeps the ceiling it always had: a long text menu is one page too, and
+  // narrowing it would truncate exactly what already worked.
+  const textTokens = Number.isInteger(base && base.maxOutputTokens) && base.maxOutputTokens > 0
+    ? base.maxOutputTokens
+    : PAGE_MAX_OUTPUT_TOKENS;
   const maxOutputTokens = unit && unit.kind === 'document'
     ? Math.min(128_000, MAX_DOCUMENT_PAGE_TOKENS * pages)
-    : PAGE_MAX_OUTPUT_TOKENS;
+    : unit && unit.kind === 'image'
+      ? PAGE_MAX_OUTPUT_TOKENS
+      : textTokens;
   // A pdf page count limits a document. A loose image is not a document page
   // (the adapter skips that check for images only) and a text source keeps the
   // reading-wide limit it always had.

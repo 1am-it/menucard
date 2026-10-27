@@ -1530,9 +1530,11 @@ een algemene foutmelding. Dit is de reparatie.
 - Elke pagina gaat in een eigen aanroep naar dezelfde keten
   (`menuExtractionAnthropicCall` -> `menuExtractionAdapter` -> validator). Er is
   geen tweede AI-pad.
-- Per aanroep: `maxOutputTokens` 8.000 (een document krijgt 8.000 per pagina,
-  begrensd door het modelmaximum), een paginalimiet van 1 pagina, een
-  time-out van 60 s.
+- Per aanroep: `maxOutputTokens` 8.000 voor een afbeelding (een document krijgt
+  8.000 per pagina, begrensd door het modelmaximum), een paginalimiet van
+  1 pagina, een time-out van 60 s. Een tekstbron houdt het bestaande plafond van
+  10.000 tokens: een lange tekstkaart is ook een pagina en mag niet worden
+  ingekort.
 - Maximaal 2 pagina's tegelijk; de lezing start geen nieuwe pagina meer na 240 s,
   zodat validatie en de conceptopslag binnen de functieduur van 300 s blijven.
 - De paginanummers zijn de herkomst die het model moet herhalen
