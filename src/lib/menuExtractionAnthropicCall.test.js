@@ -197,7 +197,7 @@ test('K1: a PDF with a document payload is sent as a base64 document block, a te
   // The same module still refuses a source without any content.
   assert.throws(
     () => buildAnthropicRequest({ protocol: protocol.text, sources: [{ id: 'source-1', kind: 'pdf' }], limits }),
-    /neither text nor a document/,
+    /neither text, a document nor an image/,
   );
   await run(callModule, budgetOf());
 });

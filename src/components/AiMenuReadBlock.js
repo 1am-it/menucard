@@ -102,6 +102,13 @@ export default function AiMenuReadBlock({
 
           {done ? (
             <div className="mai-ai-done" role="status">
+              {/* BE-33 (#79, criterion 3): an image or scan reading says out
+                  loud that its quotes cannot be checked literally. */}
+              {result.notice ? (
+                <div className="di-banner di-banner-neutral mai-image-notice">
+                  <span>{result.notice}</span>
+                </div>
+              ) : null}
               <p className="mai-summary">
                 Concept klaar: {result.summary.items} {result.summary.items === 1 ? 'gerecht' : 'gerechten'} ·{' '}
                 {result.summary.valid} in orde, {result.summary.needsReview} nalopen
@@ -113,6 +120,9 @@ export default function AiMenuReadBlock({
                   : 'niet gemeten (het maximum per aanroep blijft gereserveerd)'}
                 {result.ai && result.ai.label ? ` · ${result.ai.label}` : ''}
               </p>
+              {/* Criterion 2: the estimate that was made before the call, from
+                  the number of images or pages. */}
+              {result.estimate && result.estimate.label ? <p className="mai-why">{result.estimate.label}</p> : null}
               <button type="button" className="di-btn-primary mai-btn" onClick={onReview} disabled={busy}>
                 Nalopen
               </button>

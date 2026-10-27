@@ -392,7 +392,7 @@ function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBat
   const aiReadHref = aiReadAvailable
     ? `/internal/menu-import?job=${encodeURIComponent(item.jobId)}${
         item.restaurant ? `&restaurant=${encodeURIComponent(item.restaurant.id)}&name=${encodeURIComponent(item.restaurant.name || '')}` : ''
-      }${item.url ? `&url=${encodeURIComponent(item.url)}` : ''}`
+      }${item.url ? `&url=${encodeURIComponent(item.url)}` : ''}${imageOnly ? '&image=1' : ''}`
     : null
   const aiReadLabel = imageOnly ? '📷 Lees met AI (afbeelding)' : 'Lees met AI'
   const aiReadHint = imageOnly

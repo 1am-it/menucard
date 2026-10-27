@@ -35,8 +35,12 @@ const MAX_SOURCES = DEFAULT_EXTRACTION_LIMITS.maxDocuments;
 const MAX_SOURCE_URL = 500;
 const MAX_RESTAURANT_NAME = 160;
 const MAX_RESTAURANT_ID = 80;
-const SOURCE_KINDS = ['html', 'pdf', 'other'];
+const SOURCE_KINDS = ['html', 'pdf', 'image', 'other'];
 const SOURCE_STATUSES = ['read', 'blocked', 'failed', 'not_read'];
+// BE-33 (#79): how a source reached the model. `text` stays the default and the
+// only mode whose quote can be checked literally.
+const SOURCE_MODES = ['text', 'image', 'document', 'none'];
+const MAX_IMAGES_PER_SOURCE = 6;
 const HEX_64 = /^[0-9a-f]{64}$/;
 
 class ManualImportBundleError extends Error {
@@ -97,6 +101,10 @@ function bundleBinding({ bundleId, actorUserId, restaurantId, fetchedAt, protoco
       fetchedAt: source.fetchedAt,
       sha256: source.sha256,
       hasText: source.hasText,
+      // BE-33 (#79): what the model received, without the bytes themselves.
+      mode: source.mode,
+      imageCount: Array.isArray(source.images) ? source.images.length : 0,
+      pageCount: source.pageCount,
     })),
   };
 }
@@ -130,12 +138,26 @@ function normalizeSource(raw, index, fallbackFetchedAt) {
   const status = SOURCE_STATUSES.includes(raw.status) ? raw.status : 'read';
   const text = canonicalText(raw.text);
   // Een bron zonder tekst (scan, afbeelding, PDF zonder tekstlaag) is een
-  // expliciete stand: de prompt vraagt de mens het bestand zelf toe te voegen
-  // en bewijs is later niet automatisch controleerbaar. Nooit tekst verzinnen.
+  // expliciete stand: nooit tekst verzinnen. BE-33 (#79): zo'n bron mag wel als
+  // afbeelding of document naar hetzelfde model, maar alleen de *metadata*
+  // (urls, aantal, paginas) komt in de bundel; nooit de bytes zelf.
   const hasText = text.length > 0;
   if (hasText && text.length > MAX_SOURCE_TEXT_CHARS) {
     throw new ManualImportBundleError('source_too_large', `Bron ${index + 1} is groter dan ${MAX_SOURCE_TEXT_CHARS} tekens.`);
   }
+  const images = (Array.isArray(raw.images) ? raw.images : [])
+    .filter((image) => image && typeof image.url === 'string' && image.url.trim() !== '')
+    .slice(0, MAX_IMAGES_PER_SOURCE)
+    .map((image) => ({
+      number: Number.isInteger(image.number) ? image.number : null,
+      url: image.url.trim().slice(0, MAX_SOURCE_URL),
+      alt: typeof image.alt === 'string' ? image.alt.slice(0, 200) : null,
+      mediaType: typeof image.mediaType === 'string' ? image.mediaType.slice(0, 40) : null,
+    }));
+  const hasDocument = raw.hasDocument === true || (typeof raw.documentBase64 === 'string' && raw.documentBase64.length > 0);
+  const pageCount = Number.isInteger(raw.pageCount) && raw.pageCount > 0 ? raw.pageCount : null;
+  const inferredMode = hasText ? 'text' : images.length > 0 ? 'image' : hasDocument ? 'document' : 'none';
+  const mode = SOURCE_MODES.includes(raw.mode) ? raw.mode : inferredMode;
   const hash = typeof raw.sha256 === 'string' && HEX_64.test(raw.sha256.toLowerCase())
     ? raw.sha256.toLowerCase()
     : sourceHashForText(text);
@@ -151,6 +173,12 @@ function normalizeSource(raw, index, fallbackFetchedAt) {
     sha256: hash,
     hasText,
     text: hasText ? text : null,
+    // BE-33: the origin of an image reading, without one byte of the image.
+    mode,
+    imageRead: mode === 'image' || mode === 'document' || mode === 'mixed',
+    images,
+    hasDocument: mode === 'document' || (mode === 'mixed' && hasDocument),
+    pageCount,
     limitation: typeof raw.limitation === 'string' && raw.limitation.trim() ? raw.limitation.trim().slice(0, schema.LIMITS.limitation) : null,
   };
 }
@@ -212,8 +240,8 @@ function buildImportBundle({ bundleId, actorUserId, restaurantId, restaurantName
   if (totalText > MAX_TOTAL_TEXT_CHARS) {
     throw new ManualImportBundleError('sources_too_large', `De brontekst samen is groter dan ${MAX_TOTAL_TEXT_CHARS} tekens.`);
   }
-  if (!normalizedSources.some((source) => source.hasText)) {
-    throw new ManualImportBundleError('sources_unreadable', 'Geen enkele bron heeft leesbare tekst; exporteren heeft dan geen zin.');
+  if (!normalizedSources.some((source) => source.hasText || source.hasDocument || source.images.length > 0)) {
+    throw new ManualImportBundleError('sources_unreadable', 'Geen enkele bron heeft leesbare tekst, een document of een menu-afbeelding.');
   }
 
   const binding = bundleBinding({
@@ -286,6 +314,11 @@ function bundleMetadata(bundle) {
       fetchedAt: source.fetchedAt,
       sha256: source.sha256,
       hasText: source.hasText,
+      mode: source.mode,
+      imageRead: source.imageRead,
+      images: source.images,
+      hasDocument: source.hasDocument,
+      pageCount: source.pageCount,
       limitation: source.limitation,
     })),
   };

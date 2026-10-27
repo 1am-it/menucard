@@ -267,6 +267,9 @@ function stepHref(row, { batchId, returnTo } = {}) {
       if (restaurant.name) params.set('name', String(restaurant.name));
     }
     if (row.url) params.set('url', String(row.url));
+    // BE-33 (#79): the image/scan step is the one that may read images, so the
+    // screen may ask for the estimate of that reading before the click.
+    if (row.step.label === STEPS.ai_read_image.label) params.set('image', '1');
     return `${MANUAL_IMPORT_HREF}?${params.toString()}`;
   }
   if (row.step.key === 'manual') {

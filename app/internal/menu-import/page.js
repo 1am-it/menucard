@@ -479,6 +479,22 @@ export default function ManualMenuImportPage() {
     }
   }
 
+  // BE-33 (#79): "Nalopen in de lijst" from the image card goes to the same
+  // review row, in the list where the human decides. Nothing is decided here.
+  function showRowFromMap(rowId) {
+    setViewMode('list')
+    setOpenMark('')
+    if (typeof window !== 'undefined') {
+      window.setTimeout(() => {
+        const element = document.getElementById(`mai-row-${rowId}`)
+        if (!element) return
+        if (!element.hasAttribute('tabindex')) element.setAttribute('tabindex', '-1')
+        if (typeof element.scrollIntoView === 'function') element.scrollIntoView({ block: 'center', behavior: 'instant' })
+        if (typeof element.focus === 'function') element.focus({ preventScroll: true })
+      }, 0)
+    }
+  }
+
   // Na "Bekijk op kaart" of een paginawissel: de gemarkeerde regel in beeld.
   useEffect(() => {
     if (!mapCard || !focusMark) return
@@ -1229,6 +1245,7 @@ export default function ManualMenuImportPage() {
                       onNotDish={(mark) => sendUncovered({ id: mark.id }, 'uncovered_not_dish')}
                       onTakePrice={sendTakePrice}
                       onCorrect={correctFromMap}
+                      onShowRow={showRowFromMap}
                     />
                   ) : null}
                   {viewMode === 'list' ? (
@@ -1355,6 +1372,9 @@ export default function ManualMenuImportPage() {
                             {row.pathLabel}
                             {row.locator ? ` · ${row.locator}` : ''}
                           </p>
+                          {/* BE-33 (#79, criterion 3): the origin of a dish read
+                              from an image is its own visible sentence. */}
+                          {row.provenance ? <p className="mai-provenance">{row.provenance}</p> : null}
                           {row.quote ? <p className="mai-quote">“{row.quote}”</p> : null}
                           {rowMark ? (
                             <div className="mai-row-actions">
@@ -1603,6 +1623,7 @@ export default function ManualMenuImportPage() {
                             {row.name} · <b>{row.priceText}</b>
                             {row.outcome === 'keep_corrected' ? ' · gecorrigeerd' : ''}
                             {row.outcome === 'keep_confirmed' ? ' · bevestigd' : ''}
+                            {row.provenance ? ` · ${row.provenance}` : ''}
                             {doneMark ? (
                               <button
                                 type="button"

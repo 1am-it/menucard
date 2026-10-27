@@ -44,6 +44,8 @@
 // No key and no header ever enters the record.
 
 const schema = require('./menuExtractionSchema');
+const { MAX_MENU_IMAGES, MAX_IMAGE_BYTES, IMAGE_MEDIA_TYPES } = require('./menuImageRead');
+const IMAGE_MEDIA_TYPES_VALUES = Object.freeze(Object.values(IMAGE_MEDIA_TYPES));
 
 const ANTHROPIC_API_KEY_ENV = 'ANTHROPIC_API_KEY';
 const ANTHROPIC_PROVIDER = 'anthropic';
@@ -457,7 +459,12 @@ function buildAnthropicRequest({ protocol, sources, limits, outputMode } = {}) {
         '"sourceId: <id>". Neem die id letterlijk en volledig over: alleen de id zelf, zonder ' +
         'toevoeging of vertaling (dus "smelt-01", niet "smelt-01.BRON" en niet "BRON smelt-01"). ' +
         'Gebruik uitsluitend deze bron-ID\'s in menu.sourceId, ' +
-        `evidence.sourceId en rejected/unreadSources: ${sourceList.map((source) => source.id).join(', ')}.`,
+        `evidence.sourceId en rejected/unreadSources: ${sourceList.map((source) => source.id).join(', ')}.` +
+        // BE-33 (#79, criterion 3): an image has no text to quote, so the origin
+        // of every dish is the image or page it was read from.
+        (sourceList.some((source) => Array.isArray(source.images) && source.images.length > 0)
+          ? ' Een afbeelding wordt voorafgegaan door een regel "afbeelding N". Zet bij elk gerecht uit een afbeelding of scan de locator op precies "afbeelding N" of "pagina N" (het nummer van die afbeelding of pagina). Een gerecht zonder die herkomst wordt geweigerd. Verzin niets bij wat je niet kunt lezen.'
+          : ''),
     },
   ];
   if (mode === 'prompt') {
@@ -474,8 +481,9 @@ function buildAnthropicRequest({ protocol, sources, limits, outputMode } = {}) {
   for (const source of sourceList) {
     const hasText = typeof source.text === 'string' && source.text.length > 0;
     const hasDocument = typeof source.documentBase64 === 'string' && source.documentBase64.length > 0;
-    if (!hasText && !hasDocument) {
-      throw new AnthropicCallError(CALL_ERROR_CODES.source_missing, `source ${source.id} carries neither text nor a document`);
+    const images = Array.isArray(source.images) ? source.images : [];
+    if (!hasText && !hasDocument && images.length === 0) {
+      throw new AnthropicCallError(CALL_ERROR_CODES.source_missing, `source ${source.id} carries neither text, a document nor an image`);
     }
     content.push({ type: 'text', text: sourceHeaderText(source) });
     if (source.kind === 'pdf' && hasDocument) {
@@ -484,6 +492,29 @@ function buildAnthropicRequest({ protocol, sources, limits, outputMode } = {}) {
         title: sourceDocumentTitle(source),
         source: { type: 'base64', media_type: 'application/pdf', data: source.documentBase64 },
       });
+    } else if (images.length > 0) {
+      // BE-33 (#79, criterion 2): menu images of the same website go as images,
+      // each preceded by the exact origin the evidence must repeat. The limits
+      // were checked before the call (menuImageRead.planImageRead); here the
+      // request itself is still bounded, so a caller cannot slip past them.
+      if (images.length > MAX_MENU_IMAGES) {
+        throw new AnthropicCallError(CALL_ERROR_CODES.input_limit, `source ${source.id} carries more than ${MAX_MENU_IMAGES} images`);
+      }
+      for (const image of images) {
+        const mediaType = typeof image.mediaType === 'string' ? image.mediaType : '';
+        const data = typeof image.data === 'string' ? image.data : '';
+        if (!IMAGE_MEDIA_TYPES_VALUES.includes(mediaType) || data === '') {
+          throw new AnthropicCallError(CALL_ERROR_CODES.source_missing, `source ${source.id} carries an invalid image`);
+        }
+        if ((data.replace(/=+$/, '').length * 3) / 4 > MAX_IMAGE_BYTES) {
+          throw new AnthropicCallError(CALL_ERROR_CODES.input_limit, `source ${source.id} carries an image above the fixed maximum size`);
+        }
+        content.push({
+          type: 'text',
+          text: `afbeelding ${Number.isInteger(image.number) ? image.number : 1}${image.url ? `\nurl: ${image.url}` : ''}`,
+        });
+        content.push({ type: 'image', source: { type: 'base64', media_type: mediaType, data } });
+      }
     } else {
       content.push({ type: 'text', text: source.text });
     }

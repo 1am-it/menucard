@@ -47,7 +47,13 @@ const ROW_CODES = {
   source_hash_mismatch: { state: 'error', label: 'staat niet in de bron', askAi: true },
   unknown_source: { state: 'error', label: 'staat niet in de bron', askAi: false },
   locator_invalid: { state: 'error', label: 'staat niet in de bron', askAi: true },
+  // BE-33 (#79, criterion 3): a dish read from an image without the origin
+  // "afbeelding N"/"pagina N" is refused; the human sees why.
+  image_provenance_missing: { state: 'error', label: 'Controle nodig', askAi: false },
   scan_unverified: { state: 'unverifiable', label: 'uit scan, controleer', askAi: true },
+  // Every dish read from an image carries this label (criterion 3); a quote from
+  // an image can never be checked literally, so nothing is approved by itself.
+  image_unverified: { state: 'unverifiable', label: 'Controle nodig', askAi: true },
   category_uncertain: { state: 'unverifiable', label: 'menukopje controleren', askAi: true },
   price_variant: { state: 'unsupported', label: 'twee prijzen', askAi: false },
   price_unknown: { state: 'review', label: 'prijs onbekend', askAi: false },
@@ -191,7 +197,7 @@ function extractCodeBlock(answer) {
   };
 }
 
-/** Eén bron zoals de bestaande validator hem verwacht: id + optionele tekst. */
+/** Eén bron zoals de bestaande validator hem verwacht: id + tekst of beeldstand. */
 function validatorSources(bundle) {
   return bundle.sources.map((source) => ({
     id: source.id,
@@ -199,6 +205,12 @@ function validatorSources(bundle) {
     kind: source.kind,
     status: source.status,
     sha256: source.sha256,
+    // BE-33 (#79): an image or scan source has no text to quote; the validator
+    // demands its origin instead ("afbeelding N"/"pagina N").
+    imageRead: source.imageRead === true,
+    mode: source.mode || null,
+    images: Array.isArray(source.images) ? source.images : [],
+    pageCount: Number.isInteger(source.pageCount) ? source.pageCount : null,
     ...(source.hasText && source.text ? { text: source.text } : {}),
   }));
 }
@@ -266,6 +278,9 @@ function rowCodeForProblem(problem) {
   if (/\.items\[\d+\]\.evidence\.quote is not present in the cited source$/.test(problem)) return 'quote_not_in_source';
   if (/\.items\[\d+\]\.evidence\.sourceId must reference the source inventory$/.test(problem)) return 'unknown_source';
   if (/\.items\[\d+\]\.evidence\.locator must be a short non-empty string$/.test(problem)) return 'locator_invalid';
+  // BE-33 (#79): the origin of a dish read from an image is mandatory and has
+  // exactly one accepted shape.
+  if (/\.items\[\d+\]\.evidence\.locator must name "afbeelding N" or "pagina N" for an image or scan source$/.test(problem)) return 'image_provenance_missing';
   return null;
 }
 
@@ -331,6 +346,9 @@ function classifyRow({ item, menu, category, source, rowProblemCodes }) {
   else if (rowProblemCodes.length > 0) code = rowProblemCodes[0];
   else if (missingPrice) code = item.priceStatus === 'on_request' ? 'price_on_request' : 'price_unknown';
   else if (category && category.uncertain === true) code = 'category_uncertain';
+  // BE-33 (#79, criterion 3): anything read from an image is "Controle nodig".
+  // A scan without text keeps its own existing wording.
+  else if (source && source.imageRead === true) code = 'image_unverified';
   else if (source && !source.hasText) code = 'scan_unverified';
 
   if (code) {
@@ -361,6 +379,7 @@ function buildRows(output, bundle, problemCodesByRow) {
         const id = `${m}.${c}.${i}`;
         const evidence = item.evidence && typeof item.evidence === 'object' ? item.evidence : {};
         const source = sourceById.get(evidence.sourceId) || null;
+        const provenance = source && source.imageRead === true ? schema.imageProvenance(evidence.locator) : null;
         const classified = classifyRow({
           item,
           menu,
@@ -390,6 +409,11 @@ function buildRows(output, bundle, problemCodesByRow) {
           sourceId: typeof evidence.sourceId === 'string' ? evidence.sourceId : null,
           sourceUrl: source ? source.url : null,
           locator: typeof evidence.locator === 'string' ? evidence.locator : null,
+          // BE-33 (#79, criterion 3): the visible origin of a dish read from an
+          // image, e.g. "gelezen van afbeelding 2". Null for a text source.
+          provenance: provenance ? provenance.label : null,
+          provenanceKind: provenance ? provenance.kind : null,
+          imageRead: Boolean(source && source.imageRead === true),
           quote: typeof evidence.quote === 'string' ? evidence.quote : null,
           hasText: Boolean(source && source.hasText),
           state: classified.state,
@@ -556,7 +580,17 @@ function buildImportReport({ importId, bundle, output, aiName, now = new Date(),
       schemaVersion: bundle.schemaVersion,
       schemaHash: bundle.schemaHash,
       bundleHash: computeBundleHash(bundle.binding),
-      sources: bundle.sources.map((source) => ({ id: source.id, url: source.url, sha256: source.sha256, hasText: source.hasText })),
+      sources: bundle.sources.map((source) => ({
+        id: source.id,
+        url: source.url,
+        sha256: source.sha256,
+        hasText: source.hasText,
+        // BE-33 (#79): the durable record says whether this reading came from
+        // text, images or a document, without storing any image byte.
+        mode: source.mode || (source.hasText ? 'text' : 'none'),
+        imageCount: Array.isArray(source.images) ? source.images.length : 0,
+        pageCount: Number.isInteger(source.pageCount) ? source.pageCount : null,
+      })),
       fetchedAt: bundle.fetchedAt,
     },
     // De gevalideerde uitvoer blijft server-side; de opslagstap hergebruikt

@@ -37,7 +37,7 @@ test('Z2: de legenda en de markeringen komen uit de server, niet uit het scherm'
   assert.match(MAP, /\{GLYPH\[line\.tone\] \|\| '•'\}/);
 });
 
-test('Z3: pagina\'s komen lui binnen en er staat geen afbeelding in de kaart', () => {
+test('Z3: pagina\'s komen lui binnen en de kaart toont alleen de bron die de server aanwees', () => {
   assert.match(PAGE, /async function loadCard\(sourceId, page, token = stateToken\)/);
   assert.match(PAGE, /`\/imports\/\$\{report\.importId\}\/source-map`/);
   assert.match(PAGE, /source_id: sourceId, page/);
@@ -47,7 +47,13 @@ test('Z3: pagina\'s komen lui binnen en er staat geen afbeelding in de kaart', (
   assert.equal(loader.includes('AI_API'), false, 'no AI call when a page is read');
   assert.equal(loader.includes('fetch('), false, 'the loader uses the existing api() helper only');
   assert.equal((PAGE.match(/loadCard\(mapSource, mapPage, result\.data\.state\)/g) || []).length, 2, 'both decisions reload with the new token');
-  assert.equal(/<img|<canvas|<iframe|<object/.test(MAP), false, 'the card is text, never an image');
+  // BE-33 (#79, criterion 3): a menu that only exists as an image shows that
+  // image beside the list. It is the exact URL the server resolved (same
+  // website), never a canvas, iframe or object, and never an invented image.
+  assert.equal(/<canvas|<iframe|<object/.test(MAP), false, 'no embedded renderer');
+  assert.match(MAP, /className="mai-map-image"/);
+  assert.match(MAP, /src=\{image\.url\}/);
+  assert.match(MAP, /referrerPolicy="no-referrer"/);
   assert.match(MAP, /card\.source\.view\.notice/);
 });
 

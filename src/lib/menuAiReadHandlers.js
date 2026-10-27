@@ -17,6 +17,7 @@ const { buildImportReport, publicImportReport } = require('./manualMenuImportImp
 const { reviewView, menuContextFor } = require('./manualMenuImportReview');
 const { mapStructuredOutputToMenuContexts } = require('./menuExtractionMapping');
 const { buildMenuConcept } = require('./menuConcept');
+const { MAX_SCAN_PAGES, imageReadNotice, planImageRead } = require('./menuImageRead');
 const {
   createStructuredExtractionAdapter,
   runStructuredExtraction,
@@ -196,10 +197,16 @@ function createMenuAiReadHandlers({
         return { ok: false, status: 503, reason: 'source_unknown' };
       }
       const read = await readSources({ urls, now: stamp() });
-      const readable = (Array.isArray(read) ? read : []).filter(
-        (source) => source && source.hasText === true && typeof source.text === 'string' && source.text.trim() !== '',
+      // BE-33 (#79, criterion 2): a menu that only exists as an image or as a
+      // scan is planned here, before any budget is spent. The plan enforces the
+      // 6-image / 10-page limits and the fixed file size; a refusal names the
+      // reason instead of sending something unbounded to the model.
+      const fetched = (Array.isArray(read) ? read : []).filter(
+        (source) => source && (source.status === 'read' || source.status === undefined) && typeof source.sha256 === 'string',
       );
-      if (readable.length === 0) return { ok: false, status: 422, reason: 'source_empty' };
+      if (fetched.length === 0) return { ok: false, status: 422, reason: 'source_empty' };
+      const plan = planImageRead({ sources: fetched });
+      if (!plan.ok) return { ok: false, status: 422, reason: plan.reason, message: plan.message, plan };
       const built = buildImportBundle({
         bundleId: `AI-${generateId ? generateId() : 'job'}`,
         actorUserId: auth.userId,
@@ -207,14 +214,34 @@ function createMenuAiReadHandlers({
         restaurantName: job.restaurantName || null,
         fetchedAt: stamp().toISOString(),
         protocol,
-        sources: readable,
+        sources: fetched,
         now: stamp(),
       });
       return {
         ok: true,
         restaurantId,
         bundle: built,
-        sources: readable.map((source) => ({ id: source.id, url: source.url, kind: source.kind, text: source.text })),
+        plan,
+        // The model receives the same validated inventory: text, or the images
+        // of this website, or the PDF as a document. The bytes stay in this
+        // request only; the sealed bundle keeps metadata only.
+        sources: fetched.map((source) => ({
+          id: source.id,
+          url: source.url,
+          kind: source.kind,
+          text: source.hasText === true && typeof source.text === 'string' ? source.text : null,
+          images: Array.isArray(source.images)
+            ? source.images.map((image) => ({
+                number: image.number,
+                url: image.url,
+                mediaType: image.mediaType,
+                data: image.data,
+              }))
+            : [],
+          documentBase64: typeof source.documentBase64 === 'string' ? source.documentBase64 : null,
+          pageCount: Number.isInteger(source.pageCount) ? source.pageCount : null,
+          imageRead: source.imageRead === true,
+        })),
       };
     }
 
@@ -298,6 +325,20 @@ function createMenuAiReadHandlers({
       return reply(503, { error: messageFor('budget_unavailable'), reason: 'budget_unavailable', monthly: publicMonthly(null) });
     }
     const decision = budgetDecision(spend.spend);
+    // BE-33 (#79, criterion 2): the estimate of an image or scan reading is
+    // available before the click. A dry run resolves the source and the plan,
+    // but never creates a provider call and never spends anything.
+    if (parsed.body && parsed.body.dry_run === true) {
+      return reply(200, {
+        dry_run: true,
+        enabled: config.enabled,
+        plan: source.plan || null,
+        estimate: source.plan ? source.plan.estimate : null,
+        notice: imageReadNotice(source.plan),
+        monthly: publicMonthly(spend.spend),
+        budget: decision,
+      });
+    }
     if (!decision.allowed) {
       return reply(429, { error: messageFor(decision.reason), reason: decision.reason, monthly: publicMonthly(spend.spend) });
     }
@@ -320,7 +361,9 @@ function createMenuAiReadHandlers({
       adapter,
       protocol,
       sources: source.sources,
-      limits: AI_LIMITS,
+      // Criterion 2: at most 10 pages per reading, also for the model's own
+      // coverage claim. The adapter keeps the existing validator authoritative.
+      limits: { ...AI_LIMITS, maxPages: MAX_SCAN_PAGES },
       budget: guard,
     });
     const cost = publicCost(guard);
@@ -434,6 +477,12 @@ function createMenuAiReadHandlers({
     const spendAfter = { ...spend.spend, spentEurCents: spend.spend.spentEurCents + (cost.known ? cost.eurCents : 0) };
     return reply(200, {
       origin: { kind: AI_READ_PROVENANCE_KIND, label: AI_READ_LABEL, aiName: AI_READ_AI_NAME },
+      // BE-33 (#79): what was read (text, N images or a document of N pages),
+      // the estimate that was shown beforehand and the honest notice.
+      plan: source.plan || null,
+      estimate: source.plan ? source.plan.estimate : null,
+      notice: imageReadNotice(source.plan),
+      imageRead: Boolean(source.plan && source.plan.mode !== 'text'),
       ai: {
         provider: ai.provider,
         model: ai.model,

@@ -159,6 +159,32 @@ function quoteIsPresentInSource(quote, sourceText) {
   return normalizeEvidenceText(sourceText).includes(normalizedQuote);
 }
 
+const IMAGE_LOCATOR = /^(afbeelding|pagina)\s+(\d{1,3})$/i;
+const IMAGE_LOCATOR_PROBLEM = 'must name "afbeelding N" or "pagina N" for an image or scan source';
+
+/** A source whose evidence can never be checked literally: an image page or a scan. */
+function isImageSource(source) {
+  if (!source || typeof source !== 'object') return false;
+  if (source.kind === 'image' || source.imageRead === true) return true;
+  return Array.isArray(source.images) && source.images.length > 0;
+}
+
+/** "afbeelding 2" / "pagina 3" as { kind, number, label }, or null. */
+function imageProvenance(locator) {
+  if (typeof locator !== 'string') return null;
+  const text = locator.trim();
+  const match = IMAGE_LOCATOR.exec(text);
+  if (!match) return null;
+  const number = Number(match[2]);
+  if (!Number.isInteger(number) || number < 1) return null;
+  const kind = match[1].toLowerCase() === 'afbeelding' ? 'image' : 'page';
+  return {
+    kind,
+    number,
+    label: kind === 'image' ? `gelezen van afbeelding ${number}` : `gelezen van pagina ${number}`,
+  };
+}
+
 function validateEvidence(evidence, where, sourceById, problems) {
   if (!isObject(evidence)) {
     problems.push(`${where}.evidence must be an object`);
@@ -172,7 +198,12 @@ function validateEvidence(evidence, where, sourceById, problems) {
   } else {
     const source = sourceById.get(evidence.sourceId);
     const sourceText = source && typeof source.text === 'string' ? source.text : null;
-    if (sourceText && !quoteIsPresentInSource(evidence.quote, sourceText)) {
+    // BE-33 (#79, criterion 3): a quote from an image or a scan can never be
+    // checked literally, so it is not compared with text. Its origin is
+    // mandatory instead: a dish without "afbeelding N"/"pagina N" is refused.
+    if (isImageSource(source)) {
+      if (!imageProvenance(evidence.locator)) problems.push(`${where}.evidence.locator ${IMAGE_LOCATOR_PROBLEM}`);
+    } else if (sourceText && !quoteIsPresentInSource(evidence.quote, sourceText)) {
       problems.push(`${where}.evidence.quote is not present in the cited source`);
     }
   }
@@ -351,6 +382,8 @@ module.exports = {
   TYPOGRAPHIC_EQUIVALENTS,
   equateTypographicCharacters,
   findForbiddenKey,
+  imageProvenance,
+  isImageSource,
   normalizeEvidenceText,
   quoteIsPresentInSource,
   validateStructuredOutput,

@@ -36,6 +36,7 @@ export default function MenuSourceMap({
   onNotDish,
   onTakePrice,
   onCorrect,
+  onShowRow = null,
 }) {
   if (!map || map.available !== true) return null
   const marksById = new Map((card && Array.isArray(card.marks) ? card.marks : []).map((mark) => [mark.id, mark]))
@@ -113,8 +114,16 @@ export default function MenuSourceMap({
               {card.source.id} · {card.source.view.label}
             </span>
             <span className="mai-map-counts">
-              {card.counts.covered} overgenomen · {card.counts.uncovered} niet overgenomen · {card.counts.priceMismatch}{' '}
-              prijs wijkt af
+              {card.source.view.mode === 'images' || card.source.view.mode === 'pdf_scan' ? (
+                <>
+                  {Array.isArray(card.dishes) ? card.dishes.length : 0} gerechten gelezen · Controle nodig
+                </>
+              ) : (
+                <>
+                  {card.counts.covered} overgenomen · {card.counts.uncovered} niet overgenomen · {card.counts.priceMismatch}{' '}
+                  prijs wijkt af
+                </>
+              )}
             </span>
           </div>
           {total > 1 ? (
@@ -142,23 +151,94 @@ export default function MenuSourceMap({
               </button>
             </div>
           ) : null}
-          <CardLines
-            card={card}
-            marksById={marksById}
-            openMarkId={openMarkId}
-            focusMarkId={focusMarkId}
-            busy={busy}
-            onOpenMark={onOpenMark}
-            onAdd={onAdd}
-            onNotDish={onNotDish}
-            onTakePrice={onTakePrice}
-            onCorrect={onCorrect}
-          />
+          {card.source.view.mode === 'images' || card.source.view.mode === 'pdf_scan' ? (
+            <ImageCard card={card} busy={busy} onShowRow={onShowRow} />
+          ) : (
+            <CardLines
+              card={card}
+              marksById={marksById}
+              openMarkId={openMarkId}
+              focusMarkId={focusMarkId}
+              busy={busy}
+              onOpenMark={onOpenMark}
+              onAdd={onAdd}
+              onNotDish={onNotDish}
+              onTakePrice={onTakePrice}
+              onCorrect={onCorrect}
+            />
+          )}
           {card.omittedLabel ? <p className="mai-why">{card.omittedLabel}</p> : null}
         </div>
       )}
       {map.omitted > 0 ? <p className="mai-why">{map.omittedLabel}</p> : null}
     </section>
+  )
+}
+
+/**
+ * BE-33 (#79, criterion 3): the original image (or the page number of a scan)
+ * beside the dishes the AI read from it. Read-only on purpose: every judgement
+ * stays in the list, where the same row has its own buttons. Nothing here
+ * approves anything.
+ */
+function ImageCard({ card, busy, onShowRow }) {
+  const image = Array.isArray(card.images) && card.images[0] ? card.images[0] : null
+  const dishes = Array.isArray(card.dishes) ? card.dishes : []
+  const isImage = card.source.kind === 'image' || card.source.view.mode === 'images'
+  const kindLabel = isImage ? 'afbeelding' : 'pagina'
+  return (
+    <div className="mai-map-imagegrid">
+      <figure className="mai-map-figure">
+        {image && image.url ? (
+          <img
+            className="mai-map-image"
+            src={image.url}
+            alt={`Menukaart-${kindLabel} ${image.number} van ${card.page.total}`}
+            loading="lazy"
+            referrerPolicy="no-referrer"
+          />
+        ) : (
+          <div className="mai-map-image mai-map-image--missing" role="note">
+            <span>De {kindLabel} zelf wordt hier niet getoond; je ziet de herkomst per gerecht.</span>
+          </div>
+        )}
+        <figcaption className="mai-why">
+          {isImage
+            ? `Afbeelding ${image ? image.number : card.page.number} van ${card.page.total}`
+            : `Pagina ${card.page.number} van ${card.page.total}`}
+          {image && image.alt ? ` · ${image.alt}` : ''}
+        </figcaption>
+      </figure>
+      <div className="mai-map-dishelist">
+        <h4 className="mai-map-dishelist-title">Gerechten van deze {kindLabel}</h4>
+        {dishes.length === 0 ? (
+          <p className="mai-why">Van deze {kindLabel} is geen gerecht gelezen.</p>
+        ) : (
+          <ul className="mai-map-dishes">
+            {dishes.map((dish) => (
+              <li key={dish.rowId} className="mai-map-dish">
+                <span className="mai-map-dish-name">
+                  {dish.name || 'Gerecht zonder naam'} <span className="mai-review-price">{dish.priceText}</span>
+                </span>
+                <span className="status-badge status-badge--old">{dish.label}</span>
+                {dish.provenance ? <span className="mai-provenance">{dish.provenance}</span> : null}
+                {onShowRow ? (
+                  <button
+                    type="button"
+                    className="stg-btn-secondary mai-btn"
+                    disabled={busy}
+                    aria-label={`Nalopen in de lijst: ${dish.name || 'dit gerecht'}`}
+                    onClick={() => onShowRow(dish.rowId)}
+                  >
+                    Nalopen in de lijst
+                  </button>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
   )
 }
 
