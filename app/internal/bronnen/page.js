@@ -317,14 +317,17 @@ export default function BronnenPage() {
 
   function startCleanup() {
     const chosen = pickable.filter((task) => picked.has(task.id))
-    const targets = chosen.length > 0 ? chosen : pickable
+    const all = chosen.length === 0
+    const targets = all ? pickable : chosen
     const jobIds = [...new Set(targets.flatMap((task) => task.handledJobIds || []))]
     if (jobIds.length === 0) {
       setMessage({ tone: 'notice', text: 'Er zijn geen oude batchresultaten om op te ruimen.' })
       return
     }
     setMessage(null)
-    setCleanup({ jobIds, count: jobIds.length, taskCount: targets.length })
+    // BE-32 (#75, criterion 7): `all` travels with the confirmation so the
+    // dialog can say out loud that it takes every result, not a selection.
+    setCleanup({ jobIds, count: jobIds.length, taskCount: targets.length, all })
   }
 
   async function confirmCleanup() {

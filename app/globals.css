@@ -4469,7 +4469,7 @@ header, .site-header { height: auto; min-height: var(--header-h); }
 .brn-chip { min-height: 40px; padding: 8px 14px; border-radius: var(--radius-pill); border: 1px solid var(--border); background: var(--surface-soft); color: var(--text-primary); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
 .brn-chip[aria-pressed="true"] { background: var(--accent-fill); border-color: var(--accent); color: var(--on-accent-fill); }
 .brn-chip:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
-.brn-layout { display: flex; gap: 20px; align-items: flex-start; margin-top: 16px; }
+.brn-layout { display: flex; gap: 20px; align-items: stretch; margin-top: 16px; }
 .brn-list { width: 470px; flex: none; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 .brn-count { margin: 0; font-size: 13px; color: var(--text-secondary); }
 .brn-tasks { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
@@ -4483,8 +4483,21 @@ header, .site-header { height: auto; min-height: var(--header-h); }
 .brn-task-name { font-size: 15px; font-weight: 800; overflow-wrap: anywhere; }
 .brn-task-what, .brn-task-status { font-size: 13px; color: var(--text-secondary); overflow-wrap: anywhere; }
 .brn-task-arrow { color: var(--accent); font-weight: 800; align-self: center; }
-.brn-detail { flex: 1; min-width: 0; }
-.brn-detail-empty { padding: 18px; border: 1px dashed var(--input-border); border-radius: var(--radius-md); }
+.brn-detail { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+/* BE-32 (#75, criterion 7): the mockup's empty detail pane runs over the full
+   height of the list, with "Kies een taak links" in the middle of it. */
+.brn-detail-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 240px;
+  margin: 0;
+  padding: 18px;
+  border: 1px dashed var(--input-border);
+  border-radius: var(--radius-md);
+}
 .brn-detail-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px; display: grid; gap: 12px; }
 .brn-detail-kind { font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; }
 .brn-detail-title { margin: 0; font-size: 22px; font-weight: 800; }

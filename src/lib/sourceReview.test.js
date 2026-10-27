@@ -32,6 +32,8 @@ const {
   checkSelection,
   canStartCheck,
   countSourceReviewTasks,
+  cleanupLabel,
+  cleanupConfirmText,
   ageLabel,
 } = require('./sourceReview');
 
@@ -442,6 +444,23 @@ test('Dekking: the existing batch limits are stated before the click', () => {
   assert.equal(selection.tooMany, true);
   assert.equal(selection.urls.length, MAX_BATCH_URLS);
   assert.equal(canStartCheck({ count: selection.count, remaining: 25 }).ok, true);
+});
+
+// BE-32 (#75, criterion 7, BE-31 leftover): "Oude resultaten opruimen" either
+// acts on the picked rows or says out loud that it takes all of them.
+test('Bronnen beoordelen: cleanup names a selection, or explicitly "Alle N opruimen"', () => {
+  assert.equal(cleanupLabel(0, 7), 'Alle 7 opruimen');
+  assert.equal(cleanupLabel(2, 7), 'Opruimen (2 geselecteerd)');
+  assert.equal(cleanupLabel(null, 3), 'Alle 3 opruimen');
+  assert.equal(cleanupLabel(0, 0), 'Alle 0 opruimen');
+  assert.equal(cleanupConfirmText({ count: 7, all: true }), 'Alle 7 resultaten afhandelen?');
+  assert.equal(cleanupConfirmText({ count: 2, all: false }), '2 resultaten afhandelen?');
+  assert.equal(cleanupConfirmText({ count: 1, all: false }), '1 resultaat afhandelen?');
+  // The screen uses exactly these helpers, never its own sentence.
+  const view = fs.readFileSync(path.join(REPO_ROOT, 'app/internal/bronnen/BronnenView.js'), 'utf8');
+  assert.match(view, /cleanupLabel\(pickedCount, pickableCount\)/);
+  assert.match(view, /cleanupConfirmText\(cleanup\)/);
+  assert.doesNotMatch(view, /opruimen geldt dan voor alle/i);
 });
 
 test('copy: the empty state and the phone list use the agreed words', () => {

@@ -653,6 +653,26 @@ function canStartCheck({ count, remaining } = {}) {
 function countSourceReviewTasks(tasks) {
   return countTasks(tasks).all;
 }
+
+/**
+ * BE-32 (#75, criterion 7 / BE-31 leftover): "Oude resultaten opruimen" may only
+ * act on a selection, or it must say out loud that it takes all N. The label is
+ * decided here so the button, the dialog and the tests read the same sentence.
+ */
+function cleanupLabel(pickedCount, pickableCount) {
+  const picked = Number.isInteger(pickedCount) && pickedCount > 0 ? pickedCount : 0;
+  const total = Number.isInteger(pickableCount) && pickableCount > 0 ? pickableCount : 0;
+  if (picked > 0) return `Opruimen (${picked} geselecteerd)`;
+  return `Alle ${total} opruimen`;
+}
+
+/** The one confirmation line: names the number and whether it was a selection. */
+function cleanupConfirmText({ count, all } = {}) {
+  const n = Number.isInteger(count) ? count : 0;
+  const noun = n === 1 ? 'resultaat' : 'resultaten';
+  return `${all ? `Alle ${n}` : `${n}`} ${noun} afhandelen?`;
+}
+
 module.exports = {
   BRONNEN_HREF,
   COVERAGE_HREF,
@@ -691,5 +711,7 @@ module.exports = {
   checkSelection,
   canStartCheck,
   countSourceReviewTasks,
+  cleanupLabel,
+  cleanupConfirmText,
 };
 
