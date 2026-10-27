@@ -136,6 +136,7 @@ function writeEvidence(extra) {
     task: 'BE-31 (#74) Bronnen beoordelen, Dekking en afhandelen in de rij',
     base: 'feat/bronnen-74',
     port: PORT,
+    screenshotsDir: 'ops/browser/evidence/be-31',
     screenshots: shots,
     checks,
     passed: checks.length > 0 && checks.every((entry) => entry.passed),
