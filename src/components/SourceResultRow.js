@@ -13,6 +13,7 @@
 // existing "Lees met AI" and the existing manual import).
 
 import StatusIcon from '@/src/components/StatusIcon'
+import AiReadAction from '@/src/components/AiReadAction'
 import { CHECK_COPY } from '@/src/lib/sourceReview'
 
 const STATE_ICON = {
@@ -33,12 +34,16 @@ function handledDate(value) {
   return date.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' })
 }
 
-export default function SourceResultRow({ row, href, onConfirm, onRecheck, busy, position }) {
+export default function SourceResultRow({ row, href, onConfirm, onRecheck, onAiRead, onOpenAiRead, aiRead, busy, position }) {
   if (!row) return null
   const tone = STATE_ICON[row.state] || STATE_ICON.blocked
   const name = (row.restaurant && row.restaurant.name) || row.url || `Regel ${position || row.position || '?'}`
   const step = row.step
   const confirmable = Boolean(step && step.key === 'confirm' && typeof onConfirm === 'function')
+  // BE-34 (#81): "Lees met AI" starts the existing server-side reading right
+  // here, in this row. Only when the page wired the handler; without it the row
+  // keeps the existing link to the same route, so nothing breaks.
+  const aiReadable = Boolean(step && step.key === 'ai_read' && typeof onAiRead === 'function')
   // The age of a result stays visible and can be re-checked through the existing
   // batch analysis; nothing expires by itself (review points 5 and 6).
   const recheckable = Boolean(row.url && typeof onRecheck === 'function' && !row.handled)
@@ -93,6 +98,15 @@ export default function SourceResultRow({ row, href, onConfirm, onRecheck, busy,
           <button type="button" className="di-btn-primary srr-action" disabled={busy} onClick={() => onConfirm(row)}>
             {step.label}
           </button>
+        ) : aiReadable ? (
+          <AiReadAction
+            row={row}
+            state={aiRead}
+            onRead={onAiRead}
+            onOpen={onOpenAiRead}
+            disabled={busy}
+            label={step.label}
+          />
         ) : step && href ? (
           <a className="stg-btn-secondary srr-action" href={href}>
             {step.label}

@@ -21,15 +21,22 @@ import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import InternalNav from '@/src/components/InternalNav'
 import SourceResultRow from '@/src/components/SourceResultRow'
 import useBatchProcessing from '@/src/components/useBatchProcessing'
+import useAiReading from '@/src/components/useAiReading'
 import { decideAddEntry, manualImportHref, MAX_BATCH_URLS } from '@/src/lib/internalAddEntry'
 import { rowForBatchItem, stepHref, aiReadReady, CHECK_COPY } from '@/src/lib/sourceReview'
-import { discoveryRow, originLabel } from '@/src/lib/sourceDiscovery'
+import { discoveryRow, originLabel, costLine } from '@/src/lib/sourceDiscovery'
 import { OSM_ATTRIBUTION } from '@/src/lib/osmSource'
+import { ROW_SEARCHING, discoveryFailure } from '@/src/lib/discoveryProgress'
 
 const RESTAURANTS_API = '/api/internal/v1/manual-menu-import/restaurants'
 const BATCH_API = '/api/internal/v1/batch-analysis'
+// BE-34 (#81): a search that takes longer than this is reported as "duurde te
+// lang" instead of waiting forever.
+const DISCOVERY_TIMEOUT_MS = 120000
 // BE-32 (#75, criterion 2): the same engine as "Vind bronnen", for one restaurant.
 const DISCOVERY_API = '/api/internal/v1/source-discovery'
+// BE-34 (#81, criterion 2): the same engine for a name that is not in our list.
+const NAME_API = '/api/internal/v1/source-discovery/name'
 const TRIAGE_API = '/api/internal/v1/source-triage'
 // BE-33 (#79): the existing AI status; it decides the image/scan row step only.
 const AI_API = '/api/internal/v1/menu-ai-import'
@@ -57,6 +64,12 @@ export default function AddEntryPage() {
   const [discovery, setDiscovery] = useState(null)
   const [discoveryBusy, setDiscoveryBusy] = useState(false)
   const [discoveryNotice, setDiscoveryNotice] = useState(null)
+  // BE-34 (#81, criterion 4): a failed search keeps its own retry, next to the
+  // plain-language reason; a validation error never shows one.
+  const [discoveryFailed, setDiscoveryFailed] = useState(false)
+  // BE-34 (#81, criterion 2): "✨ Zoek op internet: <naam>, Breda" for a name that
+  // is not in our list. The answer is a proposal with its provenance and cost.
+  const [nameSearch, setNameSearch] = useState({ busy: false, proposal: null, message: null, cost: null, monthly: null })
   const [prefill, setPrefill] = useState(null)
   // BE-33 (#79): AI availability for the image/scan row; null means "manual".
   const [aiStatus, setAiStatus] = useState(null)
@@ -84,6 +97,10 @@ export default function AddEntryPage() {
   }, [router])
 
   const token = session && session.access_token
+  // BE-34 (#81): one click on "Lees met AI" in a result row starts the existing
+  // server-side reading there; the row shows progress, outcome and, on failure,
+  // "Handmatig toevoegen" as the next step.
+  const aiRead = useAiReading({ token })
 
   // BE-33 (#79, criterion 1): the image/scan row may only offer the AI reading
   // when the same status endpoint says AI is on and the budget allows it.
@@ -196,15 +213,23 @@ export default function AddEntryPage() {
     setError(null)
     setDiscovery(null)
     setDiscoveryNotice(null)
+    setDiscoveryFailed(false)
+    let timer = null
     try {
+      const controller = typeof AbortController !== 'undefined' ? new AbortController() : null
+      // BE-34 (#81, criterion 4): one search that takes too long says "duurde te
+      // lang" instead of waiting forever.
+      if (controller) timer = setTimeout(() => controller.abort(), DISCOVERY_TIMEOUT_MS)
       const res = await fetch(DISCOVERY_API, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ restaurant_ids: [selectedRestaurant.id] }),
+        ...(controller ? { signal: controller.signal } : {}),
       })
       const body = await res.json().catch(() => ({}))
       if (!res.ok) {
-        setError(body.error || 'Zoeken lukte niet.')
+        setError(discoveryFailure({ status: res.status, error: body.error }).message)
+        setDiscoveryFailed(true)
         return
       }
       setDiscovery({
@@ -214,10 +239,53 @@ export default function AddEntryPage() {
         cost: body.cost || null,
         monthly: body.monthly || null,
       })
-    } catch {
-      setError('Zoeken lukte niet.')
+    } catch (error) {
+      setError(discoveryFailure({ timedOut: Boolean(error && error.name === 'AbortError') }).message)
+      setDiscoveryFailed(true)
     } finally {
+      if (timer) clearTimeout(timer)
       setDiscoveryBusy(false)
+    }
+  }
+
+  // BE-34 (#81, criterion 2): a name that is not in our list is looked up on the
+  // internet through the same AI search layer as "Vind bronnen" — same client,
+  // same budget gate, same refused platforms, and the cost is reported. Nothing
+  // is created: the human opens the existing onboarding from the proposal.
+  async function searchNewRestaurant() {
+    const name = restaurantQuery.trim()
+    if (!token || name.length < 2) return
+    setNameSearch((prev) => ({ ...prev, busy: true, message: null, proposal: null }))
+    try {
+      const res = await fetch(NAME_API, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+      })
+      const body = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setNameSearch({
+          busy: false,
+          proposal: null,
+          message: body.error || 'Zoeken op internet lukte niet.',
+          cost: null,
+          monthly: null,
+        })
+        return
+      }
+      setNameSearch({
+        busy: false,
+        proposal: body.proposal || null,
+        message: body.proposal ? null : body.message || 'Geen website gevonden.',
+        cost: body.cost || null,
+        monthly: body.monthly || null,
+      })
+      // The found link also fills the URL field, so the existing flow continues
+      // without copy/paste; the field stays the human's to change.
+      const found = body.proposal ? (body.proposal.menu ? body.proposal.menu.url : body.proposal.website.url) : null
+      if (found && urls.trim() === '') setUrls(found)
+    } catch {
+      setNameSearch({ busy: false, proposal: null, message: 'Zoeken op internet lukte niet.', cost: null, monthly: null })
     }
   }
 
@@ -294,6 +362,8 @@ export default function AddEntryPage() {
   function changeRestaurantQuery(value) {
     setRestaurantQuery(value)
     setError(null)
+    // A proposal belongs to the name it was searched for.
+    setNameSearch({ busy: false, proposal: null, message: null, cost: null, monthly: null })
     if (selectedRestaurant && value !== selectedRestaurant.name) setSelectedRestaurant(null)
   }
 
@@ -427,6 +497,78 @@ export default function AddEntryPage() {
                 {restaurantQuery.trim().length >= 2 && restaurantChoices.length === 0 ? (
                   <p className="bta-muted">Geen restaurant gevonden met deze naam. Laat het veld leeg voor een nieuw restaurant.</p>
                 ) : null}
+                {/* BE-34 (#81, criterion 2): a name that is not in our list can be
+                    looked up on the internet — the same AI search layer, with the
+                    same budget, the same refused platforms and a visible cost. */}
+                {restaurantQuery.trim().length >= 2 && restaurantChoices.length === 0 ? (
+                  <div className="mai-discovery">
+                    <button
+                      type="button"
+                      className="stg-btn-secondary mai-btn"
+                      disabled={nameSearch.busy}
+                      onClick={searchNewRestaurant}
+                    >
+                      {nameSearch.busy
+                        ? '✨ Bezig…'
+                        : `✨ Zoek op internet: ${restaurantQuery.trim().slice(0, 120)}, Breda`}
+                    </button>
+                    <p className="bta-muted" style={{ margin: 0 }}>
+                      Dit gebruikt dezelfde AI-zoeklaag als &quot;Vind bronnen&quot;: bronvermelding verplicht, platforms
+                      geweigerd, budget vooraf gecontroleerd en de kosten zichtbaar. Kaartgegevens: {OSM_ATTRIBUTION}.
+                    </p>
+                  </div>
+                ) : null}
+                {nameSearch.busy ? (
+                  <p className="bta-muted cov-loading" role="status" aria-live="polite">
+                    <span className="cov-spinner" aria-hidden="true" />
+                    {ROW_SEARCHING} {restaurantQuery.trim().slice(0, 120)}, Breda
+                  </p>
+                ) : null}
+                {nameSearch.message ? (
+                  <div className="di-banner di-banner-neutral" role="status">
+                    {nameSearch.message}
+                  </div>
+                ) : null}
+                {nameSearch.proposal ? (
+                  <section className="mai-discovery" aria-labelledby="add-name-proposal">
+                    <p id="add-name-proposal" className="bta-label">
+                      Voorstel uit de zoekactie
+                    </p>
+                    <p className="cov-check-name">{nameSearch.proposal.name}</p>
+                    <p className="cov-check-meta">{nameSearch.proposal.address || 'Geen adres gevonden.'}</p>
+                    <p className="cov-check-meta">
+                      Website:{' '}
+                      <a href={nameSearch.proposal.website.url} target="_blank" rel="noopener noreferrer">
+                        {nameSearch.proposal.website.url}
+                      </a>
+                    </p>
+                    <p className="cov-check-meta">
+                      Menulink:{' '}
+                      {nameSearch.proposal.menu ? (
+                        <a href={nameSearch.proposal.menu.url} target="_blank" rel="noopener noreferrer">
+                          {nameSearch.proposal.menu.url}
+                        </a>
+                      ) : (
+                        'nog geen menulink gevonden; die volgt bij het controleren.'
+                      )}
+                    </p>
+                    <p className="cov-check-meta">Herkomst: {nameSearch.proposal.originLabel || 'zoekactie'}</p>
+                    {nameSearch.proposal.quote ? <p className="mai-quote">“{nameSearch.proposal.quote}”</p> : null}
+                    <p className="cov-check-meta">
+                      {costLine({
+                        costEurCents: nameSearch.cost ? nameSearch.cost.eurCents : null,
+                        monthly: nameSearch.monthly,
+                      })}
+                    </p>
+                    <a className="di-btn-primary mai-btn" href={nameSearch.proposal.onboardingHref}>
+                      Toevoegen als nieuw restaurant
+                    </a>
+                    <p className="bta-muted" style={{ margin: 0 }}>
+                      Er wordt niets automatisch aangemaakt: je bevestigt op de volgende stap zelf. Daar start ook de
+                      controle van de menukaart; daarna kun je in dezelfde rij &quot;Lees met AI&quot; gebruiken.
+                    </p>
+                  </section>
+                ) : null}
               </>
             )}
           </div>
@@ -466,6 +608,20 @@ export default function AddEntryPage() {
             >
               {discoveryBusy ? '✨ Bezig…' : '✨ Zoek de bron voor mij'}
             </button>
+            {/* BE-34 (#81, criterion 4): the app shows what it is doing, and a
+                failure keeps the reason in plain language plus one retry. */}
+            {discoveryBusy ? (
+              <p className="bta-muted cov-loading" role="status" aria-live="polite" style={{ margin: 0 }}>
+                <span className="cov-spinner" aria-hidden="true" />
+                {ROW_SEARCHING}
+                {selectedRestaurant ? ` ${selectedRestaurant.name}` : ''}
+              </p>
+            ) : null}
+            {discoveryFailed && !discoveryBusy ? (
+              <button type="button" className="stg-btn-secondary mai-btn" onClick={findSource}>
+                Opnieuw proberen
+              </button>
+            ) : null}
             <p className="bta-muted" style={{ margin: 0 }}>
               {selectedRestaurant
                 ? 'Alles wat je krijgt is een voorstel; jij bevestigt het per rij.'
@@ -567,6 +723,9 @@ export default function AddEntryPage() {
                     href={stepHref(row, { batchId: activeBatch.batch.id, returnTo })}
                     onConfirm={confirmRow}
                     onRecheck={recheck}
+                    onAiRead={aiRead.read}
+                    onOpenAiRead={aiRead.open}
+                    aiRead={aiRead.stateFor(row)}
                     busy={busy}
                   />
                 )

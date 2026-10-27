@@ -306,6 +306,25 @@ function fixtureBootstrap(scenarios, options = {}) {
       if (verdict.routeId === 'source-discovery-ignore') {
         return jsonResponse({ ok: true, ignored: 'osm-node-fictief-1', alreadyIgnored: false });
       }
+      // BE-34 (#81): "✨ Zoek op internet: <naam>, Breda" for a name that is not
+      // in our list. The query parameter nameState=notfound answers the honest
+      // "nothing found".
+      if (verdict.routeId === 'source-discovery-name') {
+        const scenario = fixtures[fixture];
+        const body = scenario && scenario.nameSearch;
+        if (!body) return jsonResponse({ error: 'Fictief zoekscenario ontbreekt.' }, 500);
+        if (params.get('nameState') === 'notfound') {
+          return jsonResponse(
+            scenario.nameSearchNotFound || {
+              ...body,
+              proposal: null,
+              reason: 'no_results',
+              message: 'Geen website gevonden.',
+            },
+          );
+        }
+        return jsonResponse(body);
+      }
       if (verdict.routeId === 'source-triage-decision') {
         return jsonResponse({ proposal: { id: 'proposal-fictief-vind-1', status: 'accepted' } });
       }

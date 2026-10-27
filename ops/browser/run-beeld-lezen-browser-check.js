@@ -151,15 +151,23 @@ async function readRow(cdp) {
     `(() => {
       const rows = [...document.querySelectorAll('.cov-check-table tbody tr')];
       const row = rows.find((candidate) => (candidate.innerText || '').includes('Fictief Al Dente')) || rows[0] || null;
-      const link = row ? row.querySelector('a.cov-check-action') : null;
+      // BE-34 (#81): the AI step is a button in the row now; a manual step is
+      // still the existing link. Both are read here.
+      const actionEl = row ? row.querySelector('a.cov-check-action, button.cov-check-action, .srr-action') : null;
+      const paste = row ? row.querySelector('.srr-paste-link') : null;
+      const hint = row ? row.querySelector('.srr-ai-hint') : null;
       return {
         present: Boolean(row),
         text: document.body.innerText,
         rowText: row ? row.innerText : '',
         outcome: row && row.querySelector('.cov-check-outcome') ? row.querySelector('.cov-check-outcome').innerText.trim() : '',
-        action: link ? link.innerText.trim() : '',
-        href: link ? link.getAttribute('href') : null,
-        aiLabels: [...document.querySelectorAll('a.cov-check-action, button.cov-check-action')].map((el) => (el.innerText || '').trim()),
+        action: actionEl ? actionEl.innerText.trim() : '',
+        actionTag: actionEl ? actionEl.tagName.toLowerCase() : '',
+        href: actionEl ? actionEl.getAttribute('href') : null,
+        paste: paste ? paste.innerText.trim() : '',
+        pasteHref: paste ? paste.getAttribute('href') : null,
+        hint: hint ? hint.innerText.trim() : '',
+        aiLabels: [...document.querySelectorAll('a.cov-check-action, button.cov-check-action, .srr-action')].map((el) => (el.innerText || '').trim()),
         overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
         theme: document.documentElement.getAttribute('data-theme'),
       };
@@ -212,10 +220,25 @@ async function rowScenario(cdp, width, theme, aiState) {
       row.action === '📷 Lees met AI (afbeelding)',
       JSON.stringify({ action: row.action, labels: row.aiLabels }),
     );
+    // BE-34 (#81, criterion 1): that step starts the existing reading in the row
+    // itself; the manual import is only the small link "Liever zelf plakken".
     check(
-      `rij (${width}/${theme}/${aiState}): die stap is de bestaande AI-lezing van dit job, met de beeldvlag`,
-      typeof row.href === 'string' && row.href.includes('job=job-bronnen-beeld') && row.href.includes('image=1'),
-      row.href,
+      `rij (${width}/${theme}/${aiState}): de stap is een knop die de bestaande lezing start`,
+      row.actionTag === 'button',
+      row.actionTag,
+    );
+    check(
+      `rij (${width}/${theme}/${aiState}): de handmatige import staat er alleen als kleine link "Liever zelf plakken"`,
+      row.paste === 'Liever zelf plakken' &&
+        typeof row.pasteHref === 'string' &&
+        row.pasteHref.startsWith('/internal/menu-import?restaurant=9010') &&
+        !row.pasteHref.includes('image=1'),
+      JSON.stringify({ paste: row.paste, href: row.pasteHref }),
+    );
+    check(
+      `rij (${width}/${theme}/${aiState}): de kostenschatting staat vooraf in de rij`,
+      /± 1 minuut · ± 1 cent/.test(row.hint),
+      row.hint,
     );
   }
   await focusOn(cdp, '.cov-check-table');

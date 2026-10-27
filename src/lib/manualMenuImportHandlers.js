@@ -31,6 +31,8 @@ const { buildImportPrompt, buildFollowUpPrompt, buildOpenPointsPrompt } = requir
 const { extractCodeBlock, buildImportReport, checkBundleBinding, publicImportReport } = require('./manualMenuImportImport');
 const {
   decideRow,
+  decideAllUnverifiable,
+  reopenDecision,
   decideUncoveredLine,
   decideSourcePriceLine,
   reviewView,
@@ -41,6 +43,8 @@ const {
   MAX_FOLLOW_UPS_PER_IMPORT,
   UNCOVERED_ACTIONS,
   SOURCE_PRICE_ACTION,
+  BULK_REVIEW_ACTION,
+  REOPEN_ACTION,
 } = require('./manualMenuImportReview');
 const { buildUsageExport } = require('./manualMenuImportUsage');
 const { aiOriginOverrides } = require('./menuAiImport');
@@ -382,11 +386,20 @@ function createManualMenuImportHandlers(deps = {}) {
     // Z4 (Lead order 6382953597): the red mark's "Neem € x over". The amount
     // comes from the server's own comparison, the row from the same review.
     const onSourcePrice = Boolean(decision && typeof decision === 'object' && decision.action === SOURCE_PRICE_ACTION);
-    const result = onSourcePrice
-      ? decideSourcePriceLine({ report: step.report, decisions, bundle: state.bundle, decision })
-      : onUncoveredLine
-        ? decideUncoveredLine({ report: step.report, decisions, bundle: state.bundle, decision })
-        : decideRow({ report: step.report, decisions, decision });
+    // BE-34 (#81, criterion 3): "Alles nagelopen" for the dishes of one image
+    // reading, with the number the human confirmed; and reopening one of those
+    // rows so the existing correction form can decide it alone.
+    const onBulkReview = Boolean(decision && typeof decision === 'object' && decision.action === BULK_REVIEW_ACTION);
+    const onReopen = Boolean(decision && typeof decision === 'object' && decision.action === REOPEN_ACTION);
+    const result = onBulkReview
+      ? decideAllUnverifiable({ report: step.report, decisions, count: decision.count })
+      : onReopen
+        ? reopenDecision({ report: step.report, decisions, rowId: decision.rowId })
+        : onSourcePrice
+          ? decideSourcePriceLine({ report: step.report, decisions, bundle: state.bundle, decision })
+          : onUncoveredLine
+            ? decideUncoveredLine({ report: step.report, decisions, bundle: state.bundle, decision })
+            : decideRow({ report: step.report, decisions, decision });
     if (!result.ok) return reply(422, { error: result.message, reason: result.code });
     const reportNext = result.report || step.report;
     const next = sealNext(nextState(state, { decisions: [...result.decisions.values()], report: reportNext }));

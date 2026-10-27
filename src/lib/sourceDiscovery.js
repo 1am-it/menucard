@@ -312,7 +312,28 @@ const DISCOVERY_MESSAGES = Object.freeze({
   not_found: 'Geen website gevonden.',
 });
 
-/** The one result row for "Zoek de bron voor mij" (SourceResultRow shape). */
+/** The address the add form and the onboarding already read. */
+const ONBOARDING_HREF = '/internal/onboarding-restaurant';
+
+/**
+ * BE-34 (#81, criterion 2) — "Toevoegen als nieuw restaurant" opens the existing
+ * onboarding with the name, the address and the website filled in (and the menu
+ * link when the search found one). Nothing is created here; the human confirms
+ * on that screen.
+ */
+function newRestaurantHref({ name, address = null, website = null, menu = null } = {}) {
+  const value = typeof name === 'string' ? name.replace(/\s+/g, ' ').trim().slice(0, 120) : '';
+  if (value === '') return ONBOARDING_HREF;
+  const params = new URLSearchParams({ naam: value });
+  if (typeof address === 'string' && address.trim() !== '') params.set('adres', address.trim());
+  if (typeof website === 'string' && website.trim() !== '') params.set('website', website.trim());
+  if (typeof menu === 'string' && menu.trim() !== '') params.set('menu', menu.trim());
+  return `${ONBOARDING_HREF}?${params.toString()}`;
+}
+
+/**
+ * The one result row for "Zoek de bron voor mij" (SourceResultRow shape).
+ */
 function discoveryRow(result) {
   const value = result && typeof result === 'object' ? result : {};
   const found = Boolean(value.website || value.menu);
@@ -415,4 +436,6 @@ module.exports = {
   discoverySummary,
   costLine,
   ignoreProposalInput,
+  ONBOARDING_HREF,
+  newRestaurantHref,
 };

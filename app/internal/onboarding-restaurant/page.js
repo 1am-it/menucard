@@ -111,6 +111,9 @@ export default function OnboardingRestaurantPage() {
   const [conceptError, setConceptError] = useState(null)
   const [conceptDuplicateOf, setConceptDuplicateOf] = useState(null)
   const [conceptResult, setConceptResult] = useState(null)
+  // BE-34 (#81, criterion 2): the name, address and website the add form passed
+  // for a restaurant that is not in our list yet. Shown, never created here.
+  const [newRestaurant, setNewRestaurant] = useState(null)
 
   useEffect(() => {
     const supabase = getSupabaseBrowser()
@@ -126,9 +129,25 @@ export default function OnboardingRestaurantPage() {
   // "Naar Onboarding Restaurant" from Batchanalyse (BE-25) passes the URL as
   // ?url=…: it only prefills the field. Nothing starts until the staff
   // member chooses to analyse.
+  // Since BE-34 (#81, criterion 2) the add form also passes the name, address and
+  // website of a restaurant found by the name search; they are shown as "given
+  // from the search" and prefill only the URL field. Nothing is created here.
   useEffect(() => {
-    const value = new URLSearchParams(window.location.search).get('url')
+    const params = new URLSearchParams(window.location.search)
+    const value = params.get('url')
+    const menu = params.get('menu')
+    const website = params.get('website')
     if (value && /^https?:\/\//i.test(value) && value.length <= 2048) setSourceUrlInput(value)
+    else if (menu && /^https?:\/\//i.test(menu) && menu.length <= 2048) setSourceUrlInput(menu)
+    else if (website && /^https?:\/\//i.test(website) && website.length <= 2048) setSourceUrlInput(website)
+    const name = params.get('naam')
+    if (name || params.get('adres') || website) {
+      setNewRestaurant({
+        naam: name ? name.slice(0, 120) : '',
+        adres: params.get('adres') ? params.get('adres').slice(0, 200) : '',
+        website: website ? website.slice(0, 2048) : '',
+      })
+    }
   }, [])
 
   useEffect(() => {
@@ -325,6 +344,20 @@ export default function OnboardingRestaurantPage() {
             <span>Your account does not have the "internal" role — this workflow cannot be used.</span>
           </div>
         )}
+
+        {/* BE-34 (#81, criterion 2): what the name search found, with the name,
+            the address and the website already in the URL field. Nothing is
+            created until the human runs the analysis and confirms. */}
+        {isInternal && newRestaurant ? (
+          <div className="di-banner di-banner-info" role="status">
+            <span>
+              Nieuw restaurant uit de zoekactie: {newRestaurant.naam || 'naam onbekend'}
+              {newRestaurant.adres ? ` · ${newRestaurant.adres}` : ''}
+              {newRestaurant.website ? ` · ${newRestaurant.website}` : ''}. De URL hieronder is al ingevuld; er is nog
+              niets aangemaakt. De analyse en het bevestigen blijven jouw stappen.
+            </span>
+          </div>
+        ) : null}
 
         {isInternal && (
           <div className="di-candidate-card" style={{ marginBottom: 16 }}>

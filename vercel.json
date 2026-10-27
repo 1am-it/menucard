@@ -1,5 +1,6 @@
 {
   "crons": [
-    { "path": "/api/health/db", "schedule": "17 5 * * *" }
+    { "path": "/api/health/db", "schedule": "17 5 * * *" },
+    { "path": "/api/cron/osm-breda", "schedule": "5 3 * * *" }
   ]
 }

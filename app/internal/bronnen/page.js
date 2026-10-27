@@ -462,6 +462,7 @@ export default function BronnenPage() {
       <main className="di-main brn-main">
         <InternalNav accessToken={token} />
         <BronnenView
+          token={token}
           triage={triage}
           counts={counts}
           loading={loading}

@@ -13,6 +13,7 @@
 import { Fragment } from 'react'
 import { Detail, FeedbackRegion } from './ProposalDetail'
 import SourceResultRow from '@/src/components/SourceResultRow'
+import useAiReading from '@/src/components/useAiReading'
 import {
   TASK_FILTERS,
   TASK_FILTER_LABELS,
@@ -26,7 +27,7 @@ import {
 
 const KIND_NAMES = { batch: 'Batch', proposal: 'Voorstel', attention: 'Bron vraagt aandacht' }
 
-function BatchRows({ task, busy, onConfirmRow, onRecheckRow }) {
+function BatchRows({ task, busy, onConfirmRow, onRecheckRow, aiRead }) {
   if (!task.rows || task.rows.length === 0) return null
   // "Menukopjes controleren" comes back to this row: the same task stays chosen.
   const returnTo = `${BRONNEN_HREF}?batch=${encodeURIComponent(task.batchId)}`
@@ -40,6 +41,9 @@ function BatchRows({ task, busy, onConfirmRow, onRecheckRow }) {
           href={stepHref(row, { batchId: row.batchId || task.batchId, returnTo })}
           onConfirm={(target) => onConfirmRow(task, target)}
           onRecheck={onRecheckRow}
+          onAiRead={aiRead.read}
+          onOpenAiRead={aiRead.open}
+          aiRead={aiRead.stateFor(row)}
           busy={busy}
         />
       ))}
@@ -68,6 +72,7 @@ function TaskSummary({ task }) {
 
 
 export default function BronnenView({
+  token,
   triage,
   counts,
   loading,
@@ -103,6 +108,8 @@ export default function BronnenView({
 }) {
   const empty = Boolean(triage) && totalTasks === 0
   const pickedCount = picked ? picked.size : 0
+  // BE-34 (#81): "Lees met AI" starts the existing reading in the row itself.
+  const aiRead = useAiReading({ token })
   // BE-32 (#75, criterion 7): the number of RESULTS the cleanup closes.
   const cleanupCount = Number.isInteger(pickableJobCount) && pickableJobCount > 0 ? pickableJobCount : pickableCount
   return (
@@ -285,6 +292,7 @@ export default function BronnenView({
                         busy={busy}
                         onConfirmRow={onConfirmRow}
                         onRecheckRow={onRecheckRow}
+                        aiRead={aiRead}
                       />
                     </>
                   ) : (

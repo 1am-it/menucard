@@ -32,6 +32,16 @@ const MAX_FOLLOW_UPS_PER_IMPORT = 20;
 const MAX_FOLLOW_UPS_PER_ROW = 1;
 
 const ACTIONS = ['confirm', 'correct', 'drop', 'choose_price', 'price_unknown'];
+// BE-34 (#81, criterion 3): "Alles nagelopen" for the dishes of one image
+// reading (BE-33). Deliberately not "alles accepteren": one explicit
+// confirmation that names the exact number, only for rows whose own code is
+// `image_unverified` (a quote from an image can never be checked literally).
+// Every one of those rows still gets its own decision record, and a single row
+// can be reopened and adjusted afterwards.
+const BULK_REVIEW_ACTION = 'confirm_all_unverifiable';
+const BULK_REVIEW_CODE = 'image_unverified';
+const REOPEN_ACTION = 'reopen';
+const BULK_REVIEW_NOTE = 'Nagelopen via "Alles nagelopen" (beeldlezing).';
 
 // W6 (Lead review 6380804419): a row whose price the source does not state.
 // The human either supplies a price, marks it unknown, or drops the row.
@@ -185,6 +195,88 @@ function decideRow({ report, decisions, decision } = {}) {
     at: new Date().toISOString(),
   });
   return { ok: true, decisions: next, row: rowForView(row, next.get(row.id)) };
+}
+
+/**
+ * BE-34 (#81, criterion 3) — the dishes a person can close together: every row
+ * whose own code says it was read from an image and that is still open. A row
+ * with its own problem (a price variant, a missing price, an evidence error)
+ * is never part of this: those keep their own decision.
+ */
+function bulkReviewRows({ report, decisions } = {}) {
+  if (!report || !Array.isArray(report.rows)) return [];
+  const map = decisions instanceof Map ? decisions : new Map(decisions || []);
+  return report.rows.filter((row) => row && row.code === BULK_REVIEW_CODE && !map.has(row.id));
+}
+
+/**
+ * The one offer above the list: the button, the confirmation that names the
+ * number of dishes, and the plain statement that nothing is approved silently.
+ */
+function bulkReviewOffer({ report, decisions } = {}) {
+  const count = bulkReviewRows({ report, decisions }).length;
+  return {
+    available: count > 0,
+    count,
+    buttonLabel: `🖐 Alles nagelopen (${count})`,
+    confirmLabel: count === 1 ? '1 gerecht nagelopen?' : `${count} gerechten nagelopen?`,
+    confirmAction: 'Ja, alles nagelopen',
+    hint: 'Eén bevestiging legt voor deze gerechten hetzelfde menselijke besluit vast: je hebt ze zelf nagelopen. Aanpassen per gerecht blijft mogelijk.',
+  };
+}
+
+/**
+ * Applies that one confirmation. The client sends the number it showed; a
+ * different number on the server means the list changed and nothing is decided
+ * — never a silent "close whatever is open".
+ */
+function decideAllUnverifiable({ report, decisions, count, at = new Date() } = {}) {
+  if (!report || !Array.isArray(report.rows)) {
+    return { ok: false, code: 'unknown_import', message: 'Deze import hoort niet bij deze sessie.' };
+  }
+  const rows = bulkReviewRows({ report, decisions });
+  if (rows.length === 0) {
+    return { ok: false, code: 'nothing_to_confirm', message: 'Er zijn geen gerechten uit een afbeelding meer om na te lopen.' };
+  }
+  if (!Number.isInteger(count) || count !== rows.length) {
+    return {
+      ok: false,
+      code: 'count_mismatch',
+      message: `Het aantal is intussen veranderd (${rows.length}). Bevestig het juiste aantal opnieuw.`,
+    };
+  }
+  const stamp = at instanceof Date ? at.toISOString() : new Date(at).toISOString();
+  const next = new Map(decisions || []);
+  for (const row of rows) {
+    next.set(row.id, {
+      rowId: row.id,
+      action: 'confirm',
+      reasonCode: null,
+      note: BULK_REVIEW_NOTE,
+      variantIndex: null,
+      correction: null,
+      // The marker of this one action; it keeps the record distinguishable from
+      // a row that was confirmed one by one.
+      bulk: true,
+      at: stamp,
+    });
+  }
+  return { ok: true, decisions: next, count: rows.length, row: null };
+}
+
+/**
+ * "Wijzig" on a dish that was closed by "Alles nagelopen": the human reopens
+ * that one row, so the existing correction form decides it. Only an existing
+ * decision can be reopened.
+ */
+function reopenDecision({ report, decisions, rowId } = {}) {
+  const row = report && Array.isArray(report.rows) ? report.rows.find((entry) => entry.id === rowId) : null;
+  if (!row) return { ok: false, code: 'unknown_row', message: 'Deze regel hoort niet bij deze import.' };
+  const map = decisions instanceof Map ? decisions : new Map(decisions || []);
+  if (!map.has(row.id)) return { ok: false, code: 'row_not_open', message: 'Deze regel is al open.' };
+  const next = new Map(map);
+  next.delete(row.id);
+  return { ok: true, decisions: next, row: rowForView(row, null) };
 }
 
 // Variant 1 (Lead order 6382189724): the two choices per uncovered line.
@@ -403,6 +495,10 @@ function decisionOutcome(row, decision) {
   if (decision.action === 'price_unknown') return 'keep_price_unknown';
   if (decision.action === 'choose_price') return 'keep_with_price';
   if (decision.action === 'correct') return 'keep_corrected';
+  // BE-34 (#81): the dishes of one image reading that the human closed with
+  // "Alles nagelopen" keep their own visible outcome, so the screen can still
+  // offer "Wijzig" on each of them.
+  if (decision.bulk === true) return 'keep_bulk_reviewed';
   // "Klopt" op een toeslag: de AI had gelijk dat dit een toeslag is. Het
   // concept kan dat niet opslaan, dus de regel gaat er zichtbaar uit.
   if (row.code === 'supplement_as_main_price') return 'exclude_supplement';
@@ -461,6 +557,10 @@ function reviewView({ report, decisions, capture } = {}) {
     // markings. Same comparison, same source; the printed page itself is loaded
     // later, one page at a time.
     sourceMap: sourceMapView({ report, decisions: map, capture }),
+    // BE-34 (#81, criterion 3): the one offer above the list for the dishes of an
+    // image reading that are still open. Counted here, so the button, the
+    // confirmation and the server rule can never disagree.
+    bulkReview: bulkReviewOffer({ report, decisions: map }),
   };
 }
 
@@ -926,9 +1026,17 @@ module.exports = {
   MISSING_REASONS,
   UNCOVERED_ACTIONS,
   SOURCE_PRICE_ACTION,
+  BULK_REVIEW_ACTION,
+  BULK_REVIEW_CODE,
+  REOPEN_ACTION,
+  BULK_REVIEW_NOTE,
   ManualImportReviewError,
   validateDecision,
   decideRow,
+  bulkReviewRows,
+  bulkReviewOffer,
+  decideAllUnverifiable,
+  reopenDecision,
   decideUncoveredLine,
   decideSourcePriceLine,
   uncoveredView,
