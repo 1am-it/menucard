@@ -25,6 +25,10 @@ const FORBIDDEN = 'Alleen interne medewerkers kunnen de werkvoorraad zien.';
 
 function createWorkqueueCountsHandlers(deps) {
   const { authenticate, getSupabase } = deps;
+  // BE-31 (#74): the Bronnen number must be the number of tasks that screen
+  // shows, so the route injects the shared task counter. Without it the older
+  // proposals-only definition is used; both are real numbers, never a guess.
+  const sourceReviewCount = typeof deps.sourceReviewCount === 'function' ? deps.sourceReviewCount : null;
 
   async function countExact(supabase, table, column, value) {
     const { count, error } = await supabase
@@ -109,7 +113,13 @@ function createWorkqueueCountsHandlers(deps) {
     const supabase = getSupabase();
     const counts = {};
     for (const key of wanted) {
-      counts[key] = await LOADERS[key](supabase);
+      // The Bronnen count asks the shared task definition, so the number and the
+      // list it opens can never disagree.
+      if (key === 'source-triage' && sourceReviewCount) {
+        counts[key] = await sourceReviewCount(request);
+      } else {
+        counts[key] = await LOADERS[key](supabase);
+      }
     }
     return { status: 200, body: { counts } };
   }

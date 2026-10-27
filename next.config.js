@@ -11,5 +11,24 @@ const nextConfig = {
     // #59 / BE-21 "Lees met AI": route B reads the same pinned instruction.
     '/api/internal/v1/menu-ai-import/**': ['./MENU-EXTRACTION.md'],
   },
+  // BE-31 (#74) — one visible address for "Bronnen beoordelen". The technical
+  // names (API routes, tables, ids) stay unchanged; only these two old page
+  // addresses move. `permanent: true` answers with a 308 and Next keeps the
+  // query string, so an existing `?batch=<id>` deeplink still resolves (the new
+  // page selects that batch task from it).
+  async redirects() {
+    return [
+      {
+        source: '/internal/source-triage/batch',
+        destination: '/internal/bronnen',
+        permanent: true,
+      },
+      {
+        source: '/internal/source-triage',
+        destination: '/internal/bronnen',
+        permanent: true,
+      },
+    ]
+  },
 }
 module.exports = nextConfig

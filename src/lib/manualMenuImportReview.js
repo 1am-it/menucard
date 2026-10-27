@@ -139,7 +139,7 @@ function validateDecision({ row, decision } = {}) {
     }
     const path = corrected.path === undefined ? undefined : normalizePath(corrected.path);
     if (corrected.path !== undefined && path === null) {
-      return { ok: false, code: 'correction_incomplete', message: 'Kies een geldige rubriek.' };
+      return { ok: false, code: 'correction_incomplete', message: 'Kies een geldig menukopje.' };
     }
     return { ok: true, action, correction: { name, description, price, path } };
   }

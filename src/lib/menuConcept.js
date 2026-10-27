@@ -28,7 +28,7 @@ const STATUS = {
   price_changed: { label: 'Prijs gewijzigd', blocker: false, attention: true },
   multiple_prices: { label: 'Meerdere prijzen', blocker: true, attention: true },
   missing_price: { label: 'Prijs ontbreekt', blocker: true, attention: true },
-  unclear_category: { label: 'Rubriek onduidelijk', blocker: true, attention: true },
+  unclear_category: { label: 'Menukopje onduidelijk', blocker: true, attention: true },
   duplicate: { label: 'Dubbel gerecht', blocker: true, attention: true },
   excluded: { label: 'Uitgesloten', blocker: false, attention: false },
 };
@@ -174,7 +174,7 @@ function summarizeRecognisedMenu(menus) {
     let category = byPath.get(key);
     if (!category) {
       category = {
-        name: line.category || 'Zonder rubriek',
+        name: line.category || 'Zonder menukopje',
         path: line.categoryPath,
         label: formatPath(line.categoryPath),
         sourceRoute: line.sourcePath ? formatPath(line.sourcePath) : null,
@@ -199,8 +199,8 @@ function summarizeRecognisedMenu(menus) {
     if (!line.price && line.priceStatus === 'multiple_undecomposed') attention.push({ id: line.id, name: line.name, reason: 'Meerdere prijzen' });
     else if (!line.price) attention.push({ id: line.id, name: line.name, reason: 'Prijs ontbreekt' });
     else if (names.get(dishKey(line)) > 1) attention.push({ id: line.id, name: line.name, reason: 'Komt meer dan eens voor' });
-    else if (isUnclearCategory(line.category)) attention.push({ id: line.id, name: line.name, reason: 'Rubriek onduidelijk' });
-    else if (line.categoryUncertain) attention.push({ id: line.id, name: line.name, reason: 'Rubriekindeling onzeker' });
+    else if (isUnclearCategory(line.category)) attention.push({ id: line.id, name: line.name, reason: 'Menukopje onduidelijk' });
+    else if (line.categoryUncertain) attention.push({ id: line.id, name: line.name, reason: 'Menukopjes onzeker' });
   }
   return { itemCount: lines.length, categoryCount: categories.length, title: conceptTitle(menus), categories, attention };
 }

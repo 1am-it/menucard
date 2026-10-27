@@ -12,14 +12,15 @@ const path = require('node:path');
 const ROOT = path.resolve(__dirname, '..', '..');
 const read = (p) => fs.readFileSync(path.join(ROOT, p), 'utf8');
 // The page (session, data, processing) and its presentational view.
-const PAGE = read('app/internal/source-triage/batch/page.js') + read('app/internal/source-triage/batch/BatchAnalysisView.js');
+const PAGE = read('app/internal/bronnen/batch/page.js') + read('app/internal/bronnen/batch/BatchAnalysisView.js');
 const CSS = read('app/globals.css');
 const BTA_CSS = CSS.slice(CSS.indexOf('/* ── Batchanalyse (BE-25 fase 2)'));
 
 test('page: visible names, breadcrumb (desktop and mobile) and the fixed v1 copy', () => {
   assert.match(PAGE, /<h1 className="di-title">Batchanalyse<\/h1>/);
   assert.match(PAGE, /Werkvoorraad<\/span>/);
-  assert.match(PAGE, /href="\/internal\/source-triage"/);
+  assert.match(PAGE, /href=\{backHref\}/);
+  assert.match(read('app/internal/bronnen/batch/BatchAnalysisView.js'), /menukopjesBackHref/);
   assert.match(PAGE, /←\{' '\}/);
   assert.match(PAGE, /Bronnen beoordelen/);
   assert.match(PAGE, /COPY\.keepOpen/);
@@ -68,7 +69,7 @@ test('page: never fetches anything but its own internal API; no AI, OCR or exter
 
 test('page: an image/scan-only menu keeps its reason and opens the existing Bronnen beoordelen route', () => {
   assert.match(PAGE, /review_source/);
-  assert.match(PAGE, /\/internal\/source-triage\?restaurant=/);
+  assert.match(PAGE, /\/internal\/bronnen\?restaurant=/);
   assert.match(PAGE, /reason=image_only/);
   assert.match(PAGE, /item\.key === 'image_only'/);
 });
@@ -115,15 +116,15 @@ test('menu review: manual review reopens the exact batch result, and shared unce
   assert.match(PAGE, /batch=\$\{encodeURIComponent\(batchId\)\}&item=\$\{item\.position\}/);
   assert.match(PAGE, /id=\{`bta-result-\$\{item\.position\}`\}/);
   assert.match(PAGE, /if \(focusItem !== item\.position\) return[\s\S]*resultRef\.current/);
-  const review = read('app/internal/source-triage/batch/MenuReview.js');
+  const review = read('app/internal/bronnen/batch/MenuReview.js');
   assert.match(review, /Gedeelde onzekerheid/);
-  assert.match(review, /Rubriek klopt zo/);
+  assert.match(review, /Menukopje klopt zo/);
   assert.match(review, /lost geen ontbrekende prijzen of andere blokkades op/);
   assert.match(review, /coverage\.status === 'candidate_without_items'/);
 });
 
 test('menu review: control view links to the original menu safely; concept is internal and saved only through its own route', () => {
-  const review = read('app/internal/source-triage/batch/MenuReview.js');
+  const review = read('app/internal/bronnen/batch/MenuReview.js');
   assert.match(review, /Open originele menukaart/);
   assert.match(review, /target="_blank" rel="noopener noreferrer"/);
   assert.match(review, /Menuconcept · intern/);
@@ -141,7 +142,7 @@ test('menu review: control view links to the original menu safely; concept is in
 // source per uncertain section, and one bulk action that still asks for the
 // human confirmation. Free: no AI, no extra fetch, nothing published.
 test('BE-30 (#72): the AI advice is a suggestion with its quote, one bulk action and one honest fallback', () => {
-  const review = read('app/internal/source-triage/batch/MenuReview.js');
+  const review = read('app/internal/bronnen/batch/MenuReview.js');
   const route = read('app/api/internal/v1/batch-analysis/[id]/structure-advice/route.js');
   const deps = read('src/lib/menuStructureAdviceRouteDeps.js');
   // Per section: the advice, its confidence and a literal quote.
@@ -153,7 +154,7 @@ test('BE-30 (#72): the AI advice is a suggestion with its quote, one bulk action
   assert.match(PAGE, /Neem alle adviezen over/);
   assert.match(PAGE, /\$\{API\}\/\$\{viewing\.batch\.id\}\/structure-advice/);
   // Unavailable AI (off, budget, error) is an honest note; the screen works on.
-  assert.match(PAGE, /Je kunt de rubrieken hieronder zelf beoordelen/);
+  assert.match(PAGE, /Je kunt de menukopjes hieronder zelf beoordelen/);
   assert.match(PAGE, /AI_API/);
   // The route is POST-only, internal and reuses the existing provider call.
   assert.match(route, /export async function POST\(request\)/);
@@ -175,7 +176,7 @@ test('BE-30 (#72): the AI advice is a suggestion with its quote, one bulk action
 
 test('BE-30 (#72): structure review shows the dishes, the reason, the source page and one bulk confirmation', () => {
 
-  const review = read('app/internal/source-triage/batch/MenuReview.js');
+  const review = read('app/internal/bronnen/batch/MenuReview.js');
   assert.match(review, /<details className="bta-structure-section">/);
   assert.match(review, /bta-structure-dishes/);
   assert.match(review, /Twijfel: \{section\.reason/);
@@ -188,14 +189,14 @@ test('BE-30 (#72): structure review shows the dishes, the reason, the source pag
   // server still re-checks every path (no automatic approval anywhere).
   assert.match(PAGE, /keepAllChoices\(structureReview\.required\)/);
   assert.match(PAGE, /setConfirming\(item\.jobId\)/);
-  assert.match(PAGE, /plural\(structureReview\.required\.length, 'rubriek', 'rubrieken'\)\} bevestigen\?/);
+  assert.match(PAGE, /plural\(structureReview\.required\.length, 'menukopje', 'menukopjes'\)\} bevestigen\?/);
   assert.doesNotMatch(review, /fetch\(/);
   assert.match(BTA_CSS, /\.bta-structure-dishes/);
   assert.match(BTA_CSS, /\.bta-structure-bulk/);
   assert.match(BTA_CSS, /\.bta-structure-link/);
 });
 test('BE-30: rubric review shows source prices in Dutch notation', () => {
-  const source = fs.readFileSync(path.join(__dirname, '..', '..', 'app', 'internal', 'source-triage', 'batch', 'MenuReview.js'), 'utf8');
+  const source = fs.readFileSync(path.join(__dirname, '..', '..', 'app', 'internal', 'bronnen', 'batch', 'MenuReview.js'), 'utf8');
   assert.match(source, /export function dutchPrice/);
   assert.equal((source.match(/dutchPrice\(dish\.price\)/g) || []).length, 2);
 });

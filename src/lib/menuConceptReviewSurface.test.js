@@ -60,7 +60,7 @@ test('the pages talk only to their own internal API; the source opens in a new t
   assert.match(view, /Publieke menukaart ongewijzigd/);
   assert.match(view, /er wordt niets gepubliceerd/);
   assert.doesNotMatch(view, /Publiceer|publiceren\b/);
-  for (const file of ['app/internal/menu-concepts/MenuConceptsView.js', 'app/internal/source-triage/batch/MenuReview.js']) {
+  for (const file of ['app/internal/menu-concepts/MenuConceptsView.js', 'app/internal/bronnen/batch/MenuReview.js']) {
     assert.doesNotMatch(read(file), /status-badge--(blocked|old)|di-banner-danger" role="status"/, `${file}: uncertainty is neutral`);
   }
 });
@@ -75,7 +75,7 @@ test('concept detail: the overview and the structure card use one section count,
   // The structure card shows the same built concept, never the stored copy.
   assert.match(view, /<ConceptStructure captured=\{concept\.content\} \/>/);
   // The card itself counts the categories it lists, not their names.
-  assert.match(read('app/internal/source-triage/batch/MenuReview.js'), /plural\(categories\.length, 'rubriek', 'rubrieken'\)/);
+  assert.match(read('app/internal/bronnen/batch/MenuReview.js'), /plural\(categories\.length, 'menukopje', 'menukopjes'\)/);
 });
 
 test('BE-27 export: the route only delegates; the GitHub client cannot merge, delete or move a branch, and its token stays on the server', () => {

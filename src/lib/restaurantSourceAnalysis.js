@@ -417,16 +417,16 @@ function noteHtmlExclusions(sourceInventory, sourceId, found) {
 
 /** A plain-language note for a recognised HTML menu. */
 function htmlMenuNote(url, found) {
-  const base = `Menukaart herkend uit de HTML van ${url}: ${found.itemCount} gerechten met prijs in ${found.menu.categories.length} rubrieken.`
+  const base = `Menukaart herkend uit de HTML van ${url}: ${found.itemCount} gerechten met prijs in ${found.menu.categories.length} menukopjes.`
   return found.menu.structure === 'uncertain'
-    ? `${base} De rubriekindeling is onzeker: controleer de bronroute.`
-    : `${base} Controleer rubrieken en prijzen.`
+    ? `${base} De menukopjes zijn onzeker: controleer de bronroute.`
+    : `${base} Controleer menukopjes en prijzen.`
 }
 
 /** A plain-language note for a recognized PDF menu, with page coverage. */
 function pdfMenuNote(url, found, pageCount) {
   const pages = Number.isInteger(pageCount) ? ` (${pageCount} ${pageCount === 1 ? 'pagina' : "pagina's"})` : ''
-  return `Menukaart herkend uit de PDF van ${url}${pages}: ${found.itemCount} gerechten met prijs in ${found.menu.categories.length} rubrieken. Controleer pagina's, rubrieken en prijzen.`
+  return `Menukaart herkend uit de PDF van ${url}${pages}: ${found.itemCount} gerechten met prijs in ${found.menu.categories.length} menukopjes. Controleer pagina's, menukopjes en prijzen.`
 }
 
 /** A safe, derived signal for a discovered PDF's own review metadata —
@@ -580,14 +580,14 @@ function pdfLayoutLimitations(sourceUrl, layout = {}) {
     limitations.push(`PDF ${sourceUrl}: ${layout.unlinkedPriceLines} prijsregel(s) konden zonder aantoonbare lokale naam-/prijskoppeling niet als gerecht worden opgenomen.`)
   }
   if (Number.isInteger(layout.unrecognizedHeadingLines) && layout.unrecognizedHeadingLines > 0) {
-    limitations.push(`PDF ${sourceUrl}: ${layout.unrecognizedHeadingLines} mogelijke rubriekkop(pen) zijn niet herkend en dus niet als rubriek opgeslagen.`)
+    limitations.push(`PDF ${sourceUrl}: ${layout.unrecognizedHeadingLines} mogelijke kop(pen) van een menukopje zijn niet herkend en dus niet als menukopje opgeslagen.`)
   }
   if (
     (Number.isInteger(layout.inheritedSectionColumns) && layout.inheritedSectionColumns > 0) ||
     (Number.isInteger(layout.inheritedSubheadingColumns) && layout.inheritedSubheadingColumns > 0)
   ) {
     limitations.push(
-      `PDF ${sourceUrl}: ${layout.inheritedSectionColumns || 0} kolom(men) zonder eigen rubriekkop en ${layout.inheritedSubheadingColumns || 0} merk-/subrubriek(en) zijn als onzekere rubricering overgenomen; controleer de rubriekkoppeling.`,
+      `PDF ${sourceUrl}: ${layout.inheritedSectionColumns || 0} kolom(men) zonder eigen kop van een menukopje en ${layout.inheritedSubheadingColumns || 0} merk-/submenukopje(en) zijn als onzekere menukopje-indeling overgenomen; controleer de koppeling van de menukopjes.`,
     )
   }
   if (Number.isInteger(layout.portionLines) && layout.portionLines > 0) {
@@ -630,7 +630,7 @@ async function applyProviderNeutralExtraction({
     limitations.push(
       `Kwaliteitscontrole op de deterministische extractie vraagt aandacht (${assessment.codes.join(', ')}); het resultaat is niet als volledig beoordeeld.`,
     )
-    if (marked > 0) notes.push(`${marked} rubriek(en) zijn als "Controle nodig" gemarkeerd op basis van de kwaliteitscontrole.`)
+    if (marked > 0) notes.push(`${marked} menukopje(s) zijn als "Controle nodig" gemarkeerd op basis van de kwaliteitscontrole.`)
   }
 
   if (typeof structuredExtraction !== 'function') return { aiExtraction: null, assessment }
@@ -770,7 +770,7 @@ async function applyProviderNeutralExtraction({
   limitations.push(
     `Model-extractie verving de deterministische uitkomst voor ${replacedSummary.join('; ')} op basis van de kwaliteitscontrole (${assessment.codes.join(', ')}). Het vervangen resultaat is als "Controle nodig" gemarkeerd en niet automatisch goedgekeurd.`,
   )
-  notes.push('De modeluitkomst is bron- en versiegebonden vervangen; open het resultaat met broncontext en controleer de gemarkeerde rubrieken.')
+  notes.push('De modeluitkomst is bron- en versiegebonden vervangen; open het resultaat met broncontext en controleer de gemarkeerde menukopjes.')
   if (rejected.length > 0) {
     limitations.push(`Niet gebruikt modelresultaat voor andere bron(nen): ${[...new Set(rejected.map((row) => row.reason))].join(', ')}.`)
   }
@@ -1089,7 +1089,7 @@ async function runRestaurantSourceAnalysis({ homepageHtml, homepageUrl, fetchCan
   const titlesFromLinks = applyLinkLabelMenuTitles(menuContexts, linkLabelsByPageKey)
   if (titlesFromLinks > 0) {
     notes.push(
-      `${titlesFromLinks} menutitel(s) zijn overgenomen uit de linklabels van de site zelf; de pagina's drukken geen eigen kaarttitel en de rubriekpaden zijn ongewijzigd.`,
+      `${titlesFromLinks} menutitel(s) zijn overgenomen uit de linklabels van de site zelf; de pagina's drukken geen eigen kaarttitel en de paden van de menukopjes zijn ongewijzigd.`,
     )
   }
 

@@ -295,7 +295,7 @@ function createMenuConceptExportHandler({ authenticate, getSupabase, restaurants
           body: [
             `Export van het intern goedgekeurde menuconcept voor **${name}** (restaurant \`${rid}\`), conceptversie ${snapshot.version}.`,
             '',
-            `- \`data/menus.json\`: de menukaarten \`${Object.keys(baseEntries).join('`, `') || '—'}\` worden vervangen door één volledige \`${menuKeyFor(rid)}\` (${entry.categories.reduce((n, c) => n + c.items.length, 0)} gerechten in ${entry.categories.length} rubrieken).`,
+            `- \`data/menus.json\`: de menukaarten \`${Object.keys(baseEntries).join('`, `') || '—'}\` worden vervangen door één volledige \`${menuKeyFor(rid)}\` (${entry.categories.reduce((n, c) => n + c.items.length, 0)} gerechten in ${entry.categories.length} menukopjes).`,
             `- \`data/restaurants.json\`: alleen \`menuLinks\` van dit restaurant.`,
             `- Bron: ${snapshot.source_url}`,
             `- Inhoudshash concept: \`${snapshot.content_hash}\``,

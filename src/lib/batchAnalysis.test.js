@@ -281,8 +281,8 @@ test('uncertain structure: never high certainty, but a per-section human route i
   assert.deepEqual(v.structureReview.required.map((s) => s.label), ['Fictief Diner › Voor', 'Fictief Lunch › Koud']);
   assert.deepEqual(v.structureReview.treated, []);
   assert.equal(v.structureReview.handledCount, 0);
-  assert.match(v.text, /Controleer elke onzekere rubriek/);
-  assert.equal(ACTION_LABELS.review_structure, 'Rubriekindeling controleren');
+  assert.match(v.text, /Controleer elk onzeker menukopje/);
+  assert.equal(ACTION_LABELS.review_structure, 'Menukopjes controleren');
 });
 
 test('uncertain structure: confirmation only after every section was explicitly recorded', () => {

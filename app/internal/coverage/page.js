@@ -49,6 +49,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import InternalNav from '@/src/components/InternalNav'
+import CoverageCheckSection from './CoverageCheckSection'
 import { PRIORITY_DEFAULT_VISIBLE, sortByMenuDataGap, visiblePriorityRows, metricState } from '@/src/lib/coveragePriority'
 
 function IconLock() {
@@ -342,6 +343,12 @@ export default function CoverageDashboardPage() {
           </p>
           <p style={{ color: 'var(--text-secondary)', fontSize: 12.5, margin: 0 }}>Read-only, recomputed on every load. Generated {generatedAt}.</p>
         </div>
+      </div>
+
+      {/* BE-31 (#74): "Nog niet gecontroleerd" lives here now, with the existing
+          reason texts, selection and the existing batch analysis as its check. */}
+      <div style={{ marginBottom: 20 }}>
+        <CoverageCheckSection token={session.access_token} />
       </div>
 
       {/* Hero: menu coverage — data presence, not verified accuracy */}

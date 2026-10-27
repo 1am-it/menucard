@@ -67,7 +67,7 @@ function attentionGroupsForMenus(menus) {
         sourceId: bounded(menu.sourceId) || null,
         sourceUrl: bounded(menu.sourceUrl) || null,
         path,
-        label: path.length > 0 ? path.join(' › ') : 'Zonder rubriek',
+        label: path.length > 0 ? path.join(' › ') : 'Zonder menukopje',
         itemCount: Array.isArray(category.items) ? category.items.length : 0,
         reason: 'uncertain_structure',
       });

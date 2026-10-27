@@ -54,7 +54,7 @@ const STATUSES = {
 
 const ACTION_LABELS = {
   confirm: 'Bevestig bron',
-  review_structure: 'Rubriekindeling controleren',
+  review_structure: 'Menukopjes controleren',
   review_manually: 'Beoordeel handmatig',
   adjust_url: 'URL aanpassen',
   retry: 'Opnieuw proberen',
@@ -239,8 +239,8 @@ function sameAddress(a, b) {
 }
 
 const NOT_HIGH_TEXT = {
-  structure_uncertain: 'Er is een menukaart gevonden, maar de rubriekindeling is onzeker. Een medewerker controleert de bronroute.',
-  structure_sections_unknown: 'Er is een menukaart gevonden met een onzekere indeling, maar de onzekere rubrieken zijn niet per rubriek vastgelegd. Een medewerker beoordeelt hem handmatig.',
+  structure_uncertain: 'Er is een menukaart gevonden, maar de menukopjes zijn onzeker. Een medewerker controleert de bronroute.',
+  structure_sections_unknown: 'Er is een menukaart gevonden met een onzekere indeling, maar de onzekere menukopjes zijn niet per menukopje vastgelegd. Een medewerker beoordeelt hem handmatig.',
   structure_normalized: 'Er is een menukaart gevonden. Een medewerker beoordeelt hem handmatig.',
   menu_source_unknown: 'Er is een menukaart gevonden, maar de vindplaats is niet vastgelegd. Een medewerker beoordeelt hem handmatig.',
   other_host: 'De gevonden menukaart staat niet op de eigen website van dit restaurant. Een medewerker beoordeelt hem handmatig.',
@@ -249,7 +249,7 @@ const NOT_HIGH_TEXT = {
 
 // Shown for a result that only a human structure review can move forward.
 const STRUCTURE_TEXT =
-  'Er is een menukaart gevonden, maar de rubriekindeling is onzeker. Controleer elke onzekere rubriek hieronder en handhaaf of corrigeer hem; pas daarna kun je de bron bevestigen.';
+  'Er is een menukaart gevonden, maar de menukopjes zijn onzeker. Controleer elk onzeker menukopje hieronder en handhaaf of corrigeer het; pas daarna kun je de bron bevestigen.';
 
 /** The accepted BE-24 proposal that confirms this result, if any. */
 function confirmationFor({ job, restaurant, foundUrl, proposals }) {

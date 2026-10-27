@@ -387,7 +387,7 @@ export default function ManualMenuImportPage() {
       adoptStep(result.data)
       setMessage(
         action === 'add_uncovered'
-          ? 'De regel staat nu als gerecht in het concept. Stel naam en rubriek bij waar nodig; opslaan blijft een aparte stap.'
+          ? 'De regel staat nu als gerecht in het concept. Stel naam en menukopje bij waar nodig; opslaan blijft een aparte stap.'
           : 'Deze regel telt als geen gerecht. De keuze blijft bij het concept bewaard.'
       )
       // De kaart opnieuw lezen met het nieuwe token: hetzelfde beeld als de server.
@@ -1255,7 +1255,7 @@ export default function ManualMenuImportPage() {
                               <p className="mai-quote">“{line.text}”</p>
                               <p className="mai-why">
                                 Pagina {line.sourceLabel} · {line.locator}
-                                {line.section ? ` · onder ${line.section}` : ' · rubriek onbekend'}
+                                {line.section ? ` · onder ${line.section}` : ' · menukopje onbekend'}
                               </p>
                               <div className="mai-row-actions">
                                 <button
@@ -1536,8 +1536,8 @@ export default function ManualMenuImportPage() {
                                 type="text"
                                 value={correction.path}
                                 onChange={(event) => setCorrection({ ...correction, path: event.target.value })}
-                                placeholder="Rubriekpad, bijvoorbeeld Lunch › Bites"
-                                aria-label="Rubriekpad"
+                                placeholder="Pad van het menukopje, bijvoorbeeld Lunch › Bites"
+                                aria-label="Pad van het menukopje"
                               />
                               <div className="mai-row-actions">
                                 <button type="button" className="di-btn-primary mai-btn" disabled={busy} onClick={() => submitCorrection(row)}>

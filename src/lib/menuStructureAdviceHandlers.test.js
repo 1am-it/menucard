@@ -263,7 +263,7 @@ test('BE-30: without literal source text nothing is called and the screen stays 
   const res = await handlers.advise(httpRequest({ job_id: 'job-1' }));
   assert.equal(res.status, 422);
   assert.equal(res.body.reason, 'source_text_unavailable');
-  assert.match(res.body.error, /Beoordeel de rubrieken zelf/);
+  assert.match(res.body.error, /Beoordeel de menukopjes zelf/);
   assert.equal(state.createCall, 0);
 });
 

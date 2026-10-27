@@ -19,7 +19,10 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import InternalNav from '@/src/components/InternalNav'
+import SourceResultRow from '@/src/components/SourceResultRow'
+import useBatchProcessing from '@/src/components/useBatchProcessing'
 import { decideAddEntry, manualImportHref, MAX_BATCH_URLS } from '@/src/lib/internalAddEntry'
+import { rowForBatchItem, stepHref, CHECK_COPY } from '@/src/lib/sourceReview'
 
 const RESTAURANTS_API = '/api/internal/v1/manual-menu-import/restaurants'
 const BATCH_API = '/api/internal/v1/batch-analysis'
@@ -38,6 +41,10 @@ export default function AddEntryPage() {
   const [error, setError] = useState(null)
   const [busy, setBusy] = useState(false)
   const [fallbackHref, setFallbackHref] = useState(null)
+  // BE-31 (#74): the result of the links appears under the form as the same
+  // rows as Dekking and Bronnen beoordelen. The batch page is no longer a
+  // destination you have to leave for.
+  const [activeBatch, setActiveBatch] = useState(null)
   const debounce = useRef(null)
 
   useEffect(() => {
@@ -49,6 +56,37 @@ export default function AddEntryPage() {
   }, [router])
 
   const token = session && session.access_token
+
+  // The rows of one batch, read through the existing GET. Used after a start and
+  // by the ?batch= deeplink (also the way back from "Menukopjes controleren").
+  const loadBatch = useCallback(
+    async (batchId) => {
+      if (!token || !batchId) return null
+      try {
+        const res = await fetch(`${BATCH_API}?batch=${encodeURIComponent(batchId)}`, {
+          headers: { Authorization: `Bearer ${token}` },
+          cache: 'no-store',
+        })
+        if (!res.ok) return null
+        const body = await res.json().catch(() => null)
+        if (!body || !body.detail) return null
+        setActiveBatch(body.detail)
+        return body
+      } catch {
+        return null
+      }
+    },
+    [token],
+  )
+
+  useEffect(() => {
+    if (!token) return
+    const fromUrl = new URLSearchParams(window.location.search).get('batch')
+    if (fromUrl) loadBatch(fromUrl)
+  }, [token, loadBatch])
+
+  const batchRunning = Boolean(activeBatch && activeBatch.batch && !activeBatch.batch.closed_at)
+  useBatchProcessing({ token, batchId: activeBatch ? activeBatch.batch.id : null, enabled: batchRunning, onTick: loadBatch })
 
   // Same search endpoint, same minimum length and the same guard against a
   // stale response as the existing manual import page.
@@ -134,7 +172,7 @@ export default function AddEntryPage() {
           setFallbackHref(decision.href)
           return
         }
-        router.push(`/internal/source-triage/batch?batch=${encodeURIComponent(body.batch.id)}`)
+        await loadBatch(body.batch.id)
       } catch {
         setError('De analyse kon niet worden gestart.')
         setFallbackHref(decision.href)
@@ -142,7 +180,7 @@ export default function AddEntryPage() {
         setBusy(false)
       }
     },
-    [router, selectedRestaurant, token, urls],
+    [loadBatch, router, selectedRestaurant, token, urls],
   )
 
   if (session === undefined) {
@@ -275,6 +313,36 @@ export default function AddEntryPage() {
             </a>
           </div>
         </form>
+
+        {activeBatch ? (
+          <section className="brn-detail-card" style={{ marginTop: 20 }} aria-labelledby="add-result-title">
+            <h2 id="add-result-title" className="brn-detail-title">
+              Resultaat · dezelfde rijen als in Dekking
+            </h2>
+            <p className="brn-batch-summary">
+              {activeBatch.batch.closed_at
+                ? `${activeBatch.items.length} URL${activeBatch.items.length === 1 ? '' : "'s"} gecontroleerd.`
+                : CHECK_COPY.running}{' '}
+              Rond je dit niet af, dan blijft het als taak staan onder Werkvoorraad → Bronnen beoordelen.
+            </p>
+            <ol className="srr-list" aria-label="Resultaat van deze toevoeging">
+              {activeBatch.items.map((item) => {
+                const row = rowForBatchItem(item, { batchId: activeBatch.batch.id })
+                const returnTo = `/internal/toevoegen?batch=${encodeURIComponent(activeBatch.batch.id)}`
+                return (
+                  <SourceResultRow
+                    key={`${item.position}-${item.jobId || item.key}`}
+                    row={row}
+                    position={item.position}
+                    href={stepHref(row, { batchId: activeBatch.batch.id, returnTo })}
+                    busy={busy}
+                  />
+                )
+              })}
+            </ol>
+            <p className="brn-notice">{CHECK_COPY.nothingPublished}</p>
+          </section>
+        ) : null}
       </main>
     </div>
   )

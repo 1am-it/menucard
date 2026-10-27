@@ -242,7 +242,7 @@ export default function BatchAnalysisPage() {
           ].includes(r.reason)
         )
         const detail = structureIssue
-          ? ' De rubriekcontrole is niet opgeslagen; controleer elke onzekere rubriek opnieuw.'
+          ? ' De menukopje-controle is niet opgeslagen; controleer elk onzeker menukopje opnieuw.'
           : rejected
             ? ' Dit resultaat is in Bronnen beoordeeld en afgewezen; start zo nodig een nieuwe analyse.'
             : openExists
@@ -270,7 +270,7 @@ export default function BatchAnalysisPage() {
     await startBatch([url], { reanalyze: action === 'reanalyze' })
   }
 
-  // BE-30 (#72): één AI-advies voor alle onzekere rubrieken van deze bronversie.
+  // BE-30 (#72): één AI-advies voor alle onzekere menukopjes van deze bronversie.
   // Het is een suggestie met een letterlijk citaat; de mens bevestigt daarna via
   // de bestaande bevestigingsroute. Niets wordt automatisch vastgelegd.
   async function requestAdvice(jobId) {
@@ -287,7 +287,7 @@ export default function BatchAnalysisPage() {
       setAiStatus((prev) => (prev && body.monthly ? { ...prev, monthly: body.monthly } : prev))
       return { ok: true, body }
     } catch {
-      return { ok: false, body: { error: 'Het AI-advies lukte niet. Je kunt de rubrieken zelf beoordelen.' } }
+      return { ok: false, body: { error: 'Het AI-advies lukte niet. Je kunt de menukopjes zelf beoordelen.' } }
     } finally {
       setBusy(false)
     }

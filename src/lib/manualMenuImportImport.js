@@ -48,7 +48,7 @@ const ROW_CODES = {
   unknown_source: { state: 'error', label: 'staat niet in de bron', askAi: false },
   locator_invalid: { state: 'error', label: 'staat niet in de bron', askAi: true },
   scan_unverified: { state: 'unverifiable', label: 'uit scan, controleer', askAi: true },
-  category_uncertain: { state: 'unverifiable', label: 'rubriek controleren', askAi: true },
+  category_uncertain: { state: 'unverifiable', label: 'menukopje controleren', askAi: true },
   price_variant: { state: 'unsupported', label: 'twee prijzen', askAi: false },
   price_unknown: { state: 'review', label: 'prijs onbekend', askAi: false },
   price_on_request: { state: 'review', label: 'prijs op aanvraag', askAi: false },

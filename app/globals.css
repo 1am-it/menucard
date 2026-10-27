@@ -4456,3 +4456,91 @@ header, .site-header { height: auto; min-height: var(--header-h); }
 
 
 
+
+/* ── BE-31 (#74) "Bronnen beoordelen", the shared result row and Dekking ──────
+   Approved reference: docs/mockups/bronnen-v2/ (screens 1-7). Only existing
+   Kleurtaal v2 tokens are used, so light and dark follow automatically. */
+.brn-breadcrumb { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px; font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+.brn-route { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--text-secondary); }
+.brn-title-row { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin: 6px 0 0; }
+.brn-subtitle { font-size: 14px; color: var(--text-secondary); }
+.brn-hint { margin: 0; font-size: 13px; color: var(--text-secondary); }
+.brn-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.brn-chip { min-height: 40px; padding: 8px 14px; border-radius: var(--radius-pill); border: 1px solid var(--border); background: var(--surface-soft); color: var(--text-primary); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+.brn-chip[aria-pressed="true"] { background: var(--accent-fill); border-color: var(--accent); color: var(--on-accent-fill); }
+.brn-chip:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+.brn-layout { display: flex; gap: 20px; align-items: flex-start; margin-top: 16px; }
+.brn-list { width: 470px; flex: none; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.brn-count { margin: 0; font-size: 13px; color: var(--text-secondary); }
+.brn-tasks { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.brn-task { width: 100%; min-height: 44px; display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: var(--radius-lg); border: 1px solid var(--border); background: var(--bg-card); color: var(--text-primary); font: inherit; text-align: left; cursor: pointer; }
+.brn-task:hover { border-color: var(--input-border); }
+.brn-task[aria-current="true"] { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+.brn-task:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+.brn-task-emoji { width: 42px; height: 42px; flex: none; border-radius: 12px; background: var(--surface-soft); display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.brn-task-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.brn-task-kind { font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; }
+.brn-task-name { font-size: 15px; font-weight: 800; overflow-wrap: anywhere; }
+.brn-task-what, .brn-task-status { font-size: 13px; color: var(--text-secondary); overflow-wrap: anywhere; }
+.brn-task-arrow { color: var(--accent); font-weight: 800; align-self: center; }
+.brn-detail { flex: 1; min-width: 0; }
+.brn-detail-empty { padding: 18px; border: 1px dashed var(--input-border); border-radius: var(--radius-md); }
+.brn-detail-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px; display: grid; gap: 12px; }
+.brn-detail-kind { font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; }
+.brn-detail-title { margin: 0; font-size: 22px; font-weight: 800; }
+.brn-detail-title:focus { outline: none; }
+.brn-batch-summary { margin: 0; font-size: 13px; color: var(--text-secondary); }
+.brn-notice { margin: 0; font-size: 13px; color: var(--text-secondary); }
+.brn-back { display: none; }
+.brn-empty { margin-top: 16px; padding: 22px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-card); display: grid; gap: 10px; justify-items: start; }
+.brn-empty-title { margin: 0; font-size: 20px; font-weight: 800; }
+.brn-action { min-height: 44px; display: inline-flex; align-items: center; padding: 0 18px; border-radius: var(--radius-pill); text-decoration: none; font-weight: 800; }
+
+
+.srr-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.srr-row { display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-soft); }
+.srr-main { display: flex; gap: 12px; min-width: 0; flex: 1; }
+.srr-emoji { font-size: 20px; line-height: 1.2; }
+.srr-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.srr-name { font-weight: 800; font-size: 15px; overflow-wrap: anywhere; }
+.srr-source, .srr-detail, .srr-found { font-size: 12px; color: var(--text-secondary); overflow-wrap: anywhere; }
+.srr-url { color: var(--text-primary); overflow-wrap: anywhere; }
+.srr-outcome { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 13px; }
+.srr-badge { font-size: 12px; }
+.srr-step { display: flex; align-items: center; }
+.srr-action { min-height: 44px; display: inline-flex; align-items: center; padding: 0 16px; border-radius: var(--radius-pill); font: inherit; font-size: 13px; font-weight: 800; text-decoration: none; }
+.srr-wait, .srr-none { font-size: 13px; color: var(--text-secondary); }
+
+/* Dekking (criterion 3): "Nog niet gecontroleerd" — the same rows the owner
+   approved, with real checkboxes and the existing check route. */
+.cov-check { display: grid; gap: 10px; }
+.cov-check-head { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.cov-check-title { margin: 0; font-weight: 800; }
+.cov-check-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.cov-check-table th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-secondary); padding: 8px 0; border-bottom: 1px solid var(--border); }
+.cov-check-table td { padding: 10px 8px 10px 0; border-bottom: 1px solid var(--border); vertical-align: top; }
+.cov-check-table td:last-child { padding-right: 0; }
+.cov-check-name { font-weight: 700; overflow-wrap: anywhere; }
+.cov-check-meta { font-size: 12px; color: var(--text-secondary); overflow-wrap: anywhere; }
+.cov-check-action { min-height: 44px; display: inline-flex; align-items: center; padding: 0 14px; border-radius: var(--radius-pill); font: inherit; font-size: 13px; font-weight: 800; text-decoration: none; white-space: nowrap; }
+.cov-check-select { width: 20px; height: 20px; }
+
+@media (max-width: 900px) {
+  .brn-list { width: 100%; }
+  .brn-layout { flex-direction: column; }
+}
+@media (max-width: 720px) {
+  /* One list; a chosen task is its own screen (criterion 2). */
+  .brn-layout--selected .brn-list { display: none; }
+  .brn-layout--selected .brn-detail { display: block; }
+  .brn-back { display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; border-radius: var(--radius-pill); font-size: 14px; }
+  .brn-chips { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; }
+  .brn-chip { flex: none; }
+  .srr-step { width: 100%; }
+  .srr-action { width: 100%; justify-content: center; }
+  .cov-check-table thead { display: none; }
+  .cov-check-table, .cov-check-table tbody, .cov-check-table tr, .cov-check-table td { display: block; width: 100%; }
+  .cov-check-table tr { border-bottom: 1px solid var(--border); padding: 10px 0; }
+  .cov-check-table td { border: 0; padding: 2px 0; }
+}
+

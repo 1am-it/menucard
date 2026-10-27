@@ -137,7 +137,7 @@ const KINDS = [
   {
     code: 'too_many_categories',
     phrase: 'staan meer rubrieken dan het schema toestaat',
-    hint: 'Beperk het aantal rubrieken per menukaart.',
+    hint: 'Beperk het aantal menukopjes per menukaart.',
   },
   {
     code: 'too_many_menus',
@@ -157,7 +157,7 @@ const KINDS = [
   {
     code: 'items_missing',
     phrase: 'ontbreekt de lijst met gerechten',
-    hint: 'Geef elke rubriek een items-lijst.',
+    hint: 'Geef elk menukopje een items-lijst.',
   },
   {
     code: 'menu_source_unknown',
@@ -182,7 +182,7 @@ const KINDS = [
   {
     code: 'category_path_invalid',
     phrase: 'is het rubriekpad te lang of geen lijst met namen',
-    hint: 'Maak het rubriekpad een korte lijst met namen.',
+    hint: 'Maak het pad van het menukopje een korte lijst met namen.',
   },
   {
     code: 'category_uncertain_invalid',

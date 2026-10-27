@@ -40,7 +40,7 @@ const COUNT_ROUTE_PATH = path.join(REPO_ROOT, 'app/api/internal/v1/workqueue-cou
 const NAV_COMPONENT_PATH = path.join(REPO_ROOT, 'src/components/InternalNav.js');
 const GLOBALS_CSS_PATH = path.join(REPO_ROOT, 'app/globals.css');
 const ADD_PAGE_PATH = path.join(REPO_ROOT, 'app/internal/toevoegen/page.js');
-const BATCH_PAGE_PATH = path.join(REPO_ROOT, 'app/internal/source-triage/batch/page.js');
+const BATCH_PAGE_PATH = path.join(REPO_ROOT, 'app/internal/bronnen/batch/page.js');
 const COVERAGE_PAGE_PATH = path.join(REPO_ROOT, 'app/internal/coverage/page.js');
 const IMPORT_INBOX_PAGE_PATH = path.join(REPO_ROOT, 'app/internal/import-inbox/page.js');
 const PROFILE_DRAFTS_PAGE_PATH = path.join(REPO_ROOT, 'app/internal/profile-drafts/page.js');
@@ -94,7 +94,7 @@ test('open work has the contract order and the contract labels, each with its re
     openWork.map((m) => [m.id, m.label, m.href, m.countKey]),
     [
       ['menu-concepts', 'Menuconcepten beoordelen', '/internal/menu-concepts', 'menu-concepts'],
-      ['source-triage', 'Bronnen beoordelen', '/internal/source-triage', 'source-triage'],
+      ['source-triage', 'Bronnen beoordelen', '/internal/bronnen', 'source-triage'],
       ['import-inbox', 'Nieuwe aanleveringen', '/internal/import-inbox', 'import-inbox'],
       ['moderation', 'Beoordelen', '/internal/moderation', 'moderation'],
     ],
@@ -251,7 +251,7 @@ test('resolveOpenWorkTotal: one missing number means no total at all, never an u
 
 test('resolveLandingHref: the visible open-work section with the most real open work wins', () => {
   const roles = [{ role: 'internal' }];
-  assert.equal(resolveLandingHref(roles, { 'menu-concepts': 2, 'source-triage': 8, 'import-inbox': 1 }), '/internal/source-triage');
+  assert.equal(resolveLandingHref(roles, { 'menu-concepts': 2, 'source-triage': 8, 'import-inbox': 1 }), '/internal/bronnen');
   assert.equal(resolveLandingHref(roles, { 'menu-concepts': 9, 'source-triage': 8, 'import-inbox': 1 }), '/internal/menu-concepts');
   assert.equal(resolveLandingHref(roles, { 'menu-concepts': 1, 'source-triage': 2, 'import-inbox': 7 }), '/internal/import-inbox');
 });
@@ -259,7 +259,7 @@ test('resolveLandingHref: the visible open-work section with the most real open 
 test('resolveLandingHref: a tie follows the contract order (Menuconcepten, Bronnen, Nieuwe aanleveringen, Beoordelen)', () => {
   const both = [{ role: 'internal' }, { role: 'editor' }];
   assert.equal(resolveLandingHref(both, { 'menu-concepts': 5, 'source-triage': 5, 'import-inbox': 5, moderation: 5 }), '/internal/menu-concepts');
-  assert.equal(resolveLandingHref(both, { 'menu-concepts': 0, 'source-triage': 5, 'import-inbox': 5, moderation: 5 }), '/internal/source-triage');
+  assert.equal(resolveLandingHref(both, { 'menu-concepts': 0, 'source-triage': 5, 'import-inbox': 5, moderation: 5 }), '/internal/bronnen');
   assert.equal(resolveLandingHref(both, { 'menu-concepts': 0, 'source-triage': 0, 'import-inbox': 5, moderation: 5 }), '/internal/import-inbox');
   assert.equal(resolveLandingHref(both, { 'menu-concepts': 0, 'source-triage': 0, 'import-inbox': 0, moderation: 4 }), '/internal/moderation');
 });
@@ -496,7 +496,10 @@ test('structural safety net: the add page reuses the existing analysis and onboa
   assert.match(source, /const BATCH_API = '\/api\/internal\/v1\/batch-analysis'/);
   assert.match(source, /method: 'POST'/);
   assert.match(source, /router\.push\(decision\.href\)/);
-  assert.match(source, /router\.push\(`\/internal\/source-triage\/batch\?batch=/);
+  // BE-31 (#74): the result stays under the form as the same rows; the batch
+  // screen is only the fallback link, never a forced destination.
+  assert.match(source, /await loadBatch\(body\.batch\.id\)/);
+  assert.match(source, /SourceResultRow/);
   assert.match(source, /setFallbackHref\(decision\.href\)/);
   assert.doesNotMatch(source, /menu-ai-import/);
 });

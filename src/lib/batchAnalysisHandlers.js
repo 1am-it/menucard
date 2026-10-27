@@ -50,7 +50,7 @@ const RECEIPT_COLUMNS =
   'id, restaurant_match_type, matched_restaurant_id, created_at, canonical_source_url, actor_user_id, analysis_result_hash, menus:candidate_summary->menus, product:candidate_summary->menuExtractionV2';
 const STRUCTURE_COLUMNS = 'id, receipt_id, job_id, path_key, original_path, source_path, locator, decision, corrected_path, actor_user_id, created_at';
 const CONFIRM_NOTE = 'Bevestigd vanuit Batchanalyse na menselijke controle.';
-const STRUCTURE_NOTE = 'Bevestigd vanuit Batchanalyse na expliciete menselijke controle van elke onzekere rubriek.';
+const STRUCTURE_NOTE = 'Bevestigd vanuit Batchanalyse na expliciete menselijke controle van elk onzeker menukopje.';
 
 // Display time for result texts ("Bevestigd om 13:20"), in the market's time zone.
 const CLOCK = new Intl.DateTimeFormat('nl-NL', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Amsterdam' });
@@ -775,7 +775,7 @@ function createBatchAnalysisHandlers(deps) {
     // confirmed; that decision is part of the concept. If its trail cannot be
     // read, the concept is refused rather than saved without it.
     if (item.structureReview && item.structureReview.eligible && item.structureReview.storeAvailable === false) {
-      return reply(409, { error: 'De opgeslagen rubriekcontrole is niet beschikbaar; het concept is niet opgeslagen.', reason: 'structure_store_unavailable' });
+      return reply(409, { error: 'De opgeslagen menukopje-controle is niet beschikbaar; het concept is niet opgeslagen.', reason: 'structure_store_unavailable' });
     }
     const structure = item.concept.structureEdits && typeof item.concept.structureEdits === 'object' ? item.concept.structureEdits : {};
     const concept = buildMenuConcept({

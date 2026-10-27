@@ -20,7 +20,11 @@ const {
 } = require('./sourceTriage');
 
 const ROOT = path.resolve(__dirname, '..', '..');
-const PAGE = fs.readFileSync(path.join(ROOT, 'app', 'internal', 'source-triage', 'page.js'), 'utf8');
+const PAGE = [
+  fs.readFileSync(path.join(ROOT, 'app', 'internal', 'bronnen', 'page.js'), 'utf8'),
+  fs.readFileSync(path.join(ROOT, 'app', 'internal', 'bronnen', 'BronnenView.js'), 'utf8'),
+  fs.readFileSync(path.join(ROOT, 'app', 'internal', 'bronnen', 'ProposalDetail.js'), 'utf8'),
+].join('\n');
 
 const SEARCH = '?restaurant=9001&reason=image_only';
 const ENTRY = { restaurant_id: '9001', name: 'Fictief Brasserie Noord' };

@@ -140,7 +140,7 @@ test('analysis: the menu page is read once and becomes one priced menu context w
   assert.match(firstItem.evidence.locator, /p\[1\]$/);
   assert.match(firstItem.evidence.quote, /Fictieve salade met citroen/);
   assert.ok(menu.categories.every((c) => c.items.every((i) => /^\d+\.\d{2}$/.test(i.price))));
-  assert.ok(result.notes.some((n) => n.startsWith(`Menukaart herkend uit de HTML van ${MENU_URL}: 7 gerechten met prijs in 3 rubrieken.`)));
+  assert.ok(result.notes.some((n) => n.startsWith(`Menukaart herkend uit de HTML van ${MENU_URL}: 7 gerechten met prijs in 3 menukopjes.`)));
   assert.deepEqual(menuSourceUrls(result), [MENU_URL]);
 });
 
@@ -196,7 +196,7 @@ test('entry page: a menu page entered directly is read from its already-fetched 
   assert.equal(result.menuContexts[0].sourceUrl, MENU_URL);
   assert.equal(result.menuContexts[0].extractionMethod, 'html');
   assert.equal(result.menuContexts[0].categories.reduce((n, c) => n + c.items.length, 0), 7);
-  assert.ok(result.notes.some((n) => n.startsWith(`Menukaart herkend uit de HTML van ${MENU_URL}: 7 gerechten met prijs in 3 rubrieken.`)));
+  assert.ok(result.notes.some((n) => n.startsWith(`Menukaart herkend uit de HTML van ${MENU_URL}: 7 gerechten met prijs in 3 menukopjes.`)));
   assert.deepEqual(menuSourceUrls(result), [MENU_URL]);
 });
 

@@ -19,7 +19,10 @@
 const { MAX_BATCH_URLS, precheckLines } = require('./batchAnalysis');
 
 const ONBOARDING_HREF = '/internal/onboarding-restaurant';
-const BATCH_HREF = '/internal/source-triage/batch';
+// BE-31 (#74): the existing batch analysis screen moved under the one address
+// "Bronnen beoordelen". It is still the same BE-25/BE-30 screen with the same
+// API, limits and confirmation route; only its visible address changed.
+const BATCH_HREF = '/internal/bronnen/batch';
 const MANUAL_IMPORT_HREF = '/internal/menu-import';
 
 const MESSAGES = {
