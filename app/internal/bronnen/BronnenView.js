@@ -20,6 +20,8 @@ import {
   COVERAGE_HREF,
   BRONNEN_HREF,
   stepHref,
+  cleanupLabel,
+  cleanupConfirmText,
 } from '@/src/lib/sourceReview'
 
 const KIND_NAMES = { batch: 'Batch', proposal: 'Voorstel', attention: 'Bron vraagt aandacht' }
@@ -89,6 +91,7 @@ export default function BronnenView({
   onRecheckRow,
   picked,
   pickableCount,
+  pickableJobCount,
   onTogglePick,
   onPickAll,
   cleanup,
@@ -100,6 +103,8 @@ export default function BronnenView({
 }) {
   const empty = Boolean(triage) && totalTasks === 0
   const pickedCount = picked ? picked.size : 0
+  // BE-32 (#75, criterion 7): the number of RESULTS the cleanup closes.
+  const cleanupCount = Number.isInteger(pickableJobCount) && pickableJobCount > 0 ? pickableJobCount : pickableCount
   return (
     <>
       <nav aria-label="Kruimelpad" className="brn-breadcrumb">
@@ -181,29 +186,26 @@ export default function BronnenView({
               {pickableCount > 0 ? (
                 <div className="brn-toolbar">
                   <button type="button" className="stg-btn-secondary" onClick={onStartCleanup} disabled={busy}>
-                    🗄️ {CHECK_COPY.cleanup}
+                    🗄️ {cleanupLabel(pickedCount, cleanupCount)}
                   </button>
                   <button type="button" className="stg-btn-secondary" aria-pressed={pickedCount === pickableCount} onClick={onPickAll}>
                     {pickedCount === pickableCount ? 'Selectie wissen' : 'Alles selecteren'}
                   </button>
                   <span className="brn-hint">
                     {pickedCount > 0
-                      ? `${pickedCount} van ${pickableCount} geselecteerd`
-                      : 'Niets geselecteerd: opruimen geldt dan voor alle batchresultaten.'}
+                      ? `${pickedCount} van ${pickableCount} geselecteerd: alleen die resultaten worden afgehandeld.`
+                      : `Niets geselecteerd: "Alle ${cleanupCount} opruimen" handelt alle batchresultaten af. Vink rijen aan om een selectie te maken.`}
                   </span>
                 </div>
               ) : null}
               {cleanup ? (
                 <div className="brn-cleanup-confirm" role="alertdialog" aria-labelledby="brn-cleanup-title">
                   <p id="brn-cleanup-title">
-                    <b>
-                      {cleanup.count} {cleanup.count === 1 ? 'resultaat' : 'resultaten'} afhandelen?
-                    </b>{' '}
-                    {CHECK_COPY.cleanupHint}
+                    <b>{cleanupConfirmText(cleanup)}</b> {CHECK_COPY.cleanupHint}
                   </p>
                   <div className="brn-cleanup-actions">
                     <button type="button" className="di-btn-primary" onClick={onConfirmCleanup} disabled={busy}>
-                      Ja, {cleanup.count} afhandelen
+                      Ja, {cleanup.all ? `alle ${cleanup.count}` : `${cleanup.count}`} afhandelen
                     </button>
                     <button type="button" className="stg-btn-secondary" onClick={onCancelCleanup} disabled={busy}>
                       Annuleren

@@ -195,28 +195,30 @@ async function bronnenScenario(cdp, width, theme) {
     batchTask && batchTask.what,
   );
   check(
-    `scherm 1 (${width}/${theme}): "Oude resultaten opruimen" is offered for batch results`,
+    `scherm 1 (${width}/${theme}): the cleanup action names what it will close ("Alle N opruimen")`,
     await evalJs(cdp, `(() => {
       const buttons = [...document.querySelectorAll('.brn-toolbar button')].map((b) => b.innerText.trim());
       const picks = document.querySelectorAll('.brn-tasks input[type="checkbox"]').length;
       return { buttons, picks };
-    })()`).then((value) => value.buttons.some((label) => label.includes('Oude resultaten opruimen')) && value.picks === 1),
+    })()`).then((value) => value.buttons.some((label) => /Alle \d+ opruimen$/.test(label)) && value.picks === 1),
   );
   await shot(cdp, `be31-scherm1-${width}-${theme}.png`, { screen: 1, theme, fixture: 'bronnen' });
 
   // The one confirmation names the number of results it closes.
-  await evalJs(cdp, `(() => {
-    const button = [...document.querySelectorAll('.brn-toolbar button')].find((b) => b.innerText.includes('Oude resultaten opruimen'));
+  const clickedCleanup = await evalJs(cdp, `(() => {
+    const button = [...document.querySelectorAll('.brn-toolbar button')].find((b) => b.innerText.includes('opruimen'));
     if (button) button.click();
-    return true;
+    return Boolean(button);
   })()`);
+  await waitFor(cdp, `Boolean(document.querySelector('.brn-cleanup-confirm'))`, 5000);
   const cleanup = await evalJs(cdp, `(() => {
     const box = document.querySelector('.brn-cleanup-confirm');
-    return box ? box.innerText.replace(/\\n/g, ' ') : '';
+    const hint = document.querySelector('.brn-toolbar .brn-hint');
+    return box ? box.innerText.replace(/\\n/g, ' ') : ('geen bevestiging; klik=' + ${JSON.stringify(String(clickedCleanup))} + '; hint=' + (hint ? hint.innerText : ''));
   })()`);
   check(
     `scherm 1 (${width}/${theme}): the cleanup confirmation names the number and deletes nothing`,
-    cleanup.includes('7 resultaten afhandelen?') && cleanup.toLowerCase().includes('niets gewist'),
+    cleanup.includes('Alle 7 resultaten afhandelen?') && cleanup.toLowerCase().includes('niets gewist'),
     cleanup,
   );
   await evalJs(cdp, `(() => {
@@ -321,7 +323,7 @@ async function coverageScenario(cdp, width, theme) {
     }));
     return {
       heading: (document.querySelector('.cov-check-title') || {}).textContent || '',
-      button: (document.querySelector('.cov-check-head .cov-check-action') || {}).textContent || '',
+      button: (document.querySelector('#cov-check-title') && document.querySelector('#cov-check-title').parentElement.querySelector('.di-btn-primary') || {}).textContent || '',
       meta: (document.querySelector('.cov-check-meta') || {}).textContent || '',
       rows,
       overflow: document.documentElement.scrollWidth - window.innerWidth,
@@ -363,7 +365,7 @@ async function coverageScenario(cdp, width, theme) {
   check(`scherm 5 (${width}/${theme}): no horizontal overflow`, section.overflow <= 0, `overflow=${section.overflow}`);
   // Selection drives the one explicit button: "Controleer N geselecteerde".
   await evalJs(cdp, `(() => { const box = document.querySelector('.cov-check-table tbody tr input[type="checkbox"]:not([disabled])'); if (box) box.click(); return true; })()`);
-  const selected = await evalJs(cdp, `(document.querySelector('.cov-check-head .cov-check-action') || {}).textContent || ''`);
+  const selected = await evalJs(cdp, `(() => { const title = document.querySelector('#cov-check-title'); const head = title ? title.parentElement : null; const button = head ? head.querySelector('.di-btn-primary') : null; return button ? button.textContent : ''; })()`);
   check(`scherm 5 (${width}/${theme}): selecting a row updates the count`, flatText(selected) === '🔎 Controleer 1 geselecteerde', selected);
   await shot(cdp, `be31-scherm5-${width}-${theme}.png`, { screen: 5, theme });
 }

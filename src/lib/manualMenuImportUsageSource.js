@@ -16,6 +16,7 @@
 const { MAX_SOURCE_ROWS, PROVENANCE_KIND } = require('./manualMenuImportUsage');
 const { AI_READ_PROVENANCE_KIND } = require('./menuAiImport');
 const { adviceCostRow, ADVICE_KIND } = require('./menuStructureAdvice');
+const { parseProposalNote } = require('./sourceDiscovery');
 
 const CONCEPT_TABLE = 'menu_snapshot_proposals';
 const CONCEPT_COLUMNS = 'id, created_at, captured_content';
@@ -25,6 +26,12 @@ const PROVENANCE_KIND_PATH = 'captured_content->importProvenance->>kind';
 const JOB_TABLE = 'restaurant_source_analysis_jobs';
 const ADVICE_COLUMNS = 'id, structure_advice:field_evidence->structureAdvice';
 const ADVICE_KIND_PATH = 'field_evidence->structureAdvice->>kind';
+// BE-32 (#75): het bestaande BE-24-voorstel waar de vindmotor de gemeten
+// AI-kosten in schrijft (`Herkomst: … · kosten: N cent`). Alleen lezen.
+const PROPOSAL_TABLE = 'source_triage_proposals';
+const PROPOSAL_COLUMNS = 'id, proposed_at, note';
+const DISCOVERY_NOTE_PREFIX = 'Herkomst:';
+const DISCOVERY_KIND = 'source_discovery';
 
 /**
  * Leest de conceptrijen met een handmatige AI-importherkomst, oud naar nieuw.
@@ -105,6 +112,44 @@ async function readDurableStructureAdviceRows(supabase, { limit = MAX_SOURCE_ROW
 }
 
 /**
+ * BE-32 (#75): de duurzame AI-kosten van "Vind bronnen" en "Zoek de bron voor
+ * mij". De motor schrijft de gemeten kosten in het `note`-veld van het bestaande
+ * BE-24-voorstel (`Herkomst: … · kosten: N cent`); deze leesfunctie zet ze om
+ * naar dezelfde kostenrijvorm als een AI-lezing, zodat het ene maandbudget van
+ * 1000 cent ze zonder uitzondering meetelt. Alleen `select`: geen insert, geen
+ * update, geen migratie en geen nieuwe tabel.
+ */
+async function readDurableSourceDiscoveryRows(supabase, { limit = MAX_SOURCE_ROWS } = {}) {
+  if (!supabase || typeof supabase.from !== 'function') return { ok: false, code: 'no_client' };
+  const effectiveLimit = Number.isInteger(limit) && limit > 0 ? limit : MAX_SOURCE_ROWS;
+  const { data, error } = await supabase
+    .from(PROPOSAL_TABLE)
+    .select(PROPOSAL_COLUMNS)
+    .like('note', `${DISCOVERY_NOTE_PREFIX}%`)
+    .order('proposed_at', { ascending: true })
+    .limit(effectiveLimit);
+  if (error) return { ok: false, code: 'read_failed' };
+  const rows = [];
+  for (const row of Array.isArray(data) ? data : []) {
+    const parsed = parseProposalNote(row && row.note);
+    if (!Number.isInteger(parsed.costEurCents) || parsed.costEurCents < 0) continue;
+    rows.push({
+      id: row.id,
+      created_at: row.proposed_at,
+      captured_content: {
+        importProvenance: {
+          kind: DISCOVERY_KIND,
+          // One proposal is one paid run: the ledger counts its cost once.
+          readId: `source-discovery:${row.id}`,
+          cost: { eurCents: parsed.costEurCents, known: true },
+        },
+      },
+    });
+  }
+  return { ok: true, rows, limit: effectiveLimit, bounded: Array.isArray(data) && data.length >= effectiveLimit };
+}
+
+/**
  * Beide duurzame AI-kostenbronnen in één lijst: de AI-lezingen (conceptrijen) en
  * de AI-adviezen (jobrijen). Eén teller, één plafond van 1000 cent per maand.
  */
@@ -113,12 +158,26 @@ async function readAllAiUsageRows(supabase, options = {}) {
   if (!concept.ok) return concept;
   const advice = await readDurableStructureAdviceRows(supabase, options);
   if (!advice.ok) return advice;
+  const discovery = await readDurableSourceDiscoveryRows(supabase, options);
+  if (!discovery.ok) return discovery;
   return {
     ok: true,
-    rows: [...concept.rows, ...advice.rows],
+    rows: [...concept.rows, ...advice.rows, ...discovery.rows],
     limit: concept.limit,
-    bounded: Boolean(concept.bounded || advice.bounded),
+    bounded: Boolean(concept.bounded || advice.bounded || discovery.bounded),
   };
 }
 
-module.exports = { CONCEPT_TABLE, CONCEPT_COLUMNS, PROVENANCE_KIND_PATH, readDurableUsageRows, readDurableAiReadRows, readDurableStructureAdviceRows, readAllAiUsageRows };
+module.exports = {
+  CONCEPT_TABLE,
+  CONCEPT_COLUMNS,
+  PROVENANCE_KIND_PATH,
+  PROPOSAL_TABLE,
+  DISCOVERY_KIND,
+  DISCOVERY_NOTE_PREFIX,
+  readDurableUsageRows,
+  readDurableAiReadRows,
+  readDurableStructureAdviceRows,
+  readDurableSourceDiscoveryRows,
+  readAllAiUsageRows,
+};

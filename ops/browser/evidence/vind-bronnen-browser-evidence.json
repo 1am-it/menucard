@@ -1,0 +1,964 @@
+{
+  "generatedAt": "2026-10-27T11:29:16.083Z",
+  "kind": "fixture-browser-check",
+  "task": "BE-32 (#75) Vind bronnen met OpenStreetMap en AI, Nieuw gevonden en de Dekking-kop",
+  "port": 3141,
+  "screenshotsDir": "ops/browser/evidence/be-32",
+  "screenshots": [
+    {
+      "file": "be32-dekking-kop-1280-light.png",
+      "sha256": "1186b5a20b4650ff5388c65a7ea3816a6688e83f8481aaeeadf246f90df55dbe",
+      "width": 1280,
+      "height": 1000,
+      "viewport": "1280x1000",
+      "screen": 5,
+      "part": "kop",
+      "theme": "light"
+    },
+    {
+      "file": "be32-vind-bronnen-1280-light.png",
+      "sha256": "188f82cfa3747907f5e2a20dfbe9971735ac4768585cfa6ba1907646618904c8",
+      "width": 1280,
+      "height": 1000,
+      "viewport": "1280x1000",
+      "screen": 5,
+      "part": "vind-bronnen",
+      "theme": "light"
+    },
+    {
+      "file": "be32-nieuw-gevonden-1280-light.png",
+      "sha256": "80c23449db91df492a6c71da7c9275f72d215b22a36ace6ece7a877cf70a8a21",
+      "width": 1280,
+      "height": 1000,
+      "viewport": "1280x1000",
+      "screen": 8,
+      "theme": "light"
+    },
+    {
+      "file": "be32-toevoegen-1280-light.png",
+      "sha256": "891f33ba7a0fe32ef026a1657a0cb5ffbd5585d89b7f1091fc918b677f502968",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "screen": 7,
+      "theme": "light"
+    },
+    {
+      "file": "be32-dekking-kop-390-light.png",
+      "sha256": "451e6f266e8ea0d8eab947ff580d2d9e36c48beff7489f887443d3a46269bd6c",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "screen": 5,
+      "part": "kop",
+      "theme": "light"
+    },
+    {
+      "file": "be32-vind-bronnen-390-light.png",
+      "sha256": "a3b1d680bf05dc6390199f4d360ae8c1201045cf09191483f3a1795512fea92f",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "screen": 5,
+      "part": "vind-bronnen",
+      "theme": "light"
+    },
+    {
+      "file": "be32-nieuw-gevonden-390-light.png",
+      "sha256": "a69fb844cc04c506599a814bcfa77aa8e437cd9bbb011e3e9dfa17847518d33e",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "screen": 8,
+      "theme": "light"
+    },
+    {
+      "file": "be32-toevoegen-390-light.png",
+      "sha256": "fec884fcd4e70c61b41cbdf812d7753471132d97a9f593a51a3aa93340447a02",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "screen": 7,
+      "theme": "light"
+    },
+    {
+      "file": "be32-dekking-kop-320-light.png",
+      "sha256": "56a602ace9c628cc87f6c3598d2bc4d0c9a005c1cc77143062e08bc9b98a17db",
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "screen": 5,
+      "part": "kop",
+      "theme": "light"
+    },
+    {
+      "file": "be32-vind-bronnen-320-light.png",
+      "sha256": "c6149bac71f32d3253e6175c8335ada1a12e7d8d5774d7a426caa16759b56101",
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "screen": 5,
+      "part": "vind-bronnen",
+      "theme": "light"
+    },
+    {
+      "file": "be32-nieuw-gevonden-320-light.png",
+      "sha256": "d79b7f2104e9004b04c9bf084178a18ec2a8c83e8b3fa6950fdcdd3688f8e61c",
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "screen": 8,
+      "theme": "light"
+    },
+    {
+      "file": "be32-toevoegen-320-light.png",
+      "sha256": "245a3df7f575da2909825de170174945f0430bef9095c2e60055f7fdf0cc5b33",
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "screen": 7,
+      "theme": "light"
+    },
+    {
+      "file": "be32-dekking-kop-1280-dark.png",
+      "sha256": "3be6d563302047c4f698cfe714f0215f1ffdbedcf8b6c63e1ddb1db210e26ecf",
+      "width": 1280,
+      "height": 1000,
+      "viewport": "1280x1000",
+      "screen": 5,
+      "part": "kop",
+      "theme": "dark"
+    },
+    {
+      "file": "be32-vind-bronnen-1280-dark.png",
+      "sha256": "d99175c688563d9583fb2da761fc2056e2068adbb1d6b503c26b55b0659b7e2d",
+      "width": 1280,
+      "height": 1000,
+      "viewport": "1280x1000",
+      "screen": 5,
+      "part": "vind-bronnen",
+      "theme": "dark"
+    },
+    {
+      "file": "be32-nieuw-gevonden-1280-dark.png",
+      "sha256": "98a76719a299401cd727f6655c67f4cc7b361422663cd6b2b9e532a5e73f86d2",
+      "width": 1280,
+      "height": 1000,
+      "viewport": "1280x1000",
+      "screen": 8,
+      "theme": "dark"
+    },
+    {
+      "file": "be32-toevoegen-1280-dark.png",
+      "sha256": "93744b5ccda3315052b6801473b9f8d86c94aa0bb6d4037933e429ac5ea332c3",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "screen": 7,
+      "theme": "dark"
+    },
+    {
+      "file": "be32-dekking-kop-390-dark.png",
+      "sha256": "0a62a572bd3dbce35955d50a41fcfce349b63ba8ed97bd9371c662912af3bd6e",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "screen": 5,
+      "part": "kop",
+      "theme": "dark"
+    },
+    {
+      "file": "be32-vind-bronnen-390-dark.png",
+      "sha256": "d92ed2cc32b77a220faefaa8f11b2559a7d6b75a1bbe14f00276aaabc7b5f82c",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "screen": 5,
+      "part": "vind-bronnen",
+      "theme": "dark"
+    },
+    {
+      "file": "be32-nieuw-gevonden-390-dark.png",
+      "sha256": "34aaa1ea45a9e52bb101efcbfecc85f49b5b5e9e3727385dc0e770e83e10e9c5",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "screen": 8,
+      "theme": "dark"
+    },
+    {
+      "file": "be32-toevoegen-390-dark.png",
+      "sha256": "83e2605abfcaa02c3c06a2d91037f8680be9c54924ab29117479204d39e44b38",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "screen": 7,
+      "theme": "dark"
+    },
+    {
+      "file": "be32-dekking-kop-320-dark.png",
+      "sha256": "a4ec52e3ed9fa68f9c031f7949442337f9414cad27547a6a32c682067e491bb8",
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "screen": 5,
+      "part": "kop",
+      "theme": "dark"
+    },
+    {
+      "file": "be32-vind-bronnen-320-dark.png",
+      "sha256": "a9d55d4b57799f2252713351ef739647c3bc4200edd410b2956d1b56bb0a8867",
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "screen": 5,
+      "part": "vind-bronnen",
+      "theme": "dark"
+    },
+    {
+      "file": "be32-nieuw-gevonden-320-dark.png",
+      "sha256": "2415c16a676f2ec172cf5e0718607de0ade51b34c8129a6ac4a8f0bdd51c2404",
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "screen": 8,
+      "theme": "dark"
+    },
+    {
+      "file": "be32-toevoegen-320-dark.png",
+      "sha256": "6b2b492f7353d2b1383ababd82bd3556d2192bbc1e89d60da3168475fae481c4",
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "screen": 7,
+      "theme": "dark"
+    }
+  ],
+  "checks": [
+    {
+      "name": "fixture bootstrap without error (http://localhost:3141/internal/coverage?theme=light&fixture=vindBronnen&navCounts=bronnen)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "warm-up: the route compiles and the Dekking top renders",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3141/internal/coverage?theme=light&fixture=vindBronnen&navCounts=bronnen)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "dekking-kop (1280/light): the Dutch title is shown",
+      "passed": true,
+      "detail": "Dekking 📊"
+    },
+    {
+      "name": "dekking-kop (1280/light): exactly three tiles — restaurants, met menukaart, nog niet gecontroleerd",
+      "passed": true,
+      "detail": "[\"25 🍽️ restaurants\",\"5 📋 met menukaart 20% van 25\",\"4 🔎 nog niet gecontroleerd\"]"
+    },
+    {
+      "name": "dekking-kop (1280/light): \"✨ Vind bronnen (N)\" and the existing check button are both offered",
+      "passed": true,
+      "detail": "[\"✨ Vind bronnen (4)\",\"🔎 Controleer 0 geselecteerde\"]"
+    },
+    {
+      "name": "dekking-kop (1280/light): the found proposal is a row with \"Bevestig voorstel\" and its provenance",
+      "passed": true,
+      "detail": "[\"✅ Bevestig voorstel\",\"\",\"✍️ Handmatig toevoegen\",\"🔎 Controleer bron\",\"＋ Toevoegen\",\"＋ Toevoegen\"]"
+    },
+    {
+      "name": "theme (1280/light): the requested theme is active",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "dekking-kop (1280/light): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=-6"
+    },
+    {
+      "name": "vind-bronnen (1280/light): the summary appears after the run",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "vind-bronnen (1280/light): the summary names the layers and the proposal",
+      "passed": true,
+      "detail": "✨ Vind bronnen klaar: 1 website voorgesteld (🗺️ 1 OpenStreetMap · 🌐 0 eigen website · 🤖 0 AI-keuze · 🤖 0 AI-zoeken) · 1 niet gevonden. Alles is een voorstel: je bevestigt per rij.\n\nKosten AI: 2 cent van je maandbudget (€ 9,62 over van € 10).\n\nKaartgegevens: © OpenStreetMap-bijdragers."
+    },
+    {
+      "name": "vind-bronnen (1280/light): the AI cost and the attribution are visible",
+      "passed": true,
+      "detail": "✨ Vind bronnen klaar: 1 website voorgesteld (🗺️ 1 OpenStreetMap · 🌐 0 eigen website · 🤖 0 AI-keuze · 🤖 0 AI-zoeken) · 1 niet gevonden. Alles is een voorstel: je bevestigt per rij.\n\nKosten AI: 2 cent van je maandbudget (€ 9,62 over van € 10).\n\nKaartgegevens: © OpenStreetMap-bijdragers."
+    },
+    {
+      "name": "vind-bronnen (1280/light): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=-6"
+    },
+    {
+      "name": "nieuw-gevonden (1280/light): the section counts and explains itself",
+      "passed": true,
+      "detail": "🆕 Nieuw gevonden (2) / 2"
+    },
+    {
+      "name": "nieuw-gevonden (1280/light): every row offers \"＋ Toevoegen\" and \"Negeren\"",
+      "passed": true,
+      "detail": "[\"＋ Toevoegen | Negeren\",\"＋ Toevoegen | Negeren\"]"
+    },
+    {
+      "name": "nieuw-gevonden (1280/light): \"Dekking voegt nooit zelf iets toe\" and the attribution are stated",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "nieuw-gevonden (1280/light): \"＋ Toevoegen\" opens the form with name, address and website",
+      "passed": true,
+      "detail": "/internal/toevoegen?naam=Trattoria+Fictief&adres=Havermarkt+1%2C+4811+WJ+Breda&website=https%3A%2F%2Ftrattoria-fictief.invalid&osm=node%2Ffictief-1"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3141/internal/toevoegen?theme=light&fixture=vindBronnen&navCounts=bronnen&naam=Trattoria+Fictief&adres=Havermarkt+1%2C+4811+WJ+Breda&website=https%3A%2F%2Ftrattoria-fictief.invalid&osm=node%2Ffictief-1)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "scherm 7 (1280/light): name, website and the OSM line are filled in",
+      "passed": true,
+      "detail": "{\"name\":\"Trattoria Fictief\",\"urls\":\"https://trattoria-fictief.invalid\"}"
+    },
+    {
+      "name": "scherm 7 (1280/light): \"✨ Zoek de bron voor mij\" is offered",
+      "passed": true,
+      "detail": "[\"✨ Zoek de bron voor mij\"]"
+    },
+    {
+      "name": "scherm 7 (1280/light): the restaurant search answers with a choice",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 7 (1280/light): the result appears as the same rows as Dekking",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 7 (1280/light): the found proposal offers \"Bevestig voorstel\" with its origin",
+      "passed": true,
+      "detail": "[\"✅ Bevestig voorstel\",\"Geen voorstel\"]"
+    },
+    {
+      "name": "scherm 7 (1280/light): the not-found row says why, and nothing is published",
+      "passed": true,
+      "detail": "Gevonden bron · dezelfde rijen als in Dekking |  | ✨ Vind bronnen klaar: 1 website voorgesteld (🗺️ 1 OpenStreetMap · 🌐 0 eigen website · 🤖 0 AI-keuze · 🤖 0 AI-zoeken) · 1 niet gevonden. Alles is een voorstel: je bevestigt per rij. |  | "
+    },
+    {
+      "name": "scherm 7 (1280/light): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=-6"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3141/internal/coverage?theme=light&fixture=vindBronnen&navCounts=bronnen)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "dekking-kop (390/light): the Dutch title is shown",
+      "passed": true,
+      "detail": "Dekking 📊"
+    },
+    {
+      "name": "dekking-kop (390/light): exactly three tiles — restaurants, met menukaart, nog niet gecontroleerd",
+      "passed": true,
+      "detail": "[\"25 🍽️ restaurants\",\"5 📋 met menukaart 20% van 25\",\"4 🔎 nog niet gecontroleerd\"]"
+    },
+    {
+      "name": "dekking-kop (390/light): \"✨ Vind bronnen (N)\" and the existing check button are both offered",
+      "passed": true,
+      "detail": "[\"✨ Vind bronnen (4)\",\"🔎 Controleer 0 geselecteerde\"]"
+    },
+    {
+      "name": "dekking-kop (390/light): the found proposal is a row with \"Bevestig voorstel\" and its provenance",
+      "passed": true,
+      "detail": "[\"✅ Bevestig voorstel\",\"\",\"✍️ Handmatig toevoegen\",\"🔎 Controleer bron\",\"＋ Toevoegen\",\"＋ Toevoegen\"]"
+    },
+    {
+      "name": "theme (390/light): the requested theme is active",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "dekking-kop (390/light): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "vind-bronnen (390/light): the summary appears after the run",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "vind-bronnen (390/light): the summary names the layers and the proposal",
+      "passed": true,
+      "detail": "✨ Vind bronnen klaar: 1 website voorgesteld (🗺️ 1 OpenStreetMap · 🌐 0 eigen website · 🤖 0 AI-keuze · 🤖 0 AI-zoeken) · 1 niet gevonden. Alles is een voorstel: je bevestigt per rij.\n\nKosten AI: 2 cent van je maandbudget (€ 9,62 over van € 10).\n\nKaartgegevens: © OpenStreetMap-bijdragers."
+    },
+    {
+      "name": "vind-bronnen (390/light): the AI cost and the attribution are visible",
+      "passed": true,
+      "detail": "✨ Vind bronnen klaar: 1 website voorgesteld (🗺️ 1 OpenStreetMap · 🌐 0 eigen website · 🤖 0 AI-keuze · 🤖 0 AI-zoeken) · 1 niet gevonden. Alles is een voorstel: je bevestigt per rij.\n\nKosten AI: 2 cent van je maandbudget (€ 9,62 over van € 10).\n\nKaartgegevens: © OpenStreetMap-bijdragers."
+    },
+    {
+      "name": "vind-bronnen (390/light): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "nieuw-gevonden (390/light): the section counts and explains itself",
+      "passed": true,
+      "detail": "🆕 Nieuw gevonden (2) / 2"
+    },
+    {
+      "name": "nieuw-gevonden (390/light): every row offers \"＋ Toevoegen\" and \"Negeren\"",
+      "passed": true,
+      "detail": "[\"＋ Toevoegen | Negeren\",\"＋ Toevoegen | Negeren\"]"
+    },
+    {
+      "name": "nieuw-gevonden (390/light): \"Dekking voegt nooit zelf iets toe\" and the attribution are stated",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "nieuw-gevonden (390/light): \"＋ Toevoegen\" opens the form with name, address and website",
+      "passed": true,
+      "detail": "/internal/toevoegen?naam=Trattoria+Fictief&adres=Havermarkt+1%2C+4811+WJ+Breda&website=https%3A%2F%2Ftrattoria-fictief.invalid&osm=node%2Ffictief-1"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3141/internal/toevoegen?theme=light&fixture=vindBronnen&navCounts=bronnen&naam=Trattoria+Fictief&adres=Havermarkt+1%2C+4811+WJ+Breda&website=https%3A%2F%2Ftrattoria-fictief.invalid&osm=node%2Ffictief-1)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "scherm 7 (390/light): name, website and the OSM line are filled in",
+      "passed": true,
+      "detail": "{\"name\":\"Trattoria Fictief\",\"urls\":\"https://trattoria-fictief.invalid\"}"
+    },
+    {
+      "name": "scherm 7 (390/light): \"✨ Zoek de bron voor mij\" is offered",
+      "passed": true,
+      "detail": "[\"✨ Zoek de bron voor mij\"]"
+    },
+    {
+      "name": "scherm 7 (390/light): the restaurant search answers with a choice",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 7 (390/light): the result appears as the same rows as Dekking",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 7 (390/light): the found proposal offers \"Bevestig voorstel\" with its origin",
+      "passed": true,
+      "detail": "[\"✅ Bevestig voorstel\",\"Geen voorstel\"]"
+    },
+    {
+      "name": "scherm 7 (390/light): the not-found row says why, and nothing is published",
+      "passed": true,
+      "detail": "Gevonden bron · dezelfde rijen als in Dekking |  | ✨ Vind bronnen klaar: 1 website voorgesteld (🗺️ 1 OpenStreetMap · 🌐 0 eigen website · 🤖 0 AI-keuze · 🤖 0 AI-zoeken) · 1 niet gevonden. Alles is een voorstel: je bevestigt per rij. |  | "
+    },
+    {
+      "name": "scherm 7 (390/light): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3141/internal/coverage?theme=light&fixture=vindBronnen&navCounts=bronnen)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "dekking-kop (320/light): the Dutch title is shown",
+      "passed": true,
+      "detail": "Dekking 📊"
+    },
+    {
+      "name": "dekking-kop (320/light): exactly three tiles — restaurants, met menukaart, nog niet gecontroleerd",
+      "passed": true,
+      "detail": "[\"25 🍽️ restaurants\",\"5 📋 met menukaart 20% van 25\",\"4 🔎 nog niet gecontroleerd\"]"
+    },
+    {
+      "name": "dekking-kop (320/light): \"✨ Vind bronnen (N)\" and the existing check button are both offered",
+      "passed": true,
+      "detail": "[\"✨ Vind bronnen (4)\",\"🔎 Controleer 0 geselecteerde\"]"
+    },
+    {
+      "name": "dekking-kop (320/light): the found proposal is a row with \"Bevestig voorstel\" and its provenance",
+      "passed": true,
+      "detail": "[\"✅ Bevestig voorstel\",\"\",\"✍️ Handmatig toevoegen\",\"🔎 Controleer bron\",\"＋ Toevoegen\",\"＋ Toevoegen\"]"
+    },
+    {
+      "name": "theme (320/light): the requested theme is active",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "dekking-kop (320/light): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "vind-bronnen (320/light): the summary appears after the run",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "vind-bronnen (320/light): the summary names the layers and the proposal",
+      "passed": true,
+      "detail": "✨ Vind bronnen klaar: 1 website voorgesteld (🗺️ 1 OpenStreetMap · 🌐 0 eigen website · 🤖 0 AI-keuze · 🤖 0 AI-zoeken) · 1 niet gevonden. Alles is een voorstel: je bevestigt per rij.\n\nKosten AI: 2 cent van je maandbudget (€ 9,62 over van € 10).\n\nKaartgegevens: © OpenStreetMap-bijdragers."
+    },
+    {
+      "name": "vind-bronnen (320/light): the AI cost and the attribution are visible",
+      "passed": true,
+      "detail": "✨ Vind bronnen klaar: 1 website voorgesteld (🗺️ 1 OpenStreetMap · 🌐 0 eigen website · 🤖 0 AI-keuze · 🤖 0 AI-zoeken) · 1 niet gevonden. Alles is een voorstel: je bevestigt per rij.\n\nKosten AI: 2 cent van je maandbudget (€ 9,62 over van € 10).\n\nKaartgegevens: © OpenStreetMap-bijdragers."
+    },
+    {
+      "name": "vind-bronnen (320/light): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "nieuw-gevonden (320/light): the section counts and explains itself",
+      "passed": true,
+      "detail": "🆕 Nieuw gevonden (2) / 2"
+    },
+    {
+      "name": "nieuw-gevonden (320/light): every row offers \"＋ Toevoegen\" and \"Negeren\"",
+      "passed": true,
+      "detail": "[\"＋ Toevoegen | Negeren\",\"＋ Toevoegen | Negeren\"]"
+    },
+    {
+      "name": "nieuw-gevonden (320/light): \"Dekking voegt nooit zelf iets toe\" and the attribution are stated",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "nieuw-gevonden (320/light): \"＋ Toevoegen\" opens the form with name, address and website",
+      "passed": true,
+      "detail": "/internal/toevoegen?naam=Trattoria+Fictief&adres=Havermarkt+1%2C+4811+WJ+Breda&website=https%3A%2F%2Ftrattoria-fictief.invalid&osm=node%2Ffictief-1"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3141/internal/toevoegen?theme=light&fixture=vindBronnen&navCounts=bronnen&naam=Trattoria+Fictief&adres=Havermarkt+1%2C+4811+WJ+Breda&website=https%3A%2F%2Ftrattoria-fictief.invalid&osm=node%2Ffictief-1)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "scherm 7 (320/light): name, website and the OSM line are filled in",
+      "passed": true,
+      "detail": "{\"name\":\"Trattoria Fictief\",\"urls\":\"https://trattoria-fictief.invalid\"}"
+    },
+    {
+      "name": "scherm 7 (320/light): \"✨ Zoek de bron voor mij\" is offered",
+      "passed": true,
+      "detail": "[\"✨ Zoek de bron voor mij\"]"
+    },
+    {
+      "name": "scherm 7 (320/light): the restaurant search answers with a choice",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 7 (320/light): the result appears as the same rows as Dekking",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 7 (320/light): the found proposal offers \"Bevestig voorstel\" with its origin",
+      "passed": true,
+      "detail": "[\"✅ Bevestig voorstel\",\"Geen voorstel\"]"
+    },
+    {
+      "name": "scherm 7 (320/light): the not-found row says why, and nothing is published",
+      "passed": true,
+      "detail": "Gevonden bron · dezelfde rijen als in Dekking |  | ✨ Vind bronnen klaar: 1 website voorgesteld (🗺️ 1 OpenStreetMap · 🌐 0 eigen website · 🤖 0 AI-keuze · 🤖 0 AI-zoeken) · 1 niet gevonden. Alles is een voorstel: je bevestigt per rij. |  | "
+    },
+    {
+      "name": "scherm 7 (320/light): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3141/internal/coverage?theme=dark&fixture=vindBronnen&navCounts=bronnen)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "dekking-kop (1280/dark): the Dutch title is shown",
+      "passed": true,
+      "detail": "Dekking 📊"
+    },
+    {
+      "name": "dekking-kop (1280/dark): exactly three tiles — restaurants, met menukaart, nog niet gecontroleerd",
+      "passed": true,
+      "detail": "[\"25 🍽️ restaurants\",\"5 📋 met menukaart 20% van 25\",\"4 🔎 nog niet gecontroleerd\"]"
+    },
+    {
+      "name": "dekking-kop (1280/dark): \"✨ Vind bronnen (N)\" and the existing check button are both offered",
+      "passed": true,
+      "detail": "[\"✨ Vind bronnen (4)\",\"🔎 Controleer 0 geselecteerde\"]"
+    },
+    {
+      "name": "dekking-kop (1280/dark): the found proposal is a row with \"Bevestig voorstel\" and its provenance",
+      "passed": true,
+      "detail": "[\"✅ Bevestig voorstel\",\"\",\"✍️ Handmatig toevoegen\",\"🔎 Controleer bron\",\"＋ Toevoegen\",\"＋ Toevoegen\"]"
+    },
+    {
+      "name": "theme (1280/dark): the requested theme is active",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "dekking-kop (1280/dark): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=-6"
+    },
+    {
+      "name": "vind-bronnen (1280/dark): the summary appears after the run",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "vind-bronnen (1280/dark): the summary names the layers and the proposal",
+      "passed": true,
+      "detail": "✨ Vind bronnen klaar: 1 website voorgesteld (🗺️ 1 OpenStreetMap · 🌐 0 eigen website · 🤖 0 AI-keuze · 🤖 0 AI-zoeken) · 1 niet gevonden. Alles is een voorstel: je bevestigt per rij.\n\nKosten AI: 2 cent van je maandbudget (€ 9,62 over van € 10).\n\nKaartgegevens: © OpenStreetMap-bijdragers."
+    },
+    {
+      "name": "vind-bronnen (1280/dark): the AI cost and the attribution are visible",
+      "passed": true,
+      "detail": "✨ Vind bronnen klaar: 1 website voorgesteld (🗺️ 1 OpenStreetMap · 🌐 0 eigen website · 🤖 0 AI-keuze · 🤖 0 AI-zoeken) · 1 niet gevonden. Alles is een voorstel: je bevestigt per rij.\n\nKosten AI: 2 cent van je maandbudget (€ 9,62 over van € 10).\n\nKaartgegevens: © OpenStreetMap-bijdragers."
+    },
+    {
+      "name": "vind-bronnen (1280/dark): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=-6"
+    },
+    {
+      "name": "nieuw-gevonden (1280/dark): the section counts and explains itself",
+      "passed": true,
+      "detail": "🆕 Nieuw gevonden (2) / 2"
+    },
+    {
+      "name": "nieuw-gevonden (1280/dark): every row offers \"＋ Toevoegen\" and \"Negeren\"",
+      "passed": true,
+      "detail": "[\"＋ Toevoegen | Negeren\",\"＋ Toevoegen | Negeren\"]"
+    },
+    {
+      "name": "nieuw-gevonden (1280/dark): \"Dekking voegt nooit zelf iets toe\" and the attribution are stated",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "nieuw-gevonden (1280/dark): \"＋ Toevoegen\" opens the form with name, address and website",
+      "passed": true,
+      "detail": "/internal/toevoegen?naam=Trattoria+Fictief&adres=Havermarkt+1%2C+4811+WJ+Breda&website=https%3A%2F%2Ftrattoria-fictief.invalid&osm=node%2Ffictief-1"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3141/internal/toevoegen?theme=dark&fixture=vindBronnen&navCounts=bronnen&naam=Trattoria+Fictief&adres=Havermarkt+1%2C+4811+WJ+Breda&website=https%3A%2F%2Ftrattoria-fictief.invalid&osm=node%2Ffictief-1)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "scherm 7 (1280/dark): name, website and the OSM line are filled in",
+      "passed": true,
+      "detail": "{\"name\":\"Trattoria Fictief\",\"urls\":\"https://trattoria-fictief.invalid\"}"
+    },
+    {
+      "name": "scherm 7 (1280/dark): \"✨ Zoek de bron voor mij\" is offered",
+      "passed": true,
+      "detail": "[\"✨ Zoek de bron voor mij\"]"
+    },
+    {
+      "name": "scherm 7 (1280/dark): the restaurant search answers with a choice",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 7 (1280/dark): the result appears as the same rows as Dekking",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 7 (1280/dark): the found proposal offers \"Bevestig voorstel\" with its origin",
+      "passed": true,
+      "detail": "[\"✅ Bevestig voorstel\",\"Geen voorstel\"]"
+    },
+    {
+      "name": "scherm 7 (1280/dark): the not-found row says why, and nothing is published",
+      "passed": true,
+      "detail": "Gevonden bron · dezelfde rijen als in Dekking |  | ✨ Vind bronnen klaar: 1 website voorgesteld (🗺️ 1 OpenStreetMap · 🌐 0 eigen website · 🤖 0 AI-keuze · 🤖 0 AI-zoeken) · 1 niet gevonden. Alles is een voorstel: je bevestigt per rij. |  | "
+    },
+    {
+      "name": "scherm 7 (1280/dark): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=-6"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3141/internal/coverage?theme=dark&fixture=vindBronnen&navCounts=bronnen)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "dekking-kop (390/dark): the Dutch title is shown",
+      "passed": true,
+      "detail": "Dekking 📊"
+    },
+    {
+      "name": "dekking-kop (390/dark): exactly three tiles — restaurants, met menukaart, nog niet gecontroleerd",
+      "passed": true,
+      "detail": "[\"25 🍽️ restaurants\",\"5 📋 met menukaart 20% van 25\",\"4 🔎 nog niet gecontroleerd\"]"
+    },
+    {
+      "name": "dekking-kop (390/dark): \"✨ Vind bronnen (N)\" and the existing check button are both offered",
+      "passed": true,
+      "detail": "[\"✨ Vind bronnen (4)\",\"🔎 Controleer 0 geselecteerde\"]"
+    },
+    {
+      "name": "dekking-kop (390/dark): the found proposal is a row with \"Bevestig voorstel\" and its provenance",
+      "passed": true,
+      "detail": "[\"✅ Bevestig voorstel\",\"\",\"✍️ Handmatig toevoegen\",\"🔎 Controleer bron\",\"＋ Toevoegen\",\"＋ Toevoegen\"]"
+    },
+    {
+      "name": "theme (390/dark): the requested theme is active",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "dekking-kop (390/dark): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "vind-bronnen (390/dark): the summary appears after the run",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "vind-bronnen (390/dark): the summary names the layers and the proposal",
+      "passed": true,
+      "detail": "✨ Vind bronnen klaar: 1 website voorgesteld (🗺️ 1 OpenStreetMap · 🌐 0 eigen website · 🤖 0 AI-keuze · 🤖 0 AI-zoeken) · 1 niet gevonden. Alles is een voorstel: je bevestigt per rij.\n\nKosten AI: 2 cent van je maandbudget (€ 9,62 over van € 10).\n\nKaartgegevens: © OpenStreetMap-bijdragers."
+    },
+    {
+      "name": "vind-bronnen (390/dark): the AI cost and the attribution are visible",
+      "passed": true,
+      "detail": "✨ Vind bronnen klaar: 1 website voorgesteld (🗺️ 1 OpenStreetMap · 🌐 0 eigen website · 🤖 0 AI-keuze · 🤖 0 AI-zoeken) · 1 niet gevonden. Alles is een voorstel: je bevestigt per rij.\n\nKosten AI: 2 cent van je maandbudget (€ 9,62 over van € 10).\n\nKaartgegevens: © OpenStreetMap-bijdragers."
+    },
+    {
+      "name": "vind-bronnen (390/dark): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "nieuw-gevonden (390/dark): the section counts and explains itself",
+      "passed": true,
+      "detail": "🆕 Nieuw gevonden (2) / 2"
+    },
+    {
+      "name": "nieuw-gevonden (390/dark): every row offers \"＋ Toevoegen\" and \"Negeren\"",
+      "passed": true,
+      "detail": "[\"＋ Toevoegen | Negeren\",\"＋ Toevoegen | Negeren\"]"
+    },
+    {
+      "name": "nieuw-gevonden (390/dark): \"Dekking voegt nooit zelf iets toe\" and the attribution are stated",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "nieuw-gevonden (390/dark): \"＋ Toevoegen\" opens the form with name, address and website",
+      "passed": true,
+      "detail": "/internal/toevoegen?naam=Trattoria+Fictief&adres=Havermarkt+1%2C+4811+WJ+Breda&website=https%3A%2F%2Ftrattoria-fictief.invalid&osm=node%2Ffictief-1"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3141/internal/toevoegen?theme=dark&fixture=vindBronnen&navCounts=bronnen&naam=Trattoria+Fictief&adres=Havermarkt+1%2C+4811+WJ+Breda&website=https%3A%2F%2Ftrattoria-fictief.invalid&osm=node%2Ffictief-1)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "scherm 7 (390/dark): name, website and the OSM line are filled in",
+      "passed": true,
+      "detail": "{\"name\":\"Trattoria Fictief\",\"urls\":\"https://trattoria-fictief.invalid\"}"
+    },
+    {
+      "name": "scherm 7 (390/dark): \"✨ Zoek de bron voor mij\" is offered",
+      "passed": true,
+      "detail": "[\"✨ Zoek de bron voor mij\"]"
+    },
+    {
+      "name": "scherm 7 (390/dark): the restaurant search answers with a choice",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 7 (390/dark): the result appears as the same rows as Dekking",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 7 (390/dark): the found proposal offers \"Bevestig voorstel\" with its origin",
+      "passed": true,
+      "detail": "[\"✅ Bevestig voorstel\",\"Geen voorstel\"]"
+    },
+    {
+      "name": "scherm 7 (390/dark): the not-found row says why, and nothing is published",
+      "passed": true,
+      "detail": "Gevonden bron · dezelfde rijen als in Dekking |  | ✨ Vind bronnen klaar: 1 website voorgesteld (🗺️ 1 OpenStreetMap · 🌐 0 eigen website · 🤖 0 AI-keuze · 🤖 0 AI-zoeken) · 1 niet gevonden. Alles is een voorstel: je bevestigt per rij. |  | "
+    },
+    {
+      "name": "scherm 7 (390/dark): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3141/internal/coverage?theme=dark&fixture=vindBronnen&navCounts=bronnen)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "dekking-kop (320/dark): the Dutch title is shown",
+      "passed": true,
+      "detail": "Dekking 📊"
+    },
+    {
+      "name": "dekking-kop (320/dark): exactly three tiles — restaurants, met menukaart, nog niet gecontroleerd",
+      "passed": true,
+      "detail": "[\"25 🍽️ restaurants\",\"5 📋 met menukaart 20% van 25\",\"4 🔎 nog niet gecontroleerd\"]"
+    },
+    {
+      "name": "dekking-kop (320/dark): \"✨ Vind bronnen (N)\" and the existing check button are both offered",
+      "passed": true,
+      "detail": "[\"✨ Vind bronnen (4)\",\"🔎 Controleer 0 geselecteerde\"]"
+    },
+    {
+      "name": "dekking-kop (320/dark): the found proposal is a row with \"Bevestig voorstel\" and its provenance",
+      "passed": true,
+      "detail": "[\"✅ Bevestig voorstel\",\"\",\"✍️ Handmatig toevoegen\",\"🔎 Controleer bron\",\"＋ Toevoegen\",\"＋ Toevoegen\"]"
+    },
+    {
+      "name": "theme (320/dark): the requested theme is active",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "dekking-kop (320/dark): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "vind-bronnen (320/dark): the summary appears after the run",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "vind-bronnen (320/dark): the summary names the layers and the proposal",
+      "passed": true,
+      "detail": "✨ Vind bronnen klaar: 1 website voorgesteld (🗺️ 1 OpenStreetMap · 🌐 0 eigen website · 🤖 0 AI-keuze · 🤖 0 AI-zoeken) · 1 niet gevonden. Alles is een voorstel: je bevestigt per rij.\n\nKosten AI: 2 cent van je maandbudget (€ 9,62 over van € 10).\n\nKaartgegevens: © OpenStreetMap-bijdragers."
+    },
+    {
+      "name": "vind-bronnen (320/dark): the AI cost and the attribution are visible",
+      "passed": true,
+      "detail": "✨ Vind bronnen klaar: 1 website voorgesteld (🗺️ 1 OpenStreetMap · 🌐 0 eigen website · 🤖 0 AI-keuze · 🤖 0 AI-zoeken) · 1 niet gevonden. Alles is een voorstel: je bevestigt per rij.\n\nKosten AI: 2 cent van je maandbudget (€ 9,62 over van € 10).\n\nKaartgegevens: © OpenStreetMap-bijdragers."
+    },
+    {
+      "name": "vind-bronnen (320/dark): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "nieuw-gevonden (320/dark): the section counts and explains itself",
+      "passed": true,
+      "detail": "🆕 Nieuw gevonden (2) / 2"
+    },
+    {
+      "name": "nieuw-gevonden (320/dark): every row offers \"＋ Toevoegen\" and \"Negeren\"",
+      "passed": true,
+      "detail": "[\"＋ Toevoegen | Negeren\",\"＋ Toevoegen | Negeren\"]"
+    },
+    {
+      "name": "nieuw-gevonden (320/dark): \"Dekking voegt nooit zelf iets toe\" and the attribution are stated",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "nieuw-gevonden (320/dark): \"＋ Toevoegen\" opens the form with name, address and website",
+      "passed": true,
+      "detail": "/internal/toevoegen?naam=Trattoria+Fictief&adres=Havermarkt+1%2C+4811+WJ+Breda&website=https%3A%2F%2Ftrattoria-fictief.invalid&osm=node%2Ffictief-1"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3141/internal/toevoegen?theme=dark&fixture=vindBronnen&navCounts=bronnen&naam=Trattoria+Fictief&adres=Havermarkt+1%2C+4811+WJ+Breda&website=https%3A%2F%2Ftrattoria-fictief.invalid&osm=node%2Ffictief-1)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "scherm 7 (320/dark): name, website and the OSM line are filled in",
+      "passed": true,
+      "detail": "{\"name\":\"Trattoria Fictief\",\"urls\":\"https://trattoria-fictief.invalid\"}"
+    },
+    {
+      "name": "scherm 7 (320/dark): \"✨ Zoek de bron voor mij\" is offered",
+      "passed": true,
+      "detail": "[\"✨ Zoek de bron voor mij\"]"
+    },
+    {
+      "name": "scherm 7 (320/dark): the restaurant search answers with a choice",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 7 (320/dark): the result appears as the same rows as Dekking",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 7 (320/dark): the found proposal offers \"Bevestig voorstel\" with its origin",
+      "passed": true,
+      "detail": "[\"✅ Bevestig voorstel\",\"Geen voorstel\"]"
+    },
+    {
+      "name": "scherm 7 (320/dark): the not-found row says why, and nothing is published",
+      "passed": true,
+      "detail": "Gevonden bron · dezelfde rijen als in Dekking |  | ✨ Vind bronnen klaar: 1 website voorgesteld (🗺️ 1 OpenStreetMap · 🌐 0 eigen website · 🤖 0 AI-keuze · 🤖 0 AI-zoeken) · 1 niet gevonden. Alles is een voorstel: je bevestigt per rij. |  | "
+    },
+    {
+      "name": "scherm 7 (320/dark): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "network guard: the page recorded no blocked app traffic",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "network guard: the CDP layer recorded no blocked app traffic",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "no uncaught browser exception",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "no fixture bootstrap error at the end",
+      "passed": true,
+      "detail": "ok"
+    }
+  ],
+  "passed": true,
+  "network": {
+    "pageViolations": [],
+    "guardViolations": []
+  }
+}

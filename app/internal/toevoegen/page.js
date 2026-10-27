@@ -23,9 +23,14 @@ import SourceResultRow from '@/src/components/SourceResultRow'
 import useBatchProcessing from '@/src/components/useBatchProcessing'
 import { decideAddEntry, manualImportHref, MAX_BATCH_URLS } from '@/src/lib/internalAddEntry'
 import { rowForBatchItem, stepHref, CHECK_COPY } from '@/src/lib/sourceReview'
+import { discoveryRow, originLabel } from '@/src/lib/sourceDiscovery'
+import { OSM_ATTRIBUTION } from '@/src/lib/osmSource'
 
 const RESTAURANTS_API = '/api/internal/v1/manual-menu-import/restaurants'
 const BATCH_API = '/api/internal/v1/batch-analysis'
+// BE-32 (#75, criterion 2): the same engine as "Vind bronnen", for one restaurant.
+const DISCOVERY_API = '/api/internal/v1/source-discovery'
+const TRIAGE_API = '/api/internal/v1/source-triage'
 
 function newBatchId() {
   return typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : null
@@ -45,7 +50,26 @@ export default function AddEntryPage() {
   // rows as Dekking and Bronnen beoordelen. The batch page is no longer a
   // destination you have to leave for.
   const [activeBatch, setActiveBatch] = useState(null)
+  // BE-32 (#75, criterion 2): "✨ Zoek de bron voor mij" and the "Nieuw gevonden"
+  // prefill (name, address and website already filled in).
+  const [discovery, setDiscovery] = useState(null)
+  const [discoveryBusy, setDiscoveryBusy] = useState(false)
+  const [discoveryNotice, setDiscoveryNotice] = useState(null)
+  const [prefill, setPrefill] = useState(null)
   const debounce = useRef(null)
+
+  useEffect(() => {
+    // The prefill is read from the address bar only (no server render, no
+    // storage): "＋ Toevoegen" in Nieuw gevonden fills the same fields.
+    const params = new URLSearchParams(window.location.search)
+    const naam = params.get('naam')
+    const website = params.get('website')
+    const adres = params.get('adres')
+    const osm = params.get('osm')
+    if (naam) setRestaurantQuery(naam)
+    if (website) setUrls(website)
+    if (naam || website || adres) setPrefill({ naam, website, adres, osm })
+  }, [])
 
   useEffect(() => {
     const supabase = getSupabaseBrowser()
@@ -136,6 +160,68 @@ export default function AddEntryPage() {
       await loadBatch(body.batch.id)
     } catch {
       setError('De controle kon niet worden gestart.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  // BE-32 (#75): the same engine as Dekking, for exactly one restaurant. Every
+  // result is a proposal; "Bevestig voorstel" uses the existing BE-24 decision
+  // route and then puts the found link in the field — nothing is added here.
+  async function findSource() {
+    if (!token || !selectedRestaurant) return
+    setDiscoveryBusy(true)
+    setError(null)
+    setDiscovery(null)
+    setDiscoveryNotice(null)
+    try {
+      const res = await fetch(DISCOVERY_API, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ restaurant_ids: [selectedRestaurant.id] }),
+      })
+      const body = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError(body.error || 'Zoeken lukte niet.')
+        return
+      }
+      setDiscovery({
+        results: Array.isArray(body.results) ? body.results : [],
+        summary: body.summary || null,
+        messages: Array.isArray(body.messages) ? body.messages : [],
+        cost: body.cost || null,
+        monthly: body.monthly || null,
+      })
+    } catch {
+      setError('Zoeken lukte niet.')
+    } finally {
+      setDiscoveryBusy(false)
+    }
+  }
+
+  async function confirmDiscoveryProposal(result) {
+    const proposalId = result && result.proposal && result.proposal.id
+    if (!token || !proposalId) return
+    setBusy(true)
+    setError(null)
+    try {
+      const res = await fetch(`${TRIAGE_API}/proposals/${encodeURIComponent(proposalId)}/decision`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ decision: 'accepted' }),
+      })
+      const body = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError(body.error || 'Het voorstel kon niet worden bevestigd.')
+        return
+      }
+      const url = (result.menu && result.menu.url) || (result.website && result.website.url) || ''
+      if (url && urls.trim() === '') setUrls(url)
+      setDiscoveryNotice(
+        'Voorstel bevestigd. Er is niets automatisch gepubliceerd; de gevonden link staat in het veld, klik op Doorgaan om te controleren.',
+      )
+    } catch {
+      setError('Het voorstel kon niet worden bevestigd.')
     } finally {
       setBusy(false)
     }
@@ -345,6 +431,35 @@ export default function AddEntryPage() {
             </p>
           </div>
 
+          {/* BE-32 (#75, criterion 2): the mockup's "Geen link bij de hand?" box. */}
+          <div className="mai-discovery">
+            <p className="bta-muted" style={{ margin: 0 }}>
+              Geen link bij de hand? OpenStreetMap, eigen website, daarna AI.
+            </p>
+            <button
+              type="button"
+              className="stg-btn-secondary mai-btn"
+              disabled={discoveryBusy || !selectedRestaurant}
+              onClick={findSource}
+            >
+              {discoveryBusy ? '✨ Bezig…' : '✨ Zoek de bron voor mij'}
+            </button>
+            <p className="bta-muted" style={{ margin: 0 }}>
+              {selectedRestaurant
+                ? 'Alles wat je krijgt is een voorstel; jij bevestigt het per rij.'
+                : 'Kies eerst het restaurant hierboven.'}{' '}
+              Kaartgegevens: {OSM_ATTRIBUTION}.
+            </p>
+          </div>
+
+          {prefill && (prefill.adres || prefill.naam) ? (
+            <p className="bta-muted">
+              Ingevuld uit OpenStreetMap{prefill.naam ? `: ${prefill.naam}` : ''}
+              {prefill.adres ? ` · ${prefill.adres}` : ''}. Controleer de gegevens voordat je verdergaat; er is nog
+              niets toegevoegd.
+            </p>
+          ) : null}
+
           {error ? (
             <div className="di-banner di-banner-danger" role="alert">
               <span>{error}</span>
@@ -366,6 +481,46 @@ export default function AddEntryPage() {
             </a>
           </div>
         </form>
+
+        {discovery ? (
+          <section className="brn-detail-card" style={{ marginTop: 20 }} aria-labelledby="add-discovery-title">
+            <h2 id="add-discovery-title" className="brn-detail-title">
+              Gevonden bron · dezelfde rijen als in Dekking
+            </h2>
+            {discovery.summary ? <p className="brn-batch-summary">{discovery.summary}</p> : null}
+            <p className="brn-batch-summary">
+              {discovery.cost && Number.isInteger(discovery.cost.eurCents)
+                ? `Kosten AI: ${discovery.cost.eurCents} cent van je maandbudget.`
+                : 'Kosten AI: niets gemeten voor deze zoekactie.'}
+            </p>
+            {discovery.messages.map((text) => (
+              <p key={text} className="brn-batch-summary">
+                {text}
+              </p>
+            ))}
+            {discoveryNotice ? (
+              <div className="di-banner di-banner-info" role="status">
+                {discoveryNotice}
+              </div>
+            ) : null}
+            <ol className="srr-list" aria-label="Gevonden bron">
+              {discovery.results.map((result) => {
+                const row = discoveryRow(result)
+                return (
+                  <SourceResultRow
+                    key={result.restaurantId}
+                    row={row}
+                    onConfirm={() => confirmDiscoveryProposal(result)}
+                    busy={busy}
+                  />
+                )
+              })}
+            </ol>
+            <p className="brn-notice">
+              {CHECK_COPY.nothingPublished} Kaartgegevens: {OSM_ATTRIBUTION}.
+            </p>
+          </section>
+        ) : null}
 
         {activeBatch ? (
           <section className="brn-detail-card" style={{ marginTop: 20 }} aria-labelledby="add-result-title">

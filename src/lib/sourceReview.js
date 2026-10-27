@@ -34,6 +34,7 @@
 
 const { MAX_BATCH_URLS, DAILY_URL_LIMIT } = require('./batchAnalysis');
 const { NOT_IN_QUEUE_LABELS } = require('./sourceWorkqueue');
+const { parseProposalNote } = require('./sourceDiscovery');
 
 // Addresses (criteria 1, 4 and 5). Technical names — tables, APIs, ids — stay
 // unchanged; only the visible route is new.
@@ -98,6 +99,10 @@ const STEPS = {
   manual: { key: 'manual', label: '✍️ Handmatig toevoegen' },
   wait: { key: 'wait', label: '⏳ Even wachten' },
   check: { key: 'check', label: '🔎 Controleer bron' },
+  // BE-32 (#75): a found source is a BE-24 proposal. The human confirms it
+  // here, and only then does the existing check become the next step.
+  confirm_proposal: { key: 'confirm_proposal', label: '✅ Bevestig voorstel' },
+  check_proposal: { key: 'check', label: '🔎 Controleer' },
 };
 
 const CHECK_COPY = {
@@ -574,13 +579,51 @@ function coverageRows(entries, { batchDetails, now } = {}) {
   return rows;
 }
 
+/**
+ * BE-32 (#75): the newest usable source proposal of one restaurant, with the
+ * provenance read back from its note. Only the two URL kinds can become a
+ * source; `mark_unusable` is not a source.
+ */
+function discoveryProposalFromEntry(entry) {
+  const proposals = entry && Array.isArray(entry.proposals) ? entry.proposals : [];
+  const usable = proposals
+    .filter(
+      (proposal) =>
+        proposal &&
+        (proposal.kind === 'add_candidate' || proposal.kind === 'replace_source') &&
+        typeof proposal.proposed_url === 'string' &&
+        proposal.proposed_url !== '',
+    )
+    .sort((a, b) => String(b.proposed_at || '').localeCompare(String(a.proposed_at || '')));
+  const proposal = usable[0];
+  if (!proposal) return null;
+  const parsed = parseProposalNote(proposal.note);
+  return {
+    id: proposal.id || null,
+    status: proposal.status || 'open',
+    url: proposal.proposed_url,
+    origin: parsed.origin,
+    website: parsed.website,
+    menu: parsed.menu,
+    quote: parsed.quote,
+    source: parsed.source,
+    note: proposal.note || null,
+  };
+}
+
 /** One Dekking row: the existing reason plus, for a dead end, the outcome, the
  * age and the one fitting next step of the same batch result. */
 function coverageRow(entry, group, now) {
   const newest = group ? group.newest : null;
   const resultRow = newest ? newest.row : null;
   const deadEnd = Boolean(resultRow && DEAD_END_STATES.includes(resultRow.state));
-  const url = (entry && entry.known_url) || (resultRow && resultRow.url) || null;
+  const proposal = discoveryProposalFromEntry(entry);
+  const openProposal = proposal && proposal.status === 'open' ? proposal : null;
+  const acceptedProposal = proposal && proposal.status === 'accepted' ? proposal : null;
+  const knownUrl = (entry && entry.known_url) || null;
+  // A proposal is a found source: the row shows it and checks it once the human
+  // has confirmed it. An open proposal is the next step; nothing is automatic.
+  const url = openProposal ? openProposal.url : knownUrl || (acceptedProposal ? acceptedProposal.url : null) || (resultRow && resultRow.url) || null;
   const reason = (entry && entry.not_in_queue_reason) || (deadEnd ? DEAD_END_REASON : null);
   const resultAt = (resultRow && resultRow.resultAt) || (newest && newest.at) || null;
   return {
@@ -607,7 +650,18 @@ function coverageRow(entry, group, now) {
     age: ageLabel(resultAt, now),
     jobId: resultRow ? resultRow.jobId : null,
     batchId: newest ? newest.batchId : null,
-    step: deadEnd && resultRow.step ? resultRow.step : url ? STEPS.check : null,
+    // BE-32: the proposal and its provenance, for the row's own text and step.
+    proposal: openProposal || (acceptedProposal ? { ...acceptedProposal, confirmed: true } : null),
+    proposedUrl: openProposal ? openProposal.url : acceptedProposal ? acceptedProposal.url : null,
+    step: openProposal
+      ? STEPS.confirm_proposal
+      : deadEnd && resultRow.step
+        ? resultRow.step
+        : url
+          ? acceptedProposal && !knownUrl
+            ? STEPS.check_proposal
+            : STEPS.check
+          : null,
   };
 }
 
@@ -653,6 +707,26 @@ function canStartCheck({ count, remaining } = {}) {
 function countSourceReviewTasks(tasks) {
   return countTasks(tasks).all;
 }
+
+/**
+ * BE-32 (#75, criterion 7 / BE-31 leftover): "Oude resultaten opruimen" may only
+ * act on a selection, or it must say out loud that it takes all N. The label is
+ * decided here so the button, the dialog and the tests read the same sentence.
+ */
+function cleanupLabel(pickedCount, pickableCount) {
+  const picked = Number.isInteger(pickedCount) && pickedCount > 0 ? pickedCount : 0;
+  const total = Number.isInteger(pickableCount) && pickableCount > 0 ? pickableCount : 0;
+  if (picked > 0) return `Opruimen (${picked} geselecteerd)`;
+  return `Alle ${total} opruimen`;
+}
+
+/** The one confirmation line: names the number and whether it was a selection. */
+function cleanupConfirmText({ count, all } = {}) {
+  const n = Number.isInteger(count) ? count : 0;
+  const noun = n === 1 ? 'resultaat' : 'resultaten';
+  return `${all ? `Alle ${n}` : `${n}`} ${noun} afhandelen?`;
+}
+
 module.exports = {
   BRONNEN_HREF,
   COVERAGE_HREF,
@@ -688,8 +762,11 @@ module.exports = {
   filterTasks,
   effectiveTaskFilter,
   coverageRows,
+  discoveryProposalFromEntry,
   checkSelection,
   canStartCheck,
   countSourceReviewTasks,
+  cleanupLabel,
+  cleanupConfirmText,
 };
 

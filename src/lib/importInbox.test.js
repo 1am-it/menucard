@@ -1031,12 +1031,15 @@ test('structural safety net: the coverage page shows the sample-threshold explan
   // tests). Still written exactly once, still outside the row loop, still
   // driven by the real sampleThreshold value.
   const source = fs.readFileSync(COVERAGE_PAGE_PATH, 'utf8');
-  const explanationMatches = source.match(/Percentages are only shown for groups with at least/g) || [];
+  // BE-32 (#75, criterion 6): the visible copy is Dutch; the explanation is
+  // still written exactly once, still outside the row loop, still driven by the
+  // real sampleThreshold value.
+  const explanationMatches = source.match(/Percentages verschijnen alleen bij groepen met minstens/g) || [];
   assert.equal(explanationMatches.length, 1, 'the explanation must be written once in source — not duplicated per call site or per row');
 
   const mapStart = source.indexOf('{rows.map((r) => (');
   const mapEnd = source.indexOf('))}', mapStart);
-  const explanationIndex = source.indexOf('Percentages are only shown for groups with at least');
+  const explanationIndex = source.indexOf('Percentages verschijnen alleen bij groepen met minstens');
   assert.ok(mapStart >= 0 && mapEnd > mapStart, 'expected to find the rows.map row-rendering block');
   assert.ok(explanationIndex > mapEnd, 'the explanation must be rendered after the row loop, never inside it — otherwise it would repeat once per row');
 
@@ -1046,7 +1049,7 @@ test('structural safety net: the coverage page shows the sample-threshold explan
 
   assert.match(
     source,
-    /Percentages are only shown for groups with at least \{data\.sampleThreshold\} restaurants\./,
+    /Percentages verschijnen alleen bij groepen met minstens \{data\.sampleThreshold\} restaurants\./,
     'must use the real sampleThreshold value from computeCoverageMetrics(), never a hardcoded number that could drift from it'
   );
 });
@@ -1094,7 +1097,7 @@ test('structural safety net: each horizontally-scrollable coverage table is keyb
   assert.match(overflowDivMatch[0], /tabIndex=\{0\}/, 'the scrollable wrapper must be part of the tab order');
   assert.match(
     overflowDivMatch[0],
-    /aria-label=\{`\$\{title\} table, horizontally scrollable`\}/,
+    /aria-label=\{`\$\{title\}: tabel, horizontaal scrollbaar`\}/,
     'the accessible name must be built from this table\'s own title, so the two tables never share an identical label'
   );
 });
@@ -1104,7 +1107,7 @@ test('structural safety net: every coverage table column header uses scope="col"
   const theadMatch = source.match(/<thead>[\s\S]*?<\/thead>/);
   assert.ok(theadMatch, 'expected to find the table header row');
   const headerCells = theadMatch[0].match(/<th\b[^>]*>/g) || [];
-  assert.equal(headerCells.length, 4, 'expected exactly the four existing column headers — Group/Restaurants/With menu data/Coverage');
+  assert.equal(headerCells.length, 4, 'expected exactly the four existing column headers — Buurt/Restaurants/Met menukaart/Dekking');
   for (const cell of headerCells) {
     assert.match(cell, /scope="col"/, `expected every <th> to carry scope="col", found: ${cell}`);
   }
@@ -1115,10 +1118,10 @@ test('structural safety net: the coverage table accessibility fix changed only t
   // The four column labels and the em-dash/explanation behaviour from the
   // presentation rebuild must still be exactly as they were — this fix
   // only adds attributes, it never touches table content or styling.
-  assert.match(source, />Group<\/th>/);
+  assert.match(source, />Buurt<\/th>/);
   assert.match(source, />Restaurants<\/th>/);
-  assert.match(source, />With menu data<\/th>/);
-  assert.match(source, />Coverage<\/th>/);
+  assert.match(source, />Met menukaart<\/th>/);
+  assert.match(source, />Dekking<\/th>/);
   assert.match(source, /r\.pct === null \? '—' : `\$\{r\.pct\}%`/);
 });
 

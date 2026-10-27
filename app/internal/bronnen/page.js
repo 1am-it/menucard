@@ -292,6 +292,12 @@ export default function BronnenPage() {
   // through the existing job rows. One confirmation names the number, nothing
   // is deleted and the record stays.
   const pickable = useMemo(() => tasks.filter((task) => task.kind === 'batch'), [tasks])
+  // BE-32 (#75, criterion 7): "Alle N opruimen" counts the RESULTS it closes,
+  // not the tasks that carry them.
+  const pickableJobCount = useMemo(
+    () => new Set(pickable.flatMap((task) => task.handledJobIds || [])).size,
+    [pickable],
+  )
 
   useEffect(() => {
     // A closed task can no longer be picked.
@@ -317,14 +323,17 @@ export default function BronnenPage() {
 
   function startCleanup() {
     const chosen = pickable.filter((task) => picked.has(task.id))
-    const targets = chosen.length > 0 ? chosen : pickable
+    const all = chosen.length === 0
+    const targets = all ? pickable : chosen
     const jobIds = [...new Set(targets.flatMap((task) => task.handledJobIds || []))]
     if (jobIds.length === 0) {
       setMessage({ tone: 'notice', text: 'Er zijn geen oude batchresultaten om op te ruimen.' })
       return
     }
     setMessage(null)
-    setCleanup({ jobIds, count: jobIds.length, taskCount: targets.length })
+    // BE-32 (#75, criterion 7): `all` travels with the confirmation so the
+    // dialog can say out loud that it takes every result, not a selection.
+    setCleanup({ jobIds, count: jobIds.length, taskCount: targets.length, all })
   }
 
   async function confirmCleanup() {
@@ -459,6 +468,7 @@ export default function BronnenPage() {
           onRecheckRow={recheck}
           picked={picked}
           pickableCount={pickable.length}
+          pickableJobCount={pickableJobCount}
           onTogglePick={togglePick}
           onPickAll={pickAll}
           cleanup={cleanup}

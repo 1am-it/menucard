@@ -532,7 +532,7 @@ test('structural safety net: the counts route exists next to the roles route, au
 
 test('structural safety net: the existing internal pages still mount the shared nav and keep their own data calls and content', () => {
   const cases = [
-    { file: COVERAGE_PAGE_PATH, mustStillContain: [/\/api\/internal\/v1\/coverage/, /Coverage Dashboard/] },
+    { file: COVERAGE_PAGE_PATH, mustStillContain: [/\/api\/internal\/v1\/coverage/, /Dekking/] },
     { file: IMPORT_INBOX_PAGE_PATH, mustStillContain: [/\/api\/internal\/v1\/import-inbox\/candidates/, /di-topbar/] },
     { file: PROFILE_DRAFTS_PAGE_PATH, mustStillContain: [/\/api\/internal\/v1\/profile-drafts/, /Restaurant Profile Drafts/] },
     { file: MODERATION_PAGE_PATH, mustStillContain: [/\/api\/internal\/v1\/moderation\/pending/, /\/api\/internal\/v1\/claims\/pending/] },

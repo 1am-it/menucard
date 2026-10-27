@@ -26,6 +26,14 @@ const FIXTURE_API_ROUTES = [
   // BE-31 (#74): Dekking now carries "Nog niet gecontroleerd"; only its read is
   // fictionalised, exactly like the triage read above.
   { id: 'coverage', match: 'exact', path: '/api/internal/v1/coverage', methods: ['GET'] },
+  // BE-32 (#75): "Vind bronnen", "Nieuw gevonden" and the remembered ignore.
+  // Only these three fictional routes are answered; the engine itself never
+  // runs in the fixture (no network, no AI).
+  { id: 'source-discovery', match: 'exact', path: '/api/internal/v1/source-discovery', methods: ['GET', 'POST'] },
+  { id: 'source-discovery-ignore', match: 'exact', path: '/api/internal/v1/source-discovery/ignore', methods: ['POST'] },
+  // The human's "Bevestig voorstel" uses the existing BE-24 decision route; the
+  // fixture answers it with a recorded decision and nothing else.
+  { id: 'source-triage-decision', match: 'prefix', path: '/api/internal/v1/source-triage/proposals/', methods: ['POST'] },
   // GET only, and the detail form allows exactly one path segment. The real
   // concept pages need these two reads; every save/decision/export POST stays
   // unknown and is refused before it can reach a handler.

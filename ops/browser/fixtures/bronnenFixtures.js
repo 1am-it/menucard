@@ -348,8 +348,136 @@ const batchDetailClosed = {
   batch: { ...batchDetail.batch, closed_at: '2026-10-15T10:05:00.000Z', close_reason: 'completed' },
 };
 
+// ── BE-32 (#75): "Vind bronnen", "Nieuw gevonden" and "Zoek de bron voor mij" ──
+// Fictional answers of the discovery engine. The origin is written into the
+// note exactly like the engine does, so the real row parser and the real
+// screens are exercised (the engine itself never runs in a fixture).
+
+const DISCOVERY_NOTE =
+  'Herkomst: OpenStreetMap (© OpenStreetMap-bijdragers) · website: https://fictief-debeyerd.invalid · menulink: https://fictief-debeyerd.invalid/menukaart';
+
+function discoveryProposal(overrides) {
+  return proposal({
+    id: 'proposal-fictief-vind-1',
+    kind: 'add_candidate',
+    proposed_url: 'https://fictief-debeyerd.invalid/menukaart',
+    note: DISCOVERY_NOTE,
+    proposed_at: '2026-10-27T08:12:00.000Z',
+    ...overrides,
+  });
+}
+
+// Dekking: one row left and one row with a discovery proposal. 9004 is the
+// "never checked" restaurant of the existing fixture; 9005 keeps "no website".
+const triageVind = {
+  ...triage,
+  restaurants: triage.restaurants.map((row) => {
+    if (row.restaurant_id !== '9004') return row;
+    return {
+      ...row,
+      open_proposal_id: 'proposal-fictief-vind-1',
+      next_step: 'review_proposal',
+      proposals: [discoveryProposal({})],
+    };
+  }),
+};
+
+const discoveryFind = {
+  summary:
+    '✨ Vind bronnen klaar: 1 website voorgesteld (🗺️ 1 OpenStreetMap · 🌐 0 eigen website · 🤖 0 AI-keuze · 🤖 0 AI-zoeken) · 1 niet gevonden. Alles is een voorstel: je bevestigt per rij.',
+  results: [
+    {
+      restaurantId: '9004',
+      name: 'Fictief De Beyerd',
+      website: { url: 'https://fictief-debeyerd.invalid', origin: 'osm' },
+      menu: { url: 'https://fictief-debeyerd.invalid/menukaart', origin: 'same_host' },
+      origin: 'osm',
+      menuOrigin: 'same_host',
+      originLabel: '🗺️ OpenStreetMap → 🌐 menulink op eigen website',
+      quote: null,
+      source: null,
+      aiCostEurCents: 0,
+      layers: [
+        { key: 'osm', outcome: 'hit', detail: 'matched' },
+        { key: 'same_host', outcome: 'hit', detail: 'Menukaart' },
+        { key: 'ai_choice', outcome: 'skipped', detail: 'already_found' },
+        { key: 'ai_search', outcome: 'skipped', detail: 'website_known' },
+      ],
+      proposal: { id: 'proposal-fictief-vind-1', url: 'https://fictief-debeyerd.invalid/menukaart', note: DISCOVERY_NOTE },
+      message: null,
+    },
+    {
+      restaurantId: '9005',
+      name: 'Fictief Gantau Village',
+      website: null,
+      menu: null,
+      origin: null,
+      menuOrigin: null,
+      originLabel: null,
+      quote: null,
+      source: null,
+      aiCostEurCents: 2,
+      layers: [
+        { key: 'osm', outcome: 'miss', detail: 'no_name_match' },
+        { key: 'same_host', outcome: 'skipped', detail: 'no_website' },
+        { key: 'ai_choice', outcome: 'skipped', detail: 'no_website' },
+        { key: 'ai_search', outcome: 'rejected', detail: 'only_rejected' },
+      ],
+      proposal: null,
+      message: 'Alleen bezorgplatforms gevonden (genegeerd)',
+    },
+  ],
+  cost: { eurCents: 2, known: true },
+  monthly: { spentEurCents: 38, limitEurCents: 1000, remainingEurCents: 962, unknownConcepts: 0 },
+  notices: [],
+  messages: [],
+  attribution: '© OpenStreetMap-bijdragers',
+};
+
+const discoveryNew = {
+  ok: true,
+  items: [
+    {
+      osmId: 'node/fictief-1',
+      name: 'Trattoria Fictief',
+      address: 'Havermarkt 1, 4811 WJ Breda',
+      website: 'https://trattoria-fictief.invalid',
+      kindLabel: 'restaurant · italian',
+      addHref: '/internal/toevoegen?naam=Trattoria+Fictief&adres=Havermarkt+1%2C+4811+WJ+Breda&website=https%3A%2F%2Ftrattoria-fictief.invalid&osm=node%2Ffictief-1',
+    },
+    {
+      osmId: 'node/fictief-2',
+      name: 'Noodlebar Fictief',
+      address: 'Ginnekenweg 2, 4812 JC Breda',
+      website: null,
+      kindLabel: 'restaurant',
+      addHref: '/internal/toevoegen?naam=Noodlebar+Fictief&adres=Ginnekenweg+2%2C+4812+JC+Breda&osm=node%2Ffictief-2',
+    },
+  ],
+  fetchedAt: NOW,
+  attribution: '© OpenStreetMap-bijdragers',
+  sourceUrl: 'https://www.openstreetmap.org',
+};
+
 const SCENARIOS = {
   bronnen: { triage, batchOverview, batchDetail, batchDetails, coverage },
+  vindBronnen: {
+    triage: triageVind,
+    batchOverview,
+    batchDetail,
+    batchDetails,
+    coverage,
+    discoveryFind,
+    discoveryNew,
+    // BE-32: the restaurant search of "Restaurant of menu toevoegen", so the
+    // screen can select one restaurant and use "Zoek de bron voor mij".
+    manual: {
+      restaurants: [
+        { id: '9004', name: 'Fictief De Beyerd', buurt: 'Centrum' },
+        { id: '9005', name: 'Fictief Gantau Village', buurt: 'Buiten' },
+      ],
+    },
+  },
   bronnenLeeg: {
     triage: triageEmpty,
     batchOverview: { daily: { used: 0, limit: 25 }, own_open_batch_id: null, recent_batches: [] },
@@ -367,6 +495,7 @@ module.exports = {
   BATCH_ID,
   triage,
   triageEmpty,
+  triageVind,
   batchOverview,
   batchDetail,
   batchDetailClosed,
@@ -374,4 +503,6 @@ module.exports = {
   batchDetailKleinJava,
   coverage,
   items,
+  discoveryFind,
+  discoveryNew,
 };

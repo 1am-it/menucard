@@ -154,33 +154,44 @@ function pageCode() {
 
 function heroSource() {
   const source = pageSource();
-  const start = source.indexOf('aria-labelledby="coverage-hero-heading"');
-  const end = source.indexOf('{/* Four secondary metric cards');
-  assert.ok(start >= 0 && end > start, 'expected to find the hero section before the metric cards');
+  const start = source.indexOf('className="cov-tiles"');
+  const end = source.indexOf('{/* Details: dezelfde cijfers');
+  assert.ok(start >= 0 && end > start, 'expected to find the three tiles before the detail cards');
   return source.slice(start, end);
 }
 
-test('structural: the hero is the dominant metric and reads exactly metrics.menuData — no other figure', () => {
+test('structural: the top is the three tiles of the mockup and reads exactly metrics.menuData for the menu figure', () => {
   const hero = heroSource();
+  assert.equal((hero.match(/className="cov-tile-value"/g) || []).length, 3, 'exactly three tiles');
+  assert.match(pageSource(), /<h1 className="cov-title">Dekking 📊<\/h1>/);
   assert.match(hero, /\{data\.metrics\.menuData\.pct === null \? '—' : `\$\{data\.metrics\.menuData\.pct\}%`\}/);
-  assert.match(hero, /\{data\.metrics\.menuData\.count\} of \{data\.metrics\.menuData\.total\} restaurants have digitized menu data\./);
+  assert.match(hero, /\{data\.metrics\.menuData\.count\}/, 'tile 2: with a menu card');
+  assert.match(hero, /\{data\.metrics\.menuData\.total\}/, 'tile 2: with the real total');
+  assert.match(hero, /nog niet gecontroleerd/, 'tile 3: not checked yet');
   for (const other of ['basicInfo', 'priceCoverage', 'reservationConfirmed', 'byBuurt', 'byCuisine']) {
-    assert.doesNotMatch(hero, new RegExp(`data\\.(metrics\\.)?${other}`), `the hero must not show ${other}`);
+    assert.doesNotMatch(hero, new RegExp(`data\\.(metrics\\.)?${other}`), `the top must not show ${other}`);
   }
   // Dominant: a larger figure than any metric card.
-  assert.match(hero, /fontSize: 'clamp\(44px, 10vw, 64px\)'/);
+  const css = fs.readFileSync(GLOBALS_CSS_PATH, 'utf8');
+  assert.match(css, /\.cov-tile-value \{[^}]*font-size: 26px;/, 'the tile figure is larger than a card figure');
   assert.match(pageSource(), /function Metric[\s\S]*?fontSize: 22,/);
 });
 
-test('structural: the hero presents data presence, never verified accuracy', () => {
-  assert.match(heroSource(), /not whether it has been verified as accurate/);
+test('structural: the top presents data presence, and never invents the third number', () => {
+  const source = pageSource();
+  assert.match(source, /Alleen lezen, bij elke load opnieuw berekend/);
+  assert.match(source, /Hoeveel van \{data\.city\} staat er al in/);
+  assert.match(heroSource(), /uncheckedCount === null \? '…' : uncheckedCount/);
+  assert.match(source, /Alleen intern · Alleen lezen/);
 });
 
 test('structural: the four existing metric cards remain, each with its exact existing figures', () => {
   const source = pageSource();
   const cards = source.match(/<Metric\b[\s\S]*?\/>/g) || [];
-  assert.equal(cards.length, 4, 'exactly the four existing metric cards');
-  const keys = ['basicInfo', 'menuData', 'priceCoverage', 'reservationConfirmed'];
+  // BE-32 (#75, criterion 6): the menu-data figure moved to the page top as the
+  // second tile, so the cards hold the three remaining figures.
+  assert.equal(cards.length, 3, 'exactly the three remaining metric cards');
+  const keys = ['basicInfo', 'priceCoverage', 'reservationConfirmed'];
   cards.forEach((card, i) => {
     for (const field of ['count', 'total', 'pct']) {
       assert.match(card, new RegExp(`${field}=\\{data\\.metrics\\.${keys[i]}\\.${field}\\}`), `card ${i + 1} must read data.metrics.${keys[i]}.${field}`);
@@ -193,7 +204,7 @@ test('structural: the priority table renders byBuurt through the pure gap sort a
   assert.match(source, /import \{[^}]*sortByMenuDataGap[^}]*\} from '@\/src\/lib\/coveragePriority'/);
   assert.match(source, /sortByMenuDataGap\(data\.byBuurt\)/);
   assert.match(source, /visiblePriorityRows\(priorityRows, showAllBuurten\)/);
-  assert.match(source, /<BreakdownTable title="Priority gaps by neighbourhood" rows=\{visibleBuurten\}/);
+  assert.match(source, /<BreakdownTable title="Grootste gaten per buurt" rows=\{visibleBuurten\}/);
   assert.doesNotMatch(source, /data\.byBuurt\.sort\(|data\.byBuurt\.(splice|reverse|push)\(/, 'the fetched data must never be mutated');
 });
 
@@ -217,9 +228,9 @@ test('structural: the cuisine table is no longer rendered in the primary view, b
   assert.doesNotMatch(source, /title="By cuisine"/);
   assert.equal((source.match(/<BreakdownTable\b/g) || []).length, 1, 'exactly one table: the neighbourhood priority table');
   const details = source.slice(source.indexOf('<details'), source.indexOf('</details>'));
-  assert.match(details, /Why there is no cuisine breakdown/);
-  assert.match(details, /near-unique free-text description per restaurant/);
-  assert.match(details, /\{data\.byCuisine\.length\} distinct values across \{data\.totals\.restaurants\} restaurants/, 'the count comes from the real data, never a hardcoded figure');
+  assert.match(details, /Waarom er geen keuken-tabel is/);
+  assert.match(details, /bijna unieke vrije tekst per restaurant/);
+  assert.match(details, /\{data\.byCuisine\.length\} verschillende waarden over \{data\.totals\.restaurants\} restaurants/, 'the count comes from the real data, never a hardcoded figure');
 });
 
 test('structural: exactly one methodology section, collapsed by default, holding every caveat', () => {
@@ -229,16 +240,16 @@ test('structural: exactly one methodology section, collapsed by default, holding
   assert.doesNotMatch(detailsTags[0], /\bopen\b/, 'collapsed by default');
   assert.equal((source.match(/<summary\b/g) || []).length, 1);
   const details = source.slice(source.indexOf('<details'), source.indexOf('</details>'));
-  assert.match(details, /Methodology &amp; data notes/);
-  assert.match(details, /Percentages are only shown for groups with at least \{data\.sampleThreshold\} restaurants\./, 'sample threshold');
-  assert.match(details, /near-unique free-text/, 'cuisine limitation');
-  assert.match(details, /data <em>presence<\/em>, not verified trust\/provenance/, 'trust/provenance caveat');
+  assert.match(details, /Methodologie &amp; datanotities/);
+  assert.match(details, /Percentages verschijnen alleen bij groepen met minstens \{data\.sampleThreshold\} restaurants\./, 'sample threshold');
+  assert.match(details, /bijna unieke vrije tekst/, 'cuisine limitation');
+  assert.match(details, /<em>aanwezigheid<\/em> van data/, 'trust/provenance caveat');
   assert.match(details, /PLATFORM-03/);
   assert.match(details, /docs\/coverage\/breda-baseline-2026-08-30\.md/, 'baseline reference');
-  assert.match(details, /How the priority order works/, 'the sort definition is documented on the page');
+  assert.match(details, /Hoe de volgorde werkt/, 'the sort definition is documented on the page');
   // None of these caveats is stated a second time outside the section.
   const outside = source.slice(0, source.indexOf('<details')) + source.slice(source.indexOf('</details>'));
-  assert.doesNotMatch(outside, /breda-baseline-2026-08-30|Percentages are only shown|near-unique free-text/);
+  assert.doesNotMatch(outside, /breda-baseline-2026-08-30|Percentages verschijnen alleen|bijna unieke vrije tekst/);
 });
 
 test('structural: no new external action, link, route or API call — the one fetch is the existing gated route', () => {
@@ -337,11 +348,11 @@ test('F2 (Kleurtaal v2): no page-scoped secondary-text variable remains', () => 
   assert.doesNotMatch(pageCode(), /--cov-text-subtle/, 'the coverage page no longer uses --cov-text-subtle');
 });
 
-test('F1: every metric-card status label (Complete / Partial / None yet) meets 4.5:1 on the card, in every theme', () => {
+test('F1: every metric-card status label (Compleet / Gedeeltelijk / Nog niets) meets 4.5:1 on the card, in every theme', () => {
   const tokens = themeTokens();
   const source = pageSource();
   const stateColor = (state) => source.match(new RegExp(`${state}: \\{ label: '[^']+', color: 'var\\(--([a-z-]+)\\)' \\}`))[1];
-  assert.equal(stateColor('empty'), 'text-secondary', '"None yet" uses --text-secondary, never --text-faint');
+  assert.equal(stateColor('empty'), 'text-secondary', '"Nog niets" uses --text-secondary, never --text-faint');
   // Kleurtaal v2: only Complete is a positive status; Partial has no
   // decided role and stays neutral (never --status-old or --status-action).
   assert.equal(stateColor('complete'), 'status-positive');
@@ -364,24 +375,32 @@ test('the global --text-muted and --text-faint tokens are unchanged', () => {
   assert.doesNotMatch(tokens.css, /\.cov-dashboard[^{]*\{[^}]*opacity/, 'no opacity trick');
 });
 
-test('structural: every <main> of the coverage page carries the page class, and its secondary texts use --text-secondary', () => {
+test('structural: every <main> of the coverage page carries the page class, and its secondary texts are readable', () => {
   const code = pageCode();
   const mains = code.match(/<main\b[^>]*>/g) || [];
   assert.equal(mains.length, 4, 'loading, error, loading-data and data states');
   for (const main of mains) assert.match(main, /className="cov-dashboard"/);
   assert.doesNotMatch(code, /var\(--text-muted\)|var\(--text-faint\)|var\(--text-dim\)/);
-  for (const text of ['Read-only, recomputed on every load', 'Overall menu coverage', 'Shows whether menu data is present', 'Neighbourhoods with the most restaurants still missing menu data']) {
-    const at = code.indexOf(text);
-    assert.ok(at > 0, text);
-    const opening = code.slice(code.lastIndexOf('<', at), at);
-    assert.match(opening, /color: 'var\(--text-secondary\)'/, `${text} uses --text-secondary`);
+  // BE-32 (#75, criterion 6): the Dutch top uses the shared .cov-sub/.cov-stamp
+  // classes; the explanation of the priority order stays inline on the token.
+  const css = fs.readFileSync(GLOBALS_CSS_PATH, 'utf8');
+  for (const cls of ['.cov-sub', '.cov-stamp', '.cov-tile-label']) {
+    const rule = css.slice(css.indexOf(`${cls} {`), css.indexOf('}', css.indexOf(`${cls} {`)));
+    assert.match(rule, /color: var\(--text-secondary\)/, `${cls} uses --text-secondary`);
   }
-  assert.match(code, /<span style=\{\{ color: 'var\(--text-secondary\)' \}\}>\{pct === null \? '—' : `\$\{pct\}%`\}<\/span>/, 'card percentages use --text-secondary');
+  for (const text of ['Alleen lezen, bij elke load opnieuw berekend', 'Hoeveel van', 'Buurten met de meeste restaurants zonder menukaart']) {
+    assert.ok(code.indexOf(text) > 0, text);
+  }
+  assert.match(
+    code,
+    /<span style=\{\{ color: 'var\(--text-secondary\)' \}\}>\{pct === null \? '—' : `\$\{pct\}%`\}<\/span>/,
+    'card percentages use --text-secondary',
+  );
 });
 
 test('structural: the status stays readable without color — text label next to a decorative, aria-hidden ring', () => {
   const source = pageSource();
   assert.match(source, /<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"/, 'the ring is decorative');
   assert.match(source, /<span style=\{\{ color, fontWeight: 600 \}\}>\{stateLabel\}<\/span>/, 'the state is always rendered as text');
-  for (const label of ['Complete', 'Partial', 'None yet']) assert.match(source, new RegExp(`label: '${label}'`));
+  for (const label of ['Compleet', 'Gedeeltelijk', 'Nog niets']) assert.match(source, new RegExp(`label: '${label}'`));
 });

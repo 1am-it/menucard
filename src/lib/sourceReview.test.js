@@ -32,6 +32,8 @@ const {
   checkSelection,
   canStartCheck,
   countSourceReviewTasks,
+  cleanupLabel,
+  cleanupConfirmText,
   ageLabel,
 } = require('./sourceReview');
 
@@ -442,6 +444,111 @@ test('Dekking: the existing batch limits are stated before the click', () => {
   assert.equal(selection.tooMany, true);
   assert.equal(selection.urls.length, MAX_BATCH_URLS);
   assert.equal(canStartCheck({ count: selection.count, remaining: 25 }).ok, true);
+});
+
+// BE-32 (#75, criterion 7, BE-31 leftover): "Oude resultaten opruimen" either
+// acts on the picked rows or says out loud that it takes all of them.
+test('Bronnen beoordelen: cleanup names a selection, or explicitly "Alle N opruimen"', () => {
+  assert.equal(cleanupLabel(0, 7), 'Alle 7 opruimen');
+  assert.equal(cleanupLabel(2, 7), 'Opruimen (2 geselecteerd)');
+  assert.equal(cleanupLabel(null, 3), 'Alle 3 opruimen');
+  assert.equal(cleanupLabel(0, 0), 'Alle 0 opruimen');
+  assert.equal(cleanupConfirmText({ count: 7, all: true }), 'Alle 7 resultaten afhandelen?');
+  assert.equal(cleanupConfirmText({ count: 2, all: false }), '2 resultaten afhandelen?');
+  assert.equal(cleanupConfirmText({ count: 1, all: false }), '1 resultaat afhandelen?');
+  // The screen uses exactly these helpers, never its own sentence.
+  const view = fs.readFileSync(path.join(REPO_ROOT, 'app/internal/bronnen/BronnenView.js'), 'utf8');
+  assert.match(view, /cleanupLabel\(pickedCount, cleanupCount\)/);
+  assert.match(view, /cleanupConfirmText\(cleanup\)/);
+  assert.doesNotMatch(view, /opruimen geldt dan voor alle/i);
+  // "Alle N opruimen" counts the results it closes, not the tasks that carry them.
+  const page = fs.readFileSync(path.join(REPO_ROOT, 'app/internal/bronnen/page.js'), 'utf8');
+  assert.match(page, /pickableJobCount = useMemo\(/);
+  assert.match(page, /pickableJobCount=\{pickableJobCount\}/);
+});
+
+// BE-32 (#75): "✨ Vind bronnen" proposes through the existing BE-24 proposal.
+// The row shows the proposal with its provenance and asks the human to confirm
+// it; only after that confirmation does the existing check become the step.
+test('Dekking: an open source proposal is the next step, "Bevestig voorstel"', () => {
+  const rows = coverageRows([
+    entry({
+      not_in_queue_reason: 'never_checked',
+      known_url: null,
+      proposals: [
+        {
+          id: 'p-1',
+          kind: 'add_candidate',
+          status: 'open',
+          proposed_url: 'https://een.nl/menukaart',
+          proposed_at: '2026-10-27T09:00:00.000Z',
+          note: 'Herkomst: OpenStreetMap (© OpenStreetMap-bijdragers) · website: https://een.nl · menulink: https://een.nl/menukaart',
+        },
+      ],
+    }),
+  ]);
+  assert.equal(rows.length, 1);
+  const row = rows[0];
+  assert.equal(row.proposal.id, 'p-1');
+  assert.equal(row.proposal.origin, 'osm');
+  assert.equal(row.proposal.website, 'https://een.nl');
+  assert.equal(row.proposal.menu, 'https://een.nl/menukaart');
+  assert.equal(row.url, 'https://een.nl/menukaart', 'the proposed link is what the row shows and checks');
+  assert.equal(row.canCheck, true);
+  assert.deepEqual(row.step, { key: 'confirm_proposal', label: '✅ Bevestig voorstel' });
+});
+
+test('Dekking: after the proposal is confirmed, the row offers the existing check', () => {
+  const rows = coverageRows([
+    entry({
+      not_in_queue_reason: 'never_checked',
+      known_url: null,
+      proposals: [
+        {
+          id: 'p-1',
+          kind: 'add_candidate',
+          status: 'accepted',
+          proposed_url: 'https://een.nl/menukaart',
+          proposed_at: '2026-10-27T09:00:00.000Z',
+          note: 'Herkomst: OpenStreetMap (© OpenStreetMap-bijdragers) · website: https://een.nl',
+        },
+      ],
+    }),
+  ]);
+  assert.equal(rows[0].url, 'https://een.nl/menukaart');
+  assert.equal(rows[0].proposal.confirmed, true);
+  assert.deepEqual(rows[0].step, { key: 'check', label: '🔎 Controleer' });
+});
+
+test('Dekking: a rejected or unusable proposal never becomes a source', () => {
+  const rejected = coverageRows([
+    entry({
+      not_in_queue_reason: 'never_checked',
+      known_url: null,
+      proposals: [{ id: 'p-1', kind: 'add_candidate', status: 'rejected', proposed_url: 'https://fout.example/menu', proposed_at: '2026-10-27T09:00:00.000Z' }],
+    }),
+  ]);
+  assert.equal(rejected[0].proposal, null);
+  assert.equal(rejected[0].url, null);
+  assert.equal(rejected[0].canCheck, false);
+
+  const unusable = coverageRows([
+    entry({
+      not_in_queue_reason: 'never_checked',
+      known_url: null,
+      proposals: [
+        {
+          id: 'p-2',
+          kind: 'mark_unusable',
+          status: 'open',
+          proposed_url: null,
+          proposed_at: '2026-10-27T09:00:00.000Z',
+          note: 'Negeren in Nieuw gevonden: Bakkerij Voorbeeld — geen restaurant voor ons.',
+        },
+      ],
+    }),
+  ]);
+  assert.equal(unusable[0].proposal, null);
 });
 
 test('copy: the empty state and the phone list use the agreed words', () => {

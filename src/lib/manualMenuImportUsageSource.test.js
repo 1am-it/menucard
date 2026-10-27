@@ -13,7 +13,10 @@ const {
   CONCEPT_COLUMNS,
   CONCEPT_TABLE,
   PROVENANCE_KIND_PATH,
+  DISCOVERY_KIND,
+  DISCOVERY_NOTE_PREFIX,
   readDurableUsageRows,
+  readDurableSourceDiscoveryRows,
 } = require('./manualMenuImportUsageSource');
 
 function fakeClient({ rows = [], error = null } = {}) {
@@ -98,4 +101,77 @@ test('K4: een leesfout of ontbrekende client is een concrete fout, geen leeg doc
   assert.deepEqual(failed, { ok: false, code: 'read_failed' });
   assert.deepEqual(await readDurableUsageRows(null), { ok: false, code: 'no_client' });
   assert.deepEqual(await readDurableUsageRows({}), { ok: false, code: 'no_client' });
+});
+
+// BE-32 (#75, criterion 4): the source-discovery AI cost lives in the existing
+// BE-24 proposal note and counts in the SAME monthly budget of 1000 cents.
+function discoveryClient(rows) {
+  const calls = [];
+  const builder = {
+    select(columns) {
+      calls.push(['select', columns]);
+      return builder;
+    },
+    like(column, value) {
+      calls.push(['like', column, value]);
+      return builder;
+    },
+    order(column, options) {
+      calls.push(['order', column, options]);
+      return builder;
+    },
+    limit(value) {
+      calls.push(['limit', value]);
+      return Promise.resolve({ data: rows, error: null });
+    },
+  };
+  return {
+    calls,
+    from(table) {
+      calls.push(['from', table]);
+      return builder;
+    },
+  };
+}
+
+test('BE-32: de gemeten AI-kosten van een vindbron-voorstel tellen mee in hetzelfde maandbudget', async () => {
+  const { monthlySpendFromRows } = require('./menuAiImport');
+  const rows = [
+    {
+      id: 'proposal-1',
+      proposed_at: '2026-10-27T09:00:00.000Z',
+      note: 'Herkomst: OpenStreetMap (© OpenStreetMap-bijdragers) · website: https://een.invalid · menulink: https://een.invalid/menukaart · kosten: 4 cent',
+    },
+    // No measured cost: never counted as zero eurocents of spend.
+    { id: 'proposal-2', proposed_at: '2026-10-27T09:10:00.000Z', note: 'Herkomst: AI-zoeken · website: https://twee.invalid' },
+    // A remembered "Negeren" is not an AI cost at all.
+    { id: 'proposal-3', proposed_at: '2026-10-27T09:20:00.000Z', note: 'Negeren in Nieuw gevonden: Bakkerij — geen restaurant voor ons.' },
+  ];
+  const client = discoveryClient(rows);
+  const read = await readDurableSourceDiscoveryRows(client, { limit: 10 });
+  assert.equal(read.ok, true);
+  assert.equal(read.rows.length, 1, 'only the proposal with a measured cost becomes a cost row');
+  assert.equal(read.rows[0].created_at, '2026-10-27T09:00:00.000Z');
+  assert.equal(read.rows[0].captured_content.importProvenance.cost.eurCents, 4);
+  assert.equal(read.rows[0].captured_content.importProvenance.kind, DISCOVERY_KIND);
+  assert.deepEqual(client.calls.filter(([name]) => name === 'like'), [['like', 'note', `${DISCOVERY_NOTE_PREFIX}%`]]);
+  assert.equal(client.calls.some(([name]) => ['insert', 'update', 'delete'].includes(name)), false);
+
+  const spend = monthlySpendFromRows(read.rows, { now: new Date('2026-10-27T12:00:00.000Z') });
+  assert.equal(spend.spentEurCents, 4);
+  assert.equal(spend.limitEurCents, 1000, 'the existing ceiling of 1000 cents, never a new budget');
+  assert.equal(spend.remainingEurCents, 996);
+
+  // A read failure is a concrete error, never an empty (free) month.
+  const failed = await readDurableSourceDiscoveryRows({
+    from: () => ({
+      select: () => ({
+        like: () => ({
+          order: () => ({ limit: async () => ({ data: null, error: { message: 'neer' } }) }),
+        }),
+      }),
+    }),
+  });
+  assert.deepEqual(failed, { ok: false, code: 'read_failed' });
+  assert.deepEqual(await readDurableSourceDiscoveryRows(null), { ok: false, code: 'no_client' });
 });
