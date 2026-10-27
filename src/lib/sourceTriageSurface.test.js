@@ -80,7 +80,8 @@ test('one list with chips and exactly one detail: the detail waits for a chosen 
 
 test('the same result row component renders the batch rows here and elsewhere', () => {
   assert.match(code, /import SourceResultRow from '@\/src\/components\/SourceResultRow'/);
-  assert.match(code, /stepHref\(row, \{ batchId: task\.batchId, returnTo: BRONNEN_HREF \}\)/);
+  assert.match(code, /stepHref\(row, \{ batchId: task\.batchId, returnTo \}\)/);
+  assert.match(code, /const returnTo = `\$\{BRONNEN_HREF\}\?batch=/);
   assert.match(code, /onConfirm=\{\(target\) => onConfirmRow\(task, target\)\}/);
   // One next step per row; the confirmation uses the existing route.
   assert.match(PAGE_FILE, /\/confirm`/);

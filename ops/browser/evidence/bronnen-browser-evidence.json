@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-27T09:03:08.144Z",
+  "generatedAt": "2026-10-27T09:23:42.275Z",
   "kind": "fixture-browser-check",
   "task": "BE-31 (#74) Bronnen beoordelen, Dekking en afhandelen in de rij",
   "base": "feat/bronnen-74",
@@ -7,7 +7,7 @@
   "screenshots": [
     {
       "file": "be31-scherm1-1280-light.png",
-      "sha256": "c55288a7c9ec7cb737388b997bf0d253e2c2427c16e888ae384ad5bb96154c8f",
+      "sha256": "048ad42138400f2706ab36e6145b046517b7b1bb07f04ca8c19e437d6309fd6b",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -35,7 +35,7 @@
     },
     {
       "file": "be31-scherm5-1280-light.png",
-      "sha256": "6415462b7e937ee44148c58b89b5a6dcf2b35b2064af7ed8bfd33a2609ec0268",
+      "sha256": "6598499a988fa03ee7f34f64b324456626dcfc366b1461a48f90118318d71c83",
       "width": 1280,
       "height": 1000,
       "viewport": "1280x1000",
@@ -63,7 +63,7 @@
     },
     {
       "file": "be31-scherm6-390-light.png",
-      "sha256": "003b2cf4f7ab0cc457bbed7bbe374060bb82ca3259e30ffaf9440f2a4c07e4f7",
+      "sha256": "2183e46e8ebe5df759a817ee3966d7a00f7e362f70de59d71831075c8f936de2",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -72,7 +72,7 @@
     },
     {
       "file": "be31-scherm2-390-light.png",
-      "sha256": "6cc68ef9d6e63825b5ebe3144626514d8b021a5b8ed44b3c2eacb70ca1f59640",
+      "sha256": "c3aab5d8e175b597a011b8133f3a55b8c1fb1e12351e6bc2e2c89b60f0c49e7b",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -81,7 +81,7 @@
     },
     {
       "file": "be31-scherm3-390-light.png",
-      "sha256": "704eaad93474bb1ed96f89669203a18d3489d8388a803b971f2e266285d0f995",
+      "sha256": "116329ed7f0f5db1cf7e688a8cee1e0c50b43258c9a20c6c86e9a42410bc4ced",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -90,7 +90,7 @@
     },
     {
       "file": "be31-scherm5-390-light.png",
-      "sha256": "02137324fa3cd9e21d16c34cfdd9d05cf2f8fce02a6a2159c853898c415f05b5",
+      "sha256": "f98ae772690e74135e80825eb5448d127a49966fb4de7b4656894424e5cfc713",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -118,7 +118,7 @@
     },
     {
       "file": "be31-scherm6-320-light.png",
-      "sha256": "e1cb3a7d23505109360ec3d153309a632de75394fe93dd4129c266b99d77af98",
+      "sha256": "88cbc53f1ee50e151d80b86ddca4c1af3466fe07100e3914eac466d6ec4dec04",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -127,7 +127,7 @@
     },
     {
       "file": "be31-scherm2-320-light.png",
-      "sha256": "3eb33a11849f9333396478cb8fecdda8e66f81c045d20c2645d3f9ee18e0fdb8",
+      "sha256": "cacc47d997138da3dde6a46b3004648a85e752385b12230710bdaaf76c61f5a8",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -145,7 +145,7 @@
     },
     {
       "file": "be31-scherm5-320-light.png",
-      "sha256": "bbf6e432c4ebfbaa0dc28716bd4f39b9f9601c179adeb47c487f37dd00efce76",
+      "sha256": "e7b5cc01c50e8374fe75efa494e9fea23bc1e4533dc3d2be294c338403ae3fd3",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -163,7 +163,7 @@
     },
     {
       "file": "be31-scherm1-1280-dark.png",
-      "sha256": "84621b9085ec468fb99c85a8ddf933e201052775a27e75571c049d8acadea37d",
+      "sha256": "7380209edfbe14ef794e94aa7458ecb4c1de12f5b8980104001f23c045cb345d",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -173,7 +173,7 @@
     },
     {
       "file": "be31-scherm2-1280-dark.png",
-      "sha256": "531736f19f3bb68d5d3bfa0659efa7bd91e13069db1c67d024ad1880a166b514",
+      "sha256": "0f3cf5c03931ba95bbdc0a371252e041a9db168922cc086a421fde1c506edf47",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -182,7 +182,7 @@
     },
     {
       "file": "be31-scherm4-1280-dark.png",
-      "sha256": "58a5421a32cb8b852bb49956ffa92aa71bbe6d6574d789eaf07173698666de70",
+      "sha256": "dc6b3742d2ae0c0aac67d2c48d4b08007b85f6fc0ada7cb0ef16a93dbd554bf9",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -191,7 +191,7 @@
     },
     {
       "file": "be31-scherm3-1280-dark.png",
-      "sha256": "a4b1331f8d9eaa6e0074820e174c367ca3857305be3451ca8428efacb435ae56",
+      "sha256": "5385bd783eb50de8db5b347c8a9faa74b66f131469b17051a05fb5df78801a71",
       "width": 1280,
       "height": 800,
       "viewport": "1280x800",
@@ -200,7 +200,7 @@
     },
     {
       "file": "be31-scherm5-1280-dark.png",
-      "sha256": "97131d2c4e459c2028afd256fef6fe05bf233d8c998e231247c3b4a556fed62f",
+      "sha256": "ed94ec395736329766dc0fec51a835ca056ca57cb753958577f52982c7f51129",
       "width": 1280,
       "height": 1000,
       "viewport": "1280x1000",
@@ -228,7 +228,7 @@
     },
     {
       "file": "be31-scherm6-390-dark.png",
-      "sha256": "5a848fff083ec1e7ed0050608fd2f5f6e68d6b077b6e0ea60190cccd323a2a5d",
+      "sha256": "0f0e020e03116e6163c6ee9b679476e22d7d861880690cafe723651a07413809",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -237,7 +237,7 @@
     },
     {
       "file": "be31-scherm2-390-dark.png",
-      "sha256": "2b05733b249717b15ef123c876c2fd20385a2960f23358a900eead351910975f",
+      "sha256": "3810de1914bb1d898ab34ac545a4fd463b096bebaefafa3f5c1993d615159674",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -246,7 +246,7 @@
     },
     {
       "file": "be31-scherm4-390-dark.png",
-      "sha256": "d06ff7602b9016549053a85f8f3a3cba13b840e2d9cb5a56110c8e943571f2d8",
+      "sha256": "4588063097105d055eb67be0453ce0c41f1613c829945810d9c7cd507d0fd32a",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -264,7 +264,7 @@
     },
     {
       "file": "be31-scherm5-390-dark.png",
-      "sha256": "1dc24c5a1bf86ca94977739931a3f3ef4b6cb7fe6d6e59cbd97a93b9ebb66e3e",
+      "sha256": "58ff6e253e868b220f54f7703c021497306ecad84838813c04a929b0722f41ae",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -301,7 +301,7 @@
     },
     {
       "file": "be31-scherm2-320-dark.png",
-      "sha256": "fef9f0664ec72fc000e1974b47b45e5da4c20d5d6e4e8e4a7c3a297fc46015db",
+      "sha256": "c7b450ef220408a80263e5e9da3537b7e1b1ee5e72959a4bf613be82395243f7",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -310,7 +310,7 @@
     },
     {
       "file": "be31-scherm4-320-dark.png",
-      "sha256": "c741fd406ed150eb29937b4435e774ade3f4318bedf20f983bac9ed48cdb1e39",
+      "sha256": "68621023b5fe86a2cf53a93194983cecae4d5450cad84c6c9471e218c5da1aa8",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -328,7 +328,7 @@
     },
     {
       "file": "be31-scherm5-320-dark.png",
-      "sha256": "326f563107aef1d852b2eca9a672a539c745b81ba0974f4e9a2fcba381ed20cf",
+      "sha256": "8592e9492064f93f4d884140a9cc22d8fec6f5059776d5b2a048b63f1a928c0f",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -419,7 +419,7 @@
     {
       "name": "scherm 2 (1280/light): twijfel opens the BE-30 screen of the same batch item",
       "passed": true,
-      "detail": "/internal/bronnen/batch?batch=batch-bronnen-0001&item=2&return=%2Finternal%2Fbronnen"
+      "detail": "/internal/bronnen/batch?batch=batch-bronnen-0001&item=2&return=%2Finternal%2Fbronnen%3Fbatch%3Dbatch-bronnen-0001"
     },
     {
       "name": "scherm 2 (1280/light): no menu reuses the existing AI reading link",
@@ -584,7 +584,7 @@
     {
       "name": "scherm 2 (390/light): twijfel opens the BE-30 screen of the same batch item",
       "passed": true,
-      "detail": "/internal/bronnen/batch?batch=batch-bronnen-0001&item=2&return=%2Finternal%2Fbronnen"
+      "detail": "/internal/bronnen/batch?batch=batch-bronnen-0001&item=2&return=%2Finternal%2Fbronnen%3Fbatch%3Dbatch-bronnen-0001"
     },
     {
       "name": "scherm 2 (390/light): no menu reuses the existing AI reading link",
@@ -749,7 +749,7 @@
     {
       "name": "scherm 2 (320/light): twijfel opens the BE-30 screen of the same batch item",
       "passed": true,
-      "detail": "/internal/bronnen/batch?batch=batch-bronnen-0001&item=2&return=%2Finternal%2Fbronnen"
+      "detail": "/internal/bronnen/batch?batch=batch-bronnen-0001&item=2&return=%2Finternal%2Fbronnen%3Fbatch%3Dbatch-bronnen-0001"
     },
     {
       "name": "scherm 2 (320/light): no menu reuses the existing AI reading link",
@@ -914,7 +914,7 @@
     {
       "name": "scherm 2 (1280/dark): twijfel opens the BE-30 screen of the same batch item",
       "passed": true,
-      "detail": "/internal/bronnen/batch?batch=batch-bronnen-0001&item=2&return=%2Finternal%2Fbronnen"
+      "detail": "/internal/bronnen/batch?batch=batch-bronnen-0001&item=2&return=%2Finternal%2Fbronnen%3Fbatch%3Dbatch-bronnen-0001"
     },
     {
       "name": "scherm 2 (1280/dark): no menu reuses the existing AI reading link",
@@ -1079,7 +1079,7 @@
     {
       "name": "scherm 2 (390/dark): twijfel opens the BE-30 screen of the same batch item",
       "passed": true,
-      "detail": "/internal/bronnen/batch?batch=batch-bronnen-0001&item=2&return=%2Finternal%2Fbronnen"
+      "detail": "/internal/bronnen/batch?batch=batch-bronnen-0001&item=2&return=%2Finternal%2Fbronnen%3Fbatch%3Dbatch-bronnen-0001"
     },
     {
       "name": "scherm 2 (390/dark): no menu reuses the existing AI reading link",
@@ -1244,7 +1244,7 @@
     {
       "name": "scherm 2 (320/dark): twijfel opens the BE-30 screen of the same batch item",
       "passed": true,
-      "detail": "/internal/bronnen/batch?batch=batch-bronnen-0001&item=2&return=%2Finternal%2Fbronnen"
+      "detail": "/internal/bronnen/batch?batch=batch-bronnen-0001&item=2&return=%2Finternal%2Fbronnen%3Fbatch%3Dbatch-bronnen-0001"
     },
     {
       "name": "scherm 2 (320/dark): no menu reuses the existing AI reading link",
@@ -1371,6 +1371,5 @@
   "network": {
     "pageViolations": [],
     "guardViolations": []
-  },
-  "screenshotsDir": "ops/browser/evidence/be-31"
+  }
 }

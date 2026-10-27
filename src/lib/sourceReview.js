@@ -205,6 +205,16 @@ function rowNeedsAction(row) {
 }
 
 
+/** A queue entry asks attention when its source or its menu is not in order —
+ * the same facts BE-23's own attention text names. A source that is reachable
+ * with a menu ready for review needs no new source work here. */
+function asksAttention(entry) {
+  if (ATTENTION_STEPS.includes(entry.next_step)) return true;
+  if (entry.source && entry.source !== 'reachable') return true;
+  if (entry.menu && entry.menu !== 'ready_for_review') return true;
+  return false;
+}
+
 /** One triage entry → one task, or null when it is not work (criterion 2/3). */
 function taskFromEntry(entry) {
   if (!entry || typeof entry !== 'object') return null;
@@ -230,7 +240,7 @@ function taskFromEntry(entry) {
       what: entry.domain ? `Nieuwe bron voorgesteld: ${entry.domain}` : 'Nieuwe bron voorgesteld',
     };
   }
-  if (ATTENTION_STEPS.includes(entry.next_step)) {
+  if (entry.next_step !== 'proposals_unknown' && asksAttention(entry)) {
     return {
       ...base,
       kind: 'attention',

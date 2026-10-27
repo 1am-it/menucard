@@ -150,7 +150,10 @@ export default function BronnenPage() {
     const restaurant = params.get('restaurant')
     if (batch) {
       const match = tasks.find((task) => task.kind === 'batch' && task.batchId === batch)
+      // An older batch is not among the recent ones shown here: keep the old
+      // deeplink usable by opening the existing batch screen for exactly that id.
       if (match) setSelectedId(match.id)
+      else router.replace(`/internal/bronnen/batch?batch=${encodeURIComponent(batch)}`)
       return
     }
     if (restaurant) {

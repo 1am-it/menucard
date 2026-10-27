@@ -36,7 +36,7 @@ const EVIDENCE_DIR = path.join(__dirname, 'evidence');
 const EVIDENCE_PATH = path.join(EVIDENCE_DIR, 'menu-review-browser-evidence.json');
 const PORT = Number(process.env.BROWSER_FIXTURE_PORT || 3137);
 const APP_ORIGINS = defaultAppOrigins(PORT);
-const BATCH_URL = `http://localhost:${PORT}/internal/source-triage/batch`;
+const BATCH_URL = `http://localhost:${PORT}/internal/bronnen/batch`;
 const MANUAL_URL = `http://localhost:${PORT}/internal/menu-import`;
 const BATCH_QUERY = `batch=${encodeURIComponent(fixtures.BATCH_ID)}`;
 const CONCEPTS_URL = `http://localhost:${PORT}/internal/menu-concepts`;
@@ -143,11 +143,11 @@ async function reviewScenario(cdp) {
 
   const before = await bodyText(cdp);
   check('review: result card and exact source URL are visible', before.includes('https://fictief-restaurant.invalid/') && before.includes('https://fictief-bron.invalid/menu'));
-  check('review: control is collapsed before the click path', !before.includes('8 gerechten in 4 rubrieken'));
+  check('review: control is collapsed before the click path', !before.includes('8 gerechten in 4 menukopjes'));
 
   const clicked = await clickButton(cdp, 'Menukaart controleren');
   check('review: "Menukaart controleren" is a real button', clicked);
-  const expanded = await waitFor(cdp, `document.body.innerText.includes('8 gerechten in 4 rubrieken')`, 15000);
+  const expanded = await waitFor(cdp, `document.body.innerText.includes('8 gerechten in 4 menukopjes')`, 15000);
   check('review: click opens the recognised menu', expanded);
 
   // Open every section through its own summary, so the assertions below see
@@ -176,12 +176,12 @@ async function reviewScenario(cdp) {
       bg: getComputedStyle(document.documentElement).getPropertyValue('--bg').trim().toLowerCase(),
       url: location.href,
       overflow: document.documentElement.scrollWidth - window.innerWidth,
-      groupButtons: buttons.filter((b) => b.text === 'Rubriek klopt zo').length,
+      groupButtons: buttons.filter((b) => b.text === 'Menukopje klopt zo').length,
     };
   })()`);
 
   const text = snapshot.text;
-  check('review: item and section counts come from the fixture', text.includes('8 gerechten in 4 rubrieken'));
+  check('review: item and section counts come from the fixture', text.includes('8 gerechten in 4 menukopjes'));
   check('review: original section paths are shown', text.includes('Fictief Lunch › Koud') && text.includes('Fictief Diner › Hoofd'));
   check('review: prices are shown per dish', ['€ 12,50', '€ 8,00', '€ 14,50', '€ 24,00'].every((price) => text.includes(price)));
   check('review: multiple undecomposed prices stay explicit', text.includes('9.50 / 18.00 · meerdere prijzen'));
@@ -193,9 +193,9 @@ async function reviewScenario(cdp) {
   check('review: group action is per section and not accept-all', snapshot.groupButtons === 2 && !/alles accepteren|accepteer alles|alles goedkeuren/i.test(text), `groupButtons=${snapshot.groupButtons}`);
   check('review: coverage and limitations are visible', text.includes('8 gerechten uit 1 bron gelezen; controle nodig.') && text.includes('arrangementen en supplementen worden niet als gerecht opgeslagen'));
 
-  const breadcrumb = snapshot.links.find((link) => link.href === '/internal/source-triage');
+  const breadcrumb = snapshot.links.find((link) => link.href === '/internal/bronnen');
   const original = snapshot.links.find((link) => link.href === fixtures.FOUND_URL);
-  const review = snapshot.links.find((link) => link.href === `/internal/source-triage/batch?${BATCH_QUERY}&item=1`);
+  const review = snapshot.links.find((link) => link.href === `/internal/bronnen/batch?${BATCH_QUERY}&item=1`);
   check('review: breadcrumb link is exact', Boolean(breadcrumb), breadcrumb && breadcrumb.text);
   check('review: original menu link is exact and safe', original && original.target === '_blank' && original.rel.includes('noopener') && original.rel.includes('noreferrer'));
   check('review: "handmatig beoordelen" opens the same batch item', Boolean(review), review && review.href);
@@ -208,21 +208,21 @@ async function reviewScenario(cdp) {
   screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'menu-review-desktop-light.png'));
 
   const closed = await clickButton(cdp, 'Controle sluiten');
-  const collapsed = closed && (await waitFor(cdp, `!document.body.innerText.includes('8 gerechten in 4 rubrieken')`, 10000));
+  const collapsed = closed && (await waitFor(cdp, `!document.body.innerText.includes('8 gerechten in 4 menukopjes')`, 10000));
   check('review: "Controle sluiten" closes the same panel', collapsed);
 }
 
 
 async function readOnlyScenario(cdp) {
   await setViewport(cdp, 1024, 900);
-  await openRoute(cdp, `${BATCH_URL}?fixture=readonly&${BATCH_QUERY}&item=1&theme=dark`, `document.body.innerText.includes('8 gerechten in 4 rubrieken')`);
+  await openRoute(cdp, `${BATCH_URL}?fixture=readonly&${BATCH_QUERY}&item=1&theme=dark`, `document.body.innerText.includes('8 gerechten in 4 menukopjes')`);
   const snapshot = await evalJs(cdp, `(() => {
     const text = document.body.innerText;
     const buttons = [...document.querySelectorAll('button')].map((b) => (b.innerText || '').trim());
     return { text, buttons, overflow: document.documentElement.scrollWidth - window.innerWidth };
   })()`);
   check('readonly: colleague view is explicitly read-only', snapshot.text.includes('alleen lezen') && !snapshot.text.includes('Gestart door jou'));
-  check('readonly: no save or group-accept control is offered', !snapshot.buttons.some((text) => text.includes('Concept opslaan') || text === 'Rubriek klopt zo'));
+  check('readonly: no save or group-accept control is offered', !snapshot.buttons.some((text) => text.includes('Concept opslaan') || text === 'Menukopje klopt zo'));
   check('readonly: no source confirmation is offered', !snapshot.buttons.some((text) => text.includes('Bevestig')));
   check('readonly: the same concept and blockers are readable', snapshot.text.includes('Menuconcept · intern') && snapshot.text.includes('6 blokkades'));
   check('readonly: no horizontal overflow at 1024 px', snapshot.overflow <= 0, `overflow=${snapshot.overflow}`);
@@ -284,7 +284,7 @@ async function imageOnlyScenario(cdp) {
   check('image-only: no confirm action is offered', !snapshot.hasConfirm);
   check(
     'image-only: the human route is linked with restaurant and reason',
-    snapshot.link === '/internal/source-triage?restaurant=9001&reason=image_only',
+    snapshot.link === '/internal/bronnen?restaurant=9001&reason=image_only',
     snapshot.link,
   );
   check('image-only: no horizontal overflow at 390 px', snapshot.overflow <= 0, `overflow=${snapshot.overflow}`);
@@ -309,7 +309,7 @@ async function imageOnlyScenario(cdp) {
 
   const steps = [{ action: 'open batch result', reached: true }];
   const clicked = await clickLink(cdp, 'Bronnen beoordelen');
-  const arrived = await waitForPath(cdp, '/internal/source-triage', 'Bronnen beoordelen', 30000);
+  const arrived = await waitForPath(cdp, '/internal/bronnen', 'Bronnen beoordelen', 30000);
   steps.push({ action: 'click Bronnen beoordelen', href: clicked, reached: Boolean(clicked), arrived });
   // The follow-up context is rendered from the triage fetch; wait for the
   // detail card itself instead of reading an empty card right after the route.
@@ -332,7 +332,7 @@ async function imageOnlyScenario(cdp) {
       banner: (document.querySelector('.di-banner-neutral[role="note"]') || {}).innerText || '',
     };
   })()`);
-  check('image-only follow-up: the existing Bronnen beoordelen page opens', arrived && triage.pathname === '/internal/source-triage');
+  check('image-only follow-up: the existing Bronnen beoordelen page opens', arrived && triage.pathname === '/internal/bronnen');
   check('image-only follow-up: the restaurant is preselected', triage.detailTitle.includes('Fictief Brasserie Noord'));
   check(
     'image-only follow-up: the detail names the real reason',
@@ -356,7 +356,7 @@ async function imageOnlyScenario(cdp) {
   );
   check('image-only follow-up: no menu status or confirmation is claimed', !triage.text.includes('Bron bevestigd') && !triage.text.includes('Menukaart gevonden'));
   check('image-only follow-up: the context is kept in the address bar', triage.search.includes('restaurant=9001') && triage.search.includes('reason=image_only'));
-  check('image-only follow-up: no proposal or publication happened', triage.text.includes('Leg een voorstel vast') && !triage.text.includes('Bron bevestigd'));
+  check('image-only follow-up: no proposal or publication happened', triage.text.includes('Voorstel doen') && !triage.text.includes('Bron bevestigd'));
   await evalJs(cdp, `(() => {
     const block = document.querySelector('.stg-followup');
     if (block) block.scrollIntoView({ block: 'center', behavior: 'instant' });
@@ -434,7 +434,7 @@ async function tabUntilInput(cdp, matches, maxTabs = 80) {
 async function structureScenario(cdp) {
   const url = (theme) => `${BATCH_URL}?fixture=structure&${BATCH_QUERY}&item=1&theme=${theme}`;
   await setViewport(cdp, 1024, 900);
-  await openRoute(cdp, url('light'), `document.body.innerText.includes('Rubriekindeling controleren')`);
+  await openRoute(cdp, url('light'), `document.body.innerText.includes('Menukopjes controleren')`);
 
   const initial = await evalJs(cdp, `(() => {
     const text = document.body.innerText;
@@ -447,7 +447,7 @@ async function structureScenario(cdp) {
       overflow: document.documentElement.scrollWidth - window.innerWidth,
     };
   })()`);
-  check('structure: the existing "Menukaart controleren" path shows the section control', initial.text.includes('Rubriekindeling controleren'));
+  check('structure: the existing "Menukaart controleren" path shows the section control', initial.text.includes('Menukopjes controleren'));
   // BE-30 (#72): the route, locator, dishes and page link live in the opened
   // section; the collapsed summary keeps only the label and the count.
   const expandedRows = await evalJs(cdp, `(() => {
@@ -515,7 +515,7 @@ async function structureScenario(cdp) {
   check('structure: the confirm control appears only now and is enabled', Boolean(confirmTrigger) && confirmTrigger.disabled === false, JSON.stringify(confirmTrigger));
 
   const opened = await clickButton(cdp, 'Bevestig bron');
-  const panel = opened && (await waitFor(cdp, `document.body.innerText.includes('2 onzekere rubrieken behandeld')`, 10000));
+  const panel = opened && (await waitFor(cdp, `document.body.innerText.includes('2 onzekere menukopjes behandeld')`, 10000));
   const panelText = await bodyText(cdp);
   check(
     'structure: the confirmation shows the handled decisions before writing',
@@ -527,7 +527,7 @@ async function structureScenario(cdp) {
   recordClickpath(
     'batch result -> Menukaart controleren -> keep/correct each uncertain section -> Bevestig bron (panel only)',
     [
-      { step: 'uncertain result opens the section control', arrived: initial.text.includes('Rubriekindeling controleren') },
+      { step: 'uncertain result opens the section control', arrived: initial.text.includes('Menukopjes controleren') },
       { step: 'keep the first uncertain section', arrived: keptFirst === true },
       { step: 'correct the second uncertain section with a path', arrived: Boolean(inputReady && typed) },
       { step: 'all sections treated', arrived: completed === true },
@@ -542,7 +542,7 @@ async function structureScenario(cdp) {
   // the keyboard route is: Tab to the section summary, Enter opens it, then Tab
   // to the decision radio and Space selects it.
   await setViewport(cdp, 390, 900);
-  await openRoute(cdp, url('light'), `document.body.innerText.includes('Rubriekindeling controleren')`);
+  await openRoute(cdp, url('light'), `document.body.innerText.includes('Menukopjes controleren')`);
   const summaryReach = await tabUntilInput(cdp, (info) => info.tag === 'SUMMARY');
   let keyboardOk = false;
   let radioReach = null;
@@ -569,7 +569,7 @@ async function structureScenario(cdp) {
   // Responsive: 390 px in both themes, with the correction field open.
   for (const theme of ['light', 'dark']) {
     await setViewport(cdp, 390, 900);
-    await openRoute(cdp, url(theme), `document.body.innerText.includes('Rubriekindeling controleren')`);
+    await openRoute(cdp, url(theme), `document.body.innerText.includes('Menukopjes controleren')`);
     await evalJs(cdp, `(() => {
       for (const row of document.querySelectorAll('.bta-structure-row')) {
         const radios = row.querySelectorAll('input[type="radio"]');
@@ -595,7 +595,7 @@ async function structureScenario(cdp) {
   await openRoute(
     cdp,
     `${BATCH_URL}?fixture=structure-readonly&${BATCH_QUERY}&item=1&theme=dark`,
-    `document.body.innerText.includes('Rubriekindeling controleren')`,
+    `document.body.innerText.includes('Menukopjes controleren')`,
   );
   const readonly = await evalJs(cdp, `(() => ({
     text: document.body.innerText,
@@ -616,7 +616,7 @@ async function be30Scenario(cdp) {
     await setViewport(cdp, width, 900);
 
     // 1. Without AI advice: collapsed, then opened.
-    await openRoute(cdp, url('structure8', theme), `document.body.innerText.includes('Rubriekindeling controleren')`);
+    await openRoute(cdp, url('structure8', theme), `document.body.innerText.includes('Menukopjes controleren')`);
     const collapsed = await evalJs(cdp, `(() => {
       const section = document.querySelector('.bta-structure-section');
       const body = section ? section.querySelector('.bta-structure-body') : null;
@@ -669,7 +669,7 @@ async function be30Scenario(cdp) {
     check(`be30 ${width}-${theme}: no horizontal overflow (expanded)`, expanded.overflow <= 0, `overflow=${expanded.overflow}`);
     screenshotFiles.push(await screenshot(cdp, OUT_DIR, `be-30-structure-expanded-${width}-${theme}.png`));
     // 2. With the stored advice: preselected, each with confidence and quote.
-    await openRoute(cdp, url('structure8-advice', theme), `document.body.innerText.includes('Rubriekindeling controleren')`);
+    await openRoute(cdp, url('structure8-advice', theme), `document.body.innerText.includes('Menukopjes controleren')`);
     const advised = await evalJs(cdp, `(() => ({
       checked: document.querySelectorAll('.bta-structure-choices input[type="radio"]:checked').length,
       quotes: document.querySelectorAll('.bta-advice-quote').length,
@@ -693,7 +693,7 @@ async function be30Scenario(cdp) {
 
     // 3. One bulk confirmation that names the number of sections.
     const clicked = await clickButton(cdp, 'Neem alle adviezen over');
-    const confirmReady = await waitFor(cdp, `document.body.innerText.includes('8 rubrieken bevestigen?')`, 10000);
+    const confirmReady = await waitFor(cdp, `document.body.innerText.includes('8 menukopjes bevestigen?')`, 10000);
     const confirmState = await evalJs(cdp, `(() => ({
       text: document.body.innerText,
       buttons: [...document.querySelectorAll('.bta-confirm button')].map((b) => ({ text: (b.innerText || '').trim(), disabled: b.disabled })),
@@ -713,7 +713,7 @@ async function be30Scenario(cdp) {
         { step: 'eight uncertain sections, collapsed', arrived: collapsed.sections === 8 },
         { step: 'dishes, reason and pdf page link in the opened section', arrived: expanded.dishes === 2 && expanded.linkHref === sections[0].sourceLink.url },
         { step: 'advices preselected with quote and confidence', arrived: advised.checked === 6 && advised.quotes === 6 },
-        { step: 'one confirmation that names 8 rubrieken', arrived: Boolean(confirmReady) },
+        { step: 'one confirmation that names 8 menukopjes', arrived: Boolean(confirmReady) },
       ],
       Boolean(confirmReady),
       JSON.stringify({ sections: sections.map((section) => section.label) }),
@@ -901,7 +901,7 @@ async function conceptProductReadOnlyScenario(cdp) {
   check('concept v2 read-only: unknown allergens stay unknown', v2.text.includes('Allergenen onbekend (geen bronvermelding)') && !v2.text.includes('allergeenvrij'));
   check('concept v2 read-only: provenance and its quote are visible', v2.text.includes('Bronbewijs') && v2.text.includes('Fictieve wijn Glas 6,50 Fles 25,00'));
   check('concept v2 read-only: coverage and its limitation are visible', v2.text.includes('Dekking') && v2.text.includes('Fictieve v2-beperking: één pagina was onleesbaar.'));
-  check('concept v2 read-only: counts keep both items, the variant and the supplement', v2.text.includes('2 items') && v2.text.includes('1 rubriek') && v2.text.includes('2 prijsvarianten') && v2.text.includes('1 supplement'));
+  check('concept v2 read-only: counts keep both items, the variant and the supplement', v2.text.includes('2 items') && v2.text.includes('1 menukopje') && v2.text.includes('2 prijsvarianten') && v2.text.includes('1 supplement'));
   check('concept v2 read-only: save, approve, reject and export are absent', !v2.buttons.some((b) => /opslaan|goedkeuren|afwijzen|review-PR/i.test(b)), v2.buttons.join('|'));
   check('concept v2 read-only: the blocked actions are named, not hidden', v2.text.includes('save, confirm, export, publish'));
   check('concept v2 read-only: the exact source link is kept', v2.sourceLinks.some((link) => link.text.startsWith('Open originele menukaart') && link.href === fixtures.SOURCE_URL), JSON.stringify(v2.sourceLinks.filter((link) => link.href === fixtures.SOURCE_URL)));
@@ -1129,9 +1129,9 @@ const themeBackgrounds = {};
 
 async function responsiveScenario(cdp, width, theme) {
   await setViewport(cdp, width, 900);
-  await openRoute(cdp, reviewUrl({ theme, item: true }), `document.body.innerText.includes('8 gerechten in 4 rubrieken')`);
+  await openRoute(cdp, reviewUrl({ theme, item: true }), `document.body.innerText.includes('8 gerechten in 4 menukopjes')`);
   const snapshot = await evalJs(cdp, `(() => {
-    const breadcrumb = document.querySelector('a[href="/internal/source-triage"]');
+    const breadcrumb = document.querySelector('a[href="/internal/bronnen"]');
     const save = [...document.querySelectorAll('button')].find((b) => b.innerText.includes('Concept opslaan'));
     return {
       theme: document.documentElement.getAttribute('data-theme'),
@@ -1147,7 +1147,7 @@ async function responsiveScenario(cdp, width, theme) {
   check(`responsive ${width}px/${theme}: requested theme is active`, snapshot.theme === theme, snapshot.theme);
   check(`responsive ${width}px/${theme}: no horizontal overflow`, snapshot.overflow <= 0, `overflow=${snapshot.overflow}`);
   check(`responsive ${width}px/${theme}: navigation and save control stay visible`, snapshot.breadcrumbVisible && snapshot.saveVisible);
-  check(`responsive ${width}px/${theme}: the menu content is unchanged`, snapshot.text.includes('Fictief Lunch › Koud') && snapshot.text.includes('8 gerechten in 4 rubrieken'));
+  check(`responsive ${width}px/${theme}: the menu content is unchanged`, snapshot.text.includes('Fictief Lunch › Koud') && snapshot.text.includes('8 gerechten in 4 menukopjes'));
   screenshotFiles.push(await screenshot(cdp, OUT_DIR, `menu-review-${width}-${theme}.png`));
 }
 
@@ -1159,7 +1159,7 @@ async function keyboardScenario(cdp) {
   check('keyboard: Tab moves focus through the page', reach.tabs > 1, `tabs=${reach.tabs}`);
   if (reach.info) {
     await pressKey(cdp, 'Enter', 'Enter', 13, '\r');
-    const opened = await waitFor(cdp, `document.body.innerText.includes('8 gerechten in 4 rubrieken')`, 15000);
+    const opened = await waitFor(cdp, `document.body.innerText.includes('8 gerechten in 4 menukopjes')`, 15000);
     const expanded = await evalJs(cdp, `(() => {
       const button = [...document.querySelectorAll('button')].find((b) => b.innerText.includes('Controle sluiten'));
       return Boolean(button && button.getAttribute('aria-expanded') === 'true');
@@ -2116,7 +2116,7 @@ async function manualUncoveredScenario(cdp) {
   );
   check(
     'uncovered lines: the added dish is in nalopen with a section to check',
-    Boolean(added) && added.text.includes('Fictieve carpaccio') && added.text.includes('rubriek controleren'),
+    Boolean(added) && added.text.includes('Fictieve carpaccio') && added.text.includes('menukopje controleren'),
     added ? (added.text.match(/Fictieve carpaccio[^\n]*/) || ['missing'])[0] : 'no block',
   );
   check('uncovered lines: no horizontal overflow after adding', Boolean(added) && added.overflow <= 0, added ? `overflow=${added.overflow}` : 'no block');

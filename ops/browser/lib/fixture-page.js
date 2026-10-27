@@ -50,8 +50,10 @@ function fixtureBootstrap(scenarios, options = {}) {
     const fixture = requestedFixture
       || (pathname.indexOf('/internal/menu-concepts') === 0
         ? 'concepts'
+        : pathname.indexOf('/internal/bronnen/batch') === 0 ? 'review'
         : pathname === '/internal/source-triage' ? 'triage'
-        : pathname.indexOf('/internal/bronnen') === 0 ? 'bronnen'
+        : pathname === '/internal/bronnen'
+          ? (params.get('reason') === 'image_only' ? 'triage' : 'bronnen')
         : pathname.indexOf('/internal/coverage') === 0 ? 'bronnen'
         : 'review');
     const theme = params.get('theme') === 'light' ? 'light' : 'dark';

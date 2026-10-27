@@ -134,6 +134,18 @@ test('tasks: an unknown restaurant is named as such, never invented', () => {
   assert.equal(task.name, 'Onbekend restaurant');
 });
 
+test('tasks: a source with a menu that is not in order asks attention, a clean source does not', () => {
+  const tasks = selectTasks({
+    entries: [
+      entry({ restaurant_id: 'a', name: 'Niet beoordeeld', menu: 'not_assessed', next_step: 'check_via_onboarding' }),
+      entry({ restaurant_id: 'b', name: 'Niet bereikbaar', source: 'unreachable', menu: 'not_assessed', next_step: 'replace_or_mark' }),
+      entry({ restaurant_id: 'c', name: 'In orde', source: 'reachable', menu: 'ready_for_review', attention: 'Menukaart wacht op beoordeling' }),
+      entry({ restaurant_id: 'd', name: 'Onbekende voorstellen', source: 'unreachable', next_step: 'proposals_unknown' }),
+    ],
+  });
+  assert.deepEqual(tasks.map((t) => t.name), ['Niet beoordeeld', 'Niet bereikbaar']);
+});
+
 test('counters: chips count every task exactly once, with real numbers', () => {
   const tasks = selectTasks({
     entries: [

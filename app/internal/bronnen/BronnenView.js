@@ -26,6 +26,8 @@ const KIND_NAMES = { batch: 'Batch', proposal: 'Voorstel', attention: 'Bron vraa
 
 function BatchRows({ task, busy, onConfirmRow }) {
   if (!task.rows || task.rows.length === 0) return null
+  // "Menukopjes controleren" comes back to this row: the same task stays chosen.
+  const returnTo = `${BRONNEN_HREF}?batch=${encodeURIComponent(task.batchId)}`
   return (
     <ol className="srr-list" aria-label="Resultaten van deze batch">
       {task.rows.map((row, index) => (
@@ -33,7 +35,7 @@ function BatchRows({ task, busy, onConfirmRow }) {
           key={`${row.position}-${row.jobId || row.key}-${index}`}
           row={row}
           position={row.position}
-          href={stepHref(row, { batchId: task.batchId, returnTo: BRONNEN_HREF })}
+          href={stepHref(row, { batchId: task.batchId, returnTo })}
           onConfirm={(target) => onConfirmRow(task, target)}
           busy={busy}
         />

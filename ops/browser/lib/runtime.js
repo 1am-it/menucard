@@ -61,10 +61,10 @@ async function startServer({ port, appUrl, outputDir, readyPath }) {
   });
   child.stdout.pipe(log);
   child.stderr.pipe(log);
-  // BE-31 (#74): the old batch page address answers with a 308, so a check can
-  // name its own ready path. Default stays the previous address for the older
-  // checks that still use it.
-  await waitForHttp(`${appUrl}${readyPath || '/internal/source-triage/batch'}`, 120000);
+  // BE-31 (#74): the old batch page address answers with a 308, so the default
+  // ready path is the login route (always 200, no auth) and a check can name its
+  // own path instead.
+  await waitForHttp(`${appUrl}${readyPath || '/internal/login'}`, 120000);
   return child;
 }
 
