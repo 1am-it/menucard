@@ -573,7 +573,7 @@ or data). It is not independent review and not production acceptance.
 
 **Contrast.** Before: all text passed except the wine line on the dark card
 (`.td-wine`, `--wine` `#a87c4a` on `#2A2F35` = **3.63:1**; 6 texts on the
-restaurant page, 22 on the menu page), and control borders failed on 8 of the 9
+restaurant page, 22 on the menu page), and control borders failed on 7 of the 9
 pages (1.09:1 to 1.29:1 for the secondary buttons, the internal navigation
 actions and the Bronnen row and chips). After:
 
@@ -624,14 +624,15 @@ that 11 to 20 emoji per public page and 1 to 10 per internal screen were read
 aloud.
 
 **Phone.** No horizontal overflow at 390 and 320 px on any of the nine pages.
-Before, `/restaurant/[id]` and Dekking ran 10 px off the screen and 24 measured
-controls were under 44 px. Repaired with existing shapes only: the chips, meal
-buttons, category navigation, back buttons, secondary buttons and search fields
-get a 44 px minimum height, the small text links (address, phone, source,
-"Liever zelf plakken", claim, allergen matrix, breadcrumb) get a 44 px row and
-the checkboxes get a 44 px label around the unchanged 20 px box (a native
-checkbox ignores padding, so its own box cannot grow without changing the
-design).
+Before, `/restaurant/[id]` and Dekking ran 10 px off the screen and a single
+page had up to 24 controls under 44 px. Repaired with existing shapes only: the
+chips, meal buttons, category navigation, back buttons, secondary buttons and
+search fields get a 44 px minimum height, the small text links (address, phone,
+source, "Liever zelf plakken", claim, allergen matrix, breadcrumb) get a 44 px
+row and the checkboxes get a 44 px label around the unchanged 20 px box (a
+native checkbox ignores padding, so its own box cannot grow without changing
+the design; the check measures the label, because that is what responds to a
+tap).
 
 **Slordigheden.** Dekking: the column heads no longer run into each other
 ("SELECTEERRESTAURANT" was two heads without spacing) — the first column is

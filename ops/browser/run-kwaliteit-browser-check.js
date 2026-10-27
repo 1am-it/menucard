@@ -69,6 +69,11 @@ const INTERNAL_START = `${INTERNAL_APP}/internal/bronnen`;
 const SHOTS_DIR = path.join(EVIDENCE_DIR, 'be-37', LABEL);
 const EVIDENCE_PATH = path.join(EVIDENCE_DIR, `kwaliteit-${LABEL}.json`);
 const FIXTURES = { ...fixtures.scenarios, ...BRONNEN_SCENARIOS };
+// De publieke fase start `next start`; zonder productiebuild stopt dat met een
+// onduidelijke fout. Liever meteen zeggen wat er ontbreekt (de interne fase
+// draait `next dev` en overschrijft dezelfde .next-map, dus na een fase 2 is
+// een nieuwe build nodig).
+const PRODUCTION_BUILD = path.join(REPO_ROOT, '.next', 'BUILD_ID');
 
 // Dezelfde pagina's als het bouwcontract: vijf publieke en vier interne.
 const PUBLIC_PAGES = [
@@ -304,13 +309,28 @@ const LAYOUT_JS = `(() => {
     const inlineInProse = el.tagName === 'A' && getComputedStyle(el).display === 'inline';
     if (inlineInProse) continue;
     const rect = el.getBoundingClientRect();
-    if (rect.height >= 44 && rect.width >= 44) continue;
+    // Een selectievakje in een <label> is samen met dat label het tikvlak:
+    // een klik op het label zet het vinkje. Meet dus het omhullende vlak.
+    let hit = rect;
+    const label = el.labels && el.labels.length ? el.labels[0] : null;
+    if (label) {
+      const outer = label.getBoundingClientRect();
+      const left = Math.min(rect.left, outer.left);
+      const top = Math.min(rect.top, outer.top);
+      hit = {
+        left,
+        top,
+        width: Math.max(rect.right, outer.right) - left,
+        height: Math.max(rect.bottom, outer.bottom) - top,
+      };
+    }
+    if (hit.height >= 44 && hit.width >= 44) continue;
     tap.push({
       selector: selectorOf(el),
       text: (el.innerText || el.getAttribute('aria-label') || '').replace(/\\s+/g, ' ').trim().slice(0, 50),
-      width: Math.round(rect.width),
-      height: Math.round(rect.height),
-      left: Math.round(rect.left),
+      width: Math.round(hit.width),
+      height: Math.round(hit.height),
+      left: Math.round(hit.left),
     });
   }
   return {
@@ -899,6 +919,11 @@ async function main() {
     process.exit(2);
   }, 40 * 60 * 1000);
   if (typeof watchdog.unref === 'function') watchdog.unref();
+
+  if (PHASE !== 'internal' && !fs.existsSync(PRODUCTION_BUILD)) {
+    writeEvidence({ error: 'production_build_missing' });
+    throw new Error('production_build_missing: run `next build` first (the internal phase overwrites .next)');
+  }
 
   const browserPath = findBrowser();
   if (!browserPath) {
