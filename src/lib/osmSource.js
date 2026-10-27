@@ -287,6 +287,20 @@ function businessAddressLabel(business) {
 }
 
 /**
+ * BE-34 (#81, criterion 2) — the OSM address of a restaurant that is not in our
+ * list yet. Matched on the comparable name only (accent- and kind-word-free) and
+ * only when exactly one business carries it: on any doubt there is no address
+ * instead of a guess. The OSM layer is read through the same cached answer.
+ */
+function findOsmBusinessByName(name, businesses = []) {
+  const target = comparableBusinessName(name);
+  if (target === '') return null;
+  const list = Array.isArray(businesses) ? businesses.filter(Boolean) : [];
+  const matches = list.filter((business) => comparableBusinessName(business.name) === target);
+  return matches.length === 1 ? matches[0] : null;
+}
+
+/**
  * "＋ Toevoegen" opens the existing add form with everything filled in
  * (criterion 3). The form only ever *offers* these values; the human submits.
  */
@@ -326,5 +340,6 @@ module.exports = {
   matchOsmBusiness,
   unknownBusinesses,
   businessAddressLabel,
+  findOsmBusinessByName,
   addFormHref,
 };

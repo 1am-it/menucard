@@ -34,6 +34,7 @@ const {
   originLabel,
   originChainLabel,
   ignoreProposalInput,
+  newRestaurantHref,
 } = require('./sourceDiscovery');
 const {
   OSM_ATTRIBUTION,
@@ -41,6 +42,7 @@ const {
   unknownBusinesses,
   businessKindLabel,
   businessAddressLabel,
+  findOsmBusinessByName,
   addFormHref,
 } = require('./osmSource');
 const { isInternalOnly } = require('./importInbox');
@@ -51,6 +53,7 @@ const { MAX_BATCH_URLS } = require('./batchAnalysis');
 const MAX_RESTAURANTS = MAX_BATCH_URLS;
 const MAX_PAGES_FOR_CHOICE = 3;
 const MAX_PAGE_TEXT = 2500;
+const MAX_NAME_CHARS = 120;
 const FORBIDDEN = 'Alleen interne medewerkers kunnen bronnen zoeken.';
 const LOAD_ERROR = 'De zoekactie kon niet worden uitgevoerd.';
 
@@ -447,6 +450,131 @@ function createSourceDiscoveryHandlers(deps = {}) {
     return result;
   }
 
+  /**
+   * POST /api/internal/v1/source-discovery/name — "✨ Zoek op internet: <naam>,
+   * Breda" (BE-34 #81, criterion 2). The typed name is not one of our
+   * restaurants, so nothing can be linked: the same AI search layer as BE-32
+   * looks for the official website, with the same budget gate, the same refused
+   * platforms and the same source requirement. A found website is followed by the
+   * existing same-host menu search; the OSM answer, when exactly one business
+   * carries this name, adds the address. Nothing is created, confirmed or
+   * published — a human adds the restaurant on the onboarding.
+   */
+  async function searchByName(request) {
+    const { denied } = await authorize(request);
+    if (denied) return denied;
+    const parsed = await readJson(request);
+    if (!parsed.ok) return reply(400, { error: 'Ongeldig verzoek.' });
+    const raw = parsed.body && typeof parsed.body.name === 'string' ? parsed.body.name : '';
+    const name = raw.replace(/\s+/g, ' ').trim().slice(0, MAX_NAME_CHARS);
+    if (name.length < 2) return reply(400, { error: 'Typ de naam van het restaurant.' });
+
+    const spend = await spendState();
+    const notices = [];
+    const osm = await businesses();
+    const osmMatch = osm.ok ? findOsmBusinessByName(name, osm.businesses) : null;
+    const layers = [];
+    if (!osm.ok) {
+      layers.push({ key: 'osm', outcome: 'error', detail: DISCOVERY_MESSAGES.osm_unreachable });
+      notices.push('osm_unreachable');
+    } else if (osmMatch) {
+      layers.push({ key: 'osm', outcome: osmMatch.website ? 'hit' : 'no_website', detail: 'name_match' });
+    } else {
+      layers.push({ key: 'osm', outcome: 'miss', detail: 'no_name_match' });
+    }
+
+    let website = osmMatch && osmMatch.website ? { url: osmMatch.website, origin: 'osm' } : null;
+    let menu = null;
+    let quote = null;
+    let source = null;
+    let aiCostEurCents = null;
+    let message = null;
+    let reason = null;
+
+    if (website) {
+      layers.push({ key: 'ai_search', outcome: 'skipped', detail: 'website_known' });
+    } else {
+      const ai = await runAi({ purpose: 'search', payload: { restaurant: { name, address: 'Breda' } }, spend, notices });
+      if (Number.isInteger(ai.cost)) aiCostEurCents = ai.cost;
+      if (!ai.ok) {
+        layers.push({ key: 'ai_search', outcome: ai.reason === 'ai_failed' ? 'error' : 'skipped', detail: ai.reason });
+        message = DISCOVERY_MESSAGES[ai.reason] || DISCOVERY_MESSAGES.not_found;
+        reason = ai.reason;
+      } else {
+        const validation = validateSearchAnswer(ai.output, { name });
+        if (validation.ok) {
+          website = { url: validation.value.url, origin: 'ai_search' };
+          quote = validation.value.quote;
+          source = validation.value.source;
+          layers.push({ key: 'ai_search', outcome: 'hit', detail: validation.value.source });
+        } else {
+          layers.push({ key: 'ai_search', outcome: 'rejected', detail: validation.reason });
+          reason = validation.reason;
+          message = validation.reason === 'only_rejected' ? DISCOVERY_MESSAGES.only_platforms : DISCOVERY_MESSAGES.not_found;
+        }
+      }
+    }
+
+    // The menu link, only when there is an official website: the existing
+    // same-host search (BE-20), no AI and no new request pattern.
+    if (website && typeof readHomepage === 'function' && typeof findMenuCandidates === 'function') {
+      try {
+        const page = await readHomepage(website.url);
+        if (page && page.ok === true && typeof page.html === 'string') {
+          const base = typeof page.finalUrl === 'string' && page.finalUrl ? page.finalUrl : website.url;
+          const candidates = findMenuCandidates(page.html, base).slice(0, 5);
+          const chosen = chooseMenuCandidate(candidates);
+          if (chosen) {
+            menu = { url: chosen.url, origin: 'same_host' };
+            layers.push({ key: 'same_host', outcome: 'hit', detail: chosen.matchedOn || null });
+          } else {
+            layers.push({ key: 'same_host', outcome: 'miss', detail: null });
+          }
+        } else {
+          layers.push({ key: 'same_host', outcome: 'error', detail: 'unreachable' });
+        }
+      } catch {
+        layers.push({ key: 'same_host', outcome: 'error', detail: 'unreachable' });
+      }
+    }
+
+    const chain = [];
+    if (website && website.origin) chain.push(website.origin);
+    if (menu && menu.origin) chain.push(menu.origin);
+    const address =
+      osmMatch && typeof osmMatch.address === 'string' && osmMatch.address.trim() !== '' ? osmMatch.address.trim() : null;
+    const proposal = website
+      ? {
+          name,
+          address,
+          website: { url: website.url, origin: website.origin },
+          menu: menu ? { url: menu.url, origin: menu.origin } : null,
+          originChain: chain,
+          originLabel: chain.length > 0 ? originChainLabel(chain, { quote, source }) : null,
+          quote,
+          source,
+          aiCostEurCents,
+          layers,
+          onboardingHref: newRestaurantHref({ name, address, website: website.url, menu: menu ? menu.url : null }),
+        }
+      : null;
+    if (!proposal && !message) message = DISCOVERY_MESSAGES.not_found;
+    const measured = Number.isInteger(aiCostEurCents) ? aiCostEurCents : null;
+    return reply(200, {
+      ok: true,
+      name,
+      proposal,
+      reason: proposal ? null : reason || 'not_found',
+      message,
+      layers,
+      cost: { eurCents: measured, known: measured !== null },
+      monthly: publicMonthly(spend.ok ? spend.spend : null),
+      notices: [...new Set(notices)],
+      messages: notices.map((notice) => DISCOVERY_MESSAGES[notice]).filter(Boolean),
+      attribution: OSM_ATTRIBUTION,
+    });
+  }
+
   /** POST /api/internal/v1/source-discovery — "✨ Vind bronnen" / "Zoek de bron voor mij". */
   async function findSources(request) {
     const { denied, auth } = await authorize(request);
@@ -561,7 +689,7 @@ function createSourceDiscoveryHandlers(deps = {}) {
     return reply(500, { error: 'Negeren kon niet worden onthouden.' });
   }
 
-  return { findSources, newRestaurants, ignoreNew };
+  return { findSources, searchByName, newRestaurants, ignoreNew };
 }
 
 module.exports = {
