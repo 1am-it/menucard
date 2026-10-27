@@ -11,15 +11,13 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { OSM_ATTRIBUTION } from '@/src/lib/osmSource'
+import { NEW_FOUND_LOADING, RETRY_LABEL, updatedLabel } from '@/src/lib/discoveryProgress'
 
 const DISCOVERY_API = '/api/internal/v1/source-discovery'
 const IGNORE_API = '/api/internal/v1/source-discovery/ignore'
 
 function fetchedLabel(value) {
-  if (!value) return null
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return null
-  return date.toLocaleString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+  return updatedLabel(value)
 }
 
 export default function NewFoundSection({ token }) {
@@ -28,6 +26,7 @@ export default function NewFoundSection({ token }) {
 
   const load = useCallback(async () => {
     if (!token) return
+    setState((prev) => ({ ...prev, loading: true, error: null }))
     try {
       const res = await fetch(DISCOVERY_API, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' })
       const body = await res.json().catch(() => ({}))
@@ -82,17 +81,31 @@ export default function NewFoundSection({ token }) {
     <section className="cov-new" aria-labelledby="cov-new-title">
       <div className="cov-check-head">
         <h2 id="cov-new-title" className="cov-check-title">
-          🆕 Nieuw gevonden ({state.items.length})
+          {/* BE-34 (#81, criterion 4): no "(0)" while the first fetch of the day
+              is still running. */}
+          {state.loading ? '🆕 Nieuw gevonden' : `🆕 Nieuw gevonden (${state.items.length})`}
         </h2>
         <p className="cov-check-meta" style={{ margin: 0 }}>
           Restaurants in Breda die OpenStreetMap kent en wij nog niet. Dekking voegt nooit zelf iets toe.
         </p>
         <div style={{ flex: 1 }} />
-        {fetched ? <span className="cov-check-meta">Laatst opgehaald: {fetched}</span> : null}
+        {!state.loading && fetched ? <span className="cov-check-meta">{fetched}</span> : null}
       </div>
 
-      {state.loading ? <p className="cov-check-meta">Nieuw gevonden wordt geladen…</p> : null}
-      {state.error ? <div className="di-banner di-banner-neutral">{state.error}</div> : null}
+      {state.loading ? (
+        <p className="cov-check-meta cov-loading" role="status" aria-live="polite">
+          <span className="cov-spinner" aria-hidden="true" />
+          {NEW_FOUND_LOADING}
+        </p>
+      ) : null}
+      {state.error ? (
+        <div className="di-banner di-banner-neutral" role="status">
+          <span>{state.error}</span>
+          <button type="button" className="stg-btn-secondary cov-check-action" onClick={load}>
+            {RETRY_LABEL}
+          </button>
+        </div>
+      ) : null}
       {state.notice ? (
         <div className="di-banner di-banner-info" role="status">
           {state.notice}

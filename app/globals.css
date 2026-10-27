@@ -4665,6 +4665,32 @@ header, .site-header { height: auto; min-height: var(--header-h); }
   border: 1px solid var(--border);
 }
 .cov-discovery-summary { margin: 0; font-size: 13px; font-weight: 700; color: var(--text-primary); }
+/* BE-34 (#81): the app shows it is busy — a spinning icon, the running step
+   list and a progress bar, all with the existing tokens and no new colour. */
+.cov-loading { display: flex; align-items: center; gap: 8px; }
+.cov-spinner {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  animation: cov-spin 0.9s linear infinite;
+}
+@keyframes cov-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .cov-spinner { animation-duration: 3s; } }
+.cov-progress {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+}
+.cov-progress-line { margin: 0; font-size: 13px; font-weight: 700; color: var(--text-primary); overflow-wrap: anywhere; }
+.cov-progress-bar { height: 6px; border-radius: var(--radius-pill); background: var(--border); overflow: hidden; }
+.cov-progress-fill { display: block; height: 100%; background: var(--accent); transition: width 0.3s ease; }
+.cov-row-searching { display: block; font-weight: 700; color: var(--text-primary); }
 .cov-check { display: grid; gap: 10px; }
 .cov-check-head { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 .cov-check-title { margin: 0; font-weight: 800; }

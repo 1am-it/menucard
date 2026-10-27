@@ -40,7 +40,10 @@ test('Dekking: "✨ Vind bronnen" runs the engine and confirms a proposal throug
   const section = read(CHECK_SECTION);
   assert.match(section, /Vind bronnen/);
   assert.match(section, /\/api\/internal\/v1\/source-discovery/);
-  assert.match(section, /restaurant_ids: ids\.slice\(0, MAX_BATCH_URLS\)/);
+  // BE-34 (#81): one request per restaurant so the step list can be real; the
+  // same bound (MAX_BATCH_URLS) still limits the whole selection.
+  assert.match(section, /const list = ids\.slice\(0, MAX_BATCH_URLS\)/);
+  assert.match(section, /restaurant_ids: \[id\]/);
   assert.match(section, /proposals\/\$\{encodeURIComponent\(row\.proposal\.id\)\}\/decision/);
   assert.match(section, /decision: 'accepted'/);
   assert.match(section, /Er is niets automatisch gepubliceerd/);

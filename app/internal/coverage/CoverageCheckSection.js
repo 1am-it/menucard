@@ -28,7 +28,15 @@ import {
   MAX_BATCH_URLS,
   DAILY_URL_LIMIT,
 } from '@/src/lib/sourceReview'
-import { costLine, originLabel } from '@/src/lib/sourceDiscovery'
+import { costLine, originLabel, discoverySummary } from '@/src/lib/sourceDiscovery'
+import {
+  ROW_SEARCHING,
+  countAiSearches,
+  discoveryFailure,
+  discoveryPlan,
+  discoverySteps,
+  updatedLabel,
+} from '@/src/lib/discoveryProgress'
 
 const TRIAGE_API = '/api/internal/v1/source-triage'
 const BATCH_API = '/api/internal/v1/batch-analysis'
@@ -38,6 +46,9 @@ const DISCOVERY_API = '/api/internal/v1/source-discovery'
 const AI_API = '/api/internal/v1/menu-ai-import'
 // The same bound the batch overview itself uses for its recent batches.
 const BATCH_DETAIL_LIMIT = 10
+// BE-34 (#81, criterion 4): one restaurant's search that takes longer than this
+// is reported honestly as "duurde te lang" instead of waiting forever.
+const DISCOVERY_TIMEOUT_MS = 120000
 
 function newBatchId() {
   return typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : null
@@ -56,6 +67,11 @@ export default function CoverageCheckSection({ token, onUncheckedCount }) {
   // notices and the AI cost of this run.
   const [discovery, setDiscovery] = useState(null)
   const [discoveryBusy, setDiscoveryBusy] = useState(false)
+  // BE-34 (#81, criterion 4): the run itself, so the screen can show the steps,
+  // the row it is working on, the time it finished and an honest reason when it
+  // stopped. One request per restaurant — the same engine, the same limits, the
+  // same budget; only the progress is visible now.
+  const [discoveryRun, setDiscoveryRun] = useState(null)
   // BE-33 (#79): AI availability for the image/scan row; null means "use the
   // manual route".
   const [aiStatus, setAiStatus] = useState(null)
@@ -203,35 +219,90 @@ export default function CoverageCheckSection({ token, onUncheckedCount }) {
 
   // BE-32 (#75, criterion 1/4): "✨ Vind bronnen" runs the engine for the
   // selection or for every row, then reloads so the proposals appear as rows.
+  // BE-34 (#81, criterion 4): one request per restaurant, in order, so the steps
+  // ("🌐 Websites 4 van 10") and the row the app is working on are real. The
+  // engine, the limits and the budget are exactly the same as before.
   async function findSources(ids) {
-    if (!token || !Array.isArray(ids) || ids.length === 0) return
+    if (!token || !Array.isArray(ids) || ids.length === 0 || discoveryBusy) return
+    const list = ids.slice(0, MAX_BATCH_URLS)
+    const byId = new Map(rows.map((row) => [row.restaurantId, row]))
+    const plan = discoveryPlan(list.map((id) => byId.get(id) || { restaurantId: id }))
     setDiscoveryBusy(true)
     setMessage(null)
     setDiscovery(null)
-    try {
-      const res = await fetch(DISCOVERY_API, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ restaurant_ids: ids.slice(0, MAX_BATCH_URLS) }),
-      })
-      const body = await res.json().catch(() => ({}))
-      if (!res.ok) {
-        setMessage({ tone: 'error', text: body.error || 'De zoekactie kon niet worden uitgevoerd.' })
-        return
+    setDiscoveryRun({
+      phase: 'running',
+      plan,
+      done: 0,
+      aiDone: 0,
+      osmDone: false,
+      currentId: list[0] || null,
+      pendingIds: list,
+      finishedAt: null,
+      failure: null,
+    })
+    const results = []
+    const messages = []
+    let cost = 0
+    let costKnown = false
+    let monthly = null
+    let failure = null
+    for (const id of list) {
+      setDiscoveryRun((prev) => (prev ? { ...prev, currentId: id } : prev))
+      let timer = null
+      try {
+        const controller = typeof AbortController !== 'undefined' ? new AbortController() : null
+        if (controller) timer = setTimeout(() => controller.abort(), DISCOVERY_TIMEOUT_MS)
+        const res = await fetch(DISCOVERY_API, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ restaurant_ids: [id] }),
+          ...(controller ? { signal: controller.signal } : {}),
+        })
+        const body = await res.json().catch(() => ({}))
+        if (!res.ok) {
+          failure = discoveryFailure({ status: res.status, error: body.error })
+          break
+        }
+        if (Array.isArray(body.results)) results.push(...body.results)
+        for (const text of Array.isArray(body.messages) ? body.messages : []) {
+          if (typeof text === 'string' && !messages.includes(text)) messages.push(text)
+        }
+        if (body.cost && Number.isInteger(body.cost.eurCents)) {
+          cost += body.cost.eurCents
+          costKnown = true
+        }
+        if (body.monthly) monthly = body.monthly
+      } catch (error) {
+        failure = discoveryFailure({ timedOut: Boolean(error && error.name === 'AbortError') })
+        break
+      } finally {
+        if (timer) clearTimeout(timer)
       }
+      const aiDone = countAiSearches(results)
+      setDiscoveryRun((prev) =>
+        prev ? { ...prev, done: results.length, aiDone, osmDone: true, currentId: null } : prev,
+      )
+    }
+
+    if (failure) {
+      const done = new Set(results.map((result) => result.restaurantId))
+      const pendingIds = list.filter((id) => !done.has(id))
+      setDiscoveryRun((prev) =>
+        prev ? { ...prev, phase: 'error', currentId: null, finishedAt: Date.now(), failure, pendingIds } : prev,
+      )
+    } else {
+      setDiscoveryRun((prev) => (prev ? { ...prev, phase: 'done', currentId: null, finishedAt: Date.now() } : prev))
       setDiscovery({
-        summary: body.summary || null,
-        messages: Array.isArray(body.messages) ? body.messages : [],
-        cost: body.cost || null,
-        monthly: body.monthly || null,
-        attribution: body.attribution || null,
+        summary: discoverySummary({ results, costEurCents: costKnown ? cost : null }),
+        messages,
+        cost: { eurCents: costKnown ? cost : null, known: costKnown },
+        monthly,
+        attribution: null,
       })
       await load()
-    } catch {
-      setMessage({ tone: 'error', text: 'De zoekactie kon niet worden uitgevoerd.' })
-    } finally {
-      setDiscoveryBusy(false)
     }
+    setDiscoveryBusy(false)
   }
 
   // A proposal is confirmed by the human, through the existing BE-24 decision
@@ -309,6 +380,52 @@ export default function CoverageCheckSection({ token, onUncheckedCount }) {
           {message.text}
         </div>
       ) : null}
+      {discoveryRun ? (
+        <div className="cov-progress" role="status" aria-live="polite">
+          {(() => {
+            const steps = discoverySteps({
+              plan: discoveryRun.plan,
+              done: discoveryRun.done,
+              aiDone: discoveryRun.aiDone,
+              osmDone: discoveryRun.osmDone,
+            })
+            return (
+              <>
+                <p className="cov-progress-line">{steps.line}</p>
+                <div
+                  className="cov-progress-bar"
+                  role="progressbar"
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={steps.percent}
+                  aria-label="Voortgang van het zoeken"
+                >
+                  <span className="cov-progress-fill" style={{ width: `${steps.percent}%` }} />
+                </div>
+              </>
+            )
+          })()}
+          {discoveryRun.phase === 'running' ? <p className="cov-check-meta">Even geduld; je hoeft deze pagina niet te verversen.</p> : null}
+          {discoveryRun.phase === 'error' && discoveryRun.failure ? (
+            <div className="di-banner di-banner-danger" role="alert">
+              <span>{discoveryRun.failure.message}</span>
+              {discoveryRun.failure.retryLabel && discoveryRun.pendingIds && discoveryRun.pendingIds.length > 0 ? (
+                <button
+                  type="button"
+                  className="stg-btn-secondary cov-check-action"
+                  disabled={discoveryBusy}
+                  onClick={() => findSources(discoveryRun.pendingIds)}
+                >
+                  {discoveryRun.failure.retryLabel}
+                </button>
+              ) : null}
+            </div>
+          ) : null}
+          {discoveryRun.phase === 'done' && updatedLabel(discoveryRun.finishedAt) ? (
+            <p className="cov-check-meta">{updatedLabel(discoveryRun.finishedAt)}</p>
+          ) : null}
+        </div>
+      ) : null}
       {discovery ? (
         <div className="cov-discovery" role="status">
           {discovery.summary ? <p className="cov-discovery-summary">{discovery.summary}</p> : null}
@@ -378,6 +495,13 @@ export default function CoverageCheckSection({ token, onUncheckedCount }) {
                   ) : null}
                 </td>
                 <td>
+                  {/* BE-34 (#81, criterion 4): the restaurant the app is working
+                      on right now says so, in its own row. */}
+                  {discoveryRun && discoveryRun.phase === 'running' && discoveryRun.currentId === row.restaurantId ? (
+                    <span className="cov-check-meta cov-row-searching" role="status">
+                      {ROW_SEARCHING}
+                    </span>
+                  ) : null}
                   {row.step && row.step.key === 'confirm_proposal' ? (
                     <button
                       type="button"

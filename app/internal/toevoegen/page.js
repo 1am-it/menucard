@@ -26,9 +26,13 @@ import { decideAddEntry, manualImportHref, MAX_BATCH_URLS } from '@/src/lib/inte
 import { rowForBatchItem, stepHref, aiReadReady, CHECK_COPY } from '@/src/lib/sourceReview'
 import { discoveryRow, originLabel } from '@/src/lib/sourceDiscovery'
 import { OSM_ATTRIBUTION } from '@/src/lib/osmSource'
+import { ROW_SEARCHING, discoveryFailure } from '@/src/lib/discoveryProgress'
 
 const RESTAURANTS_API = '/api/internal/v1/manual-menu-import/restaurants'
 const BATCH_API = '/api/internal/v1/batch-analysis'
+// BE-34 (#81): a search that takes longer than this is reported as "duurde te
+// lang" instead of waiting forever.
+const DISCOVERY_TIMEOUT_MS = 120000
 // BE-32 (#75, criterion 2): the same engine as "Vind bronnen", for one restaurant.
 const DISCOVERY_API = '/api/internal/v1/source-discovery'
 const TRIAGE_API = '/api/internal/v1/source-triage'
@@ -58,6 +62,9 @@ export default function AddEntryPage() {
   const [discovery, setDiscovery] = useState(null)
   const [discoveryBusy, setDiscoveryBusy] = useState(false)
   const [discoveryNotice, setDiscoveryNotice] = useState(null)
+  // BE-34 (#81, criterion 4): a failed search keeps its own retry, next to the
+  // plain-language reason; a validation error never shows one.
+  const [discoveryFailed, setDiscoveryFailed] = useState(false)
   const [prefill, setPrefill] = useState(null)
   // BE-33 (#79): AI availability for the image/scan row; null means "manual".
   const [aiStatus, setAiStatus] = useState(null)
@@ -201,15 +208,23 @@ export default function AddEntryPage() {
     setError(null)
     setDiscovery(null)
     setDiscoveryNotice(null)
+    setDiscoveryFailed(false)
+    let timer = null
     try {
+      const controller = typeof AbortController !== 'undefined' ? new AbortController() : null
+      // BE-34 (#81, criterion 4): one search that takes too long says "duurde te
+      // lang" instead of waiting forever.
+      if (controller) timer = setTimeout(() => controller.abort(), DISCOVERY_TIMEOUT_MS)
       const res = await fetch(DISCOVERY_API, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ restaurant_ids: [selectedRestaurant.id] }),
+        ...(controller ? { signal: controller.signal } : {}),
       })
       const body = await res.json().catch(() => ({}))
       if (!res.ok) {
-        setError(body.error || 'Zoeken lukte niet.')
+        setError(discoveryFailure({ status: res.status, error: body.error }).message)
+        setDiscoveryFailed(true)
         return
       }
       setDiscovery({
@@ -219,9 +234,11 @@ export default function AddEntryPage() {
         cost: body.cost || null,
         monthly: body.monthly || null,
       })
-    } catch {
-      setError('Zoeken lukte niet.')
+    } catch (error) {
+      setError(discoveryFailure({ timedOut: Boolean(error && error.name === 'AbortError') }).message)
+      setDiscoveryFailed(true)
     } finally {
+      if (timer) clearTimeout(timer)
       setDiscoveryBusy(false)
     }
   }
@@ -471,6 +488,20 @@ export default function AddEntryPage() {
             >
               {discoveryBusy ? '✨ Bezig…' : '✨ Zoek de bron voor mij'}
             </button>
+            {/* BE-34 (#81, criterion 4): the app shows what it is doing, and a
+                failure keeps the reason in plain language plus one retry. */}
+            {discoveryBusy ? (
+              <p className="bta-muted cov-loading" role="status" aria-live="polite" style={{ margin: 0 }}>
+                <span className="cov-spinner" aria-hidden="true" />
+                {ROW_SEARCHING}
+                {selectedRestaurant ? ` ${selectedRestaurant.name}` : ''}
+              </p>
+            ) : null}
+            {discoveryFailed && !discoveryBusy ? (
+              <button type="button" className="stg-btn-secondary mai-btn" onClick={findSource}>
+                Opnieuw proberen
+              </button>
+            ) : null}
             <p className="bta-muted" style={{ margin: 0 }}>
               {selectedRestaurant
                 ? 'Alles wat je krijgt is een voorstel; jij bevestigt het per rij.'
