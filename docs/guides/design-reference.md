@@ -800,3 +800,31 @@ existing `/search?q=` route; a tile only appears when that search really has
 results. The moment section keeps the BE-28 card, one dish per restaurant, and
 disappears below three dishes. The measured colours still come from the
 existing tokens; the BE-29 block adds no hard-coded colour.
+
+## BE-36 - de AI-leeskaart bij een gedeeltelijke lezing (implemented 2026-10-27, #87)
+
+The AI reading card (`src/components/AiMenuReadBlock.js`) keeps its place in the
+existing flow: one card after the source choice, with the manual import as a
+small link. What is new is what the card says when a menu is read page by page.
+
+- **Before the click**: "Kost ongeveer 1 cent per pagina - duurt +/- 1 minuut".
+  The estimate follows the number of pages, not one fixed reading.
+- **A partial reading**: a neutral banner "8 van 9 pagina's gelezen." above the
+  summary. The summary itself stays "Concept klaar: N gerechten - X in orde, Y
+  nalopen"; the card never claims a complete menu.
+- **A failed page**: one line per page in the card, in the page's own words
+  ("Pagina 4 kon niet gelezen worden. Het antwoord was afgekapt.") with the small
+  text button "Opnieuw proberen". That button reads only that page again; the
+  rest of the reading stays on screen.
+- **Budget**: "Het budget van deze maand is op." and the manual import link
+  remains visible; the manual import is never the only sentence a failure says.
+- **One click in a row** (Dekking / Bronnen beoordelen): the same measured
+  sentence is used in the row's own reason line; the row's result and the card
+  describe the same reading.
+
+Layout rules that do not change: the card is the same `.bta-card` with
+`mai-step-head`, the numbers follow the visible order (BB3), the primary button
+keeps `di-btn-primary`, and "Opnieuw proberen" is the small `mai-link` variant,
+not a second primary action. The failed-page list is an ordinary `ul` inside the
+card; it adds no colour token and no new page.
+

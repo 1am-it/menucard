@@ -52,3 +52,45 @@ Live contract en status: GitHub issue #87.
 - automatisch goedkeuren of publiceren.
 
 **Rollen:** Lead = Claude Code (ook de acceptatie met een echte AI). Developer = DeepSeek via de lokale runner.
+
+### Stand van de implementatie (ontwikkelaar, 27 okt)
+
+Gebouwd in `src/lib/menuReadingPages.js` (puur), `src/lib/menuAiReadHandlers.js`
+(de lus), `src/lib/menuExtractionAdapter.js` (reparatiehaak en `page_limit`
+alleen voor documenten), `src/lib/menuAiImport.js` (meldingen en budget per
+lezing), `src/lib/manualMenuImportState.js` (paginalijst in de verzegelde staat)
+en `src/components/AiMenuReadBlock.js` + `app/internal/menu-import/page.js`
+(gedeeltelijke lezing en "Opnieuw proberen").
+
+- **Per pagina:** een afbeelding of een pdf-pagina per aanroep, 8.000
+  outputtokens (document: 8.000 per pagina), 60 s per aanroep, maximaal twee
+  tegelijk, na 240 s geen nieuwe pagina. Dezelfde client, hetzelfde model,
+  dezelfde validator.
+- **Samenvoegen:** gelijke menukaarten en menukopjes samen, een gerecht met
+  dezelfde naam en prijs op een paginagrens een keer, herkomst per gerecht
+  behouden, dekking opnieuw opgebouwd (`complete` of `partial`).
+- **Opnieuw proberen:** een keer automatisch per pagina; daarna een gedeeltelijke
+  lezing met "Pagina N kon niet gelezen worden." en "Opnieuw proberen" voor die
+  pagina. Dat verzoek (`{ state, retry_pages: [N] }`) leest alleen die pagina en
+  schrijft een nieuwe versie van hetzelfde concept.
+- **Milde validatie:** afwijkende herkomst en ontbrekende prijs worden gerepareerd
+  en als "Controle nodig" getoond; de strikte validator blijft beslissen en
+  `page_limit` geldt niet meer voor losse afbeeldingen.
+- **Kosten:** ongeveer 1 cent per pagina als schatting, 3 cent reservering per
+  pagina met een maximum van 30 cent per lezing, vooraf gecontroleerd; de echte
+  kosten van alle aanroepen samen staan als een lezing in de maandteller.
+- **Meldingen:** elke reden heeft een eigen zin met een volgende stap; de
+  handmatige import blijft een kleine link.
+
+Bewijs (nagebootste AI, geen echte aanroep): `src/lib/menuReadingPages.test.js`,
+`src/lib/menuAiReadPages.test.js` (9 pagina's, een mislukte pagina die de tweede
+keer lukt, een blijvend afgekapte pagina, `retry_pages`, `page_limit`, budget) en
+de bijgewerkte `src/lib/menuAiReadImage.test.js` en
+`src/lib/menuAiReadHandlers.test.js`. `npm test` en `npm run build` horen groen
+te zijn; de acceptatie met een echte AI op Al Dente (drie keer) en Bardot doet de
+Lead.
+
+**Restpunten:** een scan-pdf gaat nog als een document in een aanroep (een pagina
+renderen vraagt een nieuwe afhankelijkheid); `MENU-EXTRACTION.md` (v0.4) is
+ongewijzigd, dus de gepinde protocolhash blijft geldig.
+

@@ -43,9 +43,20 @@ Live contract en status: GitHub issue #79.
        door de server verzegelde staat, nooit uit het verzoek. Tekstbronnen en
        beeldbronnen gaan samen naar hetzelfde model;
    - **zelfde basis:** dezelfde client, hetzelfde model, dezelfde enable-vlag, hetzelfde schema en dezelfde validator;
+     **bijgewerkt in #87:** de lezing gaat pagina voor pagina door diezelfde
+     keten (een afbeelding of een pdf-pagina per aanroep). Voor de ongewijzigde
+     validator loopt een milde reparatie (`repairPageOutput`): een afwijkende
+     herkomst of een ontbrekende prijs maakt van dat ene gerecht "Controle nodig"
+     in plaats van de hele pagina te weigeren. Zie BE-36;
    - **grenzen:**
      - maximaal 10 afbeeldingen of 10 pagina's per lezing (bijgewerkt in #84,
        ronde 2; was 6);
+     - **bijgewerkt in #87:** per aanroep gaat precies één pagina mee, met een
+       antwoordplafond van 8.000 tokens (een document 8.000 per pagina), een
+       time-out van 60 s en maximaal twee pagina's tegelijk. De lezing start na
+       240 s geen nieuwe pagina meer, zodat alles binnen de functieduur van 300 s
+       blijft. `page_limit` geldt alleen voor pdf-pagina's, niet voor losse
+       afbeeldingen;
      - de tien afbeeldingen gelden over de hele lezing, in volgorde van bron en
        pagina (bijgewerkt in #84, ronde 3). Een lezing met minstens één
        bruikbare afbeelding wordt nooit geweigerd; zij zegt het echte aantal:
@@ -60,6 +71,9 @@ Live contract en status: GitHub issue #79.
 3. **Eerlijk over zekerheid:**
    - een citaat uit een afbeelding is niet automatisch letterlijk te controleren;
    - elk gerecht dat van beeld is gelezen, krijgt daarom de herkomst "gelezen van afbeelding N / pagina N" en het label **"Controle nodig"**;
+   - **bijgewerkt in #87:** ontbreekt of wijkt de herkomst af, dan vult de app de
+     pagina aan die in die aanroep is gelezen; het gerecht blijft staan met dat
+     label in plaats van de hele pagina te laten vallen (BE-36, criterium 3);
    - de kaartweergave (variant 5) toont de afbeelding of pagina naast de lijst;
    - er wordt niets automatisch goedgekeurd;
    - de bestaande regels voor ontbrekende prijzen en "Prijs onbekend" blijven gelden.
