@@ -83,6 +83,26 @@ function estimateTokens(value) {
   return Math.ceil((text || '').length / 4);
 }
 
+// An image or a PDF page reaches the model as vision input, not as text: the
+// provider bills an image at roughly 1,600 tokens however large its base64 is.
+// Counting the base64 as text made every image menu "too large" before the call.
+const IMAGE_TOKENS = 1600;
+const PDF_PAGE_TOKENS = 1600;
+
+function estimateSourceTokens(sources) {
+  let tokens = 0;
+  for (const source of Array.isArray(sources) ? sources : []) {
+    if (!source || typeof source !== 'object') continue;
+    const { images, documentBase64, ...rest } = source;
+    tokens += estimateTokens(rest);
+    if (Array.isArray(images)) tokens += images.length * IMAGE_TOKENS;
+    if (typeof documentBase64 === 'string' && documentBase64 !== '') {
+      tokens += (Number.isInteger(source.pageCount) && source.pageCount > 0 ? source.pageCount : 1) * PDF_PAGE_TOKENS;
+    }
+  }
+  return tokens;
+}
+
 function sourcePages(sources) {
   return (Array.isArray(sources) ? sources : []).reduce((sum, source) => sum + (source && Number.isInteger(source.pageCount) ? source.pageCount : 0), 0);
 }
@@ -179,7 +199,7 @@ async function runStructuredExtraction({ adapter, protocol, sources, limits, bud
   const sourceList = Array.isArray(sources) ? sources : [];
   if (sourceList.length > effective.maxDocuments) return { ok: false, reason: 'document_limit' };
   if (sourcePages(sourceList) > effective.maxPages) return { ok: false, reason: 'page_limit' };
-  if (estimateTokens(protocol.text) + estimateTokens(sourceList) > effective.maxInputTokens) return { ok: false, reason: 'input_limit' };
+  if (estimateTokens(protocol.text) + estimateSourceTokens(sourceList) > effective.maxInputTokens) return { ok: false, reason: 'input_limit' };
 
   const reservation = reserveBudget(budget, effective.maxCostEurCents);
   if (!reservation.ok) return { ok: false, reason: reservation.reason };
@@ -286,6 +306,7 @@ function unsupportedProductFields(output) {
 }
 
 module.exports = {
+  estimateSourceTokens,
   PRICE_STATUSES,
   FORBIDDEN_TRUST_KEYS,
   RECOVERABLE_ERRORS,
